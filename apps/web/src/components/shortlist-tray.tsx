@@ -1,9 +1,9 @@
 import Link from "next/link";
-import type { ShortlistItem } from "@/lib/contract";
+import type { PickedItem } from "@/lib/report-ops";
 import { page } from "@/lib/routes";
 
-/** 핵심 지원 학교 띠. 3·4페이지가 같은 목록을 보여 주고 2페이지 리포트로 잇는다 */
-export function ShortlistTray({ items, other }: { items: ShortlistItem[]; other: "PAGE-03" | "PAGE-04" }) {
+/** 핵심 지원 학교 띠. 3·4페이지가 같은 report.shortlist 를 보여 주고 2페이지 리포트로 잇는다 */
+export function ShortlistTray({ items, other }: { items: PickedItem[]; other: "PAGE-03" | "PAGE-04" }) {
   const to = page(other);
   return (
     <div className="tray">
@@ -14,7 +14,11 @@ export function ShortlistTray({ items, other }: { items: ShortlistItem[]; other:
           </span>
           <span className="names">
             {items.length ? (
-              items.map((s) => <span key={s.offering_id}>{s.university_name.replace(/^예시/, "")} {s.unit_name}</span>)
+              items.map((s) => (
+                <span key={s.offering_id} className={s.entry.assessment_status === "needs_revalidation" ? "stale" : undefined}>
+                  {s.offering ? `${s.offering.university_name.replace(/^예시/, "")} ${s.offering.department}` : "카탈로그에 없는 모집단위"}
+                </span>
+              ))
             ) : (
               <span className="none">담은 곳이 없습니다. 담기를 누르세요.</span>
             )}

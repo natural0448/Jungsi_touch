@@ -6,16 +6,17 @@ import { PaidGate } from "@/components/paid-gate";
 import { ScoreBasis } from "@/components/score-basis";
 import { ShortlistTray } from "@/components/shortlist-tray";
 import { AccessDenied, getCaller, source } from "@/lib/api";
-import type { CandidatesResult, OfferingStatistics, ShortlistItem } from "@/lib/contract";
+import type { StatisticsDto } from "@/lib/dto";
+import { ensureCandidates, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
 import { lockFor, page } from "@/lib/routes";
-import { BUCKETS, hrefWith, parseQuery } from "./query";
-import { SchoolCard } from "./school-card";
+import { FILTERS, hrefWith, parseQuery } from "./query";
+import { bestDelta, SchoolCard } from "./school-card";
 import { WildcardDeck } from "./wildcard";
 import "./favorable.css";
 
 const route = page("PAGE-04");
 export const metadata: Metadata = { title: route.label };
-const FEATURES = ["도전학교 · 핵심학교 · 여유 후보에서 내 성적에 유리한 학교 찾기", "학교를 펼쳐 학과 · 전형 · 모집군마다 지원 검토 범위 확인", "간호 · 보건 · 교육 와일드카드 — 비장의 한 수", "마음에 드는 곳을 핵심 지원 학교에 담아 리포트로 정리"];
+const FEATURES = ["내 성적으로 지원 검토 범위(도전·핵심·여유)에 드는 학교 찾기", "학교를 펼쳐 학과 · 전형 · 모집군마다 지원가능성 확인", "간호 · 보건 · 교육 와일드카드 — 비장의 한 수", "마음에 드는 곳을 핵심 지원 학교에 담아 리포트로 정리"];
 
 export default async function Page({ searchParams }: PageProps<"/admissions/favorable">) {
   const p3 = page("PAGE-03");
@@ -35,55 +36,68 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   if (lock) return <>{head}<PaidGate kind={lock} route={route} features={FEATURES} /></>;
 
   const cur = parseQuery(await searchParams);
-  let result: CandidatesResult;
-  let shortlist: ShortlistItem[];
+  let state: ReportState;
+  let picks: PickedItem[] = [];
+  let stats = new Map<string, StatisticsDto | null>();
   try {
-    [result, shortlist] = await Promise.all([src.buildCandidates(caller), src.listShortlist(caller)]);
+    const mine = await loadMine(src, caller);
+    state = mine ? await ensureCandidates(src, caller, mine) : { kind: "none" };
+    if (state.kind === "ready") {
+      const report = state.report;
+      const c = report.candidates;
+      // 집계는 모집단위마다 따로 부른다. 펼친 학교와 와일드카드만
+      const openGroup = c?.basic_university_groups.find((g) => g.university_id === cur.open);
+      const ids = Array.from(new Set([...(openGroup?.offerings ?? []), ...(c?.wildcards ?? [])].map((i) => i.offering.offering_id)));
+      const known = c ? [...c.basic_university_groups.flatMap((g) => g.offerings), ...c.wildcards].map((i) => i.offering) : [];
+      const [p, s] = await Promise.all([pickedItems(src, caller, report, known), Promise.all(ids.map(async (id) => [id, await src.readStatistics(caller, report.report_id, id)] as const))]);
+      picks = p;
+      stats = new Map(s);
+    }
   } catch (e) {
     if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
     throw e;
   }
 
-  if (result.state === "score_required") {
+  if (state.kind !== "ready") {
     return (
       <>
         {head}
         <div className="wrap pg-body fv">
-          <ScoreBasis basis={null} emptyText="유리한 대학 찾기는 확인된 성적으로 계산합니다. 성적을 넣으면 학교 목록과 와일드카드가 나옵니다." />
+          <ScoreBasis overall={state.kind === "score_required" ? state.report?.overall ?? null : null} emptyText="유리한 대학 찾기는 확인된 성적으로 계산합니다. 성적을 넣으면 학교 목록과 와일드카드가 나옵니다." />
           <section className="gate flat">
-            <h2>성적을 넣으면 유리한 학교를 찾아 드립니다</h2>
-            <p>성적 없이 대학·학과를 둘러보려면 {p3.label}에서 검색하세요. 모집 정보와 담기는 성적 없이도 됩니다.</p>
+            <h2>{state.kind === "score_required" ? "성적 확인이 끝나면 유리한 학교를 찾아 드립니다" : "성적을 넣으면 유리한 학교를 찾아 드립니다"}</h2>
+            <p>성적 없이 대학·학과를 둘러보려면 {p3.label}에서 검색하세요. 모집 정보는 성적 없이도 볼 수 있습니다.</p>
             <div className="acts">
-              <Link className="btn p" href={page("PAGE-02").path}>성적 입력하기</Link>
+              <Link className="btn p" href={page("PAGE-02").path}>{state.kind === "score_required" ? "성적 확인하기" : "성적 입력하기"}</Link>
               <Link className="btn" href={p3.path}>{p3.label}</Link>
             </div>
           </section>
         </div>
-        <ShortlistTray items={shortlist} other="PAGE-03" />
       </>
     );
   }
 
-  const ids = [...result.schools.flatMap((s) => s.offerings.map((o) => o.offering.offering_id)), ...result.wildcards.map((w) => w.offering.offering_id)];
-  const stats = new Map<string, OfferingStatistics>((await src.getStatistics(caller, Array.from(new Set(ids)))).map((s) => [s.offering_id, s]));
-  const picked = new Set(shortlist.map((s) => s.offering_id));
-  const count = (b?: string) => result.schools.filter((s) => !b || s.bucket === b).length;
-  const shown = BUCKETS.filter((b) => !cur.bucket || b.v === cur.bucket)
-    .map((b) => ({ ...b, schools: result.schools.filter((s) => s.bucket === b.v) }))
-    .filter((g) => g.schools.length > 0);
+  const report = state.report;
+  const c = report.candidates;
+  const groups = [...(c?.basic_university_groups ?? [])].sort((a, b) => (bestDelta(b) ?? -Infinity) - (bestDelta(a) ?? -Infinity));
+  const wildcards = c?.wildcards ?? [];
+  const pendingCount = c?.pending_offerings.length ?? 0;
+  const picked = new Set(picks.map((p) => p.offering_id));
+  const count = (f?: string) => groups.filter((g) => !f || g.offerings.some((o) => o.assessment.category === f)).length;
+  const shown = groups.filter((g) => !cur.has || g.offerings.some((o) => o.assessment.category === cur.has));
 
   return (
     <>
       {head}
       <div className="wrap pg-body fv">
-        <ScoreBasis basis={result.basis} emptyText="" />
+        <ScoreBasis overall={report.overall} emptyText="" />
 
         {/* 좁은 화면에서는 와일드카드가 목록 아래로 내려간다. 있다는 것을 위에서 먼저 알린다 */}
-        {result.wildcards.length > 0 && (
+        {wildcards.length > 0 && (
           <a className="wd-teaser" href="#wildcard">
             <span className="k">WILD CARD</span>
             <span>
-              비장의 한 수 <b className="num">{result.wildcards.length}장</b>
+              비장의 한 수 <b className="num">{wildcards.length}장</b>
             </span>
             <span className="go"><ArrowRightIcon /></span>
           </a>
@@ -95,47 +109,45 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
               <h2 id="basic-t">
                 기본 학교 목록 <span className="num">{count()}</span>
               </h2>
-              <span>학교 분류는 전체 성적 1차 선별입니다. 학과마다 판단은 따로 봅니다.</span>
+              <span>환산 유불리가 큰 학교부터 보여 줍니다. 판단은 학과마다 따로 봅니다.</span>
             </div>
-            <div className="chips" role="group" aria-label="학교 분류">
-              <Link href={hrefWith(cur, { bucket: undefined, open: undefined })} className={cur.bucket ? undefined : "on"} aria-current={cur.bucket ? undefined : "true"} scroll={false}>
+            <div className="chips" role="group" aria-label="학과 판단으로 거르기">
+              <Link href={hrefWith(cur, { has: undefined, open: undefined })} className={cur.has ? undefined : "on"} aria-current={cur.has ? undefined : "true"} scroll={false}>
                 전체 <small className="num">{count()}</small>
               </Link>
-              {BUCKETS.map((b) => (
-                <Link key={b.v} href={hrefWith(cur, { bucket: b.v, open: undefined })} className={cur.bucket === b.v ? "on" : undefined} aria-current={cur.bucket === b.v ? "true" : undefined} scroll={false}>
-                  {b.label} <small className="num">{count(b.v)}</small>
+              {FILTERS.map((f) => (
+                <Link key={f.v} href={hrefWith(cur, { has: f.v, open: undefined })} className={cur.has === f.v ? "on" : undefined} aria-current={cur.has === f.v ? "true" : undefined} scroll={false}>
+                  {f.label} <small className="num">{count(f.v)}</small>
                 </Link>
               ))}
             </div>
 
-            {shown.length === 0 ? (
+            {c?.status === "pending" || shown.length === 0 ? (
               <section className="gate flat">
-                <h2>이 분류에 해당하는 학교가 없습니다</h2>
-                <p>다른 분류를 보거나 {p3.label}에서 직접 검색하세요. 목록에 없다는 것이 지원할 수 없다는 뜻은 아닙니다.</p>
+                <h2>{c?.status === "pending" ? "아직 찾은 학교가 없습니다" : "이 조건에 해당하는 학교가 없습니다"}</h2>
+                <p>다른 조건을 보거나 {p3.label}에서 직접 검색하세요. 목록에 없다는 것이 지원할 수 없다는 뜻은 아닙니다.</p>
               </section>
             ) : (
-              shown.map((g) => (
-                <div key={g.v} className="fv-group">
-                  <h3 className="fv-ghd">
-                    {g.label} <span className="num">{g.schools.length}</span>
-                  </h3>
-                  <div className="fv-list">
-                    {g.schools.map((s) => (
-                      <SchoolCard key={s.university.university_id} s={s} cur={cur} picked={picked} stats={stats} />
-                    ))}
-                  </div>
-                </div>
-              ))
+              <div className="fv-list">
+                {shown.map((g) => (
+                  <SchoolCard key={g.university_id} g={g} cur={cur} picked={picked} stats={stats} />
+                ))}
+              </div>
+            )}
+            {pendingCount > 0 && (
+              <p className="fv-note">
+                자격 확인이나 자료 검수 때문에 판단을 보류한 모집단위 <b className="num">{pendingCount}</b>곳은 목록에 넣지 않았습니다. 보류를 여유로 보지 않습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
+              </p>
             )}
             <p className="fv-note">여유 후보도 합격을 보장하지 않습니다. 지원가능성은 합격 확률이 아니며, 올해 전형과 지원 조건을 함께 확인해야 합니다.</p>
           </section>
 
           <aside className="fv-side" aria-label="와일드카드">
-            <WildcardDeck picks={result.wildcards} picked={picked} stats={stats} />
+            <WildcardDeck picks={wildcards} picked={picked} stats={stats} canPick />
           </aside>
         </div>
       </div>
-      <ShortlistTray items={shortlist} other="PAGE-03" />
+      <ShortlistTray items={picks} other="PAGE-03" />
     </>
   );
 }

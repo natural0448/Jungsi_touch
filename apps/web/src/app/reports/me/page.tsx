@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LockIcon } from "@/components/icons";
-import { AdvantageCell, ScoreCell, SupportBadge } from "@/components/offering-parts";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, getCaller, source } from "@/lib/api";
-import type { OfferingAnalysis, ShortlistItem } from "@/lib/contract";
 import type { ReportDto } from "@/lib/dto";
 import { EXAM } from "@/lib/exam";
 import { seoulDate } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { getReportId } from "@/lib/report-ref";
+import { ensureAnalyses, pickedItems, type PickedItem } from "@/lib/report-ops";
 import { lockFor, page } from "@/lib/routes";
-import { AbsoluteGrades, OverallCard, SubjectsTable } from "./report-view";
+import { AbsoluteGrades, OverallCard, PickedTable, SubjectsTable } from "./report-view";
 import { ScoreForm, type ScoreDefaults } from "./score-form";
 import "./report.css";
 
@@ -67,13 +66,14 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   }
 
   const paid = session?.member_tier === "paid";
-  let shortlist: ShortlistItem[] = [];
-  let analyses = new Map<string, OfferingAnalysis>();
+  let shortlist: PickedItem[] = [];
   if (paid) {
     try {
-      shortlist = await src.listShortlist(caller);
-      const a = await src.analyze(caller, shortlist.map((s) => s.offering_id));
-      if (a.state === "ready") analyses = new Map(a.results.map((r) => [r.offering_id, r]));
+      // 담은 곳 중 분석이 없는 것(성적을 바꾼 뒤 등)은 지금 리포트로 다시 분석한다
+      const ids = Object.entries(report.shortlist ?? {}).filter(([, e]) => e.selected).map(([id]) => id);
+      const st = await ensureAnalyses(src, caller, report, ids);
+      if (st.kind !== "none" && st.report) report = st.report;
+      shortlist = await pickedItems(src, caller, report);
     } catch (e) {
       if (!(e instanceof AccessDenied)) throw e;
     }
@@ -114,7 +114,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
                 </div>
               </div>
             ) : (
-              <ShortlistTable items={shortlist} analyses={analyses} />
+              <PickedTable items={shortlist} />
             )}
             <p className="rp-foot">모의지원 서비스에서 각 모집단위의 모집군·지원 조건·모집인원 변경을 다시 확인하세요. 정시터치는 외부 서비스에 성적을 보내거나 자동으로 등록하지 않습니다.</p>
           </section>
@@ -130,39 +130,6 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         )}
       </div>
     </>
-  );
-}
-
-function ShortlistTable({ items, analyses }: { items: ShortlistItem[]; analyses: Map<string, OfferingAnalysis> }) {
-  return (
-    <div className="tblwrap">
-      <table className="tb rp-short">
-        <thead>
-          <tr>
-            <th scope="col">대학 · 모집단위</th>
-            <th scope="col" className="r">내 환산점수</th>
-            <th scope="col">지원가능성</th>
-            <th scope="col" className="r">환산 유불리</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((s) => {
-            const a = analyses.get(s.offering_id) ?? null;
-            return (
-              <tr key={s.offering_id}>
-                <th scope="row">
-                  {s.university_name}
-                  <small> {s.unit_name}</small>
-                </th>
-                <td className="r"><ScoreCell a={a} /></td>
-                <td>{a ? <SupportBadge status={a.support.status} /> : <span className="need">분석 대기</span>}</td>
-                <td className="r"><AdvantageCell a={a} /></td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
   );
 }
 

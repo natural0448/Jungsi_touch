@@ -1,21 +1,13 @@
 import Link from "next/link";
-import { PickButton, SupportBadge } from "@/components/offering-parts";
-import type { OfferingAnalysis, OfferingRow } from "@/lib/contract";
+import { CATEGORY, CategoryBadge, PickButton, reasonText, type Cell } from "@/components/offering-parts";
+import type { AssessmentDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
 import { plainDate, signed } from "@/lib/format";
+import { page } from "@/lib/routes";
 
-/** 펼친 줄: 2027 모집 정보 + 세 판단 칸 + 근거 */
-export function Detail({ o, a, picked }: { o: OfferingRow; a: OfferingAnalysis | null | "need"; picked: boolean }) {
-  const r = o.recruitment;
-  const recruit = (
-    <div className="recruit">
-      <span>2027 모집군<b>{o.group}군</b></span>
-      <span>최초 인원<b className="num">{r.initial ?? <span className="wait">미공개</span>}</b></span>
-      <span>변경<b className="num">{r.change === null ? <span className="wait">미공개</span> : signed(r.change)}</b></span>
-      <span>최종 인원<b className="num">{r.final === null ? <span className="wait">미확정</span> : r.final}</b></span>
-      <span>기준일<b className="num">{plainDate(r.as_of)}</b></span>
-      <Link href="/admissions/results">대학 발표 입시결과 보기</Link>
-    </div>
-  );
+/** 펼친 줄: 2027 모집 정보(recruitment.read) + 세 판단 칸 + 연도별 근거(assessment) */
+export function Detail({ o, a, rec, picked }: { o: OfferingDto; a: Cell; rec: RecruitmentDto | null; picked: boolean }) {
+  const p2 = page("PAGE-02").path;
+  const recruit = <Recruit o={o} rec={rec} />;
 
   if (a === "need") {
     return (
@@ -27,7 +19,7 @@ export function Detail({ o, a, picked }: { o: OfferingRow; a: OfferingAnalysis |
             <br />
             성적이 없어도 검색과 모집 정보는 그대로 볼 수 있습니다.
           </p>
-          <Link className="btn p" href="/reports/me">성적 입력하기</Link>
+          <Link className="btn p" href={p2}>성적 입력하기</Link>
         </div>
       </>
     );
@@ -36,7 +28,7 @@ export function Detail({ o, a, picked }: { o: OfferingRow; a: OfferingAnalysis |
     return (
       <>
         {recruit}
-        <div className="empty-an"><p>이 모집단위의 분석 결과를 아직 받지 못했습니다.</p></div>
+        <div className="empty-an"><p>이 모집단위의 분석 결과를 아직 받지 못했습니다. 잠시 뒤 다시 열어 보세요.</p></div>
       </>
     );
   }
@@ -46,39 +38,51 @@ export function Detail({ o, a, picked }: { o: OfferingRow; a: OfferingAnalysis |
       {recruit}
       <div className="three">
         <ConvertedCard a={a} />
-        <SupportCard a={a} />
+        <DecisionCard a={a} />
         <AdvantageCard a={a} />
       </div>
-      <div className="reason">
-        <span className="lab">근거</span>
-        <span>
-          <b>{o.university.name} {o.unit_name}</b> · {a.support.reason}
-        </span>
-      </div>
+      <Years a={a} />
       <div className="acts">
         <PickButton id={o.offering_id} on={picked} variant="wide" />
-        <Link className="btn" href="/reports/me">내 성적 리포트에서 보기</Link>
+        <Link className="btn" href={p2}>내 성적 리포트에서 보기</Link>
       </div>
     </>
   );
 }
 
-function ConvertedCard({ a }: { a: OfferingAnalysis }) {
-  const c = a.converted;
+function Recruit({ o, rec }: { o: OfferingDto; rec: RecruitmentDto | null }) {
+  const r = rec?.status === "ready" ? rec.recruitment : null;
+  const wait = (t: string) => <span className="wait">{t}</span>;
+  return (
+    <div className="recruit">
+      <span>2027 모집군<b>{o.group}군</b></span>
+      {r ? (
+        <>
+          <span>최초 인원<b className="num">{r.initial_count ?? wait("미공개")}</b></span>
+          <span>이월·변경<b className="num">{r.rollover_change === null ? wait("미공개") : signed(r.rollover_change)}</b></span>
+          <span>최종 인원<b className="num">{r.final_count ?? wait("미확정")}</b></span>
+          <span>기준일<b className="num">{plainDate(r.source_as_of)}</b></span>
+        </>
+      ) : (
+        <span>모집 인원<b>{wait("자료 준비 중")}</b></span>
+      )}
+      <Link href={`${page("PAGE-01").path}?university=${encodeURIComponent(o.university_name)}&unit=${encodeURIComponent(o.department)}`}>대학 발표 입시결과 보기</Link>
+    </div>
+  );
+}
+
+function ConvertedCard({ a }: { a: AssessmentDto }) {
   return (
     <section className="card" aria-label="내 환산점수">
       <h3>내 환산점수</h3>
-      {c.status === "calculated" && c.score ? (
+      {a.converted_score ? (
         <>
-          <div className="big num">
-            {c.score}
-            <small>/ {c.max_score}</small>
-          </div>
+          <div className="big num">{a.converted_score}</div>
           <p>
-            {c.rule_label} 적용.
-            {c.university_top_percent && (
+            올해 이 대학 공식 반영식으로 환산했습니다.
+            {a.converted_percentile && (
               <>
-                {" "}이 대학 환산 기준으로 같은 비교집단 상위 <b className="num">{c.university_top_percent}%</b> 위치입니다.
+                {" "}이 대학 환산 분포에서 상위 <b className="num">{a.converted_percentile}%</b>(동점 포함) 위치입니다.
               </>
             )}
           </p>
@@ -86,7 +90,7 @@ function ConvertedCard({ a }: { a: OfferingAnalysis }) {
       ) : (
         <>
           <div className="big hold">계산 보류</div>
-          <p>올해 반영식이 확정되지 않아 환산하지 않았습니다. 작년 표로 대신 계산하지 않습니다.</p>
+          <p>{reasonText(a.reason_code)} 작년 표로 대신 계산하지 않습니다.</p>
         </>
       )}
       <span className="note">대학마다 만점·반영 방식이 달라 다른 대학 점수와 크기를 비교하지 않습니다.</span>
@@ -94,92 +98,123 @@ function ConvertedCard({ a }: { a: OfferingAnalysis }) {
   );
 }
 
-function SupportCard({ a }: { a: OfferingAnalysis }) {
-  const mine = a.converted.university_top_percent;
-  const hist = a.support.history;
-  const values = [mine, ...hist.map((h) => h.cut_top_percent)].filter((v): v is string => v !== null).map(Number);
-  const max = Math.max(4, Math.ceil(Math.max(0, ...values) * 1.25));
+function DecisionCard({ a }: { a: AssessmentDto }) {
+  const d = a.decision_components;
+  const ev = a.decision_evidence;
+  const r = ev?.expected_acceptance_range;
+  const f = ev?.forecast_70;
   return (
     <section className="card" aria-label="지원가능성">
       <h3>지원가능성</h3>
       <div>
-        <SupportBadge status={a.support.status} />
+        <CategoryBadge a={a} />
       </div>
-      {hist.length > 0 ? (
-        <>
-          <ul className="hist" aria-label="지난 기준과 내 위치">
-            {hist.map((h) => {
-              if (h.cut_top_percent === null || mine === null) {
-                return (
-                  <li key={h.result_year} className="h">
-                    <span className="num">{h.result_year}</span>
-                    <span className="track" />
-                    <span className="r na">{h.cut_top_percent === null ? "미발표" : "─"}</span>
-                  </li>
-                );
-              }
-              const above = Number(mine) <= Number(h.cut_top_percent);
-              return (
-                <li key={h.result_year} className="h">
-                  <span className="num">{h.result_year}</span>
-                  <span className="track" aria-label={`기준 상위 ${h.cut_top_percent}%, 내 위치 상위 ${mine}%`}>
-                    <span className="cut" style={{ left: `${(Number(h.cut_top_percent) / max) * 100}%` }} />
-                    <span className="me" style={{ left: `${(Number(mine) / max) * 100}%` }} />
-                  </span>
-                  <span className={`r ${above ? "above" : "below"}`}>{above ? "기준 이상" : "기준 미만"}</span>
-                </li>
-              );
-            })}
-          </ul>
-          <span className="note">
-            막대는 상위 0~{max}% 구간입니다. 세로선은 그해 대학 발표 기준({hist[0].metric_label})의 누적 위치, 점은 내 위치입니다. 원점수끼리 비교하지 않습니다.
-          </span>
-        </>
+      {a.status !== "ready" ? (
+        <p>{reasonText(a.reason_code)}{a.status === "ineligible" ? " 자격을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
       ) : (
-        <p>지원 자격 확인이 먼저입니다. 자격을 충족하지 않으면 점수 비교를 하지 않습니다.</p>
+        <>
+          {d?.adjusted_category && (
+            <p className="adj">
+              기본 판단 <b>{CATEGORY[d.base_category].label}</b> → 상담 조정 <b>{CATEGORY[d.adjusted_category].label}</b>
+            </p>
+          )}
+          {r && (
+            <p>
+              판단 구간 <b className="num">{r.lower}~{r.upper}</b>{r.unit}
+              <br />
+              <small>{r.definition}</small>
+            </p>
+          )}
+          {f && (
+            <p>
+              올해 70% 예상선{" "}
+              {f.status === "ready" ? (
+                <b className="num">
+                  {f.value}
+                  {f.unit}
+                </b>
+              ) : (
+                <span className="wait">발표 대기</span>
+              )}
+            </p>
+          )}
+        </>
       )}
+      <span className="note">지원가능성은 합격 확률이 아닙니다. 학과마다 따로 판단합니다.</span>
     </section>
   );
 }
 
-function AdvantageCard({ a }: { a: OfferingAnalysis }) {
+function AdvantageCard({ a }: { a: AssessmentDto }) {
   const v = a.advantage;
-  if (v.status !== "computed" || !v.pp || !v.total_top_percent || !v.university_top_percent) {
+  if (!v) {
     return (
       <section className="card" aria-label="환산 유불리">
         <h3>환산 유불리</h3>
         <div className="big hold">판단 보류</div>
-        <p>{v.reason_code === "ELIGIBILITY_NOT_MET" ? "지원 자격을 충족하지 않아 유불리를 계산하지 않았습니다." : "비교할 수 있는 분포와 환산 자료를 확인하고 있습니다."}</p>
+        <p>{a.status === "ineligible" ? "지원 자격을 충족하지 않아 유불리를 계산하지 않았습니다." : reasonText(a.reason_code) || "비교할 수 있는 분포와 환산 자료를 확인하고 있습니다."}</p>
       </section>
     );
   }
-  const total = Number(v.total_top_percent);
-  const uni = Number(v.university_top_percent);
-  const lo = Math.min(total, uni) - 0.6;
-  const hi = Math.max(total, uni) + 0.6;
-  // 왼쪽이 아래(상위 % 큼), 오른쪽이 위(상위 % 작음)
-  const pa = ((hi - total) / (hi - lo)) * 100;
-  const pb = ((hi - uni) / (hi - lo)) * 100;
-  const n = Number(v.pp);
-  const tone = Math.abs(n) < 0.1 ? "even" : n > 0 ? "up" : "down";
+  const n = Number(v.delta_pp);
+  const tone = v.status === "neutral" ? "even" : n > 0 ? "up" : "down";
   return (
     <section className="card" aria-label="환산 유불리">
       <h3>환산 유불리</h3>
       <div className={`big num ${tone}`}>
-        {v.pp}
+        {n > 0 ? "+" : ""}
+        {v.delta_pp}
         <small>%p</small>
       </div>
-      <div className="dumb" aria-hidden="true">
-        <span className="axis" />
-        <span className={`seg ${n > 0 ? "" : "down"}`} style={{ left: `${Math.min(pa, pb)}%`, width: `${Math.abs(pb - pa)}%` }} />
-        <span className="dot a" style={{ left: `${pa}%` }} />
-        <span className="dot b" style={{ left: `${pb}%` }} />
-      </div>
-      <div className="dumb-lab">
-        <span>총점 기준 상위 <b className="num">{v.total_top_percent}%</b></span>
-        <span>대학 환산 기준 상위 <b className="num">{v.university_top_percent}%</b></span>
-      </div>
+      <p>{v.status === "favorable" ? "총점보다 이 대학 환산에서 위치가 올라갑니다." : v.status === "unfavorable" ? "총점보다 이 대학 환산에서 위치가 내려갑니다." : "총점과 이 대학 환산의 위치가 거의 같습니다."}</p>
       <span className="note">같은 비교집단 안에서 위치가 얼마나 바뀌는지입니다. 유리해도 합격 가능을, 불리해도 지원 불가를 뜻하지 않습니다.</span>
     </section>
+  );
+}
+
+/** 연도별: 그해 기준으로 옮긴 내 환산점수(추정)와 대학 발표 지표를 나란히. 화면이 둘을 비교해 판정하지 않는다 */
+function Years({ a }: { a: AssessmentDto }) {
+  const metrics = a.decision_evidence?.historical_metrics ?? [];
+  const years = a.years.filter((y) => y.academic_year < 2027);
+  const all = Array.from(new Set([...years.map((y) => y.academic_year), ...metrics.map((m) => m.academic_year)])).sort((x, y) => y - x);
+  if (all.length === 0) return null;
+  return (
+    <div className="years">
+      <table>
+        <caption>연도별 근거</caption>
+        <thead>
+          <tr>
+            <th scope="col">학년도</th>
+            <th scope="col" className="r">내 환산점수(그해 기준 추정)</th>
+            <th scope="col">대학 발표 지표</th>
+          </tr>
+        </thead>
+        <tbody>
+          {all.map((yr) => {
+            const y = years.find((x) => x.academic_year === yr);
+            const ms = metrics.filter((m) => m.academic_year === yr);
+            return (
+              <tr key={yr}>
+                <th scope="row" className="num">{yr}</th>
+                <td className="r num">{y?.converted_score ?? <span className="na">─</span>}</td>
+                <td>
+                  {ms.length === 0 ? (
+                    <span className="na">자료 없음</span>
+                  ) : (
+                    ms.map((m) => (
+                      <span key={m.metric_name} className="m">
+                        {m.metric_name}{" "}
+                        {m.value === null ? <span className="na">미발표</span> : <b className="num">{m.value}{m.unit ?? ""}</b>}
+                      </span>
+                    ))
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <span className="note">대학 발표 지표는 대학마다 기준(환산점수·백분위·등급)이 달라 내 점수와 그대로 비교하지 않습니다. 판단은 위의 지원가능성을 보세요.</span>
+    </div>
   );
 }

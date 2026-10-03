@@ -21,4 +21,4 @@ export async function getCaller(): Promise<Caller> {
 }
 
 export { AccessDenied } from "./source";
-export type { Caller, JungsiSource } from "./source";
+export type { Caller, JungsiSource, OfferingSearchQuery, Result } from "./source";

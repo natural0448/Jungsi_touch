@@ -1,5 +1,7 @@
+import { AdvantageCell, reasonText, ScoreCell, StatusCell } from "@/components/offering-parts";
 import type { OverallAnalysisDto } from "@/lib/dto";
 import { AREA_LABEL } from "@/lib/exam";
+import type { PickedItem } from "@/lib/report-ops";
 
 /* 2페이지 리포트의 전체 성적 부분 — 일반·유료 모두 보는 범위(REQ-02). 인쇄 화면도 같은 부품을 쓴다 */
 
@@ -85,5 +87,47 @@ export function AbsoluteGrades({ a }: { a: OverallAnalysisDto }) {
       <span>한국사 <b className="num">{g.한국사 ? `${g.한국사}등급` : "입력 안 함"}</b></span>
       <small>절대평가 과목은 총점과 전체 위치에 넣지 않습니다.</small>
     </p>
+  );
+}
+
+/** 핵심 지원 학교 표(report.shortlist + report.analyses). 성적을 바꾼 뒤 아직 다시 확인하지 않은 항목은 표시한다 */
+export function PickedTable({ items, print = false }: { items: PickedItem[]; print?: boolean }) {
+  return (
+    <div className="tblwrap">
+      <table className="tb rp-short">
+        <thead>
+          <tr>
+            <th scope="col">대학 · 모집단위</th>
+            <th scope="col" className="r">내 환산점수</th>
+            <th scope="col">지원가능성</th>
+            <th scope="col" className="r">환산 유불리</th>
+            {print && <th scope="col">판단 근거</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((s) => {
+            const a = s.assessment;
+            const range = a?.decision_evidence?.expected_acceptance_range;
+            return (
+              <tr key={s.offering_id}>
+                <th scope="row">
+                  {s.offering ? s.offering.university_name : "카탈로그에 없는 모집단위"}
+                  {s.offering && <small> {s.offering.department} · {s.offering.group}군</small>}
+                  {s.entry.assessment_status === "needs_revalidation" && <span className="stale-tag">다시 확인 필요</span>}
+                </th>
+                <td className="r"><ScoreCell a={a} /></td>
+                <td><StatusCell a={a} /></td>
+                <td className="r"><AdvantageCell a={a} /></td>
+                {print && (
+                  <td className="why">
+                    {!a ? "─" : a.status !== "ready" ? reasonText(a.reason_code) : range ? `판단 구간 ${range.lower}~${range.upper}${range.unit}` : "─"}
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }

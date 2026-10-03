@@ -47,6 +47,7 @@
 .et .rp-short{min-width:560px}
 .et .rp-short tbody th{font-weight:800;color:var(--ink);background:none}
 .et .rp-short tbody th small{font-weight:600;color:var(--ink-2)}
+.et .rp-short .stale-tag{display:inline-block;margin-left:8px;padding:1px 6px;border-radius:4px;background:var(--sub);font-size:11px;font-weight:700;color:var(--muted)}
 .et .rp-short .why{white-space:normal;min-width:220px;color:var(--ink-2)}
 .et .rp-empty{border:1px dashed var(--line);border-radius:var(--r-card);padding:16px}
 .et .rp-empty p{margin:0 0 10px;font-size:13px;color:var(--ink-2)}

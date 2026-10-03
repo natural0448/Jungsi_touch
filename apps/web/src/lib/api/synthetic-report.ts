@@ -1,6 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
-import type { OverallAnalysisDto, ProfileDto, ReportDto, ScoresInput, SubjectResultDto } from "@/lib/dto";
+import type { AssessmentDto, OverallAnalysisDto, ProfileDto, ReportDto, ScoresInput, ShortlistEntryDto, SubjectResultDto } from "@/lib/dto";
+import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
 import { EXAM, INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "@/lib/exam";
 
 /*
@@ -13,7 +14,13 @@ const OPT = { path: "/jeongsi", maxAge: 60 * 60 * 24 * 30, sameSite: "lax" as co
 const C = { profile: "jt_syn_profile", report: "jt_syn_report" } as const;
 
 type StoredProfile = ProfileDto & { scores: ScoresInput; key: string };
-type StoredReport = { report_id: string; report_version: number; profile_id: string; updated_at: string; key: string };
+type StoredReport = {
+  report_id: string; report_version: number; profile_id: string; updated_at: string; key: string;
+  keys?: string[]; // 최근 요청 키(같은 키의 재시도는 다시 쓰지 않는다)
+  analyzed?: string[]; // university.analyze 로 분석한 모집행
+  candidates_built?: boolean;
+  shortlist?: Record<string, ShortlistEntryDto>;
+};
 
 const INQ = new Set(INQUIRY_SUBJECTS.flatMap((g) => g.subjects));
 
@@ -102,30 +109,108 @@ function strip(p: StoredProfile): ProfileDto {
   return { profile_id: p.profile_id, profile_version: p.profile_version, confirmed: p.confirmed, created_at: p.created_at };
 }
 
-export async function saveReport(profileId: string, key: string, reportId?: string, expected?: number): Promise<ReportDto | "profile_not_found" | "revision_conflict" | "report_not_found"> {
+type Fail = "profile_not_found" | "revision_conflict" | "report_not_found" | "invalid_offering_ids" | "offering_not_found" | "score_confirmation_required";
+
+export async function saveReport(profileId: string, key: string, reportId?: string, expected?: number): Promise<ReportDto | Fail> {
   const profile = await read<StoredProfile>(C.profile);
   if (!profile || profile.profile_id !== profileId) return "profile_not_found";
   const prev = await read<StoredReport>(C.report);
-  if (prev && prev.key === key) return build(prev, profile);
+  if (prev && (prev.keys ?? [prev.key]).includes(key)) return build(prev, profile, true);
   let next: StoredReport;
+  const now = new Date().toISOString();
   if (reportId) {
     if (!prev || prev.report_id !== reportId) return "report_not_found";
     if (prev.report_version !== expected) return "revision_conflict";
-    next = { ...prev, report_version: prev.report_version + 1, profile_id: profileId, updated_at: new Date().toISOString(), key };
+    // 성적이 바뀌면 분석·후보는 비우고, 담은 학교는 남기되 다시 확인 필요로 둔다
+    const shortlist = Object.fromEntries(Object.entries(prev.shortlist ?? {}).map(([k, v]) => [k, { ...v, assessment_status: "needs_revalidation" }]));
+    next = { ...prev, report_version: prev.report_version + 1, profile_id: profileId, updated_at: now, key, keys: remember(prev, key), analyzed: [], candidates_built: false, shortlist };
   } else {
-    next = { report_id: `syn-report-${Date.now().toString(36)}`, report_version: 1, profile_id: profileId, updated_at: new Date().toISOString(), key };
+    next = { report_id: `syn-report-${Date.now().toString(36)}`, report_version: 1, profile_id: profileId, updated_at: now, key, keys: [key], analyzed: [], candidates_built: false, shortlist: {} };
   }
   (await cookies()).set(C.report, JSON.stringify(next), OPT);
-  return build(next, profile);
+  return build(next, profile, true);
 }
 
-export async function loadReport(reportId: string): Promise<ReportDto | null> {
+const remember = (r: StoredReport, key: string) => [...(r.keys ?? [r.key]), key].slice(-12);
+
+/** 리포트를 고치는 쓰기 공통: 소유·revision·멱등을 실제 서버처럼 확인한다 */
+async function mutate(reportId: string, expected: number, key: string, change: (r: StoredReport, p: StoredProfile) => StoredReport | Fail): Promise<ReportDto | Fail> {
+  const prev = await read<StoredReport>(C.report);
+  const profile = await read<StoredProfile>(C.profile);
+  if (!prev || !profile || prev.report_id !== reportId) return "report_not_found";
+  if ((prev.keys ?? [prev.key]).includes(key)) return build(prev, profile, true);
+  if (prev.report_version !== expected) return "revision_conflict";
+  if (!profile.confirmed) return "score_confirmation_required";
+  const next = change(prev, profile);
+  if (typeof next === "string") return next;
+  const saved = { ...next, report_version: prev.report_version + 1, updated_at: new Date().toISOString(), key, keys: remember(prev, key) };
+  // 실제 API 는 서버에 저장한다. 합성은 쿠키에 두는데, 화면을 그리는 중(3·4페이지가 분석을 채울 때)에는
+  // 쿠키를 쓸 수 없어 이번 응답에만 반영한다. 결정적 계산이라 다음 화면에서 같은 값이 다시 나온다
+  try {
+    (await cookies()).set(C.report, JSON.stringify(saved), OPT);
+  } catch {}
+  return build(saved, profile, true);
+}
+
+export function analyzeIds(reportId: string, expected: number, ids: string[], key: string) {
+  return mutate(reportId, expected, key, (r) => {
+    if (ids.length < 1 || ids.length > 100 || new Set(ids).size !== ids.length) return "invalid_offering_ids";
+    if (ids.some((id) => !CATALOG.some((o) => o.offering_id === id))) return "offering_not_found";
+    return { ...r, analyzed: Array.from(new Set([...(r.analyzed ?? []), ...ids])) };
+  });
+}
+
+export function buildCands(reportId: string, expected: number, key: string) {
+  return mutate(reportId, expected, key, (r) => ({ ...r, analyzed: CATALOG.map((o) => o.offering_id), candidates_built: true }));
+}
+
+export function setPick(reportId: string, offeringId: string, selected: boolean, expected: number, key: string) {
+  return mutate(reportId, expected, key, (r, p) => {
+    if (!CATALOG.some((o) => o.offering_id === offeringId)) return "offering_not_found";
+    const old = r.shortlist?.[offeringId];
+    if (old && old.selected === selected) return r; // 같은 상태 쓰기
+    // 담는 곳은 화면에서 분석을 본 모집행이다. 합성은 그 분석을 렌더링 중에 저장하지 못하므로 여기서 함께 남긴다
+    const a = analysesFor(p.scores, [offeringId])[offeringId];
+    const analyzed = Array.from(new Set([...(r.analyzed ?? []), offeringId]));
+    return { ...r, analyzed, shortlist: { ...(r.shortlist ?? {}), [offeringId]: { selected, changed_at: new Date().toISOString(), assessment_status: a?.status ?? "pending", profile_id: p.profile_id, catalog_version: "SYNTHETIC-catalog-v1" } } };
+  });
+}
+
+/** paid=false 면 유료 필드(analyses·candidates·shortlist)를 뺀다(일반 회원 응답) */
+export async function loadReport(reportId: string, paid = true): Promise<ReportDto | null> {
   const prev = await read<StoredReport>(C.report);
   const profile = await read<StoredProfile>(C.profile);
   if (!prev || !profile || prev.report_id !== reportId || prev.profile_id !== profile.profile_id) return null;
-  return build(prev, profile);
+  return build(prev, profile, paid);
 }
 
-function build(r: StoredReport, p: StoredProfile): ReportDto {
-  return { format: "jungsi.persisted-report/v1", report_id: r.report_id, report_version: r.report_version, profile_id: p.profile_id, updated_at: r.updated_at, overall: computeOverall(p.scores) };
+/** 합성 집계용: 리포트 성적으로 모집행 하나를 바로 분석한다(실제 API 는 서버에 저장된 분석을 쓴다) */
+export async function assessFor(reportId: string, offeringId: string): Promise<AssessmentDto | null> {
+  const prev = await read<StoredReport>(C.report);
+  const profile = await read<StoredProfile>(C.profile);
+  if (!prev || !profile || prev.report_id !== reportId) return null;
+  return analysesFor(profile.scores, [offeringId])[offeringId] ?? null;
+}
+
+function analysesFor(scores: ScoresInput, ids: string[]): Record<string, AssessmentDto> {
+  const overall = computeOverall(scores);
+  return Object.fromEntries(CATALOG.filter((o) => ids.includes(o.offering_id)).map((o) => [o.offering_id, assess(o, scores, overall)]));
+}
+
+function build(r: StoredReport, p: StoredProfile, paid: boolean): ReportDto {
+  const report: ReportDto = { format: "jungsi.persisted-report/v1", report_id: r.report_id, report_version: r.report_version, profile_id: p.profile_id, updated_at: r.updated_at, overall: computeOverall(p.scores) };
+  if (!paid) return report;
+  const analyses = analysesFor(p.scores, r.analyzed ?? []);
+  const shortlist = Object.fromEntries(
+    // 새 성적으로 다시 분석하면 그 상태로, 아직이면 저장된 상태(다시 확인 필요 등) 그대로
+    Object.entries(r.shortlist ?? {}).map(([k, v]) => [k, analyses[k] ? { ...v, assessment_status: analyses[k].status } : v]),
+  );
+  const ready = Object.values(analyses).some((a) => a.status === "ready");
+  return {
+    ...report,
+    analyses,
+    candidates: r.candidates_built ? buildCandidates(analyses) : null,
+    shortlist,
+    analysis_status: (r.analyzed ?? []).length === 0 ? { status: "pending", reason_code: "offering_analysis_not_requested" } : { status: ready ? "ready" : "pending", reason_code: ready ? null : "offering_analysis_pending" },
+  };
 }

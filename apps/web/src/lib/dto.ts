@@ -2,8 +2,7 @@
   우리 서비스 API 의 실제 응답 모양 — develop 의 docs/current/API_DTO_계약.md (명세 1.2.2) 를 옮긴 것
   ─────────────────────────────────────────────────────────────
   route_catalog.json 의 backend_contract.dto_schemas 가 원본이다. 바뀌면 여기를 맞춘다.
-  1페이지(history.search · recruitment.read)가 먼저 이 모양을 쓴다.
-  3·4페이지는 아직 contract.ts 의 화면 초안을 쓰며, 이 파일로 옮기는 작업이 남아 있다.
+  1~4페이지가 모두 이 모양을 쓴다(session.read 만 PR #5 제안이라 contract.ts 의 Session).
 
   - 숫자 점수·누적은 엔진의 소수 문자열이다.
   - 자료 대기는 200 + status=pending/reason_code, 값 null. 승인된 0건과 구분한다.
@@ -156,6 +155,87 @@ export interface ShortlistEntryDto {
   catalog_version: string | null;
 }
 
+// ─── 3·4페이지: 모집단위 분석·후보·집계 ──────────────────────
+
+/** 학과(모집단위)마다의 지원 판단. 학교 분류를 학과에 복사하지 않는다 */
+export type Category = "challenge" | "core" | "room" | "outside" | "pending" | "ineligible";
+
+export interface HistoricalMetricDto {
+  academic_year: number;
+  metric_name: string;
+  metric_definition: string | null;
+  value: string | number | null;
+  unit: string | null;
+  original_scale: string | null;
+  publication_status: string | null;
+  source_url: string | null;
+  source_as_of: string | null; // YYYY-MM-DD
+}
+
+/** assessment — 모집단위 하나의 개인 분석 (report.analyses[offering_id]) */
+export interface AssessmentDto {
+  offering_id: string;
+  status: "ready" | "pending" | "ineligible";
+  reason_code: string | null;
+  converted_score: string | null; // 올해 공식 반영식으로 환산한 내 점수
+  converted_percentile: string | null; // 이 대학 환산 분포에서 위에서 몇 %(동점 포함)
+  category: Category;
+  advantage: { delta_pp: string; status: "favorable" | "unfavorable" | "neutral"; baseline_version: string } | null;
+  years: { academic_year: number; offering_id: string; score_basis: string; converted_score: string | null; status: string; reason_code: string | null }[];
+  versions: Record<string, string>;
+  eligibility_status: "eligible" | "needs_confirmation" | "ineligible";
+  decision_components?: { base_category: Category; adjusted_category: Category | null; adopted_category: Category; base_policy_version: string; adjustment_version: string | null };
+  decision_evidence?: {
+    version: string;
+    historical_metrics: HistoricalMetricDto[];
+    forecast_70: { status: "ready" | "pending"; reason_code: string | null; value: string | number | null; unit: string | null; definition: string | null; version: string | null };
+    expected_acceptance_range: { lower: string | number; upper: string | number; unit: string; definition: string; policy_version: string };
+  };
+}
+
+export interface CandidateItemDto {
+  offering: OfferingDto;
+  assessment: AssessmentDto;
+}
+
+/** candidates — candidates.build. 대학별 묶음과 간호·보건·교육 와일드카드, 판단 보류 목록 */
+export interface CandidatesDto {
+  status: "ready" | "pending";
+  reason_code: string | null;
+  basic_university_groups: { university_id: string; university_name: string; offerings: CandidateItemDto[] }[];
+  wildcards: CandidateItemDto[];
+  pending_offerings: { offering_id: string; category: Category; reason_code: string | null }[];
+  catalog_version: string | null;
+}
+
+export interface RankDto {
+  rank: number;
+  tie_count: number;
+  population_count: number;
+  tie_policy: string;
+}
+
+/** statistics — statistics.read. 서비스 이용자 집계이며 실제 대학 지원자가 아니다 */
+export interface StatisticsDto {
+  status: "ready" | "pending";
+  reason_code: string | null;
+  recommended_count: number | null;
+  selected_count: number | null;
+  recommended_rank: RankDto | null;
+  selected_rank: RankDto | null;
+  updated_at: string | null; // UTC Z
+  scope: string;
+  versions?: Record<string, string>;
+}
+
+/** offering_detail — offering.read */
+export interface OfferingDetailDto {
+  status: "ready" | "pending";
+  reason_code: string | null;
+  offering: OfferingDto | null;
+  catalog_version: string | null;
+}
+
 /** report — jungsi.persisted-report/v1. 유료 필드는 일반 회원 응답에서 빠진다 */
 export interface ReportDto {
   format: "jungsi.persisted-report/v1";
@@ -164,8 +244,8 @@ export interface ReportDto {
   profile_id: string;
   updated_at: string; // UTC Z
   overall: OverallAnalysisDto;
-  analyses?: Record<string, unknown>;
-  candidates?: unknown;
+  analyses?: Record<string, AssessmentDto>;
+  candidates?: CandidatesDto | null;
   shortlist?: Record<string, ShortlistEntryDto>;
   analysis_status?: { status: string; reason_code: string | null };
 }

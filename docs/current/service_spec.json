@@ -978,7 +978,7 @@
     {
       "path": "apps/web/src/app/admissions/possibilities/page.tsx",
       "layer": "presentation",
-      "status": "page3_presentation_synthetic_responses_no_live_API",
+      "status": "page3_presentation_on_backend_DTO_synthetic_responses_no_live_API",
       "requirements": [
         "REQ-03",
         "REQ-05",
@@ -1004,7 +1004,7 @@
     {
       "path": "apps/web/src/lib/contract.ts",
       "layer": "presentation",
-      "status": "presentation_draft_response_shapes_pending_application_contract",
+      "status": "presentation_draft_shapes_only_Session_in_use_pending_session_read",
       "requirements": [
         "REQ-03",
         "REQ-05",
@@ -1016,7 +1016,7 @@
     {
       "path": "apps/web/src/app/admissions/favorable/page.tsx",
       "layer": "presentation",
-      "status": "page4_presentation_synthetic_responses_no_live_API",
+      "status": "page4_presentation_on_backend_DTO_synthetic_responses_no_live_API",
       "requirements": [
         "REQ-04",
         "REQ-05",
@@ -1072,6 +1072,19 @@
       "requirements": [
         "REQ-11",
         "REQ-14"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/lib/report-ops.ts",
+      "layer": "presentation",
+      "status": "report_bound_analysis_candidates_shortlist_calls_with_idempotency_and_revision_retry",
+      "requirements": [
+        "REQ-04",
+        "REQ-05",
+        "REQ-06",
+        "REQ-10",
+        "REQ-11"
       ],
       "symbols": []
     }
@@ -1403,14 +1416,15 @@
     "대규모 집계 성능/갱신 주기 실측; Kafka/Redis 미채택",
     "1페이지 실제 입결 공개 네 학년도·비회원 공개·학부모/상담자 위임 정책 확정",
     "원격 main 강제 보호를 지원하는 GitHub 요금제 적용 후 활성화",
-    "3페이지가 쓰는 offerings.search·university.analyze·shortlist.update 의 응답 필드(apps/web/src/lib/contract.ts 화면 초안)를 애플리케이션 계약으로 확정하고, 화면이 본인 report_id 와 핵심 지원 학교 목록을 받는 방법을 정한다.",
-    "4페이지가 쓰는 candidates.build·statistics.read 응답 필드(apps/web/src/lib/contract.ts 의 CandidateSchool·WildcardPick·OfferingStatistics 화면 초안)와 학교 분류 정책을 애플리케이션 계약으로 확정한다.",
     "1페이지 4개년 비교: history_metric 에 연도 간 같은 모집단위를 잇는 키가 없어 학년도별로만 보여 준다. 연도 연결 키(PK 연결) 제공과 처음 보여 줄 학년도(화면은 결과가 있는 2026 을 기본으로 둠)를 정한다.",
     "1페이지 지역 조건의 선택지를 API 가 줄지 정한다(화면은 시·도 17곳 고정 목록을 쓴다).",
-    "3·4페이지 화면이 쓰는 초안 모양(apps/web/src/lib/contract.ts)을 develop 의 DTO(report·assessment·candidates·statistics)로 옮긴다.",
     "2페이지: 화면이 시험 목록(exam_id·pack_version·과목 선택지)을 받는 API 가 없어 2027 9월 모의평가 토큰과 과목 목록을 화면 설정에 둔다. 시험 목록 제공 방식을 정한다.",
     "2페이지: 내 리포트 번호(report_id)를 찾는 API 가 없어 화면이 마지막 리포트 번호를 브라우저에 기억한다. 다른 기기에서 내 리포트를 찾는 방법(예: 본인 최신 리포트 조회)을 정한다.",
-    "2페이지의 핵심 지원 학교 부분은 3·4페이지와 같은 화면 초안 모양을 쓴다. report.shortlist 에는 모집단위 이름이 없어 offering.read 로 이름을 붙이는 연결과 함께 실제 DTO 로 옮긴다."
+    "4페이지: candidates DTO 에 학교 분류(도전학교·핵심학교·여유 후보, v0.12 school_bucket_ui_labels)가 없다. 화면은 '그 판단을 받은 학과가 있는 학교'로 거른다. 학교 분류를 응답에 넣을지, 이 거르기를 정본으로 할지 정한다.",
+    "4페이지: 학교를 찾은 이유와 와일드카드 '한 수인 이유' 문장이 응답에 없어 화면이 delta_pp 와 학과 판단 수로만 쓴다. 서버가 이유 코드나 문장을 줄지 정한다.",
+    "3페이지: offerings.search 에 모집 인원이 없어 목록의 '2027 모집' 칸을 빼고 펼친 줄에서만 recruitment.read 로 보인다. 목록에 인원을 보일지(검색 응답에 포함 여부) 정한다.",
+    "3·4페이지: 화면을 열 때 보이는 모집행의 분석이 없으면 university.analyze·candidates.build(POST)를 부른다. 요청 키는 (리포트, revision, 대상)으로 정해 같은 화면을 다시 열어도 한 번만 쓰인다. 읽기 화면에서 쓰기를 부르는 이 방식이 서버 운영(요청량·감사 기록)에 맞는지 확인한다.",
+    "4페이지: statistics.read 가 모집단위 하나씩이라 펼친 학교와 와일드카드만 부른다. 여러 모집단위를 한 번에 읽는 방법이 필요한지 정한다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -1602,6 +1616,18 @@
         "REQ-18"
       ],
       "summary": "프레젠테이션: 2페이지(내 성적 리포트)를 develop 의 실제 DTO 로 구현했다. 일반·유료 회원이 2027학년도 9월 모의평가 표준점수(국어·수학 선택과목, 탐구 두 과목, 영어·한국사 등급)를 확인 체크와 함께 저장하면 score-profile.create → overall.analyze 로 리포트를 만들고 report.read 로 총점·전체 상위 누적(동점 포함·제외)·과목 결과·절대평가 등급을 보인다. 성적을 고치면 새 프로필로 같은 리포트의 새 revision(expected_version)을 만든다. 쓰기 요청은 화면마다 한 Idempotency-Key 를 쓴다. 유료는 핵심 지원 학교 분석과 report.export 상담 리포트 인쇄 화면을 함께 본다. 누적 대기는 사유와 함께 보이고 총점·과목 결과는 유지한다. HTTP 연결 전이라 같은 DTO 모양의 합성 응답으로 동작한다."
+    },
+    {
+      "date": "2026-10-04",
+      "requirements": [
+        "REQ-04",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-10",
+        "REQ-11"
+      ],
+      "summary": "프레젠테이션: 3·4페이지와 2페이지 핵심 지원 학교 부분을 화면 초안(contract.ts)에서 develop 의 실제 DTO 로 옮겼다. 3페이지는 offerings.search(2027, next_cursor)로 모집행을 찾고, 내 리포트에 보이는 모집행의 분석이 없으면 university.analyze 로 report.analyses 를 채워 학과마다 환산점수·대학 환산 분포 위치·지원가능성(category, 기본·상담 조정·채택)·판단 구간·70% 예상선·환산 유불리(delta_pp)·연도별 추정 환산점수와 대학 발표 지표를 보인다. 펼친 줄의 모집 인원은 recruitment.read 로 읽는다. 4페이지는 candidates.build 의 대학별 묶음과 간호·보건·교육 와일드카드(wildcard_group), 판단 보류 수를 보이고, 펼친 학교와 와일드카드의 statistics.read 를 모집단위마다 부른다. 담기는 shortlist.update(최신 revision, revision_conflict 면 한 번 다시 읽어 재시도)이며 3·4페이지와 2페이지 리포트·인쇄가 같은 report.shortlist 를 쓰고 이름은 offering.read 로 붙인다. 응답에 학교 분류와 설명 문장이 없어 학교에 색을 칠하지 않고 '그 판단을 받은 학과가 있는 학교'로 거르며, 찾은 이유는 응답 숫자만으로 쓴다. HTTP 연결 전이라 같은 모양의 합성 응답으로 동작한다."
     }
   ],
   "overall_analysis_contract": {
