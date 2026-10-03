@@ -72,9 +72,9 @@ class ConsistencyTests(unittest.TestCase):
         next(row for row in spec["operations"] if row["id"]=="overall.analyze")["member_tiers"]=["paid"]
         self.assertIn("Overall analysis access policy drift",validate_spec(spec))
 
-    def test_stateless_service_cannot_be_marked_as_http_implementation(self):
+    def test_overall_http_flag_must_match_registered_platform_adapter(self):
         spec=deepcopy(self.spec)
-        spec["overall_analysis_contract"]["http_handler_implemented"]=True
+        spec["overall_analysis_contract"]["http_handler_implemented"]=not spec['overall_analysis_contract']['http_handler_implemented']
         self.assertIn("Overall application boundary drift",validate_spec(spec))
 
     def test_frontend_contract_contains_dto_without_internal_provider_reference(self):
@@ -84,5 +84,16 @@ class ConsistencyTests(unittest.TestCase):
         self.assertEqual(public["response_fields"],internal["response_fields"])
         self.assertNotIn("application_service",public)
         self.assertNotIn("provider",public)
+
+    def test_backend_readiness_cannot_omit_an_operation(self):
+        spec=deepcopy(self.spec);spec['backend_platform_contract']['operation_gaps'].pop()
+        self.assertIn('Backend readiness operation drift',validate_spec(spec))
+
+    def test_presentation_api_contract_excludes_internal_adapter_and_registry(self):
+        frontend=json.loads(generated_files(self.spec)['apps/web/route_catalog.json'])
+        self.assertEqual(len(frontend['operations']),12)
+        self.assertNotIn('drive_registry',frontend['backend_contract'])
+        self.assertNotIn('http_adapter',frontend['operations'][0])
+        self.assertNotIn('workflow_service',frontend['operations'][0])
 
 if __name__=="__main__":unittest.main()

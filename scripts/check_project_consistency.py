@@ -134,6 +134,8 @@ def generated_files(spec):
     pending="\n".join("- "+text for text in spec["pending"])
     changes=table(["변경일","요구사항","변경과 구현 범위"],[[r["date"],", ".join(r["requirements"]),r["summary"]] for r in spec.get("change_notes",[])])
     files={}
+    platform=spec.get('backend_platform_contract')
+    runtime_intro=('FastAPI 12개 경로와 업무 서비스·Supabase/Drive 어댑터를 구현했다. 코드 합성 검증과 실제 운영 연결은 구분한다. [API DTO 계약](API_DTO_계약.md)과 [백엔드 운영 준비](백엔드_운영준비.md)를 함께 읽는다.' if platform else '아래 API는 연결 예정 계약이며 HTTP 핸들러가 등록된 상태가 아니다.')
     files[spec["current_documents"]["planning"]]=doc("정시터치 현재 서비스 기획",
        "학생·학부모가 전체 성적 위치에서 출발해 유리한 대학·학과와 핵심 지원 학교를 찾는 상담 서비스다. 교사·입시담당자는 부 사용자다. 현재는 계산·권한·라우팅의 개발 기반이며 운영 서비스 완성을 의미하지 않는다.\n\n"+
        "## 화면과 회원 정책\n\n"+table(["페이지","화면","경로","회원","역할"],page_rows)+
@@ -159,13 +161,13 @@ def generated_files(spec):
             "\n\n응답 제외: "+"; ".join(overall_contract["excludes"])+".\n\n"+
             overall_contract["integration"]+"\n\n")
     files[spec["current_documents"]["routing"]]=doc("정시터치 화면과 API 라우팅 명세",
-       "화면 URL과 서버 API 계약을 같은 요구사항에 연결한다. 아래 API는 연결 예정 계약이며 HTTP 핸들러가 등록된 상태가 아니다. 기존 성적 엔진과 권한 기반 모듈을 연결할 때 이 계약을 따른다.\n\n"+
+       "화면 URL과 서버 API 계약을 같은 요구사항에 연결한다. "+runtime_intro+"\n\n"+
        "## 화면 경로\n\n"+table(["페이지","화면","경로","회원","역할"],page_rows)+
        "\n\n루트 /는 /admissions/results로 연결한다. 비회원의 1페이지 접근은 미정이며 현재 권한 기반의 기본값은 인증 필요다. 로그인된 일반·유료 사용자의 1페이지 접근은 성적 입력을 요구하지 않는다.\n\n"+
        "## 서버 API 계약\n\n"+table(["작업 ID","메서드","경로","회원","리포트 소유권","성적 확인","응답 범위"],operation_rows)+
        "\n\n정적 경로 /offerings/search를 /offerings/{offering_id}보다 먼저 등록한다. report_id와 offering_id의 표기를 통일한다. 검색은 추천 목록과 조인해 대상을 줄이지 않는다.\n\n"+
        "## 권한과 응답 경계\n\n서버가 검증한 세션·현재 이용권으로 Actor를 만든다. 요청 본문의 회원등급·학생 ID를 신뢰하지 않는다. 미인증은 401, 일반가입자의 유료 요청은 403으로 차단하고 결과·건수·상세를 반환하지 않는다. 없는 리포트와 타인 소유 리포트는 같은 404로 처리한다. 본인 분석에 확인한 성적이 없으면 409와 보류 사유다.\n\n"+
-       "권한 모듈은 HTTP 인증이나 응답 필드 제거 기능을 대신하지 않는다. 실제 핸들러에서 입력 검증, 운영 저장소 조회, 회원별 응답 객체, 분포·산식 승인 검사를 연결해야 한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n"+
+       ("FastAPI는 세션 검증 후 업무 서비스를 호출하고 회원별 DTO를 적용한다. DB 이용권·본인 소유권과 자료/모형 승인 검사를 연결했다. 실제 서버·자료 연결 증거는 운영 준비 상태에서 따로 확인한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n" if platform else "권한 모듈은 HTTP 인증이나 응답 필드 제거 기능을 대신하지 않는다. 실제 핸들러에서 입력 검증, 운영 저장소 조회, 회원별 응답 객체, 분포·산식 승인 검사를 연결해야 한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n")+
        overall_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
     layers=table(["계층","코드 위치","책임","허용 의존"],[[l["label"],", ".join(l["roots"]),l["responsibility"],", ".join(l["allowed_dependencies"])] for l in spec["layers"]])
     implementation=table(["파일","계층","현재 상태","요구사항"],[[r["path"],r["layer"],{
@@ -183,8 +185,8 @@ def generated_files(spec):
        "\n\n애플리케이션은 구체 DB 어댑터를 가져오지 않고 자신이 정의한 포트에 의존한다. 인프라가 포트를 구현한다. 프레젠테이션은 허용된 API 결과만 표시하며 Python 엔진·DB 비밀값·전체 환산표·곡선·모델을 포함하지 않는다.\n\n"+
        "## 커밋된 코드와 새 기반\n\n"+implementation+
        "\n\n기존 src/jungsi_touch 루트 계산 모듈은 애플리케이션의 엔진 라이브러리다. 경로를 옮겨 기존 사용자를 깨뜨리지 않는다. 새 application과 infrastructure를 통해 입출력·소유권·저장소를 연결한다. 메모리 어댑터는 합성 검산 전용으로 운영 연결을 의미하지 않는다.\n\n"+
-       "## 데이터와 기술 결정\n\n실제 원자료·학생 성적·입결·환산표·곡선·모델과 .env 계열은 모든 브랜치에서 제외한다. database에는 DB 구조·마이그레이션 코드만 둘 수 있다. 현재 DB 엔진·Supabase·웹 프레임워크·HTTP 서버 채택은 미정이며 연결 비밀값을 문서나 코드로 대신하지 않는다.\n\n"+
-       "## 구현 순서\n\n현재 계약과 권한 기반 검증 다음에 로그인·결제·운영 저장소를 연결한다. 이후 1페이지 공식 조회와 2페이지 입력·전체 누적, 3페이지 학과별 분석, 4페이지 추천·리포트와 실시간 집계를 순서대로 연결한다. 각 단계는 승인된 자료가 없는 값을 보류한다."+collaboration["ownership"]+collaboration["drive"])
+       "## 데이터와 기술 결정\n\n실제 원자료·학생 성적·입결·환산표·곡선·모델과 .env 계열은 모든 브랜치에서 제외한다. database에는 DB 구조·마이그레이션 코드만 둘 수 있다. "+("FastAPI·Supabase PostgreSQL을 채택했다. UTC aware/timestamptz와 date를 구분하고 서버는 환경 설정만 읽는다. 실제 연결 설정·자료 승인·운영 배포는 대기다." if platform else "DB 엔진·웹 프레임워크·HTTP 서버 채택은 미정이다.")+"\n\n"+
+       "## 구현과 운영 연결\n\n"+(runtime_intro if platform else "현재 계약과 권한 기반 다음에 실제 인증·저장·각 업무 서비스를 연결한다.")+" 각 단계는 승인된 자료가 없는 값을 사유와 함께 보류한다."+collaboration["ownership"]+collaboration["drive"])
     workflow=spec["workflow"]
     tools="\n".join("- "+p for p in workflow["shared_tools"])
     files[spec["current_documents"]["workflow"]]=doc("정시터치 개발 브랜치와 문서 운영",
@@ -212,12 +214,39 @@ def generated_files(spec):
         )}
         backend["overall_analysis_contract"]=overall_contract
         backend["runtime_status"]="application_service_no_HTTP_handlers"
+    if platform:
+        frontend['operations']=[{key:row[key] for key in ('id','method','path','member_tiers','report_owner','confirmed_score_profile','requirements','response_scope','implementation_status','http_contract')} for row in spec['operations']]
+        frontend['backend_contract']={key:platform[key] for key in ('format','code_status','live_server_status','live_data_status','authentication','writes','errors','dto_schemas','datetime')}
+        backend['backend_platform_contract']=platform
+        backend['runtime_status']='HTTP_workflows_implemented_live_configuration_pending'
     files["apps/web/route_catalog.json"]=json.dumps(frontend,ensure_ascii=False,indent=2)+"\n"
     files["src/jungsi_touch/application/route_catalog.json"]=json.dumps(backend,ensure_ascii=False,indent=2)+"\n"
     files["apps/web/README.md"]=doc("정시터치 프레젠테이션 개발 기준","현재 경로와 회원별 화면 접근 범위는 route_catalog.json을 따른다. [현재 기획](../../docs/current/서비스_기획.md)과 [라우팅 명세](../../docs/current/라우팅_명세.md)를 함께 갱신한다. 기존 가상 화면은 기획 이력이며 이 폴더의 실행 앱이 아니다. 실제 화면 앱·인증·API 연결은 후속 작업이다.\n\n화면은 서버가 허용한 결과만 표시하고 자체 대학 계산이나 DB 직접 조회를 구현하지 않는다. 브라우저의 회원등급 선택값을 운영 권한으로 사용하지 않는다."+collaboration["presentation_intro"])
-    files["database/README.md"]=doc("정시터치 데이터 계층 개발 기준","이 폴더에는 실제 값이 없는 DB 구조·마이그레이션 코드만 추가할 수 있다. 운영 DB 채택과 스키마는 아직 확정하지 않았다. 원자료·성적·입결·환산표·곡선·모델·덤프·접속 비밀값은 여기에 복사하지 않는다.\n\n실제 데이터는 Git 제외 폴더 또는 비공개 DB·스토리지에 두고 애플리케이션 포트를 통해 접근한다. [3티어 개발구조](../docs/current/3티어_개발구조.md)를 따른다."+collaboration["drive"])
+    files["database/README.md"]=doc("정시터치 데이터 계층 개발 기준","이 폴더에는 실제 값이 없는 DB 구조·마이그레이션 코드만 추가할 수 있다. "+(platform['database'] if platform else "운영 DB 채택과 스키마는 미정이다.")+" 원자료·성적·입결·환산표·곡선·모델·덤프·접속 비밀값은 여기에 복사하지 않는다.\n\n실제 데이터는 Git 제외 폴더 또는 비공개 DB·스토리지에 두고 애플리케이션 포트를 통해 접근한다. [3티어 개발구조](../docs/current/3티어_개발구조.md)를 따른다."+collaboration["drive"])
     if spec["current_documents"].get("presentation_handoff"):
-        files[spec["current_documents"]["presentation_handoff"]]=doc("프레젠테이션 담당과 작업 인계",collaboration["handoff"])
+        files[spec["current_documents"]["presentation_handoff"]]=doc("프레젠테이션 담당과 작업 인계",collaboration["handoff"]+("\n\n## 연결할 서버 계약\n\n"+runtime_intro+" HTTP 응답은 UTC Z 시각을 표시 경계에서 Asia/Seoul로 변환하며 YYYY-MM-DD 날짜는 그대로 표시한다. Supabase 검증 access token과 쓰기 요청 Idempotency-Key, expected_version을 보내고 401/403/404/409 및 pending/null을 구분한다. GET print는 고정 revision 상담 DTO이며 인쇄/PDF 렌더링은 화면 담당이다." if platform else ''))
+    if platform:
+        gap_rows=[[r['operation'],r['before'],r['after'],r['storage'],r['verification'],r['external_settings'],r['live_data']] for r in platform['operation_gaps']]
+        time_rows=[[key,value] for key,value in platform['datetime'].items()]
+        runtime=platform['runtime']
+        files[spec['current_documents']['backend_readiness']]=doc('백엔드 구현과 운영 준비',
+            '자료 정리 전 구현 범위는 12개 HTTP/업무·서버 세션/이용권·저장/Drive 어댑터·추가 스키마·UTC 계약이다. code_status='+platform['code_status']+', live_server='+platform['live_server_status']+', live_data='+platform['live_data_status']+'. 실제 설정이 없는 운영 모드를 합성 인증/메모리 자료로 자동 대체하지 않는다.\n\n'+
+            '출발 develop: '+platform['start_commit']+'; 공통 기획 기준: '+platform['planning_commit']+'. [작업 인수 기준](../work_items/DEV-002-pre-data-platform.json)을 따른다. PR/CI/통합 결과는 해당 GitHub 변경 증거로 확인한다.\n\n'+
+            '## API별 전후 상태\n\n'+table(['API','시작 상태','구현 후','저장/자료','합성 검증','설정','실제 자료'],gap_rows)+'\n\n'+
+            '## 실행과 설정\n\n'+table(['설정 이름','용도'],platform['configuration'])+'\n\n실제 값은 Git 제외 설정 또는 서버 환경변수에만 보관한다. .env 및 예시도 커밋하지 않으며 자동 .env 로더는 없다. 연결 값은 문서/HTTP/진단 stdout에 출력하지 않는다.\n\n'+
+            '런타임 '+runtime['python']+'; 잠금 '+runtime['lock']+'.\n\n'+chr(96)*3+'text\n'+runtime['bootstrap']+'\n'+runtime['serve']+'\n'+runtime['probe']+'\n'+runtime['tests']+'\n'+chr(96)*3+'\n\n'+runtime['environment']+' SHA256 고정 공식 PyPI wheel을 새 목적지로 추출한다. 재실행에는 새로운 폴더를 지정한다. CI도 동일 lock을 사용한다.\n\n'+
+            '## DB·헬스·실제 연결 확인\n\n'+platform['database']+'\n\n'+platform['health']+'\n\n읽기 전용 probe는 실제 설정이 있을 때 DB default/effective timezone·스키마/컬럼 형식과 가상 SQL literal instant/date 왕복만 검사한다. 실제 사용자 표 조회·수정·마이그레이션 적용은 하지 않는다. Auth는 별도 검수 토큰이 있을 때만 getUser를 호출한다. 실제 Drive 읽기/쓰기 검수는 현재 probe가 수행하지 않으므로 별도 승인 자료 실행 증거가 필요하다.\n\n'+
+            '## UTC와 원본 날짜\n\n'+table(['계약','구현 기준'],time_rows)+'\n\n'+
+            '## Drive 자료 계약\n\n'+table(['항목','계약'],[[k,', '.join(v) if isinstance(v,list) else v] for k,v in platform['drive_registry'].items()])+'\n\n'+
+            '## 검증 범위와 남은 작업\n\n'+platform['verification']+'\n\n'+'\n'.join('- '+v for v in platform['remaining']))
+        schemas=[]
+        for name,schema in platform['dto_schemas'].items():
+            schemas.append('### '+name+'\n\n'+('format: '+schema['format']+'\n\n' if schema.get('format') else '')+'필드: '+', '.join(schema['fields'])+'.'+('\n\n유료 추가 필드: '+', '.join(schema['paid_fields'])+'.' if schema.get('paid_fields') else '')+('\n\n'+table(['중첩 객체','필드'],[[k,', '.join(v)] for k,v in schema['nested'].items()]) if schema.get('nested') else '')+'\n\n'+'\n'.join('- '+v for v in schema['rules']))
+        files[spec['current_documents']['api_dto']]=doc('HTTP API와 학생 DTO 계약',
+            platform['authentication']+'\n\n'+platform['writes']+'\n\n권한은 body·query 검증/자료 조회/멱등 조회보다 먼저 검사한다. unknown field와 중복 query key는 거절한다. 숫자 점수/누적은 엔진의 소수 문자열이며 원자료/전체 분포/가중치/비밀값/로컬 출처 경로는 제공하지 않는다. 모든 응답은 Cache-Control: no-store다.\n\n'+
+            '## 12개 요청과 응답\n\n'+table(['API','메서드/경로','본문','쿼리','응답 DTO','키 필수'],[[o['id'],o['method']+' '+o['path'],'; '.join(o['http_contract']['body']) or '없음',', '.join(o['http_contract']['query']) or '없음',o['http_contract']['response'],o['http_contract']['idempotency_key_required']] for o in spec['operations']])+'\n\n'+
+            '## 오류와 대기\n\n오류 객체는 {status:error,error:{code},request_id}이며 비밀값·예외 원문을 포함하지 않는다. 자료 대기는 200 응답의 status=pending/reason_code와 값 null로 구분한다. 전체 분석이 pending이어도 입력 총점·과목 결과는 보존한다.\n\n'+table(['오류 코드','HTTP','의미'],platform['errors'])+'\n\n대학 계산의 개별 자료 해시/버전/승인 불일치는 해당 assessment의 pending이다. 카탈로그 전체 형식/승인 실패와 공급 서비스 실패는 503이다.\n\n'+
+            '## 응답 객체\n\n'+'\n\n'.join(schemas)+'\n\n## 시간 표시\n\n서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.')
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_spec(spec):
@@ -256,8 +285,14 @@ def validate_spec(spec):
             errors.append("Overall analysis access policy drift")
         if operation and operation.get("application_service")!=contract["application_service"]:
             errors.append("Overall analysis service reference drift")
-        if not contract["stateless"] or contract["http_handler_implemented"]:
+        if not contract["stateless"] or contract['http_handler_implemented']!=bool(spec.get('backend_platform_contract',{}).get('http_implemented')):
             errors.append("Overall application boundary drift")
+    platform=spec.get('backend_platform_contract')
+    if platform:
+        if {r['operation'] for r in platform['operation_gaps']}!=operation_ids:errors.append('Backend readiness operation drift')
+        if len(platform['operation_gaps'])!=len(ops):errors.append('Duplicate backend readiness operation')
+        if any('http_contract' not in o or 'implementation_status' not in o for o in ops):errors.append('Missing HTTP DTO contract')
+        if platform['approved_stack']['HTTP']!='FastAPI' or platform['approved_stack']['database']!='Supabase PostgreSQL':errors.append('Approved backend stack drift')
     if spec["workflow"]["release_branch"]!="main" or spec["workflow"]["integration_branch"]!="develop":
         errors.append("Branch policy drift")
     return errors

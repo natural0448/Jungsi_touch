@@ -13,3 +13,8 @@
 /tests/test_access_policy.py text eol=lf
 /tests/test_project_consistency.py text eol=lf
 /tests/test_overall_analysis_service.py text eol=lf
+/scripts/bootstrap_backend_runtime.py text eol=lf
+/scripts/probe_backend_connection.py text eol=lf
+/tests/backend_synthetic_fixture.py text eol=lf
+/tests/test_backend*.py text eol=lf
+/backend-runtime.lock.json text eol=lf

@@ -33,5 +33,9 @@ jobs:
           python-version: "3.12"
       - name: Check planning routing layers and exclusions
         run: python -B scripts/check_project_consistency.py --revision HEAD
+      - name: Prepare retained hash-pinned backend runtime
+        run: |
+          python -B scripts/bootstrap_backend_runtime.py --destination outputs/ci_backend_runtime
+          echo "PYTHONPATH=$PWD/outputs/ci_backend_runtime/site" >> "$GITHUB_ENV"
       - name: Test only the committed snapshot
         run: python -B scripts/run_committed_tests.py --revision HEAD
