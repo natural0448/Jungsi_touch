@@ -118,3 +118,7 @@ Desktop.ini
 /docs/**/검증_기록.json
 /docs/**/verification*.json
 /docs/**/design_verification.json
+
+# Reviewed development checks; no private data embedded.
+!/scripts/check_project_consistency.py
+!/scripts/run_committed_tests.py

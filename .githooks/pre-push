@@ -1,0 +1,17 @@
+#!/bin/sh
+task_python="$(git config --get jungsi.python || true)"
+if [ -z "$task_python" ]; then
+  if command -v python3 >/dev/null 2>&1; then task_python=python3; else task_python=python; fi
+fi
+while read task_local_ref task_local_sha task_remote_ref task_remote_sha; do
+  if [ "$task_remote_ref" = "refs/heads/main" ]; then
+    echo "main direct push is blocked. Use a validated pull request from develop." >&2
+    exit 1
+  fi
+  if [ "$task_local_sha" = "0000000000000000000000000000000000000000" ]; then
+    echo "Branch deletion is outside this project's authorized workflow." >&2
+    exit 1
+  fi
+  "$task_python" -B -X utf8 scripts/check_project_consistency.py --revision "$task_local_sha" || exit 1
+  "$task_python" -B -X utf8 scripts/run_committed_tests.py --revision "$task_local_sha" || exit 1
+done

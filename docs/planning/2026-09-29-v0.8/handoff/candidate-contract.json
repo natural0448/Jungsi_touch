@@ -310,5 +310,8 @@
     "html": "../preview/index.html",
     "mock": "candidate.mock.json"
   },
-  "based_on_version": "0.7"
+  "based_on_version": "0.7",
+  "document_role": "historical_snapshot",
+  "current_spec_path": "docs/current/service_spec.json",
+  "current_routing_path": "docs/current/라우팅_명세.md"
 }

@@ -527,5 +527,8 @@
   },
   "entitlement_field_scope": {
     "catalog_search_and_basic_detail": "page3_only_not_page1"
-  }
+  },
+  "document_role": "historical_snapshot",
+  "current_spec_path": "docs/current/service_spec.json",
+  "current_routing_path": "docs/current/라우팅_명세.md"
 }

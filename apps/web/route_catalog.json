@@ -1,0 +1,56 @@
+{
+  "format": "jungsi.presentation-routes/v1",
+  "spec_version": "1.0.0",
+  "source_sha256": "6135fe35fd94379e4561cc32de93761169a0ec5b9e7a714ff43416bc446011a5",
+  "pages": [
+    {
+      "id": "PAGE-01",
+      "number": 1,
+      "label": "대학 발표 입시결과",
+      "path": "/admissions/results",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "score_required_to_browse": false
+    },
+    {
+      "id": "PAGE-02",
+      "number": 2,
+      "label": "내 성적 리포트",
+      "path": "/reports/me",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "score_required_to_browse": false
+    },
+    {
+      "id": "PAGE-03",
+      "number": 3,
+      "label": "전체 대학·학과 가능성 보기",
+      "path": "/admissions/possibilities",
+      "member_tiers": [
+        "paid"
+      ],
+      "score_required_to_browse": false
+    },
+    {
+      "id": "PAGE-04",
+      "number": 4,
+      "label": "유리한 대학 찾기",
+      "path": "/admissions/favorable",
+      "member_tiers": [
+        "paid"
+      ],
+      "score_required_to_browse": false
+    }
+  ],
+  "redirects": [
+    {
+      "path": "/",
+      "target": "/admissions/results"
+    }
+  ],
+  "runtime_status": "routing_contract_only"
+}
