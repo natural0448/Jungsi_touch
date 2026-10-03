@@ -141,6 +141,21 @@ def generated_files(spec):
        "## 확정 요구사항\n\n"+requirement_text+"\n\n## 이번 버전의 변경\n\n"+changes+"\n\n## 준비 상태와 후속 구현\n\n"+pending+
        "\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다."+collaboration["ownership"]+collaboration["drive"])
     operation_rows=[[o["id"],o["method"],o["path"],rights(o["member_tiers"]),"본인" if o["report_owner"] else "해당 없음","필요" if o["confirmed_score_profile"] else "불필요",o["response_scope"]] for o in spec["operations"]]
+    session_contract=spec.get("session_contract")
+    session_section=""
+    if session_contract:
+        session_section=("## 화면 표시용 본인 회원 등급\n\n"+
+            session_contract["purpose"]+"\n\n작업: "+session_contract["operation"]+
+            ". 응답 필드: "+", ".join(session_contract["response_fields"])+
+            ". 회원 등급 값: "+", ".join(session_contract["member_tier_values"])+".\n\n"+
+            "- 미인증: "+session_contract["unauthenticated"]+"\n"+
+            "- 시각: "+session_contract["time_format"]+"\n"+
+            "- 화면 규칙: "+session_contract["presentation_rule"]+
+            "\n\n응답 제외: "+"; ".join(session_contract["excludes"])+".\n\n")
+    technology=spec.get("technology")
+    technology_text=("현재 DB 엔진·Supabase·웹 프레임워크·HTTP 서버 채택은 미정이며 연결 비밀값을 문서나 코드로 대신하지 않는다." if not technology else
+        "기술 구성은 아래 표를 따른다. 상태가 proposed 인 항목은 기획팀 승인 전 제안이다. 연결 비밀값을 문서나 코드로 대신하지 않는다.\n\n"+
+        table(["계층","선택","상태","비고"],[[t["layer"],t["choice"],t["status"],t["note"]] for t in technology]))
     overall_contract=spec.get("overall_analysis_contract")
     overall_section=""
     if overall_contract:
@@ -166,7 +181,7 @@ def generated_files(spec):
        "\n\n정적 경로 /offerings/search를 /offerings/{offering_id}보다 먼저 등록한다. report_id와 offering_id의 표기를 통일한다. 검색은 추천 목록과 조인해 대상을 줄이지 않는다.\n\n"+
        "## 권한과 응답 경계\n\n서버가 검증한 세션·현재 이용권으로 Actor를 만든다. 요청 본문의 회원등급·학생 ID를 신뢰하지 않는다. 미인증은 401, 일반가입자의 유료 요청은 403으로 차단하고 결과·건수·상세를 반환하지 않는다. 없는 리포트와 타인 소유 리포트는 같은 404로 처리한다. 본인 분석에 확인한 성적이 없으면 409와 보류 사유다.\n\n"+
        "권한 모듈은 HTTP 인증이나 응답 필드 제거 기능을 대신하지 않는다. 실제 핸들러에서 입력 검증, 운영 저장소 조회, 회원별 응답 객체, 분포·산식 승인 검사를 연결해야 한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n"+
-       overall_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
+       session_section+overall_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
     layers=table(["계층","코드 위치","책임","허용 의존"],[[l["label"],", ".join(l["roots"]),l["responsibility"],", ".join(l["allowed_dependencies"])] for l in spec["layers"]])
     implementation=table(["파일","계층","현재 상태","요구사항"],[[r["path"],r["layer"],{
 "existing_math_foundation":"공통 계산 기반",
@@ -183,7 +198,7 @@ def generated_files(spec):
        "\n\n애플리케이션은 구체 DB 어댑터를 가져오지 않고 자신이 정의한 포트에 의존한다. 인프라가 포트를 구현한다. 프레젠테이션은 허용된 API 결과만 표시하며 Python 엔진·DB 비밀값·전체 환산표·곡선·모델을 포함하지 않는다.\n\n"+
        "## 커밋된 코드와 새 기반\n\n"+implementation+
        "\n\n기존 src/jungsi_touch 루트 계산 모듈은 애플리케이션의 엔진 라이브러리다. 경로를 옮겨 기존 사용자를 깨뜨리지 않는다. 새 application과 infrastructure를 통해 입출력·소유권·저장소를 연결한다. 메모리 어댑터는 합성 검산 전용으로 운영 연결을 의미하지 않는다.\n\n"+
-       "## 데이터와 기술 결정\n\n실제 원자료·학생 성적·입결·환산표·곡선·모델과 .env 계열은 모든 브랜치에서 제외한다. database에는 DB 구조·마이그레이션 코드만 둘 수 있다. 현재 DB 엔진·Supabase·웹 프레임워크·HTTP 서버 채택은 미정이며 연결 비밀값을 문서나 코드로 대신하지 않는다.\n\n"+
+       "## 데이터와 기술 결정\n\n실제 원자료·학생 성적·입결·환산표·곡선·모델과 .env 계열은 모든 브랜치에서 제외한다. database에는 DB 구조·마이그레이션 코드만 둘 수 있다. "+technology_text+"\n\n"+
        "## 구현 순서\n\n현재 계약과 권한 기반 검증 다음에 로그인·결제·운영 저장소를 연결한다. 이후 1페이지 공식 조회와 2페이지 입력·전체 누적, 3페이지 학과별 분석, 4페이지 추천·리포트와 실시간 집계를 순서대로 연결한다. 각 단계는 승인된 자료가 없는 값을 보류한다."+collaboration["ownership"]+collaboration["drive"])
     workflow=spec["workflow"]
     tools="\n".join("- "+p for p in workflow["shared_tools"])
@@ -212,6 +227,9 @@ def generated_files(spec):
         )}
         backend["overall_analysis_contract"]=overall_contract
         backend["runtime_status"]="application_service_no_HTTP_handlers"
+    if session_contract:
+        frontend["session_contract"]=session_contract
+        backend["session_contract"]=session_contract
     files["apps/web/route_catalog.json"]=json.dumps(frontend,ensure_ascii=False,indent=2)+"\n"
     files["src/jungsi_touch/application/route_catalog.json"]=json.dumps(backend,ensure_ascii=False,indent=2)+"\n"
     files["apps/web/README.md"]=doc("정시터치 프레젠테이션 개발 기준","현재 경로와 회원별 화면 접근 범위는 route_catalog.json을 따른다. [현재 기획](../../docs/current/서비스_기획.md)과 [라우팅 명세](../../docs/current/라우팅_명세.md)를 함께 갱신한다. 기존 가상 화면은 기획 이력이며 이 폴더의 실행 앱이 아니다. 실제 화면 앱·인증·API 연결은 후속 작업이다.\n\n화면은 서버가 허용한 결과만 표시하고 자체 대학 계산이나 DB 직접 조회를 구현하지 않는다. 브라우저의 회원등급 선택값을 운영 권한으로 사용하지 않는다."+collaboration["presentation_intro"])
@@ -249,6 +267,13 @@ def validate_spec(spec):
             errors.append("Paid personal operation policy drift")
         unknown=set(re.findall(r"\{([^}]+)\}",row["path"]))-set(spec["routing_policy"]["template_placeholders"])
         if unknown:errors.append("Unregistered API parameter")
+    session=spec.get("session_contract")
+    if session:
+        operation=next((o for o in ops if o["id"]==session["operation"]),None)
+        if not operation or operation["member_tiers"]!=["standard","paid"] or operation["report_owner"] or operation["confirmed_score_profile"]:
+            errors.append("Session operation policy drift")
+        if session["member_tier_values"]!=["standard","paid"]:
+            errors.append("Session tier values drift")
     contract=spec.get("overall_analysis_contract")
     if contract:
         operation=next((o for o in ops if o["id"]=="overall.analyze"),None)

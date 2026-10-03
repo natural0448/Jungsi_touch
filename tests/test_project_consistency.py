@@ -85,4 +85,19 @@ class ConsistencyTests(unittest.TestCase):
         self.assertNotIn("application_service",public)
         self.assertNotIn("provider",public)
 
+    def test_session_operation_cannot_become_paid_or_owner_bound(self):
+        for field,value in [("member_tiers",["paid"]),("report_owner",True)]:
+            spec=deepcopy(self.spec)
+            next(row for row in spec["operations"] if row["id"]=="session.read")[field]=value
+            self.assertIn("Session operation policy drift",validate_spec(spec))
+
+    def test_frontend_receives_session_contract_and_technology_is_documented(self):
+        generated=generated_files(self.spec)
+        session=json.loads(generated["apps/web/route_catalog.json"])["session_contract"]
+        self.assertEqual(session["member_tier_values"],["standard","paid"])
+        self.assertIn("entitlement_expires_at",session["response_fields"])
+        architecture=generated[self.spec["current_documents"]["architecture"]].decode("utf-8")
+        self.assertIn("Next.js App Router + OpenNext Cloudflare Workers",architecture)
+        self.assertNotIn("웹 프레임워크·HTTP 서버 채택은 미정",architecture)
+
 if __name__=="__main__":unittest.main()

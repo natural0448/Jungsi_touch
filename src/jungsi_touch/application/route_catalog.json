@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.1.1",
-  "source_sha256": "4407570fd102aca0a50e25a79893af19566c6e0666073ac5447621fbf8e1e7e5",
+  "spec_version": "1.2.0",
+  "source_sha256": "74c181ee7640ab7e87cd700e6cd0cac6ef79885c1f0a024f365786c0a611ec97",
   "pages": [
     {
       "id": "PAGE-01",
@@ -47,6 +47,22 @@
     }
   ],
   "operations": [
+    {
+      "id": "session.read",
+      "method": "GET",
+      "path": "/api/v1/me",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-14",
+        "REQ-18"
+      ],
+      "response_scope": "본인의 서버 판정 회원 등급(일반·유료)과 이용권 만료 시각만; 다른 사용자·결제 수단·학생 성적 제외"
+    },
     {
       "id": "history.search",
       "method": "GET",
@@ -393,5 +409,28 @@
       "출처 로컬 경로·원문 전체·해시·연구 플래그·승인 필드"
     ],
     "integration": "HTTP·로그인·결제·영속 리포트 저장은 후속 feature가 연결한다. 일반과 유료에게 동일한 본인 입력의 전체 분석 DTO만 제공한다."
+  },
+  "session_contract": {
+    "operation": "session.read",
+    "format": "jungsi.session/v1",
+    "purpose": "화면이 탭 잠금·이용 안내를 미리 표시하도록 서버가 판정한 본인 회원 등급을 돌려준다. 화면 표시용이며 각 API 의 권한 검사를 대신하지 않는다.",
+    "response_fields": [
+      "format",
+      "member_tier",
+      "entitlement_expires_at"
+    ],
+    "member_tier_values": [
+      "standard",
+      "paid"
+    ],
+    "unauthenticated": "401 authentication_required — 화면은 비회원으로 표시한다",
+    "time_format": "entitlement_expires_at 은 UTC ISO 8601 Z 문자열이며 유료가 아니면 null. 화면은 Asia/Seoul 로 변환해 표시한다",
+    "excludes": [
+      "학생 성적",
+      "결제 수단·결제 내역",
+      "다른 사용자 정보",
+      "내부 이용권 ID·부여자"
+    ],
+    "presentation_rule": "화면은 이 응답을 잠금 표시에만 쓰고, 유료 화면의 실제 차단은 해당 API 의 403 을 따른다. 브라우저 저장값이나 요청 본문의 등급을 쓰지 않는다."
   }
 }

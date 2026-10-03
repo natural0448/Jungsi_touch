@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.1.1",
-  "source_sha256": "4407570fd102aca0a50e25a79893af19566c6e0666073ac5447621fbf8e1e7e5",
+  "spec_version": "1.2.0",
+  "source_sha256": "74c181ee7640ab7e87cd700e6cd0cac6ef79885c1f0a024f365786c0a611ec97",
   "pages": [
     {
       "id": "PAGE-01",
@@ -186,5 +186,28 @@
         "유효한 시험 자료 공급·연결 미준비"
       ]
     ]
+  },
+  "session_contract": {
+    "operation": "session.read",
+    "format": "jungsi.session/v1",
+    "purpose": "화면이 탭 잠금·이용 안내를 미리 표시하도록 서버가 판정한 본인 회원 등급을 돌려준다. 화면 표시용이며 각 API 의 권한 검사를 대신하지 않는다.",
+    "response_fields": [
+      "format",
+      "member_tier",
+      "entitlement_expires_at"
+    ],
+    "member_tier_values": [
+      "standard",
+      "paid"
+    ],
+    "unauthenticated": "401 authentication_required — 화면은 비회원으로 표시한다",
+    "time_format": "entitlement_expires_at 은 UTC ISO 8601 Z 문자열이며 유료가 아니면 null. 화면은 Asia/Seoul 로 변환해 표시한다",
+    "excludes": [
+      "학생 성적",
+      "결제 수단·결제 내역",
+      "다른 사용자 정보",
+      "내부 이용권 ID·부여자"
+    ],
+    "presentation_rule": "화면은 이 응답을 잠금 표시에만 쓰고, 유료 화면의 실제 차단은 해당 API 의 403 을 따른다. 브라우저 저장값이나 요청 본문의 등급을 쓰지 않는다."
   }
 }
