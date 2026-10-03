@@ -1,0 +1,190 @@
+/* ===================================================================
+   4페이지 · 유리한 대학 찾기
+   왼쪽 2/3 기본 학교 목록(차분한 흰 카드), 오른쪽 1/3 와일드카드(짙은 남색 판 위의 상아색 패).
+   service_spec PAGE-04 desktop_columns [2,1]. 휴대폰에서는 목록 → 와일드카드 순으로 세로.
+   =================================================================== */
+.et .fv{display:grid;gap:16px;padding-bottom:24px}
+.et .fv{--on-dark:#AFC0E6}
+
+.et .fv-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:24px;align-items:start}
+.et .fv-main{display:grid;gap:12px;min-width:0}
+.et .fv-side{position:sticky;top:64px}
+.et .fv-sec-hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.et .fv-sec-hd h2{font-size:18px;font-weight:900;letter-spacing:-.4px}
+.et .fv-sec-hd h2 .num{color:var(--muted);font-weight:700;margin-left:2px}
+.et .fv-sec-hd>span{font-size:12px;color:var(--muted)}
+.et .fv .chips{margin-bottom:0}
+.et .fv .chips a small{margin-left:4px;font-weight:700;font-size:11px;color:var(--muted)}
+.et .fv .chips a.on small{color:var(--bg);opacity:.75}
+.et .fv-group{display:grid;gap:10px}
+.et .fv-ghd{margin-top:6px;font-size:14px;font-weight:800;color:var(--ink-2)}
+.et .fv-ghd .num{color:var(--muted);margin-left:2px}
+.et .fv-list{display:grid;gap:12px}
+.et .fv-note{margin:4px 2px 0;font-size:12px;color:var(--muted)}
+
+/* ── 학교 카드 ── */
+.et .sc{border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:18px 20px 14px;transition:box-shadow .15s,border-color .15s}
+.et .sc:hover{border-color:#D3D8E4;box-shadow:var(--shadow)}
+.et .sc.open{border-color:#D3D8E4}
+.et .sc-hd{display:flex;align-items:flex-start;gap:12px}
+/* 학교 분류는 무채색 꼬리표. 색 있는 판단은 학과에만 */
+.et .bucket{flex:none;display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:var(--r-sm);border:1px solid var(--ink);font-size:12px;font-weight:800;color:var(--ink);white-space:nowrap}
+.et .bucket.core{background:var(--ink);color:var(--bg)}
+.et .bucket.room{border-style:dashed}
+.et .sc-hd .ttl{min-width:0}
+.et .sc-hd h3{font-size:18px;font-weight:900;letter-spacing:-.5px}
+.et .sc-hd p{margin:2px 0 0;font-size:12px;color:var(--ink-2)}
+.et .sc-why{display:flex;gap:8px;align-items:baseline;margin:12px 0 0;padding:9px 12px;border-radius:var(--r-sm);background:var(--sub);font-size:13px;line-height:1.5}
+.et .sc-why span{flex:none;font-size:11px;font-weight:800;color:var(--brand)}
+.et .sc-sum{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:14px;margin-top:14px}
+.et .sc-sum .n{min-width:0}
+.et .sc-sum small{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.et .sc-sum .mix{display:flex;gap:8px;flex-wrap:wrap}
+.et .sc-sum .mixi{display:inline-flex;align-items:center;gap:4px}
+.et .sc-sum .mixi b{font-size:14px;font-weight:900}
+.et .sc-sum .big{font-size:20px;font-weight:900;letter-spacing:-.4px}
+.et .sc-sum .big i{font-style:normal;font-size:13px;font-weight:600;color:var(--muted)}
+.et .sc-sum .big.up{color:var(--safe)}
+.et .sc-sum .big.down{color:var(--ink-2)}
+.et .sc-sum .big.even{color:var(--fit)}
+.et .sc-toggle{display:inline-flex;align-items:center;gap:4px;margin-top:12px;font-size:13px;font-weight:700;color:var(--brand)}
+.et .sc-toggle .ic-chev{transition:transform .15s}
+.et .sc.open .sc-toggle .ic-chev{transform:rotate(90deg)}
+
+.et .sc-rows{margin-top:10px;border-top:1px solid var(--line)}
+.et .sc-rhd,.et .sc-row .line{display:grid;grid-template-columns:minmax(0,1.5fr) 40px minmax(0,1fr) 112px minmax(0,1fr) 60px;gap:10px;align-items:center}
+.et .sc-rhd{padding:8px 0;font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line)}
+.et .sc .r{text-align:right}
+.et .sc-row{padding:10px 0;border-bottom:1px solid var(--line);display:grid;gap:4px}
+.et .sc-row.inel .line{opacity:.7}
+.et .sc-row .u{display:flex;flex-direction:column;min-width:0}
+.et .sc-row .u b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.et .sc-row .u small{font-size:12px;color:var(--muted)}
+.et .sc-row .u:hover b{color:var(--brand)}
+.et .sc-row .why{margin:0;font-size:12px;color:var(--ink-2);line-height:1.5}
+.et .sc-note{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.6}
+
+/* ===================================================================
+   와일드카드 — 비장의 한 수
+   =================================================================== */
+.et .wd{
+  --gold:#F2C46D; --gold-2:#D99A2B; --gold-ink:#7A5410; --gold-soft:#FFF1D4; --felt:#0C1A40; --felt-2:#16307A;
+  position:relative;overflow:hidden;border-radius:12px;padding:22px 18px 18px;color:#E8EEFF;
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgba(58,98,210,.55) 0%, transparent 55%),
+    radial-gradient(90% 60% at 0% 100%, rgba(242,196,109,.16) 0%, transparent 60%),
+    linear-gradient(165deg,var(--felt-2) 0%,var(--felt) 70%);
+  box-shadow:0 18px 40px rgba(12,26,64,.28);
+}
+.et .wd::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 1px,transparent 1px 11px);pointer-events:none}
+.et .wd::after{content:"WILD";position:absolute;right:-14px;top:36px;font-family:var(--font-montserrat),sans-serif;font-weight:900;font-size:92px;letter-spacing:-4px;color:rgba(255,255,255,.045);transform:rotate(-8deg);pointer-events:none}
+.et .wd>*{position:relative;z-index:1}
+
+.et .wd-hd{margin-bottom:16px}
+.et .wd-kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-montserrat),sans-serif;font-weight:900;font-size:11px;letter-spacing:4px;color:var(--gold)}
+.et .wd-kicker::before{content:"";width:12px;height:16px;border-radius:2px;border:1.5px solid var(--gold);transform:rotate(-12deg);box-shadow:5px 1px 0 -1.5px var(--felt),5px 1px 0 0 var(--gold)}
+.et .wd-hd h2{margin-top:8px;font-size:24px;font-weight:900;letter-spacing:-.8px;color:#fff}
+.et .wd-hd h2 .num{color:var(--gold);margin-left:4px}
+.et .wd-hd h2 small{font-size:16px;color:var(--gold);margin-left:1px}
+.et .wd-hd p{margin:6px 0 0;font-size:13px;line-height:1.6;color:var(--on-dark)}
+.et .wd-empty{margin:0;font-size:13px;color:var(--on-dark);line-height:1.6}
+.et .wd-foot{margin:14px 0 0;font-size:11px;line-height:1.6;color:#8FA2CF}
+
+.et .wd-deck{display:grid;gap:16px;list-style:none;margin:0;padding:0}
+/* 한 장씩 펼쳐지는 움직임. 투명도는 건드리지 않는다 — 움직임이 멈춘 환경에서도 카드가 늘 보이게 */
+.et .wd-deck li{animation:wd-deal .6s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i) * 110ms + 120ms)}
+@keyframes wd-deal{from{transform:translate(28px,-22px) rotate(8deg) scale(.96)}to{transform:none}}
+
+.et .wc{
+  position:relative;padding:18px;border-radius:10px;color:var(--ink);
+  background:linear-gradient(180deg,#FFFDF8 0%,#FBF3E2 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 10px 24px rgba(0,0,0,.28),0 0 0 1px rgba(217,154,43,.35);
+  transform:rotate(var(--tilt,-.6deg));transition:transform .2s,box-shadow .2s;
+}
+.et .wd-deck li:nth-child(even) .wc{--tilt:.5deg}
+.et .wc:hover{transform:translateY(-3px) rotate(0);box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 16px 30px rgba(0,0,0,.34),0 0 0 1.5px var(--gold-2)}
+.et .wc::before{content:"";position:absolute;inset:6px;border-radius:7px;border:1px solid rgba(217,154,43,.38);pointer-events:none}
+
+.et .wc-corner{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:1;pointer-events:none}
+.et .wc-corner b{font-size:11px;font-weight:900;writing-mode:vertical-rl;letter-spacing:1px}
+.et .wc-corner i{font-style:normal;font-family:var(--font-montserrat),sans-serif;font-weight:900;font-size:13px;margin-top:3px}
+.et .wc-corner.tl{left:12px;top:14px}
+.et .wc-corner.br{right:12px;bottom:14px;transform:rotate(180deg)}
+.et .wc.cat-N .wc-corner{color:#C8321E}
+.et .wc.cat-H .wc-corner{color:#102554}
+.et .wc.cat-E .wc-corner{color:#168A5B}
+
+.et .wc>*:not(.wc-corner){margin-left:20px;margin-right:18px}
+.et .wc-top{display:flex;justify-content:flex-end}
+.et .wc-grp{font-size:11px;font-weight:800;color:#8A6A2E}
+.et .wc-univ{margin-top:4px;margin-bottom:0;font-size:13px;font-weight:700;color:var(--ink-2)}
+.et .wc-unit{margin-top:1px;font-size:22px;font-weight:900;letter-spacing:-.7px;color:var(--deep)}
+.et .wc-why{margin-top:12px;margin-bottom:0;padding:10px 12px;border-radius:7px;background:linear-gradient(100deg,#102554 0%,#1E3A80 100%);color:#FFE2A6;font-size:13px;font-weight:700;line-height:1.5;box-shadow:0 4px 12px rgba(16,37,84,.25)}
+.et .wc-why span{display:block;margin-bottom:2px;font-size:11px;font-weight:900;letter-spacing:2px;color:var(--gold)}
+.et .wc-score{display:flex;align-items:baseline;gap:5px;margin-top:14px}
+.et .wc-score b{font-size:30px;font-weight:900;letter-spacing:-1px;color:var(--deep)}
+.et .wc-score i{font-style:normal;font-size:13px;font-weight:700;color:#8C8470}
+.et .wc-move{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:13px}
+.et .wc-move small{display:block;font-size:11px;font-weight:600;color:#8C8470;margin-bottom:1px}
+.et .wc-move .from{color:#8C8470;font-weight:700}
+.et .wc-move .arrow{color:var(--gold-2);padding-bottom:2px}
+.et .wc-move .to{color:var(--deep);font-weight:900}
+.et .wc-move .gain{margin-left:auto;padding:3px 9px;border-radius:11px;background:var(--safe);color:#fff;font-size:12px;font-weight:900}
+.et .wc-hold{margin-top:6px;margin-bottom:0;font-size:12px;color:#8C8470}
+.et .wc-bench{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:10px;border-top:1px dashed rgba(140,106,46,.35)}
+.et .wc-bench small{display:block;font-size:11px;color:#8C8470;margin-bottom:2px}
+.et .wc-bench b{font-size:13px;font-weight:800}
+.et .wc-bench b.above{color:var(--safe)}
+.et .wc-bench b.below{color:var(--ink-2)}
+.et .wc-warn{margin-top:10px;margin-bottom:0;padding:7px 10px;border-radius:6px;background:#FFEFD0;color:#8A5A10;font-size:12px;font-weight:700;line-height:1.5}
+.et .wc-stats{margin-top:10px}
+.et .wc-stats .stats{color:#6E6550}
+.et .wc-stats .stats b{color:var(--deep)}
+
+.et .pick-wild{margin-top:14px}
+.et .pick-wild button{width:100%;height:42px;border-radius:21px;border:1.5px solid var(--gold-2);background:transparent;color:var(--gold-ink);font-size:14px;font-weight:800}
+.et .pick-wild button:hover{background:var(--gold-soft)}
+.et .pick-wild button.on{background:linear-gradient(90deg,var(--gold-2),var(--gold));color:var(--deep)}
+
+.et .wd-rest{margin-top:16px}
+.et .wd-rest summary{display:flex;align-items:center;justify-content:center;gap:6px;height:40px;border-radius:20px;border:1px dashed rgba(242,196,109,.55);color:var(--gold);font-size:13px;font-weight:700;cursor:pointer;list-style:none}
+.et .wd-rest summary::-webkit-details-marker{display:none}
+.et .wd-rest summary b{color:#fff}
+.et .wd-rest[open] summary{margin-bottom:16px}
+
+/* 좁은 화면에서 와일드카드로 내려가는 띠 */
+.et .wd-teaser{display:none}
+
+@media (max-width:1100px){
+  .et .sc-row .adv .bar{display:none}
+  .et .sc-row .adv .v{min-width:0}
+}
+@media (max-width:960px){
+  .et .fv-grid{grid-template-columns:1fr}
+  .et .fv-side{position:static}
+  .et .wd-teaser{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;color:#E8EEFF;font-size:14px;background:linear-gradient(100deg,#16307A,#0C1A40);box-shadow:0 8px 20px rgba(12,26,64,.22)}
+  .et .wd-teaser .k{font-family:var(--font-montserrat),sans-serif;font-weight:900;font-size:11px;letter-spacing:3px;color:#F2C46D}
+  .et .wd-teaser b{color:#F2C46D}
+  .et .wd-teaser .go{margin-left:auto;color:#F2C46D;display:inline-flex}
+}
+@media (max-width:640px){
+  .et .sc{padding:16px 14px 12px}
+  .et .sc-hd{flex-direction:column;gap:6px}
+  .et .sc-sum{grid-template-columns:1fr 1fr}
+  .et .sc-sum .n:first-child{grid-column:1/-1}
+  .et .sc-rhd{display:none}
+  .et .sc-row .line{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"u pick" "score st" "adv adv";row-gap:6px}
+  .et .sc-row .u{grid-area:u}
+  .et .sc-row .c-grp{display:none}
+  .et .sc-row .c-score{grid-area:score;text-align:left}
+  .et .sc-row .c-score .score{align-items:flex-start}
+  .et .sc-row .c-st{grid-area:st;justify-self:end}
+  .et .sc-row .c-adv{grid-area:adv;text-align:left}
+  .et .sc-row .c-pick{grid-area:pick;justify-self:end}
+  .et .wd{padding:20px 14px 16px}
+  .et .wc{--tilt:0deg!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .et .wd-deck li{animation:none}
+  .et .wc,.et .wc:hover{transform:none}
+}

@@ -121,6 +121,56 @@ export type AnalysisResult =
   | { state: "ready"; basis: ScoreBasis; results: OfferingAnalysis[] }
   | { state: "score_required" };
 
+// ─── 4페이지 · 유리한 대학 찾기 ──────────────────────────────
+// candidates.build  POST /api/v1/reports/{report_id}/candidates   (유료·본인·확인 성적)
+// statistics.read   GET  /api/v1/reports/{report_id}/offerings/{offering_id}/live-statistics
+
+/** 학교 탐색 분류. 전체 성적 1차 선별 결과이며 학과 판단에 복사하지 않는다(REQ-05) */
+export type SchoolBucket = "challenge" | "core" | "room";
+
+/** 모집단위 하나 + 그 모집단위의 개인 분석 */
+export interface CandidateOffering {
+  offering: OfferingRow;
+  analysis: OfferingAnalysis;
+}
+
+export interface CandidateSchool {
+  university: UniversityRef;
+  bucket: SchoolBucket;
+  /** 이 학교를 찾은 이유(학교 단위). 학과 판단 근거는 각 analysis.support.reason */
+  reason: string;
+  /** 검수된 모집단위 중 비교할 수 있었던 수와 전체 수 */
+  reviewed_offerings: number;
+  total_offerings: number;
+  offerings: CandidateOffering[];
+}
+
+export type WildcardCategory = "간호" | "보건" | "교육";
+
+export interface WildcardPick {
+  category: WildcardCategory;
+  offering: OfferingRow;
+  analysis: OfferingAnalysis;
+  /** 이 카드가 한 수인 이유. 카드마다 다르게 */
+  why: string;
+  note: "추가 검토 후보" | "조건 확인";
+}
+
+export type CandidatesResult =
+  | { state: "ready"; basis: ScoreBasis; schools: CandidateSchool[]; wildcards: WildcardPick[] }
+  | { state: "score_required" };
+
+/** REQ-10: 서비스 안의 추천·선택 집계. 실제 대학 지원자 수나 합격 확률이 아니다 */
+export interface OfferingStatistics {
+  offering_id: string;
+  status: "ready" | "pending";
+  recommended_count: number | null; // 이 모집단위를 추천받은 학생 수(중복 제거)
+  selected_count: number | null; // 핵심 지원 학교에 담은 학생 수(중복 제거)
+  my_rank: number | null; // 담은 학생 중 대학 환산점수 기준 내 순위
+  tie_count: number | null; // 나와 같은 점수(동점) 인원, 나 포함
+  updated_at: string | null; // UTC ISO 8601 Z
+}
+
 export interface ShortlistItem {
   offering_id: string;
   university_name: string;

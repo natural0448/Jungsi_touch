@@ -1,5 +1,5 @@
 import "server-only";
-import type { AnalysisResult, OfferingAnalysis, OfferingSearchParams, OfferingSearchResult, ScoreBasis, Session, ShortlistItem } from "@/lib/contract";
+import type { AnalysisResult, CandidatesResult, OfferingAnalysis, OfferingSearchParams, OfferingSearchResult, OfferingStatistics, ScoreBasis, Session, ShortlistItem } from "@/lib/contract";
 import { AccessDenied, type Caller, type JungsiSource } from "./source";
 
 /*
@@ -59,6 +59,29 @@ export const liveSource: JungsiSource = {
     if (!res.ok) throw new Error(`정시터치 API ${res.status}: university-results`);
     const body = (await res.json()) as { basis: ScoreBasis; results: OfferingAnalysis[] };
     return { state: "ready", basis: body.basis, results: body.results } satisfies AnalysisResult;
+  },
+  async buildCandidates(caller) {
+    const res = await fetch(`${base()}/reports/${REPORT}/candidates`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${caller.accessToken ?? ""}` },
+      body: "{}",
+      cache: "no-store",
+    });
+    if (res.status === 409) return { state: "score_required" };
+    if (res.status === 401 || res.status === 403) throw new AccessDenied(res.status, res.status === 401 ? "authentication_required" : "paid_required");
+    if (!res.ok) throw new Error(`정시터치 API ${res.status}: candidates`);
+    const body = (await res.json()) as Omit<Extract<CandidatesResult, { state: "ready" }>, "state">;
+    return { state: "ready", ...body };
+  },
+  async getStatistics(caller, offeringIds) {
+    // statistics.read 는 모집단위마다 따로 있다. 하나가 실패해도 나머지는 보이게 대기 상태로 둔다
+    return Promise.all(
+      offeringIds.map((id) =>
+        call<OfferingStatistics>(caller, `/reports/${REPORT}/offerings/${encodeURIComponent(id)}/live-statistics`).catch(
+          (): OfferingStatistics => ({ offering_id: id, status: "pending", recommended_count: null, selected_count: null, my_rank: null, tie_count: null, updated_at: null }),
+        ),
+      ),
+    );
   },
   listShortlist: (caller) => call<ShortlistItem[]>(caller, `/reports/${REPORT}/shortlist`),
   async setShortlist(caller, offeringId, selected) {

@@ -2,7 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import type { OfferingSearchResult } from "@/lib/contract";
 import { AccessDenied, type JungsiSource } from "./source";
-import { ANALYSES, BASIS, OFFERINGS } from "./synthetic-fixtures";
+import { ANALYSES, BASIS, CANDIDATE_SCHOOLS, OFFERINGS, STATISTICS, WILDCARDS } from "./synthetic-fixtures";
 
 /*
   HTTP 핸들러 연결 전 화면 제작용 합성 응답(프레젠테이션 작업 인계: '명시적인 합성 응답').
@@ -76,6 +76,19 @@ export const syntheticSource: JungsiSource = {
     const s = await requirePaid();
     if (s === "noscore") return { state: "score_required" };
     return { state: "ready", basis: BASIS, results: ANALYSES.filter((a) => offeringIds.includes(a.offering_id)) };
+  },
+
+  async buildCandidates() {
+    const s = await requirePaid();
+    if (s === "noscore") return { state: "score_required" };
+    return { state: "ready", basis: BASIS, schools: CANDIDATE_SCHOOLS, wildcards: WILDCARDS };
+  },
+
+  async getStatistics(_caller, offeringIds) {
+    await requirePaid();
+    return offeringIds.map(
+      (id) => STATISTICS.find((x) => x.offering_id === id) ?? { offering_id: id, status: "pending", recommended_count: null, selected_count: null, my_rank: null, tie_count: null, updated_at: null },
+    );
   },
 
   async listShortlist() {

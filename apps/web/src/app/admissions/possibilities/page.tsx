@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
-import { ChevronIcon, LockIcon } from "@/components/icons";
+import { ChevronIcon } from "@/components/icons";
+import { AdvantageCell, PickButton, QuotaCell, ScoreCell, SupportBadge, SupportLegend } from "@/components/offering-parts";
+import { PaidGate } from "@/components/paid-gate";
+import { ScoreBasis } from "@/components/score-basis";
+import { ShortlistTray } from "@/components/shortlist-tray";
 import { PageHead } from "@/components/page-head";
 import type { AnalysisResult, OfferingAnalysis, OfferingRow, OfferingSearchResult, ShortlistItem, UniversityRef } from "@/lib/contract";
 import { AccessDenied, getCaller, source } from "@/lib/api";
-import { loginHref } from "@/lib/links";
 import { lockFor, page } from "@/lib/routes";
-import { AdvantageCell, Detail, PickButton, QuotaCell, SUPPORT, ScoreCell, SupportBadge } from "./parts";
+import { Detail } from "./parts";
 import { GROUPS, hrefWith, parseQuery, type Query } from "./query";
 import "./possibilities.css";
 
 const route = page("PAGE-03");
+const FEATURES = ["추천에 없는 대학·학과까지 직접 검색", "모집단위마다 내 환산점수 · 지원가능성 · 환산 유불리", "마음에 드는 곳을 핵심 지원 학교에 담아 리포트로 정리"];
 export const metadata: Metadata = { title: route.label };
 
 export default async function Page({ searchParams }: PageProps<"/admissions/possibilities">) {
@@ -29,7 +33,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
   const session = await src.getSession(caller);
   // 화면 표시용 잠금. 서버가 검색을 403 으로 막아도 아래 catch 가 같은 안내를 그린다
   const lock = lockFor(session, route);
-  if (lock) return <>{head}<Gate kind={lock} /></>;
+  if (lock) return <>{head}<PaidGate kind={lock} route={route} features={FEATURES} /></>;
 
   const cur = parseQuery(await searchParams);
   let res: OfferingSearchResult;
@@ -39,7 +43,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     res = await src.searchOfferings(caller, cur);
     [analysis, shortlist] = await Promise.all([src.analyze(caller, res.items.map((o) => o.offering_id)), src.listShortlist(caller)]);
   } catch (e) {
-    if (e instanceof AccessDenied) return <>{head}<Gate kind={e.status === 401 ? "login" : "paid"} /></>;
+    if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
     throw e;
   }
 
@@ -60,27 +64,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     <>
       {head}
       <div className="wrap pg-body ps">
-        {analysis.state === "ready" ? (
-          <section className="basis" aria-label="내 성적 기준">
-            <span className="lab">내 성적 기준</span>
-            <span className="it">{analysis.basis.exam_label}</span>
-            <span className="it">
-              국·수·탐2 표준점수 합 <b className="num">{analysis.basis.total_standard_score}</b>
-            </span>
-            <span className="it">
-              전체 상위 <b className="num">{analysis.basis.overall_top_percent ? `${analysis.basis.overall_top_percent}%` : "산출 대기"}</b>
-              {analysis.basis.estimated && <span className="est">추정</span>}
-            </span>
-            <Link className="btn go" href="/reports/me">성적 바꾸기</Link>
-          </section>
-        ) : (
-          <section className="basis none" aria-label="내 성적 기준">
-            <p>
-              <b>아직 확인된 성적이 없습니다.</b> 검색과 모집 정보는 지금 볼 수 있고, 성적을 넣으면 모집단위마다 내 분석이 붙습니다.
-            </p>
-            <Link className="btn p go" href="/reports/me">성적 입력하기</Link>
-          </section>
-        )}
+        <ScoreBasis basis={analysis.state === "ready" ? analysis.basis : null} emptyText="검색과 모집 정보는 지금 볼 수 있고, 성적을 넣으면 모집단위마다 내 분석이 붙습니다." />
 
         <section className="filter" aria-label="검색 조건">
           <Form action={route.path} className="search" role="search">
@@ -105,13 +89,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
           <span>
             <b className="num">{res.total_universities}</b>개 대학 · <b className="num">{res.total_offerings}</b>개 모집단위
           </span>
-          {analysis.state === "ready" && (
-            <span className="legend" aria-label="지원가능성 표시">
-              {Object.values(SUPPORT).map((s) => (
-                <span key={s.cls} className={`st ${s.cls}`}>{s.label}</span>
-              ))}
-            </span>
-          )}
+          {analysis.state === "ready" && <SupportLegend />}
         </div>
 
         {groups.length === 0 ? (
@@ -188,24 +166,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
         )}
       </div>
 
-      <div className="tray">
-        <div className="wrap">
-          <div className="in">
-            <span className="t">
-              핵심 지원 학교 <b className="num">{shortlist.length}</b>
-            </span>
-            <span className="names">
-              {shortlist.length ? (
-                shortlist.map((s) => <span key={s.offering_id}>{s.university_name.replace(/^예시/, "")} {s.unit_name}</span>)
-              ) : (
-                <span className="none">담은 곳이 없습니다. 줄의 담기를 누르세요.</span>
-              )}
-            </span>
-            <Link className="btn" href={page("PAGE-04").path}>유리한 대학 찾기와 같은 목록</Link>
-            <Link className="btn p" href="/reports/me">리포트에서 정리</Link>
-          </div>
-        </div>
-      </div>
+      <ShortlistTray items={shortlist} other="PAGE-04" />
     </>
   );
 }
@@ -225,41 +186,6 @@ function ChipRow({ label, cur, k, items }: { label: string; cur: Query; k: "regi
           </Link>
         ))}
       </div>
-    </div>
-  );
-}
-
-/** 막힘 안내. 일반 회원에게는 검색창·결과·건수를 그리지 않는다(v0.11 결정) */
-function Gate({ kind }: { kind: "login" | "paid" }) {
-  return (
-    <div className="wrap pg-body">
-      <section className="gate pass" aria-labelledby="gate-h">
-        <div className="ic"><LockIcon size={20} /></div>
-        {kind === "login" ? (
-          <>
-            <h2 id="gate-h">로그인하고 이용권으로 여는 화면입니다</h2>
-            <p>전체 대학·학과 가능성 보기는 이용권 회원 전용입니다. 먼저 로그인해 주세요.</p>
-            <div className="acts">
-              <a className="btn p" href={loginHref(route.path)}>에듀터치 로그인</a>
-              <Link className="btn" href={page("PAGE-01").path}>대학 발표 입시결과 보기</Link>
-            </div>
-          </>
-        ) : (
-          <>
-            <h2 id="gate-h">전체 대학·학과 가능성 보기는 이용권 회원 전용입니다</h2>
-            <p>대학·학과 검색, 검색 결과와 건수, 모집단위 상세, 내 성적 분석이 모두 이용권으로 열립니다.</p>
-            <ul>
-              <li>추천에 없는 대학·학과까지 직접 검색</li>
-              <li>모집단위마다 내 환산점수 · 지원가능성 · 환산 유불리</li>
-              <li>마음에 드는 곳을 핵심 지원 학교에 담아 리포트로 정리</li>
-            </ul>
-            <div className="acts">
-              <span className="btn t off" aria-disabled="true">이용권 결제 연결 전</span>
-              <Link className="btn" href={page("PAGE-01").path}>대학 발표 입시결과 보기</Link>
-            </div>
-          </>
-        )}
-      </section>
     </div>
   );
 }

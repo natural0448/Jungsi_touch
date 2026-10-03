@@ -1,4 +1,4 @@
-import type { AnalysisResult, OfferingSearchParams, OfferingSearchResult, Session, ShortlistItem } from "@/lib/contract";
+import type { AnalysisResult, CandidatesResult, OfferingSearchParams, OfferingSearchResult, OfferingStatistics, Session, ShortlistItem } from "@/lib/contract";
 
 /** 로그인한 사람의 신원. 화면 서버는 access token 을 우리 서비스 API 에 전달만 한다 */
 export interface Caller {
@@ -25,6 +25,10 @@ export interface JungsiSource {
   searchOfferings(caller: Caller, params: OfferingSearchParams): Promise<OfferingSearchResult>;
   /** university.analyze (유료·본인). 확인된 성적이 없으면 score_required */
   analyze(caller: Caller, offeringIds: string[]): Promise<AnalysisResult>;
+  /** candidates.build (유료·본인). 기본 학교 목록과 와일드카드. 확인된 성적이 없으면 score_required */
+  buildCandidates(caller: Caller): Promise<CandidatesResult>;
+  /** statistics.read (유료·본인). 모집단위마다 따로 부른다 */
+  getStatistics(caller: Caller, offeringIds: string[]): Promise<OfferingStatistics[]>;
   /** 핵심 지원 학교(3·4페이지가 같이 쓰는 목록) */
   listShortlist(caller: Caller): Promise<ShortlistItem[]>;
   /** shortlist.update */

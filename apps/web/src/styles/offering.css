@@ -1,0 +1,66 @@
+/* 3·4페이지가 같이 쓰는 모집단위 칸 — 성적 기준 줄, 지원가능성 배지, 유불리 막대, 담기, 핵심 지원 학교 띠
+   components/offering-parts.tsx · score-basis.tsx · shortlist-tray.tsx 와 짝이다. */
+/* 내 성적 기준 줄 */
+.et .basis{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r-card);padding:12px 16px}
+.et .basis .lab{font-size:12px;font-weight:700;color:var(--muted)}
+.et .basis .it{display:flex;align-items:baseline;gap:6px;font-size:13px;color:var(--ink-2)}
+.et .basis .it b{font-size:16px;font-weight:900;color:var(--ink)}
+.et .basis .est{font-size:11px;font-weight:700;color:var(--reach);background:var(--reach-soft);padding:1px 6px;border-radius:3px}
+.et .basis .go{margin-left:auto}
+.et .basis.none{background:var(--brand-soft);border-color:transparent}
+.et .basis.none p{margin:0;font-size:13px;color:var(--ink);flex:1;min-width:220px}
+.et .legend{display:flex;gap:6px;flex-wrap:wrap}
+.et .grp{display:inline-grid;place-items:center;width:30px;height:24px;border-radius:var(--r-sm);background:var(--sub-2);font-size:12px;font-weight:800;color:var(--ink-2)}
+.et .quota{font-size:13px;color:var(--ink-2)}
+.et .quota b{color:var(--ink);font-weight:700}
+.et .quota .w{display:block;font-size:11px;font-weight:700;color:var(--reach)}
+.et .quota .w.muted{color:var(--muted);font-weight:500}
+.et .score{display:inline-flex;flex-direction:column;align-items:flex-end}
+.et .score b{font-size:16px;font-weight:900}
+.et .score small{font-size:11px;color:var(--muted)}
+.et .need{font-size:12px;color:var(--muted)}
+/* 지원가능성 배지: 모양 + 글자 */
+.et .st{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:13px;font-size:12px;font-weight:700;white-space:nowrap;border:1px solid transparent}
+.et .st::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.et .st.reach{background:var(--reach-soft);color:var(--reach)}
+.et .st.core{background:var(--fit-soft);color:var(--fit)}
+.et .st.safe{background:var(--safe-soft);color:var(--safe)}
+.et .st.out{background:var(--sub);color:var(--ink-2)}
+.et .st.out::before{background:transparent;border:1.5px solid currentColor;width:6px;height:6px}
+.et .st.check{background:var(--bg);color:var(--ink-2);border:1px dashed var(--jt-down)}
+.et .st.check::before{display:none}
+.et .st.inel{background:var(--risk-soft);color:var(--risk)}
+.et .st.inel::before{border-radius:1px;transform:rotate(45deg);width:6px;height:6px}
+/* 환산 유불리: 0 을 가운데 둔 짧은 막대 */
+.et .adv{display:inline-flex;align-items:center;gap:8px}
+.et .adv .v{font-size:13px;font-weight:800;min-width:62px;text-align:right}
+.et .adv .v.up{color:var(--safe)}
+.et .adv .v.down{color:var(--ink-2)}
+.et .adv .v.even{color:var(--fit)}
+.et .adv .bar{position:relative;width:64px;height:8px;border-radius:4px;background:var(--sub-2);flex:none}
+.et .adv .bar::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--muted)}
+.et .adv .bar i{position:absolute;top:0;bottom:0;border-radius:4px}
+.et .adv .bar i.up{left:50%;background:var(--safe)}
+.et .adv .bar i.down{right:50%;background:var(--jt-down)}
+.et .pick{height:30px;padding:0 10px;border:1px solid var(--line);border-radius:15px;font-size:12px;font-weight:700;color:var(--ink-2);background:var(--bg);white-space:nowrap}
+.et .pick.on{background:var(--touch);border-color:var(--touch);color:#fff}
+/* 핵심 지원 학교 띠 */
+.et .tray{position:sticky;bottom:0;z-index:20}
+.et .tray .in{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid var(--line);border-bottom:0;border-radius:var(--r-card) var(--r-card) 0 0;background:var(--bg);box-shadow:0 -6px 20px rgba(16,37,84,.08);padding:12px 16px}
+.et .tray .t{font-weight:900}
+.et .tray .t b{color:var(--touch)}
+.et .tray .names{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+.et .tray .names span{padding:3px 9px;border-radius:12px;background:var(--sub);font-size:12px;color:var(--ink-2)}
+.et .tray .names .none{background:none;color:var(--muted);padding:3px 0}
+/* 휴대폰: 이름 목록은 접고 개수와 리포트 버튼만 한 줄로 */
+@media (max-width:860px){
+  .et .tray .in{flex-wrap:nowrap;padding:10px 12px}
+  .et .tray .names,.et .tray .in .btn:not(.p){display:none}
+  .et .tray .t{flex:1}
+}
+
+/* 추천·선택 집계 한 줄 (REQ-10) */
+.et .stats{font-size:12px;color:var(--ink-2)}
+.et .stats b{color:var(--ink);font-weight:700}
+.et .stats small{color:var(--muted)}
+.et .stats.wait{color:var(--muted)}

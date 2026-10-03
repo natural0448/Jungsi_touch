@@ -4,6 +4,7 @@ import { Montserrat } from "next/font/google";
 import "@/styles/tokens.css";
 import "@/styles/base.css";
 import "@/styles/jungsi.css";
+import "@/styles/offering.css";
 import { SiteHeader } from "@/components/site-header";
 import { SyntheticBar } from "@/components/synthetic-bar";
 import { getCaller, source } from "@/lib/api";

@@ -1,19 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { AccessDenied, getCaller, source } from "@/lib/api";
-import { PATH } from "./query";
+import { togglePick as toggleShared } from "@/app/shortlist-actions";
 
-/** 핵심 지원 학교 담기·빼기(shortlist.update). 권한은 서버가 판단하고, 막히면 아무것도 바꾸지 않는다 */
+/*
+  3·4페이지가 같은 담기 동작을 쓰도록 본체를 app/shortlist-actions.ts 로 옮겼다.
+  이 파일은 저장소 규칙(사용자 허락 전 파일 삭제 금지)에 따라 남겨 두고 같은 동작으로 잇는다.
+*/
 export async function togglePick(fd: FormData) {
-  const id = String(fd.get("offering_id") ?? "");
-  const selected = fd.get("selected") === "1";
-  if (!id) return;
-  try {
-    await source().setShortlist(await getCaller(), id, selected);
-  } catch (e) {
-    if (e instanceof AccessDenied) return;
-    throw e;
-  }
-  revalidatePath(PATH);
+  await toggleShared(fd);
 }
