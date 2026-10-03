@@ -12,6 +12,7 @@ while read task_local_ref task_local_sha task_remote_ref task_remote_sha; do
     echo "Branch deletion is outside this project's authorized workflow." >&2
     exit 1
   fi
+  "$task_python" -B -X utf8 scripts/check_branch_policy.py --push "$task_local_sha" "$task_remote_ref" "$task_remote_sha" || exit 1
   "$task_python" -B -X utf8 scripts/check_project_consistency.py --revision "$task_local_sha" || exit 1
   "$task_python" -B -X utf8 scripts/run_committed_tests.py --revision "$task_local_sha" || exit 1
 done

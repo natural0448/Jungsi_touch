@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "pre_data_backend_implemented_configuration_pending",
   "current_documents": {
@@ -102,7 +102,7 @@
     {
       "id": "REQ-16",
       "title": "커밋과 문서 일치",
-      "description": "개발은 Git 커밋에서 출발한다. 기능 변경은 요구사항·화면/API 경로·계층·검증을 갱신하고 같은 커밋에 포함한다. main에는 검증한 최종 코드와 그 코드에 일치하는 현재 문서를 유지한다."
+      "description": "개발은 Git 커밋에서 출발한다. 기능 변경은 요구사항·화면/API 경로·계층·검증을 갱신하고 같은 커밋에 포함한다. main에는 검증한 최종 코드와 그 코드에 일치하는 현재 문서를 유지한다. main은 모든 작업 완료 후 최종 문서·검증·인계가 정리된 배포 후보이며, 병합과 라이브 적용을 분리한다."
     },
     {
       "id": "REQ-17",
@@ -112,7 +112,7 @@
     {
       "id": "REQ-18",
       "title": "프레젠테이션 별도 담당과 브랜치",
-      "description": "프레젠테이션 구현은 별도 작업자가 맡는다. 현재 개발팀은 애플리케이션·데이터/인프라와 서버 API를 담당한다. 시스템기획팀은 develop에서 검증한 기획 정본문서를 관리·공유한다. 두 개발 담당은 origin/develop의 확정 기획을 가져가 서로 다른 feature 브랜치에서 구현하고 공통 명세 변경을 조율한다."
+      "description": "기획 정본은 시스템기획팀이 develop에서 직접 관리·배포한다. 실제 개발은 시스템·콘텐츠 담당과 프레젠테이션 담당 두 명이 각각 하나의 상시 브랜치를 재사용한다. 다른 팀은 develop의 기획을 가져가 담당 브랜치에서 구현하고 PR로 누적한다. 시스템·콘텐츠는 feature/application-pre-data-platform, 프레젠테이션은 feature/presentation-foundation을 상시 사용한다. develop의 직접 변경은 시스템기획팀의 문서와 공통 관리 범위로 제한하고 개발은 PR로만 통합한다."
     },
     {
       "id": "REQ-19",
@@ -980,9 +980,9 @@
     "release_branch": "main",
     "integration_branch": "develop",
     "feature_prefix": "feature/",
-    "flow": "feature/* → develop → 검증된 PR → main",
-    "main_contents": "validated_code_and_matching_current_documents_with_historical_material_clearly_marked",
-    "bootstrap_exception": "이번 개발 기준·브랜치·검사 설정은 검증 후 develop에서 main으로 한 번 반영한다. 이후 main으로 로컬 직접 푸시는 차단한다.",
+    "flow": "담당 임시 작업 → 해당 상시 개발 브랜치 → develop → 최종 정리·검증 PR → main → 별도 승인한 라이브 배포",
+    "main_contents": "release_ready_code_matching_documents_and_verified_handoff_before_live_deployment",
+    "bootstrap_exception": "초기 기반을 main에 넣었던 부트스트랩 예외는 종료됐다. 이후 main은 전체 완료·정리·검증한 develop의 배포 후보만 PR로 받으며, main 병합 자체가 라이브 배포를 뜻하지 않는다.",
     "required_ci_job": "project-consistency",
     "remote_protection": "unavailable_private_repository_plan_403",
     "local_hooks": "tracked_hooks_activated_per_clone",
@@ -1013,15 +1013,16 @@
       "scripts/check_project_consistency.py",
       "scripts/run_committed_tests.py",
       "scripts/bootstrap_backend_runtime.py",
-      "scripts/probe_backend_connection.py"
+      "scripts/probe_backend_connection.py",
+      "scripts/check_branch_policy.py"
     ],
     "line_endings": "LF for generated documents, route catalogs, hooks and new service foundation",
-    "feature_ownership": "기획 정본은 시스템기획팀이 develop에서 관리한다. 현재 서버 개발팀은 기존 feature/application-pre-data-platform 하나에서 애플리케이션과 데이터/인프라를 함께 작성한다. 프레젠테이션은 별도 담당의 작업 브랜치를 사용한다. 3티어는 폴더·포트·의존 관계로 구분하며 작업 항목이나 서브에이전트마다 브랜치를 추가하지 않는다.",
+    "feature_ownership": "시스템기획팀만 develop에서 기획·공통 관리 설정을 직접 관리한다. 시스템·콘텐츠 개발자는 feature/application-pre-data-platform, 화면 개발자는 feature/presentation-foundation을 상시 재사용한다. 다른 팀은 develop에서 직접 구현하지 않고 담당 브랜치의 PR로 누적한다. 3티어는 폴더·포트·의존 관계로 구분한다. 하위 작업은 필요 시 부모·담당·사유를 정본에 등록하며 작업 항목이나 에이전트마다 생성하지 않는다.",
     "planning_updates": {
       "default_branch": "develop",
-      "scope": "기획 정본과 공통 명세·생성 문서",
+      "scope": "시스템기획팀의 기획 정본·생성 문서·브랜치/검사 공통 관리 설정; 업무·화면·DB 구현은 담당 PR",
       "verification": "동일 커밋의 문서 일치·코드 참조·계층·데이터 제외·필수 Git 스냅샷 검산 후 develop에 공유",
-      "implementation": "개발 구현은 담당자의 별도 feature PR에서 검증 후 통합"
+      "implementation": "다른 개발 담당은 각자의 상시 브랜치에서 구현하고 PR로 develop에 통합한다. develop 직접 구현·main 직접 푸시는 금지한다."
     },
     "CI_snapshot_policy": {
       "runner": "GitHub-hosted ubuntu-24.04의 사전 설치 Git/CPython 3.12만 사용한다. checkout/setup-python 액션과 설치 대체 경로는 사용하지 않는다.",
@@ -1031,7 +1032,256 @@
       "preservation": "gc.auto=0, maintenance.auto=false와 fetch --no-auto-maintenance를 적용한다. clean/reset/drop/기존 경로 초기화/temp cleanup을 호출하지 않는다. 생성 runtime/다운로드/검산 스냅샷은 정리하지 않는다.",
       "verification": "tests/test_ci_snapshot_preservation.py에서 기존 경로 거절·보존, 지정 SHA 결속, fetch 전용 인증과 오류 비밀값 미노출을 검수한다. CI에서는 동일 github.sha의 공통 검사·잠금 런타임·전체 테스트를 실행한다."
     },
-    "server_work_branch": "feature/application-pre-data-platform"
+    "server_work_branch": "feature/application-pre-data-platform",
+    "presentation_work_branch": "feature/presentation-foundation",
+    "branch_governance": {
+      "format": "jungsi.branch-governance/v1",
+      "checked_date": "2026-10-04 (Asia/Seoul)",
+      "reference_commit": "d666a5f2bdbc846c65b5503de35c17d6d90088db",
+      "core_branches": [
+        {
+          "name": "main",
+          "kind": "release",
+          "owner": "시스템기획팀 최종 정리; 두 개발 담당 검토",
+          "parent": null,
+          "pr_target": null,
+          "status": "active",
+          "scope": "전체 작업 완료 후 코드·문서·검증·인계 자료를 정리한 배포 후보. 라이브 적용은 별도 승인."
+        },
+        {
+          "name": "develop",
+          "kind": "integration",
+          "owner": "시스템기획팀 직접 문서 관리; 개발 담당 PR 통합",
+          "parent": "main",
+          "pr_target": "main",
+          "status": "active",
+          "scope": "현재 개발 환경과 확정 기획의 공유 정본. 다른 팀의 구현은 PR로 누적."
+        },
+        {
+          "name": "feature/application-pre-data-platform",
+          "kind": "system",
+          "owner": "시스템·콘텐츠 개발 담당 1인 / 현재 개발팀",
+          "parent": "develop",
+          "pr_target": "develop",
+          "status": "active",
+          "scope": "시스템·콘텐츠 계약, 애플리케이션, 엔진, 인증/API, DB·Drive 인프라. 기존 이름을 상시 재사용."
+        },
+        {
+          "name": "feature/presentation-foundation",
+          "kind": "presentation",
+          "owner": "프레젠테이션 개발 담당 1인 / 별도 화면 작업자",
+          "parent": "develop",
+          "pr_target": "develop",
+          "status": "active",
+          "scope": "화면 구성·입력·이동·노출·인쇄와 허용 API 표시. PR #6의 head와 이름 보존."
+        }
+      ],
+      "additional_branches": [
+        {
+          "name": "feature/planning-presentation-contracts",
+          "kind": "planning_task",
+          "owner": "화면 작업자의 계약 제안; 시스템기획팀 검토·정본 반영",
+          "parent": "develop",
+          "pr_target": "develop",
+          "status": "active",
+          "temporary": true,
+          "purpose": "기존 PR #5: session.read·화면 기술 계약 제안. 미확정 계약을 현행 운영 구현으로 기록하지 않는다.",
+          "base_commit": "d666a5f2bdbc846c65b5503de35c17d6d90088db",
+          "observed_head": "d672bf3cea2b19e1f593e5f2d16a9480db8fc1ca",
+          "pull_request": 5,
+          "exception": "기존 브랜치 이름을 보존한다. 이후 공통 기획 하위 작업은 등록한 feature/planning-task/<slug>만 사용한다."
+        },
+        {
+          "name": "feature/presentation-favorable",
+          "kind": "presentation_task",
+          "owner": "별도 프레젠테이션 작업자",
+          "parent": "feature/presentation-foundation",
+          "pr_target": "feature/presentation-foundation",
+          "status": "active",
+          "temporary": true,
+          "purpose": "기존 PR #7: 4페이지 작업을 화면 상시 브랜치에 먼저 통합.",
+          "base_commit": "eb765ab50abd6cc99985b26594b2331f2ddef5df",
+          "observed_head": "07bb4929125d9a58abbabe71176aaffeab60bfaa",
+          "pull_request": 7,
+          "exception": "진행 중인 PR의 head/base를 보존한다. 이후 화면 하위 작업은 등록한 feature/presentation-task/<slug>를 사용한다."
+        },
+        {
+          "name": "feature/presentation-results",
+          "kind": "presentation_task",
+          "owner": "별도 프레젠테이션 작업자",
+          "parent": "feature/presentation-favorable",
+          "pr_target": "feature/presentation-favorable",
+          "status": "active",
+          "temporary": true,
+          "purpose": "작업 중 새로 확인한 기존 PR #9: 1페이지 대학 발표 입시결과를 화면 작업에 연결. 새 상시 노드가 아니라 기존 화면 하위 작업.",
+          "base_commit": "07bb4929125d9a58abbabe71176aaffeab60bfaa",
+          "observed_head": "d9feb6112a23b1fd14e8e34d15bed906ecc626da",
+          "pull_request": 9,
+          "exception": "정책 공유 전 생성된 PR head/base를 보존한다. 이후 필요 시 등록하는 presentation-task만 사용하고 화면별로 자동 분기하지 않는다."
+        },
+        {
+          "name": "feature/overall-analysis-service",
+          "kind": "retired",
+          "owner": "현재 개발팀 / 과거 DEV-001",
+          "parent": "develop",
+          "pr_target": null,
+          "status": "retired_merged",
+          "observed_head": "0db02235d59fc5a282f1b87d743e00c08d99fb0a",
+          "merged_pull_request": 2,
+          "merged_into": "d666a5f2bdbc846c65b5503de35c17d6d90088db",
+          "remote_ref_state": "deleted_2026-10-04_user_authorized_remote_ref_only",
+          "scope": "develop 조상 및 진행 PR 없음 확인 후 사용자 허용 범위의 원격 참조만 삭제 완료. 새 작업 금지. 로컬 브랜치와 작업 파일은 보존.",
+          "deletion_scope": "사용자가 정확히 허용한 GitHub 원격 refs/heads/feature/overall-analysis-service만 삭제했다. develop의 커밋과 로컬 브랜치·파일·worktree·원격 추적 캐시는 보존한다."
+        },
+        {
+          "name": "feature/planning-layer-ownership",
+          "kind": "retired",
+          "owner": "시스템기획팀 / 과거 소유권 기획",
+          "parent": "develop",
+          "pr_target": null,
+          "status": "retired_merged",
+          "observed_head": "0eab1c595db9377b6a198a0a786162b8f138c577",
+          "merged_pull_request": 3,
+          "merged_into": "d666a5f2bdbc846c65b5503de35c17d6d90088db",
+          "remote_ref_state": "deleted_2026-10-04_user_authorized_remote_ref_only",
+          "scope": "develop 조상 및 진행 PR 없음 확인 후 사용자 허용 범위의 원격 참조만 삭제 완료. 새 작업 금지. 로컬 브랜치와 작업 파일은 보존.",
+          "deletion_scope": "사용자가 정확히 허용한 GitHub 원격 refs/heads/feature/planning-layer-ownership만 삭제했다. develop의 커밋과 로컬 브랜치·파일·worktree·원격 추적 캐시는 보존한다."
+        }
+      ],
+      "planning_team_declaration": "JUNGSI_TEAM=planning (해당 셸 세션에만 설정; 신원 인증이나 GitHub 권한 분리는 아님)",
+      "planning_direct_prefixes": [
+        "docs/",
+        ".github/",
+        ".githooks/"
+      ],
+      "planning_direct_paths": [
+        "README.md",
+        "AGENTS.md",
+        ".gitignore",
+        ".gitattributes",
+        "scripts/check_project_consistency.py",
+        "scripts/check_branch_policy.py",
+        "tests/test_branch_policy.py",
+        "tests/test_project_consistency.py",
+        "tests/test_ci_snapshot_preservation.py"
+      ],
+      "child_templates": [
+        {
+          "pattern": "feature/system-task/<slug>",
+          "parent": "feature/application-pre-data-platform",
+          "pr_target": "feature/application-pre-data-platform",
+          "kind": "system_task",
+          "owner": "시스템·콘텐츠 개발 담당",
+          "purpose": "독립 리뷰·충돌 분리 등 분리가 필요한 개발 작업",
+          "allowed_parent_kinds": [
+            "system",
+            "system_task"
+          ]
+        },
+        {
+          "pattern": "feature/presentation-task/<slug>",
+          "parent": "feature/presentation-foundation",
+          "pr_target": "feature/presentation-foundation",
+          "kind": "presentation_task",
+          "owner": "프레젠테이션 개발 담당",
+          "purpose": "독립 리뷰·화면 병렬 작업 등 필요한 분리",
+          "allowed_parent_kinds": [
+            "presentation",
+            "presentation_task"
+          ]
+        },
+        {
+          "pattern": "feature/planning-task/<slug>",
+          "parent": "develop",
+          "pr_target": "develop",
+          "kind": "planning_task",
+          "owner": "시스템기획팀",
+          "purpose": "공통 계약 제안·별도 문서 검토",
+          "allowed_parent_kinds": [
+            "integration",
+            "planning_task"
+          ]
+        },
+        {
+          "pattern": "feature/release-task/<slug>",
+          "parent": "develop",
+          "pr_target": "develop",
+          "kind": "release_task",
+          "owner": "시스템기획팀과 두 개발 담당",
+          "purpose": "배포 전 종합 검증·문서 정리. main으로 직접 우회하지 않음",
+          "allowed_parent_kinds": [
+            "integration",
+            "release_task"
+          ]
+        }
+      ],
+      "registration_rule": "새 하위 브랜치 생성 전 시스템기획팀이 develop 정본의 additional_branches에 name·kind·owner·parent·pr_target·status·temporary=true·purpose·base_commit을 기록한다. 출발 SHA는 부모의 실제 커밋이어야 한다. 최초 생성 후 부모 변경은 협의해 명세와 PR base를 함께 갱신한다. 상시 노드뿐 아니라 같은 담당의 등록 임시 노드 아래에도 꼭 필요하면 작업을 등록할 수 있다. allowed_parent_kinds가 허용한 부모 역할만 사용하며 직계 부모를 건너뛰지 않는다.",
+      "hierarchy_note": "Git 브랜치는 네이티브 폴더 트리가 아니다. 이 문서의 부모는 출발 커밋과 PR 통합 경로를 뜻한다. 상시 브랜치명 뒤에 /를 붙인 하위 ref는 이름 충돌을 일으킬 수 있으므로 별도 task 접두어와 부모 등록을 사용한다.",
+      "sync_rule": "origin/develop의 최신 기획·HEAD를 확인해 자기 상시 브랜치에 일반 merge로 가져온다. 충돌은 해당 담당이 현재 공통 명세와 코드 변경 범위로 해결한다. 다른 체크아웃을 reset하거나 원자료를 재집계하지 않는다.",
+      "merge_rule": "임시 개발 작업은 등록된 직계 부모에 먼저 PR한다. 일반적으로 부모는 담당 상시 브랜치이며 기존 PR #9처럼 등록한 임시 부모가 있으면 그 단계를 따른다. 상시 시스템/화면 브랜치는 develop에 PR한다. 최종 main PR은 develop에서만 연다. GitHub 병합은 merge commit으로 수행해 상시 브랜치의 이력을 이어 간다.",
+      "lifecycle_rule": "기본 노드는 상시 4개뿐이다. 임시 작업은 등록 후 필요할 때만 만들며 종료 시 status=retired_merged와 병합 PR/커밋을 기록한다. 브랜치 ref·로컬 파일·worktree·캐시·잠금 파일 삭제는 자동화하지 않는다. 삭제 대상·범위를 사용자에게 명시해 허용받기 전 보존한다.",
+      "review_rule": "develop의 기획/계약 최종 검토와 통합 조율은 시스템기획팀이 담당한다. 두 개발자는 담당 브랜치에서 작업한다. 계약 변경에는 작업 요구사항·API·DTO·소유권·계층과 변경 검증을 같은 커밋에 포함한다. 상시 브랜치 간 직접 병합으로 develop을 우회하지 않는다.",
+      "github_settings": {
+        "default_branch": "main",
+        "allow_merge_commit": true,
+        "allow_squash_merge": false,
+        "allow_rebase_merge": false,
+        "delete_branch_on_merge": false,
+        "reason": "상시 개발 브랜치의 공통 부모와 PR 누적 이력을 보존하며 브랜치 자동 삭제를 방지"
+      },
+      "enforcement": {
+        "local": "pre-commit은 등록·활성 브랜치와 파일 삭제 금지를 검사한다. develop은 planning 선언 및 허용 문서/관리 경로만 직접 stage할 수 있다. pre-push는 main 직접 푸시·ref 삭제·non-fast-forward와 develop 범위 위반을 차단한다. 각 clone에서 훅 활성화가 필요하다.",
+        "CI": "PR head/base를 정본의 부모 경로와 검사하고 planning task는 문서/관리 변경만 허용한다. push는 등록 브랜치·develop의 직접 커밋 범위·non-fast-forward를 검사한다. 모든 merge commit PR을 사용하며 이전 정책 도입 전 커밋은 새로운 시행 커밋 이전 이력으로 보존한다.",
+        "limits": "현재 비공개 GitHub 요금제의 보호 API는 403이다. 원격 권한·PR 승인·검사 통과를 서버에서 강제할 수 없다. 로컬 planning 선언은 신원 인증이 아니며 훅 우회/API 직접 변경을 기술적으로 막지 못한다. CI 실패는 반영 자체를 되돌리지 않으므로 시스템기획팀이 결과를 확인한다."
+      },
+      "release_gate": {
+        "state": "not_ready",
+        "meaning": "전체 작업 완료와 최종 자료 정리가 확인될 때에만 ready로 바꾸고 각 항목에 증거 경로/PR/커밋을 남긴다. main 병합 후에도 라이브 배포 승인은 별도다.",
+        "checks": [
+          {
+            "id": "system_contracts",
+            "status": "pending",
+            "evidence": "DEV-002 코드·합성 검증은 인수 완료; 후속 session.read 등 변경 계약 확정/구현 인수 필요"
+          },
+          {
+            "id": "presentation",
+            "status": "pending",
+            "evidence": "PR #6/#7/#9 작업 중; 확정 DTO·서버 연결·화면 권한·인쇄 인수 필요"
+          },
+          {
+            "id": "live_connections",
+            "status": "pending",
+            "evidence": "실제 Supabase·Drive 설정과 UTC/Asia/Seoul 왕복 검사 증거 대기"
+          },
+          {
+            "id": "approved_data",
+            "status": "pending",
+            "evidence": "승인 자료/모형 공급 및 실제 결과 검수 대기. GitHub에 실제 데이터 업로드하지 않음"
+          },
+          {
+            "id": "release_validation",
+            "status": "pending",
+            "evidence": "최종 develop SHA의 문서·경로·계층·데이터 제외·CI 및 통합 검증 필요"
+          },
+          {
+            "id": "handoff",
+            "status": "pending",
+            "evidence": "운영 설정 위치(값 제외)·DB 변경 적용 계획·인계·복구 절차와 배포 후보 SHA 정리 필요"
+          }
+        ]
+      },
+      "remote_inventory": {
+        "active_branch_count": 7,
+        "core_count": 4,
+        "temporary_count": 3,
+        "deleted_remote_refs": [
+          "feature/overall-analysis-service",
+          "feature/planning-layer-ownership"
+        ],
+        "checked_at": "2026-10-04 (Asia/Seoul)",
+        "note": "초기 조사 8개에서 작업 중 PR #9 브랜치 1개가 추가되어 9개였고, 허용된 과거 ref 2개를 삭제해 7개를 확인했다. 열린 작업의 종료에 따라 추가 정리는 정본의 상태와 정확한 허용 범위를 확인한다."
+      }
+    }
   },
   "pending": [
     "실제 Supabase 프로젝트·서버 역할·TLS·Auth 검증 사용자와 활성 이용권 설정 및 readonly probe 증거",
@@ -1170,6 +1420,16 @@
         "REQ-17"
       ],
       "summary": "현재 develop의 공유 폴더 구조·로컬 비공개 영역·담당/계층·작업 진입점을 공통 명세에 등록하고 폴더_구조.md를 생성한다. 기획 develop·서버 작업 브랜치 재사용·별도 프레젠테이션의 운영 기준을 함께 반영했다. README에 구조 문서 진입점을 추가하고 서버 코드와 실제 연결 상태를 구분했다."
+    },
+    {
+      "date": "2026-10-04",
+      "requirements": [
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-18"
+      ],
+      "summary": "사용자 지정의 main → develop → 시스템·콘텐츠/프레젠테이션 두 상시 개발 노드를 정식 운영 구조로 등록했다. 기존 서버·화면 브랜치와 열린 PR을 재사용하고 필요 시 등록하는 임시 하위 작업 및 병합된 종료 노드를 구분한다. develop의 시스템기획팀 직접 문서/관리 범위·PR 부모·main 최종 인수 조건을 훅/CI에서 검사하며 GitHub merge commit만 허용하고 ref 자동 삭제는 해제한다. 원격 강제 보호의 요금제 제한과 삭제 범위 별도 승인·로컬 파일 보존을 명시한다. 검토 중 생성된 PR #9도 화면 임시 노드로 등록했다. 사용자가 정확히 허용한 이미 병합된 과거 GitHub 원격 ref 2개만 삭제했고 커밋·로컬 파일/브랜치/worktree는 보존했다."
     }
   ],
   "overall_analysis_contract": {
@@ -1333,9 +1593,9 @@
   },
   "collaboration": {
     "integration_branch": "develop",
-    "description": "기획 정본은 시스템기획팀이 develop에서 관리·공유하여 두 개발 담당이 언제든 확정 기획을 가져갈 수 있게 한다. 프레젠테이션은 별도 작업자가 맡고 현재 개발팀은 애플리케이션·데이터/인프라 및 서버 API를 담당한다.",
+    "description": "기획 정본은 시스템기획팀이 develop에서 직접 관리·배포한다. 실제 개발은 시스템·콘텐츠 담당과 프레젠테이션 담당 두 명이 각각 하나의 상시 브랜치를 재사용한다. 다른 팀은 develop의 기획을 가져가 담당 브랜치에서 구현하고 PR로 누적한다.",
     "start_rule": "시스템기획팀은 develop의 현재 HEAD와 원격 동기화 상태를 확인하고 기획 정본을 검증·공유한다. 서버 개발팀과 별도 프레젠테이션 담당은 최신 origin/develop의 기획 기준과 출발 SHA를 확인하고 각자의 기존 작업 브랜치를 재사용한다. 다른 작업자의 미커밋 변경을 기준으로 삼지 않는다.",
-    "branch_rule": "기획 문서는 develop에서 공통 명세와 생성 문서를 함께 검증해 공유한다. 현재 서버 개발팀은 기존 feature/application-pre-data-platform을 재사용하여 애플리케이션과 데이터/인프라를 함께 구현한다. 프레젠테이션 담당은 자신의 별도 작업 브랜치를 재사용한다. 3티어의 책임은 폴더·포트·의존 방향으로 구분한다. 별도 병렬 브랜치가 필요하면 담당과 분리 사유를 기록한다. 구현은 검증 후 develop에 통합하고 최종 코드는 검증한 PR로 main에 반영한다.",
+    "branch_rule": "시스템기획팀만 develop에서 기획·공통 관리 설정을 직접 관리한다. 시스템·콘텐츠 개발자는 feature/application-pre-data-platform, 화면 개발자는 feature/presentation-foundation을 상시 재사용한다. 다른 팀은 develop에서 직접 구현하지 않고 담당 브랜치의 PR로 누적한다. 3티어는 폴더·포트·의존 관계로 구분한다. 하위 작업은 필요 시 부모·담당·사유를 정본에 등록하며 작업 항목이나 에이전트마다 생성하지 않는다. 상시 시스템/화면 브랜치의 통합 대상은 develop이고, 하위 개발 작업은 등록된 직계 부모에 먼저 통합한다. main에는 작업이 모두 끝나고 최종 검증·인계가 정리된 develop만 PR로 반영하며 라이브 배포는 별도 승인한다.",
     "owners": [
       {
         "layer": "공통 기획",
@@ -1353,12 +1613,12 @@
         "roots": [
           "apps/web"
         ],
-        "branch_pattern": "feature/presentation-*",
+        "branch_pattern": "feature/presentation-foundation (상시); 등록된 presentation_task만 하위 작업",
         "scope": "화면·폼·이동·허용 API 결과 표시"
       },
       {
         "layer": "애플리케이션",
-        "owner": "현재 개발팀",
+        "owner": "시스템·콘텐츠 개발 담당 / 현재 개발팀",
         "roots": [
           "src/jungsi_touch/application",
           "src/jungsi_touch"
@@ -1368,7 +1628,7 @@
       },
       {
         "layer": "데이터와 인프라",
-        "owner": "현재 개발팀의 인프라 담당; 데이터팀은 자료 정리 담당",
+        "owner": "시스템·콘텐츠 개발 담당; 데이터팀은 비공개 자료 정리 담당",
         "roots": [
           "src/jungsi_touch/infrastructure",
           "database"
@@ -1379,7 +1639,7 @@
     ],
     "existing_application_feature": "feature/application-pre-data-platform",
     "presentation_branch_example": "feature/presentation-foundation",
-    "presentation_branch_status": "프레젠테이션 담당의 기존 작업 브랜치를 재사용한다. 기획팀의 develop 및 서버 개발팀 브랜치와 구현 커밋을 공유하지 않는다. 작업자·브랜치·PR별 통합 여부를 확인하고 미병합 코드를 develop의 현재 구현으로 기록하지 않는다.",
+    "presentation_branch_status": "feature/presentation-foundation은 화면 담당의 상시 브랜치다. 현재 PR #6 및 그 아래 PR #7/#9를 보존한다. 기존 session.read 제안 PR #5는 develop의 공통 계약 검토용 임시 노드이며 확정 전 운영 계약으로 간주하지 않는다.",
     "generated_files_rule": "route_catalog.json과 생성 README/현재 문서는 직접 편집하지 않는다. 계약 변경은 service_spec.json과 생성 도구에서 수정하고 생성 결과를 같은 커밋에 포함한다.",
     "handoff_rule": "두 개발 담당은 origin/develop의 같은 커밋에 있는 service_spec과 생성 문서를 가져가 구현한다. 계약·필드·오류/보류 사유가 바뀌면 시스템기획팀과 해당 계층 담당에게 인계한다. 통합되지 않은 feature의 코드·가상 응답을 develop에 구현된 기능으로 기록하지 않는다.",
     "verification_rule": "Git 변경 범위와 해당 계약·필수 커밋 검산을 확인한다. 원자료 전수검수나 전국 재집계를 매 개발 작업에서 반복하지 않는다.",
@@ -1962,8 +2222,8 @@
   },
   "repository_layout": {
     "reference_branch": "develop",
-    "reference_commit": "2770cd564df172e02d10a1292a509d67c4143eca",
-    "checked_date": "2026-10-03 (Asia/Seoul)",
+    "reference_commit": "d666a5f2bdbc846c65b5503de35c17d6d90088db",
+    "checked_date": "2026-10-04 (Asia/Seoul)",
     "scope": "origin/develop의 커밋된 폴더·파일 구조와 로컬 작업 공간의 주요 폴더 존재 여부를 기준으로 작성했다. 실제 원자료나 성적 내용은 구조 확인에 사용하지 않았다. 새 체크아웃에는 비공개 로컬 자료가 포함되지 않을 수 있다.",
     "public_tree": "Jungsi_touch/\n├── AGENTS.md                         작업 규칙\n├── README.md                         현재 문서 진입점과 이전 이력\n├── .gitignore                        비공개 자료·설정 제외\n├── .gitattributes                    공유 파일의 줄바꿈 기준\n├── backend-runtime.lock.json         백엔드 실행 의존성과 해시\n├── .githooks/                        커밋·푸시 검사\n├── .github/\n│   ├── workflows/                    GitHub CI\n│   └── pull_request_template.md      PR 작성 기준\n├── apps/\n│   └── web/                          프레젠테이션 담당 위치\n│       ├── README.md                 화면 담당 인계\n│       └── route_catalog.json        생성된 화면·HTTP 응답 계약\n├── src/\n│   └── jungsi_touch/\n│       ├── application/              업무 서비스·권한·포트·시간 계약\n│       ├── infrastructure/           FastAPI·Supabase·PostgreSQL·Drive 어댑터\n│       └── *.py                      기존 계산 엔진과 패키지 진입점\n├── database/\n│   ├── README.md                     DB 구조와 실제 자료의 경계\n│   └── migrations/                   추가 SQL 스키마 정의\n├── docs/\n│   ├── current/                      현재 기획·API·구조·운영 정본\n│   │   ├── service_spec.json         공통 명세와 폴더 구조의 원본\n│   │   └── 폴더_구조.md              이 문서: 공통 명세에서 생성\n│   ├── work_items/                   DEV 작업 지시·인수 결과\n│   ├── planning/                     공유 가능한 과거 기획·계약·시안\n│   └── architecture/                 공유 가능한 과거 엔진 설계·합성 사례\n├── scripts/                          허용한 공통 CLI·생성·검사 도구\n├── examples/\n│   ├── equating/                     합성 연도보정·환산 입력\n│   ├── exams/                        합성 성적 입력\n│   ├── percentile/                   합성 분포 입력\n│   └── school_screening/             합성 지원 검토 입력\n└── tests/                            공유 가능한 단위·합성 검증",
     "directories": [
@@ -2152,6 +2412,10 @@
       [
         "scripts/probe_backend_connection.py",
         "설정이 있을 때만 수행하는 읽기 전용 실제 DB/Auth 연결 진단"
+      ],
+      [
+        "scripts/check_branch_policy.py",
+        "상시/등록 임시 브랜치, develop 직접 변경 범위, PR 부모, main 배포 후보 검사"
       ]
     ],
     "engine_groups": [
@@ -2259,7 +2523,7 @@
     ],
     "maintenance_rules": [
       "이 문서의 정본은 develop의 docs/current/폴더_구조.md이며 source는 같은 커밋의 service_spec.json.repository_layout이다. 다른 작업자는 origin/develop의 같은 커밋에서 기획·코드·생성 문서를 읽는다.",
-      "시스템기획팀은 develop에서 문서를 관리한다. 서버 개발팀은 기존 작업 브랜치 하나를 재사용하며 애플리케이션·데이터/인프라를 담당한다. 별도 프레젠테이션 담당은 자신의 작업 브랜치를 사용한다. 작업 항목/서브에이전트마다 새 브랜치를 추가하지 않는다.",
+      "시스템기획팀만 develop에서 기획·공통 관리 설정을 직접 관리한다. 시스템·콘텐츠 개발자는 feature/application-pre-data-platform, 화면 개발자는 feature/presentation-foundation을 상시 재사용한다. 다른 팀은 develop에서 직접 구현하지 않고 담당 브랜치의 PR로 누적한다. 3티어는 폴더·포트·의존 관계로 구분한다. 하위 작업은 필요 시 부모·담당·사유를 정본에 등록하며 작업 항목이나 에이전트마다 생성하지 않는다.",
       "폴더 추가·책임 변경·진입점 변경은 repository_layout과 관련 layers/collaboration을 함께 수정하고 생성 도구로 반영한다. 생성 문서를 단독 편집하지 않는다.",
       "docs/planning과 docs/architecture의 이전 문서·가상 시안은 이력이다. 현재 계약은 docs/current를 기준으로 확인한다. Resource/data/datas/outputs의 제외는 위치와 대소문자에 관계없이 적용한다.",
       "공유 코드·문서·예제에는 실제 원자료·성적·입결·환산표·곡선·모형 가중치·접속값을 복사하지 않는다. scripts/tests/docs에도 파일별 비공개 예외가 있으므로 .gitignore와 해당 Git 스냅샷의 추적 목록을 확인한다.",

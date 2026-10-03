@@ -1,7 +1,7 @@
 <!-- jungsi:current -->
 # 정시터치 현재 개발 기준
 
-개발은 현재 Git 커밋을 기준으로 기획·라우팅·코드를 함께 갱신한다. main에는 검증한 최종 코드와 그 코드에 일치하는 문서를 유지하고, 통합 개발은 develop에서 진행한다.
+main은 모든 작업이 완료된 뒤 코드·문서·검증·인계를 정리하는 라이브 배포 전 후보다. 시스템기획팀은 develop에 현재 기획과 공통 관리 설정을 직접 공유한다. 실제 개발은 시스템·콘텐츠 담당의 feature/application-pre-data-platform과 화면 담당의 feature/presentation-foundation 두 상시 브랜치에서 진행하고 PR로 develop에 누적한다. 필요한 하위 작업만 부모·담당·사유를 정본에 등록한다. 개발은 현재 Git 커밋을 기준으로 기획·라우팅·코드를 함께 갱신한다.
 
 - [현재 서비스 기획](docs/current/서비스_기획.md)
 - [화면과 API 라우팅 명세](docs/current/라우팅_명세.md)

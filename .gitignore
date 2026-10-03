@@ -124,3 +124,4 @@ Desktop.ini
 !/scripts/run_committed_tests.py
 !/scripts/bootstrap_backend_runtime.py
 !/scripts/probe_backend_connection.py
+!/scripts/check_branch_policy.py
