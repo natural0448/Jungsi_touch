@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
   "spec_version": "1.2.0",
-  "source_sha256": "2d8a76bf28f1c82c31231f8e71b3e316adc9a2ce19497a718c79fc87171a00eb",
+  "source_sha256": "2eecf45c2ace6c76aa88ddf51a05e4cd3ff75a570ad8f614bdf3a41211cb2989",
   "pages": [
     {
       "id": "PAGE-01",
@@ -211,6 +211,7 @@
       ],
       "response_scope": "공식 대학 발표 결과만",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search",
       "http_contract": {
         "body": [],
         "query": [
@@ -223,7 +224,8 @@
           "limit (1~100; 기본 50)"
         ],
         "response": "catalog_search (items=history_metric)",
-        "idempotency_key_required": false
+        "idempotency_key_required": false,
+        "response_schema": "catalog_search"
       }
     },
     {
@@ -241,11 +243,13 @@
       ],
       "response_scope": "공식 군·모집인원·변경·기준일·확정 상태",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.recruitment",
       "http_contract": {
         "body": [],
         "query": [],
         "response": "recruitment",
-        "idempotency_key_required": false
+        "idempotency_key_required": false,
+        "response_schema": "recruitment"
       }
     },
     {
@@ -265,6 +269,7 @@
       ],
       "response_scope": "본인에게 귀속되는 성적 프로필의 생성 결과",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.profile",
       "http_contract": {
         "body": [
           "scores: 기존 overall_analysis_contract 입력",
@@ -272,7 +277,8 @@
         ],
         "query": [],
         "response": "profile",
-        "idempotency_key_required": true
+        "idempotency_key_required": true,
+        "response_schema": "profile"
       }
     },
     {
@@ -294,6 +300,7 @@
       ],
       "response_scope": "입력 검증 후 본인의 총점·승인 전체 누적·자료 상태",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
         "body": [
           "profile_id",
@@ -303,7 +310,8 @@
         ],
         "query": [],
         "response": "report",
-        "idempotency_key_required": true
+        "idempotency_key_required": true,
+        "response_schema": "report"
       }
     },
     {
@@ -322,11 +330,13 @@
       ],
       "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
         "body": [],
         "query": [],
         "response": "report",
-        "idempotency_key_required": false
+        "idempotency_key_required": false,
+        "response_schema": "report"
       }
     },
     {
@@ -344,6 +354,7 @@
       ],
       "response_scope": "전체 서비스 카탈로그의 결과·건수; 성적·추천 여부로 축소하지 않음",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search",
       "http_contract": {
         "body": [],
         "query": [
@@ -356,7 +367,8 @@
           "limit (1~100; 기본 50)"
         ],
         "response": "catalog_search (items=offering)",
-        "idempotency_key_required": false
+        "idempotency_key_required": false,
+        "response_schema": "catalog_search"
       }
     },
     {
@@ -374,11 +386,13 @@
       ],
       "response_scope": "모집단위 기본 상세; 개인 분석은 별도 권한·입력 확인",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.offering_detail",
       "http_contract": {
         "body": [],
         "query": [],
         "response": "{status, reason_code, offering, catalog_version}",
-        "idempotency_key_required": false
+        "idempotency_key_required": false,
+        "response_schema": "offering_detail"
       }
     },
     {
@@ -398,6 +412,7 @@
       ],
       "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
         "body": [
           "expected_version: positive integer",
@@ -405,7 +420,8 @@
         ],
         "query": [],
         "response": "report (analyses 갱신)",
-        "idempotency_key_required": true
+        "idempotency_key_required": true,
+        "response_schema": "report"
       }
     },
     {
@@ -425,13 +441,15 @@
       ],
       "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
         "body": [
           "expected_version: positive integer"
         ],
         "query": [],
         "response": "report (analyses/candidates 갱신)",
-        "idempotency_key_required": true
+        "idempotency_key_required": true,
+        "response_schema": "report"
       }
     },
     {
@@ -449,6 +467,7 @@
       ],
       "response_scope": "우리 서비스 핵심 지원 학교의 선택 상태",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
         "body": [
           "selected: boolean",
@@ -456,7 +475,8 @@
         ],
         "query": [],
         "response": "report (shortlist 갱신)",
-        "idempotency_key_required": true
+        "idempotency_key_required": true,
+        "response_schema": "report"
       }
     },
     {
@@ -474,11 +494,13 @@
       ],
       "response_scope": "발행 버전이 고정된 본인 전체 상담 리포트",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.snapshot",
       "http_contract": {
         "body": [],
         "query": [],
         "response": "snapshot",
-        "idempotency_key_required": false
+        "idempotency_key_required": false,
+        "response_schema": "snapshot"
       }
     },
     {
@@ -496,11 +518,13 @@
       ],
       "response_scope": "추천·선택 인원과 본인 순위·동점·갱신 상태; 타인 성적 제외",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "contract_ref": "backend_platform_contract.dto_schemas.statistics",
       "http_contract": {
         "body": [],
         "query": [],
         "response": "statistics",
-        "idempotency_key_required": false
+        "idempotency_key_required": false,
+        "response_schema": "statistics"
       }
     }
   ],
@@ -805,6 +829,19 @@
           "추천은 승인 후보에 포함된 학생, 선택은 최신 프로필의 유효 선택 학생이다. 두 집단을 각각 학생 중복 제거한다.",
           "본인 rank=1+본인보다 높은 점수의 인원이며 동점자는 같은 competition 순위다. 본인이 해당 집단에 없으면 rank=null이다.",
           "다른 학생 ID/성적/리포트 목록은 반환하지 않는다. 미분석은 건수/순위 null이다. scope는 service_users_not_actual_university_applicants다."
+        ]
+      },
+      "offering_detail": {
+        "format": null,
+        "fields": [
+          "status",
+          "reason_code",
+          "offering",
+          "catalog_version"
+        ],
+        "rules": [
+          "offering은 모집행 기본 DTO다. 개인 환산/지원 판단은 report.analyses로 구분한다.",
+          "미발행 자료는 status=pending/offering=null이다. 검증된 카탈로그에 없는 ID는 404다."
         ]
       }
     },

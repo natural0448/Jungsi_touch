@@ -266,8 +266,11 @@
           "limit (1~100; 기본 50)"
         ],
         "response": "catalog_search (items=history_metric)",
-        "idempotency_key_required": false
-      }
+        "idempotency_key_required": false,
+        "response_schema": "catalog_search"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search"
     },
     {
       "id": "recruitment.read",
@@ -290,8 +293,11 @@
         "body": [],
         "query": [],
         "response": "recruitment",
-        "idempotency_key_required": false
-      }
+        "idempotency_key_required": false,
+        "response_schema": "recruitment"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.recruitment"
     },
     {
       "id": "score-profile.create",
@@ -319,8 +325,11 @@
         ],
         "query": [],
         "response": "profile",
-        "idempotency_key_required": true
-      }
+        "idempotency_key_required": true,
+        "response_schema": "profile"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.profile"
     },
     {
       "id": "overall.analyze",
@@ -340,8 +349,8 @@
         "REQ-15"
       ],
       "response_scope": "입력 검증 후 본인의 총점·승인 전체 누적·자료 상태",
-      "application_service": "jungsi_touch.application.overall_analysis.OverallAnalysisService.analyze",
-      "contract_ref": "overall_analysis_contract",
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -354,8 +363,10 @@
         ],
         "query": [],
         "response": "report",
-        "idempotency_key_required": true
-      }
+        "idempotency_key_required": true,
+        "response_schema": "report"
+      },
+      "engine_service": "jungsi_touch.application.overall_analysis.OverallAnalysisService.analyze"
     },
     {
       "id": "report.read",
@@ -379,8 +390,11 @@
         "body": [],
         "query": [],
         "response": "report",
-        "idempotency_key_required": false
-      }
+        "idempotency_key_required": false,
+        "response_schema": "report"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.report"
     },
     {
       "id": "offerings.search",
@@ -411,8 +425,11 @@
           "limit (1~100; 기본 50)"
         ],
         "response": "catalog_search (items=offering)",
-        "idempotency_key_required": false
-      }
+        "idempotency_key_required": false,
+        "response_schema": "catalog_search"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search"
     },
     {
       "id": "offering.read",
@@ -435,8 +452,11 @@
         "body": [],
         "query": [],
         "response": "{status, reason_code, offering, catalog_version}",
-        "idempotency_key_required": false
-      }
+        "idempotency_key_required": false,
+        "response_schema": "offering_detail"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.offering_detail"
     },
     {
       "id": "university.analyze",
@@ -464,8 +484,11 @@
         ],
         "query": [],
         "response": "report (analyses 갱신)",
-        "idempotency_key_required": true
-      }
+        "idempotency_key_required": true,
+        "response_schema": "report"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.report"
     },
     {
       "id": "candidates.build",
@@ -492,8 +515,11 @@
         ],
         "query": [],
         "response": "report (analyses/candidates 갱신)",
-        "idempotency_key_required": true
-      }
+        "idempotency_key_required": true,
+        "response_schema": "report"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.report"
     },
     {
       "id": "shortlist.update",
@@ -519,8 +545,11 @@
         ],
         "query": [],
         "response": "report (shortlist 갱신)",
-        "idempotency_key_required": true
-      }
+        "idempotency_key_required": true,
+        "response_schema": "report"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.report"
     },
     {
       "id": "report.export",
@@ -543,8 +572,11 @@
         "body": [],
         "query": [],
         "response": "snapshot",
-        "idempotency_key_required": false
-      }
+        "idempotency_key_required": false,
+        "response_schema": "snapshot"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.snapshot"
     },
     {
       "id": "statistics.read",
@@ -567,8 +599,11 @@
         "body": [],
         "query": [],
         "response": "statistics",
-        "idempotency_key_required": false
-      }
+        "idempotency_key_required": false,
+        "response_schema": "statistics"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.statistics"
     }
   ],
   "routing_policy": {
@@ -1084,6 +1119,17 @@
         "REQ-19"
       ],
       "summary": "DEV-002: FastAPI 12개 경로·업무/영속 포트·Supabase 검증 인증과 DB 이용권·추가 PostgreSQL 스키마·Drive 승인 읽기/새 파일 발행·UTC/서울 소스/date 계약을 구현했다. 합성 자료로 기존 엔진의 성공 흐름과 실패/권한/버전 검수를 수행한다. 실제 Supabase/Drive 및 자료/모형·운영 연결은 미검증 설정 대기이며 화면 구현은 별도 담당이다."
+    },
+    {
+      "date": "2026-10-03",
+      "requirements": [
+        "REQ-02",
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-18"
+      ],
+      "summary": "DEV-002 최종 인계: 12개 HTTP 작업의 업무 서비스와 응답 DTO contract_ref를 실제 PlatformService와 결속했다. DEV-001 stateless 전체 분석은 report.overall 엔진 계약으로 따로 보존했다. CI checkout의 clean/reset 동작을 명시적으로 해제했다."
     }
   ],
   "overall_analysis_contract": {
@@ -1648,6 +1694,19 @@
           "본인 rank=1+본인보다 높은 점수의 인원이며 동점자는 같은 competition 순위다. 본인이 해당 집단에 없으면 rank=null이다.",
           "다른 학생 ID/성적/리포트 목록은 반환하지 않는다. 미분석은 건수/순위 null이다. scope는 service_users_not_actual_university_applicants다."
         ]
+      },
+      "offering_detail": {
+        "format": null,
+        "fields": [
+          "status",
+          "reason_code",
+          "offering",
+          "catalog_version"
+        ],
+        "rules": [
+          "offering은 모집행 기본 DTO다. 개인 환산/지원 판단은 report.analyses로 구분한다.",
+          "미발행 자료는 status=pending/offering=null이다. 검증된 카탈로그에 없는 ID는 404다."
+        ]
       }
     },
     "operation_gaps": [
@@ -1805,7 +1864,8 @@
       "environment": "PYTHONPATH=새 runtime의 site + src; PYTHONDONTWRITEBYTECODE=1. 기존 runtime 폴더와 다운로드는 보존한다.",
       "serve": "python -B -m uvicorn jungsi_touch.infrastructure.http_api:configured_app --factory --host 127.0.0.1 --port 8000 --no-access-log",
       "probe": "python -B scripts/probe_backend_connection.py",
-      "tests": "python -B scripts/run_committed_tests.py --staged"
+      "tests": "python -B scripts/run_committed_tests.py --staged",
+      "CI_checkout": "actions/checkout clean:false 및 persist-credentials:false. 로컬/CI 검산 스크립트는 기존 작업물 정리를 실행하지 않는다."
     },
     "database": "database/migrations/001_pre_data_platform.sql은 추가 정의만 제공한다. 자동 적용하지 않으며 기존 DB를 reset/drop/delete하지 않는다. 전용 jungsi_backend 스키마의 사용자/이용권/리포트 접근은 서버 역할과 SQL owner 조건으로 제한하고 anon/authenticated 직접 접근은 허용하지 않는다. schema_versions와 실제 11개 timestamptz/date 컬럼 형식을 함께 확인한다.",
     "health": "/health/live는 프로세스 UTC 시각만 확인한다. /health/ready는 설정 존재와 읽기 전용 DB 스키마·컬럼·UTC 세션·합성 SQL literal 왕복을 검사한다. ready가 인증 사용자/입시 자료/모형 검증 완료를 뜻하지 않는다. auth와 live_data 상태를 별도로 반환한다.",

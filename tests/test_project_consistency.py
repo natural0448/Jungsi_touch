@@ -96,4 +96,15 @@ class ConsistencyTests(unittest.TestCase):
         self.assertNotIn('http_adapter',frontend['operations'][0])
         self.assertNotIn('workflow_service',frontend['operations'][0])
 
+    def test_http_response_reference_cannot_revert_to_stateless_engine(self):
+        spec=deepcopy(self.spec)
+        next(o for o in spec['operations'] if o['id']=='overall.analyze')['contract_ref']='overall_analysis_contract'
+        self.assertIn('HTTP response schema reference drift',validate_spec(spec))
+
+    def test_overall_engine_remains_separate_from_http_workflow(self):
+        op=next(o for o in self.spec['operations'] if o['id']=='overall.analyze')
+        self.assertEqual(op['engine_service'],self.spec['overall_analysis_contract']['application_service'])
+        self.assertNotEqual(op['application_service'],op['engine_service'])
+        self.assertEqual(op['http_contract']['response_schema'],'report')
+
 if __name__=="__main__":unittest.main()
