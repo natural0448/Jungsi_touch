@@ -1,10 +1,13 @@
-import type { CatalogSearchDto, HistoryMetricDto, HistorySearchQuery, RecruitmentDto } from "@/lib/dto";
+import type { CatalogSearchDto, HistoryMetricDto, HistorySearchQuery, ProfileDto, RecruitmentDto, ReportDto, ScoresInput, SnapshotDto } from "@/lib/dto";
 import type { AnalysisResult, CandidatesResult, OfferingSearchParams, OfferingSearchResult, OfferingStatistics, Session, ShortlistItem } from "@/lib/contract";
 
 /** 로그인한 사람의 신원. 화면 서버는 access token 을 우리 서비스 API 에 전달만 한다 */
 export interface Caller {
   accessToken: string | null;
 }
+
+/** 쓰기 요청 결과. 실패는 서버 오류 코드(invalid_request·engine_input_code·revision_conflict 등) */
+export type Result<T> = { ok: true; value: T } | { ok: false; code: string; status: number };
 
 /** 서버가 401·403 으로 막았을 때. 화면은 결과·건수를 그리지 않고 안내만 보인다 */
 export class AccessDenied extends Error {
@@ -24,6 +27,14 @@ export interface JungsiSource {
   searchHistory(caller: Caller, query: HistorySearchQuery): Promise<CatalogSearchDto<HistoryMetricDto>>;
   /** recruitment.read (일반·유료). 없는 모집행이면 null */
   readRecruitment(caller: Caller, offeringId: string): Promise<RecruitmentDto | null>;
+  /** score-profile.create (일반·유료). 새 프로필. 검증 실패는 서버 오류 코드 */
+  createScoreProfile(caller: Caller, scores: ScoresInput, confirmed: boolean, idempotencyKey: string): Promise<Result<ProfileDto>>;
+  /** overall.analyze (일반·유료). report_id 가 있으면 그 리포트의 새 revision */
+  analyzeOverall(caller: Caller, body: { profile_id: string; report_id?: string; expected_version?: number }, idempotencyKey: string): Promise<Result<ReportDto>>;
+  /** report.read (본인). 없거나 남의 리포트면 null(서버는 같은 404) */
+  readReport(caller: Caller, reportId: string): Promise<ReportDto | null>;
+  /** report.export (유료·본인·확인 성적). 일반 회원이면 AccessDenied(403) */
+  exportReport(caller: Caller, reportId: string): Promise<SnapshotDto | null>;
   /** session.read. 비회원이면 null */
   getSession(caller: Caller): Promise<Session | null>;
   /** offerings.search (유료). 일반 회원이면 AccessDenied(403) */

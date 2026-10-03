@@ -79,3 +79,9 @@ body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;lin
   .et .jt-tabs a{font-size:14px;padding:0 10px}
   .et .pg-head h1{font-size:24px}
 }
+
+/* 인쇄: 머리글·탭·합성 응답 띠·바닥글·핵심 지원 학교 띠를 숨긴다(상담 리포트 인쇄용 화면) */
+@media print{
+  .et .synbar,.et .jt-util,.et .jt-tabs,.et .jt-foot,.et .tray,.et .pg-head{display:none!important}
+  body{background:#fff}
+}

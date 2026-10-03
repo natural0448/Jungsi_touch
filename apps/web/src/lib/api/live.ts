@@ -1,7 +1,7 @@
 import "server-only";
 import type { AnalysisResult, CandidatesResult, OfferingAnalysis, OfferingSearchParams, OfferingSearchResult, OfferingStatistics, ScoreBasis, Session, ShortlistItem } from "@/lib/contract";
-import type { CatalogSearchDto, HistoryMetricDto, HistorySearchQuery, RecruitmentDto } from "@/lib/dto";
-import { AccessDenied, type Caller, type JungsiSource } from "./source";
+import type { CatalogSearchDto, HistoryMetricDto, HistorySearchQuery, ProfileDto, RecruitmentDto, ReportDto, SnapshotDto } from "@/lib/dto";
+import { AccessDenied, type Caller, type JungsiSource, type Result } from "./source";
 
 /*
   우리 서비스 API(애플리케이션 계층)를 부르는 쪽. 서버에서만 돈다.
@@ -32,6 +32,32 @@ function qs(p: OfferingSearchParams) {
   return s ? `?${s}` : "";
 }
 
+/** POST/PUT 은 Idempotency-Key 가 필수. 같은 키의 재시도는 처음 결과를 돌려받는다(API_DTO 계약) */
+async function write<T>(caller: Caller, method: "POST" | "PUT", path: string, body: unknown, key: string): Promise<Result<T>> {
+  const res = await fetch(`${base()}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json", "Idempotency-Key": key, Authorization: `Bearer ${caller.accessToken ?? ""}` },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+  if (res.status === 401 || res.status === 403) throw new AccessDenied(res.status, res.status === 401 ? "authentication_required" : "paid_required");
+  if (!res.ok) {
+    const err = (await res.json().catch(() => null)) as { error?: { code?: string } } | null;
+    return { ok: false, code: err?.error?.code ?? "request_failed", status: res.status };
+  }
+  return { ok: true, value: (await res.json()) as T };
+}
+
+/** 404 는 없음으로 받는다(남의 리포트도 서버는 같은 404) */
+async function orNull<T>(p: Promise<T>): Promise<T | null> {
+  try {
+    return await p;
+  } catch (e) {
+    if (e instanceof Error && e.message.includes(" 404:")) return null;
+    throw e;
+  }
+}
+
 /** history.search 쿼리. 같은 이름의 키를 두 번 보내지 않는다(서버가 422 로 거절) */
 function histQs(q: HistorySearchQuery) {
   const u = new URLSearchParams();
@@ -46,6 +72,10 @@ const REPORT = "me";
 export const liveSource: JungsiSource = {
   kind: "live",
   searchHistory: (caller, q) => call<CatalogSearchDto<HistoryMetricDto>>(caller, `/admission-history${histQs(q)}`),
+  createScoreProfile: (caller, scores, confirmed, key) => write<ProfileDto>(caller, "POST", "/score-profiles", { scores, confirmed }, key),
+  analyzeOverall: (caller, body, key) => write<ReportDto>(caller, "POST", "/overall-reports", body, key),
+  readReport: (caller, reportId) => orNull(call<ReportDto>(caller, `/reports/${encodeURIComponent(reportId)}`)),
+  exportReport: (caller, reportId) => orNull(call<SnapshotDto>(caller, `/reports/${encodeURIComponent(reportId)}/print`)),
   async readRecruitment(caller, offeringId) {
     try {
       return await call<RecruitmentDto>(caller, `/offerings/${encodeURIComponent(offeringId)}/recruitment`);

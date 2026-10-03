@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import type { OfferingSearchResult } from "@/lib/contract";
 import { AccessDenied, type JungsiSource } from "./source";
 import { HISTORY, syntheticRecruitment } from "./synthetic-history";
+import { loadReport, saveProfile, saveReport, validateScores } from "./synthetic-report";
 import { ANALYSES, BASIS, CANDIDATE_SCHOOLS, OFFERINGS, STATISTICS, WILDCARDS } from "./synthetic-fixtures";
 
 /*
@@ -75,6 +76,32 @@ export const syntheticSource: JungsiSource = {
       as_of: "2026-09-10",
       next_cursor: end < rows.length ? `${key}@${end}` : null,
     };
+  },
+
+  async createScoreProfile(_caller, scores, confirmed, key) {
+    await requireMember();
+    const bad = validateScores(scores);
+    if (bad) return { ok: false, code: bad, status: bad === "pack_version_mismatch" ? 409 : 422 };
+    return { ok: true, value: await saveProfile(scores, confirmed, key) };
+  },
+
+  async analyzeOverall(_caller, body, key) {
+    await requireMember();
+    const r = await saveReport(body.profile_id, key, body.report_id, body.expected_version);
+    if (typeof r === "string") return { ok: false, code: r, status: r === "revision_conflict" ? 409 : 404 };
+    return { ok: true, value: r };
+  },
+
+  async readReport(_caller, reportId) {
+    await requireMember();
+    return loadReport(reportId);
+  },
+
+  async exportReport(_caller, reportId) {
+    await requirePaid();
+    const report = await loadReport(reportId);
+    if (!report) return null;
+    return { format: "jungsi.counseling-snapshot/v1", status: "ready", snapshot_version: report.report_version, generated_at: report.updated_at, report };
   },
 
   async readRecruitment(_caller, offeringId) {

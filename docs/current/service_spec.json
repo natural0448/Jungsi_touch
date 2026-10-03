@@ -1051,6 +1051,29 @@
         "REQ-15"
       ],
       "symbols": []
+    },
+    {
+      "path": "apps/web/src/app/reports/me/page.tsx",
+      "layer": "presentation",
+      "status": "page2_presentation_on_backend_DTO_synthetic_responses_no_live_API",
+      "requirements": [
+        "REQ-02",
+        "REQ-11",
+        "REQ-12",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/app/reports/me/print/page.tsx",
+      "layer": "presentation",
+      "status": "counseling_report_print_view_on_report_export_DTO",
+      "requirements": [
+        "REQ-11",
+        "REQ-14"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -1384,7 +1407,10 @@
     "4페이지가 쓰는 candidates.build·statistics.read 응답 필드(apps/web/src/lib/contract.ts 의 CandidateSchool·WildcardPick·OfferingStatistics 화면 초안)와 학교 분류 정책을 애플리케이션 계약으로 확정한다.",
     "1페이지 4개년 비교: history_metric 에 연도 간 같은 모집단위를 잇는 키가 없어 학년도별로만 보여 준다. 연도 연결 키(PK 연결) 제공과 처음 보여 줄 학년도(화면은 결과가 있는 2026 을 기본으로 둠)를 정한다.",
     "1페이지 지역 조건의 선택지를 API 가 줄지 정한다(화면은 시·도 17곳 고정 목록을 쓴다).",
-    "3·4페이지 화면이 쓰는 초안 모양(apps/web/src/lib/contract.ts)을 develop 의 DTO(report·assessment·candidates·statistics)로 옮긴다."
+    "3·4페이지 화면이 쓰는 초안 모양(apps/web/src/lib/contract.ts)을 develop 의 DTO(report·assessment·candidates·statistics)로 옮긴다.",
+    "2페이지: 화면이 시험 목록(exam_id·pack_version·과목 선택지)을 받는 API 가 없어 2027 9월 모의평가 토큰과 과목 목록을 화면 설정에 둔다. 시험 목록 제공 방식을 정한다.",
+    "2페이지: 내 리포트 번호(report_id)를 찾는 API 가 없어 화면이 마지막 리포트 번호를 브라우저에 기억한다. 다른 기기에서 내 리포트를 찾는 방법(예: 본인 최신 리포트 조회)을 정한다.",
+    "2페이지의 핵심 지원 학교 부분은 3·4페이지와 같은 화면 초안 모양을 쓴다. report.shortlist 에는 모집단위 이름이 없어 offering.read 로 이름을 붙이는 연결과 함께 실제 DTO 로 옮긴다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -1565,6 +1591,17 @@
         "REQ-18"
       ],
       "summary": "프레젠테이션: 1페이지(대학 발표 입시결과)를 develop 의 실제 DTO(history.search 의 catalog_search·history_metric, recruitment.read)로 구현했다. 대학명·학과명 검색과 학년도·지역·모집군 조건, 대학→모집행 묶음, 발표 지표의 이름·정의·값·단위·척도·출처·기준일을 그대로 보이고 미발표는 값 없이 표시한다. 2027 모집행을 펼치면 최초·변경·최종 인원과 변경 이력을 보인다. 자체 누적·예상 기준은 넣지 않는다. 비회원은 로그인 안내만 본다. HTTP 연결 전이라 같은 DTO 모양의 합성 응답으로 동작한다."
+    },
+    {
+      "date": "2026-10-04",
+      "requirements": [
+        "REQ-02",
+        "REQ-11",
+        "REQ-12",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "summary": "프레젠테이션: 2페이지(내 성적 리포트)를 develop 의 실제 DTO 로 구현했다. 일반·유료 회원이 2027학년도 9월 모의평가 표준점수(국어·수학 선택과목, 탐구 두 과목, 영어·한국사 등급)를 확인 체크와 함께 저장하면 score-profile.create → overall.analyze 로 리포트를 만들고 report.read 로 총점·전체 상위 누적(동점 포함·제외)·과목 결과·절대평가 등급을 보인다. 성적을 고치면 새 프로필로 같은 리포트의 새 revision(expected_version)을 만든다. 쓰기 요청은 화면마다 한 Idempotency-Key 를 쓴다. 유료는 핵심 지원 학교 분석과 report.export 상담 리포트 인쇄 화면을 함께 본다. 누적 대기는 사유와 함께 보이고 총점·과목 결과는 유지한다. HTTP 연결 전이라 같은 DTO 모양의 합성 응답으로 동작한다."
     }
   ],
   "overall_analysis_contract": {
