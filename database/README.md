@@ -1,6 +1,6 @@
 # 정시터치 데이터 계층 개발 기준
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.3.0이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.3.1이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 이 폴더에는 실제 값이 없는 DB 구조·마이그레이션 코드만 추가할 수 있다. database/migrations/001_pre_data_platform.sql은 추가 정의만 제공한다. 자동 적용하지 않으며 기존 DB를 reset/drop/delete하지 않는다. 전용 jungsi_backend 스키마의 사용자/이용권/리포트 접근은 서버 역할과 SQL owner 조건으로 제한하고 anon/authenticated 직접 접근은 허용하지 않는다. schema_versions와 실제 11개 timestamptz/date 컬럼 형식을 함께 확인한다. 원자료·성적·입결·환산표·곡선·모델·덤프·접속 비밀값은 여기에 복사하지 않는다.
 
@@ -32,4 +32,4 @@ Google Drive API 고정 폴더·파일 버전/해시·승인 읽기와 별도 �
 - 비공개 발행 명부/승인 자료 값과 형식 호환 검수
 - 실제 읽기/쓰기·재시도/충돌·감사와 사용자 접근 검수
 
-<!-- jungsi:generated spec_sha256=f824236910c36816712eda5d9965b0ec7fd7fe6419f1227c17929d924b272965 -->
+<!-- jungsi:generated spec_sha256=c74fe9b47db0e95133b7a362de548ef2b04c02eb2e678c20b81debc4f948dd9f -->

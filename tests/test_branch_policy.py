@@ -47,9 +47,12 @@ class BranchPolicyTests(unittest.TestCase):
         self.assertEqual(policy.validate_pr(self.server,'develop',[('M','src/jungsi_touch/application/platform.py')],self.spec),[])
         self.assertEqual(policy.validate_pr(self.web,'develop',[('A','apps/web/src/app/page.tsx')],self.spec),[])
     def test_child_ui_pr_cannot_skip_its_parent(self):
-        child='feature/presentation-favorable'
-        self.assertEqual(policy.validate_pr(child,self.web,[('A','apps/web/src/app/page4.tsx')],self.spec),[])
-        self.assertTrue(policy.validate_pr(child,'develop',[],self.spec))
+        spec=deepcopy(self.spec);child='feature/presentation-task/independent-screen'
+        spec['workflow']['branch_governance']['additional_branches'].append(
+            dict(name=child,kind='presentation_task',owner='presentation',parent=self.web,pr_target=self.web,
+                 status='active',temporary=True,purpose='independent review',base_commit='a'*40))
+        self.assertEqual(policy.validate_pr(child,self.web,[('A','apps/web/src/app/page4.tsx')],spec),[])
+        self.assertTrue(policy.validate_pr(child,'develop',[],spec))
     def test_two_development_nodes_do_not_merge_directly_to_each_other(self):
         self.assertTrue(policy.validate_pr(self.server,self.web,[],self.spec))
     def test_contract_proposal_cannot_add_runtime_implementation(self):
