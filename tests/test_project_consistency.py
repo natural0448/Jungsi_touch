@@ -72,9 +72,9 @@ class ConsistencyTests(unittest.TestCase):
         next(row for row in spec["operations"] if row["id"]=="overall.analyze")["member_tiers"]=["paid"]
         self.assertIn("Overall analysis access policy drift",validate_spec(spec))
 
-    def test_stateless_service_cannot_be_marked_as_http_implementation(self):
+    def test_overall_http_flag_must_match_registered_platform_adapter(self):
         spec=deepcopy(self.spec)
-        spec["overall_analysis_contract"]["http_handler_implemented"]=True
+        spec["overall_analysis_contract"]["http_handler_implemented"]=not spec['overall_analysis_contract']['http_handler_implemented']
         self.assertIn("Overall application boundary drift",validate_spec(spec))
 
     def test_frontend_contract_contains_dto_without_internal_provider_reference(self):
@@ -85,10 +85,32 @@ class ConsistencyTests(unittest.TestCase):
         self.assertNotIn("application_service",public)
         self.assertNotIn("provider",public)
 
+    def test_backend_readiness_cannot_omit_an_operation(self):
+        spec=deepcopy(self.spec);spec['backend_platform_contract']['operation_gaps'].pop()
+        self.assertIn('Backend readiness operation drift',validate_spec(spec))
+
+    def test_presentation_api_contract_excludes_internal_adapter_and_registry(self):
+        frontend=json.loads(generated_files(self.spec)['apps/web/route_catalog.json'])
+        self.assertEqual(len(frontend['operations']),len(self.spec['operations']))
+        self.assertNotIn('drive_registry',frontend['backend_contract'])
+        self.assertNotIn('http_adapter',frontend['operations'][0])
+        self.assertNotIn('workflow_service',frontend['operations'][0])
+
+    def test_http_response_reference_cannot_revert_to_stateless_engine(self):
+        spec=deepcopy(self.spec)
+        next(o for o in spec['operations'] if o['id']=='overall.analyze')['contract_ref']='overall_analysis_contract'
+        self.assertIn('HTTP response schema reference drift',validate_spec(spec))
+
+    def test_overall_engine_remains_separate_from_http_workflow(self):
+        op=next(o for o in self.spec['operations'] if o['id']=='overall.analyze')
+        self.assertEqual(op['engine_service'],self.spec['overall_analysis_contract']['application_service'])
+        self.assertNotEqual(op['application_service'],op['engine_service'])
+        self.assertEqual(op['http_contract']['response_schema'],'report')
+
     def test_session_operation_cannot_become_paid_or_owner_bound(self):
         for field,value in [("member_tiers",["paid"]),("report_owner",True)]:
             spec=deepcopy(self.spec)
-            next(row for row in spec["operations"] if row["id"]=="session.read")[field]=value
+            spec["session_contract"][field]=value
             self.assertIn("Session operation policy drift",validate_spec(spec))
 
     def test_frontend_receives_session_contract_and_technology_is_documented(self):
@@ -98,6 +120,6 @@ class ConsistencyTests(unittest.TestCase):
         self.assertIn("entitlement_expires_at",session["response_fields"])
         architecture=generated[self.spec["current_documents"]["architecture"]].decode("utf-8")
         self.assertIn("Next.js App Router + OpenNext Cloudflare Workers",architecture)
-        self.assertNotIn("웹 프레임워크·HTTP 서버 채택은 미정",architecture)
+        self.assertNotIn("session.read",[o["id"] for o in self.spec["operations"]])
 
 if __name__=="__main__":unittest.main()

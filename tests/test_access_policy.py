@@ -70,9 +70,5 @@ class AccessPolicyTests(unittest.TestCase):
         repository=SyntheticReportAccessRepository(source)
         source["synthetic-confirmed"]=ReportAccessRecord("synthetic-other",True)
         self.assertEqual(repository.lookup_access("synthetic-confirmed").owner_id,"synthetic-owner")
-    def test_session_read_for_standard_and_paid_only_after_login(self):
-        self.assertTrue(self.policy.operation_access("session.read",self.free).allowed)
-        self.assertTrue(self.policy.operation_access("session.read",self.paid).allowed)
-        self.assertEqual(self.policy.operation_access("session.read",Actor(None)).http_status,401)
 
 if __name__=="__main__":unittest.main()
