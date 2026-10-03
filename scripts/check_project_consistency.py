@@ -77,10 +77,58 @@ def table(headers,rows):
     return "\n".join(["| "+" | ".join(headers)+" |","| "+" | ".join("---" for _ in headers)+" |"]+
                     ["| "+" | ".join(cell(v) for v in row)+" |" for row in rows])
 
+def collaboration_sections(spec):
+    """Render committed ownership and data-exchange decisions for each reader."""
+    c=spec.get("collaboration")
+    if not c:return dict(ownership="",drive="",handoff="",presentation_intro="",api_handoff="")
+    matrix=table(["담당 영역","작업자","코드와 문서 위치","브랜치"],[
+        [r["layer"],r["owner"],", ".join(r["roots"]),r["branch_pattern"]] for r in c["owners"]])
+    ownership=("\n\n## 계층별 담당과 브랜치\n\n"+c["description"]+"\n\n"+matrix+
+        "\n\n"+c["start_rule"]+"\n\n"+c["branch_rule"]+
+        "\n\n현재 개발팀의 기존 브랜치는 "+c["existing_application_feature"]+"이다. 화면 작업자는 "+
+        c["presentation_branch_example"]+"처럼 별도 feature/presentation-* 브랜치를 사용한다. "+
+        c["presentation_branch_status"]+"\n\n"+c["generated_files_rule"]+"\n\n"+c["handoff_rule"]+
+        "\n\n"+c["verification_rule"])
+    drive=""
+    d=spec.get("data_exchange")
+    if d:
+        drive=("\n\n## Google Drive 폴더 API 연동\n\n"+d["status_text"]+"\n\n"+d["flow"]+
+            "\n\n"+d["application_boundary"]+"\n\n"+d["presentation_boundary"]+
+            "\n\n### 읽기와 쓰기\n\n"+d["read_policy"]+"\n\n"+d["write_policy"]+
+            "\n\n"+d["configuration_policy"]+"\n\n"+d["unavailable_policy"]+
+            "\n\n### 남은 설정\n\n"+"\n".join("- "+x for x in d["pending_settings"]))
+    intro=("\n\n프레젠테이션은 별도 작업자가 담당한다. 최신 origin/develop 커밋에서 feature/presentation-*를 생성하고 "+
+        c["existing_application_feature"]+"와 브랜치를 공유하지 않는다. "+c["generated_files_rule"]+
+        " [프레젠테이션 작업 인계](../../docs/current/프레젠테이션_작업인계.md)를 읽고 출발 커밋과 API 계약을 맞춘다.")
+    api_handoff=("\n\n## 프레젠테이션 작업 인계\n\n화면 담당은 별도 작업자이며 feature/presentation-*에서 작업한다. "+
+        "현재 개발팀은 서버 API와 애플리케이션·데이터/인프라를 담당한다. "+
+        "[프레젠테이션 작업 인계](프레젠테이션_작업인계.md)에 담당·브랜치·연동 경계를 기록한다. "+
+        (d["presentation_boundary"] if d else ""))
+    handoff=("이 문서는 별도 프레젠테이션 작업자가 화면 개발을 시작할 때 사용할 담당·브랜치·API 경계다. "+
+        "작업 기준은 develop의 확정 커밋과 같은 커밋의 service_spec.json·route_catalog.json이다.\n\n"+
+        "## 작업 시작과 공유 계약\n\n"+c["start_rule"]+"\n\n"+
+        "프레젠테이션 작업자는 "+c["presentation_branch_example"]+"와 같은 독립 브랜치를 생성한다. "+
+        "시스템기획팀의 feature/planning-*와 현재 개발팀의 "+c["existing_application_feature"]+
+        " 또는 feature/application-*/feature/data-*에 함께 커밋하지 않는다.\n\n"+
+        "화면 경로와 회원 정책은 [서비스 기획](서비스_기획.md), 요청·응답과 권한 경계는 [라우팅 명세](라우팅_명세.md), "+
+        "의존 방향은 [3티어 개발구조](3티어_개발구조.md), 통합 절차는 [개발 브랜치 운영](개발_브랜치_운영.md)을 따른다.\n\n"+
+        "apps/web의 화면·입력·탐색·리포트 UI를 구현하고 서버가 허용한 결과를 표시한다. "+
+        "로그인/결제 확인·소유권·계산은 서버가 담당하며 브라우저 회원등급 토글을 권한으로 사용하지 않는다.\n\n"+
+        c["generated_files_rule"]+"\n\n"+c["handoff_rule"]+
+        "\n\n## 연동 준비 상태와 확인 기준\n\n현재 develop의 HTTP 핸들러·운영 인증·저장 연결 상태를 먼저 확인한다. "+
+        "연결 전 화면은 명시적인 합성 응답으로 작성하고 실제 계산·로그인·자료 연결 완료로 표시하지 않는다. "+
+        "일반가입자는 1페이지와 전체 성적 리포트 범위, 유료가입자는 3·4페이지와 대학 분석 범위를 이용한다. "+
+        "성적 또는 모델이 준비되지 않았으면 서버가 반환한 자료 대기 사유를 표시하고 임의 값을 만들지 않는다.\n\n"+
+        "인계 시 출발·결과 커밋, 변경 화면과 API 작업 ID, 허용 응답·오류/보류 사유, 합성 응답 사용 여부와 실제 연동 상태를 함께 남긴다. "+
+        c["verification_rule"]+"\n\n## 담당과 소유권\n\n"+c["description"]+"\n\n"+matrix+drive)
+    return dict(ownership=ownership,drive=drive,handoff=handoff,presentation_intro=intro,api_handoff=api_handoff)
+
+
 def generated_files(spec):
     digest=hashlib.sha256(json.dumps(spec,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     def doc(title,body):
         return f"# {title}\n\n이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 {spec['version']}이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.\n\n{body}\n\n<!-- jungsi:generated spec_sha256={digest} -->\n"
+    collaboration=collaboration_sections(spec)
     page_rows=[[p["number"],p["label"],p["path"],rights(p["member_tiers"]),p["purpose"]] for p in spec["pages"]]
     requirement_text="\n\n".join(f"### {r['id']} {r['title']}\n\n{r['description']}" for r in spec["requirements"])
     pending="\n".join("- "+text for text in spec["pending"])
@@ -91,7 +139,7 @@ def generated_files(spec):
        "## 화면과 회원 정책\n\n"+table(["페이지","화면","경로","회원","역할"],page_rows)+
        "\n\n1페이지의 실제 결과 조회 네 학년도는 자료 공개 범위에 따라 별도 확정한다. 2024~2027 성적 환산 비교와 결과 공개 연도를 혼동하지 않는다. 3페이지는 검색부터 상세까지 유료 전용이며 성적이 없어도 유료 검색을 허용한다. 개인 분석이 준비되지 않으면 이유와 함께 보류한다.\n\n"+
        "## 확정 요구사항\n\n"+requirement_text+"\n\n## 이번 버전의 변경\n\n"+changes+"\n\n## 준비 상태와 후속 구현\n\n"+pending+
-       "\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다.")
+       "\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다."+collaboration["ownership"]+collaboration["drive"])
     operation_rows=[[o["id"],o["method"],o["path"],rights(o["member_tiers"]),"본인" if o["report_owner"] else "해당 없음","필요" if o["confirmed_score_profile"] else "불필요",o["response_scope"]] for o in spec["operations"]]
     overall_contract=spec.get("overall_analysis_contract")
     overall_section=""
@@ -118,7 +166,7 @@ def generated_files(spec):
        "\n\n정적 경로 /offerings/search를 /offerings/{offering_id}보다 먼저 등록한다. report_id와 offering_id의 표기를 통일한다. 검색은 추천 목록과 조인해 대상을 줄이지 않는다.\n\n"+
        "## 권한과 응답 경계\n\n서버가 검증한 세션·현재 이용권으로 Actor를 만든다. 요청 본문의 회원등급·학생 ID를 신뢰하지 않는다. 미인증은 401, 일반가입자의 유료 요청은 403으로 차단하고 결과·건수·상세를 반환하지 않는다. 없는 리포트와 타인 소유 리포트는 같은 404로 처리한다. 본인 분석에 확인한 성적이 없으면 409와 보류 사유다.\n\n"+
        "권한 모듈은 HTTP 인증이나 응답 필드 제거 기능을 대신하지 않는다. 실제 핸들러에서 입력 검증, 운영 저장소 조회, 회원별 응답 객체, 분포·산식 승인 검사를 연결해야 한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n"+
-       overall_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다.")
+       overall_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
     layers=table(["계층","코드 위치","책임","허용 의존"],[[l["label"],", ".join(l["roots"]),l["responsibility"],", ".join(l["allowed_dependencies"])] for l in spec["layers"]])
     implementation=table(["파일","계층","현재 상태","요구사항"],[[r["path"],r["layer"],{
 "existing_math_foundation":"공통 계산 기반",
@@ -136,7 +184,7 @@ def generated_files(spec):
        "## 커밋된 코드와 새 기반\n\n"+implementation+
        "\n\n기존 src/jungsi_touch 루트 계산 모듈은 애플리케이션의 엔진 라이브러리다. 경로를 옮겨 기존 사용자를 깨뜨리지 않는다. 새 application과 infrastructure를 통해 입출력·소유권·저장소를 연결한다. 메모리 어댑터는 합성 검산 전용으로 운영 연결을 의미하지 않는다.\n\n"+
        "## 데이터와 기술 결정\n\n실제 원자료·학생 성적·입결·환산표·곡선·모델과 .env 계열은 모든 브랜치에서 제외한다. database에는 DB 구조·마이그레이션 코드만 둘 수 있다. 현재 DB 엔진·Supabase·웹 프레임워크·HTTP 서버 채택은 미정이며 연결 비밀값을 문서나 코드로 대신하지 않는다.\n\n"+
-       "## 구현 순서\n\n현재 계약과 권한 기반 검증 다음에 로그인·결제·운영 저장소를 연결한다. 이후 1페이지 공식 조회와 2페이지 입력·전체 누적, 3페이지 학과별 분석, 4페이지 추천·리포트와 실시간 집계를 순서대로 연결한다. 각 단계는 승인된 자료가 없는 값을 보류한다.")
+       "## 구현 순서\n\n현재 계약과 권한 기반 검증 다음에 로그인·결제·운영 저장소를 연결한다. 이후 1페이지 공식 조회와 2페이지 입력·전체 누적, 3페이지 학과별 분석, 4페이지 추천·리포트와 실시간 집계를 순서대로 연결한다. 각 단계는 승인된 자료가 없는 값을 보류한다."+collaboration["ownership"]+collaboration["drive"])
     workflow=spec["workflow"]
     tools="\n".join("- "+p for p in workflow["shared_tools"])
     files[spec["current_documents"]["workflow"]]=doc("정시터치 개발 브랜치와 문서 운영",
@@ -151,7 +199,7 @@ def generated_files(spec):
        "GitHub는 현재 비공개 저장소 보호 조회에 HTTP 403과 요금제 업그레이드 요구를 반환했다. 따라서 원격 PR·검사 통과 강제 보호는 활성화되지 않았다. 로컬 훅은 각 체크아웃에 적용되며 서버의 강제 보호와 같지 않다. 보호 지원 요금제에서 main에 PR·검사 통과, 강제 푸시·브랜치 삭제 금지 규칙을 적용한다. 저장소 비공개 상태는 유지한다.\n\n"+
        "## 공유 실행 도구\n\n"+tools+
        "\n\n실제 모집표·매핑·상담자료가 든 나머지 작업 도구와 원자료 검증 결과는 로컬 전용이다. 새 공통 도구를 공유하려면 명세의 공유 목록과 .gitignore를 함께 갱신한다.\n\n"+
-       "## 공식 설정 근거\n\n[GitHub 브랜치 보호](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)와 [Python 자동 검사](https://docs.github.com/en/actions/tutorials/build-and-test-code/python)를 참고한다.")
+       "## 공식 설정 근거\n\n[GitHub 브랜치 보호](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)와 [Python 자동 검사](https://docs.github.com/en/actions/tutorials/build-and-test-code/python)를 참고한다."+collaboration["ownership"])
     frontend=dict(format="jungsi.presentation-routes/v1",spec_version=spec["version"],source_sha256=digest,
         pages=[{k:p[k] for k in ["id","number","label","path","member_tiers","score_required_to_browse"]} for p in spec["pages"]],redirects=spec["redirects"],runtime_status="routing_contract_only")
     backend=dict(format="jungsi.application-routes/v1",spec_version=spec["version"],source_sha256=digest,
@@ -166,8 +214,10 @@ def generated_files(spec):
         backend["runtime_status"]="application_service_no_HTTP_handlers"
     files["apps/web/route_catalog.json"]=json.dumps(frontend,ensure_ascii=False,indent=2)+"\n"
     files["src/jungsi_touch/application/route_catalog.json"]=json.dumps(backend,ensure_ascii=False,indent=2)+"\n"
-    files["apps/web/README.md"]=doc("정시터치 프레젠테이션 개발 기준","현재 경로와 회원별 화면 접근 범위는 route_catalog.json을 따른다. [현재 기획](../../docs/current/서비스_기획.md)과 [라우팅 명세](../../docs/current/라우팅_명세.md)를 함께 갱신한다. 기존 가상 화면은 기획 이력이며 이 폴더의 실행 앱이 아니다. 실제 화면 앱·인증·API 연결은 후속 작업이다.\n\n화면은 서버가 허용한 결과만 표시하고 자체 대학 계산이나 DB 직접 조회를 구현하지 않는다. 브라우저의 회원등급 선택값을 운영 권한으로 사용하지 않는다.")
-    files["database/README.md"]=doc("정시터치 데이터 계층 개발 기준","이 폴더에는 실제 값이 없는 DB 구조·마이그레이션 코드만 추가할 수 있다. 운영 DB 채택과 스키마는 아직 확정하지 않았다. 원자료·성적·입결·환산표·곡선·모델·덤프·접속 비밀값은 여기에 복사하지 않는다.\n\n실제 데이터는 Git 제외 폴더 또는 비공개 DB·스토리지에 두고 애플리케이션 포트를 통해 접근한다. [3티어 개발구조](../docs/current/3티어_개발구조.md)를 따른다.")
+    files["apps/web/README.md"]=doc("정시터치 프레젠테이션 개발 기준","현재 경로와 회원별 화면 접근 범위는 route_catalog.json을 따른다. [현재 기획](../../docs/current/서비스_기획.md)과 [라우팅 명세](../../docs/current/라우팅_명세.md)를 함께 갱신한다. 기존 가상 화면은 기획 이력이며 이 폴더의 실행 앱이 아니다. 실제 화면 앱·인증·API 연결은 후속 작업이다.\n\n화면은 서버가 허용한 결과만 표시하고 자체 대학 계산이나 DB 직접 조회를 구현하지 않는다. 브라우저의 회원등급 선택값을 운영 권한으로 사용하지 않는다."+collaboration["presentation_intro"])
+    files["database/README.md"]=doc("정시터치 데이터 계층 개발 기준","이 폴더에는 실제 값이 없는 DB 구조·마이그레이션 코드만 추가할 수 있다. 운영 DB 채택과 스키마는 아직 확정하지 않았다. 원자료·성적·입결·환산표·곡선·모델·덤프·접속 비밀값은 여기에 복사하지 않는다.\n\n실제 데이터는 Git 제외 폴더 또는 비공개 DB·스토리지에 두고 애플리케이션 포트를 통해 접근한다. [3티어 개발구조](../docs/current/3티어_개발구조.md)를 따른다."+collaboration["drive"])
+    if spec["current_documents"].get("presentation_handoff"):
+        files[spec["current_documents"]["presentation_handoff"]]=doc("프레젠테이션 담당과 작업 인계",collaboration["handoff"])
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_spec(spec):
