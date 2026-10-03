@@ -33,4 +33,4 @@ API로 Google Drive 폴더와 자료를 주고받는 방향은 사용자 확정�
 - 자료 형식·발행 명부·버전/해시/검수 상태 계약
 - 쓰기 충돌·재시도·감사 기록·운영 연결 검증
 
-<!-- jungsi:generated spec_sha256=74c181ee7640ab7e87cd700e6cd0cac6ef79885c1f0a024f365786c0a611ec97 -->
+<!-- jungsi:generated spec_sha256=2d6590273971601a260e14c58f33e6afdbd50a41672679e4258a41d4ca5ecb35 -->
