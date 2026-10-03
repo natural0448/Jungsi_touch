@@ -11,6 +11,7 @@ from ..exam_pack import ExamPack, ExamTotalModel
 from ..percentile import PercentileError, POPULATION_ID
 from .authorization import AccessController, Actor
 from .ports import ExamAnalysisProvider, TotalModelBinding
+from .platform_ports import PlatformError
 
 
 class OverallAnalysisError(ValueError):
@@ -91,7 +92,7 @@ class OverallAnalysisService:
         payload = _scores(request)
         try:
             pack = self._data.get_exam_pack(payload["exam_id"])
-        except (OSError, PercentileError) as exc:
+        except (OSError, PercentileError, PlatformError) as exc:
             raise OverallAnalysisError("exam_data_unavailable", 503, "시험 자료 확인이 필요합니다.") from exc
         if pack is None:
             raise OverallAnalysisError("exam_not_available", 503, "시험 자료 확인이 필요합니다.")
@@ -110,6 +111,10 @@ class OverallAnalysisService:
         # Model availability failures never discard a successfully validated profile.
         try:
             binding = self._data.get_total_model(pack.exam_id, pack.pack_version)
+        except PlatformError as error:
+            reasons={'artifact_not_approved':'total_model_not_approved','drive_hash_mismatch':'model_provider_hash_mismatch',
+                     'drive_version_mismatch':'model_provider_version_mismatch','artifact_version_mismatch':'model_provider_version_mismatch'}
+            return _pending(reasons.get(error.code,'total_model_unavailable'))
         except (OSError, PercentileError):
             return _pending("total_model_unavailable")
         if binding is None:

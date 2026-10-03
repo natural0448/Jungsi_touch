@@ -17,21 +17,85 @@ concurrency:
 jobs:
   project-consistency:
     name: project-consistency
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
-      - name: Checkout committed files
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.12"
-      - name: Check planning routing layers and exclusions
-        run: python -B scripts/check_project_consistency.py --revision HEAD
-      - name: Test only the committed snapshot
-        run: python -B scripts/run_committed_tests.py --revision HEAD
+      - name: Create a fresh retained snapshot with preinstalled Git and Python
+        env:
+          JUNGSI_FETCH_TOKEN: "${{ github.token }}"
+        run: |
+          python3.12 -B - <<'PY'
+          # jungsi:ci-bootstrap-start
+          import base64
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import shutil
+          import subprocess
+          import sys
+
+          def git_command(arguments, cwd, environment):
+              result = subprocess.run(['git', *arguments], cwd=cwd, env=environment,
+                                      capture_output=True, text=True)
+              if result.returncode:
+                  raise RuntimeError('CI Git operation failed; no credentials or raw diagnostics are emitted')
+              return result.stdout.strip()
+
+          def prepare_snapshot(environment, run_git=git_command):
+              if sys.version_info[:2] != (3, 12) or not shutil.which('git'):
+                  raise RuntimeError('Preinstalled CPython 3.12 and Git are required; no installation fallback')
+              repository = environment['GITHUB_REPOSITORY']
+              sha = environment['GITHUB_SHA']
+              run_id, attempt = environment['GITHUB_RUN_ID'], environment['GITHUB_RUN_ATTEMPT']
+              if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repository):
+                  raise ValueError('Invalid repository identity')
+              if not re.fullmatch(r'[0-9a-f]{40}', sha) or not run_id.isdigit() or not attempt.isdigit():
+                  raise ValueError('Invalid fixed snapshot identity')
+              root = Path(environment['GITHUB_WORKSPACE']).resolve()
+              destination = root / 'retained_snapshots' / ('run_' + run_id + '_attempt_' + attempt)
+              if destination.exists() or destination.is_symlink():
+                  raise FileExistsError('Existing snapshot is preserved; use a new run/attempt')
+              if not destination.resolve().is_relative_to(root):
+                  raise ValueError('Snapshot path must stay within the workflow workspace')
+              token = environment.get('JUNGSI_FETCH_TOKEN')
+              if not token: raise ValueError('Fetch authentication is required')
+              # Credentials and trace switches never reach init/checkout/test children.
+              public_env = {k:v for k,v in environment.items()
+                            if k != 'JUNGSI_FETCH_TOKEN' and not k.startswith(('GIT_CONFIG_', 'GIT_TRACE'))}
+              public_env.update(GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull,
+                                GIT_TERMINAL_PROMPT='0', GIT_CONFIG_COUNT='0')
+              destination.mkdir(parents=True, exist_ok=False)
+              run_git(['init', '--initial-branch=ci-snapshot', '.'], destination, public_env)
+              # Append settings without replacing files or creating cleanup helpers.
+              with (destination / '.git/config').open('a', encoding='utf-8') as config:
+                  config.write('\n[gc]\n\tauto = 0\n[maintenance]\n\tauto = false\n')
+              fetch_env = dict(public_env)
+              fetch_env.update(GIT_CONFIG_COUNT='1',
+                  GIT_CONFIG_KEY_0='http.https://github.com/.extraheader',
+                  GIT_CONFIG_VALUE_0='AUTHORIZATION: basic ' +
+                      base64.b64encode(('x-access-token:' + token).encode()).decode())
+              run_git(['fetch', '--no-tags', '--no-recurse-submodules', '--no-auto-maintenance',
+                       'https://github.com/' + repository + '.git', sha], destination, fetch_env)
+              run_git(['checkout', '--detach', sha], destination, public_env)
+              if run_git(['rev-parse', 'HEAD'], destination, public_env) != sha:
+                  raise RuntimeError('Fetched snapshot does not match the fixed workflow SHA')
+              return destination
+
+          if __name__ == '__main__':
+              snapshot = prepare_snapshot(os.environ)
+              with Path(os.environ['GITHUB_ENV']).open('a', encoding='utf-8') as output:
+                  output.write('JUNGSI_CI_SNAPSHOT_DIR=' + str(snapshot) + '\n')
+              print(json.dumps({'snapshot':str(snapshot), 'sha':os.environ['GITHUB_SHA'],
+                                'fresh_snapshot':True, 'python':sys.version.split()[0]}))
+          # jungsi:ci-bootstrap-end
+          PY
+      - name: Check and test only the fixed retained snapshot
+        run: |
+          cd "$JUNGSI_CI_SNAPSHOT_DIR"
+          python3.12 -B scripts/check_project_consistency.py --revision "$GITHUB_SHA"
+          python3.12 -B scripts/bootstrap_backend_runtime.py --destination outputs/ci_backend_runtime
+          export PYTHONPATH="$JUNGSI_CI_SNAPSHOT_DIR/outputs/ci_backend_runtime/site"
+          python3.12 -B scripts/run_committed_tests.py --revision "$GITHUB_SHA"

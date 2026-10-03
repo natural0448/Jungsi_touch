@@ -1,14 +1,16 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.1.2",
+  "version": "1.2.1",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
-  "status": "development_foundation_not_production_service",
+  "status": "pre_data_backend_implemented_configuration_pending",
   "current_documents": {
     "planning": "docs/current/서비스_기획.md",
     "routing": "docs/current/라우팅_명세.md",
     "architecture": "docs/current/3티어_개발구조.md",
     "workflow": "docs/current/개발_브랜치_운영.md",
-    "presentation_handoff": "docs/current/프레젠테이션_작업인계.md"
+    "presentation_handoff": "docs/current/프레젠테이션_작업인계.md",
+    "backend_readiness": "docs/current/백엔드_운영준비.md",
+    "api_dto": "docs/current/API_DTO_계약.md"
   },
   "users": {
     "primary": "학생·학부모",
@@ -89,7 +91,7 @@
     {
       "id": "REQ-14",
       "title": "서버 권한과 소유권",
-      "description": "유료 권한과 리포트 접근권은 서버에서 확인한다. 일반가입자에게 유료 검색 건수나 상세를 반환하지 않는다. 현재 기반 모듈은 본인 리포트만 허용하며 학부모·상담자 위임과 실제 인증은 별도로 연결한다."
+      "description": "Supabase 서버 검증 세션과 DB의 현재 활성 이용권으로 회원 권한을 판정한다. 본인 프로필·리포트만 허용하며 타인/없는 리포트는 같은 404다. 일반가입자에게 유료 검색 건수·상세·대학 분석·선택목록을 반환하지 않는다. 결제 사업자와 학부모·상담자 위임은 미정이다."
     },
     {
       "id": "REQ-15",
@@ -114,7 +116,7 @@
     {
       "id": "REQ-19",
       "title": "Google Drive 폴더 API 연동",
-      "description": "데이터 계층은 비공개 Google Drive 폴더와 API로 자료를 읽고 쓴다. 인프라의 Drive 어댑터가 애플리케이션 소유 포트를 구현하며 프레젠테이션은 우리 서비스 API에만 접근한다. 실제 폴더·인증·읽기/쓰기 대상 설정과 운영 연결 검증은 후속 작업이다."
+      "description": "인프라의 Drive 어댑터가 애플리케이션 소유 포트를 구현한다. 서버 고정 입력 폴더·파일 버전·SHA256·승인 명부로 읽고, 서버 고정 비공개 결과 폴더에는 새 파일을 멱등 발행한다. 실제 인증·폴더·자료 설정과 읽기/쓰기 검수는 대기다. 화면은 우리 서비스 API만 사용한다."
     }
   ],
   "pages": [
@@ -248,7 +250,27 @@
       "requirements": [
         "REQ-01"
       ],
-      "response_scope": "공식 대학 발표 결과만"
+      "response_scope": "공식 대학 발표 결과만",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [
+          "academic_year (2024~2027 선택)",
+          "university_q",
+          "department_q",
+          "region",
+          "group",
+          "cursor",
+          "limit (1~100; 기본 50)"
+        ],
+        "response": "catalog_search (items=history_metric)",
+        "idempotency_key_required": false,
+        "response_schema": "catalog_search"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search"
     },
     {
       "id": "recruitment.read",
@@ -263,7 +285,19 @@
       "requirements": [
         "REQ-13"
       ],
-      "response_scope": "공식 군·모집인원·변경·기준일·확정 상태"
+      "response_scope": "공식 군·모집인원·변경·기준일·확정 상태",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "recruitment",
+        "idempotency_key_required": false,
+        "response_schema": "recruitment"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.recruitment"
     },
     {
       "id": "score-profile.create",
@@ -280,7 +314,22 @@
         "REQ-12",
         "REQ-14"
       ],
-      "response_scope": "본인에게 귀속되는 성적 프로필의 생성 결과"
+      "response_scope": "본인에게 귀속되는 성적 프로필의 생성 결과",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [
+          "scores: 기존 overall_analysis_contract 입력",
+          "confirmed: boolean"
+        ],
+        "query": [],
+        "response": "profile",
+        "idempotency_key_required": true,
+        "response_schema": "profile"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.profile"
     },
     {
       "id": "overall.analyze",
@@ -300,9 +349,24 @@
         "REQ-15"
       ],
       "response_scope": "입력 검증 후 본인의 총점·승인 전체 누적·자료 상태",
-      "application_service": "jungsi_touch.application.overall_analysis.OverallAnalysisService.analyze",
-      "contract_ref": "overall_analysis_contract",
-      "implementation_status": "application_service_no_HTTP_handler"
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [
+          "profile_id",
+          "report_id (갱신 시 선택)",
+          "expected_version (report_id 갱신 시 필수)",
+          "또는 DEV-001 flat 성적 입력; 이때 unconfirmed 프로필 생성"
+        ],
+        "query": [],
+        "response": "report",
+        "idempotency_key_required": true,
+        "response_schema": "report"
+      },
+      "engine_service": "jungsi_touch.application.overall_analysis.OverallAnalysisService.analyze"
     },
     {
       "id": "report.read",
@@ -318,7 +382,19 @@
         "REQ-02",
         "REQ-14"
       ],
-      "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외"
+      "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "report",
+        "idempotency_key_required": false,
+        "response_schema": "report"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.report"
     },
     {
       "id": "offerings.search",
@@ -333,7 +409,27 @@
         "REQ-03",
         "REQ-14"
       ],
-      "response_scope": "전체 서비스 카탈로그의 결과·건수; 성적·추천 여부로 축소하지 않음"
+      "response_scope": "전체 서비스 카탈로그의 결과·건수; 성적·추천 여부로 축소하지 않음",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [
+          "academic_year (2024~2027 선택)",
+          "university_q",
+          "department_q",
+          "region",
+          "group",
+          "cursor",
+          "limit (1~100; 기본 50)"
+        ],
+        "response": "catalog_search (items=offering)",
+        "idempotency_key_required": false,
+        "response_schema": "catalog_search"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search"
     },
     {
       "id": "offering.read",
@@ -348,7 +444,19 @@
         "REQ-03",
         "REQ-14"
       ],
-      "response_scope": "모집단위 기본 상세; 개인 분석은 별도 권한·입력 확인"
+      "response_scope": "모집단위 기본 상세; 개인 분석은 별도 권한·입력 확인",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "{status, reason_code, offering, catalog_version}",
+        "idempotency_key_required": false,
+        "response_schema": "offering_detail"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.offering_detail"
     },
     {
       "id": "university.analyze",
@@ -365,7 +473,22 @@
         "REQ-08",
         "REQ-14"
       ],
-      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유"
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [
+          "expected_version: positive integer",
+          "offering_ids: 서로 다른 등록 ID 1~100개"
+        ],
+        "query": [],
+        "response": "report (analyses 갱신)",
+        "idempotency_key_required": true,
+        "response_schema": "report"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.report"
     },
     {
       "id": "candidates.build",
@@ -382,7 +505,21 @@
         "REQ-09",
         "REQ-14"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드"
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [
+          "expected_version: positive integer"
+        ],
+        "query": [],
+        "response": "report (analyses/candidates 갱신)",
+        "idempotency_key_required": true,
+        "response_schema": "report"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.report"
     },
     {
       "id": "shortlist.update",
@@ -397,7 +534,22 @@
         "REQ-11",
         "REQ-14"
       ],
-      "response_scope": "우리 서비스 핵심 지원 학교의 선택 상태"
+      "response_scope": "우리 서비스 핵심 지원 학교의 선택 상태",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [
+          "selected: boolean",
+          "expected_version: positive integer"
+        ],
+        "query": [],
+        "response": "report (shortlist 갱신)",
+        "idempotency_key_required": true,
+        "response_schema": "report"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.report"
     },
     {
       "id": "report.export",
@@ -412,7 +564,19 @@
         "REQ-11",
         "REQ-14"
       ],
-      "response_scope": "발행 버전이 고정된 본인 전체 상담 리포트"
+      "response_scope": "발행 버전이 고정된 본인 전체 상담 리포트",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "snapshot",
+        "idempotency_key_required": false,
+        "response_schema": "snapshot"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.snapshot"
     },
     {
       "id": "statistics.read",
@@ -427,11 +591,23 @@
         "REQ-10",
         "REQ-14"
       ],
-      "response_scope": "추천·선택 인원과 본인 순위·동점·갱신 상태; 타인 성적 제외"
+      "response_scope": "추천·선택 인원과 본인 순위·동점·갱신 상태; 타인 성적 제외",
+      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "statistics",
+        "idempotency_key_required": false,
+        "response_schema": "statistics"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.statistics"
     }
   ],
   "routing_policy": {
-    "http_handlers": "not_implemented",
+    "http_handlers": "FastAPI_implemented_external_configuration_pending",
     "template_placeholders": [
       "report_id",
       "offering_id"
@@ -544,7 +720,7 @@
     {
       "path": "src/jungsi_touch/application/authorization.py",
       "layer": "application",
-      "status": "access_policy_foundation_no_HTTP_authentication",
+      "status": "server_policy_connected_by_HTTP_session_adapter",
       "requirements": [
         "REQ-14"
       ],
@@ -597,7 +773,7 @@
     {
       "path": "src/jungsi_touch/application/overall_analysis.py",
       "layer": "application",
-      "status": "overall_analysis_service_no_HTTP_or_persistence",
+      "status": "stateless_engine_connected_by_persisted_workflow_and_HTTP",
       "requirements": [
         "REQ-02",
         "REQ-07",
@@ -609,6 +785,194 @@
         "OverallAnalysisService",
         "OverallAnalysisError"
       ]
+    },
+    {
+      "path": "src/jungsi_touch/application/platform.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-03",
+        "REQ-04",
+        "REQ-10",
+        "REQ-11",
+        "REQ-13",
+        "REQ-14"
+      ],
+      "symbols": [
+        "PlatformService"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/platform_ports.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-19"
+      ],
+      "symbols": [
+        "PlatformError",
+        "VerifiedSession",
+        "PlatformRepository",
+        "PlatformDataProvider",
+        "ArtifactResultWriter",
+        "CatalogRelease",
+        "OfferingAnalysis"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/sessions.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15"
+      ],
+      "symbols": [
+        "SessionService"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/time_contract.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-15"
+      ],
+      "symbols": [
+        "utc_instant",
+        "calendar_date",
+        "seoul_date_range",
+        "UtcClock"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/offering_analysis.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-08",
+        "REQ-09",
+        "REQ-12"
+      ],
+      "symbols": [
+        "evaluate_offering",
+        "eligibility",
+        "evidence_dto"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/publication.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-11",
+        "REQ-14",
+        "REQ-17",
+        "REQ-19"
+      ],
+      "symbols": [
+        "ReportPublicationService"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/http_api.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-03",
+        "REQ-04",
+        "REQ-14",
+        "REQ-15",
+        "REQ-18"
+      ],
+      "symbols": [
+        "create_app",
+        "configured_app"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/postgres_repository.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-10",
+        "REQ-11",
+        "REQ-14",
+        "REQ-15",
+        "REQ-17"
+      ],
+      "symbols": [
+        "PostgresRepository"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/supabase_session.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15"
+      ],
+      "symbols": [
+        "SupabaseSessionProvider"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/drive_provider.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-01",
+        "REQ-06",
+        "REQ-12",
+        "REQ-13",
+        "REQ-15",
+        "REQ-17",
+        "REQ-19"
+      ],
+      "symbols": [
+        "DriveClient",
+        "DriveDataProvider",
+        "MissingDataProvider"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/settings.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-15",
+        "REQ-19"
+      ],
+      "symbols": [
+        "ServerSettings",
+        "UnavailableRepository"
+      ]
+    },
+    {
+      "path": "database/migrations/001_pre_data_platform.sql",
+      "layer": "data_infrastructure",
+      "status": "additive_schema_prepared_not_applied_to_live_DB",
+      "requirements": [
+        "REQ-10",
+        "REQ-11",
+        "REQ-14",
+        "REQ-15",
+        "REQ-17"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -646,7 +1010,9 @@
       "scripts/demo_total_curve_principle_20260927.py",
       "scripts/import_kice_exam.py",
       "scripts/check_project_consistency.py",
-      "scripts/run_committed_tests.py"
+      "scripts/run_committed_tests.py",
+      "scripts/bootstrap_backend_runtime.py",
+      "scripts/probe_backend_connection.py"
     ],
     "line_endings": "LF for generated documents, route catalogs, hooks and new service foundation",
     "feature_ownership": "기획 정본문서는 시스템기획팀의 develop에서 관리·공유한다. 프레젠테이션 feature/presentation-*는 별도 작업자, 애플리케이션 feature/application-*와 인프라 feature/data-*는 현재 개발팀 소유다. 두 개발 담당은 같은 origin/develop 기획 커밋에서 출발해 별도 feature를 사용한다.",
@@ -655,25 +1021,34 @@
       "scope": "기획 정본과 공통 명세·생성 문서",
       "verification": "동일 커밋의 문서 일치·코드 참조·계층·데이터 제외·필수 Git 스냅샷 검산 후 develop에 공유",
       "implementation": "개발 구현은 담당자의 별도 feature PR에서 검증 후 통합"
+    },
+    "CI_snapshot_policy": {
+      "runner": "GitHub-hosted ubuntu-24.04의 사전 설치 Git/CPython 3.12만 사용한다. checkout/setup-python 액션과 설치 대체 경로는 사용하지 않는다.",
+      "destination": "GITHUB_WORKSPACE/retained_snapshots/run_<run_id>_attempt_<run_attempt>가 존재하거나 symlink이면 중단한다. 새 비존재 경로만 생성하고 기존 경로·파일을 보존한다.",
+      "commit": "git init 후 github.sha와 전체 부모 이력을 fetch하고 그 SHA를 최초 detached checkout한다. HEAD가 지정 SHA와 다르면 실패한다.",
+      "credentials": "GitHub token은 fetch subprocess의 GIT_CONFIG_* http extraheader 환경으로만 전달한다. argv/로그/파일과 init/checkout/test subprocess에는 전달하지 않는다. Git trace 및 외부 config 입력을 차단하며 실패는 원문 진단 없이 안전한 사유로 기록한다.",
+      "preservation": "gc.auto=0, maintenance.auto=false와 fetch --no-auto-maintenance를 적용한다. clean/reset/drop/기존 경로 초기화/temp cleanup을 호출하지 않는다. 생성 runtime/다운로드/검산 스냅샷은 정리하지 않는다.",
+      "verification": "tests/test_ci_snapshot_preservation.py에서 기존 경로 거절·보존, 지정 SHA 결속, fetch 전용 인증과 오류 비밀값 미노출을 검수한다. CI에서는 동일 github.sha의 공통 검사·잠금 런타임·전체 테스트를 실행한다."
     }
   },
   "pending": [
-    "운영 웹 프레임워크·API 서버·Supabase 채택과 배포 구성을 확정한다.",
-    "실제 인증·결제·학생 소유권과 학부모·상담자 위임을 연결한다.",
-    "9월 모평·수능 자체곡선·연도 보정·대학 실행 규칙·분포를 검증하고 승인한다.",
-    "입결 데이터팀 자료를 연결하고 과거 기준·예측·판정 경계를 승인한다.",
-    "1페이지의 실제 조회 네 학년도와 비회원 공개 여부를 확정한다.",
-    "추천·선택 이벤트와 Kafka·집계·본인 순위 API를 구현하고 실측한다.",
-    "비공개 저장소 보호 지원 요금제 적용 시 main의 PR·검사 통과 강제 규칙을 활성화한다.",
-    "DEV-001의 시험/곡선 공급 포트는 별도 데이터·인프라 feature가 구현하고, 2페이지 UI·HTTP 어댑터는 통합된 develop 커밋에서 별도 feature로 연결한다.",
-    "Google Drive 폴더 API 연동의 폴더·인증·읽기/쓰기 범위와 포트 어댑터를 설정·검증한다. 화면은 별도 작업자의 feature/presentation-*에서 연결한다."
+    "실제 Supabase 프로젝트·서버 역할·TLS·Auth 검증 사용자와 활성 이용권 설정 및 readonly probe 증거",
+    "운영 DB에 추가 마이그레이션 적용 후 실제 UTC/timestamptz/date 및 권한/소유권 트랜잭션 검수",
+    "Drive OAuth 계정·토큰 갱신·입출력 폴더/발행 명부 및 실제 읽기·별도 산출 쓰기 검수",
+    "기존 자료팀 정리 근거를 재사용한 공식 자료·곡선·공동분포·연도보정·환산·예상/판단 근거 승인과 변경 범위 실제 검산",
+    "배포/HTTPS·CORS origin·비공개 운영 진단·이용권 발행/결제 운영 연결",
+    "별도 프레젠테이션 feature에서 로그인 토큰·이 API DTO·서울 시각 표시·인쇄 UI 연결",
+    "대규모 집계 성능/갱신 주기 실측; Kafka/Redis 미채택",
+    "1페이지 실제 입결 공개 네 학년도·비회원 공개·학부모/상담자 위임 정책 확정",
+    "원격 main 강제 보호를 지원하는 GitHub 요금제 적용 후 활성화"
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
     "docs/planning/2026-09-23-v0.6/handoff/report-contract.json",
     "docs/planning/2026-10-03-score-engine/지원검토_판정기준_v5.md",
     "AGENTS.md",
-    "docs/work_items/DEV-001-overall-analysis-service.json"
+    "docs/work_items/DEV-001-overall-analysis-service.json",
+    "docs/work_items/DEV-002-pre-data-platform.json"
   ],
   "change_notes": [
     {
@@ -727,6 +1102,51 @@
         "REQ-18"
       ],
       "summary": "사용자 지시에 따라 기획팀의 기본 작업·공유 브랜치를 develop으로 정정했다. 두 개발 담당은 origin/develop의 확정 기획을 가져가 별도 feature에서 구현한다. 병합된 현재 기획 feature의 원격 브랜치 삭제는 별도로 허용받아 처리했다."
+    },
+    {
+      "date": "2026-10-03",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-03",
+        "REQ-04",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-08",
+        "REQ-09",
+        "REQ-10",
+        "REQ-11",
+        "REQ-12",
+        "REQ-13",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-18",
+        "REQ-19"
+      ],
+      "summary": "DEV-002: FastAPI 12개 경로·업무/영속 포트·Supabase 검증 인증과 DB 이용권·추가 PostgreSQL 스키마·Drive 승인 읽기/새 파일 발행·UTC/서울 소스/date 계약을 구현했다. 합성 자료로 기존 엔진의 성공 흐름과 실패/권한/버전 검수를 수행한다. 실제 Supabase/Drive 및 자료/모형·운영 연결은 미검증 설정 대기이며 화면 구현은 별도 담당이다."
+    },
+    {
+      "date": "2026-10-03",
+      "requirements": [
+        "REQ-02",
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-18"
+      ],
+      "summary": "DEV-002 최종 인계: 12개 HTTP 작업의 업무 서비스와 응답 DTO contract_ref를 실제 PlatformService와 결속했다. DEV-001 stateless 전체 분석은 report.overall 엔진 계약으로 따로 보존했다. CI checkout의 clean/reset 동작을 명시적으로 해제했다."
+    },
+    {
+      "date": "2026-10-03",
+      "requirements": [
+        "REQ-15",
+        "REQ-16",
+        "REQ-17"
+      ],
+      "summary": "실제 CI 로그의 checkout 액션 초기화 부작용을 확인해 clean:false 보완을 대체했다. 사전 설치 Git/Python3.12와 새 run/attempt 경로의 지정 SHA 최초 checkout으로 전환하고 토큰은 fetch 환경에만 결속한다. 설치/정리 액션·기존 경로 초기화·자동 gc/maintenance 없이 기존 작업물과 새 runtime/스냅샷을 보존한다."
     }
   ],
   "overall_analysis_contract": {
@@ -734,7 +1154,7 @@
     "application_service": "jungsi_touch.application.overall_analysis.OverallAnalysisService.analyze",
     "format": "jungsi.overall-analysis/v1",
     "stateless": true,
-    "http_handler_implemented": false,
+    "http_handler_implemented": true,
     "description": "검증된 서버 Actor를 먼저 확인한 뒤 등록 시험과 자료 버전의 학생 성적을 기존 ExamPack으로 분석한다. 누적곡선의 부재·미승인·불일치는 전체 입력 오류가 아니라 overall.pending으로 반환하고 총점과 과목 결과를 보존한다.",
     "required_inputs": [
       "exam_id",
@@ -848,6 +1268,14 @@
       [
         "model_not_ready",
         "계산 엔진 승인 검사 미통과"
+      ],
+      [
+        "model_provider_hash_mismatch",
+        "Drive 자료 내용 해시 불일치"
+      ],
+      [
+        "model_provider_version_mismatch",
+        "Drive 파일 또는 발행 명부 버전 불일치"
       ]
     ],
     "errors": [
@@ -878,7 +1306,7 @@
       "분포 전체·도수·성별/동점 인원·가중치·정확 내부비율",
       "출처 로컬 경로·원문 전체·해시·연구 플래그·승인 필드"
     ],
-    "integration": "HTTP·로그인·결제·영속 리포트 저장은 후속 feature가 연결한다. 일반과 유료에게 동일한 본인 입력의 전체 분석 DTO만 제공한다."
+    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 12개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다."
   },
   "collaboration": {
     "integration_branch": "develop",
@@ -926,7 +1354,7 @@
         "scope": "Drive API 어댑터·저장 구조·버전과 검수 상태 연결"
       }
     ],
-    "existing_application_feature": "feature/overall-analysis-service",
+    "existing_application_feature": "feature/application-pre-data-platform",
     "presentation_branch_example": "feature/presentation-reports-me",
     "presentation_branch_status": "작업 시작 시 별도 작업자가 최신 origin/develop 커밋에서 생성한다. 현재 개발팀 feature와 기획 feature를 공유하지 않는다.",
     "generated_files_rule": "route_catalog.json과 생성 README/현재 문서는 직접 편집하지 않는다. 계약 변경은 service_spec.json과 생성 도구에서 수정하고 생성 결과를 같은 커밋에 포함한다.",
@@ -937,8 +1365,8 @@
   },
   "data_exchange": {
     "provider": "Google Drive",
-    "status": "direction_confirmed_configuration_pending",
-    "status_text": "API로 Google Drive 폴더와 자료를 주고받는 방향은 사용자 확정이다. 실제 폴더·인증 설정과 운영 연동 검증은 아직 완료하지 않았다.",
+    "status": "adapter_implemented_live_configuration_pending",
+    "status_text": "Google Drive API 고정 폴더·파일 버전/해시·승인 읽기와 별도 결과 폴더 멱등 새 파일 쓰기 어댑터를 구현했다. 실제 계정·폴더·승인 자료·토큰 갱신·읽기/쓰기 검증은 설정 대기다.",
     "flow": "프레젠테이션 → 우리 서비스 API → 애플리케이션 포트 ← Drive API 어댑터 → 비공개 Google Drive 폴더",
     "application_boundary": "애플리케이션은 자신이 정의한 포트에 의존한다. Drive API 호출·파일 변환·인증·재시도는 인프라 어댑터가 담당하며 전체 원자료와 인증값을 학생 응답에 넣지 않는다.",
     "presentation_boundary": "화면은 우리 서비스의 허용 API 결과만 이용한다. Google Drive API·폴더·토큰·전체 원자료에 직접 접근하지 않는다.",
@@ -947,11 +1375,545 @@
     "configuration_policy": "실제 폴더 ID·인증 계정·키/토큰·자료·입결·곡선·모델·검수 결과는 Git 제외 설정/폴더 또는 비공개 저장소에 둔다. 코드에는 어댑터와 자료 형식 계약만 둔다.",
     "unavailable_policy": "파일·버전·권한·검수 상태가 준비되지 않으면 데이터 대기 또는 오류 사유를 반환한다. 다른 시험·연도·미승인 모형으로 대체하지 않는다.",
     "pending_settings": [
-      "입력 폴더와 결과 폴더의 실제 식별자·읽기/쓰기 대상 범위",
-      "인증 계정과 서버 접근 권한·인증 방식",
-      "자료 형식·발행 명부·버전/해시/검수 상태 계약",
-      "쓰기 충돌·재시도·감사 기록·운영 연결 검증"
+      "실제 입출력 폴더·서버 계정 권한·OAuth와 갱신 설정",
+      "비공개 발행 명부/승인 자료 값과 형식 호환 검수",
+      "실제 읽기/쓰기·재시도/충돌·감사와 사용자 접근 검수"
     ],
-    "implemented": false
+    "implemented": true
+  },
+  "backend_platform_contract": {
+    "format": "jungsi.backend-platform/v1",
+    "http_implemented": true,
+    "code_status": "pre_data_code_implemented",
+    "live_server_status": "not_run_configuration_missing",
+    "live_data_status": "not_run_configuration_missing",
+    "feature": "feature/application-pre-data-platform",
+    "start_commit": "950cacce3bc5cad3f910f7584786b7936f7d8b9a",
+    "planning_commit": "592b356a15f4669f38c82d289fb35b6b78f2bc34",
+    "work_item": "docs/work_items/DEV-002-pre-data-platform.json",
+    "approved_stack": {
+      "HTTP": "FastAPI",
+      "database": "Supabase PostgreSQL",
+      "server_time_zone": "UTC",
+      "database_session_time_zone": "UTC",
+      "source_time_zone": "Asia/Seoul",
+      "secret_configuration": "Git 제외 .env 계열/서버 환경변수/비공개 설정에 보관. .env.example도 커밋하지 않는다.",
+      "authentication": "Supabase 서버 검증 사용자/세션을 Actor로 변환하며 활성 이용권·만료는 서버 저장소에서 판정한다.",
+      "payment_scope": "이용권 검증/저장을 구현한다. 결제 사업자·체크아웃·상담자 위임을 임의 확정하거나 실제 결제 완료로 표시하지 않는다.",
+      "production_mode": "외부 설정이 없을 때 합성 인증·관리자·메모리 자료로 운영 모드를 자동 대체하지 않는다."
+    },
+    "datetime": {
+      "instant_storage": "시간 포함 필드는 timezone-aware datetime으로 받고 PostgreSQL timestamptz로 저장한다. API는 UTC ISO 8601 Z로 직렬화한다. 서버와 DB 세션 기준은 UTC이며 default now()도 timestamptz를 유지한다.",
+      "source_conversion": "Asia/Seoul 원본 시각은 해당 timezone을 해석한 뒤 UTC로 변환한다. aware 시각의 tzinfo를 UTC로 바꾸는 재라벨링은 허용하지 않는다.",
+      "naive_input": "소스 계약이 Asia/Seoul을 명시한 입력에만 naive 지역시각을 허용한다. 계약 없는 입력·timezone/offset 불일치·잘못된 날짜·정밀도 정책 밖 입력은 사유와 함께 거절한다.",
+      "provenance": "필요한 소스 시각/원본 timezone/기준일/자료 버전을 별도 필드로 보존한다. timestamptz만으로 원본 timezone이 보존된다고 가정하지 않는다.",
+      "date_only": "모집요강의 시각 없는 날짜는 Python date/PostgreSQL date/ISO YYYY-MM-DD로 보존한다. 자정을 임의로 붙여 UTC 날짜로 이동시키지 않는다.",
+      "local_day_query": "서울 달력 날짜의 조회 범위는 [해당 날짜 서울 00:00, 다음 날짜 서울 00:00)을 UTC로 변환한다. UTC 날짜 문자열 비교로 서울 하루를 조회하지 않는다.",
+      "clock": "권한 만료·감사·리포트 발행·갱신/정렬은 UTC aware clock을 사용한다. 테스트는 주입 clock으로 만료 직전·동일시각·직후를 검수한다.",
+      "runtime": "Windows/서버에서 IANA Asia/Seoul ZoneInfo 데이터가 존재하는지 확인하고 필요한 tzdata 의존성을 명시한다.",
+      "pooling": "접속/트랜잭션 경계에서 UTC 세션 정책을 보장한다. 연결 풀 재사용에서 세션 timezone이 바뀌어도 instant와 date가 바뀌지 않도록 검수한다.",
+      "precision": "소수초는 최대 6자리이며 7자리 이상을 조용히 반올림하지 않고 거절한다."
+    },
+    "authentication": "Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.",
+    "writes": "POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/키의 동일 요청은 최초 결과를 현재 권한으로 반환하고 다른 본문/경로는 409다. 리포트 갱신은 expected_version CAS와 PostgreSQL 트랜잭션을 사용한다.",
+    "errors": [
+      [
+        "authentication_required",
+        401,
+        "인증 누락/거부/만료"
+      ],
+      [
+        "paid_required",
+        403,
+        "일반회원 유료 작업 차단; 결과/건수 없음"
+      ],
+      [
+        "report_not_found / profile_not_found / offering_not_found",
+        404,
+        "본인 범위의 리소스 없음; 타인 리포트도 같은 404"
+      ],
+      [
+        "score_confirmation_required / revision_conflict / idempotency_conflict / cursor_version_mismatch",
+        409,
+        "확인 성적 또는 요청/리포트/카탈로그 버전 재확인"
+      ],
+      [
+        "invalid_request / invalid_identifier / invalid_json / duplicate_query_field / engine_input_code",
+        422,
+        "허용 필드·성적·ID·형식 검증 실패"
+      ],
+      [
+        "request_too_large",
+        413,
+        "200000 byte 요청 제한"
+      ],
+      [
+        "storage_not_configured / storage_unavailable / auth_not_configured / auth_unavailable / catalog_release_not_approved / backend_dependency_unavailable",
+        503,
+        "의존 서비스/자료 미준비; 비밀값·원성적·예외 원문 제외"
+      ]
+    ],
+    "dto_schemas": {
+      "profile": {
+        "format": null,
+        "fields": [
+          "profile_id",
+          "profile_version",
+          "confirmed",
+          "created_at"
+        ],
+        "rules": [
+          "confirmed는 입력 성적을 사용자가 확인했다는 뜻이며 서버 이용권·자료 승인·입시 자격을 뜻하지 않는다.",
+          "새 입력은 새 profile_id다. 기존 성적을 수정하지 않는다."
+        ]
+      },
+      "report": {
+        "format": "jungsi.persisted-report/v1",
+        "fields": [
+          "format",
+          "report_id",
+          "report_version",
+          "profile_id",
+          "updated_at",
+          "overall"
+        ],
+        "paid_fields": [
+          "analyses",
+          "candidates",
+          "shortlist",
+          "analysis_status"
+        ],
+        "rules": [
+          "overall은 기존 jungsi.overall-analysis/v1 학생 DTO다.",
+          "일반회원 응답은 paid_fields를 제외한다. 조회와 멱등 재응답에서도 현재 이용권을 다시 적용한다.",
+          "report_version은 정수 revision이며 갱신 요청의 expected_version과 비교한다.",
+          "성적 변경은 새 프로필을 연결한 리포트 revision을 만들고 기존 분석/후보를 무효화하며 선택 항목은 needs_revalidation으로 보존한다."
+        ]
+      },
+      "catalog_search": {
+        "format": null,
+        "fields": [
+          "status",
+          "reason_code",
+          "items",
+          "matching_offering_count",
+          "matching_school_count",
+          "catalog_version",
+          "as_of",
+          "next_cursor"
+        ],
+        "rules": [
+          "대학·학과·지역·군 조건은 같은 모집행에 AND 적용한다.",
+          "cursor는 카탈로그 버전·조회 조건·위치를 결속한다. 다른 조건/버전의 재사용은 409다.",
+          "자료 미발행은 items=null와 건수 null이다. 실제 승인 카탈로그의 0건과 구분한다.",
+          "history.search는 items에 공식 지표를 포함하고 offerings.search는 모집행 기본 정보만 제공한다."
+        ]
+      },
+      "offering": {
+        "format": null,
+        "fields": [
+          "offering_id",
+          "academic_year",
+          "university_id",
+          "university_name",
+          "campus",
+          "department",
+          "track",
+          "group",
+          "region",
+          "wildcard_group"
+        ],
+        "rules": [
+          "학과명이 아니라 검수된 practical_required로 실제 실기 반영 모집행을 제외한다.",
+          "wildcard_group은 승인 자료의 nursing/health/education 분류를 사용한다."
+        ]
+      },
+      "history_metric": {
+        "format": null,
+        "fields": [
+          "offering 모집행 필드",
+          "metric_name",
+          "metric_definition",
+          "value",
+          "unit",
+          "original_scale",
+          "publication_status",
+          "source_url",
+          "source_as_of"
+        ],
+        "rules": [
+          "verification_status=verified_official인 자료만 반환한다. 승인 플래그 자체·원문·로컬 경로·해시는 반환하지 않는다.",
+          "평균/50%/70%/최저와 점수 종류를 변환·대체하지 않는다. 미발표는 null과 발표 상태로 보존한다."
+        ]
+      },
+      "recruitment": {
+        "format": null,
+        "fields": [
+          "status",
+          "reason_code",
+          "offering",
+          "recruitment",
+          "catalog_version"
+        ],
+        "nested": {
+          "recruitment": [
+            "initial_count",
+            "rollover_change",
+            "final_count",
+            "count_status",
+            "changes",
+            "source_url",
+            "source_as_of",
+            "deadline",
+            "deadline_at"
+          ],
+          "changes": [
+            "kind",
+            "delta",
+            "announced_date",
+            "announced_at",
+            "source_url",
+            "status",
+            "reason",
+            "revision"
+          ]
+        },
+        "rules": [
+          "initial_count·rollover_change·final_count는 정수 또는 null이다. 최초 0과 미공개 null을 구분한다.",
+          "deadline/announced_date는 date-only, deadline_at/announced_at는 UTC instant다.",
+          "변경 이력을 모두 포함하되 원문·비공개 메타데이터는 허용 필드 목록에서 제외한다."
+        ]
+      },
+      "assessment": {
+        "format": null,
+        "fields": [
+          "offering_id",
+          "status",
+          "reason_code",
+          "converted_score",
+          "converted_percentile",
+          "category",
+          "advantage",
+          "years",
+          "versions",
+          "eligibility_status",
+          "decision_components",
+          "decision_evidence"
+        ],
+        "nested": {
+          "years": [
+            "academic_year",
+            "offering_id",
+            "score_basis",
+            "converted_score",
+            "status",
+            "reason_code"
+          ],
+          "advantage": [
+            "delta_pp",
+            "status",
+            "baseline_version"
+          ],
+          "decision_components": [
+            "base_category",
+            "adjusted_category",
+            "adopted_category",
+            "base_policy_version",
+            "adjustment_version"
+          ],
+          "decision_evidence": [
+            "version",
+            "historical_metrics",
+            "forecast_70",
+            "expected_acceptance_range"
+          ]
+        },
+        "rules": [
+          "각 모집행의 2024~2027 승인 연도보정 → 당시 공식 환산식 → 전용 모집단 분포를 기존 엔진으로 계산한다. 현재 점수를 과거 공식식에 직접 대입하지 않는다.",
+          "지원 구간과 환산 유불리는 별도다. 유불리는 같은 연도/시험/전체 모집단의 학생 보정총점 상위 누적과 대학 환산 상위 누적의 차이(pp)다.",
+          "category=challenge/core/room/outside/pending/ineligible. 학교 category를 학과에 복사하지 않는다.",
+          "eligibility_status는 입력 등급/선택과목과 승인 요건을 비교한다. 별도 자격 확인 포트가 없는 비성적 요건은 needs_confirmation이다.",
+          "decision_evidence는 승인 정책과 동일한 context/version을 결속한다. 과거 발표 지표의 이름·정의·단위·척도, 올해 forecast_70의 값·정의·단위·version, 지원 판단용 expected_acceptance_range의 lower/upper·정의·unit·policy_version을 구분한다.",
+          "미발행 forecast_70은 value=null/status=pending이고 승인된 판단 구간으로 학과 판단을 계산할 수 있다. 미승인/불일치 근거는 decision_evidence_unapproved로 보류한다.",
+          "기본/상담 조정/채택 category와 버전을 분리한다. 조정은 승인 base_version의 최종 구간을 학생 점수로 한 번 평가한다.",
+          "versions에는 profile·pack·source_model·bridge·rule·curve·decision·evidence·population·target_exam·tie_policy·eligibility·선택적 adjustment가 포함된다. 내부 분포·가중치·실행 trace는 반환하지 않는다."
+        ]
+      },
+      "candidates": {
+        "format": null,
+        "fields": [
+          "status",
+          "reason_code",
+          "basic_university_groups",
+          "wildcards",
+          "pending_offerings",
+          "catalog_version"
+        ],
+        "rules": [
+          "현재 시험의 학년도 모집행을 대상으로 하고 각 assessment.years에는 4개년 비교를 담는다.",
+          "기본 그룹은 대학별 offerings 배열이며 각 항목에 모집행과 개별 assessment를 포함한다.",
+          "간호/보건/교육 wildcard와 대기 모집행을 별도 배열로 반환한다. 화면의 2:1 배치는 프레젠테이션 담당이다."
+        ]
+      },
+      "shortlist": {
+        "format": null,
+        "fields": [
+          "selected",
+          "changed_at",
+          "assessment_status",
+          "profile_id",
+          "catalog_version"
+        ],
+        "rules": [
+          "report.shortlist는 offering_id를 키로 한 객체다. 해제도 selected=false로 보존한다.",
+          "같은 상태 쓰기는 revision을 올리지 않지만 요청 키/결과는 보존한다. 이후 상태가 바뀌어도 이전 키의 응답은 고정된다."
+        ]
+      },
+      "snapshot": {
+        "format": "jungsi.counseling-snapshot/v1",
+        "fields": [
+          "format",
+          "status",
+          "snapshot_version",
+          "generated_at",
+          "report"
+        ],
+        "rules": [
+          "snapshot_version은 고정된 report_version이고 report는 현재 권한을 적용한 상담 DTO다. GET은 Drive 쓰기를 수행하지 않는다.",
+          "서버 내부 ReportPublicationService는 같은 revision의 updated_at을 generated_at으로 채택하여 재시도 내용 해시를 고정하고 별도 비공개 폴더에 새 파일을 기록한다.",
+          "인쇄/PDF 렌더링은 별도 UI 담당이다."
+        ]
+      },
+      "statistics": {
+        "format": null,
+        "fields": [
+          "status",
+          "reason_code",
+          "recommended_count",
+          "selected_count",
+          "recommended_rank",
+          "selected_rank",
+          "updated_at",
+          "scope",
+          "versions"
+        ],
+        "nested": {
+          "rank": [
+            "rank",
+            "tie_count",
+            "population_count",
+            "tie_policy"
+          ]
+        },
+        "rules": [
+          "같은 모집행·시험/모집단·자료/환산/보정/판단 버전의 학생별 최신 리포트만 집계한다. profile_id는 학생마다 다르므로 비교 context에서 제외하고 각 선택의 최신 profile 결속은 따로 확인한다.",
+          "추천은 승인 후보에 포함된 학생, 선택은 최신 프로필의 유효 선택 학생이다. 두 집단을 각각 학생 중복 제거한다.",
+          "본인 rank=1+본인보다 높은 점수의 인원이며 동점자는 같은 competition 순위다. 본인이 해당 집단에 없으면 rank=null이다.",
+          "다른 학생 ID/성적/리포트 목록은 반환하지 않는다. 미분석은 건수/순위 null이다. scope는 service_users_not_actual_university_applicants다."
+        ]
+      },
+      "offering_detail": {
+        "format": null,
+        "fields": [
+          "status",
+          "reason_code",
+          "offering",
+          "catalog_version"
+        ],
+        "rules": [
+          "offering은 모집행 기본 DTO다. 개인 환산/지원 판단은 report.analyses로 구분한다.",
+          "미발행 자료는 status=pending/offering=null이다. 검증된 카탈로그에 없는 ID는 404다."
+        ]
+      }
+    },
+    "operation_gaps": [
+      {
+        "operation": "history.search",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "승인 Drive 카탈로그/공식 발표 자료 공급",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "recruitment.read",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "승인 Drive 카탈로그/공식 발표 자료 공급",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "score-profile.create",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "overall.analyze",
+        "before": "DEV-001 stateless 전체 분석만 구현; HTTP/영속 업무 미연결",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "report.read",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "offerings.search",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "승인 Drive 카탈로그/공식 발표 자료 공급",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "offering.read",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "승인 Drive 카탈로그/공식 발표 자료 공급",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "university.analyze",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "candidates.build",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "shortlist.update",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "report.export",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      },
+      {
+        "operation": "statistics.read",
+        "before": "기획/권한/경로 계약만 있음; 업무/HTTP 미구현",
+        "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
+        "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
+        "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
+        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
+      }
+    ],
+    "configuration": [
+      [
+        "SUPABASE_URL",
+        "Supabase HTTPS 프로젝트 URL"
+      ],
+      [
+        "SUPABASE_PUBLISHABLE_KEY",
+        "Auth getUser 검증용 서버 설정"
+      ],
+      [
+        "DATABASE_URL",
+        "비공개 서버 역할 PostgreSQL 접속; sslmode=require"
+      ],
+      [
+        "GOOGLE_DRIVE_ACCESS_TOKEN",
+        "서버 Drive OAuth access token; 토큰 갱신/권한 설정은 운영 연결 대기"
+      ],
+      [
+        "GOOGLE_DRIVE_INPUT_FOLDER",
+        "승인 자료 입력 폴더"
+      ],
+      [
+        "GOOGLE_DRIVE_OUTPUT_FOLDER",
+        "입력과 다른 비공개 결과 폴더"
+      ],
+      [
+        "JUNGSI_DRIVE_REGISTRY",
+        "Git 제외 data/Resource/datas/outputs 또는 DATA_ACTIVE 명부 경로"
+      ],
+      [
+        "JUNGSI_ALLOWED_ORIGINS",
+        "선택: 쉼표 구분 승인 화면 origin; 기본 교차 origin 허용 없음"
+      ],
+      [
+        "JUNGSI_PROBE_ACCESS_TOKEN",
+        "선택: 읽기 전용 운영 인증 검증에 사용하는 테스트 사용자 토큰"
+      ]
+    ],
+    "runtime": {
+      "lock": "backend-runtime.lock.json",
+      "python": "CPython 3.12 x64 Windows/Linux",
+      "bootstrap": "python -B scripts/bootstrap_backend_runtime.py --destination outputs/backend_runtime_NEW",
+      "environment": "PYTHONPATH=새 runtime의 site + src; PYTHONDONTWRITEBYTECODE=1. 기존 runtime 폴더와 다운로드는 보존한다.",
+      "serve": "python -B -m uvicorn jungsi_touch.infrastructure.http_api:configured_app --factory --host 127.0.0.1 --port 8000 --no-access-log",
+      "probe": "python -B scripts/probe_backend_connection.py",
+      "tests": "python -B scripts/run_committed_tests.py --staged",
+      "CI_checkout": "checkout/setup-python 액션 없이 ubuntu-24.04의 Git/Python3.12로 run_id/run_attempt별 새 경로를 만든다. 기존 경로는 중단하고 지정 github.sha 최초 checkout만 수행한다. fetch 전용 인증 환경, gc/maintenance 해제, 정리 명령 없는 runtime/검산 보존은 workflow.CI_snapshot_policy를 따른다."
+    },
+    "database": "database/migrations/001_pre_data_platform.sql은 추가 정의만 제공한다. 자동 적용하지 않으며 기존 DB를 reset/drop/delete하지 않는다. 전용 jungsi_backend 스키마의 사용자/이용권/리포트 접근은 서버 역할과 SQL owner 조건으로 제한하고 anon/authenticated 직접 접근은 허용하지 않는다. schema_versions와 실제 11개 timestamptz/date 컬럼 형식을 함께 확인한다.",
+    "health": "/health/live는 프로세스 UTC 시각만 확인한다. /health/ready는 설정 존재와 읽기 전용 DB 스키마·컬럼·UTC 세션·합성 SQL literal 왕복을 검사한다. ready가 인증 사용자/입시 자료/모형 검증 완료를 뜻하지 않는다. auth와 live_data 상태를 별도로 반환한다.",
+    "drive_registry": {
+      "format": "jungsi.data-registry/v1",
+      "entries": "kind/key 단위 단일 발행 entry; kind=exam_pack/total_model/catalog/analysis. exam_pack key=exam_id, total_model key=exam_id:pack_version, catalog key=service, analysis key=offering_id. 중복 key는 거절한다.",
+      "entry_fields": [
+        "kind",
+        "key",
+        "file_id",
+        "drive_version",
+        "sha256",
+        "version",
+        "status",
+        "source_timezone (선택)",
+        "distribution_id (total_model 전용)"
+      ],
+      "approval": "status=approved만 사용하며 입력 폴더 부모·trashed=false·정확한 Drive version·내용 SHA256·payload version을 검증한다. 최신 수정시간 채택과 요청 승인 승격은 하지 않는다.",
+      "payloads": "exam_pack=기존 ExamPack, total_model=DistributionMetadata/frequencies, catalog=jungsi.catalog-release/v1, analysis=jungsi.offering-analysis-release/v1. analysis는 ConversionRelease·RankDistribution·BridgePolicy·UniversityScoreDistribution·모집행별 decision/evidence를 기존 엔진 계약으로 구성한다.",
+      "source_time": "Drive createdTime/modifiedTime은 자체 RFC3339 aware 시각이다. 명부 source_timezone은 내용의 naive 소스 시각에만 적용하고 원본 metadata Z를 재라벨링하지 않는다.",
+      "write": "ReportPublicationService → ArtifactResultWriter.append_result. 입력과 다른 결과 폴더에 사용자/작업/키 identity와 내용 해시를 결속한 새 파일 POST만 한다. GET 재시도 조회로 동일 해시를 재사용하고 충돌/불명확 결과를 별도 코드로 처리한다. 삭제/휴지통/덮어쓰기 없음."
+    },
+    "verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.",
+    "remaining": [
+      "실제 Supabase 프로젝트·서버 역할·TLS·Auth 검증 사용자와 활성 이용권 설정 및 readonly probe 증거",
+      "운영 DB에 추가 마이그레이션 적용 후 실제 UTC/timestamptz/date 및 권한/소유권 트랜잭션 검수",
+      "Drive OAuth 계정·토큰 갱신·입출력 폴더/발행 명부 및 실제 읽기·별도 산출 쓰기 검수",
+      "기존 자료팀 정리 근거를 재사용한 공식 자료·곡선·공동분포·연도보정·환산·예상/판단 근거 승인과 변경 범위 실제 검산",
+      "배포/HTTPS·CORS origin·비공개 운영 진단·이용권 발행/결제 운영 연결",
+      "별도 프레젠테이션 feature에서 로그인 토큰·이 API DTO·서울 시각 표시·인쇄 UI 연결",
+      "대규모 집계 성능/갱신 주기 실측; Kafka/Redis 미채택"
+    ]
   }
 }
