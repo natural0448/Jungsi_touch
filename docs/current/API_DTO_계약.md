@@ -170,4 +170,4 @@ format: jungsi.counseling-snapshot/v1
 
 서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.
 
-<!-- jungsi:generated spec_sha256=f6c6557b1843eeab5b2602b30a1c57f3c77cecf81e140e40b7c0815449e4ca60 -->
+<!-- jungsi:generated spec_sha256=a066cd99d16a66a2386450bc8844a177345da8ec479331d1cfaf4dc854900a62 -->
