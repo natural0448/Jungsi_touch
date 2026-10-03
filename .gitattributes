@@ -3,6 +3,7 @@
 /.githooks/** text eol=lf
 /.github/** text eol=lf
 /docs/current/** text eol=lf
+/docs/work_items/** text eol=lf
 /apps/web/** text eol=lf
 /database/** text eol=lf
 /src/jungsi_touch/application/** text eol=lf
@@ -11,3 +12,4 @@
 /scripts/run_committed_tests.py text eol=lf
 /tests/test_access_policy.py text eol=lf
 /tests/test_project_consistency.py text eol=lf
+/tests/test_overall_analysis_service.py text eol=lf

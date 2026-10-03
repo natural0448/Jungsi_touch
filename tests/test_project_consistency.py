@@ -67,4 +67,22 @@ class ConsistencyTests(unittest.TestCase):
         self.assertFalse(protected_path("scripts/check_project_consistency.py",self.spec["workflow"]["shared_tools"]))
         self.assertFalse(protected_path("database/structure.sql",self.spec["workflow"]["shared_tools"]))
 
+    def test_overall_service_must_remain_available_to_standard_and_paid(self):
+        spec=deepcopy(self.spec)
+        next(row for row in spec["operations"] if row["id"]=="overall.analyze")["member_tiers"]=["paid"]
+        self.assertIn("Overall analysis access policy drift",validate_spec(spec))
+
+    def test_stateless_service_cannot_be_marked_as_http_implementation(self):
+        spec=deepcopy(self.spec)
+        spec["overall_analysis_contract"]["http_handler_implemented"]=True
+        self.assertIn("Overall application boundary drift",validate_spec(spec))
+
+    def test_frontend_contract_contains_dto_without_internal_provider_reference(self):
+        generated=generated_files(self.spec)
+        public=json.loads(generated["apps/web/route_catalog.json"])["overall_analysis_contract"]
+        internal=json.loads(generated["src/jungsi_touch/application/route_catalog.json"])["overall_analysis_contract"]
+        self.assertEqual(public["response_fields"],internal["response_fields"])
+        self.assertNotIn("application_service",public)
+        self.assertNotIn("provider",public)
+
 if __name__=="__main__":unittest.main()
