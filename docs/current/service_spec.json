@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "pre_data_backend_implemented_configuration_pending",
   "current_documents": {
@@ -1021,6 +1021,14 @@
       "scope": "기획 정본과 공통 명세·생성 문서",
       "verification": "동일 커밋의 문서 일치·코드 참조·계층·데이터 제외·필수 Git 스냅샷 검산 후 develop에 공유",
       "implementation": "개발 구현은 담당자의 별도 feature PR에서 검증 후 통합"
+    },
+    "CI_snapshot_policy": {
+      "runner": "GitHub-hosted ubuntu-24.04의 사전 설치 Git/CPython 3.12만 사용한다. checkout/setup-python 액션과 설치 대체 경로는 사용하지 않는다.",
+      "destination": "GITHUB_WORKSPACE/retained_snapshots/run_<run_id>_attempt_<run_attempt>가 존재하거나 symlink이면 중단한다. 새 비존재 경로만 생성하고 기존 경로·파일을 보존한다.",
+      "commit": "git init 후 github.sha와 전체 부모 이력을 fetch하고 그 SHA를 최초 detached checkout한다. HEAD가 지정 SHA와 다르면 실패한다.",
+      "credentials": "GitHub token은 fetch subprocess의 GIT_CONFIG_* http extraheader 환경으로만 전달한다. argv/로그/파일과 init/checkout/test subprocess에는 전달하지 않는다. Git trace 및 외부 config 입력을 차단하며 실패는 원문 진단 없이 안전한 사유로 기록한다.",
+      "preservation": "gc.auto=0, maintenance.auto=false와 fetch --no-auto-maintenance를 적용한다. clean/reset/drop/기존 경로 초기화/temp cleanup을 호출하지 않는다. 생성 runtime/다운로드/검산 스냅샷은 정리하지 않는다.",
+      "verification": "tests/test_ci_snapshot_preservation.py에서 기존 경로 거절·보존, 지정 SHA 결속, fetch 전용 인증과 오류 비밀값 미노출을 검수한다. CI에서는 동일 github.sha의 공통 검사·잠금 런타임·전체 테스트를 실행한다."
     }
   },
   "pending": [
@@ -1130,6 +1138,15 @@
         "REQ-18"
       ],
       "summary": "DEV-002 최종 인계: 12개 HTTP 작업의 업무 서비스와 응답 DTO contract_ref를 실제 PlatformService와 결속했다. DEV-001 stateless 전체 분석은 report.overall 엔진 계약으로 따로 보존했다. CI checkout의 clean/reset 동작을 명시적으로 해제했다."
+    },
+    {
+      "date": "2026-10-03",
+      "requirements": [
+        "REQ-15",
+        "REQ-16",
+        "REQ-17"
+      ],
+      "summary": "실제 CI 로그의 checkout 액션 초기화 부작용을 확인해 clean:false 보완을 대체했다. 사전 설치 Git/Python3.12와 새 run/attempt 경로의 지정 SHA 최초 checkout으로 전환하고 토큰은 fetch 환경에만 결속한다. 설치/정리 액션·기존 경로 초기화·자동 gc/maintenance 없이 기존 작업물과 새 runtime/스냅샷을 보존한다."
     }
   ],
   "overall_analysis_contract": {
@@ -1865,7 +1882,7 @@
       "serve": "python -B -m uvicorn jungsi_touch.infrastructure.http_api:configured_app --factory --host 127.0.0.1 --port 8000 --no-access-log",
       "probe": "python -B scripts/probe_backend_connection.py",
       "tests": "python -B scripts/run_committed_tests.py --staged",
-      "CI_checkout": "actions/checkout clean:false 및 persist-credentials:false. 로컬/CI 검산 스크립트는 기존 작업물 정리를 실행하지 않는다."
+      "CI_checkout": "checkout/setup-python 액션 없이 ubuntu-24.04의 Git/Python3.12로 run_id/run_attempt별 새 경로를 만든다. 기존 경로는 중단하고 지정 github.sha 최초 checkout만 수행한다. fetch 전용 인증 환경, gc/maintenance 해제, 정리 명령 없는 runtime/검산 보존은 workflow.CI_snapshot_policy를 따른다."
     },
     "database": "database/migrations/001_pre_data_platform.sql은 추가 정의만 제공한다. 자동 적용하지 않으며 기존 DB를 reset/drop/delete하지 않는다. 전용 jungsi_backend 스키마의 사용자/이용권/리포트 접근은 서버 역할과 SQL owner 조건으로 제한하고 anon/authenticated 직접 접근은 허용하지 않는다. schema_versions와 실제 11개 timestamptz/date 컬럼 형식을 함께 확인한다.",
     "health": "/health/live는 프로세스 UTC 시각만 확인한다. /health/ready는 설정 존재와 읽기 전용 DB 스키마·컬럼·UTC 세션·합성 SQL literal 왕복을 검사한다. ready가 인증 사용자/입시 자료/모형 검증 완료를 뜻하지 않는다. auth와 live_data 상태를 별도로 반환한다.",

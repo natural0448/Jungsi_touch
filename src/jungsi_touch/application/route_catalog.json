@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.2.0",
-  "source_sha256": "2eecf45c2ace6c76aa88ddf51a05e4cd3ff75a570ad8f614bdf3a41211cb2989",
+  "spec_version": "1.2.1",
+  "source_sha256": "64a4138dc50f2057d82bac30999863a2c835500d1d215322a40262f636fb2ca6",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1077,7 +1077,7 @@
       "serve": "python -B -m uvicorn jungsi_touch.infrastructure.http_api:configured_app --factory --host 127.0.0.1 --port 8000 --no-access-log",
       "probe": "python -B scripts/probe_backend_connection.py",
       "tests": "python -B scripts/run_committed_tests.py --staged",
-      "CI_checkout": "actions/checkout clean:false 및 persist-credentials:false. 로컬/CI 검산 스크립트는 기존 작업물 정리를 실행하지 않는다."
+      "CI_checkout": "checkout/setup-python 액션 없이 ubuntu-24.04의 Git/Python3.12로 run_id/run_attempt별 새 경로를 만든다. 기존 경로는 중단하고 지정 github.sha 최초 checkout만 수행한다. fetch 전용 인증 환경, gc/maintenance 해제, 정리 명령 없는 runtime/검산 보존은 workflow.CI_snapshot_policy를 따른다."
     },
     "database": "database/migrations/001_pre_data_platform.sql은 추가 정의만 제공한다. 자동 적용하지 않으며 기존 DB를 reset/drop/delete하지 않는다. 전용 jungsi_backend 스키마의 사용자/이용권/리포트 접근은 서버 역할과 SQL owner 조건으로 제한하고 anon/authenticated 직접 접근은 허용하지 않는다. schema_versions와 실제 11개 timestamptz/date 컬럼 형식을 함께 확인한다.",
     "health": "/health/live는 프로세스 UTC 시각만 확인한다. /health/ready는 설정 존재와 읽기 전용 DB 스키마·컬럼·UTC 세션·합성 SQL literal 왕복을 검사한다. ready가 인증 사용자/입시 자료/모형 검증 완료를 뜻하지 않는다. auth와 live_data 상태를 별도로 반환한다.",
