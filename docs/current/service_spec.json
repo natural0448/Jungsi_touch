@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "pre_data_backend_implemented_configuration_pending",
   "current_documents": {
@@ -1174,13 +1174,17 @@
           "owner": "별도 프레젠테이션 작업자",
           "parent": "feature/presentation-foundation",
           "pr_target": "feature/presentation-foundation",
-          "status": "active",
+          "status": "retired_merged",
           "temporary": true,
-          "purpose": "기존 PR #7: 4페이지 작업을 화면 상시 브랜치에 먼저 통합.",
+          "purpose": "PR #7을 화면 상시 부모 feature/presentation-foundation에 병합 완료했다. 해당 코드는 열린 PR #6에 포함되어 있으나 develop에는 미통합. 새 작업은 상시 화면 브랜치를 재사용.",
           "base_commit": "eb765ab50abd6cc99985b26594b2331f2ddef5df",
           "observed_head": "07bb4929125d9a58abbabe71176aaffeab60bfaa",
           "pull_request": 7,
-          "exception": "진행 중인 PR의 head/base를 보존한다. 이후 화면 하위 작업은 등록한 feature/presentation-task/<slug>를 사용한다."
+          "exception": "진행 중인 PR의 head/base를 보존한다. 이후 화면 하위 작업은 등록한 feature/presentation-task/<slug>를 사용한다.",
+          "github_state": "MERGED",
+          "merge_commit": "d9feb6112a23b1fd14e8e34d15bed906ecc626da",
+          "merged_at": "2026-10-03T15:36:13Z",
+          "remote_ref_state": "retained_finished_temporary_ref_no_deletion_authorization"
         },
         {
           "name": "feature/presentation-results",
@@ -1188,13 +1192,17 @@
           "owner": "별도 프레젠테이션 작업자",
           "parent": "feature/presentation-favorable",
           "pr_target": "feature/presentation-favorable",
-          "status": "active",
+          "status": "retired_integrated_closed",
           "temporary": true,
-          "purpose": "작업 중 새로 확인한 기존 PR #9: 1페이지 대학 발표 입시결과를 화면 작업에 연결. 새 상시 노드가 아니라 기존 화면 하위 작업.",
+          "purpose": "PR #9는 CLOSED이며 GitHub merge 기록은 없다. head d9feb611이 화면 상시 부모의 HEAD와 같아 코드 포함을 확인했다. 해당 코드는 열린 PR #6에 포함되어 있으나 develop에는 미통합. 새 작업은 상시 화면 브랜치를 재사용.",
           "base_commit": "07bb4929125d9a58abbabe71176aaffeab60bfaa",
           "observed_head": "d9feb6112a23b1fd14e8e34d15bed906ecc626da",
           "pull_request": 9,
-          "exception": "정책 공유 전 생성된 PR head/base를 보존한다. 이후 필요 시 등록하는 presentation-task만 사용하고 화면별로 자동 분기하지 않는다."
+          "exception": "정책 공유 전 생성된 PR head/base를 보존한다. 이후 필요 시 등록하는 presentation-task만 사용하고 화면별로 자동 분기하지 않는다.",
+          "github_state": "CLOSED",
+          "merge_commit": null,
+          "integrated_parent_head": "d9feb6112a23b1fd14e8e34d15bed906ecc626da",
+          "remote_ref_state": "retained_finished_temporary_ref_no_deletion_authorization"
         },
         {
           "name": "feature/overall-analysis-service",
@@ -1323,7 +1331,7 @@
           {
             "id": "presentation",
             "status": "pending",
-            "evidence": "PR #6/#7/#9 작업 중; 확정 DTO·서버 연결·화면 권한·인쇄 인수 필요"
+            "evidence": "PR #6 미병합; #7은 화면 부모 통합·#9 종료 코드 포함. develop 통합과 확정 DTO·서버 연결·화면 권한·인쇄 인수 필요"
           },
           {
             "id": "live_connections",
@@ -1356,7 +1364,9 @@
           "feature/planning-layer-ownership"
         ],
         "checked_at": "2026-10-04 (Asia/Seoul)",
-        "note": "초기 조사 8개에서 작업 중 PR #9 브랜치 1개가 추가되어 9개였고, 허용된 과거 ref 2개를 삭제해 7개를 확인했다. 열린 작업의 종료에 따라 추가 정리는 정본의 상태와 정확한 허용 범위를 확인한다."
+        "note": "원격 7개: 상시 4개 + 열린 계약 제안 #5 임시 1개 + 종료된 화면 임시 ref 2개. 기존 과거 ref 2개만 사용자 허용으로 삭제했다. PR #7은 화면 부모에 MERGED, #9는 CLOSED이고 그 head가 화면 상시 HEAD에 포함됨을 확인했다. 종료 화면 ref의 삭제는 추가 허용 범위에 포함되지 않아 보존한다.",
+        "working_temporary_count": 1,
+        "retained_finished_temporary_refs": 2
       }
     }
   },
@@ -1512,6 +1522,14 @@
         "REQ-18"
       ],
       "summary": "사용자 지정의 main → develop → 시스템·콘텐츠/프레젠테이션 두 상시 개발 노드를 정식 운영 구조로 등록했다. 기존 서버·화면 브랜치와 열린 PR을 재사용하고 필요 시 등록하는 임시 하위 작업 및 병합된 종료 노드를 구분한다. develop의 시스템기획팀 직접 문서/관리 범위·PR 부모·main 최종 인수 조건을 훅/CI에서 검사하며 GitHub merge commit만 허용하고 ref 자동 삭제는 해제한다. 원격 강제 보호의 요금제 제한과 삭제 범위 별도 승인·로컬 파일 보존을 명시한다. 검토 중 생성된 PR #9도 화면 임시 노드로 등록했다. 사용자가 정확히 허용한 이미 병합된 과거 GitHub 원격 ref 2개만 삭제했고 커밋·로컬 파일/브랜치/worktree는 보존했다."
+    },
+    {
+      "date": "2026-10-04",
+      "requirements": [
+        "REQ-16",
+        "REQ-18"
+      ],
+      "summary": "브랜치 정책 공유 후 확인한 화면 하위 작업 상태를 동기화했다. PR #7은 화면 부모에 MERGED, #9는 CLOSED이며 head가 화면 상시 브랜치에 포함되어 있다. develop에는 열린 PR #6으로 통합 대기다. 종료된 화면 임시 노드는 새 작업을 막고 원격 ref/로컬 파일을 보존한다. 현재 GitHub 7개는 상시 4개·열린 임시 1개·종료 후 보존 임시 ref 2개다."
     },
     {
       "date": "2026-10-03",
@@ -1756,7 +1774,7 @@
     ],
     "existing_application_feature": "feature/application-pre-data-platform",
     "presentation_branch_example": "feature/presentation-foundation",
-    "presentation_branch_status": "feature/presentation-foundation은 화면 담당의 상시 브랜치다. 현재 PR #6 및 그 아래 PR #7/#9를 보존한다. 기존 session.read 제안 PR #5는 develop의 공통 계약 검토용 임시 노드이며 확정 전 운영 계약으로 간주하지 않는다.",
+    "presentation_branch_status": "feature/presentation-foundation은 화면 담당의 상시 브랜치다. PR #7은 여기에 병합됐고 #9는 종료됐으며 그 head가 상시 화면 HEAD에 포함되어 있다. 열린 PR #6으로 develop 통합/검토가 남아 있다. 두 종료 임시 ref는 보존하며 새 작업에 재사용하지 않는다. 열린 session.read 제안 PR #5는 develop의 공통 계약 검토용 임시 노드이고 확정 전 운영 계약으로 간주하지 않는다.",
     "generated_files_rule": "route_catalog.json과 생성 README/현재 문서는 직접 편집하지 않는다. 계약 변경은 service_spec.json과 생성 도구에서 수정하고 생성 결과를 같은 커밋에 포함한다.",
     "handoff_rule": "두 개발 담당은 origin/develop의 같은 커밋에 있는 service_spec과 생성 문서를 가져가 구현한다. 계약·필드·오류/보류 사유가 바뀌면 시스템기획팀과 해당 계층 담당에게 인계한다. 통합되지 않은 feature의 코드·가상 응답을 develop에 구현된 기능으로 기록하지 않는다.",
     "verification_rule": "Git 변경 범위와 해당 계약·필수 커밋 검산을 확인한다. 원자료 전수검수나 전국 재집계를 매 개발 작업에서 반복하지 않는다.",
