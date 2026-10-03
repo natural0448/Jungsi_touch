@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import type { OfferingSearchResult } from "@/lib/contract";
 import { AccessDenied, type JungsiSource } from "./source";
+import { HISTORY, syntheticRecruitment } from "./synthetic-history";
 import { ANALYSES, BASIS, CANDIDATE_SCHOOLS, OFFERINGS, STATISTICS, WILDCARDS } from "./synthetic-fixtures";
 
 /*
@@ -32,6 +33,10 @@ async function readPicks(): Promise<string[]> {
 
 const norm = (v?: string) => v?.replace(/\s/g, "") || undefined;
 
+async function requireMember() {
+  if ((await readSyntheticState()) === "guest") throw new AccessDenied(401, "authentication_required");
+}
+
 async function requirePaid() {
   const s = await readSyntheticState();
   if (s === "guest") throw new AccessDenied(401, "authentication_required");
@@ -41,6 +46,41 @@ async function requirePaid() {
 
 export const syntheticSource: JungsiSource = {
   kind: "synthetic",
+
+  async searchHistory(_caller, { academic_year, university_q, department_q, region, group, cursor, limit = 50 }) {
+    await requireMember();
+    const u = norm(university_q);
+    const d = norm(department_q);
+    const rows = HISTORY.filter(
+      (h) =>
+        (!academic_year || h.academic_year === academic_year) &&
+        (!u || h.university_name.replace(/\s/g, "").includes(u)) &&
+        (!d || h.department.replace(/\s/g, "").includes(d)) &&
+        (!region || h.region === region) &&
+        (!group || h.group === group),
+    );
+    // 커서는 조회 조건과 위치를 함께 묶는다(다른 조건에서 쓰면 무시하고 처음부터)
+    const key = [academic_year, u, d, region, group].join("|");
+    const [ck, co] = (cursor ?? "").split("@");
+    const start = ck === key && Number(co) > 0 ? Number(co) : 0;
+    const size = Math.max(1, Math.min(100, limit));
+    const end = start + size;
+    return {
+      status: "ready",
+      reason_code: null,
+      items: rows.slice(start, end),
+      matching_offering_count: new Set(rows.map((r) => r.offering_id)).size,
+      matching_school_count: new Set(rows.map((r) => r.university_id)).size,
+      catalog_version: "SYNTHETIC-catalog-v1",
+      as_of: "2026-09-10",
+      next_cursor: end < rows.length ? `${key}@${end}` : null,
+    };
+  },
+
+  async readRecruitment(_caller, offeringId) {
+    await requireMember();
+    return syntheticRecruitment(offeringId);
+  },
 
   async getSession() {
     const s = await readSyntheticState();

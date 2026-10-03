@@ -1,3 +1,4 @@
+import type { CatalogSearchDto, HistoryMetricDto, HistorySearchQuery, RecruitmentDto } from "@/lib/dto";
 import type { AnalysisResult, CandidatesResult, OfferingSearchParams, OfferingSearchResult, OfferingStatistics, Session, ShortlistItem } from "@/lib/contract";
 
 /** 로그인한 사람의 신원. 화면 서버는 access token 을 우리 서비스 API 에 전달만 한다 */
@@ -19,6 +20,10 @@ export class AccessDenied extends Error {
  */
 export interface JungsiSource {
   readonly kind: "synthetic" | "live";
+  /** history.search (일반·유료). 대학 발표 지표 한 줄씩 */
+  searchHistory(caller: Caller, query: HistorySearchQuery): Promise<CatalogSearchDto<HistoryMetricDto>>;
+  /** recruitment.read (일반·유료). 없는 모집행이면 null */
+  readRecruitment(caller: Caller, offeringId: string): Promise<RecruitmentDto | null>;
   /** session.read. 비회원이면 null */
   getSession(caller: Caller): Promise<Session | null>;
   /** offerings.search (유료). 일반 회원이면 AccessDenied(403) */

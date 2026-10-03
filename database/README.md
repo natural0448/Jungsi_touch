@@ -32,4 +32,4 @@ Google Drive API 고정 폴더·파일 버전/해시·승인 읽기와 별도 �
 - 비공개 발행 명부/승인 자료 값과 형식 호환 검수
 - 실제 읽기/쓰기·재시도/충돌·감사와 사용자 접근 검수
 
-<!-- jungsi:generated spec_sha256=8b7410cb1d99b8c5f14701c92b62183b5d5586fa4805729ae8d4101d1a3a1829 -->
+<!-- jungsi:generated spec_sha256=cf7348bc2caa2afb19b88969d6d04e9fa7f340f7d895e7bf34ea2392c537cc93 -->

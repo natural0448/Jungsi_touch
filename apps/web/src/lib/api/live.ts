@@ -1,5 +1,6 @@
 import "server-only";
 import type { AnalysisResult, CandidatesResult, OfferingAnalysis, OfferingSearchParams, OfferingSearchResult, OfferingStatistics, ScoreBasis, Session, ShortlistItem } from "@/lib/contract";
+import type { CatalogSearchDto, HistoryMetricDto, HistorySearchQuery, RecruitmentDto } from "@/lib/dto";
 import { AccessDenied, type Caller, type JungsiSource } from "./source";
 
 /*
@@ -31,11 +32,28 @@ function qs(p: OfferingSearchParams) {
   return s ? `?${s}` : "";
 }
 
+/** history.search 쿼리. 같은 이름의 키를 두 번 보내지 않는다(서버가 422 로 거절) */
+function histQs(q: HistorySearchQuery) {
+  const u = new URLSearchParams();
+  for (const [k, v] of Object.entries(q)) if (v !== undefined && v !== "") u.set(k, String(v));
+  const s = u.toString();
+  return s ? `?${s}` : "";
+}
+
 // 연결 때 애플리케이션이 알려 줄 리포트 번호. 명세 확정 전 자리
 const REPORT = "me";
 
 export const liveSource: JungsiSource = {
   kind: "live",
+  searchHistory: (caller, q) => call<CatalogSearchDto<HistoryMetricDto>>(caller, `/admission-history${histQs(q)}`),
+  async readRecruitment(caller, offeringId) {
+    try {
+      return await call<RecruitmentDto>(caller, `/offerings/${encodeURIComponent(offeringId)}/recruitment`);
+    } catch (e) {
+      if (e instanceof Error && e.message.includes(" 404:")) return null;
+      throw e;
+    }
+  },
   async getSession(caller) {
     if (!caller.accessToken) return null;
     try {
