@@ -3,7 +3,7 @@
   "id": "DEV-002",
   "title": "Supabase 기반 데이터 연동 전 백엔드와 UTC·서울시각 검수",
   "date": "2026-10-03",
-  "status": "execution_authorized",
+  "status": "code_accepted_live_configuration_pending",
   "authorization": "사용자는 데이터 연동 전 시스템 기획·개발 완료 여부를 확인하고 미완료 구현을 개발팀에 요청해 마무리하도록 지시했다. FastAPI + PostgreSQL을 승인한 뒤 Supabase 서버 기반, datetime UTC, 실제 입력 Asia/Seoul 및 서버 연동 검수를 명시했다.",
   "repository": "https://github.com/natural0448/Jungsi_touch",
   "base_branch": "develop",
@@ -11,9 +11,9 @@
   "base_spec_version": "1.1.1",
   "source_of_truth": "docs/current/service_spec.json; 본 지시의 승인 사항과 구현 계약을 공통 명세·생성 도구·문서에 함께 반영한다.",
   "feature_branches": {
-    "planning": "feature/planning-pre-data-readiness",
+    "planning": "develop",
     "application": "feature/application-pre-data-platform",
-    "infrastructure": "feature/data-runtime-foundation",
+    "infrastructure": "feature/application-pre-data-platform",
     "presentation": "별도 작업자가 최신 develop에서 feature/presentation-* 생성"
   },
   "requirements": [
@@ -408,5 +408,39 @@
     "https://docs.python.org/3/library/datetime.html",
     "https://docs.python.org/3/library/zoneinfo.html",
     "https://supabase.com/docs/reference/python/auth-getuser"
-  ]
+  ],
+  "baseline_feature_branches": {
+    "planning": "feature/planning-pre-data-readiness",
+    "application": "feature/application-pre-data-platform",
+    "infrastructure": "feature/data-runtime-foundation",
+    "presentation": "별도 작업자가 최신 develop에서 feature/presentation-* 생성"
+  },
+  "planning_branch_history": {
+    "former_branch": "feature/planning-pre-data-readiness",
+    "merged_pull_request": "https://github.com/natural0448/Jungsi_touch/pull/4",
+    "local_and_remote_branch_removed": true,
+    "user_authorized_scope": "사용하던 시스템기획팀 브랜치",
+    "files_preserved": true
+  },
+  "execution_result": {
+    "status": "code_accepted_on_develop_live_configuration_pending",
+    "reviewed_feature_commit": "c5376f0d8674cf82add0959abec385682f14cd4f",
+    "integrated_develop_commit": "03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced",
+    "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/8",
+    "ci": {
+      "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288",
+      "tested_commit": "c5376f0d8674cf82add0959abec385682f14cd4f",
+      "synthetic_tests_passed": 228,
+      "conclusion": "SUCCESS"
+    },
+    "code_scope": "12개 FastAPI 업무 API, Supabase 서버 인증, PostgreSQL 저장/멱등/소유권, Drive 승인 자료 읽기·별도 산출 쓰기, UTC·Asia/Seoul·date-only 계약",
+    "live_server_status": "not_run_configuration_missing",
+    "live_data_status": "not_run_configuration_missing",
+    "remaining": [
+      "실제 Supabase 프로젝트·서버 접속·검수 사용자·이용권과 추가 스키마 적용",
+      "실제 UTC/timestamptz/date 및 인증·소유권 왕복 검수",
+      "Drive 계정·입출력 폴더·토큰 갱신·승인 자료/모형과 실제 읽기/쓰기 검수",
+      "별도 프레젠테이션 구현 및 배포·결제 운영 연결"
+    ]
+  }
 }
