@@ -7,9 +7,12 @@
 - [화면과 API 라우팅 명세](docs/current/라우팅_명세.md)
 - [3티어 개발구조](docs/current/3티어_개발구조.md)
 - [개발 브랜치 운영](docs/current/개발_브랜치_운영.md)
+- [폴더 구조와 작업 위치](docs/current/폴더_구조.md)
+- [API DTO 계약](docs/current/API_DTO_계약.md)
+- [백엔드 운영 준비](docs/current/백엔드_운영준비.md)
 - [공통 명세](docs/current/service_spec.json)
 
-프레젠테이션은 apps/web, 권한·업무 처리는 src/jungsi_touch/application, 저장소 어댑터는 src/jungsi_touch/infrastructure를 기준으로 개발한다. 기존 src/jungsi_touch 루트 성적 엔진은 애플리케이션 라이브러리로 재사용한다. 실제 인증·운영 DB·HTTP 서버·웹 앱과 승인된 실제 데이터 연결은 후속 구현이다.
+프레젠테이션은 apps/web, 권한·업무 처리는 src/jungsi_touch/application, 저장소 어댑터는 src/jungsi_touch/infrastructure를 기준으로 개발한다. 기존 src/jungsi_touch 루트 성적 엔진은 애플리케이션 라이브러리로 재사용한다. FastAPI 12개 API와 Supabase/PostgreSQL·Drive 어댑터 코드는 develop에 통합했다. 실제 서버·승인 자료 연결과 별도 프레젠테이션 앱의 연결은 운영 준비 문서의 대기 항목을 따른다.
 
 현재 문서는 공통 명세에서 생성하고 Git 인덱스 또는 커밋을 기준으로 일치 여부와 계층·데이터 제외를 검사한다. 검산은 선택한 Git 스냅샷만 새 outputs 폴더에 복사해 실행한다. 실제 데이터가 필요한 로컬 테스트를 커밋 검산에 섞지 않는다.
 
@@ -17,7 +20,7 @@ GitHub는 현재 비공개 저장소의 브랜치 보호 기능에 HTTP 403과 �
 
 ## 이전 준비와 검토 이력
 
-아래 내용은 원본 보존을 위한 이전 작업 이력이다. 현재 요구사항과 문서 권한은 위 네 문서와 공통 명세를 우선한다. 과거 미정 사항·페이지 구분·환경변수 예외를 현재 정책으로 다시 적용하지 않는다.
+아래 내용은 원본 보존을 위한 이전 작업 이력이다. 현재 요구사항과 문서 권한은 위 현재 문서와 공통 명세를 우선한다. 과거 미정 사항·페이지 구분·환경변수 예외를 현재 정책으로 다시 적용하지 않는다.
 
 <!-- jungsi:history-start -->
 

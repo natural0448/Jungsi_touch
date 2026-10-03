@@ -97,7 +97,7 @@ def collaboration_sections(spec):
             "\n\n### 읽기와 쓰기\n\n"+d["read_policy"]+"\n\n"+d["write_policy"]+
             "\n\n"+d["configuration_policy"]+"\n\n"+d["unavailable_policy"]+
             "\n\n### 남은 설정\n\n"+"\n".join("- "+x for x in d["pending_settings"]))
-    intro=("\n\n프레젠테이션은 별도 작업자가 담당한다. 최신 origin/develop 커밋에서 feature/presentation-*를 생성하고 "+
+    intro=("\n\n프레젠테이션은 별도 작업자가 담당한다. 최신 origin/develop의 기획 기준을 확인하고 담당 feature/presentation-*를 재사용한다. 서버 개발팀의 "+
         c["existing_application_feature"]+"와 브랜치를 공유하지 않는다. "+c["generated_files_rule"]+
         " [프레젠테이션 작업 인계](../../docs/current/프레젠테이션_작업인계.md)를 읽고 출발 커밋과 API 계약을 맞춘다.")
     api_handoff=("\n\n## 프레젠테이션 작업 인계\n\n화면 담당은 별도 작업자이며 feature/presentation-*에서 작업한다. "+
@@ -107,9 +107,9 @@ def collaboration_sections(spec):
     handoff=("이 문서는 별도 프레젠테이션 작업자가 화면 개발을 시작할 때 사용할 담당·브랜치·API 경계다. "+
         "작업 기준은 develop의 확정 커밋과 같은 커밋의 service_spec.json·route_catalog.json이다.\n\n"+
         "## 작업 시작과 공유 계약\n\n"+c["start_rule"]+"\n\n"+
-        "프레젠테이션 작업자는 "+c["presentation_branch_example"]+"와 같은 독립 브랜치를 생성한다. "+
-        "시스템기획팀의 feature/planning-*와 현재 개발팀의 "+c["existing_application_feature"]+
-        " 또는 feature/application-*/feature/data-*에 함께 커밋하지 않는다.\n\n"+
+        "프레젠테이션 작업자는 "+c["presentation_branch_example"]+"와 같은 담당 독립 브랜치를 재사용한다. "+
+        "시스템기획팀의 develop과 현재 서버 개발팀의 "+c["existing_application_feature"]+
+        "에 화면 구현 커밋을 함께 작성하지 않는다. 담당 작업 브랜치를 재사용한다.\n\n"+
         "화면 경로와 회원 정책은 [서비스 기획](서비스_기획.md), 요청·응답과 권한 경계는 [라우팅 명세](라우팅_명세.md), "+
         "의존 방향은 [3티어 개발구조](3티어_개발구조.md), 통합 절차는 [개발 브랜치 운영](개발_브랜치_운영.md)을 따른다.\n\n"+
         "apps/web의 화면·입력·탐색·리포트 UI를 구현하고 서버가 허용한 결과를 표시한다. "+
@@ -122,6 +122,30 @@ def collaboration_sections(spec):
         "인계 시 출발·결과 커밋, 변경 화면과 API 작업 ID, 허용 응답·오류/보류 사유, 합성 응답 사용 여부와 실제 연동 상태를 함께 남긴다. "+
         c["verification_rule"]+"\n\n## 담당과 소유권\n\n"+c["description"]+"\n\n"+matrix+drive)
     return dict(ownership=ownership,drive=drive,handoff=handoff,presentation_intro=intro,api_handoff=api_handoff)
+
+
+def repository_layout_text(spec):
+    """Render the shared layout and private locations from the common specification."""
+    layout=spec["repository_layout"]
+    fence=chr(96)*3
+    references="\n".join("- ["+description+"]("+path+")" for path,description in layout["reading_order"])
+    tools="\n".join("- "+path for path in spec["workflow"]["shared_tools"])
+    return ("현재 dev 작업 기준은 Git 브랜치 develop이다. 구조 확인일: "+layout["checked_date"]+
+        ". 조사 출발 커밋: "+layout["reference_commit"]+".\n\n"+layout["scope"]+
+        "\n\n## 공유하는 프로젝트 구조\n\n"+fence+"text\n"+layout["public_tree"]+"\n"+fence+
+        "\n\napps/web에는 현재 develop의 README와 생성 경로 계약이 있다. 다른 브랜치의 화면 코드는 해당 PR의 통합 여부를 확인한다. 서버 코드의 합성 검증과 실제 Supabase/Drive 연결 상태는 [백엔드 운영 준비](백엔드_운영준비.md)를 따른다."+
+        "\n\n## 폴더별 담당과 책임\n\n"+table(["위치","계층/구분","담당","역할","Git 범위"],layout["directories"])+
+        "\n\n애플리케이션은 자신이 정의한 포트와 기존 계산 엔진을 사용한다. 인프라가 포트를 구현하며 프레젠테이션은 우리 서버의 허용 API 응답만 표시한다. data/는 비공개 실제 자료 위치이고 database/는 공유 가능한 DB 정의 위치다. FastAPI HTTP 진입점은 infrastructure/의 조립 어댑터다."+
+        "\n\n## 로컬과 외부의 비공개 영역\n\n"+table(["위치","확인/공유 상태","역할"],layout["private_locations"])+
+        "\n\n이 표는 자료 보관 위치와 제외 규칙을 설명한다. 원자료 파일명·학생 정보·발행 명부 내용·폴더 ID·접속값은 문서에 넣지 않는다. scripts/와 tests/는 공유 파일과 로컬 전용 파일이 함께 있을 수 있다. 공유 가능한 파일 여부는 루트 .gitignore와 Git 추적 목록으로 확인한다."+
+        "\n\n## 서버 작업을 시작할 파일\n\n"+table(["파일","진입점/역할"],layout["entry_points"])+
+        "\n\n## 기존 계산 엔진\n\n아래 파일은 src/jungsi_touch/ 루트에 있으며 애플리케이션 라이브러리로 재사용한다.\n\n"+table(["모듈","역할"],layout["engine_groups"])+
+        "\n\n## 새 작업을 둘 위치\n\n"+table(["작업","위치","작성 기준"],layout["change_placement"])+
+        "\n\n## 공유 실행 도구\n\n"+tools+
+        "\n\n그 밖의 로컬 자료 작업 스크립트는 기본 Git 제외다. 허용 목록은 service_spec.json.workflow.shared_tools와 루트 .gitignore에서 함께 관리한다."+
+        "\n\n## 함께 읽을 현재 문서\n\n"+references+
+        "\n\n## develop에서 계속 관리하는 방법\n\n"+"\n\n".join(layout["maintenance_rules"])+
+        "\n\n"+fence+"text\ngit branch --show-current\ngit rev-parse HEAD\npython -B scripts/check_project_consistency.py --write\n# 검토한 변경 파일만 경로를 지정해 stage\npython -B scripts/check_project_consistency.py --staged\npython -B scripts/run_committed_tests.py --staged\n"+fence)
 
 
 def generated_files(spec):
@@ -179,7 +203,7 @@ def generated_files(spec):
 "generated_routing_contract_no_web_runtime":"라우팅 계약; 웹 실행 앱 연결 전"
 }.get(r["status"],r["status"]),", ".join(r["requirements"])] for r in spec["implementation"]])
     files[spec["current_documents"]["architecture"]]=doc("정시터치 3티어 개발구조",
-       "3티어는 화면·업무 처리·저장소의 책임과 접근 경계를 나눈다. 현재 계산 모듈의 경로를 보존하고 새 권한·저장소 인터페이스를 계층에 배치한다. 서버 세 대를 요구하는 설계가 아니며 운영 기술과 배포 방식은 후속 결정이다.\n\n"+
+       "3티어는 화면·업무 처리·저장소의 책임과 접근 경계를 나눈다. 현재 계산 모듈의 경로를 보존하고 새 권한·저장소 인터페이스를 계층에 배치한다. 계층별 책임과 포트를 기준으로 구성하며 배포 환경과 실제 서버 연결 설정은 후속 구성이다.\n\n"+
        "## 계층과 의존 방향\n\n"+layers+
        "\n\n"+chr(96)*3+"mermaid\nflowchart LR\n  WEB[화면과 라우팅] --> API[인증된 서버와 업무 처리]\n  API --> ENGINE[성적 계산 엔진]\n  API --> PORT[저장소 인터페이스]\n  ADAPTER[비공개 저장소 어댑터] -.구현.-> PORT\n  ADAPTER --> DB[DB와 비공개 자료]\n"+chr(96)*3+
        "\n\n애플리케이션은 구체 DB 어댑터를 가져오지 않고 자신이 정의한 포트에 의존한다. 인프라가 포트를 구현한다. 프레젠테이션은 허용된 API 결과만 표시하며 Python 엔진·DB 비밀값·전체 환산표·곡선·모델을 포함하지 않는다.\n\n"+
@@ -248,6 +272,8 @@ def generated_files(spec):
             '## 12개 요청과 응답\n\n'+table(['API','메서드/경로','본문','쿼리','응답 DTO','키 필수'],[[o['id'],o['method']+' '+o['path'],'; '.join(o['http_contract']['body']) or '없음',', '.join(o['http_contract']['query']) or '없음',o['http_contract']['response']+'; '+o['contract_ref'],o['http_contract']['idempotency_key_required']] for o in spec['operations']])+'\n\n모든 HTTP 업무 서비스는 PlatformService.execute이며 FastAPI create_app이 경로를 등록한다. 요청은 operations[].http_contract, 응답은 해당 contract_ref를 따른다. overall.analyze의 HTTP 응답은 persisted report이고 내부 overall 필드만 기존 OverallAnalysisService의 jungsi.overall-analysis/v1 엔진 DTO다. 두 객체를 루트 응답으로 혼동하지 않는다.\n\n'+
             '## 오류와 대기\n\n오류 객체는 {status:error,error:{code},request_id}이며 비밀값·예외 원문을 포함하지 않는다. 자료 대기는 200 응답의 status=pending/reason_code와 값 null로 구분한다. 전체 분석이 pending이어도 입력 총점·과목 결과는 보존한다.\n\n'+table(['오류 코드','HTTP','의미'],platform['errors'])+'\n\n대학 계산의 개별 자료 해시/버전/승인 불일치는 해당 assessment의 pending이다. 카탈로그 전체 형식/승인 실패와 공급 서비스 실패는 503이다.\n\n'+
             '## 응답 객체\n\n'+'\n\n'.join(schemas)+'\n\n## 시간 표시\n\n서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.')
+    if spec.get("repository_layout"):
+        files[spec["current_documents"]["folder_structure"]]=doc("프로젝트 폴더 구조와 작업 위치",repository_layout_text(spec))
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_spec(spec):
