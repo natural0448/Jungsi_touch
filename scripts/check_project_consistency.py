@@ -141,6 +141,23 @@ def generated_files(spec):
        "## 확정 요구사항\n\n"+requirement_text+"\n\n## 이번 버전의 변경\n\n"+changes+"\n\n## 준비 상태와 후속 구현\n\n"+pending+
        "\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다."+collaboration["ownership"]+collaboration["drive"])
     operation_rows=[[o["id"],o["method"],o["path"],rights(o["member_tiers"]),"본인" if o["report_owner"] else "해당 없음","필요" if o["confirmed_score_profile"] else "불필요",o["response_scope"]] for o in spec["operations"]]
+    overall_contract=spec.get("overall_analysis_contract")
+    overall_section=""
+    if overall_contract:
+        overall_section=("## 2페이지 전체 분석 애플리케이션 계약\n\n"+
+            overall_contract["description"]+"\n\n서비스: "+overall_contract["application_service"]+
+            "\n\n필수 입력: "+", ".join(overall_contract["required_inputs"])+
+            ". 선택 입력: "+", ".join(overall_contract["optional_inputs"])+".\n\n"+
+            "\n".join("- "+r for r in overall_contract["input_rules"])+
+            "\n\n학생 응답: "+", ".join(overall_contract["response_fields"])+
+            ". 과목 필드: "+", ".join(overall_contract["subject_fields"])+
+            ". 누적 필드: "+", ".join(overall_contract["overall_fields"])+".\n\n"+
+            overall_contract["number_format"]+". "+overall_contract["tie_policy"]+".\n\n"+
+            "공급 포트: "+overall_contract["provider"]+".\n\n"+
+            table(["누적 대기 코드","이유"],overall_contract["pending_reasons"])+"\n\n"+
+            table(["오류 코드","HTTP 어댑터 상태","의미"],overall_contract["errors"])+
+            "\n\n응답 제외: "+"; ".join(overall_contract["excludes"])+".\n\n"+
+            overall_contract["integration"]+"\n\n")
     files[spec["current_documents"]["routing"]]=doc("정시터치 화면과 API 라우팅 명세",
        "화면 URL과 서버 API 계약을 같은 요구사항에 연결한다. 아래 API는 연결 예정 계약이며 HTTP 핸들러가 등록된 상태가 아니다. 기존 성적 엔진과 권한 기반 모듈을 연결할 때 이 계약을 따른다.\n\n"+
        "## 화면 경로\n\n"+table(["페이지","화면","경로","회원","역할"],page_rows)+
@@ -149,12 +166,13 @@ def generated_files(spec):
        "\n\n정적 경로 /offerings/search를 /offerings/{offering_id}보다 먼저 등록한다. report_id와 offering_id의 표기를 통일한다. 검색은 추천 목록과 조인해 대상을 줄이지 않는다.\n\n"+
        "## 권한과 응답 경계\n\n서버가 검증한 세션·현재 이용권으로 Actor를 만든다. 요청 본문의 회원등급·학생 ID를 신뢰하지 않는다. 미인증은 401, 일반가입자의 유료 요청은 403으로 차단하고 결과·건수·상세를 반환하지 않는다. 없는 리포트와 타인 소유 리포트는 같은 404로 처리한다. 본인 분석에 확인한 성적이 없으면 409와 보류 사유다.\n\n"+
        "권한 모듈은 HTTP 인증이나 응답 필드 제거 기능을 대신하지 않는다. 실제 핸들러에서 입력 검증, 운영 저장소 조회, 회원별 응답 객체, 분포·산식 승인 검사를 연결해야 한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n"+
-       "## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
+       overall_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
     layers=table(["계층","코드 위치","책임","허용 의존"],[[l["label"],", ".join(l["roots"]),l["responsibility"],", ".join(l["allowed_dependencies"])] for l in spec["layers"]])
     implementation=table(["파일","계층","현재 상태","요구사항"],[[r["path"],r["layer"],{
 "existing_math_foundation":"공통 계산 기반",
 "access_policy_foundation_no_HTTP_authentication":"권한 기반 모듈; 실제 인증과 HTTP 연결 전",
 "repository_interface":"저장소 인터페이스",
+"overall_analysis_service_no_HTTP_or_persistence":"2페이지 분석 서비스; HTTP·영속저장 연결 전",
 "synthetic_test_adapter_only":"합성 검산 전용 어댑터",
 "generated_routing_contract_no_web_runtime":"라우팅 계약; 웹 실행 앱 연결 전"
 }.get(r["status"],r["status"]),", ".join(r["requirements"])] for r in spec["implementation"]])
@@ -175,7 +193,7 @@ def generated_files(spec):
        "\n\n현재 기준의 출발 커밋은 "+spec["baseline_commit"]+"이다. 작업 시작 시 현재 브랜치·HEAD·변경 목록을 확인한다. 커밋하지 않은 다른 작업자의 코드나 로컬 전용 검수 결과를 구현의 확정 기준으로 취급하지 않는다.\n\n"+
        "## 한 변경에 포함할 내용\n\n요구사항과 페이지/API 경로를 공통 명세에 반영하고 해당 계층의 코드를 수정한다. 문서와 경로 카탈로그를 생성하고 검사·검산한 뒤 같은 커밋으로 올린다. 코드·공유 도구·워크플로·테스트 변경이 있으면 공통 명세와 현재 기획·라우팅 문서가 같은 변경 목록에 있어야 한다. 변경 메모에 실제 구현 범위를 기록한다. develop에서 검증한 PR만 main에 반영한다. main 반영 후에도 develop을 통합 개발 기준으로 유지한다.\n\n"+
        "## 문서 생성과 검사 명령\n\n"+
-       chr(96)*3+"text\n"+workflow["generate_command"]+"\ngit add .\n"+workflow["validate_command"]+"\n"+workflow["test_command"]+"\n"+chr(96)*3+
+       chr(96)*3+"text\n"+workflow["generate_command"]+"\n# 검토한 이번 작업 파일만 경로를 명시하여 stage\ngit add -- <reviewed-work-item-paths>\n"+workflow["validate_command"]+"\n"+workflow["test_command"]+"\n"+chr(96)*3+
        "\n\n검산은 선택한 Git 인덱스 또는 커밋의 파일을 새 outputs 폴더에 복사해서 실행한다. 커밋하지 않은 코드와 제외된 실제 데이터 의존 테스트를 섞지 않는다. 기존 파일·검산 폴더를 정리하거나 삭제하지 않는다.\n\n"+
        "## 로컬 훅과 GitHub 검사\n\n공통 문서·경로 계약·훅·새 계층 코드의 줄바꿈은 .gitattributes에서 LF로 고정해 Windows와 CI의 바이트 검사를 일치시킨다. 각 체크아웃에서 git config --local core.hooksPath .githooks를 설정한다. Python 경로가 필요하면 git config --local jungsi.python으로 실행기를 지정한다. pre-commit은 스테이징된 문서·코드·데이터 제외와 합성 테스트를 검사하고 pre-push는 main 직접 푸시를 차단한다. GitHub Actions의 검사 이름은 project-consistency다.\n\n"+
        "GitHub는 현재 비공개 저장소 보호 조회에 HTTP 403과 요금제 업그레이드 요구를 반환했다. 따라서 원격 PR·검사 통과 강제 보호는 활성화되지 않았다. 로컬 훅은 각 체크아웃에 적용되며 서버의 강제 보호와 같지 않다. 보호 지원 요금제에서 main에 PR·검사 통과, 강제 푸시·브랜치 삭제 금지 규칙을 적용한다. 저장소 비공개 상태는 유지한다.\n\n"+
@@ -186,6 +204,14 @@ def generated_files(spec):
         pages=[{k:p[k] for k in ["id","number","label","path","member_tiers","score_required_to_browse"]} for p in spec["pages"]],redirects=spec["redirects"],runtime_status="routing_contract_only")
     backend=dict(format="jungsi.application-routes/v1",spec_version=spec["version"],source_sha256=digest,
         pages=frontend["pages"],operations=spec["operations"],runtime_status="access_policy_foundation_no_HTTP_handlers")
+    if overall_contract:
+        frontend["overall_analysis_contract"]={key:overall_contract[key] for key in (
+            "operation","format","required_inputs","optional_inputs","input_rules",
+            "response_fields","exam_fields","subject_fields","overall_fields",
+            "overall_statuses","number_format","tie_policy","pending_reasons","errors",
+        )}
+        backend["overall_analysis_contract"]=overall_contract
+        backend["runtime_status"]="application_service_no_HTTP_handlers"
     files["apps/web/route_catalog.json"]=json.dumps(frontend,ensure_ascii=False,indent=2)+"\n"
     files["src/jungsi_touch/application/route_catalog.json"]=json.dumps(backend,ensure_ascii=False,indent=2)+"\n"
     files["apps/web/README.md"]=doc("정시터치 프레젠테이션 개발 기준","현재 경로와 회원별 화면 접근 범위는 route_catalog.json을 따른다. [현재 기획](../../docs/current/서비스_기획.md)과 [라우팅 명세](../../docs/current/라우팅_명세.md)를 함께 갱신한다. 기존 가상 화면은 기획 이력이며 이 폴더의 실행 앱이 아니다. 실제 화면 앱·인증·API 연결은 후속 작업이다.\n\n화면은 서버가 허용한 결과만 표시하고 자체 대학 계산이나 DB 직접 조회를 구현하지 않는다. 브라우저의 회원등급 선택값을 운영 권한으로 사용하지 않는다."+collaboration["presentation_intro"])
@@ -223,6 +249,15 @@ def validate_spec(spec):
             errors.append("Paid personal operation policy drift")
         unknown=set(re.findall(r"\{([^}]+)\}",row["path"]))-set(spec["routing_policy"]["template_placeholders"])
         if unknown:errors.append("Unregistered API parameter")
+    contract=spec.get("overall_analysis_contract")
+    if contract:
+        operation=next((o for o in ops if o["id"]=="overall.analyze"),None)
+        if not operation or operation["member_tiers"]!=["standard","paid"] or operation["report_owner"] or operation["confirmed_score_profile"]:
+            errors.append("Overall analysis access policy drift")
+        if operation and operation.get("application_service")!=contract["application_service"]:
+            errors.append("Overall analysis service reference drift")
+        if not contract["stateless"] or contract["http_handler_implemented"]:
+            errors.append("Overall application boundary drift")
     if spec["workflow"]["release_branch"]!="main" or spec["workflow"]["integration_branch"]!="develop":
         errors.append("Branch policy drift")
     return errors
