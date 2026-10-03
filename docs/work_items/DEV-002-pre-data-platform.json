@@ -1,0 +1,412 @@
+{
+  "format": "jungsi.work-item/v1",
+  "id": "DEV-002",
+  "title": "Supabase 기반 데이터 연동 전 백엔드와 UTC·서울시각 검수",
+  "date": "2026-10-03",
+  "status": "execution_authorized",
+  "authorization": "사용자는 데이터 연동 전 시스템 기획·개발 완료 여부를 확인하고 미완료 구현을 개발팀에 요청해 마무리하도록 지시했다. FastAPI + PostgreSQL을 승인한 뒤 Supabase 서버 기반, datetime UTC, 실제 입력 Asia/Seoul 및 서버 연동 검수를 명시했다.",
+  "repository": "https://github.com/natural0448/Jungsi_touch",
+  "base_branch": "develop",
+  "base_commit": "950cacce3bc5cad3f910f7584786b7936f7d8b9a",
+  "base_spec_version": "1.1.1",
+  "source_of_truth": "docs/current/service_spec.json; 본 지시의 승인 사항과 구현 계약을 공통 명세·생성 도구·문서에 함께 반영한다.",
+  "feature_branches": {
+    "planning": "feature/planning-pre-data-readiness",
+    "application": "feature/application-pre-data-platform",
+    "infrastructure": "feature/data-runtime-foundation",
+    "presentation": "별도 작업자가 최신 develop에서 feature/presentation-* 생성"
+  },
+  "requirements": [
+    "REQ-01",
+    "REQ-02",
+    "REQ-03",
+    "REQ-04",
+    "REQ-05",
+    "REQ-06",
+    "REQ-07",
+    "REQ-08",
+    "REQ-09",
+    "REQ-10",
+    "REQ-11",
+    "REQ-12",
+    "REQ-13",
+    "REQ-14",
+    "REQ-15",
+    "REQ-16",
+    "REQ-17",
+    "REQ-18",
+    "REQ-19"
+  ],
+  "new_required_contracts": [
+    "FastAPI·Supabase/PostgreSQL 운영 구성",
+    "UTC 저장·Asia/Seoul 입력·date-only 보존",
+    "전체 API 구현/검증/설정/실자료 상태 명부",
+    "자료 발행 승인·버전 호환·운영 준비 기준"
+  ],
+  "baseline_findings": {
+    "HTTP_handlers": "미구현",
+    "overall_analysis": "DEV-001 애플리케이션 서비스와 공급 포트는 develop에 통합됨",
+    "remaining_API_workflows": "11개 API의 실행 가능한 업무 서비스가 필요함",
+    "session_and_entitlement": "권한 정책 기반은 있음. 검증된 실제 서버 인증·이용권 어댑터가 필요함",
+    "persistence": "운영용 성적·리포트·선택목록·자료 릴리스 저장이 필요함",
+    "external_configuration": "실제 Supabase 프로젝트·접속 설정과 Drive 폴더·인증 설정은 아직 확인되지 않음",
+    "model_and_data": "실제 자료/모형의 승인·정확도 검수는 코드 합성 검증과 별개이며 자료팀의 기존 정리 근거를 재사용함"
+  },
+  "three_tier_scope": {
+    "presentation": "다른 작업자 담당. API 계약과 시간대 표시·권한/보류 응답을 인계한다. 현재 개발팀은 화면을 구현하지 않는다.",
+    "application": "프레임워크 독립 업무 서비스·권한·DTO·계산 오케스트레이션·저장/자료 포트를 담당한다.",
+    "infrastructure": "FastAPI HTTP 진입점·Supabase 인증·PostgreSQL 저장·환경 설정·UTC 처리·Drive API 공급 어댑터를 담당한다. 애플리케이션 소유 포트를 구현한다."
+  },
+  "approved_stack": {
+    "HTTP": "FastAPI",
+    "database": "Supabase PostgreSQL",
+    "server_time_zone": "UTC",
+    "database_session_time_zone": "UTC",
+    "source_time_zone": "Asia/Seoul",
+    "secret_configuration": "Git 제외 .env 계열/서버 환경변수/비공개 설정에 보관. .env.example도 커밋하지 않는다.",
+    "authentication": "Supabase 서버 검증 사용자/세션을 Actor로 변환하며 활성 이용권·만료는 서버 저장소에서 판정한다.",
+    "payment_scope": "이용권 검증/저장을 구현한다. 결제 사업자·체크아웃·상담자 위임을 임의 확정하거나 실제 결제 완료로 표시하지 않는다.",
+    "production_mode": "외부 설정이 없을 때 합성 인증·관리자·메모리 자료로 운영 모드를 자동 대체하지 않는다."
+  },
+  "API_acceptance": [
+    {
+      "id": "history.search",
+      "method": "GET",
+      "path": "/api/v1/admission-history",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-01"
+      ],
+      "response_scope": "공식 대학 발표 결과만",
+      "acceptance": "공식 발표 지표·단위·출처·학년도만 반환. 자체 예상값으로 공란을 채우지 않는다."
+    },
+    {
+      "id": "recruitment.read",
+      "method": "GET",
+      "path": "/api/v1/offerings/{offering_id}/recruitment",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-13"
+      ],
+      "response_scope": "공식 군·모집인원·변경·기준일·확정 상태",
+      "acceptance": "최초·변경·최종 모집인원과 모집군·기준일·확정 상태를 구분한다. 미공개와 실제 0을 구분한다."
+    },
+    {
+      "id": "score-profile.create",
+      "method": "POST",
+      "path": "/api/v1/score-profiles",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-02",
+        "REQ-12",
+        "REQ-14"
+      ],
+      "response_scope": "본인에게 귀속되는 성적 프로필의 생성 결과",
+      "acceptance": "시험별 입력을 검증하고 서버 사용자에게 귀속되는 확인된 성적 버전을 새로 저장한다. 이전 버전을 보존한다."
+    },
+    {
+      "id": "overall.analyze",
+      "method": "POST",
+      "path": "/api/v1/overall-reports",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-02",
+        "REQ-07",
+        "REQ-12",
+        "REQ-14",
+        "REQ-15"
+      ],
+      "response_scope": "입력 검증 후 본인의 총점·승인 전체 누적·자료 상태",
+      "application_service": "jungsi_touch.application.overall_analysis.OverallAnalysisService.analyze",
+      "contract_ref": "overall_analysis_contract",
+      "implementation_status": "application_service_no_HTTP_handler",
+      "acceptance": "DEV-001 엔진을 재사용해 총점·과목·승인 전체 누적을 산출하고 본인 리포트와 자료 버전을 저장한다."
+    },
+    {
+      "id": "report.read",
+      "method": "GET",
+      "path": "/api/v1/reports/{report_id}",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-02",
+        "REQ-14"
+      ],
+      "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외",
+      "acceptance": "본인 리포트를 회원 권한에 맞게 조회한다. 일반회원 응답에는 대학 분석과 선택목록의 유료 결과를 넣지 않는다."
+    },
+    {
+      "id": "offerings.search",
+      "method": "GET",
+      "path": "/api/v1/offerings/search",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-03",
+        "REQ-14"
+      ],
+      "response_scope": "전체 서비스 카탈로그의 결과·건수; 성적·추천 여부로 축소하지 않음",
+      "acceptance": "유료회원에게 전체 서비스 카탈로그를 검색한다. 추천이나 성적 존재 여부로 대상과 건수를 줄이지 않는다."
+    },
+    {
+      "id": "offering.read",
+      "method": "GET",
+      "path": "/api/v1/offerings/{offering_id}",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-03",
+        "REQ-14"
+      ],
+      "response_scope": "모집단위 기본 상세; 개인 분석은 별도 권한·입력 확인",
+      "acceptance": "유료회원의 모집행 상세 조회는 성적 미입력과 관계없이 허용한다. 개인 판정과 공식 기본 정보를 구분한다."
+    },
+    {
+      "id": "university.analyze",
+      "method": "POST",
+      "path": "/api/v1/reports/{report_id}/university-results",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": true,
+      "requirements": [
+        "REQ-05",
+        "REQ-06",
+        "REQ-08",
+        "REQ-14"
+      ],
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유",
+      "acceptance": "승인된 시험·연도보정·해당 연도 공식 환산·분포·입결/예상기준을 연결한다. 개인 환산·지원구간·유불리를 별도 산출한다."
+    },
+    {
+      "id": "candidates.build",
+      "method": "POST",
+      "path": "/api/v1/reports/{report_id}/candidates",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": true,
+      "requirements": [
+        "REQ-04",
+        "REQ-05",
+        "REQ-09",
+        "REQ-14"
+      ],
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드",
+      "acceptance": "승인된 기준으로 학교 후보와 실제 모집행의 판단을 연결한다. 기본 후보/와일드카드와 근거를 구분하고 학교 분류를 학과에 복사하지 않는다."
+    },
+    {
+      "id": "shortlist.update",
+      "method": "PUT",
+      "path": "/api/v1/reports/{report_id}/shortlist/{offering_id}",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-11",
+        "REQ-14"
+      ],
+      "response_scope": "우리 서비스 핵심 지원 학교의 선택 상태",
+      "acceptance": "본인 리포트의 모집행 선택 상태를 멱등 변경하고 이전 상태·시각·버전을 보존한다. 외부 서비스로 성적을 보내지 않는다."
+    },
+    {
+      "id": "report.export",
+      "method": "GET",
+      "path": "/api/v1/reports/{report_id}/print",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": true,
+      "requirements": [
+        "REQ-11",
+        "REQ-14"
+      ],
+      "response_scope": "발행 버전이 고정된 본인 전체 상담 리포트",
+      "acceptance": "본인 확인 성적과 고정된 발행 버전으로 상담 리포트 DTO를 반환한다. UI/인쇄/PDF 렌더링은 별도 프레젠테이션 담당이다."
+    },
+    {
+      "id": "statistics.read",
+      "method": "GET",
+      "path": "/api/v1/reports/{report_id}/offerings/{offering_id}/live-statistics",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": true,
+      "requirements": [
+        "REQ-10",
+        "REQ-14"
+      ],
+      "response_scope": "추천·선택 인원과 본인 순위·동점·갱신 상태; 타인 성적 제외",
+      "acceptance": "추천/선택 학생을 각각 중복 제거하고 같은 모집행·환산 규칙·성적 버전의 본인 순위/동점/갱신 시각을 제공한다. 타인 성적은 노출하지 않는다."
+    }
+  ],
+  "system_workflows": [
+    {
+      "id": "WF-01",
+      "flow": "검증 세션 → 서버 이용권/UTC 만료 → 회원·소유권 검사 → 업무 서비스",
+      "invariant": "요청의 owner/member_type/paid 플래그는 권한 근거가 될 수 없다. 유료 차단은 403, 타인/없는 리포트는 구별 없이 404."
+    },
+    {
+      "id": "WF-02",
+      "flow": "성적 검증 → 확인된 새 프로필 버전 → 전체 분석 → 버전이 고정된 본인 리포트",
+      "invariant": "재입력은 이전 자료를 보존한다. 프로필·보고서·집계의 revision 불일치와 중복 요청을 처리한다."
+    },
+    {
+      "id": "WF-03",
+      "flow": "공식 카탈로그 검색/모집변경 → 개인 환산/지원검토/유불리 → 후보 → 선택 → 상담 리포트/집계",
+      "invariant": "기본 검색은 성적이 없어도 가능하다. 각 계산 단계는 승인·호환 자료의 성공 경로와 누락/미승인 대기 경로를 모두 구현한다."
+    },
+    {
+      "id": "WF-04",
+      "flow": "비공개 Drive API 자료 → 파일/버전/해시/출처/timezone 명부 → 형식·호환성 검수 → 승인 릴리스 → 서버 공급 포트",
+      "invariant": "수정시간이 가장 최신이라는 이유만으로 승인하지 않는다. 읽기 폴더/발행 버전은 서버에서 고정한다. 검수 실패 자료는 발행하지 않는다."
+    },
+    {
+      "id": "WF-05",
+      "flow": "애플리케이션 결과/감사 → 서버에 설정한 비공개 결과 폴더에 새 파일/버전 기록",
+      "invariant": "원본·이전 버전·실제 사용자 자료 접근 범위를 보존한다. 재시도/중복 쓰기/충돌은 식별자·해시로 판정하고 임의 파일 정리를 하지 않는다."
+    },
+    {
+      "id": "WF-06",
+      "flow": "추천/선택 상태 이벤트 → PostgreSQL 트랜잭션/버전 → 학생 중복 제거 집계/본인 순위 → 갱신 상태",
+      "invariant": "최초 구성은 확정 PostgreSQL에서 정합성을 검수한다. Kafka/Redis 제안은 운영 채택·실측 없이 구축 완료로 기록하지 않는다."
+    },
+    {
+      "id": "WF-07",
+      "flow": "환경 설정/헬스/DB·인증 가용성 → 안전한 오류·대기 사유 → 비공개 운영 기록",
+      "invariant": "로그와 HTTP 응답에 비밀값·학생 원성적·전체 분포·DB 접속문자열을 넣지 않는다. 운영 연결 확인과 단위/합성 검증을 분리한다."
+    }
+  ],
+  "datetime_contract": {
+    "instant_storage": "시간 포함 필드는 timezone-aware datetime으로 받고 PostgreSQL timestamptz로 저장한다. API는 UTC ISO 8601 Z로 직렬화한다. 서버와 DB 세션 기준은 UTC이며 default now()도 timestamptz를 유지한다.",
+    "source_conversion": "Asia/Seoul 원본 시각은 해당 timezone을 해석한 뒤 UTC로 변환한다. aware 시각의 tzinfo를 UTC로 바꾸는 재라벨링은 허용하지 않는다.",
+    "naive_input": "소스 계약이 Asia/Seoul을 명시한 입력에만 naive 지역시각을 허용한다. 계약 없는 입력·timezone/offset 불일치·잘못된 날짜·정밀도 정책 밖 입력은 사유와 함께 거절한다.",
+    "provenance": "필요한 소스 시각/원본 timezone/기준일/자료 버전을 별도 필드로 보존한다. timestamptz만으로 원본 timezone이 보존된다고 가정하지 않는다.",
+    "date_only": "모집요강의 시각 없는 날짜는 Python date/PostgreSQL date/ISO YYYY-MM-DD로 보존한다. 자정을 임의로 붙여 UTC 날짜로 이동시키지 않는다.",
+    "local_day_query": "서울 달력 날짜의 조회 범위는 [해당 날짜 서울 00:00, 다음 날짜 서울 00:00)을 UTC로 변환한다. UTC 날짜 문자열 비교로 서울 하루를 조회하지 않는다.",
+    "clock": "권한 만료·감사·리포트 발행·갱신/정렬은 UTC aware clock을 사용한다. 테스트는 주입 clock으로 만료 직전·동일시각·직후를 검수한다.",
+    "runtime": "Windows/서버에서 IANA Asia/Seoul ZoneInfo 데이터가 존재하는지 확인하고 필요한 tzdata 의존성을 명시한다.",
+    "pooling": "접속/트랜잭션 경계에서 UTC 세션 정책을 보장한다. 연결 풀 재사용에서 세션 timezone이 바뀌어도 instant와 date가 바뀌지 않도록 검수한다."
+  },
+  "datetime_test_cases": [
+    {
+      "case": "서울 자정·연도 경계",
+      "input": "2027-01-01T00:00:00+09:00",
+      "expected_UTC": "2026-12-31T15:00:00Z",
+      "synthetic": true
+    },
+    {
+      "case": "윤년·월 경계",
+      "input": "2024-03-01T00:00:00+09:00",
+      "expected_UTC": "2024-02-29T15:00:00Z",
+      "synthetic": true
+    },
+    {
+      "case": "소수초 왕복",
+      "input": "2027-01-01T00:00:00.123456+09:00",
+      "expected_UTC": "2026-12-31T15:00:00.123456Z",
+      "synthetic": true
+    },
+    {
+      "case": "date-only",
+      "input": "2027-01-01",
+      "expected_date": "2027-01-01",
+      "synthetic": true
+    },
+    {
+      "case": "동일 instant 비교",
+      "input": [
+        "2027-01-01T00:00:00+09:00",
+        "2026-12-31T15:00:00Z"
+      ],
+      "expected": "UTC 저장·정렬·만료 비교가 동일",
+      "synthetic": true
+    },
+    {
+      "case": "naive 계약 없음/잘못된 offset",
+      "expected": "입력 거절, 머신 timezone 추측 없음",
+      "synthetic": true
+    },
+    {
+      "case": "서울 날짜 범위",
+      "input": "2027-01-01",
+      "expected_UTC_range": [
+        "2026-12-31T15:00:00Z",
+        "2027-01-01T15:00:00Z"
+      ],
+      "end_exclusive": true,
+      "synthetic": true
+    },
+    {
+      "case": "Supabase 실제 접속",
+      "expected": "SHOW TIMEZONE/clock 확인 및 기존 테이블을 건드리지 않는 timestamptz·date SQL 왕복 검수; 접속 설정 없으면 not_run_configuration_missing으로 보고",
+      "synthetic": true
+    }
+  ],
+  "acceptance_gates": [
+    "12개 API 각각에 기획/서비스/HTTP/저장/검증/외부 설정/실제 자료 상태와 코드·테스트 참조를 기록한다.",
+    "승인된 합성 공급자로 전체 분석→대학 엔진→추천→선택→상담 리포트→집계의 성공 업무 흐름을 검증한다. 모든 값을 pending으로 반환하는 형식만으로 완료 처리하지 않는다.",
+    "자료/모형 승인·학년도·시험·집단·동점·환산/보정 버전이 불일치하면 허위값 없이 사유 있는 pending으로 처리한다.",
+    "익명/만료/일반/유료/타인 접근, 내부 DTO 유출, 재시도/중복/프로필 버전, timestamp/date 경계를 변경 범위 테스트로 검수한다.",
+    "DB 정의·마이그레이션은 원본·이전 상태를 보존하는 추가 방식으로 준비한다. reset/drop/delete/동기화 정리나 로컬 파일 삭제를 수행하지 않는다.",
+    "Supabase 실서버 인증·DB 시간대/형식과 Drive 실제 읽기/쓰기 검수는 연결 설정 후 별도 실행 증거로 기록한다. 합성 테스트 통과와 동일시하지 않는다.",
+    "공통 service_spec·생성 도구·현행 문서·코드·검증을 같은 커밋에 반영하고 로컬 훅·GitHub project-consistency를 통과시킨다.",
+    "기획팀 검토 후 feature PR을 develop에 통합하고 실제 운영 대기 항목을 정확히 남긴다. main 직접 푸시·무검증 배포를 하지 않는다."
+  ],
+  "verification_policy": "GitHub 확정 커밋과 변경 파일·필수 계약/합성 스냅샷 검산을 기준으로 한다. 기존 학교별 정리본·검수 근거를 재사용하며 이 구현 때문에 원자료 전수검사·PDF 재수집·전국 재집계를 반복하지 않는다.",
+  "definition_of_done": {
+    "code_pre_data": "12개 API/업무/포트/HTTP/저장 정의/인증 어댑터/운영 설정·헬스/UTC 처리가 구현되고 합성 성공·실패 검증과 필수 CI를 통과하여 develop에 통합됨",
+    "live_server": "실제 Supabase 프로젝트에 서버 연결·검증 인증·DB timezone 및 timestamptz/date 왕복을 확인한 실행 증거가 있음",
+    "live_data": "비공개 Drive 설정·승인 자료/모형을 연결하고 기존 근거를 사용한 변경 범위 실제 검산이 있음",
+    "presentation": "별도 담당자의 feature PR과 검증으로 연결. 현재 개발팀 구현 완료에 합산하지 않음"
+  },
+  "coordination": {
+    "planning": "승인 범위·인수 기준·GitHub PR/CI/변경 범위 검토와 develop 통합",
+    "development": "FastAPI·Supabase 운영 어댑터/업무/공통 명세·생성 문서/합성 검증/PR",
+    "data": "기존 사용자 지시 입결 작업 유지. 입력 원본 시각·date 구분 및 승인 자료/버전/해시를 비공개 인계",
+    "presentation": "화면/인쇄 등 별도 feature. 서버 UTC instant는 표시 경계에서 Asia/Seoul로 변환하고 date-only는 그대로 표시"
+  },
+  "references": [
+    "https://supabase.com/docs/guides/database/postgres/configuration",
+    "https://www.postgresql.org/docs/current/datatype-datetime.html",
+    "https://docs.python.org/3/library/datetime.html",
+    "https://docs.python.org/3/library/zoneinfo.html",
+    "https://supabase.com/docs/reference/python/auth-getuser"
+  ]
+}
