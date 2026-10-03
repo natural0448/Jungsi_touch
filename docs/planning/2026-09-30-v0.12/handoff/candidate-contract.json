@@ -604,5 +604,8 @@
       "publish_unapproved_probabilities"
     ],
     "three_tier": "server_computes_versioned_results; UI_renders_authorized_results_only"
-  }
+  },
+  "document_role": "historical_snapshot",
+  "current_spec_path": "docs/current/service_spec.json",
+  "current_routing_path": "docs/current/라우팅_명세.md"
 }

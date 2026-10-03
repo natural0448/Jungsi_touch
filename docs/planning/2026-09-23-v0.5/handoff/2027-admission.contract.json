@@ -73,5 +73,8 @@
   "limits": [
     "2027전형정보 추가는 과거 입시결과 조회창의 4개 학년도 확정을 의미하지 않는다.",
     "가상 예시는 운영 입시정보로 발행하지 않는다."
-  ]
+  ],
+  "document_role": "historical_snapshot",
+  "current_spec_path": "docs/current/service_spec.json",
+  "current_routing_path": "docs/current/라우팅_명세.md"
 }

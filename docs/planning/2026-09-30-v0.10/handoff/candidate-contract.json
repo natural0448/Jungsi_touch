@@ -496,5 +496,8 @@
     "ranking": "query_relevance_and_catalog_order_not_personal_favorability",
     "scope_exception": "existing_service_exclusion_of_practical_exam_offerings",
     "access_interpretation": "기본 검색과 정보 조회는 1페이지 기본조회 정책을 적용하고 개인 분석의 기존 유료 정책을 유지한다; 비회원 접근 정책은 별도 확정하지 않음"
-  }
+  },
+  "document_role": "historical_snapshot",
+  "current_spec_path": "docs/current/service_spec.json",
+  "current_routing_path": "docs/current/라우팅_명세.md"
 }

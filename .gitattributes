@@ -1,0 +1,13 @@
+# Exact generated contracts and executable hooks use LF on every platform.
+/.gitattributes text eol=lf
+/.githooks/** text eol=lf
+/.github/** text eol=lf
+/docs/current/** text eol=lf
+/apps/web/** text eol=lf
+/database/** text eol=lf
+/src/jungsi_touch/application/** text eol=lf
+/src/jungsi_touch/infrastructure/** text eol=lf
+/scripts/check_project_consistency.py text eol=lf
+/scripts/run_committed_tests.py text eol=lf
+/tests/test_access_policy.py text eol=lf
+/tests/test_project_consistency.py text eol=lf

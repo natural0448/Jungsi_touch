@@ -124,5 +124,8 @@
   "examples": [
     "history.mock.json",
     "entitlements.mock.json"
-  ]
+  ],
+  "document_role": "historical_snapshot",
+  "current_spec_path": "docs/current/service_spec.json",
+  "current_routing_path": "docs/current/라우팅_명세.md"
 }

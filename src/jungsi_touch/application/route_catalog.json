@@ -1,0 +1,241 @@
+{
+  "format": "jungsi.application-routes/v1",
+  "spec_version": "1.0.0",
+  "source_sha256": "6135fe35fd94379e4561cc32de93761169a0ec5b9e7a714ff43416bc446011a5",
+  "pages": [
+    {
+      "id": "PAGE-01",
+      "number": 1,
+      "label": "대학 발표 입시결과",
+      "path": "/admissions/results",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "score_required_to_browse": false
+    },
+    {
+      "id": "PAGE-02",
+      "number": 2,
+      "label": "내 성적 리포트",
+      "path": "/reports/me",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "score_required_to_browse": false
+    },
+    {
+      "id": "PAGE-03",
+      "number": 3,
+      "label": "전체 대학·학과 가능성 보기",
+      "path": "/admissions/possibilities",
+      "member_tiers": [
+        "paid"
+      ],
+      "score_required_to_browse": false
+    },
+    {
+      "id": "PAGE-04",
+      "number": 4,
+      "label": "유리한 대학 찾기",
+      "path": "/admissions/favorable",
+      "member_tiers": [
+        "paid"
+      ],
+      "score_required_to_browse": false
+    }
+  ],
+  "operations": [
+    {
+      "id": "history.search",
+      "method": "GET",
+      "path": "/api/v1/admission-history",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-01"
+      ],
+      "response_scope": "공식 대학 발표 결과만"
+    },
+    {
+      "id": "recruitment.read",
+      "method": "GET",
+      "path": "/api/v1/offerings/{offering_id}/recruitment",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-13"
+      ],
+      "response_scope": "공식 군·모집인원·변경·기준일·확정 상태"
+    },
+    {
+      "id": "score-profile.create",
+      "method": "POST",
+      "path": "/api/v1/score-profiles",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-02",
+        "REQ-12",
+        "REQ-14"
+      ],
+      "response_scope": "본인에게 귀속되는 성적 프로필의 생성 결과"
+    },
+    {
+      "id": "overall.analyze",
+      "method": "POST",
+      "path": "/api/v1/overall-reports",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-02",
+        "REQ-07",
+        "REQ-12"
+      ],
+      "response_scope": "입력 검증 후 본인의 총점·승인 전체 누적·자료 상태"
+    },
+    {
+      "id": "report.read",
+      "method": "GET",
+      "path": "/api/v1/reports/{report_id}",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-02",
+        "REQ-14"
+      ],
+      "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외"
+    },
+    {
+      "id": "offerings.search",
+      "method": "GET",
+      "path": "/api/v1/offerings/search",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-03",
+        "REQ-14"
+      ],
+      "response_scope": "전체 서비스 카탈로그의 결과·건수; 성적·추천 여부로 축소하지 않음"
+    },
+    {
+      "id": "offering.read",
+      "method": "GET",
+      "path": "/api/v1/offerings/{offering_id}",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-03",
+        "REQ-14"
+      ],
+      "response_scope": "모집단위 기본 상세; 개인 분석은 별도 권한·입력 확인"
+    },
+    {
+      "id": "university.analyze",
+      "method": "POST",
+      "path": "/api/v1/reports/{report_id}/university-results",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": true,
+      "requirements": [
+        "REQ-05",
+        "REQ-06",
+        "REQ-08",
+        "REQ-14"
+      ],
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유"
+    },
+    {
+      "id": "candidates.build",
+      "method": "POST",
+      "path": "/api/v1/reports/{report_id}/candidates",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": true,
+      "requirements": [
+        "REQ-04",
+        "REQ-05",
+        "REQ-09",
+        "REQ-14"
+      ],
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드"
+    },
+    {
+      "id": "shortlist.update",
+      "method": "PUT",
+      "path": "/api/v1/reports/{report_id}/shortlist/{offering_id}",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-11",
+        "REQ-14"
+      ],
+      "response_scope": "우리 서비스 핵심 지원 학교의 선택 상태"
+    },
+    {
+      "id": "report.export",
+      "method": "GET",
+      "path": "/api/v1/reports/{report_id}/print",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": true,
+      "requirements": [
+        "REQ-11",
+        "REQ-14"
+      ],
+      "response_scope": "발행 버전이 고정된 본인 전체 상담 리포트"
+    },
+    {
+      "id": "statistics.read",
+      "method": "GET",
+      "path": "/api/v1/reports/{report_id}/offerings/{offering_id}/live-statistics",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": true,
+      "confirmed_score_profile": true,
+      "requirements": [
+        "REQ-10",
+        "REQ-14"
+      ],
+      "response_scope": "추천·선택 인원과 본인 순위·동점·갱신 상태; 타인 성적 제외"
+    }
+  ],
+  "runtime_status": "access_policy_foundation_no_HTTP_handlers"
+}
