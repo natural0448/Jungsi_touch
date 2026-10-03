@@ -101,3 +101,14 @@
 - 모든 구현은 프레젠테이션·애플리케이션·데이터 계층을 따른다. 프레젠테이션에서 엔진·비공개 데이터·운영 DB에 접근하지 않는다. 애플리케이션은 자신이 정의한 저장소 포트에 의존하고 인프라가 구현한다.
 - 문서 일치·코드 참조·계층 의존·데이터 제외 검사와 해당 Git 스냅샷 검산을 통과한 변경만 main에 반영한다. 현재 훅은 각 체크아웃에서 활성화한다. GitHub 요금제에 따른 원격 강제 보호 미지원과 로컬 훅을 구분한다.
 - 과거 기획·API 계약·시안은 이력으로 표시해 보존한다. 이 지시는 파일·폴더·이전 버전·작업 결과의 삭제를 허용하지 않는다.
+
+
+## 상시 4개 브랜치와 통합 경로 2026년 10월 4일 사용자 지시
+
+- 브랜치 정본은 develop의 docs/current/service_spec.json.workflow.branch_governance와 생성된 docs/current/개발_브랜치_운영.md다. 기본 노드는 main·develop·feature/application-pre-data-platform·feature/presentation-foundation 네 개다.
+- main은 모든 작업 완료 후 코드·문서·검증·인계를 정리한 라이브 배포 전 후보다. release_gate의 모든 체크와 증거를 완료한 develop의 PR만 받으며 main 병합과 실제 배포 승인은 구분한다.
+- 시스템기획팀만 develop에서 기획 정본·생성 문서·브랜치/검사 공통 설정을 직접 변경한다. 해당 셸에서 JUNGSI_TEAM=planning을 선언하고 훅을 적용한다. 이 선언은 신원 인증이나 원격 권한 분리가 아니다. 다른 팀의 업무·화면·DB 구현은 담당 브랜치의 PR로 통합한다.
+- 시스템·콘텐츠 개발자는 기존 feature/application-pre-data-platform, 화면 개발자는 기존 feature/presentation-foundation을 상시 재사용한다. 3티어는 폴더·포트·의존 방향이며 작업/에이전트마다 브랜치를 만들지 않는다.
+- 필요한 임시 작업은 생성 전 기획팀이 develop에 부모·PR 대상·담당·사유·출발 SHA를 등록한다. 임시 개발 PR은 등록된 직계 부모로, 상시 개발 PR은 develop으로, 최종 develop PR은 main으로 올린다. 기존 PR #5/#7/#9 예외와 종료 브랜치는 정본 등록 상태를 따른다.
+- 상시 브랜치의 누적 이력을 유지하도록 GitHub merge commit만 사용하며 squash/rebase 병합과 병합 후 자동 삭제를 끈다. 강제 갱신·미허용 ref 삭제·로컬 파일/worktree/잠금/캐시 삭제는 하지 않는다. 종료 ref는 새 개발에서 제외하되 정확한 삭제 대상·범위를 허용받기 전 보존한다.
+- 각 체크아웃에서 로컬 훅을 활성화하고 브랜치 정책·문서·계층·데이터 제외·Git 스냅샷 검산을 확인한다. 현재 비공개 GitHub 요금제의 원격 강제 보호 미지원과 훅/CI 검사를 구분한다.

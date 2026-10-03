@@ -3,5 +3,6 @@ task_python="$(git config --get jungsi.python || true)"
 if [ -z "$task_python" ]; then
   if command -v python3 >/dev/null 2>&1; then task_python=python3; else task_python=python; fi
 fi
+"$task_python" -B -X utf8 scripts/check_branch_policy.py --staged || exit 1
 "$task_python" -B -X utf8 scripts/check_project_consistency.py --staged || exit 1
 exec "$task_python" -B -X utf8 scripts/run_committed_tests.py --staged
