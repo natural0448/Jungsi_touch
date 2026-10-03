@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.2.1",
-  "source_sha256": "64a4138dc50f2057d82bac30999863a2c835500d1d215322a40262f636fb2ca6",
+  "spec_version": "1.2.2",
+  "source_sha256": "43d1a9ef08ac1de275050921955fb71875099085b29393eaec5c25c2a16a1442",
   "pages": [
     {
       "id": "PAGE-01",

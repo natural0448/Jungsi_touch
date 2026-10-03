@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.2.1",
-  "source_sha256": "64a4138dc50f2057d82bac30999863a2c835500d1d215322a40262f636fb2ca6",
+  "spec_version": "1.2.2",
+  "source_sha256": "43d1a9ef08ac1de275050921955fb71875099085b29393eaec5c25c2a16a1442",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1100,7 +1100,7 @@
       "source_time": "Drive createdTime/modifiedTime은 자체 RFC3339 aware 시각이다. 명부 source_timezone은 내용의 naive 소스 시각에만 적용하고 원본 metadata Z를 재라벨링하지 않는다.",
       "write": "ReportPublicationService → ArtifactResultWriter.append_result. 입력과 다른 결과 폴더에 사용자/작업/키 identity와 내용 해시를 결속한 새 파일 POST만 한다. GET 재시도 조회로 동일 해시를 재사용하고 충돌/불명확 결과를 별도 코드로 처리한다. 삭제/휴지통/덮어쓰기 없음."
     },
-    "verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.",
+    "verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.\n\n기획팀 검토 후 [PR #8](https://github.com/natural0448/Jungsi_touch/pull/8)을 develop 03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced에 병합했다. 검토한 기능 커밋 c5376f0d8674cf82add0959abec385682f14cd4f의 [GitHub CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288)에서 합성 테스트 228개와 문서·코드 참조·계층·비공개 데이터 제외 검사가 통과했다. 실제 Supabase·Drive 연결과 원자료/모형 검수는 설정 대기이며 이 통과에 포함되지 않는다.",
     "remaining": [
       "실제 Supabase 프로젝트·서버 역할·TLS·Auth 검증 사용자와 활성 이용권 설정 및 readonly probe 증거",
       "운영 DB에 추가 마이그레이션 적용 후 실제 UTC/timestamptz/date 및 권한/소유권 트랜잭션 검수",
@@ -1109,6 +1109,27 @@
       "배포/HTTPS·CORS origin·비공개 운영 진단·이용권 발행/결제 운영 연결",
       "별도 프레젠테이션 feature에서 로그인 토큰·이 API DTO·서울 시각 표시·인쇄 UI 연결",
       "대규모 집계 성능/갱신 주기 실측; Kafka/Redis 미채택"
-    ]
+    ],
+    "acceptance": {
+      "status": "code_accepted_on_develop_live_configuration_pending",
+      "reviewed_feature_commit": "c5376f0d8674cf82add0959abec385682f14cd4f",
+      "integrated_develop_commit": "03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/8",
+      "ci": {
+        "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288",
+        "tested_commit": "c5376f0d8674cf82add0959abec385682f14cd4f",
+        "synthetic_tests_passed": 228,
+        "conclusion": "SUCCESS"
+      },
+      "code_scope": "12개 FastAPI 업무 API, Supabase 서버 인증, PostgreSQL 저장/멱등/소유권, Drive 승인 자료 읽기·별도 산출 쓰기, UTC·Asia/Seoul·date-only 계약",
+      "live_server_status": "not_run_configuration_missing",
+      "live_data_status": "not_run_configuration_missing",
+      "remaining": [
+        "실제 Supabase 프로젝트·서버 접속·검수 사용자·이용권과 추가 스키마 적용",
+        "실제 UTC/timestamptz/date 및 인증·소유권 왕복 검수",
+        "Drive 계정·입출력 폴더·토큰 갱신·승인 자료/모형과 실제 읽기/쓰기 검수",
+        "별도 프레젠테이션 구현 및 배포·결제 운영 연결"
+      ]
+    }
   }
 }
