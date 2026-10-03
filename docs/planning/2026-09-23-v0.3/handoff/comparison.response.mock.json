@@ -1,0 +1,38 @@
+{
+  "data_kind": "synthetic",
+  "request_id": "demo-request-001",
+  "academic_year": 2026,
+  "public_release_id": "demo-release-v03",
+  "results": [
+    {
+      "offering_id": "demo-offering-a",
+      "calculation_status": "calculated",
+      "converted_score": 850.2,
+      "score_maximum": 1000,
+      "percentile": {
+        "status": "estimated",
+        "ratio_gt": 0.024,
+        "ratio_ge": 0.026,
+        "population_label": "가상 비교집단",
+        "estimate_notice": "동점 구간 표시를 위한 합성값. 실제 모델·대학 결과 아님.",
+        "unavailable_reason": null
+      },
+      "source_label": "화면 개발용 합성 결과"
+    },
+    {
+      "offering_id": "demo-offering-b",
+      "calculation_status": "calculated",
+      "converted_score": 705.4,
+      "score_maximum": 800,
+      "percentile": {
+        "status": "unavailable",
+        "ratio_gt": null,
+        "ratio_ge": null,
+        "population_label": "가상 비교집단",
+        "estimate_notice": "환산점수는 있고 누적분포가 미검증인 화면 상태의 예시.",
+        "unavailable_reason": "model_unvalidated"
+      },
+      "source_label": "화면 개발용 합성 결과"
+    }
+  ]
+}

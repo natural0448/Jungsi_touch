@@ -1,0 +1,179 @@
+{
+  "schemaVersion": "0.12",
+  "synthetic": true,
+  "scopeConfirmed": false,
+  "notice": "대학 발표 자료를 표시하는 형식 예시이며, 모든 대학·결과치는 가상입니다. 실제 공식 자료로 검증하지 않았습니다.",
+  "sourcePolicy": "university_published_values_only_in_production",
+  "records": [
+    {
+      "id": "a02",
+      "university": "예시가온대학교",
+      "department": "경제학과",
+      "campus": "본캠퍼스",
+      "selection": "일반전형",
+      "currentRecruitment": {
+        "academicYear": 2027,
+        "group": null,
+        "original": null,
+        "change": null,
+        "final": null,
+        "status": "unpublished"
+      },
+      "results": [
+        {
+          "academicYear": 2026,
+          "recruitmentGroup": "가군",
+          "metricName": "최종등록자 70% 기준 대학 환산점수",
+          "reportedValue": 908.4,
+          "unit": "점",
+          "maximumScore": 1000,
+          "valueStatus": "reported",
+          "source": {
+            "kind": "synthetic_university_publication_format",
+            "publisher": "예시가온대학교 입학처 (가상)",
+            "documentTitle": "2026학년도 공개 결과 형식 예시",
+            "reference": null,
+            "asOf": null,
+            "verifiedOfficial": false
+          }
+        },
+        {
+          "academicYear": 2025,
+          "recruitmentGroup": "가군",
+          "metricName": "최종등록자 70% 기준 대학 환산점수",
+          "reportedValue": 901.2,
+          "unit": "점",
+          "maximumScore": 1000,
+          "valueStatus": "reported",
+          "source": {
+            "kind": "synthetic_university_publication_format",
+            "publisher": "예시가온대학교 입학처 (가상)",
+            "documentTitle": "2025학년도 공개 결과 형식 예시",
+            "reference": null,
+            "asOf": null,
+            "verifiedOfficial": false
+          }
+        },
+        {
+          "academicYear": 2024,
+          "recruitmentGroup": "가군",
+          "metricName": "최종등록자 70% 기준 대학 환산점수",
+          "reportedValue": 894.6,
+          "unit": "점",
+          "maximumScore": 1000,
+          "valueStatus": "reported",
+          "source": {
+            "kind": "synthetic_university_publication_format",
+            "publisher": "예시가온대학교 입학처 (가상)",
+            "documentTitle": "2024학년도 공개 결과 형식 예시",
+            "reference": null,
+            "asOf": null,
+            "verifiedOfficial": false
+          }
+        },
+        {
+          "academicYear": 2023,
+          "recruitmentGroup": "가군",
+          "metricName": "최종등록자 70% 기준 대학 환산점수",
+          "reportedValue": null,
+          "unit": "점",
+          "maximumScore": 1000,
+          "valueStatus": "not_published",
+          "source": {
+            "kind": "synthetic_university_publication_format",
+            "publisher": "예시가온대학교 입학처 (가상)",
+            "documentTitle": "2023학년도 공개 결과 형식 예시",
+            "reference": null,
+            "asOf": null,
+            "verifiedOfficial": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "f01",
+      "university": "예시새빛대학교",
+      "department": "경영학과",
+      "campus": "본캠퍼스",
+      "selection": "일반전형",
+      "currentRecruitment": {
+        "academicYear": 2027,
+        "group": null,
+        "original": null,
+        "change": null,
+        "final": null,
+        "status": "unpublished"
+      },
+      "results": [
+        {
+          "academicYear": 2026,
+          "recruitmentGroup": "나군",
+          "metricName": "최종등록자 70% 기준 대학 환산점수",
+          "reportedValue": 745.6,
+          "unit": "점",
+          "maximumScore": 800,
+          "valueStatus": "reported",
+          "source": {
+            "kind": "synthetic_university_publication_format",
+            "publisher": "예시새빛대학교 입학처 (가상)",
+            "documentTitle": "2026학년도 공개 결과 형식 예시",
+            "reference": null,
+            "asOf": null,
+            "verifiedOfficial": false
+          }
+        },
+        {
+          "academicYear": 2025,
+          "recruitmentGroup": "나군",
+          "metricName": "최종등록자 70% 기준 대학 환산점수",
+          "reportedValue": 738.1,
+          "unit": "점",
+          "maximumScore": 800,
+          "valueStatus": "reported",
+          "source": {
+            "kind": "synthetic_university_publication_format",
+            "publisher": "예시새빛대학교 입학처 (가상)",
+            "documentTitle": "2025학년도 공개 결과 형식 예시",
+            "reference": null,
+            "asOf": null,
+            "verifiedOfficial": false
+          }
+        },
+        {
+          "academicYear": 2024,
+          "recruitmentGroup": "나군",
+          "metricName": "최종등록자 70% 기준 대학 환산점수",
+          "reportedValue": null,
+          "unit": "점",
+          "maximumScore": 800,
+          "valueStatus": "not_published",
+          "source": {
+            "kind": "synthetic_university_publication_format",
+            "publisher": "예시새빛대학교 입학처 (가상)",
+            "documentTitle": "2024학년도 공개 결과 형식 예시",
+            "reference": null,
+            "asOf": null,
+            "verifiedOfficial": false
+          }
+        },
+        {
+          "academicYear": 2023,
+          "recruitmentGroup": "나군",
+          "metricName": "최종등록자 70% 기준 대학 환산점수",
+          "reportedValue": 724.3,
+          "unit": "점",
+          "maximumScore": 800,
+          "valueStatus": "reported",
+          "source": {
+            "kind": "synthetic_university_publication_format",
+            "publisher": "예시새빛대학교 입학처 (가상)",
+            "documentTitle": "2023학년도 공개 결과 형식 예시",
+            "reference": null,
+            "asOf": null,
+            "verifiedOfficial": false
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "version": "0.4",
+  "status": "planning_only_not_openapi",
+  "decided_requirements": {
+    "primary_users": [
+      "학생",
+      "학부모"
+    ],
+    "secondary_users": [
+      "교사",
+      "입시담당자"
+    ],
+    "membership_tiers": [
+      "standard",
+      "paid"
+    ],
+    "history_year_count": 4,
+    "published_result_bases": [
+      "admission_band",
+      "upper_70"
+    ],
+    "history_requires_personal_score": false,
+    "analysis_input": "actual_csat_only"
+  },
+  "unresolved": [
+    "production_year_window",
+    "result_basis_exact_definitions",
+    "selected_count_definition",
+    "paid_price_and_term",
+    "billing_method",
+    "guest_access",
+    "score_retention",
+    "expired_personal_result_access",
+    "technology_stack"
+  ],
+  "public_display": {
+    "grouping": [
+      "university",
+      "department",
+      "selection"
+    ],
+    "year_fields": [
+      "academic_year",
+      "recruitment_group",
+      "selected_count"
+    ],
+    "fields_per_result_basis": [
+      "converted_score",
+      "cumulative_percentile"
+    ],
+    "basis_labels": {
+      "admission_band": "합격권",
+      "upper_70": "상위 70%"
+    },
+    "cumulative_storage": "fraction_0_to_1",
+    "cumulative_display": "fraction_times_100_as_top_percent",
+    "missing_values": "null_with_explicit_status_never_zero",
+    "year_specific_quota_and_rules": true
+  },
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/me/entitlements",
+      "requires": "authenticated_member"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admission-history",
+      "requires": "history.read",
+      "allowed_query": [
+        "university_query",
+        "department_query",
+        "window_id",
+        "cursor"
+      ],
+      "query_unknown_fields": "reject",
+      "calculation_inputs_allowed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/score-comparisons",
+      "requires": "analysis.run",
+      "server_checks": [
+        "authenticated_member",
+        "current_entitlement",
+        "request_limits",
+        "input_validity",
+        "result_ownership"
+      ],
+      "authorization_before_calculation": true
+    }
+  ],
+  "entitlements": {
+    "standard": {
+      "history.read": true,
+      "analysis.run": false
+    },
+    "paid_current": {
+      "history.read": true,
+      "analysis.run": true
+    },
+    "expired_or_revoked": {
+      "history.read": true,
+      "analysis.run": false
+    }
+  },
+  "excluded_from_public_responses": [
+    "student_raw_samples",
+    "full_score_distributions",
+    "model_parameters",
+    "calculation_source_code",
+    "database_credentials",
+    "other_users_score_profiles"
+  ],
+  "evidence_required_before_publication": [
+    "academic_year",
+    "source_and_location",
+    "result_basis_definition",
+    "score_rule_version",
+    "population_definition",
+    "distribution_version",
+    "review_state"
+  ],
+  "examples": [
+    "history.mock.json",
+    "entitlements.mock.json"
+  ]
+}

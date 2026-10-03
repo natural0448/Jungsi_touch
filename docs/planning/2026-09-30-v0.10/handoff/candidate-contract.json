@@ -1,0 +1,500 @@
+{
+  "version": "0.10",
+  "status": "page3_user_directed_search_prototype_not_production",
+  "ui_terms": {
+    "page_title": "내 성적에 유리한 대학 찾기",
+    "shortlist": "핵심 지원 학교",
+    "add": "핵심 지원 학교에 담기",
+    "external_action": "모의지원 서비스에서 확인"
+  },
+  "layout": {
+    "desktop_columns": [
+      2,
+      1
+    ],
+    "left": "기본 대학 목록 및 학과별 과거 입결 비교",
+    "right": "간호·보건·교육 와일드카드",
+    "narrow_order": [
+      "basic",
+      "wildcards"
+    ]
+  },
+  "entitlements": {
+    "standard": {
+      "overall": true,
+      "personal_candidates": false,
+      "wildcards": false,
+      "shortlist": false,
+      "all_offerings_personal_assessment": false,
+      "catalog_search_and_basic_detail": true
+    },
+    "paid": {
+      "overall": true,
+      "personal_candidates": true,
+      "wildcards": true,
+      "shortlist": true,
+      "all_offerings_personal_assessment": true,
+      "catalog_search_and_basic_detail": true
+    }
+  },
+  "apis": [
+    {
+      "method": "POST",
+      "path": "/api/v1/reports/{report_id}/candidates",
+      "requires": [
+        "active_paid",
+        "report_owner",
+        "confirmed_score_profile"
+      ],
+      "returns": [
+        "summary",
+        "comparison_groups",
+        "basic_university_groups",
+        "wildcards",
+        "needs_confirmation",
+        "unavailable_reasons"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/reports/{report_id}/shortlist/{offering_id}",
+      "requires": [
+        "active_paid",
+        "report_owner"
+      ],
+      "body": {
+        "selected": "boolean"
+      },
+      "meaning": "우리 서비스 관심 목록 상태 변경; 외부 모의지원 상태 아님"
+    }
+  ],
+  "offering_identity": [
+    "academic_year",
+    "verified_admission_offering_pk",
+    "selection",
+    "recruitment_group"
+  ],
+  "conversion": {
+    "input": "full_subject_profile",
+    "rule_scope": "actual_offering",
+    "required_versions": [
+      "score_profile",
+      "official_ruleset",
+      "population",
+      "model",
+      "candidate_set"
+    ],
+    "numeric_type": "decimal_or_scaled_integer",
+    "rounding": "official_rule_steps"
+  },
+  "advantage": {
+    "internal_probability_unit": "fraction",
+    "display_difference_unit": "percentage_point",
+    "formula": "100 * (base_fraction_in_same_population - converted_fraction)",
+    "requires": [
+      "same_population",
+      "same_exam_year",
+      "same_tie_policy",
+      "approved_joint_distribution",
+      "all_rules_computable_in_reference_population"
+    ],
+    "cross_group_sort": false,
+    "sort_raw_conversion_score": false,
+    "sort_ratio_to_max_score": false,
+    "not_ready_value": null
+  },
+  "historical_comparison": {
+    "metrics": [
+      "source_defined_admission_band",
+      "source_defined_top70"
+    ],
+    "requires": [
+      "verified_metric_definition",
+      "same_or_validated_linked_scale",
+      "verified_offering_mapping"
+    ],
+    "required_fields": [
+      "result_year",
+      "source_metric_id",
+      "result_id",
+      "comparability_status",
+      "bridge_version_id",
+      "source_date"
+    ],
+    "null_is_failure": false,
+    "claim": "과거 기준 이상/미만/비교 보류",
+    "probability_of_admission": false
+  },
+  "wildcards": {
+    "categories": [
+      "nursing",
+      "health",
+      "education"
+    ],
+    "outside_basic_pool_search": true,
+    "eligibility_states": [
+      "eligible",
+      "needs_confirmation",
+      "ineligible"
+    ],
+    "ineligible_recommendation": false,
+    "unknown_eligibility_recommendation": false,
+    "scope_auto_expands_to_junior_colleges": false
+  },
+  "external_service": {
+    "mode": "user_opens_and_checks",
+    "ui_label": "모의지원 서비스에서 확인",
+    "reference_guide_url": "https://www.jinhak.com/jh/high3/regular/manual",
+    "verified_on": "2026-09-23",
+    "official_integration_verified": false,
+    "auto_registration": false,
+    "auto_score_transfer": false,
+    "store_external_credentials": false,
+    "external_registered_status_from_shortlist": false
+  },
+  "response_for_standard": {
+    "status": "paid_required",
+    "include_overall_summary": true,
+    "basic_university_groups": [],
+    "wildcards": [],
+    "shortlist": [],
+    "applies_to": "personal_analysis_endpoints_only_not_catalog_search"
+  },
+  "production_release": {
+    "requires_official_4_year_school_audit": true,
+    "original_table_audit_completed_by_this_task": false,
+    "own_percentile_model_approved": false,
+    "conversion_engine_implemented": false,
+    "external_integration_implemented": false
+  },
+  "frontend_receives": [
+    "own_summary",
+    "authorized_candidate_results",
+    "explanation_summaries",
+    "limited_source_references",
+    "basic_catalog_results_allowed_by_page1_policy"
+  ],
+  "frontend_excludes": [
+    "full_reference_microdata",
+    "full_percentile_curves",
+    "private_rule_tables",
+    "other_users_profiles",
+    "credentials"
+  ],
+  "schema_version": "0.10",
+  "school_department_hierarchy": {
+    "school_discovery_buckets": [
+      "challenge",
+      "core",
+      "room"
+    ],
+    "school_bucket_ui_labels": {
+      "challenge": "도전학교",
+      "core": "핵심학교",
+      "room": "여유 후보"
+    },
+    "school_bucket_source": "first_pass_overall_score_screening",
+    "department_categories": [
+      "challenge",
+      "core",
+      "room",
+      "pending"
+    ],
+    "department_category_source": "server_decision_for_actual_offering",
+    "inherit_parent_bucket": false,
+    "all_three_school_buckets_support_same_department_detail": true,
+    "default_expansion": "all_reviewed_offerings_in_this_school",
+    "count_unit": "academic_year_and_verified_admission_offering_pk",
+    "count_pending_as_recommended": false,
+    "show_reviewed_count_and_total_scope_status": true,
+    "unreviewed_offerings_are_not_safe": true,
+    "department_order_implies_acceptance_of_lower_rows": false,
+    "discovery_bucket_is_final_department_decision": false,
+    "current_demo_single_bucket_per_school": "presentation_assumption_not_approved_classification_policy"
+  },
+  "department_decision": {
+    "required_identity": [
+      "academic_year",
+      "verified_admission_offering_pk",
+      "verified_university_pk",
+      "verified_campus_identity",
+      "selection",
+      "recruitment_group"
+    ],
+    "identity_policy": "reuse_verified_mapping_keys_do_not_replace_with_name_based_ids",
+    "conversion_scope": "each_actual_offering_and_its_rule_version",
+    "fields": [
+      "rule_id",
+      "rule_version",
+      "score",
+      "max_score",
+      "converted_top_percent",
+      "comparison_population_id",
+      "distribution_version",
+      "eligibility",
+      "historical_band",
+      "historical_top70",
+      "forecast",
+      "recommendation_category",
+      "reason_codes",
+      "decision_version",
+      "as_of"
+    ],
+    "historical_fields": [
+      "result_year",
+      "source_definition",
+      "metric_type",
+      "value",
+      "scale_version",
+      "source_ref",
+      "source_as_of",
+      "bridge_status",
+      "bridge_version"
+    ],
+    "forecast_fields": [
+      "target_year",
+      "base_forecast",
+      "issue_adjustment",
+      "adopted_forecast",
+      "uncertainty",
+      "approval_status",
+      "version",
+      "as_of"
+    ],
+    "guards": [
+      "paid_entitlement_and_report_owner",
+      "official_rule_verified_for_year_and_offering",
+      "score_profile_complete",
+      "eligible",
+      "compatible_population_and_score_scale",
+      "historical_bridge_verified_when_used",
+      "forecast_and_decision_policy_approved"
+    ],
+    "on_failed_guard": "pending_with_reason_or_ineligible_not_positive_recommendation",
+    "thresholds_status": "not_agreed_do_not_derive_from_demo",
+    "demo_labels": "hand_authored_synthetic_examples_not_a_calibrated_model",
+    "probability": null,
+    "max_score_ratio_is_rank": false,
+    "university_level_single_score_can_override_department_rule": false,
+    "display_categories": [
+      "challenge",
+      "core",
+      "room",
+      "outside",
+      "pending",
+      "ineligible"
+    ],
+    "ineligible_is_distinct_from_pending": true
+  },
+  "shortlist_offering_sync": {
+    "key": [
+      "academic_year",
+      "verified_admission_offering_pk"
+    ],
+    "unique_across": [
+      "page3_catalog",
+      "page4_school_buckets",
+      "department_filters",
+      "page4_wildcards",
+      "page2_report"
+    ],
+    "preview_storage": "same_tab_sessionStorage_synthetic_ids_tier_and_hasScore_boolean_only",
+    "production_storage": "server_per_user_report",
+    "model_or_score_revision": "revalidate_and_show_changed_or_pending_state_without_silent_loss",
+    "pending_selection_demo": "disabled_until_confirmed",
+    "external_auto_registration": false,
+    "page2_report_connected": false,
+    "demo_selectable_categories": [
+      "challenge",
+      "core",
+      "room"
+    ],
+    "server_storage_implemented": false
+  },
+  "three_tier_extension": {
+    "presentation": "render_server_school_groups_and_department_decisions_only",
+    "application": "authenticate_authorize_convert_each_offering_compare_approved_evidence_classify_and_explain",
+    "data": "versioned_mapping_rules_distributions_outcomes_forecasts_decisions_and_shortlist",
+    "free_api_excludes": [
+      "personal_school_candidates",
+      "department_recommendations",
+      "wildcard_recommendations",
+      "personal_shortlist"
+    ],
+    "client_has_no": [
+      "production_rule_tables",
+      "private_forecast_parameters",
+      "bulk_internal_datasets",
+      "service_role_keys"
+    ],
+    "prototype_client_tier_toggle_is_authorization": false
+  },
+  "prototype_paths": {
+    "page3": "../preview/index.html",
+    "page4": "../preview/favorable.html",
+    "mock": "candidate.mock.json",
+    "design": "../00_3페이지_직접검색_원칙.md"
+  },
+  "based_on_version": "0.9",
+  "page_routing": {
+    "confirmed_by_user": "2026-09-30 사용자 지시: 전체 대학·학과 가능성 보기는 3페이지, 기존 유리한 대학 찾기는 4페이지로 이동",
+    "pages": [
+      {
+        "page": 1,
+        "label": "4개년 입시결과",
+        "role": "성적 없이 과거 입결 검색",
+        "entitlement": "standard_and_paid"
+      },
+      {
+        "page": 2,
+        "label": "내 성적 리포트",
+        "role": "성적 입력·전체 누적·선택 목록 리포트",
+        "entitlement": "overall_standard_and_paid_personal_college_report_paid"
+      },
+      {
+        "page": 3,
+        "label": "전체 대학·학과 가능성 보기",
+        "role": "대학명·학과명으로 원하는 모집단위를 직접 검색하고 기본 상세 및 허용된 개인 분석 확인",
+        "entitlement": "page1_basic_catalog_access_policy; personal_analysis_requires_paid_and_score",
+        "prototype": "../preview/index.html"
+      },
+      {
+        "page": 4,
+        "label": "유리한 대학 찾기",
+        "role": "도전학교·핵심학교·여유 후보와 와일드카드",
+        "entitlement": "paid",
+        "prototype": "../preview/favorable.html"
+      }
+    ],
+    "combined_page_tabs": false,
+    "shared_shortlist": true,
+    "page4_layout": {
+      "basic_school_list": 2,
+      "wildcards": 1
+    },
+    "page3_layout": "full_width_catalog_grouped_by_university"
+  },
+  "all_offerings_catalog": {
+    "scope": "all_service_regular_admission_offerings_without_practical_exam_not_only_recommended",
+    "includes_non_recommended_schools": true,
+    "filters": [
+      "university_query",
+      "department_query",
+      "region",
+      "recruitment_group"
+    ],
+    "filter_grain": "all_query_filters_must_match_the_same_actual_offering",
+    "judgments": [
+      "challenge",
+      "core",
+      "room",
+      "outside",
+      "pending",
+      "ineligible"
+    ],
+    "unknown_is_ineligible": false,
+    "outside_means_impossible": false,
+    "search_zero_means_no_matching_data_not_no_admission_chance": true,
+    "school_counts_and_offering_counts": "filtered_unique_counts_at_verified_identifiers",
+    "expected_api": {
+      "method": "GET",
+      "path": "/api/v1/catalog/offerings",
+      "requires": [
+        "same_basic_catalog_access_policy_as_page1"
+      ],
+      "requires_report_id": false,
+      "requires_score_profile": false,
+      "requires_paid": false,
+      "query": [
+        "academic_year",
+        "university_q",
+        "department_q",
+        "region_id",
+        "group",
+        "cursor",
+        "limit"
+      ],
+      "returns": [
+        "scope_id",
+        "coverage_status",
+        "as_of",
+        "matching_school_count",
+        "matching_offering_count",
+        "basic_school_groups",
+        "next_cursor"
+      ],
+      "must_not_filter_by": [
+        "recommended_candidate_ids",
+        "student_score",
+        "student_eligibility",
+        "conversion_advantage",
+        "forecast_availability"
+      ],
+      "must_not_return": [
+        "personal_score",
+        "personal_percentile",
+        "personal_category",
+        "private_model_parameters",
+        "other_student_data"
+      ]
+    },
+    "production_pagination": "server_side_with_stable_order_and_report_version",
+    "raw_rules_or_bulk_private_tables_in_client": false,
+    "viewing_or_searching_emits_recommendation_event": false,
+    "demo_scope": {
+      "synthetic": true,
+      "schools": 6,
+      "offerings": 17,
+      "national_coverage_verified": false
+    },
+    "personal_assessment_api": {
+      "method": "POST",
+      "path": "/api/v1/reports/{report_id}/offering-assessments",
+      "requires": [
+        "paid_entitlement",
+        "report_owner",
+        "score_profile"
+      ],
+      "body": [
+        "requested_verified_offering_ids"
+      ],
+      "returns": [
+        "offering_id",
+        "analysis_status",
+        "score",
+        "converted_percentile",
+        "category",
+        "reason",
+        "versions"
+      ],
+      "can_assess_non_recommended_offering": true,
+      "missing_analysis_must_not_remove_catalog_offering": true
+    },
+    "query_join_policy": "catalog is the driving relation; optional assessment is LEFT JOIN/enrichment, never recommendation-set INNER JOIN",
+    "identity_only_browse_function": "catalogBrowse ignores judgment, tier, score and recommendation membership"
+  },
+  "page3_search_principle": {
+    "confirmed_user_intent": "1페이지와 같은 검색 흐름으로 사용자가 보고 싶은 학교·학과를 직접 확인한다",
+    "lookup_scope": "entire_service_catalog_independent_of_recommendation_result",
+    "university_search": true,
+    "department_search": true,
+    "combined_search": "AND_same_actual_offering",
+    "filters": [
+      "university_name_or_campus",
+      "department_name",
+      "region",
+      "recruitment_group"
+    ],
+    "personal_result_filters_in_primary_search": false,
+    "score_required_to_browse": false,
+    "recommendation_required_to_browse": false,
+    "favorable_conversion_required_to_browse": false,
+    "eligibility_required_to_open_details": false,
+    "calculation_complete_required_to_open_details": false,
+    "missing_analysis": "keep_catalog_row_and_show_analysis_status",
+    "no_search_results_is_admission_denial": false,
+    "ranking": "query_relevance_and_catalog_order_not_personal_favorability",
+    "scope_exception": "existing_service_exclusion_of_practical_exam_offerings",
+    "access_interpretation": "기본 검색과 정보 조회는 1페이지 기본조회 정책을 적용하고 개인 분석의 기존 유료 정책을 유지한다; 비회원 접근 정책은 별도 확정하지 않음"
+  }
+}

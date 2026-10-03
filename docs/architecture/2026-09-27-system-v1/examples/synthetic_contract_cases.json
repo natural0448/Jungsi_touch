@@ -1,0 +1,126 @@
+{
+  "data_kind": "synthetic",
+  "production_allowed": false,
+  "rule_version_id": "SYNTHETIC-CONVERSION-v1",
+  "expected_values_basis": "가상 산식에 대한 독립 수계산. 실제 대학 예제나 전국 분포 검증이 아님.",
+  "cases": [
+    {
+      "case_id": "A",
+      "purpose": "기준 프로필",
+      "profile": {
+        "academic_year": 2027,
+        "korean": {
+          "standard": 126
+        },
+        "math": {
+          "standard": 128
+        },
+        "inquiry1": {
+          "standard": 63
+        },
+        "inquiry2": {
+          "standard": 65
+        },
+        "english": {
+          "grade": 2
+        },
+        "history": {
+          "grade": 1
+        }
+      },
+      "expected": {
+        "total_standard_sum": 382,
+        "calculation_status": "calculated",
+        "converted_score": "634.00"
+      }
+    },
+    {
+      "case_id": "B",
+      "purpose": "같은 총점에서 국어/수학 구성이 달라짐",
+      "profile": {
+        "academic_year": 2027,
+        "korean": {
+          "standard": 130
+        },
+        "math": {
+          "standard": 124
+        },
+        "inquiry1": {
+          "standard": 63
+        },
+        "inquiry2": {
+          "standard": 65
+        },
+        "english": {
+          "grade": 2
+        },
+        "history": {
+          "grade": 1
+        }
+      },
+      "expected": {
+        "total_standard_sum": 382,
+        "calculation_status": "calculated",
+        "converted_score": "632.00"
+      }
+    },
+    {
+      "case_id": "C",
+      "purpose": "같은 국수탐2 총점에서 영어 등급이 달라짐",
+      "profile": {
+        "academic_year": 2027,
+        "korean": {
+          "standard": 126
+        },
+        "math": {
+          "standard": 128
+        },
+        "inquiry1": {
+          "standard": 63
+        },
+        "inquiry2": {
+          "standard": 65
+        },
+        "english": {
+          "grade": 3
+        },
+        "history": {
+          "grade": 1
+        }
+      },
+      "expected": {
+        "total_standard_sum": 382,
+        "calculation_status": "calculated",
+        "converted_score": "630.00"
+      }
+    },
+    {
+      "case_id": "D_missing_english",
+      "purpose": "필수 영어 성적이 없으면 환산 보류. 전체 총점은 산출 가능.",
+      "profile": {
+        "academic_year": 2027,
+        "korean": {
+          "standard": 126
+        },
+        "math": {
+          "standard": 128
+        },
+        "inquiry1": {
+          "standard": 63
+        },
+        "inquiry2": {
+          "standard": 65
+        },
+        "history": {
+          "grade": 1
+        }
+      },
+      "expected": {
+        "total_standard_sum": 382,
+        "calculation_status": "blocked",
+        "converted_score": null,
+        "reason_code": "REQUIRED_INPUT_MISSING"
+      }
+    }
+  ]
+}

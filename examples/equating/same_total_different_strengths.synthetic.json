@@ -1,0 +1,324 @@
+{
+  "data_kind": "synthetic",
+  "meaning": "알고리즘 동작 예제. 실제 2024/2027 자료로 추정한 결과가 아님.",
+  "profiles": [
+    {
+      "label": "국어 강점형",
+      "input_scores": {
+        "korean": 120,
+        "math": 80,
+        "inquiry1": 50,
+        "inquiry2": 50
+      },
+      "result": {
+        "academic_year": 2024,
+        "source_exam_id": "SYNTHETIC-2027",
+        "target_exam_id": "SYNTHETIC-2024",
+        "bridge_version": "SYNTHETIC-link-v1",
+        "score_basis": "year_equated_estimate",
+        "status": "research_estimate",
+        "public_eligible": false,
+        "subject_projection": {
+          "korean": {
+            "score": 125,
+            "candidate_scores": [
+              125
+            ],
+            "score_min": 125,
+            "score_max": 125,
+            "target_rank": {
+              "top_percent_exclusive": "0.000000",
+              "top_percent_inclusive": "20.000000",
+              "top_percent_midpoint": "10.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_rank": {
+              "top_percent_exclusive": "0.000000",
+              "top_percent_inclusive": "20.000000",
+              "top_percent_midpoint": "10.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_version": "SYNTHETIC-2027.v1",
+            "target_version": "SYNTHETIC-2024.v1"
+          },
+          "math": {
+            "score": 90,
+            "candidate_scores": [
+              90
+            ],
+            "score_min": 90,
+            "score_max": 90,
+            "target_rank": {
+              "top_percent_exclusive": "80.000000",
+              "top_percent_inclusive": "100.000000",
+              "top_percent_midpoint": "90.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_rank": {
+              "top_percent_exclusive": "80.000000",
+              "top_percent_inclusive": "100.000000",
+              "top_percent_midpoint": "90.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_version": "SYNTHETIC-2027.v1",
+            "target_version": "SYNTHETIC-2024.v1"
+          },
+          "inquiry1": {
+            "score": 55,
+            "candidate_scores": [
+              55
+            ],
+            "score_min": 55,
+            "score_max": 55,
+            "target_rank": {
+              "top_percent_exclusive": "20.000000",
+              "top_percent_inclusive": "80.000000",
+              "top_percent_midpoint": "50.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_rank": {
+              "top_percent_exclusive": "20.000000",
+              "top_percent_inclusive": "80.000000",
+              "top_percent_midpoint": "50.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_version": "SYNTHETIC-2027.v1",
+            "target_version": "SYNTHETIC-2024.v1"
+          },
+          "inquiry2": {
+            "score": 55,
+            "candidate_scores": [
+              55
+            ],
+            "score_min": 55,
+            "score_max": 55,
+            "target_rank": {
+              "top_percent_exclusive": "20.000000",
+              "top_percent_inclusive": "80.000000",
+              "top_percent_midpoint": "50.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_rank": {
+              "top_percent_exclusive": "20.000000",
+              "top_percent_inclusive": "80.000000",
+              "top_percent_midpoint": "50.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_version": "SYNTHETIC-2027.v1",
+            "target_version": "SYNTHETIC-2024.v1"
+          }
+        },
+        "estimated_standard_scores": {
+          "korean": 125,
+          "math": 90,
+          "inquiry1": 55,
+          "inquiry2": 55
+        },
+        "total_standard_score": 325,
+        "reason_codes": [
+          "BRIDGE_OR_DISTRIBUTION_NOT_VALIDATED",
+          "ABSOLUTE_GRADES_HELD_CONSTANT"
+        ],
+        "absolute_grade_policy": "hold_observed_grade",
+        "meaning": "연도별 상대 위치 대응 추정. 해당 연도 실제 응시 성적 또는 합격 판정이 아님.",
+        "source_total_rank": {
+          "top_percent_exclusive": "10.000000",
+          "top_percent_inclusive": "90.000000",
+          "top_percent_midpoint": "50.000000",
+          "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+        },
+        "target_total_window": {
+          "score": 325,
+          "candidate_scores": [
+            325
+          ],
+          "score_min": 325,
+          "score_max": 325,
+          "target_rank": {
+            "top_percent_exclusive": "10.000000",
+            "top_percent_inclusive": "90.000000",
+            "top_percent_midpoint": "50.000000",
+            "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+          }
+        },
+        "source_total_version": "SYNTHETIC-2027.v1",
+        "target_total_version": "SYNTHETIC-2024.v1",
+        "rank_fit_error": {
+          "numerator": 0,
+          "denominator": 1
+        },
+        "target_total_rank": {
+          "top_percent_exclusive": "10.000000",
+          "top_percent_inclusive": "90.000000",
+          "top_percent_midpoint": "50.000000",
+          "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+        },
+        "estimated_reported_scores": {
+          "korean": null,
+          "math": null,
+          "inquiry1": null,
+          "inquiry2": null
+        }
+      }
+    },
+    {
+      "label": "수학 강점형",
+      "input_scores": {
+        "korean": 80,
+        "math": 120,
+        "inquiry1": 50,
+        "inquiry2": 50
+      },
+      "result": {
+        "academic_year": 2024,
+        "source_exam_id": "SYNTHETIC-2027",
+        "target_exam_id": "SYNTHETIC-2024",
+        "bridge_version": "SYNTHETIC-link-v1",
+        "score_basis": "year_equated_estimate",
+        "status": "research_estimate",
+        "public_eligible": false,
+        "subject_projection": {
+          "korean": {
+            "score": 85,
+            "candidate_scores": [
+              85
+            ],
+            "score_min": 85,
+            "score_max": 85,
+            "target_rank": {
+              "top_percent_exclusive": "80.000000",
+              "top_percent_inclusive": "100.000000",
+              "top_percent_midpoint": "90.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_rank": {
+              "top_percent_exclusive": "80.000000",
+              "top_percent_inclusive": "100.000000",
+              "top_percent_midpoint": "90.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_version": "SYNTHETIC-2027.v1",
+            "target_version": "SYNTHETIC-2024.v1"
+          },
+          "math": {
+            "score": 130,
+            "candidate_scores": [
+              130
+            ],
+            "score_min": 130,
+            "score_max": 130,
+            "target_rank": {
+              "top_percent_exclusive": "0.000000",
+              "top_percent_inclusive": "20.000000",
+              "top_percent_midpoint": "10.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_rank": {
+              "top_percent_exclusive": "0.000000",
+              "top_percent_inclusive": "20.000000",
+              "top_percent_midpoint": "10.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_version": "SYNTHETIC-2027.v1",
+            "target_version": "SYNTHETIC-2024.v1"
+          },
+          "inquiry1": {
+            "score": 55,
+            "candidate_scores": [
+              55
+            ],
+            "score_min": 55,
+            "score_max": 55,
+            "target_rank": {
+              "top_percent_exclusive": "20.000000",
+              "top_percent_inclusive": "80.000000",
+              "top_percent_midpoint": "50.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_rank": {
+              "top_percent_exclusive": "20.000000",
+              "top_percent_inclusive": "80.000000",
+              "top_percent_midpoint": "50.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_version": "SYNTHETIC-2027.v1",
+            "target_version": "SYNTHETIC-2024.v1"
+          },
+          "inquiry2": {
+            "score": 55,
+            "candidate_scores": [
+              55
+            ],
+            "score_min": 55,
+            "score_max": 55,
+            "target_rank": {
+              "top_percent_exclusive": "20.000000",
+              "top_percent_inclusive": "80.000000",
+              "top_percent_midpoint": "50.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_rank": {
+              "top_percent_exclusive": "20.000000",
+              "top_percent_inclusive": "80.000000",
+              "top_percent_midpoint": "50.000000",
+              "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+            },
+            "source_version": "SYNTHETIC-2027.v1",
+            "target_version": "SYNTHETIC-2024.v1"
+          }
+        },
+        "estimated_standard_scores": {
+          "korean": 85,
+          "math": 130,
+          "inquiry1": 55,
+          "inquiry2": 55
+        },
+        "total_standard_score": 325,
+        "reason_codes": [
+          "BRIDGE_OR_DISTRIBUTION_NOT_VALIDATED",
+          "ABSOLUTE_GRADES_HELD_CONSTANT"
+        ],
+        "absolute_grade_policy": "hold_observed_grade",
+        "meaning": "연도별 상대 위치 대응 추정. 해당 연도 실제 응시 성적 또는 합격 판정이 아님.",
+        "source_total_rank": {
+          "top_percent_exclusive": "10.000000",
+          "top_percent_inclusive": "90.000000",
+          "top_percent_midpoint": "50.000000",
+          "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+        },
+        "target_total_window": {
+          "score": 325,
+          "candidate_scores": [
+            325
+          ],
+          "score_min": 325,
+          "score_max": 325,
+          "target_rank": {
+            "top_percent_exclusive": "10.000000",
+            "top_percent_inclusive": "90.000000",
+            "top_percent_midpoint": "50.000000",
+            "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+          }
+        },
+        "source_total_version": "SYNTHETIC-2027.v1",
+        "target_total_version": "SYNTHETIC-2024.v1",
+        "rank_fit_error": {
+          "numerator": 0,
+          "denominator": 1
+        },
+        "target_total_rank": {
+          "top_percent_exclusive": "10.000000",
+          "top_percent_inclusive": "90.000000",
+          "top_percent_midpoint": "50.000000",
+          "meaning": "동점자 위치 구간이며 예측 신뢰구간이 아님"
+        },
+        "estimated_reported_scores": {
+          "korean": null,
+          "math": null,
+          "inquiry1": null,
+          "inquiry2": null
+        }
+      }
+    }
+  ]
+}

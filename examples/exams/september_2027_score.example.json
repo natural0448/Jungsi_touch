@@ -1,0 +1,12 @@
+{
+  "example_only": true,
+  "exam_id": "2027-september-mock",
+  "korean": {"choice": "화법과 작문", "standard_score": 130},
+  "math": {"choice": "미적분", "standard_score": 128},
+  "inquiry": [
+    {"subject": "생활과 윤리", "standard_score": 65},
+    {"subject": "사회·문화", "standard_score": 63}
+  ],
+  "english_grade": 2,
+  "korean_history_grade": 1
+}

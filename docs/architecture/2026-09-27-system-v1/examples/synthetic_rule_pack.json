@@ -1,0 +1,162 @@
+{
+  "contract_version": "design-v1",
+  "rule_version_id": "SYNTHETIC-CONVERSION-v1",
+  "academic_year": 2027,
+  "data_kind": "synthetic",
+  "approval_state": "draft",
+  "production_allowed": false,
+  "description": "실제 대학 규칙이 아닌 대학 환산 계약 설명용 가상 예제",
+  "source_evidence": [
+    {
+      "source_type": "synthetic",
+      "official_document": null,
+      "note": "구조와 산술을 검토하는 가상 규칙. 실제 대학·전국 누적·합격 판정에 사용 금지."
+    }
+  ],
+  "example_binding": {
+    "academic_year": 2027,
+    "offering_pk": "SYNTHETIC-OFFERING-A"
+  },
+  "score_scope": "csat_component",
+  "official_max_score": null,
+  "required_inputs": [
+    "korean.standard",
+    "math.standard",
+    "inquiry1.standard",
+    "inquiry2.standard",
+    "english.grade",
+    "history.grade"
+  ],
+  "domain_validation": {
+    "status": "synthetic_only",
+    "official_domain_table_version": null
+  },
+  "tables": {
+    "SYNTHETIC-EN-v1": {
+      "input_basis": "grade",
+      "output_basis": "points_adjustment",
+      "data_kind": "synthetic",
+      "values": {
+        "1": "0",
+        "2": "-3",
+        "3": "-7",
+        "4": "-12",
+        "5": "-20",
+        "6": "-30",
+        "7": "-45",
+        "8": "-65",
+        "9": "-90"
+      }
+    },
+    "SYNTHETIC-HI-v1": {
+      "input_basis": "grade",
+      "output_basis": "points_adjustment",
+      "data_kind": "synthetic",
+      "values": {
+        "1": "0",
+        "2": "0",
+        "3": "0",
+        "4": "0",
+        "5": "-1",
+        "6": "-2",
+        "7": "-3",
+        "8": "-4",
+        "9": "-5"
+      }
+    }
+  },
+  "nodes": [
+    {
+      "id": "k",
+      "op": "input",
+      "path": "korean.standard"
+    },
+    {
+      "id": "m",
+      "op": "input",
+      "path": "math.standard"
+    },
+    {
+      "id": "q1",
+      "op": "input",
+      "path": "inquiry1.standard"
+    },
+    {
+      "id": "q2",
+      "op": "input",
+      "path": "inquiry2.standard"
+    },
+    {
+      "id": "eng_grade",
+      "op": "input",
+      "path": "english.grade"
+    },
+    {
+      "id": "his_grade",
+      "op": "input",
+      "path": "history.grade"
+    },
+    {
+      "id": "q_sum",
+      "op": "sum",
+      "inputs": [
+        "q1",
+        "q2"
+      ]
+    },
+    {
+      "id": "weighted",
+      "op": "weighted_sum",
+      "inputs": [
+        "k",
+        "m",
+        "q_sum"
+      ],
+      "weights": [
+        "0.30",
+        "0.40",
+        "0.30"
+      ]
+    },
+    {
+      "id": "scaled",
+      "op": "multiply",
+      "input": "weighted",
+      "factor": "5"
+    },
+    {
+      "id": "eng_adjustment",
+      "op": "lookup",
+      "input": "eng_grade",
+      "table_ref": "SYNTHETIC-EN-v1"
+    },
+    {
+      "id": "his_adjustment",
+      "op": "lookup",
+      "input": "his_grade",
+      "table_ref": "SYNTHETIC-HI-v1"
+    },
+    {
+      "id": "before_rounding",
+      "op": "sum",
+      "inputs": [
+        "scaled",
+        "eng_adjustment",
+        "his_adjustment"
+      ]
+    },
+    {
+      "id": "final",
+      "op": "quantize",
+      "input": "before_rounding",
+      "decimal_places": 2,
+      "rounding": "ROUND_HALF_UP"
+    }
+  ],
+  "output_node": "final",
+  "notes": [
+    "0.30/0.40/0.30과 등급별 점수는 가상 수치다.",
+    "반올림은 이 예제의 명시 규칙이며 실제 대학에 공통 적용하지 않는다.",
+    "국수탐2 총점의 정의나 전국 결합분포를 바꾸는 예제가 아니다."
+  ]
+}

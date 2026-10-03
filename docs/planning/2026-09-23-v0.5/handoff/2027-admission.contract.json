@@ -1,0 +1,77 @@
+{
+  "version": "0.5",
+  "status": "planning_only_not_openapi",
+  "extends": "../../2026-09-23-v0.4/handoff/membership-contract.json",
+  "presentation": {
+    "location": "right_of_university_department_heading_above_history_table",
+    "academic_year": 2027,
+    "title": "2027학년도 전형 정보",
+    "fields": [
+      {
+        "key": "recruitment_group",
+        "label": "모집군"
+      },
+      {
+        "key": "baseline_count",
+        "label": "선발인원"
+      },
+      {
+        "key": "net_change_count",
+        "label": "추가·변경 인원"
+      },
+      {
+        "key": "final_count",
+        "label": "최종인원"
+      }
+    ],
+    "display_pending_slots": true,
+    "narrow_width": "stack_below_department_heading_and_above_history_table",
+    "membership_access": [
+      "standard",
+      "paid"
+    ]
+  },
+  "data": {
+    "placement": "admission-history.items[].current_offerings[]",
+    "identity": [
+      "academic_year",
+      "university_id",
+      "department_offering_id",
+      "selection_id",
+      "recruitment_group"
+    ],
+    "history_link": "verified_history_group_id",
+    "baseline": "fixed_source_snapshot_recruitment_count",
+    "net_change": "signed_net_change_against_fixed_baseline_including_all_adjustments",
+    "final": "officially_confirmed_final_recruitment_count",
+    "required_provenance": [
+      "source_document",
+      "source_location",
+      "published_on",
+      "as_of",
+      "source_version",
+      "review_state"
+    ],
+    "nullable_states": [
+      "awaiting_verification",
+      "awaiting_confirmation",
+      "not_published",
+      "not_applicable"
+    ],
+    "no_unknown_to_zero": true,
+    "not_applicable_not_hidden_zero": true,
+    "published_data_requires_official_verified_source": true
+  },
+  "consistency": [
+    "baseline + net change must reconcile to final when all refer to the same offering and final snapshot",
+    "official final count is not synthesized from an interim change sum",
+    "source releases containing cumulative totals are not added together",
+    "revisions supersede earlier event versions for calculation while preserving history",
+    "when only baseline and final are available, net change may be their documented difference; do not invent a carryover breakdown",
+    "conditional carryover offerings and missing baselines stay explicit instead of becoming zero"
+  ],
+  "limits": [
+    "2027전형정보 추가는 과거 입시결과 조회창의 4개 학년도 확정을 의미하지 않는다.",
+    "가상 예시는 운영 입시정보로 발행하지 않는다."
+  ]
+}

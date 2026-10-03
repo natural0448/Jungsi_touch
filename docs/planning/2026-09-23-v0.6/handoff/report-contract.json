@@ -1,0 +1,116 @@
+{
+  "version": "0.6",
+  "status": "planning_only",
+  "replaces": "v0.4_paid_only_personal_input",
+  "metric": {
+    "id": "korean_math_inquiry2_standard_sum",
+    "fields": [
+      "korean_standard",
+      "math_standard",
+      "inquiry1_standard",
+      "inquiry2_standard"
+    ],
+    "exclude_from_total": [
+      "english_grade",
+      "korean_history_grade"
+    ],
+    "population": "all_examinees_with_valid_korean_math_two_inquiry_scores",
+    "split_by_track": false,
+    "year_matched": true,
+    "same_total_same_overall_percentile": true
+  },
+  "entitlements": {
+    "standard": {
+      "history.read": true,
+      "overall.analyze": true,
+      "university.analyze": false,
+      "watchlist.manage": false,
+      "report.export_full": false
+    },
+    "paid": {
+      "history.read": true,
+      "overall.analyze": true,
+      "university.analyze": true,
+      "watchlist.manage": true,
+      "report.export_full": true
+    }
+  },
+  "public_release_requirements": [
+    "official_input_validation",
+    "academic_year_match",
+    "population_definition_verified",
+    "coverage_verified",
+    "tie_policy_fixed",
+    "units_and_monotonicity_checked",
+    "independent_validation",
+    "immutable_version"
+  ],
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/v1/overall-reports",
+      "entitlement": "overall.analyze",
+      "response_fields": [
+        "report_id",
+        "academic_year",
+        "input_summary",
+        "total_standard_score",
+        "overall_percentile",
+        "release"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reports/{id}/university-results",
+      "entitlement": "university.analyze",
+      "check_owner": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/{id}/print",
+      "entitlement": "report.export_full",
+      "check_owner": true
+    }
+  ],
+  "standard_response_excludes": [
+    "university_results",
+    "watchlist_analysis",
+    "full_distributions",
+    "raw_reference_files",
+    "model_parameters"
+  ],
+  "percentile": {
+    "unit": "fraction",
+    "display": "top_percent",
+    "statuses": [
+      "model_estimate",
+      "observed_distribution",
+      "model_not_ready",
+      "unsupported_population",
+      "out_of_range",
+      "missing_input"
+    ],
+    "unverified_result_is_null": true
+  },
+  "source_eligibility": {
+    "susi_file": "excluded",
+    "etoos_2025": "separate_track_reference_not_unified",
+    "seoul_2026": "unified_candidate_population_unverified",
+    "gs_2026": "separate_track_and_university_reference"
+  },
+  "print": {
+    "format_candidates": [
+      "A4",
+      "PDF"
+    ],
+    "snapshot_fields": [
+      "input_version",
+      "exam_year",
+      "population_version",
+      "model_release",
+      "university_rule_versions",
+      "generated_at"
+    ],
+    "production_export_implemented": false
+  }
+}

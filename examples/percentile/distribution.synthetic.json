@@ -1,0 +1,24 @@
+{
+  "format": "total_score_frequency/v1",
+  "metadata": {
+    "distribution_id": "synthetic-2026-complete-example-v1",
+    "academic_year": 2026,
+    "source_name": "계산 검증용 가상 100명 분포; 실제 수능 자료 아님",
+    "source_date": "2026-09-27",
+    "metric_id": "korean_math_inquiry2_standard_sum",
+    "population_id": "all_examinees_with_korean_math_two_inquiry_scores",
+    "kind": "observed_counts",
+    "status": "synthetic",
+    "population_verified": false,
+    "complete": true,
+    "score_min": 0,
+    "score_max": 500,
+    "expected_total_weight": 100
+  },
+  "rows": [
+    {"total_score": 380, "weight": 40},
+    {"total_score": 390, "weight": 30},
+    {"total_score": 400, "weight": 20},
+    {"total_score": 410, "weight": 10}
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "version": "0.5",
+  "example_only": true,
+  "display_notice": "대학명·모집군·인원은 모두 화면 설계용 가상 자료입니다.",
+  "historical_result_window_changed": false,
+  "cases": [
+    {
+      "phase": "initial",
+      "current_offerings": [
+        {
+          "offering_id": "example-business-2027",
+          "history_group_id": "example-business",
+          "academic_year": 2027,
+          "university_name": "예시대학교",
+          "department_name": "경영학과",
+          "selection_label": "일반전형",
+          "recruitment_group": "가군",
+          "baseline_count": {
+            "value": 34,
+            "status": "available",
+            "source_ref": "synthetic-baseline"
+          },
+          "net_change_count": {
+            "value": null,
+            "status": "awaiting_verification",
+            "source_ref": null
+          },
+          "final_count": {
+            "value": null,
+            "status": "awaiting_confirmation",
+            "source_ref": null
+          },
+          "publication_phase": "initial",
+          "net_change_scope": "all_recruitment_adjustments_including_susi_carryover",
+          "is_final": false,
+          "source_kind": "synthetic_example",
+          "as_of": null
+        },
+        {
+          "offering_id": "fictional-computing-2027",
+          "history_group_id": "fictional-computing",
+          "academic_year": 2027,
+          "university_name": "가상대학교",
+          "department_name": "컴퓨터학부",
+          "selection_label": "일반전형",
+          "recruitment_group": "나군",
+          "baseline_count": {
+            "value": 44,
+            "status": "available",
+            "source_ref": "synthetic-baseline"
+          },
+          "net_change_count": {
+            "value": null,
+            "status": "awaiting_verification",
+            "source_ref": null
+          },
+          "final_count": {
+            "value": null,
+            "status": "awaiting_confirmation",
+            "source_ref": null
+          },
+          "publication_phase": "initial",
+          "net_change_scope": "all_recruitment_adjustments_including_susi_carryover",
+          "is_final": false,
+          "source_kind": "synthetic_example",
+          "as_of": null
+        }
+      ]
+    },
+    {
+      "phase": "updated",
+      "current_offerings": [
+        {
+          "offering_id": "example-business-2027",
+          "history_group_id": "example-business",
+          "academic_year": 2027,
+          "university_name": "예시대학교",
+          "department_name": "경영학과",
+          "selection_label": "일반전형",
+          "recruitment_group": "가군",
+          "baseline_count": {
+            "value": 34,
+            "status": "available",
+            "source_ref": "synthetic-baseline"
+          },
+          "net_change_count": {
+            "value": 3,
+            "status": "available",
+            "source_ref": "synthetic-updated"
+          },
+          "final_count": {
+            "value": null,
+            "status": "awaiting_confirmation",
+            "source_ref": null
+          },
+          "publication_phase": "updated",
+          "net_change_scope": "all_recruitment_adjustments_including_susi_carryover",
+          "is_final": false,
+          "source_kind": "synthetic_example",
+          "as_of": null
+        },
+        {
+          "offering_id": "fictional-computing-2027",
+          "history_group_id": "fictional-computing",
+          "academic_year": 2027,
+          "university_name": "가상대학교",
+          "department_name": "컴퓨터학부",
+          "selection_label": "일반전형",
+          "recruitment_group": "나군",
+          "baseline_count": {
+            "value": 44,
+            "status": "available",
+            "source_ref": "synthetic-baseline"
+          },
+          "net_change_count": {
+            "value": -1,
+            "status": "available",
+            "source_ref": "synthetic-updated"
+          },
+          "final_count": {
+            "value": null,
+            "status": "awaiting_confirmation",
+            "source_ref": null
+          },
+          "publication_phase": "updated",
+          "net_change_scope": "all_recruitment_adjustments_including_susi_carryover",
+          "is_final": false,
+          "source_kind": "synthetic_example",
+          "as_of": null
+        }
+      ]
+    },
+    {
+      "phase": "final",
+      "current_offerings": [
+        {
+          "offering_id": "example-business-2027",
+          "history_group_id": "example-business",
+          "academic_year": 2027,
+          "university_name": "예시대학교",
+          "department_name": "경영학과",
+          "selection_label": "일반전형",
+          "recruitment_group": "가군",
+          "baseline_count": {
+            "value": 34,
+            "status": "available",
+            "source_ref": "synthetic-baseline"
+          },
+          "net_change_count": {
+            "value": 4,
+            "status": "available",
+            "source_ref": "synthetic-final"
+          },
+          "final_count": {
+            "value": 38,
+            "status": "available",
+            "source_ref": "synthetic-final"
+          },
+          "publication_phase": "final",
+          "net_change_scope": "all_recruitment_adjustments_including_susi_carryover",
+          "is_final": true,
+          "source_kind": "synthetic_example",
+          "as_of": null
+        },
+        {
+          "offering_id": "fictional-computing-2027",
+          "history_group_id": "fictional-computing",
+          "academic_year": 2027,
+          "university_name": "가상대학교",
+          "department_name": "컴퓨터학부",
+          "selection_label": "일반전형",
+          "recruitment_group": "나군",
+          "baseline_count": {
+            "value": 44,
+            "status": "available",
+            "source_ref": "synthetic-baseline"
+          },
+          "net_change_count": {
+            "value": -2,
+            "status": "available",
+            "source_ref": "synthetic-final"
+          },
+          "final_count": {
+            "value": 42,
+            "status": "available",
+            "source_ref": "synthetic-final"
+          },
+          "publication_phase": "final",
+          "net_change_scope": "all_recruitment_adjustments_including_susi_carryover",
+          "is_final": true,
+          "source_kind": "synthetic_example",
+          "as_of": null
+        }
+      ]
+    }
+  ],
+  "confirmed_zero_change_example": {
+    "offering_id": "example-business-2027",
+    "history_group_id": "example-business",
+    "academic_year": 2027,
+    "university_name": "예시대학교",
+    "department_name": "경영학과",
+    "selection_label": "일반전형",
+    "recruitment_group": "가군",
+    "baseline_count": {
+      "value": 34,
+      "status": "available",
+      "source_ref": "synthetic-baseline"
+    },
+    "net_change_count": {
+      "value": 0,
+      "status": "available",
+      "source_ref": "synthetic-final"
+    },
+    "final_count": {
+      "value": 34,
+      "status": "available",
+      "source_ref": "synthetic-final"
+    },
+    "publication_phase": "final",
+    "net_change_scope": "all_recruitment_adjustments_including_susi_carryover",
+    "is_final": true,
+    "source_kind": "synthetic_example",
+    "as_of": null
+  }
+}

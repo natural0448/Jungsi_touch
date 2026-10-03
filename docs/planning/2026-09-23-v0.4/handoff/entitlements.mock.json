@@ -1,0 +1,48 @@
+{
+  "example_only": true,
+  "cases": [
+    {
+      "case": "standard",
+      "response": {
+        "membership_tier": "standard",
+        "features": {
+          "history.read": true,
+          "analysis.run": false
+        },
+        "analysis_entitlement": {
+          "status": "not_granted",
+          "expires_at": null
+        }
+      }
+    },
+    {
+      "case": "paid_current",
+      "response": {
+        "membership_tier": "paid",
+        "features": {
+          "history.read": true,
+          "analysis.run": true
+        },
+        "analysis_entitlement": {
+          "status": "active",
+          "expires_at": null
+        }
+      }
+    },
+    {
+      "case": "expired",
+      "response": {
+        "membership_tier": "standard",
+        "features": {
+          "history.read": true,
+          "analysis.run": false
+        },
+        "analysis_entitlement": {
+          "status": "expired",
+          "expires_at": "2026-09-22T15:00:00Z"
+        }
+      }
+    }
+  ],
+  "note": "권한 응답 형태의 가상 예시. active 예시의 null 만료 시점은 무기한 상품 확정이 아니다. 분석 요청마다 서버가 현재 권한을 확인한다."
+}

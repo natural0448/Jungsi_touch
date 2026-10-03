@@ -1,0 +1,217 @@
+{
+  "format": "school_screening_example/v1",
+  "data_kind": "synthetic",
+  "production_allowed": false,
+  "description": "두 추천 지표를 구분하는 가상 예제. 실제 대학·수능 분포가 아니다.",
+  "standard_scores": {
+    "academic_year": 2027,
+    "korean": 126,
+    "math": 128,
+    "inquiry1": 63,
+    "inquiry2": 65
+  },
+  "grade_scores": {
+    "academic_year": 2027,
+    "korean": 2,
+    "math": 3,
+    "inquiry1": 3,
+    "inquiry2": 4
+  },
+  "distribution": {
+    "format": "total_score_frequency/v1",
+    "metadata": {
+      "distribution_id": "SYNTHETIC-screening-total-v1",
+      "academic_year": 2027,
+      "source_name": "가상 1000명 분포",
+      "source_date": "2026-09-29",
+      "metric_id": "korean_math_inquiry2_standard_sum",
+      "population_id": "all_examinees_with_korean_math_two_inquiry_scores",
+      "kind": "observed_counts",
+      "status": "synthetic",
+      "population_verified": false,
+      "complete": true,
+      "score_min": 0,
+      "score_max": 600,
+      "expected_total_weight": 1000
+    },
+    "rows": [
+      {
+        "total_score": 380,
+        "weight": 880
+      },
+      {
+        "total_score": 382,
+        "weight": 60
+      },
+      {
+        "total_score": 400,
+        "weight": 60
+      }
+    ]
+  },
+  "overall_search_policy": {
+    "challenge_margin": "2",
+    "stronger_margin": "5"
+  },
+  "overall_bands": [
+    {
+      "band_id": "SYNTHETIC-A-general",
+      "school_key": "SYNTHETIC-A",
+      "school_name": "가상 A대학교",
+      "campus_label": "가상캠퍼스",
+      "scope_label": "일반 모집단위 참고 범위",
+      "basis": {
+        "academic_year": 2027,
+        "metric_id": "overall_korean_math_inquiry2_top_percent",
+        "population_id": "all_examinees_with_korean_math_two_inquiry_scores",
+        "scale_version_id": "SYNTHETIC-screening-total-v1",
+        "tie_policy": "include_equal"
+      },
+      "lower": "10",
+      "upper": "15",
+      "status": "synthetic",
+      "basis_kind": "synthetic",
+      "source_ref": "계산 흐름 설명을 위해 만든 가상 기준. 실제 입결 아님.",
+      "source_as_of": "2026-09-29"
+    },
+    {
+      "band_id": "SYNTHETIC-A-engineering",
+      "school_key": "SYNTHETIC-A",
+      "school_name": "가상 A대학교",
+      "campus_label": "가상캠퍼스",
+      "scope_label": "공학 모집단위 참고 범위",
+      "basis": {
+        "academic_year": 2027,
+        "metric_id": "overall_korean_math_inquiry2_top_percent",
+        "population_id": "all_examinees_with_korean_math_two_inquiry_scores",
+        "scale_version_id": "SYNTHETIC-screening-total-v1",
+        "tie_policy": "include_equal"
+      },
+      "lower": "12",
+      "upper": "18",
+      "status": "synthetic",
+      "basis_kind": "synthetic",
+      "source_ref": "계산 흐름 설명을 위해 만든 가상 기준. 실제 입결 아님.",
+      "source_as_of": "2026-09-29"
+    },
+    {
+      "band_id": "SYNTHETIC-B-general",
+      "school_key": "SYNTHETIC-B",
+      "school_name": "가상 B대학교",
+      "campus_label": "가상캠퍼스",
+      "scope_label": "일반 모집단위 참고 범위",
+      "basis": {
+        "academic_year": 2027,
+        "metric_id": "overall_korean_math_inquiry2_top_percent",
+        "population_id": "all_examinees_with_korean_math_two_inquiry_scores",
+        "scale_version_id": "SYNTHETIC-screening-total-v1",
+        "tie_policy": "include_equal"
+      },
+      "lower": "8",
+      "upper": "11",
+      "status": "synthetic",
+      "basis_kind": "synthetic",
+      "source_ref": "계산 흐름 설명을 위해 만든 가상 기준. 실제 입결 아님.",
+      "source_as_of": "2026-09-29"
+    },
+    {
+      "band_id": "SYNTHETIC-C-general",
+      "school_key": "SYNTHETIC-C",
+      "school_name": "가상 C대학교",
+      "campus_label": "가상캠퍼스",
+      "scope_label": "일반 모집단위 참고 범위",
+      "basis": {
+        "academic_year": 2027,
+        "metric_id": "overall_korean_math_inquiry2_top_percent",
+        "population_id": "all_examinees_with_korean_math_two_inquiry_scores",
+        "scale_version_id": "SYNTHETIC-screening-total-v1",
+        "tie_policy": "include_equal"
+      },
+      "lower": "16",
+      "upper": "22",
+      "status": "synthetic",
+      "basis_kind": "synthetic",
+      "source_ref": "계산 흐름 설명을 위해 만든 가상 기준. 실제 입결 아님.",
+      "source_as_of": "2026-09-29"
+    },
+    {
+      "band_id": "SYNTHETIC-D-general",
+      "school_key": "SYNTHETIC-D",
+      "school_name": "가상 D대학교",
+      "campus_label": "가상캠퍼스",
+      "scope_label": "일반 모집단위 참고 범위",
+      "basis": {
+        "academic_year": 2027,
+        "metric_id": "overall_korean_math_inquiry2_top_percent",
+        "population_id": "all_examinees_with_korean_math_two_inquiry_scores",
+        "scale_version_id": "SYNTHETIC-screening-total-v1",
+        "tie_policy": "include_equal"
+      },
+      "lower": "1",
+      "upper": "4",
+      "status": "synthetic",
+      "basis_kind": "synthetic",
+      "source_ref": "계산 흐름 설명을 위해 만든 가상 기준. 실제 입결 아님.",
+      "source_as_of": "2026-09-29"
+    }
+  ],
+  "grade_search_policy": {
+    "challenge_margin": "0.25",
+    "stronger_margin": "0.25"
+  },
+  "grade_bands": [
+    {
+      "band_id": "SYNTHETIC-E-grade",
+      "school_key": "SYNTHETIC-E",
+      "school_name": "가상 E대학교",
+      "campus_label": "가상캠퍼스",
+      "scope_label": "일반 모집단위 참고 범위",
+      "basis": {
+        "academic_year": 2027,
+        "metric_id": "csat_korean_math_inquiry2_mean_grade",
+        "population_id": "all_examinees_with_korean_math_two_inquiry_scores",
+        "scale_version_id": "unweighted_four_subject_grades/v1",
+        "tie_policy": null
+      },
+      "lower": "2.5",
+      "upper": "3.5",
+      "status": "synthetic",
+      "basis_kind": "synthetic",
+      "source_ref": "계산 흐름 설명을 위해 만든 가상 기준. 실제 입결 아님.",
+      "source_as_of": "2026-09-29"
+    },
+    {
+      "band_id": "SYNTHETIC-F-grade",
+      "school_key": "SYNTHETIC-F",
+      "school_name": "가상 F대학교",
+      "campus_label": "가상캠퍼스",
+      "scope_label": "일반 모집단위 참고 범위",
+      "basis": {
+        "academic_year": 2027,
+        "metric_id": "csat_korean_math_inquiry2_mean_grade",
+        "population_id": "all_examinees_with_korean_math_two_inquiry_scores",
+        "scale_version_id": "unweighted_four_subject_grades/v1",
+        "tie_policy": null
+      },
+      "lower": "2.25",
+      "upper": "2.75",
+      "status": "synthetic",
+      "basis_kind": "synthetic",
+      "source_ref": "계산 흐름 설명을 위해 만든 가상 기준. 실제 입결 아님.",
+      "source_as_of": "2026-09-29"
+    }
+  ],
+  "expected": {
+    "overall_top_percent": "12.000000",
+    "overall_school_keys": [
+      "SYNTHETIC-A",
+      "SYNTHETIC-C",
+      "SYNTHETIC-B"
+    ],
+    "mean_grade": "3.000000",
+    "grade_school_keys": [
+      "SYNTHETIC-E",
+      "SYNTHETIC-F"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "RATE_LIMITED",
+    "message": "요청이 많습니다. 잠시 후 다시 시도해 주세요.",
+    "request_id": "demo-request-002",
+    "retry_after_seconds": 60
+  }
+}

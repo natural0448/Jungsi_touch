@@ -1,0 +1,178 @@
+{
+  "version": "0.7",
+  "status": "design_not_production",
+  "ui_terms": {
+    "page_title": "내 성적에 유리한 대학 찾기",
+    "shortlist": "핵심 지원 학교",
+    "add": "핵심 지원 학교에 담기",
+    "external_action": "모의지원 서비스에서 확인"
+  },
+  "layout": {
+    "desktop_columns": [
+      2,
+      1
+    ],
+    "left": "기본 대학 목록 및 학과별 과거 입결 비교",
+    "right": "간호·보건·교육 와일드카드",
+    "narrow_order": [
+      "basic",
+      "wildcards"
+    ]
+  },
+  "entitlements": {
+    "standard": {
+      "overall": true,
+      "personal_candidates": false,
+      "wildcards": false,
+      "shortlist": false
+    },
+    "paid": {
+      "overall": true,
+      "personal_candidates": true,
+      "wildcards": true,
+      "shortlist": true
+    }
+  },
+  "apis": [
+    {
+      "method": "POST",
+      "path": "/api/v1/reports/{report_id}/candidates",
+      "requires": [
+        "active_paid",
+        "report_owner",
+        "confirmed_score_profile"
+      ],
+      "returns": [
+        "summary",
+        "comparison_groups",
+        "basic_university_groups",
+        "wildcards",
+        "needs_confirmation",
+        "unavailable_reasons"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/reports/{report_id}/shortlist/{offering_id}",
+      "requires": [
+        "active_paid",
+        "report_owner"
+      ],
+      "body": {
+        "selected": "boolean"
+      },
+      "meaning": "우리 서비스 관심 목록 상태 변경; 외부 모의지원 상태 아님"
+    }
+  ],
+  "offering_identity": [
+    "academic_year",
+    "verified_admission_offering_pk",
+    "selection",
+    "recruitment_group"
+  ],
+  "conversion": {
+    "input": "full_subject_profile",
+    "rule_scope": "actual_offering",
+    "required_versions": [
+      "score_profile",
+      "official_ruleset",
+      "population",
+      "model",
+      "candidate_set"
+    ],
+    "numeric_type": "decimal_or_scaled_integer",
+    "rounding": "official_rule_steps"
+  },
+  "advantage": {
+    "internal_probability_unit": "fraction",
+    "display_difference_unit": "percentage_point",
+    "formula": "100 * (base_fraction_in_same_population - converted_fraction)",
+    "requires": [
+      "same_population",
+      "same_exam_year",
+      "same_tie_policy",
+      "approved_joint_distribution",
+      "all_rules_computable_in_reference_population"
+    ],
+    "cross_group_sort": false,
+    "sort_raw_conversion_score": false,
+    "sort_ratio_to_max_score": false,
+    "not_ready_value": null
+  },
+  "historical_comparison": {
+    "metrics": [
+      "source_defined_admission_band",
+      "source_defined_top70"
+    ],
+    "requires": [
+      "verified_metric_definition",
+      "same_or_validated_linked_scale",
+      "verified_offering_mapping"
+    ],
+    "required_fields": [
+      "result_year",
+      "source_metric_id",
+      "result_id",
+      "comparability_status",
+      "bridge_version_id",
+      "source_date"
+    ],
+    "null_is_failure": false,
+    "claim": "과거 기준 이상/미만/비교 보류",
+    "probability_of_admission": false
+  },
+  "wildcards": {
+    "categories": [
+      "nursing",
+      "health",
+      "education"
+    ],
+    "outside_basic_pool_search": true,
+    "eligibility_states": [
+      "eligible",
+      "needs_confirmation",
+      "ineligible"
+    ],
+    "ineligible_recommendation": false,
+    "unknown_eligibility_recommendation": false,
+    "scope_auto_expands_to_junior_colleges": false
+  },
+  "external_service": {
+    "mode": "user_opens_and_checks",
+    "ui_label": "모의지원 서비스에서 확인",
+    "reference_guide_url": "https://www.jinhak.com/jh/high3/regular/manual",
+    "verified_on": "2026-09-23",
+    "official_integration_verified": false,
+    "auto_registration": false,
+    "auto_score_transfer": false,
+    "store_external_credentials": false,
+    "external_registered_status_from_shortlist": false
+  },
+  "response_for_standard": {
+    "status": "paid_required",
+    "include_overall_summary": true,
+    "basic_university_groups": [],
+    "wildcards": [],
+    "shortlist": []
+  },
+  "production_release": {
+    "requires_official_4_year_school_audit": true,
+    "original_table_audit_completed_by_this_task": false,
+    "own_percentile_model_approved": false,
+    "conversion_engine_implemented": false,
+    "external_integration_implemented": false
+  },
+  "frontend_receives": [
+    "own_summary",
+    "authorized_candidate_results",
+    "explanation_summaries",
+    "limited_source_references"
+  ],
+  "frontend_excludes": [
+    "full_reference_microdata",
+    "full_percentile_curves",
+    "private_rule_tables",
+    "other_users_profiles",
+    "credentials"
+  ]
+}

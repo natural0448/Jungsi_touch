@@ -1,0 +1,120 @@
+# Jungsi_touch: source code in Git, private data outside Git.
+# No .env example exception: all environment files stay local.
+
+# Environment files at every directory depth
+.env
+.env.*
+*.env
+*.env.*
+.[eE][nN][vV]
+.[eE][nN][vV].*
+*.[eE][nN][vV]
+*.[eE][nN][vV].*
+
+# Private source materials, 3-tier data layer, and generated outputs.
+# No leading slash: the same directory names are excluded at every depth.
+Resource/
+data/
+datas/
+outputs/
+# Portable protection against case variants, including DATA and Data.
+[rR][eE][sS][oO][uU][rR][cC][eE]/
+[dD][aA][tT][aA]/
+[dD][aA][tT][aA][sS]/
+[oO][uU][tT][pP][uU][tT][sS]/
+
+# Private data metadata / real recruitment mapping outside those folders
+DATA_ACTIVE*.json
+[dD][aA][tT][aA]_[aA][cC][tT][iI][vV][eE]*.[jJ][sS][oO][nN]
+/examples/equating/kaya_nursing_offering_map.json
+
+# Raw data tables, database files and trained-model artifacts anywhere
+*.[xX][lL][sS]
+*.[xX][lL][sS][xX]
+*.[xX][lL][sS][bB]
+*.[xX][lL][sS][mM]
+*.[cC][sS][vV]
+*.[tT][sS][vV]
+*.[jJ][sS][oO][nN][lL]
+*.[pP][aA][rR][qQ][uU][eE][tT]
+*.[fF][eE][aA][tT][hH][eE][rR]
+*.[sS][qQ][lL][iI][tT][eE]
+*.[sS][qQ][lL][iI][tT][eE]3
+*.[dD][bB]
+*.[dD][bB]-wal
+*.[dD][bB]-shm
+*.[dD][uU][mM][pP]
+*.[sS][qQ][lL].[gG][zZ]
+*.[pP][kK][lL]
+*.[pP][iI][cC][kK][lL][eE]
+*.[jJ][oO][bB][lL][iI][bB]
+*.[nN][pP][yY]
+*.[nN][pP][zZ]
+*.[sS][aA][fF][eE][tT][eE][nN][sS][oO][rR][sS]
+*.[oO][nN][nN][xX]
+*.[pP][tT][hH]
+*.[pP][tT]
+
+# Local runtimes, caches and build outputs
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+node_modules/
+.next/
+.nuxt/
+.vite/
+build/
+dist/
+coverage/
+.coverage
+htmlcov/
+*.egg-info/
+*.log
+
+# Local agent / cloud credentials and operating-system metadata
+.codex/
+.agents/
+.aws/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Data-work scripts are local by default: existing scripts include actual
+# recruitment rows, quotas, source mappings and previous data-patch versions.
+# Only reviewed generic entry points and explicitly synthetic demos are shared.
+/scripts/*
+!/scripts/calculate_overall_percentile.py
+!/scripts/analyze_exam_score.py
+!/scripts/compare_year_scores.py
+!/scripts/demo_profile_percentile.py
+!/scripts/demo_school_screening.py
+!/scripts/demo_total_curve_principle_20260927.py
+!/scripts/import_kice_exam.py
+
+# Source-value analyses and identifiable consultation records stay local.
+/docs/implementation/
+/docs/planning/2026-09-23-v0.1/04_기존_자료와_확인_범위.md
+/docs/planning/2026-09-23-v0.2/01_참고파일_분석.md
+/docs/planning/2026-09-23-v0.6/01_정시판_판별근거_재검토.md
+/docs/planning/2026-09-23-v0.6/02_통합누적_산출계약.md
+/docs/planning/2026-09-27_상담사례_2건_3페이지_공통흐름.md
+/docs/planning/2026-10-03-score-engine/입결_누적백분위_엔진준비.md
+/docs/planning/2026-10-03-score-engine/추가_환산참고자료_검토.md
+# Historical example allowed .env examples; the root policy is stricter.
+/docs/planning/2026-09-23-v0.3/handoff/.gitignore.example
+
+# Integration checks with actual published scores/rule values stay local.
+/tests/test_exam_pack.py
+/tests/test_year_equating.py
+/tests/test_university_conversion.py
+/tests/test_year_comparison.py
+/tests/test_admission_result_percentile.py
+
+# Verification outputs are local; some historical reports contain source lookup values.
+/docs/**/검증_기록.json
+/docs/**/verification*.json
+/docs/**/design_verification.json

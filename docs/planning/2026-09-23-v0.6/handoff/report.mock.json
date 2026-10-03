@@ -1,0 +1,142 @@
+{
+  "example_only": true,
+  "notice": "화면 구성 확인용 가상 리포트. 실제 점수·누적 산출 결과가 아니다.",
+  "standard": {
+    "entitlements": {
+      "history.read": true,
+      "overall.analyze": true,
+      "university.analyze": false,
+      "watchlist.manage": false,
+      "report.export_full": false
+    },
+    "report": {
+      "report_id": "synthetic-report-v06",
+      "academic_year": 2026,
+      "input_summary": {
+        "korean": {
+          "subject": "언어와 매체",
+          "standard": 137
+        },
+        "math": {
+          "subject": "미적분",
+          "standard": 133
+        },
+        "inquiry1": {
+          "subject": "생활과 윤리",
+          "standard": 65
+        },
+        "inquiry2": {
+          "subject": "지구과학Ⅰ",
+          "standard": 65
+        },
+        "english": {
+          "grade": 2
+        },
+        "korean_history": {
+          "grade": 1
+        }
+      },
+      "total_standard_score": 400,
+      "overall_percentile": {
+        "fraction": 0.0235,
+        "status": "synthetic_example",
+        "label": "전체 응시자 기준 추정 상위 2.35%",
+        "population_label": "국어·수학·탐구2 유효 성적 보유자 전체",
+        "tie_policy": "example_only"
+      },
+      "release": {
+        "id": "synthetic-unified-v06",
+        "is_real": false
+      }
+    }
+  },
+  "paid": {
+    "entitlements": {
+      "history.read": true,
+      "overall.analyze": true,
+      "university.analyze": true,
+      "watchlist.manage": true,
+      "report.export_full": true
+    },
+    "report": {
+      "report_id": "synthetic-report-v06",
+      "academic_year": 2026,
+      "input_summary": {
+        "korean": {
+          "subject": "언어와 매체",
+          "standard": 137
+        },
+        "math": {
+          "subject": "미적분",
+          "standard": 133
+        },
+        "inquiry1": {
+          "subject": "생활과 윤리",
+          "standard": 65
+        },
+        "inquiry2": {
+          "subject": "지구과학Ⅰ",
+          "standard": 65
+        },
+        "english": {
+          "grade": 2
+        },
+        "korean_history": {
+          "grade": 1
+        }
+      },
+      "total_standard_score": 400,
+      "overall_percentile": {
+        "fraction": 0.0235,
+        "status": "synthetic_example",
+        "label": "전체 응시자 기준 추정 상위 2.35%",
+        "population_label": "국어·수학·탐구2 유효 성적 보유자 전체",
+        "tie_policy": "example_only"
+      },
+      "release": {
+        "id": "synthetic-unified-v06",
+        "is_real": false
+      },
+      "university_results": [
+        {
+          "offering_id": "demo-business-2026",
+          "university": "예시대학교",
+          "department": "경영학과",
+          "selection": "일반전형",
+          "group": "가군",
+          "baseline_count": 34,
+          "net_change": 4,
+          "final_count": 38,
+          "converted_score": 884.2,
+          "university_percentile_fraction": 0.021,
+          "eligibility": "성적 조건 충족",
+          "evidence_status": "synthetic"
+        },
+        {
+          "offering_id": "demo-computing-2026",
+          "university": "가상대학교",
+          "department": "컴퓨터학부",
+          "selection": "일반전형",
+          "group": "나군",
+          "baseline_count": 44,
+          "net_change": -2,
+          "final_count": 42,
+          "converted_score": 903.5,
+          "university_percentile_fraction": 0.026,
+          "eligibility": "성적 조건 충족",
+          "evidence_status": "synthetic"
+        }
+      ]
+    }
+  },
+  "production_not_ready_example": {
+    "report_id": "example-not-ready",
+    "academic_year": 2027,
+    "total_standard_score": 400,
+    "overall_percentile": {
+      "fraction": null,
+      "status": "model_not_ready",
+      "reason": "대상 학년도·전체 비교집단에 맞는 자체 통합 누적 미승인"
+    }
+  }
+}

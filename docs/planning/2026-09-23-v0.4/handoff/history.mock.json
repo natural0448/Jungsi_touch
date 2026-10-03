@@ -1,0 +1,509 @@
+{
+  "contract_version": "0.4",
+  "example_only": true,
+  "release_id": "synthetic-history-v04",
+  "year_window": {
+    "id": "example-2023-2026",
+    "academic_years": [
+      2026,
+      2025,
+      2024,
+      2023
+    ],
+    "production_years_confirmed": false
+  },
+  "result_bases": [
+    {
+      "id": "admission_band",
+      "label": "합격권"
+    },
+    {
+      "id": "upper_70",
+      "label": "상위 70%"
+    }
+  ],
+  "items": [
+    {
+      "group_id": "example-business",
+      "university_name": "예시대학교",
+      "department_name": "경영학과",
+      "selection_label": "일반전형",
+      "years": [
+        {
+          "academic_year": 2026,
+          "offerings": [
+            {
+              "offering_id": "example-business-2026",
+              "department_name_at_year": "경영학과",
+              "selection_label": "일반전형",
+              "recruitment_group": "가군",
+              "selected_count": {
+                "value": 32,
+                "status": "synthetic",
+                "kind": "example_only_pending_production_definition"
+              },
+              "results": {
+                "admission_band": {
+                  "converted_score": {
+                    "value": 862.4,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.038,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 인문계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                },
+                "upper_70": {
+                  "converted_score": {
+                    "value": 871.2,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.031,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 인문계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "academic_year": 2025,
+          "offerings": [
+            {
+              "offering_id": "example-business-2025",
+              "department_name_at_year": "경영학과",
+              "selection_label": "일반전형",
+              "recruitment_group": "가군",
+              "selected_count": {
+                "value": 30,
+                "status": "synthetic",
+                "kind": "example_only_pending_production_definition"
+              },
+              "results": {
+                "admission_band": {
+                  "converted_score": {
+                    "value": 850.6,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.041,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 인문계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                },
+                "upper_70": {
+                  "converted_score": {
+                    "value": 862.1,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.032,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 인문계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "academic_year": 2024,
+          "offerings": [
+            {
+              "offering_id": "example-business-2024",
+              "department_name_at_year": "경영학과",
+              "selection_label": "일반전형",
+              "recruitment_group": "나군",
+              "selected_count": {
+                "value": 28,
+                "status": "synthetic",
+                "kind": "example_only_pending_production_definition"
+              },
+              "results": {
+                "admission_band": {
+                  "converted_score": {
+                    "value": 844.2,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.043,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 인문계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                },
+                "upper_70": {
+                  "converted_score": {
+                    "value": 856.8,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.034,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 인문계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "academic_year": 2023,
+          "offerings": [
+            {
+              "offering_id": "example-business-2023",
+              "department_name_at_year": "경영학과",
+              "selection_label": "일반전형",
+              "recruitment_group": "나군",
+              "selected_count": {
+                "value": 28,
+                "status": "synthetic",
+                "kind": "example_only_pending_production_definition"
+              },
+              "results": {
+                "admission_band": {
+                  "converted_score": {
+                    "value": 836.9,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.044,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 인문계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                },
+                "upper_70": {
+                  "converted_score": {
+                    "value": 849.5,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": null,
+                    "status": "pending_model",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 인문계 응시집단",
+                    "distribution_version": null
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "group_id": "fictional-computing",
+      "university_name": "가상대학교",
+      "department_name": "컴퓨터학부",
+      "selection_label": "일반전형",
+      "years": [
+        {
+          "academic_year": 2026,
+          "offerings": [
+            {
+              "offering_id": "fictional-computing-2026",
+              "department_name_at_year": "컴퓨터학부",
+              "selection_label": "일반전형",
+              "recruitment_group": "나군",
+              "selected_count": {
+                "value": 40,
+                "status": "synthetic",
+                "kind": "example_only_pending_production_definition"
+              },
+              "results": {
+                "admission_band": {
+                  "converted_score": {
+                    "value": 891.5,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.025,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 자연계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                },
+                "upper_70": {
+                  "converted_score": {
+                    "value": 906.7,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.018,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 자연계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "academic_year": 2025,
+          "offerings": [
+            {
+              "offering_id": "fictional-computing-2025",
+              "department_name_at_year": "컴퓨터학부",
+              "selection_label": "일반전형",
+              "recruitment_group": "나군",
+              "selected_count": {
+                "value": 36,
+                "status": "synthetic",
+                "kind": "example_only_pending_production_definition"
+              },
+              "results": {
+                "admission_band": {
+                  "converted_score": {
+                    "value": 884.1,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.027,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 자연계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                },
+                "upper_70": {
+                  "converted_score": {
+                    "value": 899.6,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.019,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 자연계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "academic_year": 2024,
+          "offerings": [
+            {
+              "offering_id": "fictional-computing-2024",
+              "department_name_at_year": "컴퓨터학부",
+              "selection_label": "일반전형",
+              "recruitment_group": "나군",
+              "selected_count": {
+                "value": 35,
+                "status": "synthetic",
+                "kind": "example_only_pending_production_definition"
+              },
+              "results": {
+                "admission_band": {
+                  "converted_score": {
+                    "value": 880,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.029,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 자연계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                },
+                "upper_70": {
+                  "converted_score": {
+                    "value": 895.8,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.02,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 자연계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "academic_year": 2023,
+          "offerings": [
+            {
+              "offering_id": "fictional-computing-2023",
+              "department_name_at_year": "컴퓨터학부",
+              "selection_label": "일반전형",
+              "recruitment_group": "가군",
+              "selected_count": {
+                "value": 32,
+                "status": "synthetic",
+                "kind": "example_only_pending_production_definition"
+              },
+              "results": {
+                "admission_band": {
+                  "converted_score": {
+                    "value": 867.7,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.03,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 자연계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                },
+                "upper_70": {
+                  "converted_score": {
+                    "value": 883.2,
+                    "status": "synthetic",
+                    "scale_max": 1000,
+                    "basis": "해당 학년도 대학 환산점수 예시"
+                  },
+                  "cumulative_percentile": {
+                    "fraction": 0.021,
+                    "status": "synthetic",
+                    "display_convention": "top_percent",
+                    "population_label": "가상 자연계 응시집단",
+                    "distribution_version": "synthetic-distribution-v1"
+                  },
+                  "definition_status": "pending_source_verification",
+                  "source": {
+                    "label": "화면 설계용 가상 자료",
+                    "is_official": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "next_cursor": null,
+  "display_notice": "대학명·수치·연도 범위는 화면 설계용 가상 예시입니다. 실제 데이터 및 서비스 학년도 확정이 아닙니다."
+}

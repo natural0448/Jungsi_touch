@@ -1,0 +1,30 @@
+{
+  "data_kind": "synthetic",
+  "academic_year": 2026,
+  "public_release_id": "demo-release-v03",
+  "items": [
+    {
+      "offering_id": "demo-offering-a",
+      "university_name": "예시대학교",
+      "admission_unit_name": "가상학부 A",
+      "selection_name": "화면 예시 전형",
+      "admission_group": "가",
+      "quota_count": null,
+      "quota_status": "not_collected",
+      "result_metric": null,
+      "source_label": "화면 설계용 합성 자료 — 실제 모집·입시결과 아님"
+    },
+    {
+      "offering_id": "demo-offering-b",
+      "university_name": "예시대학교",
+      "admission_unit_name": "가상학부 B",
+      "selection_name": "화면 예시 전형",
+      "admission_group": "나",
+      "quota_count": null,
+      "quota_status": "not_collected",
+      "result_metric": null,
+      "source_label": "화면 설계용 합성 자료 — 실제 모집·입시결과 아님"
+    }
+  ],
+  "next_cursor": null
+}

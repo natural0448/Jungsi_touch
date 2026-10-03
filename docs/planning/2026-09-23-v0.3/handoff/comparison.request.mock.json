@@ -1,0 +1,37 @@
+{
+  "exam_academic_year": 2026,
+  "score_profile": {
+    "korean": {
+      "subject_id": "demo-korean",
+      "standard_score": 130,
+      "percentile": 95,
+      "grade": 1
+    },
+    "math": {
+      "subject_id": "demo-math",
+      "standard_score": 125,
+      "percentile": 92,
+      "grade": 2
+    },
+    "inquiry": [
+      {
+        "subject_id": "demo-inquiry-a",
+        "standard_score": 65,
+        "percentile": 90,
+        "grade": 2
+      },
+      {
+        "subject_id": "demo-inquiry-b",
+        "standard_score": 64,
+        "percentile": 88,
+        "grade": 2
+      }
+    ],
+    "english_grade": 2,
+    "korean_history_grade": 1
+  },
+  "offering_ids": [
+    "demo-offering-a",
+    "demo-offering-b"
+  ]
+}

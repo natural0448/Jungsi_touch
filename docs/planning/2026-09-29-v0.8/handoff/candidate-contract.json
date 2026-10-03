@@ -1,0 +1,314 @@
+{
+  "version": "0.8",
+  "status": "interactive_prototype_not_production",
+  "ui_terms": {
+    "page_title": "내 성적에 유리한 대학 찾기",
+    "shortlist": "핵심 지원 학교",
+    "add": "핵심 지원 학교에 담기",
+    "external_action": "모의지원 서비스에서 확인"
+  },
+  "layout": {
+    "desktop_columns": [
+      2,
+      1
+    ],
+    "left": "기본 대학 목록 및 학과별 과거 입결 비교",
+    "right": "간호·보건·교육 와일드카드",
+    "narrow_order": [
+      "basic",
+      "wildcards"
+    ]
+  },
+  "entitlements": {
+    "standard": {
+      "overall": true,
+      "personal_candidates": false,
+      "wildcards": false,
+      "shortlist": false
+    },
+    "paid": {
+      "overall": true,
+      "personal_candidates": true,
+      "wildcards": true,
+      "shortlist": true
+    }
+  },
+  "apis": [
+    {
+      "method": "POST",
+      "path": "/api/v1/reports/{report_id}/candidates",
+      "requires": [
+        "active_paid",
+        "report_owner",
+        "confirmed_score_profile"
+      ],
+      "returns": [
+        "summary",
+        "comparison_groups",
+        "basic_university_groups",
+        "wildcards",
+        "needs_confirmation",
+        "unavailable_reasons"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/reports/{report_id}/shortlist/{offering_id}",
+      "requires": [
+        "active_paid",
+        "report_owner"
+      ],
+      "body": {
+        "selected": "boolean"
+      },
+      "meaning": "우리 서비스 관심 목록 상태 변경; 외부 모의지원 상태 아님"
+    }
+  ],
+  "offering_identity": [
+    "academic_year",
+    "verified_admission_offering_pk",
+    "selection",
+    "recruitment_group"
+  ],
+  "conversion": {
+    "input": "full_subject_profile",
+    "rule_scope": "actual_offering",
+    "required_versions": [
+      "score_profile",
+      "official_ruleset",
+      "population",
+      "model",
+      "candidate_set"
+    ],
+    "numeric_type": "decimal_or_scaled_integer",
+    "rounding": "official_rule_steps"
+  },
+  "advantage": {
+    "internal_probability_unit": "fraction",
+    "display_difference_unit": "percentage_point",
+    "formula": "100 * (base_fraction_in_same_population - converted_fraction)",
+    "requires": [
+      "same_population",
+      "same_exam_year",
+      "same_tie_policy",
+      "approved_joint_distribution",
+      "all_rules_computable_in_reference_population"
+    ],
+    "cross_group_sort": false,
+    "sort_raw_conversion_score": false,
+    "sort_ratio_to_max_score": false,
+    "not_ready_value": null
+  },
+  "historical_comparison": {
+    "metrics": [
+      "source_defined_admission_band",
+      "source_defined_top70"
+    ],
+    "requires": [
+      "verified_metric_definition",
+      "same_or_validated_linked_scale",
+      "verified_offering_mapping"
+    ],
+    "required_fields": [
+      "result_year",
+      "source_metric_id",
+      "result_id",
+      "comparability_status",
+      "bridge_version_id",
+      "source_date"
+    ],
+    "null_is_failure": false,
+    "claim": "과거 기준 이상/미만/비교 보류",
+    "probability_of_admission": false
+  },
+  "wildcards": {
+    "categories": [
+      "nursing",
+      "health",
+      "education"
+    ],
+    "outside_basic_pool_search": true,
+    "eligibility_states": [
+      "eligible",
+      "needs_confirmation",
+      "ineligible"
+    ],
+    "ineligible_recommendation": false,
+    "unknown_eligibility_recommendation": false,
+    "scope_auto_expands_to_junior_colleges": false
+  },
+  "external_service": {
+    "mode": "user_opens_and_checks",
+    "ui_label": "모의지원 서비스에서 확인",
+    "reference_guide_url": "https://www.jinhak.com/jh/high3/regular/manual",
+    "verified_on": "2026-09-23",
+    "official_integration_verified": false,
+    "auto_registration": false,
+    "auto_score_transfer": false,
+    "store_external_credentials": false,
+    "external_registered_status_from_shortlist": false
+  },
+  "response_for_standard": {
+    "status": "paid_required",
+    "include_overall_summary": true,
+    "basic_university_groups": [],
+    "wildcards": [],
+    "shortlist": []
+  },
+  "production_release": {
+    "requires_official_4_year_school_audit": true,
+    "original_table_audit_completed_by_this_task": false,
+    "own_percentile_model_approved": false,
+    "conversion_engine_implemented": false,
+    "external_integration_implemented": false
+  },
+  "frontend_receives": [
+    "own_summary",
+    "authorized_candidate_results",
+    "explanation_summaries",
+    "limited_source_references"
+  ],
+  "frontend_excludes": [
+    "full_reference_microdata",
+    "full_percentile_curves",
+    "private_rule_tables",
+    "other_users_profiles",
+    "credentials"
+  ],
+  "schema_version": "0.8",
+  "school_department_hierarchy": {
+    "school_discovery_buckets": [
+      "challenge",
+      "core",
+      "room"
+    ],
+    "school_bucket_ui_labels": {
+      "challenge": "도전학교",
+      "core": "핵심학교",
+      "room": "여유 후보"
+    },
+    "school_bucket_source": "first_pass_overall_score_screening",
+    "department_categories": [
+      "challenge",
+      "core",
+      "room",
+      "pending"
+    ],
+    "department_category_source": "server_decision_for_actual_offering",
+    "inherit_parent_bucket": false,
+    "all_three_school_buckets_support_same_department_detail": true,
+    "default_expansion": "all_reviewed_offerings_in_this_school",
+    "count_unit": "academic_year_and_verified_admission_offering_pk",
+    "count_pending_as_recommended": false,
+    "show_reviewed_count_and_total_scope_status": true,
+    "unreviewed_offerings_are_not_safe": true,
+    "department_order_implies_acceptance_of_lower_rows": false,
+    "discovery_bucket_is_final_department_decision": false,
+    "current_demo_single_bucket_per_school": "presentation_assumption_not_approved_classification_policy"
+  },
+  "department_decision": {
+    "required_identity": [
+      "academic_year",
+      "verified_admission_offering_pk",
+      "verified_university_pk",
+      "verified_campus_identity",
+      "selection",
+      "recruitment_group"
+    ],
+    "identity_policy": "reuse_verified_mapping_keys_do_not_replace_with_name_based_ids",
+    "conversion_scope": "each_actual_offering_and_its_rule_version",
+    "fields": [
+      "rule_id",
+      "rule_version",
+      "score",
+      "max_score",
+      "converted_top_percent",
+      "comparison_population_id",
+      "distribution_version",
+      "eligibility",
+      "historical_band",
+      "historical_top70",
+      "forecast",
+      "recommendation_category",
+      "reason_codes",
+      "decision_version",
+      "as_of"
+    ],
+    "historical_fields": [
+      "result_year",
+      "source_definition",
+      "metric_type",
+      "value",
+      "scale_version",
+      "source_ref",
+      "source_as_of",
+      "bridge_status",
+      "bridge_version"
+    ],
+    "forecast_fields": [
+      "target_year",
+      "base_forecast",
+      "issue_adjustment",
+      "adopted_forecast",
+      "uncertainty",
+      "approval_status",
+      "version",
+      "as_of"
+    ],
+    "guards": [
+      "paid_entitlement_and_report_owner",
+      "official_rule_verified_for_year_and_offering",
+      "score_profile_complete",
+      "eligible",
+      "compatible_population_and_score_scale",
+      "historical_bridge_verified_when_used",
+      "forecast_and_decision_policy_approved"
+    ],
+    "on_failed_guard": "pending_with_reason_or_ineligible_not_positive_recommendation",
+    "thresholds_status": "not_agreed_do_not_derive_from_demo",
+    "demo_labels": "hand_authored_synthetic_examples_not_a_calibrated_model",
+    "probability": null,
+    "max_score_ratio_is_rank": false,
+    "university_level_single_score_can_override_department_rule": false
+  },
+  "shortlist_offering_sync": {
+    "key": [
+      "academic_year",
+      "verified_admission_offering_pk"
+    ],
+    "unique_across": [
+      "school_buckets",
+      "department_filters",
+      "wildcards",
+      "report"
+    ],
+    "preview_storage": "memory_only",
+    "production_storage": "server_per_user_report",
+    "model_or_score_revision": "revalidate_and_show_changed_or_pending_state_without_silent_loss",
+    "pending_selection_demo": "disabled_until_confirmed",
+    "external_auto_registration": false
+  },
+  "three_tier_extension": {
+    "presentation": "render_server_school_groups_and_department_decisions_only",
+    "application": "authenticate_authorize_convert_each_offering_compare_approved_evidence_classify_and_explain",
+    "data": "versioned_mapping_rules_distributions_outcomes_forecasts_decisions_and_shortlist",
+    "free_api_excludes": [
+      "personal_school_candidates",
+      "department_recommendations",
+      "wildcard_recommendations",
+      "personal_shortlist"
+    ],
+    "client_has_no": [
+      "production_rule_tables",
+      "private_forecast_parameters",
+      "bulk_internal_datasets",
+      "service_role_keys"
+    ],
+    "prototype_client_tier_toggle_is_authorization": false
+  },
+  "prototype_paths": {
+    "html": "../preview/index.html",
+    "mock": "candidate.mock.json"
+  },
+  "based_on_version": "0.7"
+}
