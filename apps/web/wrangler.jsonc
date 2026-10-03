@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // 아직 배포하지 않는다. 에듀터치의 기존 jeongsi-touch 워커를 덮지 않도록 이름을 따로 둔다.
+  "name": "jungsi-touch-web",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    // 우리 서비스 API 주소(애플리케이션 계층). 비밀값이 아니다.
+    "JUNGSI_API_URL": "http://localhost:8000",
+    // synthetic: HTTP 핸들러 연결 전 화면 제작용 합성 응답 / live: 우리 서비스 API
+    "JUNGSI_API_MODE": "synthetic"
+  }
+}

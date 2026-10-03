@@ -1,0 +1,44 @@
+import Link from "next/link";
+import type { Session } from "@/lib/contract";
+import { seoulDate } from "@/lib/format";
+import { edutouch, loginHref } from "@/lib/links";
+import { PAGES, lockFor } from "@/lib/routes";
+import { Tabs } from "./tabs";
+
+/**
+ * 정시터치 머리글. 에듀터치 로고와 색·글꼴로 같은 사이트임을 알리고, 화면 넷을 탭으로 둔다.
+ * 잠금 표시는 서버가 알려 준 회원 등급(session.read)으로만 그린다.
+ */
+export function SiteHeader({ session }: { session: Session | null }) {
+  const tabs = PAGES.map((p) => ({ href: p.path, label: p.label, lock: lockFor(session, p) }));
+  return (
+    <header>
+      <div className="jt-util">
+        <div className="wrap">
+          <a className="logo" href={edutouch("/")} aria-label="에듀터치 첫 화면">
+            <b>EDU</b>
+            <i>touch</i>
+          </a>
+          <span className="jt-sep" aria-hidden="true" />
+          <Link href="/" className="jt-name">
+            정시<em>터치</em>
+          </Link>
+          <div className="jt-user">
+            {!session ? (
+              <a className="btn p" href={loginHref("/")}>로그인</a>
+            ) : session.member_tier === "paid" ? (
+              <span className="pass">이용권 {seoulDate(session.entitlement_expires_at)}까지</span>
+            ) : (
+              <span className="pass off">일반 회원</span>
+            )}
+          </div>
+        </div>
+      </div>
+      <nav className="jt-tabs" aria-label="정시터치 화면">
+        <div className="wrap">
+          <Tabs items={tabs} />
+        </div>
+      </nav>
+    </header>
+  );
+}

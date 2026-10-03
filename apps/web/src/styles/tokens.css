@@ -1,0 +1,32 @@
+/* 에듀터치 저장소(hottaes1694-cyber/edutouch) web/src/components/shared/tokens.css 의 사본. 기준 커밋 41cbfeb (2026-09-28).
+   정시터치가 에듀터치와 같은 모양으로 보이게 하는 공유 토큰이다. 여기서 고치지 말고, 원본이 바뀌면 다시 복사한다. */
+/* ===================================================================
+   에듀터치 디자인 토큰 · 기본값
+   -------------------------------------------------------------------
+   수시터치·정시터치가 별도 워커로 나뉘어도 이 파일만 같이 쓰면 같은 모양이 나온다.
+   여기에는 **어느 화면에도 매이지 않은 것만** 둔다. 색·모서리·글자 크기·초기화 정도다.
+   특정 화면의 레이아웃은 절대 넣지 말 것. 넣는 순간 공유가 안 된다.
+
+   쓰는 법: 앱의 가장 바깥 요소에 class="et" 를 주고 이 파일을 제일 먼저 불러온다.
+   순서가 중요하다. tokens → base → 화면별 css 차례여야 겹쳐쓰기가 의도대로 먹는다.
+   =================================================================== */
+.et{
+  --bg:#FFFFFF; --sub:#F5F6F9; --sub-2:#ECEEF4; --line:#E3E6EE;
+  --ink:#15192A; --ink-2:#4A5069; --muted:#8B91A8;
+  --brand:#1E56D6; --brand-soft:#E9EFFF; --deep:#102554;
+  --touch:#FF5A2E; --touch-soft:#FFEDE6;
+  --safe:#168A5B; --safe-soft:#E3F5EC; --fit:#1E56D6; --fit-soft:#E9EFFF; --reach:#B7791F; --reach-soft:#FFF4DE; --risk:#C8321E; --risk-soft:#FDE7E3;
+  --shadow:0 8px 24px rgba(16,37,84,.10);
+  /* 모서리. 참고하기로 한 메가스터디는 거의 각지고(카드 대부분 0px), 티켓링크도 6~10px 이다.
+     12~14px 짜리 둥근 카드를 늘어놓으면 만들다 만 시안처럼 보인다.
+     칩·검색창처럼 일부러 알약 모양인 것은 값을 그대로 둔다. */
+  --r-card:6px; --r-sm:4px;
+  background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;
+}
+.et a{color:inherit;text-decoration:none}
+.et button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+.et ul{list-style:none;margin:0;padding:0}
+.et h1,.et h2,.et h3,.et h4{margin:0;letter-spacing:-.3px;font-size:inherit;font-weight:inherit}
+.et .num{font-family:inherit;font-variant-numeric:tabular-nums}
+.et .wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.et :focus-visible{outline:3px solid var(--touch);outline-offset:2px}

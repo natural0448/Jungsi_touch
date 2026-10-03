@@ -609,6 +609,44 @@
         "OverallAnalysisService",
         "OverallAnalysisError"
       ]
+    },
+    {
+      "path": "apps/web/src/app/admissions/possibilities/page.tsx",
+      "layer": "presentation",
+      "status": "page3_presentation_synthetic_responses_no_live_API",
+      "requirements": [
+        "REQ-03",
+        "REQ-05",
+        "REQ-08",
+        "REQ-11",
+        "REQ-13",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/lib/api/index.ts",
+      "layer": "presentation",
+      "status": "presentation_API_client_synthetic_default_live_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-18"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/lib/contract.ts",
+      "layer": "presentation",
+      "status": "presentation_draft_response_shapes_pending_application_contract",
+      "requirements": [
+        "REQ-03",
+        "REQ-05",
+        "REQ-08",
+        "REQ-13"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -666,7 +704,8 @@
     "추천·선택 이벤트와 Kafka·집계·본인 순위 API를 구현하고 실측한다.",
     "비공개 저장소 보호 지원 요금제 적용 시 main의 PR·검사 통과 강제 규칙을 활성화한다.",
     "DEV-001의 시험/곡선 공급 포트는 별도 데이터·인프라 feature가 구현하고, 2페이지 UI·HTTP 어댑터는 통합된 develop 커밋에서 별도 feature로 연결한다.",
-    "Google Drive 폴더 API 연동의 폴더·인증·읽기/쓰기 범위와 포트 어댑터를 설정·검증한다. 화면은 별도 작업자의 feature/presentation-*에서 연결한다."
+    "Google Drive 폴더 API 연동의 폴더·인증·읽기/쓰기 범위와 포트 어댑터를 설정·검증한다. 화면은 별도 작업자의 feature/presentation-*에서 연결한다.",
+    "3페이지가 쓰는 offerings.search·university.analyze·shortlist.update 의 응답 필드(apps/web/src/lib/contract.ts 화면 초안)를 애플리케이션 계약으로 확정하고, 화면이 본인 report_id 와 핵심 지원 학교 목록을 받는 방법을 정한다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -727,6 +766,19 @@
         "REQ-18"
       ],
       "summary": "사용자 지시에 따라 기획팀의 기본 작업·공유 브랜치를 develop으로 정정했다. 두 개발 담당은 origin/develop의 확정 기획을 가져가 별도 feature에서 구현한다. 병합된 현재 기획 feature의 원격 브랜치 삭제는 별도로 허용받아 처리했다."
+    },
+    {
+      "date": "2026-10-03",
+      "requirements": [
+        "REQ-03",
+        "REQ-05",
+        "REQ-08",
+        "REQ-11",
+        "REQ-13",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "summary": "프레젠테이션: apps/web 에 Next.js 앱과 3페이지(전체 대학·학과 가능성 보기)를 구현했다. 대학명·학과명 직접 검색, 모집단위별 내 환산점수·지원가능성·환산 유불리 분리 표시, 미공개·미확정 모집인원, 핵심 지원 학교 담기, 일반 회원은 검색·건수 없이 안내만 표시한다. 경로와 회원 범위는 route_catalog.json 에서 읽는다. HTTP 핸들러 연결 전이라 명시적인 합성 응답으로 동작하며 실제 계산·로그인·자료 연결 완료가 아니다. 1·2·4페이지는 미구현 안내만 둔다."
     }
   ],
   "overall_analysis_contract": {
