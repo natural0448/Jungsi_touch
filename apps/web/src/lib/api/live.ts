@@ -1,5 +1,4 @@
 import "server-only";
-import type { Session } from "@/lib/contract";
 import type {
   CatalogSearchDto,
   HistoryMetricDto,
@@ -9,6 +8,7 @@ import type {
   ProfileDto,
   RecruitmentDto,
   ReportDto,
+  Session,
   SnapshotDto,
   StatisticsDto,
 } from "@/lib/dto";

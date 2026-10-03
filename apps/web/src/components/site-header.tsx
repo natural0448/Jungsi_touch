@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Session } from "@/lib/contract";
+import type { Session } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { edutouch, loginHref } from "@/lib/links";
 import { PAGES, lockFor } from "@/lib/routes";

@@ -2,7 +2,7 @@
   우리 서비스 API 의 실제 응답 모양 — develop 의 docs/current/API_DTO_계약.md (명세 1.2.2) 를 옮긴 것
   ─────────────────────────────────────────────────────────────
   route_catalog.json 의 backend_contract.dto_schemas 가 원본이다. 바뀌면 여기를 맞춘다.
-  1~4페이지가 모두 이 모양을 쓴다(session.read 만 PR #5 제안이라 contract.ts 의 Session).
+  1~4페이지가 모두 이 모양을 쓴다. session.read 만 PR #5 제안 단계의 모양이다.
 
   - 숫자 점수·누적은 엔진의 소수 문자열이다.
   - 자료 대기는 200 + status=pending/reason_code, 값 null. 승인된 0건과 구분한다.
@@ -11,6 +11,15 @@
 
 export type AcademicYear = 2024 | 2025 | 2026 | 2027;
 export const ACADEMIC_YEARS: AcademicYear[] = [2027, 2026, 2025, 2024];
+
+export type MemberTier = "standard" | "paid";
+
+/** session.read (PR #5 제안, 승인 대기). 화면의 잠금 표시용이며 권한 판단은 서버가 한다 */
+export interface Session {
+  format: "jungsi.session/v1";
+  member_tier: MemberTier;
+  entitlement_expires_at: string | null; // UTC Z
+}
 
 /** offering — 모집행 기본 정보 */
 export interface OfferingDto {

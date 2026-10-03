@@ -1,5 +1,4 @@
 import type { HistoryMetricDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
-import { OFFERINGS } from "./synthetic-fixtures";
 
 /*
   1페이지 합성 자료 — 대학이 발표한 지표 형식의 예시. 대학·값은 모두 지어낸 것이다.
@@ -8,6 +7,33 @@ import { OFFERINGS } from "./synthetic-fixtures";
 */
 
 const AS_OF = "2026-09-10";
+/** 예시 대학 6곳과 모집단위 13곳. 대학 이름에 '예시'를 붙여 실제 대학으로 오해하지 않게 한다 */
+const U = {
+  gaon: { id: "syn-gaon", name: "예시가온대학교", region: "서울" },
+  haesol: { id: "syn-haesol", name: "예시해솔대학교", region: "충남" },
+  daon: { id: "syn-daon", name: "예시다온대학교", region: "경기" },
+  raon: { id: "syn-raon", name: "예시라온대학교", region: "서울" },
+  saebit: { id: "syn-saebit", name: "예시새빛대학교", region: "대전" },
+  hanbit: { id: "syn-hanbit", name: "예시한빛교육대학교", region: "경기" },
+};
+type Base = { id: string; u: (typeof U)[keyof typeof U]; unit: string; track: string; group: string; initial: number; change: number | null; final: number | null };
+const b = (id: string, u: Base["u"], unit: string, track: string, group: string, initial: number, change: number | null, final: number | null): Base => ({ id, u, unit, track, group, initial, change, final });
+const BASE: Base[] = [
+  b("syn-r1", U.raon, "경영학과", "수능위주 일반", "가", 25, 1, 26),
+  b("syn-r2", U.raon, "통계학과", "수능위주 일반", "나", 18, 0, 18),
+  b("syn-g1", U.gaon, "경영학과", "수능위주 일반", "가", 32, 2, 34),
+  b("syn-g2", U.gaon, "경제학과", "수능위주 일반", "가", 28, 0, 28),
+  b("syn-g3", U.gaon, "컴퓨터공학과", "수능위주 일반", "나", 40, null, null),
+  b("syn-g4", U.gaon, "자유전공학부", "수능위주 일반", "나", 20, 0, 20),
+  b("syn-d1", U.daon, "미디어커뮤니케이션학과", "수능위주 일반", "가", 22, -1, 21),
+  b("syn-d2", U.daon, "응용통계학과", "수능위주 일반", "다", 16, 0, 16),
+  b("syn-h1", U.haesol, "임상병리학과", "수능위주 일반", "다", 15, 3, 18),
+  b("syn-h2", U.haesol, "간호학과", "수능위주 일반", "다", 24, null, null),
+  b("syn-h3", U.haesol, "군사학과", "수능+면접·체력(조건부)", "나", 10, 0, 10),
+  b("syn-s1", U.saebit, "물리치료학과", "수능위주 일반", "다", 30, 4, 34),
+  b("syn-e1", U.hanbit, "초등교육과", "수능(일반)+면접", "나", 60, null, null),
+];
+
 const SRC = "https://example.invalid/synthetic-admission-results";
 
 type MetricDef = { name: string; definition: string; unit: string; scale: string; base: number; step: number; digits: number };
@@ -26,7 +52,6 @@ const METRICS: Record<string, MetricDef[]> = {
   "syn-hanbit": [{ name: "최종등록자 70%", definition: "최종 등록자 중 위에서 70% 지점 점수(수능 부분, 면접 제외)", unit: "점", scale: "대학 환산점수(1000점 만점, 수능 부분)", base: 897, step: 2.1, digits: 2 }],
 };
 
-const REGION: Record<string, string> = Object.fromEntries(OFFERINGS.map((o) => [o.university.university_id, o.university.region]));
 const WILD: Record<string, OfferingDto["wildcard_group"]> = { 간호학과: "nursing", 임상병리학과: "health", 물리치료학과: "health", 초등교육과: "education" };
 // 2024학년도에는 이름이 달랐던 모집단위(이름 바꿈 예시)
 const OLD_NAME: Record<string, string> = { "syn-r2": "응용통계학과", "syn-d1": "미디어학과" };
@@ -42,23 +67,23 @@ function hash(s: string) {
 export const HISTORY_OFFERINGS: OfferingDto[] = [];
 export const HISTORY: HistoryMetricDto[] = [];
 
-for (const o of OFFERINGS) {
+for (const o of BASE) {
   for (const year of [2027, 2026, 2025, 2024]) {
-    const id = `${o.offering_id}-${year}`;
+    const id = `${o.id}-${year}`;
     const off: OfferingDto = {
       offering_id: id,
       academic_year: year,
-      university_id: o.university.university_id,
-      university_name: o.university.name,
+      university_id: o.u.id,
+      university_name: o.u.name,
       campus: null,
-      department: year === 2024 && OLD_NAME[o.offering_id] ? OLD_NAME[o.offering_id] : o.unit_name,
-      track: o.admission_name,
+      department: year === 2024 && OLD_NAME[o.id] ? OLD_NAME[o.id] : o.unit,
+      track: o.track,
       group: o.group,
-      region: REGION[o.university.university_id] ?? null,
-      wildcard_group: WILD[o.unit_name] ?? null,
+      region: o.u.region,
+      wildcard_group: WILD[o.unit] ?? null,
     };
     HISTORY_OFFERINGS.push(off);
-    for (const m of METRICS[o.university.university_id] ?? []) {
+    for (const m of METRICS[o.u.id] ?? []) {
       const published = year < 2027 && !UNPUBLISHED.has(id);
       const wobble = ((hash(id + m.name) % 100) / 100 - 0.5) * m.step * 2;
       const value = published ? (m.base - (2026 - year) * m.step * 0.4 + wobble).toFixed(m.digits) : null;
@@ -84,8 +109,7 @@ export function syntheticRecruitment(offeringId: string): RecruitmentDto | null 
   if (off.academic_year !== 2027) {
     return { status: "pending", reason_code: "recruitment_not_published", offering: off, recruitment: null, catalog_version: null };
   }
-  const base = OFFERINGS.find((x) => offeringId.startsWith(`${x.offering_id}-`))!;
-  const r = base.recruitment;
+  const r = BASE.find((x) => offeringId.startsWith(`${x.id}-`))!;
   return {
     status: "ready",
     reason_code: null,

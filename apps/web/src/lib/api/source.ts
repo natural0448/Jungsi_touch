@@ -1,4 +1,3 @@
-import type { Session } from "@/lib/contract";
 import type {
   CatalogSearchDto,
   HistoryMetricDto,
@@ -9,6 +8,7 @@ import type {
   RecruitmentDto,
   ReportDto,
   ScoresInput,
+  Session,
   SnapshotDto,
   StatisticsDto,
 } from "@/lib/dto";

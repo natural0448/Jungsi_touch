@@ -1,5 +1,5 @@
 import catalog from "../../route_catalog.json";
-import type { MemberTier, Session } from "./contract";
+import type { MemberTier, Session } from "./dto";
 
 /*
   화면 경로·회원 범위는 생성된 경로 계약(apps/web/route_catalog.json)에서 읽는다.
