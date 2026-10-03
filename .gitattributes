@@ -19,3 +19,5 @@
 /tests/test_backend*.py text eol=lf
 /tests/test_ci_snapshot_preservation.py text eol=lf
 /backend-runtime.lock.json text eol=lf
+/scripts/check_branch_policy.py text eol=lf
+/tests/test_branch_policy.py text eol=lf

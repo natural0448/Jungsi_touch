@@ -86,7 +86,7 @@ def collaboration_sections(spec):
     ownership=("\n\n## 계층별 담당과 브랜치\n\n"+c["description"]+"\n\n"+matrix+
         "\n\n"+c["start_rule"]+"\n\n"+c["branch_rule"]+
         "\n\n현재 개발팀의 기존 브랜치는 "+c["existing_application_feature"]+"이다. 화면 작업자는 "+
-        c["presentation_branch_example"]+"처럼 별도 feature/presentation-* 브랜치를 사용한다. "+
+        c["presentation_branch_example"]+"를 화면 담당의 상시 브랜치로 재사용한다. "+
         c["presentation_branch_status"]+"\n\n"+c["generated_files_rule"]+"\n\n"+c["handoff_rule"]+
         "\n\n"+c["verification_rule"])
     drive=""
@@ -97,17 +97,17 @@ def collaboration_sections(spec):
             "\n\n### 읽기와 쓰기\n\n"+d["read_policy"]+"\n\n"+d["write_policy"]+
             "\n\n"+d["configuration_policy"]+"\n\n"+d["unavailable_policy"]+
             "\n\n### 남은 설정\n\n"+"\n".join("- "+x for x in d["pending_settings"]))
-    intro=("\n\n프레젠테이션은 별도 작업자가 담당한다. 최신 origin/develop의 기획 기준을 확인하고 담당 feature/presentation-*를 재사용한다. 서버 개발팀의 "+
+    intro=("\n\n프레젠테이션은 별도 작업자가 담당한다. 최신 origin/develop의 기획 기준을 확인하고 담당 상시 브랜치 "+c["presentation_branch_example"]+"를 재사용한다. 서버 개발팀의 "+
         c["existing_application_feature"]+"와 브랜치를 공유하지 않는다. "+c["generated_files_rule"]+
         " [프레젠테이션 작업 인계](../../docs/current/프레젠테이션_작업인계.md)를 읽고 출발 커밋과 API 계약을 맞춘다.")
-    api_handoff=("\n\n## 프레젠테이션 작업 인계\n\n화면 담당은 별도 작업자이며 feature/presentation-*에서 작업한다. "+
+    api_handoff=("\n\n## 프레젠테이션 작업 인계\n\n화면 담당은 별도 작업자이며 "+c["presentation_branch_example"]+"를 상시 사용한다. "+
         "현재 개발팀은 서버 API와 애플리케이션·데이터/인프라를 담당한다. "+
         "[프레젠테이션 작업 인계](프레젠테이션_작업인계.md)에 담당·브랜치·연동 경계를 기록한다. "+
         (d["presentation_boundary"] if d else ""))
     handoff=("이 문서는 별도 프레젠테이션 작업자가 화면 개발을 시작할 때 사용할 담당·브랜치·API 경계다. "+
         "작업 기준은 develop의 확정 커밋과 같은 커밋의 service_spec.json·route_catalog.json이다.\n\n"+
         "## 작업 시작과 공유 계약\n\n"+c["start_rule"]+"\n\n"+
-        "프레젠테이션 작업자는 "+c["presentation_branch_example"]+"와 같은 담당 독립 브랜치를 재사용한다. "+
+        "프레젠테이션 작업자는 "+c["presentation_branch_example"]+" 상시 브랜치를 재사용한다. 필요한 하위 작업은 명세에 등록한다. "+
         "시스템기획팀의 develop과 현재 서버 개발팀의 "+c["existing_application_feature"]+
         "에 화면 구현 커밋을 함께 작성하지 않는다. 담당 작업 브랜치를 재사용한다.\n\n"+
         "화면 경로와 회원 정책은 [서비스 기획](서비스_기획.md), 요청·응답과 권한 경계는 [라우팅 명세](라우팅_명세.md), "+
@@ -122,6 +122,38 @@ def collaboration_sections(spec):
         "인계 시 출발·결과 커밋, 변경 화면과 API 작업 ID, 허용 응답·오류/보류 사유, 합성 응답 사용 여부와 실제 연동 상태를 함께 남긴다. "+
         c["verification_rule"]+"\n\n## 담당과 소유권\n\n"+c["description"]+"\n\n"+matrix+drive)
     return dict(ownership=ownership,drive=drive,handoff=handoff,presentation_intro=intro,api_handoff=api_handoff)
+
+
+def branch_governance_text(spec):
+    """Render the four permanent nodes and registered exceptional work branches."""
+    w=spec['workflow'];g=w['branch_governance'];fence=chr(96)*3
+    core=table(['브랜치','직접 담당','부모/PR 대상','관리 목적'],[
+        [r['name'],r['owner'],r['parent'] or '최상위 배포 후보',r['scope']] for r in g['core_branches']])
+    extras=table(['브랜치','분류/담당','부모와 PR 대상','현재 작업/근거'],[
+        [r['name'],r['status']+'; '+r['owner'],r.get('pr_target') or '종료: 새 PR 금지',
+         r.get('purpose',r.get('scope',''))+(' '+r['deletion_scope'] if r.get('deletion_scope') else '')+'; '+('PR #'+str(r['pull_request']) if r.get('pull_request') else ('병합 PR #'+str(r['merged_pull_request']) if r.get('merged_pull_request') else 'PR 등록 전'))+
+         ('; 원격 ref: '+r['remote_ref_state'] if r.get('remote_ref_state') else '')] for r in g['additional_branches']])
+    child=table(['필요 시 이름','부모/PR 대상','담당','생성 사유'],[
+        [r['pattern'],r['parent'],r['owner'],r['purpose']] for r in g['child_templates']])
+    gates=table(['최종 인수 항목','상태','확인할 증거'],[[r['id'],r['status'],r['evidence']] for r in g['release_gate']['checks']])
+    return ('## 기본 4개 노드와 담당\n\n'+core+'\n\n'+
+        fence+'mermaid\nflowchart TB\n  M[main: 완료한 배포 후보] --> D[develop: 기획 정본과 개발 통합]\n  D --> S[feature/application-pre-data-platform: 시스템·콘텐츠]\n  D --> P[feature/presentation-foundation: 화면]\n  S -.필요 시 등록.-> ST[feature/system-task/slug]\n  P -.필요 시 등록.-> PT[feature/presentation-task/slug]\n  D -.필요 시 등록.-> DT[공통 기획·출시 검토 작업]\n'+fence+
+        '\n\n위 화살표는 출발/관리 관계다. 구현 PR은 하위 작업에서 부모로 올라간다. '+g['hierarchy_note']+
+        '\n\n기획팀은 develop의 service_spec.json·생성 문서와 브랜치/검사 설정을 직접 갱신한다. 다른 팀은 develop의 자료를 가져가 자기 상시 브랜치에서 개발하고 PR로 통합한다. 3티어는 코드와 포트의 구분이며 각 티어/작업/에이전트마다 브랜치를 만들지 않는다.'+
+        '\n\n## 현재 GitHub 브랜치와 열린 작업\n\n조사일 '+g['checked_date']+', 통합 기준 '+g['reference_commit']+'. 상시 '+str(len(g['core_branches']))+'개, 진행 임시 '+str(sum(r.get('status')=='active' for r in g['additional_branches']))+'개, 종료 이력 '+str(sum(r.get('status')!='active' for r in g['additional_branches']))+'개로 분류한다. 원격 ref 상태는 아래 등록부를 따른다. 관측 커밋은 당시 증거이며 작업 브랜치의 미래 HEAD를 고정하는 값이 아니다.\n\n'+extras+
+        '\n\nPR #5/#6/#7/#9의 미병합 변경은 develop의 현재 구현이 아니다. 네 PR의 head/base를 보존하고 담당자가 최신 develop과 충돌을 해결한 뒤 해당 부모에 통합한다. 종료 ref는 새 개발 기준에서 제외하며 로컬 파일·브랜치·체크아웃을 보존한다.\n\n'+g['lifecycle_rule']+
+        '\n\n## 필요한 하위 작업만 등록\n\n'+child+'\n\n'+g['registration_rule']+
+        '\n\n각 노드에서 분리가 필요한 작업을 제안할 수 있다. main 배포 검토 작업도 develop의 release_task에서 정리해 develop으로 먼저 올리고, 최종 develop → main 경로를 유지한다. 임시 작업이 없으면 상시 브랜치 하나를 계속 사용한다.'+
+        '\n\n## 작업 시작·동기화·PR\n\n'+g['sync_rule']+'\n\n'+g['merge_rule']+'\n\n'+g['review_rule']+
+        '\n\n'+fence+'text\ngit status --short --branch\ngit fetch --no-prune origin\ngit rev-parse origin/develop\n# 담당 상시 브랜치에서 기획을 가져온다\ngit merge --no-edit origin/develop\n# 하위 작업 PR: base는 등록된 parent\n# 상시 시스템/화면 PR: base=develop\n# 전체 인수 완료 후 최종 PR: head=develop, base=main\n'+fence+
+        '\n\nGitHub 병합은 merge commit만 허용하고 squash/rebase 병합과 병합 후 자동 브랜치 삭제를 끈다. 상시 브랜치의 이력이 이어지고 통합 뒤 다시 같은 브랜치에서 개발할 수 있다. 미커밋 변경이 있으면 먼저 보존·검토하고 강제 checkout/reset/clean 없이 진행한다.'+
+        '\n\n## develop 직접 변경 범위와 적용 검사\n\n'+table(['검사 지점','검사/실제 한계'],list(g['enforcement'].items()))+
+        '\n\n기획팀의 직접 허용 범위는 docs/·.github/·.githooks/와 아래 공통 관리 파일, 생성된 현재 문서/카탈로그/README다. 업무·화면 실행 코드·DB 마이그레이션·런타임 잠금은 담당 개발 PR로만 누적한다.\n\n'+
+        '\n'.join('- '+v for v in g['planning_direct_paths'])+
+        '\n\n기획팀은 현재 셸 세션에서만 아래처럼 역할을 선언한다. .env 파일을 만들거나 GitHub 인증정보를 기록하지 않는다. '+g['planning_team_declaration']+'.\n\n'+
+        fence+'powershell\n$env:JUNGSI_TEAM = "planning"\npython -B scripts/check_branch_policy.py --staged\n'+fence+
+        '\n\n## main 최종 반영과 라이브 적용\n\n현재 release_gate.state='+g['release_gate']['state']+'. '+g['release_gate']['meaning']+'\n\n'+gates+
+        '\n\n최종 PR에는 배포 후보 develop SHA·문서/계약 버전·CI/통합 검증·실제 연결 검수·운영/복구 인계 근거를 담는다. 모든 체크가 passed이고 증거가 있을 때만 ready로 확정한다. main 병합 뒤 별도 승인한 배포를 실행한다. 기능 완료·합성 테스트 성공만으로 실제 데이터와 라이브 준비 완료를 표시하지 않는다.')
 
 
 def repository_layout_text(spec):
@@ -229,14 +261,14 @@ def generated_files(spec):
     workflow=spec["workflow"]
     tools="\n".join("- "+p for p in workflow["shared_tools"])
     files[spec["current_documents"]["workflow"]]=doc("정시터치 개발 브랜치와 문서 운영",
-       "main은 검증한 최종 코드와 그 코드에 일치하는 현재 문서를 보관한다. develop은 통합 개발, feature/*는 개별 작업에 사용한다. 과거 기획과 시안은 역사 자료로 표시해 보존하고 현재 개발 기준과 구분한다.\n\n"+
+       "main은 모든 작업 완료 후 최종 코드·문서·검증·인계를 정리하는 라이브 배포 전 후보다. develop은 시스템기획팀의 현재 문서 공유와 두 개발 담당의 PR 통합 환경이다. 시스템·콘텐츠와 프레젠테이션 개발은 각각 하나의 상시 브랜치를 사용한다. 과거 기획·시안은 이력으로 보존한다.\n\n"+
        "## 브랜치 흐름\n\n"+workflow["flow"]+"\n\n"+workflow["bootstrap_exception"]+
-       "\n\n현재 기준의 출발 커밋은 "+spec["baseline_commit"]+"이다. 작업 시작 시 현재 브랜치·HEAD·변경 목록을 확인한다. 커밋하지 않은 다른 작업자의 코드나 로컬 전용 검수 결과를 구현의 확정 기준으로 취급하지 않는다.\n\n"+
+       "\n\n"+branch_governance_text(spec)+"\n\n현재 기준의 출발 커밋은 "+spec["baseline_commit"]+"이다. 작업 시작 시 현재 브랜치·HEAD·변경 목록을 확인한다. 커밋하지 않은 다른 작업자의 코드나 로컬 전용 검수 결과를 구현의 확정 기준으로 취급하지 않는다.\n\n"+
        "## 한 변경에 포함할 내용\n\n요구사항과 페이지/API 경로를 공통 명세에 반영하고 해당 계층의 코드를 수정한다. 문서와 경로 카탈로그를 생성하고 검사·검산한 뒤 같은 커밋으로 올린다. 코드·공유 도구·워크플로·테스트 변경이 있으면 공통 명세와 현재 기획·라우팅 문서가 같은 변경 목록에 있어야 한다. 변경 메모에 실제 구현 범위를 기록한다. develop에서 검증한 PR만 main에 반영한다. main 반영 후에도 develop을 통합 개발 기준으로 유지한다.\n\n"+
        "## 문서 생성과 검사 명령\n\n"+
        chr(96)*3+"text\n"+workflow["generate_command"]+"\n# 검토한 이번 작업 파일만 경로를 명시하여 stage\ngit add -- <reviewed-work-item-paths>\n"+workflow["validate_command"]+"\n"+workflow["test_command"]+"\n"+chr(96)*3+
        "\n\n검산은 선택한 Git 인덱스 또는 커밋의 파일을 새 outputs 폴더에 복사해서 실행한다. 커밋하지 않은 코드와 제외된 실제 데이터 의존 테스트를 섞지 않는다. 기존 파일·검산 폴더를 정리하거나 삭제하지 않는다.\n\n"+
-       "## 로컬 훅과 GitHub 검사\n\n공통 문서·경로 계약·훅·새 계층 코드의 줄바꿈은 .gitattributes에서 LF로 고정해 Windows와 CI의 바이트 검사를 일치시킨다. 각 체크아웃에서 git config --local core.hooksPath .githooks를 설정한다. Python 경로가 필요하면 git config --local jungsi.python으로 실행기를 지정한다. pre-commit은 스테이징된 문서·코드·데이터 제외와 합성 테스트를 검사하고 pre-push는 main 직접 푸시를 차단한다. GitHub Actions의 검사 이름은 project-consistency다.\n\n"+
+       "## 로컬 훅과 GitHub 검사\n\n공통 문서·경로 계약·훅·새 계층 코드의 줄바꿈은 .gitattributes에서 LF로 고정해 Windows와 CI의 바이트 검사를 일치시킨다. 각 체크아웃에서 git config --local core.hooksPath .githooks를 설정한다. Python 경로가 필요하면 git config --local jungsi.python으로 실행기를 지정한다. pre-commit은 등록 브랜치·develop 직접 범위·파일 보존과 스테이징된 문서·코드·데이터 제외·합성 테스트를 검사한다. pre-push는 main 직접 푸시·ref 삭제·강제 갱신·develop 직접 범위를 차단한다. GitHub Actions의 검사 이름은 project-consistency다.\n\n"+
        "GitHub는 현재 비공개 저장소 보호 조회에 HTTP 403과 요금제 업그레이드 요구를 반환했다. 따라서 원격 PR·검사 통과 강제 보호는 활성화되지 않았다. 로컬 훅은 각 체크아웃에 적용되며 서버의 강제 보호와 같지 않다. 보호 지원 요금제에서 main에 PR·검사 통과, 강제 푸시·브랜치 삭제 금지 규칙을 적용한다. 저장소 비공개 상태는 유지한다.\n\n"+
        ("## 파일을 보존하는 CI 스냅샷\n\n"+table(['항목','실행 기준'],list(workflow['CI_snapshot_policy'].items()))+"\n\n" if workflow.get('CI_snapshot_policy') else '')+
        "## 공유 실행 도구\n\n"+tools+
@@ -353,6 +385,8 @@ def validate_spec(spec):
             if operation.get('application_service')!='jungsi_touch.application.platform.PlatformService.execute':errors.append('HTTP application service reference drift')
     if spec["workflow"]["release_branch"]!="main" or spec["workflow"]["integration_branch"]!="develop":
         errors.append("Branch policy drift")
+    from check_branch_policy import validate_governance
+    errors.extend(validate_governance(spec))
     return errors
 
 def protected_path(path,shared_tools):
