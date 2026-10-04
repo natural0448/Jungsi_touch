@@ -123,8 +123,11 @@ class DriveDataProvider:
     def get_total_model(self,exam_id,pack_version):
         raw,entry=self.load('total_model',exam_id+':'+pack_version)
         if raw is None:return None
-        model=ExamTotalModel(raw['exam_id'],raw['pack_version'],TotalScoreDistribution(
-            DistributionMetadata(**raw['metadata']),[ScoreFrequency(r['total_score'],r['weight']) for r in raw['frequencies']]))
+        if raw.get('format')=='jungsi.exam-total-model/v1':
+            model=ExamTotalModel.from_json(json.dumps(raw))
+        else:
+            model=ExamTotalModel(raw['exam_id'],raw['pack_version'],TotalScoreDistribution(
+                DistributionMetadata(**raw['metadata']),[ScoreFrequency(r['total_score'],r['weight']) for r in raw['frequencies']]))
         return TotalModelBinding(model,entry['distribution_id'])
 
     def get_catalog(self):
@@ -158,9 +161,15 @@ class DriveDataProvider:
         if raw is None:return None
         if raw.get('format')!='jungsi.university-percentile-release/v1':raise PlatformError('percentile_release_invalid',503)
         try:
+            population=raw.get('comparison_population');receipt=None
+            if population is not None:
+                # A second independently pinned registry entry is mandatory.
+                receipt,_=self.load('estimate_receipt',population['validation_receipt_version'])
+                if receipt is None:raise PlatformError('percentile_population_receipt_missing',503)
             return UniversityPercentileRelease(raw['version'],raw['status'],raw['release_id'],raw['academic_year'],
                 raw['exam_id'],raw['source_pack_version'],raw['exam_type'],raw['rule_version'],
-                UniversityScoreDistribution(raw['curve']),tuple(raw['bindings']))
+                UniversityScoreDistribution(raw['curve']),tuple(raw['bindings']),population,receipt)
+        except PlatformError:raise
         except (KeyError,TypeError,ValueError) as error:
             raise PlatformError('percentile_release_invalid',503) from error
 
