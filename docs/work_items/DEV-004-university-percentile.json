@@ -2,7 +2,7 @@
   "format": "jungsi.development-work-item/v1",
   "id": "DEV-004",
   "title": "독립 대학 환산 누백 계산·자료 공급과 화면 표시",
-  "status": "planned_on_develop",
+  "status": "implemented_synthetic_verified_live_curve_publication_pending",
   "start_commit": "9eab7e378bc973a169d1063e57725d3aebe48544",
   "planning_spec_version": "1.5.0",
   "feature_branch": "feature/application-pre-data-platform",
@@ -50,7 +50,25 @@
     "같은 모집단/시험/학년도/동점 처리와 승인 총점 기준이 확보돼야 전체 누백과 대학 누백의 차이로 유불리를 표시한다. 준비되지 않으면 유불리만 대기한다.",
     "로컬 기획 미리보기는 ignored outputs에서 최신 develop의 실제 애플리케이션 가상 응답을 이용한다. 운영 apps/web 구현은 feature/presentation-foundation의 별도 화면 담당 소유다."
   ],
-  "data_readiness": "실제 파일의 저장 검증과 전국 누백 운영 승인은 구분한다. 기존 근거를 재사용하고 미승인 자료를 임의 발행하지 않는다.",
+  "data_readiness": "실제 전체성적 원자료 확보를 선행 조건으로 삼지 않는다. 기존 제공 자료를 재사용한 자체 추정 prototype·보정/holdout·민감도 검증과 재현 가능한 estimated_weights 발행을 후속 계약으로 개발한다.",
   "file_preservation": "모든 원본·이전 버전·브랜치·잠금·캐시·산출물을 보존한다. 새 브랜치/서브에이전트·main/배포·강제 갱신·파일/ref 삭제 금지.",
-  "execution_result": null
+  "execution_result": {
+    "status": "implemented_synthetic_verified_live_curve_publication_pending",
+    "planning_commit": "9ff8a1278d8aa8b6dbb3870af3293c240f34e8d4",
+    "independent_synthetic_tests_passed": 33,
+    "existing_workflow_and_conversion_regression_passed": 56,
+    "live_server_status": "not_run_configuration_missing",
+    "live_data_status": "not_run_configuration_missing",
+    "data_readiness": "기존 검산·원자료/모집행 근거를 재사용했다. 자체 추정 prototype·보정/holdout·민감도 검증은 데이터팀과 후속 계약으로 진행 중이며 임의 합성도수를 전국 실제 도수로 주장하지 않는다.",
+    "presentation_status": "운영 apps/web은 별도 담당. 기획팀의 보존한 로컬 v3 미리보기에서 최종 Git 합성 응답과 상태/모바일 검증 예정",
+    "verification_scope": "동점·정확값·실제0/100·범위밖·숫자/모집단·승인/결속·불변 DTO·HTTP 권한/멱등/revision·레거시/동일연도 호환·Drive 파일/폴더/해시/버전",
+    "follow_up": "자료 기반 자체 추정 모형 및 학교 곡선 생성까지 기존 브랜치에서 개발을 이어갈 예정; 실제 전체성적 원자료 부재를 중단 조건으로 삼지 않음",
+    "git_snapshot_full_tests_passed": 328,
+    "git_snapshot_failures": 0,
+    "git_snapshot_errors": 0,
+    "git_snapshot_evidence": "outputs/committed_test_runs/20261004T052653677887Z/verification.json; 최종 commit/CI는 별도 확인",
+    "ci_status": "pending_final_commit_push_and_pull_request"
+  },
+  "implementation_spec_version": "1.5.1",
+  "planning_commit": "9ff8a1278d8aa8b6dbb3870af3293c240f34e8d4"
 }

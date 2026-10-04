@@ -6,7 +6,7 @@ import re
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from uuid import uuid4
-from ..application.platform_ports import CatalogRelease, OfferingAnalysis, PlatformError, UniversityConversionRelease
+from ..application.platform_ports import CatalogRelease, OfferingAnalysis, PlatformError, UniversityConversionRelease, UniversityPercentileRelease
 from ..application.ports import TotalModelBinding
 from ..application.time_contract import utc_instant, utc_text, calendar_date
 from ..exam_pack import ExamPack, ExamTotalModel
@@ -28,6 +28,7 @@ class MissingDataProvider:
     def get_catalog(self): return None
     def get_analysis(self,offering_id): return None
     def get_conversion(self,offering_id): return None
+    def get_percentile(self,offering_id): return None
 
 
 class DriveClient:
@@ -151,6 +152,17 @@ class DriveDataProvider:
                 tuple(raw['bindings']),raw.get('mock_compatibility'))
         except (KeyError,TypeError,ValueError) as error:
             raise PlatformError('conversion_release_invalid',503) from error
+
+    def get_percentile(self,offering_id):
+        raw,entry=self.load('percentile',offering_id)
+        if raw is None:return None
+        if raw.get('format')!='jungsi.university-percentile-release/v1':raise PlatformError('percentile_release_invalid',503)
+        try:
+            return UniversityPercentileRelease(raw['version'],raw['status'],raw['release_id'],raw['academic_year'],
+                raw['exam_id'],raw['source_pack_version'],raw['exam_type'],raw['rule_version'],
+                UniversityScoreDistribution(raw['curve']),tuple(raw['bindings']))
+        except (KeyError,TypeError,ValueError) as error:
+            raise PlatformError('percentile_release_invalid',503) from error
 
     def get_analysis(self,offering_id):
         raw,entry=self.load('analysis',offering_id)

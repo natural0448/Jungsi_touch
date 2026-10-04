@@ -359,7 +359,8 @@ def generated_files(spec):
         receipt=percentile.get('execution_result')
         if receipt:
             path=spec['current_documents']['university_percentile']
-            files[path]=files[path].replace('\n\n<!-- jungsi:generated','\n\n## 기획팀 인수 결과\n\n'+
+            receipt_title='기획팀 인수 결과' if str(receipt.get('status','')).startswith('accepted_on_develop') else '구현·검증 결과'
+            files[path]=files[path].replace('\n\n<!-- jungsi:generated','\n\n## '+receipt_title+'\n\n'+
                 table(['항목','증거'],[(key,str(value)) for key,value in receipt.items()])+'\n\n<!-- jungsi:generated')
         for key in ('planning','routing','architecture','presentation_handoff','api_dto','backend_readiness'):
             path=spec['current_documents'].get(key)
