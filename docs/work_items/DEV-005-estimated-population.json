@@ -101,7 +101,8 @@
   "planned_percentile_DTO_fields": [],
   "implementation_start_commit": "48d2a7e03880e6187a8238c878a26bd60ba7bdcf",
   "execution_result": {
-    "status": "precommit_actual_replay_complete_final_snapshot_replay_and_CI_pending",
+    "status": "actual_replay_self_validated_final_guard_replay_and_CI_pending",
+    "first_public_replay": "최종 정확 소수 가중치 재집계 포함 7개 시나리오 모형 자체 검증 통과; 후보·총점·대학 곡선의 이전 재실행 hash 일치; 등급 오류 경로 보완 후 최종 SHA 재확인",
     "precommit_original_policy": "research_only; 사전 참고 오차 기준 실패 보존",
     "precommit_new_policy": "self_validated_estimate; 원참고 차이는 진단에 보존; 최종 정확 소수 가중치 검사 추가 후 공개 SHA 재실행 필요",
     "source_policy": "기존 v3 허용오차·실패와 참고 제외 결과는 보존; 새 사전 정책은 불성립 참고 진단을 모형자체검증에서 분리",

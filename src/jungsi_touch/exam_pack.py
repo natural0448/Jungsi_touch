@@ -32,6 +32,7 @@ def _grade(subject, score):
         if _empty_grade(row):continue
         if row['grade']==9 or score>=row['lower_score']:
             return row['grade']
+    raise PercentileError('grade_not_found','등급표를 확인하세요.')
 
 
 def _empty_grade(row):
@@ -43,7 +44,6 @@ def _empty_grade(row):
 
 def _grade_count(row):
     return 0 if _empty_grade(row) else row['count']
-    raise PercentileError('grade_not_found','등급표를 확인하세요.')
 
 def _json(text):
     try:

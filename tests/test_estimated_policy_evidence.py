@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
 from test_overall_analysis_service import synthetic_pack
 from test_estimated_profiles import synthetic_scenario
 from test_estimated_validation import synthetic_validation_policy,synthetic_validation_reference
-from jungsi_touch.exam_pack import ExamPack
+from jungsi_touch.exam_pack import ExamPack,_grade
 from jungsi_touch.percentile import PercentileError
 from jungsi_touch.estimated_profiles import generate_candidate_profiles,digest,EstimationError
 from jungsi_touch.estimated_fitting import fit_estimated_joint
@@ -32,6 +32,10 @@ class EmptyOfficialGradeTests(unittest.TestCase):
     def test_empty_claim_must_agree_with_every_frequency_and_total(self):
         raw=self.raw();raw['subjects']['국어']['grades'][0].update(lower_score=9)
         with self.assertRaises(PercentileError):ExamPack(raw)
+    def test_no_applicable_nonempty_grade_reports_explicit_failure(self):
+        rows=self.raw()['subjects']['국어']['grades'][:2]
+        with self.assertRaises(PercentileError) as caught:_grade({'grades':rows},7)
+        self.assertEqual(caught.exception.code,'grade_not_found')
 
 
 class ReferenceExclusionTests(unittest.TestCase):

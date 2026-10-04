@@ -3283,7 +3283,8 @@
     "private_storage": "실제 원자료·참고 값·공동 후보·학습 계수/가중치·총점/학교 곡선·검증 결과는 data/outputs 등 Git 제외 폴더 또는 비공개 DB/스토리지에만 보관한다. 공개 코드는 범용 형식과 명확한 합성 예시만 포함하며 원본·이전 버전·실패 산출물·파일/ref를 보존한다. 파일 포트는 가장 가까운 AGENTS.md+현재 공통 명세 체크아웃의 내부 제외 영역만 허용한다. 체크아웃 자체가 조상 outputs/data에 있어도 내부 src/docs/apps 등 공유 경로를 허용하지 않는다.",
     "comparison_population_implementation_status": "implemented_with_same_commit_DTO_and_pinned_validation_receipt; 운영 실제 자료 등록과 연결 검수는 별도",
     "execution_result": {
-      "status": "precommit_actual_replay_complete_final_snapshot_replay_and_CI_pending",
+      "status": "actual_replay_self_validated_final_guard_replay_and_CI_pending",
+      "first_public_replay": "최종 정확 소수 가중치 재집계 포함 7개 시나리오 모형 자체 검증 통과; 후보·총점·대학 곡선의 이전 재실행 hash 일치; 등급 오류 경로 보완 후 최종 SHA 재확인",
       "precommit_original_policy": "research_only; 사전 참고 오차 기준 실패 보존",
       "precommit_new_policy": "self_validated_estimate; 원참고 차이는 진단에 보존; 최종 정확 소수 가중치 검사 추가 후 공개 SHA 재실행 필요",
       "source_policy": "기존 v3 허용오차·실패와 참고 제외 결과는 보존; 새 사전 정책은 불성립 참고 진단을 모형자체검증에서 분리",
