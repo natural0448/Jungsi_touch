@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.4.2",
-  "source_sha256": "ccd7a776c727fdc520b5a8cfc29804022a5fb5d990eb4fbbc727f64a05ef8700",
+  "spec_version": "1.4.3",
+  "source_sha256": "b416802f0627e26595a57f658fc9c4e75d4eeb1bacd444df97860a53bea55022",
   "pages": [
     {
       "id": "PAGE-01",
@@ -881,7 +881,7 @@
   },
   "university_scoring_contract": {
     "format": "jungsi.university-scoring-contract/v1",
-    "code_status": "implemented_synthetic_verified_live_rules_configuration_pending",
+    "code_status": "accepted_on_develop_synthetic_verified_live_rules_configuration_pending",
     "operation": "university.analyze",
     "input_rules": [
       "DEV-003에서 국어·수학 및 탐구 각 과목에 성적표 percentile·grade를 선택적으로 추가한다. 기존 표준점수 입력은 그대로 사용할 수 있다.",

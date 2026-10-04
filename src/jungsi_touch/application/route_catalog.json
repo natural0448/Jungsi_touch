@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.4.2",
-  "source_sha256": "ccd7a776c727fdc520b5a8cfc29804022a5fb5d990eb4fbbc727f64a05ef8700",
+  "spec_version": "1.4.3",
+  "source_sha256": "b416802f0627e26595a57f658fc9c4e75d4eeb1bacd444df97860a53bea55022",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1157,7 +1157,7 @@
   },
   "university_scoring_contract": {
     "format": "jungsi.university-scoring-contract/v1",
-    "code_status": "implemented_synthetic_verified_live_rules_configuration_pending",
+    "code_status": "accepted_on_develop_synthetic_verified_live_rules_configuration_pending",
     "feature": "feature/application-pre-data-platform",
     "work_item": "docs/work_items/DEV-003-university-scoring-engine.json",
     "start_commit": "e25062329f4d364ce94df315559f570e1b791efc",
@@ -1261,6 +1261,26 @@
       "제2외국어 등 추가 성적 입력 계약이 필요한 특수 규칙",
       "전체 공동분포·연도 보정·판단/예상 자료 승인; 엔진 구현 완료와 별개"
     ],
-    "planning_commit": "eb0feaebc03c986b6c7282202aae65bc26c2aa45"
+    "planning_commit": "eb0feaebc03c986b6c7282202aae65bc26c2aa45",
+    "execution_result": {
+      "status": "accepted_on_develop_live_rules_and_configuration_pending",
+      "reviewed_feature_commit": "29eadf965d44384be6cdc4ac5bc9b39be2c49e4c",
+      "integrated_develop_commit": "e88b778a099168b5be1c85ca1168115dca014f37",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/10",
+      "ci": {
+        "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37172725475",
+        "tested_commit": "29eadf965d44384be6cdc4ac5bc9b39be2c49e4c",
+        "conclusion": "SUCCESS",
+        "synthetic_tests_passed": 295,
+        "added_synthetic_tests": 39
+      },
+      "review_scope": "25개 변경 파일의 코드·권한·시험/모집행 결속·독립 환산·정확값·자료 오류 격리·DTO·공통 문서를 최종 Git 커밋과 CI로 확인함",
+      "private_source_reuse": "저장된 공식 예시 4개년을 최종 Git 코드 스냅샷으로 연구 검산하여 수치 일치·미승인 공개 차단·원규칙 참조 보존을 확인했다. 기존 source_verified/internal_review_only 승인 상태를 변경하지 않았다.",
+      "reference_inspection": "사용자 제공 고속분석기 계산 단계/일부 패턴과 기존 추출 근거를 읽기만 했다. 확인 원본 전후 해시는 일치하며 Excel 재계산·매크로·외부 링크 실행 또는 원본 변경을 하지 않았다.",
+      "live_server_status": "not_run_configuration_missing",
+      "live_data_status": "not_run_configuration_missing",
+      "production_rule_status": "operating_release_approval_and_binding_pending",
+      "files_and_branches_preserved": true
+    }
   }
 }

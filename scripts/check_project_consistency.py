@@ -316,6 +316,23 @@ def generated_files(spec):
             rules+'\n\n## 독립 자료 공급\n\n'+table(['항목','계약'],list(scoring['provider_contract'].items()))+'\n\n'+
             '## 공개 결과 DTO\n\n'+public['location']+'; 필드: '+', '.join(public['fields'])+'. 상태: '+', '.join(public['statuses'])+'.\n\n'+
             public['independence']+' '+public['compatibility']+'\n\n응답 제외: '+'; '.join(public['excluded'])+'.')
+        receipt=scoring.get('execution_result')
+        if receipt:
+            marker='\n\n<!-- jungsi:generated'
+            acceptance='\n\n## 기획팀 인수 결과\n\n'+table(['항목','증거'],[
+                ['검토 커밋',receipt['reviewed_feature_commit']],
+                ['develop 통합',receipt['integrated_develop_commit']],
+                ['PR','[PR #10]('+receipt['pull_request']+')'],
+                ['CI','[project-consistency]('+receipt['ci']['url']+'): '+receipt['ci']['conclusion']],
+                ['합성 검증',str(receipt['ci']['synthetic_tests_passed'])+'개 통과; 추가 '+str(receipt['ci']['added_synthetic_tests'])+'개'],
+                ['검토 범위',receipt['review_scope']],
+                ['기존 근거 재사용',receipt['private_source_reuse']],
+                ['통합문서 참고',receipt['reference_inspection']],
+                ['실서버',receipt['live_server_status']],
+                ['실제 자료',receipt['live_data_status']],
+                ['운영 규칙',receipt['production_rule_status']]])
+            path=spec['current_documents']['university_scoring']
+            files[path]=files[path].replace(marker,acceptance+marker)
         for key in ('planning','routing','architecture','presentation_handoff','api_dto'):
             path=spec['current_documents'].get(key)
             if path in files:
