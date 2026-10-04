@@ -2,7 +2,7 @@
   "format": "jungsi.development-work-item/v1",
   "id": "DEV-003",
   "title": "대학별 수능 성적 환산 엔진과 독립 애플리케이션 연결",
-  "status": "planning_accepted_implementation_requested",
+  "status": "implementation_complete_review_requested",
   "start_commit": "e25062329f4d364ce94df315559f570e1b791efc",
   "planning_spec_version": "1.4.0",
   "feature_branch": "feature/application-pre-data-platform",
@@ -43,8 +43,19 @@
   "data_rule_readiness": "실제 대학 전수 실행 규칙 승인 완료를 가정하지 않는다. 사전 정리본과 독립 검수 근거를 재사용하며 자료가 없거나 미승인이면 공개 점수를 생성하지 않는다.",
   "file_preservation": "원본·이전 버전·기존 엔진·로컬 브랜치·작업 폴더·새 테스트 산출물 모두 보존한다. 새 브랜치/서브에이전트 생성·파일 삭제·main 푸시/라이브 배포를 하지 않는다.",
   "execution_result": {
-    "status": "not_started_at_planning_publication",
+    "status": "implemented_synthetic_verified_live_rules_configuration_pending",
     "live_server": "not_run_configuration_missing",
-    "live_data": "not_run_configuration_missing"
-  }
+    "live_data": "not_run_configuration_missing",
+    "scope": "독립 환산·실제/모평 구분·성적표 매핑·정확값·불변 결과·API 권한·실패 격리",
+    "synthetic_tests_passed": 295,
+    "new_synthetic_tests": 39,
+    "verification_scope": "25개 공유 변경 파일의 staged Git 스냅샷; 합성 295개 성공/실패0/오류0/skip0; 문서/참조/계층/비공개 제외/브랜치 정책 통과",
+    "validated_planning_commit": "eb0feaebc03c986b6c7282202aae65bc26c2aa45",
+    "verification_command": "python -B -X utf8 scripts/run_committed_tests.py --staged",
+    "ci_status": "pending_final_commit",
+    "local_verification_record": "outputs/committed_test_runs/20261004T025518656471Z/verification.json",
+    "numeric_publication_contract": "정수/정확 소수 문자열; 이진 float·bool·비유한 값 차단"
+  },
+  "implementation_spec_version": "1.4.2",
+  "planning_commit": "eb0feaebc03c986b6c7282202aae65bc26c2aa45"
 }

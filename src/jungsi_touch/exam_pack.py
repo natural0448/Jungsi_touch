@@ -123,6 +123,21 @@ class ExamPack:
                     _require(cumulative==total==s['published_total'],'frequency_total_mismatch','도수·발표 합계·응시 인원이 다릅니다.')
                     _require(all(counts[r['grade']]==r['count'] for r in rows),
                              'grade_frequency_mismatch','등급 경계로 합산한 도수와 발표 등급 인원이 다릅니다.')
+                    reported=s.get('reported_scores',{})
+                    _require(isinstance(reported,dict),'invalid_reported_mapping','성적표 매핑 형식을 확인하세요.')
+                    observed={r['standard_score'] for r in f}
+                    for key,mapped in reported.items():
+                        _require(isinstance(key,str) and key.isdigit() and str(int(key))==key and int(key) in observed,
+                                 'invalid_reported_mapping','매핑 점수는 같은 시험의 실제 표준점수여야 합니다.')
+                        _require(isinstance(mapped,dict) and {'source_ref'}<set(mapped)<= {'percentile','grade','source_ref'},
+                                 'invalid_reported_mapping','성적표 매핑 필드를 확인하세요.')
+                        self._source_ref(mapped['source_ref'],source_ids)
+                        for field,lo,hi in [('percentile',0,100),('grade',1,9)]:
+                            if field in mapped:
+                                _require(type(mapped[field]) is int and lo<=mapped[field]<=hi,
+                                         'invalid_reported_mapping','성적표 매핑 범위를 확인하세요.')
+                        if 'grade' in mapped:
+                            _require(mapped['grade']==_grade(s,int(key)),'reported_grade_conflict','공식 등급표와 매핑이 다릅니다.')
                 else:
                     _require(s['assessment']=='absolute_grade' and 'frequencies' not in s,
                              'invalid_assessment','절대평가를 표준점수 분포로 처리할 수 없습니다.')
@@ -198,6 +213,13 @@ class ExamPack:
                 'source_ref':row['source_ref'],'basis':'official_subject_population',
                 'meaning':'과목별 응시자 중 위치. 국수탐2 총점 누적 또는 성적표 정수 백분위가 아님.'}
 
+    def reported_score(self,subject,standard_score):
+        """Verified same-exam mapping, never a percentile made from a rank tail."""
+        row=self.subject_result(subject,standard_score)
+        mapped=deepcopy(self._data['subjects'][subject_key(subject)].get('reported_scores',{}).get(str(standard_score),{}))
+        mapped.setdefault('grade',row['grade'])
+        return mapped
+
     def analyze(self,payload,*,total_model=None):
         _require(isinstance(payload,dict),'invalid_scores','성적 입력 객체가 필요합니다.')
         _require(payload.get('exam_id')==self.exam_id,'exam_mismatch','학생 성적과 기준표의 시험이 다릅니다.')
@@ -221,6 +243,13 @@ class ExamPack:
             results=[self.subject_result('국어',payload['korean']['standard_score']),
                      self.subject_result('수학',payload['math']['standard_score'])]
             results.extend(self.subject_result(i['subject'],i['standard_score']) for i in inquiry)
+            for entered,result in zip([payload['korean'],payload['math'],*inquiry],results):
+                mapped=self.reported_score(result['subject'],result['standard_score'])
+                for field,lo,hi in [('percentile',0,100),('grade',1,9)]:
+                    if field in entered:
+                        _require(type(entered[field]) is int and lo<=entered[field]<=hi,'invalid_reported_'+field,'성적표 값의 정수 범위를 확인하세요.')
+                        _require(field not in mapped or entered[field]==mapped[field],
+                                 'reported_'+field+'_conflict','입력과 같은 시험의 공식 성적표 매핑이 다릅니다.')
             absolute={}
             for field,name in [('english_grade','영어'),('korean_history_grade','한국사')]:
                 value=payload.get(field)
