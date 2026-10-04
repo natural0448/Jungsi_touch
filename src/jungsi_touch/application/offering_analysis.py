@@ -5,6 +5,8 @@ from ..year_equating import estimate_year, EquatingError, display, number
 from ..university_conversion import prepare_equated_profile, ConversionError
 from ..admission_result_percentile import ResultPercentileError, MATCH_FIELDS
 from .platform_ports import OfferingAnalysis
+from .university_percentile import legacy_percentile_result
+from .overall_analysis import _identifier
 from .time_contract import calendar_date
 from urllib.parse import urlsplit, parse_qs
 
@@ -76,8 +78,8 @@ def evidence_dto(decision):
     return dict(version=evidence['version'],historical_metrics=history,forecast_70=forecast,expected_acceptance_range=adopted)
 
 
-def evaluate_offering(offering, profile, overall, bundle, *, conversion=None):
-    try:result=_evaluate_offering(offering,profile,overall,bundle,conversion)
+def evaluate_offering(offering, profile, overall, bundle, *, conversion=None, percentile=None):
+    try:result=_evaluate_offering(offering,profile,overall,bundle,conversion,percentile)
     except (KeyError,TypeError,AttributeError,ValueError):result=blocked(offering['offering_id'],'analysis_release_invalid')
     if conversion is not None:
         result['conversion']=conversion.dto()
@@ -89,12 +91,16 @@ def evaluate_offering(offering, profile, overall, bundle, *, conversion=None):
                 score_basis=conversion.score_basis,converted_score=conversion.converted_score,status='ready',reason_code=None)
             result['years']=[years.get(y,dict(academic_year=y,offering_id=None,score_basis='year_equated_estimate',
                 converted_score=None,status='pending',reason_code='year_bridge_required')) for y in (2024,2025,2026,2027)]
+    if percentile is not None and (percentile.ready or 'percentile' not in result):
+        result['percentile']=percentile.dto()
+        result['converted_percentile']=result['percentile']['top_percent']
     return result
 
 
-def _evaluate_offering(offering, profile, overall, bundle, conversion):
+def _evaluate_offering(offering, profile, overall, bundle, conversion, percentile):
     oid = offering['offering_id']
     if not isinstance(bundle, OfferingAnalysis): return blocked(oid, 'analysis_release_missing')
+    if not _identifier(bundle.version): return blocked(oid, 'analysis_release_invalid')
     if bundle.status != 'approved': return blocked(oid, 'analysis_release_not_approved')
     scores = profile['scores']
     if bundle.source_pack_version != scores['pack_version']: return blocked(oid, 'analysis_pack_mismatch')
@@ -149,10 +155,17 @@ def _evaluate_offering(offering, profile, overall, bundle, conversion):
     result.update(converted_score=current['converted_score'], years=public_years,
                   versions=dict(analysis=bundle.version, profile=profile['profile_id'], pack=scores['pack_version'],
                                 source_model=overall['overall']['model_version'],bridge=bundle.policy.version, rule=current['rule_version']))
-    curve = bundle.curves.get(year)
-    if curve is None: return result
-    try:
+    # Absence preserves an already approved legacy lookup. A supplied artifact
+    # with invalid approval/context must never be bypassed with another curve.
+    independent=direct and percentile is not None and (percentile.ready or percentile.reason_code!='percentile_release_missing')
+    if independent:
+        if not percentile.ready:result['reason_code']=percentile.reason_code;return result
+        metadata=dict(percentile.context);curve=None
+    else:
+        curve = bundle.curves.get(year)
+        if curve is None: return result
         metadata = curve.metadata
+    try:
         binding = dict(academic_year=year, exam_id=profiles[year]['exam_id'], rule_version=current['rule_version'])
         rule = bundle.release.rules[current['rule_version']].data
         binding.update(rule_id=rule['rule_id'], score_scope=rule['score_scope'])
@@ -172,8 +185,10 @@ def _evaluate_offering(offering, profile, overall, bundle, conversion):
         record={k:metadata[k] for k in MATCH_FIELDS}
         score=Fraction(**current['exact_score'])
         record.update(score_metric=metadata['score_metric'], score_value=score, publication_precision={'mode':'exact'})
-        rank=curve.lookup(record)
+        rank=percentile.internal_rank() if independent else curve.lookup(record)
         result['converted_percentile']=rank['at_reported_score']['above_or_equal_percent']
+        if not independent:
+            result['percentile']=legacy_percentile_result(offering,profile,current,curve,bundle.version).dto()
         result['versions'].update(curve=metadata['curve_version'], decision=decision['version'],
                                  population=metadata['population_id'],target_exam=metadata['exam_id'],tie_policy='include_equal')
         eligibility_status=eligibility(scores, decision.get('eligibility_policy'))

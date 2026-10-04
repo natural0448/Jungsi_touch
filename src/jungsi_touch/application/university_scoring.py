@@ -36,6 +36,7 @@ class ScoringResult:
     table_versions: tuple[str, ...] = ()
     values: tuple[tuple[str, object], ...] = ()
     reported_sources: tuple[tuple[str, str], ...] = ()
+    context: tuple[tuple[str, object], ...] = ()
 
     @property
     def ready(self):return self.score is not None and self.reason_code is None
@@ -136,8 +137,20 @@ class UniversityScoringService:
             calculated=rule.calculate(result.internal_profile())
             maximum=calculated['official_max_score']
             check(maximum is None or type(maximum) in (str,int),'conversion_release_invalid','공식 척도 자료형을 확인하세요.')
+            check(rule.data.get('score_scale_id') is None or _identifier(rule.data['score_scale_id']),
+                  'conversion_rule_context_mismatch','환산 척도 식별자를 확인하세요.')
+            check(rule.data.get('bonus_treatment') in (None,'included','excluded'),
+                  'conversion_rule_context_mismatch','가산점 포함 기준을 확인하세요.')
+            context=dict({k:offering[k] for k in CONTEXT_FIELDS},offering_pk=offering['offering_id'],
+                rule_id=rule.data['rule_id'],rule_version=rule.data['rule_version'],score_scope=rule.data['score_scope'],
+                score_scale_id=rule.data.get('score_scale_id'),bonus_treatment=rule.data.get('bonus_treatment'),
+                exam_id=pack.exam_id,source_pack_version=pack.pack_version,exam_type=exam['exam_type'],
+                rule_exam_id=bundle.exam_id,rule_pack_version=bundle.source_pack_version,
+                mock_compatibility_version=bundle.mock_compatibility['version'] if basis=='mock_exam' else None)
+            check(all(v is None or type(v) in (str,int) for v in context.values()),
+                  'conversion_rule_context_mismatch','불변 환산 컨텍스트 자료형을 확인하세요.')
             return replace(result,reason_code=None,score=Fraction(**calculated['exact_score']),
-                           converted_score=calculated['converted_score'],official_max_score=maximum)
+                           converted_score=calculated['converted_score'],official_max_score=maximum,context=tuple(context.items()))
         except (ConversionError,PercentileError,PlatformError,OverallAnalysisError) as error:
             return replace(result,reason_code=error.code)
         except (KeyError,ValueError,TypeError,AttributeError,OSError):

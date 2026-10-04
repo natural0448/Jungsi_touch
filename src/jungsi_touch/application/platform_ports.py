@@ -89,6 +89,22 @@ class PlatformDataProvider(ExamAnalysisProvider, Protocol):
     def get_catalog(self) -> CatalogRelease | None: ...
     def get_analysis(self, offering_id: str) -> OfferingAnalysis | None: ...
     def get_conversion(self, offering_id: str) -> UniversityConversionRelease | None: ...
+    def get_percentile(self, offering_id: str) -> 'UniversityPercentileRelease | None': ...
+
+
+@dataclass(frozen=True)
+class UniversityPercentileRelease:
+    """Independent approved score distribution and exact offering/exam binding."""
+    version: str
+    status: str
+    release_id: str
+    academic_year: int
+    exam_id: str
+    source_pack_version: str
+    exam_type: str
+    rule_version: str
+    curve: UniversityScoreDistribution
+    bindings: tuple[dict, ...]
 
 
 class ArtifactResultWriter(Protocol):
