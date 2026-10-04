@@ -371,6 +371,32 @@ def generated_files(spec):
         backend['university_percentile_contract']=percentile
         files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
         files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
+    estimated=spec.get('estimated_population_contract')
+    if estimated:
+        sections='\n\n'.join('## '+title+'\n\n'+'\n'.join('- '+row for row in estimated[key]) for title,key in [
+            ('생성·보정 절차','workflow'),('출처와 모집단','source_and_population_rules'),
+            ('검증과 승인','validation_rules'),('화면 연결','presentation_rules'),('인수 조건','acceptance_gates'),('남은 범위','remaining')])
+        mapping=estimated['reported_score_mapping']
+        files[spec['current_documents']['estimated_population']]=doc('자체 추정 공동분포와 대학 누백 생성',
+            '상태: '+estimated['code_status']+'. 작업 항목: [DEV-005](../work_items/DEV-005-estimated-population.json). '+estimated['placement']+'\n\n'+
+            '## 자체 추정의 기준\n\n'+estimated['definition']+'\n\n'+sections+'\n\n## 성적표 매핑\n\n'+mapping['formula']+'\n\n'+
+            '['+mapping['source_scope']+']('+mapping['primary_source']+')\n\n'+'\n'.join('- '+row for row in mapping['rules'])+'\n\n'+
+            '## 산출물 계약\n\n'+table(['산출물','계약'],list(estimated['output_contract'].items()))+'\n\n'+
+            '## 팀별 담당\n\n'+table(['담당','작업'],list(estimated['ownership'].items()))+'\n\n## 비공개 자료와 보존\n\n'+estimated['private_storage'])
+        receipt=estimated.get('execution_result')
+        if receipt:
+            path=spec['current_documents']['estimated_population']
+            files[path]=files[path].replace('\n\n<!-- jungsi:generated','\n\n## 구현·인수 결과\n\n'+
+                table(['항목','증거'],[(key,str(value)) for key,value in receipt.items()])+'\n\n<!-- jungsi:generated')
+        for key in ('planning','routing','architecture','presentation_handoff','api_dto','backend_readiness'):
+            path=spec['current_documents'].get(key)
+            if path in files:
+                section='\n\n## 자체 추정분포 연결\n\n[자체 추정분포 개발](자체_추정분포_개발.md)을 따른다. 상태는 '+estimated['code_status']+'다. '+estimated['definition']+' 전체 누백은 overall.status=estimated, 대학 누백은 percentile.data_kind=estimated_weights로 구분한다. 기존 API 권한·시험 결속·애플리케이션 소유 포트와 프레젠테이션 담당을 유지한다.'
+                files[path]=files[path].replace('\n\n<!-- jungsi:generated',section+'\n\n<!-- jungsi:generated')
+        frontend['estimated_population_contract']={key:estimated[key] for key in ('format','code_status','definition','presentation_rules')}
+        backend['estimated_population_contract']=estimated
+        files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
+        files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
     if spec.get("repository_layout"):
         files[spec["current_documents"]["folder_structure"]]=doc("프로젝트 폴더 구조와 작업 위치",repository_layout_text(spec))
     return {p:t.encode("utf-8") for p,t in files.items()}
