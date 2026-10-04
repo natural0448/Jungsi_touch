@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.6.2",
-  "source_sha256": "eb0802dc5b95a8e22b466bca79e1fea00f59af91e8fb635994b58170a07e0d1d",
+  "spec_version": "1.6.3",
+  "source_sha256": "9c224062aa7b953641e51691a21aadd9b57e3678ca5643bd7ce98d79397b9add",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1472,7 +1472,7 @@
   },
   "estimated_population_contract": {
     "format": "jungsi.estimated-population-contract/v1",
-    "code_status": "implemented_private_replay_and_CI_in_progress",
+    "code_status": "integrated_on_develop_generic_engine_and_private_pilot_verified",
     "requirements": [
       "REQ-02",
       "REQ-05",
@@ -1566,21 +1566,37 @@
       "로컬 화면에서 자체 추정임을 표시하고 성공/보류/미승인·일반/유료·동점·모바일을 검증한다. 실제 Supabase/Drive 연결 검수는 별도 운영 증거로 남긴다."
     ],
     "remaining": [
-      "최종 Git 스냅샷 전체 회귀·CI와 공개 SHA의 실제 비공개 재실행 및 로컬 예시 연결",
+      "시범 규칙의 실제 캠퍼스 식별과 정확한 운영 모집행 결속, 서버 승인 명부 등록/발행 및 권한 검수",
       "전국 대학 공식 실행 규칙 검증 발행 및 별도 시험/학년도 모형 확대",
       "실제 Supabase/Drive 운영 설정·권한과 연결 검수"
     ],
     "private_storage": "실제 원자료·참고 값·공동 후보·학습 계수/가중치·총점/학교 곡선·검증 결과는 data/outputs 등 Git 제외 폴더 또는 비공개 DB/스토리지에만 보관한다. 공개 코드는 범용 형식과 명확한 합성 예시만 포함하며 원본·이전 버전·실패 산출물·파일/ref를 보존한다. 파일 포트는 가장 가까운 AGENTS.md+현재 공통 명세 체크아웃의 내부 제외 영역만 허용한다. 체크아웃 자체가 조상 outputs/data에 있어도 내부 src/docs/apps 등 공유 경로를 허용하지 않는다.",
     "comparison_population_implementation_status": "implemented_with_same_commit_DTO_and_pinned_validation_receipt; 운영 실제 자료 등록과 연결 검수는 별도",
     "execution_result": {
-      "status": "actual_replay_self_validated_final_guard_replay_and_CI_pending",
-      "first_public_replay": "최종 정확 소수 가중치 재집계 포함 7개 시나리오 모형 자체 검증 통과; 후보·총점·대학 곡선의 이전 재실행 hash 일치; 등급 오류 경로 보완 후 최종 SHA 재확인",
+      "status": "accepted_on_develop_private_self_validation_and_independent_replay_verified",
+      "first_public_replay": "첫 공개 SHA의 실제 재실행은 보존하며 최종 오류 경로 보완 SHA에서 후보·모형·곡선·검산의 재현 hash를 다시 확인했다.",
       "precommit_original_policy": "research_only; 사전 참고 오차 기준 실패 보존",
-      "precommit_new_policy": "self_validated_estimate; 원참고 차이는 진단에 보존; 최종 정확 소수 가중치 검사 추가 후 공개 SHA 재실행 필요",
+      "precommit_new_policy": "self_validated_estimate; 사전 실행은 이력으로 보존하고 최종 공개 SHA의 정확 소수 재집계와 독립 재현을 완료했다.",
       "source_policy": "기존 v3 허용오차·실패와 참고 제외 결과는 보존; 새 사전 정책은 불성립 참고 진단을 모형자체검증에서 분리",
       "actual_scope": "2026 수능 1개 실제 규칙 시범과 7개 가정/seed/참고 포함·제외 재실행; 전국 대학 완료 아님",
-      "server_registration": "not_performed",
-      "live_connections": "not_run_configuration_missing"
+      "server_registration": "not_performed_campus_identity_and_pinned_operational_registration_pending",
+      "live_connections": "not_run_configuration_missing",
+      "final_public_code_sha": "f5d5f9767462e15648c2fc1605317bfd3ebc0ab2",
+      "develop_merge_sha": "b77b0eeb36cef5a2cc3ae958aff1efa1e80afc69",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/12",
+      "final_public_replay": "확정 Git SHA로 후보 생성부터 재실행해 공식 제약·정확 소수 가중치 재집계·직접 환산·총점/대학 곡선·필터 분모·동점/0/100과 재현 hash를 확인했다.",
+      "independent_data_team": "동일 최종 SHA로 후보 생성부터 별도 재현하고 원자료의 도수/등급·선택/응시 조건·직접 환산·집단 합계·PK 연결을 독립 확인했다. 수치/가중치/검산 원문은 비공개 보관.",
+      "synthetic_snapshot_tests": 391,
+      "local_preview": "기획팀 소유 outputs 로컬 화면에서 제공 자료 기반 추정 시범과 합성 API 상태 예시를 표시하고 데스크톱/모바일/인쇄/권한 등 14개 묶음을 통과했다.",
+      "local_preview_check_groups": 14,
+      "local_preview_js_errors": 0,
+      "meaning": "모형 자체 검수는 추정 정의·공식 조건·재현/직접 계산 검증을 뜻한다. 전체 실제 학생 DB·공동분포 참값·실제 학생 예측 정확도·합격확률 검증이 아니다.",
+      "CI": {
+        "push": "https://github.com/natural0448/Jungsi_touch/actions/runs/37186791840",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/actions/runs/37186793966",
+        "develop_merge": "https://github.com/natural0448/Jungsi_touch/actions/runs/37187904113",
+        "status": "success"
+      }
     }
   }
 }
