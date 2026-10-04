@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "pre_data_backend_implemented_configuration_pending",
   "current_documents": {
@@ -2668,7 +2668,8 @@
       "required_fields": "version,status,academic_year,exam_id,source_pack_version,exam_type=csat,release_id,rules,bindings; binding은 academic_year,offering_pk,rule_version,university_id,campus,department,track,group을 결속한다.",
       "nested_binding": "봉투의 학년도/시험/pack은 포함한 규칙과 표 전체에 적용한다. 규칙/표가 exam_id/source_pack_version/rule_version을 명시하면 봉투·선택 규칙과 일치해야 한다. 표의 academic_year/version/source_ref/status는 기존 실행기가 검증한다.",
       "mock_contract": "선택 mock_compatibility는 status=approved,version,source_exam_id,source_pack_version,source_exam_type,rule_exam_id,rule_pack_version을 정확히 결속한다. 승인이 없거나 불일치하면 mock_compatibility_not_approved다.",
-      "reported_mapping": "ExamPack 표준점수 과목의 선택 reported_scores는 관측 표준점수 문자열 → percentile/grade/source_ref다. 출처·관측 점수·정수 범위·공식 등급표 일치를 로딩 시 검증한다."
+      "reported_mapping": "ExamPack 표준점수 과목의 선택 reported_scores는 관측 표준점수 문자열 → percentile/grade/source_ref다. 출처·관측 점수·정수 범위·공식 등급표 일치를 로딩 시 검증한다.",
+      "numeric_serialization": "Drive JSON 발행의 비율·변환점수·가감점·구간 경계·output_range·공식 척도는 정수 또는 정확한 소수 문자열(예: \"0.35\")이다. JSON 소수 숫자는 기본 파서에서 이진 float가 되므로 실행기가 거절한다. 성적표 percentile/grade·표준점수는 기존 정수 계약을 따른다. 데이터팀 원본은 보존하고 새 승인 발행본에서만 이 형식으로 변환한다."
     },
     "public_result_contract": {
       "location": "본인 유료 report.analyses[offering_id].conversion",
