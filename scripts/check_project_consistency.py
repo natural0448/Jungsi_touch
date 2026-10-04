@@ -304,6 +304,28 @@ def generated_files(spec):
             '## 12개 요청과 응답\n\n'+table(['API','메서드/경로','본문','쿼리','응답 DTO','키 필수'],[[o['id'],o['method']+' '+o['path'],'; '.join(o['http_contract']['body']) or '없음',', '.join(o['http_contract']['query']) or '없음',o['http_contract']['response']+'; '+o['contract_ref'],o['http_contract']['idempotency_key_required']] for o in spec['operations']])+'\n\n모든 HTTP 업무 서비스는 PlatformService.execute이며 FastAPI create_app이 경로를 등록한다. 요청은 operations[].http_contract, 응답은 해당 contract_ref를 따른다. overall.analyze의 HTTP 응답은 persisted report이고 내부 overall 필드만 기존 OverallAnalysisService의 jungsi.overall-analysis/v1 엔진 DTO다. 두 객체를 루트 응답으로 혼동하지 않는다.\n\n'+
             '## 오류와 대기\n\n오류 객체는 {status:error,error:{code},request_id}이며 비밀값·예외 원문을 포함하지 않는다. 자료 대기는 200 응답의 status=pending/reason_code와 값 null로 구분한다. 전체 분석이 pending이어도 입력 총점·과목 결과는 보존한다.\n\n'+table(['오류 코드','HTTP','의미'],platform['errors'])+'\n\n대학 계산의 개별 자료 해시/버전/승인 불일치는 해당 assessment의 pending이다. 카탈로그 전체 형식/승인 실패와 공급 서비스 실패는 503이다.\n\n'+
             '## 응답 객체\n\n'+'\n\n'.join(schemas)+'\n\n## 시간 표시\n\n서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.')
+    scoring=spec.get('university_scoring_contract')
+    if scoring:
+        public=scoring['public_result_contract']
+        rules='\n\n'.join('## '+title+'\n\n'+'\n'.join('- '+row for row in scoring[key]) for title,key in [
+            ('모집행과 규칙 결속','identity_rules'),('성적 입력','input_rules'),('실제·모평·보정 추정의 구분','score_basis_rules'),('계산 단계와 정확값','execution_rules'),('검증과 인수','acceptance_gates'),('실제 운영의 남은 자료','remaining')])
+        files[spec['current_documents']['university_scoring']]=doc('대학별 수능 환산 엔진',
+            '상태: '+scoring['code_status']+'. 작업 항목: [DEV-003](../work_items/DEV-003-university-scoring-engine.json). '+scoring['placement']+'\n\n'+
+            '서비스: '+scoring['application_service']+'. API: '+scoring['api_path']+'. '+scoring['access']+'\n\n'+
+            '## 참고 자료와 계산 범위\n\n'+scoring['reference_policy']+'\n\n'+scoring['calculation_scope']+'\n\n'+
+            rules+'\n\n## 독립 자료 공급\n\n'+table(['항목','계약'],list(scoring['provider_contract'].items()))+'\n\n'+
+            '## 공개 결과 DTO\n\n'+public['location']+'; 필드: '+', '.join(public['fields'])+'. 상태: '+', '.join(public['statuses'])+'.\n\n'+
+            public['independence']+' '+public['compatibility']+'\n\n응답 제외: '+'; '.join(public['excluded'])+'.')
+        for key in ('planning','routing','architecture','presentation_handoff','api_dto'):
+            path=spec['current_documents'].get(key)
+            if path in files:
+                marker='\n\n<!-- jungsi:generated'
+                section='\n\n## 대학별 수능 환산 연결\n\n[대학별 수능환산 엔진](대학별_수능환산_엔진.md)을 따른다. 구현 상태는 '+scoring['code_status']+'다. '+public['independence']+' 프레젠테이션은 독립 conversion 결과와 후속 지원 판단 상태를 표시하며 계산/조회표를 구현하지 않는다.'
+                files[path]=files[path].replace(marker,section+marker)
+        frontend['university_scoring_contract']={k:scoring[k] for k in ('format','code_status','operation','input_rules','score_basis_rules','public_result_contract')}
+        backend['university_scoring_contract']=scoring
+        files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
+        files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
     if spec.get("repository_layout"):
         files[spec["current_documents"]["folder_structure"]]=doc("프로젝트 폴더 구조와 작업 위치",repository_layout_text(spec))
     return {p:t.encode("utf-8") for p,t in files.items()}

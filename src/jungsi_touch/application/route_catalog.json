@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.3.1",
-  "source_sha256": "db6e1acfa5f526b217bb42f34e818df677210f1a7b8f53f1af5e95ea6fd947c6",
+  "spec_version": "1.4.0",
+  "source_sha256": "f21971e379a0ccc0cfc3c920784a2d662fbf65a48964742ea92c0501c12fe4a6",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1131,5 +1131,101 @@
         "별도 프레젠테이션 구현 및 배포·결제 운영 연결"
       ]
     }
+  },
+  "university_scoring_contract": {
+    "format": "jungsi.university-scoring-contract/v1",
+    "code_status": "planned_DEV003_existing_conversion_library_reused",
+    "feature": "feature/application-pre-data-platform",
+    "work_item": "docs/work_items/DEV-003-university-scoring-engine.json",
+    "start_commit": "e25062329f4d364ce94df315559f570e1b791efc",
+    "application_service": "jungsi_touch.application.university_scoring.UniversityScoringService",
+    "placement": "학교·학년도·실제 모집행의 규칙 선택과 점수 산출은 애플리케이션에 둔다. 기존 src/jungsi_touch/university_conversion.py는 이 계층의 순수 규칙 실행기로 경로를 보존한다. 계산 서비스는 구체 Drive·Supabase·화면 구현을 가져오지 않는다.",
+    "operation": "university.analyze",
+    "api_path": "POST /api/v1/reports/{report_id}/university-results",
+    "access": "서버 검증 유료 이용권·본인 리포트·확인된 성적·멱등 키·expected_version을 기존 정책대로 먼저 확인한다. 요청에서 규칙·승인·시험 유형·research·owner·계수를 지정하지 않는다.",
+    "reference_policy": "사용자 제공 고속분석기 통합문서와 기존 추출본의 입력→조회→단계식→결과 구조만 참고한다. 셀 주소·Excel 수식·대학별 계수·자체 분포·학생값을 코드에 복사하거나 Excel 실행식으로 평가하지 않는다. 대학 공식 자료 검증과 실행 검산이 필요한 운영 규칙은 별도 승인한다.",
+    "calculation_scope": "수능 반영분 CSAT component만 산출한다. 내신·면접·지원자격·합격확률·입결·판단구간·유불리는 별도 자료와 단계다.",
+    "identity_rules": [
+      "카탈로그의 offering_id는 대학·캠퍼스·학년도·모집단위·전형·모집군의 실제 모집행이다. 이름 유사성으로 규칙을 선택하지 않는다.",
+      "환산 릴리스/규칙/조회표는 학년도·시험 ID·시험 자료 pack_version·규칙 버전·자료 상태와 결속한다. 같은 키의 중복 binding·불일치는 계산하지 않는다.",
+      "운영 공개에는 승인 릴리스·공식 규칙·calculation_verified·확인된 조회표가 모두 필요하다. 합성/초안/source_verified 상태를 API 입력으로 승인 승격하지 않는다."
+    ],
+    "input_rules": [
+      "DEV-003에서 국어·수학 및 탐구 각 과목에 성적표 percentile·grade를 선택적으로 추가한다. 기존 표준점수 입력은 그대로 사용할 수 있다.",
+      "표준점수는 기존 시험 엔진의 유효 점수를 따른다. 성적표 백분위는 0~100 정수, 등급은 1~9 정수이며 bool·소수·범위 밖·알 수 없는 필드는 거절한다.",
+      "공식 시험 팩에 확인된 성적표 매핑이 있으면 해당 시험·과목·표준점수와 대조한다. 없는 백분위를 100-상위누적으로 만들지 않는다. 학생 제공 값과 검증된 매핑을 구분한다.",
+      "규칙이 필요한 입력/선택과목/탐구 과목수/변환표를 확보하지 못하면 해당 환산만 pending/null이다. 미응시·미확인·조회 실패를 0이나 최저등급으로 대체하지 않는다.",
+      "제2외국어 등 아직 API에 입력 경로가 없는 항목을 요구하는 규칙은 명시적으로 보류한다. 다른 과목으로 임의 대체하지 않는다."
+    ],
+    "score_basis_rules": [
+      "같은 학년도·동일 등록 수능 시험 actual_exam은 전체 누적곡선·연도 bridge·대학 분포·지원 정책 없이 공식 환산 규칙만으로 계산한다.",
+      "mock_exam은 실제 수능과 구분한다. 서버 승인 릴리스의 명시적 모평 호환 계약이 없는 수능 규칙에 임의 대입하지 않는다.",
+      "2024~2027 중 다른 학년도 비교는 기존 승인된 연도 보정을 거쳐 year_equated_estimate로 표시한다. 현재 성적을 과거 규칙에 직접 넣거나 다른 연도의 규칙으로 대체하지 않는다.",
+      "영어·한국사 절대등급을 과거에 유지한 경우 해당 보정 가정을 보존한다. 실제 환산과 추정 환산의 기준을 DTO에서 구분한다."
+    ],
+    "execution_rules": [
+      "허용된 선언형 연산과 DAG만 실행한다. eval·exec·Excel/매크로 실행·동적 import·임의 외부 조회를 허용하지 않는다.",
+      "입력→표준/백분위/등급 조회→과목 변환→탐구 1/2과목 처리→우수순/선택 반영→반영비율→가산/감산→척도/만점→지정 반올림 순서를 규칙 노드에 명시한다. 모든 학교에 한 고정 순서를 강제하지 않는다.",
+      "탐구 평균/합/우수 1과목·변환점수 후 순위·복수 승인 계산 방식의 최댓값·선택과목 조건·영어/한국사 조회 및 가감점을 합성 사례로 검증한다.",
+      "Fraction 정확값을 계산·분포 조회·판정에 유지한다. round/절사/반올림 방식과 자릿수는 명시된 노드에만 적용하며 최종 표시 문자열로 후속 판단을 계산하지 않는다.",
+      "0 제수·조회 누락·pending 표·오류 타입·입력/최종 점수 허용 범위 밖 값·비유한 수·순환·알 수 없는 연산·모호한 규칙은 사유 있는 실패로 차단한다. 원본 profile·규칙·lookup table을 변경하지 않는다."
+    ],
+    "provider_contract": {
+      "owner": "애플리케이션 소유 독립 대학 환산 공급 포트",
+      "read": "실제 모집행 ID에 대한 승인 환산 릴리스/규칙/정확 시험·학년도 binding·조회표/버전을 공급한다.",
+      "isolation": "bridge·curve·decision 자료 부재/형식 오류로 승인된 동일 시험 환산을 잃지 않도록 환산 공급과 후속 분석 공급을 분리한다.",
+      "infrastructure": "Drive API 어댑터가 비공개 conversion 아티팩트의 서버 고정 폴더·파일 ID·발행 버전·SHA256·승인 상태를 검증한다. 정본 자료/원본·기존 버전을 보존하고 새 발행본을 생성한다.",
+      "legacy": "기존 offering-analysis 자료의 rules/bindings를 재사용할 때도 환산 자체의 승인/시험 결속을 동일하게 확인한다. 하위 bridge/curve 오류가 환산 상태에 전파되지 않아야 한다."
+    },
+    "public_result_contract": {
+      "location": "본인 유료 report.analyses[offering_id].conversion",
+      "fields": [
+        "status",
+        "reason_code",
+        "score_basis",
+        "score_scope",
+        "converted_score",
+        "official_max_score",
+        "academic_year",
+        "exam_id",
+        "rule_version",
+        "release_version",
+        "table_versions",
+        "profile_version",
+        "pack_version"
+      ],
+      "statuses": [
+        "ready",
+        "pending"
+      ],
+      "independence": "conversion.ready와 assessment.pending은 함께 존재할 수 있다. 대학 분포·입결·지원 판단·자격 미확인은 각각의 사유로 보존한다.",
+      "compatibility": "기존 assessment.converted_score는 계산 완료 값과 일치한다. 판단이 pending이어도 환산 성공 값을 없애지 않는다. years는 학년도별 실제/모평/보정 추정 기준과 pending 사유를 구분한다.",
+      "excluded": [
+        "내부 exact 분수",
+        "실행 trace",
+        "규칙 노드",
+        "조회표 값",
+        "반영계수",
+        "원본 성적",
+        "학생 소유자 ID",
+        "로컬 경로·원문·해시·비밀값"
+      ]
+    },
+    "acceptance_gates": [
+      "승인된 같은 시험 합성 규칙으로 overall/bridge/curve/decision이 없어도 conversion.ready와 정확한 환산점수가 반환된다.",
+      "고정 가중합·등급 조회·탐구 평균/최댓값·변환 후 우수순·조건 가산/감산·척도·지정 반올림/절사를 독립 손계산 Fraction 예상값과 비교한다.",
+      "같은 학교의 다른 캠퍼스/전형/군/학년도·규칙/표/pack/시험 불일치·중복 binding·미승인·미지원 입력을 실패 또는 pending으로 구분한다.",
+      "성적표 백분위/등급 선택 입력·경계·매핑 충돌·백분위 미제공을 검수한다. 기존 표준점수 입력과 승인 보정 흐름 회귀를 확인한다.",
+      "표시 1.23과 내부 1.234처럼 자릿수가 달라지는 합성 사례로 curve·decision이 정확값을 사용함을 검수한다.",
+      "유료·소유권·확인 성적·멱등·revision·일반회원 재조회 DTO·내부 식/계수 유출 차단과 자료 오류 격리를 HTTP/업무 테스트로 확인한다.",
+      "모든 공통 명세·생성 문서·계층·Git 데이터 제외·커밋 스냅샷 테스트와 CI를 통과하고 개발 PR을 develop으로 통합한다.",
+      "실제 대학 규칙의 승인 범위와 Supabase/Drive 운영 연결은 합성 코드 인수와 구분해 보고한다. 전국 원문 재검사를 이번 구현의 완료 조건으로 삼지 않는다."
+    ],
+    "remaining": [
+      "실제 대학·모집행의 공식 실행 규칙/변환표 승인 발행 및 기존 검수 근거를 이용한 변경 범위 검산",
+      "Supabase/Drive 실서버 연결 및 승인 conversion 아티팩트 실제 읽기 검수",
+      "제2외국어 등 추가 성적 입력 계약이 필요한 특수 규칙",
+      "전체 공동분포·연도 보정·판단/예상 자료 승인; 엔진 구현 완료와 별개"
+    ]
   }
 }

@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.3.1이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.4.0이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -170,4 +170,8 @@ format: jungsi.counseling-snapshot/v1
 
 서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.
 
-<!-- jungsi:generated spec_sha256=db6e1acfa5f526b217bb42f34e818df677210f1a7b8f53f1af5e95ea6fd947c6 -->
+## 대학별 수능 환산 연결
+
+[대학별 수능환산 엔진](대학별_수능환산_엔진.md)을 따른다. 구현 상태는 planned_DEV003_existing_conversion_library_reused다. conversion.ready와 assessment.pending은 함께 존재할 수 있다. 대학 분포·입결·지원 판단·자격 미확인은 각각의 사유로 보존한다. 프레젠테이션은 독립 conversion 결과와 후속 지원 판단 상태를 표시하며 계산/조회표를 구현하지 않는다.
+
+<!-- jungsi:generated spec_sha256=f21971e379a0ccc0cfc3c920784a2d662fbf65a48964742ea92c0501c12fe4a6 -->
