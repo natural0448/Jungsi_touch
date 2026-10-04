@@ -37,6 +37,7 @@ class ScoringResult:
     values: tuple[tuple[str, object], ...] = ()
     reported_sources: tuple[tuple[str, str], ...] = ()
     context: tuple[tuple[str, object], ...] = ()
+    required_input_fields: tuple[str, ...] = ()
 
     @property
     def ready(self):return self.score is not None and self.reason_code is None
@@ -134,6 +135,7 @@ class UniversityScoringService:
             result=replace(result,rule_version=rule.data['rule_version'],release_version=bundle.version,
                            table_versions=tuple(t['version'] for t in rule.data['tables'].values()),values=tuple(values.items()),
                            reported_sources=tuple(reported_sources.items()))
+            result=replace(result,required_input_fields=tuple(sorted(rule.data['inputs'])))
             calculated=rule.calculate(result.internal_profile())
             maximum=calculated['official_max_score']
             check(maximum is None or type(maximum) in (str,int),'conversion_release_invalid','공식 척도 자료형을 확인하세요.')

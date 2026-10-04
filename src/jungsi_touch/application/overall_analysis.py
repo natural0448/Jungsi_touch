@@ -56,7 +56,7 @@ def _pending(reason_code):
         "top_percent": None, "inclusive_top_percent": None,
         "exclusive_top_percent": None, "tie_share_percent": None,
         "tie_interval_percent": None, "tie_policy": "include_equal",
-        "population_id": POPULATION_ID, "model_version": None,
+        "population_id": POPULATION_ID, "model_version": None, "data_kind": None,
     }
 
 
@@ -143,5 +143,5 @@ class OverallAnalysisService:
             "tie_share_percent", "tie_policy", "population_id",
         )}
         public["tie_interval_percent"] = {key: result["tie_interval_percent"][key] for key in ("lower", "upper")}
-        public.update(reason_code=None, model_version=binding.distribution_id)
+        public.update(reason_code=None, model_version=binding.distribution_id,data_kind=model.distribution.metadata.kind)
         return public

@@ -105,6 +105,8 @@ class UniversityPercentileRelease:
     rule_version: str
     curve: UniversityScoreDistribution
     bindings: tuple[dict, ...]
+    comparison_population: dict | None = None
+    validation_receipt: dict | None = None
 
 
 class ArtifactResultWriter(Protocol):

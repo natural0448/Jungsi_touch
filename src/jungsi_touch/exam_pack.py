@@ -29,9 +29,21 @@ def _require(condition, code, message):
 
 def _grade(subject, score):
     for row in subject['grades']:
+        if _empty_grade(row):continue
         if row['grade']==9 or score>=row['lower_score']:
             return row['grade']
     raise PercentileError('grade_not_found','등급표를 확인하세요.')
+
+
+def _empty_grade(row):
+    return (row.get('empty_grade_verified') is True and row.get('reported_count_state')=='published_dash' and
+        row.get('count') is None and row.get('lower_score') is None and row.get('upper_exclusive') is None and
+        row.get('published_percent') is None and row.get('derived_count_from_frequency')==0 and
+        type(row.get('derived_count_from_frequency')) is int and type(row.get('grade')) is int and 1<row['grade']<=9)
+
+
+def _grade_count(row):
+    return 0 if _empty_grade(row) else row['count']
 
 def _json(text):
     try:
@@ -95,14 +107,18 @@ class ExamPack:
                 _require([r['grade'] for r in rows]==list(range(1,10)),'invalid_grades','1~9등급 표가 필요합니다.')
                 bounds=[]
                 for r in rows:
-                    _integer(r['count'],'grade.count')
+                    _integer(_grade_count(r),'grade.count')
                     self._source_ref(r['source_ref'],source_ids)
+                    if _empty_grade(r):
+                        _require(s['assessment']=='standard_score','invalid_empty_grade','상대평가 공식 빈 등급만 허용합니다.')
+                        continue
                     if r['grade']<9:bounds.append(_integer(r['lower_score'],'grade.lower_score'))
                     else:_require(r['lower_score'] is None and r['upper_exclusive']==bounds[-1],
                                   'invalid_grade_boundary','9등급 경계를 확인하세요.')
                 _require(all(a>=b for a,b in zip(bounds,bounds[1:])),'invalid_grade_boundary','등급 경계가 역전되었습니다.')
-                _require(sum(r['count'] for r in rows)==total,'grade_total_mismatch','등급별 인원 합이 과목 응시 인원과 다릅니다.')
+                _require(sum(_grade_count(r) for r in rows)==total,'grade_total_mismatch','등급별 인원 합이 과목 응시 인원과 다릅니다.')
                 for r in rows:
+                    if _empty_grade(r):continue
                     expected=_decimal(Fraction(r['count']*100,total),2)
                     _require(Decimal(r['published_percent'])==Decimal(expected),
                              'grade_percent_mismatch','공식 등급 비율과 인원 계산이 일치하지 않습니다.')
@@ -121,7 +137,7 @@ class ExamPack:
                         self._source_ref(row['source_ref'],source_ids)
                         counts[_grade(s,score)]+=count
                     _require(cumulative==total==s['published_total'],'frequency_total_mismatch','도수·발표 합계·응시 인원이 다릅니다.')
-                    _require(all(counts[r['grade']]==r['count'] for r in rows),
+                    _require(all(counts[r['grade']]==_grade_count(r) for r in rows),
                              'grade_frequency_mismatch','등급 경계로 합산한 도수와 발표 등급 인원이 다릅니다.')
                     reported=s.get('reported_scores',{})
                     _require(isinstance(reported,dict),'invalid_reported_mapping','성적표 매핑 형식을 확인하세요.')

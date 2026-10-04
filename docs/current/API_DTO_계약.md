@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.6.1이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.6.2이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -112,7 +112,7 @@ format: jungsi.persisted-report/v1
 | decision_components | base_category, adjusted_category, adopted_category, base_policy_version, adjustment_version |
 | decision_evidence | version, historical_metrics, forecast_70, expected_acceptance_range |
 | conversion | status, reason_code, score_basis, score_scope, converted_score, official_max_score, academic_year, exam_id, rule_version, release_version, table_versions, profile_version, pack_version |
-| percentile | status, reason_code, score_basis, score_scope, academic_year, exam_id, top_percent, inclusive_top_percent, exclusive_top_percent, tie_share_percent, tie_policy, population_id, data_kind, rule_version, curve_version, release_version, source_model_version, profile_version, pack_version |
+| percentile | status, reason_code, score_basis, score_scope, academic_year, exam_id, top_percent, inclusive_top_percent, exclusive_top_percent, tie_share_percent, tie_policy, population_id, data_kind, rule_version, curve_version, release_version, source_model_version, profile_version, pack_version, population_scope |
 
 - 동일 학년도 실제 수능은 독립 승인 환산 포트로 actual_exam을 계산한다. 별도 승인 모평 호환은 mock_exam이며, 다른 학년도 비교는 승인 bridge → 당시 공식 환산식의 year_equated_estimate다.
 - 지원 구간과 환산 유불리는 별도다. 유불리는 같은 연도/시험/전체 모집단의 학생 보정총점 상위 누적과 대학 환산 상위 누적의 차이(pp)다.
@@ -191,6 +191,6 @@ format: jungsi.counseling-snapshot/v1
 
 ## 자체 추정분포 연결
 
-[자체 추정분포 개발](자체_추정분포_개발.md)을 따른다. 상태는 planned_method_and_private_prototype_in_progress다. 제공된 공식 시험 자료의 주변도수와 응시/선택 조건, 비교 가능한 참고 총점 곡선을 이용해 공동 성적 조합과 가중치를 자체 추정한다. 이는 전체 학생 실제 점수를 복원했다는 의미가 아니며 실제 도수·관측 분포와 구분한다. 전체 학생의 실제 공동 성적 DB 부재는 작업 중단 조건이 아니다. 전체 누백은 overall.status=estimated, 대학 누백은 percentile.data_kind=estimated_weights로 구분한다. 기존 API 권한·시험 결속·애플리케이션 소유 포트와 프레젠테이션 담당을 유지한다.
+[자체 추정분포 개발](자체_추정분포_개발.md)을 따른다. 상태는 implemented_private_replay_and_CI_in_progress다. 제공된 공식 시험 자료의 주변도수와 응시/선택 조건, 비교 가능한 참고 총점 곡선을 이용해 공동 성적 조합과 가중치를 자체 추정한다. 이는 전체 학생 실제 점수를 복원했다는 의미가 아니며 실제 도수·관측 분포와 구분한다. 전체 학생의 실제 공동 성적 DB 부재는 작업 중단 조건이 아니다. 전체 누백은 overall.status=estimated, 대학 누백은 percentile.data_kind=estimated_weights로 구분한다. 기존 API 권한·시험 결속·애플리케이션 소유 포트와 프레젠테이션 담당을 유지한다.
 
-<!-- jungsi:generated spec_sha256=b729d9e564f9bee73d657fbad9645a6c0ac071094acb6607c5aabf821da522b6 -->
+<!-- jungsi:generated spec_sha256=eb0802dc5b95a8e22b466bca79e1fea00f59af91e8fb635994b58170a07e0d1d -->

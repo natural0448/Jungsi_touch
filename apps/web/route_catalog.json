@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.6.1",
-  "source_sha256": "b729d9e564f9bee73d657fbad9645a6c0ac071094acb6607c5aabf821da522b6",
+  "spec_version": "1.6.2",
+  "source_sha256": "eb0802dc5b95a8e22b466bca79e1fea00f59af91e8fb635994b58170a07e0d1d",
   "pages": [
     {
       "id": "PAGE-01",
@@ -110,7 +110,8 @@
       "tie_interval_percent",
       "tie_policy",
       "population_id",
-      "model_version"
+      "model_version",
+      "data_kind"
     ],
     "overall_statuses": [
       "observed",
@@ -783,7 +784,8 @@
             "release_version",
             "source_model_version",
             "profile_version",
-            "pack_version"
+            "pack_version",
+            "population_scope"
           ]
         },
         "rules": [
@@ -805,9 +807,7 @@
           "관측 도수 observed_counts와 모형 가중치 estimated_weights를 표시 기준에서 구분한다. 모집단과 시험/학년도/규칙/곡선 버전을 함께 보존한다.",
           "DEV005 명시적 승인 비교집단의 population_scope를 반환한다. whole_complete와 required_rule_inputs_present를 혼용하지 않고 모집단이 다르면 환산 유불리는 보류한다. 미응시를 최저점으로 치환하지 않는다."
         ],
-        "planned_DEV005_percentile_fields": [
-          "population_scope"
-        ]
+        "planned_DEV005_percentile_fields": []
       },
       "candidates": {
         "format": null,
@@ -994,7 +994,8 @@
         "release_version",
         "source_model_version",
         "profile_version",
-        "pack_version"
+        "pack_version",
+        "population_scope"
       ],
       "statuses": [
         "ready",
@@ -1012,9 +1013,15 @@
         "규칙 노드/실행 trace",
         "원문/로컬 경로/hash/비밀값"
       ],
-      "planned_DEV005_fields": [
-        "population_scope"
-      ]
+      "planned_DEV005_fields": [],
+      "population_scope": {
+        "enum": [
+          "whole_complete",
+          "required_rule_inputs_present"
+        ],
+        "pending": null,
+        "meaning": "전체 국수탐2 비교집단과 해당 대학식 필수 성적 보유 비교집단의 구분. 실제 개인 정답/전국 원자료 보유를 뜻하지 않음"
+      }
     },
     "presentation_rules": [
       "대학 분석 카드·상세·리포트에 대학 환산점수 / 대학 환산 기준 상위 누백 / 지원 판단을 각각 표시한다. 누백이 낮을수록 같은 비교 모집단 내 앞쪽임을 설명한다.",
@@ -1027,7 +1034,7 @@
   },
   "estimated_population_contract": {
     "format": "jungsi.estimated-population-contract/v1",
-    "code_status": "planned_method_and_private_prototype_in_progress",
+    "code_status": "implemented_private_replay_and_CI_in_progress",
     "definition": "제공된 공식 시험 자료의 주변도수와 응시/선택 조건, 비교 가능한 참고 총점 곡선을 이용해 공동 성적 조합과 가중치를 자체 추정한다. 이는 전체 학생 실제 점수를 복원했다는 의미가 아니며 실제 도수·관측 분포와 구분한다. 전체 학생의 실제 공동 성적 DB 부재는 작업 중단 조건이 아니다.",
     "presentation_rules": [
       "전체 누백과 대학 환산 누백을 자체 추정으로 표시하고 학년도·시험·모형/곡선 버전·동점 기준을 함께 표시한다.",
