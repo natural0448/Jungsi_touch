@@ -60,7 +60,7 @@
     "live_server_status": "not_run_configuration_missing",
     "live_data_status": "not_run_configuration_missing",
     "data_readiness": "기존 검산·원자료/모집행 근거를 재사용했다. 자체 추정 prototype·보정/holdout·민감도 검증은 데이터팀과 후속 계약으로 진행 중이며 임의 합성도수를 전국 실제 도수로 주장하지 않는다.",
-    "presentation_status": "별도 담당의 운영 화면은 미통합. 기획팀 로컬 v3 시안을 준비했고 최종 Git 응답으로 브라우저 검증 예정",
+    "presentation_status": "develop 329f199/spec1.6.0의 로컬 v3 합성 UI: 12개 동작 묶음·desktop/mobile·인쇄·독립 환산/누백·0/100·동점·권한 검증 통과. JS 오류와 요청 실패 0. 자체 추정 실자료는 DEV005 산출 후 별도 연결.",
     "verification_scope": "동점·정확값·실제0/100·범위밖·숫자/모집단·승인/결속·불변 DTO·HTTP 권한/멱등/revision·레거시/동일연도 호환·Drive 파일/폴더/해시/버전",
     "follow_up": "DEV-005에서 자체 추정분포 생성·보정/검증과 실제 자료 시범 산출을 진행한다. 전체 학생 실제 공동 DB는 선행 조건이 아니다.",
     "git_snapshot_full_tests_passed": 328,
@@ -72,9 +72,10 @@
     "integrated_develop_commit": "3048406b4c5c52f478081883de5972ac82094b92",
     "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/11",
     "pull_request_ci": "https://github.com/natural0448/Jungsi_touch/actions/runs/37180115088",
-    "develop_ci": "https://github.com/natural0448/Jungsi_touch/actions/runs/37180409388"
+    "develop_ci": "https://github.com/natural0448/Jungsi_touch/actions/runs/37180409388",
+    "presentation_evidence": "기획 로컬 outputs/local_screen_preview_20261004_v3/browser_qa/run-2026-10-04T05-58-13-221Z/verification_receipt.json; 원자료·곡선 발행 상태는 변경하지 않음"
   },
   "implementation_spec_version": "1.5.1",
   "planning_commit": "9ff8a1278d8aa8b6dbb3870af3293c240f34e8d4",
-  "current_spec_version": "1.6.0"
+  "current_spec_version": "1.6.1"
 }
