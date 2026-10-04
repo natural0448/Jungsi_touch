@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.4.3",
-  "source_sha256": "b416802f0627e26595a57f658fc9c4e75d4eeb1bacd444df97860a53bea55022",
+  "spec_version": "1.5.0",
+  "source_sha256": "720cec18d2d2bc2dd5b2c5fd679720ceb5974675bcc455cf43d79ba5c792914a",
   "pages": [
     {
       "id": "PAGE-01",
@@ -797,7 +797,8 @@
           "eligibility_status",
           "decision_components",
           "decision_evidence",
-          "conversion"
+          "conversion",
+          "percentile"
         ],
         "nested": {
           "years": [
@@ -840,6 +841,27 @@
             "table_versions",
             "profile_version",
             "pack_version"
+          ],
+          "percentile": [
+            "status",
+            "reason_code",
+            "score_basis",
+            "score_scope",
+            "academic_year",
+            "exam_id",
+            "top_percent",
+            "inclusive_top_percent",
+            "exclusive_top_percent",
+            "tie_share_percent",
+            "tie_policy",
+            "population_id",
+            "data_kind",
+            "rule_version",
+            "curve_version",
+            "release_version",
+            "source_model_version",
+            "profile_version",
+            "pack_version"
           ]
         },
         "rules": [
@@ -854,7 +876,8 @@
           "conversion.ready와 assessment.pending은 함께 존재할 수 있다. 대학 분포·입결·지원 판단·자격 미확인은 각각의 사유로 보존한다.",
           "기존 assessment.converted_score는 계산 완료 값과 일치한다. 판단이 pending이어도 환산 성공 값을 없애지 않는다. years는 학년도별 실제/모평/보정 추정 기준과 pending 사유를 구분한다.",
           "독립 conversion은 지원 판단·자격·유불리를 승인하지 않는다. 전체 곡선이나 분석 공급 오류가 있어도 conversion.ready 점수는 보존하며 years의 현재 행은 실제/모평 기준으로 표시한다.",
-          "분포 조회·판단·상담 조정은 지정 노드 반올림까지 적용한 정확 Fraction 점수를 사용한다. 표시 문자열을 후속 계산 입력으로 사용하지 않는다."
+          "분포 조회·판단·상담 조정은 지정 노드 반올림까지 적용한 정확 Fraction 점수를 사용한다. 표시 문자열을 후속 계산 입력으로 사용하지 않는다.",
+          "conversion.ready / percentile.ready / assessment.pending은 함께 존재할 수 있다. conversion.ready / percentile.pending도 가능하며 환산 성공을 보존한다. 누백 준비만으로 지원 판단·자격·유불리를 승인하지 않는다. percentile이 ready이면 기존 assessment.converted_percentile은 top_percent와 일치한다. pending인 경우 null과 사유를 보존한다. 기존 승인 보정 경로의 성공 converted_percentile은 같은 의미의 percentile DTO로 노출한다."
         ]
       },
       "candidates": {
@@ -1282,5 +1305,112 @@
       "production_rule_status": "operating_release_approval_and_binding_pending",
       "files_and_branches_preserved": true
     }
+  },
+  "university_percentile_contract": {
+    "format": "jungsi.university-percentile-contract/v1",
+    "code_status": "planned_DEV_004_on_develop",
+    "feature": "independent_university_score_percentile",
+    "work_item": "docs/work_items/DEV-004-university-percentile.json",
+    "start_commit": "9eab7e378bc973a169d1063e57725d3aebe48544",
+    "application_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate",
+    "placement": "대학 환산점수와 누백·지원 판단은 애플리케이션에서 각각 계산한다. 프레젠테이션은 허용 DTO의 상태·수치·기준만 표시하며 인프라는 애플리케이션 소유 포트의 승인 자료를 공급한다.",
+    "operation": [
+      "university.analyze",
+      "candidates.build",
+      "report.read"
+    ],
+    "api_path": "POST /api/v1/reports/{report_id}/university-results; POST /api/v1/reports/{report_id}/candidates; GET /api/v1/reports/{report_id}",
+    "access": "유료·본인 리포트·확인 성적·현재 revision·멱등을 기존 서버 정책으로 먼저 검증한다. 일반회원 재조회·재시도 DTO에는 percentile을 포함한 대학 분석 전체를 제외한다.",
+    "definition": "같은 시험·학년도·비교 모집단 전체에 동일 대학 환산식과 가산점 처리를 적용한 점수 분포에서 본인의 정확한 환산점수 이상인 도수/가중치 비율 ×100이다. 동점 포함 상위 누적을 기본값으로 표시하며 관측 인원과 모형 가중치를 구분한다.",
+    "calculation_rules": [
+      "동점 포함 top_percent = inclusive_top_percent = (본인보다 높은 도수/가중치 + 동점 도수/가중치) / 전체 도수/가중치 ×100, exclusive_top_percent = 더 높은 도수/가중치 / 전체 ×100, tie_share_percent = 포함 - 제외다.",
+      "Fraction 정확값으로 학교 환산점수와 누적 도수/가중치를 계산한다. 표시된 converted_score나 반올림 문자열을 누백 입력으로 사용하지 않는다. 최종 백분율만 기존 소수 문자열 표시 계약을 따른다.",
+      "학교라도 캠퍼스·모집단위·전형·군·규칙/가산점 범위가 다르면 별도 결속한다. 대학명 또는 학과명 유사성으로 곡선을 자동 공유하지 않는다.",
+      "동일 학년도 actual_exam 환산과 승인된 명시적 mock_compatibility의 mock_exam 환산만 독립 포트의 정확한 시험 곡선에 조회한다. 실제 수능 곡선을 모평에 임의 적용하지 않는다.",
+      "2024~2027 과거 비교는 기존 승인 연도 보정과 당시 환산·분포 계약을 유지한다. 현재 누백을 다른 연도 years에 복사하지 않는다. 기존 승인된 보정 경로의 converted_percentile 호환과 score_basis를 보존한다.",
+      "유효한 환산점수가 관측 분포의 최소보다 낮으면 포함/제외 100%, 최대보다 높으면 0%, 동점 비중 0%가 가능하다. 분포의 관측 최대를 공식 점수 상한으로 추정하지 않는다. 기존 입결 발표점수의 원문 범위 검증은 별도로 유지한다.",
+      "자료가 없거나 미승인·불완전·모집단 미검증·결속 오류이면 pending/null과 사유를 반환한다. 실제 0%/100%는 준비된 숫자 문자열이며 대기 값과 구분한다.",
+      "본인 환산점수·승인 곡선이 준비되면 전체 총점 모형·지원 판단 정책·입결·예상선·비성적 자격 자료가 없어도 누백을 제공한다. 후속 분석 오류가 환산점수와 누백 상태를 지우지 않는다."
+    ],
+    "identity_rules": [
+      "발행 봉투의 version/status/release_id/academic_year/exam_id/source_pack_version/exam_type/rule_version과 곡선의 학년도·시험·rule_id/rule_version·score_scope·score_metric·score_scale_id·bonus_treatment를 정확한 환산 결과와 결속한다.",
+      "binding은 offering_pk,academic_year,university_id,campus,department,track,group,rule_version,curve_version을 확인한다. 일치 binding은 정확히 하나여야 하며 중복·다른 모집행/규칙으로 대체하지 않는다.",
+      "곡선 metadata의 status=approved,rule_review_status=calculation_verified,complete=true,population_verified=true 및 출처·도수 합=expected_total_weight를 확인한다. kind=observed_counts/estimated_weights와 population_id/source_model_id/source_model_version을 보존한다.",
+      "신규 독립 누백은 사전 승인된 전체 비교 모집단을 사용한다. 서비스 이용자·지원자 일부·최종 등록자 분포를 전국 전체 수험생 분포로 표시하지 않는다.",
+      "학교 환산 분포는 승인한 공동 성적 도수 또는 검증된 공동분포 모형·대학별 기존 환산곡선으로 발행한다. 입결 컷 몇 개·과목별 주변분포·성적표 백분위만으로 새 학교 전체 누백을 만들지 않는다.",
+      "기존 research/reviewed/source_verified/internal_review_only 자료를 구조 검사나 저장 형식 검증만으로 approved로 바꾸지 않는다. 실제 자료 부족과 코드 구현 완료는 별도로 기록한다."
+    ],
+    "provider_contract": {
+      "port": "PlatformDataProvider.get_percentile(offering_id) → UniversityPercentileRelease | None; 애플리케이션 소유 포트이며 get_conversion/get_analysis와 독립한다.",
+      "artifact_format": "jungsi.university-percentile-release/v1; Drive 발행 명부 kind=percentile, key=offering_id. 서버 고정 폴더·파일·version·SHA256·승인 상태를 검증해 읽는다.",
+      "required_fields": "version,status,release_id,academic_year,exam_id,source_pack_version,exam_type,rule_version,curve,bindings. curve는 기존 jungsi.university-score-distribution/v1 형식과 검증기를 재사용한다.",
+      "bindings": "academic_year,offering_pk,university_id,campus,department,track,group,rule_version,curve_version. 봉투와 곡선·환산 결과에 같은 시험/pack/규칙/모집단 결속을 집행한다.",
+      "mock": "mock_exam은 환산의 명시적 승인 호환과 동일한 시험 팩/원곡선 결속을 확인한다. 승인 범위 밖 실제 수능/모평 간 분포 전환은 보류한다.",
+      "numeric_serialization": "점수·도수/가중치·범위·분모는 정수 또는 정확한 소수 문자열이다. bool/이진 float/비유한 값/0 이하 가중치·비정수 observed_counts를 차단한다.",
+      "legacy": "기존 승인 분석 아티팩트 곡선의 재사용은 기존 보정 경로 의미를 보존한다. 새로운 독립 포트 승인을 임의 추정하지 않으며 기존 성공 누백의 DTO·값을 보존한다.",
+      "isolation": "get_analysis의 부재·자료 오류·정책/근거 승인 대기가 독립 get_percentile 결과를 훼손하지 않는다. 곡선 오류가 독립 conversion 결과를 훼손하지 않는다.",
+      "privacy": "파일 경로·원문·도수·가중치·모형·hash·실행 trace·exact 분수·원본 성적은 공개 DTO에 포함하지 않는다. 실제 자료와 검수·발행본은 제외 폴더/비공개 스토리지에만 생성하고 원본을 보존한다."
+    },
+    "public_result_contract": {
+      "location": "본인 유료 report.analyses[offering_id].percentile",
+      "fields": [
+        "status",
+        "reason_code",
+        "score_basis",
+        "score_scope",
+        "academic_year",
+        "exam_id",
+        "top_percent",
+        "inclusive_top_percent",
+        "exclusive_top_percent",
+        "tie_share_percent",
+        "tie_policy",
+        "population_id",
+        "data_kind",
+        "rule_version",
+        "curve_version",
+        "release_version",
+        "source_model_version",
+        "profile_version",
+        "pack_version"
+      ],
+      "statuses": [
+        "ready",
+        "pending"
+      ],
+      "independence": "conversion.ready / percentile.ready / assessment.pending은 함께 존재할 수 있다. conversion.ready / percentile.pending도 가능하며 환산 성공을 보존한다. 누백 준비만으로 지원 판단·자격·유불리를 승인하지 않는다.",
+      "compatibility": "percentile이 ready이면 기존 assessment.converted_percentile은 top_percent와 일치한다. pending인 경우 null과 사유를 보존한다. 기존 승인 보정 경로의 성공 converted_percentile은 같은 의미의 percentile DTO로 노출한다.",
+      "data_kind": "관측 도수 observed_counts와 모형 가중치 estimated_weights를 표시 기준에서 구분한다. 모집단과 시험/학년도/규칙/곡선 버전을 함께 보존한다.",
+      "excluded": [
+        "내부 exact 분수",
+        "점수별 도수",
+        "모형 가중치/원자료",
+        "전체 누적곡선",
+        "학생 소유자 ID",
+        "규칙 노드/실행 trace",
+        "원문/로컬 경로/hash/비밀값"
+      ]
+    },
+    "presentation_rules": [
+      "대학 분석 카드·상세·리포트에 대학 환산점수 / 대학 환산 기준 상위 누백 / 지원 판단을 각각 표시한다. 누백이 낮을수록 같은 비교 모집단 내 앞쪽임을 설명한다.",
+      "top_percent,동점 포함/제외 구간,자료 기준·학년도·시험과 data_kind를 표시한다. 전체 표준점수 누백·학교 누백·성적표 백분위를 혼용하지 않는다.",
+      "누백 0%를 빈 값으로 숨기지 않고 ready 상태와 함께 표시한다. pending은 사유와 대기를 표시한다. 개인점수·누백의 가상 사례는 실제 대학 자료와 분리한다.",
+      "같은 모집단/시험/학년도/동점 처리와 승인 총점 기준이 확보돼야 전체 누백과 대학 누백의 차이로 유불리를 표시한다. 준비되지 않으면 유불리만 대기한다.",
+      "로컬 기획 미리보기는 ignored outputs에서 최신 develop의 실제 애플리케이션 가상 응답을 이용한다. 운영 apps/web 구현은 feature/presentation-foundation의 별도 화면 담당 소유다."
+    ],
+    "acceptance_gates": [
+      "승인된 정확한 환산점수/곡선만으로 conversion.ready + percentile.ready + assessment.pending이 반환된다. 전체 모형/입결/예상선/판단/자격 부재·오류 격리를 API까지 검수한다.",
+      "동점 포함·제외·모두 동점·표시값과 내부 Fraction 차이·관측 최소/최대·분포 밖 유효 점수의 0%/100%를 독립 손계산 합성값과 대조한다.",
+      "학교/캠퍼스/학과/전형/군/시험/학년도/pack/rule/curve/population 결속·중복 binding·미승인/미검증/불완전 자료·가중치 합 및 숫자 형식을 거부한다.",
+      "일반/타인/미확인 프로필·revision·멱등·재조회에서 누백과 내부 자료를 누출하지 않는다. mutable 반환 객체가 원본 곡선·규칙·결과를 수정하지 않는다.",
+      "기존 승인 연도 보정·환산·입결·후보·통계·상담 출력 합성 회귀와 문서/계층/참조/제외/브랜치/Git 스냅샷 CI를 통과한 PR만 develop에 통합한다.",
+      "로컬 예시의 ready/분포대기/미승인/성적입력전·일반/유료·모바일 화면에서 학교 누백 수치와 각 상태를 확인한다.",
+      "실제 데이터 readiness는 기존 정본/검산 근거를 재사용해 별도 기록한다. 전국 학교 승인 또는 실서버 연결을 합성 구현 완료로 주장하지 않는다."
+    ],
+    "remaining": [
+      "실제 대학별 승인 환산 규칙·정확한 모집행 binding과 해당 시험의 공동분포/학교 환산곡선 운영 발행",
+      "Supabase/Drive 실제 계정·고정 폴더·승인 명부·권한 설정과 실제 연동 검수"
+    ],
+    "execution_result": null
   }
 }

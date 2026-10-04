@@ -343,6 +343,33 @@ def generated_files(spec):
         backend['university_scoring_contract']=scoring
         files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
         files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
+    percentile=spec.get('university_percentile_contract')
+    if percentile:
+        public=percentile['public_result_contract']
+        rules='\n\n'.join('## '+title+'\n\n'+'\n'.join('- '+row for row in percentile[key]) for title,key in [
+            ('계산과 독립 상태','calculation_rules'),('시험·규칙·모집행·모집단 결속','identity_rules'),
+            ('화면 표시와 담당','presentation_rules'),('검증과 인수','acceptance_gates'),('실제 운영의 남은 자료','remaining')])
+        files[spec['current_documents']['university_percentile']]=doc('대학별 환산 누백 계산',
+            '상태: '+percentile['code_status']+'. 작업 항목: [DEV-004](../work_items/DEV-004-university-percentile.json). '+percentile['placement']+'\n\n'+
+            '서비스: '+percentile['application_service']+'. API: '+percentile['api_path']+'. '+percentile['access']+'\n\n'+
+            '## 누백의 정의\n\n'+percentile['definition']+'\n\n'+rules+'\n\n## 독립 자료 공급\n\n'+
+            table(['항목','계약'],list(percentile['provider_contract'].items()))+'\n\n## 공개 결과 DTO\n\n'+
+            public['location']+'; 필드: '+', '.join(public['fields'])+'. 상태: '+', '.join(public['statuses'])+'.\n\n'+
+            public['independence']+' '+public['compatibility']+' '+public['data_kind']+'\n\n응답 제외: '+'; '.join(public['excluded'])+'.')
+        receipt=percentile.get('execution_result')
+        if receipt:
+            path=spec['current_documents']['university_percentile']
+            files[path]=files[path].replace('\n\n<!-- jungsi:generated','\n\n## 기획팀 인수 결과\n\n'+
+                table(['항목','증거'],[(key,str(value)) for key,value in receipt.items()])+'\n\n<!-- jungsi:generated')
+        for key in ('planning','routing','architecture','presentation_handoff','api_dto','backend_readiness'):
+            path=spec['current_documents'].get(key)
+            if path in files:
+                section='\n\n## 대학별 누백 연결\n\n[대학별 누백 계산](대학별_누백_계산.md)을 따른다. 구현 상태는 '+percentile['code_status']+'다. '+public['independence']+' 프레젠테이션은 학교 환산 기준 상위 누백과 동점·자료 기준을 표시한다.'
+                files[path]=files[path].replace('\n\n<!-- jungsi:generated',section+'\n\n<!-- jungsi:generated')
+        frontend['university_percentile_contract']={key:percentile[key] for key in ('format','code_status','operation','definition','public_result_contract','presentation_rules')}
+        backend['university_percentile_contract']=percentile
+        files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
+        files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
     if spec.get("repository_layout"):
         files[spec["current_documents"]["folder_structure"]]=doc("프로젝트 폴더 구조와 작업 위치",repository_layout_text(spec))
     return {p:t.encode("utf-8") for p,t in files.items()}
