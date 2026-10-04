@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.4.0",
-  "source_sha256": "f21971e379a0ccc0cfc3c920784a2d662fbf65a48964742ea92c0501c12fe4a6",
+  "spec_version": "1.4.1",
+  "source_sha256": "65bcee4fd63e6c74d94fd01a73fca877bba515d44037f01676136008fda35a42",
   "pages": [
     {
       "id": "PAGE-01",
@@ -69,10 +69,11 @@
     ],
     "input_rules": [
       "exam_id·pack_version은 등록 ID 토큰이며 파일 경로가 아니다",
-      "국어·수학은 standard_score와 선택적 choice만 허용",
-      "inquiry는 서로 다른 두 과목의 subject·standard_score",
+      "국어·수학은 standard_score와 선택적 choice·percentile·grade를 허용한다.",
+      "inquiry는 서로 다른 두 과목의 subject·standard_score와 선택적 percentile·grade다.",
       "점수·등급·선택과목 검증은 기존 시험 엔진에 위임",
-      "학생 ID·유료 플래그·자료 경로·research·승인 상태·동점 정책 입력은 거부"
+      "학생 ID·유료 플래그·자료 경로·research·승인 상태·동점 정책 입력은 거부",
+      "percentile은 0~100 정수, grade는 1~9 정수다. bool·소수·null·알 수 없는 필드는 거절한다. 같은 시험 공식 매핑과 충돌하면 reported_percentile_conflict/reported_grade_conflict로 422다. 누적값에서 성적표 백분위를 생성하지 않는다."
     ],
     "response_fields": [
       "format",
@@ -179,7 +180,7 @@
         "시험·곡선 공급자 호출 전 차단"
       ],
       [
-        "invalid_request / engine_input_code",
+        "invalid_request / engine_input_code / invalid_reported_percentile / invalid_reported_grade / reported_percentile_conflict / reported_grade_conflict",
         422,
         "허용 필드 또는 해당 시험 성적 불일치"
       ],
@@ -410,7 +411,7 @@
         "REQ-08",
         "REQ-14"
       ],
-      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유",
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분)",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
@@ -439,7 +440,7 @@
         "REQ-09",
         "REQ-14"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드",
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분)",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
@@ -717,7 +718,8 @@
           "versions",
           "eligibility_status",
           "decision_components",
-          "decision_evidence"
+          "decision_evidence",
+          "conversion"
         ],
         "nested": {
           "years": [
@@ -745,17 +747,36 @@
             "historical_metrics",
             "forecast_70",
             "expected_acceptance_range"
+          ],
+          "conversion": [
+            "status",
+            "reason_code",
+            "score_basis",
+            "score_scope",
+            "converted_score",
+            "official_max_score",
+            "academic_year",
+            "exam_id",
+            "rule_version",
+            "release_version",
+            "table_versions",
+            "profile_version",
+            "pack_version"
           ]
         },
         "rules": [
-          "각 모집행의 2024~2027 승인 연도보정 → 당시 공식 환산식 → 전용 모집단 분포를 기존 엔진으로 계산한다. 현재 점수를 과거 공식식에 직접 대입하지 않는다.",
+          "동일 학년도 실제 수능은 독립 승인 환산 포트로 actual_exam을 계산한다. 별도 승인 모평 호환은 mock_exam이며, 다른 학년도 비교는 승인 bridge → 당시 공식 환산식의 year_equated_estimate다.",
           "지원 구간과 환산 유불리는 별도다. 유불리는 같은 연도/시험/전체 모집단의 학생 보정총점 상위 누적과 대학 환산 상위 누적의 차이(pp)다.",
           "category=challenge/core/room/outside/pending/ineligible. 학교 category를 학과에 복사하지 않는다.",
           "eligibility_status는 입력 등급/선택과목과 승인 요건을 비교한다. 별도 자격 확인 포트가 없는 비성적 요건은 needs_confirmation이다.",
           "decision_evidence는 승인 정책과 동일한 context/version을 결속한다. 과거 발표 지표의 이름·정의·단위·척도, 올해 forecast_70의 값·정의·단위·version, 지원 판단용 expected_acceptance_range의 lower/upper·정의·unit·policy_version을 구분한다.",
           "미발행 forecast_70은 value=null/status=pending이고 승인된 판단 구간으로 학과 판단을 계산할 수 있다. 미승인/불일치 근거는 decision_evidence_unapproved로 보류한다.",
           "기본/상담 조정/채택 category와 버전을 분리한다. 조정은 승인 base_version의 최종 구간을 학생 점수로 한 번 평가한다.",
-          "versions에는 profile·pack·source_model·bridge·rule·curve·decision·evidence·population·target_exam·tie_policy·eligibility·선택적 adjustment가 포함된다. 내부 분포·가중치·실행 trace는 반환하지 않는다."
+          "versions에는 profile·pack·source_model·bridge·rule·curve·decision·evidence·population·target_exam·tie_policy·eligibility·선택적 adjustment가 포함된다. 내부 분포·가중치·실행 trace는 반환하지 않는다.",
+          "conversion.ready와 assessment.pending은 함께 존재할 수 있다. 대학 분포·입결·지원 판단·자격 미확인은 각각의 사유로 보존한다.",
+          "기존 assessment.converted_score는 계산 완료 값과 일치한다. 판단이 pending이어도 환산 성공 값을 없애지 않는다. years는 학년도별 실제/모평/보정 추정 기준과 pending 사유를 구분한다.",
+          "독립 conversion은 지원 판단·자격·유불리를 승인하지 않는다. 전체 곡선이나 분석 공급 오류가 있어도 conversion.ready 점수는 보존하며 years의 현재 행은 실제/모평 기준으로 표시한다.",
+          "분포 조회·판단·상담 조정은 지정 노드 반올림까지 적용한 정확 Fraction 점수를 사용한다. 표시 문자열을 후속 계산 입력으로 사용하지 않는다."
         ]
       },
       "candidates": {
@@ -860,14 +881,16 @@
   },
   "university_scoring_contract": {
     "format": "jungsi.university-scoring-contract/v1",
-    "code_status": "planned_DEV003_existing_conversion_library_reused",
+    "code_status": "implemented_synthetic_verified_live_rules_configuration_pending",
     "operation": "university.analyze",
     "input_rules": [
       "DEV-003에서 국어·수학 및 탐구 각 과목에 성적표 percentile·grade를 선택적으로 추가한다. 기존 표준점수 입력은 그대로 사용할 수 있다.",
       "표준점수는 기존 시험 엔진의 유효 점수를 따른다. 성적표 백분위는 0~100 정수, 등급은 1~9 정수이며 bool·소수·범위 밖·알 수 없는 필드는 거절한다.",
       "공식 시험 팩에 확인된 성적표 매핑이 있으면 해당 시험·과목·표준점수와 대조한다. 없는 백분위를 100-상위누적으로 만들지 않는다. 학생 제공 값과 검증된 매핑을 구분한다.",
       "규칙이 필요한 입력/선택과목/탐구 과목수/변환표를 확보하지 못하면 해당 환산만 pending/null이다. 미응시·미확인·조회 실패를 0이나 최저등급으로 대체하지 않는다.",
-      "제2외국어 등 아직 API에 입력 경로가 없는 항목을 요구하는 규칙은 명시적으로 보류한다. 다른 과목으로 임의 대체하지 않는다."
+      "제2외국어 등 아직 API에 입력 경로가 없는 항목을 요구하는 규칙은 명시적으로 보류한다. 다른 과목으로 임의 대체하지 않는다.",
+      "탐구 과목·국어/수학 선택과목은 같은 시험 팩에서 검증한 subject_key(공백/NFKC 정규화)로 규칙 조건을 평가하며 원본 프로필 표기를 수정하지 않는다.",
+      "내부 reported_score_sources는 verified_exam_mapping/student_report를 구분한다. 공개 conversion DTO에는 원본 값과 내부 출처를 반환하지 않는다."
     ],
     "score_basis_rules": [
       "같은 학년도·동일 등록 수능 시험 actual_exam은 전체 누적곡선·연도 bridge·대학 분포·지원 정책 없이 공식 환산 규칙만으로 계산한다.",
