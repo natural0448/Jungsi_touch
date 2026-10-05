@@ -26,6 +26,7 @@ class SessionProvider(Protocol):
 
 class EntitlementRepository(Protocol):
     def active_paid(self, subject_id: str, now: datetime) -> bool: ...
+    def active_paid_until(self, subject_id: str, now: datetime) -> datetime | None: ...
 
 
 class PlatformRepository(Protocol):

@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.6.3이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.7.1이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -24,6 +24,16 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 | shortlist.update | PUT /api/v1/reports/{report_id}/shortlist/{offering_id} | selected: boolean; expected_version: positive integer | 없음 | report (shortlist 갱신); backend_platform_contract.dto_schemas.report | True |
 | report.export | GET /api/v1/reports/{report_id}/print | 없음 | 없음 | snapshot; backend_platform_contract.dto_schemas.snapshot | False |
 | statistics.read | GET /api/v1/reports/{report_id}/offerings/{offering_id}/live-statistics | 없음 | 없음 | statistics; backend_platform_contract.dto_schemas.statistics | False |
+| session.read | GET /api/v1/me | 없음 | 없음 | session; backend_platform_contract.dto_schemas.session | False |
+| forecast.capabilities | GET /api/v1/forecast-capabilities | 없음 | 없음 | forecast_capabilities; backend_platform_contract.dto_schemas.forecast_capabilities | False |
+| forecast.list | GET /api/v1/forecast-drafts | 없음 | university_id (선택) | forecast_list; backend_platform_contract.dto_schemas.forecast_list | False |
+| forecast.create | POST /api/v1/offerings/{offering_id}/forecast-drafts | input_id; input_version; policy_id; policy_version | 없음 | forecast_draft; backend_platform_contract.dto_schemas.forecast_draft | True |
+| forecast.read | GET /api/v1/forecast-drafts/{draft_id} | 없음 | 없음 | forecast_draft; backend_platform_contract.dto_schemas.forecast_draft | False |
+| forecast.adjust | POST /api/v1/forecast-drafts/{draft_id}/adjustments | expected_revision; base_result_hash; policy_version; target: forecast_70/acceptance_range/category_ranges; replacement: 승인 정책이 허용한 동일 단위의 명시적 대체값; reason; evidence_refs: 서버 검증 ID 목록 | 없음 | forecast_draft; backend_platform_contract.dto_schemas.forecast_draft | True |
+| forecast.validate | POST /api/v1/forecast-drafts/{draft_id}/validations | expected_revision; base_result_hash; policy_version | 없음 | forecast_draft; backend_platform_contract.dto_schemas.forecast_draft | True |
+| forecast.approve | POST /api/v1/forecast-drafts/{draft_id}/approvals | expected_revision; base_result_hash; policy_version; validation_receipt_hash; reason | 없음 | forecast_draft; backend_platform_contract.dto_schemas.forecast_draft | True |
+| forecast.publish | POST /api/v1/forecast-drafts/{draft_id}/publications | expected_revision; base_result_hash; policy_version; approval_receipt_hash | 없음 | forecast_draft; backend_platform_contract.dto_schemas.forecast_draft | True |
+| forecast.published.read | GET /api/v1/offerings/{offering_id}/forecast | 없음 | 없음 | forecast_public; backend_platform_contract.dto_schemas.forecast_public | False |
 
 모든 HTTP 업무 서비스는 PlatformService.execute이며 FastAPI create_app이 경로를 등록한다. 요청은 operations[].http_contract, 응답은 해당 contract_ref를 따른다. overall.analyze의 HTTP 응답은 persisted report이고 내부 overall 필드만 기존 OverallAnalysisService의 jungsi.overall-analysis/v1 엔진 DTO다. 두 객체를 루트 응답으로 혼동하지 않는다.
 
@@ -103,16 +113,18 @@ format: jungsi.persisted-report/v1
 
 ### assessment
 
-필드: offering_id, status, reason_code, converted_score, converted_percentile, category, advantage, years, versions, eligibility_status, decision_components, decision_evidence, conversion, percentile.
+필드: offering_id, status, reason_code, converted_score, converted_percentile, category, advantage, years, versions, eligibility_status, decision_components, decision_evidence, conversion, percentile, recommendation_reasons.
 
 | 중첩 객체 | 필드 |
 | --- | --- |
 | years | academic_year, offering_id, score_basis, converted_score, status, reason_code |
 | advantage | delta_pp, status, baseline_version |
 | decision_components | base_category, adjusted_category, adopted_category, base_policy_version, adjustment_version |
-| decision_evidence | version, historical_metrics, forecast_70, expected_acceptance_range |
+| decision_evidence | version, historical_metrics, forecast_70, expected_acceptance_range, forecast_release_version, basis_summary, issue_summaries, recommendation_reasons, adjustment_summary, context, policy_version, input_version |
 | conversion | status, reason_code, score_basis, score_scope, converted_score, official_max_score, academic_year, exam_id, rule_version, release_version, table_versions, profile_version, pack_version |
 | percentile | status, reason_code, score_basis, score_scope, academic_year, exam_id, top_percent, inclusive_top_percent, exclusive_top_percent, tie_share_percent, tie_policy, population_id, data_kind, rule_version, curve_version, release_version, source_model_version, profile_version, pack_version, population_scope |
+| recommendation_reasons | code, text, evidence_refs |
+| decision_evidence.context | offering_id, academic_year, exam_id, source_pack_version, catalog_version, rule_id, rule_version, curve_version, analysis_version, score_scale_id, score_scope, bonus_treatment, population_id, comparison_metric, unit, direction, tie_policy |
 
 - 동일 학년도 실제 수능은 독립 승인 환산 포트로 actual_exam을 계산한다. 별도 승인 모평 호환은 mock_exam이며, 다른 학년도 비교는 승인 bridge → 당시 공식 환산식의 year_equated_estimate다.
 - 지원 구간과 환산 유불리는 별도다. 유불리는 같은 연도/시험/전체 모집단의 학생 보정총점 상위 누적과 대학 환산 상위 누적의 차이(pp)다.
@@ -131,14 +143,20 @@ format: jungsi.persisted-report/v1
 - percentile이 ready이면 기존 assessment.converted_percentile은 top_percent와 일치한다. pending인 경우 null과 사유를 보존한다. 기존 승인 보정 경로의 성공 converted_percentile은 같은 의미의 percentile DTO로 노출한다.
 - 관측 도수 observed_counts와 모형 가중치 estimated_weights를 표시 기준에서 구분한다. 모집단과 시험/학년도/규칙/곡선 버전을 함께 보존한다.
 - DEV005 명시적 승인 비교집단의 population_scope를 반환한다. whole_complete와 required_rule_inputs_present를 혼용하지 않고 모집단이 다르면 환산 유불리는 보류한다. 미응시를 최저점으로 치환하지 않는다.
+- 반영 방법 설명은 assessment.recommendation_reasons의 등록 code/text/evidence_refs로 반환한다. conversion에 rule_explanations를 별도로 넣지 않는다.
+- decision_evidence.context/policy_version/input_version은 채택 발표본 기준이며 forecast_public과 전체가 일치할 때만 같은 근거로 합친다.
+- 발표본이 변경되면 이전 학생 판정을 새 기준으로 덮어쓰지 않고 재분석 상태와 사유를 제공한다.
 
 ### candidates
 
-필드: status, reason_code, basic_university_groups, wildcards, pending_offerings, catalog_version.
+필드: status, reason_code, basic_university_groups, wildcards, pending_offerings, catalog_version, outside_offerings, ineligible_offerings.
 
 - 현재 시험의 학년도 모집행을 대상으로 하고 각 assessment.years에는 4개년 비교를 담는다.
 - 기본 그룹은 대학별 offerings 배열이며 각 항목에 모집행과 개별 assessment를 포함한다.
 - 간호/보건/교육 wildcard와 대기 모집행을 별도 배열로 반환한다. 화면의 2:1 배치는 프레젠테이션 담당이다.
+- outside_offerings·ineligible_offerings·pending_offerings는 각각 판단 완료 추천 범위 밖·지원 조건 미충족·판단 보류이며 혼용하지 않는다.
+- status는추천학교수의bool이아니다. outside/ineligible만있는계산완료빈추천은ready이며 실제판단보류자료부재는pending으로구분한다.
+- 일부완료/일부보류이면완료결과와실제pending_offerings를함께반환한다.
 
 ### shortlist
 
@@ -177,6 +195,88 @@ format: jungsi.counseling-snapshot/v1
 - offering은 모집행 기본 DTO다. 개인 환산/지원 판단은 report.analyses로 구분한다.
 - 미발행 자료는 status=pending/offering=null이다. 검증된 카탈로그에 없는 ID는 404다.
 
+### session
+
+format: jungsi.session/v1
+
+필드: format, member_tier, entitlement_expires_at.
+
+- 본인 검증 신원과 서버 활성 이용권만 사용한다. 활성 이용권은 starts_at<=now<expires_at이며 status=active와 정시 서비스 product를 만족한다. 복수 활성 권한은 가장 늦은 만료를 UTC Z로 반환한다.
+- 일반 회원 만료는 null. 인증 또는 저장소 장애는 503이며 일반 회원으로 자동 강등하지 않는다. 사용자 ID·등급·역할·JWT·결제 내역을 요청/응답에 포함하지 않는다.
+
+### forecast_capabilities
+
+format: jungsi.forecast-capabilities/v1
+
+필드: format, capabilities, university_ids.
+
+- 서버 관리 권한 포트에서 editor/approver와 허용 학교 ID를 조회한다. 회원 등급과 독립이다. 미허용 사용자는 빈 capability이며 관리 draft 접근은 403/404로 차단한다.
+
+### forecast_draft
+
+format: jungsi.forecast-draft/v1
+
+필드: format, draft_id, offering_id, revision, status, base_result_hash, policy_version, result, adjustments, validation, approval, audit_events, base_result, context, created_at, updated_at.
+
+| 중첩 객체 | 필드 |
+| --- | --- |
+| context | offering_id, offering_lineage_id, academic_year, university_id, campus, department, track, group, exam_id, source_pack_version, catalog_version, analysis_version, rule_id, rule_version, curve_version, population_id, score_scope, score_scale_id, bonus_treatment, unit |
+| result | forecast_70, acceptance_range, category_ranges |
+| base_result | forecast_70, acceptance_range, category_ranges |
+| result.forecast_70 | status, reason_code, value, unit, definition, version |
+| result.acceptance_range | status, reason_code, lower, upper, unit, definition, policy_version |
+| result.category_ranges | category, lower, upper |
+| base_result.forecast_70 | status, reason_code, value, unit, definition, version |
+| base_result.acceptance_range | status, reason_code, lower, upper, unit, definition, policy_version |
+| base_result.category_ranges | category, lower, upper |
+| adjustments | target, replacement, reason, evidence_refs, actor, at, base_result_hash |
+| adjustments.replacement.forecast_70 | value, unit |
+| adjustments.replacement.acceptance_range | lower, upper, unit |
+| adjustments.replacement.category_ranges | ranges |
+| adjustments.replacement.category_ranges.ranges | category, lower, upper |
+| validation | status, reason_code, checks, validated_revision, result_hash, receipt_hash, at |
+| approval | approved_revision, result_hash, validation_hash, approval_hash, reason, at |
+| audit_events | action, actor, at |
+
+- 허용 학교의 관리 사용자만 조회한다. 기본·조정·채택 결과, immutable revision, 근거/출처/정책/보정 버전, 작성/검증/승인/발행 이력을 보존한다.
+- 검증과 승인 영수증은 정확한 revision과 채택값 hash에 결속한다. 조정은 새 revision을 만들고 이전 검증/승인을 승계하지 않는다.
+- result는 현재 revision의 검증 대상 채택 객체이고 base_result는 조정 전 서버 산출 원본이다. 조정과 검증·승인은 base_result를 수정하지 않는다.
+- 관리 권한과 학교 범위를 확인한 사용자만 직원 actor·관리 영수증 해시를 조회한다. 학생/forecast_public 응답에는 반환하지 않는다.
+- draft의 최상위 응답은 fields 허용목록으로 투영한다. 내부 record 전체·contributors·created_by·events·상위 input_hash/policy_hash를 암묵적으로 반환하지 않는다.
+- 관리 draft.context는 학교·캠퍼스·전형·모집군 등 관리 확인용20필드이며 공개 발표본 context17필드와 같은 객체가 아니다.
+- created_at/updated_at은UTC Z 문자열이다. draft 최상위 input_version은 반환하지 않으며 생성 요청의 검수된 input_version과 공개 발표본의 input_version 계약을 구분한다.
+- result/base_result는 공개용 기준선·합격권·지원 구간의3필드 projection이다. 내부 exact 저장 객체·원자료·계수·trace를 포함하지 않는다.
+- validation/approval의허용목록밖input_hash/policy_hash/actor를암묵적으로반환하지않는다. 감사actor는audit_events와허용조정항목에만포함한다.
+
+### forecast_list
+
+format: jungsi.forecast-list/v1
+
+필드: format, items.
+
+- 허용 학교만 조회한다. 목록은 실제 draft가 없을 때 []이며 저장소 장애는 503이다. 페이지/limit 계약은 후속 대규모 운영 검증에서 확장한다.
+
+### forecast_public
+
+format: jungsi.forecast-public/v1
+
+필드: format, status, reason_code, offering_id, release_version, forecast_70, expected_acceptance_range, category_ranges, basis_summary, issue_summaries, recommendation_reasons, adjustment_summary, context, policy_version, input_version.
+
+| 중첩 객체 | 필드 |
+| --- | --- |
+| context | offering_id, academic_year, exam_id, source_pack_version, catalog_version, rule_id, rule_version, curve_version, analysis_version, score_scale_id, score_scope, bonus_treatment, population_id, comparison_metric, unit, direction, tie_policy |
+| recommendation_reasons | code, text, evidence_refs |
+| issue_summaries | issue_id, title, summary, numeric_effect_applied |
+| adjustment_summary | applied, reason, version |
+| forecast_70 | status, reason_code, value, unit, definition, version |
+| expected_acceptance_range | status, reason_code, lower, upper, unit, definition, policy_version |
+| category_ranges | category, lower, upper |
+
+- 발행된 정확한 모집행/시험/규칙/곡선/정책 버전만 공개한다. 미발행은 pending/null과 사유이다. 내부 원자료·가중치·trace·담당자 ID와 내부 감사 기록은 제외한다.
+- 이 조회는 대학 유료 분석의 근거 조회이며 실제 지원자 확률이나 최저 합격점으로 표시하지 않는다.
+- status는 published|pending이다. pending이면 release_version/context/policy_version/input_version/forecast_70/expected_acceptance_range는 null이다.
+- context는 승인 발표본의 공개 허용 projection이며 학생 decision_evidence와 동일하다. 없는 값을 기본값으로 가공하지 않는다.
+
 ## 시간 표시
 
 서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.
@@ -193,4 +293,4 @@ format: jungsi.counseling-snapshot/v1
 
 [자체 추정분포 개발](자체_추정분포_개발.md)을 따른다. 상태는 integrated_on_develop_generic_engine_and_private_pilot_verified다. 제공된 공식 시험 자료의 주변도수와 응시/선택 조건, 비교 가능한 참고 총점 곡선을 이용해 공동 성적 조합과 가중치를 자체 추정한다. 이는 전체 학생 실제 점수를 복원했다는 의미가 아니며 실제 도수·관측 분포와 구분한다. 전체 학생의 실제 공동 성적 DB 부재는 작업 중단 조건이 아니다. 전체 누백은 overall.status=estimated, 대학 누백은 percentile.data_kind=estimated_weights로 구분한다. 기존 API 권한·시험 결속·애플리케이션 소유 포트와 프레젠테이션 담당을 유지한다.
 
-<!-- jungsi:generated spec_sha256=9c224062aa7b953641e51691a21aadd9b57e3678ca5643bd7ce98d79397b9add -->
+<!-- jungsi:generated spec_sha256=eff2d2e4e8b3554c41454bc972924e1ff35bb18564d37947600f8031a39b7c24 -->

@@ -7,7 +7,8 @@ from fractions import Fraction
 from urllib.parse import urlsplit, parse_qs
 from .authorization import AccessController
 from .overall_analysis import OverallAnalysisService, _identifier
-from .offering_analysis import evaluate_offering, blocked
+from .offering_analysis import evaluate_offering
+from .forecast_assessment import evaluate_release, blocked
 from .university_scoring import UniversityScoringService
 from .university_percentile import UniversityPercentileService
 from .platform_ports import CatalogRelease, PlatformError
@@ -70,7 +71,10 @@ def changes_dto(rows, *, source_timezone=None):
 
 
 class PlatformService:
-    def __init__(self, repository, data, clock):
+    def __init__(self, repository, data, clock, forecast_repository=None, forecast_service=None, session_service=None):
+        self.forecast_repository=forecast_repository
+        self.forecast_service=forecast_service
+        self.session_service=session_service
         self.repository, self.data, self.clock = repository, data, clock
         self.access = AccessController(repository)
         self.overall = OverallAnalysisService(self.access, data)
@@ -79,6 +83,13 @@ class PlatformService:
 
     def execute(self, operation, actor, *, body=None, query=None, params=None, key=None):
         params, query = params or {}, query or {}
+        if operation=='session.read':
+            shape({} if body is None else body);shape(query)
+            if self.session_service is None:raise PlatformError('auth_not_configured',503)
+            return self.session_service.read(actor)
+        if operation.startswith('forecast.'):
+            if self.forecast_service is None:raise PlatformError('forecast_not_configured',503)
+            return self.forecast_service.execute(operation,actor,body=body,query=query,params=params,key=key)
         # Policy lookup precedes shape validation, data access and replay lookup.
         decision = self.access.operation_access(operation, actor, report_id=params.get('report_id'))
         if not decision.allowed: raise PlatformError(decision.status, decision.http_status)
@@ -151,6 +162,20 @@ class PlatformService:
                         assessment=evaluate_offering(offering,profile,updated['overall'],None,conversion=conversion,percentile=percentile)
                         assessment['reason_code']='analysis_release_invalid'
                     else:assessment=evaluate_offering(offering,profile,updated['overall'],bundle,conversion=conversion,percentile=percentile)
+                    if self.forecast_repository is not None:
+                        try:
+                            if self.forecast_service is None:raise PlatformError('forecast_not_configured',503)
+                            published=self.forecast_service.validated_release(offering['offering_id'])
+                            if published is not None:
+                                history=assessment.get('decision_evidence',{}).get('historical_metrics',[])
+                                newer=evaluate_release(offering,profile,conversion,percentile,published,historical_metrics=history)
+                                newer['years']=assessment['years']
+                                newer['advantage']=assessment.get('advantage') if percentile.population_scope=='whole_complete' else None
+                                if newer['advantage'] is not None:
+                                    newer['recommendation_reasons'].extend(deepcopy([r for r in assessment.get('recommendation_reasons',[]) if r['code'] in ('converted_score_position_gain','converted_score_position_loss','converted_score_position_equal')]))
+                                assessment=newer
+                        except PlatformError as error:
+                            assessment.update(status='pending',category='pending',reason_code=error.code)
                     results[offering['offering_id']]=assessment
                 updated['analyses'].update(results)
                 updated['catalog_version']=release.version
@@ -308,16 +333,20 @@ class PlatformService:
 
     @staticmethod
     def candidates(rows,analyses,version):
-        groups={};wildcards=[];pending=[]
+        groups={};wildcards=[];pending=[];outside=[];ineligible=[]
         for row in rows:
             assessment=analyses[row['offering_id']]
+            state=dict(offering_id=row['offering_id'],category=assessment['category'],reason_code=assessment['reason_code'])
+            if assessment['status']=='ineligible':ineligible.append(state);continue
+            if assessment['status']=='ready' and assessment['category']=='outside':outside.append(state);continue
             if assessment['status']!='ready' or assessment['category'] not in ('challenge','core','room'):
                 pending.append(dict(offering_id=row['offering_id'],category=assessment['category'],reason_code=assessment['reason_code']));continue
             item=dict(offering=public(row,OFFERING_FIELDS),assessment=deepcopy(assessment))
             groups.setdefault(row['university_id'],dict(university_id=row['university_id'],university_name=row['university_name'],offerings=[]))['offerings'].append(item)
             if row.get('wildcard_group') in ('nursing','health','education'): wildcards.append(item)
-        return dict(status='ready' if groups else 'pending',reason_code=None if groups else 'approved_candidates_missing',
-                    basic_university_groups=list(groups.values()),wildcards=wildcards,pending_offerings=pending,catalog_version=version)
+        ready=bool(groups) or not pending
+        return dict(status='ready' if ready else 'pending',reason_code=None if ready else 'approved_candidates_missing',
+                    basic_university_groups=list(groups.values()),wildcards=wildcards,pending_offerings=pending,outside_offerings=outside,ineligible_offerings=ineligible,catalog_version=version)
 
     def statistics(self,record,oid):
         identifier(oid)

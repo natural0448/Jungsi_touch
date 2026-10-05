@@ -12,6 +12,7 @@ from ..percentile import PercentileError
 from ..university_conversion import ConversionError, ConversionRelease, check
 from .overall_analysis import _scores, _identifier, OverallAnalysisError
 from .platform_ports import PlatformError, UniversityConversionRelease
+from .rule_explanations import explain_rule
 
 CONTEXT_FIELDS=('academic_year','university_id','campus','department','track','group')
 AREAS=('korean','math','inquiry1','inquiry2')
@@ -38,6 +39,7 @@ class ScoringResult:
     reported_sources: tuple[tuple[str, str], ...] = ()
     context: tuple[tuple[str, object], ...] = ()
     required_input_fields: tuple[str, ...] = ()
+    explanations: tuple[dict, ...] = ()
 
     @property
     def ready(self):return self.score is not None and self.reason_code is None
@@ -136,7 +138,7 @@ class UniversityScoringService:
                            table_versions=tuple(t['version'] for t in rule.data['tables'].values()),values=tuple(values.items()),
                            reported_sources=tuple(reported_sources.items()))
             result=replace(result,required_input_fields=tuple(sorted(rule.data['inputs'])))
-            calculated=rule.calculate(result.internal_profile())
+            calculated=rule.calculate(result.internal_profile(),include_trace=True)
             maximum=calculated['official_max_score']
             check(maximum is None or type(maximum) in (str,int),'conversion_release_invalid','공식 척도 자료형을 확인하세요.')
             check(rule.data.get('score_scale_id') is None or _identifier(rule.data['score_scale_id']),
@@ -152,7 +154,7 @@ class UniversityScoringService:
             check(all(v is None or type(v) in (str,int) for v in context.values()),
                   'conversion_rule_context_mismatch','불변 환산 컨텍스트 자료형을 확인하세요.')
             return replace(result,reason_code=None,score=Fraction(**calculated['exact_score']),
-                           converted_score=calculated['converted_score'],official_max_score=maximum,context=tuple(context.items()))
+                           converted_score=calculated['converted_score'],official_max_score=maximum,context=tuple(context.items()),explanations=explain_rule(rule.data,dict(result.values),calculated.get('internal_trace')))
         except (ConversionError,PercentileError,PlatformError,OverallAnalysisError) as error:
             return replace(result,reason_code=error.code)
         except (KeyError,ValueError,TypeError,AttributeError,OSError):

@@ -180,6 +180,36 @@ def repository_layout_text(spec):
         "\n\n"+fence+"text\ngit branch --show-current\ngit rev-parse HEAD\npython -B scripts/check_project_consistency.py --write\n# 검토한 변경 파일만 경로를 지정해 stage\npython -B scripts/check_project_consistency.py --staged\npython -B scripts/run_committed_tests.py --staged\n"+fence)
 
 
+def contract_body(contract):
+    """Render source-owned contracts without losing nested field semantics."""
+    labels={
+        'requirements':'적용 요구사항', 'placement':'담당 계층과 구현 위치',
+        'verification_status':'검증 상태', 'external_frontend_owner':'외부 프런트 담당',
+        'current_team_scope':'우리 팀 담당 범위', 'dto_shapes':'관리·공개 응답의 허용 필드',
+        'publication_context_contract':'공개 context 허용 필드와 결속 기준',
+        'public_response_binding':'학생 분석과 발표본의 동일 근거 결합 조건',
+        'comparison_contract':'판정 비교 지표·단위·방향·동점 기준',
+        'exact_numeric_invariants':'정확한 판정과 표시 값의 분리',
+        'historical_metric_preservation':'과거 공식 입결 근거 보존',
+        'recommendation_reason_contract':'추천 이유의 종류와 공개 범위',
+        'reason_code_groups':'외부 프런트가 소비할 이유 코드 종류',
+        'candidate_partition_contract':'추천·범위 밖·미충족·보류의 구분',
+        'database_readiness':'DB002 운영 검증 대기 조건',
+        'api_consumption_rules':'DEV006 응답 소비 규칙',
+        'acceptance':'인수검증 기준', 'remaining':'남은 작업', 'scope_excludes':'이번 범위에서 제외',
+    }
+    body='현재 상태: '+contract['code_status']+'\n\n'
+    body+='[작업 항목](../../'+contract['work_item']+')\n\n'
+    for name,value in contract.items():
+        if name in {'format','version','code_status','work_item'}: continue
+        body+='### '+labels.get(name,name)+'\n\n'
+        if isinstance(value,(dict,list)) and not (isinstance(value,list) and all(isinstance(v,str) for v in value)):
+            body+='```json\n'+json.dumps(value,ensure_ascii=False,indent=2)+'\n```\n\n'
+        elif isinstance(value,list):body+='\n'.join('- '+str(item) for item in value)+'\n\n'
+        else:body+=str(value)+'\n\n'
+    return body
+
+
 def generated_files(spec):
     digest=hashlib.sha256(json.dumps(spec,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     def doc(title,body):
@@ -399,7 +429,78 @@ def generated_files(spec):
         files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
     if spec.get("repository_layout"):
         files[spec["current_documents"]["folder_structure"]]=doc("프로젝트 폴더 구조와 작업 위치",repository_layout_text(spec))
+    # Shared analysis-connection/forecast contracts keep documents and routes atomic.
+    for key,title in (("forecast_policy","학과별 예상 기준 산출과 관리"),("presentation_connection","성적 분석 화면과 실제 세션 연결")):
+        contract=spec.get(key+"_contract")
+        if not contract: continue
+        body=contract_body(contract)
+        files[spec["current_documents"][key]]=doc(title,body)
+        for path in (spec["current_documents"]["planning"],spec["current_documents"]["routing"],spec["current_documents"]["architecture"]):
+            files[path]+="\n## "+title+"\n\n"+body
+        frontend[key+"_contract"]=contract
+        backend[key+"_contract"]=contract
+    if spec.get("management_pages"):
+        frontend["management_pages"]=spec["management_pages"]
+        backend["management_pages"]=spec["management_pages"]
+        for path in (spec["current_documents"]["planning"],spec["current_documents"]["routing"]):
+            files[path]+="\n## 관리 화면\n\n"+table(["화면","경로","서버 capability","설명"],[[r["label"],r["path"],", ".join(r["capabilities"]),r["purpose"]] for r in spec["management_pages"]])
+    files["apps/web/route_catalog.json"]=json.dumps(frontend,ensure_ascii=False,indent=2)+"\n"
+    files["src/jungsi_touch/application/route_catalog.json"]=json.dumps(backend,ensure_ascii=False,indent=2)+"\n"
     return {p:t.encode("utf-8") for p,t in files.items()}
+
+def validate_forecast_contract(spec):
+    """Check declared public boundaries without claiming engine/DB acceptance."""
+    errors=[]
+    forecast=spec.get('forecast_policy_contract')
+    if not forecast or 'publication_context_contract' not in forecast:return errors
+    connection=spec.get('presentation_connection_contract',{})
+    schemas=spec.get('backend_platform_contract',{}).get('dto_schemas',{})
+    if connection.get('current_team_scope') is None or connection.get('external_frontend_owner') is None:
+        errors.append('External frontend ownership required')
+    review=spec.get('contract_review',{})
+    if review.get('candidate_only') and (review.get('verification_status')!='verification_pending' or review.get('frontend_source_modification_allowed') is not False):
+        errors.append('Contract candidate status drift')
+    for name in ('forecast_draft','forecast_list','forecast_public'):
+        if connection.get('dto_shapes',{}).get(name)!=schemas.get(name):errors.append('Forecast DTO consumer contract drift: '+name)
+    draft=schemas.get('forecast_draft',{})
+    if 'base_result' not in draft.get('fields',[]):errors.append('Forecast original result required')
+    for nested,field in (('validation','receipt_hash'),('approval','approval_hash')):
+        if field not in draft.get('nested',{}).get(nested,[]):errors.append('Forecast receipt field missing: '+nested+'.'+field)
+    if draft.get('nested',{}).get('audit_events')!=['action','actor','at']:errors.append('Forecast audit projection drift')
+    projection=forecast['publication_context_contract']
+    if connection.get('publication_context_contract')!=projection:errors.append('Forecast public context projection drift')
+    required={'offering_id','academic_year','exam_id','source_pack_version','catalog_version','rule_id','rule_version','curve_version','analysis_version','score_scale_id','score_scope','bonus_treatment','population_id','comparison_metric','unit','direction','tie_policy'}
+    if set(projection.get('fields',[]))!=required:errors.append('Forecast context bindings missing or undocumented')
+    public=schemas.get('forecast_public',{})
+    if public.get('nested',{}).get('context')!=projection.get('fields'):errors.append('Forecast public context field drift')
+    if schemas.get('assessment',{}).get('nested',{}).get('decision_evidence.context')!=projection.get('fields'):errors.append('Assessment forecast context field drift')
+    if not {'context','policy_version','input_version'}<=set(public.get('fields',[])):errors.append('Forecast published versions missing')
+    if not {'context','policy_version','input_version'}<=set(schemas.get('assessment',{}).get('nested',{}).get('decision_evidence',[])):errors.append('Assessment forecast versions missing')
+    denied=set(projection.get('private_fields_excluded',[]))
+    if denied & set(public.get('fields',[])) or denied & set(projection.get('fields',[])):errors.append('Private forecast field in public projection')
+    if connection.get('public_response_binding')!=forecast.get('public_response_binding') or forecast.get('public_response_binding',{}).get('same_context_projection') is not True:
+        errors.append('Forecast response adoption binding drift')
+    exact=forecast.get('exact_numeric_invariants',{})
+    if exact.get('comparison_source')!='internal_exact_values' or exact.get('display_strings_are_comparison_inputs') is not False:
+        errors.append('Forecast exact comparison invariant drift')
+    comparison=forecast.get('comparison_contract',{})
+    if comparison.get('comparison_metric_values')!=['converted_score','university_top_percent'] or comparison.get('total_overall_is_allowed_comparator') is not False:
+        errors.append('Forecast comparison metric drift')
+    for metric,direction,tie in [('converted_score','higher_is_better',None),('university_top_percent','lower_is_better','include_equal')]:
+        policy=comparison.get(metric,{})
+        if policy.get('direction')!=direction or 'tie_policy' not in policy or policy['tie_policy']!=tie:errors.append('Forecast comparison semantics drift: '+metric)
+    groups=forecast.get('recommendation_reason_contract',{}).get('groups',{})
+    if set(groups)!={'rule_application','support_assessment','conversion_advantage'} or connection.get('reason_code_groups')!=groups:
+        errors.append('Forecast reason category drift')
+    partition=forecast.get('candidate_partition_contract',{})
+    for name,category in [('outside_offerings','outside'),('ineligible_offerings','ineligible'),('pending_offerings','pending')]:
+        if partition.get(name,{}).get('category')!=category:errors.append('Forecast candidate partition drift: '+name)
+    if not {'outside_offerings','ineligible_offerings','pending_offerings'}<=set(schemas.get('candidates',{}).get('fields',[])):errors.append('Candidate classification fields missing')
+    readiness=forecast.get('database_readiness',{})
+    if readiness.get('migration')!='database/migrations/002_forecast_policy.sql' or ((review.get('candidate_only') or forecast.get('verification_status')=='code_verified_live_NOT_RUN') and (readiness.get('status')!='NOT_RUN' or readiness.get('production_ready') is not False)):
+        errors.append('Forecast DB readiness evidence drift')
+    return errors
+
 
 def validate_spec(spec):
     errors=[]
@@ -411,15 +512,25 @@ def validate_spec(spec):
     if len({o["id"] for o in ops})!=len(ops):errors.append("Duplicate operation ID")
     if len({(o["method"],o["path"]) for o in ops})!=len(ops):errors.append("Duplicate API method/path")
     operation_ids={o["id"] for o in ops}
-    for row in pages+ops+spec["implementation"]:
+    for row in pages+spec.get("management_pages",[])+ops+spec["implementation"]:
         if not set(row["requirements"])<=requirements:errors.append("Unknown requirement reference")
-    for row in pages:
+    for row in pages+spec.get("management_pages",[]):
         if not set(row["operations"])<=operation_ids:errors.append("Unknown page operation")
     if len(pages)>=4:
         if pages[0]["member_tiers"]!=["standard","paid"]:errors.append("Page1 member policy drift")
         if pages[2]["member_tiers"]!=["paid"] or pages[3]["member_tiers"]!=["paid"]:errors.append("Paid page policy drift")
         if pages[2]["score_required_to_browse"]:errors.append("Paid catalog must allow browsing without scores")
         if pages[3].get("desktop_columns")!=[2,1]:errors.append("Page4 two-to-one layout drift")
+    management=spec.get("management_pages",[])
+    if len({p["path"] for p in pages+management})!=len(pages+management): errors.append("Duplicate management page path")
+    for row in management:
+        if not row.get("capabilities") or not set(row["capabilities"])<={"editor","approver"}: errors.append("Management capability required")
+    for row in ops:
+        if row["id"].startswith("forecast.") and row["method"]=="POST" and not row["http_contract"]["idempotency_key_required"]:
+            errors.append("Forecast writes require idempotency")
+        if row["id"] in {"forecast.approve","forecast.publish"} and row.get("operator_capabilities")!=["approver"]:
+            errors.append("Forecast approval capability drift")
+        if row["id"]=="forecast.published.read" and row["member_tiers"]!=["paid"]: errors.append("Forecast public analysis is paid")
     for row in ops:
         if not row["member_tiers"] or not set(row["member_tiers"])<={"standard","paid"}:errors.append("Invalid member tiers")
         if row["confirmed_score_profile"] and not row["report_owner"]:errors.append("Confirmed analysis needs report ownership")
@@ -453,6 +564,7 @@ def validate_spec(spec):
         errors.append("Branch policy drift")
     from check_branch_policy import validate_governance
     errors.extend(validate_governance(spec))
+    errors.extend(validate_forecast_contract(spec))
     return errors
 
 def protected_path(path,shared_tools):
