@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.7.1",
-  "source_sha256": "cd12da7e818c6407bbb273259768c0587cae81b900ebe9b3df2cc1e142678ef0",
+  "source_sha256": "a5c7912519aff970f85141133e2afd69e96a162a9c603aa1304a8c05afc2cadb",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1960,7 +1960,7 @@
       "JWKS": "readonly_HTTP200_ES256",
       "server_secret": "REST_metadata_HTTP200_only_not_admin_account_acceptance",
       "private_schema_API": "readonly_request_rejected_401_406_PGRST106",
-      "actual_login": "NOT_RUN_missing_test_access_token",
+      "actual_login": "NOT_RUN_missing_verified_test_user_login_JWT",
       "DATABASE_URL": "DEFERRED_user_will_supply_later",
       "Drive_settings": "MISSING",
       "migration_002": "NOT_APPLIED",
@@ -1973,7 +1973,8 @@
       "selection": "not_selected",
       "actual_connection_values": "private_only_never_common_Git",
       "existing_SSR_OpenNext_rewrite": "external_reference_only_not_22_API_or_entitlement_acceptance",
-      "actual_DB_and_test_user_validation": "DEFERRED_until_private_settings_available"
+      "actual_DB_and_test_user_validation": "DEFERRED_until_private_settings_available",
+      "profile_condition_read": "readonly_metadata_admin_active_conditions_confirmed_not_actual_login_JWT_acceptance"
     },
     "historical_DEV002_verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.\n\n기획팀 검토 후 [PR #8](https://github.com/natural0448/Jungsi_touch/pull/8)을 develop 03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced에 병합했다. 검토한 기능 커밋 c5376f0d8674cf82add0959abec385682f14cd4f의 [GitHub CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288)에서 합성 테스트 228개와 문서·코드 참조·계층·비공개 데이터 제외 검사가 통과했다. 실제 Supabase·Drive 연결과 원자료/모형 검수는 설정 대기이며 이 통과에 포함되지 않는다."
   },

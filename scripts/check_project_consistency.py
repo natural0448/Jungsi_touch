@@ -164,6 +164,23 @@ def deletion_scope_text(spec):
         table(['정확한 경로','mode','고정 Git blob','원본 바이트 SHA256'],[[r['path'],r['mode'],r['blob'],r['sha256']] for r in record['files']])+'\n\n출발 브랜치: '+record['origin_branch']+'; 출발 커밋: '+record['source_commit']+'; 사용자 메시지: '+record['user_evidence']['message_id']+'; 요청서 SHA256: '+record['source_request_sha256']+'. 원본과 이전 버전은 보존한다. 최초 삭제와 승인된 삭제의 부모 병합 승계를 구분하고 다른 경로·수정/복원 후 재사용·병렬 삭제 origin의 재소비·과거 소급·숨긴 sideparent·ref 삭제·force를 거절한다. 동일한 승인 삭제 origin을 develop/main으로 운반하는 정상 병합과 새로운 삭제 사건은 구분한다.')
 
 
+def common_tools_acceptance_text(spec):
+    receipt=spec.get('contract_review',{}).get('common_tools_acceptance')
+    if not receipt:return ''
+    checks=receipt['normal_commit_push_hooks'];ci=receipt['exact_HEAD_CI']
+    front=spec['workflow']['branch_governance']['remote_inventory']['latest_observation']
+    return ('\n\n## 공통 도구의 확인된 이전 인수 기준\n\n'+
+        table(['범위','확인한 증거'],[
+            ['공통 Git/CI 검사·명세·생성 문서',receipt['commit']+'; tree '+receipt['tree']],
+            ['정상 commit/push 훅',str(checks['tests_run'])+'건 PASS; 실패 '+str(checks['failures'])+'·오류 '+str(checks['errors'])+'·건너뜀 '+str(checks['skipped'])],
+            ['정확한 HEAD GitHub CI','[project-consistency]('+ci['url']+'): '+ci['conclusion']],
+            ['서비스·DB 역사 기준',receipt['service_DB_baseline']],
+            ['최신 외부 프런트 관측',front['frontend']+'; sameRelease blob '+front['sameRelease_blob']+'는 e12 대비 동일'],
+            ['운영/외부 인수',receipt['frontend_acceptance']+'; DB .env 추후; 실제 삭제 NOT_RUN; main '+receipt['main_release_state']]
+        ])+'\n\n'+receipt['publication_rule']+' '+receipt['scope']+
+        ' 외부 버전 release/policy/input 양쪽 값의 유효한 비어 있지 않은 문자열 검증은 후속이며 실제 프런트 인수는 pending이다. 최소 profile 조건 읽기와 실제 로그인 JWT 검증 NOT_RUN을 구분한다. 실제 자료·모형 운영 채택/등록 승인도 유지 상태이며 완료로 표시하지 않는다.')
+
+
 def repository_layout_text(spec):
     """Render the shared layout and private locations from the common specification."""
     layout=spec["repository_layout"]
@@ -466,6 +483,12 @@ def generated_files(spec):
         item=dict(metadata)
         item['scope']=spec[item['contract_ref']]
         files[path]=json.dumps(item,ensure_ascii=False,indent=2)+'\n'
+    acceptance=common_tools_acceptance_text(spec)
+    if acceptance:
+        marker='\n\n<!-- jungsi:generated'
+        for path in files:
+            if path.endswith('.md'):
+                files[path]=files[path].replace(marker,acceptance+marker)
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):

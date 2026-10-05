@@ -32,4 +32,17 @@ Google Drive API 고정 폴더·파일 버전/해시·승인 읽기와 별도 �
 - 비공개 발행 명부/승인 자료 값과 형식 호환 검수
 - 실제 읽기/쓰기·재시도/충돌·감사와 사용자 접근 검수
 
-<!-- jungsi:generated spec_sha256=cd12da7e818c6407bbb273259768c0587cae81b900ebe9b3df2cc1e142678ef0 -->
+## 공통 도구의 확인된 이전 인수 기준
+
+| 범위 | 확인한 증거 |
+| --- | --- |
+| 공통 Git/CI 검사·명세·생성 문서 | b66c2274f0b0a27dc174555adde181cd16c68188; tree bd23bf5bd1ec0a05fed7c7f8db7db39621bf2748 |
+| 정상 commit/push 훅 | 530건 PASS; 실패 0·오류 0·건너뜀 0 |
+| 정확한 HEAD GitHub CI | [project-consistency](https://github.com/natural0448/Jungsi_touch/actions/runs/37324278331/job/111810898785): success |
+| 서비스·DB 역사 기준 | adc684/74fd 구현과 develop947 통합의 493 PASS는 별도의 역사 인수 증거로 유지한다. |
+| 최신 외부 프런트 관측 | 67644ef980e5d0e41afbe6dcc6d419a060979cf8; sameRelease blob efb40ce76682dbcea74c6c3716c090303d1c108d는 e12 대비 동일 |
+| 운영/외부 인수 | verification_pending; DB .env 추후; 실제 삭제 NOT_RUN; main not_ready |
+
+확인된 이전 baseline b66까지만 증거로 명시한다. 후속 문서 커밋 자신의 미래 SHA나 미실행 CI 성공을 기록하지 않는다. 공통 Git/CI 검사·명세·생성 문서 인수 및 전체 합성 회귀. 운영 DB·외부 프런트·실제 데이터·모형 운영 승인을 뜻하지 않는다. 외부 버전 release/policy/input 양쪽 값의 유효한 비어 있지 않은 문자열 검증은 후속이며 실제 프런트 인수는 pending이다. 최소 profile 조건 읽기와 실제 로그인 JWT 검증 NOT_RUN을 구분한다. 실제 자료·모형 운영 채택/등록 승인도 유지 상태이며 완료로 표시하지 않는다.
+
+<!-- jungsi:generated spec_sha256=a5c7912519aff970f85141133e2afd69e96a162a9c603aa1304a8c05afc2cadb -->
