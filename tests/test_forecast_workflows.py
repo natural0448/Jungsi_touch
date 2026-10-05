@@ -73,3 +73,42 @@ class ForecastWorkflowTests(unittest.TestCase):
         record=self.validate(self.create())
         with self.assertRaises(PlatformError):self.call('forecast.approve',record,self.approver,dict(validation_receipt_hash='WRONG',reason='검토'))
         with self.assertRaises(PlatformError):self.call('forecast.validate',record,extra=dict(policy_version='WRONG'))
+
+    def published(self):
+        r=self.approve(self.validate(self.create()))
+        return self.call('forecast.publish',r,self.approver,dict(approval_receipt_hash=r['approval']['approval_hash']))
+
+    def test_management_projection_does_not_copy_private_persistence_fields(self):
+        record=self.create();stored=self.repo.get(record['draft_id'])
+        stored['secret']='SYNTHETIC-private';stored['context']['secret']='SYNTHETIC-private';stored['result']['secret']='SYNTHETIC-private';stored['validation']=dict(status='failed',receipt_hash='a'*64,secret='SYNTHETIC-private')
+        self.repo.drafts[record['draft_id']]=stored
+        dto=self.service.execute('forecast.read',self.editor,params=dict(draft_id=record['draft_id']))
+        import json
+        self.assertNotIn('SYNTHETIC-private',json.dumps(dto));self.assertNotIn('exact_values',json.dumps(dto));self.assertNotIn('input_hash',dto);self.assertNotIn('policy_hash',dto)
+        self.assertEqual(set(dto['audit_events'][0]),{'action','actor','at'})
+        self.assertEqual(dto['result'],record['result']);self.assertEqual(dto['base_result'],record['base_result'])
+
+    def test_published_release_requires_entire_current_context_and_pinned_artifacts(self):
+        self.published()
+        for mutate in (lambda:setattr(self.inputs,'current_context',lambda oid:dict(self.inputs.data['context'],catalog_version='NEW')),lambda:self.inputs.data.update(status='pending'),lambda:self.inputs.rules.update(status='pending')):
+            previous_context=self.inputs.current_context;previous_data=__import__('copy').deepcopy(self.inputs.data);previous_policy=__import__('copy').deepcopy(self.inputs.rules)
+            mutate()
+            with self.assertRaises(PlatformError) as e:self.service.validated_release(CONTEXT['offering_id'])
+            self.assertEqual(e.exception.code,'forecast_base_version_conflict')
+            self.inputs.current_context=previous_context;self.inputs.data=previous_data;self.inputs.rules=previous_policy
+
+    def test_adjustment_retains_exact_replacement_and_formats_display_once(self):
+        record=self.create();body=dict(target='forecast_70',replacement=dict(value='56.004',unit='점'),reason='합성 검토',evidence_refs=['SYNTHETIC-manual'])
+        updated=self.call('forecast.adjust',record,extra=body)
+        self.assertEqual(updated['result']['forecast_70']['value'],'56')
+        self.assertEqual(self.repo.get(record['draft_id'])['result']['exact_values']['forecast_70'],'14001/250')
+        self.assertEqual(self.validate(updated)['validation']['status'],'passed')
+
+    def test_current_input_and_policy_versions_are_explicit_context_requirements(self):
+        for key in ('input_version','policy_version'):
+            with self.subTest(key=key):
+                previous=__import__('copy').deepcopy(self.inputs.data['context'])
+                self.inputs.data['context'].pop(key);self.inputs.rules['context']=__import__('copy').deepcopy(self.inputs.data['context'])
+                with self.assertRaises(PlatformError) as error:self.create()
+                self.assertEqual(error.exception.code,'forecast_base_version_conflict')
+                self.inputs.data['context']=previous;self.inputs.rules['context']=__import__('copy').deepcopy(previous)

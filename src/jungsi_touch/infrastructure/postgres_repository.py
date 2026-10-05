@@ -8,6 +8,7 @@ from datetime import date, datetime
 from ..application.platform_ports import PlatformError
 from ..application.ports import ReportAccessRecord
 from ..application.time_contract import UTC, utc_instant, utc_text
+from .forecast_schema import probe_forecast
 
 EXPECTED_COLUMN_TYPES = {('profiles','created_at'):'timestamptz',('reports','updated_at'):'timestamptz',
     ('report_revisions','created_at'):'timestamptz',('requests','created_at'):'timestamptz',
@@ -144,8 +145,9 @@ class PostgresRepository:
             migration=bool(c.execute("SELECT EXISTS(SELECT 1 FROM jungsi_backend.schema_versions WHERE version='001_pre_data_platform')").fetchone()[0]) if schema else False
             actual={(row[0],row[1]):row[2] for row in c.execute('SELECT table_name,column_name,udt_name FROM information_schema.columns WHERE table_schema=%s',('jungsi_backend',)).fetchall()} if schema else {}
             mismatches={'.'.join(key):actual.get(key,'missing') for key,expected in EXPECTED_COLUMN_TYPES.items() if actual.get(key)!=expected}
-            verified=zone.upper()=='UTC' and baseline.upper()=='UTC' and utc_instant(returned[0])==instant and returned[1]==day and schema and migration and not mismatches
+            forecast=probe_forecast(c) if schema else dict(status='failed',migration_002=False,tables_present=False)
+            verified=zone.upper()=='UTC' and baseline.upper()=='UTC' and utc_instant(returned[0])==instant and returned[1]==day and schema and migration and not mismatches and forecast['status']=='verified'
             return dict(status='verified' if verified else 'failed',default_timezone=baseline,
                         session_timezone=zone,instant_round_trip=utc_instant(returned[0])==instant,date_round_trip=returned[1]==day,
                         storage_schema='verified' if schema and migration else 'missing_or_unversioned',
-                        timestamp_date_types='verified' if not mismatches else 'mismatched',type_mismatches=mismatches)
+                        timestamp_date_types='verified' if not mismatches else 'mismatched',type_mismatches=mismatches,forecast_schema=forecast)

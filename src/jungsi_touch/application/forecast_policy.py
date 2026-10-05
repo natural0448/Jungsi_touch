@@ -1,7 +1,8 @@
 """Forecast lifecycle with server authority, CAS and pinned approvals."""
 from copy import deepcopy
 from uuid import uuid4
-from ..forecasting import digest,generate,require,number,validate_result,validate_ranges,validate_policy_result
+from ..forecasting import digest,generate,require,number,validate_result,validate_ranges,validate_policy_result,policy_decimal
+from .forecast_dto import draft_dto,result_dto,public_context
 from .platform_ports import PlatformError
 from .platform import identifier,shape,revision
 from .time_contract import utc_text
@@ -32,11 +33,10 @@ class ForecastPolicyService:
             shape(body);shape(query);return dict(format='jungsi.forecast-capabilities/v1',capabilities=[role for role,field in [('editor','edit'),('approver','approve')] if caps.get(field) is True],university_ids=caps.get('university_ids',[]))
         if operation=='forecast.published.read':
             shape(body);shape(query);require(actor.paid_active,'paid_required',403)
-            release=self.repository.published(identifier(params.get('offering_id')))
+            release=self.validated_release(identifier(params.get('offering_id')))
             if release is None:return self.pending(params['offering_id'],'forecast_release_missing')
-            require(release['context']==self.inputs.current_context(params['offering_id']),'forecast_base_version_conflict',409)
-            pinned=deepcopy(release);claimed=pinned.pop('release_hash',None)
-            require(claimed==digest(pinned) and release.get('approval_hash') and release.get('validation_hash'),'forecast_release_invalid',503)
+            try:public_context(release['context'])
+            except PlatformError as error:return self.pending(params['offering_id'],error.code)
             return self.public(release)
         if operation=='forecast.list':
             shape(body);shape(query,(),('university_id',))
@@ -52,6 +52,7 @@ class ForecastPolicyService:
             oid=identifier(params.get('offering_id'));inputs=self.inputs.inputs(oid,identifier(body['input_id']),identifier(body['input_version']));policy=self.inputs.policy(identifier(body['policy_id']),identifier(body['policy_version']))
             require(inputs.get('version')==body['input_version'] and policy.get('version')==body['policy_version'],'forecast_base_version_conflict',409)
             result=generate(inputs,policy);require(result['context']['offering_id']==oid,'forecast_offering_mismatch')
+            require(result['context'].get('input_version')==body['input_version'] and result['context'].get('policy_version')==body['policy_version'],'forecast_base_version_conflict',409)
             require(result['context']==self.inputs.current_context(oid),'forecast_base_version_conflict',409)
             record=dict(draft_id='forecast-'+uuid4().hex,revision=1,status='draft',context=result['context'],input_id=body['input_id'],policy_id=body['policy_id'],input_version=inputs['version'],input_hash=digest(inputs),policy_version=policy['version'],policy_hash=digest(policy),base_result=deepcopy(result),base_result_hash=digest(result),result=result,contributors=[actor.subject_id],adjustments=[],validation=None,approval=None,created_at=now,updated_at=now,created_by=actor.subject_id,events=[dict(action='create',actor=actor.subject_id,at=now)])
             self.authority(actor,operation,record)
@@ -78,13 +79,20 @@ class ForecastPolicyService:
                 require(all(ref in inputs.get('approved_evidence_refs',[]) for ref in body['evidence_refs']),'forecast_adjustment_evidence_unapproved')
                 replacement=deepcopy(body.get('replacement'));require(isinstance(replacement,dict),'forecast_adjustment_invalid')
                 if target=='category_ranges':
-                    shape(replacement,('ranges',));validate_ranges(replacement['ranges']);record['result'][target]=replacement['ranges']
+                    shape(replacement,('ranges',));validate_ranges(replacement['ranges'])
+                    for row in replacement['ranges']:shape(row,('category','lower','upper'))
+                    record['result']['exact_values'][target]=deepcopy(replacement['ranges'])
+                    spec=policy['acceptance_range']
+                    record['result'][target]=[dict(category=r['category'],lower=policy_decimal(number(r['lower']),spec),upper=policy_decimal(number(r['upper']),spec)) for r in replacement['ranges']]
                 else:
                     require(target in ('forecast_70','acceptance_range'),'forecast_adjustment_invalid')
                     shape(replacement,('value','unit') if target=='forecast_70' else ('lower','upper','unit'))
                     require(replacement['unit']==record['context']['unit'],'forecast_adjustment_unit_mismatch')
                     for field in ('value',) if target=='forecast_70' else ('lower','upper'):number(replacement[field])
-                    result=record['result'][target];require(result['status']=='ready','forecast_adjustment_base_pending',409);result.update(replacement)
+                    result=record['result'][target];require(result['status']=='ready','forecast_adjustment_base_pending',409)
+                    record['result']['exact_values'][target]=str(number(replacement['value'])) if target=='forecast_70' else {f:str(number(replacement[f])) for f in ('lower','upper')}
+                    value_fields=('value',) if target=='forecast_70' else ('lower','upper')
+                    result.update({f:policy_decimal(number(replacement[f]),policy[target]) for f in value_fields})
                 validate_result(record['result']);record['contributors']=sorted(set(record['contributors']+[actor.subject_id]))
                 record['adjustments'].append(dict(target=target,replacement=replacement,reason=body['reason'],evidence_refs=body['evidence_refs'],actor=actor.subject_id,at=now,base_result_hash=record['base_result_hash']))
                 record.update(status='draft',validation=None,approval=None)
@@ -104,26 +112,40 @@ class ForecastPolicyService:
             elif operation=='forecast.publish':
                 approval=record.get('approval');require(record['status']=='approved' and approval,'forecast_approval_required',409)
                 require(body.get('approval_receipt_hash')==approval['approval_hash'] and approval['approved_revision']==record['revision'] and approval['result_hash']==digest(record['result']),'forecast_approval_stale',409)
-                release=dict(release_id='release-'+uuid4().hex,context=record['context'],result=deepcopy(record['result']),draft_id=record['draft_id'],draft_revision=record['revision'],base_result=deepcopy(record['base_result']),eligibility_policy=deepcopy(policy.get('eligibility_policy')),policy_version=record['policy_version'],input_version=record['input_version'],validation_hash=record['validation']['receipt_hash'],approval_hash=approval['approval_hash'],adjustments=deepcopy(record['adjustments']),published_at=now,published_by=actor.subject_id)
+                release=dict(release_id='release-'+uuid4().hex,context=record['context'],result=deepcopy(record['result']),draft_id=record['draft_id'],draft_revision=record['revision'],base_result=deepcopy(record['base_result']),eligibility_policy=deepcopy(policy.get('eligibility_policy')),policy_id=record['policy_id'],policy_version=record['policy_version'],policy_hash=record['policy_hash'],input_id=record['input_id'],input_version=record['input_version'],input_hash=record['input_hash'],validation_hash=record['validation']['receipt_hash'],approval_hash=approval['approval_hash'],adjustments=deepcopy(record['adjustments']),published_at=now,published_by=actor.subject_id)
                 release['release_hash']=digest(release);store.publish(release);record.update(status='published',release_id=release['release_id'])
             else:raise PlatformError('route_not_found',404)
             record['revision']+=1;record['updated_at']=now;record['events'].append(dict(action=operation,actor=actor.subject_id,at=now))
         store.put(record);return self.draft_dto(record)
     @staticmethod
     def draft_dto(record):
-        result=deepcopy(record)
-        result.update(format='jungsi.forecast-draft/v1',offering_id=record['context']['offering_id'],audit_events=deepcopy(record['events']))
-        return result
+        return draft_dto(record)
+
+    def validated_release(self,offering_id):
+        release=self.repository.published(offering_id)
+        if release is None:return None
+        try:
+            pinned=deepcopy(release);claimed=pinned.pop('release_hash',None)
+            require(claimed==digest(pinned) and release.get('approval_hash') and release.get('validation_hash'),'forecast_release_invalid',503)
+            require(release['context']==self.inputs.current_context(offering_id),'forecast_base_version_conflict',409)
+            require(release['context'].get('input_version')==release['input_version'] and release['context'].get('policy_version')==release['policy_version'],'forecast_base_version_conflict',409)
+            inputs=self.inputs.inputs(offering_id,release['input_id'],release['input_version'])
+            policy=self.inputs.policy(release['policy_id'],release['policy_version'])
+            require(inputs.get('version')==release['input_version'] and policy.get('version')==release['policy_version'] and digest(inputs)==release['input_hash'] and digest(policy)==release['policy_hash'],'forecast_base_version_conflict',409)
+            validate_policy_result(release['result'],policy)
+        except PlatformError:raise
+        except (KeyError,TypeError,ValueError):raise PlatformError('forecast_release_invalid',503)
+        return release
 
     @staticmethod
     def pending(offering_id,reason):
-        return dict(format='jungsi.forecast-public/v1',status='pending',reason_code=reason,offering_id=offering_id,release_version=None,forecast_70=None,expected_acceptance_range=None,category_ranges=[],basis_summary=None,issue_summaries=[],recommendation_reasons=[],adjustment_summary=dict(applied=False,reason=None,version=None))
+        return dict(format='jungsi.forecast-public/v1',status='pending',reason_code=reason,offering_id=offering_id,release_version=None,context=None,policy_version=None,input_version=None,forecast_70=None,expected_acceptance_range=None,category_ranges=[],basis_summary=None,issue_summaries=[],recommendation_reasons=[],adjustment_summary=dict(applied=False,reason=None,version=None))
 
     @staticmethod
     def public(release):
-        result=deepcopy(release['result'])
-        basis=result['basis_summary']
+        private=release['result'];result=result_dto(private)
+        basis=private['basis_summary']
         reasons=[dict(code='approved_'+r['target'],text='승인된 '+r['target']+' 비교자료와 정책에 따라 기준을 산출했습니다.',evidence_refs=r['source_refs']) for r in basis]
-        issues=[dict(issue_id=i['issue_id'],title=i.get('title',i['issue_id']),summary=i['explanation'],numeric_effect_applied=False) for i in result['issue_summaries']]
+        issues=[dict(issue_id=i['issue_id'],title=i.get('title',i['issue_id']),summary=i['explanation'],numeric_effect_applied=False) for i in private['issue_summaries']]
         adjustments=release['adjustments']
-        return dict(format='jungsi.forecast-public/v1',status='published',reason_code=None,offering_id=release['context']['offering_id'],release_version=release['release_id'],forecast_70=result['forecast_70'],expected_acceptance_range=result['acceptance_range'],category_ranges=result['category_ranges'],basis_summary=' / '.join(r['target']+': 승인된 비교자료 및 정책 적용' for r in basis) or None,issue_summaries=issues,recommendation_reasons=reasons,adjustment_summary=dict(applied=bool(adjustments),reason=' / '.join(a['reason'] for a in adjustments) or None,version=release['release_id'] if adjustments else None))
+        return dict(format='jungsi.forecast-public/v1',status='published',reason_code=None,offering_id=release['context']['offering_id'],release_version=release['release_id'],context=public_context(release['context']),policy_version=release['policy_version'],input_version=release['input_version'],forecast_70=result['forecast_70'],expected_acceptance_range=result['acceptance_range'],category_ranges=result['category_ranges'],basis_summary=' / '.join(r['target']+': 승인된 비교자료 및 정책 적용' for r in basis) or None,issue_summaries=issues,recommendation_reasons=reasons,adjustment_summary=dict(applied=bool(adjustments),reason=' / '.join(a['reason'] for a in adjustments) or None,version=release['release_id'] if adjustments else None))

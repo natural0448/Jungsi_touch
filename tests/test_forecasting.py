@@ -44,6 +44,7 @@ class ForecastCalculationTests(unittest.TestCase):
         self.assertEqual(generate(inputs,policy)['forecast_70']['reason_code'],'forecast_trend_limit_exceeded')
     def test_lower_is_better_needs_reversed_categories(self):
         inputs,policy=fixture();spec=policy['acceptance_range'];spec['direction']='lower_is_better'
+        inputs['context']['direction']='lower_is_better';policy['context']=deepcopy(inputs['context'])
         result=generate(inputs,policy);self.assertEqual(result['acceptance_range']['reason_code'],'forecast_category_direction_mismatch')
         spec['category_offsets'][0]['category']='room';spec['category_offsets'][2]['category']='challenge'
         self.assertEqual(generate(inputs,policy)['acceptance_range']['status'],'ready')

@@ -87,7 +87,7 @@ def generate(inputs,policy):
     required=('offering_id','offering_lineage_id','academic_year','exam_id','rule_version','curve_version','analysis_version','score_scale_id','population_id','unit')
     require(all(k in context and context[k] is not None for k in required) and context['academic_year']==2027,'forecast_context_invalid')
     require(policy.get('context')==context,'forecast_policy_context_mismatch')
-    result=dict(context=deepcopy(context),forecast_70=dict(status='pending',reason_code='comparable_history_missing',value=None),acceptance_range=dict(status='pending',reason_code='acceptance_evidence_missing',lower=None,upper=None),category_ranges=[],issue_summaries=[],basis_summary=[])
+    result=dict(context=deepcopy(context),forecast_70=dict(status='pending',reason_code='comparable_history_missing',value=None),acceptance_range=dict(status='pending',reason_code='acceptance_evidence_missing',lower=None,upper=None),category_ranges=[],issue_summaries=[],basis_summary=[],exact_values=dict(forecast_70=None,acceptance_range=None,category_ranges=[]),comparison_basis=None)
     for target,history_key in (('forecast_70','history_70'),('acceptance_range','acceptance_history')):
         spec=policy.get(target)
         if spec is None:continue
@@ -97,6 +97,7 @@ def generate(inputs,policy):
             center=project(rows,spec,context['academic_year'])
             if target=='forecast_70':
                 result[target]=dict(status='ready',reason_code=None,value=policy_decimal(center,spec),unit=context['unit'],definition=spec['metric']['definition'],version=policy['version'])
+                result['exact_values'][target]=str(center)
             else:
                 require(spec.get('range_evidence_ref') and spec.get('category_evidence_ref'),'acceptance_evidence_missing')
                 low=center-number(spec['lower_width']);high=center+number(spec['upper_width'])
@@ -105,15 +106,21 @@ def generate(inputs,policy):
                 ranges=[]
                 for row in spec.get('category_offsets',[]):
                     require(row.get('category') in ('challenge','core','room','outside'),'forecast_category_invalid')
-                    ranges.append(dict(category=row['category'],lower=policy_decimal(center+number(row['lower']),spec),upper=policy_decimal(center+number(row['upper']),spec)))
-                validate_ranges(ranges);validate_direction(ranges,spec['direction']);result['category_ranges']=ranges
+                    ranges.append(dict(category=row['category'],lower=str(center+number(row['lower'])),upper=str(center+number(row['upper']))))
+                validate_ranges(ranges);validate_direction(ranges,spec['direction'])
+                result['exact_values'][target]=dict(lower=str(low),upper=str(high))
+                result['exact_values']['category_ranges']=ranges
+                result['category_ranges']=[dict(category=r['category'],lower=policy_decimal(number(r['lower']),spec),upper=policy_decimal(number(r['upper']),spec)) for r in ranges]
+                require(all(k in context for k in ('comparison_metric','direction','tie_policy')),'forecast_comparison_basis_missing')
+                require(spec.get('comparison_metric')==context['comparison_metric'] and spec['direction']==context['direction'] and spec.get('tie_policy')==context['tie_policy'],'forecast_comparison_basis_mismatch')
+                result['comparison_basis']=dict(metric=context['comparison_metric'],unit=context['unit'],score_scale_id=context['score_scale_id'],population_id=context['population_id'],direction=context['direction'],tie_policy=context['tie_policy'])
             result['basis_summary'].append(dict(target=target,method=spec['method'],policy_version=policy['version'],source_refs=[r['source_ref'] for r in rows]))
         except (KeyError,TypeError):raise PlatformError('forecast_policy_invalid')
         except PlatformError as error:
             result[target].update(status='pending',reason_code=error.code)
             if target=='forecast_70':result[target]['value']=None
             else:
-                result[target].update(lower=None,upper=None);result['category_ranges']=[]
+                result[target].update(lower=None,upper=None);result['category_ranges']=[];result['exact_values'][target]=None;result['exact_values']['category_ranges']=[];result['comparison_basis']=None
     for issue in inputs.get('issues',[]):
         require(issue.get('issue_id') and issue.get('explanation') and issue.get('evidence_ref'),'forecast_issue_invalid')
         require(issue.get('effect') is None,'forecast_numeric_issue_policy_unsupported')
@@ -134,10 +141,12 @@ def validate_ranges(rows):
 def validate_result(result):
     checks=[]
     forecast=result['forecast_70']; acceptance=result['acceptance_range']
-    if forecast['status']=='ready':number(forecast['value']);checks.append('forecast_70_exact')
+    exact=result.get('exact_values');require(isinstance(exact,dict),'forecast_exact_values_missing',409)
+    if forecast['status']=='ready':number(exact['forecast_70']);checks.append('forecast_70_exact')
     if acceptance['status']=='ready':
-        require(number(acceptance['lower'])<number(acceptance['upper']),'forecast_range_invalid')
-        validate_ranges(result['category_ranges']);checks.append('acceptance_ranges_valid')
+        bounds=exact['acceptance_range'];require(isinstance(bounds,dict),'forecast_exact_values_missing',409)
+        require(number(bounds['lower'])<number(bounds['upper']),'forecast_range_invalid')
+        validate_ranges(exact['category_ranges']);checks.append('acceptance_ranges_valid')
     require(bool(checks),'forecast_outputs_pending',409)
     return dict(status='passed',checks=checks,result_hash=digest(result))
 
@@ -149,13 +158,20 @@ def validate_policy_result(result,policy):
         if value['status']!='ready':continue
         spec=policy.get(target);require(isinstance(spec,dict),'forecast_policy_invalid')
         lower=number(spec['value_bounds']['lower']);upper=number(spec['value_bounds']['upper'])
+        exact=result['exact_values'][target]
         for field in ('value',) if target=='forecast_70' else ('lower','upper'):
-            require(lower<=number(value[field])<=upper,'forecast_outside_policy_bounds')
+            precise=number(exact if target=='forecast_70' else exact[field])
+            require(lower<=precise<=upper,'forecast_outside_policy_bounds')
+            require(value[field]==policy_decimal(precise,spec),'forecast_display_value_mismatch')
         require(value.get('unit')==result['context']['unit'],'forecast_adjustment_unit_mismatch')
     if result['acceptance_range']['status']=='ready':
-        validate_direction(result['category_ranges'],policy['acceptance_range']['direction'])
-        cores=[r for r in result['category_ranges'] if r['category']=='core']
-        require(len(cores)==1 and number(cores[0]['lower'])==number(result['acceptance_range']['lower']) and number(cores[0]['upper'])==number(result['acceptance_range']['upper']),'forecast_core_range_mismatch')
+        rows=result['exact_values']['category_ranges'];spec=policy['acceptance_range']
+        validate_direction(rows,spec['direction'])
+        require(result['comparison_basis']==dict(metric=spec.get('comparison_metric'),unit=result['context']['unit'],score_scale_id=result['context']['score_scale_id'],population_id=result['context']['population_id'],direction=spec['direction'],tie_policy=spec.get('tie_policy')),'forecast_comparison_basis_mismatch')
+        expected=[dict(category=r['category'],lower=policy_decimal(number(r['lower']),spec),upper=policy_decimal(number(r['upper']),spec)) for r in rows]
+        require(result['category_ranges']==expected,'forecast_display_value_mismatch')
+        cores=[r for r in rows if r['category']=='core'];bounds=result['exact_values']['acceptance_range']
+        require(len(cores)==1 and number(cores[0]['lower'])==number(bounds['lower']) and number(cores[0]['upper'])==number(bounds['upper']),'forecast_core_range_mismatch')
     return receipt
 
 
@@ -166,6 +182,7 @@ def policy_decimal(value,policy):
 
 
 def validate_direction(rows,direction):
+    require(direction in ('higher_is_better','lower_is_better'),'forecast_direction_missing')
     order={'challenge':0,'core':1,'room':2}
     ranked=[order[r['category']] for r in sorted(rows,key=lambda r:number(r['lower'])) if r['category'] in order]
     require(ranked==sorted(ranked,reverse=direction=='lower_is_better'),'forecast_category_direction_mismatch')

@@ -130,4 +130,81 @@ class ConsistencyTests(unittest.TestCase):
         self.assertIn("학과별".encode("utf-8"),doc)
         self.assertNotIn(bytes([92])+b"n##",doc)
 
+    def test_original_forecast_result_and_receipt_fields_are_required(self):
+        spec=deepcopy(self.spec)
+        spec['backend_platform_contract']['dto_schemas']['forecast_draft']['fields'].remove('base_result')
+        self.assertIn('Forecast original result required',validate_spec(spec))
+        spec=deepcopy(self.spec)
+        spec['backend_platform_contract']['dto_schemas']['forecast_draft']['nested']['approval'].remove('approval_hash')
+        self.assertIn('Forecast receipt field missing: approval.approval_hash',validate_spec(spec))
+
+    def test_wire_contract_cannot_diverge_from_external_frontend_contract(self):
+        spec=deepcopy(self.spec)
+        spec['presentation_connection_contract']['dto_shapes']['forecast_public']['fields'].append('unregistered')
+        self.assertIn('Forecast DTO consumer contract drift: forecast_public',validate_spec(spec))
+
+    def test_public_context_cannot_drop_versions_or_leak_private_fields(self):
+        spec=deepcopy(self.spec)
+        spec['forecast_policy_contract']['publication_context_contract']['fields'].remove('catalog_version')
+        self.assertIn('Forecast context bindings missing or undocumented',validate_spec(spec))
+        spec=deepcopy(self.spec)
+        spec['backend_platform_contract']['dto_schemas']['forecast_public']['fields'].append('published_by')
+        self.assertIn('Private forecast field in public projection',validate_spec(spec))
+
+    def test_student_adoption_requires_same_public_projection_and_versions(self):
+        spec=deepcopy(self.spec)
+        spec['backend_platform_contract']['dto_schemas']['assessment']['nested']['decision_evidence'].remove('input_version')
+        self.assertIn('Assessment forecast versions missing',validate_spec(spec))
+        spec=deepcopy(self.spec)
+        spec['forecast_policy_contract']['public_response_binding']['same_context_projection']=False
+        self.assertIn('Forecast response adoption binding drift',validate_spec(spec))
+
+    def test_display_strings_cannot_become_comparison_values(self):
+        spec=deepcopy(self.spec)
+        spec['forecast_policy_contract']['exact_numeric_invariants']['display_strings_are_comparison_inputs']=True
+        self.assertIn('Forecast exact comparison invariant drift',validate_spec(spec))
+
+    def test_percentile_comparison_cannot_use_total_overall_or_wrong_direction(self):
+        spec=deepcopy(self.spec)
+        spec['forecast_policy_contract']['comparison_contract']['total_overall_is_allowed_comparator']=True
+        self.assertIn('Forecast comparison metric drift',validate_spec(spec))
+        spec=deepcopy(self.spec)
+        spec['forecast_policy_contract']['comparison_contract']['university_top_percent']['direction']='higher_is_better'
+        self.assertIn('Forecast comparison semantics drift: university_top_percent',validate_spec(spec))
+
+    def test_not_applicable_tie_policy_is_distinct_from_missing_policy(self):
+        self.assertEqual(validate_spec(self.spec),[])
+        spec=deepcopy(self.spec)
+        spec['forecast_policy_contract']['comparison_contract']['converted_score'].pop('tie_policy')
+        self.assertIn('Forecast comparison semantics drift: converted_score',validate_spec(spec))
+
+    def test_outside_cannot_be_counted_as_pending(self):
+        spec=deepcopy(self.spec)
+        spec['forecast_policy_contract']['candidate_partition_contract']['outside_offerings']['category']='pending'
+        self.assertIn('Forecast candidate partition drift: outside_offerings',validate_spec(spec))
+
+    def test_candidate_cannot_claim_production_db_readiness(self):
+        spec=deepcopy(self.spec)
+        spec['forecast_policy_contract']['database_readiness'].update(status='passed',production_ready=True)
+        self.assertIn('Forecast DB readiness evidence drift',validate_spec(spec))
+
+    def test_reason_kinds_cannot_disappear_and_management_audit_is_explicit(self):
+        spec=deepcopy(self.spec)
+        spec['forecast_policy_contract']['recommendation_reason_contract']['groups'].pop('conversion_advantage')
+        self.assertIn('Forecast reason category drift',validate_spec(spec))
+        spec=deepcopy(self.spec)
+        spec['backend_platform_contract']['dto_schemas']['forecast_draft']['nested']['audit_events'].append('private_trace')
+        self.assertIn('Forecast audit projection drift',validate_spec(spec))
+
+    def test_generated_consumer_contract_preserves_status_and_nested_json(self):
+        files=generated_files(self.spec)
+        for path in ['apps/web/route_catalog.json','src/jungsi_touch/application/route_catalog.json']:
+            content=json.loads(files[path])
+            self.assertEqual(content['presentation_connection_contract']['verification_status'],'verification_pending')
+            self.assertEqual(content['forecast_policy_contract']['database_readiness']['status'],'NOT_RUN')
+            self.assertEqual(len(content['forecast_policy_contract']['publication_context_contract']['fields']),17)
+        doc=files[self.spec['current_documents']['presentation_connection']]
+        self.assertIn(b'```json\n',doc)
+        self.assertIn(b'base_result',doc)
+
 if __name__=="__main__":unittest.main()

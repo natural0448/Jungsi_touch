@@ -3,9 +3,25 @@ from copy import deepcopy
 from ..forecasting import digest,require,number,validate_ranges
 from .platform_ports import PlatformError
 from .offering_analysis import blocked,eligibility
+from .forecast_dto import result_dto,public_context
 from ..admission_result_percentile import MATCH_FIELDS
 
-def evaluate_release(offering,profile,conversion,percentile,release):
+def comparison_value(calculated,conversion,percentile):
+    basis=calculated.get('comparison_basis')
+    require(isinstance(basis,dict),'forecast_comparison_basis_missing',409)
+    require(basis.get('population_id')==percentile.population_id and basis.get('score_scale_id')==dict(conversion.context).get('score_scale_id'),'forecast_comparison_basis_mismatch',409)
+    if basis.get('metric')=='converted_score':
+        require(basis.get('tie_policy') is None,'forecast_tie_policy_mismatch',409)
+        require(basis.get('unit')=='점' and basis.get('direction')=='higher_is_better','forecast_comparison_basis_mismatch',409)
+        return conversion.score
+    if basis.get('metric')=='university_top_percent':
+        require(basis.get('tie_policy')=='include_equal','forecast_tie_policy_mismatch',409)
+        require(basis.get('unit')=='%' and basis.get('direction')=='lower_is_better','forecast_comparison_basis_mismatch',409)
+        return percentile.inclusive*100
+    raise PlatformError('forecast_comparison_metric_unsupported',409)
+
+
+def evaluate_release(offering,profile,conversion,percentile,release,*,historical_metrics=None):
     result=blocked(offering['offering_id'],'forecast_release_missing')
     result['conversion']=conversion.dto();result['percentile']=percentile.dto()
     result['recommendation_reasons']=deepcopy(list(conversion.explanations)) if conversion.ready else []
@@ -14,27 +30,32 @@ def evaluate_release(offering,profile,conversion,percentile,release):
     result['years']=[dict(academic_year=y,offering_id=offering['offering_id'] if y==offering['academic_year'] else None,score_basis=conversion.score_basis if y==offering['academic_year'] else 'year_equated_estimate',converted_score=conversion.converted_score if y==offering['academic_year'] else None,status='ready' if y==offering['academic_year'] and conversion.ready else 'pending',reason_code=None if y==offering['academic_year'] and conversion.ready else 'year_bridge_required') for y in (2024,2025,2026,2027)]
     if conversion.ready:result['versions'].update(rule=conversion.rule_version,conversion=conversion.release_version,profile=profile['profile_id'],pack=conversion.pack_version)
     try:
-        require(conversion.ready,conversion.reason_code or 'conversion_release_missing',409)
-        require(percentile.ready,percentile.reason_code or 'percentile_release_missing',409)
         require(isinstance(release,dict),'forecast_release_missing',409)
         pinned=deepcopy(release);claimed=pinned.pop('release_hash',None)
         require(claimed==digest(pinned) and release.get('approval_hash') and release.get('validation_hash'),'forecast_release_invalid',409)
-        context=release['context'];actual=dict(percentile.context);actual.update(dict(conversion.context))
-        require(context.get('offering_id')==offering['offering_id'] and all(k in context and context[k]==actual.get(k) for k in MATCH_FIELDS),'forecast_context_mismatch',409)
-        require(context.get('curve_version')==percentile.curve_version,'forecast_context_mismatch',409)
+        context=release['context']
+        require(context.get('offering_id')==offering['offering_id'],'forecast_context_mismatch',409)
         calculated=release['result'];require(calculated.get('context')==context,'forecast_context_mismatch',409)
-        acceptance=calculated['acceptance_range'];forecast=calculated['forecast_70']
-        result['decision_evidence']=dict(version=release['release_id'],forecast_release_version=release['release_id'],historical_metrics=deepcopy(calculated.get('historical_metrics',[])),forecast_70=deepcopy(forecast),expected_acceptance_range=deepcopy(acceptance),basis_summary=' / '.join(r['target']+': 승인 비교자료 및 정책 적용' for r in calculated['basis_summary']) or None,issue_summaries=[dict(issue_id=i['issue_id'],title=i.get('title',i['issue_id']),summary=i['explanation'],numeric_effect_applied=False) for i in calculated['issue_summaries']],recommendation_reasons=[dict(code='approved_'+r['target'],text='승인된 비교자료와 정책에 따라 기준을 산출했습니다.',evidence_refs=r['source_refs']) for r in calculated['basis_summary']],adjustment_summary=dict(applied=bool(release['adjustments']),reason=' / '.join(a['reason'] for a in release['adjustments']) or None,version=release['release_id'] if release['adjustments'] else None))
+        public=result_dto(calculated);acceptance=public['acceptance_range'];forecast=public['forecast_70']
+        result['decision_evidence']=dict(version=release['release_id'],forecast_release_version=release['release_id'],historical_metrics=deepcopy(historical_metrics or []),forecast_70=forecast,expected_acceptance_range=acceptance,basis_summary=' / '.join(r['target']+': 승인 비교자료 및 정책 적용' for r in calculated['basis_summary']) or None,issue_summaries=[dict(issue_id=i['issue_id'],title=i.get('title',i['issue_id']),summary=i['explanation'],numeric_effect_applied=False) for i in calculated['issue_summaries']],recommendation_reasons=[dict(code='approved_'+r['target'],text='승인된 비교자료와 정책에 따라 기준을 산출했습니다.',evidence_refs=r['source_refs']) for r in calculated['basis_summary']],adjustment_summary=dict(applied=bool(release['adjustments']),reason=' / '.join(a['reason'] for a in release['adjustments']) or None,version=release['release_id'] if release['adjustments'] else None))
+        result['decision_evidence'].update(context=public_context(context),policy_version=release['policy_version'],input_version=release['input_version'])
+        require(conversion.ready,conversion.reason_code or 'conversion_release_missing',409)
+        require(percentile.ready,percentile.reason_code or 'percentile_release_missing',409)
+        actual=dict(percentile.context);actual.update(dict(conversion.context))
+        require(all(k in context and context[k]==actual.get(k) for k in MATCH_FIELDS),'forecast_context_mismatch',409)
+        require(context.get('curve_version')==percentile.curve_version,'forecast_context_mismatch',409)
         require(acceptance['status']=='ready',acceptance.get('reason_code') or 'acceptance_evidence_missing',409)
         eligibility_status=eligibility(profile['scores'],release.get('eligibility_policy'))
         result['eligibility_status']=eligibility_status
         if eligibility_status=='ineligible':result.update(status='ineligible',category='ineligible',reason_code='eligibility_not_met');return result
         require(eligibility_status=='eligible','eligibility_confirmation_required',409)
-        rows=calculated['category_ranges'];validate_ranges(rows)
-        matches=[r for r in rows if number(r['lower'])<=conversion.score<number(r['upper'])]
+        value=comparison_value(calculated,conversion,percentile)
+        rows=calculated['exact_values']['category_ranges'];validate_ranges(rows)
+        matches=[r for r in rows if number(r['lower'])<=value<number(r['upper'])]
         require(len(matches)==1,'decision_range_unconfirmed',409)
-        base_rows=release['base_result']['category_ranges']
-        base=[r for r in base_rows if number(r['lower'])<=conversion.score<number(r['upper'])]
+        base_rows=release['base_result']['exact_values']['category_ranges'];validate_ranges(base_rows)
+        require(release['base_result'].get('comparison_basis')==calculated['comparison_basis'],'forecast_comparison_basis_mismatch',409)
+        base=[r for r in base_rows if number(r['lower'])<=value<number(r['upper'])]
         require(len(base)==1,'decision_range_unconfirmed',409)
         adjusted=bool(release['adjustments']);category=matches[0]['category']
         result.update(status='ready',category=category,reason_code=None,decision_components=dict(base_category=base[0]['category'],adjusted_category=category if adjusted else None,adopted_category=category,base_policy_version=release['policy_version'],adjustment_version=release['release_id'] if adjusted else None))

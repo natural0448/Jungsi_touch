@@ -49,7 +49,7 @@ class ScoringResult:
             score_basis=self.score_basis,score_scope='csat_component',converted_score=self.converted_score,
             official_max_score=self.official_max_score,academic_year=self.academic_year,exam_id=self.exam_id,
             rule_version=self.rule_version,release_version=self.release_version,table_versions=list(self.table_versions),
-            profile_version=self.profile_version,pack_version=self.pack_version,rule_explanations=deepcopy(list(self.explanations)))
+            profile_version=self.profile_version,pack_version=self.pack_version)
 
     def internal_profile(self):
         return dict(academic_year=self.academic_year,exam_id=self.exam_id,profile_version=self.profile_version,
