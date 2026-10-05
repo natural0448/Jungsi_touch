@@ -44,6 +44,34 @@ class ConsistencyTests(unittest.TestCase):
         for row in self.spec["implementation"]:
             files.setdefault(row["path"],(ROOT/row["path"]).read_bytes())
         return files
+    def test_generated_work_items_use_current_scope_and_preserve_historical_acceptance(self):
+        generated=generated_files(self.spec)
+        for path,metadata in self.spec['workflow']['synchronized_work_items'].items():
+            with self.subTest(path=path):
+                item=json.loads(generated[path])
+                self.assertEqual(item['scope'],self.spec[metadata['contract_ref']])
+                historical=item['historical_scope_at_adc684_acceptance']
+                key='backend_contract_acceptance' if 'backend_contract_acceptance' in historical else 'implementation_acceptance'
+                self.assertEqual(historical[key]['develop_integration']['status'],'pending')
+                self.assertEqual(item['scope'][key]['develop_integration']['status'],'merged_verified')
+
+    def test_stale_work_item_pending_cannot_replace_current_integrated_scope(self):
+        files=self.virtual_files()
+        for path in self.spec['workflow']['synchronized_work_items']:
+            with self.subTest(path=path):
+                changed=dict(files);item=json.loads(changed[path])
+                key='backend_contract_acceptance' if 'backend_contract_acceptance' in item['scope'] else 'implementation_acceptance'
+                item['scope'][key]['develop_integration']['status']='pending'
+                changed[path]=json.dumps(item,ensure_ascii=False,indent=2).encode()
+                self.assertIn('Document or route drift: '+path,validate_content(list(changed),changed.__getitem__,self.spec))
+
+    def test_generated_handoff_and_work_item_cannot_expand_to_protected_paths(self):
+        wrong=deepcopy(self.spec);records=wrong['workflow']['synchronized_work_items']
+        records['outputs/private.json']=records.pop('docs/work_items/DEV-006-analysis-connection.json')
+        self.assertIn('Synchronized work-item scope registration drift',validate_spec(wrong))
+        wrong=deepcopy(self.spec);wrong['contract_review']['handoff_response']['path']='.env'
+        self.assertIn('DEV006 handoff source registration drift',validate_spec(wrong))
+
     def test_generated_doc_change_is_detected(self):
         files=self.virtual_files()
         target=self.spec["current_documents"]["routing"];files[target]+=b"changed route\n"

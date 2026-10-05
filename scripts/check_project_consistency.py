@@ -141,7 +141,7 @@ def branch_governance_text(spec):
         '\n\n위 화살표는 출발/관리 관계다. 구현 PR은 하위 작업에서 부모로 올라간다. '+g['hierarchy_note']+
         '\n\n기획팀은 develop의 service_spec.json·생성 문서와 브랜치/검사 설정을 직접 갱신한다. 다른 팀은 develop의 자료를 가져가 자기 상시 브랜치에서 개발하고 PR로 통합한다. 3티어는 코드와 포트의 구분이며 각 티어/작업/에이전트마다 브랜치를 만들지 않는다.'+
         '\n\n## 현재 GitHub 브랜치와 열린 작업\n\n조사일 '+g['checked_date']+', 통합 기준 '+g['reference_commit']+'. 상시 '+str(len(g['core_branches']))+'개, 진행 임시 '+str(sum(r.get('status')=='active' for r in g['additional_branches']))+'개, 종료 이력 '+str(sum(r.get('status')!='active' for r in g['additional_branches']))+'개로 분류한다. 원격 ref 상태는 아래 등록부를 따른다. 관측 커밋은 당시 증거이며 작업 브랜치의 미래 HEAD를 고정하는 값이 아니다.\n\n'+extras+'\n\n'+g['remote_inventory']['note']+
-        '\n\n열린 PR #5/#6의 변경은 develop의 현재 구현이 아니다. PR #7은 화면 부모에 통합됐고 #9는 종료됐으며 그 head가 화면 상시 HEAD에 포함되어 있다. 화면 코드는 PR #6으로 develop 통합/인수가 남아 있다. 종료 ref는 새 개발에서 제외하고 보존한다. 열린 PR 담당은 최신 develop과 충돌을 해결한 뒤 등록 부모에 통합한다.\n\n'+g['lifecycle_rule']+
+        '\n\nPR #5의 중복 제안은 종료됐고 head/ref는 보존한다. 정식 session.read 계약과 동적 경로 제목 검사는 현행 공통 도구로 계승했다. 열린 PR #6의 화면 변경은 develop의 현재 구현이 아니다. PR #7은 화면 부모에 통합됐고 #9는 종료됐으며 그 head가 화면 상시 HEAD에 포함되어 있다. 화면 코드는 PR #6으로 develop 통합/인수가 남아 있다. 종료 ref는 새 개발에서 제외하고 보존한다. 열린 PR 담당은 최신 develop과 충돌을 해결한 뒤 등록 부모에 통합한다.\n\n'+g['lifecycle_rule']+
         '\n\n## 필요한 하위 작업만 등록\n\n'+child+'\n\n'+g['registration_rule']+
         '\n\n각 노드에서 분리가 필요한 작업을 제안할 수 있다. main 배포 검토 작업도 develop의 release_task에서 정리해 develop으로 먼저 올리고, 최종 develop → main 경로를 유지한다. 임시 작업이 없으면 상시 브랜치 하나를 계속 사용한다.'+
         '\n\n## 작업 시작·동기화·PR\n\n'+g['sync_rule']+'\n\n'+g['merge_rule']+'\n\n'+g['review_rule']+
@@ -154,6 +154,14 @@ def branch_governance_text(spec):
         fence+'powershell\n$env:JUNGSI_TEAM = "planning"\npython -B scripts/check_branch_policy.py --staged\n'+fence+
         '\n\n## main 최종 반영과 라이브 적용\n\n현재 release_gate.state='+g['release_gate']['state']+'. '+g['release_gate']['meaning']+'\n\n'+gates+
         '\n\n최종 PR에는 배포 후보 develop SHA·문서/계약 버전·CI/통합 검증·실제 연결 검수·운영/복구 인계 근거를 담는다. 모든 체크가 passed이고 증거가 있을 때만 ready로 확정한다. main 병합 뒤 별도 승인한 배포를 실행한다. 기능 완료·합성 테스트 성공만으로 실제 데이터와 라이브 준비 완료를 표시하지 않는다.')
+
+
+def deletion_scope_text(spec):
+    policy=spec['workflow']['branch_governance'].get('file_deletion_policy')
+    if not policy:return ''
+    record=policy['record']
+    return ('\n\n## DEV006⑦ 정확한 파일 삭제 승인 검사\n\n기본값은 deny다. develop947 이후 등록·공통 검사는 시스템기획팀, 실제 삭제와 화면 검증은 외부 화면 개발팀의 범위다. 서비스 개발팀은 서비스 계층만 담당한다. 현재 실행 상태: '+policy['execution_state']+'. 별도 develop 선행 등록 전에는 후보가 스스로 승인할 수 없다.\n\n'+
+        table(['정확한 경로','mode','고정 Git blob','원본 바이트 SHA256'],[[r['path'],r['mode'],r['blob'],r['sha256']] for r in record['files']])+'\n\n출발 브랜치: '+record['origin_branch']+'; 출발 커밋: '+record['source_commit']+'; 사용자 메시지: '+record['user_evidence']['message_id']+'; 요청서 SHA256: '+record['source_request_sha256']+'. 원본과 이전 버전은 보존한다. 최초 삭제와 승인된 삭제의 부모 병합 승계를 구분하고 다른 경로·수정/복원 후 재사용·병렬 삭제 origin의 재소비·과거 소급·숨긴 sideparent·ref 삭제·force를 거절한다. 동일한 승인 삭제 origin을 develop/main으로 운반하는 정상 병합과 새로운 삭제 사건은 구분한다.')
 
 
 def repository_layout_text(spec):
@@ -221,7 +229,7 @@ def generated_files(spec):
     changes=table(["변경일","요구사항","변경과 구현 범위"],[[r["date"],", ".join(r["requirements"]),r["summary"]] for r in spec.get("change_notes",[])])
     files={}
     platform=spec.get('backend_platform_contract')
-    runtime_intro=('FastAPI 12개 경로와 업무 서비스·Supabase/Drive 어댑터를 구현했다. 코드 합성 검증과 실제 운영 연결은 구분한다. [API DTO 계약](API_DTO_계약.md)과 [백엔드 운영 준비](백엔드_운영준비.md)를 함께 읽는다.' if platform else '아래 API는 연결 예정 계약이며 HTTP 핸들러가 등록된 상태가 아니다.')
+    runtime_intro=('FastAPI '+str(len(spec['operations']))+'개 경로와 업무 서비스·Supabase/Drive 어댑터를 구현했다. 코드 합성 검증과 실제 운영 연결은 구분한다. [API DTO 계약](API_DTO_계약.md)과 [백엔드 운영 준비](백엔드_운영준비.md)를 함께 읽는다.' if platform else '아래 API는 연결 예정 계약이며 HTTP 핸들러가 등록된 상태가 아니다.')
     files[spec["current_documents"]["planning"]]=doc("정시터치 현재 서비스 기획",
        "학생·학부모가 전체 성적 위치에서 출발해 유리한 대학·학과와 핵심 지원 학교를 찾는 상담 서비스다. 교사·입시담당자는 부 사용자다. 현재는 계산·권한·라우팅의 개발 기반이며 운영 서비스 완성을 의미하지 않는다.\n\n"+
        "## 화면과 회원 정책\n\n"+table(["페이지","화면","경로","회원","역할"],page_rows)+
@@ -317,7 +325,7 @@ def generated_files(spec):
         time_rows=[[key,value] for key,value in platform['datetime'].items()]
         runtime=platform['runtime']
         files[spec['current_documents']['backend_readiness']]=doc('백엔드 구현과 운영 준비',
-            '자료 정리 전 구현 범위는 12개 HTTP/업무·서버 세션/이용권·저장/Drive 어댑터·추가 스키마·UTC 계약이다. code_status='+platform['code_status']+', live_server='+platform['live_server_status']+', live_data='+platform['live_data_status']+'. 실제 설정이 없는 운영 모드를 합성 인증/메모리 자료로 자동 대체하지 않는다.\n\n'+
+            '현재 구현 범위는 '+str(len(spec['operations']))+'개 HTTP/업무·서버 세션/이용권·저장/Drive 어댑터·추가 스키마·UTC 계약이다. code_status='+platform['code_status']+', live_server='+platform['live_server_status']+', live_data='+platform['live_data_status']+'. 실제 설정이 없는 운영 모드를 합성 인증/메모리 자료로 자동 대체하지 않는다.\n\n'+
             '출발 develop: '+platform['start_commit']+'; 공통 기획 기준: '+platform['planning_commit']+'. [작업 인수 기준](../work_items/DEV-002-pre-data-platform.json)을 따른다. PR/CI/통합 결과는 해당 GitHub 변경 증거로 확인한다.\n\n'+
             '## API별 전후 상태\n\n'+table(['API','시작 상태','구현 후','저장/자료','합성 검증','설정','실제 자료'],gap_rows)+'\n\n'+
             '## 실행과 설정\n\n'+table(['설정 이름','용도'],platform['configuration'])+'\n\n실제 값은 Git 제외 설정 또는 서버 환경변수에만 보관한다. .env 및 예시도 커밋하지 않으며 자동 .env 로더는 없다. 연결 값은 문서/HTTP/진단 stdout에 출력하지 않는다.\n\n'+
@@ -331,7 +339,7 @@ def generated_files(spec):
             schemas.append('### '+name+'\n\n'+('format: '+schema['format']+'\n\n' if schema.get('format') else '')+'필드: '+', '.join(schema['fields'])+'.'+('\n\n유료 추가 필드: '+', '.join(schema['paid_fields'])+'.' if schema.get('paid_fields') else '')+('\n\n'+table(['중첩 객체','필드'],[[k,', '.join(v)] for k,v in schema['nested'].items()]) if schema.get('nested') else '')+'\n\n'+'\n'.join('- '+v for v in schema['rules']))
         files[spec['current_documents']['api_dto']]=doc('HTTP API와 학생 DTO 계약',
             platform['authentication']+'\n\n'+platform['writes']+'\n\n권한은 body·query 검증/자료 조회/멱등 조회보다 먼저 검사한다. unknown field와 중복 query key는 거절한다. 숫자 점수/누적은 엔진의 소수 문자열이며 원자료/전체 분포/가중치/비밀값/로컬 출처 경로는 제공하지 않는다. 모든 응답은 Cache-Control: no-store다.\n\n'+
-            '## 12개 요청과 응답\n\n'+table(['API','메서드/경로','본문','쿼리','응답 DTO','키 필수'],[[o['id'],o['method']+' '+o['path'],'; '.join(o['http_contract']['body']) or '없음',', '.join(o['http_contract']['query']) or '없음',o['http_contract']['response']+'; '+o['contract_ref'],o['http_contract']['idempotency_key_required']] for o in spec['operations']])+'\n\n모든 HTTP 업무 서비스는 PlatformService.execute이며 FastAPI create_app이 경로를 등록한다. 요청은 operations[].http_contract, 응답은 해당 contract_ref를 따른다. overall.analyze의 HTTP 응답은 persisted report이고 내부 overall 필드만 기존 OverallAnalysisService의 jungsi.overall-analysis/v1 엔진 DTO다. 두 객체를 루트 응답으로 혼동하지 않는다.\n\n'+
+            '## '+str(len(spec['operations']))+'개 요청과 응답\n\n'+table(['API','메서드/경로','본문','쿼리','응답 DTO','키 필수'],[[o['id'],o['method']+' '+o['path'],'; '.join(o['http_contract']['body']) or '없음',', '.join(o['http_contract']['query']) or '없음',o['http_contract']['response']+'; '+o['contract_ref'],o['http_contract']['idempotency_key_required']] for o in spec['operations']])+'\n\n모든 HTTP 업무 서비스는 PlatformService.execute이며 FastAPI create_app이 경로를 등록한다. 요청은 operations[].http_contract, 응답은 해당 contract_ref를 따른다. overall.analyze의 HTTP 응답은 persisted report이고 내부 overall 필드만 기존 OverallAnalysisService의 jungsi.overall-analysis/v1 엔진 DTO다. 두 객체를 루트 응답으로 혼동하지 않는다.\n\n'+
             '## 오류와 대기\n\n오류 객체는 {status:error,error:{code},request_id}이며 비밀값·예외 원문을 포함하지 않는다. 자료 대기는 200 응답의 status=pending/reason_code와 값 null로 구분한다. 전체 분석이 pending이어도 입력 총점·과목 결과는 보존한다.\n\n'+table(['오류 코드','HTTP','의미'],platform['errors'])+'\n\n대학 계산의 개별 자료 해시/버전/승인 불일치는 해당 assessment의 pending이다. 카탈로그 전체 형식/승인 실패와 공급 서비스 실패는 503이다.\n\n'+
             '## 응답 객체\n\n'+'\n\n'.join(schemas)+'\n\n## 시간 표시\n\n서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.')
     scoring=spec.get('university_scoring_contract')
@@ -446,6 +454,18 @@ def generated_files(spec):
             files[path]+="\n## 관리 화면\n\n"+table(["화면","경로","서버 capability","설명"],[[r["label"],r["path"],", ".join(r["capabilities"]),r["purpose"]] for r in spec["management_pages"]])
     files["apps/web/route_catalog.json"]=json.dumps(frontend,ensure_ascii=False,indent=2)+"\n"
     files["src/jungsi_touch/application/route_catalog.json"]=json.dumps(backend,ensure_ascii=False,indent=2)+"\n"
+    for path in spec['current_documents'].values():
+        if path in files:
+            marker='\n\n<!-- jungsi:generated'
+            section='\n\n## 서비스·DB develop 통합 상태\n\nPR13 merged; 고정 통합947cee82f0a91b0ed337753d6e0ae9619e49a78b. adc684/74fd의 정상493검사와 동일 트리·정확 병합SHA CI 성공을 역사로 보존한다. 현재 API는 '+str(len(spec['operations']))+'경로다. Supabase settings/JWKS/REST metadata 최소 GET 준비는 확인했다. 실제 검수사용자 인증·이용권/DB/Drive/우리22API/외부프런트/정확도는 NOT_RUN, DB설정은추후준비, 운영002는 NOT_APPLIED다.'
+            files[path]=files[path].replace(marker,section+deletion_scope_text(spec)+marker)
+    handoff=spec.get('contract_review',{}).get('handoff_response')
+    if handoff:
+        files[handoff['path']]=doc(handoff['title'],handoff['body'])
+    for path,metadata in spec['workflow'].get('synchronized_work_items',{}).items():
+        item=dict(metadata)
+        item['scope']=spec[item['contract_ref']]
+        files[path]=json.dumps(item,ensure_ascii=False,indent=2)+'\n'
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -564,6 +584,33 @@ def validate_spec(spec):
         errors.append("Branch policy drift")
     from check_branch_policy import validate_governance
     errors.extend(validate_governance(spec))
+    records=spec['workflow'].get('synchronized_work_items')
+    expected_items={'docs/work_items/DEV-006-analysis-connection.json':'presentation_connection_contract',
+                    'docs/work_items/DEV-007-forecast-policy.json':'forecast_policy_contract'}
+    if records is not None:
+        if not isinstance(records,dict) or set(records)!=set(expected_items):
+            errors.append('Synchronized work-item scope registration drift')
+        else:
+            for path,reference in expected_items.items():
+                row=records[path]
+                if not isinstance(row,dict) or row.get('contract_ref')!=reference or 'scope' in row or row.get('contract_version')!=spec['version']:
+                    errors.append('Synchronized work-item contract reference drift: '+path)
+    handoff=spec.get('contract_review',{}).get('handoff_response')
+    if handoff is not None:
+        if not isinstance(handoff,dict) or handoff.get('path')!='docs/team_sessions/2026-10-05/DEV006_서비스_DB_응답.md' or not isinstance(handoff.get('body'),str) or not handoff.get('body'):
+            errors.append('DEV006 handoff source registration drift')
+    session=[o for o in ops if o.get('id')=='session.read']
+    if len(session)!=1 or session[0].get('method')!='GET' or session[0].get('path')!='/api/v1/me' or session[0].get('member_tiers')!=['standard','paid'] or session[0].get('report_owner') is not False or session[0].get('confirmed_score_profile') is not False:
+        errors.append('Formal session access contract drift')
+    if session:
+        http=session[0].get('http_contract',{})
+        dto=spec.get('backend_platform_contract',{}).get('dto_schemas',{}).get('session',{})
+        if session[0].get('contract_ref')!='backend_platform_contract.dto_schemas.session' or http.get('response_schema')!='session' or http.get('body')!=[] or http.get('query')!=[] or http.get('idempotency_key_required') is not False or dto.get('format')!='jungsi.session/v1' or dto.get('fields')!=['format','member_tier','entitlement_expires_at']:
+            errors.append('Formal session DTO contract drift')
+    rules=' '.join(spec.get('backend_platform_contract',{}).get('dto_schemas',{}).get('session',{}).get('rules',[]))
+    if 'jungsi_backend.entitlements' not in rules or 'active=true' not in rules or 'starts_at<=now<expires_at' not in rules or 'status=active' in rules:
+        errors.append('Formal session entitlement rule drift')
+    if 'session_contract' in spec:errors.append('Superseded proposed session contract must not be revived')
     errors.extend(validate_forecast_contract(spec))
     return errors
 

@@ -11,6 +11,167 @@
     "REQ-21",
     "REQ-22"
   ],
+  "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
+  "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
+  "contract_version": "1.7.1",
+  "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+  "owner": "외부 프런트 전담 개발자",
+  "candidate_only": true,
+  "backend_contract_acceptance": {
+    "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
+    "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+    "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+    "accepted_on": "2026-10-05",
+    "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
+    "normal_commit_push_hooks": {
+      "tests_run": 493,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "successful": true,
+      "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
+    },
+    "dto_allowlist_comparison": {
+      "checks": 40,
+      "passed": true,
+      "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
+    },
+    "remote_checks": {
+      "head": "adc684be2e9d22f8edad766d044b81894676036d",
+      "check_name": "project-consistency",
+      "successful_count": 2,
+      "source": "부모의 정확한 HEAD GitHub API 독립 확인"
+    },
+    "byte_equivalence": {
+      "service_test_files": 16,
+      "common_contract_generator_files": 25,
+      "same_or_lf_normalized": true
+    },
+    "validated_source_spec": {
+      "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
+      "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
+      "difference": "LF normalization only"
+    },
+    "develop_integration": {
+      "status": "merged_verified",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+      "pull_request_state": "merged",
+      "merge_method": "merge",
+      "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+      "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+      "merge_tree_equals_tested_HEAD": true,
+      "CI": {
+        "conclusion": "success",
+        "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+      },
+      "live_API_Supabase_DB_Drive": "NOT_RUN",
+      "operational_migration_002": "NOT_APPLIED",
+      "external_frontend_acceptance": "NOT_RUN",
+      "forecast_accuracy": "NOT_RUN"
+    },
+    "live_API_Supabase_DB_Drive": "NOT_RUN",
+    "operational_migration_002": "NOT_APPLIED",
+    "operational_DB002_readiness": "NOT_RUN",
+    "external_frontend_acceptance": "NOT_RUN",
+    "forecast_accuracy": "NOT_RUN",
+    "local_evidence": [
+      "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
+      "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
+    ],
+    "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다.",
+    "historical_develop_integration_at_adc684_acceptance": {
+      "status": "pending",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+      "pull_request_state_at_acceptance": "open_draft"
+    }
+  },
+  "develop_integration": {
+    "status": "merged_verified",
+    "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+    "pull_request_state": "merged",
+    "merge_method": "merge",
+    "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+    "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+    "merge_tree_equals_tested_HEAD": true,
+    "CI": {
+      "conclusion": "success",
+      "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+    },
+    "live_API_Supabase_DB_Drive": "NOT_RUN",
+    "operational_migration_002": "NOT_APPLIED",
+    "external_frontend_acceptance": "NOT_RUN",
+    "forecast_accuracy": "NOT_RUN"
+  },
+  "service_DB_status": "accepted_and_integrated_on_develop_live_pending",
+  "historical_tests_preserved": "adc684/74fd normal hooks493 PASS; new common checker candidate validation recorded separately",
+  "approved_deletion_checker": {
+    "status": "candidate_implementation",
+    "record_id": "DEV006-7-four-retained-drafts",
+    "actual_file_deletion": "NOT_RUN_external_executor"
+  },
+  "historical_scope_at_adc684_acceptance": {
+    "code_status": "approved_for_implementation",
+    "verification_status": "verification_pending",
+    "remaining": [
+      "운영 Supabase/백엔드 설정과 기존 에듀터치의 동일 프로젝트/쿠키 배포 설정 확인",
+      "실제 계정/이용권/관리 capability의 전체 연결 검증",
+      "v1.7.1 후보의 DTO allowlist/base_result/context/version/이유 코드/후보 분할을 외부 프런트 담당에게 확정 백엔드 커밋과 전달",
+      "운영 DB002 적용·권한·동시성·멱등·발행 readiness 실측은 NOT_RUN"
+    ],
+    "reason": "adc684 인수 당시 승인 범위와 open/draft 통합 대기를 역사로 보존한다. 현재 scope는 공통 contract_ref에서 생성한다. 전체 수정 전 파일은 비공개 보존 영수증에 남긴다.",
+    "backend_contract_acceptance": {
+      "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
+      "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+      "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+      "accepted_on": "2026-10-05",
+      "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
+      "normal_commit_push_hooks": {
+        "tests_run": 493,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "successful": true,
+        "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
+      },
+      "dto_allowlist_comparison": {
+        "checks": 40,
+        "passed": true,
+        "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
+      },
+      "remote_checks": {
+        "head": "adc684be2e9d22f8edad766d044b81894676036d",
+        "check_name": "project-consistency",
+        "successful_count": 2,
+        "source": "부모의 정확한 HEAD GitHub API 독립 확인"
+      },
+      "byte_equivalence": {
+        "service_test_files": 16,
+        "common_contract_generator_files": 25,
+        "same_or_lf_normalized": true
+      },
+      "validated_source_spec": {
+        "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
+        "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
+        "difference": "LF normalization only"
+      },
+      "develop_integration": {
+        "status": "pending",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+        "pull_request_state_at_acceptance": "open_draft"
+      },
+      "live_API_Supabase_DB_Drive": "NOT_RUN",
+      "operational_migration_002": "NOT_APPLIED",
+      "operational_DB002_readiness": "NOT_RUN",
+      "external_frontend_acceptance": "NOT_RUN",
+      "forecast_accuracy": "NOT_RUN",
+      "local_evidence": [
+        "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
+        "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
+      ],
+      "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
+    }
+  },
+  "scope_generation": "scope equals current service_spec contract_ref; historical scope acceptance remains separate",
   "scope": {
     "format": "jungsi.presentation-connection/v1",
     "code_status": "approved_for_implementation",
@@ -47,10 +208,11 @@
       "외부 프런트 담당의 수정 커밋·TypeScript/lint·브라우저 흐름 검증은 별도 인수 증거이며 현재 verification_pending"
     ],
     "remaining": [
-      "운영 Supabase/백엔드 설정과 기존 에듀터치의 동일 프로젝트/쿠키 배포 설정 확인",
+      "Supabase settings/JWKS/REST metadata 최소 GET는 확인했다. 검수 사용자·이용권·관리 capability·실제 DB/Drive·우리 22 API와 기존 서비스의 쿠키/배포 연결은 별도 검증 대기다.",
       "실제 계정/이용권/관리 capability의 전체 연결 검증",
       "v1.7.1 후보의 DTO allowlist/base_result/context/version/이유 코드/후보 분할을 외부 프런트 담당에게 확정 백엔드 커밋과 전달",
-      "운영 DB002 적용·권한·동시성·멱등·발행 readiness 실측은 NOT_RUN"
+      "운영 DB002 적용·권한·동시성·멱등·발행 readiness 실측은 NOT_RUN",
+      "사용자는 DATABASE_URL을 비공개 .env로 추후 제공하기로 했다. 실제 값·권한·DB 연결 승인을 추정하지 않으며 준비 전 실제 DB 검증은 유보한다."
     ],
     "scope_excludes": [
       "리포트/인쇄 확장",
@@ -546,9 +708,21 @@
         "difference": "LF normalization only"
       },
       "develop_integration": {
-        "status": "pending",
+        "status": "merged_verified",
         "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
-        "pull_request_state_at_acceptance": "open_draft"
+        "pull_request_state": "merged",
+        "merge_method": "merge",
+        "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+        "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+        "merge_tree_equals_tested_HEAD": true,
+        "CI": {
+          "conclusion": "success",
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+        },
+        "live_API_Supabase_DB_Drive": "NOT_RUN",
+        "operational_migration_002": "NOT_APPLIED",
+        "external_frontend_acceptance": "NOT_RUN",
+        "forecast_accuracy": "NOT_RUN"
       },
       "live_API_Supabase_DB_Drive": "NOT_RUN",
       "operational_migration_002": "NOT_APPLIED",
@@ -559,64 +733,12 @@
         "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
         "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
       ],
-      "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
+      "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다.",
+      "historical_develop_integration_at_adc684_acceptance": {
+        "status": "pending",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+        "pull_request_state_at_acceptance": "open_draft"
+      }
     }
-  },
-  "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
-  "verification_status": "verification_pending",
-  "contract_version": "1.7.1",
-  "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
-  "owner": "외부 프런트 전담 개발자",
-  "candidate_only": true,
-  "backend_contract_acceptance": {
-    "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
-    "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
-    "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
-    "accepted_on": "2026-10-05",
-    "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
-    "normal_commit_push_hooks": {
-      "tests_run": 493,
-      "failures": 0,
-      "errors": 0,
-      "skipped": 0,
-      "successful": true,
-      "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
-    },
-    "dto_allowlist_comparison": {
-      "checks": 40,
-      "passed": true,
-      "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
-    },
-    "remote_checks": {
-      "head": "adc684be2e9d22f8edad766d044b81894676036d",
-      "check_name": "project-consistency",
-      "successful_count": 2,
-      "source": "부모의 정확한 HEAD GitHub API 독립 확인"
-    },
-    "byte_equivalence": {
-      "service_test_files": 16,
-      "common_contract_generator_files": 25,
-      "same_or_lf_normalized": true
-    },
-    "validated_source_spec": {
-      "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
-      "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
-      "difference": "LF normalization only"
-    },
-    "develop_integration": {
-      "status": "pending",
-      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
-      "pull_request_state_at_acceptance": "open_draft"
-    },
-    "live_API_Supabase_DB_Drive": "NOT_RUN",
-    "operational_migration_002": "NOT_APPLIED",
-    "operational_DB002_readiness": "NOT_RUN",
-    "external_frontend_acceptance": "NOT_RUN",
-    "forecast_accuracy": "NOT_RUN",
-    "local_evidence": [
-      "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
-      "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
-    ],
-    "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
   }
 }

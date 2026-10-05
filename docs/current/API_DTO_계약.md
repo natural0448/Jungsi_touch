@@ -8,7 +8,7 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 
 권한은 body·query 검증/자료 조회/멱등 조회보다 먼저 검사한다. unknown field와 중복 query key는 거절한다. 숫자 점수/누적은 엔진의 소수 문자열이며 원자료/전체 분포/가중치/비밀값/로컬 출처 경로는 제공하지 않는다. 모든 응답은 Cache-Control: no-store다.
 
-## 12개 요청과 응답
+## 22개 요청과 응답
 
 | API | 메서드/경로 | 본문 | 쿼리 | 응답 DTO | 키 필수 |
 | --- | --- | --- | --- | --- | --- |
@@ -201,7 +201,7 @@ format: jungsi.session/v1
 
 필드: format, member_tier, entitlement_expires_at.
 
-- 본인 검증 신원과 서버 활성 이용권만 사용한다. 활성 이용권은 starts_at<=now<expires_at이며 status=active와 정시 서비스 product를 만족한다. 복수 활성 권한은 가장 늦은 만료를 UTC Z로 반환한다.
+- 전용 정시 jungsi_backend.entitlements의 active=true 및 starts_at<=now<expires_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 가장 늦은 expires_at을 UTC Z로 반환한다. 별도 status/product 컬럼을 가정하지 않는다.
 - 일반 회원 만료는 null. 인증 또는 저장소 장애는 503이며 일반 회원으로 자동 강등하지 않는다. 사용자 ID·등급·역할·JWT·결제 내역을 요청/응답에 포함하지 않는다.
 
 ### forecast_capabilities
@@ -293,4 +293,21 @@ format: jungsi.forecast-public/v1
 
 [자체 추정분포 개발](자체_추정분포_개발.md)을 따른다. 상태는 integrated_on_develop_generic_engine_and_private_pilot_verified다. 제공된 공식 시험 자료의 주변도수와 응시/선택 조건, 비교 가능한 참고 총점 곡선을 이용해 공동 성적 조합과 가중치를 자체 추정한다. 이는 전체 학생 실제 점수를 복원했다는 의미가 아니며 실제 도수·관측 분포와 구분한다. 전체 학생의 실제 공동 성적 DB 부재는 작업 중단 조건이 아니다. 전체 누백은 overall.status=estimated, 대학 누백은 percentile.data_kind=estimated_weights로 구분한다. 기존 API 권한·시험 결속·애플리케이션 소유 포트와 프레젠테이션 담당을 유지한다.
 
-<!-- jungsi:generated spec_sha256=45baf947f46e5d451506f37fbf1257b6a7d538afe28b83a57425f9916f5f960f -->
+## 서비스·DB develop 통합 상태
+
+PR13 merged; 고정 통합947cee82f0a91b0ed337753d6e0ae9619e49a78b. adc684/74fd의 정상493검사와 동일 트리·정확 병합SHA CI 성공을 역사로 보존한다. 현재 API는 22경로다. Supabase settings/JWKS/REST metadata 최소 GET 준비는 확인했다. 실제 검수사용자 인증·이용권/DB/Drive/우리22API/외부프런트/정확도는 NOT_RUN, DB설정은추후준비, 운영002는 NOT_APPLIED다.
+
+## DEV006⑦ 정확한 파일 삭제 승인 검사
+
+기본값은 deny다. develop947 이후 등록·공통 검사는 시스템기획팀, 실제 삭제와 화면 검증은 외부 화면 개발팀의 범위다. 서비스 개발팀은 서비스 계층만 담당한다. 현재 실행 상태: NOT_RUN_external_executor. 별도 develop 선행 등록 전에는 후보가 스스로 승인할 수 없다.
+
+| 정확한 경로 | mode | 고정 Git blob | 원본 바이트 SHA256 |
+| --- | --- | --- | --- |
+| apps/web/src/app/admissions/possibilities/actions.ts | 100644 | c1f0200bec8cdd20f23e49134125a7cff7b17fce | fe2fcf6e3e02c9a08c4d7922babd6e4c8c1d6a10ccdd3b7120493dfb3dfe5c68 |
+| apps/web/src/components/pending-page.tsx | 100644 | 2bd4303143db69494460f8740977c90c2e4060c1 | 7fd9a61c79fc4b09296d6140db4318482974ee37a8a47dc034e72c53af08a9ec |
+| apps/web/src/lib/api/synthetic-fixtures.ts | 100644 | a8e5bb68743d8f2f5a776964f8c042d09a97dc51 | bdc103cb6059e29f1192d22e40275da77ff17beb17a7414577df40c0fe245ede |
+| apps/web/src/lib/contract.ts | 100644 | c12709ab04dba81d6f4748b3fea7a937b5a0d6c9 | 0456daf6671c4c2ba76b932dc7d7cf5022cd96b398a1baa10c219b0013f7e478 |
+
+출발 브랜치: feature/presentation-foundation; 출발 커밋: f46c6635664a6c2315e6c71c4f700aa3e331c60c; 사용자 메시지: 01a10bf5-898b-7180-8442-3bfd4d1c2914; 요청서 SHA256: 686e51deb7f29cc259e5fb8d63e1c16456b16aebfa5fc9f4c04e9988d0d694e3. 원본과 이전 버전은 보존한다. 최초 삭제와 승인된 삭제의 부모 병합 승계를 구분하고 다른 경로·수정/복원 후 재사용·병렬 삭제 origin의 재소비·과거 소급·숨긴 sideparent·ref 삭제·force를 거절한다. 동일한 승인 삭제 origin을 develop/main으로 운반하는 정상 병합과 새로운 삭제 사건은 구분한다.
+
+<!-- jungsi:generated spec_sha256=9cf6b952c8d086224b4dd1e532620e703d53b56f046e38f8bdb99d2bcfcd2475 -->

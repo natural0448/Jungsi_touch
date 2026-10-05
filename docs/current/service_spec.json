@@ -1716,10 +1716,10 @@
     "CI_snapshot_policy": {
       "runner": "GitHub-hosted ubuntu-24.04의 사전 설치 Git/CPython 3.12만 사용한다. checkout/setup-python 액션과 설치 대체 경로는 사용하지 않는다.",
       "destination": "GITHUB_WORKSPACE/retained_snapshots/run_<run_id>_attempt_<run_attempt>가 존재하거나 symlink이면 중단한다. 새 비존재 경로만 생성하고 기존 경로·파일을 보존한다.",
-      "commit": "git init 후 github.sha와 전체 부모 이력을 fetch하고 그 SHA를 최초 detached checkout한다. HEAD가 지정 SHA와 다르면 실패한다.",
+      "commit": "git init 후 github.sha와 전체 부모 이력, refs/heads/develop 및 refs/heads/feature/presentation-foundation을 fetch한다. 두 origin tracking ref의 고정 SHA가 확인돼야 지정 github.sha를 최초 detached checkout한다. 각 HEAD/ref가 확보된 SHA와 다르면 실패한다.",
       "credentials": "GitHub token은 fetch subprocess의 GIT_CONFIG_* http extraheader 환경으로만 전달한다. argv/로그/파일과 init/checkout/test subprocess에는 전달하지 않는다. Git trace 및 외부 config 입력을 차단하며 실패는 원문 진단 없이 안전한 사유로 기록한다.",
       "preservation": "gc.auto=0, maintenance.auto=false와 fetch --no-auto-maintenance를 적용한다. clean/reset/drop/기존 경로 초기화/temp cleanup을 호출하지 않는다. 생성 runtime/다운로드/검산 스냅샷은 정리하지 않는다.",
-      "verification": "tests/test_ci_snapshot_preservation.py에서 기존 경로 거절·보존, 지정 SHA 결속, fetch 전용 인증과 오류 비밀값 미노출을 검수한다. CI에서는 동일 github.sha의 공통 검사·잠금 런타임·전체 테스트를 실행한다."
+      "verification": "tests/test_ci_snapshot_preservation.py에서 기존 경로 보존, 지정 SHA 결속, develop/프런트 ref 부재 거절, fetch 전용 인증과 오류 비밀값 미노출을 검사한다. 현재 workflow 변경은 로컬 합성 검증 후보이며 새 commit의 원격 CI 전체 실행은 아직 확인하지 않았다."
     },
     "server_work_branch": "feature/application-pre-data-platform",
     "presentation_work_branch": "feature/presentation-foundation",
@@ -1772,13 +1772,17 @@
           "owner": "화면 작업자의 계약 제안; 시스템기획팀 검토·정본 반영",
           "parent": "develop",
           "pr_target": "develop",
-          "status": "active",
+          "status": "retired_superseded",
           "temporary": true,
           "purpose": "기존 PR #5: session.read·화면 기술 계약 제안. 미확정 계약을 현행 운영 구현으로 기록하지 않는다.",
           "base_commit": "d666a5f2bdbc846c65b5503de35c17d6d90088db",
-          "observed_head": "d672bf3cea2b19e1f593e5f2d16a9480db8fc1ca",
+          "observed_head": "bb98a825e6cd86a20359557deec114b2980e78cb",
           "pull_request": 5,
-          "exception": "기존 브랜치 이름을 보존한다. 이후 공통 기획 하위 작업은 등록한 feature/planning-task/<slug>만 사용한다."
+          "exception": "기존 브랜치 이름을 보존한다. 이후 공통 기획 하위 작업은 등록한 feature/planning-task/<slug>만 사용한다.",
+          "pull_request_state": "closed",
+          "closed_at": "2026-10-05T12:42:14Z",
+          "remote_ref_state": "retained_closed_superseded_no_deletion_authorization",
+          "scope": "PR5의18파일 제안은 정식 session 채택으로 중복 종료했다. 동적 API 경로 수 제목과 정식 session 권한/DTO 검사는 공통 도구로 보존한다. head/원격ref/로컬원본은보존하며새작업을받지않는다."
         },
         {
           "name": "feature/presentation-favorable",
@@ -1860,7 +1864,9 @@
         "scripts/check_branch_policy.py",
         "tests/test_branch_policy.py",
         "tests/test_project_consistency.py",
-        "tests/test_ci_snapshot_preservation.py"
+        "tests/test_ci_snapshot_preservation.py",
+        "tests/test_deletion_approval.py",
+        "tests/test_session_contract.py"
       ],
       "child_templates": [
         {
@@ -1937,8 +1943,9 @@
         "checks": [
           {
             "id": "system_contracts",
-            "status": "pending",
-            "evidence": "DEV-002 코드·합성 검증은 인수 완료; 후속 session.read 등 변경 계약 확정/구현 인수 필요"
+            "status": "passed",
+            "evidence": "정식22 API/session/forecast 서비스·DB 계약은493개 정상Git스냅샷 검사와PR13/develop947cee8 CI를 거쳐 인수·통합완료. 실제로그인/이용권/DB/Drive와외부프런트는다른pending gate로분리한다.",
+            "historical_pre_session_evidence": "DEV-002 코드·합성 검증은 인수 완료; 후속 session.read 등 변경 계약 확정/구현 인수 필요"
           },
           {
             "id": "presentation",
@@ -1948,7 +1955,7 @@
           {
             "id": "live_connections",
             "status": "pending",
-            "evidence": "실제 Supabase·Drive 설정과 UTC/Asia/Seoul 왕복 검사 증거 대기"
+            "evidence": "Supabase Auth settings/JWKS·REST metadata 최소GET는확인했다. 검수사용자로그인/이용권·DB직접연결·UTC왕복·Drive·22API배포는NOT_RUN이며 DATABASE_URL을추후받는다."
           },
           {
             "id": "approved_data",
@@ -1976,9 +1983,20 @@
           "feature/planning-layer-ownership"
         ],
         "checked_at": "2026-10-04 (Asia/Seoul)",
-        "note": "원격 7개: 상시 4개 + 열린 계약 제안 #5 임시 1개 + 종료된 화면 임시 ref 2개. 기존 과거 ref 2개만 사용자 허용으로 삭제했다. PR #7은 화면 부모에 MERGED, #9는 CLOSED이고 그 head가 화면 상시 HEAD에 포함됨을 확인했다. 종료 화면 ref의 삭제는 추가 허용 범위에 포함되지 않아 보존한다.",
-        "working_temporary_count": 1,
-        "retained_finished_temporary_refs": 2
+        "note": "상시4개와종료후보존하는임시ref3개를유지한다. PR5는2026-10-05 중복 제안으로closed 처리했으며 bb98a825e6cd86a20359557deec114b2980e78cb head와원격branch는보존한다. 동적22경로 제목과정식session 검사는현행공통도구로계승한다. PR6는외부화면담당의통합대기이며 이서비스작업에서병합하지않는다.",
+        "working_temporary_count": 0,
+        "retained_finished_temporary_refs": 3,
+        "latest_observation": {
+          "date": "2026-10-05",
+          "source": "부모 기획팀의 원격 ref 및 frontend ls-tree 독립 확인",
+          "develop": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+          "main": "8a5c089ff2c9beaa71d067d33e959c7823b96947",
+          "server": "74fd795099cc25762481c0498c76065f91048003",
+          "frontend": "e12dd849fb7f3d2e05fe4fc7655a37d613e349cb",
+          "PR5_head_preserved": "bb98a825e6cd86a20359557deec114b2980e78cb",
+          "approved_deletion_source_unchanged": "f46c6635664a6c2315e6c71c4f700aa3e331c60c",
+          "frontend_target_blobs": "고정 f46 소스의 4개 blob/mode와 동일; 실제 삭제 없음"
+        }
       },
       "merge_scope_policy": {
         "format": "jungsi.merge-scope/v1",
@@ -1986,6 +2004,428 @@
         "incoming_sync": "registered_develop_parent_only",
         "conflicts": "planning_paths_only",
         "direct_edits": "normal_planning_scope_and_no_deletions"
+      },
+      "file_deletion_policy": {
+        "format": "jungsi.file-deletion-scope/v1",
+        "default": "deny",
+        "record": {
+          "id": "DEV006-7-four-retained-drafts",
+          "origin_branch": "feature/presentation-foundation",
+          "target_parent": "develop",
+          "source_commit": "f46c6635664a6c2315e6c71c4f700aa3e331c60c",
+          "scope": "exact_tracked_four_files_first_deletion_only",
+          "executor_scope": "external_presentation_team_only",
+          "developer_scope": "registry_checker_and_synthetic_tests_only_no_actual_deletion",
+          "reason": "외부 화면 담당의 현행 DTO 전환 후 미사용 초안4파일 제거 요청. import·화면 검증과 실제 실행은 외부 담당 범위다.",
+          "user_evidence": {
+            "thread_id": "01a0ccde-6f3d-7772-acd3-3eaca9a67b65",
+            "turn_id": "01a10bf5-8841-74a3-93e2-f2e2de8ac674",
+            "message_id": "01a10bf5-898b-7180-8442-3bfd4d1c2914",
+            "text": "그럼 완료될 때까지 작업해 필요하다면 개발팀과 데이터팀 두군대와 협력해서 작업해",
+            "interpretation": "직전 DEV006 7항목과 정확4파일 요청에 따른 승인 등록·검사 마감. 오래된 요청서의 타채팅 승인 주장만으로 승인하지 않는다.",
+            "text_sha256": "d75d5efd8f43680e0838bcea4d298e3d2de704c1d4c0940733b7afbf475e8f32"
+          },
+          "source_request_sha256": "686e51deb7f29cc259e5fb8d63e1c16456b16aebfa5fc9f4c04e9988d0d694e3",
+          "files": [
+            {
+              "path": "apps/web/src/app/admissions/possibilities/actions.ts",
+              "blob": "c1f0200bec8cdd20f23e49134125a7cff7b17fce",
+              "mode": "100644",
+              "sha256": "fe2fcf6e3e02c9a08c4d7922babd6e4c8c1d6a10ccdd3b7120493dfb3dfe5c68"
+            },
+            {
+              "path": "apps/web/src/components/pending-page.tsx",
+              "blob": "2bd4303143db69494460f8740977c90c2e4060c1",
+              "mode": "100644",
+              "sha256": "7fd9a61c79fc4b09296d6140db4318482974ee37a8a47dc034e72c53af08a9ec"
+            },
+            {
+              "path": "apps/web/src/lib/api/synthetic-fixtures.ts",
+              "blob": "a8e5bb68743d8f2f5a776964f8c042d09a97dc51",
+              "mode": "100644",
+              "sha256": "bdc103cb6059e29f1192d22e40275da77ff17beb17a7414577df40c0fe245ede"
+            },
+            {
+              "path": "apps/web/src/lib/contract.ts",
+              "blob": "c12709ab04dba81d6f4748b3fea7a937b5a0d6c9",
+              "mode": "100644",
+              "sha256": "0456daf6671c4c2ba76b932dc7d7cf5022cd96b398a1baa10c219b0013f7e478"
+            }
+          ],
+          "preservation": {
+            "originals_and_previous_versions_retained": true,
+            "source_commit_and_blobs_retained": true,
+            "manifest_sha256": "73f276964bd327bbce9bd33225f0529ec4db687255290873ee8e0c5fd8a44775",
+            "local_receipt": "outputs/service_review/20261005T122747408643Z/original-preservation.json"
+          },
+          "activation": "preexisting_trusted_develop_registration_required",
+          "record_sha256": "83c5ca04ee9f461d14b8b7f600dbf4c8f5d5c559a0424f7aec443fd451a7fd8a"
+        },
+        "registration_state": "candidate_until_preexisting_develop_registration",
+        "execution_state": "NOT_RUN_external_executor",
+        "forbidden": [
+          "other_paths",
+          "parent_directories",
+          "wildcards",
+          "traversal",
+          "case_aliases",
+          "protected_data",
+          "ref_deletion",
+          "force",
+          "same_commit_registration_and_deletion",
+          "later_modified_or_restored_targets",
+          "reused_approval",
+          "retroactive_approval",
+          "untrusted_or_missing_parent_history"
+        ]
+      }
+    },
+    "synchronized_work_items": {
+      "docs/work_items/DEV-006-analysis-connection.json": {
+        "format": "jungsi.work-item/v1",
+        "id": "DEV-006-analysis-connection",
+        "approved_on": "2026-10-05",
+        "start_commit": "9bf81e8d6a04e99086208422021fdb903aff204c",
+        "branch": "feature/presentation-foundation",
+        "status": "approved_for_implementation",
+        "contract_ref": "presentation_connection_contract",
+        "requirements": [
+          "REQ-20",
+          "REQ-21",
+          "REQ-22"
+        ],
+        "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
+        "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
+        "contract_version": "1.7.1",
+        "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+        "owner": "외부 프런트 전담 개발자",
+        "candidate_only": true,
+        "backend_contract_acceptance": {
+          "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
+          "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+          "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+          "accepted_on": "2026-10-05",
+          "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
+          "normal_commit_push_hooks": {
+            "tests_run": 493,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0,
+            "successful": true,
+            "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
+          },
+          "dto_allowlist_comparison": {
+            "checks": 40,
+            "passed": true,
+            "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
+          },
+          "remote_checks": {
+            "head": "adc684be2e9d22f8edad766d044b81894676036d",
+            "check_name": "project-consistency",
+            "successful_count": 2,
+            "source": "부모의 정확한 HEAD GitHub API 독립 확인"
+          },
+          "byte_equivalence": {
+            "service_test_files": 16,
+            "common_contract_generator_files": 25,
+            "same_or_lf_normalized": true
+          },
+          "validated_source_spec": {
+            "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
+            "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
+            "difference": "LF normalization only"
+          },
+          "develop_integration": {
+            "status": "merged_verified",
+            "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+            "pull_request_state": "merged",
+            "merge_method": "merge",
+            "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+            "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+            "merge_tree_equals_tested_HEAD": true,
+            "CI": {
+              "conclusion": "success",
+              "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+            },
+            "live_API_Supabase_DB_Drive": "NOT_RUN",
+            "operational_migration_002": "NOT_APPLIED",
+            "external_frontend_acceptance": "NOT_RUN",
+            "forecast_accuracy": "NOT_RUN"
+          },
+          "live_API_Supabase_DB_Drive": "NOT_RUN",
+          "operational_migration_002": "NOT_APPLIED",
+          "operational_DB002_readiness": "NOT_RUN",
+          "external_frontend_acceptance": "NOT_RUN",
+          "forecast_accuracy": "NOT_RUN",
+          "local_evidence": [
+            "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
+            "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
+          ],
+          "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다.",
+          "historical_develop_integration_at_adc684_acceptance": {
+            "status": "pending",
+            "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+            "pull_request_state_at_acceptance": "open_draft"
+          }
+        },
+        "develop_integration": {
+          "status": "merged_verified",
+          "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+          "pull_request_state": "merged",
+          "merge_method": "merge",
+          "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+          "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+          "merge_tree_equals_tested_HEAD": true,
+          "CI": {
+            "conclusion": "success",
+            "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+          },
+          "live_API_Supabase_DB_Drive": "NOT_RUN",
+          "operational_migration_002": "NOT_APPLIED",
+          "external_frontend_acceptance": "NOT_RUN",
+          "forecast_accuracy": "NOT_RUN"
+        },
+        "service_DB_status": "accepted_and_integrated_on_develop_live_pending",
+        "historical_tests_preserved": "adc684/74fd normal hooks493 PASS; new common checker candidate validation recorded separately",
+        "approved_deletion_checker": {
+          "status": "candidate_implementation",
+          "record_id": "DEV006-7-four-retained-drafts",
+          "actual_file_deletion": "NOT_RUN_external_executor"
+        },
+        "historical_scope_at_adc684_acceptance": {
+          "code_status": "approved_for_implementation",
+          "verification_status": "verification_pending",
+          "remaining": [
+            "운영 Supabase/백엔드 설정과 기존 에듀터치의 동일 프로젝트/쿠키 배포 설정 확인",
+            "실제 계정/이용권/관리 capability의 전체 연결 검증",
+            "v1.7.1 후보의 DTO allowlist/base_result/context/version/이유 코드/후보 분할을 외부 프런트 담당에게 확정 백엔드 커밋과 전달",
+            "운영 DB002 적용·권한·동시성·멱등·발행 readiness 실측은 NOT_RUN"
+          ],
+          "reason": "adc684 인수 당시 승인 범위와 open/draft 통합 대기를 역사로 보존한다. 현재 scope는 공통 contract_ref에서 생성한다. 전체 수정 전 파일은 비공개 보존 영수증에 남긴다.",
+          "backend_contract_acceptance": {
+            "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
+            "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+            "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+            "accepted_on": "2026-10-05",
+            "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
+            "normal_commit_push_hooks": {
+              "tests_run": 493,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0,
+              "successful": true,
+              "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
+            },
+            "dto_allowlist_comparison": {
+              "checks": 40,
+              "passed": true,
+              "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
+            },
+            "remote_checks": {
+              "head": "adc684be2e9d22f8edad766d044b81894676036d",
+              "check_name": "project-consistency",
+              "successful_count": 2,
+              "source": "부모의 정확한 HEAD GitHub API 독립 확인"
+            },
+            "byte_equivalence": {
+              "service_test_files": 16,
+              "common_contract_generator_files": 25,
+              "same_or_lf_normalized": true
+            },
+            "validated_source_spec": {
+              "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
+              "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
+              "difference": "LF normalization only"
+            },
+            "develop_integration": {
+              "status": "pending",
+              "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+              "pull_request_state_at_acceptance": "open_draft"
+            },
+            "live_API_Supabase_DB_Drive": "NOT_RUN",
+            "operational_migration_002": "NOT_APPLIED",
+            "operational_DB002_readiness": "NOT_RUN",
+            "external_frontend_acceptance": "NOT_RUN",
+            "forecast_accuracy": "NOT_RUN",
+            "local_evidence": [
+              "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
+              "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
+            ],
+            "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
+          }
+        },
+        "scope_generation": "scope equals current service_spec contract_ref; historical scope acceptance remains separate"
+      },
+      "docs/work_items/DEV-007-forecast-policy.json": {
+        "format": "jungsi.work-item/v1",
+        "id": "DEV-007-forecast-policy",
+        "approved_on": "2026-10-05",
+        "start_commit": "9bf81e8d6a04e99086208422021fdb903aff204c",
+        "branch": "feature/application-pre-data-platform",
+        "status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
+        "contract_ref": "forecast_policy_contract",
+        "requirements": [
+          "REQ-21",
+          "REQ-22"
+        ],
+        "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
+        "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
+        "contract_version": "1.7.1",
+        "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+        "owner": "서비스·DB 개발팀",
+        "candidate_only": false,
+        "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+        "develop_integration": {
+          "status": "merged_verified",
+          "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+          "pull_request_state": "merged",
+          "merge_method": "merge",
+          "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+          "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+          "merge_tree_equals_tested_HEAD": true,
+          "CI": {
+            "conclusion": "success",
+            "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+          },
+          "live_API_Supabase_DB_Drive": "NOT_RUN",
+          "operational_migration_002": "NOT_APPLIED",
+          "external_frontend_acceptance": "NOT_RUN",
+          "forecast_accuracy": "NOT_RUN"
+        },
+        "service_DB_status": "accepted_and_integrated_on_develop_live_pending",
+        "historical_tests_preserved": "adc684/74fd normal hooks493 PASS; new common checker candidate validation recorded separately",
+        "implementation_acceptance": {
+          "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
+          "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+          "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+          "accepted_on": "2026-10-05",
+          "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
+          "normal_commit_push_hooks": {
+            "tests_run": 493,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0,
+            "successful": true,
+            "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
+          },
+          "dto_allowlist_comparison": {
+            "checks": 40,
+            "passed": true,
+            "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
+          },
+          "remote_checks": {
+            "head": "adc684be2e9d22f8edad766d044b81894676036d",
+            "check_name": "project-consistency",
+            "successful_count": 2,
+            "source": "부모의 정확한 HEAD GitHub API 독립 확인"
+          },
+          "byte_equivalence": {
+            "service_test_files": 16,
+            "common_contract_generator_files": 25,
+            "same_or_lf_normalized": true
+          },
+          "validated_source_spec": {
+            "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
+            "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
+            "difference": "LF normalization only"
+          },
+          "develop_integration": {
+            "status": "merged_verified",
+            "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+            "pull_request_state": "merged",
+            "merge_method": "merge",
+            "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+            "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+            "merge_tree_equals_tested_HEAD": true,
+            "CI": {
+              "conclusion": "success",
+              "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+            },
+            "live_API_Supabase_DB_Drive": "NOT_RUN",
+            "operational_migration_002": "NOT_APPLIED",
+            "external_frontend_acceptance": "NOT_RUN",
+            "forecast_accuracy": "NOT_RUN"
+          },
+          "live_API_Supabase_DB_Drive": "NOT_RUN",
+          "operational_migration_002": "NOT_APPLIED",
+          "operational_DB002_readiness": "NOT_RUN",
+          "external_frontend_acceptance": "NOT_RUN",
+          "forecast_accuracy": "NOT_RUN",
+          "local_evidence": [
+            "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
+            "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
+          ],
+          "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다.",
+          "historical_develop_integration_at_adc684_acceptance": {
+            "status": "pending",
+            "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+            "pull_request_state_at_acceptance": "open_draft"
+          }
+        },
+        "historical_scope_at_adc684_acceptance": {
+          "code_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
+          "verification_status": "code_verified_live_NOT_RUN",
+          "remaining": [
+            "실제 자료의 비교값·연도 보정·정책별 숫자와 근거 승인",
+            "실제 Supabase/DB/Drive 설정 및 운영 마이그레이션·발행 검증",
+            "전국 대학 산출 정확도·예측 성능 검증",
+            "외부 프런트 담당의 새 context/version/base_result, 후보 분할, 이유 코드 소비 수정 및 브라우저 검증",
+            "확정 서비스·DB 구현 adc684be2e9d22f8edad766d044b81894676036d의 PR #13 develop 통합. 현재 open/draft이며 운영 배포 완료가 아니다."
+          ],
+          "reason": "adc684 인수 당시 승인 범위와 open/draft 통합 대기를 역사로 보존한다. 현재 scope는 공통 contract_ref에서 생성한다. 전체 수정 전 파일은 비공개 보존 영수증에 남긴다.",
+          "implementation_acceptance": {
+            "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
+            "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+            "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+            "accepted_on": "2026-10-05",
+            "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
+            "normal_commit_push_hooks": {
+              "tests_run": 493,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0,
+              "successful": true,
+              "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
+            },
+            "dto_allowlist_comparison": {
+              "checks": 40,
+              "passed": true,
+              "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
+            },
+            "remote_checks": {
+              "head": "adc684be2e9d22f8edad766d044b81894676036d",
+              "check_name": "project-consistency",
+              "successful_count": 2,
+              "source": "부모의 정확한 HEAD GitHub API 독립 확인"
+            },
+            "byte_equivalence": {
+              "service_test_files": 16,
+              "common_contract_generator_files": 25,
+              "same_or_lf_normalized": true
+            },
+            "validated_source_spec": {
+              "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
+              "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
+              "difference": "LF normalization only"
+            },
+            "develop_integration": {
+              "status": "pending",
+              "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+              "pull_request_state_at_acceptance": "open_draft"
+            },
+            "live_API_Supabase_DB_Drive": "NOT_RUN",
+            "operational_migration_002": "NOT_APPLIED",
+            "operational_DB002_readiness": "NOT_RUN",
+            "external_frontend_acceptance": "NOT_RUN",
+            "forecast_accuracy": "NOT_RUN",
+            "local_evidence": [
+              "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
+              "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
+            ],
+            "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
+          }
+        },
+        "scope_generation": "scope equals current service_spec contract_ref; historical scope acceptance remains separate"
       }
     }
   },
@@ -2300,6 +2740,24 @@
       "summary": "v1.7.1 기능 계약은 유지하고 서비스·DB 인수 상태를 확정 구현 adc684be2e9d22f8edad766d044b81894676036d에 일치시켰다. 정상 Git 훅의 493 합성/HTTP/계약 검사와 DTO 허용 필드40 대조, 서비스/test16개·공통25개 동일 또는 LF 정규화를 인수했다. PR #13 develop 통합은 대기이며 실제 API/Supabase/DB/Drive·외부 프런트·예측 정확도 NOT_RUN, 운영002 NOT_APPLIED는 유지한다."
     },
     {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-17",
+        "REQ-20",
+        "REQ-21",
+        "REQ-22"
+      ],
+      "summary": "PR13 서비스·DB 인수와develop947 통합을현재상태에반영하고 역사493근거·운영대기를보존한다. DEV006⑦의 정확4경로/고정blob/직접사용자증거/원본보존과선행develop등록·최초삭제검사를 공통계약에등록한다. 실제삭제·프런트수정·운영적용은수행하지않는다."
+    },
+    {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-17",
+        "REQ-20"
+      ],
+      "summary": "PR5 중복 제안 closed와 ref 보존을 반영하고 정식 session access/DTO 및 실제 active=true 기간 조건을 고정 검사한다. 기존외부서비스 발견·Supabase 최소읽기·22API 계약차이·이용권 단일기준 미결정을 구분하며 실제값은 비공개로만 보관한다."
+    },
+    {
       "date": "2026-10-03",
       "requirements": [
         "REQ-03",
@@ -2566,7 +3024,7 @@
       "분포 전체·도수·성별/동점 인원·가중치·정확 내부비율",
       "출처 로컬 경로·원문 전체·해시·연구 플래그·승인 필드"
     ],
-    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 12개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다."
+    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 22개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다."
   },
   "collaboration": {
     "integration_branch": "develop",
@@ -2616,7 +3074,7 @@
     ],
     "existing_application_feature": "feature/application-pre-data-platform",
     "presentation_branch_example": "feature/presentation-foundation",
-    "presentation_branch_status": "feature/presentation-foundation은 화면 담당의 상시 브랜치다. PR #7은 여기에 병합됐고 #9는 종료됐으며 그 head가 상시 화면 HEAD에 포함되어 있다. 열린 PR #6으로 develop 통합/검토가 남아 있다. 두 종료 임시 ref는 보존하며 새 작업에 재사용하지 않는다. 열린 session.read 제안 PR #5는 develop의 공통 계약 검토용 임시 노드이고 확정 전 운영 계약으로 간주하지 않는다.",
+    "presentation_branch_status": "외부 화면은 feature/presentation-foundation과 PR6에서 별도 개발·통합 대기다. PR5는정식session채택으로2026-10-05 closed/superseded 처리했으며 bb98a825e6cd86a20359557deec114b2980e78cb head와ref를보존한다. 서비스·DB는PR13/develop947에통합완료다.",
     "generated_files_rule": "route_catalog.json과 생성 README/현재 문서는 직접 편집하지 않는다. 계약 변경은 service_spec.json과 생성 도구에서 수정하고 생성 결과를 같은 커밋에 포함한다.",
     "handoff_rule": "두 개발 담당은 origin/develop의 같은 커밋에 있는 service_spec과 생성 문서를 가져가 구현한다. 계약·필드·오류/보류 사유가 바뀌면 시스템기획팀과 해당 계층 담당에게 인계한다. 통합되지 않은 feature의 코드·가상 응답을 develop에 구현된 기능으로 기록하지 않는다. 현재 기획팀과 서비스·DB 개발팀은 외부 프런트 담당에게 확정 공통 계약과 백엔드 인수 증거를 전달한다. 외부 프런트의 수정·브라우저 인수검증은 해당 담당자의 완료 증거를 별도로 확인한다.",
     "verification_rule": "Git 변경 범위와 해당 계약·필수 커밋 검산을 확인한다. 원자료 전수검수나 전국 재집계를 매 개발 작업에서 반복하지 않는다. 하위 브랜치 병합은 등록된 직계 부모 또는 승인된 develop 인입과 결속한 Git merge-tree 결과를 기준으로 확인한다. 충돌 해결 근거와 별도 직접 수정의 승인 범위를 구분하며 삭제 차단·팀 권한·main 승격·등록 부모·fast-forward 규칙을 유지한다. merge_scope_policy 표식이 있는 커밋부터 병합 재구성 정책을 적용한다. 과거 병합은 소급 판정하지 않으며, 기획 경로 충돌 해결과 비기획 자동 병합 결과를 구분한다.",
@@ -2646,9 +3104,9 @@
   "backend_platform_contract": {
     "format": "jungsi.backend-platform/v1",
     "http_implemented": true,
-    "code_status": "pre_data_code_implemented",
-    "live_server_status": "not_run_configuration_missing",
-    "live_data_status": "not_run_configuration_missing",
+    "code_status": "service_DB_accepted_and_integrated_on_develop_live_pending",
+    "live_server_status": "not_run_Jungsi_API_deployment_contract_pending",
+    "live_data_status": "not_run_operational_release_binding_pending",
     "feature": "feature/application-pre-data-platform",
     "start_commit": "950cacce3bc5cad3f910f7584786b7936f7d8b9a",
     "planning_commit": "592b356a15f4669f38c82d289fb35b6b78f2bc34",
@@ -3085,7 +3543,7 @@
           "entitlement_expires_at"
         ],
         "rules": [
-          "본인 검증 신원과 서버 활성 이용권만 사용한다. 활성 이용권은 starts_at<=now<expires_at이며 status=active와 정시 서비스 product를 만족한다. 복수 활성 권한은 가장 늦은 만료를 UTC Z로 반환한다.",
+          "전용 정시 jungsi_backend.entitlements의 active=true 및 starts_at<=now<expires_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 가장 늦은 expires_at을 UTC Z로 반환한다. 별도 status/product 컬럼을 가정하지 않는다.",
           "일반 회원 만료는 null. 인증 또는 저장소 장애는 503이며 일반 회원으로 자동 강등하지 않는다. 사용자 ID·등급·역할·JWT·결제 내역을 요청/응답에 포함하지 않는다."
         ]
       },
@@ -3361,7 +3819,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "승인 Drive 카탈로그/공식 발표 자료 공급",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3370,7 +3828,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "승인 Drive 카탈로그/공식 발표 자료 공급",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3379,7 +3837,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3388,7 +3846,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3397,7 +3855,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3406,7 +3864,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "승인 Drive 카탈로그/공식 발표 자료 공급",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3415,7 +3873,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "승인 Drive 카탈로그/공식 발표 자료 공급",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3424,7 +3882,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3433,7 +3891,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3442,7 +3900,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3451,7 +3909,7 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
@@ -3460,97 +3918,97 @@
         "after": "업무 서비스·HTTP·서버 인증/저장 포트 구현 및 합성 검증",
         "storage": "PostgreSQL 본인 프로필/리포트 revision·요청 replay·감사·이용권",
         "verification": "tests/test_backend_workflows.py; tests/test_backend_adapters.py",
-        "external_settings": "실제 Supabase 인증·DB·Drive 설정 대기",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "공식 승인 자료/모형 연결·실제 변경 범위 검산 미실행"
       },
       {
         "operation": "session.read",
         "before": "기존 분석과 별도 관리 계약 미구현",
-        "after": "구현 승인; 현재 개발 항목으로 진행",
+        "after": "서비스·DB 구현 인수 및 develop947cee8 통합 완료; 실제 운영과 외부 프런트 검증은 별도 대기",
         "storage": "서버 관리 권한·승인 자료 포트와 비공개 revision/release 저장",
-        "verification": "DEV-006/DEV-007 합성·HTTP·권한·연결 인수 예정",
-        "external_settings": "실제 Supabase/DB/Drive 설정 대기",
+        "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
       },
       {
         "operation": "forecast.capabilities",
         "before": "기존 분석과 별도 관리 계약 미구현",
-        "after": "구현 승인; 현재 개발 항목으로 진행",
+        "after": "서비스·DB 구현 인수 및 develop947cee8 통합 완료; 실제 운영과 외부 프런트 검증은 별도 대기",
         "storage": "서버 관리 권한·승인 자료 포트와 비공개 revision/release 저장",
-        "verification": "DEV-006/DEV-007 합성·HTTP·권한·연결 인수 예정",
-        "external_settings": "실제 Supabase/DB/Drive 설정 대기",
+        "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
       },
       {
         "operation": "forecast.list",
         "before": "기존 분석과 별도 관리 계약 미구현",
-        "after": "구현 승인; 현재 개발 항목으로 진행",
+        "after": "서비스·DB 구현 인수 및 develop947cee8 통합 완료; 실제 운영과 외부 프런트 검증은 별도 대기",
         "storage": "서버 관리 권한·승인 자료 포트와 비공개 revision/release 저장",
-        "verification": "DEV-006/DEV-007 합성·HTTP·권한·연결 인수 예정",
-        "external_settings": "실제 Supabase/DB/Drive 설정 대기",
+        "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
       },
       {
         "operation": "forecast.create",
         "before": "기존 분석과 별도 관리 계약 미구현",
-        "after": "구현 승인; 현재 개발 항목으로 진행",
+        "after": "서비스·DB 구현 인수 및 develop947cee8 통합 완료; 실제 운영과 외부 프런트 검증은 별도 대기",
         "storage": "서버 관리 권한·승인 자료 포트와 비공개 revision/release 저장",
-        "verification": "DEV-006/DEV-007 합성·HTTP·권한·연결 인수 예정",
-        "external_settings": "실제 Supabase/DB/Drive 설정 대기",
+        "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
       },
       {
         "operation": "forecast.read",
         "before": "기존 분석과 별도 관리 계약 미구현",
-        "after": "구현 승인; 현재 개발 항목으로 진행",
+        "after": "서비스·DB 구현 인수 및 develop947cee8 통합 완료; 실제 운영과 외부 프런트 검증은 별도 대기",
         "storage": "서버 관리 권한·승인 자료 포트와 비공개 revision/release 저장",
-        "verification": "DEV-006/DEV-007 합성·HTTP·권한·연결 인수 예정",
-        "external_settings": "실제 Supabase/DB/Drive 설정 대기",
+        "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
       },
       {
         "operation": "forecast.adjust",
         "before": "기존 분석과 별도 관리 계약 미구현",
-        "after": "구현 승인; 현재 개발 항목으로 진행",
+        "after": "서비스·DB 구현 인수 및 develop947cee8 통합 완료; 실제 운영과 외부 프런트 검증은 별도 대기",
         "storage": "서버 관리 권한·승인 자료 포트와 비공개 revision/release 저장",
-        "verification": "DEV-006/DEV-007 합성·HTTP·권한·연결 인수 예정",
-        "external_settings": "실제 Supabase/DB/Drive 설정 대기",
+        "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
       },
       {
         "operation": "forecast.validate",
         "before": "기존 분석과 별도 관리 계약 미구현",
-        "after": "구현 승인; 현재 개발 항목으로 진행",
+        "after": "서비스·DB 구현 인수 및 develop947cee8 통합 완료; 실제 운영과 외부 프런트 검증은 별도 대기",
         "storage": "서버 관리 권한·승인 자료 포트와 비공개 revision/release 저장",
-        "verification": "DEV-006/DEV-007 합성·HTTP·권한·연결 인수 예정",
-        "external_settings": "실제 Supabase/DB/Drive 설정 대기",
+        "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
       },
       {
         "operation": "forecast.approve",
         "before": "기존 분석과 별도 관리 계약 미구현",
-        "after": "구현 승인; 현재 개발 항목으로 진행",
+        "after": "서비스·DB 구현 인수 및 develop947cee8 통합 완료; 실제 운영과 외부 프런트 검증은 별도 대기",
         "storage": "서버 관리 권한·승인 자료 포트와 비공개 revision/release 저장",
-        "verification": "DEV-006/DEV-007 합성·HTTP·권한·연결 인수 예정",
-        "external_settings": "실제 Supabase/DB/Drive 설정 대기",
+        "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
       },
       {
         "operation": "forecast.publish",
         "before": "기존 분석과 별도 관리 계약 미구현",
-        "after": "구현 승인; 현재 개발 항목으로 진행",
+        "after": "서비스·DB 구현 인수 및 develop947cee8 통합 완료; 실제 운영과 외부 프런트 검증은 별도 대기",
         "storage": "서버 관리 권한·승인 자료 포트와 비공개 revision/release 저장",
-        "verification": "DEV-006/DEV-007 합성·HTTP·권한·연결 인수 예정",
-        "external_settings": "실제 Supabase/DB/Drive 설정 대기",
+        "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
       },
       {
         "operation": "forecast.published.read",
         "before": "기존 분석과 별도 관리 계약 미구현",
-        "after": "구현 승인; 현재 개발 항목으로 진행",
+        "after": "서비스·DB 구현 인수 및 develop947cee8 통합 완료; 실제 운영과 외부 프런트 검증은 별도 대기",
         "storage": "서버 관리 권한·승인 자료 포트와 비공개 revision/release 저장",
-        "verification": "DEV-006/DEV-007 합성·HTTP·권한·연결 인수 예정",
-        "external_settings": "실제 Supabase/DB/Drive 설정 대기",
+        "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
+        "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
       }
     ],
@@ -3624,7 +4082,7 @@
       "source_time": "Drive createdTime/modifiedTime은 자체 RFC3339 aware 시각이다. 명부 source_timezone은 내용의 naive 소스 시각에만 적용하고 원본 metadata Z를 재라벨링하지 않는다.",
       "write": "ReportPublicationService → ArtifactResultWriter.append_result. 입력과 다른 결과 폴더에 사용자/작업/키 identity와 내용 해시를 결속한 새 파일 POST만 한다. GET 재시도 조회로 동일 해시를 재사용하고 충돌/불명확 결과를 별도 코드로 처리한다. 삭제/휴지통/덮어쓰기 없음."
     },
-    "verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.\n\n기획팀 검토 후 [PR #8](https://github.com/natural0448/Jungsi_touch/pull/8)을 develop 03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced에 병합했다. 검토한 기능 커밋 c5376f0d8674cf82add0959abec385682f14cd4f의 [GitHub CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288)에서 합성 테스트 228개와 문서·코드 참조·계층·비공개 데이터 제외 검사가 통과했다. 실제 Supabase·Drive 연결과 원자료/모형 검수는 설정 대기이며 이 통과에 포함되지 않는다.",
+    "verification": "현재22 API의서비스·DB 및합성HTTP·권한검증은PR13/develop947 통합과역사493정상검사로인수했다. 현재공통검사후속후보는별도최신회귀영수증으로검증한다. 실제사용자로그인/이용권·DB/Drive/우리API배포는NOT_RUN이며 실제API·CSV자료를자동채택하지않는다. 과거DEV002/PR8의228검사는historical_DEV002_verification과execution_result에보존한다.",
     "remaining": [
       "실제 Supabase 프로젝트·서버 역할·TLS·Auth 검증 사용자와 활성 이용권 설정 및 readonly probe 증거",
       "운영 DB에 추가 마이그레이션 적용 후 실제 UTC/timestamptz/date 및 권한/소유권 트랜잭션 검수",
@@ -3669,7 +4127,49 @@
       ],
       "evidence_required": "실제 Supabase DB/서버 역할의 실행 영수증. 메모리 저장소·가짜 SQL 연결·합성 HTTP 통과로 대체하지 않는다.",
       "missing_behavior": "DB002/schema/권한 미준비는 forecast storage readiness의 503으로 구분한다. 이용권 강등·가짜 발행·다른 학생/학교 자료 대체를 하지 않는다."
-    }
+    },
+    "develop_integration": {
+      "status": "merged_verified",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+      "pull_request_state": "merged",
+      "merge_method": "merge",
+      "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+      "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+      "merge_tree_equals_tested_HEAD": true,
+      "CI": {
+        "conclusion": "success",
+        "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+      },
+      "live_API_Supabase_DB_Drive": "NOT_RUN",
+      "operational_migration_002": "NOT_APPLIED",
+      "external_frontend_acceptance": "NOT_RUN",
+      "forecast_accuracy": "NOT_RUN"
+    },
+    "integration_readiness": {
+      "status": "partial_readonly_auth_metadata_verified_service_and_entitlement_contract_pending",
+      "existing_EduTouch_service": "discovered_by_planning_team",
+      "existing_API_contract": "incompatible_me_DTO_and_jeongsi_namespace_skeleton",
+      "Jungsi_22_API_deployment": "NOT_RUN",
+      "Supabase_auth_settings": "readonly_HTTP200",
+      "JWKS": "readonly_HTTP200_ES256",
+      "server_secret": "REST_metadata_HTTP200_only_not_admin_account_acceptance",
+      "private_schema_API": "readonly_request_rejected_401_406_PGRST106",
+      "actual_login": "NOT_RUN_missing_test_access_token",
+      "DATABASE_URL": "DEFERRED_user_will_supply_later",
+      "Drive_settings": "MISSING",
+      "migration_002": "NOT_APPLIED",
+      "legacy_entitlement": "public.jeongsi_passes_not_automatically_bound_to_jungsi_backend.entitlements",
+      "single_entitlement_authority": "decision_and_adapter_contract_pending",
+      "server_connection_candidates": [
+        "separate_Jungsi_FastAPI_deployment",
+        "external_EduTouch_namespace_adapter"
+      ],
+      "selection": "not_selected",
+      "actual_connection_values": "private_only_never_common_Git",
+      "existing_SSR_OpenNext_rewrite": "external_reference_only_not_22_API_or_entitlement_acceptance",
+      "actual_DB_and_test_user_validation": "DEFERRED_until_private_settings_available"
+    },
+    "historical_DEV002_verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.\n\n기획팀 검토 후 [PR #8](https://github.com/natural0448/Jungsi_touch/pull/8)을 develop 03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced에 병합했다. 검토한 기능 커밋 c5376f0d8674cf82add0959abec385682f14cd4f의 [GitHub CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288)에서 합성 테스트 228개와 문서·코드 참조·계층·비공개 데이터 제외 검사가 통과했다. 실제 Supabase·Drive 연결과 원자료/모형 검수는 설정 대기이며 이 통과에 포함되지 않는다."
   },
   "repository_layout": {
     "reference_branch": "develop",
@@ -4519,10 +5019,10 @@
     ],
     "remaining": [
       "실제 자료의 비교값·연도 보정·정책별 숫자와 근거 승인",
-      "실제 Supabase/DB/Drive 설정 및 운영 마이그레이션·발행 검증",
+      "Supabase 최소GET확인 이후 DATABASE_URL·검수사용자token·Drive설정은추후준비하며 실제DB001/002적용과발행검증은deferred/NOT_RUN/NOT_APPLIED",
       "전국 대학 산출 정확도·예측 성능 검증",
       "외부 프런트 담당의 새 context/version/base_result, 후보 분할, 이유 코드 소비 수정 및 브라우저 검증",
-      "확정 서비스·DB 구현 adc684be2e9d22f8edad766d044b81894676036d의 PR #13 develop 통합. 현재 open/draft이며 운영 배포 완료가 아니다."
+      "PR13의서비스·DB 코드는develop947cee8에통합완료. 운영배포·검수사용자·DB/Drive·외부프런트·예측정확도는별도증거대기다."
     ],
     "scope_excludes": [
       "리포트/인쇄 확장",
@@ -4839,9 +5339,21 @@
         "difference": "LF normalization only"
       },
       "develop_integration": {
-        "status": "pending",
+        "status": "merged_verified",
         "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
-        "pull_request_state_at_acceptance": "open_draft"
+        "pull_request_state": "merged",
+        "merge_method": "merge",
+        "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+        "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+        "merge_tree_equals_tested_HEAD": true,
+        "CI": {
+          "conclusion": "success",
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+        },
+        "live_API_Supabase_DB_Drive": "NOT_RUN",
+        "operational_migration_002": "NOT_APPLIED",
+        "external_frontend_acceptance": "NOT_RUN",
+        "forecast_accuracy": "NOT_RUN"
       },
       "live_API_Supabase_DB_Drive": "NOT_RUN",
       "operational_migration_002": "NOT_APPLIED",
@@ -4852,8 +5364,20 @@
         "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
         "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
       ],
-      "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
-    }
+      "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다.",
+      "historical_develop_integration_at_adc684_acceptance": {
+        "status": "pending",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+        "pull_request_state_at_acceptance": "open_draft"
+      }
+    },
+    "historical_remaining_at_adc684_acceptance": [
+      "실제 자료의 비교값·연도 보정·정책별 숫자와 근거 승인",
+      "실제 Supabase/DB/Drive 설정 및 운영 마이그레이션·발행 검증",
+      "전국 대학 산출 정확도·예측 성능 검증",
+      "외부 프런트 담당의 새 context/version/base_result, 후보 분할, 이유 코드 소비 수정 및 브라우저 검증",
+      "확정 서비스·DB 구현 adc684be2e9d22f8edad766d044b81894676036d의 PR #13 develop 통합. 현재 open/draft이며 운영 배포 완료가 아니다."
+    ]
   },
   "presentation_connection_contract": {
     "format": "jungsi.presentation-connection/v1",
@@ -4891,10 +5415,11 @@
       "외부 프런트 담당의 수정 커밋·TypeScript/lint·브라우저 흐름 검증은 별도 인수 증거이며 현재 verification_pending"
     ],
     "remaining": [
-      "운영 Supabase/백엔드 설정과 기존 에듀터치의 동일 프로젝트/쿠키 배포 설정 확인",
+      "Supabase settings/JWKS/REST metadata 최소 GET는 확인했다. 검수 사용자·이용권·관리 capability·실제 DB/Drive·우리 22 API와 기존 서비스의 쿠키/배포 연결은 별도 검증 대기다.",
       "실제 계정/이용권/관리 capability의 전체 연결 검증",
       "v1.7.1 후보의 DTO allowlist/base_result/context/version/이유 코드/후보 분할을 외부 프런트 담당에게 확정 백엔드 커밋과 전달",
-      "운영 DB002 적용·권한·동시성·멱등·발행 readiness 실측은 NOT_RUN"
+      "운영 DB002 적용·권한·동시성·멱등·발행 readiness 실측은 NOT_RUN",
+      "사용자는 DATABASE_URL을 비공개 .env로 추후 제공하기로 했다. 실제 값·권한·DB 연결 승인을 추정하지 않으며 준비 전 실제 DB 검증은 유보한다."
     ],
     "scope_excludes": [
       "리포트/인쇄 확장",
@@ -5390,9 +5915,21 @@
         "difference": "LF normalization only"
       },
       "develop_integration": {
-        "status": "pending",
+        "status": "merged_verified",
         "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
-        "pull_request_state_at_acceptance": "open_draft"
+        "pull_request_state": "merged",
+        "merge_method": "merge",
+        "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+        "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+        "merge_tree_equals_tested_HEAD": true,
+        "CI": {
+          "conclusion": "success",
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+        },
+        "live_API_Supabase_DB_Drive": "NOT_RUN",
+        "operational_migration_002": "NOT_APPLIED",
+        "external_frontend_acceptance": "NOT_RUN",
+        "forecast_accuracy": "NOT_RUN"
       },
       "live_API_Supabase_DB_Drive": "NOT_RUN",
       "operational_migration_002": "NOT_APPLIED",
@@ -5403,20 +5940,25 @@
         "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
         "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
       ],
-      "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
+      "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다.",
+      "historical_develop_integration_at_adc684_acceptance": {
+        "status": "pending",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+        "pull_request_state_at_acceptance": "open_draft"
+      }
     }
   },
   "contract_review": {
     "format": "jungsi.contract-review/v1",
     "code_status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
-    "verification_status": "service_DB_verified_external_frontend_and_live_pending",
+    "verification_status": "service_DB_accepted_and_integrated_external_frontend_and_live_pending",
     "candidate_only": false,
     "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
     "checkout_baseline_commit": "9bf81e8d6a04e99086208422021fdb903aff204c",
     "scope": "기획팀은 시스템 기획·서비스·DB 계약과 인수검증을 담당한다. 실제 서비스·DB 코드는 개발팀, 프런트 구현은 다른 PC의 전담 개발자가 수행한다.",
     "limitations": [
-      "PR #13은 인수 시점 open/draft이며 develop 통합은 대기다. 운영 배포를 완료하지 않았다.",
-      "실제 API·Supabase·DB·Drive 연결과 운영 readiness는 NOT_RUN이다.",
+      "PR13은 merge commit通합947cee82f0a91b0ed337753d6e0ae9619e49a78b완료. 현재운영배포와실회원검증은완료하지않았다.",
+      "Supabase settings/JWKS/REST metadata 최소GET는검증했다. 실제검수사용자로그인/이용권·우리22API·DB·Drive 연결/readiness는NOT_RUN이며 DATABASE_URL은추후제공예정이다.",
       "운영 마이그레이션002는 NOT_APPLIED이며 실제 DB002 검증은 NOT_RUN이다.",
       "외부 프런트 전담자의 화면 구현·브라우저 인수는 이번 서비스·DB 작업 범위에서 NOT_RUN이다.",
       "실제 입결·학생 사례에 대한 예측 정확도 검증은 NOT_RUN이다."
@@ -5425,7 +5967,68 @@
     "commit_or_push_performed": true,
     "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
     "checkout_baseline_meaning": "9bf81e8d6a04e99086208422021fdb903aff204c는 기획 검토 체크아웃의 출발점이다. 서비스·DB 인수 대상은 source_backend_commit의 확정 구현이며 현재 상태 정정 문서의 새 커밋을 가리키지 않는다.",
-    "commit_or_push_scope": "확정 서비스·DB 구현 adc684be2e9d22f8edad766d044b81894676036d의 정상 커밋·원격 공유 사실이다. 이번 공통 인수 상태 정정 변경은 별도이며 개발팀이 후속 커밋/검사를 수행한다.",
-    "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
+    "commit_or_push_scope": "adc684 구현 인수와 74fd795 상태 정정의 정상 커밋/push를 거쳐 PR13이947cee82f0a91b0ed337753d6e0ae9619e49a78b로develop에merge commit 통합됐다. 이 기록은 고정된 과거 인수 증거이며 후속 공통 검사 후보의 미래 SHA를 뜻하지 않는다.",
+    "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다.",
+    "develop_integration": {
+      "status": "merged_verified",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+      "pull_request_state": "merged",
+      "merge_method": "merge",
+      "integrated_develop_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+      "status_document_commit": "74fd795099cc25762481c0498c76065f91048003",
+      "merge_tree_equals_tested_HEAD": true,
+      "CI": {
+        "conclusion": "success",
+        "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37302190441/job/111737291613"
+      },
+      "live_API_Supabase_DB_Drive": "NOT_RUN",
+      "operational_migration_002": "NOT_APPLIED",
+      "external_frontend_acceptance": "NOT_RUN",
+      "forecast_accuracy": "NOT_RUN"
+    },
+    "historical_limitations_at_adc684_acceptance": [
+      "PR #13은 인수 시점 open/draft이며 develop 통합은 대기다. 운영 배포를 완료하지 않았다.",
+      "실제 API·Supabase·DB·Drive 연결과 운영 readiness는 NOT_RUN이다.",
+      "운영 마이그레이션002는 NOT_APPLIED이며 실제 DB002 검증은 NOT_RUN이다.",
+      "외부 프런트 전담자의 화면 구현·브라우저 인수는 이번 서비스·DB 작업 범위에서 NOT_RUN이다.",
+      "실제 입결·학생 사례에 대한 예측 정확도 검증은 NOT_RUN이다."
+    ],
+    "common_tools_candidate": {
+      "owner": "시스템기획팀",
+      "branch": "develop",
+      "baseline_commit": "947cee82f0a91b0ed337753d6e0ae9619e49a78b",
+      "status": "candidate_verification_pending",
+      "historical_service_acceptance": "adc684/74fd 및 PR13 develop947 통합의 확정 인수 증거는 보존한다. 후속 공통 검사 후보의 미래 commit/CI를 뜻하지 않는다.",
+      "actual_frontend_deletion": "NOT_RUN_external_executor",
+      "actual_DB_validation": "DEFERRED_DATABASE_URL_user_will_supply_later",
+      "historical_focused_verification": {
+        "tests_run": 142,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source_sha256": "180d6a49a3d36945269669c904c1a1ce07425759d0f033d458dc3579a96cb11e",
+        "receipt": "outputs/common_git_review/20261005T132947463779Z/focused-receipt.json",
+        "scope": "e12 후속 메타문서 반영 전 공통 6모듈 검증; 전체 서비스/운영 증거가 아니다."
+      }
+    },
+    "CI_parent_authentication": {
+      "historical_fixed_SHA_only": "과거 fixed SHA만 fetch한 CI에서는 과거 second-parent의 실제 원격 develop 계보까지 인증하지 못했다. 당시 merge-tree/직접 수정/삭제 검증 증거를 보존한다.",
+      "current_candidate": "현재 workflow 후보는 fixed github.sha와 전체 부모 이력, develop/프런트 tracking refs를 확보·고정 SHA 확인한 뒤 trusted registry와 부모 이력을 검사한다.",
+      "verification_limit": "현재 새 workflow의 원격 CI 실행/서버 강제 보호 완료는 주장하지 않는다. GitHub 권한/브랜치 강제 보호 제한과 로컬 선언 한계는 유지한다."
+    },
+    "handoff_response": {
+      "path": "docs/team_sessions/2026-10-05/DEV006_서비스_DB_응답.md",
+      "title": "DEV006 서비스·DB 응답과 외부 프런트 인계",
+      "body": "기준일: 2026-10-05. 상태: **서비스·DB 확정 코드 인수 완료 / 공통 계약 동일성 확인 / develop947 통합 완료 / 실제 사용자·DB·외부 프런트 검증 대기**. 문서 인계 revision: **6**. 후속 공통 검사·기획 상태 정합성은 시스템기획팀의 develop 후보이며 새 커밋·원격 CI 인수는 대기다.\n\n이 문서는 외부 프런트 전담 개발자가 소비할 공개 구조와 관리 응답의 허용 필드를 설명한다. 실제 성적·입결·키·계수·곡선·운영 연결 값은 포함하지 않는다. 시스템 기획팀은 공통 계약과 인수 기준을, 서비스·DB 개발팀은 백엔드 구현을 담당한다. 프런트 코드와 브라우저 검증은 다른 PC의 전담 개발자가 담당한다.\n\n## ① 구현 기준과 확정 SHA\n\n서비스·DB 수정의 확정 구현 SHA는 **`adc684be2e9d22f8edad766d044b81894676036d`**이며, 부모는 `262e6ba283d37c9e2e446619e6bf1235f4881170`이다. 이 커밋에 원래 검토 지적 7개와 DB002 준비 검사 보완, v1.7.1 공통 계약 및 생성 문서가 함께 포함돼 있다. 해당 코드·계약의 인수 검증을 완료했다.\n\n[PR #13](https://github.com/natural0448/Jungsi_touch/pull/13)을 통해 원격에 공유했다. adc684 인수 시점의 PR은 open/draft였고 그 기록은 역사다. 현재 PR13은 merged이며 develop947cee82f0a91b0ed337753d6e0ae9619e49a78b로 통합됐다. 확정 커밋의 GitHub `project-consistency` 검사 두 건은 모두 success로 확인됐다. 서비스·DB 인수와 develop 통합 완료를 운영 배포·실사용자 검증 완료로 확대하지 않는다.\n\n공통 계약은 [service_spec.json](../../current/service_spec.json), 설명은 [분석화면_연결.md](../../current/분석화면_연결.md)와 [예상기준_산출과_관리.md](../../current/예상기준_산출과_관리.md)를 함께 사용한다. 기획·라우팅·DTO는 같은 공통 명세에서 생성된다. 외부 프런트 연동 시 확정 구현 커밋의 코드와 공통 문서를 함께 사용한다.\n\n확정 구현 adc684의 인수 대상 공통 명세 원본 파일 SHA256은 `37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7`, 그 커밋에 저장된 같은 파일 내용 SHA256은 `8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42`이다. 이 차이는 Git의 LF 정규화이며 의미 변경이 없음을 독립 대조했다.\n\n현재 공통 명세는 같은 v1.7.1 기능 계약을 유지하면서 서비스·DB 상태를 `implemented_synthetic_HTTP_contract_verified_live_readiness_pending` / `code_verified_live_NOT_RUN`으로 정정했다. 검토 출발점 `9bf81e8d6a04e99086208422021fdb903aff204c`와 인수 구현 adc684를 구분하고, 외부 화면 계약의 `approved_for_implementation` / `verification_pending`은 유지한다. 역사적으로 서비스·DB 개발팀은 adc684 구현과 74fd 인수 상태 정정을 제공했고 PR13의 develop947 통합을 완료했다. 이후 공통 검사·기획 문서 정리는 시스템기획팀이 develop947을 출발점으로 단독 작성한다. 서비스 개발팀은 서비스 계층을, 외부 화면 개발팀은 프런트를 담당한다. 이 문서에 기록한 493건은 adc684의 검사 증거이며 후속 후보의 재검사 결과가 아니다.\n\n프런트의 관측 기준은 외부 화면 담당자의 [PR #6](https://github.com/natural0448/Jungsi_touch/pull/6) 및 `e12dd849fb7f3d2e05fe4fc7655a37d613e349cb` HEAD다. 기획팀은 고정 승인 소스 `f46c6635664a6c2315e6c71c4f700aa3e331c60c`의 조상 관계와 정확한 4개 blob/mode의 동일성을 읽기 대조했다. 이 최신 관측은 삭제 승인의 고정 source를 바꾸거나 화면 구현을 통합·인수한 기록이 아니다. 이 채팅에서 만든 임시 프런트 후보는 외부 담당자가 채택한 구현 기준으로 취급하지 않는다.\n\n## ② 관리 초안과 공개 발표본의 응답\n\n`forecast_draft`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, draft_id, offering_id, revision, status,\nbase_result_hash, policy_version, context,\nresult, base_result, created_at, updated_at,\nadjustments, validation, approval, audit_events\n```\n\n- `result`: 현재 revision에서 채택하여 검증할 최종 객체.\n- `base_result`: 조정 전 서버 산출 원본. 조정·검증·승인으로 수정하지 않는다.\n- 두 객체의 필드: `forecast_70`, `acceptance_range`, `category_ranges`.\n- 관리 상태: `draft → validated → approved → published`. 조정하면 새 revision이 되고 이전 검증·승인을 승계하지 않는다.\n- `created_at`, `updated_at`, 감사 기록의 `at`은 UTC Z 문자열이다.\n- 관리 draft의 최상위 `input_version`은 반환하지 않는다. 초안 생성 요청과 공개 발표본의 `input_version`을 관리 draft 응답과 구분한다.\n\n관리 `context`의 허용 20필드는 다음과 같다. 학교·캠퍼스·전형·모집군을 확인하기 위한 객체이며 공개 발표본의 context와 다르다.\n\n```text\noffering_id, offering_lineage_id, academic_year, university_id,\ncampus, department, track, group, exam_id, source_pack_version,\ncatalog_version, analysis_version, rule_id, rule_version,\ncurve_version, population_id, score_scope, score_scale_id,\nbonus_treatment, unit\n```\n\n중첩 객체는 다음 허용 필드만 소비한다. 필드의 부재·null·실제 0을 구분한다.\n\n| 객체 | 허용 필드 |\n|---|---|\n| `result.forecast_70` / `base_result.forecast_70` | `status`, `reason_code`, `value`, `unit`, `definition`, `version` |\n| `result.acceptance_range` / `base_result.acceptance_range` | `status`, `reason_code`, `lower`, `upper`, `unit`, `definition`, `policy_version` |\n| `result.category_ranges[]` / `base_result.category_ranges[]` | `category`, `lower`, `upper` |\n| `adjustments[]` | `target`, `replacement`, `reason`, `evidence_refs`, `actor`, `at`, `base_result_hash` |\n| `validation` | `status`, `reason_code`, `checks`, `validated_revision`, `result_hash`, `receipt_hash`, `at` |\n| `approval` | `approved_revision`, `result_hash`, `validation_hash`, `approval_hash`, `reason`, `at` |\n| `audit_events[]` | `action`, `actor`, `at` |\n\n`adjustments[].replacement`는 대상에 따라 형태가 다르다. `forecast_70`은 `value/unit`, `acceptance_range`는 `lower/upper/unit`, `category_ranges`는 `ranges` 배열을 가진 객체다. `ranges[]`에는 `category/lower/upper`만 들어간다.\n\n검증 요청은 현재 revision·기준 해시·정책 버전에 결속한다. 승인 요청에는 `validation.receipt_hash`, 게시 요청에는 `approval.approval_hash`를 전달한다. 영수증은 프런트에서 만들지 않는다. 모든 관리 POST에는 `Idempotency-Key`가 필요하다. 유료 회원 여부로 관리 권한을 부여하지 않으며 서버의 editor/approver 및 허용 학교 범위가 기준이다.\n\n관리 `actor`와 영수증 해시는 관리 권한으로 보호된다. 학생 응답에는 직원 식별·내부 감사 기록·상위 `input_hash/policy_hash`·전체 저장 record·내부 정확값 저장 객체·원자료·계수·trace를 복사하지 않는다.\n\n공개 `forecast_public`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, status, reason_code, offering_id, release_version,\ncontext, policy_version, input_version,\nforecast_70, expected_acceptance_range, category_ranges,\nbasis_summary, issue_summaries, recommendation_reasons,\nadjustment_summary\n```\n\n공개 `status`는 **`published | pending`**이다. `pending`이면 `release_version/context/policy_version/input_version/forecast_70/expected_acceptance_range`는 null이며, 미발행 사유를 유지한다. 발표본이 `published`여도 예상 70%와 별도 합격권은 각각 `ready/pending`일 수 있다. 70%만 준비됐다는 이유로 최저 합격점·합격확률을 만들지 않는다.\n\nHTTP 오류 응답과 공개 발표본의 `pending` 객체는 별개다. 현재 context 또는 고정 입력·정책 내용이 달라진 공개 조회는 `409` 오류가 될 수 있다. 이 응답을 기존 학생 분석의 발표본과 결합하지 않으며, 학생 분석 경로에서는 성공한 환산·누백을 유지한 채 지원 판단을 보류한다.\n\n공개 중첩 형태는 다음과 같다.\n\n- `forecast_70`: 관리 기준선과 동일한 `status/reason_code/value/unit/definition/version`.\n- `expected_acceptance_range`: 관리 합격권과 동일한 `status/reason_code/lower/upper/unit/definition/policy_version`.\n- `category_ranges[]`: `category/lower/upper`.\n- `recommendation_reasons[]`: `code/text/evidence_refs`.\n- `issue_summaries[]`: `issue_id/title/summary/numeric_effect_applied`.\n- `adjustment_summary`: `applied/reason/version`.\n\n학생 `assessment.conversion`에는 중복 `rule_explanations`를 추가하지 않는다. 실제 반영 방법 설명은 `assessment.recommendation_reasons`의 등록 코드로 전달한다.\n\n## ③ 학생 분석과 발표본을 같은 근거로 결합하는 조건\n\n학생 `assessment.decision_evidence`와 공개 발표본에 같은 `context`, `policy_version`, `input_version` projection을 전달한다. 공개 context의 허용 17필드는 다음과 같다.\n\n```text\noffering_id, academic_year, exam_id, source_pack_version,\ncatalog_version, rule_id, rule_version, curve_version,\nanalysis_version, score_scale_id, score_scope, bonus_treatment,\npopulation_id, comparison_metric, unit, direction, tie_policy\n```\n\n다음 항목이 전부 일치할 때만 두 응답을 같은 근거로 결합한다.\n\n1. 학생 `forecast_release_version`와 발표본 `release_version`.\n2. 두 응답의 `policy_version`, `input_version`.\n3. 공개 context 17필드의 값과 타입, 명시적 null.\n\n외부 프런트 `e12dd849fb7f3d2e05fe4fc7655a37d613e349cb`의 읽기 검토는 완료했다. 공개 context 17필드의 순서·값·타입·명시적 null을 대조하고, `409`를 published 조회에서만 처리하여 다른 오류를 가리지 않는 범위는 확인됐다. 다만 버전 세 쌍의 `===`만 검사하면 양쪽 누락값/undefined, null 또는 빈 문자열이 같다는 이유로 결합될 수 있어 외부 담당의 보완이 필요하다.\n\n버전 비교 전 학생/발표본의 release 버전, 양쪽 `policy_version`, 양쪽 `input_version`이 모두 유효한 비어 있지 않은 문자열인지 확인해야 한다. 이 조건을 충족할 때만 원래 값의 exact equality로 결합한다. 한쪽 또는 양쪽의 누락/undefined/null/빈 문자열/잘못된 타입은 `sameRelease=false`로 처리하고 재분석·지원 판단 보류를 표시한다. 미완성 응답을 지원하는 기존 DTO nullable 계약은 유지한다. 외부 담당은 정상 동일/불일치와 한쪽·양쪽 누락/null/빈 값/잘못된 타입 회귀를 추가해야 하며, 이 채팅의 실제 화면 변경·브라우저 인수는 **NOT_RUN**, 전체 프런트 상태는 **verification_pending**이다.\n\n학생 분석은 계산할 때 채택한 발표본 버전을 유지한다. 새 발표본을 읽어 옛 학과 판정에 새 컷만 덧붙이지 않는다. 발표본·자료·규칙·곡선·카탈로그가 달라지면 재분석 대상으로 표시하고 새로운 학생 분석 revision에서 채택한다. 필요한 값이 없거나 결속이 틀리면 성공한 환산·누백과 과거 발표 자료는 유지하면서 지원 판단만 보류한다.\n\n`comparison_metric`은 `converted_score | university_top_percent`다. 점수는 내부 정확 환산값, 단위 `점`, 방향 `higher_is_better`, 동점 정책의 해당 없음은 `tie_policy=null`이다. 대학 누백은 `percentile.top_percent`에 대응하는 정확 비율, 단위 `%`, 방향 `lower_is_better`, `tie_policy=include_equal`이다. 전체 국수탐2 `overall` 누백을 대학 누백 비교 값으로 대신 넣지 않는다.\n\n`population_scope`와 `data_kind`는 `percentile` DTO에서 전체/반영 필수 비교집단 및 관측/추정 의미를 표시한다. 공개 발표본 context에 이 두 필드를 가공해 넣거나 관리 context로 대신 결합하지 않는다.\n\n이유 코드는 반영 방법, 지원 판단, 환산 유불리의 세 종류로 구분한다. 우수 탐구 반영·영어 등급 차감 같은 규칙 설명만으로 학생에게 유리했다고 표현하지 않는다. 정확한 동일 모집단 위치 차이의 근거가 있을 때만 유불리 이유를 생성한다.\n\n후보 응답의 `outside_offerings`, `ineligible_offerings`, `pending_offerings`는 각각 판단 완료 추천 범위 밖, 확인된 조건 미충족, 자료·자격·승인·버전 부족에 따른 보류다. 추천 대학이 0개여도 모든 판단이 outside/ineligible로 완료됐다면 정상 `ready` 빈 결과다. 실제로 모두 보류인 `pending`과 구분한다.\n\n## ④ 실제 연결 설정과 검증 계정\n\nAPI 구현과 응답 계약은 ①의 확정 구현과 develop947 통합으로 제공됐다. Supabase의 비공개 설정4필드를 받아 settings/JWKS/REST metadata 최소GET를 확인했다. 기존외부API는우리22 API/이용권 계약과달라주소를자동채택하지않는다. DATABASE_URL은추후.env로제공예정이며검수사용자token·이용권·관리 capability·Drive설정도대기다. 실제회원로그인과운영DB/Drive/우리API연동은NOT_RUN, 운영001/002적용은이작업에서수행하지않았다. 키·비밀번호·실제접속값은이문서와Git에넣지않는다.\n\nDB 마이그레이션 `002_forecast_policy.sql`의 실제 운영 DB 적용은 **NOT_APPLIED**, 운영 readiness 검증은 **NOT_RUN**이다. 5개 테이블·002 버전·필수 열 타입/NOT NULL·PK/FK/CHECK·RLS·클라이언트 권한을 확인하는 읽기 전용 준비 검사와 추가형 SQL 검사는 구현·합성 검증했다. 실제 서버 권한·직접 접근 차단·불변 revision·동시 수정·멱등 재시도·원자적 게시와 UTC 저장의 운영 증거는 아직 없다. 운영 마이그레이션을 자동 적용하지 않으며 합성 HTTP·메모리 저장소·DB 모의 검증을 실제 운영 DB 증거로 표시하지 않는다.\n\n## ⑤ 검사 보완과 계층별 완료 상태\n\n공통 명세·생성 문서·라우팅 및 36개 계약 드리프트 검사는 통과했다. 정확 경계·비교 지표·전체 버전 결속·과거 공식 입결 보존·DTO 허용 필드·이유 코드·후보 분리의 서비스 수정과 DB 준비 검사 보완은 ①의 확정 커밋에서 코드 인수를 완료했다.\n\n정상 커밋·push 훅의 확정 Git 스냅샷 전체 검사는 **493건 통과, 실패 0·오류 0·건너뜀 0**이다. 사전 승인한 서비스·테스트 16개 파일과 공통 계약·생성물·검사 도구 25개 파일이 확정 커밋과 동일하거나 LF 정규화만 다름을 독립 확인했다. 합성 서비스 응답의 DTO 허용 필드 40건 대조도 통과했다. 이 40건은 응답 필드 집합 검사이며 운영 연결·예측 정확도 전체를 검증한 수치가 아니다.\n\n인수 증거는 프로젝트 루트의 `outputs/service_review/20261005T104545255261Z/planning-acceptance.json`과 같은 폴더의 `service-fix-byte-verification.json`에 보존돼 있다. 이번 갱신에서는 그 증거를 읽어 인수 상태를 반영했으며 493건 전체 회귀를 재실행하지 않았다. 공통 인수 상태 정정의 문서/라우팅 일치와 36개 계약 검사는 별도 영수증으로 확인한다. 프런트 소스 변경 0, 파일 삭제 0, 보호 대상 경로 추적 0도 adc684 인수 증거에서 확인했다.\n\n서비스·DB 코드를 인수한 뒤에도 운영 DB002 `NOT_RUN`과 `production_ready=false` 제약이 유지되도록 공통 검사 한 조건을 강화했다. 후보 여부만으로 운영 제약 검사를 해제하지 않는다. 기존 운영 DB 완료 위조 거부 테스트를 유지하며, 코드 인수 사실과 실제 운영 인수를 혼동하지 않게 하는 상태 정합성 보완이다.\n\n병합 검사는 승인된 develop 인입 또는 등록 직계 부모를 Git 재구성 결과에 결속하고 기획 경로의 충돌 해결과 별도 수정 범위를 구분하도록 보완했다. 기존 삭제 차단·main 승격·팀 권한·등록 부모·fast-forward 검사와 과거 이력을 유지한다.\n\n과거 검증 범위의 한계: 고정 SHA만 fetch하던 CI에서는 과거 second-parent가 실제 원격 develop 계보에 속했는지까지 인증하지 못했다. 당시 부모별 자동 병합 결과와 직접 수정·삭제·충돌 허용 범위의 검사 증거를 보존한다. 현재 staged 검사는 확인한 `refs/remotes/origin/develop` tip에 결속하며, 현재 workflow 후보는 fixed github.sha와 전체 부모 이력 및 develop/프런트 tracking refs를 함께 확보·고정 SHA 확인한 뒤 trusted policy를 검사한다. 이 후보의 로컬 합성 검증과 새 커밋의 원격 CI 실행은 구분하며, 새 원격 CI 전체 인증이나 서버의 강제 보호가 완료됐다고 주장하지 않는다.\n\n상태는 기획 계약 검증, 서비스·DB 코드 인수, 외부 프런트 수정/브라우저 인수, 실제 운영 연결을 각각 기록한다. 외부 프런트가 미완료여도 확인된 서비스·DB 검증 결과는 별도로 보고한다. 코드·계약 검사 통과를 전체 서비스나 예측 정확도 완료로 확대하지 않는다.\n\n| 범위 | 이 인계 시점의 상태 |\n|---|---|\n| v1.7.1 공통 계약·서비스·DB 코드 | 확정 커밋 코드 인수 완료 |\n| 확정 Git 스냅샷 검사 / 정확한 HEAD의 원격 검사 | 493건 PASS / project-consistency 두 건 success |\n| develop 통합 | PR #13 merged, 947cee82f0a91b0ed337753d6e0ae9619e49a78b |\n| 외부 전담 프런트 구현·브라우저 인수 | 이 서비스·DB 작업 범위에서 NOT_RUN |\n| Supabase Auth settings/JWKS/REST metadata 최소 GET | 읽기 준비 검수 PASS; 실제 로그인·DB 인수와 구분 |\n| 실제 회원/이용권·우리 22 API·운영 DB·Drive 연결과 readiness | NOT_RUN; DATABASE_URL .env 추후 제공, 실제 DB 검증 유보 |\n| 운영 DB002 적용 | NOT_APPLIED |\n| 실제 입결·학생 사례에 대한 예측 정확도 검증 | NOT_RUN |\n\n## ⑥ session.read 제안 PR #5\n\n[PR #5](https://github.com/natural0448/Jungsi_touch/pull/5)의 session.read는정식공통계약에채택됐으며기획팀이2026-10-05T12:42:14Z에중복제안으로closed 처리했다. bb98a825e6cd86a20359557deec114b2980e78cb head와원격branch·원본은보존했다. 과거adc684인수시점의open 상태는이전문서/인수영수증에보존한다. 유용한동적len(operations) 제목과정식session권한/DTO 검사는현재공통도구로계승했다. 종료영수증은비공개outputs/integration_review_20261005T213058546/pr5-closure-result.json, SHA256 e6c15901d815707582b39e24b79f3d8d44d2efe60c8649efb64aad40d70cdb2e에있다.\n\n## ⑦ 초안·기존 프런트 후보 보존\n\n직접 사용자 메시지의 승인 증거를 정확한 4개 프런트 초안 경로에 한정해 확인하고 공통 삭제 등록부 후보에 결속했다. 증거 thread는 `01a0ccde-6f3d-7772-acd3-3eaca9a67b65`, turn은 `01a10bf5-8841-74a3-93e2-f2e2de8ac674`, message는 `01a10bf5-898b-7180-8442-3bfd4d1c2914`다. 다른 채팅의 승인 주장만으로 판단하지 않는다. 별도 선행 develop 등록과 고정 source/blob/mode/바이트 SHA 및 최초 삭제 사건 검사를 통과해야 하며 같은 커밋의 자기 승인·과거 소급·수정/복원 후 재사용·병렬 재소비를 허용하지 않는다.\n\n승인 경로는 `apps/web/src/lib/contract.ts`, `apps/web/src/lib/api/synthetic-fixtures.ts`, `apps/web/src/app/admissions/possibilities/actions.ts`, `apps/web/src/components/pending-page.tsx` 네 개뿐이다. 실제 삭제 executor는 외부 화면 개발팀이며 실행은 **NOT_RUN**이다. 시스템기획팀은 등록·검사·합성 회귀만 담당한다. 그 밖의 초안·원본·이전 후보·캐시·검토 결과는 보존한다. 이 문서는 실제 삭제 실행 증거가 아니다.\n\n\n## PR13 develop 통합 완료와 DEV006⑦ 공통 검사 후보\n\n서비스·DB 구현 adc684와 인수 상태 정정74fd는 PR13 merge commit947cee82f0a91b0ed337753d6e0ae9619e49a78b로develop에통합됐다. 병합트리는493검사HEAD와같으며정확병합SHA CI도성공했다. 앞선493기록은역사증거로보존한다. 후속공통검사의최신검증은별도영수증으로기록하며미래자기SHA를이문서에넣지않는다.\n\nDEV006⑦의승인등록은공통spec.workflow.branch_governance.file_deletion_policy를따른다. 별도develop선행등록을읽으며정확4경로·origin branch·고정source/blob/mode/바이트SHA·직접사용자증거·원본보존·최초삭제사건을검사한다. 실제삭제의executor는외부화면개발팀이다. 시스템기획팀은 develop947 이후 등록·공통검사·합성검증만 담당하고 실제 파일을 삭제하지 않는다. 서비스 개발팀은 사용자 지시에 따라 서비스 계층에 한정하고 프런트는 외부 전담자 소관이다.\n\nSupabase 최소 GET 준비 검수는 아래 읽기 증거로 확인했다. 실제 회원·이용권·운영 DB/Drive/우리 22 API·검수계정/쿠키도메인·운영DB002·외부브라우저·예측정확도는 새 증거 전 NOT_RUN/NOT_APPLIED를 유지한다. DATABASE_URL은 사용자에게 비공개 .env로 추후 전달받기 전까지 실제 DB 검증을 유보한다. GitHub연동설정은기획팀이조사중이며로컬설정검색결과를외부프로젝트부재로확대하지않는다.\n\n\nSupabase 최소 GET 준비 검수: Auth settings/JWKS 200, 사용자토큰없는getUser401, server secret의RESTmetadata200, jungsi_backend schema요청401/406으로직접노출거부. 실제관리자계정·회원로그인·이용권·DB/Drive는미검증이며DB접속설정은추후제공예정이다. 기존외부API의me DTO와jeongsi namespace뼈대는우리22 API계약과다르므로주소를자동채택하지않는다. PR5는2026-10-05 중복제안closed이며head/ref와원본은보존했고동적22경로제목·정식session검사를계승했다.",
+      "source_rule": "공통 명세에서 생성한다. 역사 인수 증거와 현재 공통 후보·운영 유보 상태를 구분한다."
+    },
+    "external_frontend_readonly_review": {
+      "observed_head": "e12dd849fb7f3d2e05fe4fc7655a37d613e349cb",
+      "status": "readonly_review_completed_external_implementation_verification_pending",
+      "confirmed": "공개 context17필드의 순서·값·타입·null 비교와 published 조회에서만409를 처리하는 범위는 읽기 확인했다.",
+      "followup": "발표본/학생 release 버전, policy_version, input_version 양쪽 값 모두 유효한 비어 있지 않은 문자열일 때만 exact equality로 결합한다. 누락/undefined/null/빈 문자열은 same=false와 재분석/보류다.",
+      "regressions_required": "동일 유효 버전/불일치/한쪽 및 양쪽 누락/null/빈 문자열/잘못된 타입을 외부 화면 담당이 회귀로 검증한다.",
+      "scope_boundary": "22 API와 DTO nullable 계약 변경 없음; 화면 코드 수정·브라우저 인수는 외부 담당이며 NOT_RUN/verification_pending을 유지한다."
+    }
   }
 }

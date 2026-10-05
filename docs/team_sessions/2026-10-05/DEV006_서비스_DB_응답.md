@@ -1,6 +1,8 @@
 # DEV006 서비스·DB 응답과 외부 프런트 인계
 
-기준일: 2026-10-05. 상태: **서비스·DB 확정 코드 인수 완료 / 공통 계약 동일성 확인 / develop 통합 대기**. 문서 인계 revision: **4**.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.7.1이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+
+기준일: 2026-10-05. 상태: **서비스·DB 확정 코드 인수 완료 / 공통 계약 동일성 확인 / develop947 통합 완료 / 실제 사용자·DB·외부 프런트 검증 대기**. 문서 인계 revision: **6**. 후속 공통 검사·기획 상태 정합성은 시스템기획팀의 develop 후보이며 새 커밋·원격 CI 인수는 대기다.
 
 이 문서는 외부 프런트 전담 개발자가 소비할 공개 구조와 관리 응답의 허용 필드를 설명한다. 실제 성적·입결·키·계수·곡선·운영 연결 값은 포함하지 않는다. 시스템 기획팀은 공통 계약과 인수 기준을, 서비스·DB 개발팀은 백엔드 구현을 담당한다. 프런트 코드와 브라우저 검증은 다른 PC의 전담 개발자가 담당한다.
 
@@ -8,15 +10,15 @@
 
 서비스·DB 수정의 확정 구현 SHA는 **`adc684be2e9d22f8edad766d044b81894676036d`**이며, 부모는 `262e6ba283d37c9e2e446619e6bf1235f4881170`이다. 이 커밋에 원래 검토 지적 7개와 DB002 준비 검사 보완, v1.7.1 공통 계약 및 생성 문서가 함께 포함돼 있다. 해당 코드·계약의 인수 검증을 완료했다.
 
-[PR #13](https://github.com/natural0448/Jungsi_touch/pull/13)을 통해 원격에 공유했다. 이 인계 시점의 PR은 **open / draft**이며 develop 통합은 예정 상태다. 확정 커밋의 GitHub `project-consistency` 검사 두 건은 모두 success로 확인됐다. 서비스·DB 코드 인수 완료를 develop 통합 또는 운영 배포 완료로 확대하지 않는다.
+[PR #13](https://github.com/natural0448/Jungsi_touch/pull/13)을 통해 원격에 공유했다. adc684 인수 시점의 PR은 open/draft였고 그 기록은 역사다. 현재 PR13은 merged이며 develop947cee82f0a91b0ed337753d6e0ae9619e49a78b로 통합됐다. 확정 커밋의 GitHub `project-consistency` 검사 두 건은 모두 success로 확인됐다. 서비스·DB 인수와 develop 통합 완료를 운영 배포·실사용자 검증 완료로 확대하지 않는다.
 
 공통 계약은 [service_spec.json](../../current/service_spec.json), 설명은 [분석화면_연결.md](../../current/분석화면_연결.md)와 [예상기준_산출과_관리.md](../../current/예상기준_산출과_관리.md)를 함께 사용한다. 기획·라우팅·DTO는 같은 공통 명세에서 생성된다. 외부 프런트 연동 시 확정 구현 커밋의 코드와 공통 문서를 함께 사용한다.
 
 확정 구현 adc684의 인수 대상 공통 명세 원본 파일 SHA256은 `37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7`, 그 커밋에 저장된 같은 파일 내용 SHA256은 `8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42`이다. 이 차이는 Git의 LF 정규화이며 의미 변경이 없음을 독립 대조했다.
 
-현재 공통 명세는 같은 v1.7.1 기능 계약을 유지하면서 서비스·DB 상태를 `implemented_synthetic_HTTP_contract_verified_live_readiness_pending` / `code_verified_live_NOT_RUN`으로 정정했다. 검토 출발점 `9bf81e8d6a04e99086208422021fdb903aff204c`와 인수 구현 adc684를 구분하고, 외부 화면 계약의 `approved_for_implementation` / `verification_pending`은 유지한다. 이 인수 상태 정정·생성 문서·전달 문서의 후속 변경은 개발팀이 adc684 위에 적용하고 같은 Git 스냅샷을 전체 검사해 새 커밋으로 공유한다. 이 문서에 기록한 493건은 adc684의 검사 증거다.
+현재 공통 명세는 같은 v1.7.1 기능 계약을 유지하면서 서비스·DB 상태를 `implemented_synthetic_HTTP_contract_verified_live_readiness_pending` / `code_verified_live_NOT_RUN`으로 정정했다. 검토 출발점 `9bf81e8d6a04e99086208422021fdb903aff204c`와 인수 구현 adc684를 구분하고, 외부 화면 계약의 `approved_for_implementation` / `verification_pending`은 유지한다. 역사적으로 서비스·DB 개발팀은 adc684 구현과 74fd 인수 상태 정정을 제공했고 PR13의 develop947 통합을 완료했다. 이후 공통 검사·기획 문서 정리는 시스템기획팀이 develop947을 출발점으로 단독 작성한다. 서비스 개발팀은 서비스 계층을, 외부 화면 개발팀은 프런트를 담당한다. 이 문서에 기록한 493건은 adc684의 검사 증거이며 후속 후보의 재검사 결과가 아니다.
 
-프런트 기준은 외부 화면 담당자의 [PR #6](https://github.com/natural0448/Jungsi_touch/pull/6) 및 제공한 `6c22…` HEAD다. 전체 SHA와 최신 상태는 외부 담당자의 인계에서 확인한다. 이 채팅에서 만든 임시 프런트 후보는 외부 담당자가 채택한 구현 기준으로 취급하지 않는다.
+프런트의 관측 기준은 외부 화면 담당자의 [PR #6](https://github.com/natural0448/Jungsi_touch/pull/6) 및 `e12dd849fb7f3d2e05fe4fc7655a37d613e349cb` HEAD다. 기획팀은 고정 승인 소스 `f46c6635664a6c2315e6c71c4f700aa3e331c60c`의 조상 관계와 정확한 4개 blob/mode의 동일성을 읽기 대조했다. 이 최신 관측은 삭제 승인의 고정 source를 바꾸거나 화면 구현을 통합·인수한 기록이 아니다. 이 채팅에서 만든 임시 프런트 후보는 외부 담당자가 채택한 구현 기준으로 취급하지 않는다.
 
 ## ② 관리 초안과 공개 발표본의 응답
 
@@ -106,6 +108,10 @@ population_id, comparison_metric, unit, direction, tie_policy
 2. 두 응답의 `policy_version`, `input_version`.
 3. 공개 context 17필드의 값과 타입, 명시적 null.
 
+외부 프런트 `e12dd849fb7f3d2e05fe4fc7655a37d613e349cb`의 읽기 검토는 완료했다. 공개 context 17필드의 순서·값·타입·명시적 null을 대조하고, `409`를 published 조회에서만 처리하여 다른 오류를 가리지 않는 범위는 확인됐다. 다만 버전 세 쌍의 `===`만 검사하면 양쪽 누락값/undefined, null 또는 빈 문자열이 같다는 이유로 결합될 수 있어 외부 담당의 보완이 필요하다.
+
+버전 비교 전 학생/발표본의 release 버전, 양쪽 `policy_version`, 양쪽 `input_version`이 모두 유효한 비어 있지 않은 문자열인지 확인해야 한다. 이 조건을 충족할 때만 원래 값의 exact equality로 결합한다. 한쪽 또는 양쪽의 누락/undefined/null/빈 문자열/잘못된 타입은 `sameRelease=false`로 처리하고 재분석·지원 판단 보류를 표시한다. 미완성 응답을 지원하는 기존 DTO nullable 계약은 유지한다. 외부 담당은 정상 동일/불일치와 한쪽·양쪽 누락/null/빈 값/잘못된 타입 회귀를 추가해야 하며, 이 채팅의 실제 화면 변경·브라우저 인수는 **NOT_RUN**, 전체 프런트 상태는 **verification_pending**이다.
+
 학생 분석은 계산할 때 채택한 발표본 버전을 유지한다. 새 발표본을 읽어 옛 학과 판정에 새 컷만 덧붙이지 않는다. 발표본·자료·규칙·곡선·카탈로그가 달라지면 재분석 대상으로 표시하고 새로운 학생 분석 revision에서 채택한다. 필요한 값이 없거나 결속이 틀리면 성공한 환산·누백과 과거 발표 자료는 유지하면서 지원 판단만 보류한다.
 
 `comparison_metric`은 `converted_score | university_top_percent`다. 점수는 내부 정확 환산값, 단위 `점`, 방향 `higher_is_better`, 동점 정책의 해당 없음은 `tie_policy=null`이다. 대학 누백은 `percentile.top_percent`에 대응하는 정확 비율, 단위 `%`, 방향 `lower_is_better`, `tie_policy=include_equal`이다. 전체 국수탐2 `overall` 누백을 대학 누백 비교 값으로 대신 넣지 않는다.
@@ -118,7 +124,7 @@ population_id, comparison_metric, unit, direction, tie_policy
 
 ## ④ 실제 연결 설정과 검증 계정
 
-API 구현과 응답 계약은 ①의 확정 커밋으로 제공됐다. 실서비스 API 주소, Supabase 프로젝트/공개 설정, 실제 계정·이용권·관리 capability는 **아직 미제공**이다. 키·비밀번호를 채팅이나 이 문서에 넣지 않는다. 운영 설정·실계정 로그인·실제 Supabase/DB/Drive 연동 검증은 **NOT_RUN**이다.
+API 구현과 응답 계약은 ①의 확정 구현과 develop947 통합으로 제공됐다. Supabase의 비공개 설정4필드를 받아 settings/JWKS/REST metadata 최소GET를 확인했다. 기존외부API는우리22 API/이용권 계약과달라주소를자동채택하지않는다. DATABASE_URL은추후.env로제공예정이며검수사용자token·이용권·관리 capability·Drive설정도대기다. 실제회원로그인과운영DB/Drive/우리API연동은NOT_RUN, 운영001/002적용은이작업에서수행하지않았다. 키·비밀번호·실제접속값은이문서와Git에넣지않는다.
 
 DB 마이그레이션 `002_forecast_policy.sql`의 실제 운영 DB 적용은 **NOT_APPLIED**, 운영 readiness 검증은 **NOT_RUN**이다. 5개 테이블·002 버전·필수 열 타입/NOT NULL·PK/FK/CHECK·RLS·클라이언트 권한을 확인하는 읽기 전용 준비 검사와 추가형 SQL 검사는 구현·합성 검증했다. 실제 서버 권한·직접 접근 차단·불변 revision·동시 수정·멱등 재시도·원자적 게시와 UTC 저장의 운영 증거는 아직 없다. 운영 마이그레이션을 자동 적용하지 않으며 합성 HTTP·메모리 저장소·DB 모의 검증을 실제 운영 DB 증거로 표시하지 않는다.
 
@@ -134,7 +140,7 @@ DB 마이그레이션 `002_forecast_policy.sql`의 실제 운영 DB 적용은 **
 
 병합 검사는 승인된 develop 인입 또는 등록 직계 부모를 Git 재구성 결과에 결속하고 기획 경로의 충돌 해결과 별도 수정 범위를 구분하도록 보완했다. 기존 삭제 차단·main 승격·팀 권한·등록 부모·fast-forward 검사와 과거 이력을 유지한다.
 
-검증 범위의 한계: staged 검사는 확인한 `refs/remotes/origin/develop` tip을 기준으로 승인 인입을 검사한다. 고정 SHA만 fetch한 CI에서는 과거 second-parent가 실제 원격 develop 계보에 속했는지까지 인증하지 못한다. 이 경우 부모별 자동 병합 결과와 직접 수정·삭제·충돌 허용 범위를 검사한 증거이며, 완전한 원격 부모 인증으로 표시하지 않는다. CI에서 필요한 원격 ref 증거 확보는 후속 조건이다.
+과거 검증 범위의 한계: 고정 SHA만 fetch하던 CI에서는 과거 second-parent가 실제 원격 develop 계보에 속했는지까지 인증하지 못했다. 당시 부모별 자동 병합 결과와 직접 수정·삭제·충돌 허용 범위의 검사 증거를 보존한다. 현재 staged 검사는 확인한 `refs/remotes/origin/develop` tip에 결속하며, 현재 workflow 후보는 fixed github.sha와 전체 부모 이력 및 develop/프런트 tracking refs를 함께 확보·고정 SHA 확인한 뒤 trusted policy를 검사한다. 이 후보의 로컬 합성 검증과 새 커밋의 원격 CI 실행은 구분하며, 새 원격 CI 전체 인증이나 서버의 강제 보호가 완료됐다고 주장하지 않는다.
 
 상태는 기획 계약 검증, 서비스·DB 코드 인수, 외부 프런트 수정/브라우저 인수, 실제 운영 연결을 각각 기록한다. 외부 프런트가 미완료여도 확인된 서비스·DB 검증 결과는 별도로 보고한다. 코드·계약 검사 통과를 전체 서비스나 예측 정확도 완료로 확대하지 않는다.
 
@@ -142,16 +148,33 @@ DB 마이그레이션 `002_forecast_policy.sql`의 실제 운영 DB 적용은 **
 |---|---|
 | v1.7.1 공통 계약·서비스·DB 코드 | 확정 커밋 코드 인수 완료 |
 | 확정 Git 스냅샷 검사 / 정확한 HEAD의 원격 검사 | 493건 PASS / project-consistency 두 건 success |
-| develop 통합 | PR #13 open / draft, 통합 예정 |
+| develop 통합 | PR #13 merged, 947cee82f0a91b0ed337753d6e0ae9619e49a78b |
 | 외부 전담 프런트 구현·브라우저 인수 | 이 서비스·DB 작업 범위에서 NOT_RUN |
-| 실제 API·Supabase·DB·Drive 연결과 운영 readiness | NOT_RUN |
+| Supabase Auth settings/JWKS/REST metadata 최소 GET | 읽기 준비 검수 PASS; 실제 로그인·DB 인수와 구분 |
+| 실제 회원/이용권·우리 22 API·운영 DB·Drive 연결과 readiness | NOT_RUN; DATABASE_URL .env 추후 제공, 실제 DB 검증 유보 |
 | 운영 DB002 적용 | NOT_APPLIED |
 | 실제 입결·학생 사례에 대한 예측 정확도 검증 | NOT_RUN |
 
 ## ⑥ session.read 제안 PR #5
 
-[PR #5](https://github.com/natural0448/Jungsi_touch/pull/5)의 session.read 제안은 확정 구현의 새 공통 계약에 채택됐다. 이 인계 시점의 상태는 open이며 이 문서 작성 과정에서는 종료하지 않았다. ①의 확정 백엔드 계약과 SHA를 공유한 이후 중복 제안 PR의 종료를 검토한다.
+[PR #5](https://github.com/natural0448/Jungsi_touch/pull/5)의 session.read는정식공통계약에채택됐으며기획팀이2026-10-05T12:42:14Z에중복제안으로closed 처리했다. bb98a825e6cd86a20359557deec114b2980e78cb head와원격branch·원본은보존했다. 과거adc684인수시점의open 상태는이전문서/인수영수증에보존한다. 유용한동적len(operations) 제목과정식session권한/DTO 검사는현재공통도구로계승했다. 종료영수증은비공개outputs/integration_review_20261005T213058546/pr5-closure-result.json, SHA256 e6c15901d815707582b39e24b79f3d8d44d2efe60c8649efb64aad40d70cdb2e에있다.
 
 ## ⑦ 초안·기존 프런트 후보 보존
 
-초안 또는 이전 후보를 삭제해도 된다는 직접 사용자 허용 증거를 확인하지 않았다. 프런트 파일의 처리는 외부 전담자의 담당 범위이며 현재 서비스·DB 작업에서 수정·삭제하지 않는다. 원본·이전 후보·생성 캐시·검토 산출물을 보존한다. 이 문서는 원격 PR 종료나 로컬 파일 삭제를 실행한 증거가 아니다.
+직접 사용자 메시지의 승인 증거를 정확한 4개 프런트 초안 경로에 한정해 확인하고 공통 삭제 등록부 후보에 결속했다. 증거 thread는 `01a0ccde-6f3d-7772-acd3-3eaca9a67b65`, turn은 `01a10bf5-8841-74a3-93e2-f2e2de8ac674`, message는 `01a10bf5-898b-7180-8442-3bfd4d1c2914`다. 다른 채팅의 승인 주장만으로 판단하지 않는다. 별도 선행 develop 등록과 고정 source/blob/mode/바이트 SHA 및 최초 삭제 사건 검사를 통과해야 하며 같은 커밋의 자기 승인·과거 소급·수정/복원 후 재사용·병렬 재소비를 허용하지 않는다.
+
+승인 경로는 `apps/web/src/lib/contract.ts`, `apps/web/src/lib/api/synthetic-fixtures.ts`, `apps/web/src/app/admissions/possibilities/actions.ts`, `apps/web/src/components/pending-page.tsx` 네 개뿐이다. 실제 삭제 executor는 외부 화면 개발팀이며 실행은 **NOT_RUN**이다. 시스템기획팀은 등록·검사·합성 회귀만 담당한다. 그 밖의 초안·원본·이전 후보·캐시·검토 결과는 보존한다. 이 문서는 실제 삭제 실행 증거가 아니다.
+
+
+## PR13 develop 통합 완료와 DEV006⑦ 공통 검사 후보
+
+서비스·DB 구현 adc684와 인수 상태 정정74fd는 PR13 merge commit947cee82f0a91b0ed337753d6e0ae9619e49a78b로develop에통합됐다. 병합트리는493검사HEAD와같으며정확병합SHA CI도성공했다. 앞선493기록은역사증거로보존한다. 후속공통검사의최신검증은별도영수증으로기록하며미래자기SHA를이문서에넣지않는다.
+
+DEV006⑦의승인등록은공통spec.workflow.branch_governance.file_deletion_policy를따른다. 별도develop선행등록을읽으며정확4경로·origin branch·고정source/blob/mode/바이트SHA·직접사용자증거·원본보존·최초삭제사건을검사한다. 실제삭제의executor는외부화면개발팀이다. 시스템기획팀은 develop947 이후 등록·공통검사·합성검증만 담당하고 실제 파일을 삭제하지 않는다. 서비스 개발팀은 사용자 지시에 따라 서비스 계층에 한정하고 프런트는 외부 전담자 소관이다.
+
+Supabase 최소 GET 준비 검수는 아래 읽기 증거로 확인했다. 실제 회원·이용권·운영 DB/Drive/우리 22 API·검수계정/쿠키도메인·운영DB002·외부브라우저·예측정확도는 새 증거 전 NOT_RUN/NOT_APPLIED를 유지한다. DATABASE_URL은 사용자에게 비공개 .env로 추후 전달받기 전까지 실제 DB 검증을 유보한다. GitHub연동설정은기획팀이조사중이며로컬설정검색결과를외부프로젝트부재로확대하지않는다.
+
+
+Supabase 최소 GET 준비 검수: Auth settings/JWKS 200, 사용자토큰없는getUser401, server secret의RESTmetadata200, jungsi_backend schema요청401/406으로직접노출거부. 실제관리자계정·회원로그인·이용권·DB/Drive는미검증이며DB접속설정은추후제공예정이다. 기존외부API의me DTO와jeongsi namespace뼈대는우리22 API계약과다르므로주소를자동채택하지않는다. PR5는2026-10-05 중복제안closed이며head/ref와원본은보존했고동적22경로제목·정식session검사를계승했다.
+
+<!-- jungsi:generated spec_sha256=9cf6b952c8d086224b4dd1e532620e703d53b56f046e38f8bdb99d2bcfcd2475 -->
