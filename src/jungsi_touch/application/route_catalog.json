@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.7.1",
-  "source_sha256": "8daef33e6d1534364f357f47853604fc9ce3b9eaabc51edb97a6e74d11388f86",
+  "source_sha256": "eff2d2e4e8b3554c41454bc972924e1ff35bb18564d37947600f8031a39b7c24",
   "pages": [
     {
       "id": "PAGE-01",
@@ -433,7 +433,7 @@
         "REQ-20"
       ],
       "response_scope": "본인 현재 활성 회원 상태",
-      "implementation_status": "approved_for_implementation_verification_pending",
+      "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -460,7 +460,7 @@
         "REQ-21"
       ],
       "response_scope": "본인 관리 capability와 학교 범위",
-      "implementation_status": "approved_for_implementation_verification_pending",
+      "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -487,7 +487,7 @@
         "REQ-21"
       ],
       "response_scope": "허용 학교의 관리 draft 목록",
-      "implementation_status": "approved_for_implementation_verification_pending",
+      "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -520,7 +520,7 @@
         "REQ-21"
       ],
       "response_scope": "서버 승인 자료·정책 ID 기반 모집행 draft 생성",
-      "implementation_status": "approved_for_implementation_verification_pending",
+      "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -555,7 +555,7 @@
         "REQ-21"
       ],
       "response_scope": "허용 학교의 draft와 revision/근거",
-      "implementation_status": "approved_for_implementation_verification_pending",
+      "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -586,7 +586,7 @@
         "REQ-21"
       ],
       "response_scope": "기본값 보존과 새 조정 revision",
-      "implementation_status": "approved_for_implementation_verification_pending",
+      "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -624,7 +624,7 @@
         "REQ-21"
       ],
       "response_scope": "정확한 revision의 검증 영수증",
-      "implementation_status": "approved_for_implementation_verification_pending",
+      "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -658,7 +658,7 @@
         "REQ-21"
       ],
       "response_scope": "검증된 정확한 revision 승인",
-      "implementation_status": "approved_for_implementation_verification_pending",
+      "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -695,7 +695,7 @@
         "REQ-22"
       ],
       "response_scope": "승인 revision의 새 불변 발행",
-      "implementation_status": "approved_for_implementation_verification_pending",
+      "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -730,7 +730,7 @@
         "REQ-22"
       ],
       "response_scope": "발행된 학과 기준과 공개 판단 근거",
-      "implementation_status": "approved_for_implementation_verification_pending",
+      "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -2348,7 +2348,7 @@
   "forecast_policy_contract": {
     "format": "jungsi.forecast-policy-contract/v1",
     "version": "1.1",
-    "code_status": "approved_for_implementation",
+    "code_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
     "requirements": [
       "REQ-21",
       "REQ-22"
@@ -2419,8 +2419,8 @@
       "실제 자료의 비교값·연도 보정·정책별 숫자와 근거 승인",
       "실제 Supabase/DB/Drive 설정 및 운영 마이그레이션·발행 검증",
       "전국 대학 산출 정확도·예측 성능 검증",
-      "백엔드 262e6ba의 검토 지적을 개발팀이 수정하고 v1.7.1 후보 계약으로 인수검증한 커밋 확정",
-      "외부 프런트 담당의 새 context/version/base_result, 후보 분할, 이유 코드 소비 수정 및 브라우저 검증"
+      "외부 프런트 담당의 새 context/version/base_result, 후보 분할, 이유 코드 소비 수정 및 브라우저 검증",
+      "확정 서비스·DB 구현 adc684be2e9d22f8edad766d044b81894676036d의 PR #13 develop 통합. 현재 open/draft이며 운영 배포 완료가 아니다."
     ],
     "scope_excludes": [
       "리포트/인쇄 확장",
@@ -2430,7 +2430,7 @@
       "실제 대학 지원자 확률",
       "라이브 배포"
     ],
-    "verification_status": "verification_pending",
+    "verification_status": "code_verified_live_NOT_RUN",
     "publication_context_contract": {
       "format": "jungsi.publication-context-contract/v1",
       "field": "context",
@@ -2699,6 +2699,58 @@
       ],
       "evidence_required": "실제 Supabase DB/서버 역할의 실행 영수증. 메모리 저장소·가짜 SQL 연결·합성 HTTP 통과로 대체하지 않는다.",
       "missing_behavior": "DB002/schema/권한 미준비는 forecast storage readiness의 503으로 구분한다. 이용권 강등·가짜 발행·다른 학생/학교 자료 대체를 하지 않는다."
+    },
+    "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+    "implementation_acceptance": {
+      "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
+      "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+      "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+      "accepted_on": "2026-10-05",
+      "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
+      "normal_commit_push_hooks": {
+        "tests_run": 493,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "successful": true,
+        "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
+      },
+      "dto_allowlist_comparison": {
+        "checks": 40,
+        "passed": true,
+        "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
+      },
+      "remote_checks": {
+        "head": "adc684be2e9d22f8edad766d044b81894676036d",
+        "check_name": "project-consistency",
+        "successful_count": 2,
+        "source": "부모의 정확한 HEAD GitHub API 독립 확인"
+      },
+      "byte_equivalence": {
+        "service_test_files": 16,
+        "common_contract_generator_files": 25,
+        "same_or_lf_normalized": true
+      },
+      "validated_source_spec": {
+        "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
+        "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
+        "difference": "LF normalization only"
+      },
+      "develop_integration": {
+        "status": "pending",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+        "pull_request_state_at_acceptance": "open_draft"
+      },
+      "live_API_Supabase_DB_Drive": "NOT_RUN",
+      "operational_migration_002": "NOT_APPLIED",
+      "operational_DB002_readiness": "NOT_RUN",
+      "external_frontend_acceptance": "NOT_RUN",
+      "forecast_accuracy": "NOT_RUN",
+      "local_evidence": [
+        "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
+        "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
+      ],
+      "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
     }
   },
   "presentation_connection_contract": {
@@ -3199,7 +3251,58 @@
       "외부 프런트는 반영 방법 code를 유리한 이유로 읽지 않고 outside/ineligible/pending을 각각 표시한다.",
       "API 허용 필드 또는 오류/보류 사유가 추가되면 외부 프런트 담당의 계약 수정과 별도 검증이 필요하다. 이 기획 후보 작업의 완료로 대체하지 않는다."
     ],
-    "management_context_rule": "관리 draft.context의20필드와 공개 발표본/학생decision_evidence.context의17필드를 구분한다. 관리context로학생근거를결합하지않는다."
+    "management_context_rule": "관리 draft.context의20필드와 공개 발표본/학생decision_evidence.context의17필드를 구분한다. 관리context로학생근거를결합하지않는다.",
+    "backend_contract_acceptance": {
+      "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
+      "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+      "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+      "accepted_on": "2026-10-05",
+      "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
+      "normal_commit_push_hooks": {
+        "tests_run": 493,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "successful": true,
+        "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
+      },
+      "dto_allowlist_comparison": {
+        "checks": 40,
+        "passed": true,
+        "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
+      },
+      "remote_checks": {
+        "head": "adc684be2e9d22f8edad766d044b81894676036d",
+        "check_name": "project-consistency",
+        "successful_count": 2,
+        "source": "부모의 정확한 HEAD GitHub API 독립 확인"
+      },
+      "byte_equivalence": {
+        "service_test_files": 16,
+        "common_contract_generator_files": 25,
+        "same_or_lf_normalized": true
+      },
+      "validated_source_spec": {
+        "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
+        "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
+        "difference": "LF normalization only"
+      },
+      "develop_integration": {
+        "status": "pending",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+        "pull_request_state_at_acceptance": "open_draft"
+      },
+      "live_API_Supabase_DB_Drive": "NOT_RUN",
+      "operational_migration_002": "NOT_APPLIED",
+      "operational_DB002_readiness": "NOT_RUN",
+      "external_frontend_acceptance": "NOT_RUN",
+      "forecast_accuracy": "NOT_RUN",
+      "local_evidence": [
+        "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
+        "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
+      ],
+      "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
+    }
   },
   "management_pages": [
     {

@@ -509,12 +509,114 @@
       "외부 프런트는 반영 방법 code를 유리한 이유로 읽지 않고 outside/ineligible/pending을 각각 표시한다.",
       "API 허용 필드 또는 오류/보류 사유가 추가되면 외부 프런트 담당의 계약 수정과 별도 검증이 필요하다. 이 기획 후보 작업의 완료로 대체하지 않는다."
     ],
-    "management_context_rule": "관리 draft.context의20필드와 공개 발표본/학생decision_evidence.context의17필드를 구분한다. 관리context로학생근거를결합하지않는다."
+    "management_context_rule": "관리 draft.context의20필드와 공개 발표본/학생decision_evidence.context의17필드를 구분한다. 관리context로학생근거를결합하지않는다.",
+    "backend_contract_acceptance": {
+      "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
+      "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+      "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+      "accepted_on": "2026-10-05",
+      "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
+      "normal_commit_push_hooks": {
+        "tests_run": 493,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "successful": true,
+        "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
+      },
+      "dto_allowlist_comparison": {
+        "checks": 40,
+        "passed": true,
+        "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
+      },
+      "remote_checks": {
+        "head": "adc684be2e9d22f8edad766d044b81894676036d",
+        "check_name": "project-consistency",
+        "successful_count": 2,
+        "source": "부모의 정확한 HEAD GitHub API 독립 확인"
+      },
+      "byte_equivalence": {
+        "service_test_files": 16,
+        "common_contract_generator_files": 25,
+        "same_or_lf_normalized": true
+      },
+      "validated_source_spec": {
+        "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
+        "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
+        "difference": "LF normalization only"
+      },
+      "develop_integration": {
+        "status": "pending",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+        "pull_request_state_at_acceptance": "open_draft"
+      },
+      "live_API_Supabase_DB_Drive": "NOT_RUN",
+      "operational_migration_002": "NOT_APPLIED",
+      "operational_DB002_readiness": "NOT_RUN",
+      "external_frontend_acceptance": "NOT_RUN",
+      "forecast_accuracy": "NOT_RUN",
+      "local_evidence": [
+        "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
+        "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
+      ],
+      "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
+    }
   },
   "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
   "verification_status": "verification_pending",
   "contract_version": "1.7.1",
-  "source_backend_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+  "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
   "owner": "외부 프런트 전담 개발자",
-  "candidate_only": true
+  "candidate_only": true,
+  "backend_contract_acceptance": {
+    "status": "service_DB_code_accepted_synthetic_HTTP_contract_verified",
+    "implementation_commit": "adc684be2e9d22f8edad766d044b81894676036d",
+    "source_parent_commit": "262e6ba283d37c9e2e446619e6bf1235f4881170",
+    "accepted_on": "2026-10-05",
+    "scope": "확정 Git 스냅샷의 서비스·DB 코드와 공통 계약·합성 HTTP/권한/회귀 검사 인수. 실제 운영·외부 프런트·예측 정확도 인수를 뜻하지 않는다.",
+    "normal_commit_push_hooks": {
+      "tests_run": 493,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "successful": true,
+      "snapshot": "adc684be2e9d22f8edad766d044b81894676036d"
+    },
+    "dto_allowlist_comparison": {
+      "checks": 40,
+      "passed": true,
+      "scope": "합성 서비스 응답의 허용 필드 집합 대조. 운영 연결·전체 응답값·예측 정확도 검증으로 확대하지 않는다."
+    },
+    "remote_checks": {
+      "head": "adc684be2e9d22f8edad766d044b81894676036d",
+      "check_name": "project-consistency",
+      "successful_count": 2,
+      "source": "부모의 정확한 HEAD GitHub API 독립 확인"
+    },
+    "byte_equivalence": {
+      "service_test_files": 16,
+      "common_contract_generator_files": 25,
+      "same_or_lf_normalized": true
+    },
+    "validated_source_spec": {
+      "original_sha256": "37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7",
+      "committed_content_sha256": "8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42",
+      "difference": "LF normalization only"
+    },
+    "develop_integration": {
+      "status": "pending",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
+      "pull_request_state_at_acceptance": "open_draft"
+    },
+    "live_API_Supabase_DB_Drive": "NOT_RUN",
+    "operational_migration_002": "NOT_APPLIED",
+    "operational_DB002_readiness": "NOT_RUN",
+    "external_frontend_acceptance": "NOT_RUN",
+    "forecast_accuracy": "NOT_RUN",
+    "local_evidence": [
+      "outputs/service_review/20261005T104545255261Z/planning-acceptance.json",
+      "outputs/service_review/20261005T104545255261Z/service-fix-byte-verification.json"
+    ],
+    "post_acceptance_readiness_guard": "후보 상태와 서비스·DB 코드 인수 완료 상태 모두에서 운영 DB002 미실행 NOT_RUN/production_ready=false를 검사한다. 코드 인수 사실만으로 실제 운영 DB 인수를 주장하지 못하도록 공통 검사 한 조건을 강화하며 기능 계약·tests·실제 DB/서비스/프런트 코드는 변경하지 않는다."
+  }
 }

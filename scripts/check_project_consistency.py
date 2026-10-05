@@ -497,7 +497,7 @@ def validate_forecast_contract(spec):
         if partition.get(name,{}).get('category')!=category:errors.append('Forecast candidate partition drift: '+name)
     if not {'outside_offerings','ineligible_offerings','pending_offerings'}<=set(schemas.get('candidates',{}).get('fields',[])):errors.append('Candidate classification fields missing')
     readiness=forecast.get('database_readiness',{})
-    if readiness.get('migration')!='database/migrations/002_forecast_policy.sql' or (review.get('candidate_only') and (readiness.get('status')!='NOT_RUN' or readiness.get('production_ready') is not False)):
+    if readiness.get('migration')!='database/migrations/002_forecast_policy.sql' or ((review.get('candidate_only') or forecast.get('verification_status')=='code_verified_live_NOT_RUN') and (readiness.get('status')!='NOT_RUN' or readiness.get('production_ready') is not False)):
         errors.append('Forecast DB readiness evidence drift')
     return errors
 
