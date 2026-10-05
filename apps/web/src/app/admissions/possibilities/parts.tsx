@@ -347,12 +347,14 @@ export function sameRelease(a: Cell, f: ForecastPublicDto | null) {
   if (!ev || !f || f.status !== "published" || !ev.context || !f.context) return false;
   const x = ev.context as unknown as Record<string, unknown>;
   const y = f.context as unknown as Record<string, unknown>;
-  return (
-    ev.forecast_release_version === f.release_version &&
-    ev.policy_version === f.policy_version &&
-    ev.input_version === f.input_version &&
-    CONTEXT_FIELDS.every((k) => k in x && k in y && x[k] === y[k])
-  );
+  // 발표본·정책·입력 버전은 양쪽 모두 비어 있지 않은 문자열이어야 한다. 둘 다 없거나 null 인 것을 '같다'로 보지 않는다
+  const id = (v: unknown): v is string => typeof v === "string" && v.trim() !== "";
+  const pairs: [unknown, unknown][] = [
+    [ev.forecast_release_version, f.release_version],
+    [ev.policy_version, f.policy_version],
+    [ev.input_version, f.input_version],
+  ];
+  return pairs.every(([a, b]) => id(a) && id(b) && a === b) && CONTEXT_FIELDS.every((k) => k in x && k in y && x[k] === y[k]);
 }
 
 const CAT_LABEL: Record<string, string> = { challenge: "도전", core: "핵심 검토", room: "여유 후보", outside: "추천 범위 밖" };
