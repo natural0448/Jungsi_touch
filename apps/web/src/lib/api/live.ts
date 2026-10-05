@@ -28,6 +28,8 @@ const base = () => `${process.env.JUNGSI_API_URL}/api/v1`;
 const enc = encodeURIComponent;
 
 class NotFound extends Error {}
+/** 409: 자료·정책·카탈로그 버전이 바뀌었다. 조회 화면에서는 '없음'으로 받고 다른 근거와 합치지 않는다 */
+class Stale extends Error {}
 
 type ErrBody = { error?: { code?: string } } | null;
 const codeOf = async (res: Response) => ((await res.json().catch(() => null)) as ErrBody)?.error?.code;
@@ -59,6 +61,7 @@ async function call<T>(caller: Caller, path: string): Promise<T> {
   const res = await send(path, { headers: auth(caller) });
   await guard(res);
   if (res.status === 404) throw new NotFound(path);
+  if (res.status === 409) throw new Stale(path);
   if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res)) ?? ""}: ${path}`);
   return (await res.json()) as T;
 }
@@ -127,5 +130,13 @@ export const liveSource: JungsiSource = {
   validateForecastDraft: (caller, id, body, key) => write<ForecastDraftDto>(caller, "POST", `/forecast-drafts/${enc(id)}/validations`, body, key),
   approveForecastDraft: (caller, id, body, key) => write<ForecastDraftDto>(caller, "POST", `/forecast-drafts/${enc(id)}/approvals`, body, key),
   publishForecastDraft: (caller, id, body, key) => write<ForecastDraftDto>(caller, "POST", `/forecast-drafts/${enc(id)}/publications`, body, key),
-  readPublishedForecast: (caller, offeringId) => orNull(call<ForecastPublicDto>(caller, `/offerings/${enc(offeringId)}/forecast`)),
+  // 현재 context·고정 입력·정책이 발표본과 달라지면 409. 학생 분석 쪽은 성공한 환산·누백을 유지하고 발표본만 보이지 않는다
+  readPublishedForecast: async (caller, offeringId) => {
+    try {
+      return await orNull(call<ForecastPublicDto>(caller, `/offerings/${enc(offeringId)}/forecast`));
+    } catch (e) {
+      if (e instanceof Stale) return null;
+      throw e;
+    }
+  },
 };

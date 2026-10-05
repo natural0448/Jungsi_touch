@@ -335,15 +335,23 @@ function IssueItem({ t }: { t: IssueSummaryDto }) {
   );
 }
 
-/** 학과 판단에 쓴 근거(decision_evidence)와 발행본(forecast_public)이 같은 발표본인지: context·정책·입력 버전이 모두 같을 때만 */
+/** 공개 context 17필드(서비스·DB 인계 ③). 값·타입·명시적 null 이 모두 같아야 같은 근거다 */
+const CONTEXT_FIELDS = [
+  "offering_id", "academic_year", "exam_id", "source_pack_version", "catalog_version", "rule_id", "rule_version", "curve_version",
+  "analysis_version", "score_scale_id", "score_scope", "bonus_treatment", "population_id", "comparison_metric", "unit", "direction", "tie_policy",
+] as const;
+
+/** 학과 판단에 쓴 근거(decision_evidence)와 발행본(forecast_public)이 같은 발표본인지: 발표본 버전·정책·입력 버전과 context 17필드가 모두 같을 때만 */
 export function sameRelease(a: Cell, f: ForecastPublicDto | null) {
   const ev = a && a !== "need" ? a.decision_evidence : undefined;
-  if (!ev || !f || f.status !== "published") return false;
+  if (!ev || !f || f.status !== "published" || !ev.context || !f.context) return false;
+  const x = ev.context as unknown as Record<string, unknown>;
+  const y = f.context as unknown as Record<string, unknown>;
   return (
     ev.forecast_release_version === f.release_version &&
     ev.policy_version === f.policy_version &&
     ev.input_version === f.input_version &&
-    JSON.stringify(ev.context ?? null) === JSON.stringify(f.context)
+    CONTEXT_FIELDS.every((k) => k in x && k in y && x[k] === y[k])
   );
 }
 
@@ -391,7 +399,9 @@ function Published({ f, same }: { f: ForecastPublicDto | null; same: boolean }) 
         </ul>
       )}
       <span className="note">
-        {same ? "이 학과의 지원 판단도 이 발표본으로 계산했습니다. " : "이 학과의 지원 판단은 다른 기준으로 계산됐을 수 있어 아래 판단과 합쳐 보지 않습니다. "}
+        {same
+          ? "이 학과의 지원 판단도 이 발표본으로 계산했습니다. "
+          : "이 학과의 지원 판단은 다른 발표본·기준으로 계산됐을 수 있어 아래 판단과 합쳐 보지 않습니다. 새 기준으로 보려면 성적을 다시 분석해야 합니다. "}
         학과 기준은 지원 판단의 근거이며 실제 지원자의 합격 확률이나 최저 합격점이 아닙니다.
       </span>
     </div>
