@@ -33,13 +33,13 @@ class CiSnapshotPreservationTests(unittest.TestCase):
         self.calls.append((list(args),dict(env)))
         if args[0]=='init':
             (cwd/'.git').mkdir();(cwd/'.git/config').write_text('[core]\n\tbare = false\n',encoding='utf-8')
-        return self.sha if args[0]=='rev-parse' else ''
+        return self.sha if args[0] in ('rev-parse','show-ref') else ''
     def test_fixed_first_checkout_and_fetch_only_credentials(self):
         snapshot=bootstrap.prepare_snapshot(self.environment,self.git)
         self.assertEqual(snapshot,self.root/'retained_snapshots/run_123_attempt_1')
-        self.assertEqual([args[0] for args,env in self.calls],['init','fetch','checkout','rev-parse'])
-        self.assertEqual(self.calls[2][0],['checkout','--detach',self.sha])
-        self.assertIn(self.sha,self.calls[1][0]);self.assertIn('--no-auto-maintenance',self.calls[1][0])
+        self.assertEqual([args[0] for args,env in self.calls],['init','fetch','show-ref','show-ref','checkout','rev-parse'])
+        self.assertEqual(self.calls[4][0],['checkout','--detach',self.sha])
+        self.assertIn('refs/heads/develop:refs/remotes/origin/develop',self.calls[1][0]);self.assertIn('refs/heads/feature/presentation-foundation:refs/remotes/origin/feature/presentation-foundation',self.calls[1][0]);self.assertIn(self.sha,self.calls[1][0]);self.assertIn('--no-auto-maintenance',self.calls[1][0])
         for args,env in self.calls:
             self.assertNotIn('JUNGSI_FETCH_TOKEN',env);self.assertNotIn('GIT_TRACE',env)
             self.assertNotIn('SYNTHETIC-PRIVATE-TOKEN',json.dumps(args))
@@ -49,6 +49,13 @@ class CiSnapshotPreservationTests(unittest.TestCase):
         self.assertEqual(base64.b64decode(header.split('basic ',1)[1]).decode(),'x-access-token:SYNTHETIC-PRIVATE-TOKEN')
         self.assertIn('auto = 0',(snapshot/'.git/config').read_text(encoding='utf-8'))
         self.assertIn('auto = false',(snapshot/'.git/config').read_text(encoding='utf-8'))
+    def test_missing_trusted_parent_reference_is_closed(self):
+        def missing(args,cwd,env):
+            result=self.git(args,cwd,env)
+            return '' if args[0]=='show-ref' else result
+        with self.assertRaisesRegex(RuntimeError,'trusted parent history'):bootstrap.prepare_snapshot(self.environment,missing)
+        self.assertNotIn('checkout',[args[0] for args,env in self.calls])
+
     def test_existing_snapshot_preserves_sentinel_and_runs_no_git(self):
         snapshot=self.root/'retained_snapshots/run_123_attempt_1';snapshot.mkdir(parents=True)
         sentinel=snapshot/'retained.txt';sentinel.write_text('SYNTHETIC-PRESERVE',encoding='utf-8')

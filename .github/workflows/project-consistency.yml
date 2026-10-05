@@ -78,7 +78,13 @@ jobs:
                   GIT_CONFIG_VALUE_0='AUTHORIZATION: basic ' +
                       base64.b64encode(('x-access-token:' + token).encode()).decode())
               run_git(['fetch', '--no-tags', '--no-recurse-submodules', '--no-auto-maintenance',
-                       'https://github.com/' + repository + '.git', sha], destination, fetch_env)
+                       'https://github.com/' + repository + '.git', sha,
+                       'refs/heads/develop:refs/remotes/origin/develop',
+                       'refs/heads/feature/presentation-foundation:refs/remotes/origin/feature/presentation-foundation'], destination, fetch_env)
+              for trusted_ref in ('refs/remotes/origin/develop', 'refs/remotes/origin/feature/presentation-foundation'):
+                  trusted_sha = run_git(['show-ref', '--verify', '--hash', trusted_ref], destination, public_env)
+                  if not re.fullmatch(r'[0-9a-f]{40}', trusted_sha):
+                      raise RuntimeError('Required trusted parent history is unavailable')
               run_git(['checkout', '--detach', sha], destination, public_env)
               if run_git(['rev-parse', 'HEAD'], destination, public_env) != sha:
                   raise RuntimeError('Fetched snapshot does not match the fixed workflow SHA')

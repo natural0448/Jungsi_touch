@@ -57,7 +57,7 @@ class BranchPolicyTests(unittest.TestCase):
         self.assertTrue(policy.validate_pr(self.server,self.web,[],self.spec))
     def test_contract_proposal_cannot_add_runtime_implementation(self):
         head='feature/planning-presentation-contracts'
-        self.assertEqual(policy.validate_pr(head,'develop',[('M','docs/current/service_spec.json')],self.spec),[])
+        self.assertIn('Retired branch cannot receive new work: '+head,policy.validate_pr(head,'develop',[('M','docs/current/service_spec.json')],self.spec))
         self.assertTrue(policy.validate_pr(head,'develop',[('M','src/jungsi_touch/application/platform.py')],self.spec))
     def test_main_only_accepts_final_develop(self):
         self.assertTrue(policy.validate_pr(self.web,'main',[],self.spec))
@@ -200,7 +200,9 @@ class RetainedMergeScopeTests(unittest.TestCase):
         self._blobs={};self._trees={}
         self.spec['workflow']['branch_governance']['merge_scope_policy']={
             'format':'jungsi.merge-scope/v1','adoption':'commits_with_policy_marker_only'}
-        self.branch='feature/planning-presentation-contracts'
+        # Only this retained synthetic repository registers an active planning task.
+        # The operational retired branch and its history remain unchanged.
+        self.branch='feature/planning-task/synthetic-merge-policy'
         self.git_env={k:v for k,v in os.environ.items() if not k.startswith('GIT_')}
         self.env_patch=patch.dict(os.environ,self.git_env,clear=True);self.env_patch.start()
         stamp=datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'_'+uuid.uuid4().hex[:8]
@@ -213,8 +215,11 @@ class RetainedMergeScopeTests(unittest.TestCase):
             'retained_git_dir':str(self.git_dir),'cleanup_performed':False}).encode('utf-8'))
         base_spec=deepcopy(self.spec)
         self.seed=self.commit(self.files(base_spec))
-        for row in self.spec['workflow']['branch_governance']['additional_branches']:
-            if row['name']==self.branch:row['base_commit']=self.seed
+        self.spec['workflow']['branch_governance']['additional_branches'].append(
+            dict(name=self.branch,kind='planning_task',owner='synthetic-planning-fixture',
+                 parent='develop',pr_target='develop',status='active',temporary=True,
+                 purpose='Explicit isolated synthetic merge-policy regression',base_commit=self.seed))
+        self.assertEqual(policy.validate_governance(self.spec),[])
         self.base=self.commit(self.files(),(self.seed,))
 
     def tearDown(self):
