@@ -2449,7 +2449,8 @@
     "3·4페이지: 화면을 열 때 보이는 모집행의 분석이 없으면 university.analyze·candidates.build(POST)를 부른다. 요청 키는 (리포트, revision, 대상)으로 정해 같은 화면을 다시 열어도 한 번만 쓰인다. 읽기 화면에서 쓰기를 부르는 이 방식이 서버 운영(요청량·감사 기록)에 맞는지 확인한다.",
     "4페이지: statistics.read 가 모집단위 하나씩이라 펼친 학교와 와일드카드만 부른다. 여러 모집단위를 한 번에 읽는 방법이 필요한지 정한다.",
     "쓰지 않는 프레젠테이션 초안 파일 4개(apps/web/src/lib/contract.ts, lib/api/synthetic-fixtures.ts, app/admissions/possibilities/actions.ts, components/pending-page.tsx)는 사용자가 2026-10-04 삭제를 허락했다. check_branch_policy 의 validate_deletions 가 커밋·PR 의 모든 파일 삭제를 막고 허락 범위를 적는 방법이 없으므로, 기획 담당이 삭제하거나 허락 범위를 적는 방법을 정한다.",
-    "live 연결: 에듀터치 본체와 같은 Supabase 프로젝트·쿠키 도메인 배포 설정과 실제 계정·이용권·관리 권한의 전체 연결 검증이 남아 있다(DEV-006 remaining)."
+    "live 연결: 에듀터치 본체와 같은 Supabase 프로젝트·쿠키 도메인 배포 설정과 실제 계정·이용권·관리 권한의 전체 연결 검증이 남아 있다(DEV-006 remaining).",
+    "live 배포 설정: 운영 우리 서비스 API 주소(JUNGSI_API_URL)와 에듀터치 Supabase URL·publishable 키를 jeongsi-touch 워커 설정에 넣어야 실제 화면이 열린다. 에듀터치 본체의 /jeongsi 통로는 아직 관리자에게만 열려 있다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -2862,6 +2863,14 @@
         "REQ-12"
       ],
       "summary": "프레젠테이션: 사용자 지시에 따라 2페이지 성적 입력을 수능 성적표와 같은 가로 표로 다시 디자인했다. 열은 성적표 순서(한국사·국어·수학·영어·탐구 과목1·2), 행은 선택과목·표준점수·백분위·등급이다. 넣는 칸은 기존 계약 그대로 국어·수학·탐구 표준점수(필수)와 영어·한국사 등급(선택)이며, 국어·수학·탐구의 백분위·등급 칸은 서버 엔진이 계산하므로 '저장 후 계산'으로 비워 둔다. 좁은 화면에서는 표 안에서만 가로로 밀리고 머리 열이 고정된다. 입력 누락 칸을 표시한다."
+    },
+    {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-15",
+        "REQ-20"
+      ],
+      "summary": "프레젠테이션 배포: 정시터치 최종 관리자(사용자) 결정으로 apps/web 을 에듀터치 본체가 /jeongsi 를 넘기는 기존 Cloudflare 워커 jeongsi-touch 에 배포해 예전 시안 앱을 교체한다(본체 설정은 그대로, 본체는 지금 관리자에게만 넘긴다). 연결 방식은 live 이고 운영 API 주소·Supabase 설정을 아직 받지 않아 화면은 '연결 설정 대기'를 보인다. 되돌릴 때는 wrangler rollback 으로 이전 판을 다시 올린다. 운영 주소가 오면 JUNGSI_API_URL·NEXT_PUBLIC_SUPABASE_URL·NEXT_PUBLIC_SUPABASE_ANON_KEY 를 넣어 다시 배포한다."
     }
   ],
   "overall_analysis_contract": {

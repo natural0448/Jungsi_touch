@@ -1,7 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // 아직 배포하지 않는다. 에듀터치의 기존 jeongsi-touch 워커를 덮지 않도록 이름을 따로 둔다.
-  "name": "jungsi-touch-web",
+  // 2026-10-05 사용자(정시터치 최종 관리자) 결정: 에듀터치 본체가 /jeongsi 를 넘기는 기존 jeongsi-touch 워커를
+  // 이 앱으로 교체한다(본체 JEONGSI_PREVIEW_ORIGIN 은 그대로). 되돌릴 때는 `wrangler rollback` 으로 이전 판을 다시 올린다.
+  "name": "jeongsi-touch",
   "main": ".open-next/worker.js",
   "compatibility_date": "2025-09-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -13,12 +14,12 @@
     "enabled": true
   },
   "vars": {
-    // 우리 서비스 API 주소(애플리케이션 계층). 비밀값이 아니다.
-    "JUNGSI_API_URL": "http://localhost:8000",
+    // 우리 서비스 API 주소(애플리케이션 계층)는 담당자가 운영 주소를 주면 "JUNGSI_API_URL" 로 넣는다. 비밀값이 아니다.
     // synthetic: 명시적으로 고른 화면 제작·검토용 합성 응답 / live: 우리 서비스 API + 에듀터치 Supabase 로그인
     // 값이 없거나 live 설정(JUNGSI_API_URL, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)이 빠지면
     // 화면은 '연결 설정 대기'를 보인다. 실서버가 실패해도 합성 응답으로 바꾸지 않는다(DEV-006).
     // Supabase 두 값은 에듀터치 본체(web)와 같은 프로젝트의 URL·publishable 키다(비밀값이 아니다).
-    "JUNGSI_API_MODE": "synthetic"
+    // 화면 제작·검토는 로컬에서 JUNGSI_API_MODE=synthetic 을 명시해 띄운다.
+    "JUNGSI_API_MODE": "live"
   }
 }
