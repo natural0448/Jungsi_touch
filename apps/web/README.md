@@ -8,4 +8,4 @@
 
 프레젠테이션은 별도 작업자가 담당한다. 최신 origin/develop의 기획 기준을 확인하고 담당 상시 브랜치 feature/presentation-foundation를 재사용한다. 서버 개발팀의 feature/application-pre-data-platform와 브랜치를 공유하지 않는다. route_catalog.json과 생성 README/현재 문서는 직접 편집하지 않는다. 계약 변경은 service_spec.json과 생성 도구에서 수정하고 생성 결과를 같은 커밋에 포함한다. [프레젠테이션 작업 인계](../../docs/current/프레젠테이션_작업인계.md)를 읽고 출발 커밋과 API 계약을 맞춘다.
 
-<!-- jungsi:generated spec_sha256=0ba42092d88454359e74897a9dd4b66303980cfdc2be18d82670953f55f63985 -->
+<!-- jungsi:generated spec_sha256=45baf947f46e5d451506f37fbf1257b6a7d538afe28b83a57425f9916f5f960f -->
