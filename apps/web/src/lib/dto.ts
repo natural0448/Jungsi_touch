@@ -2,7 +2,7 @@
   우리 서비스 API 의 실제 응답 모양 — develop 의 docs/current/API_DTO_계약.md (명세 1.2.2) 를 옮긴 것
   ─────────────────────────────────────────────────────────────
   route_catalog.json 의 backend_contract.dto_schemas 가 원본이다. 바뀌면 여기를 맞춘다.
-  1~4페이지가 모두 이 모양을 쓴다. session.read 만 PR #5 제안 단계의 모양이다.
+  1~4페이지가 모두 이 모양을 쓴다. 1.7.0(공유 드라이브의 DEV-006·DEV-007 지시) 필드를 함께 담는다.
 
   - 숫자 점수·누적은 엔진의 소수 문자열이다.
   - 자료 대기는 200 + status=pending/reason_code, 값 null. 승인된 0건과 구분한다.
@@ -14,7 +14,7 @@ export const ACADEMIC_YEARS: AcademicYear[] = [2027, 2026, 2025, 2024];
 
 export type MemberTier = "standard" | "paid";
 
-/** session.read (PR #5 제안, 승인 대기). 화면의 잠금 표시용이며 권한 판단은 서버가 한다 */
+/** session.read (1.7.0 정식 작업, GET /api/v1/me). 화면의 잠금 표시용이며 권한 판단은 서버가 한다 */
 export interface Session {
   format: "jungsi.session/v1";
   member_tier: MemberTier;
@@ -138,11 +138,19 @@ export interface OverallResultDto {
   inclusive_top_percent: string | null;
   exclusive_top_percent: string | null;
   tie_share_percent: string | null;
-  tie_interval_percent: string[] | string | null;
+  tie_interval_percent: { lower: string; upper: string } | null; // 동점 구간(상위 %)
   tie_policy: string | null;
   population_id: string | null;
   model_version: string | null;
+  data_kind?: DataKind | null; // 1.7.0: 관측 도수인지 자체 추정 가중치인지
 }
+
+/** 누적의 근거. observed_counts=실제 도수, estimated_weights=공식 주변도수로 자체 추정한 가중치 */
+export type DataKind = "observed_counts" | "estimated_weights";
+/** 대학 누백의 비교집단. whole_complete=국·수·탐2 전체 응시자, required_rule_inputs_present=그 대학 반영 성적을 모두 가진 응시자 */
+export type PopulationScope = "whole_complete" | "required_rule_inputs_present";
+/** 환산 기준. actual_exam=같은 학년도 실제 수능, mock_exam=승인된 모의평가 호환, year_equated_estimate=연도 보정 추정 */
+export type ScoreBasis = "actual_exam" | "mock_exam" | "year_equated_estimate";
 
 /** jungsi.overall-analysis/v1 — 리포트 안의 전체 분석 */
 export interface OverallAnalysisDto {
@@ -199,7 +207,65 @@ export interface AssessmentDto {
     historical_metrics: HistoricalMetricDto[];
     forecast_70: { status: "ready" | "pending"; reason_code: string | null; value: string | number | null; unit: string | null; definition: string | null; version: string | null };
     expected_acceptance_range: { lower: string | number; upper: string | number; unit: string; definition: string; policy_version: string };
+    // 1.7.0 (DEV-007): 발행된 학과별 예상 기준의 공개 근거
+    forecast_release_version?: string | null;
+    basis_summary?: string | null;
+    issue_summaries?: string[] | null;
+    recommendation_reasons?: ReasonDto[] | null;
+    adjustment_summary?: string | null;
   };
+  // 1.7.0: 환산·누백·판단은 각자 준비 상태를 가진다
+  conversion?: ConversionDto | null;
+  percentile?: PercentileDto | null;
+  recommendation_reasons?: ReasonDto[] | null;
+}
+
+/** assessment.conversion — 대학 공식 반영식 환산. 판단이 보류여도 성공한 환산은 남는다 */
+export interface ConversionDto {
+  status: "ready" | "pending";
+  reason_code: string | null;
+  score_basis: ScoreBasis | null;
+  score_scope: string | null;
+  converted_score: string | null;
+  official_max_score: string | null;
+  academic_year: number | null;
+  exam_id: string | null;
+  rule_version: string | null;
+  release_version: string | null;
+  table_versions: Record<string, string> | null;
+  profile_version: number | string | null;
+  pack_version: string | null;
+}
+
+/** assessment.percentile — 학교 환산 분포에서의 상위 누백 */
+export interface PercentileDto {
+  status: "ready" | "pending";
+  reason_code: string | null;
+  score_basis: ScoreBasis | null;
+  score_scope: string | null;
+  academic_year: number | null;
+  exam_id: string | null;
+  top_percent: string | null;
+  inclusive_top_percent: string | null;
+  exclusive_top_percent: string | null;
+  tie_share_percent: string | null;
+  tie_policy: string | null;
+  population_id: string | null;
+  data_kind: DataKind | null;
+  rule_version: string | null;
+  curve_version: string | null;
+  release_version: string | null;
+  source_model_version: string | null;
+  profile_version: number | string | null;
+  pack_version: string | null;
+  population_scope: PopulationScope | null;
+}
+
+/** 서버가 만든 추천·판단 이유. 화면은 문장을 지어내지 않는다 */
+export interface ReasonDto {
+  code: string;
+  text: string;
+  evidence_refs: string[];
 }
 
 export interface CandidateItemDto {
@@ -273,4 +339,68 @@ export interface ApiErrorDto {
   status: "error";
   error: { code: string };
   request_id: string;
+}
+
+// ─── 1.7.0 관리: 학과별 예상 기준(DEV-007) ─────────────────────
+
+export type ForecastCapability = "editor" | "approver";
+
+/** forecast_capabilities — 서버 관리 권한. 회원 등급과 무관하다 */
+export interface ForecastCapabilitiesDto {
+  format: "jungsi.forecast-capabilities/v1";
+  capabilities: ForecastCapability[];
+  university_ids: string[];
+}
+
+export type ForecastStatus = "draft" | "validated" | "approved" | "published";
+export type ForecastTarget = "forecast_70" | "acceptance_range" | "category_ranges";
+
+/**
+ * forecast_draft. result·adjustments·validation·approval·audit_events 의 안쪽 모양은
+ * 명세(1.7.0)에 필드 목록이 없어 화면은 알려진 이름만 골라 쓰고 나머지는 그대로 보인다.
+ */
+export interface ForecastDraftDto {
+  format: "jungsi.forecast-draft/v1";
+  draft_id: string;
+  offering_id: string;
+  revision: number;
+  status: ForecastStatus;
+  base_result_hash: string;
+  policy_version: string;
+  result: Record<string, unknown> | null;
+  adjustments: Record<string, unknown>[];
+  validation: (Record<string, unknown> & { receipt_hash?: string }) | null;
+  approval: (Record<string, unknown> & { receipt_hash?: string }) | null;
+  audit_events: Record<string, unknown>[];
+}
+
+export interface ForecastListDto {
+  format: "jungsi.forecast-list/v1";
+  items: ForecastDraftDto[];
+}
+
+export interface ForecastAdjustInput {
+  expected_revision: number;
+  base_result_hash: string;
+  policy_version: string;
+  target: ForecastTarget;
+  replacement: unknown; // 승인 정책이 허용한 같은 단위의 대체값
+  reason: string;
+  evidence_refs: string[]; // 서버가 검증하는 근거 ID
+}
+
+/** forecast_public — 발행된 학과 기준과 공개 근거. 합격 확률·최저점이 아니다 */
+export interface ForecastPublicDto {
+  format: "jungsi.forecast-public/v1";
+  status: "ready" | "pending";
+  reason_code: string | null;
+  offering_id: string;
+  release_version: string | null;
+  forecast_70: { value: string | number | null; unit: string | null; definition: string | null } | null;
+  expected_acceptance_range: { lower: string | number; upper: string | number; unit: string; definition: string } | null;
+  category_ranges: { category: Category; lower: string | number; upper: string | number }[] | null;
+  basis_summary: string | null;
+  issue_summaries: string[] | null;
+  recommendation_reasons: ReasonDto[] | null;
+  adjustment_summary: string | null;
 }

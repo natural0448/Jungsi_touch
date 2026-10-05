@@ -9,7 +9,7 @@ import { Tabs } from "./tabs";
  * 정시터치 머리글. 에듀터치 로고와 색·글꼴로 같은 사이트임을 알리고, 화면 넷을 탭으로 둔다.
  * 잠금 표시는 서버가 알려 준 회원 등급(session.read)으로만 그린다.
  */
-export function SiteHeader({ session }: { session: Session | null }) {
+export function SiteHeader({ session, down = false }: { session: Session | null; down?: boolean }) {
   const tabs = PAGES.map((p) => ({ href: p.path, label: p.label, lock: lockFor(session, p) }));
   return (
     <header>
@@ -24,7 +24,9 @@ export function SiteHeader({ session }: { session: Session | null }) {
             정시<em>터치</em>
           </Link>
           <div className="jt-user">
-            {!session ? (
+            {down ? (
+              <span className="pass off">연결 대기</span>
+            ) : !session ? (
               <a className="btn p" href={loginHref("/")}>로그인</a>
             ) : session.member_tier === "paid" ? (
               <span className="pass">이용권 {seoulDate(session.entitlement_expires_at)}까지</span>

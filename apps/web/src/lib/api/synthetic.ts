@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
 import { AccessDenied, type JungsiSource, type Result } from "./source";
+import * as fc from "./synthetic-forecast";
 import { CATALOG, statistics } from "./synthetic-assessment";
 import { HISTORY, syntheticRecruitment } from "./synthetic-history";
 import { analyzeIds, assessFor, buildCands, loadReport, saveProfile, saveReport, setPick, validateScores } from "./synthetic-report";
@@ -13,11 +14,12 @@ import { analyzeIds, assessFor, buildCands, loadReport, saveProfile, saveReport,
 */
 
 export const SYN_COOKIE = { state: "jt_syn_state" } as const;
-export type SyntheticState = "paid" | "noscore" | "standard" | "guest";
+export type SyntheticState = "paid" | "noscore" | "standard" | "operator" | "guest";
 export const SYN_STATES: { v: SyntheticState; label: string }[] = [
   { v: "paid", label: "유료 회원" },
   { v: "noscore", label: "유료 · 성적 없음" },
   { v: "standard", label: "일반 회원" },
+  { v: "operator", label: "운영자(일반 회원 + 관리 권한)" },
   { v: "guest", label: "비회원" },
 ];
 
@@ -36,7 +38,7 @@ async function requireMember() {
 
 async function requirePaid() {
   const s = await requireMember();
-  if (s === "standard") throw new AccessDenied(403, "paid_required");
+  if (s === "standard" || s === "operator") throw new AccessDenied(403, "paid_required");
   return s;
 }
 
@@ -86,7 +88,7 @@ export const syntheticSource: JungsiSource = {
   async getSession() {
     const s = await readSyntheticState();
     if (s === "guest") return null;
-    if (s === "standard") return { format: "jungsi.session/v1", member_tier: "standard", entitlement_expires_at: null };
+    if (s === "standard" || s === "operator") return { format: "jungsi.session/v1", member_tier: "standard", entitlement_expires_at: null };
     // 2027-02-28 23:59:59 서울 = 14:59:59 UTC
     return { format: "jungsi.session/v1", member_tier: "paid", entitlement_expires_at: "2027-02-28T14:59:59Z" };
   },
@@ -169,4 +171,53 @@ export const syntheticSource: JungsiSource = {
     const picked = report.shortlist?.[offeringId]?.selected === true;
     return statistics(offeringId, a, listed, picked);
   },
+
+  async readForecastCapabilities() {
+    const s = await requireMember();
+    return fc.capabilities(s === "operator");
+  },
+  async listForecastDrafts(_caller, universityId) {
+    await requireOperator();
+    return { format: "jungsi.forecast-list/v1", items: await fc.list(universityId) };
+  },
+  async readForecastDraft(_caller, id) {
+    await requireOperator();
+    return fc.read(id);
+  },
+  async createForecastDraft(_caller, offeringId, body, key) {
+    await requireOperator();
+    return done(await fc.create(offeringId, body, key));
+  },
+  async adjustForecastDraft(_caller, id, body, key) {
+    await requireOperator();
+    return done(await fc.adjust(id, body, key));
+  },
+  async validateForecastDraft(_caller, id, body, key) {
+    await requireOperator();
+    return done(await fc.validate(id, body, key));
+  },
+  async approveForecastDraft(_caller, id, body, key) {
+    await requireOperator();
+    return done(await fc.approve(id, body, key));
+  },
+  async publishForecastDraft(_caller, id, body, key) {
+    await requireOperator();
+    return done(await fc.publish(id, body, key));
+  },
+  async readPublishedForecast(_caller, offeringId) {
+    await requirePaid();
+    return fc.published(offeringId);
+  },
 };
+
+/** 관리 작업: 회원 등급이 아니라 관리 권한으로 막는다(서버의 ForecastAuthorityRepository 흉내) */
+async function requireOperator() {
+  const s = await requireMember();
+  if (s !== "operator") throw new AccessDenied(403, "forecast_permission_denied");
+}
+
+function done<T extends object>(r: T | { code: string; status: number }): Result<T> {
+  return "code" in r && "status" in r && typeof (r as { status: unknown }).status === "number" && !("format" in r)
+    ? { ok: false, code: (r as { code: string }).code, status: (r as { status: number }).status }
+    : { ok: true, value: r as T };
+}

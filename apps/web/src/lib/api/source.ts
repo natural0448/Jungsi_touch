@@ -1,5 +1,10 @@
 import type {
   CatalogSearchDto,
+  ForecastAdjustInput,
+  ForecastCapabilitiesDto,
+  ForecastDraftDto,
+  ForecastListDto,
+  ForecastPublicDto,
   HistoryMetricDto,
   HistorySearchQuery,
   OfferingDetailDto,
@@ -25,6 +30,18 @@ export type Result<T> = { ok: true; value: T } | { ok: false; code: string; stat
 export class AccessDenied extends Error {
   constructor(public status: 401 | 403, public code: string) {
     super(`${status} ${code}`);
+  }
+}
+
+/**
+ * 우리 서비스 API 에 닿지 못했을 때. 결과를 지어내지 않고 연결 대기로 보인다(DEV-006 mode_rules).
+ * - unconfigured: 연결 방식(JUNGSI_API_MODE)·API 주소·로그인 설정이 없다
+ * - unavailable: 서버가 503 을 돌려주었거나 연결이 끊겼다(인증·저장소·자료 미준비 포함)
+ * 일반 회원이나 합성 응답으로 바꿔 보이지 않는다.
+ */
+export class ConnectionError extends Error {
+  constructor(public kind: "unconfigured" | "unavailable", public code: string) {
+    super(`${kind} ${code}`);
   }
 }
 
@@ -68,4 +85,30 @@ export interface JungsiSource {
   updateShortlist(caller: Caller, reportId: string, offeringId: string, selected: boolean, expectedVersion: number, idempotencyKey: string): Promise<Result<ReportDto>>;
   /** statistics.read (유료·본인·확인 성적). 모집단위마다 따로 부른다 */
   readStatistics(caller: Caller, reportId: string, offeringId: string): Promise<StatisticsDto | null>;
+
+  /** forecast.capabilities. 관리 권한(editor·approver)과 허용 학교. 회원 등급과 무관하다 */
+  readForecastCapabilities(caller: Caller): Promise<ForecastCapabilitiesDto>;
+  /** forecast.list. 허용 학교의 draft 목록 */
+  listForecastDrafts(caller: Caller, universityId?: string): Promise<ForecastListDto>;
+  /** forecast.read. 범위 밖이면 없는 draft 와 같은 404 → null */
+  readForecastDraft(caller: Caller, draftId: string): Promise<ForecastDraftDto | null>;
+  /** forecast.create (editor) */
+  createForecastDraft(caller: Caller, offeringId: string, body: { input_id: string; input_version: string; policy_id: string; policy_version: string }, key: string): Promise<Result<ForecastDraftDto>>;
+  /** forecast.adjust (editor). 새 revision 을 만들고 이전 검증·승인을 잇지 않는다 */
+  adjustForecastDraft(caller: Caller, draftId: string, body: ForecastAdjustInput, key: string): Promise<Result<ForecastDraftDto>>;
+  /** forecast.validate (editor) */
+  validateForecastDraft(caller: Caller, draftId: string, body: ForecastRevisionRef, key: string): Promise<Result<ForecastDraftDto>>;
+  /** forecast.approve (approver) */
+  approveForecastDraft(caller: Caller, draftId: string, body: ForecastRevisionRef & { validation_receipt_hash: string; reason: string }, key: string): Promise<Result<ForecastDraftDto>>;
+  /** forecast.publish (approver). 새 불변 발행 */
+  publishForecastDraft(caller: Caller, draftId: string, body: ForecastRevisionRef & { approval_receipt_hash: string }, key: string): Promise<Result<ForecastDraftDto>>;
+  /** forecast.published.read (유료). 발행 전이면 pending */
+  readPublishedForecast(caller: Caller, offeringId: string): Promise<ForecastPublicDto | null>;
+}
+
+/** 관리 요청이 묶는 revision. 다른 사람이 먼저 바꿨으면 409 */
+export interface ForecastRevisionRef {
+  expected_revision: number;
+  base_result_hash: string;
+  policy_version: string;
 }

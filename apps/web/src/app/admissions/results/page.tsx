@@ -1,9 +1,10 @@
+import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
 import { ChevronIcon, LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
-import { AccessDenied, getCaller, source } from "@/lib/api";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import { ACADEMIC_YEARS, type CatalogSearchDto, type HistoryMetricDto, type RecruitmentDto } from "@/lib/dto";
 import { plainDate } from "@/lib/format";
 import { loginHref } from "@/lib/links";
@@ -34,7 +35,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
 
   const caller = await getCaller();
   const src = source();
-  const session = await src.getSession(caller);
+  const { session, down } = await sessionOrDown(src, caller);
+  if (down) return <>{head}<ConnectionNotice e={down} /></>;
   if (lockFor(session, route)) return <>{head}<LoginGate /></>;
 
   const cur = parseQuery(await searchParams);
@@ -50,6 +52,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
       limit: LIMIT,
     });
   } catch (e) {
+    if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
     throw e;
   }
@@ -71,6 +74,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
     try {
       recruitment = await src.readRecruitment(caller, openOff.id);
     } catch (e) {
+      if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
       if (!(e instanceof AccessDenied)) throw e;
     }
   }

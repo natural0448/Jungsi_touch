@@ -85,7 +85,8 @@ function WildCard({ w, on, stat, canPick }: { w: CandidateItemDto; on: boolean; 
 
       <p className="wc-why">
         <span>한 수인 이유</span>
-        {n !== null && n > 0 ? `이 학과 환산에서 총점보다 위치가 ${a.advantage!.delta_pp}%p 올라갑니다.` : "내 성적으로 지원 검토 범위에 드는 계열 후보입니다."}
+        {a.recommendation_reasons?.[0]?.text ??
+          (n !== null && n > 0 ? `이 학과 환산에서 총점보다 위치가 ${a.advantage!.delta_pp}%p 올라갑니다.` : "내 성적으로 지원 검토 범위에 드는 계열 후보입니다.")}
       </p>
 
       <div className="wc-score">

@@ -1,6 +1,7 @@
+import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AccessDenied, getCaller, source } from "@/lib/api";
+import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import type { SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { getReportId } from "@/lib/report-ref";
@@ -28,6 +29,7 @@ export default async function Page() {
     // 고정된 revision 의 shortlist·analyses 를 그대로 쓴다. 이름만 offering.read 로 붙인다
     if (snap) shortlist = await pickedItems(src, caller, snap.report);
   } catch (e) {
+    if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
     if (!(e instanceof AccessDenied)) throw e;
     return (
       <div className="wrap pg-body">

@@ -1,5 +1,6 @@
 import { AdvantageCell, reasonText, ScoreCell, StatusCell } from "@/components/offering-parts";
 import type { OverallAnalysisDto } from "@/lib/dto";
+import { DATA_KIND } from "@/lib/analysis-labels";
 import { AREA_LABEL } from "@/lib/exam";
 import type { PickedItem } from "@/lib/report-ops";
 
@@ -14,7 +15,8 @@ const PENDING: Record<string, string> = {
 /** 전체 위치: 국·수·탐2 표준점수 합과 같은 비교집단에서 위에서 몇 % */
 export function OverallCard({ a }: { a: OverallAnalysisDto }) {
   const o = a.overall;
-  const interval = Array.isArray(o.tie_interval_percent) ? o.tie_interval_percent : null;
+  const interval = o.tie_interval_percent && typeof o.tie_interval_percent === "object" ? o.tie_interval_percent : null;
+  const kind = o.data_kind ? DATA_KIND[o.data_kind] : null;
   return (
     <section className="rp-overall" aria-label="전체 성적 위치">
       <div className="n">
@@ -27,12 +29,13 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
         {o.status !== "pending" && o.inclusive_top_percent ? (
           <>
             <b className="num big">{o.inclusive_top_percent}%</b>
-            {o.status === "estimated" && <span className="est">추정</span>}
+            {o.status === "estimated" && <span className="est">{kind?.label ?? "추정"}</span>}
             {interval && (
               <p className="tie">
-                나와 같은 총점까지 포함하면 상위 {interval[1]}%, 빼면 {interval[0]}%입니다. 동점 범위는 합격 확률이나 오차 범위가 아닙니다.
+                동점 구간 상위 <b className="num">{interval.lower}%</b>~<b className="num">{interval.upper}%</b>. 나와 같은 총점까지 포함하면 {interval.upper}%, 빼면 {interval.lower}%입니다. 동점 구간은 합격 확률이나 오차 범위가 아닙니다.
               </p>
             )}
+            {kind && <p className="tie">{kind.note}</p>}
           </>
         ) : (
           <>

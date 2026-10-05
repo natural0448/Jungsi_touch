@@ -7,9 +7,14 @@ import "@/styles/jungsi.css";
 import "@/styles/offering.css";
 import { SiteHeader } from "@/components/site-header";
 import { SyntheticBar } from "@/components/synthetic-bar";
-import { getCaller, source } from "@/lib/api";
+import { ConnectionNotice } from "@/components/connection-notice";
+import { ConnectionError, getCaller, source } from "@/lib/api";
+import type { Session } from "@/lib/dto";
 
 const montserrat = Montserrat({ variable: "--font-montserrat", subsets: ["latin"], weight: ["800", "900"] });
+
+// 모든 화면이 회원 개인 응답이라 요청마다 그린다(미리 만들어 공유하지 않는다)
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: { default: "정시터치 | 에듀터치", template: "%s | 정시터치" },
@@ -17,7 +22,15 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const session = await source().getSession(await getCaller());
+  // 로그인 상태를 못 읽으면(설정 없음·503) 화면 전체를 연결 대기로 둔다. 일반 회원으로 낮춰 보이지 않는다
+  let session: Session | null = null;
+  let down: ConnectionError | null = null;
+  try {
+    session = await source().getSession(await getCaller());
+  } catch (e) {
+    if (!(e instanceof ConnectionError)) throw e;
+    down = e;
+  }
   return (
     <html lang="ko" className={montserrat.variable}>
       <head>
@@ -27,8 +40,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <div className="et jt">
           <SyntheticBar />
-          <SiteHeader session={session} />
-          <main>{children}</main>
+          <SiteHeader session={session} down={Boolean(down)} />
+          <main>{down ? <ConnectionNotice e={down} /> : children}</main>
           <footer className="jt-foot">
             <div className="wrap">
               <p>지원가능성은 합격 확률이 아닙니다. 대학마다 만점과 반영 방식이 달라 다른 대학의 환산점수와 크기를 비교할 수 없습니다.</p>

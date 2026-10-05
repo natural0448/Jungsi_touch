@@ -64,3 +64,7 @@
 .et .stats b{color:var(--ink);font-weight:700}
 .et .stats small{color:var(--muted)}
 .et .stats.wait{color:var(--muted)}
+
+/* 서버가 만든 이유(recommendation_reasons) */
+.et .reason-list{margin:0;padding:0 0 0 18px;display:grid;gap:3px;font-size:13px;color:var(--ink-2);line-height:1.55}
+.et .reason-list li::marker{color:var(--muted)}

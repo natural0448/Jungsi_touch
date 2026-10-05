@@ -79,10 +79,11 @@ export function computeOverall(s: ScoresInput): OverallAnalysisDto {
       inclusive_top_percent: pct(inc),
       exclusive_top_percent: pct(exc),
       tie_share_percent: pct(tie),
-      tie_interval_percent: [pct(exc), pct(inc)],
+      tie_interval_percent: { lower: pct(exc), upper: pct(inc) },
       tie_policy: "include_equal",
       population_id: "SYNTHETIC-2027-09-KMI2",
       model_version: "SYNTHETIC-curve-v1",
+      data_kind: "estimated_weights",
     },
   };
 }

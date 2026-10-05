@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChevronIcon } from "@/components/icons";
-import { AdvantageCell, CATEGORY, CategoryBadge, PickButton, ScoreCell, StatsLine } from "@/components/offering-parts";
+import { AdvantageCell, CATEGORY, CategoryBadge, PickButton, ReasonList, ScoreCell, StatsLine } from "@/components/offering-parts";
 import type { CandidatesDto, Category, StatisticsDto } from "@/lib/dto";
 import { page } from "@/lib/routes";
 import { hrefWith, type Query } from "./query";
@@ -16,7 +16,7 @@ export function bestDelta(g: Group): number | null {
 /**
  * 기본 학교 목록의 학교 한 곳(candidates.basic_university_groups 한 묶음).
  * 응답에 학교 분류가 없으므로 학교에 색을 칠하지 않고, 색이 있는 판단은 학과마다 따로 붙인다(REQ-05).
- * '찾은 이유'는 서버 문장이 없어서 응답 숫자(유불리·학과 판단)만으로 쓴다.
+ * '찾은 이유'는 서버가 만든 학과별 이유(recommendation_reasons, 1.7.0)를 그대로 쓰고, 없으면 응답 숫자만으로 적는다.
  */
 export function SchoolCard({ g, cur, picked, stats }: { g: Group; cur: Query; picked: Set<string>; stats: Map<string, StatisticsDto | null> }) {
   const open = cur.open === g.university_id;
@@ -24,6 +24,9 @@ export function SchoolCard({ g, cur, picked, stats }: { g: Group; cur: Query; pi
   for (const o of g.offerings) counts.set(o.assessment.category, (counts.get(o.assessment.category) ?? 0) + 1);
   const best = bestDelta(g);
   const first = g.offerings[0]?.offering;
+  // 유불리가 가장 큰 학과의 서버 이유를 학교의 첫 이유로 보인다
+  const lead = [...g.offerings].sort((x, y) => Number(y.assessment.advantage?.delta_pp ?? -99) - Number(x.assessment.advantage?.delta_pp ?? -99))[0];
+  const leadReasons = lead?.assessment.recommendation_reasons ?? [];
   const toggle = `${hrefWith(cur, { open: open ? undefined : g.university_id })}#${g.university_id}`;
   const p3 = page("PAGE-03").path;
 
@@ -36,12 +39,19 @@ export function SchoolCard({ g, cur, picked, stats }: { g: Group; cur: Query; pi
         </div>
       </header>
 
-      <p className="sc-why">
+      <div className="sc-why">
         <span>찾은 이유</span>
-        {best !== null && best > 0
-          ? `이 학교 환산에서 총점보다 위치가 최대 ${best.toFixed(2)}%p 올라가는 학과가 있습니다.`
-          : `내 성적으로 지원 검토 범위(도전·핵심·여유)에 드는 학과가 ${g.offerings.length}곳 있습니다.`}
-      </p>
+        {leadReasons.length > 0 ? (
+          <div>
+            <b className="lead-unit">{lead.offering.department}</b>
+            <ReasonList items={leadReasons} max={2} />
+          </div>
+        ) : best !== null && best > 0 ? (
+          `이 학교 환산에서 총점보다 위치가 최대 ${best.toFixed(2)}%p 올라가는 학과가 있습니다.`
+        ) : (
+          `내 성적으로 지원 검토 범위(도전·핵심·여유)에 드는 학과가 ${g.offerings.length}곳 있습니다.`
+        )}
+      </div>
 
       <div className="sc-sum">
         <div className="n">
@@ -95,6 +105,7 @@ export function SchoolCard({ g, cur, picked, stats }: { g: Group; cur: Query; pi
                   <span className="c-adv r"><AdvantageCell a={a} /></span>
                   <span className="c-pick"><PickButton id={o.offering_id} on={picked.has(o.offering_id)} /></span>
                 </div>
+                {(a.recommendation_reasons?.length ?? 0) > 0 && <ReasonList items={a.recommendation_reasons!} max={2} />}
                 <StatsLine s={stats.get(o.offering_id)} />
               </li>
             ))}

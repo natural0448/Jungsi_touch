@@ -1,5 +1,5 @@
 import { togglePick } from "@/app/shortlist-actions";
-import type { AssessmentDto, Category, StatisticsDto } from "@/lib/dto";
+import type { AssessmentDto, Category, ReasonDto, StatisticsDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 
 /* 3·4페이지(와 2페이지 유료 부분)가 같이 쓰는 모집단위 칸. 응답 모양은 assessment·statistics DTO */
@@ -29,6 +29,11 @@ const REASON: Record<string, string> = {
   target_distribution_missing: "그해 비교 분포가 아직 없습니다.",
   total_model_missing: "전체 누적 곡선이 아직 발행되지 않았습니다.",
   counselor_adjustment_unapproved: "상담 조정 기준을 검수하고 있습니다.",
+  percentile_curve_unpublished: "이 대학 환산 분포가 아직 발행되지 않았습니다.",
+  percentile_conversion_context_missing: "환산 척도 근거가 없어 대학 위치를 계산하지 않았습니다.",
+  advantage_population_mismatch: "비교집단이 전체 응시자와 달라 유불리를 보류합니다.",
+  forecast_70_not_published: "올해 70% 예상선이 아직 발행되지 않았습니다.",
+  forecast_not_published: "학과별 예상 기준이 아직 발행되지 않았습니다.",
 };
 export const reasonText = (code: string | null | undefined) => (code ? REASON[code] ?? "자료를 확인하고 있습니다." : "");
 
@@ -121,5 +126,17 @@ export function StatsLine({ s }: { s: StatisticsDto | null | undefined }) {
       )}
       {s.updated_at && <small> {seoulDate(s.updated_at)} 기준</small>}
     </span>
+  );
+}
+
+/** 서버가 만든 이유 목록(recommendation_reasons). 화면은 문장을 바꾸거나 지어내지 않는다 */
+export function ReasonList({ items, max }: { items: ReasonDto[]; max?: number }) {
+  const shown = max ? items.slice(0, max) : items;
+  return (
+    <ul className="reason-list">
+      {shown.map((r) => (
+        <li key={`${r.code}-${r.text}`}>{r.text}</li>
+      ))}
+    </ul>
   );
 }

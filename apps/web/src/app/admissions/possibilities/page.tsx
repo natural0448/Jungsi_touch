@@ -1,3 +1,4 @@
+import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
@@ -7,8 +8,8 @@ import { PaidGate } from "@/components/paid-gate";
 import { ScoreBasis } from "@/components/score-basis";
 import { ShortlistTray } from "@/components/shortlist-tray";
 import { PageHead } from "@/components/page-head";
-import { AccessDenied, getCaller, source } from "@/lib/api";
-import type { CatalogSearchDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
+import type { CatalogSearchDto, ForecastPublicDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
 import { REGIONS } from "@/lib/regions";
 import { ensureAnalyses, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
 import { lockFor, page } from "@/lib/routes";
@@ -32,7 +33,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
 
   const caller = await getCaller();
   const src = source();
-  const session = await src.getSession(caller);
+  const { session, down } = await sessionOrDown(src, caller);
+  if (down) return <>{head}<ConnectionNotice e={down} /></>;
   // 화면 표시용 잠금. 서버가 검색을 403 으로 막아도 아래 catch 가 같은 안내를 그린다
   const lock = lockFor(session, route);
   if (lock) return <>{head}<PaidGate kind={lock} route={route} features={FEATURES} /></>;
@@ -41,6 +43,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
   let res: CatalogSearchDto<OfferingDto>;
   let state: ReportState;
   let rec: RecruitmentDto | null = null;
+  let pub: ForecastPublicDto | null = null;
   let picks: PickedItem[] = [];
   try {
     const [found, mine] = await Promise.all([src.searchOfferings(caller, toSearch(cur)), loadMine(src, caller)]);
@@ -50,8 +53,14 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     state = mine ? await ensureAnalyses(src, caller, mine, items.map((o) => o.offering_id)) : { kind: "none" };
     const report = state.kind === "none" ? null : state.report;
     const open = items.find((o) => o.offering_id === cur.open);
-    [rec, picks] = await Promise.all([open ? src.readRecruitment(caller, open.offering_id) : null, report ? pickedItems(src, caller, report, items) : []]);
+    [rec, picks, pub] = await Promise.all([
+      open ? src.readRecruitment(caller, open.offering_id) : null,
+      report ? pickedItems(src, caller, report, items) : [],
+      // 발행된 학과 기준(공개 근거). 성적과 무관하게 펼친 모집행만
+      open ? src.readPublishedForecast(caller, open.offering_id) : null,
+    ]);
   } catch (e) {
+    if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
     throw e;
   }
@@ -167,7 +176,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                             </div>
                             {open && (
                               <div className="detail">
-                                <Detail o={o} a={a} rec={rec} picked={on} />
+                                <Detail o={o} a={a} rec={rec} pub={pub} picked={on} />
                               </div>
                             )}
                           </li>

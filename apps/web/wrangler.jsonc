@@ -15,7 +15,10 @@
   "vars": {
     // 우리 서비스 API 주소(애플리케이션 계층). 비밀값이 아니다.
     "JUNGSI_API_URL": "http://localhost:8000",
-    // synthetic: HTTP 핸들러 연결 전 화면 제작용 합성 응답 / live: 우리 서비스 API
+    // synthetic: 명시적으로 고른 화면 제작·검토용 합성 응답 / live: 우리 서비스 API + 에듀터치 Supabase 로그인
+    // 값이 없거나 live 설정(JUNGSI_API_URL, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)이 빠지면
+    // 화면은 '연결 설정 대기'를 보인다. 실서버가 실패해도 합성 응답으로 바꾸지 않는다(DEV-006).
+    // Supabase 두 값은 에듀터치 본체(web)와 같은 프로젝트의 URL·publishable 키다(비밀값이 아니다).
     "JUNGSI_API_MODE": "synthetic"
   }
 }

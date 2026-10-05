@@ -20,3 +20,11 @@ export function plainDate(ymd: string | null): string {
 export function signed(n: number): string {
   return n > 0 ? `+${n}` : String(n);
 }
+
+/** UTC 시각 → 서울 날짜·시각 "2027.02.28 14:05" */
+export function seoulDateTime(isoUtc: string | null): string {
+  if (!isoUtc) return "─";
+  const p = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(isoUtc));
+  const get = (t: string) => p.find((x) => x.type === t)?.value ?? "";
+  return `${get("year")}.${get("month")}.${get("day")} ${get("hour")}:${get("minute")}`;
+}

@@ -53,7 +53,33 @@
 .et .ps .recruit b{display:block;font-size:16px;font-weight:900;color:var(--ink)}
 .et .ps .recruit .wait{font-size:13px;font-weight:700;color:var(--reach)}
 .et .ps .recruit a{margin-left:auto;color:var(--brand);font-weight:700}
-.et .ps .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.et .ps .four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+/* 환산·누백·판단 준비 상태 띠 */
+.et .ps .strip{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:0;list-style:none}
+.et .ps .strip li{font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink-2)}
+.et .ps .strip li b{color:var(--ink);font-weight:800}
+.et .ps .strip li.ok b::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--safe);margin-right:6px;vertical-align:1px}
+.et .ps .strip li.hold b::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--muted);margin-right:6px;vertical-align:0}
+.et .ps .strip li small{color:var(--muted)}
+.et .ps .card .tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:4px;background:var(--sub);font-size:11px;font-weight:700;color:var(--ink-2)}
+.et .ps .card .tags{display:flex;gap:6px;flex-wrap:wrap}
+.et .ps .card .tags .tag{margin-left:0}
+/* 서버가 만든 판단 이유와 기준선 근거 */
+.et .ps .reasons,.et .ps .evidence{margin-top:12px;padding:12px 16px;border-radius:var(--r-card);border:1px solid var(--line);background:var(--bg)}
+.et .ps .reasons h3,.et .ps .evidence h3{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+.et .ps .evidence h3 small{font-weight:600}
+.et .ps .evidence ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:13px;color:var(--ink-2)}
+.et .ps .evidence li b{display:inline-block;min-width:64px;font-weight:700;color:var(--ink)}
+/* 발행된 학과 기준(관리 화면에서 발행한 값) */
+.et .ps .published{margin:0 0 14px;padding:12px 16px;border-radius:var(--r-card);border:1px solid var(--line);background:var(--bg)}
+.et .ps .published h3{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+.et .ps .published h3 small{font-weight:600;letter-spacing:0}
+.et .ps .published dl{margin:0;display:flex;gap:6px 22px;flex-wrap:wrap}
+.et .ps .published dl div{display:flex;gap:8px;align-items:baseline;font-size:13px}
+.et .ps .published dt{color:var(--ink-2)}
+.et .ps .published dd{margin:0;font-weight:800}
+.et .ps .published p{margin:6px 0 0;font-size:12px;color:var(--ink-2)}
+.et .ps .published .note{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
 .et .ps .card{border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .et .ps .card h3{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px}
 .et .ps .card .big{font-size:26px;font-weight:900;letter-spacing:-.6px}
@@ -110,6 +136,7 @@
 
 /* 좁은 노트북: 유불리 막대를 빼고 숫자만 둔다(숫자가 담기 버튼과 겹치지 않게) */
 @media (max-width:1100px){
+  .et .ps .four{grid-template-columns:repeat(2,minmax(0,1fr))}
   .et .ps .row .adv .bar{display:none}
   .et .ps .adv .v{min-width:0}
 }
@@ -127,7 +154,7 @@
   .et .ps .row>.c-pick{grid-area:pick;justify-self:end}
   /* 핵심 지원 학교 띠는 휴대폰에서 한 줄로: 이름 목록은 접고 개수와 리포트 버튼만 */
   .et .ps .row>.mmeta{grid-area:meta;display:flex}
-  .et .ps .three{grid-template-columns:1fr}
+  .et .ps .four{grid-template-columns:1fr}
   .et .ps .search{grid-template-columns:1fr}
   .et .ps .univ .scale{margin-left:0;width:100%}
   .et .ps .recruit a{margin-left:0}

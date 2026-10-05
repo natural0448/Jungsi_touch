@@ -1262,6 +1262,47 @@
         "REQ-18"
       ],
       "symbols": []
+    },
+    {
+      "path": "apps/web/src/proxy.ts",
+      "layer": "presentation",
+      "status": "supabase_ssr_token_refresh_and_private_no_store_DEV006_from_drive_1_7_0",
+      "requirements": [
+        "REQ-14",
+        "REQ-15"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/lib/supabase/server.ts",
+      "layer": "presentation",
+      "status": "same_supabase_project_cookie_read_publishable_key_only",
+      "requirements": [
+        "REQ-14",
+        "REQ-15"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/components/connection-notice.tsx",
+      "layer": "presentation",
+      "status": "explicit_synthetic_only_connection_pending_notice_no_fallback",
+      "requirements": [
+        "REQ-14",
+        "REQ-15"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/app/management/forecasts/page.tsx",
+      "layer": "presentation",
+      "status": "ADMIN_FORECAST_management_screen_on_drive_1_7_0_contract_synthetic_responses",
+      "requirements": [
+        "REQ-08",
+        "REQ-09",
+        "REQ-14"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -1600,7 +1641,11 @@
     "3페이지: offerings.search 에 모집 인원이 없어 목록의 '2027 모집' 칸을 빼고 펼친 줄에서만 recruitment.read 로 보인다. 목록에 인원을 보일지(검색 응답에 포함 여부) 정한다.",
     "3·4페이지: 화면을 열 때 보이는 모집행의 분석이 없으면 university.analyze·candidates.build(POST)를 부른다. 요청 키는 (리포트, revision, 대상)으로 정해 같은 화면을 다시 열어도 한 번만 쓰인다. 읽기 화면에서 쓰기를 부르는 이 방식이 서버 운영(요청량·감사 기록)에 맞는지 확인한다.",
     "4페이지: statistics.read 가 모집단위 하나씩이라 펼친 학교와 와일드카드만 부른다. 여러 모집단위를 한 번에 읽는 방법이 필요한지 정한다.",
-    "쓰지 않는 프레젠테이션 초안 파일 4개(apps/web/src/lib/contract.ts, lib/api/synthetic-fixtures.ts, app/admissions/possibilities/actions.ts, components/pending-page.tsx)는 사용자가 2026-10-04 삭제를 허락했다. check_branch_policy 의 validate_deletions 가 커밋·PR 의 모든 파일 삭제를 막고 허락 범위를 적는 방법이 없으므로, 기획 담당이 삭제하거나 허락 범위를 적는 방법을 정한다."
+    "쓰지 않는 프레젠테이션 초안 파일 4개(apps/web/src/lib/contract.ts, lib/api/synthetic-fixtures.ts, app/admissions/possibilities/actions.ts, components/pending-page.tsx)는 사용자가 2026-10-04 삭제를 허락했다. check_branch_policy 의 validate_deletions 가 커밋·PR 의 모든 파일 삭제를 막고 허락 범위를 적는 방법이 없으므로, 기획 담당이 삭제하거나 허락 범위를 적는 방법을 정한다.",
+    "DEV-006·DEV-007 은 공유 드라이브의 명세 1.7.0 을 기준으로 구현했다. develop 에 1.7.0 이 들어오면 병합해 REQ-20~22 와 관리 화면 경로 계약(route_catalog management_pages)으로 맞춘다. 그 전까지 관리 화면 경로는 apps/web/src/lib/routes.ts 의 MANAGEMENT_FORECASTS 에 둔다.",
+    "forecast_draft 의 result·adjustments·validation·approval·audit_events 안쪽 필드가 1.7.0 dto_schemas 에 없다. 화면은 base·adopted·adjusted(forecast_70·acceptance_range·category_ranges)와 receipt_hash 이름을 가정하고 모르는 모양은 그대로 보인다. 서버 구현과 함께 필드를 확정한다.",
+    "3페이지는 발행된 학과 기준을 forecast.published.read 로 따로 읽고, 학과 판단 근거는 assessment.decision_evidence 의 공개 필드로 보인다. 두 값이 같은 발행본(forecast_release_version)을 가리키는지 서버 연결 때 확인한다.",
+    "live 연결: 에듀터치 본체와 같은 Supabase 프로젝트·쿠키 도메인 배포 설정과 실제 계정·이용권·관리 권한의 전체 연결 검증이 남아 있다(DEV-006 remaining)."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -1918,6 +1963,19 @@
         "REQ-18"
       ],
       "summary": "프레젠테이션: 실제 DTO 로 옮긴 뒤 화면이 화면 초안을 더 쓰지 않게 했다. session.read 제안 모양(Session)은 lib/dto.ts 로 옮기고, 합성 예시 대학·모집단위 목록은 lib/api/synthetic-history.ts 에 둔다. 쓰지 않는 초안 파일 4개는 사용자가 삭제를 허락했지만 check_branch_policy 가 모든 파일 삭제를 막아 남겨 두었다."
+    },
+    {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-02",
+        "REQ-03",
+        "REQ-05",
+        "REQ-08",
+        "REQ-09",
+        "REQ-14",
+        "REQ-15"
+      ],
+      "summary": "프레젠테이션: 사용자 지시에 따라 공유 드라이브에 올라온 명세 1.7.0(아직 develop 미반영)의 DEV-006 작업을 시작했다. 연결 방식은 JUNGSI_API_MODE=synthetic 를 명시했을 때만 합성 응답을 쓰고, 값이 없거나 live 설정(API 주소·Supabase URL·publishable 키)이 빠지면 '연결 설정 대기', 실서버 503·연결 실패는 '연결 대기'로 보이며 합성 응답이나 일반 회원으로 대신하지 않는다. live 에서는 에듀터치와 같은 Supabase 쿠키를 @supabase/ssr 로 읽어 access token 만 우리 API 에 전달하고, proxy.ts 에서 토큰을 갱신하며 모든 응답에 private, no-store 를 붙인다. session.read 를 정식 작업으로 쓴다. 3페이지는 환산(conversion)·학교 누백(percentile)·지원 판단의 준비 상태를 따로 보이고, 관측 도수/자체 추정(data_kind), 비교집단(population_scope: 국·수·탐2 전체/대학 반영 성적 보유자, 다르면 유불리 보류), 실제 수능/모평/연도 보정 추정(score_basis), 서버 추천 이유(recommendation_reasons), 발행된 기준선 근거와 forecast.published.read 의 학과 기준을 보인다. 2페이지는 전체 누백의 자체 추정 여부와 동점 구간 {lower,upper} 를 보인다. 4페이지 찾은 이유·학과 행·와일드카드는 서버 추천 이유를 그대로 쓴다. 관리 화면 /management/forecasts(ADMIN-FORECAST)는 소비자 4개 탭과 분리하고 forecast.capabilities 의 관리 권한·허용 학교로만 열리며 draft 생성·조정(새 revision)·검증·승인·발행과 403/404/409/422 거절을 보인다. 거절된 요청 뒤에는 새 Idempotency-Key 를 쓰고 연결 실패면 같은 키로 재시도한다. 합성 응답은 운영자(일반 회원 + 관리 권한) 보기 상태와 forecast 흐름을 흉내 낸다."
     }
   ],
   "overall_analysis_contract": {

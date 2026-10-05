@@ -1,3 +1,4 @@
+import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRightIcon } from "@/components/icons";
@@ -5,7 +6,7 @@ import { PageHead } from "@/components/page-head";
 import { PaidGate } from "@/components/paid-gate";
 import { ScoreBasis } from "@/components/score-basis";
 import { ShortlistTray } from "@/components/shortlist-tray";
-import { AccessDenied, getCaller, source } from "@/lib/api";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { StatisticsDto } from "@/lib/dto";
 import { ensureCandidates, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
 import { lockFor, page } from "@/lib/routes";
@@ -31,7 +32,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
 
   const caller = await getCaller();
   const src = source();
-  const session = await src.getSession(caller);
+  const { session, down } = await sessionOrDown(src, caller);
+  if (down) return <>{head}<ConnectionNotice e={down} /></>;
   const lock = lockFor(session, route);
   if (lock) return <>{head}<PaidGate kind={lock} route={route} features={FEATURES} /></>;
 
@@ -54,6 +56,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
       stats = new Map(s);
     }
   } catch (e) {
+    if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
     throw e;
   }

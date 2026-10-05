@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { AccessDenied, getCaller, source } from "@/lib/api";
+import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import { loadMine, togglePickOn } from "@/lib/report-ops";
 
 /**
@@ -19,7 +19,7 @@ export async function togglePick(fd: FormData) {
     if (!report) return;
     await togglePickOn(src, caller, report, id, selected);
   } catch (e) {
-    if (e instanceof AccessDenied) return;
+    if (e instanceof AccessDenied || e instanceof ConnectionError) return;
     throw e;
   }
   revalidatePath("/", "layout");
