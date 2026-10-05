@@ -66,9 +66,47 @@ class OfferingAnalysis:
     decisions: dict
 
 
+@dataclass(frozen=True)
+class UniversityConversionRelease:
+    """Independent approved rule supply; no bridge, curve or decision objects.
+
+    Each binding repeats the catalog's university/campus/department/track/group
+    identity beside its year/PK/rule version. Exam and pack metadata bind every
+    contained rule/table, which may also declare stricter matching metadata.
+    """
+    version: str
+    status: str
+    academic_year: int
+    exam_id: str
+    source_pack_version: str
+    exam_type: str
+    release: ConversionRelease
+    bindings: tuple[dict, ...]
+    mock_compatibility: dict | None = None
+
+
 class PlatformDataProvider(ExamAnalysisProvider, Protocol):
     def get_catalog(self) -> CatalogRelease | None: ...
     def get_analysis(self, offering_id: str) -> OfferingAnalysis | None: ...
+    def get_conversion(self, offering_id: str) -> UniversityConversionRelease | None: ...
+    def get_percentile(self, offering_id: str) -> 'UniversityPercentileRelease | None': ...
+
+
+@dataclass(frozen=True)
+class UniversityPercentileRelease:
+    """Independent approved score distribution and exact offering/exam binding."""
+    version: str
+    status: str
+    release_id: str
+    academic_year: int
+    exam_id: str
+    source_pack_version: str
+    exam_type: str
+    rule_version: str
+    curve: UniversityScoreDistribution
+    bindings: tuple[dict, ...]
+    comparison_population: dict | None = None
+    validation_receipt: dict | None = None
 
 
 class ArtifactResultWriter(Protocol):

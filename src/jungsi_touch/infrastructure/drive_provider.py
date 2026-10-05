@@ -6,7 +6,7 @@ import re
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from uuid import uuid4
-from ..application.platform_ports import CatalogRelease, OfferingAnalysis, PlatformError
+from ..application.platform_ports import CatalogRelease, OfferingAnalysis, PlatformError, UniversityConversionRelease, UniversityPercentileRelease
 from ..application.ports import TotalModelBinding
 from ..application.time_contract import utc_instant, utc_text, calendar_date
 from ..exam_pack import ExamPack, ExamTotalModel
@@ -27,6 +27,8 @@ class MissingDataProvider:
     def get_total_model(self,exam_id,pack_version): return None
     def get_catalog(self): return None
     def get_analysis(self,offering_id): return None
+    def get_conversion(self,offering_id): return None
+    def get_percentile(self,offering_id): return None
 
 
 class DriveClient:
@@ -121,8 +123,11 @@ class DriveDataProvider:
     def get_total_model(self,exam_id,pack_version):
         raw,entry=self.load('total_model',exam_id+':'+pack_version)
         if raw is None:return None
-        model=ExamTotalModel(raw['exam_id'],raw['pack_version'],TotalScoreDistribution(
-            DistributionMetadata(**raw['metadata']),[ScoreFrequency(r['total_score'],r['weight']) for r in raw['frequencies']]))
+        if raw.get('format')=='jungsi.exam-total-model/v1':
+            model=ExamTotalModel.from_json(json.dumps(raw))
+        else:
+            model=ExamTotalModel(raw['exam_id'],raw['pack_version'],TotalScoreDistribution(
+                DistributionMetadata(**raw['metadata']),[ScoreFrequency(r['total_score'],r['weight']) for r in raw['frequencies']]))
         return TotalModelBinding(model,entry['distribution_id'])
 
     def get_catalog(self):
@@ -139,6 +144,34 @@ class DriveDataProvider:
                     change['announced_at']=utc_text(utc_instant(change['announced_at'],source_timezone=entry.get('source_timezone')))
         return CatalogRelease(raw['version'],raw['status'],utc_instant(raw['as_of'],source_timezone=entry.get('source_timezone')),
                               tuple(raw['offerings']),tuple(raw.get('history',[])))
+
+    def get_conversion(self,offering_id):
+        raw,entry=self.load('conversion',offering_id)
+        if raw is None:return None
+        if raw.get('format')!='jungsi.university-conversion-release/v1':raise PlatformError('conversion_release_invalid',503)
+        try:
+            return UniversityConversionRelease(raw['version'],raw['status'],raw['academic_year'],raw['exam_id'],
+                raw['source_pack_version'],raw['exam_type'],ConversionRelease(raw['release_id'],raw['rules'],raw['bindings']),
+                tuple(raw['bindings']),raw.get('mock_compatibility'))
+        except (KeyError,TypeError,ValueError) as error:
+            raise PlatformError('conversion_release_invalid',503) from error
+
+    def get_percentile(self,offering_id):
+        raw,entry=self.load('percentile',offering_id)
+        if raw is None:return None
+        if raw.get('format')!='jungsi.university-percentile-release/v1':raise PlatformError('percentile_release_invalid',503)
+        try:
+            population=raw.get('comparison_population');receipt=None
+            if population is not None:
+                # A second independently pinned registry entry is mandatory.
+                receipt,_=self.load('estimate_receipt',population['validation_receipt_version'])
+                if receipt is None:raise PlatformError('percentile_population_receipt_missing',503)
+            return UniversityPercentileRelease(raw['version'],raw['status'],raw['release_id'],raw['academic_year'],
+                raw['exam_id'],raw['source_pack_version'],raw['exam_type'],raw['rule_version'],
+                UniversityScoreDistribution(raw['curve']),tuple(raw['bindings']),population,receipt)
+        except PlatformError:raise
+        except (KeyError,TypeError,ValueError) as error:
+            raise PlatformError('percentile_release_invalid',503) from error
 
     def get_analysis(self,offering_id):
         raw,entry=self.load('analysis',offering_id)

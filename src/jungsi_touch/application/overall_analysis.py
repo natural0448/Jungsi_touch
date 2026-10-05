@@ -36,13 +36,17 @@ def _scores(request):
         raise OverallAnalysisError("invalid_request", 422, "시험 ID와 자료 버전을 확인하세요.")
     for area in ("korean", "math"):
         row = request[area]
-        if not isinstance(row, dict) or "standard_score" not in row or set(row) - {"standard_score", "choice"}:
-            raise OverallAnalysisError("invalid_request", 422, "영역별 표준점수와 선택과목만 입력하세요.")
+        if not isinstance(row, dict) or "standard_score" not in row or set(row) - {"standard_score", "choice", "percentile", "grade"}:
+            raise OverallAnalysisError("invalid_request", 422, "영역별 허용 성적 필드를 확인하세요.")
     inquiry = request["inquiry"]
     if not isinstance(inquiry, list) or len(inquiry) != 2 or any(
-        not isinstance(row, dict) or set(row) != {"subject", "standard_score"} for row in inquiry
+        not isinstance(row, dict) or not {"subject", "standard_score"} <= set(row) or set(row)-{"subject", "standard_score", "percentile", "grade"} for row in inquiry
     ):
         raise OverallAnalysisError("invalid_request", 422, "탐구 두 과목의 과목명과 표준점수가 필요합니다.")
+    for row in [request['korean'], request['math'], *inquiry]:
+        for field,lo,hi in [('percentile',0,100),('grade',1,9)]:
+            if field in row and (type(row[field]) is not int or not lo<=row[field]<=hi):
+                raise OverallAnalysisError('invalid_reported_'+field,422,'성적표 백분위·등급은 유효 범위의 정수여야 합니다.')
     return {key: deepcopy(value) for key, value in request.items() if key != "pack_version"}
 
 
@@ -52,7 +56,7 @@ def _pending(reason_code):
         "top_percent": None, "inclusive_top_percent": None,
         "exclusive_top_percent": None, "tie_share_percent": None,
         "tie_interval_percent": None, "tie_policy": "include_equal",
-        "population_id": POPULATION_ID, "model_version": None,
+        "population_id": POPULATION_ID, "model_version": None, "data_kind": None,
     }
 
 
@@ -117,6 +121,8 @@ class OverallAnalysisService:
             return _pending(reasons.get(error.code,'total_model_unavailable'))
         except (OSError, PercentileError):
             return _pending("total_model_unavailable")
+        except (KeyError,TypeError,AttributeError,ValueError):
+            return _pending('total_model_invalid')
         if binding is None:
             return _pending("total_model_missing")
         if not isinstance(binding, TotalModelBinding) or not isinstance(binding.model, ExamTotalModel):
@@ -137,5 +143,5 @@ class OverallAnalysisService:
             "tie_share_percent", "tie_policy", "population_id",
         )}
         public["tie_interval_percent"] = {key: result["tie_interval_percent"][key] for key in ("lower", "upper")}
-        public.update(reason_code=None, model_version=binding.distribution_id)
+        public.update(reason_code=None, model_version=binding.distribution_id,data_kind=model.distribution.metadata.kind)
         return public

@@ -29,9 +29,21 @@ def _require(condition, code, message):
 
 def _grade(subject, score):
     for row in subject['grades']:
+        if _empty_grade(row):continue
         if row['grade']==9 or score>=row['lower_score']:
             return row['grade']
     raise PercentileError('grade_not_found','등급표를 확인하세요.')
+
+
+def _empty_grade(row):
+    return (row.get('empty_grade_verified') is True and row.get('reported_count_state')=='published_dash' and
+        row.get('count') is None and row.get('lower_score') is None and row.get('upper_exclusive') is None and
+        row.get('published_percent') is None and row.get('derived_count_from_frequency')==0 and
+        type(row.get('derived_count_from_frequency')) is int and type(row.get('grade')) is int and 1<row['grade']<=9)
+
+
+def _grade_count(row):
+    return 0 if _empty_grade(row) else row['count']
 
 def _json(text):
     try:
@@ -95,14 +107,18 @@ class ExamPack:
                 _require([r['grade'] for r in rows]==list(range(1,10)),'invalid_grades','1~9등급 표가 필요합니다.')
                 bounds=[]
                 for r in rows:
-                    _integer(r['count'],'grade.count')
+                    _integer(_grade_count(r),'grade.count')
                     self._source_ref(r['source_ref'],source_ids)
+                    if _empty_grade(r):
+                        _require(s['assessment']=='standard_score','invalid_empty_grade','상대평가 공식 빈 등급만 허용합니다.')
+                        continue
                     if r['grade']<9:bounds.append(_integer(r['lower_score'],'grade.lower_score'))
                     else:_require(r['lower_score'] is None and r['upper_exclusive']==bounds[-1],
                                   'invalid_grade_boundary','9등급 경계를 확인하세요.')
                 _require(all(a>=b for a,b in zip(bounds,bounds[1:])),'invalid_grade_boundary','등급 경계가 역전되었습니다.')
-                _require(sum(r['count'] for r in rows)==total,'grade_total_mismatch','등급별 인원 합이 과목 응시 인원과 다릅니다.')
+                _require(sum(_grade_count(r) for r in rows)==total,'grade_total_mismatch','등급별 인원 합이 과목 응시 인원과 다릅니다.')
                 for r in rows:
+                    if _empty_grade(r):continue
                     expected=_decimal(Fraction(r['count']*100,total),2)
                     _require(Decimal(r['published_percent'])==Decimal(expected),
                              'grade_percent_mismatch','공식 등급 비율과 인원 계산이 일치하지 않습니다.')
@@ -121,8 +137,23 @@ class ExamPack:
                         self._source_ref(row['source_ref'],source_ids)
                         counts[_grade(s,score)]+=count
                     _require(cumulative==total==s['published_total'],'frequency_total_mismatch','도수·발표 합계·응시 인원이 다릅니다.')
-                    _require(all(counts[r['grade']]==r['count'] for r in rows),
+                    _require(all(counts[r['grade']]==_grade_count(r) for r in rows),
                              'grade_frequency_mismatch','등급 경계로 합산한 도수와 발표 등급 인원이 다릅니다.')
+                    reported=s.get('reported_scores',{})
+                    _require(isinstance(reported,dict),'invalid_reported_mapping','성적표 매핑 형식을 확인하세요.')
+                    observed={r['standard_score'] for r in f}
+                    for key,mapped in reported.items():
+                        _require(isinstance(key,str) and key.isdigit() and str(int(key))==key and int(key) in observed,
+                                 'invalid_reported_mapping','매핑 점수는 같은 시험의 실제 표준점수여야 합니다.')
+                        _require(isinstance(mapped,dict) and {'source_ref'}<set(mapped)<= {'percentile','grade','source_ref'},
+                                 'invalid_reported_mapping','성적표 매핑 필드를 확인하세요.')
+                        self._source_ref(mapped['source_ref'],source_ids)
+                        for field,lo,hi in [('percentile',0,100),('grade',1,9)]:
+                            if field in mapped:
+                                _require(type(mapped[field]) is int and lo<=mapped[field]<=hi,
+                                         'invalid_reported_mapping','성적표 매핑 범위를 확인하세요.')
+                        if 'grade' in mapped:
+                            _require(mapped['grade']==_grade(s,int(key)),'reported_grade_conflict','공식 등급표와 매핑이 다릅니다.')
                 else:
                     _require(s['assessment']=='absolute_grade' and 'frequencies' not in s,
                              'invalid_assessment','절대평가를 표준점수 분포로 처리할 수 없습니다.')
@@ -198,6 +229,13 @@ class ExamPack:
                 'source_ref':row['source_ref'],'basis':'official_subject_population',
                 'meaning':'과목별 응시자 중 위치. 국수탐2 총점 누적 또는 성적표 정수 백분위가 아님.'}
 
+    def reported_score(self,subject,standard_score):
+        """Verified same-exam mapping, never a percentile made from a rank tail."""
+        row=self.subject_result(subject,standard_score)
+        mapped=deepcopy(self._data['subjects'][subject_key(subject)].get('reported_scores',{}).get(str(standard_score),{}))
+        mapped.setdefault('grade',row['grade'])
+        return mapped
+
     def analyze(self,payload,*,total_model=None):
         _require(isinstance(payload,dict),'invalid_scores','성적 입력 객체가 필요합니다.')
         _require(payload.get('exam_id')==self.exam_id,'exam_mismatch','학생 성적과 기준표의 시험이 다릅니다.')
@@ -221,6 +259,13 @@ class ExamPack:
             results=[self.subject_result('국어',payload['korean']['standard_score']),
                      self.subject_result('수학',payload['math']['standard_score'])]
             results.extend(self.subject_result(i['subject'],i['standard_score']) for i in inquiry)
+            for entered,result in zip([payload['korean'],payload['math'],*inquiry],results):
+                mapped=self.reported_score(result['subject'],result['standard_score'])
+                for field,lo,hi in [('percentile',0,100),('grade',1,9)]:
+                    if field in entered:
+                        _require(type(entered[field]) is int and lo<=entered[field]<=hi,'invalid_reported_'+field,'성적표 값의 정수 범위를 확인하세요.')
+                        _require(field not in mapped or entered[field]==mapped[field],
+                                 'reported_'+field+'_conflict','입력과 같은 시험의 공식 성적표 매핑이 다릅니다.')
             absolute={}
             for field,name in [('english_grade','영어'),('korean_history_grade','한국사')]:
                 value=payload.get(field)

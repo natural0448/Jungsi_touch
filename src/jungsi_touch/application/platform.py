@@ -8,6 +8,8 @@ from urllib.parse import urlsplit, parse_qs
 from .authorization import AccessController
 from .overall_analysis import OverallAnalysisService, _identifier
 from .offering_analysis import evaluate_offering, blocked
+from .university_scoring import UniversityScoringService
+from .university_percentile import UniversityPercentileService
 from .platform_ports import CatalogRelease, PlatformError
 from .time_contract import utc_instant, utc_text, calendar_date
 
@@ -72,6 +74,8 @@ class PlatformService:
         self.repository, self.data, self.clock = repository, data, clock
         self.access = AccessController(repository)
         self.overall = OverallAnalysisService(self.access, data)
+        self.scoring = UniversityScoringService(data)
+        self.percentile = UniversityPercentileService(data)
 
     def execute(self, operation, actor, *, body=None, query=None, params=None, key=None):
         params, query = params or {}, query or {}
@@ -137,11 +141,17 @@ class PlatformService:
                 else: rows=[row for row in self.service_rows(release) if row['academic_year']==updated['overall']['exam']['academic_year']]
                 results={}
                 for offering in rows:
+                    conversion=self.scoring.calculate(offering,profile)
+                    percentile=self.percentile.calculate(offering,conversion)
                     try: bundle=self.data.get_analysis(offering['offering_id'])
                     except PlatformError as error:
-                        results[offering['offering_id']]=blocked(offering['offering_id'],error.code);continue
-                    except OSError: bundle=None
-                    results[offering['offering_id']]=evaluate_offering(offering,profile,updated['overall'],bundle)
+                        assessment=evaluate_offering(offering,profile,updated['overall'],None,conversion=conversion,percentile=percentile)
+                        assessment['reason_code']=error.code
+                    except (OSError,ValueError,TypeError,KeyError,AttributeError):
+                        assessment=evaluate_offering(offering,profile,updated['overall'],None,conversion=conversion,percentile=percentile)
+                        assessment['reason_code']='analysis_release_invalid'
+                    else:assessment=evaluate_offering(offering,profile,updated['overall'],bundle,conversion=conversion,percentile=percentile)
+                    results[offering['offering_id']]=assessment
                 updated['analyses'].update(results)
                 updated['catalog_version']=release.version
                 updated['analysis_status']=dict(status='ready' if any(r['status']=='ready' for r in results.values()) else 'pending',
