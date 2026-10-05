@@ -19,7 +19,8 @@
     // 값이 없거나 live 설정(JUNGSI_API_URL, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)이 빠지면
     // 화면은 '연결 설정 대기'를 보인다. 실서버가 실패해도 합성 응답으로 바꾸지 않는다(DEV-006).
     // Supabase 두 값은 에듀터치 본체(web)와 같은 프로젝트의 URL·publishable 키다(비밀값이 아니다).
-    // 화면 제작·검토는 로컬에서 JUNGSI_API_MODE=synthetic 을 명시해 띄운다.
-    "JUNGSI_API_MODE": "live"
+    // 2026-10-06 사용자 결정: 운영 API 주소를 받기 전까지 배포 화면을 예시 응답(synthetic)으로 둔다.
+    // 상단 '합성 응답' 띠가 보인다. 주소가 오면 "live" 와 JUNGSI_API_URL·Supabase 두 값을 넣어 다시 배포한다.
+    "JUNGSI_API_MODE": "synthetic"
   }
 }

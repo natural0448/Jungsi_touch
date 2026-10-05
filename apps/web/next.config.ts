@@ -13,6 +13,16 @@ const nextConfig: NextConfig = {
   */
   basePath: "/jeongsi",
   turbopack: { root: appRoot },
+  // 예전 시안 앱(에듀터치 jeongsi/)의 주소로 들어온 사람을 새 화면으로 보낸다(같은 jeongsi-touch 워커를 교체함)
+  async redirects() {
+    return [
+      { source: "/score", destination: "/reports/me", permanent: false },
+      { source: "/report", destination: "/reports/me", permanent: false },
+      { source: "/results", destination: "/admissions/results", permanent: false },
+      { source: "/find", destination: "/admissions/favorable", permanent: false },
+      { source: "/schools", destination: "/admissions/possibilities", permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;
