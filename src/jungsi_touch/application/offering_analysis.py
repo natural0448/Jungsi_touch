@@ -5,6 +5,8 @@ from ..year_equating import estimate_year, EquatingError, display, number
 from ..university_conversion import prepare_equated_profile, ConversionError
 from ..admission_result_percentile import ResultPercentileError, MATCH_FIELDS
 from .platform_ports import OfferingAnalysis
+from .university_percentile import legacy_percentile_result
+from .overall_analysis import _identifier
 from .time_contract import calendar_date
 from urllib.parse import urlsplit, parse_qs
 
@@ -76,24 +78,44 @@ def evidence_dto(decision):
     return dict(version=evidence['version'],historical_metrics=history,forecast_70=forecast,expected_acceptance_range=adopted)
 
 
-def evaluate_offering(offering, profile, overall, bundle):
-    try:return _evaluate_offering(offering,profile,overall,bundle)
-    except (KeyError,TypeError,AttributeError,ValueError):return blocked(offering['offering_id'],'analysis_release_invalid')
+def evaluate_offering(offering, profile, overall, bundle, *, conversion=None, percentile=None):
+    try:result=_evaluate_offering(offering,profile,overall,bundle,conversion,percentile)
+    except (KeyError,TypeError,AttributeError,ValueError):result=blocked(offering['offering_id'],'analysis_release_invalid')
+    if conversion is not None:
+        result['conversion']=conversion.dto()
+        if conversion.ready:
+            result['converted_score']=conversion.converted_score
+            result['versions'].update(rule=conversion.rule_version,conversion=conversion.release_version)
+            years={row['academic_year']:row for row in result['years']}
+            years[conversion.academic_year]=dict(academic_year=conversion.academic_year,offering_id=offering['offering_id'],
+                score_basis=conversion.score_basis,converted_score=conversion.converted_score,status='ready',reason_code=None)
+            result['years']=[years.get(y,dict(academic_year=y,offering_id=None,score_basis='year_equated_estimate',
+                converted_score=None,status='pending',reason_code='year_bridge_required')) for y in (2024,2025,2026,2027)]
+    if percentile is not None and (percentile.ready or 'percentile' not in result):
+        result['percentile']=percentile.dto()
+        result['converted_percentile']=result['percentile']['top_percent']
+    return result
 
 
-def _evaluate_offering(offering, profile, overall, bundle):
+def _evaluate_offering(offering, profile, overall, bundle, conversion, percentile):
     oid = offering['offering_id']
     if not isinstance(bundle, OfferingAnalysis): return blocked(oid, 'analysis_release_missing')
+    if not _identifier(bundle.version): return blocked(oid, 'analysis_release_invalid')
     if bundle.status != 'approved': return blocked(oid, 'analysis_release_not_approved')
     scores = profile['scores']
     if bundle.source_pack_version != scores['pack_version']: return blocked(oid, 'analysis_pack_mismatch')
     year = offering['academic_year']
     if bundle.offerings_by_year.get(year) != oid: return blocked(oid, 'offering_binding_mismatch')
-    if overall['overall']['status'] == 'pending': return blocked(oid, overall['overall']['reason_code'])
+    direct=conversion is not None and conversion.ready
+    if overall['overall']['status'] == 'pending' and not direct: return blocked(oid, overall['overall']['reason_code'])
     marks = dict(korean=scores['korean']['standard_score'], math=scores['math']['standard_score'],
                  inquiry1=scores['inquiry'][0]['standard_score'], inquiry2=scores['inquiry'][1]['standard_score'])
     profiles, failures = {}, {}
     for target_year in (2024, 2025, 2026, 2027):
+        if direct and target_year==year:
+            profiles[target_year]=conversion.internal_profile();continue
+        if overall['overall']['status']=='pending':
+            failures[target_year]=overall['overall']['reason_code'];continue
         bridge = bundle.bridges.get(target_year)
         if bridge is None:
             failures[target_year] = 'target_distribution_missing'; continue
@@ -116,11 +138,14 @@ def _evaluate_offering(offering, profile, overall, bundle):
         except (EquatingError, ConversionError) as error:
             failures[target_year] = error.code
     converted = bundle.release.compare_years(bundle.offerings_by_year, profiles)
+    if direct:
+        current_row=next(r for r in converted['years'] if r['academic_year']==year)
+        current_row.update(conversion.internal_calculation())
     public_years = []
     for row in converted['years']:
         y = row['academic_year']
         public_years.append(dict(academic_year=y, offering_id=row['offering_pk'],
-            score_basis='year_equated_estimate', converted_score=row.get('converted_score'),
+            score_basis=row.get('score_basis','year_equated_estimate'), converted_score=row.get('converted_score'),
             status='ready' if row.get('calculation_status')=='calculated' else 'pending',
             reason_code=None if row.get('calculation_status')=='calculated' else failures.get(y, row['reason_codes'][0])))
     current = next(r for r in converted['years'] if r['academic_year']==year)
@@ -130,10 +155,17 @@ def _evaluate_offering(offering, profile, overall, bundle):
     result.update(converted_score=current['converted_score'], years=public_years,
                   versions=dict(analysis=bundle.version, profile=profile['profile_id'], pack=scores['pack_version'],
                                 source_model=overall['overall']['model_version'],bridge=bundle.policy.version, rule=current['rule_version']))
-    curve = bundle.curves.get(year)
-    if curve is None: return result
-    try:
+    # Absence preserves an already approved legacy lookup. A supplied artifact
+    # with invalid approval/context must never be bypassed with another curve.
+    independent=direct and percentile is not None and (percentile.ready or percentile.reason_code!='percentile_release_missing')
+    if independent:
+        if not percentile.ready:result['reason_code']=percentile.reason_code;return result
+        metadata=dict(percentile.context);curve=None
+    else:
+        curve = bundle.curves.get(year)
+        if curve is None: return result
         metadata = curve.metadata
+    try:
         binding = dict(academic_year=year, exam_id=profiles[year]['exam_id'], rule_version=current['rule_version'])
         rule = bundle.release.rules[current['rule_version']].data
         binding.update(rule_id=rule['rule_id'], score_scope=rule['score_scope'])
@@ -151,9 +183,12 @@ def _evaluate_offering(offering, profile, overall, bundle):
         if any(metadata[k] != value for k, value in binding.items()):
             result['reason_code']='conversion_curve_context_mismatch'; return result
         record={k:metadata[k] for k in MATCH_FIELDS}
-        record.update(score_metric=metadata['score_metric'], score_value=current['converted_score'], publication_precision={'mode':'exact'})
-        rank=curve.lookup(record)
+        score=Fraction(**current['exact_score'])
+        record.update(score_metric=metadata['score_metric'], score_value=score, publication_precision={'mode':'exact'})
+        rank=percentile.internal_rank() if independent else curve.lookup(record)
         result['converted_percentile']=rank['at_reported_score']['above_or_equal_percent']
+        if not independent:
+            result['percentile']=legacy_percentile_result(offering,profile,current,curve,bundle.version).dto()
         result['versions'].update(curve=metadata['curve_version'], decision=decision['version'],
                                  population=metadata['population_id'],target_exam=metadata['exam_id'],tie_policy='include_equal')
         eligibility_status=eligibility(scores, decision.get('eligibility_policy'))
@@ -163,7 +198,6 @@ def _evaluate_offering(offering, profile, overall, bundle):
         result['versions']['eligibility']=decision['eligibility_policy']['version']
         ranges=decision.get('ranges', [])
         allowed={'challenge','core','room','outside'}
-        score=number(current['converted_score'])
         matches=[r for r in ranges if r.get('category') in allowed and number(r['lower']) <= score < number(r['upper'])]
         if len(matches) != 1: result['reason_code']='decision_range_unconfirmed'; return result
         # Counselor adjustment is separately approved, versioned, and applied once.
@@ -178,8 +212,8 @@ def _evaluate_offering(offering, profile, overall, bundle):
             adopted_category=category,base_policy_version=decision['version'],adjustment_version=adjustment['version'] if adjustment else None)
         result.update(status='ready', category=category, reason_code=None)
         baseline=decision.get('baseline')
-        target_total=bundle.bridges[year]['target_total']
-        if (baseline and all(baseline.get(k)==metadata[k] for k in ('academic_year','exam_id','population_id'))
+        target_total=bundle.bridges.get(year,{}).get('target_total')
+        if (baseline and target_total is not None and all(baseline.get(k)==metadata[k] for k in ('academic_year','exam_id','population_id'))
             and (target_total.academic_year, target_total.exam_id, target_total.population_id)==
                 (metadata['academic_year'], metadata['exam_id'], metadata['population_id'])
             and target_total.status=='validated' and target_total.kind!='synthetic'

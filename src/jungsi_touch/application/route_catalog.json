@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.3.1",
-  "source_sha256": "c74fe9b47db0e95133b7a362de548ef2b04c02eb2e678c20b81debc4f948dd9f",
+  "spec_version": "1.6.3",
+  "source_sha256": "8ca745da0073e4b8c3ed6ea4ba1fc330bca6567cd0b72cad9f7ee8baff1f4519",
   "pages": [
     {
       "id": "PAGE-01",
@@ -283,7 +283,7 @@
         "REQ-08",
         "REQ-14"
       ],
-      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유",
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -298,7 +298,9 @@
         "response_schema": "report"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.report"
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
+      "scoring_service": "jungsi_touch.application.university_scoring.UniversityScoringService.calculate",
+      "percentile_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate"
     },
     {
       "id": "candidates.build",
@@ -315,7 +317,7 @@
         "REQ-09",
         "REQ-14"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드",
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -329,7 +331,9 @@
         "response_schema": "report"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.report"
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
+      "scoring_service": "jungsi_touch.application.university_scoring.UniversityScoringService.calculate",
+      "percentile_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate"
     },
     {
       "id": "shortlist.update",
@@ -423,7 +427,7 @@
     "format": "jungsi.overall-analysis/v1",
     "stateless": true,
     "http_handler_implemented": true,
-    "description": "검증된 서버 Actor를 먼저 확인한 뒤 등록 시험과 자료 버전의 학생 성적을 기존 ExamPack으로 분석한다. 누적곡선의 부재·미승인·불일치는 전체 입력 오류가 아니라 overall.pending으로 반환하고 총점과 과목 결과를 보존한다.",
+    "description": "검증된 서버 Actor를 먼저 확인한 뒤 등록 시험과 자료 버전의 학생 성적을 기존 ExamPack으로 분석한다. 누적곡선의 부재·미승인·불일치는 전체 입력 오류가 아니라 overall.pending으로 반환하고 총점과 과목 결과를 보존한다. DEV-005는 제공된 공식 주변도수와 참고 제약을 이용해 자체 추정 공동분포·총점 곡선을 생성한다. 전체 학생 실제 DB를 필수로 요구하지 않으며 승인된 추정 모델의 overall.status는 estimated다.",
     "required_inputs": [
       "exam_id",
       "pack_version",
@@ -437,10 +441,11 @@
     ],
     "input_rules": [
       "exam_id·pack_version은 등록 ID 토큰이며 파일 경로가 아니다",
-      "국어·수학은 standard_score와 선택적 choice만 허용",
-      "inquiry는 서로 다른 두 과목의 subject·standard_score",
+      "국어·수학은 standard_score와 선택적 choice·percentile·grade를 허용한다.",
+      "inquiry는 서로 다른 두 과목의 subject·standard_score와 선택적 percentile·grade다.",
       "점수·등급·선택과목 검증은 기존 시험 엔진에 위임",
-      "학생 ID·유료 플래그·자료 경로·research·승인 상태·동점 정책 입력은 거부"
+      "학생 ID·유료 플래그·자료 경로·research·승인 상태·동점 정책 입력은 거부",
+      "percentile은 0~100 정수, grade는 1~9 정수다. bool·소수·null·알 수 없는 필드는 거절한다. 같은 시험 공식 매핑과 충돌하면 reported_percentile_conflict/reported_grade_conflict로 422다. 누적값에서 성적표 백분위를 생성하지 않는다."
     ],
     "response_fields": [
       "format",
@@ -477,7 +482,8 @@
       "tie_interval_percent",
       "tie_policy",
       "population_id",
-      "model_version"
+      "model_version",
+      "data_kind"
     ],
     "overall_statuses": [
       "observed",
@@ -490,7 +496,8 @@
     "model_validation": [
       "서버 채택 distribution_id와 공급 모델 버전 일치",
       "approved 상태와 시험 ID·자료 버전·학년도·전체 국수탐2 모집단·분모·조회 범위 검증",
-      "미승인 자료를 연구 옵션으로 실행하거나 요청값으로 승인 승격하지 않음"
+      "미승인 자료를 연구 옵션으로 실행하거나 요청값으로 승인 승격하지 않음",
+      "신규 nested jungsi.exam-total-model/v1도 엄격 검증기로 읽는다. Drive 명부 version은 봉투 pack_version에 결속하고 distribution_id는 승인한 분포 버전을 별도로 결속한다. data_kind는 observed_counts/estimated_weights이며 pending은 null이다."
     ],
     "pending_reasons": [
       [
@@ -553,7 +560,7 @@
         "시험·곡선 공급자 호출 전 차단"
       ],
       [
-        "invalid_request / engine_input_code",
+        "invalid_request / engine_input_code / invalid_reported_percentile / invalid_reported_grade / reported_percentile_conflict / reported_grade_conflict",
         422,
         "허용 필드 또는 해당 시험 성적 불일치"
       ],
@@ -793,7 +800,9 @@
           "versions",
           "eligibility_status",
           "decision_components",
-          "decision_evidence"
+          "decision_evidence",
+          "conversion",
+          "percentile"
         ],
         "nested": {
           "years": [
@@ -821,18 +830,65 @@
             "historical_metrics",
             "forecast_70",
             "expected_acceptance_range"
+          ],
+          "conversion": [
+            "status",
+            "reason_code",
+            "score_basis",
+            "score_scope",
+            "converted_score",
+            "official_max_score",
+            "academic_year",
+            "exam_id",
+            "rule_version",
+            "release_version",
+            "table_versions",
+            "profile_version",
+            "pack_version"
+          ],
+          "percentile": [
+            "status",
+            "reason_code",
+            "score_basis",
+            "score_scope",
+            "academic_year",
+            "exam_id",
+            "top_percent",
+            "inclusive_top_percent",
+            "exclusive_top_percent",
+            "tie_share_percent",
+            "tie_policy",
+            "population_id",
+            "data_kind",
+            "rule_version",
+            "curve_version",
+            "release_version",
+            "source_model_version",
+            "profile_version",
+            "pack_version",
+            "population_scope"
           ]
         },
         "rules": [
-          "각 모집행의 2024~2027 승인 연도보정 → 당시 공식 환산식 → 전용 모집단 분포를 기존 엔진으로 계산한다. 현재 점수를 과거 공식식에 직접 대입하지 않는다.",
+          "동일 학년도 실제 수능은 독립 승인 환산 포트로 actual_exam을 계산한다. 별도 승인 모평 호환은 mock_exam이며, 다른 학년도 비교는 승인 bridge → 당시 공식 환산식의 year_equated_estimate다.",
           "지원 구간과 환산 유불리는 별도다. 유불리는 같은 연도/시험/전체 모집단의 학생 보정총점 상위 누적과 대학 환산 상위 누적의 차이(pp)다.",
           "category=challenge/core/room/outside/pending/ineligible. 학교 category를 학과에 복사하지 않는다.",
           "eligibility_status는 입력 등급/선택과목과 승인 요건을 비교한다. 별도 자격 확인 포트가 없는 비성적 요건은 needs_confirmation이다.",
           "decision_evidence는 승인 정책과 동일한 context/version을 결속한다. 과거 발표 지표의 이름·정의·단위·척도, 올해 forecast_70의 값·정의·단위·version, 지원 판단용 expected_acceptance_range의 lower/upper·정의·unit·policy_version을 구분한다.",
           "미발행 forecast_70은 value=null/status=pending이고 승인된 판단 구간으로 학과 판단을 계산할 수 있다. 미승인/불일치 근거는 decision_evidence_unapproved로 보류한다.",
           "기본/상담 조정/채택 category와 버전을 분리한다. 조정은 승인 base_version의 최종 구간을 학생 점수로 한 번 평가한다.",
-          "versions에는 profile·pack·source_model·bridge·rule·curve·decision·evidence·population·target_exam·tie_policy·eligibility·선택적 adjustment가 포함된다. 내부 분포·가중치·실행 trace는 반환하지 않는다."
-        ]
+          "versions에는 profile·pack·source_model·bridge·rule·curve·decision·evidence·population·target_exam·tie_policy·eligibility·선택적 adjustment가 포함된다. 내부 분포·가중치·실행 trace는 반환하지 않는다.",
+          "conversion.ready와 assessment.pending은 함께 존재할 수 있다. 대학 분포·입결·지원 판단·자격 미확인은 각각의 사유로 보존한다.",
+          "기존 assessment.converted_score는 계산 완료 값과 일치한다. 판단이 pending이어도 환산 성공 값을 없애지 않는다. years는 학년도별 실제/모평/보정 추정 기준과 pending 사유를 구분한다.",
+          "독립 conversion은 지원 판단·자격·유불리를 승인하지 않는다. 전체 곡선이나 분석 공급 오류가 있어도 conversion.ready 점수는 보존하며 years의 현재 행은 실제/모평 기준으로 표시한다.",
+          "분포 조회·판단·상담 조정은 지정 노드 반올림까지 적용한 정확 Fraction 점수를 사용한다. 표시 문자열을 후속 계산 입력으로 사용하지 않는다.",
+          "conversion.ready / percentile.ready / assessment.pending은 함께 존재할 수 있다. conversion.ready / percentile.pending도 가능하며 환산 성공을 보존한다. 누백 준비만으로 지원 판단·자격·유불리를 승인하지 않는다. percentile이 ready이면 기존 assessment.converted_percentile은 top_percent와 일치한다. pending인 경우 null과 사유를 보존한다. 기존 승인 보정 경로의 성공 converted_percentile은 같은 의미의 percentile DTO로 노출한다.",
+          "conversion.ready / percentile.ready / assessment.pending은 함께 존재할 수 있다. conversion.ready / percentile.pending도 가능하며 환산 성공을 보존한다. 누백 준비만으로 지원 판단·자격·유불리를 승인하지 않는다.",
+          "percentile이 ready이면 기존 assessment.converted_percentile은 top_percent와 일치한다. pending인 경우 null과 사유를 보존한다. 기존 승인 보정 경로의 성공 converted_percentile은 같은 의미의 percentile DTO로 노출한다.",
+          "관측 도수 observed_counts와 모형 가중치 estimated_weights를 표시 기준에서 구분한다. 모집단과 시험/학년도/규칙/곡선 버전을 함께 보존한다.",
+          "DEV005 명시적 승인 비교집단의 population_scope를 반환한다. whole_complete와 required_rule_inputs_present를 혼용하지 않고 모집단이 다르면 환산 유불리는 보류한다. 미응시를 최저점으로 치환하지 않는다."
+        ],
+        "planned_DEV005_percentile_fields": []
       },
       "candidates": {
         "format": null,
@@ -1077,7 +1133,8 @@
       "serve": "python -B -m uvicorn jungsi_touch.infrastructure.http_api:configured_app --factory --host 127.0.0.1 --port 8000 --no-access-log",
       "probe": "python -B scripts/probe_backend_connection.py",
       "tests": "python -B scripts/run_committed_tests.py --staged",
-      "CI_checkout": "checkout/setup-python 액션 없이 ubuntu-24.04의 Git/Python3.12로 run_id/run_attempt별 새 경로를 만든다. 기존 경로는 중단하고 지정 github.sha 최초 checkout만 수행한다. fetch 전용 인증 환경, gc/maintenance 해제, 정리 명령 없는 runtime/검산 보존은 workflow.CI_snapshot_policy를 따른다."
+      "CI_checkout": "checkout/setup-python 액션 없이 ubuntu-24.04의 Git/Python3.12로 run_id/run_attempt별 새 경로를 만든다. 기존 경로는 중단하고 지정 github.sha 최초 checkout만 수행한다. fetch 전용 인증 환경, gc/maintenance 해제, 정리 명령 없는 runtime/검산 보존은 workflow.CI_snapshot_policy를 따른다.",
+      "numerical_estimation": "NumPy 2.3.5의 CPython3.12 Windows/Linux x64 wheel과 SHA256을 backend-runtime.lock.json으로 고정한다. 수치 최적화는 내부 float이며 발행은 정확 정수/소수 문자열로 재검증한다."
     },
     "database": "database/migrations/001_pre_data_platform.sql은 추가 정의만 제공한다. 자동 적용하지 않으며 기존 DB를 reset/drop/delete하지 않는다. 전용 jungsi_backend 스키마의 사용자/이용권/리포트 접근은 서버 역할과 SQL owner 조건으로 제한하고 anon/authenticated 직접 접근은 허용하지 않는다. schema_versions와 실제 11개 timestamptz/date 컬럼 형식을 함께 확인한다.",
     "health": "/health/live는 프로세스 UTC 시각만 확인한다. /health/ready는 설정 존재와 읽기 전용 DB 스키마·컬럼·UTC 세션·합성 SQL literal 왕복을 검사한다. ready가 인증 사용자/입시 자료/모형 검증 완료를 뜻하지 않는다. auth와 live_data 상태를 별도로 반환한다.",
@@ -1168,5 +1225,415 @@
     ],
     "presentation_rule": "화면은 이 응답을 잠금 표시에만 쓰고, 유료 화면의 실제 차단은 해당 API 의 403 을 따른다. 브라우저 저장값이나 요청 본문의 등급을 쓰지 않는다.",
     "adoption": "애플리케이션 담당이 승인하면 operations 에 http_contract·dto_schemas.session·operation_gaps 와 함께 추가하고 HTTP 핸들러를 구현한다. 그 전에는 구현된 API 가 아니다."
+  },
+  "university_scoring_contract": {
+    "format": "jungsi.university-scoring-contract/v1",
+    "code_status": "accepted_on_develop_synthetic_verified_live_rules_configuration_pending",
+    "feature": "feature/application-pre-data-platform",
+    "work_item": "docs/work_items/DEV-003-university-scoring-engine.json",
+    "start_commit": "e25062329f4d364ce94df315559f570e1b791efc",
+    "application_service": "jungsi_touch.application.university_scoring.UniversityScoringService",
+    "placement": "학교·학년도·실제 모집행의 규칙 선택과 점수 산출은 애플리케이션에 둔다. 기존 src/jungsi_touch/university_conversion.py는 이 계층의 순수 규칙 실행기로 경로를 보존한다. 계산 서비스는 구체 Drive·Supabase·화면 구현을 가져오지 않는다.",
+    "operation": "university.analyze",
+    "api_path": "POST /api/v1/reports/{report_id}/university-results",
+    "access": "서버 검증 유료 이용권·본인 리포트·확인된 성적·멱등 키·expected_version을 기존 정책대로 먼저 확인한다. 요청에서 규칙·승인·시험 유형·research·owner·계수를 지정하지 않는다.",
+    "reference_policy": "사용자 제공 고속분석기 통합문서와 기존 추출본의 입력→조회→단계식→결과 구조만 참고한다. 셀 주소·Excel 수식·대학별 계수·자체 분포·학생값을 코드에 복사하거나 Excel 실행식으로 평가하지 않는다. 대학 공식 자료 검증과 실행 검산이 필요한 운영 규칙은 별도 승인한다.",
+    "calculation_scope": "수능 반영분 CSAT component만 산출한다. 내신·면접·지원자격·합격확률·입결·판단구간·유불리는 별도 자료와 단계다.",
+    "identity_rules": [
+      "카탈로그의 offering_id는 대학·캠퍼스·학년도·모집단위·전형·모집군의 실제 모집행이다. 이름 유사성으로 규칙을 선택하지 않는다.",
+      "환산 릴리스/규칙/조회표는 학년도·시험 ID·시험 자료 pack_version·규칙 버전·자료 상태와 결속한다. 같은 키의 중복 binding·불일치는 계산하지 않는다.",
+      "운영 공개에는 승인 릴리스·공식 규칙·calculation_verified·확인된 조회표가 모두 필요하다. 합성/초안/source_verified 상태를 API 입력으로 승인 승격하지 않는다."
+    ],
+    "input_rules": [
+      "DEV-003에서 국어·수학 및 탐구 각 과목에 성적표 percentile·grade를 선택적으로 추가한다. 기존 표준점수 입력은 그대로 사용할 수 있다.",
+      "표준점수는 기존 시험 엔진의 유효 점수를 따른다. 성적표 백분위는 0~100 정수, 등급은 1~9 정수이며 bool·소수·범위 밖·알 수 없는 필드는 거절한다.",
+      "공식 시험 팩에 확인된 성적표 매핑이 있으면 해당 시험·과목·표준점수와 대조한다. 없는 백분위를 100-상위누적으로 만들지 않는다. 학생 제공 값과 검증된 매핑을 구분한다.",
+      "규칙이 필요한 입력/선택과목/탐구 과목수/변환표를 확보하지 못하면 해당 환산만 pending/null이다. 미응시·미확인·조회 실패를 0이나 최저등급으로 대체하지 않는다.",
+      "제2외국어 등 아직 API에 입력 경로가 없는 항목을 요구하는 규칙은 명시적으로 보류한다. 다른 과목으로 임의 대체하지 않는다.",
+      "탐구 과목·국어/수학 선택과목은 같은 시험 팩에서 검증한 subject_key(공백/NFKC 정규화)로 규칙 조건을 평가하며 원본 프로필 표기를 수정하지 않는다.",
+      "내부 reported_score_sources는 verified_exam_mapping/student_report를 구분한다. 공개 conversion DTO에는 원본 값과 내부 출처를 반환하지 않는다.",
+      "성적표 매핑이 없는 점수는 동일 시험·영역/과목의 완전한 공식 표준점수 도수와 평가원 공식 백분위 산식·반올림에 근거한 검증 파생 매핑으로 보완할 수 있다. 기존 검증 매핑과 충돌하면 보류한다. 추정 공동분포·총점/학교 누백으로 성적표 백분위를 만들지 않는다. 공식 등급컷을 사용하며 국수 선택과목별 분모로 영역 백분위를 계산하지 않는다."
+    ],
+    "score_basis_rules": [
+      "같은 학년도·동일 등록 수능 시험 actual_exam은 전체 누적곡선·연도 bridge·대학 분포·지원 정책 없이 공식 환산 규칙만으로 계산한다.",
+      "mock_exam은 실제 수능과 구분한다. 서버 승인 릴리스의 명시적 모평 호환 계약이 없는 수능 규칙에 임의 대입하지 않는다.",
+      "2024~2027 중 다른 학년도 비교는 기존 승인된 연도 보정을 거쳐 year_equated_estimate로 표시한다. 현재 성적을 과거 규칙에 직접 넣거나 다른 연도의 규칙으로 대체하지 않는다.",
+      "영어·한국사 절대등급을 과거에 유지한 경우 해당 보정 가정을 보존한다. 실제 환산과 추정 환산의 기준을 DTO에서 구분한다."
+    ],
+    "execution_rules": [
+      "허용된 선언형 연산과 DAG만 실행한다. eval·exec·Excel/매크로 실행·동적 import·임의 외부 조회를 허용하지 않는다.",
+      "입력→표준/백분위/등급 조회→과목 변환→탐구 1/2과목 처리→우수순/선택 반영→반영비율→가산/감산→척도/만점→지정 반올림 순서를 규칙 노드에 명시한다. 모든 학교에 한 고정 순서를 강제하지 않는다.",
+      "탐구 평균/합/우수 1과목·변환점수 후 순위·복수 승인 계산 방식의 최댓값·선택과목 조건·영어/한국사 조회 및 가감점을 합성 사례로 검증한다.",
+      "Fraction 정확값을 계산·분포 조회·판정에 유지한다. round/절사/반올림 방식과 자릿수는 명시된 노드에만 적용하며 최종 표시 문자열로 후속 판단을 계산하지 않는다.",
+      "0 제수·조회 누락·pending 표·오류 타입·입력/최종 점수 허용 범위 밖 값·비유한 수·순환·알 수 없는 연산·모호한 규칙은 사유 있는 실패로 차단한다. 원본 profile·규칙·lookup table을 변경하지 않는다.",
+      "official_max_score는 공식 기본 만점 척도 메타데이터다. 가산점 포함 최종 상한으로 추정하지 않는다. 명시적 output_range {min,max}가 있을 때만 최종점수 범위를 집행한다.",
+      "불변 ScoringResult에는 Fraction·문자열·정수·튜플만 보존한다. dto()는 매번 새 허용 필드 객체를 생성하고 실행기 반환 출처/비수능 구성도 원규칙과 참조를 공유하지 않는다."
+    ],
+    "provider_contract": {
+      "owner": "애플리케이션 소유 독립 대학 환산 공급 포트",
+      "read": "실제 모집행 ID에 대한 승인 환산 릴리스/규칙/정확 시험·학년도 binding·조회표/버전을 공급한다.",
+      "isolation": "bridge·curve·decision 자료 부재/형식 오류로 승인된 동일 시험 환산을 잃지 않도록 환산 공급과 후속 분석 공급을 분리한다.",
+      "infrastructure": "Drive API 어댑터가 비공개 conversion 아티팩트의 서버 고정 폴더·파일 ID·발행 버전·SHA256·승인 상태를 검증한다. 정본 자료/원본·기존 버전을 보존하고 새 발행본을 생성한다.",
+      "legacy": "기존 offering-analysis 자료의 rules/bindings를 재사용할 때도 환산 자체의 승인/시험 결속을 동일하게 확인한다. 하위 bridge/curve 오류가 환산 상태에 전파되지 않아야 한다.",
+      "port": "PlatformDataProvider.get_conversion(offering_id) → UniversityConversionRelease | None; get_analysis는 독립 후속 분석 포트다.",
+      "artifact_format": "jungsi.university-conversion-release/v1; 발행 명부 kind=conversion, key=offering_id. 별도 승인 봉투만 읽으며 구형 analysis를 임의 승인·자동 대체하지 않는다.",
+      "required_fields": "version,status,academic_year,exam_id,source_pack_version,exam_type=csat,release_id,rules,bindings; binding은 academic_year,offering_pk,rule_version,university_id,campus,department,track,group을 결속한다.",
+      "nested_binding": "봉투의 학년도/시험/pack은 포함한 규칙과 표 전체에 적용한다. 규칙/표가 exam_id/source_pack_version/rule_version을 명시하면 봉투·선택 규칙과 일치해야 한다. 표의 academic_year/version/source_ref/status는 기존 실행기가 검증한다.",
+      "mock_contract": "선택 mock_compatibility는 status=approved,version,source_exam_id,source_pack_version,source_exam_type,rule_exam_id,rule_pack_version을 정확히 결속한다. 승인이 없거나 불일치하면 mock_compatibility_not_approved다.",
+      "reported_mapping": "ExamPack 표준점수 과목의 선택 reported_scores는 관측 표준점수 문자열 → percentile/grade/source_ref다. 출처·관측 점수·정수 범위·공식 등급표 일치를 로딩 시 검증한다.",
+      "numeric_serialization": "Drive JSON 발행의 비율·변환점수·가감점·구간 경계·output_range·공식 척도는 정수 또는 정확한 소수 문자열(예: \"0.35\")이다. JSON 소수 숫자는 기본 파서에서 이진 float가 되므로 실행기가 거절한다. 성적표 percentile/grade·표준점수는 기존 정수 계약을 따른다. 데이터팀 원본은 보존하고 새 승인 발행본에서만 이 형식으로 변환한다."
+    },
+    "public_result_contract": {
+      "location": "본인 유료 report.analyses[offering_id].conversion",
+      "fields": [
+        "status",
+        "reason_code",
+        "score_basis",
+        "score_scope",
+        "converted_score",
+        "official_max_score",
+        "academic_year",
+        "exam_id",
+        "rule_version",
+        "release_version",
+        "table_versions",
+        "profile_version",
+        "pack_version"
+      ],
+      "statuses": [
+        "ready",
+        "pending"
+      ],
+      "independence": "conversion.ready와 assessment.pending은 함께 존재할 수 있다. 대학 분포·입결·지원 판단·자격 미확인은 각각의 사유로 보존한다.",
+      "compatibility": "기존 assessment.converted_score는 계산 완료 값과 일치한다. 판단이 pending이어도 환산 성공 값을 없애지 않는다. years는 학년도별 실제/모평/보정 추정 기준과 pending 사유를 구분한다.",
+      "excluded": [
+        "내부 exact 분수",
+        "실행 trace",
+        "규칙 노드",
+        "조회표 값",
+        "반영계수",
+        "원본 성적",
+        "학생 소유자 ID",
+        "로컬 경로·원문·해시·비밀값"
+      ]
+    },
+    "acceptance_gates": [
+      "승인된 같은 시험 합성 규칙으로 overall/bridge/curve/decision이 없어도 conversion.ready와 정확한 환산점수가 반환된다.",
+      "고정 가중합·등급 조회·탐구 평균/최댓값·변환 후 우수순·조건 가산/감산·척도·지정 반올림/절사를 독립 손계산 Fraction 예상값과 비교한다.",
+      "같은 학교의 다른 캠퍼스/전형/군/학년도·규칙/표/pack/시험 불일치·중복 binding·미승인·미지원 입력을 실패 또는 pending으로 구분한다.",
+      "성적표 백분위/등급 선택 입력·경계·매핑 충돌·백분위 미제공을 검수한다. 기존 표준점수 입력과 승인 보정 흐름 회귀를 확인한다.",
+      "표시 1.23과 내부 1.234처럼 자릿수가 달라지는 합성 사례로 curve·decision이 정확값을 사용함을 검수한다.",
+      "유료·소유권·확인 성적·멱등·revision·일반회원 재조회 DTO·내부 식/계수 유출 차단과 자료 오류 격리를 HTTP/업무 테스트로 확인한다.",
+      "모든 공통 명세·생성 문서·계층·Git 데이터 제외·커밋 스냅샷 테스트와 CI를 통과하고 개발 PR을 develop으로 통합한다.",
+      "실제 대학 규칙의 승인 범위와 Supabase/Drive 운영 연결은 합성 코드 인수와 구분해 보고한다. 전국 원문 재검사를 이번 구현의 완료 조건으로 삼지 않는다."
+    ],
+    "remaining": [
+      "실제 대학·모집행의 공식 실행 규칙/변환표 승인 발행 및 기존 검수 근거를 이용한 변경 범위 검산",
+      "Supabase/Drive 실서버 연결 및 승인 conversion 아티팩트 실제 읽기 검수",
+      "제2외국어 등 추가 성적 입력 계약이 필요한 특수 규칙",
+      "전체 공동분포·연도 보정·판단/예상 자료 승인; 엔진 구현 완료와 별개"
+    ],
+    "planning_commit": "eb0feaebc03c986b6c7282202aae65bc26c2aa45",
+    "execution_result": {
+      "status": "accepted_on_develop_live_rules_and_configuration_pending",
+      "reviewed_feature_commit": "29eadf965d44384be6cdc4ac5bc9b39be2c49e4c",
+      "integrated_develop_commit": "e88b778a099168b5be1c85ca1168115dca014f37",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/10",
+      "ci": {
+        "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37172725475",
+        "tested_commit": "29eadf965d44384be6cdc4ac5bc9b39be2c49e4c",
+        "conclusion": "SUCCESS",
+        "synthetic_tests_passed": 295,
+        "added_synthetic_tests": 39
+      },
+      "review_scope": "25개 변경 파일의 코드·권한·시험/모집행 결속·독립 환산·정확값·자료 오류 격리·DTO·공통 문서를 최종 Git 커밋과 CI로 확인함",
+      "private_source_reuse": "저장된 공식 예시 4개년을 최종 Git 코드 스냅샷으로 연구 검산하여 수치 일치·미승인 공개 차단·원규칙 참조 보존을 확인했다. 기존 source_verified/internal_review_only 승인 상태를 변경하지 않았다.",
+      "reference_inspection": "사용자 제공 고속분석기 계산 단계/일부 패턴과 기존 추출 근거를 읽기만 했다. 확인 원본 전후 해시는 일치하며 Excel 재계산·매크로·외부 링크 실행 또는 원본 변경을 하지 않았다.",
+      "live_server_status": "not_run_configuration_missing",
+      "live_data_status": "not_run_configuration_missing",
+      "production_rule_status": "operating_release_approval_and_binding_pending",
+      "files_and_branches_preserved": true
+    }
+  },
+  "university_percentile_contract": {
+    "format": "jungsi.university-percentile-contract/v1",
+    "code_status": "implemented_synthetic_verified_live_curve_publication_pending",
+    "feature": "independent_university_score_percentile",
+    "work_item": "docs/work_items/DEV-004-university-percentile.json",
+    "start_commit": "9eab7e378bc973a169d1063e57725d3aebe48544",
+    "application_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate",
+    "placement": "대학 환산점수와 누백·지원 판단은 애플리케이션에서 각각 계산한다. 프레젠테이션은 허용 DTO의 상태·수치·기준만 표시하며 인프라는 애플리케이션 소유 포트의 승인 자료를 공급한다.",
+    "operation": [
+      "university.analyze",
+      "candidates.build",
+      "report.read"
+    ],
+    "api_path": "POST /api/v1/reports/{report_id}/university-results; POST /api/v1/reports/{report_id}/candidates; GET /api/v1/reports/{report_id}",
+    "access": "유료·본인 리포트·확인 성적·현재 revision·멱등을 기존 서버 정책으로 먼저 검증한다. 일반회원 재조회·재시도 DTO에는 percentile을 포함한 대학 분석 전체를 제외한다.",
+    "definition": "같은 시험·학년도·비교 모집단 전체에 동일 대학 환산식과 가산점 처리를 적용한 점수 분포에서 본인의 정확한 환산점수 이상인 도수/가중치 비율 ×100이다. 동점 포함 상위 누적을 기본값으로 표시하며 관측 인원과 모형 가중치를 구분한다.",
+    "calculation_rules": [
+      "동점 포함 top_percent = inclusive_top_percent = (본인보다 높은 도수/가중치 + 동점 도수/가중치) / 전체 도수/가중치 ×100, exclusive_top_percent = 더 높은 도수/가중치 / 전체 ×100, tie_share_percent = 포함 - 제외다.",
+      "Fraction 정확값으로 학교 환산점수와 누적 도수/가중치를 계산한다. 표시된 converted_score나 반올림 문자열을 누백 입력으로 사용하지 않는다. 최종 백분율만 기존 소수 문자열 표시 계약을 따른다.",
+      "학교라도 캠퍼스·모집단위·전형·군·규칙/가산점 범위가 다르면 별도 결속한다. 대학명 또는 학과명 유사성으로 곡선을 자동 공유하지 않는다.",
+      "동일 학년도 actual_exam 환산과 승인된 명시적 mock_compatibility의 mock_exam 환산만 독립 포트의 정확한 시험 곡선에 조회한다. 실제 수능 곡선을 모평에 임의 적용하지 않는다.",
+      "2024~2027 과거 비교는 기존 승인 연도 보정과 당시 환산·분포 계약을 유지한다. 현재 누백을 다른 연도 years에 복사하지 않는다. 기존 승인된 보정 경로의 converted_percentile 호환과 score_basis를 보존한다.",
+      "유효한 환산점수가 관측 분포의 최소보다 낮으면 포함/제외 100%, 최대보다 높으면 0%, 동점 비중 0%가 가능하다. 분포의 관측 최대를 공식 점수 상한으로 추정하지 않는다. 기존 입결 발표점수의 원문 범위 검증은 별도로 유지한다.",
+      "자료가 없거나 미승인·불완전·모집단 미검증·결속 오류이면 pending/null과 사유를 반환한다. 실제 0%/100%는 준비된 숫자 문자열이며 대기 값과 구분한다.",
+      "본인 환산점수·승인 곡선이 준비되면 전체 총점 모형·지원 판단 정책·입결·예상선·비성적 자격 자료가 없어도 누백을 제공한다. 후속 분석 오류가 환산점수와 누백 상태를 지우지 않는다.",
+      "불변 PercentileResult의 Fraction 포함·제외 누적을 각각 계산하고 동점 비중은 정확값의 차이를 표시한다. 표시 문자열의 차이로 동점 비중을 만들지 않는다. dto()는 매번 새 허용 키 객체다.",
+      "현재 판단 정책은 독립 누백의 정확 곡선 context/version에 결속한다. analysis에 곡선을 중복 저장할 필요는 없으며 다른 curve_version의 정책은 보류한다.",
+      "학교 곡선이 필요한 성적 보유 집단으로 한정되면 전체 총점과 모집단이 달라진다. 범위를 표시한 독립 학교 누백은 제공할 수 있으나 같은 모집단을 요구하는 환산 유불리·지원 판단 승인을 자동으로 부여하지 않는다."
+    ],
+    "identity_rules": [
+      "발행 봉투의 version/status/release_id/academic_year/exam_id/source_pack_version/exam_type/rule_version과 곡선의 학년도·시험·rule_id/rule_version·score_scope·score_metric·score_scale_id·bonus_treatment를 정확한 환산 결과와 결속한다.",
+      "binding은 offering_pk,academic_year,university_id,campus,department,track,group,rule_version,curve_version을 확인한다. 일치 binding은 정확히 하나여야 하며 중복·다른 모집행/규칙으로 대체하지 않는다.",
+      "곡선 metadata의 status=approved,rule_review_status=calculation_verified,complete=true,population_verified=true 및 출처·도수 합=expected_total_weight를 확인한다. kind=observed_counts/estimated_weights와 population_id/source_model_id/source_model_version을 보존한다.",
+      "신규 독립 누백은 사전 승인된 전체 비교 모집단을 사용한다. 서비스 이용자·지원자 일부·최종 등록자 분포를 전국 전체 수험생 분포로 표시하지 않는다.",
+      "학교 환산 분포는 승인한 공동 성적 도수 또는 검증된 공동분포 모형·대학별 기존 환산곡선으로 발행한다. 입결 컷 몇 개·과목별 주변분포·성적표 백분위만으로 새 학교 전체 누백을 만들지 않는다.",
+      "기존 research/reviewed/source_verified/internal_review_only 자료를 구조 검사나 저장 형식 검증만으로 approved로 바꾸지 않는다. 실제 자료 부족과 코드 구현 완료는 별도로 기록한다.",
+      "사용자 제공 공식 주변분포·기존 참고곡선/표본을 이용한 자체 추정 공동분포와 환산곡선 제작을 이어간다. 보정·holdout·민감도와 검증 범위를 갖춘 estimated_weights로 발행하며 추정 가중치를 실제 전국 도수라고 표시하지 않는다.",
+      "기본 전체 집단 외에는 신규 봉투의 승인된 comparison_population만 허용한다. 실제 규칙 필수 입력·학년도/시험/pack/rule/curve/population/검증 영수증 버전을 결속하고 오류 시 누백만 pending이다. 레거시 보정 성공은 기존 전체 집단 계약을 유지한다.",
+      "기본 전체/레거시는 whole_complete를 유지한다. required_rule_inputs_present는 비교집단 계약·별도 고정 영수증을 함께 검증한 새 독립 릴리스만 허용한다. 모집단이 다른 총점/학교 누백의 advantage는 기존 동일 모집단 검사에 따라 보류한다."
+    ],
+    "provider_contract": {
+      "port": "PlatformDataProvider.get_percentile(offering_id) → UniversityPercentileRelease | None; 애플리케이션 소유 포트이며 get_conversion/get_analysis와 독립한다.",
+      "artifact_format": "jungsi.university-percentile-release/v1; Drive 발행 명부 kind=percentile, key=offering_id. 서버 고정 폴더·파일·version·SHA256·승인 상태를 검증해 읽는다.",
+      "required_fields": "version,status,release_id,academic_year,exam_id,source_pack_version,exam_type,rule_version,curve,bindings. curve는 기존 jungsi.university-score-distribution/v1 형식과 검증기를 재사용한다.",
+      "bindings": "academic_year,offering_pk,university_id,campus,department,track,group,rule_version,curve_version. 봉투와 곡선·환산 결과에 같은 시험/pack/규칙/모집단 결속을 집행한다.",
+      "mock": "mock_exam은 환산의 명시적 승인 호환과 동일한 시험 팩/원곡선 결속을 확인한다. 승인 범위 밖 실제 수능/모평 간 분포 전환은 보류한다.",
+      "numeric_serialization": "점수·도수/가중치·범위·분모는 정수 또는 정확한 소수 문자열이다. bool/이진 float/비유한 값/0 이하 가중치·비정수 observed_counts를 차단한다.",
+      "legacy": "기존 승인 분석 아티팩트 곡선의 재사용은 기존 보정 경로 의미를 보존한다. 새로운 독립 포트 승인을 임의 추정하지 않으며 기존 성공 누백의 DTO·값을 보존한다. 새 포트가 미존재/명시적 None이면 기존 same-year/승인 보정 분석의 검증된 lookup 성공을 보존한다. 실제 미승인·결속/형식 오류는 다른 곡선으로 우회하지 않는다. 레거시 DTO의 exam_id는 검증된 target exam, pack_version은 analysis가 결속한 원본 성적 팩이다.",
+      "isolation": "get_analysis의 부재·자료 오류·정책/근거 승인 대기가 독립 get_percentile 결과를 훼손하지 않는다. 곡선 오류가 독립 conversion 결과를 훼손하지 않는다.",
+      "privacy": "파일 경로·원문·도수·가중치·모형·hash·실행 trace·exact 분수·원본 성적은 공개 DTO에 포함하지 않는다. 실제 자료와 검수·발행본은 제외 폴더/비공개 스토리지에만 생성하고 원본을 보존한다.",
+      "population_contract": "기본 독립 누백과 레거시는 POPULATION_ID=all_examinees_with_korean_math_two_inquiry_scores 전체 집단을 유지한다. DEV-005 신규 봉투에 서버 승인 comparison_population이 있으면 required_rule_inputs_present의 명시적 별도 집단을 허용한다. 승인/필터/시험/pack/규칙/곡선/ID/검증 버전 결속을 재검사하며 임의 모집단 문자열이나 영어 미응시 누락을 전체 집단으로 표시하지 않는다.",
+      "conversion_context": "ScoringResult.context는 검증된 모집행/학년도/원시험/pack/exam_type/rule_id/rule_version/score_scope/score_scale_id/bonus_treatment와 원규칙 시험/pack 및 승인 모평 호환 버전의 불변 튜플이다. 새 포트에 척도·가산처리 근거가 없으면 환산 성공을 보존하고 누백만 percentile_conversion_context_missing으로 보류한다. ScoringResult.required_input_fields는 실제 검증한 규칙 입력의 불변 정렬 튜플이며 공개 conversion DTO에 넣지 않는다.",
+      "comparison_population": "선택적 jungsi.university-comparison-population/v1: status=approved, scope=required_rule_inputs_present, population_id, base_population_id=기존 POP, academic_year,exam_id,source_pack_version,rule_version,curve_version,required_input_fields,validation_receipt_version. 서버 승인 명부와 실제 규칙의 필수 입력/곡선 검증 근거를 결속한다. 필터 전 전체/잔존/제외 가중치와 제외 사유는 비공개 영수증에 보존하고 누락 후보를 조용히 버리거나 불완전 집단을 complete로 승인하지 않는다.",
+      "comparison_validation_receipt": "UniversityPercentileRelease.validation_receipt는 별도 서버 승인 명부 kind=estimate_receipt, key=validation_receipt_version으로 고정해 읽는 jungsi.estimate-release-receipt/v1이다. 상태·동일 학년도/시험/팩/규칙/곡선/모집단·실제 ConversionRule.inputs의 정렬된 required_input_fields·모형 버전·곡선 SHA256·모형 채택 체크·규칙 재실행·직렬화·전체/잔존/제외 가중치·제외 사유를 재검사한다. inline approved 표시나 별도 집단 ID만으로 부분집단을 승인하지 않는다."
+    },
+    "public_result_contract": {
+      "location": "본인 유료 report.analyses[offering_id].percentile",
+      "fields": [
+        "status",
+        "reason_code",
+        "score_basis",
+        "score_scope",
+        "academic_year",
+        "exam_id",
+        "top_percent",
+        "inclusive_top_percent",
+        "exclusive_top_percent",
+        "tie_share_percent",
+        "tie_policy",
+        "population_id",
+        "data_kind",
+        "rule_version",
+        "curve_version",
+        "release_version",
+        "source_model_version",
+        "profile_version",
+        "pack_version",
+        "population_scope"
+      ],
+      "statuses": [
+        "ready",
+        "pending"
+      ],
+      "independence": "conversion.ready / percentile.ready / assessment.pending은 함께 존재할 수 있다. conversion.ready / percentile.pending도 가능하며 환산 성공을 보존한다. 누백 준비만으로 지원 판단·자격·유불리를 승인하지 않는다.",
+      "compatibility": "percentile이 ready이면 기존 assessment.converted_percentile은 top_percent와 일치한다. pending인 경우 null과 사유를 보존한다. 기존 승인 보정 경로의 성공 converted_percentile은 같은 의미의 percentile DTO로 노출한다.",
+      "data_kind": "관측 도수 observed_counts와 모형 가중치 estimated_weights를 표시 기준에서 구분한다. 모집단과 시험/학년도/규칙/곡선 버전을 함께 보존한다. population_scope는 whole_complete/required_rule_inputs_present의 한정 enum이며 비교집단을 함께 표시한다.",
+      "excluded": [
+        "내부 exact 분수",
+        "점수별 도수",
+        "모형 가중치/원자료",
+        "전체 누적곡선",
+        "학생 소유자 ID",
+        "규칙 노드/실행 trace",
+        "원문/로컬 경로/hash/비밀값"
+      ],
+      "planned_DEV005_fields": [],
+      "population_scope": {
+        "enum": [
+          "whole_complete",
+          "required_rule_inputs_present"
+        ],
+        "pending": null,
+        "meaning": "전체 국수탐2 비교집단과 해당 대학식 필수 성적 보유 비교집단의 구분. 실제 개인 정답/전국 원자료 보유를 뜻하지 않음"
+      }
+    },
+    "presentation_rules": [
+      "대학 분석 카드·상세·리포트에 대학 환산점수 / 대학 환산 기준 상위 누백 / 지원 판단을 각각 표시한다. 누백이 낮을수록 같은 비교 모집단 내 앞쪽임을 설명한다.",
+      "top_percent,동점 포함/제외 구간,자료 기준·학년도·시험과 data_kind를 표시한다. 전체 표준점수 누백·학교 누백·성적표 백분위를 혼용하지 않는다.",
+      "누백 0%를 빈 값으로 숨기지 않고 ready 상태와 함께 표시한다. pending은 사유와 대기를 표시한다. 개인점수·누백의 가상 사례는 실제 대학 자료와 분리한다.",
+      "같은 모집단/시험/학년도/동점 처리와 승인 총점 기준이 확보돼야 전체 누백과 대학 누백의 차이로 유불리를 표시한다. 준비되지 않으면 유불리만 대기한다.",
+      "로컬 기획 미리보기는 ignored outputs에서 최신 develop의 실제 애플리케이션 가상 응답을 이용한다. 운영 apps/web 구현은 feature/presentation-foundation의 별도 화면 담당 소유다.",
+      "population_scope=whole_complete는 전체 국수탐2, required_rule_inputs_present는 대학 반영에 필요한 성적을 모두 보유한 명시적 비교집단이다. 두 범위를 구분해 표시하고 분모가 다르면 전체 누백과 차이를 유불리로 제시하지 않는다."
+    ],
+    "acceptance_gates": [
+      "승인된 정확한 환산점수/곡선만으로 conversion.ready + percentile.ready + assessment.pending이 반환된다. 전체 모형/입결/예상선/판단/자격 부재·오류 격리를 API까지 검수한다.",
+      "동점 포함·제외·모두 동점·표시값과 내부 Fraction 차이·관측 최소/최대·분포 밖 유효 점수의 0%/100%를 독립 손계산 합성값과 대조한다.",
+      "학교/캠퍼스/학과/전형/군/시험/학년도/pack/rule/curve/population 결속·중복 binding·미승인/미검증/불완전 자료·가중치 합 및 숫자 형식을 거부한다.",
+      "일반/타인/미확인 프로필·revision·멱등·재조회에서 누백과 내부 자료를 누출하지 않는다. mutable 반환 객체가 원본 곡선·규칙·결과를 수정하지 않는다.",
+      "기존 승인 연도 보정·환산·입결·후보·통계·상담 출력 합성 회귀와 문서/계층/참조/제외/브랜치/Git 스냅샷 CI를 통과한 PR만 develop에 통합한다.",
+      "로컬 예시의 ready/분포대기/미승인/성적입력전·일반/유료·모바일 화면에서 학교 누백 수치와 각 상태를 확인한다.",
+      "실제 데이터 readiness는 기존 정본/검산 근거를 재사용해 별도 기록한다. 전국 학교 승인 또는 실서버 연결을 합성 구현 완료로 주장하지 않는다.",
+      "전체/필수입력보유 집단 구분·missing 영어 비치환·승인 없는 subset 거절·규칙과 필터 불일치·제외 가중치/집계 범위·모집단 차이에서 유불리 보류를 검수한다."
+    ],
+    "remaining": [
+      "사용자 제공 자료 기반 자체 추정 공동분포·대학 환산곡선의 보정/holdout/민감도 검증과 estimated_weights 발행; 기획 추가 계약·자료팀 prototype 연계",
+      "Supabase/Drive 실제 계정·고정 폴더·승인 명부·권한 설정과 실제 연동 검수"
+    ],
+    "execution_result": {
+      "status": "accepted_on_develop_synthetic_verified",
+      "planning_commit": "9ff8a1278d8aa8b6dbb3870af3293c240f34e8d4",
+      "independent_synthetic_tests_passed": 33,
+      "existing_workflow_and_conversion_regression_passed": 56,
+      "live_server_status": "not_run_configuration_missing",
+      "live_data_status": "not_run_configuration_missing",
+      "data_readiness": "기존 검산·원자료/모집행 근거를 재사용했다. 자체 추정 prototype·보정/holdout·민감도 검증은 데이터팀과 후속 계약으로 진행 중이며 임의 합성도수를 전국 실제 도수로 주장하지 않는다.",
+      "presentation_status": "develop 329f199/spec1.6.0의 로컬 v3 합성 UI: 12개 동작 묶음·desktop/mobile·인쇄·독립 환산/누백·0/100·동점·권한 검증 통과. JS 오류와 요청 실패 0. 자체 추정 실자료는 DEV005 산출 후 별도 연결.",
+      "verification_scope": "동점·정확값·실제0/100·범위밖·숫자/모집단·승인/결속·불변 DTO·HTTP 권한/멱등/revision·레거시/동일연도 호환·Drive 파일/폴더/해시/버전",
+      "follow_up": "DEV-005에서 자체 추정분포 생성·보정/검증과 실제 자료 시범 산출을 진행한다. 전체 학생 실제 공동 DB는 선행 조건이 아니다.",
+      "git_snapshot_full_tests_passed": 328,
+      "git_snapshot_failures": 0,
+      "git_snapshot_errors": 0,
+      "git_snapshot_evidence": "최종 구현 Git 스냅샷 합성 테스트 328개·추가 독립 누백 테스트 33개 통과; 기획팀 PR 및 통합 CI 확인",
+      "ci_status": "success",
+      "reviewed_feature_commit": "6d3f19aeb8b2c0fb2530707f703fe51d843b00f6",
+      "integrated_develop_commit": "3048406b4c5c52f478081883de5972ac82094b92",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/11",
+      "pull_request_ci": "https://github.com/natural0448/Jungsi_touch/actions/runs/37180115088",
+      "develop_ci": "https://github.com/natural0448/Jungsi_touch/actions/runs/37180409388",
+      "presentation_evidence": "기획 로컬 outputs/local_screen_preview_20261004_v3/browser_qa/run-2026-10-04T05-58-13-221Z/verification_receipt.json; 원자료·곡선 발행 상태는 변경하지 않음"
+    },
+    "planning_commit": "9ff8a1278d8aa8b6dbb3870af3293c240f34e8d4"
+  },
+  "estimated_population_contract": {
+    "format": "jungsi.estimated-population-contract/v1",
+    "code_status": "integrated_on_develop_generic_engine_and_private_pilot_verified",
+    "requirements": [
+      "REQ-02",
+      "REQ-05",
+      "REQ-06",
+      "REQ-07",
+      "REQ-12",
+      "REQ-14",
+      "REQ-15",
+      "REQ-16"
+    ],
+    "start_commit": "48d2a7e03880e6187a8238c878a26bd60ba7bdcf",
+    "placement": "범용 추정·집계 수학은 순수 엔진, 검증·발행 절차는 애플리케이션, 실제 자료 읽기·저장은 애플리케이션 소유 포트를 구현하는 인프라에 둔다.",
+    "definition": "제공된 공식 시험 자료의 주변도수와 응시/선택 조건, 비교 가능한 참고 총점 곡선을 이용해 공동 성적 조합과 가중치를 자체 추정한다. 이는 전체 학생 실제 점수를 복원했다는 의미가 아니며 실제 도수·관측 분포와 구분한다. 전체 학생의 실제 공동 성적 DB 부재는 작업 중단 조건이 아니다.",
+    "workflow": [
+      "기존 정본·공식 도수·선택/응시 조건·참고 분석 캐시·검수 결과를 우선 재사용한다. 자료 개정/불일치/새로 필요한 셀만 다시 확인한다.",
+      "보정 전에 출처 묶음·시험/학년도/pack·모집단 정의·seed·후보 생성 가정·훈련/검증 제약 분리·오차 지표·허용 범위를 버전으로 저장한다.",
+      "보정 전 공식 주변도수·응시 조건·선택한 분모와 참고 제약의 양립 가능성을 검사한다. 점수 합/범위/응시 인원의 필요조건을 위반한 보간곡선이나 참고 범위는 hard 제약으로 채택하지 않는다.",
+      "generate_candidate_profiles: 서로 다른 국수탐 성적과 국수 선택과목·탐구 과목 조합·영어/한국사 등급·미응시 조건을 가진 후보를 생성한다. 한 분위씩 고정 매칭한 조합만 사용하지 않는다.",
+      "fit_estimated_joint: 후보 가중치를 공식 도수·응시 조건·비교 가능한 참고 제약에 보정한다. 독립 곱과 단일 분위 매칭은 비교 기준으로만 사용하고 운영 공동분포로 자동 채택하지 않는다.",
+      "validate_estimate: 구조 검사와 별도로 보정 오차·미사용 참고 점수 구간·비교 가능한 다른 출처·가정/seed/참고 제외 민감도를 검사한다. 통과하지 않은 버전은 보존하고 발행을 보류한다.",
+      "검증한 후보 중 국어·수학·서로 다른 유효 탐구 2과목 성적을 가진 비교집단을 추출한다. 후보마다 정확한 과목 식별·성적·가중치와 채택 가정을 보존한다.",
+      "총점은 기존 국수탐2 총점 정의로 합산하고, build_university_distribution은 동일 시험의 검증한 실제 대학 환산 규칙을 모든 해당 후보에 적용해 환산점수별 가중치를 집계한다.",
+      "최종 공개 코드 커밋으로 재실행해 같은 산출물·검증값을 얻는지 확인하고 새 비공개 버전으로 보관한다. 서버에서 채택한 검증 버전만 DEV-001/004 포트에 연결한다.",
+      "EstimatedPopulationService.run은 애플리케이션 소유 EstimationInputProvider/EstimationArtifactStore를 사용한다. frozen_inputs.json을 보정 전에 독점 생성하고 실제 시나리오를 매번 generate→fit→validate→build로 실행한다. 실패/미수렴도 별도 결과로 보존하며 학생 HTTP 요청에 승인/연구 옵션을 노출하지 않는다."
+    ],
+    "source_and_population_rules": [
+      "첫 실자료 시범 범위는 비교 가능한 자료가 있는 2026학년도 실제 수능이다. 2027학년도 9월 모평은 별도 시험·모형이며 실제 수능 모형을 임의 재사용하지 않는다.",
+      "공식 인원·표준점수 도수·선택과목/탐구 과목수·절대평가 등급은 해당 학년도·시험 원문 정의와 단위를 보존한다. 서로 다른 과목의 응시인원을 같은 사람 수로 더하지 않는다.",
+      "탐구 0/1/2과목·사회/과학/직업의 허용 조합과 영어 미응시를 구분한다. 미응시를 0점/9등급으로 바꾸지 않는다. 한국사 필수 조건은 공식 유효 응시 조건을 따른다.",
+      "국수 선택과목과 성적의 관계, 탐구 조합, 영어/한국사 등급의 공동 관계는 직접 식별 가능한 제약과 모형 가정을 구분한다. 선택과목 이름만 무작위 부여해 검증됐다고 주장하지 않는다.",
+      "외부 참고 총점/누적곡선은 보정·평가 제약이다. 원곡선을 그대로 최종 학교 곡선으로 복사하지 않는다. 시험·모집단·총점 정의·동점 기준이 다르면 비교 범위를 제한하거나 제외 사유를 남긴다.",
+      "population_verified는 추정 모집단의 정의·응시 조건·표본/가중치 범위 검수가 완료됐다는 의미다. 전체 실제 학생 DB 보유 또는 공동분포의 참값 확인을 뜻하지 않는다.",
+      "최종 총점 가중치 합은 모델이 추정한 국수탐2 응시 규모이며 기존 ExamPack의 공식 target_population 인원 범위/확정값 계약과 일치한다. 최적화 내부 정규화 합1을 그대로 서비스 분모에 쓰거나 기존 검사를 완화하지 않는다.",
+      "총점 조회 유효 범위는 공식 과목 점수 지원 범위로 정의한다. 후보에 우연히 나타난 최솟값·최댓값을 유효 성적의 제한으로 삼지 않는다.",
+      "대학식이 요구하는 영어/한국사 등 성적이 없는 후보를 제외하면 전체 국수탐2 모집단을 그대로 표시하지 않는다. 전체 총점은 기존 전체 집단을 유지하며 대학 곡선의 별도 필수 입력 보유 집단은 승인된 comparison_population 계약과 필터 검수에 따라 결속한다. 미응시를 0/9등급으로 바꾸지 않는다."
+    ],
+    "reported_score_mapping": {
+      "primary_source": "https://www.suneung.re.kr/boardCnts/fileDown.do?fileSeq=5696e5e4dc68876dd4c83126b9bccb3c",
+      "source_scope": "평가원 2027 수능 Q&A 인쇄 18쪽 백분위 산식, 20쪽 정수 반올림, 19쪽 등급. 적용 시험의 공식 도수/등급컷과 동일 제도 근거를 함께 검증한다.",
+      "formula": "100 × (같은 영역/과목에서 해당 표준점수보다 낮은 인원 + 동점 인원/2) / 같은 영역/과목 응시인원; 비음수 정수 반올림은 정확값에서 HALF_UP",
+      "rules": [
+        "기존 verified_exam_mapping을 우선 재사용한다. 매핑이 없으면 완전한 동일 시험 공식 표준점수 도수로 별도 파생본을 생성하고 출처/hash/산식/반올림/검산을 기록한다.",
+        "국수 영역은 공식 전체 영역 도수를 사용하고 탐구는 해당 과목 도수를 사용한다. 선택과목별 가상 도수를 영역 분모로 쓰지 않는다.",
+        "등급은 공식 등급컷과 대조한다. 정수 백분위가 같다는 이유로 등급을 동일하게 부여하지 않는다.",
+        "독립적으로 확인한 성적표 값이 있으면 대조하고 불일치는 보류한다. 자체 추정 총점/학교 누백을 성적표 백분위로 변환하지 않는다."
+      ]
+    },
+    "validation_rules": [
+      "검증 정책은 보정 전에 저장한다. 검증 후 통과시키기 위해 허용 오차를 임의 확대하거나 실패 버전을 덮어쓰지 않는다.",
+      "공식 도수·응시 조건은 우선하는 hard 제약이다. 참고 추정곡선은 적합한 범위를 확인한 soft 제약/평가 자료로 사용한다. 보간·모집단 정의에 따른 비성립과 출처 간 불일치를 검증 증거로 보존하며 공식 제약을 왜곡해 참고 곡선을 맞추지 않는다.",
+      "공식 과목별 도수·절대등급·응시/선택 제약의 잔차와 총 가중치/집단 규모를 독립 계산한다. 근사 허용 범위와 지지집합 누락을 명시한다.",
+      "학습에 사용한 참고 곡선의 오차, 보정에 사용하지 않은 참고 점수 구간 오차, 비교 가능한 다른 참고 출처의 차이를 구분한다. 같은 참고 곡선의 미사용 점수 구간은 실제 학생 단위 holdout이나 예측 정확도 검증이 아니다.",
+      "공동 관계가 식별되지 않는 부분은 가정·seed·참고 제외 변화에 대한 시나리오 민감도를 기록한다. 시나리오 최소/최대 범위를 95% 신뢰구간·실제 정답 보장·합격확률로 표시하지 않는다.",
+      "대학 곡선은 기존 검증한 실제 환산 규칙과 정확한 모집행 결속을 재사용해 집계한다. 개인 점수와 집계 점수에서 동일한 반영 과목·선택 조건·가산·반올림이 적용되는지 독립 검산한다.",
+      "수치 최적화에서 유한 float를 사용할 수 있으나 최종 도수/가중치/환산점수는 기존 엔진이 검증하는 정수·정확한 소수 문자열로 직렬화한다. 직렬화 후 다시 검증하고 분모·누적 단조성·동점을 확인한다.",
+      "재현 가능한 seed·입력 hash·코드 SHA·정책 버전·잔차·비교 범위·민감도·판정 증거를 별도 비공개 영수증에 남긴다. 구조 검사를 통과한 것만으로 승인하지 않는다.",
+      "source_verified/internal_review/reference/approved 상태를 구분한다. 채택 모형은 실질 검증을 통과한 새 릴리스로만 승인하며 기존 원본 상태를 자동 승격하지 않는다.",
+      "검증 결과는 checks·adoption_checks·diagnostic_checks를 분리한다. 기본 reference_validation_role=required는 사전 참고 기준 실패를 research_only로 유지한다. 새 사전 정책 diagnostic_excluded_incompatible은 원참고 CDF와 공식 주변도수/완성인원 평균 필요조건의 불성립을 같은 입력에서 정확 분수로 재계산하고 certificate_hash/출처/사유를 결속한 경우만 허용한다. 기준을 사후 확대하거나 기존 실패 버전을 승격하지 않는다.",
+      "새 정책에서도 원참고 잔차·미사용점·조건부 평균·상위꼬리·다른 출처·참고 포함/제외 민감도는 진단으로 보존한다. 공식 hard 잔차·희소/상대오차·정규화·수렴·수치 지지집합·실제 seed/규모/가정/참고 제외 재실행·반복 오차 등 모형자체검증의 실패는 계속 채택을 차단한다. 검증 정책의 미지원 한계 항목도 기록하고 채택을 차단한다.",
+      "공식 표에서 빈 등급이 대시/미기재로 발표된 경우 원문 count/lower_score/published_percent null을 보존한다. explicit empty_grade_verified와 published_dash·derived_count_from_frequency=0이 결속되고 전체 공식 도수/등급 합을 재검산한 상대평가 빈 등급만 건너뛴다. 임의 미공개/null을 0으로 치환하지 않는다.",
+      "EstimatedReleaseService.adopt는 서버 소유 EstimateApprovalProvider의 별도 고정 승인·run receipt hash·최종 code SHA·산출물 hash·모형 채택 체크·독립 대학 규칙 재실행 근거를 확인해 새 릴리스만 생성한다. 기존 reference/research/source_verified 상태를 직접 수정하거나 서버 명부에 자동 등록하지 않는다. 정확값이 유한 소수로 표현되지 않는 규칙은 표시 반올림으로 대체하지 않고 nonterminating_exact_value로 보류한다.",
+      "최종 joint의 완성/나머지 집단별 정확 소수 가중치를 정수 공통분모로 재집계하여 공식 도수·등급·응시·선택·탐구 조합·전체/완성인원 잔차를 다시 검사한다. float fit 검수와 분모 합계만으로 대체하지 않으며 사전 허용 한계를 유지한다. 실패는 serialized_official_constraints로 채택을 차단한다."
+    ],
+    "output_contract": {
+      "joint_profiles": "추정 공동 성적 후보·선택/응시 조건·정확한 가중치·모집단 필터·가정/검증 버전; 비공개 저장",
+      "total_model": "jungsi.exam-total-model/v1 + total_score_frequency/v1; estimated_weights; 기존 시험/pack/모집단/분모/조회범위 결속을 유지",
+      "university_distribution": "jungsi.university-score-distribution/v1; estimated_weights; 동일 학년도/시험/pack/규칙/점수범위/가산처리/모집단 결속",
+      "percentile_release": "jungsi.university-percentile-release/v1; DEV-004 exact offering binding; 개인 conversion 승인과 분포 승인을 독립 검증; 필수 입력 보유 후보로 한정하면 comparison_population 봉투와 별도 비교집단 ID/검증 영수증을 명시",
+      "validation_receipt": "jungsi.estimate-validation/v1의 checks/adoption_checks/diagnostic_checks·필요조건 반증·참고 잔차·민감도와 jungsi.estimate-run-receipt/v1의 사전 정책/입력·후보·가중치·출력 hash/code SHA를 비공개 보존한다. 새 서버 채택은 jungsi.estimate-release-receipt/v1 및 adoption receipt로 결속한다.",
+      "public_result": "overall.status=estimated + overall.data_kind=estimated_weights; percentile.data_kind=estimated_weights 및 population_scope=whole_complete/required_rule_inputs_present. 내부 후보·가중치·계수·곡선·검산 원문은 공개 응답에서 제외한다."
+    },
+    "presentation_rules": [
+      "전체 누백과 대학 환산 누백을 자체 추정으로 표시하고 학년도·시험·모형/곡선 버전·동점 기준을 함께 표시한다.",
+      "검증된 적용 범위에만 수치를 표시한다. 소수의 실제 규칙 시범 산출을 전국 모든 대학 누백 완성으로 표시하지 않는다.",
+      "기획팀은 기존 로컬 outputs 미리보기에서 확정 Git 코드와 비공개 발행본을 서버 쪽에서 읽어 가상 학생 결과를 보여준다. 브라우저에는 허용 DTO만 전달한다.",
+      "운영 프레젠테이션은 별도 feature/presentation-foundation 담당이며 화면에서 추정·환산 엔진 또는 비공개 데이터/DB에 직접 접근하지 않는다.",
+      "전체 국수탐2 집단과 대학 산식의 필수 성적 보유 집단을 population_scope로 구분한다. 분모/시험/학년도/동점 기준이 달라지면 전체 누백과 대학 누백의 환산 유불리 비교는 보류한다."
+    ],
+    "ownership": {
+      "planning": "develop에서 공통 계약·검증 기준·인수 결과를 관리하고 개발/데이터 결과를 직접 확인한다.",
+      "application_developer": "기존 feature/application-pre-data-platform에서 범용 추정·검증·집계 코드와 합성 테스트를 구현해 develop PR로 전달한다.",
+      "data_team": "기존 비공개 자료/캐시를 재사용해 실제 입력 prototype·사전 정책·실제 추정 산출물·검산 영수증을 새 버전으로 제공한다.",
+      "presentation_developer": "기존 feature/presentation-foundation에서 기획/DTO를 읽어 화면을 구현한다."
+    },
+    "acceptance_gates": [
+      "같은 입력/정책/seed로 재현되는 후보·보정·검증·총점/대학 곡선 생성 엔진과 의미 있는 합성 독립 검산을 완료한다.",
+      "공식 주변도수/참고 곡선에 근거한 자체 추정 prototype을 실제로 산출하고 사전 정책에 따른 오차·미사용 구간·민감도·적용 범위를 기록한다. 전체 학생 실제 DB 없이 진행한다.",
+      "정확한 실제 대학 규칙 시범 곡선과 가상 학생의 환산/누백 결과를 최종 Git 코드로 재실행한다. 과거/모평 시험 혼용과 잘못된 모집단·미승인 버전은 보류한다.",
+      "최종 직렬화 형식·총 가중치·0/100/동점·누적 단조성·불완전 제약·최적화 실패·미수렴·음수/비유한 입력·승인 우회 차단을 검사한다.",
+      "전체 합성 회귀·문서/계층/참조/자료 제외/브랜치/Git 스냅샷 검산 및 CI를 통과한 PR만 develop에 통합한다.",
+      "로컬 화면에서 자체 추정임을 표시하고 성공/보류/미승인·일반/유료·동점·모바일을 검증한다. 실제 Supabase/Drive 연결 검수는 별도 운영 증거로 남긴다."
+    ],
+    "remaining": [
+      "시범 규칙의 실제 캠퍼스 식별과 정확한 운영 모집행 결속, 서버 승인 명부 등록/발행 및 권한 검수",
+      "전국 대학 공식 실행 규칙 검증 발행 및 별도 시험/학년도 모형 확대",
+      "실제 Supabase/Drive 운영 설정·권한과 연결 검수"
+    ],
+    "private_storage": "실제 원자료·참고 값·공동 후보·학습 계수/가중치·총점/학교 곡선·검증 결과는 data/outputs 등 Git 제외 폴더 또는 비공개 DB/스토리지에만 보관한다. 공개 코드는 범용 형식과 명확한 합성 예시만 포함하며 원본·이전 버전·실패 산출물·파일/ref를 보존한다. 파일 포트는 가장 가까운 AGENTS.md+현재 공통 명세 체크아웃의 내부 제외 영역만 허용한다. 체크아웃 자체가 조상 outputs/data에 있어도 내부 src/docs/apps 등 공유 경로를 허용하지 않는다.",
+    "comparison_population_implementation_status": "implemented_with_same_commit_DTO_and_pinned_validation_receipt; 운영 실제 자료 등록과 연결 검수는 별도",
+    "execution_result": {
+      "status": "accepted_on_develop_private_self_validation_and_independent_replay_verified",
+      "first_public_replay": "첫 공개 SHA의 실제 재실행은 보존하며 최종 오류 경로 보완 SHA에서 후보·모형·곡선·검산의 재현 hash를 다시 확인했다.",
+      "precommit_original_policy": "research_only; 사전 참고 오차 기준 실패 보존",
+      "precommit_new_policy": "self_validated_estimate; 사전 실행은 이력으로 보존하고 최종 공개 SHA의 정확 소수 재집계와 독립 재현을 완료했다.",
+      "source_policy": "기존 v3 허용오차·실패와 참고 제외 결과는 보존; 새 사전 정책은 불성립 참고 진단을 모형자체검증에서 분리",
+      "actual_scope": "2026 수능 1개 실제 규칙 시범과 7개 가정/seed/참고 포함·제외 재실행; 전국 대학 완료 아님",
+      "server_registration": "not_performed_campus_identity_and_pinned_operational_registration_pending",
+      "live_connections": "not_run_configuration_missing",
+      "final_public_code_sha": "f5d5f9767462e15648c2fc1605317bfd3ebc0ab2",
+      "develop_merge_sha": "b77b0eeb36cef5a2cc3ae958aff1efa1e80afc69",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/12",
+      "final_public_replay": "확정 Git SHA로 후보 생성부터 재실행해 공식 제약·정확 소수 가중치 재집계·직접 환산·총점/대학 곡선·필터 분모·동점/0/100과 재현 hash를 확인했다.",
+      "independent_data_team": "동일 최종 SHA로 후보 생성부터 별도 재현하고 원자료의 도수/등급·선택/응시 조건·직접 환산·집단 합계·PK 연결을 독립 확인했다. 수치/가중치/검산 원문은 비공개 보관.",
+      "synthetic_snapshot_tests": 391,
+      "local_preview": "기획팀 소유 outputs 로컬 화면에서 제공 자료 기반 추정 시범과 합성 API 상태 예시를 표시하고 데스크톱/모바일/인쇄/권한 등 14개 묶음을 통과했다.",
+      "local_preview_check_groups": 14,
+      "local_preview_js_errors": 0,
+      "meaning": "모형 자체 검수는 추정 정의·공식 조건·재현/직접 계산 검증을 뜻한다. 전체 실제 학생 DB·공동분포 참값·실제 학생 예측 정확도·합격확률 검증이 아니다.",
+      "CI": {
+        "push": "https://github.com/natural0448/Jungsi_touch/actions/runs/37186791840",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/actions/runs/37186793966",
+        "develop_merge": "https://github.com/natural0448/Jungsi_touch/actions/runs/37187904113",
+        "status": "success"
+      }
+    }
   }
 }

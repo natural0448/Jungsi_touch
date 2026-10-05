@@ -322,6 +322,99 @@ def generated_files(spec):
             '## '+str(len(spec['operations']))+'개 요청과 응답\n\n'+table(['API','메서드/경로','본문','쿼리','응답 DTO','키 필수'],[[o['id'],o['method']+' '+o['path'],'; '.join(o['http_contract']['body']) or '없음',', '.join(o['http_contract']['query']) or '없음',o['http_contract']['response']+'; '+o['contract_ref'],o['http_contract']['idempotency_key_required']] for o in spec['operations']])+'\n\n모든 HTTP 업무 서비스는 PlatformService.execute이며 FastAPI create_app이 경로를 등록한다. 요청은 operations[].http_contract, 응답은 해당 contract_ref를 따른다. overall.analyze의 HTTP 응답은 persisted report이고 내부 overall 필드만 기존 OverallAnalysisService의 jungsi.overall-analysis/v1 엔진 DTO다. 두 객체를 루트 응답으로 혼동하지 않는다.\n\n'+
             '## 오류와 대기\n\n오류 객체는 {status:error,error:{code},request_id}이며 비밀값·예외 원문을 포함하지 않는다. 자료 대기는 200 응답의 status=pending/reason_code와 값 null로 구분한다. 전체 분석이 pending이어도 입력 총점·과목 결과는 보존한다.\n\n'+table(['오류 코드','HTTP','의미'],platform['errors'])+'\n\n대학 계산의 개별 자료 해시/버전/승인 불일치는 해당 assessment의 pending이다. 카탈로그 전체 형식/승인 실패와 공급 서비스 실패는 503이다.\n\n'+
             '## 응답 객체\n\n'+'\n\n'.join(schemas)+'\n\n## 시간 표시\n\n서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.')
+    scoring=spec.get('university_scoring_contract')
+    if scoring:
+        public=scoring['public_result_contract']
+        rules='\n\n'.join('## '+title+'\n\n'+'\n'.join('- '+row for row in scoring[key]) for title,key in [
+            ('모집행과 규칙 결속','identity_rules'),('성적 입력','input_rules'),('실제·모평·보정 추정의 구분','score_basis_rules'),('계산 단계와 정확값','execution_rules'),('검증과 인수','acceptance_gates'),('실제 운영의 남은 자료','remaining')])
+        files[spec['current_documents']['university_scoring']]=doc('대학별 수능 환산 엔진',
+            '상태: '+scoring['code_status']+'. 작업 항목: [DEV-003](../work_items/DEV-003-university-scoring-engine.json). '+scoring['placement']+'\n\n'+
+            '서비스: '+scoring['application_service']+'. API: '+scoring['api_path']+'. '+scoring['access']+'\n\n'+
+            '## 참고 자료와 계산 범위\n\n'+scoring['reference_policy']+'\n\n'+scoring['calculation_scope']+'\n\n'+
+            rules+'\n\n## 독립 자료 공급\n\n'+table(['항목','계약'],list(scoring['provider_contract'].items()))+'\n\n'+
+            '## 공개 결과 DTO\n\n'+public['location']+'; 필드: '+', '.join(public['fields'])+'. 상태: '+', '.join(public['statuses'])+'.\n\n'+
+            public['independence']+' '+public['compatibility']+'\n\n응답 제외: '+'; '.join(public['excluded'])+'.')
+        receipt=scoring.get('execution_result')
+        if receipt:
+            marker='\n\n<!-- jungsi:generated'
+            acceptance='\n\n## 기획팀 인수 결과\n\n'+table(['항목','증거'],[
+                ['검토 커밋',receipt['reviewed_feature_commit']],
+                ['develop 통합',receipt['integrated_develop_commit']],
+                ['PR','[PR #10]('+receipt['pull_request']+')'],
+                ['CI','[project-consistency]('+receipt['ci']['url']+'): '+receipt['ci']['conclusion']],
+                ['합성 검증',str(receipt['ci']['synthetic_tests_passed'])+'개 통과; 추가 '+str(receipt['ci']['added_synthetic_tests'])+'개'],
+                ['검토 범위',receipt['review_scope']],
+                ['기존 근거 재사용',receipt['private_source_reuse']],
+                ['통합문서 참고',receipt['reference_inspection']],
+                ['실서버',receipt['live_server_status']],
+                ['실제 자료',receipt['live_data_status']],
+                ['운영 규칙',receipt['production_rule_status']]])
+            path=spec['current_documents']['university_scoring']
+            files[path]=files[path].replace(marker,acceptance+marker)
+        for key in ('planning','routing','architecture','presentation_handoff','api_dto'):
+            path=spec['current_documents'].get(key)
+            if path in files:
+                marker='\n\n<!-- jungsi:generated'
+                section='\n\n## 대학별 수능 환산 연결\n\n[대학별 수능환산 엔진](대학별_수능환산_엔진.md)을 따른다. 구현 상태는 '+scoring['code_status']+'다. '+public['independence']+' 프레젠테이션은 독립 conversion 결과와 후속 지원 판단 상태를 표시하며 계산/조회표를 구현하지 않는다.'
+                files[path]=files[path].replace(marker,section+marker)
+        frontend['university_scoring_contract']={k:scoring[k] for k in ('format','code_status','operation','input_rules','score_basis_rules','public_result_contract')}
+        backend['university_scoring_contract']=scoring
+        files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
+        files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
+    percentile=spec.get('university_percentile_contract')
+    if percentile:
+        public=percentile['public_result_contract']
+        rules='\n\n'.join('## '+title+'\n\n'+'\n'.join('- '+row for row in percentile[key]) for title,key in [
+            ('계산과 독립 상태','calculation_rules'),('시험·규칙·모집행·모집단 결속','identity_rules'),
+            ('화면 표시와 담당','presentation_rules'),('검증과 인수','acceptance_gates'),('실제 운영의 남은 자료','remaining')])
+        files[spec['current_documents']['university_percentile']]=doc('대학별 환산 누백 계산',
+            '상태: '+percentile['code_status']+'. 작업 항목: [DEV-004](../work_items/DEV-004-university-percentile.json). '+percentile['placement']+'\n\n'+
+            '서비스: '+percentile['application_service']+'. API: '+percentile['api_path']+'. '+percentile['access']+'\n\n'+
+            '## 누백의 정의\n\n'+percentile['definition']+'\n\n'+rules+'\n\n## 독립 자료 공급\n\n'+
+            table(['항목','계약'],list(percentile['provider_contract'].items()))+'\n\n## 공개 결과 DTO\n\n'+
+            public['location']+'; 필드: '+', '.join(public['fields'])+'. 상태: '+', '.join(public['statuses'])+'.\n\n'+
+            public['independence']+' '+public['compatibility']+' '+public['data_kind']+'\n\n응답 제외: '+'; '.join(public['excluded'])+'.')
+        receipt=percentile.get('execution_result')
+        if receipt:
+            path=spec['current_documents']['university_percentile']
+            receipt_title='기획팀 인수 결과' if str(receipt.get('status','')).startswith('accepted_on_develop') else '구현·검증 결과'
+            files[path]=files[path].replace('\n\n<!-- jungsi:generated','\n\n## '+receipt_title+'\n\n'+
+                table(['항목','증거'],[(key,str(value)) for key,value in receipt.items()])+'\n\n<!-- jungsi:generated')
+        for key in ('planning','routing','architecture','presentation_handoff','api_dto','backend_readiness'):
+            path=spec['current_documents'].get(key)
+            if path in files:
+                section='\n\n## 대학별 누백 연결\n\n[대학별 누백 계산](대학별_누백_계산.md)을 따른다. 구현 상태는 '+percentile['code_status']+'다. '+public['independence']+' 프레젠테이션은 학교 환산 기준 상위 누백과 동점·자료 기준을 표시한다.'
+                files[path]=files[path].replace('\n\n<!-- jungsi:generated',section+'\n\n<!-- jungsi:generated')
+        frontend['university_percentile_contract']={key:percentile[key] for key in ('format','code_status','operation','definition','public_result_contract','presentation_rules')}
+        backend['university_percentile_contract']=percentile
+        files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
+        files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
+    estimated=spec.get('estimated_population_contract')
+    if estimated:
+        sections='\n\n'.join('## '+title+'\n\n'+'\n'.join('- '+row for row in estimated[key]) for title,key in [
+            ('생성·보정 절차','workflow'),('출처와 모집단','source_and_population_rules'),
+            ('검증과 승인','validation_rules'),('화면 연결','presentation_rules'),('인수 조건','acceptance_gates'),('남은 범위','remaining')])
+        mapping=estimated['reported_score_mapping']
+        files[spec['current_documents']['estimated_population']]=doc('자체 추정 공동분포와 대학 누백 생성',
+            '상태: '+estimated['code_status']+'. 작업 항목: [DEV-005](../work_items/DEV-005-estimated-population.json). '+estimated['placement']+'\n\n'+
+            '## 자체 추정의 기준\n\n'+estimated['definition']+'\n\n'+sections+'\n\n## 성적표 매핑\n\n'+mapping['formula']+'\n\n'+
+            '['+mapping['source_scope']+']('+mapping['primary_source']+')\n\n'+'\n'.join('- '+row for row in mapping['rules'])+'\n\n'+
+            '## 산출물 계약\n\n'+table(['산출물','계약'],list(estimated['output_contract'].items()))+'\n\n'+
+            '## 팀별 담당\n\n'+table(['담당','작업'],list(estimated['ownership'].items()))+'\n\n## 비공개 자료와 보존\n\n'+estimated['private_storage'])
+        receipt=estimated.get('execution_result')
+        if receipt:
+            path=spec['current_documents']['estimated_population']
+            files[path]=files[path].replace('\n\n<!-- jungsi:generated','\n\n## 구현·인수 결과\n\n'+
+                table(['항목','증거'],[(key,str(value)) for key,value in receipt.items()])+'\n\n<!-- jungsi:generated')
+        for key in ('planning','routing','architecture','presentation_handoff','api_dto','backend_readiness'):
+            path=spec['current_documents'].get(key)
+            if path in files:
+                section='\n\n## 자체 추정분포 연결\n\n[자체 추정분포 개발](자체_추정분포_개발.md)을 따른다. 상태는 '+estimated['code_status']+'다. '+estimated['definition']+' 전체 누백은 overall.status=estimated, 대학 누백은 percentile.data_kind=estimated_weights로 구분한다. 기존 API 권한·시험 결속·애플리케이션 소유 포트와 프레젠테이션 담당을 유지한다.'
+                files[path]=files[path].replace('\n\n<!-- jungsi:generated',section+'\n\n<!-- jungsi:generated')
+        frontend['estimated_population_contract']={key:estimated[key] for key in ('format','code_status','definition','presentation_rules')}
+        backend['estimated_population_contract']=estimated
+        files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
+        files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
     if spec.get("repository_layout"):
         files[spec["current_documents"]["folder_structure"]]=doc("프로젝트 폴더 구조와 작업 위치",repository_layout_text(spec))
     return {p:t.encode("utf-8") for p,t in files.items()}

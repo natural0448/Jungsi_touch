@@ -1,0 +1,85 @@
+{
+  "format": "jungsi.development-work-item/v1",
+  "id": "DEV-003",
+  "title": "대학별 수능 성적 환산 엔진과 독립 애플리케이션 연결",
+  "status": "accepted_on_develop_live_rules_and_configuration_pending",
+  "start_commit": "e25062329f4d364ce94df315559f570e1b791efc",
+  "planning_spec_version": "1.4.0",
+  "feature_branch": "feature/application-pre-data-platform",
+  "integration_branch": "develop",
+  "requirements": [
+    "REQ-05",
+    "REQ-06",
+    "REQ-12",
+    "REQ-14"
+  ],
+  "source_of_truth": "docs/current/service_spec.json:university_scoring_contract",
+  "reuse": [
+    "src/jungsi_touch/university_conversion.py",
+    "src/jungsi_touch/year_equating.py",
+    "src/jungsi_touch/application/offering_analysis.py",
+    "src/jungsi_touch/application/platform.py",
+    "src/jungsi_touch/application/platform_ports.py",
+    "src/jungsi_touch/infrastructure/drive_provider.py"
+  ],
+  "requested_changes": [
+    "application/university_scoring.py에 학교별 환산 서비스와 불변 결과를 구현한다. 기존 루트 엔진 경로를 보존하며 필요 연산/검증만 보완한다.",
+    "실제 수능 동일 시험 경로를 전체 누적/과거 보정/대학 분포/판단 정책에서 분리하고 독립 환산 공급 포트 및 Drive conversion 계약을 구현한다.",
+    "성적표 percentile/grade 선택 입력과 검증을 공통 프로필/전체 분석에 연결한다. 임의 누적 기반 성적표 백분위 생성은 금지한다.",
+    "university.analyze 및 candidates.build에 conversion.DTO를 연결하고 실패 격리/본인 유료 경계/정확값 후속 판단을 검수한다.",
+    "공통 명세·라우팅·3티어·작업인계·API DTO·폴더 구조와 코드 참조를 같은 구현 커밋으로 갱신하고 합성 테스트·CI 후 PR을 develop으로 제출한다."
+  ],
+  "reference_policy": "사용자 제공 고속분석기 통합문서와 기존 추출본의 입력→조회→단계식→결과 구조만 참고한다. 셀 주소·Excel 수식·대학별 계수·자체 분포·학생값을 코드에 복사하거나 Excel 실행식으로 평가하지 않는다. 대학 공식 자료 검증과 실행 검산이 필요한 운영 규칙은 별도 승인한다.",
+  "acceptance_gates": [
+    "승인된 같은 시험 합성 규칙으로 overall/bridge/curve/decision이 없어도 conversion.ready와 정확한 환산점수가 반환된다.",
+    "고정 가중합·등급 조회·탐구 평균/최댓값·변환 후 우수순·조건 가산/감산·척도·지정 반올림/절사를 독립 손계산 Fraction 예상값과 비교한다.",
+    "같은 학교의 다른 캠퍼스/전형/군/학년도·규칙/표/pack/시험 불일치·중복 binding·미승인·미지원 입력을 실패 또는 pending으로 구분한다.",
+    "성적표 백분위/등급 선택 입력·경계·매핑 충돌·백분위 미제공을 검수한다. 기존 표준점수 입력과 승인 보정 흐름 회귀를 확인한다.",
+    "표시 1.23과 내부 1.234처럼 자릿수가 달라지는 합성 사례로 curve·decision이 정확값을 사용함을 검수한다.",
+    "유료·소유권·확인 성적·멱등·revision·일반회원 재조회 DTO·내부 식/계수 유출 차단과 자료 오류 격리를 HTTP/업무 테스트로 확인한다.",
+    "모든 공통 명세·생성 문서·계층·Git 데이터 제외·커밋 스냅샷 테스트와 CI를 통과하고 개발 PR을 develop으로 통합한다.",
+    "실제 대학 규칙의 승인 범위와 Supabase/Drive 운영 연결은 합성 코드 인수와 구분해 보고한다. 전국 원문 재검사를 이번 구현의 완료 조건으로 삼지 않는다."
+  ],
+  "data_rule_readiness": "실제 대학 전수 실행 규칙 승인 완료를 가정하지 않는다. 사전 정리본과 독립 검수 근거를 재사용하며 자료가 없거나 미승인이면 공개 점수를 생성하지 않는다.",
+  "file_preservation": "원본·이전 버전·기존 엔진·로컬 브랜치·작업 폴더·새 테스트 산출물 모두 보존한다. 새 브랜치/서브에이전트 생성·파일 삭제·main 푸시/라이브 배포를 하지 않는다.",
+  "execution_result": {
+    "status": "accepted_on_develop_live_rules_and_configuration_pending",
+    "live_server": "not_run_configuration_missing",
+    "live_data": "not_run_configuration_missing",
+    "scope": "독립 환산·실제/모평 구분·성적표 매핑·정확값·불변 결과·API 권한·실패 격리",
+    "synthetic_tests_passed": 295,
+    "new_synthetic_tests": 39,
+    "verification_scope": "25개 공유 변경 파일의 staged Git 스냅샷; 합성 295개 성공/실패0/오류0/skip0; 문서/참조/계층/비공개 제외/브랜치 정책 통과",
+    "validated_planning_commit": "eb0feaebc03c986b6c7282202aae65bc26c2aa45",
+    "verification_command": "python -B -X utf8 scripts/run_committed_tests.py --staged",
+    "ci_status": "SUCCESS",
+    "local_verification_record": "outputs/committed_test_runs/20261004T025518656471Z/verification.json",
+    "numeric_publication_contract": "정수/정확 소수 문자열; 이진 float·bool·비유한 값 차단",
+    "reviewed_feature_commit": "29eadf965d44384be6cdc4ac5bc9b39be2c49e4c",
+    "integrated_develop_commit": "e88b778a099168b5be1c85ca1168115dca014f37",
+    "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/10",
+    "ci": {
+      "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37172725475",
+      "tested_commit": "29eadf965d44384be6cdc4ac5bc9b39be2c49e4c",
+      "conclusion": "SUCCESS",
+      "synthetic_tests_passed": 295,
+      "added_synthetic_tests": 39
+    },
+    "review_scope": "25개 변경 파일의 코드·권한·시험/모집행 결속·독립 환산·정확값·자료 오류 격리·DTO·공통 문서를 최종 Git 커밋과 CI로 확인함",
+    "private_source_reuse": "저장된 공식 예시 4개년을 최종 Git 코드 스냅샷으로 연구 검산하여 수치 일치·미승인 공개 차단·원규칙 참조 보존을 확인했다. 기존 source_verified/internal_review_only 승인 상태를 변경하지 않았다.",
+    "reference_inspection": "사용자 제공 고속분석기 계산 단계/일부 패턴과 기존 추출 근거를 읽기만 했다. 확인 원본 전후 해시는 일치하며 Excel 재계산·매크로·외부 링크 실행 또는 원본 변경을 하지 않았다.",
+    "live_server_status": "not_run_configuration_missing",
+    "live_data_status": "not_run_configuration_missing",
+    "production_rule_status": "operating_release_approval_and_binding_pending",
+    "files_and_branches_preserved": true,
+    "remaining": [
+      "실제 대학·모집행의 공식 실행 규칙/변환표 승인 발행 및 기존 검수 근거를 이용한 변경 범위 검산",
+      "Supabase/Drive 실서버 연결 및 승인 conversion 아티팩트 실제 읽기 검수",
+      "제2외국어 등 추가 성적 입력 계약이 필요한 특수 규칙",
+      "전체 공동분포·연도 보정·판단/예상 자료 승인; 엔진 구현 완료와 별개"
+    ]
+  },
+  "implementation_spec_version": "1.4.2",
+  "planning_commit": "eb0feaebc03c986b6c7282202aae65bc26c2aa45",
+  "current_spec_version": "1.4.3"
+}

@@ -85,6 +85,12 @@ class ConversionRule:
             for key in ('rule_id','rule_version','score_scope'):
                 check(isinstance(d[key],str) and bool(d[key]),'INVALID_RULE_METADATA','규칙 식별 정보가 필요합니다.')
             check(d['score_scope']=='csat_component','UNSUPPORTED_SCOPE','현재 엔진은 수능 부분점수를 계산합니다.')
+            check(type(d.get('display_places',2)) is int and 0<=d.get('display_places',2)<=8,'INVALID_PRECISION','표시 자릿수를 확인하세요.')
+            if d.get('official_max_score') is not None:
+                check(num(d['official_max_score'])>0,'INVALID_RULE_METADATA','공식 만점 척도를 확인하세요.')
+            if 'output_range' in d:
+                check(set(d['output_range'])=={'min','max'} and num(d['output_range']['min'])<=num(d['output_range']['max']),
+                      'INVALID_OUTPUT_RANGE','공식 최종점수 허용 범위를 확인하세요.')
             check(isinstance(d['source_refs'],list) and d['source_refs'],'SOURCE_REQUIRED','공식 근거가 필요합니다.')
             check(isinstance(d['inputs'],dict) and isinstance(d['tables'],dict) and isinstance(d['nodes'],dict),'INVALID_RULE_SCHEMA','입력·조회표·연산 정의가 필요합니다.')
             for spec in d['inputs'].values():
@@ -192,15 +198,18 @@ class ConversionRule:
                 return value
             raise ConversionError('UNSUPPORTED_OPERATOR','지원하지 않는 연산입니다.')
         score=node(d['output_node']);check(isinstance(score,Fraction),'INVALID_OUTPUT','환산점수가 숫자가 아닙니다.')
+        if 'output_range' in d:
+            check(num(d['output_range']['min'])<=score<=num(d['output_range']['max']),
+                  'OUTPUT_OUT_OF_RANGE','규칙의 최종점수 허용 범위를 벗어났습니다.')
         result={'academic_year':d['academic_year'],'exam_id':profile['exam_id'],'profile_version':profile['profile_version'],
                 'rule_version':d['rule_version'],'score_basis':profile['score_basis'],'bridge_version':profile.get('bridge_version'),
                 'calculation_status':'calculated','score_scope':d['score_scope'],
                 'converted_score':display(score,d.get('display_places',2)),
                 'exact_score':{'numerator':score.numerator,'denominator':score.denominator},
                 'official_max_score':d.get('official_max_score'), 'admission_total_score':None,
-                'eligibility_status':'needs_confirmation','non_csat_components':d.get('non_csat_components',[]),
+                'eligibility_status':'needs_confirmation','non_csat_components':deepcopy(d.get('non_csat_components',[])),
                 'college_percentile':None,'possibility':None,'advantage':None,
-                'source_refs':d['source_refs'],'conversion_table_versions':[t['version'] for t in d['tables'].values()],
+                'source_refs':deepcopy(d['source_refs']),'conversion_table_versions':[t['version'] for t in d['tables'].values()],
                 'reason_codes':['CSAT_COMPONENT_ONLY','ELIGIBILITY_NOT_EVALUATED']}
         if include_trace:result['internal_trace']={k:display(v,8) if isinstance(v,Fraction) else v for k,v in trace.items()}
         return result
