@@ -2386,7 +2386,7 @@
         "REQ-21",
         "REQ-22"
       ],
-      "summary": "프레젠테이션: develop 1.7.1(세션·학과별 예상 기준 구현, PR #13)을 병합해 DEV-006 화면을 정식 계약에 맞췄다. 관리 화면 경로는 route_catalog 의 management_pages 에서 읽는다. forecast_draft 는 base_result·result(기준선·합격권·지원 구간 3필드)·context·영수증(validation.receipt_hash, approval.approval_hash)·감사(action·actor·at) 투영으로 보이고, 조정 대체값은 {value,unit}·{lower,upper,unit}·{ranges} 로 보내며 쓰기마다 오르는 revision 과 생성 때의 base_result_hash 로 묶는다. 3페이지 공개 근거는 이슈·조정 객체로 보이고, forecast_public(status=published)과 decision_evidence 의 context·정책·입력 버전이 모두 같을 때만 같은 발표본으로 안내한다. 4페이지는 판단 완료 추천 범위 밖·지원 조건 미충족 수를 판단 보류와 따로 알린다. 합성 응답도 같은 모양으로 바꿨다."
+      "summary": "프레젠테이션: develop 1.7.1(세션·학과별 예상 기준 구현, PR #13)을 병합했고, 이어지는 커밋에서 DEV-006 화면을 정식 계약에 맞췄다(병합 커밋에는 들어온 내용과 문서 해결만 담는 규칙). 관리 화면 경로는 route_catalog 의 management_pages 에서 읽는다. forecast_draft 는 base_result·result(기준선·합격권·지원 구간 3필드)·context·영수증(validation.receipt_hash, approval.approval_hash)·감사(action·actor·at) 투영으로 보이고, 조정 대체값은 {value,unit}·{lower,upper,unit}·{ranges} 로 보내며 쓰기마다 오르는 revision 과 생성 때의 base_result_hash 로 묶는다. 3페이지 공개 근거는 이슈·조정 객체로 보이고, forecast_public(status=published)과 decision_evidence 의 context·정책·입력 버전이 모두 같을 때만 같은 발표본으로 안내한다. 4페이지는 판단 완료 추천 범위 밖·지원 조건 미충족 수를 판단 보류와 따로 알린다. 합성 응답도 같은 모양으로 바꿨다."
     }
   ],
   "overall_analysis_contract": {

@@ -102,9 +102,12 @@ export function assess(o: OfferingDto, scores: ScoresInput, overall: OverallAnal
     expected_acceptance_range: { lower: fmt(center - rule.band), upper: fmt(center + rule.band), unit: "점", definition: "지원 판단용 채택 구간(합성). 이 구간이면 핵심 검토", policy_version: `SYNTHETIC-policy-${base}` },
     forecast_release_version: forecastPending ? null : "SYNTHETIC-forecast-release-v1",
     basis_summary: forecastPending ? null : "2024~2026 최종등록자 70% 비교값(공통 척도)의 가중 평균(합성)",
-    issue_summaries: base === "syn-h1" ? ["2027 모집인원이 3명 늘었습니다(대학 변경 공고). 점수에 주는 영향은 확인하지 않아 숫자로 반영하지 않았습니다."] : [],
+    issue_summaries:
+      base === "syn-h1"
+        ? [{ issue_id: "SYN-issue-h1-quota", title: "모집인원 증가", summary: "2027 모집인원이 3명 늘었습니다(대학 변경 공고). 점수에 주는 영향은 확인하지 않아 숫자로 반영하지 않았습니다.", numeric_effect_applied: false }]
+        : [],
     recommendation_reasons: policyReasons,
-    adjustment_summary: null as string | null,
+    adjustment_summary: { applied: false, reason: null, version: null } as { applied: boolean; reason: string | null; version: string | null },
   };
 
   const result: AssessmentDto = {
@@ -151,7 +154,7 @@ export function assess(o: OfferingDto, scores: ScoresInput, overall: OverallAnal
     status: "ready",
     category: adopted,
     decision_components: { base_category: cat, adjusted_category: adjusted, adopted_category: adopted, base_policy_version: `SYNTHETIC-policy-${base}`, adjustment_version: adjusted ? "SYNTHETIC-adjustment-v1" : null },
-    decision_evidence: adjusted ? { ...decision_evidence, adjustment_summary: "상담 판단으로 한 단계 조정했습니다(여유 후보 → 핵심 검토)." } : decision_evidence,
+    decision_evidence: adjusted ? { ...decision_evidence, adjustment_summary: { applied: true, reason: "상담 판단으로 한 단계 조정했습니다(여유 후보 → 핵심 검토).", version: "SYNTHETIC-adjustment-v1" } } : decision_evidence,
     // 비교집단이 전체 응시자와 다르면 분모가 달라 유불리를 보류한다
     advantage: sameScope ? { delta_pp: fmt(delta), status: delta > 0.005 ? "favorable" : delta < -0.005 ? "unfavorable" : "neutral", baseline_version: "SYNTHETIC-baseline-v1" } : null,
     reason_code: sameScope ? null : "advantage_population_mismatch",
@@ -164,11 +167,22 @@ export function buildCandidates(analyses: Record<string, AssessmentDto>): Candid
   const groups = new Map<string, CandidatesDto["basic_university_groups"][number]>();
   const wildcards: CandidatesDto["wildcards"] = [];
   const pending: CandidatesDto["pending_offerings"] = [];
+  const outside: CandidatesDto["pending_offerings"] = [];
+  const ineligible: CandidatesDto["pending_offerings"] = [];
   for (const o of CATALOG) {
     const a = analyses[o.offering_id];
     if (!a) continue;
+    const state = { offering_id: o.offering_id, category: a.category, reason_code: a.reason_code };
+    if (a.status === "ineligible") {
+      ineligible.push(state);
+      continue;
+    }
+    if (a.status === "ready" && a.category === "outside") {
+      outside.push(state);
+      continue;
+    }
     if (a.status !== "ready" || !["challenge", "core", "room"].includes(a.category)) {
-      pending.push({ offering_id: o.offering_id, category: a.category, reason_code: a.reason_code });
+      pending.push(state);
       continue;
     }
     const item = { offering: o, assessment: a };
@@ -177,11 +191,14 @@ export function buildCandidates(analyses: Record<string, AssessmentDto>): Candid
     if (o.wildcard_group) wildcards.push(item);
   }
   return {
-    status: groups.size ? "ready" : "pending",
-    reason_code: groups.size ? null : "approved_candidates_missing",
+    // 추천 학교가 없어도 판단이 끝났으면 ready. 실제 보류만 있을 때 pending (1.7.1)
+    status: groups.size || !pending.length ? "ready" : "pending",
+    reason_code: groups.size || !pending.length ? null : "approved_candidates_missing",
     basic_university_groups: Array.from(groups.values()),
     wildcards,
     pending_offerings: pending,
+    outside_offerings: outside,
+    ineligible_offerings: ineligible,
     catalog_version: "SYNTHETIC-catalog-v1",
   };
 }

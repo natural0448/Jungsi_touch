@@ -2,7 +2,7 @@
   우리 서비스 API 의 실제 응답 모양 — develop 의 docs/current/API_DTO_계약.md (명세 1.2.2) 를 옮긴 것
   ─────────────────────────────────────────────────────────────
   route_catalog.json 의 backend_contract.dto_schemas 가 원본이다. 바뀌면 여기를 맞춘다.
-  1~4페이지가 모두 이 모양을 쓴다. 1.7.0(공유 드라이브의 DEV-006·DEV-007 지시) 필드를 함께 담는다.
+  1~4페이지와 관리 화면이 이 모양을 쓴다. develop 명세 1.7.1(DEV-006·DEV-007) 기준.
 
   - 숫자 점수·누적은 엔진의 소수 문자열이다.
   - 자료 대기는 200 + status=pending/reason_code, 값 null. 승인된 0건과 구분한다.
@@ -206,13 +206,16 @@ export interface AssessmentDto {
     version: string;
     historical_metrics: HistoricalMetricDto[];
     forecast_70: { status: "ready" | "pending"; reason_code: string | null; value: string | number | null; unit: string | null; definition: string | null; version: string | null };
-    expected_acceptance_range: { lower: string | number; upper: string | number; unit: string; definition: string; policy_version: string };
-    // 1.7.0 (DEV-007): 발행된 학과별 예상 기준의 공개 근거
+    expected_acceptance_range: { status?: "ready" | "pending"; reason_code?: string | null; lower: string | number; upper: string | number; unit: string; definition: string; policy_version: string };
+    // 1.7.1 (DEV-007): 채택 발표본의 공개 근거. context·policy_version·input_version 이 forecast_public 과 모두 같을 때만 같은 근거다
     forecast_release_version?: string | null;
     basis_summary?: string | null;
-    issue_summaries?: string[] | null;
+    issue_summaries?: IssueSummaryDto[] | null;
     recommendation_reasons?: ReasonDto[] | null;
-    adjustment_summary?: string | null;
+    adjustment_summary?: AdjustmentSummaryDto | null;
+    context?: ForecastPublicContextDto | null;
+    policy_version?: string | null;
+    input_version?: string | null;
   };
   // 1.7.0: 환산·누백·판단은 각자 준비 상태를 가진다
   conversion?: ConversionDto | null;
@@ -261,6 +264,42 @@ export interface PercentileDto {
   population_scope: PopulationScope | null;
 }
 
+/** 올해 이슈. 숫자 효과가 확인되지 않은 이슈는 numeric_effect_applied=false 로 남는다 */
+export interface IssueSummaryDto {
+  issue_id: string;
+  title: string;
+  summary: string;
+  numeric_effect_applied: boolean;
+}
+
+/** 상담 조정이 반영됐는지 */
+export interface AdjustmentSummaryDto {
+  applied: boolean;
+  reason: string | null;
+  version: string | null;
+}
+
+/** 발표본의 공개 기준 묶음(17필드). 비교 지표·단위·방향이 함께 온다 */
+export interface ForecastPublicContextDto {
+  offering_id: string;
+  academic_year: number;
+  exam_id: string;
+  source_pack_version: string;
+  catalog_version: string;
+  rule_id: string;
+  rule_version: string;
+  curve_version: string;
+  analysis_version: string;
+  score_scale_id: string;
+  score_scope: string;
+  bonus_treatment: string;
+  population_id: string;
+  comparison_metric: "converted_score" | "university_top_percent";
+  unit: string;
+  direction: "higher_is_better" | "lower_is_better";
+  tie_policy: string | null;
+}
+
 /** 서버가 만든 추천·판단 이유. 화면은 문장을 지어내지 않는다 */
 export interface ReasonDto {
   code: string;
@@ -279,8 +318,16 @@ export interface CandidatesDto {
   reason_code: string | null;
   basic_university_groups: { university_id: string; university_name: string; offerings: CandidateItemDto[] }[];
   wildcards: CandidateItemDto[];
-  pending_offerings: { offering_id: string; category: Category; reason_code: string | null }[];
+  pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
+  outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)
+  ineligible_offerings?: OfferingStateDto[]; // 판단 완료 · 지원 조건 미충족 (1.7.1)
   catalog_version: string | null;
+}
+
+export interface OfferingStateDto {
+  offering_id: string;
+  category: Category;
+  reason_code: string | null;
 }
 
 export interface RankDto {
@@ -355,10 +402,42 @@ export interface ForecastCapabilitiesDto {
 export type ForecastStatus = "draft" | "validated" | "approved" | "published";
 export type ForecastTarget = "forecast_70" | "acceptance_range" | "category_ranges";
 
-/**
- * forecast_draft. result·adjustments·validation·approval·audit_events 의 안쪽 모양은
- * 명세(1.7.0)에 필드 목록이 없어 화면은 알려진 이름만 골라 쓰고 나머지는 그대로 보인다.
- */
+export interface ForecastValueDto {
+  status: "ready" | "pending";
+  reason_code: string | null;
+  value: string | null;
+  unit: string | null;
+  definition: string | null;
+  version: string | null;
+}
+
+export interface ForecastRangeDto {
+  status: "ready" | "pending";
+  reason_code: string | null;
+  lower: string | null;
+  upper: string | null;
+  unit: string | null;
+  definition: string | null;
+  policy_version: string | null;
+}
+
+export interface CategoryRangeDto {
+  category: Category;
+  lower: string;
+  upper: string;
+}
+
+/** 기준선·합격권·지원 구간 3필드 투영. 내부 정확값·계수·trace 는 오지 않는다 */
+export interface ForecastResultDto {
+  forecast_70: ForecastValueDto;
+  acceptance_range: ForecastRangeDto;
+  category_ranges: CategoryRangeDto[];
+}
+
+/** 조정 대체값: 같은 단위로 명시한다 */
+export type ForecastReplacement = { value: string; unit: string } | { lower: string; upper: string; unit: string } | { ranges: CategoryRangeDto[] };
+
+/** forecast_draft — 관리 사용자 전용. 쓰기마다 revision 이 1 오르고 base_result_hash 는 생성 때 값 그대로다 */
 export interface ForecastDraftDto {
   format: "jungsi.forecast-draft/v1";
   draft_id: string;
@@ -367,11 +446,36 @@ export interface ForecastDraftDto {
   status: ForecastStatus;
   base_result_hash: string;
   policy_version: string;
-  result: Record<string, unknown> | null;
-  adjustments: Record<string, unknown>[];
-  validation: (Record<string, unknown> & { receipt_hash?: string }) | null;
-  approval: (Record<string, unknown> & { receipt_hash?: string }) | null;
-  audit_events: Record<string, unknown>[];
+  context: {
+    offering_id: string;
+    offering_lineage_id: string | null;
+    academic_year: number;
+    university_id: string;
+    campus: string | null;
+    department: string;
+    track: string | null;
+    group: string;
+    exam_id: string;
+    source_pack_version: string;
+    catalog_version: string;
+    analysis_version: string;
+    rule_id: string;
+    rule_version: string;
+    curve_version: string;
+    population_id: string;
+    score_scope: string;
+    score_scale_id: string;
+    bonus_treatment: string;
+    unit: string;
+  };
+  result: ForecastResultDto; // 현재 revision 의 채택값
+  base_result: ForecastResultDto; // 조정 전 서버 산출 원본
+  created_at: string; // UTC Z
+  updated_at: string; // UTC Z
+  adjustments: { target: ForecastTarget; replacement: ForecastReplacement; reason: string; evidence_refs: string[]; actor: string; at: string; base_result_hash: string }[];
+  validation: { status: "passed" | "failed"; reason_code: string | null; checks: unknown; validated_revision: number; result_hash: string; receipt_hash: string; at: string } | null;
+  approval: { approved_revision: number; result_hash: string; validation_hash: string; approval_hash: string; reason: string; at: string } | null;
+  audit_events: { action: string; actor: string; at: string }[];
 }
 
 export interface ForecastListDto {
@@ -384,23 +488,26 @@ export interface ForecastAdjustInput {
   base_result_hash: string;
   policy_version: string;
   target: ForecastTarget;
-  replacement: unknown; // 승인 정책이 허용한 같은 단위의 대체값
+  replacement: ForecastReplacement;
   reason: string;
-  evidence_refs: string[]; // 서버가 검증하는 근거 ID
+  evidence_refs: string[]; // 서버에 승인된 근거 ID
 }
 
-/** forecast_public — 발행된 학과 기준과 공개 근거. 합격 확률·최저점이 아니다 */
+/** forecast_public — 발행된 학과 기준과 공개 근거. 합격 확률·최저점이 아니다. 발행 전이면 pending 과 null */
 export interface ForecastPublicDto {
   format: "jungsi.forecast-public/v1";
-  status: "ready" | "pending";
+  status: "published" | "pending";
   reason_code: string | null;
   offering_id: string;
   release_version: string | null;
-  forecast_70: { value: string | number | null; unit: string | null; definition: string | null } | null;
-  expected_acceptance_range: { lower: string | number; upper: string | number; unit: string; definition: string } | null;
-  category_ranges: { category: Category; lower: string | number; upper: string | number }[] | null;
+  context: ForecastPublicContextDto | null;
+  policy_version: string | null;
+  input_version: string | null;
+  forecast_70: ForecastValueDto | null;
+  expected_acceptance_range: ForecastRangeDto | null;
+  category_ranges: CategoryRangeDto[];
   basis_summary: string | null;
-  issue_summaries: string[] | null;
-  recommendation_reasons: ReasonDto[] | null;
-  adjustment_summary: string | null;
+  issue_summaries: IssueSummaryDto[];
+  recommendation_reasons: ReasonDto[];
+  adjustment_summary: AdjustmentSummaryDto;
 }

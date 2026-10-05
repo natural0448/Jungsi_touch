@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CATEGORY, CategoryBadge, PickButton, ReasonList, reasonText, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
-import type { AssessmentDto, ForecastPublicDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
+import type { AssessmentDto, ForecastPublicDto, IssueSummaryDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
 import { plainDate, signed } from "@/lib/format";
 import { page } from "@/lib/routes";
 
@@ -14,7 +14,7 @@ export function Detail({ o, a, rec, pub, picked }: { o: OfferingDto; a: Cell; re
   const recruit = (
     <>
       <Recruit o={o} rec={rec} />
-      <Published f={pub} />
+      <Published f={pub} same={sameRelease(a, pub)} />
     </>
   );
 
@@ -260,7 +260,7 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
 /** 발행된 학과별 예상 기준의 공개 근거(DEV-007). 내부 계산 과정은 오지 않는다 */
 function Evidence({ a }: { a: AssessmentDto }) {
   const ev = a.decision_evidence;
-  if (!ev || (!ev.basis_summary && !ev.issue_summaries?.length && !ev.adjustment_summary && !ev.recommendation_reasons?.length)) return null;
+  if (!ev || (!ev.basis_summary && !ev.issue_summaries?.length && !ev.adjustment_summary?.applied && !ev.recommendation_reasons?.length)) return null;
   return (
     <div className="evidence">
       <h3>
@@ -270,8 +270,8 @@ function Evidence({ a }: { a: AssessmentDto }) {
       <ul>
         {ev.basis_summary && <li><b>산출</b> {ev.basis_summary}</li>}
         {ev.recommendation_reasons?.map((r) => <li key={r.code}><b>근거</b> {r.text}</li>)}
-        {ev.issue_summaries?.map((t) => <li key={t}><b>올해 변화</b> {t}</li>)}
-        {ev.adjustment_summary && <li><b>상담 조정</b> {ev.adjustment_summary}</li>}
+        {ev.issue_summaries?.map((t) => <IssueItem key={t.issue_id} t={t} />)}
+        {ev.adjustment_summary?.applied && <li><b>상담 조정</b> {ev.adjustment_summary.reason ?? "상담 판단으로 조정한 값입니다."}</li>}
       </ul>
     </div>
   );
@@ -326,43 +326,74 @@ function Years({ a }: { a: AssessmentDto }) {
   );
 }
 
+function IssueItem({ t }: { t: IssueSummaryDto }) {
+  return (
+    <li>
+      <b>올해 변화</b> {t.title}: {t.summary}
+      {!t.numeric_effect_applied && <small> · 점수에는 반영하지 않음</small>}
+    </li>
+  );
+}
+
+/** 학과 판단에 쓴 근거(decision_evidence)와 발행본(forecast_public)이 같은 발표본인지: context·정책·입력 버전이 모두 같을 때만 */
+export function sameRelease(a: Cell, f: ForecastPublicDto | null) {
+  const ev = a && a !== "need" ? a.decision_evidence : undefined;
+  if (!ev || !f || f.status !== "published") return false;
+  return (
+    ev.forecast_release_version === f.release_version &&
+    ev.policy_version === f.policy_version &&
+    ev.input_version === f.input_version &&
+    JSON.stringify(ev.context ?? null) === JSON.stringify(f.context)
+  );
+}
+
 const CAT_LABEL: Record<string, string> = { challenge: "도전", core: "핵심 검토", room: "여유 후보", outside: "추천 범위 밖" };
 
 /** 발행된 학과별 예상 기준(forecast.published.read). 합격 확률·최저점이 아니다. 발행 전이면 보이지 않는다 */
-function Published({ f }: { f: ForecastPublicDto | null }) {
-  if (!f || f.status !== "ready") return null;
+function Published({ f, same }: { f: ForecastPublicDto | null; same: boolean }) {
+  if (!f || f.status !== "published") return null;
+  const v = f.forecast_70;
+  const r = f.expected_acceptance_range;
   return (
     <div className="published">
       <h3>
         발행된 학과 기준 <small>{f.release_version}</small>
       </h3>
       <dl>
-        {f.forecast_70 && (
+        {v && (
           <div>
             <dt>올해 70% 예상선</dt>
-            <dd className="num">{f.forecast_70.value ?? "─"}{f.forecast_70.unit ?? ""}</dd>
+            <dd className="num">{v.status === "ready" ? `${v.value}${v.unit ?? ""}` : <span className="wait">발표 대기</span>}</dd>
           </div>
         )}
-        {f.expected_acceptance_range && (
+        {r && (
           <div>
             <dt>판단용 합격권</dt>
-            <dd className="num">{f.expected_acceptance_range.lower}~{f.expected_acceptance_range.upper}{f.expected_acceptance_range.unit}</dd>
+            <dd className="num">{r.status === "ready" ? `${r.lower}~${r.upper}${r.unit ?? ""}` : <span className="wait">발표 대기</span>}</dd>
           </div>
         )}
-        {f.category_ranges?.map((c) => (
+        {f.category_ranges.map((c) => (
           <div key={c.category}>
             <dt>{CAT_LABEL[c.category] ?? c.category}</dt>
             <dd className="num">[{c.lower}, {c.upper})</dd>
           </div>
         ))}
       </dl>
-      {(f.basis_summary || f.adjustment_summary) && (
+      {(f.basis_summary || f.adjustment_summary.applied) && (
         <p>
           {f.basis_summary}
-          {f.adjustment_summary && <> · {f.adjustment_summary}</>}
+          {f.adjustment_summary.applied && <> · 상담 조정: {f.adjustment_summary.reason ?? "반영됨"}</>}
         </p>
       )}
-      <span className="note">학과 기준은 지원 판단의 근거이며 실제 지원자의 합격 확률이나 최저 합격점이 아닙니다.</span>
+      {f.issue_summaries.length > 0 && (
+        <ul className="pub-issues">
+          {f.issue_summaries.map((t) => <IssueItem key={t.issue_id} t={t} />)}
+        </ul>
+      )}
+      <span className="note">
+        {same ? "이 학과의 지원 판단도 이 발표본으로 계산했습니다. " : "이 학과의 지원 판단은 다른 기준으로 계산됐을 수 있어 아래 판단과 합쳐 보지 않습니다. "}
+        학과 기준은 지원 판단의 근거이며 실제 지원자의 합격 확률이나 최저 합격점이 아닙니다.
+      </span>
     </div>
   );
 }

@@ -85,6 +85,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   const groups = [...(c?.basic_university_groups ?? [])].sort((a, b) => (bestDelta(b) ?? -Infinity) - (bestDelta(a) ?? -Infinity));
   const wildcards = c?.wildcards ?? [];
   const pendingCount = c?.pending_offerings.length ?? 0;
+  const outsideCount = c?.outside_offerings?.length ?? 0;
+  const ineligibleCount = c?.ineligible_offerings?.length ?? 0;
   const picked = new Set(picks.map((p) => p.offering_id));
   const count = (f?: string) => groups.filter((g) => !f || g.offerings.some((o) => o.assessment.category === f)).length;
   const shown = groups.filter((g) => !cur.has || g.offerings.some((o) => o.assessment.category === cur.has));
@@ -136,6 +138,11 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
                   <SchoolCard key={g.university_id} g={g} cur={cur} picked={picked} stats={stats} />
                 ))}
               </div>
+            )}
+            {(outsideCount > 0 || ineligibleCount > 0) && (
+              <p className="fv-note">
+                판단이 끝난 모집단위 중 추천 범위 밖 <b className="num">{outsideCount}</b>곳, 지원 조건 미충족 <b className="num">{ineligibleCount}</b>곳은 목록에 넣지 않았습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
+              </p>
             )}
             {pendingCount > 0 && (
               <p className="fv-note">

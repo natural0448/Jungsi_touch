@@ -38,8 +38,9 @@ export function lockFor(session: Session | null, route: PageRoute): Lock {
 }
 
 /**
- * 관리 화면(1.7.0 management_pages · ADMIN-FORECAST). 소비자 4개 화면의 번호·탭에는 넣지 않는다.
- * 지금 경로 계약(route_catalog.json)은 1.6.3 이라 이 화면이 없어, develop 에 1.7.0 이 들어오기 전까지 여기 둔다.
+ * 관리 화면(management_pages · ADMIN-FORECAST). 소비자 4개 화면의 번호·탭에는 넣지 않는다.
  * 접근은 회원 등급이 아니라 서버의 관리 권한(forecast.capabilities)으로 정해진다.
  */
-export const MANAGEMENT_FORECASTS = { id: "ADMIN-FORECAST", label: "학과별 예상 기준 관리", path: "/management/forecasts" } as const;
+const admin = catalog.management_pages.find((p) => p.id === "ADMIN-FORECAST");
+if (!admin) throw new Error("경로 계약에 없는 관리 화면: ADMIN-FORECAST");
+export const MANAGEMENT_FORECASTS = { id: admin.id, label: admin.label, path: admin.path } as const;

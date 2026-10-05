@@ -80,6 +80,9 @@
 .et .ps .published dd{margin:0;font-weight:800}
 .et .ps .published p{margin:6px 0 0;font-size:12px;color:var(--ink-2)}
 .et .ps .published .note{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
+.et .ps .published .pub-issues{margin:6px 0 0;padding:0;list-style:none;font-size:12px;color:var(--ink-2)}
+.et .ps .published .pub-issues b,.et .ps .evidence li small{font-weight:700;color:var(--ink)}
+.et .ps .evidence li small{font-weight:500;color:var(--muted)}
 .et .ps .card{border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .et .ps .card h3{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px}
 .et .ps .card .big{font-size:26px;font-weight:900;letter-spacing:-.6px}

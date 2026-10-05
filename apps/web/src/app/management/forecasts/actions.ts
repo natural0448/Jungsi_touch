@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller, source, type ForecastRevisionRef, type Result } from "@/lib/api";
-import type { ForecastDraftDto, ForecastTarget } from "@/lib/dto";
+import type { CategoryRangeDto, ForecastDraftDto, ForecastReplacement, ForecastTarget } from "@/lib/dto";
 import { MANAGEMENT_FORECASTS } from "@/lib/routes";
 
 /*
@@ -35,22 +35,23 @@ function ref(fd: FormData): ForecastRevisionRef {
   return { expected_revision: Number(text(fd, "expected_revision")), base_result_hash: text(fd, "base_result_hash"), policy_version: text(fd, "policy_version") };
 }
 
-/** 대체값: 같은 단위로 명시한다. 범위는 아래<위, 구간 목록은 JSON 배열 */
-function replacement(fd: FormData, target: ForecastTarget): unknown | null {
-  const unit = text(fd, "unit") || null;
+/** 대체값(1.7.1): 같은 단위로 명시한다. 기준선 {value,unit} · 합격권 {lower,upper,unit} · 구간 {ranges:[{category,lower,upper}]} */
+function replacement(fd: FormData, target: ForecastTarget): ForecastReplacement | null {
+  const unit = text(fd, "unit");
+  const num = (v: string) => v !== "" && Number.isFinite(Number(v));
   if (target === "forecast_70") {
     const v = text(fd, "value");
-    return v && Number.isFinite(Number(v)) ? { value: v, unit, definition: text(fd, "definition") || null } : null;
+    return num(v) && unit ? { value: v, unit } : null;
   }
   if (target === "acceptance_range") {
     const lo = text(fd, "lower");
     const hi = text(fd, "upper");
-    if (!lo || !hi || !(Number(lo) < Number(hi))) return null;
-    return { lower: lo, upper: hi, unit, definition: text(fd, "definition") || null };
+    return num(lo) && num(hi) && Number(lo) < Number(hi) && unit ? { lower: lo, upper: hi, unit } : null;
   }
   try {
-    const v = JSON.parse(text(fd, "ranges"));
-    return Array.isArray(v) ? v : null;
+    const v = JSON.parse(text(fd, "ranges")) as unknown;
+    const ok = Array.isArray(v) && v.every((r) => r && typeof r === "object" && "category" in r && "lower" in r && "upper" in r);
+    return ok ? { ranges: v as CategoryRangeDto[] } : null;
   } catch {
     return null;
   }
@@ -74,7 +75,7 @@ export async function runForecast(_prev: ForecastFormState, fd: FormData): Promi
     } else if (op === "adjust") {
       const target = text(fd, "target") as ForecastTarget;
       const value = replacement(fd, target);
-      if (value === null) return { code: "invalid_replacement", status: 422, message: "대체값을 확인하세요. 범위는 아래 값이 위 값보다 작아야 하고, 구간 목록은 JSON 배열이어야 합니다.", key };
+      if (value === null) return { code: "invalid_replacement", status: 422, message: "대체값을 확인하세요. 숫자로 적고, 합격권은 아래 값이 위 값보다 작아야 하며, 구간 목록은 [{category, lower, upper}] 형식의 JSON 배열이어야 합니다.", key };
       const evidence = text(fd, "evidence_refs").split(/[\s,]+/).filter(Boolean);
       res = await src.adjustForecastDraft(caller, id, { ...ref(fd), target, replacement: value, reason: text(fd, "reason"), evidence_refs: evidence }, key);
     } else if (op === "validate") {
