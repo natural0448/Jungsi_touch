@@ -192,4 +192,330 @@ class RetainedGitHistoryTests(unittest.TestCase):
         with patch.object(policy,'ROOT',self.repo):
             self.assertIn('Permanent release/integration refs must already exist',policy.validate_push_history('develop',policy.ZERO,after,self.spec))
 
+class RetainedMergeScopeTests(unittest.TestCase):
+    """Native two-parent trees/indexes; every repository, object and index is retained."""
+    def setUp(self):
+        import tempfile,uuid
+        self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        self._blobs={};self._trees={}
+        self.spec['workflow']['branch_governance']['merge_scope_policy']={
+            'format':'jungsi.merge-scope/v1','adoption':'commits_with_policy_marker_only'}
+        self.branch='feature/planning-presentation-contracts'
+        self.git_env={k:v for k,v in os.environ.items() if not k.startswith('GIT_')}
+        self.env_patch=patch.dict(os.environ,self.git_env,clear=True);self.env_patch.start()
+        stamp=datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'_'+uuid.uuid4().hex[:8]
+        self.repo=ROOT/'outputs/branch_policy_merge_tests'/stamp
+        self.repo.mkdir(parents=True,exist_ok=False)
+        self.git_dir=Path(tempfile.gettempdir())/'jungsi_touch_retained_policy_git'/stamp
+        self.git_dir.parent.mkdir(parents=True,exist_ok=True)
+        self.call('init','--initial-branch=fixture','--separate-git-dir='+str(self.git_dir))
+        (self.repo/'fixture.json').write_bytes(json.dumps({'repository':str(self.repo),
+            'retained_git_dir':str(self.git_dir),'cleanup_performed':False}).encode('utf-8'))
+        base_spec=deepcopy(self.spec)
+        self.seed=self.commit(self.files(base_spec))
+        for row in self.spec['workflow']['branch_governance']['additional_branches']:
+            if row['name']==self.branch:row['base_commit']=self.seed
+        self.base=self.commit(self.files(),(self.seed,))
+
+    def tearDown(self):
+        self.env_patch.stop()
+
+    def call(self,*args,input=None,raw=False):
+        result=subprocess.run(['git','-c','gc.auto=0','-c','maintenance.auto=false',
+            '-c','user.name=Synthetic policy fixture','-c','user.email=synthetic@example.invalid',
+            *args],cwd=self.repo,input=input,capture_output=True,env=self.git_env)
+        if result.returncode:raise AssertionError(result.stderr.decode('utf-8',errors='replace'))
+        return result.stdout if raw else result.stdout.strip()
+
+    def files(self,spec=None,**extra):
+        return {'docs/current/service_spec.json':json.dumps(spec or self.spec,indent=2).encode('utf-8'),
+                'README.md':b'Preserved synthetic baseline\n',**extra}
+
+    def commit(self,files,parents=()):
+        nested={}
+        for name,value in files.items():
+            node=nested;parts=name.split('/')
+            for part in parts[:-1]:node=node.setdefault(part,{})
+            node[parts[-1]]=value
+        def tree(node):
+            entries=[]
+            for name,value in sorted(node.items()):
+                if isinstance(value,dict):mode,kind,oid='040000','tree',tree(value)
+                else:
+                    if value not in self._blobs:self._blobs[value]=self.call('hash-object','-w','--stdin',input=value)
+                    mode,kind,oid='100644','blob',self._blobs[value]
+                entries.append((mode+' '+kind+' '+oid.decode()+'\t'+name+'\n').encode('utf-8'))
+            key=b''.join(entries)
+            if key not in self._trees:self._trees[key]=self.call('mktree',input=key)
+            return self._trees[key]
+        args=['commit-tree',tree(nested).decode(),'-m','Retained merge scope fixture']
+        for parent in parents:args+=['-p',parent]
+        return self.call(*args).decode()
+
+    def divergent(self,*,left=None,right=None):
+        left_files=self.files(**{'docs/current/own_note.md':b'Owned planning note\n'})
+        right_files=self.files(**{'src/jungsi_touch/application/platform.py':b'Approved incoming implementation\n'})
+        left_files.update(left or {});right_files.update(right or {})
+        return self.commit(left_files,(self.base,)),self.commit(right_files,(self.base,))
+
+    def expected(self,left,right):
+        with patch.object(policy,'ROOT',self.repo):
+            return policy.automatic_merge(left,right,self.spec)
+
+    def tree_files(self,tree):
+        files={}
+        for record in self.call('ls-tree','-r','-z',tree).split(bytes([0])):
+            if not record:continue
+            header,name=record.split(b'\t',1);mode,kind,oid=header.split()
+            self.assertEqual(kind,b'blob')
+            files[name.decode()]=self.call('cat-file','blob',oid.decode(),raw=True)
+        # Blob bytes, including trailing newlines, are retained exactly.
+        return files
+
+    def stage(self,left,right,tree,*,branch=None,merge_head=None,approved=None):
+        self.call('update-ref','refs/heads/'+(branch or self.branch),left)
+        self.call('symbolic-ref','HEAD','refs/heads/'+(branch or self.branch))
+        if approved is not False:self.call('update-ref','refs/remotes/origin/develop',approved or right)
+        self.call('read-tree',tree)
+        if merge_head is not False:
+            with (self.git_dir/'MERGE_HEAD').open('x',encoding='ascii',newline='\n') as stream:
+                stream.write((right if merge_head is None else merge_head)+'\n')
+
+    def check(self,*,branch=None,team='planning',candidate=None):
+        with patch.object(policy,'ROOT',self.repo):
+            return policy.validate_staged_snapshot(branch or self.branch,team,candidate or self.spec)
+
+    def test_pure_develop_merge_into_registered_planning_task_passes(self):
+        left,right=self.divergent();tree,conflicts=self.expected(left,right)
+        self.assertEqual(conflicts,[]);self.stage(left,right,tree)
+        self.assertEqual(self.check(),[])
+
+    def test_pure_develop_merge_into_both_permanent_work_branches_passes(self):
+        for branch in (self.spec['workflow']['server_work_branch'],self.spec['workflow']['presentation_work_branch']):
+            left,right=self.divergent();tree,_=self.expected(left,right)
+            with patch.object(policy,'ROOT',self.repo):
+                self.call('update-ref','refs/heads/'+branch,left)
+                self.call('symbolic-ref','HEAD','refs/heads/'+branch)
+                direct=policy.change_records(left,tree)
+                self.assertEqual(policy.validate_staged(branch,'development',direct,self.spec),[])
+        # Actual MERGE_HEAD/index validation uses one retained merge state per repository.
+        branch=self.spec['workflow']['server_work_branch'];self.stage(left,right,tree,branch=branch)
+        self.assertEqual(self.check(branch=branch,team='development'),[])
+
+    def test_ordinary_planning_runtime_commit_is_still_rejected(self):
+        left,right=self.divergent()
+        self.stage(left,right,right,merge_head=False)
+        self.assertTrue(any('scope' in e for e in self.check()))
+
+    def test_ordinary_owned_system_runtime_commit_remains_allowed(self):
+        left,right=self.divergent();branch=self.spec['workflow']['server_work_branch']
+        tree,_=self.expected(left,right)
+        self.stage(left,right,tree,branch=branch,merge_head=False)
+        self.assertEqual(self.check(branch=branch,team='development'),[])
+
+    def test_forged_merge_parent_is_not_an_approved_develop_tip(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        rogue=self.commit(self.files(**{'src/rogue.py':b'Unapproved code\n'}),(self.base,))
+        self.stage(left,right,tree,merge_head=rogue)
+        self.assertTrue(any('approved develop parent' in e for e in self.check()))
+
+    def test_remote_parent_tip_cannot_be_replaced_by_local_tip(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        self.stage(left,right,tree,approved=self.base);self.call('update-ref','refs/heads/develop',right)
+        self.assertTrue(any('approved develop parent' in e for e in self.check()))
+
+    def test_multiple_merge_parents_fail_closed(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        self.stage(left,right,tree,merge_head=right+'\n'+left)
+        with self.assertRaisesRegex(ValueError,'Exactly one fixed'):self.check()
+
+    def test_symbolic_merge_parent_fails_closed(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        self.stage(left,right,tree,merge_head='refs/remotes/origin/develop')
+        with self.assertRaisesRegex(ValueError,'Exactly one fixed'):self.check()
+
+    def test_main_is_not_a_sync_work_destination(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        self.stage(left,right,tree,branch='main')
+        self.assertTrue(any('main accepts final' in e for e in self.check(branch='main')))
+
+    def test_retired_or_unregistered_branch_cannot_claim_sync(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        self.stage(left,right,tree,branch='feature/not-registered')
+        self.assertTrue(any('Unregistered branch' in e for e in self.check(branch='feature/not-registered')))
+
+    def test_candidate_cannot_reparent_the_trusted_branch_for_sync(self):
+        trusted=deepcopy(self.spec)
+        row=next(r for r in trusted['workflow']['branch_governance']['additional_branches'] if r['name']==self.branch)
+        row['parent']=trusted['workflow']['server_work_branch'];row['pr_target']=row['parent']
+        left=self.commit(self.files(trusted),(self.base,));right=self.commit(self.files(),(self.base,))
+        # The trusted source may conflict in planning metadata, but parent authorization runs first.
+        self.stage(left,right,right)
+        self.assertTrue(any('registered develop child' in e for e in self.check()))
+
+    def test_direct_runtime_edit_hidden_in_clean_merge_is_rejected(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        files=self.tree_files(tree);files['src/jungsi_touch/application/platform.py']=b'Unauthorized direct edit'
+        actual=self.commit(files);self.stage(left,right,actual)
+        self.assertTrue(any('platform.py' in e and 'scope' in e for e in self.check()))
+
+    def test_direct_runtime_edit_on_permanent_sync_also_requires_separate_commit(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        files=self.tree_files(tree);files['src/jungsi_touch/application/platform.py']=b'Additional owned code'
+        actual=self.commit(files);branch=self.spec['workflow']['server_work_branch']
+        self.stage(left,right,actual,branch=branch)
+        self.assertTrue(any('scope' in e for e in self.check(branch=branch,team='development')))
+
+    def test_direct_planning_resolution_is_allowed(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        files=self.tree_files(tree);files['docs/current/resolution.md']=b'Allowed merge note'
+        actual=self.commit(files);self.stage(left,right,actual)
+        self.assertEqual(self.check(),[])
+
+    def test_total_staged_file_removal_is_rejected(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        files=self.tree_files(tree);files.pop('README.md')
+        actual=self.commit(files);self.stage(left,right,actual)
+        self.assertTrue(any('File deletion requires explicit' in e for e in self.check()))
+
+    def test_removal_of_new_incoming_file_is_also_rejected(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        files=self.tree_files(tree);files.pop('src/jungsi_touch/application/platform.py')
+        actual=self.commit(files);self.stage(left,right,actual)
+        self.assertTrue(any('File deletion requires explicit' in e for e in self.check()))
+
+    def conflict_parents(self,path):
+        base=self.commit(self.files(**{path:b'base line\n'}),(self.base,))
+        left=self.commit(self.files(**{path:b'planning side\n'}),(base,))
+        right=self.commit(self.files(**{path:b'incoming side\n','src/incoming.py':b'Approved incoming bytes\n'}),(base,))
+        return left,right
+
+    def test_allowed_planning_conflict_resolution_with_incoming_runtime_passes(self):
+        left,right=self.conflict_parents('docs/current/conflict_note.md')
+        tree,conflicts=self.expected(left,right)
+        self.assertEqual(conflicts,['docs/current/conflict_note.md'])
+        files=self.tree_files(tree);files['docs/current/conflict_note.md']=b'Resolved planning text'
+        actual=self.commit(files);self.stage(left,right,actual)
+        self.assertEqual(self.check(),[])
+
+    def test_actual_service_spec_conflict_can_be_resolved_inside_planning_scope(self):
+        left_spec=deepcopy(self.spec);right_spec=deepcopy(self.spec)
+        left_spec['fixture_note']='planning';right_spec['fixture_note']='develop'
+        left=self.commit(self.files(left_spec),(self.base,))
+        right=self.commit(self.files(right_spec,**{'src/incoming.py':b'Incoming runtime bytes'}),(self.base,))
+        tree,conflicts=self.expected(left,right)
+        self.assertEqual(conflicts,['docs/current/service_spec.json'])
+        files=self.tree_files(tree);resolved=deepcopy(right_spec);resolved['fixture_note']='reviewed resolution'
+        files['docs/current/service_spec.json']=json.dumps(resolved,indent=2).encode()
+        actual=self.commit(files);self.stage(left,right,actual)
+        self.assertEqual(self.check(candidate=resolved),[])
+
+    def test_nonplanning_conflict_cannot_use_the_sync_exemption(self):
+        left,right=self.conflict_parents('src/conflicted.py')
+        self.stage(left,right,right)
+        with self.assertRaisesRegex(ValueError,'outside planning scope'):self.check()
+
+    def test_planning_conflict_does_not_hide_a_direct_runtime_edit(self):
+        left,right=self.conflict_parents('docs/current/conflict_note.md');tree,_=self.expected(left,right)
+        files=self.tree_files(tree);files['docs/current/conflict_note.md']=b'Allowed resolution'
+        files['src/incoming.py']=b'Forbidden code resolution'
+        actual=self.commit(files);self.stage(left,right,actual)
+        self.assertTrue(any('src/incoming.py' in e and 'scope' in e for e in self.check()))
+
+    def test_remaining_conflict_markers_are_rejected(self):
+        left,right=self.conflict_parents('docs/current/conflict_note.md');tree,_=self.expected(left,right)
+        self.stage(left,right,tree)
+        self.assertTrue(any('conflict markers remain' in e for e in self.check()))
+
+    def test_unmerged_index_stages_are_rejected(self):
+        left,right=self.divergent();tree,_=self.expected(left,right);self.stage(left,right,tree)
+        oid=self.call('hash-object','-w','--stdin',input=b'Unresolved planning text').decode()
+        stages=('100644 '+oid+' 2\tdocs/current/unresolved.md\n100644 '+oid+
+                ' 3\tdocs/current/unresolved.md\n').encode()
+        self.call('update-index','--index-info',input=stages)
+        self.assertTrue(any('Unresolved index stages' in e for e in self.check()))
+
+    def test_unrecognized_merge_output_is_rejected(self):
+        fake=subprocess.CompletedProcess([],1,stdout=b'not-an-object\x00unknown\x00',stderr=b'')
+        with patch.object(policy.subprocess,'run',return_value=fake):
+            with self.assertRaisesRegex(ValueError,'Unrecognized automatic'):policy.automatic_merge('a'*40,'b'*40,self.spec)
+
+    def test_planning_conflict_delete_modify_is_not_implicitly_approved(self):
+        base=self.commit(self.files(**{'docs/current/note.md':b'base\n'}),(self.base,))
+        left=self.commit(self.files(**{'docs/current/note.md':b'changed\n'}),(base,))
+        right=self.commit(self.files(),(base,));self.stage(left,right,left)
+        with self.assertRaisesRegex(ValueError,'Deletion or structural'):self.check()
+
+    def test_new_clean_two_parent_push_and_pr_match_staged_result(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        merged=self.call('commit-tree',tree,'-p',left,'-p',right,'-m','Approved retained merge').decode()
+        self.stage(left,right,tree);self.assertEqual(self.check(),[])
+        event={'pull_request':{'head':{'ref':self.branch,'sha':merged,'repo':{'full_name':'synthetic/repo'}},
+            'base':{'ref':'develop','sha':right,'repo':{'full_name':'synthetic/repo'}}}}
+        with patch.object(policy,'ROOT',self.repo):
+            self.assertEqual(policy.validate_push_history(self.branch,left,merged,self.spec),[])
+            self.assertEqual(policy.validate_event('pull_request',event,merged,self.spec),[])
+
+    def test_new_merge_runtime_injection_is_rejected_in_push_and_pr(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        files=self.tree_files(tree);files['src/jungsi_touch/application/platform.py']=b'Injected merge edit'
+        merged=self.commit(files,(left,right))
+        event={'pull_request':{'head':{'ref':self.branch,'sha':merged,'repo':{'full_name':'synthetic/repo'}},
+            'base':{'ref':'develop','sha':right,'repo':{'full_name':'synthetic/repo'}}}}
+        with patch.object(policy,'ROOT',self.repo):
+            self.assertTrue(any('scope' in e for e in policy.validate_push_history(self.branch,left,merged,self.spec)))
+            self.assertTrue(any('scope' in e for e in policy.validate_event('pull_request',event,merged,self.spec)))
+
+    def test_planning_conflict_resolution_matches_push_policy(self):
+        left,right=self.conflict_parents('docs/current/conflict_note.md');tree,_=self.expected(left,right)
+        files=self.tree_files(tree);files['docs/current/conflict_note.md']=b'Accepted planning resolution'
+        merged=self.commit(files,(left,right))
+        with patch.object(policy,'ROOT',self.repo):
+            self.assertEqual(policy.validate_push_history('develop',left,merged,self.spec),[])
+
+    def test_old_merge_history_is_preserved_before_marker_adoption(self):
+        old=deepcopy(self.spec);old['workflow']['branch_governance'].pop('merge_scope_policy')
+        first=self.commit(self.files(old))
+        incoming=self.commit(self.files(old,**{'src/old.py':b'Old merged content'}),(first,))
+        historic=self.commit(self.files(old,**{'src/old.py':b'Historical direct merge resolution'}),(first,incoming))
+        adoption=self.commit(self.files(**{'src/old.py':b'Historical direct merge resolution'}),(historic,))
+        with patch.object(policy,'ROOT',self.repo):
+            self.assertEqual(policy.validate_push_history('develop',first,adoption,self.spec),[])
+
+    def test_removing_adopted_marker_cannot_restore_the_old_merge_exemption(self):
+        left,right=self.divergent();old=deepcopy(self.spec);old['workflow']['branch_governance'].pop('merge_scope_policy')
+        merged=self.commit(self.files(old,**{'src/rogue.py':b'Injected after removing marker'}),(left,right))
+        with patch.object(policy,'ROOT',self.repo):
+            errors=policy.validate_push_history('develop',left,merged,self.spec)
+            self.assertIn('Adopted merge scope policy cannot be removed',errors)
+
+    def test_missing_origin_ref_cannot_be_replaced_by_a_local_parent(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        self.stage(left,right,tree,approved=False);self.call('update-ref','refs/heads/develop',right)
+        with self.assertRaisesRegex(ValueError,'origin/develop parent ref is unavailable'):self.check()
+
+    def test_pure_develop_merge_into_presentation_branch_passes(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        branch=self.spec['workflow']['presentation_work_branch'];self.stage(left,right,tree,branch=branch)
+        self.assertEqual(self.check(branch=branch,team='presentation'),[])
+
+    def test_delete_then_restore_in_new_history_cannot_hide_deletion(self):
+        removed=self.files();removed.pop('README.md')
+        deletion=self.commit(removed,(self.base,))
+        restored=self.commit(self.files(),(deletion,))
+        with patch.object(policy,'ROOT',self.repo):
+            errors=policy.validate_push_history(self.spec['workflow']['server_work_branch'],self.base,restored,self.spec)
+            self.assertIn('File deletion requires explicit user scope: README.md',errors)
+
+    def test_new_octopus_merge_cannot_receive_a_merge_exemption(self):
+        left,right=self.divergent();tree,_=self.expected(left,right)
+        merged=self.call('commit-tree',tree,'-p',left,'-p',right,'-p',self.seed,'-m','Retained octopus fixture').decode()
+        with patch.object(policy,'ROOT',self.repo):
+            self.assertIn('Exactly two merge parents are required',policy.validate_push_history('develop',left,merged,self.spec))
+
+    def test_staged_ordinary_policy_downgrade_is_rejected(self):
+        left,right=self.divergent();old=deepcopy(self.spec);old['workflow']['branch_governance'].pop('merge_scope_policy')
+        staged=self.commit(self.files(old));self.stage(left,right,staged,merge_head=False)
+        self.assertIn('Adopted merge scope policy cannot be removed',self.check(candidate=old))
+
 if __name__=='__main__':unittest.main()

@@ -99,8 +99,9 @@ class SupabaseSessionTests(unittest.TestCase):
 
 
 class FakePgConnection:
-    def __init__(self,*,missing_schema=False,default_zone='UTC',wrong_type=False):
+    def __init__(self,*,missing_schema=False,default_zone='UTC',wrong_type=False,forecast_missing=False,forecast_unversioned=False,forecast_partial=False,forecast_rls=False,forecast_constraint=False,forecast_grant=False):
         self.calls=[];self.missing_schema=missing_schema;self.default_zone=default_zone;self.utc=False;self.row=None;self.rows=[];self.wrong_type=wrong_type
+        self.forecast_missing=forecast_missing;self.forecast_unversioned=forecast_unversioned;self.forecast_partial=forecast_partial;self.forecast_rls=forecast_rls;self.forecast_constraint=forecast_constraint;self.forecast_grant=forecast_grant
     def __enter__(self):return self
     def __exit__(self,*args):return False
     def execute(self,query,params=None):
@@ -108,9 +109,21 @@ class FakePgConnection:
         if query.startswith('SET LOCAL'):self.utc=True;self.row=None
         elif query=='SHOW TIMEZONE':self.row=('UTC' if self.utc else self.default_zone,)
         elif query.startswith('SELECT %s::timestamptz'):self.row=params
-        elif 'to_regclass' in query:self.row=(None,)*8 if self.missing_schema else ('synthetic_table',)*8
-        elif 'schema_versions' in query:self.row=(True,)
+        elif 'to_regclass' in query:self.row=(None,)*query.count('to_regclass') if self.missing_schema or (self.forecast_missing and 'forecast_' in query) else ('synthetic_table',)*query.count('to_regclass')
+        elif 'schema_versions' in query:self.row=(not (self.forecast_unversioned and '002_forecast_policy' in query),)
         elif 'entitlements' in query:self.row=(False,)
+        elif 'information_schema.columns' in query and 'is_nullable' in query:
+            from jungsi_touch.infrastructure.forecast_schema import COLUMN_TYPES
+            self.rows=[(t,col,'timestamp' if self.forecast_partial and (t,col)==('forecast_releases','published_at') else kind,'NO') for (t,col),kind in COLUMN_TYPES.items()]
+        elif 'pg_get_constraintdef' in query:
+            from jungsi_touch.infrastructure.forecast_schema import CONSTRAINTS
+            self.rows=[(t,kind,definition) for (t,kind),definition in CONSTRAINTS.items() if not (self.forecast_constraint and (t,kind)==('forecast_revisions','f'))]
+        elif 'relrowsecurity' in query:
+            from jungsi_touch.infrastructure.forecast_schema import TABLES
+            self.rows=[(t,not(self.forecast_rls and t=='forecast_drafts')) for t in TABLES]
+        elif 'has_table_privilege' in query:
+            from jungsi_touch.infrastructure.forecast_schema import TABLES
+            self.rows=[(t,role,self.forecast_grant and t=='forecast_drafts' and role=='authenticated') for t in TABLES for role in ('anon','authenticated')]
         elif 'information_schema.columns' in query:self.rows=[(t,col,'timestamp' if self.wrong_type and (t,col)==('profiles','created_at') else kind) for (t,col),kind in EXPECTED_COLUMN_TYPES.items()]
         else:self.row=None
         return self
@@ -145,6 +158,22 @@ class PostgreSQLContractTests(unittest.TestCase):
         repo,connection,calls=self.connector(wrong_type=True);result=repo.probe()
         self.assertEqual(result['storage_schema'],'verified');self.assertEqual(result['status'],'failed')
         self.assertEqual(result['type_mismatches'],{'profiles.created_at':'timestamp'})
+    def test_missing_partial_or_unsafe_forecast_schema_blocks_readiness(self):
+        for flag in ('forecast_missing','forecast_unversioned','forecast_partial','forecast_rls','forecast_constraint','forecast_grant'):
+            with self.subTest(flag=flag):
+                repo,connection,calls=self.connector(**{flag:True});result=repo.probe()
+                self.assertEqual(result['status'],'failed');self.assertEqual(result['forecast_schema']['status'],'failed')
+                self.assertEqual(result['storage_schema'],'verified')
+                self.assertFalse(any(q.startswith(('INSERT','UPDATE','DELETE','DROP','ALTER','CREATE')) for q,p in connection.calls))
+    def test_forecast_migration_is_additive_and_matches_the_required_security_shape(self):
+        from jungsi_touch.infrastructure.forecast_schema import TABLES
+        sql=(ROOT/'database/migrations/002_forecast_policy.sql').read_text(encoding='utf-8')
+        self.assertNotRegex(sql,r'(?im)^\s*(DROP|DELETE|TRUNCATE)\b')
+        for table in TABLES:
+            self.assertIn('CREATE TABLE IF NOT EXISTS jungsi_backend.'+table,sql)
+            self.assertIn('ALTER TABLE jungsi_backend.'+table+' ENABLE ROW LEVEL SECURITY',sql)
+        self.assertIn('CHECK(revision>0)',sql);self.assertIn('REFERENCES jungsi_backend.forecast_drafts(draft_id)',sql)
+        self.assertIn('FROM PUBLIC,anon,authenticated',sql);self.assertIn("'002_forecast_policy'",sql)
     def test_entitlement_query_uses_server_owner_and_utc_expiry(self):
         repo,connection,calls=self.connector();clock=FrozenClock()
         self.assertFalse(repo.active_paid('SYNTHETIC-owner',clock.now()))

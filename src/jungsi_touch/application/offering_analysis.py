@@ -83,6 +83,7 @@ def evaluate_offering(offering, profile, overall, bundle, *, conversion=None, pe
     except (KeyError,TypeError,AttributeError,ValueError):result=blocked(offering['offering_id'],'analysis_release_invalid')
     if conversion is not None:
         result['conversion']=conversion.dto()
+        result['recommendation_reasons']=(deepcopy(list(conversion.explanations)) if conversion.ready else [])+result.get('recommendation_reasons',[])
         if conversion.ready:
             result['converted_score']=conversion.converted_score
             result['versions'].update(rule=conversion.rule_version,conversion=conversion.release_version)
@@ -225,6 +226,9 @@ def _evaluate_offering(offering, profile, overall, bundle, conversion, percentil
             delta=base_percent-Fraction(exact['numerator'],exact['denominator'])*100
             result['advantage']=dict(delta_pp=display(delta), status='favorable' if delta>0 else 'unfavorable' if delta<0 else 'neutral',
                                      baseline_version=baseline['version'])
+            code='converted_score_position_gain' if delta>0 else 'converted_score_position_loss' if delta<0 else 'converted_score_position_equal'
+            text='같은 시험·모집단·동점 기준의 총점 위치와 비교하면 대학 환산 위치가 '+('더 앞섭니다.' if delta>0 else '더 뒤입니다.' if delta<0 else '같습니다.')
+            result['recommendation_reasons']=[dict(code=code,text=text,evidence_refs=[baseline['version'],metadata['curve_version']])]
         return result
     except (ResultPercentileError, EquatingError, ConversionError) as error:
         result['reason_code']=error.code; return result

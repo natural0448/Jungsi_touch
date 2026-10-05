@@ -16,9 +16,12 @@ from .settings import ServerSettings, UnavailableRepository
 from .supabase_session import SupabaseSessionProvider
 from .postgres_repository import PostgresRepository
 from .drive_provider import DriveClient, DriveDataProvider, MissingDataProvider
+from ..application.forecast_policy import ForecastPolicyService
+from .postgres_forecast_repository import PostgresForecastRepository
+from .forecast_inputs import DriveForecastInputProvider
 
 
-def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=None):
+def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None):
     settings=settings or ServerSettings.from_environment()
     clock=clock or UtcClock()
     if repository is None: repository=PostgresRepository(settings.database_url) if settings.database_url else UnavailableRepository()
@@ -28,7 +31,11 @@ def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=Non
         else:data=MissingDataProvider()
     sessions=sessions or SupabaseSessionProvider(settings.supabase_url,settings.supabase_key)
     auth=SessionService(sessions,repository,clock)
-    service=PlatformService(repository,data,clock)
+    forecast_store=forecast_repository or (PostgresForecastRepository(repository) if isinstance(repository,PostgresRepository) else None)
+    service=PlatformService(repository,data,clock,forecast_repository=forecast_store)
+    forecasts=ForecastPolicyService(forecast_store or UnavailableRepository(),forecast_inputs or DriveForecastInputProvider(data),clock)
+    service.forecast_service=forecasts
+    service.session_service=auth
     app=FastAPI(title='Jungsi Touch Backend',version='1.2.0',docs_url=None,redoc_url=None,openapi_url=None,debug=False)
 
     @app.middleware('http')
@@ -72,8 +79,11 @@ def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=Non
 
     def handler(operation):
         async def endpoint(request:Request,actor=Depends(verified_actor)):
-            access=await run_in_threadpool(service.access.operation_access,operation,actor,report_id=request.path_params.get('report_id'))
-            if not access.allowed:raise PlatformError(access.status,access.http_status)
+            if operation.startswith('forecast.'):
+                await run_in_threadpool(forecasts.preauthorize,operation,actor,dict(request.path_params))
+            elif operation!='session.read':
+                access=await run_in_threadpool(service.access.operation_access,operation,actor,report_id=request.path_params.get('report_id'))
+                if not access.allowed:raise PlatformError(access.status,access.http_status)
             body=None
             if request.method in ('POST','PUT'):
                 length=request.headers.get('content-length')
@@ -95,6 +105,7 @@ def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=Non
     for operation in operations:
         app.add_api_route(operation['path'],handler(operation['id']),methods=[operation['method']],
                           operation_id=operation['id'].replace('.','_'),openapi_extra={'x-jungsi-operation':operation['id']})
+    app.state.forecasts=forecasts
     app.state.platform=service
     writer=DriveClient(settings.drive_token,settings.drive_input_folder,settings.drive_output_folder) if settings.drive_token and settings.drive_output_folder else None
     app.state.publication=ReportPublicationService(service,writer)

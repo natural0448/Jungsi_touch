@@ -57,6 +57,15 @@ class BackendWorkflowTests(unittest.TestCase):
         updated=self.candidates(record)
         self.assertEqual(updated['analyses']['SYNTHETIC-A-2027']['reason_code'],'decision_evidence_unapproved')
 
+    def test_advantage_reason_requires_verified_comparable_total_position(self):
+        result=self.candidates(self.report())['analyses']['SYNTHETIC-A-2027']
+        self.assertIsNotNone(result['advantage'])
+        code={'favorable':'converted_score_position_gain','unfavorable':'converted_score_position_loss','neutral':'converted_score_position_equal'}[result['advantage']['status']]
+        self.assertEqual([r['code'] for r in result['recommendation_reasons'] if r['code'].startswith('converted_score_position_')],[code])
+        bundle=self.data.bundles['SYNTHETIC-A-2027'];bundle.decisions[2027]['baseline']['population_id']='SYNTHETIC-other-population'
+        result=self.candidates(self.report())['analyses']['SYNTHETIC-A-2027']
+        self.assertIsNone(result['advantage']);self.assertFalse(any(r['code'].startswith('converted_score_position_') for r in result['recommendation_reasons']))
+
     def test_unpublished_forecast_is_null_without_changing_approved_range(self):
         self.data.bundles['SYNTHETIC-A-2027'].decisions[2027]['evidence']['forecast_70']=None
         result=self.candidates(self.report())['analyses']['SYNTHETIC-A-2027']
@@ -87,12 +96,14 @@ class BackendWorkflowTests(unittest.TestCase):
         self.assertEqual(len(calls),2)
         with self.assertRaises(PlatformError):ReportPublicationService(self.app.state.platform,None).publish(actor,record['report_id'],'SYNTHETIC-write')
 
-    def test_all_twelve_routes_authenticate_before_parsing_or_lookup(self):
+    def test_all_contract_routes_authenticate_before_parsing_or_lookup(self):
         catalog=json.loads((ROOT/'src/jungsi_touch/application/route_catalog.json').read_text(encoding='utf-8'))
-        self.assertEqual(len(catalog['operations']),12)
+        spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        self.assertEqual(len(catalog['operations']),len(spec['operations']))
+        self.assertEqual({o['id'] for o in catalog['operations']},{o['id'] for o in spec['operations']})
         for operation in catalog['operations']:
             with self.subTest(operation=operation['id']):
-                path=operation['path'].replace('{report_id}','SYNTHETIC-missing').replace('{offering_id}','SYNTHETIC-A-2027')
+                path=operation['path'].replace('{report_id}','SYNTHETIC-missing').replace('{offering_id}','SYNTHETIC-A-2027').replace('{draft_id}','SYNTHETIC-missing')
                 result=self.client.request(operation['method'],path,content=b'{bad json')
                 self.assertEqual(result.status_code,401,result.text)
                 self.assertEqual(result.json()['error']['code'],'authentication_required')
