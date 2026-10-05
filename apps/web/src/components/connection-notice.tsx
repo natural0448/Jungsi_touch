@@ -19,7 +19,13 @@ export function ConnectionNotice({ e }: { e: ConnectionError }) {
         </p>
         {missing.length > 0 && (
           <p className="conn-missing">
-            빠진 설정: {missing.map((m) => <code key={m}>{m}</code>)}
+            빠진 설정:{" "}
+            {missing.map((m, i) => (
+              <span key={m}>
+                {i > 0 && " · "}
+                <code>{m}</code>
+              </span>
+            ))}
           </p>
         )}
         <p className="conn-code">

@@ -177,4 +177,4 @@ Supabase 최소 GET 준비 검수는 아래 읽기 증거로 확인했다. 실�
 
 Supabase 최소 GET 준비 검수: Auth settings/JWKS 200, 사용자토큰없는getUser401, server secret의RESTmetadata200, jungsi_backend schema요청401/406으로직접노출거부. 실제관리자계정·회원로그인·이용권·DB/Drive는미검증이며DB접속설정은추후제공예정이다. 기존외부API의me DTO와jeongsi namespace뼈대는우리22 API계약과다르므로주소를자동채택하지않는다. PR5는2026-10-05 중복제안closed이며head/ref와원본은보존했고동적22경로제목·정식session검사를계승했다.
 
-<!-- jungsi:generated spec_sha256=7dce9af3727251b506c64915cf25b5ed4130b9ea2508e85b5997d7eaa1c53f36 -->
+<!-- jungsi:generated spec_sha256=2a29d2291b45ecff619faabf1683d693a0fe23c6449c450e6bc063e4086fdab3 -->

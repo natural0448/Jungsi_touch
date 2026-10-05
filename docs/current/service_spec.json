@@ -2871,6 +2871,13 @@
         "REQ-20"
       ],
       "summary": "프레젠테이션 배포: 정시터치 최종 관리자(사용자) 결정으로 apps/web 을 에듀터치 본체가 /jeongsi 를 넘기는 기존 Cloudflare 워커 jeongsi-touch 에 배포해 예전 시안 앱을 교체한다(본체 설정은 그대로, 본체는 지금 관리자에게만 넘긴다). 연결 방식은 live 이고 운영 API 주소·Supabase 설정을 아직 받지 않아 화면은 '연결 설정 대기'를 보인다. 되돌릴 때는 wrangler rollback 으로 이전 판을 다시 올린다. 운영 주소가 오면 JUNGSI_API_URL·NEXT_PUBLIC_SUPABASE_URL·NEXT_PUBLIC_SUPABASE_ANON_KEY 를 넣어 다시 배포한다."
+    },
+    {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-20"
+      ],
+      "summary": "프레젠테이션: 배포 화면에서 연결 대기 안내의 빠진 설정 이름이 붙어 보이던 것을 구분 기호와 글자 상자로 나눴다."
     }
   ],
   "overall_analysis_contract": {
