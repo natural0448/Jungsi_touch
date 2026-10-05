@@ -87,12 +87,14 @@ class BackendWorkflowTests(unittest.TestCase):
         self.assertEqual(len(calls),2)
         with self.assertRaises(PlatformError):ReportPublicationService(self.app.state.platform,None).publish(actor,record['report_id'],'SYNTHETIC-write')
 
-    def test_all_twelve_routes_authenticate_before_parsing_or_lookup(self):
+    def test_all_contract_routes_authenticate_before_parsing_or_lookup(self):
         catalog=json.loads((ROOT/'src/jungsi_touch/application/route_catalog.json').read_text(encoding='utf-8'))
-        self.assertEqual(len(catalog['operations']),12)
+        spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        self.assertEqual(len(catalog['operations']),len(spec['operations']))
+        self.assertEqual({o['id'] for o in catalog['operations']},{o['id'] for o in spec['operations']})
         for operation in catalog['operations']:
             with self.subTest(operation=operation['id']):
-                path=operation['path'].replace('{report_id}','SYNTHETIC-missing').replace('{offering_id}','SYNTHETIC-A-2027')
+                path=operation['path'].replace('{report_id}','SYNTHETIC-missing').replace('{offering_id}','SYNTHETIC-A-2027').replace('{draft_id}','SYNTHETIC-missing')
                 result=self.client.request(operation['method'],path,content=b'{bad json')
                 self.assertEqual(result.status_code,401,result.text)
                 self.assertEqual(result.json()['error']['code'],'authentication_required')

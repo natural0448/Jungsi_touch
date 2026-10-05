@@ -399,6 +399,30 @@ def generated_files(spec):
         files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
     if spec.get("repository_layout"):
         files[spec["current_documents"]["folder_structure"]]=doc("프로젝트 폴더 구조와 작업 위치",repository_layout_text(spec))
+    # Shared analysis-connection/forecast contracts keep documents and routes atomic.
+    for key,title in (("forecast_policy","학과별 예상 기준 산출과 관리"),("presentation_connection","성적 분석 화면과 실제 세션 연결")):
+        contract=spec.get(key+"_contract")
+        if not contract: continue
+        body="현재 상태: "+contract["code_status"]+"\n\n"
+        body+="[작업 항목](../../"+contract["work_item"]+")\n\n"
+        for name,value in contract.items():
+            if name in {"format","version","code_status","work_item"}: continue
+            body+="### "+name+"\n\n"
+            if isinstance(value,list): body+="\n".join("- "+str(item) for item in value)+"\n\n"
+            elif isinstance(value,dict): body+=json.dumps(value,ensure_ascii=False,indent=2)+"\n\n"
+            else: body+=str(value)+"\n\n"
+        files[spec["current_documents"][key]]=doc(title,body)
+        for path in (spec["current_documents"]["planning"],spec["current_documents"]["routing"],spec["current_documents"]["architecture"]):
+            files[path]+="\n## "+title+"\n\n"+body
+        frontend[key+"_contract"]=contract
+        backend[key+"_contract"]=contract
+    if spec.get("management_pages"):
+        frontend["management_pages"]=spec["management_pages"]
+        backend["management_pages"]=spec["management_pages"]
+        for path in (spec["current_documents"]["planning"],spec["current_documents"]["routing"]):
+            files[path]+="\n## 관리 화면\n\n"+table(["화면","경로","서버 capability","설명"],[[r["label"],r["path"],", ".join(r["capabilities"]),r["purpose"]] for r in spec["management_pages"]])
+    files["apps/web/route_catalog.json"]=json.dumps(frontend,ensure_ascii=False,indent=2)+"\n"
+    files["src/jungsi_touch/application/route_catalog.json"]=json.dumps(backend,ensure_ascii=False,indent=2)+"\n"
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_spec(spec):
@@ -411,15 +435,25 @@ def validate_spec(spec):
     if len({o["id"] for o in ops})!=len(ops):errors.append("Duplicate operation ID")
     if len({(o["method"],o["path"]) for o in ops})!=len(ops):errors.append("Duplicate API method/path")
     operation_ids={o["id"] for o in ops}
-    for row in pages+ops+spec["implementation"]:
+    for row in pages+spec.get("management_pages",[])+ops+spec["implementation"]:
         if not set(row["requirements"])<=requirements:errors.append("Unknown requirement reference")
-    for row in pages:
+    for row in pages+spec.get("management_pages",[]):
         if not set(row["operations"])<=operation_ids:errors.append("Unknown page operation")
     if len(pages)>=4:
         if pages[0]["member_tiers"]!=["standard","paid"]:errors.append("Page1 member policy drift")
         if pages[2]["member_tiers"]!=["paid"] or pages[3]["member_tiers"]!=["paid"]:errors.append("Paid page policy drift")
         if pages[2]["score_required_to_browse"]:errors.append("Paid catalog must allow browsing without scores")
         if pages[3].get("desktop_columns")!=[2,1]:errors.append("Page4 two-to-one layout drift")
+    management=spec.get("management_pages",[])
+    if len({p["path"] for p in pages+management})!=len(pages+management): errors.append("Duplicate management page path")
+    for row in management:
+        if not row.get("capabilities") or not set(row["capabilities"])<={"editor","approver"}: errors.append("Management capability required")
+    for row in ops:
+        if row["id"].startswith("forecast.") and row["method"]=="POST" and not row["http_contract"]["idempotency_key_required"]:
+            errors.append("Forecast writes require idempotency")
+        if row["id"] in {"forecast.approve","forecast.publish"} and row.get("operator_capabilities")!=["approver"]:
+            errors.append("Forecast approval capability drift")
+        if row["id"]=="forecast.published.read" and row["member_tiers"]!=["paid"]: errors.append("Forecast public analysis is paid")
     for row in ops:
         if not row["member_tiers"] or not set(row["member_tiers"])<={"standard","paid"}:errors.append("Invalid member tiers")
         if row["confirmed_score_profile"] and not row["report_owner"]:errors.append("Confirmed analysis needs report ownership")

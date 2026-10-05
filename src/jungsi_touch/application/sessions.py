@@ -24,3 +24,15 @@ class SessionService:
         if type(paid) is not bool:
             raise PlatformError('entitlement_unavailable', 503)
         return Actor(session.subject_id, paid)
+
+    def read(self, actor):
+        if actor.subject_id is None: raise PlatformError('authentication_required',401)
+        if not actor.paid_active:
+            return dict(format='jungsi.session/v1',member_tier='standard',entitlement_expires_at=None)
+        method=getattr(self.entitlements,'active_paid_until',None)
+        if method is None: raise PlatformError('entitlement_unavailable',503)
+        until=method(actor.subject_id,utc_instant(self.clock.now()))
+        if until is None or utc_instant(until)<=utc_instant(self.clock.now()):
+            raise PlatformError('entitlement_unavailable',503)
+        from .time_contract import utc_text
+        return dict(format='jungsi.session/v1',member_tier='paid',entitlement_expires_at=utc_text(utc_instant(until)))

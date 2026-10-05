@@ -122,6 +122,11 @@ class PostgresRepository:
             row=c.execute('SELECT EXISTS(SELECT 1 FROM jungsi_backend.entitlements WHERE owner_id=%s AND active=true AND starts_at<=%s AND expires_at>%s)',(owner,utc_instant(now),utc_instant(now))).fetchone()
             return bool(row[0])
 
+    def active_paid_until(self,owner,now):
+        with self.transaction() as c:
+            row=c.execute('SELECT max(expires_at) FROM jungsi_backend.entitlements WHERE owner_id=%s AND active=true AND starts_at<=%s AND expires_at>%s',(owner,utc_instant(now),utc_instant(now))).fetchone()
+            return row[0] if row else None
+
     def active_reports(self):
         with self.transaction() as c:
             rows=c.execute('SELECT r.report_id,r.owner_id,v.profile_id,r.revision,v.body,v.created_at FROM jungsi_backend.reports r JOIN jungsi_backend.report_revisions v ON (r.report_id,r.revision)=(v.report_id,v.revision)').fetchall()

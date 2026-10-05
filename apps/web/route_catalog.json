@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.6.3",
-  "source_sha256": "9c224062aa7b953641e51691a21aadd9b57e3678ca5643bd7ce98d79397b9add",
+  "spec_version": "1.7.0",
+  "source_sha256": "824390686ae071bae1525a9f4915573b59cf07fd5bd48fa05c6945325ebca88b",
   "pages": [
     {
       "id": "PAGE-01",
@@ -528,6 +528,277 @@
         "idempotency_key_required": false,
         "response_schema": "statistics"
       }
+    },
+    {
+      "id": "session.read",
+      "method": "GET",
+      "path": "/api/v1/me",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-20"
+      ],
+      "response_scope": "본인 현재 활성 회원 상태",
+      "implementation_status": "approved_contract_implementation_in_progress",
+      "contract_ref": "backend_platform_contract.dto_schemas.session",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "session",
+        "response_schema": "session",
+        "idempotency_key_required": false
+      }
+    },
+    {
+      "id": "forecast.capabilities",
+      "method": "GET",
+      "path": "/api/v1/forecast-capabilities",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-21"
+      ],
+      "response_scope": "본인 관리 capability와 학교 범위",
+      "implementation_status": "approved_contract_implementation_in_progress",
+      "contract_ref": "backend_platform_contract.dto_schemas.forecast_capabilities",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "forecast_capabilities",
+        "response_schema": "forecast_capabilities",
+        "idempotency_key_required": false
+      }
+    },
+    {
+      "id": "forecast.list",
+      "method": "GET",
+      "path": "/api/v1/forecast-drafts",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-21"
+      ],
+      "response_scope": "허용 학교의 관리 draft 목록",
+      "implementation_status": "approved_contract_implementation_in_progress",
+      "contract_ref": "backend_platform_contract.dto_schemas.forecast_list",
+      "http_contract": {
+        "body": [],
+        "query": [
+          "university_id (선택)"
+        ],
+        "response": "forecast_list",
+        "response_schema": "forecast_list",
+        "idempotency_key_required": false
+      }
+    },
+    {
+      "id": "forecast.create",
+      "method": "POST",
+      "path": "/api/v1/offerings/{offering_id}/forecast-drafts",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-21"
+      ],
+      "response_scope": "서버 승인 자료·정책 ID 기반 모집행 draft 생성",
+      "implementation_status": "approved_contract_implementation_in_progress",
+      "contract_ref": "backend_platform_contract.dto_schemas.forecast_draft",
+      "http_contract": {
+        "body": [
+          "input_id",
+          "input_version",
+          "policy_id",
+          "policy_version"
+        ],
+        "query": [],
+        "response": "forecast_draft",
+        "response_schema": "forecast_draft",
+        "idempotency_key_required": true
+      }
+    },
+    {
+      "id": "forecast.read",
+      "method": "GET",
+      "path": "/api/v1/forecast-drafts/{draft_id}",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-21"
+      ],
+      "response_scope": "허용 학교의 draft와 revision/근거",
+      "implementation_status": "approved_contract_implementation_in_progress",
+      "contract_ref": "backend_platform_contract.dto_schemas.forecast_draft",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "forecast_draft",
+        "response_schema": "forecast_draft",
+        "idempotency_key_required": false
+      }
+    },
+    {
+      "id": "forecast.adjust",
+      "method": "POST",
+      "path": "/api/v1/forecast-drafts/{draft_id}/adjustments",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-21"
+      ],
+      "response_scope": "기본값 보존과 새 조정 revision",
+      "implementation_status": "approved_contract_implementation_in_progress",
+      "contract_ref": "backend_platform_contract.dto_schemas.forecast_draft",
+      "http_contract": {
+        "body": [
+          "expected_revision",
+          "base_result_hash",
+          "policy_version",
+          "target: forecast_70|acceptance_range|category_ranges",
+          "replacement: 승인 정책이 허용한 동일 단위의 명시적 대체값",
+          "reason",
+          "evidence_refs: 서버 검증 ID 목록"
+        ],
+        "query": [],
+        "response": "forecast_draft",
+        "response_schema": "forecast_draft",
+        "idempotency_key_required": true
+      }
+    },
+    {
+      "id": "forecast.validate",
+      "method": "POST",
+      "path": "/api/v1/forecast-drafts/{draft_id}/validations",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-21"
+      ],
+      "response_scope": "정확한 revision의 검증 영수증",
+      "implementation_status": "approved_contract_implementation_in_progress",
+      "contract_ref": "backend_platform_contract.dto_schemas.forecast_draft",
+      "http_contract": {
+        "body": [
+          "expected_revision",
+          "base_result_hash",
+          "policy_version"
+        ],
+        "query": [],
+        "response": "forecast_draft",
+        "response_schema": "forecast_draft",
+        "idempotency_key_required": true
+      }
+    },
+    {
+      "id": "forecast.approve",
+      "method": "POST",
+      "path": "/api/v1/forecast-drafts/{draft_id}/approvals",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-21"
+      ],
+      "response_scope": "검증된 정확한 revision 승인",
+      "implementation_status": "approved_contract_implementation_in_progress",
+      "contract_ref": "backend_platform_contract.dto_schemas.forecast_draft",
+      "http_contract": {
+        "body": [
+          "expected_revision",
+          "base_result_hash",
+          "policy_version",
+          "validation_receipt_hash",
+          "reason"
+        ],
+        "query": [],
+        "response": "forecast_draft",
+        "response_schema": "forecast_draft",
+        "idempotency_key_required": true
+      }
+    },
+    {
+      "id": "forecast.publish",
+      "method": "POST",
+      "path": "/api/v1/forecast-drafts/{draft_id}/publications",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-21",
+        "REQ-22"
+      ],
+      "response_scope": "승인 revision의 새 불변 발행",
+      "implementation_status": "approved_contract_implementation_in_progress",
+      "contract_ref": "backend_platform_contract.dto_schemas.forecast_draft",
+      "http_contract": {
+        "body": [
+          "expected_revision",
+          "base_result_hash",
+          "policy_version",
+          "approval_receipt_hash"
+        ],
+        "query": [],
+        "response": "forecast_draft",
+        "response_schema": "forecast_draft",
+        "idempotency_key_required": true
+      }
+    },
+    {
+      "id": "forecast.published.read",
+      "method": "GET",
+      "path": "/api/v1/offerings/{offering_id}/forecast",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-21",
+        "REQ-22"
+      ],
+      "response_scope": "발행된 학과 기준과 공개 판단 근거",
+      "implementation_status": "approved_contract_implementation_in_progress",
+      "contract_ref": "backend_platform_contract.dto_schemas.forecast_public",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "forecast_public",
+        "response_schema": "forecast_public",
+        "idempotency_key_required": false
+      }
     }
   ],
   "backend_contract": {
@@ -721,7 +992,8 @@
           "decision_components",
           "decision_evidence",
           "conversion",
-          "percentile"
+          "percentile",
+          "recommendation_reasons"
         ],
         "nested": {
           "years": [
@@ -748,7 +1020,12 @@
             "version",
             "historical_metrics",
             "forecast_70",
-            "expected_acceptance_range"
+            "expected_acceptance_range",
+            "forecast_release_version",
+            "basis_summary",
+            "issue_summaries",
+            "recommendation_reasons",
+            "adjustment_summary"
           ],
           "conversion": [
             "status",
@@ -786,6 +1063,11 @@
             "profile_version",
             "pack_version",
             "population_scope"
+          ],
+          "recommendation_reasons": [
+            "code",
+            "text",
+            "evidence_refs"
           ]
         },
         "rules": [
@@ -893,6 +1175,81 @@
         "rules": [
           "offering은 모집행 기본 DTO다. 개인 환산/지원 판단은 report.analyses로 구분한다.",
           "미발행 자료는 status=pending/offering=null이다. 검증된 카탈로그에 없는 ID는 404다."
+        ]
+      },
+      "session": {
+        "format": "jungsi.session/v1",
+        "fields": [
+          "format",
+          "member_tier",
+          "entitlement_expires_at"
+        ],
+        "rules": [
+          "본인 검증 신원과 서버 활성 이용권만 사용한다. 활성 이용권은 starts_at<=now<expires_at이며 status=active와 정시 서비스 product를 만족한다. 복수 활성 권한은 가장 늦은 만료를 UTC Z로 반환한다.",
+          "일반 회원 만료는 null. 인증 또는 저장소 장애는 503이며 일반 회원으로 자동 강등하지 않는다. 사용자 ID·등급·역할·JWT·결제 내역을 요청/응답에 포함하지 않는다."
+        ]
+      },
+      "forecast_capabilities": {
+        "format": "jungsi.forecast-capabilities/v1",
+        "fields": [
+          "format",
+          "capabilities",
+          "university_ids"
+        ],
+        "rules": [
+          "서버 관리 권한 포트에서 editor/approver와 허용 학교 ID를 조회한다. 회원 등급과 독립이다. 미허용 사용자는 빈 capability이며 관리 draft 접근은 403/404로 차단한다."
+        ]
+      },
+      "forecast_draft": {
+        "format": "jungsi.forecast-draft/v1",
+        "fields": [
+          "format",
+          "draft_id",
+          "offering_id",
+          "revision",
+          "status",
+          "base_result_hash",
+          "policy_version",
+          "result",
+          "adjustments",
+          "validation",
+          "approval",
+          "audit_events"
+        ],
+        "rules": [
+          "허용 학교의 관리 사용자만 조회한다. 기본·조정·채택 결과, immutable revision, 근거/출처/정책/보정 버전, 작성/검증/승인/발행 이력을 보존한다.",
+          "검증과 승인 영수증은 정확한 revision과 채택값 hash에 결속한다. 조정은 새 revision을 만들고 이전 검증/승인을 승계하지 않는다."
+        ]
+      },
+      "forecast_list": {
+        "format": "jungsi.forecast-list/v1",
+        "fields": [
+          "format",
+          "items"
+        ],
+        "rules": [
+          "허용 학교만 조회한다. 목록은 실제 draft가 없을 때 []이며 저장소 장애는 503이다. 페이지/limit 계약은 후속 대규모 운영 검증에서 확장한다."
+        ]
+      },
+      "forecast_public": {
+        "format": "jungsi.forecast-public/v1",
+        "fields": [
+          "format",
+          "status",
+          "reason_code",
+          "offering_id",
+          "release_version",
+          "forecast_70",
+          "expected_acceptance_range",
+          "category_ranges",
+          "basis_summary",
+          "issue_summaries",
+          "recommendation_reasons",
+          "adjustment_summary"
+        ],
+        "rules": [
+          "발행된 정확한 모집행/시험/규칙/곡선/정책 버전만 공개한다. 미발행은 pending/null과 사유이다. 내부 원자료·가중치·trace·담당자 ID와 내부 감사 기록은 제외한다.",
+          "이 조회는 대학 유료 분석의 근거 조회이며 실제 지원자 확률이나 최저 합격점으로 표시하지 않는다."
         ]
       }
     },
@@ -1043,5 +1400,154 @@
       "운영 프레젠테이션은 별도 feature/presentation-foundation 담당이며 화면에서 추정·환산 엔진 또는 비공개 데이터/DB에 직접 접근하지 않는다.",
       "전체 국수탐2 집단과 대학 산식의 필수 성적 보유 집단을 population_scope로 구분한다. 분모/시험/학년도/동점 기준이 달라지면 전체 누백과 대학 누백의 환산 유불리 비교는 보류한다."
     ]
-  }
+  },
+  "forecast_policy_contract": {
+    "format": "jungsi.forecast-policy-contract/v1",
+    "version": "1.0",
+    "code_status": "approved_for_implementation",
+    "requirements": [
+      "REQ-21",
+      "REQ-22"
+    ],
+    "work_item": "docs/work_items/DEV-007-forecast-policy.json",
+    "placement": "계산은 src/jungsi_touch/forecasting.py, 업무·포트는 application, SQL/Drive/JSON 어댑터는 infrastructure와 database. 화면은 우리 HTTP API만 호출한다.",
+    "atomic_unit": "학년도·대학·캠퍼스·모집단위·전형·모집군이 결속된 offering_id. 학교는 필터·권한 범위이며 학과로 동일 판단을 복사하지 않는다.",
+    "input_rules": [
+      "서버 승인 입력·정책 ID와 version을 결속한다. 클라이언트에서 원자료·원점수·모형 상태·작성자·승인자·회원 역할을 신뢰하지 않는다.",
+      "2024~2026 동일 입결 지표의 원값과 비교값을 분리한다. 동일 지표 정의·단위·공통 척도·모집단과 승인된 4개년 모집행 연결/연도 변환 영수증이 필요하다.",
+      "대학 환산 원점수와 표준점수를 연도 간 직접 회귀하지 않는다. 70%컷 한 점을 학생용 과목 보정 함수에 넣지 않는다.",
+      "예상70%와 판단용 합격권은 각각 별도의 승인 근거/자료 요건이다. 한쪽 미준비 시 준비된 결과를 유지한다. 70%만으로 최저점·합격확률을 생성하지 않는다.",
+      "각 정책의 min_years, 허용 비교 척도, 출력 단위/범위/표시 정밀도, 기준/폭/가중치와 검산 근거를 명시한다. 합성 수치를 운영 기본값으로 사용하지 않는다.",
+      "올해 모집/반영 변화는 사실과 상담 가설, 근거, 중복 관련 이슈를 구분한다. 수치 효과가 미확인인 이슈는 null이며 임의 +점/%p로 적용하지 않는다."
+    ],
+    "calculation_methods": [
+      "latest_comparable",
+      "weighted_mean",
+      "linear_trend"
+    ],
+    "method_rules": [
+      "정확한 유리수 계산 후 정책 지정 위치에서만 표시 반올림한다. 연도와 가중치 정합/합계, 연속성, 최소 자료 수를 검사한다.",
+      "linear_trend는 승인된 공통 척도 비교값의 연도별 최소제곱 추세다. 적용 여부/추세 상한/대상 연도는 명시 정책이며 회귀 오차를 합격확률이나 95% 신뢰구간으로 명명하지 않는다.",
+      "판단용 구간은 별도 calibration 근거와 정책에서 생성하며 경계 [lower,upper), 비중복, 허용 category를 검증한다. 단위와 higher/lower 방향을 검사한다."
+    ],
+    "state_flow": [
+      "draft",
+      "validated",
+      "approved",
+      "published"
+    ],
+    "authority_rules": [
+      "ForecastAuthorityRepository의 editor/approver와 허용 university_ids를 사용한다. 유료 등급이나 Supabase user_metadata로 관리 권한을 부여하지 않는다.",
+      "편집과 승인은 별도 capability이다. 정책 require_independent_approver=true이면 작성/조정자와 다른 승인자가 필요하다. false인 명시 정책과 두 capability가 있으면 개인 운영자의 승인도 가능하다. 누락 정책은 자동 false로 채택하지 않는다.",
+      "미허용 관리 기능은403; 조회 범위 밖 draft는 존재하지 않는 draft와 동일404이다. 클라이언트는 status/역할/작성자/승인자/검증 통과값을 지정하지 않는다."
+    ],
+    "revision_rules": [
+      "모든 POST는 Idempotency-Key를 요구한다. 생성 이후 expected_revision/base_result_hash/policy_version을 결속한다.",
+      "조정은 reason과 server-verified evidence_refs, 동일 단위의 명시 replacement를 새 revision으로 저장한다. 기본값과 이전 revision을 보존하고 조정이 재시도마다 더해지지 않는다.",
+      "조정은 검증/승인 승계를 해제한다. 검증/승인 hash는 정확한 채택값과 revision/자료 버전에 결속한다.",
+      "현재 자료/정책/카탈로그/규칙/곡선 변경과 동시 수정은409이며 미검증·미승인 값을 발행하지 않는다. 발행은 새 불변 release를 보존한다."
+    ],
+    "public_fields": [
+      "forecast_release_version",
+      "basis_summary",
+      "issue_summaries",
+      "recommendation_reasons",
+      "adjustment_summary"
+    ],
+    "reason_rules": [
+      "확인된 대학 반영 방법과 해당 학생 계산 결과/위치 및 학과 판단의 설명만 공개한다. 내부 전체trace·계수표·곡선·가중치·담당자 ID를 공개하지 않는다.",
+      "추천 이유는 {code,text,evidence_refs}로 서버가 생성한다. 정책 추세 근거와 학생 유불리 설명을 구분하고 확인되지 않은 인과를 확정 표현하지 않는다."
+    ],
+    "acceptance": [
+      "원점수/연도/지표/단위/집단 혼용 거부; 최소 자료/정책 부재와 미확인 이슈 null 보존",
+      "예상70%와 합격권 독립 상태 및 독립 환산/누백 성공값 보존",
+      "편집/승인 범위·위조 역할·자기 승인 정책·동시 수정·정확 해시·멱등 재시도·새 revision 검증",
+      "새 공개 근거가 3/4페이지에 연결되고 학생에게 내부 자료가 노출되지 않음"
+    ],
+    "remaining": [
+      "실제 자료의 비교값·연도 보정·정책별 숫자와 근거 승인",
+      "실제 Supabase/DB/Drive 설정 및 운영 마이그레이션·발행 검증",
+      "전국 대학 산출 정확도·예측 성능 검증"
+    ],
+    "scope_excludes": [
+      "리포트/인쇄 확장",
+      "학생별 개별 수동 판정",
+      "군별 지원 조합",
+      "실제 입결 수집/정본 변경",
+      "실제 대학 지원자 확률",
+      "라이브 배포"
+    ]
+  },
+  "presentation_connection_contract": {
+    "format": "jungsi.presentation-connection/v1",
+    "code_status": "approved_for_implementation",
+    "work_item": "docs/work_items/DEV-006-analysis-connection.json",
+    "source_commit": "01b8fe6461ad60c10649f07349f796b00051d903",
+    "authentication": [
+      "같은 Supabase 프로젝트/쿠키를 @supabase/ssr로 읽고 refresh를 쿠키 쓰기 가능 경계에서 처리한다.",
+      "화면은 access token을 HTTP Authorization으로 전달하고 사용자 신원·회원 등급은 우리 API에서 검증한다. 서비스 권한을 클라이언트에서 변경하지 않는다.",
+      "Supabase publishable key와 URL만 Auth client에 사용하고 운영 DB/내부 엔진/비공개 저장소에 접근하지 않는다.",
+      "회원 개인 응답과 token refresh 응답은 no-store/private이며 다른 사용자의 CDN 캐시로 공유하지 않는다."
+    ],
+    "display_rules": [
+      "conversion/percentile/assessment의 준비 상태를 각각 표시한다. 판정 pending만으로 성공 환산/누백을 숨기지 않는다.",
+      "observed_counts와 estimated_weights의 의미를 표시하고 전체 국수탐2/규칙 필수입력 비교집단의 차이를 명시한다.",
+      "동점 구간 {lower,upper}, UTC Z 시각의 서울 표시, 실제 수능/모평/연도보정 추정을 구분한다.",
+      "3페이지 전체 유료 검색을 유지하고4페이지 학과별 도전/핵심/여유/보류 및 와일드카드에서 근거를 표시한다.",
+      "관리 화면은 소비자 4개 탭과 분리하고 서버 관리 capability/허용 학교로 생성·검증·조정·승인·발행을 수행한다."
+    ],
+    "mode_rules": [
+      "합성 모드는 명시적 synthetic 설정만 사용하며 실서버 실패에서 자동 합성 대체하지 않는다.",
+      "미설정 운영 연결은 설정/연결 대기로 표시하고 일반회원 또는 가짜 점수로 대체하지 않는다."
+    ],
+    "official_sources": [
+      "https://supabase.com/docs/guides/auth/server-side/creating-a-client",
+      "https://nextjs.org/docs/app/api-reference/file-conventions/proxy"
+    ],
+    "acceptance": [
+      "실제 어댑터의401/403/404/409/503와 권한 상태",
+      "불완전 판정에서도 독립 환산/누백·추정/집단 표시",
+      "관리 업무의 요청 형식·변경 충돌·서버 거부 표시",
+      "TypeScript·lint·명시적 합성/HTTP 연결 검사"
+    ],
+    "remaining": [
+      "운영 Supabase/백엔드 설정과 기존 에듀터치의 동일 프로젝트/쿠키 배포 설정 확인",
+      "실제 계정/이용권/관리 capability의 전체 연결 검증"
+    ],
+    "scope_excludes": [
+      "리포트/인쇄 확장",
+      "라이브 배포"
+    ]
+  },
+  "management_pages": [
+    {
+      "id": "ADMIN-FORECAST",
+      "label": "학과별 예상 기준 관리",
+      "path": "/management/forecasts",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "capabilities": [
+        "editor",
+        "approver"
+      ],
+      "requirements": [
+        "REQ-20",
+        "REQ-21",
+        "REQ-22"
+      ],
+      "operations": [
+        "forecast.capabilities",
+        "forecast.list",
+        "forecast.create",
+        "forecast.read",
+        "forecast.adjust",
+        "forecast.validate",
+        "forecast.approve",
+        "forecast.publish"
+      ],
+      "purpose": "서버에서 관리 capability와 허용 학교 범위를 확인한 사용자가 모집행별 생성·검증·조정·승인·발행을 수행한다. 소비자 4개 화면의 번호와 탭에는 추가하지 않는다."
+    }
+  ]
 }

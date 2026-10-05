@@ -7,7 +7,8 @@ from fractions import Fraction
 from urllib.parse import urlsplit, parse_qs
 from .authorization import AccessController
 from .overall_analysis import OverallAnalysisService, _identifier
-from .offering_analysis import evaluate_offering, blocked
+from .offering_analysis import evaluate_offering
+from .forecast_assessment import evaluate_release, blocked
 from .university_scoring import UniversityScoringService
 from .university_percentile import UniversityPercentileService
 from .platform_ports import CatalogRelease, PlatformError
@@ -70,7 +71,10 @@ def changes_dto(rows, *, source_timezone=None):
 
 
 class PlatformService:
-    def __init__(self, repository, data, clock):
+    def __init__(self, repository, data, clock, forecast_repository=None, forecast_service=None, session_service=None):
+        self.forecast_repository=forecast_repository
+        self.forecast_service=forecast_service
+        self.session_service=session_service
         self.repository, self.data, self.clock = repository, data, clock
         self.access = AccessController(repository)
         self.overall = OverallAnalysisService(self.access, data)
@@ -79,6 +83,13 @@ class PlatformService:
 
     def execute(self, operation, actor, *, body=None, query=None, params=None, key=None):
         params, query = params or {}, query or {}
+        if operation=='session.read':
+            shape({} if body is None else body);shape(query)
+            if self.session_service is None:raise PlatformError('auth_not_configured',503)
+            return self.session_service.read(actor)
+        if operation.startswith('forecast.'):
+            if self.forecast_service is None:raise PlatformError('forecast_not_configured',503)
+            return self.forecast_service.execute(operation,actor,body=body,query=query,params=params,key=key)
         # Policy lookup precedes shape validation, data access and replay lookup.
         decision = self.access.operation_access(operation, actor, report_id=params.get('report_id'))
         if not decision.allowed: raise PlatformError(decision.status, decision.http_status)
@@ -151,6 +162,16 @@ class PlatformService:
                         assessment=evaluate_offering(offering,profile,updated['overall'],None,conversion=conversion,percentile=percentile)
                         assessment['reason_code']='analysis_release_invalid'
                     else:assessment=evaluate_offering(offering,profile,updated['overall'],bundle,conversion=conversion,percentile=percentile)
+                    if self.forecast_repository is not None:
+                        try:
+                            published=self.forecast_repository.published(offering['offering_id'])
+                            if published is not None:
+                                newer=evaluate_release(offering,profile,conversion,percentile,published)
+                                newer['years']=assessment['years']
+                                newer['advantage']=assessment.get('advantage')
+                                assessment=newer
+                        except PlatformError as error:
+                            assessment.update(status='pending',category='pending',reason_code=error.code)
                     results[offering['offering_id']]=assessment
                 updated['analyses'].update(results)
                 updated['catalog_version']=release.version

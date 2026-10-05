@@ -91,7 +91,7 @@ class ConsistencyTests(unittest.TestCase):
 
     def test_presentation_api_contract_excludes_internal_adapter_and_registry(self):
         frontend=json.loads(generated_files(self.spec)['apps/web/route_catalog.json'])
-        self.assertEqual(len(frontend['operations']),12)
+        self.assertEqual(len(frontend['operations']),len(self.spec['operations']))
         self.assertNotIn('drive_registry',frontend['backend_contract'])
         self.assertNotIn('http_adapter',frontend['operations'][0])
         self.assertNotIn('workflow_service',frontend['operations'][0])
@@ -106,5 +106,28 @@ class ConsistencyTests(unittest.TestCase):
         self.assertEqual(op['engine_service'],self.spec['overall_analysis_contract']['application_service'])
         self.assertNotEqual(op['application_service'],op['engine_service'])
         self.assertEqual(op['http_contract']['response_schema'],'report')
+
+    def test_management_route_requires_server_capability(self):
+        spec=deepcopy(self.spec);spec["management_pages"][0]["capabilities"]=[]
+        self.assertIn("Management capability required",validate_spec(spec))
+
+    def test_forecast_approval_cannot_be_given_to_paid_members(self):
+        spec=deepcopy(self.spec)
+        next(o for o in spec["operations"] if o["id"]=="forecast.approve")["operator_capabilities"]=[]
+        self.assertIn("Forecast approval capability drift",validate_spec(spec))
+
+    def test_forecast_mutations_require_idempotency_contract(self):
+        spec=deepcopy(self.spec)
+        next(o for o in spec["operations"] if o["id"]=="forecast.adjust")["http_contract"]["idempotency_key_required"]=False
+        self.assertIn("Forecast writes require idempotency",validate_spec(spec))
+
+    def test_new_generated_routes_are_valid_json_and_consumer_pages_unchanged(self):
+        files=generated_files(self.spec)
+        frontend=json.loads(files["apps/web/route_catalog.json"])
+        self.assertEqual([p["number"] for p in frontend["pages"]],[1,2,3,4])
+        self.assertEqual(frontend["management_pages"][0]["path"],"/management/forecasts")
+        doc=files[self.spec["current_documents"]["forecast_policy"]]
+        self.assertIn("학과별".encode("utf-8"),doc)
+        self.assertNotIn(bytes([92])+b"n##",doc)
 
 if __name__=="__main__":unittest.main()

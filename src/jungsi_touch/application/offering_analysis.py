@@ -83,6 +83,7 @@ def evaluate_offering(offering, profile, overall, bundle, *, conversion=None, pe
     except (KeyError,TypeError,AttributeError,ValueError):result=blocked(offering['offering_id'],'analysis_release_invalid')
     if conversion is not None:
         result['conversion']=conversion.dto()
+        result['recommendation_reasons']=deepcopy(list(conversion.explanations)) if conversion.ready else []
         if conversion.ready:
             result['converted_score']=conversion.converted_score
             result['versions'].update(rule=conversion.rule_version,conversion=conversion.release_version)
