@@ -3465,6 +3465,14 @@
         "REQ-23"
       ],
       "summary": "프레젠테이션 FE-01: Retry-After 해석을 안전하게 바꾼다. delta-seconds 는 순수 십진 정수 문법(1~7자리)만 받고 빈 값·공백·음수·소수·지수(1e300)·범위 밖 값을 거절하며, HTTP 날짜는 지금 이후 7일 안만 받는다. 유효하지 않으면 임의 복구 시각을 만들지 않고 시각 없는 제한 안내만 보인다(입력값·멱등 키 보존은 기존 규칙 유지). 운영 빌드에서 12개 사례(0·정상 정수·빈 값·공백·음수·소수·1e300·자릿수 초과·1시간 뒤 HTTP 날짜·1년 뒤 날짜·임의 문자열·헤더 없음)를 주입 응답으로 회귀 확인했다 — 유효 3종만 시각 표시, 나머지는 전부 안전 안내, 서버 오류 0건(수정 전에는 1e300 finite 초가 Invalid Date 를 만들어 toISOString 에서 오류). 이는 주입 시험 응답 기준이며 실제 429 인수(FE-03)와 구분한다."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-15",
+        "REQ-20"
+      ],
+      "summary": "프레젠테이션: 에듀터치 본체가 /jeongsi 를 jeongsi-touch 워커로 대신 넘기는 임시 통로에서 서버 액션 POST(성적 저장·담기·관리 작업)가 Origin(본체 주소)과 Host(워커 주소) 불일치로 500 이 나던 문제를 고친다. next.config 의 serverActions.allowedOrigins 에 본체·워커·localhost 주소를 명시했고, 실도메인 Workers Routes 가 붙으면 본체·워커 항목은 지운다. 배포 워커에서 불일치 Origin POST 가 500→정상 경로(404: 가짜 action id)로 바뀜을 확인했다."
     }
   ],
   "overall_analysis_contract": {
