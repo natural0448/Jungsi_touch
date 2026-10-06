@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
   "spec_version": "1.7.1",
-  "source_sha256": "a5c7912519aff970f85141133e2afd69e96a162a9c603aa1304a8c05afc2cadb",
+  "source_sha256": "f045811bdb7e3cc356b4096e435b649f9b8492cc18999ba5ad11f819f6260441",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2068,7 +2068,7 @@
     "format": "jungsi.presentation-connection/v1",
     "code_status": "approved_for_implementation",
     "work_item": "docs/work_items/DEV-006-analysis-connection.json",
-    "source_commit": "01b8fe6461ad60c10649f07349f796b00051d903",
+    "source_commit": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
     "authentication": [
       "같은 Supabase 프로젝트/쿠키를 @supabase/ssr로 읽고 refresh를 쿠키 쓰기 가능 경계에서 처리한다.",
       "화면은 access token을 HTTP Authorization으로 전달하고 사용자 신원·회원 등급은 우리 API에서 검증한다. 서비스 권한을 클라이언트에서 변경하지 않는다.",
@@ -2631,6 +2631,16 @@
         "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
         "pull_request_state_at_acceptance": "open_draft"
       }
+    },
+    "historical_frontend_source_before_20261006": "01b8fe6461ad60c10649f07349f796b00051d903",
+    "external_source_observation": {
+      "version_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
+      "version_fix": "observed_implemented",
+      "approved_four_file_deletion": "observed_completed_external_not_integrated",
+      "PR6": "open_unmerged",
+      "exact_HEAD_CI_jobs": "two_success",
+      "browser_and_real_connection": "NOT_RUN",
+      "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
     }
   },
   "management_pages": [
@@ -2663,5 +2673,31 @@
       ],
       "purpose": "서버에서 관리 capability와 허용 학교 범위를 확인한 사용자가 모집행별 생성·검증·조정·승인·발행을 수행한다. 소비자 4개 화면의 번호와 탭에는 추가하지 않는다."
     }
-  ]
+  ],
+  "local_verification_contract": {
+    "format": "jungsi.local-verification-contract/v1",
+    "code_status": "implemented_local_only_synthetic_native_verified_actual_data_hold",
+    "verification_status": "service_23_scoped_native_verified_same_commit_Git_hooks_CI_integration_pending",
+    "frontend_connection": {
+      "owner": "external_presentation_team",
+      "SSRSupabase_cookie_to_local_Caller_automatic": false,
+      "frontend_server_only_local_Caller": "pending_external_owner_implementation_and_review",
+      "frontend_test_token_client_exposure_allowed": false,
+      "browser_acceptance": "NOT_RUN",
+      "Supabase_configuration": "publishable 설정 준비와 실제 localhost 로그인/쿠키/JWT·Caller 검수를 구분한다. 값·비공개 설정 파일 경로를 공개 정본에 복사하지 않는다.",
+      "rule": "PR6 Supabase SSR 쿠키 경로는 localhost에서 운영 사이트 쿠키나 local fixed 사용자 token을 자동으로 받지 못한다. 서버 전용 로컬 Caller와 private 토큰 전달은 외부 담당의 후속이다. backend 시험 인증 준비만으로 화면 실연동을 완료 처리하지 않는다."
+    },
+    "api_boundary": {
+      "operation_count": 22,
+      "operation_and_DTO_unchanged": true,
+      "nullable_unchanged": true,
+      "public_context_fields": 17,
+      "required_identity_versions": [
+        "release_version",
+        "policy_version",
+        "input_version"
+      ],
+      "UI_rule": "유효한 비어 있지 않은 버전3쌍과 context17의 정확 equality로 발표 근거를 결합한다. nullable·권한·Idempotency·보류코드는 유지한다."
+    }
+  }
 }

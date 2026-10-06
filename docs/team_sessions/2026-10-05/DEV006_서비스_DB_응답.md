@@ -2,7 +2,7 @@
 
 이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.7.1이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
-기준일: 2026-10-05. 상태: **서비스·DB baseline 인수 완료 / 공통 도구 b66 baseline 인수 완료 / 실제 사용자·DB·외부 프런트 검증 대기**. 문서 인계 revision: **7**. 공통 검사·기획 정합성의 확인된 이전 기준은 `b66c2274f0b0a27dc174555adde181cd16c68188`이며 정상 commit/push 훅 530건과 해당 HEAD CI success를 확인했다. revision6 도입부의 새 커밋·CI 대기 문구는 작성 당시 이력이다. 이 문서 이후 커밋의 미래 SHA나 미실행 CI 성공을 뜻하지 않는다.
+기준일: 2026-10-06. 상태: **서비스·DB baseline 인수 완료 / 공통 도구 b66 baseline 인수 완료 / 실제 사용자·DB·외부 프런트 검증 대기**. 문서 인계 revision: **8**. 공통 검사·기획 정합성의 확인된 이전 기준은 `b66c2274f0b0a27dc174555adde181cd16c68188`이며 정상 commit/push 훅 530건과 해당 HEAD CI success를 확인했다. revision6 도입부의 새 커밋·CI 대기 문구는 작성 당시 이력이다. 이 문서 이후 커밋의 미래 SHA나 미실행 CI 성공을 뜻하지 않는다.
 
 이 문서는 외부 프런트 전담 개발자가 소비할 공개 구조와 관리 응답의 허용 필드를 설명한다. 실제 성적·입결·키·계수·곡선·운영 연결 값은 포함하지 않는다. 시스템 기획팀은 공통 계약과 인수 기준을, 서비스·DB 개발팀은 백엔드 구현을 담당한다. 프런트 코드와 브라우저 검증은 다른 PC의 전담 개발자가 담당한다.
 
@@ -18,7 +18,7 @@
 
 현재 공통 명세는 같은 v1.7.1 기능 계약을 유지하면서 서비스·DB 상태를 `implemented_synthetic_HTTP_contract_verified_live_readiness_pending` / `code_verified_live_NOT_RUN`으로 정정했다. 검토 출발점 `9bf81e8d6a04e99086208422021fdb903aff204c`와 인수 구현 adc684를 구분하고, 외부 화면 계약의 `approved_for_implementation` / `verification_pending`은 유지한다. 역사적으로 서비스·DB 개발팀은 adc684 구현과 74fd 인수 상태 정정을 제공했고 PR13의 develop947 통합을 완료했다. 이후 공통 검사·기획 문서 정리는 시스템기획팀이 develop947을 출발점으로 단독 작성한다. 서비스 개발팀은 서비스 계층을, 외부 화면 개발팀은 프런트를 담당한다. 이 문서에 기록한 493건은 adc684의 검사 증거이며 후속 후보의 재검사 결과가 아니다.
 
-프런트의 최신 관측 기준은 외부 화면 담당자의 [PR #6](https://github.com/natural0448/Jungsi_touch/pull/6) 및 `67644ef980e5d0e41afbe6dcc6d419a060979cf8` HEAD다. e12 대비 sameRelease 파일 blob `efb40ce76682dbcea74c6c3716c090303d1c108d`는 변경되지 않았고, score-form/css 변경 관측만으로 버전 값 검증 후속을 완료 처리하지 않는다. 기획팀은 고정 승인 소스 `f46c6635664a6c2315e6c71c4f700aa3e331c60c`의 조상 관계와 정확한 4개 blob/mode의 동일성을 읽기 대조했다. 이 최신 관측은 삭제 승인의 고정 source를 바꾸거나 화면 구현을 통합·인수한 기록이 아니다. 이 채팅에서 만든 임시 프런트 후보는 외부 담당자가 채택한 구현 기준으로 취급하지 않는다.
+프런트 최신 관측은 [PR #6](https://github.com/natural0448/Jungsi_touch/pull/6)의 d7b0279b2725a81ecd734cdec957c485ae5d6172 HEAD다. PR6 open/unmerged와 해당 HEAD CI 두 건 success를 직접 읽기 영수증으로 확인했다. 4cc849a39ebbadf82f348d37995f3d84a938a8c9에서 release/policy/input 양쪽 비어 있지 않은 문자열·정확 equality와 context17 비교를 보완한 소스를 관측했다. e12/676 시점의 미구현 문구는 역사다. 실제 SSR/로컬 Caller·브라우저·운영 로그인 인수는 NOT_RUN이다. d7의 승인4파일 제거와 고정f46 원본 blob 일치를 관측했지만 develop에는 미통합이며 고정 source/단회 origin 검사는 유지한다. 워커 fc31bd61은 사용자 전달 관측으로 직접 배포 검증은 NOT_RUN이다. 이 채팅의 임시 프런트 후보를 외부 채택 기준으로 쓰지 않는다.
 
 ## ② 관리 초안과 공개 발표본의 응답
 
@@ -150,7 +150,8 @@ adc684 서비스·DB baseline의 정상 커밋·push 훅 Git 스냅샷 검사는
 | 서비스·DB 역사 baseline adc684/74fd/947 | 493건 PASS / 해당 구현 CI success |
 | 공통 도구의 확인된 이전 baseline b66 | 530건 PASS / 정확 HEAD project-consistency CI success |
 | develop 통합 | PR #13 merged, 947cee82f0a91b0ed337753d6e0ae9619e49a78b |
-| 외부 전담 프런트 구현·브라우저 인수 | 이 서비스·DB 작업 범위에서 NOT_RUN |
+| 외부 프런트 source/CI 관측 | PR6d7 open/unmerged;4cc필수3버전보완·exactCI2success 관측 |
+| 외부 프런트 실제 Caller·브라우저 인수 | NOT_RUN;운영로그인·로컬시험인증과구분 |
 | Supabase Auth settings/JWKS/REST metadata 최소 GET | 읽기 준비 검수 PASS; 실제 로그인·DB 인수와 구분 |
 | 실제 회원/이용권·우리 22 API·운영 DB·Drive 연결과 readiness | NOT_RUN; DATABASE_URL .env 추후 제공, 실제 DB 검증 유보 |
 | 운영 DB002 적용 | NOT_APPLIED |
@@ -164,7 +165,7 @@ adc684 서비스·DB baseline의 정상 커밋·push 훅 Git 스냅샷 검사는
 
 직접 사용자 메시지의 승인 증거를 정확한 4개 프런트 초안 경로에 한정해 확인하고 공통 삭제 등록부에 결속했고 b66을 통해 별도 선행 develop 등록을 확인했다. 증거 thread는 `01a0ccde-6f3d-7772-acd3-3eaca9a67b65`, turn은 `01a10bf5-8841-74a3-93e2-f2e2de8ac674`, message는 `01a10bf5-898b-7180-8442-3bfd4d1c2914`다. 다른 채팅의 승인 주장만으로 판단하지 않는다. 별도 선행 develop 등록과 고정 source/blob/mode/바이트 SHA 및 최초 삭제 사건 검사를 통과해야 하며 같은 커밋의 자기 승인·과거 소급·수정/복원 후 재사용·병렬 재소비를 허용하지 않는다.
 
-승인 경로는 `apps/web/src/lib/contract.ts`, `apps/web/src/lib/api/synthetic-fixtures.ts`, `apps/web/src/app/admissions/possibilities/actions.ts`, `apps/web/src/components/pending-page.tsx` 네 개뿐이다. 실제 삭제 executor는 외부 화면 개발팀이며 실행은 **NOT_RUN**이다. 시스템기획팀은 등록·검사·합성 회귀만 담당한다. 그 밖의 초안·원본·이전 후보·캐시·검토 결과는 보존한다. 이 문서는 실제 삭제 실행 증거가 아니다.
+승인 경로는 `apps/web/src/lib/contract.ts`, `apps/web/src/lib/api/synthetic-fixtures.ts`, `apps/web/src/app/admissions/possibilities/actions.ts`, `apps/web/src/components/pending-page.tsx` 네 개뿐이다. 실제 삭제 executor는 외부 화면 개발팀이다. 최신 d7의 네 경로 제거와 승인 원본 blob 일치를 GitHub 영수증으로 관측해 상태를 **observed_completed_external_not_integrated**로 기록한다. PR6 open/unmerged로 develop 승계는 대기이며 기획/서비스팀의 실제 삭제 실행은 NOT_RUN이다. 기본 deny·고정 f46 source·단회 origin 검사는 그대로다. 그 밖의 초안·원본·이전 후보·캐시·검토 결과는 보존하며 외부 Git 관측을 브라우저 인수나 새 삭제 허용으로 확대하지 않는다.
 
 
 ## PR13 서비스 통합과 b66 공통 도구 인수 기준
@@ -180,6 +181,17 @@ Supabase 최소 GET 준비 검수: Auth settings/JWKS 200, 사용자토큰없는
 
 최소 profile 읽기 검수에서 관리자/활성 조건의 메타데이터 표식은 확인했다. 실제 사용자 로그인 JWT 검증·관리 권한 연동·DB/Drive/우리 22 API 검수는 NOT_RUN이다. 공개 문서에는 실제 profile 값·이메일·UUID·키·접속값을 기록하지 않는다. 실제 데이터/모형 운영 채택·등록 승인도 기존 미완료 상태를 유지한다.
 
+## ⑧ 로컬 검증 연결 요청2판
+
+[로컬 검증 연결](../../current/로컬_검증_연결.md)은 공통 local_verification_contract에서 생성한다. 출발점은 확인된 develop354d450이며 별도 loopback factory에 메모리 저장소·서버 allowlist의 standard/paid/editor/approver 네 subject·수신 PC DPAPI 승인 자료를 명시 주입한다. configured_app·운영 settings·22 API/DTO는 불변이다. 재시작 소실·운영 인증 아님·실제 DB002/Supabase NOT_RUN·production_ready=false를 표시한다. editor/approver 분리와 자기 승인403은 독립 승인 정책의 유지 조건이다.
+
+권한 있는 데이터팀의 별도 승인 명부 또는 local selection과 독립 신뢰 SHA·pinned 출처 영수증·폴더/판/평문 SHA가 필요하다. DATA_ACTIVE_CSV/시험팩 목록은 엔진 승인이 아니다. 실제 Drive 다운로드와 local_filesystem을 구분하고 local_verification 승인이 운영 모형 승격을 뜻하지 않는다. 승인 곡선 없음은 HOLD/null/pending이고 성공 총점은 보존한다.
+
+PR6의 Supabase SSR 쿠키는 localhost 고정 시험 Caller를 자동 제공하지 않는다. 서버 전용 local Caller는 외부팀, 실제 승인 자료/기대값은 데이터팀 담당이다. 서비스 모듈 다섯 파일의 고정 SHA·23건 집중 검사와 같은 받는 PC의 DPAPI/loopback HTTP·승인0/pending 명부 HOLD 검수를 인수했다. CLI 도움말 네 개도 기존 고정 runtime에서 exit0으로 대조했다. 이는 아직 미커밋 후보의 local-only 검수이며 같은 커밋·전체 정상 훅·정확 HEAD CI·develop 통합은 대기다. 실제 승인 수치·다른 PC/계정·외부 브라우저 인수는 NOT_RUN이다. publishable 설정 준비를 로그인 JWT 인수로 확대하지 않고 비공개 값/설정 파일 경로는 공개 정본에 복사하지 않는다.
+
+
+[로컬 검증 계약과 실행 후보](../../current/로컬_검증_연결.md)를 함께 읽는다.
+
 ## 공통 도구의 확인된 이전 인수 기준
 
 | 범위 | 확인한 증거 |
@@ -188,9 +200,10 @@ Supabase 최소 GET 준비 검수: Auth settings/JWKS 200, 사용자토큰없는
 | 정상 commit/push 훅 | 530건 PASS; 실패 0·오류 0·건너뜀 0 |
 | 정확한 HEAD GitHub CI | [project-consistency](https://github.com/natural0448/Jungsi_touch/actions/runs/37324278331/job/111810898785): success |
 | 서비스·DB 역사 기준 | adc684/74fd 구현과 develop947 통합의 493 PASS는 별도의 역사 인수 증거로 유지한다. |
-| 최신 외부 프런트 관측 | 67644ef980e5d0e41afbe6dcc6d419a060979cf8; sameRelease blob efb40ce76682dbcea74c6c3716c090303d1c108d는 e12 대비 동일 |
-| 운영/외부 인수 | verification_pending; DB .env 추후; 실제 삭제 NOT_RUN; main not_ready |
+| 최신 외부 프런트 관측 | d7b0279b2725a81ecd734cdec957c485ae5d6172; 4cc에서 필수3버전의 비어 있지 않은 문자열·정확동일성 보완과context17비교유지를관측했다. 실제Caller/브라우저/운영로그인인수는NOT_RUN이다. |
+| 외부 삭제 관측 | observed_completed_external_not_integrated; develop 통합과 실제 브라우저 인수는 구분한다. |
+| 운영/외부 인수 | verification_pending; DB .env 추후; main not_ready |
 
-확인된 이전 baseline b66까지만 증거로 명시한다. 후속 문서 커밋 자신의 미래 SHA나 미실행 CI 성공을 기록하지 않는다. 공통 Git/CI 검사·명세·생성 문서 인수 및 전체 합성 회귀. 운영 DB·외부 프런트·실제 데이터·모형 운영 승인을 뜻하지 않는다. 외부 버전 release/policy/input 양쪽 값의 유효한 비어 있지 않은 문자열 검증은 후속이며 실제 프런트 인수는 pending이다. 최소 profile 조건 읽기와 실제 로그인 JWT 검증 NOT_RUN을 구분한다. 실제 자료·모형 운영 채택/등록 승인도 유지 상태이며 완료로 표시하지 않는다.
+확인된 이전 baseline b66까지만 증거로 명시한다. 후속 문서 커밋 자신의 미래 SHA나 미실행 CI 성공을 기록하지 않는다. 공통 Git/CI 검사·명세·생성 문서 인수 및 전체 합성 회귀. 운영 DB·외부 프런트·실제 데이터·모형 운영 승인을 뜻하지 않는다. 이전 e12/676 버전값 보완 pending은 역사이며 최신 소스 관측과 실제 프런트 인수 대기를 구분한다. 최소 profile 조건 읽기와 실제 로그인 JWT NOT_RUN, 실제 자료·모형 운영 미승인 상태를 유지한다.
 
-<!-- jungsi:generated spec_sha256=a5c7912519aff970f85141133e2afd69e96a162a9c603aa1304a8c05afc2cadb -->
+<!-- jungsi:generated spec_sha256=f045811bdb7e3cc356b4096e435b649f9b8492cc18999ba5ad11f819f6260441 -->

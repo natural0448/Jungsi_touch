@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.7.1",
-  "source_sha256": "a5c7912519aff970f85141133e2afd69e96a162a9c603aa1304a8c05afc2cadb",
+  "source_sha256": "f045811bdb7e3cc356b4096e435b649f9b8492cc18999ba5ad11f819f6260441",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2824,7 +2824,7 @@
     "format": "jungsi.presentation-connection/v1",
     "code_status": "approved_for_implementation",
     "work_item": "docs/work_items/DEV-006-analysis-connection.json",
-    "source_commit": "01b8fe6461ad60c10649f07349f796b00051d903",
+    "source_commit": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
     "authentication": [
       "같은 Supabase 프로젝트/쿠키를 @supabase/ssr로 읽고 refresh를 쿠키 쓰기 가능 경계에서 처리한다.",
       "화면은 access token을 HTTP Authorization으로 전달하고 사용자 신원·회원 등급은 우리 API에서 검증한다. 서비스 권한을 클라이언트에서 변경하지 않는다.",
@@ -3387,6 +3387,16 @@
         "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
         "pull_request_state_at_acceptance": "open_draft"
       }
+    },
+    "historical_frontend_source_before_20261006": "01b8fe6461ad60c10649f07349f796b00051d903",
+    "external_source_observation": {
+      "version_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
+      "version_fix": "observed_implemented",
+      "approved_four_file_deletion": "observed_completed_external_not_integrated",
+      "PR6": "open_unmerged",
+      "exact_HEAD_CI_jobs": "two_success",
+      "browser_and_real_connection": "NOT_RUN",
+      "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
     }
   },
   "management_pages": [
@@ -3419,5 +3429,414 @@
       ],
       "purpose": "서버에서 관리 capability와 허용 학교 범위를 확인한 사용자가 모집행별 생성·검증·조정·승인·발행을 수행한다. 소비자 4개 화면의 번호와 탭에는 추가하지 않는다."
     }
-  ]
+  ],
+  "local_verification_contract": {
+    "format": "jungsi.local-verification-contract/v1",
+    "version": "1",
+    "code_status": "implemented_local_only_synthetic_native_verified_actual_data_hold",
+    "verification_status": "service_23_scoped_native_verified_same_commit_Git_hooks_CI_integration_pending",
+    "requirements": [
+      "REQ-12",
+      "REQ-14",
+      "REQ-15",
+      "REQ-16",
+      "REQ-17",
+      "REQ-19",
+      "REQ-20",
+      "REQ-21",
+      "REQ-23"
+    ],
+    "source_request": {
+      "revision": 2,
+      "sha256": "c6258a8e38a949ae1476c054b24b7b9a7bc4a6bdb7dd441e4dcdd494f0f7d4e0",
+      "baseline_develop": "354d45097a501d788b8bb93ef238a15aef4d3ae3",
+      "meaning": "외부 화면 담당의 요청을 사용자의 범위와 기획 검토 조건에 맞춰 준비 계약으로 구체화한다. 요청 문서 자체가 새 데이터/배포/삭제/운영 승인 권한을 만들지 않는다."
+    },
+    "purpose": "받는 Windows PC에서 별도 로컬 서버로 승인 자료의 화면·권한·보류 흐름을 검수한다. 운영 배포·DB 검증·모형 승인과 분리한다.",
+    "composition": {
+      "owner": "service_development_team_on_registered_application_branch",
+      "production_configured_app_unchanged": true,
+      "production_settings_selection_unchanged": true,
+      "local_factory_separate": true,
+      "inject_existing_create_app": true,
+      "repositories": [
+        "LocalMemoryRepository",
+        "MemoryForecastRepository"
+      ],
+      "session_provider": "server_exact_allowlist_LocalSessions",
+      "data_provider": "existing_DriveDataProvider_with_private_approved_encrypted_source_adapter",
+      "existing_application_ports_unchanged": true,
+      "production_can_select_local_adapter": false,
+      "operational_SQL_or_Drive_result_writes": false,
+      "adopt_or_register_estimated_model": false,
+      "rule": "configured_app와 ServerSettings 운영 선택은 불변이다. 별도 local composition이 메모리 포트·시험 사용자·암호 자료를 명시 주입한다. 운영 DB 연결·002 실행·Drive 결과쓰기·실제 모형 adopt/register는 하지 않는다."
+    },
+    "network": {
+      "loopback_only": true,
+      "default_port": 8000,
+      "allow_wildcard_host": false,
+      "CORS": "exact_loopback_frontend_origins_only",
+      "access_log": false,
+      "public_or_operational_deployment_allowed": false,
+      "rule": "실행 bind는127.0.0.1이다. 요청 peer와Host는loopback IP(127/8·::1)또는localhost 정책과정확port를검사한다. Origin은exact loopback목록이다. Forwarded/X-Forwarded 계열·중복보안헤더·wildcard·공개tunnel을거절하며proxy_headers=false와no-access-log를유지한다.",
+      "bind_host": "127.0.0.1",
+      "request_host_policy": "loopback_IP_or_localhost",
+      "peer_loopback_required": true,
+      "Host_port_exact": true,
+      "forwarded_headers_allowed": false,
+      "proxy_headers": false
+    },
+    "storage": {
+      "kind": "memory",
+      "restart_loses_state": true,
+      "DB_verified": false,
+      "DB002": "NOT_RUN",
+      "migration": "NOT_APPLIED",
+      "persistence_claim_allowed": false,
+      "rule": "성적·리포트·관심학교·시험 이용권·관리 초안/발표는 메모리에 저장하고 재시작하면 사라진다. PostgreSQL·Supabase 영속성·migration·동시성 검수 완료를 뜻하지 않는다."
+    },
+    "local_auth": {
+      "production_authentication": false,
+      "server_allowlist_only": true,
+      "client_role_or_paid_fields_authoritative": false,
+      "production_entry_accepts_local_tokens": false,
+      "server_verified_subject_and_expiry": true,
+      "token_distribution": "명시적인 issue 명령이 서로 다른 네 subject와무작위opaque token의서버exact allowlist를생성한다. UTC issued_at<=now<expires_at·최대8시간이며만료·미등록·잘못된역할을거절한다. 실제 token/subject는DPAPI보호비공개설정으로만전달하고공개문서/Git/로그/브라우저빌드에넣지않는다.",
+      "profiles": [
+        "standard",
+        "paid",
+        "editor",
+        "approver"
+      ],
+      "distinct_subjects_required": true,
+      "staff_is_paid": false,
+      "permissions": [
+        "owner_check",
+        "active_entitlement_UTC_window",
+        "exact_operator_capability",
+        "exact_university_allowlist",
+        "expiry_rejection",
+        "unknown_token_rejection"
+      ],
+      "operator_university_allowlist_default": "empty",
+      "synthetic_scope_only": "SYNTHETIC",
+      "rule": "editor/approver와 유료 이용권은 독립이다. 세 회원 종류를 네 시험 subject로 구성해 편집자와 독립 승인자를 분리한다. 실제 학교 허용 목록이 없으면 빈 범위를 유지하며 실제 발행 양성 검수는 NOT_RUN이다.",
+      "provider_class": "LocalSessions",
+      "maximum_TTL_hours": 8,
+      "session_issue_required": true,
+      "session_format": "jungsi.local-sessions/v1"
+    },
+    "independent_approval": {
+      "existing_policy_unchanged": true,
+      "distinct_editor_and_approver_subjects": true,
+      "self_approval_expected_HTTP": 403,
+      "self_approval_reason": "forecast_independent_approver_required",
+      "actual_publication_without_approved_inputs": "pending",
+      "rule": "require_independent_approver=true 정책을 완화하지 않는다. 편집 기여자의 자기 승인403과 별도 승인자 subject를 검수한다. 승인 입력·정책·학교 범위가 없으면 capability 확인까지만 하며 실제 컷 발행/모형 승인으로 확대하지 않는다."
+    },
+    "data_authority": {
+      "private_approved_registry_required": true,
+      "publisher": "authorized_data_team_with_separate_explicit_approval_evidence",
+      "source_completion_is_engine_approval": false,
+      "automatic_status_promotion": false,
+      "latest_modified_time_adoption": false,
+      "explicit_engine_approved_requires_exact_true": true,
+      "DATA_ACTIVE_CSV_or_exam_inventory": "공개 자료 정리와 시험팩 확인은 엔진 승인이 아니다. engine_approved=false/production_allowed=false를 approved로 덮지 않는다. 명시된 engine_approved는 정확 bool이어야 하며 false는 계산 승인으로 해석하지 않고 null/0/문자열은 거절한다. 부재만으로 승인하지 않으며 별도 명부와 승인 증거가 필요하다.",
+      "approval_binding": [
+        "kind",
+        "key",
+        "version",
+        "exam_id",
+        "pack_version",
+        "context",
+        "sha256",
+        "approval_evidence"
+      ],
+      "registry_format": "jungsi.data-registry/v1",
+      "registry_selection": "관리자가 따로 확인한 신뢰 명부/선택명부 SHA를 받는 파일과 독립 결속한다. 공급 파일 스스로 계산한 해시나 status 문자열만으로 승인하지 않는다.",
+      "pending_rule": "권한있는 데이터팀의 승인 발행 명부가 없으면 목록·시험팩 준비의 부분 검수다. 대학 곡선·지원 판단·예상 기준은 기존 pending·503/null이다. 승인 entry가 없는 명부로 ready 숫자를 만들지 않는다.",
+      "drive_requires_trusted_registry_sha256": true,
+      "local_requires_trusted_selection_sha256": true,
+      "reference_kind_examples": [
+        "exam_pack",
+        "total_model",
+        "catalog",
+        "analysis",
+        "conversion",
+        "percentile",
+        "estimate_receipt",
+        "forecast_inputs",
+        "forecast_policy",
+        "forecast_context"
+      ],
+      "kind_scope_rule": "이 목록은 기존 provider kind의 참고 예시이며 완전한 허용/금지 목록이 아니다. DriveDataProvider와DriveForecastInputProvider가등록된kind/key를기존포트/승인/context검사로읽는다. 새kind를목록에추가했다는이유로승인하지않고예시4kind밖이라고기존입력을일괄차단하지않는다.",
+      "current_data_preparation": "데이터팀의 시험팩·승인 entry가 없는 명부·후보/HOLD 검수 묶음을 수령했다. 자료 묶음과 해시 준비 완료는 곡선/규칙/모형 승인이나 실제 기대값 정확도 인수가 아니다. 인원 집계의 원문 범주 정의는 데이터팀이 설명·대조했고 이 QA 확인을 운영 승인으로 확대하지 않는다."
+    },
+    "source_provenance": {
+      "source_kinds": [
+        "drive_download",
+        "local_filesystem"
+      ],
+      "source_kind_explicit": true,
+      "receipt_binding_required": true,
+      "trusted_receipt_sha256_required": true,
+      "every_read_revalidation": true,
+      "drive_required": [
+        "registry_sha256",
+        "file_id",
+        "parents",
+        "input_folder",
+        "drive_version",
+        "plaintext_sha256",
+        "plaintext_bytes",
+        "downloaded_at",
+        "reviewer",
+        "source_receipt_sha256"
+      ],
+      "local_required": [
+        "selection_sha256",
+        "local_artifact_id",
+        "local_version",
+        "payload_version",
+        "plaintext_sha256",
+        "plaintext_bytes",
+        "captured_at",
+        "reviewer",
+        "source_receipt_sha256"
+      ],
+      "ciphertext_binding": [
+        "source_kind",
+        "registry_or_selection_sha256",
+        "entry_identity",
+        "source_receipt_sha256",
+        "plaintext_sha256",
+        "plaintext_bytes"
+      ],
+      "offline_snapshot_not_live_drive": true,
+      "fabricate_drive_metadata_for_filesystem": false,
+      "rule": "Drive 다운로드는 승인 명부·file_id·parents/input_folder·drive_version·평문SHA/bytes·다운로드 시각/검수자/출처 영수증에 결속한다. 캐시 재읽기도 별도로 pinned한 명부/선택명부·영수증 SHA와 출처·폴더/판·평문SHA/bytes를 재검증한다. offline 캐시는 고정 스냅샷이다. local_filesystem을 실제 Drive GET/다운로드 증거로 기록하지 않는다."
+    },
+    "local_filesystem_selection": {
+      "format": "jungsi.local-selection/v1",
+      "trusted_selection_sha256_required": true,
+      "fake_Google_file_id_or_drive_version_or_parents": false,
+      "entry_fields": [
+        "kind",
+        "key",
+        "local_artifact_id",
+        "local_version",
+        "sha256",
+        "bytes",
+        "payload_version",
+        "status",
+        "source_timezone",
+        "path",
+        "engine_approved (optional exact bool)",
+        "approval_evidence",
+        "approval_evidence_sha256"
+      ],
+      "private_path_and_values": true,
+      "transport": "local_filesystem",
+      "provider_reuse": "메모리 jungsi.data-registry/v1 entry에 transport=local_filesystem과 local_artifact_id/local_version을 명시한다. kind/key/sha256/version/status는 기존 DriveDataProvider init/load의 승인·payload version 검사에 재사용한다. 실제 file_id/drive_version/Google parents를 가공하거나 alias로 위장하지 않는다. 운영 DriveClient는 불변이다.",
+      "rule": "실제 Drive pin이 없으면 권한 있는 데이터팀의 별도 local selection을 독립 신뢰 SHA로 고정한다. path와 원본은 비공개이며 local client가 평문 SHA/bytes와 pinned receipt를 확인한다. 파일 이름이나 최신 시각으로 source를 자동 승인하지 않는다.",
+      "approval_format": "jungsi.local-data-approval/v1",
+      "approval_fields": {
+        "status": "approved",
+        "scope": "local_verification",
+        "artifacts": [
+          "local_artifact_id",
+          "local_version",
+          "sha256",
+          "payload_version"
+        ]
+      },
+      "approval_scope_is_production_approval": false
+    },
+    "encryption": {
+      "method": "Windows_DPAPI",
+      "scope": "current_user",
+      "recipient_encrypts_on_recipient_PC": true,
+      "CRYPTPROTECT_LOCAL_MACHINE": false,
+      "encryption_key_sharing": false,
+      "decrypt_in_RAM_only": true,
+      "new_plaintext_disk_write": false,
+      "delete_existing_plaintext_originals": false,
+      "decrypt_success_is_approval": false,
+      "no_payload_key_in_logs_or_receipts": true,
+      "authenticated_metadata_binding": true,
+      "ciphertext_location": "Git 제외 data 또는 outputs 아래 새 암호 파일. 실제 이름/경로/키/내용은 비공개.",
+      "rule": "DPAPI 기본 사용자 범위로 받는 PC·사용자가 자기 환경에서 새로 보호하고 RAM 복호화한다. 발신PC 암호문 전달을 수신자 복호화 방법으로 삼지 않는다. LOCAL_MACHINE flag와 공용 키 공유를 금지한다. roaming profile 예외가 있어 절대적인 다른 PC 복호화 불가를 약속하지 않는다. MAC 보호 내용에 명부/영수증 metadata를 결속하고 평문SHA를 확인한다. 기존 원본은 보존하며 신규 평문 파일·debug/crash payload·키 출력은 금지한다.",
+      "memory_limit": "RAM만 복호화하는 설계와 일부 native buffer zeroing은 Python 모든 객체의 완전 메모리 제거를 보장하지 않는다. 다른 PC/계정 실제 거부와 받는 PC native 인수는 별도 NOT_RUN이다.",
+      "alternate_AES_GCM": "이번 선택은 DPAPI다. AES-GCM·키 별도 전달·nonce 재사용 금지·metadata AAD·InvalidTag 거부·dependency lock 변경은 별도 범위 검토 없이 도입하지 않는다.",
+      "primary_source": "https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptprotectdata"
+    },
+    "health": {
+      "local_factory_intercepts_only": "/health/ready",
+      "production_health_semantics_unchanged": true,
+      "mode": "local_verification",
+      "storage": "memory_ephemeral_lost_on_restart",
+      "production_ready": false,
+      "required_local_fields": [
+        "mode",
+        "local_ready",
+        "storage",
+        "production_ready",
+        "database",
+        "auth",
+        "real_data"
+      ],
+      "real_DB002": "NOT_RUN",
+      "real_Supabase": "NOT_RUN",
+      "local_ready_is_production_ready": false,
+      "rule": "local factory에서만 /health/ready를 별도 진단으로 intercept한다. mode=local_verification, local_ready, storage=memory_ephemeral_lost_on_restart, production_ready=false와 database=NOT_RUN, auth=test_allowlist, real_data의 승인/HOLD 사유를 반환한다. local_ready=true는 서버 시험 흐름 준비이며 숫자 결과나 실제 DB/Supabase 준비를 뜻하지 않는다. 운영 configured_app의 /health/ready 의미와 503은 불변이다.",
+      "auth": "test_allowlist_not_production_authentication"
+    },
+    "score_results": {
+      "missing_approved_curve": "HOLD",
+      "preserve_successful_total": true,
+      "unapproved_percentile_or_support": "null_or_pending",
+      "invent_numeric_expected_result": false,
+      "binding": [
+        "exam_id",
+        "pack_version",
+        "curve_version",
+        "rule_version",
+        "analysis_context",
+        "independent_expected_receipt_sha256"
+      ],
+      "rule": "국어·수학·탐구2 표준점수 합의 성공 결과는 유지한다. 승인 전체곡선이 없으면 상위 누백은 HOLD/null/pending이고 대학 자료·컷 부족은 해당 부분만 보류다. 미승인 모형·임의곡선으로 숫자를 만들지 않는다.",
+      "reference_cases": "실제9월 기대값2~3건은 승인 시험팩/곡선/규칙과 독립검산 영수증 해시에 결속해 데이터팀이 준비한다. 없음은 NOT_RUN이고 합성 control-flow와 실제 기대값 검수는 분리한다."
+    },
+    "frontend_connection": {
+      "owner": "external_presentation_team",
+      "SSRSupabase_cookie_to_local_Caller_automatic": false,
+      "frontend_server_only_local_Caller": "pending_external_owner_implementation_and_review",
+      "frontend_test_token_client_exposure_allowed": false,
+      "browser_acceptance": "NOT_RUN",
+      "Supabase_configuration": "publishable 설정 준비와 실제 localhost 로그인/쿠키/JWT·Caller 검수를 구분한다. 값·비공개 설정 파일 경로를 공개 정본에 복사하지 않는다.",
+      "rule": "PR6 Supabase SSR 쿠키 경로는 localhost에서 운영 사이트 쿠키나 local fixed 사용자 token을 자동으로 받지 못한다. 서버 전용 로컬 Caller와 private 토큰 전달은 외부 담당의 후속이다. backend 시험 인증 준비만으로 화면 실연동을 완료 처리하지 않는다."
+    },
+    "api_boundary": {
+      "operation_count": 22,
+      "operation_and_DTO_unchanged": true,
+      "nullable_unchanged": true,
+      "public_context_fields": 17,
+      "required_identity_versions": [
+        "release_version",
+        "policy_version",
+        "input_version"
+      ],
+      "UI_rule": "유효한 비어 있지 않은 버전3쌍과 context17의 정확 equality로 발표 근거를 결합한다. nullable·권한·Idempotency·보류코드는 유지한다."
+    },
+    "implementation_paths": {
+      "status": "confirmed_paths_frozen_source_and_help_verified_same_commit_pending",
+      "service_modules": [
+        "src/jungsi_touch/infrastructure/local_dpapi.py",
+        "src/jungsi_touch/infrastructure/local_drive.py",
+        "src/jungsi_touch/infrastructure/local_repository.py",
+        "src/jungsi_touch/infrastructure/local_verification.py"
+      ],
+      "test": "tests/test_local_verification.py",
+      "CLI_module": "jungsi_touch.infrastructure.local_verification",
+      "launch_command": "python -B -m jungsi_touch.infrastructure.local_verification serve --cache-source local_filesystem --cache SEALED --selection-sha256 TRUSTED --sessions SEALED",
+      "rule": "서비스팀의 네 모듈·test가 고정 영수증의 raw/staged SHA와 일치한다. 공통 writer는 기존 고정 runtime/site와 해당 src로 CLI 도움말 네 개의 exit0을 확인했다. 아래 명령은 확정 소스의 실행 형식이며 각 명령의 직접 실행·실제 자료 숫자 검수와 구분한다. PRIVATE/TRUSTED/NEW/SEALED는 자리표시자이고 실제 값·학교·경로는 비공개다. 아직 서비스 코드와 공통 기획/라우팅의 같은 커밋·정상 훅·CI·develop 통합은 대기다. 공용 script allowlist는 추가하지 않았으며 운영 DB/인증/배포는 불변이다.",
+      "CLI_status": "confirmed_help_syntax_four_exit0",
+      "prepare_local_candidate": "python -B -m jungsi_touch.infrastructure.local_verification prepare-local --selection PRIVATE --selection-sha256 TRUSTED --destination NEW",
+      "serve_candidate": "python -B -m jungsi_touch.infrastructure.local_verification serve --cache-source local_filesystem --cache SEALED --selection-sha256 TRUSTED --sessions SEALED",
+      "serve_optional_scope_candidate": [
+        "--exam-id APPROVED_EXAM",
+        "--university-id APPROVED_SCOPE"
+      ],
+      "issue_sessions_candidate": "python -B -m jungsi_touch.infrastructure.local_verification issue --sessions NEW",
+      "hold_serve_candidate": "python -B -m jungsi_touch.infrastructure.local_verification serve --hold-no-data --sessions SEALED",
+      "interactive_token_command_policy": "token --sessions SEALED --role ROLE은소유자의비공개대화형터미널에서만수동취득하는후보이다. 기획검수·자동로그/영수증수집에서실행하지않으며프런트token수신경로는외부담당후속이다."
+    },
+    "ownership": {
+      "planning": "공통 명세·생성 가이드·정합성 검사",
+      "service": "별도local factory/저장소/시험session/암호source·합성/native검사",
+      "data": "정본·독립 승인 발행명부·신뢰SHA·실제 기대값",
+      "frontend": "서버 전용local Caller·브라우저1~4페이지와관리화면인수"
+    },
+    "private_git_boundary": {
+      "real_payloads_env_and_registry_in_git": false,
+      "force_add_or_reinclude_private_paths": false,
+      "rule": "실제 자료·명부 값·token·키·학생 성적·곡선·환산표·.env는 비공개 위치에 둔다. .env 예시도 Git 제외이며 공개 소스와 합성 회귀에 실제 값을 복사하지 않는다."
+    },
+    "acceptance": [
+      "운영 configured_app/ServerSettings와 22 API/DTO 불변 대조, loopback/exact CORS 거절",
+      "메모리 재시작 소실, 실제 DB002/Supabase NOT_RUN과 production_ready=false",
+      "미등록/만료 token·소유권·유료 UTC 경계·staff/paid 독립·학교 범위 거절",
+      "기존 독립 승인 정책의 자기 승인403과 별도 승인자; 실제 학교 없음과 SYNTHETIC 회귀 구분",
+      "신뢰 명부/선택명부·pinned 출처 영수증·출처 kind·폴더/판·평문 SHA/bytes·암호 metadata 불일치 거절",
+      "수신 PC DPAPI roundtrip·LOCAL_MACHINE 금지·RAM 복호화·키/payload 출력 금지",
+      "승인 곡선 없음 HOLD·성공 총점 보존·대학/컷 부분 보류",
+      "외부 Caller·브라우저·실제 기대값 인수는 별도 source/영수증으로 검증"
+    ],
+    "remaining": [
+      "서비스 코드와 공통 기획/라우팅의 같은 커밋·정상 훅·정확 HEAD CI·develop 통합",
+      "데이터팀의 승인 곡선/규칙/카탈로그와 실제 기대값",
+      "외부 서버 전용 Caller와 브라우저 인수",
+      "다른 PC/계정 DPAPI 거부는 별도 미실행",
+      "운영 DB.env/실제 로그인/DB/Drive/배포는 별도 대기"
+    ],
+    "implementation_acceptance": {
+      "status": "frozen_candidate_source_and_scoped_local_verification_accepted",
+      "baseline_develop": "354d45097a501d788b8bb93ef238a15aef4d3ae3",
+      "branch": "feature/application-pre-data-platform",
+      "commit_state": "uncommitted_candidate_not_Git_CI_or_develop_acceptance",
+      "source_freeze_sha256": "83a636181716ecfd6a7d0a3540063fa18d7b6e791e729af038bfc30fda050ba0",
+      "source_files": [
+        {
+          "path": "src/jungsi_touch/infrastructure/local_dpapi.py",
+          "sha256": "fa8df5bc4369fb079d94db82990656579f84bd70798037345adc787bc1cd4047"
+        },
+        {
+          "path": "src/jungsi_touch/infrastructure/local_drive.py",
+          "sha256": "e2144c5241184b48b408cd4e0de6c212de0dd842a5aee159faf3666b6c518deb"
+        },
+        {
+          "path": "src/jungsi_touch/infrastructure/local_repository.py",
+          "sha256": "f2e4871389fe6967b7e6ed23d727d69d2cdd7722b9b0877cf0077c6164f97590"
+        },
+        {
+          "path": "src/jungsi_touch/infrastructure/local_verification.py",
+          "sha256": "fdb0256b30c83569f8bf7bccaccabfb330c6a471cbe956c6867dce5aa1a913da"
+        },
+        {
+          "path": "tests/test_local_verification.py",
+          "sha256": "331a56781ca1e1974dc439f6ef7c113a38b5ebbfa867e0b6f22e23eb929adfb9"
+        }
+      ],
+      "focused_tests": {
+        "count": 23,
+        "status": "PASS",
+        "source": "서비스팀 고정 영수증 및 부모 인수; 공통 writer는 전체 서비스 검사를 재실행하지 않았다."
+      },
+      "native_checks": {
+        "DPAPI_same_recipient_PC_user": "PASS_local_native_only",
+        "real_loopback_HTTP_test_users": "PASS_local_native_only",
+        "explicit_HOLD_no_data": "PASS",
+        "actual_empty_selection": "PASS_HOLD",
+        "actual_pending_selection": "PASS_HOLD",
+        "servers_stopped": true
+      },
+      "CLI_help": {
+        "commands": [
+          "--help",
+          "issue --help",
+          "prepare-local --help",
+          "serve --help"
+        ],
+        "status": "four_exit0",
+        "source": "공통 writer가 기존 고정 runtime/site와 고정 서비스 src에서 실제 help만 실행했다. token/자료/서버 명령은 실행하지 않았다."
+      },
+      "whole_snapshot_hooks_CI": "pending_same_commit_service_code_spec_planning_routing",
+      "PR_and_develop_integration": "pending_no_future_SHA_or_CI_claim",
+      "actual_approved_numeric_cases": "NOT_RUN_no_approved_curve_or_catalog_inputs",
+      "actual_DB_Supabase_Drive_browser": "NOT_RUN",
+      "production_ready": false,
+      "actual_model_operating_registration": false,
+      "cross_PC_or_other_account_DPAPI_rejection": "NOT_RUN"
+    }
+  }
 }
