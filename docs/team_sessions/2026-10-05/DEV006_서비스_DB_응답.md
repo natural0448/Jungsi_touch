@@ -1,6 +1,8 @@
 # DEV006 서비스·DB 응답과 외부 프런트 인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.3이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.6이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+
+현재 추가관측은아래⑪에기록한다. 기존본문의SQL미적용/PR대기등은해당시점history이며②③정식응답정의는불변이다.
 
 기획 반영일: 2026-10-06 UTC. 인계 revision **2026.10.06.v3**. 문서 출발 기준은 **2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f**이다. SUP01 별도 정시 FastAPI와 SUP02 public.jeongsi_passes 원본 목표는 확정했다. 현재 entitlements 어댑터/session v1 실행은 아직 전환하지 않았으며 **운영 NOT_READY**다. 문서 prepared_at와 과거 HTTP checked_at는 별개다.
 
@@ -145,13 +147,30 @@ SUP01/02 의사결정 대기는 해소했지만 배포 제공자·Connect·publi
 마지막 범위 정리: PR6의 head6b2 CI2는 같은 head이고 347은 develop2624의 ancestor가 아니며 빈학교표시fix도없다. FE-05 후속PR통합을요청한다. 로컬 네역할/HOLD·503/HTML검색0·경고는 document_reported pass, 직접root브라우저·전체JS/RSC/JSON/maps/storage/download·실429/공유예산/서버신원/preview·권한양성/자기승인·숫자/실DBAuth/운영은NOT_RUN/PENDING이다. FE-01 live.ts55 위험은P2 정적추론/실행미재현이며 외부화면팀이수정한다.
 
 
+## ⑨ 실제 Supabase staging 및 source DDL 수령 — 후속 snapshot
+
+현재 문서 출발 기준은 4366d67732556b69a17ebad03dbb5fc8bf1d6671이며 앞의 v3/2624 관측은 당시 기록으로 보존한다. 신규 private Storage 생성·49객체 해시 재수신·원본 보존/public 경로98거절과 source9파일/30SQL 검토·OpenAPI9컬럼 metadata를 수령했다. 실제 raw Storage 인증사용자/RLS·signedURL·SQL DB/권한·migration·자료/모형 채택·운영은 별도 미검수다. CR-SERVICE-SUP03 서비스 구현 준비가 채택됐으나 default 운영 factory/old entitlement/session v1 세필드/Drive·22API·4페이지·보안은 전환하지 않았다. 구체 현재 상태는 [Supabase 운영 인계](../../current/Supabase_운영_인수인계.md)의 실제 업데이트/source 입력 절을 따른다. 실제 자료경로/SHA/키는 private 영수증에만 두며 화면/코드로 복사하지 않는다.
+
+
+### ⑩ 실제 DB 사전 검수와001·002 적용의 단계 구분
+
+양계정 실제 TLS/role/master 최소SELECT와 기존 두 SELECT policy를 사전 catalog에서 확인했다. 이후 owner 단일transaction의 신규 private schema/13RLS tables·001002 적용 개발 영수증을 수령했으나 독립 원장 검수 pending·private app 정책0/runtime003·실 사용자권한/기본factory·운영은 미인수다. 이전 Storage/HTTP의 SQL NOT_RUN은 당시 관측으로 보존한다. CR-SERVICE-SUP04의 app-only/current_user·migration owner runtime거절을 채택하고 master9컬럼SELECT의 임의 REVOKE는 금지한다. PR15 정적 빈학교/숫자범위fix와 CI2 관측은 수용하고 FE-01R HTTP-date 문법 잔여·실브라우저/429·통합 인수는 후속이다.
+
+
+### ⑪ 003·최소자료·PR15통합의현재단계
+
+003은정확인간승인후적용하고fresh24policy/SELECT13·INSERT9·columnUPDATE6의최소권한metadata를확인했다. 실제10합성행은새process/TLS연결로영속성·CAS/멱등/소유권거절을검수했으나실학생/Auth/유료rows·운영전체인수는아니다. 명시port actualDB/master metadata는PASS이고health503는구성/자료/실세션준비보류다. 최소시험팩1건/328915B는statusstaged·승인0/unbound/engineprodfalse·provider미승인거절/network0이다. 수학한구간/9경계부분QA는wholeexam/CDF/공식정수백분위·실화면mode승인이아니다. PR15 ef7b7c08 exactCI2와develop3d90정상merge/삭제0·branch보존은확인됐고FE-01R·FE-ORIGIN·FE-SOURCE-01·browser/429·securitygate는pending이다. 직접인간은기본경로유지·명시연결만준비를선택하여CR06source변경0/defaultlegacy를유지한다. 서비스7준비파일/33focusedPASS와641이전9ERROR/별도fixture10PASS를같은Git전체검수와분리한다. 실제승인자료활성화·JWT·livehost·기본factory·운영은미완료이며minimalallowlist/49archive보존·API22/session3/page4·productionfalse/NOT_READY를유지한다.
+
+기본factory전환안CR06은직접인간이허용하지않았고명시연결준비만진행한다. owner는이관전용·운영서버app DATABASE_URL만·외부화면공개설정/APIorigin만전달한다. 실제secret/DBURL/자료hash·경로/공식점수/학생값은공유문서에복사하지않는다. FE-SOURCE-01 외부담당회신요청: https://github.com/natural0448/Jungsi_touch/pull/15#issuecomment-6018143154 .
+
+
 [로컬 검증 계약과 실행 후보](../../current/로컬_검증_연결.md)를 함께 읽는다.
 
 ## Supabase 운영 인수 상태
 
-별도 정시 Python FastAPI 배포와 public.jeongsi_passes 단일 이용권 원본을 확정 목표로 채택했다. 배포 제공자·BFF 상세 계약·DB 연결·어댑터 전환·관리자 예외 표현은 후속 회신/개발/검수가 필요하다. 현재 session v1 3필드·jungsi_backend.entitlements 실행·22API·4페이지·무료 전체 누백/유료 대학 후보 정책은 불변이다. 기존 보관 키의 HTTP 접근/limit=0 관측은 과거 범위이며 실제 로그인·SQL/RLS·이용권·승인 수치·Drive·운영 API·화면/보안 인수가 아니다. 승인 자료 0건은 05:32Z 관측이고 새 자료 승인 검수는 실행하지 않았다. production_ready=false / NOT_READY다. PR6는 develop2624에 통합됐고 head6b2 CI2 success를 root가 읽기 확인했다. 새 로컬 보고는 독립 문서 범위 검토를 마쳤으며 네 역할/HOLD·503/HTML검색0·경고의 document_reported pass다. 직접 root 브라우저·전체 전달물/실429/수치/운영/보안은 NOT_RUN/PENDING이다. 347의 빈 학교 표시 fix는 현재 develop에 포함되지 않아 FE-05로 통합해야 한다.
+003은정확인간승인후적용하고fresh24policy/SELECT13·INSERT9·columnUPDATE6의최소권한metadata를확인했다. 실제10합성행은새process/TLS연결로영속성·CAS/멱등/소유권거절을검수했으나실학생/Auth/유료rows·운영전체인수는아니다. 명시port actualDB/master metadata는PASS이고health503는구성/자료/실세션준비보류다. 최소시험팩1건/328915B는statusstaged·승인0/unbound/engineprodfalse·provider미승인거절/network0이다. 수학한구간/9경계부분QA는wholeexam/CDF/공식정수백분위·실화면mode승인이아니다. PR15 ef7b7c08 exactCI2와develop3d90정상merge/삭제0·branch보존은확인됐고FE-01R·FE-ORIGIN·FE-SOURCE-01·browser/429·securitygate는pending이다. 직접인간은기본경로유지·명시연결만준비를선택하여CR06source변경0/defaultlegacy를유지한다. 서비스7준비파일/33focusedPASS와641이전9ERROR/별도fixture10PASS를같은Git전체검수와분리한다. 실제승인자료활성화·JWT·livehost·기본factory·운영은미완료이며minimalallowlist/49archive보존·API22/session3/page4·productionfalse/NOT_READY를유지한다.
 
-[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v3; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
+[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v6; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
 
 [화면팀 최종 회신 요청](../../current/화면팀_회신요청_최종.md)의 RF-01~06과 로컬 요청 ①~⑥를 함께 인수한다. 문서 전달 준비 완료는 담당자 회신·실제 연결·운영 검수 완료를 뜻하지 않는다.
 
@@ -177,4 +196,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](../../current/외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=0555392e163a2e29d4593f32fc38e3516b9a6f4ee63979d9b81fbf186bc48f8d -->
+<!-- jungsi:generated spec_sha256=11a88bab4dcbb5f5823bab36f61bad938ee2e7c52471ea7649f76e2178bd43d7 -->
