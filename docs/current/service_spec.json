@@ -3378,6 +3378,14 @@
         "REQ-23"
       ],
       "summary": "프레젠테이션: 서버 전용 로컬 Caller 를 추가한다. JUNGSI_API_MODE=local 은 loopback(127.0.0.1·localhost·::1) JUNGSI_API_URL 과 Git 제외 설정의 시험 사용자 토큰(JUNGSI_LOCAL_TOKEN, 또는 JUNGSI_LOCAL_ROLE 이 고르는 JUNGSI_LOCAL_TOKEN_<역할>)이 모두 있을 때만 켜지고, 빠지면 기존 '연결 설정 대기'다. 토큰은 server-only 모듈에서 Authorization 전달에만 쓰며 브라우저·클라이언트 번들·화면에 내보내지 않고, 화면이 토큰을 해석하거나 역할·등급을 정하지 않는다(로컬 서버 allowlist 가 판단). 호출부는 live 와 같은 22개 API 클라이언트를 재사용하고 실패를 합성 응답으로 바꾸지 않는다. 화면 위 띠에는 로컬 검증 연결과 역할 이름만 표시한다. 이 방식은 로컬 검증 전용이며 운영 배포 설정(wrangler)에는 넣지 않는다."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-16",
+        "REQ-21"
+      ],
+      "summary": "프레젠테이션 합성 전수 점검 반영. ① 관리 화면 ActionForm 에 서버 액션 action 을 함께 걸어, 클라이언트 JS 가 붙기 전의 제출이 기본 GET 이동으로 빠져 멱등 key·입력값이 주소에 남던 문제를 막았다(JS 가 붙으면 기존 onSubmit 직접 제출로 입력값 유지). ② 핵심 지원 학교 띠가 대학 이름 앞 '예시' 접두어를 지우던 임시 처리(합성 전용)를 제거해 서버가 준 이름을 그대로 보여 준다. ③ next dev 가 apps/web 에 자동 생성하는 AGENTS.md·CLAUDE.md 를 Git 제외에 추가했다. 점검 결과: 회원 상태 5종 × 4페이지·관리·인쇄 화면, 성적 저장·담기·예상 기준 작성→조정→검증→승인→발행 흐름, 휴대폰 폭 가로 넘침 없음 확인."
     }
   ],
   "overall_analysis_contract": {

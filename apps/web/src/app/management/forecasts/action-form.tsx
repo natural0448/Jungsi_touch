@@ -7,13 +7,16 @@ const INITIAL: ForecastFormState = { code: null, status: null, message: null, ke
 
 /**
  * 관리 작업 폼. 서버 거절은 코드와 함께 폼 아래에 보인다.
- * form action 은 끝나면 입력을 비우므로(React 19) 직접 제출해 거절 뒤에도 입력한 값이 남게 한다.
+ * form action 은 끝나면 입력을 비우므로(React 19) JS 가 있으면 onSubmit 으로 직접 제출해
+ * 거절 뒤에도 입력한 값이 남게 한다. action 도 함께 걸어 JS 가 아직 안 붙었을 때(느린 연결)의
+ * 제출이 기본 GET 이동으로 빠지지 않고 같은 서버 액션 POST 로 가게 한다(주소에 값이 남지 않는다).
  */
 export function ActionForm({ hidden, submit, tone = "p", children }: { hidden: Record<string, string>; submit: string; tone?: "p" | "plain"; children?: ReactNode }) {
   const [state, action, pending] = useActionState(runForecast, INITIAL);
   return (
     <form
       className="mg-form"
+      action={action}
       onSubmit={(e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);

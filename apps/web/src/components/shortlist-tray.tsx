@@ -16,7 +16,7 @@ export function ShortlistTray({ items, other }: { items: PickedItem[]; other: "P
             {items.length ? (
               items.map((s) => (
                 <span key={s.offering_id} className={s.entry.assessment_status === "needs_revalidation" ? "stale" : undefined}>
-                  {s.offering ? `${s.offering.university_name.replace(/^예시/, "")} ${s.offering.department}` : "카탈로그에 없는 모집단위"}
+                  {s.offering ? `${s.offering.university_name} ${s.offering.department}` : "카탈로그에 없는 모집단위"}
                 </span>
               ))
             ) : (
