@@ -176,7 +176,7 @@
     "format": "jungsi.presentation-connection/v1",
     "code_status": "approved_for_implementation",
     "work_item": "docs/work_items/DEV-006-analysis-connection.json",
-    "source_commit": "01b8fe6461ad60c10649f07349f796b00051d903",
+    "source_commit": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
     "authentication": [
       "같은 Supabase 프로젝트/쿠키를 @supabase/ssr로 읽고 refresh를 쿠키 쓰기 가능 경계에서 처리한다.",
       "화면은 access token을 HTTP Authorization으로 전달하고 사용자 신원·회원 등급은 우리 API에서 검증한다. 서비스 권한을 클라이언트에서 변경하지 않는다.",
@@ -739,6 +739,16 @@
         "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/13",
         "pull_request_state_at_acceptance": "open_draft"
       }
+    },
+    "historical_frontend_source_before_20261006": "01b8fe6461ad60c10649f07349f796b00051d903",
+    "external_source_observation": {
+      "version_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
+      "version_fix": "observed_implemented",
+      "approved_four_file_deletion": "observed_completed_external_not_integrated",
+      "PR6": "open_unmerged",
+      "exact_HEAD_CI_jobs": "two_success",
+      "browser_and_real_connection": "NOT_RUN",
+      "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
     }
   }
 }

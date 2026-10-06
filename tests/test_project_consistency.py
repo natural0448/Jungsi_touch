@@ -235,4 +235,145 @@ class ConsistencyTests(unittest.TestCase):
         self.assertIn(b'```json\n',doc)
         self.assertIn(b'base_result',doc)
 
+
+class LocalVerificationContractTests(unittest.TestCase):
+    """Virtual attacks against local preparation, with no private inputs or cleanup."""
+    def setUp(self):
+        self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+
+    def changed(self,path,value):
+        spec=deepcopy(self.spec);target=spec['local_verification_contract']
+        parts=path.split('.')
+        for name in parts[:-1]:target=target[name]
+        target[parts[-1]]=value
+        return spec
+
+    def test_local_preparation_is_valid_and_guide_is_linked_without_internal_frontend_injection(self):
+        self.assertEqual(validate_spec(self.spec),[])
+        files=generated_files(self.spec)
+        guide=self.spec['current_documents']['local_verification']
+        self.assertIn(guide,files)
+        self.assertIn('production_ready=false'.encode(),files[guide])
+        for key in ('planning','routing','architecture','backend_readiness','presentation_handoff','presentation_connection'):
+            with self.subTest(document=key):
+                self.assertIn('로컬_검증_연결.md'.encode(),files[self.spec['current_documents'][key]])
+        frontend=json.loads(files['apps/web/route_catalog.json'])['local_verification_contract']
+        self.assertNotIn('composition',frontend)
+        self.assertNotIn('source_provenance',frontend)
+        self.assertNotIn('local_filesystem_selection',frontend)
+        self.assertEqual(len(self.spec['operations']),22)
+
+    def test_local_guide_cannot_be_redirected_or_contract_removed(self):
+        for path in ('.env','outputs/private.md','docs/current/임의가이드.md'):
+            with self.subTest(path=path):
+                wrong=deepcopy(self.spec);wrong['current_documents']['local_verification']=path
+                self.assertIn('Local verification source or document registration drift',validate_spec(wrong))
+        wrong=deepcopy(self.spec);wrong.pop('local_verification_contract')
+        self.assertIn('Local verification contract required',validate_spec(wrong))
+
+    def test_production_factory_auth_and_writes_cannot_select_local_adapters(self):
+        for path,value in (
+            ('composition.production_configured_app_unchanged',False),
+            ('composition.production_settings_selection_unchanged',False),
+            ('composition.local_factory_separate',False),
+            ('composition.production_can_select_local_adapter',True),
+            ('composition.operational_SQL_or_Drive_result_writes',True),
+            ('composition.adopt_or_register_estimated_model',True),
+            ('local_auth.production_entry_accepts_local_tokens',True),
+            ('network.allow_wildcard_host',True),
+            ('network.bind_host','0.0.0.0'),
+            ('network.CORS','*'),
+            ('network.proxy_headers',True),
+            ('network.forwarded_headers_allowed',True),
+        ):
+            with self.subTest(path=path):
+                self.assertIn('Local verification invariant drift: '+path,validate_spec(self.changed(path,value)))
+
+    def test_client_paid_staff_and_self_approval_cannot_override_server_scope(self):
+        for path,value in (
+            ('local_auth.server_allowlist_only',False),
+            ('local_auth.client_role_or_paid_fields_authoritative',True),
+            ('local_auth.profiles',['standard','paid','operator']),
+            ('local_auth.distinct_subjects_required',False),
+            ('local_auth.staff_is_paid',True),
+            ('local_auth.session_issue_required',False),
+            ('local_auth.maximum_TTL_hours',24),
+            ('local_auth.operator_university_allowlist_default','all'),
+            ('independent_approval.existing_policy_unchanged',False),
+            ('independent_approval.distinct_editor_and_approver_subjects',False),
+            ('independent_approval.self_approval_expected_HTTP',200),
+        ):
+            with self.subTest(path=path):
+                self.assertIn('Local verification invariant drift: '+path,validate_spec(self.changed(path,value)))
+
+    def test_hashes_receipts_and_source_identity_cannot_be_self_approved_or_aliased(self):
+        for path,value in (
+            ('data_authority.drive_requires_trusted_registry_sha256',False),
+            ('data_authority.local_requires_trusted_selection_sha256',False),
+            ('data_authority.explicit_engine_approved_requires_exact_true',None),
+            ('data_authority.automatic_status_promotion',True),
+            ('data_authority.source_completion_is_engine_approval',True),
+            ('source_provenance.trusted_receipt_sha256_required',False),
+            ('source_provenance.every_read_revalidation',False),
+            ('source_provenance.fabricate_drive_metadata_for_filesystem',True),
+            ('local_filesystem_selection.fake_Google_file_id_or_drive_version_or_parents',True),
+            ('local_filesystem_selection.approval_scope_is_production_approval',True),
+            ('local_filesystem_selection.approval_fields.scope','production'),
+            ('local_filesystem_selection.approval_fields.artifacts',['local_artifact_id']),
+        ):
+            with self.subTest(path=path):
+                self.assertIn('Local verification invariant drift: '+path,validate_spec(self.changed(path,value)))
+        for path,missing in (('source_provenance.drive_required','drive_version'),
+                             ('source_provenance.local_required','source_receipt_sha256'),
+                             ('local_filesystem_selection.entry_fields','approval_evidence_sha256')):
+            with self.subTest(path=path,missing=missing):
+                original=self.spec['local_verification_contract']
+                for part in path.split('.'):original=original[part]
+                self.assertIn('Local verification receipt or diagnostic fields drift: '+path,
+                              validate_spec(self.changed(path,[x for x in original if x!=missing])))
+
+    def test_dpapi_receiving_user_and_plaintext_preservation_cannot_be_weakened(self):
+        for path,value in (
+            ('encryption.scope','local_machine'),
+            ('encryption.CRYPTPROTECT_LOCAL_MACHINE',True),
+            ('encryption.recipient_encrypts_on_recipient_PC',False),
+            ('encryption.encryption_key_sharing',True),
+            ('encryption.new_plaintext_disk_write',True),
+            ('encryption.delete_existing_plaintext_originals',True),
+            ('encryption.decrypt_success_is_approval',True),
+            ('encryption.no_payload_key_in_logs_or_receipts',False),
+            ('private_git_boundary.real_payloads_env_and_registry_in_git',True),
+        ):
+            with self.subTest(path=path):
+                self.assertIn('Local verification invariant drift: '+path,validate_spec(self.changed(path,value)))
+
+    def test_memory_ready_and_numeric_hold_are_not_operational_acceptance(self):
+        for path,value in (
+            ('storage.DB_verified',True),
+            ('storage.restart_loses_state',False),
+            ('storage.DB002','verified'),
+            ('health.production_ready',True),
+            ('implementation_acceptance.production_ready',True),
+            ('implementation_acceptance.actual_model_operating_registration',True),
+            ('health.real_Supabase','verified'),
+            ('health.local_ready_is_production_ready',True),
+            ('score_results.missing_approved_curve','estimated'),
+            ('score_results.preserve_successful_total',False),
+            ('score_results.invent_numeric_expected_result',True),
+            ('api_boundary.operation_count',23),
+            ('api_boundary.nullable_unchanged',False),
+        ):
+            with self.subTest(path=path):
+                self.assertIn('Local verification invariant drift: '+path,validate_spec(self.changed(path,value)))
+
+    def test_null_numeric_and_string_flags_fail_closed_instead_of_boolean_coercion(self):
+        for path in ('encryption.CRYPTPROTECT_LOCAL_MACHINE','health.production_ready',
+                     'composition.production_can_select_local_adapter',
+                     'data_authority.local_requires_trusted_selection_sha256'):
+            for value in (None,0,1,'false','true'):
+                with self.subTest(path=path,value=value):
+                    self.assertIn('Local verification invariant drift: '+path,validate_spec(self.changed(path,value)))
+        wrong=self.changed('source_provenance.drive_required',['registry_sha256',False])
+        self.assertIn('Local verification receipt or diagnostic fields drift: source_provenance.drive_required',validate_spec(wrong))
+
 if __name__=="__main__":unittest.main()
