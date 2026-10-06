@@ -1,10 +1,10 @@
 # Supabase 운영 인수인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.0이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.1이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
-Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다.
+Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 기존 보관 키로 인증 설정·REST 메타데이터와 public 테이블의 limit=0 조회 접근을 확인했다. 실제 서비스 운영은 production_ready=false / NOT_READY다. HTTP 200과 0건 응답은 실제 사용자 로그인·PostgreSQL SQL 연결·RLS·이용권·입시모델 인수가 아니다.
 
-revision 2026.10.06.v1; 2026-10-06T05:32Z 읽기 snapshot; 문서 reviewed_pending_commit_validation. 공통 기획·라우팅·인수인계 메타데이터를 갱신한다. 서비스 구현, 실제 DB 쓰기·마이그레이션, 입시자료 승인, 운영 배포는 이번 범위에서 제외한다.
+revision 2026.10.06.v2; 2026-10-06T08:40:54.349322Z 읽기 snapshot; 문서 access_recheck_recorded_operational_NOT_READY. 공통 기획·라우팅·인수인계에 직전 읽기 요청의 Supabase API 재점검 결과를 기록한다. 최신 확인시각은 HTTP 접근 재점검에 한정하며 05:32Z 통합 현황은 이전 관측으로 보존한다. 서비스 구현, 실제 DB 쓰기·마이그레이션, 사용자 로그인, 입시자료 승인, 운영 배포는 이번 문서 갱신 범위에서 제외한다.
 
 ## 권장 구조와 미선택 결정
 
@@ -18,7 +18,7 @@ revision 2026.10.06.v1; 2026-10-06T05:32Z 읽기 snapshot; 문서 reviewed_pendi
 
 현재 구현은 jungsi_backend.entitlements를 조회한다. 기존 에듀터치 이용권과 연결할 단일 기준 저장소는 아직 선택하지 않았다(single_authority=not_selected).
 
-## 최소 조회와 실제 검수
+## 이전 통합 snapshot의 최소 조회와 실제 검수
 
 2026-10-06T05:32Z 읽기 점검 결과다. 이번에 확인한 비공개 설정 파일과 해당 프로세스·루트 환경, 최소 HTTP 조회와 Git 상태에 한정한다. 모든 PC나 전역 환경에서 설정이 없다고 단정하지 않는다.
 
@@ -38,11 +38,70 @@ PGRST106은 요청한 schema가 REST API의 db-schemas 노출 설정에 없다�
 
 외부 화면 PR6 head는 ff2a8e412c7adc16eb61af34a6219a2c5c2d072b, base는 81672e7214e34ff929639492319896420bd62196다. PR은 open/unmerged이며 실제 브라우저 검수는 NOT_RUN이다. 이 최신 HEAD의 CI 상태는 NOT_REVIEWED_IN_THIS_HANDOFF로 구분한다.
 
+## 최신 HTTP 접근 재점검과 .env 경계
+
+증거 ID SUP-ACCESS-20261006-083858Z-084054Z; 2026-10-06T08:38:58.873951Z ~ 2026-10-06T08:40:54.349322Z. 직전 사용자 요청에서 실행한 읽기 전용 HTTP·환경 존재 여부 점검의 도구 출력. 이번 변경은 관측 기록이며 HTTP 요청을 재실행하지 않는다. 동일 프로젝트의 GET 요청, 공개 인증키·Auth 설정·REST 메타데이터와 public 테이블 0건 요청에 한정한다. 사용자 인증·회원 데이터·비공개 입시자료를 조회하지 않았다.
+
+### 설정 파일·키 없는 조회
+
+| 시각 UTC | 요청 | HTTP | 확인 범위 |
+| --- | --- | --- | --- |
+| 08:38:58Z | 공개 JWKS | 200 | 설정 파일·키 없이 접근; ES256 공개키 1개 |
+| 08:38:58Z | Auth settings | 401 | 설정 파일·키 없이 요청; 인증 설정 접근 거절 |
+| 08:38:58Z | Auth user | 401 | 설정 파일·키·사용자 JWT 없이 요청; 사용자 로그인 미검증 |
+
+### 기존 비공개 보관 키를 사용한 조회
+
+파일과 키를 사용하지 않는 공개 조회를 먼저 수행했다. 키가 필요한 단계에서는 이전에 전달받은 설정을 보관한 기존 비공개 파일을 메모리로 읽었다. 새 .env 생성은 0건이다. 무키 조회와 기존 보관 키 조회를 분리한다.
+
+| 시각 UTC | 요청 | HTTP | 확인 범위 |
+| --- | --- | --- | --- |
+| 08:38:58Z | 공개키 Auth settings | 200 | 기존 보관 공개키로 인증 설정 접근 가능 |
+| 08:38:58Z | 공개키 Auth user | 401 | 사용자 JWT 없음; 실제 로그인 미검증 |
+| 08:38:58Z | 공개키 REST metadata | 401 | 이 요청의 REST 접근 거절; 일반 사용자 권한 판정 아님 |
+| 08:38:58Z | 서버키 REST metadata | 200 | 서버키로 REST 메타데이터 접근; SQL/RLS/회원권한 인수 아님 |
+| 08:38:58Z | 비공개 schema REST | 406 / PGRST106 | 현재 REST 비노출; SQL schema 존재·권한은 미검증 |
+| 08:40:54Z | public.profiles GET select=*&limit=0 | 200 | 반환 [] 확인; 실제 회원 레코드 취득 0건 |
+
+limit=0의 응답 []는 요청이 0건 반환되었다는 증거다. 테이블의 전체 인원이 0명이라는 뜻이 아니며 실제 레코드 내용·일반 사용자 RLS·유료 이용권·현재 PostgreSQL 어댑터를 검수하지 않았다.
+
+### 설정 보관과 실행 환경
+
+기존 비공개 파일 확인 설정 이름: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY, SUPABASE_JWKS_URL.
+
+이번 프로세스·해당 PC User/Machine 환경변수 미주입 이름: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY, SUPABASE_JWKS_URL, DATABASE_URL, JUNGSI_PROBE_ACCESS_TOKEN.
+
+확인한 기존 비공개 파일에는 위 4개 참조가 있었다. 이번 점검 프로세스·해당 PC의 User/Machine 환경변수에는 위 6개 이름이 없었다. DATABASE_URL과 JUNGSI_PROBE_ACCESS_TOKEN은 확인한 파일과 환경 모두에서 확보하지 못했다. 다른 PC·배포 서버·프로젝트 전체의 부재를 뜻하지 않는다.
+
+.env 파일은 설정 보관·주입 방식 중 하나이며 그 파일 자체는 필수가 아니다. ServerSettings.from_environment는 os.environ만 읽고 .env를 자동으로 읽지 않는다. 파일 보관과 실행 프로세스 환경변수 주입은 별도 작업이다. 배포 서버 환경변수로 같은 필수 설정을 전달할 수 있으며, 설정 없이 보호 API/DB를 사용할 수 있다는 뜻은 아니다.
+
+### 미검증 범위와 운영 상태
+
+| 항목 | 상태 | 이유 |
+| --- | --- | --- |
+| PostgreSQL SQL 연결·전용 role·RLS | NOT_RUN | 현재 PostgreSQL 어댑터용 DATABASE_URL 미확보 |
+| 실제 사용자 로그인 | NOT_RUN | 검수 사용자 Bearer JWT 미확보 |
+| 이용권·소유권·staff 범위 | NOT_RUN | 실제 DB·로그인 검수와 단일 이용권 기준 필요 |
+| Supabase Console 로그인·관리 권한 | NOT_VERIFIED_TIMEOUT | 브라우저 상태 조회 시간 초과; 계정 권한의 허용·거절을 관측하지 못함 |
+| 마이그레이션·운영 쓰기 | NOT_RUN | 이 읽기 점검에서 실행하지 않음 |
+| 운영 준비 | NOT_READY | production_ready=false 유지; API 200으로 승격하지 않음 |
+
+실제 레코드 취득 0건; 운영 쓰기 0건; 새 .env 생성 0건. production_ready=false를 유지한다.
+
+### 다음 담당자의 작업
+
+| 담당 | 작업과 경계 |
+| --- | --- |
+| 서버·DB 담당 | 기존 설정으로 비공개 최소 읽기 점검 가능. 현재 PostgreSQL 어댑터는 DATABASE_URL·전용 role·TLS를 실행 환경에 주입하고 실제 SQL 검수를 별도로 수행한다. REST 0건 성공을 그 검수로 대체하지 않는다. |
+| 인증·이용권 담당 | 검수용 실제 일반·유료 사용자 JWT와 단일 이용권 기준을 준비한다. 사이트 admin 표식이나 서버 API 키를 사용자 로그인·유료 권한으로 취급하지 않는다. |
+| 외부 화면 담당 | 화면에는 운영 API origin과 공개 Auth 설정만 전달한다. 서버키·DATABASE_URL·비공개 데이터 접근값은 화면·브라우저에 전달하지 않는다. 서버 중계 신원은 BFF의 서버 전용 설정과 분석 서버 검증으로 별도 구현한다. |
+| 운영·통합 담당 | SUP-01~11 및 보안 SEC-01~08의 기존 의존관계·NOT_RUN/HOLD를 유지한다. private schema REST 노출 변경·기존 어댑터 교체·DB 쓰기·배포를 이번 API 접근 결과만으로 수행하지 않는다. |
+
 ## 현재 코드와 설정 경계
 
 | 항목 | 현재 구현과 미실행 경계 |
 | --- | --- |
-| settings | ServerSettings.from_environment는 os.environ만 읽는다. ignored .env 파일을 보관하는 것만으로 서버 프로세스에 자동 주입되지 않는다. |
+| settings | .env 파일 자체는 필수가 아니다. ServerSettings.from_environment는 os.environ만 읽으며 .env 자동 로더가 없다. 기존 파일을 보관하는 것과 서버 프로세스에 필요한 환경변수를 주입하는 것은 별도 작업이다. |
 | authentication | SupabaseSessionProvider는 getUser로 확인한 사용자와 같은 JWT의 sub/exp를 대조한다. JWKS를 조회한 사실이 직접 서명 검증 구현의 완료를 뜻하지 않는다. |
 | entitlement | SessionService는 서버 이용권으로 유료 권한을 판정한다. profile/admin 표식이나 클라이언트 paid 값으로 자동 승격하지 않는다. 결제 취소·회수·동기화 adapter는 별도 구현이 필요하다. |
 | postgres | prepare_threshold=None, TLS require, 트랜잭션의 SET LOCAL UTC와 advisory transaction lock을 유지한다. 실제 DB 연결 검수는 NOT_RUN이다. |
@@ -115,7 +174,7 @@ SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설�
 
 업무:
 
-- URL/publishable Auth 설정은 검토 범위에서 확보됐다. 새 프로젝트 생성이 필수라는 전제를 두지 않는다.
+- 기존 비공개 보관 URL/publishable/서버키로 HTTP API와 public 테이블 limit=0 접근을 확인했다. .env 파일 자체는 필수가 아니며 새 프로젝트 생성이 필수라는 전제를 두지 않는다. 현재 SQL 어댑터 검수는 별도다.
 - 배포환경에 맞게 direct/session pooler/transaction을 선택하고 Connect의 exact host/사용자/연결 문자열을 복사한다. 지역으로 host를 합성하지 않는다.
 - DATABASE_URL·전용role·TLS를 process 환경에 주입한다. ignored .env 보관만으로 자동 load하지 않고 secret API key는 DB 비밀번호가 아니다.
 - 현재 psycopg prepare_threshold=None·transaction SET LOCAL UTC·advisory transaction lock을 보존한다.
@@ -144,6 +203,7 @@ SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설�
 - JWT를 보안 경로로 받아 실제 Auth getUser 응답과 sub/exp 일치, 만료·비정상·불일치 JWT 거절을 검수한다. 유료·staff 권한과 /api/v1/me session DTO 판정은 SUP-04·05 이후 SUP-06에서 인수한다.
 - 현재 SupabaseSessionProvider는 getUser 검증 후 sub/exp를 대조한다. JWKS 조회 성공을 직접 signature 검증 구현 완료로 기록하지 않는다.
 - 사이트 admin 표식은 현재 실로그인/console admin/paid 권한을 보장하지 않는다. JWT/비밀번호/개인식별정보를 공개문서·로그에 넣지 않는다.
+- 키를 넣은 Auth settings200·JWT 없는 getUser401은 실제 사용자 로그인 인수가 아니다. Console 상태 조회 시간 초과는 관리 권한 없음·있음의 증거가 아니다.
 
 완료조건:
 
@@ -191,7 +251,7 @@ SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설�
 
 업무:
 
-- 운영 API/공개설정만 전달받아 실제 JWT Caller/22 DTO/4페이지·브라우저를 검수한다. 이번 문서팀은 화면 코드를 수정하지 않는다.
+- 기존 Supabase 공개 설정은 확인돼 있으므로 같은 설정을 다시 요청할 필요는 없다. 운영 API/공개설정으로 실제 JWT Caller/22 DTO/4페이지·브라우저를 검수한다. 서버키·DATABASE_URL을 화면에 전달하지 않는다. 이번 문서팀은 화면 코드를 수정하지 않는다.
 - PAGE1 발표입결/개인성적 불필요, PAGE2 무료 전체누백까지, PAGE3 유료검색·환산·가능성·유불리, PAGE4 유료2:1 학교·학과/와일드카드를 유지한다.
 - 409 학과기준 조회는 해당 부분만 보류하며 성공점수 보존. release/policy/input 모두 nonempty string일 때 exact equality·context17 존재/값/타입/null 동일성을 검수한다.
 - PR6 open/unmerged·브라우저 NOT_RUN. source/CI·로컬 공개설정을 운영/브라우저 인수로 확대하지 않는다.
@@ -273,9 +333,9 @@ TypeScript/Deno runtime이다. 현재PythonFastAPI/NumPy의별도backend권장�
 
 ## Supabase 운영 인수 상태
 
-Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다. Python FastAPI 엔진과 22개 API의 배포 연결 방식, 유료 이용권의 단일 권한 기준은 아직 선택하지 않았다. 실제 DB·Bearer 로그인·유료 권한·승인 입시자료·운영 API 배포·외부 4페이지 인수는 NOT_RUN 또는 HOLD다. 승인 자료 수는 0이다.
+기존 비공개 보관 키로 Supabase Auth 설정·서버 REST 메타데이터·public 테이블 limit=0 조회가 HTTP 200으로 성공했다. .env 파일 자체는 필수가 아니며, 이번 keyed 조회에는 기존 비공개 설정 파일을 사용했다. 현재 PostgreSQL 어댑터의 DATABASE_URL과 실제 사용자 JWT는 확인한 설정 범위에서 미확보다. 관리 콘솔 권한은 브라우저 조회 시간 초과로 미검증이다. API 접근 확인과 전체 운영 인수를 구분하며 production_ready=false / NOT_READY를 유지한다. Python API 배포 연결 방식과 이용권의 단일 기준은 미선택이고, 실제 DB·로그인·이용권·승인 자료·운영 API·외부 4페이지 인수는 NOT_RUN/HOLD다. 승인 자료 0건은 05:32Z 이전 관측이며 이번 HTTP 재점검에서 재조사하지 않았다.
 
-[Supabase 운영 인수인계](Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v1; 2026-10-06T05:32Z 읽기 snapshot.
+[Supabase 운영 인수인계](Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v2; 2026-10-06T08:40:54.349322Z 읽기 snapshot.
 
 PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.
 
@@ -310,4 +370,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=2d8fcb45b5bd01a1184de342d703a3a6786e727c8a3cd3095e42f2428451bcc4 -->
+<!-- jungsi:generated spec_sha256=e60ee221a1a947ee40e8ac19b31f22a3a8bf910a793e00710ab631f0b661e02f -->
