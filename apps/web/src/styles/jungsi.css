@@ -1,0 +1,91 @@
+/* ===================================================================
+   정시터치 공통 틀 — 머리글·탭·막힘 안내·합성 응답 띠·바닥글
+   tokens.css → base.css 다음에 불러온다. 색은 토큰만 쓴다(에듀터치 정시터치 화면과 같은 규칙).
+   =================================================================== */
+:root{--font-kr:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;word-break:keep-all}
+@media (max-width:640px){input,select,textarea{font-size:16px!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.et.jt{min-height:100vh;display:flex;flex-direction:column;
+  --jt-picked:#F8FAFF; --jt-down:#9097AA;
+}
+.et.jt main{flex:1}
+.et .wrap.pg-body{padding-left:20px;padding-right:20px}
+
+/* 머리글 */
+.et .jt-util{border-bottom:1px solid var(--line)}
+.et .jt-util .wrap{display:flex;align-items:center;gap:14px;height:64px}
+.et .logo{display:flex;align-items:baseline;gap:2px;font-family:var(--font-montserrat),sans-serif;font-weight:900;font-size:22px;letter-spacing:-1px;white-space:nowrap}
+.et .logo b{color:var(--brand)}
+.et .logo i{font-style:normal;color:var(--touch)}
+.et .jt-sep{width:1px;height:18px;background:var(--line)}
+.et .jt-name{font-weight:900;font-size:18px;letter-spacing:-.6px;color:var(--ink)}
+.et .jt-name em{font-style:normal;color:var(--touch)}
+.et .jt-user{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-2)}
+.et .jt-user .pass{padding:2px 8px;border-radius:10px;background:var(--touch-soft);color:var(--touch);font-weight:700;font-size:12px;white-space:nowrap}
+.et .jt-user .pass.off{background:var(--sub-2);color:var(--muted)}
+.et .jt-user .btn{height:32px}
+
+/* 탭 */
+.et .jt-tabs{border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:40}
+.et .jt-tabs ul{display:flex;gap:4px;height:52px;overflow-x:auto;scrollbar-width:none}
+.et .jt-tabs ul::-webkit-scrollbar{display:none}
+.et .jt-tabs li{display:flex;flex:none}
+.et .jt-tabs a{display:flex;align-items:center;gap:5px;padding:0 14px;font-weight:700;font-size:16px;color:var(--muted);position:relative;letter-spacing:-.3px;white-space:nowrap}
+.et .jt-tabs a:hover{color:var(--ink)}
+.et .jt-tabs a::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;border-radius:2px 2px 0 0;background:var(--touch);transform:scaleX(0);transition:transform .15s}
+.et .jt-tabs a.on{color:var(--ink)}
+.et .jt-tabs a.on::after{transform:scaleX(1)}
+.et .jt-tabs .ic-lock{flex:none;color:var(--muted)}
+
+/* 쪽 머리 보탬 */
+.et .pg-head .row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.et .pg-head p{max-width:62ch}
+
+/* 버튼 보탬 */
+.et .btn.off{opacity:.55;cursor:not-allowed}
+
+/* 막힘 안내 */
+.et .gate{max-width:640px;margin:28px auto 0;border:1px solid var(--line);border-radius:var(--r-card);padding:28px;background:var(--bg)}
+.et .gate.flat{max-width:none;margin:0}
+.et .gate .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--sub);color:var(--ink-2);margin-bottom:14px}
+.et .gate.pass .ic{background:var(--touch-soft);color:var(--touch)}
+.et .gate h2{font-size:22px;font-weight:900;letter-spacing:-.5px}
+.et .gate p{margin:8px 0 0;color:var(--ink-2);line-height:1.7}
+.et .gate ul{margin:14px 0 0;display:grid;gap:6px;font-size:13px;color:var(--ink-2)}
+.et .gate li{display:flex;gap:8px}
+.et .gate li::before{content:"";flex:none;width:6px;height:6px;margin-top:8px;border-radius:50%;background:var(--touch)}
+.et .gate .acts{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.et .gate .acts .btn{height:42px;padding:0 18px;font-size:14px}
+
+/* 합성 응답 띠 */
+.et .synbar{background:var(--deep);color:#fff;font-size:12px}
+.et .synbar .wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.et .synbar .tag{font-weight:700;color:var(--touch-soft)}
+.et .synbar .txt{color:#C9D3EA}
+.et .synbar .sp{flex:1}
+.et .synbar button{padding:4px 10px;border:1px solid rgba(255,255,255,.35);border-radius:14px;color:#fff;font-size:12px}
+.et .synbar button.on{background:#fff;color:var(--deep);border-color:#fff;font-weight:700}
+
+/* 바닥글 */
+.et .jt-foot{border-top:1px solid var(--line);background:var(--sub);font-size:12px;color:var(--muted)}
+.et .jt-foot .wrap{padding-top:18px;padding-bottom:26px}
+.et .jt-foot p{margin:0 0 4px}
+
+@media (max-width:520px){
+  .et .jt-tabs a{font-size:14px;padding:0 10px}
+  .et .pg-head h1{font-size:24px}
+}
+
+/* 인쇄: 머리글·탭·합성 응답 띠·바닥글·핵심 지원 학교 띠를 숨긴다(상담 리포트 인쇄용 화면) */
+@media print{
+  .et .synbar,.et .jt-util,.et .jt-tabs,.et .jt-foot,.et .tray,.et .pg-head{display:none!important}
+  body{background:#fff}
+}
+
+/* 연결 대기 안내: 설정 이름과 사유 코드 */
+.et .conn-missing,.et .conn-code{margin:6px 0 0;font-size:12px;color:var(--ink-2)}
+.et .conn-missing code,.et .conn-code code{padding:1px 5px;border-radius:3px;background:var(--sub);font-size:11px;word-break:break-all}

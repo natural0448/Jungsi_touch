@@ -1,0 +1,164 @@
+/* 3페이지 · 전체 대학·학과 가능성 보기 (시안 2026-10-03) */
+.et .ps{display:grid;gap:16px;padding-bottom:24px}
+
+
+/* 검색 상자 (1페이지와 같은 구성) */
+.et .ps .filter{border:1px solid var(--line);border-radius:var(--r-card);padding:16px 18px 8px}
+.et .ps .search{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}
+.et .ps .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.et .ps .field span{font-size:13px;font-weight:700}
+.et .ps .search input{width:100%;min-width:0;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:var(--r-card);font:inherit;color:var(--ink)}
+.et .ps .search input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.et .ps .search .btn{height:46px;padding:0 26px;font-size:14px}
+.et .ps .cfilter{margin-bottom:6px}
+.et .ps .cfilter .lab{width:44px}
+.et .ps .chips{margin-bottom:6px}
+.et .ps .hint{margin:4px 0 8px;font-size:12px;color:var(--muted)}
+
+.et .ps .count{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.et .ps .count b{color:var(--ink)}
+.et .ps .count small{color:var(--muted)}
+.et .ps .ps-warn{margin:0;padding:10px 14px;border-radius:var(--r-sm);background:var(--sub);font-size:13px;color:var(--ink-2)}
+
+/* 대학별 묶음 */
+.et .ps .list{display:grid;gap:12px}
+.et .ps .univ{border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+.et .ps .univ header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:12px 16px;background:var(--sub);border-bottom:1px solid var(--line)}
+.et .ps .univ h2{font-size:16px;font-weight:900;letter-spacing:-.4px}
+.et .ps .univ .meta{font-size:13px;color:var(--muted)}
+.et .ps .univ .scale{margin-left:auto;font-size:12px;color:var(--ink-2)}
+.et .ps .univ .scale b{font-weight:700}
+
+.et .ps .thead,.et .ps .row{display:grid;grid-template-columns:minmax(0,1.7fr) 44px minmax(0,1fr) 120px minmax(0,1.15fr) 66px 22px;gap:12px;align-items:center;padding:0 16px}
+.et .ps .thead{height:34px;font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line)}
+.et .ps .r{text-align:right}
+.et .ps .row{min-height:60px;padding-top:8px;padding-bottom:8px;transition:background .12s}
+.et .ps .item+.item{border-top:1px solid var(--line)}
+.et .ps .row:hover{background:var(--sub)}
+.et .ps .item.open .row{background:var(--jt-picked)}
+.et .ps .unit{display:flex;flex-direction:column;min-width:0}
+.et .ps .unit b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.et .ps .unit small{font-size:12px;color:var(--muted)}
+.et .ps .unit:hover b{color:var(--brand)}
+.et .ps .c-chev{display:grid;place-items:center;color:var(--muted)}
+.et .ps .ic-chev{transition:transform .15s}
+.et .ps .item.open .ic-chev{transform:rotate(90deg)}
+
+
+
+
+/* 펼친 상세 */
+.et .ps .detail{border-top:1px solid var(--line);background:var(--jt-picked);padding:16px}
+.et .ps .recruit{display:flex;gap:22px;flex-wrap:wrap;align-items:baseline;font-size:12px;color:var(--ink-2);margin-bottom:14px}
+.et .ps .recruit b{display:block;font-size:16px;font-weight:900;color:var(--ink)}
+.et .ps .recruit .wait{font-size:13px;font-weight:700;color:var(--reach)}
+.et .ps .recruit a{margin-left:auto;color:var(--brand);font-weight:700}
+.et .ps .four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+/* 환산·누백·판단 준비 상태 띠 */
+.et .ps .strip{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:0;list-style:none}
+.et .ps .strip li{font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink-2)}
+.et .ps .strip li b{color:var(--ink);font-weight:800}
+.et .ps .strip li.ok b::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--safe);margin-right:6px;vertical-align:1px}
+.et .ps .strip li.hold b::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--muted);margin-right:6px;vertical-align:0}
+.et .ps .strip li small{color:var(--muted)}
+.et .ps .card .tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:4px;background:var(--sub);font-size:11px;font-weight:700;color:var(--ink-2)}
+.et .ps .card .tags{display:flex;gap:6px;flex-wrap:wrap}
+.et .ps .card .tags .tag{margin-left:0}
+/* 서버가 만든 판단 이유와 기준선 근거 */
+.et .ps .reasons,.et .ps .evidence{margin-top:12px;padding:12px 16px;border-radius:var(--r-card);border:1px solid var(--line);background:var(--bg)}
+.et .ps .reasons h3,.et .ps .evidence h3{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+.et .ps .evidence h3 small{font-weight:600}
+.et .ps .evidence ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:13px;color:var(--ink-2)}
+.et .ps .evidence li b{display:inline-block;min-width:64px;font-weight:700;color:var(--ink)}
+/* 발행된 학과 기준(관리 화면에서 발행한 값) */
+.et .ps .published{margin:0 0 14px;padding:12px 16px;border-radius:var(--r-card);border:1px solid var(--line);background:var(--bg)}
+.et .ps .published h3{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+.et .ps .published h3 small{font-weight:600;letter-spacing:0}
+.et .ps .published dl{margin:0;display:flex;gap:6px 22px;flex-wrap:wrap}
+.et .ps .published dl div{display:flex;gap:8px;align-items:baseline;font-size:13px}
+.et .ps .published dt{color:var(--ink-2)}
+.et .ps .published dd{margin:0;font-weight:800}
+.et .ps .published p{margin:6px 0 0;font-size:12px;color:var(--ink-2)}
+.et .ps .published .note{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
+.et .ps .published .pub-issues{margin:6px 0 0;padding:0;list-style:none;font-size:12px;color:var(--ink-2)}
+.et .ps .published .pub-issues b,.et .ps .evidence li small{font-weight:700;color:var(--ink)}
+.et .ps .evidence li small{font-weight:500;color:var(--muted)}
+.et .ps .card{border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.et .ps .card h3{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px}
+.et .ps .card .big{font-size:26px;font-weight:900;letter-spacing:-.6px}
+.et .ps .card .big small{font-size:13px;font-weight:600;color:var(--muted);margin-left:4px}
+.et .ps .card .big.hold{font-size:18px;color:var(--muted)}
+.et .ps .card .big.up{color:var(--safe)}
+.et .ps .card .big.down{color:var(--ink-2)}
+.et .ps .card .big.even{color:var(--fit)}
+.et .ps .card p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.6}
+.et .ps .card .note{font-size:12px;color:var(--muted)}
+.et .ps .card p small{font-size:12px;color:var(--muted)}
+.et .ps .card .wait{font-weight:700;color:var(--muted)}
+.et .ps .card .adj b{color:var(--ink)}
+/* 연도별 근거: 내 추정 환산점수와 대학 발표 지표를 나란히(판정하지 않는다) */
+.et .ps .years{margin-top:12px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:12px 16px;overflow-x:auto}
+.et .ps .years table{width:100%;border-collapse:collapse;font-size:13px}
+.et .ps .years caption{text-align:left;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px;padding-bottom:6px}
+.et .ps .years th,.et .ps .years td{padding:6px 8px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+.et .ps .years thead th{border-top:0;font-size:12px;color:var(--muted);font-weight:700}
+.et .ps .years .r{text-align:right}
+.et .ps .years .m{display:inline-block;margin-right:14px;color:var(--ink-2)}
+.et .ps .years .m b{color:var(--ink)}
+.et .ps .years .na{color:var(--muted)}
+.et .ps .years .note{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
+.et .ps .hist{display:grid;gap:4px}
+.et .ps .hist .h{display:grid;grid-template-columns:40px 1fr 66px;gap:8px;align-items:center;font-size:12px;color:var(--ink-2)}
+.et .ps .hist .track{position:relative;height:10px;background:var(--sub-2);border-radius:5px}
+.et .ps .hist .cut{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink-2);border-radius:1px}
+.et .ps .hist .me{position:absolute;top:1px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:var(--brand)}
+.et .ps .hist .r{font-weight:700}
+.et .ps .hist .r.above{color:var(--safe)}
+.et .ps .hist .r.below{color:var(--ink-2)}
+.et .ps .hist .r.na{color:var(--muted);font-weight:500}
+.et .ps .dumb{position:relative;height:30px;margin:4px 6px 0}
+.et .ps .dumb .axis{position:absolute;left:0;right:0;top:14px;height:2px;background:var(--sub-2)}
+.et .ps .dumb .seg{position:absolute;top:13px;height:4px;background:var(--safe);border-radius:2px}
+.et .ps .dumb .seg.down{background:var(--jt-down)}
+.et .ps .dumb .dot{position:absolute;top:9px;width:12px;height:12px;margin-left:-6px;border-radius:50%;border:2px solid var(--bg)}
+.et .ps .dumb .dot.a{background:var(--muted)}
+.et .ps .dumb .dot.b{background:var(--ink)}
+.et .ps .dumb-lab{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink-2)}
+.et .ps .dumb-lab b{color:var(--ink)}
+.et .ps .reason{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:10px 12px;border-radius:var(--r-sm);background:var(--sub);font-size:13px;color:var(--ink-2)}
+.et .ps .reason .lab{flex:none;font-weight:700;color:var(--muted)}
+.et .ps .reason b{color:var(--ink)}
+.et .ps .detail .acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.et .ps .empty-an{border:1px dashed var(--line);border-radius:var(--r-card);background:var(--bg);padding:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.et .ps .empty-an p{margin:0;font-size:13px;color:var(--ink-2);flex:1;min-width:220px}
+
+.et .ps .pager{display:flex;justify-content:space-between}
+
+
+.et .ps .mmeta{display:none;gap:10px;font-size:12px;color:var(--ink-2);align-items:center}
+
+/* 좁은 노트북: 유불리 막대를 빼고 숫자만 둔다(숫자가 담기 버튼과 겹치지 않게) */
+@media (max-width:1100px){
+  .et .ps .four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .et .ps .row .adv .bar{display:none}
+  .et .ps .adv .v{min-width:0}
+}
+
+/* 휴대폰: 줄을 카드처럼 */
+@media (max-width:860px){
+  .et .ps .thead{display:none}
+  .et .ps .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"unit pick" "meta meta" "score st" "adv adv";row-gap:8px}
+  .et .ps .row>.unit{grid-area:unit}
+  .et .ps .row>.c-grp,.et .ps .row>.c-chev{display:none}
+  .et .ps .row>.c-score{grid-area:score;text-align:left}
+  .et .ps .row>.c-score .score{align-items:flex-start}
+  .et .ps .row>.c-st{grid-area:st;justify-self:end}
+  .et .ps .row>.c-adv{grid-area:adv;text-align:left}
+  .et .ps .row>.c-pick{grid-area:pick;justify-self:end}
+  /* 핵심 지원 학교 띠는 휴대폰에서 한 줄로: 이름 목록은 접고 개수와 리포트 버튼만 */
+  .et .ps .row>.mmeta{grid-area:meta;display:flex}
+  .et .ps .four{grid-template-columns:1fr}
+  .et .ps .search{grid-template-columns:1fr}
+  .et .ps .univ .scale{margin-left:0;width:100%}
+  .et .ps .recruit a{margin-left:0}
+}

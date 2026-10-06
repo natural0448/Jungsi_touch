@@ -1,0 +1,11 @@
+# 루트 .gitignore 가 node_modules·.next·.env 계열을 이미 막는다. 여기는 웹 앱 빌드 산출물만.
+/.open-next/
+/.wrangler/
+.dev.vars
+cloudflare-env.d.ts
+*.tsbuildinfo
+next-env.d.ts
+/out/
+# next dev 가 자동 생성하는 에이전트 안내 파일(커밋 금지)
+/AGENTS.md
+/CLAUDE.md

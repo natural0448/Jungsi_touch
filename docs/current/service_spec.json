@@ -1877,6 +1877,154 @@
         "PrivateJsonEstimationStore",
         "PrivateJsonEstimateApproval"
       ]
+    },
+    {
+      "path": "apps/web/src/app/admissions/possibilities/page.tsx",
+      "layer": "presentation",
+      "status": "page3_presentation_on_backend_DTO_synthetic_responses_no_live_API",
+      "requirements": [
+        "REQ-03",
+        "REQ-05",
+        "REQ-08",
+        "REQ-11",
+        "REQ-13",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/lib/api/index.ts",
+      "layer": "presentation",
+      "status": "presentation_API_client_synthetic_default_live_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-18"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/app/admissions/favorable/page.tsx",
+      "layer": "presentation",
+      "status": "page4_presentation_on_backend_DTO_synthetic_responses_no_live_API",
+      "requirements": [
+        "REQ-04",
+        "REQ-05",
+        "REQ-08",
+        "REQ-09",
+        "REQ-10",
+        "REQ-11",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/app/admissions/results/page.tsx",
+      "layer": "presentation",
+      "status": "page1_presentation_on_backend_DTO_synthetic_responses_no_live_API",
+      "requirements": [
+        "REQ-01",
+        "REQ-13",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/lib/dto.ts",
+      "layer": "presentation",
+      "status": "presentation_copy_of_backend_DTO_contract_1_2_2",
+      "requirements": [
+        "REQ-01",
+        "REQ-13",
+        "REQ-15"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/app/reports/me/page.tsx",
+      "layer": "presentation",
+      "status": "page2_presentation_on_backend_DTO_synthetic_responses_no_live_API",
+      "requirements": [
+        "REQ-02",
+        "REQ-11",
+        "REQ-12",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/app/reports/me/print/page.tsx",
+      "layer": "presentation",
+      "status": "counseling_report_print_view_on_report_export_DTO",
+      "requirements": [
+        "REQ-11",
+        "REQ-14"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/lib/report-ops.ts",
+      "layer": "presentation",
+      "status": "report_bound_analysis_candidates_shortlist_calls_with_idempotency_and_revision_retry",
+      "requirements": [
+        "REQ-04",
+        "REQ-05",
+        "REQ-06",
+        "REQ-10",
+        "REQ-11"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/proxy.ts",
+      "layer": "presentation",
+      "status": "supabase_ssr_token_refresh_and_private_no_store_DEV006",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-20"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/lib/supabase/server.ts",
+      "layer": "presentation",
+      "status": "same_supabase_project_cookie_read_publishable_key_only",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-20"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/components/connection-notice.tsx",
+      "layer": "presentation",
+      "status": "explicit_synthetic_only_connection_pending_notice_no_fallback",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-20"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "apps/web/src/app/management/forecasts/page.tsx",
+      "layer": "presentation",
+      "status": "ADMIN_FORECAST_management_screen_on_1_7_1_contract_synthetic_responses",
+      "requirements": [
+        "REQ-08",
+        "REQ-09",
+        "REQ-14",
+        "REQ-20",
+        "REQ-21",
+        "REQ-22"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -2728,7 +2876,18 @@
     "1페이지 실제 입결 공개 네 학년도·비회원 공개·학부모/상담자 위임 정책 확정",
     "원격 main 강제 보호를 지원하는 GitHub 요금제 적용 후 활성화",
     "REQ-24~26/SEC-01~08 실제 응답 필터·중계·공유 원자적 예산은 담당 상시 브랜치 PR; 실제 frontend/서비스/DB 변경은 이번 범위 밖",
-    "보안 숫자/탐지 임계값 별도 운영 승인·무료 overall/유료 전체 검색 유지; 실제 브라우저/운영 보안 NOT_RUN"
+    "보안 숫자/탐지 임계값 별도 운영 승인·무료 overall/유료 전체 검색 유지; 실제 브라우저/운영 보안 NOT_RUN",
+    "1페이지 4개년 비교: history_metric 에 연도 간 같은 모집단위를 잇는 키가 없어 학년도별로만 보여 준다. 연도 연결 키(PK 연결) 제공과 처음 보여 줄 학년도(화면은 결과가 있는 2026 을 기본으로 둠)를 정한다.",
+    "1페이지 지역 조건의 선택지를 API 가 줄지 정한다(화면은 시·도 17곳 고정 목록을 쓴다).",
+    "2페이지: 화면이 시험 목록(exam_id·pack_version·과목 선택지)을 받는 API 가 없어 2027 9월 모의평가 토큰과 과목 목록을 화면 설정에 둔다. 시험 목록 제공 방식을 정한다.",
+    "2페이지: 내 리포트 번호(report_id)를 찾는 API 가 없어 화면이 마지막 리포트 번호를 브라우저에 기억한다. 다른 기기에서 내 리포트를 찾는 방법(예: 본인 최신 리포트 조회)을 정한다.",
+    "4페이지: candidates DTO 에 학교 분류(도전학교·핵심학교·여유 후보, v0.12 school_bucket_ui_labels)가 없다. 화면은 '그 판단을 받은 학과가 있는 학교'로 거른다. 학교 분류를 응답에 넣을지, 이 거르기를 정본으로 할지 정한다.",
+    "4페이지: 학교를 찾은 이유와 와일드카드 '한 수인 이유' 문장이 응답에 없어 화면이 delta_pp 와 학과 판단 수로만 쓴다. 서버가 이유 코드나 문장을 줄지 정한다.",
+    "3페이지: offerings.search 에 모집 인원이 없어 목록의 '2027 모집' 칸을 빼고 펼친 줄에서만 recruitment.read 로 보인다. 목록에 인원을 보일지(검색 응답에 포함 여부) 정한다.",
+    "3·4페이지: 화면을 열 때 보이는 모집행의 분석이 없으면 university.analyze·candidates.build(POST)를 부른다. 요청 키는 (리포트, revision, 대상)으로 정해 같은 화면을 다시 열어도 한 번만 쓰인다. 읽기 화면에서 쓰기를 부르는 이 방식이 서버 운영(요청량·감사 기록)에 맞는지 확인한다.",
+    "4페이지: statistics.read 가 모집단위 하나씩이라 펼친 학교와 와일드카드만 부른다. 여러 모집단위를 한 번에 읽는 방법이 필요한지 정한다.",
+    "live 연결: 에듀터치 본체와 같은 Supabase 프로젝트·쿠키 도메인 배포 설정과 실제 계정·이용권·관리 권한의 전체 연결 검증이 남아 있다(DEV-006 remaining).",
+    "live 배포 설정: 운영 우리 서비스 API 주소(JUNGSI_API_URL)와 에듀터치 Supabase URL·publishable 키를 jeongsi-touch 워커 설정에 넣어야 실제 화면이 열린다. 에듀터치 본체의 /jeongsi 통로는 아직 관리자에게만 열려 있다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -3064,6 +3223,178 @@
         "REQ-26"
       ],
       "summary": "외부 노출/API 우회/대량 수집의 필수 계약·22operation 참조·선독 하네스·3개 release gate 등록. API22/4페이지/회원/DTO shape·기존 미완료 운영 상태 유지. 보안 런타임·배포 NOT_RUN."
+    },
+    {
+      "date": "2026-10-03",
+      "requirements": [
+        "REQ-03",
+        "REQ-05",
+        "REQ-08",
+        "REQ-11",
+        "REQ-13",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "summary": "프레젠테이션: apps/web 에 Next.js 앱과 3페이지(전체 대학·학과 가능성 보기)를 구현했다. 대학명·학과명 직접 검색, 모집단위별 내 환산점수·지원가능성·환산 유불리 분리 표시, 미공개·미확정 모집인원, 핵심 지원 학교 담기, 일반 회원은 검색·건수 없이 안내만 표시한다. 경로와 회원 범위는 route_catalog.json 에서 읽는다. HTTP 핸들러 연결 전이라 명시적인 합성 응답으로 동작하며 실제 계산·로그인·자료 연결 완료가 아니다. 1·2·4페이지는 미구현 안내만 둔다."
+    },
+    {
+      "date": "2026-10-03",
+      "requirements": [
+        "REQ-04",
+        "REQ-05",
+        "REQ-10",
+        "REQ-11",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "summary": "프레젠테이션: 4페이지(유리한 대학 찾기)를 구현했다. 데스크톱 2:1 배치로 왼쪽은 도전학교·핵심학교·여유 후보 기본 학교 목록, 오른쪽은 간호·보건·교육 와일드카드다. 학교 분류는 무채색 꼬리표로만 두고 학과마다 지원가능성·환산 유불리를 따로 표시하며, 학교를 펼쳐 학과·전형·모집군별 범위와 서비스 안의 추천·담음 인원·담은 사람 중 내 순위를 보여 준다. 비교하지 못한 모집단위는 여유로 보지 않는다고 안내한다. 핵심 지원 학교는 3페이지와 같은 목록을 쓴다. 합성 응답으로 동작하며 candidates.build·statistics.read 연결 전이다."
+    },
+    {
+      "date": "2026-10-04",
+      "requirements": [
+        "REQ-01",
+        "REQ-13",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "summary": "프레젠테이션: 1페이지(대학 발표 입시결과)를 develop 의 실제 DTO(history.search 의 catalog_search·history_metric, recruitment.read)로 구현했다. 대학명·학과명 검색과 학년도·지역·모집군 조건, 대학→모집행 묶음, 발표 지표의 이름·정의·값·단위·척도·출처·기준일을 그대로 보이고 미발표는 값 없이 표시한다. 2027 모집행을 펼치면 최초·변경·최종 인원과 변경 이력을 보인다. 자체 누적·예상 기준은 넣지 않는다. 비회원은 로그인 안내만 본다. HTTP 연결 전이라 같은 DTO 모양의 합성 응답으로 동작한다."
+    },
+    {
+      "date": "2026-10-04",
+      "requirements": [
+        "REQ-02",
+        "REQ-11",
+        "REQ-12",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "summary": "프레젠테이션: 2페이지(내 성적 리포트)를 develop 의 실제 DTO 로 구현했다. 일반·유료 회원이 2027학년도 9월 모의평가 표준점수(국어·수학 선택과목, 탐구 두 과목, 영어·한국사 등급)를 확인 체크와 함께 저장하면 score-profile.create → overall.analyze 로 리포트를 만들고 report.read 로 총점·전체 상위 누적(동점 포함·제외)·과목 결과·절대평가 등급을 보인다. 성적을 고치면 새 프로필로 같은 리포트의 새 revision(expected_version)을 만든다. 쓰기 요청은 화면마다 한 Idempotency-Key 를 쓴다. 유료는 핵심 지원 학교 분석과 report.export 상담 리포트 인쇄 화면을 함께 본다. 누적 대기는 사유와 함께 보이고 총점·과목 결과는 유지한다. HTTP 연결 전이라 같은 DTO 모양의 합성 응답으로 동작한다."
+    },
+    {
+      "date": "2026-10-04",
+      "requirements": [
+        "REQ-04",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-10",
+        "REQ-11"
+      ],
+      "summary": "프레젠테이션: 3·4페이지와 2페이지 핵심 지원 학교 부분을 화면 초안(contract.ts)에서 develop 의 실제 DTO 로 옮겼다. 3페이지는 offerings.search(2027, next_cursor)로 모집행을 찾고, 내 리포트에 보이는 모집행의 분석이 없으면 university.analyze 로 report.analyses 를 채워 학과마다 환산점수·대학 환산 분포 위치·지원가능성(category, 기본·상담 조정·채택)·판단 구간·70% 예상선·환산 유불리(delta_pp)·연도별 추정 환산점수와 대학 발표 지표를 보인다. 펼친 줄의 모집 인원은 recruitment.read 로 읽는다. 4페이지는 candidates.build 의 대학별 묶음과 간호·보건·교육 와일드카드(wildcard_group), 판단 보류 수를 보이고, 펼친 학교와 와일드카드의 statistics.read 를 모집단위마다 부른다. 담기는 shortlist.update(최신 revision, revision_conflict 면 한 번 다시 읽어 재시도)이며 3·4페이지와 2페이지 리포트·인쇄가 같은 report.shortlist 를 쓰고 이름은 offering.read 로 붙인다. 응답에 학교 분류와 설명 문장이 없어 학교에 색을 칠하지 않고 '그 판단을 받은 학과가 있는 학교'로 거르며, 찾은 이유는 응답 숫자만으로 쓴다. HTTP 연결 전이라 같은 모양의 합성 응답으로 동작한다."
+    },
+    {
+      "date": "2026-10-04",
+      "requirements": [
+        "REQ-18"
+      ],
+      "summary": "프레젠테이션: 실제 DTO 로 옮긴 뒤 화면이 화면 초안을 더 쓰지 않게 했다. session.read 제안 모양(Session)은 lib/dto.ts 로 옮기고, 합성 예시 대학·모집단위 목록은 lib/api/synthetic-history.ts 에 둔다. 쓰지 않는 초안 파일 4개는 사용자가 삭제를 허락했지만 check_branch_policy 가 모든 파일 삭제를 막아 남겨 두었다."
+    },
+    {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-02",
+        "REQ-03",
+        "REQ-05",
+        "REQ-08",
+        "REQ-09",
+        "REQ-14",
+        "REQ-15"
+      ],
+      "summary": "프레젠테이션: 사용자 지시에 따라 공유 드라이브에 올라온 명세 1.7.0(아직 develop 미반영)의 DEV-006 작업을 시작했다. 연결 방식은 JUNGSI_API_MODE=synthetic 를 명시했을 때만 합성 응답을 쓰고, 값이 없거나 live 설정(API 주소·Supabase URL·publishable 키)이 빠지면 '연결 설정 대기', 실서버 503·연결 실패는 '연결 대기'로 보이며 합성 응답이나 일반 회원으로 대신하지 않는다. live 에서는 에듀터치와 같은 Supabase 쿠키를 @supabase/ssr 로 읽어 access token 만 우리 API 에 전달하고, proxy.ts 에서 토큰을 갱신하며 모든 응답에 private, no-store 를 붙인다. session.read 를 정식 작업으로 쓴다. 3페이지는 환산(conversion)·학교 누백(percentile)·지원 판단의 준비 상태를 따로 보이고, 관측 도수/자체 추정(data_kind), 비교집단(population_scope: 국·수·탐2 전체/대학 반영 성적 보유자, 다르면 유불리 보류), 실제 수능/모평/연도 보정 추정(score_basis), 서버 추천 이유(recommendation_reasons), 발행된 기준선 근거와 forecast.published.read 의 학과 기준을 보인다. 2페이지는 전체 누백의 자체 추정 여부와 동점 구간 {lower,upper} 를 보인다. 4페이지 찾은 이유·학과 행·와일드카드는 서버 추천 이유를 그대로 쓴다. 관리 화면 /management/forecasts(ADMIN-FORECAST)는 소비자 4개 탭과 분리하고 forecast.capabilities 의 관리 권한·허용 학교로만 열리며 draft 생성·조정(새 revision)·검증·승인·발행과 403/404/409/422 거절을 보인다. 거절된 요청 뒤에는 새 Idempotency-Key 를 쓰고 연결 실패면 같은 키로 재시도한다. 합성 응답은 운영자(일반 회원 + 관리 권한) 보기 상태와 forecast 흐름을 흉내 낸다."
+    },
+    {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-05",
+        "REQ-08",
+        "REQ-20",
+        "REQ-21",
+        "REQ-22"
+      ],
+      "summary": "프레젠테이션: develop 1.7.1(세션·학과별 예상 기준 구현, PR #13)을 병합했고, 이어지는 커밋에서 DEV-006 화면을 정식 계약에 맞췄다(병합 커밋에는 들어온 내용과 문서 해결만 담는 규칙). 관리 화면 경로는 route_catalog 의 management_pages 에서 읽는다. forecast_draft 는 base_result·result(기준선·합격권·지원 구간 3필드)·context·영수증(validation.receipt_hash, approval.approval_hash)·감사(action·actor·at) 투영으로 보이고, 조정 대체값은 {value,unit}·{lower,upper,unit}·{ranges} 로 보내며 쓰기마다 오르는 revision 과 생성 때의 base_result_hash 로 묶는다. 3페이지 공개 근거는 이슈·조정 객체로 보이고, forecast_public(status=published)과 decision_evidence 의 context·정책·입력 버전이 모두 같을 때만 같은 발표본으로 안내한다. 4페이지는 판단 완료 추천 범위 밖·지원 조건 미충족 수를 판단 보류와 따로 알린다. 합성 응답도 같은 모양으로 바꿨다."
+    },
+    {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-08",
+        "REQ-21",
+        "REQ-22"
+      ],
+      "summary": "프레젠테이션: 서비스·DB 인계(DEV006_서비스_DB_응답 ③)에 맞춰 3페이지의 같은 발표본 판정을 발표본 버전·정책·입력 버전과 공개 context 17필드의 값·타입·명시적 null 비교로 바꿨다. forecast.published.read 가 409(현재 context·고정 입력·정책 변경)를 돌려주면 발표본을 보이지 않고 학생 분석과 합치지 않으며, 성공한 환산·누백은 그대로 둔다. 다른 발표본이면 재분석이 필요하다고 안내한다."
+    },
+    {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-02",
+        "REQ-12"
+      ],
+      "summary": "프레젠테이션: 사용자 지시에 따라 2페이지 성적 입력을 수능 성적표와 같은 가로 표로 다시 디자인했다. 열은 성적표 순서(한국사·국어·수학·영어·탐구 과목1·2), 행은 선택과목·표준점수·백분위·등급이다. 넣는 칸은 기존 계약 그대로 국어·수학·탐구 표준점수(필수)와 영어·한국사 등급(선택)이며, 국어·수학·탐구의 백분위·등급 칸은 서버 엔진이 계산하므로 '저장 후 계산'으로 비워 둔다. 좁은 화면에서는 표 안에서만 가로로 밀리고 머리 열이 고정된다. 입력 누락 칸을 표시한다."
+    },
+    {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-15",
+        "REQ-20"
+      ],
+      "summary": "프레젠테이션 배포: 정시터치 최종 관리자(사용자) 결정으로 apps/web 을 에듀터치 본체가 /jeongsi 를 넘기는 기존 Cloudflare 워커 jeongsi-touch 에 배포해 예전 시안 앱을 교체한다(본체 설정은 그대로, 본체는 지금 관리자에게만 넘긴다). 연결 방식은 live 이고 운영 API 주소·Supabase 설정을 아직 받지 않아 화면은 '연결 설정 대기'를 보인다. 되돌릴 때는 wrangler rollback 으로 이전 판을 다시 올린다. 운영 주소가 오면 JUNGSI_API_URL·NEXT_PUBLIC_SUPABASE_URL·NEXT_PUBLIC_SUPABASE_ANON_KEY 를 넣어 다시 배포한다."
+    },
+    {
+      "date": "2026-10-05",
+      "requirements": [
+        "REQ-20"
+      ],
+      "summary": "프레젠테이션: 배포 화면에서 연결 대기 안내의 빠진 설정 이름이 붙어 보이던 것을 구분 기호와 글자 상자로 나눴다."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-15",
+        "REQ-20"
+      ],
+      "summary": "프레젠테이션 배포: 운영 API 주소를 받기 전에는 live 배포 화면이 모두 '연결 설정 대기'라 확인할 수 없어, 사용자(최종 관리자) 요청으로 jeongsi-touch 워커를 명시적 synthetic 설정으로 다시 배포한다. 상단 합성 응답 띠로 예시 데이터임을 알린다. 예전 시안 앱 주소(/score·/report·/results·/find·/schools)는 새 화면으로 임시 이동시킨다. 운영 주소가 오면 live 와 JUNGSI_API_URL·Supabase 설정으로 바꾼다."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-08",
+        "REQ-21",
+        "REQ-22"
+      ],
+      "summary": "프레젠테이션: 데이터 담당 검토(DEV006 인계 revision 7)에 따라 3페이지의 같은 발표본 판정에서 발표본·정책·입력 버전이 양쪽 모두 비어 있지 않은 문자열일 때만 비교한다. 둘 다 없거나 null 이면 같은 근거로 합치지 않는다."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-17",
+        "REQ-18"
+      ],
+      "summary": "프레젠테이션: 등록된 삭제 승인(file_deletion_policy DEV006-7-four-retained-drafts)에 따라 쓰지 않는 초안 4개 파일(apps/web/src/lib/contract.ts, lib/api/synthetic-fixtures.ts, app/admissions/possibilities/actions.ts, components/pending-page.tsx)을 등록된 내용 그대로 지웠다. 다른 파일은 지우지 않았고, 화면 코드에서 이 파일들을 가져다 쓰는 곳이 없음을 타입 검사로 확인했다."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-15",
+        "REQ-20",
+        "REQ-23"
+      ],
+      "summary": "프레젠테이션: 서버 전용 로컬 Caller 를 추가한다. JUNGSI_API_MODE=local 은 loopback(127.0.0.1·localhost·::1) JUNGSI_API_URL 과 Git 제외 설정의 시험 사용자 토큰(JUNGSI_LOCAL_TOKEN, 또는 JUNGSI_LOCAL_ROLE 이 고르는 JUNGSI_LOCAL_TOKEN_<역할>)이 모두 있을 때만 켜지고, 빠지면 기존 '연결 설정 대기'다. 토큰은 server-only 모듈에서 Authorization 전달에만 쓰며 브라우저·클라이언트 번들·화면에 내보내지 않고, 화면이 토큰을 해석하거나 역할·등급을 정하지 않는다(로컬 서버 allowlist 가 판단). 호출부는 live 와 같은 22개 API 클라이언트를 재사용하고 실패를 합성 응답으로 바꾸지 않는다. 화면 위 띠에는 로컬 검증 연결과 역할 이름만 표시한다. 이 방식은 로컬 검증 전용이며 운영 배포 설정(wrangler)에는 넣지 않는다."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-16",
+        "REQ-21"
+      ],
+      "summary": "프레젠테이션 합성 전수 점검 반영. ① 관리 화면 ActionForm 에 서버 액션 action 을 함께 걸어, 클라이언트 JS 가 붙기 전의 제출이 기본 GET 이동으로 빠져 멱등 key·입력값이 주소에 남던 문제를 막았다(JS 가 붙으면 기존 onSubmit 직접 제출로 입력값 유지). ② 핵심 지원 학교 띠가 대학 이름 앞 '예시' 접두어를 지우던 임시 처리(합성 전용)를 제거해 서버가 준 이름을 그대로 보여 준다. ③ next dev 가 apps/web 에 자동 생성하는 AGENTS.md·CLAUDE.md 를 Git 제외에 추가했다. 점검 결과: 회원 상태 5종 × 4페이지·관리·인쇄 화면, 성적 저장·담기·예상 기준 작성→조정→검증→승인→발행 흐름, 휴대폰 폭 가로 넘침 없음 확인."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-20",
+        "REQ-23",
+        "REQ-26"
+      ],
+      "summary": "프레젠테이션: 보안 기준(SEC-07) 화면 몫 반영. ① 429(rate_limit_exceeded·analysis_quota_exceeded 등)를 ConnectionError kind=rate_limited 로 받아 제한 안내와 Retry-After 기반 재시도 시각(서울)만 표시한다. 조회는 연결 안내 화면으로, 성적 저장·관리 작업은 폼 아래 안내로 보이며 입력값을 유지하고 같은 키로 재시도한다. 제한을 합성 성공이나 영구 차단으로 보이지 않는다. ② 로컬 검증 띠에 메모리 저장소 재시작 유실 경고(성적·리포트·담은 학교·관리 초안 소실)를 추가해 로컬 Caller 성공과 운영 영속성 인수를 구분한다."
     }
   ],
   "overall_analysis_contract": {

@@ -1,0 +1,45 @@
+/* 에듀터치 저장소(hottaes1694-cyber/edutouch) web/src/components/shared/base.css 의 사본. 기준 커밋 41cbfeb (2026-09-28).
+   정시터치가 에듀터치와 같은 모양으로 보이게 하는 공유 토큰이다. 여기서 고치지 말고, 원본이 바뀌면 다시 복사한다. */
+/* ===================================================================
+   에듀터치 공통 부품
+   -------------------------------------------------------------------
+   버튼·카드·배지·안내띠·표·칩처럼 화면을 가리지 않고 쓰는 것만 둔다.
+   tokens.css 다음, 화면별 css 앞에 불러온다.
+
+   특정 화면에서만 쓰는 규칙은 여기 두지 말 것. 판단이 서지 않으면
+   "수시터치에서도 이게 필요한가?" 를 물어보면 대개 답이 나온다.
+   =================================================================== */
+.et .g-soc{background:#B7791F}
+.et .pg-head{background:var(--sub);border-bottom:1px solid var(--line);padding:22px 0 20px}
+.et .pg-head .kicker{font-family:inherit;font-weight:800;font-size:11px;letter-spacing:3px;color:var(--touch);margin-bottom:6px}
+.et .pg-head h1{font-size:28px;font-weight:900;letter-spacing:-.8px}
+.et .pg-head p{margin:6px 0 0;color:var(--ink-2);font-size:13.5px}
+.et .crumb{font-size:12.5px;color:var(--muted);padding:14px 0 0}
+.et .crumb a:hover{color:var(--brand)}
+.et .crumb b{color:var(--ink);font-weight:500}
+.et .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 14px;border-radius:var(--r-sm);font-weight:700;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink-2)}
+.et .btn.p{background:var(--brand);border-color:var(--brand);color:#fff}
+.et .btn.t{background:var(--touch);border-color:var(--touch);color:#fff}
+.et .card{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-card);padding:16px 18px}
+.et .ty{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--sub-2);color:var(--ink-2)}
+.et .note{background:var(--sub);border-radius:var(--r-sm);padding:10px 14px;font-size:12.5px;color:var(--ink-2);line-height:1.6}
+.et .disc{margin-top:20px;padding:12px 14px;background:var(--sub);border-radius:var(--r-sm);font-size:12px;color:var(--muted);line-height:1.7}
+.et table.tb{border-collapse:collapse;width:100%;font-size:13px}
+.et table.tb th,.et table.tb td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.et table.tb th{background:var(--sub);font-size:12px;color:var(--ink-2);font-weight:700}
+.et table.tb td.r,.et table.tb th.r{text-align:right}
+.et .tblwrap{border:1px solid var(--line);border-radius:var(--r-card);overflow:auto;background:var(--bg)}
+.et .pg-body{padding:18px 0 60px}
+.et .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.et .kpis div{background:var(--sub);border-radius:var(--r-card);padding:12px 14px}
+.et .kpis b{display:block;font-family:inherit;font-weight:900;font-size:22px}
+.et .kpis span{font-size:12px;color:var(--muted)}
+.et .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.et .chips button,.et .chips a{padding:5px 12px;border-radius:16px;border:1px solid var(--line);font-size:12.5px;color:var(--ink-2);background:var(--bg)}
+.et .chips button.on,.et .chips a.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.et .chips button small{margin-left:5px;font-family:inherit;font-weight:700;font-size:11px;color:var(--muted)}
+.et .chips button.on small{color:var(--bg);opacity:.75}
+.et .chips button.more{border-style:dashed;color:var(--brand);font-weight:700}
+.et .cfilter{display:flex;gap:8px;margin-bottom:14px}
+.et .cfilter .lab{flex:none;padding-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.et table.tb td .yr{margin-left:4px;padding:1px 7px;border-radius:var(--r-card);background:var(--brand-soft);color:var(--brand);font-family:inherit;font-weight:800;font-size:11.5px}
