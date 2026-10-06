@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.7.1",
+  "version": "1.8.0",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -18,7 +18,8 @@
     "forecast_policy": "docs/current/예상기준_산출과_관리.md",
     "presentation_connection": "docs/current/분석화면_연결.md",
     "local_verification": "docs/current/로컬_검증_연결.md",
-    "supabase_operations_handoff": "docs/current/Supabase_운영_인수인계.md"
+    "supabase_operations_handoff": "docs/current/Supabase_운영_인수인계.md",
+    "external_security": "docs/current/외부접근_데이터보호_개발기준.md"
   },
   "users": {
     "primary": "학생·학부모",
@@ -145,6 +146,21 @@
       "id": "REQ-23",
       "title": "로컬 검증 연결과 운영 준비 분리",
       "description": "운영 factory를 바꾸지 않는 loopback 서버에 메모리 저장소·서버 allowlist 시험사용자·수신PC에서 보호한 승인자료를 주입한다. 신뢰명부/영수증/버전을검증하고실제DB/운영인증/모형승인/외부화면인수는별도기록한다."
+    },
+    {
+      "id": "REQ-24",
+      "title": "외부 전달물과 응답의 내부자료 노출 차단",
+      "description": "정상·오류·보류·멱등 재응답·리포트·발표본과 브라우저 전달물에 역할별 재귀 허용목록을 적용한다. 원자료·전체 환산표·곡선·모델·비밀값은 서버 전용이며 학생의 허용 점수·근거·공식 출처와 직원용 관리 DTO는 보존한다."
+    },
+    {
+      "id": "REQ-25",
+      "title": "화면 우회와 분석 API 직접 접근 통제",
+      "description": "운영 분석 API는 인증된 서버 중계를 통해 접근하며 서버 간 신원과 실제 사용자 세션·현재 이용권·소유권·관리 학교 범위를 각각 검증한다. body/role/paid/Origin/CORS나 임의 사용자 헤더로 권한을 부여하지 않는다. 미구현 서버 중계를 운영 완료로 표시하지 않는다."
+    },
+    {
+      "id": "REQ-26",
+      "title": "계정별 반복 분석과 대량 결과 수집 통제",
+      "description": "무료 전체 누백과 유료 환산·추천·조회에 요청량·동시성·새 성적·계산 비용·반환량 예산을 적용한다. 계정·시험 기준의 공유 저장소에서 계산 전 원자적으로 판정하며 새 JWT/요청키/프로필/리포트·페이지 순회·서버 재시작으로 초기화하지 않는다. 정상 대학·학과 검색 범위와 성공 결과 보존 원칙은 유지한다."
     }
   ],
   "pages": [
@@ -161,7 +177,10 @@
         "REQ-01",
         "REQ-13",
         "REQ-18",
-        "REQ-20"
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "purpose": "개인 성적 없이 공식 결과를 검색한다.",
       "score_required_to_browse": false,
@@ -188,7 +207,10 @@
         "REQ-11",
         "REQ-12",
         "REQ-18",
-        "REQ-20"
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "purpose": "일반은 전체 성적 위치까지, 유료는 대학 분석과 선택 목록을 포함한 리포트를 이용한다.",
       "score_required_to_browse": false,
@@ -218,7 +240,10 @@
         "REQ-18",
         "REQ-20",
         "REQ-21",
-        "REQ-22"
+        "REQ-22",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "purpose": "추천 밖 모집단위까지 검색하고 개인 환산·지원 검토·유불리를 확인한다.",
       "score_required_to_browse": false,
@@ -248,7 +273,10 @@
         "REQ-18",
         "REQ-20",
         "REQ-21",
-        "REQ-22"
+        "REQ-22",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "purpose": "기본 학교와 학과별 범위, 특수계열 와일드카드를 비교해 핵심 지원 학교를 선택한다.",
       "score_required_to_browse": false,
@@ -288,7 +316,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-01"
+        "REQ-01",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "공식 대학 발표 결과만",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -310,7 +341,20 @@
         "response_schema": "catalog_search"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search"
+      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "recruitment.read",
@@ -323,7 +367,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-13"
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "공식 군·모집인원·변경·기준일·확정 상태",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -337,7 +384,20 @@
         "response_schema": "recruitment"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.recruitment"
+      "contract_ref": "backend_platform_contract.dto_schemas.recruitment",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "score-profile.create",
@@ -352,7 +412,10 @@
       "requirements": [
         "REQ-02",
         "REQ-12",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인에게 귀속되는 성적 프로필의 생성 결과",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -369,7 +432,20 @@
         "response_schema": "profile"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.profile"
+      "contract_ref": "backend_platform_contract.dto_schemas.profile",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "overall.analyze",
@@ -386,7 +462,10 @@
         "REQ-07",
         "REQ-12",
         "REQ-14",
-        "REQ-15"
+        "REQ-15",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "입력 검증 후 본인의 총점·승인 전체 누적·자료 상태",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -406,7 +485,20 @@
         "idempotency_key_required": true,
         "response_schema": "report"
       },
-      "engine_service": "jungsi_touch.application.overall_analysis.OverallAnalysisService.analyze"
+      "engine_service": "jungsi_touch.application.overall_analysis.OverallAnalysisService.analyze",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "report.read",
@@ -420,7 +512,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-02",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -434,7 +529,20 @@
         "response_schema": "report"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.report"
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "offerings.search",
@@ -447,7 +555,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-03",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "전체 서비스 카탈로그의 결과·건수; 성적·추천 여부로 축소하지 않음",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -469,7 +580,20 @@
         "response_schema": "catalog_search"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search"
+      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "offering.read",
@@ -482,7 +606,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-03",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "모집단위 기본 상세; 개인 분석은 별도 권한·입력 확인",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -496,7 +623,20 @@
         "response_schema": "offering_detail"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.offering_detail"
+      "contract_ref": "backend_platform_contract.dto_schemas.offering_detail",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "university.analyze",
@@ -511,7 +651,10 @@
         "REQ-05",
         "REQ-06",
         "REQ-08",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -530,7 +673,20 @@
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "scoring_service": "jungsi_touch.application.university_scoring.UniversityScoringService.calculate",
-      "percentile_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate"
+      "percentile_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "candidates.build",
@@ -545,7 +701,10 @@
         "REQ-04",
         "REQ-05",
         "REQ-09",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -563,7 +722,20 @@
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "scoring_service": "jungsi_touch.application.university_scoring.UniversityScoringService.calculate",
-      "percentile_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate"
+      "percentile_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "shortlist.update",
@@ -576,7 +748,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-11",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "우리 서비스 핵심 지원 학교의 선택 상태",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -593,7 +768,20 @@
         "response_schema": "report"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.report"
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "report.export",
@@ -606,7 +794,10 @@
       "confirmed_score_profile": true,
       "requirements": [
         "REQ-11",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "발행 버전이 고정된 본인 전체 상담 리포트",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -620,7 +811,20 @@
         "response_schema": "snapshot"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.snapshot"
+      "contract_ref": "backend_platform_contract.dto_schemas.snapshot",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "statistics.read",
@@ -633,7 +837,10 @@
       "confirmed_score_profile": true,
       "requirements": [
         "REQ-10",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "추천·선택 인원과 본인 순위·동점·갱신 상태; 타인 성적 제외",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -647,7 +854,20 @@
         "response_schema": "statistics"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.statistics"
+      "contract_ref": "backend_platform_contract.dto_schemas.statistics",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "session.read",
@@ -660,7 +880,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-20"
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인 현재 활성 회원 상태",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -674,6 +897,17 @@
         "response": "session",
         "response_schema": "session",
         "idempotency_key_required": false
+      },
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
       }
     },
     {
@@ -687,7 +921,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인 관리 capability와 학교 범위",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -701,6 +938,17 @@
         "response": "forecast_capabilities",
         "response_schema": "forecast_capabilities",
         "idempotency_key_required": false
+      },
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
       }
     },
     {
@@ -714,7 +962,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "허용 학교의 관리 draft 목록",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -734,7 +985,18 @@
       "operator_capabilities": [
         "editor",
         "approver"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.create",
@@ -747,7 +1009,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "서버 승인 자료·정책 ID 기반 모집행 draft 생성",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -769,7 +1034,18 @@
       },
       "operator_capabilities": [
         "editor"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.read",
@@ -782,7 +1058,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "허용 학교의 draft와 revision/근거",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -800,7 +1079,18 @@
       "operator_capabilities": [
         "editor",
         "approver"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.adjust",
@@ -813,7 +1103,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "기본값 보존과 새 조정 revision",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -838,7 +1131,18 @@
       },
       "operator_capabilities": [
         "editor"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.validate",
@@ -851,7 +1155,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "정확한 revision의 검증 영수증",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -872,7 +1179,18 @@
       },
       "operator_capabilities": [
         "editor"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.approve",
@@ -885,7 +1203,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "검증된 정확한 revision 승인",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -908,7 +1229,18 @@
       },
       "operator_capabilities": [
         "approver"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.publish",
@@ -922,7 +1254,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-21",
-        "REQ-22"
+        "REQ-22",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "승인 revision의 새 불변 발행",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -944,7 +1279,18 @@
       },
       "operator_capabilities": [
         "approver"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.published.read",
@@ -957,7 +1303,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-21",
-        "REQ-22"
+        "REQ-22",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "발행된 학과 기준과 공개 판단 근거",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -971,6 +1320,19 @@
         "response": "forecast_public",
         "response_schema": "forecast_public",
         "idempotency_key_required": false
+      },
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
       }
     }
   ],
@@ -985,7 +1347,9 @@
     "authenticated_context_source": "verified_server_session_not_request_body",
     "default_denial": true,
     "standard_paid_endpoint_denial": "403_without_results_counts_details",
-    "other_owner_resource_denial": "404_without_resource_existence_disclosure"
+    "other_owner_resource_denial": "404_without_resource_existence_disclosure",
+    "security_contract_ref": "security_contract",
+    "security_enforcement_status": "pending_runtime_implementation"
   },
   "layers": [
     {
@@ -1921,7 +2285,7 @@
       "sync_rule": "origin/develop의 최신 기획·HEAD를 확인해 자기 상시 브랜치에 일반 merge로 가져온다. 충돌은 해당 담당이 현재 공통 명세와 코드 변경 범위로 해결한다. 다른 체크아웃을 reset하거나 원자료를 재집계하지 않는다.",
       "merge_rule": "임시 개발 작업은 등록된 직계 부모에 먼저 PR한다. 일반적으로 부모는 담당 상시 브랜치이며 기존 PR #9처럼 등록한 임시 부모가 있으면 그 단계를 따른다. 상시 시스템/화면 브랜치는 develop에 PR한다. 최종 main PR은 develop에서만 연다. GitHub 병합은 merge commit으로 수행해 상시 브랜치의 이력을 이어 간다.",
       "lifecycle_rule": "기본 노드는 상시 4개뿐이다. 임시 작업은 등록 후 필요할 때만 만들며 종료 시 status=retired_merged와 병합 PR/커밋을 기록한다. 브랜치 ref·로컬 파일·worktree·캐시·잠금 파일 삭제는 자동화하지 않는다. 삭제 대상·범위를 사용자에게 명시해 허용받기 전 보존한다.",
-      "review_rule": "develop의 기획/계약 최종 검토와 통합 조율은 시스템기획팀이 담당한다. 두 개발자는 담당 브랜치에서 작업한다. 계약 변경에는 작업 요구사항·API·DTO·소유권·계층과 변경 검증을 같은 커밋에 포함한다. 상시 브랜치 간 직접 병합으로 develop을 우회하지 않는다.",
+      "review_rule": "develop의 기획/계약 최종 검토와 통합 조율은 시스템기획팀이 담당한다. 두 개발자는 담당 브랜치에서 작업한다. 계약 변경에는 작업 요구사항·API·DTO·소유권·계층과 변경 검증을 같은 커밋에 포함한다. 상시 브랜치 간 직접 병합으로 develop을 우회하지 않는다. REQ-24~26·보안 개발기준은 모든 구현의 필수 참조이며 보안 gate/operation/증거 누락은 인수하지 않는다.",
       "github_settings": {
         "default_branch": "main",
         "allow_merge_commit": true,
@@ -1969,6 +2333,21 @@
             "id": "handoff",
             "status": "pending",
             "evidence": "운영 설정 위치(값 제외)·DB 변경 적용 계획·인계·복구 절차와 배포 후보 SHA 정리 필요"
+          },
+          {
+            "id": "security_response_artifacts",
+            "status": "pending",
+            "evidence": "모든 역할 HTTP 응답과 실제 외부 화면 빌드/브라우저 노출 검수 NOT_RUN"
+          },
+          {
+            "id": "security_direct_authorization",
+            "status": "pending",
+            "evidence": "서버 중계·실세션/이용권·소유권·관리 범위와 직접 접근 거절 NOT_RUN"
+          },
+          {
+            "id": "security_harvest_controls",
+            "status": "pending",
+            "evidence": "공유 원자적 예산·무료 누백/paid 후보·동시성/재시작/429 검수 NOT_RUN; 운영 숫자 승인 필요"
           }
         ]
       },
@@ -2129,7 +2508,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.7.1",
+        "contract_version": "1.8.0",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2303,7 +2682,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.7.1",
+        "contract_version": "1.8.0",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2460,6 +2839,30 @@
         },
         "scope_generation": "scope equals current service_spec contract_ref; historical scope acceptance remains separate"
       }
+    },
+    "development_harness": {
+      "format": "jungsi.development-harness/v1",
+      "security_required": true,
+      "security_document": "docs/current/외부접근_데이터보호_개발기준.md",
+      "required_documents": [
+        "AGENTS.md",
+        "docs/current/service_spec.json",
+        "docs/current/서비스_기획.md",
+        "docs/current/라우팅_명세.md",
+        "docs/current/3티어_개발구조.md",
+        "docs/current/개발_브랜치_운영.md",
+        "docs/current/API_DTO_계약.md",
+        "docs/current/프레젠테이션_작업인계.md",
+        "docs/current/외부접근_데이터보호_개발기준.md"
+      ],
+      "invariants_required": true,
+      "start_rule": "작업 전에 이 정본을 읽고 현재 develop SHA·REQ-24~26·SEC 영향·담당 브랜치를 확인한다. 선독을 생략해 API/화면/DB를 구현하지 않는다.",
+      "report_rule": "PR/완료 보고에 보안 revision·영향 operation/SEC ID·합성/브라우저/운영 증거와 NOT_RUN을 각각 적는다. 영향 없음도 근거를 적는다. 하네스 PASS가 실제 독서나 런타임 보안을 증명하지는 않는다.",
+      "checks": [
+        "python -B scripts/check_project_consistency.py --staged",
+        "python -B scripts/check_branch_policy.py --staged",
+        "정상 pre-commit/pre-push 및 정확 commit CI의 스냅샷 검산"
+      ]
     }
   },
   "pending": [
@@ -2472,6 +2875,8 @@
     "대규모 집계 성능/갱신 주기 실측; Kafka/Redis 미채택",
     "1페이지 실제 입결 공개 네 학년도·비회원 공개·학부모/상담자 위임 정책 확정",
     "원격 main 강제 보호를 지원하는 GitHub 요금제 적용 후 활성화",
+    "REQ-24~26/SEC-01~08 실제 응답 필터·중계·공유 원자적 예산은 담당 상시 브랜치 PR; 실제 frontend/서비스/DB 변경은 이번 범위 밖",
+    "보안 숫자/탐지 임계값 별도 운영 승인·무료 overall/유료 전체 검색 유지; 실제 브라우저/운영 보안 NOT_RUN",
     "1페이지 4개년 비교: history_metric 에 연도 간 같은 모집단위를 잇는 키가 없어 학년도별로만 보여 준다. 연도 연결 키(PK 연결) 제공과 처음 보여 줄 학년도(화면은 결과가 있는 2026 을 기본으로 둠)를 정한다.",
     "1페이지 지역 조건의 선택지를 API 가 줄지 정한다(화면은 시·도 17곳 고정 목록을 쓴다).",
     "2페이지: 화면이 시험 목록(exam_id·pack_version·과목 선택지)을 받는 API 가 없어 2027 9월 모의평가 토큰과 과목 목록을 화면 설정에 둔다. 시험 목록 제공 방식을 정한다.",
@@ -2811,6 +3216,15 @@
       "summary": "Supabase운영인수인계revision2026.10.06.v1/SUP-01~11·현재gate·동일문서링크추가. API/DTO/회원/REQ·featureversion1.7.1·실자료승인/배포불변."
     },
     {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "외부 노출/API 우회/대량 수집의 필수 계약·22operation 참조·선독 하네스·3개 release gate 등록. API22/4페이지/회원/DTO shape·기존 미완료 운영 상태 유지. 보안 런타임·배포 NOT_RUN."
+    },
+    {
       "date": "2026-10-03",
       "requirements": [
         "REQ-03",
@@ -3131,7 +3545,7 @@
   "collaboration": {
     "integration_branch": "develop",
     "description": "기획 정본은 시스템기획팀이 develop에서 직접 관리·배포한다. 실제 개발은 시스템·콘텐츠 담당과 프레젠테이션 담당 두 명이 각각 하나의 상시 브랜치를 재사용한다. 다른 팀은 develop의 기획을 가져가 담당 브랜치에서 구현하고 PR로 누적한다.",
-    "start_rule": "시스템기획팀은 develop의 현재 HEAD와 원격 동기화 상태를 확인하고 기획 정본을 검증·공유한다. 서버 개발팀과 별도 프레젠테이션 담당은 최신 origin/develop의 기획 기준과 출발 SHA를 확인하고 각자의 기존 작업 브랜치를 재사용한다. 다른 작업자의 미커밋 변경을 기준으로 삼지 않는다.",
+    "start_rule": "시스템기획팀은 develop의 현재 HEAD와 원격 동기화 상태를 확인하고 기획 정본을 검증·공유한다. 서버 개발팀과 별도 프레젠테이션 담당은 최신 origin/develop의 기획 기준과 출발 SHA를 확인하고 각자의 기존 작업 브랜치를 재사용한다. 다른 작업자의 미커밋 변경을 기준으로 삼지 않는다. AGENTS.md와 외부접근_데이터보호_개발기준.md를 반드시 읽고 변경 operation의 SEC 통제를 확인한다.",
     "branch_rule": "시스템기획팀만 develop에서 기획·공통 관리 설정을 직접 관리한다. 시스템·콘텐츠 개발자는 feature/application-pre-data-platform, 화면 개발자는 feature/presentation-foundation을 상시 재사용한다. 다른 팀은 develop에서 직접 구현하지 않고 담당 브랜치의 PR로 누적한다. 3티어는 폴더·포트·의존 관계로 구분한다. 하위 작업은 필요 시 부모·담당·사유를 정본에 등록하며 작업 항목이나 에이전트마다 생성하지 않는다. 상시 시스템/화면 브랜치의 통합 대상은 develop이고, 하위 개발 작업은 등록된 직계 부모에 먼저 통합한다. main에는 작업이 모두 끝나고 최종 검증·인계가 정리된 develop만 PR로 반영하며 라이브 배포는 별도 승인한다.",
     "owners": [
       {
@@ -4312,7 +4726,9 @@
       "existing_SSR_OpenNext_rewrite": "external_reference_only_not_22_API_or_entitlement_acceptance",
       "actual_DB_and_test_user_validation": "DEFERRED_until_private_settings_available",
       "profile_condition_read": "readonly_metadata_admin_active_conditions_confirmed_not_actual_login_JWT_acceptance"
-    }
+    },
+    "security_contract_ref": "security_contract",
+    "security_transition_status": "pending_runtime_implementation"
   },
   "repository_layout": {
     "reference_branch": "develop",
@@ -5075,7 +5491,10 @@
       "requirements": [
         "REQ-20",
         "REQ-21",
-        "REQ-22"
+        "REQ-22",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "operations": [
         "forecast.capabilities",
@@ -6111,7 +6530,9 @@
       "exact_HEAD_CI_jobs": "two_success",
       "browser_and_real_connection": "NOT_RUN",
       "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
-    }
+    },
+    "security_contract_ref": "security_contract",
+    "security_transition_status": "pending_runtime_implementation"
   },
   "contract_review": {
     "format": "jungsi.contract-review/v1",
@@ -7434,6 +7855,366 @@
     ],
     "scope_excludes": [
       "리포트·인쇄 기능 확장 또는 새로운 인쇄 기능 구현. SUP-09는 기존 report.export 계약의 응답 소비 검수에 한정한다."
-    ]
+    ],
+    "security_contract_ref": "security_contract",
+    "security_transition_status": "pending_runtime_implementation"
+  },
+  "security_contract": {
+    "format": "jungsi.external-access-security/v1",
+    "revision": "2026.10.06.v1",
+    "required": true,
+    "status": "required_for_development_runtime_NOT_RUN",
+    "implementation_status": "pending",
+    "production_ready": false,
+    "basis_commit": "25973cb1a93b452e002d5902ef573013ebcabfaf",
+    "requirements": [
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "document": "docs/current/외부접근_데이터보호_개발기준.md",
+    "scope": "외부 이용자가 화면/응답/요청을 분석하여 내부자료·권한 밖 결과·대량 분석 결과를 가져가는 경로를 통제한다. 공동 제작자의 신뢰·전체 접근 정책은 변경하지 않는다.",
+    "invariants": {
+      "recursive_role_based_response_allowlist": true,
+      "browser_artifact_inspection_required": true,
+      "verified_server_relay_required": true,
+      "application_user_authorization_required": true,
+      "free_overall_is_throttled": true,
+      "paid_candidates_is_throttled": true,
+      "quota_shared_atomic_before_compute": true,
+      "quota_stable_across_identifier_rotation": true,
+      "quota_survives_restart_and_multiple_workers": true,
+      "counter_failure_is_not_unlimited": true,
+      "same_score_catalog_browse_scope_preserved": true,
+      "successful_score_pending_judgment_preserved": true,
+      "role_specific_management_receipts_preserved": true,
+      "idempotent_replay_still_rate_limited": true,
+      "private_data_and_secrets_stay_server_only": true,
+      "runtime_acceptance_is_separate": true
+    },
+    "controls": [
+      {
+        "id": "SEC-01",
+        "title": "공개 응답의 재귀 허용목록",
+        "owner_layer": "application",
+        "branch": "feature/application-pre-data-platform",
+        "rule": "기존 contract_ref의 회원/관리 역할별 허용 필드를 중첩 객체·배열까지 적용한다. 정상·pending·오류·멱등 재응답·리포트 snapshot·인쇄 DTO·발표본을 포함한다.",
+        "acceptance": "금지 필드를 중첩/배열에 넣은 합성 자료로 실제 HTTP 응답을 검사하고 공개 근거·버전·공식 출처를 보존한다.",
+        "implementation_status": "pending",
+        "operational_verification": "NOT_RUN"
+      },
+      {
+        "id": "SEC-02",
+        "title": "브라우저 전달물 검수",
+        "owner_layer": "presentation",
+        "branch": "feature/presentation-foundation",
+        "rule": "외부 화면 담당이 API JSON·SSR HTML·hydration/RSC·클라이언트 JS·정적 JSON·source map·다운로드·브라우저 저장소·오류 전달물을 검사한다. CSS 숨김이나 .gitignore만으로 통과하지 않는다.",
+        "acceptance": "동일 후보의 실제 빌드/브라우저 전달물 영수증이 필요하다. 합성 화면과 운영 자료 검수를 구분한다.",
+        "implementation_status": "pending",
+        "operational_verification": "NOT_RUN"
+      },
+      {
+        "id": "SEC-03",
+        "title": "서버 중계와 분석 API 직접 접근 거절",
+        "owner_layer": "infrastructure",
+        "branch": "feature/application-pre-data-platform",
+        "rule": "화면 서버의 중계 API(BFF)와 분석 API 사이에 서버 전용 인증을 적용하며 분석 API에서도 실제 사용자 권한을 검증한다. 공개 origin·우회 도메인·preview·이전 배포 경로를 포함한다. 화면 BFF/세션·CSRF·신원 송신은 외부 화면 브랜치, 분석 서버 검증/재인가는 서비스·DB 브랜치가 각각 구현하고 같은 전이 계약으로 인수한다.",
+        "acceptance": "허용 중계+허용 사용자만 성공한다. 직접 호출/잘못된 서버 신원/필수 설정 누락에 보호 대상 결과를 제공하지 않는다. health와 결과 API는 구분한다.",
+        "implementation_status": "pending",
+        "operational_verification": "NOT_RUN"
+      },
+      {
+        "id": "SEC-04",
+        "title": "현재 세션·이용권·소유권·관리 범위",
+        "owner_layer": "application",
+        "branch": "feature/application-pre-data-platform",
+        "rule": "자료·건수·멱등 저장 응답을 읽기 전에 Supabase 검증 사용자와 DB 현재 이용권을 판단한다. 본인 소유권과 editor/approver·학교 scope·자기승인 거절을 유지한다.",
+        "acceptance": "401/403/404/409와 무료 overall/유료 후보·staff≠paid를 회귀 검증한다. 인증/이용권 장애를 허용으로 바꾸지 않는다.",
+        "implementation_status": "pending",
+        "operational_verification": "NOT_RUN"
+      },
+      {
+        "id": "SEC-05",
+        "title": "반복 분석·조회·계산 비용 예산",
+        "owner_layer": "application",
+        "branch": "feature/application-pre-data-platform",
+        "rule": "무료 누백·유료 환산/후보·검색/통계/발표본/export를 대상으로 한다. 정상 성적표의 대학·학과 검색 범위는 유지하며 새 성적·반복 계산·대량 반환을 각각 통제한다.",
+        "acceptance": "키/프로필/리포트/검색어/cursor·새 JWT/재로그인/동시 요청으로 우회하지 못한다. candidates.build 내부 다수 학과 계산 비용도 계상한다.",
+        "implementation_status": "pending",
+        "operational_verification": "NOT_RUN"
+      },
+      {
+        "id": "SEC-06",
+        "title": "공유 사용량 저장·원자성·결과 재사용",
+        "owner_layer": "data",
+        "branch": "feature/application-pre-data-platform",
+        "rule": "애플리케이션 포트와 비공개 공유 저장소로 예산 예약/소비/동시성/만료를 관리한다. 초기 Supabase 구현은 담당 PR에서 준비하며 메모리 카운터만으로 완료 처리하지 않는다.",
+        "acceptance": "복수 worker·재시작·경계 시간·장애·멱등 재시도를 검증한다. 결과 재사용은 사용자·성적·시험·자료/산식/곡선/정책/모집행 버전에 결속한다.",
+        "implementation_status": "pending",
+        "operational_verification": "NOT_RUN"
+      },
+      {
+        "id": "SEC-07",
+        "title": "거절 응답·안전한 관측·화면 안내",
+        "owner_layer": "application",
+        "branch": "feature/application-pre-data-platform",
+        "rule": "기존 오류 객체를 유지한 429 사유/Retry-After와 통제 저장소 장애의 503을 구현한다. 원성적·JWT·키·예외 원문·타인 정보·내부 예산을 응답/로그에 남기지 않는다.",
+        "acceptance": "안전한 제한 안내와 재시도 시각만 표시한다. 기록/쿨다운/추가 확인/이용 검토는 정상 학교 검색을 영구히 감추지 않는다.",
+        "implementation_status": "pending",
+        "operational_verification": "NOT_RUN"
+      },
+      {
+        "id": "SEC-08",
+        "title": "동일 스냅샷 인수와 운영 gate",
+        "owner_layer": "planning",
+        "branch": "develop",
+        "rule": "필수 문서·operation 참조·기획/라우팅·release gate를 하네스에 결속한다. 계약 검산·합성 HTTP·브라우저·운영 검수를 구분한다.",
+        "acceptance": "필수 계약/문서/gate 제거, 미구현 상태의 passed/ready, 증거 없는 완료를 거절한다. 등록/합성 PASS만으로 운영 인수를 완료하지 않는다.",
+        "implementation_status": "pending",
+        "operational_verification": "NOT_RUN"
+      }
+    ],
+    "response_boundary": {
+      "public_schema_source": "operations[].contract_ref",
+      "covers": [
+        "success",
+        "pending",
+        "error",
+        "idempotent_replay",
+        "persisted_report",
+        "print_dto",
+        "published_forecast",
+        "browser_artifacts"
+      ],
+      "forbidden": [
+        {
+          "id": "private_source_and_model",
+          "description": "원자료/전체 분포·환산표·계수·모델"
+        },
+        {
+          "id": "unapproved_internal_detail",
+          "description": "학생에게 허용되지 않은 내부 정확값 저장 객체·trace·관리 기록"
+        },
+        {
+          "id": "private_reference_and_download",
+          "description": "비공개 경로·Drive 식별자·원자료 다운로드 URL"
+        },
+        {
+          "id": "credential_and_token",
+          "description": "DB 연결·secret/service_role 키·OAuth/access/refresh token"
+        }
+      ],
+      "preserve": [
+        {
+          "id": "student_result_and_rationale",
+          "description": "학생 허용 점수·누백·자료 상태·판단 근거·공식 공개 출처·버전"
+        },
+        {
+          "id": "authorized_management_receipts",
+          "description": "권한 있는 직원의 기존 관리 actor·검증/승인 영수증 DTO"
+        },
+        {
+          "id": "independent_score_and_judgment_state",
+          "description": "성공 환산·누백과 지원 판단 보류의 독립 상태"
+        }
+      ]
+    },
+    "gateway_policy": {
+      "mode": "server_authenticated_relay",
+      "implementation_status": "pending",
+      "server_identity_required": true,
+      "user_authorization_in_application_required": true,
+      "direct_browser_analysis_allowed": false,
+      "credentials_in_browser_allowed": false,
+      "failure_policy": "필수 서버 인증 설정 누락·잘못된 신원에 보호 대상 결과를 제공하지 않는다. 통제 의존 장애는 비밀 없는 503으로 실패한다.",
+      "presentation_rule": "중계는 실제 세션·안전한 입력을 전달한다. 쿠키 세션이면 HttpOnly/Secure/SameSite와 상태변경 CSRF 검증을 적용한다. Origin/Referer/CORS는 서버·사용자 인증을 대신하지 않는다.",
+      "deployment_rule": "중계/분석은 클라우드에서 운영하며 PC 로컬 파일·상주 프로세스를 의존하지 않는다. 공개 원본·이전/preview 주소로 보안 계층을 우회하지 못하게 검수한다.",
+      "owner_roles": [
+        {
+          "owner_layer": "presentation",
+          "branch": "feature/presentation-foundation",
+          "responsibility": "화면 서버 BFF·실제 세션/쿠키와 CSRF·서버 전용 신원 송신·허용 DTO 소비·브라우저 검수"
+        },
+        {
+          "owner_layer": "infrastructure",
+          "branch": "feature/application-pre-data-platform",
+          "responsibility": "분석 API 서버 신원 검증·실사용자 권한 재인가·직접 접근 거절·운영 설정/장애 응답"
+        }
+      ]
+    },
+    "quota_policy": {
+      "identity": [
+        "verified_subject_id",
+        "exam_id",
+        "policy_version",
+        "period"
+      ],
+      "analysis_operations": [
+        "score-profile.create",
+        "overall.analyze",
+        "university.analyze",
+        "candidates.build"
+      ],
+      "read_operations": [
+        "history.search",
+        "recruitment.read",
+        "report.read",
+        "offerings.search",
+        "offering.read",
+        "report.export",
+        "statistics.read",
+        "forecast.published.read",
+        "shortlist.update"
+      ],
+      "input_paths": [
+        "direct_scores",
+        "owned_profile_id"
+      ],
+      "storage": "application_port_private_shared_store",
+      "policy_values_status": "pending_approved_operational_values",
+      "limits": {
+        "request_window": null,
+        "distinct_scores": null,
+        "calculation_cost": null,
+        "concurrent_jobs": null,
+        "result_volume": null
+      },
+      "rotation_does_not_reset": [
+        "JWT",
+        "request_key",
+        "profile_id",
+        "report_id",
+        "search_term",
+        "cursor",
+        "worker",
+        "server_restart"
+      ],
+      "cost_rule": "같은 성적/버전 결과 재사용과 새 계산 비용을 구분한다. 프로필 생성과 flat/profile_id 전체 분석은 공통 예산을 쓴다. 멱등 재응답은 계산을 중복 소비하지 않되 요청/반환량 통제를 적용한다.",
+      "counter_rule": "사용량 확인/예약/소비는 공유 저장소에서 원자적으로 수행한다. 취소/실패의 예약 해제·기간 만료를 정책으로 정하며 장애를 무제한 허용으로 바꾸지 않는다.",
+      "cache_binding": [
+        "verified_subject_id",
+        "normalized_scores",
+        "exam_id",
+        "source_pack_version",
+        "calculation_version",
+        "rule_version",
+        "curve_version",
+        "catalog_version",
+        "analysis_version",
+        "policy_version",
+        "offering_id",
+        "report_revision"
+      ],
+      "number_rule": "학생/상담 계정별 숫자는 승인된 운영 정책으로 별도 설정한다. 실제 한도/탐지 임계값은 Git에 넣지 않는다. null/미설정을 무제한 또는 실제 0으로 치환하지 않는다.",
+      "normal_use_rule": "전체 서비스 대학·학과 검색은 유지한다. 학교 제외나 성공 점수 삭제 대신 요청/재분석/동시성/반환량을 통제한다. IP는 계정 통제의 보조 신호다."
+    },
+    "planned_errors": [
+      {
+        "code": "rate_limit_exceeded",
+        "http": 429,
+        "retry_after_required": true,
+        "status": "planned_not_implemented"
+      },
+      {
+        "code": "analysis_quota_exceeded",
+        "http": 429,
+        "retry_after_required": true,
+        "status": "planned_not_implemented"
+      },
+      {
+        "code": "security_policy_unavailable",
+        "http": 503,
+        "retry_after_required": false,
+        "status": "planned_not_implemented"
+      }
+    ],
+    "error_rule": "기존 {status:error,error:{code},request_id}를 유지한다. 401/403/404/409의 기존 의미를 우선하며 429/Retry-After는 정식 계약 반영·구현 전 실제 응답이라고 주장하지 않는다. no-store와 안전한 거절 이벤트를 유지한다.",
+    "mandatory_release_gates": [
+      "security_response_artifacts",
+      "security_direct_authorization",
+      "security_harvest_controls"
+    ],
+    "acceptance_evidence": [],
+    "acceptance_cases": [
+      {
+        "id": "SEC-QA-01",
+        "control": "SEC-01",
+        "scope": "synthetic_HTTP",
+        "expected": "중첩/배열·오류/pending/멱등/report/print/published 금지값 노출 없음"
+      },
+      {
+        "id": "SEC-QA-02",
+        "control": "SEC-02",
+        "scope": "browser_artifacts",
+        "expected": "HTML/hydration/RSC/JS/JSON/source map/storage/download와 preview 내부자료 없음"
+      },
+      {
+        "id": "SEC-QA-03",
+        "control": "SEC-03",
+        "scope": "synthetic_HTTP",
+        "expected": "직접 요청/잘못된 서버 신원/미설정 거절; 중계만으로 사용자 권한 승격 없음"
+      },
+      {
+        "id": "SEC-QA-04",
+        "control": "SEC-04",
+        "scope": "operational_auth_db",
+        "expected": "실제 일반/유료/만료/취소/타인·직원 학교 범위/자기승인·의존 장애 검수"
+      },
+      {
+        "id": "SEC-QA-05",
+        "control": "SEC-05",
+        "scope": "synthetic_HTTP",
+        "expected": "무료 누백·paid 환산/후보·cursor·키·성적표 회전도 누적 예산 준수"
+      },
+      {
+        "id": "SEC-QA-06",
+        "control": "SEC-06",
+        "scope": "operational_auth_db",
+        "expected": "동시 요청·복수 worker·재시작·재시도·만료·카운터 장애 일관성"
+      },
+      {
+        "id": "SEC-QA-07",
+        "control": "SEC-07",
+        "scope": "synthetic_HTTP",
+        "expected": "429/Retry-After·503와 로그의 비밀/원성적/타인정보 미노출"
+      },
+      {
+        "id": "SEC-QA-08",
+        "control": "SEC-08",
+        "scope": "contract_harness",
+        "expected": "필수 계약/문서/gate 제거·우회·증거 없는 완료를 하네스가 거절"
+      }
+    ],
+    "evidence_rule": "완료 시 동일 구현 commit·정책 revision·검수 범위·결과·안전한 증거 참조를 기록한다. 3개 보안 gate와 synthetic_HTTP/browser_artifacts/operational_auth_db 증거가 모두 있어야 운영 준비를 검토한다. 문서 등록/계약 회귀 PASS는 런타임 또는 운영 보안 인수가 아니다. 현재 인수 명부는 case_id마다 활성 증거 1건이며 중복/상충 결과를 허용하지 않는다. 이전 검수 이력·파일은 보존하고 현 명부와 구분한다.",
+    "sources": [
+      {
+        "title": "OWASP API 응답 항목 노출 방지",
+        "url": "https://api-security.owasp.org/editions/2023/en/0xa3-broken-object-property-level-authorization/"
+      },
+      {
+        "title": "OWASP REST 접근 통제",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html"
+      },
+      {
+        "title": "OWASP 업무 기능 자동화 악용",
+        "url": "https://api-security.owasp.org/editions/2023/en/0xa6-unrestricted-access-to-sensitive-business-flows/"
+      },
+      {
+        "title": "Supabase API grants/RLS/비공개 스키마",
+        "url": "https://supabase.com/docs/guides/api/securing-your-api"
+      }
+    ],
+    "limitation": "사용자에게 정상 제공한 개별 결과 저장을 완전히 막는다고 약속하지 않는다. 내부자료 비전달·권한 밖 조회 거절·대량 수집 규모/비용 통제를 인수 범위로 한다.",
+    "implementation_commit": null,
+    "evidence_fields": [
+      "case_id",
+      "control",
+      "scope",
+      "result",
+      "implementation_commit",
+      "policy_revision",
+      "evidence_ref"
+    ],
+    "transport_transition": "기존 22 API 경로·회원·DTO를 유지한다. 기존 연결 준비의 사용자 Bearer는 중계 뒤 분석 서버에서도 검증하며 서버 전용 신원을 추가한다. 기존 화면 직접 호출 방식은 운영 보안 인수 경로로 채택하지 않는다. 중계 경로/전달 방식/오류·CSRF 세부 계약은 두 개발 담당이 구현 PR에서 정본과 함께 확정한다."
   }
 }

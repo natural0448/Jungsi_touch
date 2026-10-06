@@ -454,6 +454,372 @@ def supabase_operations_route_metadata(spec):
     c=spec['supabase_operations_handoff_contract']
     return dict(format=c['format'],revision=c['revision'],checked_at=c['checked_at'],status=c['status'],production_ready=c['production_ready'],document=spec['current_documents']['supabase_operations_handoff'],deployment_selection=c['architecture']['selection'],gates=[dict(id=v[0],status=v[2]) for v in c['acceptance_gates']])
 
+
+SECURITY_DOCUMENT="docs/current/외부접근_데이터보호_개발기준.md"
+SECURITY_REQUIREMENTS={"REQ-24","REQ-25","REQ-26"}
+SECURITY_GATES={
+    "security_response_artifacts":{"SEC-QA-01","SEC-QA-02"},
+    "security_direct_authorization":{"SEC-QA-03","SEC-QA-04"},
+    "security_harvest_controls":{"SEC-QA-05","SEC-QA-06","SEC-QA-07"},
+}
+SECURITY_CASES={
+    "SEC-QA-01":("SEC-01","synthetic_HTTP"),
+    "SEC-QA-02":("SEC-02","browser_artifacts"),
+    "SEC-QA-03":("SEC-03","synthetic_HTTP"),
+    "SEC-QA-04":("SEC-04","operational_auth_db"),
+    "SEC-QA-05":("SEC-05","synthetic_HTTP"),
+    "SEC-QA-06":("SEC-06","operational_auth_db"),
+    "SEC-QA-07":("SEC-07","synthetic_HTTP"),
+    "SEC-QA-08":("SEC-08","contract_harness"),
+}
+SECURITY_INVARIANTS={
+    "recursive_role_based_response_allowlist","browser_artifact_inspection_required",
+    "verified_server_relay_required","application_user_authorization_required",
+    "free_overall_is_throttled","paid_candidates_is_throttled",
+    "quota_shared_atomic_before_compute","quota_stable_across_identifier_rotation",
+    "quota_survives_restart_and_multiple_workers","counter_failure_is_not_unlimited",
+    "same_score_catalog_browse_scope_preserved","successful_score_pending_judgment_preserved",
+    "role_specific_management_receipts_preserved","idempotent_replay_still_rate_limited",
+    "private_data_and_secrets_stay_server_only","runtime_acceptance_is_separate",
+}
+SECURITY_ANALYSIS={"score-profile.create","overall.analyze","university.analyze","candidates.build"}
+SECURITY_READS={"history.search","recruitment.read","report.read","offerings.search",
+                "offering.read","report.export","statistics.read","forecast.published.read","shortlist.update"}
+SECURITY_ERRORS={"rate_limit_exceeded":(429,True),"analysis_quota_exceeded":(429,True),
+                 "security_policy_unavailable":(503,False)}
+SECURITY_ERROR_FIELDS={"code","http","retry_after_required","status"}
+SECURITY_BOUNDARY_IDS={
+    "forbidden":{"private_source_and_model","unapproved_internal_detail","private_reference_and_download","credential_and_token"},
+    "preserve":{"student_result_and_rationale","authorized_management_receipts","independent_score_and_judgment_state"},
+}
+SECURITY_CONTROL_OWNERS={
+    "SEC-01":"application","SEC-02":"presentation","SEC-03":"infrastructure",
+    "SEC-04":"application","SEC-05":"application","SEC-06":"data",
+    "SEC-07":"application","SEC-08":"planning",
+}
+SECURITY_CACHE_BINDING={"verified_subject_id","normalized_scores","exam_id","source_pack_version",
+                        "calculation_version","rule_version","curve_version","catalog_version",
+                        "analysis_version","policy_version","offering_id","report_revision"}
+
+
+def security_catalog_contract(spec):
+    """Only safe development metadata; never copy internal quota/storage values."""
+    c=spec["security_contract"]
+    return {key:c[key] for key in ("format","revision","required","document","requirements",
+                                   "implementation_status","production_ready")} | {
+        "contract_ref":"security_contract",
+        "gateway_mode":c["gateway_policy"]["mode"],
+        "runtime_enforcement_status":("implemented" if c["implementation_status"]=="implemented" else "pending_runtime_implementation"),
+        "controls":[{key:row[key] for key in ("id","title","owner_layer","implementation_status")}
+                    for row in c["controls"]],
+        "planned_errors":[{key:row[key] for key in ("code","http","retry_after_required","status")}
+                          for row in c["planned_errors"] if row.get("code") in SECURITY_ERRORS],
+    }
+
+
+def security_reference(spec,link):
+    c=spec["security_contract"]
+    return ("\n\n## 외부 접근 데이터 보호: 개발 시작 전 필수\n\n"+
+            f"[외부접근 데이터보호 개발기준]({link})을 작업 전에 반드시 읽는다. "+
+            f"정본은 service_spec.json의 security_contract와 workflow.development_harness이며 "+
+            f"보안 revision은 {c['revision']}이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. "+
+            "공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. "+
+            "기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. "+
+            "현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. "+
+            "문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.")
+
+
+def security_operation_rights(operation):
+    result=rights(operation["member_tiers"])
+    capabilities=operation.get("operator_capabilities",[])
+    if capabilities:
+        result+="; 관리 "+"/".join(capabilities)+" + 허용 학교 scope"
+        if operation["id"] in {"forecast.approve","forecast.publish"}:
+            result+="; 독립 approver·자기승인 거절"
+    if operation.get("report_owner"):result+="; 본인 소유 리포트/성적표"
+    if operation.get("confirmed_score_profile"):result+="; 확인 성적표 필수"
+    return result
+
+
+def security_document_body(spec):
+    c=spec["security_contract"]; h=spec["workflow"]["development_harness"];q=c["quota_policy"]
+    ticks=chr(96)
+    intro=(f"필수 개발 기준 · 보안 revision {ticks}{c['revision']}{ticks} · "+
+           f"기획 출발 commit {ticks}{c['basis_commit']}{ticks}\n\n"+
+           c["scope"]+"\n\n"+
+           "**작업 전에 이 문서와 공통 명세를 읽고, 영향 operation·SEC ID·담당 브랜치를 PR에 기록한다.** "+
+           "현재 등록은 기획과 계약 하네스의 기준이며 런타임 보안 구현·운영 인수가 아니다. "+
+           f"전체 구현 상태 {c['implementation_status']} / production_ready={str(c['production_ready']).lower()}. "+
+           "기존 인증·소유권·이용권 코드가 존재해도 아래 추가 통제를 구현·검수하기 전 완료로 처리하지 않는다.\n\n")
+    risks=table(["외부 반출 경로","필수 대응","인수 기준"],[
+        ["화면 전달물에서 내부 자료를 얻음","SEC-01·02: 역할별 필드 허용목록과 브라우저 전달물 검사",
+         "정상/pending/오류/재응답/인쇄·JS/HTML/RSC 등에 전체 곡선·환산표·비밀이 없음"],
+        ["화면을 거치지 않고 API 직접 호출","SEC-03·04: 서버 중계 신원과 실제 사용자 권한을 각각 확인",
+         "서버 신원 누락·타인·무료 유료기능·만료·scope 밖 결과 거절"],
+        ["정상 계정으로 점수·결과를 반복 수집","SEC-05·06·07: 원자적 공유 예산과 계산/반환량·탐지",
+         "무료 누백까지 적용; ID/JWT/worker/재시작 교체로 예산 초기화 불가"],
+    ])
+    flow=(ticks*3+"mermaid\nflowchart LR\n"+
+          '    U["학생·학부모 브라우저<br/>허용 결과만 수신"] --> P["프레젠테이션 서버<br/>세션·CSRF·중계"]\n'+
+          '    P -->|"서버 전용 신원 + 실제 사용자"| A["애플리케이션 API<br/>권한·DTO·사용량·계산"]\n'+
+          '    A -->|"저장소 포트"| D["비공개 데이터 계층<br/>자료·모델·공유 사용량"]\n'+
+          ticks*3+"\n\n")
+    controls=table(["통제","담당 계층","기존 담당 브랜치","구현 상태","운영 검수"],
+        [[r["id"]+" "+r["title"],r["owner_layer"],r["branch"],r["implementation_status"],
+          r["operational_verification"]] for r in c["controls"]])
+    detailed="\n\n".join("### "+r["id"]+" "+r["title"]+"\n\n"+r["rule"]+"\n\n인수: "+r["acceptance"] for r in c["controls"])
+    ops=table(["operation","경로","회원/관리 조건","필수 통제","현재 적용 상태"],
+        [[o["id"],o["method"]+" "+o["path"],security_operation_rights(o),
+          ", ".join(o["security_policy"]["control_ids"]),o["security_policy"]["enforcement_status"]]
+         for o in spec["operations"]])
+    quota=(q["cost_rule"]+"\n\n"+q["counter_rule"]+"\n\n"+q["normal_use_rule"]+"\n\n"+
+           "예산 키: "+", ".join(q["identity"])+". 직접 성적 입력과 본인 성적표 ID 경로 모두 같은 예산에 결속한다.\n\n"+
+           "교체해도 초기화 금지: "+", ".join(q["rotation_does_not_reset"])+".\n\n"+
+           "결과 재사용의 결속: "+", ".join(q["cache_binding"])+".\n\n"+
+           q["number_rule"]+" 현재 숫자는 모두 null이며 미승인이다. "+
+           "운영 설정 승인·검증 전 무제한 기본값을 넣거나 이 정책이 적용됐다고 표시하지 않는다.\n\n"+
+           "무료 전체 누백 제공, 유료 전체 대학·학과 검색, 성공한 점수·누백과 판단 보류의 독립 표시를 유지한다. "+
+           "학교 목록을 임의 축소해 보안 통제로 대체하지 않는다.")
+    errors=table(["계획 코드","HTTP","Retry-After","구현 상태"],
+         [[r["code"],r["http"],str(r["retry_after_required"]).lower(),r["status"]] for r in c["planned_errors"]])
+    qa=table(["사례","통제","증거 범위","통과 기준"],
+         [[r["id"],r["control"],r["scope"],r["expected"]] for r in c["acceptance_cases"]])
+    refs="\n".join("- ["+PurePosixPath(p).name+"]("+PurePosixPath(p).name+")" if p.startswith("docs/current/")
+                  else "- ["+p+"](../../"+p+")" for p in h["required_documents"])
+    sources="\n".join("- ["+r["title"]+"]("+r["url"]+")" for r in c["sources"])
+    return (intro+"## 세 가지 위협과 결과\n\n"+risks+
+            "\n\n## 3티어 구현 경계와 연결 변경\n\n"+flow+c["transport_transition"]+"\n\n"+
+            c["gateway_policy"]["failure_policy"]+"\n\n"+c["gateway_policy"]["presentation_rule"]+"\n\n"+
+            c["gateway_policy"]["deployment_rule"]+
+            "\n\n## 담당자별 구현과 인수\n\n"+controls+
+            "\n\nSEC-03은 두 기존 담당자가 함께 인수한다. 표의 infrastructure는 분석 API 측 책임이다.\n\n"+
+            table(["중계 참여 계층","담당 브랜치","책임"],[[r["owner_layer"],r["branch"],r["responsibility"]]
+                  for r in c["gateway_policy"]["owner_roles"]])+"\n\n"+detailed+
+            "\n\n## 모든 API의 보안 연결\n\n"+ops+
+            "\n\n## 응답과 브라우저의 전달 범위\n\n"+
+            "기존 operations[].contract_ref의 공개·관리 역할별 DTO가 허용목록의 원본이다. "+
+            "중첩 객체/배열도 명시적으로 선택하고 저장 객체를 그대로 직렬화하지 않는다.\n\n"+
+            "\n".join("- 전달 금지 ["+v["id"]+"]: "+v["description"] for v in c["response_boundary"]["forbidden"])+"\n\n"+
+            "\n".join("- 보존 ["+v["id"]+"]: "+v["description"] for v in c["response_boundary"]["preserve"])+
+            "\n\n## 누적 예산과 정상 이용의 보존\n\n"+quota+
+            "\n\n## 실패 응답과 안전한 기록\n\n"+errors+"\n\n"+c["error_rule"]+
+            "\n\n## 하네스 필수 참조와 검사\n\n"+h["start_rule"]+"\n\n"+h["report_rule"]+
+            "\n\n선독 문서:\n\n"+refs+
+            "\n\n기획 변경은 공통 명세와 생성 도구를 수정하고 문서·라우팅·두 catalog를 함께 생성한다. "+
+            "정상 pre-commit/pre-push와 GitHub 정확 커밋 CI가 필수 계약/AGENTS 참조/operation 연결/역할·예산 "+
+            "불변 조건/발행 gate와 같은 스냅샷의 생성 결과를 검사한다. "+
+            "필수 항목 제거·문서 단독 편집·우회 설정·근거 없는 ready/passed는 실패한다. "+
+            "개발자가 실제로 읽었는지는 기계가 증명할 수 없어 PR의 revision·영향/무영향 설명으로 남긴다. "+
+            "파일 보존·비공개 데이터 제외·담당 브랜치와 기존 테스트를 유지한다."+
+            "\n\n## 회귀·브라우저·운영 인수와 발행 gate\n\n"+qa+"\n\n"+
+            c["evidence_rule"]+"\n\n증거 필드: "+", ".join(c["evidence_fields"])+
+            ". case_id별 통과 증거의 구현 commit와 보안 revision이 일치해야 한다. "+
+            "계약 회귀의 합성 PASS는 실제 JWT/이용권/DB/배포·브라우저를 대체하지 않는다. "+
+            "현재 acceptance_evidence는 비어 있고 운영 실행은 NOT_RUN이다.\n\n"+
+            "필수 보안 발행 gate: "+", ".join(c["mandatory_release_gates"])+
+            ". 하나라도 누락·pending/failed면 main 준비 완료로 올리지 않는다."+
+            "\n\n## 보호 범위의 한계\n\n"+c["limitation"]+
+            "\n\n## 공식 기술 근거\n\n"+sources)
+
+
+def validate_security_contract(spec):
+    """Required planning invariants, not a claim that runtime security is enforced."""
+    errors=[]
+    c=spec.get("security_contract")
+    if not isinstance(c,dict):
+        return ["Required external security contract absent"]
+    if c.get("format")!="jungsi.external-access-security/v1" or c.get("required") is not True:
+        errors.append("Required external security contract drift")
+    if c.get("document")!=SECURITY_DOCUMENT or spec.get("current_documents",{}).get("external_security")!=SECURITY_DOCUMENT:
+        errors.append("Mandatory security document registration drift")
+    if not isinstance(c.get("revision"),str) or not c["revision"].strip():
+        errors.append("Security revision absent")
+    if not SECURITY_REQUIREMENTS<=set(c.get("requirements",[])) or not SECURITY_REQUIREMENTS<={
+        r["id"] for r in spec.get("requirements",[])}:
+        errors.append("Mandatory security requirements absent")
+    invariants=c.get("invariants",{})
+    if not isinstance(invariants,dict) or any(invariants.get(k) is not True for k in SECURITY_INVARIANTS):
+        errors.append("Security invariant missing or weakened")
+    h=spec.get("workflow",{}).get("development_harness",{})
+    required={"AGENTS.md",SPEC_PATH,SECURITY_DOCUMENT}|{
+        spec.get("current_documents",{}).get(k,"") for k in
+        ("planning","routing","architecture","workflow","api_dto","presentation_handoff")}
+    if (not isinstance(h,dict) or h.get("format")!="jungsi.development-harness/v1" or
+        h.get("security_required") is not True or h.get("invariants_required") is not True or
+        h.get("security_document")!=SECURITY_DOCUMENT or
+        not required<=set(h.get("required_documents",[])) or
+        any(not isinstance(h.get(k),str) or not h[k].strip() for k in ("start_rule","report_rule"))):
+        errors.append("Mandatory security harness registration drift")
+    if (spec.get("routing_policy",{}).get("security_contract_ref")!="security_contract" or
+        any(spec.get(k,{}).get("security_contract_ref")!="security_contract" for k in
+            ("backend_platform_contract","presentation_connection_contract","supabase_operations_handoff_contract"))):
+        errors.append("Security routing or handoff reference drift")
+    controls=c.get("controls",[])
+    control_map={r.get("id"):r for r in controls if isinstance(r,dict)} if isinstance(controls,list) else {}
+    if (set(control_map)!=set(SECURITY_CONTROL_OWNERS) or len(controls)!=len(SECURITY_CONTROL_OWNERS)):
+        errors.append("Mandatory security controls missing or duplicated")
+    states={"pending","in_progress","implemented"}
+    for key,owner in SECURITY_CONTROL_OWNERS.items():
+        r=control_map.get(key,{})
+        branch=("develop" if owner=="planning" else "feature/presentation-foundation"
+                if owner=="presentation" else "feature/application-pre-data-platform")
+        if (r.get("owner_layer")!=owner or r.get("branch")!=branch or
+            r.get("implementation_status") not in states or
+            r.get("operational_verification") not in {"NOT_RUN","passed","failed"} or
+            any(not isinstance(r.get(k),str) or not r[k].strip() for k in ("rule","acceptance"))):
+            errors.append("Security control owner or acceptance drift: "+key)
+    for o in spec.get("operations",[]):
+        p=o.get("security_policy",{}); ids=set(p.get("control_ids",[]))
+        needed={"SEC-01","SEC-03","SEC-04","SEC-07","SEC-08"}
+        if o["id"] in SECURITY_ANALYSIS|SECURITY_READS:needed|={"SEC-05","SEC-06"}
+        if (p.get("contract_ref")!="security_contract" or not needed<=ids or
+            not ids<=set(SECURITY_CONTROL_OWNERS) or
+            p.get("enforcement_status") not in {"pending_runtime_implementation","implemented"} or
+            not SECURITY_REQUIREMENTS<=set(o.get("requirements",[]))):
+            errors.append("Operation security policy drift: "+o["id"])
+    for p in spec.get("pages",[])+spec.get("management_pages",[]):
+        if not SECURITY_REQUIREMENTS<=set(p.get("requirements",[])):
+            errors.append("Page security requirements absent: "+p.get("id",p.get("path","unknown")))
+    boundary=c.get("response_boundary",{})
+    if (boundary.get("public_schema_source")!="operations[].contract_ref" or
+        not {"success","pending","error","idempotent_replay","persisted_report","print_dto",
+             "published_forecast","browser_artifacts"}<=set(boundary.get("covers",[])) or
+        not isinstance(boundary.get("forbidden"),list) or not isinstance(boundary.get("preserve"),list)):
+        errors.append("Recursive response boundary drift")
+    for category,ids in SECURITY_BOUNDARY_IDS.items():
+        rows=boundary.get(category,[])
+        rows=rows if isinstance(rows,list) else []
+        keys=[r.get("id") for r in rows if isinstance(r,dict)]
+        if (set(keys)!=ids or len(keys)!=len(ids) or len(rows)!=len(keys) or any(
+            set(r)!={"id","description"} or not isinstance(r.get("description"),str) or
+            not r.get("description","").strip() for r in rows if isinstance(r,dict))):
+            errors.append("Mandatory response boundary category drift: "+category)
+    gateway=c.get("gateway_policy",{})
+    if (gateway.get("mode")!="server_authenticated_relay" or
+        gateway.get("server_identity_required") is not True or
+        gateway.get("user_authorization_in_application_required") is not True or
+        gateway.get("direct_browser_analysis_allowed") is not False or
+        gateway.get("credentials_in_browser_allowed") is not False):
+        errors.append("Authenticated relay security drift")
+    owner_roles=gateway.get("owner_roles",[])
+    owner_map={r.get("owner_layer"):r for r in owner_roles if isinstance(r,dict)}
+    if len(owner_roles)!=2 or set(owner_map)!={"presentation","infrastructure"} or any(
+        owner_map.get(layer,{}).get("branch")!=branch or
+        not isinstance(owner_map.get(layer,{}).get("responsibility"),str) or
+        not owner_map.get(layer,{}).get("responsibility","").strip()
+        for layer,branch in (("presentation","feature/presentation-foundation"),
+                            ("infrastructure","feature/application-pre-data-platform"))):
+        errors.append("Relay owner split drift")
+    if gateway.get("implementation_status") not in states:
+        errors.append("Relay implementation state drift")
+    q=c.get("quota_policy",{})
+    if not SECURITY_ANALYSIS<=set(q.get("analysis_operations",[])) or not SECURITY_READS<=set(q.get("read_operations",[])):
+        errors.append("Free or paid security quota coverage drift")
+    if set(q.get("input_paths",[]))!={"direct_scores","owned_profile_id"}:
+        errors.append("Security quota input path bypass")
+    if q.get("identity")!=["verified_subject_id","exam_id","policy_version","period"]:
+        errors.append("Security quota identity drift")
+    if (q.get("storage")!="application_port_private_shared_store" or
+        not {"JWT","request_key","profile_id","report_id","search_term","cursor","worker","server_restart"}<=
+            set(q.get("rotation_does_not_reset",[]))):
+        errors.append("Shared quota persistence or rotation drift")
+    if not SECURITY_CACHE_BINDING<=set(q.get("cache_binding",[])):
+        errors.append("Security cache identity or version binding drift")
+    if (q.get("policy_values_status") not in {"pending_approved_operational_values","approved_private_runtime_configuration"} or
+        q.get("limits")!={k:None for k in ("request_window","distinct_scores","calculation_cost","concurrent_jobs","result_volume")}):
+        errors.append("Operational quota values must stay private and unset in Git")
+    error_rows=c.get("planned_errors",[])
+    planned={r.get("code"):r for r in error_rows if isinstance(r,dict)}
+    if len(error_rows)!=len(SECURITY_ERRORS) or set(planned)!=set(SECURITY_ERRORS):
+        errors.append("Security planned errors missing unknown or duplicated")
+    for code,(http,retry) in SECURITY_ERRORS.items():
+        row=planned.get(code,{})
+        if (set(row)!=SECURITY_ERROR_FIELDS or row.get("http")!=http or
+            row.get("retry_after_required") is not retry or
+            row.get("status") not in {"planned_not_implemented","in_progress","implemented"}):
+            errors.append("Security planned error contract drift: "+code)
+    cases=c.get("acceptance_cases",[])
+    cases_map={r.get("id"):r for r in cases if isinstance(r,dict)} if isinstance(cases,list) else {}
+    if len(cases)!=len(SECURITY_CASES) or set(cases_map)!=set(SECURITY_CASES) or any(
+            cases_map.get(k,{}).get("control")!=v[0] or cases_map.get(k,{}).get("scope")!=v[1]
+            for k,v in SECURITY_CASES.items()) or any(
+            not isinstance(r.get("expected"),str) or not r.get("expected","").strip() for r in cases if isinstance(r,dict)):
+        errors.append("Mandatory security acceptance cases drift")
+    gates=spec.get("workflow",{}).get("branch_governance",{}).get("release_gate",{})
+    checks=gates.get("checks",[])
+    check_map={r.get("id"):r for r in checks if isinstance(r,dict)}
+    if (set(c.get("mandatory_release_gates",[]))!=set(SECURITY_GATES) or
+        not set(SECURITY_GATES)<=set(check_map) or any(
+            sum(1 for r in checks if r.get("id")==k)!=1 for k in SECURITY_GATES)):
+        errors.append("Mandatory security release gate absent or duplicated")
+    evidence=c.get("acceptance_evidence",[])
+    passed=set(); evidence_commits=set(); seen_cases=set()
+    expected_fields={"case_id","control","scope","result","implementation_commit","policy_revision","evidence_ref"}
+    if set(c.get("evidence_fields",[]))!=expected_fields:
+        errors.append("Security evidence schema drift")
+    if not isinstance(evidence,list):
+        errors.append("Security evidence must be a list");evidence=[]
+    for row in evidence:
+        if not isinstance(row,dict):
+            errors.append("Security evidence invalid");continue
+        if row.get("case_id") in seen_cases:
+            errors.append("Security evidence duplicated or conflicting")
+        seen_cases.add(row.get("case_id"))
+        case=SECURITY_CASES.get(row.get("case_id"))
+        commit=row.get("implementation_commit")
+        valid=(expected_fields<=set(row) and case is not None and row.get("control")==case[0] and
+               row.get("scope")==case[1] and row.get("policy_revision")==c.get("revision") and
+               isinstance(commit,str) and re.fullmatch(r"[0-9a-f]{40}",commit) is not None and
+               isinstance(row.get("evidence_ref"),str) and bool(row["evidence_ref"].strip()) and
+               row.get("result") in {"passed","failed","NOT_RUN"})
+        if not valid:errors.append("Security evidence incomplete or mismatched");continue
+        if row["result"]=="passed":
+            passed.add(row["case_id"]);evidence_commits.add(commit)
+    for case_id in passed:
+        control,scope=SECURITY_CASES[case_id]
+        verification=control_map.get(control,{}).get("operational_verification")
+        if verification=="failed" or (scope in {"browser_artifacts","operational_auth_db"} and verification!="passed"):
+            errors.append("Security evidence contradicts verification state: "+control)
+    implementation_commit=c.get("implementation_commit")
+    if passed and (len(evidence_commits)!=1 or evidence_commits!={implementation_commit}):
+        errors.append("Security evidence implementation snapshot drift")
+    for key,r in control_map.items():
+        completed=r.get("implementation_status")=="implemented" or r.get("operational_verification")=="passed"
+        if completed and not {k for k,v in SECURITY_CASES.items() if v[0]==key}<=passed:
+            errors.append("Security control completion lacks scoped evidence: "+key)
+    for key,required_cases in SECURITY_GATES.items():
+        if check_map.get(key,{}).get("status")=="passed" and (
+            not required_cases<=passed or any(control_map.get(SECURITY_CASES[k][0],{}).get(
+                "implementation_status")!="implemented" for k in required_cases)):
+            errors.append("Security release gate lacks implemented scoped evidence: "+key)
+    complete=c.get("implementation_status")=="implemented"
+    if c.get("implementation_status") not in states or (complete and (
+        not set(SECURITY_CASES)<=passed or any(r.get("implementation_status")!="implemented" for r in control_map.values()))):
+        errors.append("Security implementation readiness lacks evidence")
+    if complete and (
+        gateway.get("implementation_status")!="implemented" or
+        any(o.get("security_policy",{}).get("enforcement_status")!="implemented" for o in spec.get("operations",[])) or
+        any(row.get("status")!="implemented" for row in planned.values()) or
+        spec.get("routing_policy",{}).get("security_enforcement_status")!="implemented" or
+        any(spec.get(key,{}).get("security_transition_status")!="implemented" for key in
+            ("backend_platform_contract","presentation_connection_contract","supabase_operations_handoff_contract"))):
+        errors.append("Completed security runtime state drift")
+    for o in spec.get("operations",[]):
+        if o.get("security_policy",{}).get("enforcement_status")=="implemented" and not complete:
+            errors.append("Operation security enforcement lacks implementation evidence: "+o["id"])
+    if c.get("status") not in {"required_for_development_runtime_NOT_RUN","runtime_implemented_verification_pending","accepted"} or (
+        c.get("status")=="accepted" and (not complete or not set(SECURITY_CASES)<=passed)):
+        errors.append("Security acceptance status lacks evidence")
+    if type(c.get("production_ready")) is not bool:
+        errors.append("Security production readiness must be boolean")
+    if c.get("production_ready") is True or gates.get("state")=="ready":
+        if (not complete or q.get("policy_values_status")!="approved_private_runtime_configuration" or
+            not set(SECURITY_CASES)<=passed or any(check_map.get(k,{}).get("status")!="passed" for k in SECURITY_GATES) or
+            any(r.get("operational_verification")!="passed" for r in control_map.values())):
+            errors.append("Security production readiness lacks all required acceptance")
+    return sorted(set(errors))
+
+
 def generated_files(spec):
     digest=hashlib.sha256(json.dumps(spec,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     def doc(title,body):
@@ -733,6 +1099,30 @@ def generated_files(spec):
         for path in files:
             if path.endswith('.md'):
                 files[path]=files[path].replace(marker,acceptance+marker)
+
+    if spec.get("security_contract"):
+        security_path=spec["security_contract"]["document"]
+        files[security_path]=doc("외부접근 데이터보호 개발기준 · 필수 개발 참조",security_document_body(spec))
+        marker="\n\n<!-- jungsi:generated"
+        for path in spec["current_documents"].values():
+            if path in files and path!=security_path:
+                files[path]=files[path].replace(marker,security_reference(spec,PurePosixPath(security_path).name)+marker)
+        for path,link in [
+            ("apps/web/README.md","../../"+security_path),
+            ("database/README.md","../"+security_path),
+            (spec.get("contract_review",{}).get("handoff_response",{}).get("path"),"../../current/"+PurePosixPath(security_path).name),
+        ]:
+            if path in files:
+                files[path]=files[path].replace(marker,security_reference(spec,link)+marker)
+        for path in ("apps/web/route_catalog.json","src/jungsi_touch/application/route_catalog.json"):
+            catalog=json.loads(files[path])
+            catalog["security_contract"]=security_catalog_contract(spec)
+            catalog["mandatory_security_document"]=security_path
+            for op in catalog.get("operations",[]):
+                canonical=next(o for o in spec["operations"] if o["id"]==op["id"])
+                op["security_policy"]=canonical["security_policy"]
+            files[path]=json.dumps(catalog,ensure_ascii=False,indent=2)+"\n"
+
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -880,6 +1270,7 @@ def validate_spec(spec):
     if 'session_contract' in spec:errors.append('Superseded proposed session contract must not be revived')
     errors.extend(validate_forecast_contract(spec))
     errors.extend(validate_local_verification_contract(spec))
+    errors.extend(validate_security_contract(spec))
     return errors
 
 def protected_path(path,shared_tools):
@@ -929,6 +1320,15 @@ def validate_content(paths,read,spec):
         errors.append("README missing current planning pointer")
     if "AGENTS.md" not in names or b"docs/current/service_spec.json" not in read("AGENTS.md"):
         errors.append("AGENTS missing current specification authority")
+    if ("AGENTS.md" not in names or b"<!-- jungsi:security-required -->" not in read("AGENTS.md") or
+        SECURITY_DOCUMENT.encode("utf-8") not in read("AGENTS.md")):
+        errors.append("AGENTS missing mandatory security reference")
+    for path in ("README.md",".github/pull_request_template.md"):
+        if path not in names or SECURITY_DOCUMENT.encode("utf-8") not in read(path):
+            errors.append("Mandatory security entry point absent: "+path)
+    harness=spec.get("workflow",{}).get("development_harness",{})
+    for path in harness.get("required_documents",[]):
+        if path not in names:errors.append("Mandatory development reference absent: "+path)
     return sorted(set(errors))
 
 def validate_changed_paths(changed,spec):
