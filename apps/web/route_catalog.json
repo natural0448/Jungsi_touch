@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.8.1",
-  "source_sha256": "730d25778c3cdd4a21f7ac27460ad9a361c19cbdccb306c23f178407738a6f3c",
+  "spec_version": "1.8.3",
+  "source_sha256": "1d7483e7fe1971947d3965c023a3421ef4cc195e3d6d9b077c58ff186182fa37",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2438,7 +2438,8 @@
       "실제 계정/이용권/관리 capability의 전체 연결 검증",
       "v1.7.1 후보의 DTO allowlist/base_result/context/version/이유 코드/후보 분할을 외부 프런트 담당에게 확정 백엔드 커밋과 전달",
       "운영 DB002 적용·권한·동시성·멱등·발행 readiness 실측은 NOT_RUN",
-      "사용자는 DATABASE_URL을 비공개 .env로 추후 제공하기로 했다. 같은 필수 설정을 배포 서버 환경변수로 전달할 수도 있으며 .env 파일 자체를 필수 조건으로 삼지 않는다. 기존 키의 API 조회 성공으로 DB 연결값·권한·SQL 연결 승인을 추정하지 않으며 준비 전 실제 PostgreSQL 검증은 유보한다."
+      "사용자는 DATABASE_URL을 비공개 .env로 추후 제공하기로 했다. 같은 필수 설정을 배포 서버 환경변수로 전달할 수도 있으며 .env 파일 자체를 필수 조건으로 삼지 않는다. 기존 키의 API 조회 성공으로 DB 연결값·권한·SQL 연결 승인을 추정하지 않으며 준비 전 실제 PostgreSQL 검증은 유보한다.",
+      "RF-01~06: BFF/CSRF/서버신원·관리자 CR·DDL/사용자키·모드·정확 PR/SHA/증거·로컬 명부/네 subject/기대값 수령을 회신받는다. 현재 22API/DTO/session v1·보안은 불변이다."
     ],
     "scope_excludes": [
       "리포트/인쇄 확장",
@@ -3053,12 +3054,16 @@
   },
   "supabase_operations_handoff": {
     "format": "jungsi.supabase-operations-handoff/v1",
-    "revision": "2026.10.06.v2",
+    "revision": "2026.10.06.v3",
     "checked_at": "2026-10-06T08:40:54.349322Z",
     "status": "NOT_READY",
     "production_ready": false,
     "document": "docs/current/Supabase_운영_인수인계.md",
-    "deployment_selection": "not_selected",
+    "deployment_selection": "separate_Jungsi_FastAPI_deployment",
+    "entitlement_target": "public.jeongsi_passes",
+    "entitlement_adapter_status": "unchanged_target_transition_NOT_RUN",
+    "frontend_reply_document": "docs/current/화면팀_회신요청_최종.md",
+    "frontend_reply_status": "finalized_for_delivery_replies_and_runtime_pending",
     "gates": [
       {
         "id": "실DB",
@@ -3070,7 +3075,7 @@
       },
       {
         "id": "유료·staff 권한",
-        "status": "NOT_RUN_DECISION_PENDING"
+        "status": "NOT_RUN_TARGET_CONFIRMED_ADAPTER_PENDING"
       },
       {
         "id": "실approved 자료",
@@ -3086,11 +3091,23 @@
       },
       {
         "id": "외부4페이지",
-        "status": "NOT_RUN_PR6_OPEN_UNMERGED"
+        "status": "NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED"
       },
       {
         "id": "운영·최종release",
         "status": "NOT_READY"
+      },
+      {
+        "id": "브라우저·응답 전달물",
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "중계·실권한·원점 차단",
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "공유 원자적 수집 예산",
+        "status": "NOT_RUN"
       }
     ]
   },

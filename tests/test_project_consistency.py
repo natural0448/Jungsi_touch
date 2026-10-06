@@ -4,7 +4,7 @@ import json,sys,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
-from check_project_consistency import validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
+from check_project_consistency import validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,validate_frontend_reply_contract,validate_frontend_followup_contract,FRONTEND_REPLY_DOCUMENT,FRONTEND_FOLLOWUP_DOCUMENT,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
 
 class ConsistencyTests(unittest.TestCase):
     def setUp(self):
@@ -641,5 +641,137 @@ class SecurityContractTests(unittest.TestCase):
         for op in frontend["operations"]:
             canonical=next(o for o in self.spec["operations"] if o["id"]==op["id"])
             self.assertEqual(op["security_policy"],canonical["security_policy"])
+
+    def test_frontend_reply_cannot_disappear_from_current_spec(self):
+        self.assertEqual(validate_frontend_reply_contract(self.spec),[])
+        wrong=deepcopy(self.spec);wrong['supabase_operations_handoff_contract'].pop('reply_contract')
+        self.assertIn('Frontend reply contract missing',validate_spec(wrong))
+
+    def test_frontend_reply_cannot_point_to_a_different_or_private_document(self):
+        for field in ('contract','registration'):
+            wrong=deepcopy(self.spec)
+            if field=='contract':wrong['supabase_operations_handoff_contract']['reply_contract']['document']='outputs/private.md'
+            else:wrong['current_documents']['frontend_reply']='outputs/private.md'
+            self.assertIn('Frontend reply source registration drift',validate_frontend_reply_contract(wrong))
+
+    def test_frontend_reply_missing_or_duplicated_work_item_is_rejected(self):
+        for mutation in ('missing','duplicate','invalid_type'):
+            wrong=deepcopy(self.spec);items=wrong['supabase_operations_handoff_contract']['reply_contract']['items']
+            if mutation=='missing':items.pop()
+            elif mutation=='duplicate':items[-1]=deepcopy(items[0])
+            else:items[0]['id']=[]
+            self.assertIn('Frontend reply six work items incomplete',validate_frontend_reply_contract(wrong))
+
+    def test_frontend_reply_must_assign_owners_inputs_dependencies_and_evidence(self):
+        for field in ('owners','requested_reply','our_answer','dependencies','completion_evidence'):
+            for invalid in ([],[' '],'untyped'):
+                wrong=deepcopy(self.spec);row=wrong['supabase_operations_handoff_contract']['reply_contract']['items'][0];row[field]=invalid
+                self.assertIn('Frontend reply work item incomplete: '+row['id']+'/'+field,validate_frontend_reply_contract(wrong))
+
+    def test_frontend_reply_cannot_invent_or_duplicate_an_api_operation(self):
+        for refs in (['not.registered'],['session.read','session.read'],[]):
+            wrong=deepcopy(self.spec);row=wrong['supabase_operations_handoff_contract']['reply_contract']['items'][0];row['route_refs']=refs
+            self.assertIn('Frontend reply operation reference drift: '+row['id'],validate_frontend_reply_contract(wrong))
+
+    def test_frontend_reply_requires_all_six_original_local_answers(self):
+        for mutation in ('missing','duplicate','untyped'):
+            wrong=deepcopy(self.spec);rows=wrong['supabase_operations_handoff_contract']['reply_contract']['local_request_answers']
+            if mutation=='missing':rows.pop()
+            elif mutation=='duplicate':rows[-1]=deepcopy(rows[0])
+            else:rows[0]['number']=True
+            self.assertIn('Frontend reply six local answers incomplete',validate_frontend_reply_contract(wrong))
+
+    def test_frontend_reply_local_answer_cannot_drop_boundary_or_completion_evidence(self):
+        for field in ('our_answer','dependencies','completion_evidence'):
+            wrong=deepcopy(self.spec);row=wrong['supabase_operations_handoff_contract']['reply_contract']['local_request_answers'][0];row[field]=[]
+            self.assertIn('Frontend reply local answer incomplete: '+str(row['number'])+'/'+field,validate_frontend_reply_contract(wrong))
+
+    def test_frontend_reply_final_document_cannot_claim_pending_work_is_operational(self):
+        wrong=deepcopy(self.spec);wrong['supabase_operations_handoff_contract']['production_ready']=True
+        self.assertIn('Frontend reply pending work cannot certify production readiness',validate_frontend_reply_contract(wrong))
+        wrong=deepcopy(self.spec);row=wrong['supabase_operations_handoff_contract']['reply_contract']['items'][0];row['status']='completed'
+        self.assertIn('Frontend reply work item status drift: '+row['id'],validate_frontend_reply_contract(wrong))
+
+    def test_frontend_reply_target_adoption_cannot_silently_replace_current_adapter(self):
+        wrong=deepcopy(self.spec);a=wrong['supabase_operations_handoff_contract']['architecture'];a['current_entitlement_adapter']['table']='public.jeongsi_passes'
+        self.assertIn('Frontend reply current adapter boundary drift',validate_frontend_reply_contract(wrong))
+        wrong=deepcopy(self.spec);wrong['supabase_operations_handoff_contract']['architecture']['authority_target']='jungsi_backend.entitlements'
+        self.assertIn('Frontend reply adopted authority target drift',validate_frontend_reply_contract(wrong))
+
+    def test_frontend_reply_confirmed_deployment_cannot_revert_to_unselected_or_run(self):
+        for field,value in (('selection','not_selected'),('deployment_status','passed')):
+            wrong=deepcopy(self.spec);wrong['supabase_operations_handoff_contract']['architecture'][field]=value
+            self.assertIn('Frontend reply deployment decision boundary drift',validate_frontend_reply_contract(wrong))
+
+    def test_frontend_reply_requires_exact_start_commit_and_unresolved_inputs(self):
+        wrong=deepcopy(self.spec);r=wrong['supabase_operations_handoff_contract']['reply_contract'];r['basis_commit']='e764583'
+        self.assertIn('Frontend reply basis commit invalid',validate_frontend_reply_contract(wrong))
+        wrong=deepcopy(self.spec);wrong['supabase_operations_handoff_contract']['reply_contract']['unresolved']=[]
+        self.assertIn('Frontend reply unresolved inputs missing',validate_frontend_reply_contract(wrong))
+
+    def test_frontend_reply_is_generated_and_cannot_drift_independently(self):
+        files=self.virtual_files();self.assertIn(FRONTEND_REPLY_DOCUMENT,files)
+        files[FRONTEND_REPLY_DOCUMENT]+=b'completed live connection\n'
+        self.assertIn('Document or route drift: '+FRONTEND_REPLY_DOCUMENT,validate_content(list(files),files.__getitem__,self.spec))
+
+    def test_frontend_reply_and_restart_loss_are_direct_handoff_references(self):
+        files=generated_files(self.spec)
+        for key in ('planning','routing','architecture','backend_readiness','presentation_handoff','presentation_connection'):
+            with self.subTest(document=key):
+                body=files[self.spec['current_documents'][key]].decode('utf-8')
+                self.assertIn('화면팀_회신요청_최종.md',body)
+                self.assertIn('서버 재시작 시 사라진다',body)
+
+    def test_frontend_followup_requires_all_five_owner_tasks(self):
+        self.assertEqual(validate_frontend_followup_contract(self.spec),[])
+        wrong=deepcopy(self.spec);wrong['supabase_operations_handoff_contract']['reply_contract']['followup']['tasks'].pop()
+        self.assertIn('Frontend followup five tasks incomplete',validate_spec(wrong))
+
+    def test_frontend_followup_cannot_claim_pending_browser_or_integration_as_completed(self):
+        wrong=deepcopy(self.spec);row=wrong['supabase_operations_handoff_contract']['reply_contract']['followup']['tasks'][-1];row['status']='completed'
+        self.assertIn('Frontend followup work status drift: '+row['id'],validate_spec(wrong))
+        wrong=deepcopy(self.spec);wrong['supabase_operations_handoff_contract']['reply_contract']['followup']['basis_commit']='e764583'
+        self.assertIn('Frontend followup basis commit drift',validate_spec(wrong))
+
+    def test_frontend_followup_cannot_omit_concrete_sup_reply_and_review_boundaries(self):
+        for field in ('sup_reply','local_review_boundary','unresolved'):
+            wrong=deepcopy(self.spec);wrong['supabase_operations_handoff_contract']['reply_contract']['followup'][field]=[]
+            self.assertTrue(any('Frontend followup' in v for v in validate_spec(wrong)))
+
+    def test_frontend_followup_work_must_keep_inputs_evidence_and_public_operation_scope(self):
+        for field,value in (('owner',''),('work',[]),('completion',[]),('route_refs',['private.dump']),('depends_on',None)):
+            wrong=deepcopy(self.spec);row=wrong['supabase_operations_handoff_contract']['reply_contract']['followup']['tasks'][0];row[field]=value
+            self.assertTrue(any('Frontend followup' in v for v in validate_spec(wrong)))
+
+    def test_frontend_followup_is_generated_and_referenced_by_planning_and_routing(self):
+        files=self.virtual_files();self.assertIn(FRONTEND_FOLLOWUP_DOCUMENT,files)
+        for key in ('planning','routing','presentation_handoff'):
+            self.assertIn('화면팀_후속작업_지시.md',files[self.spec['current_documents'][key]].decode('utf-8'))
+        files[FRONTEND_FOLLOWUP_DOCUMENT]+=b'operational pass\n'
+        self.assertIn('Document or route drift: '+FRONTEND_FOLLOWUP_DOCUMENT,validate_content(list(files),files.__getitem__,self.spec))
+
+    def test_branch_documents_use_source_observation_without_fixed_unmerged_claim(self):
+        spec=deepcopy(self.spec)
+        spec['collaboration']['presentation_branch_status']='SOURCE_PRESENTATION_STATE_PENDING_BROWSER'
+        observation=spec['workflow']['branch_governance']['remote_inventory']['latest_observation']
+        observation['develop']='1234567890abcdef1234567890abcdef12345678'
+        files=generated_files(spec)
+        body=files[spec['current_documents']['workflow']].decode('utf-8')
+        self.assertIn('SOURCE_PRESENTATION_STATE_PENDING_BROWSER',body)
+        self.assertIn('최신 통합 관측일 '+observation['date']+', develop '+observation['develop'],body)
+        self.assertIn('정책 등록일 ',body)
+        self.assertIn('현재 원격 전체 ref 재조회 결과와 구분한다',body)
+        self.assertNotIn('열린 PR #6의 화면 변경은 develop의 현재 구현이 아니다',body)
+
+    def test_previous_acceptance_uses_retained_historical_observation(self):
+        spec=deepcopy(self.spec)
+        inventory=spec['workflow']['branch_governance']['remote_inventory']
+        historical=inventory['historical_observation_before_PR6_merge']
+        historical['frontend']='HISTORICAL_FRONTEND_ONLY'
+        historical['sameRelease_observation']='HISTORICAL_RELEASE_OBSERVATION_ONLY'
+        inventory['latest_observation'].pop('frontend',None)
+        inventory['latest_observation'].pop('sameRelease_observation',None)
+        body=generated_files(spec)[spec['current_documents']['workflow']].decode('utf-8')
+        self.assertIn('당시 외부 프런트 관측 / HISTORICAL_FRONTEND_ONLY; HISTORICAL_RELEASE_OBSERVATION_ONLY',body.replace('|','/'))
 
 if __name__=="__main__":unittest.main()
