@@ -169,16 +169,192 @@ def common_tools_acceptance_text(spec):
     if not receipt:return ''
     checks=receipt['normal_commit_push_hooks'];ci=receipt['exact_HEAD_CI']
     front=spec['workflow']['branch_governance']['remote_inventory']['latest_observation']
+    deletion=spec['workflow']['branch_governance'].get('file_deletion_policy',{})
     return ('\n\n## 공통 도구의 확인된 이전 인수 기준\n\n'+
         table(['범위','확인한 증거'],[
             ['공통 Git/CI 검사·명세·생성 문서',receipt['commit']+'; tree '+receipt['tree']],
             ['정상 commit/push 훅',str(checks['tests_run'])+'건 PASS; 실패 '+str(checks['failures'])+'·오류 '+str(checks['errors'])+'·건너뜀 '+str(checks['skipped'])],
             ['정확한 HEAD GitHub CI','[project-consistency]('+ci['url']+'): '+ci['conclusion']],
             ['서비스·DB 역사 기준',receipt['service_DB_baseline']],
-            ['최신 외부 프런트 관측',front['frontend']+'; sameRelease blob '+front['sameRelease_blob']+'는 e12 대비 동일'],
-            ['운영/외부 인수',receipt['frontend_acceptance']+'; DB .env 추후; 실제 삭제 NOT_RUN; main '+receipt['main_release_state']]
+            ['최신 외부 프런트 관측',front['frontend']+'; '+front['sameRelease_observation']],
+            ['외부 삭제 관측',deletion.get('execution_state','NOT_RUN')+'; develop 통합과 실제 브라우저 인수는 구분한다.'],
+            ['운영/외부 인수',receipt['frontend_acceptance']+'; DB .env 추후; main '+receipt['main_release_state']]
         ])+'\n\n'+receipt['publication_rule']+' '+receipt['scope']+
-        ' 외부 버전 release/policy/input 양쪽 값의 유효한 비어 있지 않은 문자열 검증은 후속이며 실제 프런트 인수는 pending이다. 최소 profile 조건 읽기와 실제 로그인 JWT 검증 NOT_RUN을 구분한다. 실제 자료·모형 운영 채택/등록 승인도 유지 상태이며 완료로 표시하지 않는다.')
+        ' 이전 e12/676 버전값 보완 pending은 역사이며 최신 소스 관측과 실제 프런트 인수 대기를 구분한다. 최소 profile 조건 읽기와 실제 로그인 JWT NOT_RUN, 실제 자료·모형 운영 미승인 상태를 유지한다.')
+
+
+def local_verification_text(spec):
+    """Render local preparation from public metadata; never source private values."""
+    contract=spec['local_verification_contract']
+    paths=contract['implementation_paths'];fence=chr(96)*3
+    source=contract['source_request']
+    rows=[
+        ['운영 서버','configured_app/ServerSettings와 운영 /health/ready 의미는 그대로다.'],
+        ['로컬 조립',contract['composition']['rule']],
+        ['접근 범위',contract['network']['rule']],
+        ['저장과 DB',contract['storage']['rule']],
+        ['로컬 상태',contract['health']['rule']]
+    ]
+    body=('현재 상태: '+contract['code_status']+'; '+contract['verification_status']+'.\n\n'+
+        contract['purpose']+'\n\n확인한 출발 develop: '+source['baseline_develop']+
+        '. 요청 2판 SHA256: '+source['sha256']+'. 이후 후보의 미래 SHA/미실행 검증 완료는 기록하지 않는다.\n\n'+
+        '## 운영과 별도인 로컬 서버\n\n'+table(['범위','계약'],rows)+
+        '\n\n## 시험 사용자와 독립 승인\n\n일반·유료·편집자·승인자는 서로 다른 네 subject다. 회원 종류와 직원 capability는 별개다.\n\n'+
+        contract['local_auth']['token_distribution']+'\n\n'+contract['local_auth']['rule']+'\n\n'+
+        contract['independent_approval']['rule']+
+        '\n\n소유권·active=true 이용권 UTC 기간·허용 학교·만료·미등록 token 거부를 유지한다. 실제 학교 허용 목록이 없으면 빈 범위다. SYNTHETIC 회귀는 실제 학교 발행 양성 검수의 증거가 아니다.\n\n'+
+        '## 자료 발행 권한과 신뢰 기준\n\n'+contract['data_authority']['DATA_ACTIVE_CSV_or_exam_inventory']+'\n\n'+
+        contract['data_authority']['registry_selection']+'\n\n'+contract['data_authority']['pending_rule']+'\n\n'+
+        contract['data_authority']['kind_scope_rule']+'\n\n참고 kind 예시: '+', '.join(contract['data_authority']['reference_kind_examples'])+'\n\n'+contract['data_authority']['current_data_preparation']+
+        '\n\n## Drive와 로컬 파일의 출처\n\n'+contract['source_provenance']['rule']+'\n\n'+
+        table(['출처','필요한 고정 근거'],[
+            ['drive_download',', '.join(contract['source_provenance']['drive_required'])],
+            ['local_filesystem',', '.join(contract['source_provenance']['local_required'])]
+        ])+'\n\n'+contract['local_filesystem_selection']['provider_reuse']+'\n\n'+
+        contract['local_filesystem_selection']['rule']+
+        '\n\n로컬 선택명부 형식은 jungsi.local-selection/v1이며 transport=local_filesystem이다. 항목은 '+
+        ', '.join(contract['local_filesystem_selection']['entry_fields'])+
+        '다. 별도 승인 문서 jungsi.local-data-approval/v1은 status=approved, scope=local_verification과 local_artifact_id/local_version/sha256/payload_version의 정확한 조합에 결속한다. 이 승인은 운영 production 승인이나 모형 adopt/register가 아니다. path·영수증·승인 명부의 실제 값은 모두 비공개다.\n\n'+
+        '## 수신 PC에서 DPAPI 보호\n\n'+contract['encryption']['rule']+'\n\n'+
+        contract['encryption']['memory_limit']+'\n\n'+contract['encryption']['alternate_AES_GCM']+
+        '\n\n[Microsoft DPAPI 설명]('+contract['encryption']['primary_source']+')에 따른 기본 사용자 범위를 사용한다. 암호 해제 성공만으로 자료를 approved로 취급하지 않는다.\n\n'+
+        '## 계산 성공과 보류\n\n'+contract['score_results']['rule']+'\n\n'+contract['score_results']['reference_cases']+
+        '\n\n## 외부 화면의 실제 연결\n\n'+contract['frontend_connection']['rule']+'\n\n'+
+        contract['frontend_connection']['Supabase_configuration']+
+        '\n\nAPI 22개·DTO nullable·권한·Idempotency·보류 코드는 불변이다. 발표 근거는 유효한 release/policy/input 세 버전과 공개 context17필드의 정확한 동일성으로 결합한다. PR6 소스/CI 관측은 실제 localhost Caller·브라우저 인수가 아니다.\n\n'+
+        '## 구현 경로와 실행 형식\n\n'+paths['rule']+'\n\n'+
+        table(['코드 위치','검수 범위'],[[x,'서비스 개발팀; 고정 소스의 raw/staged SHA 확인'] for x in paths['service_modules']]+
+              [[paths['test'],'서비스 합성/어댑터 회귀'],[str(paths['CLI_module']),'CLI help 네 개 exit0; 개별 명령 직접 실행과 구분']])+
+        '\n\nbackend-runtime.lock.json의 기존 고정 runtime/site와 해당 src를 PYTHONPATH로 사용하며 PYTHONDONTWRITEBYTECODE=1, Python -B를 유지한다. DPAPI 보호·복호화는 받는 Windows PC/사용자에서 수행한다. 아래는 help로 대조한 실행 형식이며 개별 명령 직접 실행 기록은 아니다. PRIVATE/TRUSTED/NEW/SEALED는 설명용 자리표시자이고 실제 비공개 값으로만 설정한다. 기존 폴더를 덮어쓰거나 비우지 않는다.\n\n'+
+        fence+'text\n'+paths.get('issue_sessions_candidate','발급 명령 미확정')+'\n'+paths.get('prepare_local_candidate','명령 미확정')+'\n'+paths.get('serve_candidate','명령 미확정')+
+        '\n'+paths.get('hold_serve_candidate','HOLD 명령 미확정')+'\n'+fence+'\n\n'+paths.get('interactive_token_command_policy','')+'\n\n시험/학교 범위 옵션 후보: '+', '.join(paths.get('serve_optional_scope_candidate',[]))+
+        '. 승인 row가 없거나 pending이면 payload를 읽거나 숫자를 채우지 않고 HOLD한다.\n\n'+
+        '## 담당과 인수 순서\n\n'+table(['담당','작업'],list(contract['ownership'].items()))+
+        '\n\n'+contract['private_git_boundary']['rule']+'\n\n'+
+        '1. 데이터팀의 승인 범위·명부/선택명부·신뢰 SHA·독립 출처 영수증을 먼저 확인한다.\n'+
+        '2. 받는 PC에서 새 DPAPI 캐시에 보호하고, 재읽기의 버전·출처·SHA 거부를 검증한다.\n'+
+        '3. 별도 loopback 서버와 네 시험 subject를 준비하며 메모리 소실/운영 NOT_RUN을 확인한다.\n'+
+        '4. 외부 화면 담당이 서버 전용 Caller를 연결하고 승인된 기대값·보류 사유로 화면을 검수한다.\n'+
+        '5. 정확한 소스·명령·검수 범위·영수증을 남기고 운영 DB/인증/배포 완료와 구분한다.\n\n'+
+        '## 확인한 로컬 검수와 Git 인수 대기\n\n'+table(['범위','상태'],[
+            ['고정 서비스 후보',contract.get('implementation_acceptance',{}).get('status','pending')],
+            ['서비스 집중 검사',str(contract.get('implementation_acceptance',{}).get('focused_tests',{}).get('count','pending'))+'건; 고정 영수증을 읽기 인수, 공통 writer 재실행 아님'],
+            ['native 로컬 검수','같은 받는 PC/사용자 DPAPI·loopback HTTP·승인0/pending 명부 HOLD PASS'],
+            ['CLI 도움말','기존 고정 runtime에서 네 개 exit0; token/prepare/serve 실행과 구분'],
+            ['Git 및 운영 인수','같은 커밋·전체 훅·CI·develop 통합 대기; 실제 승인 숫자/DB/Supabase/Drive/브라우저 NOT_RUN']
+        ])+'\n\n## 집중 검증과 남은 작업\n\n'+'\n'.join('- '+x for x in contract['acceptance'])+
+        '\n\n'+'\n'.join('- '+x for x in contract['remaining']))
+    return body
+
+
+def validate_local_verification_contract(spec):
+    """Reject contract drift rather than making production or private approvals."""
+    contract=spec.get('local_verification_contract')
+    registered=spec.get('current_documents',{}).get('local_verification')
+    requested=any(r.get('id')=='REQ-23' for r in spec.get('requirements',[]))
+    if not isinstance(contract,dict):
+        return ['Local verification contract required'] if registered or requested else []
+    errors=[]
+    if contract.get('format')!='jungsi.local-verification-contract/v1' or registered!='docs/current/로컬_검증_연결.md':
+        errors.append('Local verification source or document registration drift')
+    if not requested or not set(contract.get('requirements',[]))<={r['id'] for r in spec['requirements']}:
+        errors.append('Local verification requirement reference drift')
+    def field(path):
+        value=contract
+        for name in path.split('.'):
+            if not isinstance(value,dict) or name not in value:return None
+            value=value[name]
+        return value
+    positive=(
+        'composition.production_configured_app_unchanged','composition.production_settings_selection_unchanged',
+        'composition.local_factory_separate','composition.inject_existing_create_app',
+        'composition.existing_application_ports_unchanged','network.loopback_only','network.peer_loopback_required',
+        'network.Host_port_exact','local_auth.session_issue_required','storage.restart_loses_state',
+        'local_auth.server_allowlist_only','local_auth.server_verified_subject_and_expiry',
+        'local_auth.distinct_subjects_required','independent_approval.existing_policy_unchanged',
+        'independent_approval.distinct_editor_and_approver_subjects',
+        'data_authority.private_approved_registry_required','data_authority.drive_requires_trusted_registry_sha256',
+        'data_authority.local_requires_trusted_selection_sha256','data_authority.explicit_engine_approved_requires_exact_true',
+        'source_provenance.source_kind_explicit','source_provenance.receipt_binding_required',
+        'source_provenance.trusted_receipt_sha256_required','source_provenance.every_read_revalidation',
+        'source_provenance.offline_snapshot_not_live_drive','local_filesystem_selection.trusted_selection_sha256_required',
+        'local_filesystem_selection.private_path_and_values','encryption.recipient_encrypts_on_recipient_PC',
+        'encryption.decrypt_in_RAM_only','encryption.no_payload_key_in_logs_or_receipts',
+        'encryption.authenticated_metadata_binding','health.production_health_semantics_unchanged',
+        'score_results.preserve_successful_total','api_boundary.operation_and_DTO_unchanged',
+        'api_boundary.nullable_unchanged'
+    )
+    negative=(
+        'composition.production_can_select_local_adapter','composition.operational_SQL_or_Drive_result_writes',
+        'composition.adopt_or_register_estimated_model','network.allow_wildcard_host','network.access_log',
+        'network.public_or_operational_deployment_allowed','network.forwarded_headers_allowed',
+        'network.proxy_headers','storage.DB_verified','storage.persistence_claim_allowed',
+        'local_auth.production_authentication','local_auth.client_role_or_paid_fields_authoritative',
+        'local_auth.production_entry_accepts_local_tokens','local_auth.staff_is_paid',
+        'data_authority.source_completion_is_engine_approval','data_authority.automatic_status_promotion',
+        'data_authority.latest_modified_time_adoption','source_provenance.fabricate_drive_metadata_for_filesystem',
+        'local_filesystem_selection.fake_Google_file_id_or_drive_version_or_parents',
+        'local_filesystem_selection.approval_scope_is_production_approval','encryption.CRYPTPROTECT_LOCAL_MACHINE',
+        'encryption.encryption_key_sharing','encryption.new_plaintext_disk_write',
+        'encryption.delete_existing_plaintext_originals','encryption.decrypt_success_is_approval',
+        'health.production_ready','health.local_ready_is_production_ready',
+        'score_results.invent_numeric_expected_result','frontend_connection.SSRSupabase_cookie_to_local_Caller_automatic',
+        'frontend_connection.frontend_test_token_client_exposure_allowed',
+        'private_git_boundary.real_payloads_env_and_registry_in_git','private_git_boundary.force_add_or_reinclude_private_paths'
+    )
+    for path in positive:
+        if field(path) is not True:errors.append('Local verification invariant drift: '+path)
+    for path in negative:
+        if field(path) is not False:errors.append('Local verification invariant drift: '+path)
+    exact={
+        'composition.repositories':['LocalMemoryRepository','MemoryForecastRepository'],
+        'network.bind_host':'127.0.0.1','network.request_host_policy':'loopback_IP_or_localhost',
+        'network.CORS':'exact_loopback_frontend_origins_only',
+        'local_auth.provider_class':'LocalSessions','local_auth.maximum_TTL_hours':8,
+        'local_auth.session_format':'jungsi.local-sessions/v1',
+        'storage.kind':'memory','storage.DB002':'NOT_RUN','storage.migration':'NOT_APPLIED',
+        'local_auth.profiles':['standard','paid','editor','approver'],
+        'local_auth.operator_university_allowlist_default':'empty','local_auth.synthetic_scope_only':'SYNTHETIC',
+        'independent_approval.self_approval_expected_HTTP':403,
+        'independent_approval.self_approval_reason':'forecast_independent_approver_required',
+        'local_filesystem_selection.format':'jungsi.local-selection/v1',
+        'local_filesystem_selection.transport':'local_filesystem',
+        'local_filesystem_selection.approval_format':'jungsi.local-data-approval/v1',
+        'local_filesystem_selection.approval_fields.status':'approved',
+        'local_filesystem_selection.approval_fields.scope':'local_verification',
+        'local_filesystem_selection.approval_fields.artifacts':['local_artifact_id','local_version','sha256','payload_version'],
+        'source_provenance.source_kinds':['drive_download','local_filesystem'],
+        'encryption.method':'Windows_DPAPI','encryption.scope':'current_user',
+        'health.local_factory_intercepts_only':'/health/ready','health.mode':'local_verification',
+        'health.storage':'memory_ephemeral_lost_on_restart','health.real_DB002':'NOT_RUN','health.real_Supabase':'NOT_RUN',
+        'score_results.missing_approved_curve':'HOLD','score_results.unapproved_percentile_or_support':'null_or_pending',
+        'api_boundary.operation_count':22,'api_boundary.public_context_fields':17,
+        'api_boundary.required_identity_versions':['release_version','policy_version','input_version']
+    }
+    for path,expected in exact.items():
+        value=field(path)
+        if type(value) is not type(expected) or value!=expected:
+            errors.append('Local verification invariant drift: '+path)
+    acceptance=contract.get('implementation_acceptance')
+    if acceptance is not None:
+        if not isinstance(acceptance,dict):
+            errors.append('Local implementation acceptance must be an explicit record')
+        else:
+            for name in ('production_ready','actual_model_operating_registration'):
+                if acceptance.get(name) is not False:
+                    errors.append('Local verification invariant drift: implementation_acceptance.'+name)
+    if len(spec['operations'])!=22:errors.append('Local verification 22 API boundary drift')
+    fields={
+        'source_provenance.drive_required':{'registry_sha256','file_id','parents','input_folder','drive_version','plaintext_sha256','plaintext_bytes','downloaded_at','reviewer','source_receipt_sha256'},
+        'source_provenance.local_required':{'selection_sha256','local_artifact_id','local_version','payload_version','plaintext_sha256','plaintext_bytes','captured_at','reviewer','source_receipt_sha256'},
+        'local_filesystem_selection.entry_fields':{'kind','key','local_artifact_id','local_version','sha256','bytes','payload_version','status','source_timezone','path','engine_approved (optional exact bool)','approval_evidence','approval_evidence_sha256'},
+        'health.required_local_fields':{'mode','local_ready','storage','production_ready','database','auth','real_data'}
+    }
+    for path,required in fields.items():
+        value=field(path)
+        if not isinstance(value,list) or any(not isinstance(x,str) for x in value) or len(value)!=len(set(value)) or set(value)!=required:
+            errors.append('Local verification receipt or diagnostic fields drift: '+path)
+    return errors
 
 
 def repository_layout_text(spec):
@@ -469,6 +645,11 @@ def generated_files(spec):
         backend["management_pages"]=spec["management_pages"]
         for path in (spec["current_documents"]["planning"],spec["current_documents"]["routing"]):
             files[path]+="\n## 관리 화면\n\n"+table(["화면","경로","서버 capability","설명"],[[r["label"],r["path"],", ".join(r["capabilities"]),r["purpose"]] for r in spec["management_pages"]])
+    if spec.get('local_verification_contract'):
+        local=spec['local_verification_contract']
+        files[spec['current_documents']['local_verification']]=doc('로컬 검증 연결',local_verification_text(spec))
+        frontend['local_verification_contract']={key:local[key] for key in ('format','code_status','verification_status','frontend_connection','api_boundary')}
+        backend['local_verification_contract']=local
     files["apps/web/route_catalog.json"]=json.dumps(frontend,ensure_ascii=False,indent=2)+"\n"
     files["src/jungsi_touch/application/route_catalog.json"]=json.dumps(backend,ensure_ascii=False,indent=2)+"\n"
     for path in spec['current_documents'].values():
@@ -479,6 +660,15 @@ def generated_files(spec):
     handoff=spec.get('contract_review',{}).get('handoff_response')
     if handoff:
         files[handoff['path']]=doc(handoff['title'],handoff['body'])
+    if spec.get('local_verification_contract'):
+        for key in ('planning','routing','architecture','backend_readiness','presentation_handoff','presentation_connection'):
+            path=spec['current_documents'].get(key)
+            if path in files:
+                section='\n\n## 로컬 검증 연결 계약\n\n'+'[로컬 검증 연결](로컬_검증_연결.md)은 별도 loopback factory·메모리 저장소·네 시험 subject·수신PC DPAPI·신뢰 명부/선택명부와 출처 영수증을 규정한다. 운영 factory/22API·DTO는 불변이며 승인곡선 없음은 HOLD와 총점 보존이다. 실제 DB/운영 인증/외부 브라우저 인수와 production_ready=false를 구분한다.'
+                files[path]=files[path].replace('\n\n<!-- jungsi:generated',section+'\n\n<!-- jungsi:generated')
+        if handoff:
+            files[handoff['path']]=files[handoff['path']].replace('\n\n<!-- jungsi:generated',
+                '\n\n[로컬 검증 계약과 실행 후보](../../current/로컬_검증_연결.md)를 함께 읽는다.\n\n<!-- jungsi:generated')
     for path,metadata in spec['workflow'].get('synchronized_work_items',{}).items():
         item=dict(metadata)
         item['scope']=spec[item['contract_ref']]
@@ -635,6 +825,7 @@ def validate_spec(spec):
         errors.append('Formal session entitlement rule drift')
     if 'session_contract' in spec:errors.append('Superseded proposed session contract must not be revived')
     errors.extend(validate_forecast_contract(spec))
+    errors.extend(validate_local_verification_contract(spec))
     return errors
 
 def protected_path(path,shared_tools):
