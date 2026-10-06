@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.8.3",
-  "source_sha256": "0555392e163a2e29d4593f32fc38e3516b9a6f4ee63979d9b81fbf186bc48f8d",
+  "spec_version": "1.8.4",
+  "source_sha256": "95292e81ded9715ae796640bb3c4ea6f4662aea6ad1fcca1a243b1a677ce741a",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3054,7 +3054,7 @@
   },
   "supabase_operations_handoff": {
     "format": "jungsi.supabase-operations-handoff/v1",
-    "revision": "2026.10.06.v3",
+    "revision": "2026.10.06.v4",
     "checked_at": "2026-10-06T08:40:54.349322Z",
     "status": "NOT_READY",
     "production_ready": false,
@@ -3067,7 +3067,7 @@
     "gates": [
       {
         "id": "실DB",
-        "status": "NOT_RUN_001_UNCONFIRMED_002_NOT_APPLIED"
+        "status": "001002_APPLIED_DEVELOPMENT_RECEIPT_INDEPENDENT_AND_RUNTIME_PENDING"
       },
       {
         "id": "Bearer 로그인",
@@ -3109,7 +3109,45 @@
         "id": "공유 원자적 수집 예산",
         "status": "NOT_RUN"
       }
-    ]
+    ],
+    "storage_staging": {
+      "format": "jungsi.supabase-storage-staging/v1",
+      "status": "ALL_STAGED_OBJECTS_UPLOADED_HASH_VERIFIED_PUBLIC_ROUTE_ACCESS_DENIED",
+      "observed_at": "2026-10-06T12:48:00.372547Z",
+      "evidence_id": "SUP-STORAGE-20261006-PRIVATE-STAGING",
+      "private_bucket": true,
+      "verified_objects": 49,
+      "authenticated_raw_RLS": "NOT_RUN",
+      "engine_approved": false,
+      "production_ready": false
+    },
+    "service_transition": {
+      "id": "CR-SERVICE-SUP03",
+      "status": "adopted_for_service_implementation_verification_pending",
+      "default_transition": "NOT_RUN",
+      "production_ready": false
+    },
+    "runtime_ingestion_policy": {
+      "mode": "minimal_explicit_approved_allowlist",
+      "selection": "requested_operation_required_dependencies_only",
+      "bulk_autoimport": false,
+      "archive_auto_adopted": false,
+      "production_ready": false
+    },
+    "database_preflight": {
+      "status": "PASS_READONLY_CONNECTION_ROLE_MASTER_SCHEMA_ABSENCE",
+      "observed_at": "2026-10-06T13:12:00.846782Z",
+      "evidence_id": "SUP-DB-20261006-READONLY-PREFLIGHT",
+      "read_only": true
+    },
+    "database_application": {
+      "status": "actual_applied_verified_by_development_receipt_independent_review_pending",
+      "committed_at": "2026-10-06T13:17:14.729580Z",
+      "evidence_id": "SUP-DB-20261006-001002-APPLY",
+      "independent_review": "pending",
+      "runtime003": "NOT_APPLIED",
+      "production_ready": false
+    }
   },
   "security_contract": {
     "format": "jungsi.external-access-security/v1",
