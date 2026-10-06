@@ -1,6 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
-import type { AssessmentDto, OverallAnalysisDto, ProfileDto, ReportDto, ScoresInput, ShortlistEntryDto, SubjectResultDto } from "@/lib/dto";
+import type { AssessmentDto, ComboPositionDto, OverallAnalysisDto, ProfileDto, ReportDto, ScoresInput, ShortlistEntryDto, SubjectResultDto } from "@/lib/dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
 import { EXAM, INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "@/lib/exam";
 
@@ -72,6 +72,27 @@ export function computeOverall(s: ScoresInput): OverallAnalysisDto {
       ...(s.english_grade !== undefined ? { 영어: s.english_grade } : {}),
       ...(s.korean_history_grade !== undefined ? { 한국사: s.korean_history_grade } : {}),
     },
+    // 반영 조합별 위치(제안 필드 미리보기). 합성 곡선으로 모양만 보여 주고, 한 조합은 분포 미발행 보류 예시
+    combinations: ((): ComboPositionDto[] => {
+      const combo = (combo_id: string, label: string, total: number | null, mid: number, spread: number): ComboPositionDto => {
+        const top = total === null ? null : curve(total, mid, spread);
+        return {
+          combo_id, label, total_standard_score: total,
+          status: top === null ? "pending" : "estimated",
+          reason_code: top === null ? "combo_model_missing" : null,
+          inclusive_top_percent: top === null ? null : pct(top),
+          exclusive_top_percent: top === null ? null : pct(Math.max(0, top - 0.05)),
+          data_kind: top === null ? null : "estimated_weights",
+        };
+      };
+      const k = s.korean.standard_score, m = s.math.standard_score, q = s.inquiry[0].standard_score + s.inquiry[1].standard_score;
+      return [
+        combo("korean_math", "국어+수학", k + m, 212, 16),
+        combo("korean_inquiry2", "국어+탐구2", k + q, 207, 14),
+        combo("math_inquiry2", "수학+탐구2", m + q, 210, 15),
+        { ...combo("korean_math_inquiry1", "국어+수학+탐구1", null, 0, 1), total_standard_score: k + m + s.inquiry[0].standard_score },
+      ];
+    })(),
     overall: {
       status: "estimated",
       reason_code: null,

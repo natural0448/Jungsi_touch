@@ -131,6 +131,22 @@ export interface SubjectResultDto {
   basis: string | null;
 }
 
+/**
+ * 제안(백엔드 계약 미반영, 2026-10-07): 반영 조합별 전체 위치. 조합마다 승인된 결합분포로
+ * 서버가 계산해 줄 때만 채워진다. 응답에 없으면 화면은 '자료 대기' 안내만 보이고, 화면이
+ * 조합 수치를 직접 계산하지 않는다(SEC 기준). 계약 채택 요청서를 담당자에게 별도 전달한다.
+ */
+export interface ComboPositionDto {
+  combo_id: string; // 예: korean_math
+  label: string; // 예: 국어+수학
+  total_standard_score: number | null; // 그 조합의 표준점수 합(서버 계산)
+  status: "observed" | "estimated" | "pending";
+  reason_code: string | null; // pending 사유. 예: combo_model_missing
+  inclusive_top_percent: string | null;
+  exclusive_top_percent: string | null;
+  data_kind?: DataKind | null;
+}
+
 export interface OverallResultDto {
   status: "observed" | "estimated" | "pending";
   reason_code: string | null;
@@ -162,6 +178,7 @@ export interface OverallAnalysisDto {
   subjects: SubjectResultDto[];
   absolute_grades: { 영어?: number; 한국사?: number };
   overall: OverallResultDto;
+  combinations?: ComboPositionDto[] | null; // 제안 필드(위 ComboPositionDto 설명). 서버가 줄 때만 존재
 }
 
 export interface ShortlistEntryDto {

@@ -48,48 +48,177 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
   );
 }
 
-export function SubjectsTable({ a }: { a: OverallAnalysisDto }) {
+/** 가로 성적표: 입력 성적표와 같은 틀(한국사·국어·수학·영어·탐구). 절대평가 등급도 여기에 함께 보인다 */
+export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
+  const by = new Map(a.subjects.map((s) => [s.area, s]));
+  const k = by.get("korean"), m = by.get("math"), q1 = by.get("inquiry1"), q2 = by.get("inquiry2");
+  const g = a.absolute_grades;
+  const na = <span className="rs-na" aria-label="해당 없음">─</span>;
+  const num = (v: number | string | null | undefined, unit = "") => (v === null || v === undefined ? <span className="rs-wait">대기</span> : <b className="num">{v}{unit}</b>);
+  const pctv = (v: string | null | undefined) => (v ? <b className="num">{v}%</b> : <span className="rs-wait">대기</span>);
   return (
-    <div className="tblwrap">
-      <table className="tb rp-subjects">
+    <div className="rp-sheet" role="group" aria-label="과목별 결과 성적표">
+      <table>
+        <colgroup>
+          <col className="c-head" />
+          <col />
+          <col className="c-main" />
+          <col className="c-main" />
+          <col />
+          <col className="c-main" />
+          <col className="c-main" />
+        </colgroup>
         <thead>
           <tr>
-            <th scope="col">영역</th>
-            <th scope="col">과목</th>
-            <th scope="col" className="r">표준점수</th>
-            <th scope="col" className="r">등급</th>
-            <th scope="col" className="r">상위(동점 포함)</th>
-            <th scope="col" className="r">상위(동점 제외)</th>
+            <th scope="col" rowSpan={2} className="corner">구분</th>
+            <th scope="col" rowSpan={2}>한국사<br />영역</th>
+            <th scope="col" rowSpan={2}>국어<br />영역</th>
+            <th scope="col" rowSpan={2}>수학<br />영역</th>
+            <th scope="col" rowSpan={2}>영어<br />영역</th>
+            <th scope="colgroup" colSpan={2}>탐구 영역</th>
+          </tr>
+          <tr>
+            <th scope="col" className="sub">{q1?.subject ?? "과목 1"}</th>
+            <th scope="col" className="sub">{q2?.subject ?? "과목 2"}</th>
           </tr>
         </thead>
         <tbody>
-          {a.subjects.map((s) => (
-            <tr key={s.area}>
-              <th scope="row">{AREA_LABEL[s.area] ?? s.area}</th>
-              <td>
-                {s.subject}
-                {s.choice && <small> · {s.choice}</small>}
-              </td>
-              <td className="r num"><b>{s.standard_score}</b></td>
-              <td className="r num">{s.grade ?? "─"}</td>
-              <td className="r num">{s.top_percent_inclusive ? `${s.top_percent_inclusive}%` : "─"}</td>
-              <td className="r num">{s.top_percent_exclusive ? `${s.top_percent_exclusive}%` : "─"}</td>
-            </tr>
-          ))}
+          <tr>
+            <th scope="row">선택과목</th>
+            <td className="na">{na}</td>
+            <td>{k?.choice ?? "─"}</td>
+            <td>{m?.choice ?? "─"}</td>
+            <td className="na">{na}</td>
+            <td className="na">{na}</td>
+            <td className="na">{na}</td>
+          </tr>
+          <tr className="key">
+            <th scope="row">표준점수</th>
+            <td className="na">{na}</td>
+            <td>{num(k?.standard_score)}</td>
+            <td>{num(m?.standard_score)}</td>
+            <td className="na">{na}</td>
+            <td>{num(q1?.standard_score)}</td>
+            <td>{num(q2?.standard_score)}</td>
+          </tr>
+          <tr>
+            <th scope="row">등급</th>
+            <td>{g.한국사 ? <b className="num">{g.한국사}</b> : <span className="rs-na">안 넣음</span>}</td>
+            <td>{num(k?.grade)}</td>
+            <td>{num(m?.grade)}</td>
+            <td>{g.영어 ? <b className="num">{g.영어}</b> : <span className="rs-na">안 넣음</span>}</td>
+            <td>{num(q1?.grade)}</td>
+            <td>{num(q2?.grade)}</td>
+          </tr>
+          <tr>
+            <th scope="row">상위 % <small>동점 포함</small></th>
+            <td className="na">{na}</td>
+            <td>{pctv(k?.top_percent_inclusive)}</td>
+            <td>{pctv(m?.top_percent_inclusive)}</td>
+            <td className="na">{na}</td>
+            <td>{pctv(q1?.top_percent_inclusive)}</td>
+            <td>{pctv(q2?.top_percent_inclusive)}</td>
+          </tr>
+          <tr>
+            <th scope="row">상위 % <small>동점 제외</small></th>
+            <td className="na">{na}</td>
+            <td>{pctv(k?.top_percent_exclusive)}</td>
+            <td>{pctv(m?.top_percent_exclusive)}</td>
+            <td className="na">{na}</td>
+            <td>{pctv(q1?.top_percent_exclusive)}</td>
+            <td>{pctv(q2?.top_percent_exclusive)}</td>
+          </tr>
         </tbody>
       </table>
+      <p className="rp-sheet-note">상위 %는 그 과목 응시자 기준입니다. 영어·한국사는 절대평가라 등급만 표시하며 총점(국·수·탐2)과 전체 위치에 넣지 않습니다.</p>
     </div>
   );
 }
 
-export function AbsoluteGrades({ a }: { a: OverallAnalysisDto }) {
-  const g = a.absolute_grades;
+/* ── 위치 그래프: 서버가 준 상위 % 를 눈금 위에 표시만 한다(계산 없음) ── */
+
+const COMBO_PENDING: Record<string, string> = {
+  combo_model_missing: "이 조합의 분포가 아직 발행되지 않았습니다",
+  total_model_missing: "분포 미발행",
+  total_model_not_approved: "분포 검수 중",
+};
+
+function pos(v: string | null | undefined): number | null {
+  if (v === null || v === undefined) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : null;
+}
+
+function ChartRow({ label, sub, incl, excl, strong = false, waitText }: { label: string; sub?: string; incl: string | null | undefined; excl: string | null | undefined; strong?: boolean; waitText?: string }) {
+  const i = pos(incl);
+  if (i === null)
+    return (
+      <div className="pc-row">
+        <span className="pc-label">{label}{sub && <small>{sub}</small>}</span>
+        <div className="pc-track pending"><span>{waitText ?? "자료 대기"}</span></div>
+        <span className="pc-val">─</span>
+      </div>
+    );
+  const e = pos(excl) ?? i;
+  const left = Math.min(i, e);
+  const width = Math.max(0.8, Math.abs(i - e));
   return (
-    <p className="rp-abs">
-      <span>영어 <b className="num">{g.영어 ? `${g.영어}등급` : "입력 안 함"}</b></span>
-      <span>한국사 <b className="num">{g.한국사 ? `${g.한국사}등급` : "입력 안 함"}</b></span>
-      <small>절대평가 과목은 총점과 전체 위치에 넣지 않습니다.</small>
-    </p>
+    <div className="pc-row">
+      <span className="pc-label">{label}{sub && <small>{sub}</small>}</span>
+      <div className="pc-track" aria-hidden>
+        <i className={`pc-band${strong ? " strong" : ""}`} style={{ left: `${left}%`, width: `${width}%` }} />
+        <i className={`pc-dot${strong ? " strong" : ""}`} style={{ left: `${i}%` }} />
+      </div>
+      <span className="pc-val num">{incl}%</span>
+    </div>
+  );
+}
+
+function Axis() {
+  return (
+    <div className="pc-row pc-axis" aria-hidden>
+      <span className="pc-label" />
+      <div className="axis"><span>상위 0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+      <span className="pc-val" />
+    </div>
+  );
+}
+
+/** 과목·전체 위치 그래프 */
+export function PositionChart({ a }: { a: OverallAnalysisDto }) {
+  const o = a.overall;
+  return (
+    <section className="rp-chart" aria-label="상위 위치 그래프">
+      <header>
+        <h3>위치 그래프</h3>
+        <small>왼쪽 끝이 최상위(상위 0%) · 띠는 동점 제외~포함 구간</small>
+      </header>
+      <Axis />
+      {a.subjects.map((s) => (
+        <ChartRow key={s.area} label={AREA_LABEL[s.area] ?? s.area} sub={s.area === "korean" || s.area === "math" ? (s.choice ?? undefined) : s.subject} incl={s.top_percent_inclusive} excl={s.top_percent_exclusive} />
+      ))}
+      <ChartRow label="전체" sub="국·수·탐2" strong incl={o.inclusive_top_percent} excl={o.exclusive_top_percent} waitText={(o.reason_code && COMBO_PENDING[o.reason_code]) ?? "계산 대기"} />
+      <p className="pc-note">과목 막대는 그 과목 응시자, 전체는 국·수·탐2 응시자 기준입니다. 기준 집단이 달라 막대끼리 크기를 비교하지 않습니다.</p>
+    </section>
+  );
+}
+
+/** 반영 조합별 위치(제안 필드). 서버가 combinations 를 주지 않으면 안내만 보인다 */
+export function ComboChart({ a }: { a: OverallAnalysisDto }) {
+  const combos = a.combinations ?? [];
+  if (combos.length === 0)
+    return <p className="rp-combo-wait">반영 조합별 위치(국+수, 국+탐 등)는 조합별 승인 분포가 발행되면 여기에 표시됩니다.</p>;
+  return (
+    <section className="rp-chart" aria-label="반영 조합별 위치">
+      <header>
+        <h3>반영 조합별 위치</h3>
+        <small>조합마다 그 조합 응시자 기준 상위 % · 대학별 반영비율 환산은 가능성 보기에서 확인</small>
+      </header>
+      <Axis />
+      {combos.map((c) => (
+        <ChartRow key={c.combo_id} label={c.label} sub={c.total_standard_score !== null ? `${c.total_standard_score}점` : undefined} incl={c.inclusive_top_percent} excl={c.exclusive_top_percent} waitText={(c.reason_code && COMBO_PENDING[c.reason_code]) ?? "자료 대기"} />
+      ))}
+    </section>
   );
 }
 
