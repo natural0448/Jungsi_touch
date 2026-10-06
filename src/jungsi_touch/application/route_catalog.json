@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.7.1",
-  "source_sha256": "870ba02fb6cc6cc6923e7d5d45d4ae238e590f5cf9a8aab983c2fc004c14a188",
+  "source_sha256": "84c7194a915f07471f265de82b5a45082be3791fefb08fbbab5efe00f9de710f",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1890,9 +1890,9 @@
     },
     "verification": "현재22 API의서비스·DB 및합성HTTP·권한검증은PR13/develop947 통합과역사493정상검사로인수했다. 현재공통검사후속후보는별도최신회귀영수증으로검증한다. 실제사용자로그인/이용권·DB/Drive/우리API배포는NOT_RUN이며 실제API·CSV자료를자동채택하지않는다. 과거DEV002/PR8의228검사는historical_DEV002_verification과execution_result에보존한다.",
     "remaining": [
-      "실제 Supabase 프로젝트·서버 역할·TLS·Auth 검증 사용자와 활성 이용권 설정 및 readonly probe 증거",
+      "Supabase URL/publishable·참조secret/JWKS의 존재와최소GET는검토범위확인완료. 실제DATABASE_URL/전용role/TLS·검수JWT·단일권한authority·실DB인수는미완료.",
       "운영 DB에 추가 마이그레이션 적용 후 실제 UTC/timestamptz/date 및 권한/소유권 트랜잭션 검수",
-      "Drive OAuth 계정·토큰 갱신·입출력 폴더/발행 명부 및 실제 읽기·별도 산출 쓰기 검수",
+      "Drive OAuth·토큰갱신운영/필요adapter 별도개발·입출력folder/승인명부·실read/별도write 검수; approved0 HOLD",
       "기존 자료팀 정리 근거를 재사용한 공식 자료·곡선·공동분포·연도보정·환산·예상/판단 근거 승인과 변경 범위 실제 검산",
       "배포/HTTPS·CORS origin·비공개 운영 진단·이용권 발행/결제 운영 연결",
       "별도 프레젠테이션 feature에서 로그인 토큰·이 API DTO·서울 시각 표시·인쇄 UI 연결",
@@ -1952,6 +1952,47 @@
       "forecast_accuracy": "NOT_RUN"
     },
     "integration_readiness": {
+      "status": "readonly_settings_confirmed_production_NOT_READY_operations_handoff_pending",
+      "existing_EduTouch_service": "discovered_by_planning_team",
+      "existing_API_contract": "incompatible_me_DTO_and_jeongsi_namespace_skeleton",
+      "Jungsi_22_API_deployment": "NOT_RUN",
+      "Supabase_auth_settings": "readonly_HTTP200",
+      "JWKS": "readonly_HTTP200_ES256",
+      "server_secret": "REST_metadata_HTTP200_only_not_admin_account_acceptance",
+      "private_schema_API": "readonly_HTTP406_PGRST106_REST_not_exposed_not_schema_absence",
+      "actual_login": "NOT_RUN_missing_test_user_Bearer_JWT",
+      "DATABASE_URL": "not_present_in_reviewed_file_process_scope_no_global_claim",
+      "Drive_settings": "operational_OAuth_refresh_folders_registry_NOT_RUN_approved0",
+      "migration_002": "NOT_APPLIED",
+      "legacy_entitlement": "public.jeongsi_passes_not_automatically_bound_to_jungsi_backend.entitlements",
+      "single_entitlement_authority": "decision_pending_default_entitlements_adapter_requires_contract_implementation_PR",
+      "server_connection_candidates": [
+        "separate_Jungsi_FastAPI_deployment",
+        "external_EduTouch_namespace_adapter"
+      ],
+      "selection": "not_selected",
+      "actual_connection_values": "private_only_never_common_Git",
+      "existing_SSR_OpenNext_rewrite": "external_reference_only_not_22_API_or_entitlement_acceptance",
+      "actual_DB_and_test_user_validation": "NOT_RUN_missing_private_inputs",
+      "profile_condition_read": "readonly_metadata_admin_active_conditions_confirmed_not_actual_login_JWT_acceptance",
+      "Supabase_project_settings": "present_in_reviewed_private_configuration_scope",
+      "latest_review": {
+        "revision": "2026.10.06.v1",
+        "checked_at": "2026-10-06T05:32Z",
+        "summary": "Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다. Python FastAPI 22 API/엔진의 배포 연결안과 이용권 단일 authority는 미선택이다. 실DB/Bearer 로그인/유료 권한/승인 자료/22 API 배포/외부4페이지 인수는 NOT_RUN/HOLD이며 승인 자료0을 유지한다.",
+        "production_ready": false,
+        "scope": "2026-10-06T05:32Z root 읽기 snapshot: 검토한 private file와 해당 process/rootenv·최소HTTP/Git에 한정. 전PC/global 설정부재를 단정하지 않음",
+        "handoff_document": "docs/current/Supabase_운영_인수인계.md",
+        "approved_data_count": 0,
+        "frontend_PR6_head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+        "actual_DB": "NOT_RUN",
+        "actual_login": "NOT_RUN",
+        "migration001": "UNCONFIRMED",
+        "migration002": "NOT_APPLIED"
+      }
+    },
+    "historical_DEV002_verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.\n\n기획팀 검토 후 [PR #8](https://github.com/natural0448/Jungsi_touch/pull/8)을 develop 03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced에 병합했다. 검토한 기능 커밋 c5376f0d8674cf82add0959abec385682f14cd4f의 [GitHub CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288)에서 합성 테스트 228개와 문서·코드 참조·계층·비공개 데이터 제외 검사가 통과했다. 실제 Supabase·Drive 연결과 원자료/모형 검수는 설정 대기이며 이 통과에 포함되지 않는다.",
+    "historical_integration_readiness_before_supabase_handoff_v1": {
       "status": "partial_readonly_auth_metadata_verified_service_and_entitlement_contract_pending",
       "existing_EduTouch_service": "discovered_by_planning_team",
       "existing_API_contract": "incompatible_me_DTO_and_jeongsi_namespace_skeleton",
@@ -1975,8 +2016,7 @@
       "existing_SSR_OpenNext_rewrite": "external_reference_only_not_22_API_or_entitlement_acceptance",
       "actual_DB_and_test_user_validation": "DEFERRED_until_private_settings_available",
       "profile_condition_read": "readonly_metadata_admin_active_conditions_confirmed_not_actual_login_JWT_acceptance"
-    },
-    "historical_DEV002_verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.\n\n기획팀 검토 후 [PR #8](https://github.com/natural0448/Jungsi_touch/pull/8)을 develop 03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced에 병합했다. 검토한 기능 커밋 c5376f0d8674cf82add0959abec385682f14cd4f의 [GitHub CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288)에서 합성 테스트 228개와 문서·코드 참조·계층·비공개 데이터 제외 검사가 통과했다. 실제 Supabase·Drive 연결과 원자료/모형 검수는 설정 대기이며 이 통과에 포함되지 않는다."
+    }
   },
   "university_scoring_contract": {
     "format": "jungsi.university-scoring-contract/v1",
@@ -3394,6 +3434,18 @@
       "version_fix": "observed_implemented",
       "approved_four_file_deletion": "observed_completed_external_not_integrated",
       "PR6": "open_unmerged",
+      "exact_HEAD_CI_jobs": "NOT_REVIEWED_for_latest_head",
+      "browser_and_real_connection": "NOT_RUN",
+      "local_SSR_Caller": "SSR/로컬시험Caller 자동상호대체를보장하지않는다. 최신PR6 실Caller/운영JWT/브라우저는외부별도인수.",
+      "observed_at": "2026-10-06T05:32Z",
+      "observed_head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+      "base": "81672e7214e34ff929639492319896420bd62196"
+    },
+    "historical_external_source_observation_before_supabase_handoff_v1": {
+      "version_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
+      "version_fix": "observed_implemented",
+      "approved_four_file_deletion": "observed_completed_external_not_integrated",
+      "PR6": "open_unmerged",
       "exact_HEAD_CI_jobs": "two_success",
       "browser_and_real_connection": "NOT_RUN",
       "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
@@ -3955,5 +4007,48 @@
       "remaining_first": "서비스 코드와 공통 기획/라우팅의 같은 커밋·정상 훅·정확 HEAD CI·develop 통합",
       "meaning": "354d450 출발의 코드·공통 패치와 23/local native 검수는 고정 후보로 인수했지만 Git 통합은 아직 미실행이었던 당시 이력이다. 기존 동결 영수증·원본과 함께 보존한다."
     }
+  },
+  "supabase_operations_handoff": {
+    "format": "jungsi.supabase-operations-handoff/v1",
+    "revision": "2026.10.06.v1",
+    "checked_at": "2026-10-06T05:32Z",
+    "status": "NOT_READY",
+    "production_ready": false,
+    "document": "docs/current/Supabase_운영_인수인계.md",
+    "deployment_selection": "not_selected",
+    "gates": [
+      {
+        "id": "실DB",
+        "status": "NOT_RUN_001_UNCONFIRMED_002_NOT_APPLIED"
+      },
+      {
+        "id": "Bearer 로그인",
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "유료·staff 권한",
+        "status": "NOT_RUN_DECISION_PENDING"
+      },
+      {
+        "id": "실approved 자료",
+        "status": "HOLD_APPROVED0"
+      },
+      {
+        "id": "Drive 실제공급",
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "Jungsi22 API",
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "외부4페이지",
+        "status": "NOT_RUN_PR6_OPEN_UNMERGED"
+      },
+      {
+        "id": "운영·최종release",
+        "status": "NOT_READY"
+      }
+    ]
   }
 }
