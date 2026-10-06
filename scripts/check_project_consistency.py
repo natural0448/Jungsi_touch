@@ -435,11 +435,27 @@ def supabase_operations_summary(spec,link='Supabase_운영_인수인계.md'):
         return '\n\n## 서비스 통합과 운영 상태\n\n'+str(p.get('code_status','pending'))+'; 운영서버 '+str(p.get('live_server_status','NOT_RUN'))+'; 실제자료 '+str(p.get('live_data_status','NOT_RUN'))+'.'
     return '\n\n## Supabase 운영 인수 상태\n\n'+c['summary']+'\n\n[Supabase 운영 인수인계]('+link+')를 따른다. revision '+c['revision']+'; '+c['checked_at']+' 읽기 snapshot.\n\n'+c['history']['summary']
 
+def supabase_access_recheck_text(contract):
+    recheck = contract.get('access_recheck')
+    if not recheck:
+        return ''
+    return '\n\n'.join([
+        '## 최신 HTTP 접근 재점검과 .env 경계',
+        '증거 ID ' + recheck['evidence_id'] + '; ' + recheck['started_at'] + ' ~ ' + recheck['checked_at'] + '. ' + recheck['source'] + ' ' + recheck['scope'],
+        '### 설정 파일·키 없는 조회\n\n' + table(['시각 UTC', '요청', 'HTTP', '확인 범위'], recheck['without_settings_HTTP']),
+        '### 기존 비공개 보관 키를 사용한 조회\n\n' + recheck['settings_source'] + '\n\n' + table(['시각 UTC', '요청', 'HTTP', '확인 범위'], recheck['existing_keys_HTTP']),
+        recheck['zero_row_boundary'],
+        '### 설정 보관과 실행 환경\n\n기존 비공개 파일 확인 설정 이름: ' + ', '.join(recheck['settings_present_names']) + '.\n\n이번 프로세스·해당 PC User/Machine 환경변수 미주입 이름: ' + ', '.join(recheck['environment_missing_names']) + '.\n\n' + recheck['settings_boundary'] + '\n\n' + recheck['configuration_boundary'],
+        '### 미검증 범위와 운영 상태\n\n' + table(['항목', '상태', '이유'], recheck['verification_boundaries']) + '\n\n실제 레코드 취득 ' + str(recheck['records_fetched']) + '건; 운영 쓰기 ' + str(recheck['operational_writes']) + '건; 새 .env 생성 ' + str(recheck['new_env_files']) + '건. production_ready=false를 유지한다.',
+        '### 다음 담당자의 작업\n\n' + table(['담당', '작업과 경계'], recheck['developer_actions']),
+    ])
+
+
 def supabase_operations_handoff_text(spec):
     c=spec['supabase_operations_handoff_contract'];r=c['current_review'];a=c['architecture']
     head=c['decision']+'\n\nrevision '+c['revision']+'; '+c['checked_at']+' 읽기 snapshot; 문서 '+c['document_status']+'. '+c['scope']
     architecture='## 권장 구조와 미선택 결정\n\n'+table(['계층','책임'],a['tiers'])+'\n\n별도 Python FastAPI 서버를 권장한다. 현재 Python runtime과 Supabase Edge runtime의 차이에 근거한 권장 추론이며 연결 방식은 아직 선택하지 않았다(selection='+a['selection']+'). 후보는 '+', '.join(a['candidates'])+'이다. '+a['boundary']+'\n\n현재 구현은 '+a['entitlement_default']+'를 조회한다. 기존 에듀터치 이용권과 연결할 단일 기준 저장소는 아직 선택하지 않았다(single_authority='+a['single_authority']+').'
-    current='## 최소 조회와 실제 검수\n\n'+r['scope']+'\n\n'+table(['항목','HTTP','확인 범위'],r['readonly_HTTP'])+'\n\n'+r['PGRST106_meaning']+'\n\n확인한 설정 이름: '+', '.join(r['present_names'])+'. 이번에 확인한 파일과 프로세스에서 확보하지 못한 설정: '+', '.join(r['missing_in_reviewed_scope'])+'. '+r['site_admin']+' '+r['local_reference']+'\n\n승인 자료는 0건이며 로컬 후보 1건의 engine_approved=false를 확인했다. 미승인 자료·합성 모형의 production_allowed=false를 표시 목적으로 true로 바꾸지 않는 정책과 구분한다. 후보에서 production_allowed 필드를 읽었다는 주장이 아니다.\n\n외부 화면 PR6 head는 '+r['frontend']['head']+', base는 '+r['frontend']['base']+'다. PR은 open/unmerged이며 실제 브라우저 검수는 NOT_RUN이다. 이 최신 HEAD의 CI 상태는 '+r['frontend']['latest_HEAD_CI']+'로 구분한다.'
+    current='## 이전 통합 snapshot의 최소 조회와 실제 검수\n\n'+r['scope']+'\n\n'+table(['항목','HTTP','확인 범위'],r['readonly_HTTP'])+'\n\n'+r['PGRST106_meaning']+'\n\n확인한 설정 이름: '+', '.join(r['present_names'])+'. 이번에 확인한 파일과 프로세스에서 확보하지 못한 설정: '+', '.join(r['missing_in_reviewed_scope'])+'. '+r['site_admin']+' '+r['local_reference']+'\n\n승인 자료는 0건이며 로컬 후보 1건의 engine_approved=false를 확인했다. 미승인 자료·합성 모형의 production_allowed=false를 표시 목적으로 true로 바꾸지 않는 정책과 구분한다. 후보에서 production_allowed 필드를 읽었다는 주장이 아니다.\n\n외부 화면 PR6 head는 '+r['frontend']['head']+', base는 '+r['frontend']['base']+'다. PR은 open/unmerged이며 실제 브라우저 검수는 NOT_RUN이다. 이 최신 HEAD의 CI 상태는 '+r['frontend']['latest_HEAD_CI']+'로 구분한다.'
     facts='## 현재 코드와 설정 경계\n\n'+table(['항목','현재 구현과 미실행 경계'],list(c['existing_code_facts'].items()))+'\n\n현재 프로젝트의 URL·publishable 설정을 확인했으므로 새 프로젝트 생성이 필수라고 볼 근거는 없다. .env 예시도 Git에서 제외한다. 파일 보관과 서버 프로세스의 환경변수 주입은 별도 작업이다.'
     settings='## 공개·서버·검수 설정\n\n'+table(['설정 이름','사용 범위','용도와 현재 상태','runtime 분류'],c['environment'])+'\n\nSUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설정이 아니며 자동으로 사용되지 않는다. 프런트 NEXT_PUBLIC_SUPABASE_ANON_KEY는 publishable 참조 값을 보관하는 기존 호환 이름이다. secret key나 사용자 JWT를 뜻하지 않는다. 운영 환경의 변수 이름과 설정 채택은 외부 화면 담당자가 확인해야 한다.'
     overview='## 담당별 인계 작업\n\n'+table(['ID/우선순위','담당/계층','입력','선행','현재상태'],[[t['id']+' '+t['priority'],t['owner']+' / '+t['layer'],'; '.join(t['inputs']),', '.join(t['depends_on']) or '없음',t['status']] for t in c['tasks']])
@@ -448,7 +464,7 @@ def supabase_operations_handoff_text(spec):
     gate='## 운영 인수 완료 조건\n\n'+table(['gate','담당','현재상태','완료증거'],c['acceptance_gates'])+'\n\n실DB/Bearer로그인/유료·staff/실approved자료/22API/외부4페이지는각각NOT_RUN/HOLD다. production_ready=false/NOT_READY·mainnot_ready를각증거인수전유지한다. 이번문서작성은DB쓰기/migration/모형등록/main/배포승인이아니다. reset/drop/delete금지.'
     history='## 이전 코드 인수와 이번 후보\n\n'+c['history']['summary']+'\n\n확인된이전baseline '+c['history']['baseline']+', tree '+c['history']['tree']+'; normalhooks '+str(c['history']['previous_normal_hooks'])+'건. [이전정확CI]('+c['history']['CI']+').'
     references='## 공식 primary 참고\n\n'+'\n\n'.join(v[2]+' ['+v[0]+']('+v[1]+').' for v in c['references'])+'\n\n연결권장은추론/미선택이며제공자무료plan가격/제한수치를단정하지않는다. 공개문서에실projectURL/id/key/JWT/개인식별/자료hash/비공개PC경로를넣지않는다.'
-    return '\n\n'.join([head,architecture,current,facts,settings,overview,detail,order,gate,history,references])
+    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),facts,settings,overview,detail,order,gate,history,references] if part)
 
 def supabase_operations_route_metadata(spec):
     c=spec['supabase_operations_handoff_contract']

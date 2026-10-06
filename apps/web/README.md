@@ -1,6 +1,6 @@
 # 정시터치 프레젠테이션 개발 기준
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.0이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.1이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 현재 경로와 회원별 화면 접근 범위는 route_catalog.json을 따른다. [현재 기획](../../docs/current/서비스_기획.md)과 [라우팅 명세](../../docs/current/라우팅_명세.md)를 함께 갱신한다. 기존 가상 화면은 기획 이력이며 이 폴더의 실행 앱이 아니다. 실제 화면 앱·인증·API 연결은 후속 작업이다.
 
@@ -10,9 +10,9 @@
 
 ## Supabase 운영 인수 상태
 
-Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다. Python FastAPI 엔진과 22개 API의 배포 연결 방식, 유료 이용권의 단일 권한 기준은 아직 선택하지 않았다. 실제 DB·Bearer 로그인·유료 권한·승인 입시자료·운영 API 배포·외부 4페이지 인수는 NOT_RUN 또는 HOLD다. 승인 자료 수는 0이다.
+기존 비공개 보관 키로 Supabase Auth 설정·서버 REST 메타데이터·public 테이블 limit=0 조회가 HTTP 200으로 성공했다. .env 파일 자체는 필수가 아니며, 이번 keyed 조회에는 기존 비공개 설정 파일을 사용했다. 현재 PostgreSQL 어댑터의 DATABASE_URL과 실제 사용자 JWT는 확인한 설정 범위에서 미확보다. 관리 콘솔 권한은 브라우저 조회 시간 초과로 미검증이다. API 접근 확인과 전체 운영 인수를 구분하며 production_ready=false / NOT_READY를 유지한다. Python API 배포 연결 방식과 이용권의 단일 기준은 미선택이고, 실제 DB·로그인·이용권·승인 자료·운영 API·외부 4페이지 인수는 NOT_RUN/HOLD다. 승인 자료 0건은 05:32Z 이전 관측이며 이번 HTTP 재점검에서 재조사하지 않았다.
 
-[Supabase 운영 인수인계](../../docs/current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v1; 2026-10-06T05:32Z 읽기 snapshot.
+[Supabase 운영 인수인계](../../docs/current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v2; 2026-10-06T08:40:54.349322Z 읽기 snapshot.
 
 PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.
 
@@ -34,4 +34,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](../../docs/current/외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=8cd931680428e5bc1ec07db1952ccfb3350f6ba2ed7f6656fd00a973a5ee4230 -->
+<!-- jungsi:generated spec_sha256=477371bb54733ca196f2260dfc92d34c2a9ba13aa9507da0a7d74dd282cfdb9a -->

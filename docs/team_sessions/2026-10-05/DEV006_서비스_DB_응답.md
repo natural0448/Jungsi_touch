@@ -1,10 +1,10 @@
 # DEV006 서비스·DB 응답과 외부 프런트 인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.0이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.1이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
-기준일: 2026-10-06 UTC. 인계 revision **2026.10.06.v1**. 확인시각은 **05:32Z 읽기 snapshot**이며 상태는 **이전 서비스·공통 코드 인수 확인 / 운영 NOT_READY**다.
+기준일: 2026-10-06 UTC. 인계 revision **2026.10.06.v2**. 최신 추가 관측은 **08:38:58Z~08:40:54Z HTTP 접근 재점검**이며, **05:32Z 통합 현황은 이전 snapshot**으로 보존한다. 상태는 **이전 서비스·공통 코드 인수 확인 / 운영 NOT_READY**다.
 
-Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다.
+Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 기존 보관 키의 HTTP API·public 테이블 limit=0 조회200을 확인했다. 0건 응답은 테이블 전체 인원이 0이라는 뜻이 아니며 실제 로그인·SQL·RLS·이용권·입시모델 인수가 아니다.
 
 [Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)의 SUP-01~11·의존관계·입력·완료조건·개별gate를 따른다. API22/DTO·일반/유료·본인소유권·UTC·forecast_authorities 학교scope·독립approver/자기승인거절은불변이다. 시스템기획/서비스개발/외부화면/데이터팀 담당을 유지하며 이번팀은 화면·서비스·DB코드를수정하지않는다.
 
@@ -112,9 +112,9 @@ population_id, comparison_metric, unit, direction, tie_policy
 
 ## 최소설정 조회와 실제운영
 
-검토 privatefile/process범위에서 URL/publishable·참조secret/JWKS존재를확인했다. Authsettings/JWKS200·ES256공개키1·JWT없는getUser401·secretRESTmetadata200·privateREST406PGRST106은최소읽기증거다. PGRST106은REST비노출이며SQL schema부재/권한실패가아니다. 실제DB/로그인/이용권/migration/운영쓰기0이며개인식별값·projectURL/id·키·JWT·자료hash·비공개PC경로는공개하지않는다.
+05:32Z 이전 통합 snapshot을 보존한다. 최신 재점검에서는 파일·키 없는 JWKS200, Auth settings401, user401을 확인했다. 기존 비공개 보관 키로 Auth settings200·JWT 없는 user401·공개키 REST metadata401·서버키 REST metadata200·비공개 schema REST406/PGRST106을 확인했다. 08:40:54Z public 테이블 limit=0 조회200/응답[]이며 실제 레코드 취득0건·DB쓰기0·새.env 생성0이다. 테이블 총건수·SQL/RLS·회원 이용권은 미검증이다. PGRST106은REST비노출이며SQL schema부재/권한실패가아니다. 개인식별값·projectURL/id·키·JWT·자료hash·비공개PC경로는공개하지않는다.
 
-DATABASE_URL/검수JWT는검토설정범위미확보이며전PC/global부재를단정하지않는다. ignored.env보관은process주입이아니다. secretkey는DB비밀번호가아니며현재getUser뒤sub/exp검증을JWKS직접검증완료로기록하지않는다. 과거siteadmin표식조회는현재실로그인/consoleadmin/paid권한이아니다.
+기존 비공개 파일에서 URL/publishable/secret/JWKS 참조를 확인했다. 이번 프로세스와 해당 PC User/Machine 환경에서는 이 4개 및 DATABASE_URL/검수JWT 6개 이름이 부재였다. DATABASE_URL/검수JWT는 확인한 파일·환경 범위에서 미확보이며 다른 PC·배포 서버의 부재를 단정하지 않는다. .env 파일 자체는 필수가 아니고 ServerSettings는os.environ만 읽는다. 기존 파일의 보관과process주입은별도다. secretkey는DB비밀번호·사용자JWT가아니며현재getUser뒤sub/exp검증을JWKS직접검증완료로기록하지않는다. Console 브라우저 상태조회는 시간초과로 권한 미검증이다. 과거siteadmin표식조회는현재실로그인/consoleadmin/paid권한이아니다.
 
 ## 이전코드 인수 이력
 
@@ -135,9 +135,9 @@ PR5closed/보존ref와정확4파일f46/선행등록/기본deny/단회origin삭�
 
 ## Supabase 운영 인수 상태
 
-Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다. Python FastAPI 엔진과 22개 API의 배포 연결 방식, 유료 이용권의 단일 권한 기준은 아직 선택하지 않았다. 실제 DB·Bearer 로그인·유료 권한·승인 입시자료·운영 API 배포·외부 4페이지 인수는 NOT_RUN 또는 HOLD다. 승인 자료 수는 0이다.
+기존 비공개 보관 키로 Supabase Auth 설정·서버 REST 메타데이터·public 테이블 limit=0 조회가 HTTP 200으로 성공했다. .env 파일 자체는 필수가 아니며, 이번 keyed 조회에는 기존 비공개 설정 파일을 사용했다. 현재 PostgreSQL 어댑터의 DATABASE_URL과 실제 사용자 JWT는 확인한 설정 범위에서 미확보다. 관리 콘솔 권한은 브라우저 조회 시간 초과로 미검증이다. API 접근 확인과 전체 운영 인수를 구분하며 production_ready=false / NOT_READY를 유지한다. Python API 배포 연결 방식과 이용권의 단일 기준은 미선택이고, 실제 DB·로그인·이용권·승인 자료·운영 API·외부 4페이지 인수는 NOT_RUN/HOLD다. 승인 자료 0건은 05:32Z 이전 관측이며 이번 HTTP 재점검에서 재조사하지 않았다.
 
-[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v1; 2026-10-06T05:32Z 읽기 snapshot.
+[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v2; 2026-10-06T08:40:54.349322Z 읽기 snapshot.
 
 PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.
 
@@ -159,4 +159,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](../../current/외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=8cd931680428e5bc1ec07db1952ccfb3350f6ba2ed7f6656fd00a973a5ee4230 -->
+<!-- jungsi:generated spec_sha256=477371bb54733ca196f2260dfc92d34c2a9ba13aa9507da0a7d74dd282cfdb9a -->
