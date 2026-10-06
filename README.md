@@ -10,9 +10,12 @@ main은 모든 작업이 완료된 뒤 코드·문서·검증·인계를 정리�
 - [폴더 구조와 작업 위치](docs/current/폴더_구조.md)
 - [API DTO 계약](docs/current/API_DTO_계약.md)
 - [백엔드 운영 준비](docs/current/백엔드_운영준비.md)
+- [Supabase 운영 인수인계](docs/current/Supabase_운영_인수인계.md)
 - [공통 명세](docs/current/service_spec.json)
 
-프레젠테이션은 apps/web, 권한·업무 처리는 src/jungsi_touch/application, 저장소 어댑터는 src/jungsi_touch/infrastructure를 기준으로 개발한다. 기존 src/jungsi_touch 루트 성적 엔진은 애플리케이션 라이브러리로 재사용한다. FastAPI 12개 API와 Supabase/PostgreSQL·Drive 어댑터 코드는 develop에 통합했다. 실제 서버·승인 자료 연결과 별도 프레젠테이션 앱의 연결은 운영 준비 문서의 대기 항목을 따른다.
+프레젠테이션은 apps/web, 권한·업무 처리는 src/jungsi_touch/application, 저장소 어댑터는 src/jungsi_touch/infrastructure를 기준으로 개발한다. 기존 src/jungsi_touch 루트 성적 엔진은 애플리케이션 라이브러리로 재사용한다. FastAPI 22개 API와 Supabase/PostgreSQL·Drive 어댑터 코드는 develop에 통합했다. 실제 서버·승인 자료 연결과 별도 프레젠테이션 앱의 연결은 운영 준비 문서의 대기 항목을 따른다.
+
+Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다. [Supabase 운영 인수인계](docs/current/Supabase_운영_인수인계.md)의 SUP-01~11·입력·의존관계·완료조건을 따른다. 연결안/단일authority는미선택이며실DB/Bearer로그인/유료권한/승인자료/22API/외부4페이지는NOT_RUN/HOLD다.
 
 현재 문서는 공통 명세에서 생성하고 Git 인덱스 또는 커밋을 기준으로 일치 여부와 계층·데이터 제외를 검사한다. 검산은 선택한 Git 스냅샷만 새 outputs 폴더에 복사해 실행한다. 실제 데이터가 필요한 로컬 테스트를 커밋 검산에 섞지 않는다.
 

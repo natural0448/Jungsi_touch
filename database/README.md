@@ -32,6 +32,14 @@ Google Drive API 고정 폴더·파일 버전/해시·승인 읽기와 별도 �
 - 비공개 발행 명부/승인 자료 값과 형식 호환 검수
 - 실제 읽기/쓰기·재시도/충돌·감사와 사용자 접근 검수
 
+## Supabase 운영 인수 상태
+
+Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다. Python FastAPI 엔진과 22개 API의 배포 연결 방식, 유료 이용권의 단일 권한 기준은 아직 선택하지 않았다. 실제 DB·Bearer 로그인·유료 권한·승인 입시자료·운영 API 배포·외부 4페이지 인수는 NOT_RUN 또는 HOLD다. 승인 자료 수는 0이다.
+
+[Supabase 운영 인수인계](../docs/current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v1; 2026-10-06T05:32Z 읽기 snapshot.
+
+PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.
+
 ## 공통 도구의 확인된 이전 인수 기준
 
 | 범위 | 확인한 증거 |
@@ -40,10 +48,10 @@ Google Drive API 고정 폴더·파일 버전/해시·승인 읽기와 별도 �
 | 정상 commit/push 훅 | 530건 PASS; 실패 0·오류 0·건너뜀 0 |
 | 정확한 HEAD GitHub CI | [project-consistency](https://github.com/natural0448/Jungsi_touch/actions/runs/37324278331/job/111810898785): success |
 | 서비스·DB 역사 기준 | adc684/74fd 구현과 develop947 통합의 493 PASS는 별도의 역사 인수 증거로 유지한다. |
-| 최신 외부 프런트 관측 | d7b0279b2725a81ecd734cdec957c485ae5d6172; 4cc에서 필수3버전의 비어 있지 않은 문자열·정확동일성 보완과context17비교유지를관측했다. 실제Caller/브라우저/운영로그인인수는NOT_RUN이다. |
+| 당시 외부 프런트 관측 | d7b0279b2725a81ecd734cdec957c485ae5d6172; 4cc에서 필수3버전의 비어 있지 않은 문자열·정확동일성 보완과context17비교유지를관측했다. 실제Caller/브라우저/운영로그인인수는NOT_RUN이다. |
 | 외부 삭제 관측 | observed_completed_external_not_integrated; develop 통합과 실제 브라우저 인수는 구분한다. |
 | 운영/외부 인수 | verification_pending; DB .env 추후; main not_ready |
 
 확인된 이전 baseline b66까지만 증거로 명시한다. 후속 문서 커밋 자신의 미래 SHA나 미실행 CI 성공을 기록하지 않는다. 공통 Git/CI 검사·명세·생성 문서 인수 및 전체 합성 회귀. 운영 DB·외부 프런트·실제 데이터·모형 운영 승인을 뜻하지 않는다. 이전 e12/676 버전값 보완 pending은 역사이며 최신 소스 관측과 실제 프런트 인수 대기를 구분한다. 최소 profile 조건 읽기와 실제 로그인 JWT NOT_RUN, 실제 자료·모형 운영 미승인 상태를 유지한다.
 
-<!-- jungsi:generated spec_sha256=ca7d5358ca86887b0bb394e6eeb8b061782eeb9d8f5f40cfc0b68a3f9b5fce7b -->
+<!-- jungsi:generated spec_sha256=b8b4d3592c84895008a967f7b1290e910ead76a7439c80d35a29a444c8be90ab -->

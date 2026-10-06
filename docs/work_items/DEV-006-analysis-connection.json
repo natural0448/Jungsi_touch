@@ -746,6 +746,18 @@
       "version_fix": "observed_implemented",
       "approved_four_file_deletion": "observed_completed_external_not_integrated",
       "PR6": "open_unmerged",
+      "exact_HEAD_CI_jobs": "NOT_REVIEWED_for_latest_head",
+      "browser_and_real_connection": "NOT_RUN",
+      "local_SSR_Caller": "SSR/로컬시험Caller 자동상호대체를보장하지않는다. 최신PR6 실Caller/운영JWT/브라우저는외부별도인수.",
+      "observed_at": "2026-10-06T05:32Z",
+      "observed_head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+      "base": "81672e7214e34ff929639492319896420bd62196"
+    },
+    "historical_external_source_observation_before_supabase_handoff_v1": {
+      "version_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
+      "version_fix": "observed_implemented",
+      "approved_four_file_deletion": "observed_completed_external_not_integrated",
+      "PR6": "open_unmerged",
       "exact_HEAD_CI_jobs": "two_success",
       "browser_and_real_connection": "NOT_RUN",
       "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."

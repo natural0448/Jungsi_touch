@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
   "spec_version": "1.7.1",
-  "source_sha256": "ca7d5358ca86887b0bb394e6eeb8b061782eeb9d8f5f40cfc0b68a3f9b5fce7b",
+  "source_sha256": "b8b4d3592c84895008a967f7b1290e910ead76a7439c80d35a29a444c8be90ab",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2638,6 +2638,18 @@
       "version_fix": "observed_implemented",
       "approved_four_file_deletion": "observed_completed_external_not_integrated",
       "PR6": "open_unmerged",
+      "exact_HEAD_CI_jobs": "NOT_REVIEWED_for_latest_head",
+      "browser_and_real_connection": "NOT_RUN",
+      "local_SSR_Caller": "SSR/로컬시험Caller 자동상호대체를보장하지않는다. 최신PR6 실Caller/운영JWT/브라우저는외부별도인수.",
+      "observed_at": "2026-10-06T05:32Z",
+      "observed_head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+      "base": "81672e7214e34ff929639492319896420bd62196"
+    },
+    "historical_external_source_observation_before_supabase_handoff_v1": {
+      "version_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
+      "version_fix": "observed_implemented",
+      "approved_four_file_deletion": "observed_completed_external_not_integrated",
+      "PR6": "open_unmerged",
       "exact_HEAD_CI_jobs": "two_success",
       "browser_and_real_connection": "NOT_RUN",
       "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
@@ -2699,5 +2711,48 @@
       ],
       "UI_rule": "유효한 비어 있지 않은 버전3쌍과 context17의 정확 equality로 발표 근거를 결합한다. nullable·권한·Idempotency·보류코드는 유지한다."
     }
+  },
+  "supabase_operations_handoff": {
+    "format": "jungsi.supabase-operations-handoff/v1",
+    "revision": "2026.10.06.v1",
+    "checked_at": "2026-10-06T05:32Z",
+    "status": "NOT_READY",
+    "production_ready": false,
+    "document": "docs/current/Supabase_운영_인수인계.md",
+    "deployment_selection": "not_selected",
+    "gates": [
+      {
+        "id": "실DB",
+        "status": "NOT_RUN_001_UNCONFIRMED_002_NOT_APPLIED"
+      },
+      {
+        "id": "Bearer 로그인",
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "유료·staff 권한",
+        "status": "NOT_RUN_DECISION_PENDING"
+      },
+      {
+        "id": "실approved 자료",
+        "status": "HOLD_APPROVED0"
+      },
+      {
+        "id": "Drive 실제공급",
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "Jungsi22 API",
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "외부4페이지",
+        "status": "NOT_RUN_PR6_OPEN_UNMERGED"
+      },
+      {
+        "id": "운영·최종release",
+        "status": "NOT_READY"
+      }
+    ]
   }
 }

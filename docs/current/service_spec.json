@@ -17,7 +17,8 @@
     "estimated_population": "docs/current/자체_추정분포_개발.md",
     "forecast_policy": "docs/current/예상기준_산출과_관리.md",
     "presentation_connection": "docs/current/분석화면_연결.md",
-    "local_verification": "docs/current/로컬_검증_연결.md"
+    "local_verification": "docs/current/로컬_검증_연결.md",
+    "supabase_operations_handoff": "docs/current/Supabase_운영_인수인계.md"
   },
   "users": {
     "primary": "학생·학부모",
@@ -2462,9 +2463,9 @@
     }
   },
   "pending": [
-    "실제 Supabase 프로젝트·서버 역할·TLS·Auth 검증 사용자와 활성 이용권 설정 및 readonly probe 증거",
+    "Supabase URL/publishable·참조secret/JWKS의 존재와최소GET는검토범위확인완료. 실제DATABASE_URL/전용role/TLS·검수JWT·단일권한authority·실DB인수는미완료.",
     "운영 DB에 추가 마이그레이션 적용 후 실제 UTC/timestamptz/date 및 권한/소유권 트랜잭션 검수",
-    "Drive OAuth 계정·토큰 갱신·입출력 폴더/발행 명부 및 실제 읽기·별도 산출 쓰기 검수",
+    "Drive OAuth·토큰갱신운영/필요adapter 별도개발·입출력folder/승인명부·실read/별도write 검수; approved0 HOLD",
     "자체 추정 모형의 실제 캠퍼스 식별·운영 명부 등록/발행과 전국 대학 공식 실행 규칙·연도보정·예상/판단 근거의 검증/승인 및 변경 범위 검산",
     "배포/HTTPS·CORS origin·비공개 운영 진단·이용권 발행/결제 운영 연결",
     "별도 프레젠테이션 feature에서 로그인 토큰·이 API DTO·서울 시각 표시·인쇄 UI 연결",
@@ -2803,6 +2804,11 @@
         "REQ-23"
       ],
       "summary": "요청2판 기반 local_verification_contract와생성가이드후보를등록한다. configured_app·22API/DTO유지;loopback/메모리/4subject/독립승인/DPAPI/신뢰명부와출처영수증/HOLD를규정한다. PR6d7 open/unmerged·정확CI2성공과4cc3버전보완,정확4파일외부삭제는관측하되develop미통합이다. 실제DB/JWT/모형승격/브라우저/실제기대값완료를주장하지않는다."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [],
+      "summary": "Supabase운영인수인계revision2026.10.06.v1/SUP-01~11·현재gate·동일문서링크추가. API/DTO/회원/REQ·featureversion1.7.1·실자료승인/배포불변."
     },
     {
       "date": "2026-10-03",
@@ -4171,9 +4177,9 @@
     },
     "verification": "현재22 API의서비스·DB 및합성HTTP·권한검증은PR13/develop947 통합과역사493정상검사로인수했다. 현재공통검사후속후보는별도최신회귀영수증으로검증한다. 실제사용자로그인/이용권·DB/Drive/우리API배포는NOT_RUN이며 실제API·CSV자료를자동채택하지않는다. 과거DEV002/PR8의228검사는historical_DEV002_verification과execution_result에보존한다.",
     "remaining": [
-      "실제 Supabase 프로젝트·서버 역할·TLS·Auth 검증 사용자와 활성 이용권 설정 및 readonly probe 증거",
+      "Supabase URL/publishable·참조secret/JWKS의 존재와최소GET는검토범위확인완료. 실제DATABASE_URL/전용role/TLS·검수JWT·단일권한authority·실DB인수는미완료.",
       "운영 DB에 추가 마이그레이션 적용 후 실제 UTC/timestamptz/date 및 권한/소유권 트랜잭션 검수",
-      "Drive OAuth 계정·토큰 갱신·입출력 폴더/발행 명부 및 실제 읽기·별도 산출 쓰기 검수",
+      "Drive OAuth·토큰갱신운영/필요adapter 별도개발·입출력folder/승인명부·실read/별도write 검수; approved0 HOLD",
       "기존 자료팀 정리 근거를 재사용한 공식 자료·곡선·공동분포·연도보정·환산·예상/판단 근거 승인과 변경 범위 실제 검산",
       "배포/HTTPS·CORS origin·비공개 운영 진단·이용권 발행/결제 운영 연결",
       "별도 프레젠테이션 feature에서 로그인 토큰·이 API DTO·서울 시각 표시·인쇄 UI 연결",
@@ -4233,6 +4239,47 @@
       "forecast_accuracy": "NOT_RUN"
     },
     "integration_readiness": {
+      "status": "readonly_settings_confirmed_production_NOT_READY_operations_handoff_pending",
+      "existing_EduTouch_service": "discovered_by_planning_team",
+      "existing_API_contract": "incompatible_me_DTO_and_jeongsi_namespace_skeleton",
+      "Jungsi_22_API_deployment": "NOT_RUN",
+      "Supabase_auth_settings": "readonly_HTTP200",
+      "JWKS": "readonly_HTTP200_ES256",
+      "server_secret": "REST_metadata_HTTP200_only_not_admin_account_acceptance",
+      "private_schema_API": "readonly_HTTP406_PGRST106_REST_not_exposed_not_schema_absence",
+      "actual_login": "NOT_RUN_missing_test_user_Bearer_JWT",
+      "DATABASE_URL": "not_present_in_reviewed_file_process_scope_no_global_claim",
+      "Drive_settings": "operational_OAuth_refresh_folders_registry_NOT_RUN_approved0",
+      "migration_002": "NOT_APPLIED",
+      "legacy_entitlement": "public.jeongsi_passes_not_automatically_bound_to_jungsi_backend.entitlements",
+      "single_entitlement_authority": "decision_pending_default_entitlements_adapter_requires_contract_implementation_PR",
+      "server_connection_candidates": [
+        "separate_Jungsi_FastAPI_deployment",
+        "external_EduTouch_namespace_adapter"
+      ],
+      "selection": "not_selected",
+      "actual_connection_values": "private_only_never_common_Git",
+      "existing_SSR_OpenNext_rewrite": "external_reference_only_not_22_API_or_entitlement_acceptance",
+      "actual_DB_and_test_user_validation": "NOT_RUN_missing_private_inputs",
+      "profile_condition_read": "readonly_metadata_admin_active_conditions_confirmed_not_actual_login_JWT_acceptance",
+      "Supabase_project_settings": "present_in_reviewed_private_configuration_scope",
+      "latest_review": {
+        "revision": "2026.10.06.v1",
+        "checked_at": "2026-10-06T05:32Z",
+        "summary": "Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다. Python FastAPI 22 API/엔진의 배포 연결안과 이용권 단일 authority는 미선택이다. 실DB/Bearer 로그인/유료 권한/승인 자료/22 API 배포/외부4페이지 인수는 NOT_RUN/HOLD이며 승인 자료0을 유지한다.",
+        "production_ready": false,
+        "scope": "2026-10-06T05:32Z root 읽기 snapshot: 검토한 private file와 해당 process/rootenv·최소HTTP/Git에 한정. 전PC/global 설정부재를 단정하지 않음",
+        "handoff_document": "docs/current/Supabase_운영_인수인계.md",
+        "approved_data_count": 0,
+        "frontend_PR6_head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+        "actual_DB": "NOT_RUN",
+        "actual_login": "NOT_RUN",
+        "migration001": "UNCONFIRMED",
+        "migration002": "NOT_APPLIED"
+      }
+    },
+    "historical_DEV002_verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.\n\n기획팀 검토 후 [PR #8](https://github.com/natural0448/Jungsi_touch/pull/8)을 develop 03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced에 병합했다. 검토한 기능 커밋 c5376f0d8674cf82add0959abec385682f14cd4f의 [GitHub CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288)에서 합성 테스트 228개와 문서·코드 참조·계층·비공개 데이터 제외 검사가 통과했다. 실제 Supabase·Drive 연결과 원자료/모형 검수는 설정 대기이며 이 통과에 포함되지 않는다.",
+    "historical_integration_readiness_before_supabase_handoff_v1": {
       "status": "partial_readonly_auth_metadata_verified_service_and_entitlement_contract_pending",
       "existing_EduTouch_service": "discovered_by_planning_team",
       "existing_API_contract": "incompatible_me_DTO_and_jeongsi_namespace_skeleton",
@@ -4256,8 +4303,7 @@
       "existing_SSR_OpenNext_rewrite": "external_reference_only_not_22_API_or_entitlement_acceptance",
       "actual_DB_and_test_user_validation": "DEFERRED_until_private_settings_available",
       "profile_condition_read": "readonly_metadata_admin_active_conditions_confirmed_not_actual_login_JWT_acceptance"
-    },
-    "historical_DEV002_verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.\n\n기획팀 검토 후 [PR #8](https://github.com/natural0448/Jungsi_touch/pull/8)을 develop 03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced에 병합했다. 검토한 기능 커밋 c5376f0d8674cf82add0959abec385682f14cd4f의 [GitHub CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288)에서 합성 테스트 228개와 문서·코드 참조·계층·비공개 데이터 제외 검사가 통과했다. 실제 Supabase·Drive 연결과 원자료/모형 검수는 설정 대기이며 이 통과에 포함되지 않는다."
+    }
   },
   "repository_layout": {
     "reference_branch": "develop",
@@ -6041,6 +6087,18 @@
       "version_fix": "observed_implemented",
       "approved_four_file_deletion": "observed_completed_external_not_integrated",
       "PR6": "open_unmerged",
+      "exact_HEAD_CI_jobs": "NOT_REVIEWED_for_latest_head",
+      "browser_and_real_connection": "NOT_RUN",
+      "local_SSR_Caller": "SSR/로컬시험Caller 자동상호대체를보장하지않는다. 최신PR6 실Caller/운영JWT/브라우저는외부별도인수.",
+      "observed_at": "2026-10-06T05:32Z",
+      "observed_head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+      "base": "81672e7214e34ff929639492319896420bd62196"
+    },
+    "historical_external_source_observation_before_supabase_handoff_v1": {
+      "version_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
+      "version_fix": "observed_implemented",
+      "approved_four_file_deletion": "observed_completed_external_not_integrated",
+      "PR6": "open_unmerged",
       "exact_HEAD_CI_jobs": "two_success",
       "browser_and_real_connection": "NOT_RUN",
       "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
@@ -6106,11 +6164,17 @@
     "handoff_response": {
       "path": "docs/team_sessions/2026-10-05/DEV006_서비스_DB_응답.md",
       "title": "DEV006 서비스·DB 응답과 외부 프런트 인계",
-      "body": "기준일: 2026-10-06. 상태: **서비스·DB baseline 인수 완료 / 공통 도구 b66 baseline 인수 완료 / 실제 사용자·DB·외부 프런트 검증 대기**. 문서 인계 revision: **8**. 공통 검사·기획 정합성의 확인된 이전 기준은 `b66c2274f0b0a27dc174555adde181cd16c68188`이며 정상 commit/push 훅 530건과 해당 HEAD CI success를 확인했다. revision6 도입부의 새 커밋·CI 대기 문구는 작성 당시 이력이다. 이 문서 이후 커밋의 미래 SHA나 미실행 CI 성공을 뜻하지 않는다.\n\n이 문서는 외부 프런트 전담 개발자가 소비할 공개 구조와 관리 응답의 허용 필드를 설명한다. 실제 성적·입결·키·계수·곡선·운영 연결 값은 포함하지 않는다. 시스템 기획팀은 공통 계약과 인수 기준을, 서비스·DB 개발팀은 백엔드 구현을 담당한다. 프런트 코드와 브라우저 검증은 다른 PC의 전담 개발자가 담당한다.\n\n## ① 구현 기준과 확정 SHA\n\n서비스·DB 수정의 확정 구현 SHA는 **`adc684be2e9d22f8edad766d044b81894676036d`**이며, 부모는 `262e6ba283d37c9e2e446619e6bf1235f4881170`이다. 이 커밋에 원래 검토 지적 7개와 DB002 준비 검사 보완, v1.7.1 공통 계약 및 생성 문서가 함께 포함돼 있다. 해당 코드·계약의 인수 검증을 완료했다.\n\n[PR #13](https://github.com/natural0448/Jungsi_touch/pull/13)을 통해 원격에 공유했다. adc684 인수 시점의 PR은 open/draft였고 그 기록은 역사다. 현재 PR13은 merged이며 develop947cee82f0a91b0ed337753d6e0ae9619e49a78b로 통합됐다. 확정 커밋의 GitHub `project-consistency` 검사 두 건은 모두 success로 확인됐다. 서비스·DB 인수와 develop 통합 완료를 운영 배포·실사용자 검증 완료로 확대하지 않는다.\n\n공통 계약은 [service_spec.json](../../current/service_spec.json), 설명은 [분석화면_연결.md](../../current/분석화면_연결.md)와 [예상기준_산출과_관리.md](../../current/예상기준_산출과_관리.md)를 함께 사용한다. 기획·라우팅·DTO는 같은 공통 명세에서 생성된다. 외부 프런트 연동 시 확정 구현 커밋의 코드와 공통 문서를 함께 사용한다.\n\n확정 구현 adc684의 인수 대상 공통 명세 원본 파일 SHA256은 `37a155ede2d9048b2eb071ba7446ce32e19106aa734be8943a3c738e986472b7`, 그 커밋에 저장된 같은 파일 내용 SHA256은 `8bd3b6cbb9d87875b00533219b56448cbfc26858eac052232465468845d99d42`이다. 이 차이는 Git의 LF 정규화이며 의미 변경이 없음을 독립 대조했다.\n\n현재 공통 명세는 같은 v1.7.1 기능 계약을 유지하면서 서비스·DB 상태를 `implemented_synthetic_HTTP_contract_verified_live_readiness_pending` / `code_verified_live_NOT_RUN`으로 정정했다. 검토 출발점 `9bf81e8d6a04e99086208422021fdb903aff204c`와 인수 구현 adc684를 구분하고, 외부 화면 계약의 `approved_for_implementation` / `verification_pending`은 유지한다. 역사적으로 서비스·DB 개발팀은 adc684 구현과 74fd 인수 상태 정정을 제공했고 PR13의 develop947 통합을 완료했다. 이후 공통 검사·기획 문서 정리는 시스템기획팀이 develop947을 출발점으로 단독 작성한다. 서비스 개발팀은 서비스 계층을, 외부 화면 개발팀은 프런트를 담당한다. 이 문서에 기록한 493건은 adc684의 검사 증거이며 후속 후보의 재검사 결과가 아니다.\n\n프런트 최신 관측은 [PR #6](https://github.com/natural0448/Jungsi_touch/pull/6)의 d7b0279b2725a81ecd734cdec957c485ae5d6172 HEAD다. PR6 open/unmerged와 해당 HEAD CI 두 건 success를 직접 읽기 영수증으로 확인했다. 4cc849a39ebbadf82f348d37995f3d84a938a8c9에서 release/policy/input 양쪽 비어 있지 않은 문자열·정확 equality와 context17 비교를 보완한 소스를 관측했다. e12/676 시점의 미구현 문구는 역사다. 실제 SSR/로컬 Caller·브라우저·운영 로그인 인수는 NOT_RUN이다. d7의 승인4파일 제거와 고정f46 원본 blob 일치를 관측했지만 develop에는 미통합이며 고정 source/단회 origin 검사는 유지한다. 워커 fc31bd61은 사용자 전달 관측으로 직접 배포 검증은 NOT_RUN이다. 이 채팅의 임시 프런트 후보를 외부 채택 기준으로 쓰지 않는다.\n\n## ② 관리 초안과 공개 발표본의 응답\n\n`forecast_draft`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, draft_id, offering_id, revision, status,\nbase_result_hash, policy_version, context,\nresult, base_result, created_at, updated_at,\nadjustments, validation, approval, audit_events\n```\n\n- `result`: 현재 revision에서 채택하여 검증할 최종 객체.\n- `base_result`: 조정 전 서버 산출 원본. 조정·검증·승인으로 수정하지 않는다.\n- 두 객체의 필드: `forecast_70`, `acceptance_range`, `category_ranges`.\n- 관리 상태: `draft → validated → approved → published`. 조정하면 새 revision이 되고 이전 검증·승인을 승계하지 않는다.\n- `created_at`, `updated_at`, 감사 기록의 `at`은 UTC Z 문자열이다.\n- 관리 draft의 최상위 `input_version`은 반환하지 않는다. 초안 생성 요청과 공개 발표본의 `input_version`을 관리 draft 응답과 구분한다.\n\n관리 `context`의 허용 20필드는 다음과 같다. 학교·캠퍼스·전형·모집군을 확인하기 위한 객체이며 공개 발표본의 context와 다르다.\n\n```text\noffering_id, offering_lineage_id, academic_year, university_id,\ncampus, department, track, group, exam_id, source_pack_version,\ncatalog_version, analysis_version, rule_id, rule_version,\ncurve_version, population_id, score_scope, score_scale_id,\nbonus_treatment, unit\n```\n\n중첩 객체는 다음 허용 필드만 소비한다. 필드의 부재·null·실제 0을 구분한다.\n\n| 객체 | 허용 필드 |\n|---|---|\n| `result.forecast_70` / `base_result.forecast_70` | `status`, `reason_code`, `value`, `unit`, `definition`, `version` |\n| `result.acceptance_range` / `base_result.acceptance_range` | `status`, `reason_code`, `lower`, `upper`, `unit`, `definition`, `policy_version` |\n| `result.category_ranges[]` / `base_result.category_ranges[]` | `category`, `lower`, `upper` |\n| `adjustments[]` | `target`, `replacement`, `reason`, `evidence_refs`, `actor`, `at`, `base_result_hash` |\n| `validation` | `status`, `reason_code`, `checks`, `validated_revision`, `result_hash`, `receipt_hash`, `at` |\n| `approval` | `approved_revision`, `result_hash`, `validation_hash`, `approval_hash`, `reason`, `at` |\n| `audit_events[]` | `action`, `actor`, `at` |\n\n`adjustments[].replacement`는 대상에 따라 형태가 다르다. `forecast_70`은 `value/unit`, `acceptance_range`는 `lower/upper/unit`, `category_ranges`는 `ranges` 배열을 가진 객체다. `ranges[]`에는 `category/lower/upper`만 들어간다.\n\n검증 요청은 현재 revision·기준 해시·정책 버전에 결속한다. 승인 요청에는 `validation.receipt_hash`, 게시 요청에는 `approval.approval_hash`를 전달한다. 영수증은 프런트에서 만들지 않는다. 모든 관리 POST에는 `Idempotency-Key`가 필요하다. 유료 회원 여부로 관리 권한을 부여하지 않으며 서버의 editor/approver 및 허용 학교 범위가 기준이다.\n\n관리 `actor`와 영수증 해시는 관리 권한으로 보호된다. 학생 응답에는 직원 식별·내부 감사 기록·상위 `input_hash/policy_hash`·전체 저장 record·내부 정확값 저장 객체·원자료·계수·trace를 복사하지 않는다.\n\n공개 `forecast_public`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, status, reason_code, offering_id, release_version,\ncontext, policy_version, input_version,\nforecast_70, expected_acceptance_range, category_ranges,\nbasis_summary, issue_summaries, recommendation_reasons,\nadjustment_summary\n```\n\n공개 `status`는 **`published | pending`**이다. `pending`이면 `release_version/context/policy_version/input_version/forecast_70/expected_acceptance_range`는 null이며, 미발행 사유를 유지한다. 발표본이 `published`여도 예상 70%와 별도 합격권은 각각 `ready/pending`일 수 있다. 70%만 준비됐다는 이유로 최저 합격점·합격확률을 만들지 않는다.\n\nHTTP 오류 응답과 공개 발표본의 `pending` 객체는 별개다. 현재 context 또는 고정 입력·정책 내용이 달라진 공개 조회는 `409` 오류가 될 수 있다. 이 응답을 기존 학생 분석의 발표본과 결합하지 않으며, 학생 분석 경로에서는 성공한 환산·누백을 유지한 채 지원 판단을 보류한다.\n\n공개 중첩 형태는 다음과 같다.\n\n- `forecast_70`: 관리 기준선과 동일한 `status/reason_code/value/unit/definition/version`.\n- `expected_acceptance_range`: 관리 합격권과 동일한 `status/reason_code/lower/upper/unit/definition/policy_version`.\n- `category_ranges[]`: `category/lower/upper`.\n- `recommendation_reasons[]`: `code/text/evidence_refs`.\n- `issue_summaries[]`: `issue_id/title/summary/numeric_effect_applied`.\n- `adjustment_summary`: `applied/reason/version`.\n\n학생 `assessment.conversion`에는 중복 `rule_explanations`를 추가하지 않는다. 실제 반영 방법 설명은 `assessment.recommendation_reasons`의 등록 코드로 전달한다.\n\n## ③ 학생 분석과 발표본을 같은 근거로 결합하는 조건\n\n학생 `assessment.decision_evidence`와 공개 발표본에 같은 `context`, `policy_version`, `input_version` projection을 전달한다. 공개 context의 허용 17필드는 다음과 같다.\n\n```text\noffering_id, academic_year, exam_id, source_pack_version,\ncatalog_version, rule_id, rule_version, curve_version,\nanalysis_version, score_scale_id, score_scope, bonus_treatment,\npopulation_id, comparison_metric, unit, direction, tie_policy\n```\n\n다음 항목이 전부 일치할 때만 두 응답을 같은 근거로 결합한다.\n\n1. 학생 `forecast_release_version`와 발표본 `release_version`.\n2. 두 응답의 `policy_version`, `input_version`.\n3. 공개 context 17필드의 값과 타입, 명시적 null.\n\n외부 프런트 `e12dd849fb7f3d2e05fe4fc7655a37d613e349cb`의 읽기 검토는 완료했다. 공개 context 17필드의 순서·값·타입·명시적 null을 대조하고, `409`를 published 조회에서만 처리하여 다른 오류를 가리지 않는 범위는 확인됐다. 다만 버전 세 쌍의 `===`만 검사하면 양쪽 누락값/undefined, null 또는 빈 문자열이 같다는 이유로 결합될 수 있어 외부 담당의 보완이 필요하다.\n\n버전 비교 전 학생/발표본의 release 버전, 양쪽 `policy_version`, 양쪽 `input_version`이 모두 유효한 비어 있지 않은 문자열인지 확인해야 한다. 이 조건을 충족할 때만 원래 값의 exact equality로 결합한다. 한쪽 또는 양쪽의 누락/undefined/null/빈 문자열/잘못된 타입은 `sameRelease=false`로 처리하고 재분석·지원 판단 보류를 표시한다. 미완성 응답을 지원하는 기존 DTO nullable 계약은 유지한다. 외부 담당은 정상 동일/불일치와 한쪽·양쪽 누락/null/빈 값/잘못된 타입 회귀를 추가해야 하며, 이 채팅의 실제 화면 변경·브라우저 인수는 **NOT_RUN**, 전체 프런트 상태는 **verification_pending**이다.\n\n학생 분석은 계산할 때 채택한 발표본 버전을 유지한다. 새 발표본을 읽어 옛 학과 판정에 새 컷만 덧붙이지 않는다. 발표본·자료·규칙·곡선·카탈로그가 달라지면 재분석 대상으로 표시하고 새로운 학생 분석 revision에서 채택한다. 필요한 값이 없거나 결속이 틀리면 성공한 환산·누백과 과거 발표 자료는 유지하면서 지원 판단만 보류한다.\n\n`comparison_metric`은 `converted_score | university_top_percent`다. 점수는 내부 정확 환산값, 단위 `점`, 방향 `higher_is_better`, 동점 정책의 해당 없음은 `tie_policy=null`이다. 대학 누백은 `percentile.top_percent`에 대응하는 정확 비율, 단위 `%`, 방향 `lower_is_better`, `tie_policy=include_equal`이다. 전체 국수탐2 `overall` 누백을 대학 누백 비교 값으로 대신 넣지 않는다.\n\n`population_scope`와 `data_kind`는 `percentile` DTO에서 전체/반영 필수 비교집단 및 관측/추정 의미를 표시한다. 공개 발표본 context에 이 두 필드를 가공해 넣거나 관리 context로 대신 결합하지 않는다.\n\n이유 코드는 반영 방법, 지원 판단, 환산 유불리의 세 종류로 구분한다. 우수 탐구 반영·영어 등급 차감 같은 규칙 설명만으로 학생에게 유리했다고 표현하지 않는다. 정확한 동일 모집단 위치 차이의 근거가 있을 때만 유불리 이유를 생성한다.\n\n후보 응답의 `outside_offerings`, `ineligible_offerings`, `pending_offerings`는 각각 판단 완료 추천 범위 밖, 확인된 조건 미충족, 자료·자격·승인·버전 부족에 따른 보류다. 추천 대학이 0개여도 모든 판단이 outside/ineligible로 완료됐다면 정상 `ready` 빈 결과다. 실제로 모두 보류인 `pending`과 구분한다.\n\n## ④ 실제 연결 설정과 검증 계정\n\nAPI 구현과 응답 계약은 ①의 확정 구현과 develop947 통합으로 제공됐다. Supabase의 비공개 설정4필드를 받아 settings/JWKS/REST metadata 최소GET를 확인했다. 기존외부API는우리22 API/이용권 계약과달라주소를자동채택하지않는다. DATABASE_URL은추후.env로제공예정이며검수사용자token·이용권·관리 capability·Drive설정도대기다. 실제회원로그인과운영DB/Drive/우리API연동은NOT_RUN, 운영001/002적용은이작업에서수행하지않았다. 키·비밀번호·실제접속값은이문서와Git에넣지않는다.\n\nDB 마이그레이션 `002_forecast_policy.sql`의 실제 운영 DB 적용은 **NOT_APPLIED**, 운영 readiness 검증은 **NOT_RUN**이다. 5개 테이블·002 버전·필수 열 타입/NOT NULL·PK/FK/CHECK·RLS·클라이언트 권한을 확인하는 읽기 전용 준비 검사와 추가형 SQL 검사는 구현·합성 검증했다. 실제 서버 권한·직접 접근 차단·불변 revision·동시 수정·멱등 재시도·원자적 게시와 UTC 저장의 운영 증거는 아직 없다. 운영 마이그레이션을 자동 적용하지 않으며 합성 HTTP·메모리 저장소·DB 모의 검증을 실제 운영 DB 증거로 표시하지 않는다.\n\n## ⑤ 검사 보완과 계층별 완료 상태\n\n공통 명세·생성 문서·라우팅 및 36개 계약 드리프트 검사는 통과했다. 정확 경계·비교 지표·전체 버전 결속·과거 공식 입결 보존·DTO 허용 필드·이유 코드·후보 분리의 서비스 수정과 DB 준비 검사 보완은 ①의 확정 커밋에서 코드 인수를 완료했다.\n\nadc684 서비스·DB baseline의 정상 커밋·push 훅 Git 스냅샷 검사는 역사적으로 **493건 통과, 실패 0·오류 0·건너뜀 0**였다. 별도 공통 도구 baseline b66은 정상 훅 530건 PASS와 정확한 HEAD CI success를 확인했다. 사전 승인한 서비스·테스트 16개 파일과 공통 계약·생성물·검사 도구 25개 파일이 확정 커밋과 동일하거나 LF 정규화만 다름을 독립 확인했다. 합성 서비스 응답의 DTO 허용 필드 40건 대조도 통과했다. 이 40건은 응답 필드 집합 검사이며 운영 연결·예측 정확도 전체를 검증한 수치가 아니다.\n\n인수 증거는 프로젝트 루트의 `outputs/service_review/20261005T104545255261Z/planning-acceptance.json`과 같은 폴더의 `service-fix-byte-verification.json`에 보존돼 있다. 이번 갱신에서는 그 증거를 읽어 인수 상태를 반영했으며 493건 전체 회귀를 재실행하지 않았다. 공통 인수 상태 정정의 문서/라우팅 일치와 36개 계약 검사는 별도 영수증으로 확인한다. 프런트 소스 변경 0, 파일 삭제 0, 보호 대상 경로 추적 0도 adc684 인수 증거에서 확인했다.\n\n서비스·DB 코드를 인수한 뒤에도 운영 DB002 `NOT_RUN`과 `production_ready=false` 제약이 유지되도록 공통 검사 한 조건을 강화했다. 후보 여부만으로 운영 제약 검사를 해제하지 않는다. 기존 운영 DB 완료 위조 거부 테스트를 유지하며, 코드 인수 사실과 실제 운영 인수를 혼동하지 않게 하는 상태 정합성 보완이다.\n\n병합 검사는 승인된 develop 인입 또는 등록 직계 부모를 Git 재구성 결과에 결속하고 기획 경로의 충돌 해결과 별도 수정 범위를 구분하도록 보완했다. 기존 삭제 차단·main 승격·팀 권한·등록 부모·fast-forward 검사와 과거 이력을 유지한다.\n\n과거 검증 범위의 한계: 고정 SHA만 fetch하던 CI에서는 과거 second-parent가 실제 원격 develop 계보에 속했는지까지 인증하지 못했다. 당시 부모별 자동 병합 결과와 직접 수정·삭제·충돌 허용 범위의 검사 증거를 보존한다. 현재 staged 검사는 확인한 `refs/remotes/origin/develop` tip에 결속하며, 확인된 이전 baseline b66의 workflow는 fixed github.sha와 전체 부모 이력 및 develop/프런트 tracking refs를 함께 확보·고정 SHA 확인한 뒤 trusted policy를 검사하며, 해당 HEAD의 project-consistency CI success를 확인했다. 이 증거를 이후 문서 커밋의 미래 CI 성공, 운영 인수나 서버의 강제 보호 완료로 확대하지 않는다.\n\n상태는 기획 계약 검증, 서비스·DB 코드 인수, 외부 프런트 수정/브라우저 인수, 실제 운영 연결을 각각 기록한다. 외부 프런트가 미완료여도 확인된 서비스·DB 검증 결과는 별도로 보고한다. 코드·계약 검사 통과를 전체 서비스나 예측 정확도 완료로 확대하지 않는다.\n\n| 범위 | 이 인계 시점의 상태 |\n|---|---|\n| v1.7.1 공통 계약·서비스·DB 코드 | 확정 커밋 코드 인수 완료 |\n| 서비스·DB 역사 baseline adc684/74fd/947 | 493건 PASS / 해당 구현 CI success |\n| 공통 도구의 확인된 이전 baseline b66 | 530건 PASS / 정확 HEAD project-consistency CI success |\n| develop 통합 | PR #13 merged, 947cee82f0a91b0ed337753d6e0ae9619e49a78b |\n| 외부 프런트 source/CI 관측 | PR6d7 open/unmerged;4cc필수3버전보완·exactCI2success 관측 |\n| 외부 프런트 실제 Caller·브라우저 인수 | NOT_RUN;운영로그인·로컬시험인증과구분 |\n| Supabase Auth settings/JWKS/REST metadata 최소 GET | 읽기 준비 검수 PASS; 실제 로그인·DB 인수와 구분 |\n| 실제 회원/이용권·우리 22 API·운영 DB·Drive 연결과 readiness | NOT_RUN; DATABASE_URL .env 추후 제공, 실제 DB 검증 유보 |\n| 운영 DB002 적용 | NOT_APPLIED |\n| 실제 입결·학생 사례에 대한 예측 정확도 검증 | NOT_RUN |\n\n## ⑥ session.read 제안 PR #5\n\n[PR #5](https://github.com/natural0448/Jungsi_touch/pull/5)의 session.read는정식공통계약에채택됐으며기획팀이2026-10-05T12:42:14Z에중복제안으로closed 처리했다. bb98a825e6cd86a20359557deec114b2980e78cb head와원격branch·원본은보존했다. 과거adc684인수시점의open 상태는이전문서/인수영수증에보존한다. 유용한동적len(operations) 제목과정식session권한/DTO 검사는현재공통도구로계승했다. 종료영수증은비공개outputs/integration_review_20261005T213058546/pr5-closure-result.json, SHA256 e6c15901d815707582b39e24b79f3d8d44d2efe60c8649efb64aad40d70cdb2e에있다.\n\n## ⑦ 초안·기존 프런트 후보 보존\n\n직접 사용자 메시지의 승인 증거를 정확한 4개 프런트 초안 경로에 한정해 확인하고 공통 삭제 등록부에 결속했고 b66을 통해 별도 선행 develop 등록을 확인했다. 증거 thread는 `01a0ccde-6f3d-7772-acd3-3eaca9a67b65`, turn은 `01a10bf5-8841-74a3-93e2-f2e2de8ac674`, message는 `01a10bf5-898b-7180-8442-3bfd4d1c2914`다. 다른 채팅의 승인 주장만으로 판단하지 않는다. 별도 선행 develop 등록과 고정 source/blob/mode/바이트 SHA 및 최초 삭제 사건 검사를 통과해야 하며 같은 커밋의 자기 승인·과거 소급·수정/복원 후 재사용·병렬 재소비를 허용하지 않는다.\n\n승인 경로는 `apps/web/src/lib/contract.ts`, `apps/web/src/lib/api/synthetic-fixtures.ts`, `apps/web/src/app/admissions/possibilities/actions.ts`, `apps/web/src/components/pending-page.tsx` 네 개뿐이다. 실제 삭제 executor는 외부 화면 개발팀이다. 최신 d7의 네 경로 제거와 승인 원본 blob 일치를 GitHub 영수증으로 관측해 상태를 **observed_completed_external_not_integrated**로 기록한다. PR6 open/unmerged로 develop 승계는 대기이며 기획/서비스팀의 실제 삭제 실행은 NOT_RUN이다. 기본 deny·고정 f46 source·단회 origin 검사는 그대로다. 그 밖의 초안·원본·이전 후보·캐시·검토 결과는 보존하며 외부 Git 관측을 브라우저 인수나 새 삭제 허용으로 확대하지 않는다.\n\n\n## PR13 서비스 통합과 b66 공통 도구 인수 기준\n\n서비스·DB 구현 adc684와 인수 상태 정정74fd는 PR13 merge commit947cee82f0a91b0ed337753d6e0ae9619e49a78b로develop에통합됐다. 병합트리는493검사HEAD와같으며정확병합SHA CI도성공했다. 앞선493기록은역사증거로보존한다. 공통 도구는 확인된 이전 baseline b66의 정상 훅 530건 PASS와 정확 HEAD CI success로 별도 인수했다. 이후 문서 커밋의 미래 자기 SHA/미실행 CI는 기록하지 않는다.\n\nDEV006⑦의승인등록은공통spec.workflow.branch_governance.file_deletion_policy를따른다. 별도develop선행등록을읽으며정확4경로·origin branch·고정source/blob/mode/바이트SHA·직접사용자증거·원본보존·최초삭제사건을검사한다. 실제삭제의executor는외부화면개발팀이다. 시스템기획팀은 develop947 이후 등록·공통검사·합성검증만 담당하고 실제 파일을 삭제하지 않는다. 서비스 개발팀은 사용자 지시에 따라 서비스 계층에 한정하고 프런트는 외부 전담자 소관이다.\n\nSupabase 최소 GET 준비 검수는 아래 읽기 증거로 확인했다. 실제 회원·이용권·운영 DB/Drive/우리 22 API·검수계정/쿠키도메인·운영DB002·외부브라우저·예측정확도는 새 증거 전 NOT_RUN/NOT_APPLIED를 유지한다. DATABASE_URL은 사용자에게 비공개 .env로 추후 전달받기 전까지 실제 DB 검증을 유보한다. GitHub연동설정은기획팀이조사중이며로컬설정검색결과를외부프로젝트부재로확대하지않는다.\n\n\nSupabase 최소 GET 준비 검수: Auth settings/JWKS 200, 사용자토큰없는getUser401, server secret의RESTmetadata200, jungsi_backend schema요청401/406으로직접노출거부. 실제관리자계정·회원로그인·이용권·DB/Drive는미검증이며DB접속설정은추후제공예정이다. 기존외부API의me DTO와jeongsi namespace뼈대는우리22 API계약과다르므로주소를자동채택하지않는다. PR5는2026-10-05 중복제안closed이며head/ref와원본은보존했고동적22경로제목·정식session검사를계승했다.\n\n최소 profile 읽기 검수에서 관리자/활성 조건의 메타데이터 표식은 확인했다. 실제 사용자 로그인 JWT 검증·관리 권한 연동·DB/Drive/우리 22 API 검수는 NOT_RUN이다. 공개 문서에는 실제 profile 값·이메일·UUID·키·접속값을 기록하지 않는다. 실제 데이터/모형 운영 채택·등록 승인도 기존 미완료 상태를 유지한다.\n\n## ⑧ 로컬 검증 연결 요청2판\n\n[로컬 검증 연결](../../current/로컬_검증_연결.md)은 공통 local_verification_contract에서 생성한다. 출발점은 확인된 develop354d450이며 별도 loopback factory에 메모리 저장소·서버 allowlist의 standard/paid/editor/approver 네 subject·수신 PC DPAPI 승인 자료를 명시 주입한다. configured_app·운영 settings·22 API/DTO는 불변이다. 재시작 소실·운영 인증 아님·실제 DB002/Supabase NOT_RUN·production_ready=false를 표시한다. editor/approver 분리와 자기 승인403은 독립 승인 정책의 유지 조건이다.\n\n권한 있는 데이터팀의 별도 승인 명부 또는 local selection과 독립 신뢰 SHA·pinned 출처 영수증·폴더/판/평문 SHA가 필요하다. DATA_ACTIVE_CSV/시험팩 목록은 엔진 승인이 아니다. 실제 Drive 다운로드와 local_filesystem을 구분하고 local_verification 승인이 운영 모형 승격을 뜻하지 않는다. 승인 곡선 없음은 HOLD/null/pending이고 성공 총점은 보존한다.\n\nPR6의 Supabase SSR 쿠키는 localhost 고정 시험 Caller를 자동 제공하지 않는다. 서버 전용 local Caller는 외부팀, 실제 승인 자료/기대값은 데이터팀 담당이다. 서비스 모듈 다섯 파일의 고정 SHA·23건 집중 검사와 이번 검수 PC의 동일 Windows 사용자 DPAPI/loopback HTTP·승인0/pending 명부 HOLD 검수를 인수했다. CLI 도움말 네 개도 기존 고정 runtime에서 exit0으로 대조했다. 구현429482ec6a3e0be7ac5d25512fcf902580a04c73은 서비스5+공통23파일의 같은 커밋이며 정상 pre-commit/pre-push 각각561건 PASS와 정확 구현 HEAD CI 두 건 success를 확인했다. [PR14](https://github.com/natural0448/Jungsi_touch/pull/14)는 merged이고 develop91eb0c5a1f67115d64227f71b87f6dd8ec66085a의 동일 tree·[정확 병합 CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37415227579/job/112112250475) success도 확인했다. 이는 확인된 이전 local-only 구현/통합의 기록이며 현재 메타데이터 커밋의 미래 SHA/CI를 뜻하지 않는다. 외부 수신 PC·실제 승인 수치·다른 PC/계정·외부 브라우저·운영 DB/JWT/Drive/모형 등록 인수는 NOT_RUN/HOLD이다. publishable 설정 준비를 로그인 JWT 인수로 확대하지 않고 비공개 값/설정 파일 경로는 공개 정본에 복사하지 않는다.\n",
-      "source_rule": "공통 명세에서 생성한다. 역사 인수 증거와 현재 공통 후보·운영 유보 상태를 구분한다.",
+      "body": "기준일: 2026-10-06 UTC. 인계 revision **2026.10.06.v1**. 확인시각은 **05:32Z 읽기 snapshot**이며 상태는 **이전 서비스·공통 코드 인수 확인 / 운영 NOT_READY**다.\n\nSupabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다.\n\n[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)의 SUP-01~11·의존관계·입력·완료조건·개별gate를 따른다. API22/DTO·일반/유료·본인소유권·UTC·forecast_authorities 학교scope·독립approver/자기승인거절은불변이다. 시스템기획/서비스개발/외부화면/데이터팀 담당을 유지하며 이번팀은 화면·서비스·DB코드를수정하지않는다.\n\n## ② 관리 초안과 공개 발표본의 응답\n\n`forecast_draft`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, draft_id, offering_id, revision, status,\nbase_result_hash, policy_version, context,\nresult, base_result, created_at, updated_at,\nadjustments, validation, approval, audit_events\n```\n\n- `result`: 현재 revision에서 채택하여 검증할 최종 객체.\n- `base_result`: 조정 전 서버 산출 원본. 조정·검증·승인으로 수정하지 않는다.\n- 두 객체의 필드: `forecast_70`, `acceptance_range`, `category_ranges`.\n- 관리 상태: `draft → validated → approved → published`. 조정하면 새 revision이 되고 이전 검증·승인을 승계하지 않는다.\n- `created_at`, `updated_at`, 감사 기록의 `at`은 UTC Z 문자열이다.\n- 관리 draft의 최상위 `input_version`은 반환하지 않는다. 초안 생성 요청과 공개 발표본의 `input_version`을 관리 draft 응답과 구분한다.\n\n관리 `context`의 허용 20필드는 다음과 같다. 학교·캠퍼스·전형·모집군을 확인하기 위한 객체이며 공개 발표본의 context와 다르다.\n\n```text\noffering_id, offering_lineage_id, academic_year, university_id,\ncampus, department, track, group, exam_id, source_pack_version,\ncatalog_version, analysis_version, rule_id, rule_version,\ncurve_version, population_id, score_scope, score_scale_id,\nbonus_treatment, unit\n```\n\n중첩 객체는 다음 허용 필드만 소비한다. 필드의 부재·null·실제 0을 구분한다.\n\n| 객체 | 허용 필드 |\n|---|---|\n| `result.forecast_70` / `base_result.forecast_70` | `status`, `reason_code`, `value`, `unit`, `definition`, `version` |\n| `result.acceptance_range` / `base_result.acceptance_range` | `status`, `reason_code`, `lower`, `upper`, `unit`, `definition`, `policy_version` |\n| `result.category_ranges[]` / `base_result.category_ranges[]` | `category`, `lower`, `upper` |\n| `adjustments[]` | `target`, `replacement`, `reason`, `evidence_refs`, `actor`, `at`, `base_result_hash` |\n| `validation` | `status`, `reason_code`, `checks`, `validated_revision`, `result_hash`, `receipt_hash`, `at` |\n| `approval` | `approved_revision`, `result_hash`, `validation_hash`, `approval_hash`, `reason`, `at` |\n| `audit_events[]` | `action`, `actor`, `at` |\n\n`adjustments[].replacement`는 대상에 따라 형태가 다르다. `forecast_70`은 `value/unit`, `acceptance_range`는 `lower/upper/unit`, `category_ranges`는 `ranges` 배열을 가진 객체다. `ranges[]`에는 `category/lower/upper`만 들어간다.\n\n검증 요청은 현재 revision·기준 해시·정책 버전에 결속한다. 승인 요청에는 `validation.receipt_hash`, 게시 요청에는 `approval.approval_hash`를 전달한다. 영수증은 프런트에서 만들지 않는다. 모든 관리 POST에는 `Idempotency-Key`가 필요하다. 유료 회원 여부로 관리 권한을 부여하지 않으며 서버의 editor/approver 및 허용 학교 범위가 기준이다.\n\n관리 `actor`와 영수증 해시는 관리 권한으로 보호된다. 학생 응답에는 직원 식별·내부 감사 기록·상위 `input_hash/policy_hash`·전체 저장 record·내부 정확값 저장 객체·원자료·계수·trace를 복사하지 않는다.\n\n공개 `forecast_public`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, status, reason_code, offering_id, release_version,\ncontext, policy_version, input_version,\nforecast_70, expected_acceptance_range, category_ranges,\nbasis_summary, issue_summaries, recommendation_reasons,\nadjustment_summary\n```\n\n공개 `status`는 **`published | pending`**이다. `pending`이면 `release_version/context/policy_version/input_version/forecast_70/expected_acceptance_range`는 null이며, 미발행 사유를 유지한다. 발표본이 `published`여도 예상 70%와 별도 합격권은 각각 `ready/pending`일 수 있다. 70%만 준비됐다는 이유로 최저 합격점·합격확률을 만들지 않는다.\n\nHTTP 오류 응답과 공개 발표본의 `pending` 객체는 별개다. 현재 context 또는 고정 입력·정책 내용이 달라진 공개 조회는 `409` 오류가 될 수 있다. 이 응답을 기존 학생 분석의 발표본과 결합하지 않으며, 학생 분석 경로에서는 성공한 환산·누백을 유지한 채 지원 판단을 보류한다.\n\n공개 중첩 형태는 다음과 같다.\n\n- `forecast_70`: 관리 기준선과 동일한 `status/reason_code/value/unit/definition/version`.\n- `expected_acceptance_range`: 관리 합격권과 동일한 `status/reason_code/lower/upper/unit/definition/policy_version`.\n- `category_ranges[]`: `category/lower/upper`.\n- `recommendation_reasons[]`: `code/text/evidence_refs`.\n- `issue_summaries[]`: `issue_id/title/summary/numeric_effect_applied`.\n- `adjustment_summary`: `applied/reason/version`.\n\n학생 `assessment.conversion`에는 중복 `rule_explanations`를 추가하지 않는다. 실제 반영 방법 설명은 `assessment.recommendation_reasons`의 등록 코드로 전달한다.\n\n## ③ 학생 분석과 발표본을 같은 근거로 결합하는 조건\n\n학생 `assessment.decision_evidence`와 공개 발표본에 같은 `context`, `policy_version`, `input_version` projection을 전달한다. 공개 context의 허용 17필드는 다음과 같다.\n\n```text\noffering_id, academic_year, exam_id, source_pack_version,\ncatalog_version, rule_id, rule_version, curve_version,\nanalysis_version, score_scale_id, score_scope, bonus_treatment,\npopulation_id, comparison_metric, unit, direction, tie_policy\n```\n\n다음 항목이 전부 일치할 때만 두 응답을 같은 근거로 결합한다.\n\n1. 학생 `forecast_release_version`와 발표본 `release_version`.\n2. 두 응답의 `policy_version`, `input_version`.\n3. 공개 context 17필드의 값과 타입, 명시적 null.\n\n외부 프런트 `e12dd849fb7f3d2e05fe4fc7655a37d613e349cb`의 읽기 검토는 완료했다. 공개 context 17필드의 순서·값·타입·명시적 null을 대조하고, `409`를 published 조회에서만 처리하여 다른 오류를 가리지 않는 범위는 확인됐다. 다만 버전 세 쌍의 `===`만 검사하면 양쪽 누락값/undefined, null 또는 빈 문자열이 같다는 이유로 결합될 수 있어 외부 담당의 보완이 필요하다.\n\n버전 비교 전 학생/발표본의 release 버전, 양쪽 `policy_version`, 양쪽 `input_version`이 모두 유효한 비어 있지 않은 문자열인지 확인해야 한다. 이 조건을 충족할 때만 원래 값의 exact equality로 결합한다. 한쪽 또는 양쪽의 누락/undefined/null/빈 문자열/잘못된 타입은 `sameRelease=false`로 처리하고 재분석·지원 판단 보류를 표시한다. 미완성 응답을 지원하는 기존 DTO nullable 계약은 유지한다. 외부 담당은 정상 동일/불일치와 한쪽·양쪽 누락/null/빈 값/잘못된 타입 회귀를 추가해야 하며, 이 채팅의 실제 화면 변경·브라우저 인수는 **NOT_RUN**, 전체 프런트 상태는 **verification_pending**이다.\n\n학생 분석은 계산할 때 채택한 발표본 버전을 유지한다. 새 발표본을 읽어 옛 학과 판정에 새 컷만 덧붙이지 않는다. 발표본·자료·규칙·곡선·카탈로그가 달라지면 재분석 대상으로 표시하고 새로운 학생 분석 revision에서 채택한다. 필요한 값이 없거나 결속이 틀리면 성공한 환산·누백과 과거 발표 자료는 유지하면서 지원 판단만 보류한다.\n\n`comparison_metric`은 `converted_score | university_top_percent`다. 점수는 내부 정확 환산값, 단위 `점`, 방향 `higher_is_better`, 동점 정책의 해당 없음은 `tie_policy=null`이다. 대학 누백은 `percentile.top_percent`에 대응하는 정확 비율, 단위 `%`, 방향 `lower_is_better`, `tie_policy=include_equal`이다. 전체 국수탐2 `overall` 누백을 대학 누백 비교 값으로 대신 넣지 않는다.\n\n`population_scope`와 `data_kind`는 `percentile` DTO에서 전체/반영 필수 비교집단 및 관측/추정 의미를 표시한다. 공개 발표본 context에 이 두 필드를 가공해 넣거나 관리 context로 대신 결합하지 않는다.\n\n이유 코드는 반영 방법, 지원 판단, 환산 유불리의 세 종류로 구분한다. 우수 탐구 반영·영어 등급 차감 같은 규칙 설명만으로 학생에게 유리했다고 표현하지 않는다. 정확한 동일 모집단 위치 차이의 근거가 있을 때만 유불리 이유를 생성한다.\n\n후보 응답의 `outside_offerings`, `ineligible_offerings`, `pending_offerings`는 각각 판단 완료 추천 범위 밖, 확인된 조건 미충족, 자료·자격·승인·버전 부족에 따른 보류다. 추천 대학이 0개여도 모든 판단이 outside/ineligible로 완료됐다면 정상 `ready` 빈 결과다. 실제로 모두 보류인 `pending`과 구분한다.\n\n## 최소설정 조회와 실제운영\n\n검토 privatefile/process범위에서 URL/publishable·참조secret/JWKS존재를확인했다. Authsettings/JWKS200·ES256공개키1·JWT없는getUser401·secretRESTmetadata200·privateREST406PGRST106은최소읽기증거다. PGRST106은REST비노출이며SQL schema부재/권한실패가아니다. 실제DB/로그인/이용권/migration/운영쓰기0이며개인식별값·projectURL/id·키·JWT·자료hash·비공개PC경로는공개하지않는다.\n\nDATABASE_URL/검수JWT는검토설정범위미확보이며전PC/global부재를단정하지않는다. ignored.env보관은process주입이아니다. secretkey는DB비밀번호가아니며현재getUser뒤sub/exp검증을JWKS직접검증완료로기록하지않는다. 과거siteadmin표식조회는현재실로그인/consoleadmin/paid권한이아니다.\n\n## 이전코드 인수 이력\n\nPR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.\n\n## 현재외부화면 관측\n\n최신PR6 head ff2a8e412c7adc16eb61af34a6219a2c5c2d072b/base816/open-unmerged를읽기관측했다. d7/e164·4cc source/CI는역사로보존하며최신실Caller/운영API/4페이지·브라우저는NOT_RUN이다. nonempty 3버전/context17·409부분보류/성공점수보존을외부인수조건으로유지한다.\n\n## 권한·자료·실행 승인\n\n기본jungsi_backend.entitlements와legacy단일authority 선택·결제취소/회수/동기화adapter는별도계약·구현·검수다. paid profile/admin자동승격금지와staff학교scope·editor/approver독립을유지한다. 승인 자료 0, 로컬 후보 1건의 관측 engine_approved=false는 HOLD다. 미승인 자료/합성 모형의 production_allowed=false를 true로 승격하지 않는 정책을 유지하며, 후보에서 그 필드를 관측했다는 주장이 아니다. Drive자동OAuthrefresh는미구현이며marginal수치QA로jointcurve완성을판정하지않는다.\n\nPR5closed/보존ref와정확4파일f46/선행등록/기본deny/단회origin삭제검사는그대로다. d7외부제거관측은역사이며새삭제허용/이번팀실삭제아니다. 001실적용UNCONFIRMED/002NOT_APPLIED·mainnot_ready를유지한다. 이번문서는DB쓰기/migration/모형승인/main병합/배포실행승인이아니다. 원본/이전문서/backup/cache/검수결과는모두보존한다.\n",
+      "source_rule": "현재판정/공식운영인계는supabase_operations_handoff_contract 정본으로생성. 원본before/역사SHA보존; 실제설정/개인값/자료hash/비공개PC경로새공개body복사금지.",
       "historical_revision6_intro": {
         "text": "기준일: 2026-10-05. 상태: **서비스·DB 확정 코드 인수 완료 / 공통 계약 동일성 확인 / develop947 통합 완료 / 실제 사용자·DB·외부 프런트 검증 대기**. 문서 인계 revision: **6**. 후속 공통 검사·기획 상태 정합성은 시스템기획팀의 develop 후보이며 새 커밋·원격 CI 인수는 대기다.",
         "meaning": "작성 당시의 공통 후보/CI 대기 상태다. 이후 b66 정상 훅·530검사·정확 HEAD CI 인수로 종료됐으며 현재 상태로 사용하지 않는다."
+      },
+      "revision": "2026.10.06.v1",
+      "historical_revision8_before_20261006": {
+        "body_sha256": "ada181a32b48aaece6e791e89116c20d87495cce394e4efb40483b05d41b3232",
+        "source_commit": "81672e7214e34ff929639492319896420bd62196",
+        "meaning": "revision8 전체 본문은 Git816과 before 원본에 보존한다. 현재 유효한 ②③ 응답 정의는 원문 그대로 유지하고, 당시 최신 관측/대기 메타데이터만 현재 읽기 상태로 갱신했다."
       },
       "historical_revision7_before_20261006": {
         "body_sha256": "9c3ae5fdd114b22cb372f17ba48a5c8294b880bcb20e02f1043315c2d56ecbd7",
@@ -6118,41 +6182,27 @@
       }
     },
     "external_frontend_readonly_review": {
-      "observed_head": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
-      "latest_observed_head": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
-      "status": "source_changes_observed_external_browser_and_integration_pending",
-      "source": "부모 기획팀의 GitHub API 직접 읽기 영수증을 공통 writer가 해시 대조했다.",
-      "observed_at": "2026-10-06T04:02:32.163955+00:00",
-      "source_receipt_sha256": "29e52de1f097bc82267fbe4fbfef1ea598adaa91eb7efb3b5072e75892b58f1f",
+      "observed_head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+      "latest_observed_head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+      "status": "latest_PR6_metadata_observed_open_unmerged_external_acceptance_NOT_RUN",
+      "source": "root의현재GitHub읽기관측. d7/4cc source·CI는별도역사이며최신실브라우저인수아님.",
+      "observed_at": "2026-10-06T05:32Z",
       "version_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
       "source_fix_status": "observed_implemented_not_browser_accepted",
-      "confirmed": "4cc849a sameRelease의 release/policy/input 양쪽 비어 있지 않은 문자열·정확 equality 보완과 context17 존재/값/타입/null 비교 유지를 관측했다. e12/676의 누락값끼리 true가 되는 구현 지적은 소스에서 해소됐다.",
-      "followup": "외부 서버 전용 local Caller·SSR/실제 로그인·브라우저1~4페이지·기대값 대조는 별도 인수해야 한다. 소스 관측·CI2건만으로 완료 처리하지 않는다.",
+      "confirmed": "기존4cc 3버전/context17 보완관측은역사다. 현재head/base/open metadata만최신관측하며최신source전체/브라우저검수완료아님.",
+      "followup": "Supabase운영인수인계SUP-01~11/gate에따라실JWT/권한/22API/4페이지를별도인수한다.",
       "regressions_required": "sameRelease 유효3버전/불일치/한쪽·양쪽누락/null/빈문자열/공백/잘못된타입 및context17결속을 실제화면인수에포함한다.",
       "scope_boundary": "22API·DTO nullable·서버권한은불변이다. 프런트코드·브라우저인수는외부담당 verification_pending/NOT_RUN이다.",
       "PR6": {
         "number": 6,
         "state": "open",
         "merged": false,
-        "head": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
-        "base": "354d45097a501d788b8bb93ef238a15aef4d3ae3"
+        "head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+        "base": "81672e7214e34ff929639492319896420bd62196"
       },
       "exact_HEAD_CI": {
-        "commit": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
-        "successful_jobs": 2,
-        "source": "확정영수증head_sha대조",
-        "jobs": [
-          {
-            "name": "project-consistency",
-            "conclusion": "success",
-            "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37340130673/job/111864812560"
-          },
-          {
-            "name": "project-consistency",
-            "conclusion": "success",
-            "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37340127879/job/111864803644"
-          }
-        ]
+        "commit": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+        "status": "NOT_REVIEWED_IN_THIS_HANDOFF"
       },
       "worker_observation": {
         "commit": "fc31bd61",
@@ -6217,6 +6267,54 @@
       "latest_observed_head": "67644ef980e5d0e41afbe6dcc6d419a060979cf8",
       "sameRelease_blob": "efb40ce76682dbcea74c6c3716c090303d1c108d",
       "latest_observation": "67644ef의 score-form/css 변경을 관측했다. e12와 sameRelease 파일 blob은 동일하며 필수 버전 값 검증 후속과 외부 프런트 인수는 pending이다."
+    },
+    "historical_external_frontend_review_before_supabase_handoff_v1": {
+      "observed_head": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
+      "latest_observed_head": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
+      "status": "source_changes_observed_external_browser_and_integration_pending",
+      "source": "부모 기획팀의 GitHub API 직접 읽기 영수증을 공통 writer가 해시 대조했다.",
+      "observed_at": "2026-10-06T04:02:32.163955+00:00",
+      "source_receipt_sha256": "29e52de1f097bc82267fbe4fbfef1ea598adaa91eb7efb3b5072e75892b58f1f",
+      "version_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
+      "source_fix_status": "observed_implemented_not_browser_accepted",
+      "confirmed": "4cc849a sameRelease의 release/policy/input 양쪽 비어 있지 않은 문자열·정확 equality 보완과 context17 존재/값/타입/null 비교 유지를 관측했다. e12/676의 누락값끼리 true가 되는 구현 지적은 소스에서 해소됐다.",
+      "followup": "외부 서버 전용 local Caller·SSR/실제 로그인·브라우저1~4페이지·기대값 대조는 별도 인수해야 한다. 소스 관측·CI2건만으로 완료 처리하지 않는다.",
+      "regressions_required": "sameRelease 유효3버전/불일치/한쪽·양쪽누락/null/빈문자열/공백/잘못된타입 및context17결속을 실제화면인수에포함한다.",
+      "scope_boundary": "22API·DTO nullable·서버권한은불변이다. 프런트코드·브라우저인수는외부담당 verification_pending/NOT_RUN이다.",
+      "PR6": {
+        "number": 6,
+        "state": "open",
+        "merged": false,
+        "head": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
+        "base": "354d45097a501d788b8bb93ef238a15aef4d3ae3"
+      },
+      "exact_HEAD_CI": {
+        "commit": "d7b0279b2725a81ecd734cdec957c485ae5d6172",
+        "successful_jobs": 2,
+        "source": "확정영수증head_sha대조",
+        "jobs": [
+          {
+            "name": "project-consistency",
+            "conclusion": "success",
+            "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37340130673/job/111864812560"
+          },
+          {
+            "name": "project-consistency",
+            "conclusion": "success",
+            "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37340127879/job/111864803644"
+          }
+        ]
+      },
+      "worker_observation": {
+        "commit": "fc31bd61",
+        "source": "user_provided_report_only",
+        "direct_deployment_validation": "NOT_RUN",
+        "meaning": "사용자 전달 워커 관측이며 직접 배포·운영API·브라우저 인수 증거가 아니다."
+      }
+    },
+    "historical_handoff_before_supabase_20261006_v1": {
+      "body_sha256": "ada181a32b48aaece6e791e89116c20d87495cce394e4efb40483b05d41b3232",
+      "meaning": "이전body/원본은before에보존. PR13/PR14/816 및d7관측은당시역사이며현재운영상태로재사용금지."
     }
   },
   "local_verification_contract": {
@@ -6744,5 +6842,589 @@
       "remaining_first": "서비스 코드와 공통 기획/라우팅의 같은 커밋·정상 훅·정확 HEAD CI·develop 통합",
       "meaning": "354d450 출발의 코드·공통 패치와 23/local native 검수는 고정 후보로 인수했지만 Git 통합은 아직 미실행이었던 당시 이력이다. 기존 동결 영수증·원본과 함께 보존한다."
     }
+  },
+  "supabase_operations_handoff_contract": {
+    "format": "jungsi.supabase-operations-handoff/v1",
+    "revision": "2026.10.06.v1",
+    "checked_at": "2026-10-06T05:32Z",
+    "status": "NOT_READY",
+    "production_ready": false,
+    "document_status": "reviewed_pending_commit_validation",
+    "decision": "Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다.",
+    "summary": "Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 최소 설정 조회 200은 실제 로그인·DB·권한·입시모델 인수가 아니다. Python FastAPI 엔진과 22개 API의 배포 연결 방식, 유료 이용권의 단일 권한 기준은 아직 선택하지 않았다. 실제 DB·Bearer 로그인·유료 권한·승인 입시자료·운영 API 배포·외부 4페이지 인수는 NOT_RUN 또는 HOLD다. 승인 자료 수는 0이다.",
+    "scope": "공통 기획·라우팅·인수인계 메타데이터를 갱신한다. 서비스 구현, 실제 DB 쓰기·마이그레이션, 입시자료 승인, 운영 배포는 이번 범위에서 제외한다.",
+    "architecture": {
+      "recommendation": "separate_Python_FastAPI_backend",
+      "recommendation_is_inference": true,
+      "selection": "not_selected",
+      "candidates": [
+        "separate_Jungsi_FastAPI_deployment",
+        "external_EduTouch_namespace_adapter"
+      ],
+      "tiers": [
+        [
+          "프레젠테이션",
+          "기존 화면에서 Supabase 공개 Auth 설정과 실제 JWT Caller를 사용하고 허용된 DTO를 소비한다."
+        ],
+        [
+          "애플리케이션",
+          "Python FastAPI 엔진과 22개 API가 서버의 권한·소유권·승인 정책과 저장소 포트를 처리한다."
+        ],
+        [
+          "데이터/인프라",
+          "Supabase Auth/PostgreSQL, 전용 서버 role, 승인된 비공개 자료 공급자를 연결한다."
+        ]
+      ],
+      "entitlement_default": "jungsi_backend.entitlements",
+      "single_authority": "not_selected",
+      "boundary": "Supabase API key만으로 현재 Python 엔진이 호스팅되지는 않는다. 기존 EduTouch의 me DTO나 jeongsi 뼈대가 정시터치의 22개 API를 자동으로 대체하지도 않는다."
+    },
+    "current_review": {
+      "scope": "2026-10-06T05:32Z 읽기 점검 결과다. 이번에 확인한 비공개 설정 파일과 해당 프로세스·루트 환경, 최소 HTTP 조회와 Git 상태에 한정한다. 모든 PC나 전역 환경에서 설정이 없다고 단정하지 않는다.",
+      "present_names": [
+        "SUPABASE_URL",
+        "SUPABASE_PUBLISHABLE_KEY",
+        "SUPABASE_SECRET_KEY",
+        "SUPABASE_JWKS_URL"
+      ],
+      "missing_in_reviewed_scope": [
+        "DATABASE_URL",
+        "JUNGSI_PROBE_ACCESS_TOKEN"
+      ],
+      "readonly_HTTP": [
+        [
+          "Auth settings",
+          "200",
+          "최소설정조회"
+        ],
+        [
+          "JWKS",
+          "200",
+          "ES256공개키1"
+        ],
+        [
+          "JWT없는getUser",
+          "401",
+          "실로그인아님"
+        ],
+        [
+          "secret REST metadata",
+          "200",
+          "SQL/회원권한인수아님"
+        ],
+        [
+          "private schema REST",
+          "406 PGRST106",
+          "REST노출설정거절"
+        ]
+      ],
+      "PGRST106_meaning": "PGRST106은 요청한 schema가 REST API의 db-schemas 노출 설정에 없다는 뜻이다. DB schema가 없거나 SQL 권한이 실패했다는 증거가 아니며, 이 문서 작업에서 private schema 노출 설정을 바꾸지 않는다.",
+      "actual_DB": "NOT_RUN",
+      "actual_login": "NOT_RUN",
+      "actual_entitlement": "NOT_RUN",
+      "migration001": "UNCONFIRMED",
+      "migration002": "NOT_APPLIED",
+      "operational_writes": 0,
+      "approved_data_count": 0,
+      "local_candidate_count": 1,
+      "local_candidate_engine_approved": false,
+      "site_admin": "과거에 확인한 사이트 admin 메타데이터 표식은 현재의 실제 로그인, 프로젝트 Console 관리자 권한, 유료 이용권을 증명하지 않는다.",
+      "frontend": {
+        "PR": 6,
+        "head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+        "base": "81672e7214e34ff929639492319896420bd62196",
+        "state": "open",
+        "merged": false,
+        "browser": "NOT_RUN",
+        "latest_HEAD_CI": "NOT_REVIEWED_IN_THIS_HANDOFF"
+      },
+      "local_reference": "준비된 로컬공개설정은 외부 배포origin/실JWT/브라우저·운영인수가 아니다.",
+      "unapproved_promotion_policy": "미승인 자료/합성 모형의 production_allowed=false를 표시 목적으로 true로 승격하지 않는다. 실제 후보에서 production_allowed 필드를 읽었다는 주장이 아니다."
+    },
+    "existing_code_facts": {
+      "settings": "ServerSettings.from_environment는 os.environ만 읽는다. ignored .env 파일을 보관하는 것만으로 서버 프로세스에 자동 주입되지 않는다.",
+      "authentication": "SupabaseSessionProvider는 getUser로 확인한 사용자와 같은 JWT의 sub/exp를 대조한다. JWKS를 조회한 사실이 직접 서명 검증 구현의 완료를 뜻하지 않는다.",
+      "entitlement": "SessionService는 서버 이용권으로 유료 권한을 판정한다. profile/admin 표식이나 클라이언트 paid 값으로 자동 승격하지 않는다. 결제 취소·회수·동기화 adapter는 별도 구현이 필요하다.",
+      "postgres": "prepare_threshold=None, TLS require, 트랜잭션의 SET LOCAL UTC와 advisory transaction lock을 유지한다. 실제 DB 연결 검수는 NOT_RUN이다.",
+      "Drive": "DriveClient는 주입된 static token으로 Bearer 요청을 만든다. 자동 OAuth refresh는 구현되어 있지 않아 갱신 운영 방법 또는 별도 adapter가 필요하다.",
+      "health": "운영 /health/ready의 200은 인증·자료·전체 운영의 인수를 뜻하지 않는다. local memory/test auth/DPAPI factory는 production_ready=false이며 공개 배포하지 않는다."
+    },
+    "tasks": [
+      {
+        "id": "SUP-01",
+        "priority": "P0",
+        "owner": "시스템기획·서버 담당",
+        "layer": "기획/애플리케이션·인프라",
+        "inputs": [
+          "22 API·DTO·엔진 계약",
+          "배포환경 Python runtime·운영 API origin 요구"
+        ],
+        "depends_on": [],
+        "work": [
+          "별도 Python FastAPI 배포와 기존 EduTouch namespace adapter를 결정한다. 별도 Python 경로는 권장 추론이며 selection=not_selected다.",
+          "Supabase API key는 Python FastAPI/NumPy runtime 호스팅이 아니다. 기존 EduTouch me DTO/jeongsi 뼈대는 Jungsi 22 API를 대체하지 않는다."
+        ],
+        "completion": [
+          "선택안·담당·확정 API origin 및 22 contract 호환 증거가 있다."
+        ],
+        "status": "DECISION_PENDING"
+      },
+      {
+        "id": "SUP-02",
+        "priority": "P0",
+        "owner": "에듀터치 결제·DB 담당·시스템기획",
+        "layer": "기획/애플리케이션·데이터",
+        "inputs": [
+          "결제·취소·환불·회수 흐름",
+          "public.jeongsi_passes/jungsi_backend.entitlements 계약"
+        ],
+        "depends_on": [],
+        "work": [
+          "현재 백엔드 default는 jungsi_backend.entitlements다. legacy와의 단일 권한 authority는 미선택이다. paid profile/admin 표시를 자동 승격하지 않는다.",
+          "adapter 채택은 공통 계약·애플리케이션 포트·구현/검증 PR이 필요하며 단순 env 작업이 아니다.",
+          "만료·취소·환불·중복 이벤트·회수·동기화와 starts_at<=now<expires_at을 서버 UTC 권위로 처리한다."
+        ],
+        "completion": [
+          "단일 authority·이벤트/회수·UTC 경계와 필요한 adapter의 PR/검증이 인수됐다."
+        ],
+        "status": "DECISION_PENDING"
+      },
+      {
+        "id": "SUP-03",
+        "priority": "P0",
+        "owner": "Supabase·서버 설정 담당",
+        "layer": "인프라/데이터",
+        "inputs": [
+          "Dashboard Connect 정보",
+          "전용 server role·TLS·배포환경"
+        ],
+        "depends_on": [
+          "SUP-01"
+        ],
+        "work": [
+          "URL/publishable Auth 설정은 검토 범위에서 확보됐다. 새 프로젝트 생성이 필수라는 전제를 두지 않는다.",
+          "배포환경에 맞게 direct/session pooler/transaction을 선택하고 Connect의 exact host/사용자/연결 문자열을 복사한다. 지역으로 host를 합성하지 않는다.",
+          "DATABASE_URL·전용role·TLS를 process 환경에 주입한다. ignored .env 보관만으로 자동 load하지 않고 secret API key는 DB 비밀번호가 아니다.",
+          "현재 psycopg prepare_threshold=None·transaction SET LOCAL UTC·advisory transaction lock을 보존한다."
+        ],
+        "completion": [
+          "배포환경 내 비공개 설정 주입·실제 DB/TLS 읽기 검수 증거가 있다."
+        ],
+        "status": "BLOCKED_MISSING_DATABASE_URL"
+      },
+      {
+        "id": "SUP-04",
+        "priority": "P0",
+        "owner": "DB 담당",
+        "layer": "데이터/인프라",
+        "inputs": [
+          "실DB 기존 상태·승인 backup",
+          "001/002 정의·전용role 권한계획"
+        ],
+        "depends_on": [
+          "SUP-02",
+          "SUP-03"
+        ],
+        "work": [
+          "기존 상태 점검·승인 backup 후 001/002 추가 적용 계획을 별도로 승인받는다. 이번 문서는 운영쓰기 실행 승인이 아니다.",
+          "전용role grants/RLS·anon/authenticated 직접 접근 차단·owner·UTC·11개 timestamptz/date 컬럼·schema_versions를 실DB에서 검수한다.",
+          "002 CAS·멱등·불변 release·원자적 게시와 동시성을 실제 검수한다. 001 실제적용 UNCONFIRMED/002 NOT_APPLIED를 유지한다.",
+          "reset/drop/delete 금지. REST PGRST106은 DB schema 부재/SQL 권한 실패 증거가 아니다."
+        ],
+        "completion": [
+          "적용·권한·소유권·UTC왕복·11컬럼·schema_versions·002 트랜잭션 인수가 끝났다."
+        ],
+        "status": "NOT_RUN_001_UNCONFIRMED_002_NOT_APPLIED"
+      },
+      {
+        "id": "SUP-05",
+        "priority": "P0",
+        "owner": "인증 담당·서버 개발자",
+        "layer": "애플리케이션/인프라",
+        "inputs": [
+          "실제 검수 사용자 Bearer JWT·Supabase Auth 공개 설정"
+        ],
+        "depends_on": [
+          "SUP-01"
+        ],
+        "work": [
+          "JWT를 보안 경로로 받아 실제 Auth getUser 응답과 sub/exp 일치, 만료·비정상·불일치 JWT 거절을 검수한다. 유료·staff 권한과 /api/v1/me session DTO 판정은 SUP-04·05 이후 SUP-06에서 인수한다.",
+          "현재 SupabaseSessionProvider는 getUser 검증 후 sub/exp를 대조한다. JWKS 조회 성공을 직접 signature 검증 구현 완료로 기록하지 않는다.",
+          "사이트 admin 표식은 현재 실로그인/console admin/paid 권한을 보장하지 않는다. JWT/비밀번호/개인식별정보를 공개문서·로그에 넣지 않는다."
+        ],
+        "completion": [
+          "실제 Auth getUser/sub/exp 확인과 만료·비정상·불일치 Bearer JWT 거절 증거가 있다."
+        ],
+        "status": "NOT_RUN_MISSING_TEST_USER_JWT"
+      },
+      {
+        "id": "SUP-06",
+        "priority": "P0",
+        "owner": "권한·서비스 DB 담당",
+        "layer": "애플리케이션/데이터",
+        "inputs": [
+          "선택한 단일 authority",
+          "entitlement·owner·forecast_authorities",
+          "SUP-05 실Auth 검수·일반/유료 검수 사용자·별도 editor/approver subject"
+        ],
+        "depends_on": [
+          "SUP-02",
+          "SUP-04",
+          "SUP-05"
+        ],
+        "work": [
+          "선택 authority를 구현하고 결제 취소/회수/동기화 adapter 미구현은 별도 개발로 명시한다.",
+          "일반 PAGE3/4·유료 API403, 다른 학생 report404, UTC 접근기간을 실제 사용자로 검수한다.",
+          "staff와 paid는 독립이다. forecast_authorities 학교 scope·editor/approver 독립·자기 승인403·scope밖404를 유지한다.",
+          "SUP-04 실DB와 SUP-05 실Auth 이후 단일 entitlement authority를 사용한 /api/v1/me의 일반·유료·만료·취소 session DTO와 서버 권한 판정을 함께 검수한다."
+        ],
+        "completion": [
+          "실DB/JWT 및 단일 entitlement authority에 결속된 /api/v1/me 일반·유료·만료·취소 DTO, 이용권·소유권·UTC·staff 학교 범위·독립 승인 거절 매트릭스를 인수했다."
+        ],
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "SUP-07",
+        "priority": "P0",
+        "owner": "서버 담당",
+        "layer": "인프라/애플리케이션",
+        "inputs": [
+          "선택 실행환경·locked Python runtime",
+          "운영 settings·HTTPS/CORS origin"
+        ],
+        "depends_on": [
+          "SUP-01",
+          "SUP-03",
+          "SUP-04",
+          "SUP-05"
+        ],
+        "work": [
+          "configured_app을 locked Python runtime에 배포하고 HTTPS/CORS·제한 health·log/redaction을 검수한다.",
+          "/health/ready200은 Auth/data/전체 운영 PASS가 아니다. localhost/test allowlist/memory/DPAPI factory를 public 배포하지 않는다.",
+          "static환경에 Python 실행준비가 없으면 별도 서버 runtime이 필요하다."
+        ],
+        "completion": [
+          "확정 origin·운영factory·22 API·HTTPS/CORS·비공개 진단 증거가 있다."
+        ],
+        "status": "NOT_RUN_DEPLOYMENT_NOT_SELECTED"
+      },
+      {
+        "id": "SUP-08",
+        "priority": "P0",
+        "owner": "데이터팀·서버 인프라 담당",
+        "layer": "데이터/인프라",
+        "inputs": [
+          "Drive OAuth/folders/승인발행명부",
+          "approved exam/joint curve/catalog/analysis/rule/year bridge/학교누백/forecast 근거"
+        ],
+        "depends_on": [
+          "SUP-01",
+          "SUP-03"
+        ],
+        "work": [
+          "현재 DriveClient는 주입된 static token으로 Bearer 요청하며 자동 OAuth refresh는 없다. 토큰 갱신 운영방법/필요 adapter는 별도 개발이다.",
+          "자료/모형 승인과 버전 결속 후 실제 read 및 입력을 덮지 않는 비중복 별도 output write를 검수한다.",
+          "approved0가 병목이다. engine_approved=false/production_allowed=false를 표시용 true로 승격하지 않는다.",
+          "원문 수치 QA는 모델 승인이 아니며 marginal 분포만으로 joint curve 완성을 판정하지 않는다. 승인 곡선 없음은 HOLD/null/pending과 총점 보존이다."
+        ],
+        "completion": [
+          "승인 명부/곡선/규칙/모형·버전·실Drive read/갱신/별도 write·독립 수치 증거가 있다."
+        ],
+        "status": "BLOCKED_APPROVED0_DRIVE_NOT_RUN"
+      },
+      {
+        "id": "SUP-09",
+        "priority": "P0",
+        "owner": "외부 화면 개발자",
+        "layer": "프레젠테이션",
+        "inputs": [
+          "운영 API origin·Supabase 공개설정",
+          "실JWT Caller·22 DTO·승인 기대값"
+        ],
+        "depends_on": [
+          "SUP-06",
+          "SUP-07",
+          "SUP-08"
+        ],
+        "work": [
+          "운영 API/공개설정만 전달받아 실제 JWT Caller/22 DTO/4페이지·브라우저를 검수한다. 이번 문서팀은 화면 코드를 수정하지 않는다.",
+          "PAGE1 발표입결/개인성적 불필요, PAGE2 무료 전체누백까지, PAGE3 유료검색·환산·가능성·유불리, PAGE4 유료2:1 학교·학과/와일드카드를 유지한다.",
+          "409 학과기준 조회는 해당 부분만 보류하며 성공점수 보존. release/policy/input 모두 nonempty string일 때 exact equality·context17 존재/값/타입/null 동일성을 검수한다.",
+          "PR6 open/unmerged·브라우저 NOT_RUN. source/CI·로컬 공개설정을 운영/브라우저 인수로 확대하지 않는다.",
+          "출력 검수는 기존 report.export 계약의 응답을 소비하는 범위에 한정한다. 리포트·인쇄 기능의 확장은 이번 운영 준비 범위에서 제외하며 새 인쇄 기능을 완료조건으로 추가하지 않는다."
+        ],
+        "completion": [
+          "실JWT/운영 API·일반/유료·소유권·점수/HOLD·발표본 결속·4페이지 및 기존 report.export 응답 소비를 실제 브라우저로 인수했다. 리포트·인쇄 기능 확장은 제외한다."
+        ],
+        "status": "NOT_RUN_PR6_OPEN_UNMERGED"
+      },
+      {
+        "id": "SUP-10",
+        "priority": "P1",
+        "owner": "서버·DB 운영 담당",
+        "layer": "인프라/데이터",
+        "inputs": [
+          "실API/DB/승인자료",
+          "backup/restore·장애·통계 계획"
+        ],
+        "depends_on": [
+          "SUP-06",
+          "SUP-07",
+          "SUP-08"
+        ],
+        "work": [
+          "승인 범위 최소 backup/restore·재시작 영속성·동시성·통계범위/갱신 latency·설정 refresh를 검수한다.",
+          "Auth/DB/Drive 장애 HOLD/안전한 실패·민감로그 배제·UTC/서울시각 구분을 검수한다.",
+          "Kafka/Redis 미채택. 서비스 추천/선택 집계·순위를 전국 실제 지원인원/전국순위로 표시하지 않는다."
+        ],
+        "completion": [
+          "영속성·복구·장애·통계범위·갱신 측정·비밀/개인정보 로그배제 증거가 있다."
+        ],
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "SUP-11",
+        "priority": "P0",
+        "owner": "시스템기획·두 개발 담당·데이터팀",
+        "layer": "통합 인수/3티어",
+        "inputs": [
+          "SUP-01~10 개별 증거",
+          "정확 develop SHA/API/자료버전·CI·외부인수"
+        ],
+        "depends_on": [
+          "SUP-01",
+          "SUP-02",
+          "SUP-03",
+          "SUP-04",
+          "SUP-05",
+          "SUP-06",
+          "SUP-07",
+          "SUP-08",
+          "SUP-09",
+          "SUP-10"
+        ],
+        "work": [
+          "개별 gate 완료 후 정확 SHA/API/승인자료버전·CI·privateexclude·문서일치·외부인수를 고정해 develop→main PR을 검토한다.",
+          "main 반영과 운영 배포는 별도 승인이다. 현재 main/release not_ready를 유지하고 이번 문서를 DB쓰기·모형 승인·배포 승인으로 확대하지 않는다."
+        ],
+        "completion": [
+          "개별 gate·정확 SHA/CI·문서/자료/외부인수와 별도 배포승인 여부를 기록했다."
+        ],
+        "status": "BLOCKED_NOT_READY"
+      }
+    ],
+    "acceptance_gates": [
+      [
+        "실DB",
+        "SUP-03/04",
+        "NOT_RUN_001_UNCONFIRMED_002_NOT_APPLIED",
+        "실DB의 001/002 schema_versions·TLS·전용 role·owner·UTC·CAS/멱등·불변 발표본 원자성 검수 영수증"
+      ],
+      [
+        "Bearer 로그인",
+        "SUP-05",
+        "NOT_RUN",
+        "실제 Auth getUser/sub/exp와 만료·비정상·불일치 JWT 거절 영수증"
+      ],
+      [
+        "유료·staff 권한",
+        "SUP-02/06",
+        "NOT_RUN_DECISION_PENDING",
+        "단일 entitlement authority·실DB/Auth에 결속된 /api/v1/me 일반·유료·만료·취소 DTO와 UTC·owner·학교 scope·독립 승인 검수 증거"
+      ],
+      [
+        "실approved 자료",
+        "SUP-08",
+        "HOLD_APPROVED0",
+        "권한 있는 joint curve/규칙/연도보정/학교누백/forecast·독립검산"
+      ],
+      [
+        "Drive 실제공급",
+        "SUP-08",
+        "NOT_RUN",
+        "OAuth/갱신·승인명부·실read·별도write"
+      ],
+      [
+        "Jungsi22 API",
+        "SUP-01/07",
+        "NOT_RUN",
+        "배포선택/운영origin/configured_app/HTTPS/CORS"
+      ],
+      [
+        "외부4페이지",
+        "SUP-09",
+        "NOT_RUN_PR6_OPEN_UNMERGED",
+        "화면 PR의 develop 통합과 운영 API·실JWT Caller·4페이지 브라우저 인수 증거"
+      ],
+      [
+        "운영·최종release",
+        "SUP-10/11",
+        "NOT_READY",
+        "영속성/복구/장애·정확SHA/CI·main/별도배포승인"
+      ]
+    ],
+    "environment": [
+      [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "프런트 공개",
+        "local2판 참조/운영담당확인",
+        "frontend_reference_only"
+      ],
+      [
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "프런트 공개",
+        "compat 이름에 publishable 참조; secret/JWT 아님",
+        "frontend_reference_only"
+      ],
+      [
+        "JUNGSI_API_MODE / JUNGSI_API_URL",
+        "외부 화면",
+        "로컬참조; 운영API 키/채택은외부확정",
+        "not_operation_selected"
+      ],
+      [
+        "SUPABASE_URL",
+        "서버",
+        "Auth HTTPS URL; 검토 설정범위 존재",
+        "ServerSettings_required"
+      ],
+      [
+        "SUPABASE_PUBLISHABLE_KEY",
+        "서버",
+        "getUser apikey; 사용자Bearer와별개/검토범위존재",
+        "ServerSettings_required"
+      ],
+      [
+        "DATABASE_URL",
+        "서버 전용 비밀",
+        "Connect 전용role/TLS; 검토file/process범위없음",
+        "ServerSettings_required"
+      ],
+      [
+        "GOOGLE_DRIVE_ACCESS_TOKEN",
+        "서버 전용 비밀",
+        "현재 static token·갱신운영/adapter 별도",
+        "ServerSettings_required"
+      ],
+      [
+        "GOOGLE_DRIVE_INPUT_FOLDER",
+        "서버 전용",
+        "승인 input folder/실공급NOT_RUN",
+        "ServerSettings_required"
+      ],
+      [
+        "GOOGLE_DRIVE_OUTPUT_FOLDER",
+        "서버 전용",
+        "입력과 다른 output/실공급NOT_RUN",
+        "ServerSettings_required"
+      ],
+      [
+        "JUNGSI_DRIVE_REGISTRY",
+        "서버 전용",
+        "비공개승인명부/approved0/HOLD",
+        "ServerSettings_required"
+      ],
+      [
+        "JUNGSI_ALLOWED_ORIGINS",
+        "서버",
+        "승인origin/기본교차origin허용없음",
+        "ServerSettings_optional"
+      ],
+      [
+        "JUNGSI_PROBE_ACCESS_TOKEN",
+        "검수 전용 비밀",
+        "실사용자JWT/검토file/process범위없음",
+        "probe_optional_not_ServerSettings_required"
+      ],
+      [
+        "SUPABASE_SECRET_KEY",
+        "서버 참조/비밀",
+        "최소REST metadata조회참조/검토범위존재",
+        "reference_not_required_or_auto_used"
+      ],
+      [
+        "SUPABASE_JWKS_URL",
+        "설정 참조",
+        "공개키조회참조/검토범위존재·직접JWT검증완료아님",
+        "reference_not_required_or_auto_used"
+      ]
+    ],
+    "execution_order": [
+      [
+        "1 연결안·authority결정",
+        "SUP-01/02",
+        "미선택결정선행/권장안자동채택금지"
+      ],
+      [
+        "2 비공개입력·자료준비",
+        "SUP-03/05/08",
+        "depends_on충족후병행/단순env·원문QA는승인아님"
+      ],
+      [
+        "3 DB·권한·운영API",
+        "SUP-04/06/07",
+        "별도추가적용승인·실JWT/UTC/owner후HTTPS/CORS검수"
+      ],
+      [
+        "4 화면·최소운영",
+        "SUP-09/10",
+        "실approved자료/운영API·권한결속후브라우저/복구검수"
+      ],
+      [
+        "5 최종SHA·mainPR",
+        "SUP-11",
+        "모든gate증거·CI/제외·외부인수/배포별도승인"
+      ]
+    ],
+    "history": {
+      "summary": "PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.",
+      "baseline": "81672e7214e34ff929639492319896420bd62196",
+      "tree": "c44d0dc9381e01a2d02ccd1ee18739f549aef9be",
+      "previous_normal_hooks": 561,
+      "CI": "https://github.com/natural0448/Jungsi_touch/actions/runs/37417096001/job/112118000627"
+    },
+    "safety": {
+      "public_metadata_only": true,
+      "private_values_in_Git": false,
+      "actual_data_hash_in_public": false,
+      "automatic_dotenv_load": false,
+      "automatic_paid_upgrade": false,
+      "approved_data_promotion": false,
+      "write_or_migration_authorized": false,
+      "deployment_authorized": false,
+      "reset_drop_delete_allowed": false,
+      "main_release_state": "not_ready",
+      "API_DTO_permissions_independent_approver_school_scope_unchanged": true
+    },
+    "references": [
+      [
+        "Supabase PostgreSQL 연결",
+        "https://supabase.com/docs/guides/database/connecting-to-postgres",
+        "실행환경에 따라direct/session/transaction을 고르고 Dashboard Connect 문자열을 사용한다. transaction prepared/session-state 제약을 실제환경에서 검수한다."
+      ],
+      [
+        "Supabase API keys",
+        "https://supabase.com/docs/guides/getting-started/api-keys",
+        "publishable와secret 역할을 구분하고secret은서버전용이다. 사용자JWT/DB비밀번호를대체하지않는다. .env예시도Git제외규칙을유지한다."
+      ],
+      [
+        "Supabase custom schemas",
+        "https://supabase.com/docs/guides/api/using-custom-schemas",
+        "Data API 노출schema설정과SQL grants를구분한다. private schema를자동노출하지않는다."
+      ],
+      [
+        "PostgREST 오류",
+        "https://docs.postgrest.org/en/stable/references/errors.html",
+        "PGRST106/406은요청schema가db-schemas API노출설정에없는경우다. SQL schema부재/권한실패로확대하지않는다."
+      ],
+      [
+        "Supabase Edge Functions",
+        "https://supabase.com/docs/guides/functions",
+        "TypeScript/Deno runtime이다. 현재PythonFastAPI/NumPy의별도backend권장은runtime차이의추론이며아직미선택이다."
+      ]
+    ],
+    "scope_excludes": [
+      "리포트·인쇄 기능 확장 또는 새로운 인쇄 기능 구현. SUP-09는 기존 report.export 계약의 응답 소비 검수에 한정한다."
+    ]
   }
 }
