@@ -1,4 +1,9 @@
 <!-- jungsi:current -->
+
+## 개발 시작 전 필수 보안 기준
+
+[외부접근 데이터보호 개발기준](docs/current/외부접근_데이터보호_개발기준.md)은 모든 개발자가 반드시 읽는 정본이다. `service_spec.json.security_contract`와 `workflow.development_harness`가 REQ-24~26·SEC-01~08·22API 참조·미완료 gate를 관리한다. 정상 훅/CI의 계약 검산과 실제 HTTP/브라우저/운영 보안 인수는 구분한다. 개발 전 AGENTS.md의 필수 선독 기준을 따른다.
+
 # 정시터치 현재 개발 기준
 
 main은 모든 작업이 완료된 뒤 코드·문서·검증·인계를 정리하는 라이브 배포 전 후보다. 시스템기획팀은 develop에 현재 기획과 공통 관리 설정을 직접 공유한다. 실제 개발은 시스템·콘텐츠 담당의 feature/application-pre-data-platform과 화면 담당의 feature/presentation-foundation 두 상시 브랜치에서 진행하고 PR로 develop에 누적한다. 필요한 하위 작업만 부모·담당·사유를 정본에 등록한다. 개발은 현재 Git 커밋을 기준으로 기획·라우팅·코드를 함께 갱신한다.

@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.7.1",
-  "source_sha256": "84c7194a915f07471f265de82b5a45082be3791fefb08fbbab5efe00f9de710f",
+  "spec_version": "1.8.0",
+  "source_sha256": "8cd931680428e5bc1ec07db1952ccfb3350f6ba2ed7f6656fd00a973a5ee4230",
   "pages": [
     {
       "id": "PAGE-01",
@@ -58,7 +58,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-01"
+        "REQ-01",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "공식 대학 발표 결과만",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -80,7 +83,20 @@
         "response_schema": "catalog_search"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search"
+      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "recruitment.read",
@@ -93,7 +109,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-13"
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "공식 군·모집인원·변경·기준일·확정 상태",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -107,7 +126,20 @@
         "response_schema": "recruitment"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.recruitment"
+      "contract_ref": "backend_platform_contract.dto_schemas.recruitment",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "score-profile.create",
@@ -122,7 +154,10 @@
       "requirements": [
         "REQ-02",
         "REQ-12",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인에게 귀속되는 성적 프로필의 생성 결과",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -139,7 +174,20 @@
         "response_schema": "profile"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.profile"
+      "contract_ref": "backend_platform_contract.dto_schemas.profile",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "overall.analyze",
@@ -156,7 +204,10 @@
         "REQ-07",
         "REQ-12",
         "REQ-14",
-        "REQ-15"
+        "REQ-15",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "입력 검증 후 본인의 총점·승인 전체 누적·자료 상태",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
@@ -176,7 +227,20 @@
         "idempotency_key_required": true,
         "response_schema": "report"
       },
-      "engine_service": "jungsi_touch.application.overall_analysis.OverallAnalysisService.analyze"
+      "engine_service": "jungsi_touch.application.overall_analysis.OverallAnalysisService.analyze",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "report.read",
@@ -190,7 +254,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-02",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -204,7 +271,20 @@
         "response_schema": "report"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.report"
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "offerings.search",
@@ -217,7 +297,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-03",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "전체 서비스 카탈로그의 결과·건수; 성적·추천 여부로 축소하지 않음",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -239,7 +322,20 @@
         "response_schema": "catalog_search"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search"
+      "contract_ref": "backend_platform_contract.dto_schemas.catalog_search",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "offering.read",
@@ -252,7 +348,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-03",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "모집단위 기본 상세; 개인 분석은 별도 권한·입력 확인",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -266,7 +365,20 @@
         "response_schema": "offering_detail"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.offering_detail"
+      "contract_ref": "backend_platform_contract.dto_schemas.offering_detail",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "university.analyze",
@@ -281,7 +393,10 @@
         "REQ-05",
         "REQ-06",
         "REQ-08",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -300,7 +415,20 @@
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "scoring_service": "jungsi_touch.application.university_scoring.UniversityScoringService.calculate",
-      "percentile_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate"
+      "percentile_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "candidates.build",
@@ -315,7 +443,10 @@
         "REQ-04",
         "REQ-05",
         "REQ-09",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -333,7 +464,20 @@
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "scoring_service": "jungsi_touch.application.university_scoring.UniversityScoringService.calculate",
-      "percentile_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate"
+      "percentile_service": "jungsi_touch.application.university_percentile.UniversityPercentileService.calculate",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "shortlist.update",
@@ -346,7 +490,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-11",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "우리 서비스 핵심 지원 학교의 선택 상태",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -363,7 +510,20 @@
         "response_schema": "report"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.report"
+      "contract_ref": "backend_platform_contract.dto_schemas.report",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "report.export",
@@ -376,7 +536,10 @@
       "confirmed_score_profile": true,
       "requirements": [
         "REQ-11",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "발행 버전이 고정된 본인 전체 상담 리포트",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -390,7 +553,20 @@
         "response_schema": "snapshot"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.snapshot"
+      "contract_ref": "backend_platform_contract.dto_schemas.snapshot",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "statistics.read",
@@ -403,7 +579,10 @@
       "confirmed_score_profile": true,
       "requirements": [
         "REQ-10",
-        "REQ-14"
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "추천·선택 인원과 본인 순위·동점·갱신 상태; 타인 성적 제외",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -417,7 +596,20 @@
         "response_schema": "statistics"
       },
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
-      "contract_ref": "backend_platform_contract.dto_schemas.statistics"
+      "contract_ref": "backend_platform_contract.dto_schemas.statistics",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "session.read",
@@ -430,7 +622,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-20"
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인 현재 활성 회원 상태",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -444,6 +639,17 @@
         "response": "session",
         "response_schema": "session",
         "idempotency_key_required": false
+      },
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
       }
     },
     {
@@ -457,7 +663,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "본인 관리 capability와 학교 범위",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -471,6 +680,17 @@
         "response": "forecast_capabilities",
         "response_schema": "forecast_capabilities",
         "idempotency_key_required": false
+      },
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
       }
     },
     {
@@ -484,7 +704,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "허용 학교의 관리 draft 목록",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -504,7 +727,18 @@
       "operator_capabilities": [
         "editor",
         "approver"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.create",
@@ -517,7 +751,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "서버 승인 자료·정책 ID 기반 모집행 draft 생성",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -539,7 +776,18 @@
       },
       "operator_capabilities": [
         "editor"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.read",
@@ -552,7 +800,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "허용 학교의 draft와 revision/근거",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -570,7 +821,18 @@
       "operator_capabilities": [
         "editor",
         "approver"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.adjust",
@@ -583,7 +845,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "기본값 보존과 새 조정 revision",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -608,7 +873,18 @@
       },
       "operator_capabilities": [
         "editor"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.validate",
@@ -621,7 +897,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "정확한 revision의 검증 영수증",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -642,7 +921,18 @@
       },
       "operator_capabilities": [
         "editor"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.approve",
@@ -655,7 +945,10 @@
       "report_owner": false,
       "confirmed_score_profile": false,
       "requirements": [
-        "REQ-21"
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "검증된 정확한 revision 승인",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -678,7 +971,18 @@
       },
       "operator_capabilities": [
         "approver"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.publish",
@@ -692,7 +996,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-21",
-        "REQ-22"
+        "REQ-22",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "승인 revision의 새 불변 발행",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -714,7 +1021,18 @@
       },
       "operator_capabilities": [
         "approver"
-      ]
+      ],
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     },
     {
       "id": "forecast.published.read",
@@ -727,7 +1045,10 @@
       "confirmed_score_profile": false,
       "requirements": [
         "REQ-21",
-        "REQ-22"
+        "REQ-22",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "response_scope": "발행된 학과 기준과 공개 판단 근거",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
@@ -741,6 +1062,19 @@
         "response": "forecast_public",
         "response_schema": "forecast_public",
         "idempotency_key_required": false
+      },
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
       }
     }
   ],
@@ -2016,7 +2350,9 @@
       "existing_SSR_OpenNext_rewrite": "external_reference_only_not_22_API_or_entitlement_acceptance",
       "actual_DB_and_test_user_validation": "DEFERRED_until_private_settings_available",
       "profile_condition_read": "readonly_metadata_admin_active_conditions_confirmed_not_actual_login_JWT_acceptance"
-    }
+    },
+    "security_contract_ref": "security_contract",
+    "security_transition_status": "pending_runtime_implementation"
   },
   "university_scoring_contract": {
     "format": "jungsi.university-scoring-contract/v1",
@@ -3449,7 +3785,9 @@
       "exact_HEAD_CI_jobs": "two_success",
       "browser_and_real_connection": "NOT_RUN",
       "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
-    }
+    },
+    "security_contract_ref": "security_contract",
+    "security_transition_status": "pending_runtime_implementation"
   },
   "management_pages": [
     {
@@ -3467,7 +3805,10 @@
       "requirements": [
         "REQ-20",
         "REQ-21",
-        "REQ-22"
+        "REQ-22",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "operations": [
         "forecast.capabilities",
@@ -4050,5 +4391,92 @@
         "status": "NOT_READY"
       }
     ]
-  }
+  },
+  "security_contract": {
+    "format": "jungsi.external-access-security/v1",
+    "revision": "2026.10.06.v1",
+    "required": true,
+    "document": "docs/current/외부접근_데이터보호_개발기준.md",
+    "requirements": [
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "implementation_status": "pending",
+    "production_ready": false,
+    "contract_ref": "security_contract",
+    "gateway_mode": "server_authenticated_relay",
+    "runtime_enforcement_status": "pending_runtime_implementation",
+    "controls": [
+      {
+        "id": "SEC-01",
+        "title": "공개 응답의 재귀 허용목록",
+        "owner_layer": "application",
+        "implementation_status": "pending"
+      },
+      {
+        "id": "SEC-02",
+        "title": "브라우저 전달물 검수",
+        "owner_layer": "presentation",
+        "implementation_status": "pending"
+      },
+      {
+        "id": "SEC-03",
+        "title": "서버 중계와 분석 API 직접 접근 거절",
+        "owner_layer": "infrastructure",
+        "implementation_status": "pending"
+      },
+      {
+        "id": "SEC-04",
+        "title": "현재 세션·이용권·소유권·관리 범위",
+        "owner_layer": "application",
+        "implementation_status": "pending"
+      },
+      {
+        "id": "SEC-05",
+        "title": "반복 분석·조회·계산 비용 예산",
+        "owner_layer": "application",
+        "implementation_status": "pending"
+      },
+      {
+        "id": "SEC-06",
+        "title": "공유 사용량 저장·원자성·결과 재사용",
+        "owner_layer": "data",
+        "implementation_status": "pending"
+      },
+      {
+        "id": "SEC-07",
+        "title": "거절 응답·안전한 관측·화면 안내",
+        "owner_layer": "application",
+        "implementation_status": "pending"
+      },
+      {
+        "id": "SEC-08",
+        "title": "동일 스냅샷 인수와 운영 gate",
+        "owner_layer": "planning",
+        "implementation_status": "pending"
+      }
+    ],
+    "planned_errors": [
+      {
+        "code": "rate_limit_exceeded",
+        "http": 429,
+        "retry_after_required": true,
+        "status": "planned_not_implemented"
+      },
+      {
+        "code": "analysis_quota_exceeded",
+        "http": 429,
+        "retry_after_required": true,
+        "status": "planned_not_implemented"
+      },
+      {
+        "code": "security_policy_unavailable",
+        "http": 503,
+        "retry_after_required": false,
+        "status": "planned_not_implemented"
+      }
+    ]
+  },
+  "mandatory_security_document": "docs/current/외부접근_데이터보호_개발기준.md"
 }
