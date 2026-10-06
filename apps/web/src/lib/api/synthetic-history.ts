@@ -86,6 +86,14 @@ for (const o of BASE) {
       wildcard_group: WILD[o.unit] ?? null,
     };
     HISTORY_OFFERINGS.push(off);
+    // 과거 학년도의 모집인원·충원인원도 대학 발표 지표로 전달된다(명 단위, 모집단위별 값)
+    if (year < 2027 && !UNPUBLISHED.has(id)) {
+      const cap = Math.max(5, o.initial + ((hash(id + "cap") % 5) - 2) - (2026 - year === 2 ? 1 : 0));
+      const fill = Math.max(0, Math.round(cap * (0.22 + (hash(id + "fill" + year) % 28) / 100)));
+      const src_as = `${year}-03-1${hash(id) % 9}`;
+      HISTORY.push({ ...off, metric_name: "모집인원", metric_definition: "그 학년도 정시 모집인원(최종)", value: String(cap), unit: "명", original_scale: "정시 모집인원", publication_status: "published", source_url: SRC, source_as_of: src_as });
+      HISTORY.push({ ...off, metric_name: "충원인원", metric_definition: "미등록 이월로 추가 합격(충원)된 인원", value: String(fill), unit: "명", original_scale: "추가 합격 인원", publication_status: "published", source_url: SRC, source_as_of: src_as });
+    }
     for (const m of METRICS[o.u.id] ?? []) {
       const published = year < 2027 && !UNPUBLISHED.has(id);
       const wobble = ((hash(id + m.name) % 100) / 100 - 0.5) * m.step * 2;

@@ -26,7 +26,7 @@ const LIMIT_NOW = 60;
 const LIMIT_PAST = 100;
 
 /** 지표 열 순서. 발표가 흔한 것부터, 목록에 없는 지표는 받은 순서대로 뒤에 붙인다 */
-const METRIC_ORDER = ["경쟁률", "최종등록자 50%", "최종등록자 70%", "최종등록자 평균", "최종 합격선"];
+const METRIC_ORDER = ["모집인원", "경쟁률", "충원인원", "최종등록자 50%", "최종등록자 70%", "최종등록자 평균", "최종 합격선"];
 
 const lineage = (offeringId: string) => offeringId.replace(/-\d{4}$/, "");
 
@@ -130,7 +130,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
           </Form>
           <ChipRow label="지역" cur={cur} k="region" items={REGIONS} />
           <ChipRow label="모집군" cur={cur} k="group" items={[...GROUPS]} suffix="군" />
-          <p className="hint">2024~2026학년도 발표 결과와 2027학년도 모집 인원을 모집단위마다 한 번에 보여 드립니다. 대학마다 발표하는 지표(경쟁률·평균·50%·70%·최종 합격선)가 달라 서로 바꾸지 않고 발표한 그대로입니다.</p>
+          <p className="hint">2024~2026학년도 발표 결과와 2027학년도 모집 인원을 모집단위마다 한 번에 보여 드립니다. 대학마다 발표하는 지표(모집·충원인원, 경쟁률, 평균·50%·70%·최종 합격선)가 달라 서로 바꾸지 않고 발표한 그대로입니다.</p>
         </section>
 
         {now.status !== "ready" || now.items === null ? (
