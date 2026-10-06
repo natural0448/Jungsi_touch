@@ -7,6 +7,7 @@
 .et .mg-caps .unis{display:flex;gap:6px;flex-wrap:wrap}
 .et .mg-caps .unis a{padding:2px 9px;border-radius:6px;border:1px solid var(--line);color:var(--ink-2);font-size:12px}
 .et .mg-caps .unis a.on{border-color:var(--ink);color:var(--ink);font-weight:700}
+.et .mg-caps .mg-nouni{padding:2px 9px;border-radius:6px;border:1px dashed var(--line);color:var(--muted);font-size:12px}
 
 .et .mg-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:16px;align-items:start}
 .et .mg-list,.et .mg-detail{border:1px solid var(--line);border-radius:var(--r-card);padding:14px 16px;min-width:0}
