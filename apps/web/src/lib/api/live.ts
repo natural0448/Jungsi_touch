@@ -42,11 +42,18 @@ async function send(path: string, init: RequestInit): Promise<Response> {
   }
 }
 
-/** 401·403·503 은 공통으로 올린다. 나머지는 호출한 쪽이 판단한다 */
+/** 401·403·429·503 은 공통으로 올린다. 나머지는 호출한 쪽이 판단한다 */
 async function guard(res: Response) {
   if (res.status === 401 || res.status === 403) {
     const code = await codeOf(res);
     throw new AccessDenied(res.status, code ?? (res.status === 401 ? "authentication_required" : "paid_required"));
+  }
+  // 429(요청 제한, SEC-07): 코드와 Retry-After(초 또는 HTTP 날짜)만 받아 안내한다. 성공으로 숨기지 않는다
+  if (res.status === 429) {
+    const ra = res.headers.get("Retry-After");
+    const sec = Number(ra);
+    const retryAt = ra === null ? null : Number.isFinite(sec) ? new Date(Date.now() + sec * 1000) : Number.isNaN(Date.parse(ra)) ? null : new Date(ra);
+    throw new ConnectionError("rate_limited", (await codeOf(res)) ?? "rate_limit_exceeded", retryAt);
   }
   if (res.status === 503) throw new ConnectionError("unavailable", (await codeOf(res)) ?? "backend_dependency_unavailable");
 }

@@ -21,6 +21,13 @@ export function signed(n: number): string {
   return n > 0 ? `+${n}` : String(n);
 }
 
+/** UTC 시각 → 서울 시각 "14:05:30" (요청 제한 재시도 안내용. 초 단위 제한이 흔해 초까지 보인다) */
+export function seoulTime(isoUtc: string): string {
+  const p = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).formatToParts(new Date(isoUtc));
+  const get = (t: string) => p.find((x) => x.type === t)?.value ?? "";
+  return `${get("hour")}:${get("minute")}:${get("second")}`;
+}
+
 /** UTC 시각 → 서울 날짜·시각 "2027.02.28 14:05" */
 export function seoulDateTime(isoUtc: string | null): string {
   if (!isoUtc) return "─";

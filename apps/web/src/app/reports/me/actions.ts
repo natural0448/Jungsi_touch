@@ -1,5 +1,6 @@
 "use server";
 
+import { seoulTime } from "@/lib/format";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
@@ -79,7 +80,14 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
     await setReportId(report.value.report_id);
   } catch (e) {
     if (e instanceof AccessDenied) return fail("로그인이 필요합니다. 다시 로그인한 뒤 저장해 주세요.");
-    if (e instanceof ConnectionError) return fail("정시터치 서버에 연결할 수 없어 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요.");
+    if (e instanceof ConnectionError)
+      return fail(
+        e.kind === "rate_limited"
+          ? e.retryAt
+            ? `요청이 많아 잠시 제한되었습니다. ${seoulTime(e.retryAt.toISOString())} 이후 다시 저장해 주세요. 입력한 값은 그대로 남아 있습니다.`
+            : "요청이 많아 잠시 제한되었습니다. 잠시 뒤 다시 저장해 주세요. 입력한 값은 그대로 남아 있습니다."
+          : "정시터치 서버에 연결할 수 없어 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요.",
+      );
     throw e;
   }
   // 자바스크립트 없이 보낸 양식은 basePath 가 붙지 않은 주소로 돌아가므로 직접 붙인다

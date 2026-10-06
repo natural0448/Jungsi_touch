@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller, source, type ForecastRevisionRef, type Result } from "@/lib/api";
 import type { CategoryRangeDto, ForecastDraftDto, ForecastReplacement, ForecastTarget } from "@/lib/dto";
+import { seoulTime } from "@/lib/format";
 import { MANAGEMENT_FORECASTS } from "@/lib/routes";
 
 /*
@@ -89,7 +90,12 @@ export async function runForecast(_prev: ForecastFormState, fd: FormData): Promi
     }
   } catch (e) {
     if (e instanceof AccessDenied) return { code: e.code, status: e.status, message: MESSAGE[e.status], key: crypto.randomUUID() };
-    if (e instanceof ConnectionError) return { code: e.code, status: 503, message: "정시터치 서버에 연결할 수 없습니다. 잠시 뒤 같은 내용으로 다시 보내세요.", key };
+    if (e instanceof ConnectionError) {
+      // 요청 제한(429)은 처리되지 않은 요청이라 같은 키로 안내한 시각 이후 다시 보낸다(SEC-07)
+      if (e.kind === "rate_limited")
+        return { code: e.code, status: 429, message: e.retryAt ? `요청이 많아 잠시 제한되었습니다. ${seoulTime(e.retryAt.toISOString())} 이후 같은 내용으로 다시 보내세요.` : "요청이 많아 잠시 제한되었습니다. 잠시 뒤 같은 내용으로 다시 보내세요.", key };
+      return { code: e.code, status: 503, message: "정시터치 서버에 연결할 수 없습니다. 잠시 뒤 같은 내용으로 다시 보내세요.", key };
+    }
     throw e;
   }
   if (!res.ok) return { code: res.code, status: res.status, message: MESSAGE[res.status] ?? "요청을 처리하지 못했습니다.", key: crypto.randomUUID() };

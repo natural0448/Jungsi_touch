@@ -34,13 +34,16 @@ export class AccessDenied extends Error {
 }
 
 /**
- * 우리 서비스 API 에 닿지 못했을 때. 결과를 지어내지 않고 연결 대기로 보인다(DEV-006 mode_rules).
+ * 우리 서비스 API 에 닿지 못했거나 서버가 요청을 잠시 제한했을 때.
+ * 결과를 지어내지 않고 안내만 보인다(DEV-006 mode_rules, SEC-07).
  * - unconfigured: 연결 방식(JUNGSI_API_MODE)·API 주소·로그인 설정이 없다
  * - unavailable: 서버가 503 을 돌려주었거나 연결이 끊겼다(인증·저장소·자료 미준비 포함)
+ * - rate_limited: 서버가 429 로 제한했다(rate_limit_exceeded·analysis_quota_exceeded 등).
+ *   retryAt 이 있으면 재시도 시각만 안내한다. 제한을 성공이나 영구 차단으로 보이지 않는다.
  * 일반 회원이나 합성 응답으로 바꿔 보이지 않는다.
  */
 export class ConnectionError extends Error {
-  constructor(public kind: "unconfigured" | "unavailable", public code: string) {
+  constructor(public kind: "unconfigured" | "unavailable" | "rate_limited", public code: string, public retryAt: Date | null = null) {
     super(`${kind} ${code}`);
   }
 }
