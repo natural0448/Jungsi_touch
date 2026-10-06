@@ -1,6 +1,8 @@
 # DEV006 서비스·DB 응답과 외부 프런트 인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.4이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.5이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+
+현재 추가관측은아래⑪에기록한다. 기존본문의SQL미적용/PR대기등은해당시점history이며②③정식응답정의는불변이다.
 
 기획 반영일: 2026-10-06 UTC. 인계 revision **2026.10.06.v3**. 문서 출발 기준은 **2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f**이다. SUP01 별도 정시 FastAPI와 SUP02 public.jeongsi_passes 원본 목표는 확정했다. 현재 entitlements 어댑터/session v1 실행은 아직 전환하지 않았으며 **운영 NOT_READY**다. 문서 prepared_at와 과거 HTTP checked_at는 별개다.
 
@@ -155,13 +157,20 @@ SUP01/02 의사결정 대기는 해소했지만 배포 제공자·Connect·publi
 양계정 실제 TLS/role/master 최소SELECT와 기존 두 SELECT policy를 사전 catalog에서 확인했다. 이후 owner 단일transaction의 신규 private schema/13RLS tables·001002 적용 개발 영수증을 수령했으나 독립 원장 검수 pending·private app 정책0/runtime003·실 사용자권한/기본factory·운영은 미인수다. 이전 Storage/HTTP의 SQL NOT_RUN은 당시 관측으로 보존한다. CR-SERVICE-SUP04의 app-only/current_user·migration owner runtime거절을 채택하고 master9컬럼SELECT의 임의 REVOKE는 금지한다. PR15 정적 빈학교/숫자범위fix와 CI2 관측은 수용하고 FE-01R HTTP-date 문법 잔여·실브라우저/429·통합 인수는 후속이다.
 
 
+### ⑪ 003·최소자료·PR15통합의현재단계
+
+003은정확인간승인후적용하고fresh24policy/SELECT13·INSERT9·columnUPDATE6의최소권한metadata를확인했다. 실제10합성행은새process/TLS연결로영속성·CAS/멱등/소유권거절을검수했으나실학생/Auth/유료rows·운영전체인수는아니다. 명시port actualDB/master metadata는PASS이고health503는구성/자료/실세션준비보류다. 최소시험팩1건/328915B는statusstaged·승인0/unbound/engineprodfalse·provider미승인거절/network0이다. 수학한구간/9경계부분QA는wholeexam/CDF/공식정수백분위·실화면mode승인이아니다. PR15 ef7b7c08 exactCI2와develop3d90정상merge/삭제0·branch보존은확인됐고FE-01R·FE-ORIGIN·FE-SOURCE-01·browser/429·securitygate는pending이다. 직접인간은기본경로유지·명시연결만준비를선택하여CR06source변경0/defaultlegacy를유지한다. 서비스7준비파일/33focusedPASS와641이전9ERROR/별도fixture10PASS를같은Git전체검수와분리한다. 실제승인자료활성화·JWT·livehost·기본factory·운영은미완료이며minimalallowlist/49archive보존·API22/session3/page4·productionfalse/NOT_READY를유지한다.
+
+기본factory전환안CR06은직접인간이허용하지않았고명시연결준비만진행한다. owner는이관전용·운영서버app DATABASE_URL만·외부화면공개설정/APIorigin만전달한다. 실제secret/DBURL/자료hash·경로/공식점수/학생값은공유문서에복사하지않는다. FE-SOURCE-01 외부담당회신요청: https://github.com/natural0448/Jungsi_touch/pull/15#issuecomment-6018143154 .
+
+
 [로컬 검증 계약과 실행 후보](../../current/로컬_검증_연결.md)를 함께 읽는다.
 
 ## Supabase 운영 인수 상태
 
-신규 private Storage49객체 hash readback/원본보존·public경로98거절, source9DDL/30SQL·OpenAPI9컬럼 부분수신 이후 private 설정수령·실제 양계정 TLS/role/master catalog preflight PASS와001002 신규 schema/13RLS tables 적용 개발 영수증을 수령했다. 현재 001002는 actual_applied_verified_by_development_receipt이며 독립 원장검수 pending·private app정책0/runtime003 미적용·실Auth/유료권한/기본factory/자료승인/운영은 미인수다. master/profiles/기존roleowner 변경·DELETE/DROP/TRUNCATE0. CR-SERVICE-SUP03/04 구현준비·서비스후보27검수보고와 PR15 정적fix/CI2는 각각 same snapshot 구현/통합 및 실제 검수대기다. FE-01R HTTP-date 문법 잔여를 별도 후속으로 요청한다. API22/session3/page4·무료누백/유료후보·보안3gate·production_ready=false/NOT_READY와 모든 이전 관측/원본을 보존한다. 최신 PR15 head243d2cd7의 exactCI2/28M/noD·정확 allowedOrigins 관측은 이전339 기록과 분리하며 증분review/merge/보안운영gate는 pending이다. 최신PR15 증분은 임시preview용으로 수용했으며 FE-ORIGIN 실도메인전환/환경분리·유효action/실세션 조건은 pending이다. 최신 인입 규정은 minimal_explicit_approved_allowlist다. 요청별 최소 승인자료만 선택하며 전체소유자료/PDF·QA·dump·전체원표의 자동runtime 인입을 금지한다. 기존49archive와13table schema는 보존·자료인입과 분리한다.
+003은정확인간승인후적용하고fresh24policy/SELECT13·INSERT9·columnUPDATE6의최소권한metadata를확인했다. 실제10합성행은새process/TLS연결로영속성·CAS/멱등/소유권거절을검수했으나실학생/Auth/유료rows·운영전체인수는아니다. 명시port actualDB/master metadata는PASS이고health503는구성/자료/실세션준비보류다. 최소시험팩1건/328915B는statusstaged·승인0/unbound/engineprodfalse·provider미승인거절/network0이다. 수학한구간/9경계부분QA는wholeexam/CDF/공식정수백분위·실화면mode승인이아니다. PR15 ef7b7c08 exactCI2와develop3d90정상merge/삭제0·branch보존은확인됐고FE-01R·FE-ORIGIN·FE-SOURCE-01·browser/429·securitygate는pending이다. 직접인간은기본경로유지·명시연결만준비를선택하여CR06source변경0/defaultlegacy를유지한다. 서비스7준비파일/33focusedPASS와641이전9ERROR/별도fixture10PASS를같은Git전체검수와분리한다. 실제승인자료활성화·JWT·livehost·기본factory·운영은미완료이며minimalallowlist/49archive보존·API22/session3/page4·productionfalse/NOT_READY를유지한다.
 
-[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v4; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
+[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v5; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
 
 [화면팀 최종 회신 요청](../../current/화면팀_회신요청_최종.md)의 RF-01~06과 로컬 요청 ①~⑥를 함께 인수한다. 문서 전달 준비 완료는 담당자 회신·실제 연결·운영 검수 완료를 뜻하지 않는다.
 
@@ -187,4 +196,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](../../current/외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=2228d6a45c19a25ace99daf5b230c46057f324ad5c298e0a66d2e1848fb57a0e -->
+<!-- jungsi:generated spec_sha256=5f1f4f77d5895316ca8620952d30961f9ec0ffd6c6680cbb60fa4c995f236273 -->

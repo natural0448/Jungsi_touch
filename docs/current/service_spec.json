@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2156,7 +2156,7 @@
           "pr_target": "feature/presentation-foundation",
           "status": "retired_merged",
           "temporary": true,
-          "purpose": "PR #7의 화면 상시 부모 feature/presentation-foundation 병합 이력을 보존한다. PR6 head6b2는 현재 develop2624에 통합됐고 정확 head CI2 성공을 확인했다. 347 빈 학교 표시 fix는 현재 develop에 포함되지 않아 FE-05 후속 PR/인수가 필요하다. 실Caller/브라우저·수치/운영/보안 인수는 별도 대기이며 새 개발은 상시 화면 브랜치를 재사용한다.",
+          "purpose": "이전 PR7의종료/부모통합이력과원격ref는보존한다. 최신 PR15 source는develop3d90에merged/CI2확인됐으며원original347ancestor를새로주장하지않는다. 실browser·수치·권한·보안운영과FE-01R/FE-ORIGIN/FE-SOURCE-01은pending이다. 새개발은등록된상시부모를사용한다.",
           "base_commit": "eb765ab50abd6cc99985b26594b2331f2ddef5df",
           "observed_head": "07bb4929125d9a58abbabe71176aaffeab60bfaa",
           "pull_request": 7,
@@ -2165,7 +2165,8 @@
           "merge_commit": "d9feb6112a23b1fd14e8e34d15bed906ecc626da",
           "merged_at": "2026-10-03T15:36:13Z",
           "remote_ref_state": "retained_finished_temporary_ref_no_deletion_authorization",
-          "historical_purpose_before_PR6_merge": "PR #7을 화면 상시 부모 feature/presentation-foundation에 병합 완료했다. 해당 코드는 열린 PR #6에 포함되어 있으나 develop에는 미통합. 새 작업은 상시 화면 브랜치를 재사용."
+          "historical_purpose_before_PR6_merge": "PR #7을 화면 상시 부모 feature/presentation-foundation에 병합 완료했다. 해당 코드는 열린 PR #6에 포함되어 있으나 develop에는 미통합. 새 작업은 상시 화면 브랜치를 재사용.",
+          "historical_purpose_before_PR15_merge": "PR #7의 화면 상시 부모 feature/presentation-foundation 병합 이력을 보존한다. PR6 head6b2는 현재 develop2624에 통합됐고 정확 head CI2 성공을 확인했다. 347 빈 학교 표시 fix는 현재 develop에 포함되지 않아 FE-05 후속 PR/인수가 필요하다. 실Caller/브라우저·수치/운영/보안 인수는 별도 대기이며 새 개발은 상시 화면 브랜치를 재사용한다."
         },
         {
           "name": "feature/presentation-results",
@@ -2175,7 +2176,7 @@
           "pr_target": "feature/presentation-favorable",
           "status": "retired_integrated_closed",
           "temporary": true,
-          "purpose": "PR #9 CLOSED/별도 GitHub merge 없음과 당시 화면 부모에 포함된 head 이력을 보존한다. PR6 head6b2는 현재 develop2624에 통합됐고 정확 head CI2 성공을 확인했다. 347 빈 학교 표시 fix의 후속 PR/FE-05와 실Caller/브라우저·수치/운영/보안 인수는 대기다. 종료 ref는 보존하고 새 개발은 상시 화면 브랜치를 재사용한다.",
+          "purpose": "이전 PR9의종료/부모통합이력과원격ref는보존한다. 최신 PR15 source는develop3d90에merged/CI2확인됐으며원original347ancestor를새로주장하지않는다. 실browser·수치·권한·보안운영과FE-01R/FE-ORIGIN/FE-SOURCE-01은pending이다. 새개발은등록된상시부모를사용한다.",
           "base_commit": "07bb4929125d9a58abbabe71176aaffeab60bfaa",
           "observed_head": "d9feb6112a23b1fd14e8e34d15bed906ecc626da",
           "pull_request": 9,
@@ -2184,7 +2185,8 @@
           "merge_commit": null,
           "integrated_parent_head": "d9feb6112a23b1fd14e8e34d15bed906ecc626da",
           "remote_ref_state": "retained_finished_temporary_ref_no_deletion_authorization",
-          "historical_purpose_before_PR6_merge": "PR #9는 CLOSED이며 GitHub merge 기록은 없다. head d9feb611이 화면 상시 부모의 HEAD와 같아 코드 포함을 확인했다. 해당 코드는 열린 PR #6에 포함되어 있으나 develop에는 미통합. 새 작업은 상시 화면 브랜치를 재사용."
+          "historical_purpose_before_PR6_merge": "PR #9는 CLOSED이며 GitHub merge 기록은 없다. head d9feb611이 화면 상시 부모의 HEAD와 같아 코드 포함을 확인했다. 해당 코드는 열린 PR #6에 포함되어 있으나 develop에는 미통합. 새 작업은 상시 화면 브랜치를 재사용.",
+          "historical_purpose_before_PR15_merge": "PR #9 CLOSED/별도 GitHub merge 없음과 당시 화면 부모에 포함된 head 이력을 보존한다. PR6 head6b2는 현재 develop2624에 통합됐고 정확 head CI2 성공을 확인했다. 347 빈 학교 표시 fix의 후속 PR/FE-05와 실Caller/브라우저·수치/운영/보안 인수는 대기다. 종료 ref는 보존하고 새 개발은 상시 화면 브랜치를 재사용한다."
         },
         {
           "name": "feature/overall-analysis-service",
@@ -2316,13 +2318,15 @@
           {
             "id": "presentation",
             "status": "pending",
-            "evidence": "PR6 head6b2의 develop2624 통합과 해당 head CI2 성공은 source 인수 관측이다. 347 빈 학교 표시 fix는 미포함이라 FE-05 후속 PR이 필요하다. FE-01~05·확정 DTO/서버 Caller·4페이지·권한·기존 report.export 응답 소비와 세 security gate의 실제 scope 증거는 별도 대기다. 문서보고의 local pass와 직접 브라우저/운영/수치/보안 인수를 구분하며 인쇄/리포트 확장을 새 완료조건으로 요구하지 않는다.",
-            "historical_evidence_before_PR6_merge": "PR #6 미병합; #7은 화면 부모 통합·#9 종료 코드 포함. develop 통합과 확정 DTO·서버 연결·화면 권한·인쇄 인수 필요"
+            "evidence": "PR15 ef7b7c08/CI2·develop3d90통합·삭제0/branch보존은source인수다. FE-01R/FE-ORIGIN/FE-SOURCE-01·실browser/유효action·권한/전달물·실429/숫자·보안gate는pending이다.",
+            "historical_evidence_before_PR6_merge": "PR #6 미병합; #7은 화면 부모 통합·#9 종료 코드 포함. develop 통합과 확정 DTO·서버 연결·화면 권한·인쇄 인수 필요",
+            "historical_evidence_before_second_update": "PR6 head6b2의 develop2624 통합과 해당 head CI2 성공은 source 인수 관측이다. 347 빈 학교 표시 fix는 미포함이라 FE-05 후속 PR이 필요하다. FE-01~05·확정 DTO/서버 Caller·4페이지·권한·기존 report.export 응답 소비와 세 security gate의 실제 scope 증거는 별도 대기다. 문서보고의 local pass와 직접 브라우저/운영/수치/보안 인수를 구분하며 인쇄/리포트 확장을 새 완료조건으로 요구하지 않는다."
           },
           {
             "id": "live_connections",
             "status": "pending",
-            "evidence": "Supabase Auth settings/JWKS·REST metadata 최소GET는확인했다. 검수사용자로그인/이용권·DB직접연결·UTC왕복·Drive·22API배포는NOT_RUN이며 DATABASE_URL을추후받는다."
+            "evidence": "SQL001002003/fresh권한metadata·UTC/타입·master명시port와합성10행별도process지속성은제한PASS다. 기본factorylegacy유지·실JWT/유료rows·livehost/승인자료/Drive·22API/security운영은미인수다.",
+            "historical_evidence_before_second_update": "Supabase Auth settings/JWKS·REST metadata 최소GET는확인했다. 검수사용자로그인/이용권·DB직접연결·UTC왕복·Drive·22API배포는NOT_RUN이며 DATABASE_URL을추후받는다."
           },
           {
             "id": "approved_data",
@@ -2337,7 +2341,8 @@
           {
             "id": "handoff",
             "status": "pending",
-            "evidence": "운영 설정 위치(값 제외)·DB 변경 적용 계획·인계·복구 절차와 배포 후보 SHA 정리 필요"
+            "evidence": "최소자료staged/보류·app/owner배포설정경계와직접인간기본경로유지결정을기록했다. backup/restore·실권한/자료활성화·후보sameSHA/CI·별도배포승인은pending이다.",
+            "historical_evidence_before_second_update": "운영 설정 위치(값 제외)·DB 변경 적용 계획·인계·복구 절차와 배포 후보 SHA 정리 필요"
           },
           {
             "id": "security_response_artifacts",
@@ -2365,34 +2370,28 @@
           "feature/planning-layer-ownership"
         ],
         "checked_at": "2026-10-04 (Asia/Seoul)",
-        "note": "PR5는 중복 제안으로 closed이며 고정 head/ref를 보존한다. PR6 head6b2는 develop2624에 merged이고 해당 head의 CI2 success를 확인했다. 347 빈 학교 표시 fix는 현재 develop에 포함되지 않으므로 FE-05 후속 통합이 필요하다. 실Caller·브라우저/보안/수치/운영은 별도 미인수다. 상시4/종료후보존임시ref3/전체7 계수와 checked_at은 기존 원격 등록부 관측이다. 이번 PR/ancestor 읽기는 원격 전체 ref 전수조회가 아니며 서버·main 등 미재조회값을 최신 관측으로 추정하지 않는다. 새 작업/삭제 허용을 부여하지 않는다.",
+        "note": "PR5closed·ref보존과PR6통합역사는유지한다. 최신PR15 ef7b7c08 exactCI2·develop3d90정상merge/삭제0·화면branch보존을확인했다. FE05빈학교fix는source통합됐으나 FE-01R/FE-ORIGIN/FE-SOURCE-01·실browser/권한/수치/보안운영은pending이다. 원격전체ref계수/등록부checked시각·main/server미재조회값은과거관측그대로이며새조회·삭제허가로확대하지않는다.",
         "working_temporary_count": 0,
         "retained_finished_temporary_refs": 3,
         "latest_observation": {
-          "date": "2026-10-06",
-          "prepared_at": "2026-10-06T11:41:32.244467Z",
-          "source": "root의 비밀 없는 GitHub API PR/head/CI 및 develop Git ancestor/source 읽기 대조",
-          "HTTP_API_observed_at": "2026-10-06T10:56:00.912393+00:00",
-          "scope": "PR6와 확인된 develop 통합/두 commit 포함 여부에 한정한다. 원격 전체 ref 계수/서버/main branch 재조회 아님.",
-          "develop": "2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f",
-          "frontend_PR6_head": "6b2b45952f7610dda92c9cb83c8cc0a0b4ee1b5d",
-          "PR6_state": "closed_merged",
-          "PR6_head_exact_CI_success_count": 2,
-          "PR6_head_ancestor_in_develop": true,
-          "missing_fix_commit": "347a1100f536ca6b8cd72b381ecbb08cc102560f",
-          "missing_fix_ancestor_in_develop": false,
-          "missing_fix_source_state": "빈 학교 표시 fix가 현재 management source에 없어 FE-05 후속 통합 필요",
-          "missing_fix_CI": "NOT_CHECKED",
-          "PR5_ref_boundary": "기존 closed/superseded head와 ref 보존 계약 불변",
-          "approved_deletion_source_unchanged": "f46c6635664a6c2315e6c71c4f700aa3e331c60c",
-          "deletion_scope": "고정 source/등록/허용계약·원본보존 그대로, 이번 새 삭제/원격 ref 변경 없음",
-          "unrefreshed_refs": [
+          "prepared_at": "2026-10-06T14:40:02.016045Z",
+          "scope": "PR15 reviewed head/exactCI/merge/develop source만;전체원격ref/main/server전수조회아님",
+          "develop": "3d90bc461c57102fc9ee8868cec7edac498470d4",
+          "PR15_head": "ef7b7c08ae0c3db5ea02c7af685a99f6064219df",
+          "PR15_state": "closed_merged",
+          "PR15_head_exact_CI_success_count": 2,
+          "source_deletions": 0,
+          "branch_preserved": true,
+          "FE05_source": "integrated_PR15_equivalent_fix",
+          "historical_347_ancestor_claim_unchanged": true,
+          "browser_security_numeric_operations": "NOT_RUN_PENDING",
+          "unrefreshed": [
+            "whole_remote_inventory",
             "main",
-            "server",
-            "whole_remote_inventory"
+            "server"
           ],
-          "frontend_browser_scope": "네 역할/HOLD·503/HTML검색0/경고는 document_reported pass; 직접 root브라우저·전체전달물/실429/수치/운영/보안 NOT_RUN/PENDING",
-          "followup_ref": "supabase_operations_handoff_contract.reply_contract.followup"
+          "date": "2026-10-06",
+          "source": "root의 PR15 고정 head/CI2/GitHub merge 및 develop source 영수증 대조; 원격 전체 ref/main/server 재조회 아님"
         },
         "historical_observation_before_20261006": {
           "date": "2026-10-05",
@@ -2423,7 +2422,36 @@
           "sameRelease_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
           "sameRelease_observation": "4cc에서 필수3버전의 비어 있지 않은 문자열·정확동일성 보완과context17비교유지를관측했다. 실제Caller/브라우저/운영로그인인수는NOT_RUN이다."
         },
-        "count_observation_scope": "existing_20261004_inventory_not_reenumerated_in_current_PR6_read"
+        "count_observation_scope": "existing_20261004_inventory_not_reenumerated_in_current_PR6_read",
+        "history_before_PR15_merge": {
+          "note": "PR5는 중복 제안으로 closed이며 고정 head/ref를 보존한다. PR6 head6b2는 develop2624에 merged이고 해당 head의 CI2 success를 확인했다. 347 빈 학교 표시 fix는 현재 develop에 포함되지 않으므로 FE-05 후속 통합이 필요하다. 실Caller·브라우저/보안/수치/운영은 별도 미인수다. 상시4/종료후보존임시ref3/전체7 계수와 checked_at은 기존 원격 등록부 관측이다. 이번 PR/ancestor 읽기는 원격 전체 ref 전수조회가 아니며 서버·main 등 미재조회값을 최신 관측으로 추정하지 않는다. 새 작업/삭제 허용을 부여하지 않는다.",
+          "latest_observation": {
+            "date": "2026-10-06",
+            "prepared_at": "2026-10-06T11:41:32.244467Z",
+            "source": "root의 비밀 없는 GitHub API PR/head/CI 및 develop Git ancestor/source 읽기 대조",
+            "HTTP_API_observed_at": "2026-10-06T10:56:00.912393+00:00",
+            "scope": "PR6와 확인된 develop 통합/두 commit 포함 여부에 한정한다. 원격 전체 ref 계수/서버/main branch 재조회 아님.",
+            "develop": "2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f",
+            "frontend_PR6_head": "6b2b45952f7610dda92c9cb83c8cc0a0b4ee1b5d",
+            "PR6_state": "closed_merged",
+            "PR6_head_exact_CI_success_count": 2,
+            "PR6_head_ancestor_in_develop": true,
+            "missing_fix_commit": "347a1100f536ca6b8cd72b381ecbb08cc102560f",
+            "missing_fix_ancestor_in_develop": false,
+            "missing_fix_source_state": "빈 학교 표시 fix가 현재 management source에 없어 FE-05 후속 통합 필요",
+            "missing_fix_CI": "NOT_CHECKED",
+            "PR5_ref_boundary": "기존 closed/superseded head와 ref 보존 계약 불변",
+            "approved_deletion_source_unchanged": "f46c6635664a6c2315e6c71c4f700aa3e331c60c",
+            "deletion_scope": "고정 source/등록/허용계약·원본보존 그대로, 이번 새 삭제/원격 ref 변경 없음",
+            "unrefreshed_refs": [
+              "main",
+              "server",
+              "whole_remote_inventory"
+            ],
+            "frontend_browser_scope": "네 역할/HOLD·503/HTML검색0/경고는 document_reported pass; 직접 root브라우저·전체전달물/실429/수치/운영/보안 NOT_RUN/PENDING",
+            "followup_ref": "supabase_operations_handoff_contract.reply_contract.followup"
+          }
+        }
       },
       "merge_scope_policy": {
         "format": "jungsi.merge-scope/v1",
@@ -2541,7 +2569,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.8.4",
+        "contract_version": "1.8.5",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2715,7 +2743,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.8.4",
+        "contract_version": "1.8.5",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -3484,6 +3512,17 @@
         "REQ-20"
       ],
       "summary": "프레젠테이션: 에듀터치 본체가 /jeongsi 를 jeongsi-touch 워커로 대신 넘기는 임시 통로에서 서버 액션 POST(성적 저장·담기·관리 작업)가 Origin(본체 주소)과 Host(워커 주소) 불일치로 500 이 나던 문제를 고친다. next.config 의 serverActions.allowedOrigins 에 본체·워커·localhost 주소를 명시했고, 실도메인 Workers Routes 가 붙으면 본체·워커 항목은 지운다. 배포 워커에서 불일치 Origin POST 가 500→정상 경로(404: 가짜 action id)로 바뀜을 확인했다."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-20",
+        "REQ-23",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "v1.8.5 mergeddevelop3d90의전용003직접승인/실적용·fresh24policy최소권한·명시port actualmetadata·10합성process영속성/한정33검수·최소시험팩1staged/수학9경계부분QA·PR15source/CImerge를현재관측으로추가한다. 과거미적용/빈범위fix미포함/641실패와원본을보존한다. 직접인간답변은기본경로유지/명시연결준비로CR06default전환미허용/source0이며legacy/session3/API22/page4를보존한다. 실제학생/공식점수·자료/설정hash/path/key를공개문서에복사하지않고실JWT/유료rows·운영host/자료승인·실browsermode/보안gate는NOT_RUN/NOT_READY다. 최소allowlist·49archive보존/자동채택0과app운영/owner이관설정분리를유지한다. 수학 제한 QA 동결은 역사 관측이며 별도 사용자 지시로 데이터팀의 최소 후속 후보 준비가 진행 중이다. 추가 업로드/승인/활성화는 미관측이고 FE-SOURCE-01 확장 요청 송신과 실제 화면 수정 인수를 구분한다."
     }
   ],
   "overall_analysis_contract": {
@@ -6726,13 +6765,13 @@
     "handoff_response": {
       "path": "docs/team_sessions/2026-10-05/DEV006_서비스_DB_응답.md",
       "title": "DEV006 서비스·DB 응답과 외부 프런트 인계",
-      "body": "기획 반영일: 2026-10-06 UTC. 인계 revision **2026.10.06.v3**. 문서 출발 기준은 **2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f**이다. SUP01 별도 정시 FastAPI와 SUP02 public.jeongsi_passes 원본 목표는 확정했다. 현재 entitlements 어댑터/session v1 실행은 아직 전환하지 않았으며 **운영 NOT_READY**다. 문서 prepared_at와 과거 HTTP checked_at는 별개다.\n\n05:32Z 통합 현황과 08:38:58Z~08:40:54Z HTTP 접근 재점검은 기존 관측으로 보존한다. HTTP200/limit=0은 SQL/RLS·이용권·실회원·입시모형 인수가 아니다.\n\n[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)의 SUP-01~11과 [화면팀 회신요청 최종](../../current/화면팀_회신요청_최종.md)의 RF-01~06/로컬 1~6을 따른다. API22/DTO/session v1·4페이지·일반/유료·본인소유권·UTC·학교scope·독립승인은 불변이다.\n\n## ② 관리 초안과 공개 발표본의 응답\n\n`forecast_draft`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, draft_id, offering_id, revision, status,\nbase_result_hash, policy_version, context,\nresult, base_result, created_at, updated_at,\nadjustments, validation, approval, audit_events\n```\n\n- `result`: 현재 revision에서 채택하여 검증할 최종 객체.\n- `base_result`: 조정 전 서버 산출 원본. 조정·검증·승인으로 수정하지 않는다.\n- 두 객체의 필드: `forecast_70`, `acceptance_range`, `category_ranges`.\n- 관리 상태: `draft → validated → approved → published`. 조정하면 새 revision이 되고 이전 검증·승인을 승계하지 않는다.\n- `created_at`, `updated_at`, 감사 기록의 `at`은 UTC Z 문자열이다.\n- 관리 draft의 최상위 `input_version`은 반환하지 않는다. 초안 생성 요청과 공개 발표본의 `input_version`을 관리 draft 응답과 구분한다.\n\n관리 `context`의 허용 20필드는 다음과 같다. 학교·캠퍼스·전형·모집군을 확인하기 위한 객체이며 공개 발표본의 context와 다르다.\n\n```text\noffering_id, offering_lineage_id, academic_year, university_id,\ncampus, department, track, group, exam_id, source_pack_version,\ncatalog_version, analysis_version, rule_id, rule_version,\ncurve_version, population_id, score_scope, score_scale_id,\nbonus_treatment, unit\n```\n\n중첩 객체는 다음 허용 필드만 소비한다. 필드의 부재·null·실제 0을 구분한다.\n\n| 객체 | 허용 필드 |\n|---|---|\n| `result.forecast_70` / `base_result.forecast_70` | `status`, `reason_code`, `value`, `unit`, `definition`, `version` |\n| `result.acceptance_range` / `base_result.acceptance_range` | `status`, `reason_code`, `lower`, `upper`, `unit`, `definition`, `policy_version` |\n| `result.category_ranges[]` / `base_result.category_ranges[]` | `category`, `lower`, `upper` |\n| `adjustments[]` | `target`, `replacement`, `reason`, `evidence_refs`, `actor`, `at`, `base_result_hash` |\n| `validation` | `status`, `reason_code`, `checks`, `validated_revision`, `result_hash`, `receipt_hash`, `at` |\n| `approval` | `approved_revision`, `result_hash`, `validation_hash`, `approval_hash`, `reason`, `at` |\n| `audit_events[]` | `action`, `actor`, `at` |\n\n`adjustments[].replacement`는 대상에 따라 형태가 다르다. `forecast_70`은 `value/unit`, `acceptance_range`는 `lower/upper/unit`, `category_ranges`는 `ranges` 배열을 가진 객체다. `ranges[]`에는 `category/lower/upper`만 들어간다.\n\n검증 요청은 현재 revision·기준 해시·정책 버전에 결속한다. 승인 요청에는 `validation.receipt_hash`, 게시 요청에는 `approval.approval_hash`를 전달한다. 영수증은 프런트에서 만들지 않는다. 모든 관리 POST에는 `Idempotency-Key`가 필요하다. 유료 회원 여부로 관리 권한을 부여하지 않으며 서버의 editor/approver 및 허용 학교 범위가 기준이다.\n\n관리 `actor`와 영수증 해시는 관리 권한으로 보호된다. 학생 응답에는 직원 식별·내부 감사 기록·상위 `input_hash/policy_hash`·전체 저장 record·내부 정확값 저장 객체·원자료·계수·trace를 복사하지 않는다.\n\n공개 `forecast_public`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, status, reason_code, offering_id, release_version,\ncontext, policy_version, input_version,\nforecast_70, expected_acceptance_range, category_ranges,\nbasis_summary, issue_summaries, recommendation_reasons,\nadjustment_summary\n```\n\n공개 `status`는 **`published | pending`**이다. `pending`이면 `release_version/context/policy_version/input_version/forecast_70/expected_acceptance_range`는 null이며, 미발행 사유를 유지한다. 발표본이 `published`여도 예상 70%와 별도 합격권은 각각 `ready/pending`일 수 있다. 70%만 준비됐다는 이유로 최저 합격점·합격확률을 만들지 않는다.\n\nHTTP 오류 응답과 공개 발표본의 `pending` 객체는 별개다. 현재 context 또는 고정 입력·정책 내용이 달라진 공개 조회는 `409` 오류가 될 수 있다. 이 응답을 기존 학생 분석의 발표본과 결합하지 않으며, 학생 분석 경로에서는 성공한 환산·누백을 유지한 채 지원 판단을 보류한다.\n\n공개 중첩 형태는 다음과 같다.\n\n- `forecast_70`: 관리 기준선과 동일한 `status/reason_code/value/unit/definition/version`.\n- `expected_acceptance_range`: 관리 합격권과 동일한 `status/reason_code/lower/upper/unit/definition/policy_version`.\n- `category_ranges[]`: `category/lower/upper`.\n- `recommendation_reasons[]`: `code/text/evidence_refs`.\n- `issue_summaries[]`: `issue_id/title/summary/numeric_effect_applied`.\n- `adjustment_summary`: `applied/reason/version`.\n\n학생 `assessment.conversion`에는 중복 `rule_explanations`를 추가하지 않는다. 실제 반영 방법 설명은 `assessment.recommendation_reasons`의 등록 코드로 전달한다.\n\n## ③ 학생 분석과 발표본을 같은 근거로 결합하는 조건\n\n학생 `assessment.decision_evidence`와 공개 발표본에 같은 `context`, `policy_version`, `input_version` projection을 전달한다. 공개 context의 허용 17필드는 다음과 같다.\n\n```text\noffering_id, academic_year, exam_id, source_pack_version,\ncatalog_version, rule_id, rule_version, curve_version,\nanalysis_version, score_scale_id, score_scope, bonus_treatment,\npopulation_id, comparison_metric, unit, direction, tie_policy\n```\n\n다음 항목이 전부 일치할 때만 두 응답을 같은 근거로 결합한다.\n\n1. 학생 `forecast_release_version`와 발표본 `release_version`.\n2. 두 응답의 `policy_version`, `input_version`.\n3. 공개 context 17필드의 값과 타입, 명시적 null.\n\n외부 프런트 `e12dd849fb7f3d2e05fe4fc7655a37d613e349cb`의 읽기 검토는 완료했다. 공개 context 17필드의 순서·값·타입·명시적 null을 대조하고, `409`를 published 조회에서만 처리하여 다른 오류를 가리지 않는 범위는 확인됐다. 다만 버전 세 쌍의 `===`만 검사하면 양쪽 누락값/undefined, null 또는 빈 문자열이 같다는 이유로 결합될 수 있어 외부 담당의 보완이 필요하다.\n\n버전 비교 전 학생/발표본의 release 버전, 양쪽 `policy_version`, 양쪽 `input_version`이 모두 유효한 비어 있지 않은 문자열인지 확인해야 한다. 이 조건을 충족할 때만 원래 값의 exact equality로 결합한다. 한쪽 또는 양쪽의 누락/undefined/null/빈 문자열/잘못된 타입은 `sameRelease=false`로 처리하고 재분석·지원 판단 보류를 표시한다. 미완성 응답을 지원하는 기존 DTO nullable 계약은 유지한다. 외부 담당은 정상 동일/불일치와 한쪽·양쪽 누락/null/빈 값/잘못된 타입 회귀를 추가해야 하며, 이 채팅의 실제 화면 변경·브라우저 인수는 **NOT_RUN**, 전체 프런트 상태는 **verification_pending**이다.\n\n학생 분석은 계산할 때 채택한 발표본 버전을 유지한다. 새 발표본을 읽어 옛 학과 판정에 새 컷만 덧붙이지 않는다. 발표본·자료·규칙·곡선·카탈로그가 달라지면 재분석 대상으로 표시하고 새로운 학생 분석 revision에서 채택한다. 필요한 값이 없거나 결속이 틀리면 성공한 환산·누백과 과거 발표 자료는 유지하면서 지원 판단만 보류한다.\n\n`comparison_metric`은 `converted_score | university_top_percent`다. 점수는 내부 정확 환산값, 단위 `점`, 방향 `higher_is_better`, 동점 정책의 해당 없음은 `tie_policy=null`이다. 대학 누백은 `percentile.top_percent`에 대응하는 정확 비율, 단위 `%`, 방향 `lower_is_better`, `tie_policy=include_equal`이다. 전체 국수탐2 `overall` 누백을 대학 누백 비교 값으로 대신 넣지 않는다.\n\n`population_scope`와 `data_kind`는 `percentile` DTO에서 전체/반영 필수 비교집단 및 관측/추정 의미를 표시한다. 공개 발표본 context에 이 두 필드를 가공해 넣거나 관리 context로 대신 결합하지 않는다.\n\n이유 코드는 반영 방법, 지원 판단, 환산 유불리의 세 종류로 구분한다. 우수 탐구 반영·영어 등급 차감 같은 규칙 설명만으로 학생에게 유리했다고 표현하지 않는다. 정확한 동일 모집단 위치 차이의 근거가 있을 때만 유불리 이유를 생성한다.\n\n후보 응답의 `outside_offerings`, `ineligible_offerings`, `pending_offerings`는 각각 판단 완료 추천 범위 밖, 확인된 조건 미충족, 자료·자격·승인·버전 부족에 따른 보류다. 추천 대학이 0개여도 모든 판단이 outside/ineligible로 완료됐다면 정상 `ready` 빈 결과다. 실제로 모두 보류인 `pending`과 구분한다.\n\n## 최소설정 조회와 실제운영\n\n05:32Z 이전 통합 snapshot을 보존한다. 최신 재점검에서는 파일·키 없는 JWKS200, Auth settings401, user401을 확인했다. 기존 비공개 보관 키로 Auth settings200·JWT 없는 user401·공개키 REST metadata401·서버키 REST metadata200·비공개 schema REST406/PGRST106을 확인했다. 08:40:54Z public 테이블 limit=0 조회200/응답[]이며 실제 레코드 취득0건·DB쓰기0·새.env 생성0이다. 테이블 총건수·SQL/RLS·회원 이용권은 미검증이다. PGRST106은REST비노출이며SQL schema부재/권한실패가아니다. 개인식별값·projectURL/id·키·JWT·자료hash·비공개PC경로는공개하지않는다.\n\n기존 비공개 파일에서 URL/publishable/secret/JWKS 참조를 확인했다. 이번 프로세스와 해당 PC User/Machine 환경에서는 이 4개 및 DATABASE_URL/검수JWT 6개 이름이 부재였다. DATABASE_URL/검수JWT는 확인한 파일·환경 범위에서 미확보이며 다른 PC·배포 서버의 부재를 단정하지 않는다. .env 파일 자체는 필수가 아니고 ServerSettings는os.environ만 읽는다. 기존 파일의 보관과process주입은별도다. secretkey는DB비밀번호·사용자JWT가아니며현재getUser뒤sub/exp검증을JWKS직접검증완료로기록하지않는다. Console 브라우저 상태조회는 시간초과로 권한 미검증이다. 과거siteadmin표식조회는현재실로그인/consoleadmin/paid권한이아니다.\n\n## 이전코드 인수 이력\n\nPR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.\n\n## ⑥ 외부화면 당시 관측과 현재 기준\n\n05:32Z 당시 PR6 head ff2a8e412c7adc16eb61af34a6219a2c5c2d072b/base816/open-unmerged를 읽기 관측했다. 후속 root API 관측에서 PR6는 closed/merged, head6b2 exactCI2 success·develop2624를 확인했다. 과거05:32Z 관측은 보존하며 새 로컬 보고는 document_reported 범위를 독립 문서 검토했지만 직접 브라우저/운영 인수는 NOT_RUN이다. 347 빈학교 표시 fix는 이 develop에 포함되지 않는다. d7/e164·4cc source/CI는역사로보존하며최신실Caller/운영API/4페이지·브라우저는NOT_RUN이다. nonempty 3버전/context17·409부분보류/성공점수보존을외부인수조건으로유지한다.\n\n## 권한·자료·실행 승인\n\n목표 단일 authority는 public.jeongsi_passes로 확정했다. 현재 기본 jungsi_backend.entitlements/session v1은 그대로이며 목표 어댑터·DDL/사용자키·권한 SQL·취소/회수는 별도 계약/구현/검수다. 관리자 열람 예외의 서버 조회·별도 capability·operation·화면/session CR과 활성 MAX(ends_at)은 미채택 제안/회신 대상이다. paid profile/admin자동승격금지와staff학교scope·editor/approver독립을유지한다. 승인 자료 0, 로컬 후보 1건의 관측 engine_approved=false는 HOLD다. 미승인 자료/합성 모형의 production_allowed=false를 true로 승격하지 않는 정책을 유지하며, 후보에서 그 필드를 관측했다는 주장이 아니다. Drive자동OAuthrefresh는미구현이며marginal수치QA로jointcurve완성을판정하지않는다.\n\nPR5closed/보존ref와정확4파일f46/선행등록/기본deny/단회origin삭제검사는그대로다. d7외부제거관측은역사이며새삭제허용/이번팀실삭제아니다. 001실적용UNCONFIRMED/002NOT_APPLIED·mainnot_ready를유지한다. 이번문서는DB쓰기/migration/모형승인/main병합/배포실행승인이아니다. 원본/이전문서/backup/cache/검수결과는모두보존한다.\n\n## ⑧ 확정 결정과 후속 회신 요청\n\nSUP01/02 의사결정 대기는 해소했지만 배포 제공자·Connect·public master 어댑터·관리자 예외 CR은 NOT_RUN/회신 대기다. RF-01 BFF/CSRF/사용자·서버 신원, RF-02 관리자 표현, RF-03 DDL/사용자키/권한 SQL, RF-04 모드/실연결, RF-05 PR/SHA/증거, RF-06 명부/계정/기대값을 직접 회신받는다. HMAC/session v2는 미채택 제안이고 이번 문서가 실제 코드/운영 설정을 바꾸지는 않는다.\n\n기존 로컬 요청 1~6에는 별도 local factory·네 opaque subject·loopback·수신 PC DPAPI·신뢰 명부 version/SHA·미등록/등록미채택 시험팩의 두503을 나누고 승인·유효 exam 계산 성공에서만 총점/subjects·curve 없음 pending을 보존·데이터팀 공급·출발/후속 검수 SHA 구분으로 답한다. 메모리 성적/리포트/관심학교/관리초안·발표는 재시작 시 소실한다. DPAPI 자료 캐시와 운영 DB 영속성은 다르다.\n\n화면 반출 방지는 SEC-02 전달물/SEC-03 BFF·실세션·CSRF·서버신원/SEC-07 429·안전한503/no-store/SEC-08 세 gate의 같은 snapshot 실제 검수를 선행한다. 서비스팀의 재귀 DTO·공유 원자적 예산과 외부 화면팀의 Caller/브라우저/preview 담당을 분리한다. 무료 전체 누백·유료 전체 대학/학과 검색 및 기존 성공점수/부분 HOLD를 유지한다. 공개 회신에는 실제 설정/개인정보/성적/자료 hash/운영 한도를 넣지 않는다.\n\n개발팀 보완 조건: 요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다. 요청 localhost3003은 local serve의 정확 Origin으로만 명시하며 운영 configured_app을 선택하지 않는다. 네 subject/수신 PC DPAPI·SSR 실제 로그인은 독립이다. public master 전이는 reader/factory/probe/checker1284/정본 session 규칙을 같은 구현 PR에 묶고 이번 old pin은 유지한다. admin SSR gate/internal admin_read/opt-in v2는 대안·미채택이며 shortlist 예외도 별도 CR이고 owner·editor/approver scope/독립승인을 유지한다.\n\n현재 기준 보완: PR6 merged/head6b2 CI2는 source 관측이며 새 로컬 보고의 브라우저/비노출/오류응답 독립 인수는 대기다. source e764의 시험팩 code 구분은 정적 판독이며 기존 catalog/권한/host native 증거로 overall 두503을 관측했다고 주장하지 않는다. 소유자 user_id uuid/MAX 동의 보고도 실제DDL·권한SQL 인수가 아니다. FE-01~05 후속 지시의 입력/증거 충족 전 NOT_RUN을 유지한다.\n\n마지막 범위 정리: PR6의 head6b2 CI2는 같은 head이고 347은 develop2624의 ancestor가 아니며 빈학교표시fix도없다. FE-05 후속PR통합을요청한다. 로컬 네역할/HOLD·503/HTML검색0·경고는 document_reported pass, 직접root브라우저·전체JS/RSC/JSON/maps/storage/download·실429/공유예산/서버신원/preview·권한양성/자기승인·숫자/실DBAuth/운영은NOT_RUN/PENDING이다. FE-01 live.ts55 위험은P2 정적추론/실행미재현이며 외부화면팀이수정한다.\n\n\n## ⑨ 실제 Supabase staging 및 source DDL 수령 — 후속 snapshot\n\n현재 문서 출발 기준은 4366d67732556b69a17ebad03dbb5fc8bf1d6671이며 앞의 v3/2624 관측은 당시 기록으로 보존한다. 신규 private Storage 생성·49객체 해시 재수신·원본 보존/public 경로98거절과 source9파일/30SQL 검토·OpenAPI9컬럼 metadata를 수령했다. 실제 raw Storage 인증사용자/RLS·signedURL·SQL DB/권한·migration·자료/모형 채택·운영은 별도 미검수다. CR-SERVICE-SUP03 서비스 구현 준비가 채택됐으나 default 운영 factory/old entitlement/session v1 세필드/Drive·22API·4페이지·보안은 전환하지 않았다. 구체 현재 상태는 [Supabase 운영 인계](../../current/Supabase_운영_인수인계.md)의 실제 업데이트/source 입력 절을 따른다. 실제 자료경로/SHA/키는 private 영수증에만 두며 화면/코드로 복사하지 않는다.\n\n\n### ⑩ 실제 DB 사전 검수와001·002 적용의 단계 구분\n\n양계정 실제 TLS/role/master 최소SELECT와 기존 두 SELECT policy를 사전 catalog에서 확인했다. 이후 owner 단일transaction의 신규 private schema/13RLS tables·001002 적용 개발 영수증을 수령했으나 독립 원장 검수 pending·private app 정책0/runtime003·실 사용자권한/기본factory·운영은 미인수다. 이전 Storage/HTTP의 SQL NOT_RUN은 당시 관측으로 보존한다. CR-SERVICE-SUP04의 app-only/current_user·migration owner runtime거절을 채택하고 master9컬럼SELECT의 임의 REVOKE는 금지한다. PR15 정적 빈학교/숫자범위fix와 CI2 관측은 수용하고 FE-01R HTTP-date 문법 잔여·실브라우저/429·통합 인수는 후속이다.\n",
+      "body": "현재 추가관측은아래⑪에기록한다. 기존본문의SQL미적용/PR대기등은해당시점history이며②③정식응답정의는불변이다.\n\n기획 반영일: 2026-10-06 UTC. 인계 revision **2026.10.06.v3**. 문서 출발 기준은 **2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f**이다. SUP01 별도 정시 FastAPI와 SUP02 public.jeongsi_passes 원본 목표는 확정했다. 현재 entitlements 어댑터/session v1 실행은 아직 전환하지 않았으며 **운영 NOT_READY**다. 문서 prepared_at와 과거 HTTP checked_at는 별개다.\n\n05:32Z 통합 현황과 08:38:58Z~08:40:54Z HTTP 접근 재점검은 기존 관측으로 보존한다. HTTP200/limit=0은 SQL/RLS·이용권·실회원·입시모형 인수가 아니다.\n\n[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)의 SUP-01~11과 [화면팀 회신요청 최종](../../current/화면팀_회신요청_최종.md)의 RF-01~06/로컬 1~6을 따른다. API22/DTO/session v1·4페이지·일반/유료·본인소유권·UTC·학교scope·독립승인은 불변이다.\n\n## ② 관리 초안과 공개 발표본의 응답\n\n`forecast_draft`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, draft_id, offering_id, revision, status,\nbase_result_hash, policy_version, context,\nresult, base_result, created_at, updated_at,\nadjustments, validation, approval, audit_events\n```\n\n- `result`: 현재 revision에서 채택하여 검증할 최종 객체.\n- `base_result`: 조정 전 서버 산출 원본. 조정·검증·승인으로 수정하지 않는다.\n- 두 객체의 필드: `forecast_70`, `acceptance_range`, `category_ranges`.\n- 관리 상태: `draft → validated → approved → published`. 조정하면 새 revision이 되고 이전 검증·승인을 승계하지 않는다.\n- `created_at`, `updated_at`, 감사 기록의 `at`은 UTC Z 문자열이다.\n- 관리 draft의 최상위 `input_version`은 반환하지 않는다. 초안 생성 요청과 공개 발표본의 `input_version`을 관리 draft 응답과 구분한다.\n\n관리 `context`의 허용 20필드는 다음과 같다. 학교·캠퍼스·전형·모집군을 확인하기 위한 객체이며 공개 발표본의 context와 다르다.\n\n```text\noffering_id, offering_lineage_id, academic_year, university_id,\ncampus, department, track, group, exam_id, source_pack_version,\ncatalog_version, analysis_version, rule_id, rule_version,\ncurve_version, population_id, score_scope, score_scale_id,\nbonus_treatment, unit\n```\n\n중첩 객체는 다음 허용 필드만 소비한다. 필드의 부재·null·실제 0을 구분한다.\n\n| 객체 | 허용 필드 |\n|---|---|\n| `result.forecast_70` / `base_result.forecast_70` | `status`, `reason_code`, `value`, `unit`, `definition`, `version` |\n| `result.acceptance_range` / `base_result.acceptance_range` | `status`, `reason_code`, `lower`, `upper`, `unit`, `definition`, `policy_version` |\n| `result.category_ranges[]` / `base_result.category_ranges[]` | `category`, `lower`, `upper` |\n| `adjustments[]` | `target`, `replacement`, `reason`, `evidence_refs`, `actor`, `at`, `base_result_hash` |\n| `validation` | `status`, `reason_code`, `checks`, `validated_revision`, `result_hash`, `receipt_hash`, `at` |\n| `approval` | `approved_revision`, `result_hash`, `validation_hash`, `approval_hash`, `reason`, `at` |\n| `audit_events[]` | `action`, `actor`, `at` |\n\n`adjustments[].replacement`는 대상에 따라 형태가 다르다. `forecast_70`은 `value/unit`, `acceptance_range`는 `lower/upper/unit`, `category_ranges`는 `ranges` 배열을 가진 객체다. `ranges[]`에는 `category/lower/upper`만 들어간다.\n\n검증 요청은 현재 revision·기준 해시·정책 버전에 결속한다. 승인 요청에는 `validation.receipt_hash`, 게시 요청에는 `approval.approval_hash`를 전달한다. 영수증은 프런트에서 만들지 않는다. 모든 관리 POST에는 `Idempotency-Key`가 필요하다. 유료 회원 여부로 관리 권한을 부여하지 않으며 서버의 editor/approver 및 허용 학교 범위가 기준이다.\n\n관리 `actor`와 영수증 해시는 관리 권한으로 보호된다. 학생 응답에는 직원 식별·내부 감사 기록·상위 `input_hash/policy_hash`·전체 저장 record·내부 정확값 저장 객체·원자료·계수·trace를 복사하지 않는다.\n\n공개 `forecast_public`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, status, reason_code, offering_id, release_version,\ncontext, policy_version, input_version,\nforecast_70, expected_acceptance_range, category_ranges,\nbasis_summary, issue_summaries, recommendation_reasons,\nadjustment_summary\n```\n\n공개 `status`는 **`published | pending`**이다. `pending`이면 `release_version/context/policy_version/input_version/forecast_70/expected_acceptance_range`는 null이며, 미발행 사유를 유지한다. 발표본이 `published`여도 예상 70%와 별도 합격권은 각각 `ready/pending`일 수 있다. 70%만 준비됐다는 이유로 최저 합격점·합격확률을 만들지 않는다.\n\nHTTP 오류 응답과 공개 발표본의 `pending` 객체는 별개다. 현재 context 또는 고정 입력·정책 내용이 달라진 공개 조회는 `409` 오류가 될 수 있다. 이 응답을 기존 학생 분석의 발표본과 결합하지 않으며, 학생 분석 경로에서는 성공한 환산·누백을 유지한 채 지원 판단을 보류한다.\n\n공개 중첩 형태는 다음과 같다.\n\n- `forecast_70`: 관리 기준선과 동일한 `status/reason_code/value/unit/definition/version`.\n- `expected_acceptance_range`: 관리 합격권과 동일한 `status/reason_code/lower/upper/unit/definition/policy_version`.\n- `category_ranges[]`: `category/lower/upper`.\n- `recommendation_reasons[]`: `code/text/evidence_refs`.\n- `issue_summaries[]`: `issue_id/title/summary/numeric_effect_applied`.\n- `adjustment_summary`: `applied/reason/version`.\n\n학생 `assessment.conversion`에는 중복 `rule_explanations`를 추가하지 않는다. 실제 반영 방법 설명은 `assessment.recommendation_reasons`의 등록 코드로 전달한다.\n\n## ③ 학생 분석과 발표본을 같은 근거로 결합하는 조건\n\n학생 `assessment.decision_evidence`와 공개 발표본에 같은 `context`, `policy_version`, `input_version` projection을 전달한다. 공개 context의 허용 17필드는 다음과 같다.\n\n```text\noffering_id, academic_year, exam_id, source_pack_version,\ncatalog_version, rule_id, rule_version, curve_version,\nanalysis_version, score_scale_id, score_scope, bonus_treatment,\npopulation_id, comparison_metric, unit, direction, tie_policy\n```\n\n다음 항목이 전부 일치할 때만 두 응답을 같은 근거로 결합한다.\n\n1. 학생 `forecast_release_version`와 발표본 `release_version`.\n2. 두 응답의 `policy_version`, `input_version`.\n3. 공개 context 17필드의 값과 타입, 명시적 null.\n\n외부 프런트 `e12dd849fb7f3d2e05fe4fc7655a37d613e349cb`의 읽기 검토는 완료했다. 공개 context 17필드의 순서·값·타입·명시적 null을 대조하고, `409`를 published 조회에서만 처리하여 다른 오류를 가리지 않는 범위는 확인됐다. 다만 버전 세 쌍의 `===`만 검사하면 양쪽 누락값/undefined, null 또는 빈 문자열이 같다는 이유로 결합될 수 있어 외부 담당의 보완이 필요하다.\n\n버전 비교 전 학생/발표본의 release 버전, 양쪽 `policy_version`, 양쪽 `input_version`이 모두 유효한 비어 있지 않은 문자열인지 확인해야 한다. 이 조건을 충족할 때만 원래 값의 exact equality로 결합한다. 한쪽 또는 양쪽의 누락/undefined/null/빈 문자열/잘못된 타입은 `sameRelease=false`로 처리하고 재분석·지원 판단 보류를 표시한다. 미완성 응답을 지원하는 기존 DTO nullable 계약은 유지한다. 외부 담당은 정상 동일/불일치와 한쪽·양쪽 누락/null/빈 값/잘못된 타입 회귀를 추가해야 하며, 이 채팅의 실제 화면 변경·브라우저 인수는 **NOT_RUN**, 전체 프런트 상태는 **verification_pending**이다.\n\n학생 분석은 계산할 때 채택한 발표본 버전을 유지한다. 새 발표본을 읽어 옛 학과 판정에 새 컷만 덧붙이지 않는다. 발표본·자료·규칙·곡선·카탈로그가 달라지면 재분석 대상으로 표시하고 새로운 학생 분석 revision에서 채택한다. 필요한 값이 없거나 결속이 틀리면 성공한 환산·누백과 과거 발표 자료는 유지하면서 지원 판단만 보류한다.\n\n`comparison_metric`은 `converted_score | university_top_percent`다. 점수는 내부 정확 환산값, 단위 `점`, 방향 `higher_is_better`, 동점 정책의 해당 없음은 `tie_policy=null`이다. 대학 누백은 `percentile.top_percent`에 대응하는 정확 비율, 단위 `%`, 방향 `lower_is_better`, `tie_policy=include_equal`이다. 전체 국수탐2 `overall` 누백을 대학 누백 비교 값으로 대신 넣지 않는다.\n\n`population_scope`와 `data_kind`는 `percentile` DTO에서 전체/반영 필수 비교집단 및 관측/추정 의미를 표시한다. 공개 발표본 context에 이 두 필드를 가공해 넣거나 관리 context로 대신 결합하지 않는다.\n\n이유 코드는 반영 방법, 지원 판단, 환산 유불리의 세 종류로 구분한다. 우수 탐구 반영·영어 등급 차감 같은 규칙 설명만으로 학생에게 유리했다고 표현하지 않는다. 정확한 동일 모집단 위치 차이의 근거가 있을 때만 유불리 이유를 생성한다.\n\n후보 응답의 `outside_offerings`, `ineligible_offerings`, `pending_offerings`는 각각 판단 완료 추천 범위 밖, 확인된 조건 미충족, 자료·자격·승인·버전 부족에 따른 보류다. 추천 대학이 0개여도 모든 판단이 outside/ineligible로 완료됐다면 정상 `ready` 빈 결과다. 실제로 모두 보류인 `pending`과 구분한다.\n\n## 최소설정 조회와 실제운영\n\n05:32Z 이전 통합 snapshot을 보존한다. 최신 재점검에서는 파일·키 없는 JWKS200, Auth settings401, user401을 확인했다. 기존 비공개 보관 키로 Auth settings200·JWT 없는 user401·공개키 REST metadata401·서버키 REST metadata200·비공개 schema REST406/PGRST106을 확인했다. 08:40:54Z public 테이블 limit=0 조회200/응답[]이며 실제 레코드 취득0건·DB쓰기0·새.env 생성0이다. 테이블 총건수·SQL/RLS·회원 이용권은 미검증이다. PGRST106은REST비노출이며SQL schema부재/권한실패가아니다. 개인식별값·projectURL/id·키·JWT·자료hash·비공개PC경로는공개하지않는다.\n\n기존 비공개 파일에서 URL/publishable/secret/JWKS 참조를 확인했다. 이번 프로세스와 해당 PC User/Machine 환경에서는 이 4개 및 DATABASE_URL/검수JWT 6개 이름이 부재였다. DATABASE_URL/검수JWT는 확인한 파일·환경 범위에서 미확보이며 다른 PC·배포 서버의 부재를 단정하지 않는다. .env 파일 자체는 필수가 아니고 ServerSettings는os.environ만 읽는다. 기존 파일의 보관과process주입은별도다. secretkey는DB비밀번호·사용자JWT가아니며현재getUser뒤sub/exp검증을JWKS직접검증완료로기록하지않는다. Console 브라우저 상태조회는 시간초과로 권한 미검증이다. 과거siteadmin표식조회는현재실로그인/consoleadmin/paid권한이아니다.\n\n## 이전코드 인수 이력\n\nPR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.\n\n## ⑥ 외부화면 당시 관측과 현재 기준\n\n05:32Z 당시 PR6 head ff2a8e412c7adc16eb61af34a6219a2c5c2d072b/base816/open-unmerged를 읽기 관측했다. 후속 root API 관측에서 PR6는 closed/merged, head6b2 exactCI2 success·develop2624를 확인했다. 과거05:32Z 관측은 보존하며 새 로컬 보고는 document_reported 범위를 독립 문서 검토했지만 직접 브라우저/운영 인수는 NOT_RUN이다. 347 빈학교 표시 fix는 이 develop에 포함되지 않는다. d7/e164·4cc source/CI는역사로보존하며최신실Caller/운영API/4페이지·브라우저는NOT_RUN이다. nonempty 3버전/context17·409부분보류/성공점수보존을외부인수조건으로유지한다.\n\n## 권한·자료·실행 승인\n\n목표 단일 authority는 public.jeongsi_passes로 확정했다. 현재 기본 jungsi_backend.entitlements/session v1은 그대로이며 목표 어댑터·DDL/사용자키·권한 SQL·취소/회수는 별도 계약/구현/검수다. 관리자 열람 예외의 서버 조회·별도 capability·operation·화면/session CR과 활성 MAX(ends_at)은 미채택 제안/회신 대상이다. paid profile/admin자동승격금지와staff학교scope·editor/approver독립을유지한다. 승인 자료 0, 로컬 후보 1건의 관측 engine_approved=false는 HOLD다. 미승인 자료/합성 모형의 production_allowed=false를 true로 승격하지 않는 정책을 유지하며, 후보에서 그 필드를 관측했다는 주장이 아니다. Drive자동OAuthrefresh는미구현이며marginal수치QA로jointcurve완성을판정하지않는다.\n\nPR5closed/보존ref와정확4파일f46/선행등록/기본deny/단회origin삭제검사는그대로다. d7외부제거관측은역사이며새삭제허용/이번팀실삭제아니다. 001실적용UNCONFIRMED/002NOT_APPLIED·mainnot_ready를유지한다. 이번문서는DB쓰기/migration/모형승인/main병합/배포실행승인이아니다. 원본/이전문서/backup/cache/검수결과는모두보존한다.\n\n## ⑧ 확정 결정과 후속 회신 요청\n\nSUP01/02 의사결정 대기는 해소했지만 배포 제공자·Connect·public master 어댑터·관리자 예외 CR은 NOT_RUN/회신 대기다. RF-01 BFF/CSRF/사용자·서버 신원, RF-02 관리자 표현, RF-03 DDL/사용자키/권한 SQL, RF-04 모드/실연결, RF-05 PR/SHA/증거, RF-06 명부/계정/기대값을 직접 회신받는다. HMAC/session v2는 미채택 제안이고 이번 문서가 실제 코드/운영 설정을 바꾸지는 않는다.\n\n기존 로컬 요청 1~6에는 별도 local factory·네 opaque subject·loopback·수신 PC DPAPI·신뢰 명부 version/SHA·미등록/등록미채택 시험팩의 두503을 나누고 승인·유효 exam 계산 성공에서만 총점/subjects·curve 없음 pending을 보존·데이터팀 공급·출발/후속 검수 SHA 구분으로 답한다. 메모리 성적/리포트/관심학교/관리초안·발표는 재시작 시 소실한다. DPAPI 자료 캐시와 운영 DB 영속성은 다르다.\n\n화면 반출 방지는 SEC-02 전달물/SEC-03 BFF·실세션·CSRF·서버신원/SEC-07 429·안전한503/no-store/SEC-08 세 gate의 같은 snapshot 실제 검수를 선행한다. 서비스팀의 재귀 DTO·공유 원자적 예산과 외부 화면팀의 Caller/브라우저/preview 담당을 분리한다. 무료 전체 누백·유료 전체 대학/학과 검색 및 기존 성공점수/부분 HOLD를 유지한다. 공개 회신에는 실제 설정/개인정보/성적/자료 hash/운영 한도를 넣지 않는다.\n\n개발팀 보완 조건: 요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다. 요청 localhost3003은 local serve의 정확 Origin으로만 명시하며 운영 configured_app을 선택하지 않는다. 네 subject/수신 PC DPAPI·SSR 실제 로그인은 독립이다. public master 전이는 reader/factory/probe/checker1284/정본 session 규칙을 같은 구현 PR에 묶고 이번 old pin은 유지한다. admin SSR gate/internal admin_read/opt-in v2는 대안·미채택이며 shortlist 예외도 별도 CR이고 owner·editor/approver scope/독립승인을 유지한다.\n\n현재 기준 보완: PR6 merged/head6b2 CI2는 source 관측이며 새 로컬 보고의 브라우저/비노출/오류응답 독립 인수는 대기다. source e764의 시험팩 code 구분은 정적 판독이며 기존 catalog/권한/host native 증거로 overall 두503을 관측했다고 주장하지 않는다. 소유자 user_id uuid/MAX 동의 보고도 실제DDL·권한SQL 인수가 아니다. FE-01~05 후속 지시의 입력/증거 충족 전 NOT_RUN을 유지한다.\n\n마지막 범위 정리: PR6의 head6b2 CI2는 같은 head이고 347은 develop2624의 ancestor가 아니며 빈학교표시fix도없다. FE-05 후속PR통합을요청한다. 로컬 네역할/HOLD·503/HTML검색0·경고는 document_reported pass, 직접root브라우저·전체JS/RSC/JSON/maps/storage/download·실429/공유예산/서버신원/preview·권한양성/자기승인·숫자/실DBAuth/운영은NOT_RUN/PENDING이다. FE-01 live.ts55 위험은P2 정적추론/실행미재현이며 외부화면팀이수정한다.\n\n\n## ⑨ 실제 Supabase staging 및 source DDL 수령 — 후속 snapshot\n\n현재 문서 출발 기준은 4366d67732556b69a17ebad03dbb5fc8bf1d6671이며 앞의 v3/2624 관측은 당시 기록으로 보존한다. 신규 private Storage 생성·49객체 해시 재수신·원본 보존/public 경로98거절과 source9파일/30SQL 검토·OpenAPI9컬럼 metadata를 수령했다. 실제 raw Storage 인증사용자/RLS·signedURL·SQL DB/권한·migration·자료/모형 채택·운영은 별도 미검수다. CR-SERVICE-SUP03 서비스 구현 준비가 채택됐으나 default 운영 factory/old entitlement/session v1 세필드/Drive·22API·4페이지·보안은 전환하지 않았다. 구체 현재 상태는 [Supabase 운영 인계](../../current/Supabase_운영_인수인계.md)의 실제 업데이트/source 입력 절을 따른다. 실제 자료경로/SHA/키는 private 영수증에만 두며 화면/코드로 복사하지 않는다.\n\n\n### ⑩ 실제 DB 사전 검수와001·002 적용의 단계 구분\n\n양계정 실제 TLS/role/master 최소SELECT와 기존 두 SELECT policy를 사전 catalog에서 확인했다. 이후 owner 단일transaction의 신규 private schema/13RLS tables·001002 적용 개발 영수증을 수령했으나 독립 원장 검수 pending·private app 정책0/runtime003·실 사용자권한/기본factory·운영은 미인수다. 이전 Storage/HTTP의 SQL NOT_RUN은 당시 관측으로 보존한다. CR-SERVICE-SUP04의 app-only/current_user·migration owner runtime거절을 채택하고 master9컬럼SELECT의 임의 REVOKE는 금지한다. PR15 정적 빈학교/숫자범위fix와 CI2 관측은 수용하고 FE-01R HTTP-date 문법 잔여·실브라우저/429·통합 인수는 후속이다.\n\n\n### ⑪ 003·최소자료·PR15통합의현재단계\n\n003은정확인간승인후적용하고fresh24policy/SELECT13·INSERT9·columnUPDATE6의최소권한metadata를확인했다. 실제10합성행은새process/TLS연결로영속성·CAS/멱등/소유권거절을검수했으나실학생/Auth/유료rows·운영전체인수는아니다. 명시port actualDB/master metadata는PASS이고health503는구성/자료/실세션준비보류다. 최소시험팩1건/328915B는statusstaged·승인0/unbound/engineprodfalse·provider미승인거절/network0이다. 수학한구간/9경계부분QA는wholeexam/CDF/공식정수백분위·실화면mode승인이아니다. PR15 ef7b7c08 exactCI2와develop3d90정상merge/삭제0·branch보존은확인됐고FE-01R·FE-ORIGIN·FE-SOURCE-01·browser/429·securitygate는pending이다. 직접인간은기본경로유지·명시연결만준비를선택하여CR06source변경0/defaultlegacy를유지한다. 서비스7준비파일/33focusedPASS와641이전9ERROR/별도fixture10PASS를같은Git전체검수와분리한다. 실제승인자료활성화·JWT·livehost·기본factory·운영은미완료이며minimalallowlist/49archive보존·API22/session3/page4·productionfalse/NOT_READY를유지한다.\n\n기본factory전환안CR06은직접인간이허용하지않았고명시연결준비만진행한다. owner는이관전용·운영서버app DATABASE_URL만·외부화면공개설정/APIorigin만전달한다. 실제secret/DBURL/자료hash·경로/공식점수/학생값은공유문서에복사하지않는다. FE-SOURCE-01 외부담당회신요청: https://github.com/natural0448/Jungsi_touch/pull/15#issuecomment-6018143154 .\n",
       "source_rule": "기획 정본의 확정 목표/현재 실행/과거 관측/회신 대기/실제 인수를 분리해 생성한다. ②③ core 계약과 실제22API/session v1·보안은 불변이다.",
       "historical_revision6_intro": {
         "text": "기준일: 2026-10-05. 상태: **서비스·DB 확정 코드 인수 완료 / 공통 계약 동일성 확인 / develop947 통합 완료 / 실제 사용자·DB·외부 프런트 검증 대기**. 문서 인계 revision: **6**. 후속 공통 검사·기획 상태 정합성은 시스템기획팀의 develop 후보이며 새 커밋·원격 CI 인수는 대기다.",
         "meaning": "작성 당시의 공통 후보/CI 대기 상태다. 이후 b66 정상 훅·530검사·정확 HEAD CI 인수로 종료됐으며 현재 상태로 사용하지 않는다."
       },
-      "revision": "2026.10.06.v3",
+      "revision": "2026.10.06.current_runtime_and_source_observations",
       "historical_revision8_before_20261006": {
         "body_sha256": "ada181a32b48aaece6e791e89116c20d87495cce394e4efb40483b05d41b3232",
         "source_commit": "81672e7214e34ff929639492319896420bd62196",
@@ -6746,7 +6785,8 @@
         "revision": "2026.10.06.v1",
         "body_sha256": "90428884588b8e92e0a922e898e6bfb4181cfa83b0118d4b241a2189be8755aa",
         "meaning": "이전 원본문과 후보/관측 상태는 ignored before에 보존한다. 현재 회신 요청과 당시 HTTP·PR 관측을 구분한다."
-      }
+      },
+      "historical_body_before_second_update_1_8_5": "기획 반영일: 2026-10-06 UTC. 인계 revision **2026.10.06.v3**. 문서 출발 기준은 **2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f**이다. SUP01 별도 정시 FastAPI와 SUP02 public.jeongsi_passes 원본 목표는 확정했다. 현재 entitlements 어댑터/session v1 실행은 아직 전환하지 않았으며 **운영 NOT_READY**다. 문서 prepared_at와 과거 HTTP checked_at는 별개다.\n\n05:32Z 통합 현황과 08:38:58Z~08:40:54Z HTTP 접근 재점검은 기존 관측으로 보존한다. HTTP200/limit=0은 SQL/RLS·이용권·실회원·입시모형 인수가 아니다.\n\n[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)의 SUP-01~11과 [화면팀 회신요청 최종](../../current/화면팀_회신요청_최종.md)의 RF-01~06/로컬 1~6을 따른다. API22/DTO/session v1·4페이지·일반/유료·본인소유권·UTC·학교scope·독립승인은 불변이다.\n\n## ② 관리 초안과 공개 발표본의 응답\n\n`forecast_draft`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, draft_id, offering_id, revision, status,\nbase_result_hash, policy_version, context,\nresult, base_result, created_at, updated_at,\nadjustments, validation, approval, audit_events\n```\n\n- `result`: 현재 revision에서 채택하여 검증할 최종 객체.\n- `base_result`: 조정 전 서버 산출 원본. 조정·검증·승인으로 수정하지 않는다.\n- 두 객체의 필드: `forecast_70`, `acceptance_range`, `category_ranges`.\n- 관리 상태: `draft → validated → approved → published`. 조정하면 새 revision이 되고 이전 검증·승인을 승계하지 않는다.\n- `created_at`, `updated_at`, 감사 기록의 `at`은 UTC Z 문자열이다.\n- 관리 draft의 최상위 `input_version`은 반환하지 않는다. 초안 생성 요청과 공개 발표본의 `input_version`을 관리 draft 응답과 구분한다.\n\n관리 `context`의 허용 20필드는 다음과 같다. 학교·캠퍼스·전형·모집군을 확인하기 위한 객체이며 공개 발표본의 context와 다르다.\n\n```text\noffering_id, offering_lineage_id, academic_year, university_id,\ncampus, department, track, group, exam_id, source_pack_version,\ncatalog_version, analysis_version, rule_id, rule_version,\ncurve_version, population_id, score_scope, score_scale_id,\nbonus_treatment, unit\n```\n\n중첩 객체는 다음 허용 필드만 소비한다. 필드의 부재·null·실제 0을 구분한다.\n\n| 객체 | 허용 필드 |\n|---|---|\n| `result.forecast_70` / `base_result.forecast_70` | `status`, `reason_code`, `value`, `unit`, `definition`, `version` |\n| `result.acceptance_range` / `base_result.acceptance_range` | `status`, `reason_code`, `lower`, `upper`, `unit`, `definition`, `policy_version` |\n| `result.category_ranges[]` / `base_result.category_ranges[]` | `category`, `lower`, `upper` |\n| `adjustments[]` | `target`, `replacement`, `reason`, `evidence_refs`, `actor`, `at`, `base_result_hash` |\n| `validation` | `status`, `reason_code`, `checks`, `validated_revision`, `result_hash`, `receipt_hash`, `at` |\n| `approval` | `approved_revision`, `result_hash`, `validation_hash`, `approval_hash`, `reason`, `at` |\n| `audit_events[]` | `action`, `actor`, `at` |\n\n`adjustments[].replacement`는 대상에 따라 형태가 다르다. `forecast_70`은 `value/unit`, `acceptance_range`는 `lower/upper/unit`, `category_ranges`는 `ranges` 배열을 가진 객체다. `ranges[]`에는 `category/lower/upper`만 들어간다.\n\n검증 요청은 현재 revision·기준 해시·정책 버전에 결속한다. 승인 요청에는 `validation.receipt_hash`, 게시 요청에는 `approval.approval_hash`를 전달한다. 영수증은 프런트에서 만들지 않는다. 모든 관리 POST에는 `Idempotency-Key`가 필요하다. 유료 회원 여부로 관리 권한을 부여하지 않으며 서버의 editor/approver 및 허용 학교 범위가 기준이다.\n\n관리 `actor`와 영수증 해시는 관리 권한으로 보호된다. 학생 응답에는 직원 식별·내부 감사 기록·상위 `input_hash/policy_hash`·전체 저장 record·내부 정확값 저장 객체·원자료·계수·trace를 복사하지 않는다.\n\n공개 `forecast_public`의 최상위 허용 필드는 다음과 같다.\n\n```text\nformat, status, reason_code, offering_id, release_version,\ncontext, policy_version, input_version,\nforecast_70, expected_acceptance_range, category_ranges,\nbasis_summary, issue_summaries, recommendation_reasons,\nadjustment_summary\n```\n\n공개 `status`는 **`published | pending`**이다. `pending`이면 `release_version/context/policy_version/input_version/forecast_70/expected_acceptance_range`는 null이며, 미발행 사유를 유지한다. 발표본이 `published`여도 예상 70%와 별도 합격권은 각각 `ready/pending`일 수 있다. 70%만 준비됐다는 이유로 최저 합격점·합격확률을 만들지 않는다.\n\nHTTP 오류 응답과 공개 발표본의 `pending` 객체는 별개다. 현재 context 또는 고정 입력·정책 내용이 달라진 공개 조회는 `409` 오류가 될 수 있다. 이 응답을 기존 학생 분석의 발표본과 결합하지 않으며, 학생 분석 경로에서는 성공한 환산·누백을 유지한 채 지원 판단을 보류한다.\n\n공개 중첩 형태는 다음과 같다.\n\n- `forecast_70`: 관리 기준선과 동일한 `status/reason_code/value/unit/definition/version`.\n- `expected_acceptance_range`: 관리 합격권과 동일한 `status/reason_code/lower/upper/unit/definition/policy_version`.\n- `category_ranges[]`: `category/lower/upper`.\n- `recommendation_reasons[]`: `code/text/evidence_refs`.\n- `issue_summaries[]`: `issue_id/title/summary/numeric_effect_applied`.\n- `adjustment_summary`: `applied/reason/version`.\n\n학생 `assessment.conversion`에는 중복 `rule_explanations`를 추가하지 않는다. 실제 반영 방법 설명은 `assessment.recommendation_reasons`의 등록 코드로 전달한다.\n\n## ③ 학생 분석과 발표본을 같은 근거로 결합하는 조건\n\n학생 `assessment.decision_evidence`와 공개 발표본에 같은 `context`, `policy_version`, `input_version` projection을 전달한다. 공개 context의 허용 17필드는 다음과 같다.\n\n```text\noffering_id, academic_year, exam_id, source_pack_version,\ncatalog_version, rule_id, rule_version, curve_version,\nanalysis_version, score_scale_id, score_scope, bonus_treatment,\npopulation_id, comparison_metric, unit, direction, tie_policy\n```\n\n다음 항목이 전부 일치할 때만 두 응답을 같은 근거로 결합한다.\n\n1. 학생 `forecast_release_version`와 발표본 `release_version`.\n2. 두 응답의 `policy_version`, `input_version`.\n3. 공개 context 17필드의 값과 타입, 명시적 null.\n\n외부 프런트 `e12dd849fb7f3d2e05fe4fc7655a37d613e349cb`의 읽기 검토는 완료했다. 공개 context 17필드의 순서·값·타입·명시적 null을 대조하고, `409`를 published 조회에서만 처리하여 다른 오류를 가리지 않는 범위는 확인됐다. 다만 버전 세 쌍의 `===`만 검사하면 양쪽 누락값/undefined, null 또는 빈 문자열이 같다는 이유로 결합될 수 있어 외부 담당의 보완이 필요하다.\n\n버전 비교 전 학생/발표본의 release 버전, 양쪽 `policy_version`, 양쪽 `input_version`이 모두 유효한 비어 있지 않은 문자열인지 확인해야 한다. 이 조건을 충족할 때만 원래 값의 exact equality로 결합한다. 한쪽 또는 양쪽의 누락/undefined/null/빈 문자열/잘못된 타입은 `sameRelease=false`로 처리하고 재분석·지원 판단 보류를 표시한다. 미완성 응답을 지원하는 기존 DTO nullable 계약은 유지한다. 외부 담당은 정상 동일/불일치와 한쪽·양쪽 누락/null/빈 값/잘못된 타입 회귀를 추가해야 하며, 이 채팅의 실제 화면 변경·브라우저 인수는 **NOT_RUN**, 전체 프런트 상태는 **verification_pending**이다.\n\n학생 분석은 계산할 때 채택한 발표본 버전을 유지한다. 새 발표본을 읽어 옛 학과 판정에 새 컷만 덧붙이지 않는다. 발표본·자료·규칙·곡선·카탈로그가 달라지면 재분석 대상으로 표시하고 새로운 학생 분석 revision에서 채택한다. 필요한 값이 없거나 결속이 틀리면 성공한 환산·누백과 과거 발표 자료는 유지하면서 지원 판단만 보류한다.\n\n`comparison_metric`은 `converted_score | university_top_percent`다. 점수는 내부 정확 환산값, 단위 `점`, 방향 `higher_is_better`, 동점 정책의 해당 없음은 `tie_policy=null`이다. 대학 누백은 `percentile.top_percent`에 대응하는 정확 비율, 단위 `%`, 방향 `lower_is_better`, `tie_policy=include_equal`이다. 전체 국수탐2 `overall` 누백을 대학 누백 비교 값으로 대신 넣지 않는다.\n\n`population_scope`와 `data_kind`는 `percentile` DTO에서 전체/반영 필수 비교집단 및 관측/추정 의미를 표시한다. 공개 발표본 context에 이 두 필드를 가공해 넣거나 관리 context로 대신 결합하지 않는다.\n\n이유 코드는 반영 방법, 지원 판단, 환산 유불리의 세 종류로 구분한다. 우수 탐구 반영·영어 등급 차감 같은 규칙 설명만으로 학생에게 유리했다고 표현하지 않는다. 정확한 동일 모집단 위치 차이의 근거가 있을 때만 유불리 이유를 생성한다.\n\n후보 응답의 `outside_offerings`, `ineligible_offerings`, `pending_offerings`는 각각 판단 완료 추천 범위 밖, 확인된 조건 미충족, 자료·자격·승인·버전 부족에 따른 보류다. 추천 대학이 0개여도 모든 판단이 outside/ineligible로 완료됐다면 정상 `ready` 빈 결과다. 실제로 모두 보류인 `pending`과 구분한다.\n\n## 최소설정 조회와 실제운영\n\n05:32Z 이전 통합 snapshot을 보존한다. 최신 재점검에서는 파일·키 없는 JWKS200, Auth settings401, user401을 확인했다. 기존 비공개 보관 키로 Auth settings200·JWT 없는 user401·공개키 REST metadata401·서버키 REST metadata200·비공개 schema REST406/PGRST106을 확인했다. 08:40:54Z public 테이블 limit=0 조회200/응답[]이며 실제 레코드 취득0건·DB쓰기0·새.env 생성0이다. 테이블 총건수·SQL/RLS·회원 이용권은 미검증이다. PGRST106은REST비노출이며SQL schema부재/권한실패가아니다. 개인식별값·projectURL/id·키·JWT·자료hash·비공개PC경로는공개하지않는다.\n\n기존 비공개 파일에서 URL/publishable/secret/JWKS 참조를 확인했다. 이번 프로세스와 해당 PC User/Machine 환경에서는 이 4개 및 DATABASE_URL/검수JWT 6개 이름이 부재였다. DATABASE_URL/검수JWT는 확인한 파일·환경 범위에서 미확보이며 다른 PC·배포 서버의 부재를 단정하지 않는다. .env 파일 자체는 필수가 아니고 ServerSettings는os.environ만 읽는다. 기존 파일의 보관과process주입은별도다. secretkey는DB비밀번호·사용자JWT가아니며현재getUser뒤sub/exp검증을JWKS직접검증완료로기록하지않는다. Console 브라우저 상태조회는 시간초과로 권한 미검증이다. 과거siteadmin표식조회는현재실로그인/consoleadmin/paid권한이아니다.\n\n## 이전코드 인수 이력\n\nPR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.\n\n## ⑥ 외부화면 당시 관측과 현재 기준\n\n05:32Z 당시 PR6 head ff2a8e412c7adc16eb61af34a6219a2c5c2d072b/base816/open-unmerged를 읽기 관측했다. 후속 root API 관측에서 PR6는 closed/merged, head6b2 exactCI2 success·develop2624를 확인했다. 과거05:32Z 관측은 보존하며 새 로컬 보고는 document_reported 범위를 독립 문서 검토했지만 직접 브라우저/운영 인수는 NOT_RUN이다. 347 빈학교 표시 fix는 이 develop에 포함되지 않는다. d7/e164·4cc source/CI는역사로보존하며최신실Caller/운영API/4페이지·브라우저는NOT_RUN이다. nonempty 3버전/context17·409부분보류/성공점수보존을외부인수조건으로유지한다.\n\n## 권한·자료·실행 승인\n\n목표 단일 authority는 public.jeongsi_passes로 확정했다. 현재 기본 jungsi_backend.entitlements/session v1은 그대로이며 목표 어댑터·DDL/사용자키·권한 SQL·취소/회수는 별도 계약/구현/검수다. 관리자 열람 예외의 서버 조회·별도 capability·operation·화면/session CR과 활성 MAX(ends_at)은 미채택 제안/회신 대상이다. paid profile/admin자동승격금지와staff학교scope·editor/approver독립을유지한다. 승인 자료 0, 로컬 후보 1건의 관측 engine_approved=false는 HOLD다. 미승인 자료/합성 모형의 production_allowed=false를 true로 승격하지 않는 정책을 유지하며, 후보에서 그 필드를 관측했다는 주장이 아니다. Drive자동OAuthrefresh는미구현이며marginal수치QA로jointcurve완성을판정하지않는다.\n\nPR5closed/보존ref와정확4파일f46/선행등록/기본deny/단회origin삭제검사는그대로다. d7외부제거관측은역사이며새삭제허용/이번팀실삭제아니다. 001실적용UNCONFIRMED/002NOT_APPLIED·mainnot_ready를유지한다. 이번문서는DB쓰기/migration/모형승인/main병합/배포실행승인이아니다. 원본/이전문서/backup/cache/검수결과는모두보존한다.\n\n## ⑧ 확정 결정과 후속 회신 요청\n\nSUP01/02 의사결정 대기는 해소했지만 배포 제공자·Connect·public master 어댑터·관리자 예외 CR은 NOT_RUN/회신 대기다. RF-01 BFF/CSRF/사용자·서버 신원, RF-02 관리자 표현, RF-03 DDL/사용자키/권한 SQL, RF-04 모드/실연결, RF-05 PR/SHA/증거, RF-06 명부/계정/기대값을 직접 회신받는다. HMAC/session v2는 미채택 제안이고 이번 문서가 실제 코드/운영 설정을 바꾸지는 않는다.\n\n기존 로컬 요청 1~6에는 별도 local factory·네 opaque subject·loopback·수신 PC DPAPI·신뢰 명부 version/SHA·미등록/등록미채택 시험팩의 두503을 나누고 승인·유효 exam 계산 성공에서만 총점/subjects·curve 없음 pending을 보존·데이터팀 공급·출발/후속 검수 SHA 구분으로 답한다. 메모리 성적/리포트/관심학교/관리초안·발표는 재시작 시 소실한다. DPAPI 자료 캐시와 운영 DB 영속성은 다르다.\n\n화면 반출 방지는 SEC-02 전달물/SEC-03 BFF·실세션·CSRF·서버신원/SEC-07 429·안전한503/no-store/SEC-08 세 gate의 같은 snapshot 실제 검수를 선행한다. 서비스팀의 재귀 DTO·공유 원자적 예산과 외부 화면팀의 Caller/브라우저/preview 담당을 분리한다. 무료 전체 누백·유료 전체 대학/학과 검색 및 기존 성공점수/부분 HOLD를 유지한다. 공개 회신에는 실제 설정/개인정보/성적/자료 hash/운영 한도를 넣지 않는다.\n\n개발팀 보완 조건: 요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다. 요청 localhost3003은 local serve의 정확 Origin으로만 명시하며 운영 configured_app을 선택하지 않는다. 네 subject/수신 PC DPAPI·SSR 실제 로그인은 독립이다. public master 전이는 reader/factory/probe/checker1284/정본 session 규칙을 같은 구현 PR에 묶고 이번 old pin은 유지한다. admin SSR gate/internal admin_read/opt-in v2는 대안·미채택이며 shortlist 예외도 별도 CR이고 owner·editor/approver scope/독립승인을 유지한다.\n\n현재 기준 보완: PR6 merged/head6b2 CI2는 source 관측이며 새 로컬 보고의 브라우저/비노출/오류응답 독립 인수는 대기다. source e764의 시험팩 code 구분은 정적 판독이며 기존 catalog/권한/host native 증거로 overall 두503을 관측했다고 주장하지 않는다. 소유자 user_id uuid/MAX 동의 보고도 실제DDL·권한SQL 인수가 아니다. FE-01~05 후속 지시의 입력/증거 충족 전 NOT_RUN을 유지한다.\n\n마지막 범위 정리: PR6의 head6b2 CI2는 같은 head이고 347은 develop2624의 ancestor가 아니며 빈학교표시fix도없다. FE-05 후속PR통합을요청한다. 로컬 네역할/HOLD·503/HTML검색0·경고는 document_reported pass, 직접root브라우저·전체JS/RSC/JSON/maps/storage/download·실429/공유예산/서버신원/preview·권한양성/자기승인·숫자/실DBAuth/운영은NOT_RUN/PENDING이다. FE-01 live.ts55 위험은P2 정적추론/실행미재현이며 외부화면팀이수정한다.\n\n\n## ⑨ 실제 Supabase staging 및 source DDL 수령 — 후속 snapshot\n\n현재 문서 출발 기준은 4366d67732556b69a17ebad03dbb5fc8bf1d6671이며 앞의 v3/2624 관측은 당시 기록으로 보존한다. 신규 private Storage 생성·49객체 해시 재수신·원본 보존/public 경로98거절과 source9파일/30SQL 검토·OpenAPI9컬럼 metadata를 수령했다. 실제 raw Storage 인증사용자/RLS·signedURL·SQL DB/권한·migration·자료/모형 채택·운영은 별도 미검수다. CR-SERVICE-SUP03 서비스 구현 준비가 채택됐으나 default 운영 factory/old entitlement/session v1 세필드/Drive·22API·4페이지·보안은 전환하지 않았다. 구체 현재 상태는 [Supabase 운영 인계](../../current/Supabase_운영_인수인계.md)의 실제 업데이트/source 입력 절을 따른다. 실제 자료경로/SHA/키는 private 영수증에만 두며 화면/코드로 복사하지 않는다.\n\n\n### ⑩ 실제 DB 사전 검수와001·002 적용의 단계 구분\n\n양계정 실제 TLS/role/master 최소SELECT와 기존 두 SELECT policy를 사전 catalog에서 확인했다. 이후 owner 단일transaction의 신규 private schema/13RLS tables·001002 적용 개발 영수증을 수령했으나 독립 원장 검수 pending·private app 정책0/runtime003·실 사용자권한/기본factory·운영은 미인수다. 이전 Storage/HTTP의 SQL NOT_RUN은 당시 관측으로 보존한다. CR-SERVICE-SUP04의 app-only/current_user·migration owner runtime거절을 채택하고 master9컬럼SELECT의 임의 REVOKE는 금지한다. PR15 정적 빈학교/숫자범위fix와 CI2 관측은 수용하고 FE-01R HTTP-date 문법 잔여·실브라우저/429·통합 인수는 후속이다.\n"
     },
     "external_frontend_readonly_review": {
       "observed_at": "2026-10-06T10:56:00.912393+00:00",
@@ -7470,14 +7510,14 @@
   },
   "supabase_operations_handoff_contract": {
     "format": "jungsi.supabase-operations-handoff/v1",
-    "revision": "2026.10.06.v4",
+    "revision": "2026.10.06.v5",
     "checked_at": "2026-10-06T08:40:54.349322Z",
     "status": "NOT_READY",
     "production_ready": false,
     "document_status": "actual_storage_and_source_intake_reviewed_service_implementation_pending_commit_validation",
     "decision": "SUP01은 separate_Jungsi_FastAPI_deployment, SUP02의 목표 단일 원본은 public.jeongsi_passes로 확정했다. 현재 코드는 여전히 jungsi_backend.entitlements를 조회하며 목표 어댑터 전환·실DB/실Auth·배포·보안 인수는 NOT_RUN이다. production_ready=false / NOT_READY를 유지한다.",
-    "summary": "신규 private Storage49객체 hash readback/원본보존·public경로98거절, source9DDL/30SQL·OpenAPI9컬럼 부분수신 이후 private 설정수령·실제 양계정 TLS/role/master catalog preflight PASS와001002 신규 schema/13RLS tables 적용 개발 영수증을 수령했다. 현재 001002는 actual_applied_verified_by_development_receipt이며 독립 원장검수 pending·private app정책0/runtime003 미적용·실Auth/유료권한/기본factory/자료승인/운영은 미인수다. master/profiles/기존roleowner 변경·DELETE/DROP/TRUNCATE0. CR-SERVICE-SUP03/04 구현준비·서비스후보27검수보고와 PR15 정적fix/CI2는 각각 same snapshot 구현/통합 및 실제 검수대기다. FE-01R HTTP-date 문법 잔여를 별도 후속으로 요청한다. API22/session3/page4·무료누백/유료후보·보안3gate·production_ready=false/NOT_READY와 모든 이전 관측/원본을 보존한다. 최신 PR15 head243d2cd7의 exactCI2/28M/noD·정확 allowedOrigins 관측은 이전339 기록과 분리하며 증분review/merge/보안운영gate는 pending이다. 최신PR15 증분은 임시preview용으로 수용했으며 FE-ORIGIN 실도메인전환/환경분리·유효action/실세션 조건은 pending이다. 최신 인입 규정은 minimal_explicit_approved_allowlist다. 요청별 최소 승인자료만 선택하며 전체소유자료/PDF·QA·dump·전체원표의 자동runtime 인입을 금지한다. 기존49archive와13table schema는 보존·자료인입과 분리한다.",
-    "scope": "Supabase actual 신규 private49객체 staging 및 actual owner/app TLS·role/master 읽기 preflight PASS·신규private schema001002 개발 적용영수증을 각 시점으로 기록한다. 13table/RLSenabled·private app정책0·독립 검수 pending과 runtime003/실Auth/업무/Storage승인·default전환/운영 pending을 구분한다. 기존 API22/session3/page4·회원/oldfactory/authority/Drive/security와 모든 dated history는 보존한다.",
+    "summary": "003은정확인간승인후적용하고fresh24policy/SELECT13·INSERT9·columnUPDATE6의최소권한metadata를확인했다. 실제10합성행은새process/TLS연결로영속성·CAS/멱등/소유권거절을검수했으나실학생/Auth/유료rows·운영전체인수는아니다. 명시port actualDB/master metadata는PASS이고health503는구성/자료/실세션준비보류다. 최소시험팩1건/328915B는statusstaged·승인0/unbound/engineprodfalse·provider미승인거절/network0이다. 수학한구간/9경계부분QA는wholeexam/CDF/공식정수백분위·실화면mode승인이아니다. PR15 ef7b7c08 exactCI2와develop3d90정상merge/삭제0·branch보존은확인됐고FE-01R·FE-ORIGIN·FE-SOURCE-01·browser/429·securitygate는pending이다. 직접인간은기본경로유지·명시연결만준비를선택하여CR06source변경0/defaultlegacy를유지한다. 서비스7준비파일/33focusedPASS와641이전9ERROR/별도fixture10PASS를같은Git전체검수와분리한다. 실제승인자료활성화·JWT·livehost·기본factory·운영은미완료이며minimalallowlist/49archive보존·API22/session3/page4·productionfalse/NOT_READY를유지한다.",
+    "scope": "merged develop3d90를기준으로정확003직접승인/적용·fresh최소권한·명시port actualmetadata·10합성별도process영속성·최소시험팩1staged와수학9경계부분검수·PR15 source/CI통합을각증거scope로기록한다. 기본factory는직접인간답변에따라유지하고defaultlegacy/API22/session3/page4·무료누백/유료후보·보안gate/과거history를보존한다. 자료활성화·실JWT/유료rows·livehost/운영·실화면mode는미인수다.",
     "architecture": {
       "recommendation": "separate_Python_FastAPI_backend",
       "recommendation_is_inference": false,
@@ -7662,12 +7702,13 @@
           "취소/회수 후 저장된 결과 재조회도 현재 권한으로 재인가한다. 옛 entitlements는 보존하고 이중 authority·동기화 fallback을 만들지 않는다.",
           "관리자 열람 예외의 조회·별도 capability·허용 operation·화면/session DTO 영향은 CR로 확정한다. paid=true나 임의 만료로 승격하지 않는다.",
           "master reader·factory의 session entitlement 주입·readiness/probe·정본 session 규칙/route catalog·checker1284와 회귀를 같은 구현 PR에서 전이한다. 이번 명세 반영에서는 현재 old authority 검사 pin을 유지하고 old OR new로 완화하지 않는다.",
-          "CR-SERVICE-SUP03의 독립 entitlement 주입·read-only master reader 구현 준비를 채택한다. source DDL 수령은 실제 DB preflight·default factory 전환 인수가 아니며 old 실행 pin은 유지한다."
+          "CR-SERVICE-SUP03의 독립 entitlement 주입·read-only master reader 구현 준비를 채택한다. source DDL 수령은 실제 DB preflight·default factory 전환 인수가 아니며 old 실행 pin은 유지한다.",
+          "직접인간답변으로기본경로유지/명시port준비만확정했다. CR06review-only7PASS·actualmastermetadata를기본factory전환/paid실사용자검수로확대하지않는다."
         ],
         "completion": [
           "원본 DDL/사용자키·UTC 활성/만료·지급/취소/회수·최소 SELECT를 확인하고 어댑터/정본 session 규칙/검사 PR을 인수한다. 관리자 CR·기본 v1 호환도 별도 확정한다."
         ],
-        "status": "DECISION_CONFIRMED_ADAPTER_NOT_RUN",
+        "status": "TARGET_CONFIRMED_EXPLICIT_PREPARATION_DEFAULT_LEGACY_KEPT_BY_HUMAN",
         "decision_status": "confirmed_by_user",
         "execution_status": "NOT_RUN_target_adapter_transition",
         "history_before_actual_update": {
@@ -7740,20 +7781,16 @@
           "SUP-03"
         ],
         "work": [
-          "기존 상태 점검·승인 backup 후 001/002 추가 적용 계획을 별도로 승인받는다. 이번 문서는 운영쓰기 실행 승인이 아니다.",
-          "전용role grants/RLS·anon/authenticated 직접 접근 차단·owner·UTC·11개 timestamptz/date 컬럼·schema_versions를 실DB에서 검수한다.",
-          "reset/drop/delete 금지. REST PGRST106은 DB schema 부재/SQL 권한 실패 증거가 아니다.",
-          "권한 SQL 원문을 확보해 master SELECT·다른 public 표 제한·자체 업무쓰기·owner/RLS/함수 범위를 대조한다. SELECT만으로 ALTER/RLS 작성 권한이 생긴다고 추정하지 않는다.",
-          "profiles 관리자 판정이 필요하면 다른 public 표 접근 제한과 양립하는 최소 server-only 조회를 별도 확정한다. SQL/DDL을 추정해 실행하지 않는다.",
-          "source9파일/30SQL검토와 repo001/002 존재는 실제 적용 증거가 아니다. 사용자 요청의 비파괴적 업데이트 목적과 credential/owner/RLS·보존 backup·구체 적용계획 미충족을 분리한다.",
-          "owner는 이관/schema소유/001002용, app은 runtime private USAGE/SELECT/INSERT/UPDATE·masterreadonly/DELETE·TRUNCATE없음 목표다. owner의 소유·구조 변경 권한이 없다고 주장하거나 runtime에 owner 계정을 재사용하지 않는다. 전용 권한 SQL 원문·runtime003은 미수신/미적용이다. role/master catalog와001002 개발 영수증은 수신했다.",
-          "13:12 private schema/table0 preflight 이후13:17 owner 단일transaction의 신규 jungsi_backend/13RLS tables·001002 schema_versions 적용 개발 영수증을 수령했다. 독립 검수 pending·private app 정책0/runtime003 미적용·실업무/CAS/멱등/권한 인수 미실행을 분리한다. public/master/profiles/기존owner 변경·DELETE/DROP/TRUNCATE0."
+          "정확003 v2 SQL/권한matrix의직접인간승인후owner transaction을적용하고freshconnection의24policy/13SELECT/9INSERT/6columnUPDATE·tablewideUPDATE/DELETE/TRUNCATE/미래GRANT없음을검수했다. 이전001002앱정책0·미적용관측은history다.",
+          "기존 public4범주 metadata·owner/role 보존과실자료인입0을확인했다. 전체index/defaultACL 전수와운영backup/restore·JWT/유료/HTTP는미인수다.",
+          "저장소port 합성10건의CAS/멱등/타인소유권거절과새프로세스영속성을확인하고합성행을보존한다. 실제학생/운영인수로확대하지않는다.",
+          "기본factory/legacy는인간이유지하도록결정했다. owner이관URL과운영appURL을분리하고 reset/drop/delete·master변경·임의profiles/admingrant·자동Storage전환은하지않는다."
         ],
         "completion": [
           "적용·권한·소유권·UTC왕복·11컬럼·schema_versions·002 트랜잭션 인수가 끝났다.",
           "원본 DDL/SQL·전용 role·RLS·master/자체 schema 거절·관리자 조회와 실제 001/002 증거를 분리해 인수한다."
         ],
-        "status": "001002_applied_development_receipt_independent_review_runtime003_pending",
+        "status": "003_APPLIED_FRESH_METADATA_AND_SYNTHETIC_PORT_PASS_LIVE_PENDING",
         "history_before_actual_update": {
           "status": "NOT_RUN_001_UNCONFIRMED_002_NOT_APPLIED"
         },
@@ -7897,7 +7934,8 @@
           "요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다.",
           "실제 Storage49객체 업로드·SHA 재수신·원본 보존과 public 경로98거절을 인수했다. 실제 로그인 사용자의 raw Storage/RLS·signed URL·runtime read·자료/모형 채택은 별도 NOT_RUN/pending이다.",
           "현재 default는 Drive다. CR-SERVICE-SUP03의 Storage GET-only 공급자 준비를 explicit 주입으로 검수하고 저장 CSV/후보를 runtime 승인본이나 가짜 Drive identity로 자동 치환하지 않는다.",
-          "최신 최소 인입 규정(minimal_explicit_approved_allowlist)을 따른다. 요청 operation에 필요한 시험팩/모형/규칙/학교카탈로그/입결 중 최소 승인 entries만 선택하고 모든 보유자료 scan·자동채택/PDF·QA·dump·전체원표 필수추정을 금지한다. 자료가 없으면 기존 guard/503·pending을 보존하고49archive는 삭제 없이 유지한다."
+          "최신 최소 인입 규정(minimal_explicit_approved_allowlist)을 따른다. 요청 operation에 필요한 시험팩/모형/규칙/학교카탈로그/입결 중 최소 승인 entries만 선택하고 모든 보유자료 scan·자동채택/PDF·QA·dump·전체원표 필수추정을 금지한다. 자료가 없으면 기존 guard/503·pending을 보존하고49archive는 삭제 없이 유지한다.",
+          "최소시험팩1건/328915B·statusstaged/승인0/engineprodfalse·archiveexactFalse는미채택이다. 수학한구간/9경계in-memory검수와전체CDF/공식정수백분위/실화면mode인수를분리한다. provider미승인거절/network0을유지하고부족한모형/입결은pending으로둔다."
         ],
         "completion": [
           "승인 명부/곡선/규칙/모형·버전·실Drive read/갱신/별도 write·독립 수치 증거가 있다.",
@@ -7905,7 +7943,7 @@
           "요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다. 정적 코드 판독과 실제HTTP 인수를 구분한다.",
           "Storage 저장본의 bytes/version/원문SHA·승인명부/엔진 scope·공급자 검수를 각각 인수한다. staging hash PASS만으로 engine_approved/production_allowed·실DB·학생 수치·운영 gate를 승격하지 않는다."
         ],
-        "status": "PRIVATE_STORAGE_STAGED_ENGINE_AND_PROVIDER_ADOPTION_PENDING_DRIVE_NOT_RUN",
+        "status": "MINIMUM_EXAM_STAGED_UNBOUND_SUBJECT_SCOPED_QA_PASS_ADOPTION_PENDING",
         "history_before_actual_update": {
           "status": "BLOCKED_APPROVED0_DRIVE_NOT_RUN"
         }
@@ -7941,13 +7979,14 @@
           "SEC-08 세 security gate의 같은 snapshot 실제 browser/HTTP 증거를 결속한다. 문서/단위 PASS는 실제 반출/우회/수집 방어 인수가 아니다.",
           "로컬 메모리의 성적·리포트·관심학교·관리 초안/발표는 재시작 시 소실한다. 로컬 성공을 운영 영속성으로 표시하지 않으며 SUP-10 실DB 복구를 선행한다.",
           "요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다.",
-          "head6b2 merged와347 비포함을 분리하며 FE-05의 최신 develop 후속 PR·fullSHA/CI·browser 증거를 제출하기 전 빈 학교 표시 fix가 통합됐다고 기록하지 않는다."
+          "head6b2 merged와347 비포함을 분리하며 FE-05의 최신 develop 후속 PR·fullSHA/CI·browser 증거를 제출하기 전 빈 학교 표시 fix가 통합됐다고 기록하지 않는다.",
+          "PR15 ef7b7c08 source/CI2·develop3d90통합/삭제0은확인됐다. FE-01R·FE-ORIGIN·FE-SOURCE-01 comment의수치오인/보류/실mode·전체전달물·유효action/실Auth/429/browser는별도인수다."
         ],
         "completion": [
           "실JWT/운영 API·일반/유료·소유권·점수/HOLD·발표본 결속·4페이지 및 기존 report.export 응답 소비를 실제 브라우저로 인수했다. 리포트·인쇄 기능 확장은 제외한다.",
           "BFF/22 매핑·실세션/CSRF/서버 신원·브라우저 전달물/재귀 DTO·원점/권한 우회·공유 예산/429/503/no-store·preview 및 세 security gate의 실제 인수 증거를 같은 SHA에 결속한다. 담당 경계·미채택 admin/session/헤더 CR은 분리한다."
         ],
-        "status": "NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED",
+        "status": "PR15_MERGED_SOURCE_CI_VERIFIED_BROWSER_AND_SECURITY_PENDING",
         "history_before_actual_update": {
           "status": "NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED"
         }
@@ -8023,7 +8062,7 @@
       [
         "실DB",
         "SUP-03/04",
-        "001002_APPLIED_DEVELOPMENT_RECEIPT_INDEPENDENT_AND_RUNTIME_PENDING",
+        "003_FRESH_METADATA_AND_SYNTHETIC_PERSISTENCE_PASS_LIVE_PENDING",
         "실DB의 001/002 schema_versions·TLS·전용 role·owner·UTC·CAS/멱등·불변 발표본 원자성 검수 영수증"
       ],
       [
@@ -8035,13 +8074,13 @@
       [
         "유료·staff 권한",
         "SUP-02/06",
-        "NOT_RUN_TARGET_CONFIRMED_ADAPTER_PENDING",
+        "EXPLICIT_MASTER_METADATA_PASS_REAL_JWT_ROWS_NOT_RUN_DEFAULT_LEGACY_KEPT",
         "확정 master의 어댑터·사용자키/UTC/취소/회수·관리자 CR·session v1 호환·owner/학교 scope/독립승인 실제 증거"
       ],
       [
         "실approved 자료",
         "SUP-08",
-        "HOLD_APPROVED0",
+        "HOLD_MINIMUM_EXAM_STAGED_APPROVED0_SCOPED_MATH_QA_ONLY",
         "권한 있는 joint curve/규칙/연도보정/학교누백/forecast·독립검산"
       ],
       [
@@ -8059,7 +8098,7 @@
       [
         "외부4페이지",
         "SUP-09",
-        "NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED",
+        "PR15_MERGED_SOURCE_CI_PASS_BROWSER_SECURITY_NOT_RUN",
         "통합2624/PR6 source·CI 관측 이후 정확 actual자료/권한/세security gate/수신PC·브라우저/429503 증거를 별도 인수"
       ],
       [
@@ -8121,7 +8160,7 @@
       [
         "DATABASE_URL",
         "서버 전용 비밀",
-        "app private 설정 수령·실TLS/role/master preflight PASS. 배포process/default private업무권한·runtime003 인수pending",
+        "실SQL/003최소권한·metadata확인. 운영서버는app만주입하며실Auth/default경로는현재legacy유지",
         "ServerSettings_required"
       ],
       [
@@ -8175,7 +8214,7 @@
       [
         "JUNGSI_MIGRATION_DATABASE_URL",
         "이관 전용 비밀",
-        "owner private 수령·실TLS/role preflight·001002 개발 적용영수증. 이관전용/독립검수·runtime003 별도",
+        "owner001002003이관전용private분리;운영서버/runtime/외부화면에는전달하지않음",
         "migration_reference_not_current_ServerSettings_or_runtime"
       ]
     ],
@@ -8682,6 +8721,946 @@
           "work": "Retry-After fallback는 HTTP-date의 정식3형식만 허용한다. Date.parse가 ISO datetime 등 비HTTP-date를 수락하는 잔여를 수정하고 형식 밖 값은 복구시각을 만들지 않는다.",
           "evidence_boundary": "정적 소스 추론과 보고12case 범위다. 직접 실제429/브라우저 재현·정확 통합 SHA 인수는 NOT_RUN."
         }
+      },
+      "before_second_actual_update_1_8_4": {
+        "summary": "신규 private Storage49객체 hash readback/원본보존·public경로98거절, source9DDL/30SQL·OpenAPI9컬럼 부분수신 이후 private 설정수령·실제 양계정 TLS/role/master catalog preflight PASS와001002 신규 schema/13RLS tables 적용 개발 영수증을 수령했다. 현재 001002는 actual_applied_verified_by_development_receipt이며 독립 원장검수 pending·private app정책0/runtime003 미적용·실Auth/유료권한/기본factory/자료승인/운영은 미인수다. master/profiles/기존roleowner 변경·DELETE/DROP/TRUNCATE0. CR-SERVICE-SUP03/04 구현준비·서비스후보27검수보고와 PR15 정적fix/CI2는 각각 same snapshot 구현/통합 및 실제 검수대기다. FE-01R HTTP-date 문법 잔여를 별도 후속으로 요청한다. API22/session3/page4·무료누백/유료후보·보안3gate·production_ready=false/NOT_READY와 모든 이전 관측/원본을 보존한다. 최신 PR15 head243d2cd7의 exactCI2/28M/noD·정확 allowedOrigins 관측은 이전339 기록과 분리하며 증분review/merge/보안운영gate는 pending이다. 최신PR15 증분은 임시preview용으로 수용했으며 FE-ORIGIN 실도메인전환/환경분리·유효action/실세션 조건은 pending이다. 최신 인입 규정은 minimal_explicit_approved_allowlist다. 요청별 최소 승인자료만 선택하며 전체소유자료/PDF·QA·dump·전체원표의 자동runtime 인입을 금지한다. 기존49archive와13table schema는 보존·자료인입과 분리한다.",
+        "scope": "Supabase actual 신규 private49객체 staging 및 actual owner/app TLS·role/master 읽기 preflight PASS·신규private schema001002 개발 적용영수증을 각 시점으로 기록한다. 13table/RLSenabled·private app정책0·독립 검수 pending과 runtime003/실Auth/업무/Storage승인·default전환/운영 pending을 구분한다. 기존 API22/session3/page4·회원/oldfactory/authority/Drive/security와 모든 dated history는 보존한다.",
+        "actual_update_scope": {
+          "format": "jungsi.supabase-actual-update-scope/v1",
+          "basis_commit": "4366d67732556b69a17ebad03dbb5fc8bf1d6671",
+          "recorded_at": "2026-10-06T13:26:00.596308Z",
+          "authorization_source": "human_current_Supabase_update_and_all_needed_inputs_intake_request",
+          "storage_new_private_copies_authorized": true,
+          "database_non_destructive_update_requested": true,
+          "database_execution_status": "001002_applied_development_receipt_independent_review_pending",
+          "specific_database_apply_plan": "001002_new_private_schema_applied_preserved_master_runtime003_pending",
+          "storage_writes_executed": true,
+          "database_SQL_executed": true,
+          "migration001": "actual_applied_verified_by_development_receipt",
+          "migration002": "actual_applied_verified_by_development_receipt",
+          "master_write_authorized": false,
+          "arbitrary_schema_or_policy_changes_authorized": false,
+          "deletion_authorized": false,
+          "overwrite_authorized": false,
+          "engine_adoption_performed": false,
+          "deployment_performed": false,
+          "production_ready": false,
+          "boundary": "최신 사용자 요청 범위에서 신규 private Storage 복사·원본 보존, 실제 owner/app 연결·catalog 사전 읽기 검수 및 신규 private schema 001/002 적용 개발 영수증을 수령했다. 001/002 적용의 독립 원장 검수는 대기이며 private app 정책0·runtime003·사용자Auth/유료권한/default factory·자료/모형·보안·운영은 미인수다. master/public/profiles/기존role owner 변경·DELETE/DROP/TRUNCATE·기존 자료 덮어쓰기0을 분리한다. arbitrary schema/policy/master 변경·삭제·운영배포 권한으로 확대하지 않는다. 과거 미접속/미적용/safety 관측은 각 시점 history로 보존한다. 최신 사용자 지시는 서비스에 필요한 최소 자료만 인입하는 것으로 범위를 한정한다. 모든 소유자료 scan/자동import는 금지하며 기존49archive 보존/자동 runtime채택0·삭제0.",
+          "owner_reply": {
+            "status": "private_credentials_and_readonly_DB_preflight_received_001002_development_receipt_received",
+            "existing_frontend_and_main_API_DATABASE_URL": "not_used_owner_reported_APIkey_mode",
+            "connection_delivery": "primary2/directalternatives2 private 수령 후 양계정 실제 TLS 연결·role/master catalog 확인; 운영 process/default 전환 별도",
+            "grant_SQL_original": "NOT_RECEIVED",
+            "SQL_issuance_or_application_receipt": "001002_private_schema_development_apply_receipt_received_original_role_SQL_NOT_RECEIVED",
+            "profiles_minimal_admin_lookup": "exception_contract_and_minimum_grant_pending"
+          },
+          "database_SQL_reads_executed": true,
+          "database_SQL_writes_executed": true,
+          "ingestion_policy": "minimal_explicit_approved_allowlist"
+        },
+        "credentials_intake": {
+          "format": "jungsi.private-credential-intake-summary/v1",
+          "evidence_id": "SUP-CREDENTIALS-20261006-OWNER-APP",
+          "recorded_at": "2026-10-06T13:12:22.356600Z",
+          "status": "credentials_received_connection_preflight_PASS_private_migration_review_pending",
+          "source": "human_owner_private_delivery_and_root_structure_only_verification",
+          "primary_connection_settings": 2,
+          "direct_alternatives": 2,
+          "Supabase_reference_settings": 4,
+          "safe_configuration_names": [
+            "DATABASE_URL",
+            "JUNGSI_MIGRATION_DATABASE_URL"
+          ],
+          "structure_verified_by_root": [
+            "app/owner primary는 session5432 구조",
+            "ROLE.PROJECTREF/TLS·URI 및 대상 결속 검토",
+            "원본 보존·Git제외/비밀값 출력0/Drive 업로드0"
+          ],
+          "private_values_read_by_planning": false,
+          "actual_DB_connection_verified": true,
+          "effective_role_policy_verified": true,
+          "migration001": "actual_applied_verified_by_development_receipt",
+          "migration002": "actual_applied_verified_by_development_receipt",
+          "runtime_RLS003": "implementation_plan_pending_NOT_APPLIED",
+          "boundary": "설정 수령 후 실제 SQL 읽기 연결/TLS·role/master preflight PASS와001/002 개발 적용 영수증을 별도로 확인했다. independent 원장 검수/runtime003·실 사용자권한·default factory/운영 process 배포·자료승인은 대기다. 설정값/host/프로젝트ID/비공개 경로는 public 문서/라우팅으로 전달하지 않는다.",
+          "effective_verification_scope": "양계정 실제 TLS/현재role/최소 master SELECT·쓰기없음 사전 catalog 검수; private app 업무 policy/운영Auth NOT_RUN"
+        },
+        "database_role_target": {
+          "format": "jungsi.database-role-target/v1",
+          "status": "actual_connection_role_master_read_preflight_PASS_runtime_privileges_pending",
+          "owner_role": "jungsi_backend_owner",
+          "owner_scope": "이관/schema 객체 소유·001/002 적용 전용. 실제 객체 owner의 구조 변경 권한을 runtime 제한과 혼동하지 않는다.",
+          "app_role": "jungsi_backend_app",
+          "app_scope": "runtime private schema USAGE/SELECT/INSERT/UPDATE 및 master read-only. DELETE/TRUNCATE 권한 없음이 목표이며 실제 GRANT/RLS/effective privileges 검수 필요.",
+          "master_read_only": true,
+          "runtime_DELETE_allowed": false,
+          "runtime_TRUNCATE_allowed": false,
+          "owner_has_schema_management_authority": true,
+          "owner_is_migration_only": true,
+          "owner_runtime_reuse_allowed": false,
+          "profiles_minimum_lookup": "별도 예외 계약 이후 최소 조회 부여 여부 미정",
+          "session_pooler": {
+            "port": 5432,
+            "username_structure": "ROLE.PROJECTREF",
+            "host": "Dashboard Connect 원본을 비공개로 전달; 지역/프로젝트로 합성하지 않음",
+            "password": "URI percent-encoding·TLS 조건의 private 인계, 실제 값 공개 금지"
+          },
+          "connection_selection": "지속 FastAPI/IPv4는 session5432 우선안. IPv6 direct5432 대안 및 transaction6543 실제 호환 검수는 별도.",
+          "actual_role_exists_verified": true,
+          "actual_effective_privileges_verified": true,
+          "boundary": "신규 연결설정과 실제 TLS/role/master metadata 사전 검수로 계정 존재·최소 SELECT·쓰기없음을 확인했다. owner는 이관/schema 소유·구조변경 권한을 갖고 runtime 재사용하지 않는다. private 업무 app 정책은 001/002 적용 영수증에서0이며 runtime003/CRUD/권한 인수는 pending이다. 기존 발급중 보고와 credential 미확보 관측은 history로 보존한다.",
+          "actual_privilege_scope": "13:12 preflight master SELECT/쓰기없음·CREATE·비super/BYPASSRLS/membership 검수만. 신규 private app CRUD/policies/runtime003·운영승인 NOT_RUN"
+        },
+        "service_transition_contract": {
+          "format": "jungsi.service-supabase-transition/v1",
+          "id": "CR-SERVICE-SUP03",
+          "status": "adopted_for_service_implementation_verification_pending",
+          "basis_commit": "4366d67732556b69a17ebad03dbb5fc8bf1d6671",
+          "requirements": [
+            "REQ-20",
+            "REQ-23",
+            "REQ-24",
+            "REQ-25",
+            "REQ-26"
+          ],
+          "owner": "서비스·DB 개발팀",
+          "default_operating_factory_transition": "NOT_RUN",
+          "current_authority": "jungsi_backend.entitlements",
+          "target_authority": "public.jeongsi_passes",
+          "entitlement_injection": {
+            "scope": "create_app의 entitlement port를 업무 저장소와 독립 주입하는 구현 준비를 채택한다. 기존 호출과 default factory는 보존한다.",
+            "reader": "PostgresJeongsiPassesRepository read-only 후보",
+            "preflight": [
+              "수신 source9컬럼·UUID·timestamptz/UTC·period CHECK/FK 정의와 현재DB의 일치를 검수한다.",
+              "서버 검증 subject만 조회하며 동일 서버 UTC 평가시각의 활성 revoked_at/starts_at/ends_at·MAX(활성 ends_at) 의미를 검수한다.",
+              "전용 최소 SELECT role·CONNECT/USAGE·owner/RLS/effective privileges·raw psycopg context를 검수한다. auth.uid() 자동 주입을 가정하지 않는다.",
+              "master에 INSERT/UPDATE/DELETE하지 않고 실제 paid와 관리자/staff capability를 분리한다.",
+              "reader/factory/probe/session 규칙/검사 전이를 같은 구현 PR에서 인수한다. 현재 default는 old authority·session v1 3필드다.",
+              "nullable metadata는 명시 YES/NO만 해석하고 미확인/잘못된 타입은 거절한다. bool 승인필드도 정확 bool을 요구한다. source/API metadata를 실제 DB 효과로 추론하지 않는다.",
+              "CR-SERVICE-SUP04-20261006-01: 실제 두 SELECT 정책(기존 own/admin·전용 backend app/owner read)을 정확히 대조하고 runtime reader current_user는 jungsi_backend_app만 허용한다. migration owner는 runtime reader에서 거절하며 기존 public9컬럼 SELECT를 임의 REVOKE하지 않는다.",
+              "master trusted backend SELECT는 실제 RLS USING(true)로 넓다. WHERE user_id=%s 검증UUID parameter를 필수로 하고 claim만으로 사용자격리를 증명하지 않는다. 실제 두 policy signature의 role/predicate/PERMISSIVE를 대조하고 unknown 추가/변경은 거절한다."
+            ],
+            "source_definition_received": true,
+            "actual_DB_preflight": "PASS_READONLY_CONNECTION_ROLE_MASTER_SCHEMA_ABSENCE",
+            "runtime_role_target": "jungsi_backend_app",
+            "migration_role_target": "jungsi_backend_owner"
+          },
+          "storage_provider": {
+            "scope": "SupabaseStorageDataProvider와 GET-only Client의 explicit 주입 구현 준비를 채택한다. 현재 Drive 공급자/default configured_app은 자동 전환하지 않는다.",
+            "registry_format": "jungsi.data-registry/v1",
+            "transport": "supabase_storage_explicit_injection",
+            "entry_fields": [
+              "kind",
+              "key",
+              "bucket",
+              "object_key",
+              "bytes",
+              "sha256",
+              "version",
+              "payload_version",
+              "approved",
+              "engine_approved",
+              "production_allowed",
+              "archive_only"
+            ],
+            "registry_status": "proposed_transport_shape_subject_to_same_implementation_PR_validation",
+            "independent_registry_SHA_binding_required": true,
+            "maximum_artifact_bytes": 33554432,
+            "credentials": "서버 전용 apikey·private bucket. 사용자 Bearer와 서버 Storage 비밀은 서로 대체하지 않으며 브라우저/응답/로그에 전달하지 않는다.",
+            "checks": [
+              "GET-only 공급자·private bucket·신뢰 명부 SHA·entry identity/version/bytes/원문 SHA·최대32MiB를 결속한다.",
+              "approved·engine_approved·production_allowed는 정확 bool과 실행 scope의 승인 근거로 검사하며 staging false를 임의 true로 승격하지 않는다.",
+              "bucket/object_key는 private 명부에만 있고 허용 경로/버전·키 경로 정규화를 검수한다. 승인 엔트리 외 payload를 읽거나 키 traversal/공개 signed URL을 노출하지 않는다.",
+              "원문 CSV/후보 자료가 업로드됐다는 이유로 runtime envelope를 만들거나 실제 Drive ID/version으로 자동 변환하지 않는다.",
+              "current factory 자동전환·누락설정의 메모리/합성/다른 사용자/미승인 자료 fallback을 금지한다.",
+              "새 Storage 명부 archive_only는 명시된 정확 bool false만 허용한다. 누락/null/0/문자열과 미확인 상태는 거절하고 archive 저장본을 runtime 승인본으로 승격하지 않는다. 기존 Drive명부를 자동 변환하지 않는다."
+            ],
+            "actual_runtime_registry_and_read": "NOT_RUN",
+            "current_factory_storage_selected": false,
+            "archive_only_policy": {
+              "required": true,
+              "allowed_value": false,
+              "exact_bool_required": true,
+              "missing_null_number_string_rejected": true,
+              "scope": "새 Storage 명부 각 entry에 명시 archive_only exact bool False 필수. registry 단일 flag/누락 default로 보완하지 않고 기존 Drive형식 자동변환0.",
+              "location": "registry_entry"
+            }
+          },
+          "implementation_code_paths": [],
+          "code_path_status": "service_candidate_files_created_feature_PR_integration_pending",
+          "synthetic_verification": "service_team_reported_27_PASS_final_typeguards_and_same_snapshot_pending",
+          "actual_auth_DB_Storage_privilege_verification": "NOT_RUN",
+          "production_ready": false,
+          "route_refs": [
+            "session.read",
+            "history.search",
+            "recruitment.read",
+            "overall.analyze",
+            "offerings.search",
+            "offering.read",
+            "university.analyze",
+            "candidates.build",
+            "forecast.published.read"
+          ],
+          "preservation": "API22/session v1 세필드/4페이지·무료누백/유료후보·본인소유권·확인성적·학교 scope·독립승인·기존 Drive/local 경로·security 계약을 보존한다. 실제 서비스 구현/기본 factory 전환/DB 권한/수치/운영은 후속 증거로 별도 인수한다.",
+          "pending_pr_paths": [
+            "src/jungsi_touch/infrastructure/http_api.py",
+            "src/jungsi_touch/infrastructure/postgres_entitlements.py",
+            "src/jungsi_touch/infrastructure/supabase_storage.py",
+            "tests/test_http_entitlement_injection.py",
+            "tests/test_postgres_entitlements.py",
+            "tests/test_supabase_storage.py"
+          ],
+          "code_paths_boundary": "서비스팀 후보에서 파일 생성 보고를 수령했다. develop implementation 참조에 추가하지 않으며 같은 공통계약·서비스6파일 snapshot의 PR/검수/통합 후 실제 참조로 전이한다.",
+          "synthetic_evidence": {
+            "reported_tests": 27,
+            "source": "service_team_report_read_by_root",
+            "status": "reported_PASS_before_final_typeguard_freeze",
+            "independent_rerun": false,
+            "exact_implementation_commit": "pending_feature_commit",
+            "actual_DB_auth_storage_permission": "NOT_RUN"
+          },
+          "reader_contract_update": {
+            "id": "CR-SERVICE-SUP04-20261006-01",
+            "status": "adopted_for_implementation_actual_policy_preflight_received",
+            "source_observation": "SUP-DB-20261006-READONLY-PREFLIGHT",
+            "SELECT_policy_count": 2,
+            "SELECT_policies": [
+              {
+                "name": "jeongsi_passes: select own or admin",
+                "roles": [
+                  "public"
+                ],
+                "command": "SELECT",
+                "qual": "((auth.uid() = user_id) OR is_admin())",
+                "permissive": "PERMISSIVE"
+              },
+              {
+                "name": "jeongsi_passes: jungsi backend read",
+                "roles": [
+                  "jungsi_backend_app",
+                  "jungsi_backend_owner"
+                ],
+                "command": "SELECT",
+                "qual": "true",
+                "permissive": "PERMISSIVE"
+              }
+            ],
+            "runtime_current_user": "jungsi_backend_app",
+            "migration_owner_runtime_rejected": true,
+            "public_nine_column_SELECT_arbitrary_REVOKE_allowed": false,
+            "actual_reader_implementation_acceptance": "pending_same_service_PR",
+            "actual_paid_subject_validation": "NOT_RUN",
+            "boundary": "実際の own/admin·backend read 두 SELECT policy를 바탕으로 검사 계약을 개정한다. 임의 public REVOKE나 migration owner 런타임 사용으로 해결하지 않는다. SQL 계약/권한 구조만 공개하며 실행 설정값/실제 사용자/자료는 공개하지 않는다. 전용 app/owner 정책의 PERMISSIVE USING(true)는 기존 PUBLIC own/admin와 OR 결합되므로 DB RLS가 verified UUID만의 행으로 좁혀준다는 주장은 금지한다. reader의 WHERE user_id=%s 및 서버 검증 UUID parameter로 조회범위를 강제하고 transaction local claim을 결속한다. 추가/변경 정책·role·predicate는 거절한다.",
+            "master_RLS_user_isolation_certified": false,
+            "SQL_verified_subject_filter_required": "WHERE user_id = %s; server-verified UUID bound as parameter",
+            "transaction_local_claim_scope": "검증 UUID와 transaction local claim을 결속하되 USING(true)의 trusted backend 정책이 사용자별 RLS를 보장한다고 주장하지 않음",
+            "unknown_added_or_changed_SELECT_policy_rejected": true,
+            "SELECT_policy_signature_match": "exact command/PERMISSIVE/role sets/predicates for existing two policies"
+          }
+        },
+        "frontend_followup_observation": {
+          "pull_request_number": 15,
+          "status": "incremental_review_accepted_for_temporary_preview_merge_and_operational_pending",
+          "head_prefix": "243d2cd7",
+          "exact_full_SHA": "parent_private_receipt_binding_pending",
+          "exact_head_CI_success_count": 2,
+          "changed_files_reported": 28,
+          "all_modified_no_deletion_reported": true,
+          "basis_commit": "4366d67732556b69a17ebad03dbb5fc8bf1d6671",
+          "boundary": "3395983e 정적 fix 검토는 history로 보존한다. 최신243d2cd7 head/base4366/28M/noD/exactCI2 관측을 append했다. origin allowlist는 서버 중계신원/실사용자 재인가를 대신하지 않는다. 증분 인수/merge·실브라우저/실429/운영gate는 pending. allowedOrigins는 상수이므로 운영빌드에도 적용된다. 실도메인 전환 전에 임시 worker/loopback 항목을 제거 또는 환경 분리하고 유효 action·실세션권한·허용/비허용 Origin을 인수한다. 가짜action404는CSRF경로 확인만이며 유효action/auth 성공증거가 아니다.",
+          "static_review": {
+            "FE05": "empty_school_scope_display_fix_accepted",
+            "FE01": "delta_seconds_range_and_InvalidDate_fix_accepted_HTTP_date_grammar_followup_pending"
+          },
+          "residual": {
+            "id": "FE-01R",
+            "priority": "P2",
+            "owner": "외부 화면팀",
+            "status": "implementation_pending",
+            "merge_blocker": false,
+            "work": "Retry-After fallback는 HTTP-date의 정식3형식만 허용한다. Date.parse가 ISO datetime 등 비HTTP-date를 수락하는 잔여를 수정하고 형식 밖 값은 복구시각을 만들지 않는다.",
+            "evidence_boundary": "정적 소스 추론과 보고12case 범위다. 직접 실제429/브라우저 재현·정확 통합 SHA 인수는 NOT_RUN."
+          },
+          "head_commit": "243d2cd7fc91ac6bed729163a1ae52e37dc9f96a",
+          "allowed_origins_structure": "정확 hostname4개/localhost3003; wildcard 없음. 실제 origin 값은 공개 정본에 복사하지 않음",
+          "incremental_review_status": "accepted_for_temporary_preview"
+        }
+      },
+      "frontend_followup_before_PR15_merge": {
+        "format": "jungsi.frontend-followup/v1",
+        "document": "docs/current/화면팀_후속작업_지시.md",
+        "prepared_at": "2026-10-06T11:09:32.087958Z",
+        "basis_commit": "2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f",
+        "summary": "이전 develop2624/PR6·347 비포함 관측은 history다. 현재4366 부모의 PR15 head3395983e source/CI2·27M/noD와 독립 정적 검토에서 빈 학교 범위 표시 및 숫자범위/InvalidDate fix를 수용했다. FE-01R HTTP-date 문법 잔여(P2, merge blocker=false)와 정확 후속 통합/직접 브라우저·실429·전체전달물·숫자·운영 인수는 pending이다. 최신 PR15 head243d2cd7 CI2/28M/noD와 정확 allowedOrigins 구조는 별도관측이고 증분review·실통합은 pending이다. CORS/origin 설정을 SEC03 서버중계·실사용자권한 인수로 확대하지 않는다. 최신243 증분은 임시preview용 정적수용이며 실도메인전환 FE-ORIGIN·merge/유효action/실권한은 pending이다.",
+        "local_review_boundary": [
+          "이전 로컬 보고·2624/6b/347 ancestor 관측은 dated history로 보존한다. PR15 source/CI 관측·정적fix 인수와 직접 브라우저/운영 인수는 구분한다.",
+          "네 역할·HOLD/503·HTML검색0·경고는 보고 문서에서 확인한 document_reported pass다. 원문·범위 독립 읽기 검토 완료이며 직접 root 브라우저 실행은 NOT_RUN이다.",
+          "HTML0건·축약 SHA·429 실제 응답 미제공 범위는 그 자체로 모든HTML/JS/RSC/JSON/maps/storage/download token 미노출을 증명하지 않는다.",
+          "overall 두503은 고정소스 판독이다. 기존native 증거는 catalog/권한/host 범위여서 해당 exact status/code의 실제 관측은 NOT_RUN이다.",
+          "정확 backend/source/검수PC/화면 fullSHA·private 증거를 결속하며 값/PC경로/실자료 fullhash/token을 공개 정본에 복사하지 않는다.",
+          "로컬 메모리 결과는 재시작 소실한다. 성공local Caller·DPAPI는 Supabase 실인증/운영 DB 영속성/3securitygate 인수가 아니다."
+        ],
+        "sup_reply": [
+          [
+            "이용권",
+            "public.jeongsi_passes 단일 목표와 user_id uuid·활성 MAX(ends_at) 동의는 소유자 보고다. 실제DDL/GRANT/RLS/기간타입·runtime/migration권한 검토와 어댑터PR은 미완료다."
+          ],
+          [
+            "DB권한 입력",
+            "원문 입력10종(IN-DB-01A/01B/02A/02B/03A/03B/04A/04B/05A/05B)을 RF-03으로 요청한다. master DDL/현재schema·관리자최소조회·roleGRANT/상속·masterRLS·자체owner/업무RLS·Connect/TLS·적용/복구를 구분한다. runtime과migration/객체owner 권한은 분리하며 실제 원문/effective policy 전 충분성/적용을 확정하지 않는다. 실제 입력값은 비공개다."
+          ],
+          [
+            "연결방식",
+            "장기 FastAPI/IPv4는 session pooler5432 우선 후보, IPv6가 가능한 direct5432 대안을 검토한다. transaction6543 호환은 prepare_threshold/UTC/xactlock 포함 별도 실DB 검수이며 완료 아님이다."
+          ],
+          [
+            "관리자",
+            "paid 위장 없이 SSR/BFF 검증 내부권한context로 session v1을 유지하는 우선 제안이다. 별도 브라우저 소비가 필요하면 opt-inv2를 CR로 검토한다. header/5operation/shortlist 예외/조회함수는 미채택이다."
+          ],
+          [
+            "운영전환",
+            "origin/보관키만으로 live되지 않는다. 실제Auth/권한/DB/승인자료·BFF/CSRF/서버신원/공유예산·세securitygate·preview/브라우저를 각각 인수한다."
+          ]
+        ],
+        "tasks": [
+          {
+            "id": "FE-01",
+            "title": "Retry-After 기존 안전 fix 수용 및 FE-01R HTTP-date 문법 후속",
+            "owner": "외부 화면팀(서비스 응답·자료 입력은 각 담당 협업)",
+            "priority": "P2",
+            "status": "implementation_pending",
+            "depends_on": [
+              "RF-01"
+            ],
+            "work": [
+              "PR15 정적 검토에서 숫자 문법/7일 cap·안전 Date범위·InvalidDate fix를 수용했다. 과거1e300 위험과 source는 history로 보존한다.",
+              "FE-01R(P2, 비머지 blocker): Date.parse fallback의 ISO datetime 수락 잔여를 정식 HTTP-date3형식 검사로 보완한다. 비형식값은 복구시각을 생성하지 않으며 입력/Idempotency-Key·성공 결과를 보존한다."
+            ],
+            "completion": [
+              "외부팀 HTTP-date3형식/정상정수/허용범위·ISO/비형식/음수/소수/지수/빈값/초과값 회귀와 정확source/실안내 증거. 보고12case와 직접 실제429/browser NOT_RUN을 분리한다."
+            ],
+            "route_refs": [
+              "score-profile.create",
+              "overall.analyze",
+              "forecast.create",
+              "forecast.adjust",
+              "forecast.validate",
+              "forecast.approve",
+              "forecast.publish"
+            ]
+          },
+          {
+            "id": "FE-02",
+            "title": "전체 브라우저 전달물 비노출 증거",
+            "owner": "외부 화면팀(서비스 응답·자료 입력은 각 담당 협업)",
+            "priority": "P1",
+            "status": "evidence_pending",
+            "depends_on": [
+              "RF-01",
+              "RF-05",
+              "RF-06"
+            ],
+            "work": [
+              "검수 산출물7종과 정확화면/backend fullSHA·자료버전·시각을 private명부에 결속한다. 실제token/hash/PC경로를 public회신에 넣지 않는다.",
+              "모든HTML·JS/clientbundle·RSC/hydration·JSON·source maps·storage/cache·download·오류/로그/헤더에서 token/서버신원/키/원자료·직원감사 미노출을 검수한다. HTML0·축약SHA만으로 완료하지 않는다."
+            ],
+            "completion": [
+              "전달물범위·검색규칙/대상수·결과·fullSHA의 private 증거와 public최소 요약. 놓친/미확보 범위는 NOT_RUN로 유지하며3securitygate 실제scope와 결속한다."
+            ],
+            "route_refs": [
+              "session.read",
+              "report.read",
+              "university.analyze",
+              "forecast.read",
+              "forecast.published.read",
+              "report.export"
+            ]
+          },
+          {
+            "id": "FE-03",
+            "title": "실제429·Retry-After/503 안내 인수",
+            "owner": "외부 화면팀(서비스 응답·자료 입력은 각 담당 협업)",
+            "priority": "P1",
+            "status": "inputs_pending",
+            "depends_on": [
+              "FE-01",
+              "RF-01",
+              "RF-04"
+            ],
+            "work": [
+              "실429/유효·무효 Retry-After/안전503을 조회화면과 성적·관리폼에서 검수한다. 서비스미준비면 주입fixture/mock검수와 realNOT_RUN을 분리한다.",
+              "입력·같은Idempotency-Key·성공총점/환산/누백을 보존하고 오류를 합성성공/일반회원/영구차단으로 대체하거나 자동반복재시도로 우회하지 않는다."
+            ],
+            "completion": [
+              "정확status/code/header·유효Date/안전안내·입력/키보존·no-store·합성fallback없음의 fullSHA증거. 실제429가 없으면3securitygate 완료로 올리지 않는다."
+            ],
+            "route_refs": [
+              "history.search",
+              "overall.analyze",
+              "offerings.search",
+              "university.analyze",
+              "candidates.build",
+              "shortlist.update",
+              "forecast.create"
+            ]
+          },
+          {
+            "id": "FE-04",
+            "title": "승인 시험팩·모형 보류·정확503/권한 재검수",
+            "owner": "외부 화면팀(서비스 응답·자료 입력은 각 담당 협업)",
+            "priority": "P1",
+            "status": "inputs_pending",
+            "depends_on": [
+              "RF-06",
+              "SUP-08"
+            ],
+            "work": [
+              "데이터팀 승인·유효시험팩 수령 후2페이지의 총점/과목결과·과목상위%와 overall 모형없음 pending(total_model_missing)을 독립 기대값과 대조한다. 미승인/부족한과목매핑은 실제숫자로 꾸미지 않는다.",
+              "미등록 exam_not_available503·등록미채택 artifact_not_approved→overall exam_data_unavailable503·승인시험팩/모형미승인 total_model_not_approved를 각각 실제응답으로 구분한다.",
+              "지정학교빈범위의403·다른scope거절·자기승인403·독립editor/approver를 재검수한다. 양성시험에필요한실학교scope/승인draft근거가없으면그항목NOT_RUN이며 임의권한/자료를 만들지 않는다."
+            ],
+            "completion": [
+              "승인version·독립기대값·두503 exactbody/status·총점/subjects성공/overallpending·학교scope403/자기승인403의 정확실행증거. 승인수치/권한입력미충족은NOT_RUN, backend정적경로와실HTTP구분."
+            ],
+            "route_refs": [
+              "score-profile.create",
+              "overall.analyze",
+              "report.read",
+              "forecast.capabilities",
+              "forecast.validate",
+              "forecast.approve",
+              "forecast.publish"
+            ]
+          },
+          {
+            "id": "FE-05",
+            "title": "빈 학교 표시 fix·Retry-After 후속 PR 통합",
+            "owner": "외부 화면팀(기획팀 동일 snapshot 인수 협업)",
+            "priority": "P1",
+            "status": "integration_pending",
+            "depends_on": [
+              "FE-01",
+              "RF-05"
+            ],
+            "work": [
+              "PR15 제출 source의 빈 허용 학교범위 표시 fix와 Retry-After 숫자범위/InvalidDate fix가 정적 검토에서 수용됐다. 정확 head CI2·27M/noD와 develop4366 기준 후속 PR의 실제 통합 SHA는 별도로 인수한다.",
+              "FE-01R 문법 잔여는 P2 비머지 blocker 후속이다. 빈 school scope/403/독립권한·owner 의미와 입력/키를 보존한다.",
+              "정확 통합 fullSHA·CI와 동일 snapshot 브라우저/비노출/429503 영수증을 제출한다. source·CI 관측을 운영 완료로 확대하지 않는다."
+            ],
+            "completion": [
+              "최신 develop 부모와 후속 PR·구현/통합 fullSHA·정확 CI 및 빈목록/정상범위·안전한 Retry-After·입력/키보존 브라우저 검수 증거를 제출한다. 머지와 direct/보안/수치/운영 인수는 별도다."
+            ],
+            "route_refs": [
+              "forecast.capabilities",
+              "forecast.list",
+              "forecast.create",
+              "forecast.approve",
+              "overall.analyze"
+            ]
+          }
+        ],
+        "unresolved": [
+          "DB source 이후 이력/전용 권한 SQL 원문·profiles 관리자 최소 조회·private app runtime003/업무 권한",
+          "BFF/신원/헤더/서명·내부권한/session CR",
+          "승인시험팩/모형/기대값·정확503 응답원문",
+          "화면 fullSHA/비노출증거·실429/503·preview와3securitygate",
+          "PR15 실제 통합 SHA·FE-01R 문법 후속·직접 브라우저/실429 fullSHA 증거"
+        ],
+        "preservation": "원본·프런트committed변경·우리before후보와 실제private증거는 모두 보존한다. 실제 token/성적/입결/curve/hash/PC경로/설정값을 공개 문서나Git에 넣지 않는다. 후속은 외부담당이며 이번 기획작성은 frontend/DB/Auth/배포/삭제 실행이 아니다.",
+        "historical_basis_commit": "2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f",
+        "residual_followups": [
+          {
+            "id": "FE-01R",
+            "priority": "P2",
+            "owner": "외부 화면팀",
+            "status": "implementation_pending",
+            "merge_blocker": false,
+            "work": "Retry-After fallback는 HTTP-date의 정식3형식만 허용한다. Date.parse가 ISO datetime 등 비HTTP-date를 수락하는 잔여를 수정하고 형식 밖 값은 복구시각을 만들지 않는다.",
+            "evidence_boundary": "정적 소스 추론과 보고12case 범위다. 직접 실제429/브라우저 재현·정확 통합 SHA 인수는 NOT_RUN."
+          },
+          {
+            "id": "FE-ORIGIN",
+            "priority": "P1",
+            "owner": "외부 화면팀",
+            "status": "implementation_pending",
+            "merge_blocker": false,
+            "work": "임시preview용 allowedOrigins 증분을 수용한다. 상수는 운영빌드에도 적용되므로 실제도메인전환 전 임시 worker/loopback 항목 제거 또는환경분리·허용/비허용Origin·유효action 및 실세션권한을 검수한다.",
+            "evidence_boundary": "가짜action404는CSRF허용경로 확인 범위다. 유효action·실Auth/SEC03중계신원/사용자재인가·브라우저/운영gate NOT_RUN."
+          }
+        ],
+        "current_review_basis_commit": "4366d67732556b69a17ebad03dbb5fc8bf1d6671"
+      },
+      "tasks_and_gates_before_second_actual_update": {
+        "tasks": [
+          {
+            "id": "SUP-01",
+            "priority": "P0",
+            "owner": "시스템기획·서버 담당",
+            "layer": "기획/애플리케이션·인프라",
+            "inputs": [
+              "확정 separate_Jungsi_FastAPI_deployment",
+              "22 API·DTO·엔진 계약",
+              "배포 제공자·Python runtime·BFF 운영 연결 요구(값은 비공개)"
+            ],
+            "depends_on": [],
+            "work": [
+              "별도 정시 Python FastAPI 배포는 확정이다. 기존 namespace adapter 선택 대기는 해소하며 배포 실행/운영 인수는 별도다.",
+              "배포 제공자·runtime·담당과 브라우저→BFF→분석 서버 경계를 정한다. CORS/origin은 인증이 아니며 기존 EduTouch me DTO가 22API를 대체하지 않는다."
+            ],
+            "completion": [
+              "확정안·담당·runtime·BFF 연결 설계·22API 매핑을 인수한다. 실제 배포/보안/연결 증거는 SUP-07/09/11에서 별도 충족한다."
+            ],
+            "status": "DECISION_CONFIRMED_DEPLOYMENT_NOT_RUN",
+            "decision_status": "confirmed_by_user",
+            "execution_status": "NOT_RUN_deployment",
+            "history_before_actual_update": {
+              "status": "DECISION_CONFIRMED_DEPLOYMENT_NOT_RUN"
+            }
+          },
+          {
+            "id": "SUP-02",
+            "priority": "P0",
+            "owner": "에듀터치 결제·DB 담당·시스템기획",
+            "layer": "기획/애플리케이션·데이터",
+            "inputs": [
+              "확정 public.jeongsi_passes 단일 원본",
+              "원본 DDL·사용자 식별 컬럼/타입·취소/환불/회수 규칙·권한 SQL 원문(source DDL 부분수신·현재권한/적용 미검수)",
+              "현재 포트/조회·session v1 규칙·검사와 같은 어댑터 전환 PR",
+              "기존 사이트 관리자 예외의 서버 조회/권한/DTO 영향 CR"
+            ],
+            "depends_on": [],
+            "work": [
+              "목표는 public.jeongsi_passes로 확정한다. 현재 entitlements와 session v1 3필드는 이번 문서에서 보존하고 서비스 PR에서 함께 전이한다.",
+              "DDL/사용자키와 revoked_at·starts_at·ends_at의 실제 정의, 지급·취소·환불·회수 경로를 회신받는다. MAX(활성 ends_at)은 제안이며 구현/원문 검수 완료가 아니다.",
+              "취소/회수 후 저장된 결과 재조회도 현재 권한으로 재인가한다. 옛 entitlements는 보존하고 이중 authority·동기화 fallback을 만들지 않는다.",
+              "관리자 열람 예외의 조회·별도 capability·허용 operation·화면/session DTO 영향은 CR로 확정한다. paid=true나 임의 만료로 승격하지 않는다.",
+              "master reader·factory의 session entitlement 주입·readiness/probe·정본 session 규칙/route catalog·checker1284와 회귀를 같은 구현 PR에서 전이한다. 이번 명세 반영에서는 현재 old authority 검사 pin을 유지하고 old OR new로 완화하지 않는다.",
+              "CR-SERVICE-SUP03의 독립 entitlement 주입·read-only master reader 구현 준비를 채택한다. source DDL 수령은 실제 DB preflight·default factory 전환 인수가 아니며 old 실행 pin은 유지한다."
+            ],
+            "completion": [
+              "원본 DDL/사용자키·UTC 활성/만료·지급/취소/회수·최소 SELECT를 확인하고 어댑터/정본 session 규칙/검사 PR을 인수한다. 관리자 CR·기본 v1 호환도 별도 확정한다."
+            ],
+            "status": "DECISION_CONFIRMED_ADAPTER_NOT_RUN",
+            "decision_status": "confirmed_by_user",
+            "execution_status": "NOT_RUN_target_adapter_transition",
+            "history_before_actual_update": {
+              "status": "DECISION_CONFIRMED_ADAPTER_NOT_RUN"
+            }
+          },
+          {
+            "id": "SUP-03",
+            "priority": "P0",
+            "owner": "Supabase·서버 설정 담당",
+            "layer": "인프라/데이터",
+            "inputs": [
+              "Dashboard Connect 정보",
+              "전용 server role·TLS·배포환경",
+              "확정 별도 FastAPI 환경의 IPv4/IPv6·연결 유지 요구",
+              "master 최소 SELECT와 자체 업무 schema 쓰기/마이그레이션 role을 구분한 권한 계획",
+              "RF-03 IN-DB-01A~05B의 정확 원본/권한 입력10종과 role/owner/RLS 효과; 실제 값은 private 인계",
+              "source schema-only 원문 부분수신/OpenAPI9컬럼 metadata와 실제DB/TLS/role 검수의 분리"
+            ],
+            "depends_on": [
+              "SUP-01"
+            ],
+            "work": [
+              "기존 비공개 보관 URL/publishable/서버키로 HTTP API와 public 테이블 limit=0 접근을 확인했다. .env 파일 자체는 필수가 아니며 새 프로젝트 생성이 필수라는 전제를 두지 않는다. 현재 SQL 어댑터 검수는 별도다.",
+              "배포환경에 맞게 direct/session pooler/transaction을 선택하고 Connect의 exact host/사용자/연결 문자열을 복사한다. 지역으로 host를 합성하지 않는다.",
+              "DATABASE_URL·전용role·TLS를 process 환경에 주입한다. ignored .env 보관만으로 자동 load하지 않고 secret API key는 DB 비밀번호가 아니다.",
+              "현재 psycopg prepare_threshold=None·transaction SET LOCAL UTC·advisory transaction lock을 보존한다.",
+              "영구 FastAPI의 direct 5432(IPv6 가능 환경), session pooler 5432(IPv4 후보), transaction 6543 제약을 실제 환경에 맞춰 선택한다. 포트 설명은 후보이며 실DB 호환 완료가 아니다.",
+              "master SELECT·자체 업무 schema 쓰기·owner/RLS 마이그레이션 권한을 구분한다. 비밀 DB URL/JWT·전달경로를 공개문서/브라우저에 복사하지 않는다.",
+              "양계정 actual TLS/현재role/UTC/PostgreSQL17.6·masterSELECT·쓰기없음·owner/app CREATE·비super/BYPASS/membership를 preflight에서 확인했다. 배포 process·runtime private policy·실Auth는 별도로 인수하고 과거 credential 부재/발급중 관측은 history로 보존한다."
+            ],
+            "completion": [
+              "배포환경 내 비공개 설정 주입·실제 DB/TLS 읽기 검수 증거가 있다.",
+              "Connect 방식·TLS·전용 role·비공개 process 주입·master/자체 schema 권한 분리의 실제 SQL 검수 증거를 갖춘다. REST 200/.env 보관으로 완료하지 않는다."
+            ],
+            "status": "actual_DB_TLS_role_master_preflight_PASS_deployment_runtime_pending",
+            "history_before_actual_update": {
+              "status": "BLOCKED_MISSING_DATABASE_URL"
+            },
+            "history_before_latest_DB_observation": {
+              "status": "credentials_received_connection_preflight_pending",
+              "work": [
+                "기존 비공개 보관 URL/publishable/서버키로 HTTP API와 public 테이블 limit=0 접근을 확인했다. .env 파일 자체는 필수가 아니며 새 프로젝트 생성이 필수라는 전제를 두지 않는다. 현재 SQL 어댑터 검수는 별도다.",
+                "배포환경에 맞게 direct/session pooler/transaction을 선택하고 Connect의 exact host/사용자/연결 문자열을 복사한다. 지역으로 host를 합성하지 않는다.",
+                "DATABASE_URL·전용role·TLS를 process 환경에 주입한다. ignored .env 보관만으로 자동 load하지 않고 secret API key는 DB 비밀번호가 아니다.",
+                "현재 psycopg prepare_threshold=None·transaction SET LOCAL UTC·advisory transaction lock을 보존한다.",
+                "영구 FastAPI의 direct 5432(IPv6 가능 환경), session pooler 5432(IPv4 후보), transaction 6543 제약을 실제 환경에 맞춰 선택한다. 포트 설명은 후보이며 실DB 호환 완료가 아니다.",
+                "master SELECT·자체 업무 schema 쓰기·owner/RLS 마이그레이션 권한을 구분한다. 비밀 DB URL/JWT·전달경로를 공개문서/브라우저에 복사하지 않는다.",
+                "Storage apikey/업로드·OpenAPI200은 DATABASE_URL/SQL CONNECT/전용role 권한을 대신하지 않는다. 실제 DB 연결 credential·TLS·effective policy 미확보 상태를 유지한다.",
+                "기존 화면/본체API DATABASE_URL 미사용의 소유자 회신에 따라 신규 jungsi_backend_owner/app 계정 발급·Connect 원본 전달을 기다린다. pooled username ROLE.PROJECTREF 구조·URI password encoding/TLS를 private 인계하며 host를 합성하지 않는다.",
+                "owner/app primary2·direct대안2를 비공개로 수령하고 root 구조/TLS/Git제외만 검토했다. 기존 부재/발급중 관측은 history다. 실제 SQL catalog/role/effective RLS preflight를 별도 인수하고 설정 파일 존재를 접속 PASS로 기록하지 않는다."
+              ]
+            }
+          },
+          {
+            "id": "SUP-04",
+            "priority": "P0",
+            "owner": "DB 담당",
+            "layer": "데이터/인프라",
+            "inputs": [
+              "실DB 기존 상태·승인 backup",
+              "001/002 정의·전용role 권한계획",
+              "public.jeongsi_passes source DDL 일부수신·현재 사용자키/FK/인덱스/RLS·전용 권한 SQL 미검수",
+              "runtime/migration role·owner와 관리자 최소 조회 포트 CR",
+              "RF-03 IN-DB-01A~05B의 정확 원본/권한 입력10종과 role/owner/RLS 효과; 실제 값은 private 인계",
+              "신규 owner/app private 설정 수령 이후 real catalog/preflight·001002 비파괴 적용·runtime RLS003 계획(미실행)"
+            ],
+            "depends_on": [
+              "SUP-02",
+              "SUP-03"
+            ],
+            "work": [
+              "기존 상태 점검·승인 backup 후 001/002 추가 적용 계획을 별도로 승인받는다. 이번 문서는 운영쓰기 실행 승인이 아니다.",
+              "전용role grants/RLS·anon/authenticated 직접 접근 차단·owner·UTC·11개 timestamptz/date 컬럼·schema_versions를 실DB에서 검수한다.",
+              "reset/drop/delete 금지. REST PGRST106은 DB schema 부재/SQL 권한 실패 증거가 아니다.",
+              "권한 SQL 원문을 확보해 master SELECT·다른 public 표 제한·자체 업무쓰기·owner/RLS/함수 범위를 대조한다. SELECT만으로 ALTER/RLS 작성 권한이 생긴다고 추정하지 않는다.",
+              "profiles 관리자 판정이 필요하면 다른 public 표 접근 제한과 양립하는 최소 server-only 조회를 별도 확정한다. SQL/DDL을 추정해 실행하지 않는다.",
+              "source9파일/30SQL검토와 repo001/002 존재는 실제 적용 증거가 아니다. 사용자 요청의 비파괴적 업데이트 목적과 credential/owner/RLS·보존 backup·구체 적용계획 미충족을 분리한다.",
+              "owner는 이관/schema소유/001002용, app은 runtime private USAGE/SELECT/INSERT/UPDATE·masterreadonly/DELETE·TRUNCATE없음 목표다. owner의 소유·구조 변경 권한이 없다고 주장하거나 runtime에 owner 계정을 재사용하지 않는다. 전용 권한 SQL 원문·runtime003은 미수신/미적용이다. role/master catalog와001002 개발 영수증은 수신했다.",
+              "13:12 private schema/table0 preflight 이후13:17 owner 단일transaction의 신규 jungsi_backend/13RLS tables·001002 schema_versions 적용 개발 영수증을 수령했다. 독립 검수 pending·private app 정책0/runtime003 미적용·실업무/CAS/멱등/권한 인수 미실행을 분리한다. public/master/profiles/기존owner 변경·DELETE/DROP/TRUNCATE0."
+            ],
+            "completion": [
+              "적용·권한·소유권·UTC왕복·11컬럼·schema_versions·002 트랜잭션 인수가 끝났다.",
+              "원본 DDL/SQL·전용 role·RLS·master/자체 schema 거절·관리자 조회와 실제 001/002 증거를 분리해 인수한다."
+            ],
+            "status": "001002_applied_development_receipt_independent_review_runtime003_pending",
+            "history_before_actual_update": {
+              "status": "NOT_RUN_001_UNCONFIRMED_002_NOT_APPLIED"
+            },
+            "history_before_latest_DB_observation": {
+              "status": "NOT_RUN_001_UNCONFIRMED_002_NOT_APPLIED",
+              "work": [
+                "기존 상태 점검·승인 backup 후 001/002 추가 적용 계획을 별도로 승인받는다. 이번 문서는 운영쓰기 실행 승인이 아니다.",
+                "전용role grants/RLS·anon/authenticated 직접 접근 차단·owner·UTC·11개 timestamptz/date 컬럼·schema_versions를 실DB에서 검수한다.",
+                "002 CAS·멱등·불변 release·원자적 게시와 동시성을 실제 검수한다. 001 실제적용 UNCONFIRMED/002 NOT_APPLIED를 유지한다.",
+                "reset/drop/delete 금지. REST PGRST106은 DB schema 부재/SQL 권한 실패 증거가 아니다.",
+                "권한 SQL 원문을 확보해 master SELECT·다른 public 표 제한·자체 업무쓰기·owner/RLS/함수 범위를 대조한다. SELECT만으로 ALTER/RLS 작성 권한이 생긴다고 추정하지 않는다.",
+                "profiles 관리자 판정이 필요하면 다른 public 표 접근 제한과 양립하는 최소 server-only 조회를 별도 확정한다. SQL/DDL을 추정해 실행하지 않는다.",
+                "source9파일/30SQL검토와 repo001/002 존재는 실제 적용 증거가 아니다. 사용자 요청의 비파괴적 업데이트 목적과 credential/owner/RLS·보존 backup·구체 적용계획 미충족을 분리한다.",
+                "owner는 이관/schema소유/001002용, app은 runtime private USAGE/SELECT/INSERT/UPDATE·masterreadonly/DELETE·TRUNCATE없음 목표다. owner의 소유·구조 변경 권한이 없다고 주장하거나 runtime에 owner 계정을 재사용하지 않는다. 실제 grant/RLS/owner·신규SQL은 아직 미수신이다.",
+                "신규 연결설정 수령 후 서비스팀이 actual catalog/effective role preflight와 비파괴001002·runtime RLS003 구현/검수 계획을 맡는다. 아직 SQL 연결·적용이 완료됐다고 표시하지 않고 같은 source/schema/role snapshot과 원본보존을 결속한다."
+              ]
+            }
+          },
+          {
+            "id": "SUP-05",
+            "priority": "P0",
+            "owner": "인증 담당·서버 개발자",
+            "layer": "애플리케이션/인프라",
+            "inputs": [
+              "실제 검수 사용자 Bearer JWT·Supabase Auth 공개 설정"
+            ],
+            "depends_on": [
+              "SUP-01"
+            ],
+            "work": [
+              "JWT를 보안 경로로 받아 실제 Auth getUser 응답과 sub/exp 일치, 만료·비정상·불일치 JWT 거절을 검수한다. 유료·staff 권한과 /api/v1/me session DTO 판정은 SUP-04·05 이후 SUP-06에서 인수한다.",
+              "현재 SupabaseSessionProvider는 getUser 검증 후 sub/exp를 대조한다. JWKS 조회 성공을 직접 signature 검증 구현 완료로 기록하지 않는다.",
+              "사이트 admin 표식은 현재 실로그인/console admin/paid 권한을 보장하지 않는다. JWT/비밀번호/개인식별정보를 공개문서·로그에 넣지 않는다.",
+              "키를 넣은 Auth settings200·JWT 없는 getUser401은 실제 사용자 로그인 인수가 아니다. Console 상태 조회 시간 초과는 관리 권한 없음·있음의 증거가 아니다."
+            ],
+            "completion": [
+              "실제 Auth getUser/sub/exp 확인과 만료·비정상·불일치 Bearer JWT 거절 증거가 있다."
+            ],
+            "status": "NOT_RUN_MISSING_TEST_USER_JWT",
+            "history_before_actual_update": {
+              "status": "NOT_RUN_MISSING_TEST_USER_JWT"
+            }
+          },
+          {
+            "id": "SUP-06",
+            "priority": "P0",
+            "owner": "권한·서비스 DB 담당",
+            "layer": "애플리케이션/데이터",
+            "inputs": [
+              "선택한 단일 authority",
+              "entitlement·owner·forecast_authorities",
+              "SUP-05 실Auth 검수·일반/유료 검수 사용자·별도 editor/approver subject",
+              "RF-02 관리자 권한/operation/session CR",
+              "RF-03 DDL·사용자키·SQL 권한과 취소/회수",
+              "CR-SERVICE-SUP03의 read-only reader/preflight·source user_id UUID/FK/period와 actual DB 일치"
+            ],
+            "depends_on": [
+              "SUP-02",
+              "SUP-04",
+              "SUP-05"
+            ],
+            "work": [
+              "선택 authority를 구현하고 결제 취소/회수/동기화 adapter 미구현은 별도 개발로 명시한다.",
+              "일반 PAGE3/4·유료 API403, 다른 학생 report404, UTC 접근기간을 실제 사용자로 검수한다.",
+              "staff와 paid는 독립이다. forecast_authorities 학교 scope·editor/approver 독립·자기 승인403·scope밖404를 유지한다.",
+              "SUP-04 실DB와 SUP-05 실Auth 이후 단일 entitlement authority를 사용한 /api/v1/me의 일반·유료·만료·취소 session DTO와 서버 권한 판정을 함께 검수한다.",
+              "목표 어댑터·factory·같은 서버 UTC 시각·포트/정본 session 규칙/검사를 같은 PR에 묶는다. 활성 MAX(ends_at)은 소유자 동의와 CR-SERVICE-SUP03 구현 준비로 결속하되 실제 동일UTC/reader 검수는 pending이다. session v2 opt-in/admin_read 상세는 기존 미채택 제안이며 별도 CR이다.",
+              "관리자 열람과 paid·forecast staff를 구분하고 명시 operation만 적용한다. owner·확인성적·학교/forecast scope·독립승인·mutation은 우회하지 않는다. 클라이언트 role/paid는 권위가 아니다.",
+              "취소/회수/만료 뒤 기존 report·캐시·선택 결과 재응답에도 현재 권한을 검수하고 장애를 일반 회원/허용으로 자동 변환하지 않는다.",
+              "current Postgres probe/ready의 old table/컬럼 가정과 reader 상태를 실제 DDL에 맞춰 같은 PR에서 전이하며 업무 schema 001/002 준비와 이용권 reader 준비를 구분한다.",
+              "source user_id UUID/FK/기간정의 수령 이후에도 실제 단일 reader/factory/probe/session·권한 거절 전이를 같은 구현 PR에서 검수한다. 자료 업로드로 유료/관리자 권한이 생기지 않는다."
+            ],
+            "completion": [
+              "실DB/JWT 및 단일 entitlement authority에 결속된 /api/v1/me 일반·유료·만료·취소 DTO, 이용권·소유권·UTC·staff 학교 범위·독립 승인 거절 매트릭스를 인수했다.",
+              "실제 사용자키·UTC/취소/회수/만료·재조회 재인가·관리자 최소 capability/operation·v1 호환 또는 승인 v2 소비·scope/독립 승인의 실제 거절 증거를 인수한다."
+            ],
+            "status": "NOT_RUN",
+            "history_before_actual_update": {
+              "status": "NOT_RUN"
+            }
+          },
+          {
+            "id": "SUP-07",
+            "priority": "P0",
+            "owner": "서버 담당",
+            "layer": "인프라/애플리케이션",
+            "inputs": [
+              "선택 실행환경·locked Python runtime",
+              "운영 settings·HTTPS/CORS origin",
+              "RF-01 BFF 사용자/서버 전용 신원과 원점 차단",
+              "RF-04 synthetic/local_verification/production 모드·전환 승인"
+            ],
+            "depends_on": [
+              "SUP-01",
+              "SUP-03",
+              "SUP-04",
+              "SUP-05"
+            ],
+            "work": [
+              "configured_app을 locked Python runtime에 배포하고 HTTPS/CORS·제한 health·log/redaction을 검수한다.",
+              "/health/ready200은 Auth/data/전체 운영 PASS가 아니다. localhost/test allowlist/memory/DPAPI factory를 public 배포하지 않는다.",
+              "static환경에 Python 실행준비가 없으면 별도 서버 runtime이 필요하다.",
+              "사용자 Bearer와 별도 서버 신원을 모두 검증한다. HMAC/헤더/서명·nonce/회수 방식은 미채택 제안이며 개발팀이 충돌 없이 확정한다.",
+              "운영/preview BFF·원점 거절·공유 예산·실권한·승인 자료 gate 전에 live 전환하지 않는다. local allowlist token/메모리/DPAPI factory를 운영에서 선택하거나 공개 배포하지 않는다.",
+              "모드·health 실패/HOLD를 명시하고 설정/Auth/DB/Drive 부족을 ready/paid/수치로 바꾸지 않는다. 안전한503/부분보류를 유지한다."
+            ],
+            "completion": [
+              "확정 origin·운영factory·22 API·HTTPS/CORS·비공개 진단 증거가 있다.",
+              "운영 factory·실JWT/서버 신원·원점 우회·preview 공유 예산/안전한 오류·모드 거절 및 세 security gate의 실제 scope 증거를 인수한다."
+            ],
+            "status": "NOT_RUN_HOSTING_AND_SECURITY_ACCEPTANCE_PENDING",
+            "history_before_actual_update": {
+              "status": "NOT_RUN_HOSTING_AND_SECURITY_ACCEPTANCE_PENDING"
+            }
+          },
+          {
+            "id": "SUP-08",
+            "priority": "P0",
+            "owner": "데이터팀·서버 인프라 담당",
+            "layer": "데이터/인프라",
+            "inputs": [
+              "Drive OAuth/folders/승인발행명부",
+              "approved exam/joint curve/catalog/analysis/rule/year bridge/학교누백/forecast 근거",
+              "데이터팀 approved/HOLD 발행 명부·독립 신뢰 version/SHA·승인/수령 영수증",
+              "실제 9월 검수 2~3건·독립 기대값과 보류 목록(실값 비공개)",
+              "실제 Drive/local 출처·수신 Windows PC DPAPI 재보호",
+              "SUP-STORAGE-20261006-PRIVATE-STAGING의 신규 private 저장/해시 재수신 증거·원본 보존",
+              "CR-SERVICE-SUP03 Storage explicit 공급자와 승인된 runtime envelope/신뢰명부(미준비)"
+            ],
+            "depends_on": [
+              "SUP-01",
+              "SUP-03"
+            ],
+            "work": [
+              "현재 DriveClient는 주입된 static token으로 Bearer 요청하며 자동 OAuth refresh는 없다. 토큰 갱신 운영방법/필요 adapter는 별도 개발이다.",
+              "자료/모형 승인과 버전 결속 후 실제 read 및 입력을 덮지 않는 비중복 별도 output write를 검수한다.",
+              "approved0가 병목이다. engine_approved=false/production_allowed=false를 표시용 true로 승격하지 않는다.",
+              "원문 수치 QA는 모델 승인이 아니며 marginal 분포만으로 joint curve 완성을 판정하지 않는다. 승인 곡선 없음은 HOLD/null/pending과 총점 보존이다.",
+              "데이터팀이 kind/key/version/exam/pack/context/hash/승인증거를 공급한다. 화면팀은 가상 곡선/approved를 만들지 않는다. 자료 정리와 엔진/모형 승인을 구분한다.",
+              "독립 신뢰 명부 SHA·receipt에 결속한다. local에 가짜 Drive ID/version을 만들지 않는다. DPAPI는 수신 사용자/PC에서 재보호하고 RAM 복호화·평문 신규 저장 금지를 유지한다.",
+              "요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다.",
+              "실제 Storage49객체 업로드·SHA 재수신·원본 보존과 public 경로98거절을 인수했다. 실제 로그인 사용자의 raw Storage/RLS·signed URL·runtime read·자료/모형 채택은 별도 NOT_RUN/pending이다.",
+              "현재 default는 Drive다. CR-SERVICE-SUP03의 Storage GET-only 공급자 준비를 explicit 주입으로 검수하고 저장 CSV/후보를 runtime 승인본이나 가짜 Drive identity로 자동 치환하지 않는다.",
+              "최신 최소 인입 규정(minimal_explicit_approved_allowlist)을 따른다. 요청 operation에 필요한 시험팩/모형/규칙/학교카탈로그/입결 중 최소 승인 entries만 선택하고 모든 보유자료 scan·자동채택/PDF·QA·dump·전체원표 필수추정을 금지한다. 자료가 없으면 기존 guard/503·pending을 보존하고49archive는 삭제 없이 유지한다."
+            ],
+            "completion": [
+              "승인 명부/곡선/규칙/모형·버전·실Drive read/갱신/별도 write·독립 수치 증거가 있다.",
+              "명부/버전/SHA·수령/출처·독립 기대값·실자료를 인수하거나 수치 미승인 HOLD를 명시한다. HOLD 연결 성공은 수치 정확도/운영 승인 완료가 아니다.",
+              "요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다. 정적 코드 판독과 실제HTTP 인수를 구분한다.",
+              "Storage 저장본의 bytes/version/원문SHA·승인명부/엔진 scope·공급자 검수를 각각 인수한다. staging hash PASS만으로 engine_approved/production_allowed·실DB·학생 수치·운영 gate를 승격하지 않는다."
+            ],
+            "status": "PRIVATE_STORAGE_STAGED_ENGINE_AND_PROVIDER_ADOPTION_PENDING_DRIVE_NOT_RUN",
+            "history_before_actual_update": {
+              "status": "BLOCKED_APPROVED0_DRIVE_NOT_RUN"
+            }
+          },
+          {
+            "id": "SUP-09",
+            "priority": "P0",
+            "owner": "외부 화면 개발자",
+            "layer": "프레젠테이션",
+            "inputs": [
+              "운영 API origin·Supabase 공개설정",
+              "실JWT Caller·22 DTO·승인 기대값",
+              "RF-01 BFF 공개 경로·22 operation 매핑·신원/쿠키/CSRF",
+              "RF-02 관리자 예외 화면/버튼·session CR",
+              "RF-04 모드·RF-05 정확 PR/SHA/인수",
+              "SEC-02/03/07/08 및 세 security gate"
+            ],
+            "depends_on": [
+              "SUP-06",
+              "SUP-07",
+              "SUP-08"
+            ],
+            "work": [
+              "기존 Supabase 공개 설정은 확인돼 있으므로 같은 설정을 다시 요청할 필요는 없다. 운영 API/공개설정으로 실제 JWT Caller/22 DTO/4페이지·브라우저를 검수한다. 서버키·DATABASE_URL을 화면에 전달하지 않는다. 이번 문서팀은 화면 코드를 수정하지 않는다.",
+              "PAGE1 발표입결/개인성적 불필요, PAGE2 무료 전체누백까지, PAGE3 유료검색·환산·가능성·유불리, PAGE4 유료2:1 학교·학과/와일드카드를 유지한다.",
+              "409 학과기준 조회는 해당 부분만 보류하며 성공점수 보존. release/policy/input 모두 nonempty string일 때 exact equality·context17 존재/값/타입/null 동일성을 검수한다.",
+              "PR6는 develop2624에 merged·정확 head CI2 success를 읽기 확인했지만 이번 브라우저 독립 인수는 NOT_RUN/pending이다. source/CI·로컬 공개설정을 운영/브라우저 인수로 확대하지 않는다.",
+              "출력 검수는 기존 report.export 계약의 응답을 소비하는 범위에 한정한다. 리포트·인쇄 기능의 확장은 이번 운영 준비 범위에서 제외하며 새 인쇄 기능을 완료조건으로 추가하지 않는다.",
+              "화면팀은 BFF 실제 session·HttpOnly/Secure/SameSite 쿠키/CSRF를 검증하고 사용자/서버 신원을 분석 서버로 중계한다. 경로·22 mapping·헤더/서명은 회신/CR로 확정한다. CORS/origin은 인증이 아니다.",
+              "SEC-02 HTML/JS/source map·RSC/hydration/JSON·다운로드/오류/로그/캐시를 검수하여 원자료·모형·직원감사·서버키/token이 브라우저로 전달되지 않게 한다. SEC-01 재귀 DTO는 서비스팀 담당이다.",
+              "SEC-03 직접 원점·사용자만/서버만·일반/만료/취소·다른 report/학교 scope를 preview/운영에서 검수한다. SEC-07 429/Retry-After·안전한503/no-store와 기존 성공 점수/HOLD를 소비하고 다른 오류를 가리지 않는다.",
+              "SEC-05/06 공유 원자적 예산은 서비스/인프라팀이 검색/상세/분석/후보/shortlist 반환/출력에 공통 적용하고 화면팀은 반복수집·preview 우회를 검수한다. 무료 전체누백·유료 전체 대학/학과 검색을 폐지하거나 임의 고정 수치로 제한하지 않는다.",
+              "SEC-08 세 security gate의 같은 snapshot 실제 browser/HTTP 증거를 결속한다. 문서/단위 PASS는 실제 반출/우회/수집 방어 인수가 아니다.",
+              "로컬 메모리의 성적·리포트·관심학교·관리 초안/발표는 재시작 시 소실한다. 로컬 성공을 운영 영속성으로 표시하지 않으며 SUP-10 실DB 복구를 선행한다.",
+              "요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다.",
+              "head6b2 merged와347 비포함을 분리하며 FE-05의 최신 develop 후속 PR·fullSHA/CI·browser 증거를 제출하기 전 빈 학교 표시 fix가 통합됐다고 기록하지 않는다."
+            ],
+            "completion": [
+              "실JWT/운영 API·일반/유료·소유권·점수/HOLD·발표본 결속·4페이지 및 기존 report.export 응답 소비를 실제 브라우저로 인수했다. 리포트·인쇄 기능 확장은 제외한다.",
+              "BFF/22 매핑·실세션/CSRF/서버 신원·브라우저 전달물/재귀 DTO·원점/권한 우회·공유 예산/429/503/no-store·preview 및 세 security gate의 실제 인수 증거를 같은 SHA에 결속한다. 담당 경계·미채택 admin/session/헤더 CR은 분리한다."
+            ],
+            "status": "NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED",
+            "history_before_actual_update": {
+              "status": "NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED"
+            }
+          },
+          {
+            "id": "SUP-10",
+            "priority": "P1",
+            "owner": "서버·DB 운영 담당",
+            "layer": "인프라/데이터",
+            "inputs": [
+              "실API/DB/승인자료",
+              "backup/restore·장애·통계 계획",
+              "로컬 메모리/운영 PostgreSQL 차이와 재시작 소실 고지",
+              "backup/restore·성적/리포트/관심학교/관리 초안/발표 영속성 목록"
+            ],
+            "depends_on": [
+              "SUP-06",
+              "SUP-07",
+              "SUP-08"
+            ],
+            "work": [
+              "승인 범위 최소 backup/restore·재시작 영속성·동시성·통계범위/갱신 latency·설정 refresh를 검수한다.",
+              "Auth/DB/Drive 장애 HOLD/안전한 실패·민감로그 배제·UTC/서울시각 구분을 검수한다.",
+              "Kafka/Redis 미채택. 서비스 추천/선택 집계·순위를 전국 실제 지원인원/전국순위로 표시하지 않는다.",
+              "LocalMemoryRepository/MemoryForecastRepository 결과는 재시작 시 소실한다. DPAPI 자료 캐시는 이 업무 결과를 영속화하지 않는다.",
+              "같은 owner/권한/발표본 결속을 유지한 운영DB 재시작·backup/restore를 승인 검수 범위에서 대조한다. 준비 목적으로 DB 초기화/원본 삭제를 하지 않는다.",
+              "Storage의 원본 파일 보존/원격 재수신과 리포트/성적의 DB 영속성·재시작/복구는 다른 검수다. 로컬 memory 재시작 소실 경고를 유지한다."
+            ],
+            "completion": [
+              "영속성·복구·장애·통계범위·갱신 측정·비밀/개인정보 로그배제 증거가 있다.",
+              "로컬 소실 경고와 실제 DB 재시작/backup/restore/owner·발표본 영속성 증거를 구분한다. 로컬 PASS로 운영 저장 인수를 완료하지 않는다."
+            ],
+            "status": "NOT_RUN",
+            "history_before_actual_update": {
+              "status": "NOT_RUN"
+            }
+          },
+          {
+            "id": "SUP-11",
+            "priority": "P0",
+            "owner": "시스템기획·두 개발 담당·데이터팀",
+            "layer": "통합 인수/3티어",
+            "inputs": [
+              "SUP-01~10 개별 증거",
+              "정확 develop SHA/API/자료버전·CI·외부인수"
+            ],
+            "depends_on": [
+              "SUP-01",
+              "SUP-02",
+              "SUP-03",
+              "SUP-04",
+              "SUP-05",
+              "SUP-06",
+              "SUP-07",
+              "SUP-08",
+              "SUP-09",
+              "SUP-10"
+            ],
+            "work": [
+              "개별 gate 완료 후 정확 SHA/API/승인자료버전·CI·privateexclude·문서일치·외부인수를 고정해 develop→main PR을 검토한다.",
+              "main 반영과 운영 배포는 별도 승인이다. 현재 main/release not_ready를 유지하고 이번 문서를 DB쓰기·모형 승인·배포 승인으로 확대하지 않는다."
+            ],
+            "completion": [
+              "개별 gate·정확 SHA/CI·문서/자료/외부인수와 별도 배포승인 여부를 기록했다."
+            ],
+            "status": "BLOCKED_NOT_READY",
+            "history_before_actual_update": {
+              "status": "BLOCKED_NOT_READY"
+            }
+          }
+        ],
+        "acceptance_gates": [
+          [
+            "실DB",
+            "SUP-03/04",
+            "001002_APPLIED_DEVELOPMENT_RECEIPT_INDEPENDENT_AND_RUNTIME_PENDING",
+            "실DB의 001/002 schema_versions·TLS·전용 role·owner·UTC·CAS/멱등·불변 발표본 원자성 검수 영수증"
+          ],
+          [
+            "Bearer 로그인",
+            "SUP-05",
+            "NOT_RUN",
+            "실제 Auth getUser/sub/exp와 만료·비정상·불일치 JWT 거절 영수증"
+          ],
+          [
+            "유료·staff 권한",
+            "SUP-02/06",
+            "NOT_RUN_TARGET_CONFIRMED_ADAPTER_PENDING",
+            "확정 master의 어댑터·사용자키/UTC/취소/회수·관리자 CR·session v1 호환·owner/학교 scope/독립승인 실제 증거"
+          ],
+          [
+            "실approved 자료",
+            "SUP-08",
+            "HOLD_APPROVED0",
+            "권한 있는 joint curve/규칙/연도보정/학교누백/forecast·독립검산"
+          ],
+          [
+            "Drive 실제공급",
+            "SUP-08",
+            "NOT_RUN",
+            "OAuth/갱신·승인명부·실read·별도write"
+          ],
+          [
+            "Jungsi22 API",
+            "SUP-01/07",
+            "NOT_RUN",
+            "확정 별도 FastAPI의 실제 배포·운영factory·HTTPS·BFF/서버신원·실권한·원점 차단 증거"
+          ],
+          [
+            "외부4페이지",
+            "SUP-09",
+            "NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED",
+            "통합2624/PR6 source·CI 관측 이후 정확 actual자료/권한/세security gate/수신PC·브라우저/429503 증거를 별도 인수"
+          ],
+          [
+            "운영·최종release",
+            "SUP-10/11",
+            "NOT_READY",
+            "영속성/복구/장애·정확SHA/CI·main/별도배포승인"
+          ],
+          [
+            "브라우저·응답 전달물",
+            "SEC-08/security_response_artifacts",
+            "NOT_RUN",
+            "기존 security_contract/workflow 필수 gate의 같은 snapshot 실제 scope 증거. 문서/합성 PASS는 런타임 인수가 아니다."
+          ],
+          [
+            "중계·실권한·원점 차단",
+            "SEC-08/security_direct_authorization",
+            "NOT_RUN",
+            "기존 security_contract/workflow 필수 gate의 같은 snapshot 실제 scope 증거. 문서/합성 PASS는 런타임 인수가 아니다."
+          ],
+          [
+            "공유 원자적 수집 예산",
+            "SEC-08/security_harvest_controls",
+            "NOT_RUN",
+            "기존 security_contract/workflow 필수 gate의 같은 snapshot 실제 scope 증거. 문서/합성 PASS는 런타임 인수가 아니다."
+          ]
+        ]
       }
     },
     "safety": {
@@ -8868,7 +9847,7 @@
         ]
       ]
     },
-    "prepared_at": "2026-10-06T13:26:00.596308Z",
+    "prepared_at": "2026-10-06T14:40:02.016045Z",
     "prepared_at_scope": "확정 결정·회신 요청을 정본에 반영한 문서 준비 시각이다. checked_at의 과거 HTTP 재점검 시각이나 새 운영 검수 시각이 아니다.",
     "decisions": [
       {
@@ -8894,12 +9873,12 @@
     ],
     "reply_contract": {
       "format": "jungsi.frontend-reply/v1",
-      "revision": "2026.10.06.v4",
+      "revision": "2026.10.06.v5",
       "document": "docs/current/화면팀_회신요청_최종.md",
       "document_status": "finalized_for_delivery_replies_and_runtime_pending",
       "finalized": true,
       "finalized_meaning": "전달용 요청/현재 답변 문구와 인수 목록의 정본 준비 완료다. 미회신/미구현/운영/생성문서 Git 인수 완료를 뜻하지 않는다. 생성/정합 검사와 실제 전달 여부는 root가 별도로 확인한다.",
-      "prepared_at": "2026-10-06T11:09:32.087958Z",
+      "prepared_at": "2026-10-06T14:40:02.016045Z",
       "basis_commit": "2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f",
       "scope": "회신 RF-01~06과 기존 로컬 2판 요청 1~6 직접 답변. API/DTO/회원/보안 형태 불변, 실제값/운영 실행 제외.",
       "summary": "SUP01/02 목표는 확정이며 current old adapter는 불변이다. BFF·관리자 표현·DDL/SQL·모드·PR/증거·자료/계정 수령의 명시 답변을 요청한다. 로컬 재시작 소실과 외부 반출/권한 우회/대량 수집의 세 gate는 별도 인수한다. 현재 경계/조건은 답변했지만 자료·token 수령·외부 Caller/브라우저·운영 인수는 미완료다. 요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다. 최신 Supabase actual stage/role 사전검수·001002 개발 적용영수증과 독립/runtime pending은 아래 actual update 절로 분리한다.",
@@ -9271,8 +10250,9 @@
         "document": "docs/current/화면팀_후속작업_지시.md",
         "prepared_at": "2026-10-06T11:09:32.087958Z",
         "basis_commit": "2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f",
-        "summary": "이전 develop2624/PR6·347 비포함 관측은 history다. 현재4366 부모의 PR15 head3395983e source/CI2·27M/noD와 독립 정적 검토에서 빈 학교 범위 표시 및 숫자범위/InvalidDate fix를 수용했다. FE-01R HTTP-date 문법 잔여(P2, merge blocker=false)와 정확 후속 통합/직접 브라우저·실429·전체전달물·숫자·운영 인수는 pending이다. 최신 PR15 head243d2cd7 CI2/28M/noD와 정확 allowedOrigins 구조는 별도관측이고 증분review·실통합은 pending이다. CORS/origin 설정을 SEC03 서버중계·실사용자권한 인수로 확대하지 않는다. 최신243 증분은 임시preview용 정적수용이며 실도메인전환 FE-ORIGIN·merge/유효action/실권한은 pending이다.",
+        "summary": "PR15 reviewed ef7b7c08 exactCI2·develop3d90 merge·삭제0/branch보존을확인했다. 기존 FE05 표시/안전숫자fix source는통합됐으나 HTTP-date문법 FE-01R·실도메인/유효action FE-ORIGIN·가상화면자료오인 FE-SOURCE-01 및실브라우저/429·전체전달물·숫자/운영은pending이다. 실제003/freshmetadata·10합성영속성과실Auth/자료활성화는분리한다.",
         "local_review_boundary": [
+          "최신 PR15 source merge/CI2와003/freshmetadata·합성10건저장소영속성은확인됐다. 실사용자/실브라우저/자료활성화·운영은별도미인수다.",
           "이전 로컬 보고·2624/6b/347 ancestor 관측은 dated history로 보존한다. PR15 source/CI 관측·정적fix 인수와 직접 브라우저/운영 인수는 구분한다.",
           "네 역할·HOLD/503·HTML검색0·경고는 보고 문서에서 확인한 document_reported pass다. 원문·범위 독립 읽기 검토 완료이며 직접 root 브라우저 실행은 NOT_RUN이다.",
           "HTML0건·축약 SHA·429 실제 응답 미제공 범위는 그 자체로 모든HTML/JS/RSC/JSON/maps/storage/download token 미노출을 증명하지 않는다.",
@@ -9300,6 +10280,10 @@
           [
             "운영전환",
             "origin/보관키만으로 live되지 않는다. 실제Auth/권한/DB/승인자료·BFF/CSRF/서버신원/공유예산·세securitygate·preview/브라우저를 각각 인수한다."
+          ],
+          [
+            "기본경로결정",
+            "직접인간답변은기본경로유지/명시연결만준비다. CR06합성7PASS를기본factory전환승인으로해석하지않는다. 기존session3/API22/legacy경로를그대로둔다."
           ]
         ],
         "tasks": [
@@ -9417,18 +10401,17 @@
             "title": "빈 학교 표시 fix·Retry-After 후속 PR 통합",
             "owner": "외부 화면팀(기획팀 동일 snapshot 인수 협업)",
             "priority": "P1",
-            "status": "integration_pending",
+            "status": "evidence_pending",
             "depends_on": [
               "FE-01",
               "RF-05"
             ],
             "work": [
-              "PR15 제출 source의 빈 허용 학교범위 표시 fix와 Retry-After 숫자범위/InvalidDate fix가 정적 검토에서 수용됐다. 정확 head CI2·27M/noD와 develop4366 기준 후속 PR의 실제 통합 SHA는 별도로 인수한다.",
-              "FE-01R 문법 잔여는 P2 비머지 blocker 후속이다. 빈 school scope/403/독립권한·owner 의미와 입력/키를 보존한다.",
-              "정확 통합 fullSHA·CI와 동일 snapshot 브라우저/비노출/429503 영수증을 제출한다. source·CI 관측을 운영 완료로 확대하지 않는다."
+              "PR15 ef7b7c08의 sourcefix는develop3d90에정상 merge되고head별CI2가확인됐다. 이전347미포함·243관측은history로보존한다.",
+              "정확통합snapshot의빈학교/정상scope·안전Retry-After/입력키보존·실브라우저/fullSHA증거를제출한다. source통합을실권한/운영인수로확대하지않는다."
             ],
             "completion": [
-              "최신 develop 부모와 후속 PR·구현/통합 fullSHA·정확 CI 및 빈목록/정상범위·안전한 Retry-After·입력/키보존 브라우저 검수 증거를 제출한다. 머지와 direct/보안/수치/운영 인수는 별도다."
+              "source통합은확인됐으며동일snapshot브라우저·유효action/권한·입력/키/429503·전체전달물범위의인수증거를별도제출한다."
             ],
             "route_refs": [
               "forecast.capabilities",
@@ -9444,7 +10427,7 @@
           "BFF/신원/헤더/서명·내부권한/session CR",
           "승인시험팩/모형/기대값·정확503 응답원문",
           "화면 fullSHA/비노출증거·실429/503·preview와3securitygate",
-          "PR15 실제 통합 SHA·FE-01R 문법 후속·직접 브라우저/실429 fullSHA 증거"
+          "PR15통합후실브라우저·FE-01R 문법 후속·직접 브라우저/실429 fullSHA 증거"
         ],
         "preservation": "원본·프런트committed변경·우리before후보와 실제private증거는 모두 보존한다. 실제 token/성적/입결/curve/hash/PC경로/설정값을 공개 문서나Git에 넣지 않는다. 후속은 외부담당이며 이번 기획작성은 frontend/DB/Auth/배포/삭제 실행이 아니다.",
         "historical_basis_commit": "2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f",
@@ -9466,9 +10449,20 @@
             "merge_blocker": false,
             "work": "임시preview용 allowedOrigins 증분을 수용한다. 상수는 운영빌드에도 적용되므로 실제도메인전환 전 임시 worker/loopback 항목 제거 또는환경분리·허용/비허용Origin·유효action 및 실세션권한을 검수한다.",
             "evidence_boundary": "가짜action404는CSRF허용경로 확인 범위다. 유효action·실Auth/SEC03중계신원/사용자재인가·브라우저/운영gate NOT_RUN."
+          },
+          {
+            "id": "FE-SOURCE-01",
+            "priority": "P1",
+            "owner": "외부 화면팀(기획·데이터 검수 협업)",
+            "status": "evidence_pending",
+            "merge_blocker": false,
+            "request": "https://github.com/natural0448/Jungsi_touch/pull/15#issuecomment-6018143154",
+            "work": "화면의가상분석예시/학과근거·등급·백분위표시가실제승인자료의서버산출값으로오인되지않는지확인한다. source mode/자료승인·출처/보류를표시하고가상값을공식수치로발행하지않는다. 실제서비스분석·전체CDF로승격하지않는다. 실제 시험 미연결 상태의 가상 응시자 수·총점 누백 흐름, 배포 Caller/source 확인 및 소유자의 후속 수정·전달물 증거 회신을 요청했다. [최초 요청](https://github.com/natural0448/Jungsi_touch/pull/15#issuecomment-6018143154) 및 [확장 회신 요청](https://github.com/natural0448/Jungsi_touch/pull/15#issuecomment-6018649390)을 기준으로 답한다.",
+            "evidence_boundary": "수학한구간/9경계의제한검수와실제화면mode/전체공식정수백분위·전체학생누백은다르다. UI/browser검수는외부owner이며현재NOT_RUN. 확장 요청 송신은 확인됐으나 화면팀 실제 수정/브라우저 회신은 아직 관측하지 않았다.",
+            "expanded_request": "https://github.com/natural0448/Jungsi_touch/pull/15#issuecomment-6018649390"
           }
         ],
-        "current_review_basis_commit": "4366d67732556b69a17ebad03dbb5fc8bf1d6671"
+        "current_review_basis_commit": "3d90bc461c57102fc9ee8868cec7edac498470d4"
       },
       "ddl_input_requests": [
         {
@@ -9571,13 +10565,13 @@
     "frontend_committed_pending_boundary": "HEAD 프런트의 pending 추가11은 당시 제약/회신 요청 원문을 보존한 것이다. API origin/공개 설정 전달만으로 live 전환하지 않으며 이번 RF·SUP 및 세 security gate를 선행한다. 새 API/DTO·시험 목록/리포트 찾기/학교 분류 등을 이미 채택하지 않는다.",
     "actual_update_scope": {
       "format": "jungsi.supabase-actual-update-scope/v1",
-      "basis_commit": "4366d67732556b69a17ebad03dbb5fc8bf1d6671",
-      "recorded_at": "2026-10-06T13:26:00.596308Z",
+      "basis_commit": "3d90bc461c57102fc9ee8868cec7edac498470d4",
+      "recorded_at": "2026-10-06T14:40:02.016045Z",
       "authorization_source": "human_current_Supabase_update_and_all_needed_inputs_intake_request",
       "storage_new_private_copies_authorized": true,
       "database_non_destructive_update_requested": true,
-      "database_execution_status": "001002_applied_development_receipt_independent_review_pending",
-      "specific_database_apply_plan": "001002_new_private_schema_applied_preserved_master_runtime003_pending",
+      "database_execution_status": "001002003_applied_fresh_metadata_synthetic_ports_verified_live_pending",
+      "specific_database_apply_plan": "exact_human_approved003_applied_existing_public_metadata_preserved",
       "storage_writes_executed": true,
       "database_SQL_executed": true,
       "migration001": "actual_applied_verified_by_development_receipt",
@@ -9589,7 +10583,7 @@
       "engine_adoption_performed": false,
       "deployment_performed": false,
       "production_ready": false,
-      "boundary": "최신 사용자 요청 범위에서 신규 private Storage 복사·원본 보존, 실제 owner/app 연결·catalog 사전 읽기 검수 및 신규 private schema 001/002 적용 개발 영수증을 수령했다. 001/002 적용의 독립 원장 검수는 대기이며 private app 정책0·runtime003·사용자Auth/유료권한/default factory·자료/모형·보안·운영은 미인수다. master/public/profiles/기존role owner 변경·DELETE/DROP/TRUNCATE·기존 자료 덮어쓰기0을 분리한다. arbitrary schema/policy/master 변경·삭제·운영배포 권한으로 확대하지 않는다. 과거 미접속/미적용/safety 관측은 각 시점 history로 보존한다. 최신 사용자 지시는 서비스에 필요한 최소 자료만 인입하는 것으로 범위를 한정한다. 모든 소유자료 scan/자동import는 금지하며 기존49archive 보존/자동 runtime채택0·삭제0.",
+      "boundary": "최신 요청에 따라 최소 명시 승인자료만 준비한다. 기존 private49archive/001002·미적용 당시 관측을 보존하고, 정확003 인간승인/적용·fresh24정책과합성10건 영속성·명시port metadata검수를 최신별도 관측으로 기록한다. 기본factory는 인간이 유지하도록 결정했으므로 legacy그대로이고 자동target/Storage전환을 하지않는다. 시험팩1건은staged/미채택·추가QA 대기다. 실JWT/유료/운영host·자료활성화/수치·전체보안/배포는미인수이며 master/public 변경·삭제·덮어쓰기를 하지않는다.",
       "owner_reply": {
         "status": "private_credentials_and_readonly_DB_preflight_received_001002_development_receipt_received",
         "existing_frontend_and_main_API_DATABASE_URL": "not_used_owner_reported_APIkey_mode",
@@ -9600,7 +10594,8 @@
       },
       "database_SQL_reads_executed": true,
       "database_SQL_writes_executed": true,
-      "ingestion_policy": "minimal_explicit_approved_allowlist"
+      "ingestion_policy": "minimal_explicit_approved_allowlist",
+      "migration003": "APPLIED_FRESH_METADATA_VERIFIED"
     },
     "storage_staging": {
       "format": "jungsi.supabase-storage-staging/v1",
@@ -9705,7 +10700,7 @@
       "format": "jungsi.service-supabase-transition/v1",
       "id": "CR-SERVICE-SUP03",
       "status": "adopted_for_service_implementation_verification_pending",
-      "basis_commit": "4366d67732556b69a17ebad03dbb5fc8bf1d6671",
+      "basis_commit": "3d90bc461c57102fc9ee8868cec7edac498470d4",
       "requirements": [
         "REQ-20",
         "REQ-23",
@@ -9777,8 +10772,8 @@
         }
       },
       "implementation_code_paths": [],
-      "code_path_status": "service_candidate_files_created_feature_PR_integration_pending",
-      "synthetic_verification": "service_team_reported_27_PASS_final_typeguards_and_same_snapshot_pending",
+      "code_path_status": "seven_prepared_files_feature_PR_integration_pending",
+      "synthetic_verification": "service_team_reported_33_focused_PASS_full_snapshot_retry_pending",
       "actual_auth_DB_Storage_privilege_verification": "NOT_RUN",
       "production_ready": false,
       "route_refs": [
@@ -9799,13 +10794,14 @@
         "src/jungsi_touch/infrastructure/supabase_storage.py",
         "tests/test_http_entitlement_injection.py",
         "tests/test_postgres_entitlements.py",
-        "tests/test_supabase_storage.py"
+        "tests/test_supabase_storage.py",
+        "database/migrations/003_runtime_role_access.sql"
       ],
-      "code_paths_boundary": "서비스팀 후보에서 파일 생성 보고를 수령했다. develop implementation 참조에 추가하지 않으며 같은 공통계약·서비스6파일 snapshot의 PR/검수/통합 후 실제 참조로 전이한다.",
+      "code_paths_boundary": "명시 port6코드/검수와003SQL 총7준비파일은 feature PR 대기다. source시스템에는 pending path만 두고 develop 활성 참조를추가하지않는다. 기본factory전환은 인간이 허용하지 않았으며 33회귀/actualmetadata를 운영인수로확대하지않는다.",
       "synthetic_evidence": {
-        "reported_tests": 27,
+        "reported_tests": 33,
         "source": "service_team_report_read_by_root",
-        "status": "reported_PASS_before_final_typeguard_freeze",
+        "status": "reported_33_focused_PASS_not_full_snapshot_acceptance",
         "independent_rerun": false,
         "exact_implementation_commit": "pending_feature_commit",
         "actual_DB_auth_storage_permission": "NOT_RUN"
@@ -9839,7 +10835,7 @@
         "runtime_current_user": "jungsi_backend_app",
         "migration_owner_runtime_rejected": true,
         "public_nine_column_SELECT_arbitrary_REVOKE_allowed": false,
-        "actual_reader_implementation_acceptance": "pending_same_service_PR",
+        "actual_reader_implementation_acceptance": "actual_metadata_verified_on_explicit_port_feature_PR_pending",
         "actual_paid_subject_validation": "NOT_RUN",
         "boundary": "実際の own/admin·backend read 두 SELECT policy를 바탕으로 검사 계약을 개정한다. 임의 public REVOKE나 migration owner 런타임 사용으로 해결하지 않는다. SQL 계약/권한 구조만 공개하며 실행 설정값/실제 사용자/자료는 공개하지 않는다. 전용 app/owner 정책의 PERMISSIVE USING(true)는 기존 PUBLIC own/admin와 OR 결합되므로 DB RLS가 verified UUID만의 행으로 좁혀준다는 주장은 금지한다. reader의 WHERE user_id=%s 및 서버 검증 UUID parameter로 조회범위를 강제하고 transaction local claim을 결속한다. 추가/변경 정책·role·predicate는 거절한다.",
         "master_RLS_user_isolation_certified": false,
@@ -9847,15 +10843,46 @@
         "transaction_local_claim_scope": "검증 UUID와 transaction local claim을 결속하되 USING(true)의 trusted backend 정책이 사용자별 RLS를 보장한다고 주장하지 않음",
         "unknown_added_or_changed_SELECT_policy_rejected": true,
         "SELECT_policy_signature_match": "exact command/PERMISSIVE/role sets/predicates for existing two policies"
-      }
+      },
+      "full_snapshot_verification": {
+        "status": "pending_retry_after_root_fixture_portability_fix",
+        "previous_tests": 641,
+        "previous_errors": 9,
+        "failure_scope": "RetainedGitHistoryTests_Git_for_Windows_FilenameTooLong",
+        "previous_PASS_claimed": false,
+        "root_fixture_CR": "CR-SERVICE-VERIFY-20261006-01",
+        "root_fixture_focused_tests": 10,
+        "root_fixture_focused_status": "PASS",
+        "boundary": "서비스33개 집중 결과·이전 전체641의9ERROR·root별도10개 fixture 회귀는 서로 다른 범위다. 같은 Git snapshot 전체 정상훅/CI 재검수는 pending이며 실패를 PASS로 바꾸지 않는다."
+      },
+      "explicit_port_verification_ref": "supabase_operations_handoff_contract.explicit_port_metadata_verification",
+      "factory_transition_review": {
+        "id": "CR-SERVICE-SUP06-20261006-01",
+        "status": "user_selected_explicit_preparation_only",
+        "technical_review": "candidate_review7PASS_review_only",
+        "candidate_source_applied": false,
+        "default_factory_change_allowed": false,
+        "default_factory_applied": false,
+        "future_automatic_transition_allowed": false,
+        "human_question_resolved": true,
+        "human_answer": "기본 경로는 유지하고 명시 연결만 준비",
+        "current_factory_authority": "jungsi_backend.entitlements",
+        "current_session_format": "jungsi.session/v1",
+        "explicit_port_preparation_allowed": true,
+        "source_changes": 0,
+        "actual_Auth_DB_write_deployment_changes": 0,
+        "approval_review_history": "앞선 실제patch는auto-review가거절했다. 정확003승인과defaultfactory 접근판정/readiness전환 범위가다르므로 별도인간답변이필요했다. 이전v1 fixture실패와새v2합성7PASS는 보존하고 구현 인수로 확대하지 않는다.",
+        "boundary": "직접 인간 답변으로 기본 경로 유지/명시 연결 준비만 확정했다. 기술권장/7합성PASS를 default 전환승인으로 해석하지 않는다. 현재 legacy/session3/API22 핀과 운영factory를 유지하고 자동전환/legacyfallback 변경·profiles조회/admin paid합성·추가GRANT·Storage승인을 실행하지 않는다."
+      },
+      "future_default_factory_transition": "not_authorized_in_current_scope"
     },
     "database_role_target": {
       "format": "jungsi.database-role-target/v1",
-      "status": "actual_connection_role_master_read_preflight_PASS_runtime_privileges_pending",
+      "status": "actual_runtime003_least_privilege_metadata_verified_live_pending",
       "owner_role": "jungsi_backend_owner",
       "owner_scope": "이관/schema 객체 소유·001/002 적용 전용. 실제 객체 owner의 구조 변경 권한을 runtime 제한과 혼동하지 않는다.",
       "app_role": "jungsi_backend_app",
-      "app_scope": "runtime private schema USAGE/SELECT/INSERT/UPDATE 및 master read-only. DELETE/TRUNCATE 권한 없음이 목표이며 실제 GRANT/RLS/effective privileges 검수 필요.",
+      "app_scope": "실제003/freshmetadata의 privateSELECT13/INSERT9/columnUPDATE6·artifactSELECTonly와masterreadonly. runtimeDELETE/TRUNCATE·tablewideUPDATE·futureGRANT 없음. verified caller는서비스SQL로 제한한다.",
       "master_read_only": true,
       "runtime_DELETE_allowed": false,
       "runtime_TRUNCATE_allowed": false,
@@ -9872,14 +10899,14 @@
       "connection_selection": "지속 FastAPI/IPv4는 session5432 우선안. IPv6 direct5432 대안 및 transaction6543 실제 호환 검수는 별도.",
       "actual_role_exists_verified": true,
       "actual_effective_privileges_verified": true,
-      "boundary": "신규 연결설정과 실제 TLS/role/master metadata 사전 검수로 계정 존재·최소 SELECT·쓰기없음을 확인했다. owner는 이관/schema 소유·구조변경 권한을 갖고 runtime 재사용하지 않는다. private 업무 app 정책은 001/002 적용 영수증에서0이며 runtime003/CRUD/권한 인수는 pending이다. 기존 발급중 보고와 credential 미확보 관측은 history로 보존한다.",
-      "actual_privilege_scope": "13:12 preflight master SELECT/쓰기없음·CREATE·비super/BYPASSRLS/membership 검수만. 신규 private app CRUD/policies/runtime003·운영승인 NOT_RUN"
+      "boundary": "owner는 이관전용이고 runtime에 재사용하지 않는다. 실제003이 app 최소권한/정책을 추가했고 새연결메타로확인했다. 계정보관과운영process주입·기본factory·실사용자/전체securitygate는별개이며public/profiles/기존role owner를변경하지않았다.",
+      "actual_privilege_scope": "13SELECT/9INSERT/6columnUPDATE·24policy·artifactSELECTonly·tablewideUPDATE/DELETE/TRUNCATE없음 freshmetadata; realJWT/HTTP전체/RLS tenant인수아님"
     },
     "credentials_intake": {
       "format": "jungsi.private-credential-intake-summary/v1",
       "evidence_id": "SUP-CREDENTIALS-20261006-OWNER-APP",
       "recorded_at": "2026-10-06T13:12:22.356600Z",
-      "status": "credentials_received_connection_preflight_PASS_private_migration_review_pending",
+      "status": "actual_connection_runtime003_metadata_verified_live_pending",
       "source": "human_owner_private_delivery_and_root_structure_only_verification",
       "primary_connection_settings": 2,
       "direct_alternatives": 2,
@@ -9898,20 +10925,28 @@
       "effective_role_policy_verified": true,
       "migration001": "actual_applied_verified_by_development_receipt",
       "migration002": "actual_applied_verified_by_development_receipt",
-      "runtime_RLS003": "implementation_plan_pending_NOT_APPLIED",
-      "boundary": "설정 수령 후 실제 SQL 읽기 연결/TLS·role/master preflight PASS와001/002 개발 적용 영수증을 별도로 확인했다. independent 원장 검수/runtime003·실 사용자권한·default factory/운영 process 배포·자료승인은 대기다. 설정값/host/프로젝트ID/비공개 경로는 public 문서/라우팅으로 전달하지 않는다.",
-      "effective_verification_scope": "양계정 실제 TLS/현재role/최소 master SELECT·쓰기없음 사전 catalog 검수; private app 업무 policy/운영Auth NOT_RUN"
+      "runtime_RLS003": "APPLIED_FRESH_METADATA_VERIFIED",
+      "boundary": "수령한 private 설정으로 실제 SQL/TLS/role/master 및003 fresh metadata 검수까지 진행했다. 보관묶음에app/owner·direct대안이있어도 운영서버에는app DATABASE_URL만, migration owner는승인된이관작업전용으로분리한다. 기본factory는유지한다. 공개값·APIorigin만외부화면에전달하며실secret/연결값/비공개path/hash/ACL identity는공개하지않는다. JWT/실유료·운영host·자료승인은NOT_RUN.",
+      "effective_verification_scope": "actual TLS/role/master SELECT와003 fresh24정책·최소private권한/metadata만. realJWT/유료rows·배포/runtime factory승인 아님",
+      "delivery_boundary": {
+        "operating_server": "DATABASE_URL_app_only",
+        "migration_owner": "separate_private_migration_only_not_runtime",
+        "presentation": "public_Supabase_settings_and_API_origin_only",
+        "root_private_ACL_metadata_reviewed": true,
+        "settings_values_public": false,
+        "settings_files_or_permissions_changed_by_planning": false
+      }
     },
     "frontend_followup_observation": {
       "pull_request_number": 15,
-      "status": "incremental_review_accepted_for_temporary_preview_merge_and_operational_pending",
-      "head_prefix": "243d2cd7",
-      "exact_full_SHA": "parent_private_receipt_binding_pending",
+      "status": "PR15_merged_source_exactCI_verified_operational_pending",
+      "head_prefix": "ef7b7c08",
+      "exact_full_SHA": "ef7b7c08ae0c3db5ea02c7af685a99f6064219df",
       "exact_head_CI_success_count": 2,
       "changed_files_reported": 28,
       "all_modified_no_deletion_reported": true,
       "basis_commit": "4366d67732556b69a17ebad03dbb5fc8bf1d6671",
-      "boundary": "3395983e 정적 fix 검토는 history로 보존한다. 최신243d2cd7 head/base4366/28M/noD/exactCI2 관측을 append했다. origin allowlist는 서버 중계신원/실사용자 재인가를 대신하지 않는다. 증분 인수/merge·실브라우저/실429/운영gate는 pending. allowedOrigins는 상수이므로 운영빌드에도 적용된다. 실도메인 전환 전에 임시 worker/loopback 항목을 제거 또는 환경 분리하고 유효 action·실세션권한·허용/비허용 Origin을 인수한다. 가짜action404는CSRF경로 확인만이며 유효action/auth 성공증거가 아니다.",
+      "boundary": "PR15 reviewed ef7b7c08 exactCI2와 merge develop3d90/삭제0·branch보존을 확인했다. runtime4개파일은기존검토와바이트가같다. source통합/CI 관측은실브라우저/유효action·실권한·실429/숫자/운영인수아님이며 FE-01R/FE-ORIGIN/FE-SOURCE-01 및securitygate는 별도보류다.",
       "static_review": {
         "FE05": "empty_school_scope_display_fix_accepted",
         "FE01": "delta_seconds_range_and_InvalidDate_fix_accepted_HTTP_date_grammar_followup_pending"
@@ -9925,9 +10960,16 @@
         "work": "Retry-After fallback는 HTTP-date의 정식3형식만 허용한다. Date.parse가 ISO datetime 등 비HTTP-date를 수락하는 잔여를 수정하고 형식 밖 값은 복구시각을 만들지 않는다.",
         "evidence_boundary": "정적 소스 추론과 보고12case 범위다. 직접 실제429/브라우저 재현·정확 통합 SHA 인수는 NOT_RUN."
       },
-      "head_commit": "243d2cd7fc91ac6bed729163a1ae52e37dc9f96a",
+      "head_commit": "ef7b7c08ae0c3db5ea02c7af685a99f6064219df",
       "allowed_origins_structure": "정확 hostname4개/localhost3003; wildcard 없음. 실제 origin 값은 공개 정본에 복사하지 않음",
-      "incremental_review_status": "accepted_for_temporary_preview"
+      "incremental_review_status": "accepted_and_merged",
+      "merge_commit": "3d90bc461c57102fc9ee8868cec7edac498470d4",
+      "branch_preserved": true,
+      "source_deletions": 0,
+      "exact_CI_links": [
+        "https://github.com/natural0448/Jungsi_touch/actions/runs/37476704767/job/112313877303",
+        "https://github.com/natural0448/Jungsi_touch/actions/runs/37476695953/job/112313861535"
+      ]
     },
     "database_preflight": {
       "format": "jungsi.database-preflight-observation/v1",
@@ -10017,7 +11059,8 @@
       "boundary": "001/002 는 owner 단일 transaction의 신규 private schema 추가·13 tables·RLS enabled·schema_versions 반영 개발 영수증이다. 독립 실원장 검수는 pending이다. FORCE RLS/앱 업무 policy·runtime003·실제 사용자/유료권한/CAS·멱등·발표 원자성·22API·배포/운영 인수가 아니며 master/profiles/기존 owner·role은 변경하지 않았다.",
       "independent_document_review_status": "PASS_SOURCE_BODY_AND_DEVELOPMENT_RECEIPT_CONSISTENCY",
       "independent_document_review_scope": "001002 source Gitblob/보존사본 byte 및 outerBEGINCOMMIT만 제거한 실행body·13tables/RLS/history 구조 대조. 별도 after catalog/readback 부재로 내구성/보존 검증은 개발영수증 진술범위.",
-      "independent_after_catalog_and_durability_review": "NOT_RUN"
+      "independent_after_catalog_and_durability_review": "NOT_RUN",
+      "observation_scope": "001002 적용 당시 역사(003 적용 전); 최신 runtime은 별도 database_runtime_application"
     },
     "runtime_ingestion_policy": {
       "format": "jungsi.minimal-runtime-ingestion/v1",
@@ -10048,6 +11091,158 @@
       "boundary": "Storage49개는 보존용 staging의 관측이며 자동 runtime 채택0/삭제0을 유지한다. 13개 스키마 테이블 생성은 자료 대량 인입과 다르다. 자료팀이 최소 명시 승인 allowlist와 독립 검산을 준비하고 공급자/engine/production은 별도 인수한다.",
       "runtime_implementation_status": "pending",
       "production_ready": false
+    },
+    "database_runtime_application": {
+      "format": "jungsi.private-runtime-application-observation/v1",
+      "evidence_id": "SUP-DB-20261006-003-APPLY",
+      "evidence_collected_at": "2026-10-06T13:57:27.619438Z",
+      "status": "APPLIED_AND_FRESH_METADATA_VERIFIED",
+      "contract": "CR-SERVICE-SUP05-20261006-01",
+      "human_approval": "direct_human_exact003_v2_SQL_and_permission_matrix_confirmed_by_root",
+      "sql_execution": "owner_single_transaction",
+      "migration_versions": 3,
+      "policies": 24,
+      "fresh_readback_evidence": "SUP-DB-20261006-FRESH-RUNTIME-READBACK",
+      "fresh_readback_at": "2026-10-06T14:06:10.865405Z",
+      "fresh_connections": true,
+      "select_tables": 13,
+      "insert_tables": 9,
+      "update_columns": 6,
+      "table_wide_UPDATE": false,
+      "artifact_releases_access": "SELECT_only",
+      "runtime_DELETE_TRUNCATE": false,
+      "anon_authenticated_private_access": false,
+      "future_default_grants": false,
+      "public_scoped_metadata_equal": true,
+      "public_source_changed": false,
+      "business_data_imported": 0,
+      "apply_synthetic_rows_written": 0,
+      "DELETE_DROP_TRUNCATE_executed": false,
+      "caller_scope": "trusted_backend_role_has_broad_RLS_access_service_SQL_predicates_enforce_verified_caller_scope",
+      "full_index_defaultACL_census": "NOT_RUN",
+      "live_user_JWT_validation": "NOT_RUN",
+      "production_ready": false,
+      "boundary": "정확003 v2의 직접 인간 승인과 적용 영수증, 새 연결의24정책·SELECT13/INSERT9/columnUPDATE6·artifact SELECT-only·tablewideUPDATE/DELETE/TRUNCATE/미래GRANT 없음만 인수한다. 기존 public4범주 메타보존과 실제 학생/입결 인입0을 확인했다. 모든 index/defaultACL·운영JWT/유료권한/HTTP·공유보안 예산 인수로 확대하지 않는다. trusted backend RLS는 SQL 검증subject/소유권 필터를 대신하지 않는다."
+    },
+    "synthetic_persistence_verification": {
+      "format": "jungsi.synthetic-port-persistence-observation/v1",
+      "evidence_id": "SUP-DB-20261006-SYNTHETIC-PERSISTENCE",
+      "observed_at": "2026-10-06T14:07:48.654239Z",
+      "status": "PASS_SYNTHETIC_NEW_PROCESS_NEW_CONNECTIONS",
+      "synthetic_only": true,
+      "preserved_rows": 10,
+      "row_counts": {
+        "profiles": 1,
+        "reports": 1,
+        "report_revisions": 2,
+        "requests": 3,
+        "audit_events": 3
+      },
+      "separate_process": true,
+      "readback_new_connections": 5,
+      "write_new_connections": 14,
+      "all_connections_TLS": true,
+      "same_key_replay_unchanged": true,
+      "stale_CAS_rejected": true,
+      "idempotency_conflict_rejected": true,
+      "foreign_owner_reads_none": true,
+      "foreign_owner_write_rejected": true,
+      "public_auth_or_master_rows_read_or_changed": 0,
+      "real_business_data_imported": 0,
+      "DELETE_DROP_TRUNCATE": 0,
+      "operating_API_Auth_acceptance": "NOT_RUN",
+      "boundary": "합성 JSON으로 저장소 port의 CAS/멱등/타인소유권 거절과 새 프로세스·새 연결의 지속성을 확인했다. 합성10건은 보존한다. 실제 학생·실유료·Auth/외부HTTP·운영 backup/restore·전체 report/forecast 흐름의 인수 증거가 아니다."
+    },
+    "explicit_port_metadata_verification": {
+      "format": "jungsi.explicit-port-metadata-observation/v1",
+      "evidence_id": "SUP-SERVICE-20261006-EXPLICIT-PORT-METADATA",
+      "observed_at": "2026-10-06T14:11:34.301972Z",
+      "status": "PASS_SCOPED_ACTUAL_METADATA",
+      "scope": "ASGI_TestClient_actual_DB_metadata_only",
+      "database_timezone_types_constraints": "verified",
+      "UTC_instant_and_date_roundtrip": true,
+      "forecast002_metadata": "verified",
+      "master_metadata": "verified",
+      "master_authority": "public.jeongsi_passes",
+      "master_subject_scope": "parameterized_user_id",
+      "real_entitlement_rows_read": false,
+      "real_user_JWT_verified": false,
+      "sql_writes": 0,
+      "health_ready_HTTP": 503,
+      "health_ready_status": "configuration_pending",
+      "auth": "configured_not_session_verified",
+      "live_data": "not_verified",
+      "missing_settings_names": [
+        "GOOGLE_DRIVE_ACCESS_TOKEN",
+        "GOOGLE_DRIVE_INPUT_FOLDER",
+        "GOOGLE_DRIVE_OUTPUT_FOLDER",
+        "JUNGSI_DRIVE_REGISTRY"
+      ],
+      "default_factory_transition": false,
+      "data_approval_changed": false,
+      "live_host": "NOT_RUN",
+      "production_ready": false,
+      "boundary": "명시 연결 port의 actual metadata 검수만 PASS다. health는 DB메타가 verified여도 Drive/승인자료/실사용자·배포준비 부족으로503이다. 기존 factory의 자동 Storage/기본 유료판정 전환·합성성공 fallback을 수행하지 않았다."
+    },
+    "minimum_exam_stage": {
+      "format": "jungsi.minimum-exam-stage-observation/v1",
+      "evidence_id": "SUP-DATA-20261006-MINIMUM-EXAM",
+      "observed_at": "2026-10-06T13:44:23.927632Z",
+      "status": "MINIMUM_CANDIDATE_NOT_ADOPTED",
+      "payload_count": 1,
+      "payload_bytes": 328915,
+      "registry_entry_count": 1,
+      "entry_status": "staged",
+      "approved_entries": 0,
+      "engine_approved": false,
+      "production_allowed": false,
+      "archive_only": false,
+      "registry_binding": "candidate_not_runtime_selected",
+      "total_model_entries": 0,
+      "reused_existing_Storage_copy": true,
+      "candidate_sha_readback_observed": true,
+      "new_import_or_upload_by_data_review": false,
+      "provider_denial": "artifact_not_approved",
+      "provider_network_calls": 0,
+      "actual_data_adopted": false,
+      "active_config_changed": false,
+      "additional_accuracy_QA": "pending",
+      "production_ready": false,
+      "boundary": "자료팀이 최소 시험팩1건/328915B의 후보와 이미 저장된 Storage 복사 검증근거를 재사용했다. status=staged와승인0·engine/productionfalse·archive_only exactFalse는 runtime 채택이나 독립승인이 아니다. unbound 후보는 provider가 네트워크0으로거절했다. 없는 전체누백모형/입결은 기존 guard/503·pending이며 가상값으로 대체하지 않는다. 모든 보유자료/원표/PDF/QA의 자동인입을 하지 않는다."
+    },
+    "subject_accuracy_review": {
+      "format": "jungsi.scoped-subject-accuracy-observation/v1",
+      "evidence_id": "SUP-DATA-20261006-MATH-SCOPED-QA",
+      "reviewed_at": "2026-10-06T14:16:34.426292Z",
+      "status": "PASS_SCOPED_REVIEW_FROZEN",
+      "scope": "9월 모의평가 수학 한 점수구간 및9등급 경계의 공식 근거·동점 포함/제외 비율 검수",
+      "boundary_checks_passed": 9,
+      "subject_result_in_memory": true,
+      "operational_engine_run": false,
+      "whole_exam_approved": false,
+      "total_CDF_approved": false,
+      "runtime_registry_changed": false,
+      "official_scorecard_integer_percentile_certified": false,
+      "normative_rounding_primary_source_verified": false,
+      "top_percent_distinct_from_scorecard_integer_percentile": true,
+      "actual_UI_source_mode": "NOT_RUN",
+      "Auth_DB_Storage_write_by_review": false,
+      "source_files_changed": false,
+      "automatic_resume": false,
+      "production_ready": false,
+      "boundary": "수학의 제한 구간과9경계만 원문/캐시와 대조하고 in-memory 검산했다. 이를 전체시험/CDF·공식 정수 성적표백분위·실제 화면 mode·운영분석 완료로 확대하지 않는다. 성적값/학생값/도수·누백수치/자료SHA/원문경로를 Git문서에 복사하지 않는다. UI 가상예시가 공식결과로 오인되지 않는지는 외부 FE-SOURCE-01 후속이다.",
+      "observation_scope": "14:16Z 수학 제한 검수의 동결 관측이다. 이후 직접 사용자 요청으로 데이터팀이 최소 변경본·정의/동점 방식 보완 후보를 별도로 준비 중이며 기존 부분 검수를 자동 재개한 관측이 아니다."
+    },
+    "targeted_data_followup": {
+      "format": "jungsi.targeted-data-followup/v1",
+      "status": "targeted_update_receipt_pending",
+      "scope": "최소 변경본과 산출 정의·동점 방식 보완의 정확 선별 목록 및 새 버전 검토 영수증 대기",
+      "actual_additional_uploads_observed": 0,
+      "full_CDF_approved": false,
+      "runtime_adopted": false,
+      "engine_approved": false,
+      "production_allowed": false,
+      "boundary": "별도 직접 사용자 지시에 따른 데이터팀 후속 준비다. 공식 원자료를 임의 오류로 수정하거나 전체 49개 보관물을 재업로드하지 않는다. 필요한 선별 목록 동결을 먼저 받고 새 형식·DTO·엔진 로직 변화는 별도 계약 변경으로 다룬다."
     }
   },
   "security_contract": {

@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.8.4",
-  "source_sha256": "2228d6a45c19a25ace99daf5b230c46057f324ad5c298e0a66d2e1848fb57a0e",
+  "spec_version": "1.8.5",
+  "source_sha256": "5f1f4f77d5895316ca8620952d30961f9ec0ffd6c6680cbb60fa4c995f236273",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4377,7 +4377,7 @@
   },
   "supabase_operations_handoff": {
     "format": "jungsi.supabase-operations-handoff/v1",
-    "revision": "2026.10.06.v4",
+    "revision": "2026.10.06.v5",
     "checked_at": "2026-10-06T08:40:54.349322Z",
     "status": "NOT_READY",
     "production_ready": false,
@@ -4390,7 +4390,7 @@
     "gates": [
       {
         "id": "실DB",
-        "status": "001002_APPLIED_DEVELOPMENT_RECEIPT_INDEPENDENT_AND_RUNTIME_PENDING"
+        "status": "003_FRESH_METADATA_AND_SYNTHETIC_PERSISTENCE_PASS_LIVE_PENDING"
       },
       {
         "id": "Bearer 로그인",
@@ -4398,11 +4398,11 @@
       },
       {
         "id": "유료·staff 권한",
-        "status": "NOT_RUN_TARGET_CONFIRMED_ADAPTER_PENDING"
+        "status": "EXPLICIT_MASTER_METADATA_PASS_REAL_JWT_ROWS_NOT_RUN_DEFAULT_LEGACY_KEPT"
       },
       {
         "id": "실approved 자료",
-        "status": "HOLD_APPROVED0"
+        "status": "HOLD_MINIMUM_EXAM_STAGED_APPROVED0_SCOPED_MATH_QA_ONLY"
       },
       {
         "id": "Drive 실제공급",
@@ -4414,7 +4414,7 @@
       },
       {
         "id": "외부4페이지",
-        "status": "NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED"
+        "status": "PR15_MERGED_SOURCE_CI_PASS_BROWSER_SECURITY_NOT_RUN"
       },
       {
         "id": "운영·최종release",
@@ -4470,6 +4470,30 @@
       "independent_review": "pending",
       "runtime003": "NOT_APPLIED",
       "production_ready": false
+    },
+    "runtime003": {
+      "status": "APPLIED_AND_FRESH_METADATA_VERIFIED",
+      "policies": 24,
+      "scope": "metadata_only",
+      "production_ready": false
+    },
+    "explicit_port": {
+      "status": "PASS_SCOPED_ACTUAL_METADATA",
+      "health_HTTP": 503,
+      "real_user_JWT": false,
+      "default_factory_transition": false
+    },
+    "minimum_exam_stage": {
+      "status": "MINIMUM_CANDIDATE_NOT_ADOPTED",
+      "payloads": 1,
+      "approved_entries": 0,
+      "engine_approved": false,
+      "production_allowed": false
+    },
+    "factory_decision": {
+      "id": "CR-SERVICE-SUP06-20261006-01",
+      "status": "user_selected_explicit_preparation_only",
+      "default_change_allowed": false
     }
   },
   "security_contract": {

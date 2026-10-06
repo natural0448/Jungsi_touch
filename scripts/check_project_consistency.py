@@ -466,7 +466,7 @@ def frontend_reply_text(spec):
     items='## 화면팀에 요청하는 회신\n\n'+table(['ID','업무','담당','상태'],[[v['id'],v['title'],', '.join(v['owners']),v['status']] for v in r['items']])
     local='## 로컬 연결 요청 2판에 대한 직접 답변\n\n'+'\n\n'.join(details(v,'①②③④⑤⑥'[v['number']-1]) for v in r['local_request_answers'])
     boundary='## 인수 경계와 미확정 사항\n\n'+r['handoff_boundary']+'\n\n'+bullets(r['unresolved'])+'\n\n'+r['preservation']
-    return '\n\n'.join([head,items,'\n\n'.join(details(v,v['id']) for v in r['items']),local,boundary,'## 새 로컬 검수 보고의 후속 작업\n\n[화면팀 후속 작업 지시](화면팀_후속작업_지시.md)의 FE-01~05와 구체 SUP 회신을 함께 전달한다.',supabase_actual_update_text(c)])
+    return '\n\n'.join([head,items,'\n\n'.join(details(v,v['id']) for v in r['items']),local,boundary,'## 새 로컬 검수 보고의 후속 작업\n\n[화면팀 후속 작업 지시](화면팀_후속작업_지시.md)의 FE-01~05와 구체 SUP 회신을 함께 전달한다.',supabase_actual_update_text(c),supabase_second_actual_update_text(c)])
 
 
 def frontend_followup_text(spec):
@@ -604,7 +604,7 @@ def supabase_actual_update_text(contract):
     relay=cr['entitlement_injection'];provider=cr['storage_provider']
     implementation=cr['id']+'; '+cr['status']+'. '+cr['preservation']
     db=contract['database_preflight'];apply=contract['database_application']
-    db_text='### 실제 SQL 사전 검수와 신규 private schema 적용 단계\n\n'+table(['관측','상태','범위'],[
+    db_text='### 이전001·002 관측:003적용전의역사\n\n'+table(['관측','상태','범위'],[
         ['읽기 preflight',db['status'],db['observed_at']+'; '+db['evidence_id']+'; TLS 양계정/least role/master9컬럼·2 SELECT policy/당시schema0'],
         ['001·002 적용',apply['status'],apply['committed_at']+'; '+apply['evidence_id']+'; 신규13 RLS tables/owner·schema_versions'],
         ['독립 원장검수',apply['independent_review_status'],'개발 적용 영수증 이후 별도 검수; runtime app정책 '+str(apply['private_app_policy_count'])+'건'],
@@ -695,7 +695,7 @@ def validate_supabase_actual_update_contract(spec):
     if cr.get('current_authority')!='jungsi_backend.entitlements' or cr.get('target_authority')!='public.jeongsi_passes':
         errors.append('Supabase target must preserve current default authority')
     credentials=c.get('credentials_intake',{})
-    if credentials.get('status')!='credentials_received_connection_preflight_PASS_private_migration_review_pending' or credentials.get('private_values_read_by_planning')is not False or credentials.get('actual_DB_connection_verified')is not True or credentials.get('effective_role_policy_verified')is not True or not credentials.get('effective_verification_scope'):
+    if credentials.get('status')!=('actual_connection_runtime003_metadata_verified_live_pending'if tuple(int(v)for v in version.split('.'))>=(1,8,5)else 'credentials_received_connection_preflight_PASS_private_migration_review_pending') or credentials.get('private_values_read_by_planning')is not False or credentials.get('actual_DB_connection_verified')is not True or credentials.get('effective_role_policy_verified')is not True or not credentials.get('effective_verification_scope'):
         errors.append('Supabase private configuration intake needs scoped actual connection evidence')
     db=c.get('database_preflight',{});apply=c.get('database_application',{})
     if db.get('format')!='jungsi.database-preflight-observation/v1' or db.get('status')!='PASS_READONLY_CONNECTION_ROLE_MASTER_SCHEMA_ABSENCE' or db.get('read_only')is not True or type(db.get('sql_writes'))is not int or db.get('sql_writes')!=0 or db.get('private_schema_present_at_preflight')is not False or db.get('private_table_count_at_preflight')!=0:
@@ -719,13 +719,67 @@ def validate_supabase_actual_update_contract(spec):
         errors.append('Supabase migration receipt cannot certify independent runtime acceptance')
     if any(apply.get(k)is not False for k in ('public_master_changed','profiles_changed','existing_owner_or_role_changed','DELETE_DROP_TRUNCATE_executed','production_ready')) or apply.get('runtime003_status')!='NOT_APPLIED' or apply.get('runtime_CRUD_privilege_acceptance')!='NOT_RUN' or apply.get('live_authenticated_operations')!='NOT_RUN':
         errors.append('Supabase private schema receipt does not permit master mutation or runtime readiness')
-    if any(scope.get(k)is not True for k in ('database_SQL_executed','database_SQL_reads_executed','database_SQL_writes_executed')) or scope.get('database_execution_status')!='001002_applied_development_receipt_independent_review_pending' or any(scope.get(k)!='actual_applied_verified_by_development_receipt' for k in ('migration001','migration002')):
+    if any(scope.get(k)is not True for k in ('database_SQL_executed','database_SQL_reads_executed','database_SQL_writes_executed')) or scope.get('database_execution_status')!=('001002003_applied_fresh_metadata_synthetic_ports_verified_live_pending'if tuple(int(v)for v in version.split('.'))>=(1,8,5)else '001002_applied_development_receipt_independent_review_pending') or any(scope.get(k)!='actual_applied_verified_by_development_receipt' for k in ('migration001','migration002')):
         errors.append('Supabase actual SQL receipt state drift')
     minimal=c.get('runtime_ingestion_policy',{})
     if minimal.get('format')!='jungsi.minimal-runtime-ingestion/v1' or minimal.get('mode')!='minimal_explicit_approved_allowlist' or minimal.get('selection')!='requested_operation_required_dependencies_only' or minimal.get('explicit_approved_entries_only')is not True or minimal.get('archive49_preserved')is not True:
         errors.append('Supabase runtime ingestion must use minimum explicit approved dependencies')
     if any(minimal.get(k)is not False for k in ('bulk_scan_or_all_owned_data_autoimport_allowed','archive_uploads_auto_adopted','deletion_performed','production_ready')) or minimal.get('runtime_implementation_status')!='pending' or not minimal.get('missing_behavior'):
         errors.append('Supabase staged archives cannot become bulk runtime data or approval')
+    return errors
+
+
+def supabase_second_actual_update_text(contract):
+    runtime=contract.get('database_runtime_application')
+    if not runtime:return ''
+    synthetic=contract['synthetic_persistence_verification'];port=contract['explicit_port_metadata_verification']
+    minimum=contract['minimum_exam_stage'];accuracy=contract['subject_accuracy_review'];factory=contract['service_transition_contract']['factory_transition_review']
+    return '\n\n'.join([
+        '## 2차 실제 관측:003·명시port·최소시험팩·화면통합',
+        table(['관측','상태','검수범위'],[
+            ['정확003 적용/fresh권한',runtime['status'],runtime['evidence_id']+'; 정책24/SELECT13·INSERT9·columnUPDATE6'],
+            ['합성 새process영속성',synthetic['status'],synthetic['evidence_id']+'; 합성'+str(synthetic['preserved_rows'])+'건'],
+            ['명시port메타',port['status'],port['evidence_id']+'; health'+str(port['health_ready_HTTP'])+' / '+port['health_ready_status']],
+            ['최소시험팩',minimum['status'],minimum['evidence_id']+'; '+str(minimum['payload_count'])+'건/'+str(minimum['payload_bytes'])+'B·'+minimum['entry_status']+'/승인0'],
+            ['수학 부분QA',accuracy['status'],accuracy['evidence_id']+'; 수학한구간/9경계만·wholeexam/CDF승인0'],
+            ['기본경로 결정',factory['status'],factory['human_answer']+'; candidate7PASS는review-only/source변경0']]),
+        runtime['boundary'],synthetic['boundary'],port['boundary'],minimum['boundary'],accuracy['boundary'],accuracy.get('observation_scope',''),factory['boundary'],
+        ('데이터팀 후속: '+contract['targeted_data_followup']['status']+'. '+contract['targeted_data_followup']['boundary']) if contract.get('targeted_data_followup') else '',
+        '운영서버는 app DATABASE_URL만, owner URL은이관작업전용private로분리한다. 외부화면은공개Supabase설정/APIorigin만받는다. 비공개env값/path/hash/ACL identity를기록하지않는다.',
+        '현재legacy/defaultfactory/API22/session3/page4·최소allowlist를유지한다. 실제사용자JWT/유료rows·자료활성화·livehost·브라우저와세securitygate/운영은NOT_RUN/NOT_READY다.'
+    ])
+
+
+def validate_supabase_second_actual_update_contract(spec):
+    try:adopted=tuple(int(v)for v in spec.get('version','').split('.'))>=(1,8,5)
+    except (ValueError,AttributeError):adopted=False
+    if not adopted:return []
+    c=spec.get('supabase_operations_handoff_contract',{});errors=[]
+    runtime=c.get('database_runtime_application',{});synthetic=c.get('synthetic_persistence_verification',{})
+    port=c.get('explicit_port_metadata_verification',{});minimum=c.get('minimum_exam_stage',{});accuracy=c.get('subject_accuracy_review',{})
+    if runtime.get('format')!='jungsi.private-runtime-application-observation/v1' or runtime.get('status')!='APPLIED_AND_FRESH_METADATA_VERIFIED' or runtime.get('policies')!=24 or runtime.get('select_tables')!=13 or runtime.get('insert_tables')!=9 or runtime.get('update_columns')!=6 or runtime.get('artifact_releases_access')!='SELECT_only':
+        errors.append('Supabase exact003 fresh metadata scope drift')
+    if any(runtime.get(k)is not False for k in ('table_wide_UPDATE','runtime_DELETE_TRUNCATE','anon_authenticated_private_access','future_default_grants','public_source_changed','DELETE_DROP_TRUNCATE_executed','production_ready')) or runtime.get('business_data_imported')!=0 or runtime.get('live_user_JWT_validation')!='NOT_RUN':
+        errors.append('Supabase metadata permission proof cannot expand authority or live readiness')
+    if synthetic.get('synthetic_only')is not True or synthetic.get('separate_process')is not True or synthetic.get('preserved_rows')!=10 or synthetic.get('real_business_data_imported')!=0 or synthetic.get('public_auth_or_master_rows_read_or_changed')!=0 or synthetic.get('operating_API_Auth_acceptance')!='NOT_RUN':
+        errors.append('Supabase synthetic persistence is not actual user or operational acceptance')
+    if port.get('scope')!='ASGI_TestClient_actual_DB_metadata_only' or port.get('health_ready_HTTP')!=503 or port.get('real_entitlement_rows_read')is not False or port.get('real_user_JWT_verified')is not False or port.get('default_factory_transition')is not False or port.get('data_approval_changed')is not False or port.get('production_ready')is not False:
+        errors.append('Supabase explicit metadata port cannot certify default factory Auth or data')
+    if minimum.get('payload_count')!=1 or minimum.get('payload_bytes')!=328915 or minimum.get('entry_status')!='staged' or minimum.get('approved_entries')!=0 or minimum.get('registry_binding')!='candidate_not_runtime_selected' or minimum.get('provider_denial')!='artifact_not_approved' or minimum.get('provider_network_calls')!=0 or minimum.get('archive_only')is not False or any(minimum.get(k)is not False for k in ('engine_approved','production_allowed','actual_data_adopted','active_config_changed','production_ready')):
+        errors.append('Supabase minimum staged exam must stay unapproved and unbound')
+    if accuracy.get('boundary_checks_passed')!=9 or any(accuracy.get(k)is not False for k in ('whole_exam_approved','total_CDF_approved','runtime_registry_changed','official_scorecard_integer_percentile_certified','normative_rounding_primary_source_verified','operational_engine_run','production_ready')) or accuracy.get('actual_UI_source_mode')!='NOT_RUN':
+        errors.append('Scoped mathematics review cannot certify entire exam CDF integer percentile or UI')
+    cr=c.get('service_transition_contract',{});factory=cr.get('factory_transition_review',{})
+    if factory.get('status')!='user_selected_explicit_preparation_only' or factory.get('human_answer')!='기본 경로는 유지하고 명시 연결만 준비' or any(factory.get(k)is not False for k in ('default_factory_change_allowed','default_factory_applied','future_automatic_transition_allowed','candidate_source_applied')) or factory.get('current_factory_authority')!='jungsi_backend.entitlements' or factory.get('human_question_resolved')is not True or cr.get('default_operating_factory_transition')!='NOT_RUN':
+        errors.append('Human explicit-only decision forbids default factory transition')
+    if cr.get('pending_pr_paths',[]).count('database/migrations/003_runtime_role_access.sql')!=1 or cr.get('implementation_code_paths')!=[] or cr.get('full_snapshot_verification',{}).get('previous_PASS_claimed')is not False:
+        errors.append('Service preparation paths and focused results cannot certify full snapshot integration')
+    fo=c.get('frontend_followup_observation',{})
+    if fo.get('merge_commit')!='3d90bc461c57102fc9ee8868cec7edac498470d4' or fo.get('head_commit')!='ef7b7c08ae0c3db5ea02c7af685a99f6064219df' or fo.get('exact_head_CI_success_count')!=2 or fo.get('source_deletions')!=0 or fo.get('branch_preserved')is not True:
+        errors.append('PR15 source integration observation drift')
+    residual=c.get('reply_contract',{}).get('followup',{}).get('residual_followups',[])
+    if not {'FE-01R','FE-ORIGIN','FE-SOURCE-01'}<={v.get('id')for v in residual if isinstance(v,dict)}:
+        errors.append('PR15 integration must retain operational origin date and source followups')
     return errors
 
 
@@ -743,7 +797,7 @@ def supabase_operations_handoff_text(spec):
     history='## 이전 코드 인수와 이번 후보\n\n'+c['history']['summary']+'\n\n확인된이전baseline '+c['history']['baseline']+', tree '+c['history']['tree']+'; normalhooks '+str(c['history']['previous_normal_hooks'])+'건. [이전정확CI]('+c['history']['CI']+').'
     reply='## 화면팀 최종 회신 인수\n\n[화면팀 회신 요청](화면팀_회신요청_최종.md)의 RF-01~06 및 원래 로컬 요청 ①~⑥를 함께 확인한다. 전달 문서 완성과 실제 회신·연결·보안 검수는 별도 상태다.'
     references='## 공식 primary 참고\n\n'+'\n\n'.join(v[2]+' ['+v[0]+']('+v[1]+').' for v in c['references'])+'\n\n별도 FastAPI와 이용권 단일 기준은 확정 목표이며 운영 배포·DB·어댑터 전환은 미실행이다. 제공자 무료 plan 가격·제한 수치를 단정하지 않는다. 공개 문서에 실제 project URL/id/key/JWT/개인식별/자료 hash/비공개 PC 경로를 넣지 않는다.'
-    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),supabase_actual_update_text(c),facts,settings,overview,detail,reply,order,gate,history,references] if part)
+    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),supabase_actual_update_text(c),supabase_second_actual_update_text(c),facts,settings,overview,detail,reply,order,gate,history,references] if part)
 
 def supabase_operations_route_metadata(spec):
     c=spec['supabase_operations_handoff_contract']
@@ -756,6 +810,12 @@ def supabase_operations_route_metadata(spec):
         d=c['database_preflight'];a=c['database_application']
         result['database_preflight']=dict(status=d['status'],observed_at=d['observed_at'],evidence_id=d['evidence_id'],read_only=d['read_only'])
         result['database_application']=dict(status=a['status'],committed_at=a['committed_at'],evidence_id=a['evidence_id'],independent_review=a['independent_review_status'],runtime003=a['runtime003_status'],production_ready=a['production_ready'])
+    if c.get('database_runtime_application'):
+        v=c['database_runtime_application'];p=c['explicit_port_metadata_verification'];e=c['minimum_exam_stage'];f=c['service_transition_contract']['factory_transition_review']
+        result['runtime003']=dict(status=v['status'],policies=v['policies'],scope='metadata_only',production_ready=False)
+        result['explicit_port']=dict(status=p['status'],health_HTTP=p['health_ready_HTTP'],real_user_JWT=False,default_factory_transition=False)
+        result['minimum_exam_stage']=dict(status=e['status'],payloads=e['payload_count'],approved_entries=e['approved_entries'],engine_approved=False,production_allowed=False)
+        result['factory_decision']=dict(id=f['id'],status=f['status'],default_change_allowed=False)
     return result
 
 
@@ -1579,6 +1639,7 @@ def validate_spec(spec):
     errors.extend(validate_security_contract(spec))
     errors.extend(validate_frontend_reply_contract(spec))
     errors.extend(validate_supabase_actual_update_contract(spec))
+    errors.extend(validate_supabase_second_actual_update_contract(spec))
     return errors
 
 def protected_path(path,shared_tools):
