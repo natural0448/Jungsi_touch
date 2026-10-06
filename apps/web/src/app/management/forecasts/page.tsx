@@ -66,10 +66,17 @@ export default async function Page({ searchParams }: PageProps<"/management/fore
           {caps.capabilities.map((c) => <span key={c} className="cap">{c === "editor" ? "작성·조정·검증" : "승인·발행"}</span>)}
           <span className="lab">허용 학교</span>
           <span className="unis">
-            <Link href={route.path} className={uni ? undefined : "on"}>전체</Link>
-            {caps.university_ids.map((u) => (
-              <Link key={u} href={`${route.path}?university=${encodeURIComponent(u)}`} className={uni === u ? "on" : undefined}>{u}</Link>
-            ))}
+            {/* 빈 허용 목록은 '전체'가 아니라 빈 범위다(서버가 학교를 지정하기 전) */}
+            {caps.university_ids.length === 0 ? (
+              <span className="mg-nouni">지정된 학교 없음</span>
+            ) : (
+              <>
+                <Link href={route.path} className={uni ? undefined : "on"}>전체</Link>
+                {caps.university_ids.map((u) => (
+                  <Link key={u} href={`${route.path}?university=${encodeURIComponent(u)}`} className={uni === u ? "on" : undefined}>{u}</Link>
+                ))}
+              </>
+            )}
           </span>
         </section>
 

@@ -42,18 +42,34 @@ async function send(path: string, init: RequestInit): Promise<Response> {
   }
 }
 
+/**
+ * Retry-After 해석(FE-01). 계약은 음이 아닌 정수 delta-seconds 또는 HTTP 날짜다.
+ * - 숫자는 순수 십진 정수 문법만 받는다. 빈 값·공백·음수·소수·지수(1e300 등)는 거절한다.
+ * - 날짜는 '지금 이후 ~ 7일 안'만 받는다. 과거·범위 밖·해석 불가 값으로 임의 복구 시각을 만들지 않는다.
+ * 유효하지 않으면 null 을 돌려주고 화면은 시각 없는 제한 안내만 보인다. 입력값·멱등 키 보존은 호출한 쪽 규칙 그대로다.
+ */
+const RETRY_AFTER_MAX_MS = 7 * 24 * 60 * 60 * 1000;
+function retryAfterAt(header: string | null): Date | null {
+  if (header === null) return null;
+  const v = header.trim();
+  if (/^\d{1,7}$/.test(v)) {
+    const ms = Number(v) * 1000;
+    return ms <= RETRY_AFTER_MAX_MS ? new Date(Date.now() + ms) : null;
+  }
+  const t = Date.parse(v);
+  if (!Number.isNaN(t) && t > Date.now() && t - Date.now() <= RETRY_AFTER_MAX_MS) return new Date(t);
+  return null;
+}
+
 /** 401·403·429·503 은 공통으로 올린다. 나머지는 호출한 쪽이 판단한다 */
 async function guard(res: Response) {
   if (res.status === 401 || res.status === 403) {
     const code = await codeOf(res);
     throw new AccessDenied(res.status, code ?? (res.status === 401 ? "authentication_required" : "paid_required"));
   }
-  // 429(요청 제한, SEC-07): 코드와 Retry-After(초 또는 HTTP 날짜)만 받아 안내한다. 성공으로 숨기지 않는다
+  // 429(요청 제한, SEC-07): 코드와 Retry-After 만 받아 안내한다. 성공으로 숨기지 않는다
   if (res.status === 429) {
-    const ra = res.headers.get("Retry-After");
-    const sec = Number(ra);
-    const retryAt = ra === null ? null : Number.isFinite(sec) ? new Date(Date.now() + sec * 1000) : Number.isNaN(Date.parse(ra)) ? null : new Date(ra);
-    throw new ConnectionError("rate_limited", (await codeOf(res)) ?? "rate_limit_exceeded", retryAt);
+    throw new ConnectionError("rate_limited", (await codeOf(res)) ?? "rate_limit_exceeded", retryAfterAt(res.headers.get("Retry-After")));
   }
   if (res.status === 503) throw new ConnectionError("unavailable", (await codeOf(res)) ?? "backend_dependency_unavailable");
 }

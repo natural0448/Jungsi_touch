@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.8.6",
-  "source_sha256": "11a88bab4dcbb5f5823bab36f61bad938ee2e7c52471ea7649f76e2178bd43d7",
+  "spec_version": "1.8.8",
+  "source_sha256": "f659b99d852bf1597eea5bb9df93c77ee3a8e6f6fa41eb6cb91c99f4f5f0c07c",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4377,7 +4377,7 @@
   },
   "supabase_operations_handoff": {
     "format": "jungsi.supabase-operations-handoff/v1",
-    "revision": "2026.10.06.v6",
+    "revision": "2026.10.07.v8",
     "checked_at": "2026-10-06T08:40:54.349322Z",
     "status": "NOT_READY",
     "production_ready": false,

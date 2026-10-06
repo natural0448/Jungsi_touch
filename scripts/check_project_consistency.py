@@ -1726,13 +1726,88 @@ def validate_changed_paths(changed,spec):
     return []
 
 def snapshot_changed_paths(snapshot):
+    """Compare the immutable selected result with every fixed merge parent."""
+    oid_pattern=r"(?:[0-9a-f]{40}|[0-9a-f]{64})"
+    def commit_oid(raw):
+        value=raw.decode("ascii").strip()
+        if not re.fullmatch(oid_pattern,value):raise ValueError("Invalid snapshot parent commit.")
+        return value
+    def parse_entries(raw,*,index):
+        entries={}
+        for row in raw.split(b"\0"):
+            if not row:continue
+            info,name=row.split(b"\t",1);fields=info.decode("ascii").split()
+            if len(fields)!=3:raise ValueError("Invalid snapshot tree metadata.")
+            mode,second,third=fields
+            if index:
+                oid=second
+                if third!="0":raise ValueError("Resolve the index conflict before validation.")
+            else:
+                oid=third
+                if second not in {"blob","commit"}:raise ValueError("Invalid snapshot tree metadata.")
+            path=name.decode("utf-8")
+            if not re.fullmatch(r"[0-7]{6}",mode) or not re.fullmatch(oid_pattern,oid) or not path or path in entries:
+                raise ValueError("Invalid snapshot tree metadata.")
+            entries[path]=(mode,oid)
+        return entries
     if snapshot.staged:
-        raw=git("diff","--cached","--name-only","-z")
+        captured=getattr(snapshot,"entries",None)
+        if not isinstance(captured,dict):raise ValueError("Staged snapshot entries are required.")
+        captured=dict(captured)
+        def assert_same_index():
+            if parse_entries(git("ls-files","--stage","-z"),index=True)!=captured:
+                raise ValueError("Index changed after the selected snapshot was captured.")
+        def head_commit():
+            try:return commit_oid(git("rev-parse","--verify","HEAD^{commit}"))
+            except subprocess.CalledProcessError as failure:
+                # Preserve ordinary initial staging only for a proven unborn branch.
+                ref=git("symbolic-ref","--quiet","HEAD").decode("utf-8").strip()
+                if not ref.startswith("refs/heads/"):raise failure
+                try:git("show-ref","--verify","--quiet",ref)
+                except subprocess.CalledProcessError as missing:
+                    if missing.returncode==1:return None
+                    raise
+                raise failure
+        merge_file=Path(git("rev-parse","--git-path","MERGE_HEAD").decode("utf-8").strip())
+        if not merge_file.is_absolute():merge_file=ROOT/merge_file
+        def merge_state():
+            if merge_file.is_symlink():raise ValueError("Unexpected symbolic MERGE_HEAD.")
+            try:return merge_file.read_bytes()
+            except FileNotFoundError:return None
+        assert_same_index()
+        head=head_commit();merge_raw=merge_state();parents=[] if head is None else [head]
+        if merge_raw is not None:
+            heads=merge_raw.splitlines()
+            if head is None or len(heads)!=1 or not re.fullmatch(oid_pattern.encode(),heads[0]):
+                raise ValueError("Expected one fixed MERGE_HEAD commit.")
+            merge=commit_oid(git("rev-parse","--verify",heads[0].decode("ascii")+"^{commit}"))
+            if merge!=heads[0].decode("ascii") or merge==head:
+                raise ValueError("Invalid staged merge parent.")
+            parents.append(merge)
+        changed=set(captured) if not parents else set()
+        for parent in parents:
+            entries=parse_entries(git("ls-tree","-r","-z",parent),index=False)
+            changed.update(path for path in set(captured)|set(entries) if captured.get(path)!=entries.get(path))
+        assert_same_index()
+        if merge_state()!=merge_raw or head_commit()!=head:
+            raise ValueError("Merge state changed while validating the index.")
+        return sorted(changed)
     elif snapshot.revision:
-        raw=git("diff",snapshot.revision+"^",snapshot.revision,"--name-only","-z")
+        revision=commit_oid(snapshot.revision.encode("ascii"))
+        headers,separator,_=git("cat-file","commit",revision).partition(b"\n\n")
+        rows=headers.splitlines();trees=[row for row in rows if row.startswith(b"tree ")]
+        parent_rows=[row for row in rows if row.startswith(b"parent")]
+        if not separator or len(trees)!=1 or not re.fullmatch(b"tree "+oid_pattern.encode(),trees[0]):
+            raise ValueError("Invalid commit parent metadata.")
+        if any(not re.fullmatch(b"parent "+oid_pattern.encode(),row) for row in parent_rows):
+            raise ValueError("Invalid commit parent metadata.")
+        parents=[row[7:].decode("ascii") for row in parent_rows]
+        if not parents or len(set(parents))!=len(parents) or revision in parents:
+            raise ValueError("Unsupported root commit or invalid commit parent metadata.")
+        raw=b"".join(git("diff",parent,revision,"--name-only","-z","--") for parent in parents)
     else:
         return []
-    return [p.decode("utf-8") for p in raw.split(bytes([0])) if p]
+    return sorted({p.decode("utf-8") for p in raw.split(bytes([0])) if p})
 
 def write_generated(spec):
     timestamp=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
