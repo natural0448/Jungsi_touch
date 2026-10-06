@@ -7,6 +7,7 @@ import "@/styles/jungsi.css";
 import "@/styles/offering.css";
 import { SiteHeader } from "@/components/site-header";
 import { SyntheticBar } from "@/components/synthetic-bar";
+import { LocalBar } from "@/components/local-bar";
 import { ConnectionNotice } from "@/components/connection-notice";
 import { ConnectionError, getCaller, source } from "@/lib/api";
 import type { Session } from "@/lib/dto";
@@ -40,6 +41,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <div className="et jt">
           <SyntheticBar />
+          <LocalBar />
           <SiteHeader session={session} down={Boolean(down)} />
           <main>{down ? <ConnectionNotice e={down} /> : children}</main>
           <footer className="jt-foot">
