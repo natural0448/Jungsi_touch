@@ -466,18 +466,19 @@ def frontend_reply_text(spec):
     items='## 화면팀에 요청하는 회신\n\n'+table(['ID','업무','담당','상태'],[[v['id'],v['title'],', '.join(v['owners']),v['status']] for v in r['items']])
     local='## 로컬 연결 요청 2판에 대한 직접 답변\n\n'+'\n\n'.join(details(v,'①②③④⑤⑥'[v['number']-1]) for v in r['local_request_answers'])
     boundary='## 인수 경계와 미확정 사항\n\n'+r['handoff_boundary']+'\n\n'+bullets(r['unresolved'])+'\n\n'+r['preservation']
-    return '\n\n'.join([head,items,'\n\n'.join(details(v,v['id']) for v in r['items']),local,boundary,'## 새 로컬 검수 보고의 후속 작업\n\n[화면팀 후속 작업 지시](화면팀_후속작업_지시.md)의 FE-01~05와 구체 SUP 회신을 함께 전달한다.'])
+    return '\n\n'.join([head,items,'\n\n'.join(details(v,v['id']) for v in r['items']),local,boundary,'## 새 로컬 검수 보고의 후속 작업\n\n[화면팀 후속 작업 지시](화면팀_후속작업_지시.md)의 FE-01~05와 구체 SUP 회신을 함께 전달한다.',supabase_actual_update_text(c)])
 
 
 def frontend_followup_text(spec):
     f=spec['supabase_operations_handoff_contract']['reply_contract']['followup']
-    head=(f['summary']+'\n\n계약 '+f['format']+'; 작성 시각 '+f['prepared_at']+'; 최신 통합 기준 develop '+f['basis_commit']+'.')
+    head=(f['summary']+'\n\n계약 '+f['format']+'; 작성 시각 '+f['prepared_at']+'; 기획 출발 기준 develop '+f['basis_commit']+'; 후속 관측 parent 기준 '+f.get('current_review_basis_commit',f['basis_commit'])+'.')
     boundary='## 확인한 범위와 남은 검수\n\n'+'\n'.join('- '+v for v in f['local_review_boundary'])
     reply='## SUP-01·02 결정통지에 대한 구체 회신\n\n'+table(['항목','담당자 회신과 적용 조건'],f['sup_reply'])
     overview='## 화면팀 후속 업무\n\n'+table(['ID/우선순위','업무','담당','상태'],[[v['id']+' '+v['priority'],v['title'],v['owner'],v['status']]for v in f['tasks']])
     detail='\n\n'.join('### '+v['id']+' '+v['title']+'\n\n담당: '+v['owner']+'; 상태: '+v['status']+'\n\n선행 조건: '+('; '.join(v['depends_on'])or '없음')+'\n\n업무:\n\n'+'\n'.join('- '+x for x in v['work'])+'\n\n완료 증거:\n\n'+'\n'.join('- '+x for x in v['completion'])+'\n\n관련 operation: '+', '.join(v['route_refs'])for v in f['tasks'])
     unresolved='## 수령·승인 대기와 보존\n\n'+'\n'.join('- '+v for v in f['unresolved'])+'\n\n'+f['preservation']+'\n\n[최종 회신 요청](화면팀_회신요청_최종.md), [Supabase 운영 인수인계](Supabase_운영_인수인계.md), [필수 외부접근 보호 기준](외부접근_데이터보호_개발기준.md)을 함께 따른다.'
-    return '\n\n'.join([head,boundary,reply,overview,detail,unresolved])
+    residual='## 추가 정적 검토 후속\n\n'+table(['ID/우선순위','담당/상태','요청','증거경계'],[[v['id']+' '+v['priority'],v['owner']+' / '+v['status'],v['work'],v['evidence_boundary']]for v in f.get('residual_followups',[])]) if f.get('residual_followups')else ''
+    return '\n\n'.join(v for v in [head,boundary,reply,overview,detail,residual,unresolved]if v)
 
 
 def validate_frontend_reply_contract(spec):
@@ -579,6 +580,155 @@ def supabase_access_recheck_text(contract):
     ])
 
 
+def supabase_actual_update_text(contract):
+    stage=contract.get('storage_staging')
+    if not stage:
+        return ''
+    intake=contract['source_DDL_intake'];cr=contract['service_transition_contract'];scope=contract['actual_update_scope']
+    objects=stage['objects'];access=stage['public_route_access']
+    states=[
+        ['Storage 관측',stage['status'],stage['observed_at']+'; 증거 '+stage['evidence_id']],
+        ['신규 private/기존 보존',str(stage['bucket']['public'])+' / '+str(stage['bucket']['existing_preserved']),'bucket 생성·재조회. 실제 식별자/경로는 private 영수증'],
+        ['객체 적재/해시 재수신',str(objects['verified_count'])+'건',objects['status']+'; 원본 보존 '+str(objects['all_local_files_preserved'])],
+        ['public 경로 거절',str(access['probe_count'])+'건 / HTTP '+str(access['HTTP_status']),access['scope']],
+        ['인증 사용자 raw RLS/signed URL',access['actual_authenticated_raw_RLS']+' / '+access['signed_URL_authorization'],'public 경로 거절과 별도 검수'],
+        ['Storage 당시 SQL/001/002',stage['database']['SQL_connection']+' / '+stage['database']['migration001']+' / '+stage['database']['migration002'],'Storage 관측 시점의 역사. 최신 actual DB 단계는 아래 별도 절'],
+        ['engine/production',str(stage['engine']['engine_approved'])+' / '+str(stage['engine']['production_allowed']),'저장본 채택·숫자·운영 승인 미실행'],
+    ]
+    sample=stage.get('independent_sample_review')
+    if sample:
+        states.append(['독립 sample 검수',str(sample['sample_objects'])+'객체 / '+str(sample['denial_checks'])+'거절',sample['evidence_id']+'; '+sample['scope']])
+    source=intake['status']+'; '+intake['received_at']+'; source commit '+intake['source_commit']+'. '+str(intake['received_schema_files'])+' source 파일 수령 / '+str(intake['scanned_schema_files'])+' SQL 파일 검토. '+intake['boundary']
+    requests=contract['reply_contract']['ddl_input_requests']
+    entries=table(['입력','현재 수신/검수 상태','받은 범위','남은 범위'],[[v['id'],v['status'],v.get('received_scope','원본 미수신'),v.get('remaining','현재 효과 검수 대기')]for v in requests])
+    relay=cr['entitlement_injection'];provider=cr['storage_provider']
+    implementation=cr['id']+'; '+cr['status']+'. '+cr['preservation']
+    db=contract['database_preflight'];apply=contract['database_application']
+    db_text='### 실제 SQL 사전 검수와 신규 private schema 적용 단계\n\n'+table(['관측','상태','범위'],[
+        ['읽기 preflight',db['status'],db['observed_at']+'; '+db['evidence_id']+'; TLS 양계정/least role/master9컬럼·2 SELECT policy/당시schema0'],
+        ['001·002 적용',apply['status'],apply['committed_at']+'; '+apply['evidence_id']+'; 신규13 RLS tables/owner·schema_versions'],
+        ['독립 원장검수',apply['independent_review_status'],'개발 적용 영수증 이후 별도 검수; runtime app정책 '+str(apply['private_app_policy_count'])+'건'],
+        ['runtime003/실업무',apply['runtime003_status']+' / '+apply['runtime_CRUD_privilege_acceptance'],'Auth/paid/defaultfactory/운영승인 미인수']])+'\n\n'+db['boundary']+'\n\n'+apply['boundary']
+    reader=cr['reader_contract_update']
+    db_text+='\n\n'+reader['id']+'; '+reader['status']+'. runtime current_user='+reader['runtime_current_user']+'; migration owner runtime 거절; 기존 master9컬럼 SELECT 임의 REVOKE 금지. '+reader['boundary']
+    return '\n\n'.join([
+        '## 실제 Supabase Storage 업데이트와 DB·운영 경계',
+        scope['boundary']+'\n\n'+table(['항목','상태','증거 범위'],states),
+        '### 최소 승인 자료 인입 규정\n\n'+contract['runtime_ingestion_policy']['mode']+'; '+contract['runtime_ingestion_policy']['dependency_boundary']+'\n\n'+contract['runtime_ingestion_policy']['missing_behavior']+'\n\n'+contract['runtime_ingestion_policy']['boundary']+'\n\nRuntime 필수로 추정하지 않는 자료: '+', '.join(contract['runtime_ingestion_policy']['runtime_nonrequirements']),
+        '\n'.join('- '+v for v in stage['boundaries']),
+        '### 소유자 source DDL 부분수신',
+        source+'\n\n'+'\n'.join('- '+v for v in intake['source_definition_facts']),
+        db_text,
+        'OpenAPI metadata HTTP '+str(intake['metadata_probe']['HTTP'])+', '+str(intake['metadata_probe']['master_column_count'])+'컬럼; '+intake['metadata_probe']['scope'],
+        entries,
+        '### 채택한 서비스 구현 준비와 남은 인수',
+        implementation,
+        relay['scope']+'\n\n'+'\n'.join('- '+v for v in relay['preflight']),
+        provider['scope']+'\n\n공급 명부 '+provider['registry_format']+' / '+provider['transport']+'; 필드 '+', '.join(provider['entry_fields'])+'; '+provider['registry_status']+'. '+provider['credentials'],
+        '\n'.join('- '+v for v in provider['checks']),
+        'codepath '+cr['code_path_status']+'; 합성 '+cr['synthetic_verification']+'; 실제Auth/DB/Storage권한 '+cr['actual_auth_DB_Storage_privilege_verification']+'. 구현 준비 채택은 현재 default 전환/운영 PASS가 아니다.',
+        cr.get('code_paths_boundary','')+'\n\n후속 PR 후보 경로: '+', '.join(cr.get('pending_pr_paths',[])),
+        '### 신규 DB role 발급 요청과 실제 권한 대기',
+        table(['항목','보고된 목표/남은 검수'],[[k,v]for k,v in contract.get('database_role_target',{}).items()if isinstance(v,(str,bool))]),
+        contract.get('database_role_target',{}).get('boundary',''),
+        '### private 연결설정 수령과 실제 preflight 경계',
+        contract.get('credentials_intake',{}).get('status','')+'; 증거 '+contract.get('credentials_intake',{}).get('evidence_id','')+'; '+contract.get('credentials_intake',{}).get('boundary',''),
+    ])
+
+
+def validate_supabase_actual_update_contract(spec):
+    version=spec.get('version','')
+    try:
+        adopted=tuple(int(v)for v in version.split('.')) >= (1,8,4)
+    except (ValueError,AttributeError):
+        adopted=False
+    if not adopted:
+        return []
+    c=spec.get('supabase_operations_handoff_contract',{})
+    stage=c.get('storage_staging');scope=c.get('actual_update_scope');intake=c.get('source_DDL_intake');cr=c.get('service_transition_contract')
+    if not all(isinstance(v,dict)for v in (stage,scope,intake,cr)):
+        return ['Supabase actual update contract missing']
+    errors=[]
+    if stage.get('format')!='jungsi.supabase-storage-staging/v1' or stage.get('production_ready')is not False:
+        errors.append('Supabase storage staging cannot certify production')
+    if stage.get('bucket',{}).get('public')is not False or stage.get('bucket',{}).get('existing_preserved')is not True:
+        errors.append('Supabase private staging preservation drift')
+    objects=stage.get('objects',{});count=objects.get('verified_count')
+    if type(count)is not int or count<1 or not all(objects.get(k)is True for k in ('all_readback_sha256_match','all_originals_rehashed_equal','all_local_files_preserved')):
+        errors.append('Supabase object staging verification drift')
+    if any(type(objects.get(k))is not int or objects[k]!=0 for k in ('overwrite_operations','delete_operations')):
+        errors.append('Supabase staging does not permit overwrite or deletion')
+    access=stage.get('public_route_access',{})
+    if access.get('actual_authenticated_raw_RLS')!='NOT_RUN' or access.get('signed_URL_authorization')!='NOT_RUN' or access.get('all_denied')is not True:
+        errors.append('Supabase public-route observation cannot certify authenticated Storage RLS')
+    if stage.get('database',{}).get('SQL_connection')!='NOT_RUN' or stage.get('database',{}).get('SQL_executed')is not False:
+        errors.append('Supabase Storage writes cannot certify SQL connection')
+    if not all(stage.get('engine',{}).get(k)is False for k in ('adoption_performed','engine_approved','production_allowed')):
+        errors.append('Supabase staging is not engine approval')
+    if not all(scope.get(k)is False for k in ('master_write_authorized','arbitrary_schema_or_policy_changes_authorized','deletion_authorized','overwrite_authorized','engine_adoption_performed','deployment_performed','production_ready')):
+        errors.append('Supabase actual update scope cannot expand unperformed authority')
+    if not re.fullmatch('[0-9a-f]{40}',intake.get('source_commit','')) or not all(intake.get(k)is False for k in ('production_ddl_observed','migration_history_observed','role_grants_observed','SQL_executed')):
+        errors.append('Supabase source DDL intake is not production effect')
+    entries=c.get('reply_contract',{}).get('ddl_input_requests',[])
+    required={'IN-DB-01A','IN-DB-01B','IN-DB-02A','IN-DB-02B','IN-DB-03A','IN-DB-03B','IN-DB-04A','IN-DB-04B','IN-DB-05A','IN-DB-05B'}
+    if len(entries)!=10 or {v.get('id')for v in entries if isinstance(v,dict)}!=required or any(not v.get('remaining')for v in entries):
+        errors.append('Supabase partial intake must preserve all ten remaining input mappings')
+    if cr.get('id')!='CR-SERVICE-SUP03' or cr.get('status')!='adopted_for_service_implementation_verification_pending' or cr.get('production_ready')is not False or cr.get('default_operating_factory_transition')!='NOT_RUN':
+        errors.append('Supabase implementation preparation cannot certify default runtime')
+    provider=cr.get('storage_provider',{})
+    if provider.get('current_factory_storage_selected')is not False or provider.get('independent_registry_SHA_binding_required')is not True or provider.get('maximum_artifact_bytes')!=33554432:
+        errors.append('Supabase explicit Storage provider boundary drift')
+    archive=provider.get('archive_only_policy',{})
+    if archive.get('required')is not True or archive.get('allowed_value')is not False or archive.get('exact_bool_required')is not True or archive.get('missing_null_number_string_rejected')is not True or archive.get('location')!='registry_entry' or 'archive_only'not in provider.get('entry_fields',[]):
+        errors.append('Supabase Storage requires explicit exact-bool archive_only false')
+    allowed_intake_status={'original_input_pending_NOT_REVIEWED','source_original_received_production_effect_NOT_RUN','partial_source_received_production_effect_NOT_RUN','target_SQL_candidate_pending_NOT_REVIEWED','partial_source_policy_received_backend_role_effect_NOT_RUN','repository_migrations_present_live_owner_policy_history_pending','update_purpose_confirmed_execution_plan_and_evidence_pending','credentials_received_connection_preflight_pending','source_original_and_live_catalog_received_history_partial','live_catalog_partial_history_pending','live_role_master_privileges_verified_original_SQL_pending','live_two_master_SELECT_policies_verified_reader_pending','001002_applied_development_receipt_independent_review_pending','runtime_RLS003_candidate_pending_NOT_APPLIED','actual_TLS_connections_and_role_preflight_PASS_runtime_pending'}
+    if any(v.get('status')not in allowed_intake_status for v in entries):
+        errors.append('Supabase partial source intake cannot claim live completion')
+    roles=c.get('database_role_target',{})
+    if roles.get('runtime_DELETE_allowed')is not False or roles.get('runtime_TRUNCATE_allowed')is not False or roles.get('owner_runtime_reuse_allowed')is not False or roles.get('owner_has_schema_management_authority')is not True or roles.get('owner_is_migration_only')is not True:
+        errors.append('Supabase runtime least role cannot deny inherent owner authority')
+    if roles.get('actual_role_exists_verified')is not True or roles.get('actual_effective_privileges_verified')is not True or not roles.get('actual_privilege_scope'):
+        errors.append('Supabase actual role verification needs scoped preflight evidence')
+    refs=cr.get('route_refs',[]);operations={v['id']for v in spec['operations']}
+    if not refs or len(refs)!=len(set(refs)) or not set(refs)<=operations:
+        errors.append('Supabase transition operation reference drift')
+    if cr.get('current_authority')!='jungsi_backend.entitlements' or cr.get('target_authority')!='public.jeongsi_passes':
+        errors.append('Supabase target must preserve current default authority')
+    credentials=c.get('credentials_intake',{})
+    if credentials.get('status')!='credentials_received_connection_preflight_PASS_private_migration_review_pending' or credentials.get('private_values_read_by_planning')is not False or credentials.get('actual_DB_connection_verified')is not True or credentials.get('effective_role_policy_verified')is not True or not credentials.get('effective_verification_scope'):
+        errors.append('Supabase private configuration intake needs scoped actual connection evidence')
+    db=c.get('database_preflight',{});apply=c.get('database_application',{})
+    if db.get('format')!='jungsi.database-preflight-observation/v1' or db.get('status')!='PASS_READONLY_CONNECTION_ROLE_MASTER_SCHEMA_ABSENCE' or db.get('read_only')is not True or type(db.get('sql_writes'))is not int or db.get('sql_writes')!=0 or db.get('private_schema_present_at_preflight')is not False or db.get('private_table_count_at_preflight')!=0:
+        errors.append('Supabase readonly preflight observation scope drift')
+    if any(db.get('connections',{}).get(k,{}).get('TLS')is not True for k in ('app','owner')) or any(db.get('roles',{}).get(k)is not False for k in ('superuser','BYPASSRLS','app_database_CREATE')) or db.get('roles',{}).get('owner_database_CREATE')is not True or db.get('roles',{}).get('memberships')!=[]:
+        errors.append('Supabase preflight least role or TLS drift')
+    master=db.get('master',{})
+    if master.get('column_count')!=9 or master.get('select_policy_count')!=2 or any(master.get(k)is not True for k in ('app_SELECT','owner_SELECT')) or any(master.get(k)is not False for k in ('app_INSERT_UPDATE_DELETE_TRUNCATE','owner_INSERT_UPDATE_DELETE_TRUNCATE')):
+        errors.append('Supabase master scoped readonly privilege drift')
+    reader=cr.get('reader_contract_update',{})
+    policy_names={'jeongsi_passes: select own or admin','jeongsi_passes: jungsi backend read'}
+    policies=master.get('select_policies',[])
+    if len(policies)!=2 or {v.get('name')for v in policies}!=policy_names or reader.get('SELECT_policies')!=policies or reader.get('id')!='CR-SERVICE-SUP04-20261006-01' or reader.get('runtime_current_user')!='jungsi_backend_app' or reader.get('migration_owner_runtime_rejected')is not True or reader.get('public_nine_column_SELECT_arbitrary_REVOKE_allowed')is not False:
+        errors.append('Supabase actual two SELECT policies and app-only reader drift')
+    expected_policies={
+        'jeongsi_passes: select own or admin':dict(name='jeongsi_passes: select own or admin',roles=['public'],command='SELECT',qual='((auth.uid() = user_id) OR is_admin())',permissive='PERMISSIVE'),
+        'jeongsi_passes: jungsi backend read':dict(name='jeongsi_passes: jungsi backend read',roles=['jungsi_backend_app','jungsi_backend_owner'],command='SELECT',qual='true',permissive='PERMISSIVE')}
+    if {v.get('name'):v for v in policies}!=expected_policies or reader.get('master_RLS_user_isolation_certified')is not False or not reader.get('SQL_verified_subject_filter_required') or reader.get('unknown_added_or_changed_SELECT_policy_rejected')is not True:
+        errors.append('Supabase broad backend SELECT requires exact policies and verified-subject SQL filter')
+    if apply.get('format')!='jungsi.private-schema-application-observation/v1' or apply.get('status')!='actual_applied_verified_by_development_receipt_independent_review_pending' or apply.get('independent_review_status')!='pending' or apply.get('independent_review_passed')is not False or apply.get('migration_history')!=['001_pre_data_platform','002_forecast_policy'] or apply.get('private_table_count')!=13 or apply.get('all_private_tables_RLS_enabled')is not True or apply.get('private_app_policy_count')!=0:
+        errors.append('Supabase migration receipt cannot certify independent runtime acceptance')
+    if any(apply.get(k)is not False for k in ('public_master_changed','profiles_changed','existing_owner_or_role_changed','DELETE_DROP_TRUNCATE_executed','production_ready')) or apply.get('runtime003_status')!='NOT_APPLIED' or apply.get('runtime_CRUD_privilege_acceptance')!='NOT_RUN' or apply.get('live_authenticated_operations')!='NOT_RUN':
+        errors.append('Supabase private schema receipt does not permit master mutation or runtime readiness')
+    if any(scope.get(k)is not True for k in ('database_SQL_executed','database_SQL_reads_executed','database_SQL_writes_executed')) or scope.get('database_execution_status')!='001002_applied_development_receipt_independent_review_pending' or any(scope.get(k)!='actual_applied_verified_by_development_receipt' for k in ('migration001','migration002')):
+        errors.append('Supabase actual SQL receipt state drift')
+    minimal=c.get('runtime_ingestion_policy',{})
+    if minimal.get('format')!='jungsi.minimal-runtime-ingestion/v1' or minimal.get('mode')!='minimal_explicit_approved_allowlist' or minimal.get('selection')!='requested_operation_required_dependencies_only' or minimal.get('explicit_approved_entries_only')is not True or minimal.get('archive49_preserved')is not True:
+        errors.append('Supabase runtime ingestion must use minimum explicit approved dependencies')
+    if any(minimal.get(k)is not False for k in ('bulk_scan_or_all_owned_data_autoimport_allowed','archive_uploads_auto_adopted','deletion_performed','production_ready')) or minimal.get('runtime_implementation_status')!='pending' or not minimal.get('missing_behavior'):
+        errors.append('Supabase staged archives cannot become bulk runtime data or approval')
+    return errors
+
+
 def supabase_operations_handoff_text(spec):
     c=spec['supabase_operations_handoff_contract'];r=c['current_review'];a=c['architecture']
     head=c['decision']+'\n\nrevision '+c['revision']+'; '+c['checked_at']+' 읽기 snapshot; 문서 '+c['document_status']+'. '+c['scope']
@@ -589,15 +739,24 @@ def supabase_operations_handoff_text(spec):
     overview='## 담당별 인계 작업\n\n'+table(['ID/우선순위','담당/계층','입력','선행','현재상태'],[[t['id']+' '+t['priority'],t['owner']+' / '+t['layer'],'; '.join(t['inputs']),', '.join(t['depends_on']) or '없음',t['status']] for t in c['tasks']])
     detail='\n\n'.join('### '+t['id']+' '+t['priority']+' — '+t['owner']+'\n\n업무:\n\n'+'\n'.join('- '+v for v in t['work'])+'\n\n완료조건:\n\n'+'\n'.join('- '+v for v in t['completion']) for t in c['tasks'])
     order='## 실행 순서와 의존관계\n\n'+table(['단계','작업','실행경계'],c['execution_order'])+'\n\n각depends_on을먼저충족한다. env/원문QA/안전한HOLD준비와실자료·운영인수를구분한다.'
-    gate='## 운영 인수 완료 조건\n\n'+table(['gate','담당','현재상태','완료증거'],c['acceptance_gates'])+'\n\n실DB/Bearer로그인/유료·staff/실approved자료/22API/외부4페이지는각각NOT_RUN/HOLD다. production_ready=false/NOT_READY·mainnot_ready를각증거인수전유지한다. 이번문서작성은DB쓰기/migration/모형등록/main/배포승인이아니다. reset/drop/delete금지.'
+    gate='## 운영 인수 완료 조건\n\n'+table(['gate','담당','현재상태','완료증거'],c['acceptance_gates'])+'\n\n실DB의 preflight/001002 개발 적용영수증과 독립·runtime 인수를 구분한다. Bearer로그인/유료·staff/실approved자료/22API/외부4페이지는NOT_RUN/HOLD다. production_ready=false/NOT_READY·mainnot_ready를각증거인수전유지한다. 이번문서작성은DB쓰기/migration/모형등록/main/배포승인이아니다. reset/drop/delete금지.'
     history='## 이전 코드 인수와 이번 후보\n\n'+c['history']['summary']+'\n\n확인된이전baseline '+c['history']['baseline']+', tree '+c['history']['tree']+'; normalhooks '+str(c['history']['previous_normal_hooks'])+'건. [이전정확CI]('+c['history']['CI']+').'
     reply='## 화면팀 최종 회신 인수\n\n[화면팀 회신 요청](화면팀_회신요청_최종.md)의 RF-01~06 및 원래 로컬 요청 ①~⑥를 함께 확인한다. 전달 문서 완성과 실제 회신·연결·보안 검수는 별도 상태다.'
     references='## 공식 primary 참고\n\n'+'\n\n'.join(v[2]+' ['+v[0]+']('+v[1]+').' for v in c['references'])+'\n\n별도 FastAPI와 이용권 단일 기준은 확정 목표이며 운영 배포·DB·어댑터 전환은 미실행이다. 제공자 무료 plan 가격·제한 수치를 단정하지 않는다. 공개 문서에 실제 project URL/id/key/JWT/개인식별/자료 hash/비공개 PC 경로를 넣지 않는다.'
-    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),facts,settings,overview,detail,reply,order,gate,history,references] if part)
+    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),supabase_actual_update_text(c),facts,settings,overview,detail,reply,order,gate,history,references] if part)
 
 def supabase_operations_route_metadata(spec):
     c=spec['supabase_operations_handoff_contract']
-    return dict(format=c['format'],revision=c['revision'],checked_at=c['checked_at'],status=c['status'],production_ready=c['production_ready'],document=spec['current_documents']['supabase_operations_handoff'],deployment_selection=c['architecture']['selection'],entitlement_target=c['architecture']['authority_target'],entitlement_adapter_status=c['architecture']['current_entitlement_adapter']['status'],frontend_reply_document=c['reply_contract']['document'],frontend_reply_status=c['reply_contract']['document_status'],gates=[dict(id=v[0],status=v[2]) for v in c['acceptance_gates']])
+    result=dict(format=c['format'],revision=c['revision'],checked_at=c['checked_at'],status=c['status'],production_ready=c['production_ready'],document=spec['current_documents']['supabase_operations_handoff'],deployment_selection=c['architecture']['selection'],entitlement_target=c['architecture']['authority_target'],entitlement_adapter_status=c['architecture']['current_entitlement_adapter']['status'],frontend_reply_document=c['reply_contract']['document'],frontend_reply_status=c['reply_contract']['document_status'],gates=[dict(id=v[0],status=v[2]) for v in c['acceptance_gates']])
+    if c.get('storage_staging'):
+        v=c['storage_staging'];cr=c['service_transition_contract']
+        result['storage_staging']=dict(format=v['format'],status=v['status'],observed_at=v['observed_at'],evidence_id=v['evidence_id'],private_bucket=v['bucket']['public']is False,verified_objects=v['objects']['verified_count'],authenticated_raw_RLS=v['public_route_access']['actual_authenticated_raw_RLS'],engine_approved=v['engine']['engine_approved'],production_ready=v['production_ready'])
+        result['service_transition']=dict(id=cr['id'],status=cr['status'],default_transition=cr['default_operating_factory_transition'],production_ready=cr['production_ready'])
+        result['runtime_ingestion_policy']=dict(mode=c['runtime_ingestion_policy']['mode'],selection=c['runtime_ingestion_policy']['selection'],bulk_autoimport=False,archive_auto_adopted=False,production_ready=False)
+        d=c['database_preflight'];a=c['database_application']
+        result['database_preflight']=dict(status=d['status'],observed_at=d['observed_at'],evidence_id=d['evidence_id'],read_only=d['read_only'])
+        result['database_application']=dict(status=a['status'],committed_at=a['committed_at'],evidence_id=a['evidence_id'],independent_review=a['independent_review_status'],runtime003=a['runtime003_status'],production_ready=a['production_ready'])
+    return result
 
 
 SECURITY_DOCUMENT="docs/current/외부접근_데이터보호_개발기준.md"
@@ -1419,6 +1578,7 @@ def validate_spec(spec):
     errors.extend(validate_local_verification_contract(spec))
     errors.extend(validate_security_contract(spec))
     errors.extend(validate_frontend_reply_contract(spec))
+    errors.extend(validate_supabase_actual_update_contract(spec))
     return errors
 
 def protected_path(path,shared_tools):
