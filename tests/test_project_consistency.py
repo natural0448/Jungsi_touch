@@ -750,4 +750,28 @@ class SecurityContractTests(unittest.TestCase):
         files[FRONTEND_FOLLOWUP_DOCUMENT]+=b'operational pass\n'
         self.assertIn('Document or route drift: '+FRONTEND_FOLLOWUP_DOCUMENT,validate_content(list(files),files.__getitem__,self.spec))
 
+    def test_branch_documents_use_source_observation_without_fixed_unmerged_claim(self):
+        spec=deepcopy(self.spec)
+        spec['collaboration']['presentation_branch_status']='SOURCE_PRESENTATION_STATE_PENDING_BROWSER'
+        observation=spec['workflow']['branch_governance']['remote_inventory']['latest_observation']
+        observation['develop']='1234567890abcdef1234567890abcdef12345678'
+        files=generated_files(spec)
+        body=files[spec['current_documents']['workflow']].decode('utf-8')
+        self.assertIn('SOURCE_PRESENTATION_STATE_PENDING_BROWSER',body)
+        self.assertIn('최신 통합 관측일 '+observation['date']+', develop '+observation['develop'],body)
+        self.assertIn('정책 등록일 ',body)
+        self.assertIn('현재 원격 전체 ref 재조회 결과와 구분한다',body)
+        self.assertNotIn('열린 PR #6의 화면 변경은 develop의 현재 구현이 아니다',body)
+
+    def test_previous_acceptance_uses_retained_historical_observation(self):
+        spec=deepcopy(self.spec)
+        inventory=spec['workflow']['branch_governance']['remote_inventory']
+        historical=inventory['historical_observation_before_PR6_merge']
+        historical['frontend']='HISTORICAL_FRONTEND_ONLY'
+        historical['sameRelease_observation']='HISTORICAL_RELEASE_OBSERVATION_ONLY'
+        inventory['latest_observation'].pop('frontend',None)
+        inventory['latest_observation'].pop('sameRelease_observation',None)
+        body=generated_files(spec)[spec['current_documents']['workflow']].decode('utf-8')
+        self.assertIn('당시 외부 프런트 관측 / HISTORICAL_FRONTEND_ONLY; HISTORICAL_RELEASE_OBSERVATION_ONLY',body.replace('|','/'))
+
 if __name__=="__main__":unittest.main()

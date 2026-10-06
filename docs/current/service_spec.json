@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2156,7 +2156,7 @@
           "pr_target": "feature/presentation-foundation",
           "status": "retired_merged",
           "temporary": true,
-          "purpose": "PR #7을 화면 상시 부모 feature/presentation-foundation에 병합 완료했다. 해당 코드는 열린 PR #6에 포함되어 있으나 develop에는 미통합. 새 작업은 상시 화면 브랜치를 재사용.",
+          "purpose": "PR #7의 화면 상시 부모 feature/presentation-foundation 병합 이력을 보존한다. PR6 head6b2는 현재 develop2624에 통합됐고 정확 head CI2 성공을 확인했다. 347 빈 학교 표시 fix는 현재 develop에 포함되지 않아 FE-05 후속 PR/인수가 필요하다. 실Caller/브라우저·수치/운영/보안 인수는 별도 대기이며 새 개발은 상시 화면 브랜치를 재사용한다.",
           "base_commit": "eb765ab50abd6cc99985b26594b2331f2ddef5df",
           "observed_head": "07bb4929125d9a58abbabe71176aaffeab60bfaa",
           "pull_request": 7,
@@ -2164,7 +2164,8 @@
           "github_state": "MERGED",
           "merge_commit": "d9feb6112a23b1fd14e8e34d15bed906ecc626da",
           "merged_at": "2026-10-03T15:36:13Z",
-          "remote_ref_state": "retained_finished_temporary_ref_no_deletion_authorization"
+          "remote_ref_state": "retained_finished_temporary_ref_no_deletion_authorization",
+          "historical_purpose_before_PR6_merge": "PR #7을 화면 상시 부모 feature/presentation-foundation에 병합 완료했다. 해당 코드는 열린 PR #6에 포함되어 있으나 develop에는 미통합. 새 작업은 상시 화면 브랜치를 재사용."
         },
         {
           "name": "feature/presentation-results",
@@ -2174,7 +2175,7 @@
           "pr_target": "feature/presentation-favorable",
           "status": "retired_integrated_closed",
           "temporary": true,
-          "purpose": "PR #9는 CLOSED이며 GitHub merge 기록은 없다. head d9feb611이 화면 상시 부모의 HEAD와 같아 코드 포함을 확인했다. 해당 코드는 열린 PR #6에 포함되어 있으나 develop에는 미통합. 새 작업은 상시 화면 브랜치를 재사용.",
+          "purpose": "PR #9 CLOSED/별도 GitHub merge 없음과 당시 화면 부모에 포함된 head 이력을 보존한다. PR6 head6b2는 현재 develop2624에 통합됐고 정확 head CI2 성공을 확인했다. 347 빈 학교 표시 fix의 후속 PR/FE-05와 실Caller/브라우저·수치/운영/보안 인수는 대기다. 종료 ref는 보존하고 새 개발은 상시 화면 브랜치를 재사용한다.",
           "base_commit": "07bb4929125d9a58abbabe71176aaffeab60bfaa",
           "observed_head": "d9feb6112a23b1fd14e8e34d15bed906ecc626da",
           "pull_request": 9,
@@ -2182,7 +2183,8 @@
           "github_state": "CLOSED",
           "merge_commit": null,
           "integrated_parent_head": "d9feb6112a23b1fd14e8e34d15bed906ecc626da",
-          "remote_ref_state": "retained_finished_temporary_ref_no_deletion_authorization"
+          "remote_ref_state": "retained_finished_temporary_ref_no_deletion_authorization",
+          "historical_purpose_before_PR6_merge": "PR #9는 CLOSED이며 GitHub merge 기록은 없다. head d9feb611이 화면 상시 부모의 HEAD와 같아 코드 포함을 확인했다. 해당 코드는 열린 PR #6에 포함되어 있으나 develop에는 미통합. 새 작업은 상시 화면 브랜치를 재사용."
         },
         {
           "name": "feature/overall-analysis-service",
@@ -2314,7 +2316,8 @@
           {
             "id": "presentation",
             "status": "pending",
-            "evidence": "PR #6 미병합; #7은 화면 부모 통합·#9 종료 코드 포함. develop 통합과 확정 DTO·서버 연결·화면 권한·인쇄 인수 필요"
+            "evidence": "PR6 head6b2의 develop2624 통합과 해당 head CI2 성공은 source 인수 관측이다. 347 빈 학교 표시 fix는 미포함이라 FE-05 후속 PR이 필요하다. FE-01~05·확정 DTO/서버 Caller·4페이지·권한·기존 report.export 응답 소비와 세 security gate의 실제 scope 증거는 별도 대기다. 문서보고의 local pass와 직접 브라우저/운영/수치/보안 인수를 구분하며 인쇄/리포트 확장을 새 완료조건으로 요구하지 않는다.",
+            "historical_evidence_before_PR6_merge": "PR #6 미병합; #7은 화면 부모 통합·#9 종료 코드 포함. develop 통합과 확정 DTO·서버 연결·화면 권한·인쇄 인수 필요"
           },
           {
             "id": "live_connections",
@@ -2362,10 +2365,50 @@
           "feature/planning-layer-ownership"
         ],
         "checked_at": "2026-10-04 (Asia/Seoul)",
-        "note": "상시4개와종료후보존하는임시ref3개를유지한다. PR5는2026-10-05 중복 제안으로closed 처리했으며 bb98a825e6cd86a20359557deec114b2980e78cb head와원격branch는보존한다. 동적22경로 제목과정식session 검사는현행공통도구로계승한다. PR6는외부화면담당의통합대기이며 이서비스작업에서병합하지않는다.",
+        "note": "PR5는 중복 제안으로 closed이며 고정 head/ref를 보존한다. PR6 head6b2는 develop2624에 merged이고 해당 head의 CI2 success를 확인했다. 347 빈 학교 표시 fix는 현재 develop에 포함되지 않으므로 FE-05 후속 통합이 필요하다. 실Caller·브라우저/보안/수치/운영은 별도 미인수다. 상시4/종료후보존임시ref3/전체7 계수와 checked_at은 기존 원격 등록부 관측이다. 이번 PR/ancestor 읽기는 원격 전체 ref 전수조회가 아니며 서버·main 등 미재조회값을 최신 관측으로 추정하지 않는다. 새 작업/삭제 허용을 부여하지 않는다.",
         "working_temporary_count": 0,
         "retained_finished_temporary_refs": 3,
         "latest_observation": {
+          "date": "2026-10-06",
+          "prepared_at": "2026-10-06T11:41:32.244467Z",
+          "source": "root의 비밀 없는 GitHub API PR/head/CI 및 develop Git ancestor/source 읽기 대조",
+          "HTTP_API_observed_at": "2026-10-06T10:56:00.912393+00:00",
+          "scope": "PR6와 확인된 develop 통합/두 commit 포함 여부에 한정한다. 원격 전체 ref 계수/서버/main branch 재조회 아님.",
+          "develop": "2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f",
+          "frontend_PR6_head": "6b2b45952f7610dda92c9cb83c8cc0a0b4ee1b5d",
+          "PR6_state": "closed_merged",
+          "PR6_head_exact_CI_success_count": 2,
+          "PR6_head_ancestor_in_develop": true,
+          "missing_fix_commit": "347a1100f536ca6b8cd72b381ecbb08cc102560f",
+          "missing_fix_ancestor_in_develop": false,
+          "missing_fix_source_state": "빈 학교 표시 fix가 현재 management source에 없어 FE-05 후속 통합 필요",
+          "missing_fix_CI": "NOT_CHECKED",
+          "PR5_ref_boundary": "기존 closed/superseded head와 ref 보존 계약 불변",
+          "approved_deletion_source_unchanged": "f46c6635664a6c2315e6c71c4f700aa3e331c60c",
+          "deletion_scope": "고정 source/등록/허용계약·원본보존 그대로, 이번 새 삭제/원격 ref 변경 없음",
+          "unrefreshed_refs": [
+            "main",
+            "server",
+            "whole_remote_inventory"
+          ],
+          "frontend_browser_scope": "네 역할/HOLD·503/HTML검색0/경고는 document_reported pass; 직접 root브라우저·전체전달물/실429/수치/운영/보안 NOT_RUN/PENDING",
+          "followup_ref": "supabase_operations_handoff_contract.reply_contract.followup"
+        },
+        "historical_observation_before_20261006": {
+          "date": "2026-10-05",
+          "source": "부모 기획팀의 원격 ref 및 frontend ls-tree 독립 확인",
+          "develop": "b66c2274f0b0a27dc174555adde181cd16c68188",
+          "main": "8a5c089ff2c9beaa71d067d33e959c7823b96947",
+          "server": "74fd795099cc25762481c0498c76065f91048003",
+          "frontend": "67644ef980e5d0e41afbe6dcc6d419a060979cf8",
+          "PR5_head_preserved": "bb98a825e6cd86a20359557deec114b2980e78cb",
+          "approved_deletion_source_unchanged": "f46c6635664a6c2315e6c71c4f700aa3e331c60c",
+          "frontend_target_blobs": "고정 f46 소스의 4개 blob/mode와 동일; 실제 삭제 없음",
+          "sameRelease_blob": "efb40ce76682dbcea74c6c3716c090303d1c108d",
+          "sameRelease_observation": "e12 대비 변경 없음. score-form/css 변경 관측은 버전값 검증 보완이나 프런트 전체 인수를 뜻하지 않는다."
+        },
+        "historical_note_before_PR6_merge": "상시4개와종료후보존하는임시ref3개를유지한다. PR5는2026-10-05 중복 제안으로closed 처리했으며 bb98a825e6cd86a20359557deec114b2980e78cb head와원격branch는보존한다. 동적22경로 제목과정식session 검사는현행공통도구로계승한다. PR6는외부화면담당의통합대기이며 이서비스작업에서병합하지않는다.",
+        "historical_observation_before_PR6_merge": {
           "date": "2026-10-06",
           "source": "GitHub API 직접 읽기 영수증의 고정 SHA/PR/CI 대조",
           "develop": "354d45097a501d788b8bb93ef238a15aef4d3ae3",
@@ -2380,19 +2423,7 @@
           "sameRelease_fix_commit": "4cc849a39ebbadf82f348d37995f3d84a938a8c9",
           "sameRelease_observation": "4cc에서 필수3버전의 비어 있지 않은 문자열·정확동일성 보완과context17비교유지를관측했다. 실제Caller/브라우저/운영로그인인수는NOT_RUN이다."
         },
-        "historical_observation_before_20261006": {
-          "date": "2026-10-05",
-          "source": "부모 기획팀의 원격 ref 및 frontend ls-tree 독립 확인",
-          "develop": "b66c2274f0b0a27dc174555adde181cd16c68188",
-          "main": "8a5c089ff2c9beaa71d067d33e959c7823b96947",
-          "server": "74fd795099cc25762481c0498c76065f91048003",
-          "frontend": "67644ef980e5d0e41afbe6dcc6d419a060979cf8",
-          "PR5_head_preserved": "bb98a825e6cd86a20359557deec114b2980e78cb",
-          "approved_deletion_source_unchanged": "f46c6635664a6c2315e6c71c4f700aa3e331c60c",
-          "frontend_target_blobs": "고정 f46 소스의 4개 blob/mode와 동일; 실제 삭제 없음",
-          "sameRelease_blob": "efb40ce76682dbcea74c6c3716c090303d1c108d",
-          "sameRelease_observation": "e12 대비 변경 없음. score-form/css 변경 관측은 버전값 검증 보완이나 프런트 전체 인수를 뜻하지 않는다."
-        }
+        "count_observation_scope": "existing_20261004_inventory_not_reenumerated_in_current_PR6_read"
       },
       "merge_scope_policy": {
         "format": "jungsi.merge-scope/v1",
@@ -2510,7 +2541,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.8.2",
+        "contract_version": "1.8.3",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2684,7 +2715,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.8.2",
+        "contract_version": "1.8.3",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -3407,6 +3438,17 @@
         "REQ-26"
       ],
       "summary": "SUP01 별도 FastAPI와 SUP02 public.jeongsi_passes 목표 채택/current entitlements 분리·RF-01~06/로컬1~6 답변·SUP03~10 보안/자료/영속성 인수 구체화. 4페이지/22API/session v1/회원/보안·②③·과거HTTP 불변; 실제 어댑터/DB/Auth/자료승인/배포/브라우저 NOT_RUN. 최종 commit 훅의 전체606 검사에서 검수 fixture 깊은 경로의 Git for Windows stat가 Filename too long으로 실패했다. 같은 경로의 읽기 조회는 core.longpaths=true에서 성공한 root 관측을 기록한다. tests/test_branch_policy.py의 RetainedMergeScopeTests.setUp에서 init 직후 생성된 검수용 저장소에만 core.longpaths=true를 설정하는 경로 호환 보완을 예정하며 규칙/판정/서비스·운영 환경·원본 보존은 불변이다. 전체606 재검증과 정상 훅/정확한 HEAD CI는 후속 실제 결과를 확인한 뒤 인수하며 현재 성공으로 기록하지 않는다. 이 보완은 실제 DB/Auth/배포/브라우저/승인수치·운영 준비 증거가 아니다."
+    },
+    {
+      "date": "2026-10-06",
+      "requirements": [
+        "REQ-17",
+        "REQ-18",
+        "REQ-20",
+        "REQ-23",
+        "REQ-26"
+      ],
+      "summary": "v1.8.3 브랜치 현재/역사 상태 충돌 정정: PR7/9 purpose·remote note/latest observation·presentation gate evidence·collaboration 화면상태의 옛 미통합 문구를 exact 역사로 보존하고 PR6 head6b2/develop2624 merged·동일head CI2와347 fix 미포함/FE-05 후속을 현재로 분리한다. 기존7개 ref 계수/서버/main 값을 새 원격 전수 확인으로 주장하지 않는다. topology/registration/reference·삭제계약/runtime/API/DTO/회원/security/notready는 불변이고 직접 브라우저/전체전달물/실429/승인수치·DB/Auth/운영 gate는 pending/NOT_RUN이다. 별도 검수 중인 이전1.8.2 index 스냅샷과 이1.8.3 후속 메타데이터 인수는 실제 정확 snapshot 증거로 구분한다."
     }
   ],
   "overall_analysis_contract": {
@@ -3619,12 +3661,13 @@
     ],
     "existing_application_feature": "feature/application-pre-data-platform",
     "presentation_branch_example": "feature/presentation-foundation",
-    "presentation_branch_status": "외부 화면은 feature/presentation-foundation과 PR6에서 별도 개발·통합 대기다. PR5는정식session채택으로2026-10-05 closed/superseded 처리했으며 bb98a825e6cd86a20359557deec114b2980e78cb head와ref를보존한다. 서비스·DB는PR13/develop947에통합완료다.",
+    "presentation_branch_status": "화면 상시 브랜치 feature/presentation-foundation는 유지하며 PR6 head6b2는 develop2624에 통합됐다. 두 CI success는 해당6b head에 한정한다. 347 빈 학교 표시 fix는 develop 미포함이고 Retry-After 보완과 함께 FE-05 후속 PR/정확 fullSHA·CI·브라우저 증거가 필요하다. PR5 closed/superseded head/ref와 PR7/9 종료 이력은 보존한다. 서비스·DB PR13/develop947 인수 이력도 그대로다. 실Caller/화면·보안·승인 수치/운영 인수는 별도 pending/NOT_RUN이다.",
     "generated_files_rule": "route_catalog.json과 생성 README/현재 문서는 직접 편집하지 않는다. 계약 변경은 service_spec.json과 생성 도구에서 수정하고 생성 결과를 같은 커밋에 포함한다.",
     "handoff_rule": "두 개발 담당은 origin/develop의 같은 커밋에 있는 service_spec과 생성 문서를 가져가 구현한다. 계약·필드·오류/보류 사유가 바뀌면 시스템기획팀과 해당 계층 담당에게 인계한다. 통합되지 않은 feature의 코드·가상 응답을 develop에 구현된 기능으로 기록하지 않는다. 현재 기획팀과 서비스·DB 개발팀은 외부 프런트 담당에게 확정 공통 계약과 백엔드 인수 증거를 전달한다. 외부 프런트의 수정·브라우저 인수검증은 해당 담당자의 완료 증거를 별도로 확인한다.",
     "verification_rule": "Git 변경 범위와 해당 계약·필수 커밋 검산을 확인한다. 원자료 전수검수나 전국 재집계를 매 개발 작업에서 반복하지 않는다. 하위 브랜치 병합은 등록된 직계 부모 또는 승인된 develop 인입과 결속한 Git merge-tree 결과를 기준으로 확인한다. 충돌 해결 근거와 별도 직접 수정의 승인 범위를 구분하며 삭제 차단·팀 권한·main 승격·등록 부모·fast-forward 규칙을 유지한다. merge_scope_policy 표식이 있는 커밋부터 병합 재구성 정책을 적용한다. 과거 병합은 소급 판정하지 않으며, 기획 경로 충돌 해결과 비기획 자동 병합 결과를 구분한다.",
     "planning_default_branch": "develop",
-    "planning_source": "origin/develop:docs/current/service_spec.json 및 동일 커밋의 docs/current 생성 문서"
+    "planning_source": "origin/develop:docs/current/service_spec.json 및 동일 커밋의 docs/current 생성 문서",
+    "historical_presentation_branch_status_before_PR6_merge": "외부 화면은 feature/presentation-foundation과 PR6에서 별도 개발·통합 대기다. PR5는정식session채택으로2026-10-05 closed/superseded 처리했으며 bb98a825e6cd86a20359557deec114b2980e78cb head와ref를보존한다. 서비스·DB는PR13/develop947에통합완료다."
   },
   "data_exchange": {
     "provider": "Google Drive",

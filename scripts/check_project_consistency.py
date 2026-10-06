@@ -140,8 +140,8 @@ def branch_governance_text(spec):
         fence+'mermaid\nflowchart TB\n  M[main: 완료한 배포 후보] --> D[develop: 기획 정본과 개발 통합]\n  D --> S[feature/application-pre-data-platform: 시스템·콘텐츠]\n  D --> P[feature/presentation-foundation: 화면]\n  S -.필요 시 등록.-> ST[feature/system-task/slug]\n  P -.필요 시 등록.-> PT[feature/presentation-task/slug]\n  D -.필요 시 등록.-> DT[공통 기획·출시 검토 작업]\n'+fence+
         '\n\n위 화살표는 출발/관리 관계다. 구현 PR은 하위 작업에서 부모로 올라간다. '+g['hierarchy_note']+
         '\n\n기획팀은 develop의 service_spec.json·생성 문서와 브랜치/검사 설정을 직접 갱신한다. 다른 팀은 develop의 자료를 가져가 자기 상시 브랜치에서 개발하고 PR로 통합한다. 3티어는 코드와 포트의 구분이며 각 티어/작업/에이전트마다 브랜치를 만들지 않는다.'+
-        '\n\n## 현재 GitHub 브랜치와 열린 작업\n\n조사일 '+g['checked_date']+', 통합 기준 '+g['reference_commit']+'. 상시 '+str(len(g['core_branches']))+'개, 진행 임시 '+str(sum(r.get('status')=='active' for r in g['additional_branches']))+'개, 종료 이력 '+str(sum(r.get('status')!='active' for r in g['additional_branches']))+'개로 분류한다. 원격 ref 상태는 아래 등록부를 따른다. 관측 커밋은 당시 증거이며 작업 브랜치의 미래 HEAD를 고정하는 값이 아니다.\n\n'+extras+'\n\n'+g['remote_inventory']['note']+
-        '\n\nPR #5의 중복 제안은 종료됐고 head/ref는 보존한다. 정식 session.read 계약과 동적 경로 제목 검사는 현행 공통 도구로 계승했다. 열린 PR #6의 화면 변경은 develop의 현재 구현이 아니다. PR #7은 화면 부모에 통합됐고 #9는 종료됐으며 그 head가 화면 상시 HEAD에 포함되어 있다. 화면 코드는 PR #6으로 develop 통합/인수가 남아 있다. 종료 ref는 새 개발에서 제외하고 보존한다. 열린 PR 담당은 최신 develop과 충돌을 해결한 뒤 등록 부모에 통합한다.\n\n'+g['lifecycle_rule']+
+        '\n\n## 브랜치 등록부와 최신 통합 관측\n\n정책 등록일 '+g['checked_date']+', 등록 기준 '+g['reference_commit']+'. 등록부의 상시 '+str(len(g['core_branches']))+'개, 진행 임시 '+str(sum(r.get('status')=='active' for r in g['additional_branches']))+'개, 종료 이력 '+str(sum(r.get('status')!='active' for r in g['additional_branches']))+'개로 분류한다. 현재 원격 전체 ref 재조회 결과와 구분한다. 관측 커밋은 당시 증거이며 작업 브랜치의 미래 HEAD를 고정하는 값이 아니다.\n\n최신 통합 관측일 '+g['remote_inventory']['latest_observation']['date']+', develop '+g['remote_inventory']['latest_observation']['develop']+'. '+g['remote_inventory']['latest_observation']['source']+'\n\n'+extras+'\n\n'+g['remote_inventory']['note']+
+        '\n\nPR #5의 중복 제안은 종료됐고 head/ref는 보존한다. 정식 session.read 계약과 동적 경로 제목 검사는 현행 공통 도구로 계승했다. '+spec['collaboration']['presentation_branch_status']+' 종료 ref는 새 개발에서 제외하고 보존한다. 후속 PR 담당은 최신 develop과 충돌을 해결한 뒤 등록 부모에 통합한다.\n\n'+g['lifecycle_rule']+
         '\n\n## 필요한 하위 작업만 등록\n\n'+child+'\n\n'+g['registration_rule']+
         '\n\n각 노드에서 분리가 필요한 작업을 제안할 수 있다. main 배포 검토 작업도 develop의 release_task에서 정리해 develop으로 먼저 올리고, 최종 develop → main 경로를 유지한다. 임시 작업이 없으면 상시 브랜치 하나를 계속 사용한다.'+
         '\n\n## 작업 시작·동기화·PR\n\n'+g['sync_rule']+'\n\n'+g['merge_rule']+'\n\n'+g['review_rule']+
@@ -168,7 +168,8 @@ def common_tools_acceptance_text(spec):
     receipt=spec.get('contract_review',{}).get('common_tools_acceptance')
     if not receipt:return ''
     checks=receipt['normal_commit_push_hooks'];ci=receipt['exact_HEAD_CI']
-    front=spec['workflow']['branch_governance']['remote_inventory']['latest_observation']
+    inventory=spec['workflow']['branch_governance']['remote_inventory']
+    front=inventory.get('historical_observation_before_PR6_merge',inventory['latest_observation'])
     deletion=spec['workflow']['branch_governance'].get('file_deletion_policy',{})
     return ('\n\n## 공통 도구의 확인된 이전 인수 기준\n\n'+
         table(['범위','확인한 증거'],[
