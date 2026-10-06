@@ -1,10 +1,10 @@
 # Supabase 운영 인수인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.7이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.8이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 SUP01은 separate_Jungsi_FastAPI_deployment, SUP02의 목표 단일 원본은 public.jeongsi_passes로 확정했다. 현재 코드는 여전히 jungsi_backend.entitlements를 조회하며 목표 어댑터 전환·실DB/실Auth·배포·보안 인수는 NOT_RUN이다. production_ready=false / NOT_READY를 유지한다.
 
-revision 2026.10.07.v7; 2026-10-06T08:40:54.349322Z 읽기 snapshot; 문서 proposed_not_applied_requires_user_approval. merged develop3d90를기준으로정확003직접승인/적용·fresh최소권한·명시port actualmetadata·10합성별도process영속성·최소시험팩1staged와수학9경계부분검수·PR15 source/CI통합을각증거scope로기록한다. 기본factory는직접인간답변에따라유지하고defaultlegacy/API22/session3/page4·무료누백/유료후보·보안gate/과거history를보존한다. 자료활성화·실JWT/유료rows·livehost/운영·실화면mode는미인수다.
+revision 2026.10.07.v8; 2026-10-06T08:40:54.349322Z 읽기 snapshot; 문서 proposed_not_applied_requires_user_approval. merged develop3d90를기준으로정확003직접승인/적용·fresh최소권한·명시port actualmetadata·10합성별도process영속성·최소시험팩1staged와수학9경계부분검수·PR15 source/CI통합을각증거scope로기록한다. 기본factory는직접인간답변에따라유지하고defaultlegacy/API22/session3/page4·무료누백/유료후보·보안gate/과거history를보존한다. 자료활성화·실JWT/유료rows·livehost/운영·실화면mode는미인수다.
 
 ## 확정된 구성과 현재 실행 상태
 
@@ -185,7 +185,7 @@ OpenAPI metadata HTTP 200, 9컬럼; OpenAPI definition/GET metadata만 실제 �
 
 ### 채택한 서비스 구현 준비와 남은 인수
 
-CR-SERVICE-SUP03; adopted_for_service_implementation_verification_pending. API22/session v1 세필드/4페이지·무료누백/유료후보·본인소유권·확인성적·학교 scope·독립승인·기존 Drive/local 경로·security 계약을 보존한다. 실제 서비스 구현/기본 factory 전환/DB 권한/수치/운영은 후속 증거로 별도 인수한다.
+CR-SERVICE-SUP03; adopted_for_service_implementation_verification_pending. API22/session v1 세필드/4페이지·무료누백/유료후보·본인소유권·확인성적·학교 scope·독립승인·기존 Drive/local/default legacy 및 security 계약을 보존한다. 실제 마련된 명시 연결 코드와 33focused PASS·metadata 증거를 정상 whole641·PR통합 및 실제 JWT·수치/운영 인수와 구분한다.
 
 create_app의 entitlement port를 업무 저장소와 독립 주입하는 구현 준비를 채택한다. 기존 호출과 default factory는 보존한다.
 
@@ -209,11 +209,11 @@ SupabaseStorageDataProvider와 GET-only Client의 explicit 주입 구현 준비�
 - current factory 자동전환·누락설정의 메모리/합성/다른 사용자/미승인 자료 fallback을 금지한다.
 - 새 Storage 명부 archive_only는 명시된 정확 bool false만 허용한다. 누락/null/0/문자열과 미확인 상태는 거절하고 archive 저장본을 runtime 승인본으로 승격하지 않는다. 기존 Drive명부를 자동 변환하지 않는다.
 
-codepath seven_prepared_files_feature_PR_integration_pending; 합성 service_team_reported_33_focused_PASS_full_snapshot_retry_pending; 실제Auth/DB/Storage권한 NOT_RUN. 구현 준비 채택은 현재 default 전환/운영 PASS가 아니다.
+codepath explicit_prepared_snapshot_PR_integration_pending; 합성 service_team_reported_33_focused_PASS_full_snapshot_retry_pending; 실제Auth/DB/Storage권한 NOT_RUN. 구현 준비 채택은 현재 default 전환/운영 PASS가 아니다.
 
-명시 port6코드/검수와003SQL 총7준비파일은 feature PR 대기다. source시스템에는 pending path만 두고 develop 활성 참조를추가하지않는다. 기본factory전환은 인간이 허용하지 않았으며 33회귀/actualmetadata를 운영인수로확대하지않는다.
+명시 주입 6개 코드/검수와 003 SQL의 7개 파일은 이번 feature 작업 스냅샷에 실제 마련됐다. 구현 참조는 이 스냅샷에만 결속하며 정상 whole641/커밋·PR통합 인수는 아직 대기다. reported 33focused PASS와 actual metadata 검수는 운영 승인·기본 factory 전환이 아니다.
 
-후속 PR 후보 경로: src/jungsi_touch/infrastructure/http_api.py, src/jungsi_touch/infrastructure/postgres_entitlements.py, src/jungsi_touch/infrastructure/supabase_storage.py, tests/test_http_entitlement_injection.py, tests/test_postgres_entitlements.py, tests/test_supabase_storage.py, database/migrations/003_runtime_role_access.sql
+이번 feature 스냅샷의 명시 준비 구현 경로: src/jungsi_touch/infrastructure/http_api.py, src/jungsi_touch/infrastructure/postgres_entitlements.py, src/jungsi_touch/infrastructure/supabase_storage.py, tests/test_http_entitlement_injection.py, tests/test_postgres_entitlements.py, tests/test_supabase_storage.py, database/migrations/003_runtime_role_access.sql
 
 ### 신규 DB role 발급 요청과 실제 권한 대기
 
@@ -269,7 +269,7 @@ actual_connection_runtime003_metadata_verified_live_pending; 증거 SUP-CREDENTI
 
 직접 인간 답변으로 기본 경로 유지/명시 연결 준비만 확정했다. 기술권장/7합성PASS를 default 전환승인으로 해석하지 않는다. 현재 legacy/session3/API22 핀과 운영factory를 유지하고 자동전환/legacyfallback 변경·profiles조회/admin paid합성·추가GRANT·Storage승인을 실행하지 않는다.
 
-데이터팀 후속: targeted_update_receipt_pending. 별도 직접 사용자 지시에 따른 데이터팀 후속 준비다. 공식 원자료를 임의 오류로 수정하거나 전체 49개 보관물을 재업로드하지 않는다. 필요한 선별 목록 동결을 먼저 받고 새 형식·DTO·엔진 로직 변화는 별도 계약 변경으로 다룬다.
+데이터팀 후속: targeted_update_receipt_pending. 별도 직접 사용자 지시에 따른 데이터팀 후속 준비다. 공식 원자료를 임의 오류로 수정하거나 전체 49개 보관물을 재업로드하지 않는다. 필요한 선별 목록 동결을 먼저 받고 새 형식·DTO·엔진 로직 변화는 별도 계약 변경으로 다룬다. 8수준 joint 정의·공식 전체 분모 선택은 데이터팀 후속 CR 준비이며 현재 엔진/DTO/자료 승인으로 반영하지 않는다.
 
 운영서버는 app DATABASE_URL만, owner URL은이관작업전용private로분리한다. 외부화면은공개Supabase설정/APIorigin만받는다. 비공개env값/path/hash/ACL identity를기록하지않는다.
 
@@ -282,7 +282,7 @@ actual_connection_runtime003_metadata_verified_live_pending; 증거 SUP-CREDENTI
 | settings | .env 파일 자체는 필수가 아니다. ServerSettings.from_environment는 os.environ만 읽으며 .env 자동 로더가 없다. 기존 파일을 보관하는 것과 서버 프로세스에 필요한 환경변수를 주입하는 것은 별도 작업이다. |
 | authentication | SupabaseSessionProvider는 getUser로 확인한 사용자와 같은 JWT의 sub/exp를 대조한다. JWKS를 조회한 사실이 직접 서명 검증 구현의 완료를 뜻하지 않는다. |
 | entitlement | SessionService는 서버 이용권으로 유료 권한을 판정한다. profile/admin 표식이나 클라이언트 paid 값으로 자동 승격하지 않는다. 결제 취소·회수·동기화 adapter는 별도 구현이 필요하다. |
-| postgres | prepare_threshold=None, TLS require, 트랜잭션의 SET LOCAL UTC와 advisory transaction lock을 유지한다. 실제 DB 연결 검수는 NOT_RUN이다. |
+| postgres | prepare_threshold=None, TLS require, 트랜잭션의 SET LOCAL UTC와 advisory transaction lock을 유지한다. 명시 포트의 실제 DB 연결·001/002/003 및 24정책 metadata 검수와 합성 10건의 별도 프로세스 영속성은 지정 증거 범위에서 PASS다. 실제 사용자 JWT·이용권 행·default factory 전환·운영 22API/전체 배포 인수는 NOT_RUN이며 기본 경로는 유지한다. |
 | Drive | DriveClient는 주입된 static token으로 Bearer 요청을 만든다. 자동 OAuth refresh는 구현되어 있지 않아 갱신 운영 방법 또는 별도 adapter가 필요하다. |
 | health | 운영 /health/ready의 200은 인증·자료·전체 운영의 인수를 뜻하지 않는다. local memory/test auth/DPAPI factory는 production_ready=false이며 공개 배포하지 않는다. |
 
@@ -564,7 +564,7 @@ TypeScript/Deno runtime이다. 현재PythonFastAPI/NumPy의별도backend권장�
 
 003은정확인간승인후적용하고fresh24policy/SELECT13·INSERT9·columnUPDATE6의최소권한metadata를확인했다. 실제10합성행은새process/TLS연결로영속성·CAS/멱등/소유권거절을검수했으나실학생/Auth/유료rows·운영전체인수는아니다. 명시port actualDB/master metadata는PASS이고health503는구성/자료/실세션준비보류다. 최소시험팩1건/328915B는statusstaged·승인0/unbound/engineprodfalse·provider미승인거절/network0이다. 수학한구간/9경계부분QA는wholeexam/CDF/공식정수백분위·실화면mode승인이아니다. PR15 ef7b7c08 exactCI2와develop3d90정상merge/삭제0·branch보존은확인됐고FE-01R·FE-ORIGIN·FE-SOURCE-01·browser/429·securitygate는pending이다. 직접인간은기본경로유지·명시연결만준비를선택하여CR06source변경0/defaultlegacy를유지한다. 서비스7준비파일/33focusedPASS와641이전9ERROR/별도fixture10PASS를같은Git전체검수와분리한다. 실제승인자료활성화·JWT·livehost·기본factory·운영은미완료이며minimalallowlist/49archive보존·API22/session3/page4·productionfalse/NOT_READY를유지한다.
 
-[Supabase 운영 인수인계](Supabase_운영_인수인계.md)를 따른다. revision 2026.10.07.v7; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
+[Supabase 운영 인수인계](Supabase_운영_인수인계.md)를 따른다. revision 2026.10.07.v8; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
 
 [화면팀 최종 회신 요청](화면팀_회신요청_최종.md)의 RF-01~06과 로컬 요청 ①~⑥를 함께 인수한다. 문서 전달 준비 완료는 담당자 회신·실제 연결·운영 검수 완료를 뜻하지 않는다.
 
@@ -603,4 +603,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=2b595e9f761c5f751b101c3945371ee03fccb46abc2a2d1061939d55c16b0d94 -->
+<!-- jungsi:generated spec_sha256=f659b99d852bf1597eea5bb9df93c77ee3a8e6f6fa41eb6cb91c99f4f5f0c07c -->

@@ -21,7 +21,7 @@ from .postgres_forecast_repository import PostgresForecastRepository
 from .forecast_inputs import DriveForecastInputProvider
 
 
-def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None):
+def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None,entitlements=None):
     settings=settings or ServerSettings.from_environment()
     clock=clock or UtcClock()
     if repository is None: repository=PostgresRepository(settings.database_url) if settings.database_url else UnavailableRepository()
@@ -30,7 +30,7 @@ def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=Non
             data=DriveDataProvider(DriveClient(settings.drive_token,settings.drive_input_folder,settings.drive_output_folder),settings.drive_registry)
         else:data=MissingDataProvider()
     sessions=sessions or SupabaseSessionProvider(settings.supabase_url,settings.supabase_key)
-    auth=SessionService(sessions,repository,clock)
+    auth=SessionService(sessions,repository if entitlements is None else entitlements,clock)
     forecast_store=forecast_repository or (PostgresForecastRepository(repository) if isinstance(repository,PostgresRepository) else None)
     service=PlatformService(repository,data,clock,forecast_repository=forecast_store)
     forecasts=ForecastPolicyService(forecast_store or UnavailableRepository(),forecast_inputs or DriveForecastInputProvider(data),clock)
@@ -69,10 +69,20 @@ def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=Non
         if settings.database_url:
             try:db=repository.probe()
             except PlatformError:db={'status':'unavailable'}
-        configured=not missing and db['status']=='verified'
+        entitlement_status=None
+        if entitlements is not None:
+            entitlement_status={'status':'not_run_probe_missing'}
+            probe=getattr(entitlements,'probe',None)
+            if callable(probe):
+                try:
+                    result=probe()
+                    entitlement_status={'status':'verified' if isinstance(result,dict) and result.get('status')=='verified' else 'failed'}
+                except Exception:entitlement_status={'status':'unavailable'}
+        configured=not missing and db['status']=='verified' and (entitlement_status is None or entitlement_status['status']=='verified')
+        extra={} if entitlement_status is None else {'entitlements':entitlement_status}
         return JSONResponse(status_code=200 if configured else 503,content=dict(status='ready' if configured else 'configuration_pending',
             missing_settings=missing,database=db,auth='configured_not_session_verified' if settings.supabase_url and settings.supabase_key else 'not_configured',
-            live_data='not_verified',server_timezone='UTC'))
+            live_data='not_verified',server_timezone='UTC',**extra))
 
     def verified_actor(request:Request):
         return auth.actor(request.headers.get('Authorization'))

@@ -627,7 +627,7 @@ def supabase_actual_update_text(contract):
         provider['scope']+'\n\n공급 명부 '+provider['registry_format']+' / '+provider['transport']+'; 필드 '+', '.join(provider['entry_fields'])+'; '+provider['registry_status']+'. '+provider['credentials'],
         '\n'.join('- '+v for v in provider['checks']),
         'codepath '+cr['code_path_status']+'; 합성 '+cr['synthetic_verification']+'; 실제Auth/DB/Storage권한 '+cr['actual_auth_DB_Storage_privilege_verification']+'. 구현 준비 채택은 현재 default 전환/운영 PASS가 아니다.',
-        cr.get('code_paths_boundary','')+'\n\n후속 PR 후보 경로: '+', '.join(cr.get('pending_pr_paths',[])),
+        cr.get('code_paths_boundary','')+'\n\n'+('이번 feature 스냅샷의 명시 준비 구현 경로: '+', '.join(cr.get('implementation_code_paths',[])) if cr.get('implementation_mode')=='explicit_prepared_default_unchanged' else '후속 PR 후보 경로: '+', '.join(cr.get('pending_pr_paths',[]))),
         '### 신규 DB role 발급 요청과 실제 권한 대기',
         table(['항목','보고된 목표/남은 검수'],[[k,v]for k,v in contract.get('database_role_target',{}).items()if isinstance(v,(str,bool))]),
         contract.get('database_role_target',{}).get('boundary',''),
@@ -772,7 +772,19 @@ def validate_supabase_second_actual_update_contract(spec):
     cr=c.get('service_transition_contract',{});factory=cr.get('factory_transition_review',{})
     if factory.get('status')!='user_selected_explicit_preparation_only' or factory.get('human_answer')!='기본 경로는 유지하고 명시 연결만 준비' or any(factory.get(k)is not False for k in ('default_factory_change_allowed','default_factory_applied','future_automatic_transition_allowed','candidate_source_applied')) or factory.get('current_factory_authority')!='jungsi_backend.entitlements' or factory.get('human_question_resolved')is not True or cr.get('default_operating_factory_transition')!='NOT_RUN':
         errors.append('Human explicit-only decision forbids default factory transition')
-    if cr.get('pending_pr_paths',[]).count('database/migrations/003_runtime_role_access.sql')!=1 or cr.get('implementation_code_paths')!=[] or cr.get('full_snapshot_verification',{}).get('previous_PASS_claimed')is not False:
+    prepared_version=tuple(int(v)for v in spec.get('version','0').split('.'))>=(1,8,6)
+    expected_prepared_paths={
+        'src/jungsi_touch/infrastructure/http_api.py','src/jungsi_touch/infrastructure/postgres_entitlements.py',
+        'src/jungsi_touch/infrastructure/supabase_storage.py','tests/test_http_entitlement_injection.py',
+        'tests/test_postgres_entitlements.py','tests/test_supabase_storage.py',
+        'database/migrations/003_runtime_role_access.sql'}
+    paths=cr.get('implementation_code_paths',[])
+    if prepared_version:
+        if cr.get('implementation_mode')!='explicit_prepared_default_unchanged' or cr.get('code_path_status')!='explicit_prepared_snapshot_PR_integration_pending' or not isinstance(paths,list) or len(paths)!=7 or set(paths)!=expected_prepared_paths or set(cr.get('pending_pr_paths',[]))!=expected_prepared_paths:
+            errors.append('Explicit prepared mode must bind the exact seven feature snapshot paths with default unchanged')
+    elif paths!=[]:
+        errors.append('Unprepared historical contract cannot activate implementation paths')
+    if cr.get('pending_pr_paths',[]).count('database/migrations/003_runtime_role_access.sql')!=1 or cr.get('full_snapshot_verification',{}).get('previous_PASS_claimed')is not False:
         errors.append('Service preparation paths and focused results cannot certify full snapshot integration')
     fo=c.get('frontend_followup_observation',{})
     if fo.get('merge_commit')!='3d90bc461c57102fc9ee8868cec7edac498470d4' or fo.get('head_commit')!='ef7b7c08ae0c3db5ea02c7af685a99f6064219df' or fo.get('exact_head_CI_success_count')!=2 or fo.get('source_deletions')!=0 or fo.get('branch_preserved')is not True:
@@ -809,7 +821,7 @@ def supabase_operations_route_metadata(spec):
         result['runtime_ingestion_policy']=dict(mode=c['runtime_ingestion_policy']['mode'],selection=c['runtime_ingestion_policy']['selection'],bulk_autoimport=False,archive_auto_adopted=False,production_ready=False)
         d=c['database_preflight'];a=c['database_application']
         result['database_preflight']=dict(status=d['status'],observed_at=d['observed_at'],evidence_id=d['evidence_id'],read_only=d['read_only'])
-        result['database_application']=dict(status=a['status'],committed_at=a['committed_at'],evidence_id=a['evidence_id'],independent_review=a['independent_review_status'],runtime003=a['runtime003_status'],production_ready=a['production_ready'])
+        result['database_application']=dict(status=a['status'],committed_at=a['committed_at'],evidence_id=a['evidence_id'],independent_review=a['independent_review_status'],runtime003=a['runtime003_status'],observation_scope=a.get('observation_scope','001/002 apply observation before runtime003; latest runtime003 is separate'),production_ready=a['production_ready'])
     if c.get('database_runtime_application'):
         v=c['database_runtime_application'];p=c['explicit_port_metadata_verification'];e=c['minimum_exam_stage'];f=c['service_transition_contract']['factory_transition_review']
         result['runtime003']=dict(status=v['status'],policies=v['policies'],scope='metadata_only',production_ready=False)
@@ -1657,6 +1669,10 @@ def protected_path(path,shared_tools):
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
     names=set(paths)
+    transition=spec.get('supabase_operations_handoff_contract',{}).get('service_transition_contract',{})
+    if transition.get('implementation_mode')=='explicit_prepared_default_unchanged':
+        for path in transition.get('implementation_code_paths',[]):
+            if path not in names:errors.append('Explicit prepared implementation reference absent from selected snapshot: '+path)
     for path,expected in generated_files(spec).items():
         if path not in names:errors.append("Missing generated file: "+path)
         elif read(path)!=expected:errors.append("Document or route drift: "+path)
