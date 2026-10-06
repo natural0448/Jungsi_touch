@@ -188,6 +188,22 @@ def local_verification_text(spec):
     contract=spec['local_verification_contract']
     paths=contract['implementation_paths'];fence=chr(96)*3
     source=contract['source_request']
+    acceptance=contract.get('implementation_acceptance',{})
+    integration=acceptance.get('develop_integration',{})
+    if integration.get('status')=='merged_verified':
+        git_heading='## 확인한 로컬 검수와 Git 통합 기록'
+        hooks=acceptance.get('normal_commit_push_hooks',{})
+        ci=integration.get('exact_merge_CI',{})
+        git_state=('확인된 이전 구현 '+acceptance.get('implementation_commit','')+
+            '; 정상 훅 '+str(hooks.get('pre_commit',{}).get('tests_run','pending'))+
+            '/'+str(hooks.get('pre_push',{}).get('tests_run','pending'))+
+            '건; [PR14]('+integration.get('pull_request','')+') merged; develop '+integration.get('merge_commit','')+
+            '; [정확 병합 CI]('+ci.get('url','')+'): '+ci.get('conclusion','pending')+
+            '. 현재 메타데이터 커밋의 미래 CI/운영 인수는 포함하지 않는다.')
+    else:
+        git_heading='## 확인한 로컬 검수와 Git 인수 대기'
+        git_state='같은 커밋·전체 훅·CI·develop 통합 대기'
+
     rows=[
         ['운영 서버','configured_app/ServerSettings와 운영 /health/ready 의미는 그대로다.'],
         ['로컬 조립',contract['composition']['rule']],
@@ -236,12 +252,13 @@ def local_verification_text(spec):
         '3. 별도 loopback 서버와 네 시험 subject를 준비하며 메모리 소실/운영 NOT_RUN을 확인한다.\n'+
         '4. 외부 화면 담당이 서버 전용 Caller를 연결하고 승인된 기대값·보류 사유로 화면을 검수한다.\n'+
         '5. 정확한 소스·명령·검수 범위·영수증을 남기고 운영 DB/인증/배포 완료와 구분한다.\n\n'+
-        '## 확인한 로컬 검수와 Git 인수 대기\n\n'+table(['범위','상태'],[
+        git_heading+'\n\n'+table(['범위','상태'],[
             ['고정 서비스 후보',contract.get('implementation_acceptance',{}).get('status','pending')],
             ['서비스 집중 검사',str(contract.get('implementation_acceptance',{}).get('focused_tests',{}).get('count','pending'))+'건; 고정 영수증을 읽기 인수, 공통 writer 재실행 아님'],
             ['native 로컬 검수','같은 받는 PC/사용자 DPAPI·loopback HTTP·승인0/pending 명부 HOLD PASS'],
             ['CLI 도움말','기존 고정 runtime에서 네 개 exit0; token/prepare/serve 실행과 구분'],
-            ['Git 및 운영 인수','같은 커밋·전체 훅·CI·develop 통합 대기; 실제 승인 숫자/DB/Supabase/Drive/브라우저 NOT_RUN']
+            ['Git 인수',git_state],
+            ['운영/외부 인수','실제 승인 숫자/DB/Supabase/Drive 다운로드/외부 수신 PC·브라우저 NOT_RUN/HOLD']
         ])+'\n\n## 집중 검증과 남은 작업\n\n'+'\n'.join('- '+x for x in contract['acceptance'])+
         '\n\n'+'\n'.join('- '+x for x in contract['remaining']))
     return body

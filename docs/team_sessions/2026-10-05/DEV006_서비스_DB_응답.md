@@ -187,7 +187,7 @@ Supabase 최소 GET 준비 검수: Auth settings/JWKS 200, 사용자토큰없는
 
 권한 있는 데이터팀의 별도 승인 명부 또는 local selection과 독립 신뢰 SHA·pinned 출처 영수증·폴더/판/평문 SHA가 필요하다. DATA_ACTIVE_CSV/시험팩 목록은 엔진 승인이 아니다. 실제 Drive 다운로드와 local_filesystem을 구분하고 local_verification 승인이 운영 모형 승격을 뜻하지 않는다. 승인 곡선 없음은 HOLD/null/pending이고 성공 총점은 보존한다.
 
-PR6의 Supabase SSR 쿠키는 localhost 고정 시험 Caller를 자동 제공하지 않는다. 서버 전용 local Caller는 외부팀, 실제 승인 자료/기대값은 데이터팀 담당이다. 서비스 모듈 다섯 파일의 고정 SHA·23건 집중 검사와 같은 받는 PC의 DPAPI/loopback HTTP·승인0/pending 명부 HOLD 검수를 인수했다. CLI 도움말 네 개도 기존 고정 runtime에서 exit0으로 대조했다. 이는 아직 미커밋 후보의 local-only 검수이며 같은 커밋·전체 정상 훅·정확 HEAD CI·develop 통합은 대기다. 실제 승인 수치·다른 PC/계정·외부 브라우저 인수는 NOT_RUN이다. publishable 설정 준비를 로그인 JWT 인수로 확대하지 않고 비공개 값/설정 파일 경로는 공개 정본에 복사하지 않는다.
+PR6의 Supabase SSR 쿠키는 localhost 고정 시험 Caller를 자동 제공하지 않는다. 서버 전용 local Caller는 외부팀, 실제 승인 자료/기대값은 데이터팀 담당이다. 서비스 모듈 다섯 파일의 고정 SHA·23건 집중 검사와 이번 검수 PC의 동일 Windows 사용자 DPAPI/loopback HTTP·승인0/pending 명부 HOLD 검수를 인수했다. CLI 도움말 네 개도 기존 고정 runtime에서 exit0으로 대조했다. 구현429482ec6a3e0be7ac5d25512fcf902580a04c73은 서비스5+공통23파일의 같은 커밋이며 정상 pre-commit/pre-push 각각561건 PASS와 정확 구현 HEAD CI 두 건 success를 확인했다. [PR14](https://github.com/natural0448/Jungsi_touch/pull/14)는 merged이고 develop91eb0c5a1f67115d64227f71b87f6dd8ec66085a의 동일 tree·[정확 병합 CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37415227579/job/112112250475) success도 확인했다. 이는 확인된 이전 local-only 구현/통합의 기록이며 현재 메타데이터 커밋의 미래 SHA/CI를 뜻하지 않는다. 외부 수신 PC·실제 승인 수치·다른 PC/계정·외부 브라우저·운영 DB/JWT/Drive/모형 등록 인수는 NOT_RUN/HOLD이다. publishable 설정 준비를 로그인 JWT 인수로 확대하지 않고 비공개 값/설정 파일 경로는 공개 정본에 복사하지 않는다.
 
 
 [로컬 검증 계약과 실행 후보](../../current/로컬_검증_연결.md)를 함께 읽는다.
@@ -206,4 +206,4 @@ PR6의 Supabase SSR 쿠키는 localhost 고정 시험 Caller를 자동 제공하
 
 확인된 이전 baseline b66까지만 증거로 명시한다. 후속 문서 커밋 자신의 미래 SHA나 미실행 CI 성공을 기록하지 않는다. 공통 Git/CI 검사·명세·생성 문서 인수 및 전체 합성 회귀. 운영 DB·외부 프런트·실제 데이터·모형 운영 승인을 뜻하지 않는다. 이전 e12/676 버전값 보완 pending은 역사이며 최신 소스 관측과 실제 프런트 인수 대기를 구분한다. 최소 profile 조건 읽기와 실제 로그인 JWT NOT_RUN, 실제 자료·모형 운영 미승인 상태를 유지한다.
 
-<!-- jungsi:generated spec_sha256=f045811bdb7e3cc356b4096e435b649f9b8492cc18999ba5ad11f819f6260441 -->
+<!-- jungsi:generated spec_sha256=870ba02fb6cc6cc6923e7d5d45d4ae238e590f5cf9a8aab983c2fc004c14a188 -->

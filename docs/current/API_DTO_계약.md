@@ -324,4 +324,4 @@ PR13 merged; 고정 통합947cee82f0a91b0ed337753d6e0ae9619e49a78b. adc684/74fd�
 
 확인된 이전 baseline b66까지만 증거로 명시한다. 후속 문서 커밋 자신의 미래 SHA나 미실행 CI 성공을 기록하지 않는다. 공통 Git/CI 검사·명세·생성 문서 인수 및 전체 합성 회귀. 운영 DB·외부 프런트·실제 데이터·모형 운영 승인을 뜻하지 않는다. 이전 e12/676 버전값 보완 pending은 역사이며 최신 소스 관측과 실제 프런트 인수 대기를 구분한다. 최소 profile 조건 읽기와 실제 로그인 JWT NOT_RUN, 실제 자료·모형 운영 미승인 상태를 유지한다.
 
-<!-- jungsi:generated spec_sha256=f045811bdb7e3cc356b4096e435b649f9b8492cc18999ba5ad11f819f6260441 -->
+<!-- jungsi:generated spec_sha256=870ba02fb6cc6cc6923e7d5d45d4ae238e590f5cf9a8aab983c2fc004c14a188 -->

@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.7.1",
-  "source_sha256": "f045811bdb7e3cc356b4096e435b649f9b8492cc18999ba5ad11f819f6260441",
+  "source_sha256": "870ba02fb6cc6cc6923e7d5d45d4ae238e590f5cf9a8aab983c2fc004c14a188",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3434,7 +3434,7 @@
     "format": "jungsi.local-verification-contract/v1",
     "version": "1",
     "code_status": "implemented_local_only_synthetic_native_verified_actual_data_hold",
-    "verification_status": "service_23_scoped_native_verified_same_commit_Git_hooks_CI_integration_pending",
+    "verification_status": "local_code_scoped_native_and_confirmed_429_hooks_CI_PR14_develop91_verified_actual_data_hold",
     "requirements": [
       "REQ-12",
       "REQ-14",
@@ -3666,7 +3666,7 @@
       "authenticated_metadata_binding": true,
       "ciphertext_location": "Git 제외 data 또는 outputs 아래 새 암호 파일. 실제 이름/경로/키/내용은 비공개.",
       "rule": "DPAPI 기본 사용자 범위로 받는 PC·사용자가 자기 환경에서 새로 보호하고 RAM 복호화한다. 발신PC 암호문 전달을 수신자 복호화 방법으로 삼지 않는다. LOCAL_MACHINE flag와 공용 키 공유를 금지한다. roaming profile 예외가 있어 절대적인 다른 PC 복호화 불가를 약속하지 않는다. MAC 보호 내용에 명부/영수증 metadata를 결속하고 평문SHA를 확인한다. 기존 원본은 보존하며 신규 평문 파일·debug/crash payload·키 출력은 금지한다.",
-      "memory_limit": "RAM만 복호화하는 설계와 일부 native buffer zeroing은 Python 모든 객체의 완전 메모리 제거를 보장하지 않는다. 다른 PC/계정 실제 거부와 받는 PC native 인수는 별도 NOT_RUN이다.",
+      "memory_limit": "RAM만 복호화하는 설계와 일부 native buffer zeroing은 Python 모든 객체의 완전 메모리 제거를 보장하지 않는다. 이번 검수 PC의 동일 Windows 사용자에서 DPAPI roundtrip과 local HTTP/HOLD 검수는 PASS다. 외부 수신 PC 재현과 다른 PC/계정의 실제 복호화 거부는 별도 NOT_RUN이다.",
       "alternate_AES_GCM": "이번 선택은 DPAPI다. AES-GCM·키 별도 전달·nonce 재사용 금지·metadata AAD·InvalidTag 거부·dependency lock 변경은 별도 범위 검토 없이 도입하지 않는다.",
       "primary_source": "https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptprotectdata"
     },
@@ -3729,7 +3729,7 @@
       "UI_rule": "유효한 비어 있지 않은 버전3쌍과 context17의 정확 equality로 발표 근거를 결합한다. nullable·권한·Idempotency·보류코드는 유지한다."
     },
     "implementation_paths": {
-      "status": "confirmed_paths_frozen_source_and_help_verified_same_commit_pending",
+      "status": "confirmed_code_help_and_previous_Git_integration_verified",
       "service_modules": [
         "src/jungsi_touch/infrastructure/local_dpapi.py",
         "src/jungsi_touch/infrastructure/local_drive.py",
@@ -3739,7 +3739,7 @@
       "test": "tests/test_local_verification.py",
       "CLI_module": "jungsi_touch.infrastructure.local_verification",
       "launch_command": "python -B -m jungsi_touch.infrastructure.local_verification serve --cache-source local_filesystem --cache SEALED --selection-sha256 TRUSTED --sessions SEALED",
-      "rule": "서비스팀의 네 모듈·test가 고정 영수증의 raw/staged SHA와 일치한다. 공통 writer는 기존 고정 runtime/site와 해당 src로 CLI 도움말 네 개의 exit0을 확인했다. 아래 명령은 확정 소스의 실행 형식이며 각 명령의 직접 실행·실제 자료 숫자 검수와 구분한다. PRIVATE/TRUSTED/NEW/SEALED는 자리표시자이고 실제 값·학교·경로는 비공개다. 아직 서비스 코드와 공통 기획/라우팅의 같은 커밋·정상 훅·CI·develop 통합은 대기다. 공용 script allowlist는 추가하지 않았으며 운영 DB/인증/배포는 불변이다.",
+      "rule": "서비스 네 모듈·test와 공통23파일은 구현429482ec6a3e0be7ac5d25512fcf902580a04c73의 같은 커밋으로 결속됐다. 정상 pre-commit/pre-push의561건·정확 구현 HEAD CI 두 건과 PR14 merged·develop91eb0c5a1f67115d64227f71b87f6dd8ec66085a의 동일 tree/정확 CI success를 확인했다. 기존 고정 runtime의 CLI 도움말 네 개 exit0·검수PC의 local native 증거를 보존한다. 아래 명령은 확정 소스의 실행 형식이며 각 명령 직접 실행·외부 수신PC/브라우저·실제 승인 수치 검수와 구분한다. PRIVATE/TRUSTED/NEW/SEALED는 자리표시자이고 실제 값·학교·경로는 비공개다. 공용 script allowlist·운영 DB/인증/배포는 불변이다. 이 기록은 확인된 이전 구현/통합이며 현재 메타데이터 커밋의 미래 SHA/CI를 뜻하지 않는다.",
       "CLI_status": "confirmed_help_syntax_four_exit0",
       "prepare_local_candidate": "python -B -m jungsi_touch.infrastructure.local_verification prepare-local --selection PRIVATE --selection-sha256 TRUSTED --destination NEW",
       "serve_candidate": "python -B -m jungsi_touch.infrastructure.local_verification serve --cache-source local_filesystem --cache SEALED --selection-sha256 TRUSTED --sessions SEALED",
@@ -3773,17 +3773,17 @@
       "외부 Caller·브라우저·실제 기대값 인수는 별도 source/영수증으로 검증"
     ],
     "remaining": [
-      "서비스 코드와 공통 기획/라우팅의 같은 커밋·정상 훅·정확 HEAD CI·develop 통합",
+      "외부 수신 PC에서 고정 runtime·DPAPI 시험설정·미승인 자료의 정상 HOLD를 재현하고 인수",
       "데이터팀의 승인 곡선/규칙/카탈로그와 실제 기대값",
       "외부 서버 전용 Caller와 브라우저 인수",
       "다른 PC/계정 DPAPI 거부는 별도 미실행",
       "운영 DB.env/실제 로그인/DB/Drive/배포는 별도 대기"
     ],
     "implementation_acceptance": {
-      "status": "frozen_candidate_source_and_scoped_local_verification_accepted",
+      "status": "confirmed_previous_code_scoped_local_native_hooks_CI_and_develop_integration_accepted",
       "baseline_develop": "354d45097a501d788b8bb93ef238a15aef4d3ae3",
       "branch": "feature/application-pre-data-platform",
-      "commit_state": "uncommitted_candidate_not_Git_CI_or_develop_acceptance",
+      "commit_state": "committed_429_and_PR14_integrated_91_confirmed_previous_baseline",
       "source_freeze_sha256": "83a636181716ecfd6a7d0a3540063fa18d7b6e791e729af038bfc30fda050ba0",
       "source_files": [
         {
@@ -3830,13 +3830,130 @@
         "status": "four_exit0",
         "source": "공통 writer가 기존 고정 runtime/site와 고정 서비스 src에서 실제 help만 실행했다. token/자료/서버 명령은 실행하지 않았다."
       },
-      "whole_snapshot_hooks_CI": "pending_same_commit_service_code_spec_planning_routing",
-      "PR_and_develop_integration": "pending_no_future_SHA_or_CI_claim",
+      "whole_snapshot_hooks_CI": "passed_confirmed_previous_429_hooks561_and_429_91_exact_CI",
+      "PR_and_develop_integration": "PR14_merged_confirmed_previous_develop91",
       "actual_approved_numeric_cases": "NOT_RUN_no_approved_curve_or_catalog_inputs",
       "actual_DB_Supabase_Drive_browser": "NOT_RUN",
       "production_ready": false,
       "actual_model_operating_registration": false,
-      "cross_PC_or_other_account_DPAPI_rejection": "NOT_RUN"
+      "cross_PC_or_other_account_DPAPI_rejection": "NOT_RUN",
+      "implementation_commit": "429482ec6a3e0be7ac5d25512fcf902580a04c73",
+      "implementation_parent_commit": "354d45097a501d788b8bb93ef238a15aef4d3ae3",
+      "implementation_tree": "be0d5851d462cc02ecc1bb53309d0382b84491f9",
+      "normal_commit_push_hooks": {
+        "commit": "429482ec6a3e0be7ac5d25512fcf902580a04c73",
+        "pre_commit": {
+          "tests_run": 561,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "successful": true,
+          "scope": "동일 implementation index snapshot",
+          "receipt_sha256": "0f0849fcc624244605ed0935a641de1ef3e8e080c28d29bd37eb9ea4f33748ac"
+        },
+        "pre_push": {
+          "tests_run": 561,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "successful": true,
+          "scope": "exact committed 429 snapshot",
+          "receipt_sha256": "1c45033af98c9a022e17b2998b51ef982fb4ea55c87e56b9d6340806e7faecf6"
+        },
+        "source": "부모의 정상 훅 인수 및 공통 writer의 원본 verification 영수증 SHA/561·0·0·0·successful 대조"
+      },
+      "exact_implementation_CI": {
+        "commit": "429482ec6a3e0be7ac5d25512fcf902580a04c73",
+        "successful_jobs": 2,
+        "jobs": [
+          "https://github.com/natural0448/Jungsi_touch/actions/runs/37414903927/job/112111270876",
+          "https://github.com/natural0448/Jungsi_touch/actions/runs/37415078048/job/112111806839"
+        ],
+        "source": "부모 기획팀의 정확 구현HEAD GitHub 직접 읽기 인수"
+      },
+      "develop_integration": {
+        "status": "merged_verified",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/14",
+        "pull_request_state": "merged",
+        "merge_commit": "91eb0c5a1f67115d64227f71b87f6dd8ec66085a",
+        "tree": "be0d5851d462cc02ecc1bb53309d0382b84491f9",
+        "tree_equals_verified_implementation": true,
+        "exact_merge_CI": {
+          "commit": "91eb0c5a1f67115d64227f71b87f6dd8ec66085a",
+          "conclusion": "success",
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37415227579/job/112112250475"
+        },
+        "CI_receipt_sha256": "24977eda5c6c1d14875fd70499093035a8353b6f17c0000ec9c3f49c35d00b25",
+        "local_FF_preservation": "원본/23 staged raw/index/수신 tree 동일성 확인 후 --ff-only; reset/삭제/버림 없음",
+        "local_FF_receipt_sha256": "ffbf0fd8ee090aba47c6c54121bf52d70d2023ef9926ac3e096cd0cf7dc227d9"
+      },
+      "publication_rule": "확인된 이전 구현429/병합91의 성공만 기록한다. 현재 후속 메타데이터 커밋 자신의 미래 SHA/미실행 CI나 운영 성공을 기록하지 않는다."
+    },
+    "historical_before_PR14_integration": {
+      "verification_status": "service_23_scoped_native_verified_same_commit_Git_hooks_CI_integration_pending",
+      "implementation_paths_status": "confirmed_paths_frozen_source_and_help_verified_same_commit_pending",
+      "implementation_paths_rule": "서비스팀의 네 모듈·test가 고정 영수증의 raw/staged SHA와 일치한다. 공통 writer는 기존 고정 runtime/site와 해당 src로 CLI 도움말 네 개의 exit0을 확인했다. 아래 명령은 확정 소스의 실행 형식이며 각 명령의 직접 실행·실제 자료 숫자 검수와 구분한다. PRIVATE/TRUSTED/NEW/SEALED는 자리표시자이고 실제 값·학교·경로는 비공개다. 아직 서비스 코드와 공통 기획/라우팅의 같은 커밋·정상 훅·CI·develop 통합은 대기다. 공용 script allowlist는 추가하지 않았으며 운영 DB/인증/배포는 불변이다.",
+      "implementation_acceptance": {
+        "status": "frozen_candidate_source_and_scoped_local_verification_accepted",
+        "baseline_develop": "354d45097a501d788b8bb93ef238a15aef4d3ae3",
+        "branch": "feature/application-pre-data-platform",
+        "commit_state": "uncommitted_candidate_not_Git_CI_or_develop_acceptance",
+        "source_freeze_sha256": "83a636181716ecfd6a7d0a3540063fa18d7b6e791e729af038bfc30fda050ba0",
+        "source_files": [
+          {
+            "path": "src/jungsi_touch/infrastructure/local_dpapi.py",
+            "sha256": "fa8df5bc4369fb079d94db82990656579f84bd70798037345adc787bc1cd4047"
+          },
+          {
+            "path": "src/jungsi_touch/infrastructure/local_drive.py",
+            "sha256": "e2144c5241184b48b408cd4e0de6c212de0dd842a5aee159faf3666b6c518deb"
+          },
+          {
+            "path": "src/jungsi_touch/infrastructure/local_repository.py",
+            "sha256": "f2e4871389fe6967b7e6ed23d727d69d2cdd7722b9b0877cf0077c6164f97590"
+          },
+          {
+            "path": "src/jungsi_touch/infrastructure/local_verification.py",
+            "sha256": "fdb0256b30c83569f8bf7bccaccabfb330c6a471cbe956c6867dce5aa1a913da"
+          },
+          {
+            "path": "tests/test_local_verification.py",
+            "sha256": "331a56781ca1e1974dc439f6ef7c113a38b5ebbfa867e0b6f22e23eb929adfb9"
+          }
+        ],
+        "focused_tests": {
+          "count": 23,
+          "status": "PASS",
+          "source": "서비스팀 고정 영수증 및 부모 인수; 공통 writer는 전체 서비스 검사를 재실행하지 않았다."
+        },
+        "native_checks": {
+          "DPAPI_same_recipient_PC_user": "PASS_local_native_only",
+          "real_loopback_HTTP_test_users": "PASS_local_native_only",
+          "explicit_HOLD_no_data": "PASS",
+          "actual_empty_selection": "PASS_HOLD",
+          "actual_pending_selection": "PASS_HOLD",
+          "servers_stopped": true
+        },
+        "CLI_help": {
+          "commands": [
+            "--help",
+            "issue --help",
+            "prepare-local --help",
+            "serve --help"
+          ],
+          "status": "four_exit0",
+          "source": "공통 writer가 기존 고정 runtime/site와 고정 서비스 src에서 실제 help만 실행했다. token/자료/서버 명령은 실행하지 않았다."
+        },
+        "whole_snapshot_hooks_CI": "pending_same_commit_service_code_spec_planning_routing",
+        "PR_and_develop_integration": "pending_no_future_SHA_or_CI_claim",
+        "actual_approved_numeric_cases": "NOT_RUN_no_approved_curve_or_catalog_inputs",
+        "actual_DB_Supabase_Drive_browser": "NOT_RUN",
+        "production_ready": false,
+        "actual_model_operating_registration": false,
+        "cross_PC_or_other_account_DPAPI_rejection": "NOT_RUN"
+      },
+      "remaining_first": "서비스 코드와 공통 기획/라우팅의 같은 커밋·정상 훅·정확 HEAD CI·develop 통합",
+      "meaning": "354d450 출발의 코드·공통 패치와 23/local native 검수는 고정 후보로 인수했지만 Git 통합은 아직 미실행이었던 당시 이력이다. 기존 동결 영수증·원본과 함께 보존한다."
     }
   }
 }

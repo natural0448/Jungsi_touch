@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
   "spec_version": "1.7.1",
-  "source_sha256": "f045811bdb7e3cc356b4096e435b649f9b8492cc18999ba5ad11f819f6260441",
+  "source_sha256": "870ba02fb6cc6cc6923e7d5d45d4ae238e590f5cf9a8aab983c2fc004c14a188",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2677,7 +2677,7 @@
   "local_verification_contract": {
     "format": "jungsi.local-verification-contract/v1",
     "code_status": "implemented_local_only_synthetic_native_verified_actual_data_hold",
-    "verification_status": "service_23_scoped_native_verified_same_commit_Git_hooks_CI_integration_pending",
+    "verification_status": "local_code_scoped_native_and_confirmed_429_hooks_CI_PR14_develop91_verified_actual_data_hold",
     "frontend_connection": {
       "owner": "external_presentation_team",
       "SSRSupabase_cookie_to_local_Caller_automatic": false,
