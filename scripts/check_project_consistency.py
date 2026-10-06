@@ -160,7 +160,7 @@ def deletion_scope_text(spec):
     policy=spec['workflow']['branch_governance'].get('file_deletion_policy')
     if not policy:return ''
     record=policy['record']
-    return ('\n\n## DEV006⑦ 정확한 파일 삭제 승인 검사\n\n기본값은 deny다. develop947 이후 등록·공통 검사는 시스템기획팀, 실제 삭제와 화면 검증은 외부 화면 개발팀의 범위다. 서비스 개발팀은 서비스 계층만 담당한다. 현재 실행 상태: '+policy['execution_state']+'. 별도 develop 선행 등록 전에는 후보가 스스로 승인할 수 없다.\n\n'+
+    return ('\n\n## DEV006⑦ 정확한 파일 삭제 승인 검사\n\n기본값은 deny다. develop947 이후 등록·공통 검사는 시스템기획팀, 실제 삭제와 화면 검증은 외부 화면 개발팀의 범위다. 서비스 개발팀은 서비스 계층만 담당한다. 삭제 승인 등록 당시의 역사 관측 상태: '+policy['execution_state']+'. 이 관측을 현재 PR 통합 상태로 취급하지 않는다. 별도 develop 선행 등록 전에는 후보가 스스로 승인할 수 없다.\n\n'+
         table(['정확한 경로','mode','고정 Git blob','원본 바이트 SHA256'],[[r['path'],r['mode'],r['blob'],r['sha256']] for r in record['files']])+'\n\n출발 브랜치: '+record['origin_branch']+'; 출발 커밋: '+record['source_commit']+'; 사용자 메시지: '+record['user_evidence']['message_id']+'; 요청서 SHA256: '+record['source_request_sha256']+'. 원본과 이전 버전은 보존한다. 최초 삭제와 승인된 삭제의 부모 병합 승계를 구분하고 다른 경로·수정/복원 후 재사용·병렬 삭제 origin의 재소비·과거 소급·숨긴 sideparent·ref 삭제·force를 거절한다. 동일한 승인 삭제 origin을 develop/main으로 운반하는 정상 병합과 새로운 삭제 사건은 구분한다.')
 
 
@@ -177,7 +177,7 @@ def common_tools_acceptance_text(spec):
             ['정확한 HEAD GitHub CI','[project-consistency]('+ci['url']+'): '+ci['conclusion']],
             ['서비스·DB 역사 기준',receipt['service_DB_baseline']],
             ['당시 외부 프런트 관측',front['frontend']+'; '+front['sameRelease_observation']],
-            ['외부 삭제 관측',deletion.get('execution_state','NOT_RUN')+'; develop 통합과 실제 브라우저 인수는 구분한다.'],
+            ['승인 등록 당시 외부 삭제 관측',deletion.get('execution_state','NOT_RUN')+'; 이후 develop 통합과 실제 브라우저 인수는 각각의 정확한 증거로 구분한다.'],
             ['운영/외부 인수',receipt['frontend_acceptance']+'; DB .env 추후; main '+receipt['main_release_state']]
         ])+'\n\n'+receipt['publication_rule']+' '+receipt['scope']+
         ' 이전 e12/676 버전값 보완 pending은 역사이며 최신 소스 관측과 실제 프런트 인수 대기를 구분한다. 최소 profile 조건 읽기와 실제 로그인 JWT NOT_RUN, 실제 자료·모형 운영 미승인 상태를 유지한다.')
@@ -433,7 +433,134 @@ def supabase_operations_summary(spec,link='Supabase_운영_인수인계.md'):
     if not c:
         p=spec.get('backend_platform_contract',{})
         return '\n\n## 서비스 통합과 운영 상태\n\n'+str(p.get('code_status','pending'))+'; 운영서버 '+str(p.get('live_server_status','NOT_RUN'))+'; 실제자료 '+str(p.get('live_data_status','NOT_RUN'))+'.'
-    return '\n\n## Supabase 운영 인수 상태\n\n'+c['summary']+'\n\n[Supabase 운영 인수인계]('+link+')를 따른다. revision '+c['revision']+'; '+c['checked_at']+' 읽기 snapshot.\n\n'+c['history']['summary']
+    reply=c.get('reply_contract')
+    reply_link=str(PurePosixPath(link).parent/PurePosixPath(reply['document']).name) if reply else ''
+    followup_link=str(PurePosixPath(link).parent/PurePosixPath(reply['followup']['document']).name) if reply and reply.get('followup') else ''
+    reply_summary=('\n\n[화면팀 최종 회신 요청]('+reply_link+')의 RF-01~06과 로컬 요청 ①~⑥를 함께 인수한다. 문서 전달 준비 완료는 담당자 회신·실제 연결·운영 검수 완료를 뜻하지 않는다.') if reply else ''
+    if followup_link:reply_summary+='\n\n[화면팀 후속 작업 지시]('+followup_link+')의 FE-01~05는 로컬 검수 보고 이후 발견한 결함·증거 보완·승인 자료 대조·후속 PR 통합을 담당한다.'
+    return '\n\n## Supabase 운영 인수 상태\n\n'+c['summary']+'\n\n[Supabase 운영 인수인계]('+link+')를 따른다. revision '+c['revision']+'; HTTP 관측 시각 '+c['checked_at']+'.'+reply_summary+'\n\n'+c['history']['summary']
+
+
+FRONTEND_REPLY_DOCUMENT='docs/current/화면팀_회신요청_최종.md'
+FRONTEND_REPLY_IDS={'RF-01','RF-02','RF-03','RF-04','RF-05','RF-06'}
+FRONTEND_REPLY_STATUS={'reply_pending','implementation_pending','supplied_boundary_implementation_pending'}
+FRONTEND_FOLLOWUP_DOCUMENT='docs/current/화면팀_후속작업_지시.md'
+FRONTEND_FOLLOWUP_IDS={'FE-01','FE-02','FE-03','FE-04','FE-05'}
+FRONTEND_FOLLOWUP_STATUS={'implementation_pending','evidence_pending','inputs_pending','integration_pending'}
+
+
+def frontend_reply_text(spec):
+    c=spec['supabase_operations_handoff_contract'];r=c['reply_contract']
+    def bullets(values):return '\n'.join('- '+v for v in values)
+    def details(row,label):
+        return ('### '+label+' '+row['title']+'\n\n상태: '+row['status']+'\n\n'+
+                ('담당: '+', '.join(row['owners'])+'\n\n' if 'owners' in row else '')+
+                ('요청 원문 요지: '+row['request_summary']+'\n\n' if 'request_summary' in row else '')+
+                ('회신 요청:\n\n'+bullets(row['requested_reply'])+'\n\n' if 'requested_reply' in row else '')+
+                '담당자 답변과 제공 범위:\n\n'+bullets(row['our_answer'])+'\n\n'+
+                '선행 조건:\n\n'+bullets(row['dependencies'])+'\n\n완료 증거:\n\n'+bullets(row['completion_evidence'])+
+                ('\n\n관련 operation: '+', '.join(row['route_refs'])+'\n\n비공개 전달 경계: '+row['secret_boundary'] if 'route_refs' in row else ''))
+    head=(r['summary']+'\n\n회신 계약 '+r['format']+'; revision '+r['revision']+'; 작성 시각 '+r['prepared_at']+
+          '; 작업 출발 develop '+r['basis_commit']+'.\n\n'+r['finalized_meaning']+'\n\n'+r['scope'])
+    items='## 화면팀에 요청하는 회신\n\n'+table(['ID','업무','담당','상태'],[[v['id'],v['title'],', '.join(v['owners']),v['status']] for v in r['items']])
+    local='## 로컬 연결 요청 2판에 대한 직접 답변\n\n'+'\n\n'.join(details(v,'①②③④⑤⑥'[v['number']-1]) for v in r['local_request_answers'])
+    boundary='## 인수 경계와 미확정 사항\n\n'+r['handoff_boundary']+'\n\n'+bullets(r['unresolved'])+'\n\n'+r['preservation']
+    return '\n\n'.join([head,items,'\n\n'.join(details(v,v['id']) for v in r['items']),local,boundary,'## 새 로컬 검수 보고의 후속 작업\n\n[화면팀 후속 작업 지시](화면팀_후속작업_지시.md)의 FE-01~05와 구체 SUP 회신을 함께 전달한다.'])
+
+
+def frontend_followup_text(spec):
+    f=spec['supabase_operations_handoff_contract']['reply_contract']['followup']
+    head=(f['summary']+'\n\n계약 '+f['format']+'; 작성 시각 '+f['prepared_at']+'; 최신 통합 기준 develop '+f['basis_commit']+'.')
+    boundary='## 확인한 범위와 남은 검수\n\n'+'\n'.join('- '+v for v in f['local_review_boundary'])
+    reply='## SUP-01·02 결정통지에 대한 구체 회신\n\n'+table(['항목','담당자 회신과 적용 조건'],f['sup_reply'])
+    overview='## 화면팀 후속 업무\n\n'+table(['ID/우선순위','업무','담당','상태'],[[v['id']+' '+v['priority'],v['title'],v['owner'],v['status']]for v in f['tasks']])
+    detail='\n\n'.join('### '+v['id']+' '+v['title']+'\n\n담당: '+v['owner']+'; 상태: '+v['status']+'\n\n선행 조건: '+('; '.join(v['depends_on'])or '없음')+'\n\n업무:\n\n'+'\n'.join('- '+x for x in v['work'])+'\n\n완료 증거:\n\n'+'\n'.join('- '+x for x in v['completion'])+'\n\n관련 operation: '+', '.join(v['route_refs'])for v in f['tasks'])
+    unresolved='## 수령·승인 대기와 보존\n\n'+'\n'.join('- '+v for v in f['unresolved'])+'\n\n'+f['preservation']+'\n\n[최종 회신 요청](화면팀_회신요청_최종.md), [Supabase 운영 인수인계](Supabase_운영_인수인계.md), [필수 외부접근 보호 기준](외부접근_데이터보호_개발기준.md)을 함께 따른다.'
+    return '\n\n'.join([head,boundary,reply,overview,detail,unresolved])
+
+
+def validate_frontend_reply_contract(spec):
+    c=spec.get('supabase_operations_handoff_contract')
+    if not c:return []
+    errors=[];r=c.get('reply_contract')
+    if not isinstance(r,dict):return ['Frontend reply contract missing']
+    if r.get('format')!='jungsi.frontend-reply/v1' or r.get('document')!=FRONTEND_REPLY_DOCUMENT or spec.get('current_documents',{}).get('frontend_reply')!=FRONTEND_REPLY_DOCUMENT:
+        errors.append('Frontend reply source registration drift')
+    if r.get('revision')!=c.get('revision') or r.get('finalized') is not True or r.get('document_status')!='finalized_for_delivery_replies_and_runtime_pending':
+        errors.append('Frontend reply delivery state drift')
+    for field in ('finalized_meaning','prepared_at','scope','summary','handoff_boundary','preservation'):
+        if not isinstance(r.get(field),str) or not r[field].strip():errors.append('Frontend reply field missing: '+field)
+    if not isinstance(r.get('basis_commit'),str) or not re.fullmatch('[0-9a-f]{40}',r['basis_commit']):errors.append('Frontend reply basis commit invalid')
+    def strings(value):return isinstance(value,list) and bool(value) and all(isinstance(v,str) and v.strip() for v in value)
+    if not strings(r.get('unresolved')):errors.append('Frontend reply unresolved inputs missing')
+    items=r.get('items')
+    if not isinstance(items,list) or len(items)!=6 or not all(isinstance(v,dict) and isinstance(v.get('id'),str) for v in items) or {v['id'] for v in items}!=FRONTEND_REPLY_IDS:
+        errors.append('Frontend reply six work items incomplete')
+    else:
+        operation_ids={v['id'] for v in spec['operations']}
+        for row in items:
+            key=row['id']
+            if not isinstance(row.get('title'),str) or not row['title'].strip():errors.append('Frontend reply title missing: '+key)
+            for field in ('owners','requested_reply','our_answer','dependencies','completion_evidence'):
+                if not strings(row.get(field)):errors.append('Frontend reply work item incomplete: '+key+'/'+field)
+            if row.get('status') not in FRONTEND_REPLY_STATUS:errors.append('Frontend reply work item status drift: '+key)
+            refs=row.get('route_refs')
+            if not strings(refs) or len(refs)!=len(set(refs)) or not set(refs)<=operation_ids:errors.append('Frontend reply operation reference drift: '+key)
+            if not isinstance(row.get('secret_boundary'),str) or not row['secret_boundary'].strip():errors.append('Frontend reply secret boundary missing: '+key)
+    local=r.get('local_request_answers')
+    if not isinstance(local,list) or len(local)!=6 or not all(isinstance(v,dict) and type(v.get('number')) is int for v in local) or {v['number'] for v in local}!={1,2,3,4,5,6}:
+        errors.append('Frontend reply six local answers incomplete')
+    else:
+        for row in local:
+            key=str(row['number'])
+            if type(row['number']) is not int:errors.append('Frontend reply local number invalid: '+key)
+            for field in ('title','request_summary'):
+                if not isinstance(row.get(field),str) or not row[field].strip():errors.append('Frontend reply local field missing: '+key+'/'+field)
+            for field in ('our_answer','dependencies','completion_evidence'):
+                if not strings(row.get(field)):errors.append('Frontend reply local answer incomplete: '+key+'/'+field)
+            if row.get('status') not in FRONTEND_REPLY_STATUS:errors.append('Frontend reply local status drift: '+key)
+    if c.get('production_ready') is not False:errors.append('Frontend reply pending work cannot certify production readiness')
+    a=c.get('architecture',{})
+    if a.get('authority_target')!='public.jeongsi_passes' or a.get('single_authority')!='public.jeongsi_passes' or a.get('decision_status')!='confirmed_target_runtime_transition_pending':errors.append('Frontend reply adopted authority target drift')
+    if a.get('selection')!='separate_Jungsi_FastAPI_deployment' or a.get('deployment_status')!='NOT_RUN':errors.append('Frontend reply deployment decision boundary drift')
+    adapter=a.get('current_entitlement_adapter',{})
+    if adapter.get('table')!='jungsi_backend.entitlements' or adapter.get('session_format')!='jungsi.session/v1' or adapter.get('status')!='unchanged_target_transition_NOT_RUN':errors.append('Frontend reply current adapter boundary drift')
+    errors.extend(validate_frontend_followup_contract(spec))
+    return errors
+
+
+def validate_frontend_followup_contract(spec):
+    r=spec.get('supabase_operations_handoff_contract',{}).get('reply_contract',{})
+    f=r.get('followup')
+    if not isinstance(f,dict):return ['Frontend followup contract missing']
+    errors=[]
+    if f.get('format')!='jungsi.frontend-followup/v1' or f.get('document')!=FRONTEND_FOLLOWUP_DOCUMENT or spec.get('current_documents',{}).get('frontend_followup')!=FRONTEND_FOLLOWUP_DOCUMENT:
+        errors.append('Frontend followup source registration drift')
+    if f.get('basis_commit')!=r.get('basis_commit') or not isinstance(f.get('basis_commit'),str) or not re.fullmatch('[0-9a-f]{40}',f['basis_commit']):errors.append('Frontend followup basis commit drift')
+    def strings(value):return isinstance(value,list) and bool(value) and all(isinstance(v,str) and v.strip()for v in value)
+    for field in ('prepared_at','summary','preservation'):
+        if not isinstance(f.get(field),str) or not f[field].strip():errors.append('Frontend followup field missing: '+field)
+    for field in ('local_review_boundary','unresolved'):
+        if not strings(f.get(field)):errors.append('Frontend followup evidence boundary missing: '+field)
+    reply=f.get('sup_reply')
+    if not isinstance(reply,list) or not reply or not all(strings(v) and len(v)==2 for v in reply):errors.append('Frontend followup concrete SUP reply missing')
+    tasks=f.get('tasks')
+    if not isinstance(tasks,list) or len(tasks)!=5 or not all(isinstance(v,dict) and isinstance(v.get('id'),str)for v in tasks) or {v['id']for v in tasks}!=FRONTEND_FOLLOWUP_IDS:
+        errors.append('Frontend followup five tasks incomplete')
+    else:
+        operation_ids={v['id']for v in spec['operations']}
+        for row in tasks:
+            key=row['id']
+            for field in ('title','owner','priority'):
+                if not isinstance(row.get(field),str) or not row[field].strip():errors.append('Frontend followup work field missing: '+key+'/'+field)
+            for field in ('work','completion'):
+                if not strings(row.get(field)):errors.append('Frontend followup work item incomplete: '+key+'/'+field)
+            dependencies=row.get('depends_on')
+            if not isinstance(dependencies,list) or not all(isinstance(v,str) and v.strip()for v in dependencies):errors.append('Frontend followup dependency drift: '+key)
+            if row.get('status') not in FRONTEND_FOLLOWUP_STATUS:errors.append('Frontend followup work status drift: '+key)
+            refs=row.get('route_refs')
+            if not strings(refs) or len(refs)!=len(set(refs)) or not set(refs)<=operation_ids:errors.append('Frontend followup operation reference drift: '+key)
+    return errors
 
 def supabase_access_recheck_text(contract):
     recheck = contract.get('access_recheck')
@@ -454,8 +581,8 @@ def supabase_access_recheck_text(contract):
 def supabase_operations_handoff_text(spec):
     c=spec['supabase_operations_handoff_contract'];r=c['current_review'];a=c['architecture']
     head=c['decision']+'\n\nrevision '+c['revision']+'; '+c['checked_at']+' 읽기 snapshot; 문서 '+c['document_status']+'. '+c['scope']
-    architecture='## 권장 구조와 미선택 결정\n\n'+table(['계층','책임'],a['tiers'])+'\n\n별도 Python FastAPI 서버를 권장한다. 현재 Python runtime과 Supabase Edge runtime의 차이에 근거한 권장 추론이며 연결 방식은 아직 선택하지 않았다(selection='+a['selection']+'). 후보는 '+', '.join(a['candidates'])+'이다. '+a['boundary']+'\n\n현재 구현은 '+a['entitlement_default']+'를 조회한다. 기존 에듀터치 이용권과 연결할 단일 기준 저장소는 아직 선택하지 않았다(single_authority='+a['single_authority']+').'
-    current='## 이전 통합 snapshot의 최소 조회와 실제 검수\n\n'+r['scope']+'\n\n'+table(['항목','HTTP','확인 범위'],r['readonly_HTTP'])+'\n\n'+r['PGRST106_meaning']+'\n\n확인한 설정 이름: '+', '.join(r['present_names'])+'. 이번에 확인한 파일과 프로세스에서 확보하지 못한 설정: '+', '.join(r['missing_in_reviewed_scope'])+'. '+r['site_admin']+' '+r['local_reference']+'\n\n승인 자료는 0건이며 로컬 후보 1건의 engine_approved=false를 확인했다. 미승인 자료·합성 모형의 production_allowed=false를 표시 목적으로 true로 바꾸지 않는 정책과 구분한다. 후보에서 production_allowed 필드를 읽었다는 주장이 아니다.\n\n외부 화면 PR6 head는 '+r['frontend']['head']+', base는 '+r['frontend']['base']+'다. PR은 open/unmerged이며 실제 브라우저 검수는 NOT_RUN이다. 이 최신 HEAD의 CI 상태는 '+r['frontend']['latest_HEAD_CI']+'로 구분한다.'
+    architecture='## 확정된 구성과 현재 실행 상태\n\n'+table(['계층','책임'],a['tiers'])+'\n\n배포 방식은 '+a['selection']+'로 확정했다. 실제 운영 배포 상태는 '+a['deployment_status']+'이며 실행 환경과 운영 주소 인수는 별도 작업이다. '+a['boundary']+'\n\n유료 이용권 단일 기준의 확정 목표는 '+a['authority_target']+'다. 현재 실행 어댑터는 '+a['current_entitlement_adapter']['table']+'를 조회하며, '+a['current_entitlement_adapter']['status']+' 상태다. 기존 session v1과 그 실행 규칙을 보존하고, 원본 DDL을 확인한 별도 어댑터 변경·검증 후에만 목표 기준으로 전환한다.\n\n'+table(['목표 이용권 계약','상태 또는 근거'],[[key,str(value)] for key,value in a['target_entitlement_contract'].items()])
+    current='## 이전 통합 snapshot의 최소 조회와 실제 검수\n\n'+r['scope']+'\n\n'+table(['항목','HTTP','확인 범위'],r['readonly_HTTP'])+'\n\n'+r['PGRST106_meaning']+'\n\n당시 확인한 설정 이름: '+', '.join(r['present_names'])+'. 해당 관측에서 확보하지 못한 설정: '+', '.join(r['missing_in_reviewed_scope'])+'. '+r['site_admin']+' '+r['local_reference']+'\n\n해당 시점의 지정 범위에서 승인 자료 0건과 로컬 후보 1건의 engine_approved=false를 확인했다. 새 자료나 전체 저장소의 현재 승인 현황으로 확대하지 않는다. 미승인 자료·합성 모형의 production_allowed=false를 표시 목적으로 true로 바꾸지 않는 정책과 구분한다. 후보에서 production_allowed 필드를 읽었다는 주장이 아니다.\n\n해당 관측의 외부 화면 PR6 head는 '+r['frontend']['head']+', base는 '+r['frontend']['base']+'였다. 당시 PR 상태는 open/unmerged이며 실제 브라우저 검수는 NOT_RUN이다. 그 HEAD의 CI 상태는 '+r['frontend']['latest_HEAD_CI']+'로 기록했다. 최신 통합 SHA와 회신 인수는 화면팀 최종 회신 요청에서 별도로 확인한다.'
     facts='## 현재 코드와 설정 경계\n\n'+table(['항목','현재 구현과 미실행 경계'],list(c['existing_code_facts'].items()))+'\n\n현재 프로젝트의 URL·publishable 설정을 확인했으므로 새 프로젝트 생성이 필수라고 볼 근거는 없다. .env 예시도 Git에서 제외한다. 파일 보관과 서버 프로세스의 환경변수 주입은 별도 작업이다.'
     settings='## 공개·서버·검수 설정\n\n'+table(['설정 이름','사용 범위','용도와 현재 상태','runtime 분류'],c['environment'])+'\n\nSUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설정이 아니며 자동으로 사용되지 않는다. 프런트 NEXT_PUBLIC_SUPABASE_ANON_KEY는 publishable 참조 값을 보관하는 기존 호환 이름이다. secret key나 사용자 JWT를 뜻하지 않는다. 운영 환경의 변수 이름과 설정 채택은 외부 화면 담당자가 확인해야 한다.'
     overview='## 담당별 인계 작업\n\n'+table(['ID/우선순위','담당/계층','입력','선행','현재상태'],[[t['id']+' '+t['priority'],t['owner']+' / '+t['layer'],'; '.join(t['inputs']),', '.join(t['depends_on']) or '없음',t['status']] for t in c['tasks']])
@@ -463,12 +590,13 @@ def supabase_operations_handoff_text(spec):
     order='## 실행 순서와 의존관계\n\n'+table(['단계','작업','실행경계'],c['execution_order'])+'\n\n각depends_on을먼저충족한다. env/원문QA/안전한HOLD준비와실자료·운영인수를구분한다.'
     gate='## 운영 인수 완료 조건\n\n'+table(['gate','담당','현재상태','완료증거'],c['acceptance_gates'])+'\n\n실DB/Bearer로그인/유료·staff/실approved자료/22API/외부4페이지는각각NOT_RUN/HOLD다. production_ready=false/NOT_READY·mainnot_ready를각증거인수전유지한다. 이번문서작성은DB쓰기/migration/모형등록/main/배포승인이아니다. reset/drop/delete금지.'
     history='## 이전 코드 인수와 이번 후보\n\n'+c['history']['summary']+'\n\n확인된이전baseline '+c['history']['baseline']+', tree '+c['history']['tree']+'; normalhooks '+str(c['history']['previous_normal_hooks'])+'건. [이전정확CI]('+c['history']['CI']+').'
-    references='## 공식 primary 참고\n\n'+'\n\n'.join(v[2]+' ['+v[0]+']('+v[1]+').' for v in c['references'])+'\n\n연결권장은추론/미선택이며제공자무료plan가격/제한수치를단정하지않는다. 공개문서에실projectURL/id/key/JWT/개인식별/자료hash/비공개PC경로를넣지않는다.'
-    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),facts,settings,overview,detail,order,gate,history,references] if part)
+    reply='## 화면팀 최종 회신 인수\n\n[화면팀 회신 요청](화면팀_회신요청_최종.md)의 RF-01~06 및 원래 로컬 요청 ①~⑥를 함께 확인한다. 전달 문서 완성과 실제 회신·연결·보안 검수는 별도 상태다.'
+    references='## 공식 primary 참고\n\n'+'\n\n'.join(v[2]+' ['+v[0]+']('+v[1]+').' for v in c['references'])+'\n\n별도 FastAPI와 이용권 단일 기준은 확정 목표이며 운영 배포·DB·어댑터 전환은 미실행이다. 제공자 무료 plan 가격·제한 수치를 단정하지 않는다. 공개 문서에 실제 project URL/id/key/JWT/개인식별/자료 hash/비공개 PC 경로를 넣지 않는다.'
+    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),facts,settings,overview,detail,reply,order,gate,history,references] if part)
 
 def supabase_operations_route_metadata(spec):
     c=spec['supabase_operations_handoff_contract']
-    return dict(format=c['format'],revision=c['revision'],checked_at=c['checked_at'],status=c['status'],production_ready=c['production_ready'],document=spec['current_documents']['supabase_operations_handoff'],deployment_selection=c['architecture']['selection'],gates=[dict(id=v[0],status=v[2]) for v in c['acceptance_gates']])
+    return dict(format=c['format'],revision=c['revision'],checked_at=c['checked_at'],status=c['status'],production_ready=c['production_ready'],document=spec['current_documents']['supabase_operations_handoff'],deployment_selection=c['architecture']['selection'],entitlement_target=c['architecture']['authority_target'],entitlement_adapter_status=c['architecture']['current_entitlement_adapter']['status'],frontend_reply_document=c['reply_contract']['document'],frontend_reply_status=c['reply_contract']['document_status'],gates=[dict(id=v[0],status=v[2]) for v in c['acceptance_gates']])
 
 
 SECURITY_DOCUMENT="docs/current/외부접근_데이터보호_개발기준.md"
@@ -1079,6 +1207,8 @@ def generated_files(spec):
     files["src/jungsi_touch/application/route_catalog.json"]=json.dumps(backend,ensure_ascii=False,indent=2)+"\n"
     if spec.get('supabase_operations_handoff_contract'):
         files[spec['current_documents']['supabase_operations_handoff']]=doc('Supabase 운영 인수인계',supabase_operations_handoff_text(spec))
+        files[spec['current_documents']['frontend_reply']]=doc('화면팀 최종 회신 요청과 로컬 연결 답변',frontend_reply_text(spec))
+        files[spec['current_documents']['frontend_followup']]=doc('화면팀 로컬 검수 후속 작업 지시와 SUP 회신',frontend_followup_text(spec))
         frontend['supabase_operations_handoff']=supabase_operations_route_metadata(spec)
         backend['supabase_operations_handoff']=supabase_operations_route_metadata(spec)
         files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
@@ -1095,7 +1225,7 @@ def generated_files(spec):
         for key in ('planning','routing','architecture','backend_readiness','presentation_handoff','presentation_connection'):
             path=spec['current_documents'].get(key)
             if path in files:
-                section='\n\n## 로컬 검증 연결 계약\n\n'+'[로컬 검증 연결](로컬_검증_연결.md)은 별도 loopback factory·메모리 저장소·네 시험 subject·수신PC DPAPI·신뢰 명부/선택명부와 출처 영수증을 규정한다. 운영 factory/22API·DTO는 불변이며 승인곡선 없음은 HOLD와 총점 보존이다. 실제 DB/운영 인증/외부 브라우저 인수와 production_ready=false를 구분한다.'
+                section='\n\n## 로컬 검증 연결 계약\n\n'+'[로컬 검증 연결](로컬_검증_연결.md)은 별도 loopback factory·메모리 저장소·네 시험 subject·수신PC DPAPI·신뢰 명부/선택명부와 출처 영수증을 규정한다. 이 로컬 factory의 성적·리포트·담기·시험 이용권·예측 초안/발행 내용은 메모리에만 있으므로 서버 재시작 시 사라진다. 원본 승인 파일·DPAPI 패키지 보존과 계산·저장 결과의 영속성은 별개이며 실제 학생의 저장 기능 인수에는 운영 DB 검수가 필요하다. 운영 factory/22API·DTO는 불변이다. 전체 분석에서 시험팩 미등록은 exam_not_available 503, 등록된 미채택 팩은 provider의 artifact_not_approved를 exam_data_unavailable 503으로 응답하는 조건이다. 이는 소스 조건이며 HTTP 관측은 별도 증거로 확인한다. 승인 시험팩이 있고 승인곡선이 없는 경우에는 HOLD와 계산에 성공한 총점 보존을 확인한다. 실제 DB/운영 인증/외부 브라우저 인수와 production_ready=false를 구분한다.'
                 files[path]=files[path].replace('\n\n<!-- jungsi:generated',section+'\n\n<!-- jungsi:generated')
         if handoff:
             files[handoff['path']]=files[handoff['path']].replace('\n\n<!-- jungsi:generated',
@@ -1287,6 +1417,7 @@ def validate_spec(spec):
     errors.extend(validate_forecast_contract(spec))
     errors.extend(validate_local_verification_contract(spec))
     errors.extend(validate_security_contract(spec))
+    errors.extend(validate_frontend_reply_contract(spec))
     return errors
 
 def protected_path(path,shared_tools):

@@ -1,12 +1,12 @@
 # DEV006 서비스·DB 응답과 외부 프런트 인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.1이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.2이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
-기준일: 2026-10-06 UTC. 인계 revision **2026.10.06.v2**. 최신 추가 관측은 **08:38:58Z~08:40:54Z HTTP 접근 재점검**이며, **05:32Z 통합 현황은 이전 snapshot**으로 보존한다. 상태는 **이전 서비스·공통 코드 인수 확인 / 운영 NOT_READY**다.
+기획 반영일: 2026-10-06 UTC. 인계 revision **2026.10.06.v3**. 문서 출발 기준은 **2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f**이다. SUP01 별도 정시 FastAPI와 SUP02 public.jeongsi_passes 원본 목표는 확정했다. 현재 entitlements 어댑터/session v1 실행은 아직 전환하지 않았으며 **운영 NOT_READY**다. 문서 prepared_at와 과거 HTTP checked_at는 별개다.
 
-Supabase Auth + PostgreSQL을 사용하는 현재 3티어 구조는 구현 가능하다. 실제 서비스 운영은 production_ready=false / NOT_READY다. 기존 보관 키의 HTTP API·public 테이블 limit=0 조회200을 확인했다. 0건 응답은 테이블 전체 인원이 0이라는 뜻이 아니며 실제 로그인·SQL·RLS·이용권·입시모델 인수가 아니다.
+05:32Z 통합 현황과 08:38:58Z~08:40:54Z HTTP 접근 재점검은 기존 관측으로 보존한다. HTTP200/limit=0은 SQL/RLS·이용권·실회원·입시모형 인수가 아니다.
 
-[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)의 SUP-01~11·의존관계·입력·완료조건·개별gate를 따른다. API22/DTO·일반/유료·본인소유권·UTC·forecast_authorities 학교scope·독립approver/자기승인거절은불변이다. 시스템기획/서비스개발/외부화면/데이터팀 담당을 유지하며 이번팀은 화면·서비스·DB코드를수정하지않는다.
+[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)의 SUP-01~11과 [화면팀 회신요청 최종](../../current/화면팀_회신요청_최종.md)의 RF-01~06/로컬 1~6을 따른다. API22/DTO/session v1·4페이지·일반/유료·본인소유권·UTC·학교scope·독립승인은 불변이다.
 
 ## ② 관리 초안과 공개 발표본의 응답
 
@@ -120,24 +120,42 @@ population_id, comparison_metric, unit, direction, tie_policy
 
 PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.
 
-## 현재외부화면 관측
+## ⑥ 외부화면 당시 관측과 현재 기준
 
-최신PR6 head ff2a8e412c7adc16eb61af34a6219a2c5c2d072b/base816/open-unmerged를읽기관측했다. d7/e164·4cc source/CI는역사로보존하며최신실Caller/운영API/4페이지·브라우저는NOT_RUN이다. nonempty 3버전/context17·409부분보류/성공점수보존을외부인수조건으로유지한다.
+05:32Z 당시 PR6 head ff2a8e412c7adc16eb61af34a6219a2c5c2d072b/base816/open-unmerged를 읽기 관측했다. 후속 root API 관측에서 PR6는 closed/merged, head6b2 exactCI2 success·develop2624를 확인했다. 과거05:32Z 관측은 보존하며 새 로컬 보고는 document_reported 범위를 독립 문서 검토했지만 직접 브라우저/운영 인수는 NOT_RUN이다. 347 빈학교 표시 fix는 이 develop에 포함되지 않는다. d7/e164·4cc source/CI는역사로보존하며최신실Caller/운영API/4페이지·브라우저는NOT_RUN이다. nonempty 3버전/context17·409부분보류/성공점수보존을외부인수조건으로유지한다.
 
 ## 권한·자료·실행 승인
 
-기본jungsi_backend.entitlements와legacy단일authority 선택·결제취소/회수/동기화adapter는별도계약·구현·검수다. paid profile/admin자동승격금지와staff학교scope·editor/approver독립을유지한다. 승인 자료 0, 로컬 후보 1건의 관측 engine_approved=false는 HOLD다. 미승인 자료/합성 모형의 production_allowed=false를 true로 승격하지 않는 정책을 유지하며, 후보에서 그 필드를 관측했다는 주장이 아니다. Drive자동OAuthrefresh는미구현이며marginal수치QA로jointcurve완성을판정하지않는다.
+목표 단일 authority는 public.jeongsi_passes로 확정했다. 현재 기본 jungsi_backend.entitlements/session v1은 그대로이며 목표 어댑터·DDL/사용자키·권한 SQL·취소/회수는 별도 계약/구현/검수다. 관리자 열람 예외의 서버 조회·별도 capability·operation·화면/session CR과 활성 MAX(ends_at)은 미채택 제안/회신 대상이다. paid profile/admin자동승격금지와staff학교scope·editor/approver독립을유지한다. 승인 자료 0, 로컬 후보 1건의 관측 engine_approved=false는 HOLD다. 미승인 자료/합성 모형의 production_allowed=false를 true로 승격하지 않는 정책을 유지하며, 후보에서 그 필드를 관측했다는 주장이 아니다. Drive자동OAuthrefresh는미구현이며marginal수치QA로jointcurve완성을판정하지않는다.
 
 PR5closed/보존ref와정확4파일f46/선행등록/기본deny/단회origin삭제검사는그대로다. d7외부제거관측은역사이며새삭제허용/이번팀실삭제아니다. 001실적용UNCONFIRMED/002NOT_APPLIED·mainnot_ready를유지한다. 이번문서는DB쓰기/migration/모형승인/main병합/배포실행승인이아니다. 원본/이전문서/backup/cache/검수결과는모두보존한다.
+
+## ⑧ 확정 결정과 후속 회신 요청
+
+SUP01/02 의사결정 대기는 해소했지만 배포 제공자·Connect·public master 어댑터·관리자 예외 CR은 NOT_RUN/회신 대기다. RF-01 BFF/CSRF/사용자·서버 신원, RF-02 관리자 표현, RF-03 DDL/사용자키/권한 SQL, RF-04 모드/실연결, RF-05 PR/SHA/증거, RF-06 명부/계정/기대값을 직접 회신받는다. HMAC/session v2는 미채택 제안이고 이번 문서가 실제 코드/운영 설정을 바꾸지는 않는다.
+
+기존 로컬 요청 1~6에는 별도 local factory·네 opaque subject·loopback·수신 PC DPAPI·신뢰 명부 version/SHA·미등록/등록미채택 시험팩의 두503을 나누고 승인·유효 exam 계산 성공에서만 총점/subjects·curve 없음 pending을 보존·데이터팀 공급·출발/후속 검수 SHA 구분으로 답한다. 메모리 성적/리포트/관심학교/관리초안·발표는 재시작 시 소실한다. DPAPI 자료 캐시와 운영 DB 영속성은 다르다.
+
+화면 반출 방지는 SEC-02 전달물/SEC-03 BFF·실세션·CSRF·서버신원/SEC-07 429·안전한503/no-store/SEC-08 세 gate의 같은 snapshot 실제 검수를 선행한다. 서비스팀의 재귀 DTO·공유 원자적 예산과 외부 화면팀의 Caller/브라우저/preview 담당을 분리한다. 무료 전체 누백·유료 전체 대학/학과 검색 및 기존 성공점수/부분 HOLD를 유지한다. 공개 회신에는 실제 설정/개인정보/성적/자료 hash/운영 한도를 넣지 않는다.
+
+개발팀 보완 조건: 요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다. 요청 localhost3003은 local serve의 정확 Origin으로만 명시하며 운영 configured_app을 선택하지 않는다. 네 subject/수신 PC DPAPI·SSR 실제 로그인은 독립이다. public master 전이는 reader/factory/probe/checker1284/정본 session 규칙을 같은 구현 PR에 묶고 이번 old pin은 유지한다. admin SSR gate/internal admin_read/opt-in v2는 대안·미채택이며 shortlist 예외도 별도 CR이고 owner·editor/approver scope/독립승인을 유지한다.
+
+현재 기준 보완: PR6 merged/head6b2 CI2는 source 관측이며 새 로컬 보고의 브라우저/비노출/오류응답 독립 인수는 대기다. source e764의 시험팩 code 구분은 정적 판독이며 기존 catalog/권한/host native 증거로 overall 두503을 관측했다고 주장하지 않는다. 소유자 user_id uuid/MAX 동의 보고도 실제DDL·권한SQL 인수가 아니다. FE-01~05 후속 지시의 입력/증거 충족 전 NOT_RUN을 유지한다.
+
+마지막 범위 정리: PR6의 head6b2 CI2는 같은 head이고 347은 develop2624의 ancestor가 아니며 빈학교표시fix도없다. FE-05 후속PR통합을요청한다. 로컬 네역할/HOLD·503/HTML검색0·경고는 document_reported pass, 직접root브라우저·전체JS/RSC/JSON/maps/storage/download·실429/공유예산/서버신원/preview·권한양성/자기승인·숫자/실DBAuth/운영은NOT_RUN/PENDING이다. FE-01 live.ts55 위험은P2 정적추론/실행미재현이며 외부화면팀이수정한다.
 
 
 [로컬 검증 계약과 실행 후보](../../current/로컬_검증_연결.md)를 함께 읽는다.
 
 ## Supabase 운영 인수 상태
 
-기존 비공개 보관 키로 Supabase Auth 설정·서버 REST 메타데이터·public 테이블 limit=0 조회가 HTTP 200으로 성공했다. .env 파일 자체는 필수가 아니며, 이번 keyed 조회에는 기존 비공개 설정 파일을 사용했다. 현재 PostgreSQL 어댑터의 DATABASE_URL과 실제 사용자 JWT는 확인한 설정 범위에서 미확보다. 관리 콘솔 권한은 브라우저 조회 시간 초과로 미검증이다. API 접근 확인과 전체 운영 인수를 구분하며 production_ready=false / NOT_READY를 유지한다. Python API 배포 연결 방식과 이용권의 단일 기준은 미선택이고, 실제 DB·로그인·이용권·승인 자료·운영 API·외부 4페이지 인수는 NOT_RUN/HOLD다. 승인 자료 0건은 05:32Z 이전 관측이며 이번 HTTP 재점검에서 재조사하지 않았다.
+별도 정시 Python FastAPI 배포와 public.jeongsi_passes 단일 이용권 원본을 확정 목표로 채택했다. 배포 제공자·BFF 상세 계약·DB 연결·어댑터 전환·관리자 예외 표현은 후속 회신/개발/검수가 필요하다. 현재 session v1 3필드·jungsi_backend.entitlements 실행·22API·4페이지·무료 전체 누백/유료 대학 후보 정책은 불변이다. 기존 보관 키의 HTTP 접근/limit=0 관측은 과거 범위이며 실제 로그인·SQL/RLS·이용권·승인 수치·Drive·운영 API·화면/보안 인수가 아니다. 승인 자료 0건은 05:32Z 관측이고 새 자료 승인 검수는 실행하지 않았다. production_ready=false / NOT_READY다. PR6는 develop2624에 통합됐고 head6b2 CI2 success를 root가 읽기 확인했다. 새 로컬 보고는 독립 문서 범위 검토를 마쳤으며 네 역할/HOLD·503/HTML검색0·경고의 document_reported pass다. 직접 root 브라우저·전체 전달물/실429/수치/운영/보안은 NOT_RUN/PENDING이다. 347의 빈 학교 표시 fix는 현재 develop에 포함되지 않아 FE-05로 통합해야 한다.
 
-[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v2; 2026-10-06T08:40:54.349322Z 읽기 snapshot.
+[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v3; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
+
+[화면팀 최종 회신 요청](../../current/화면팀_회신요청_최종.md)의 RF-01~06과 로컬 요청 ①~⑥를 함께 인수한다. 문서 전달 준비 완료는 담당자 회신·실제 연결·운영 검수 완료를 뜻하지 않는다.
+
+[화면팀 후속 작업 지시](../../current/화면팀_후속작업_지시.md)의 FE-01~05는 로컬 검수 보고 이후 발견한 결함·증거 보완·승인 자료 대조·후속 PR 통합을 담당한다.
 
 PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서816의 정상561건/정확CI는 확인된 이전 코드 인수 이력이다. 이번 문서 후보의 미실행 검사·미래 commit/CI와 실제 운영 완료를 뜻하지 않는다.
 
@@ -150,7 +168,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 | 정확한 HEAD GitHub CI | [project-consistency](https://github.com/natural0448/Jungsi_touch/actions/runs/37324278331/job/111810898785): success |
 | 서비스·DB 역사 기준 | adc684/74fd 구현과 develop947 통합의 493 PASS는 별도의 역사 인수 증거로 유지한다. |
 | 당시 외부 프런트 관측 | d7b0279b2725a81ecd734cdec957c485ae5d6172; 4cc에서 필수3버전의 비어 있지 않은 문자열·정확동일성 보완과context17비교유지를관측했다. 실제Caller/브라우저/운영로그인인수는NOT_RUN이다. |
-| 외부 삭제 관측 | observed_completed_external_not_integrated; develop 통합과 실제 브라우저 인수는 구분한다. |
+| 승인 등록 당시 외부 삭제 관측 | observed_completed_external_not_integrated; 이후 develop 통합과 실제 브라우저 인수는 각각의 정확한 증거로 구분한다. |
 | 운영/외부 인수 | verification_pending; DB .env 추후; main not_ready |
 
 확인된 이전 baseline b66까지만 증거로 명시한다. 후속 문서 커밋 자신의 미래 SHA나 미실행 CI 성공을 기록하지 않는다. 공통 Git/CI 검사·명세·생성 문서 인수 및 전체 합성 회귀. 운영 DB·외부 프런트·실제 데이터·모형 운영 승인을 뜻하지 않는다. 이전 e12/676 버전값 보완 pending은 역사이며 최신 소스 관측과 실제 프런트 인수 대기를 구분한다. 최소 profile 조건 읽기와 실제 로그인 JWT NOT_RUN, 실제 자료·모형 운영 미승인 상태를 유지한다.
@@ -159,4 +177,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](../../current/외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=c8ad6be3659c7b3168f71d96793d0cbcc358fb8a85036566409690e763022abb -->
+<!-- jungsi:generated spec_sha256=378b82832ee3adcedc8ff403d28e079839de01e43afc90b55f2f88606e73c302 -->

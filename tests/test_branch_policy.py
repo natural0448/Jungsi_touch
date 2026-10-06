@@ -211,6 +211,8 @@ class RetainedMergeScopeTests(unittest.TestCase):
         self.git_dir=Path(tempfile.gettempdir())/'jungsi_touch_retained_policy_git'/stamp
         self.git_dir.parent.mkdir(parents=True,exist_ok=True)
         self.call('init','--initial-branch=fixture','--separate-git-dir='+str(self.git_dir))
+        # Retained snapshot paths can exceed Windows Git's default stat limit.
+        self.call('config','core.longpaths','true')
         (self.repo/'fixture.json').write_bytes(json.dumps({'repository':str(self.repo),
             'retained_git_dir':str(self.git_dir),'cleanup_performed':False}).encode('utf-8'))
         base_spec=deepcopy(self.spec)

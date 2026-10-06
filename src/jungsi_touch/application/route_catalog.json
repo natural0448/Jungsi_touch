@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.8.1",
-  "source_sha256": "c8ad6be3659c7b3168f71d96793d0cbcc358fb8a85036566409690e763022abb",
+  "spec_version": "1.8.2",
+  "source_sha256": "378b82832ee3adcedc8ff403d28e079839de01e43afc90b55f2f88606e73c302",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2286,7 +2286,7 @@
       "forecast_accuracy": "NOT_RUN"
     },
     "integration_readiness": {
-      "status": "readonly_API_access_confirmed_production_NOT_READY_operations_handoff_pending",
+      "status": "targets_confirmed_current_adapter_and_operational_security_NOT_READY",
       "existing_EduTouch_service": "discovered_by_planning_team",
       "existing_API_contract": "incompatible_me_DTO_and_jeongsi_namespace_skeleton",
       "Jungsi_22_API_deployment": "NOT_RUN",
@@ -2299,18 +2299,38 @@
       "Drive_settings": "operational_OAuth_refresh_folders_registry_NOT_RUN_approved0",
       "migration_002": "NOT_APPLIED",
       "legacy_entitlement": "public.jeongsi_passes_not_automatically_bound_to_jungsi_backend.entitlements",
-      "single_entitlement_authority": "decision_pending_default_entitlements_adapter_requires_contract_implementation_PR",
+      "single_entitlement_authority": "target_public_jeongsi_passes_confirmed_current_adapter_transition_NOT_RUN",
       "server_connection_candidates": [
         "separate_Jungsi_FastAPI_deployment",
         "external_EduTouch_namespace_adapter"
       ],
-      "selection": "not_selected",
+      "selection": "separate_Jungsi_FastAPI_deployment",
       "actual_connection_values": "private_only_never_common_Git",
       "existing_SSR_OpenNext_rewrite": "external_reference_only_not_22_API_or_entitlement_acceptance",
       "actual_DB_and_test_user_validation": "NOT_RUN_missing_private_inputs",
       "profile_condition_read": "readonly_metadata_admin_active_conditions_confirmed_not_actual_login_JWT_acceptance",
       "Supabase_project_settings": "present_in_reviewed_private_configuration_scope",
       "latest_review": {
+        "revision": "2026.10.06.v3",
+        "checked_at": "2026-10-06T08:40:54.349322Z",
+        "summary": "별도 정시 Python FastAPI 배포와 public.jeongsi_passes 단일 이용권 원본을 확정 목표로 채택했다. 배포 제공자·BFF 상세 계약·DB 연결·어댑터 전환·관리자 예외 표현은 후속 회신/개발/검수가 필요하다. 현재 session v1 3필드·jungsi_backend.entitlements 실행·22API·4페이지·무료 전체 누백/유료 대학 후보 정책은 불변이다. 기존 보관 키의 HTTP 접근/limit=0 관측은 과거 범위이며 실제 로그인·SQL/RLS·이용권·승인 수치·Drive·운영 API·화면/보안 인수가 아니다. 승인 자료 0건은 05:32Z 관측이고 새 자료 승인 검수는 실행하지 않았다. production_ready=false / NOT_READY다.",
+        "production_ready": false,
+        "scope": "checked_at는 기존 HTTP 재점검 시각이다. prepared_at는 문서 결정 반영 시각이며 새 실제 운영 검수는 실행하지 않았다.",
+        "handoff_document": "docs/current/Supabase_운영_인수인계.md",
+        "approved_data_count": 0,
+        "frontend_PR6_head": "ff2a8e412c7adc16eb61af34a6219a2c5c2d072b",
+        "actual_DB": "NOT_RUN",
+        "actual_login": "NOT_RUN",
+        "migration001": "UNCONFIRMED",
+        "migration002": "NOT_APPLIED",
+        "access_recheck_ref": "supabase_operations_handoff_contract.access_recheck",
+        "non_HTTP_source_checked_at": "2026-10-06T05:32Z",
+        "prepared_at": "2026-10-06T11:05:44.484226Z",
+        "decision_adoption_ref": "supabase_operations_handoff_contract.decisions"
+      },
+      "public_table_zero_row_probe": "server_key_public_profiles_limit0_HTTP200_response0_only_not_record_SQL_RLS_or_entitlement_acceptance",
+      "console_account_access": "NOT_VERIFIED_browser_state_timeout_not_permission_denied",
+      "historical_latest_review_before_decision_adoption": {
         "revision": "2026.10.06.v2",
         "checked_at": "2026-10-06T08:40:54.349322Z",
         "summary": "기존 비공개 보관 키로 Supabase Auth 설정·서버 REST 메타데이터·public 테이블 limit=0 조회가 HTTP 200으로 성공했다. .env 파일 자체는 필수가 아니며, 이번 keyed 조회에는 기존 비공개 설정 파일을 사용했다. 현재 PostgreSQL 어댑터의 DATABASE_URL과 실제 사용자 JWT는 확인한 설정 범위에서 미확보다. 관리 콘솔 권한은 브라우저 조회 시간 초과로 미검증이다. API 접근 확인과 전체 운영 인수를 구분하며 production_ready=false / NOT_READY를 유지한다. Python API 배포 연결 방식과 이용권의 단일 기준은 미선택이고, 실제 DB·로그인·이용권·승인 자료·운영 API·외부 4페이지 인수는 NOT_RUN/HOLD다. 승인 자료 0건은 05:32Z 이전 관측이며 이번 HTTP 재점검에서 재조사하지 않았다.",
@@ -2326,8 +2346,8 @@
         "access_recheck_ref": "supabase_operations_handoff_contract.access_recheck",
         "non_HTTP_source_checked_at": "2026-10-06T05:32Z"
       },
-      "public_table_zero_row_probe": "server_key_public_profiles_limit0_HTTP200_response0_only_not_record_SQL_RLS_or_entitlement_acceptance",
-      "console_account_access": "NOT_VERIFIED_browser_state_timeout_not_permission_denied"
+      "current_entitlement_adapter": "jungsi_backend.entitlements_runtime_unchanged",
+      "decision_adoption_ref": "supabase_operations_handoff_contract.decisions"
     },
     "historical_DEV002_verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.\n\n기획팀 검토 후 [PR #8](https://github.com/natural0448/Jungsi_touch/pull/8)을 develop 03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced에 병합했다. 검토한 기능 커밋 c5376f0d8674cf82add0959abec385682f14cd4f의 [GitHub CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288)에서 합성 테스트 228개와 문서·코드 참조·계층·비공개 데이터 제외 검사가 통과했다. 실제 Supabase·Drive 연결과 원자료/모형 검수는 설정 대기이며 이 통과에 포함되지 않는다.",
     "historical_integration_readiness_before_supabase_handoff_v1": {
@@ -3240,7 +3260,8 @@
       "실제 계정/이용권/관리 capability의 전체 연결 검증",
       "v1.7.1 후보의 DTO allowlist/base_result/context/version/이유 코드/후보 분할을 외부 프런트 담당에게 확정 백엔드 커밋과 전달",
       "운영 DB002 적용·권한·동시성·멱등·발행 readiness 실측은 NOT_RUN",
-      "사용자는 DATABASE_URL을 비공개 .env로 추후 제공하기로 했다. 같은 필수 설정을 배포 서버 환경변수로 전달할 수도 있으며 .env 파일 자체를 필수 조건으로 삼지 않는다. 기존 키의 API 조회 성공으로 DB 연결값·권한·SQL 연결 승인을 추정하지 않으며 준비 전 실제 PostgreSQL 검증은 유보한다."
+      "사용자는 DATABASE_URL을 비공개 .env로 추후 제공하기로 했다. 같은 필수 설정을 배포 서버 환경변수로 전달할 수도 있으며 .env 파일 자체를 필수 조건으로 삼지 않는다. 기존 키의 API 조회 성공으로 DB 연결값·권한·SQL 연결 승인을 추정하지 않으며 준비 전 실제 PostgreSQL 검증은 유보한다.",
+      "RF-01~06: BFF/CSRF/서버신원·관리자 CR·DDL/사용자키·모드·정확 PR/SHA/증거·로컬 명부/네 subject/기대값 수령을 회신받는다. 현재 22API/DTO/session v1·보안은 불변이다."
     ],
     "scope_excludes": [
       "리포트/인쇄 확장",
@@ -4101,8 +4122,9 @@
         "analysis_context",
         "independent_expected_receipt_sha256"
       ],
-      "rule": "국어·수학·탐구2 표준점수 합의 성공 결과는 유지한다. 승인 전체곡선이 없으면 상위 누백은 HOLD/null/pending이고 대학 자료·컷 부족은 해당 부분만 보류다. 미승인 모형·임의곡선으로 숫자를 만들지 않는다.",
-      "reference_cases": "실제9월 기대값2~3건은 승인 시험팩/곡선/규칙과 독립검산 영수증 해시에 결속해 데이터팀이 준비한다. 없음은 NOT_RUN이고 합성 control-flow와 실제 기대값 검수는 분리한다."
+      "rule": "요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다. 대학 규칙/곡선/컷 부족은 해당 산출만 보류한다.",
+      "reference_cases": "실제9월 2~3건은 승인 시험팩/곡선/규칙과 독립 기대영수증에 결속한다. 시험팩 미등록·등록미채택·승인시험팩/모형부족을 각각 검수한다. 현재 구분은 e764 고정 소스 판독이고 기존 native는 catalog/권한/host 범위여서 overall 두503 직접 HTTP 관측은 NOT_RUN이다.",
+      "exam_pack_precondition": "exam_entry_absent_exam_not_available503_registered_unapproved_exam_data_unavailable503_approved_valid_exam_before_success"
     },
     "frontend_connection": {
       "owner": "external_presentation_team",
@@ -4355,12 +4377,16 @@
   },
   "supabase_operations_handoff": {
     "format": "jungsi.supabase-operations-handoff/v1",
-    "revision": "2026.10.06.v2",
+    "revision": "2026.10.06.v3",
     "checked_at": "2026-10-06T08:40:54.349322Z",
     "status": "NOT_READY",
     "production_ready": false,
     "document": "docs/current/Supabase_운영_인수인계.md",
-    "deployment_selection": "not_selected",
+    "deployment_selection": "separate_Jungsi_FastAPI_deployment",
+    "entitlement_target": "public.jeongsi_passes",
+    "entitlement_adapter_status": "unchanged_target_transition_NOT_RUN",
+    "frontend_reply_document": "docs/current/화면팀_회신요청_최종.md",
+    "frontend_reply_status": "finalized_for_delivery_replies_and_runtime_pending",
     "gates": [
       {
         "id": "실DB",
@@ -4372,7 +4398,7 @@
       },
       {
         "id": "유료·staff 권한",
-        "status": "NOT_RUN_DECISION_PENDING"
+        "status": "NOT_RUN_TARGET_CONFIRMED_ADAPTER_PENDING"
       },
       {
         "id": "실approved 자료",
@@ -4388,11 +4414,23 @@
       },
       {
         "id": "외부4페이지",
-        "status": "NOT_RUN_PR6_OPEN_UNMERGED"
+        "status": "NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED"
       },
       {
         "id": "운영·최종release",
         "status": "NOT_READY"
+      },
+      {
+        "id": "브라우저·응답 전달물",
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "중계·실권한·원점 차단",
+        "status": "NOT_RUN"
+      },
+      {
+        "id": "공유 원자적 수집 예산",
+        "status": "NOT_RUN"
       }
     ]
   },
