@@ -795,6 +795,30 @@ def validate_supabase_second_actual_update_contract(spec):
     return errors
 
 
+def supabase_current_followup_text(contract):
+    v=contract.get('current_followup')
+    if not v:return ''
+    p=v['phase1'];d=v['database_readonly'];t=v['selected_storage'];m=v['minimum_metadata_registration'];f=v['external_frontend'];phase=v['phase2'];child=v['September_application_children'];source=v['source_availability'];plan=v['data_definition_followup']['implementation_plan']
+    return '\n\n'.join([
+        '## 현재 통합과 source 등록·모형 채택의 경계',
+        'FROZEN 문서 준비 시각 '+v['prepared_at']+'; '+v['status']+'. 이전 준비/관측·실패 기록은 보존하며 이번 정본반영/새 훅/CI는 NOT_RUN이다.',
+        table(['항목','현재 상태','인수 범위와 남은 작업'],[
+            ['공통 phase1',p['status'],p['commit']+'; 정상commit/prepush/정확CI 각각'+str(p['precommit_tests'])+'PASS'],
+            ['서비스 phase2',phase['status'],phase['final_HEAD']+'; 정상precommit/prepush/HEAD pushCI/PR시험CI/developCI각'+str(phase['normal_precommit_tests'])+'PASS·실패/오류/skip0'],
+            ['전용 app TLS 읽기',d['status'],str(d['checks_passed'])+'건; RLS '+str(d['tables_RLS_enabled'])+'table/'+str(d['policy_count'])+'policy metadata'],
+            ['전용 schema REST',str(d['private_REST_metadata']['HTTP'])+'/'+d['private_REST_metadata']['code'],d['private_REST_metadata']['meaning']],
+            ['선별 Storage',t['status'],str(t['verified_object_count'])+'객체 fullSHA 독립검수·noJWT '+str(t['no_JWT_denied_requests'])+'거절·승인/활성화false'],
+            ['source 메타 draft',m['status'],str(m['registered_metadata_items'])+'개 fresh app 독립readback·owner일회등록·publishednull'],
+            ['최종 source별 메타집계',v['source_specific_final_summary']['status'],'등록/정책34·기존GET/DB결속32 PASS·새GET0; 실JWT/엔진검수가아님'],
+            ['모평적용 child',child['status'],str(child['child_count'])+'개 원source SHA/모평applicationContext분리·원AST수치불변'],
+            ['공식 입결 source',source['official_history']['status'],str(source['admission_results_source_count'])+'개 최소선별native58/RAM39 PASS·DBdraft등록'+str(source['admission_results_DB_registered_count'])+'·전국완료false'],
+            ['Storage RLS metadata',v['storage_RLS_metadata_review']['status'],'현재보호bucket 클라이언트허용조건없음·실제JWT HTTP/SEC운영NOT_RUN'],
+            ['공식학교 catalog',source['official_school_catalog'],'최종자료팀영수증대기'],
+            ['v2 서비스 구현',plan['status'],str(plan['candidate_path_count'])+'경로후보·code0·nativev1유지·호환/품질/newscopeFE작업미완료'],
+            ['외부 화면',f['status'],'실제JWT/22API/4page/배포·보안gate별도']]),
+        phase['boundary'],d['boundary'],t['boundary'],m['boundary'],child['boundary'],source['boundary'],v['storage_RLS_metadata_review']['boundary'],v['source_reading_followup']['boundary'],v['census_snapshot_preservation']['boundary'],v['data_definition_followup']['boundary'],v['default_membership']['boundary'],f['boundary'],v['source_specific_final_summary']['boundary'],v['final_document_validation']['boundary'],v['private_boundary']
+    ])
+
 def supabase_operations_handoff_text(spec):
     c=spec['supabase_operations_handoff_contract'];r=c['current_review'];a=c['architecture']
     head=c['decision']+'\n\nrevision '+c['revision']+'; '+c['checked_at']+' 읽기 snapshot; 문서 '+c['document_status']+'. '+c['scope']
@@ -808,8 +832,8 @@ def supabase_operations_handoff_text(spec):
     gate='## 운영 인수 완료 조건\n\n'+table(['gate','담당','현재상태','완료증거'],c['acceptance_gates'])+'\n\n실DB의 preflight/001002 개발 적용영수증과 독립·runtime 인수를 구분한다. Bearer로그인/유료·staff/실approved자료/22API/외부4페이지는NOT_RUN/HOLD다. production_ready=false/NOT_READY·mainnot_ready를각증거인수전유지한다. 이번문서작성은DB쓰기/migration/모형등록/main/배포승인이아니다. reset/drop/delete금지.'
     history='## 이전 코드 인수와 이번 후보\n\n'+c['history']['summary']+'\n\n확인된이전baseline '+c['history']['baseline']+', tree '+c['history']['tree']+'; normalhooks '+str(c['history']['previous_normal_hooks'])+'건. [이전정확CI]('+c['history']['CI']+').'
     reply='## 화면팀 최종 회신 인수\n\n[화면팀 회신 요청](화면팀_회신요청_최종.md)의 RF-01~06 및 원래 로컬 요청 ①~⑥를 함께 확인한다. 전달 문서 완성과 실제 회신·연결·보안 검수는 별도 상태다.'
-    references='## 공식 primary 참고\n\n'+'\n\n'.join(v[2]+' ['+v[0]+']('+v[1]+').' for v in c['references'])+'\n\n별도 FastAPI와 이용권 단일 기준은 확정 목표이며 운영 배포·DB·어댑터 전환은 미실행이다. 제공자 무료 plan 가격·제한 수치를 단정하지 않는다. 공개 문서에 실제 project URL/id/key/JWT/개인식별/자료 hash/비공개 PC 경로를 넣지 않는다.'
-    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),supabase_actual_update_text(c),supabase_second_actual_update_text(c),facts,settings,overview,detail,reply,order,gate,history,references] if part)
+    references='## 공식 primary 참고\n\n'+'\n\n'.join(v[2]+' ['+v[0]+']('+v[1]+').' for v in c['references'])+'\n\n별도 FastAPI와 이용권 단일 기준은 확정 목표다. 실제 SQL구조·메타draft/코드통합 검수는 현재 관측으로 구분하며 기본어댑터 전환·운영 배포·실JWT/전체API/화면 인수는 미실행이다. 제공자 무료 plan 가격·제한 수치를 단정하지 않는다. 공개 문서에 실제 project URL/id/key/JWT/개인식별/자료 hash/비공개 PC 경로를 넣지 않는다.'
+    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),supabase_actual_update_text(c),supabase_second_actual_update_text(c),supabase_current_followup_text(c),facts,settings,overview,detail,reply,order,gate,history,references] if part)
 
 def supabase_operations_route_metadata(spec):
     c=spec['supabase_operations_handoff_contract']
@@ -828,6 +852,20 @@ def supabase_operations_route_metadata(spec):
         result['explicit_port']=dict(status=p['status'],health_HTTP=p['health_ready_HTTP'],real_user_JWT=False,default_factory_transition=False)
         result['minimum_exam_stage']=dict(status=e['status'],payloads=e['payload_count'],approved_entries=e['approved_entries'],engine_approved=False,production_allowed=False)
         result['factory_decision']=dict(id=f['id'],status=f['status'],default_change_allowed=False)
+    if c.get('current_followup'):
+        v=c['current_followup'];p=v['phase1'];d=v['database_readonly'];t=v['selected_storage'];m=v['minimum_metadata_registration'];phase=v['phase2'];child=v['September_application_children'];source=v['source_availability'];plan=v['data_definition_followup']['implementation_plan']
+        result['current_followup']=dict(format=v['format'],status=v['status'],prepared_at=v['prepared_at'],basis_commit=v['basis_commit'],
+            phase1=dict(status=p['status'],commit=p['commit'],precommit_tests=p['precommit_tests'],prepush_tests=p['prepush_tests'],exact_CI_tests=p['exact_head_CI_tests']),
+            phase2=dict(status=phase['status'],HEAD=phase['final_HEAD'],normal_precommit_tests=phase['normal_precommit_tests'],normal_prepush_tests=phase['normal_prepush_tests'],head_push_CI_tests=phase['exact_head_push_CI_tests'],PR_merge_test_CI_tests=phase['PR_merge_test_CI_tests'],final_develop_CI_tests=phase['final_develop_CI_tests'],integration_complete=True,operational_acceptance=False),
+            readonly_metadata=dict(status=d['status'],checks=d['checks_passed'],RLS_tables=d['tables_RLS_enabled'],policies=d['policy_count'],private_REST_HTTP=406,private_REST_code='PGRST106',real_JWT=False),
+            selected_storage=dict(status=t['status'],verified_objects=t['verified_object_count'],no_JWT_denials=t['no_JWT_denied_requests'],engine_approved=False,production_allowed=False,runtime_adopted=False),
+            metadata_draft=dict(status=m['status'],registered_items=m['registered_metadata_items'],registration_complete=m['registration_complete'],independent_review=m['independent_review'],review_status=m['review_status'],published_release=None,engine_approved=False,production_allowed=False,runtime_adopted=False),
+            September_children=dict(status=child['status'],children=child['child_count'],original_sources_preserved=True,source_and_application_contexts_bound=True,runtime_adopted=False),
+            source_availability=dict(official_school_catalog=source['official_school_catalog'],admission_results_sources=source['admission_results_source_count'],admission_results_DB_registered=source['admission_results_DB_registered_count'],admission_semantics=source['official_history']['status'],selected_universities=source['official_history']['selected_university_count'],school_years=source['official_history']['school_year_pair_count'],selected_metrics=source['official_history']['selected_metric_count'],selected_offerings=source['official_history']['selected_offering_count'],native_checks=source['official_history']['independent_native_checks'],frozen_RAM_checks=source['official_history']['frozen_RAM_checks'],nationwide_QA_complete=False),
+            Storage_RLS_metadata=dict(status=v['storage_RLS_metadata_review']['status'],objects_RLS=True,buckets_RLS=True,current_bucket_client_SELECT_allowed=False,actual_authenticated_JWT_HTTP='NOT_RUN',SEC_operational_gate=False),
+            model_implementation_plan=dict(status=plan['status'],candidate_paths=plan['candidate_path_count'],code_changes=0,native_v1_preserved=True),
+            default_factory_transition=False,external_frontend_status=v['external_frontend']['status'],source_specific_summary=dict(status=v['source_specific_final_summary']['status'],registration_policy_conditions=34,existing_GET_DB_binding_conditions=32,new_Cloud_GET=0,actual_student_calculation=False,actual_JWT=False,runtime_adopted=False),this_document_canonical_application='NOT_RUN',this_document_hooks_CI='NOT_RUN',production_ready=False)
+        if 'service_transition'in result:result['service_transition']['observation_scope']='1.8.8 prepared feature snapshot; current integrated phase2 is current_followup.phase2'
     return result
 
 

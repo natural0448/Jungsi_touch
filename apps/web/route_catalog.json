@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.8.8",
-  "source_sha256": "f659b99d852bf1597eea5bb9df93c77ee3a8e6f6fa41eb6cb91c99f4f5f0c07c",
+  "spec_version": "1.8.9",
+  "source_sha256": "36d4d71e19956a5e5fd33ec7aaafa9647e732d5b23d34b2c0aa8b9cba027eeb0",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2990,7 +2990,8 @@
       "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
     },
     "security_contract_ref": "security_contract",
-    "security_transition_status": "pending_runtime_implementation"
+    "security_transition_status": "pending_runtime_implementation",
+    "latest_followup_ref": "supabase_operations_handoff_contract.current_followup"
   },
   "management_pages": [
     {
@@ -3054,7 +3055,7 @@
   },
   "supabase_operations_handoff": {
     "format": "jungsi.supabase-operations-handoff/v1",
-    "revision": "2026.10.07.v8",
+    "revision": "2026.10.07.v9",
     "checked_at": "2026-10-06T08:40:54.349322Z",
     "status": "NOT_READY",
     "production_ready": false,
@@ -3125,7 +3126,8 @@
       "id": "CR-SERVICE-SUP03",
       "status": "adopted_for_service_implementation_verification_pending",
       "default_transition": "NOT_RUN",
-      "production_ready": false
+      "production_ready": false,
+      "observation_scope": "1.8.8 prepared feature snapshot; current integrated phase2 is current_followup.phase2"
     },
     "runtime_ingestion_policy": {
       "mode": "minimal_explicit_approved_allowlist",
@@ -3172,6 +3174,106 @@
       "id": "CR-SERVICE-SUP06-20261006-01",
       "status": "user_selected_explicit_preparation_only",
       "default_change_allowed": false
+    },
+    "current_followup": {
+      "format": "jungsi.current-followup-observation/v1",
+      "status": "FROZEN_SCOPED_SOURCE18_DOCUMENT_CANDIDATE_NOT_CANONICAL_APPLIED_NEW_HOOKS_CI_NOT_RUN",
+      "prepared_at": "2026-10-06T19:21:31.629238Z",
+      "basis_commit": "57f74b1daabd2d6a8e94de216f182e8bfe6557b7",
+      "phase1": {
+        "status": "NORMAL_COMMIT_PUSH_EXACT_HEAD_CI_PASS",
+        "commit": "c1cd8d2fca8eab0b6e0e7e008cc22641d642ce2a",
+        "precommit_tests": 645,
+        "prepush_tests": 645,
+        "exact_CI_tests": 645
+      },
+      "phase2": {
+        "status": "NORMAL_PRECOMMIT_PREPUSH_HEAD_PUSH_PR_MERGE_TEST_AND_FINAL_DEVELOP_CI_678_PASS",
+        "HEAD": "57f74b1daabd2d6a8e94de216f182e8bfe6557b7",
+        "normal_precommit_tests": 678,
+        "normal_prepush_tests": 678,
+        "head_push_CI_tests": 678,
+        "PR_merge_test_CI_tests": 678,
+        "final_develop_CI_tests": 678,
+        "integration_complete": true,
+        "operational_acceptance": false
+      },
+      "readonly_metadata": {
+        "status": "SCOPED_APP_TLS_METADATA_PASS",
+        "checks": 12,
+        "RLS_tables": 13,
+        "policies": 24,
+        "private_REST_HTTP": 406,
+        "private_REST_code": "PGRST106",
+        "real_JWT": false
+      },
+      "selected_storage": {
+        "status": "SELECTED_MINIMUM_18_FULL_GET_SHA_VERIFIED_NO_JWT_72_NO_BODY_RETURNED",
+        "verified_objects": 18,
+        "no_JWT_denials": 72,
+        "engine_approved": false,
+        "production_allowed": false,
+        "runtime_adopted": false
+      },
+      "metadata_draft": {
+        "status": "PASS_EXACT18_DRAFT_SOURCE_META_BASE16_003_STORAGE_PRESERVED_NOT_ENGINE_ADOPTION",
+        "registered_items": 18,
+        "registration_complete": true,
+        "independent_review": "PASS_FRESH_APP_TLS_READONLY_EXACT18_OLD16_PRESERVED_NEW2_EXACT",
+        "review_status": "draft",
+        "published_release": null,
+        "engine_approved": false,
+        "production_allowed": false,
+        "runtime_adopted": false
+      },
+      "September_children": {
+        "status": "INDEPENDENT_SOURCE_CONTEXT_AND_SEPTEMBER_APPLICATION_CONTEXT_BINDINGS_PASS",
+        "children": 3,
+        "original_sources_preserved": true,
+        "source_and_application_contexts_bound": true,
+        "runtime_adopted": false
+      },
+      "source_availability": {
+        "official_school_catalog": "MINIMUM_SELECTED_V4_NATIVE_QA_AND_SOURCE_DRAFT18_INDEPENDENT_APP_READBACK_PASS_NOT_PUBLISHED",
+        "admission_results_sources": 2,
+        "admission_results_DB_registered": 2,
+        "admission_semantics": "MINIMUM_V4_INDEPENDENT_STORAGE_NATIVE58_AND_FROZEN_RAM39_PASS_SOURCE_DRAFT_REGISTERED",
+        "selected_universities": 3,
+        "school_years": 9,
+        "selected_metrics": 451,
+        "selected_offerings": 249,
+        "native_checks": 58,
+        "frozen_RAM_checks": 39,
+        "nationwide_QA_complete": false
+      },
+      "Storage_RLS_metadata": {
+        "status": "PASS_METADATA_CLIENT_SELECT_DENIED_CURRENT_BUCKET_ACTUAL_JWT_NOT_RUN",
+        "objects_RLS": true,
+        "buckets_RLS": true,
+        "current_bucket_client_SELECT_allowed": false,
+        "actual_authenticated_JWT_HTTP": "NOT_RUN",
+        "SEC_operational_gate": false
+      },
+      "model_implementation_plan": {
+        "status": "PLAN_ONLY",
+        "candidate_paths": 14,
+        "code_changes": 0,
+        "native_v1_preserved": true
+      },
+      "default_factory_transition": false,
+      "external_frontend_status": "REAL_22API_4PAGE_JWT_DEPLOYMENT_NOT_RUN",
+      "source_specific_summary": {
+        "status": "PASS_SCOPED_EXISTING_GET18_SHA_BYTES_AND_DB18_METADATA_BINDINGS",
+        "registration_policy_conditions": 34,
+        "existing_GET_DB_binding_conditions": 32,
+        "new_Cloud_GET": 0,
+        "actual_student_calculation": false,
+        "actual_JWT": false,
+        "runtime_adopted": false
+      },
+      "this_document_canonical_application": "NOT_RUN",
+      "this_document_hooks_CI": "NOT_RUN",
+      "production_ready": false
     }
   },
   "security_contract": {

@@ -13,7 +13,7 @@
   ],
   "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
   "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-  "contract_version": "1.8.8",
+  "contract_version": "1.8.9",
   "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
   "owner": "외부 프런트 전담 개발자",
   "candidate_only": true,
@@ -764,6 +764,7 @@
       "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
     },
     "security_contract_ref": "security_contract",
-    "security_transition_status": "pending_runtime_implementation"
+    "security_transition_status": "pending_runtime_implementation",
+    "latest_followup_ref": "supabase_operations_handoff_contract.current_followup"
   }
 }
