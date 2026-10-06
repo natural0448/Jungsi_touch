@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.8.5",
-  "source_sha256": "5f1f4f77d5895316ca8620952d30961f9ec0ffd6c6680cbb60fa4c995f236273",
+  "spec_version": "1.8.7",
+  "source_sha256": "2b595e9f761c5f751b101c3945371ee03fccb46abc2a2d1061939d55c16b0d94",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3054,7 +3054,7 @@
   },
   "supabase_operations_handoff": {
     "format": "jungsi.supabase-operations-handoff/v1",
-    "revision": "2026.10.06.v5",
+    "revision": "2026.10.07.v7",
     "checked_at": "2026-10-06T08:40:54.349322Z",
     "status": "NOT_READY",
     "production_ready": false,

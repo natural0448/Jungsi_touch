@@ -1,10 +1,10 @@
 # Supabase 운영 인수인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.5이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.7이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 SUP01은 separate_Jungsi_FastAPI_deployment, SUP02의 목표 단일 원본은 public.jeongsi_passes로 확정했다. 현재 코드는 여전히 jungsi_backend.entitlements를 조회하며 목표 어댑터 전환·실DB/실Auth·배포·보안 인수는 NOT_RUN이다. production_ready=false / NOT_READY를 유지한다.
 
-revision 2026.10.06.v5; 2026-10-06T08:40:54.349322Z 읽기 snapshot; 문서 actual_storage_and_source_intake_reviewed_service_implementation_pending_commit_validation. merged develop3d90를기준으로정확003직접승인/적용·fresh최소권한·명시port actualmetadata·10합성별도process영속성·최소시험팩1staged와수학9경계부분검수·PR15 source/CI통합을각증거scope로기록한다. 기본factory는직접인간답변에따라유지하고defaultlegacy/API22/session3/page4·무료누백/유료후보·보안gate/과거history를보존한다. 자료활성화·실JWT/유료rows·livehost/운영·실화면mode는미인수다.
+revision 2026.10.07.v7; 2026-10-06T08:40:54.349322Z 읽기 snapshot; 문서 proposed_not_applied_requires_user_approval. merged develop3d90를기준으로정확003직접승인/적용·fresh최소권한·명시port actualmetadata·10합성별도process영속성·최소시험팩1staged와수학9경계부분검수·PR15 source/CI통합을각증거scope로기록한다. 기본factory는직접인간답변에따라유지하고defaultlegacy/API22/session3/page4·무료누백/유료후보·보안gate/과거history를보존한다. 자료활성화·실JWT/유료rows·livehost/운영·실화면mode는미인수다.
 
 ## 확정된 구성과 현재 실행 상태
 
@@ -166,7 +166,7 @@ SOURCE_DDL_PARTIALLY_RECEIVED_PRODUCTION_EFFECT_NOT_RUN; 2026-10-06T12:41:50.177
 
 001/002 는 owner 단일 transaction의 신규 private schema 추가·13 tables·RLS enabled·schema_versions 반영 개발 영수증이다. 독립 실원장 검수는 pending이다. FORCE RLS/앱 업무 policy·runtime003·실제 사용자/유료권한/CAS·멱등·발표 원자성·22API·배포/운영 인수가 아니며 master/profiles/기존 owner·role은 변경하지 않았다.
 
-CR-SERVICE-SUP04-20261006-01; adopted_for_implementation_actual_policy_preflight_received. runtime current_user=jungsi_backend_app; migration owner runtime 거절; 기존 master9컬럼 SELECT 임의 REVOKE 금지. 実際の own/admin·backend read 두 SELECT policy를 바탕으로 검사 계약을 개정한다. 임의 public REVOKE나 migration owner 런타임 사용으로 해결하지 않는다. SQL 계약/권한 구조만 공개하며 실행 설정값/실제 사용자/자료는 공개하지 않는다. 전용 app/owner 정책의 PERMISSIVE USING(true)는 기존 PUBLIC own/admin와 OR 결합되므로 DB RLS가 verified UUID만의 행으로 좁혀준다는 주장은 금지한다. reader의 WHERE user_id=%s 및 서버 검증 UUID parameter로 조회범위를 강제하고 transaction local claim을 결속한다. 추가/변경 정책·role·predicate는 거절한다.
+CR-SERVICE-SUP04-20261006-01; adopted_for_implementation_actual_policy_preflight_received. runtime current_user=jungsi_backend_app; migration owner runtime 거절; 기존 master9컬럼 SELECT 임의 REVOKE 금지. 실제 own/admin·backend read 두 SELECT policy를 바탕으로 검사 계약을 개정한다. 임의 public REVOKE나 migration owner 런타임 사용으로 해결하지 않는다. SQL 계약/권한 구조만 공개하며 실행 설정값/실제 사용자/자료는 공개하지 않는다. 전용 app/owner 정책의 PERMISSIVE USING(true)는 기존 PUBLIC own/admin와 OR 결합되므로 DB RLS가 verified UUID만의 행으로 좁혀준다는 주장은 금지한다. reader의 WHERE user_id=%s 및 서버 검증 UUID parameter로 조회범위를 강제하고 transaction local claim을 결속한다. 추가/변경 정책·role·predicate는 거절한다.
 
 OpenAPI metadata HTTP 200, 9컬럼; OpenAPI definition/GET metadata만 실제 조회. nullable/FK/default/CHECK/trigger/index/GRANT/RLS 및 적용 이력의 실제 SQL 인수는 아니다.
 
@@ -564,7 +564,7 @@ TypeScript/Deno runtime이다. 현재PythonFastAPI/NumPy의별도backend권장�
 
 003은정확인간승인후적용하고fresh24policy/SELECT13·INSERT9·columnUPDATE6의최소권한metadata를확인했다. 실제10합성행은새process/TLS연결로영속성·CAS/멱등/소유권거절을검수했으나실학생/Auth/유료rows·운영전체인수는아니다. 명시port actualDB/master metadata는PASS이고health503는구성/자료/실세션준비보류다. 최소시험팩1건/328915B는statusstaged·승인0/unbound/engineprodfalse·provider미승인거절/network0이다. 수학한구간/9경계부분QA는wholeexam/CDF/공식정수백분위·실화면mode승인이아니다. PR15 ef7b7c08 exactCI2와develop3d90정상merge/삭제0·branch보존은확인됐고FE-01R·FE-ORIGIN·FE-SOURCE-01·browser/429·securitygate는pending이다. 직접인간은기본경로유지·명시연결만준비를선택하여CR06source변경0/defaultlegacy를유지한다. 서비스7준비파일/33focusedPASS와641이전9ERROR/별도fixture10PASS를같은Git전체검수와분리한다. 실제승인자료활성화·JWT·livehost·기본factory·운영은미완료이며minimalallowlist/49archive보존·API22/session3/page4·productionfalse/NOT_READY를유지한다.
 
-[Supabase 운영 인수인계](Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v5; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
+[Supabase 운영 인수인계](Supabase_운영_인수인계.md)를 따른다. revision 2026.10.07.v7; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
 
 [화면팀 최종 회신 요청](화면팀_회신요청_최종.md)의 RF-01~06과 로컬 요청 ①~⑥를 함께 인수한다. 문서 전달 준비 완료는 담당자 회신·실제 연결·운영 검수 완료를 뜻하지 않는다.
 
@@ -603,4 +603,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=5f1f4f77d5895316ca8620952d30961f9ec0ffd6c6680cbb60fa4c995f236273 -->
+<!-- jungsi:generated spec_sha256=2b595e9f761c5f751b101c3945371ee03fccb46abc2a2d1061939d55c16b0d94 -->

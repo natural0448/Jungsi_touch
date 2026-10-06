@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.8.5",
+  "version": "1.8.7",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2569,7 +2569,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.8.5",
+        "contract_version": "1.8.7",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2743,7 +2743,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.8.5",
+        "contract_version": "1.8.7",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2918,11 +2918,13 @@
       ],
       "invariants_required": true,
       "start_rule": "작업 전에 이 정본을 읽고 현재 develop SHA·REQ-24~26·SEC 영향·담당 브랜치를 확인한다. 선독을 생략해 API/화면/DB를 구현하지 않는다.",
-      "report_rule": "PR/완료 보고에 보안 revision·영향 operation/SEC ID·합성/브라우저/운영 증거와 NOT_RUN을 각각 적는다. 영향 없음도 근거를 적는다. 하네스 PASS가 실제 독서나 런타임 보안을 증명하지는 않는다.",
+      "report_rule": "PR/완료 보고에 보안 revision·영향 operation/SEC ID·합성/브라우저/운영 증거와 NOT_RUN을 각각 적는다. 영향 없음도 근거를 적는다. 하네스 PASS가 실제 독서나 런타임 보안을 증명하지는 않는다. 합법적인 두 부모 병합의 코드-문서 동시 변경 판정은 staged에서 HEAD와 각 검증된 MERGE_HEAD 부모부터 동일 index까지의 name-only diff 합집합, 커밋 검사에서는 각 검증된 부모부터 해당 merge commit까지의 diff 합집합으로 정의하는 검토안이다. 부모 또는 diff 조회 실패는 검사 실패로 거절하고 빈 목록으로 대체하지 않는다. 일반 단일 부모 commit과 최종 snapshot의 내용·계층·권한·삭제·비공개 데이터 검사는 보존한다. 이 정의는 부모/브랜치 승인·정본 소유 규칙의 우회 허용이 아니며 현재 미적용이다.",
       "checks": [
         "python -B scripts/check_project_consistency.py --staged",
         "python -B scripts/check_branch_policy.py --staged",
-        "정상 pre-commit/pre-push 및 정확 commit CI의 스냅샷 검산"
+        "정상 pre-commit/pre-push 및 정확 commit CI의 스냅샷 검산",
+        "제안된 합법 두 부모 merge changed-path 집합은 부모별 diff 합집합이다. 이미 HEAD에 있는 승인 문서도 포함하지만 최종 snapshot 내용 검사와 문서의 같은 정본 결속을 생략하지 않는다.",
+        "부모 확인·diff 실패/누락을 fail-closed로 검사한다. 기존 641검산 증거·이번 하네스 새 회귀·최종 동일 commit 전체/CI 결과는 서로 다른 범위이며 새 검증은 아직 NOT_RUN이다."
       ]
     }
   },
@@ -3523,6 +3525,13 @@
         "REQ-26"
       ],
       "summary": "v1.8.5 mergeddevelop3d90의전용003직접승인/실적용·fresh24policy최소권한·명시port actualmetadata·10합성process영속성/한정33검수·최소시험팩1staged/수학9경계부분QA·PR15source/CImerge를현재관측으로추가한다. 과거미적용/빈범위fix미포함/641실패와원본을보존한다. 직접인간답변은기본경로유지/명시연결준비로CR06default전환미허용/source0이며legacy/session3/API22/page4를보존한다. 실제학생/공식점수·자료/설정hash/path/key를공개문서에복사하지않고실JWT/유료rows·운영host/자료승인·실browsermode/보안gate는NOT_RUN/NOT_READY다. 최소allowlist·49archive보존/자동채택0과app운영/owner이관설정분리를유지한다. 수학 제한 QA 동결은 역사 관측이며 별도 사용자 지시로 데이터팀의 최소 후속 후보 준비가 진행 중이다. 추가 업로드/승인/활성화는 미관측이고 FE-SOURCE-01 확장 요청 송신과 실제 화면 수정 인수를 구분한다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-26"
+      ],
+      "summary": "v1.8.7은 develop bf5ac6fe68022de2bfa45797653626f523065033의1.8.5 사실을 유지하는 미적용 공통 검토 후보다. staged HEAD/검증MERGE_HEAD 각부모→index 및 committed merge 각부모→merge diff 합집합으로 코드-문서 변경집합을 정의하고 부모/diff조회 실패는 거절하는 하네스 보완을 제안한다. 정순병합에서 HEAD에있는승인문서27을누락한 검사실패와 역순 parent거절 상태는 보존하며 병합순서/권한우회로 해결하지 않는다. 서비스7참조는develop미통합이므로추가0이다. 일반commit·현재내용/계층/권한/삭제/자료검사와API22/page4/session3·defaultlegacy/운영gates는보존한다. 과거641증거와새회귀/최종whole·CI를구분하고이번검증PASS를선행기록하지않는다. 일본어표현실제번역외의원문뜻은변경하지않는다. 영구적용·Git반영은별도사용자승인대기다."
     }
   ],
   "overall_analysis_contract": {
@@ -7510,11 +7519,11 @@
   },
   "supabase_operations_handoff_contract": {
     "format": "jungsi.supabase-operations-handoff/v1",
-    "revision": "2026.10.06.v5",
+    "revision": "2026.10.07.v7",
     "checked_at": "2026-10-06T08:40:54.349322Z",
     "status": "NOT_READY",
     "production_ready": false,
-    "document_status": "actual_storage_and_source_intake_reviewed_service_implementation_pending_commit_validation",
+    "document_status": "proposed_not_applied_requires_user_approval",
     "decision": "SUP01은 separate_Jungsi_FastAPI_deployment, SUP02의 목표 단일 원본은 public.jeongsi_passes로 확정했다. 현재 코드는 여전히 jungsi_backend.entitlements를 조회하며 목표 어댑터 전환·실DB/실Auth·배포·보안 인수는 NOT_RUN이다. production_ready=false / NOT_READY를 유지한다.",
     "summary": "003은정확인간승인후적용하고fresh24policy/SELECT13·INSERT9·columnUPDATE6의최소권한metadata를확인했다. 실제10합성행은새process/TLS연결로영속성·CAS/멱등/소유권거절을검수했으나실학생/Auth/유료rows·운영전체인수는아니다. 명시port actualDB/master metadata는PASS이고health503는구성/자료/실세션준비보류다. 최소시험팩1건/328915B는statusstaged·승인0/unbound/engineprodfalse·provider미승인거절/network0이다. 수학한구간/9경계부분QA는wholeexam/CDF/공식정수백분위·실화면mode승인이아니다. PR15 ef7b7c08 exactCI2와develop3d90정상merge/삭제0·branch보존은확인됐고FE-01R·FE-ORIGIN·FE-SOURCE-01·browser/429·securitygate는pending이다. 직접인간은기본경로유지·명시연결만준비를선택하여CR06source변경0/defaultlegacy를유지한다. 서비스7준비파일/33focusedPASS와641이전9ERROR/별도fixture10PASS를같은Git전체검수와분리한다. 실제승인자료활성화·JWT·livehost·기본factory·운영은미완료이며minimalallowlist/49archive보존·API22/session3/page4·productionfalse/NOT_READY를유지한다.",
     "scope": "merged develop3d90를기준으로정확003직접승인/적용·fresh최소권한·명시port actualmetadata·10합성별도process영속성·최소시험팩1staged와수학9경계부분검수·PR15 source/CI통합을각증거scope로기록한다. 기본factory는직접인간답변에따라유지하고defaultlegacy/API22/session3/page4·무료누백/유료후보·보안gate/과거history를보존한다. 자료활성화·실JWT/유료rows·livehost/운영·실화면mode는미인수다.",
@@ -8951,7 +8960,7 @@
             "public_nine_column_SELECT_arbitrary_REVOKE_allowed": false,
             "actual_reader_implementation_acceptance": "pending_same_service_PR",
             "actual_paid_subject_validation": "NOT_RUN",
-            "boundary": "実際の own/admin·backend read 두 SELECT policy를 바탕으로 검사 계약을 개정한다. 임의 public REVOKE나 migration owner 런타임 사용으로 해결하지 않는다. SQL 계약/권한 구조만 공개하며 실행 설정값/실제 사용자/자료는 공개하지 않는다. 전용 app/owner 정책의 PERMISSIVE USING(true)는 기존 PUBLIC own/admin와 OR 결합되므로 DB RLS가 verified UUID만의 행으로 좁혀준다는 주장은 금지한다. reader의 WHERE user_id=%s 및 서버 검증 UUID parameter로 조회범위를 강제하고 transaction local claim을 결속한다. 추가/변경 정책·role·predicate는 거절한다.",
+            "boundary": "실제 own/admin·backend read 두 SELECT policy를 바탕으로 검사 계약을 개정한다. 임의 public REVOKE나 migration owner 런타임 사용으로 해결하지 않는다. SQL 계약/권한 구조만 공개하며 실행 설정값/실제 사용자/자료는 공개하지 않는다. 전용 app/owner 정책의 PERMISSIVE USING(true)는 기존 PUBLIC own/admin와 OR 결합되므로 DB RLS가 verified UUID만의 행으로 좁혀준다는 주장은 금지한다. reader의 WHERE user_id=%s 및 서버 검증 UUID parameter로 조회범위를 강제하고 transaction local claim을 결속한다. 추가/변경 정책·role·predicate는 거절한다.",
             "master_RLS_user_isolation_certified": false,
             "SQL_verified_subject_filter_required": "WHERE user_id = %s; server-verified UUID bound as parameter",
             "transaction_local_claim_scope": "검증 UUID와 transaction local claim을 결속하되 USING(true)의 trusted backend 정책이 사용자별 RLS를 보장한다고 주장하지 않음",
@@ -9847,7 +9856,7 @@
         ]
       ]
     },
-    "prepared_at": "2026-10-06T14:40:02.016045Z",
+    "prepared_at": "2026-10-06T16:01:06.564666+00:00",
     "prepared_at_scope": "확정 결정·회신 요청을 정본에 반영한 문서 준비 시각이다. checked_at의 과거 HTTP 재점검 시각이나 새 운영 검수 시각이 아니다.",
     "decisions": [
       {
@@ -9873,12 +9882,12 @@
     ],
     "reply_contract": {
       "format": "jungsi.frontend-reply/v1",
-      "revision": "2026.10.06.v5",
+      "revision": "2026.10.07.v7",
       "document": "docs/current/화면팀_회신요청_최종.md",
       "document_status": "finalized_for_delivery_replies_and_runtime_pending",
       "finalized": true,
       "finalized_meaning": "전달용 요청/현재 답변 문구와 인수 목록의 정본 준비 완료다. 미회신/미구현/운영/생성문서 Git 인수 완료를 뜻하지 않는다. 생성/정합 검사와 실제 전달 여부는 root가 별도로 확인한다.",
-      "prepared_at": "2026-10-06T14:40:02.016045Z",
+      "prepared_at": "2026-10-06T16:01:06.564666+00:00",
       "basis_commit": "2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f",
       "scope": "회신 RF-01~06과 기존 로컬 2판 요청 1~6 직접 답변. API/DTO/회원/보안 형태 불변, 실제값/운영 실행 제외.",
       "summary": "SUP01/02 목표는 확정이며 current old adapter는 불변이다. BFF·관리자 표현·DDL/SQL·모드·PR/증거·자료/계정 수령의 명시 답변을 요청한다. 로컬 재시작 소실과 외부 반출/권한 우회/대량 수집의 세 gate는 별도 인수한다. 현재 경계/조건은 답변했지만 자료·token 수령·외부 Caller/브라우저·운영 인수는 미완료다. 요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다. 최신 Supabase actual stage/role 사전검수·001002 개발 적용영수증과 독립/runtime pending은 아래 actual update 절로 분리한다.",
@@ -10837,7 +10846,7 @@
         "public_nine_column_SELECT_arbitrary_REVOKE_allowed": false,
         "actual_reader_implementation_acceptance": "actual_metadata_verified_on_explicit_port_feature_PR_pending",
         "actual_paid_subject_validation": "NOT_RUN",
-        "boundary": "実際の own/admin·backend read 두 SELECT policy를 바탕으로 검사 계약을 개정한다. 임의 public REVOKE나 migration owner 런타임 사용으로 해결하지 않는다. SQL 계약/권한 구조만 공개하며 실행 설정값/실제 사용자/자료는 공개하지 않는다. 전용 app/owner 정책의 PERMISSIVE USING(true)는 기존 PUBLIC own/admin와 OR 결합되므로 DB RLS가 verified UUID만의 행으로 좁혀준다는 주장은 금지한다. reader의 WHERE user_id=%s 및 서버 검증 UUID parameter로 조회범위를 강제하고 transaction local claim을 결속한다. 추가/변경 정책·role·predicate는 거절한다.",
+        "boundary": "실제 own/admin·backend read 두 SELECT policy를 바탕으로 검사 계약을 개정한다. 임의 public REVOKE나 migration owner 런타임 사용으로 해결하지 않는다. SQL 계약/권한 구조만 공개하며 실행 설정값/실제 사용자/자료는 공개하지 않는다. 전용 app/owner 정책의 PERMISSIVE USING(true)는 기존 PUBLIC own/admin와 OR 결합되므로 DB RLS가 verified UUID만의 행으로 좁혀준다는 주장은 금지한다. reader의 WHERE user_id=%s 및 서버 검증 UUID parameter로 조회범위를 강제하고 transaction local claim을 결속한다. 추가/변경 정책·role·predicate는 거절한다.",
         "master_RLS_user_isolation_certified": false,
         "SQL_verified_subject_filter_required": "WHERE user_id = %s; server-verified UUID bound as parameter",
         "transaction_local_claim_scope": "검증 UUID와 transaction local claim을 결속하되 USING(true)의 trusted backend 정책이 사용자별 RLS를 보장한다고 주장하지 않음",
