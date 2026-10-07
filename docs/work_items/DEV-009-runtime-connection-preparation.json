@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "approved_for_implementation",
   "contract_ref": "runtime_connection_preparation_contract",
-  "contract_version": "1.9.4",
+  "contract_version": "1.9.5",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -25,7 +25,7 @@
   "scope": {
     "format": "jungsi.runtime-connection-preparation/v1",
     "id": "DEV-009",
-    "revision": "2026.10.07.v1",
+    "revision": "2026.10.07.v2",
     "basis_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
     "code_status": "planned",
     "production_ready": false,
@@ -83,7 +83,7 @@
         "percentile",
         "estimate_receipt",
         "analysis",
-        "forecast_input",
+        "forecast_inputs",
         "forecast_policy",
         "forecast_context"
       ],
@@ -97,7 +97,9 @@
       "source_files_overwritten": false,
       "native_versions_separate_from_source": true,
       "selection_format": "jungsi.runtime-selection/v1",
-      "selection_shape": "required: nonempty [{kind, key}]; duplicate identities rejected; only explicitly required dependencies are read"
+      "selection_shape": "required: nonempty [{kind, key}]; duplicate identities rejected; only explicitly required dependencies are read",
+      "selected_native_cross_bindings_required": true,
+      "cross_binding_rule": "명시 선택에 이미 포함된 시험·팩·카탈로그·환산·누백·곡선·모집행의 학년도와 버전/맥락을 서로 대조한다. 불일치는503이며 미선택 자료를 암묵적으로 읽거나 전 자료를 필수로 확장하지 않는다."
     },
     "readiness": {
       "path": "/health/ready",
@@ -193,7 +195,8 @@
         "app_role_probe_failure_and_dependency_error_safe_503",
         "relay_required_and_public_ready_four_fields_only",
         "legacy_and_local_factory_regressions",
-        "private_preflight_provenance_without_public_secret_or_source_values"
+        "private_preflight_provenance_without_public_secret_or_source_values",
+        "selected_native_cross_exam_pack_year_offering_rule_curve_bindings_must_match"
       ]
     },
     "preservation": {

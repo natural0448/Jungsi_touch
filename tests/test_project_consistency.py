@@ -1277,7 +1277,7 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
                 wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['readiness'][field]=value
                 self.assertIn('DEV-009 provider readiness or public boundary drift',validate_runtime_connection_preparation(wrong))
     def test_native_selection_cannot_omit_approval_integrity_or_select_archive(self):
-        for field,value in [('native_decoder_required',False),('engine_approved_required',False),('production_allowed_required',False),('reference_size_hash_version_binding_required',False),('implicit_all_artifacts_selection',True),('archive_only_required',True),('source_files_overwritten',True),('selection_format','unbound-selection/v0')]:
+        for field,value in [('native_decoder_required',False),('engine_approved_required',False),('production_allowed_required',False),('reference_size_hash_version_binding_required',False),('selected_native_cross_bindings_required',False),('implicit_all_artifacts_selection',True),('archive_only_required',True),('source_files_overwritten',True),('selection_format','unbound-selection/v0')]:
             with self.subTest(field=field):
                 wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['runtime_selection'][field]=value
                 self.assertIn('DEV-009 native selection approval or integrity drift',validate_runtime_connection_preparation(wrong))
