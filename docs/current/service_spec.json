@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2609,7 +2609,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.2",
+        "contract_version": "1.9.3",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2783,7 +2783,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.2",
+        "contract_version": "1.9.3",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2947,16 +2947,17 @@
         "approved_on": "2026-10-07",
         "start_commit": "e6b8aacd0ba7057f80aa766b07a3137be6160643",
         "branch": "feature/application-pre-data-platform",
-        "status": "approved_for_implementation",
+        "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.2",
+        "contract_version": "1.9.3",
         "requirements": [
           "REQ-24",
           "REQ-25",
           "REQ-26"
         ],
         "owner": "서비스 개발팀; 공통 기획/검사는 시스템기획팀",
-        "preservation": "기존22API/session3/default/Drive/local·원본·비공개자료·파일·잠금 보존; 새branch0·운영배포0"
+        "preservation": "기존22API/session3/default/Drive/local·원본·비공개자료·파일·잠금 보존; 새branch0·운영배포0",
+        "verification_status": "PASS_SCOPED_SYNTHETIC_HTTP"
       }
     },
     "development_harness": {
@@ -2996,7 +2997,7 @@
     "대규모 집계 성능/갱신 주기 실측; Kafka/Redis 미채택",
     "1페이지 실제 입결 공개 네 학년도·비회원 공개·학부모/상담자 위임 정책 확정",
     "원격 main 강제 보호를 지원하는 GitHub 요금제 적용 후 활성화",
-    "REQ-24~26/SEC-01~08 실제 응답 필터·중계·공유 원자적 예산은 담당 상시 브랜치 PR; 실제 frontend/서비스/DB 변경은 이번 범위 밖",
+    "REQ-24~26/SEC-01~08: DEV-008 명시 서버 중계·응답 필터 코드는 develop에 통합했다. 공유 원자적 예산과 실제 프레젠테이션 BFF·브라우저·Auth/DB 인수는 각 담당 상시 브랜치의 후속 PR로 진행한다.",
     "보안 숫자/탐지 임계값 별도 운영 승인·무료 overall/유료 전체 검색 유지; 실제 브라우저/운영 보안 NOT_RUN",
     "1페이지 4개년 비교: history_metric 에 연도 간 같은 모집단위를 잇는 키가 없어 학년도별로만 보여 준다. 연도 연결 키(PK 연결) 제공과 처음 보여 줄 학년도(화면은 결과가 있는 2026 을 기본으로 둠)를 정한다.",
     "1페이지 지역 조건의 선택지를 API 가 줄지 정한다(화면은 시·도 17곳 고정 목록을 쓴다).",
@@ -3009,7 +3010,7 @@
     "4페이지: statistics.read 가 모집단위 하나씩이라 펼친 학교와 와일드카드만 부른다. 여러 모집단위를 한 번에 읽는 방법이 필요한지 정한다.",
     "live 연결: 에듀터치 본체와 같은 Supabase 프로젝트·쿠키 도메인 배포 설정과 실제 계정·이용권·관리 권한의 전체 연결 검증이 남아 있다(DEV-006 remaining).",
     "live 배포 설정: 운영 우리 서비스 API 주소(JUNGSI_API_URL)와 에듀터치 Supabase URL·publishable 키를 jeongsi-touch 워커 설정에 넣어야 실제 화면이 열린다. 에듀터치 본체의 /jeongsi 통로는 아직 관리자에게만 열려 있다.",
-    "DEV-008 명시 보안 구성의 relay 인증·재귀 공개 응답 경계 구현 및 합성 인수. 기본 factory 자동전환·운영 배포/BFF/실Auth/공유 사용량 한도 인수는 별도다."
+    "DEV-008 명시 중계 인증·재귀 응답 경계는 PR17/develop 합성 인수 완료. 기본 연결 전환은 별도이며 실제 BFF/CSRF/브라우저·Auth/이용권/DB·공유 사용량 한도·배포 인수가 남아 있다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -3680,6 +3681,15 @@
         "REQ-26"
       ],
       "summary": "DEV-008 최초 구현 36bf42aa532701aa493260bd54098bd8c5ccaa22의 정상 고정 스냅샷 741개 및 보안 HTTP 57개 PASS 증거를 기록한다. 기획팀이 공통 테스트 2건의 planned/구현완료 상태 의존성을 보완해 승인 전달했다. 최신 병합의 정상 훅·CI는 별도로 검증하며 실제 Auth·DB·BFF·브라우저·배포 인수와 전역 보안 gate는 미완료로 유지한다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "DEV-008을 PR17의 develop 9abc493ffc5b1ef6b3c8a00042c125f9dff183cb에 통합했다. 최종 구현 HEAD 5f9618c447be95f6a858b4bb24a31a30433be337의 정상 훅 748개·정확 HEAD/PR/병합 CI와 독립 합성 22개를 확인하여 명시 보안 구성만 인수한다. 전역 보안 통제는 in_progress, 실제 Auth·DB·BFF·브라우저·배포는 NOT_RUN, production_ready=false이며 공유 사용량 한도와 운영 인수는 후속이다."
     }
   ],
   "overall_analysis_contract": {
@@ -12227,7 +12237,7 @@
     "revision": "2026.10.06.v1",
     "required": true,
     "status": "required_for_development_runtime_NOT_RUN",
-    "implementation_status": "pending",
+    "implementation_status": "in_progress",
     "production_ready": false,
     "basis_commit": "25973cb1a93b452e002d5902ef573013ebcabfaf",
     "requirements": [
@@ -12263,7 +12273,7 @@
         "branch": "feature/application-pre-data-platform",
         "rule": "기존 contract_ref의 회원/관리 역할별 허용 필드를 중첩 객체·배열까지 적용한다. 정상·pending·오류·멱등 재응답·리포트 snapshot·인쇄 DTO·발표본을 포함한다.",
         "acceptance": "금지 필드를 중첩/배열에 넣은 합성 자료로 실제 HTTP 응답을 검사하고 공개 근거·버전·공식 출처를 보존한다.",
-        "implementation_status": "pending",
+        "implementation_status": "in_progress",
         "operational_verification": "NOT_RUN"
       },
       {
@@ -12283,7 +12293,7 @@
         "branch": "feature/application-pre-data-platform",
         "rule": "화면 서버의 중계 API(BFF)와 분석 API 사이에 서버 전용 인증을 적용하며 분석 API에서도 실제 사용자 권한을 검증한다. 공개 origin·우회 도메인·preview·이전 배포 경로를 포함한다. 화면 BFF/세션·CSRF·신원 송신은 외부 화면 브랜치, 분석 서버 검증/재인가는 서비스·DB 브랜치가 각각 구현하고 같은 전이 계약으로 인수한다.",
         "acceptance": "허용 중계+허용 사용자만 성공한다. 직접 호출/잘못된 서버 신원/필수 설정 누락에 보호 대상 결과를 제공하지 않는다. health와 결과 API는 구분한다.",
-        "implementation_status": "pending",
+        "implementation_status": "in_progress",
         "operational_verification": "NOT_RUN"
       },
       {
@@ -12323,7 +12333,7 @@
         "branch": "feature/application-pre-data-platform",
         "rule": "기존 오류 객체를 유지한 429 사유/Retry-After와 통제 저장소 장애의 503을 구현한다. 원성적·JWT·키·예외 원문·타인 정보·내부 예산을 응답/로그에 남기지 않는다.",
         "acceptance": "안전한 제한 안내와 재시도 시각만 표시한다. 기록/쿨다운/추가 확인/이용 검토는 정상 학교 검색을 영구히 감추지 않는다.",
-        "implementation_status": "pending",
+        "implementation_status": "in_progress",
         "operational_verification": "NOT_RUN"
       },
       {
@@ -12333,7 +12343,7 @@
         "branch": "develop",
         "rule": "필수 문서·operation 참조·기획/라우팅·release gate를 하네스에 결속한다. 계약 검산·합성 HTTP·브라우저·운영 검수를 구분한다.",
         "acceptance": "필수 계약/문서/gate 제거, 미구현 상태의 passed/ready, 증거 없는 완료를 거절한다. 등록/합성 PASS만으로 운영 인수를 완료하지 않는다.",
-        "implementation_status": "pending",
+        "implementation_status": "in_progress",
         "operational_verification": "NOT_RUN"
       }
     ],
@@ -12384,7 +12394,7 @@
     },
     "gateway_policy": {
       "mode": "server_authenticated_relay",
-      "implementation_status": "pending",
+      "implementation_status": "in_progress",
       "server_identity_required": true,
       "user_authorization_in_application_required": true,
       "direct_browser_analysis_allowed": false,
@@ -12488,7 +12498,7 @@
         "code": "security_policy_unavailable",
         "http": 503,
         "retry_after_required": false,
-        "status": "planned_not_implemented"
+        "status": "in_progress"
       }
     ],
     "error_rule": "기존 {status:error,error:{code},request_id}를 유지한다. 401/403/404/409의 기존 의미를 우선하며 429/Retry-After는 정식 계약 반영·구현 전 실제 응답이라고 주장하지 않는다. no-store와 안전한 거절 이벤트를 유지한다.",
@@ -12568,7 +12578,7 @@
       }
     ],
     "limitation": "사용자에게 정상 제공한 개별 결과 저장을 완전히 막는다고 약속하지 않는다. 내부자료 비전달·권한 밖 조회 거절·대량 수집 규모/비용 통제를 인수 범위로 한다.",
-    "implementation_commit": null,
+    "implementation_commit": "5f9618c447be95f6a858b4bb24a31a30433be337",
     "evidence_fields": [
       "case_id",
       "control",
@@ -12585,7 +12595,7 @@
     "id": "DEV-008",
     "revision": "2026.10.07.v1",
     "policy_revision": "2026.10.06.v1",
-    "code_status": "implemented_synthetic_verified_integration_pending",
+    "code_status": "accepted_on_develop_scoped_synthetic_verified",
     "production_ready": false,
     "basis_commit": "e6b8aacd0ba7057f80aa766b07a3137be6160643",
     "branch": "feature/application-pre-data-platform",
@@ -12734,7 +12744,23 @@
       "status": "PASS_SCOPED_SYNTHETIC_HTTP",
       "implementation_commit": "716affb4915a2e7e5af690da7574262fa2459c86",
       "synthetic_test_count": 57,
-      "CI": null,
+      "CI": {
+        "implementation_head": {
+          "commit": "5f9618c447be95f6a858b4bb24a31a30433be337",
+          "conclusion": "success",
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37560623438"
+        },
+        "pull_request_candidate": {
+          "head_commit": "5f9618c447be95f6a858b4bb24a31a30433be337",
+          "conclusion": "success",
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37560978933"
+        },
+        "integrated_develop": {
+          "commit": "9abc493ffc5b1ef6b3c8a00042c125f9dff183cb",
+          "conclusion": "success",
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37561114571"
+        }
+      },
       "cases": [
         "all_22_operation_bindings_and_contract_fields",
         "nested_object_array_ID_map_extra_field_removal",
@@ -12751,7 +12777,12 @@
       "candidate_focused_test_count": 57,
       "fixed_implementation_evidence": "normal_commit_hook_fixed_snapshot_748_PASS",
       "full_snapshot_test_count": 748,
-      "evidence_ref": "outputs/dev008_development/20261007T013229108129Z/fixed_merge_receipt.json"
+      "evidence_ref": "outputs/dev008_development/20261007T013229108129Z/fixed_merge_receipt.json",
+      "final_implementation_head": "5f9618c447be95f6a858b4bb24a31a30433be337",
+      "independent_synthetic_test_count": 22,
+      "independent_synthetic_commit": "716affb4915a2e7e5af690da7574262fa2459c86",
+      "independent_evidence_ref": "outputs/dev008_review/20261007T015941005441Z/candidate_receipt.json",
+      "implementation_continuity": "716affb4915a2e7e5af690da7574262fa2459c86와 최종 HEAD의 런타임 보안 코드·스키마는 동일하며 생성 catalog의 기획 출처만 갱신했다. 최종 HEAD의 정상 훅 748개·CI PASS와 PR 병합 tree 일치를 확인했다."
     },
     "planned_code_paths": [
       "src/jungsi_touch/application/public_response.py",
@@ -12773,6 +12804,20 @@
       "main_ready_allowed": false
     },
     "registry_path": "src/jungsi_touch/application/public_response_schemas.json",
-    "registry_format": "jungsi.public-response-schemas/v1"
+    "registry_format": "jungsi.public-response-schemas/v1",
+    "develop_integration": {
+      "status": "merged_verified",
+      "accepted_on": "2026-10-07",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/17",
+      "pull_request_state": "merged",
+      "merge_method": "merge",
+      "implementation_head": "5f9618c447be95f6a858b4bb24a31a30433be337",
+      "integrated_develop_commit": "9abc493ffc5b1ef6b3c8a00042c125f9dff183cb",
+      "merge_tree_equals_tested_HEAD": true,
+      "policy_revision": "2026.10.06.v1",
+      "scope": "명시 create_secured_app 구성·중계 인증·재귀 공개 응답 경계의 합성 HTTP/고정 Git 스냅샷 인수.",
+      "actual_Auth_DB_BFF_browser_deployment": "NOT_RUN",
+      "production_ready": false
+    }
   }
 }

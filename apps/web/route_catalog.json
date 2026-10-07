@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.2",
-  "source_sha256": "d47ee1d9faa32c52b0095846490305100a9dfa164493723746d1121a084c75f1",
+  "spec_version": "1.9.3",
+  "source_sha256": "80c0a7fb649fcd471fd0ba97a4b440ca2acd678a46f807a24dbc1455325572c3",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3286,7 +3286,7 @@
       "REQ-25",
       "REQ-26"
     ],
-    "implementation_status": "pending",
+    "implementation_status": "in_progress",
     "production_ready": false,
     "contract_ref": "security_contract",
     "gateway_mode": "server_authenticated_relay",
@@ -3296,7 +3296,7 @@
         "id": "SEC-01",
         "title": "공개 응답의 재귀 허용목록",
         "owner_layer": "application",
-        "implementation_status": "pending"
+        "implementation_status": "in_progress"
       },
       {
         "id": "SEC-02",
@@ -3308,7 +3308,7 @@
         "id": "SEC-03",
         "title": "서버 중계와 분석 API 직접 접근 거절",
         "owner_layer": "infrastructure",
-        "implementation_status": "pending"
+        "implementation_status": "in_progress"
       },
       {
         "id": "SEC-04",
@@ -3332,13 +3332,13 @@
         "id": "SEC-07",
         "title": "거절 응답·안전한 관측·화면 안내",
         "owner_layer": "application",
-        "implementation_status": "pending"
+        "implementation_status": "in_progress"
       },
       {
         "id": "SEC-08",
         "title": "동일 스냅샷 인수와 운영 gate",
         "owner_layer": "planning",
-        "implementation_status": "pending"
+        "implementation_status": "in_progress"
       }
     ],
     "planned_errors": [
@@ -3358,7 +3358,7 @@
         "code": "security_policy_unavailable",
         "http": 503,
         "retry_after_required": false,
-        "status": "planned_not_implemented"
+        "status": "in_progress"
       }
     ]
   },

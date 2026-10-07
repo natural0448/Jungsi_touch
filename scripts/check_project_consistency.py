@@ -962,7 +962,7 @@ def security_document_body(spec):
            f"기획 출발 commit {ticks}{c['basis_commit']}{ticks}\n\n"+
            c["scope"]+"\n\n"+
            "**작업 전에 이 문서와 공통 명세를 읽고, 영향 operation·SEC ID·담당 브랜치를 PR에 기록한다.** "+
-           "현재 등록은 기획과 계약 하네스의 기준이며 런타임 보안 구현·운영 인수가 아니다. "+
+           "이 문서는 전체 보안 통제의 개발·인수 기준이다. 명시 보안 구성의 코드·합성 검수 결과는 DEV-008 절에서 확인한다. 전체 운영 인수는 미완료다. "+
            f"전체 구현 상태 {c['implementation_status']} / production_ready={str(c['production_ready']).lower()}. "+
            "기존 인증·소유권·이용권 코드가 존재해도 아래 추가 통제를 구현·검수하기 전 완료로 처리하지 않는다.\n\n")
     risks=table(["외부 반출 경로","필수 대응","인수 기준"],[
@@ -1055,8 +1055,19 @@ def secured_preparation_document(spec):
         "정상 점수·누백·판단 보류·공식 출처/버전·권한 있는 관리 영수증을 보존한다."+registry_note+"\n\n"+
         h["public_path"]+"는 공개 최소 liveness다. "+h["relay_protected_path"]+"는 relay만 확인하고 "+
         ", ".join(h["ready_public_fields"])+"만 반환한다. production_ready=false이며 비공개 환경·DB role/경로를 전달하지 않는다.\n\n"+
-        "검수 상태 "+v["status"]+". 합성 인수: "+"; ".join(v["cases"])+".\n\n"+
+        "검수 상태 "+v["status"]+". 합성 인수: "+"; ".join(v["cases"])+".\n\n"+secured_preparation_evidence(c)+
         "남은 인수: "+"; ".join(c["remaining"])+". 전체 SEC-01~08/3 보안 gate와 실운영 준비는 미완료로 유지한다.")
+
+
+def secured_preparation_evidence(contract):
+    v=contract['verification']; integration=contract.get('develop_integration')
+    if not integration:return ''
+    ci=v.get('CI') or {}
+    checks='; '.join('['+name+']('+row['url']+') '+row['conclusion'] for name,row in ci.items())
+    return ('기획 인수 '+integration['accepted_on']+' · ['+integration['pull_request'].rsplit('/',1)[-1]+'번 PR]('+integration['pull_request']+') · '+integration['status']+'.\n\n'+
+            '구현 HEAD '+integration['implementation_head']+' · develop 병합 '+integration['integrated_develop_commit']+'.\n\n'+
+            '보안 HTTP '+str(v['synthetic_test_count'])+'개 · 고정 스냅샷 전체 '+str(v['full_snapshot_test_count'])+'개 · 독립 합성 '+str(v['independent_synthetic_test_count'])+'개 PASS. '+v['implementation_continuity']+'\n\n'+
+            'GitHub CI: '+checks+'. 실제 Auth·DB·BFF·브라우저·배포는 '+v['actual_Auth_DB_BFF_browser_deployment']+'이다.\n\n')
 
 
 def validate_secured_preparation(spec):
