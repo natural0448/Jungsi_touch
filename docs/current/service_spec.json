@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.9",
+  "version": "1.9.10",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2639,7 +2639,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.9",
+        "contract_version": "1.9.10",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2813,7 +2813,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.9",
+        "contract_version": "1.9.10",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2979,7 +2979,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.9",
+        "contract_version": "1.9.10",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -2998,7 +2998,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.9",
+        "contract_version": "1.9.10",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3023,7 +3023,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "planned",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.9",
+        "contract_version": "1.9.10",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3850,6 +3850,19 @@
         "REQ-26"
       ],
       "summary": "다른 PC develop4c3c577와 명세1.9.8을 동기화한 뒤 화면팀 추정표기/초안시사 요청을 공통 기획1.9.9에 반영한다. 추정 2열은 유지하되 공식 지표와 분리·통계 분모/학년도/모집행·산술 한계·결측/0/음수 정책을 명시한다. 시사는 기존 로컬 catalog 최소 후보로 준비하고 상태/API/DTO·발행·기본 이용권은 변경하지 않는다. 사용자께서 Apps Script 검토 후보 포함만 승인했으며 실제 배포/숫자/브라우저 인수는 미완료다. 별도 수시 반입은 출처/사용 경로 검토 대기로 구분한다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-01",
+        "REQ-13",
+        "REQ-18",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "서비스팀의 독립 검토에서 확인한 두 모호함을 보완한다. 공식지원자A의 추정총지원자칸은 ─, 탈락자는 A−Q−C로 계산하며 R은 이 분기의 필수재료가 아니다. A없으면 기존Q/R/C모두필수다. catalog-only 로컬 readiness의 ready/production_false와 실제자료hold/시험미제공·Page1 API대조를 구분하고 v6native와최신정본/모집정보pending을 함께 기록한다. DTO·API·코드실행경로·원자료/발행·기본회원판정은 변경하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -13404,7 +13417,7 @@
   },
   "history_presentation_contract": {
     "format": "jungsi.history-display/v1",
-    "revision": "2026.10.07.v1",
+    "revision": "2026.10.07.v2",
     "page": "PAGE-01",
     "path": "/admissions/results",
     "member_tiers": [
@@ -13435,15 +13448,15 @@
       {
         "id": "estimated_non_admitted",
         "label": "추정 탈락자",
-        "formula": "추정 총 지원자 − 같은 모집행/모집 단계의 모집인원 − 공식 충원인원"
+        "formula": "공식 지원자수 A가 검수됐으면 A − 모집인원 Q − 충원인원 C, 없으면 ROUND_HALF_UP(Q × 경쟁률 R) − Q − C; 동일 모집행/통계 분모·단계 확인 및 결과 비음수 필수"
       }
     ],
     "rules": [
       "발표 지표 뒤 별도 추정 2열에만 표시한다. 머리글에 추정을 명시하고 회색 배경·범례로 구분한다.",
-      "모집인원·경쟁률·충원인원 중 하나라도 공식 값이 없으면 기존 보수적 정책대로 두 파생값 모두 ─다. 실제 0은 결측으로 바꾸지 않는다.",
+      "공식 지원자수 A가 없을 때는 검수된 모집인원 Q·경쟁률 R·충원인원 C를 모두 요구하고 하나라도 없으면 두 파생값 모두 ─다. 공식 A가 있을 때는 발표 영역 A를 표시하고 추정 총 지원자 칸은 ─, 추정 탈락자만 A−Q−C로 계산한다. 이 분기에 경쟁률 R은 필요 없으며 Q/C 결측·범위 불일치면 탈락자 칸은 ─다. 실제 0은 결측으로 바꾸지 않는다.",
       "같은 학년도·대학/캠퍼스·모집단위·전형·모집군과 동일 통계 범위의 자료만 묶는다. 과거 경쟁률에 2027 모집인원을 곱하지 않는다.",
       "곱셈의 모집인원은 경쟁률을 산출한 공식 분모다. 최초/이월 전/최종인원 중 이름이 비슷한 값을 임의 선택하지 않는다. 분모와 모집 단계가 확인되지 않으면 ─다.",
-      "공식 지원자수 지표가 있으면 발표 지표 영역에서 그 값을 우선 표시하고 대응 추정 칸은 비운다. 추정 머리글 아래에 공식 값을 섞거나 중복 표시하지 않는다.",
+      "공식 지원자수 A가 동일 학년도/캠퍼스/모집행/전형/군/통계 단계·대상으로 검수되면 공식 영역의 발표 지표로 표시한다. 추정 총 지원자 칸은 ─로 비우고 추정 탈락자 칸만 같은 Q/C 정의·범위에서 A−Q−C로 표시한다. 공식 A와 추정 Q×R을 같은 칸에 섞거나 병기하지 않는다. A−Q−C도 산술 추정이며 실제 불합격자수를 뜻하지 않는다.",
       "지원자수는 history_metric의 metric_name·metric_definition·unit·publication_status·출처로 구분한다. 영문 고정 필드 applicant_count가 있다고 가정하거나 문자열 포함 검사만으로 지표를 합치지 않는다. 데이터팀이 검수한 의미 대응을 사용한다.",
       "모집·충원은 명 단위의 비음수 정수, 경쟁률은 공식 정의에 맞는 유한 비음수 값만 사용한다. 문자열 원문·백분율·충원율·최종 예비번호·최종 등록인원을 충원인원으로 치환하지 않는다.",
       "공식 경쟁률이 반올림된 값이면 역산 지원자수에도 오차가 생긴다는 주의 문구를 표시한다. 공식 지원자수를 복원했다고 설명하지 않는다.",
@@ -13467,9 +13480,11 @@
         "검수한 최소 catalog native 후보·신뢰 SHA256·원본→native 계보·공식 지표 의미 대응·정확 비교 모집행과 기대값을 먼저 고정한다.",
         "local 선택명부의 path는 수신 PC 경로이며 신뢰 명부·승인 문서·수신 PC 시험 세션을 기존 로컬 계약으로 결속한다. 작성·형식 통과만으로 승인됐다고 간주하지 않는다.",
         "1페이지 시사에는 catalog만 최소 선택한다. 2~4페이지 산출용 exam_pack/total_model/conversion/percentile/analysis 등의 승인 근거는 각 기능이 필요할 때 별도로 준비한다.",
+        "catalog-only 시사는 기존 local factory로 가능하다. /health/ready의 local_ready=true·production_ready=false 및 real_data.status=hold/exam_binding=NOT_PROVIDED를 Page1 자료 자체의 승인·API/기대값 인수와 구분한다. health 정상으로 전체 2~4페이지 준비 완료를 주장하지 않는다.",
         "가상 학생 성적과 로컬 시험 subject만 사용하며 운영 DB·발행 상태를 바꾸지 않는다. 메모리 저장 결과는 재시작 시 유실되고 실제 학생 저장 완료로 표시하지 않는다.",
         "부족한 자료와 미승인 모형은 기존 pending/503으로 보존한다. 4페이지까지 시사를 위해 숫자·곡선·판단을 만들어 넣지 않는다.",
-        "화면팀이 수신본 해시/선택명부/화면 SHA·역할·자료 버전과 공식 지표 대조·화면 산술 대조·브라우저 전달물 결과를 별도로 기록한다."
+        "화면팀이 수신본 해시/선택명부/화면 SHA·역할·자료 버전과 공식 지표 대조·화면 산술 대조·브라우저 전달물 결과를 별도로 기록한다.",
+        "v6 고정 native와 최신 원자료/정제 포인터는 다른 버전이다. 검수한 후보의 정확한 source/native 버전·해시와 현재 정본 대비 변경/제외 범위를 기록한다. 모집인원 object가 없는 카탈로그는 recruitment.read의 pending/recruitment_not_published와 빈 추정 칸이 정상이며 이를 0으로 채우지 않는다."
       ],
       "alternatives": [
         [
@@ -13491,7 +13506,17 @@
       "readiness": "minimum_native_catalog_approval_and_delivery_pending",
       "first_preview_scope": "PAGE-01_official_history_and_recruitment",
       "full_four_page_numeric_preview": "NOT_RUN",
-      "ETA_rule": "학교/모집행·지표 범위·결측·PK/공식 근거·native 변환·독립 대조·승인 담당이 고정된 뒤 담당자가 예상 시점을 기록한다. 저장 건수로 날짜를 약속하지 않는다."
+      "ETA_rule": "학교/모집행·지표 범위·결측·PK/공식 근거·native 변환·독립 대조·승인 담당이 고정된 뒤 담당자가 예상 시점을 기록한다. 저장 건수로 날짜를 약속하지 않는다.",
+      "local_required_evidence": [
+        "separate_local_approval_evidence",
+        "selection_manifest_trusted_SHA256",
+        "approved_catalog_body",
+        "native_version_bytes_hash_and_source_lineage",
+        "engine_false_rejection_preserved",
+        "receiving_PC_DPAPI_and_current_test_session",
+        "loopback_and_standard_paid_authorization",
+        "Page1_API_expected_value_receipt_separate_from_health"
+      ]
     },
     "separate_import": {
       "reported_source": "외부 화면팀이 다른 PC Downloads의 admission-results_3.json을 에듀터치 본체에 반입했다고 보고했다.",
@@ -13526,14 +13551,16 @@
     ],
     "verification": {
       "planning_and_routing": "updated_await_same_snapshot_validation",
-      "official_metric_mapping": "data_and_service_review_pending",
+      "official_metric_mapping": "service_contract_reviewed_data_semantic_mapping_pending",
       "external_frontend_source_claim": "reported_not_independently_accepted",
       "native_catalog_package": "NOT_DELIVERED",
       "actual_local_browser": "NOT_RUN",
       "operational_publication": "NOT_RUN",
       "files_deleted": 0,
       "DTO_changes": false,
-      "new_API_operations": 0
+      "new_API_operations": 0,
+      "local_catalog_readiness": "code_review_supported_actual_local_NOT_RUN",
+      "independent_contract_review": "service_team_read_only_two_findings_incorporated"
     }
   }
 }
