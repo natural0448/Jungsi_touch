@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "approved_for_implementation",
   "contract_ref": "secured_backend_preparation_contract",
-  "contract_version": "1.9.1",
+  "contract_version": "1.9.2",
   "requirements": [
     "REQ-24",
     "REQ-25",
@@ -167,7 +167,7 @@
     },
     "verification": {
       "status": "PASS_SCOPED_SYNTHETIC_HTTP",
-      "implementation_commit": "36bf42aa532701aa493260bd54098bd8c5ccaa22",
+      "implementation_commit": "716affb4915a2e7e5af690da7574262fa2459c86",
       "synthetic_test_count": 57,
       "CI": null,
       "cases": [
@@ -184,9 +184,9 @@
       ],
       "actual_Auth_DB_BFF_browser_deployment": "NOT_RUN",
       "candidate_focused_test_count": 57,
-      "fixed_implementation_evidence": "normal_commit_hook_fixed_snapshot_741_PASS",
-      "full_snapshot_test_count": 741,
-      "evidence_ref": "outputs/dev008_development/20261007T013229108129Z/implementation_receipt.json"
+      "fixed_implementation_evidence": "normal_commit_hook_fixed_snapshot_748_PASS",
+      "full_snapshot_test_count": 748,
+      "evidence_ref": "outputs/dev008_development/20261007T013229108129Z/fixed_merge_receipt.json"
     },
     "planned_code_paths": [
       "src/jungsi_touch/application/public_response.py",
