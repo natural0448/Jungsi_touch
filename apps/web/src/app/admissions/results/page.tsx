@@ -237,12 +237,28 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
                   const v = m?.value === null || m?.value === undefined ? NaN : Number(m.value);
                   return Number.isFinite(v) ? v : null;
                 };
-                const cap = num("모집인원");
-                const rate = num("경쟁률");
-                const fill = num("충원인원");
-                // 화면 계산(추정): 발표값의 단순 산술. 경쟁률 반올림 때문에 실제와 다를 수 있다
-                const applicants = cap !== null && rate !== null ? Math.round(cap * rate) : null;
-                const dropped = applicants !== null && cap !== null && fill !== null ? applicants - cap - fill : null;
+                // 추정 2열 산술(1페이지_공식자료_추정표기_시사 계약): 같은 학년도 행의 발표 지표만 재료로 쓴다.
+                // Q(모집)·C(충원)는 명 단위 비음수 정수, R(경쟁률)은 유한 비음수만 인정. 아니면 그 칸은 ─.
+                const intOrNull = (v: number | null) => (v !== null && v >= 0 && Number.isInteger(v) ? v : null);
+                const cap = intOrNull(num("모집인원"));
+                const fill = intOrNull(num("충원인원"));
+                const rateRaw = num("경쟁률");
+                const rate = rateRaw !== null && rateRaw >= 0 ? rateRaw : null;
+                // 공식 지원자 수 지표의 의미 대응은 데이터팀 검수 뒤 이름을 넣는다(문자열 짐작 대응 금지).
+                // 이름이 확정되면: A가 있는 행은 추정 총 지원자 ─, 추정 탈락자만 A−Q−C(R 불필요).
+                const OFFICIAL_APPLICANT_METRICS: string[] = [];
+                const officialA = intOrNull(OFFICIAL_APPLICANT_METRICS.map(num).find((v) => v !== null) ?? null);
+                // ROUND_HALF_UP(Q×R)를 정확 소수로: R을 1e6 배 정수로 올려 정수 연산 후 반올림(부동소수 .5 오차 제거)
+                const applicants = officialA !== null
+                  ? null
+                  : cap !== null && rate !== null
+                    ? Math.floor((cap * Math.round(rate * 1e6) + 5e5) / 1e6)
+                    : null;
+                const droppedRaw = officialA !== null
+                  ? cap !== null && fill !== null ? officialA - cap - fill : null
+                  : applicants !== null && cap !== null && fill !== null ? applicants - cap - fill : null;
+                // 차감 결과가 음수면 정의·범위 충돌로 보고 ─(음수 인원을 표시하지 않는다)
+                const dropped = droppedRaw !== null && droppedRaw >= 0 ? droppedRaw : null;
                 return (
                   <tr key={y}>
                     <th scope="row">
@@ -319,8 +335,8 @@ function CommonLegend({ univs, hist }: { univs: { offerings: { line: string }[] 
     if (list.length === 1) return { name: n, scale: list[0].scale, def: list[0].def ?? (list[0].scale ? null : "대학이 정의를 함께 발표하지 않았습니다.") };
     return { name: n, scale: null, def: "대학마다 발표 척도·정의가 달라 각 표의 값은 그 대학 발표 기준입니다." };
   });
-  if (canApplicants) legend.push({ name: "추정 총 지원자", scale: "모집인원 × 경쟁률(화면 계산)", def: "발표된 경쟁률이 반올림된 값이라 실제 지원자 수와 다를 수 있습니다." });
-  if (canDropped) legend.push({ name: "추정 탈락자", scale: "추정 총 지원자 − 모집인원 − 충원인원(화면 계산)", def: "미등록·이월 등 대학 사정에 따라 실제와 다를 수 있습니다." });
+  if (canApplicants) legend.push({ name: "추정 총 지원자", scale: "모집인원 × 경쟁률(화면 계산, 0.5 이상 올림)", def: "발표된 경쟁률이 반올림된 값이라 실제 지원자 수와 다를 수 있고, 공식 지원자 수가 복원되는 것은 아닙니다. 대학이 지원자 수를 직접 발표하면 그 값을 발표 열에 보이고 이 칸은 ─로 둡니다." });
+  if (canDropped) legend.push({ name: "추정 탈락자", scale: "추정 총 지원자 − 모집인원 − 충원인원(화면 계산)", def: "합격 후 등록 포기·반복 충원 등을 반영하지 못하는 산술값이라 실제 불합격자 수나 합격 확률을 뜻하지 않습니다. 재료가 하나라도 없거나 차감 결과가 음수면 ─로 둡니다." });
 
   return (
     <details className="rs-legendbox" open>
