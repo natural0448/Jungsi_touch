@@ -157,8 +157,16 @@
   .et .rp-chart{padding:12px}
 }
 @media print{
-  .et .rp-sheet{overflow:visible;border-color:#999}
+  .et .rp-sheet{overflow:visible;border-color:#999;break-inside:avoid}
   .et .rp-sheet table{min-width:0}
-  .et .pc-track{outline-color:#999}
-  .et .rp-chart{break-inside:avoid}
+  /* 흑백 인쇄에서도 점·띠가 또렷하게: 색 의존을 없애고 명도 대비로 */
+  .et .pc-track{outline-color:#999;background:#F2F2F2}
+  .et .pc-track::before{opacity:1}
+  .et .pc-band{background:#777;opacity:.5}
+  .et .pc-dot{background:#333;border-color:#fff;box-shadow:0 0 0 1.5px #333}
+  .et .pc-band.strong{background:#000;opacity:.55}
+  .et .pc-dot.strong{background:#000;box-shadow:0 0 0 1.5px #000}
+  .et .pc-track.pending{background:repeating-linear-gradient(135deg,#EEE 0 6px,#fff 6px 12px)}
+  .et .rp-chart{break-inside:avoid;border-color:#999}
+  .et .rs-wait,.et .rp-combo-wait{color:#555}
 }
