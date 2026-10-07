@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.8",
+  "version": "1.9.10",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -23,7 +23,8 @@
     "frontend_reply": "docs/current/화면팀_회신요청_최종.md",
     "frontend_followup": "docs/current/화면팀_후속작업_지시.md",
     "runtime_connection_preparation": "docs/current/Supabase_실행자료_연결.md",
-    "supabase_deployment": "docs/current/Supabase_배포_화면_후속작업.md"
+    "supabase_deployment": "docs/current/Supabase_배포_화면_후속작업.md",
+    "history_display": "docs/current/1페이지_공식자료_추정표기_시사.md"
   },
   "users": {
     "primary": "학생·학부모",
@@ -39,7 +40,7 @@
     {
       "id": "REQ-01",
       "title": "공식 입시결과 조회",
-      "description": "1페이지는 개인 성적 없이 대학·학과를 검색하고 대학 발표 지표명·결과치·단위·출처를 제공한다. 자체 누적·예상컷·개인 분석으로 미발표 값을 채우지 않는다."
+      "description": "1페이지는 개인 성적 없이 대학·학과를 검색하고 대학 발표 지표명·결과치·단위·출처를 제공한다. 자체 누적·예상컷·개인 분석으로 미발표 값을 채우지 않는다. 추정 총 지원자·추정 탈락자 2열은 공식 값과 분리된 화면 파생값으로 유지한다. 산식·오차·실제 불합격자수와의 차이를 표시하고 동일 학년도/모집행/통계 분모·자료 결측을 검사한다. 공식 DTO·발행 자료에 추정값을 추가하지 않는다."
     },
     {
       "id": "REQ-02",
@@ -186,14 +187,15 @@
         "REQ-25",
         "REQ-26"
       ],
-      "purpose": "개인 성적 없이 공식 결과를 검색한다.",
+      "purpose": "개인 성적 없이 공식 결과를 검색하고, 분리된 추정 2열은 표기·산술 조건에 따라 표시한다.",
       "score_required_to_browse": false,
       "operations": [
         "session.read",
         "history.search",
         "recruitment.read"
       ],
-      "prototype": "docs/planning/2026-09-30-v0.12/preview/history.html"
+      "prototype": "docs/planning/2026-09-30-v0.12/preview/history.html",
+      "presentation_contract_ref": "history_presentation_contract"
     },
     {
       "id": "PAGE-02",
@@ -2637,7 +2639,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.8",
+        "contract_version": "1.9.10",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2811,7 +2813,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.8",
+        "contract_version": "1.9.10",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2977,7 +2979,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.8",
+        "contract_version": "1.9.10",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -2996,7 +2998,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.8",
+        "contract_version": "1.9.10",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3021,7 +3023,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "planned",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.8",
+        "contract_version": "1.9.10",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3066,7 +3068,7 @@
     }
   },
   "pending": [
-    "SUP01 별도 정시 FastAPI·SUP02 public.jeongsi_passes 목표는 확정. 현재 entitlements/session v1 실행은 불변이고 DDL/사용자키/권한 SQL·관리자/BFF CR·어댑터·실DB/실Auth/배포/보안 인수는 미완료.",
+    "현재 회원판정은 jungsi_backend.entitlements/session v1을 유지한다. public.jeongsi_passes는 명시 연결 준비만이며 기본 전환을 하지 않는다. 운영 플랫폼은 Google Drive·Supabase와 DEV-010 기준을 따른다.",
     "운영 DB에 추가 마이그레이션 적용 후 실제 UTC/timestamptz/date 및 권한/소유권 트랜잭션 검수",
     "Drive OAuth·토큰갱신운영/필요adapter 별도개발·입출력folder/승인명부·실read/별도write 검수; approved0 HOLD",
     "자체 추정 모형의 실제 캠퍼스 식별·운영 명부 등록/발행과 전국 대학 공식 실행 규칙·연도보정·예상/판단 근거의 검증/승인 및 변경 범위 검산",
@@ -3090,7 +3092,8 @@
     "이전 외부 화면 워커의 live 설정 인계는 역사 기록이다. 새 운영 인계는 Google Drive·Supabase 전용 배포 계약을 따르며 API 주소·공개 Auth·서버 relay·화면 제공 범위와 실제 계정/브라우저를 같은 후보로 확인한다.",
     "DEV-008 명시 중계 인증·재귀 응답 경계는 PR17/develop 합성 인수 완료. 기본 연결 전환은 별도이며 실제 BFF/CSRF/브라우저·Auth/이용권/DB·공유 사용량 한도·배포 인수가 남아 있다.",
     "DEV-009 연결 코드는 PR19/develop 합성 인수 완료다. 사용자 최신 지시로 운영 플랫폼은 Google Drive·Supabase로 한정하며 Python/FastAPI는 로컬 검산 기준으로 보존한다. DEV-010 Edge 호환 구현·최소 native 승인/발행·화면 제공 범위·실제 운영과 포함 사용량 인수는 미완료다.",
-    "DEV-010: 외부 유료 호스팅·추가 서버·유료 부가 기능 없이 Supabase Edge 대응을 진행한다. 기존 요금제/Spend Cap 검수와 Google Drive Apps Script 화면 제공 범위 확인 전 실제 배포/비용 검증 완료로 기록하지 않는다."
+    "DEV-010: 외부 유료 호스팅·추가 서버·유료 부가 기능 없이 Supabase Edge 대응을 준비한다. Apps Script 웹앱은 검토 후보 포함만 승인됐으며 실제 배포/화면 교체·기존 요금제/Spend Cap·운영 보안 인수는 미완료다.",
+    "1페이지 추정 2열 유지·보완과 로컬 catalog 시사 준비: 공식 지표 의미 대응/동일 통계 범위·최소 native 변환·승인/신뢰 해시/기대값·별도 수시 반입 출처와 화면 모드·외부 브라우저 인수가 남아 있다. source-only/CSV 저장 건수는 발행과 시사 완료를 뜻하지 않는다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -3834,6 +3837,32 @@
         "REQ-26"
       ],
       "summary": "사용자 최신 플랫폼/비용 지시를 반영해 Render 제안을 실행 전 철회하고 Google Drive·기존 Supabase만 사용하는 DEV-010을 등록한다. Python/FastAPI 검산은 보존하고 운영은 TypeScript/Deno Edge 호환이 필요하다. 정확한 relay 계약·최신 native 발행 감지·최소 자료와 화면 인계를 보완하며 실제 운영/과금 검증과 화면 제공 방식은 미완료다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-01",
+        "REQ-13",
+        "REQ-18",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "다른 PC develop4c3c577와 명세1.9.8을 동기화한 뒤 화면팀 추정표기/초안시사 요청을 공통 기획1.9.9에 반영한다. 추정 2열은 유지하되 공식 지표와 분리·통계 분모/학년도/모집행·산술 한계·결측/0/음수 정책을 명시한다. 시사는 기존 로컬 catalog 최소 후보로 준비하고 상태/API/DTO·발행·기본 이용권은 변경하지 않는다. 사용자께서 Apps Script 검토 후보 포함만 승인했으며 실제 배포/숫자/브라우저 인수는 미완료다. 별도 수시 반입은 출처/사용 경로 검토 대기로 구분한다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-01",
+        "REQ-13",
+        "REQ-18",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "서비스팀의 독립 검토에서 확인한 두 모호함을 보완한다. 공식지원자A의 추정총지원자칸은 ─, 탈락자는 A−Q−C로 계산하며 R은 이 분기의 필수재료가 아니다. A없으면 기존Q/R/C모두필수다. catalog-only 로컬 readiness의 ready/production_false와 실제자료hold/시험미제공·Page1 API대조를 구분하고 v6native와최신정본/모집정보pending을 함께 기록한다. DTO·API·코드실행경로·원자료/발행·기본회원판정은 변경하지 않는다."
     },
     {
       "date": "2026-10-07",
@@ -6504,7 +6533,9 @@
       "observed_counts와 estimated_weights의 의미를 표시하고 전체 국수탐2/규칙 필수입력 비교집단의 차이를 명시한다.",
       "동점 구간 {lower,upper}, UTC Z 시각의 서울 표시, 실제 수능/모평/연도보정 추정을 구분한다.",
       "3페이지 전체 유료 검색을 유지하고4페이지 학과별 도전/핵심/여유/보류 및 와일드카드에서 근거를 표시한다.",
-      "관리 화면은 소비자 4개 탭과 분리하고 서버 관리 capability/허용 학교로 생성·검증·조정·승인·발행을 수행한다."
+      "관리 화면은 소비자 4개 탭과 분리하고 서버 관리 capability/허용 학교로 생성·검증·조정·승인·발행을 수행한다.",
+      "1페이지 추정 2열은 history_presentation_contract의 공식 지표 분리·동일 학년도/모집행/통계 분모·정확 소수·오차/산술 한계·결측/0/음수 정책을 따른다. 공식 history_metric DTO와 발행 자료는 불변이다.",
+      "초안 시사는 기존 로컬 경로의 최소 catalog 후보 준비부터 진행한다. 별도 preview 상태/DTO나 source-only 승인 우회를 도입하지 않으며 운영 native 발행·4페이지 수치 검수와 구분한다."
     ],
     "mode_rules": [
       "합성 모드는 명시적 synthetic 설정만 사용하며 실서버 실패에서 자동 합성 대체하지 않는다.",
@@ -7081,7 +7112,8 @@
     },
     "security_contract_ref": "security_contract",
     "security_transition_status": "pending_runtime_implementation",
-    "latest_followup_ref": "supabase_operations_handoff_contract.current_followup"
+    "latest_followup_ref": "supabase_operations_handoff_contract.current_followup",
+    "history_display_ref": "history_presentation_contract"
   },
   "contract_review": {
     "format": "jungsi.contract-review/v1",
@@ -13354,16 +13386,23 @@
       "branch": "feature/presentation-foundation",
       "hosting_status": "scope_confirmation_pending",
       "candidate": "google_drive_apps_script_web_app",
-      "candidate_permission": "user_input_pending",
+      "candidate_permission": "user_approved_for_feasibility_review_only",
       "existing_external_preview": "historical_preserved_not_approved_as_new_platform",
       "handoff": [
         "최신 develop의 공통 명세를 자기 브랜치에 정상 merge하고 화면 변경을 보존해 생성 문서와 정확 HEAD CI를 갱신한다.",
         "relay는 예고가 아니라 X-Jungsi-Relay-Token 확정 계약이다. 서버 전용 비밀은 브라우저에 넣지 않고 사용자 Bearer·세션/CSRF·현재 권한을 함께 검수한다.",
         "발행 감지의 과거 draft 개수 기준선을 최신 native 명부의 승인·발행 버전/해시와 기능별 기대값으로 교체한다.",
         "API 기본 주소·공개 Auth 설정·비공개 relay 전달·native 기대값은 같은 승인 후보에서 받는다. 주소를 임의로 만들거나 source-only 응답으로 live 전환하지 않는다.",
-        "Google Drive Apps Script의 화면 제공 허용 여부를 확인한다. 현재 Next.js/기존 외부 워커 화면이 Supabase 안에서 그대로 호스팅된다고 가정하지 않는다.",
+        "Google Drive Apps Script 웹앱은 검토 후보 포함이 승인됐다. 기존 Next.js/쿠키 세션·사용자 JWT·BFF/CSRF·relay·HTTP 계약·호출 제한의 호환성을 먼저 검토하고 실제 배포는 별도 결정한다.",
         "실제 브라우저 HTML/JS/JSON/source map/저장소·401/403/503·성공 점수와 판단 pending·서울 시각 표시를 같은 후보로 검수한다."
-      ]
+      ],
+      "candidate_decision": {
+        "date": "2026-10-07",
+        "scope": "Google Apps Script 웹앱을 화면 제공 방식 검토 후보에 포함",
+        "deployment_authorized": false,
+        "existing_frontend_replacement_authorized": false,
+        "compatibility_review": "NOT_RUN"
+      }
     },
     "phases": [
       {
@@ -13438,6 +13477,154 @@
       "Number_or_Math_round_equivalence_assumed": false,
       "heavy_model_generation_in_request_allowed": false,
       "rule": "환산·누백의 유리수/정확 소수·명시 반올림과 경계값을 Python 기준과 독립 대조한다. TypeScript Number/Math.round만으로 동등성을 가정하지 않는다. JSON 정수 키·불리언/비유한 값·버전/학년도/시험/모집행 결속과 UTC/서울 변환을 함께 비교한다. 대규모 모형 생성은 보존된 오프라인 검수 작업과 발행본으로 구분하고 Edge 요청에 그대로 넣지 않는다."
+    }
+  },
+  "history_presentation_contract": {
+    "format": "jungsi.history-display/v1",
+    "revision": "2026.10.07.v2",
+    "page": "PAGE-01",
+    "path": "/admissions/results",
+    "member_tiers": [
+      "standard",
+      "paid"
+    ],
+    "requirements": [
+      "REQ-01",
+      "REQ-13",
+      "REQ-18",
+      "REQ-20",
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "operations": [
+      "history.search",
+      "recruitment.read"
+    ],
+    "status": "planning_recorded_external_implementation_and_browser_acceptance_pending",
+    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다.",
+    "estimated_columns": [
+      {
+        "id": "estimated_applicants",
+        "label": "추정 총 지원자",
+        "formula": "동일 모집행의 공식 경쟁률 분모 모집인원 × 공식 경쟁률을 정확 소수로 계산한 뒤 0.5 이상 올림하여 정수 표시"
+      },
+      {
+        "id": "estimated_non_admitted",
+        "label": "추정 탈락자",
+        "formula": "공식 지원자수 A가 검수됐으면 A − 모집인원 Q − 충원인원 C, 없으면 ROUND_HALF_UP(Q × 경쟁률 R) − Q − C; 동일 모집행/통계 분모·단계 확인 및 결과 비음수 필수"
+      }
+    ],
+    "rules": [
+      "발표 지표 뒤 별도 추정 2열에만 표시한다. 머리글에 추정을 명시하고 회색 배경·범례로 구분한다.",
+      "공식 지원자수 A가 없을 때는 검수된 모집인원 Q·경쟁률 R·충원인원 C를 모두 요구하고 하나라도 없으면 두 파생값 모두 ─다. 공식 A가 있을 때는 발표 영역 A를 표시하고 추정 총 지원자 칸은 ─, 추정 탈락자만 A−Q−C로 계산한다. 이 분기에 경쟁률 R은 필요 없으며 Q/C 결측·범위 불일치면 탈락자 칸은 ─다. 실제 0은 결측으로 바꾸지 않는다.",
+      "같은 학년도·대학/캠퍼스·모집단위·전형·모집군과 동일 통계 범위의 자료만 묶는다. 과거 경쟁률에 2027 모집인원을 곱하지 않는다.",
+      "곱셈의 모집인원은 경쟁률을 산출한 공식 분모다. 최초/이월 전/최종인원 중 이름이 비슷한 값을 임의 선택하지 않는다. 분모와 모집 단계가 확인되지 않으면 ─다.",
+      "공식 지원자수 A가 동일 학년도/캠퍼스/모집행/전형/군/통계 단계·대상으로 검수되면 공식 영역의 발표 지표로 표시한다. 추정 총 지원자 칸은 ─로 비우고 추정 탈락자 칸만 같은 Q/C 정의·범위에서 A−Q−C로 표시한다. 공식 A와 추정 Q×R을 같은 칸에 섞거나 병기하지 않는다. A−Q−C도 산술 추정이며 실제 불합격자수를 뜻하지 않는다.",
+      "지원자수는 history_metric의 metric_name·metric_definition·unit·publication_status·출처로 구분한다. 영문 고정 필드 applicant_count가 있다고 가정하거나 문자열 포함 검사만으로 지표를 합치지 않는다. 데이터팀이 검수한 의미 대응을 사용한다.",
+      "모집·충원은 명 단위의 비음수 정수, 경쟁률은 공식 정의에 맞는 유한 비음수 값만 사용한다. 문자열 원문·백분율·충원율·최종 예비번호·최종 등록인원을 충원인원으로 치환하지 않는다.",
+      "공식 경쟁률이 반올림된 값이면 역산 지원자수에도 오차가 생긴다는 주의 문구를 표시한다. 공식 지원자수를 복원했다고 설명하지 않는다.",
+      "추정 탈락자는 모집인원과 발표 충원인원을 차감한 산술 지표다. 합격 후 등록 포기·반복 충원 등의 차이를 반영하지 못하므로 실제 불합격자수나 합격확률로 해석하지 않는다는 주의 문구를 표시한다.",
+      "차감 결과가 음수이거나 정의/통계 범위가 충돌하면 ─와 산출 불가 사유를 표시한다. 임의 0 보정·음수 인원 표시·다른 학년도 대체는 하지 않는다.",
+      "추정값과 범례는 화면에서만 파생한다. DTO·source metric·native 발행 자료·운영 DB·데이터팀 공식 수치 검산에 넣지 않는다. 공식 수치 대조와 화면 산술 대조는 별도 영수증이다.",
+      "2027 모집인원 상자는 최초 인원·전체 변경분·공식 최종인원·상태/기준일을 그대로 구분한다. 과거 입결 표의 산술 재료로 사용하지 않는다."
+    ],
+    "preview": {
+      "selected_preparation": "C_local_review_package",
+      "reason": "기존 로컬 Caller와 별도 승인 명부 경로로 최소 1페이지 시사 후보부터 준비한다. 시사는 발행 판단을 대신하지 않는다.",
+      "state_model_unchanged": true,
+      "operational_draft_read_allowed": false,
+      "new_preview_DTO_flag_allowed": false,
+      "source_flag_only_promotion_allowed": false,
+      "automatic_publication_allowed": false,
+      "minimum_dependencies": [
+        "catalog"
+      ],
+      "local_preconditions": [
+        "검수한 최소 catalog native 후보·신뢰 SHA256·원본→native 계보·공식 지표 의미 대응·정확 비교 모집행과 기대값을 먼저 고정한다.",
+        "local 선택명부의 path는 수신 PC 경로이며 신뢰 명부·승인 문서·수신 PC 시험 세션을 기존 로컬 계약으로 결속한다. 작성·형식 통과만으로 승인됐다고 간주하지 않는다.",
+        "1페이지 시사에는 catalog만 최소 선택한다. 2~4페이지 산출용 exam_pack/total_model/conversion/percentile/analysis 등의 승인 근거는 각 기능이 필요할 때 별도로 준비한다.",
+        "catalog-only 시사는 기존 local factory로 가능하다. /health/ready의 local_ready=true·production_ready=false 및 real_data.status=hold/exam_binding=NOT_PROVIDED를 Page1 자료 자체의 승인·API/기대값 인수와 구분한다. health 정상으로 전체 2~4페이지 준비 완료를 주장하지 않는다.",
+        "가상 학생 성적과 로컬 시험 subject만 사용하며 운영 DB·발행 상태를 바꾸지 않는다. 메모리 저장 결과는 재시작 시 유실되고 실제 학생 저장 완료로 표시하지 않는다.",
+        "부족한 자료와 미승인 모형은 기존 pending/503으로 보존한다. 4페이지까지 시사를 위해 숫자·곡선·판단을 만들어 넣지 않는다.",
+        "화면팀이 수신본 해시/선택명부/화면 SHA·역할·자료 버전과 공식 지표 대조·화면 산술 대조·브라우저 전달물 결과를 별도로 기록한다.",
+        "v6 고정 native와 최신 원자료/정제 포인터는 다른 버전이다. 검수한 후보의 정확한 source/native 버전·해시와 현재 정본 대비 변경/제외 범위를 기록한다. 모집인원 object가 없는 카탈로그는 recruitment.read의 pending/recruitment_not_published와 빈 추정 칸이 정상이며 이를 0으로 채우지 않는다."
+      ],
+      "alternatives": [
+        [
+          "A",
+          "검수 통과분 부분 발행",
+          "기능별 최소 native 후보의 검수·승인·불변 발행·선택을 완료한 뒤 검토한다. source-only의 draft/시각만 변경하는 방식은 사용하지 않는다."
+        ],
+        [
+          "B",
+          "관리자 검수 시사 상태 추가",
+          "상태·API·DTO·권한·캐시/보안/발행 계약을 바꾸므로 별도 CR 검토 대상으로 남긴다. 현재 경로에 운영 draft 우회를 넣지 않는다."
+        ],
+        [
+          "C",
+          "로컬 시사 꾸러미",
+          "이번 준비 경로다. 실제 꾸러미 수신·승인·화면 검수는 해당 영수증이 있을 때만 완료로 기록한다."
+        ]
+      ],
+      "readiness": "minimum_native_catalog_approval_and_delivery_pending",
+      "first_preview_scope": "PAGE-01_official_history_and_recruitment",
+      "full_four_page_numeric_preview": "NOT_RUN",
+      "ETA_rule": "학교/모집행·지표 범위·결측·PK/공식 근거·native 변환·독립 대조·승인 담당이 고정된 뒤 담당자가 예상 시점을 기록한다. 저장 건수로 날짜를 약속하지 않는다.",
+      "local_required_evidence": [
+        "separate_local_approval_evidence",
+        "selection_manifest_trusted_SHA256",
+        "approved_catalog_body",
+        "native_version_bytes_hash_and_source_lineage",
+        "engine_false_rejection_preserved",
+        "receiving_PC_DPAPI_and_current_test_session",
+        "loopback_and_standard_paid_authorization",
+        "Page1_API_expected_value_receipt_separate_from_health"
+      ]
+    },
+    "separate_import": {
+      "reported_source": "외부 화면팀이 다른 PC Downloads의 admission-results_3.json을 에듀터치 본체에 반입했다고 보고했다.",
+      "verification_status": "external_report_only_origin_scope_publication_and_actual_usage_pending",
+      "rules": [
+        "이 반입은 정시 정본 CSV/Supabase source 등록과 다른 자료 흐름이다. 수시/정시 이름이나 학생부 지표만으로 분류를 확정하지 않는다.",
+        "파일 SHA256·원문 출처/학년도/전형·공개 이용 범위·반입 위치/관계·화면 사용 경로와 합성/live 모드를 소유자가 기록한다. 두 흐름을 자동 조인하거나 1페이지 정시 발행본으로 채택하지 않는다.",
+        "원본/기존 반입/이력은 보존한다. 개발자의 롤백 가능 보고는 사용자 삭제 승인이나 실제 삭제 완료를 뜻하지 않는다. 분류/출처 불명 값은 발행 후보에서 보류한다."
+      ]
+    },
+    "frontend_tasks": [
+      [
+        "FE-HISTORY-01",
+        "feature/presentation-foundation",
+        "두 추정 열의 동일 통계 범위·정확 소수/반올림·결측/0/음수·공식 지원자수 우선·주의 문구를 검토하고 해당 SHA의 화면 영수증을 남긴다."
+      ],
+      [
+        "FE-PREVIEW-01",
+        "외부 화면팀·데이터팀·서비스 개발팀",
+        "최소 native catalog의 자료 의미 대응·신뢰 해시·기대값·로컬 승인/수신을 준비하고 기존 Caller로 1페이지 시사를 검수한다."
+      ],
+      [
+        "FE-SOURCE-02",
+        "외부 화면팀·데이터팀",
+        "admission-results_3.json의 별도 출처·반입·화면 모드 증거를 회신하고 정시 정본 흐름과의 혼용 여부를 확인한다."
+      ],
+      [
+        "DEP-04-APPS",
+        "feature/presentation-foundation",
+        "Apps Script 웹앱은 검토 후보 포함만 승인됐다. 기존 Next.js·세션/JWT·BFF/CSRF·relay·HTTP 방법/상태/헤더·호출 제한/비용·보안 전송물의 호환성 표와 후속 제안을 만든다. 새 배포 승인으로 확대하지 않는다."
+      ]
+    ],
+    "verification": {
+      "planning_and_routing": "updated_await_same_snapshot_validation",
+      "official_metric_mapping": "service_contract_reviewed_data_semantic_mapping_pending",
+      "external_frontend_source_claim": "reported_not_independently_accepted",
+      "native_catalog_package": "NOT_DELIVERED",
+      "actual_local_browser": "NOT_RUN",
+      "operational_publication": "NOT_RUN",
+      "files_deleted": 0,
+      "DTO_changes": false,
+      "new_API_operations": 0,
+      "local_catalog_readiness": "code_review_supported_actual_local_NOT_RUN",
+      "independent_contract_review": "service_team_read_only_two_findings_incorporated"
     }
   }
 }

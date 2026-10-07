@@ -1731,6 +1731,35 @@ def generated_files(spec):
             if path in files:
                 link=('../../docs/current/' if path=='apps/web/README.md' else '../docs/current/' if path=='database/README.md' else '')+'Supabase_배포_화면_후속작업.md'
                 files[path]=files[path].replace(marker,'\n\n## 현재 운영 플랫폼과 화면 인계\n\n[Google Drive·Supabase 전용 배포 계약]('+link+')이 이전 별도 FastAPI 호스팅/외부 워커 인계보다 우선한다. Python 검산은 보존하고 Edge 호환과 실제 인수는 후속 작업이다. relay는 X-Jungsi-Relay-Token 확정 계약이며 발행 감지는 최신 승인 native 버전/해시를 사용한다. 화면 제공 범위와 요금제 포함량 검수는 완료 전 상태를 유지한다.'+marker)
+    history=spec.get('history_presentation_contract')
+    if history:
+        marker='\n\n<!-- jungsi:generated'
+        preview=history['preview']; verification=history['verification']
+        history_text=(history['decision']+'\n\n## 추정 2열의 표시와 산술'+'\n\n'+
+            table(['열','산식'],[[r['label'],r['formula']] for r in history['estimated_columns']])+
+            '\n\n'+'\n'.join('- '+r for r in history['rules'])+
+            '\n\n## 발행 전 시사 준비\n\n선택한 준비 경로: '+preview['selected_preparation']+'. '+preview['reason']+
+            '\n\n'+table(['안','방식','적용 조건'],preview['alternatives'])+
+            '\n\n'+'\n'.join('- '+r for r in preview['local_preconditions'])+
+            '\n\n'+preview['ETA_rule']+
+            '\n\n## 별도 자료 반입 흐름\n\n'+history['separate_import']['reported_source']+
+            '\n\n상태: '+history['separate_import']['verification_status']+'.\n\n'+
+            '\n'.join('- '+r for r in history['separate_import']['rules'])+
+            '\n\n## 담당 후속 작업\n\n'+table(['작업','담당','수행 범위'],history['frontend_tasks'])+
+            '\n\n## 현재 검증 범위\n\n'+table(['항목','상태'],list(verification.items()))+
+            '\n\n기획 검산은 외부 화면 구현·로컬 꾸러미 승인/수신·실제 시사·운영 발행/배포/보안 인수를 대신하지 않는다.')
+        history_path=spec['current_documents']['history_display']
+        files[history_path]=doc('1페이지 공식 자료·추정 표기·발행 전 시사',history_text)
+        summary=('\n\n## 1페이지 추정 2열과 초안 시사\n\n'+
+            '[공식 자료·추정 표기·시사 계약](1페이지_공식자료_추정표기_시사.md)을 따른다. '+
+            history['decision']+' 동일 학년도/모집행/통계 분모와 결측·실제0·음수를 검사하고 실제 불합격자수와의 차이를 표시한다. '+
+            'API의 공식 history_metric과 발행 상태는 불변이다. 기존 로컬 최소 catalog 시사 후보만 준비하며 승인·수신·브라우저·운영 발행은 별도 인수다.')
+        for key in ('planning','routing','architecture','workflow','presentation_handoff','api_dto','presentation_connection','local_verification','frontend_reply','frontend_followup','supabase_deployment','runtime_connection_preparation'):
+            path=spec['current_documents'].get(key)
+            if path in files:files[path]=files[path].replace(marker,summary+marker)
+        for path in ('apps/web/route_catalog.json','src/jungsi_touch/application/route_catalog.json'):
+            catalog=json.loads(files[path]);catalog['history_presentation_contract']=history
+            files[path]=json.dumps(catalog,ensure_ascii=False,indent=2)+'\n'
     for path,metadata in spec['workflow'].get('synchronized_work_items',{}).items():
         item=dict(metadata)
         item['scope']=spec[item['contract_ref']]
