@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.5",
+  "version": "1.9.6",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -1683,7 +1683,9 @@
       "symbols": [
         "DriveClient",
         "DriveDataProvider",
-        "MissingDataProvider"
+        "MissingDataProvider",
+        "_integer_keys",
+        "_rank_distribution"
       ]
     },
     {
@@ -2067,6 +2069,30 @@
         "SecuritySettings",
         "SecuredBoundary",
         "create_secured_app"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/supabase_runtime.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-20",
+        "REQ-23",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "RuntimeArtifactSelection",
+        "SupabaseRuntimeReadiness",
+        "create_supabase_secured_app",
+        "configured_supabase_app",
+        "configuration_status"
       ]
     }
   ],
@@ -2610,7 +2636,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.5",
+        "contract_version": "1.9.6",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2784,7 +2810,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.5",
+        "contract_version": "1.9.6",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2950,7 +2976,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.5",
+        "contract_version": "1.9.6",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -2967,9 +2993,9 @@
         "approved_on": "2026-10-07",
         "start_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
         "branch": "feature/application-pre-data-platform",
-        "status": "approved_for_implementation",
+        "status": "implemented_synthetic_verified_integration_pending",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.5",
+        "contract_version": "1.9.6",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3037,7 +3063,7 @@
     "live 연결: 에듀터치 본체와 같은 Supabase 프로젝트·쿠키 도메인 배포 설정과 실제 계정·이용권·관리 권한의 전체 연결 검증이 남아 있다(DEV-006 remaining).",
     "live 배포 설정: 운영 우리 서비스 API 주소(JUNGSI_API_URL)와 에듀터치 Supabase URL·publishable 키를 jeongsi-touch 워커 설정에 넣어야 실제 화면이 열린다. 에듀터치 본체의 /jeongsi 통로는 아직 관리자에게만 열려 있다.",
     "DEV-008 명시 중계 인증·재귀 응답 경계는 PR17/develop 합성 인수 완료. 기본 연결 전환은 별도이며 실제 BFF/CSRF/브라우저·Auth/이용권/DB·공유 사용량 한도·배포 인수가 남아 있다.",
-    "DEV-009 명시 Supabase 보안 factory·공급자별 설정·선택 native 실행 자료 사전 검수와 readiness를 구현한다. 최신 원자료/정제 정본→별도 native 검산/승인/발행→선택 연결→서버·실화면 인수를 순서대로 확인하며 배포 서비스 입력은 대기 중이다."
+    "DEV-009 연결 코드는 feature606e의 합성44/독립11/정상훅798/정확HEAD CI 검수를 통과했다. PR19 develop 통합 검수를 진행한다. 실제 native 검산·승인·불변발행·명부 선택 및 서버/Auth/DB/BFF/브라우저 인수는 NOT_RUN이고 배포 서비스 입력은 대기 중이다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -3733,6 +3759,22 @@
         "REQ-26"
       ],
       "summary": "DEV-009을 승인한다. 과거 source-only 관측과 최신 원자료/정제 정본·native 실행 발행본을 분리하고, 명시 Supabase 구성에서도 Drive 설정을 요구하는 readiness 문제를 재현해 공급자별 설정·최소 native 검수·안전한 health 연결을 개발한다. 기존22API/회원/session/기본경로와 원본을 보존하며 실제 발행·서버/브라우저 인수는 별도 증거로 확인한다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-20",
+        "REQ-23",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "DEV-009 feature606e의 공급자별 readiness·명시 native 선택과 자료 결속, 분석 내부 승인 검사 및 JSON 정수 점수 키 해석을 합성44/독립11/정상 commit·push798/정확HEAD CI로 확인했다. 구현 symbol과 환경 진입점·private CLI를 공통 명세에 등록하고 PR19 통합 검수를 진행한다. 실제 source→native 수치 승인·불변 발행과 운영 Auth/DB/BFF/브라우저/배포는 NOT_RUN이며 production_ready=false다."
     }
   ],
   "overall_analysis_contract": {
@@ -12870,7 +12912,7 @@
     "id": "DEV-009",
     "revision": "2026.10.07.v2",
     "basis_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
-    "code_status": "planned",
+    "code_status": "implemented_synthetic_verified_integration_pending",
     "production_ready": false,
     "branch": "feature/application-pre-data-platform",
     "requirements": [
@@ -12899,7 +12941,10 @@
       "session_format": "jungsi.session/v1",
       "existing_API_count": 22,
       "API_or_DTO_additions": false,
-      "local_verification_unchanged": true
+      "local_verification_unchanged": true,
+      "environment_factory": "configured_supabase_app",
+      "configuration_check_command": "python -m jungsi_touch.infrastructure.supabase_runtime --check-config",
+      "server_factory_command": "python -m uvicorn jungsi_touch.infrastructure.supabase_runtime:configured_supabase_app --factory --host 127.0.0.1 --port 8000 --no-access-log"
     },
     "source_lineage": {
       "canonical_private_pointers": [
@@ -12979,7 +13024,8 @@
         "JUNGSI_SUPABASE_RUNTIME_REGISTRY",
         "JUNGSI_SUPABASE_RUNTIME_SELECTION",
         "JUNGSI_RELAY_TOKEN"
-      ]
+      ],
+      "private_probe_symbol": "SupabaseRuntimeReadiness.probe"
     },
     "workflow": [
       {
@@ -13026,10 +13072,15 @@
       "BFF_browser_actual_acceptance": "NOT_RUN"
     },
     "verification": {
-      "status": "NOT_RUN",
-      "implementation_commit": null,
-      "synthetic_test_count": 0,
-      "CI": null,
+      "status": "PASS_SCOPED_SYNTHETIC_HTTP",
+      "implementation_commit": "606e8307883ea53340be850ea13674a19baa8f81",
+      "synthetic_test_count": 44,
+      "CI": {
+        "headSha": "606e8307883ea53340be850ea13674a19baa8f81",
+        "run_id": 37582748954,
+        "conclusion": "success",
+        "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37582748954"
+      },
       "actual_source_native_publication_Auth_DB_BFF_browser_deployment": "NOT_RUN",
       "cases": [
         "native_approved_selection_without_Drive_settings_can_be_ready",
@@ -13039,8 +13090,17 @@
         "relay_required_and_public_ready_four_fields_only",
         "legacy_and_local_factory_regressions",
         "private_preflight_provenance_without_public_secret_or_source_values",
-        "selected_native_cross_exam_pack_year_offering_rule_curve_bindings_must_match"
-      ]
+        "selected_native_cross_exam_pack_year_offering_rule_curve_bindings_must_match",
+        "native_analysis_bridge_JSON_canonical_integer_keys_roundtrip_and_noncanonical_collision_rejection",
+        "selected_analysis_embedded_curve_rule_approval_and_pack_binding",
+        "private_manifest_location_checked_relative_to_project_not_ancestor_outputs"
+      ],
+      "normal_commit_push_snapshot_test_count": 798,
+      "independent_synthetic_case_count": 11,
+      "integration": {
+        "status": "PR19_merge_candidate_verification_pending",
+        "PR": "https://github.com/natural0448/Jungsi_touch/pull/19"
+      }
     },
     "preservation": {
       "files_deleted": 0,
@@ -13057,6 +13117,8 @@
       "forecast publication needs its separate independent editor/approver and pinned context; source metadata is not a forecast draft"
     ],
     "planned_code_paths": [
+      "src/jungsi_touch/infrastructure/drive_provider.py",
+      "src/jungsi_touch/infrastructure/http_api.py",
       "src/jungsi_touch/infrastructure/supabase_runtime.py",
       "tests/test_supabase_runtime.py"
     ]
