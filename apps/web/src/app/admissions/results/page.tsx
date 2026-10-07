@@ -148,6 +148,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
               {filtered && <Link href={hrefWith(cur, { university: undefined, unit: undefined, region: undefined, group: undefined })}>조건 지우기</Link>}
             </div>
 
+            <CommonLegend univs={univs} hist={hist} />
+
             {univs.length === 0 ? (
               <section className="gate flat">
                 <h2>{words ? `‘${words}’에 맞는 모집단위가 없습니다` : "조건에 맞는 모집단위가 없습니다"}</h2>
@@ -186,7 +188,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   );
 }
 
-/** 한 모집단위: 2027 모집 인원 한 줄 + 2026~2024 결과 표(경쟁률·추정 지원자/탈락자 포함) + 지표 설명 */
+/** 한 모집단위: 2027 모집 인원 한 줄 + 2026~2024 결과 표(경쟁률·추정 지원자/탈락자 포함). 지표 설명은 목록 위 공통 한 번 */
 function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto }; years: Map<number, HistoryMetricDto[]> | undefined; rec: RecruitmentDto | null }) {
   // 이 모집단위가 발표해 온 지표 열(과거 3개 학년도 기준, 순서 고정)
   const seen: string[] = [];
@@ -202,23 +204,6 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
     if (n === "경쟁률" && canApplicants) cols.push({ key: "__applicants", label: "추정 총 지원자", derived: true });
     if (n === "충원인원" && canDropped) cols.push({ key: "__dropped", label: "추정 탈락자", derived: true });
   }
-  // 점수 종류·정의 안내(열마다 한 번) + 추정 산식
-  const legend = metricCols.map((n) => {
-    for (const y of PAST_YEARS) {
-      const m = (years?.get(y) ?? []).find((x) => x.metric_name === n);
-      if (m) return { name: n, scale: m.original_scale, def: m.metric_definition };
-    }
-    return { name: n, scale: null as string | null, def: null as string | null };
-  });
-  if (canApplicants) legend.push({ name: "추정 총 지원자", scale: "모집인원 × 경쟁률(화면 계산)", def: "발표된 경쟁률이 반올림된 값이라 실제 지원자 수와 다를 수 있습니다." });
-  if (canDropped) legend.push({ name: "추정 탈락자", scale: "추정 총 지원자 − 모집인원 − 충원인원(화면 계산)", def: "미등록·이월 등 대학 사정에 따라 실제와 다를 수 있습니다." });
-  // 출처는 열 대신 표 아래 한 줄로(학년도별 링크·날짜)
-  const sources: { y: number; url: string; as_of: string | null }[] = [];
-  for (const y of PAST_YEARS) {
-    const m = (years?.get(y) ?? []).find((x) => x.source_url);
-    if (m?.source_url) sources.push({ y, url: m.source_url, as_of: m.source_as_of });
-  }
-
   return (
     <li id={o.id} className="rs-off open">
       <div className="rs-offhd plain">
@@ -296,33 +281,63 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
           </table>
         </div>
       )}
-      {sources.length > 0 && (
-        <p className="rs-src">
-          출처(대학 발표):{" "}
-          {sources.map((x, i) => (
-            <span key={x.y}>
-              {i > 0 && " · "}
-              <a href={x.url} target="_blank" rel="noopener noreferrer">{x.y}학년도</a>
-              {x.as_of && <small className="num"> {plainDate(x.as_of)}</small>}
-            </span>
-          ))}
-        </p>
-      )}
-      {legend.length > 0 && (
-        <dl className="rs-legend">
-          {legend.map((l) => (
-            <div key={l.name}>
-              <dt>{l.name}</dt>
-              <dd>
-                {l.scale && <b>{l.scale}</b>}
-                {l.scale && l.def ? " · " : null}
-                {l.def ?? (l.scale ? null : "대학이 정의를 함께 발표하지 않았습니다.")}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      )}
     </li>
+  );
+}
+
+/**
+ * 지표 설명을 카드마다 반복하지 않고 목록 위에 한 번만 보여 준다(사용자 요청).
+ * 같은 지표라도 대학마다 척도·정의가 다를 수 있어, 화면에 나온 카드들에서 서로 다른
+ * 발표 정의가 섞여 있으면 그 사실을 적고 특정 대학의 정의를 전체 정의처럼 쓰지 않는다.
+ */
+function CommonLegend({ univs, hist }: { univs: { offerings: { line: string }[] }[]; hist: Map<string, Map<number, HistoryMetricDto[]>> }) {
+  const defs = new Map<string, { scale: string | null; def: string | null }[]>();
+  let canApplicants = false;
+  let canDropped = false;
+  for (const u of univs)
+    for (const o of u.offerings) {
+      const years = hist.get(o.line);
+      const seen: string[] = [];
+      for (const y of PAST_YEARS)
+        for (const m of years?.get(y) ?? []) {
+          if (!seen.includes(m.metric_name)) seen.push(m.metric_name);
+          const list = defs.get(m.metric_name) ?? [];
+          if (!list.some((d) => d.scale === m.original_scale && d.def === m.metric_definition))
+            list.push({ scale: m.original_scale, def: m.metric_definition });
+          defs.set(m.metric_name, list);
+        }
+      if (seen.includes("모집인원") && seen.includes("경쟁률")) {
+        canApplicants = true;
+        if (seen.includes("충원인원")) canDropped = true;
+      }
+    }
+  if (defs.size === 0) return null;
+
+  const names = [...METRIC_ORDER.filter((n) => defs.has(n)), ...[...defs.keys()].filter((n) => !METRIC_ORDER.includes(n))];
+  const legend = names.map((n) => {
+    const list = defs.get(n) ?? [];
+    if (list.length === 1) return { name: n, scale: list[0].scale, def: list[0].def ?? (list[0].scale ? null : "대학이 정의를 함께 발표하지 않았습니다.") };
+    return { name: n, scale: null, def: "대학마다 발표 척도·정의가 달라 각 표의 값은 그 대학 발표 기준입니다." };
+  });
+  if (canApplicants) legend.push({ name: "추정 총 지원자", scale: "모집인원 × 경쟁률(화면 계산)", def: "발표된 경쟁률이 반올림된 값이라 실제 지원자 수와 다를 수 있습니다." });
+  if (canDropped) legend.push({ name: "추정 탈락자", scale: "추정 총 지원자 − 모집인원 − 충원인원(화면 계산)", def: "미등록·이월 등 대학 사정에 따라 실제와 다를 수 있습니다." });
+
+  return (
+    <details className="rs-legendbox" open>
+      <summary>지표 설명 · 추정 산식</summary>
+      <dl className="rs-legend">
+        {legend.map((l) => (
+          <div key={l.name}>
+            <dt>{l.name}</dt>
+            <dd>
+              {l.scale && <b>{l.scale}</b>}
+              {l.scale && l.def ? " · " : null}
+              {l.def}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </details>
   );
 }
 

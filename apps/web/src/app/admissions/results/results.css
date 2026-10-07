@@ -82,7 +82,10 @@
 .et .rs-years tbody th{font-weight:800;color:var(--ink);background:none;white-space:nowrap}
 .et .rs-years tbody th small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
 .et .rs-years td small{color:var(--muted)}
-.et .rs-legend{display:grid;gap:3px;margin:0;padding:10px 16px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-2);line-height:1.55}
+/* 지표 설명: 카드마다 반복하지 않고 목록 위 공통 상자 한 번 */
+.et .rs-legendbox{margin:10px 0 2px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.et .rs-legendbox summary{cursor:pointer;padding:9px 16px;font-size:12px;font-weight:800;color:var(--ink)}
+.et .rs-legend{display:grid;gap:3px;margin:0;padding:0 16px 10px;font-size:11px;color:var(--ink-2);line-height:1.55}
 .et .rs-legend div{display:flex;gap:8px}
 .et .rs-legend dt{flex:none;min-width:96px;font-weight:700;color:var(--ink)}
 .et .rs-legend dd b{font-weight:700;color:var(--ink-2)}
@@ -91,9 +94,7 @@
   .et .rs-legend dt{min-width:84px}
 }
 
-/* 추정 열(화면 계산)·출처 줄 */
+/* 추정 열(화면 계산) */
 .et .rs-years th.derived{color:var(--ink-2);font-weight:700}
 .et .rs-years td.derived{background:var(--sub)}
 .et .rs-years td.derived .num{color:var(--ink-2)}
-.et .rs-src{margin:0;padding:8px 16px 0;font-size:11px;color:var(--muted)}
-.et .rs-src a{color:var(--ink-2);text-decoration:underline}
