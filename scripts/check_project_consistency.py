@@ -1090,6 +1090,7 @@ def runtime_connection_document(spec):
             '외부 화면 담당은 확정 API 주소와 공개 Auth 설정, 서버 전용 relay·세션/CSRF 계약 및 같은 native 버전의 기대값을 수령해 실제1~4페이지를 검수한다. API22/DTO·회원·소유권·성공 점수와 판단 pending 조건을 유지한다.\n\n'+
             '## 검수 상태와 남은 입력\n\n검수 '+c['verification']['status']+' · 실제 원자료→native 발행/Auth/DB/BFF/브라우저/배포 '+c['verification']['actual_source_native_publication_Auth_DB_BFF_browser_deployment']+'.\n\n'+
             '확인한 구현 '+str(c['verification'].get('implementation_commit'))+' · 합성 '+str(c['verification'].get('synthetic_test_count',0))+' · 독립 합성 '+str(c['verification'].get('independent_synthetic_case_count',0))+' · 정상 훅 '+str(c['verification'].get('normal_commit_push_snapshot_test_count',0))+' · CI '+str((c['verification'].get('CI') or {}).get('url','미실행'))+'. 세부 private probe 영수증은 공개 health에 포함하지 않는다.\n\n'+
+            'develop 인수 '+str((c['verification'].get('integration') or {}).get('develop_merge_commit','통합 대기'))+' · 통합 훅 '+str((c['verification'].get('integration') or {}).get('normal_commit_push_snapshot_test_count',0))+' · '+str((c['verification'].get('integration') or {}).get('PR','PR 대기'))+' · 병합 CI '+str(((c['verification'].get('integration') or {}).get('merge_CI') or {}).get('url','미실행'))+'. 코드 인수와 실제 운영 인수는 각각의 증거로 판단한다.\n\n'+
             '\n'.join('- '+x for x in c['remaining'])+'\n\n[작업 항목](../work_items/DEV-009-runtime-connection-preparation.json) · [Supabase 운영 인계](Supabase_운영_인수인계.md) · [필수 보안 기준](외부접근_데이터보호_개발기준.md)')
 
 

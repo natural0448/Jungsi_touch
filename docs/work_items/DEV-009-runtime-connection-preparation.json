@@ -5,9 +5,9 @@
   "approved_on": "2026-10-07",
   "start_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
   "branch": "feature/application-pre-data-platform",
-  "status": "implemented_synthetic_verified_integration_pending",
+  "status": "accepted_on_develop_scoped_synthetic_verified",
   "contract_ref": "runtime_connection_preparation_contract",
-  "contract_version": "1.9.6",
+  "contract_version": "1.9.7",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -27,7 +27,7 @@
     "id": "DEV-009",
     "revision": "2026.10.07.v2",
     "basis_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
-    "code_status": "implemented_synthetic_verified_integration_pending",
+    "code_status": "accepted_on_develop_scoped_synthetic_verified",
     "production_ready": false,
     "branch": "feature/application-pre-data-platform",
     "requirements": [
@@ -213,8 +213,26 @@
       "normal_commit_push_snapshot_test_count": 798,
       "independent_synthetic_case_count": 11,
       "integration": {
-        "status": "PR19_merge_candidate_verification_pending",
-        "PR": "https://github.com/natural0448/Jungsi_touch/pull/19"
+        "status": "accepted_on_develop_scoped_synthetic_verified",
+        "PR": "https://github.com/natural0448/Jungsi_touch/pull/19",
+        "feature_head": "08f73a4a71ac9b9a5cef323ff3c748090acc5ffc",
+        "develop_merge_commit": "493232832d663d7fea7b0fbb350de15055cd9ccf",
+        "same_reviewed_tree": "faa6b90fd3622ada04040474fc4076dbec141f9d",
+        "normal_commit_push_snapshot_test_count": 799,
+        "feature_CI": {
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37586180114",
+          "conclusion": "success"
+        },
+        "PR_CI": {
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37586185665",
+          "conclusion": "success"
+        },
+        "merge_CI": {
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37586473913",
+          "conclusion": "success"
+        },
+        "code_hashes_match_independent_evidence": true,
+        "actual_operations": "NOT_RUN"
       }
     },
     "preservation": {
