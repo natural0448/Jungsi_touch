@@ -22,6 +22,11 @@ from .forecast_inputs import DriveForecastInputProvider
 
 
 def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None,entitlements=None):
+    return _compose_app(settings=settings,repository=repository,data=data,sessions=sessions,clock=clock,
+                        forecast_repository=forecast_repository,forecast_inputs=forecast_inputs,entitlements=entitlements)
+
+
+def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None,entitlements=None,boundary=None):
     settings=settings or ServerSettings.from_environment()
     clock=clock or UtcClock()
     if repository is None: repository=PostgresRepository(settings.database_url) if settings.database_url else UnavailableRepository()
@@ -32,7 +37,7 @@ def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=Non
     sessions=sessions or SupabaseSessionProvider(settings.supabase_url,settings.supabase_key)
     auth=SessionService(sessions,repository if entitlements is None else entitlements,clock)
     forecast_store=forecast_repository or (PostgresForecastRepository(repository) if isinstance(repository,PostgresRepository) else None)
-    service=PlatformService(repository,data,clock,forecast_repository=forecast_store)
+    service=(PlatformService if boundary is None else boundary.platform)(repository,data,clock,forecast_repository=forecast_store)
     forecasts=ForecastPolicyService(forecast_store or UnavailableRepository(),forecast_inputs or DriveForecastInputProvider(data),clock)
     service.forecast_service=forecasts
     service.session_service=auth
@@ -41,11 +46,18 @@ def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=Non
     @app.middleware('http')
     async def safe_boundary(request,call_next):
         request.state.request_id=uuid4().hex
-        try: response=await call_next(request)
+        try:
+            if boundary is not None and (request.url.path.startswith('/api/v1/') or request.url.path=='/health/ready'):
+                boundary.verify(request)
+            response=await call_next(request)
+        except PlatformError as error:
+            response=(boundary.error(request,error.code,error.http_status) if boundary is not None else
+                      JSONResponse(status_code=503,content=dict(status='error',error={'code':'backend_dependency_unavailable'},request_id=request.state.request_id)))
         except Exception:
             # Adapter failures never place raw data, connection URLs or tokens in
             # response/log exception text. Detailed private diagnostics are separate.
-            response=JSONResponse(status_code=503,content=dict(status='error',error={'code':'backend_dependency_unavailable'},request_id=request.state.request_id))
+            response=(boundary.error(request) if boundary is not None else
+                      JSONResponse(status_code=503,content=dict(status='error',error={'code':'backend_dependency_unavailable'},request_id=request.state.request_id)))
         response.headers['Cache-Control']='no-store'
         response.headers['X-Request-ID']=request.state.request_id
         response.headers['X-Content-Type-Options']='nosniff'
@@ -57,7 +69,14 @@ def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=Non
     @app.exception_handler(PlatformError)
     @app.exception_handler(OverallAnalysisError)
     async def failure(request,error):
+        if boundary is not None:return boundary.error(request,error.code,error.http_status)
         return JSONResponse(status_code=error.http_status,content=dict(status='error',error={'code':error.code},request_id=request.state.request_id))
+
+    if boundary is not None:
+        from starlette.exceptions import HTTPException
+        async def safe_http_failure(request,error):
+            return boundary.error(request,'route_not_found' if error.status_code==404 else 'method_not_allowed',error.status_code)
+        app.add_exception_handler(HTTPException,safe_http_failure)
 
     @app.get('/health/live')
     def live():return dict(status='alive',server_timezone='UTC',now=utc_text(clock.now()))
@@ -79,6 +98,7 @@ def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=Non
                     entitlement_status={'status':'verified' if isinstance(result,dict) and result.get('status')=='verified' else 'failed'}
                 except Exception:entitlement_status={'status':'unavailable'}
         configured=not missing and db['status']=='verified' and (entitlement_status is None or entitlement_status['status']=='verified')
+        if boundary is not None:return boundary.ready(configured)
         extra={} if entitlement_status is None else {'entitlements':entitlement_status}
         return JSONResponse(status_code=200 if configured else 503,content=dict(status='ready' if configured else 'configuration_pending',
             missing_settings=missing,database=db,auth='configured_not_session_verified' if settings.supabase_url and settings.supabase_key else 'not_configured',

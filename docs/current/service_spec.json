@@ -2027,6 +2027,46 @@
         "REQ-22"
       ],
       "symbols": []
+    },
+    {
+      "path": "src/jungsi_touch/application/public_response.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_integration_pending",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "PublicResponseProjection",
+        "ProjectedPlatformService"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/public_response_schemas.json",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_integration_pending",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/secured_http.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_integration_pending",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "SecuritySettings",
+        "SecuredBoundary",
+        "create_secured_app"
+      ]
     }
   ],
   "workflow": {
@@ -3631,6 +3671,15 @@
         "REQ-26"
       ],
       "summary": "DEV-008 공통 음성 검수 입력을 현재 기획 상태와 독립시켜 planned 및 구현 증거가 있는 상태 모두에서 누락 증거와 registry 부재를 정확히 검사한다. 코드·문서의 운영 준비 승격은 하지 않는다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "DEV-008 최초 구현 36bf42aa532701aa493260bd54098bd8c5ccaa22의 정상 고정 스냅샷 741개 및 보안 HTTP 57개 PASS 증거를 기록한다. 기획팀이 공통 테스트 2건의 planned/구현완료 상태 의존성을 보완해 승인 전달했다. 최신 병합의 정상 훅·CI는 별도로 검증하며 실제 Auth·DB·BFF·브라우저·배포 인수와 전역 보안 gate는 미완료로 유지한다."
     }
   ],
   "overall_analysis_contract": {
@@ -12536,7 +12585,7 @@
     "id": "DEV-008",
     "revision": "2026.10.07.v1",
     "policy_revision": "2026.10.06.v1",
-    "code_status": "planned",
+    "code_status": "implemented_synthetic_verified_integration_pending",
     "production_ready": false,
     "basis_commit": "e6b8aacd0ba7057f80aa766b07a3137be6160643",
     "branch": "feature/application-pre-data-platform",
@@ -12682,9 +12731,9 @@
       }
     },
     "verification": {
-      "status": "NOT_RUN",
-      "implementation_commit": null,
-      "synthetic_test_count": null,
+      "status": "PASS_SCOPED_SYNTHETIC_HTTP",
+      "implementation_commit": "716affb4915a2e7e5af690da7574262fa2459c86",
+      "synthetic_test_count": 57,
       "CI": null,
       "cases": [
         "all_22_operation_bindings_and_contract_fields",
@@ -12698,10 +12747,15 @@
         "public_live_protected_redacted_ready",
         "legacy_and_local_factory_regressions"
       ],
-      "actual_Auth_DB_BFF_browser_deployment": "NOT_RUN"
+      "actual_Auth_DB_BFF_browser_deployment": "NOT_RUN",
+      "candidate_focused_test_count": 57,
+      "fixed_implementation_evidence": "normal_commit_hook_fixed_snapshot_748_PASS",
+      "full_snapshot_test_count": 748,
+      "evidence_ref": "outputs/dev008_development/20261007T013229108129Z/fixed_merge_receipt.json"
     },
     "planned_code_paths": [
       "src/jungsi_touch/application/public_response.py",
+      "src/jungsi_touch/application/public_response_schemas.json",
       "src/jungsi_touch/infrastructure/secured_http.py"
     ],
     "remaining": [
@@ -12717,6 +12771,8 @@
       "data_promotion_allowed": false,
       "actual_DB_write_deployment_allowed": false,
       "main_ready_allowed": false
-    }
+    },
+    "registry_path": "src/jungsi_touch/application/public_response_schemas.json",
+    "registry_format": "jungsi.public-response-schemas/v1"
   }
 }
