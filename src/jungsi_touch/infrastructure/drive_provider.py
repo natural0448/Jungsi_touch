@@ -1,4 +1,5 @@
 """Pinned Drive releases and append-only result uploads; no latest-file adoption."""
+from copy import deepcopy
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -20,6 +21,31 @@ def drive_id(value):
     if not isinstance(value,str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,200}',value):
         raise PlatformError('drive_identifier_invalid',503)
     return value
+
+
+def _integer_keys(value):
+    """JSON maps use canonical decimal score keys; the engine uses integers."""
+    if type(value) is not dict:
+        raise PlatformError('analysis_release_invalid',503)
+    result={}
+    for key,item in value.items():
+        if type(key) is int and key>=0:
+            score=key
+        elif type(key) is str and len(key)<=128 and re.fullmatch(r'0|[1-9][0-9]*',key):
+            score=int(key)
+        else:
+            raise PlatformError('analysis_release_invalid',503)
+        if score in result:raise PlatformError('registry_identity_conflict',503)
+        result[score]=item
+    return result
+
+
+def _rank_distribution(raw):
+    values=deepcopy(raw)
+    values['counts']=_integer_keys(values['counts'])
+    if values.get('reported_scores') is not None:
+        values['reported_scores']=_integer_keys(values['reported_scores'])
+    return RankDistribution(**values)
 
 
 class MissingDataProvider:
@@ -179,8 +205,8 @@ class DriveDataProvider:
         if raw.get('format')!='jungsi.offering-analysis-release/v1':raise PlatformError('analysis_release_invalid',503)
         bridges={}
         for year,bridge in raw['bridges'].items():
-            bridges[int(year)]={k:({area:RankDistribution(**values) for area,values in value.items()}
-                                  if k in ('source','target') else RankDistribution(**value)) for k,value in bridge.items()}
+            bridges[int(year)]={k:({area:_rank_distribution(values) for area,values in value.items()}
+                                  if k in ('source','target') else _rank_distribution(value)) for k,value in bridge.items()}
         return OfferingAnalysis(raw['version'],raw['status'],raw['source_pack_version'],
             ConversionRelease(raw['release_id'],raw['rules'],raw['bindings']),
             {int(y):v for y,v in raw['offerings_by_year'].items()},bridges,BridgePolicy(**raw['policy']),

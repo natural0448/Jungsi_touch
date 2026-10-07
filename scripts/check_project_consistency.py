@@ -1078,6 +1078,8 @@ def runtime_connection_document(spec):
             table(['단계','담당','완료 조건'],[[x['stage'],x['owner'],x['completion']] for x in c['workflow']])+'\n\n'+
             '## 명시 서버 구성과 공급자별 상태 확인\n\n'+c['composition']['factory']+'를 명시 선택하고 DEV-008 security 구성을 연결한다. 기존 create_app/configured_app·이용권·session v1·Drive·local 경로를 유지한다.\n\n'+
             '필수 구성: '+', '.join(r['required_server_components'])+'. Supabase 명시 구성의 health에서 Drive token/input/output/registry를 추가 필수로 판단하지 않는다. DB 검증과 명시 선택한 native 실행 자료의 읽기·디코딩·버전/해시 검수가 필요하다.\n\n'+
+            '환경 진입점 '+c['composition'].get('environment_factory','configured_supabase_app')+' · 읽기 전 설정 이름 검사 '+chr(96)+c['composition'].get('configuration_check_command','')+chr(96)+'. 설정 이름 검사는 파일/DB/Auth/Storage를 읽지 않는다.\n\n'+
+            '서버 실행 진입점 '+chr(96)+c['composition'].get('server_factory_command','')+chr(96)+'. 주소/TLS/worker/비밀 명부 mount는 배포 대상에서 확정한다. 이 문서는 배포 실행 증거가 아니다.\n\n'+
             '비공개 환경변수 이름: '+', '.join(r.get('private_environment_names',[]))+'. 값은 별도 서버 비밀 설정으로 공급하며 환경 예시 파일·클라이언트 코드에 넣지 않는다.\n\n'+
             r['path']+'는 relay를 확인하며 '+', '.join(r['ready_public_fields'])+'만 반환한다. production_ready=false이고 draft/false 승인·누락·잘못된 형식/해시/버전에 안전한503을 반환한다. '+r['diagnostics']+'\n\n'+
             '## 최소 실행 자료 선택과 검수\n\n명부 형식 '+q['registry_format']+' · 종류 '+', '.join(q['supported_kinds'])+'. 요청 기능이 필요한 kind/key만 명시 선택한다. 승인 status·engine_approved·production_allowed·archive_only=false와 native decoder·크기/해시/버전 결속을 함께 확인한다.\n\n'+
@@ -1087,6 +1089,7 @@ def runtime_connection_document(spec):
             '## 배포와 화면 담당 인계\n\n별도 Python FastAPI 서버 · 배포 대상 '+d['hosting_target_status']+' · 실제 배포 '+d['actual_deployment']+' · 화면 '+d['frontend_owner_branch']+'. 서버 UTC, 원자료/화면 Asia/Seoul이며 runtime에는 app role만 사용한다. 서버 비밀과 원자료는 브라우저에 전달하지 않는다.\n\n'+
             '외부 화면 담당은 확정 API 주소와 공개 Auth 설정, 서버 전용 relay·세션/CSRF 계약 및 같은 native 버전의 기대값을 수령해 실제1~4페이지를 검수한다. API22/DTO·회원·소유권·성공 점수와 판단 pending 조건을 유지한다.\n\n'+
             '## 검수 상태와 남은 입력\n\n검수 '+c['verification']['status']+' · 실제 원자료→native 발행/Auth/DB/BFF/브라우저/배포 '+c['verification']['actual_source_native_publication_Auth_DB_BFF_browser_deployment']+'.\n\n'+
+            '확인한 구현 '+str(c['verification'].get('implementation_commit'))+' · 합성 '+str(c['verification'].get('synthetic_test_count',0))+' · 독립 합성 '+str(c['verification'].get('independent_synthetic_case_count',0))+' · 정상 훅 '+str(c['verification'].get('normal_commit_push_snapshot_test_count',0))+' · CI '+str((c['verification'].get('CI') or {}).get('url','미실행'))+'. 세부 private probe 영수증은 공개 health에 포함하지 않는다.\n\n'+
             '\n'.join('- '+x for x in c['remaining'])+'\n\n[작업 항목](../work_items/DEV-009-runtime-connection-preparation.json) · [Supabase 운영 인계](Supabase_운영_인수인계.md) · [필수 보안 기준](외부접근_데이터보호_개발기준.md)')
 
 
@@ -1101,7 +1104,7 @@ def validate_runtime_connection_preparation(spec):
         spec.get('current_documents',{}).get('runtime_connection_preparation')!='docs/current/Supabase_실행자료_연결.md' or
         not {'REQ-12','REQ-14','REQ-15','REQ-16','REQ-17','REQ-20','REQ-23','REQ-24','REQ-25','REQ-26'}<=set(c.get('requirements',[]))):
         errors.append('DEV-009 owner or source registration drift')
-    if (comp.get('factory')!='create_supabase_secured_app' or comp.get('explicit_selection_required')is not True or comp.get('security_contract_ref')!='secured_backend_preparation_contract' or
+    if (comp.get('factory')!='create_supabase_secured_app' or comp.get('environment_factory')!='configured_supabase_app' or comp.get('explicit_selection_required')is not True or comp.get('security_contract_ref')!='secured_backend_preparation_contract' or
         comp.get('default_factories_unchanged')is not True or comp.get('legacy_factories')!=['create_app','configured_app'] or comp.get('current_entitlement_authority')!='jungsi_backend.entitlements' or
         comp.get('session_format')!='jungsi.session/v1' or comp.get('existing_API_count')!=len(spec.get('operations',[])) or comp.get('API_or_DTO_additions')is not False or comp.get('local_verification_unchanged')is not True):
         errors.append('DEV-009 explicit composition preservation drift')
@@ -1128,6 +1131,13 @@ def validate_runtime_connection_preparation(spec):
         errors.append('DEV-009 scoped code state drift')
     if c.get('code_status')!='planned' and (not re.fullmatch(r'[0-9a-f]{40}',str(v.get('implementation_commit',''))) or type(v.get('synthetic_test_count'))is not int or v.get('synthetic_test_count',0)<=0 or v.get('status')!='PASS_SCOPED_SYNTHETIC_HTTP'):
         errors.append('DEV-009 implementation completion lacks fixed synthetic evidence')
+    if c.get('code_status')!='planned':
+        row=next((x for x in spec.get('implementation',[]) if x.get('path')=='src/jungsi_touch/infrastructure/supabase_runtime.py'),None)
+        if row is None or not {'RuntimeArtifactSelection','SupabaseRuntimeReadiness','create_supabase_secured_app','configured_supabase_app','configuration_status'}<=set(row.get('symbols',[])):
+            errors.append('DEV-009 runtime implementation or entrypoint registration drift')
+        ci=v.get('CI')
+        if not isinstance(ci,dict) or ci.get('headSha')!=v.get('implementation_commit') or ci.get('conclusion')!='success':
+            errors.append('DEV-009 CI evidence does not bind verified implementation')
     return errors
 
 

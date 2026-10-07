@@ -1293,6 +1293,13 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
         wrong=deepcopy(self.spec);c=wrong['runtime_connection_preparation_contract'];c['production_ready']=True;c['deployment']['actual_deployment']='PASS'
         self.assertIn('DEV-009 preparation cannot promote production or source data',validate_runtime_connection_preparation(wrong))
         self.assertIn('DEV-009 deployment preparation cannot certify live acceptance',validate_runtime_connection_preparation(wrong))
+    def test_runtime_implementation_index_and_CI_bind_verified_code(self):
+        wrong=deepcopy(self.spec)
+        wrong['implementation']=[x for x in wrong['implementation'] if x['path']!='src/jungsi_touch/infrastructure/supabase_runtime.py']
+        self.assertIn('DEV-009 runtime implementation or entrypoint registration drift',validate_runtime_connection_preparation(wrong))
+        wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['verification']['CI']['headSha']='f'*40
+        self.assertIn('DEV-009 CI evidence does not bind verified implementation',validate_runtime_connection_preparation(wrong))
+
     def test_runtime_contract_and_work_item_cannot_be_removed(self):
         wrong=deepcopy(self.spec);wrong.pop('runtime_connection_preparation_contract')
         self.assertIn('DEV-009 required runtime connection contract missing',validate_spec(wrong))

@@ -5,9 +5,9 @@
   "approved_on": "2026-10-07",
   "start_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
   "branch": "feature/application-pre-data-platform",
-  "status": "approved_for_implementation",
+  "status": "implemented_synthetic_verified_integration_pending",
   "contract_ref": "runtime_connection_preparation_contract",
-  "contract_version": "1.9.5",
+  "contract_version": "1.9.6",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -27,7 +27,7 @@
     "id": "DEV-009",
     "revision": "2026.10.07.v2",
     "basis_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
-    "code_status": "planned",
+    "code_status": "implemented_synthetic_verified_integration_pending",
     "production_ready": false,
     "branch": "feature/application-pre-data-platform",
     "requirements": [
@@ -56,7 +56,10 @@
       "session_format": "jungsi.session/v1",
       "existing_API_count": 22,
       "API_or_DTO_additions": false,
-      "local_verification_unchanged": true
+      "local_verification_unchanged": true,
+      "environment_factory": "configured_supabase_app",
+      "configuration_check_command": "python -m jungsi_touch.infrastructure.supabase_runtime --check-config",
+      "server_factory_command": "python -m uvicorn jungsi_touch.infrastructure.supabase_runtime:configured_supabase_app --factory --host 127.0.0.1 --port 8000 --no-access-log"
     },
     "source_lineage": {
       "canonical_private_pointers": [
@@ -136,7 +139,8 @@
         "JUNGSI_SUPABASE_RUNTIME_REGISTRY",
         "JUNGSI_SUPABASE_RUNTIME_SELECTION",
         "JUNGSI_RELAY_TOKEN"
-      ]
+      ],
+      "private_probe_symbol": "SupabaseRuntimeReadiness.probe"
     },
     "workflow": [
       {
@@ -183,10 +187,15 @@
       "BFF_browser_actual_acceptance": "NOT_RUN"
     },
     "verification": {
-      "status": "NOT_RUN",
-      "implementation_commit": null,
-      "synthetic_test_count": 0,
-      "CI": null,
+      "status": "PASS_SCOPED_SYNTHETIC_HTTP",
+      "implementation_commit": "606e8307883ea53340be850ea13674a19baa8f81",
+      "synthetic_test_count": 44,
+      "CI": {
+        "headSha": "606e8307883ea53340be850ea13674a19baa8f81",
+        "run_id": 37582748954,
+        "conclusion": "success",
+        "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37582748954"
+      },
       "actual_source_native_publication_Auth_DB_BFF_browser_deployment": "NOT_RUN",
       "cases": [
         "native_approved_selection_without_Drive_settings_can_be_ready",
@@ -196,8 +205,17 @@
         "relay_required_and_public_ready_four_fields_only",
         "legacy_and_local_factory_regressions",
         "private_preflight_provenance_without_public_secret_or_source_values",
-        "selected_native_cross_exam_pack_year_offering_rule_curve_bindings_must_match"
-      ]
+        "selected_native_cross_exam_pack_year_offering_rule_curve_bindings_must_match",
+        "native_analysis_bridge_JSON_canonical_integer_keys_roundtrip_and_noncanonical_collision_rejection",
+        "selected_analysis_embedded_curve_rule_approval_and_pack_binding",
+        "private_manifest_location_checked_relative_to_project_not_ancestor_outputs"
+      ],
+      "normal_commit_push_snapshot_test_count": 798,
+      "independent_synthetic_case_count": 11,
+      "integration": {
+        "status": "PR19_merge_candidate_verification_pending",
+        "PR": "https://github.com/natural0448/Jungsi_touch/pull/19"
+      }
     },
     "preservation": {
       "files_deleted": 0,
@@ -214,6 +232,8 @@
       "forecast publication needs its separate independent editor/approver and pinned context; source metadata is not a forecast draft"
     ],
     "planned_code_paths": [
+      "src/jungsi_touch/infrastructure/drive_provider.py",
+      "src/jungsi_touch/infrastructure/http_api.py",
       "src/jungsi_touch/infrastructure/supabase_runtime.py",
       "tests/test_supabase_runtime.py"
     ]

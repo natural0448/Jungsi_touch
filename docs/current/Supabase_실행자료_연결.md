@@ -1,10 +1,10 @@
 # Supabase 실행 자료 연결과 운영 준비
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.5이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.6이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 명시 Supabase 보안 앱 구성·공급자별 설정·선택 실행 자료의 사전 검수·최소 readiness 연결과 배포 준비. 원자료·정제 정본과 실행 발행본을 구분한다.
 
-계약 2026.10.07.v2 · 코드 planned · 운영 준비 false. 출발 develop 0b120ff3b4e168b6c724de0b212e221ef8527c3e.
+계약 2026.10.07.v2 · 코드 implemented_synthetic_verified_integration_pending · 운영 준비 false. 출발 develop 0b120ff3b4e168b6c724de0b212e221ef8527c3e.
 
 ## 원자료 등록과 실행 발행본
 
@@ -26,6 +26,10 @@
 create_supabase_secured_app를 명시 선택하고 DEV-008 security 구성을 연결한다. 기존 create_app/configured_app·이용권·session v1·Drive·local 경로를 유지한다.
 
 필수 구성: Supabase_Auth_settings, app_role_PostgreSQL, private_Storage_scope, private_runtime_registry, explicit_required_native_selection, relay_security. Supabase 명시 구성의 health에서 Drive token/input/output/registry를 추가 필수로 판단하지 않는다. DB 검증과 명시 선택한 native 실행 자료의 읽기·디코딩·버전/해시 검수가 필요하다.
+
+환경 진입점 configured_supabase_app · 읽기 전 설정 이름 검사 `python -m jungsi_touch.infrastructure.supabase_runtime --check-config`. 설정 이름 검사는 파일/DB/Auth/Storage를 읽지 않는다.
+
+서버 실행 진입점 `python -m uvicorn jungsi_touch.infrastructure.supabase_runtime:configured_supabase_app --factory --host 127.0.0.1 --port 8000 --no-access-log`. 주소/TLS/worker/비밀 명부 mount는 배포 대상에서 확정한다. 이 문서는 배포 실행 증거가 아니다.
 
 비공개 환경변수 이름: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, DATABASE_URL, SUPABASE_SECRET_KEY, JUNGSI_SUPABASE_STORAGE_BUCKET, JUNGSI_SUPABASE_STORAGE_PREFIX, JUNGSI_SUPABASE_RUNTIME_REGISTRY, JUNGSI_SUPABASE_RUNTIME_SELECTION, JUNGSI_RELAY_TOKEN. 값은 별도 서버 비밀 설정으로 공급하며 환경 예시 파일·클라이언트 코드에 넣지 않는다.
 
@@ -49,7 +53,9 @@ create_supabase_secured_app를 명시 선택하고 DEV-008 security 구성을 �
 
 ## 검수 상태와 남은 입력
 
-검수 NOT_RUN · 실제 원자료→native 발행/Auth/DB/BFF/브라우저/배포 NOT_RUN.
+검수 PASS_SCOPED_SYNTHETIC_HTTP · 실제 원자료→native 발행/Auth/DB/BFF/브라우저/배포 NOT_RUN.
+
+확인한 구현 606e8307883ea53340be850ea13674a19baa8f81 · 합성 44 · 독립 합성 11 · 정상 훅 798 · CI https://github.com/natural0448/Jungsi_touch/actions/runs/37582748954. 세부 private probe 영수증은 공개 health에 포함하지 않는다.
 
 - latest verified source to compatible native candidate and scoped numerical review
 - explicit approval/immutable publication/runtime selection of eligible minimum native artifacts
@@ -77,4 +83,4 @@ create_supabase_secured_app를 명시 선택하고 DEV-008 security 구성을 �
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=6a1a9d402ec708f2edda8c41e05d63d9408002b3fa4502ac09a16d91c42e4e3c -->
+<!-- jungsi:generated spec_sha256=0eba84192d33007ab970f5955db92f3ebc50c1869f6555c63505e4689e55bf95 -->
