@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "approved_for_implementation",
   "contract_ref": "secured_backend_preparation_contract",
-  "contract_version": "1.9.0",
+  "contract_version": "1.9.1",
   "requirements": [
     "REQ-24",
     "REQ-25",
@@ -20,7 +20,7 @@
     "id": "DEV-008",
     "revision": "2026.10.07.v1",
     "policy_revision": "2026.10.06.v1",
-    "code_status": "planned",
+    "code_status": "implemented_synthetic_verified_integration_pending",
     "production_ready": false,
     "basis_commit": "e6b8aacd0ba7057f80aa766b07a3137be6160643",
     "branch": "feature/application-pre-data-platform",
@@ -153,12 +153,22 @@
         "error.code",
         "request_id"
       ],
-      "new_schema_catalog_shape": "same implementation PR; root checks complete operation/ref/role/nested bindings"
+      "new_schema_catalog_shape": "same implementation PR; root checks complete operation/ref/role/nested bindings",
+      "static_schema_registry": {
+        "path": "src/jungsi_touch/application/public_response_schemas.json",
+        "format": "jungsi.public-response-schemas/v1",
+        "operation_bindings": "id, contract_ref, roots.standard/paid",
+        "auxiliary_roots": [
+          "error",
+          "readiness"
+        ],
+        "validation": "all operation IDs and exact declared top-level fields; typed nested object/array/map values; required/optional partition; closed references; no cycles/Any; unique JSON keys"
+      }
     },
     "verification": {
-      "status": "NOT_RUN",
-      "implementation_commit": null,
-      "synthetic_test_count": null,
+      "status": "PASS_SCOPED_SYNTHETIC_HTTP",
+      "implementation_commit": "36bf42aa532701aa493260bd54098bd8c5ccaa22",
+      "synthetic_test_count": 57,
       "CI": null,
       "cases": [
         "all_22_operation_bindings_and_contract_fields",
@@ -174,7 +184,9 @@
       ],
       "actual_Auth_DB_BFF_browser_deployment": "NOT_RUN",
       "candidate_focused_test_count": 57,
-      "fixed_implementation_evidence": "pending_first_implementation_commit"
+      "fixed_implementation_evidence": "normal_commit_hook_fixed_snapshot_741_PASS",
+      "full_snapshot_test_count": 741,
+      "evidence_ref": "outputs/dev008_development/20261007T013229108129Z/implementation_receipt.json"
     },
     "planned_code_paths": [
       "src/jungsi_touch/application/public_response.py",

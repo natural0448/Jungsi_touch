@@ -1040,6 +1040,8 @@ def secured_preparation_document(spec):
     c=spec.get("secured_backend_preparation_contract")
     if not c:return ""
     r=c["relay"]; h=c["health"]; v=c["verification"]
+    registry=c["response_projection"].get("static_schema_registry")
+    registry_note=(" 정적 registry "+registry["path"]+" ("+registry["format"]+")를 JSON으로 읽어 API별 역할 필드, 참조·순환·타입·required/optional·중복 key를 검사한다.") if registry else ""
     return ("\n\n## DEV-008 명시 보안 앱 구성\n\n"+c["scope"]+"\n\n"+
         f"계약 {c['revision']} · 정책 {c['policy_revision']} · 코드 {c['code_status']} · 운영 준비 false. "+
         "기존 create_app/configured_app·이용권·Drive·local·22 API/session v1을 유지한다. "+
@@ -1050,7 +1052,7 @@ def secured_preparation_document(spec):
         "raw header의 대소문자·중복, ASCII/공백/쉼표/Unicode/크기와 정확 길이를 검사하고 bytes compare_digest를 쓴다.\n\n"+
         "22 operation의 contract_ref와 standard/paid typed root를 연결한다. 객체·배열·ID map의 값까지 재귀 투영하고 "+
         "추가 필드는 응답에서만 제거한다. 구조·필수값 오류는 비밀 없는 503이다. 자유 Any/무제한 객체는 금지한다. "+
-        "정상 점수·누백·판단 보류·공식 출처/버전·권한 있는 관리 영수증을 보존한다.\n\n"+
+        "정상 점수·누백·판단 보류·공식 출처/버전·권한 있는 관리 영수증을 보존한다."+registry_note+"\n\n"+
         h["public_path"]+"는 공개 최소 liveness다. "+h["relay_protected_path"]+"는 relay만 확인하고 "+
         ", ".join(h["ready_public_fields"])+"만 반환한다. production_ready=false이며 비공개 환경·DB role/경로를 전달하지 않는다.\n\n"+
         "검수 상태 "+v["status"]+". 합성 인수: "+"; ".join(v["cases"])+".\n\n"+
@@ -1093,6 +1095,12 @@ def validate_secured_preparation(spec):
         x.get("free_form_Any_allowed") is not False or x.get("untyped_additional_properties_allowed") is not False or
         set(x.get("covers",[]))!={"success","pending","error","persisted_report","idempotent_replay","print_dto","published_forecast"}):
         errors.append("DEV-008 recursive response boundary drift")
+    registry=x.get("static_schema_registry")
+    try:registry_required=tuple(int(y) for y in spec.get("version","0.0.0").split(".")) >= (1,9,1)
+    except (TypeError,ValueError):registry_required=False
+    if registry_required or registry is not None:
+        if not isinstance(registry,dict) or registry.get("path")!="src/jungsi_touch/application/public_response_schemas.json" or registry.get("format")!="jungsi.public-response-schemas/v1" or registry.get("auxiliary_roots")!=["error","readiness"]:
+            errors.append("DEV-008 static schema registry source drift")
     preserve=c.get("preservation",{})
     if (c.get("production_ready") is not False or any(preserve.get(k)is not False for k in
         ("default_factory_change_allowed","data_promotion_allowed","actual_DB_write_deployment_allowed","main_ready_allowed"))):
@@ -1779,9 +1787,127 @@ def protected_path(path,shared_tools):
     if path.startswith("scripts/") and path not in shared_tools:return True
     return False
 
+PUBLIC_RESPONSE_SCHEMA_PATH="src/jungsi_touch/application/public_response_schemas.json"
+
+
+def validate_public_response_catalog(catalog,spec):
+    """Check a static schema graph without importing implementation or private data."""
+    errors=[]
+    graph_error="DEV-008 public response schema type/reference graph invalid"
+    if not isinstance(catalog,dict) or catalog.get("format")!="jungsi.public-response-schemas/v1":
+        return ["DEV-008 public response schema registry invalid"]
+    definitions=catalog.get("schemas")
+    if not isinstance(definitions,dict) or not definitions or any(not isinstance(k,str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]{0,127}",k) for k in definitions):
+        return [graph_error]
+    colors={}
+    primitive={"string","integer","number","boolean","null"}
+    def visit(node,depth=0):
+        if not isinstance(node,dict) or depth>128:raise ValueError()
+        if "nullable" in node and type(node["nullable"])is not bool:raise ValueError()
+        if "ref" in node:
+            if set(node)-{"ref","nullable","description"}:raise ValueError()
+            name=node["ref"]
+            if not isinstance(name,str) or name not in definitions or colors.get(name)==1:raise ValueError()
+            if colors.get(name)!=2:
+                colors[name]=1;visit(definitions[name],depth+1);colors[name]=2
+            return
+        kind=node.get("type")
+        if kind in primitive:
+            if "enum" in node:
+                values=node["enum"]
+                if not isinstance(values,list) or not values:raise ValueError()
+                accepts={"string":lambda v:isinstance(v,str),"integer":lambda v:type(v)is int,
+                         "number":lambda v:type(v)in (int,float),"boolean":lambda v:type(v)is bool,"null":lambda v:v is None}
+                if any(not accepts[kind](v) for v in values):raise ValueError()
+            return
+        if kind=="enum":
+            if not isinstance(node.get("values"),list) or not node["values"] or any(type(v)not in (str,int,float,bool,type(None)) for v in node["values"]):raise ValueError()
+            return
+        if kind=="object":
+            properties=node.get("properties");required=node.get("required");optional=node.get("optional")
+            if not isinstance(properties,dict) or not isinstance(required,list) or not isinstance(optional,list):raise ValueError()
+            if any(not isinstance(k,str) for k in [*properties,*required,*optional]):raise ValueError()
+            if len(required)!=len(set(required)) or len(optional)!=len(set(optional)) or set(required)&set(optional):raise ValueError()
+            if set(required)|set(optional)!=set(properties) or node.get("additionalProperties") not in (None,False):raise ValueError()
+            for child in properties.values():visit(child,depth+1)
+            return
+        if kind=="array":visit(node.get("items"),depth+1);return
+        if kind=="map":visit(node.get("keys"),depth+1);visit(node.get("values"),depth+1);return
+        if kind=="union":
+            variants=node.get("variants",node.get("options"))
+            if not isinstance(variants,list) or not variants:raise ValueError()
+            for child in variants:visit(child,depth+1)
+            return
+        raise ValueError()
+    try:
+        for name in definitions:visit({"ref":name})
+    except (ValueError,TypeError,RecursionError):errors.append(graph_error)
+    if errors:return errors
+    def properties(node):
+        if "ref" in node:return properties(definitions[node["ref"]])
+        if node["type"]=="union":
+            result=set()
+            for child in node.get("variants",node.get("options")):result.update(properties(child))
+            return result
+        if node["type"]!="object":raise ValueError()
+        return set(node["properties"])
+    operations=catalog.get("operations")
+    if not isinstance(operations,list):return ["DEV-008 public response schema operation binding drift"]
+    by_id={o["id"]:o for o in spec["operations"]};seen=set()
+    for binding in operations:
+        if not isinstance(binding,dict) or not isinstance(binding.get("id"),str) or binding["id"] not in by_id or binding["id"] in seen:
+            errors.append("DEV-008 public response schema operation binding drift");continue
+        seen.add(binding["id"]);operation=by_id[binding["id"]]
+        if binding.get("contract_ref")!=operation.get("contract_ref"):
+            errors.append("DEV-008 public response schema operation binding drift")
+        roots=binding.get("roots")
+        if not isinstance(roots,dict) or set(roots)!={"standard","paid"}:
+            errors.append("DEV-008 public response schema operation binding drift");continue
+        dto=spec["backend_platform_contract"]["dto_schemas"][operation["http_contract"]["response_schema"]]
+        for role,root in roots.items():
+            try:
+                visit(root);actual=properties(root)
+                expected=set(dto["fields"])|(set(dto.get("paid_fields",[])) if role=="paid" else set())
+                if actual!=expected:errors.append("DEV-008 public response schema field boundary drift")
+            except (ValueError,TypeError,KeyError,RecursionError):errors.append(graph_error)
+    if seen!=set(by_id):errors.append("DEV-008 public response schema operation binding drift")
+    auxiliary=catalog.get("auxiliary_roots")
+    if not isinstance(auxiliary,dict) or set(auxiliary)!={"error","readiness"}:
+        errors.append("DEV-008 public response auxiliary boundary drift")
+    else:
+        for name,root in auxiliary.items():
+            try:
+                visit(root)
+                expected={"status","error","request_id"} if name=="error" else {"status","server_timezone","production_ready","security_boundary"}
+                if properties(root)!=expected:errors.append("DEV-008 public response auxiliary boundary drift")
+                if name=="error":
+                    resolved=root
+                    while "ref" in resolved:resolved=definitions[resolved["ref"]]
+                    if properties(resolved["properties"]["error"])!={"code"}:errors.append("DEV-008 public response auxiliary boundary drift")
+            except (ValueError,TypeError,KeyError,RecursionError):errors.append(graph_error)
+    return sorted(set(errors))
+
+
+def validate_public_response_registry(paths,read,spec):
+    contract=spec.get("secured_backend_preparation_contract")
+    if not contract:return []
+    if PUBLIC_RESPONSE_SCHEMA_PATH not in paths:
+        return [] if contract.get("code_status")=="planned" else ["DEV-008 public response schema registry missing"]
+    def unique(pairs):
+        result={}
+        for key,value in pairs:
+            if key in result:raise ValueError()
+            result[key]=value
+        return result
+    try:catalog=json.loads(read(PUBLIC_RESPONSE_SCHEMA_PATH),object_pairs_hook=unique)
+    except (ValueError,TypeError,RecursionError):return ["DEV-008 public response schema registry invalid"]
+    return validate_public_response_catalog(catalog,spec)
+
+
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
     names=set(paths)
+    errors.extend(validate_public_response_registry(names,read,spec))
     transition=spec.get('supabase_operations_handoff_contract',{}).get('service_transition_contract',{})
     if transition.get('implementation_mode')=='explicit_prepared_default_unchanged':
         for path in transition.get('implementation_code_paths',[]):
