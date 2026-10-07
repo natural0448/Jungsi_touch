@@ -26,7 +26,7 @@ def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=Non
                         forecast_repository=forecast_repository,forecast_inputs=forecast_inputs,entitlements=entitlements)
 
 
-def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None,entitlements=None,boundary=None):
+def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None,entitlements=None,boundary=None,readiness_policy=None):
     settings=settings or ServerSettings.from_environment()
     clock=clock or UtcClock()
     if repository is None: repository=PostgresRepository(settings.database_url) if settings.database_url else UnavailableRepository()
@@ -83,11 +83,16 @@ def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=N
 
     @app.get('/health/ready')
     def ready():
-        missing=settings.missing()
+        missing=settings.missing() if readiness_policy is None else readiness_policy.missing(settings)
         db={'status':'not_run_configuration_missing'}
         if settings.database_url:
             try:db=repository.probe()
             except PlatformError:db={'status':'unavailable'}
+            except Exception:
+                if readiness_policy is None:raise
+                db={'status':'unavailable'}
+        if readiness_policy is not None and (not isinstance(db,dict) or db.get('status')!='verified'):
+            db={'status':'unavailable'}
         entitlement_status=None
         if entitlements is not None:
             entitlement_status={'status':'not_run_probe_missing'}

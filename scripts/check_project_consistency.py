@@ -1082,6 +1082,7 @@ def runtime_connection_document(spec):
             r['path']+'는 relay를 확인하며 '+', '.join(r['ready_public_fields'])+'만 반환한다. production_ready=false이고 draft/false 승인·누락·잘못된 형식/해시/버전에 안전한503을 반환한다. '+r['diagnostics']+'\n\n'+
             '## 최소 실행 자료 선택과 검수\n\n명부 형식 '+q['registry_format']+' · 종류 '+', '.join(q['supported_kinds'])+'. 요청 기능이 필요한 kind/key만 명시 선택한다. 승인 status·engine_approved·production_allowed·archive_only=false와 native decoder·크기/해시/버전 결속을 함께 확인한다.\n\n'+
             '선택 명부 '+q.get('selection_format','')+' · '+q.get('selection_shape','')+'. 빈 선택·중복·알 수 없는 kind와 보호 위치 밖 명부는 거절한다.\n\n'+
+            q.get('cross_binding_rule','')+'\n\n'+
             '원자료/CSV 저장 검수와 실행 산술 검수, 형식 검수와 모형 정확도, native 승인과 예상 기준선 forecast 승인은 각각의 근거로 판단한다. forecast는 기존 독립 editor/approver·revision/입력/정책/context 조건을 유지한다.\n\n'+
             '## 배포와 화면 담당 인계\n\n별도 Python FastAPI 서버 · 배포 대상 '+d['hosting_target_status']+' · 실제 배포 '+d['actual_deployment']+' · 화면 '+d['frontend_owner_branch']+'. 서버 UTC, 원자료/화면 Asia/Seoul이며 runtime에는 app role만 사용한다. 서버 비밀과 원자료는 브라우저에 전달하지 않는다.\n\n'+
             '외부 화면 담당은 확정 API 주소와 공개 Auth 설정, 서버 전용 relay·세션/CSRF 계약 및 같은 native 버전의 기대값을 수령해 실제1~4페이지를 검수한다. API22/DTO·회원·소유권·성공 점수와 판단 pending 조건을 유지한다.\n\n'+
@@ -1107,9 +1108,9 @@ def validate_runtime_connection_preparation(spec):
     if (lineage.get('canonical_private_pointers')!=['DATA_ACTIVE_SUPABASE_v1.json','DATA_ACTIVE_CSV_v1.json'] or lineage.get('source_snapshots_preserved')is not True or
         any(lineage.get(k)is not False for k in ('historical_source_only_records_are_canonical','source_validation_is_engine_approval','source_or_archive_auto_adoption','actual_source_data_in_Git'))):
         errors.append('DEV-009 source registration cannot promote native runtime')
-    if (q.get('registry_format')!='jungsi.data-registry/v1' or q.get('selection_format')!='jungsi.runtime-selection/v1' or any(q.get(k)is not True for k in ('private_registry_required','required_dependencies_only','native_decoder_required','engine_approved_required','production_allowed_required','reference_size_hash_version_binding_required','native_versions_separate_from_source')) or
+    if (q.get('registry_format')!='jungsi.data-registry/v1' or q.get('selection_format')!='jungsi.runtime-selection/v1' or any(q.get(k)is not True for k in ('private_registry_required','required_dependencies_only','native_decoder_required','engine_approved_required','production_allowed_required','reference_size_hash_version_binding_required','native_versions_separate_from_source','selected_native_cross_bindings_required')) or
         any(q.get(k)is not False for k in ('implicit_all_artifacts_selection','archive_only_required','source_files_overwritten')) or q.get('status_required')!='approved' or
-        set(q.get('supported_kinds',[]))!={'exam_pack','total_model','catalog','conversion','percentile','estimate_receipt','analysis','forecast_input','forecast_policy','forecast_context'}):
+        set(q.get('supported_kinds',[]))!={'exam_pack','total_model','catalog','conversion','percentile','estimate_receipt','analysis','forecast_inputs','forecast_policy','forecast_context'}):
         errors.append('DEV-009 native selection approval or integrity drift')
     if (r.get('path')!='/health/ready' or r.get('relay_required')is not True or r.get('user_Bearer_required')is not False or r.get('data_source')!='explicit_supabase_storage' or
         r.get('legacy_Drive_requirements_apply')is not False or r.get('selected_native_probe_required')is not True or r.get('draft_or_false_approval_or_bad_integrity_is_ready')is not False or

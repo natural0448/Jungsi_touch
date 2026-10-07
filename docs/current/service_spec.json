@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.4",
+  "version": "1.9.5",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2610,7 +2610,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.4",
+        "contract_version": "1.9.5",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2784,7 +2784,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.4",
+        "contract_version": "1.9.5",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2950,7 +2950,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.4",
+        "contract_version": "1.9.5",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -2969,7 +2969,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "approved_for_implementation",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.4",
+        "contract_version": "1.9.5",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -12868,7 +12868,7 @@
   "runtime_connection_preparation_contract": {
     "format": "jungsi.runtime-connection-preparation/v1",
     "id": "DEV-009",
-    "revision": "2026.10.07.v1",
+    "revision": "2026.10.07.v2",
     "basis_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
     "code_status": "planned",
     "production_ready": false,
@@ -12926,7 +12926,7 @@
         "percentile",
         "estimate_receipt",
         "analysis",
-        "forecast_input",
+        "forecast_inputs",
         "forecast_policy",
         "forecast_context"
       ],
@@ -12940,7 +12940,9 @@
       "source_files_overwritten": false,
       "native_versions_separate_from_source": true,
       "selection_format": "jungsi.runtime-selection/v1",
-      "selection_shape": "required: nonempty [{kind, key}]; duplicate identities rejected; only explicitly required dependencies are read"
+      "selection_shape": "required: nonempty [{kind, key}]; duplicate identities rejected; only explicitly required dependencies are read",
+      "selected_native_cross_bindings_required": true,
+      "cross_binding_rule": "명시 선택에 이미 포함된 시험·팩·카탈로그·환산·누백·곡선·모집행의 학년도와 버전/맥락을 서로 대조한다. 불일치는503이며 미선택 자료를 암묵적으로 읽거나 전 자료를 필수로 확장하지 않는다."
     },
     "readiness": {
       "path": "/health/ready",
@@ -13036,7 +13038,8 @@
         "app_role_probe_failure_and_dependency_error_safe_503",
         "relay_required_and_public_ready_four_fields_only",
         "legacy_and_local_factory_regressions",
-        "private_preflight_provenance_without_public_secret_or_source_values"
+        "private_preflight_provenance_without_public_secret_or_source_values",
+        "selected_native_cross_exam_pack_year_offering_rule_curve_bindings_must_match"
       ]
     },
     "preservation": {

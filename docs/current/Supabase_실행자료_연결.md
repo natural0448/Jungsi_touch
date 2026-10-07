@@ -1,10 +1,10 @@
 # Supabase 실행 자료 연결과 운영 준비
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.4이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.5이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 명시 Supabase 보안 앱 구성·공급자별 설정·선택 실행 자료의 사전 검수·최소 readiness 연결과 배포 준비. 원자료·정제 정본과 실행 발행본을 구분한다.
 
-계약 2026.10.07.v1 · 코드 planned · 운영 준비 false. 출발 develop 0b120ff3b4e168b6c724de0b212e221ef8527c3e.
+계약 2026.10.07.v2 · 코드 planned · 운영 준비 false. 출발 develop 0b120ff3b4e168b6c724de0b212e221ef8527c3e.
 
 ## 원자료 등록과 실행 발행본
 
@@ -33,9 +33,11 @@ create_supabase_secured_app를 명시 선택하고 DEV-008 security 구성을 �
 
 ## 최소 실행 자료 선택과 검수
 
-명부 형식 jungsi.data-registry/v1 · 종류 exam_pack, total_model, catalog, conversion, percentile, estimate_receipt, analysis, forecast_input, forecast_policy, forecast_context. 요청 기능이 필요한 kind/key만 명시 선택한다. 승인 status·engine_approved·production_allowed·archive_only=false와 native decoder·크기/해시/버전 결속을 함께 확인한다.
+명부 형식 jungsi.data-registry/v1 · 종류 exam_pack, total_model, catalog, conversion, percentile, estimate_receipt, analysis, forecast_inputs, forecast_policy, forecast_context. 요청 기능이 필요한 kind/key만 명시 선택한다. 승인 status·engine_approved·production_allowed·archive_only=false와 native decoder·크기/해시/버전 결속을 함께 확인한다.
 
 선택 명부 jungsi.runtime-selection/v1 · required: nonempty [{kind, key}]; duplicate identities rejected; only explicitly required dependencies are read. 빈 선택·중복·알 수 없는 kind와 보호 위치 밖 명부는 거절한다.
+
+명시 선택에 이미 포함된 시험·팩·카탈로그·환산·누백·곡선·모집행의 학년도와 버전/맥락을 서로 대조한다. 불일치는503이며 미선택 자료를 암묵적으로 읽거나 전 자료를 필수로 확장하지 않는다.
 
 원자료/CSV 저장 검수와 실행 산술 검수, 형식 검수와 모형 정확도, native 승인과 예상 기준선 forecast 승인은 각각의 근거로 판단한다. forecast는 기존 독립 editor/approver·revision/입력/정책/context 조건을 유지한다.
 
@@ -75,4 +77,4 @@ create_supabase_secured_app를 명시 선택하고 DEV-008 security 구성을 �
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=fc1fe9364542f6a1a0b13297a73894bb06c313d595beed799802a42db8d10e8b -->
+<!-- jungsi:generated spec_sha256=6a1a9d402ec708f2edda8c41e05d63d9408002b3fa4502ac09a16d91c42e4e3c -->
