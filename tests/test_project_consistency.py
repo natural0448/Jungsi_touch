@@ -4,7 +4,7 @@ import json,sys,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
-from check_project_consistency import validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,validate_frontend_reply_contract,validate_frontend_followup_contract,FRONTEND_REPLY_DOCUMENT,FRONTEND_FOLLOWUP_DOCUMENT,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
+from check_project_consistency import validate_public_response_catalog,validate_public_response_registry,PUBLIC_RESPONSE_SCHEMA_PATH,validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,validate_frontend_reply_contract,validate_frontend_followup_contract,FRONTEND_REPLY_DOCUMENT,FRONTEND_FOLLOWUP_DOCUMENT,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
 
 class ConsistencyTests(unittest.TestCase):
     def setUp(self):
@@ -1197,6 +1197,67 @@ class SecuredPreparationContractTests(unittest.TestCase):
     def test_synthetic_completion_requires_fixed_snapshot_evidence(self):
         spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["code_status"]="accepted_on_develop_scoped_synthetic_verified"
         self.assertIn("DEV-008 implementation completion lacks fixed synthetic evidence",validate_spec(spec))
+
+
+class PublicResponseRegistryContractTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/"docs/current/service_spec.json").read_text(encoding="utf-8"))
+        self.catalog={"format":"jungsi.public-response-schemas/v1","operations":[],"schemas":{},"auxiliary_roots":{}}
+        for operation in self.spec["operations"]:
+            dto=self.spec["backend_platform_contract"]["dto_schemas"][operation["http_contract"]["response_schema"]]
+            roots={}
+            for role in ("standard","paid"):
+                fields=dto["fields"]+(dto.get("paid_fields",[]) if role=="paid" else [])
+                name=operation["id"]+"."+role
+                self.catalog["schemas"][name]={"type":"object","properties":{f:{"type":"string","nullable":True} for f in fields},"required":[],"optional":fields}
+                roots[role]={"ref":name}
+            self.catalog["operations"].append({"id":operation["id"],"contract_ref":operation["contract_ref"],"roots":roots})
+        self.catalog["schemas"]["safe_error"]={"type":"object","properties":{"code":{"type":"string"}},"required":["code"],"optional":[]}
+        self.catalog["schemas"]["error"]={"type":"object","properties":{"status":{"type":"string"},"error":{"ref":"safe_error"},"request_id":{"type":"string"}},"required":["status","error","request_id"],"optional":[]}
+        self.catalog["schemas"]["readiness"]={"type":"object","properties":{f:{"type":"string"} for f in ("status","server_timezone","production_ready","security_boundary")},"required":["status","server_timezone","production_ready","security_boundary"],"optional":[]}
+        self.catalog["auxiliary_roots"]={"error":{"ref":"error"},"readiness":{"ref":"readiness"}}
+        self.catalog["schemas"]["nested"]={"type":"object","properties":{"rows":{"type":"array","items":{"ref":"safe_error"}},"by_id":{"type":"map","keys":{"type":"string"},"values":{"ref":"safe_error"}}},"required":["rows"],"optional":["by_id"]}
+    def test_complete_typed_graph_matches_existing_operation_fields(self):
+        self.assertEqual(validate_public_response_catalog(self.catalog,self.spec),[])
+    def test_missing_duplicate_or_changed_operation_binding_is_rejected(self):
+        for mode in ("missing","duplicate","changed_ref"):
+            with self.subTest(mode=mode):
+                c=deepcopy(self.catalog)
+                if mode=="missing":c["operations"].pop()
+                elif mode=="duplicate":c["operations"].append(deepcopy(c["operations"][0]))
+                else:c["operations"][0]["contract_ref"]="unregistered.private"
+                self.assertIn("DEV-008 public response schema operation binding drift",validate_public_response_catalog(c,self.spec))
+    def test_untyped_nested_values_bad_references_and_cycles_are_rejected(self):
+        cases=[{"type":"Any"},{"type":"array"},{"type":"map","keys":{"type":"string"}}, {"ref":"missing"},{"ref":"nested"},{"type":"enum","values":[{"private":"SYNTHETIC"}]}]
+        for node in cases:
+            with self.subTest(node=node):
+                c=deepcopy(self.catalog);c["schemas"]["nested"]["properties"]["by_id"]=node
+                self.assertIn("DEV-008 public response schema type/reference graph invalid",validate_public_response_catalog(c,self.spec))
+    def test_required_optional_partition_and_open_objects_are_rejected(self):
+        for mode in ("missing","overlap","duplicate","open"):
+            with self.subTest(mode=mode):
+                c=deepcopy(self.catalog);node=c["schemas"]["nested"]
+                if mode=="missing":node["optional"]=[]
+                elif mode=="overlap":node["optional"].append("rows")
+                elif mode=="duplicate":node["required"].append("rows")
+                else:node["additionalProperties"]=True
+                self.assertIn("DEV-008 public response schema type/reference graph invalid",validate_public_response_catalog(c,self.spec))
+    def test_standard_report_cannot_add_paid_or_private_fields(self):
+        c=deepcopy(self.catalog);node=c["schemas"]["report.read.standard"]
+        node["properties"]["analyses"]={"ref":"nested"};node["optional"].append("analyses")
+        self.assertIn("DEV-008 public response schema field boundary drift",validate_public_response_catalog(c,self.spec))
+    def test_auxiliary_error_and_ready_cannot_add_private_fields(self):
+        for name,field in (("safe_error","raw_exception"),("readiness","database_role")):
+            with self.subTest(name=name):
+                c=deepcopy(self.catalog);node=c["schemas"][name]
+                node["properties"][field]={"type":"string"};node["optional"].append(field)
+                self.assertIn("DEV-008 public response auxiliary boundary drift",validate_public_response_catalog(c,self.spec))
+    def test_completed_implementation_requires_registry_and_unique_json_keys(self):
+        self.assertEqual(validate_public_response_registry([],lambda p:b"",self.spec),[])
+        s=deepcopy(self.spec);s["secured_backend_preparation_contract"]["code_status"]="implemented_synthetic_verified_integration_pending"
+        self.assertIn("DEV-008 public response schema registry missing",validate_public_response_registry([],lambda p:b"",s))
+        raw=b'{"format":"jungsi.public-response-schemas/v1","format":"duplicate"}'
+        self.assertIn("DEV-008 public response schema registry invalid",validate_public_response_registry([PUBLIC_RESPONSE_SCHEMA_PATH],lambda p:raw,self.spec))
 
 
 if __name__=="__main__":unittest.main()

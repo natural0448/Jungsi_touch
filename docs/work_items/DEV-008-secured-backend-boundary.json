@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "approved_for_implementation",
   "contract_ref": "secured_backend_preparation_contract",
-  "contract_version": "1.9.0",
+  "contract_version": "1.9.1",
   "requirements": [
     "REQ-24",
     "REQ-25",
@@ -153,7 +153,17 @@
         "error.code",
         "request_id"
       ],
-      "new_schema_catalog_shape": "same implementation PR; root checks complete operation/ref/role/nested bindings"
+      "new_schema_catalog_shape": "same implementation PR; root checks complete operation/ref/role/nested bindings",
+      "static_schema_registry": {
+        "path": "src/jungsi_touch/application/public_response_schemas.json",
+        "format": "jungsi.public-response-schemas/v1",
+        "operation_bindings": "id, contract_ref, roots.standard/paid",
+        "auxiliary_roots": [
+          "error",
+          "readiness"
+        ],
+        "validation": "all operation IDs and exact declared top-level fields; typed nested object/array/map values; required/optional partition; closed references; no cycles/Any; unique JSON keys"
+      }
     },
     "verification": {
       "status": "NOT_RUN",

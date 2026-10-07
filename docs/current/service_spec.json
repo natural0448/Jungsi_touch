@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2569,7 +2569,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.0",
+        "contract_version": "1.9.1",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2743,7 +2743,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.0",
+        "contract_version": "1.9.1",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2909,7 +2909,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "approved_for_implementation",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.0",
+        "contract_version": "1.9.1",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -3613,6 +3613,15 @@
         "REQ-26"
       ],
       "summary": "DEV-008: 중첩 응답 추가필드 잔존의 합성 재현을 근거로 명시 보안 앱의 relay 인증과 역할별 typed 재귀 투영을 개발한다. 기존22API/session3/default·이용권/Storage/local을 보존하고 BFF/실JWT/공유예산·운영gate NOT_RUN을 유지한다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "DEV-008 정적 공개 스키마 그래프 공통 검사를 준비한다. 22 API/역할 필드 일치, 중첩 타입·참조·순환·중복 JSON을 검사하고 구현 전 planned/운영 미준비 상태를 유지한다."
     }
   ],
   "overall_analysis_contract": {
@@ -12651,7 +12660,17 @@
         "error.code",
         "request_id"
       ],
-      "new_schema_catalog_shape": "same implementation PR; root checks complete operation/ref/role/nested bindings"
+      "new_schema_catalog_shape": "same implementation PR; root checks complete operation/ref/role/nested bindings",
+      "static_schema_registry": {
+        "path": "src/jungsi_touch/application/public_response_schemas.json",
+        "format": "jungsi.public-response-schemas/v1",
+        "operation_bindings": "id, contract_ref, roots.standard/paid",
+        "auxiliary_roots": [
+          "error",
+          "readiness"
+        ],
+        "validation": "all operation IDs and exact declared top-level fields; typed nested object/array/map values; required/optional partition; closed references; no cycles/Any; unique JSON keys"
+      }
     },
     "verification": {
       "status": "NOT_RUN",
