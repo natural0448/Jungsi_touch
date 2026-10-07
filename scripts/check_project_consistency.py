@@ -1145,6 +1145,10 @@ def validate_runtime_connection_preparation(spec):
 
 def supabase_deployment_document(spec):
     c=spec['supabase_deployment_contract']; p=c['platform_policy']; a=c['architecture']; s=c['security']; f=c['frontend']; v=c['verification']
+    comparison=f.get('comparison_review')
+    comparison_text=('\n\n## 화면 제공 방식 비교 회신의 검토\n\n'+comparison['decision']+'\n\n'+
+        table(['항목','확인·정정 기준'],comparison['facts'])+'\n\n실제 호환성/브라우저/비용 '+comparison['actual_compatibility_browser_and_billing']+'. 비교 수신은 배포·화면교체 승인이 아니다.\n\n'+
+        '\n'.join('- ['+x['title']+']('+x['url']+')' for x in comparison['official_sources'])) if comparison else ''
     return (c['scope']+'\n\n계약 '+c['revision']+' · 코드 '+c['code_status']+' · 실제 운영 NOT_RUN · production_ready=false. 출발 develop '+c['basis_commit']+'.\n\n'+
             '## 플랫폼과 비용 범위\n\n'+p['rule']+'\n\n허용 플랫폼: '+', '.join(p['allowed'])+' · 기존 요금제/Spend Cap 검수 '+p['usage_and_spend_cap_verification']+'. 추가 비용 없이 사용할 수 있는 범위를 먼저 확인한다.\n\n'+
             '## 3티어와 기존 Python 구현\n\n'+table(['계층/기준','구성'],[['프레젠테이션',a['presentation']],['애플리케이션',a['application']],['데이터',a['data']],['기존 검산',a['python_reference']]])+'\n\n'+a['rule']+'\n\n서버 UTC · 원자료/화면 Asia/Seoul. '+c['platform_limits']['cost_rule']+' 현재 플랫폼 상한은 메모리256MiB, 요청 active CPU2초, Free worker wall clock150초다. 플랫폼 상한은 내부 운영 한도를 뜻하지 않는다.\n\n'+
@@ -1153,7 +1157,7 @@ def supabase_deployment_document(spec):
             c['native_publication']['rule']+'\n\nEdge에서 사용할 private Storage 명부/환경 이름은 서버 담당의 구현 계약과 후보 증거로 확정한다. Python의 로컬 파일 경로·factory 실행 명령을 Edge 배포 명령으로 사용하지 않는다.\n\n'+
             '## 담당별 후속 단계\n\n'+table(['단계','담당','상태','산출물'],[[x['id'],x['owner'],x['status'],x['deliverable']] for x in c['phases']])+'\n\n'+
             '## 화면 담당에게 전달할 작업\n\n화면 제공 범위 '+f['hosting_status']+' · Drive Apps Script 후보 '+f['candidate_permission']+'. 기존 외부 preview와 파일은 이력으로 보존한다. 새 플랫폼으로 채택하지 않는다.\n\n'+'\n'.join('- '+x for x in f['handoff'])+'\n\n'+
-            '## 검증 상태\n\nEdge 구현 '+v['status']+' · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 '+v['actual_Auth_DB_Storage_Edge_BFF_browser_deployment']+' · 실제 비용/요금제 '+v['actual_billing_and_quota_verification']+'. 기존 Python 합성 인수는 Edge 포팅/실운영 인수를 대신하지 않는다.\n\n'+
+            comparison_text+'\n\n## 검증 상태\n\nEdge 구현 '+v['status']+' · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 '+v['actual_Auth_DB_Storage_Edge_BFF_browser_deployment']+' · 실제 비용/요금제 '+v['actual_billing_and_quota_verification']+'. 기존 Python 합성 인수는 Edge 포팅/실운영 인수를 대신하지 않는다.\n\n'+
             '## 공식 기술 근거\n\n'+'\n'.join('- ['+x['title']+']('+x['url']+')' for x in c['official_sources'])+'\n\n[DEV-010 작업 항목](../work_items/DEV-010-supabase-platform-deployment.json) · [기존 실행 자료 계약](Supabase_실행자료_연결.md)')
 
 
@@ -1748,12 +1752,18 @@ def generated_files(spec):
             '\n\n## 담당 후속 작업\n\n'+table(['작업','담당','수행 범위'],history['frontend_tasks'])+
             '\n\n## 현재 검증 범위\n\n'+table(['항목','상태'],list(verification.items()))+
             '\n\n기획 검산은 외부 화면 구현·로컬 꾸러미 승인/수신·실제 시사·운영 발행/배포/보안 인수를 대신하지 않는다.')
+        submission=history.get('submission_review')
+        if submission:
+            history_text+='\n\n## 화면 영수증 수신과 수정 인수\n\n화면 관측 '+submission['frontend_commit']+' · '+submission['evidence_scope']+'. '+submission['decision']+'\n\n'+table(['작업','항목','수정·인수 조건'],submission['corrections'])
+        partial=history.get('partial_publication')
+        if partial:
+            history_text+='\n\n## 학교별 부분 발행 착수\n\n'+partial['request']+'\n\n상태 '+partial['state']+' · 단위 '+partial['unit']+' · 선택 '+partial['selection_strategy']+'.\n\n'+'\n'.join('- '+x for x in partial['rules'])+'\n\n'+table(['작업','담당','산출물'],partial['owners'])+'\n\n'+partial['first_batch_and_ETA']+' 운영 발행 '+partial['operational_publication']+'.'
         history_path=spec['current_documents']['history_display']
         files[history_path]=doc('1페이지 공식 자료·추정 표기·발행 전 시사',history_text)
         summary=('\n\n## 1페이지 추정 2열과 초안 시사\n\n'+
             '[공식 자료·추정 표기·시사 계약](1페이지_공식자료_추정표기_시사.md)을 따른다. '+
             history['decision']+' 동일 학년도/모집행/통계 분모와 결측·실제0·음수를 검사하고 실제 불합격자수와의 차이를 표시한다. '+
-            'API의 공식 history_metric과 발행 상태는 불변이다. 기존 로컬 최소 catalog 시사 후보만 준비하며 승인·수신·브라우저·운영 발행은 별도 인수다.')
+            'API의 공식 history_metric과 회원 권한은 유지한다. 학교별 부분 발행은 단일 활성 catalog의 누적 불변 판으로 착수하며 source 승격·자동 병합을 하지 않는다. 실제 발행된 과거 입결의 목록/검수 계보·부분 조회를 화면에서 대조하고 승인·선택·수신·브라우저·운영 발행은 별도 인수다.')
         for key in ('planning','routing','architecture','workflow','presentation_handoff','api_dto','presentation_connection','local_verification','frontend_reply','frontend_followup','supabase_deployment','runtime_connection_preparation'):
             path=spec['current_documents'].get(key)
             if path in files:files[path]=files[path].replace(marker,summary+marker)
