@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -21,7 +21,8 @@
     "supabase_operations_handoff": "docs/current/Supabase_운영_인수인계.md",
     "external_security": "docs/current/외부접근_데이터보호_개발기준.md",
     "frontend_reply": "docs/current/화면팀_회신요청_최종.md",
-    "frontend_followup": "docs/current/화면팀_후속작업_지시.md"
+    "frontend_followup": "docs/current/화면팀_후속작업_지시.md",
+    "runtime_connection_preparation": "docs/current/Supabase_실행자료_연결.md"
   },
   "users": {
     "primary": "학생·학부모",
@@ -2609,7 +2610,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.3",
+        "contract_version": "1.9.4",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2783,7 +2784,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.3",
+        "contract_version": "1.9.4",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2949,7 +2950,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.3",
+        "contract_version": "1.9.4",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -2958,6 +2959,31 @@
         "owner": "서비스 개발팀; 공통 기획/검사는 시스템기획팀",
         "preservation": "기존22API/session3/default/Drive/local·원본·비공개자료·파일·잠금 보존; 새branch0·운영배포0",
         "verification_status": "PASS_SCOPED_SYNTHETIC_HTTP"
+      },
+      "docs/work_items/DEV-009-runtime-connection-preparation.json": {
+        "format": "jungsi.work-item/v1",
+        "id": "DEV-009-runtime-connection-preparation",
+        "title": "명시 Supabase 실행 자료 연결·공급자별 readiness·운영 준비",
+        "approved_on": "2026-10-07",
+        "start_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
+        "branch": "feature/application-pre-data-platform",
+        "status": "approved_for_implementation",
+        "contract_ref": "runtime_connection_preparation_contract",
+        "contract_version": "1.9.4",
+        "requirements": [
+          "REQ-12",
+          "REQ-14",
+          "REQ-15",
+          "REQ-16",
+          "REQ-17",
+          "REQ-20",
+          "REQ-23",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "owner": "서비스 개발팀·데이터팀; 공통 기획/검사는 시스템기획팀",
+        "preservation": "원본·정제·이전 발행본·파일·기존 상시 브랜치 보존; 실제 자료/설정/검수 근거는 Git 제외."
       }
     },
     "development_harness": {
@@ -3010,7 +3036,8 @@
     "4페이지: statistics.read 가 모집단위 하나씩이라 펼친 학교와 와일드카드만 부른다. 여러 모집단위를 한 번에 읽는 방법이 필요한지 정한다.",
     "live 연결: 에듀터치 본체와 같은 Supabase 프로젝트·쿠키 도메인 배포 설정과 실제 계정·이용권·관리 권한의 전체 연결 검증이 남아 있다(DEV-006 remaining).",
     "live 배포 설정: 운영 우리 서비스 API 주소(JUNGSI_API_URL)와 에듀터치 Supabase URL·publishable 키를 jeongsi-touch 워커 설정에 넣어야 실제 화면이 열린다. 에듀터치 본체의 /jeongsi 통로는 아직 관리자에게만 열려 있다.",
-    "DEV-008 명시 중계 인증·재귀 응답 경계는 PR17/develop 합성 인수 완료. 기본 연결 전환은 별도이며 실제 BFF/CSRF/브라우저·Auth/이용권/DB·공유 사용량 한도·배포 인수가 남아 있다."
+    "DEV-008 명시 중계 인증·재귀 응답 경계는 PR17/develop 합성 인수 완료. 기본 연결 전환은 별도이며 실제 BFF/CSRF/브라우저·Auth/이용권/DB·공유 사용량 한도·배포 인수가 남아 있다.",
+    "DEV-009 명시 Supabase 보안 factory·공급자별 설정·선택 native 실행 자료 사전 검수와 readiness를 구현한다. 최신 원자료/정제 정본→별도 native 검산/승인/발행→선택 연결→서버·실화면 인수를 순서대로 확인하며 배포 서비스 입력은 대기 중이다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -3690,6 +3717,22 @@
         "REQ-26"
       ],
       "summary": "DEV-008을 PR17의 develop 9abc493ffc5b1ef6b3c8a00042c125f9dff183cb에 통합했다. 최종 구현 HEAD 5f9618c447be95f6a858b4bb24a31a30433be337의 정상 훅 748개·정확 HEAD/PR/병합 CI와 독립 합성 22개를 확인하여 명시 보안 구성만 인수한다. 전역 보안 통제는 in_progress, 실제 Auth·DB·BFF·브라우저·배포는 NOT_RUN, production_ready=false이며 공유 사용량 한도와 운영 인수는 후속이다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-20",
+        "REQ-23",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "DEV-009을 승인한다. 과거 source-only 관측과 최신 원자료/정제 정본·native 실행 발행본을 분리하고, 명시 Supabase 구성에서도 Drive 설정을 요구하는 readiness 문제를 재현해 공급자별 설정·최소 native 검수·안전한 health 연결을 개발한다. 기존22API/회원/session/기본경로와 원본을 보존하며 실제 발행·서버/브라우저 인수는 별도 증거로 확인한다."
     }
   ],
   "overall_analysis_contract": {
@@ -8098,10 +8141,10 @@
           "SUP-05"
         ],
         "work": [
-          "configured_app을 locked Python runtime에 배포하고 HTTPS/CORS·제한 health·log/redaction을 검수한다.",
+          "별도 FastAPI 서버에 명시 보안 factory와 선택 공급자별 설정·최소 승인 native 실행 명부를 연결해 HTTPS/CORS·제한 health·안전한 오류를 검수한다. 현재 기본 factory는 유지한다.",
           "/health/ready200은 Auth/data/전체 운영 PASS가 아니다. localhost/test allowlist/memory/DPAPI factory를 public 배포하지 않는다.",
           "static환경에 Python 실행준비가 없으면 별도 서버 runtime이 필요하다.",
-          "사용자 Bearer와 별도 서버 신원을 모두 검증한다. HMAC/헤더/서명·nonce/회수 방식은 미채택 제안이며 개발팀이 충돌 없이 확정한다.",
+          "DEV-008 서버 전용 X-Jungsi-Relay-Token과 실제 사용자 Bearer를 각각 검증한다. 서버 토큰은 클라이언트에 전달하지 않으며 실제 BFF/세션/CSRF·원점 우회 인수는 외부 화면 담당과 같은 정책·후보로 수행한다.",
           "운영/preview BFF·원점 거절·공유 예산·실권한·승인 자료 gate 전에 live 전환하지 않는다. local allowlist token/메모리/DPAPI factory를 운영에서 선택하거나 공개 배포하지 않는다.",
           "모드·health 실패/HOLD를 명시하고 설정/Auth/DB/Drive 부족을 ready/paid/수치로 바꾸지 않는다. 안전한503/부분보류를 유지한다."
         ],
@@ -8112,7 +8155,8 @@
         "status": "NOT_RUN_HOSTING_AND_SECURITY_ACCEPTANCE_PENDING",
         "history_before_actual_update": {
           "status": "NOT_RUN_HOSTING_AND_SECURITY_ACCEPTANCE_PENDING"
-        }
+        },
+        "implementation_preparation_contract_ref": "runtime_connection_preparation_contract"
       },
       {
         "id": "SUP-08",
@@ -11757,7 +11801,8 @@
       ],
       "boundary": "Storage49개는 보존용 staging의 관측이며 자동 runtime 채택0/삭제0을 유지한다. 13개 스키마 테이블 생성은 자료 대량 인입과 다르다. 자료팀이 최소 명시 승인 allowlist와 독립 검산을 준비하고 공급자/engine/production은 별도 인수한다.",
       "runtime_implementation_status": "pending",
-      "production_ready": false
+      "production_ready": false,
+      "implementation_preparation_contract_ref": "runtime_connection_preparation_contract"
     },
     "database_runtime_application": {
       "format": "jungsi.private-runtime-application-observation/v1",
@@ -12819,5 +12864,198 @@
       "actual_Auth_DB_BFF_browser_deployment": "NOT_RUN",
       "production_ready": false
     }
+  },
+  "runtime_connection_preparation_contract": {
+    "format": "jungsi.runtime-connection-preparation/v1",
+    "id": "DEV-009",
+    "revision": "2026.10.07.v1",
+    "basis_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
+    "code_status": "planned",
+    "production_ready": false,
+    "branch": "feature/application-pre-data-platform",
+    "requirements": [
+      "REQ-12",
+      "REQ-14",
+      "REQ-15",
+      "REQ-16",
+      "REQ-17",
+      "REQ-20",
+      "REQ-23",
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "scope": "명시 Supabase 보안 앱 구성·공급자별 설정·선택 실행 자료의 사전 검수·최소 readiness 연결과 배포 준비. 원자료·정제 정본과 실행 발행본을 구분한다.",
+    "composition": {
+      "factory": "create_supabase_secured_app",
+      "explicit_selection_required": true,
+      "security_contract_ref": "secured_backend_preparation_contract",
+      "default_factories_unchanged": true,
+      "legacy_factories": [
+        "create_app",
+        "configured_app"
+      ],
+      "current_entitlement_authority": "jungsi_backend.entitlements",
+      "session_format": "jungsi.session/v1",
+      "existing_API_count": 22,
+      "API_or_DTO_additions": false,
+      "local_verification_unchanged": true
+    },
+    "source_lineage": {
+      "canonical_private_pointers": [
+        "DATA_ACTIVE_SUPABASE_v1.json",
+        "DATA_ACTIVE_CSV_v1.json"
+      ],
+      "historical_source_only_records_are_canonical": false,
+      "source_validation_is_engine_approval": false,
+      "source_or_archive_auto_adoption": false,
+      "actual_source_data_in_Git": false,
+      "source_snapshots_preserved": true,
+      "rule": "최신 활성 등록부의 원자료/정제 release·효과적 읽기 관계·버전/해시와 기존 검수 근거를 먼저 확인한다. 과거 source-only 개수/상태를 현재 실행 자료의 상태로 대체하지 않는다. 검증된 CSV/DB 저장 사실은 native 형식·산술·모형·운영 승인을 대신하지 않는다."
+    },
+    "runtime_selection": {
+      "registry_format": "jungsi.data-registry/v1",
+      "private_registry_required": true,
+      "required_dependencies_only": true,
+      "implicit_all_artifacts_selection": false,
+      "supported_kinds": [
+        "exam_pack",
+        "total_model",
+        "catalog",
+        "conversion",
+        "percentile",
+        "estimate_receipt",
+        "analysis",
+        "forecast_input",
+        "forecast_policy",
+        "forecast_context"
+      ],
+      "native_decoder_required": true,
+      "status_required": "approved",
+      "engine_approved_required": true,
+      "production_allowed_required": true,
+      "archive_only_required": false,
+      "reference_size_hash_version_binding_required": true,
+      "missing_or_invalid_selection": "503; keep existing approved score success and independent judgment pending semantics",
+      "source_files_overwritten": false,
+      "native_versions_separate_from_source": true,
+      "selection_format": "jungsi.runtime-selection/v1",
+      "selection_shape": "required: nonempty [{kind, key}]; duplicate identities rejected; only explicitly required dependencies are read"
+    },
+    "readiness": {
+      "path": "/health/ready",
+      "relay_required": true,
+      "user_Bearer_required": false,
+      "data_source": "explicit_supabase_storage",
+      "legacy_Drive_requirements_apply": false,
+      "required_server_components": [
+        "Supabase_Auth_settings",
+        "app_role_PostgreSQL",
+        "private_Storage_scope",
+        "private_runtime_registry",
+        "explicit_required_native_selection",
+        "relay_security"
+      ],
+      "selected_native_probe_required": true,
+      "draft_or_false_approval_or_bad_integrity_is_ready": false,
+      "database_verified_required": true,
+      "ready_public_fields": [
+        "status",
+        "server_timezone",
+        "production_ready",
+        "security_boundary"
+      ],
+      "production_ready": false,
+      "diagnostics": "Detailed missing settings/object references/paths/probe receipts stay in private CLI output; no public readiness leak.",
+      "private_environment_names": [
+        "SUPABASE_URL",
+        "SUPABASE_PUBLISHABLE_KEY",
+        "DATABASE_URL",
+        "SUPABASE_SECRET_KEY",
+        "JUNGSI_SUPABASE_STORAGE_BUCKET",
+        "JUNGSI_SUPABASE_STORAGE_PREFIX",
+        "JUNGSI_SUPABASE_RUNTIME_REGISTRY",
+        "JUNGSI_SUPABASE_RUNTIME_SELECTION",
+        "JUNGSI_RELAY_TOKEN"
+      ]
+    },
+    "workflow": [
+      {
+        "stage": "source_registered",
+        "owner": "데이터팀",
+        "completion": "정본 버전·원자료/정제·검수 근거를 고정한다. 기존 원본/이력은 보존한다."
+      },
+      {
+        "stage": "native_candidate",
+        "owner": "서비스 개발팀·데이터팀",
+        "completion": "요청 기능의 최소 의존성만 native 실행 형식으로 별도 변환한다. 값 부족·미확정 산식은 보류한다."
+      },
+      {
+        "stage": "scoped_validation",
+        "owner": "데이터팀·시스템기획팀·서비스 개발팀",
+        "completion": "원본→native 계보·해시·타입·모집행/시험/산식/곡선 버전·독립 산술/추정 검산을 확인한다."
+      },
+      {
+        "stage": "approval_and_immutable_publication",
+        "owner": "승인 담당·서버 담당",
+        "completion": "검수한 정확 버전과 승인 근거에 결속한 별도 불변 발행본과 명부를 만든다. source-only의 상태/시각만 바꾸어 실행 자료로 승격하지 않는다."
+      },
+      {
+        "stage": "explicit_runtime_selection",
+        "owner": "서버 담당",
+        "completion": "승인된 native 최소 명부와 명시 보안 factory로 연결하고 공급자별 readiness를 검수한다."
+      },
+      {
+        "stage": "hosting_and_actual_acceptance",
+        "owner": "서버 담당·외부 화면 담당",
+        "completion": "배포 대상·운영 설정·실JWT/권한·API/원점·BFF/CSRF·브라우저·공유 사용량 및 세 보안 gate의 실제 증거를 같은 후보에 결속한다."
+      }
+    ],
+    "deployment": {
+      "architecture": "separate_Python_FastAPI_backend",
+      "hosting_target_status": "user_input_pending",
+      "frontend_owner_branch": "feature/presentation-foundation",
+      "server_timezone": "UTC",
+      "source_display_timezone": "Asia/Seoul",
+      "app_role_only": true,
+      "migration_owner_as_runtime_allowed": false,
+      "private_credentials_in_client_allowed": false,
+      "actual_deployment": "NOT_RUN",
+      "BFF_browser_actual_acceptance": "NOT_RUN"
+    },
+    "verification": {
+      "status": "NOT_RUN",
+      "implementation_commit": null,
+      "synthetic_test_count": 0,
+      "CI": null,
+      "actual_source_native_publication_Auth_DB_BFF_browser_deployment": "NOT_RUN",
+      "cases": [
+        "native_approved_selection_without_Drive_settings_can_be_ready",
+        "source_archive_draft_false_flags_rejected_without_automatic_adoption",
+        "missing_native_selection_and_native_decode_or_hash_version_failure_not_ready",
+        "app_role_probe_failure_and_dependency_error_safe_503",
+        "relay_required_and_public_ready_four_fields_only",
+        "legacy_and_local_factory_regressions",
+        "private_preflight_provenance_without_public_secret_or_source_values"
+      ]
+    },
+    "preservation": {
+      "files_deleted": 0,
+      "new_branches": 0,
+      "default_factory_change_allowed": false,
+      "source_only_automatic_publication_allowed": false,
+      "production_ready_promotion_allowed": false
+    },
+    "remaining": [
+      "latest verified source to compatible native candidate and scoped numerical review",
+      "explicit approval/immutable publication/runtime selection of eligible minimum native artifacts",
+      "hosting target and private server configuration",
+      "actual JWT/entitlement/owner/Storage/API/BFF/CSRF/browser acceptance and shared atomic quota",
+      "forecast publication needs its separate independent editor/approver and pinned context; source metadata is not a forecast draft"
+    ],
+    "planned_code_paths": [
+      "src/jungsi_touch/infrastructure/supabase_runtime.py",
+      "tests/test_supabase_runtime.py"
+    ]
   }
 }

@@ -1070,6 +1070,66 @@ def secured_preparation_evidence(contract):
             'GitHub CI: '+checks+'. 실제 Auth·DB·BFF·브라우저·배포는 '+v['actual_Auth_DB_BFF_browser_deployment']+'이다.\n\n')
 
 
+def runtime_connection_document(spec):
+    c=spec['runtime_connection_preparation_contract']; q=c['runtime_selection']; r=c['readiness']; d=c['deployment']
+    return (c['scope']+'\n\n계약 '+c['revision']+' · 코드 '+c['code_status']+' · 운영 준비 false. 출발 develop '+c['basis_commit']+'.\n\n'+
+            '## 원자료 등록과 실행 발행본\n\n'+c['source_lineage']['rule']+'\n\n'+
+            '최신 비공개 정본 포인터: '+', '.join(c['source_lineage']['canonical_private_pointers'])+'. 포인터·해시·실제 release/검수 기록은 비공개이며 여기에는 실제 원자료나 수치를 복사하지 않는다.\n\n'+
+            table(['단계','담당','완료 조건'],[[x['stage'],x['owner'],x['completion']] for x in c['workflow']])+'\n\n'+
+            '## 명시 서버 구성과 공급자별 상태 확인\n\n'+c['composition']['factory']+'를 명시 선택하고 DEV-008 security 구성을 연결한다. 기존 create_app/configured_app·이용권·session v1·Drive·local 경로를 유지한다.\n\n'+
+            '필수 구성: '+', '.join(r['required_server_components'])+'. Supabase 명시 구성의 health에서 Drive token/input/output/registry를 추가 필수로 판단하지 않는다. DB 검증과 명시 선택한 native 실행 자료의 읽기·디코딩·버전/해시 검수가 필요하다.\n\n'+
+            '비공개 환경변수 이름: '+', '.join(r.get('private_environment_names',[]))+'. 값은 별도 서버 비밀 설정으로 공급하며 환경 예시 파일·클라이언트 코드에 넣지 않는다.\n\n'+
+            r['path']+'는 relay를 확인하며 '+', '.join(r['ready_public_fields'])+'만 반환한다. production_ready=false이고 draft/false 승인·누락·잘못된 형식/해시/버전에 안전한503을 반환한다. '+r['diagnostics']+'\n\n'+
+            '## 최소 실행 자료 선택과 검수\n\n명부 형식 '+q['registry_format']+' · 종류 '+', '.join(q['supported_kinds'])+'. 요청 기능이 필요한 kind/key만 명시 선택한다. 승인 status·engine_approved·production_allowed·archive_only=false와 native decoder·크기/해시/버전 결속을 함께 확인한다.\n\n'+
+            '선택 명부 '+q.get('selection_format','')+' · '+q.get('selection_shape','')+'. 빈 선택·중복·알 수 없는 kind와 보호 위치 밖 명부는 거절한다.\n\n'+
+            '원자료/CSV 저장 검수와 실행 산술 검수, 형식 검수와 모형 정확도, native 승인과 예상 기준선 forecast 승인은 각각의 근거로 판단한다. forecast는 기존 독립 editor/approver·revision/입력/정책/context 조건을 유지한다.\n\n'+
+            '## 배포와 화면 담당 인계\n\n별도 Python FastAPI 서버 · 배포 대상 '+d['hosting_target_status']+' · 실제 배포 '+d['actual_deployment']+' · 화면 '+d['frontend_owner_branch']+'. 서버 UTC, 원자료/화면 Asia/Seoul이며 runtime에는 app role만 사용한다. 서버 비밀과 원자료는 브라우저에 전달하지 않는다.\n\n'+
+            '외부 화면 담당은 확정 API 주소와 공개 Auth 설정, 서버 전용 relay·세션/CSRF 계약 및 같은 native 버전의 기대값을 수령해 실제1~4페이지를 검수한다. API22/DTO·회원·소유권·성공 점수와 판단 pending 조건을 유지한다.\n\n'+
+            '## 검수 상태와 남은 입력\n\n검수 '+c['verification']['status']+' · 실제 원자료→native 발행/Auth/DB/BFF/브라우저/배포 '+c['verification']['actual_source_native_publication_Auth_DB_BFF_browser_deployment']+'.\n\n'+
+            '\n'.join('- '+x for x in c['remaining'])+'\n\n[작업 항목](../work_items/DEV-009-runtime-connection-preparation.json) · [Supabase 운영 인계](Supabase_운영_인수인계.md) · [필수 보안 기준](외부접근_데이터보호_개발기준.md)')
+
+
+def validate_runtime_connection_preparation(spec):
+    c=spec.get('runtime_connection_preparation_contract')
+    try: required=tuple(int(x) for x in spec.get('version','0.0.0').split('.')) >= (1,9,4)
+    except (ValueError,TypeError): required=False
+    if c is None:return ['DEV-009 required runtime connection contract missing'] if required else []
+    if not isinstance(c,dict):return ['DEV-009 runtime connection contract invalid']
+    errors=[]; comp=c.get('composition',{}); lineage=c.get('source_lineage',{}); q=c.get('runtime_selection',{}); r=c.get('readiness',{}); d=c.get('deployment',{}); v=c.get('verification',{}); preserve=c.get('preservation',{})
+    if (c.get('format')!='jungsi.runtime-connection-preparation/v1' or c.get('id')!='DEV-009' or c.get('branch')!='feature/application-pre-data-platform' or
+        spec.get('current_documents',{}).get('runtime_connection_preparation')!='docs/current/Supabase_실행자료_연결.md' or
+        not {'REQ-12','REQ-14','REQ-15','REQ-16','REQ-17','REQ-20','REQ-23','REQ-24','REQ-25','REQ-26'}<=set(c.get('requirements',[]))):
+        errors.append('DEV-009 owner or source registration drift')
+    if (comp.get('factory')!='create_supabase_secured_app' or comp.get('explicit_selection_required')is not True or comp.get('security_contract_ref')!='secured_backend_preparation_contract' or
+        comp.get('default_factories_unchanged')is not True or comp.get('legacy_factories')!=['create_app','configured_app'] or comp.get('current_entitlement_authority')!='jungsi_backend.entitlements' or
+        comp.get('session_format')!='jungsi.session/v1' or comp.get('existing_API_count')!=len(spec.get('operations',[])) or comp.get('API_or_DTO_additions')is not False or comp.get('local_verification_unchanged')is not True):
+        errors.append('DEV-009 explicit composition preservation drift')
+    if (lineage.get('canonical_private_pointers')!=['DATA_ACTIVE_SUPABASE_v1.json','DATA_ACTIVE_CSV_v1.json'] or lineage.get('source_snapshots_preserved')is not True or
+        any(lineage.get(k)is not False for k in ('historical_source_only_records_are_canonical','source_validation_is_engine_approval','source_or_archive_auto_adoption','actual_source_data_in_Git'))):
+        errors.append('DEV-009 source registration cannot promote native runtime')
+    if (q.get('registry_format')!='jungsi.data-registry/v1' or q.get('selection_format')!='jungsi.runtime-selection/v1' or any(q.get(k)is not True for k in ('private_registry_required','required_dependencies_only','native_decoder_required','engine_approved_required','production_allowed_required','reference_size_hash_version_binding_required','native_versions_separate_from_source')) or
+        any(q.get(k)is not False for k in ('implicit_all_artifacts_selection','archive_only_required','source_files_overwritten')) or q.get('status_required')!='approved' or
+        set(q.get('supported_kinds',[]))!={'exam_pack','total_model','catalog','conversion','percentile','estimate_receipt','analysis','forecast_input','forecast_policy','forecast_context'}):
+        errors.append('DEV-009 native selection approval or integrity drift')
+    if (r.get('path')!='/health/ready' or r.get('relay_required')is not True or r.get('user_Bearer_required')is not False or r.get('data_source')!='explicit_supabase_storage' or
+        r.get('legacy_Drive_requirements_apply')is not False or r.get('selected_native_probe_required')is not True or r.get('draft_or_false_approval_or_bad_integrity_is_ready')is not False or
+        r.get('database_verified_required')is not True or r.get('ready_public_fields')!=['status','server_timezone','production_ready','security_boundary'] or r.get('production_ready')is not False or
+        set(r.get('required_server_components',[]))!={'Supabase_Auth_settings','app_role_PostgreSQL','private_Storage_scope','private_runtime_registry','explicit_required_native_selection','relay_security'} or
+        set(r.get('private_environment_names',[]))!={'SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','DATABASE_URL','SUPABASE_SECRET_KEY','JUNGSI_SUPABASE_STORAGE_BUCKET','JUNGSI_SUPABASE_STORAGE_PREFIX','JUNGSI_SUPABASE_RUNTIME_REGISTRY','JUNGSI_SUPABASE_RUNTIME_SELECTION','JUNGSI_RELAY_TOKEN'}):
+        errors.append('DEV-009 provider readiness or public boundary drift')
+    if (d.get('architecture')!='separate_Python_FastAPI_backend' or d.get('frontend_owner_branch')!='feature/presentation-foundation' or d.get('server_timezone')!='UTC' or d.get('source_display_timezone')!='Asia/Seoul' or
+        d.get('app_role_only')is not True or d.get('migration_owner_as_runtime_allowed')is not False or d.get('private_credentials_in_client_allowed')is not False or d.get('actual_deployment')!='NOT_RUN' or d.get('BFF_browser_actual_acceptance')!='NOT_RUN'):
+        errors.append('DEV-009 deployment preparation cannot certify live acceptance')
+    if (c.get('production_ready')is not False or any(preserve.get(k)is not False for k in ('default_factory_change_allowed','source_only_automatic_publication_allowed','production_ready_promotion_allowed')) or
+        v.get('actual_source_native_publication_Auth_DB_BFF_browser_deployment')!='NOT_RUN'):
+        errors.append('DEV-009 preparation cannot promote production or source data')
+    if c.get('code_status')not in {'planned','implemented_synthetic_verified_integration_pending','accepted_on_develop_scoped_synthetic_verified'}:
+        errors.append('DEV-009 scoped code state drift')
+    if c.get('code_status')!='planned' and (not re.fullmatch(r'[0-9a-f]{40}',str(v.get('implementation_commit',''))) or type(v.get('synthetic_test_count'))is not int or v.get('synthetic_test_count',0)<=0 or v.get('status')!='PASS_SCOPED_SYNTHETIC_HTTP'):
+        errors.append('DEV-009 implementation completion lacks fixed synthetic evidence')
+    return errors
+
+
 def validate_secured_preparation(spec):
     c=spec.get("secured_backend_preparation_contract")
     try:required=tuple(int(x) for x in spec.get("version","0.0.0").split(".")) >= (1,9,0)
@@ -1596,6 +1656,14 @@ def generated_files(spec):
             files[path]=files[path].replace('\n\n<!-- jungsi:generated',supabase_operations_summary(spec,link)+'\n\n<!-- jungsi:generated')
         if handoff:
             files[handoff['path']]=files[handoff['path']].replace('\n\n<!-- jungsi:generated',supabase_operations_summary(spec,'../../current/Supabase_운영_인수인계.md')+'\n\n<!-- jungsi:generated')
+    if spec.get('runtime_connection_preparation_contract'):
+        runtime_path=spec['current_documents']['runtime_connection_preparation']
+        files[runtime_path]=doc('Supabase 실행 자료 연결과 운영 준비',runtime_connection_document(spec))
+        marker='\n\n<!-- jungsi:generated'
+        for path in [spec['current_documents'][key] for key in ('planning','routing','architecture','workflow')]+['docs/current/Supabase_운영_인수인계.md','apps/web/README.md','database/README.md']:
+            if path in files:
+                link=('../../docs/current/' if path=='apps/web/README.md' else '../docs/current/' if path=='database/README.md' else '')+'Supabase_실행자료_연결.md'
+                files[path]=files[path].replace(marker,'\n\n[명시 Supabase 실행 자료 연결·공급자별 readiness·운영 준비]('+link+')의 DEV-009 계약을 함께 따른다.'+marker)
     for path,metadata in spec['workflow'].get('synchronized_work_items',{}).items():
         item=dict(metadata)
         item['scope']=spec[item['contract_ref']]
@@ -1753,6 +1821,8 @@ def validate_spec(spec):
                     'docs/work_items/DEV-007-forecast-policy.json':'forecast_policy_contract'}
     if 'secured_backend_preparation_contract' in spec:
         expected_items['docs/work_items/DEV-008-secured-backend-boundary.json']='secured_backend_preparation_contract'
+    if 'runtime_connection_preparation_contract' in spec:
+        expected_items['docs/work_items/DEV-009-runtime-connection-preparation.json']='runtime_connection_preparation_contract'
     if records is not None:
         if not isinstance(records,dict) or set(records)!=set(expected_items):
             errors.append('Synchronized work-item scope registration drift')
@@ -1781,6 +1851,7 @@ def validate_spec(spec):
     errors.extend(validate_local_verification_contract(spec))
     errors.extend(validate_security_contract(spec))
     errors.extend(validate_secured_preparation(spec))
+    errors.extend(validate_runtime_connection_preparation(spec))
     errors.extend(validate_frontend_reply_contract(spec))
     errors.extend(validate_supabase_actual_update_contract(spec))
     errors.extend(validate_supabase_second_actual_update_contract(spec))

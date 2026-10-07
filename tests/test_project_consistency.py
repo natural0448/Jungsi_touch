@@ -4,7 +4,7 @@ import json,sys,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
-from check_project_consistency import validate_public_response_catalog,validate_public_response_registry,PUBLIC_RESPONSE_SCHEMA_PATH,validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,validate_frontend_reply_contract,validate_frontend_followup_contract,FRONTEND_REPLY_DOCUMENT,FRONTEND_FOLLOWUP_DOCUMENT,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
+from check_project_consistency import validate_runtime_connection_preparation,validate_public_response_catalog,validate_public_response_registry,PUBLIC_RESPONSE_SCHEMA_PATH,validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,validate_frontend_reply_contract,validate_frontend_followup_contract,FRONTEND_REPLY_DOCUMENT,FRONTEND_FOLLOWUP_DOCUMENT,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
 
 class ConsistencyTests(unittest.TestCase):
     def setUp(self):
@@ -53,8 +53,8 @@ class ConsistencyTests(unittest.TestCase):
                 item=json.loads(generated[path])
                 self.assertEqual(item['scope'],self.spec[metadata['contract_ref']])
                 if 'historical_scope_at_adc684_acceptance' not in item:
-                    self.assertEqual(metadata['contract_ref'],'secured_backend_preparation_contract')
-                    self.assertEqual(item['scope'],self.spec['secured_backend_preparation_contract'])
+                    self.assertIn(metadata['contract_ref'],{'secured_backend_preparation_contract','runtime_connection_preparation_contract'})
+                    self.assertEqual(item['scope'],self.spec[metadata['contract_ref']])
                     self.assertFalse(item['scope']['production_ready'])
                     continue
                 historical=item['historical_scope_at_adc684_acceptance']
@@ -67,7 +67,7 @@ class ConsistencyTests(unittest.TestCase):
         for path in self.spec['workflow']['synchronized_work_items']:
             with self.subTest(path=path):
                 changed=dict(files);item=json.loads(changed[path])
-                if self.spec['workflow']['synchronized_work_items'][path]['contract_ref']=='secured_backend_preparation_contract':
+                if self.spec['workflow']['synchronized_work_items'][path]['contract_ref'] in {'secured_backend_preparation_contract','runtime_connection_preparation_contract'}:
                     item['scope']['code_status']='unreviewed_implementation'
                 else:
                     key='backend_contract_acceptance' if 'backend_contract_acceptance' in item['scope'] else 'implementation_acceptance'
@@ -1261,6 +1261,43 @@ class PublicResponseRegistryContractTests(unittest.TestCase):
         self.assertIn("DEV-008 public response schema registry missing",validate_public_response_registry([],lambda p:b"",s))
         raw=b'{"format":"jungsi.public-response-schemas/v1","format":"duplicate"}'
         self.assertIn("DEV-008 public response schema registry invalid",validate_public_response_registry([PUBLIC_RESPONSE_SCHEMA_PATH],lambda p:raw,self.spec))
+
+
+class RuntimeConnectionPreparationContractTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+    def test_source_validation_cannot_become_native_approval(self):
+        for field in ['historical_source_only_records_are_canonical','source_validation_is_engine_approval','source_or_archive_auto_adoption','actual_source_data_in_Git']:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['source_lineage'][field]=True
+                self.assertIn('DEV-009 source registration cannot promote native runtime',validate_runtime_connection_preparation(wrong))
+    def test_explicit_storage_readiness_cannot_inherit_drive_or_drop_relay(self):
+        for field,value in [('legacy_Drive_requirements_apply',True),('relay_required',False),('selected_native_probe_required',False),('database_verified_required',False),('draft_or_false_approval_or_bad_integrity_is_ready',True)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['readiness'][field]=value
+                self.assertIn('DEV-009 provider readiness or public boundary drift',validate_runtime_connection_preparation(wrong))
+    def test_native_selection_cannot_omit_approval_integrity_or_select_archive(self):
+        for field,value in [('native_decoder_required',False),('engine_approved_required',False),('production_allowed_required',False),('reference_size_hash_version_binding_required',False),('implicit_all_artifacts_selection',True),('archive_only_required',True),('source_files_overwritten',True),('selection_format','unbound-selection/v0')]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['runtime_selection'][field]=value
+                self.assertIn('DEV-009 native selection approval or integrity drift',validate_runtime_connection_preparation(wrong))
+    def test_source_fix_preserves_default_factories_and_minimal_health(self):
+        wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['composition']['default_factories_unchanged']=False
+        self.assertIn('DEV-009 explicit composition preservation drift',validate_runtime_connection_preparation(wrong))
+        wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['readiness']['ready_public_fields'].append('private_registry')
+        self.assertIn('DEV-009 provider readiness or public boundary drift',validate_runtime_connection_preparation(wrong))
+    def test_scoped_acceptance_needs_evidence_and_cannot_claim_live(self):
+        wrong=deepcopy(self.spec);c=wrong['runtime_connection_preparation_contract'];c['code_status']='accepted_on_develop_scoped_synthetic_verified'
+        c['verification'].update(implementation_commit=None,synthetic_test_count=0,status='NOT_RUN')
+        self.assertIn('DEV-009 implementation completion lacks fixed synthetic evidence',validate_runtime_connection_preparation(wrong))
+        wrong=deepcopy(self.spec);c=wrong['runtime_connection_preparation_contract'];c['production_ready']=True;c['deployment']['actual_deployment']='PASS'
+        self.assertIn('DEV-009 preparation cannot promote production or source data',validate_runtime_connection_preparation(wrong))
+        self.assertIn('DEV-009 deployment preparation cannot certify live acceptance',validate_runtime_connection_preparation(wrong))
+    def test_runtime_contract_and_work_item_cannot_be_removed(self):
+        wrong=deepcopy(self.spec);wrong.pop('runtime_connection_preparation_contract')
+        self.assertIn('DEV-009 required runtime connection contract missing',validate_spec(wrong))
+        wrong=deepcopy(self.spec);wrong['workflow']['synchronized_work_items'].pop('docs/work_items/DEV-009-runtime-connection-preparation.json')
+        self.assertIn('Synchronized work-item scope registration drift',validate_spec(wrong))
 
 
 if __name__=="__main__":unittest.main()
