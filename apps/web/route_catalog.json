@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.10",
-  "source_sha256": "92db4bf00f89c4268fbd6214651020ac0753b3b32aa54a180076dd9351ae6012",
+  "spec_version": "1.9.12",
+  "source_sha256": "62bba2ce76c41d1d958b9faabb21df9b669de5555f306aadfe449b582a35a7ab",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1269,7 +1269,7 @@
         ],
         "rules": [
           "verification_status=verified_official인 자료만 반환한다. 승인 플래그 자체·원문·로컬 경로·해시는 반환하지 않는다.",
-          "평균/50%/70%/최저와 점수 종류를 변환·대체하지 않는다. 미발표는 null과 발표 상태로 보존한다."
+          "평균/50%/70%/75%/최저 등 원문 지표와 점수 종류를 변환·대체하지 않는다. 75%컷을 70%컷·합격권·최저 합격점으로 분류하지 않는다. 미발표는 null과 발표 상태로 보존하며 미전사·미검수와 구분한다."
         ]
       },
       "recruitment": {
@@ -3281,7 +3281,7 @@
   },
   "history_presentation_contract": {
     "format": "jungsi.history-display/v1",
-    "revision": "2026.10.07.v2",
+    "revision": "2026.10.08.v2",
     "page": "PAGE-01",
     "path": "/admissions/results",
     "member_tiers": [
@@ -3301,7 +3301,7 @@
       "history.search",
       "recruitment.read"
     ],
-    "status": "planning_recorded_external_implementation_and_browser_acceptance_pending",
+    "status": "external_history_receipt_received_contract_defects_to_correct_partial_school_publication_started",
     "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다.",
     "estimated_columns": [
       {
@@ -3327,11 +3327,12 @@
       "추정 탈락자는 모집인원과 발표 충원인원을 차감한 산술 지표다. 합격 후 등록 포기·반복 충원 등의 차이를 반영하지 못하므로 실제 불합격자수나 합격확률로 해석하지 않는다는 주의 문구를 표시한다.",
       "차감 결과가 음수이거나 정의/통계 범위가 충돌하면 ─와 산출 불가 사유를 표시한다. 임의 0 보정·음수 인원 표시·다른 학년도 대체는 하지 않는다.",
       "추정값과 범례는 화면에서만 파생한다. DTO·source metric·native 발행 자료·운영 DB·데이터팀 공식 수치 검산에 넣지 않는다. 공식 수치 대조와 화면 산술 대조는 별도 영수증이다.",
-      "2027 모집인원 상자는 최초 인원·전체 변경분·공식 최종인원·상태/기준일을 그대로 구분한다. 과거 입결 표의 산술 재료로 사용하지 않는다."
+      "2027 모집인원 상자는 최초 인원·전체 변경분·공식 최종인원·상태/기준일을 그대로 구분한다. 과거 입결 표의 산술 재료로 사용하지 않는다.",
+      "대학 발표의 평균·50%·70%·75%·최저 등 원래 통계 위치와 이름/정의/단위/점수 척도를 그대로 보존한다. 75%컷을 70%컷·최저 합격점·합격권으로 바꾸지 않으며 예상70%·판단용 합격권과도 분리한다. 일부 모집행/학년도 검수는 학교 4개년 전체 입결 완전성이나 모델 전체 승인 증거가 아니다."
     ],
     "preview": {
       "selected_preparation": "C_local_review_package",
-      "reason": "기존 로컬 Caller와 별도 승인 명부 경로로 최소 1페이지 시사 후보부터 준비한다. 시사는 발행 판단을 대신하지 않는다.",
+      "reason": "기존 C 최소 catalog 로컬 시사와 A 학교별 정규 부분 발행 착수를 병행한다. 실제 자료 검수·승인·불변 저장·선택을 건너뛰지 않으며 시사는 발행 판단을 대신하지 않는다.",
       "state_model_unchanged": true,
       "operational_draft_read_allowed": false,
       "new_preview_DTO_flag_allowed": false,
@@ -3354,7 +3355,7 @@
         [
           "A",
           "검수 통과분 부분 발행",
-          "기능별 최소 native 후보의 검수·승인·불변 발행·선택을 완료한 뒤 검토한다. source-only의 draft/시각만 변경하는 방식은 사용하지 않는다."
+          "검수 완료 최소 학교부터 착수한다. 단일 활성 catalog에 맞게 누적 불변 판을 만들고 native/독립 값 대조/권한/승인/저장/선택을 각각 인수한다. source-only 상태를 일괄 변경하지 않는다."
         ],
         [
           "B",
@@ -3364,7 +3365,7 @@
         [
           "C",
           "로컬 시사 꾸러미",
-          "이번 준비 경로다. 실제 꾸러미 수신·승인·화면 검수는 해당 영수증이 있을 때만 완료로 기록한다."
+          "A 학교별 발행 착수와 병행하는 기존 로컬 시사 경로다. 별도 로컬 승인·명부·수신 보호·API/브라우저 영수증이 있어야 실제 완료다."
         ]
       ],
       "readiness": "minimum_native_catalog_approval_and_delivery_pending",
@@ -3383,19 +3384,20 @@
       ]
     },
     "separate_import": {
-      "reported_source": "외부 화면팀이 다른 PC Downloads의 admission-results_3.json을 에듀터치 본체에 반입했다고 보고했다.",
-      "verification_status": "external_report_only_origin_scope_publication_and_actual_usage_pending",
+      "reported_source": "외부 화면팀이 수시 JSON의 식별·범위·본체 반입·공개 후 비공개/반입분 삭제·현재 정시/본체에서 미사용이라고 FE-SOURCE-02로 회신했다.",
+      "verification_status": "report_received_closed_for_jungsi_non_use_external_EduTouch_DB_and_authority_NOT_RUN",
       "rules": [
-        "이 반입은 정시 정본 CSV/Supabase source 등록과 다른 자료 흐름이다. 수시/정시 이름이나 학생부 지표만으로 분류를 확정하지 않는다.",
-        "파일 SHA256·원문 출처/학년도/전형·공개 이용 범위·반입 위치/관계·화면 사용 경로와 합성/live 모드를 소유자가 기록한다. 두 흐름을 자동 조인하거나 1페이지 정시 발행본으로 채택하지 않는다.",
-        "원본/기존 반입/이력은 보존한다. 개발자의 롤백 가능 보고는 사용자 삭제 승인이나 실제 삭제 완료를 뜻하지 않는다. 분류/출처 불명 값은 발행 후보에서 보류한다."
+        "파일 식별/출처·수시 범위/본체 반입 관계/현재 미사용 보고는 수신했다. 다른 PC 원본·본체 PR/DB 잔존 수·외부 사용자 삭제 승인 사실을 이 작업에서 독립 검증한 것으로 적지 않는다.",
+        "정시 정본/source 등록·jungsi_backend·정시 페이지와 독립 흐름으로 유지한다. 수시 자료를 정시 native/1페이지 발행 후보로 자동 조인하거나 재반입하지 않는다.",
+        "화면팀의 본체 삭제 완료 보고는 외부 소관 이력으로 기록한다. 여기서 본체 DB 삭제·복원·재반입·설정 제거를 실행하거나 승인하지 않는다. 기존 원본/스크립트/마이그레이션/이력은 보존한다.",
+        "현재 정시에서 사용하지 않는 흐름의 회신은 수신/분리 확인으로 마감한다. 향후 다시 사용하려면 원본 hash·출처/공개 이용 범위·전형 분류·권한·현재 DB/화면 경로를 별도 검수한다."
       ]
     },
     "frontend_tasks": [
       [
         "FE-HISTORY-01",
         "feature/presentation-foundation",
-        "두 추정 열의 동일 통계 범위·정확 소수/반올림·결측/0/음수·공식 지원자수 우선·주의 문구를 검토하고 해당 SHA의 화면 영수증을 남긴다."
+        "FE-HISTORY-01A/B/C의 입력·정확소수·공식 A/R 결측 표시·지표 의미 불일치를 수정한 화면 SHA와 실제 분기 영수증을 제출한다. 현재 외부 영수증 수신만으로 최종 인수하지 않는다."
       ],
       [
         "FE-PREVIEW-01",
@@ -3405,12 +3407,22 @@
       [
         "FE-SOURCE-02",
         "외부 화면팀·데이터팀",
-        "admission-results_3.json의 별도 출처·반입·화면 모드 증거를 회신하고 정시 정본 흐름과의 혼용 여부를 확인한다."
+        "별도 수시 본체 흐름/미사용·반입분 삭제 보고를 수신했다. 정시와 분리한 보고 마감이며 본체 원본/DB/사용자 승인 독립 검증이나 새 삭제 허용은 아니다."
       ],
       [
         "DEP-04-APPS",
         "feature/presentation-foundation",
-        "Apps Script 웹앱은 검토 후보 포함만 승인됐다. 기존 Next.js·세션/JWT·BFF/CSRF·relay·HTTP 방법/상태/헤더·호출 제한/비용·보안 전송물의 호환성 표와 후속 제안을 만든다. 새 배포 승인으로 확대하지 않는다."
+        "비교 회신의 inbound/outbound·사용자당30/스크립트당1000·HTTP 상태/헤더·relay 구현 상태·Supabase HTML/custom domain 제한을 정정한다. 운영화면/비용은 미선택이며 배포/화면교체는 승인되지 않았다."
+      ],
+      [
+        "FE-HISTORY-02",
+        "feature/presentation-foundation",
+        "실제 발행 과거 입결을 목록으로 보여 주고 2027 history 의존·suffix 연결 추측·부분조회 미공개 오표기를 수정한다. API/일반회원 권한 확대는 별도 CR이다."
+      ],
+      [
+        "FE-SEC03-RELAY",
+        "feature/presentation-foundation",
+        "현재 live Caller의 서버 relay 송신과 필수 설정 거절·실제 사용자 Bearer·브라우저 비노출을 구현/검수한 정확한 후보를 회신한다."
       ]
     ],
     "verification": {
@@ -3424,7 +3436,104 @@
       "DTO_changes": false,
       "new_API_operations": 0,
       "local_catalog_readiness": "code_review_supported_actual_local_NOT_RUN",
-      "independent_contract_review": "service_team_read_only_two_findings_incorporated"
+      "independent_contract_review": "service_team_read_only_two_findings_incorporated",
+      "frontend_history_receipt": "RECEIVED_SOURCE_CONTRACT_DEFECTS_TO_CORRECT",
+      "frontend_source_report": "RECEIVED_EXTERNAL_REPORT_ONLY_JUNGSI_NOT_USING",
+      "partial_publication": "STARTED_MINIMUM_BATCH_AND_AUTHORITY_PREPARATION",
+      "semantic_absence_and_original_cut_labels": "CLARIFIED_NOT_INCLUDED_UNTRANSCRIBED_UNVERIFIED_OFFICIAL_ABSENCE_ZERO_AND_75_PERCENT_PRESERVED"
+    },
+    "submission_review": {
+      "format": "jungsi.frontend-history-submission-review/v1",
+      "date": "2026-10-08",
+      "basis_planning_commit": "ea88d336d7d69391b4e1433ba7d8e1b2440217a9",
+      "frontend_commit": "d83e19d7f78b39f64a296bec577de68a104b197b",
+      "evidence_scope": "Git source review and external receipt; actual new receiver browser and operational acceptance remain separate",
+      "decision": "영수증 수신은 완료했다. 추정 표시 계약의 불일치·실자료 검색/연결·중계 송신 증거를 보완한 정확한 화면 SHA로 재검수하며 현재 판을 최종 인수로 처리하지 않는다.",
+      "corrections": [
+        [
+          "FE-HISTORY-01A",
+          "추정 입력 검증",
+          "공식 A가 없으면 Q/R/C 전체가 유효하고 동일 통계 범위일 때만 두 파생값을 계산한다. C가 없을 때 Q/R만으로 지원자수를 표시하는 영수증 #4와 코드를 바로잡는다. 단위·지표 정의·발표 상태·경쟁률 분모·모집 단계 검수도 필요하다."
+        ],
+        [
+          "FE-HISTORY-01B",
+          "정확 소수 산술",
+          "R×10^6을 Number 정수로 반올림하는 방식은 선양자화다. 원문 정확 소수를 무손실 정수/유리수로 처리하거나 검수한 입력 정밀도 상한과 안전정수 범위를 실제 계약/증거로 고정한다. 0.5 경계 전후·큰 정수·결측·음수·실제0을 대조한다."
+        ],
+        [
+          "FE-HISTORY-01C",
+          "공식 지원자 분기와 열",
+          "A/Q/C만 있고 R가 없을 때도 탈락자 칸이 표시돼야 한다. A 의미 대응이 없으면 후보 미포함·원문 미전사·미검수·공식 미발표 확인·실제0을 구분하고 이름을 추측해 주입하지 않는다. 공식 미발표는 원문 범위 검수 근거가 있을 때만 확정한다. 두 추정 열은 재료 결측 시 ─로 구분한다."
+        ],
+        [
+          "FE-HISTORY-02",
+          "실제 발행 자료 목록·연도 연결",
+          "2027 history만을 목록의 축으로 쓰지 않는다. 기존 일반 history.search로 실제 발행된 과거 지표를 보여 주는 경로를 먼저 검수한다. 검수된 계보가 없으면 학년도별 모집행을 분리하며 -YYYY suffix 추측으로 연결하지 않는다. 2027 결과를 만들어 넣거나 paid offerings.search를 일반회원에 임의 허용하지 않는다."
+        ],
+        [
+          "FE-HISTORY-03",
+          "부분 검색과 결측 설명",
+          "과거 limit100 응답의 next_cursor가 남으면 전부 조회했다고 표시하지 않는다. 현재 발행본의 빈 검색결과는 자료 없음/미발표 확정이 아니다. 검수 중·미포함·읽기 미완료와 실제 공식 미공개 근거를 구분한다. 조회 범위·공유 예산을 지켜 필요한 범위만 대조한다."
+        ],
+        [
+          "FE-SEC03-RELAY",
+          "서버 중계",
+          "현재 live Caller에서 X-Jungsi-Relay-Token 송신이 관측되지 않은 판은 송신 완료로 적지 않는다. 실제 사용자 Bearer와 서버 전용 신원을 분석 API에 함께 전달하고, 비밀의 브라우저 비노출·필수 설정 실패·직접 접근 거절을 같은 후보로 검수한다."
+        ]
+      ],
+      "frontend_implementation_owner": "feature/presentation-foundation",
+      "front_source_edit_in_planning_team": false,
+      "new_API_or_member_permission_approved": false,
+      "receiver_browser": "NOT_RUN",
+      "semantics_clarification_basis_commit": "30baaf64b32a1477c7c4b82a1d6f86b79f3f5ba8"
+    },
+    "partial_publication": {
+      "format": "jungsi.school-history-publication-plan/v1",
+      "date": "2026-10-08",
+      "request": "사용자가 화면팀 요청 해결과 회신을 지시했다. 1페이지 입시결과는 검수 완료 학교의 최소 묶음부터 정규 승인·불변 발행 절차를 착수하며 C 로컬 검수도 병행한다.",
+      "state": "data_candidate_selection_and_service_independent_review_in_progress",
+      "unit": "school_bundle_with_explicit_academic_year_offering_metric_coverage",
+      "selection_strategy": "one_cumulative_immutable_catalog_snapshot_per_version",
+      "rules": [
+        "원자료/source 등록의 draft/승인 필드만 바꿔 runtime 자료로 승격하지 않는다. 새로운 native 후보·출처 계보·독립 값 대조·자료 의미/권한·실행 승인 근거·불변 저장 대상·선택 신뢰 SHA를 각각 확인한다.",
+        "기존 catalog/service 선택은 하나의 활성 catalog다. 학교별 파일 다중 선택·자동 병합이 있다고 가정하지 않는다. 후속 판은 검수한 이전 발행 학교를 누적 포함해 하나의 새 불변 판으로 만들고 변경·제외·보류 사유를 명부에 남긴다.",
+        "학교별 4개년 정리·모집행 연결 근거를 재사용한다. 입결 일부 학년도만 검수됐다면 포함 학년도/지표·미대조 범위를 명시하고 그 학교의 4개년 전체 입결 또는 모집표 전수검수 완료라고 하지 않는다.",
+        "매 판마다 버전·bytes/SHA256·대학/모집행/학년도/지표 포함 범위·검수 중/자료 없음/미공개/실기 제외 사유·원본→native 계보·독립 검수·승인 담당을 고정한다. 실제 수치는 비공개 자료 계층에 둔다.",
+        "공식 A/R/Q/C 의미 대응은 metric_name 하나로 확정하지 않는다. 정의·단위·발표 상태·출처·동일 통계 분모/단계를 검수한다. 후보 미포함·원문 미전사·미검수·공식 미발표 확인·실제0을 구분한다. 후보에서 읽지 않았거나 대응이 없다는 이유로 공식 발표 없음으로 확정하지 않으며 미확인 A를 이름으로 추측해 주입하지 않는다.",
+        "미포함 대학은 기존 search가 ready/items=[]로 응답할 수 있고 개별 존재하지 않는 offering은 404다. 이를 pending 자동변환이라고 약속하지 않는다. 화면은 현재 발행본의 검색 범위와 미발행/검수 중 가능성을 설명한다. 신규 coverage DTO/API는 별도 CR이다.",
+        "Supabase runtime client의 GET 읽기 구현은 publisher 구현이 아니다. 적격 후보·쓰기 주체/역할·정확 새 private 대상·불변/idempotency 검수·선택/철회 근거가 없으면 업로드/운영 발행 완료로 적지 않는다. 기존 파일/객체를 지우거나 upsert로 교체하지 않는다.",
+        "1페이지 자료 승인과 운영 readiness는 분리한다. 곡선/환산/개인분석·기본 이용권·공유 보안/배포를 함께 승인하지 않는다. C 로컬 승인/선택과 A 운영 발행 권한도 구분한다.",
+        "발행 감지의 3시간 주기/즉시 인수 시작은 화면팀 보고다. 담당자 자동화·배포 실행을 이 문서로 새로 만들거나 재개하지 않는다. 실제 발행 시간과 화면 관측/인수 시간은 각각 기록한다.",
+        "대학 발표의 평균·50%·70%·75%·최저 등 원래 통계 위치와 이름/정의/단위/점수 척도를 그대로 보존한다. 75%컷을 70%컷·최저 합격점·합격권으로 바꾸지 않으며 예상70%·판단용 합격권과도 분리한다. 일부 모집행/학년도 검수는 학교 4개년 전체 입결 완전성이나 모델 전체 승인 증거가 아니다.",
+        "최소 묶음은 학교·필요 지표·파일 범위를 줄이는 방식이다. 같은 선정 학교/모집행의 이미 조사·검수한 2024·2025·2026 입결을 최종 전달 후보에서 임의로 빼지 않는다. 일부 학년도 근거가 실제 부족하면 그 범위와 이유를 명부에 기록하고, 아직 발표되지 않은 2027 입결을 만들어 채우지 않는다."
+      ],
+      "owners": [
+        [
+          "DATA-HISTORY-PUBLISH-01",
+          "데이터팀",
+          "검수 완료 최소 학교 native 후보·학년도/지표 범위·의미 대응·출처/값 대조·포함/제외 명부"
+        ],
+        [
+          "SVC-HISTORY-PUBLISH-01",
+          "feature/application-pre-data-platform",
+          "학교 단위 catalog/provider/API의 독립 대조·publisher 준비·실행 승인/선택·C 검수·운영 발행 영수증"
+        ],
+        [
+          "FE-HISTORY-02",
+          "feature/presentation-foundation",
+          "발행된 과거 입결 목록·검수 계보·빈 검색/부분 조회 설명·실물 숫자/전달물 인수"
+        ],
+        [
+          "PM-HISTORY-PUBLISH-01",
+          "develop",
+          "기획·라우팅·요청/검수/승인/발행 상태의 일치 및 같은 코드 스냅샷 인수"
+        ]
+      ],
+      "first_batch_and_ETA": "게이트 담당자가 최소 학교 후보와 정확한 검수/쓰기/선택 근거를 확정한 뒤 범위와 시점을 기록한다. 자료 수·계획 문구·외부 최종 관리자 표제만으로 발행 완료나 날짜를 만들지 않는다.",
+      "operational_publication": "NOT_RUN",
+      "new_operating_deployment_authorized": false,
+      "deletion_allowed": false,
+      "default_entitlement_change_allowed": false
     }
   },
   "security_contract": {
