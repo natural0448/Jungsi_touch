@@ -1,0 +1,259 @@
+{
+  "format": "jungsi.work-item/v1",
+  "id": "DEV-009-runtime-connection-preparation",
+  "title": "명시 Supabase 실행 자료 연결·공급자별 readiness·운영 준비",
+  "approved_on": "2026-10-07",
+  "start_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
+  "branch": "feature/application-pre-data-platform",
+  "status": "accepted_on_develop_scoped_synthetic_verified",
+  "contract_ref": "runtime_connection_preparation_contract",
+  "contract_version": "1.9.7",
+  "requirements": [
+    "REQ-12",
+    "REQ-14",
+    "REQ-15",
+    "REQ-16",
+    "REQ-17",
+    "REQ-20",
+    "REQ-23",
+    "REQ-24",
+    "REQ-25",
+    "REQ-26"
+  ],
+  "owner": "서비스 개발팀·데이터팀; 공통 기획/검사는 시스템기획팀",
+  "preservation": "원본·정제·이전 발행본·파일·기존 상시 브랜치 보존; 실제 자료/설정/검수 근거는 Git 제외.",
+  "scope": {
+    "format": "jungsi.runtime-connection-preparation/v1",
+    "id": "DEV-009",
+    "revision": "2026.10.07.v2",
+    "basis_commit": "0b120ff3b4e168b6c724de0b212e221ef8527c3e",
+    "code_status": "accepted_on_develop_scoped_synthetic_verified",
+    "production_ready": false,
+    "branch": "feature/application-pre-data-platform",
+    "requirements": [
+      "REQ-12",
+      "REQ-14",
+      "REQ-15",
+      "REQ-16",
+      "REQ-17",
+      "REQ-20",
+      "REQ-23",
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "scope": "명시 Supabase 보안 앱 구성·공급자별 설정·선택 실행 자료의 사전 검수·최소 readiness 연결과 배포 준비. 원자료·정제 정본과 실행 발행본을 구분한다.",
+    "composition": {
+      "factory": "create_supabase_secured_app",
+      "explicit_selection_required": true,
+      "security_contract_ref": "secured_backend_preparation_contract",
+      "default_factories_unchanged": true,
+      "legacy_factories": [
+        "create_app",
+        "configured_app"
+      ],
+      "current_entitlement_authority": "jungsi_backend.entitlements",
+      "session_format": "jungsi.session/v1",
+      "existing_API_count": 22,
+      "API_or_DTO_additions": false,
+      "local_verification_unchanged": true,
+      "environment_factory": "configured_supabase_app",
+      "configuration_check_command": "python -m jungsi_touch.infrastructure.supabase_runtime --check-config",
+      "server_factory_command": "python -m uvicorn jungsi_touch.infrastructure.supabase_runtime:configured_supabase_app --factory --host 127.0.0.1 --port 8000 --no-access-log"
+    },
+    "source_lineage": {
+      "canonical_private_pointers": [
+        "DATA_ACTIVE_SUPABASE_v1.json",
+        "DATA_ACTIVE_CSV_v1.json"
+      ],
+      "historical_source_only_records_are_canonical": false,
+      "source_validation_is_engine_approval": false,
+      "source_or_archive_auto_adoption": false,
+      "actual_source_data_in_Git": false,
+      "source_snapshots_preserved": true,
+      "rule": "최신 활성 등록부의 원자료/정제 release·효과적 읽기 관계·버전/해시와 기존 검수 근거를 먼저 확인한다. 과거 source-only 개수/상태를 현재 실행 자료의 상태로 대체하지 않는다. 검증된 CSV/DB 저장 사실은 native 형식·산술·모형·운영 승인을 대신하지 않는다."
+    },
+    "runtime_selection": {
+      "registry_format": "jungsi.data-registry/v1",
+      "private_registry_required": true,
+      "required_dependencies_only": true,
+      "implicit_all_artifacts_selection": false,
+      "supported_kinds": [
+        "exam_pack",
+        "total_model",
+        "catalog",
+        "conversion",
+        "percentile",
+        "estimate_receipt",
+        "analysis",
+        "forecast_inputs",
+        "forecast_policy",
+        "forecast_context"
+      ],
+      "native_decoder_required": true,
+      "status_required": "approved",
+      "engine_approved_required": true,
+      "production_allowed_required": true,
+      "archive_only_required": false,
+      "reference_size_hash_version_binding_required": true,
+      "missing_or_invalid_selection": "503; keep existing approved score success and independent judgment pending semantics",
+      "source_files_overwritten": false,
+      "native_versions_separate_from_source": true,
+      "selection_format": "jungsi.runtime-selection/v1",
+      "selection_shape": "required: nonempty [{kind, key}]; duplicate identities rejected; only explicitly required dependencies are read",
+      "selected_native_cross_bindings_required": true,
+      "cross_binding_rule": "명시 선택에 이미 포함된 시험·팩·카탈로그·환산·누백·곡선·모집행의 학년도와 버전/맥락을 서로 대조한다. 불일치는503이며 미선택 자료를 암묵적으로 읽거나 전 자료를 필수로 확장하지 않는다."
+    },
+    "readiness": {
+      "path": "/health/ready",
+      "relay_required": true,
+      "user_Bearer_required": false,
+      "data_source": "explicit_supabase_storage",
+      "legacy_Drive_requirements_apply": false,
+      "required_server_components": [
+        "Supabase_Auth_settings",
+        "app_role_PostgreSQL",
+        "private_Storage_scope",
+        "private_runtime_registry",
+        "explicit_required_native_selection",
+        "relay_security"
+      ],
+      "selected_native_probe_required": true,
+      "draft_or_false_approval_or_bad_integrity_is_ready": false,
+      "database_verified_required": true,
+      "ready_public_fields": [
+        "status",
+        "server_timezone",
+        "production_ready",
+        "security_boundary"
+      ],
+      "production_ready": false,
+      "diagnostics": "Detailed missing settings/object references/paths/probe receipts stay in private CLI output; no public readiness leak.",
+      "private_environment_names": [
+        "SUPABASE_URL",
+        "SUPABASE_PUBLISHABLE_KEY",
+        "DATABASE_URL",
+        "SUPABASE_SECRET_KEY",
+        "JUNGSI_SUPABASE_STORAGE_BUCKET",
+        "JUNGSI_SUPABASE_STORAGE_PREFIX",
+        "JUNGSI_SUPABASE_RUNTIME_REGISTRY",
+        "JUNGSI_SUPABASE_RUNTIME_SELECTION",
+        "JUNGSI_RELAY_TOKEN"
+      ],
+      "private_probe_symbol": "SupabaseRuntimeReadiness.probe"
+    },
+    "workflow": [
+      {
+        "stage": "source_registered",
+        "owner": "데이터팀",
+        "completion": "정본 버전·원자료/정제·검수 근거를 고정한다. 기존 원본/이력은 보존한다."
+      },
+      {
+        "stage": "native_candidate",
+        "owner": "서비스 개발팀·데이터팀",
+        "completion": "요청 기능의 최소 의존성만 native 실행 형식으로 별도 변환한다. 값 부족·미확정 산식은 보류한다."
+      },
+      {
+        "stage": "scoped_validation",
+        "owner": "데이터팀·시스템기획팀·서비스 개발팀",
+        "completion": "원본→native 계보·해시·타입·모집행/시험/산식/곡선 버전·독립 산술/추정 검산을 확인한다."
+      },
+      {
+        "stage": "approval_and_immutable_publication",
+        "owner": "승인 담당·서버 담당",
+        "completion": "검수한 정확 버전과 승인 근거에 결속한 별도 불변 발행본과 명부를 만든다. source-only의 상태/시각만 바꾸어 실행 자료로 승격하지 않는다."
+      },
+      {
+        "stage": "explicit_runtime_selection",
+        "owner": "서버 담당",
+        "completion": "승인된 native 최소 명부와 명시 보안 factory로 연결하고 공급자별 readiness를 검수한다."
+      },
+      {
+        "stage": "hosting_and_actual_acceptance",
+        "owner": "서버 담당·외부 화면 담당",
+        "completion": "배포 대상·운영 설정·실JWT/권한·API/원점·BFF/CSRF·브라우저·공유 사용량 및 세 보안 gate의 실제 증거를 같은 후보에 결속한다."
+      }
+    ],
+    "deployment": {
+      "architecture": "separate_Python_FastAPI_backend",
+      "hosting_target_status": "user_input_pending",
+      "frontend_owner_branch": "feature/presentation-foundation",
+      "server_timezone": "UTC",
+      "source_display_timezone": "Asia/Seoul",
+      "app_role_only": true,
+      "migration_owner_as_runtime_allowed": false,
+      "private_credentials_in_client_allowed": false,
+      "actual_deployment": "NOT_RUN",
+      "BFF_browser_actual_acceptance": "NOT_RUN"
+    },
+    "verification": {
+      "status": "PASS_SCOPED_SYNTHETIC_HTTP",
+      "implementation_commit": "606e8307883ea53340be850ea13674a19baa8f81",
+      "synthetic_test_count": 44,
+      "CI": {
+        "headSha": "606e8307883ea53340be850ea13674a19baa8f81",
+        "run_id": 37582748954,
+        "conclusion": "success",
+        "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37582748954"
+      },
+      "actual_source_native_publication_Auth_DB_BFF_browser_deployment": "NOT_RUN",
+      "cases": [
+        "native_approved_selection_without_Drive_settings_can_be_ready",
+        "source_archive_draft_false_flags_rejected_without_automatic_adoption",
+        "missing_native_selection_and_native_decode_or_hash_version_failure_not_ready",
+        "app_role_probe_failure_and_dependency_error_safe_503",
+        "relay_required_and_public_ready_four_fields_only",
+        "legacy_and_local_factory_regressions",
+        "private_preflight_provenance_without_public_secret_or_source_values",
+        "selected_native_cross_exam_pack_year_offering_rule_curve_bindings_must_match",
+        "native_analysis_bridge_JSON_canonical_integer_keys_roundtrip_and_noncanonical_collision_rejection",
+        "selected_analysis_embedded_curve_rule_approval_and_pack_binding",
+        "private_manifest_location_checked_relative_to_project_not_ancestor_outputs"
+      ],
+      "normal_commit_push_snapshot_test_count": 798,
+      "independent_synthetic_case_count": 11,
+      "integration": {
+        "status": "accepted_on_develop_scoped_synthetic_verified",
+        "PR": "https://github.com/natural0448/Jungsi_touch/pull/19",
+        "feature_head": "08f73a4a71ac9b9a5cef323ff3c748090acc5ffc",
+        "develop_merge_commit": "493232832d663d7fea7b0fbb350de15055cd9ccf",
+        "same_reviewed_tree": "faa6b90fd3622ada04040474fc4076dbec141f9d",
+        "normal_commit_push_snapshot_test_count": 799,
+        "feature_CI": {
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37586180114",
+          "conclusion": "success"
+        },
+        "PR_CI": {
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37586185665",
+          "conclusion": "success"
+        },
+        "merge_CI": {
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37586473913",
+          "conclusion": "success"
+        },
+        "code_hashes_match_independent_evidence": true,
+        "actual_operations": "NOT_RUN"
+      }
+    },
+    "preservation": {
+      "files_deleted": 0,
+      "new_branches": 0,
+      "default_factory_change_allowed": false,
+      "source_only_automatic_publication_allowed": false,
+      "production_ready_promotion_allowed": false
+    },
+    "remaining": [
+      "latest verified source to compatible native candidate and scoped numerical review",
+      "explicit approval/immutable publication/runtime selection of eligible minimum native artifacts",
+      "hosting target and private server configuration",
+      "actual JWT/entitlement/owner/Storage/API/BFF/CSRF/browser acceptance and shared atomic quota",
+      "forecast publication needs its separate independent editor/approver and pinned context; source metadata is not a forecast draft"
+    ],
+    "planned_code_paths": [
+      "src/jungsi_touch/infrastructure/drive_provider.py",
+      "src/jungsi_touch/infrastructure/http_api.py",
+      "src/jungsi_touch/infrastructure/supabase_runtime.py",
+      "tests/test_supabase_runtime.py"
+    ]
+  }
+}
