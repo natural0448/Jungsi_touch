@@ -172,10 +172,13 @@
         "public_live_protected_redacted_ready",
         "legacy_and_local_factory_regressions"
       ],
-      "actual_Auth_DB_BFF_browser_deployment": "NOT_RUN"
+      "actual_Auth_DB_BFF_browser_deployment": "NOT_RUN",
+      "candidate_focused_test_count": 57,
+      "fixed_implementation_evidence": "pending_first_implementation_commit"
     },
     "planned_code_paths": [
       "src/jungsi_touch/application/public_response.py",
+      "src/jungsi_touch/application/public_response_schemas.json",
       "src/jungsi_touch/infrastructure/secured_http.py"
     ],
     "remaining": [
@@ -191,6 +194,8 @@
       "data_promotion_allowed": false,
       "actual_DB_write_deployment_allowed": false,
       "main_ready_allowed": false
-    }
+    },
+    "registry_path": "src/jungsi_touch/application/public_response_schemas.json",
+    "registry_format": "jungsi.public-response-schemas/v1"
   }
 }
