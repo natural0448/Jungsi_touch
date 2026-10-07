@@ -1,4 +1,4 @@
-import { AdvantageCell, reasonText, ScoreCell, StatusCell } from "@/components/offering-parts";
+import { AdvantageCell, plainReason, reasonText, ScoreCell, StatusCell } from "@/components/offering-parts";
 import type { OverallAnalysisDto } from "@/lib/dto";
 import { DATA_KIND } from "@/lib/analysis-labels";
 import { AREA_LABEL } from "@/lib/exam";
@@ -239,7 +239,8 @@ export function PickedTable({ items, print = false }: { items: PickedItem[]; pri
         <tbody>
           {items.map((s) => {
             const a = s.assessment;
-            const range = a?.decision_evidence?.expected_acceptance_range;
+            // 판단 구간 같은 내부 기준 수치는 인쇄본에도 적지 않는다(최종 관리자 지시 2026-10-07)
+            const why = a && a.status === "ready" ? (a.recommendation_reasons?.length ? plainReason(a.recommendation_reasons[0]) : null) : null;
             return (
               <tr key={s.offering_id}>
                 <th scope="row">
@@ -252,7 +253,7 @@ export function PickedTable({ items, print = false }: { items: PickedItem[]; pri
                 <td className="r"><AdvantageCell a={a} /></td>
                 {print && (
                   <td className="why">
-                    {!a ? "─" : a.status !== "ready" ? reasonText(a.reason_code) : range ? `판단 구간 ${range.lower}~${range.upper}${range.unit}` : "─"}
+                    {!a ? "─" : a.status !== "ready" ? reasonText(a.reason_code) : why ?? "─"}
                   </td>
                 )}
               </tr>

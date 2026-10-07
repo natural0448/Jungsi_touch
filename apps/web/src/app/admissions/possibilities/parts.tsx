@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CATEGORY, CategoryBadge, PickButton, ReasonList, reasonText, type Cell } from "@/components/offering-parts";
+import { CATEGORY, CategoryBadge, PickButton, plainReason, ReasonList, reasonText, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { AssessmentDto, ForecastPublicDto, IssueSummaryDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
 import { plainDate, signed } from "@/lib/format";
@@ -94,8 +94,8 @@ function StatusStrip({ a }: { a: AssessmentDto }) {
   const conv = a.conversion?.status ?? (a.converted_score ? "ready" : "pending");
   const pct = a.percentile?.status ?? (a.converted_percentile ? "ready" : "pending");
   const items = [
-    { k: "환산", ok: conv === "ready", why: a.conversion?.reason_code },
-    { k: "학교 누백", ok: pct === "ready", why: a.percentile?.reason_code },
+    { k: "점수 변환", ok: conv === "ready", why: a.conversion?.reason_code },
+    { k: "대학 안 내 위치", ok: pct === "ready", why: a.percentile?.reason_code },
     { k: "지원 판단", ok: a.status === "ready", why: a.status === "ineligible" ? "eligibility_not_met" : a.reason_code },
   ];
   return (
@@ -123,17 +123,17 @@ function ConversionCard({ a }: { a: AssessmentDto }) {
             {c?.official_max_score && <small>/ {c.official_max_score}</small>}
           </div>
           <p>
-            올해 이 대학 공식 반영식으로 환산했습니다.
+            내 성적을 올해 이 대학이 정한 과목 비율대로 다시 계산한 점수입니다.
             {c?.score_basis && <span className="tag">{scoreBasisLabel(c.score_basis)}</span>}
           </p>
         </>
       ) : (
         <>
           <div className="big hold">계산 보류</div>
-          <p>{reasonText(c?.reason_code ?? a.reason_code)} 작년 표로 대신 계산하지 않습니다.</p>
+          <p>{reasonText(c?.reason_code ?? a.reason_code)} 작년 기준으로 대신 계산하지 않습니다.</p>
         </>
       )}
-      <span className="note">대학마다 만점·반영 방식이 달라 다른 대학 점수와 크기를 비교하지 않습니다.</span>
+      <span className="note">대학마다 만점과 계산 방법이 달라, 이 점수를 다른 대학 점수와 직접 비교하면 안 됩니다.</span>
     </section>
   );
 }
@@ -145,7 +145,7 @@ function PercentileCard({ a }: { a: AssessmentDto }) {
   const pop = p?.population_scope ? POPULATION[p.population_scope] : null;
   return (
     <section className="card" aria-label="학교 환산 누백">
-      <h3>이 대학 환산 기준 위치</h3>
+      <h3>이 대학 기준 내 위치</h3>
       {top && p?.status !== "pending" ? (
         <>
           <div className="big num">
@@ -153,9 +153,8 @@ function PercentileCard({ a }: { a: AssessmentDto }) {
             <small>%</small>
           </div>
           <p>
-            동점 포함 상위 <b className="num">{top}%</b>
-            {p?.exclusive_top_percent && <> · 동점 제외 <b className="num">{p.exclusive_top_percent}%</b></>}
-            {p?.tie_share_percent && <> · 동점 비중 {p.tie_share_percent}%</>}
+            이 대학 방식으로 점수를 매겼을 때 나는 비교 대상 중 상위 <b className="num">{top}%</b>쯤입니다.
+            {p?.exclusive_top_percent && <> 나와 같은 점수인 사람을 빼고 세면 상위 <b className="num">{p.exclusive_top_percent}%</b>입니다.</>}
           </p>
           {(kind || pop) && (
             <p className="tags">
@@ -176,11 +175,9 @@ function PercentileCard({ a }: { a: AssessmentDto }) {
   );
 }
 
+/** 판단 구간·예상선 같은 내부 기준 수치는 보이지 않는다(최종 관리자 지시 2026-10-07). 뜻풀이와 조정 여부만 적는다 */
 function DecisionCard({ a }: { a: AssessmentDto }) {
   const d = a.decision_components;
-  const ev = a.decision_evidence;
-  const r = ev?.expected_acceptance_range;
-  const f = ev?.forecast_70;
   return (
     <section className="card" aria-label="지원가능성">
       <h3>지원가능성</h3>
@@ -188,37 +185,18 @@ function DecisionCard({ a }: { a: AssessmentDto }) {
         <CategoryBadge a={a} />
       </div>
       {a.status !== "ready" ? (
-        <p>{reasonText(a.reason_code)}{a.status === "ineligible" ? " 자격을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
+        <p>{reasonText(a.reason_code)}{a.status === "ineligible" ? " 지원 조건을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
       ) : (
         <>
+          <p>{CATEGORY[a.category].desc}</p>
           {d?.adjusted_category && (
             <p className="adj">
-              기본 판단 <b>{CATEGORY[d.base_category].label}</b> → 상담 조정 <b>{CATEGORY[d.adjusted_category].label}</b>
-            </p>
-          )}
-          {r && (
-            <p>
-              판단 구간 <b className="num">{r.lower}~{r.upper}</b>{r.unit}
-              <br />
-              <small>{r.definition}</small>
-            </p>
-          )}
-          {f && (
-            <p>
-              올해 70% 예상선{" "}
-              {f.status === "ready" ? (
-                <b className="num">
-                  {f.value}
-                  {f.unit}
-                </b>
-              ) : (
-                <span className="wait">발표 대기</span>
-              )}
+              점수로 본 판단은 <b>{CATEGORY[d.base_category].label}</b>이지만, 상담 경험을 반영해 <b>{CATEGORY[d.adjusted_category].label}</b>로 조정했습니다.
             </p>
           )}
         </>
       )}
-      <span className="note">지원가능성은 합격 확률이 아닙니다. 학과마다 따로 판단합니다.</span>
+      <span className="note">올해 예상 기준과 대학 발표 자료로 학과마다 따로 판단하며, 판단에 쓰는 기준 점수는 공개하지 않습니다. 지원가능성은 합격 확률이 아닙니다.</span>
     </section>
   );
 }
@@ -251,27 +229,34 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
         {v.delta_pp}
         <small>%p</small>
       </div>
-      <p>{v.status === "favorable" ? "총점보다 이 대학 환산에서 위치가 올라갑니다." : v.status === "unfavorable" ? "총점보다 이 대학 환산에서 위치가 내려갑니다." : "총점과 이 대학 환산의 위치가 거의 같습니다."}</p>
-      <span className="note">같은 비교집단 안에서 위치가 얼마나 바뀌는지입니다. 유리해도 합격 가능을, 불리해도 지원 불가를 뜻하지 않습니다.</span>
+      <p>
+        {v.status === "favorable"
+          ? "이 대학의 점수 계산 방식이 내 과목 구성에 비교적 유리해, 전체 성적 기준보다 위치가 올라갑니다."
+          : v.status === "unfavorable"
+            ? "이 대학의 점수 계산 방식이 내 과목 구성에 다소 불리해, 전체 성적 기준보다 위치가 내려갑니다."
+            : "이 대학의 계산 방식으로 봐도 전체 성적 기준과 위치가 거의 같습니다."}
+      </p>
+      <span className="note">같은 성적이라도 대학마다 과목 비율이 달라 위치가 달라집니다. 유리해도 합격을, 불리해도 지원 불가를 뜻하지 않습니다.</span>
     </section>
   );
 }
 
-/** 발행된 학과별 예상 기준의 공개 근거(DEV-007). 내부 계산 과정은 오지 않는다 */
+/** 발행된 학과별 예상 기준의 공개 근거(DEV-007). 내부 계산 과정은 오지 않고, 기준 수치도 보이지 않는다 —
+ * 서버 문장 대신 코드별 쉬운 문구(plainReason)를 쓴다(최종 관리자 지시 2026-10-07) */
 function Evidence({ a }: { a: AssessmentDto }) {
   const ev = a.decision_evidence;
   if (!ev || (!ev.basis_summary && !ev.issue_summaries?.length && !ev.adjustment_summary?.applied && !ev.recommendation_reasons?.length)) return null;
   return (
     <div className="evidence">
       <h3>
-        기준선 근거
-        {ev.forecast_release_version && <small> · 발행 {ev.forecast_release_version}</small>}
+        판단 기준을 만든 방법
+        {ev.forecast_release_version && <small> · 자료판 {ev.forecast_release_version}</small>}
       </h3>
       <ul>
-        {ev.basis_summary && <li><b>산출</b> {ev.basis_summary}</li>}
-        {ev.recommendation_reasons?.map((r) => <li key={r.code}><b>근거</b> {r.text}</li>)}
+        {ev.basis_summary && <li><b>방법</b> {ev.basis_summary}</li>}
+        {[...new Set(ev.recommendation_reasons?.map((r) => plainReason(r)) ?? [])].map((t) => <li key={t}><b>근거</b> {t}</li>)}
         {ev.issue_summaries?.map((t) => <IssueItem key={t.issue_id} t={t} />)}
-        {ev.adjustment_summary?.applied && <li><b>상담 조정</b> {ev.adjustment_summary.reason ?? "상담 판단으로 조정한 값입니다."}</li>}
+        {ev.adjustment_summary?.applied && <li><b>상담 조정</b> 상담 경험을 반영해 기준을 조정했습니다.</li>}
       </ul>
     </div>
   );
@@ -357,44 +342,21 @@ export function sameRelease(a: Cell, f: ForecastPublicDto | null) {
   return pairs.every(([a, b]) => id(a) && id(b) && a === b) && CONTEXT_FIELDS.every((k) => k in x && k in y && x[k] === y[k]);
 }
 
-const CAT_LABEL: Record<string, string> = { challenge: "도전", core: "핵심 검토", room: "여유 후보", outside: "추천 범위 밖" };
-
-/** 발행된 학과별 예상 기준(forecast.published.read). 합격 확률·최저점이 아니다. 발행 전이면 보이지 않는다 */
+/** 발행된 학과별 예상 기준(forecast.published.read). 예상선·합격권·구간표 같은 기준 수치는
+ * 화면에 보이지 않는다(최종 관리자 지시 2026-10-07) — 자료판·준비 상태·만든 방법·올해 변화만 적는다 */
 function Published({ f, same }: { f: ForecastPublicDto | null; same: boolean }) {
   if (!f || f.status !== "published") return null;
-  const v = f.forecast_70;
-  const r = f.expected_acceptance_range;
+  const ready = f.forecast_70?.status === "ready";
   return (
     <div className="published">
       <h3>
-        발행된 학과 기준 <small>{f.release_version}</small>
+        이 판단에 쓴 자료 <small>자료판 {f.release_version}</small>
       </h3>
-      <dl>
-        {v && (
-          <div>
-            <dt>올해 70% 예상선</dt>
-            <dd className="num">{v.status === "ready" ? `${v.value}${v.unit ?? ""}` : <span className="wait">발표 대기</span>}</dd>
-          </div>
-        )}
-        {r && (
-          <div>
-            <dt>판단용 합격권</dt>
-            <dd className="num">{r.status === "ready" ? `${r.lower}~${r.upper}${r.unit ?? ""}` : <span className="wait">발표 대기</span>}</dd>
-          </div>
-        )}
-        {f.category_ranges.map((c) => (
-          <div key={c.category}>
-            <dt>{CAT_LABEL[c.category] ?? c.category}</dt>
-            <dd className="num">[{c.lower}, {c.upper})</dd>
-          </div>
-        ))}
-      </dl>
-      {(f.basis_summary || f.adjustment_summary.applied) && (
-        <p>
-          {f.basis_summary}
-          {f.adjustment_summary.applied && <> · 상담 조정: {f.adjustment_summary.reason ?? "반영됨"}</>}
-        </p>
-      )}
+      <p>
+        올해 예상 기준이 {ready ? "검수를 마치고 준비돼 있습니다." : <span className="wait">아직 발표 대기입니다.</span>}
+        {f.basis_summary && <> 기준을 만든 방법: {f.basis_summary}</>}
+        {f.adjustment_summary.applied && <> · 상담 경험을 반영한 조정이 들어 있습니다.</>}
+      </p>
       {f.issue_summaries.length > 0 && (
         <ul className="pub-issues">
           {f.issue_summaries.map((t) => <IssueItem key={t.issue_id} t={t} />)}
@@ -402,9 +364,9 @@ function Published({ f, same }: { f: ForecastPublicDto | null; same: boolean }) 
       )}
       <span className="note">
         {same
-          ? "이 학과의 지원 판단도 이 발표본으로 계산했습니다. "
-          : "이 학과의 지원 판단은 다른 발표본·기준으로 계산됐을 수 있어 아래 판단과 합쳐 보지 않습니다. 새 기준으로 보려면 성적을 다시 분석해야 합니다. "}
-        학과 기준은 지원 판단의 근거이며 실제 지원자의 합격 확률이나 최저 합격점이 아닙니다.
+          ? "이 학과의 지원 판단도 이 자료로 계산했습니다. "
+          : "이 학과의 지원 판단은 다른 판 자료로 계산됐을 수 있습니다. 최신 기준으로 보려면 성적을 다시 분석해 주세요. "}
+        판단에 쓰는 기준 점수는 공개하지 않으며, 이 자료는 실제 합격 확률이나 최저 합격점이 아닙니다.
       </span>
     </div>
   );

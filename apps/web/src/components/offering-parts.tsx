@@ -4,14 +4,15 @@ import { seoulDate } from "@/lib/format";
 
 /* 3·4페이지(와 2페이지 유료 부분)가 같이 쓰는 모집단위 칸. 응답 모양은 assessment·statistics DTO */
 
-/** 학과마다의 지원 판단(assessment.category). 색과 함께 점 모양으로도 구분, 빨강은 '지원 조건 미충족'에만 */
-export const CATEGORY: Record<Category, { cls: string; label: string }> = {
-  challenge: { cls: "reach", label: "도전" },
-  core: { cls: "core", label: "핵심 검토" },
-  room: { cls: "safe", label: "여유 후보" },
-  outside: { cls: "out", label: "추천 범위 밖" },
-  pending: { cls: "check", label: "판단 보류" },
-  ineligible: { cls: "inel", label: "지원 조건 미충족" },
+/** 학과마다의 지원 판단(assessment.category). 색과 함께 점 모양으로도 구분, 빨강은 '지원 조건 미충족'에만.
+ * desc 는 입시 용어에 익숙하지 않은 사용자(수험생·학부모)를 위한 쉬운 풀이 — 기준 점수는 적지 않는다 */
+export const CATEGORY: Record<Category, { cls: string; label: string; desc: string }> = {
+  challenge: { cls: "reach", label: "도전", desc: "지금 점수보다 다소 높은 곳이지만, 남은 기간을 보고 노려볼 수 있는 범위입니다." },
+  core: { cls: "core", label: "핵심 검토", desc: "올해 적극적으로 검토해 볼 만한 범위입니다." },
+  room: { cls: "safe", label: "여유 후보", desc: "내 점수에 비교적 여유가 있는 범위입니다. 그래도 합격이 보장되는 것은 아닙니다." },
+  outside: { cls: "out", label: "추천 범위 밖", desc: "올해 기준으로는 추천 범위에 들지 않습니다. 지원 자체가 불가능하다는 뜻은 아닙니다." },
+  pending: { cls: "check", label: "판단 보류", desc: "판단에 필요한 자료가 아직 갖춰지지 않아 결론을 내리지 않았습니다." },
+  ineligible: { cls: "inel", label: "지원 조건 미충족", desc: "이 전형이 요구하는 지원 조건(과목·자격)을 충족하지 않습니다." },
 };
 
 /** 판단 보류·자격 확인의 이유(서버 reason_code) */
@@ -129,13 +130,28 @@ export function StatsLine({ s }: { s: StatisticsDto | null | undefined }) {
   );
 }
 
-/** 서버가 만든 이유 목록(recommendation_reasons). 화면은 문장을 바꾸거나 지어내지 않는다 */
+/** 이유 코드 → 기준 수치 없는 쉬운 문장 (최종 관리자 지시 2026-10-07: 내부 판단 기준·구간 점수는 화면에 노출하지 않는다).
+ * 서버 문장(r.text)에는 구간·기준점 수치가 들어올 수 있어 그대로 보이지 않고, 코드마다 화면 문구를 둔다.
+ * 모르는 코드는 수치가 섞였을 수 있으므로 서버 문장 대신 일반 안내로 보인다. */
+const REASON_PLAIN: Record<string, string> = {
+  within_acceptance_range: "내 점수가 올해 이 학과에 지원해 볼 만한 범위 안에 있습니다.",
+  above_acceptance_range: "내 점수가 올해 지원해 볼 만한 범위보다 여유 있게 높습니다.",
+  below_acceptance_range: "내 점수가 올해 지원해 볼 만한 범위에 조금 못 미칩니다.",
+  conversion_advantage: "이 대학의 점수 계산 방식이 내 과목 구성에 비교적 유리합니다.",
+  counselor_adjustment: "입시 상담 경험을 반영해 판단을 한 단계 조정했습니다.",
+  forecast_basis_trend: "최근 3년 대학 발표 결과의 흐름으로 올해 기준을 잡았습니다.",
+  approved_forecast_70: "검수를 마친 올해 예상 기준으로 판단했습니다.",
+};
+export const plainReason = (r: ReasonDto) => REASON_PLAIN[r.code] ?? "올해 예상 기준과 대학 발표 자료로 판단했습니다.";
+
+/** 서버가 만든 이유 목록(recommendation_reasons)을 기준 수치 없는 화면 문구로 바꿔 보인다. 같은 문구는 한 번만 */
 export function ReasonList({ items, max }: { items: ReasonDto[]; max?: number }) {
   const shown = max ? items.slice(0, max) : items;
+  const texts = [...new Set(shown.map(plainReason))];
   return (
     <ul className="reason-list">
-      {shown.map((r) => (
-        <li key={`${r.code}-${r.text}`}>{r.text}</li>
+      {texts.map((t) => (
+        <li key={t}>{t}</li>
       ))}
     </ul>
   );
