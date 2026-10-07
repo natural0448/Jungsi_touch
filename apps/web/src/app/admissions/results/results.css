@@ -90,3 +90,10 @@
   .et .rs-rec{margin-left:0;width:100%}
   .et .rs-legend dt{min-width:84px}
 }
+
+/* 추정 열(화면 계산)·출처 줄 */
+.et .rs-years th.derived{color:var(--ink-2);font-weight:700}
+.et .rs-years td.derived{background:var(--sub)}
+.et .rs-years td.derived .num{color:var(--ink-2)}
+.et .rs-src{margin:0;padding:8px 16px 0;font-size:11px;color:var(--muted)}
+.et .rs-src a{color:var(--ink-2);text-decoration:underline}

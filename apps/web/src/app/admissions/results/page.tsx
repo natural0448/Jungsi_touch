@@ -186,20 +186,39 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   );
 }
 
-/** 한 모집단위: 2027 모집 인원 한 줄 + 2026~2024 결과 표(경쟁률 포함) + 지표 설명 */
+/** 한 모집단위: 2027 모집 인원 한 줄 + 2026~2024 결과 표(경쟁률·추정 지원자/탈락자 포함) + 지표 설명 */
 function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto }; years: Map<number, HistoryMetricDto[]> | undefined; rec: RecruitmentDto | null }) {
   // 이 모집단위가 발표해 온 지표 열(과거 3개 학년도 기준, 순서 고정)
   const seen: string[] = [];
   for (const y of PAST_YEARS) for (const m of years?.get(y) ?? []) if (!seen.includes(m.metric_name)) seen.push(m.metric_name);
-  const cols = [...METRIC_ORDER.filter((n) => seen.includes(n)), ...seen.filter((n) => !METRIC_ORDER.includes(n))];
-  // 점수 종류·정의 안내(열마다 한 번)
-  const legend = cols.map((n) => {
+  const metricCols = [...METRIC_ORDER.filter((n) => seen.includes(n)), ...seen.filter((n) => !METRIC_ORDER.includes(n))];
+  // 추정 2열은 재료(모집인원·경쟁률[·충원인원])가 발표 지표로 있을 때만 끼운다. 값은 화면의 단순 산술(아래 설명 참고)
+  const canApplicants = metricCols.includes("모집인원") && metricCols.includes("경쟁률");
+  const canDropped = canApplicants && metricCols.includes("충원인원");
+  type Col = { key: string; label: string; derived?: boolean };
+  const cols: Col[] = [];
+  for (const n of metricCols) {
+    cols.push({ key: n, label: n });
+    if (n === "경쟁률" && canApplicants) cols.push({ key: "__applicants", label: "추정 총 지원자", derived: true });
+    if (n === "충원인원" && canDropped) cols.push({ key: "__dropped", label: "추정 탈락자", derived: true });
+  }
+  // 점수 종류·정의 안내(열마다 한 번) + 추정 산식
+  const legend = metricCols.map((n) => {
     for (const y of PAST_YEARS) {
       const m = (years?.get(y) ?? []).find((x) => x.metric_name === n);
       if (m) return { name: n, scale: m.original_scale, def: m.metric_definition };
     }
     return { name: n, scale: null as string | null, def: null as string | null };
   });
+  if (canApplicants) legend.push({ name: "추정 총 지원자", scale: "모집인원 × 경쟁률(화면 계산)", def: "발표된 경쟁률이 반올림된 값이라 실제 지원자 수와 다를 수 있습니다." });
+  if (canDropped) legend.push({ name: "추정 탈락자", scale: "추정 총 지원자 − 모집인원 − 충원인원(화면 계산)", def: "미등록·이월 등 대학 사정에 따라 실제와 다를 수 있습니다." });
+  // 출처는 열 대신 표 아래 한 줄로(학년도별 링크·날짜)
+  const sources: { y: number; url: string; as_of: string | null }[] = [];
+  for (const y of PAST_YEARS) {
+    const m = (years?.get(y) ?? []).find((x) => x.source_url);
+    if (m?.source_url) sources.push({ y, url: m.source_url, as_of: m.source_as_of });
+  }
+
   return (
     <li id={o.id} className="rs-off open">
       <div className="rs-offhd plain">
@@ -210,7 +229,7 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
         </span>
         <RecruitLine rec={rec} />
       </div>
-      {cols.length === 0 ? (
+      {metricCols.length === 0 ? (
         <p className="rs-wait">이 모집단위의 2024~2026학년도 발표 결과가 아직 없습니다.</p>
       ) : (
         <div className="tblwrap">
@@ -218,8 +237,9 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
             <thead>
               <tr>
                 <th scope="col">학년도</th>
-                {cols.map((n) => <th key={n} scope="col" className="r">{n}</th>)}
-                <th scope="col">출처</th>
+                {cols.map((c) => (
+                  <th key={c.key} scope="col" className={c.derived ? "r derived" : "r"}>{c.label}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -227,17 +247,35 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
                 const rows = years?.get(y) ?? [];
                 const info = rows[0];
                 const renamed = info && info.department !== o.first.department ? info.department : null;
-                const srcRow = rows.find((m) => m.source_url);
+                const num = (name: string) => {
+                  const m = rows.find((x) => x.metric_name === name);
+                  const v = m?.value === null || m?.value === undefined ? NaN : Number(m.value);
+                  return Number.isFinite(v) ? v : null;
+                };
+                const cap = num("모집인원");
+                const rate = num("경쟁률");
+                const fill = num("충원인원");
+                // 화면 계산(추정): 발표값의 단순 산술. 경쟁률 반올림 때문에 실제와 다를 수 있다
+                const applicants = cap !== null && rate !== null ? Math.round(cap * rate) : null;
+                const dropped = applicants !== null && cap !== null && fill !== null ? applicants - cap - fill : null;
                 return (
                   <tr key={y}>
                     <th scope="row">
                       <span className="num">{y}</span>
                       {renamed && <small>당시 {renamed}</small>}
                     </th>
-                    {cols.map((n) => {
-                      const m = rows.find((x) => x.metric_name === n);
+                    {cols.map((c) => {
+                      if (c.derived) {
+                        const v = c.key === "__applicants" ? applicants : dropped;
+                        return (
+                          <td key={c.key} className="r derived">
+                            {v === null ? <span className="unpub">─</span> : <><b className="num">{v}</b><small> 명</small></>}
+                          </td>
+                        );
+                      }
+                      const m = rows.find((x) => x.metric_name === c.key);
                       return (
-                        <td key={n} className="r">
+                        <td key={c.key} className="r">
                           {!m ? (
                             <span className="unpub">─</span>
                           ) : m.value !== null ? (
@@ -251,16 +289,24 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
                         </td>
                       );
                     })}
-                    <td className="src">
-                      {srcRow?.source_url ? <a href={srcRow.source_url} target="_blank" rel="noopener noreferrer">대학 발표</a> : "─"}
-                      {srcRow?.source_as_of && <small className="num"> {plainDate(srcRow.source_as_of)}</small>}
-                    </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
+      )}
+      {sources.length > 0 && (
+        <p className="rs-src">
+          출처(대학 발표):{" "}
+          {sources.map((x, i) => (
+            <span key={x.y}>
+              {i > 0 && " · "}
+              <a href={x.url} target="_blank" rel="noopener noreferrer">{x.y}학년도</a>
+              {x.as_of && <small className="num"> {plainDate(x.as_of)}</small>}
+            </span>
+          ))}
+        </p>
       )}
       {legend.length > 0 && (
         <dl className="rs-legend">
