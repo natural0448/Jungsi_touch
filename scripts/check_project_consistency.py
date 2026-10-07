@@ -1033,7 +1033,79 @@ def security_document_body(spec):
             "필수 보안 발행 gate: "+", ".join(c["mandatory_release_gates"])+
             ". 하나라도 누락·pending/failed면 main 준비 완료로 올리지 않는다."+
             "\n\n## 보호 범위의 한계\n\n"+c["limitation"]+
-            "\n\n## 공식 기술 근거\n\n"+sources)
+            "\n\n## 공식 기술 근거\n\n"+sources+secured_preparation_document(spec))
+
+
+def secured_preparation_document(spec):
+    c=spec.get("secured_backend_preparation_contract")
+    if not c:return ""
+    r=c["relay"]; h=c["health"]; v=c["verification"]
+    return ("\n\n## DEV-008 명시 보안 앱 구성\n\n"+c["scope"]+"\n\n"+
+        f"계약 {c['revision']} · 정책 {c['policy_revision']} · 코드 {c['code_status']} · 운영 준비 false. "+
+        "기존 create_app/configured_app·이용권·Drive·local·22 API/session v1을 유지한다. "+
+        "create_secured_app(*, security, ...)를 명시 선택하며 운영 자동전환을 하지 않는다.\n\n"+
+        "중계 헤더 "+r["header"]+"는 서버 전용 "+r["environment_name"]+"/명시 설정 객체에서 공급한다. "+
+        "relay → 사용자 Bearer → 현재 이용권/소유권 → 입력/자료 순서다. 중계만으로 사용자 권한이 생기지 않는다. "+
+        "누락/잘못된 설정은 503 security_policy_unavailable, 누락/불일치/중복/잘못된 헤더는 403 relay_authentication_failed다. "+
+        "raw header의 대소문자·중복, ASCII/공백/쉼표/Unicode/크기와 정확 길이를 검사하고 bytes compare_digest를 쓴다.\n\n"+
+        "22 operation의 contract_ref와 standard/paid typed root를 연결한다. 객체·배열·ID map의 값까지 재귀 투영하고 "+
+        "추가 필드는 응답에서만 제거한다. 구조·필수값 오류는 비밀 없는 503이다. 자유 Any/무제한 객체는 금지한다. "+
+        "정상 점수·누백·판단 보류·공식 출처/버전·권한 있는 관리 영수증을 보존한다.\n\n"+
+        h["public_path"]+"는 공개 최소 liveness다. "+h["relay_protected_path"]+"는 relay만 확인하고 "+
+        ", ".join(h["ready_public_fields"])+"만 반환한다. production_ready=false이며 비공개 환경·DB role/경로를 전달하지 않는다.\n\n"+
+        "검수 상태 "+v["status"]+". 합성 인수: "+"; ".join(v["cases"])+".\n\n"+
+        "남은 인수: "+"; ".join(c["remaining"])+". 전체 SEC-01~08/3 보안 gate와 실운영 준비는 미완료로 유지한다.")
+
+
+def validate_secured_preparation(spec):
+    c=spec.get("secured_backend_preparation_contract")
+    try:required=tuple(int(x) for x in spec.get("version","0.0.0").split(".")) >= (1,9,0)
+    except (TypeError,ValueError):required=False
+    if c is None:return ["DEV-008 required secure preparation contract missing"] if required else []
+    if not isinstance(c,dict):return ["DEV-008 secure preparation contract invalid"]
+    errors=[]; p=c.get("composition",{}); r=c.get("relay",{}); h=c.get("health",{}); x=c.get("response_projection",{})
+    if (c.get("format")!="jungsi.secured-backend-preparation/v1" or c.get("id")!="DEV-008" or
+        c.get("policy_revision")!=spec.get("security_contract",{}).get("revision") or
+        c.get("branch")!="feature/application-pre-data-platform" or c.get("requirements")!=["REQ-24","REQ-25","REQ-26"]):
+        errors.append("DEV-008 policy/owner binding drift")
+    if (p.get("factory")!="create_secured_app" or p.get("required_keyword")!="security" or
+        p.get("legacy_factories")!=["create_app","configured_app"] or p.get("default_factories_unchanged") is not True or
+        p.get("automatic_storage_or_entitlement_transition") is not False or p.get("local_verification_unchanged") is not True or
+        p.get("existing_API_count")!=22 or p.get("API_or_DTO_additions") is not False or p.get("session_format")!="jungsi.session/v1"):
+        errors.append("DEV-008 default composition preservation drift")
+    if (r.get("header")!="X-Jungsi-Relay-Token" or r.get("environment_name")!="JUNGSI_RELAY_TOKEN" or
+        r.get("server_only") is not True or r.get("secret_repr_allowed") is not False or r.get("browser_secret_allowed") is not False or
+        r.get("duplicate_raw_headers_rejected") is not True or r.get("user_authentication_required_after_relay") is not True or
+        r.get("relay_alone_grants_user_access") is not False or
+        r.get("order")!=["relay_identity","verified_user_Bearer","current_entitlement_and_owner_scope","input_and_data_access"] or
+        r.get("configuration_error")!={"http":503,"code":"security_policy_unavailable"} or
+        r.get("authentication_error")!={"http":403,"code":"relay_authentication_failed"}):
+        errors.append("DEV-008 relay identity/privacy drift")
+    ids=[o["id"] for o in spec["operations"]]
+    if sorted(c.get("protected_operations",[]))!=sorted(ids):errors.append("DEV-008 operation coverage drift")
+    if (h.get("public_path")!="/health/live" or h.get("relay_protected_path")!="/health/ready" or
+        h.get("ready_requires_user_Bearer") is not False or h.get("ready_production_ready") is not False or
+        h.get("ready_public_fields")!=["status","server_timezone","production_ready","security_boundary"] or
+        h.get("detailed_environment_DB_role_private_location_exposed") is not False):
+        errors.append("DEV-008 safe health boundary drift")
+    if (x.get("ownership")!="application" or x.get("role_roots")!=["standard","paid"] or
+        any(x.get(k)is not True for k in ("operation_binding_required","all_registered_operations_required","nested_objects_and_arrays","dynamic_ID_map_values_typed")) or
+        x.get("free_form_Any_allowed") is not False or x.get("untyped_additional_properties_allowed") is not False or
+        set(x.get("covers",[]))!={"success","pending","error","persisted_report","idempotent_replay","print_dto","published_forecast"}):
+        errors.append("DEV-008 recursive response boundary drift")
+    preserve=c.get("preservation",{})
+    if (c.get("production_ready") is not False or any(preserve.get(k)is not False for k in
+        ("default_factory_change_allowed","data_promotion_allowed","actual_DB_write_deployment_allowed","main_ready_allowed"))):
+        errors.append("DEV-008 scoped preparation cannot promote production")
+    states={"planned","implemented_synthetic_verified_integration_pending","accepted_on_develop_scoped_synthetic_verified"}
+    v=c.get("verification",{})
+    if c.get("code_status") not in states or v.get("actual_Auth_DB_BFF_browser_deployment")!="NOT_RUN":
+        errors.append("DEV-008 scoped verification state drift")
+    if c.get("code_status")!="planned" and (not re.fullmatch(r"[0-9a-f]{40}",str(v.get("implementation_commit",""))) or
+        type(v.get("synthetic_test_count"))is not int or v.get("synthetic_test_count",0)<=0 or
+        v.get("status")!="PASS_SCOPED_SYNTHETIC_HTTP"):
+        errors.append("DEV-008 implementation completion lacks fixed synthetic evidence")
+    return errors
 
 
 def validate_security_contract(spec):
@@ -1660,6 +1732,8 @@ def validate_spec(spec):
     records=spec['workflow'].get('synchronized_work_items')
     expected_items={'docs/work_items/DEV-006-analysis-connection.json':'presentation_connection_contract',
                     'docs/work_items/DEV-007-forecast-policy.json':'forecast_policy_contract'}
+    if 'secured_backend_preparation_contract' in spec:
+        expected_items['docs/work_items/DEV-008-secured-backend-boundary.json']='secured_backend_preparation_contract'
     if records is not None:
         if not isinstance(records,dict) or set(records)!=set(expected_items):
             errors.append('Synchronized work-item scope registration drift')
@@ -1687,6 +1761,7 @@ def validate_spec(spec):
     errors.extend(validate_forecast_contract(spec))
     errors.extend(validate_local_verification_contract(spec))
     errors.extend(validate_security_contract(spec))
+    errors.extend(validate_secured_preparation(spec))
     errors.extend(validate_frontend_reply_contract(spec))
     errors.extend(validate_supabase_actual_update_contract(spec))
     errors.extend(validate_supabase_second_actual_update_contract(spec))

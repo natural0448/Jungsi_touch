@@ -52,6 +52,11 @@ class ConsistencyTests(unittest.TestCase):
             with self.subTest(path=path):
                 item=json.loads(generated[path])
                 self.assertEqual(item['scope'],self.spec[metadata['contract_ref']])
+                if 'historical_scope_at_adc684_acceptance' not in item:
+                    self.assertEqual(metadata['contract_ref'],'secured_backend_preparation_contract')
+                    self.assertEqual(item['scope'],self.spec['secured_backend_preparation_contract'])
+                    self.assertFalse(item['scope']['production_ready'])
+                    continue
                 historical=item['historical_scope_at_adc684_acceptance']
                 key='backend_contract_acceptance' if 'backend_contract_acceptance' in historical else 'implementation_acceptance'
                 self.assertEqual(historical[key]['develop_integration']['status'],'pending')
@@ -62,8 +67,11 @@ class ConsistencyTests(unittest.TestCase):
         for path in self.spec['workflow']['synchronized_work_items']:
             with self.subTest(path=path):
                 changed=dict(files);item=json.loads(changed[path])
-                key='backend_contract_acceptance' if 'backend_contract_acceptance' in item['scope'] else 'implementation_acceptance'
-                item['scope'][key]['develop_integration']['status']='pending'
+                if self.spec['workflow']['synchronized_work_items'][path]['contract_ref']=='secured_backend_preparation_contract':
+                    item['scope']['code_status']='unreviewed_implementation'
+                else:
+                    key='backend_contract_acceptance' if 'backend_contract_acceptance' in item['scope'] else 'implementation_acceptance'
+                    item['scope'][key]['develop_integration']['status']='pending'
                 changed[path]=json.dumps(item,ensure_ascii=False,indent=2).encode()
                 self.assertIn('Document or route drift: '+path,validate_content(list(changed),changed.__getitem__,self.spec))
 
@@ -786,7 +794,13 @@ class SnapshotChangedPathsTests(unittest.TestCase):
         cls.fixture_number=0
 
     def setUp(self):
+        import os
+        from unittest.mock import patch
         import check_project_consistency as checker
+        # Git hooks export repository/index variables. Synthetic DAGs must stay independent.
+        isolated={k:v for k,v in os.environ.items() if not k.startswith("GIT_")}
+        isolation=patch.dict(os.environ,isolated,clear=True)
+        isolation.start();self.addCleanup(isolation.stop)
         self.checker=checker
         type(self).fixture_number+=1
         self.repo=self.fixture_root/str(type(self).fixture_number)
@@ -1153,6 +1167,36 @@ class MergeValidationBoundaryTests(unittest.TestCase):
         fixture,files=self.context();path=fixture.spec["current_documents"]["routing"]
         files[path]+=b"synthetic independent route edit\n"
         self.assertIn("Document or route drift: "+path,validate_content(list(files),files.__getitem__,fixture.spec))
+
+
+
+
+class SecuredPreparationContractTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/"docs/current/service_spec.json").read_text(encoding="utf-8"))
+    def test_default_factory_cannot_be_automatically_switched(self):
+        spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["composition"]["default_factories_unchanged"]=False
+        self.assertIn("DEV-008 default composition preservation drift",validate_spec(spec))
+    def test_relay_cannot_replace_user_authorization(self):
+        spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["relay"]["relay_alone_grants_user_access"]=True
+        self.assertIn("DEV-008 relay identity/privacy drift",validate_spec(spec))
+    def test_missing_operation_or_untyped_nested_values_cannot_pass(self):
+        spec=deepcopy(self.spec);c=spec["secured_backend_preparation_contract"]
+        c["protected_operations"].pop();c["response_projection"]["free_form_Any_allowed"]=True
+        self.assertIn("DEV-008 operation coverage drift",validate_spec(spec))
+        self.assertIn("DEV-008 recursive response boundary drift",validate_spec(spec))
+    def test_ready_cannot_expose_private_settings_or_promote_production(self):
+        spec=deepcopy(self.spec);c=spec["secured_backend_preparation_contract"]
+        c["health"]["ready_public_fields"].append("database_url");c["production_ready"]=True
+        self.assertIn("DEV-008 safe health boundary drift",validate_spec(spec))
+        self.assertIn("DEV-008 scoped preparation cannot promote production",validate_spec(spec))
+    def test_preparation_and_work_item_cannot_disappear(self):
+        spec=deepcopy(self.spec);del spec["secured_backend_preparation_contract"]
+        del spec["workflow"]["synchronized_work_items"]["docs/work_items/DEV-008-secured-backend-boundary.json"]
+        self.assertIn("DEV-008 required secure preparation contract missing",validate_spec(spec))
+    def test_synthetic_completion_requires_fixed_snapshot_evidence(self):
+        spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["code_status"]="accepted_on_develop_scoped_synthetic_verified"
+        self.assertIn("DEV-008 implementation completion lacks fixed synthetic evidence",validate_spec(spec))
 
 
 if __name__=="__main__":unittest.main()
