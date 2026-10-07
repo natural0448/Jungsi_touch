@@ -1,10 +1,10 @@
 # Supabase 운영 인수인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.4이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.3이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 SUP01은 separate_Jungsi_FastAPI_deployment, SUP02의 목표 단일 원본은 public.jeongsi_passes로 확정했다. 현재 코드는 여전히 jungsi_backend.entitlements를 조회하며 목표 어댑터 전환·실DB/실Auth·배포·보안 인수는 NOT_RUN이다. production_ready=false / NOT_READY를 유지한다.
 
-revision 2026.10.06.v4; 2026-10-06T08:40:54.349322Z 읽기 snapshot; 문서 actual_storage_and_source_intake_reviewed_service_implementation_pending_commit_validation. Supabase actual 신규 private49객체 staging 및 actual owner/app TLS·role/master 읽기 preflight PASS·신규private schema001002 개발 적용영수증을 각 시점으로 기록한다. 13table/RLSenabled·private app정책0·독립 검수 pending과 runtime003/실Auth/업무/Storage승인·default전환/운영 pending을 구분한다. 기존 API22/session3/page4·회원/oldfactory/authority/Drive/security와 모든 dated history는 보존한다.
+revision 2026.10.07.v9; 2026-10-06T08:40:54.349322Z 읽기 snapshot; 문서 frozen_reviewed_scoped_documents_pending_canonical_application_and_normal_validation. 현재57통합·지정범위 SQL/Storage메타 검수와 미채택 source/모형·실운영 경계를 동기화한 outputs-only 후보다. 실제 운영 또는 자료승인 완료가 아니다.
 
 ## 확정된 구성과 현재 실행 상태
 
@@ -114,7 +114,7 @@ limit=0의 응답 []는 요청이 0건 반환되었다는 증거다. 테이블�
 
 ## 실제 Supabase Storage 업데이트와 DB·운영 경계
 
-최신 사용자 요청 범위에서 신규 private Storage 복사·원본 보존, 실제 owner/app 연결·catalog 사전 읽기 검수 및 신규 private schema 001/002 적용 개발 영수증을 수령했다. 001/002 적용의 독립 원장 검수는 대기이며 private app 정책0·runtime003·사용자Auth/유료권한/default factory·자료/모형·보안·운영은 미인수다. master/public/profiles/기존role owner 변경·DELETE/DROP/TRUNCATE·기존 자료 덮어쓰기0을 분리한다. arbitrary schema/policy/master 변경·삭제·운영배포 권한으로 확대하지 않는다. 과거 미접속/미적용/safety 관측은 각 시점 history로 보존한다. 최신 사용자 지시는 서비스에 필요한 최소 자료만 인입하는 것으로 범위를 한정한다. 모든 소유자료 scan/자동import는 금지하며 기존49archive 보존/자동 runtime채택0·삭제0.
+최신 요청에 따라 최소 명시 승인자료만 준비한다. 기존 private49archive/001002·미적용 당시 관측을 보존하고, 정확003 인간승인/적용·fresh24정책과합성10건 영속성·명시port metadata검수를 최신별도 관측으로 기록한다. 기본factory는 인간이 유지하도록 결정했으므로 legacy그대로이고 자동target/Storage전환을 하지않는다. 시험팩1건은staged/미채택·추가QA 대기다. 실JWT/유료/운영host·자료활성화/수치·전체보안/배포는미인수이며 master/public 변경·삭제·덮어쓰기를 하지않는다.
 
 | 항목 | 상태 | 증거 범위 |
 | --- | --- | --- |
@@ -153,7 +153,7 @@ SOURCE_DDL_PARTIALLY_RECEIVED_PRODUCTION_EFFECT_NOT_RUN; 2026-10-06T12:41:50.177
 - master ENABLE RLS 및 auth.uid()/public.is_admin() 기반 기존 정책은 소스 정의다. direct backend role의 신원 context와 효과를 검수한 것이 아니다.
 - profiles role/admin·status 제약과 기존 is_admin(auth.uid()) 정의는 reference source다. 검증 subject를 받는 최소 서버 판정 포트로 자동 채택하지 않는다.
 
-### 실제 SQL 사전 검수와 신규 private schema 적용 단계
+### 이전001·002 관측:003적용전의역사
 
 | 관측 | 상태 | 범위 |
 | --- | --- | --- |
@@ -166,7 +166,7 @@ SOURCE_DDL_PARTIALLY_RECEIVED_PRODUCTION_EFFECT_NOT_RUN; 2026-10-06T12:41:50.177
 
 001/002 는 owner 단일 transaction의 신규 private schema 추가·13 tables·RLS enabled·schema_versions 반영 개발 영수증이다. 독립 실원장 검수는 pending이다. FORCE RLS/앱 업무 policy·runtime003·실제 사용자/유료권한/CAS·멱등·발표 원자성·22API·배포/운영 인수가 아니며 master/profiles/기존 owner·role은 변경하지 않았다.
 
-CR-SERVICE-SUP04-20261006-01; adopted_for_implementation_actual_policy_preflight_received. runtime current_user=jungsi_backend_app; migration owner runtime 거절; 기존 master9컬럼 SELECT 임의 REVOKE 금지. 実際の own/admin·backend read 두 SELECT policy를 바탕으로 검사 계약을 개정한다. 임의 public REVOKE나 migration owner 런타임 사용으로 해결하지 않는다. SQL 계약/권한 구조만 공개하며 실행 설정값/실제 사용자/자료는 공개하지 않는다. 전용 app/owner 정책의 PERMISSIVE USING(true)는 기존 PUBLIC own/admin와 OR 결합되므로 DB RLS가 verified UUID만의 행으로 좁혀준다는 주장은 금지한다. reader의 WHERE user_id=%s 및 서버 검증 UUID parameter로 조회범위를 강제하고 transaction local claim을 결속한다. 추가/변경 정책·role·predicate는 거절한다.
+CR-SERVICE-SUP04-20261006-01; adopted_for_implementation_actual_policy_preflight_received. runtime current_user=jungsi_backend_app; migration owner runtime 거절; 기존 master9컬럼 SELECT 임의 REVOKE 금지. 실제 own/admin·backend read 두 SELECT policy를 바탕으로 검사 계약을 개정한다. 임의 public REVOKE나 migration owner 런타임 사용으로 해결하지 않는다. SQL 계약/권한 구조만 공개하며 실행 설정값/실제 사용자/자료는 공개하지 않는다. 전용 app/owner 정책의 PERMISSIVE USING(true)는 기존 PUBLIC own/admin와 OR 결합되므로 DB RLS가 verified UUID만의 행으로 좁혀준다는 주장은 금지한다. reader의 WHERE user_id=%s 및 서버 검증 UUID parameter로 조회범위를 강제하고 transaction local claim을 결속한다. 추가/변경 정책·role·predicate는 거절한다.
 
 OpenAPI metadata HTTP 200, 9컬럼; OpenAPI definition/GET metadata만 실제 조회. nullable/FK/default/CHECK/trigger/index/GRANT/RLS 및 적용 이력의 실제 SQL 인수는 아니다.
 
@@ -185,7 +185,7 @@ OpenAPI metadata HTTP 200, 9컬럼; OpenAPI definition/GET metadata만 실제 �
 
 ### 채택한 서비스 구현 준비와 남은 인수
 
-CR-SERVICE-SUP03; adopted_for_service_implementation_verification_pending. API22/session v1 세필드/4페이지·무료누백/유료후보·본인소유권·확인성적·학교 scope·독립승인·기존 Drive/local 경로·security 계약을 보존한다. 실제 서비스 구현/기본 factory 전환/DB 권한/수치/운영은 후속 증거로 별도 인수한다.
+CR-SERVICE-SUP03; adopted_for_service_implementation_verification_pending. API22/session v1 세필드/4페이지·무료누백/유료후보·본인소유권·확인성적·학교 scope·독립승인·기존 Drive/local/default legacy 및 security 계약을 보존한다. 실제 마련된 명시 연결 코드와 33focused PASS·metadata 증거를 정상 whole641·PR통합 및 실제 JWT·수치/운영 인수와 구분한다.
 
 create_app의 entitlement port를 업무 저장소와 독립 주입하는 구현 준비를 채택한다. 기존 호출과 default factory는 보존한다.
 
@@ -209,22 +209,22 @@ SupabaseStorageDataProvider와 GET-only Client의 explicit 주입 구현 준비�
 - current factory 자동전환·누락설정의 메모리/합성/다른 사용자/미승인 자료 fallback을 금지한다.
 - 새 Storage 명부 archive_only는 명시된 정확 bool false만 허용한다. 누락/null/0/문자열과 미확인 상태는 거절하고 archive 저장본을 runtime 승인본으로 승격하지 않는다. 기존 Drive명부를 자동 변환하지 않는다.
 
-codepath service_candidate_files_created_feature_PR_integration_pending; 합성 service_team_reported_27_PASS_final_typeguards_and_same_snapshot_pending; 실제Auth/DB/Storage권한 NOT_RUN. 구현 준비 채택은 현재 default 전환/운영 PASS가 아니다.
+codepath explicit_prepared_snapshot_PR_integration_pending; 합성 service_team_reported_33_focused_PASS_full_snapshot_retry_pending; 실제Auth/DB/Storage권한 NOT_RUN. 구현 준비 채택은 현재 default 전환/운영 PASS가 아니다.
 
-서비스팀 후보에서 파일 생성 보고를 수령했다. develop implementation 참조에 추가하지 않으며 같은 공통계약·서비스6파일 snapshot의 PR/검수/통합 후 실제 참조로 전이한다.
+명시 주입 6개 코드/검수와 003 SQL의 7개 파일은 이번 feature 작업 스냅샷에 실제 마련됐다. 구현 참조는 이 스냅샷에만 결속하며 정상 whole641/커밋·PR통합 인수는 아직 대기다. reported 33focused PASS와 actual metadata 검수는 운영 승인·기본 factory 전환이 아니다.
 
-후속 PR 후보 경로: src/jungsi_touch/infrastructure/http_api.py, src/jungsi_touch/infrastructure/postgres_entitlements.py, src/jungsi_touch/infrastructure/supabase_storage.py, tests/test_http_entitlement_injection.py, tests/test_postgres_entitlements.py, tests/test_supabase_storage.py
+이번 feature 스냅샷의 명시 준비 구현 경로: src/jungsi_touch/infrastructure/http_api.py, src/jungsi_touch/infrastructure/postgres_entitlements.py, src/jungsi_touch/infrastructure/supabase_storage.py, tests/test_http_entitlement_injection.py, tests/test_postgres_entitlements.py, tests/test_supabase_storage.py, database/migrations/003_runtime_role_access.sql
 
 ### 신규 DB role 발급 요청과 실제 권한 대기
 
 | 항목 | 보고된 목표/남은 검수 |
 | --- | --- |
 | format | jungsi.database-role-target/v1 |
-| status | actual_connection_role_master_read_preflight_PASS_runtime_privileges_pending |
+| status | actual_runtime003_least_privilege_metadata_verified_live_pending |
 | owner_role | jungsi_backend_owner |
 | owner_scope | 이관/schema 객체 소유·001/002 적용 전용. 실제 객체 owner의 구조 변경 권한을 runtime 제한과 혼동하지 않는다. |
 | app_role | jungsi_backend_app |
-| app_scope | runtime private schema USAGE/SELECT/INSERT/UPDATE 및 master read-only. DELETE/TRUNCATE 권한 없음이 목표이며 실제 GRANT/RLS/effective privileges 검수 필요. |
+| app_scope | 실제003/freshmetadata의 privateSELECT13/INSERT9/columnUPDATE6·artifactSELECTonly와masterreadonly. runtimeDELETE/TRUNCATE·tablewideUPDATE·futureGRANT 없음. verified caller는서비스SQL로 제한한다. |
 | master_read_only | True |
 | runtime_DELETE_allowed | False |
 | runtime_TRUNCATE_allowed | False |
@@ -235,14 +235,95 @@ codepath service_candidate_files_created_feature_PR_integration_pending; 합성 
 | connection_selection | 지속 FastAPI/IPv4는 session5432 우선안. IPv6 direct5432 대안 및 transaction6543 실제 호환 검수는 별도. |
 | actual_role_exists_verified | True |
 | actual_effective_privileges_verified | True |
-| boundary | 신규 연결설정과 실제 TLS/role/master metadata 사전 검수로 계정 존재·최소 SELECT·쓰기없음을 확인했다. owner는 이관/schema 소유·구조변경 권한을 갖고 runtime 재사용하지 않는다. private 업무 app 정책은 001/002 적용 영수증에서0이며 runtime003/CRUD/권한 인수는 pending이다. 기존 발급중 보고와 credential 미확보 관측은 history로 보존한다. |
-| actual_privilege_scope | 13:12 preflight master SELECT/쓰기없음·CREATE·비super/BYPASSRLS/membership 검수만. 신규 private app CRUD/policies/runtime003·운영승인 NOT_RUN |
+| boundary | owner는 이관전용이고 runtime에 재사용하지 않는다. 실제003이 app 최소권한/정책을 추가했고 새연결메타로확인했다. 계정보관과운영process주입·기본factory·실사용자/전체securitygate는별개이며public/profiles/기존role owner를변경하지않았다. |
+| actual_privilege_scope | 13SELECT/9INSERT/6columnUPDATE·24policy·artifactSELECTonly·tablewideUPDATE/DELETE/TRUNCATE없음 freshmetadata; realJWT/HTTP전체/RLS tenant인수아님 |
 
-신규 연결설정과 실제 TLS/role/master metadata 사전 검수로 계정 존재·최소 SELECT·쓰기없음을 확인했다. owner는 이관/schema 소유·구조변경 권한을 갖고 runtime 재사용하지 않는다. private 업무 app 정책은 001/002 적용 영수증에서0이며 runtime003/CRUD/권한 인수는 pending이다. 기존 발급중 보고와 credential 미확보 관측은 history로 보존한다.
+owner는 이관전용이고 runtime에 재사용하지 않는다. 실제003이 app 최소권한/정책을 추가했고 새연결메타로확인했다. 계정보관과운영process주입·기본factory·실사용자/전체securitygate는별개이며public/profiles/기존role owner를변경하지않았다.
 
 ### private 연결설정 수령과 실제 preflight 경계
 
-credentials_received_connection_preflight_PASS_private_migration_review_pending; 증거 SUP-CREDENTIALS-20261006-OWNER-APP; 설정 수령 후 실제 SQL 읽기 연결/TLS·role/master preflight PASS와001/002 개발 적용 영수증을 별도로 확인했다. independent 원장 검수/runtime003·실 사용자권한·default factory/운영 process 배포·자료승인은 대기다. 설정값/host/프로젝트ID/비공개 경로는 public 문서/라우팅으로 전달하지 않는다.
+actual_connection_runtime003_metadata_verified_live_pending; 증거 SUP-CREDENTIALS-20261006-OWNER-APP; 수령한 private 설정으로 실제 SQL/TLS/role/master 및003 fresh metadata 검수까지 진행했다. 보관묶음에app/owner·direct대안이있어도 운영서버에는app DATABASE_URL만, migration owner는승인된이관작업전용으로분리한다. 기본factory는유지한다. 공개값·APIorigin만외부화면에전달하며실secret/연결값/비공개path/hash/ACL identity는공개하지않는다. JWT/실유료·운영host·자료승인은NOT_RUN.
+
+## 2차 실제 관측:003·명시port·최소시험팩·화면통합
+
+| 관측 | 상태 | 검수범위 |
+| --- | --- | --- |
+| 정확003 적용/fresh권한 | APPLIED_AND_FRESH_METADATA_VERIFIED | SUP-DB-20261006-003-APPLY; 정책24/SELECT13·INSERT9·columnUPDATE6 |
+| 합성 새process영속성 | PASS_SYNTHETIC_NEW_PROCESS_NEW_CONNECTIONS | SUP-DB-20261006-SYNTHETIC-PERSISTENCE; 합성10건 |
+| 명시port메타 | PASS_SCOPED_ACTUAL_METADATA | SUP-SERVICE-20261006-EXPLICIT-PORT-METADATA; health503 / configuration_pending |
+| 최소시험팩 | MINIMUM_CANDIDATE_NOT_ADOPTED | SUP-DATA-20261006-MINIMUM-EXAM; 1건/328915B·staged/승인0 |
+| 수학 부분QA | PASS_SCOPED_REVIEW_FROZEN | SUP-DATA-20261006-MATH-SCOPED-QA; 수학한구간/9경계만·wholeexam/CDF승인0 |
+| 기본경로 결정 | user_selected_explicit_preparation_only | 기본 경로는 유지하고 명시 연결만 준비; candidate7PASS는review-only/source변경0 |
+
+정확003 v2의 직접 인간 승인과 적용 영수증, 새 연결의24정책·SELECT13/INSERT9/columnUPDATE6·artifact SELECT-only·tablewideUPDATE/DELETE/TRUNCATE/미래GRANT 없음만 인수한다. 기존 public4범주 메타보존과 실제 학생/입결 인입0을 확인했다. 모든 index/defaultACL·운영JWT/유료권한/HTTP·공유보안 예산 인수로 확대하지 않는다. trusted backend RLS는 SQL 검증subject/소유권 필터를 대신하지 않는다.
+
+합성 JSON으로 저장소 port의 CAS/멱등/타인소유권 거절과 새 프로세스·새 연결의 지속성을 확인했다. 합성10건은 보존한다. 실제 학생·실유료·Auth/외부HTTP·운영 backup/restore·전체 report/forecast 흐름의 인수 증거가 아니다.
+
+명시 연결 port의 actual metadata 검수만 PASS다. health는 DB메타가 verified여도 Drive/승인자료/실사용자·배포준비 부족으로503이다. 기존 factory의 자동 Storage/기본 유료판정 전환·합성성공 fallback을 수행하지 않았다.
+
+자료팀이 최소 시험팩1건/328915B의 후보와 이미 저장된 Storage 복사 검증근거를 재사용했다. status=staged와승인0·engine/productionfalse·archive_only exactFalse는 runtime 채택이나 독립승인이 아니다. unbound 후보는 provider가 네트워크0으로거절했다. 없는 전체누백모형/입결은 기존 guard/503·pending이며 가상값으로 대체하지 않는다. 모든 보유자료/원표/PDF/QA의 자동인입을 하지 않는다.
+
+수학의 제한 구간과9경계만 원문/캐시와 대조하고 in-memory 검산했다. 이를 전체시험/CDF·공식 정수 성적표백분위·실제 화면 mode·운영분석 완료로 확대하지 않는다. 성적값/학생값/도수·누백수치/자료SHA/원문경로를 Git문서에 복사하지 않는다. UI 가상예시가 공식결과로 오인되지 않는지는 외부 FE-SOURCE-01 후속이다.
+
+14:16Z 수학 제한 검수의 동결 관측이다. 이후 직접 사용자 요청으로 데이터팀이 최소 변경본·정의/동점 방식 보완 후보를 별도로 준비 중이며 기존 부분 검수를 자동 재개한 관측이 아니다.
+
+직접 인간 답변으로 기본 경로 유지/명시 연결 준비만 확정했다. 기술권장/7합성PASS를 default 전환승인으로 해석하지 않는다. 현재 legacy/session3/API22 핀과 운영factory를 유지하고 자동전환/legacyfallback 변경·profiles조회/admin paid합성·추가GRANT·Storage승인을 실행하지 않는다.
+
+데이터팀 후속: targeted_update_receipt_pending. 별도 직접 사용자 지시에 따른 데이터팀 후속 준비다. 공식 원자료를 임의 오류로 수정하거나 전체 49개 보관물을 재업로드하지 않는다. 필요한 선별 목록 동결을 먼저 받고 새 형식·DTO·엔진 로직 변화는 별도 계약 변경으로 다룬다. 8수준 joint 정의·공식 전체 분모 선택은 데이터팀 후속 CR 준비이며 현재 엔진/DTO/자료 승인으로 반영하지 않는다.
+
+운영서버는 app DATABASE_URL만, owner URL은이관작업전용private로분리한다. 외부화면은공개Supabase설정/APIorigin만받는다. 비공개env값/path/hash/ACL identity를기록하지않는다.
+
+현재legacy/defaultfactory/API22/session3/page4·최소allowlist를유지한다. 실제사용자JWT/유료rows·자료활성화·livehost·브라우저와세securitygate/운영은NOT_RUN/NOT_READY다.
+
+## 현재 통합과 source 등록·모형 채택의 경계
+
+FROZEN 문서 준비 시각 2026-10-06T19:21:31.629238Z; FROZEN_SCOPED_SOURCE18_DOCUMENT_CANDIDATE_NOT_CANONICAL_APPLIED_NEW_HOOKS_CI_NOT_RUN. 이전 준비/관측·실패 기록은 보존하며 이번 정본반영/새 훅/CI는 NOT_RUN이다.
+
+| 항목 | 현재 상태 | 인수 범위와 남은 작업 |
+| --- | --- | --- |
+| 공통 phase1 | NORMAL_COMMIT_PUSH_EXACT_HEAD_CI_PASS | c1cd8d2fca8eab0b6e0e7e008cc22641d642ce2a; 정상commit/prepush/정확CI 각각645PASS |
+| 서비스 phase2 | NORMAL_PRECOMMIT_PREPUSH_HEAD_PUSH_PR_MERGE_TEST_AND_FINAL_DEVELOP_CI_678_PASS | 57f74b1daabd2d6a8e94de216f182e8bfe6557b7; 정상precommit/prepush/HEAD pushCI/PR시험CI/developCI각678PASS·실패/오류/skip0 |
+| 전용 app TLS 읽기 | SCOPED_APP_TLS_METADATA_PASS | 12건; RLS 13table/24policy metadata |
+| 전용 schema REST | 406/PGRST106 | 전용 schema는 REST 노출 목록에 없다는 관측이다. SQL schema 부재나 로그인 사용자 권한 인수로 해석하지 않는다. |
+| 선별 Storage | SELECTED_MINIMUM_18_FULL_GET_SHA_VERIFIED_NO_JWT_72_NO_BODY_RETURNED | 18객체 fullSHA 독립검수·noJWT 72거절·승인/활성화false |
+| source 메타 draft | PASS_EXACT18_DRAFT_SOURCE_META_BASE16_003_STORAGE_PRESERVED_NOT_ENGINE_ADOPTION | 18개 fresh app 독립readback·owner일회등록·publishednull |
+| 최종 source별 메타집계 | PASS_SCOPED_EXISTING_GET18_SHA_BYTES_AND_DB18_METADATA_BINDINGS | 등록/정책34·기존GET/DB결속32 PASS·새GET0; 실JWT/엔진검수가아님 |
+| 모평적용 child | INDEPENDENT_SOURCE_CONTEXT_AND_SEPTEMBER_APPLICATION_CONTEXT_BINDINGS_PASS | 3개 원source SHA/모평applicationContext분리·원AST수치불변 |
+| 공식 입결 source | MINIMUM_V4_INDEPENDENT_STORAGE_NATIVE58_AND_FROZEN_RAM39_PASS_SOURCE_DRAFT_REGISTERED | 2개 최소선별native58/RAM39 PASS·DBdraft등록2·전국완료false |
+| Storage RLS metadata | PASS_METADATA_CLIENT_SELECT_DENIED_CURRENT_BUCKET_ACTUAL_JWT_NOT_RUN | 현재보호bucket 클라이언트허용조건없음·실제JWT HTTP/SEC운영NOT_RUN |
+| 공식학교 catalog | MINIMUM_SELECTED_V4_NATIVE_QA_AND_SOURCE_DRAFT18_INDEPENDENT_APP_READBACK_PASS_NOT_PUBLISHED | 최종자료팀영수증대기 |
+| v2 서비스 구현 | PLAN_ONLY | 14경로후보·code0·nativev1유지·호환/품질/newscopeFE작업미완료 |
+| 외부 화면 | REAL_22API_4PAGE_JWT_DEPLOYMENT_NOT_RUN | 실제JWT/22API/4page/배포·보안gate별도 |
+
+서비스·공통 계약의 정상 Git 검수와 develop 통합 인수다. 기본회원 경로/명시DI 선택·API/DTO·자료flags는 그대로이며 실제JWT/운영22API·4페이지/배포·보안 인수를 뜻하지 않는다.
+
+새 app TLS 읽기·table/RLS/policy metadata의 지정 범위 독립 검수다. 실제 22API/실사용자·유료·전체 RLS/운영 인수는 아니다.
+
+명시적으로 선별한최소source18개(신규17+공식시험팩재사용1)의fullGET/SHA와비인증읽기72건본문미반환을각지정영수증으로결속했다. 전체bucket파일수가18개라는뜻이아니다. 새최소공식source2개는8개비인증HTTP400을기록했고v2/v3실패archive는별도보존한다. 승인/engine/production/runtime/live trial 인수는아니다.
+
+Source-only draft18의owner일회신규2 COMMIT와freshapp18에이어독립appTLS READONLY exact18/old16불변/new2exact/missing0/non-target0을확인했다. 기존003권한/13RLStable/24policy·공개passes/profiles·Storagebaseline을보존한다. 독립검수DB쓰기/owner/CloudGET/Auth0이며발행0/engine/production/runtimefalse/publishednull이다. 상시ownerAPI·실회원·정식모형/운영채택을뜻하지않는다.
+
+원 수능 source SHA와 모평 시험팩 application context SHA를 child에 명시해75binding의 문맥 차이를 분리했다. 원AST 수치·원본source는 치환/삭제하지 않았다. native형식/모형호환과 실제서비스 계산 채택은 별도 작업이며 이 문맥 대조가 승인모형 발행은 아니다.
+
+최소공식sourcev4의신규2 source메타등록·독립Storage/native58·frozenRAM39·최종appTLS exact18대조를완료했다. 전체source-only draft18이며원본/실패v2/v3archive는보존·DB0이다. 일부3개대학/9학교년도/451지표/249모집행선별범위의인수이고전국완료false·실회원JWT/운영모형/학생서비스발행미인수를유지한다.
+
+기존권한/RLS/predicate metadata 읽기에서현재 보호bucket의 anon/authenticated 허용조건이 없음을 확인한 범위다. service_role의 신뢰backend 경로는 유지한다. 실제 JWT authenticated HTTP/사용자행 검수는 미실행이고 전체운영보안/SECgate를 인수하지 않는다. 정책명·literal bucket값·private설정은 공개하지 않는다.
+
+원문 JSONL의 splitlines 처리 문제를 LFReader 관점에서 조사했고 지정구문검사PASS는 확인했다. 원본은 변경하지 않았으며 이 구문검사를 전체의미전수검수 PASS로 해석하지 않는다.
+
+검수당시불변census snapshot의원형prefix/bytes검수가확인됐고동일원bytes의새snapshot도보존했다. 이후append된현재census와당시snapshot은별개다. 선별payload/manifest변경0이며원본손상/유실로해석하지않는다. private원문SHA/실제입결값은공개하지않는다.
+
+공식전체N 기준·8band 추정모형·정확유리수·rule/scenario별27봉투의 기획승인과 구현계획 준비는 완료 범위다. 14경로는 후보이며 코드0·v2미구현·모형/계산운영채택false다. native v1을 유지하며 품질검수·후방호환·newscope FE공통계약 작업이 미완료다. 사용자 재승인 대기로 표현하지 않는다. 관측/합성/추정 모형과 전체jointCDF를 구분하며 실제N·원점수·학생·계수를 공개하지 않는다.
+
+사용자 결정은 기본 경로 유지와 public.jeongsi_passes 명시연결 준비다. 기본유료판정 전환의 승인 대기가 아니며 자동전환/legacyfallback변경/가짜paid 승격을 하지 않는다.
+
+외부 화면 담당의 실제 세션·BFF 신원/CSRF·허용 DTO·브라우저 전달물·실429/503·운영 origin 검수와 운영 배포는 별도 인수다.
+
+등록·정책34조건/실패0과기존GET18의경로bytes/SHA·DB18연결32조건/실패0을지정영수증으로집계했다. 새GET0이며각source범주18/총bytes·비인증72본문미반환의메타근거다. 선별draft18확인을학생계산/실JWT/엔진활성화·보안운영gate로확대하지않는다. source별private경로·원자료SHA·정책SHA는공개하지않는다.
+
+이번FROZEN은검토가능한문서27파일의동결만뜻한다. 이전phase2의678x5와이번문서미실행훅/CI를구분하고자기미래커밋SHA를선행기록하지않는다.
+
+비공개 값/실제 N·원성적/학생·key/JWT/DBURL/bucket·object key/원문 payload/full자료hash/PC 경로는 공개 문서에 넣지 않는다. 증거 원문·SHA는 private 영수증에만 결속한다.
 
 ## 현재 코드와 설정 경계
 
@@ -251,9 +332,10 @@ credentials_received_connection_preflight_PASS_private_migration_review_pending;
 | settings | .env 파일 자체는 필수가 아니다. ServerSettings.from_environment는 os.environ만 읽으며 .env 자동 로더가 없다. 기존 파일을 보관하는 것과 서버 프로세스에 필요한 환경변수를 주입하는 것은 별도 작업이다. |
 | authentication | SupabaseSessionProvider는 getUser로 확인한 사용자와 같은 JWT의 sub/exp를 대조한다. JWKS를 조회한 사실이 직접 서명 검증 구현의 완료를 뜻하지 않는다. |
 | entitlement | SessionService는 서버 이용권으로 유료 권한을 판정한다. profile/admin 표식이나 클라이언트 paid 값으로 자동 승격하지 않는다. 결제 취소·회수·동기화 adapter는 별도 구현이 필요하다. |
-| postgres | prepare_threshold=None, TLS require, 트랜잭션의 SET LOCAL UTC와 advisory transaction lock을 유지한다. 실제 DB 연결 검수는 NOT_RUN이다. |
+| postgres | prepare_threshold=None, TLS require, 트랜잭션의 SET LOCAL UTC와 advisory transaction lock을 유지한다. 명시 포트의 실제 DB 연결·001/002/003 및 24정책 metadata 검수와 합성 10건의 별도 프로세스 영속성은 지정 증거 범위에서 PASS다. 실제 사용자 JWT·이용권 행·default factory 전환·운영 22API/전체 배포 인수는 NOT_RUN이며 기본 경로는 유지한다. |
 | Drive | DriveClient는 주입된 static token으로 Bearer 요청을 만든다. 자동 OAuth refresh는 구현되어 있지 않아 갱신 운영 방법 또는 별도 adapter가 필요하다. |
 | health | 운영 /health/ready의 200은 인증·자료·전체 운영의 인수를 뜻하지 않는다. local memory/test auth/DPAPI factory는 production_ready=false이며 공개 배포하지 않는다. |
+| current_followup | 현재 develop57f74b1daabd2d6a8e94de216f182e8bfe6557b7에 서비스phase2와 승인된 병합 하네스 수정이 통합됐다. 정상precommit/prepush/정확HEAD pushCI/PR병합시험CI/최종developCI각678PASS·실패/오류/skip0이며 main은 보존했다. 최소source-only draft18의신규2 ownerINSERT COMMIT/freshapp18과선별Storage18(fullGET/SHA·비인증72건본문미반환)을확인했다. 최종appTLS READONLY exact18/old16불변/new2exact 독립영수증도PASS이며003/13RLS24policy·공개/Storagebaseline보존을확인했다. 원수능AST source는 보존하고 모평적용child3의 source/applicationContext를 분리 확인했다. engine/production/runtimefalse·publishednull과 기본회원경로유지/명시DI만준비선택은 확정 유지다. 공식입결v2/v3의미실패는보존하고 최소선별v4의일부학교/학교년도local·remote native범위PASS를 수령했다. 신규2개DB메타등록을수령하고최소공식source2의독립native58/frozenRAM39를기록했으며전체draft18/발행0·전국완료false를유지한다. 최종freshapp18독립검수도완료했다. StorageRLS메타는현재보호bucket에클라이언트SELECT허용조건없음을확인했으나실제JWT HTTP/운영SECgate는NOT_RUN이다. v2설계승인·최신v1.1/14경로PLAN_ONLY구현계획은 준비됐으나 코드0·품질/newscopeFE공통계약/모형호환·계산채택은 미완료다. 실제JWT/APIorigin·22API/4페이지/보안운영·live배포는 미인수다. 과거제안/실패/fixture·관측은 보존한다. |
 
 현재 프로젝트의 URL·publishable 설정을 확인했으므로 새 프로젝트 생성이 필수라고 볼 근거는 없다. .env 예시도 Git에서 제외한다. 파일 보관과 서버 프로세스의 환경변수 주입은 별도 작업이다.
 
@@ -266,7 +348,7 @@ credentials_received_connection_preflight_PASS_private_migration_review_pending;
 | JUNGSI_API_MODE / JUNGSI_API_URL | 외부 화면 | 모드·서버 전용 Caller/운영 연결은 외부 회신; 값 비공개 | mode_contract_pending_no_automatic_live |
 | SUPABASE_URL | 서버 | Auth HTTPS URL; 검토 설정범위 존재 | ServerSettings_required |
 | SUPABASE_PUBLISHABLE_KEY | 서버 | getUser apikey; 사용자Bearer와별개/검토범위존재 | ServerSettings_required |
-| DATABASE_URL | 서버 전용 비밀 | app private 설정 수령·실TLS/role/master preflight PASS. 배포process/default private업무권한·runtime003 인수pending | ServerSettings_required |
+| DATABASE_URL | 서버 전용 비밀 | 실SQL/003최소권한·metadata확인. 운영서버는app만주입하며실Auth/default경로는현재legacy유지 | ServerSettings_required |
 | GOOGLE_DRIVE_ACCESS_TOKEN | 서버 전용 비밀 | 현재 static token·갱신운영/adapter 별도 | ServerSettings_required |
 | GOOGLE_DRIVE_INPUT_FOLDER | 서버 전용 | 승인 input folder/실공급NOT_RUN | ServerSettings_required |
 | GOOGLE_DRIVE_OUTPUT_FOLDER | 서버 전용 | 입력과 다른 output/실공급NOT_RUN | ServerSettings_required |
@@ -275,7 +357,7 @@ credentials_received_connection_preflight_PASS_private_migration_review_pending;
 | JUNGSI_PROBE_ACCESS_TOKEN | 검수 전용 비밀 | 실사용자JWT/검토file/process범위없음 | probe_optional_not_ServerSettings_required |
 | SUPABASE_SECRET_KEY | 서버 참조/비밀 | 최소REST metadata조회참조/검토범위존재 | reference_not_required_or_auto_used |
 | SUPABASE_JWKS_URL | 설정 참조 | 공개키조회참조/검토범위존재·직접JWT검증완료아님 | reference_not_required_or_auto_used |
-| JUNGSI_MIGRATION_DATABASE_URL | 이관 전용 비밀 | owner private 수령·실TLS/role preflight·001002 개발 적용영수증. 이관전용/독립검수·runtime003 별도 | migration_reference_not_current_ServerSettings_or_runtime |
+| JUNGSI_MIGRATION_DATABASE_URL | 이관 전용 비밀 | owner001002003이관전용private분리;운영서버/runtime/외부화면에는전달하지않음 | migration_reference_not_current_ServerSettings_or_runtime |
 
 SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설정이 아니며 자동으로 사용되지 않는다. 프런트 NEXT_PUBLIC_SUPABASE_ANON_KEY는 publishable 참조 값을 보관하는 기존 호환 이름이다. secret key나 사용자 JWT를 뜻하지 않는다. 운영 환경의 변수 이름과 설정 채택은 외부 화면 담당자가 확인해야 한다.
 
@@ -284,14 +366,14 @@ SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설�
 | ID/우선순위 | 담당/계층 | 입력 | 선행 | 현재상태 |
 | --- | --- | --- | --- | --- |
 | SUP-01 P0 | 시스템기획·서버 담당 / 기획/애플리케이션·인프라 | 확정 separate_Jungsi_FastAPI_deployment; 22 API·DTO·엔진 계약; 배포 제공자·Python runtime·BFF 운영 연결 요구(값은 비공개) | 없음 | DECISION_CONFIRMED_DEPLOYMENT_NOT_RUN |
-| SUP-02 P0 | 에듀터치 결제·DB 담당·시스템기획 / 기획/애플리케이션·데이터 | 확정 public.jeongsi_passes 단일 원본; 원본 DDL·사용자 식별 컬럼/타입·취소/환불/회수 규칙·권한 SQL 원문(source DDL 부분수신·현재권한/적용 미검수); 현재 포트/조회·session v1 규칙·검사와 같은 어댑터 전환 PR; 기존 사이트 관리자 예외의 서버 조회/권한/DTO 영향 CR | 없음 | DECISION_CONFIRMED_ADAPTER_NOT_RUN |
+| SUP-02 P0 | 에듀터치 결제·DB 담당·시스템기획 / 기획/애플리케이션·데이터 | 확정 public.jeongsi_passes 단일 원본; 원본 DDL·사용자 식별 컬럼/타입·취소/환불/회수 규칙·권한 SQL 원문(source DDL 부분수신·현재권한/적용 미검수); 현재 포트/조회·session v1 규칙·검사와 같은 어댑터 전환 PR; 기존 사이트 관리자 예외의 서버 조회/권한/DTO 영향 CR | 없음 | TARGET_CONFIRMED_EXPLICIT_PREPARATION_DEFAULT_LEGACY_KEPT_BY_HUMAN |
 | SUP-03 P0 | Supabase·서버 설정 담당 / 인프라/데이터 | Dashboard Connect 정보; 전용 server role·TLS·배포환경; 확정 별도 FastAPI 환경의 IPv4/IPv6·연결 유지 요구; master 최소 SELECT와 자체 업무 schema 쓰기/마이그레이션 role을 구분한 권한 계획; RF-03 IN-DB-01A~05B의 정확 원본/권한 입력10종과 role/owner/RLS 효과; 실제 값은 private 인계; source schema-only 원문 부분수신/OpenAPI9컬럼 metadata와 실제DB/TLS/role 검수의 분리 | SUP-01 | actual_DB_TLS_role_master_preflight_PASS_deployment_runtime_pending |
-| SUP-04 P0 | DB 담당 / 데이터/인프라 | 실DB 기존 상태·승인 backup; 001/002 정의·전용role 권한계획; public.jeongsi_passes source DDL 일부수신·현재 사용자키/FK/인덱스/RLS·전용 권한 SQL 미검수; runtime/migration role·owner와 관리자 최소 조회 포트 CR; RF-03 IN-DB-01A~05B의 정확 원본/권한 입력10종과 role/owner/RLS 효과; 실제 값은 private 인계; 신규 owner/app private 설정 수령 이후 real catalog/preflight·001002 비파괴 적용·runtime RLS003 계획(미실행) | SUP-02, SUP-03 | 001002_applied_development_receipt_independent_review_runtime003_pending |
+| SUP-04 P0 | DB 담당 / 데이터/인프라 | 실DB 기존 상태·승인 backup; 001/002 정의·전용role 권한계획; public.jeongsi_passes source DDL 일부수신·현재 사용자키/FK/인덱스/RLS·전용 권한 SQL 미검수; runtime/migration role·owner와 관리자 최소 조회 포트 CR; RF-03 IN-DB-01A~05B의 정확 원본/권한 입력10종과 role/owner/RLS 효과; 실제 값은 private 인계; 신규 owner/app private 설정 수령 이후 real catalog/preflight·001002 비파괴 적용·runtime RLS003 계획(미실행) | SUP-02, SUP-03 | 003_APPLIED_FRESH_METADATA_AND_SYNTHETIC_PORT_PASS_LIVE_PENDING |
 | SUP-05 P0 | 인증 담당·서버 개발자 / 애플리케이션/인프라 | 실제 검수 사용자 Bearer JWT·Supabase Auth 공개 설정 | SUP-01 | NOT_RUN_MISSING_TEST_USER_JWT |
 | SUP-06 P0 | 권한·서비스 DB 담당 / 애플리케이션/데이터 | 선택한 단일 authority; entitlement·owner·forecast_authorities; SUP-05 실Auth 검수·일반/유료 검수 사용자·별도 editor/approver subject; RF-02 관리자 권한/operation/session CR; RF-03 DDL·사용자키·SQL 권한과 취소/회수; CR-SERVICE-SUP03의 read-only reader/preflight·source user_id UUID/FK/period와 actual DB 일치 | SUP-02, SUP-04, SUP-05 | NOT_RUN |
 | SUP-07 P0 | 서버 담당 / 인프라/애플리케이션 | 선택 실행환경·locked Python runtime; 운영 settings·HTTPS/CORS origin; RF-01 BFF 사용자/서버 전용 신원과 원점 차단; RF-04 synthetic/local_verification/production 모드·전환 승인 | SUP-01, SUP-03, SUP-04, SUP-05 | NOT_RUN_HOSTING_AND_SECURITY_ACCEPTANCE_PENDING |
-| SUP-08 P0 | 데이터팀·서버 인프라 담당 / 데이터/인프라 | Drive OAuth/folders/승인발행명부; approved exam/joint curve/catalog/analysis/rule/year bridge/학교누백/forecast 근거; 데이터팀 approved/HOLD 발행 명부·독립 신뢰 version/SHA·승인/수령 영수증; 실제 9월 검수 2~3건·독립 기대값과 보류 목록(실값 비공개); 실제 Drive/local 출처·수신 Windows PC DPAPI 재보호; SUP-STORAGE-20261006-PRIVATE-STAGING의 신규 private 저장/해시 재수신 증거·원본 보존; CR-SERVICE-SUP03 Storage explicit 공급자와 승인된 runtime envelope/신뢰명부(미준비) | SUP-01, SUP-03 | PRIVATE_STORAGE_STAGED_ENGINE_AND_PROVIDER_ADOPTION_PENDING_DRIVE_NOT_RUN |
-| SUP-09 P0 | 외부 화면 개발자 / 프레젠테이션 | 운영 API origin·Supabase 공개설정; 실JWT Caller·22 DTO·승인 기대값; RF-01 BFF 공개 경로·22 operation 매핑·신원/쿠키/CSRF; RF-02 관리자 예외 화면/버튼·session CR; RF-04 모드·RF-05 정확 PR/SHA/인수; SEC-02/03/07/08 및 세 security gate | SUP-06, SUP-07, SUP-08 | NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED |
+| SUP-08 P0 | 데이터팀·서버 인프라 담당 / 데이터/인프라 | Drive OAuth/folders/승인발행명부; approved exam/joint curve/catalog/analysis/rule/year bridge/학교누백/forecast 근거; 데이터팀 approved/HOLD 발행 명부·독립 신뢰 version/SHA·승인/수령 영수증; 실제 9월 검수 2~3건·독립 기대값과 보류 목록(실값 비공개); 실제 Drive/local 출처·수신 Windows PC DPAPI 재보호; SUP-STORAGE-20261006-PRIVATE-STAGING의 신규 private 저장/해시 재수신 증거·원본 보존; CR-SERVICE-SUP03 Storage explicit 공급자와 승인된 runtime envelope/신뢰명부(미준비) | SUP-01, SUP-03 | MINIMUM_EXAM_STAGED_UNBOUND_SUBJECT_SCOPED_QA_PASS_ADOPTION_PENDING |
+| SUP-09 P0 | 외부 화면 개발자 / 프레젠테이션 | 운영 API origin·Supabase 공개설정; 실JWT Caller·22 DTO·승인 기대값; RF-01 BFF 공개 경로·22 operation 매핑·신원/쿠키/CSRF; RF-02 관리자 예외 화면/버튼·session CR; RF-04 모드·RF-05 정확 PR/SHA/인수; SEC-02/03/07/08 및 세 security gate | SUP-06, SUP-07, SUP-08 | PR15_MERGED_SOURCE_CI_VERIFIED_BROWSER_AND_SECURITY_PENDING |
 | SUP-10 P1 | 서버·DB 운영 담당 / 인프라/데이터 | 실API/DB/승인자료; backup/restore·장애·통계 계획; 로컬 메모리/운영 PostgreSQL 차이와 재시작 소실 고지; backup/restore·성적/리포트/관심학교/관리 초안/발표 영속성 목록 | SUP-06, SUP-07, SUP-08 | NOT_RUN |
 | SUP-11 P0 | 시스템기획·두 개발 담당·데이터팀 / 통합 인수/3티어 | SUP-01~10 개별 증거; 정확 develop SHA/API/자료버전·CI·외부인수 | SUP-01, SUP-02, SUP-03, SUP-04, SUP-05, SUP-06, SUP-07, SUP-08, SUP-09, SUP-10 | BLOCKED_NOT_READY |
 
@@ -316,6 +398,7 @@ SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설�
 - 관리자 열람 예외의 조회·별도 capability·허용 operation·화면/session DTO 영향은 CR로 확정한다. paid=true나 임의 만료로 승격하지 않는다.
 - master reader·factory의 session entitlement 주입·readiness/probe·정본 session 규칙/route catalog·checker1284와 회귀를 같은 구현 PR에서 전이한다. 이번 명세 반영에서는 현재 old authority 검사 pin을 유지하고 old OR new로 완화하지 않는다.
 - CR-SERVICE-SUP03의 독립 entitlement 주입·read-only master reader 구현 준비를 채택한다. source DDL 수령은 실제 DB preflight·default factory 전환 인수가 아니며 old 실행 pin은 유지한다.
+- 직접인간답변으로기본경로유지/명시port준비만확정했다. CR06review-only7PASS·actualmastermetadata를기본factory전환/paid실사용자검수로확대하지않는다.
 
 완료조건:
 
@@ -342,14 +425,10 @@ SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설�
 
 업무:
 
-- 기존 상태 점검·승인 backup 후 001/002 추가 적용 계획을 별도로 승인받는다. 이번 문서는 운영쓰기 실행 승인이 아니다.
-- 전용role grants/RLS·anon/authenticated 직접 접근 차단·owner·UTC·11개 timestamptz/date 컬럼·schema_versions를 실DB에서 검수한다.
-- reset/drop/delete 금지. REST PGRST106은 DB schema 부재/SQL 권한 실패 증거가 아니다.
-- 권한 SQL 원문을 확보해 master SELECT·다른 public 표 제한·자체 업무쓰기·owner/RLS/함수 범위를 대조한다. SELECT만으로 ALTER/RLS 작성 권한이 생긴다고 추정하지 않는다.
-- profiles 관리자 판정이 필요하면 다른 public 표 접근 제한과 양립하는 최소 server-only 조회를 별도 확정한다. SQL/DDL을 추정해 실행하지 않는다.
-- source9파일/30SQL검토와 repo001/002 존재는 실제 적용 증거가 아니다. 사용자 요청의 비파괴적 업데이트 목적과 credential/owner/RLS·보존 backup·구체 적용계획 미충족을 분리한다.
-- owner는 이관/schema소유/001002용, app은 runtime private USAGE/SELECT/INSERT/UPDATE·masterreadonly/DELETE·TRUNCATE없음 목표다. owner의 소유·구조 변경 권한이 없다고 주장하거나 runtime에 owner 계정을 재사용하지 않는다. 전용 권한 SQL 원문·runtime003은 미수신/미적용이다. role/master catalog와001002 개발 영수증은 수신했다.
-- 13:12 private schema/table0 preflight 이후13:17 owner 단일transaction의 신규 jungsi_backend/13RLS tables·001002 schema_versions 적용 개발 영수증을 수령했다. 독립 검수 pending·private app 정책0/runtime003 미적용·실업무/CAS/멱등/권한 인수 미실행을 분리한다. public/master/profiles/기존owner 변경·DELETE/DROP/TRUNCATE0.
+- 정확003 v2 SQL/권한matrix의직접인간승인후owner transaction을적용하고freshconnection의24policy/13SELECT/9INSERT/6columnUPDATE·tablewideUPDATE/DELETE/TRUNCATE/미래GRANT없음을검수했다. 이전001002앱정책0·미적용관측은history다.
+- 기존 public4범주 metadata·owner/role 보존과실자료인입0을확인했다. 전체index/defaultACL 전수와운영backup/restore·JWT/유료/HTTP는미인수다.
+- 저장소port 합성10건의CAS/멱등/타인소유권거절과새프로세스영속성을확인하고합성행을보존한다. 실제학생/운영인수로확대하지않는다.
+- 기본factory/legacy는인간이유지하도록결정했다. owner이관URL과운영appURL을분리하고 reset/drop/delete·master변경·임의profiles/admingrant·자동Storage전환은하지않는다.
 
 완료조건:
 
@@ -418,6 +497,9 @@ SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설�
 - 실제 Storage49객체 업로드·SHA 재수신·원본 보존과 public 경로98거절을 인수했다. 실제 로그인 사용자의 raw Storage/RLS·signed URL·runtime read·자료/모형 채택은 별도 NOT_RUN/pending이다.
 - 현재 default는 Drive다. CR-SERVICE-SUP03의 Storage GET-only 공급자 준비를 explicit 주입으로 검수하고 저장 CSV/후보를 runtime 승인본이나 가짜 Drive identity로 자동 치환하지 않는다.
 - 최신 최소 인입 규정(minimal_explicit_approved_allowlist)을 따른다. 요청 operation에 필요한 시험팩/모형/규칙/학교카탈로그/입결 중 최소 승인 entries만 선택하고 모든 보유자료 scan·자동채택/PDF·QA·dump·전체원표 필수추정을 금지한다. 자료가 없으면 기존 guard/503·pending을 보존하고49archive는 삭제 없이 유지한다.
+- 최소시험팩1건/328915B·statusstaged/승인0/engineprodfalse·archiveexactFalse는미채택이다. 수학한구간/9경계in-memory검수와전체CDF/공식정수백분위/실화면mode인수를분리한다. provider미승인거절/network0을유지하고부족한모형/입결은pending으로둔다.
+- 최소16개draft메타/Storage 검수와 실제계산승인을 분리한다. 원수능AST와모평적용child3를 각각보존한다. 입결source2객체는전달성공·의미BLOCKED/DB등록0으로두고catalog/수정본영수증을받아야한다. v2기획승인·14경로PLAN_ONLY·code0 상태에서품질/호환/newscopeFE공통계약을구현한다.
+- 공식source v2/v3실패를보존하고최소선별v4의local/remote native검수범위만수령한다. 신규2개DB등록/전체18독립검수는최종영수증후에반영한다. JSONL구문PASS와원문census의미검수를분리하며전국/모형승격으로확대하지않는다.
 
 완료조건:
 
@@ -443,6 +525,9 @@ SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설�
 - 로컬 메모리의 성적·리포트·관심학교·관리 초안/발표는 재시작 시 소실한다. 로컬 성공을 운영 영속성으로 표시하지 않으며 SUP-10 실DB 복구를 선행한다.
 - 요청 시험팩 엔트리가 없거나 MissingDataProvider가 None을 반환하면 overall.analyze는 exam_not_available/HTTP503이다. 엔트리가 등록됐지만 미채택이면 provider의 artifact_not_approved/503을 overall이 exam_data_unavailable/HTTP503으로 변환한다. 승인·유효 시험팩 계산 성공 후 모형 없음/미승인에서만 total_standard_score/subjects를 보존하고 total_model_missing/total_model_not_approved pending/null을 구분한다. approved_count=0만으로 두503 중 하나를 결정하지 않는다.
 - head6b2 merged와347 비포함을 분리하며 FE-05의 최신 develop 후속 PR·fullSHA/CI·browser 증거를 제출하기 전 빈 학교 표시 fix가 통합됐다고 기록하지 않는다.
+- PR15 ef7b7c08 source/CI2·develop3d90통합/삭제0은확인됐다. FE-01R·FE-ORIGIN·FE-SOURCE-01 comment의수치오인/보류/실mode·전체전달물·유효action/실Auth/429/browser는별도인수다.
+- 현재57 코드통합과 실제22API/4페이지/JWT/배포/보안인수를 분리한다. v2기획승인은 있으나newscopeFE·mockparameter수용/표시·source오인방지·실429/503/서버신원·공유예산은실행검수가남아있다.
+- 현재bucket에클라이언트허용SELECT정책없음이라는RLS metadata PASS와 실제JWT Storage HTTP/실22API·브라우저/보안운영검수는다르다. 최신v1.1 PLAN_ONLY의newscopeFE 호환은미구현으로유지한다.
 
 완료조건:
 
@@ -459,6 +544,7 @@ SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설�
 - LocalMemoryRepository/MemoryForecastRepository 결과는 재시작 시 소실한다. DPAPI 자료 캐시는 이 업무 결과를 영속화하지 않는다.
 - 같은 owner/권한/발표본 결속을 유지한 운영DB 재시작·backup/restore를 승인 검수 범위에서 대조한다. 준비 목적으로 DB 초기화/원본 삭제를 하지 않는다.
 - Storage의 원본 파일 보존/원격 재수신과 리포트/성적의 DB 영속성·재시작/복구는 다른 검수다. 로컬 memory 재시작 소실 경고를 유지한다.
+- 메타draft16의새process읽기를실사용자영속성/backup·restore·운영배포인수로확대하지않는다. 로컬메모리재시작소실경고와owner일회메타INSERT/운영app권한분리를유지한다.
 
 완료조건:
 
@@ -496,13 +582,13 @@ SUPABASE_SECRET_KEY와 SUPABASE_JWKS_URL은 현재 ServerSettings의 필수 설�
 
 | gate | 담당 | 현재상태 | 완료증거 |
 | --- | --- | --- | --- |
-| 실DB | SUP-03/04 | 001002_APPLIED_DEVELOPMENT_RECEIPT_INDEPENDENT_AND_RUNTIME_PENDING | 실DB의 001/002 schema_versions·TLS·전용 role·owner·UTC·CAS/멱등·불변 발표본 원자성 검수 영수증 |
+| 실DB | SUP-03/04 | 003_FRESH_METADATA_AND_SYNTHETIC_PERSISTENCE_PASS_LIVE_PENDING | 실DB의 001/002 schema_versions·TLS·전용 role·owner·UTC·CAS/멱등·불변 발표본 원자성 검수 영수증 |
 | Bearer 로그인 | SUP-05 | NOT_RUN | 실제 Auth getUser/sub/exp와 만료·비정상·불일치 JWT 거절 영수증 |
-| 유료·staff 권한 | SUP-02/06 | NOT_RUN_TARGET_CONFIRMED_ADAPTER_PENDING | 확정 master의 어댑터·사용자키/UTC/취소/회수·관리자 CR·session v1 호환·owner/학교 scope/독립승인 실제 증거 |
-| 실approved 자료 | SUP-08 | HOLD_APPROVED0 | 권한 있는 joint curve/규칙/연도보정/학교누백/forecast·독립검산 |
+| 유료·staff 권한 | SUP-02/06 | EXPLICIT_MASTER_METADATA_PASS_REAL_JWT_ROWS_NOT_RUN_DEFAULT_LEGACY_KEPT | 확정 master의 어댑터·사용자키/UTC/취소/회수·관리자 CR·session v1 호환·owner/학교 scope/독립승인 실제 증거 |
+| 실approved 자료 | SUP-08 | HOLD_MINIMUM_EXAM_STAGED_APPROVED0_SCOPED_MATH_QA_ONLY | 권한 있는 joint curve/규칙/연도보정/학교누백/forecast·독립검산 |
 | Drive 실제공급 | SUP-08 | NOT_RUN | OAuth/갱신·승인명부·실read·별도write |
 | Jungsi22 API | SUP-01/07 | NOT_RUN | 확정 별도 FastAPI의 실제 배포·운영factory·HTTPS·BFF/서버신원·실권한·원점 차단 증거 |
-| 외부4페이지 | SUP-09 | NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED | 통합2624/PR6 source·CI 관측 이후 정확 actual자료/권한/세security gate/수신PC·브라우저/429503 증거를 별도 인수 |
+| 외부4페이지 | SUP-09 | PR15_MERGED_SOURCE_CI_PASS_BROWSER_SECURITY_NOT_RUN | 통합2624/PR6 source·CI 관측 이후 정확 actual자료/권한/세security gate/수신PC·브라우저/429503 증거를 별도 인수 |
 | 운영·최종release | SUP-10/11 | NOT_READY | 영속성/복구/장애·정확SHA/CI·main/별도배포승인 |
 | 브라우저·응답 전달물 | SEC-08/security_response_artifacts | NOT_RUN | 기존 security_contract/workflow 필수 gate의 같은 snapshot 실제 scope 증거. 문서/합성 PASS는 런타임 인수가 아니다. |
 | 중계·실권한·원점 차단 | SEC-08/security_direct_authorization | NOT_RUN | 기존 security_contract/workflow 필수 gate의 같은 snapshot 실제 scope 증거. 문서/합성 PASS는 런타임 인수가 아니다. |
@@ -528,13 +614,13 @@ PGRST106/406은요청schema가db-schemas API노출설정에없는경우다. SQL 
 
 TypeScript/Deno runtime이다. 현재PythonFastAPI/NumPy의별도backend권장은runtime차이의추론이며아직미선택이다. [Supabase Edge Functions](https://supabase.com/docs/guides/functions).
 
-별도 FastAPI와 이용권 단일 기준은 확정 목표이며 운영 배포·DB·어댑터 전환은 미실행이다. 제공자 무료 plan 가격·제한 수치를 단정하지 않는다. 공개 문서에 실제 project URL/id/key/JWT/개인식별/자료 hash/비공개 PC 경로를 넣지 않는다.
+별도 FastAPI와 이용권 단일 기준은 확정 목표다. 실제 SQL구조·메타draft/코드통합 검수는 현재 관측으로 구분하며 기본어댑터 전환·운영 배포·실JWT/전체API/화면 인수는 미실행이다. 제공자 무료 plan 가격·제한 수치를 단정하지 않는다. 공개 문서에 실제 project URL/id/key/JWT/개인식별/자료 hash/비공개 PC 경로를 넣지 않는다.
 
 ## Supabase 운영 인수 상태
 
-신규 private Storage49객체 hash readback/원본보존·public경로98거절, source9DDL/30SQL·OpenAPI9컬럼 부분수신 이후 private 설정수령·실제 양계정 TLS/role/master catalog preflight PASS와001002 신규 schema/13RLS tables 적용 개발 영수증을 수령했다. 현재 001002는 actual_applied_verified_by_development_receipt이며 독립 원장검수 pending·private app정책0/runtime003 미적용·실Auth/유료권한/기본factory/자료승인/운영은 미인수다. master/profiles/기존roleowner 변경·DELETE/DROP/TRUNCATE0. CR-SERVICE-SUP03/04 구현준비·서비스후보27검수보고와 PR15 정적fix/CI2는 각각 same snapshot 구현/통합 및 실제 검수대기다. FE-01R HTTP-date 문법 잔여를 별도 후속으로 요청한다. API22/session3/page4·무료누백/유료후보·보안3gate·production_ready=false/NOT_READY와 모든 이전 관측/원본을 보존한다. 최신 PR15 head243d2cd7의 exactCI2/28M/noD·정확 allowedOrigins 관측은 이전339 기록과 분리하며 증분review/merge/보안운영gate는 pending이다. 최신PR15 증분은 임시preview용으로 수용했으며 FE-ORIGIN 실도메인전환/환경분리·유효action/실세션 조건은 pending이다. 최신 인입 규정은 minimal_explicit_approved_allowlist다. 요청별 최소 승인자료만 선택하며 전체소유자료/PDF·QA·dump·전체원표의 자동runtime 인입을 금지한다. 기존49archive와13table schema는 보존·자료인입과 분리한다.
+현재 develop57f74b1daabd2d6a8e94de216f182e8bfe6557b7에 서비스phase2와 승인된 병합 하네스 수정이 통합됐다. 정상precommit/prepush/정확HEAD pushCI/PR병합시험CI/최종developCI각678PASS·실패/오류/skip0이며 main은 보존했다. 최소source-only draft18의신규2 ownerINSERT COMMIT/freshapp18과선별Storage18(fullGET/SHA·비인증72건본문미반환)을확인했다. 최종appTLS READONLY exact18/old16불변/new2exact 독립영수증도PASS이며003/13RLS24policy·공개/Storagebaseline보존을확인했다. 원수능AST source는 보존하고 모평적용child3의 source/applicationContext를 분리 확인했다. engine/production/runtimefalse·publishednull과 기본회원경로유지/명시DI만준비선택은 확정 유지다. 공식입결v2/v3의미실패는보존하고 최소선별v4의일부학교/학교년도local·remote native범위PASS를 수령했다. 신규2개DB메타등록을수령하고최소공식source2의독립native58/frozenRAM39를기록했으며전체draft18/발행0·전국완료false를유지한다. 최종freshapp18독립검수도완료했다. StorageRLS메타는현재보호bucket에클라이언트SELECT허용조건없음을확인했으나실제JWT HTTP/운영SECgate는NOT_RUN이다. v2설계승인·최신v1.1/14경로PLAN_ONLY구현계획은 준비됐으나 코드0·품질/newscopeFE공통계약/모형호환·계산채택은 미완료다. 실제JWT/APIorigin·22API/4페이지/보안운영·live배포는 미인수다. 과거제안/실패/fixture·관측은 보존한다.
 
-[Supabase 운영 인수인계](Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v4; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
+[Supabase 운영 인수인계](Supabase_운영_인수인계.md)를 따른다. revision 2026.10.07.v9; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
 
 [화면팀 최종 회신 요청](화면팀_회신요청_최종.md)의 RF-01~06과 로컬 요청 ①~⑥를 함께 인수한다. 문서 전달 준비 완료는 담당자 회신·실제 연결·운영 검수 완료를 뜻하지 않는다.
 
@@ -573,4 +659,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=b98650fb151240438f3f599fb7ad42803a1d7b0964fab0edfac4d0c989b64a2d -->
+<!-- jungsi:generated spec_sha256=fa39d8144fb4ba6fddb7446f460dc05cc160b0e085cdf456e59cda110059fdc2 -->

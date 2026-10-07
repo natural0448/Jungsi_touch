@@ -12,7 +12,7 @@
   ],
   "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
   "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-  "contract_version": "1.8.4",
+  "contract_version": "1.9.3",
   "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
   "owner": "서비스·DB 개발팀",
   "candidate_only": false,
@@ -240,7 +240,7 @@
     ],
     "remaining": [
       "실제 자료의 비교값·연도 보정·정책별 숫자와 근거 승인",
-      "Supabase 최소GET확인 이후 DATABASE_URL·검수사용자token·Drive설정은추후준비하며 실제DB001/002적용과발행검증은deferred/NOT_RUN/NOT_APPLIED",
+      "DB001/002/003 적용과 명시 포트의 DB002 forecast metadata 검수는 PASS다. 실제 사용자 JWT·editor/approver 범위·독립 승인·운영 발행 HTTP/전체 readiness는 NOT_RUN이며 검수 토큰과 Drive/승인자료 준비가 필요하다.",
       "전국 대학 산출 정확도·예측 성능 검증",
       "외부 프런트 담당의 새 context/version/base_result, 후보 분할, 이유 코드 소비 수정 및 브라우저 검증",
       "PR13의서비스·DB 코드는develop947cee8에통합완료. 운영배포·검수사용자·DB/Drive·외부프런트·예측정확도는별도증거대기다."

@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.8.4",
-  "source_sha256": "b98650fb151240438f3f599fb7ad42803a1d7b0964fab0edfac4d0c989b64a2d",
+  "spec_version": "1.9.3",
+  "source_sha256": "fa39d8144fb4ba6fddb7446f460dc05cc160b0e085cdf456e59cda110059fdc2",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2224,8 +2224,9 @@
     },
     "verification": "현재22 API의서비스·DB 및합성HTTP·권한검증은PR13/develop947 통합과역사493정상검사로인수했다. 현재공통검사후속후보는별도최신회귀영수증으로검증한다. 실제사용자로그인/이용권·DB/Drive/우리API배포는NOT_RUN이며 실제API·CSV자료를자동채택하지않는다. 과거DEV002/PR8의228검사는historical_DEV002_verification과execution_result에보존한다.",
     "remaining": [
-      "Supabase URL/publishable·참조secret/JWKS의 존재와최소GET는검토범위확인완료. 실제DATABASE_URL/전용role/TLS·검수JWT·단일권한authority·실DB인수는미완료.",
-      "운영 DB에 추가 마이그레이션 적용 후 실제 UTC/timestamptz/date 및 권한/소유권 트랜잭션 검수",
+      "현재57통합/이전정상678x5·source-only draft18 COMMIT와최종appTLS READONLY exact18/old16보존/new2exact·선별Storage18/fullGETSHA/비인증72본문미반환을지정범위로인수했다. 일부3교/9학교년도/451지표/249모집행native58/frozenRAM39는선별QA이며전국완료false다. 발행0/engine/production/runtimefalse·v2PLAN_ONLY14경로/code0·실JWT/운영주소/22API4페이지/배포/보안운영회원검수NOT_RUN을유지한다. 기본유지·명시DI선택은확정이다. 이번1.8.9문서의정본반영/새정상훅/CI는아직NOT_RUN이다.",
+      "Supabase 최소 GET와 전용 app/owner DB 연결·TLS·001/002/003 및 최소 권한 metadata 검수는 범위별 증거로 확인됐다. 명시 포트만 준비하며 실제 검수 JWT·유료 이용권 행·default 운영 어댑터 전환·운영 전체 인수는 NOT_RUN이다.",
+      "명시 포트의 UTC/timestamptz/date·24정책 metadata 및 합성 CAS/멱등/소유권·새 프로세스 영속성 검수는 PASS다. 실제 사용자·전체 업무/발행 HTTP·동시 부하·backup/restore 및 배포 운영 검수는 별도 NOT_RUN이다.",
       "Drive OAuth·토큰갱신운영/필요adapter 별도개발·입출력folder/승인명부·실read/별도write 검수; approved0 HOLD",
       "기존 자료팀 정리 근거를 재사용한 공식 자료·곡선·공동분포·연도보정·환산·예상/판단 근거 승인과 변경 범위 실제 검산",
       "배포/HTTPS·CORS origin·비공개 운영 진단·이용권 발행/결제 운영 연결",
@@ -2347,7 +2348,8 @@
         "non_HTTP_source_checked_at": "2026-10-06T05:32Z"
       },
       "current_entitlement_adapter": "jungsi_backend.entitlements_runtime_unchanged",
-      "decision_adoption_ref": "supabase_operations_handoff_contract.decisions"
+      "decision_adoption_ref": "supabase_operations_handoff_contract.decisions",
+      "latest_followup_ref": "supabase_operations_handoff_contract.current_followup"
     },
     "historical_DEV002_verification": "합성 공급자는 tests 전용이며 production_allowed=false다. 실제 기존 엔진과 FastAPI의 12개 경로 정상/거부/보류 흐름을 검증한다. 가짜 연결 SQL/HTTP 검증은 실제 Supabase·Drive 실행 증거로 세지 않는다.\n\n기획팀 검토 후 [PR #8](https://github.com/natural0448/Jungsi_touch/pull/8)을 develop 03c9545b0fcf7ecfab29fd35b48c3eb68e9ddced에 병합했다. 검토한 기능 커밋 c5376f0d8674cf82add0959abec385682f14cd4f의 [GitHub CI](https://github.com/natural0448/Jungsi_touch/actions/runs/37127792288)에서 합성 테스트 228개와 문서·코드 참조·계층·비공개 데이터 제외 검사가 통과했다. 실제 Supabase·Drive 연결과 원자료/모형 검수는 설정 대기이며 이 통과에 포함되지 않는다.",
     "historical_integration_readiness_before_supabase_handoff_v1": {
@@ -2860,7 +2862,7 @@
     ],
     "remaining": [
       "실제 자료의 비교값·연도 보정·정책별 숫자와 근거 승인",
-      "Supabase 최소GET확인 이후 DATABASE_URL·검수사용자token·Drive설정은추후준비하며 실제DB001/002적용과발행검증은deferred/NOT_RUN/NOT_APPLIED",
+      "DB001/002/003 적용과 명시 포트의 DB002 forecast metadata 검수는 PASS다. 실제 사용자 JWT·editor/approver 범위·독립 승인·운영 발행 HTTP/전체 readiness는 NOT_RUN이며 검수 토큰과 Drive/승인자료 준비가 필요하다.",
       "전국 대학 산출 정확도·예측 성능 검증",
       "외부 프런트 담당의 새 context/version/base_result, 후보 분할, 이유 코드 소비 수정 및 브라우저 검증",
       "PR13의서비스·DB 코드는develop947cee8에통합완료. 운영배포·검수사용자·DB/Drive·외부프런트·예측정확도는별도증거대기다."
@@ -3256,11 +3258,11 @@
       "외부 프런트 담당의 수정 커밋·TypeScript/lint·브라우저 흐름 검증은 별도 인수 증거이며 현재 verification_pending"
     ],
     "remaining": [
-      "기존 비공개 보관 키로 Supabase HTTP API와 public 테이블 limit=0 조회200을 확인했다. .env 파일 자체는 필수가 아니며 파일 보관과 서버 환경변수 주입은 별개다. 검수 사용자·이용권·관리 capability·현재 PostgreSQL 어댑터의 SQL·Drive·우리 22 API와 기존 서비스의 쿠키/배포 연결은 별도 검증 대기다.",
+      "기존 최소 Supabase HTTP 조회와 명시 포트의 실제 DB metadata 검수는 별도 증거로 확인됐다. 검수 사용자·이용권 행·관리 capability·Drive/승인자료·우리 22API의 실사용자 HTTP와 기존 쿠키/배포 연결은 NOT_RUN이다. .env 파일 보관과 운영 프로세스 환경 주입은 구분한다.",
       "실제 계정/이용권/관리 capability의 전체 연결 검증",
       "v1.7.1 후보의 DTO allowlist/base_result/context/version/이유 코드/후보 분할을 외부 프런트 담당에게 확정 백엔드 커밋과 전달",
-      "운영 DB002 적용·권한·동시성·멱등·발행 readiness 실측은 NOT_RUN",
-      "사용자는 DATABASE_URL을 비공개 .env로 추후 제공하기로 했다. 같은 필수 설정을 배포 서버 환경변수로 전달할 수도 있으며 .env 파일 자체를 필수 조건으로 삼지 않는다. 기존 키의 API 조회 성공으로 DB 연결값·권한·SQL 연결 승인을 추정하지 않으며 준비 전 실제 PostgreSQL 검증은 유보한다.",
+      "DB001/002/003 적용과 명시 포트의 metadata·24정책·합성 멱등/소유권 영속성 검수는 PASS다. 실제 사용자 JWT·전체 발행 HTTP readiness·운영 동시성/부하·backup/restore는 NOT_RUN이며 default factory는 유지한다.",
+      "DB 연결 설정은 비공개로 수령했고 실제 app/owner TLS 및 명시 포트 metadata를 검수했다. 운영에는 app DATABASE_URL만 전달하고 owner URL은 이관 전용으로 분리한다. 실제 사용자 토큰·배포 환경 주입·Drive/승인자료·운영 전체 검수는 별도 대기이며 .env 자체는 필수 파일이 아니다.",
       "RF-01~06: BFF/CSRF/서버신원·관리자 CR·DDL/사용자키·모드·정확 PR/SHA/증거·로컬 명부/네 subject/기대값 수령을 회신받는다. 현재 22API/DTO/session v1·보안은 불변이다."
     ],
     "scope_excludes": [
@@ -3812,7 +3814,8 @@
       "local_SSR_Caller": "Supabase SSR쿠키없이는고정local token을자동취득하지못한다. 서버전용연결은외부담당후속이며운영로그인인수와구분한다."
     },
     "security_contract_ref": "security_contract",
-    "security_transition_status": "pending_runtime_implementation"
+    "security_transition_status": "pending_runtime_implementation",
+    "latest_followup_ref": "supabase_operations_handoff_contract.current_followup"
   },
   "management_pages": [
     {
@@ -4377,7 +4380,7 @@
   },
   "supabase_operations_handoff": {
     "format": "jungsi.supabase-operations-handoff/v1",
-    "revision": "2026.10.06.v4",
+    "revision": "2026.10.07.v9",
     "checked_at": "2026-10-06T08:40:54.349322Z",
     "status": "NOT_READY",
     "production_ready": false,
@@ -4390,7 +4393,7 @@
     "gates": [
       {
         "id": "실DB",
-        "status": "001002_APPLIED_DEVELOPMENT_RECEIPT_INDEPENDENT_AND_RUNTIME_PENDING"
+        "status": "003_FRESH_METADATA_AND_SYNTHETIC_PERSISTENCE_PASS_LIVE_PENDING"
       },
       {
         "id": "Bearer 로그인",
@@ -4398,11 +4401,11 @@
       },
       {
         "id": "유료·staff 권한",
-        "status": "NOT_RUN_TARGET_CONFIRMED_ADAPTER_PENDING"
+        "status": "EXPLICIT_MASTER_METADATA_PASS_REAL_JWT_ROWS_NOT_RUN_DEFAULT_LEGACY_KEPT"
       },
       {
         "id": "실approved 자료",
-        "status": "HOLD_APPROVED0"
+        "status": "HOLD_MINIMUM_EXAM_STAGED_APPROVED0_SCOPED_MATH_QA_ONLY"
       },
       {
         "id": "Drive 실제공급",
@@ -4414,7 +4417,7 @@
       },
       {
         "id": "외부4페이지",
-        "status": "NOT_RUN_BROWSER_PR6_MERGED_SOURCE_OBSERVED"
+        "status": "PR15_MERGED_SOURCE_CI_PASS_BROWSER_SECURITY_NOT_RUN"
       },
       {
         "id": "운영·최종release",
@@ -4448,7 +4451,8 @@
       "id": "CR-SERVICE-SUP03",
       "status": "adopted_for_service_implementation_verification_pending",
       "default_transition": "NOT_RUN",
-      "production_ready": false
+      "production_ready": false,
+      "observation_scope": "1.8.8 prepared feature snapshot; current integrated phase2 is current_followup.phase2"
     },
     "runtime_ingestion_policy": {
       "mode": "minimal_explicit_approved_allowlist",
@@ -4469,6 +4473,131 @@
       "evidence_id": "SUP-DB-20261006-001002-APPLY",
       "independent_review": "pending",
       "runtime003": "NOT_APPLIED",
+      "observation_scope": "001002 적용 당시 역사(003 적용 전); 최신 runtime은 별도 database_runtime_application",
+      "production_ready": false
+    },
+    "runtime003": {
+      "status": "APPLIED_AND_FRESH_METADATA_VERIFIED",
+      "policies": 24,
+      "scope": "metadata_only",
+      "production_ready": false
+    },
+    "explicit_port": {
+      "status": "PASS_SCOPED_ACTUAL_METADATA",
+      "health_HTTP": 503,
+      "real_user_JWT": false,
+      "default_factory_transition": false
+    },
+    "minimum_exam_stage": {
+      "status": "MINIMUM_CANDIDATE_NOT_ADOPTED",
+      "payloads": 1,
+      "approved_entries": 0,
+      "engine_approved": false,
+      "production_allowed": false
+    },
+    "factory_decision": {
+      "id": "CR-SERVICE-SUP06-20261006-01",
+      "status": "user_selected_explicit_preparation_only",
+      "default_change_allowed": false
+    },
+    "current_followup": {
+      "format": "jungsi.current-followup-observation/v1",
+      "status": "FROZEN_SCOPED_SOURCE18_DOCUMENT_CANDIDATE_NOT_CANONICAL_APPLIED_NEW_HOOKS_CI_NOT_RUN",
+      "prepared_at": "2026-10-06T19:21:31.629238Z",
+      "basis_commit": "57f74b1daabd2d6a8e94de216f182e8bfe6557b7",
+      "phase1": {
+        "status": "NORMAL_COMMIT_PUSH_EXACT_HEAD_CI_PASS",
+        "commit": "c1cd8d2fca8eab0b6e0e7e008cc22641d642ce2a",
+        "precommit_tests": 645,
+        "prepush_tests": 645,
+        "exact_CI_tests": 645
+      },
+      "phase2": {
+        "status": "NORMAL_PRECOMMIT_PREPUSH_HEAD_PUSH_PR_MERGE_TEST_AND_FINAL_DEVELOP_CI_678_PASS",
+        "HEAD": "57f74b1daabd2d6a8e94de216f182e8bfe6557b7",
+        "normal_precommit_tests": 678,
+        "normal_prepush_tests": 678,
+        "head_push_CI_tests": 678,
+        "PR_merge_test_CI_tests": 678,
+        "final_develop_CI_tests": 678,
+        "integration_complete": true,
+        "operational_acceptance": false
+      },
+      "readonly_metadata": {
+        "status": "SCOPED_APP_TLS_METADATA_PASS",
+        "checks": 12,
+        "RLS_tables": 13,
+        "policies": 24,
+        "private_REST_HTTP": 406,
+        "private_REST_code": "PGRST106",
+        "real_JWT": false
+      },
+      "selected_storage": {
+        "status": "SELECTED_MINIMUM_18_FULL_GET_SHA_VERIFIED_NO_JWT_72_NO_BODY_RETURNED",
+        "verified_objects": 18,
+        "no_JWT_denials": 72,
+        "engine_approved": false,
+        "production_allowed": false,
+        "runtime_adopted": false
+      },
+      "metadata_draft": {
+        "status": "PASS_EXACT18_DRAFT_SOURCE_META_BASE16_003_STORAGE_PRESERVED_NOT_ENGINE_ADOPTION",
+        "registered_items": 18,
+        "registration_complete": true,
+        "independent_review": "PASS_FRESH_APP_TLS_READONLY_EXACT18_OLD16_PRESERVED_NEW2_EXACT",
+        "review_status": "draft",
+        "published_release": null,
+        "engine_approved": false,
+        "production_allowed": false,
+        "runtime_adopted": false
+      },
+      "September_children": {
+        "status": "INDEPENDENT_SOURCE_CONTEXT_AND_SEPTEMBER_APPLICATION_CONTEXT_BINDINGS_PASS",
+        "children": 3,
+        "original_sources_preserved": true,
+        "source_and_application_contexts_bound": true,
+        "runtime_adopted": false
+      },
+      "source_availability": {
+        "official_school_catalog": "MINIMUM_SELECTED_V4_NATIVE_QA_AND_SOURCE_DRAFT18_INDEPENDENT_APP_READBACK_PASS_NOT_PUBLISHED",
+        "admission_results_sources": 2,
+        "admission_results_DB_registered": 2,
+        "admission_semantics": "MINIMUM_V4_INDEPENDENT_STORAGE_NATIVE58_AND_FROZEN_RAM39_PASS_SOURCE_DRAFT_REGISTERED",
+        "selected_universities": 3,
+        "school_years": 9,
+        "selected_metrics": 451,
+        "selected_offerings": 249,
+        "native_checks": 58,
+        "frozen_RAM_checks": 39,
+        "nationwide_QA_complete": false
+      },
+      "Storage_RLS_metadata": {
+        "status": "PASS_METADATA_CLIENT_SELECT_DENIED_CURRENT_BUCKET_ACTUAL_JWT_NOT_RUN",
+        "objects_RLS": true,
+        "buckets_RLS": true,
+        "current_bucket_client_SELECT_allowed": false,
+        "actual_authenticated_JWT_HTTP": "NOT_RUN",
+        "SEC_operational_gate": false
+      },
+      "model_implementation_plan": {
+        "status": "PLAN_ONLY",
+        "candidate_paths": 14,
+        "code_changes": 0,
+        "native_v1_preserved": true
+      },
+      "default_factory_transition": false,
+      "external_frontend_status": "REAL_22API_4PAGE_JWT_DEPLOYMENT_NOT_RUN",
+      "source_specific_summary": {
+        "status": "PASS_SCOPED_EXISTING_GET18_SHA_BYTES_AND_DB18_METADATA_BINDINGS",
+        "registration_policy_conditions": 34,
+        "existing_GET_DB_binding_conditions": 32,
+        "new_Cloud_GET": 0,
+        "actual_student_calculation": false,
+        "actual_JWT": false,
+        "runtime_adopted": false
+      },
+      "this_document_canonical_application": "NOT_RUN",
+      "this_document_hooks_CI": "NOT_RUN",
       "production_ready": false
     }
   },
@@ -4482,7 +4611,7 @@
       "REQ-25",
       "REQ-26"
     ],
-    "implementation_status": "pending",
+    "implementation_status": "in_progress",
     "production_ready": false,
     "contract_ref": "security_contract",
     "gateway_mode": "server_authenticated_relay",
@@ -4492,7 +4621,7 @@
         "id": "SEC-01",
         "title": "공개 응답의 재귀 허용목록",
         "owner_layer": "application",
-        "implementation_status": "pending"
+        "implementation_status": "in_progress"
       },
       {
         "id": "SEC-02",
@@ -4504,7 +4633,7 @@
         "id": "SEC-03",
         "title": "서버 중계와 분석 API 직접 접근 거절",
         "owner_layer": "infrastructure",
-        "implementation_status": "pending"
+        "implementation_status": "in_progress"
       },
       {
         "id": "SEC-04",
@@ -4528,13 +4657,13 @@
         "id": "SEC-07",
         "title": "거절 응답·안전한 관측·화면 안내",
         "owner_layer": "application",
-        "implementation_status": "pending"
+        "implementation_status": "in_progress"
       },
       {
         "id": "SEC-08",
         "title": "동일 스냅샷 인수와 운영 gate",
         "owner_layer": "planning",
-        "implementation_status": "pending"
+        "implementation_status": "in_progress"
       }
     ],
     "planned_errors": [
@@ -4554,7 +4683,7 @@
         "code": "security_policy_unavailable",
         "http": 503,
         "retry_after_required": false,
-        "status": "planned_not_implemented"
+        "status": "in_progress"
       }
     ]
   },

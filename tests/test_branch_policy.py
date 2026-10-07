@@ -89,6 +89,7 @@ class RetainedGitHistoryTests(unittest.TestCase):
         cls.repo=ROOT/'outputs/branch_policy_tests'/stamp
         cls.repo.mkdir(parents=True,exist_ok=False)
         cls.call('init','--initial-branch=fixture')
+        cls.call('config','core.longpaths','true')
     @classmethod
     def call(cls,*arguments,input=None):
         result=subprocess.run(['git','-c','gc.auto=0','-c','maintenance.auto=false',

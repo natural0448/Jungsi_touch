@@ -4,7 +4,7 @@ import json,sys,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
-from check_project_consistency import validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,validate_frontend_reply_contract,validate_frontend_followup_contract,FRONTEND_REPLY_DOCUMENT,FRONTEND_FOLLOWUP_DOCUMENT,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
+from check_project_consistency import validate_public_response_catalog,validate_public_response_registry,PUBLIC_RESPONSE_SCHEMA_PATH,validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,validate_frontend_reply_contract,validate_frontend_followup_contract,FRONTEND_REPLY_DOCUMENT,FRONTEND_FOLLOWUP_DOCUMENT,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
 
 class ConsistencyTests(unittest.TestCase):
     def setUp(self):
@@ -52,6 +52,11 @@ class ConsistencyTests(unittest.TestCase):
             with self.subTest(path=path):
                 item=json.loads(generated[path])
                 self.assertEqual(item['scope'],self.spec[metadata['contract_ref']])
+                if 'historical_scope_at_adc684_acceptance' not in item:
+                    self.assertEqual(metadata['contract_ref'],'secured_backend_preparation_contract')
+                    self.assertEqual(item['scope'],self.spec['secured_backend_preparation_contract'])
+                    self.assertFalse(item['scope']['production_ready'])
+                    continue
                 historical=item['historical_scope_at_adc684_acceptance']
                 key='backend_contract_acceptance' if 'backend_contract_acceptance' in historical else 'implementation_acceptance'
                 self.assertEqual(historical[key]['develop_integration']['status'],'pending')
@@ -62,8 +67,11 @@ class ConsistencyTests(unittest.TestCase):
         for path in self.spec['workflow']['synchronized_work_items']:
             with self.subTest(path=path):
                 changed=dict(files);item=json.loads(changed[path])
-                key='backend_contract_acceptance' if 'backend_contract_acceptance' in item['scope'] else 'implementation_acceptance'
-                item['scope'][key]['develop_integration']['status']='pending'
+                if self.spec['workflow']['synchronized_work_items'][path]['contract_ref']=='secured_backend_preparation_contract':
+                    item['scope']['code_status']='unreviewed_implementation'
+                else:
+                    key='backend_contract_acceptance' if 'backend_contract_acceptance' in item['scope'] else 'implementation_acceptance'
+                    item['scope'][key]['develop_integration']['status']='pending'
                 changed[path]=json.dumps(item,ensure_ascii=False,indent=2).encode()
                 self.assertIn('Document or route drift: '+path,validate_content(list(changed),changed.__getitem__,self.spec))
 
@@ -773,5 +781,486 @@ class SecurityContractTests(unittest.TestCase):
         inventory['latest_observation'].pop('sameRelease_observation',None)
         body=generated_files(spec)[spec['current_documents']['workflow']].decode('utf-8')
         self.assertIn('당시 외부 프런트 관측 / HISTORICAL_FRONTEND_ONLY; HISTORICAL_RELEASE_OBSERVATION_ONLY',body.replace('|','/'))
+
+
+
+class SnapshotChangedPathsTests(unittest.TestCase):
+    """Retain independent synthetic Git DAGs; never edit or clean the real repository."""
+    @classmethod
+    def setUpClass(cls):
+        import datetime
+        cls.fixture_root=ROOT/"outputs/consistency_merge_fixtures"/datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+        cls.fixture_root.mkdir(parents=True,exist_ok=False)
+        cls.fixture_number=0
+
+    def setUp(self):
+        import os
+        from unittest.mock import patch
+        import check_project_consistency as checker
+        # Git hooks export repository/index variables. Synthetic DAGs must stay independent.
+        isolated={k:v for k,v in os.environ.items() if not k.startswith("GIT_")}
+        isolation=patch.dict(os.environ,isolated,clear=True)
+        isolation.start();self.addCleanup(isolation.stop)
+        self.checker=checker
+        type(self).fixture_number+=1
+        self.repo=self.fixture_root/str(type(self).fixture_number)
+        self.repo.mkdir()
+        self.call("init","-q","-b","develop")
+        self.call("config","core.longpaths","true")
+        self.call("config","user.name","Synthetic consistency fixture")
+        self.call("config","user.email","fixture@example.invalid")
+        self.call("config","core.hooksPath",".disabled-fixture-hooks")
+        self.call("config","commit.gpgSign","false")
+        self.planning="docs/current/서비스_기획.md"
+        self.routing="docs/current/라우팅_명세.md"
+        self.required={"docs/current/service_spec.json",self.planning,self.routing}
+        self.spec={"workflow":{"shared_tools":["scripts/check_project_consistency.py"]},
+                   "current_documents":{"planning":self.planning,"routing":self.routing}}
+        initial={"docs/current/service_spec.json":json.dumps(self.spec),self.planning:"base planning\n",self.routing:"base routing\n","src/score.py":"value = 1\n",
+                 "README.md":"baseline synthetic note\n","apps/web/candidate.ts":"export const value = 1;\n",
+                 "src/left.py":"value = 1\n","src/right.py":"value = 1\n","src/third.py":"value = 1\n"}
+        self.baseline_paths=set(initial)
+        self.write(initial)
+        self.commit("synthetic baseline")
+        self.base=self.oid()
+
+    def call(self,*args,input=None,expected=0):
+        import subprocess
+        transition=args[0] in {"checkout","merge"}
+        before={p.decode("utf-8") for p in self.call("ls-files","-z").split(b"\0") if p} if transition else set()
+        result=subprocess.run(["git","-c","core.longpaths=true",*args],cwd=self.repo,input=input,capture_output=True)
+        self.assertEqual(result.returncode,expected,result.stderr.decode("utf-8","replace"))
+        if transition:
+            after={p.decode("utf-8") for p in self.call("ls-files","-z").split(b"\0") if p}
+            removed=sorted(before-after);missing=sorted(p for p in before if not (self.repo/p).is_file())
+            record={"fixture":str(self.repo),"transition":list(args),"removed_tracked_paths":removed,"missing_previous_files":missing}
+            with (self.fixture_root/"transition-receipts.jsonl").open("a",encoding="utf-8") as log:log.write(json.dumps(record,ensure_ascii=False)+"\n")
+            self.assertEqual(removed,[],"Fixture transition removed a tracked path")
+            self.assertEqual(missing,[],"Fixture transition removed a previous file")
+        return result.stdout
+
+    def oid(self):return self.call("rev-parse","HEAD").decode().strip()
+
+    def write(self,changes):
+        for path,text in changes.items():
+            target=self.repo/path;target.parent.mkdir(parents=True,exist_ok=True)
+            target.write_text(text,encoding="utf-8")
+
+    def commit(self,message):
+        self.call("add",".");self.call("commit","-q","-m",message)
+
+    def documents(self,label):return {path:label+" "+path+"\n" for path in self.required}
+
+    def changes(self,*,staged=False,revision=None):
+        from unittest.mock import patch
+        with patch.object(self.checker,"ROOT",self.repo):
+            return self.checker.snapshot_changed_paths(self.checker.GitSnapshot(staged=staged,revision=revision))
+
+    def merge(self,left,right,*,conflict=False):
+        self.call("checkout","-q","-b","feature/application-pre-data-platform",self.base)
+        self.write(left);self.commit("feature contribution");left_oid=self.oid()
+        self.call("checkout","-q","develop")
+        self.write(right);self.commit("develop contribution");right_oid=self.oid()
+        self.call("checkout","-q","feature/application-pre-data-platform")
+        self.call("merge","--no-ff","--no-commit","develop",expected=1 if conflict else 0)
+        return left_oid,right_oid
+
+    def merge_head_path(self):
+        path=Path(self.call("rev-parse","--git-path","MERGE_HEAD").decode().strip())
+        return path if path.is_absolute() else self.repo/path
+
+    def test_ordinary_staged_code_only_stays_rejected(self):
+        self.write({"src/score.py":"value = 2\n"});self.call("add",".")
+        self.assertEqual(self.changes(staged=True),["src/score.py"])
+        self.assertTrue(validate_changed_paths(self.changes(staged=True),self.spec))
+
+    def test_ordinary_staged_matching_documents_stays_accepted(self):
+        self.write({**self.documents("next"),"src/score.py":"value = 2\n"});self.call("add",".")
+        changed=self.changes(staged=True)
+        self.assertEqual(changed,sorted(self.required|{"src/score.py"}))
+        self.assertEqual(validate_changed_paths(changed,self.spec),[])
+
+    def test_single_parent_code_only_stays_rejected(self):
+        self.write({"src/score.py":"value = 2\n"});self.call("add",".")
+        staged=self.changes(staged=True);self.call("commit","-q","-m","code only")
+        self.assertEqual(self.changes(revision=self.oid()),staged)
+        self.assertTrue(validate_changed_paths(staged,self.spec))
+
+    def test_single_parent_matching_documents_stays_accepted(self):
+        self.write({**self.documents("next"),"src/score.py":"value = 2\n"});self.call("add",".")
+        staged=self.changes(staged=True);self.call("commit","-q","-m","documented change")
+        self.assertEqual(self.changes(revision=self.oid()),staged)
+        self.assertEqual(validate_changed_paths(staged,self.spec),[])
+
+    def test_approved_direction_staged_feature_docs_and_develop_code_are_combined(self):
+        self.merge(self.documents("feature"),{"apps/web/candidate.ts":"export const value = 2;\n"})
+        changed=self.changes(staged=True)
+        self.assertEqual(changed,sorted(self.required|{"apps/web/candidate.ts"}))
+        self.assertEqual(validate_changed_paths(changed,self.spec),[])
+
+    def test_approved_direction_staged_feature_code_and_develop_docs_are_combined(self):
+        self.merge({"src/score.py":"value = 2\n"},self.documents("develop"))
+        self.assertEqual(validate_changed_paths(self.changes(staged=True),self.spec),[])
+
+    def test_two_parent_committed_and_staged_merge_have_identical_paths(self):
+        self.merge(self.documents("feature"),{"apps/web/candidate.ts":"export const value = 2;\n"})
+        staged=self.changes(staged=True)
+        self.call("commit","-q","-m","approved-direction synthetic merge")
+        committed=self.changes(revision=self.oid())
+        self.assertEqual(staged,committed)
+        self.assertEqual(validate_changed_paths(committed,self.spec),[])
+
+    def test_two_parent_code_only_merge_stays_rejected_in_both_modes(self):
+        self.merge({"src/left.py":"value = 2\n"},{"src/right.py":"value = 3\n"})
+        staged=self.changes(staged=True)
+        self.assertTrue(validate_changed_paths(staged,self.spec))
+        self.call("commit","-q","-m","undocumented synthetic merge")
+        self.assertEqual(staged,self.changes(revision=self.oid()))
+        self.assertTrue(validate_changed_paths(self.changes(revision=self.oid()),self.spec))
+
+    def test_required_document_equal_to_every_parent_is_not_counted(self):
+        docs=self.documents("feature");docs.pop(self.routing)
+        self.merge(docs,{"src/right.py":"value = 3\n"})
+        changed=self.changes(staged=True)
+        self.assertNotIn(self.routing,changed)
+        self.assertTrue(validate_changed_paths(changed,self.spec))
+
+    def test_committed_code_hidden_from_first_parent_is_still_rejected(self):
+        self.call("checkout","-q","-b","feature/application-pre-data-platform",self.base)
+        self.write({"src/score.py":"value = 2\n"});self.commit("undocumented feature code");left=self.oid()
+        self.call("checkout","-q","develop");self.write({"README.md":"synthetic side note\n"});self.commit("side note");right=self.oid()
+        tree=self.call("rev-parse",left+"^{tree}").decode().strip()
+        merge=self.call("commit-tree",tree,"-p",left,"-p",right,input=b"synthetic resolution keeps first-parent tree\n").decode().strip()
+        changed=self.changes(revision=merge)
+        self.assertIn("src/score.py",changed)
+        self.assertTrue(validate_changed_paths(changed,self.spec))
+
+    def test_conflict_resolution_and_new_resolution_file_are_detected(self):
+        self.merge({**self.documents("feature"),"src/score.py":"value = 2\n"},{"src/score.py":"value = 3\n"},conflict=True)
+        self.write({"src/score.py":"value = 4\n","src/resolution_only.py":"value = 4\n"});self.call("add",".")
+        staged=self.changes(staged=True)
+        self.assertIn("src/score.py",staged);self.assertIn("src/resolution_only.py",staged)
+        self.call("commit","-q","-m","explicit synthetic resolution")
+        self.assertEqual(staged,self.changes(revision=self.oid()))
+
+    def test_committed_root_with_documents_preserves_existing_rejection(self):
+        import subprocess
+        with self.assertRaises((ValueError,subprocess.CalledProcessError)):self.changes(revision=self.base)
+
+    def test_committed_code_only_root_preserves_existing_rejection(self):
+        blob=self.call("hash-object","-w","--stdin",input=b"value = 2\n").decode().strip()
+        tree=self.call("mktree",input=("100644 blob "+blob+"\tcode.py\n").encode()).decode().strip()
+        root_tree=self.call("mktree",input=("040000 tree "+tree+"\tsrc\n").encode()).decode().strip()
+        root=self.call("commit-tree",root_tree,input=b"synthetic code-only root\n").decode().strip()
+        import subprocess
+        with self.assertRaises((ValueError,subprocess.CalledProcessError)):self.changes(revision=root)
+
+    def test_every_actual_parent_is_compared_for_committed_three_parent_merge(self):
+        self.call("checkout","-q","-b","feature/application-pre-data-platform",self.base)
+        self.write(self.documents("feature"));self.commit("feature docs");left=self.oid()
+        self.call("checkout","-q","develop");self.write({"src/right.py":"value = 2\n"});self.commit("develop code");right=self.oid()
+        self.call("checkout","-q","-b","synthetic-third",self.base);self.write({"src/third.py":"value = 3\n"});self.commit("third code");third=self.oid()
+        tree=self.call("rev-parse",left+"^{tree}").decode().strip()
+        merge=self.call("commit-tree",tree,"-p",left,"-p",right,"-p",third,input=b"synthetic three-parent resolution\n").decode().strip()
+        changed=self.changes(revision=merge)
+        self.assertTrue({"src/right.py","src/third.py"}<=set(changed))
+        self.assertTrue(self.required<=set(changed))
+        self.assertEqual(validate_changed_paths(changed,self.spec),[])
+
+    def test_empty_merge_head_is_not_treated_as_ordinary_stage(self):
+        self.merge_head_path().write_bytes(b"")
+        with self.assertRaises(ValueError):self.changes(staged=True)
+
+    def test_multiple_merge_heads_are_rejected_for_staged_merge(self):
+        self.merge_head_path().write_bytes((self.base+"\n"+self.base+"\n").encode())
+        with self.assertRaises(ValueError):self.changes(staged=True)
+
+    def test_missing_merge_parent_object_fails_closed(self):
+        import subprocess
+        self.merge_head_path().write_bytes(("f"*40+"\n").encode())
+        with self.assertRaises(subprocess.CalledProcessError):self.changes(staged=True)
+
+    def test_same_head_as_merge_parent_is_rejected(self):
+        self.merge_head_path().write_bytes((self.base+"\n").encode())
+        with self.assertRaises(ValueError):self.changes(staged=True)
+
+    def test_malformed_merge_head_is_rejected(self):
+        self.merge_head_path().write_bytes(b"not-a-fixed-commit\n")
+        with self.assertRaises(ValueError):self.changes(staged=True)
+
+    def test_merge_head_change_during_diff_fails_closed(self):
+        from unittest.mock import patch
+        self.merge(self.documents("feature"),{"src/right.py":"value = 3\n"})
+        original=self.checker.git;changed=False
+        def mutate(*args,**kwargs):
+            nonlocal changed
+            result=original(*args,**kwargs)
+            if args[0]=="ls-tree" and not changed:
+                self.merge_head_path().write_bytes((self.base+"\n").encode());changed=True
+            return result
+        with patch.object(self.checker,"git",side_effect=mutate):
+            with self.assertRaises(ValueError):self.changes(staged=True)
+
+    def test_head_change_during_merge_diff_fails_closed(self):
+        from unittest.mock import patch
+        self.merge(self.documents("feature"),{"src/right.py":"value = 3\n"})
+        original=self.checker.git;head_calls=0
+        def mutate(*args,**kwargs):
+            nonlocal head_calls
+            if args==("rev-parse","--verify","HEAD^{commit}"):
+                head_calls+=1
+                if head_calls==2:return (self.base+"\n").encode()
+            return original(*args,**kwargs)
+        with patch.object(self.checker,"git",side_effect=mutate):
+            with self.assertRaises(ValueError):self.changes(staged=True)
+
+    def test_merge_state_appearing_during_ordinary_stage_fails_closed(self):
+        from unittest.mock import patch
+        original=self.checker.git
+        def mutate(*args,**kwargs):
+            result=original(*args,**kwargs)
+            if args[0]=="ls-tree":self.merge_head_path().write_bytes((self.base+"\n").encode())
+            return result
+        with patch.object(self.checker,"git",side_effect=mutate):
+            with self.assertRaises(ValueError):self.changes(staged=True)
+
+    def test_commit_parent_query_failure_is_not_a_root(self):
+        import subprocess
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        original=self.checker.git
+        def fail(*args,**kwargs):
+            if args[0]=="cat-file":raise subprocess.CalledProcessError(128,["git",*args])
+            return original(*args,**kwargs)
+        with patch.object(self.checker,"ROOT",self.repo),patch.object(self.checker,"git",side_effect=fail):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.checker.snapshot_changed_paths(SimpleNamespace(staged=False,revision=self.base))
+
+    def test_malformed_parent_metadata_is_not_a_root(self):
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        original=self.checker.git
+        for header in (b"missing tree\n\nmessage\n",b"tree "+b"a"*40+b"\nparent broken\n\nmessage\n",b"tree "+b"a"*40+b"\nparent "+b"b"*40+b"\nparent "+b"b"*40+b"\n\nmessage\n"):
+            def invalid(*args,**kwargs):
+                if args[0]=="cat-file":return header
+                return original(*args,**kwargs)
+            with patch.object(self.checker,"ROOT",self.repo),patch.object(self.checker,"git",side_effect=invalid):
+                with self.assertRaises(ValueError):
+                    self.checker.snapshot_changed_paths(SimpleNamespace(staged=False,revision=self.base))
+
+    def test_recorded_but_unavailable_parent_is_not_a_root(self):
+        import subprocess
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        original=self.checker.git
+        def unavailable(*args,**kwargs):
+            if args[0]=="cat-file":return b"tree "+b"a"*40+b"\nparent "+b"f"*40+b"\n\nmessage\n"
+            return original(*args,**kwargs)
+        with patch.object(self.checker,"ROOT",self.repo),patch.object(self.checker,"git",side_effect=unavailable):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.checker.snapshot_changed_paths(SimpleNamespace(staged=False,revision=self.base))
+
+    def test_parent_diff_failure_is_not_an_empty_success(self):
+        import subprocess
+        from unittest.mock import patch
+        self.merge(self.documents("feature"),{"src/right.py":"value = 3\n"})
+        original=self.checker.git
+        def fail(*args,**kwargs):
+            if args[0]=="ls-tree":raise subprocess.CalledProcessError(128,["git",*args])
+            return original(*args,**kwargs)
+        with patch.object(self.checker,"git",side_effect=fail):
+            with self.assertRaises(subprocess.CalledProcessError):self.changes(staged=True)
+
+
+    def test_index_changed_after_snapshot_capture_is_rejected(self):
+        from unittest.mock import patch
+        self.merge(self.documents("feature"),{"src/right.py":"value = 3\n"})
+        with patch.object(self.checker,"ROOT",self.repo):
+            snapshot=self.checker.GitSnapshot(staged=True)
+            old_entries=dict(snapshot.entries)
+            self.write({"src/score.py":"value = 99\n"});self.call("add","src/score.py")
+            with self.assertRaises(ValueError):self.checker.snapshot_changed_paths(snapshot)
+            self.assertEqual(snapshot.entries,old_entries)
+
+    def test_index_change_between_parent_tree_reads_is_rejected(self):
+        from unittest.mock import patch
+        self.merge(self.documents("feature"),{"src/right.py":"value = 3\n"})
+        original=self.checker.git;changed=False
+        def mutate(*args,**kwargs):
+            nonlocal changed
+            result=original(*args,**kwargs)
+            if args[0]=="ls-tree" and not changed:
+                self.write({"src/score.py":"value = 99\n"});self.call("add","src/score.py");changed=True
+            return result
+        with patch.object(self.checker,"git",side_effect=mutate):
+            with self.assertRaises(ValueError):self.changes(staged=True)
+
+    def test_index_content_change_with_same_paths_is_rejected(self):
+        from unittest.mock import patch
+        self.write({**self.documents("next"),"src/score.py":"value = 2\n"});self.call("add",".")
+        with patch.object(self.checker,"ROOT",self.repo):
+            snapshot=self.checker.GitSnapshot(staged=True);old_names=set(snapshot.entries)
+            self.write({"src/score.py":"value = 999\n"});self.call("add","src/score.py")
+            self.assertEqual(old_names,{p.decode() for p in self.call("ls-files","-z").split(b"\0") if p})
+            with self.assertRaises(ValueError):self.checker.snapshot_changed_paths(snapshot)
+
+    def test_index_change_before_final_comparison_is_rejected(self):
+        from unittest.mock import patch
+        self.merge(self.documents("feature"),{"src/right.py":"value = 3\n"})
+        with patch.object(self.checker,"ROOT",self.repo):snapshot=self.checker.GitSnapshot(staged=True)
+        original=self.checker.git;index_calls=0
+        def mutate(*args,**kwargs):
+            nonlocal index_calls
+            if args==("ls-files","--stage","-z"):
+                index_calls+=1
+                if index_calls==2:self.write({"src/score.py":"value = 99\n"});self.call("add","src/score.py")
+            return original(*args,**kwargs)
+        with patch.object(self.checker,"ROOT",self.repo),patch.object(self.checker,"git",side_effect=mutate):
+            with self.assertRaises(ValueError):self.checker.snapshot_changed_paths(snapshot)
+
+    def test_existing_head_lookup_failure_is_not_unborn_stage(self):
+        import subprocess
+        from unittest.mock import patch
+        original=self.checker.git
+        def fail(*args,**kwargs):
+            if args==("rev-parse","--verify","HEAD^{commit}"):raise subprocess.CalledProcessError(128,["git",*args])
+            return original(*args,**kwargs)
+        with patch.object(self.checker,"git",side_effect=fail):
+            with self.assertRaises(subprocess.CalledProcessError):self.changes(staged=True)
+
+    def test_ordinary_initial_staging_preserves_existing_path_policy(self):
+        previous_repo=self.repo
+        self.repo=self.fixture_root/(str(type(self).fixture_number)+"-unborn");self.repo.mkdir()
+        self.call("init","-q","-b","develop");self.call("config","core.longpaths","true")
+        self.write({**self.documents("initial"),"src/score.py":"value = 1\n"});self.call("add",".")
+        self.assertEqual(self.changes(staged=True),sorted(self.required|{"src/score.py"}))
+        self.assertEqual(validate_changed_paths(self.changes(staged=True),self.spec),[])
+        self.repo=previous_repo
+
+    def test_unresolved_index_is_rejected_before_path_selection(self):
+        self.merge({"src/score.py":"value = 2\n"},{"src/score.py":"value = 3\n"},conflict=True)
+        with self.assertRaises(ValueError):self.changes(staged=True)
+
+    def test_working_tree_mode_stays_outside_changed_path_gate(self):
+        from types import SimpleNamespace
+        self.assertEqual(self.checker.snapshot_changed_paths(SimpleNamespace(staged=False,revision=None)),[])
+
+
+class MergeValidationBoundaryTests(unittest.TestCase):
+    """Use only in-memory payloads; never force-track private paths or credentials."""
+    def context(self):
+        fixture=ConsistencyTests(methodName="test_code_only_commit_is_rejected")
+        fixture.setUp()
+        return fixture,fixture.virtual_files()
+
+    def test_private_path_remains_rejected_without_real_git_tracking(self):
+        fixture,files=self.context();path="nested/Resource/private.json"
+        files[path]=b'{"synthetic":true}'
+        self.assertIn("Private file tracked: "+path,validate_content(list(files),files.__getitem__,fixture.spec))
+
+    def test_synthetic_credential_pattern_remains_rejected_in_memory(self):
+        fixture,files=self.context();path="apps/web/example.ts"
+        files[path]=b"const synthetic = '"+b"sb_secret_"+b"x"*24+b"';\n"
+        self.assertIn("Credential pattern in shared file: "+path,validate_content(list(files),files.__getitem__,fixture.spec))
+
+    def test_generated_routing_drift_remains_rejected_in_memory(self):
+        fixture,files=self.context();path=fixture.spec["current_documents"]["routing"]
+        files[path]+=b"synthetic independent route edit\n"
+        self.assertIn("Document or route drift: "+path,validate_content(list(files),files.__getitem__,fixture.spec))
+
+
+
+
+class SecuredPreparationContractTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/"docs/current/service_spec.json").read_text(encoding="utf-8"))
+    def test_default_factory_cannot_be_automatically_switched(self):
+        spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["composition"]["default_factories_unchanged"]=False
+        self.assertIn("DEV-008 default composition preservation drift",validate_spec(spec))
+    def test_relay_cannot_replace_user_authorization(self):
+        spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["relay"]["relay_alone_grants_user_access"]=True
+        self.assertIn("DEV-008 relay identity/privacy drift",validate_spec(spec))
+    def test_missing_operation_or_untyped_nested_values_cannot_pass(self):
+        spec=deepcopy(self.spec);c=spec["secured_backend_preparation_contract"]
+        c["protected_operations"].pop();c["response_projection"]["free_form_Any_allowed"]=True
+        self.assertIn("DEV-008 operation coverage drift",validate_spec(spec))
+        self.assertIn("DEV-008 recursive response boundary drift",validate_spec(spec))
+    def test_ready_cannot_expose_private_settings_or_promote_production(self):
+        spec=deepcopy(self.spec);c=spec["secured_backend_preparation_contract"]
+        c["health"]["ready_public_fields"].append("database_url");c["production_ready"]=True
+        self.assertIn("DEV-008 safe health boundary drift",validate_spec(spec))
+        self.assertIn("DEV-008 scoped preparation cannot promote production",validate_spec(spec))
+    def test_preparation_and_work_item_cannot_disappear(self):
+        spec=deepcopy(self.spec);del spec["secured_backend_preparation_contract"]
+        del spec["workflow"]["synchronized_work_items"]["docs/work_items/DEV-008-secured-backend-boundary.json"]
+        self.assertIn("DEV-008 required secure preparation contract missing",validate_spec(spec))
+    def test_synthetic_completion_requires_fixed_snapshot_evidence(self):
+        spec=deepcopy(self.spec);contract=spec["secured_backend_preparation_contract"]
+        contract["code_status"]="accepted_on_develop_scoped_synthetic_verified"
+        contract["verification"].update(implementation_commit=None,synthetic_test_count=None,status="NOT_RUN")
+        self.assertIn("DEV-008 implementation completion lacks fixed synthetic evidence",validate_spec(spec))
+
+
+class PublicResponseRegistryContractTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/"docs/current/service_spec.json").read_text(encoding="utf-8"))
+        self.catalog={"format":"jungsi.public-response-schemas/v1","operations":[],"schemas":{},"auxiliary_roots":{}}
+        for operation in self.spec["operations"]:
+            dto=self.spec["backend_platform_contract"]["dto_schemas"][operation["http_contract"]["response_schema"]]
+            roots={}
+            for role in ("standard","paid"):
+                fields=dto["fields"]+(dto.get("paid_fields",[]) if role=="paid" else [])
+                name=operation["id"]+"."+role
+                self.catalog["schemas"][name]={"type":"object","properties":{f:{"type":"string","nullable":True} for f in fields},"required":[],"optional":fields}
+                roots[role]={"ref":name}
+            self.catalog["operations"].append({"id":operation["id"],"contract_ref":operation["contract_ref"],"roots":roots})
+        self.catalog["schemas"]["safe_error"]={"type":"object","properties":{"code":{"type":"string"}},"required":["code"],"optional":[]}
+        self.catalog["schemas"]["error"]={"type":"object","properties":{"status":{"type":"string"},"error":{"ref":"safe_error"},"request_id":{"type":"string"}},"required":["status","error","request_id"],"optional":[]}
+        self.catalog["schemas"]["readiness"]={"type":"object","properties":{f:{"type":"string"} for f in ("status","server_timezone","production_ready","security_boundary")},"required":["status","server_timezone","production_ready","security_boundary"],"optional":[]}
+        self.catalog["auxiliary_roots"]={"error":{"ref":"error"},"readiness":{"ref":"readiness"}}
+        self.catalog["schemas"]["nested"]={"type":"object","properties":{"rows":{"type":"array","items":{"ref":"safe_error"}},"by_id":{"type":"map","keys":{"type":"string"},"values":{"ref":"safe_error"}}},"required":["rows"],"optional":["by_id"]}
+    def test_complete_typed_graph_matches_existing_operation_fields(self):
+        self.assertEqual(validate_public_response_catalog(self.catalog,self.spec),[])
+    def test_missing_duplicate_or_changed_operation_binding_is_rejected(self):
+        for mode in ("missing","duplicate","changed_ref"):
+            with self.subTest(mode=mode):
+                c=deepcopy(self.catalog)
+                if mode=="missing":c["operations"].pop()
+                elif mode=="duplicate":c["operations"].append(deepcopy(c["operations"][0]))
+                else:c["operations"][0]["contract_ref"]="unregistered.private"
+                self.assertIn("DEV-008 public response schema operation binding drift",validate_public_response_catalog(c,self.spec))
+    def test_untyped_nested_values_bad_references_and_cycles_are_rejected(self):
+        cases=[{"type":"Any"},{"type":"array"},{"type":"map","keys":{"type":"string"}}, {"ref":"missing"},{"ref":"nested"},{"type":"enum","values":[{"private":"SYNTHETIC"}]}]
+        for node in cases:
+            with self.subTest(node=node):
+                c=deepcopy(self.catalog);c["schemas"]["nested"]["properties"]["by_id"]=node
+                self.assertIn("DEV-008 public response schema type/reference graph invalid",validate_public_response_catalog(c,self.spec))
+    def test_required_optional_partition_and_open_objects_are_rejected(self):
+        for mode in ("missing","overlap","duplicate","open"):
+            with self.subTest(mode=mode):
+                c=deepcopy(self.catalog);node=c["schemas"]["nested"]
+                if mode=="missing":node["optional"]=[]
+                elif mode=="overlap":node["optional"].append("rows")
+                elif mode=="duplicate":node["required"].append("rows")
+                else:node["additionalProperties"]=True
+                self.assertIn("DEV-008 public response schema type/reference graph invalid",validate_public_response_catalog(c,self.spec))
+    def test_standard_report_cannot_add_paid_or_private_fields(self):
+        c=deepcopy(self.catalog);node=c["schemas"]["report.read.standard"]
+        node["properties"]["analyses"]={"ref":"nested"};node["optional"].append("analyses")
+        self.assertIn("DEV-008 public response schema field boundary drift",validate_public_response_catalog(c,self.spec))
+    def test_auxiliary_error_and_ready_cannot_add_private_fields(self):
+        for name,field in (("safe_error","raw_exception"),("readiness","database_role")):
+            with self.subTest(name=name):
+                c=deepcopy(self.catalog);node=c["schemas"][name]
+                node["properties"][field]={"type":"string"};node["optional"].append(field)
+                self.assertIn("DEV-008 public response auxiliary boundary drift",validate_public_response_catalog(c,self.spec))
+    def test_completed_implementation_requires_registry_and_unique_json_keys(self):
+        planned=deepcopy(self.spec);planned["secured_backend_preparation_contract"]["code_status"]="planned"
+        self.assertEqual(validate_public_response_registry([],lambda p:b"",planned),[])
+        s=deepcopy(self.spec);s["secured_backend_preparation_contract"]["code_status"]="implemented_synthetic_verified_integration_pending"
+        self.assertIn("DEV-008 public response schema registry missing",validate_public_response_registry([],lambda p:b"",s))
+        raw=b'{"format":"jungsi.public-response-schemas/v1","format":"duplicate"}'
+        self.assertIn("DEV-008 public response schema registry invalid",validate_public_response_registry([PUBLIC_RESPONSE_SCHEMA_PATH],lambda p:raw,self.spec))
+
 
 if __name__=="__main__":unittest.main()

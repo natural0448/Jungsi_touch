@@ -1,0 +1,249 @@
+{
+  "format": "jungsi.work-item/v1",
+  "id": "DEV-008-secured-backend-boundary",
+  "title": "명시 서버 중계 인증과 역할별 재귀 공개 응답 경계",
+  "approved_on": "2026-10-07",
+  "start_commit": "e6b8aacd0ba7057f80aa766b07a3137be6160643",
+  "branch": "feature/application-pre-data-platform",
+  "status": "accepted_on_develop_scoped_synthetic_verified",
+  "contract_ref": "secured_backend_preparation_contract",
+  "contract_version": "1.9.3",
+  "requirements": [
+    "REQ-24",
+    "REQ-25",
+    "REQ-26"
+  ],
+  "owner": "서비스 개발팀; 공통 기획/검사는 시스템기획팀",
+  "preservation": "기존22API/session3/default/Drive/local·원본·비공개자료·파일·잠금 보존; 새branch0·운영배포0",
+  "verification_status": "PASS_SCOPED_SYNTHETIC_HTTP",
+  "scope": {
+    "format": "jungsi.secured-backend-preparation/v1",
+    "id": "DEV-008",
+    "revision": "2026.10.07.v1",
+    "policy_revision": "2026.10.06.v1",
+    "code_status": "accepted_on_develop_scoped_synthetic_verified",
+    "production_ready": false,
+    "basis_commit": "e6b8aacd0ba7057f80aa766b07a3137be6160643",
+    "branch": "feature/application-pre-data-platform",
+    "requirements": [
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "controls": [
+      "SEC-01",
+      "SEC-03",
+      "SEC-07",
+      "SEC-08"
+    ],
+    "scope": "명시 보안 앱 구성의 중계 인증·역할별 재귀 응답 투영과 합성 HTTP 검수. 기존 기본 연결과 운영 상태를 보존한다.",
+    "composition": {
+      "factory": "create_secured_app",
+      "required_keyword": "security",
+      "default_factories_unchanged": true,
+      "legacy_factories": [
+        "create_app",
+        "configured_app"
+      ],
+      "default_entitlement_authority": "jungsi_backend.entitlements",
+      "automatic_storage_or_entitlement_transition": false,
+      "local_verification_unchanged": true,
+      "existing_API_count": 22,
+      "API_or_DTO_additions": false,
+      "session_format": "jungsi.session/v1"
+    },
+    "relay": {
+      "header": "X-Jungsi-Relay-Token",
+      "environment_name": "JUNGSI_RELAY_TOKEN",
+      "server_only": true,
+      "secret_repr_allowed": false,
+      "browser_secret_allowed": false,
+      "minimum_token_characters": 32,
+      "maximum_token_characters": 512,
+      "token_syntax": "visible ASCII, no whitespace/comma; exact configured length; bytes hmac.compare_digest",
+      "duplicate_raw_headers_rejected": true,
+      "header_names_case_insensitive": true,
+      "order": [
+        "relay_identity",
+        "verified_user_Bearer",
+        "current_entitlement_and_owner_scope",
+        "input_and_data_access"
+      ],
+      "user_authentication_required_after_relay": true,
+      "relay_alone_grants_user_access": false,
+      "configuration_error": {
+        "http": 503,
+        "code": "security_policy_unavailable"
+      },
+      "authentication_error": {
+        "http": 403,
+        "code": "relay_authentication_failed"
+      },
+      "invalid_gateway_provider_calls": 0,
+      "production_transport": "HTTPS; actual BFF/CSRF/browser acceptance remains NOT_RUN"
+    },
+    "protected_operations": [
+      "history.search",
+      "recruitment.read",
+      "score-profile.create",
+      "overall.analyze",
+      "report.read",
+      "offerings.search",
+      "offering.read",
+      "university.analyze",
+      "candidates.build",
+      "shortlist.update",
+      "report.export",
+      "statistics.read",
+      "session.read",
+      "forecast.capabilities",
+      "forecast.list",
+      "forecast.create",
+      "forecast.read",
+      "forecast.adjust",
+      "forecast.validate",
+      "forecast.approve",
+      "forecast.publish",
+      "forecast.published.read"
+    ],
+    "health": {
+      "public_path": "/health/live",
+      "relay_protected_path": "/health/ready",
+      "ready_requires_user_Bearer": false,
+      "ready_public_fields": [
+        "status",
+        "server_timezone",
+        "production_ready",
+        "security_boundary"
+      ],
+      "ready_production_ready": false,
+      "detailed_environment_DB_role_private_location_exposed": false
+    },
+    "response_projection": {
+      "ownership": "application",
+      "source": "operations[].contract_ref and typed schema registry",
+      "operation_binding_required": true,
+      "all_registered_operations_required": true,
+      "role_roots": [
+        "standard",
+        "paid"
+      ],
+      "nested_objects_and_arrays": true,
+      "dynamic_ID_map_values_typed": true,
+      "free_form_Any_allowed": false,
+      "untyped_additional_properties_allowed": false,
+      "unknown_fields": "remove_without_changing_stored_original",
+      "invalid_structure": "503 security_policy_unavailable",
+      "covers": [
+        "success",
+        "pending",
+        "error",
+        "persisted_report",
+        "idempotent_replay",
+        "print_dto",
+        "published_forecast"
+      ],
+      "preserve": [
+        "authorized_scores_and_percentiles",
+        "pending_judgment",
+        "official_public_sources_and_versions",
+        "authorized_management_receipts"
+      ],
+      "error_body_fields": [
+        "status",
+        "error.code",
+        "request_id"
+      ],
+      "new_schema_catalog_shape": "same implementation PR; root checks complete operation/ref/role/nested bindings",
+      "static_schema_registry": {
+        "path": "src/jungsi_touch/application/public_response_schemas.json",
+        "format": "jungsi.public-response-schemas/v1",
+        "operation_bindings": "id, contract_ref, roots.standard/paid",
+        "auxiliary_roots": [
+          "error",
+          "readiness"
+        ],
+        "validation": "all operation IDs and exact declared top-level fields; typed nested object/array/map values; required/optional partition; closed references; no cycles/Any; unique JSON keys"
+      }
+    },
+    "verification": {
+      "status": "PASS_SCOPED_SYNTHETIC_HTTP",
+      "implementation_commit": "716affb4915a2e7e5af690da7574262fa2459c86",
+      "synthetic_test_count": 57,
+      "CI": {
+        "implementation_head": {
+          "commit": "5f9618c447be95f6a858b4bb24a31a30433be337",
+          "conclusion": "success",
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37560623438"
+        },
+        "pull_request_candidate": {
+          "head_commit": "5f9618c447be95f6a858b4bb24a31a30433be337",
+          "conclusion": "success",
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37560978933"
+        },
+        "integrated_develop": {
+          "commit": "9abc493ffc5b1ef6b3c8a00042c125f9dff183cb",
+          "conclusion": "success",
+          "url": "https://github.com/natural0448/Jungsi_touch/actions/runs/37561114571"
+        }
+      },
+      "cases": [
+        "all_22_operation_bindings_and_contract_fields",
+        "nested_object_array_ID_map_extra_field_removal",
+        "malformed_required_value_safe_503",
+        "saved_report_and_print_and_idempotent_and_forecast_projection",
+        "current_standard_member_paid_field_exclusion",
+        "authorized_staff_scope_and_receipts_preserved",
+        "missing_invalid_duplicate_Unicode_oversized_relay_denied_before_provider",
+        "valid_relay_still_requires_real_user_authorization",
+        "public_live_protected_redacted_ready",
+        "legacy_and_local_factory_regressions"
+      ],
+      "actual_Auth_DB_BFF_browser_deployment": "NOT_RUN",
+      "candidate_focused_test_count": 57,
+      "fixed_implementation_evidence": "normal_commit_hook_fixed_snapshot_748_PASS",
+      "full_snapshot_test_count": 748,
+      "evidence_ref": "outputs/dev008_development/20261007T013229108129Z/fixed_merge_receipt.json",
+      "final_implementation_head": "5f9618c447be95f6a858b4bb24a31a30433be337",
+      "independent_synthetic_test_count": 22,
+      "independent_synthetic_commit": "716affb4915a2e7e5af690da7574262fa2459c86",
+      "independent_evidence_ref": "outputs/dev008_review/20261007T015941005441Z/candidate_receipt.json",
+      "implementation_continuity": "716affb4915a2e7e5af690da7574262fa2459c86와 최종 HEAD의 런타임 보안 코드·스키마는 동일하며 생성 catalog의 기획 출처만 갱신했다. 최종 HEAD의 정상 훅 748개·CI PASS와 PR 병합 tree 일치를 확인했다."
+    },
+    "planned_code_paths": [
+      "src/jungsi_touch/application/public_response.py",
+      "src/jungsi_touch/application/public_response_schemas.json",
+      "src/jungsi_touch/infrastructure/secured_http.py"
+    ],
+    "remaining": [
+      "external presentation BFF relay secret/CSRF and same-snapshot browser acceptance",
+      "SEC-05/06 shared atomic private quota and approved operational values",
+      "actual JWT/entitlement/owner/DB/Storage/deployment acceptance",
+      "exam catalog, latest owned report and reflection combinations are separate follow-ups"
+    ],
+    "preservation": {
+      "files_deleted": 0,
+      "new_branches": 0,
+      "default_factory_change_allowed": false,
+      "data_promotion_allowed": false,
+      "actual_DB_write_deployment_allowed": false,
+      "main_ready_allowed": false
+    },
+    "registry_path": "src/jungsi_touch/application/public_response_schemas.json",
+    "registry_format": "jungsi.public-response-schemas/v1",
+    "develop_integration": {
+      "status": "merged_verified",
+      "accepted_on": "2026-10-07",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/17",
+      "pull_request_state": "merged",
+      "merge_method": "merge",
+      "implementation_head": "5f9618c447be95f6a858b4bb24a31a30433be337",
+      "integrated_develop_commit": "9abc493ffc5b1ef6b3c8a00042c125f9dff183cb",
+      "merge_tree_equals_tested_HEAD": true,
+      "policy_revision": "2026.10.06.v1",
+      "scope": "명시 create_secured_app 구성·중계 인증·재귀 공개 응답 경계의 합성 HTTP/고정 Git 스냅샷 인수.",
+      "actual_Auth_DB_BFF_browser_deployment": "NOT_RUN",
+      "production_ready": false
+    }
+  }
+}

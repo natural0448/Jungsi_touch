@@ -466,7 +466,7 @@ def frontend_reply_text(spec):
     items='## 화면팀에 요청하는 회신\n\n'+table(['ID','업무','담당','상태'],[[v['id'],v['title'],', '.join(v['owners']),v['status']] for v in r['items']])
     local='## 로컬 연결 요청 2판에 대한 직접 답변\n\n'+'\n\n'.join(details(v,'①②③④⑤⑥'[v['number']-1]) for v in r['local_request_answers'])
     boundary='## 인수 경계와 미확정 사항\n\n'+r['handoff_boundary']+'\n\n'+bullets(r['unresolved'])+'\n\n'+r['preservation']
-    return '\n\n'.join([head,items,'\n\n'.join(details(v,v['id']) for v in r['items']),local,boundary,'## 새 로컬 검수 보고의 후속 작업\n\n[화면팀 후속 작업 지시](화면팀_후속작업_지시.md)의 FE-01~05와 구체 SUP 회신을 함께 전달한다.',supabase_actual_update_text(c)])
+    return '\n\n'.join([head,items,'\n\n'.join(details(v,v['id']) for v in r['items']),local,boundary,'## 새 로컬 검수 보고의 후속 작업\n\n[화면팀 후속 작업 지시](화면팀_후속작업_지시.md)의 FE-01~05와 구체 SUP 회신을 함께 전달한다.',supabase_actual_update_text(c),supabase_second_actual_update_text(c)])
 
 
 def frontend_followup_text(spec):
@@ -604,7 +604,7 @@ def supabase_actual_update_text(contract):
     relay=cr['entitlement_injection'];provider=cr['storage_provider']
     implementation=cr['id']+'; '+cr['status']+'. '+cr['preservation']
     db=contract['database_preflight'];apply=contract['database_application']
-    db_text='### 실제 SQL 사전 검수와 신규 private schema 적용 단계\n\n'+table(['관측','상태','범위'],[
+    db_text='### 이전001·002 관측:003적용전의역사\n\n'+table(['관측','상태','범위'],[
         ['읽기 preflight',db['status'],db['observed_at']+'; '+db['evidence_id']+'; TLS 양계정/least role/master9컬럼·2 SELECT policy/당시schema0'],
         ['001·002 적용',apply['status'],apply['committed_at']+'; '+apply['evidence_id']+'; 신규13 RLS tables/owner·schema_versions'],
         ['독립 원장검수',apply['independent_review_status'],'개발 적용 영수증 이후 별도 검수; runtime app정책 '+str(apply['private_app_policy_count'])+'건'],
@@ -627,7 +627,7 @@ def supabase_actual_update_text(contract):
         provider['scope']+'\n\n공급 명부 '+provider['registry_format']+' / '+provider['transport']+'; 필드 '+', '.join(provider['entry_fields'])+'; '+provider['registry_status']+'. '+provider['credentials'],
         '\n'.join('- '+v for v in provider['checks']),
         'codepath '+cr['code_path_status']+'; 합성 '+cr['synthetic_verification']+'; 실제Auth/DB/Storage권한 '+cr['actual_auth_DB_Storage_privilege_verification']+'. 구현 준비 채택은 현재 default 전환/운영 PASS가 아니다.',
-        cr.get('code_paths_boundary','')+'\n\n후속 PR 후보 경로: '+', '.join(cr.get('pending_pr_paths',[])),
+        cr.get('code_paths_boundary','')+'\n\n'+('이번 feature 스냅샷의 명시 준비 구현 경로: '+', '.join(cr.get('implementation_code_paths',[])) if cr.get('implementation_mode')=='explicit_prepared_default_unchanged' else '후속 PR 후보 경로: '+', '.join(cr.get('pending_pr_paths',[]))),
         '### 신규 DB role 발급 요청과 실제 권한 대기',
         table(['항목','보고된 목표/남은 검수'],[[k,v]for k,v in contract.get('database_role_target',{}).items()if isinstance(v,(str,bool))]),
         contract.get('database_role_target',{}).get('boundary',''),
@@ -695,7 +695,7 @@ def validate_supabase_actual_update_contract(spec):
     if cr.get('current_authority')!='jungsi_backend.entitlements' or cr.get('target_authority')!='public.jeongsi_passes':
         errors.append('Supabase target must preserve current default authority')
     credentials=c.get('credentials_intake',{})
-    if credentials.get('status')!='credentials_received_connection_preflight_PASS_private_migration_review_pending' or credentials.get('private_values_read_by_planning')is not False or credentials.get('actual_DB_connection_verified')is not True or credentials.get('effective_role_policy_verified')is not True or not credentials.get('effective_verification_scope'):
+    if credentials.get('status')!=('actual_connection_runtime003_metadata_verified_live_pending'if tuple(int(v)for v in version.split('.'))>=(1,8,5)else 'credentials_received_connection_preflight_PASS_private_migration_review_pending') or credentials.get('private_values_read_by_planning')is not False or credentials.get('actual_DB_connection_verified')is not True or credentials.get('effective_role_policy_verified')is not True or not credentials.get('effective_verification_scope'):
         errors.append('Supabase private configuration intake needs scoped actual connection evidence')
     db=c.get('database_preflight',{});apply=c.get('database_application',{})
     if db.get('format')!='jungsi.database-preflight-observation/v1' or db.get('status')!='PASS_READONLY_CONNECTION_ROLE_MASTER_SCHEMA_ABSENCE' or db.get('read_only')is not True or type(db.get('sql_writes'))is not int or db.get('sql_writes')!=0 or db.get('private_schema_present_at_preflight')is not False or db.get('private_table_count_at_preflight')!=0:
@@ -719,7 +719,7 @@ def validate_supabase_actual_update_contract(spec):
         errors.append('Supabase migration receipt cannot certify independent runtime acceptance')
     if any(apply.get(k)is not False for k in ('public_master_changed','profiles_changed','existing_owner_or_role_changed','DELETE_DROP_TRUNCATE_executed','production_ready')) or apply.get('runtime003_status')!='NOT_APPLIED' or apply.get('runtime_CRUD_privilege_acceptance')!='NOT_RUN' or apply.get('live_authenticated_operations')!='NOT_RUN':
         errors.append('Supabase private schema receipt does not permit master mutation or runtime readiness')
-    if any(scope.get(k)is not True for k in ('database_SQL_executed','database_SQL_reads_executed','database_SQL_writes_executed')) or scope.get('database_execution_status')!='001002_applied_development_receipt_independent_review_pending' or any(scope.get(k)!='actual_applied_verified_by_development_receipt' for k in ('migration001','migration002')):
+    if any(scope.get(k)is not True for k in ('database_SQL_executed','database_SQL_reads_executed','database_SQL_writes_executed')) or scope.get('database_execution_status')!=('001002003_applied_fresh_metadata_synthetic_ports_verified_live_pending'if tuple(int(v)for v in version.split('.'))>=(1,8,5)else '001002_applied_development_receipt_independent_review_pending') or any(scope.get(k)!='actual_applied_verified_by_development_receipt' for k in ('migration001','migration002')):
         errors.append('Supabase actual SQL receipt state drift')
     minimal=c.get('runtime_ingestion_policy',{})
     if minimal.get('format')!='jungsi.minimal-runtime-ingestion/v1' or minimal.get('mode')!='minimal_explicit_approved_allowlist' or minimal.get('selection')!='requested_operation_required_dependencies_only' or minimal.get('explicit_approved_entries_only')is not True or minimal.get('archive49_preserved')is not True:
@@ -728,6 +728,96 @@ def validate_supabase_actual_update_contract(spec):
         errors.append('Supabase staged archives cannot become bulk runtime data or approval')
     return errors
 
+
+def supabase_second_actual_update_text(contract):
+    runtime=contract.get('database_runtime_application')
+    if not runtime:return ''
+    synthetic=contract['synthetic_persistence_verification'];port=contract['explicit_port_metadata_verification']
+    minimum=contract['minimum_exam_stage'];accuracy=contract['subject_accuracy_review'];factory=contract['service_transition_contract']['factory_transition_review']
+    return '\n\n'.join([
+        '## 2차 실제 관측:003·명시port·최소시험팩·화면통합',
+        table(['관측','상태','검수범위'],[
+            ['정확003 적용/fresh권한',runtime['status'],runtime['evidence_id']+'; 정책24/SELECT13·INSERT9·columnUPDATE6'],
+            ['합성 새process영속성',synthetic['status'],synthetic['evidence_id']+'; 합성'+str(synthetic['preserved_rows'])+'건'],
+            ['명시port메타',port['status'],port['evidence_id']+'; health'+str(port['health_ready_HTTP'])+' / '+port['health_ready_status']],
+            ['최소시험팩',minimum['status'],minimum['evidence_id']+'; '+str(minimum['payload_count'])+'건/'+str(minimum['payload_bytes'])+'B·'+minimum['entry_status']+'/승인0'],
+            ['수학 부분QA',accuracy['status'],accuracy['evidence_id']+'; 수학한구간/9경계만·wholeexam/CDF승인0'],
+            ['기본경로 결정',factory['status'],factory['human_answer']+'; candidate7PASS는review-only/source변경0']]),
+        runtime['boundary'],synthetic['boundary'],port['boundary'],minimum['boundary'],accuracy['boundary'],accuracy.get('observation_scope',''),factory['boundary'],
+        ('데이터팀 후속: '+contract['targeted_data_followup']['status']+'. '+contract['targeted_data_followup']['boundary']) if contract.get('targeted_data_followup') else '',
+        '운영서버는 app DATABASE_URL만, owner URL은이관작업전용private로분리한다. 외부화면은공개Supabase설정/APIorigin만받는다. 비공개env값/path/hash/ACL identity를기록하지않는다.',
+        '현재legacy/defaultfactory/API22/session3/page4·최소allowlist를유지한다. 실제사용자JWT/유료rows·자료활성화·livehost·브라우저와세securitygate/운영은NOT_RUN/NOT_READY다.'
+    ])
+
+
+def validate_supabase_second_actual_update_contract(spec):
+    try:adopted=tuple(int(v)for v in spec.get('version','').split('.'))>=(1,8,5)
+    except (ValueError,AttributeError):adopted=False
+    if not adopted:return []
+    c=spec.get('supabase_operations_handoff_contract',{});errors=[]
+    runtime=c.get('database_runtime_application',{});synthetic=c.get('synthetic_persistence_verification',{})
+    port=c.get('explicit_port_metadata_verification',{});minimum=c.get('minimum_exam_stage',{});accuracy=c.get('subject_accuracy_review',{})
+    if runtime.get('format')!='jungsi.private-runtime-application-observation/v1' or runtime.get('status')!='APPLIED_AND_FRESH_METADATA_VERIFIED' or runtime.get('policies')!=24 or runtime.get('select_tables')!=13 or runtime.get('insert_tables')!=9 or runtime.get('update_columns')!=6 or runtime.get('artifact_releases_access')!='SELECT_only':
+        errors.append('Supabase exact003 fresh metadata scope drift')
+    if any(runtime.get(k)is not False for k in ('table_wide_UPDATE','runtime_DELETE_TRUNCATE','anon_authenticated_private_access','future_default_grants','public_source_changed','DELETE_DROP_TRUNCATE_executed','production_ready')) or runtime.get('business_data_imported')!=0 or runtime.get('live_user_JWT_validation')!='NOT_RUN':
+        errors.append('Supabase metadata permission proof cannot expand authority or live readiness')
+    if synthetic.get('synthetic_only')is not True or synthetic.get('separate_process')is not True or synthetic.get('preserved_rows')!=10 or synthetic.get('real_business_data_imported')!=0 or synthetic.get('public_auth_or_master_rows_read_or_changed')!=0 or synthetic.get('operating_API_Auth_acceptance')!='NOT_RUN':
+        errors.append('Supabase synthetic persistence is not actual user or operational acceptance')
+    if port.get('scope')!='ASGI_TestClient_actual_DB_metadata_only' or port.get('health_ready_HTTP')!=503 or port.get('real_entitlement_rows_read')is not False or port.get('real_user_JWT_verified')is not False or port.get('default_factory_transition')is not False or port.get('data_approval_changed')is not False or port.get('production_ready')is not False:
+        errors.append('Supabase explicit metadata port cannot certify default factory Auth or data')
+    if minimum.get('payload_count')!=1 or minimum.get('payload_bytes')!=328915 or minimum.get('entry_status')!='staged' or minimum.get('approved_entries')!=0 or minimum.get('registry_binding')!='candidate_not_runtime_selected' or minimum.get('provider_denial')!='artifact_not_approved' or minimum.get('provider_network_calls')!=0 or minimum.get('archive_only')is not False or any(minimum.get(k)is not False for k in ('engine_approved','production_allowed','actual_data_adopted','active_config_changed','production_ready')):
+        errors.append('Supabase minimum staged exam must stay unapproved and unbound')
+    if accuracy.get('boundary_checks_passed')!=9 or any(accuracy.get(k)is not False for k in ('whole_exam_approved','total_CDF_approved','runtime_registry_changed','official_scorecard_integer_percentile_certified','normative_rounding_primary_source_verified','operational_engine_run','production_ready')) or accuracy.get('actual_UI_source_mode')!='NOT_RUN':
+        errors.append('Scoped mathematics review cannot certify entire exam CDF integer percentile or UI')
+    cr=c.get('service_transition_contract',{});factory=cr.get('factory_transition_review',{})
+    if factory.get('status')!='user_selected_explicit_preparation_only' or factory.get('human_answer')!='기본 경로는 유지하고 명시 연결만 준비' or any(factory.get(k)is not False for k in ('default_factory_change_allowed','default_factory_applied','future_automatic_transition_allowed','candidate_source_applied')) or factory.get('current_factory_authority')!='jungsi_backend.entitlements' or factory.get('human_question_resolved')is not True or cr.get('default_operating_factory_transition')!='NOT_RUN':
+        errors.append('Human explicit-only decision forbids default factory transition')
+    prepared_version=tuple(int(v)for v in spec.get('version','0').split('.'))>=(1,8,6)
+    expected_prepared_paths={
+        'src/jungsi_touch/infrastructure/http_api.py','src/jungsi_touch/infrastructure/postgres_entitlements.py',
+        'src/jungsi_touch/infrastructure/supabase_storage.py','tests/test_http_entitlement_injection.py',
+        'tests/test_postgres_entitlements.py','tests/test_supabase_storage.py',
+        'database/migrations/003_runtime_role_access.sql'}
+    paths=cr.get('implementation_code_paths',[])
+    if prepared_version:
+        if cr.get('implementation_mode')!='explicit_prepared_default_unchanged' or cr.get('code_path_status')!='explicit_prepared_snapshot_PR_integration_pending' or not isinstance(paths,list) or len(paths)!=7 or set(paths)!=expected_prepared_paths or set(cr.get('pending_pr_paths',[]))!=expected_prepared_paths:
+            errors.append('Explicit prepared mode must bind the exact seven feature snapshot paths with default unchanged')
+    elif paths!=[]:
+        errors.append('Unprepared historical contract cannot activate implementation paths')
+    if cr.get('pending_pr_paths',[]).count('database/migrations/003_runtime_role_access.sql')!=1 or cr.get('full_snapshot_verification',{}).get('previous_PASS_claimed')is not False:
+        errors.append('Service preparation paths and focused results cannot certify full snapshot integration')
+    fo=c.get('frontend_followup_observation',{})
+    if fo.get('merge_commit')!='3d90bc461c57102fc9ee8868cec7edac498470d4' or fo.get('head_commit')!='ef7b7c08ae0c3db5ea02c7af685a99f6064219df' or fo.get('exact_head_CI_success_count')!=2 or fo.get('source_deletions')!=0 or fo.get('branch_preserved')is not True:
+        errors.append('PR15 source integration observation drift')
+    residual=c.get('reply_contract',{}).get('followup',{}).get('residual_followups',[])
+    if not {'FE-01R','FE-ORIGIN','FE-SOURCE-01'}<={v.get('id')for v in residual if isinstance(v,dict)}:
+        errors.append('PR15 integration must retain operational origin date and source followups')
+    return errors
+
+
+def supabase_current_followup_text(contract):
+    v=contract.get('current_followup')
+    if not v:return ''
+    p=v['phase1'];d=v['database_readonly'];t=v['selected_storage'];m=v['minimum_metadata_registration'];f=v['external_frontend'];phase=v['phase2'];child=v['September_application_children'];source=v['source_availability'];plan=v['data_definition_followup']['implementation_plan']
+    return '\n\n'.join([
+        '## 현재 통합과 source 등록·모형 채택의 경계',
+        'FROZEN 문서 준비 시각 '+v['prepared_at']+'; '+v['status']+'. 이전 준비/관측·실패 기록은 보존하며 이번 정본반영/새 훅/CI는 NOT_RUN이다.',
+        table(['항목','현재 상태','인수 범위와 남은 작업'],[
+            ['공통 phase1',p['status'],p['commit']+'; 정상commit/prepush/정확CI 각각'+str(p['precommit_tests'])+'PASS'],
+            ['서비스 phase2',phase['status'],phase['final_HEAD']+'; 정상precommit/prepush/HEAD pushCI/PR시험CI/developCI각'+str(phase['normal_precommit_tests'])+'PASS·실패/오류/skip0'],
+            ['전용 app TLS 읽기',d['status'],str(d['checks_passed'])+'건; RLS '+str(d['tables_RLS_enabled'])+'table/'+str(d['policy_count'])+'policy metadata'],
+            ['전용 schema REST',str(d['private_REST_metadata']['HTTP'])+'/'+d['private_REST_metadata']['code'],d['private_REST_metadata']['meaning']],
+            ['선별 Storage',t['status'],str(t['verified_object_count'])+'객체 fullSHA 독립검수·noJWT '+str(t['no_JWT_denied_requests'])+'거절·승인/활성화false'],
+            ['source 메타 draft',m['status'],str(m['registered_metadata_items'])+'개 fresh app 독립readback·owner일회등록·publishednull'],
+            ['최종 source별 메타집계',v['source_specific_final_summary']['status'],'등록/정책34·기존GET/DB결속32 PASS·새GET0; 실JWT/엔진검수가아님'],
+            ['모평적용 child',child['status'],str(child['child_count'])+'개 원source SHA/모평applicationContext분리·원AST수치불변'],
+            ['공식 입결 source',source['official_history']['status'],str(source['admission_results_source_count'])+'개 최소선별native58/RAM39 PASS·DBdraft등록'+str(source['admission_results_DB_registered_count'])+'·전국완료false'],
+            ['Storage RLS metadata',v['storage_RLS_metadata_review']['status'],'현재보호bucket 클라이언트허용조건없음·실제JWT HTTP/SEC운영NOT_RUN'],
+            ['공식학교 catalog',source['official_school_catalog'],'최종자료팀영수증대기'],
+            ['v2 서비스 구현',plan['status'],str(plan['candidate_path_count'])+'경로후보·code0·nativev1유지·호환/품질/newscopeFE작업미완료'],
+            ['외부 화면',f['status'],'실제JWT/22API/4page/배포·보안gate별도']]),
+        phase['boundary'],d['boundary'],t['boundary'],m['boundary'],child['boundary'],source['boundary'],v['storage_RLS_metadata_review']['boundary'],v['source_reading_followup']['boundary'],v['census_snapshot_preservation']['boundary'],v['data_definition_followup']['boundary'],v['default_membership']['boundary'],f['boundary'],v['source_specific_final_summary']['boundary'],v['final_document_validation']['boundary'],v['private_boundary']
+    ])
 
 def supabase_operations_handoff_text(spec):
     c=spec['supabase_operations_handoff_contract'];r=c['current_review'];a=c['architecture']
@@ -742,8 +832,8 @@ def supabase_operations_handoff_text(spec):
     gate='## 운영 인수 완료 조건\n\n'+table(['gate','담당','현재상태','완료증거'],c['acceptance_gates'])+'\n\n실DB의 preflight/001002 개발 적용영수증과 독립·runtime 인수를 구분한다. Bearer로그인/유료·staff/실approved자료/22API/외부4페이지는NOT_RUN/HOLD다. production_ready=false/NOT_READY·mainnot_ready를각증거인수전유지한다. 이번문서작성은DB쓰기/migration/모형등록/main/배포승인이아니다. reset/drop/delete금지.'
     history='## 이전 코드 인수와 이번 후보\n\n'+c['history']['summary']+'\n\n확인된이전baseline '+c['history']['baseline']+', tree '+c['history']['tree']+'; normalhooks '+str(c['history']['previous_normal_hooks'])+'건. [이전정확CI]('+c['history']['CI']+').'
     reply='## 화면팀 최종 회신 인수\n\n[화면팀 회신 요청](화면팀_회신요청_최종.md)의 RF-01~06 및 원래 로컬 요청 ①~⑥를 함께 확인한다. 전달 문서 완성과 실제 회신·연결·보안 검수는 별도 상태다.'
-    references='## 공식 primary 참고\n\n'+'\n\n'.join(v[2]+' ['+v[0]+']('+v[1]+').' for v in c['references'])+'\n\n별도 FastAPI와 이용권 단일 기준은 확정 목표이며 운영 배포·DB·어댑터 전환은 미실행이다. 제공자 무료 plan 가격·제한 수치를 단정하지 않는다. 공개 문서에 실제 project URL/id/key/JWT/개인식별/자료 hash/비공개 PC 경로를 넣지 않는다.'
-    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),supabase_actual_update_text(c),facts,settings,overview,detail,reply,order,gate,history,references] if part)
+    references='## 공식 primary 참고\n\n'+'\n\n'.join(v[2]+' ['+v[0]+']('+v[1]+').' for v in c['references'])+'\n\n별도 FastAPI와 이용권 단일 기준은 확정 목표다. 실제 SQL구조·메타draft/코드통합 검수는 현재 관측으로 구분하며 기본어댑터 전환·운영 배포·실JWT/전체API/화면 인수는 미실행이다. 제공자 무료 plan 가격·제한 수치를 단정하지 않는다. 공개 문서에 실제 project URL/id/key/JWT/개인식별/자료 hash/비공개 PC 경로를 넣지 않는다.'
+    return '\n\n'.join(part for part in [head,architecture,current,supabase_access_recheck_text(c),supabase_actual_update_text(c),supabase_second_actual_update_text(c),supabase_current_followup_text(c),facts,settings,overview,detail,reply,order,gate,history,references] if part)
 
 def supabase_operations_route_metadata(spec):
     c=spec['supabase_operations_handoff_contract']
@@ -755,7 +845,27 @@ def supabase_operations_route_metadata(spec):
         result['runtime_ingestion_policy']=dict(mode=c['runtime_ingestion_policy']['mode'],selection=c['runtime_ingestion_policy']['selection'],bulk_autoimport=False,archive_auto_adopted=False,production_ready=False)
         d=c['database_preflight'];a=c['database_application']
         result['database_preflight']=dict(status=d['status'],observed_at=d['observed_at'],evidence_id=d['evidence_id'],read_only=d['read_only'])
-        result['database_application']=dict(status=a['status'],committed_at=a['committed_at'],evidence_id=a['evidence_id'],independent_review=a['independent_review_status'],runtime003=a['runtime003_status'],production_ready=a['production_ready'])
+        result['database_application']=dict(status=a['status'],committed_at=a['committed_at'],evidence_id=a['evidence_id'],independent_review=a['independent_review_status'],runtime003=a['runtime003_status'],observation_scope=a.get('observation_scope','001/002 apply observation before runtime003; latest runtime003 is separate'),production_ready=a['production_ready'])
+    if c.get('database_runtime_application'):
+        v=c['database_runtime_application'];p=c['explicit_port_metadata_verification'];e=c['minimum_exam_stage'];f=c['service_transition_contract']['factory_transition_review']
+        result['runtime003']=dict(status=v['status'],policies=v['policies'],scope='metadata_only',production_ready=False)
+        result['explicit_port']=dict(status=p['status'],health_HTTP=p['health_ready_HTTP'],real_user_JWT=False,default_factory_transition=False)
+        result['minimum_exam_stage']=dict(status=e['status'],payloads=e['payload_count'],approved_entries=e['approved_entries'],engine_approved=False,production_allowed=False)
+        result['factory_decision']=dict(id=f['id'],status=f['status'],default_change_allowed=False)
+    if c.get('current_followup'):
+        v=c['current_followup'];p=v['phase1'];d=v['database_readonly'];t=v['selected_storage'];m=v['minimum_metadata_registration'];phase=v['phase2'];child=v['September_application_children'];source=v['source_availability'];plan=v['data_definition_followup']['implementation_plan']
+        result['current_followup']=dict(format=v['format'],status=v['status'],prepared_at=v['prepared_at'],basis_commit=v['basis_commit'],
+            phase1=dict(status=p['status'],commit=p['commit'],precommit_tests=p['precommit_tests'],prepush_tests=p['prepush_tests'],exact_CI_tests=p['exact_head_CI_tests']),
+            phase2=dict(status=phase['status'],HEAD=phase['final_HEAD'],normal_precommit_tests=phase['normal_precommit_tests'],normal_prepush_tests=phase['normal_prepush_tests'],head_push_CI_tests=phase['exact_head_push_CI_tests'],PR_merge_test_CI_tests=phase['PR_merge_test_CI_tests'],final_develop_CI_tests=phase['final_develop_CI_tests'],integration_complete=True,operational_acceptance=False),
+            readonly_metadata=dict(status=d['status'],checks=d['checks_passed'],RLS_tables=d['tables_RLS_enabled'],policies=d['policy_count'],private_REST_HTTP=406,private_REST_code='PGRST106',real_JWT=False),
+            selected_storage=dict(status=t['status'],verified_objects=t['verified_object_count'],no_JWT_denials=t['no_JWT_denied_requests'],engine_approved=False,production_allowed=False,runtime_adopted=False),
+            metadata_draft=dict(status=m['status'],registered_items=m['registered_metadata_items'],registration_complete=m['registration_complete'],independent_review=m['independent_review'],review_status=m['review_status'],published_release=None,engine_approved=False,production_allowed=False,runtime_adopted=False),
+            September_children=dict(status=child['status'],children=child['child_count'],original_sources_preserved=True,source_and_application_contexts_bound=True,runtime_adopted=False),
+            source_availability=dict(official_school_catalog=source['official_school_catalog'],admission_results_sources=source['admission_results_source_count'],admission_results_DB_registered=source['admission_results_DB_registered_count'],admission_semantics=source['official_history']['status'],selected_universities=source['official_history']['selected_university_count'],school_years=source['official_history']['school_year_pair_count'],selected_metrics=source['official_history']['selected_metric_count'],selected_offerings=source['official_history']['selected_offering_count'],native_checks=source['official_history']['independent_native_checks'],frozen_RAM_checks=source['official_history']['frozen_RAM_checks'],nationwide_QA_complete=False),
+            Storage_RLS_metadata=dict(status=v['storage_RLS_metadata_review']['status'],objects_RLS=True,buckets_RLS=True,current_bucket_client_SELECT_allowed=False,actual_authenticated_JWT_HTTP='NOT_RUN',SEC_operational_gate=False),
+            model_implementation_plan=dict(status=plan['status'],candidate_paths=plan['candidate_path_count'],code_changes=0,native_v1_preserved=True),
+            default_factory_transition=False,external_frontend_status=v['external_frontend']['status'],source_specific_summary=dict(status=v['source_specific_final_summary']['status'],registration_policy_conditions=34,existing_GET_DB_binding_conditions=32,new_Cloud_GET=0,actual_student_calculation=False,actual_JWT=False,runtime_adopted=False),this_document_canonical_application='NOT_RUN',this_document_hooks_CI='NOT_RUN',production_ready=False)
+        if 'service_transition'in result:result['service_transition']['observation_scope']='1.8.8 prepared feature snapshot; current integrated phase2 is current_followup.phase2'
     return result
 
 
@@ -852,7 +962,7 @@ def security_document_body(spec):
            f"기획 출발 commit {ticks}{c['basis_commit']}{ticks}\n\n"+
            c["scope"]+"\n\n"+
            "**작업 전에 이 문서와 공통 명세를 읽고, 영향 operation·SEC ID·담당 브랜치를 PR에 기록한다.** "+
-           "현재 등록은 기획과 계약 하네스의 기준이며 런타임 보안 구현·운영 인수가 아니다. "+
+           "이 문서는 전체 보안 통제의 개발·인수 기준이다. 명시 보안 구성의 코드·합성 검수 결과는 DEV-008 절에서 확인한다. 전체 운영 인수는 미완료다. "+
            f"전체 구현 상태 {c['implementation_status']} / production_ready={str(c['production_ready']).lower()}. "+
            "기존 인증·소유권·이용권 코드가 존재해도 아래 추가 통제를 구현·검수하기 전 완료로 처리하지 않는다.\n\n")
     risks=table(["외부 반출 경로","필수 대응","인수 기준"],[
@@ -923,7 +1033,98 @@ def security_document_body(spec):
             "필수 보안 발행 gate: "+", ".join(c["mandatory_release_gates"])+
             ". 하나라도 누락·pending/failed면 main 준비 완료로 올리지 않는다."+
             "\n\n## 보호 범위의 한계\n\n"+c["limitation"]+
-            "\n\n## 공식 기술 근거\n\n"+sources)
+            "\n\n## 공식 기술 근거\n\n"+sources+secured_preparation_document(spec))
+
+
+def secured_preparation_document(spec):
+    c=spec.get("secured_backend_preparation_contract")
+    if not c:return ""
+    r=c["relay"]; h=c["health"]; v=c["verification"]
+    registry=c["response_projection"].get("static_schema_registry")
+    registry_note=(" 정적 registry "+registry["path"]+" ("+registry["format"]+")를 JSON으로 읽어 API별 역할 필드, 참조·순환·타입·required/optional·중복 key를 검사한다.") if registry else ""
+    return ("\n\n## DEV-008 명시 보안 앱 구성\n\n"+c["scope"]+"\n\n"+
+        f"계약 {c['revision']} · 정책 {c['policy_revision']} · 코드 {c['code_status']} · 운영 준비 false. "+
+        "기존 create_app/configured_app·이용권·Drive·local·22 API/session v1을 유지한다. "+
+        "create_secured_app(*, security, ...)를 명시 선택하며 운영 자동전환을 하지 않는다.\n\n"+
+        "중계 헤더 "+r["header"]+"는 서버 전용 "+r["environment_name"]+"/명시 설정 객체에서 공급한다. "+
+        "relay → 사용자 Bearer → 현재 이용권/소유권 → 입력/자료 순서다. 중계만으로 사용자 권한이 생기지 않는다. "+
+        "누락/잘못된 설정은 503 security_policy_unavailable, 누락/불일치/중복/잘못된 헤더는 403 relay_authentication_failed다. "+
+        "raw header의 대소문자·중복, ASCII/공백/쉼표/Unicode/크기와 정확 길이를 검사하고 bytes compare_digest를 쓴다.\n\n"+
+        "22 operation의 contract_ref와 standard/paid typed root를 연결한다. 객체·배열·ID map의 값까지 재귀 투영하고 "+
+        "추가 필드는 응답에서만 제거한다. 구조·필수값 오류는 비밀 없는 503이다. 자유 Any/무제한 객체는 금지한다. "+
+        "정상 점수·누백·판단 보류·공식 출처/버전·권한 있는 관리 영수증을 보존한다."+registry_note+"\n\n"+
+        h["public_path"]+"는 공개 최소 liveness다. "+h["relay_protected_path"]+"는 relay만 확인하고 "+
+        ", ".join(h["ready_public_fields"])+"만 반환한다. production_ready=false이며 비공개 환경·DB role/경로를 전달하지 않는다.\n\n"+
+        "검수 상태 "+v["status"]+". 합성 인수: "+"; ".join(v["cases"])+".\n\n"+secured_preparation_evidence(c)+
+        "남은 인수: "+"; ".join(c["remaining"])+". 전체 SEC-01~08/3 보안 gate와 실운영 준비는 미완료로 유지한다.")
+
+
+def secured_preparation_evidence(contract):
+    v=contract['verification']; integration=contract.get('develop_integration')
+    if not integration:return ''
+    ci=v.get('CI') or {}
+    checks='; '.join('['+name+']('+row['url']+') '+row['conclusion'] for name,row in ci.items())
+    return ('기획 인수 '+integration['accepted_on']+' · ['+integration['pull_request'].rsplit('/',1)[-1]+'번 PR]('+integration['pull_request']+') · '+integration['status']+'.\n\n'+
+            '구현 HEAD '+integration['implementation_head']+' · develop 병합 '+integration['integrated_develop_commit']+'.\n\n'+
+            '보안 HTTP '+str(v['synthetic_test_count'])+'개 · 고정 스냅샷 전체 '+str(v['full_snapshot_test_count'])+'개 · 독립 합성 '+str(v['independent_synthetic_test_count'])+'개 PASS. '+v['implementation_continuity']+'\n\n'+
+            'GitHub CI: '+checks+'. 실제 Auth·DB·BFF·브라우저·배포는 '+v['actual_Auth_DB_BFF_browser_deployment']+'이다.\n\n')
+
+
+def validate_secured_preparation(spec):
+    c=spec.get("secured_backend_preparation_contract")
+    try:required=tuple(int(x) for x in spec.get("version","0.0.0").split(".")) >= (1,9,0)
+    except (TypeError,ValueError):required=False
+    if c is None:return ["DEV-008 required secure preparation contract missing"] if required else []
+    if not isinstance(c,dict):return ["DEV-008 secure preparation contract invalid"]
+    errors=[]; p=c.get("composition",{}); r=c.get("relay",{}); h=c.get("health",{}); x=c.get("response_projection",{})
+    if (c.get("format")!="jungsi.secured-backend-preparation/v1" or c.get("id")!="DEV-008" or
+        c.get("policy_revision")!=spec.get("security_contract",{}).get("revision") or
+        c.get("branch")!="feature/application-pre-data-platform" or c.get("requirements")!=["REQ-24","REQ-25","REQ-26"]):
+        errors.append("DEV-008 policy/owner binding drift")
+    if (p.get("factory")!="create_secured_app" or p.get("required_keyword")!="security" or
+        p.get("legacy_factories")!=["create_app","configured_app"] or p.get("default_factories_unchanged") is not True or
+        p.get("automatic_storage_or_entitlement_transition") is not False or p.get("local_verification_unchanged") is not True or
+        p.get("existing_API_count")!=22 or p.get("API_or_DTO_additions") is not False or p.get("session_format")!="jungsi.session/v1"):
+        errors.append("DEV-008 default composition preservation drift")
+    if (r.get("header")!="X-Jungsi-Relay-Token" or r.get("environment_name")!="JUNGSI_RELAY_TOKEN" or
+        r.get("server_only") is not True or r.get("secret_repr_allowed") is not False or r.get("browser_secret_allowed") is not False or
+        r.get("duplicate_raw_headers_rejected") is not True or r.get("user_authentication_required_after_relay") is not True or
+        r.get("relay_alone_grants_user_access") is not False or
+        r.get("order")!=["relay_identity","verified_user_Bearer","current_entitlement_and_owner_scope","input_and_data_access"] or
+        r.get("configuration_error")!={"http":503,"code":"security_policy_unavailable"} or
+        r.get("authentication_error")!={"http":403,"code":"relay_authentication_failed"}):
+        errors.append("DEV-008 relay identity/privacy drift")
+    ids=[o["id"] for o in spec["operations"]]
+    if sorted(c.get("protected_operations",[]))!=sorted(ids):errors.append("DEV-008 operation coverage drift")
+    if (h.get("public_path")!="/health/live" or h.get("relay_protected_path")!="/health/ready" or
+        h.get("ready_requires_user_Bearer") is not False or h.get("ready_production_ready") is not False or
+        h.get("ready_public_fields")!=["status","server_timezone","production_ready","security_boundary"] or
+        h.get("detailed_environment_DB_role_private_location_exposed") is not False):
+        errors.append("DEV-008 safe health boundary drift")
+    if (x.get("ownership")!="application" or x.get("role_roots")!=["standard","paid"] or
+        any(x.get(k)is not True for k in ("operation_binding_required","all_registered_operations_required","nested_objects_and_arrays","dynamic_ID_map_values_typed")) or
+        x.get("free_form_Any_allowed") is not False or x.get("untyped_additional_properties_allowed") is not False or
+        set(x.get("covers",[]))!={"success","pending","error","persisted_report","idempotent_replay","print_dto","published_forecast"}):
+        errors.append("DEV-008 recursive response boundary drift")
+    registry=x.get("static_schema_registry")
+    try:registry_required=tuple(int(y) for y in spec.get("version","0.0.0").split(".")) >= (1,9,1)
+    except (TypeError,ValueError):registry_required=False
+    if registry_required or registry is not None:
+        if not isinstance(registry,dict) or registry.get("path")!="src/jungsi_touch/application/public_response_schemas.json" or registry.get("format")!="jungsi.public-response-schemas/v1" or registry.get("auxiliary_roots")!=["error","readiness"]:
+            errors.append("DEV-008 static schema registry source drift")
+    preserve=c.get("preservation",{})
+    if (c.get("production_ready") is not False or any(preserve.get(k)is not False for k in
+        ("default_factory_change_allowed","data_promotion_allowed","actual_DB_write_deployment_allowed","main_ready_allowed"))):
+        errors.append("DEV-008 scoped preparation cannot promote production")
+    states={"planned","implemented_synthetic_verified_integration_pending","accepted_on_develop_scoped_synthetic_verified"}
+    v=c.get("verification",{})
+    if c.get("code_status") not in states or v.get("actual_Auth_DB_BFF_browser_deployment")!="NOT_RUN":
+        errors.append("DEV-008 scoped verification state drift")
+    if c.get("code_status")!="planned" and (not re.fullmatch(r"[0-9a-f]{40}",str(v.get("implementation_commit",""))) or
+        type(v.get("synthetic_test_count"))is not int or v.get("synthetic_test_count",0)<=0 or
+        v.get("status")!="PASS_SCOPED_SYNTHETIC_HTTP"):
+        errors.append("DEV-008 implementation completion lacks fixed synthetic evidence")
+    return errors
 
 
 def validate_security_contract(spec):
@@ -1550,6 +1751,8 @@ def validate_spec(spec):
     records=spec['workflow'].get('synchronized_work_items')
     expected_items={'docs/work_items/DEV-006-analysis-connection.json':'presentation_connection_contract',
                     'docs/work_items/DEV-007-forecast-policy.json':'forecast_policy_contract'}
+    if 'secured_backend_preparation_contract' in spec:
+        expected_items['docs/work_items/DEV-008-secured-backend-boundary.json']='secured_backend_preparation_contract'
     if records is not None:
         if not isinstance(records,dict) or set(records)!=set(expected_items):
             errors.append('Synchronized work-item scope registration drift')
@@ -1577,8 +1780,10 @@ def validate_spec(spec):
     errors.extend(validate_forecast_contract(spec))
     errors.extend(validate_local_verification_contract(spec))
     errors.extend(validate_security_contract(spec))
+    errors.extend(validate_secured_preparation(spec))
     errors.extend(validate_frontend_reply_contract(spec))
     errors.extend(validate_supabase_actual_update_contract(spec))
+    errors.extend(validate_supabase_second_actual_update_contract(spec))
     return errors
 
 def protected_path(path,shared_tools):
@@ -1593,9 +1798,131 @@ def protected_path(path,shared_tools):
     if path.startswith("scripts/") and path not in shared_tools:return True
     return False
 
+PUBLIC_RESPONSE_SCHEMA_PATH="src/jungsi_touch/application/public_response_schemas.json"
+
+
+def validate_public_response_catalog(catalog,spec):
+    """Check a static schema graph without importing implementation or private data."""
+    errors=[]
+    graph_error="DEV-008 public response schema type/reference graph invalid"
+    if not isinstance(catalog,dict) or catalog.get("format")!="jungsi.public-response-schemas/v1":
+        return ["DEV-008 public response schema registry invalid"]
+    definitions=catalog.get("schemas")
+    if not isinstance(definitions,dict) or not definitions or any(not isinstance(k,str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]{0,127}",k) for k in definitions):
+        return [graph_error]
+    colors={}
+    primitive={"string","integer","number","boolean","null"}
+    def visit(node,depth=0):
+        if not isinstance(node,dict) or depth>128:raise ValueError()
+        if "nullable" in node and type(node["nullable"])is not bool:raise ValueError()
+        if "ref" in node:
+            if set(node)-{"ref","nullable","description"}:raise ValueError()
+            name=node["ref"]
+            if not isinstance(name,str) or name not in definitions or colors.get(name)==1:raise ValueError()
+            if colors.get(name)!=2:
+                colors[name]=1;visit(definitions[name],depth+1);colors[name]=2
+            return
+        kind=node.get("type")
+        if kind in primitive:
+            if "enum" in node:
+                values=node["enum"]
+                if not isinstance(values,list) or not values:raise ValueError()
+                accepts={"string":lambda v:isinstance(v,str),"integer":lambda v:type(v)is int,
+                         "number":lambda v:type(v)in (int,float),"boolean":lambda v:type(v)is bool,"null":lambda v:v is None}
+                if any(not accepts[kind](v) for v in values):raise ValueError()
+            return
+        if kind=="enum":
+            if not isinstance(node.get("values"),list) or not node["values"] or any(type(v)not in (str,int,float,bool,type(None)) for v in node["values"]):raise ValueError()
+            return
+        if kind=="object":
+            properties=node.get("properties");required=node.get("required");optional=node.get("optional")
+            if not isinstance(properties,dict) or not isinstance(required,list) or not isinstance(optional,list):raise ValueError()
+            if any(not isinstance(k,str) for k in [*properties,*required,*optional]):raise ValueError()
+            if len(required)!=len(set(required)) or len(optional)!=len(set(optional)) or set(required)&set(optional):raise ValueError()
+            if set(required)|set(optional)!=set(properties) or node.get("additionalProperties") not in (None,False):raise ValueError()
+            for child in properties.values():visit(child,depth+1)
+            return
+        if kind=="array":visit(node.get("items"),depth+1);return
+        if kind=="map":visit(node.get("keys"),depth+1);visit(node.get("values"),depth+1);return
+        if kind=="union":
+            variants=node.get("variants",node.get("options"))
+            if not isinstance(variants,list) or not variants:raise ValueError()
+            for child in variants:visit(child,depth+1)
+            return
+        raise ValueError()
+    try:
+        for name in definitions:visit({"ref":name})
+    except (ValueError,TypeError,RecursionError):errors.append(graph_error)
+    if errors:return errors
+    def properties(node):
+        if "ref" in node:return properties(definitions[node["ref"]])
+        if node["type"]=="union":
+            result=set()
+            for child in node.get("variants",node.get("options")):result.update(properties(child))
+            return result
+        if node["type"]!="object":raise ValueError()
+        return set(node["properties"])
+    operations=catalog.get("operations")
+    if not isinstance(operations,list):return ["DEV-008 public response schema operation binding drift"]
+    by_id={o["id"]:o for o in spec["operations"]};seen=set()
+    for binding in operations:
+        if not isinstance(binding,dict) or not isinstance(binding.get("id"),str) or binding["id"] not in by_id or binding["id"] in seen:
+            errors.append("DEV-008 public response schema operation binding drift");continue
+        seen.add(binding["id"]);operation=by_id[binding["id"]]
+        if binding.get("contract_ref")!=operation.get("contract_ref"):
+            errors.append("DEV-008 public response schema operation binding drift")
+        roots=binding.get("roots")
+        if not isinstance(roots,dict) or set(roots)!={"standard","paid"}:
+            errors.append("DEV-008 public response schema operation binding drift");continue
+        dto=spec["backend_platform_contract"]["dto_schemas"][operation["http_contract"]["response_schema"]]
+        for role,root in roots.items():
+            try:
+                visit(root);actual=properties(root)
+                expected=set(dto["fields"])|(set(dto.get("paid_fields",[])) if role=="paid" else set())
+                if actual!=expected:errors.append("DEV-008 public response schema field boundary drift")
+            except (ValueError,TypeError,KeyError,RecursionError):errors.append(graph_error)
+    if seen!=set(by_id):errors.append("DEV-008 public response schema operation binding drift")
+    auxiliary=catalog.get("auxiliary_roots")
+    if not isinstance(auxiliary,dict) or set(auxiliary)!={"error","readiness"}:
+        errors.append("DEV-008 public response auxiliary boundary drift")
+    else:
+        for name,root in auxiliary.items():
+            try:
+                visit(root)
+                expected={"status","error","request_id"} if name=="error" else {"status","server_timezone","production_ready","security_boundary"}
+                if properties(root)!=expected:errors.append("DEV-008 public response auxiliary boundary drift")
+                if name=="error":
+                    resolved=root
+                    while "ref" in resolved:resolved=definitions[resolved["ref"]]
+                    if properties(resolved["properties"]["error"])!={"code"}:errors.append("DEV-008 public response auxiliary boundary drift")
+            except (ValueError,TypeError,KeyError,RecursionError):errors.append(graph_error)
+    return sorted(set(errors))
+
+
+def validate_public_response_registry(paths,read,spec):
+    contract=spec.get("secured_backend_preparation_contract")
+    if not contract:return []
+    if PUBLIC_RESPONSE_SCHEMA_PATH not in paths:
+        return [] if contract.get("code_status")=="planned" else ["DEV-008 public response schema registry missing"]
+    def unique(pairs):
+        result={}
+        for key,value in pairs:
+            if key in result:raise ValueError()
+            result[key]=value
+        return result
+    try:catalog=json.loads(read(PUBLIC_RESPONSE_SCHEMA_PATH),object_pairs_hook=unique)
+    except (ValueError,TypeError,RecursionError):return ["DEV-008 public response schema registry invalid"]
+    return validate_public_response_catalog(catalog,spec)
+
+
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
     names=set(paths)
+    errors.extend(validate_public_response_registry(names,read,spec))
+    transition=spec.get('supabase_operations_handoff_contract',{}).get('service_transition_contract',{})
+    if transition.get('implementation_mode')=='explicit_prepared_default_unchanged':
+        for path in transition.get('implementation_code_paths',[]):
+            if path not in names:errors.append('Explicit prepared implementation reference absent from selected snapshot: '+path)
     for path,expected in generated_files(spec).items():
         if path not in names:errors.append("Missing generated file: "+path)
         elif read(path)!=expected:errors.append("Document or route drift: "+path)
@@ -1649,13 +1976,88 @@ def validate_changed_paths(changed,spec):
     return []
 
 def snapshot_changed_paths(snapshot):
+    """Compare the immutable selected result with every fixed merge parent."""
+    oid_pattern=r"(?:[0-9a-f]{40}|[0-9a-f]{64})"
+    def commit_oid(raw):
+        value=raw.decode("ascii").strip()
+        if not re.fullmatch(oid_pattern,value):raise ValueError("Invalid snapshot parent commit.")
+        return value
+    def parse_entries(raw,*,index):
+        entries={}
+        for row in raw.split(b"\0"):
+            if not row:continue
+            info,name=row.split(b"\t",1);fields=info.decode("ascii").split()
+            if len(fields)!=3:raise ValueError("Invalid snapshot tree metadata.")
+            mode,second,third=fields
+            if index:
+                oid=second
+                if third!="0":raise ValueError("Resolve the index conflict before validation.")
+            else:
+                oid=third
+                if second not in {"blob","commit"}:raise ValueError("Invalid snapshot tree metadata.")
+            path=name.decode("utf-8")
+            if not re.fullmatch(r"[0-7]{6}",mode) or not re.fullmatch(oid_pattern,oid) or not path or path in entries:
+                raise ValueError("Invalid snapshot tree metadata.")
+            entries[path]=(mode,oid)
+        return entries
     if snapshot.staged:
-        raw=git("diff","--cached","--name-only","-z")
+        captured=getattr(snapshot,"entries",None)
+        if not isinstance(captured,dict):raise ValueError("Staged snapshot entries are required.")
+        captured=dict(captured)
+        def assert_same_index():
+            if parse_entries(git("ls-files","--stage","-z"),index=True)!=captured:
+                raise ValueError("Index changed after the selected snapshot was captured.")
+        def head_commit():
+            try:return commit_oid(git("rev-parse","--verify","HEAD^{commit}"))
+            except subprocess.CalledProcessError as failure:
+                # Preserve ordinary initial staging only for a proven unborn branch.
+                ref=git("symbolic-ref","--quiet","HEAD").decode("utf-8").strip()
+                if not ref.startswith("refs/heads/"):raise failure
+                try:git("show-ref","--verify","--quiet",ref)
+                except subprocess.CalledProcessError as missing:
+                    if missing.returncode==1:return None
+                    raise
+                raise failure
+        merge_file=Path(git("rev-parse","--git-path","MERGE_HEAD").decode("utf-8").strip())
+        if not merge_file.is_absolute():merge_file=ROOT/merge_file
+        def merge_state():
+            if merge_file.is_symlink():raise ValueError("Unexpected symbolic MERGE_HEAD.")
+            try:return merge_file.read_bytes()
+            except FileNotFoundError:return None
+        assert_same_index()
+        head=head_commit();merge_raw=merge_state();parents=[] if head is None else [head]
+        if merge_raw is not None:
+            heads=merge_raw.splitlines()
+            if head is None or len(heads)!=1 or not re.fullmatch(oid_pattern.encode(),heads[0]):
+                raise ValueError("Expected one fixed MERGE_HEAD commit.")
+            merge=commit_oid(git("rev-parse","--verify",heads[0].decode("ascii")+"^{commit}"))
+            if merge!=heads[0].decode("ascii") or merge==head:
+                raise ValueError("Invalid staged merge parent.")
+            parents.append(merge)
+        changed=set(captured) if not parents else set()
+        for parent in parents:
+            entries=parse_entries(git("ls-tree","-r","-z",parent),index=False)
+            changed.update(path for path in set(captured)|set(entries) if captured.get(path)!=entries.get(path))
+        assert_same_index()
+        if merge_state()!=merge_raw or head_commit()!=head:
+            raise ValueError("Merge state changed while validating the index.")
+        return sorted(changed)
     elif snapshot.revision:
-        raw=git("diff",snapshot.revision+"^",snapshot.revision,"--name-only","-z")
+        revision=commit_oid(snapshot.revision.encode("ascii"))
+        headers,separator,_=git("cat-file","commit",revision).partition(b"\n\n")
+        rows=headers.splitlines();trees=[row for row in rows if row.startswith(b"tree ")]
+        parent_rows=[row for row in rows if row.startswith(b"parent")]
+        if not separator or len(trees)!=1 or not re.fullmatch(b"tree "+oid_pattern.encode(),trees[0]):
+            raise ValueError("Invalid commit parent metadata.")
+        if any(not re.fullmatch(b"parent "+oid_pattern.encode(),row) for row in parent_rows):
+            raise ValueError("Invalid commit parent metadata.")
+        parents=[row[7:].decode("ascii") for row in parent_rows]
+        if not parents or len(set(parents))!=len(parents) or revision in parents:
+            raise ValueError("Unsupported root commit or invalid commit parent metadata.")
+        raw=b"".join(git("diff",parent,revision,"--name-only","-z","--") for parent in parents)
     else:
         return []
-    return [p.decode("utf-8") for p in raw.split(bytes([0])) if p]
+    return sorted({p.decode("utf-8") for p in raw.split(bytes([0])) if p})
 
 def write_generated(spec):
     timestamp=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")

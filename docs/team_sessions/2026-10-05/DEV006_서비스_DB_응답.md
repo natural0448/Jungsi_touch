@@ -1,6 +1,10 @@
 # DEV006 서비스·DB 응답과 외부 프런트 인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.8.4이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.3이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+
+다음 기존 본문은 1.8.8까지의 준비/관측 이력과 계약 정의다. ②③ 응답 계약은 그대로 유지하고 현재 통합·자료메타 인수는 마지막1.8.9추가관측과current_followup을 따른다.
+
+현재 추가관측은아래⑪에기록한다. 기존본문의SQL미적용/PR대기등은해당시점history이며②③정식응답정의는불변이다.
 
 기획 반영일: 2026-10-06 UTC. 인계 revision **2026.10.06.v3**. 문서 출발 기준은 **2624f0eb1e8ffa52cd86b866e658e7b1ee45e33f**이다. SUP01 별도 정시 FastAPI와 SUP02 public.jeongsi_passes 원본 목표는 확정했다. 현재 entitlements 어댑터/session v1 실행은 아직 전환하지 않았으며 **운영 NOT_READY**다. 문서 prepared_at와 과거 HTTP checked_at는 별개다.
 
@@ -155,13 +159,32 @@ SUP01/02 의사결정 대기는 해소했지만 배포 제공자·Connect·publi
 양계정 실제 TLS/role/master 최소SELECT와 기존 두 SELECT policy를 사전 catalog에서 확인했다. 이후 owner 단일transaction의 신규 private schema/13RLS tables·001002 적용 개발 영수증을 수령했으나 독립 원장 검수 pending·private app 정책0/runtime003·실 사용자권한/기본factory·운영은 미인수다. 이전 Storage/HTTP의 SQL NOT_RUN은 당시 관측으로 보존한다. CR-SERVICE-SUP04의 app-only/current_user·migration owner runtime거절을 채택하고 master9컬럼SELECT의 임의 REVOKE는 금지한다. PR15 정적 빈학교/숫자범위fix와 CI2 관측은 수용하고 FE-01R HTTP-date 문법 잔여·실브라우저/429·통합 인수는 후속이다.
 
 
+### ⑪ 003·최소자료·PR15통합의현재단계
+
+003은정확인간승인후적용하고fresh24policy/SELECT13·INSERT9·columnUPDATE6의최소권한metadata를확인했다. 실제10합성행은새process/TLS연결로영속성·CAS/멱등/소유권거절을검수했으나실학생/Auth/유료rows·운영전체인수는아니다. 명시port actualDB/master metadata는PASS이고health503는구성/자료/실세션준비보류다. 최소시험팩1건/328915B는statusstaged·승인0/unbound/engineprodfalse·provider미승인거절/network0이다. 수학한구간/9경계부분QA는wholeexam/CDF/공식정수백분위·실화면mode승인이아니다. PR15 ef7b7c08 exactCI2와develop3d90정상merge/삭제0·branch보존은확인됐고FE-01R·FE-ORIGIN·FE-SOURCE-01·browser/429·securitygate는pending이다. 직접인간은기본경로유지·명시연결만준비를선택하여CR06source변경0/defaultlegacy를유지한다. 서비스7준비파일/33focusedPASS와641이전9ERROR/별도fixture10PASS를같은Git전체검수와분리한다. 실제승인자료활성화·JWT·livehost·기본factory·운영은미완료이며minimalallowlist/49archive보존·API22/session3/page4·productionfalse/NOT_READY를유지한다.
+
+기본factory전환안CR06은직접인간이허용하지않았고명시연결준비만진행한다. owner는이관전용·운영서버app DATABASE_URL만·외부화면공개설정/APIorigin만전달한다. 실제secret/DBURL/자료hash·경로/공식점수/학생값은공유문서에복사하지않는다. FE-SOURCE-01 외부담당회신요청: https://github.com/natural0448/Jungsi_touch/pull/15#issuecomment-6018143154 .
+
+
+1.8.9 최신 통합·자료 경계: 현재 develop57f74b1daabd2d6a8e94de216f182e8bfe6557b7에 서비스phase2와 승인된 병합 하네스 수정이 통합됐다. 정상precommit/prepush/정확HEAD pushCI/PR병합시험CI/최종developCI각678PASS·실패/오류/skip0이며 main은 보존했다. source메타draft16과 선별Storage16(fullSHA독립/noJWT64)을 확인했다. 원수능AST source는 보존하고 모평적용child3의 source/applicationContext를 분리 확인했다. engine/production/runtimefalse·publishednull과 기본회원경로유지/명시DI만준비선택은 확정 유지다. 공식입결2객체는 전달검수PASS이나 의미충돌·중복·실기/전형PK혼입으로 DB등록0/채택보류이고 catalog최종영수증을 기다린다. v2설계승인·14경로구현계획은 준비됐으나 코드0·품질/newscopeFE공통계약/모형호환·계산채택은 미완료다. 실제JWT/APIorigin·22API/4페이지/보안운영·live배포는 미인수다. 과거제안/실패/fixture·관측은 보존한다.
+
+관리owner의 source메타 등록은 일회성 이관 작업이며 상시 API/상시권한을 만들지 않는다. source 원본manifest버전과 승인runtime발행버전을 구분한다. 사용자는 기본회원경로유지·명시연결준비를 선택했으며 기본전환승인 대기는 아니다.
+
+최소공식source v4 후속: v2/v3 의미실패와 원본은 보존한다. 일부대학/학교년도 최소선별본의 local/remote native대조PASS는 수령했으며 신규2개DB메타등록/전체18독립검수는최종영수증대기다. 현재등록확정16·engine/production/runtimefalse·publishednull을유지한다. StorageRLS metadata상현재보호bucket클라이언트SELECT허용조건은없지만실제JWT/authenticated HTTP/SEC운영gate는NOT_RUN이다. 최신구현계획v1.1도14경로PLAN_ONLY/code0이며 JSONL구문검사와의미전수QA는구분한다.
+
+최소공식source최종등록관측: 신규2source메타INSERT COMMIT/fresh app exact18과독립Storage/native58·frozenRAM39를수령했다. 현재선별Storage18/fullGETSHA/비인증72본문미반환이며전체bucket파일수가18인것은아니다. source-only draft18·발행0/engine/production/runtimefalse/publishednull·실회원JWT/운영주소/22API4페이지/배포NOT_RUN을유지한다. 일부3교9학교년도451지표249모집행선별범위는전국완료가아니다. 최종app18독립영수증은대기다. 원문census검수당시불변snapshot과이후append를구분하며원본손상/유실을주장하지않는다. 이번1.8.9후보의새훅/CI는아직미실행이다.
+
+1.8.9최종FROZEN관측: appTLS READONLY exact18/old16불변/new2exact/missing0/non-target0의독립PASS를수령했다. 기존003권한/13RLS24policy/publicpasses·profiles/Storagebaseline보존과독립검수DB쓰기/owner/CloudGET/Auth0을구분한다. source-onlydraft18·발행0/engineproductionruntimefalse/publishednull·전국QAfalse·실JWT/22API4페이지/운영주소/배포·보안운영회원검수NOT_RUN은그대로다. 이번FROZEN은검토문서27개만동결한것이며이문서의정본반영/정상commitpush훅/정확HEADCI는미실행이다. 현재기준은이미확인된57이고미래자기커밋SHA를쓰지않는다.
+
+최종메타집계보강: 실제등록·정책34조건PASS/실패0, 기존GET18의bytes/SHA·DB18결속32조건PASS/실패0·새GET0을추가영수증으로확인했다. 누적선별source18/비인증72본문미반환의집계이며실JWT·학생계산·운영엔진/보안gate인수가아니다. 이번문서정본반영/새훅/CI는여전히NOT_RUN이다.
+
 [로컬 검증 계약과 실행 후보](../../current/로컬_검증_연결.md)를 함께 읽는다.
 
 ## Supabase 운영 인수 상태
 
-신규 private Storage49객체 hash readback/원본보존·public경로98거절, source9DDL/30SQL·OpenAPI9컬럼 부분수신 이후 private 설정수령·실제 양계정 TLS/role/master catalog preflight PASS와001002 신규 schema/13RLS tables 적용 개발 영수증을 수령했다. 현재 001002는 actual_applied_verified_by_development_receipt이며 독립 원장검수 pending·private app정책0/runtime003 미적용·실Auth/유료권한/기본factory/자료승인/운영은 미인수다. master/profiles/기존roleowner 변경·DELETE/DROP/TRUNCATE0. CR-SERVICE-SUP03/04 구현준비·서비스후보27검수보고와 PR15 정적fix/CI2는 각각 same snapshot 구현/통합 및 실제 검수대기다. FE-01R HTTP-date 문법 잔여를 별도 후속으로 요청한다. API22/session3/page4·무료누백/유료후보·보안3gate·production_ready=false/NOT_READY와 모든 이전 관측/원본을 보존한다. 최신 PR15 head243d2cd7의 exactCI2/28M/noD·정확 allowedOrigins 관측은 이전339 기록과 분리하며 증분review/merge/보안운영gate는 pending이다. 최신PR15 증분은 임시preview용으로 수용했으며 FE-ORIGIN 실도메인전환/환경분리·유효action/실세션 조건은 pending이다. 최신 인입 규정은 minimal_explicit_approved_allowlist다. 요청별 최소 승인자료만 선택하며 전체소유자료/PDF·QA·dump·전체원표의 자동runtime 인입을 금지한다. 기존49archive와13table schema는 보존·자료인입과 분리한다.
+현재 develop57f74b1daabd2d6a8e94de216f182e8bfe6557b7에 서비스phase2와 승인된 병합 하네스 수정이 통합됐다. 정상precommit/prepush/정확HEAD pushCI/PR병합시험CI/최종developCI각678PASS·실패/오류/skip0이며 main은 보존했다. 최소source-only draft18의신규2 ownerINSERT COMMIT/freshapp18과선별Storage18(fullGET/SHA·비인증72건본문미반환)을확인했다. 최종appTLS READONLY exact18/old16불변/new2exact 독립영수증도PASS이며003/13RLS24policy·공개/Storagebaseline보존을확인했다. 원수능AST source는 보존하고 모평적용child3의 source/applicationContext를 분리 확인했다. engine/production/runtimefalse·publishednull과 기본회원경로유지/명시DI만준비선택은 확정 유지다. 공식입결v2/v3의미실패는보존하고 최소선별v4의일부학교/학교년도local·remote native범위PASS를 수령했다. 신규2개DB메타등록을수령하고최소공식source2의독립native58/frozenRAM39를기록했으며전체draft18/발행0·전국완료false를유지한다. 최종freshapp18독립검수도완료했다. StorageRLS메타는현재보호bucket에클라이언트SELECT허용조건없음을확인했으나실제JWT HTTP/운영SECgate는NOT_RUN이다. v2설계승인·최신v1.1/14경로PLAN_ONLY구현계획은 준비됐으나 코드0·품질/newscopeFE공통계약/모형호환·계산채택은 미완료다. 실제JWT/APIorigin·22API/4페이지/보안운영·live배포는 미인수다. 과거제안/실패/fixture·관측은 보존한다.
 
-[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.06.v4; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
+[Supabase 운영 인수인계](../../current/Supabase_운영_인수인계.md)를 따른다. revision 2026.10.07.v9; HTTP 관측 시각 2026-10-06T08:40:54.349322Z.
 
 [화면팀 최종 회신 요청](../../current/화면팀_회신요청_최종.md)의 RF-01~06과 로컬 요청 ①~⑥를 함께 인수한다. 문서 전달 준비 완료는 담당자 회신·실제 연결·운영 검수 완료를 뜻하지 않는다.
 
@@ -187,4 +210,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](../../current/외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=b98650fb151240438f3f599fb7ad42803a1d7b0964fab0edfac4d0c989b64a2d -->
+<!-- jungsi:generated spec_sha256=fa39d8144fb4ba6fddb7446f460dc05cc160b0e085cdf456e59cda110059fdc2 -->
