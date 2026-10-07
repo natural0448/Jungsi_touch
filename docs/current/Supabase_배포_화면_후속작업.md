@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.8이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.9이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 운영 API 전환 준비 및 화면 담당 인계. 기존 Python 구현의 검산 근거와 미완료 운영 인수를 구분한다.
 
@@ -51,13 +51,13 @@ Edge에서 사용할 private Storage 명부/환경 이름은 서버 담당의 �
 
 ## 화면 담당에게 전달할 작업
 
-화면 제공 범위 scope_confirmation_pending · Drive Apps Script 후보 user_input_pending. 기존 외부 preview와 파일은 이력으로 보존한다. 새 플랫폼으로 채택하지 않는다.
+화면 제공 범위 scope_confirmation_pending · Drive Apps Script 후보 user_approved_for_feasibility_review_only. 기존 외부 preview와 파일은 이력으로 보존한다. 새 플랫폼으로 채택하지 않는다.
 
 - 최신 develop의 공통 명세를 자기 브랜치에 정상 merge하고 화면 변경을 보존해 생성 문서와 정확 HEAD CI를 갱신한다.
 - relay는 예고가 아니라 X-Jungsi-Relay-Token 확정 계약이다. 서버 전용 비밀은 브라우저에 넣지 않고 사용자 Bearer·세션/CSRF·현재 권한을 함께 검수한다.
 - 발행 감지의 과거 draft 개수 기준선을 최신 native 명부의 승인·발행 버전/해시와 기능별 기대값으로 교체한다.
 - API 기본 주소·공개 Auth 설정·비공개 relay 전달·native 기대값은 같은 승인 후보에서 받는다. 주소를 임의로 만들거나 source-only 응답으로 live 전환하지 않는다.
-- Google Drive Apps Script의 화면 제공 허용 여부를 확인한다. 현재 Next.js/기존 외부 워커 화면이 Supabase 안에서 그대로 호스팅된다고 가정하지 않는다.
+- Google Drive Apps Script 웹앱은 검토 후보 포함이 승인됐다. 기존 Next.js/쿠키 세션·사용자 JWT·BFF/CSRF·relay·HTTP 계약·호출 제한의 호환성을 먼저 검토하고 실제 배포는 별도 결정한다.
 - 실제 브라우저 HTML/JS/JSON/source map/저장소·401/403/503·성공 점수와 판단 pending·서울 시각 표시를 같은 후보로 검수한다.
 
 ## 검증 상태
@@ -72,6 +72,10 @@ Edge 구현 NOT_RUN · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 NOT_R
 - [Google Apps Script 웹앱 제공](https://developers.google.com/apps-script/guides/web)
 
 [DEV-010 작업 항목](../work_items/DEV-010-supabase-platform-deployment.json) · [기존 실행 자료 계약](Supabase_실행자료_연결.md)
+
+## 1페이지 추정 2열과 초안 시사
+
+[공식 자료·추정 표기·시사 계약](1페이지_공식자료_추정표기_시사.md)을 따른다. 추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 동일 학년도/모집행/통계 분모와 결측·실제0·음수를 검사하고 실제 불합격자수와의 차이를 표시한다. API의 공식 history_metric과 발행 상태는 불변이다. 기존 로컬 최소 catalog 시사 후보만 준비하며 승인·수신·브라우저·운영 발행은 별도 인수다.
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -91,4 +95,4 @@ Edge 구현 NOT_RUN · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 NOT_R
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=0f0ba711f5d5ab087676da74b2237861e2dc644517413eb4a9fe2b18dffb33a9 -->
+<!-- jungsi:generated spec_sha256=9ab288ee6bb77fdf28574829cdb54dc40d635f6453ff466c6c41c2d52d98ca8b -->

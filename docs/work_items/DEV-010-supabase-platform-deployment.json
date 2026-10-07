@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "planned",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.8",
+  "contract_version": "1.9.9",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -110,16 +110,23 @@
       "branch": "feature/presentation-foundation",
       "hosting_status": "scope_confirmation_pending",
       "candidate": "google_drive_apps_script_web_app",
-      "candidate_permission": "user_input_pending",
+      "candidate_permission": "user_approved_for_feasibility_review_only",
       "existing_external_preview": "historical_preserved_not_approved_as_new_platform",
       "handoff": [
         "최신 develop의 공통 명세를 자기 브랜치에 정상 merge하고 화면 변경을 보존해 생성 문서와 정확 HEAD CI를 갱신한다.",
         "relay는 예고가 아니라 X-Jungsi-Relay-Token 확정 계약이다. 서버 전용 비밀은 브라우저에 넣지 않고 사용자 Bearer·세션/CSRF·현재 권한을 함께 검수한다.",
         "발행 감지의 과거 draft 개수 기준선을 최신 native 명부의 승인·발행 버전/해시와 기능별 기대값으로 교체한다.",
         "API 기본 주소·공개 Auth 설정·비공개 relay 전달·native 기대값은 같은 승인 후보에서 받는다. 주소를 임의로 만들거나 source-only 응답으로 live 전환하지 않는다.",
-        "Google Drive Apps Script의 화면 제공 허용 여부를 확인한다. 현재 Next.js/기존 외부 워커 화면이 Supabase 안에서 그대로 호스팅된다고 가정하지 않는다.",
+        "Google Drive Apps Script 웹앱은 검토 후보 포함이 승인됐다. 기존 Next.js/쿠키 세션·사용자 JWT·BFF/CSRF·relay·HTTP 계약·호출 제한의 호환성을 먼저 검토하고 실제 배포는 별도 결정한다.",
         "실제 브라우저 HTML/JS/JSON/source map/저장소·401/403/503·성공 점수와 판단 pending·서울 시각 표시를 같은 후보로 검수한다."
-      ]
+      ],
+      "candidate_decision": {
+        "date": "2026-10-07",
+        "scope": "Google Apps Script 웹앱을 화면 제공 방식 검토 후보에 포함",
+        "deployment_authorized": false,
+        "existing_frontend_replacement_authorized": false,
+        "compatibility_review": "NOT_RUN"
+      }
     },
     "phases": [
       {
