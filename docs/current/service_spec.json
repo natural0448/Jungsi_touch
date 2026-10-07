@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2569,7 +2569,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.1",
+        "contract_version": "1.9.2",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2743,7 +2743,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.1",
+        "contract_version": "1.9.2",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2909,7 +2909,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "approved_for_implementation",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.1",
+        "contract_version": "1.9.2",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -3622,6 +3622,15 @@
         "REQ-26"
       ],
       "summary": "DEV-008 정적 공개 스키마 그래프 공통 검사를 준비한다. 22 API/역할 필드 일치, 중첩 타입·참조·순환·중복 JSON을 검사하고 구현 전 planned/운영 미준비 상태를 유지한다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "DEV-008 공통 음성 검수 입력을 현재 기획 상태와 독립시켜 planned 및 구현 증거가 있는 상태 모두에서 누락 증거와 registry 부재를 정확히 검사한다. 코드·문서의 운영 준비 승격은 하지 않는다."
     }
   ],
   "overall_analysis_contract": {

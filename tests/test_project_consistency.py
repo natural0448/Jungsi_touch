@@ -1195,7 +1195,9 @@ class SecuredPreparationContractTests(unittest.TestCase):
         del spec["workflow"]["synchronized_work_items"]["docs/work_items/DEV-008-secured-backend-boundary.json"]
         self.assertIn("DEV-008 required secure preparation contract missing",validate_spec(spec))
     def test_synthetic_completion_requires_fixed_snapshot_evidence(self):
-        spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["code_status"]="accepted_on_develop_scoped_synthetic_verified"
+        spec=deepcopy(self.spec);contract=spec["secured_backend_preparation_contract"]
+        contract["code_status"]="accepted_on_develop_scoped_synthetic_verified"
+        contract["verification"].update(implementation_commit=None,synthetic_test_count=None,status="NOT_RUN")
         self.assertIn("DEV-008 implementation completion lacks fixed synthetic evidence",validate_spec(spec))
 
 
@@ -1253,7 +1255,8 @@ class PublicResponseRegistryContractTests(unittest.TestCase):
                 node["properties"][field]={"type":"string"};node["optional"].append(field)
                 self.assertIn("DEV-008 public response auxiliary boundary drift",validate_public_response_catalog(c,self.spec))
     def test_completed_implementation_requires_registry_and_unique_json_keys(self):
-        self.assertEqual(validate_public_response_registry([],lambda p:b"",self.spec),[])
+        planned=deepcopy(self.spec);planned["secured_backend_preparation_contract"]["code_status"]="planned"
+        self.assertEqual(validate_public_response_registry([],lambda p:b"",planned),[])
         s=deepcopy(self.spec);s["secured_backend_preparation_contract"]["code_status"]="implemented_synthetic_verified_integration_pending"
         self.assertIn("DEV-008 public response schema registry missing",validate_public_response_registry([],lambda p:b"",s))
         raw=b'{"format":"jungsi.public-response-schemas/v1","format":"duplicate"}'
