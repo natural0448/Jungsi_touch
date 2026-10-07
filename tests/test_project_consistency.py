@@ -4,7 +4,7 @@ import json,sys,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
-from check_project_consistency import validate_runtime_connection_preparation,validate_public_response_catalog,validate_public_response_registry,PUBLIC_RESPONSE_SCHEMA_PATH,validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,validate_frontend_reply_contract,validate_frontend_followup_contract,FRONTEND_REPLY_DOCUMENT,FRONTEND_FOLLOWUP_DOCUMENT,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
+from check_project_consistency import validate_supabase_deployment_contract,validate_runtime_connection_preparation,validate_public_response_catalog,validate_public_response_registry,PUBLIC_RESPONSE_SCHEMA_PATH,validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,validate_frontend_reply_contract,validate_frontend_followup_contract,FRONTEND_REPLY_DOCUMENT,FRONTEND_FOLLOWUP_DOCUMENT,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
 
 class ConsistencyTests(unittest.TestCase):
     def setUp(self):
@@ -53,7 +53,7 @@ class ConsistencyTests(unittest.TestCase):
                 item=json.loads(generated[path])
                 self.assertEqual(item['scope'],self.spec[metadata['contract_ref']])
                 if 'historical_scope_at_adc684_acceptance' not in item:
-                    self.assertIn(metadata['contract_ref'],{'secured_backend_preparation_contract','runtime_connection_preparation_contract'})
+                    self.assertIn(metadata['contract_ref'],{'secured_backend_preparation_contract','runtime_connection_preparation_contract','supabase_deployment_contract'})
                     self.assertEqual(item['scope'],self.spec[metadata['contract_ref']])
                     self.assertFalse(item['scope']['production_ready'])
                     continue
@@ -67,7 +67,7 @@ class ConsistencyTests(unittest.TestCase):
         for path in self.spec['workflow']['synchronized_work_items']:
             with self.subTest(path=path):
                 changed=dict(files);item=json.loads(changed[path])
-                if self.spec['workflow']['synchronized_work_items'][path]['contract_ref'] in {'secured_backend_preparation_contract','runtime_connection_preparation_contract'}:
+                if self.spec['workflow']['synchronized_work_items'][path]['contract_ref'] in {'secured_backend_preparation_contract','runtime_connection_preparation_contract','supabase_deployment_contract'}:
                     item['scope']['code_status']='unreviewed_implementation'
                 else:
                     key='backend_contract_acceptance' if 'backend_contract_acceptance' in item['scope'] else 'implementation_acceptance'
@@ -1306,5 +1306,50 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
         wrong=deepcopy(self.spec);wrong['workflow']['synchronized_work_items'].pop('docs/work_items/DEV-009-runtime-connection-preparation.json')
         self.assertIn('Synchronized work-item scope registration drift',validate_spec(wrong))
 
+
+class SupabaseDeploymentContractTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+
+    def test_supabase_only_constraint_rejects_external_hosting_and_extra_cost(self):
+        for field in ('external_hosting_allowed','additional_billable_service_allowed','plan_upgrade_allowed','paid_add_on_allowed','automatic_overage_opt_in_allowed'):
+            with self.subTest(field=field):
+                spec=deepcopy(self.spec);spec['supabase_deployment_contract']['platform_policy'][field]=True
+                self.assertIn('DEV-010 platform or additional-cost constraint drift',validate_supabase_deployment_contract(spec))
+        spec=deepcopy(self.spec);spec['supabase_deployment_contract']['platform_policy']['allowed'].append('render')
+        self.assertIn('DEV-010 platform or additional-cost constraint drift',validate_supabase_deployment_contract(spec))
+    def test_edge_plan_cannot_claim_python_hosting_or_browser_engine(self):
+        for field in ('python_hosted_unchanged','engine_in_browser_allowed'):
+            spec=deepcopy(self.spec);spec['supabase_deployment_contract']['architecture'][field]=True
+            self.assertIn('DEV-010 Edge and Python reference boundary drift',validate_supabase_deployment_contract(spec))
+    def test_edge_plan_preserves_exact_relay_and_application_user_authorization(self):
+        spec=deepcopy(self.spec);spec['supabase_deployment_contract']['security']['relay_header']='X-Jungsi-Relay'
+        self.assertIn('DEV-010 relay or application authorization drift',validate_supabase_deployment_contract(spec))
+        spec=deepcopy(self.spec);spec['supabase_deployment_contract']['security']['user_authorization_in_application_required']=False
+        self.assertIn('DEV-010 relay or application authorization drift',validate_supabase_deployment_contract(spec))
+    def test_edge_plan_cannot_promote_source_or_use_historical_count_as_trigger(self):
+        for field in ('source_state_only_promotion_allowed','historical_source_count_trigger_allowed'):
+            spec=deepcopy(self.spec);spec['supabase_deployment_contract']['native_publication'][field]=True
+            self.assertIn('DEV-010 native publication or historical trigger drift',validate_supabase_deployment_contract(spec))
+    def test_edge_preparation_cannot_certify_actual_operations_or_cost(self):
+        spec=deepcopy(self.spec);spec['supabase_deployment_contract']['production_ready']=True
+        self.assertIn('DEV-010 preparation cannot certify operating or billing acceptance',validate_supabase_deployment_contract(spec))
+        for field in ('actual_Auth_DB_Storage_Edge_BFF_browser_deployment','actual_billing_and_quota_verification'):
+            spec=deepcopy(self.spec);spec['supabase_deployment_contract']['verification'][field]='PASS'
+            self.assertIn('DEV-010 preparation cannot certify operating or billing acceptance',validate_supabase_deployment_contract(spec))
+    def test_edge_implementation_completion_needs_exact_commit_and_scoped_evidence(self):
+        spec=deepcopy(self.spec);spec['supabase_deployment_contract']['code_status']='accepted_on_develop_scoped_synthetic_verified'
+        self.assertIn('DEV-010 implementation completion lacks fixed scoped evidence',validate_supabase_deployment_contract(spec))
+    def test_new_platform_contract_and_work_item_are_mandatory(self):
+        spec=deepcopy(self.spec);spec.pop('supabase_deployment_contract')
+        self.assertIn('DEV-010 required platform contract missing',validate_spec(spec))
+        spec=deepcopy(self.spec);spec['workflow']['synchronized_work_items'].pop('docs/work_items/DEV-010-supabase-platform-deployment.json')
+        self.assertIn('Synchronized work-item scope registration drift',validate_spec(spec))
+
+    def test_edge_port_cannot_assume_float_rounding_or_drop_independent_comparison(self):
+        for field,value in [('Number_or_Math_round_equivalence_assumed',True),('independent_python_edge_comparison_required',False),('heavy_model_generation_in_request_allowed',True)]:
+            with self.subTest(field=field):
+                spec=deepcopy(self.spec);spec['supabase_deployment_contract']['numerical_compatibility'][field]=value
+                self.assertIn('DEV-010 precision or heavy-compute compatibility drift',validate_supabase_deployment_contract(spec))
 
 if __name__=="__main__":unittest.main()

@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.7",
+  "version": "1.9.8",
   "baseline_commit": "c77c358b0855686fd061e67225777410550e6b5f",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -22,7 +22,8 @@
     "external_security": "docs/current/외부접근_데이터보호_개발기준.md",
     "frontend_reply": "docs/current/화면팀_회신요청_최종.md",
     "frontend_followup": "docs/current/화면팀_후속작업_지시.md",
-    "runtime_connection_preparation": "docs/current/Supabase_실행자료_연결.md"
+    "runtime_connection_preparation": "docs/current/Supabase_실행자료_연결.md",
+    "supabase_deployment": "docs/current/Supabase_배포_화면_후속작업.md"
   },
   "users": {
     "primary": "학생·학부모",
@@ -2636,7 +2637,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.7",
+        "contract_version": "1.9.8",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2810,7 +2811,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.7",
+        "contract_version": "1.9.8",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -2976,7 +2977,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.7",
+        "contract_version": "1.9.8",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -2995,7 +2996,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.7",
+        "contract_version": "1.9.8",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3010,6 +3011,31 @@
         ],
         "owner": "서비스 개발팀·데이터팀; 공통 기획/검사는 시스템기획팀",
         "preservation": "원본·정제·이전 발행본·파일·기존 상시 브랜치 보존; 실제 자료/설정/검수 근거는 Git 제외."
+      },
+      "docs/work_items/DEV-010-supabase-platform-deployment.json": {
+        "format": "jungsi.work-item/v1",
+        "id": "DEV-010-supabase-platform-deployment",
+        "title": "Google Drive·Supabase 전용 배포 대응과 화면 인계",
+        "approved_on": "2026-10-07",
+        "start_commit": "dc59831a9b34e5dbf4bd15955a1f9489847403af",
+        "branch": "feature/application-pre-data-platform",
+        "status": "planned",
+        "contract_ref": "supabase_deployment_contract",
+        "contract_version": "1.9.8",
+        "requirements": [
+          "REQ-12",
+          "REQ-14",
+          "REQ-15",
+          "REQ-16",
+          "REQ-17",
+          "REQ-20",
+          "REQ-23",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "owner": "서비스 개발팀; 데이터·화면 담당 협력; 공통 기획/검사는 시스템기획팀",
+        "preservation": "기존 Python 검산 코드·원본/이력·모든 파일·상시 브랜치 보존; 비공개 자료/비밀·운영 수치는 Git 제외."
       }
     },
     "development_harness": {
@@ -3061,9 +3087,10 @@
     "3·4페이지: 화면을 열 때 보이는 모집행의 분석이 없으면 university.analyze·candidates.build(POST)를 부른다. 요청 키는 (리포트, revision, 대상)으로 정해 같은 화면을 다시 열어도 한 번만 쓰인다. 읽기 화면에서 쓰기를 부르는 이 방식이 서버 운영(요청량·감사 기록)에 맞는지 확인한다.",
     "4페이지: statistics.read 가 모집단위 하나씩이라 펼친 학교와 와일드카드만 부른다. 여러 모집단위를 한 번에 읽는 방법이 필요한지 정한다.",
     "live 연결: 에듀터치 본체와 같은 Supabase 프로젝트·쿠키 도메인 배포 설정과 실제 계정·이용권·관리 권한의 전체 연결 검증이 남아 있다(DEV-006 remaining).",
-    "live 배포 설정: 운영 우리 서비스 API 주소(JUNGSI_API_URL)와 에듀터치 Supabase URL·publishable 키를 jeongsi-touch 워커 설정에 넣어야 실제 화면이 열린다. 에듀터치 본체의 /jeongsi 통로는 아직 관리자에게만 열려 있다.",
+    "이전 외부 화면 워커의 live 설정 인계는 역사 기록이다. 새 운영 인계는 Google Drive·Supabase 전용 배포 계약을 따르며 API 주소·공개 Auth·서버 relay·화면 제공 범위와 실제 계정/브라우저를 같은 후보로 확인한다.",
     "DEV-008 명시 중계 인증·재귀 응답 경계는 PR17/develop 합성 인수 완료. 기본 연결 전환은 별도이며 실제 BFF/CSRF/브라우저·Auth/이용권/DB·공유 사용량 한도·배포 인수가 남아 있다.",
-    "DEV-009 명시 Supabase 연결·native 버전/승인 검사·분석 JSON 해석 코드는 PR19/develop4932328로 통합 인수했다. 최신 정본→최소 native 수치 검산·독립 승인·불변 발행·명부 선택과 실제 서버/Auth/DB/BFF/브라우저·공유 quota 인수는 NOT_RUN이며 배포 서비스 입력은 대기 중이다."
+    "DEV-009 연결 코드는 PR19/develop 합성 인수 완료다. 사용자 최신 지시로 운영 플랫폼은 Google Drive·Supabase로 한정하며 Python/FastAPI는 로컬 검산 기준으로 보존한다. DEV-010 Edge 호환 구현·최소 native 승인/발행·화면 제공 범위·실제 운영과 포함 사용량 인수는 미완료다.",
+    "DEV-010: 외부 유료 호스팅·추가 서버·유료 부가 기능 없이 Supabase Edge 대응을 진행한다. 기존 요금제/Spend Cap 검수와 Google Drive Apps Script 화면 제공 범위 확인 전 실제 배포/비용 검증 완료로 기록하지 않는다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -3791,6 +3818,22 @@
         "REQ-26"
       ],
       "summary": "DEV-009을 PR19/develop493232832d663d7fea7b0fbb350de15055cd9ccf로 통합했다. HEAD08f73의 정상799개·정확HEAD/PR/병합 CI와 검수본faa6b90 트리 일치, 구현606e의 합성44/독립11 해시 결속을 확인해 명시 Supabase 연결 코드만 인수한다. 실제 native 승인·발행/운영 Auth/DB/BFF/브라우저/배포는 NOT_RUN이고 production_ready=false다. main·기본 factory·현재 이용권·원본·파일·상시 브랜치를 보존한다."
+    },
+    {
+      "date": "2026-10-07",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-20",
+        "REQ-23",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "사용자 최신 플랫폼/비용 지시를 반영해 Render 제안을 실행 전 철회하고 Google Drive·기존 Supabase만 사용하는 DEV-010을 등록한다. Python/FastAPI 검산은 보존하고 운영은 TypeScript/Deno Edge 호환이 필요하다. 정확한 relay 계약·최신 native 발행 감지·최소 자료와 화면 인계를 보완하며 실제 운영/과금 검증과 화면 제공 방식은 미완료다."
     },
     {
       "date": "2026-10-07",
@@ -13123,8 +13166,8 @@
       }
     ],
     "deployment": {
-      "architecture": "separate_Python_FastAPI_backend",
-      "hosting_target_status": "user_input_pending",
+      "architecture": "supabase_edge_functions",
+      "hosting_target_status": "selected_supabase_edge_migration_pending",
       "frontend_owner_branch": "feature/presentation-foundation",
       "server_timezone": "UTC",
       "source_display_timezone": "Asia/Seoul",
@@ -13132,7 +13175,9 @@
       "migration_owner_as_runtime_allowed": false,
       "private_credentials_in_client_allowed": false,
       "actual_deployment": "NOT_RUN",
-      "BFF_browser_actual_acceptance": "NOT_RUN"
+      "BFF_browser_actual_acceptance": "NOT_RUN",
+      "hosting_contract_ref": "supabase_deployment_contract",
+      "python_reference_only": true
     },
     "verification": {
       "status": "PASS_SCOPED_SYNTHETIC_HTTP",
@@ -13193,8 +13238,8 @@
     "remaining": [
       "latest verified source to compatible native candidate and scoped numerical review",
       "explicit approval/immutable publication/runtime selection of eligible minimum native artifacts",
-      "hosting target and private server configuration",
-      "actual JWT/entitlement/owner/Storage/API/BFF/CSRF/browser acceptance and shared atomic quota",
+      "Supabase Edge compatibility implementation and private configuration within the existing plan",
+      "approved presentation hosting scope and actual JWT/entitlement/owner/Storage/API/BFF/CSRF/browser acceptance and shared atomic quota",
       "forecast publication needs its separate independent editor/approver and pinned context; source metadata is not a forecast draft"
     ],
     "planned_code_paths": [
@@ -13203,5 +13248,179 @@
       "src/jungsi_touch/infrastructure/supabase_runtime.py",
       "tests/test_supabase_runtime.py"
     ]
+  },
+  "supabase_deployment_contract": {
+    "format": "jungsi.supabase-deployment/v1",
+    "id": "DEV-010",
+    "revision": "2026.10.07.v1",
+    "basis_commit": "dc59831a9b34e5dbf4bd15955a1f9489847403af",
+    "branch": "feature/application-pre-data-platform",
+    "code_status": "planned",
+    "production_ready": false,
+    "requirements": [
+      "REQ-12",
+      "REQ-14",
+      "REQ-15",
+      "REQ-16",
+      "REQ-17",
+      "REQ-20",
+      "REQ-23",
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "scope": "Google Drive와 기존 Supabase만 사용하는 운영 API 전환 준비 및 화면 담당 인계. 기존 Python 구현의 검산 근거와 미완료 운영 인수를 구분한다.",
+    "platform_policy": {
+      "allowed": [
+        "google_drive",
+        "supabase"
+      ],
+      "external_hosting_allowed": false,
+      "additional_billable_service_allowed": false,
+      "plan_upgrade_allowed": false,
+      "paid_add_on_allowed": false,
+      "automatic_overage_opt_in_allowed": false,
+      "existing_plan_only": true,
+      "usage_and_spend_cap_verification": "NOT_RUN",
+      "render_proposal": "withdrawn_before_files_or_commits_or_service_creation",
+      "rule": "사용자 최신 지시가 별도 FastAPI 유료 호스팅 제안보다 우선한다. 기존 요금제·포함 사용량·Spend Cap을 확인하며 추가 서버·DB·Redis·유료 도메인·요금제 업그레이드를 도입하지 않는다. 포함량 초과를 추가 과금으로 자동 전환하거나 무제한 기본값으로 해석하지 않는다."
+    },
+    "architecture": {
+      "presentation": "담당 화면/BFF; 제공 방식의 플랫폼 범위 확인 중",
+      "application": "Supabase Edge Functions의 TypeScript/Deno 업무 서비스·환산/누백 엔진·저장소 포트",
+      "data": "기존 Supabase Auth/PostgreSQL/private Storage; Google Drive 원본·검수 계보 보관",
+      "python_reference": "현재 Python/FastAPI 코드와 검산을 로컬 기준으로 보존",
+      "python_hosted_unchanged": false,
+      "engine_in_browser_allowed": false,
+      "runtime": "supabase_edge_typescript_deno",
+      "hosting_target_status": "selected_migration_pending",
+      "API_count": 22,
+      "API_DTO_session_changes": false,
+      "server_timezone": "UTC",
+      "source_display_timezone": "Asia/Seoul",
+      "rule": "Edge Functions가 Python ASGI 서버를 그대로 실행한다고 가정하지 않는다. 기존22 API·DTO/session v1·권한·현재 이용권·성공 점수/판단 pending을 보존하고 포팅한 정확한 Git 후보와 독립 수치/응답 검산을 확인한 뒤 운영에 채택한다."
+    },
+    "platform_limits": {
+      "memory_MiB": 256,
+      "active_CPU_seconds_per_request": 2,
+      "free_worker_wall_clock_seconds": 150,
+      "cost_rule": "실제 요금제와 포함량은 비공개 운영 확인 대상이다. BFF/내부 호출·재시도도 사용량에 포함하므로 사전 집계·정확 버전의 결과 재사용·공유 예산을 사용한다. CPU/메모리/포함량 초과를 외부 유료 서버로 우회하지 않는다."
+    },
+    "security": {
+      "contract_ref": "security_contract",
+      "revision": "2026.10.06.v1",
+      "relay_header": "X-Jungsi-Relay-Token",
+      "relay_environment_name": "JUNGSI_RELAY_TOKEN",
+      "relay_server_only": true,
+      "user_Bearer_required": true,
+      "user_authorization_in_application_required": true,
+      "current_entitlement_authority": "jungsi_backend.entitlements",
+      "direct_browser_analysis_allowed": false,
+      "secrets_in_browser_allowed": false,
+      "shared_atomic_quota_required": true,
+      "health_live_path": "/health/live",
+      "health_ready_path": "/health/ready",
+      "health_ready_relay_required": true,
+      "rule": "relay 계약은 이미 확정됐다. 화면 서버/BFF가 정확한 단일 헤더와 실제 사용자 Bearer를 전달하며 분석 API는 현재 이용권·소유권·관리 범위를 다시 검사한다. 공개 liveness와 보호된 readiness를 구분하고 쿠키/CSRF·재귀 DTO·실브라우저·공유 원자적 예산 및 세 보안 gate를 인수한다."
+    },
+    "native_publication": {
+      "registry_format": "jungsi.data-registry/v1",
+      "selection_format": "jungsi.runtime-selection/v1",
+      "required_dependencies_only": true,
+      "source_state_only_promotion_allowed": false,
+      "historical_source_count_trigger_allowed": false,
+      "source_snapshots_preserved": true,
+      "actual_data_in_Git": false,
+      "rule": "발행 감지 기준은 최신 활성 포인터와 기능별 native 명부의 승인·발행 버전/해시/선택 변경이다. 과거 draft 개수·DB 적재·source-only 승인 시각만으로 live 전환하지 않는다. catalog/환산/누백/판단은 각각 최소 의존성과 검수 범위를 기록하며 미공개·미확인·0·판단 pending을 보존한다."
+    },
+    "frontend": {
+      "branch": "feature/presentation-foundation",
+      "hosting_status": "scope_confirmation_pending",
+      "candidate": "google_drive_apps_script_web_app",
+      "candidate_permission": "user_input_pending",
+      "existing_external_preview": "historical_preserved_not_approved_as_new_platform",
+      "handoff": [
+        "최신 develop의 공통 명세를 자기 브랜치에 정상 merge하고 화면 변경을 보존해 생성 문서와 정확 HEAD CI를 갱신한다.",
+        "relay는 예고가 아니라 X-Jungsi-Relay-Token 확정 계약이다. 서버 전용 비밀은 브라우저에 넣지 않고 사용자 Bearer·세션/CSRF·현재 권한을 함께 검수한다.",
+        "발행 감지의 과거 draft 개수 기준선을 최신 native 명부의 승인·발행 버전/해시와 기능별 기대값으로 교체한다.",
+        "API 기본 주소·공개 Auth 설정·비공개 relay 전달·native 기대값은 같은 승인 후보에서 받는다. 주소를 임의로 만들거나 source-only 응답으로 live 전환하지 않는다.",
+        "Google Drive Apps Script의 화면 제공 허용 여부를 확인한다. 현재 Next.js/기존 외부 워커 화면이 Supabase 안에서 그대로 호스팅된다고 가정하지 않는다.",
+        "실제 브라우저 HTML/JS/JSON/source map/저장소·401/403/503·성공 점수와 판단 pending·서울 시각 표시를 같은 후보로 검수한다."
+      ]
+    },
+    "phases": [
+      {
+        "id": "DEP-01",
+        "owner": "서비스 개발팀·시스템기획팀",
+        "status": "in_progress",
+        "deliverable": "기존22 operation·저장소/native 종류·수치/반올림/시각·권한을 Edge 구현에 대응한 변경 경계와 재사용 검산 목록"
+      },
+      {
+        "id": "DEP-02",
+        "owner": "서비스 개발팀",
+        "status": "planned",
+        "deliverable": "Edge 명시 구성·relay/실사용자 권한·private Storage 명부·DB 포트·안전한 health 및 정밀 계산의 단계적 호환 구현"
+      },
+      {
+        "id": "DEP-03",
+        "owner": "데이터팀·서비스 개발팀·시스템기획팀",
+        "status": "in_progress",
+        "deliverable": "기존 검수/변환 캐시를 재사용한 기능별 최소 native 후보·독립 검산·승인·불변 발행·명시 선택"
+      },
+      {
+        "id": "DEP-04",
+        "owner": "화면 담당",
+        "status": "planned",
+        "deliverable": "허용된 화면 제공 방식·BFF relay/세션/CSRF·발행 감지와 기대값·실브라우저 검수"
+      },
+      {
+        "id": "DEP-05",
+        "owner": "서버 담당·시스템기획팀",
+        "status": "planned",
+        "deliverable": "현재 Supabase 요금제/포함량/Spend Cap 확인, 실제 Auth/DB/Storage/공유 예산/Edge 후보 배포와 세 보안 gate 인수"
+      }
+    ],
+    "verification": {
+      "status": "NOT_RUN",
+      "implementation_commit": null,
+      "synthetic_test_count": 0,
+      "CI": null,
+      "actual_Auth_DB_Storage_Edge_BFF_browser_deployment": "NOT_RUN",
+      "actual_billing_and_quota_verification": "NOT_RUN"
+    },
+    "preservation": {
+      "files_deleted": 0,
+      "new_branches": 0,
+      "legacy_factory_change_allowed": false,
+      "source_flag_only_promotion_allowed": false,
+      "production_ready_promotion_allowed": false
+    },
+    "official_sources": [
+      {
+        "title": "Supabase Edge Functions 실행 언어",
+        "url": "https://supabase.com/docs/guides/functions"
+      },
+      {
+        "title": "Edge CPU·메모리·시간 제한",
+        "url": "https://supabase.com/docs/guides/functions/limits"
+      },
+      {
+        "title": "Edge 포함 호출량·추가 과금",
+        "url": "https://supabase.com/docs/guides/platform/manage-your-usage/edge-function-invocations"
+      },
+      {
+        "title": "Google Apps Script 웹앱 제공",
+        "url": "https://developers.google.com/apps-script/guides/web"
+      }
+    ],
+    "numerical_compatibility": {
+      "exact_rational_and_decimal_preserved": true,
+      "explicit_rule_rounding_preserved": true,
+      "canonical_integer_JSON_keys_preserved": true,
+      "independent_python_edge_comparison_required": true,
+      "Number_or_Math_round_equivalence_assumed": false,
+      "heavy_model_generation_in_request_allowed": false,
+      "rule": "환산·누백의 유리수/정확 소수·명시 반올림과 경계값을 Python 기준과 독립 대조한다. TypeScript Number/Math.round만으로 동등성을 가정하지 않는다. JSON 정수 키·불리언/비유한 값·버전/학년도/시험/모집행 결속과 UTC/서울 변환을 함께 비교한다. 대규모 모형 생성은 보존된 오프라인 검수 작업과 발행본으로 구분하고 Edge 요청에 그대로 넣지 않는다."
+    }
   }
 }

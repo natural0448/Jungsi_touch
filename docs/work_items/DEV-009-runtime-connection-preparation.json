@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "accepted_on_develop_scoped_synthetic_verified",
   "contract_ref": "runtime_connection_preparation_contract",
-  "contract_version": "1.9.7",
+  "contract_version": "1.9.8",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -175,8 +175,8 @@
       }
     ],
     "deployment": {
-      "architecture": "separate_Python_FastAPI_backend",
-      "hosting_target_status": "user_input_pending",
+      "architecture": "supabase_edge_functions",
+      "hosting_target_status": "selected_supabase_edge_migration_pending",
       "frontend_owner_branch": "feature/presentation-foundation",
       "server_timezone": "UTC",
       "source_display_timezone": "Asia/Seoul",
@@ -184,7 +184,9 @@
       "migration_owner_as_runtime_allowed": false,
       "private_credentials_in_client_allowed": false,
       "actual_deployment": "NOT_RUN",
-      "BFF_browser_actual_acceptance": "NOT_RUN"
+      "BFF_browser_actual_acceptance": "NOT_RUN",
+      "hosting_contract_ref": "supabase_deployment_contract",
+      "python_reference_only": true
     },
     "verification": {
       "status": "PASS_SCOPED_SYNTHETIC_HTTP",
@@ -245,8 +247,8 @@
     "remaining": [
       "latest verified source to compatible native candidate and scoped numerical review",
       "explicit approval/immutable publication/runtime selection of eligible minimum native artifacts",
-      "hosting target and private server configuration",
-      "actual JWT/entitlement/owner/Storage/API/BFF/CSRF/browser acceptance and shared atomic quota",
+      "Supabase Edge compatibility implementation and private configuration within the existing plan",
+      "approved presentation hosting scope and actual JWT/entitlement/owner/Storage/API/BFF/CSRF/browser acceptance and shared atomic quota",
       "forecast publication needs its separate independent editor/approver and pinned context; source metadata is not a forecast draft"
     ],
     "planned_code_paths": [
