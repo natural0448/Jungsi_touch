@@ -220,11 +220,9 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
   }
   const n = Number(v.delta_pp);
   const tone = v.status === "neutral" ? "even" : n > 0 ? "up" : "down";
-  // 어디에서 어디로 움직였는지 함께 적는다(사용자 요청): 유불리는 '전체 기준 위치 − 이 대학 기준 위치'이므로
-  // 전체 기준 위치 = 이 대학 기준 위치 + 유불리(정확한 역산, 화면 계산). 같은 비교집단일 때만 성립한다
-  const uniTop = Number(a.percentile?.inclusive_top_percent ?? a.percentile?.top_percent ?? a.converted_percentile ?? NaN);
-  const totalTop = Number.isFinite(uniTop) && Number.isFinite(n) ? uniTop + n : null;
-  const pct = (x: number) => x.toLocaleString("ko-KR", { maximumFractionDigits: 2 });
+  // 이 대학 기준 위치만 보여 준다(사용자 지시 2026-10-08): 유불리로 역산한 '전체 기준' 수치는
+  // 페이지 상단의 전체 위치와 달라 보일 수 있어(비교 보정 차이) 혼란을 만들므로 적지 않는다
+  const uniTop = a.percentile?.inclusive_top_percent ?? a.percentile?.top_percent ?? a.converted_percentile ?? null;
   return (
     <section className="card" aria-label="환산 유불리">
       <h3>환산 유불리</h3>
@@ -235,16 +233,21 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
       </div>
       <p>
         같은 성적이라도 대학마다 반영하는 과목과 비율이 달라, 어느 대학 방식으로 계산하느냐에 따라 내 위치가 달라집니다.
-        {totalTop !== null && (
+        {uniTop !== null ? (
           <>
-            {" "}전체 성적(총점) 기준으로는 상위 <b className="num">{pct(totalTop)}%</b>인데, 이 대학 방식으로 계산하면 상위 <b className="num">{pct(uniTop)}%</b>
-            {v.status === "favorable" ? "로 올라갑니다" : v.status === "unfavorable" ? "로 내려갑니다" : "로 거의 같습니다"} — 그 차이가 위 숫자입니다.
+            {" "}이 대학 방식으로는 상위 <b className="num">{uniTop}%</b>이고,
+            {v.status === "favorable" ? " 전체 성적(총점) 기준 위치보다 그만큼 올라간 자리입니다" : v.status === "unfavorable" ? " 전체 성적(총점) 기준 위치보다 그만큼 내려간 자리입니다" : " 전체 성적(총점) 기준 위치와 거의 같은 자리입니다"}
+            {" "}— 위 숫자가 그 차이입니다.
           </>
+        ) : v.status === "favorable" ? (
+          " 이 대학 방식이 내 과목 구성에 비교적 유리합니다."
+        ) : v.status === "unfavorable" ? (
+          " 이 대학 방식이 내 과목 구성에 다소 불리합니다."
+        ) : (
+          " 이 대학 방식으로 봐도 위치가 거의 같습니다."
         )}
-        {totalTop === null && (v.status === "favorable" ? " 이 대학 방식이 내 과목 구성에 비교적 유리합니다." : v.status === "unfavorable" ? " 이 대학 방식이 내 과목 구성에 다소 불리합니다." : " 이 대학 방식으로 봐도 위치가 거의 같습니다.")}
       </p>
       <span className="note">
-        전체 기준 위치는 이 대학 기준 위치에 유불리를 더해 계산한 값입니다(화면 계산).
         지원해도 되는지는 이 숫자가 아니라 왼쪽 <b>지원가능성</b> 판단을 보세요 — 유불리는 비슷한 수준의 대학 중
         어디가 내 과목 구성에 더 잘 맞는지 고를 때 쓰는 보조 지표이며, 유리해도 합격을, 불리해도 지원 불가를 뜻하지 않습니다.
       </span>
