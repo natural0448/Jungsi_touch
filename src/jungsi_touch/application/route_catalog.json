@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.6",
-  "source_sha256": "0eba84192d33007ab970f5955db92f3ebc50c1869f6555c63505e4689e55bf95",
+  "spec_version": "1.9.16",
+  "source_sha256": "b4bf2e6a9b562e06ee8f69167c0c8c774abaaa1d75a7f531fecb4da032a7987e",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1403,7 +1403,7 @@
         ],
         "rules": [
           "verification_status=verified_official인 자료만 반환한다. 승인 플래그 자체·원문·로컬 경로·해시는 반환하지 않는다.",
-          "평균/50%/70%/최저와 점수 종류를 변환·대체하지 않는다. 미발표는 null과 발표 상태로 보존한다."
+          "평균/50%/70%/75%/최저 등 원문 지표와 점수 종류를 변환·대체하지 않는다. 75%컷을 70%컷·합격권·최저 합격점으로 분류하지 않는다. 미발표는 null과 발표 상태로 보존하며 미전사·미검수와 구분한다."
         ]
       },
       "recruitment": {
@@ -2845,7 +2845,8 @@
     ],
     "reason_rules": [
       "확인된 대학 반영 방법과 해당 학생 계산 결과/위치 및 학과 판단의 설명만 공개한다. 내부 전체trace·계수표·곡선·가중치·담당자 ID를 공개하지 않는다.",
-      "추천 이유는 {code,text,evidence_refs}로 서버가 생성한다. 정책 추세 근거와 학생 유불리 설명을 구분하고 확인되지 않은 인과를 확정 표현하지 않는다."
+      "추천 이유는 {code,text,evidence_refs}로 서버가 생성한다. 정책 추세 근거와 학생 유불리 설명을 구분하고 확인되지 않은 인과를 확정 표현하지 않는다.",
+      "내부 판단 기준 수치 비노출과 정상 공개 근거 보존은 함께 적용한다. 학생 분석의 채택본에 결속된 이슈·상담조정 요약·버전은 최신 별도 발표본이 null/409/다른판이어도 삭제하거나 새 발표본으로 덮어쓰지 않는다. 성공한 환산점수·누백·공식 입결은 비교/판단 보류와 독립적으로 유지한다."
     ],
     "acceptance": [
       "원점수/연도/지표/단위/집단 혼용 거부; 최소 자료/정책 부재와 미확인 이슈 null 보존",
@@ -3016,7 +3017,8 @@
         "숫자 문자열이 같아도 척도·단위·방향·모집단·보너스·동점 정책이 다르면 비교하지 않는다.",
         "converted_score에 lower_is_better 또는 university_top_percent에 higher_is_better를 지정한 정책은 거부한다.",
         "자료에 tie_policy가 없는 상태와 converted_score의 해당 없음 null을 구분한다.",
-        "모집단이 whole_complete가 아닌 경우 전체 누백과의 유불리는 별도 승인한 동일 모집단 근거가 있어야 한다."
+        "모집단이 whole_complete가 아닌 경우 전체 누백과의 유불리는 별도 승인한 동일 모집단 근거가 있어야 한다.",
+        "PAGE-03 과거 입결과 연도별 학생 환산점수는 연도·모집행·통계 정의/단계·점수 척도·단위·범위·보너스·모집집단 일치를 입증한 경우에만 비교한다. 같은 70% 이름의 첫 지표나 현재 분석 context17은 연도별 비교 증거가 아니다. 평균백분위/등급/다른 만점·집단이면 개별 공개값을 보존하고 비교를 보류한다. 과거와 올해 판정의 방향 차이만으로 올해 기준 변화의 원인을 단정하지 않는다."
       ]
     },
     "exact_numeric_invariants": {
@@ -3238,7 +3240,12 @@
       "observed_counts와 estimated_weights의 의미를 표시하고 전체 국수탐2/규칙 필수입력 비교집단의 차이를 명시한다.",
       "동점 구간 {lower,upper}, UTC Z 시각의 서울 표시, 실제 수능/모평/연도보정 추정을 구분한다.",
       "3페이지 전체 유료 검색을 유지하고4페이지 학과별 도전/핵심/여유/보류 및 와일드카드에서 근거를 표시한다.",
-      "관리 화면은 소비자 4개 탭과 분리하고 서버 관리 capability/허용 학교로 생성·검증·조정·승인·발행을 수행한다."
+      "관리 화면은 소비자 4개 탭과 분리하고 서버 관리 capability/허용 학교로 생성·검증·조정·승인·발행을 수행한다.",
+      "1페이지 추정 2열은 history_presentation_contract의 공식 지표 분리·동일 학년도/모집행/통계 분모·정확 소수·오차/산술 한계·결측/0/음수 정책을 따른다. 공식 history_metric DTO와 발행 자료는 불변이다.",
+      "초안 시사는 기존 로컬 경로의 최소 catalog 후보 준비부터 진행한다. 별도 preview 상태/DTO나 source-only 승인 우회를 도입하지 않으며 운영 native 발행·4페이지 수치 검수와 구분한다.",
+      "PAGE-03 과거 입결과 연도별 학생 환산점수는 연도·모집행·통계 정의/단계·점수 척도·단위·범위·보너스·모집집단 일치를 입증한 경우에만 비교한다. 같은 70% 이름의 첫 지표나 현재 분석 context17은 연도별 비교 증거가 아니다. 평균백분위/등급/다른 만점·집단이면 개별 공개값을 보존하고 비교를 보류한다. 과거와 올해 판정의 방향 차이만으로 올해 기준 변화의 원인을 단정하지 않는다.",
+      "내부 판단 기준 수치 비노출과 정상 공개 근거 보존은 함께 적용한다. 학생 분석의 채택본에 결속된 이슈·상담조정 요약·버전은 최신 별도 발표본이 null/409/다른판이어도 삭제하거나 새 발표본으로 덮어쓰지 않는다. 성공한 환산점수·누백·공식 입결은 비교/판단 보류와 독립적으로 유지한다.",
+      "유불리 설명은 등록된 converted_score_position_gain/loss/equal 코드·ready 상태·정확한 부호와 일치시킨다. 음수는 반영식에 잘 맞는다는 설명으로 표현하지 않고, 0은 상승/하락이 아닌 같은 위치로 설명한다. 알 수 없는 코드·보류 delta는 정상 이유 텍스트와 상태를 보존하고 새 이득 이유로 해석하지 않는다."
     ],
     "mode_rules": [
       "합성 모드는 명시적 synthetic 설정만 사용하며 실서버 실패에서 자동 합성 대체하지 않는다.",
@@ -3815,7 +3822,8 @@
     },
     "security_contract_ref": "security_contract",
     "security_transition_status": "pending_runtime_implementation",
-    "latest_followup_ref": "supabase_operations_handoff_contract.current_followup"
+    "latest_followup_ref": "supabase_operations_handoff_contract.current_followup",
+    "history_display_ref": "history_presentation_contract"
   },
   "management_pages": [
     {
@@ -4599,6 +4607,542 @@
       "this_document_canonical_application": "NOT_RUN",
       "this_document_hooks_CI": "NOT_RUN",
       "production_ready": false
+    }
+  },
+  "history_presentation_contract": {
+    "format": "jungsi.history-display/v1",
+    "revision": "2026.10.08.v5",
+    "page": "PAGE-01",
+    "path": "/admissions/results",
+    "member_tiers": [
+      "standard",
+      "paid"
+    ],
+    "requirements": [
+      "REQ-01",
+      "REQ-13",
+      "REQ-18",
+      "REQ-20",
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "operations": [
+      "history.search",
+      "recruitment.read"
+    ],
+    "status": "FE_967_SOURCE_REVIEWED_C_LOCAL_APPROVED_ACTUAL_TCP31_PASS_EXTERNAL_BROWSER_AND_THREE_FE_FIXES_PENDING",
+    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다.",
+    "estimated_columns": [
+      {
+        "id": "estimated_applicants",
+        "label": "추정 총 지원자",
+        "formula": "동일 모집행의 공식 경쟁률 분모 모집인원 × 공식 경쟁률을 정확 소수로 계산한 뒤 0.5 이상 올림하여 정수 표시"
+      },
+      {
+        "id": "estimated_non_admitted",
+        "label": "추정 탈락자",
+        "formula": "공식 지원자수 A가 검수됐으면 A − 모집인원 Q − 충원인원 C, 없으면 ROUND_HALF_UP(Q × 경쟁률 R) − Q − C; 동일 모집행/통계 분모·단계 확인 및 결과 비음수 필수"
+      }
+    ],
+    "rules": [
+      "발표 지표 뒤 별도 추정 2열에만 표시한다. 머리글에 추정을 명시하고 회색 배경·범례로 구분한다.",
+      "공식 지원자수 A가 없을 때는 검수된 모집인원 Q·경쟁률 R·충원인원 C를 모두 요구하고 하나라도 없으면 두 파생값 모두 ─다. 공식 A가 있을 때는 발표 영역 A를 표시하고 추정 총 지원자 칸은 ─, 추정 탈락자만 A−Q−C로 계산한다. 이 분기에 경쟁률 R은 필요 없으며 Q/C 결측·범위 불일치면 탈락자 칸은 ─다. 실제 0은 결측으로 바꾸지 않는다.",
+      "같은 학년도·대학/캠퍼스·모집단위·전형·모집군과 동일 통계 범위의 자료만 묶는다. 과거 경쟁률에 2027 모집인원을 곱하지 않는다.",
+      "곱셈의 모집인원은 경쟁률을 산출한 공식 분모다. 최초/이월 전/최종인원 중 이름이 비슷한 값을 임의 선택하지 않는다. 분모와 모집 단계가 확인되지 않으면 ─다.",
+      "공식 지원자수 A가 동일 학년도/캠퍼스/모집행/전형/군/통계 단계·대상으로 검수되면 공식 영역의 발표 지표로 표시한다. 추정 총 지원자 칸은 ─로 비우고 추정 탈락자 칸만 같은 Q/C 정의·범위에서 A−Q−C로 표시한다. 공식 A와 추정 Q×R을 같은 칸에 섞거나 병기하지 않는다. A−Q−C도 산술 추정이며 실제 불합격자수를 뜻하지 않는다.",
+      "지원자수는 history_metric의 metric_name·metric_definition·unit·publication_status·출처로 구분한다. 영문 고정 필드 applicant_count가 있다고 가정하거나 문자열 포함 검사만으로 지표를 합치지 않는다. 데이터팀이 검수한 의미 대응을 사용한다.",
+      "모집·충원은 명 단위의 비음수 정수, 경쟁률은 공식 정의에 맞는 유한 비음수 값만 사용한다. 문자열 원문·백분율·충원율·최종 예비번호·최종 등록인원을 충원인원으로 치환하지 않는다.",
+      "공식 경쟁률이 반올림된 값이면 역산 지원자수에도 오차가 생긴다는 주의 문구를 표시한다. 공식 지원자수를 복원했다고 설명하지 않는다.",
+      "추정 탈락자는 모집인원과 발표 충원인원을 차감한 산술 지표다. 합격 후 등록 포기·반복 충원 등의 차이를 반영하지 못하므로 실제 불합격자수나 합격확률로 해석하지 않는다는 주의 문구를 표시한다.",
+      "차감 결과가 음수이거나 정의/통계 범위가 충돌하면 ─와 산출 불가 사유를 표시한다. 임의 0 보정·음수 인원 표시·다른 학년도 대체는 하지 않는다.",
+      "추정값과 범례는 화면에서만 파생한다. DTO·source metric·native 발행 자료·운영 DB·데이터팀 공식 수치 검산에 넣지 않는다. 공식 수치 대조와 화면 산술 대조는 별도 영수증이다.",
+      "2027 모집인원 상자는 최초 인원·전체 변경분·공식 최종인원·상태/기준일을 그대로 구분한다. 과거 입결 표의 산술 재료로 사용하지 않는다.",
+      "대학 발표의 평균·50%·70%·75%·최저 등 원래 통계 위치와 이름/정의/단위/점수 척도를 그대로 보존한다. 75%컷을 70%컷·최저 합격점·합격권으로 바꾸지 않으며 예상70%·판단용 합격권과도 분리한다. 일부 모집행/학년도 검수는 학교 4개년 전체 입결 완전성이나 모델 전체 승인 증거가 아니다.",
+      "모집·충원·공식 지원자수의 빈 문자열과 공백은 실제 0으로 변환하지 않는다. 파싱 전 결측·형식·안전정수 범위를 검사하고 검수된 정수 원값 0만 0으로 표시한다.",
+      "자료가 부족한 카드에서도 추정 총 지원자·추정 탈락자 2열을 유지하고 계산 불가 칸에 ─를 표시한다. 공식 A/Q/C가 확인된 분기는 R 지표나 경쟁률 열의 존재로 탈락자 열을 숨기지 않는다.",
+      "2027 모집 상자는 recruitment.read 응답의 모집행 결속과 offering.academic_year=2027을 ready/pending 문구보다 먼저 확인한다. 과거 2024~2026 또는 학년도 미확인 응답은 상태에 관계없이 연계 확인 전이다. 해당 2027 모집행이 확인된 뒤에만 ready 수치 또는 2027 모집 정보 미발행 상태를 표시한다. 과거 응답을 2027 값으로 재명명하거나 연결 미확인을 공식 미공개 확정으로 바꾸지 않는다.",
+      "next_cursor가 남은 학년도는 조건을 좁힌 뒤에도 일부 조회일 수 있다. 잔여 커서 해소 증거 없이 조건을 좁히면 전부 볼 수 있다고 보장하지 않는다. 조회 예산 종료·미완전 모집행 보류로 표시 카드가 0개여도 잔여가 있으면 조회 미완료로 안내한다. 완전한 검색의 빈 결과와 구분하며 일부 조회 중에 조건에 맞는 발행 결과가 없다고 단정하지 않는다."
+    ],
+    "preview": {
+      "selected_preparation": "C_local_review_package",
+      "reason": "기존 C 최소 catalog 로컬 시사와 A 학교별 정규 부분 발행 착수를 병행한다. 실제 자료 검수·승인·불변 저장·선택을 건너뛰지 않으며 시사는 발행 판단을 대신하지 않는다.",
+      "state_model_unchanged": true,
+      "operational_draft_read_allowed": false,
+      "new_preview_DTO_flag_allowed": false,
+      "source_flag_only_promotion_allowed": false,
+      "automatic_publication_allowed": false,
+      "minimum_dependencies": [
+        "catalog"
+      ],
+      "local_preconditions": [
+        "검수한 최소 catalog native 후보·신뢰 SHA256·원본→native 계보·공식 지표 의미 대응·정확 비교 모집행과 기대값을 먼저 고정한다.",
+        "local 선택명부의 path는 수신 PC 경로이며 신뢰 명부·승인 문서·수신 PC 시험 세션을 기존 로컬 계약으로 결속한다. 작성·형식 통과만으로 승인됐다고 간주하지 않는다.",
+        "1페이지 시사에는 catalog만 최소 선택한다. 2~4페이지 산출용 exam_pack/total_model/conversion/percentile/analysis 등의 승인 근거는 각 기능이 필요할 때 별도로 준비한다.",
+        "catalog-only 시사는 기존 local factory로 가능하다. /health/ready의 local_ready=true·production_ready=false 및 real_data.status=hold/exam_binding=NOT_PROVIDED를 Page1 자료 자체의 승인·API/기대값 인수와 구분한다. health 정상으로 전체 2~4페이지 준비 완료를 주장하지 않는다.",
+        "가상 학생 성적과 로컬 시험 subject만 사용하며 운영 DB·발행 상태를 바꾸지 않는다. 메모리 저장 결과는 재시작 시 유실되고 실제 학생 저장 완료로 표시하지 않는다.",
+        "부족한 자료와 미승인 모형은 기존 pending/503으로 보존한다. 4페이지까지 시사를 위해 숫자·곡선·판단을 만들어 넣지 않는다.",
+        "화면팀이 수신본 해시/선택명부/화면 SHA·역할·자료 버전과 공식 지표 대조·화면 산술 대조·브라우저 전달물 결과를 별도로 기록한다.",
+        "v6 고정 native와 최신 원자료/정제 포인터는 다른 버전이다. 검수한 후보의 정확한 source/native 버전·해시와 현재 정본 대비 변경/제외 범위를 기록한다. 모집인원 object가 없는 카탈로그는 recruitment.read의 pending/recruitment_not_published와 빈 추정 칸이 정상이며 이를 0으로 채우지 않는다."
+      ],
+      "alternatives": [
+        [
+          "A",
+          "검수 통과분 부분 발행",
+          "검수 완료 최소 학교부터 착수한다. 단일 활성 catalog에 맞게 누적 불변 판을 만들고 native/독립 값 대조/권한/승인/저장/선택을 각각 인수한다. source-only 상태를 일괄 변경하지 않는다."
+        ],
+        [
+          "B",
+          "관리자 검수 시사 상태 추가",
+          "상태·API·DTO·권한·캐시/보안/발행 계약을 바꾸므로 별도 CR 검토 대상으로 남긴다. 현재 경로에 운영 draft 우회를 넣지 않는다."
+        ],
+        [
+          "C",
+          "로컬 시사 꾸러미",
+          "A 학교별 발행 착수와 병행하는 기존 로컬 시사 경로다. 별도 로컬 승인·명부·수신 보호·API/브라우저 영수증이 있어야 실제 완료다."
+        ]
+      ],
+      "readiness": "catalog_only_local_C_approved_actual_TCP31_PASS_external_receiver_browser_pending",
+      "first_preview_scope": "PAGE-01_selected_official_2024_2025_2026_history_only_past_recruitment_pending_no_2027_data",
+      "full_four_page_numeric_preview": "NOT_RUN",
+      "ETA_rule": "학교/모집행·지표 범위·결측·PK/공식 근거·native 변환·독립 대조·승인 담당이 고정된 뒤 담당자가 예상 시점을 기록한다. 저장 건수로 날짜를 약속하지 않는다.",
+      "local_required_evidence": [
+        "separate_local_approval_evidence",
+        "selection_manifest_trusted_SHA256",
+        "approved_catalog_body",
+        "native_version_bytes_hash_and_source_lineage",
+        "engine_false_rejection_preserved",
+        "receiving_PC_DPAPI_and_current_test_session",
+        "loopback_and_standard_paid_authorization",
+        "Page1_API_expected_value_receipt_separate_from_health"
+      ]
+    },
+    "separate_import": {
+      "reported_source": "외부 화면팀이 수시 JSON의 식별·범위·본체 반입·공개 후 비공개/반입분 삭제·현재 정시/본체에서 미사용이라고 FE-SOURCE-02로 회신했다.",
+      "verification_status": "report_received_closed_for_jungsi_non_use_external_EduTouch_DB_and_authority_NOT_RUN",
+      "rules": [
+        "파일 식별/출처·수시 범위/본체 반입 관계/현재 미사용 보고는 수신했다. 다른 PC 원본·본체 PR/DB 잔존 수·외부 사용자 삭제 승인 사실을 이 작업에서 독립 검증한 것으로 적지 않는다.",
+        "정시 정본/source 등록·jungsi_backend·정시 페이지와 독립 흐름으로 유지한다. 수시 자료를 정시 native/1페이지 발행 후보로 자동 조인하거나 재반입하지 않는다.",
+        "화면팀의 본체 삭제 완료 보고는 외부 소관 이력으로 기록한다. 여기서 본체 DB 삭제·복원·재반입·설정 제거를 실행하거나 승인하지 않는다. 기존 원본/스크립트/마이그레이션/이력은 보존한다.",
+        "현재 정시에서 사용하지 않는 흐름의 회신은 수신/분리 확인으로 마감한다. 향후 다시 사용하려면 원본 hash·출처/공개 이용 범위·전형 분류·권한·현재 DB/화면 경로를 별도 검수한다."
+      ]
+    },
+    "frontend_tasks": [
+      [
+        "FE-HISTORY-01",
+        "feature/presentation-foundation",
+        "ab8fb2d에서 추정 열 유지·A 분기 R 불요·빈 값 차단·실제0 구분을 합성 소스 검수로 확인했다. 실제 공식 A 의미 대응은 데이터 검수 후 적용하며 합성 이름을 채택하지 않는다."
+      ],
+      [
+        "FE-PREVIEW-01",
+        "외부 화면팀·데이터팀·서비스 개발팀",
+        "최소 native catalog의 자료 의미 대응·신뢰 해시·기대값·로컬 승인/수신을 준비하고 기존 Caller로 1페이지 시사를 검수한다."
+      ],
+      [
+        "FE-SOURCE-02",
+        "외부 화면팀·데이터팀",
+        "별도 수시 본체 흐름/미사용·반입분 삭제 보고를 수신했다. 정시와 분리한 보고 마감이며 본체 원본/DB/사용자 승인 독립 검증이나 새 삭제 허용은 아니다."
+      ],
+      [
+        "DEP-04-APPS",
+        "feature/presentation-foundation",
+        "교정판 v2의 주요 사실관계를 공식 문서로 대조했다. 비교 후보로 수용하되 운영 화면 미선정·배포/화면교체 미승인·세션/상태 전이·쿼터/비용 실검수 NOT_RUN을 유지한다."
+      ],
+      [
+        "FE-HISTORY-02",
+        "feature/presentation-foundation",
+        "02S/03S 소스 수정은 수용했다. 기존 정확소수 검산을 재사용하고 C 실물 수신 후 3개년 값·범위·학년도·커서/빈 카드의 실제 API/브라우저를 인수한다."
+      ],
+      [
+        "FE-SEC03-RELAY",
+        "feature/presentation-foundation",
+        "v4의 34b1b5f 빌드 출처·21파일 명부 형식은 수신했다. 최신 수정 SHA의 실물/검색 및 배포 no-store·실제 relay 송신·직접 접근 차단·필수 설정 거절 3gate는 별도 인수다."
+      ],
+      [
+        "FE-ANALYSIS-01",
+        "feature/presentation-foundation",
+        "PAGE-03 / REQ-08·16·21·22: 연도별 공식 입결과 학생 환산의 척도 근거 없이 비교/추세/예상컷 원인을 생성하지 않는다. 현재 DTO로 증명이 안 되면 원래 지표/점수는 각각 보존하고 비교만 보류한다. 확장 DTO는 별도 CR이다."
+      ],
+      [
+        "FE-ANALYSIS-02",
+        "feature/presentation-foundation",
+        "PAGE-03 / REQ-21·22·24: 학생 분석이 채택한 공개 이슈·조정요약·버전을 최신 별도 발표본과 구분해 보존한다. 내부 기준 수치는 공개하지 않는다."
+      ],
+      [
+        "FE-ANALYSIS-03",
+        "feature/presentation-foundation",
+        "PAGE-03 / REQ-16·21·22: 유불리 gain/loss/equal 등록 코드·준비 상태·부호에 맞춰 상승/하락/같음 문구를 표시한다. 알 수 없는 코드는 유리함으로 추정하지 않는다."
+      ]
+    ],
+    "verification": {
+      "planning_and_routing": "updated_await_same_snapshot_validation",
+      "official_metric_mapping": "MINIMUM_SCOPE_ORIGINAL_COHORT_STATISTIC_UNIT_AND_SCALE_PRESERVED_A_Q_R_C_ESTIMATES_MISSING",
+      "external_frontend_source_claim": "FE_3CCEE98_TWO_STATE_FIXES_SOURCE_ACCEPTED_967_ADDITIONAL_COMPARISON_EVIDENCE_FIXES_REQUIRED",
+      "native_catalog_package": "APPROVED_LOCAL_C_EXACT_4TUPLE_TWO_SELECTION_SHA_TRUST_AND_ACTUAL_TCP31_PASS",
+      "actual_local_browser": "NOT_RUN_EXTERNAL_RECEIVER_PC",
+      "operational_publication": "NOT_RUN",
+      "files_deleted": 0,
+      "DTO_changes": false,
+      "new_API_operations": 0,
+      "local_catalog_readiness": "ACTUAL_TCP_LOCAL_READY_PRODUCTION_FALSE_CATALOG_ONLY_REAL_DATA_HOLD_EXAM_NOT_PROVIDED",
+      "independent_contract_review": "PRIOR_408_EXACT_DECIMAL_CASES_REUSED_02S_03S_SOURCE_FIXED_NEW_ANNUAL_SCALE_AND_ADOPTED_EVIDENCE_GAPS",
+      "frontend_history_receipt": "V4_RECEIVED_34B1B5F_MANIFEST_STRUCTURE_VERIFIED_ACTUAL_BUILD_FILES_NOT_RECEIVED",
+      "frontend_source_report": "RECEIVED_EXTERNAL_REPORT_ONLY_JUNGSI_NOT_USING",
+      "partial_publication": "LOCAL_C_APPROVAL_AND_API_COMPLETE_OPERATIONAL_PUBLICATION_NOT_RUN",
+      "semantic_absence_and_original_cut_labels": "CLARIFIED_NOT_INCLUDED_UNTRANSCRIBED_UNVERIFIED_OFFICIAL_ABSENCE_ZERO_AND_75_PERCENT_PRESERVED",
+      "final_build_sweep": "21_UNIQUE_PATHS_VALID_BYTES_SHA_FORMAT_AUTHOR_SCAN_REPORT_ONLY_LATEST967_BUILD_NOT_BOUND",
+      "current_runtime_no_store": "NOT_RUN_AT_LATEST_SHA_DEMO_DEPLOYMENT_IS_EXTERNAL_REPORT",
+      "strict_DB_metadata_read": "ACTUAL_VERIFY_FULL_READONLY_35_DRAFT_METADATA_NO_DB_STORAGE_WRITE_NO_PRODUCTION_ACCEPTANCE",
+      "engine_and_nationwide_approval": "FALSE_SOURCE_HOLDS_NULLS_AND_ORIGINAL_EXACT_FAILURES_PRESERVED"
+    },
+    "submission_review": {
+      "format": "jungsi.frontend-history-submission-review/v1",
+      "date": "2026-10-08",
+      "basis_planning_commit": "6f61f86c392d8e29c7f557b743a400aef1a4e1f3",
+      "frontend_commit": "ab8fb2da595b2b8576e6139f8853b87d98dabef7",
+      "evidence_scope": "Exact Git commit and CI, independent synthetic source-excerpt execution, external reply v2; private proposed copy is not a committed fix or browser acceptance",
+      "decision": "기존 추정 열·산술·빈 값 수정과 ready 과거 학년도 가드·커서 과잉 보장 제거를 소스 범위에서 수용한다. pending 학년도와 잔여 커서+빈 카드 두 상태 반례가 남아 PR18 최종 병합·실자료 화면 인수는 보류한다. C 준비와 데이터·서비스 독립 검수는 병행한다.",
+      "corrections": [
+        [
+          "FE-HISTORY-02S",
+          "학년도 가드 순서",
+          "RecruitLine의 학년도/모집행 결속을 pending 문구보다 먼저 확인한다. pending/학년도 미확인 및 pending/2024·2025·2026은 연계 확인 전이어야 하며 2027 미발행으로 표시하지 않는다. 무응답·과거 ready/pending·2027 ready/pending 10상태를 같은 수정 SHA로 검수한다."
+        ],
+        [
+          "FE-HISTORY-03S",
+          "잔여 커서와 빈 카드",
+          "예산 종료 후 꼬리 모집행을 보류해 items=[]·truncated=true가 되는 사례를 필터 유무로 재현한다. 표시 카드가 0개여도 일부 조회 안내를 유지하고 발행 결과 없음을 단정하지 않는다. 완전 조회의 빈 결과 문구와 구분하며 전량 조회 확대는 요구하지 않는다."
+        ],
+        [
+          "FE-SEC03-RELAY",
+          "최종 수정 후보의 비노출·운영 증거",
+          "수정 후 SHA와 빌드 명령/환경·전달물 상대 경로/bytes/SHA256·검사 종류/결과를 결속한다. 현재 21파일×9종 0건은 화면팀 보고 수신이며 기획팀 독립 빌드 검증이 아니다. no-store 이전 배포 관측과 현재 운영 요청 송신/보안3gate는 별도 NOT_RUN이다."
+        ],
+        [
+          "DATA-HISTORY-PUBLISH-01",
+          "첫 자료 묶음과 C 수신",
+          "기존 원문/척도/전형·군/PK/보류 근거와 최신 정본의 선정 행만 대조한다. draft 후보 수신을 catalog 승인·선택·실제 C 수신·운영 발행으로 확대하지 않는다. 원문 A/Q/R/C 근거가 적격하지 않으면 추정 두 칸은 ─이며 실제0/미발표로 바꾸지 않는다."
+        ]
+      ],
+      "frontend_implementation_owner": "feature/presentation-foundation",
+      "front_source_edit_in_planning_team": false,
+      "new_API_or_member_permission_approved": false,
+      "receiver_browser": "NOT_RUN",
+      "semantics_clarification_basis_commit": "30baaf64b32a1477c7c4b82a1d6f86b79f3f5ba8",
+      "previous_review": {
+        "format": "jungsi.frontend-history-submission-review/v2",
+        "date": "2026-10-08",
+        "basis_planning_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
+        "frontend_commit": "d7500f14765b44de1d55ee65fa8ea1600dc06dee",
+        "evidence_scope": "Exact committed non-JSX TypeScript excerpts, independent synthetic exact-decimal oracle, source DTO/year predicates and primary deployment documentation; no browser/live acceptance",
+        "decision": "수정 회신 v1과 CI2 성공을 수신하고 정확 소수·단위·중복 보류·과거 목록·relay 헤더의 확인 범위를 수용했다. 추정 열 누락·빈 값의 0 변환·과거 모집인원의 2027 오표기·커서 문구가 남아 화면 구현 최종 인수와 PR18 병합은 보류한다. 원문 의미/분모·단계, 현재 후보 운영 빌드 비노출, 실제 송신·C 수신·브라우저 인수는 별도다.",
+        "corrections": [
+          [
+            "FE-HISTORY-01C",
+            "공식 A/R 결측과 추정 2열",
+            "d7500f1의 canDerived는 Q/R/C 전체 지표를 요구한다. 검수 A+Q/C·R없음에서도 탈락자 열이 보이게 하고, C행 자체가 없을 때는 두 추정 열과 ─를 유지한다. A 이름·의미 대응은 데이터팀 검수 뒤에만 사용한다."
+          ],
+          [
+            "FE-HISTORY-01D",
+            "빈 문자열·공백과 실제0",
+            "personInt의 Number 변환 전에 빈 문자열/공백·형식·안전정수 범위를 검증한다. 빈 Q/C를 실제0으로 계산하지 않는다. 결측·실제0·중복·단위·반올림 경계의 합성 검산을 고친 정확한 SHA로 제출한다."
+          ],
+          [
+            "FE-HISTORY-02R",
+            "2027 모집행 결속과 상태",
+            "RecruitLine은 ready만 검사해 2024~2026 응답도 2027 모집으로 표시한다. 응답 학년도=2027 및 검수 모집행 결속이 있어야 표시하고 과거 응답·연결 미확인·pending을 미공개 확정으로 바꾸지 않는다. 접미사 추측 연결·API/회원권한 확대는 하지 않는다."
+          ],
+          [
+            "FE-HISTORY-03R",
+            "커서 잔여 문구",
+            "현재 미수집 안내는 수용하되 조건을 좁히면 전부 보인다는 보장을 제거한다. 필터 후에도 next_cursor가 남는 합성 사례와 목록의 일부 조회 표시를 검수한다."
+          ],
+          [
+            "FE-SEC03-RELAY",
+            "같은 후보의 비노출·실제 송신",
+            "server-only auth의 사용자 Bearer/별도 relay 헤더 구성을 합성 신원으로 확인했다. 전일 운영 빌드 스윕은 수정 후보의 운영 빌드 증거가 아니다. 최종 수정 SHA의 전달물 스윕을 제출하며 운영 요청 송신/직접 접근 거절/필수 설정 실패는 실제 연결 인수 전까지 NOT_RUN으로 표시한다."
+          ],
+          [
+            "DATA-HISTORY-PUBLISH-01",
+            "원문 의미·통계 범위",
+            "중복 보류는 분모·단계 일치 증거가 아니다. 동일 학년도/캠퍼스/모집행/전형/군/공식 분모·충원 단계·단위·발표상태와 A 의미 대응을 원문 검수에 결속한다. 공식 원값 검산과 화면 파생 산술 영수증을 분리한다."
+          ]
+        ],
+        "frontend_implementation_owner": "feature/presentation-foundation",
+        "front_source_edit_in_planning_team": false,
+        "new_API_or_member_permission_approved": false,
+        "receiver_browser": "NOT_RUN",
+        "semantics_clarification_basis_commit": "30baaf64b32a1477c7c4b82a1d6f86b79f3f5ba8",
+        "previous_review": {
+          "format": "jungsi.frontend-history-submission-review/v1",
+          "date": "2026-10-08",
+          "basis_planning_commit": "ea88d336d7d69391b4e1433ba7d8e1b2440217a9",
+          "frontend_commit": "d83e19d7f78b39f64a296bec577de68a104b197b",
+          "evidence_scope": "Git source review and external receipt; actual new receiver browser and operational acceptance remain separate",
+          "decision": "영수증 수신은 완료했다. 추정 표시 계약의 불일치·실자료 검색/연결·중계 송신 증거를 보완한 정확한 화면 SHA로 재검수하며 현재 판을 최종 인수로 처리하지 않는다.",
+          "corrections": [
+            [
+              "FE-HISTORY-01A",
+              "추정 입력 검증",
+              "공식 A가 없으면 Q/R/C 전체가 유효하고 동일 통계 범위일 때만 두 파생값을 계산한다. C가 없을 때 Q/R만으로 지원자수를 표시하는 영수증 #4와 코드를 바로잡는다. 단위·지표 정의·발표 상태·경쟁률 분모·모집 단계 검수도 필요하다."
+            ],
+            [
+              "FE-HISTORY-01B",
+              "정확 소수 산술",
+              "R×10^6을 Number 정수로 반올림하는 방식은 선양자화다. 원문 정확 소수를 무손실 정수/유리수로 처리하거나 검수한 입력 정밀도 상한과 안전정수 범위를 실제 계약/증거로 고정한다. 0.5 경계 전후·큰 정수·결측·음수·실제0을 대조한다."
+            ],
+            [
+              "FE-HISTORY-01C",
+              "공식 지원자 분기와 열",
+              "A/Q/C만 있고 R가 없을 때도 탈락자 칸이 표시돼야 한다. A 의미 대응이 없으면 후보 미포함·원문 미전사·미검수·공식 미발표 확인·실제0을 구분하고 이름을 추측해 주입하지 않는다. 공식 미발표는 원문 범위 검수 근거가 있을 때만 확정한다. 두 추정 열은 재료 결측 시 ─로 구분한다."
+            ],
+            [
+              "FE-HISTORY-02",
+              "실제 발행 자료 목록·연도 연결",
+              "2027 history만을 목록의 축으로 쓰지 않는다. 기존 일반 history.search로 실제 발행된 과거 지표를 보여 주는 경로를 먼저 검수한다. 검수된 계보가 없으면 학년도별 모집행을 분리하며 -YYYY suffix 추측으로 연결하지 않는다. 2027 결과를 만들어 넣거나 paid offerings.search를 일반회원에 임의 허용하지 않는다."
+            ],
+            [
+              "FE-HISTORY-03",
+              "부분 검색과 결측 설명",
+              "과거 limit100 응답의 next_cursor가 남으면 전부 조회했다고 표시하지 않는다. 현재 발행본의 빈 검색결과는 자료 없음/미발표 확정이 아니다. 검수 중·미포함·읽기 미완료와 실제 공식 미공개 근거를 구분한다. 조회 범위·공유 예산을 지켜 필요한 범위만 대조한다."
+            ],
+            [
+              "FE-SEC03-RELAY",
+              "서버 중계",
+              "현재 live Caller에서 X-Jungsi-Relay-Token 송신이 관측되지 않은 판은 송신 완료로 적지 않는다. 실제 사용자 Bearer와 서버 전용 신원을 분석 API에 함께 전달하고, 비밀의 브라우저 비노출·필수 설정 실패·직접 접근 거절을 같은 후보로 검수한다."
+            ]
+          ],
+          "frontend_implementation_owner": "feature/presentation-foundation",
+          "front_source_edit_in_planning_team": false,
+          "new_API_or_member_permission_approved": false,
+          "receiver_browser": "NOT_RUN",
+          "semantics_clarification_basis_commit": "30baaf64b32a1477c7c4b82a1d6f86b79f3f5ba8"
+        },
+        "followup_review": {
+          "summary": "d7500f1의 Git/CI와 회신 원문을 대조했다. Python Fraction 독립 기준과 커밋의 실제 계산 발췌를 합성 408건으로 비교해 소수 산술 불일치 0건을 확인했다. 브라우저 실행·실자료 인수·운영 송신 완료를 뜻하지 않는다. 앞선 d83e19d 검토는 이력으로 보존한다.",
+          "accepted_observations": [
+            [
+              "정확 소수·단위·중복",
+              "입력 상한 내 408건 exact half-up 일치, 단위 불일치/중복 지표의 산술 보류 확인. C=null의 두 파생값 null 확인."
+            ],
+            [
+              "과거 입결 목록",
+              "2024~2026 단일 학년도 history.search, 정확한 모집행 PK, 실제 있는 학년도 행, ready+빈 결과와 pending 구분을 소스로 확인. 실제 모집행 수신/계보/브라우저는 별도."
+            ],
+            [
+              "relay 헤더",
+              "server-only auth에서 사용자 Authorization Bearer와 X-Jungsi-Relay-Token 분리·추가 헤더 유지·relay 미설정 시 미송신을 합성 신원으로 확인."
+            ],
+            [
+              "DEP-04 교정판 v2",
+              "Google 웹앱·UrlFetch·TextOutput·쿼터와 Supabase 함수 제한 공식 문서로 교정 범위를 확인했다. Apps Script는 검토 후보이며 운영 화면 호스팅·세션/상태 전이·쿼터/비용 실검수는 미완료."
+            ]
+          ],
+          "evidence_boundaries": [
+            [
+              "GitHub PR18",
+              "d7500f1, OPEN/MERGEABLE/CLEAN, project-consistency push/pull_request 2건 성공(run37721625792/37721631619). CLEAN/CI 성공은 제품 인수와 다르며 잔여 결함으로 병합 보류."
+            ],
+            [
+              "소스 발췌",
+              "기획팀은 화면 원본 편집/설치/빌드/브라우저 실행을 하지 않았다. 공식 A 이름 주입은 합성 조건부 분기 검증에만 사용했고 실제 의미 대응으로 채택하지 않았다."
+            ],
+            [
+              "비노출·송신",
+              "2026-10-07 운영 빌드와 2026-10-08 개발 모드 보고는 구분한다. 수정 후보 운영 빌드 스윕·실제 운영 요청 캡처·보안3gate는 별도."
+            ],
+            [
+              "첫 학교 묶음",
+              "강원대 춘천 기존 2024~2026 후보의 범위·해시·원문/의미 검수와 독립 provider/API 대조를 팀에 요청했다. 현재 draft/source 저장은 native 승인·선택·C 수신·운영 발행이 아니다."
+            ]
+          ],
+          "primary_sources": [
+            {
+              "title": "웹앱 진입점·실행 신원",
+              "url": "https://developers.google.com/apps-script/guides/web"
+            },
+            {
+              "title": "UrlFetch HTTP 방법",
+              "url": "https://developers.google.com/apps-script/reference/url-fetch/url-fetch-app"
+            },
+            {
+              "title": "TextOutput 메서드·리디렉션",
+              "url": "https://developers.google.com/apps-script/reference/content/text-output"
+            },
+            {
+              "title": "Apps Script 쿼터",
+              "url": "https://developers.google.com/apps-script/guides/services/quotas"
+            },
+            {
+              "title": "Supabase 함수·HTML 제한",
+              "url": "https://supabase.com/docs/guides/functions/limits"
+            }
+          ],
+          "real_browser": "NOT_RUN",
+          "operational_publication": "NOT_RUN"
+        }
+      },
+      "followup_review": {
+        "summary": "재회신 v2와 ab8fb2d를 고정 대조했다. 66715ca의 기존 수정도 소스로 확인했으며 Python Fraction 기준 408건 불일치0, 추정 열·빈 값 반례는 해소됐다. pending 과거/미확인 학년도 4경로와 잔여 커서+빈 카드 반례를 새로 확인했다. 별도 비공개 수정 제안 사본에서는 학년도10상태·빈 안내4상태가 통과했으나 실제 화면 브랜치 수정·빌드·브라우저 검수는 아니다.",
+        "accepted_observations": [
+          [
+            "01C·01D와 산술",
+            "C 행 결측에서도 추정2열 유지, 공식A 조건부 합성 분기에서 R 불요, 빈 문자열/공백 차단·실제0 유지 확인. 합성408 exact half-up 불일치0. 공식 A 지표 이름은 실제 의미 대응으로 승인하지 않음."
+          ],
+          [
+            "ready 과거 학년도",
+            "2024·2025·2026 ready 응답은 연계 확인 전으로 처리한다. 과거/미확인 pending은 가드 순서 수정이 남았다."
+          ],
+          [
+            "예산 내 커서와 일부 조회",
+            "학년도별 최대3쪽×100지표, 필터 유지·연속 커서·완성된 페이지 경계의 모집행 수집을 합성으로 확인했다. 일부 조회 배너의 과잉 보장 제거는 수용하며 빈 카드 분기는 보완한다."
+          ],
+          [
+            "relay와 표현 정정",
+            "server-only의 Bearer/relay 분리 합성 검수, canDropped 완료 시점 정정, 합성/실제 운영 증거 구분을 확인했다."
+          ]
+        ],
+        "evidence_boundaries": [
+          [
+            "GitHub PR18",
+            "관측 SHA ab8fb2d, OPEN/MERGEABLE/CLEAN. develop 6f61f86 포함 및 CI push/pull_request 성공(run37730172446/37730178630)을 확인했다. 이 관측 뒤 develop 문서가 갱신되면 최신 develop 일반 merge·충돌 해결과 새 SHA CI를 다시 확인한다."
+          ],
+          [
+            "수정 제안 사본",
+            "기획팀이 outputs의 보존 사본에 두 상태 수정안을 준비했다. 원본 FE 브랜치·DTO/API/회원권한·자료/운영 설정은 변경하지 않았다. 소스 발췌의 합성 실행은 JSX/실제 React/browser 증거가 아니다."
+          ],
+          [
+            "운영 빌드 스윕",
+            "21파일×9종 0건은 외부 화면팀 영수증 보고를 접수했다. 해당 전달물 해시 명부/빌드 출처와 기획팀 독립 재현은 미수신·NOT_RUN. 기존 배포 no-store 관측은 ab8fb2d의 운영 헤더 증명이 아니다."
+          ],
+          [
+            "C와 첫 학교",
+            "기존 draft native와 원문/의미 검수 근거를 수신했고 최신 정본 선정 행 대조를 개발팀에 요청했다. 자료 승인·독립 신뢰 selection·새 수신 PC DPAPI/시험 세션·실제 API/화면 인수·운영 발행은 각각 별도다."
+          ],
+          [
+            "운영 플랫폼",
+            "Google Drive+기존 Supabase 한정. Apps Script는 검토 후보이며 OpenNext 등 별도 호스팅의 과거 관측/후속 시연 언급을 신규 배포 승인으로 해석하지 않는다."
+          ]
+        ],
+        "primary_sources": [
+          {
+            "title": "웹앱 진입점·실행 신원",
+            "url": "https://developers.google.com/apps-script/guides/web"
+          },
+          {
+            "title": "UrlFetch HTTP 방법",
+            "url": "https://developers.google.com/apps-script/reference/url-fetch/url-fetch-app"
+          },
+          {
+            "title": "TextOutput 메서드·리디렉션",
+            "url": "https://developers.google.com/apps-script/reference/content/text-output"
+          },
+          {
+            "title": "Apps Script 쿼터",
+            "url": "https://developers.google.com/apps-script/guides/services/quotas"
+          },
+          {
+            "title": "Supabase 함수·HTML 제한",
+            "url": "https://supabase.com/docs/guides/functions/limits"
+          }
+        ],
+        "real_browser": "NOT_RUN",
+        "operational_publication": "NOT_RUN"
+      },
+      "latest_observation": {
+        "date": "2026-10-08",
+        "frontend_commit": "967366574ed41aaa7018687730fd0309046433fe",
+        "summary": "3ccee98의 02S/03S 수정은 34b1b5f 및 9673665의 조상이며 소스로 수용했다. v4의 21파일 명부는 34b1b5f의 작성자 보고와 형식 검증에 한정한다. 2885b8f/9673665 추가 화면 변경과 같은 SHA의 빌드·실자료·브라우저·보안은 별도로 검수한다.",
+        "observations": [
+          [
+            "FE-HISTORY-02S",
+            "3ccee98에서 학년도 가드가 pending 분기보다 앞서도록 수정. 최신 9673665까지 계보 확인, 소스 인수. 실제 수신 브라우저는 NOT_RUN."
+          ],
+          [
+            "FE-HISTORY-03S",
+            "3ccee98에서 일부 조회와 빈 카드 설명을 독립 표시. 최신 9673665에 포함, 소스 인수. 실제 커서/필터 수신 브라우저는 NOT_RUN."
+          ],
+          [
+            "v4 빌드 명부",
+            "34b1b5f clean/synthetic 빌드의 21개 고유 경로·bytes·64hex SHA 표 형식 검증. 실물 파일 미수신으로 SHA 내용 재대조·9종 검색·source map 부재는 작성자 보고에 한정. 최신 9673665 빌드 증거가 아님."
+          ],
+          [
+            "PR18·CI",
+            "2026-10-08T11:19:53Z 조회에서 PR18 open/unmerged/mergeable=true/clean, head9673665/base7c6475f. head push37766109007/PR37766114820와 develop37753757973 CI 성공. 기획 문서 후속 커밋 뒤 충돌/CI를 다시 확인한다."
+          ],
+          [
+            "FE-ANALYSIS-01",
+            "9673665 RangeEvidence는 연도+최종등록자70% 이름의 첫 지표를 학생 환산점수와 비교한다. 척도·정의·단위·모집행·모집집단 일치 근거가 없으면 높낮이/추세/올해 기준 상승·하락을 만들지 않는다. 현재 years6필드는 연도별 척도 결속을 보증하지 않으며 현재분석 context17을 과거연도에 복사하지 않는다."
+          ],
+          [
+            "FE-ANALYSIS-02",
+            "채택된 분석 근거의 공개 이슈·상담조정 요약·버전은 별도 최신 발표본 미조회/409/null/다른판에서도 분석의 채택본에 결속해 보존한다. 내부 기준 수치 비노출과 성공 환산/누백 보존을 유지한다."
+          ],
+          [
+            "FE-ANALYSIS-03",
+            "9673665 DetailReasons의 음수/0 유불리 설명을 gain/loss/equal 등록 코드와 ready 상태·부호에 일치시킨다. 음수에 잘 맞음/0에 올라감이라고 쓰지 않으며 미등록 conversion_advantage를 등록 코드로 임의 간주하지 않는다."
+          ],
+          [
+            "운영 시연",
+            "화면팀이 0d1fd0e5 재배포와 2·3페이지 개선을 보고했다. root의 해당 운영 런타임·relay·3gate·C 수신 브라우저 인수는 NOT_RUN."
+          ],
+          [
+            "C 실제 검수",
+            "독립 원문/4년모집행 범위와 자료140항목을 결속한 새 catalog-only 로컬 승인판/selection으로 TCP31PASS/0FAIL. 3개년 전필드·타입/커서/빈검색/권한/no-store/비공개필드거절/서버종료를 확인. 다른PC·브라우저·실JWT·운영은 NOT_RUN."
+          ]
+        ],
+        "production_build_and_browser": "NOT_RUN_INDEPENDENTLY_AT_LATEST967",
+        "build_manifest_commit": "34b1b5fd01423da61b00fb5d68135c5bf12959a0"
+      }
+    },
+    "partial_publication": {
+      "format": "jungsi.school-history-publication-plan/v1",
+      "date": "2026-10-08",
+      "request": "사용자가 화면팀 요청 해결과 회신을 지시했다. 1페이지 입시결과는 검수 완료 학교의 최소 묶음부터 정규 승인·불변 발행 절차를 착수하며 C 로컬 검수도 병행한다.",
+      "state": "C_local_binding_selection_and_actual_API_accepted_operating_publication_NOT_RUN",
+      "unit": "school_bundle_with_explicit_academic_year_offering_metric_coverage",
+      "selection_strategy": "one_cumulative_immutable_catalog_snapshot_per_version",
+      "rules": [
+        "원자료/source 등록의 draft/승인 필드만 바꿔 runtime 자료로 승격하지 않는다. 새로운 native 후보·출처 계보·독립 값 대조·자료 의미/권한·실행 승인 근거·불변 저장 대상·선택 신뢰 SHA를 각각 확인한다.",
+        "기존 catalog/service 선택은 하나의 활성 catalog다. 학교별 파일 다중 선택·자동 병합이 있다고 가정하지 않는다. 후속 판은 검수한 이전 발행 학교를 누적 포함해 하나의 새 불변 판으로 만들고 변경·제외·보류 사유를 명부에 남긴다.",
+        "학교별 4개년 정리·모집행 연결 근거를 재사용한다. 입결 일부 학년도만 검수됐다면 포함 학년도/지표·미대조 범위를 명시하고 그 학교의 4개년 전체 입결 또는 모집표 전수검수 완료라고 하지 않는다.",
+        "매 판마다 버전·bytes/SHA256·대학/모집행/학년도/지표 포함 범위·검수 중/자료 없음/미공개/실기 제외 사유·원본→native 계보·독립 검수·승인 담당을 고정한다. 실제 수치는 비공개 자료 계층에 둔다.",
+        "공식 A/R/Q/C 의미 대응은 metric_name 하나로 확정하지 않는다. 정의·단위·발표 상태·출처·동일 통계 분모/단계를 검수한다. 후보 미포함·원문 미전사·미검수·공식 미발표 확인·실제0을 구분한다. 후보에서 읽지 않았거나 대응이 없다는 이유로 공식 발표 없음으로 확정하지 않으며 미확인 A를 이름으로 추측해 주입하지 않는다.",
+        "미포함 대학은 기존 search가 ready/items=[]로 응답할 수 있고 개별 존재하지 않는 offering은 404다. 이를 pending 자동변환이라고 약속하지 않는다. 화면은 현재 발행본의 검색 범위와 미발행/검수 중 가능성을 설명한다. 신규 coverage DTO/API는 별도 CR이다.",
+        "Supabase runtime client의 GET 읽기 구현은 publisher 구현이 아니다. 적격 후보·쓰기 주체/역할·정확 새 private 대상·불변/idempotency 검수·선택/철회 근거가 없으면 업로드/운영 발행 완료로 적지 않는다. 기존 파일/객체를 지우거나 upsert로 교체하지 않는다.",
+        "1페이지 자료 승인과 운영 readiness는 분리한다. 곡선/환산/개인분석·기본 이용권·공유 보안/배포를 함께 승인하지 않는다. C 로컬 승인/선택과 A 운영 발행 권한도 구분한다.",
+        "발행 감지의 3시간 주기/즉시 인수 시작은 화면팀 보고다. 담당자 자동화·배포 실행을 이 문서로 새로 만들거나 재개하지 않는다. 실제 발행 시간과 화면 관측/인수 시간은 각각 기록한다.",
+        "대학 발표의 평균·50%·70%·75%·최저 등 원래 통계 위치와 이름/정의/단위/점수 척도를 그대로 보존한다. 75%컷을 70%컷·최저 합격점·합격권으로 바꾸지 않으며 예상70%·판단용 합격권과도 분리한다. 일부 모집행/학년도 검수는 학교 4개년 전체 입결 완전성이나 모델 전체 승인 증거가 아니다.",
+        "최소 묶음은 학교·필요 지표·파일 범위를 줄이는 방식이다. 같은 선정 학교/모집행의 이미 조사·검수한 2024·2025·2026 입결을 최종 전달 후보에서 임의로 빼지 않는다. 일부 학년도 근거가 실제 부족하면 그 범위와 이유를 명부에 기록하고, 아직 발표되지 않은 2027 입결을 만들어 채우지 않는다.",
+        "C 로컬 검수용 새 판은 원본 source의 draft/engine_ready=false/전형공란/정확범위 실패와 별도로 목적별 자료 근거·독립 검수·승인4항목·선택 신뢰 SHA를 결속한다. 운영 DB의 draft35건은 로컬 C 승인 여부를 대신하지 않는다. 전국 정본 갱신과 최소 C 전달을 서로 선행 조건으로 삼지 않는다."
+      ],
+      "owners": [
+        [
+          "DATA-HISTORY-PUBLISH-01",
+          "데이터팀",
+          "검수 완료 최소 학교 native 후보·학년도/지표 범위·의미 대응·출처/값 대조·포함/제외 명부"
+        ],
+        [
+          "SVC-HISTORY-PUBLISH-01",
+          "feature/application-pre-data-platform",
+          "학교 단위 catalog/provider/API의 독립 대조·publisher 준비·실행 승인/선택·C 검수·운영 발행 영수증"
+        ],
+        [
+          "FE-HISTORY-02",
+          "feature/presentation-foundation",
+          "발행된 과거 입결 목록·검수 계보·빈 검색/부분 조회 설명·실물 숫자/전달물 인수"
+        ],
+        [
+          "PM-HISTORY-PUBLISH-01",
+          "develop",
+          "기획·라우팅·요청/검수/승인/발행 상태의 일치 및 같은 코드 스냅샷 인수"
+        ]
+      ],
+      "first_batch_and_ETA": "첫 최소 C는 공식 과거 입결 3개년·선정12모집행/140지표로 승인4항목·선택명부신뢰·actual TCP31건을 검수했다. 기존 원문/전형공란4/범위보류4/enginefalse140/exact실패12는 보존했다. 수신PC의 새경로selection/독립신뢰·DPAPI/session·브라우저·최신화면수정과 운영발행은 별도이며 발행시각/날짜를 추측하지 않는다.",
+      "operational_publication": "NOT_RUN",
+      "new_operating_deployment_authorized": false,
+      "deletion_allowed": false,
+      "default_entitlement_change_allowed": false
     }
   },
   "security_contract": {

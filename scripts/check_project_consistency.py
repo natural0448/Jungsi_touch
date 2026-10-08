@@ -4,6 +4,7 @@ No file deletion. --write preserves prior generated content under ignored output
 from __future__ import annotations
 import argparse,ast,datetime,hashlib,json,re,subprocess,sys
 from pathlib import Path,PurePosixPath
+from audit_documentation_sync import AGENT_MARKER,generated_sync_files,validate_catalog,validate_sync_policy
 
 ROOT=Path(__file__).resolve().parents[1]
 SPEC_PATH="docs/current/service_spec.json"
@@ -1073,6 +1074,7 @@ def secured_preparation_evidence(contract):
 def runtime_connection_document(spec):
     c=spec['runtime_connection_preparation_contract']; q=c['runtime_selection']; r=c['readiness']; d=c['deployment']
     return (c['scope']+'\n\n계약 '+c['revision']+' · 코드 '+c['code_status']+' · 운영 준비 false. 출발 develop '+c['basis_commit']+'.\n\n'+
+            ('현재 운영 플랫폼은 Google Drive·Supabase로 한정한다. 아래 Python factory·파일 경로·합성 인수는 보존된 로컬 참조 구현이며 Edge 배포 완료를 뜻하지 않는다. [Supabase 전용 배포 후속작업](Supabase_배포_화면_후속작업.md)을 함께 따른다.\n\n' if spec.get('supabase_deployment_contract') else '')+
             '## 원자료 등록과 실행 발행본\n\n'+c['source_lineage']['rule']+'\n\n'+
             '최신 비공개 정본 포인터: '+', '.join(c['source_lineage']['canonical_private_pointers'])+'. 포인터·해시·실제 release/검수 기록은 비공개이며 여기에는 실제 원자료나 수치를 복사하지 않는다.\n\n'+
             table(['단계','담당','완료 조건'],[[x['stage'],x['owner'],x['completion']] for x in c['workflow']])+'\n\n'+
@@ -1090,6 +1092,7 @@ def runtime_connection_document(spec):
             '외부 화면 담당은 확정 API 주소와 공개 Auth 설정, 서버 전용 relay·세션/CSRF 계약 및 같은 native 버전의 기대값을 수령해 실제1~4페이지를 검수한다. API22/DTO·회원·소유권·성공 점수와 판단 pending 조건을 유지한다.\n\n'+
             '## 검수 상태와 남은 입력\n\n검수 '+c['verification']['status']+' · 실제 원자료→native 발행/Auth/DB/BFF/브라우저/배포 '+c['verification']['actual_source_native_publication_Auth_DB_BFF_browser_deployment']+'.\n\n'+
             '확인한 구현 '+str(c['verification'].get('implementation_commit'))+' · 합성 '+str(c['verification'].get('synthetic_test_count',0))+' · 독립 합성 '+str(c['verification'].get('independent_synthetic_case_count',0))+' · 정상 훅 '+str(c['verification'].get('normal_commit_push_snapshot_test_count',0))+' · CI '+str((c['verification'].get('CI') or {}).get('url','미실행'))+'. 세부 private probe 영수증은 공개 health에 포함하지 않는다.\n\n'+
+            'develop 인수 '+str((c['verification'].get('integration') or {}).get('develop_merge_commit','통합 대기'))+' · 통합 훅 '+str((c['verification'].get('integration') or {}).get('normal_commit_push_snapshot_test_count',0))+' · '+str((c['verification'].get('integration') or {}).get('PR','PR 대기'))+' · 병합 CI '+str(((c['verification'].get('integration') or {}).get('merge_CI') or {}).get('url','미실행'))+'. 코드 인수와 실제 운영 인수는 각각의 증거로 판단한다.\n\n'+
             '\n'.join('- '+x for x in c['remaining'])+'\n\n[작업 항목](../work_items/DEV-009-runtime-connection-preparation.json) · [Supabase 운영 인계](Supabase_운영_인수인계.md) · [필수 보안 기준](외부접근_데이터보호_개발기준.md)')
 
 
@@ -1121,7 +1124,7 @@ def validate_runtime_connection_preparation(spec):
         set(r.get('required_server_components',[]))!={'Supabase_Auth_settings','app_role_PostgreSQL','private_Storage_scope','private_runtime_registry','explicit_required_native_selection','relay_security'} or
         set(r.get('private_environment_names',[]))!={'SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','DATABASE_URL','SUPABASE_SECRET_KEY','JUNGSI_SUPABASE_STORAGE_BUCKET','JUNGSI_SUPABASE_STORAGE_PREFIX','JUNGSI_SUPABASE_RUNTIME_REGISTRY','JUNGSI_SUPABASE_RUNTIME_SELECTION','JUNGSI_RELAY_TOKEN'}):
         errors.append('DEV-009 provider readiness or public boundary drift')
-    if (d.get('architecture')!='separate_Python_FastAPI_backend' or d.get('frontend_owner_branch')!='feature/presentation-foundation' or d.get('server_timezone')!='UTC' or d.get('source_display_timezone')!='Asia/Seoul' or
+    if (d.get('architecture')!=('supabase_edge_functions' if spec.get('supabase_deployment_contract') else 'separate_Python_FastAPI_backend') or d.get('frontend_owner_branch')!='feature/presentation-foundation' or d.get('server_timezone')!='UTC' or d.get('source_display_timezone')!='Asia/Seoul' or
         d.get('app_role_only')is not True or d.get('migration_owner_as_runtime_allowed')is not False or d.get('private_credentials_in_client_allowed')is not False or d.get('actual_deployment')!='NOT_RUN' or d.get('BFF_browser_actual_acceptance')!='NOT_RUN'):
         errors.append('DEV-009 deployment preparation cannot certify live acceptance')
     if (c.get('production_ready')is not False or any(preserve.get(k)is not False for k in ('default_factory_change_allowed','source_only_automatic_publication_allowed','production_ready_promotion_allowed')) or
@@ -1138,6 +1141,56 @@ def validate_runtime_connection_preparation(spec):
         ci=v.get('CI')
         if not isinstance(ci,dict) or ci.get('headSha')!=v.get('implementation_commit') or ci.get('conclusion')!='success':
             errors.append('DEV-009 CI evidence does not bind verified implementation')
+    return errors
+
+
+def supabase_deployment_document(spec):
+    c=spec['supabase_deployment_contract']; p=c['platform_policy']; a=c['architecture']; s=c['security']; f=c['frontend']; v=c['verification']
+    comparison=f.get('comparison_review')
+    comparison_text=('\n\n## 화면 제공 방식 비교 회신의 검토\n\n'+comparison['decision']+'\n\n'+
+        table(['항목','확인·정정 기준'],comparison['facts'])+'\n\n실제 호환성/브라우저/비용 '+comparison['actual_compatibility_browser_and_billing']+'. 비교 수신은 배포·화면교체 승인이 아니다.\n\n'+
+        '\n'.join('- ['+x['title']+']('+x['url']+')' for x in comparison['official_sources'])) if comparison else ''
+    return (c['scope']+'\n\n계약 '+c['revision']+' · 코드 '+c['code_status']+' · 실제 운영 NOT_RUN · production_ready=false. 출발 develop '+c['basis_commit']+'.\n\n'+
+            '## 플랫폼과 비용 범위\n\n'+p['rule']+'\n\n허용 플랫폼: '+', '.join(p['allowed'])+' · 기존 요금제/Spend Cap 검수 '+p['usage_and_spend_cap_verification']+'. 추가 비용 없이 사용할 수 있는 범위를 먼저 확인한다.\n\n'+
+            '## 3티어와 기존 Python 구현\n\n'+table(['계층/기준','구성'],[['프레젠테이션',a['presentation']],['애플리케이션',a['application']],['데이터',a['data']],['기존 검산',a['python_reference']]])+'\n\n'+a['rule']+'\n\n서버 UTC · 원자료/화면 Asia/Seoul. '+c['platform_limits']['cost_rule']+' 현재 플랫폼 상한은 메모리256MiB, 요청 active CPU2초, Free worker wall clock150초다. 플랫폼 상한은 내부 운영 한도를 뜻하지 않는다.\n\n'+
+            '## 수치와 응답의 호환 검산\n\n'+c['numerical_compatibility']['rule']+'\n\n'+
+            '## 서버 계약과 자료 발행\n\n'+s['rule']+'\n\n정확 헤더 '+chr(96)+s['relay_header']+chr(96)+' · 서버 전용 '+chr(96)+s['relay_environment_name']+chr(96)+' · 실제 사용자 Authorization Bearer. relay만으로 사용자 권한이 생기지 않는다. '+s['health_live_path']+'는 최소 공개 생존 확인, '+s['health_ready_path']+'는 relay 보호 검수다.\n\n'+
+            c['native_publication']['rule']+'\n\nEdge에서 사용할 private Storage 명부/환경 이름은 서버 담당의 구현 계약과 후보 증거로 확정한다. Python의 로컬 파일 경로·factory 실행 명령을 Edge 배포 명령으로 사용하지 않는다.\n\n'+
+            '## 담당별 후속 단계\n\n'+table(['단계','담당','상태','산출물'],[[x['id'],x['owner'],x['status'],x['deliverable']] for x in c['phases']])+'\n\n'+
+            '## 화면 담당에게 전달할 작업\n\n화면 제공 범위 '+f['hosting_status']+' · Drive Apps Script 후보 '+f['candidate_permission']+'. 기존 외부 preview와 파일은 이력으로 보존한다. 새 플랫폼으로 채택하지 않는다.\n\n'+'\n'.join('- '+x for x in f['handoff'])+'\n\n'+
+            comparison_text+'\n\n## 검증 상태\n\nEdge 구현 '+v['status']+' · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 '+v['actual_Auth_DB_Storage_Edge_BFF_browser_deployment']+' · 실제 비용/요금제 '+v['actual_billing_and_quota_verification']+'. 기존 Python 합성 인수는 Edge 포팅/실운영 인수를 대신하지 않는다.\n\n'+
+            '## 공식 기술 근거\n\n'+'\n'.join('- ['+x['title']+']('+x['url']+')' for x in c['official_sources'])+'\n\n[DEV-010 작업 항목](../work_items/DEV-010-supabase-platform-deployment.json) · [기존 실행 자료 계약](Supabase_실행자료_연결.md)')
+
+
+def validate_supabase_deployment_contract(spec):
+    c=spec.get('supabase_deployment_contract')
+    try: required=tuple(int(x) for x in spec.get('version','0.0.0').split('.')) >= (1,9,8)
+    except (ValueError,TypeError): required=False
+    if c is None:return ['DEV-010 required platform contract missing'] if required else []
+    if not isinstance(c,dict):return ['DEV-010 platform contract invalid']
+    errors=[]; p=c.get('platform_policy',{}); a=c.get('architecture',{}); s=c.get('security',{}); n=c.get('native_publication',{}); v=c.get('verification',{}); preserve=c.get('preservation',{})
+    if (c.get('format')!='jungsi.supabase-deployment/v1' or c.get('id')!='DEV-010' or c.get('branch')!='feature/application-pre-data-platform' or spec.get('current_documents',{}).get('supabase_deployment')!='docs/current/Supabase_배포_화면_후속작업.md'):
+        errors.append('DEV-010 owner or document registration drift')
+    if (p.get('allowed')!=['google_drive','supabase'] or p.get('existing_plan_only')is not True or any(p.get(k)is not False for k in ('external_hosting_allowed','additional_billable_service_allowed','plan_upgrade_allowed','paid_add_on_allowed','automatic_overage_opt_in_allowed'))):
+        errors.append('DEV-010 platform or additional-cost constraint drift')
+    d=spec.get('runtime_connection_preparation_contract',{}).get('deployment',{})
+    if (a.get('runtime')!='supabase_edge_typescript_deno' or a.get('python_hosted_unchanged')is not False or a.get('engine_in_browser_allowed')is not False or a.get('API_count')!=len(spec.get('operations',[])) or a.get('API_DTO_session_changes')is not False or a.get('server_timezone')!='UTC' or a.get('source_display_timezone')!='Asia/Seoul' or d.get('architecture')!='supabase_edge_functions' or d.get('hosting_contract_ref')!='supabase_deployment_contract' or d.get('python_reference_only')is not True):
+        errors.append('DEV-010 Edge and Python reference boundary drift')
+    if (s.get('contract_ref')!='security_contract' or s.get('revision')!=spec.get('security_contract',{}).get('revision') or s.get('relay_header')!='X-Jungsi-Relay-Token' or s.get('relay_environment_name')!='JUNGSI_RELAY_TOKEN' or any(s.get(k)is not True for k in ('relay_server_only','user_Bearer_required','user_authorization_in_application_required','shared_atomic_quota_required','health_ready_relay_required')) or any(s.get(k)is not False for k in ('direct_browser_analysis_allowed','secrets_in_browser_allowed')) or s.get('health_live_path')!='/health/live' or s.get('health_ready_path')!='/health/ready' or s.get('current_entitlement_authority')!='jungsi_backend.entitlements'):
+        errors.append('DEV-010 relay or application authorization drift')
+    if (n.get('registry_format')!='jungsi.data-registry/v1' or n.get('selection_format')!='jungsi.runtime-selection/v1' or n.get('required_dependencies_only')is not True or n.get('source_snapshots_preserved')is not True or any(n.get(k)is not False for k in ('source_state_only_promotion_allowed','historical_source_count_trigger_allowed','actual_data_in_Git'))):
+        errors.append('DEV-010 native publication or historical trigger drift')
+    if (c.get('production_ready')is not False or any(preserve.get(k)is not False for k in ('legacy_factory_change_allowed','source_flag_only_promotion_allowed','production_ready_promotion_allowed')) or v.get('actual_Auth_DB_Storage_Edge_BFF_browser_deployment')!='NOT_RUN' or v.get('actual_billing_and_quota_verification')!='NOT_RUN' or p.get('usage_and_spend_cap_verification')!='NOT_RUN'):
+        errors.append('DEV-010 preparation cannot certify operating or billing acceptance')
+    precision=c.get('numerical_compatibility',{})
+    if (any(precision.get(k)is not True for k in ('exact_rational_and_decimal_preserved','explicit_rule_rounding_preserved','canonical_integer_JSON_keys_preserved','independent_python_edge_comparison_required')) or precision.get('Number_or_Math_round_equivalence_assumed')is not False or precision.get('heavy_model_generation_in_request_allowed')is not False):
+        errors.append('DEV-010 precision or heavy-compute compatibility drift')
+    if c.get('code_status')not in {'planned','implemented_scoped_synthetic_verified_integration_pending','accepted_on_develop_scoped_synthetic_verified'}:
+        errors.append('DEV-010 scoped code state drift')
+    if c.get('code_status')!='planned':
+        ci=v.get('CI')
+        if (not re.fullmatch(r'[0-9a-f]{40}',str(v.get('implementation_commit',''))) or type(v.get('synthetic_test_count'))is not int or v.get('synthetic_test_count',0)<=0 or v.get('status')!='PASS_SCOPED_SYNTHETIC' or not isinstance(ci,dict) or ci.get('headSha')!=v.get('implementation_commit') or ci.get('conclusion')!='success'):
+            errors.append('DEV-010 implementation completion lacks fixed scoped evidence')
     return errors
 
 
@@ -1675,10 +1728,71 @@ def generated_files(spec):
             if path in files:
                 link=('../../docs/current/' if path=='apps/web/README.md' else '../docs/current/' if path=='database/README.md' else '')+'Supabase_실행자료_연결.md'
                 files[path]=files[path].replace(marker,'\n\n[명시 Supabase 실행 자료 연결·공급자별 readiness·운영 준비]('+link+')의 DEV-009 계약을 함께 따른다.'+marker)
+    if spec.get('supabase_deployment_contract'):
+        deployment_path=spec['current_documents']['supabase_deployment']
+        files[deployment_path]=doc('Google Drive·Supabase 전용 배포와 화면 후속작업',supabase_deployment_document(spec))
+        marker='\n\n<!-- jungsi:generated'
+        for path in [spec['current_documents'][key] for key in ('planning','routing','architecture','workflow','runtime_connection_preparation','supabase_operations_handoff','frontend_reply','frontend_followup','presentation_handoff')]+['apps/web/README.md','database/README.md']:
+            if path in files:
+                link=('../../docs/current/' if path=='apps/web/README.md' else '../docs/current/' if path=='database/README.md' else '')+'Supabase_배포_화면_후속작업.md'
+                files[path]=files[path].replace(marker,'\n\n## 현재 운영 플랫폼과 화면 인계\n\n[Google Drive·Supabase 전용 배포 계약]('+link+')이 이전 별도 FastAPI 호스팅/외부 워커 인계보다 우선한다. Python 검산은 보존하고 Edge 호환과 실제 인수는 후속 작업이다. relay는 X-Jungsi-Relay-Token 확정 계약이며 발행 감지는 최신 승인 native 버전/해시를 사용한다. 화면 제공 범위와 요금제 포함량 검수는 완료 전 상태를 유지한다.'+marker)
+    history=spec.get('history_presentation_contract')
+    if history:
+        marker='\n\n<!-- jungsi:generated'
+        preview=history['preview']; verification=history['verification']
+        history_text=(history['decision']+'\n\n## 추정 2열의 표시와 산술'+'\n\n'+
+            table(['열','산식'],[[r['label'],r['formula']] for r in history['estimated_columns']])+
+            '\n\n'+'\n'.join('- '+r for r in history['rules'])+
+            '\n\n## 발행 전 시사 준비\n\n선택한 준비 경로: '+preview['selected_preparation']+'. '+preview['reason']+
+            '\n\n'+table(['안','방식','적용 조건'],preview['alternatives'])+
+            '\n\n'+'\n'.join('- '+r for r in preview['local_preconditions'])+
+            '\n\n'+preview['ETA_rule']+
+            '\n\n## 별도 자료 반입 흐름\n\n'+history['separate_import']['reported_source']+
+            '\n\n상태: '+history['separate_import']['verification_status']+'.\n\n'+
+            '\n'.join('- '+r for r in history['separate_import']['rules'])+
+            '\n\n## 담당 후속 작업\n\n'+table(['작업','담당','수행 범위'],history['frontend_tasks'])+
+            '\n\n## 현재 검증 범위\n\n'+table(['항목','상태'],list(verification.items()))+
+            '\n\n기획 검산은 외부 화면 구현·로컬 꾸러미 승인/수신·실제 시사·운영 발행/배포/보안 인수를 대신하지 않는다.')
+        submission=history.get('submission_review')
+        if submission:
+            history_text+='\n\n## 화면 영수증 수신과 수정 인수\n\n화면 관측 '+submission['frontend_commit']+' · '+submission['evidence_scope']+'. '+submission['decision']+'\n\n'+table(['작업','항목','수정·인수 조건'],submission['corrections'])
+            followup=submission.get('followup_review')
+            if followup:
+                history_text+='\n\n## 수정 회신의 독립 검토\n\n'+followup['summary']+'\n\n'+table(['항목','확인 범위·판정'],followup['accepted_observations'])+'\n\n'+table(['증거','상태·한계'],followup['evidence_boundaries'])
+                history_text+='\n\n공식 근거: '+', '.join('['+r['title']+']('+r['url']+')' for r in followup['primary_sources'])+'.'
+            latest=submission.get('latest_observation')
+            if latest:
+                history_text+='\n\n## 최신 소스 변경 관측\n\n'+latest['summary']+'\n\n'+table(['항목','현재 확인 범위'],latest['observations'])
+        partial=history.get('partial_publication')
+        if partial:
+            history_text+='\n\n## 학교별 부분 발행 착수\n\n'+partial['request']+'\n\n상태 '+partial['state']+' · 단위 '+partial['unit']+' · 선택 '+partial['selection_strategy']+'.\n\n'+'\n'.join('- '+x for x in partial['rules'])+'\n\n'+table(['작업','담당','산출물'],partial['owners'])+'\n\n'+partial['first_batch_and_ETA']+' 운영 발행 '+partial['operational_publication']+'.'
+        history_path=spec['current_documents']['history_display']
+        files[history_path]=doc('1페이지 공식 자료·추정 표기·발행 전 시사',history_text)
+        summary=('\n\n## 1페이지 추정 2열과 초안 시사\n\n'+
+            '[공식 자료·추정 표기·시사 계약](1페이지_공식자료_추정표기_시사.md)을 따른다. '+
+            history['decision']+' 동일 학년도/모집행/통계 분모와 결측·실제0·음수를 검사하고 실제 불합격자수와의 차이를 표시한다. '+
+            'API의 공식 history_metric과 회원 권한은 유지한다. 학교별 부분 발행은 단일 활성 catalog의 누적 불변 판으로 착수하며 source 승격·자동 병합을 하지 않는다. 실제 발행된 과거 입결의 목록/검수 계보·부분 조회를 화면에서 대조하고 승인·선택·수신·브라우저·운영 발행은 별도 인수다.')
+        for key in ('planning','routing','architecture','workflow','presentation_handoff','api_dto','presentation_connection','local_verification','frontend_reply','frontend_followup','supabase_deployment','runtime_connection_preparation'):
+            path=spec['current_documents'].get(key)
+            if path in files:files[path]=files[path].replace(marker,summary+marker)
+        for path in ('apps/web/route_catalog.json','src/jungsi_touch/application/route_catalog.json'):
+            catalog=json.loads(files[path]);catalog['history_presentation_contract']=history
+            files[path]=json.dumps(catalog,ensure_ascii=False,indent=2)+'\n'
     for path,metadata in spec['workflow'].get('synchronized_work_items',{}).items():
         item=dict(metadata)
         item['scope']=spec[item['contract_ref']]
         files[path]=json.dumps(item,ensure_ascii=False,indent=2)+'\n'
+    files.update(generated_sync_files(spec,doc,table))
+    if spec.get('workflow',{}).get('documentation_sync'):
+        marker='\n\n<!-- jungsi:generated'
+        reference=('\n\n## 개발 변경과 문서 동기화\n\n'+
+                   '[현재 개발현황과 문서 동기화](개발현황_문서동기화.md) 및 [코드 색인](code_routing_index.json)을 먼저 읽는다. '
+                   '최신 검증 커밋부터 Git 변경 파일과 연결된 요구사항·라우팅만 검토하고 공통 명세에서 모든 문서를 함께 생성한다. '
+                   '모든 에이전트는 코드·기획·라우팅을 같은 커밋에서 일치시키고 필수 훅·CI를 통과해야 한다. '
+                   '이미 검증한 원자료·전체 소스를 매 작업마다 다시 읽지 않는다. 범위 확대 사유와 실제 운영 미검증 상태는 별도로 기록한다.')
+        for key in ('planning','routing','architecture','workflow','presentation_handoff'):
+            path=spec['current_documents'][key]
+            files[path]=files[path].replace(marker,reference+marker)
     acceptance=common_tools_acceptance_text(spec)
     if acceptance:
         marker='\n\n<!-- jungsi:generated'
@@ -1766,7 +1880,7 @@ def validate_forecast_contract(spec):
 
 
 def validate_spec(spec):
-    errors=[]
+    errors=validate_sync_policy(spec)
     if spec.get("format")!="jungsi.service-spec/v1":errors.append("Unsupported service specification")
     requirements={r["id"] for r in spec["requirements"]}
     pages=spec["pages"];ops=spec["operations"]
@@ -1834,6 +1948,8 @@ def validate_spec(spec):
         expected_items['docs/work_items/DEV-008-secured-backend-boundary.json']='secured_backend_preparation_contract'
     if 'runtime_connection_preparation_contract' in spec:
         expected_items['docs/work_items/DEV-009-runtime-connection-preparation.json']='runtime_connection_preparation_contract'
+    if 'supabase_deployment_contract' in spec:
+        expected_items['docs/work_items/DEV-010-supabase-platform-deployment.json']='supabase_deployment_contract'
     if records is not None:
         if not isinstance(records,dict) or set(records)!=set(expected_items):
             errors.append('Synchronized work-item scope registration drift')
@@ -1863,6 +1979,7 @@ def validate_spec(spec):
     errors.extend(validate_security_contract(spec))
     errors.extend(validate_secured_preparation(spec))
     errors.extend(validate_runtime_connection_preparation(spec))
+    errors.extend(validate_supabase_deployment_contract(spec))
     errors.extend(validate_frontend_reply_contract(spec))
     errors.extend(validate_supabase_actual_update_contract(spec))
     errors.extend(validate_supabase_second_actual_update_contract(spec))
@@ -2000,6 +2117,7 @@ def validate_public_response_registry(paths,read,spec):
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
     names=set(paths)
+    errors.extend(validate_catalog(paths,read,spec))
     errors.extend(validate_public_response_registry(names,read,spec))
     transition=spec.get('supabase_operations_handoff_contract',{}).get('service_transition_contract',{})
     if transition.get('implementation_mode')=='explicit_prepared_default_unchanged':
@@ -2037,6 +2155,8 @@ def validate_content(paths,read,spec):
         errors.append("README missing current planning pointer")
     if "AGENTS.md" not in names or b"docs/current/service_spec.json" not in read("AGENTS.md"):
         errors.append("AGENTS missing current specification authority")
+    if spec.get('workflow',{}).get('documentation_sync') and ("AGENTS.md" not in names or AGENT_MARKER not in read("AGENTS.md")):
+        errors.append("AGENTS missing mandatory documentation synchronization")
     if ("AGENTS.md" not in names or b"<!-- jungsi:security-required -->" not in read("AGENTS.md") or
         SECURITY_DOCUMENT.encode("utf-8") not in read("AGENTS.md")):
         errors.append("AGENTS missing mandatory security reference")
@@ -2053,6 +2173,8 @@ def validate_changed_paths(changed,spec):
     code_changed=any(p.startswith(watched) and not p.endswith(".md") for p in changed)
     code_changed=code_changed or bool(set(changed)&set(spec["workflow"]["shared_tools"]))
     required={SPEC_PATH,spec["current_documents"]["planning"],spec["current_documents"]["routing"]}
+    if spec.get('workflow',{}).get('documentation_sync'):
+        required.update(spec['current_documents'][k] for k in ('architecture','workflow','development_sync'))
     if code_changed and not required<=set(changed):
         return ["Code changed without matching specification planning and routing in the same commit"]
     return []

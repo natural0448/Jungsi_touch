@@ -1,10 +1,12 @@
 # Supabase 실행 자료 연결과 운영 준비
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.6이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.16이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 명시 Supabase 보안 앱 구성·공급자별 설정·선택 실행 자료의 사전 검수·최소 readiness 연결과 배포 준비. 원자료·정제 정본과 실행 발행본을 구분한다.
 
-계약 2026.10.07.v2 · 코드 implemented_synthetic_verified_integration_pending · 운영 준비 false. 출발 develop 0b120ff3b4e168b6c724de0b212e221ef8527c3e.
+계약 2026.10.07.v2 · 코드 accepted_on_develop_scoped_synthetic_verified · 운영 준비 false. 출발 develop 0b120ff3b4e168b6c724de0b212e221ef8527c3e.
+
+현재 운영 플랫폼은 Google Drive·Supabase로 한정한다. 아래 Python factory·파일 경로·합성 인수는 보존된 로컬 참조 구현이며 Edge 배포 완료를 뜻하지 않는다. [Supabase 전용 배포 후속작업](Supabase_배포_화면_후속작업.md)을 함께 따른다.
 
 ## 원자료 등록과 실행 발행본
 
@@ -47,7 +49,7 @@ create_supabase_secured_app를 명시 선택하고 DEV-008 security 구성을 �
 
 ## 배포와 화면 담당 인계
 
-별도 Python FastAPI 서버 · 배포 대상 user_input_pending · 실제 배포 NOT_RUN · 화면 feature/presentation-foundation. 서버 UTC, 원자료/화면 Asia/Seoul이며 runtime에는 app role만 사용한다. 서버 비밀과 원자료는 브라우저에 전달하지 않는다.
+별도 Python FastAPI 서버 · 배포 대상 selected_supabase_edge_migration_pending · 실제 배포 NOT_RUN · 화면 feature/presentation-foundation. 서버 UTC, 원자료/화면 Asia/Seoul이며 runtime에는 app role만 사용한다. 서버 비밀과 원자료는 브라우저에 전달하지 않는다.
 
 외부 화면 담당은 확정 API 주소와 공개 Auth 설정, 서버 전용 relay·세션/CSRF 계약 및 같은 native 버전의 기대값을 수령해 실제1~4페이지를 검수한다. API22/DTO·회원·소유권·성공 점수와 판단 pending 조건을 유지한다.
 
@@ -57,13 +59,23 @@ create_supabase_secured_app를 명시 선택하고 DEV-008 security 구성을 �
 
 확인한 구현 606e8307883ea53340be850ea13674a19baa8f81 · 합성 44 · 독립 합성 11 · 정상 훅 798 · CI https://github.com/natural0448/Jungsi_touch/actions/runs/37582748954. 세부 private probe 영수증은 공개 health에 포함하지 않는다.
 
+develop 인수 493232832d663d7fea7b0fbb350de15055cd9ccf · 통합 훅 799 · https://github.com/natural0448/Jungsi_touch/pull/19 · 병합 CI https://github.com/natural0448/Jungsi_touch/actions/runs/37586473913. 코드 인수와 실제 운영 인수는 각각의 증거로 판단한다.
+
 - latest verified source to compatible native candidate and scoped numerical review
 - explicit approval/immutable publication/runtime selection of eligible minimum native artifacts
-- hosting target and private server configuration
-- actual JWT/entitlement/owner/Storage/API/BFF/CSRF/browser acceptance and shared atomic quota
+- Supabase Edge compatibility implementation and private configuration within the existing plan
+- approved presentation hosting scope and actual JWT/entitlement/owner/Storage/API/BFF/CSRF/browser acceptance and shared atomic quota
 - forecast publication needs its separate independent editor/approver and pinned context; source metadata is not a forecast draft
 
 [작업 항목](../work_items/DEV-009-runtime-connection-preparation.json) · [Supabase 운영 인계](Supabase_운영_인수인계.md) · [필수 보안 기준](외부접근_데이터보호_개발기준.md)
+
+## 현재 운영 플랫폼과 화면 인계
+
+[Google Drive·Supabase 전용 배포 계약](Supabase_배포_화면_후속작업.md)이 이전 별도 FastAPI 호스팅/외부 워커 인계보다 우선한다. Python 검산은 보존하고 Edge 호환과 실제 인수는 후속 작업이다. relay는 X-Jungsi-Relay-Token 확정 계약이며 발행 감지는 최신 승인 native 버전/해시를 사용한다. 화면 제공 범위와 요금제 포함량 검수는 완료 전 상태를 유지한다.
+
+## 1페이지 추정 2열과 초안 시사
+
+[공식 자료·추정 표기·시사 계약](1페이지_공식자료_추정표기_시사.md)을 따른다. 추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 동일 학년도/모집행/통계 분모와 결측·실제0·음수를 검사하고 실제 불합격자수와의 차이를 표시한다. API의 공식 history_metric과 회원 권한은 유지한다. 학교별 부분 발행은 단일 활성 catalog의 누적 불변 판으로 착수하며 source 승격·자동 병합을 하지 않는다. 실제 발행된 과거 입결의 목록/검수 계보·부분 조회를 화면에서 대조하고 승인·선택·수신·브라우저·운영 발행은 별도 인수다.
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -83,4 +95,4 @@ create_supabase_secured_app를 명시 선택하고 DEV-008 security 구성을 �
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=0eba84192d33007ab970f5955db92f3ebc50c1869f6555c63505e4689e55bf95 -->
+<!-- jungsi:generated spec_sha256=b4bf2e6a9b562e06ee8f69167c0c8c774abaaa1d75a7f531fecb4da032a7987e -->

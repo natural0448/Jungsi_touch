@@ -1,0 +1,5434 @@
+{
+  "format": "jungsi.documentation-code-index/v1",
+  "parser": "python-ast-signatures/v1",
+  "source_hash_policy": "UTF8_BOM_REMOVED_CRLF_TO_LF",
+  "files": [
+    {
+      "path": "scripts/analyze_exam_score.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "dd217173e11764a2d1659270f93c7a3d49871fa16c3099494bbb38db634629ed",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main():",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/audit_documentation_sync.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "3c039f157a93ce7a324524b5ce7a08dacd60499c2c2552e695a5be46c4b06725",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "delta_audit",
+          "signature": "def delta_audit(paths, read, spec, base_paths, base_read, base_spec=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "extract_signatures",
+          "signature": "def extract_signatures(raw: bytes, filename: str):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "extract_signatures.Visitor",
+          "signature": "class Visitor(ast.NodeVisitor):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "extract_signatures.Visitor.__init__",
+          "signature": "def __init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "extract_signatures.Visitor.function",
+          "signature": "def function(self, node, asynchronous):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "extract_signatures.Visitor.visit_AsyncFunctionDef",
+          "signature": "def visit_AsyncFunctionDef(self, node):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "extract_signatures.Visitor.visit_ClassDef",
+          "signature": "def visit_ClassDef(self, node):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "extract_signatures.Visitor.visit_FunctionDef",
+          "signature": "def visit_FunctionDef(self, node):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "generated_sync_files",
+          "signature": "def generated_sync_files(spec, doc, table):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "normalized_source",
+          "signature": "def normalized_source(raw: bytes) -> bytes:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "reference_metadata",
+          "signature": "def reference_metadata(path, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "refresh_catalog",
+          "signature": "def refresh_catalog(paths, read, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "source_digest",
+          "signature": "def source_digest(raw: bytes) -> str:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "source_paths",
+          "signature": "def source_paths(paths, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_catalog",
+          "signature": "def validate_catalog(paths, read, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_sync_policy",
+          "signature": "def validate_sync_policy(spec):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/bootstrap_backend_runtime.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "fa5660dd26e35452b8ca90ddf2cb6a512133242fccd405ddca1da0160c726c6c",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "bootstrap",
+          "signature": "def bootstrap(destination, lock_path):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/calculate_overall_percentile.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "6f1bd645250eef83c4d3a1769a43dc22a319e83f8544b4cef8738a8efab9a76b",
+      "symbols": []
+    },
+    {
+      "path": "scripts/check_branch_policy.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "5693c34c35fc67887eaab688660f130f0b2494e4848a0e74cd7bf4015e15f076",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "DeletionAuthority",
+          "signature": "class DeletionAuthority:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DeletionAuthority.__init__",
+          "signature": "def __init__(self, observed_tips=()):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DeletionAuthority.changes",
+          "signature": "def changes(self, commit):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DeletionAuthority.entry",
+          "signature": "def entry(self, revision, path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DeletionAuthority.first",
+          "signature": "def first(self, commit, parent, path, branch, event_tip):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DeletionAuthority.inherited",
+          "signature": "def inherited(self, commit, parents, path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DeletionAuthority.origin_deletions",
+          "signature": "def origin_deletions(self, tip, path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DeletionAuthority.since_source",
+          "signature": "def since_source(self, tip):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DeletionAuthority.source_remote",
+          "signature": "def source_remote(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DeletionAuthority.unique_origin",
+          "signature": "def unique_origin(self, commit, path, event_tip):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ancestor",
+          "signature": "def ancestor(before, after):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "approved_develop_tip",
+          "signature": "def approved_develop_tip():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "automatic_merge",
+          "signature": "def automatic_merge(before, incoming, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "branches",
+          "signature": "def branches(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "canonical_hash",
+          "signature": "def canonical_hash(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "change_records",
+          "signature": "def change_records(before=None, after=None, *, staged=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "deletion_record",
+          "signature": "def deletion_record(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "deletion_registry_sticky",
+          "signature": "def deletion_registry_sticky(trusted, candidate):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "git",
+          "signature": "def git(*arguments):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "inspect_deletion_events",
+          "signature": "def inspect_deletion_events(branch, before, after, *, staged=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "load_spec",
+          "signature": "def load_spec(revision):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "merge_scope_adopted",
+          "signature": "def merge_scope_adopted(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "new_merge_history_errors",
+          "signature": "def new_merge_history_errors(branch, before, after, spec, *, approved=()):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "registry_history_errors",
+          "signature": "def registry_history_errors(before, after):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "staged_merge_head",
+          "signature": "def staged_merge_head():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "unresolved_markers",
+          "signature": "def unresolved_markers(conflicts, revision=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_deletion_registry",
+          "signature": "def validate_deletion_registry(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_deletions",
+          "signature": "def validate_deletions(changes, approved=()):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_event",
+          "signature": "def validate_event(event_name, event, revision, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_governance",
+          "signature": "def validate_governance(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_merge_commit",
+          "signature": "def validate_merge_commit(branch, commit, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_planning_paths",
+          "signature": "def validate_planning_paths(paths, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_pr",
+          "signature": "def validate_pr(head, base, changes, spec, *, approved=()):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_push_history",
+          "signature": "def validate_push_history(branch, before, after, spec, *, team=None, local=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_staged",
+          "signature": "def validate_staged(branch, team, changes, spec, *, direct_changes=None, approved=()):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_staged_snapshot",
+          "signature": "def validate_staged_snapshot(branch, team, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_work_branch",
+          "signature": "def validate_work_branch(branch, spec):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/check_project_consistency.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "0f74853bb441d982a864ea9ae28792c055451f3d73ebe71725981f3a19d71bd7",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "GitSnapshot",
+          "signature": "class GitSnapshot:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "GitSnapshot.__init__",
+          "signature": "def __init__(self, *, staged=False, revision=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "GitSnapshot.read",
+          "signature": "def read(self, path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "GitSnapshot.text",
+          "signature": "def text(self, path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "branch_governance_text",
+          "signature": "def branch_governance_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "collaboration_sections",
+          "signature": "def collaboration_sections(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "common_tools_acceptance_text",
+          "signature": "def common_tools_acceptance_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "contract_body",
+          "signature": "def contract_body(contract):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "deletion_scope_text",
+          "signature": "def deletion_scope_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "frontend_followup_text",
+          "signature": "def frontend_followup_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "frontend_reply_text",
+          "signature": "def frontend_reply_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "frontend_reply_text.bullets",
+          "signature": "def bullets(values):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "frontend_reply_text.details",
+          "signature": "def details(row, label):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "generated_files",
+          "signature": "def generated_files(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "generated_files.doc",
+          "signature": "def doc(title, body):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "git",
+          "signature": "def git(*args, input=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "local_verification_text",
+          "signature": "def local_verification_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "protected_path",
+          "signature": "def protected_path(path, shared_tools):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "repository_layout_text",
+          "signature": "def repository_layout_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "rights",
+          "signature": "def rights(tiers):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "runtime_connection_document",
+          "signature": "def runtime_connection_document(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "secured_preparation_document",
+          "signature": "def secured_preparation_document(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "secured_preparation_evidence",
+          "signature": "def secured_preparation_evidence(contract):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "security_catalog_contract",
+          "signature": "def security_catalog_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "security_document_body",
+          "signature": "def security_document_body(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "security_operation_rights",
+          "signature": "def security_operation_rights(operation):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "security_reference",
+          "signature": "def security_reference(spec, link):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "snapshot_changed_paths",
+          "signature": "def snapshot_changed_paths(snapshot):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "snapshot_changed_paths.assert_same_index",
+          "signature": "def assert_same_index():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "snapshot_changed_paths.commit_oid",
+          "signature": "def commit_oid(raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "snapshot_changed_paths.head_commit",
+          "signature": "def head_commit():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "snapshot_changed_paths.merge_state",
+          "signature": "def merge_state():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "snapshot_changed_paths.parse_entries",
+          "signature": "def parse_entries(raw, *, index):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "supabase_access_recheck_text",
+          "signature": "def supabase_access_recheck_text(contract):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "supabase_actual_update_text",
+          "signature": "def supabase_actual_update_text(contract):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "supabase_current_followup_text",
+          "signature": "def supabase_current_followup_text(contract):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "supabase_deployment_document",
+          "signature": "def supabase_deployment_document(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "supabase_operations_handoff_text",
+          "signature": "def supabase_operations_handoff_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "supabase_operations_route_metadata",
+          "signature": "def supabase_operations_route_metadata(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "supabase_operations_summary",
+          "signature": "def supabase_operations_summary(spec, link='Supabase_운영_인수인계.md'):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "supabase_second_actual_update_text",
+          "signature": "def supabase_second_actual_update_text(contract):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "table",
+          "signature": "def table(headers, rows):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "table.cell",
+          "signature": "def cell(v):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_changed_paths",
+          "signature": "def validate_changed_paths(changed, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_content",
+          "signature": "def validate_content(paths, read, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_forecast_contract",
+          "signature": "def validate_forecast_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_frontend_followup_contract",
+          "signature": "def validate_frontend_followup_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_frontend_followup_contract.strings",
+          "signature": "def strings(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_frontend_reply_contract",
+          "signature": "def validate_frontend_reply_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_frontend_reply_contract.strings",
+          "signature": "def strings(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_local_verification_contract",
+          "signature": "def validate_local_verification_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_local_verification_contract.field",
+          "signature": "def field(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_public_response_catalog",
+          "signature": "def validate_public_response_catalog(catalog, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_public_response_catalog.properties",
+          "signature": "def properties(node):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_public_response_catalog.visit",
+          "signature": "def visit(node, depth=0):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_public_response_registry",
+          "signature": "def validate_public_response_registry(paths, read, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_public_response_registry.unique",
+          "signature": "def unique(pairs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_runtime_connection_preparation",
+          "signature": "def validate_runtime_connection_preparation(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_secured_preparation",
+          "signature": "def validate_secured_preparation(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_security_contract",
+          "signature": "def validate_security_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_spec",
+          "signature": "def validate_spec(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_supabase_actual_update_contract",
+          "signature": "def validate_supabase_actual_update_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_supabase_deployment_contract",
+          "signature": "def validate_supabase_deployment_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_supabase_second_actual_update_contract",
+          "signature": "def validate_supabase_second_actual_update_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "write_generated",
+          "signature": "def write_generated(spec):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/compare_year_scores.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "1d6a1b71ef51ff9872a72786de3fb60734b4e356261aa0f3221e595cbf87aea5",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "linked",
+          "signature": "def linked(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "read",
+          "signature": "def read(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "run",
+          "signature": "def run(config, payload, profile_version, offering_by_year, research=False):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/demo_profile_percentile.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "3006361464808aea9bb3c71281200c7ec66adfa7455b4acf1f1c627fdbf0be99",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "build_demo",
+          "signature": "def build_demo():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "comparison",
+          "signature": "def comparison():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "make_profile",
+          "signature": "def make_profile(k, m, i1, i2, *, year=2026):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/demo_school_screening.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "9e510fdbd9fb9df7e6a8967ac526eb055abe5f2abc53f34994f6f595f5ea7fc4",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "run_example",
+          "signature": "def run_example(path=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "run_example.rows",
+          "signature": "def rows(records):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/demo_total_curve_principle_20260927.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "b5c39dd878179225cbfe0aabe4028d83a972cb53b4e3cf482d89e8fe278e9530",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ConstraintError",
+          "signature": "class ConstraintError(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main(argv=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "unique_solution",
+          "signature": "def unique_solution(equations, unknowns):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/import_kice_exam.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "841dcc3e6f1e8db7ef8e65b0d14299b9d9cee11bda475afea53d9e344feea3f3",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "build",
+          "signature": "def build(paths, exam, pack_version):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "extract",
+          "signature": "def extract(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "key",
+          "signature": "def key(text):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "number",
+          "signature": "def number(text):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_frequencies",
+          "signature": "def parse_frequencies(pages):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_grades",
+          "signature": "def parse_grades(pages, source_id, assessment):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_participants",
+          "signature": "def parse_participants(pages, exam):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "provenance",
+          "signature": "def provenance(path, source_id):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/probe_backend_connection.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "7881d53f39b83a6a108c0862911611e3af47b2803c5808bafaae58dd4c8fbcae",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "probe",
+          "signature": "def probe():",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/run_committed_tests.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "7cee5514ffd4a853c0014ad37df817678545aa80574cd9162c8f4b7c868653c5",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main():",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/__init__.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "f29a56e3df6f3048df09a0843a3408e503e7150ed79b5cea3a9c81f3645746e0",
+      "symbols": []
+    },
+    {
+      "path": "src/jungsi_touch/admission_result_percentile.py",
+      "layer": "application",
+      "status": "existing_math_foundation",
+      "requirements": [
+        "REQ-08"
+      ],
+      "source_sha256": "9a29bd3c05f96d1d496578419d35afde858e6a40d61ff48f0f2f9caf98dc1556",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ResultPercentileError",
+          "signature": "class ResultPercentileError(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ResultPercentileError.__init__",
+          "signature": "def __init__(self, code, message):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "UniversityScoreDistribution",
+          "signature": "class UniversityScoreDistribution:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UniversityScoreDistribution.__init__",
+          "signature": "def __init__(self, data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UniversityScoreDistribution.lookup",
+          "signature": "def lookup(self, record, *, research=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UniversityScoreDistribution.tail",
+          "signature": "def tail(self, threshold, *, inclusive):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "build_research_distribution",
+          "signature": "def build_research_distribution(rule, weighted_profiles, model_metadata, source_refs, *, research=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "estimate_result_percentile",
+          "signature": "def estimate_result_percentile(record, curve=None, *, research=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "numeric",
+          "signature": "def numeric(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "publication_interval",
+          "signature": "def publication_interval(score, precision):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ratio",
+          "signature": "def ratio(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require",
+          "signature": "def require(ok, code, message):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/__init__.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "037edb787292a8e8743af07fa5533bbd0494be35d16b8bee28160b53e91ed990",
+      "symbols": []
+    },
+    {
+      "path": "src/jungsi_touch/application/authorization.py",
+      "layer": "application",
+      "status": "server_policy_connected_by_HTTP_session_adapter",
+      "requirements": [
+        "REQ-14"
+      ],
+      "source_sha256": "1f2ea24129f937b7b801b7d4cb6abd382bd2919796ca142dc305b1ff56792bb4",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "AccessController",
+          "signature": "class AccessController:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "AccessController.__init__",
+          "signature": "def __init__(self, reports: ReportAccessRepository):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "AccessController._membership",
+          "signature": "def _membership(actor: Actor, allowed_tiers: list[str]) -> AccessDecision:",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "AccessController.operation_access",
+          "signature": "def operation_access(self, operation_id: str, actor: Actor, *, report_id: str | None=None) -> AccessDecision:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "AccessController.page_access",
+          "signature": "def page_access(self, page_id: str, actor: Actor) -> AccessDecision:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "AccessDecision",
+          "signature": "class AccessDecision:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "Actor",
+          "signature": "class Actor:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "Actor.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/estimated_population.py",
+      "layer": "application",
+      "status": "private_workflow_and_server_adoption",
+      "requirements": [
+        "REQ-02",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16"
+      ],
+      "source_sha256": "ee6bbb0d63b813e7db17ed598554af4a122a957a80f7919dd90177931f7842cc",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "EstimateApprovalProvider",
+          "signature": "class EstimateApprovalProvider(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EstimateApprovalProvider.get_estimate_approval",
+          "signature": "def get_estimate_approval(self, run_id: str) -> dict | None:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "EstimatedPopulationService",
+          "signature": "class EstimatedPopulationService:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EstimatedPopulationService.__init__",
+          "signature": "def __init__(self, inputs: EstimationInputProvider, store: EstimationArtifactStore):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EstimatedPopulationService.run",
+          "signature": "def run(self, input_version, run_id, code_sha, progress=None):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "EstimatedReleaseService",
+          "signature": "class EstimatedReleaseService:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EstimatedReleaseService.__init__",
+          "signature": "def __init__(self, approvals: EstimateApprovalProvider, store: EstimationArtifactStore):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EstimatedReleaseService.adopt",
+          "signature": "def adopt(self, run_id, result, release_version):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "EstimationArtifactStore",
+          "signature": "class EstimationArtifactStore(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EstimationArtifactStore.append",
+          "signature": "def append(self, run_id: str, name: str, payload: dict) -> dict:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EstimationArtifactStore.begin",
+          "signature": "def begin(self, run_id: str, manifest: dict) -> None:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "EstimationInputProvider",
+          "signature": "class EstimationInputProvider(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EstimationInputProvider.get_estimation_inputs",
+          "signature": "def get_estimation_inputs(self, version: str) -> EstimationInputs:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "EstimationInputs",
+          "signature": "class EstimationInputs:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "reference_feasibility",
+          "signature": "def reference_feasibility(pack, reference, policy, count, scenario):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "scenario_dimensions",
+          "signature": "def scenario_dimensions(base, other):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/forecast_assessment.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "40f402ef187749227c366e1d4dfc6722c4938dcb5d578e9e0070d35fd6b89004",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "comparison_value",
+          "signature": "def comparison_value(calculated, conversion, percentile):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "evaluate_release",
+          "signature": "def evaluate_release(offering, profile, conversion, percentile, release, *, historical_metrics=None):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/forecast_dto.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "28f389022b34aaab75105c4d1c241935b75b2e6a35edae3351177b6ce7b7d873",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "adjustment_dto",
+          "signature": "def adjustment_dto(row):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "draft_dto",
+          "signature": "def draft_dto(record):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "fields",
+          "signature": "def fields(value, names):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "public_context",
+          "signature": "def public_context(context):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "result_dto",
+          "signature": "def result_dto(result):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/forecast_policy.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "adbd5e1a7834a4004ed836def6aaae94d4034ff08367bd3eb0811ded56e58af6",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ForecastPolicyService",
+          "signature": "class ForecastPolicyService:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastPolicyService.__init__",
+          "signature": "def __init__(self, repository, inputs, clock):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastPolicyService.authority",
+          "signature": "def authority(self, actor, operation, record=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastPolicyService.draft_dto",
+          "signature": "def draft_dto(record):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ForecastPolicyService.execute",
+          "signature": "def execute(self, operation, actor, *, body=None, query=None, params=None, key=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastPolicyService.mutate",
+          "signature": "def mutate(self, store, operation, actor, body, params):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastPolicyService.pending",
+          "signature": "def pending(offering_id, reason):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ForecastPolicyService.preauthorize",
+          "signature": "def preauthorize(self, operation, actor, params):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastPolicyService.public",
+          "signature": "def public(release):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ForecastPolicyService.validated_release",
+          "signature": "def validated_release(self, offering_id):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/forecast_ports.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "800d43e3aa87b1b333cfb7cb097bbc416d545af9e228dcb4d344c6dc9a229a97",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ForecastInputProvider",
+          "signature": "class ForecastInputProvider(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastInputProvider.current_context",
+          "signature": "def current_context(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastInputProvider.inputs",
+          "signature": "def inputs(self, offering_id, input_id, version):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastInputProvider.policy",
+          "signature": "def policy(self, policy_id, version):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ForecastRepository",
+          "signature": "class ForecastRepository(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastRepository.capabilities",
+          "signature": "def capabilities(self, subject_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastRepository.get",
+          "signature": "def get(self, draft_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastRepository.list",
+          "signature": "def list(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastRepository.published",
+          "signature": "def published(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastRepository.transact",
+          "signature": "def transact(self, subject_id, operation, key, request_hash, callback):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/offering_analysis.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-08",
+        "REQ-09",
+        "REQ-12"
+      ],
+      "source_sha256": "0307a67a75e4c4190eb8ac53f2393bba77b267ae59aed0fa913e99c863fe5c01",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "_evaluate_offering",
+          "signature": "def _evaluate_offering(offering, profile, overall, bundle, conversion, percentile):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "blocked",
+          "signature": "def blocked(offering_id, reason):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "eligibility",
+          "signature": "def eligibility(scores, policy):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "evaluate_offering",
+          "signature": "def evaluate_offering(offering, profile, overall, bundle, *, conversion=None, percentile=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "evidence_dto",
+          "signature": "def evidence_dto(decision):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "evidence_dto.url",
+          "signature": "def url(value):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/overall_analysis.py",
+      "layer": "application",
+      "status": "stateless_engine_connected_by_persisted_workflow_and_HTTP",
+      "requirements": [
+        "REQ-02",
+        "REQ-07",
+        "REQ-12",
+        "REQ-14",
+        "REQ-15"
+      ],
+      "source_sha256": "1f393b577ed493ffc17e5603df3a34efa7884b0fbbec915067fc7035642a531c",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "OverallAnalysisError",
+          "signature": "class OverallAnalysisError(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "OverallAnalysisError.__init__",
+          "signature": "def __init__(self, code: str, http_status: int, message: str):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "OverallAnalysisService",
+          "signature": "class OverallAnalysisService:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "OverallAnalysisService.__init__",
+          "signature": "def __init__(self, access: AccessController, data: ExamAnalysisProvider):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "OverallAnalysisService._overall",
+          "signature": "def _overall(self, pack, payload):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "OverallAnalysisService.analyze",
+          "signature": "def analyze(self, actor: Actor, request: dict) -> dict:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_identifier",
+          "signature": "def _identifier(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_pending",
+          "signature": "def _pending(reason_code):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_scores",
+          "signature": "def _scores(request):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_student_response",
+          "signature": "def _student_response(analysis, payload, overall):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/platform.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-03",
+        "REQ-04",
+        "REQ-10",
+        "REQ-11",
+        "REQ-13",
+        "REQ-14"
+      ],
+      "source_sha256": "9af8e6df16d903a823920cc9be9242586b45402d3f5862c3405968f8bd0d1081",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "PlatformService",
+          "signature": "class PlatformService:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.__init__",
+          "signature": "def __init__(self, repository, data, clock, forecast_repository=None, forecast_service=None, session_service=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.candidates",
+          "signature": "def candidates(rows, analyses, version):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.catalog",
+          "signature": "def catalog(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.create_overall",
+          "signature": "def create_overall(self, actor, body, query, key, digest):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.execute",
+          "signature": "def execute(self, operation, actor, *, body=None, query=None, params=None, key=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.offering",
+          "signature": "def offering(self, release, oid):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.profile_dto",
+          "signature": "def profile_dto(profile):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.report",
+          "signature": "def report(self, actor, report_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.report_dto",
+          "signature": "def report_dto(actor, record):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.search",
+          "signature": "def search(self, operation, query):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.service_rows",
+          "signature": "def service_rows(release):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.statistics",
+          "signature": "def statistics(self, record, oid):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformService.statistics.rank",
+          "signature": "def rank(rows):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "changes_dto",
+          "signature": "def changes_dto(rows, *, source_timezone=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "identifier",
+          "signature": "def identifier(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "payload_hash",
+          "signature": "def payload_hash(body, params):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "public",
+          "signature": "def public(row, fields):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "revision",
+          "signature": "def revision(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "shape",
+          "signature": "def shape(value, required=(), optional=()):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "source_url",
+          "signature": "def source_url(value):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/platform_ports.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-19"
+      ],
+      "source_sha256": "ad8ef1491cb16152f8e06e7fff78ff49326b9e3172be09cf6ca417d2c2bf8e82",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ArtifactResultWriter",
+          "signature": "class ArtifactResultWriter(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ArtifactResultWriter.append_result",
+          "signature": "def append_result(self, owner_id, operation, request_key, content, now) -> dict:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "CatalogRelease",
+          "signature": "class CatalogRelease:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "EntitlementRepository",
+          "signature": "class EntitlementRepository(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EntitlementRepository.active_paid",
+          "signature": "def active_paid(self, subject_id: str, now: datetime) -> bool:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EntitlementRepository.active_paid_until",
+          "signature": "def active_paid_until(self, subject_id: str, now: datetime) -> datetime | None:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "OfferingAnalysis",
+          "signature": "class OfferingAnalysis:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "PlatformDataProvider",
+          "signature": "class PlatformDataProvider(ExamAnalysisProvider, Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformDataProvider.get_analysis",
+          "signature": "def get_analysis(self, offering_id: str) -> OfferingAnalysis | None:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformDataProvider.get_catalog",
+          "signature": "def get_catalog(self) -> CatalogRelease | None:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformDataProvider.get_conversion",
+          "signature": "def get_conversion(self, offering_id: str) -> UniversityConversionRelease | None:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformDataProvider.get_percentile",
+          "signature": "def get_percentile(self, offering_id: str) -> 'UniversityPercentileRelease | None':",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "PlatformError",
+          "signature": "class PlatformError(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformError.__init__",
+          "signature": "def __init__(self, code, status=422):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "PlatformRepository",
+          "signature": "class PlatformRepository(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformRepository.active_reports",
+          "signature": "def active_reports(self) -> list[dict]:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformRepository.create_profile",
+          "signature": "def create_profile(self, owner_id, scores, confirmed, now, key, digest, operation='score-profile.create') -> dict:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformRepository.get_profile",
+          "signature": "def get_profile(self, owner_id, profile_id) -> dict | None:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformRepository.get_report",
+          "signature": "def get_report(self, owner_id, report_id) -> dict | None:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformRepository.lookup_access",
+          "signature": "def lookup_access(self, report_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformRepository.replay",
+          "signature": "def replay(self, owner_id, operation, key, digest) -> dict | None:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PlatformRepository.write_report",
+          "signature": "def write_report(self, owner_id, report_id, profile_id, body, expected, now, operation, key, digest, *, no_op=False) -> dict:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "SessionProvider",
+          "signature": "class SessionProvider(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SessionProvider.verify",
+          "signature": "def verify(self, token: str, now: datetime) -> VerifiedSession | None:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "UniversityConversionRelease",
+          "signature": "class UniversityConversionRelease:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "UniversityPercentileRelease",
+          "signature": "class UniversityPercentileRelease:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "VerifiedSession",
+          "signature": "class VerifiedSession:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/ports.py",
+      "layer": "application",
+      "status": "repository_interface",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-02",
+        "REQ-12"
+      ],
+      "source_sha256": "ad78e6826c81f23737de595663f00860067400f3f425d79cbbb08bd3b9297098",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ExamAnalysisProvider",
+          "signature": "class ExamAnalysisProvider(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ExamAnalysisProvider.get_exam_pack",
+          "signature": "def get_exam_pack(self, exam_id: str) -> ExamPack | None:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ExamAnalysisProvider.get_total_model",
+          "signature": "def get_total_model(self, exam_id: str, pack_version: str) -> TotalModelBinding | None:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ReportAccessRecord",
+          "signature": "class ReportAccessRecord:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ReportAccessRecord.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ReportAccessRepository",
+          "signature": "class ReportAccessRepository(Protocol):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ReportAccessRepository.lookup_access",
+          "signature": "def lookup_access(self, report_id: str) -> ReportAccessRecord | None:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "TotalModelBinding",
+          "signature": "class TotalModelBinding:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/public_response.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_integration_pending",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "source_sha256": "2d7599ba6ef130523a8cf451639a076dbe16101e38c651177dfe56ea08a5fc62",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ProjectedPlatformService",
+          "signature": "class ProjectedPlatformService(PlatformService):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ProjectedPlatformService.__init__",
+          "signature": "def __init__(self, *args, projection, **kwargs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ProjectedPlatformService.execute",
+          "signature": "def execute(self, operation, actor, **kwargs):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "PublicResponseProjection",
+          "signature": "class PublicResponseProjection:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PublicResponseProjection.__init__",
+          "signature": "def __init__(self, registry=None, operations=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PublicResponseProjection._project",
+          "signature": "def _project(self, node, value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PublicResponseProjection._validate_catalog",
+          "signature": "def _validate_catalog(self, operations):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PublicResponseProjection._validate_node",
+          "signature": "def _validate_node(self, node, stack):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PublicResponseProjection.auxiliary",
+          "signature": "def auxiliary(self, root, value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PublicResponseProjection.project",
+          "signature": "def project(self, operation, actor, value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_unavailable",
+          "signature": "def _unavailable():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_unique_object",
+          "signature": "def _unique_object(pairs):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/publication.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-11",
+        "REQ-14",
+        "REQ-17",
+        "REQ-19"
+      ],
+      "source_sha256": "a125a2a684e65856dfcdab0d3ebea2104614a0d9ab08011ae94c8d447c3be801",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ReportPublicationService",
+          "signature": "class ReportPublicationService:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ReportPublicationService.__init__",
+          "signature": "def __init__(self, platform, writer):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ReportPublicationService.publish",
+          "signature": "def publish(self, actor, report_id, request_key):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/rule_explanations.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "04d98b37dd84d4e45a85464be9a6a1b9f14ce9acf42ad6c7faf33ceaabd957e3",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "explain_rule",
+          "signature": "def explain_rule(rule, values=None, trace=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "explain_rule.chosen",
+          "signature": "def chosen(expr):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "explain_rule.condition",
+          "signature": "def condition(expr):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "explain_rule.fields",
+          "signature": "def fields(expr):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "explain_rule.walk",
+          "signature": "def walk(expr):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/sessions.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15"
+      ],
+      "source_sha256": "48cbc306e9f99787704196ead1d8cc24ad52e283fd9ae5abaf41582a689d75cb",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "SessionService",
+          "signature": "class SessionService:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SessionService.__init__",
+          "signature": "def __init__(self, sessions, entitlements, clock):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SessionService.actor",
+          "signature": "def actor(self, authorization):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SessionService.read",
+          "signature": "def read(self, actor):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/time_contract.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-15"
+      ],
+      "source_sha256": "4a52054c38da1faebaab54d4ee8cbc61cb80763ead2b01a255f6e13545be6f26",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "UtcClock",
+          "signature": "class UtcClock:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UtcClock.now",
+          "signature": "def now(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "calendar_date",
+          "signature": "def calendar_date(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "seoul_date_range",
+          "signature": "def seoul_date_range(start, end):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "utc_instant",
+          "signature": "def utc_instant(value, *, source_timezone=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "utc_text",
+          "signature": "def utc_text(value):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/university_percentile.py",
+      "layer": "application",
+      "status": "implemented_synthetic_verified_live_curve_publication_pending",
+      "requirements": [
+        "REQ-05",
+        "REQ-06",
+        "REQ-08",
+        "REQ-12",
+        "REQ-14"
+      ],
+      "source_sha256": "1bc917ef1b16ec41d720d5d386eb6e6260b8bea31b0dc68999d12c7a0f6259ec",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "PercentileResult",
+          "signature": "class PercentileResult:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PercentileResult.dto",
+          "signature": "def dto(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PercentileResult.internal_rank",
+          "signature": "def internal_rank(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PercentileResult.ready",
+          "signature": "def ready(self):",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "UniversityPercentileService",
+          "signature": "class UniversityPercentileService:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UniversityPercentileService.__init__",
+          "signature": "def __init__(self, data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UniversityPercentileService.calculate",
+          "signature": "def calculate(self, offering, conversion):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "comparison_scope",
+          "signature": "def comparison_scope(bundle, conversion, curve):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "legacy_percentile_result",
+          "signature": "def legacy_percentile_result(offering, profile, current, curve, release_version):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "result_for_curve",
+          "signature": "def result_for_curve(base, curve, score, release_version, *, population_scope='whole_complete'):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/university_scoring.py",
+      "layer": "application",
+      "status": "accepted_on_develop_synthetic_verified_live_rules_configuration_pending",
+      "requirements": [
+        "REQ-05",
+        "REQ-06",
+        "REQ-12",
+        "REQ-14"
+      ],
+      "source_sha256": "9a62c6e08700180b67bdae3adc77e8b1f65b97fd9266b8eeb154d76f1d7749ef",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ScoringResult",
+          "signature": "class ScoringResult:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ScoringResult.dto",
+          "signature": "def dto(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ScoringResult.internal_calculation",
+          "signature": "def internal_calculation(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ScoringResult.internal_profile",
+          "signature": "def internal_profile(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ScoringResult.ready",
+          "signature": "def ready(self):",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "UniversityScoringService",
+          "signature": "class UniversityScoringService:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UniversityScoringService.__init__",
+          "signature": "def __init__(self, data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UniversityScoringService.calculate",
+          "signature": "def calculate(self, offering, profile):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/estimated_curves.py",
+      "layer": "application",
+      "status": "exact_aggregation",
+      "requirements": [
+        "REQ-02",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16"
+      ],
+      "source_sha256": "cc16755fe900027739f827f8c7c70bd488f1d67c3028e5890c50d6e3e18abd55",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "build_total_model",
+          "signature": "def build_total_model(pack, p, weights, info, validation, metadata):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "build_university_distribution",
+          "signature": "def build_university_distribution(pack, p, weights, info, rule, validation, metadata, *, mock_compatibility=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "candidate_rule_values",
+          "signature": "def candidate_rule_values(pack, p, info, index):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "decimal_string",
+          "signature": "def decimal_string(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "official_total_domain",
+          "signature": "def official_total_domain(pack, info):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "serialize_cohort_weights",
+          "signature": "def serialize_cohort_weights(weights, mask, expected_total):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "verify_build_context",
+          "signature": "def verify_build_context(p, weights, info, validation):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/estimated_fitting.py",
+      "layer": "application",
+      "status": "entropy_soft_reference",
+      "requirements": [
+        "REQ-02",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16"
+      ],
+      "source_sha256": "42ab97f26c44485e821d0a40e350791988090dc4fc19be4c89747511eef628a9",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "constraint_errors",
+          "signature": "def constraint_errors(weights, constraints):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "fit_estimated_joint",
+          "signature": "def fit_estimated_joint(pack, p, info, reference, policy, complete_count, progress=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "fit_estimated_joint.evaluate",
+          "signature": "def evaluate(t):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "official_constraints",
+          "signature": "def official_constraints(pack, p, info, complete_count):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "official_constraints.add",
+          "signature": "def add(name, codes, counts):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "reference_context",
+          "signature": "def reference_context(pack, reference):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "soft_features",
+          "signature": "def soft_features(pack, p, reference, policy, complete_count):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_policy_context",
+          "signature": "def validate_policy_context(pack, policy):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/estimated_profiles.py",
+      "layer": "application",
+      "status": "candidate_profiles",
+      "requirements": [
+        "REQ-02",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16"
+      ],
+      "source_sha256": "30772a8ff31e406f41e25642d377ad7b4c300def13fa0074c86e3d2f752dc3eb",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "EstimationError",
+          "signature": "class EstimationError(PercentileError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "complete_mask",
+          "signature": "def complete_mask(p):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "digest",
+          "signature": "def digest(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "finite",
+          "signature": "def finite(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "generate_candidate_profiles",
+          "signature": "def generate_candidate_profiles(pack, scenario):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "generate_candidate_profiles.availability_uniform",
+          "signature": "def availability_uniform(key):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "generate_candidate_profiles.choose",
+          "signature": "def choose(ids, weights, indices, labels):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "generate_candidate_profiles.factor",
+          "signature": "def factor(key):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "generate_candidate_profiles.row",
+          "signature": "def row(group=2):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "input_structure",
+          "signature": "def input_structure(pack, common_subject=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "inverse_discrete",
+          "signature": "def inverse_discrete(u, values, weights):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "normal_cdf",
+          "signature": "def normal_cdf(z):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "pack_data",
+          "signature": "def pack_data(pack):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require",
+          "signature": "def require(ok, code):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "subject_values",
+          "signature": "def subject_values(subject):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_candidate_profiles",
+          "signature": "def validate_candidate_profiles(pack, p, info):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/estimated_validation.py",
+      "layer": "application",
+      "status": "independent_validation",
+      "requirements": [
+        "REQ-02",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16"
+      ],
+      "source_sha256": "5783ce6123b2d77ffbeec09a033d3722ba1f64fb9286fcfce26e1cdad2eed400",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "official_residuals",
+          "signature": "def official_residuals(pack, p, info, weights, complete_count):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "official_residuals.check",
+          "signature": "def check(name, actual, count):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "reference_feasibility_certificate",
+          "signature": "def reference_feasibility_certificate(pack, reference, count, info):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "reference_feasibility_certificate.exact",
+          "signature": "def exact(v):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "reference_feasibility_certificate.selected_mean",
+          "signature": "def selected_mean(names, slots, reverse):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "reference_residuals",
+          "signature": "def reference_residuals(pack, p, weights, reference, point_ids):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_estimate",
+          "signature": "def validate_estimate(pack, p, weights, info, fit, reference, policy, *, independent_references=(), sensitivity=()):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_serialized_weights",
+          "signature": "def validate_serialized_weights(pack, p, info, exact_weights, count, policy):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_serialized_weights.add",
+          "signature": "def add(key, value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_serialized_weights.ratio",
+          "signature": "def ratio(v):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/exam_pack.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "85c0c9fbfc5d7605bac554161640780517c605e17b4f4068dc2f7e6e684aa175",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ExamPack",
+          "signature": "class ExamPack:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ExamPack.__init__",
+          "signature": "def __init__(self, data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ExamPack._source_ref",
+          "signature": "def _source_ref(value, ids):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ExamPack.academic_year",
+          "signature": "def academic_year(self):",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ExamPack.analyze",
+          "signature": "def analyze(self, payload, *, total_model=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ExamPack.exam_id",
+          "signature": "def exam_id(self):",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ExamPack.from_json",
+          "signature": "def from_json(cls, text):",
+          "decorators": [
+            "classmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ExamPack.pack_version",
+          "signature": "def pack_version(self):",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ExamPack.reported_score",
+          "signature": "def reported_score(self, subject, standard_score):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ExamPack.subject_result",
+          "signature": "def subject_result(self, subject, standard_score):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ExamPack.validation_summary",
+          "signature": "def validation_summary(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ExamTotalModel",
+          "signature": "class ExamTotalModel:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ExamTotalModel.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ExamTotalModel.from_json",
+          "signature": "def from_json(cls, text):",
+          "decorators": [
+            "classmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "_empty_grade",
+          "signature": "def _empty_grade(row):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_grade",
+          "signature": "def _grade(subject, score):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_grade_count",
+          "signature": "def _grade_count(row):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_json",
+          "signature": "def _json(text):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_require",
+          "signature": "def _require(condition, code, message):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "subject_key",
+          "signature": "def subject_key(label):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/forecasting.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "63e7fc2f8888cad6b24876975db08abd0f6b6184bb103c5f60f4ac0994e68460",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "comparable",
+          "signature": "def comparable(rows, context, metric):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "decimal",
+          "signature": "def decimal(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "digest",
+          "signature": "def digest(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "generate",
+          "signature": "def generate(inputs, policy):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "number",
+          "signature": "def number(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "policy_decimal",
+          "signature": "def policy_decimal(value, policy):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "project",
+          "signature": "def project(rows, policy, target_year):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require",
+          "signature": "def require(ok, code, status=422):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_direction",
+          "signature": "def validate_direction(rows, direction):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_policy_result",
+          "signature": "def validate_policy_result(result, policy):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_ranges",
+          "signature": "def validate_ranges(rows):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_result",
+          "signature": "def validate_result(result):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/__init__.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "0b601b06e1e77b58b088c27aa58f055b11524322e0e72caf2005ab3dc3abad34",
+      "symbols": []
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/drive_provider.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-01",
+        "REQ-06",
+        "REQ-12",
+        "REQ-13",
+        "REQ-15",
+        "REQ-17",
+        "REQ-19"
+      ],
+      "source_sha256": "3b07f85661a10fa69e75d2c1171b91fb73386fe375f85734223379cc62336b16",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "DriveClient",
+          "signature": "class DriveClient:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveClient.__init__",
+          "signature": "def __init__(self, token, input_folder, output_folder, *, opener=urlopen):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveClient.append_result",
+          "signature": "def append_result(self, owner_id, operation, request_key, content, now):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveClient.artifact",
+          "signature": "def artifact(self, entry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveClient.call",
+          "signature": "def call(self, path, *, params=None, data=None, content_type='application/json'):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "DriveDataProvider",
+          "signature": "class DriveDataProvider:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveDataProvider.__init__",
+          "signature": "def __init__(self, client, registry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveDataProvider.get_analysis",
+          "signature": "def get_analysis(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveDataProvider.get_catalog",
+          "signature": "def get_catalog(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveDataProvider.get_conversion",
+          "signature": "def get_conversion(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveDataProvider.get_exam_pack",
+          "signature": "def get_exam_pack(self, exam_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveDataProvider.get_percentile",
+          "signature": "def get_percentile(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveDataProvider.get_total_model",
+          "signature": "def get_total_model(self, exam_id, pack_version):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveDataProvider.load",
+          "signature": "def load(self, kind, key):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "MissingDataProvider",
+          "signature": "class MissingDataProvider:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MissingDataProvider.get_analysis",
+          "signature": "def get_analysis(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MissingDataProvider.get_catalog",
+          "signature": "def get_catalog(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MissingDataProvider.get_conversion",
+          "signature": "def get_conversion(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MissingDataProvider.get_exam_pack",
+          "signature": "def get_exam_pack(self, exam_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MissingDataProvider.get_percentile",
+          "signature": "def get_percentile(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MissingDataProvider.get_total_model",
+          "signature": "def get_total_model(self, exam_id, pack_version):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_integer_keys",
+          "signature": "def _integer_keys(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_rank_distribution",
+          "signature": "def _rank_distribution(raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "drive_id",
+          "signature": "def drive_id(value):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/forecast_inputs.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "0847561621dd82fcde21268c943061528ba2f3d9709ed77e09ac0120781fd66d",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "DriveForecastInputProvider",
+          "signature": "class DriveForecastInputProvider:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveForecastInputProvider.__init__",
+          "signature": "def __init__(self, data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveForecastInputProvider.current_context",
+          "signature": "def current_context(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveForecastInputProvider.inputs",
+          "signature": "def inputs(self, offering_id, input_id, version):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveForecastInputProvider.load",
+          "signature": "def load(self, kind, key):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "DriveForecastInputProvider.policy",
+          "signature": "def policy(self, policy_id, version):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/forecast_schema.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "3542820cfbaf24fa780f06ea2f7f15ae2a8bc1fd98ae48901723dc675f529622",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "normalize",
+          "signature": "def normalize(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "probe_forecast",
+          "signature": "def probe_forecast(c):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/http_api.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-03",
+        "REQ-04",
+        "REQ-14",
+        "REQ-15",
+        "REQ-18"
+      ],
+      "source_sha256": "8542be563020783489f473a0b2efdf1f767c8635debc8fd0cc6b46a4d23ca8ca",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "_compose_app",
+          "signature": "def _compose_app(*, settings=None, repository=None, data=None, sessions=None, clock=None, forecast_repository=None, forecast_inputs=None, entitlements=None, boundary=None, readiness_policy=None):",
+          "decorators": []
+        },
+        {
+          "kind": "async_function",
+          "name": "_compose_app.failure",
+          "signature": "async def failure(request, error):",
+          "decorators": [
+            "app.exception_handler(PlatformError)",
+            "app.exception_handler(OverallAnalysisError)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "_compose_app.handler",
+          "signature": "def handler(operation):",
+          "decorators": []
+        },
+        {
+          "kind": "async_function",
+          "name": "_compose_app.handler.endpoint",
+          "signature": "async def endpoint(request: Request, actor=Depends(verified_actor)):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_compose_app.live",
+          "signature": "def live():",
+          "decorators": [
+            "app.get('/health/live')"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "_compose_app.ready",
+          "signature": "def ready():",
+          "decorators": [
+            "app.get('/health/ready')"
+          ]
+        },
+        {
+          "kind": "async_function",
+          "name": "_compose_app.safe_boundary",
+          "signature": "async def safe_boundary(request, call_next):",
+          "decorators": [
+            "app.middleware('http')"
+          ]
+        },
+        {
+          "kind": "async_function",
+          "name": "_compose_app.safe_http_failure",
+          "signature": "async def safe_http_failure(request, error):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_compose_app.verified_actor",
+          "signature": "def verified_actor(request: Request):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "configured_app",
+          "signature": "def configured_app():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "create_app",
+          "signature": "def create_app(*, settings=None, repository=None, data=None, sessions=None, clock=None, forecast_repository=None, forecast_inputs=None, entitlements=None):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/local_dpapi.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "fa8df5bc4369fb079d94db82990656579f84bd70798037345adc787bc1cd4047",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "Blob",
+          "signature": "class Blob(ctypes.Structure):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "WindowsDpapi",
+          "signature": "class WindowsDpapi:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "WindowsDpapi._transform",
+          "signature": "def _transform(self, data, protect):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "WindowsDpapi.protect",
+          "signature": "def protect(self, data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "WindowsDpapi.unprotect",
+          "signature": "def unprotect(self, data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "private_path",
+          "signature": "def private_path(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "read_bounded",
+          "signature": "def read_bounded(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "read_sealed",
+          "signature": "def read_sealed(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "write_sealed_new",
+          "signature": "def write_sealed_new(path, value):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/local_drive.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "e2144c5241184b48b408cd4e0de6c212de0dd842a5aee159faf3666b6c518deb",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "LocalEncryptedDriveClient",
+          "signature": "class LocalEncryptedDriveClient:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalEncryptedDriveClient.__init__",
+          "signature": "def __init__(self, bundle, trusted_registry_sha256, *, trusted_selection_sha256=None, trusted_source='drive'):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalEncryptedDriveClient.artifact",
+          "signature": "def artifact(self, entry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalEncryptedDriveClient.diagnostic",
+          "signature": "def diagnostic(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalEncryptedDriveClient.from_file",
+          "signature": "def from_file(cls, path, trusted_registry_sha256, **trust):",
+          "decorators": [
+            "classmethod"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "LocalFilesystemClient",
+          "signature": "class LocalFilesystemClient:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalFilesystemClient.__init__",
+          "signature": "def __init__(self, bundle, trusted_selection_sha256):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalFilesystemClient.artifact",
+          "signature": "def artifact(self, entry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalFilesystemClient.diagnostic",
+          "signature": "def diagnostic(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalFilesystemClient.from_file",
+          "signature": "def from_file(cls, path, trusted_selection_sha256):",
+          "decorators": [
+            "classmethod"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "RecordingDriveClient",
+          "signature": "class RecordingDriveClient(DriveClient):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "RecordingDriveClient.artifact",
+          "signature": "def artifact(self, entry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "RecordingDriveClient.call",
+          "signature": "def call(self, path, *, params=None, **kwargs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "checked_json",
+          "signature": "def checked_json(content, expected):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "entry_hash",
+          "signature": "def entry_hash(entry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "local_approval",
+          "signature": "def local_approval(row, raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "local_selection",
+          "signature": "def local_selection(raw, trusted_hash):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "prepare_cache",
+          "signature": "def prepare_cache(*, registry_path, registry_sha256, input_folder, destination, source, selection_path=None, selection_sha256=None, token=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "prepare_local_cache",
+          "signature": "def prepare_local_cache(*, selection_path, selection_sha256, destination):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "registry_entries",
+          "signature": "def registry_entries(raw, trusted_hash):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/local_repository.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "f2e4871389fe6967b7e6ed23d727d69d2cdd7722b9b0877cf0077c6164f97590",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "LocalMemoryRepository",
+          "signature": "class LocalMemoryRepository:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository.__init__",
+          "signature": "def __init__(self, entitlements=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository._remember",
+          "signature": "def _remember(self, owner, operation, key, digest, row):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository.active_paid",
+          "signature": "def active_paid(self, owner, now):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository.active_paid_until",
+          "signature": "def active_paid_until(self, owner, now):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository.active_reports",
+          "signature": "def active_reports(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository.create_profile",
+          "signature": "def create_profile(self, owner, scores, confirmed, now, key, digest, operation='score-profile.create'):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository.get_profile",
+          "signature": "def get_profile(self, owner, profile_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository.get_report",
+          "signature": "def get_report(self, owner, report_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository.lookup_access",
+          "signature": "def lookup_access(self, report_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository.replay",
+          "signature": "def replay(self, owner, operation, key, digest):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalMemoryRepository.write_report",
+          "signature": "def write_report(self, owner, report_id, profile_id, body, expected, now, operation, key, digest, *, no_op=False):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/local_verification.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "fdb0256b30c83569f8bf7bccaccabfb330c6a471cbe956c6867dce5aa1a913da",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "LocalBoundary",
+          "signature": "class LocalBoundary:",
+          "decorators": []
+        },
+        {
+          "kind": "async_function",
+          "name": "LocalBoundary.__call__",
+          "signature": "async def __call__(self, scope, receive, send):",
+          "decorators": []
+        },
+        {
+          "kind": "async_function",
+          "name": "LocalBoundary.__call__.marked_send",
+          "signature": "async def marked_send(message):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalBoundary.__init__",
+          "signature": "def __init__(self, app, *, origins, port, diagnostic):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "LocalSessions",
+          "signature": "class LocalSessions:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalSessions.__init__",
+          "signature": "def __init__(self, sealed, clock):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "LocalSessions.verify",
+          "signature": "def verify(self, token, now):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "build_local_app",
+          "signature": "def build_local_app(*, sessions, cache=None, registry_sha256=None, hold_no_data=False, origins=('http://127.0.0.1:3000', 'http://localhost:3000'), port=8000, university_ids=(), clock=None, exam_id=None, selection_sha256=None, cache_source='drive'):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "build_local_app.diagnostic",
+          "signature": "def diagnostic():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "issue_sessions",
+          "signature": "def issue_sessions(clock=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "local_origin",
+          "signature": "def local_origin(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "loopback_host",
+          "signature": "def loopback_host(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main(argv=None):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/memory_forecast_repository.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "cb8c494621734252638d4a6158c4abf6fab784a7ec72d1ec17691fb6c5c88aef",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "MemoryForecastRepository",
+          "signature": "class MemoryForecastRepository:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MemoryForecastRepository.__init__",
+          "signature": "def __init__(self, authorities=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MemoryForecastRepository.capabilities",
+          "signature": "def capabilities(self, subject_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MemoryForecastRepository.get",
+          "signature": "def get(self, draft_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MemoryForecastRepository.list",
+          "signature": "def list(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MemoryForecastRepository.publish",
+          "signature": "def publish(self, release):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MemoryForecastRepository.published",
+          "signature": "def published(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MemoryForecastRepository.put",
+          "signature": "def put(self, record):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "MemoryForecastRepository.transact",
+          "signature": "def transact(self, subject, operation, key, request_hash, callback):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/memory_report_repository.py",
+      "layer": "data_infrastructure",
+      "status": "synthetic_test_adapter_only",
+      "requirements": [
+        "REQ-14",
+        "REQ-15"
+      ],
+      "source_sha256": "1b0724ce1429997bcd664f4f8dbf2f470b95350c9ebd33f661d7b58cc1f4ae30",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "SyntheticReportAccessRepository",
+          "signature": "class SyntheticReportAccessRepository:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SyntheticReportAccessRepository.__init__",
+          "signature": "def __init__(self, records: Mapping[str, ReportAccessRecord]):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SyntheticReportAccessRepository.lookup_access",
+          "signature": "def lookup_access(self, report_id: str) -> ReportAccessRecord | None:",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/postgres_entitlements.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "e7d64b4e638c28a61302f0227d0b52ca2f5008eeeeb2723146f9be526cc6f429",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "PostgresJeongsiPassesRepository",
+          "signature": "class PostgresJeongsiPassesRepository:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresJeongsiPassesRepository.__init__",
+          "signature": "def __init__(self, database_url, *, connector=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresJeongsiPassesRepository._schema",
+          "signature": "def _schema(connection):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PostgresJeongsiPassesRepository.active_paid",
+          "signature": "def active_paid(self, subject_id, now):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresJeongsiPassesRepository.active_paid_until",
+          "signature": "def active_paid_until(self, subject_id, now):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresJeongsiPassesRepository.probe",
+          "signature": "def probe(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_expression",
+          "signature": "def _expression(value):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/postgres_forecast_repository.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "e510a05b3f47199e085f5c8707a0235314920f07e39faa56645009a2366fa67f",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ForecastTransaction",
+          "signature": "class ForecastTransaction:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastTransaction.__init__",
+          "signature": "def __init__(self, connection):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastTransaction.capabilities",
+          "signature": "def capabilities(self, subject):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastTransaction.get",
+          "signature": "def get(self, draft_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastTransaction.publish",
+          "signature": "def publish(self, release):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ForecastTransaction.put",
+          "signature": "def put(self, record):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "PostgresForecastRepository",
+          "signature": "class PostgresForecastRepository:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresForecastRepository.__init__",
+          "signature": "def __init__(self, repository):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresForecastRepository.capabilities",
+          "signature": "def capabilities(self, subject):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresForecastRepository.get",
+          "signature": "def get(self, draft_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresForecastRepository.list",
+          "signature": "def list(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresForecastRepository.published",
+          "signature": "def published(self, offering_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresForecastRepository.transact",
+          "signature": "def transact(self, subject, operation, key, request_hash, callback):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/postgres_repository.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-10",
+        "REQ-11",
+        "REQ-14",
+        "REQ-15",
+        "REQ-17"
+      ],
+      "source_sha256": "0d03336106dcdebe001faca9543ff5ccbb0dbfc70a802862f82f97db47ca27c4",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "PostgresRepository",
+          "signature": "class PostgresRepository:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.__init__",
+          "signature": "def __init__(self, database_url, *, connector=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.active_paid",
+          "signature": "def active_paid(self, owner, now):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.active_paid_until",
+          "signature": "def active_paid_until(self, owner, now):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.active_reports",
+          "signature": "def active_reports(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.create_profile",
+          "signature": "def create_profile(self, owner, scores, confirmed, now, key, digest, operation='score-profile.create'):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.get_profile",
+          "signature": "def get_profile(self, owner, pid):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.get_report",
+          "signature": "def get_report(self, owner, rid):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.lock",
+          "signature": "def lock(connection, owner, operation, key):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.lookup_access",
+          "signature": "def lookup_access(self, rid):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.probe",
+          "signature": "def probe(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.remember",
+          "signature": "def remember(c, owner, operation, key, digest, result, now):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.replay",
+          "signature": "def replay(self, owner, operation, key, digest):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.replay_in",
+          "signature": "def replay_in(connection, owner, operation, key, digest):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.report_row",
+          "signature": "def report_row(row):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.transaction",
+          "signature": "def transaction(self, *, include_baseline=False, read_only=False):",
+          "decorators": [
+            "contextmanager"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PostgresRepository.write_report",
+          "signature": "def write_report(self, owner, rid, pid, body, expected, now, operation, key, digest, *, no_op=False):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/private_estimation.py",
+      "layer": "data_infrastructure",
+      "status": "private_append_only_adapters",
+      "requirements": [
+        "REQ-02",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16"
+      ],
+      "source_sha256": "2aa90a250e9bd681eeea94138d213fad3c7075dfbc5e972daad6b8386a4017f0",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "PrivateJsonEstimateApproval",
+          "signature": "class PrivateJsonEstimateApproval:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PrivateJsonEstimateApproval.__init__",
+          "signature": "def __init__(self, path, expected_sha256):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PrivateJsonEstimateApproval.get_estimate_approval",
+          "signature": "def get_estimate_approval(self, run_id):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "PrivateJsonEstimationInputs",
+          "signature": "class PrivateJsonEstimationInputs:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PrivateJsonEstimationInputs.__init__",
+          "signature": "def __init__(self, manifest_path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PrivateJsonEstimationInputs.get_estimation_inputs",
+          "signature": "def get_estimation_inputs(self, version):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "PrivateJsonEstimationStore",
+          "signature": "class PrivateJsonEstimationStore:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PrivateJsonEstimationStore.__init__",
+          "signature": "def __init__(self, root):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PrivateJsonEstimationStore.append",
+          "signature": "def append(self, run_id, name, payload):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PrivateJsonEstimationStore.begin",
+          "signature": "def begin(self, run_id, manifest):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "bytes_json",
+          "signature": "def bytes_json(payload):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "private_path",
+          "signature": "def private_path(path):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/secured_http.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_integration_pending",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "source_sha256": "675c02406977f3e1d5bd6a86e1eca181c3a0d8231caff9732c03c376723632ce",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "SecuredBoundary",
+          "signature": "class SecuredBoundary:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SecuredBoundary.__init__",
+          "signature": "def __init__(self, security):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SecuredBoundary.error",
+          "signature": "def error(self, request, code='backend_dependency_unavailable', http=503):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SecuredBoundary.platform",
+          "signature": "def platform(self, *args, **kwargs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SecuredBoundary.ready",
+          "signature": "def ready(self, configured):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SecuredBoundary.verify",
+          "signature": "def verify(self, request):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "SecuritySettings",
+          "signature": "class SecuritySettings:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "SecuritySettings.from_environment",
+          "signature": "def from_environment(cls):",
+          "decorators": [
+            "classmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "_token",
+          "signature": "def _token(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "create_secured_app",
+          "signature": "def create_secured_app(*, security, settings=None, repository=None, data=None, sessions=None, clock=None, forecast_repository=None, forecast_inputs=None, entitlements=None):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/settings.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-15",
+        "REQ-19"
+      ],
+      "source_sha256": "fa5ace888f300dc0fff2f6f1291bda2504443cc9c6f5e4f93b4766a4836899c7",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ServerSettings",
+          "signature": "class ServerSettings:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ServerSettings.from_environment",
+          "signature": "def from_environment(cls):",
+          "decorators": [
+            "classmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ServerSettings.missing",
+          "signature": "def missing(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "UnavailableRepository",
+          "signature": "class UnavailableRepository:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UnavailableRepository.__getattr__",
+          "signature": "def __getattr__(self, name):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UnavailableRepository.__getattr__.unavailable",
+          "signature": "def unavailable(*args, **kwargs):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/supabase_runtime.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-20",
+        "REQ-23",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "source_sha256": "575408f3d09fc5e9068bb723fc9f701ce3a28fb24efe05a567cc9554cde2256e",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "RuntimeArtifactSelection",
+          "signature": "class RuntimeArtifactSelection:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "RuntimeArtifactSelection.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "RuntimeArtifactSelection.from_manifest",
+          "signature": "def from_manifest(cls, manifest):",
+          "decorators": [
+            "classmethod"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "SupabaseRuntimeReadiness",
+          "signature": "class SupabaseRuntimeReadiness:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness.__init__",
+          "signature": "def __init__(self, data, selection):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness._decode",
+          "signature": "def _decode(data, raw, identity):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness._entries",
+          "signature": "def _entries(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness._validate_analysis",
+          "signature": "def _validate_analysis(data, raw):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness._validate_bindings",
+          "signature": "def _validate_bindings(data, raw):",
+          "decorators": [
+            "staticmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness._validate_bindings.binding",
+          "signature": "def binding(release, key):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness._validate_bindings.context",
+          "signature": "def context(release):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness._validate_bindings.equal",
+          "signature": "def equal(actual, expected):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness._validate_bindings.verify_pack",
+          "signature": "def verify_pack(release, key):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness.missing",
+          "signature": "def missing(self, settings):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseRuntimeReadiness.probe",
+          "signature": "def probe(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "_VerifiedSnapshot",
+          "signature": "class _VerifiedSnapshot:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_VerifiedSnapshot.__init__",
+          "signature": "def __init__(self, payloads):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_VerifiedSnapshot.artifact",
+          "signature": "def artifact(self, entry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_private_path",
+          "signature": "def _private_path(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "configuration_status",
+          "signature": "def configuration_status():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "configured_supabase_app",
+          "signature": "def configured_supabase_app():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "create_supabase_secured_app",
+          "signature": "def create_supabase_secured_app(*, security, settings, data, selection, repository=None, sessions=None, clock=None, forecast_repository=None, forecast_inputs=None, entitlements=None):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/supabase_session.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15"
+      ],
+      "source_sha256": "bab1e01dbc55c30ba2d25668083a9d7d764c8147ed9c62b0a855af34a5a8faf7",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "SupabaseSessionProvider",
+          "signature": "class SupabaseSessionProvider:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseSessionProvider.__init__",
+          "signature": "def __init__(self, url, key, *, opener=urlopen):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseSessionProvider.verify",
+          "signature": "def verify(self, token, now):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/supabase_storage.py",
+      "layer": "data_infrastructure",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "6e0f8781a504dbbe25b9b31bc65917b523ad54c14c0dfb8350ca13ebfd53b579",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "SupabaseStorageClient",
+          "signature": "class SupabaseStorageClient:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseStorageClient.__init__",
+          "signature": "def __init__(self, url, secret_key, bucket, *, object_prefix, opener=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseStorageClient._call",
+          "signature": "def _call(self, path, limit):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseStorageClient.artifact",
+          "signature": "def artifact(self, entry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseStorageClient.validate_reference",
+          "signature": "def validate_reference(self, entry):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "SupabaseStorageDataProvider",
+          "signature": "class SupabaseStorageDataProvider(DriveDataProvider):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SupabaseStorageDataProvider.__init__",
+          "signature": "def __init__(self, client, registry):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "_NoRedirect",
+          "signature": "class _NoRedirect(HTTPRedirectHandler):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_NoRedirect.redirect_request",
+          "signature": "def redirect_request(self, request, fp, code, msg, headers, newurl):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_json",
+          "signature": "def _json(content):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_json.constant",
+          "signature": "def constant(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_json.pairs",
+          "signature": "def pairs(items):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_object_key",
+          "signature": "def _object_key(value):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/joint_distribution.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "3dd64aa36d0fa36051385b377d8528bcbeb8b1c3484eb853e28e8db7cd949b29",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "JointScoreCount",
+          "signature": "class JointScoreCount:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "JointScoreCount.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "JointScoreDistribution",
+          "signature": "class JointScoreDistribution:",
+          "decorators": [
+            "dataclass(frozen=True, init=False)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "JointScoreDistribution.__init__",
+          "signature": "def __init__(self, metadata: DistributionMetadata, cells: Iterable[JointScoreCount]):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "JointScoreDistribution.conditional_counts",
+          "signature": "def conditional_counts(self, *, target: str, given: Mapping[str, int]) -> dict[int, Fraction]:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "JointScoreDistribution.to_total_distribution",
+          "signature": "def to_total_distribution(self) -> TotalScoreDistribution:",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/percentile.py",
+      "layer": "application",
+      "status": "existing_math_foundation",
+      "requirements": [
+        "REQ-02",
+        "REQ-07"
+      ],
+      "source_sha256": "4c5d40f5b516d2a39c6c17a682a90da71c39f38290cc3d60ce15196900f5f7be",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "DistributionMetadata",
+          "signature": "class DistributionMetadata:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "DistributionMetadata.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "PercentileError",
+          "signature": "class PercentileError(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PercentileError.__init__",
+          "signature": "def __init__(self, code: str, message: str):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ScoreFrequency",
+          "signature": "class ScoreFrequency:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ScoreFrequency.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "StandardScores",
+          "signature": "class StandardScores:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "StandardScores.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "StandardScores.total",
+          "signature": "def total(self) -> int:",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "TotalScoreDistribution",
+          "signature": "class TotalScoreDistribution:",
+          "decorators": [
+            "dataclass(frozen=True, init=False)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "TotalScoreDistribution.__init__",
+          "signature": "def __init__(self, metadata: DistributionMetadata, rows: Iterable[ScoreFrequency]):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "TotalScoreDistribution.calculate",
+          "signature": "def calculate(self, scores: StandardScores, *, tie_policy: str='include_equal', require_approved: bool=True) -> UpperCumulativeResult:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "TotalScoreDistribution.frequency_rows",
+          "signature": "def frequency_rows(self) -> tuple[ScoreFrequency, ...]:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "UpperCumulativeResult",
+          "signature": "class UpperCumulativeResult:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "UpperCumulativeResult.exclusive_fraction",
+          "signature": "def exclusive_fraction(self) -> Fraction:",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "UpperCumulativeResult.inclusive_fraction",
+          "signature": "def inclusive_fraction(self) -> Fraction:",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "UpperCumulativeResult.to_dict",
+          "signature": "def to_dict(self, decimal_places: int=6) -> dict:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "UpperCumulativeResult.top_fraction",
+          "signature": "def top_fraction(self) -> Fraction:",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "UpperCumulativeResult.top_percent",
+          "signature": "def top_percent(self) -> Fraction:",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "_decimal",
+          "signature": "def _decimal(value: Fraction, places: int) -> str:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_exact_keys",
+          "signature": "def _exact_keys(value: object, expected: set[str], location: str) -> dict:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_integer",
+          "signature": "def _integer(value: object, name: str, minimum: int=0) -> int:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_invalid_constant",
+          "signature": "def _invalid_constant(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_ratio",
+          "signature": "def _ratio(value: Fraction) -> dict[str, int]:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_text",
+          "signature": "def _text(value: object, name: str) -> str:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_unique_object",
+          "signature": "def _unique_object(pairs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_weight",
+          "signature": "def _weight(value: object, name: str='weight') -> Fraction:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "load_distribution_json",
+          "signature": "def load_distribution_json(text: str) -> TotalScoreDistribution:",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/percentile_cli.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "5aa27edf87291453e840370f9ec1c7fdfeb315702299e3a48e4b14fa73657315",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main(argv=None) -> int:",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/profile_percentile.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "a2c9ab135d7c8690861484ddfd535cf9c20866493a9900409797e4fed6d81210",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ExamProfile",
+          "signature": "class ExamProfile:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ExamProfile.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ExamProfile.marks",
+          "signature": "def marks(self) -> tuple[SubjectMark, ...]:",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ExamProfile.standard_total",
+          "signature": "def standard_total(self) -> int:",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "JointRecord",
+          "signature": "class JointRecord:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "JointRecord.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ProfilePercentileModel",
+          "signature": "class ProfilePercentileModel:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ProfilePercentileModel.__init__",
+          "signature": "def __init__(self, academic_year: int, subjects: Iterable[SubjectDistribution], *, model_id: str, records: Iterable[JointRecord] | None=None, expected_joint_weight: object | None=None, population_id: str=POPULATION_ID, population_verified: bool=False, status: str='reference'):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ProfilePercentileModel._table",
+          "signature": "def _table(self, mark: SubjectMark) -> SubjectDistribution:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ProfilePercentileModel._validate_profile",
+          "signature": "def _validate_profile(self, profile: ExamProfile):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ProfilePercentileModel.describe",
+          "signature": "def describe(self, profile: ExamProfile) -> dict:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ProfilePercentileModel.rank",
+          "signature": "def rank(self, profile: ExamProfile, rule: ProfileRule, *, require_approved: bool=True) -> dict:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ProfileRule",
+          "signature": "class ProfileRule:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ProfileRule.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "SubjectDistribution",
+          "signature": "class SubjectDistribution:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SubjectDistribution.__init__",
+          "signature": "def __init__(self, academic_year: int, area: str, subject_id: str, counts: Iterable[tuple[int, int]], *, distribution_id: str, population_label: str, expected_count: int, complete: bool, status: str='reference'):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SubjectDistribution.midrank_fraction",
+          "signature": "def midrank_fraction(self, mark: SubjectMark) -> Fraction:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "SubjectDistribution.upper_fractions",
+          "signature": "def upper_fractions(self, mark: SubjectMark) -> tuple[Fraction, Fraction]:",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "SubjectMark",
+          "signature": "class SubjectMark:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "SubjectMark.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "WeightedECDF",
+          "signature": "class WeightedECDF:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "WeightedECDF.__init__",
+          "signature": "def __init__(self, pairs: Iterable[tuple[object, object]], expected_weight: object):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "WeightedECDF.fractions",
+          "signature": "def fractions(self, value: object) -> tuple[Fraction, Fraction]:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "make_research_weighted_rule",
+          "signature": "def make_research_weighted_rule(rule_id: str, academic_year: int, *, korean: object, math: object, inquiry: object, basis: str) -> ProfileRule:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "make_research_weighted_rule.score",
+          "signature": "def score(profile: ExamProfile, model: ProfilePercentileModel):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/reference_curve.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "40d292a274cbf856742dc1772914ffa6665677594b643a7f89e3f5cfa1ead347",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ReferenceQuantileCurve",
+          "signature": "class ReferenceQuantileCurve:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ReferenceQuantileCurve.__init__",
+          "signature": "def __init__(self, rows):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ReferenceQuantileCurve.boundary",
+          "signature": "def boundary(self, score):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ReferenceQuantileCurve.lookup",
+          "signature": "def lookup(self, total):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "inspect_gs_total",
+          "signature": "def inspect_gs_total(reference, total, official_total):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/reported_score_mapping.py",
+      "layer": "application",
+      "status": "reported_mapping_derivation",
+      "requirements": [
+        "REQ-02",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-12",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16"
+      ],
+      "source_sha256": "43f4d1454f5e96d3ebc71193a5ed83188e53e11c6ab6e17bb51d6eec115e06b6",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "derive_reported_score_pack",
+          "signature": "def derive_reported_score_pack(pack, *, pack_version, formula_source):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "derive_reported_score_pack.require",
+          "signature": "def require(ok, code):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/school_screening.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "ff251e4f72020b18289a057ccc73a5156520006de018ea09e0734cd8bb0f963d",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ComparisonBasis",
+          "signature": "class ComparisonBasis:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ComparisonBasis.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ComparisonBasis.domain",
+          "signature": "def domain(self):",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ComparisonBasis.to_dict",
+          "signature": "def to_dict(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "SchoolBand",
+          "signature": "class SchoolBand:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "SchoolBand.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ScreeningError",
+          "signature": "class ScreeningError(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ScreeningError.__init__",
+          "signature": "def __init__(self, code: str, message: str):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ScreeningScore",
+          "signature": "class ScreeningScore:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ScreeningScore.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ScreeningScore.from_grades",
+          "signature": "def from_grades(cls, academic_year: int, korean: int, math: int, inquiry1: int, inquiry2: int, *, source_ref='reported_csat_grades'):",
+          "decorators": [
+            "classmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "ScreeningScore.from_overall",
+          "signature": "def from_overall(cls, result: UpperCumulativeResult):",
+          "decorators": [
+            "classmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "_display",
+          "signature": "def _display(value: Fraction):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_number",
+          "signature": "def _number(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_text",
+          "signature": "def _text(value, name):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "recommend_schools",
+          "signature": "def recommend_schools(score: ScreeningScore, bands: Iterable[SchoolBand], *, challenge_margin=0, stronger_margin=0, require_approved=True) -> dict:",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/university_conversion.py",
+      "layer": "application",
+      "status": "existing_math_foundation",
+      "requirements": [
+        "REQ-05",
+        "REQ-06"
+      ],
+      "source_sha256": "9433b49bcf74b434db8bc96bf2c0e856d034bd0118c5fa8e9fa154b1ed146852",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ConversionError",
+          "signature": "class ConversionError(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ConversionError.__init__",
+          "signature": "def __init__(self, code, message):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ConversionRelease",
+          "signature": "class ConversionRelease:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ConversionRelease.__init__",
+          "signature": "def __init__(self, release_id, rules, bindings):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ConversionRelease.compare_years",
+          "signature": "def compare_years(self, offering_by_year, profiles, *, research=False):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "ConversionRule",
+          "signature": "class ConversionRule:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ConversionRule.__init__",
+          "signature": "def __init__(self, data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ConversionRule.__init__.visit",
+          "signature": "def visit(name):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ConversionRule.calculate",
+          "signature": "def calculate(self, profile, *, research=False, include_trace=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ConversionRule.calculate.node",
+          "signature": "def node(name):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ConversionRule.calculate.run",
+          "signature": "def run(e):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_inspect",
+          "signature": "def _inspect(expr, nodes, inputs, tables, depth=0):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_refs",
+          "signature": "def _refs(expr):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "check",
+          "signature": "def check(ok, code, message):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "num",
+          "signature": "def num(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "prepare_equated_profile",
+          "signature": "def prepare_equated_profile(profile_version, result, *, english_grade, korean_history_grade, choices=None, research=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "round_exact",
+          "signature": "def round_exact(value, places, mode):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/year_comparison.py",
+      "layer": "application",
+      "status": "support_module_no_direct_operation_registration",
+      "requirements": [],
+      "source_sha256": "fb2d9824d0d93f6fcda0df4afdcd7930c8b0f5e94a911ec2948ce5168a78c651",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ComparisonError",
+          "signature": "class ComparisonError(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ComparisonError.__init__",
+          "signature": "def __init__(self, code, message):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "TargetDataset",
+          "signature": "class TargetDataset:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "check",
+          "signature": "def check(ok, code, message):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "compare_student",
+          "signature": "def compare_student(*, profile_version, payload, source_data, source_model, targets, rule_release, offering_by_year, internal_research=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "student_response",
+          "signature": "def student_response(report):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "total_rank_distribution",
+          "signature": "def total_rank_distribution(model, pack):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/year_equating.py",
+      "layer": "application",
+      "status": "existing_math_foundation",
+      "requirements": [
+        "REQ-06"
+      ],
+      "source_sha256": "5e01b24cec08342f1901a75f7d6a33012bcc9b7acb740d69b519b0b3dd443d57",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "BridgePolicy",
+          "signature": "class BridgePolicy:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "BridgePolicy.__post_init__",
+          "signature": "def __post_init__(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "EquatingError",
+          "signature": "class EquatingError(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "EquatingError.__init__",
+          "signature": "def __init__(self, code, message):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "RankDistribution",
+          "signature": "class RankDistribution:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "RankDistribution.__init__",
+          "signature": "def __init__(self, *, exam_id, academic_year, subject_id, version, population_id, counts, expected_total, kind, status, source_refs, reported_scores=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "RankDistribution.inverse",
+          "signature": "def inverse(self, rank):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "RankDistribution.provenance",
+          "signature": "def provenance(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "RankDistribution.rank",
+          "signature": "def rank(self, score):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "TailRank",
+          "signature": "class TailRank:",
+          "decorators": [
+            "dataclass(frozen=True)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "TailRank.midpoint",
+          "signature": "def midpoint(self):",
+          "decorators": [
+            "property"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "TailRank.overlaps",
+          "signature": "def overlaps(self, other):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "TailRank.to_dict",
+          "signature": "def to_dict(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_bundle",
+          "signature": "def _bundle(distributions):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_fit_to_total",
+          "signature": "def _fit_to_total(source_ranks, targets, allowed_totals, max_shift):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "display",
+          "signature": "def display(value, places=6):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "distributions_from_exam_pack",
+          "signature": "def distributions_from_exam_pack(data, subjects):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "estimate_year",
+          "signature": "def estimate_year(scores, source, target, *, policy, source_total=None, target_total=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "four_year_plan",
+          "signature": "def four_year_plan(source_exam_id, available_targets):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "fraction_dict",
+          "signature": "def fraction_dict(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "number",
+          "signature": "def number(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require",
+          "signature": "def require(ok, code, message):",
+          "decorators": []
+        }
+      ]
+    }
+  ]
+}
