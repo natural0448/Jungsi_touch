@@ -40,11 +40,13 @@ class ConsistencyTests(unittest.TestCase):
         files=generated_files(self.spec)
         files["README.md"]=("<!-- jungsi:current -->\n"+SECURITY_DOCUMENT).encode("utf-8")
         files[".github/pull_request_template.md"]=SECURITY_DOCUMENT.encode("utf-8")
-        files["AGENTS.md"]=("docs/current/service_spec.json\n<!-- jungsi:security-required -->\n"+SECURITY_DOCUMENT).encode("utf-8")
+        files["AGENTS.md"]=("docs/current/service_spec.json\n<!-- jungsi:security-required -->\n<!-- jungsi:documentation-sync-required -->\n"+SECURITY_DOCUMENT).encode("utf-8")
         files["docs/current/service_spec.json"]=json.dumps(self.spec,ensure_ascii=False).encode("utf-8")
         for path in self.spec["source_documents"]:files.setdefault(path,b"")
         for row in self.spec["implementation"]:
             files.setdefault(row["path"],(ROOT/row["path"]).read_bytes())
+        for row in self.spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('files',[]):
+            files.setdefault(row['path'],(ROOT/row['path']).read_bytes())
         return files
     def test_generated_work_items_use_current_scope_and_preserve_historical_acceptance(self):
         generated=generated_files(self.spec)
@@ -100,6 +102,8 @@ class ConsistencyTests(unittest.TestCase):
     def test_code_with_matching_current_documents_is_accepted(self):
         changed=["src/jungsi_touch/percentile.py","docs/current/service_spec.json",
                  self.spec["current_documents"]["planning"],self.spec["current_documents"]["routing"]]
+        if self.spec['workflow'].get('documentation_sync'):
+            changed.extend(self.spec['current_documents'][k] for k in ('architecture','workflow','development_sync'))
         self.assertEqual(validate_changed_paths(changed,self.spec),[])
     def test_shared_check_and_schema_are_allowed(self):
         self.assertFalse(protected_path("scripts/check_project_consistency.py",self.spec["workflow"]["shared_tools"]))

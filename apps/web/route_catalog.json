@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.14",
-  "source_sha256": "5f9376acaba52d911c8e08559486bfe7cdbb848c08c72488a25e8fad7922127f",
+  "spec_version": "1.9.15",
+  "source_sha256": "bd5a76e5c8ce55e02a1a007338ca1aa2b4c64b3b794a4917f0547fe9311370fd",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3701,6 +3701,30 @@
         ],
         "real_browser": "NOT_RUN",
         "operational_publication": "NOT_RUN"
+      },
+      "latest_observation": {
+        "date": "2026-10-08",
+        "frontend_commit": "998eb1663f3225b4a2998384af48d00d47d84ce4",
+        "summary": "이전 ab8fb2d 검토는 해당 커밋의 이력이다. 최신 998eb166의 두 후속 수정은 소스에서 확인했다. 나머지 미수신 운영 빌드·브라우저·실자료 인수 조건은 유지한다.",
+        "observations": [
+          [
+            "FE-HISTORY-02S",
+            "학년도 가드가 pending 분기 앞에 있으며 과거/학년도 미확인 응답을 2027 미발행으로 표시하지 않도록 수정됨. 소스 확인이며 React/browser 인수는 별도."
+          ],
+          [
+            "FE-HISTORY-03S",
+            "빈 카드에서도 uncollected가 남으면 일부 조회 전용 문구를 표시하는 분기 확인. 전체 발행 결과가 없다는 단정을 하지 않음. 실제 수신 자료/필터 화면 검수는 별도."
+          ],
+          [
+            "같은 SHA CI",
+            "push run37746300627 및 pull_request run37746307906 성공 관측. 공통 CI 성공은 Next 운영 전달물/relay 실송신/실자료 UI 증명이 아님."
+          ],
+          [
+            "범위",
+            "추가 3페이지 변경·전체 화면 인수·최종 병합은 미검토. 기존 산술 검산은 이전 고정 소스의 근거이며 전체 검산을 재실행하지 않음."
+          ]
+        ],
+        "production_build_and_browser": "NOT_RUN"
       }
     },
     "partial_publication": {
