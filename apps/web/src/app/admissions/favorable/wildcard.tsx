@@ -1,4 +1,4 @@
-import { CategoryBadge, PickButton, plainReason, StatsLine } from "@/components/offering-parts";
+import { CategoryBadge, enrichedReasonTexts, PickButton, StatsLine } from "@/components/offering-parts";
 import type { CandidateItemDto, OfferingDto, StatisticsDto } from "@/lib/dto";
 
 /*
@@ -86,7 +86,7 @@ function WildCard({ w, on, stat, canPick }: { w: CandidateItemDto; on: boolean; 
       <p className="wc-why">
         <span>한 수인 이유</span>
         {a.recommendation_reasons?.length
-          ? plainReason(a.recommendation_reasons[0])
+          ? enrichedReasonTexts(a, 1)[0]
           : n !== null && n > 0
             ? `이 학과 환산에서 총점보다 위치가 ${a.advantage!.delta_pp}%p 올라갑니다.`
             : "내 성적으로 지원 검토 범위에 드는 계열 후보입니다."}

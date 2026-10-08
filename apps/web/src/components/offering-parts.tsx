@@ -122,7 +122,7 @@ export function StatsLine({ s }: { s: StatisticsDto | null | undefined }) {
       {r && (
         <>
           {" "}· {s.selected_rank ? "담은 사람" : "추천받은 사람"} 중 <b className="num">{r.rank}</b>위
-          {r.tie_count > 1 ? <> (동점 {r.tie_count}명)</> : null}
+          {r.tie_count > 1 ? <> (같은 점수 {r.tie_count}명)</> : null}
         </>
       )}
       {s.updated_at && <small> {seoulDate(s.updated_at)} 기준</small>}
@@ -148,6 +148,30 @@ export const plainReason = (r: ReasonDto) => REASON_PLAIN[r.code] ?? "올해 예
 export function ReasonList({ items, max }: { items: ReasonDto[]; max?: number }) {
   const shown = max ? items.slice(0, max) : items;
   const texts = [...new Set(shown.map(plainReason))];
+  return (
+    <ul className="reason-list">
+      {texts.map((t) => (
+        <li key={t}>{t}</li>
+      ))}
+    </ul>
+  );
+}
+
+/** 판단 이유 구체화(최종 관리자 지시 2026-10-08, 3·4페이지 공용): 유불리 이유에는 실제 이동 폭(%p,
+ *  사용자 자신의 상대값)을 붙인다. 내부 기준 점수는 여전히 적지 않는다 */
+export function enrichedReasonTexts(a: AssessmentDto, max?: number): string[] {
+  const n = a.advantage ? Number(a.advantage.delta_pp) : null;
+  const items = max ? (a.recommendation_reasons ?? []).slice(0, max) : a.recommendation_reasons ?? [];
+  return [...new Set(items.map((r) => {
+    if (r.code === "conversion_advantage" && n !== null && Number.isFinite(n))
+      return `이 대학 반영식으로 계산하면 전체 성적 기준보다 내 위치가 ${n > 0 ? "+" : ""}${a.advantage!.delta_pp}%p ${n >= 0 ? "올라갑니다" : "내려갑니다"} — 내 선택과목·점수 구성이 이 대학의 과목 반영 비율과 비교적 잘 맞는다는 뜻입니다.`;
+    return plainReason(r);
+  }))];
+}
+
+export function EnrichedReasonList({ a, max }: { a: AssessmentDto; max?: number }) {
+  const texts = enrichedReasonTexts(a, max);
+  if (texts.length === 0) return null;
   return (
     <ul className="reason-list">
       {texts.map((t) => (

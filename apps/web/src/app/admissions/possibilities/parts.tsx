@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CATEGORY, CategoryBadge, PickButton, plainReason, reasonText, type Cell } from "@/components/offering-parts";
+import { CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, reasonText, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { AssessmentDto, ForecastPublicDto, IssueSummaryDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
 import { signed } from "@/lib/format";
@@ -260,18 +260,10 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
 const RANGE_CODES = new Set(["within_acceptance_range", "above_acceptance_range", "below_acceptance_range"]);
 
 function DetailReasons({ a }: { a: AssessmentDto }) {
-  const n = a.advantage ? Number(a.advantage.delta_pp) : null;
-  const texts = [...new Set((a.recommendation_reasons ?? []).map((r) => {
-    if (r.code === "conversion_advantage" && n !== null && Number.isFinite(n))
-      return `이 대학 반영식으로 계산하면 전체 성적 기준보다 내 위치가 ${n > 0 ? "+" : ""}${a.advantage!.delta_pp}%p ${n >= 0 ? "올라갑니다" : "내려갑니다"} — 내 선택과목·점수 구성이 이 대학의 과목 반영 비율과 비교적 잘 맞는다는 뜻입니다.`;
-    return plainReason(r);
-  }))];
   const hasRange = (a.recommendation_reasons ?? []).some((r) => RANGE_CODES.has(r.code));
   return (
     <>
-      <ul className="reason-list">
-        {texts.map((t) => <li key={t}>{t}</li>)}
-      </ul>
+      <EnrichedReasonList a={a} />
       {hasRange && <RangeEvidence a={a} rangeCode={(a.recommendation_reasons ?? []).find((r) => RANGE_CODES.has(r.code))?.code ?? null} />}
     </>
   );
