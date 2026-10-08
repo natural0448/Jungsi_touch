@@ -32,7 +32,7 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
             {o.status === "estimated" && <span className="est">{kind?.label ?? "추정"}</span>}
             {interval && (
               <p className="tie">
-                동점 구간 상위 <b className="num">{interval.lower}%</b>~<b className="num">{interval.upper}%</b>. 나와 같은 총점까지 포함하면 {interval.upper}%, 빼면 {interval.lower}%입니다. 동점 구간은 합격 확률이나 오차 범위가 아닙니다.
+                나와 총점이 같은 학생들이 있어, 같은 점수인 사람을 빼고 세면 상위 <b className="num">{interval.lower}%</b>, 포함해 세면 상위 <b className="num">{interval.upper}%</b>입니다. 이 구간은 세는 방법의 차이일 뿐, 합격 확률이나 오차 범위가 아닙니다.
               </p>
             )}
             {kind && <p className="tie">{kind.note}</p>}
@@ -111,7 +111,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td>{num(q2?.grade)}</td>
           </tr>
           <tr>
-            <th scope="row">상위 % <small>동점 포함</small></th>
+            <th scope="row">상위 % <small>같은 점수 포함</small></th>
             <td className="na">{na}</td>
             <td>{pctv(k?.top_percent_inclusive)}</td>
             <td>{pctv(m?.top_percent_inclusive)}</td>
@@ -120,7 +120,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td>{pctv(q2?.top_percent_inclusive)}</td>
           </tr>
           <tr>
-            <th scope="row">상위 % <small>동점 제외</small></th>
+            <th scope="row">상위 % <small>같은 점수 제외</small></th>
             <td className="na">{na}</td>
             <td>{pctv(k?.top_percent_exclusive)}</td>
             <td>{pctv(m?.top_percent_exclusive)}</td>
@@ -130,7 +130,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
           </tr>
         </tbody>
       </table>
-      <p className="rp-sheet-note">상위 %는 그 과목 응시자 기준입니다. 영어·한국사는 절대평가라 등급만 표시하며 총점(국·수·탐2)과 전체 위치에 넣지 않습니다.</p>
+      <p className="rp-sheet-note">상위 %는 그 과목을 본 응시자 중에서 내가 위에서 몇 번째쯤인지입니다(과목마다 본 사람이 달라 과목끼리 직접 비교하지 않습니다). 영어·한국사는 절대평가라 등급만 표시하며 총점(국·수·탐2)과 전체 위치에 넣지 않습니다.</p>
     </div>
   );
 }
@@ -191,14 +191,14 @@ export function PositionChart({ a }: { a: OverallAnalysisDto }) {
     <section className="rp-chart" aria-label="상위 위치 그래프">
       <header>
         <h3>위치 그래프</h3>
-        <small>왼쪽 끝이 최상위(상위 0%) · 띠는 동점 제외~포함 구간</small>
+        <small>왼쪽일수록 상위권 · 점은 내 위치(같은 점수 포함), 짧은 띠는 나와 같은 점수인 학생들이 차지하는 구간</small>
       </header>
       <Axis />
       {a.subjects.map((s) => (
         <ChartRow key={s.area} label={AREA_LABEL[s.area] ?? s.area} sub={s.area === "korean" || s.area === "math" ? (s.choice ?? undefined) : s.subject} incl={s.top_percent_inclusive} excl={s.top_percent_exclusive} />
       ))}
       <ChartRow label="전체" sub="국·수·탐2" strong incl={o.inclusive_top_percent} excl={o.exclusive_top_percent} waitText={(o.reason_code && COMBO_PENDING[o.reason_code]) ?? "계산 대기"} />
-      <p className="pc-note">과목 막대는 그 과목 응시자, 전체는 국·수·탐2 응시자 기준입니다. 기준 집단이 달라 막대끼리 크기를 비교하지 않습니다.</p>
+      <p className="pc-note">과목 줄은 그 과목을 본 응시자, 전체 줄은 국·수·탐 2과목을 모두 본 응시자 중의 내 위치입니다. 비교하는 집단이 서로 달라 줄끼리 길이를 견주지 않습니다.</p>
     </section>
   );
 }
@@ -212,7 +212,7 @@ export function ComboChart({ a }: { a: OverallAnalysisDto }) {
     <section className="rp-chart" aria-label="반영 조합별 위치">
       <header>
         <h3>반영 조합별 위치</h3>
-        <small>조합마다 그 조합 응시자 기준 상위 % · 대학별 반영비율 환산은 가능성 보기에서 확인</small>
+        <small>대학마다 반영 과목 조합이 달라, 조합별로 그 조합 응시자 중 내 위치를 보여 줍니다 · 대학별 환산은 '전체 대학·학과 가능성 보기'에서</small>
       </header>
       <Axis />
       {combos.map((c) => (
@@ -261,6 +261,11 @@ export function PickedTable({ items, print = false }: { items: PickedItem[]; pri
           })}
         </tbody>
       </table>
+      <p className="rp-short-note">
+        내 환산점수는 그 대학이 정한 과목 비율대로 다시 계산한 점수(대학마다 만점이 달라 서로 비교하지 않음),
+        환산 유불리는 전체 성적 기준과 견줘 그 대학 계산 방식에서 내 위치가 얼마나 오르내리는지(%p)입니다.
+        지원 가부는 지원가능성 판단을 보세요 — 각 학과를 누르면 가능성 보기에서 자세한 설명이 열립니다.
+      </p>
     </div>
   );
 }
