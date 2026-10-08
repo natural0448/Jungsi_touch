@@ -23,12 +23,18 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "3c039f157a93ce7a324524b5ce7a08dacd60499c2c2552e695a5be46c4b06725",
+      "source_sha256": "2fbd96d77c9a28ffa0527151bd2c44dc2457c426b9646e872f1aa9cd0ab23945",
       "symbols": [
         {
           "kind": "function",
           "name": "delta_audit",
           "signature": "def delta_audit(paths, read, spec, base_paths, base_read, base_spec=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "edge_source_index",
+          "signature": "def edge_source_index(paths, read, spec):",
           "decorators": []
         },
         {
@@ -119,6 +125,12 @@
           "kind": "function",
           "name": "validate_catalog",
           "signature": "def validate_catalog(paths, read, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_edge_index",
+          "signature": "def validate_edge_index(paths, read, spec):",
           "decorators": []
         },
         {
@@ -394,7 +406,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "0f74853bb441d982a864ea9ae28792c055451f3d73ebe71725981f3a19d71bd7",
+      "source_sha256": "46adc7927c56953023ccce0801be6565472d7d665d1ca3b7dde9ea1877366693",
       "symbols": [
         {
           "kind": "class",
@@ -5430,5 +5442,10 @@
         }
       ]
     }
-  ]
+  ],
+  "edge_sources": {
+    "format": "jungsi.typescript-source-hash-index/v1",
+    "verification": "whole_source_hash_not_type_or_runtime_proof",
+    "files": []
+  }
 }

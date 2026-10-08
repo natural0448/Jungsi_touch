@@ -49,6 +49,45 @@ class DocumentationSyncTests(unittest.TestCase):
         self.assertEqual(audit.source_digest(b"\xef\xbb\xbfdef read():\r\n    pass\r\n"),
                          audit.source_digest(b"def read():\n    pass\n"))
 
+    def edge_fixture(self):
+        spec, files = self.fixture()
+        path = 'supabase/functions/_shared/display.ts'
+        spec['implementation'].append({'path': path, 'layer': 'application', 'status': 'candidate',
+                                       'requirements': ['REQ-01'], 'symbols': ['display']})
+        files[path] = b'export function display(value: string) { return value; }\n'
+        spec['workflow']['documentation_sync']['code_index'], _ = audit.refresh_catalog(files, files.__getitem__, spec)
+        return spec, files, path
+
+    def test_edge_body_only_change_cannot_reuse_old_whole_source_hash(self):
+        spec, files, path = self.edge_fixture()
+        files[path] = files[path].replace(b'return value;', b'return "changed";')
+        self.assertIn('Public Edge whole source index drift', audit.validate_catalog(files, files.__getitem__, spec))
+
+    def test_edge_missing_or_unregistered_dependency_is_rejected(self):
+        spec, files, _ = self.edge_fixture()
+        files['supabase/functions/_shared/new_dependency.ts'] = b'export const dependency = true;\n'
+        self.assertIn('Public Edge source registration or encoding invalid', audit.validate_catalog(files, files.__getitem__, spec))
+        with self.assertRaisesRegex(ValueError, 'Unregistered public Edge source'):
+            audit.refresh_catalog(files, files.__getitem__, spec)
+
+    def test_edge_type_change_updates_hash_but_is_not_claimed_as_type_proof(self):
+        spec, files, path = self.edge_fixture()
+        old = spec['workflow']['documentation_sync']['code_index']['edge_sources']
+        files[path] = files[path].replace(b'value: string', b'value: number')
+        current, _ = audit.refresh_catalog(files, files.__getitem__, spec)
+        self.assertNotEqual(old['files'][0]['source_sha256'], current['edge_sources']['files'][0]['source_sha256'])
+        self.assertEqual(current['edge_sources']['verification'], 'whole_source_hash_not_type_or_runtime_proof')
+
+    def test_edge_delta_lists_changed_source_and_preserves_python_scope(self):
+        spec, files, path = self.edge_fixture()
+        prior, original = copy.deepcopy(spec), dict(files)
+        files[path] = files[path].replace(b'value: string', b'value: number')
+        spec['workflow']['documentation_sync']['code_index'], _ = audit.refresh_catalog(files, files.__getitem__, spec)
+        result = self.delta(spec, files, prior, original)
+        self.assertTrue(result['passed'], result['errors'])
+        self.assertEqual(result['changed_source_files'], 0)
+        self.assertEqual(result['changed_edge_source_files'], [path])
+
     def test_unchanged_sync_reuses_every_signature_without_ast_read(self):
         spec, files = self.fixture()
         with patch.object(audit, "extract_signatures", side_effect=AssertionError("Unchanged AST should be reused")):
