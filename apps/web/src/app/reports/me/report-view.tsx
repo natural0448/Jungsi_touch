@@ -212,7 +212,7 @@ export function ComboChart({ a }: { a: OverallAnalysisDto }) {
     <section className="rp-chart" aria-label="반영 조합별 위치">
       <header>
         <h3>반영 조합별 위치</h3>
-        <small>대학마다 반영 과목 조합이 달라, 조합별로 그 조합 응시자 중 내 위치를 보여 줍니다 · 대학별 환산은 '전체 대학·학과 가능성 보기'에서</small>
+        <small>대학마다 반영 과목 조합이 달라, 조합별로 그 조합 응시자 중 내 위치를 보여 줍니다 · 대학별 환산은 「전체 대학·학과 가능성 보기」에서</small>
       </header>
       <Axis />
       {combos.map((c) => (

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { CATEGORY, CategoryBadge, PickButton, plainReason, ReasonList, reasonText, type Cell } from "@/components/offering-parts";
+import { CATEGORY, CategoryBadge, PickButton, plainReason, reasonText, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { AssessmentDto, ForecastPublicDto, IssueSummaryDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
-import { plainDate, signed } from "@/lib/format";
+import { signed } from "@/lib/format";
 import { page } from "@/lib/routes";
 
 /**
@@ -55,11 +55,9 @@ export function Detail({ o, a, rec, pub, picked }: { o: OfferingDto; a: Cell; re
       {(a.recommendation_reasons?.length ?? 0) > 0 && (
         <div className="reasons">
           <h3>이 학과의 판단 이유</h3>
-          <ReasonList items={a.recommendation_reasons!} />
-          <p className="reasons-note">이 이유들이 위 <b>지원가능성</b> 표시({CATEGORY[a.category].label})로 이어집니다. 판단에 쓰는 기준 점수는 공개하지 않습니다.</p>
+          <DetailReasons a={a} />
         </div>
       )}
-      <Evidence a={a} />
       <Years a={a} />
       <div className="acts">
         <PickButton id={o.offering_id} on={picked} variant="wide" />
@@ -245,7 +243,7 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
         {totalTop === null && (v.status === "favorable" ? " 이 대학 방식이 내 과목 구성에 비교적 유리합니다." : v.status === "unfavorable" ? " 이 대학 방식이 내 과목 구성에 다소 불리합니다." : " 이 대학 방식으로 봐도 위치가 거의 같습니다.")}
       </p>
       <span className="note">
-        전체 기준 위치는 "이 대학 기준 위치 + 유불리"로 계산한 값입니다(화면 계산).
+        전체 기준 위치는 이 대학 기준 위치에 유불리를 더해 계산한 값입니다(화면 계산).
         지원해도 되는지는 이 숫자가 아니라 왼쪽 <b>지원가능성</b> 판단을 보세요 — 유불리는 비슷한 수준의 대학 중
         어디가 내 과목 구성에 더 잘 맞는지 고를 때 쓰는 보조 지표이며, 유리해도 합격을, 불리해도 지원 불가를 뜻하지 않습니다.
       </span>
@@ -253,23 +251,77 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
   );
 }
 
-/** 발행된 학과별 예상 기준의 공개 근거(DEV-007). 내부 계산 과정은 오지 않고, 기준 수치도 보이지 않는다 —
- * 서버 문장 대신 코드별 쉬운 문구(plainReason)를 쓴다(최종 관리자 지시 2026-10-07) */
-function Evidence({ a }: { a: AssessmentDto }) {
-  const ev = a.decision_evidence;
-  if (!ev || (!ev.basis_summary && !ev.issue_summaries?.length && !ev.adjustment_summary?.applied && !ev.recommendation_reasons?.length)) return null;
+/**
+ * 판단 이유를 수험생·학부모가 이해할 수 있게 구체적으로 적는다(최종 관리자 지시 2026-10-08).
+ * - 유불리 이유에는 실제 이동 폭(%p)을 붙인다(사용자 자신의 상대값 — 내부 기준 아님).
+ * - 범위 이유에는 '공개된 과거 발표값(최종등록자 70%) ↔ 그해 기준 내 환산점수'의 연도별 대조를 붙인다.
+ *   올해 판단 기준 점수 자체는 계속 공개하지 않고, 산출 방법·자료판도 화면에 보이지 않는다.
+ */
+const RANGE_CODES = new Set(["within_acceptance_range", "above_acceptance_range", "below_acceptance_range"]);
+
+function DetailReasons({ a }: { a: AssessmentDto }) {
+  const n = a.advantage ? Number(a.advantage.delta_pp) : null;
+  const texts = [...new Set((a.recommendation_reasons ?? []).map((r) => {
+    if (r.code === "conversion_advantage" && n !== null && Number.isFinite(n))
+      return `이 대학 반영식으로 계산하면 전체 성적 기준보다 내 위치가 ${n > 0 ? "+" : ""}${a.advantage!.delta_pp}%p ${n >= 0 ? "올라갑니다" : "내려갑니다"} — 내 선택과목·점수 구성이 이 대학의 과목 반영 비율과 비교적 잘 맞는다는 뜻입니다.`;
+    return plainReason(r);
+  }))];
+  const hasRange = (a.recommendation_reasons ?? []).some((r) => RANGE_CODES.has(r.code));
   return (
-    <div className="evidence">
-      <h3>
-        판단 기준을 만든 방법
-        {ev.forecast_release_version && <small> · 자료판 {ev.forecast_release_version}</small>}
-      </h3>
-      <ul>
-        {ev.basis_summary && <li><b>방법</b> {ev.basis_summary}</li>}
-        {[...new Set(ev.recommendation_reasons?.map((r) => plainReason(r)) ?? [])].map((t) => <li key={t}><b>근거</b> {t}</li>)}
-        {ev.issue_summaries?.map((t) => <IssueItem key={t.issue_id} t={t} />)}
-        {ev.adjustment_summary?.applied && <li><b>상담 조정</b> 상담 경험을 반영해 기준을 조정했습니다.</li>}
+    <>
+      <ul className="reason-list">
+        {texts.map((t) => <li key={t}>{t}</li>)}
       </ul>
+      {hasRange && <RangeEvidence a={a} rangeCode={(a.recommendation_reasons ?? []).find((r) => RANGE_CODES.has(r.code))?.code ?? null} />}
+    </>
+  );
+}
+
+/** 범위 판단의 체감 근거: 공개 발표값(그해 최종등록자 70%)과 그해 기준으로 옮긴 내 환산점수를 나란히.
+ *  과거 대조 방향이 올해 판정과 어긋나면(예: 과거엔 높았는데 올해는 못 미침) 그 뜻을 풀어 주는 문장을 함께 둔다 */
+function RangeEvidence({ a, rangeCode }: { a: AssessmentDto; rangeCode: string | null }) {
+  const metrics = a.decision_evidence?.historical_metrics ?? [];
+  const rows = a.years
+    .map((y) => {
+      const m = metrics.find((x) => x.academic_year === y.academic_year && x.metric_name === "최종등록자 70%");
+      const mine = y.converted_score !== null ? Number(y.converted_score) : NaN;
+      const pub = m && m.value !== null ? Number(m.value) : NaN;
+      if (!Number.isFinite(mine) || !Number.isFinite(pub)) return null;
+      return { year: y.academic_year, mine: y.converted_score!, pub: String(m!.value), unit: m!.unit ?? "", dir: Math.sign(mine - pub) };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null)
+    .sort((x, y) => y.year - x.year)
+    .slice(0, 3);
+  if (rows.length === 0) return null;
+  const dirs = new Set(rows.map((r) => r.dir));
+  const oneDir = dirs.size === 1 ? rows[0].dir : 0;
+  const trend =
+    dirs.size > 1
+      ? "해마다 높낮이가 엇갈렸습니다"
+      : oneDir < 0
+        ? "매해 내 점수가 조금 낮은 편이었습니다"
+        : oneDir > 0
+          ? "매해 내 점수가 높은 편이었습니다"
+          : "매해 거의 같은 수준이었습니다";
+  // 과거 대조와 올해 판정의 방향이 다르면 이유를 풀어 준다(원인 단정 없이 기준의 높낮이만)
+  const bridge =
+    rangeCode === "below_acceptance_range" && oneDir > 0
+      ? "과거 발표값보다는 높은데도 '조금 못 미침'인 것은, 올해 예상 기준이 최근 발표 지점보다 높게 잡혀 있다는 뜻입니다."
+      : rangeCode === "above_acceptance_range" && oneDir < 0
+        ? "과거 발표값보다는 낮은데도 '여유'인 것은, 올해 예상 기준이 최근 발표 지점보다 낮게 잡혀 있다는 뜻입니다."
+        : null;
+  return (
+    <div className="range-ev">
+      <p>체감 기준으로, 그해 성적으로 옮긴 내 환산점수와 그해 발표된 최종등록자 70% 지점을 나란히 보면 — {trend}.</p>
+      {bridge && <p>{bridge}</p>}
+      <ul>
+        {rows.map((r) => (
+          <li key={r.year}>
+            <b className="num">{r.year}</b> 내 환산 <b className="num">{r.mine}</b>{r.unit} · 발표 70% 지점 <b className="num">{r.pub}</b>{r.unit}
+          </li>
+        ))}
+      </ul>
+      <p className="caveat">과거 발표값과의 비교는 체감용 참고입니다. 올해 판단은 올해 예상 기준으로 하며, 그 기준 점수는 공개하지 않습니다.</p>
     </div>
   );
 }
@@ -366,8 +418,7 @@ function Published({ f, same }: { f: ForecastPublicDto | null; same: boolean }) 
       </h3>
       <p>
         올해 예상 기준이 {ready ? "검수를 마치고 준비돼 있습니다." : <span className="wait">아직 발표 대기입니다.</span>}
-        {f.basis_summary && <> 기준을 만든 방법: {f.basis_summary}</>}
-        {f.adjustment_summary.applied && <> · 상담 경험을 반영한 조정이 들어 있습니다.</>}
+        {f.adjustment_summary.applied && <> 상담 경험을 반영한 조정이 들어 있습니다.</>}
       </p>
       {f.issue_summaries.length > 0 && (
         <ul className="pub-issues">
