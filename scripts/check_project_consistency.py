@@ -1755,6 +1755,10 @@ def generated_files(spec):
         submission=history.get('submission_review')
         if submission:
             history_text+='\n\n## 화면 영수증 수신과 수정 인수\n\n화면 관측 '+submission['frontend_commit']+' · '+submission['evidence_scope']+'. '+submission['decision']+'\n\n'+table(['작업','항목','수정·인수 조건'],submission['corrections'])
+            followup=submission.get('followup_review')
+            if followup:
+                history_text+='\n\n## 수정 회신의 독립 검토\n\n'+followup['summary']+'\n\n'+table(['항목','확인 범위·판정'],followup['accepted_observations'])+'\n\n'+table(['증거','상태·한계'],followup['evidence_boundaries'])
+                history_text+='\n\n공식 근거: '+', '.join('['+r['title']+']('+r['url']+')' for r in followup['primary_sources'])+'.'
         partial=history.get('partial_publication')
         if partial:
             history_text+='\n\n## 학교별 부분 발행 착수\n\n'+partial['request']+'\n\n상태 '+partial['state']+' · 단위 '+partial['unit']+' · 선택 '+partial['selection_strategy']+'.\n\n'+'\n'.join('- '+x for x in partial['rules'])+'\n\n'+table(['작업','담당','산출물'],partial['owners'])+'\n\n'+partial['first_batch_and_ETA']+' 운영 발행 '+partial['operational_publication']+'.'
