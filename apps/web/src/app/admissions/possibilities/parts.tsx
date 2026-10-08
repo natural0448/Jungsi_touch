@@ -299,7 +299,10 @@ function RangeEvidence({ a }: { a: AssessmentDto }) {
   if (rows.length === 0) return null;
   return (
     <div className="range-ev">
-      <p>참고로, 같은 만점({officialMax}점) 척도로 발표된 과거 값과 그해 기준 내 환산점수를 나란히 보존해 보여 드립니다.</p>
+      <p>
+        참고로, 발표된 과거 값과 그해 기준 내 환산점수를 나란히 보존해 보여 드립니다 — 만점 숫자({officialMax}점)가 같은
+        발표값만 골랐으며, 이것이 연도별 산식·단위·집단까지 같다는 뜻은 아닙니다(동등성은 검수 대상).
+      </p>
       <ul>
         {rows.map((r) => (
           <li key={r.year}>
@@ -320,18 +323,29 @@ function RangeEvidence({ a }: { a: AssessmentDto }) {
 function AdoptedEvidence({ a }: { a: AssessmentDto }) {
   const ev = a.decision_evidence;
   const issues = ev?.issue_summaries ?? [];
-  const adjusted = ev?.adjustment_summary?.applied ?? false;
-  if (issues.length === 0 && !adjusted) return null;
+  const adj = ev?.adjustment_summary;
+  const version = ev?.forecast_release_version ?? null;
+  // 버전만 있는 채택본도 자료판 결속을 지우지 않는다(1.9.16 FE-ANALYSIS-02) — 다른 발표본으로 덮지 않음
+  if (issues.length === 0 && !adj?.applied && !version) return null;
   return (
     <div className="evidence">
       <h3>
-        올해 변화·상담 조정
-        {ev?.forecast_release_version && <small> · 자료판 {ev.forecast_release_version}</small>}
+        이 분석이 채택한 발표 자료
+        {version && <small> · 자료판 {version}</small>}
       </h3>
-      <ul>
-        {issues.map((t) => <IssueItem key={t.issue_id} t={t} />)}
-        {adjusted && <li><b>상담 조정</b> 상담 경험을 반영해 기준을 조정했습니다.</li>}
-      </ul>
+      {issues.length === 0 && !adj?.applied ? (
+        <p className="ev-only-version">이 판단은 위 자료판에 결속돼 있습니다. 올해 변화·상담 조정 항목은 없습니다.</p>
+      ) : (
+        <ul>
+          {issues.map((t) => <IssueItem key={t.issue_id} t={t} />)}
+          {adj?.applied && (
+            <li>
+              <b>상담 조정</b> {adj.reason ?? "상담 경험을 반영해 기준을 조정했습니다."}
+              {adj.version && <small> · {adj.version}</small>}
+            </li>
+          )}
+        </ul>
+      )}
     </div>
   );
 }

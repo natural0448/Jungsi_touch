@@ -137,10 +137,12 @@ const REASON_PLAIN: Record<string, string> = {
   within_acceptance_range: "내 점수가 올해 이 학과에 지원해 볼 만한 범위 안에 있습니다.",
   above_acceptance_range: "내 점수가 올해 지원해 볼 만한 범위보다 여유 있게 높습니다.",
   below_acceptance_range: "내 점수가 올해 지원해 볼 만한 범위에 조금 못 미칩니다.",
-  conversion_advantage: "이 대학의 점수 계산 방식이 내 과목 구성에 비교적 유리합니다.",
-  converted_score_position_gain: "이 대학 반영식에서는 전체 성적 기준보다 내 위치가 올라갑니다.",
-  converted_score_position_loss: "이 대학 반영식에서는 전체 성적 기준보다 내 위치가 내려갑니다.",
-  converted_score_position_equal: "이 대학 반영식으로 계산해도 전체 성적 기준과 내 위치가 거의 같습니다.",
+  // 위치 이동 계열 코드의 기본 문구는 방향을 단정하지 않는다(1.9.16 FE-ANALYSIS-03).
+  // 코드·advantage 상태·부호가 전부 맞을 때의 방향 문장은 enrichedReasonTexts 가 만든다
+  conversion_advantage: "이 대학 환산 방식에서의 위치 변화가 판단에 반영됐습니다(자세한 폭은 유불리 칸에서 확인).",
+  converted_score_position_gain: "이 대학 환산 방식에서의 위치 변화가 판단에 반영됐습니다(자세한 폭은 유불리 칸에서 확인).",
+  converted_score_position_loss: "이 대학 환산 방식에서의 위치 변화가 판단에 반영됐습니다(자세한 폭은 유불리 칸에서 확인).",
+  converted_score_position_equal: "이 대학 환산 방식에서의 위치 변화가 판단에 반영됐습니다(자세한 폭은 유불리 칸에서 확인).",
   counselor_adjustment: "입시 상담 경험을 반영해 판단을 한 단계 조정했습니다.",
   forecast_basis_trend: "최근 3년 대학 발표 결과의 흐름으로 올해 기준을 잡았습니다.",
   approved_forecast_70: "검수를 마친 올해 예상 기준으로 판단했습니다.",
@@ -169,12 +171,13 @@ export function enrichedReasonTexts(a: AssessmentDto, max?: number): string[] {
   const n = adv ? Number(adv.delta_pp) : null;
   const items = max ? (a.recommendation_reasons ?? []).slice(0, max) : a.recommendation_reasons ?? [];
   return [...new Set(items.map((r) => {
-    const gain = r.code === "conversion_advantage" || r.code === "converted_score_position_gain";
-    if (gain && adv?.status === "favorable" && n !== null && Number.isFinite(n) && n > 0)
+    // 등록 코드·advantage 준비 상태·부호가 전부 일치할 때만 방향·수치를 적는다.
+    // 미등록 conversion_advantage 는 gain 별칭으로 확정하지 않고, 불일치·보류는 방향을 단정하지 않는다
+    if (r.code === "converted_score_position_gain" && adv?.status === "favorable" && n !== null && Number.isFinite(n) && n > 0)
       return `이 대학 반영식으로 계산하면 전체 성적 기준보다 내 위치가 +${adv.delta_pp}%p 올라갑니다 — 내 선택과목·점수 구성이 이 대학의 과목 반영 비율과 비교적 잘 맞는다는 뜻입니다.`;
     if (r.code === "converted_score_position_loss" && adv?.status === "unfavorable" && n !== null && Number.isFinite(n) && n < 0)
       return `이 대학 반영식으로 계산하면 전체 성적 기준보다 내 위치가 ${adv.delta_pp}%p 내려갑니다.`;
-    if (r.code === "converted_score_position_equal")
+    if (r.code === "converted_score_position_equal" && adv?.status === "neutral")
       return "이 대학 반영식으로 계산해도 전체 성적 기준과 내 위치가 거의 같습니다.";
     return plainReason(r);
   }))];
