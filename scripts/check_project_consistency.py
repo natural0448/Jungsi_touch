@@ -1736,6 +1736,31 @@ def generated_files(spec):
             if path in files:
                 link=('../../docs/current/' if path=='apps/web/README.md' else '../docs/current/' if path=='database/README.md' else '')+'Supabase_배포_화면_후속작업.md'
                 files[path]=files[path].replace(marker,'\n\n## 현재 운영 플랫폼과 화면 인계\n\n[Google Drive·Supabase 전용 배포 계약]('+link+')이 이전 별도 FastAPI 호스팅/외부 워커 인계보다 우선한다. Python 검산은 보존하고 Edge 호환과 실제 인수는 후속 작업이다. relay는 X-Jungsi-Relay-Token 확정 계약이며 발행 감지는 최신 승인 native 버전/해시를 사용한다. 화면 제공 범위와 요금제 포함량 검수는 완료 전 상태를 유지한다.'+marker)
+    display=spec.get('official_history_db_display_contract')
+    if display:
+        marker='\n\n<!-- jungsi:generated'
+        body=(display['purpose']+'\n\n계약 '+display['revision']+' · 코드 '+display['code_status']+
+              ' · production_ready=false. 담당 '+display['branch']+'.\n\n## 연결과 승인 범위\n\n'+
+              '화면/BFF → Supabase Edge 서비스 API → 기존 비공개 입결 DB. Python은 로컬 기준이다. '+
+              'DB 적재·C 로컬 수신·제한 클라우드 검수·운영 발행은 각각 구분한다.\n\n'+
+              '\n'.join('- '+r for r in display['rules'])+
+              '\n\n## 기존 API와 구현 경로\n\n'+table(['항목','값'],[[k,str(v)] for k,v in display['composition'].items()])+
+              '\n\n논리 작업: '+', '.join(display['operations'])+'. 기존22 API 중 명시한 조회 부분만 연결하며 전체 엔진 포팅 완료를 뜻하지 않는다.'+
+              '\n\n## 담당 작업\n\n'+table(['작업','담당','범위'],display['tasks'])+
+              '\n\n## 화면팀 연결\n\n'+'\n'.join('- '+r for r in display['frontend_handoff'])+
+              '\n\n## 증거와 미실행 범위\n\n'+table(['항목','상태'],[[k,str(v)] for k,v in display['verification'].items()]))
+        files[spec['current_documents']['official_history_db_display']]=doc('Supabase 입결 DB와 화면 API 연결',body)
+        for key in ('planning','routing','architecture','workflow','presentation_handoff','runtime_connection_preparation','supabase_deployment','supabase_operations_handoff','frontend_reply','frontend_followup'):
+            target=spec['current_documents'].get(key)
+            if target in files:
+                files[target]=files[target].replace(marker,'\n\n## 기존 입결 DB를 화면 API에 연결\n\n'+
+                    '[공식 입결 DB 표시 연결](DB_입결_화면연결.md)의 DEV-011을 따른다. 기존 DB를 별도 목적 범위로 명시 조회하며 '+
+                    '기본 이용권·엔진/운영 원형 상태·22API/DTO·보안 gate를 유지한다. 코드 '+display['code_status']+
+                    '; 실제 검수/운영 상태는 같은 문서의 항목별 증거로 확인한다.'+marker)
+        for target in ('apps/web/route_catalog.json','src/jungsi_touch/application/route_catalog.json'):
+            if target in files:
+                route=json.loads(files[target]); route['official_history_db_display_contract']=display
+                files[target]=json.dumps(route,ensure_ascii=False,indent=2)+'\n'
     history=spec.get('history_presentation_contract')
     if history:
         marker='\n\n<!-- jungsi:generated'
@@ -1881,6 +1906,37 @@ def validate_forecast_contract(spec):
 
 def validate_spec(spec):
     errors=validate_sync_policy(spec)
+    display=spec.get('official_history_db_display_contract')
+    try: display_required=tuple(int(v) for v in spec.get('version','0.0.0').split('.')) >= (1,9,17)
+    except (ValueError,TypeError): display_required=False
+    if display is None and display_required:
+        errors.append('Official history DB display purpose contract missing')
+    if display is not None and not isinstance(display,dict):
+        errors.append('Official history DB display purpose contract invalid')
+        display=None
+    if display is not None:
+        scope=display.get('scope',{}); composition=display.get('composition',{})
+        if not isinstance(scope,dict) or not isinstance(composition,dict):
+            errors.append('Official history DB display purpose contract invalid')
+            scope={}; composition={}
+        if (display.get('format')!='jungsi.official-history-db-display/v1' or display.get('id')!='DEV-011' or
+            display.get('branch')!='feature/application-pre-data-platform' or display.get('production_ready')is not False or
+            set(display.get('operations',[]))!={'history.search','offerings.search','offering.read','recruitment.read','session.read'}):
+            errors.append('Official history DB display purpose registration drift')
+        if (scope.get('environment')!='restricted_cloud_review_only' or
+            any(scope.get(k)is not True for k in ('explicit_server_selection_required','verified_review_subject_allowlist_required','immutable_descriptor_bytes_sha_required','exact_source_identity_type_PK_year_required','validity_and_revocation_required')) or
+            any(scope.get(k)is not False for k in ('global_source_flags_changed','local_C_approval_is_cloud_approval','all_ingested_data_auto_adopted','engine_or_forecast_auto_adopted','actual_values_in_Git'))):
+            errors.append('Official history DB display approval boundary drift')
+        if (composition.get('default_factories_changed')is not False or composition.get('entitlement_authority')!='jungsi_backend.entitlements' or
+            composition.get('existing_API_count')!=22 or composition.get('new_logical_API_or_DTO')is not False or
+            composition.get('browser_DB_credentials')is not False or composition.get('relay_header')!='X-Jungsi-Relay-Token'):
+            errors.append('Official history DB display existing contract preservation drift')
+        query=display.get('query_contract',{})
+        if (not isinstance(query,dict) or
+            any(query.get(k)is not True for k in ('parameterized_bulk_join','row_security_on','enforce_effective_RLS','reject_superuser_bypassrls_owner','verify_view_security_invoker_or_use_direct_RLS_relation','exact_selected_scope_only')) or
+            type(query.get('data_queries_per_catalog'))is not int or query.get('data_queries_per_catalog')!=1 or query.get('row_by_row_query_allowed')is not False or
+            query.get('automatic_unverified_fallback')is not False):
+            errors.append('Official history DB display RLS or bulk query boundary drift')
     if spec.get("format")!="jungsi.service-spec/v1":errors.append("Unsupported service specification")
     requirements={r["id"] for r in spec["requirements"]}
     pages=spec["pages"];ops=spec["operations"]
@@ -1950,6 +2006,8 @@ def validate_spec(spec):
         expected_items['docs/work_items/DEV-009-runtime-connection-preparation.json']='runtime_connection_preparation_contract'
     if 'supabase_deployment_contract' in spec:
         expected_items['docs/work_items/DEV-010-supabase-platform-deployment.json']='supabase_deployment_contract'
+    if display:
+        expected_items['docs/work_items/DEV-011-official-history-db-display.json']='official_history_db_display_contract'
     if records is not None:
         if not isinstance(records,dict) or set(records)!=set(expected_items):
             errors.append('Synchronized work-item scope registration drift')
@@ -2169,7 +2227,7 @@ def validate_content(paths,read,spec):
     return sorted(set(errors))
 
 def validate_changed_paths(changed,spec):
-    watched=("src/","apps/","database/",".github/workflows/",".githooks/","tests/")
+    watched=("src/","apps/","database/","supabase/functions/",".github/workflows/",".githooks/","tests/")
     code_changed=any(p.startswith(watched) and not p.endswith(".md") for p in changed)
     code_changed=code_changed or bool(set(changed)&set(spec["workflow"]["shared_tools"]))
     required={SPEC_PATH,spec["current_documents"]["planning"],spec["current_documents"]["routing"]}

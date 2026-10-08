@@ -17,6 +17,32 @@ PARSER = "python-ast-signatures/v1"
 SYNC_DOCUMENT = "docs/current/개발현황_문서동기화.md"
 INDEX_DOCUMENT = "docs/current/code_routing_index.json"
 AGENT_MARKER = b"<!-- jungsi:documentation-sync-required -->"
+EDGE_SOURCE_PREFIX = "supabase/functions/"
+EDGE_INDEX_FORMAT = "jungsi.typescript-source-hash-index/v1"
+
+
+def edge_source_index(paths, read, spec):
+    """Bind complete Edge bytes; this does not claim TypeScript parsing/testing."""
+    rows = []
+    for path in sorted(p for p in paths if p.startswith(EDGE_SOURCE_PREFIX) and p.endswith(".ts")):
+        row = next((x for x in spec["implementation"] if x["path"] == path), None)
+        if row is None:
+            raise ValueError("Unregistered public Edge source: " + path)
+        rows.append({**reference_metadata(path, spec), "source_sha256": source_digest(read(path)),
+                     "declared_exports": list(row.get("symbols", []))})
+    return {"format": EDGE_INDEX_FORMAT, "verification": "whole_source_hash_not_type_or_runtime_proof", "files": rows}
+
+
+def validate_edge_index(paths, read, spec):
+    current = spec.get("workflow", {}).get("documentation_sync", {}).get("code_index", {}).get("edge_sources")
+    relevant = any(p.startswith(EDGE_SOURCE_PREFIX) and p.endswith(".ts") for p in paths)
+    if current is None and not relevant:
+        return []
+    try:
+        expected = edge_source_index(paths, read, spec)
+    except (ValueError, UnicodeError, KeyError):
+        return ["Public Edge source registration or encoding invalid"]
+    return [] if current == expected else ["Public Edge whole source index drift"]
 
 
 def normalized_source(raw: bytes) -> bytes:
@@ -110,7 +136,7 @@ def refresh_catalog(paths, read, spec):
             parsed.append(path)
         rows.append({**metadata, "source_sha256": digest, "symbols": symbols})
     return {"format": FORMAT, "parser": PARSER, "source_hash_policy": "UTF8_BOM_REMOVED_CRLF_TO_LF",
-            "files": rows}, {"parsed_files": parsed, "reused_files": reused}
+            "files": rows, "edge_sources": edge_source_index(paths, read, spec)}, {"parsed_files": parsed, "reused_files": reused}
 
 
 def validate_catalog(paths, read, spec):
@@ -145,7 +171,7 @@ def validate_catalog(paths, read, spec):
             continue
         if item != actual:
             errors.append("Documentation code index drift: " + path)
-    return sorted(set(errors))
+    return sorted(set(errors + validate_edge_index(paths, read, spec)))
 
 
 def validate_sync_policy(spec):
@@ -217,6 +243,15 @@ def generated_sync_files(spec, doc, table):
             "보조 모듈은 업무 경로 등록과 구분하며 업무 완료를 새로 주장하지 않는다. planning_tool은 공통 검사/합성 CLI 분류로서 서비스의 추가 계층이 아니다. "
             "비공개 데이터와 작업 스크립트, 테스트의 합성 값은 이 업무 코드 색인에 넣지 않는다.\n\n" +
             table(["파일", "담당 계층", "요구사항", "등록 상태", "선언 수", "LF 정규화 SHA-256"], modules))
+    edge = policy.get("code_index", {}).get("edge_sources", {}).get("files", [])
+    if edge:
+        body += ("\n\n## 공개 Edge TypeScript 소스 결속\n\n"
+                 "등록된 함수·공유 의존·검수 소스의 전체 본문 해시와 담당 계층/선언 export를 같은 스냅샷에 결속한다. "
+                 "이 색인은 TypeScript 문법·타입·런타임 검증을 주장하지 않는다. Deno check/test의 정확한 후보 증거를 별도로 기록한다. "
+                 "기존 Python AST·필수 보안·브랜치 검사는 유지한다.\n\n" +
+                 table(["파일", "담당 계층", "요구사항", "등록 상태", "등록 export", "LF 정규화 SHA-256"],
+                       [[r["path"], r["layer"], ", ".join(r["requirements"]), r["status"],
+                         ", ".join(r["declared_exports"]), r["source_sha256"]] for r in edge]))
     return {SYNC_DOCUMENT: doc("현재 개발현황과 기획·라우팅 문서 동기화", body),
             INDEX_DOCUMENT: json.dumps(policy["code_index"], ensure_ascii=False, indent=2) + "\n"}
 
@@ -228,7 +263,7 @@ def delta_audit(paths, read, spec, base_paths, base_read, base_spec=None):
     current = set(source_paths(paths, spec))
     base = set(source_paths(base_paths, base_spec or spec))
     changed = sorted(p for p in current | base if p not in current or p not in base or normalized_source(read(p)) != normalized_source(base_read(p)))
-    observations, errors = [], validate_sync_policy(spec)
+    observations, errors = [], validate_sync_policy(spec) + validate_edge_index(paths, read, spec)
     if len(entries) != len(policy["code_index"]["files"]) or set(entries) != current:
         errors.append("Documentation code index coverage drift")
     old_index = (base_spec or {}).get("workflow", {}).get("documentation_sync", {}).get("code_index", {})
@@ -272,8 +307,13 @@ def delta_audit(paths, read, spec, base_paths, base_read, base_spec=None):
             errors.append("Document or route drift: " + path)
     if "AGENTS.md" not in paths or AGENT_MARKER not in read("AGENTS.md"):
         errors.append("AGENTS missing mandatory documentation synchronization")
+    edge_current = {p for p in paths if p.startswith(EDGE_SOURCE_PREFIX) and p.endswith(".ts")}
+    edge_base = {p for p in base_paths if p.startswith(EDGE_SOURCE_PREFIX) and p.endswith(".ts")}
+    edge_changed = sorted(p for p in edge_current | edge_base if p not in edge_current or p not in edge_base or normalized_source(read(p)) != normalized_source(base_read(p)))
     return {"format": "jungsi.documentation-delta-audit/v1", "passed": not errors,
             "changed_source_files": len(changed), "unchanged_source_files_reused": len(current - set(changed)),
+            "changed_edge_source_files": edge_changed,
+            "edge_verification_scope": "complete source hash; Deno type and runtime acceptance recorded separately",
             "index_entries_revalidated": len(index_changed | (set(changed) & current)),
             "initial_index_verification": not initialized,
             "source_observations": observations, "linked_documents": required, "errors": errors,

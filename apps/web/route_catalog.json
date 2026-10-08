@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.16",
-  "source_sha256": "b4bf2e6a9b562e06ee8f69167c0c8c774abaaa1d75a7f531fecb4da032a7987e",
+  "spec_version": "1.9.17",
+  "source_sha256": "1d2285b0453f7e156ecd190557484be129a29d65111f03ec097f4f6e7594f05d",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3282,6 +3282,121 @@
       "this_document_canonical_application": "NOT_RUN",
       "this_document_hooks_CI": "NOT_RUN",
       "production_ready": false
+    }
+  },
+  "official_history_db_display_contract": {
+    "format": "jungsi.official-history-db-display/v1",
+    "id": "DEV-011",
+    "revision": "2026.10.08.v1",
+    "branch": "feature/application-pre-data-platform",
+    "basis_commit": "db50c45127cfb314cc52e2bc8682505e077fffec",
+    "requirements": [
+      "REQ-01",
+      "REQ-08",
+      "REQ-12",
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "code_status": "planned",
+    "production_ready": false,
+    "purpose": "이미 적재한 비공개 Supabase 입결을 별도 목적 범위의 공식자료 표시용 공급자로 읽어 기존 화면 API에 명시 연결한다.",
+    "operations": [
+      "history.search",
+      "offerings.search",
+      "offering.read",
+      "recruitment.read",
+      "session.read"
+    ],
+    "scope": {
+      "environment": "restricted_cloud_review_only",
+      "explicit_server_selection_required": true,
+      "verified_review_subject_allowlist_required": true,
+      "immutable_descriptor_bytes_sha_required": true,
+      "exact_source_identity_type_PK_year_required": true,
+      "validity_and_revocation_required": true,
+      "global_source_flags_changed": false,
+      "local_C_approval_is_cloud_approval": false,
+      "all_ingested_data_auto_adopted": false,
+      "engine_or_forecast_auto_adopted": false,
+      "actual_values_in_Git": false
+    },
+    "composition": {
+      "python_reference": "src/jungsi_touch/infrastructure/official_history_display.py",
+      "edge_entry": "supabase/functions/official-history-display/index.ts",
+      "edge_application": "supabase/functions/_shared/official_history_display.ts",
+      "edge_infrastructure": "supabase/functions/_shared/official_history_postgres.ts",
+      "default_factories_changed": false,
+      "entitlement_authority": "jungsi_backend.entitlements",
+      "existing_API_count": 22,
+      "new_logical_API_or_DTO": false,
+      "browser_DB_credentials": false,
+      "relay_header": "X-Jungsi-Relay-Token"
+    },
+    "rules": [
+      "표시 purpose 승인과 engine/production/native 전체 발행은 구분한다. 기존 Storage 승인 guard와 원본 false/null 상태는 유지한다.",
+      "실DB의 승인된 exact source rows를 app role READONLY/TLS로 조회한다. 기존 카탈로그는 공개 설명·정의·출처 메타와 기대 검수에만 쓰며 DB를 조회하지 않은 fixture로 성공을 대체하지 않는다.",
+      "값·타입·null·원 literal·지표 정의·단위·원척도·모집행 PK·학년도·출처를 보존한다. 다른 컷/모집집단으로 치환하거나 연도 anchor를 과거 행에 덮어쓰지 않는다.",
+      "누락/중복/추가행·다른 scope/버전/지문·승인 만료/회수·DB 장애는 비밀 없는 503/403으로 거절한다. 미공개·미검수와 실제 0을 구분한다.",
+      "승인한 명시 source 범위의 동일성이 검증된 경우에만 최적화 PK 조회를 선택할 수 있다. 같은 원형/버전/typed fingerprint를 결속하고 다른 행이나 overlay로 일반화하지 않는다. 불일치 때 전체 view/fixture로 자동 fallback하지 않는다.",
+      "서버 relay → 실제 Supabase 사용자 → 서버 검증 sub 명부 → 현재 이용권/operation 권한 → 자료 조회 → 재귀 공개 DTO 순서를 유지한다. staff/admin을 paid로 자동 승격하지 않는다.",
+      "Edge function prefix는 배포 transport다. suffix의 기존 API 경로·query·회원·DTO/session v1은 그대로이며 미포팅 operation을 구현 완료로 기록하지 않는다.",
+      "모집군/인원 중 검수하지 않은 값은 pending/null로 유지한다. 제한된 검수 scope의 빈 결과를 전국 자료 부재로 설명하지 않는다.",
+      "no-store·직접 접근 거절·안전한 오류를 유지한다. 공유 원자적 예산과 실제 JWT/BFF/브라우저의 미인수 상태는 운영 보안 3 gate 완료로 바꾸지 않는다.",
+      "공개 TS와 공유 의존·검수 소스의 전체 본문 SHA를 같은 스냅샷 색인에 결속한다. 기존 Python AST 검사를 유지하며 Deno 타입/런타임 증거를 별도로 기록한다.",
+      "RLS와 최소 역할 권한을 유지한다. 서버 app 역할은 superuser/BYPASSRLS/자료 소유자가 아니어야 하며 row_security=on, 실제 참조 표의 RLS 정책 적용과 view security_invoker 또는 직접 RLS 표 경로를 확인한다. 이를 확인하지 못하면 응답을 보류한다.",
+      "모집행·입결·출처와 승인 선택 PK를 파라미터화한 bounded bulk JOIN으로 같은 READONLY snapshot에서 한 번에 조회한다(data query 1회). 학과/지표별 SELECT 반복 N+1, 검수하지 않은 전체 view/다른 버전/fixture fallback은 금지한다. 역할·권한·인증 사전 조회는 data query와 별도 집계한다."
+    ],
+    "tasks": [
+      [
+        "DBD-01",
+        "데이터팀",
+        "exact 원행/curated 기준의 원형·타입·PK·학년도 대조와 필요 최소 app SELECT 권한/성능 검수"
+      ],
+      [
+        "DBD-02",
+        "서비스 개발팀",
+        "명시 표시 공급자와 Python reference·Edge ports/adapter·인증/오류/DTO 호환 구현"
+      ],
+      [
+        "DBD-03",
+        "시스템기획팀·서비스 개발팀",
+        "목적별 제한 검수 승인·불변 private descriptor·설정·동일 후보 API 수치 대조"
+      ],
+      [
+        "DBD-04",
+        "외부 화면팀",
+        "API transport prefix와 서버 relay 연결·실제 로그인·1페이지 원지표/보류/오류 브라우저 검수"
+      ]
+    ],
+    "verification": {
+      "source_db_read_only": "PASS_READONLY_TYPED_140_SOURCE_ROWS; runtime_RLS_and_new_JOIN_pending",
+      "python_reference_HTTP": "NOT_RUN",
+      "Deno_check_test": "NOT_RUN",
+      "restricted_cloud_API": "NOT_RUN",
+      "actual_user_JWT": "NOT_RUN",
+      "frontend_BFF_browser": "NOT_RUN",
+      "operational_security_three_gates": "NOT_RUN",
+      "effective_RLS": "NOT_RUN",
+      "bulk_JOIN_query_count": "NOT_RUN"
+    },
+    "frontend_handoff": [
+      "화면은 기존 API 응답만 읽는다. DATABASE_URL/secret 키/descriptor/원자료/전체 DB는 수령하지 않는다.",
+      "제한 검수 API가 실제 배포·응답 검수된 후 관측한 base URL과 transport prefix·공개 Auth 설정을 받는다. 예측한 주소로 live 전환하지 않는다.",
+      "relay는 비공개 서버 설정으로 전달하며 사용자 JWT는 BFF에서 재검증해 보낸다. 실제 학생 성적·토큰은 채팅/공유 문서/Git에 넣지 않는다.",
+      "다른 PC는 같은 candidate에서 실제 원지표·타입·출처·검색 조건·401/403/503·no-store와 전달물 비노출을 검수한다.",
+      "DB 행 수가 늘어도 행별 조회를 추가하지 않는다. 같은 요청의 data JOIN 1회 증거와 실제 RLS 영수증을 별도 확인한다."
+    ],
+    "query_contract": {
+      "parameterized_bulk_join": true,
+      "data_queries_per_catalog": 1,
+      "row_by_row_query_allowed": false,
+      "row_security_on": true,
+      "enforce_effective_RLS": true,
+      "reject_superuser_bypassrls_owner": true,
+      "verify_view_security_invoker_or_use_direct_RLS_relation": true,
+      "exact_selected_scope_only": true,
+      "automatic_unverified_fallback": false
     }
   },
   "history_presentation_contract": {

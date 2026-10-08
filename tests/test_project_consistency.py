@@ -55,7 +55,7 @@ class ConsistencyTests(unittest.TestCase):
                 item=json.loads(generated[path])
                 self.assertEqual(item['scope'],self.spec[metadata['contract_ref']])
                 if 'historical_scope_at_adc684_acceptance' not in item:
-                    self.assertIn(metadata['contract_ref'],{'secured_backend_preparation_contract','runtime_connection_preparation_contract','supabase_deployment_contract'})
+                    self.assertIn(metadata['contract_ref'],{'secured_backend_preparation_contract','runtime_connection_preparation_contract','supabase_deployment_contract','official_history_db_display_contract'})
                     self.assertEqual(item['scope'],self.spec[metadata['contract_ref']])
                     self.assertFalse(item['scope']['production_ready'])
                     continue
@@ -69,7 +69,7 @@ class ConsistencyTests(unittest.TestCase):
         for path in self.spec['workflow']['synchronized_work_items']:
             with self.subTest(path=path):
                 changed=dict(files);item=json.loads(changed[path])
-                if self.spec['workflow']['synchronized_work_items'][path]['contract_ref'] in {'secured_backend_preparation_contract','runtime_connection_preparation_contract','supabase_deployment_contract'}:
+                if self.spec['workflow']['synchronized_work_items'][path]['contract_ref'] in {'secured_backend_preparation_contract','runtime_connection_preparation_contract','supabase_deployment_contract','official_history_db_display_contract'}:
                     item['scope']['code_status']='unreviewed_implementation'
                 else:
                     key='backend_contract_acceptance' if 'backend_contract_acceptance' in item['scope'] else 'implementation_acceptance'
@@ -99,6 +99,24 @@ class ConsistencyTests(unittest.TestCase):
     def test_code_only_commit_is_rejected(self):
         errors=validate_changed_paths(["src/jungsi_touch/percentile.py"],self.spec)
         self.assertTrue(errors)
+    def test_edge_code_only_commit_is_rejected(self):
+        self.assertTrue(validate_changed_paths(['supabase/functions/official-history-display/index.ts'],self.spec))
+    def test_display_purpose_cannot_disappear_or_enable_operating_engine(self):
+        missing=deepcopy(self.spec); missing.pop('official_history_db_display_contract')
+        self.assertIn('Official history DB display purpose contract missing',validate_spec(missing))
+        for key in ('global_source_flags_changed','local_C_approval_is_cloud_approval','engine_or_forecast_auto_adopted'):
+            changed=deepcopy(self.spec); changed['official_history_db_display_contract']['scope'][key]=True
+            self.assertIn('Official history DB display approval boundary drift',validate_spec(changed))
+    def test_display_RLS_and_bulk_join_cannot_be_disabled(self):
+        for key in ('parameterized_bulk_join','row_security_on','enforce_effective_RLS','reject_superuser_bypassrls_owner','verify_view_security_invoker_or_use_direct_RLS_relation'):
+            changed=deepcopy(self.spec); changed['official_history_db_display_contract']['query_contract'][key]=False
+            self.assertIn('Official history DB display RLS or bulk query boundary drift',validate_spec(changed))
+        for key,value in (('data_queries_per_catalog',2),('data_queries_per_catalog',True),('data_queries_per_catalog',1.0),('row_by_row_query_allowed',True),('automatic_unverified_fallback',True)):
+            changed=deepcopy(self.spec); changed['official_history_db_display_contract']['query_contract'][key]=value
+            self.assertIn('Official history DB display RLS or bulk query boundary drift',validate_spec(changed))
+    def test_display_contract_invalid_type_is_rejected(self):
+        changed=deepcopy(self.spec); changed['official_history_db_display_contract']=[]
+        self.assertIn('Official history DB display purpose contract invalid',validate_spec(changed))
     def test_code_with_matching_current_documents_is_accepted(self):
         changed=["src/jungsi_touch/percentile.py","docs/current/service_spec.json",
                  self.spec["current_documents"]["planning"],self.spec["current_documents"]["routing"]]
