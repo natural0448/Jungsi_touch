@@ -138,6 +138,9 @@ const REASON_PLAIN: Record<string, string> = {
   above_acceptance_range: "내 점수가 올해 지원해 볼 만한 범위보다 여유 있게 높습니다.",
   below_acceptance_range: "내 점수가 올해 지원해 볼 만한 범위에 조금 못 미칩니다.",
   conversion_advantage: "이 대학의 점수 계산 방식이 내 과목 구성에 비교적 유리합니다.",
+  converted_score_position_gain: "이 대학 반영식에서는 전체 성적 기준보다 내 위치가 올라갑니다.",
+  converted_score_position_loss: "이 대학 반영식에서는 전체 성적 기준보다 내 위치가 내려갑니다.",
+  converted_score_position_equal: "이 대학 반영식으로 계산해도 전체 성적 기준과 내 위치가 거의 같습니다.",
   counselor_adjustment: "입시 상담 경험을 반영해 판단을 한 단계 조정했습니다.",
   forecast_basis_trend: "최근 3년 대학 발표 결과의 흐름으로 올해 기준을 잡았습니다.",
   approved_forecast_70: "검수를 마친 올해 예상 기준으로 판단했습니다.",
@@ -158,13 +161,21 @@ export function ReasonList({ items, max }: { items: ReasonDto[]; max?: number })
 }
 
 /** 판단 이유 구체화(최종 관리자 지시 2026-10-08, 3·4페이지 공용): 유불리 이유에는 실제 이동 폭(%p,
- *  사용자 자신의 상대값)을 붙인다. 내부 기준 점수는 여전히 적지 않는다 */
+ *  사용자 자신의 상대값)을 붙인다. 내부 기준 점수는 여전히 적지 않는다.
+ *  1.9.16: 등록 코드(gain/loss/equal)·advantage 상태·부호가 정확히 맞을 때만 수치를 붙이고,
+ *  음수를 '잘 맞는다'로 말하지 않으며 0은 '같은 위치'로 적는다. 어긋나면 일반 문구로 보존한다. */
 export function enrichedReasonTexts(a: AssessmentDto, max?: number): string[] {
-  const n = a.advantage ? Number(a.advantage.delta_pp) : null;
+  const adv = a.advantage;
+  const n = adv ? Number(adv.delta_pp) : null;
   const items = max ? (a.recommendation_reasons ?? []).slice(0, max) : a.recommendation_reasons ?? [];
   return [...new Set(items.map((r) => {
-    if (r.code === "conversion_advantage" && n !== null && Number.isFinite(n))
-      return `이 대학 반영식으로 계산하면 전체 성적 기준보다 내 위치가 ${n > 0 ? "+" : ""}${a.advantage!.delta_pp}%p ${n >= 0 ? "올라갑니다" : "내려갑니다"} — 내 선택과목·점수 구성이 이 대학의 과목 반영 비율과 비교적 잘 맞는다는 뜻입니다.`;
+    const gain = r.code === "conversion_advantage" || r.code === "converted_score_position_gain";
+    if (gain && adv?.status === "favorable" && n !== null && Number.isFinite(n) && n > 0)
+      return `이 대학 반영식으로 계산하면 전체 성적 기준보다 내 위치가 +${adv.delta_pp}%p 올라갑니다 — 내 선택과목·점수 구성이 이 대학의 과목 반영 비율과 비교적 잘 맞는다는 뜻입니다.`;
+    if (r.code === "converted_score_position_loss" && adv?.status === "unfavorable" && n !== null && Number.isFinite(n) && n < 0)
+      return `이 대학 반영식으로 계산하면 전체 성적 기준보다 내 위치가 ${adv.delta_pp}%p 내려갑니다.`;
+    if (r.code === "converted_score_position_equal")
+      return "이 대학 반영식으로 계산해도 전체 성적 기준과 내 위치가 거의 같습니다.";
     return plainReason(r);
   }))];
 }

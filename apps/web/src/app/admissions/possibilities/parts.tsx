@@ -58,6 +58,7 @@ export function Detail({ o, a, rec, pub, picked }: { o: OfferingDto; a: Cell; re
           <DetailReasons a={a} />
         </div>
       )}
+      <AdoptedEvidence a={a} />
       <Years a={a} />
       <div className="acts">
         <PickButton id={o.offering_id} on={picked} variant="wide" />
@@ -264,56 +265,73 @@ function DetailReasons({ a }: { a: AssessmentDto }) {
   return (
     <>
       <EnrichedReasonList a={a} />
-      {hasRange && <RangeEvidence a={a} rangeCode={(a.recommendation_reasons ?? []).find((r) => RANGE_CODES.has(r.code))?.code ?? null} />}
+      {hasRange && <RangeEvidence a={a} />}
     </>
   );
 }
 
-/** 범위 판단의 체감 근거: 공개 발표값(그해 최종등록자 70%)과 그해 기준으로 옮긴 내 환산점수를 나란히.
- *  과거 대조 방향이 올해 판정과 어긋나면(예: 과거엔 높았는데 올해는 못 미침) 그 뜻을 풀어 주는 문장을 함께 둔다 */
-function RangeEvidence({ a, rangeCode }: { a: AssessmentDto; rangeCode: string | null }) {
+/**
+ * 범위 판단의 체감 근거(1.9.16 보강): 공개 발표값(그해 최종등록자 70%)과 그해 기준 내 환산점수를
+ * '값 나열'로만 보여 준다 — 통계 정의·산출 단계까지 같은지는 화면이 입증할 수 없으므로 추세·비교
+ * 해석 문장을 붙이지 않고, 과거 대조 방향으로 올해 기준의 높낮이·원인을 단정하지 않는다.
+ * 단위가 '점'이고 발표 척도의 만점이 올해 환산 만점과 같을 때만 같은 척도로 보고 나열한다.
+ */
+function RangeEvidence({ a }: { a: AssessmentDto }) {
   const metrics = a.decision_evidence?.historical_metrics ?? [];
+  const officialMax = a.conversion?.official_max_score != null ? Number(a.conversion.official_max_score) : NaN;
+  const scaleMax = (s: string | null | undefined) => {
+    const t = s ? /(\d+(?:\.\d+)?)\s*점\s*만점/.exec(s) : null;
+    return t ? Number(t[1]) : NaN;
+  };
   const rows = a.years
     .map((y) => {
-      const m = metrics.find((x) => x.academic_year === y.academic_year && x.metric_name === "최종등록자 70%");
+      const same = metrics.filter((x) => x.academic_year === y.academic_year && x.metric_name === "최종등록자 70%");
+      const m = same.length === 1 ? same[0] : null; // 같은 이름 중복이면 첫 지표를 고르지 않는다
+      if (!m || m.value === null || m.unit !== "점") return null;
+      if (!Number.isFinite(officialMax) || scaleMax(m.original_scale) !== officialMax) return null;
       const mine = y.converted_score !== null ? Number(y.converted_score) : NaN;
-      const pub = m && m.value !== null ? Number(m.value) : NaN;
-      if (!Number.isFinite(mine) || !Number.isFinite(pub)) return null;
-      return { year: y.academic_year, mine: y.converted_score!, pub: String(m!.value), unit: m!.unit ?? "", dir: Math.sign(mine - pub) };
+      if (!Number.isFinite(mine) || !Number.isFinite(Number(m.value))) return null;
+      return { year: y.academic_year, mine: y.converted_score!, pub: String(m.value), unit: m.unit };
     })
     .filter((x): x is NonNullable<typeof x> => x !== null)
     .sort((x, y) => y.year - x.year)
     .slice(0, 3);
   if (rows.length === 0) return null;
-  const dirs = new Set(rows.map((r) => r.dir));
-  const oneDir = dirs.size === 1 ? rows[0].dir : 0;
-  const trend =
-    dirs.size > 1
-      ? "해마다 높낮이가 엇갈렸습니다"
-      : oneDir < 0
-        ? "매해 내 점수가 조금 낮은 편이었습니다"
-        : oneDir > 0
-          ? "매해 내 점수가 높은 편이었습니다"
-          : "매해 거의 같은 수준이었습니다";
-  // 과거 대조와 올해 판정의 방향이 다르면 이유를 풀어 준다(원인 단정 없이 기준의 높낮이만)
-  const bridge =
-    rangeCode === "below_acceptance_range" && oneDir > 0
-      ? "과거 발표값보다는 높은데도 '조금 못 미침'인 것은, 올해 예상 기준이 최근 발표 지점보다 높게 잡혀 있다는 뜻입니다."
-      : rangeCode === "above_acceptance_range" && oneDir < 0
-        ? "과거 발표값보다는 낮은데도 '여유'인 것은, 올해 예상 기준이 최근 발표 지점보다 낮게 잡혀 있다는 뜻입니다."
-        : null;
   return (
     <div className="range-ev">
-      <p>체감 기준으로, 그해 성적으로 옮긴 내 환산점수와 그해 발표된 최종등록자 70% 지점을 나란히 보면 — {trend}.</p>
-      {bridge && <p>{bridge}</p>}
+      <p>참고로, 같은 만점({officialMax}점) 척도로 발표된 과거 값과 그해 기준 내 환산점수를 나란히 보존해 보여 드립니다.</p>
       <ul>
         {rows.map((r) => (
           <li key={r.year}>
-            <b className="num">{r.year}</b> 내 환산 <b className="num">{r.mine}</b>{r.unit} · 발표 70% 지점 <b className="num">{r.pub}</b>{r.unit}
+            <b className="num">{r.year}</b> 내 환산 <b className="num">{r.mine}</b>{r.unit} · 발표 최종등록자 70% <b className="num">{r.pub}</b>{r.unit}
           </li>
         ))}
       </ul>
-      <p className="caveat">과거 발표값과의 비교는 체감용 참고입니다. 올해 판단은 올해 예상 기준으로 하며, 그 기준 점수는 공개하지 않습니다.</p>
+      <p className="caveat">
+        통계 정의·산출 단계까지 완전히 같은지는 검수 전이라 값만 보여 드리며, 추세·비교 해석은 하지 않습니다.
+        올해 판단은 올해 예상 기준으로 하며, 그 기준 점수는 공개하지 않습니다.
+      </p>
+    </div>
+  );
+}
+
+/** 채택본에 결속된 공개 근거(올해 변화·상담 조정·자료판)는 비노출 대상이 아니다 — 1.9.16 보존 요구.
+ *  산출 방법(basis) 문구는 최종 관리자 지시대로 계속 보이지 않는다 */
+function AdoptedEvidence({ a }: { a: AssessmentDto }) {
+  const ev = a.decision_evidence;
+  const issues = ev?.issue_summaries ?? [];
+  const adjusted = ev?.adjustment_summary?.applied ?? false;
+  if (issues.length === 0 && !adjusted) return null;
+  return (
+    <div className="evidence">
+      <h3>
+        올해 변화·상담 조정
+        {ev?.forecast_release_version && <small> · 자료판 {ev.forecast_release_version}</small>}
+      </h3>
+      <ul>
+        {issues.map((t) => <IssueItem key={t.issue_id} t={t} />)}
+        {adjusted && <li><b>상담 조정</b> 상담 경험을 반영해 기준을 조정했습니다.</li>}
+      </ul>
     </div>
   );
 }
