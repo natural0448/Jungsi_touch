@@ -163,6 +163,11 @@ function PercentileCard({ a }: { a: AssessmentDto }) {
           )}
           {pop && <span className="note">{pop.note}</span>}
           {kind && <span className="note">{kind.note}</span>}
+          <span className="note">
+            이 위치는 전체 응시자 중의 자리이고, 실제 경쟁은 이 대학에 지원한 수험생들 사이에서 벌어집니다.
+            상위 몇 %면 유리한지는 학과의 모집인원과 지원자 수준에 따라 달라 이 숫자만으로는 판단할 수 없습니다 —
+            그 판단은 <b>지원가능성</b> 칸이 대신하며, 아래 <b>연도별 근거</b>의 과거 발표 입결과 함께 보세요.
+          </span>
         </>
       ) : (
         <>
