@@ -164,8 +164,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
 
             {uncollected.length > 0 && (
               <p className="rs-uncollected">
-                조건이 넓어 <b>{uncollected.join("·")}학년도</b> 결과 일부가 이 화면에 아직 담기지 않았습니다(학년도마다 {MAX_PAGES}쪽 × 지표 {LIMIT_PAST}개 예산으로 조회하며,
-                지표가 일부만 담긴 잘린 모집행은 표에서 뺐습니다). 대학명·학과명으로 조건을 좁히면 모두 볼 수 있습니다. 담기지 않은 결과는 미발표·자료 없음이 아닙니다.
+                <b>{uncollected.join("·")}학년도</b> 결과는 일부만 조회됐습니다(학년도마다 {MAX_PAGES}쪽 × 지표 {LIMIT_PAST}개 예산으로 조회하며,
+                지표가 일부만 담긴 잘린 모집행은 표에서 뺐습니다). 대학명·학과명으로 조건을 좁히면 조회 범위를 줄일 수 있으나, 이 안내가 보이는 동안은 일부 조회입니다. 담기지 않은 결과는 미발표·자료 없음이 아닙니다.
               </p>
             )}
 
@@ -395,11 +395,15 @@ function CommonLegend({ units }: { units: { years: Map<number, HistoryMetricDto[
 }
 
 /** 2027 모집 인원 요약 한 줄. 미공개는 0 이 아니라 미공개(REQ-13).
- *  과거 모집행에 2027 연계가 확인되지 않은 것과 '2027 모집이 있는데 비공개'를 섞어 쓰지 않는다(1.9.13 지적) */
+ *  과거 모집행에 2027 연계가 확인되지 않은 것과 '2027 모집이 있는데 비공개'를 섞어 쓰지 않는다(1.9.13 지적).
+ *  FE-HISTORY-02R: 응답 offering.academic_year 가 2027 일 때만 '2027 모집' 상자를 채운다 —
+ *  recruitment.read 는 요청 모집행의 학년도를 그대로 돌려주므로, 과거 학년도 ready 응답을 2027 로 재명명하지 않는다 */
 function RecruitLine({ rec }: { rec: RecruitmentDto | null }) {
   if (!rec) return <span className="rs-rec wait">2027 모집행 연계 확인 전</span>;
   if (rec.status !== "ready" || !rec.recruitment)
     return <span className="rs-rec wait">2027 모집 정보 미발행</span>;
+  if (rec.offering?.academic_year !== 2027)
+    return <span className="rs-rec wait">2027 모집행 연계 확인 전</span>;
   const x = rec.recruitment;
   return (
     <span className="rs-rec">
