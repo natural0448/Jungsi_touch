@@ -4,6 +4,7 @@ No file deletion. --write preserves prior generated content under ignored output
 from __future__ import annotations
 import argparse,ast,datetime,hashlib,json,re,subprocess,sys
 from pathlib import Path,PurePosixPath
+from audit_documentation_sync import AGENT_MARKER,generated_sync_files,validate_catalog,validate_sync_policy
 
 ROOT=Path(__file__).resolve().parents[1]
 SPEC_PATH="docs/current/service_spec.json"
@@ -1759,6 +1760,9 @@ def generated_files(spec):
             if followup:
                 history_text+='\n\n## 수정 회신의 독립 검토\n\n'+followup['summary']+'\n\n'+table(['항목','확인 범위·판정'],followup['accepted_observations'])+'\n\n'+table(['증거','상태·한계'],followup['evidence_boundaries'])
                 history_text+='\n\n공식 근거: '+', '.join('['+r['title']+']('+r['url']+')' for r in followup['primary_sources'])+'.'
+            latest=submission.get('latest_observation')
+            if latest:
+                history_text+='\n\n## 최신 소스 변경 관측\n\n'+latest['summary']+'\n\n'+table(['항목','현재 확인 범위'],latest['observations'])
         partial=history.get('partial_publication')
         if partial:
             history_text+='\n\n## 학교별 부분 발행 착수\n\n'+partial['request']+'\n\n상태 '+partial['state']+' · 단위 '+partial['unit']+' · 선택 '+partial['selection_strategy']+'.\n\n'+'\n'.join('- '+x for x in partial['rules'])+'\n\n'+table(['작업','담당','산출물'],partial['owners'])+'\n\n'+partial['first_batch_and_ETA']+' 운영 발행 '+partial['operational_publication']+'.'
@@ -1778,6 +1782,17 @@ def generated_files(spec):
         item=dict(metadata)
         item['scope']=spec[item['contract_ref']]
         files[path]=json.dumps(item,ensure_ascii=False,indent=2)+'\n'
+    files.update(generated_sync_files(spec,doc,table))
+    if spec.get('workflow',{}).get('documentation_sync'):
+        marker='\n\n<!-- jungsi:generated'
+        reference=('\n\n## 개발 변경과 문서 동기화\n\n'+
+                   '[현재 개발현황과 문서 동기화](개발현황_문서동기화.md) 및 [코드 색인](code_routing_index.json)을 먼저 읽는다. '
+                   '최신 검증 커밋부터 Git 변경 파일과 연결된 요구사항·라우팅만 검토하고 공통 명세에서 모든 문서를 함께 생성한다. '
+                   '모든 에이전트는 코드·기획·라우팅을 같은 커밋에서 일치시키고 필수 훅·CI를 통과해야 한다. '
+                   '이미 검증한 원자료·전체 소스를 매 작업마다 다시 읽지 않는다. 범위 확대 사유와 실제 운영 미검증 상태는 별도로 기록한다.')
+        for key in ('planning','routing','architecture','workflow','presentation_handoff'):
+            path=spec['current_documents'][key]
+            files[path]=files[path].replace(marker,reference+marker)
     acceptance=common_tools_acceptance_text(spec)
     if acceptance:
         marker='\n\n<!-- jungsi:generated'
@@ -1865,7 +1880,7 @@ def validate_forecast_contract(spec):
 
 
 def validate_spec(spec):
-    errors=[]
+    errors=validate_sync_policy(spec)
     if spec.get("format")!="jungsi.service-spec/v1":errors.append("Unsupported service specification")
     requirements={r["id"] for r in spec["requirements"]}
     pages=spec["pages"];ops=spec["operations"]
@@ -2102,6 +2117,7 @@ def validate_public_response_registry(paths,read,spec):
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
     names=set(paths)
+    errors.extend(validate_catalog(paths,read,spec))
     errors.extend(validate_public_response_registry(names,read,spec))
     transition=spec.get('supabase_operations_handoff_contract',{}).get('service_transition_contract',{})
     if transition.get('implementation_mode')=='explicit_prepared_default_unchanged':
@@ -2139,6 +2155,8 @@ def validate_content(paths,read,spec):
         errors.append("README missing current planning pointer")
     if "AGENTS.md" not in names or b"docs/current/service_spec.json" not in read("AGENTS.md"):
         errors.append("AGENTS missing current specification authority")
+    if spec.get('workflow',{}).get('documentation_sync') and ("AGENTS.md" not in names or AGENT_MARKER not in read("AGENTS.md")):
+        errors.append("AGENTS missing mandatory documentation synchronization")
     if ("AGENTS.md" not in names or b"<!-- jungsi:security-required -->" not in read("AGENTS.md") or
         SECURITY_DOCUMENT.encode("utf-8") not in read("AGENTS.md")):
         errors.append("AGENTS missing mandatory security reference")
@@ -2155,6 +2173,8 @@ def validate_changed_paths(changed,spec):
     code_changed=any(p.startswith(watched) and not p.endswith(".md") for p in changed)
     code_changed=code_changed or bool(set(changed)&set(spec["workflow"]["shared_tools"]))
     required={SPEC_PATH,spec["current_documents"]["planning"],spec["current_documents"]["routing"]}
+    if spec.get('workflow',{}).get('documentation_sync'):
+        required.update(spec['current_documents'][k] for k in ('architecture','workflow','development_sync'))
     if code_changed and not required<=set(changed):
         return ["Code changed without matching specification planning and routing in the same commit"]
     return []
