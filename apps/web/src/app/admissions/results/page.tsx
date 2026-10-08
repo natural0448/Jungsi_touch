@@ -16,19 +16,17 @@ const route = page("PAGE-01");
 export const metadata: Metadata = { title: route.label };
 
 /*
-  목록의 축은 올해(2027) 모집행이고, 과거 3개 학년도 결과를 모집행 계보(offering_id 에서 학년도를 뗀 값)로
-  이어 붙인다. 과거 학년도 조회는 같은 조건으로 최대 LIMIT_PAST 줄까지만 받으므로, 조건이 아주 넓으면
-  뒤쪽 쪽의 과거 값이 ─ 로 보일 수 있다(쪽을 좁히면 다 보인다). 서버에 계보 단위 묶음 조회가 생기면 바꾼다.
+  목록의 축은 실제 발행된 2024~2026 입시결과다(1.9.12 지시). 학년도마다 한 번씩(각 정수 단일 요청,
+  limit 100 — 지표 행 기준) 조회하고, next_cursor 가 남으면 미수집 범위를 화면에 분명히 알린다.
+  숨은 전국 전량 읽기를 추가하지 않는다. 연도 묶음은 발표 자료의 같은 모집행 PK(offering_id)가
+  같을 때만 합치고, PK 접미사를 지워 계보를 추정하지 않는다. 2027 모집 인원 상자는 같은 PK 의
+  recruitment.read 가 ready 일 때만 채운다(2027 입결 placeholder 를 만들지 않는다).
 */
-const YEAR_NOW = 2027;
 const PAST_YEARS = [2026, 2025, 2024] as const;
-const LIMIT_NOW = 60;
 const LIMIT_PAST = 100;
 
-/** 지표 열 순서. 발표가 흔한 것부터, 목록에 없는 지표는 받은 순서대로 뒤에 붙인다 */
+/** 지표 열 순서. 발표가 흔한 것부터, 목록에 없는 지표는 받은 순서대로 뒤에 붙인다(이름을 바꾸거나 합치지 않는다) */
 const METRIC_ORDER = ["모집인원", "경쟁률", "충원인원", "최종등록자 50%", "최종등록자 70%", "최종등록자 평균", "최종 합격선"];
-
-const lineage = (offeringId: string) => offeringId.replace(/-\d{4}$/, "");
 
 /**
  * 1페이지 · 대학 발표 입시결과 (REQ-01)
@@ -55,38 +53,34 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
 
   const cur = parseQuery(await searchParams);
   const base = { university_q: cur.university, department_q: cur.unit, region: cur.region, group: cur.group };
-  let now: CatalogSearchDto<HistoryMetricDto>;
   let past: CatalogSearchDto<HistoryMetricDto>[];
   try {
-    [now, ...past] = await Promise.all([
-      src.searchHistory(caller, { ...base, academic_year: YEAR_NOW, cursor: cur.cursor, limit: LIMIT_NOW }),
-      ...PAST_YEARS.map((y) => src.searchHistory(caller, { ...base, academic_year: y, limit: LIMIT_PAST })),
-    ]);
+    past = await Promise.all(PAST_YEARS.map((y) => src.searchHistory(caller, { ...base, academic_year: y, limit: LIMIT_PAST })));
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
     throw e;
   }
 
-  // 올해 모집행을 대학 → 모집단위로 묶는다(받은 순서 유지)
-  type Off = { id: string; line: string; first: HistoryMetricDto };
+  // 발행된 과거 결과를 대학 → 모집행(PK 그대로) → 학년도로 묶는다. 최신 학년도의 행이 카드 머리가 된다
+  const anyReady = past.some((r) => r.status === "ready" && r.items !== null);
+  const uncollected = PAST_YEARS.filter((_, i) => past[i].next_cursor);
+  const asOf = past.map((r) => r.as_of).filter(Boolean).sort().at(-1) ?? null;
+  type Off = { id: string; first: HistoryMetricDto; years: Map<number, HistoryMetricDto[]> };
   const univs: { id: string; name: string; region: string | null; offerings: Off[] }[] = [];
-  for (const m of now.items ?? []) {
-    let u = univs.find((x) => x.id === m.university_id);
-    if (!u) univs.push((u = { id: m.university_id, name: m.university_name, region: m.region, offerings: [] }));
-    if (!u.offerings.some((x) => x.id === m.offering_id)) u.offerings.push({ id: m.offering_id, line: lineage(m.offering_id), first: m });
-  }
-  const units = univs.flatMap((u) => u.offerings);
-
-  // 과거 결과를 계보·학년도로 묶는다
-  const hist = new Map<string, Map<number, HistoryMetricDto[]>>();
+  const byId = new Map<string, Off>();
   for (const res of past)
     for (const m of res.items ?? []) {
-      const key = lineage(m.offering_id);
-      const byYear = hist.get(key) ?? new Map<number, HistoryMetricDto[]>();
-      if (!hist.has(key)) hist.set(key, byYear);
-      byYear.set(m.academic_year, [...(byYear.get(m.academic_year) ?? []), m]);
+      let u = univs.find((x) => x.id === m.university_id);
+      if (!u) univs.push((u = { id: m.university_id, name: m.university_name, region: m.region, offerings: [] }));
+      let o = byId.get(m.offering_id);
+      if (!o) {
+        byId.set(m.offering_id, (o = { id: m.offering_id, first: m, years: new Map() }));
+        u.offerings.push(o);
+      }
+      o.years.set(m.academic_year, [...(o.years.get(m.academic_year) ?? []), m]);
     }
+  const units = univs.flatMap((u) => u.offerings);
 
   // 올해 모집 인원(화면에 보이는 모집단위만). 권한 거절은 빈칸으로 두고, 연결 실패는 화면 전체 안내로
   const recs = new Map<string, RecruitmentDto | null>();
@@ -130,10 +124,10 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
           </Form>
           <ChipRow label="지역" cur={cur} k="region" items={REGIONS} />
           <ChipRow label="모집군" cur={cur} k="group" items={[...GROUPS]} suffix="군" />
-          <p className="hint">2024~2026학년도 발표 결과와 2027학년도 모집 인원을 모집단위마다 한 번에 보여 드립니다. 대학마다 발표하는 지표(모집·충원인원, 경쟁률, 평균·50%·70%·최종 합격선)가 달라 서로 바꾸지 않고 발표한 그대로입니다.</p>
+          <p className="hint">실제 발행된 2024~2026학년도 결과를 기준으로 모집단위를 보여 드리고, 2027학년도 모집 인원은 확인된 모집행에만 붙입니다. 대학마다 발표하는 지표(모집·충원인원, 경쟁률, 평균·50%·70%·최종 합격선)가 달라 서로 바꾸지 않고 발표한 그대로입니다.</p>
         </section>
 
-        {now.status !== "ready" || now.items === null ? (
+        {!anyReady ? (
           <section className="gate flat">
             <h2>입시결과 자료가 아직 공개되지 않았습니다</h2>
             <p>검수가 끝난 대학 발표 자료부터 차례로 엽니다. 자료가 없는 것이지 결과가 0건인 것은 아닙니다.</p>
@@ -142,18 +136,25 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
           <>
             <div className="rs-count">
               <span>
-                <b className="num">{now.matching_school_count ?? 0}</b>개 대학 · <b className="num">{now.matching_offering_count ?? 0}</b>개 모집단위 · 2027학년도 모집 중
-                {now.as_of && <small> · 자료 기준 {plainDate(now.as_of)}</small>}
+                <b className="num">{univs.length}</b>개 대학 · <b className="num">{units.length}</b>개 모집단위 · 2024~2026 발행 결과 기준
+                {asOf && <small> · 자료 기준 {plainDate(asOf)}</small>}
               </span>
               {filtered && <Link href={hrefWith(cur, { university: undefined, unit: undefined, region: undefined, group: undefined })}>조건 지우기</Link>}
             </div>
 
-            <CommonLegend univs={univs} hist={hist} />
+            {uncollected.length > 0 && (
+              <p className="rs-uncollected">
+                조건이 넓어 <b>{uncollected.join("·")}학년도</b> 결과 일부가 이 화면에 아직 담기지 않았습니다(학년도마다 지표 {LIMIT_PAST}개까지 조회).
+                대학명·학과명으로 조건을 좁히면 모두 볼 수 있습니다. 담기지 않은 결과는 미발표·자료 없음이 아닙니다.
+              </p>
+            )}
+
+            <CommonLegend units={units} />
 
             {univs.length === 0 ? (
               <section className="gate flat">
-                <h2>{words ? `‘${words}’에 맞는 모집단위가 없습니다` : "조건에 맞는 모집단위가 없습니다"}</h2>
-                <p>검색어를 줄이거나 다른 지역·모집군을 골라 보세요. 실기 반영 전형은 서비스 범위에서 빠져 있습니다.</p>
+                <h2>{words ? `‘${words}’에 맞는 발행 결과가 없습니다` : "조건에 맞는 발행 결과가 없습니다"}</h2>
+                <p>검색어를 줄이거나 다른 지역·모집군을 골라 보세요. 발행이 학교 단위로 나뉘어 진행되는 동안에는 아직 이번 판에 포함되지 않은 대학일 수 있습니다 — 자료가 없다는 뜻이 아닙니다. 실기 반영 전형은 서비스 범위에서 빠져 있습니다.</p>
               </section>
             ) : (
               <div className="rs-list">
@@ -166,7 +167,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
                     </header>
                     <ul>
                       {u.offerings.map((o) => (
-                        <UnitCard key={o.id} o={o} years={hist.get(o.line)} rec={recs.get(o.id) ?? null} />
+                        <UnitCard key={o.id} o={o} years={o.years} rec={recs.get(o.id) ?? null} />
                       ))}
                     </ul>
                   </section>
@@ -174,12 +175,6 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
               </div>
             )}
 
-            {(cur.cursor || now.next_cursor) && (
-              <nav className="rs-pager" aria-label="쪽 넘기기">
-                {cur.cursor ? <Link className="btn" href={hrefWith(cur, { cursor: undefined })}>처음으로</Link> : <span />}
-                {now.next_cursor && <Link className="btn" href={hrefWith(cur, { cursor: now.next_cursor })}>다음</Link>}
-              </nav>
-            )}
           </>
         )}
         <p className="rs-foot">대학 발표 자료만 보여 줍니다. 정시터치가 추정한 값(자체 누적·예상 기준)은 이 화면에 넣지 않습니다. 내 성적과 견주어 보려면 {p3.label}를 이용하세요.</p>
@@ -194,15 +189,14 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
   const seen: string[] = [];
   for (const y of PAST_YEARS) for (const m of years?.get(y) ?? []) if (!seen.includes(m.metric_name)) seen.push(m.metric_name);
   const metricCols = [...METRIC_ORDER.filter((n) => seen.includes(n)), ...seen.filter((n) => !METRIC_ORDER.includes(n))];
-  // 추정 2열은 재료(모집인원·경쟁률[·충원인원])가 발표 지표로 있을 때만 끼운다. 값은 화면의 단순 산술(아래 설명 참고)
-  const canApplicants = metricCols.includes("모집인원") && metricCols.includes("경쟁률");
-  const canDropped = canApplicants && metricCols.includes("충원인원");
+  // 추정 2열은 재료 셋(모집인원·경쟁률·충원인원)이 모두 발표 지표로 있을 때만 끼운다(하나라도 없으면 두 칸 다 ─)
+  const canDerived = ["모집인원", "경쟁률", "충원인원"].every((n) => metricCols.includes(n));
   type Col = { key: string; label: string; derived?: boolean };
   const cols: Col[] = [];
   for (const n of metricCols) {
     cols.push({ key: n, label: n });
-    if (n === "경쟁률" && canApplicants) cols.push({ key: "__applicants", label: "추정 총 지원자", derived: true });
-    if (n === "충원인원" && canDropped) cols.push({ key: "__dropped", label: "추정 탈락자", derived: true });
+    if (n === "경쟁률" && canDerived) cols.push({ key: "__applicants", label: "추정 총 지원자", derived: true });
+    if (n === "충원인원" && canDerived) cols.push({ key: "__dropped", label: "추정 탈락자", derived: true });
   }
   return (
     <li id={o.id} className="rs-off open">
@@ -228,37 +222,61 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
               </tr>
             </thead>
             <tbody>
-              {PAST_YEARS.map((y) => {
+              {/* 이 모집행 PK 로 실제 발행된 학년도만 그린다 — 없는 학년도를 ─ 행으로 만들면
+                  '발표 없음'과 '연도 연결 미검증(다른 PK)'이 섞여 보이기 때문 */}
+              {PAST_YEARS.filter((y) => years?.has(y)).map((y) => {
                 const rows = years?.get(y) ?? [];
                 const info = rows[0];
                 const renamed = info && info.department !== o.first.department ? info.department : null;
-                const num = (name: string) => {
-                  const m = rows.find((x) => x.metric_name === name);
-                  const v = m?.value === null || m?.value === undefined ? NaN : Number(m.value);
-                  return Number.isFinite(v) ? v : null;
+                // 같은 이름 지표가 여러 번 발표된 해는 첫 행을 임의 선택하지 않는다(FE-HISTORY 반례5) — 보류
+                const metricAt = (name: string): HistoryMetricDto | "dup" | null => {
+                  const ms = rows.filter((x) => x.metric_name === name);
+                  return ms.length === 1 ? ms[0] : ms.length === 0 ? null : "dup";
                 };
-                // 추정 2열 산술(1페이지_공식자료_추정표기_시사 계약): 같은 학년도 행의 발표 지표만 재료로 쓴다.
-                // Q(모집)·C(충원)는 명 단위 비음수 정수, R(경쟁률)은 유한 비음수만 인정. 아니면 그 칸은 ─.
-                const intOrNull = (v: number | null) => (v !== null && v >= 0 && Number.isInteger(v) ? v : null);
-                const cap = intOrNull(num("모집인원"));
-                const fill = intOrNull(num("충원인원"));
-                const rateRaw = num("경쟁률");
-                const rate = rateRaw !== null && rateRaw >= 0 ? rateRaw : null;
+                // 모집·충원 재료: '명' 단위로 발표된 비음수 정수만(단위 미확인·%·순위 등은 보류, 반례3)
+                const personInt = (m: HistoryMetricDto | "dup" | null): number | null => {
+                  if (!m || m === "dup" || m.value === null || m.unit !== "명") return null;
+                  const v = Number(m.value);
+                  return Number.isFinite(v) && v >= 0 && Number.isInteger(v) ? v : null;
+                };
+                // 경쟁률 재료: 발표 원문(십진 문자열)을 그대로 정수 분수로 받는다. 중간 반올림 없음(반례2).
+                // 전체 12자리까지만 — Q×n 이 2^53 을 넘지 않아 정수 연산이 정확하다. 넘치면 보류
+                const ratioOf = (m: HistoryMetricDto | "dup" | null): { n: number; s: number } | null => {
+                  if (!m || m === "dup" || m.value === null) return null;
+                  if (m.unit !== null && m.unit !== undefined && !m.unit.includes("대")) return null;
+                  const t = /^(\d+)(?:\.(\d+))?$/.exec(String(m.value).trim());
+                  if (!t) return null;
+                  const frac = t[2] ?? "";
+                  const digits = t[1] + frac;
+                  if (digits.length > 10) return null;
+                  return { n: Number(digits), s: 10 ** frac.length };
+                };
+                const cap = personInt(metricAt("모집인원"));
+                const fill = personInt(metricAt("충원인원"));
+                const ratio = ratioOf(metricAt("경쟁률"));
                 // 공식 지원자 수 지표의 의미 대응은 데이터팀 검수 뒤 이름을 넣는다(문자열 짐작 대응 금지).
-                // 이름이 확정되면: A가 있는 행은 추정 총 지원자 ─, 추정 탈락자만 A−Q−C(R 불필요).
                 const OFFICIAL_APPLICANT_METRICS: string[] = [];
-                const officialA = intOrNull(OFFICIAL_APPLICANT_METRICS.map(num).find((v) => v !== null) ?? null);
-                // ROUND_HALF_UP(Q×R)를 정확 소수로: R을 1e6 배 정수로 올려 정수 연산 후 반올림(부동소수 .5 오차 제거)
-                const applicants = officialA !== null
-                  ? null
-                  : cap !== null && rate !== null
-                    ? Math.floor((cap * Math.round(rate * 1e6) + 5e5) / 1e6)
-                    : null;
-                const droppedRaw = officialA !== null
-                  ? cap !== null && fill !== null ? officialA - cap - fill : null
-                  : applicants !== null && cap !== null && fill !== null ? applicants - cap - fill : null;
-                // 차감 결과가 음수면 정의·범위 충돌로 보고 ─(음수 인원을 표시하지 않는다)
-                const dropped = droppedRaw !== null && droppedRaw >= 0 ? droppedRaw : null;
+                let officialA: number | null = null;
+                for (const n of OFFICIAL_APPLICANT_METRICS) {
+                  const v = personInt(metricAt(n));
+                  if (v !== null) { officialA = v; break; }
+                }
+                let applicants: number | null = null;
+                let dropped: number | null = null;
+                if (officialA !== null) {
+                  // 공식 A 우선: 추정 지원자 칸은 ─, 탈락자만 A−Q−C(R 불필요). 음수면 ─
+                  if (cap !== null && fill !== null) {
+                    const d = officialA - cap - fill;
+                    dropped = d >= 0 ? d : null;
+                  }
+                } else if (cap !== null && fill !== null && ratio !== null && cap < 1e5) {
+                  // Q·R·C 가 전부 유효할 때만 두 칸을 만든다(하나라도 없으면 둘 다 ─, 반례1).
+                  // half-up(Q×R)을 정수 분수로: floor((2QR + s) / 2s) — 모든 피연산자가 2^53 미만 정수라 정확(반례2)
+                  const p = cap * ratio.n;
+                  applicants = Math.floor((2 * p + ratio.s) / (2 * ratio.s));
+                  const d = applicants - cap - fill;
+                  dropped = d >= 0 ? d : null; // 음수는 정의·범위 충돌 — 표시하지 않는다
+                }
                 return (
                   <tr key={y}>
                     <th scope="row">
@@ -274,7 +292,14 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
                           </td>
                         );
                       }
-                      const m = rows.find((x) => x.metric_name === c.key);
+                      const same = rows.filter((x) => x.metric_name === c.key);
+                      const m = same.length === 1 ? same[0] : null;
+                      if (same.length > 1)
+                        return (
+                          <td key={c.key} className="r">
+                            <span className="unpub" title="같은 이름 지표가 집단·척도·출처가 다르게 여러 번 발표되어, 의미 확인 전에는 한 값을 고르지 않습니다">복수 발표</span>
+                          </td>
+                        );
                       return (
                         <td key={c.key} className="r">
                           {!m ? (
@@ -306,27 +331,21 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
  * 같은 지표라도 대학마다 척도·정의가 다를 수 있어, 화면에 나온 카드들에서 서로 다른
  * 발표 정의가 섞여 있으면 그 사실을 적고 특정 대학의 정의를 전체 정의처럼 쓰지 않는다.
  */
-function CommonLegend({ univs, hist }: { univs: { offerings: { line: string }[] }[]; hist: Map<string, Map<number, HistoryMetricDto[]>> }) {
+function CommonLegend({ units }: { units: { years: Map<number, HistoryMetricDto[]> }[] }) {
   const defs = new Map<string, { scale: string | null; def: string | null }[]>();
-  let canApplicants = false;
-  let canDropped = false;
-  for (const u of univs)
-    for (const o of u.offerings) {
-      const years = hist.get(o.line);
-      const seen: string[] = [];
-      for (const y of PAST_YEARS)
-        for (const m of years?.get(y) ?? []) {
-          if (!seen.includes(m.metric_name)) seen.push(m.metric_name);
-          const list = defs.get(m.metric_name) ?? [];
-          if (!list.some((d) => d.scale === m.original_scale && d.def === m.metric_definition))
-            list.push({ scale: m.original_scale, def: m.metric_definition });
-          defs.set(m.metric_name, list);
-        }
-      if (seen.includes("모집인원") && seen.includes("경쟁률")) {
-        canApplicants = true;
-        if (seen.includes("충원인원")) canDropped = true;
+  let canDerived = false;
+  for (const o of units) {
+    const seen: string[] = [];
+    for (const y of PAST_YEARS)
+      for (const m of o.years.get(y) ?? []) {
+        if (!seen.includes(m.metric_name)) seen.push(m.metric_name);
+        const list = defs.get(m.metric_name) ?? [];
+        if (!list.some((d) => d.scale === m.original_scale && d.def === m.metric_definition))
+          list.push({ scale: m.original_scale, def: m.metric_definition });
+        defs.set(m.metric_name, list);
       }
-    }
+    if (["모집인원", "경쟁률", "충원인원"].every((n) => seen.includes(n))) canDerived = true;
+  }
   if (defs.size === 0) return null;
 
   const names = [...METRIC_ORDER.filter((n) => defs.has(n)), ...[...defs.keys()].filter((n) => !METRIC_ORDER.includes(n))];
@@ -335,8 +354,10 @@ function CommonLegend({ univs, hist }: { univs: { offerings: { line: string }[] 
     if (list.length === 1) return { name: n, scale: list[0].scale, def: list[0].def ?? (list[0].scale ? null : "대학이 정의를 함께 발표하지 않았습니다.") };
     return { name: n, scale: null, def: "대학마다 발표 척도·정의가 달라 각 표의 값은 그 대학 발표 기준입니다." };
   });
-  if (canApplicants) legend.push({ name: "추정 총 지원자", scale: "모집인원 × 경쟁률(화면 계산, 0.5 이상 올림)", def: "발표된 경쟁률이 반올림된 값이라 실제 지원자 수와 다를 수 있고, 공식 지원자 수가 복원되는 것은 아닙니다. 대학이 지원자 수를 직접 발표하면 그 값을 발표 열에 보이고 이 칸은 ─로 둡니다." });
-  if (canDropped) legend.push({ name: "추정 탈락자", scale: "추정 총 지원자 − 모집인원 − 충원인원(화면 계산)", def: "합격 후 등록 포기·반복 충원 등을 반영하지 못하는 산술값이라 실제 불합격자 수나 합격 확률을 뜻하지 않습니다. 재료가 하나라도 없거나 차감 결과가 음수면 ─로 둡니다." });
+  if (canDerived) {
+    legend.push({ name: "추정 총 지원자", scale: "모집인원 × 경쟁률(화면 계산, 0.5 이상 올림)", def: "모집인원·경쟁률·충원인원이 그 해에 모두 발표된 경우에만 계산합니다. 발표된 경쟁률이 반올림된 값이라 실제 지원자 수와 다를 수 있고, 공식 지원자 수가 복원되는 것은 아닙니다. 대학이 지원자 수를 직접 발표하면 그 값을 발표 열에 보이고 이 칸은 ─로 둡니다." });
+    legend.push({ name: "추정 탈락자", scale: "추정 총 지원자 − 모집인원 − 충원인원(화면 계산)", def: "합격 후 등록 포기·반복 충원 등을 반영하지 못하는 산술값이라 실제 불합격자 수나 합격 확률을 뜻하지 않습니다. 재료가 하나라도 없거나, '명' 단위가 아니거나, 같은 이름 지표가 중복 발표됐거나, 차감 결과가 음수면 ─로 둡니다." });
+  }
 
   return (
     <details className="rs-legendbox" open>

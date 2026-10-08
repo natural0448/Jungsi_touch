@@ -77,6 +77,10 @@ async function guard(res: Response) {
 function auth(caller: Caller, extra?: Record<string, string>) {
   const h = new Headers(extra);
   if (caller.accessToken) h.set("Authorization", `Bearer ${caller.accessToken}`);
+  // FE-SEC03-RELAY: 서버 전용 relay 토큰(확정 계약). 사용자 Bearer 와 별도 헤더로 보내고,
+  // 이 모듈은 server-only 라 값이 브라우저 번들·화면에 내려가지 않는다. 없으면 보내지 않는다.
+  const relay = process.env.JUNGSI_RELAY_TOKEN;
+  if (relay) h.set("X-Jungsi-Relay-Token", relay);
   return h;
 }
 
