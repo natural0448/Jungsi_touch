@@ -172,10 +172,19 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
             <CommonLegend units={units} />
 
             {univs.length === 0 ? (
-              <section className="gate flat">
-                <h2>{words ? `‘${words}’에 맞는 발행 결과가 없습니다` : "조건에 맞는 발행 결과가 없습니다"}</h2>
-                <p>검색어를 줄이거나 다른 지역·모집군을 골라 보세요. 발행이 학교 단위로 나뉘어 진행되는 동안에는 아직 이번 판에 포함되지 않은 대학일 수 있습니다 — 자료가 없다는 뜻이 아닙니다. 실기 반영 전형은 서비스 범위에서 빠져 있습니다.</p>
-              </section>
+              uncollected.length > 0 ? (
+                /* FE-HISTORY-03S: 잔여 커서가 있는 동안은 빈 화면이어도 '없음'을 단정하지 않는다 —
+                   예산 종료로 지표가 일부만 담긴 모집행을 보류해 카드가 0개일 수 있다 */
+                <section className="gate flat">
+                  <h2>일부 조회 상태입니다 — 아직 담긴 결과가 없습니다</h2>
+                  <p>조회 예산이 끝나 지표가 일부만 담긴 모집행을 보류했기 때문일 수 있습니다. 조건에 맞는 발행 결과가 없다는 뜻이 아닙니다. 대학명·학과명으로 조건을 더 좁혀 다시 조회해 주세요.</p>
+                </section>
+              ) : (
+                <section className="gate flat">
+                  <h2>{words ? `‘${words}’에 맞는 발행 결과가 없습니다` : "조건에 맞는 발행 결과가 없습니다"}</h2>
+                  <p>검색어를 줄이거나 다른 지역·모집군을 골라 보세요. 발행이 학교 단위로 나뉘어 진행되는 동안에는 아직 이번 판에 포함되지 않은 대학일 수 있습니다 — 자료가 없다는 뜻이 아닙니다. 실기 반영 전형은 서비스 범위에서 빠져 있습니다.</p>
+                </section>
+              )
             ) : (
               <div className="rs-list">
                 {univs.map((u) => (
@@ -399,11 +408,12 @@ function CommonLegend({ units }: { units: { years: Map<number, HistoryMetricDto[
  *  FE-HISTORY-02R: 응답 offering.academic_year 가 2027 일 때만 '2027 모집' 상자를 채운다 —
  *  recruitment.read 는 요청 모집행의 학년도를 그대로 돌려주므로, 과거 학년도 ready 응답을 2027 로 재명명하지 않는다 */
 function RecruitLine({ rec }: { rec: RecruitmentDto | null }) {
-  if (!rec) return <span className="rs-rec wait">2027 모집행 연계 확인 전</span>;
+  // FE-HISTORY-02S: 학년도·모집행 결속을 상태 문구보다 먼저 본다 — 2027 결속이 확인되지 않은 응답은
+  // ready/pending 을 가리지 않고 '연계 확인 전'. 과거·미확인 pending 을 '2027 미발행'으로 표시하지 않는다
+  if (!rec || rec.offering?.academic_year !== 2027)
+    return <span className="rs-rec wait">2027 모집행 연계 확인 전</span>;
   if (rec.status !== "ready" || !rec.recruitment)
     return <span className="rs-rec wait">2027 모집 정보 미발행</span>;
-  if (rec.offering?.academic_year !== 2027)
-    return <span className="rs-rec wait">2027 모집행 연계 확인 전</span>;
   const x = rec.recruitment;
   return (
     <span className="rs-rec">
