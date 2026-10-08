@@ -56,6 +56,7 @@ export function Detail({ o, a, rec, pub, picked }: { o: OfferingDto; a: Cell; re
         <div className="reasons">
           <h3>이 학과의 판단 이유</h3>
           <ReasonList items={a.recommendation_reasons!} />
+          <p className="reasons-note">이 이유들이 위 <b>지원가능성</b> 표시({CATEGORY[a.category].label})로 이어집니다. 판단에 쓰는 기준 점수는 공개하지 않습니다.</p>
         </div>
       )}
       <Evidence a={a} />
@@ -79,7 +80,6 @@ function Recruit({ o, rec }: { o: OfferingDto; rec: RecruitmentDto | null }) {
           <span>최초 인원<b className="num">{r.initial_count ?? wait("미공개")}</b></span>
           <span>이월·변경<b className="num">{r.rollover_change === null ? wait("미공개") : signed(r.rollover_change)}</b></span>
           <span>최종 인원<b className="num">{r.final_count ?? wait("미확정")}</b></span>
-          <span>기준일<b className="num">{plainDate(r.source_as_of)}</b></span>
         </>
       ) : (
         <span>모집 인원<b>{wait("자료 준비 중")}</b></span>
@@ -221,6 +221,11 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
   }
   const n = Number(v.delta_pp);
   const tone = v.status === "neutral" ? "even" : n > 0 ? "up" : "down";
+  // 어디에서 어디로 움직였는지 함께 적는다(사용자 요청): 유불리는 '전체 기준 위치 − 이 대학 기준 위치'이므로
+  // 전체 기준 위치 = 이 대학 기준 위치 + 유불리(정확한 역산, 화면 계산). 같은 비교집단일 때만 성립한다
+  const uniTop = Number(a.percentile?.inclusive_top_percent ?? a.percentile?.top_percent ?? a.converted_percentile ?? NaN);
+  const totalTop = Number.isFinite(uniTop) && Number.isFinite(n) ? uniTop + n : null;
+  const pct = (x: number) => x.toLocaleString("ko-KR", { maximumFractionDigits: 2 });
   return (
     <section className="card" aria-label="환산 유불리">
       <h3>환산 유불리</h3>
@@ -230,13 +235,20 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
         <small>%p</small>
       </div>
       <p>
-        {v.status === "favorable"
-          ? "이 대학의 점수 계산 방식이 내 과목 구성에 비교적 유리해, 전체 성적 기준보다 위치가 올라갑니다."
-          : v.status === "unfavorable"
-            ? "이 대학의 점수 계산 방식이 내 과목 구성에 다소 불리해, 전체 성적 기준보다 위치가 내려갑니다."
-            : "이 대학의 계산 방식으로 봐도 전체 성적 기준과 위치가 거의 같습니다."}
+        같은 성적이라도 대학마다 반영하는 과목과 비율이 달라, 어느 대학 방식으로 계산하느냐에 따라 내 위치가 달라집니다.
+        {totalTop !== null && (
+          <>
+            {" "}전체 성적(총점) 기준으로는 상위 <b className="num">{pct(totalTop)}%</b>인데, 이 대학 방식으로 계산하면 상위 <b className="num">{pct(uniTop)}%</b>
+            {v.status === "favorable" ? "로 올라갑니다" : v.status === "unfavorable" ? "로 내려갑니다" : "로 거의 같습니다"} — 그 차이가 위 숫자입니다.
+          </>
+        )}
+        {totalTop === null && (v.status === "favorable" ? " 이 대학 방식이 내 과목 구성에 비교적 유리합니다." : v.status === "unfavorable" ? " 이 대학 방식이 내 과목 구성에 다소 불리합니다." : " 이 대학 방식으로 봐도 위치가 거의 같습니다.")}
       </p>
-      <span className="note">같은 성적이라도 대학마다 과목 비율이 달라 위치가 달라집니다. 유리해도 합격을, 불리해도 지원 불가를 뜻하지 않습니다.</span>
+      <span className="note">
+        전체 기준 위치는 "이 대학 기준 위치 + 유불리"로 계산한 값입니다(화면 계산).
+        지원해도 되는지는 이 숫자가 아니라 왼쪽 <b>지원가능성</b> 판단을 보세요 — 유불리는 비슷한 수준의 대학 중
+        어디가 내 과목 구성에 더 잘 맞는지 고를 때 쓰는 보조 지표이며, 유리해도 합격을, 불리해도 지원 불가를 뜻하지 않습니다.
+      </span>
     </section>
   );
 }
