@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.19",
+  "version": "1.9.20",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2789,7 +2789,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.19",
+        "contract_version": "1.9.20",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2963,7 +2963,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.19",
+        "contract_version": "1.9.20",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -3129,7 +3129,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.19",
+        "contract_version": "1.9.20",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -3148,7 +3148,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.19",
+        "contract_version": "1.9.20",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3173,7 +3173,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "planned",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.19",
+        "contract_version": "1.9.20",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3196,9 +3196,9 @@
         "approved_on": "2026-10-08",
         "start_commit": "db50c45127cfb314cc52e2bc8682505e077fffec",
         "branch": "feature/application-pre-data-platform",
-        "status": "planned",
+        "status": "accepted_on_develop_scoped_verified_cloud_acceptance_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.19",
+        "contract_version": "1.9.20",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -8939,22 +8939,22 @@
       ],
       "development_state": [
         [
-          "develop / 마지막 공통 검증 기준",
-          "bfb5c25def4c782029bffb766888c16000faad04 / spec1.9.17",
-          "공통 검수836 정상 통과 / 표시 reader 업무코드는 담당 feature 후보",
-          "기존 4개 화면·22HTTP·공개 코드 근거 재사용. 새 후보 검산·커밋·CI·실화면 인수와 구분한다."
+          "develop / 최신 서비스 통합 기준",
+          "9ed5102a656859ca0ef5136cb3c4bd8009d0cb8f / source 472052546dc8672167c7576bde7f758c6964e186 / spec1.9.19",
+          "PR20 merge commit · source 정상853+853/Deno33 · exact mergeCI238 success",
+          "기존4화면·22HTTP·공개 코드 근거 재사용. 이번 spec1.9.20은 관측 상태 갱신이며 새 SHA 정상 훅·CI는 별도 영수증에서 확인한다. main/운영 인수와 구분한다."
         ],
         [
           "시스템기획팀 / 공통 문서",
-          "spec1.9.19 / 담당 feature 구현·문서 같은 후보",
+          "spec1.9.20 / 통합 코드 관측 상태 갱신",
           "기획·라우팅·계층·브랜치·현황·색인 동기화",
-          "기준·소스 해시·시그니처를 연결하고 모든 에이전트의 변경 우선 검토와 같은 커밋 동기화를 강제한다. 최종 검사/커밋 SHA는 별도 영수증·CI에서 확인한다."
+          "업무코드 변경0. 기본7·Storage·generic 배포 완료와 PIN3·실JWT·hostedDB·BFF·브라우저 NOT_RUN을 분리한다. 새 최종 SHA의 훅·CI는 별도 영수증으로 확인한다."
         ],
         [
           "화면팀 / PR18",
-          "967366574ed41aaa7018687730fd0309046433fe",
-          "미병합·현재 CLEAN / CI2 성공 / 세 후속 보완 필요",
-          "02S/03S 소스 수용·34b1b5f v4명부 형식 수신. 최신 점수 비교·채택 공개근거 보존·유불리 부호 설명은 화면 담당 보완, 최신 빌드/실자료/브라우저/보안은 별도 인수."
+          "b9d88ee12af48cfd2ae00f7a53e4a2d823c5d58b",
+          "미병합 · 해당head CI232/233 success 관측 · latest develop 통합 검토 별도",
+          "02S/03S와 후속 화면 보완 보고·기존빌드명부는 보존. frontend실자료/relay/브라우저와보안 인수는 외부팀 담당이며 미병합 PR을develop완료로 보지 않는다."
         ],
         [
           "서비스 개발팀 / DEV-010",
@@ -8976,15 +8976,21 @@
         ],
         [
           "서비스팀 / Supabase 접속",
-          "2026-10-08 실제 strict READONLY 메타데이터 조회",
-          "verify-full·공식 CA·서버 신원 검증 성공 / 쓰기0",
-          "35draft 메타데이터 조회만 성공. writer/runtime·Auth/JWT·이용권·운영 발행/배포·브라우저 readiness는 별도 미인수다."
+          "fresh v5 · actual app-only scoped readonly 140/12",
+          "verify-full/RLS/source guards·single bulk dataJOIN 및DI HTTP100/40 PASS · 쓰기0",
+          "메타데이터 조회만 완료했던 이전상태는 이력. 이번 실제DB 공급자 증거는 synthetic DI 인증이고 realJWT·hostedEdge·BFF·브라우저 인수는 별도다."
         ],
         [
           "서비스·DB / 공식 입결 표시 연결",
-          "DEV-011 / spec1.9.19 담당 feature 후보",
-          "Python17·Deno33 합성/UTC 승인판 파일 PASS · fresh 실제DB140/12와DI HTTP100/40 각JOIN1 PASS · develop 미통합",
-          "기본7 실등록은 영수증/Dashboard로 확인. 원형·RLS·5초·기본회원·flags 보존, v4 timeout과별도53100 파일 관측 보존. 클라우드 승인판/PIN3 준비와 실제PIN등록·함수배포·실JWT/BFF/브라우저·보안gate는 구분한다. C 수신은 기계검수 원영수증 미확보로CLI재개 미수용이다."
+          "DEV-011 / PR20 merge 9ed5102a656859ca0ef5136cb3c4bd8009d0cb8f",
+          "develop통합·기본7 digest일치·비공개Storage readback·generic함수배포 및주소관측 완료",
+          "PIN3는 지정Owner에게 전달/등록대기. 5GET만명시연결; realJWT·hosted성공·BFF/브라우저·보안3gate NOT_RUN. C원영수증1미확보로CLI재개HOLD. 원형·RLS·단일dataJOIN·기본회원·flags 보존."
+        ],
+        [
+          "지정 화면팀 Supabase 관리자 / 다음 인수",
+          "descriptor3 최소 인계 v2 / 실제 관측 URL",
+          "등록·실JWT 검수 대기 / 기존 기본7 유지",
+          "지정3키와공개bundle·회신·해시명부만 전달. 운영학생·전체자료·migration-owner를 공유하지 않는다. 목적승인24h와만료·재승인 조건을 유지한다."
         ]
       ]
     }
@@ -9905,6 +9911,18 @@
         "REQ-26"
       ],
       "summary": "1.9.19: UTC Z/+00:00을 같은 microseconds로 읽되 원형 시각과 기존 Z 응답/정확TTL 경계를 보존하고 Deno28+5=33 회귀를 확인한다. 기본7 등록 영수증/Dashboard·fresh v5 실제DB140/12 및 DI HTTP100/40 각JOIN1·승인판 Python/TS 파일 검수를 분리 기록한다. 이전v4 57014와 별도53100 파일 관측/번들 도구실패를 보존하며 PIN3 실등록/함수배포/실JWT/BFF/브라우저/운영gate·C CLI 수용은 미완료다."
+    },
+    {
+      "date": "2026-10-09",
+      "requirements": [
+        "REQ-01",
+        "REQ-08",
+        "REQ-12",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "2026-10-09 spec1.9.20: PR20 source4720525를merge9ed5102/CI238로develop통합. 기본7독립digest일치·승인descriptor 비공개신규업로드/원격대조·generic함수 실제배포URL/익명401을기록하고 PIN3실등록·실JWT·hostedDB·BFF/브라우저·보안NOT_RUN을분리. C명부내용동일성과수신원영수증HOLD 구분, 전역22base/기본회원/원flags/RLS/데이터JOIN1 유지. 업무코드변경0; 기존실패·원본·문서·브랜치보존."
     }
   ],
   "overall_analysis_contract": {
@@ -20088,7 +20106,7 @@
       "REQ-25",
       "REQ-26"
     ],
-    "code_status": "implemented_scoped_synthetic_verified_integration_pending",
+    "code_status": "implemented_scoped_verified_in_develop_cloud_acceptance_pending",
     "production_ready": false,
     "purpose": "이미 적재한 비공개 Supabase 입결을 별도 목적 범위의 공식자료 표시용 공급자로 읽어 기존 화면 API에 명시 연결한다.",
     "operations": [
@@ -20180,17 +20198,17 @@
       "source_db_read_only": "PASS_FRESH_V5_SCOPED_APP_ROLE_TLS_READONLY_PROVIDER_140_METRICS_12_ANNUAL_OFFERINGS; ORIGINAL_V4_57014_PRESERVED; NOT_FULL_SERVICE_ACCEPTANCE",
       "python_reference_HTTP": "PASS_17_NATIVE_SCOPED_SYNTHETIC_AND_FRESH_V5_ACTUAL_DB_HTTP_WITH_SYNTHETIC_DI_AUTH_HISTORY_100_40_ME_3_FIELDS_NEGATIVE_PAYLOAD_ZERO; REAL_JWT_CLOUD_BFF_BROWSER_NOT_RUN",
       "Deno_check_test": "PASS_NATIVE_Deno_2.9.7_SHARED_APPLICATION_AND_TEST_CHECK_33_SCOPED_SYNTHETIC_TESTS_EXISTING_28_PLUS_5_UTC_COMPATIBILITY; NO_DB_AUTH_ENV_NETWORK",
-      "restricted_cloud_API": "NOT_RUN; BASE_7_CONFIGURATION_REGISTRATION_RECEIPT_AND_DASHBOARD_OBSERVED; FINAL_DESCRIPTOR_PIN_3_REGISTRATION_FUNCTION_DEPLOYMENT_REAL_JWT_BFF_BROWSER_PENDING",
+      "restricted_cloud_API": "GENERIC_FUNCTION_DEPLOYED_AND_OBSERVED_HTTPS_URL_ANONYMOUS_ME_401_DATA_ZERO; BASE_7_REGISTERED_AND_DIGEST_EXACT; PRIVATE_APPROVED_DESCRIPTOR_UPLOADED_READBACK_BYTES_SHA_EXACT; PIN_3_REGISTRATION_REAL_JWT_HOSTED_DB_BFF_BROWSER_SECURITY_PENDING",
       "actual_user_JWT": "NOT_RUN",
       "frontend_BFF_browser": "NOT_RUN",
       "operational_security_three_gates": "NOT_RUN",
       "effective_RLS": "PASS_FRESH_V5_ACTUAL_PROVIDER_NONOWNER_NONSUPER_NONBYPASS_APP_ROLE_READONLY_ROW_SECURITY_ON_19_PINNED_INVOKER_VIEWS_3_ENABLE_AND_FORCE_RLS_TABLES; HOSTED_EDGE_RLS_NOT_RUN",
       "bulk_JOIN_query_count": "PASS_FRESH_V5_ACTUAL_PROVIDER_DATA_JOIN_1_HISTORY_HTTP_PAGE_100_JOIN_1_PAGE_40_JOIN_1; TOTAL_DATA_JOINS_3; AUTH_ROLE_ENTITLEMENT_METADATA_COUNTED_SEPARATELY_NO_N_PLUS_1",
-      "cloud_deployment": "NOT_RUN; NEW_GENERIC_SOURCE_BUNDLE_BUILD_IS_NOT_APPLIED_CONFIGURATION_HOSTED_RUNTIME_OR_DEPLOYMENT; NO_OBSERVED_API_URL",
+      "cloud_deployment": "PASS_DASHBOARD_GENERIC_FUNCTION_DEPLOYMENT_AND_OBSERVED_URL_ONLY; EDITOR_CRLF_113451_BYTES_NORMALIZED_TO_COMMITTED_LF_110796_BYTES_EXACT; NOT_HOSTED_DB_OR_REAL_JWT_ACCEPTANCE",
       "keyset_optimization": "PRIVATE_PROPOSAL_SCOPE_EQUIVALENCE_ONLY; REAL_METADATA_TIMEOUT_BEFORE_NEW_PAYLOAD; NOT_ADOPTED_IN_RUNTIME",
-      "cloud_configuration_registration": "BASE_7_REGISTERED_BY_DESIGNATED_FRONTEND_SUPABASE_OWNER_AND_INDEPENDENTLY_OBSERVED_IN_DASHBOARD; CURRENT_ACCOUNT_SECRET_MANAGEMENT_PERMISSION_UNCHANGED_NO_BYPASS; FINAL_PIN_3_REGISTRATION_NOT_RUN",
-      "base_configuration_registration": "PASS_RECEIPT_V2_BYTES_SHA_AND_ROOT_DASHBOARD_7_CUSTOM_NAMES_REGISTRATION_TIMESTAMPS_DIGEST_LIST; PRIVATE_VALUES_NOT_EXPOSED; REGISTRATION_NOT_RUNTIME_ACCEPTANCE",
-      "final_descriptor_configuration": "APPROVED_ISOLATED_CLOUD_REVIEW_FILE_140_METRICS_12_OFFERINGS_ONE_REVIEW_SUBJECT_5_GET_24H; ORIGINAL_COMPONENT_BYTES_AND_FALSE_FLAGS_PRESERVED; PYTHON_AND_TS_FILE_VALIDATION_PASS; PRIVATE_PIN_3_PREPARED_REGISTRATION_NOT_RUN",
+      "cloud_configuration_registration": "BASE_7_REGISTERED_BY_DESIGNATED_OWNER_INDEPENDENT_DIGEST_MATCH; APPROVED_PIN_3_MINIMAL_FILE_DELIVERED_TO_SAME_DESIGNATED_ADMIN_REGISTRATION_NOT_RUN; CURRENT_ACCOUNT_SECRET_PERMISSION_UNCHANGED",
+      "base_configuration_registration": "PASS_OWNER_RECEIPT_V2_AND_ROOT_DASHBOARD_7_NAMES_TIMESTAMPS_WITH_PRIVATE_EXPECTED_VALUE_DIGESTS_ALL_7_EXACT_MATCH; NO_SECRET_VALUE_EXPOSURE; NOT_RUNTIME_ACCEPTANCE",
+      "final_descriptor_configuration": "APPROVED_FILE_PYTHON_AND_TS_VALIDATED; EXISTING_PRIVATE_BUCKET_NEW_IMMUTABLE_OBJECT_1_POST_NO_UPSERT; AUTHENTICATED_READBACK_BYTES_SHA_EXACT_PUBLIC_READ_400_DENIED; DB_WRITES_AND_SOURCE_FLAGS_CHANGE_0; APPROVED_PIN_3_DELIVERED_REGISTRATION_NOT_RUN",
       "metadata_plan_diagnostic": "FAILED_SQLSTATE_57014_FIVE_SECOND_BOUND; EXPLAIN_ANALYZE_FALSE_RETURNED_NO_PLAN; METADATA_SELECT_AND_PAYLOAD_NOT_RUN_IN_THIS_DIAGNOSTIC; CAUSE_UNCONFIRMED_NO_RETRY",
       "further_real_database_execution": "FRESH_USER_REQUEST_AUTHORIZED_SINGLE_V5_ORIGINAL_ORACLE_PROBE_PASS; ATTEMPTS_1_RETRIES_0_WRITES_0; NO_UNBOUNDED_RETRY_TIMEOUT_EXTENSION_FALLBACK_KEYSET_OR_AUTHORITY_CHANGE",
       "before_metadata_optimization_actual_provider": "FAILED_SCOPED_ORIGINAL_PROVIDER_OR_METADATA_DIAGNOSTIC_SQLSTATE_57014_WITH_FIVE_SECOND_BOUND; ORIGINAL_FAILURES_PRESERVED",
@@ -20205,11 +20223,19 @@
       "UTC_timestamp_compatibility": "Z_AND_POSITIVE_ZERO_OFFSET_PLUS_00_00_EQUAL_BIGINT_MICROSECONDS; ORIGINAL_CATALOG_AS_OF_LITERAL_UNCHANGED; HTTP_NORMALIZED_Z_WITH_UP_TO_6_FRACTION_DIGITS; NONZERO_OR_NEGATIVE_ZERO_OFFSET_INVALID_DATE_7_DIGIT_FRACTION_AND_EXCESS_TTL_REJECT; EXACT_ISSUE_EXPIRY_BOUNDARIES_PRESERVED",
       "UTC_TS_file_validation_receipt_sha256": "f7e561ead524fd55b855122f0a06c6959f221921c04043d9b8021473ed86e0e1",
       "UTC_TS_approved_descriptor_validation": "PASS_FILE_ONLY_APPROVED_DESCRIPTOR_AND_EXPIRED_REVOKED_WRONG_ENV_PROPOSED_TTL_ABOVE_24H_NEGATIVE_CASES; COMPONENT_BYTES_UNCHANGED_DB_0_NETWORK_0; ACTUAL_CLOUD_SQL_AND_JWT_NOT_RUN",
-      "data_team_intake_observation": "FILE_RECEIPTS_REPORT_V33_FULL_APP_READBACK_PASS_AND_TWO_SUBSEQUENT_V35_DISKFULL_SQLSTATE_53100_ROLLBACK_FAILURES; NOT_ASSUMED_CAUSE_OF_PRIOR_57014_NO_DATA_SCOPE_EXPANSION",
+      "data_team_intake_observation": "FILE_RECEIPTS_V33_APP_READBACK_PASS_AND_TWO_V35_DISKFULL_53100_ROLLBACKS_PRESERVED; DASHBOARD_AVAILABLE_DISK_SPACE_WARNING_OBSERVED_SEPARATELY; NOT_CAUSE_PROOF_OR_RESOLVED_CAPACITY_NO_DATA_SCOPE_EXPANSION",
       "generic_bundle": "PASS_CACHED_OFFICIAL_ESBUILD_0_25_5_SOURCE_ONLY_ESM_THREE_SERVICE_SOURCES_FIXED_POSTGRES_3_4_5_IMPORT_EXPORT_AND_NODE_BUILTIN_ALIAS; PRIOR_DENO_BUNDLE_OS_ERROR_2_FAILURES_PRESERVED_NO_CONFIRMED_CAUSE; HOSTED_RUNTIME_NOT_RUN",
       "generic_bundle_sha256": "b3068379af4a4625113e99be4f5ef10a76f1852a8ffe7e9e68011e66c4728c74",
       "generic_bundle_bytes": 110796,
-      "local_C_receiver_acceptance": "NOT_ACCEPTED_FOR_CLI_RESUME; RECONSTRUCTED_924_BYTE_SELECTION_MATCHED_REPORTED_SHA_AND_SENDER_SCOPE_REVIEW; RECEIVER_ACTUAL_MACHINE_REVIEW_RECEIPT_BYTES_NOT_RECEIVED_INDEPENDENTLY; NO_CACHE_SESSION_OR_API_RESUME"
+      "local_C_receiver_acceptance": "CONTENT_BYTES_SHA_VERIFIED_BY_SINGLE_DETERMINISTIC_PATH_ONLY_RECONSTRUCTION; RECEIVER_ACTUAL_MACHINE_REVIEW_RECEIPT_ORIGINAL_STILL_MISSING; NOT_ACCEPTED_FOR_CLI_RESUME_TRUST_REGISTRATION_CACHE_SESSION_API_0; CLOUD_REVIEW_SEPARATE",
+      "observed_function_url": "https://ksrpnhvyfdwysrexdhrd.supabase.co/functions/v1/official-history-display",
+      "private_descriptor_storage": "PASS_PRIVATE_STORAGE_ONLY_SINGLE_ATTEMPT_RETRIES_0_EXISTING_OVERWRITES_0_PRIVATE_BUCKET_FALSE_AUTHENTICATED_READBACK_EXACT_ANONYMOUS_DENIED; NO_DB_RLS_OR_SOURCE_FLAG_CHANGES",
+      "cloud_anonymous_endpoint": "PASS_SINGLE_NATIVE_HTTPS_GET_ME_401_AND_DATA_ZERO_PLATFORM_GATE_ONLY; HANDLER_NO_STORE_REAL_JWT_SQL_NOT_PROVEN",
+      "cloud_JWT_gateway": "DASHBOARD_VERIFY_JWT_WITH_LEGACY_SECRET_ON_UNCHANGED_PUBLIC_JWKS_ES256_1_KEY_OBSERVED; DOCUMENTATION_AND_DASHBOARD_WORDING_DIFFER_SO_REAL_JWT_INTAKE_REQUIRED_BEFORE_COMPATIBILITY_CLAIM; NO_AUTO_DISABLE_OR_API_KEY_BEARER_SUBSTITUTION",
+      "integration_commit": "9ed5102a656859ca0ef5136cb3c4bd8009d0cb8f",
+      "service_source_commit": "472052546dc8672167c7576bde7f758c6964e186",
+      "integration_CI": "PASS_EXACT_DEVELOP_MERGE_COMMIT_PROJECT_CONSISTENCY_238; SOURCE_HEAD_4720525_PRECOMMIT_853_PREPUSH_853_DENO_33_AND_CI_237_SUCCESS; CURRENT_PLANNING_STATUS_COMMIT_CHECKS_SEPARATE",
+      "source_integration": "PR20_MERGE_COMMIT_DEVELOP_ONLY_BRANCHES_PRESERVED_MAIN_UNCHANGED; CODE_ACCEPTANCE_NOT_OPERATIONAL_ACCEPTANCE"
     },
     "frontend_handoff": [
       "브라우저·화면 코드·일반 프런트 환경은 기존 API의 공개 응답만 읽는다. app DATABASE_URL/DB CA/Storage secret/descriptor/원자료/전체 DB를 수령하지 않는다. 지정된 Supabase 관리자가 비공개 app-only 기본7 설정을 등록하는 역할은 별도 인계 범위다. migration-owner 접속값·키는 외부 화면 환경에 전달하지 않는다.",
@@ -20217,12 +20243,14 @@
       "relay는 비공개 서버 설정으로 전달하며 사용자 JWT는 BFF에서 재검증해 보낸다. 실제 학생 성적·토큰은 채팅/공유 문서/Git에 넣지 않는다.",
       "다른 PC는 같은 candidate에서 실제 원지표·타입·출처·검색 조건·401/403/503·no-store와 전달물 비노출을 검수한다.",
       "DB 행 수가 늘어도 행별 조회를 추가하지 않는다. 같은 요청의 data JOIN 1회 증거와 실제 RLS 영수증을 별도 확인한다.",
-      "프로젝트의 Edge Function secret 관리 권한이 없는 현재 계정으로 클라우드 설정/배포를 우회하지 않는다. 권한 있는 프로젝트 담당자가 검토한 불변 descriptor와 app-only 비공개 설정을 받아 제한 검수 함수만 배포하고 실제 URL/응답을 제출해야 한다. 기존 사이트 관리자와 DB SELECT 권한은 Edge secret 관리 권한을 대신하지 않는다.",
+      "현재 계정의 Edge Secret 관리권한은 없으며 지정된 화면팀 Supabase Owner/Administrator가 비공개 설정을 등록한다. 함수 generic 코드 배포 권한은 별도로 관측하여 실제 배포와 URL 확인을 완료했다. Secret 권한·DB SELECT·사이트 관리자·함수 배포를 서로 대체하지 않으며 권한 우회는 하지 않는다.",
       "이 제한 검수 함수의 base는 5개 GET operation 전용이다. 기존 22API의 전역 base를 일괄 live 전환하지 않는다. 1페이지의 history.search/recruitment.read/session.read와 유료 offerings.search/offering.read에만 명시 operation routing으로 연결한다.",
       "미포팅 17API와 2~4페이지의 성적·환산·지원판정 엔진은 이 함수로 준비 완료되지 않았으며 pending/503을 유지한다. 관리자·개발자 계정의 관리 권한을 유료 이용권으로 자동 승격하지 않는다.",
       "화면 팀은 기존 페이지 및 operation별 routing과 transport prefix를 대조하여 연결한다. CSS·화면 구현·BFF 및 브라우저 실수신 검수는 외부 화면 팀 담당이며 서비스 소스·합성 검산으로 대신 완료 처리하지 않는다.",
-      "사용자 결정에 따라 비공개 Edge 설정 등록은 화면 개발팀의 Supabase 관리자가 맡는다. 기본7개는 등록 영수증 v2 bytes/SHA와 담당자의 Dashboard 이름·개수·등록시각·digest 목록으로 확인했으며 값은 공개 문서·Git에 넣지 않는다. 현재 계정의 Secret 관리권한은 그대로다. 새 클라우드 표시 승인판은 원형140지표/12모집행·검수자1·5GET·24h·false flags를 유지해 Python/TS 파일 검수에 통과했다. 최종 descriptor PIN3은 비공개 준비 상태이며 실등록은 NOT_RUN이다. 함수 실제 배포/관측 URL·실사용자 JWT/BFF/브라우저·운영 보안3gate 인수는 각각 미완료이고 등록만으로 완료 처리하지 않는다.",
-      "설정 인계는 기본7개 실등록과 최종 descriptor PATH/SHA/BYTES3개를 구분한다. 최종 승인판과 불변 PIN은 지정 관리자에게 비공개로 전달하며 일반 화면 담당은 서버 relay-only와 공개 Auth 설정만 받는다. fresh v5 실제 Python DB 공급자140/12·HTTP100/40·각 JOIN1/DTO/no-store는 DI 인증 범위이며 새 TS의 UTC 호환33 합성과 승인판 파일 검수는 별도 증거다. 실등록 전 missing PIN503은 정상 차단이다. 배포 주소는 실제 관측·응답 검수 후 전달하며5GET만 명시 연결하고 기존22 API 전역 live 전환·미포팅17 API/2~4페이지 엔진 승격을 하지 않는다."
+      "기본7 등록은 사용자 PC/Drive 영수증 bytes·SHA와 Dashboard7개 등록 digest의 보관값 전체 일치를 확인했다. 별도로 검수한 클라우드 표시 승인판은 비공개 Storage 새 객체1개로 올려 원격 bytes/SHA 일치와 익명400 거절을 확인했다. generic 함수 실제 배포·관측 URL과 무인증 me401은 확인했지만 descriptor PIN3 실제 등록·실JWT·hosted DB 성공·BFF/브라우저·보안3gate는 미인수다. 설정 등록은 사용자 위임에 따라 지정 화면팀 Supabase 관리자가 수행한다.",
+      "최종 PIN3만 기존 지정 관리자 공유 폴더에 전달했고 기본7의 DB/CA/Storage/relay 비밀을 다시 복사하지 않았다. 실제 관측한 함수 URL에 5GET만 operation별 명시 연결하며 기존22API 전역live 전환과 미포팅17API/2~4페이지 엔진 승격은 하지 않는다. fresh v5 Python 실제DB+DI HTTP100/40·각 data JOIN1과 새TS UTC33 합성/파일 검수는 별도 증거이며, 등록 후 실제JWT·수치·no-store·중계·브라우저 검수를 완료해야 한다. 일반 검수 계정의 유료2개403·미발표 모집 pending/null·기본entitlements를 유지한다.",
+      "C 콘텐츠924B/SHA 일치 재구성은 확인했지만 수신PC 실제 pathonly-review 원영수증과 fullSHA가 없어 CLI 신뢰등록/캐시/세션/API 재개 수용은 HOLD다. 원영수증1개를 기존C폴더로 요청했고 전체자료 재전송·Git 반입이나 cloud 승인으로 대체하지 않는다.",
+      "배포된 함수의 JWTlegacy ON은 그대로 둔다. 실제 ES256 사용자 JWT를 BFF에서 보내 플랫폼/함수 상태를 구분하고, 401을 API 키의 사용자 Bearer 대체나 인증 설정 자동 해제로 해결하지 않는다. 24h 목적 승인 만료 후에는 새 승인판을 요구하며 임의 연장하지 않는다."
     ],
     "query_contract": {
       "parameterized_bulk_join": true,
@@ -20265,12 +20293,19 @@
           "JUNGSI_DISPLAY_DESCRIPTOR_SHA256",
           "JUNGSI_DISPLAY_DESCRIPTOR_BYTES"
         ],
-        "administrator_private_scope": "7 prepared server settings; descriptor pins separately held",
+        "administrator_private_scope": "Existing app-only base7 registered; approved descriptor3 path/SHA/bytes delivered separately; no migration-owner credentials",
         "ordinary_frontend_private_scope": "relay-only server setting plus public Auth settings; no appDSN, CA, StorageSecret or descriptor",
-        "actual_registration": "NOT_RUN",
+        "actual_registration": "BASE_7_REGISTERED_DIGEST_ALL_MATCH; APPROVED_DESCRIPTOR_3_DELIVERED_TO_DESIGNATED_ADMIN_REGISTRATION_PENDING",
         "builtin_SUPABASE_URL": "existing project injection; no user custom replacement",
         "missing_or_unapproved_descriptor_response": 503,
-        "configuration_is_deployment_or_runtime_approval": false
+        "configuration_is_deployment_or_runtime_approval": false,
+        "descriptor_approval_status": "APPROVED_ISOLATED_CLOUD_REVIEW_AND_PRIVATE_STORAGE_READBACK; REGISTRATION_PENDING_NOT_PRODUCTION",
+        "descriptor_keys_registration_pending": [
+          "JUNGSI_DISPLAY_DESCRIPTOR_PATH",
+          "JUNGSI_DISPLAY_DESCRIPTOR_SHA256",
+          "JUNGSI_DISPLAY_DESCRIPTOR_BYTES"
+        ],
+        "descriptor_keys_on_hold_interpretation": "Legacy key list retained: approved PIN3 exists and is delivered, but actual registration/runtime acceptance remains pending"
       }
     },
     "private_descriptor_contract": {
