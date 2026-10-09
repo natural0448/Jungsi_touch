@@ -5581,7 +5581,7 @@
       {
         "path": "supabase/functions/_shared/node_compat_bootstrap.ts",
         "layer": "data_infrastructure",
-        "status": "implemented_native36_offline_actual_bundle_boot_verified_integration_pending",
+        "status": "implemented_native36_offline_bundle_verified_integrated_real_cloud_retest_pending",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -5600,7 +5600,7 @@
       {
         "path": "supabase/functions/_shared/node_compat_bootstrap_test.ts",
         "layer": "data_infrastructure",
-        "status": "implemented_native36_offline_actual_bundle_boot_verified_integration_pending",
+        "status": "implemented_native36_offline_bundle_verified_integrated_real_cloud_retest_pending",
         "requirements": [
           "REQ-01",
           "REQ-08",
