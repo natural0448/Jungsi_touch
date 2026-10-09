@@ -89,13 +89,21 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   type Off = { id: string; first: HistoryMetricDto; years: Map<number, HistoryMetricDto[]> };
   const univs: { id: string; name: string; region: string | null; offerings: Off[] }[] = [];
   const byId = new Map<string, Off>();
+  /** 공개 offering_id 는 "{학년도}:{모집행 PK}" 꼴이다. 접두사 학년도가 그 행의 academic_year 와
+   *  일치할 때만 PK 를 꺼내 연도 결합 키로 쓰고(대학 범위 안에서), 그 외 형태는 결합하지 않는다 —
+   *  접두사 제거는 발표 자료가 밝힌 같은 모집행 PK 의 확인이지 접미사 계보 추정이 아니다 */
+  const pkOf = (m: HistoryMetricDto) => {
+    const t = /^(\d{4}):(.+)$/.exec(m.offering_id);
+    return t && Number(t[1]) === m.academic_year ? `${m.university_id}#${t[2]}` : m.offering_id;
+  };
   for (const res of past)
     for (const m of res.items) {
       let u = univs.find((x) => x.id === m.university_id);
       if (!u) univs.push((u = { id: m.university_id, name: m.university_name, region: m.region, offerings: [] }));
-      let o = byId.get(m.offering_id);
+      const pk = pkOf(m);
+      let o = byId.get(pk);
       if (!o) {
-        byId.set(m.offering_id, (o = { id: m.offering_id, first: m, years: new Map() }));
+        byId.set(pk, (o = { id: pk, first: m, years: new Map() }));
         u.offerings.push(o);
       }
       o.years.set(m.academic_year, [...(o.years.get(m.academic_year) ?? []), m]);
@@ -108,7 +116,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
     await Promise.all(
       units.map(async (o) => {
         try {
-          recs.set(o.id, await src.readRecruitment(caller, o.id));
+          // 2027 모집 인원은 같은 PK 의 최신 발행 학년도 offering_id 로 묻는다(결합 키는 API id 가 아니다)
+          recs.set(o.id, await src.readRecruitment(caller, o.first.offering_id));
         } catch (e) {
           if (e instanceof ConnectionError) throw e;
           recs.set(o.id, null);
