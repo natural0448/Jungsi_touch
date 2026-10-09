@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "accepted_on_develop_scoped_verified_cloud_acceptance_pending",
   "contract_ref": "official_history_db_display_contract",
-  "contract_version": "1.9.30",
+  "contract_version": "1.9.31",
   "requirements": [
     "REQ-01",
     "REQ-08",
@@ -20,7 +20,7 @@
   "scope": {
     "format": "jungsi.official-history-db-display/v1",
     "id": "DEV-011",
-    "revision": "2026.10.10.v13",
+    "revision": "2026.10.10.v14",
     "branch": "feature/application-pre-data-platform",
     "basis_commit": "9e03bd6483cffc420aa02ed01a09e93e3c5356c6",
     "requirements": [
@@ -335,10 +335,10 @@
       "current_review_candidate_native": "PASS_DENO_CHECK6_AND_SYNTHETIC41; NEW_SOURCE6_DEVELOPMENT_CANDIDATE; NOT_ACTUAL_PERFORMANCE_OR_HOSTED_ACCEPTANCE",
       "current_review_native_receipt_sha256": "a9e6a8b29c916c11458e7b1bcf602f406bfefc871bfde01e2fc931ec5fcba169",
       "current_review_actual_app_bounded_page": "FAIL_ACTUAL_STATEMENT_TIMEOUT57014_QUALIFIED_PAYLOAD_AND_FILTERED_COUNTS_PAGE_KEYS; METADATA12_ROLE_RLS_13SCALAR_PASS_ROWS0; PRIOR_STATE503_PRESERVED; CONCRETE_LIGHT_PROVIDER_CR_REQUIRED_NO_TIMEOUT_OR_SCOPE_RELAXATION",
-      "current_review_new_function_runtime": "NOT_RUN_NEW_CURRENT_APPROVAL_PIN4_DEPLOYMENT_JWT_BFF_BROWSER_AND_SECURITY_GATES; ACTUAL_PERFORMANCE_FAILED; EXISTING_C_ENDPOINT_PIN3_AND_DEFAULT_ENTITLEMENTS_UNCHANGED",
-      "current_review_independent_source": "PENDING_NEW_SQL_TEST_STAGED_DELTA_REVIEW; EARLIER_SOURCE6_NATIVE40_STATIC_PASS_PRESERVED_NOT_FINAL_NEW_PIN_REVIEW",
-      "current_review_source_only_candidate_bundle": "PASS_NEW_AA910_ACDC_SOURCE_ONLY_NATIVE41_BUNDLE17INPUTS_MAP0_NEEDLE0_BOOT_GLOBALS4_HANDLER1_EMPTYCONFIG503_PRIVATE_NO_STORE_NETWORK_DB0; ACTUAL_PERFORMANCE_FAILED_NOT_LAUNCH_OR_COMMITTED_RELEASE",
-      "current_review_candidate_bundle_receipt_sha256": "95736f6a3a2ccc74deb1dff03a86f7c542b706a80f0070451de77a3a753061ac",
+      "current_review_new_function_runtime": "NOT_RUN_NEW_CURRENT_APPROVAL_PIN4_DEPLOYMENT_JWT_BFF_BROWSER_AND_SECURITY_GATES; SOURCE_ACCEPTED_DEVELOP_BUT_ACTUAL_PERFORMANCE_FAILED_IO_HOLD; EXISTING_C_ENDPOINT_PIN3_DEFAULT_ENTITLEMENTS_UNCHANGED",
+      "current_review_independent_source": "PASS_EXACT_SOURCE6_NATIVE41_EVIDENCE_AND_STAGE42_IO_DELTA14_STATIC_REVIEW; PERFORMANCE_FAILED_AND_DB_IO_HOLD_RETAINED",
+      "current_review_source_only_candidate_bundle": "PASS_EXACT_COMMITTED_f566c7e_SOURCE9_BLOB_BOUND_BUNDLE17INPUTS_MAP0_NEEDLE0_OFFLINE_BOOT_EMPTYCONFIG503_PRIVATE_NO_STORE_NET_DB0; NOT_DEPLOYED_NOT_ACTUAL_PERFORMANCE_ACCEPTED",
+      "current_review_candidate_bundle_receipt_sha256": "9d5fa736ea6dd93ec1d1b5db4d0920853f3670fe5227f622242debb2aeebc48a",
       "current_review_actual_timeout_receipt_sha256": "b3b5f662f0907c9f353f0f79df69938bf0310bfd06ea419548325280db1c75da",
       "historical_current_review_before_page_semifilter_native41": {
         "current_review_candidate_native": "PASS_DENO_CHECK6_AND_SYNTHETIC40; SOURCE6_NEW_UNTRACKED_AT_VERIFICATION; NOT_NEW_ACTUAL_DRIVER_DB_BUNDLE_JWT_OR_DEPLOYMENT",
@@ -356,7 +356,9 @@
         "filtered_counts_page_keys_and_payload_components": "d37aef3aa8ee2aeaccedd9ce5167fd9807d59d5cb67e46fb8ede74fd3ba5424f",
         "fixed_four_year_IN_plus_exact_JSON_guard": "68ddbddfd513ec805b69e22fb7df97446a7a2405f05e9b27b2d497adf4093afc"
       },
-      "current_review_IO_budget_warning": "USER_REPORTED_DASHBOARD_WARNING_IO_BUDGET_NEAR_DEPLETION_BASE5MB_PER_SECOND_AFTER_EXHAUSTION; ADDITIONAL_IO_INTENSIVE_REAL_DB_EXECUTION_HOLD; ROOT_FRESH_METRICS_AND_CAUSAL_LINK_NOT_RUN; LOCAL_FILE_SOURCE_COMMON_GIT_PREPARATION_CONTINUES"
+      "current_review_IO_budget_warning": "USER_REPORTED_DASHBOARD_WARNING_IO_BUDGET_NEAR_DEPLETION_BASE5MB_PER_SECOND_AFTER_EXHAUSTION; ADDITIONAL_IO_INTENSIVE_REAL_DB_EXECUTION_HOLD; ROOT_FRESH_METRICS_AND_CAUSAL_LINK_NOT_RUN; LOCAL_FILE_SOURCE_COMMON_GIT_PREPARATION_CONTINUES",
+      "current_review_independent_final_stage_receipt_sha256": "b63a58d1c00d963ddace40a93205cd9a43c6d18698248fa9f674f3670c156ade",
+      "current_review_develop_integration": "PASS_NORMAL_PR23_DEVELOP_ONLY_EXACT_f566c7e_TREE_EQUAL_e59a13_SOURCE_CI273_PR_CI274_MERGE_CI275; MAIN_UNCHANGED; NOT_CURRENT_RUNTIME_ACCEPTANCE"
     },
     "frontend_handoff": [
       "브라우저·화면 코드·일반 프런트 환경은 기존 API의 공개 응답만 읽는다. app DATABASE_URL/DB CA/Storage secret/descriptor/원자료/전체 DB를 수령하지 않는다. 지정된 Supabase 관리자가 비공개 app-only 기본7 설정을 등록하는 역할은 별도 인계 범위다. migration-owner 접속값·키는 외부 화면 환경에 전달하지 않는다.",
@@ -565,7 +567,7 @@
     },
     "current_review_connection": {
       "id": "DBD-06-CURRENT-ALL-REVIEW",
-      "status": "implemented_development_candidate_native41_offline_bundle_boot_verified_actual_performance_FAILED_light_query_CR_and_runtime_activation_pending_user_reported_IO_budget_warning_real_DB_validation_HOLD",
+      "status": "accepted_on_develop_development_candidate_source_native41_committed_bundle_CI_PASS_actual_performance_FAILED_IO_budget_warning_real_DB_HOLD",
       "human_scope": "frontend_team_and_administrators_review_first",
       "source_view": "jungsi_data_ingest.admission_results_current",
       "academic_years": [
@@ -596,11 +598,9 @@
       "public_projection": "official_public_metadata_not_verified_remains_null_and_hold_reason; no_published_or_verified_official_inference_from_active_current",
       "recruitment": "approved_recruitment_data_only; otherwise_pending_null_no_zero_or_inferred_count",
       "missing_prerequisites": [
-        "independent_delta_source_test_bundle_and_final_staged_review",
         "qualified_light_query_projection_or_index_provider_CR_preserving_corrected_current_semantics_and_RLS",
         "actual_same_snapshot_typed_page_count_keyset_member_link_wire_with_existing_timeout_PASS",
         "explicit_all_current_subject_purpose_qualified_state_approval_and_four_namespaced_settings",
-        "normal_source_docs_commit_push_exact_SHA_CI_develop_integration_of_development_candidate",
         "new_function_deployment_fresh_JWT_BFF_browser_security_gates_after_actual_performance_PASS"
       ],
       "operational_security_three_gates": "NOT_RUN",
@@ -780,16 +780,18 @@
           "earlier_default_cache_download_observation": "preserved; first default-cache check fetched pinned postgres package; final explicit preserved-cache verification separate"
         },
         "independent_source_review": {
-          "status": "PENDING_DELTA_SQL_TEST_AND_FINAL_STAGED_SNAPSHOT_REVIEW",
-          "earlier_source6_native40_review_receipt_sha256": "6300960e90775ebef82dcd11e4f7b3e3a497fc4d42e15cc4f7060023472b55d3",
-          "earlier_review_is_not_new_SQL_test_pin_review": true
+          "status": "PASS_SOURCE6_NATIVE41_AND_EXACT42_STAGED_IO_DELTA14_STATIC_ONLY_NOT_RUNTIME",
+          "source_review_receipt_sha256": "9285b9581ab07ca099b86899e5964361ef1394a035f6128e81e6ee062c4471fd",
+          "final_IO_stage_receipt_sha256": "b63a58d1c00d963ddace40a93205cd9a43c6d18698248fa9f674f3670c156ade",
+          "source_6_pins_unchanged": true,
+          "actual_DB_or_runtime_reexecution": false
         },
         "actual_app_role_bounded_page": "FAIL_STATEMENT_TIMEOUT57014_ON_QUALIFIED_PAYLOAD_AND_FILTERED_COUNTS_PAGE_KEYS; NO_COMPLETE_TYPED_PAGE_ACCEPTANCE_NO_MORE_SAME_FULL_QUERY_RETRIES",
         "source_only_generic_bundle_and_missing_globals_boot": {
-          "status": "PASS_SOURCE_ONLY_CANDIDATE_FLAT_BUNDLE_AND_OFFLINE_BOOT_NOT_HOSTED_OR_COMMITTED_RELEASE",
+          "status": "PASS_EXACT_COMMITTED_SOURCE_BUNDLE_OFFLINE_BOOT_NOT_HOSTED_OR_PERFORMANCE_ACCEPTANCE",
           "bundle_bytes": 125024,
           "bundle_sha256": "059aed5951a704945add7e960c3161df178679ff81c6e133f98959b1e3d49081",
-          "receipt_sha256": "95736f6a3a2ccc74deb1dff03a86f7c542b706a80f0070451de77a3a753061ac",
+          "receipt_sha256": "9d5fa736ea6dd93ec1d1b5db4d0920853f3670fe5227f622242debb2aeebc48a",
           "runtime_source_inputs": 7,
           "pinned_driver_inputs": 10,
           "total_inputs": 17,
@@ -802,9 +804,11 @@
           "actual_network_and_DB_calls": 0,
           "settings_loaded": false,
           "deployment": "NOT_RUN",
-          "source_state": "aa91015_SQL_acdc3660_test_native41_development_candidate_uncommitted; actual_performance_failed_not_launch_accepted"
+          "source_state": "exact_f566c7e_source9_Git_blobs; native41_reused; actual_performance_FAILED_IO_HOLD_not_launch_accepted",
+          "source_commit": "f566c7effefeaeadda6307d62ebba9786c43ca13",
+          "Git_blob_runtime_and_support_sources": 9
         },
-        "normal_commit_pre_push_exact_SHA_CI_and_develop_integration": "HOLD_PENDING_FINAL_STAGED_INDEPENDENT_REVIEW; DEVELOPMENT_CANDIDATE_INTEGRATION_IS_NOT_RUNTIME_ACCEPTANCE",
+        "normal_commit_pre_push_exact_SHA_CI_and_develop_integration": "PASS_EXACT_f566c7e_NORMAL_PRECOMMIT853_PREPUSH853_SOURCE_CI273_PR_CI274_AND_PR23_DEVELOP_MERGE_e59a13_EXACT_MERGE_CI275; COMMON_STATUS_FOLLOWUP_CHECKS_SEPARATE; NOT_RUNTIME_ACCEPTANCE",
         "new_purpose_approval_and_PIN3_cursor_key_registration": "NOT_RUN_NEW_CURRENT_DESCRIPTOR3_PLUS_SEPARATE_CURSOR_KEY_NAMES4; EXISTING_C_PIN3_UNCHANGED",
         "new_function_deployment_fresh_JWT_BFF_browser_and_security_three_gates": "NOT_RUN",
         "actual_readonly_probe_observation": {
@@ -934,7 +938,72 @@
           "registry_initial_fields_filter_substitution_allowed": false,
           "new_materialized_cache_view_index_timeout_or_RLS_change": false
         },
-        "new_purpose_approval_and_PIN4_registration": "NOT_RUN_CURRENT_REVIEW_FOUR_NAMESPACED_SETTINGS; EXISTING_C_BASE7_AND_PIN3_UNCHANGED"
+        "new_purpose_approval_and_PIN4_registration": "NOT_RUN_CURRENT_REVIEW_FOUR_NAMESPACED_SETTINGS; EXISTING_C_BASE7_AND_PIN3_UNCHANGED",
+        "historical_before_PR23_source_integration": {
+          "independent_source_review": {
+            "status": "PENDING_DELTA_SQL_TEST_AND_FINAL_STAGED_SNAPSHOT_REVIEW",
+            "earlier_source6_native40_review_receipt_sha256": "6300960e90775ebef82dcd11e4f7b3e3a497fc4d42e15cc4f7060023472b55d3",
+            "earlier_review_is_not_new_SQL_test_pin_review": true
+          },
+          "source_only_generic_bundle_and_missing_globals_boot": {
+            "status": "PASS_SOURCE_ONLY_CANDIDATE_FLAT_BUNDLE_AND_OFFLINE_BOOT_NOT_HOSTED_OR_COMMITTED_RELEASE",
+            "bundle_bytes": 125024,
+            "bundle_sha256": "059aed5951a704945add7e960c3161df178679ff81c6e133f98959b1e3d49081",
+            "receipt_sha256": "95736f6a3a2ccc74deb1dff03a86f7c542b706a80f0070451de77a3a753061ac",
+            "runtime_source_inputs": 7,
+            "pinned_driver_inputs": 10,
+            "total_inputs": 17,
+            "source_map_files": 0,
+            "private_needle_hits": 0,
+            "initial_Buffer_process_and_immediate_globals_absent": true,
+            "bootstrap_before_driver_Buffer_top_level": true,
+            "handler_registrations": 1,
+            "empty_settings_response": "503_security_policy_unavailable_private_no_store",
+            "actual_network_and_DB_calls": 0,
+            "settings_loaded": false,
+            "deployment": "NOT_RUN",
+            "source_state": "aa91015_SQL_acdc3660_test_native41_development_candidate_uncommitted; actual_performance_failed_not_launch_accepted"
+          },
+          "normal_commit_pre_push_exact_SHA_CI_and_develop_integration": "HOLD_PENDING_FINAL_STAGED_INDEPENDENT_REVIEW; DEVELOPMENT_CANDIDATE_INTEGRATION_IS_NOT_RUNTIME_ACCEPTANCE"
+        },
+        "source_integration": {
+          "status": "merged_develop_development_candidate_only",
+          "source_commit": "f566c7effefeaeadda6307d62ebba9786c43ca13",
+          "merge_commit": "e59a13a506d551ef086bf58399da751286502288",
+          "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/23",
+          "merge_method": "merge",
+          "source_CI": [
+            {
+              "id": 37967820853,
+              "number": 273,
+              "event": "push",
+              "head": "f566c7effefeaeadda6307d62ebba9786c43ca13",
+              "conclusion": "success"
+            },
+            {
+              "id": 37967988310,
+              "number": 274,
+              "event": "pull_request",
+              "head": "f566c7effefeaeadda6307d62ebba9786c43ca13",
+              "conclusion": "success"
+            }
+          ],
+          "merge_tree_equals_tested_source_tree": true,
+          "source_and_merge_tree": "bca9424c0d2c3c81e09d57242a6d4d96d74320f0",
+          "precommit_tests": 853,
+          "prepush_tests": 853,
+          "normal_hook_failure_error_skip_count": 0,
+          "final_service_binding_receipt_sha256": "af41f7eb1634756e23babc00884f846fdf5d5a9e2c909589ac3c65d6c02e746e",
+          "merge_CI": {
+            "id": 37968228996,
+            "number": 275,
+            "head": "e59a13a506d551ef086bf58399da751286502288",
+            "conclusion": "success",
+            "URL": "https://github.com/natural0448/Jungsi_touch/actions/runs/37968228996"
+          },
+          "main_changed": false,
+          "actual_new_function_deployment": false
+        }
       },
       "normalized_filter_contract": {
         "normalization": "trim_then_ASCII_A_Z_case_fold; exact_shared_application_and_SQL_translate",
@@ -981,7 +1050,7 @@
         "performance_acceptance": "FAILED_ACTUAL_FILTERED_COUNTS_PAGE_KEYS_AND_COMPLETE_PAYLOAD; SQL_shape_regression_or_compilation_is_not_launch_qualification"
       },
       "performance_change_request": {
-        "status": "REQUIRED_CONCRETE_LIGHT_CURRENT_PROJECTION_OR_INDEX_PROVIDER_CR; ADVISORY_RESULTS_PENDING; NOT_IMPLEMENTED_OR_APPROVED",
+        "status": "DOCUMENT_PROPOSAL_V1_PREPARED_AND_SERVICE_DATA_FILE_REVIEW_COMPLETED; REFINEMENT_AND_TECHNICAL_ADOPTION_PENDING; NO_DB_OR_SOURCE_IMPLEMENTATION",
         "authority": "fixed_admission_results_current_definition_and_corrected_curation_head_override_semantics_remain_authoritative",
         "constraints": [
           "single_bounded_payload_statement_with_exact_same_snapshot_counts",
@@ -993,7 +1062,30 @@
           "IO_budget_recovery_and_safe_write_checkpoint_before_fresh_actual_validation",
           "finite_initial_build_and_incremental_update_cost_no_automatic_full_rebuild",
           "no_COMPUTE_UPGRADE_or_billing_change_without_human_request"
-        ]
+        ],
+        "id": "CR-CURRENT-REVIEW-READ-MODEL-01",
+        "candidate_technical_gate_requirements": [
+          {
+            "id": "RM-01",
+            "requirement": "exact_single_PK_FK_column_and_descriptor_types_for_all_six_candidate_tables; preserve_existing_canonical_source_command_ID_types"
+          },
+          {
+            "id": "RM-02",
+            "requirement": "immutable_sealed_batch_changes_lineage_control_and_manifest_with_exact_approved_ancestry_and_same_lock_scope"
+          },
+          {
+            "id": "RM-03",
+            "requirement": "explicit_domain_separated_byte_codec_for_content_row_binding_and_leaf_root_manifest; original_lexeme_type_null_missing_zero_duplicates_preserved"
+          },
+          {
+            "id": "RM-04",
+            "requirement": "complete_machine_checkable_source_coverage_dependency_impact_before_after_manifest_and_outside_impact_invariance; latest_journal_or_core_fingerprint_not_sufficient"
+          }
+        ],
+        "independent_candidate_review_sha256": "74c34e890179a4f1c1c1dcd2c733750483a28b49a0dc7bc447c56c197b49017f",
+        "data_candidate_review_sha256": "c2ebc2e6c8fd875fff1179c95e8459edd7b4a5552d179c9ef16cf13ccaf8e1b4",
+        "new_variant_recipe_port_projection_DDL_or_RLS_adopted": false,
+        "complete_source_coverage_and_actual_performance_proven": false
       },
       "IO_budget_guard": {
         "id": "DEP-IO-01",
@@ -1024,7 +1116,8 @@
         "new_SQL_or_timeout_or_role_RLS_change": false,
         "compute_upgrade_or_billing_change": false,
         "actual_budget_recovery_or_cost_attribution": "NOT_RUN",
-        "in_flight_transaction_forced_kill_or_rollback": false
+        "in_flight_transaction_forced_kill_or_rollback": false,
+        "team_coordination": "DEVELOPMENT_TEAM_CR_FILE_ONLY; DATA_TEAM_SAFE_WRITE_CHECKPOINT_AND_ADDITIONAL_BULK_FULL_READ_HOLD_ACKNOWLEDGED; ROOT_NEW_REAL_DATABASE_ACTIONS_AFTER_WARNING0; ROOT_DID_NOT_ADOPT_NEW_CURRENT_POINTER"
       }
     },
     "historical_current_review_connection_before_source_registration": {

@@ -1,10 +1,10 @@
 # Supabase 입결 DB와 화면 API 연결
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.30이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.31이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 승인된 동결 역사 입결의 제한 표시 검수; 현재 단일 정본 공급자는 별도 준비 단계
 
-계약 2026.10.10.v13 · 코드 historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress · production_ready=false. 담당 feature/application-pre-data-platform.
+계약 2026.10.10.v14 · 코드 historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress · production_ready=false. 담당 feature/application-pre-data-platform.
 
 ## 연결과 승인 범위
 
@@ -214,14 +214,16 @@
 | current_review_candidate_native | PASS_DENO_CHECK6_AND_SYNTHETIC41; NEW_SOURCE6_DEVELOPMENT_CANDIDATE; NOT_ACTUAL_PERFORMANCE_OR_HOSTED_ACCEPTANCE |
 | current_review_native_receipt_sha256 | a9e6a8b29c916c11458e7b1bcf602f406bfefc871bfde01e2fc931ec5fcba169 |
 | current_review_actual_app_bounded_page | FAIL_ACTUAL_STATEMENT_TIMEOUT57014_QUALIFIED_PAYLOAD_AND_FILTERED_COUNTS_PAGE_KEYS; METADATA12_ROLE_RLS_13SCALAR_PASS_ROWS0; PRIOR_STATE503_PRESERVED; CONCRETE_LIGHT_PROVIDER_CR_REQUIRED_NO_TIMEOUT_OR_SCOPE_RELAXATION |
-| current_review_new_function_runtime | NOT_RUN_NEW_CURRENT_APPROVAL_PIN4_DEPLOYMENT_JWT_BFF_BROWSER_AND_SECURITY_GATES; ACTUAL_PERFORMANCE_FAILED; EXISTING_C_ENDPOINT_PIN3_AND_DEFAULT_ENTITLEMENTS_UNCHANGED |
-| current_review_independent_source | PENDING_NEW_SQL_TEST_STAGED_DELTA_REVIEW; EARLIER_SOURCE6_NATIVE40_STATIC_PASS_PRESERVED_NOT_FINAL_NEW_PIN_REVIEW |
-| current_review_source_only_candidate_bundle | PASS_NEW_AA910_ACDC_SOURCE_ONLY_NATIVE41_BUNDLE17INPUTS_MAP0_NEEDLE0_BOOT_GLOBALS4_HANDLER1_EMPTYCONFIG503_PRIVATE_NO_STORE_NETWORK_DB0; ACTUAL_PERFORMANCE_FAILED_NOT_LAUNCH_OR_COMMITTED_RELEASE |
-| current_review_candidate_bundle_receipt_sha256 | 95736f6a3a2ccc74deb1dff03a86f7c542b706a80f0070451de77a3a753061ac |
+| current_review_new_function_runtime | NOT_RUN_NEW_CURRENT_APPROVAL_PIN4_DEPLOYMENT_JWT_BFF_BROWSER_AND_SECURITY_GATES; SOURCE_ACCEPTED_DEVELOP_BUT_ACTUAL_PERFORMANCE_FAILED_IO_HOLD; EXISTING_C_ENDPOINT_PIN3_DEFAULT_ENTITLEMENTS_UNCHANGED |
+| current_review_independent_source | PASS_EXACT_SOURCE6_NATIVE41_EVIDENCE_AND_STAGE42_IO_DELTA14_STATIC_REVIEW; PERFORMANCE_FAILED_AND_DB_IO_HOLD_RETAINED |
+| current_review_source_only_candidate_bundle | PASS_EXACT_COMMITTED_f566c7e_SOURCE9_BLOB_BOUND_BUNDLE17INPUTS_MAP0_NEEDLE0_OFFLINE_BOOT_EMPTYCONFIG503_PRIVATE_NO_STORE_NET_DB0; NOT_DEPLOYED_NOT_ACTUAL_PERFORMANCE_ACCEPTED |
+| current_review_candidate_bundle_receipt_sha256 | 9d5fa736ea6dd93ec1d1b5db4d0920853f3670fe5227f622242debb2aeebc48a |
 | current_review_actual_timeout_receipt_sha256 | b3b5f662f0907c9f353f0f79df69938bf0310bfd06ea419548325280db1c75da |
 | historical_current_review_before_page_semifilter_native41 | {'current_review_candidate_native': 'PASS_DENO_CHECK6_AND_SYNTHETIC40; SOURCE6_NEW_UNTRACKED_AT_VERIFICATION; NOT_NEW_ACTUAL_DRIVER_DB_BUNDLE_JWT_OR_DEPLOYMENT', 'current_review_native_receipt_sha256': '5fba508a4bf27e9a606d064d88133911097a24bf90858d96f8a482cf5b1cbaed', 'current_review_actual_app_bounded_page': 'FAIL_ACTUAL_QUALIFIED_STATE_PAYLOAD_STATEMENT_TIMEOUT57014_METADATA12_ROLE_RLS_AND_13SCALAR_PASS_RETURNED_ROWS0; PRIOR_UNKNOWN_STATE503_PRESERVED; SOURCE_SQL_PLAN_REVIEW_PENDING; NO_TIMEOUT_RLS_QUERY_COUNT_OR_DATA_SCOPE_RELAXATION', 'current_review_new_function_runtime': 'NOT_RUN_NEW_APPROVAL_SETTINGS_SOURCE_BUNDLE_GIT_AND_DEPLOYMENT_REQUIRED; EXISTING_C_FUNCTION_AND_PIN3_UNCHANGED', 'current_review_independent_source': 'PASS_STATIC_SOURCE6_FROZEN_AND_NATIVE40_EVIDENCE_REUSED; ACTUAL_DB_BUNDLE_HOSTED_ACCEPTANCE_SEPARATE', 'current_review_source_only_candidate_bundle': 'PASS_CACHED_ESBUILD_AND_POSTGRES3_4_5_SOURCE17INPUTS_NO_MAP_OR_PRIVATE_NEEDLES; MISSING_GLOBALS4_BOOTSTRAP_HANDLER1_EMPTY_CONFIG503_NO_STORE_NET_DB0; NOT_COMMITTED_OR_HOSTED_RELEASE', 'current_review_candidate_bundle_receipt_sha256': '15e86ba15b8e415652a7ecd06f8b632073e02f0fdd73334c313e41d8b3711def', 'current_review_actual_timeout_receipt_sha256': '80792d5f2dace48d7c9978adbf5a967b438e13d2e65c350189e16e620685ed3a'} |
 | current_review_performance_diagnostic_receipts | {'page_semifilter_candidate': 'b3b5f662f0907c9f353f0f79df69938bf0310bfd06ea419548325280db1c75da', 'transaction_local_jit_off': '33b41b205af099c6c0b3bffb080705daf2ae2126200feea136ed7edb6effd82b', 'filtered_counts_page_keys_and_payload_components': 'd37aef3aa8ee2aeaccedd9ce5167fd9807d59d5cb67e46fb8ede74fd3ba5424f', 'fixed_four_year_IN_plus_exact_JSON_guard': '68ddbddfd513ec805b69e22fb7df97446a7a2405f05e9b27b2d497adf4093afc'} |
 | current_review_IO_budget_warning | USER_REPORTED_DASHBOARD_WARNING_IO_BUDGET_NEAR_DEPLETION_BASE5MB_PER_SECOND_AFTER_EXHAUSTION; ADDITIONAL_IO_INTENSIVE_REAL_DB_EXECUTION_HOLD; ROOT_FRESH_METRICS_AND_CAUSAL_LINK_NOT_RUN; LOCAL_FILE_SOURCE_COMMON_GIT_PREPARATION_CONTINUES |
+| current_review_independent_final_stage_receipt_sha256 | b63a58d1c00d963ddace40a93205cd9a43c6d18698248fa9f674f3670c156ade |
+| current_review_develop_integration | PASS_NORMAL_PR23_DEVELOP_ONLY_EXACT_f566c7e_TREE_EQUAL_e59a13_SOURCE_CI273_PR_CI274_MERGE_CI275; MAIN_UNCHANGED; NOT_CURRENT_RUNTIME_ACCEPTANCE |
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -241,4 +243,4 @@
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=85ed5cc3090b7fc08b966ea5ed8fde0131608673e9c38ffe1aaca697b93e97ba -->
+<!-- jungsi:generated spec_sha256=0a0bb5fe7f0a423c8050a6b84ee940c9cd26a00c7349fdf6fe1469675395daac -->
