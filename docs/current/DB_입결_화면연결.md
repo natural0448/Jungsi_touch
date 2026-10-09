@@ -1,10 +1,10 @@
 # Supabase 입결 DB와 화면 API 연결
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.28이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.30이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 승인된 동결 역사 입결의 제한 표시 검수; 현재 단일 정본 공급자는 별도 준비 단계
 
-계약 2026.10.10.v11 · 코드 historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress · production_ready=false. 담당 feature/application-pre-data-platform.
+계약 2026.10.10.v13 · 코드 historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress · production_ready=false. 담당 feature/application-pre-data-platform.
 
 ## 연결과 승인 범위
 
@@ -79,7 +79,7 @@
 | DBD-03 | 시스템기획팀·서비스 개발팀 | 목적별 제한 검수 승인·불변 private descriptor·설정·동일 후보 API 수치 대조 |
 | DBD-04 | 외부 화면팀 | API transport prefix와 서버 relay 연결·실제 로그인·1페이지 원지표/보류/오류 브라우저 검수 |
 | DBD-05 | 외부 화면 개발팀의 Supabase 관리자 | 사용자가 위임한 비공개 Edge 설정 등록을 담당한다. 비공개 전달/정확 후보 확인 후 등록 증거를 제출한다. 제한 함수의 실제 배포는 별도 승인·검수와 구분하며 계정·DB 권한 변경이나 전체 운영 승인으로 확대하지 않음 |
-| DBD-06 | 데이터팀·서비스 개발팀 | 별도 검수 DTO·경로·current 공급자 준비; 실제 app metadata 검수 PASS. literal/원 타입·적격 변경 명령 상태·동일 스냅샷 bulk JOIN/정확 집계·신규 목적/PIN3/cursor 설정·실제 페이지/함수/JWT/BFF 인수는 단계별로 진행한다. 공개 History 투영과 일반 회원 운영 공개는 별도다. |
+| DBD-06 | 데이터팀·서비스 개발팀 | 별도 reviewer source6·native check6/합성41·source-only 번들 기동 PASS인 개발 후보다. 현재 단일 SQL의 실제 filtered/count/page 및 payload는 기존5초에서57014로 실패했다. 현재 수정값·RLS·정확 count를 보존하는 경량 조회/projection·색인 공급자 변경 CR과 실제 성능 PASS가 선행돼야 한다. 새 승인/PIN4·배포/JWT/BFF/보안 인수는 미실행이고 기존 C/22API·기본이용권은 유지한다. |
 | DBD-07 | 데이터팀; 시스템기획팀·화면팀 독립 검수 | 최신 실제 크기와 current/C root별 의존을 검수; registry 정본 직접 의존 보존 판정. Storage 원형 이전·overlays 정리·참조 resolver·정확 제거 승인·전후 변경0·일반/FULL VACUUM은 NOT_RUN |
 | DBD-08 | 서비스 개발팀; 시스템기획팀·데이터팀·외부 화면팀 독립 인수 | 배열 I/O 수정·정상853+853·native44·실제 readonly provider·통합/재배포 완료; 외부 화면팀 최종 fresh JWT C140/12·cursor·paid403·auth/relay/no-store PASS 영수증 수신. current 전체·BFF/브라우저·운영 보안3gate는 별도 미완료 |
 
@@ -211,6 +211,17 @@
 | registry_capacity_adjudication | RETAIN_REQUIRED_DIRECT_CURRENT_VIEW_DEPENDENCY_WITH_CANONICAL_AND_SOURCE_IDS_SOURCE_INITIAL_FIELDS_EVIDENCE_AND_HASH_HISTORY; SIZE_MATCHES_NEW_PRIVATE_MEASUREMENT; GROWTH_CAUSE_AND_FUTURE_EXACT_BYTES_NOT_INFERRED_FROM_TIMING_OR_SIZE_ALONE |
 | admission_metric_expansion | REQUEST_RECEIVED_RECRUITMENT_COMPETITION_AND_ADDITIONAL_ADMISSION_COUNTS_REQUIRE_DISTINCT_OFFICIAL_METRIC_DEFINITIONS_CURRENT_ID_SOURCE_PUBLIC_MAPPING_AND_APPROVAL; NOT_CURRENT_HISTORY_OR_FORECAST_AUTO_ADOPTION |
 | bonus_summary_CR | REVIEW_PENDING_OFFICIAL_YEAR_DEPARTMENT_RULE_CONDITIONS_AND_EXPLANATION_CONTRACT; NOT_AN_IMPLEMENTED_ENGINE_OR_PUBLISHED_ADJUSTMENT |
+| current_review_candidate_native | PASS_DENO_CHECK6_AND_SYNTHETIC41; NEW_SOURCE6_DEVELOPMENT_CANDIDATE; NOT_ACTUAL_PERFORMANCE_OR_HOSTED_ACCEPTANCE |
+| current_review_native_receipt_sha256 | a9e6a8b29c916c11458e7b1bcf602f406bfefc871bfde01e2fc931ec5fcba169 |
+| current_review_actual_app_bounded_page | FAIL_ACTUAL_STATEMENT_TIMEOUT57014_QUALIFIED_PAYLOAD_AND_FILTERED_COUNTS_PAGE_KEYS; METADATA12_ROLE_RLS_13SCALAR_PASS_ROWS0; PRIOR_STATE503_PRESERVED; CONCRETE_LIGHT_PROVIDER_CR_REQUIRED_NO_TIMEOUT_OR_SCOPE_RELAXATION |
+| current_review_new_function_runtime | NOT_RUN_NEW_CURRENT_APPROVAL_PIN4_DEPLOYMENT_JWT_BFF_BROWSER_AND_SECURITY_GATES; ACTUAL_PERFORMANCE_FAILED; EXISTING_C_ENDPOINT_PIN3_AND_DEFAULT_ENTITLEMENTS_UNCHANGED |
+| current_review_independent_source | PENDING_NEW_SQL_TEST_STAGED_DELTA_REVIEW; EARLIER_SOURCE6_NATIVE40_STATIC_PASS_PRESERVED_NOT_FINAL_NEW_PIN_REVIEW |
+| current_review_source_only_candidate_bundle | PASS_NEW_AA910_ACDC_SOURCE_ONLY_NATIVE41_BUNDLE17INPUTS_MAP0_NEEDLE0_BOOT_GLOBALS4_HANDLER1_EMPTYCONFIG503_PRIVATE_NO_STORE_NETWORK_DB0; ACTUAL_PERFORMANCE_FAILED_NOT_LAUNCH_OR_COMMITTED_RELEASE |
+| current_review_candidate_bundle_receipt_sha256 | 95736f6a3a2ccc74deb1dff03a86f7c542b706a80f0070451de77a3a753061ac |
+| current_review_actual_timeout_receipt_sha256 | b3b5f662f0907c9f353f0f79df69938bf0310bfd06ea419548325280db1c75da |
+| historical_current_review_before_page_semifilter_native41 | {'current_review_candidate_native': 'PASS_DENO_CHECK6_AND_SYNTHETIC40; SOURCE6_NEW_UNTRACKED_AT_VERIFICATION; NOT_NEW_ACTUAL_DRIVER_DB_BUNDLE_JWT_OR_DEPLOYMENT', 'current_review_native_receipt_sha256': '5fba508a4bf27e9a606d064d88133911097a24bf90858d96f8a482cf5b1cbaed', 'current_review_actual_app_bounded_page': 'FAIL_ACTUAL_QUALIFIED_STATE_PAYLOAD_STATEMENT_TIMEOUT57014_METADATA12_ROLE_RLS_AND_13SCALAR_PASS_RETURNED_ROWS0; PRIOR_UNKNOWN_STATE503_PRESERVED; SOURCE_SQL_PLAN_REVIEW_PENDING; NO_TIMEOUT_RLS_QUERY_COUNT_OR_DATA_SCOPE_RELAXATION', 'current_review_new_function_runtime': 'NOT_RUN_NEW_APPROVAL_SETTINGS_SOURCE_BUNDLE_GIT_AND_DEPLOYMENT_REQUIRED; EXISTING_C_FUNCTION_AND_PIN3_UNCHANGED', 'current_review_independent_source': 'PASS_STATIC_SOURCE6_FROZEN_AND_NATIVE40_EVIDENCE_REUSED; ACTUAL_DB_BUNDLE_HOSTED_ACCEPTANCE_SEPARATE', 'current_review_source_only_candidate_bundle': 'PASS_CACHED_ESBUILD_AND_POSTGRES3_4_5_SOURCE17INPUTS_NO_MAP_OR_PRIVATE_NEEDLES; MISSING_GLOBALS4_BOOTSTRAP_HANDLER1_EMPTY_CONFIG503_NO_STORE_NET_DB0; NOT_COMMITTED_OR_HOSTED_RELEASE', 'current_review_candidate_bundle_receipt_sha256': '15e86ba15b8e415652a7ecd06f8b632073e02f0fdd73334c313e41d8b3711def', 'current_review_actual_timeout_receipt_sha256': '80792d5f2dace48d7c9978adbf5a967b438e13d2e65c350189e16e620685ed3a'} |
+| current_review_performance_diagnostic_receipts | {'page_semifilter_candidate': 'b3b5f662f0907c9f353f0f79df69938bf0310bfd06ea419548325280db1c75da', 'transaction_local_jit_off': '33b41b205af099c6c0b3bffb080705daf2ae2126200feea136ed7edb6effd82b', 'filtered_counts_page_keys_and_payload_components': 'd37aef3aa8ee2aeaccedd9ce5167fd9807d59d5cb67e46fb8ede74fd3ba5424f', 'fixed_four_year_IN_plus_exact_JSON_guard': '68ddbddfd513ec805b69e22fb7df97446a7a2405f05e9b27b2d497adf4093afc'} |
+| current_review_IO_budget_warning | USER_REPORTED_DASHBOARD_WARNING_IO_BUDGET_NEAR_DEPLETION_BASE5MB_PER_SECOND_AFTER_EXHAUSTION; ADDITIONAL_IO_INTENSIVE_REAL_DB_EXECUTION_HOLD; ROOT_FRESH_METRICS_AND_CAUSAL_LINK_NOT_RUN; LOCAL_FILE_SOURCE_COMMON_GIT_PREPARATION_CONTINUES |
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -230,4 +241,4 @@
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=99a6138f5c2f1493d58864f195846189a249cb9f64b86e3871f961283529d34d -->
+<!-- jungsi:generated spec_sha256=85ed5cc3090b7fc08b966ea5ed8fde0131608673e9c38ffe1aaca697b93e97ba -->

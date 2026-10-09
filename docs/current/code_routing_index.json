@@ -5579,6 +5579,135 @@
     "verification": "whole_source_hash_not_type_or_runtime_proof",
     "files": [
       {
+        "path": "supabase/functions/_shared/current_admission_display.ts",
+        "layer": "application",
+        "status": "implemented_current_review_development_candidate_native41_offline_bundle_verified_actual_performance_failed_runtime_activation_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "5e24c6f4976e500cdd88295b0b2ba3961c6ff9027d7f601641a9b9d72adf3bad",
+        "declared_exports": [
+          "CURRENT_REVIEW_VIEW",
+          "CURRENT_REVIEW_YEARS",
+          "CurrentSearchOperation",
+          "CurrentKey",
+          "CurrentSearchQuery",
+          "CurrentPageBinding",
+          "CurrentProjectedRow",
+          "CurrentPortPage",
+          "CurrentAdmissionSearchPort",
+          "parseCurrentSearch",
+          "currentQuerySha256",
+          "validateCurrentKey",
+          "compareCurrentKeys",
+          "EncryptedCurrentCursor",
+          "closeCurrentPage"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_admission_display_test.ts",
+        "layer": "data_infrastructure",
+        "status": "implemented_current_review_development_candidate_native41_offline_bundle_verified_actual_performance_failed_runtime_activation_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "8720f38d355e136891208026de0802e5f7add002cb573f8b566cae8ac906878f",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/current_admission_review.ts",
+        "layer": "application",
+        "status": "implemented_current_review_development_candidate_native41_offline_bundle_verified_actual_performance_failed_runtime_activation_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "3b1d5270225fed62fcb450d1de197f23ef507f933b25cbb0aa65cdc94d6d0c61",
+        "declared_exports": [
+          "CURRENT_REVIEW_ROUTE",
+          "CURRENT_REVIEW_PURPOSE",
+          "CURRENT_REVIEW_OPERATION",
+          "CURRENT_WIRE_FIELDS",
+          "MEMBER_WIRE_FIELDS",
+          "POPULATION_WIRE_FIELDS",
+          "REVIEW_QUERY_FIELDS",
+          "CURRENT_REVIEW_FIELDS",
+          "CURRENT_REVIEW_WIRE_RECIPE",
+          "CurrentReviewQuery",
+          "CurrentReviewDescriptor",
+          "CurrentReviewObservation",
+          "CurrentReviewRawPage",
+          "CurrentReviewPorts",
+          "CurrentReviewTransport",
+          "currentReviewWireJson",
+          "currentReviewSha256",
+          "currentReviewProjectionSha256",
+          "validateCurrentReviewDescriptor",
+          "parseCurrentReviewQuery",
+          "validateCurrentReviewQuery",
+          "currentReviewBinding",
+          "validateCurrentWireJsonText",
+          "validateCurrentScalar",
+          "currentReviewKey",
+          "closeCurrentReviewPage",
+          "createCurrentAdmissionReviewHandler"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_admission_review_postgres.ts",
+        "layer": "data_infrastructure",
+        "status": "implemented_current_review_development_candidate_native41_offline_bundle_verified_actual_performance_failed_runtime_activation_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "aa91015d156311f3cf56d14a77476f3712ba69fc628e85e67f37599f842285f4",
+        "declared_exports": [
+          "CurrentReviewInfrastructureSettings",
+          "CURRENT_REVIEW_METADATA_SQL",
+          "CURRENT_REVIEW_PAYLOAD_SQL",
+          "createCurrentReviewInfrastructure"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_admission_review_test.ts",
+        "layer": "data_infrastructure",
+        "status": "implemented_current_review_development_candidate_native41_offline_bundle_verified_actual_performance_failed_runtime_activation_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "acdc36607d74574ef7a36c1989e40921fa991ca6e74afe368dd378e4c0396306",
+        "declared_exports": []
+      },
+      {
         "path": "supabase/functions/_shared/node_compat_bootstrap.ts",
         "layer": "data_infrastructure",
         "status": "implemented_native36_offline_bundle_verified_integrated_real_cloud_retest_pending",
@@ -5687,6 +5816,22 @@
           "loadPinnedDisplayDescriptor",
           "OfficialHistoryInfrastructureSettings"
         ]
+      },
+      {
+        "path": "supabase/functions/current-admission-review/index.ts",
+        "layer": "data_infrastructure",
+        "status": "implemented_current_review_development_candidate_native41_offline_bundle_verified_actual_performance_failed_runtime_activation_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "fbbd8eb7af2fa8db1d6f0a7d591ea617cfb937843ec71af9963076d930ed70c1",
+        "declared_exports": []
       },
       {
         "path": "supabase/functions/official-history-display/index.ts",
