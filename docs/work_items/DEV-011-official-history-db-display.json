@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "accepted_on_develop_scoped_verified_cloud_acceptance_pending",
   "contract_ref": "official_history_db_display_contract",
-  "contract_version": "1.9.28",
+  "contract_version": "1.9.30",
   "requirements": [
     "REQ-01",
     "REQ-08",
@@ -16,11 +16,11 @@
     "REQ-25",
     "REQ-26"
   ],
-  "runtime_followup_status": "historical_C_final_freshJWT_report_received_PASS; current_all_review_provider_route_preparation_in_progress; BFF_browser_operational3gates_NOT_RUN",
+  "runtime_followup_status": "historical_C_frontend_freshJWT_report_PASS_separate; current_development_candidate_source6_native41_offline_bundle_PASS_actual5second_payload_and_counts_FAIL_light_query_CR_required; new_approval_PIN4_deployment_JWT_BFF_security_NOT_RUN",
   "scope": {
     "format": "jungsi.official-history-db-display/v1",
     "id": "DEV-011",
-    "revision": "2026.10.10.v11",
+    "revision": "2026.10.10.v13",
     "branch": "feature/application-pre-data-platform",
     "basis_commit": "9e03bd6483cffc420aa02ed01a09e93e3c5356c6",
     "requirements": [
@@ -140,7 +140,7 @@
       [
         "DBD-06",
         "데이터팀·서비스 개발팀",
-        "별도 검수 DTO·경로·current 공급자 준비; 실제 app metadata 검수 PASS. literal/원 타입·적격 변경 명령 상태·동일 스냅샷 bulk JOIN/정확 집계·신규 목적/PIN3/cursor 설정·실제 페이지/함수/JWT/BFF 인수는 단계별로 진행한다. 공개 History 투영과 일반 회원 운영 공개는 별도다."
+        "별도 reviewer source6·native check6/합성41·source-only 번들 기동 PASS인 개발 후보다. 현재 단일 SQL의 실제 filtered/count/page 및 payload는 기존5초에서57014로 실패했다. 현재 수정값·RLS·정확 count를 보존하는 경량 조회/projection·색인 공급자 변경 CR과 실제 성능 PASS가 선행돼야 한다. 새 승인/PIN4·배포/JWT/BFF/보안 인수는 미실행이고 기존 C/22API·기본이용권은 유지한다."
       ],
       [
         "DBD-07",
@@ -331,7 +331,32 @@
       "DB_capacity_execution": "STORAGE_ORIGINAL_BYTES_MIGRATION_NOT_RUN; OVERLAY_CLEANUP_NOT_RUN; ARCHIVE_RESOLVER_NOT_RUN; EXACT_DB_REMOVAL_TARGETS_UNAPPROVED_AND_EMPTY; ORDINARY_VACUUM_NOT_RUN; VACUUM_FULL_NOT_RUN; FRONTEND_CONDITIONAL_AGREEMENT_AND_EXTERNAL_REQUEST_ARE_NOT_EXACT_DELETION_APPROVAL",
       "registry_capacity_adjudication": "RETAIN_REQUIRED_DIRECT_CURRENT_VIEW_DEPENDENCY_WITH_CANONICAL_AND_SOURCE_IDS_SOURCE_INITIAL_FIELDS_EVIDENCE_AND_HASH_HISTORY; SIZE_MATCHES_NEW_PRIVATE_MEASUREMENT; GROWTH_CAUSE_AND_FUTURE_EXACT_BYTES_NOT_INFERRED_FROM_TIMING_OR_SIZE_ALONE",
       "admission_metric_expansion": "REQUEST_RECEIVED_RECRUITMENT_COMPETITION_AND_ADDITIONAL_ADMISSION_COUNTS_REQUIRE_DISTINCT_OFFICIAL_METRIC_DEFINITIONS_CURRENT_ID_SOURCE_PUBLIC_MAPPING_AND_APPROVAL; NOT_CURRENT_HISTORY_OR_FORECAST_AUTO_ADOPTION",
-      "bonus_summary_CR": "REVIEW_PENDING_OFFICIAL_YEAR_DEPARTMENT_RULE_CONDITIONS_AND_EXPLANATION_CONTRACT; NOT_AN_IMPLEMENTED_ENGINE_OR_PUBLISHED_ADJUSTMENT"
+      "bonus_summary_CR": "REVIEW_PENDING_OFFICIAL_YEAR_DEPARTMENT_RULE_CONDITIONS_AND_EXPLANATION_CONTRACT; NOT_AN_IMPLEMENTED_ENGINE_OR_PUBLISHED_ADJUSTMENT",
+      "current_review_candidate_native": "PASS_DENO_CHECK6_AND_SYNTHETIC41; NEW_SOURCE6_DEVELOPMENT_CANDIDATE; NOT_ACTUAL_PERFORMANCE_OR_HOSTED_ACCEPTANCE",
+      "current_review_native_receipt_sha256": "a9e6a8b29c916c11458e7b1bcf602f406bfefc871bfde01e2fc931ec5fcba169",
+      "current_review_actual_app_bounded_page": "FAIL_ACTUAL_STATEMENT_TIMEOUT57014_QUALIFIED_PAYLOAD_AND_FILTERED_COUNTS_PAGE_KEYS; METADATA12_ROLE_RLS_13SCALAR_PASS_ROWS0; PRIOR_STATE503_PRESERVED; CONCRETE_LIGHT_PROVIDER_CR_REQUIRED_NO_TIMEOUT_OR_SCOPE_RELAXATION",
+      "current_review_new_function_runtime": "NOT_RUN_NEW_CURRENT_APPROVAL_PIN4_DEPLOYMENT_JWT_BFF_BROWSER_AND_SECURITY_GATES; ACTUAL_PERFORMANCE_FAILED; EXISTING_C_ENDPOINT_PIN3_AND_DEFAULT_ENTITLEMENTS_UNCHANGED",
+      "current_review_independent_source": "PENDING_NEW_SQL_TEST_STAGED_DELTA_REVIEW; EARLIER_SOURCE6_NATIVE40_STATIC_PASS_PRESERVED_NOT_FINAL_NEW_PIN_REVIEW",
+      "current_review_source_only_candidate_bundle": "PASS_NEW_AA910_ACDC_SOURCE_ONLY_NATIVE41_BUNDLE17INPUTS_MAP0_NEEDLE0_BOOT_GLOBALS4_HANDLER1_EMPTYCONFIG503_PRIVATE_NO_STORE_NETWORK_DB0; ACTUAL_PERFORMANCE_FAILED_NOT_LAUNCH_OR_COMMITTED_RELEASE",
+      "current_review_candidate_bundle_receipt_sha256": "95736f6a3a2ccc74deb1dff03a86f7c542b706a80f0070451de77a3a753061ac",
+      "current_review_actual_timeout_receipt_sha256": "b3b5f662f0907c9f353f0f79df69938bf0310bfd06ea419548325280db1c75da",
+      "historical_current_review_before_page_semifilter_native41": {
+        "current_review_candidate_native": "PASS_DENO_CHECK6_AND_SYNTHETIC40; SOURCE6_NEW_UNTRACKED_AT_VERIFICATION; NOT_NEW_ACTUAL_DRIVER_DB_BUNDLE_JWT_OR_DEPLOYMENT",
+        "current_review_native_receipt_sha256": "5fba508a4bf27e9a606d064d88133911097a24bf90858d96f8a482cf5b1cbaed",
+        "current_review_actual_app_bounded_page": "FAIL_ACTUAL_QUALIFIED_STATE_PAYLOAD_STATEMENT_TIMEOUT57014_METADATA12_ROLE_RLS_AND_13SCALAR_PASS_RETURNED_ROWS0; PRIOR_UNKNOWN_STATE503_PRESERVED; SOURCE_SQL_PLAN_REVIEW_PENDING; NO_TIMEOUT_RLS_QUERY_COUNT_OR_DATA_SCOPE_RELAXATION",
+        "current_review_new_function_runtime": "NOT_RUN_NEW_APPROVAL_SETTINGS_SOURCE_BUNDLE_GIT_AND_DEPLOYMENT_REQUIRED; EXISTING_C_FUNCTION_AND_PIN3_UNCHANGED",
+        "current_review_independent_source": "PASS_STATIC_SOURCE6_FROZEN_AND_NATIVE40_EVIDENCE_REUSED; ACTUAL_DB_BUNDLE_HOSTED_ACCEPTANCE_SEPARATE",
+        "current_review_source_only_candidate_bundle": "PASS_CACHED_ESBUILD_AND_POSTGRES3_4_5_SOURCE17INPUTS_NO_MAP_OR_PRIVATE_NEEDLES; MISSING_GLOBALS4_BOOTSTRAP_HANDLER1_EMPTY_CONFIG503_NO_STORE_NET_DB0; NOT_COMMITTED_OR_HOSTED_RELEASE",
+        "current_review_candidate_bundle_receipt_sha256": "15e86ba15b8e415652a7ecd06f8b632073e02f0fdd73334c313e41d8b3711def",
+        "current_review_actual_timeout_receipt_sha256": "80792d5f2dace48d7c9978adbf5a967b438e13d2e65c350189e16e620685ed3a"
+      },
+      "current_review_performance_diagnostic_receipts": {
+        "page_semifilter_candidate": "b3b5f662f0907c9f353f0f79df69938bf0310bfd06ea419548325280db1c75da",
+        "transaction_local_jit_off": "33b41b205af099c6c0b3bffb080705daf2ae2126200feea136ed7edb6effd82b",
+        "filtered_counts_page_keys_and_payload_components": "d37aef3aa8ee2aeaccedd9ce5167fd9807d59d5cb67e46fb8ede74fd3ba5424f",
+        "fixed_four_year_IN_plus_exact_JSON_guard": "68ddbddfd513ec805b69e22fb7df97446a7a2405f05e9b27b2d497adf4093afc"
+      },
+      "current_review_IO_budget_warning": "USER_REPORTED_DASHBOARD_WARNING_IO_BUDGET_NEAR_DEPLETION_BASE5MB_PER_SECOND_AFTER_EXHAUSTION; ADDITIONAL_IO_INTENSIVE_REAL_DB_EXECUTION_HOLD; ROOT_FRESH_METRICS_AND_CAUSAL_LINK_NOT_RUN; LOCAL_FILE_SOURCE_COMMON_GIT_PREPARATION_CONTINUES"
     },
     "frontend_handoff": [
       "브라우저·화면 코드·일반 프런트 환경은 기존 API의 공개 응답만 읽는다. app DATABASE_URL/DB CA/Storage secret/descriptor/원자료/전체 DB를 수령하지 않는다. 지정된 Supabase 관리자가 비공개 app-only 기본7 설정을 등록하는 역할은 별도 인계 범위다. migration-owner 접속값·키는 외부 화면 환경에 전달하지 않는다.",
@@ -539,6 +564,470 @@
       }
     },
     "current_review_connection": {
+      "id": "DBD-06-CURRENT-ALL-REVIEW",
+      "status": "implemented_development_candidate_native41_offline_bundle_boot_verified_actual_performance_FAILED_light_query_CR_and_runtime_activation_pending_user_reported_IO_budget_warning_real_DB_validation_HOLD",
+      "human_scope": "frontend_team_and_administrators_review_first",
+      "source_view": "jungsi_data_ingest.admission_results_current",
+      "academic_years": [
+        2024,
+        2025,
+        2026,
+        2027
+      ],
+      "source_scope": "all_current_active_service_records_in_review_scope; no_historical_C_fallback; not_operational_publication",
+      "general_member_operational_publication": false,
+      "existing_C_scope_or_PIN3_changed": false,
+      "basic_member_or_entitlement_policy_changed": false,
+      "separate_private_current_purpose_required": true,
+      "verified_subject_allowlist_and_approved_scope_required": true,
+      "new_private_approval_bytes_SHA_state_projection_binding_required": true,
+      "actual_numbers_or_identity_maps_in_Git": false,
+      "priority_operations": [
+        "current.review.search"
+      ],
+      "paid_operations_authorization_preserved": [
+        "offerings.search",
+        "offering.read"
+      ],
+      "pagination": "one_parameterized_bounded_bulk_JOIN; filtered_light_keys_CTE_exact_matching_observation_count_and_matching_source_school_count_same_snapshot; limit_plus_one_keyset; payload_FETCH_page_only",
+      "cursor": "server_only_AEAD_encrypted_cursor_bound_to_subject_operation_normalized_query_current_state_projection_version_expiry_and_last_unique_key; not_plain_signed_internal_IDs",
+      "freshness": "exact independently qualified command_id/payload_SHA/view_schema_state pins in approved descriptor; first_page_unknown_latest_state503current_review_state_unapproved; cursor_changed_state409; same_SQL_snapshot; new_wire_recipe_not_native32_hash",
+      "identity": "canonical_observation_source_member_original_year_offering_and_public_offering_IDs_distinct; no_1N_fanout_or_distinct_by_public_ID_data_loss",
+      "public_projection": "official_public_metadata_not_verified_remains_null_and_hold_reason; no_published_or_verified_official_inference_from_active_current",
+      "recruitment": "approved_recruitment_data_only; otherwise_pending_null_no_zero_or_inferred_count",
+      "missing_prerequisites": [
+        "independent_delta_source_test_bundle_and_final_staged_review",
+        "qualified_light_query_projection_or_index_provider_CR_preserving_corrected_current_semantics_and_RLS",
+        "actual_same_snapshot_typed_page_count_keyset_member_link_wire_with_existing_timeout_PASS",
+        "explicit_all_current_subject_purpose_qualified_state_approval_and_four_namespaced_settings",
+        "normal_source_docs_commit_push_exact_SHA_CI_develop_integration_of_development_candidate",
+        "new_function_deployment_fresh_JWT_BFF_browser_security_gates_after_actual_performance_PASS"
+      ],
+      "operational_security_three_gates": "NOT_RUN",
+      "nationwide_original_census_complete": false,
+      "engine_approved": false,
+      "production_allowed": false,
+      "function_name": "current-admission-review",
+      "purpose": "current_admission_review",
+      "operation": "current.review.search",
+      "route": {
+        "method": "GET",
+        "path": "/api/v1/review/current-admissions",
+        "audience": "explicit_subject_allowlisted_frontend_admin_reviewers_only",
+        "default_22API_or_C_5GET_changed": false
+      },
+      "query_fields": [
+        "academic_year",
+        "university_q",
+        "department_q",
+        "track",
+        "group",
+        "metric_kind",
+        "cohort",
+        "limit",
+        "cursor"
+      ],
+      "review_DTO": "jungsi.current-admission-review/v1; separate_closed_review_projection_with_exact_literal_original_JSON_type_nulls_and_hold_reasons; not_public_History_DTO",
+      "source_school_count_identity": [
+        "school_id",
+        "university_code"
+      ],
+      "maximum_approval_hours": 24,
+      "namespaced_private_settings": [
+        "JUNGSI_CURRENT_REVIEW_DESCRIPTOR_PATH",
+        "JUNGSI_CURRENT_REVIEW_DESCRIPTOR_SHA256",
+        "JUNGSI_CURRENT_REVIEW_DESCRIPTOR_BYTES",
+        "JUNGSI_CURRENT_REVIEW_CURSOR_KEY_HEX"
+      ],
+      "base_7_settings_reuse": "server_only_readonly; existing_C_PIN3_values_and_relay_default_unchanged",
+      "DB_storage_migration_overlays_cleanup_and_VACUUM": "NOT_RUN_NO_EXACT_REMOVAL_TARGET_APPROVED",
+      "existing_C_read_operations_preserved": [
+        "history.search",
+        "recruitment.read",
+        "session.read"
+      ],
+      "private_keyset_namespace": {
+        "fields": [
+          "academic_year",
+          "CURRENT_REVIEW",
+          "CANONICAL_OBSERVATIONS",
+          "",
+          "canonical_result_id"
+        ],
+        "order": "academic_year_and_canonical_result_id_COLLATE_C",
+        "use": "server_internal_wire_state_keyset_and_AEAD_only; no_public_offering_mapping_or_rawID_response_logging"
+      },
+      "automatic_latest_command_adoption": false,
+      "DTO_contract": {
+        "format": "jungsi.current-admission-review/v1",
+        "official_metadata_keys": [
+          "metric_definition",
+          "unit",
+          "original_scale",
+          "source_url",
+          "source_as_of",
+          "publication_status"
+        ],
+        "unverified_official_metadata": "all_explicit_null_with_hold_reasons; never_guessed",
+        "review_status": "review_only",
+        "value_availability": [
+          "present",
+          "actual_null",
+          "missing",
+          "held"
+        ],
+        "unvalidated_nested_literal_object_or_array": "not_returned; held_value_null_with_original_type_and_reason",
+        "matching_count_fields": [
+          "matching_observation_count",
+          "matching_source_school_count"
+        ],
+        "known_source_scalar": "exact_original_literal_JSON_type_numeric_text; no_float_roundtrip",
+        "raw_canonical_source_PK_path": "server_only_never_response_or_logs",
+        "page_format": "jungsi.current-admission-review-page/v1",
+        "page_fields": [
+          "format",
+          "status",
+          "items",
+          "matching_observation_count",
+          "matching_source_school_count",
+          "review_version",
+          "as_of",
+          "next_cursor",
+          "publication_status"
+        ],
+        "item_fields": [
+          "observation_token",
+          "academic_year",
+          "university",
+          "department",
+          "track",
+          "recruit_group",
+          "metric_kind",
+          "metric_value_literal",
+          "metric_value_json_type",
+          "metric_value_numeric_text",
+          "cohort",
+          "statistic_label",
+          "source_member_count",
+          "link_scopes",
+          "official_metadata",
+          "review_status",
+          "value_availability",
+          "hold_reasons"
+        ],
+        "page_status": "review",
+        "page_publication_status": "not_published"
+      },
+      "implementation": {
+        "basis_commit": "6161ee4454d8a2448b81c74f24b29617a19b5308",
+        "paths": [
+          "supabase/functions/_shared/current_admission_display.ts",
+          "supabase/functions/_shared/current_admission_display_test.ts",
+          "supabase/functions/_shared/current_admission_review.ts",
+          "supabase/functions/_shared/current_admission_review_postgres.ts",
+          "supabase/functions/_shared/current_admission_review_test.ts",
+          "supabase/functions/current-admission-review/index.ts"
+        ],
+        "source_files": [
+          {
+            "path": "supabase/functions/_shared/current_admission_display.ts",
+            "bytes": 13766,
+            "sha256": "5e24c6f4976e500cdd88295b0b2ba3961c6ff9027d7f601641a9b9d72adf3bad"
+          },
+          {
+            "path": "supabase/functions/_shared/current_admission_display_test.ts",
+            "bytes": 14325,
+            "sha256": "8720f38d355e136891208026de0802e5f7add002cb573f8b566cae8ac906878f"
+          },
+          {
+            "path": "supabase/functions/_shared/current_admission_review.ts",
+            "bytes": 24473,
+            "sha256": "3b1d5270225fed62fcb450d1de197f23ef507f933b25cbb0aa65cdc94d6d0c61"
+          },
+          {
+            "path": "supabase/functions/_shared/current_admission_review_postgres.ts",
+            "bytes": 14262,
+            "sha256": "aa91015d156311f3cf56d14a77476f3712ba69fc628e85e67f37599f842285f4"
+          },
+          {
+            "path": "supabase/functions/_shared/current_admission_review_test.ts",
+            "bytes": 24515,
+            "sha256": "acdc36607d74574ef7a36c1989e40921fa991ca6e74afe368dd378e4c0396306"
+          },
+          {
+            "path": "supabase/functions/current-admission-review/index.ts",
+            "bytes": 1691,
+            "sha256": "fbbd8eb7af2fa8db1d6f0a7d591ea617cfb937843ec71af9963076d930ed70c1"
+          }
+        ],
+        "application_handler": "createCurrentAdmissionReviewHandler",
+        "repository_port": "CurrentReviewPorts.search",
+        "infrastructure_factory": "createCurrentReviewInfrastructure",
+        "explicit_entrypoint": "supabase/functions/current-admission-review/index.ts",
+        "default_factory_changed": false,
+        "current_data_loaded_in_frontend": false,
+        "source_status": "implemented_development_candidate_compiled_native41_offline_boot_verified_actual_page_performance_FAILED_not_launch_accepted",
+        "native": {
+          "status": "PASS_CHECK6_SYNTHETIC41_SQL_PUSHDOWN_CANDIDATE_ONLY",
+          "Deno": "2.9.7",
+          "check_files": 6,
+          "generic_application_tests": 19,
+          "current_reviewer_tests": 22,
+          "total_tests": 41,
+          "failed": 0,
+          "receipt_sha256": "a9e6a8b29c916c11458e7b1bcf602f406bfefc871bfde01e2fc931ec5fcba169",
+          "scope": "cached_only_no_remote_check6_and_synthetic41_including_SQL_page_bounds_regression; no_new_actual_payload_performance_or_hosted_acceptance",
+          "earlier_default_cache_download_observation": "preserved; first default-cache check fetched pinned postgres package; final explicit preserved-cache verification separate"
+        },
+        "independent_source_review": {
+          "status": "PENDING_DELTA_SQL_TEST_AND_FINAL_STAGED_SNAPSHOT_REVIEW",
+          "earlier_source6_native40_review_receipt_sha256": "6300960e90775ebef82dcd11e4f7b3e3a497fc4d42e15cc4f7060023472b55d3",
+          "earlier_review_is_not_new_SQL_test_pin_review": true
+        },
+        "actual_app_role_bounded_page": "FAIL_STATEMENT_TIMEOUT57014_ON_QUALIFIED_PAYLOAD_AND_FILTERED_COUNTS_PAGE_KEYS; NO_COMPLETE_TYPED_PAGE_ACCEPTANCE_NO_MORE_SAME_FULL_QUERY_RETRIES",
+        "source_only_generic_bundle_and_missing_globals_boot": {
+          "status": "PASS_SOURCE_ONLY_CANDIDATE_FLAT_BUNDLE_AND_OFFLINE_BOOT_NOT_HOSTED_OR_COMMITTED_RELEASE",
+          "bundle_bytes": 125024,
+          "bundle_sha256": "059aed5951a704945add7e960c3161df178679ff81c6e133f98959b1e3d49081",
+          "receipt_sha256": "95736f6a3a2ccc74deb1dff03a86f7c542b706a80f0070451de77a3a753061ac",
+          "runtime_source_inputs": 7,
+          "pinned_driver_inputs": 10,
+          "total_inputs": 17,
+          "source_map_files": 0,
+          "private_needle_hits": 0,
+          "initial_Buffer_process_and_immediate_globals_absent": true,
+          "bootstrap_before_driver_Buffer_top_level": true,
+          "handler_registrations": 1,
+          "empty_settings_response": "503_security_policy_unavailable_private_no_store",
+          "actual_network_and_DB_calls": 0,
+          "settings_loaded": false,
+          "deployment": "NOT_RUN",
+          "source_state": "aa91015_SQL_acdc3660_test_native41_development_candidate_uncommitted; actual_performance_failed_not_launch_accepted"
+        },
+        "normal_commit_pre_push_exact_SHA_CI_and_develop_integration": "HOLD_PENDING_FINAL_STAGED_INDEPENDENT_REVIEW; DEVELOPMENT_CANDIDATE_INTEGRATION_IS_NOT_RUNTIME_ACCEPTANCE",
+        "new_purpose_approval_and_PIN3_cursor_key_registration": "NOT_RUN_NEW_CURRENT_DESCRIPTOR3_PLUS_SEPARATE_CURSOR_KEY_NAMES4; EXISTING_C_PIN3_UNCHANGED",
+        "new_function_deployment_fresh_JWT_BFF_browser_and_security_three_gates": "NOT_RUN",
+        "actual_readonly_probe_observation": {
+          "status": "FAIL_SAME_5_SECOND_QUALIFIED_PAYLOAD_AFTER_PAGE_SEMIFILTER_METADATA_AND_ROLE_PASS",
+          "metadata_closure": 12,
+          "parameter_count": 13,
+          "raw_JS_array_parameters": 0,
+          "returned_current_observations": 0,
+          "DB_writes": 0,
+          "statement_timeout_preserved": true,
+          "sqlstate": "57014",
+          "receipt_sha256": "b3b5f662f0907c9f353f0f79df69938bf0310bfd06ea419548325280db1c75da",
+          "boundary": "existing5second limit preserved; actual typed page/count/member/link acceptance failed; not source compilation or auth/RLS failure",
+          "source_SQL_sha256": "aa91015d156311f3cf56d14a77476f3712ba69fc628e85e67f37599f842285f4"
+        },
+        "actual_first_stale_state_observation": {
+          "status": "PASS_EFFECTIVE_ROLE_AND_METADATA_PLUS_EXPECTED_UNAPPROVED_STATE503_ONLY",
+          "metadata_closure": 12,
+          "parameter_count": 13,
+          "raw_JS_array_parameters": 0,
+          "returned_current_observations": 0,
+          "DB_writes": 0,
+          "receipt_sha256": "f265be901e94b85849fe3cba25655006fe3778bf44fb965fadeab5f71f5c98db",
+          "boundary": "first_payload_statement_executed_but_latest_state_mismatch_closed_before_typed_page; not_current_page_performance_or_full_scope_acceptance"
+        },
+        "historical_before_page_semifilter_native41": {
+          "source_files": [
+            {
+              "path": "supabase/functions/_shared/current_admission_display.ts",
+              "bytes": 13766,
+              "sha256": "5e24c6f4976e500cdd88295b0b2ba3961c6ff9027d7f601641a9b9d72adf3bad"
+            },
+            {
+              "path": "supabase/functions/_shared/current_admission_display_test.ts",
+              "bytes": 14325,
+              "sha256": "8720f38d355e136891208026de0802e5f7add002cb573f8b566cae8ac906878f"
+            },
+            {
+              "path": "supabase/functions/_shared/current_admission_review.ts",
+              "bytes": 24473,
+              "sha256": "3b1d5270225fed62fcb450d1de197f23ef507f933b25cbb0aa65cdc94d6d0c61"
+            },
+            {
+              "path": "supabase/functions/_shared/current_admission_review_postgres.ts",
+              "bytes": 13976,
+              "sha256": "c4bd03c3b052547957e96b6f3d4dc77d50bda265e554300bd35669f3621216ae"
+            },
+            {
+              "path": "supabase/functions/_shared/current_admission_review_test.ts",
+              "bytes": 23468,
+              "sha256": "1ef14d5ef594489e6a7a7c194f39b9bbfb8c17a36e84436b84f2f2ac93fc613c"
+            },
+            {
+              "path": "supabase/functions/current-admission-review/index.ts",
+              "bytes": 1691,
+              "sha256": "fbbd8eb7af2fa8db1d6f0a7d591ea617cfb937843ec71af9963076d930ed70c1"
+            }
+          ],
+          "native": {
+            "status": "PASS_SOURCE_TYPECHECK_AND_SYNTHETIC40_CANDIDATE_ONLY",
+            "Deno": "2.9.7",
+            "check_files": 6,
+            "generic_application_tests": 19,
+            "current_reviewer_tests": 21,
+            "total_tests": 40,
+            "failed": 0,
+            "receipt_sha256": "5fba508a4bf27e9a606d064d88133911097a24bf90858d96f8a482cf5b1cbaed",
+            "scope": "explicit_cached_only_no_remote_typecheck_and_synthetic_ports_SQL_mock; not_new_actual_driver_DB_wire_or_cloud_acceptance",
+            "earlier_default_cache_download_observation": "preserved; first default-cache check fetched pinned postgres package; final explicit preserved-cache verification separate"
+          },
+          "independent_source_review": {
+            "status": "PASS_INDEPENDENT_STATIC_SOURCE_REVIEW_ONLY",
+            "receipt_sha256": "6300960e90775ebef82dcd11e4f7b3e3a497fc4d42e15cc4f7060023472b55d3",
+            "source_6_pins_equal": true,
+            "native40_evidence_reused_not_rerun": true,
+            "actual_DB_or_runtime_reexecution": false
+          },
+          "source_only_generic_bundle_and_missing_globals_boot": {
+            "status": "PASS_SOURCE_ONLY_UNCOMMITTED_CANDIDATE_OFFLINE_BOOT_NOT_HOSTED_RELEASE",
+            "bundle_bytes": 124738,
+            "bundle_sha256": "10eebbf484ac6a0ba1be8dda414afeea091a1feed385c2754c7563bdb1339197",
+            "receipt_sha256": "15e86ba15b8e415652a7ecd06f8b632073e02f0fdd73334c313e41d8b3711def",
+            "runtime_source_inputs": 7,
+            "pinned_driver_inputs": 10,
+            "total_inputs": 17,
+            "source_map_files": 0,
+            "private_needle_hits": 0,
+            "initial_Buffer_process_and_immediate_globals_absent": true,
+            "bootstrap_before_driver_Buffer_top_level": true,
+            "handler_registrations": 1,
+            "empty_settings_response": "503_security_policy_unavailable_private_no_store",
+            "actual_network_and_DB_calls": 0,
+            "settings_loaded": false,
+            "deployment": "NOT_RUN"
+          },
+          "actual_readonly_probe_observation": {
+            "status": "FAIL_QUALIFIED_CURRENT_PAYLOAD_STATEMENT_TIMEOUT_ONLY_METADATA_GUARDS_PASS",
+            "metadata_closure": 12,
+            "parameter_count": 13,
+            "raw_JS_array_parameters": 0,
+            "returned_current_observations": 0,
+            "DB_writes": 0,
+            "statement_timeout_preserved": true,
+            "sqlstate": "57014",
+            "receipt_sha256": "80792d5f2dace48d7c9978adbf5a967b438e13d2e65c350189e16e620685ed3a",
+            "boundary": "qualified state reached payload but query exceeded existing timeout; no complete typed page/count/cursor/member/link/performance acceptance; no source_view_or_RLS_or_timeout_or_permission_relaxation"
+          }
+        },
+        "actual_performance_diagnostics": {
+          "page_semifilter_candidate": {
+            "status": "FAIL_SQLSTATE57014",
+            "receipt_sha256": "b3b5f662f0907c9f353f0f79df69938bf0310bfd06ea419548325280db1c75da"
+          },
+          "transaction_local_jit_off": {
+            "status": "FAIL_SQLSTATE57014_DIAGNOSTIC_ONLY_NOT_SOURCE_SETTING",
+            "receipt_sha256": "33b41b205af099c6c0b3bffb080705daf2ae2126200feea136ed7edb6effd82b"
+          },
+          "filtered_counts_page_keys_and_payload_components": {
+            "status": "FAIL_SQLSTATE57014_EACH_DIAGNOSTIC_COMPONENT; API_STATEMENT_COUNT_UNCHANGED",
+            "receipt_sha256": "d37aef3aa8ee2aeaccedd9ce5167fd9807d59d5cb67e46fb8ede74fd3ba5424f"
+          },
+          "fixed_four_year_IN_plus_exact_JSON_guard": {
+            "status": "FAIL_SQLSTATE57014_PRIVATE_DIAGNOSTIC_NOT_ADOPTED_IN_SOURCE",
+            "receipt_sha256": "68ddbddfd513ec805b69e22fb7df97446a7a2405f05e9b27b2d497adf4093afc"
+          },
+          "no_more_same_full_query_retries": true,
+          "registry_initial_fields_filter_substitution_allowed": false,
+          "new_materialized_cache_view_index_timeout_or_RLS_change": false
+        },
+        "new_purpose_approval_and_PIN4_registration": "NOT_RUN_CURRENT_REVIEW_FOUR_NAMESPACED_SETTINGS; EXISTING_C_BASE7_AND_PIN3_UNCHANGED"
+      },
+      "normalized_filter_contract": {
+        "normalization": "trim_then_ASCII_A_Z_case_fold; exact_shared_application_and_SQL_translate",
+        "substring": [
+          "university_q",
+          "department_q"
+        ],
+        "exact": [
+          "track",
+          "group",
+          "metric_kind",
+          "cohort"
+        ],
+        "unsupported": [
+          "region"
+        ],
+        "maximum_limit": 100,
+        "sort": "academic_year_then_canonical_result_id_COLLATE_C",
+        "unknown_or_duplicate_query_field": "invalid_input"
+      },
+      "wire_contract": {
+        "recipe": "current_review_wire_state_v1",
+        "current_fields": 35,
+        "member_fields": 32,
+        "population_fields": 7,
+        "numeric_and_nested_JSONB": "explicit_numeric_text_and_JSONB_text_with_lexical_validation; no_float_roundtrip_or_native32_hash_claim",
+        "member_binding": "exact_selected_source_member_count; unique_release_source_composite; exactly_one_representative; source_result_release_fingerprint_match",
+        "population": "ordered_multiset_duplicates_preserved; forward_reference_does_not_create_result_year",
+        "record_state_digest": "declared_wire_projection_and_private_state_bound_inside_separate_observation_AEAD_domain; not_original_native32_or_all29",
+        "cursor_domain": "jungsi_current_cursor_binding_separate_from_observation_domain"
+      },
+      "query_contract": {
+        "fixed_view": "jungsi_data_ingest.admission_results_current",
+        "data_statements_per_page": 1,
+        "metadata_statement": "independent_recursive_closure_of_current_member_population_and_command_seeds; exact_approved_definition_columns_options_role_RLS_in_same_transaction",
+        "payload": "qualified_state_then_filtered_lightkeys_exact_counts_limit_plus_one_keyset; all_three_payload_paths_have_page_key_ANY_semifilters_and_bulk_JOIN; one_statement; actual5second_performance_FAILED",
+        "parameters": "13_scalar_bindings; allowed_years_JSON_string_through_text_then_jsonb; no_raw_JS_array_or_value_SQL_interpolation",
+        "snapshot": "repeatable_read_read_only_row_security_on_verified_app_role_and_TLS_CA",
+        "whole_payload_fetch_memory_filter_sort_or_per_row_queries": false,
+        "count_failure": "503_safe_rejection; not_zero_or_page_count_substitution",
+        "unknown_first_page_state": "503_current_review_state_unapproved",
+        "changed_cursor_state": "409_cursor_version_mismatch",
+        "guard_timeout_or_dependency_failure": "503_without_exception_or_secret_text; no_unverified_fallback",
+        "performance_acceptance": "FAILED_ACTUAL_FILTERED_COUNTS_PAGE_KEYS_AND_COMPLETE_PAYLOAD; SQL_shape_regression_or_compilation_is_not_launch_qualification"
+      },
+      "performance_change_request": {
+        "status": "REQUIRED_CONCRETE_LIGHT_CURRENT_PROJECTION_OR_INDEX_PROVIDER_CR; ADVISORY_RESULTS_PENDING; NOT_IMPLEMENTED_OR_APPROVED",
+        "authority": "fixed_admission_results_current_definition_and_corrected_curation_head_override_semantics_remain_authoritative",
+        "constraints": [
+          "single_bounded_payload_statement_with_exact_same_snapshot_counts",
+          "no_N_plus_1_or_unbounded_returned_payload",
+          "existing5second_timeout_role_RLS_TLS_no_row_loss",
+          "no_registry_initial_name_year_active_filter_shortcut",
+          "no_unknown_latest_state_adoption_or_current_C_promotion",
+          "no_DDL_GRANT_cache_fallback_without_new_concrete_authority",
+          "IO_budget_recovery_and_safe_write_checkpoint_before_fresh_actual_validation",
+          "finite_initial_build_and_incremental_update_cost_no_automatic_full_rebuild",
+          "no_COMPUTE_UPGRADE_or_billing_change_without_human_request"
+        ]
+      },
+      "IO_budget_guard": {
+        "id": "DEP-IO-01",
+        "status": "HOLD_ADDITIONAL_IO_INTENSIVE_DB_EXECUTION_USER_REPORTED_WARNING; FILE_ONLY_PREPARATION_CONTINUES",
+        "basis": "user_supplied_Supabase_dashboard_image_2026_10_10; not_a_new_Root_dashboard_or_metrics_measurement",
+        "reported_warning": "프로젝트의 디스크 I/O 예산이 곧 소진될 예정이며, 소진되면 처리량이 기본5MB/s로 돌아간다는 경고",
+        "cause": "unconfirmed; existing_SQLSTATE57014_timeouts_and_budget_warning_are_separate_observations",
+        "held_operations": [
+          "new_full_current_payload_queries",
+          "new_EXPLAIN_or_EXPLAIN_ANALYZE",
+          "new_database_wide_counts_or_statistics",
+          "bulk_Storage_copy_or_export",
+          "whole_data_reingestion_or_read_model_build",
+          "VACUUM_or_VACUUM_FULL"
+        ],
+        "permitted_work": [
+          "source_and_local_synthetic_verification",
+          "existing_receipt_and_query_plan_file_review",
+          "planning_routing_and_change_request_preparation"
+        ],
+        "resume_requirements": [
+          "project_owner_or_current_metrics_observation_confirms_IO_budget_throughput_latency_and_ongoing_jobs; existing_size_snapshot_is_not_live_IO_evidence",
+          "concrete_IO_bounded_query_or_read_model_CR_with_initial_build_and_incremental_update_cost_and_short_finite_batches",
+          "single_fresh_bounded_app_role_readonly_validation_with_existing5second_timeout_and_safe_abort; no_automatic_repeat",
+          "data_team_confirms_safe_write_checkpoint_and_no_concurrent_bulk_build_for_the_same_review_snapshot"
+        ],
+        "current_source_and_existing_C_preserved": true,
+        "new_SQL_or_timeout_or_role_RLS_change": false,
+        "compute_upgrade_or_billing_change": false,
+        "actual_budget_recovery_or_cost_attribution": "NOT_RUN",
+        "in_flight_transaction_forced_kill_or_rollback": false
+      }
+    },
+    "historical_current_review_connection_before_source_registration": {
       "id": "DBD-06-CURRENT-ALL-REVIEW",
       "status": "preparation_in_progress_not_activated",
       "human_scope": "frontend_team_and_administrators_review_first",
