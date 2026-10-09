@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.23",
+  "version": "1.9.24",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2822,7 +2822,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.23",
+        "contract_version": "1.9.24",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -2996,7 +2996,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.23",
+        "contract_version": "1.9.24",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -3162,7 +3162,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.23",
+        "contract_version": "1.9.24",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -3181,7 +3181,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.23",
+        "contract_version": "1.9.24",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3206,7 +3206,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "planned",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.23",
+        "contract_version": "1.9.24",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3231,7 +3231,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_verified_cloud_acceptance_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.23",
+        "contract_version": "1.9.24",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -3240,7 +3240,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "runtime_followup_status": "minimum_node_bootstrap_fix_source_merged_generic_redeployed_fresh_real_JWT_retest_pending"
+        "runtime_followup_status": "second_JWT_worker_error_resolved_subject_denial_single_subject_appendix_reviewed_owner_PIN3_activation_pending"
       }
     },
     "development_harness": {
@@ -9010,15 +9010,15 @@
       "development_state": [
         [
           "develop / 최신 검증 기준",
-          "e086a6b571caa8ac758b7280c6d3538fb682c47a / spec1.9.22 / source30cf5686330cdacc3d60d7a98f512ed107288c1f",
-          "정상source853+853·exactsource/mergeCI PASS; 최신상태 문서 검사는 별도",
-          "최소 Node bootstrap 수정과 재배포 확인을 기록한다. main/운영 인수와 구분한다."
+          "4dd89882557c4445ad6e6522c1c0c57f1b0f3159 / spec1.9.23",
+          "정상853+853·exactCI250 PASS; 새 문서 검사는 별도",
+          "배포 소스30cf/mergee086/bundleb7ed를 유지하며 2차실JWT 보고와 subject 부속 등록 상태를 구분한다. main/운영 인수와 구분한다."
         ],
         [
           "시스템기획팀 / 공통 문서",
-          "spec1.9.23 / 기동 수정 통합·재배포 관측",
-          "기획·라우팅·계층·브랜치·현황·색인 동기화",
-          "기존 WORKER_ERROR와 source/native/bundle·재배포 증거를 보존한다. fresh JWT/hostedDB/BFF브라우저·보안 인수는 별도 미실행."
+          "spec1.9.24 / 2차실JWT 보고·검수자1명 부속 범위",
+          "기획·라우팅·계층·현황·인계 동기화",
+          "일반 403은 subject 선행이면 paid 증거가 아니다. 비공개 UUID/PIN값은 Git에 넣지 않고 Owner PIN3 활성화와 실자료/BFF 검수를 별도 기록한다."
         ],
         [
           "화면팀 / PR18",
@@ -9053,14 +9053,14 @@
         [
           "서비스·DB / 공식 입결 표시 연결",
           "DEV-011 / 동결C/v21_1 제한 검수",
-          "최소 bootstrap source 통합·native36/동일번들기동 회귀·기존함수 재배포 확인",
-          "실제JWT5GET500 이전실패보존; 수정판 freshJWT·hostedDB·BFF/브라우저·보안3gate는별도 재검수. 설정/기본권한/RLS/JOIN/C/current/TTL불변."
+          "수정판 기동 정상 2차 화면팀 보고 수신·검수 subject 미등록 원인 확인·1계정 부속판 검수",
+          "새 자료판 준비/비공개 등록과 PIN3 활성화를 구분한다. 유료403 paid_required 재검수·140지표·cursor/pending/실hostedDB/BFF브라우저는 후속. RLS/JOIN/기본이용권/승인만료불변."
         ],
         [
-          "지정 화면팀 Supabase 관리자 / 등록 완료",
+          "지정 화면팀 Supabase 관리자 / 기존판 완료·부속판 대기",
           "기본7+PIN3 / 독립 digest 모두 일치",
-          "설정 재등록 불필요; 수정판 배포 후 fresh JWT 재검수",
-          "기본7/PIN3·JWT ON·relay 및 기존GET5범위 유지. 승인 만료 후 새승인판; 실제 보안/브라우저 인수 전 완료 표시 금지."
+          "기본7·원PIN3 등록 완료 / 새 계정 부속판 PIN3 전환 대기",
+          "기존 등록 영수증을 보존한다. 지정 Owner/Admin이 새 자료판 PATH·SHA256·BYTES만 함께 교체하고 실제 적용 시각·digest를 회신한다. Root 적용/실JWT 인수는 NOT_RUN."
         ],
         [
           "데이터팀·서비스 / 단일 현재 입결",
@@ -9104,11 +9104,11 @@
     "DEV-009 연결 코드는 PR19/develop 합성 인수 완료다. 사용자 최신 지시로 운영 플랫폼은 Google Drive·Supabase로 한정하며 Python/FastAPI는 로컬 검산 기준으로 보존한다. DEV-010 Edge 호환 구현·최소 native 승인/발행·화면 제공 범위·실제 운영과 포함 사용량 인수는 미완료다.",
     "DEV-010: 외부 유료 호스팅·추가 서버·유료 부가 기능 없이 Supabase Edge 대응을 준비한다. Apps Script 웹앱은 검토 후보 포함만 승인됐으며 실제 배포/화면 교체·기존 요금제/Spend Cap·운영 보안 인수는 미완료다.",
     "1페이지 추정 2열 유지·보완과 로컬 catalog 시사 준비: 공식 지표 의미 대응/동일 통계 범위·최소 native 변환·승인/신뢰 해시/기대값·별도 수시 반입 출처와 화면 모드·외부 브라우저 인수가 남아 있다. source-only/CSV 저장 건수는 발행과 시사 완료를 뜻하지 않는다.",
-    "DEV-011 spec1.9.23: 최소 Node bootstrap source/native36·동일배포번들기동 회귀·정상훅/정확CI/develop통합·기존함수 재배포를 확인했다. freshJWT5GET140지표/hostedDB/BFF브라우저·no-store/권한·운영보안 인수는 화면팀 후속이다. 승인 만료 뒤 새 승인판을 요구하고 동일판 자동연장을 하지 않는다.",
+    "DEV-011 spec1.9.24: 화면팀 2차실JWT에서500 기동오류가 재현되지 않고 subject 미등록403이 관측됐다. 보고 수신과 Root exactAuth GET200/file-native 합성 검수를 구분한다. 일반회원의 유료2GET403은 subject 확인이 먼저이므로 paid_required 코드로 다시 검증한다.",
     "C 경로변경 독립수용 후 화면팀PC README3~5의 로컬21/21·140 typed/render PASS 영수증을수신했다. Root의문서검토이며Root재실행·클라우드/운영인수는아니다. 해당Edge 재검수·BFF/브라우저·보안영수증은별도다.",
     "현재 단일 정본 입결 공급자는 새 canonical/source 관측 binding·목적승인·실제 app SELECT/RLS·bounded JOIN 구현 및 검수가 필요하다. 기존 C/v21_1 검수 공급자를 현재 정본으로 다시 승격하지 않는다.",
     "DB 용량 정리는 원형 아카이브/해시/참조 보존과 정확한 DB 제거 범위·권한·current/C 영향·유지보수 후 실측을 별도 검토한다. 화면팀 조건부 동의를 정확한 사용자 삭제 승인으로 대신하지 않으며 실제 정리 완료로 기록하지 않는다.",
-    "DEV-011 spec1.9.23: 최소 Node bootstrap source/native36·동일배포번들기동 회귀·정상훅/정확CI/develop통합·기존함수 재배포를 확인했다. freshJWT5GET140지표/hostedDB/BFF브라우저·no-store/권한·운영보안 인수는 화면팀 후속이다. 승인 만료 뒤 새 승인판을 요구하고 동일판 자동연장을 하지 않는다."
+    "DEV-011 검수자 부속 범위: 기존 140지표·12연도별모집행·목적·승인기간을 그대로 두고 계정1개를 추가한 새 불변 자료판을 준비했다. Owner/Admin의 descriptor PIN3 일치 전환 후 freshJWT140지표100+40·pending·no-store·payload 미노출을 재검수한다. 활성화/실hostedDB/BFF/운영보안 인수는 미실행이며 만료 뒤 새 승인판을 요구한다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -10046,6 +10046,18 @@
         "REQ-26"
       ],
       "summary": "spec1.9.23: Edge WORKER_ERROR 최소 bootstrap 수정의 source 정상853+853/정확CI·개발통합과 동일committedbundle 재배포·편집기SHA/JWT ON 확인을 기록한다. 이전500과 미실행 이력·C 보고 수신을 보존하고 실제 freshJWT/hostedDB/BFF브라우저·보안 인수는 미실행으로 유지한다. 기본회원/DB/RLS/JOIN/원형/current/승인TTL·전역22API 불변."
+    },
+    {
+      "date": "2026-10-09",
+      "requirements": [
+        "REQ-01",
+        "REQ-08",
+        "REQ-12",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "spec1.9.24: 화면팀 2차실JWT에서 Node 기동 정상·subject 미등록403을 분리해 기록한다. 정확한 기존 계정Auth 읽기와 검수자1명 부속판 file/native 합성 검수·비공개 등록 상태를 PIN3 Owner 활성화/실자료·브라우저 인수와 구분한다. subject가 paid 확인보다 먼저이므로 일반 유료403은 paid_required로 재검수한다. 실제 UUID/키/PIN값 Git 제외, 소스/RLS/JOIN/기본권한/입결/원승인기간·17API·current 공급자 불변."
     }
   ],
   "overall_analysis_contract": {
@@ -20217,7 +20229,7 @@
   "official_history_db_display_contract": {
     "format": "jungsi.official-history-db-display/v1",
     "id": "DEV-011",
-    "revision": "2026.10.09.v6",
+    "revision": "2026.10.09.v7",
     "branch": "feature/application-pre-data-platform",
     "basis_commit": "db50c45127cfb314cc52e2bc8682505e077fffec",
     "requirements": [
@@ -20229,7 +20241,7 @@
       "REQ-25",
       "REQ-26"
     ],
-    "code_status": "runtime_bootstrap_fix_integrated_generic_redeployed_real_cloud_acceptance_pending",
+    "code_status": "runtime_bootstrap_fixed_deployed_second_JWT_subject_denial_one_subject_appendix_PIN3_owner_pending",
     "production_ready": false,
     "purpose": "승인된 동결 역사 입결의 제한 표시 검수; 현재 단일 정본 공급자는 별도 준비 단계",
     "operations": [
@@ -20338,8 +20350,8 @@
       "source_db_read_only": "PASS_FRESH_V5_SCOPED_APP_ROLE_TLS_READONLY_PROVIDER_140_METRICS_12_ANNUAL_OFFERINGS; ORIGINAL_V4_57014_PRESERVED; NOT_FULL_SERVICE_ACCEPTANCE",
       "python_reference_HTTP": "PASS_17_NATIVE_SCOPED_SYNTHETIC_AND_FRESH_V5_ACTUAL_DB_HTTP_WITH_SYNTHETIC_DI_AUTH_HISTORY_100_40_ME_3_FIELDS_NEGATIVE_PAYLOAD_ZERO; REAL_JWT_CLOUD_BFF_BROWSER_NOT_RUN",
       "Deno_check_test": "PASS_NATIVE_DENO2_9_7_CACHED_ONLY_CHECK6_SOURCE_AND_TEST_FILES_AND_TEST36_33_EXISTING_PLUS3_BOOTSTRAP; NO_ACTUAL_AUTH_PRIVATE_SETTINGS_DB_OR_NETWORK; OFFLINE_FULL_BUNDLE_BOOT_RECEIPT_SEPARATE; FIXED_HOSTED_RETEST_NOT_RUN",
-      "restricted_cloud_API": "FIXED_COMMITTED_BUNDLE_REDEPLOYED_AFTER_NATIVE_AND_OFFLINE_BOOT_REGRESSION; OLD_FRONTEND_REAL_JWT_5_GET_500_WORKER_ERROR_PRESERVED; FIXED_REAL_JWT_HOSTED_DB_BFF_BROWSER_SECURITY_RETEST_PENDING",
-      "actual_user_JWT": "FRONTEND_REAL_STANDARD_USER_JWT_5_GET_ATTEMPTED_500_WORKER_ERROR; ROOT_DASHBOARD_BUFFER_REFERENCE_ERROR_LOG_MATCH; FIXED_REVISION_RETEST_NOT_RUN",
+      "restricted_cloud_API": "FRONTEND_SECOND_REAL_JWT_REPORT_NO_WORKER_ERROR_AUTH_RELAY_NEGATIVES_AND_ERROR_NO_STORE; REVIEW_SUBJECT_NOT_ALLOWED403_BEFORE_ENTITLEMENT_AND_PAYLOAD; ONE_SUBJECT_APPENDIX_PREPARED_RUNTIME_PIN3_OWNER_ACTIVATION_PENDING",
+      "actual_user_JWT": "FRONTEND_SECOND_REAL_USER_JWT_REACHED_APPLICATION_SUBJECT_CHECK403_REVIEW_SUBJECT_NOT_ALLOWED; ROOT_READ_REPORT_AND_EXACT_AUTH_SUBJECT_ADMIN_GET200; ROOT_REAL_USER_JWT_RERUN_NOT_RUN",
       "frontend_BFF_browser": "NOT_RUN",
       "operational_security_three_gates": "NOT_RUN",
       "effective_RLS": "PASS_FRESH_V5_ACTUAL_PROVIDER_NONOWNER_NONSUPER_NONBYPASS_APP_ROLE_READONLY_ROW_SECURITY_ON_19_PINNED_INVOKER_VIEWS_3_ENABLE_AND_FORCE_RLS_TABLES; HOSTED_EDGE_RLS_NOT_RUN",
@@ -20378,7 +20390,7 @@
       "source_integration": "PR21_MERGE_COMMIT_DEVELOP_ONLY_SOURCE_30cf5686330cdacc3d60d7a98f512ed107288c1f_INTEGRATION_e086a6b571caa8ac758b7280c6d3538fb682c47a; BRANCHES_PRESERVED_MAIN_UNCHANGED; SOURCE_INTEGRATION_NOT_OPERATIONAL_ACCEPTANCE",
       "current_canonical_provider": "NOT_IMPLEMENTED; CURRENT_VIEW_ADMISSION_RESULTS_CURRENT_AND_CANONICAL_SOURCE_ID_BINDING_PERMISSION_RLS_REVIEW_REQUIRE_NEW_PURPOSE_ADAPTER; HISTORICAL_C_SOURCE_NOT_PROMOTED",
       "DB_capacity_preservation": "PREPARATION_ONLY_AFTER_FRESH_BOUNDED_METADATA_PASS; CURRENT_AND_HISTORICAL_C_DIRECT_OVERLAY_DEPENDENCIES_AND_BYTEA_NOT_NULL_REQUIRE_ADAPTER_SCHEMA_REVIEW; NO_DB_SOURCE_REMOVAL_ARCHIVE_WRITE_OR_VACUUM_ACCEPTANCE",
-      "previous_planning_status_CI": "PASS_EXACT_DEVELOP_A59F370_PROJECT_CONSISTENCY_241_NORMAL_PRECOMMIT_853_PREPUSH_853; CURRENT_NEW_STATUS_COMMIT_CHECKS_SEPARATE",
+      "previous_planning_status_CI": "PASS_EXACT_DEVELOP_4dd89882557c4445ad6e6522c1c0c57f1b0f3159_PROJECT_CONSISTENCY250_NORMAL_PRECOMMIT853_PREPUSH853; CURRENT_NEW_STATUS_COMMIT_CHECKS_SEPARATE",
       "DB_capacity_metadata_probe": "PASS_SINGLE_ACTUAL_APP_CONNECTION_TLS_VERIFY_FULL_READONLY_ROW_SECURITY_NO_SUPER_BYPASS; TARGET3_SELECT_ONLY_FORCE_RLS; SETUP5_METADATA5_COMMIT1; FIVE_SECOND_STATEMENT_TWO_SECOND_LOCK_BOUNDS; NO_PAYLOAD_DB_STORAGE_WRITE_VACUUM_OR_PRIVILEGE_CHANGE; NOT_ARCHIVE_ACCEPTANCE",
       "historical_cloud_runtime_before_bootstrap": {
         "restricted_cloud_API": "GENERIC_FUNCTION_DEPLOYED_PRIVATE_DESCRIPTOR_READBACK_AND_BASE7_PLUS_PIN3_INDEPENDENT_DIGEST_MATCH; REAL_JWT_HOSTED_DB_BFF_BROWSER_SECURITY_PENDING",
@@ -20393,7 +20405,7 @@
       "worker_fixed_bundle": "PASS_OFFLINE_ACTUAL_ORIGINAL_DEPLOYED_BUNDLE_BUFFER_REFERENCE_ERROR_HANDLER0_AND_NEW_FULL_BUNDLE_ALL4_GLOBALS_MISSING_HANDLER1_BUFFER_PROCESS_ENV_TIMER_SCHEDULE_CANCEL; EMPTY_SYNTHETIC_SETTINGS503_SECURITY_POLICY_UNAVAILABLE_NO_STORE_FETCH0_DB0; NOT_HOSTED_AUTH_DB_ACCEPTANCE",
       "worker_fix_source_integration": "PASS_SOURCE_30cf5686330cdacc3d60d7a98f512ed107288c1f_NORMAL_PRECOMMIT_AND_PREPUSH_853_EACH_EXACT_SOURCE_CI; PR21_MERGE_COMMIT_e086a6b571caa8ac758b7280c6d3538fb682c47a_EXACT_MERGE_CI_SUCCESS; BRANCHES_PRESERVED_MAIN_UNCHANGED",
       "worker_fix_cloud_deployment": "PASS_EXISTING_FUNCTION_REDEPLOYMENT_VISIBLE_UPDATED_EDITOR_READBACK_LF_BYTES_SHA_EXACT_COMMITTED_SOURCE_BUNDLE_JWT_ON_UNCHANGED; SOURCE_DEPLOYMENT_ONLY_NOT_REAL_USER_HOSTED_SQL_OR_BROWSER_ACCEPTANCE",
-      "worker_fixed_real_JWT_retest": "NOT_RUN_FRONTEND_OWNER_RETRY_WITH_FRESH_USER_JWT_EXISTING_RELAY_5_GET_140_TYPED_METRICS_NO_STORE_STANDARD_PAID_GET_403_RECRUITMENT_PENDING_BEFORE_VALID_APPROVAL_EXPIRY",
+      "worker_fixed_real_JWT_retest": "FRONTEND_SECOND_REPORT_RUNTIME_CRASH_NOT_REPRODUCED_AND_NEGATIVE_GATES_REPORTED; HISTORY140_CURSOR100_40_AND_RECRUITMENT_PENDING_BLOCKED_BEFORE_PAYLOAD; FULL_HOSTED_DB_BFF_BROWSER_ACCEPTANCE_NOT_RUN",
       "frontend_local_C_report": "RECEIVED_AND_READ_FRONTEND_RECEIVER_LOCAL_README_STEPS_3_TO_5_21_OF_21_API_CASES_AND_140_TYPED_FIELDS_RENDER_REPORTED_PASS; ROOT_RECEIPT_REVIEW_NOT_ROOT_RERUN_OR_CLOUD_ACCEPTANCE",
       "frontend_local_C_report_sha256": "2cc4da7e063fad95dbf5fe9a8af486d4ed7c0cf3ce6a3ee841c6d5afd02b9372",
       "historical_local_C_receiver_acceptance_before_frontend_report": "PASS_ROOT_ACK_EXACT_PATH_ONLY_RECEIVER_SELECTION_AND_ORIGINAL_MECHANICAL_RECEIPT_MANIFEST_APPROVAL4TUPLE_TYPED_BYTES_BINDING; FROZEN_LOCAL_VERIFICATION_ONLY; RECEIVER_CLI_CACHE_SESSION_API_BROWSER_NOT_RUN",
@@ -20435,7 +20447,18 @@
         "worker_fix_source_integration": "PENDING_NORMAL_COMMIT_PUSH_HOOKS_EXACT_SHA_CI_AND_DEVELOP_PR; NO_MAIN_MERGE_OR_OPERATIONAL_ACCEPTANCE",
         "worker_fix_cloud_deployment": "NOT_RUN_PENDING_COMMITTED_SOURCE_BUILD_READBACK_SHA_AND_EXISTING_FUNCTION_REDEPLOYMENT; OLD_GENERIC_DEPLOYMENT_ONLY_EVIDENCE_PRESERVED"
       },
-      "worker_committed_bundle_verification_receipt_sha256": "63d319c6c692f6ce4568e4dbc4c58bf63787f84dccc42a39e92a9d13b7994e01"
+      "worker_committed_bundle_verification_receipt_sha256": "63d319c6c692f6ce4568e4dbc4c58bf63787f84dccc42a39e92a9d13b7994e01",
+      "historical_before_second_JWT_report_and_subject_appendix": {
+        "restricted_cloud_API": "FIXED_COMMITTED_BUNDLE_REDEPLOYED_AFTER_NATIVE_AND_OFFLINE_BOOT_REGRESSION; OLD_FRONTEND_REAL_JWT_5_GET_500_WORKER_ERROR_PRESERVED; FIXED_REAL_JWT_HOSTED_DB_BFF_BROWSER_SECURITY_RETEST_PENDING",
+        "actual_user_JWT": "FRONTEND_REAL_STANDARD_USER_JWT_5_GET_ATTEMPTED_500_WORKER_ERROR; ROOT_DASHBOARD_BUFFER_REFERENCE_ERROR_LOG_MATCH; FIXED_REVISION_RETEST_NOT_RUN",
+        "worker_fixed_real_JWT_retest": "NOT_RUN_FRONTEND_OWNER_RETRY_WITH_FRESH_USER_JWT_EXISTING_RELAY_5_GET_140_TYPED_METRICS_NO_STORE_STANDARD_PAID_GET_403_RECRUITMENT_PENDING_BEFORE_VALID_APPROVAL_EXPIRY",
+        "previous_planning_status_CI": "PASS_EXACT_DEVELOP_A59F370_PROJECT_CONSISTENCY_241_NORMAL_PRECOMMIT_853_PREPUSH_853; CURRENT_NEW_STATUS_COMMIT_CHECKS_SEPARATE"
+      },
+      "subject_appendix_preparation": "PASS_PRIVATE_NEW_ONE_EXISTING_AUTHENTICATED_SUBJECT_APPENDIX_FILE_AND_NATIVE_SYNTHETIC_PORTS_REVIEW; ORIGINAL_SUBJECTS_AND_140_TYPED_CATALOG_BINDINGS_FLAGS_ISSUE_EXPIRY_OPERATIONS_UNCHANGED; NEW_APPROVAL_ID_AND_ONE_SUBJECT_ONLY; NO_PAID_GRANT",
+      "subject_appendix_storage_registration": "PASS_NEW_PRIVATE_OBJECT_RAW_READBACK_EXACT_ANONYMOUS_DENIED; EXISTING_SOURCE_PRESERVED_NEW_IMMUTABLE_OBJECT_ONLY_NO_DB_RLS_SECRET_OR_PIN3_CHANGE",
+      "subject_appendix_PIN3_activation": "NOT_RUN_DESIGNATED_FRONTEND_SUPABASE_OWNER_ADMIN_MUST_REPLACE_ONLY_DESCRIPTOR_PATH_SHA256_BYTES_MATCHED_TRIPLET; DO_NOT_CHANGE_BASE7_JWT_RELAY_ROLE_PAID_OR_APPROVAL_TTL; ORIGINAL_SCOPE_PERIOD_ANCHORED_NOT_A_NEW_BACKDATED_GRANT",
+      "paid_route_cloud_acceptance": "NOT_PROVEN_BY_SECOND_REPORT_403_STATUS_ONLY_SUBJECT_CHECK_PRECEDES_PAID_CHECK; AFTER_SUBJECT_ACTIVATION_STANDARD_SEARCH_AND_READ_MUST_RETURN403_PAID_REQUIRED_WITH_PAYLOAD_ZERO",
+      "subject_appendix_upload_approval_history": "INITIAL_EXACT_UPLOAD_AUTO_REVIEW_REJECTED_BEFORE_EXECUTION; CURRENT_USER_EXPLICIT_FILE_BUCKET_PATH_APPROVAL_RECEIVED; IMMUTABLE_OBJECT_REGISTERED; POST_REGISTRATION_ERROR_SHAPE_VALIDATOR_FAILURE_PRESERVED_AND_GET_ONLY_FINAL_CHECK_PASS; NO_SECOND_POST_OR_GATE_BYPASS"
     },
     "frontend_handoff": [
       "브라우저·화면 코드·일반 프런트 환경은 기존 API의 공개 응답만 읽는다. app DATABASE_URL/DB CA/Storage secret/descriptor/원자료/전체 DB를 수령하지 않는다. 지정된 Supabase 관리자가 비공개 app-only 기본7 설정을 등록하는 역할은 별도 인계 범위다. migration-owner 접속값·키는 외부 화면 환경에 전달하지 않는다.",
