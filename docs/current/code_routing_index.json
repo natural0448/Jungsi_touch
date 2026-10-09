@@ -3741,6 +3741,137 @@
       ]
     },
     {
+      "path": "src/jungsi_touch/infrastructure/official_history_display.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_scoped_synthetic_verified_integration_pending",
+      "requirements": [
+        "REQ-01",
+        "REQ-08",
+        "REQ-12",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "source_sha256": "4bf59db073feaf95ce0b8784769c2bcc5bcfdfedfebeee7ff8012d14e6e154cb",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "OfficialHistoryDisplayScope",
+          "signature": "class OfficialHistoryDisplayScope:",
+          "decorators": [
+            "dataclass(frozen=True, repr=False)"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "OfficialHistoryDisplayScope.from_bytes",
+          "signature": "def from_bytes(cls, raw, sha256, *, environment):",
+          "decorators": [
+            "classmethod"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "OfficialHistoryDisplayScope.validate",
+          "signature": "def validate(self, now):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "PostgresOfficialHistoryDisplayProvider",
+          "signature": "class PostgresOfficialHistoryDisplayProvider(MissingDataProvider):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresOfficialHistoryDisplayProvider.__init__",
+          "signature": "def __init__(self, *, scope, clock, database_url=None, sslrootcert=None, connector=None, reader=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresOfficialHistoryDisplayProvider._rows",
+          "signature": "def _rows(self, body):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "PostgresOfficialHistoryDisplayProvider._transaction",
+          "signature": "def _transaction(self):",
+          "decorators": [
+            "contextmanager"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "PostgresOfficialHistoryDisplayProvider.get_catalog",
+          "signature": "def get_catalog(self):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "_DisplayBoundary",
+          "signature": "class _DisplayBoundary(SecuredBoundary):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_DisplayBoundary.verify",
+          "signature": "def verify(self, request):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "_DisplaySessions",
+          "signature": "class _DisplaySessions:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_DisplaySessions.__init__",
+          "signature": "def __init__(self, sessions, scope):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_DisplaySessions.verify",
+          "signature": "def verify(self, token, now):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_decimal",
+          "signature": "def _decimal(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_invalid",
+          "signature": "def _invalid():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_object",
+          "signature": "def _object(pairs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_same",
+          "signature": "def _same(a, b):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "create_official_history_display_app",
+          "signature": "def create_official_history_display_app(*, provider, security, settings, repository, sessions, clock):",
+          "decorators": []
+        }
+      ]
+    },
+    {
       "path": "src/jungsi_touch/infrastructure/postgres_entitlements.py",
       "layer": "data_infrastructure",
       "status": "support_module_no_direct_operation_registration",
@@ -5446,6 +5577,98 @@
   "edge_sources": {
     "format": "jungsi.typescript-source-hash-index/v1",
     "verification": "whole_source_hash_not_type_or_runtime_proof",
-    "files": []
+    "files": [
+      {
+        "path": "supabase/functions/_shared/official_history_display.ts",
+        "layer": "application",
+        "status": "implemented_scoped_synthetic_verified_integration_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "91def2f8a5755f9ea53e1164b689a27f769957a8d6c1fa110611d6c1addb413f",
+        "declared_exports": [
+          "DisplayError",
+          "canonicalDecimal",
+          "createOfficialHistoryDisplayHandler",
+          "DB_FIELDS",
+          "GUARD_FIELDS",
+          "HISTORY_FIELDS",
+          "mapScopedCatalog",
+          "nowMicros",
+          "OPERATIONS",
+          "OFFERING_FIELDS",
+          "parseStrictJson",
+          "sameJson",
+          "utcInstantMicros",
+          "utcText",
+          "validateDisplayScope",
+          "VIEW",
+          "DisplayDescriptor",
+          "DisplayTransport",
+          "Json",
+          "OfficialHistoryPorts",
+          "Row",
+          "VerifiedReviewSession"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/official_history_display_test.ts",
+        "layer": "data_infrastructure",
+        "status": "implemented_scoped_synthetic_verified_integration_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "6a6544c8b1577b4f559c127f6a46e9760f0f1d18ce70fde0d1fd9cad3ee23562",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/official_history_postgres.ts",
+        "layer": "data_infrastructure",
+        "status": "implemented_scoped_synthetic_verified_integration_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "0519110a716db968131c6a24f3526cc0ccd26642c875a71024bb8b201e0dd348",
+        "declared_exports": [
+          "createOfficialHistoryInfrastructure",
+          "loadPinnedDisplayDescriptor",
+          "OfficialHistoryInfrastructureSettings"
+        ]
+      },
+      {
+        "path": "supabase/functions/official-history-display/index.ts",
+        "layer": "data_infrastructure",
+        "status": "implemented_scoped_synthetic_verified_integration_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "94843a1e45d903cd8d5086e2e2e6745c6870b3c34eea19de01a42365ac652da2",
+        "declared_exports": []
+      }
+    ]
   }
 }

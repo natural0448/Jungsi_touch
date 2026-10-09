@@ -1,6 +1,6 @@
 # DEV006 서비스·DB 응답과 외부 프런트 인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.17이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.19이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 다음 기존 본문은 1.8.8까지의 준비/관측 이력과 계약 정의다. ②③ 응답 계약은 그대로 유지하고 현재 통합·자료메타 인수는 마지막1.8.9추가관측과current_followup을 따른다.
 
@@ -178,6 +178,9 @@ SUP01/02 의사결정 대기는 해소했지만 배포 제공자·Connect·publi
 
 최종메타집계보강: 실제등록·정책34조건PASS/실패0, 기존GET18의bytes/SHA·DB18결속32조건PASS/실패0·새GET0을추가영수증으로확인했다. 누적선별source18/비인증72본문미반환의집계이며실JWT·학생계산·운영엔진/보안gate인수가아니다. 이번문서정본반영/새훅/CI는여전히NOT_RUN이다.
 
+1.9.19 DEV-011 후속 관측: 기본7 Edge 설정은 지정 관리자의 등록 영수증v2와 Dashboard의7이름/등록시각/digest 목록으로 확인했다. Secret 관리권한·기본회원·원 engine/productionfalse는 유지한다. fresh v5 실제 app READONLY/TLS 공급자140공식지표/12모집행·DI HTTP100/40 각 dataJOIN1·RLS19view/3표 검수는 PASS이고 실제JWT/클라우드SQL/BFF/브라우저/보안gate와 구분한다. 원catalog의+00:00 시각을 변경하지 않고 TS에서 Z와동등 microseconds로읽어 Deno33 및 승인descriptor 파일 양성/만료/회수/목적/TTL 음성검수PASS를 확인했다. 승인판·불변PIN3은 비공개 준비 상태이고 실등록·함수배포/관측URL은NOT_RUN이다. 기존v4 57014·번들 도구OSerror2 실패와 데이터팀 후속v35 DiskFull53100 파일관측은 각각보존·원인미확정이다. C 수신은 재구성924B 내용/보고SHA 일치만 확인했고 수신실제 기계검수 원영수증 bytes 미확보로 CLI재개 NOT_ACCEPTED다. 새code/docs 후보의정상 훅/CI는 별도 영수증으로 판정하며 미실행 성공이나 미래자기SHA를 기록하지 않는다.
+
+
 [로컬 검증 계약과 실행 후보](../../current/로컬_검증_연결.md)를 함께 읽는다.
 
 ## Supabase 운영 인수 상태
@@ -210,4 +213,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](../../current/외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=1d2285b0453f7e156ecd190557484be129a29d65111f03ec097f4f6e7594f05d -->
+<!-- jungsi:generated spec_sha256=1cea04f121a75c5ad957e9f4b59364669d7c3b57e6bbba8e8ae866fe798aff67 -->
