@@ -1,10 +1,10 @@
 # Supabase 입결 DB와 화면 API 연결
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.27이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.28이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 승인된 동결 역사 입결의 제한 표시 검수; 현재 단일 정본 공급자는 별도 준비 단계
 
-계약 2026.10.09.v10 · 코드 array_io_corrected_source_integrated_and_redeployed_actual_readonly_provider140_verified_freshJWT_BFF_browser_acceptance_pending · production_ready=false. 담당 feature/application-pre-data-platform.
+계약 2026.10.10.v11 · 코드 historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress · production_ready=false. 담당 feature/application-pre-data-platform.
 
 ## 연결과 승인 범위
 
@@ -36,6 +36,17 @@
 - DB 원문 아카이브는 비공개 목적지의 새 사본·bytes/SHA·출처와 기존 승인해시 결속을 확인하고 currentview와 동결C 참조 범위의 값·타입·bytes 변경0을 검수한다. 아직 허용하지 않은 DB 제거/포인터치환/DDL/VACUUM은 완료로 표시하지 않는다. 일반VACUUM의 내부 재사용과 물리 파일 용량 반환을 구분하며 FULL의 배타잠금·추가공간/서비스영향을 별도 판단한다.
 - VACUUM의 내부 재사용 공간과 물리 파일 감소를 구분한다. 일반 VACUUM 완료만으로 전체 DB 공간 반환을 주장하지 않으며, VACUUM FULL의 배타 잠금·추가 사본 공간·정확한 실행 승인은 별도 검토한다.
 - Edge 의존 드라이버가 필요한 Node 전역은 별도 bootstrap을 의존 import 앞에서 평가한다. 엔트리 본문의 단순 Buffer 대입이 static import보다 먼저 실행된다고 가정하지 않는다. 기존 전역은 덮어쓰지 않으며 배포용 동일 번들에서 전역이 없는 초기 상태의 실패 재현·수정본 handler 등록을 검수한다. 기동 회귀는 실JWT·hosted SQL·BFF·브라우저 인수를 대신하지 않는다.
+- 사용자가 현재 정본 전수 연결의 첫 범위를 화면팀·관리자 검수로 확정했다. 모든 서비스 대학·학과를 검색할 수 있도록 준비하되 일반 회원 운영 공개를 동시에 채택하지 않는다. 기존 C 검수 승인 범위를 삭제·완화하지 않고 별도 current-purpose와 현재 상태·검수자 범위를 결속한다.
+- 현재 정본 검수는 matching_observation_count와 matching_source_school_count를 동일 검색조건·SQL 스냅샷에서 정확히 집계한다. 학교 식별은 (school_id, university_code)이며 검증된 공개 대학 ID의 수와 다르다. SQL 집계는 허용하되 전체 payload 수신·메모리 정렬·N+1 조회는 금지한다. 기존 C 집계 필드는 유지한다.
+- current cursor는 서버 전용 키로 암호화하고 검수자·operation·정규화 질의·현재 상태·공개 투영 revision·만료·마지막 고유 키에 결속한다. HMAC 서명만 된 읽을 수 있는 payload에 내부 관측 ID를 넣지 않는다. 정본이나 조건이 바뀐 cursor는 기존 409로 거절한다.
+- 현재 source 관측 ID·canonical ID·원 학년도 모집행·공개 offering ID·복수 출처 회원을 구분한다. 모집단·통계 정의를 합치거나 1:N 출처 JOIN으로 지표를 복제하지 않는다. 공개 지표 정의·단위·척도·공식 URL·기준일·발표 상태가 미확보된 행은 임의 발표 DTO로 승격하지 않는다.
+- actual current metadata에서 app SELECT·nonowner/nonbypass·읽기 전용·TLS와 실제 RLS/invoker를 확인했다. 이는 새 current-purpose·실제 페이지·공개 metadata·JWT·BFF·브라우저 인수를 대체하지 않는다. 현재 조회 권한이 확인됐으므로 추가 Owner 또는 쓰기 GRANT가 필요하다고 단정하지 않는다.
+- registry는 canonical/source 관측 연결과 원형 근거를 보존하는 현재 정본의 직접 의존 표다. 용량 증가만으로 임시 파일·삭제 대상으로 분류하지 않는다. current와 역사 C는 overlays에 실제 의존하므로 단순 전량 정리하지 않는다.
+- 파일류 Storage 이전은 기존 exact gzip bytes·SHA·원형 명부·private/익명 거절·remote readback·참조 결속을 먼저 인수한다. DB 원본 제거는 정확한 표·행·열·복구 검산과 별도 사용자 승인 뒤 진행한다. bytea NOT NULL·CHECK·ingest/recovery resolver와 C/현재 정본을 함께 보존한다.
+- Storage 이전·overlays 정리·DB 제거·참조 전환·일반 VACUUM·VACUUM FULL의 실행 여부를 각각 기록한다. 현재는 모두 NOT_RUN이고 제거 승인 대상은 없다. 전후 DB/표 bytes·사본 SHA 명부·C140/current field 변경0·유지보수 종류를 한 영수증으로 인수하며 원문·이전 버전은 보존한다.
+- 별도 GET /api/v1/review/current-admissions는 허용된 검수자에게만 닫힌 검수 응답을 제공한다. 지표 원문 literal과 원 JSON 타입을 보존한다. 미확인 공식 공개 정보는 null과 보류 사유로 표시하며 active current를 발표 입결로 간주하지 않는다. 기존 C·일반 회원 화면·기본22API·이용권 판정은 유지한다.
+- all_current 검수 목적은 명시 허용된 subject와 승인 만료 안에서만 적용한다(최대24시간). 첫 페이지에서 동일 읽기 전용 SQL 스냅샷의 최근 적격 변경 명령 상태를 결속하고 이후 cursor의 상태가 달라지면409로 거절한다. 새 wire 상태 검증은 기존32필드 정본 codec을 대체하지 않는다. 출처 회원 검증과 모집단 연결의 원 멀티셋을 보존한다.
+- 파일류와 overlays 정리는 원형 bytes·원격 SHA 재수신·참조 및 복구 reader 검산·C/current 변경0 영수증을 먼저 갖춘다. registry는 출처 연결과 원형 근거를 보존하는 영구 자료다. Storage 복사·resolver 전환·제거·일반 VACUUM·VACUUM FULL은 각각 NOT_RUN이며 제거 대상은 아직 승인되지 않았다.
 
 ## 기존 API와 구현 경로
 
@@ -68,9 +79,9 @@
 | DBD-03 | 시스템기획팀·서비스 개발팀 | 목적별 제한 검수 승인·불변 private descriptor·설정·동일 후보 API 수치 대조 |
 | DBD-04 | 외부 화면팀 | API transport prefix와 서버 relay 연결·실제 로그인·1페이지 원지표/보류/오류 브라우저 검수 |
 | DBD-05 | 외부 화면 개발팀의 Supabase 관리자 | 사용자가 위임한 비공개 Edge 설정 등록을 담당한다. 비공개 전달/정확 후보 확인 후 등록 증거를 제출한다. 제한 함수의 실제 배포는 별도 승인·검수와 구분하며 계정·DB 권한 변경이나 전체 운영 승인으로 확대하지 않음 |
-| DBD-06 | 데이터팀·서비스 개발팀 | 단일 현재 정본 공급자/목적승인·canonical/source ID 및 지문·출처회원·bounded JOIN·app 권한/RLS의 별도 준비와 구현; 현재 미구현 |
-| DBD-07 | 데이터팀; 시스템기획팀·화면팀 독립 검수 | 용량 최신 메타데이터 실측·원형 아카이브 명부·현재/C 의존 영향·정확한 제거 승인·전후 bytes/SHA/변경0 및 유지보수 실행 영수증; 실제 정리 미인수 |
-| DBD-08 | 서비스 개발팀; 시스템기획팀·데이터팀·외부 화면팀 독립 인수 | 배열 I/O 수정·공개 native39+원형 Bind5·실제 readonly provider140/12/JOIN1·정상 코드/짝문서 통합·같은 committed 번들 기존 함수 재배포 완료. 새 fresh JWT140/cursor/pending·BFF·브라우저·보안3gate는 외부 화면팀 인수 대기. 원본/실패/기존승인/RLS/기본이용권/현재정본은 보존. |
+| DBD-06 | 데이터팀·서비스 개발팀 | 별도 검수 DTO·경로·current 공급자 준비; 실제 app metadata 검수 PASS. literal/원 타입·적격 변경 명령 상태·동일 스냅샷 bulk JOIN/정확 집계·신규 목적/PIN3/cursor 설정·실제 페이지/함수/JWT/BFF 인수는 단계별로 진행한다. 공개 History 투영과 일반 회원 운영 공개는 별도다. |
+| DBD-07 | 데이터팀; 시스템기획팀·화면팀 독립 검수 | 최신 실제 크기와 current/C root별 의존을 검수; registry 정본 직접 의존 보존 판정. Storage 원형 이전·overlays 정리·참조 resolver·정확 제거 승인·전후 변경0·일반/FULL VACUUM은 NOT_RUN |
+| DBD-08 | 서비스 개발팀; 시스템기획팀·데이터팀·외부 화면팀 독립 인수 | 배열 I/O 수정·정상853+853·native44·실제 readonly provider·통합/재배포 완료; 외부 화면팀 최종 fresh JWT C140/12·cursor·paid403·auth/relay/no-store PASS 영수증 수신. current 전체·BFF/브라우저·운영 보안3gate는 별도 미완료 |
 
 ## 화면팀 연결
 
@@ -83,7 +94,7 @@
 - 이 제한 검수 함수의 base는 5개 GET operation 전용이다. 기존 22API의 전역 base를 일괄 live 전환하지 않는다. 1페이지의 history.search/recruitment.read/session.read와 유료 offerings.search/offering.read에만 명시 operation routing으로 연결한다.
 - 미포팅 17API와 2~4페이지의 성적·환산·지원판정 엔진은 이 함수로 준비 완료되지 않았으며 pending/503을 유지한다. 관리자·개발자 계정의 관리 권한을 유료 이용권으로 자동 승격하지 않는다.
 - 화면 팀은 기존 페이지 및 operation별 routing과 transport prefix를 대조하여 연결한다. CSS·화면 구현·BFF 및 브라우저 실수신 검수는 외부 화면 팀 담당이며 서비스 소스·합성 검산으로 대신 완료 처리하지 않는다.
-- 기본7/PIN3는 지정 Owner의 적용 보고·Root 독립 digest 대조로 등록됐다. 화면팀3차 subject/me/paid_required·인증/relay/no-store 보고와 수정 소스의 실제 읽기전용 DB140/JOIN1 검수는 서로 다른 증거다. 새 수정판 재배포 뒤 실제 사용자 JWT·hosted DB·BFF·브라우저·보안3gate 인수는 남아 있으며 기본 설정 재등록이나 운영 권한 확대를 요구하지 않는다.
+- 화면팀의 2026-10-09T14:28:39Z 최종 freshJWT 영수증을 수신했다. 기존 C140 값·타입·출처·모집행 메타와 cursor100+40·recruitment12 pending/null·paid403·auth/relay/no-store 검수가 보고상 PASS다. Root 재실행·current 전수·BFF/브라우저·운영 보안3gate 완료로 확대하지 않는다.
 - 등록된 PIN3와 실제 관측 URL로 동결 C140 역사 검수 GET5개만 명시 연결한다. 기존22API 전역 live 전환·기본 회원/이용권 변경·2~4페이지 엔진 승격은 하지 않는다. 실제 로그인·두 cursor 페이지·지표 값/타입/근거·no-store/중계/브라우저 비노출을 별도 검수한다.
 - C 수신 기계 검수 원영수증 원형과 선택명부·manifest·승인4tuple·경로2필드의 typed/bytes 일치를 독립 검토하고 Root가 정확한 선택명부 SHA의 동결 local_verification 경로 변경을 수용했다. 화면팀은 기존README3~5단계를 실행·회신한다. 수용 기록은 CLI/캐시/세션/API/브라우저의 실제 실행 완료나 새 엔진/운영 권한을 뜻하지 않는다.
 - 배포된 함수의 JWTlegacy ON은 그대로 둔다. 실제 ES256 사용자 JWT를 BFF에서 보내 플랫폼/함수 상태를 구분하고, 401을 API 키의 사용자 Bearer 대체나 인증 설정 자동 해제로 해결하지 않는다. 24h 목적 승인 만료 후에는 새 승인판을 요구하며 임의 연장하지 않는다.
@@ -91,6 +102,11 @@
 - DB 용량 정리는 데이터팀 소유 schema의 별도 작업이다. csv/support gzip 원형·overlays 검수 근거를 비공개 Storage/Drive 보존하고 사본 bytes/SHA/원래 해시 참조를 대조한 뒤 정확히 허용된 DB 제거만 별도 판단한다. NOT NULL/길이CHECK와 current/C 역사 의존을 먼저 확인하며 포인터만 치환하거나 전량 재적재하지 않는다.
 - DB 용량 메타데이터만 실제 앱1연결 READONLY/TLS로 확인했다. 대상3표의 RLS/FORCE·SELECT전용과 gzip NOT NULL·현재/역사 overlay 의존을 확인했지만 사본 원격 bytes/SHA·삭제·VACUUM을 실행한 것은 아니다. 주석 분리 preflight 실패는 접속0으로 보존하고 정정본1회 성공과 구분한다. 최신 실측 bytes와 후보 명부·실행 단계는 별도 비공개 인계 영수증에 보관한다.
 - 1차 WORKER_ERROR/Buffer·2차 subject 제한·3차 history/recruitment503과 정상 보안 응답은 이력으로 보존한다. 배열6개 입력·reloptions 타입 보완과 native39+원형wire5·actual provider140/12/JOIN1, 정상 source/docs 통합·같은 committed 번들 기존 함수 재배포는 완료다. 외부 화면팀은 같은 URL/relay/PIN3/공개Auth에서 fresh JWT140지표100+40·유료403·recruitment pending/null·no-store·BFF 토큰 비노출을 원승인 만료 전에 재검수한다. 만료 후에는 새 승인판이 필요하며 권한·기간을 임의 확대하지 않는다.
+- 전수 current 연결은 화면팀·관리자 검수 환경에서 별도 승인된 purpose/상태/subject와 operation routing으로 제공한다. 기존 C 함수·PIN3를 범위 없는 조회로 바꾸거나 학생 운영 화면에 전체 DB dump를 배포하지 않는다. 승인 후 공급할 base URL과 서버 설정을 정확한 배포 영수증으로 전달한다.
+- 현재는 current 공개 projection·공개 offering ID 대응·정본 상태 결속·서버 cursor 키·새 승인판이 준비 단계다. 앱 읽기 권한 메타 확인은 완료했고 현재 실제 페이지·함수 배포·화면 수신은 미실행이다. DB 접속·원자료·Storage 경로·새 cursor 키는 브라우저에 전달하지 않는다.
+- DB 정리 회신에는 registry 직접 의존·보존 판정과 원형 Storage 복사·overlays 정리·참조 전환·제거·일반/FULL VACUUM을 각각 RUN/NOT_RUN으로 적는다. 역사 C/v21_1과 단일 최신 current 정본을 서로 대체하지 않고 둘의 변경0 근거를 보존한다.
+- 별도 current-admission-review 함수의 GET /api/v1/review/current-admissions는 허용 명부에 있는 검수자만 사용한다. 1페이지의 공개 History DTO와 다르며 literal·원 타입·보류 사유와 암호화 cursor를 제공한다. 원 canonical/source ID와 비공개 경로는 응답에서 제외한다. 구체적인 자료판 검수 후 Supabase 관리자가 신규 이름의 PIN3·cursor 키를 등록하며 기존 C 설정은 유지한다.
+- registry 용량 요청은 실제 읽기 전용 크기·의존 검수와 함께 회신한다. registry는 현재 정본의 직접 의존 표이며 overlays는 현재 정본과 역사 C 모두가 사용한다. 파일류가 SQL 뷰 의존 목록에 없다는 사실만으로 아카이브·재생 안전을 확인한 것은 아니다. 정확한 복사·복구·제거 범위·유지보수 조건을 인수하기 전까지 두 정리 작업과 VACUUM은 미실행이다.
 
 ## 증거와 미실행 범위
 
@@ -99,11 +115,11 @@
 | source_db_read_only | PASS_FRESH_V5_SCOPED_APP_ROLE_TLS_READONLY_PROVIDER_140_METRICS_12_ANNUAL_OFFERINGS; ORIGINAL_V4_57014_PRESERVED; NOT_FULL_SERVICE_ACCEPTANCE |
 | python_reference_HTTP | PASS_17_NATIVE_SCOPED_SYNTHETIC_AND_FRESH_V5_ACTUAL_DB_HTTP_WITH_SYNTHETIC_DI_AUTH_HISTORY_100_40_ME_3_FIELDS_NEGATIVE_PAYLOAD_ZERO; REAL_JWT_CLOUD_BFF_BROWSER_NOT_RUN |
 | Deno_check_test | PASS_NATIVE_DENO2_9_7_CACHED_ONLY_CHECK_POSTGRES_PUBLIC_TEST_BOOTSTRAP_TEST_PRIVATE_PRIMARY_WIRE_ROOTS; PUBLIC_SERVICE36_PLUS_BOOTSTRAP3_EQUAL39_AND_PRIVATE_REAL_BIND_WIRE5_EQUAL44_TOTAL; EMPTY_SYNTHETIC_PROCESS_ENV_ONLY_NO_SECRET_VALUES_DB_OR_NETWORK; DEPLOYMENT_AND_FRESH_JWT_INTAKE_SEPARATE |
-| restricted_cloud_API | ARRAY_IO_CORRECTED_COMMITTED_SOURCE_REDEPLOYED_AFTER_NATIVE_DRIVER_AND_ACTUAL_APP_ONLY_READONLY_PROVIDER140_12_JOIN1_PASS; POST_DEPLOYMENT_FRESH_USER_JWT_140_TYPED_CURSOR_PENDING_BFF_BROWSER_ACCEPTANCE_NOT_RUN; ONLY_EXISTING_FIVE_GET_HISTORY_REVIEW_OPERATIONS |
-| actual_user_JWT | HISTORICAL_FRONTEND_THIRD_REPORT_SUBJECT_ME200_PAID_REQUIRED403_AUTH_RELAY_NO_STORE_PASS_AND_HISTORY_RECRUITMENT503_PRESERVED; NEW_ARRAY_FIXED_HOSTED_SOURCE_FRESH_USER_JWT_RETEST_NOT_RUN; ROOT_REAL_USER_JWT_UNAVAILABLE_NO_MINT_OR_BYPASS |
+| restricted_cloud_API | RECEIVED_FRONTEND_FINAL_REPORT_2026_10_09T14_28_39Z_FRESH_JWT_HISTORY140_EXACT_TYPED_FIELDS_CURSOR100_PLUS40_NO_DUPLICATES_OR_MISSING_RECRUITMENT12_PENDING_NULL_ME200_STANDARD_PAID2_GET403_AUTH_RELAY_NO_STORE_PASS; ONLY_HISTORICAL_C_FIVE_GET_SCOPE; ROOT_NOT_A_NEW_JWT_RERUN |
+| actual_user_JWT | RECEIVED_AND_READ_EXTERNAL_FRONTEND_FINAL_FRESH_JWT_REPORT_FOR_APPROVED_C140_AND_RECRUITMENT12; CURRENT_ALL_REVIEW_JWT_BFF_BROWSER_AND_OPERATIONAL_THREE_GATES_NOT_RUN |
 | frontend_BFF_browser | NOT_RUN |
 | operational_security_three_gates | NOT_RUN |
-| effective_RLS | PASS_FRESH_V5_ACTUAL_PROVIDER_NONOWNER_NONSUPER_NONBYPASS_APP_ROLE_READONLY_ROW_SECURITY_ON_19_PINNED_INVOKER_VIEWS_3_ENABLE_AND_FORCE_RLS_TABLES; HOSTED_EDGE_RLS_NOT_RUN |
+| effective_RLS | EXISTING_APPROVED_C_SOURCE_APP_ROLE_GUARDS_PRESERVED; NEW_CURRENT_METADATA13_RELATIONS_PHYSICAL8_RLS_FORCE_VIEW5_INVOKER_BARRIER_APP_SELECT_ONLY_ANON_AUTH_DENIED_PASS; CURRENT_TYPED_PAGE_AND_HOSTED_CURRENT_SERVICE_ACCEPTANCE_NOT_RUN |
 | bulk_JOIN_query_count | PASS_FRESH_V5_ACTUAL_PROVIDER_DATA_JOIN_1_HISTORY_HTTP_PAGE_100_JOIN_1_PAGE_40_JOIN_1; TOTAL_DATA_JOINS_3; AUTH_ROLE_ENTITLEMENT_METADATA_COUNTED_SEPARATELY_NO_N_PLUS_1 |
 | cloud_deployment | PASS_EXISTING_FUNCTION_ARRAY_IO_REDEPLOYMENT_VISIBLE_UI_EDITOR_READBACK_LF_BYTES_SHA_EXACT_COMMITTED_BUNDLE_JWT_GATE_ON_UNCHANGED; ONLY_SOURCE_DEPLOYMENT_NOT_FRESH_USER_JWT_BFF_BROWSER_OR_WHOLE_SERVICE_ACCEPTANCE |
 | keyset_optimization | PRIVATE_PROPOSAL_SCOPE_EQUIVALENCE_ONLY; REAL_METADATA_TIMEOUT_BEFORE_NEW_PAYLOAD; NOT_ADOPTED_IN_RUNTIME |
@@ -137,10 +153,10 @@
 | service_source_commit | 065cef786159ac29f3b093616c52ac83ff8dec99 |
 | integration_CI | PASS_EXACT_SOURCE_065cef786159ac29f3b093616c52ac83ff8dec99_RUN_37936519388_AND_EXACT_DEVELOP_MERGE_9e03bd6483cffc420aa02ed01a09e93e3c5356c6_RUN_37937144615; NORMAL_PRECOMMIT853_PREPUSH853; FINAL_STATUS_DOCUMENT_COMMIT_CHECKS_SEPARATE |
 | source_integration | PR22_MERGE_COMMIT_DEVELOP_ONLY_SOURCE_065cef786159ac29f3b093616c52ac83ff8dec99_INTEGRATION_9e03bd6483cffc420aa02ed01a09e93e3c5356c6; BRANCHES_AND_FILES_PRESERVED_MAIN_UNCHANGED; SOURCE_ACCEPTANCE_NOT_WHOLE_OPERATIONAL_ACCEPTANCE |
-| current_canonical_provider | NOT_IMPLEMENTED; CURRENT_VIEW_ADMISSION_RESULTS_CURRENT_AND_CANONICAL_SOURCE_ID_BINDING_PERMISSION_RLS_REVIEW_REQUIRE_NEW_PURPOSE_ADAPTER; HISTORICAL_C_SOURCE_NOT_PROMOTED |
-| DB_capacity_preservation | PREPARATION_ONLY_AFTER_FRESH_BOUNDED_METADATA_PASS; CURRENT_AND_HISTORICAL_C_DIRECT_OVERLAY_DEPENDENCIES_AND_BYTEA_NOT_NULL_REQUIRE_ADAPTER_SCHEMA_REVIEW; NO_DB_SOURCE_REMOVAL_ARCHIVE_WRITE_OR_VACUUM_ACCEPTANCE |
+| current_canonical_provider | USER_AUTHORIZED_ALL_CURRENT_FRONTEND_ADMIN_REVIEW_PREPARATION_IN_PROGRESS; GENERIC_APPLICATION_PORT_CURSOR_CANDIDATE_SEPARATE_FROM_ACTUAL_SQL_PUBLIC_MAPPING_FACTORY_AND_DEPLOYMENT; CURRENT_ACTIVATION_NOT_RUN |
+| DB_capacity_preservation | REGISTRY_IS_PERSISTENT_CURRENT_CANONICAL_SOURCE_MEMBERSHIP_STATE_NOT_TEMPORARY_PROVIDER_OUTPUT; CURRENT_AND_HISTORICAL_C_OVERLAY_DEPENDENCIES_CONFIRMED; ARCHIVE_POINTER_RESOLVER_EXACT_REMOVAL_APPROVAL_AND_CURRENT_C_FIELD_REPLAY_ACCEPTANCE_REQUIRED_BEFORE_CLEANUP |
 | previous_planning_status_CI | PASS_EXACT_DEVELOP_ac2731628d82c785345cbd000fdaae03eb2b1024_PROJECT_CONSISTENCY255_NORMAL_PRECOMMIT853_PREPUSH853; CURRENT_NEW_STATUS_COMMIT_CHECKS_SEPARATE |
-| DB_capacity_metadata_probe | PASS_SINGLE_ACTUAL_APP_CONNECTION_TLS_VERIFY_FULL_READONLY_ROW_SECURITY_NO_SUPER_BYPASS; TARGET3_SELECT_ONLY_FORCE_RLS; SETUP5_METADATA5_COMMIT1; FIVE_SECOND_STATEMENT_TWO_SECOND_LOCK_BOUNDS; NO_PAYLOAD_DB_STORAGE_WRITE_VACUUM_OR_PRIVILEGE_CHANGE; NOT_ARCHIVE_ACCEPTANCE |
+| DB_capacity_metadata_probe | PASS_NEW_BOUNDED_APP_READONLY_METADATA_AND_ROOT_SPECIFIC_DEPENDENCY_FOLLOWUP; REGISTRY_AND_TARGET_TABLE_SIZES_RECORDED_ONLY_IN_PRIVATE_RECEIPT; NO_PAYLOAD_READ_DB_STORAGE_WRITE_DDL_DML_VACUUM_OR_PRIVILEGE_CHANGE |
 | historical_cloud_runtime_before_bootstrap | {'restricted_cloud_API': 'GENERIC_FUNCTION_DEPLOYED_PRIVATE_DESCRIPTOR_READBACK_AND_BASE7_PLUS_PIN3_INDEPENDENT_DIGEST_MATCH; REAL_JWT_HOSTED_DB_BFF_BROWSER_SECURITY_PENDING', 'actual_user_JWT': 'NOT_RUN', 'cloud_deployment': 'PASS_DASHBOARD_GENERIC_FUNCTION_DEPLOYMENT_AND_OBSERVED_URL_ONLY; EDITOR_CRLF_113451_BYTES_NORMALIZED_TO_COMMITTED_LF_110796_BYTES_EXACT; NOT_HOSTED_DB_OR_REAL_JWT_ACCEPTANCE', 'generic_bundle': 'PASS_CACHED_OFFICIAL_ESBUILD_0_25_5_SOURCE_ONLY_ESM_THREE_SERVICE_SOURCES_FIXED_POSTGRES_3_4_5_IMPORT_EXPORT_AND_NODE_BUILTIN_ALIAS; PRIOR_DENO_BUNDLE_OS_ERROR_2_FAILURES_PRESERVED_NO_CONFIRMED_CAUSE; HOSTED_RUNTIME_NOT_RUN', 'generic_bundle_sha256': 'b3068379af4a4625113e99be4f5ef10a76f1852a8ffe7e9e68011e66c4728c74', 'generic_bundle_bytes': 110796} |
 | worker_runtime_failure | ROOT_DASHBOARD_EVENT_LOOP_REFERENCE_ERROR_BUFFER_NOT_DEFINED_AFTER_BOOT_20_TO_26MS; FRONTEND_5_GET_ALL_500_REPORT; IMPORT_EVALUATION_BEFORE_HANDLER_REGISTRATION; EXACT_SOURCE_MAP_EQUIVALENCE_NOT_CLAIMED |
 | worker_runtime_bootstrap | PASS_NATIVE_DENO2_9_7_CHECK_AND_36_TESTS_33_EXISTING_PLUS3; UNDEFINED_ONLY_NO_EXISTING_GLOBAL_OVERWRITE; FLAT_BUNDLE_BOOTSTRAP_PRECEDES_FIRST_POSTGRES_BUFFER_INITIALIZATION |
@@ -174,7 +190,7 @@
 | database_array_source_fix | PASS_SOURCE_TWO_PUBLIC_FILES_AND_MATCHING_PLANNING_ROUTING_NORMAL_PRECOMMIT853_PREPUSH853_EXACT_SOURCE_CI_AND_MERGE_COMMIT_DEVELOP; NO_MAIN_MERGE_OR_PRIVACY_AUTH_POLICY_CHANGE |
 | database_array_redeployment | PASS_EXISTING_FUNCTION_ARRAY_IO_REDEPLOYMENT_VISIBLE_UI_EDITOR_READBACK_LF_BYTES_SHA_EXACT_COMMITTED_BUNDLE_JWT_GATE_ON_UNCHANGED; ONLY_SOURCE_DEPLOYMENT_NOT_FRESH_USER_JWT_BFF_BROWSER_OR_WHOLE_SERVICE_ACCEPTANCE |
 | database_array_actual_provider | PASS_ROOT_ACTUAL_CORRECTED_TS_PROVIDER_SOURCE_A85E7C_APP_ONLY_TLS_CA_REJECT_UNAUTHORIZED_REPEATABLE_READ_READ_ONLY_ROW_SECURITY_NONOWNER_NONSUPER_NONBYPASS; PINNED_METADATA22_DEFINITIONS19_EXACT_AND_FORCE_RLS3; ACTUAL_SELECTED140_TYPED_HISTORY140_ANNUAL_OFFERINGS12_BULK_DATA_JOIN1_RAW_JS_ARRAY_PARAMETERS0; AUTH_JWT_BFF_BROWSER_AND_REDEPLOYMENT_NOT_RUN |
-| database_array_frontend_retest | NOT_RUN_EXTERNAL_FRONTEND_OWNER_USE_SAME_ENDPOINT_RELAY_PUBLIC_AUTH_AND_UNCHANGED_PIN3_WITH_FRESH_USER_JWT; HISTORY140_TYPED_CLOSED_DTO_CURSOR100_40_RECRUITMENT_PENDING_NULL_STANDARD_PAID2_GET403_NO_STORE_BFF_TOKEN_NONEXPOSURE_BEFORE_ORIGINAL_APPROVAL_EXPIRY; NO_22_API_GLOBAL_SWITCH |
+| database_array_frontend_retest | PASS_REPORTED_EXISTING_C140_12_REDEPLOYED_ARRAY_FIX_503_NOT_REPRODUCED; RECEIPT_BOUND_TO_EXISTING_ENDPOINT_APPROVED_DESCRIPTOR_AND_COMMITTED_BUNDLE; EXTERNAL_FRONTEND_EXECUTION_NOT_ROOT_RERUN |
 | historical_before_array_io_fix | {'Deno_check_test': 'PASS_NATIVE_DENO2_9_7_CACHED_ONLY_CHECK6_SOURCE_AND_TEST_FILES_AND_TEST36_33_EXISTING_PLUS3_BOOTSTRAP; NO_ACTUAL_AUTH_PRIVATE_SETTINGS_DB_OR_NETWORK; OFFLINE_FULL_BUNDLE_BOOT_RECEIPT_SEPARATE; FIXED_HOSTED_RETEST_NOT_RUN', 'restricted_cloud_API': 'FRONTEND_THIRD_REPORT_RUNTIME_AND_SUBJECT_GATES_PASSED_ENTITLEMENT_ME_AND_PAID_DENIAL_OBSERVED; HISTORY_RECRUITMENT_DB_PARAMETER_FAILURE_REMAINS; NO_140_TYPED_CURSOR_PENDING_OR_BFF_BROWSER_ACCEPTANCE', 'actual_user_JWT': 'FRONTEND_THIRD_FRESH_JWT_REPORT_SUBJECT_PASSED_ME200_STANDARD_PAID2_GET403_PAID_REQUIRED_AUTH_RELAY_NEGATIVES_AND_PRIVATE_NO_STORE; HISTORY_RECRUITMENT503_OFFICIAL_HISTORY_DB_UNAVAILABLE; ROOT_REAL_JWT_RERUN_NOT_RUN', 'source_db_read_only': 'PASS_FRESH_V5_SCOPED_APP_ROLE_TLS_READONLY_PROVIDER_140_METRICS_12_ANNUAL_OFFERINGS; ORIGINAL_V4_57014_PRESERVED; NOT_FULL_SERVICE_ACCEPTANCE', 'effective_RLS': 'PASS_FRESH_V5_ACTUAL_PROVIDER_NONOWNER_NONSUPER_NONBYPASS_APP_ROLE_READONLY_ROW_SECURITY_ON_19_PINNED_INVOKER_VIEWS_3_ENABLE_AND_FORCE_RLS_TABLES; HOSTED_EDGE_RLS_NOT_RUN', 'bulk_JOIN_query_count': 'PASS_FRESH_V5_ACTUAL_PROVIDER_DATA_JOIN_1_HISTORY_HTTP_PAGE_100_JOIN_1_PAGE_40_JOIN_1; TOTAL_DATA_JOINS_3; AUTH_ROLE_ENTITLEMENT_METADATA_COUNTED_SEPARATELY_NO_N_PLUS_1', 'generic_bundle': 'PASS_COMMITTED_SOURCE_ONLY_FIXED_POSTGRES_DEPENDENCY_WITH_NODE_BOOTSTRAP_111398_BYTES_NATIVE36_AND_OFFLINE_FULL_BUNDLE_REGRESSION; OLD_HOSTED_REVISION_BUFFER_FAILURE_PRESERVED; FIXED_REAL_JWT_HOSTED_RETEST_NOT_RUN', 'generic_bundle_role': 'COMMITTED_SOURCE_30cf5686330cdacc3d60d7a98f512ed107288c1f_SIX_FILE_GIT_BLOB_BINDING_NATIVE36_AND_OFFLINE_FULL_BUNDLE_REGRESSION; EXISTING_FUNCTION_REDEPLOYED_EDITOR_READBACK_EXACT; REAL_JWT_HOSTED_DB_BFF_BROWSER_RETEST_NOT_RUN', 'cloud_deployment': 'PASS_EXISTING_FUNCTION_REDEPLOYMENT_VISIBLE_UPDATED_EDITOR_READBACK_LF_BYTES_SHA_EXACT_COMMITTED_SOURCE_BUNDLE_JWT_ON_UNCHANGED; SOURCE_DEPLOYMENT_ONLY_NOT_REAL_USER_HOSTED_SQL_OR_BROWSER_ACCEPTANCE', 'worker_fixed_real_JWT_retest': 'FRONTEND_THIRD_REPORT_NO_WORKER_ERROR_NO_SUBJECT_DENIAL; HISTORY140_CURSOR100_40_RECRUITMENT_PENDING_BLOCKED_BY_DB_PARAMETER_FAILURE; FULL_HOSTED_DB_BFF_BROWSER_ACCEPTANCE_NOT_RUN', 'database_array_source_fix': 'IN_PROGRESS_EXISTING_SERVICE_FEATURE_BRANCH_MINIMAL_THREE_QUERIES_SIX_ARRAY_BINDINGS_AND_REAL_DRIVER_REGRESSION; NORMAL_COMMIT_HOOKS_CI_AND_REVIEWED_DEVELOP_INTEGRATION_REQUIRED', 'database_array_actual_provider': 'NOT_RUN_PENDING_FIXED_PROVIDER_COMPLETE_140_TYPED_BINDING_JOIN_AND_METADATA_GUARD_READONLY_VERIFICATION; NO_INVENTED_DATA_OR_SCOPE_RELAXATION', 'database_array_redeployment': 'NOT_RUN_PENDING_FIXED_COMMITTED_SOURCE_BUNDLE_EXACT_BINDING_AND_EXISTING_FUNCTION_REDEPLOYMENT; PIN3_BASE7_APPROVAL_SCOPE_AND_JWT_GATE_UNCHANGED', 'database_array_frontend_retest': 'NOT_RUN_FRESH_USER_JWT_HISTORY140_CURSOR100_40_RECRUITMENT_PENDING_PAID403_NO_STORE_AND_BFF_BROWSER_REQUIRED_BEFORE_UNCHANGED_APPROVAL_EXPIRY'} |
 | database_array_native_receipt_sha256 | 335b4cea52e02c521a19d055eb1aad68a6dbf49a148e69d1ac8477fbf753d6b6 |
 | database_array_primary_driver_wire | PASS_ACTUAL_POSTGRES3_4_5_UNSAFE_PARAMETER_OPTIONS_AND_UNMODIFIED_PRIMARY_BIND_WITH_PRIMARY_BYTE_BUILDER_5_TESTS_18_WIRE_MESSAGES; EMPTY_COMMA_QUOTE_BACKSLASH_UNICODE_NEWLINE_NULL_LIKE_STRINGS_AND_PAIRED_IDS; RAW_JS_AND_ARRAY25_MALFORMED_WIRE_DIRECT_JSONB_DOUBLE_ENCODING_PRESERVED; SERVER_OID25_1009_3802_SUPPLIED_TO_OFFLINE_BIND_FROM_SEPARATE_ACTUAL_DB_OBSERVATIONS; NOT_A_HOSTED_QUERY_OR_JWT_TEST |
@@ -188,6 +204,13 @@
 | database_array_deployment_receipt_sha256 | fb0d2ea15bf82ed3fffab79c2583428c02b5601329df9d1724817c26c147041a |
 | database_array_deployment_verified_utc | 2026-10-09 13:36:17 UTC |
 | database_array_anonymous_endpoint | PASS_SINGLE_POSTDEPLOYMENT_ANONYMOUS_GET_ME401_UNAUTHORIZED_NO_AUTH_HEADER_AND_DATA_ZERO_PLATFORM_GATE_ONLY_NO_HANDLER_NO_STORE_OR_SQL_CLAIM |
+| current_all_review_scope | USER_CONFIRMED_FRONTEND_TEAM_AND_ADMINISTRATORS_REVIEW_FIRST; ALL_CURRENT_ACTIVE_SERVICE_RECORDS_IN_2024_TO2027_SUBJECT_TO_NEW_EXPLICIT_PURPOSE_SCOPE_AND_VALIDATED_PUBLIC_PROJECTION; GENERAL_MEMBER_OPERATIONAL_DISCLOSURE_EXCLUDED |
+| current_app_readonly_metadata | PASS_ACTUAL_TLS_CA_NONOWNER_NONSUPER_NONBYPASS_APP_ROLE_ROW_SECURITY_ON_READONLY; RECURSIVE_CURRENT_REVIEW_METADATA13; PHYSICAL8_ENABLE_FORCE_RLS_VIEW5_SECURITY_INVOKER_BARRIER; ALL_APP_SELECT_TRUE_WRITABLE_ANON_AUTH_FALSE; ADMISSION_ROW_READS0_DB_WRITES0; NOT_CURRENT_PAGE_ACCEPTANCE |
+| current_root_dependency_edges | PASS_ACTUAL_ROOT_SPECIFIC_PG_DEPEND_METADATA_CURRENT_DIRECT_REGISTRY_AND_CURRENT_HISTORICAL_C_OVERLAY_REACHABILITY; FILE_PAYLOAD_RELATIONS_NOT_IN_THOSE_VIEW_CLOSURES_DOES_NOT_PROVE_NO_INGEST_REPLAY_RESOLVER_DEPENDENCY |
+| DB_capacity_execution | STORAGE_ORIGINAL_BYTES_MIGRATION_NOT_RUN; OVERLAY_CLEANUP_NOT_RUN; ARCHIVE_RESOLVER_NOT_RUN; EXACT_DB_REMOVAL_TARGETS_UNAPPROVED_AND_EMPTY; ORDINARY_VACUUM_NOT_RUN; VACUUM_FULL_NOT_RUN; FRONTEND_CONDITIONAL_AGREEMENT_AND_EXTERNAL_REQUEST_ARE_NOT_EXACT_DELETION_APPROVAL |
+| registry_capacity_adjudication | RETAIN_REQUIRED_DIRECT_CURRENT_VIEW_DEPENDENCY_WITH_CANONICAL_AND_SOURCE_IDS_SOURCE_INITIAL_FIELDS_EVIDENCE_AND_HASH_HISTORY; SIZE_MATCHES_NEW_PRIVATE_MEASUREMENT; GROWTH_CAUSE_AND_FUTURE_EXACT_BYTES_NOT_INFERRED_FROM_TIMING_OR_SIZE_ALONE |
+| admission_metric_expansion | REQUEST_RECEIVED_RECRUITMENT_COMPETITION_AND_ADDITIONAL_ADMISSION_COUNTS_REQUIRE_DISTINCT_OFFICIAL_METRIC_DEFINITIONS_CURRENT_ID_SOURCE_PUBLIC_MAPPING_AND_APPROVAL; NOT_CURRENT_HISTORY_OR_FORECAST_AUTO_ADOPTION |
+| bonus_summary_CR | REVIEW_PENDING_OFFICIAL_YEAR_DEPARTMENT_RULE_CONDITIONS_AND_EXPLANATION_CONTRACT; NOT_AN_IMPLEMENTED_ENGINE_OR_PUBLISHED_ADJUSTMENT |
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -207,4 +230,4 @@
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=70d99c8fe48a10b86a2b2d333ff302bb18c7e7f8b46eaa3bbe156e247fc14477 -->
+<!-- jungsi:generated spec_sha256=99a6138f5c2f1493d58864f195846189a249cb9f64b86e3871f961283529d34d -->
