@@ -5655,7 +5655,7 @@
       {
         "path": "supabase/functions/_shared/official_history_display_test.ts",
         "layer": "data_infrastructure",
-        "status": "implemented_scoped_synthetic_verified_integration_pending",
+        "status": "implemented_array_io_corrected_native39_primary_wire5_actual_provider140_verified_integration_redeployment_pending",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -5665,13 +5665,13 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "6a6544c8b1577b4f559c127f6a46e9760f0f1d18ce70fde0d1fd9cad3ee23562",
+        "source_sha256": "4c9bb1af51a66c608bbaa5569ac4db9e53e42087173b625dbf41588fdae0ac97",
         "declared_exports": []
       },
       {
         "path": "supabase/functions/_shared/official_history_postgres.ts",
         "layer": "data_infrastructure",
-        "status": "implemented_scoped_synthetic_verified_integration_pending",
+        "status": "implemented_array_io_corrected_native39_primary_wire5_actual_provider140_verified_integration_redeployment_pending",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -5681,7 +5681,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "60a8ad0f855168614e16da04ee8f962c84bd623de9cb9336140a5dd95d66c4f4",
+        "source_sha256": "a85e7c502837403736577eadf84dc6c93d5f452e59e87b574ebd09ad1d7cd560",
         "declared_exports": [
           "createOfficialHistoryInfrastructure",
           "loadPinnedDisplayDescriptor",
