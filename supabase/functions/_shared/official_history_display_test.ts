@@ -51,6 +51,43 @@ Deno.test('duplicate and unsupported query cannot change server member identity'
 Deno.test('dependency failure produces only closed safe error without exception message',async()=>{const f=fixture();f.ports.readRows=async()=>{throw new Error('SYNTHETIC-private-DSN-and-trace');};const r=await f.request('/api/v1/admission-history'),t=await r.text();equal(r.status,503);assert(!t.includes('SYNTHETIC-private'));equal(Object.keys(JSON.parse(t)).sort(),['error','request_id','status']);});
 Deno.test('source raw key and public year key are distinct and separately bound',()=>{const d=synthetic();assert(d.bindings[0].offering_id!==(d.bindings[0].expected_db_row as Row).offering_pk);for(const mode of ['raw','missing','public','year','lineage']){const x=copy(d);if(mode==='raw')x.bindings[0].source_offering_pk='SYNTHETIC wrong';if(mode==='missing')delete x.bindings[0].source_offering_pk;if(mode==='public')x.bindings[0].offering_id='2025:SYNTHETIC-A';if(mode==='year')(x.bindings[0].expected_db_row as Row).academic_year=2025;if(mode==='lineage')delete(x.source_evidence as Row).metric_lineage_sha256;let failed=false;try{validateDisplayScope(x,'local_verification',NOW);}catch{failed=true;}assert(failed,mode);}});
 Deno.test('UTC fractions preserve six digits and strict microsecond expiry',async()=>{equal(utcText('2026-10-08T00:00:00.123456Z'),'2026-10-08T00:00:00.123456Z');equal(utcText('2026-10-08T00:00:00.123Z'),'2026-10-08T00:00:00.123000Z');equal(utcText('2026-10-08T00:00:00.000000Z'),'2026-10-08T00:00:00Z');assert(utcInstantMicros('2026-10-08T00:00:00.000500Z')>utcInstantMicros('2026-10-08T00:00:00Z'));const f=fixture();f.setPaid('2026-10-08T00:00:00.000500Z');const r=await f.request('/api/v1/me');equal(r.status,200);equal((await r.json()).entitlement_expires_at,'2026-10-08T00:00:00.000500Z');f.descriptor.approval.expires_at='2026-10-08T00:00:00.000500Z';validateDisplayScope(f.descriptor,'local_verification',NOW);let rejected=false;try{validateDisplayScope(f.descriptor,'local_verification',NOW+.5);}catch{rejected=true;}assert(rejected);});
+Deno.test('UTC Z and zero offset preserve the same microsecond instant and canonical text',()=>{
+  for(const [fraction,canonical]of [['',''],['.0',''],['.000000',''],['.1','.100000'],['.123','.123000'],['.000001','.000001'],['.123456','.123456']]){
+    const z='2026-10-08T00:00:00'+fraction+'Z',offset='2026-10-08T00:00:00'+fraction+'+00:00';
+    assert(utcInstantMicros(offset)===utcInstantMicros(z));
+    equal(utcText(offset),'2026-10-08T00:00:00'+canonical+'Z');
+  }
+  assert(utcInstantMicros('2026-10-08T00:00:00.1+00:00')===utcInstantMicros('2026-10-08T00:00:00.100000Z'));
+  assert(utcInstantMicros('2026-10-08T00:00:00.000001+00:00')-utcInstantMicros('2026-10-08T00:00:00Z')===1n);
+});
+Deno.test('UTC parser rejects nonzero offsets malformed dates and excess fraction precision',()=>{
+  for(const invalid of ['2026-10-08T00:00:00+09:00','2026-10-08T00:00:00+00:01','2026-10-08T00:00:00-00:00','2026-10-08T00:00:00+0000','2026-10-08T00:00:00','2026-10-08T00:00:00z','2026-02-30T00:00:00+00:00','2025-02-29T00:00:00Z','2026-10-08T24:00:00+00:00','2026-10-08T00:00:60Z','2026-10-08T00:00:00.1234567Z','2026-10-08T00:00:00.1234567+00:00','2026-10-08T00:00:00.+00:00']){
+    let instantRejected=false,textRejected=false;
+    try{utcInstantMicros(invalid);}catch{instantRejected=true;}
+    try{utcText(invalid);}catch{textRejected=true;}
+    assert(instantRejected&&textRejected,invalid);
+  }
+});
+Deno.test('UTC zero offset approval keeps inclusive issue and exclusive microsecond expiry',()=>{
+  const d=synthetic();d.approval.issued_at='2026-10-08T00:00:00.000500+00:00';d.approval.expires_at='2026-10-08T00:00:00.001000+00:00';
+  for(const [now,accepted]of [[NOW,false],[NOW+.5,true],[NOW+.999,true],[NOW+1,false]]as const){
+    let valid=true;try{validateDisplayScope(d,'local_verification',now);}catch{valid=false;}
+    equal(valid,accepted);
+  }
+});
+Deno.test('UTC zero offset approval keeps the exact twenty four hour TTL limit',()=>{
+  for(const [expires,accepted]of [['2026-10-09T00:00:00+00:00',true],['2026-10-09T00:00:00.000001+00:00',false]]as const){
+    const d=synthetic();d.approval.issued_at='2026-10-08T00:00:00+00:00';d.approval.expires_at=expires;
+    let valid=true;try{validateDisplayScope(d,'local_verification',NOW);}catch{valid=false;}
+    equal(valid,accepted);
+  }
+});
+Deno.test('catalog and entitlement UTC zero offset remain unchanged in source and normalize in HTTP',async()=>{
+  const f=fixture(),asOf='2026-10-08T00:00:00.123456+00:00';f.descriptor.catalog.as_of=asOf;
+  const first=await(await f.request('/api/v1/admission-history?limit=1')).json();equal(first.as_of,'2026-10-08T00:00:00.123456Z');
+  const next=await(await f.request('/api/v1/admission-history?limit=1&cursor='+encodeURIComponent(first.next_cursor))).json();equal(next.as_of,first.as_of);equal(next.items[0].value,0);equal(f.descriptor.catalog.as_of,asOf);
+  f.setPaid('2026-10-08T00:00:00.000500+00:00');const me=await f.request('/api/v1/me');equal(me.status,200);equal((await me.json()).entitlement_expires_at,'2026-10-08T00:00:00.000500Z');
+});
 Deno.test('catalog as_of microseconds survives search and cursor continuation',async()=>{const f=fixture();f.descriptor.catalog.as_of='2026-10-08T00:00:00.123456Z';const first=await(await f.request('/api/v1/admission-history?limit=1')).json();equal(first.as_of,'2026-10-08T00:00:00.123456Z');const next=await(await f.request('/api/v1/admission-history?limit=1&cursor='+encodeURIComponent(first.next_cursor))).json();equal(next.as_of,first.as_of);equal(next.items[0].value,0);});
 Deno.test('typed dependency error is filtered by safe code and status allowlist',async()=>{for(const [code,status]of [['SYNTHETIC-private-detail',503],['review_subject_not_allowed',200]]as const){const f=fixture();f.ports.readRows=async()=>{throw new DisplayError(code,status);};const r=await f.request('/api/v1/admission-history'),t=await r.text();equal(r.status,503);equal(JSON.parse(t).error.code,'backend_dependency_unavailable');assert(!t.includes('SYNTHETIC-private'));}});
 async function syntheticSql(mode='valid') {

@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.18",
-  "source_sha256": "7227f221a7eb5060be74235f4e2e17217153bc97544b52b7b4f04057b7c22ed6",
+  "spec_version": "1.9.19",
+  "source_sha256": "1cea04f121a75c5ad957e9f4b59364669d7c3b57e6bbba8e8ae866fe798aff67",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4647,7 +4647,7 @@
   "official_history_db_display_contract": {
     "format": "jungsi.official-history-db-display/v1",
     "id": "DEV-011",
-    "revision": "2026.10.09.v2",
+    "revision": "2026.10.09.v3",
     "branch": "feature/application-pre-data-platform",
     "basis_commit": "db50c45127cfb314cc52e2bc8682505e077fffec",
     "requirements": [
@@ -4712,13 +4712,13 @@
       "RLS와 최소 역할 권한을 유지한다. 서버 app 역할은 superuser/BYPASSRLS/자료 소유자가 아니어야 하며 row_security=on, 실제 참조 표의 RLS 정책 적용과 view security_invoker 또는 직접 RLS 표 경로를 확인한다. 이를 확인하지 못하면 응답을 보류한다.",
       "모집행·입결·출처와 승인 선택 PK를 파라미터화한 bounded bulk JOIN으로 같은 READONLY snapshot에서 한 번에 조회한다(data query 1회). 학과/지표별 SELECT 반복 N+1, 검수하지 않은 전체 view/다른 버전/fixture fallback은 금지한다. 역할·권한·인증 사전 조회는 data query와 별도 집계한다.",
       "원 DB offering_pk와 GUIDE 화면용 offering_id는 두 namespace다. source_offering_pk와 full29 기대행·원형 PK·year:rawPK/승인 lineage를 각각 검증하며 raw 모집군/전형을 GUIDE 표기에 덮어쓰지 않는다.",
-      "TS의 소수초 시간은 BigInt microseconds로 비교하고 UTC 최대6자리로 반환한다. legacy 이용권 owner UUID WHERE 및 현재 활성기간 조건·session v1 세 필드는 유지한다.",
+      "TS의 UTC 시각은 Z와 +00:00을 같은 BigInt microseconds로 해석하고 원 catalog 시각 literal은 변경하지 않는다. HTTP는 기존 Z 및 최대6자리 소수초로 정규화한다. UTC 이외 offset·잘못된 날짜·7자리 소수초를 거절하며 issued 포함·expires 제외·최대24h의 정확 경계를 유지한다. legacy 이용권 owner UUID WHERE·현재 활성기간·session v1 세 필드는 그대로다.",
       "안전한 오류 enum만 명시 증분한다. Python 재귀 응답 필터는 유지하고 Edge의 오류 code/status도 허용목록 밖 값은 비밀 없는503으로 필터한다.",
       "외부 base에는 /functions/v1/함수명 prefix가 있으나 함수 내부 Request path는 /함수명 prefix다. 화면 중계의 encoded 모집행 ID는 원 ID로 1회 복원하고 기존 API suffix·query·DTO를 유지한다.",
       "실제 provider 검수에서 SQLSTATE57014를 관측하면 five-second 조회 제한과 원형 source/typed 값·범위·RLS를 유지하며 안전한503으로 닫는다. 파일 수준 keyset 후보 검수와 실제 payload 미실행을 구분하고 성공한 native/값 대조 없이 runtime 최적화로 채택하지 않는다.",
-      "metadata의 EXPLAIN(ANALYZE FALSE) 진단도5초 timeout으로 계획을 반환하지 못한 관측은 새 metadata SELECT나 payload 성공 증거가 아니다. 원인 미확정이며 추가 실DB 실행은 중지했다. 기존 성공 source 검수·현재 코드/합성·현재 실제 실패와 환경 준비/등록/배포 인수를 항목별로 분리한다.",
-      "승인된 OID 메타데이터 최적화는 같은 qualified 관계명 집합을 unnest→to_regclass→pg_class OID JOIN으로 조회한다. 원11컬럼·namespace/app/nonowner·RLS/read-only·4권한 함수·view 정의/옵션·기저3표 forced RLS 검수와5초 제한을 유지한다. payload JOIN/선택 명부/숫자 투영/회원/default/flags는 불변이며 현재 동결 runtime의 실제 검수는 OID 관계 메타데이터 조회57014로 중단되어 입결 payload JOIN과 HTTP 인수는 미실행이다. 단독 OID source 검수 성공을 runtime 성공으로 대체하지 않는다.",
-      "현재 실제 OID provider 검수는 동결7파일 SHA에 결속한1회 후보로 수행했고 role metadata는 통과했으나 관계 metadata가5초 제한의 QueryCanceled/SQLSTATE57014로 실패했다. 관측 execute6968ms·입결 JOIN0·HTTP0·재시도0·DB쓰기0이며 특정 원인은 미확정이다. 원 실패/단독 source 성공을 보존하고 제한 확대·대체 쿼리·권한 우회·승인 승격은 하지 않는다."
+      "이전 metadata EXPLAIN(ANALYZE FALSE)의5초57014·계획 미반환 관측과 원본은 보존한다. 최신 사용자 요청의 단일 fresh v5는 같은 SQL/typed 범위/RLS/5초 제한으로 공급자140지표·12모집행과 HTTP 두 페이지100/40을 확인했다. 실제DB+DI 검수와 실JWT·클라우드·브라우저를 구분하고 원인 미확정인 이전 실패를 새 성공으로 지우지 않는다.",
+      "승인된 OID 메타데이터 최적화는 같은 qualified 관계명 집합을 unnest→to_regclass→pg_class OID JOIN으로 조회한다. 원11컬럼·namespace/app/nonowner·RLS/read-only·권한 함수·view 정의/옵션·기저3표 forced RLS 검수와5초 제한을 유지한다. payload JOIN/선택 명부/숫자 투영/회원/default/flags는 불변이다. v4 metadata57014는 보존하고 fresh v5의 실제 공급자·입결HTTP100/40·각 dataJOIN1 성공과 실제JWT/Edge 운영 미검수를 별도로 기록한다.",
+      "이전 v4 동결7파일 검수는 role metadata 통과 후 관계 metadata57014·관측execute6968ms·JOIN0/HTTP0/재시도0/DB쓰기0으로 실패한 이력이다. 새 v5는 사용자 요청의1회 original oracle READONLY 검수로 같은5초 제한·SQL·RLS를 유지해140/12와HTTP 대조를 통과했으며 쓰기/재시도0이다. 데이터팀 후속 v35 DiskFull53100 파일 영수증은 별도 관측이고57014의 원인으로 단정하지 않는다. 제한 확대·대체 쿼리·권한 우회·전국/엔진/운영 승인 승격은 하지 않는다."
     ],
     "tasks": [
       [
@@ -4748,27 +4748,39 @@
       ]
     ],
     "verification": {
-      "source_db_read_only": "PASS_PRIOR_SCOPED_QUALIFIED_SOURCE_140_AND_INDEPENDENT_BULK_JOIN_RLS; CURRENT_FROZEN_OID_PROVIDER_METADATA_FAILED_57014_PAYLOAD_HTTP_NOT_RUN",
-      "python_reference_HTTP": "PASS_17_NATIVE_SCOPED_SYNTHETIC_WITH_QUALIFIED_OID_PARAMS_AND_MISSING_METADATA_PAYLOAD_ZERO; ACTUAL_DB_HTTP_JWT_BFF_BROWSER_NOT_RUN",
-      "Deno_check_test": "PASS_NATIVE_Deno_2.9.7_ENTRY_AND_TEST_TYPECHECK_AND_28_SCOPED_SYNTHETIC_WITH_QUALIFIED_OID_METADATA_GUARDS; NO_DB_AUTH_ENV_NETWORK",
-      "restricted_cloud_API": "NOT_RUN_BLOCKED_EDGE_FUNCTION_SECRET_MANAGEMENT_PERMISSION; AUTHORIZED_FRONTEND_SUPABASE_ADMIN_CONFIGURATION_INTAKE_PENDING",
+      "source_db_read_only": "PASS_FRESH_V5_SCOPED_APP_ROLE_TLS_READONLY_PROVIDER_140_METRICS_12_ANNUAL_OFFERINGS; ORIGINAL_V4_57014_PRESERVED; NOT_FULL_SERVICE_ACCEPTANCE",
+      "python_reference_HTTP": "PASS_17_NATIVE_SCOPED_SYNTHETIC_AND_FRESH_V5_ACTUAL_DB_HTTP_WITH_SYNTHETIC_DI_AUTH_HISTORY_100_40_ME_3_FIELDS_NEGATIVE_PAYLOAD_ZERO; REAL_JWT_CLOUD_BFF_BROWSER_NOT_RUN",
+      "Deno_check_test": "PASS_NATIVE_Deno_2.9.7_SHARED_APPLICATION_AND_TEST_CHECK_33_SCOPED_SYNTHETIC_TESTS_EXISTING_28_PLUS_5_UTC_COMPATIBILITY; NO_DB_AUTH_ENV_NETWORK",
+      "restricted_cloud_API": "NOT_RUN; BASE_7_CONFIGURATION_REGISTRATION_RECEIPT_AND_DASHBOARD_OBSERVED; FINAL_DESCRIPTOR_PIN_3_REGISTRATION_FUNCTION_DEPLOYMENT_REAL_JWT_BFF_BROWSER_PENDING",
       "actual_user_JWT": "NOT_RUN",
       "frontend_BFF_browser": "NOT_RUN",
       "operational_security_three_gates": "NOT_RUN",
-      "effective_RLS": "PASS_PRIOR_QUALIFIED_OID_METADATA_SOURCE_PROBE_22_RELATIONS_11_TYPED_FIELDS_SAME_GUARDS; CURRENT_RUNTIME_METADATA_TIMEOUT_PREVENTED_COMPLETE_RLS_AND_HTTP_ACCEPTANCE",
-      "bulk_JOIN_query_count": "PASS_PRIOR_SCOPED_SOURCE_1_AND_SYNTHETIC_CONCRETE_1; CURRENT_ACTUAL_OID_PROBE_PAYLOAD_JOIN_0_HTTP_0_METADATA_FAILURE; PAYLOAD_SQL_UNCHANGED",
-      "cloud_deployment": "NOT_RUN; prepared source, bundle and private settings are not an applied or deployed service",
+      "effective_RLS": "PASS_FRESH_V5_ACTUAL_PROVIDER_NONOWNER_NONSUPER_NONBYPASS_APP_ROLE_READONLY_ROW_SECURITY_ON_19_PINNED_INVOKER_VIEWS_3_ENABLE_AND_FORCE_RLS_TABLES; HOSTED_EDGE_RLS_NOT_RUN",
+      "bulk_JOIN_query_count": "PASS_FRESH_V5_ACTUAL_PROVIDER_DATA_JOIN_1_HISTORY_HTTP_PAGE_100_JOIN_1_PAGE_40_JOIN_1; TOTAL_DATA_JOINS_3; AUTH_ROLE_ENTITLEMENT_METADATA_COUNTED_SEPARATELY_NO_N_PLUS_1",
+      "cloud_deployment": "NOT_RUN; NEW_GENERIC_SOURCE_BUNDLE_BUILD_IS_NOT_APPLIED_CONFIGURATION_HOSTED_RUNTIME_OR_DEPLOYMENT; NO_OBSERVED_API_URL",
       "keyset_optimization": "PRIVATE_PROPOSAL_SCOPE_EQUIVALENCE_ONLY; REAL_METADATA_TIMEOUT_BEFORE_NEW_PAYLOAD; NOT_ADOPTED_IN_RUNTIME",
-      "cloud_configuration_registration": "USER_ASSIGNED_TO_FRONTEND_TEAM_SUPABASE_ADMIN; CURRENT_ACCOUNT_NO_PERMISSION_CHANGE_OR_BYPASS; ACTUAL_REGISTRATION_NOT_RUN",
-      "base_configuration_registration": "PREPARED_7_SERVER_SETTINGS_PRIVATE_ADMIN_INTAKE_ONLY; ACTUAL_REGISTRATION_NOT_RUN",
-      "final_descriptor_configuration": "PATH_SHA_BYTES_3_HELD_PENDING_SEPARATE_APPROVAL_AND_FINAL_IMMUTABLE_PINS; MISSING_OR_UNAPPROVED_DESCRIPTOR_EXPECTED_503",
+      "cloud_configuration_registration": "BASE_7_REGISTERED_BY_DESIGNATED_FRONTEND_SUPABASE_OWNER_AND_INDEPENDENTLY_OBSERVED_IN_DASHBOARD; CURRENT_ACCOUNT_SECRET_MANAGEMENT_PERMISSION_UNCHANGED_NO_BYPASS; FINAL_PIN_3_REGISTRATION_NOT_RUN",
+      "base_configuration_registration": "PASS_RECEIPT_V2_BYTES_SHA_AND_ROOT_DASHBOARD_7_CUSTOM_NAMES_REGISTRATION_TIMESTAMPS_DIGEST_LIST; PRIVATE_VALUES_NOT_EXPOSED; REGISTRATION_NOT_RUNTIME_ACCEPTANCE",
+      "final_descriptor_configuration": "APPROVED_ISOLATED_CLOUD_REVIEW_FILE_140_METRICS_12_OFFERINGS_ONE_REVIEW_SUBJECT_5_GET_24H; ORIGINAL_COMPONENT_BYTES_AND_FALSE_FLAGS_PRESERVED; PYTHON_AND_TS_FILE_VALIDATION_PASS; PRIVATE_PIN_3_PREPARED_REGISTRATION_NOT_RUN",
       "metadata_plan_diagnostic": "FAILED_SQLSTATE_57014_FIVE_SECOND_BOUND; EXPLAIN_ANALYZE_FALSE_RETURNED_NO_PLAN; METADATA_SELECT_AND_PAYLOAD_NOT_RUN_IN_THIS_DIAGNOSTIC; CAUSE_UNCONFIRMED_NO_RETRY",
-      "further_real_database_execution": "STOP_AFTER_ONE_FROZEN_OID_CANDIDATE_FAILURE; NO_RETRY_TIMEOUT_EXTENSION_FALLBACK_KEYSET_ADOPTION_OR_AUTHORITY_CHANGE",
+      "further_real_database_execution": "FRESH_USER_REQUEST_AUTHORIZED_SINGLE_V5_ORIGINAL_ORACLE_PROBE_PASS; ATTEMPTS_1_RETRIES_0_WRITES_0; NO_UNBOUNDED_RETRY_TIMEOUT_EXTENSION_FALLBACK_KEYSET_OR_AUTHORITY_CHANGE",
       "before_metadata_optimization_actual_provider": "FAILED_SCOPED_ORIGINAL_PROVIDER_OR_METADATA_DIAGNOSTIC_SQLSTATE_57014_WITH_FIVE_SECOND_BOUND; ORIGINAL_FAILURES_PRESERVED",
-      "metadata_lookup_optimization": "QUALIFIED_NAMES_UNNEST_TO_REGCLASS_PG_CLASS_OID_JOIN_SAME_PREDICATE; PRIOR_INDEPENDENT_SOURCE_PROBE_PASS_UNDER_5_SECONDS_AND_PYTHON_DENO_REGRESSION_PASS; CURRENT_ACTUAL_PROVIDER_METADATA_FAILED_57014_PAYLOAD_HTTP_NOT_RUN",
-      "current_actual_provider_v4": "FAIL_AT_OID_RELATION_METADATA_QUERYCANCELED_SQLSTATE_57014_UNDER_CONFIGURED_5_SECOND_BOUND; OBSERVED_EXECUTE_6968MS; ROLE_METADATA_PASS_2172MS; PAYLOAD_JOIN_0_HTTP_0_ATTEMPTS_1_RETRIES_0_WRITES_0",
+      "metadata_lookup_optimization": "QUALIFIED_NAMES_UNNEST_TO_REGCLASS_PG_CLASS_OID_JOIN_SAME_PREDICATE; FRESH_V5_ACTUAL_PROVIDER_GUARDS_AND_PAYLOAD_HTTP_PASS_WITH_5_SECOND_BOUND; PRIOR_V4_TIMEOUT_PRESERVED_CAUSE_UNCONFIRMED",
+      "current_actual_provider_v4": "HISTORICAL_FAIL_AT_OID_RELATION_METADATA_QUERYCANCELED_SQLSTATE_57014_UNDER_CONFIGURED_5_SECOND_BOUND; OBSERVED_EXECUTE_6968MS_ROLE_METADATA_PASS_2172MS_PAYLOAD_JOIN_0_HTTP_0_ATTEMPTS_1_RETRIES_0_WRITES_0_PRESERVED",
       "current_actual_provider_v4_receipt_sha256": "d20051ca7c47ff679702cfa0d86c1ee8697b130972c4fd17aa1813f96771ec9d",
-      "current_actual_provider_v4_source_binding": "SEVEN_FROZEN_RUNTIME_SCHEMA_TEST_SHA256_EXACT_MATCH; SYNTHETIC_DI_AUTH_ONLY; ACTUAL_JWT_CLOUD_BFF_BROWSER_AND_ALL_5_GET_ACCEPTANCE_NOT_RUN"
+      "current_actual_provider_v4_source_binding": "HISTORICAL_SEVEN_FROZEN_RUNTIME_SCHEMA_TEST_SHA256_EXACT_MATCH_SYNTHETIC_DI_AUTH_ONLY; ORIGINAL_FAILURE_PRESERVED_NOT_REPLACED_BY_NEW_SUCCESS",
+      "base_configuration_receipt_sha256": "0c3e2b0f3de09dd2566da17a9619e1d6c0476110cdd0d2bc4de33f5eae01f657",
+      "current_actual_provider_v5": "PASS_SINGLE_FRESH_ORIGINAL_ORACLE_READONLY_140_METRICS_12_ANNUAL_OFFERINGS_PROVIDER_2532MS; HISTORY_HTTP_100_40_TYPED_CLOSED_DTO_NO_STORE_ME_3_FIELDS_STANDARD; RELAY_MISSING_403_BEARER_MISSING_401_OTHER_SUBJECT_403_DATA_ZERO; RETRIES_0_WRITES_0",
+      "current_actual_provider_v5_receipt_sha256": "c69d5311bbb4752c5aea9f3629bdc85eedc09151ffc6588477bbc2c20163b028",
+      "current_actual_provider_v5_source_binding": "BASELINE_3C47B07_SEVEN_ORIGINAL_SOURCE_HASHES_FROZEN_BEFORE_UTC_TS_DELTA; UNCHANGED_PYTHON_PROVIDER_SQL_RLS_AND_HTTP_WITH_SYNTHETIC_DI_AUTH_PASS; NEW_TS_FILE_VALIDATION_AND_SYNTHETIC_TESTS_ARE_SEPARATE_NO_REAL_JWT_CLOUD_SQL_BROWSER",
+      "UTC_timestamp_compatibility": "Z_AND_POSITIVE_ZERO_OFFSET_PLUS_00_00_EQUAL_BIGINT_MICROSECONDS; ORIGINAL_CATALOG_AS_OF_LITERAL_UNCHANGED; HTTP_NORMALIZED_Z_WITH_UP_TO_6_FRACTION_DIGITS; NONZERO_OR_NEGATIVE_ZERO_OFFSET_INVALID_DATE_7_DIGIT_FRACTION_AND_EXCESS_TTL_REJECT; EXACT_ISSUE_EXPIRY_BOUNDARIES_PRESERVED",
+      "UTC_TS_file_validation_receipt_sha256": "f7e561ead524fd55b855122f0a06c6959f221921c04043d9b8021473ed86e0e1",
+      "UTC_TS_approved_descriptor_validation": "PASS_FILE_ONLY_APPROVED_DESCRIPTOR_AND_EXPIRED_REVOKED_WRONG_ENV_PROPOSED_TTL_ABOVE_24H_NEGATIVE_CASES; COMPONENT_BYTES_UNCHANGED_DB_0_NETWORK_0; ACTUAL_CLOUD_SQL_AND_JWT_NOT_RUN",
+      "data_team_intake_observation": "FILE_RECEIPTS_REPORT_V33_FULL_APP_READBACK_PASS_AND_TWO_SUBSEQUENT_V35_DISKFULL_SQLSTATE_53100_ROLLBACK_FAILURES; NOT_ASSUMED_CAUSE_OF_PRIOR_57014_NO_DATA_SCOPE_EXPANSION",
+      "generic_bundle": "PASS_CACHED_OFFICIAL_ESBUILD_0_25_5_SOURCE_ONLY_ESM_THREE_SERVICE_SOURCES_FIXED_POSTGRES_3_4_5_IMPORT_EXPORT_AND_NODE_BUILTIN_ALIAS; PRIOR_DENO_BUNDLE_OS_ERROR_2_FAILURES_PRESERVED_NO_CONFIRMED_CAUSE; HOSTED_RUNTIME_NOT_RUN",
+      "generic_bundle_sha256": "b3068379af4a4625113e99be4f5ef10a76f1852a8ffe7e9e68011e66c4728c74",
+      "generic_bundle_bytes": 110796,
+      "local_C_receiver_acceptance": "NOT_ACCEPTED_FOR_CLI_RESUME; RECONSTRUCTED_924_BYTE_SELECTION_MATCHED_REPORTED_SHA_AND_SENDER_SCOPE_REVIEW; RECEIVER_ACTUAL_MACHINE_REVIEW_RECEIPT_BYTES_NOT_RECEIVED_INDEPENDENTLY; NO_CACHE_SESSION_OR_API_RESUME"
     },
     "frontend_handoff": [
       "브라우저·화면 코드·일반 프런트 환경은 기존 API의 공개 응답만 읽는다. app DATABASE_URL/DB CA/Storage secret/descriptor/원자료/전체 DB를 수령하지 않는다. 지정된 Supabase 관리자가 비공개 app-only 기본7 설정을 등록하는 역할은 별도 인계 범위다. migration-owner 접속값·키는 외부 화면 환경에 전달하지 않는다.",
@@ -4780,8 +4792,8 @@
       "이 제한 검수 함수의 base는 5개 GET operation 전용이다. 기존 22API의 전역 base를 일괄 live 전환하지 않는다. 1페이지의 history.search/recruitment.read/session.read와 유료 offerings.search/offering.read에만 명시 operation routing으로 연결한다.",
       "미포팅 17API와 2~4페이지의 성적·환산·지원판정 엔진은 이 함수로 준비 완료되지 않았으며 pending/503을 유지한다. 관리자·개발자 계정의 관리 권한을 유료 이용권으로 자동 승격하지 않는다.",
       "화면 팀은 기존 페이지 및 operation별 routing과 transport prefix를 대조하여 연결한다. CSS·화면 구현·BFF 및 브라우저 실수신 검수는 외부 화면 팀 담당이며 서비스 소스·합성 검산으로 대신 완료 처리하지 않는다.",
-      "사용자 결정에 따라 비공개 Edge 설정 등록은 화면 개발팀의 Supabase 관리자가 맡는다. 값은 채팅·공개 문서·Git으로 전달하지 않고 검토한 비공개 app-only 설정 묶음만 별도 전달한다. 현재 계정의 권한 확대·기본 DB 접속값 우회는 하지 않는다. 기본7 설정의 등록 완료는 등록 영수증으로 별도 판정하고 descriptor PIN3개의 HOLD는 유지한다. 함수 배포는 최종 승인·정확 코드/descriptor PIN·실제 URL과 API 응답 검수로, 실화면 인수는 실제 JWT/BFF/브라우저 증거로 각각 판정한다. 등록 증거만으로 배포·실화면 완료를 표시하지 않는다. 현재 기본7 설정의 실제 등록·함수 배포·실사용자 JWT/BFF·브라우저 인수는 NOT_RUN이다. 로컬 실제 OID provider 검수는 관계 메타데이터 조회57014로 중단됐으며 입결 payload·HTTP 응답은 아직 미실행이다. 단위 검수나 단독 source 성공을 전체5GET·유료 실제 요청 완료로 표시하지 않는다.",
-      "설정 인계는 2단계다. Supabase 관리자에게는 준비된 기본 서버 설정7개를 비공개로 전달하고, 아직 제안 상태인 descriptor PATH/SHA/BYTES3개는 최종 승인·PIN이 정해질 때까지 HOLD한다. 일반 화면 담당에게는 서버 relay-only와 공개 Auth 설정만 전달한다. 3개 미결·descriptor 미승인 상태의503은 기대 차단이며 가짜 대체값이나 자체 승인으로 통과시키지 않는다. 실제 환경 등록은NOT_RUN이고 등록만으로 DB 조회/배포/화면 인수가 완료되지 않는다."
+      "사용자 결정에 따라 비공개 Edge 설정 등록은 화면 개발팀의 Supabase 관리자가 맡는다. 기본7개는 등록 영수증 v2 bytes/SHA와 담당자의 Dashboard 이름·개수·등록시각·digest 목록으로 확인했으며 값은 공개 문서·Git에 넣지 않는다. 현재 계정의 Secret 관리권한은 그대로다. 새 클라우드 표시 승인판은 원형140지표/12모집행·검수자1·5GET·24h·false flags를 유지해 Python/TS 파일 검수에 통과했다. 최종 descriptor PIN3은 비공개 준비 상태이며 실등록은 NOT_RUN이다. 함수 실제 배포/관측 URL·실사용자 JWT/BFF/브라우저·운영 보안3gate 인수는 각각 미완료이고 등록만으로 완료 처리하지 않는다.",
+      "설정 인계는 기본7개 실등록과 최종 descriptor PATH/SHA/BYTES3개를 구분한다. 최종 승인판과 불변 PIN은 지정 관리자에게 비공개로 전달하며 일반 화면 담당은 서버 relay-only와 공개 Auth 설정만 받는다. fresh v5 실제 Python DB 공급자140/12·HTTP100/40·각 JOIN1/DTO/no-store는 DI 인증 범위이며 새 TS의 UTC 호환33 합성과 승인판 파일 검수는 별도 증거다. 실등록 전 missing PIN503은 정상 차단이다. 배포 주소는 실제 관측·응답 검수 후 전달하며5GET만 명시 연결하고 기존22 API 전역 live 전환·미포팅17 API/2~4페이지 엔진 승격을 하지 않는다."
     ],
     "query_contract": {
       "parameterized_bulk_join": true,

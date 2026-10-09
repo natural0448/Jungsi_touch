@@ -97,17 +97,19 @@ export function canonicalDecimal(value: Json): string | null {
   return (negative && magnitude !== '0' ? '-' : '') + magnitude;
 }
 export function utcInstantMicros(value: Json | undefined): bigint {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z$/.test(value)) throw invalid();
+  if (typeof value !== 'string') throw invalid();
+  const match = value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.(\d{1,6}))?(?:Z|\+00:00)$/);
+  if (!match) throw invalid();
   const n = Date.parse(value.slice(0, 19) + 'Z'); if (!Number.isFinite(n)) throw invalid();
   if (new Date(n).toISOString().slice(0, 19) !== value.slice(0, 19)) throw invalid();
-  return BigInt(n) * 1000n + BigInt((value.match(/\.(\d+)Z$/)?.[1] ?? '').padEnd(6, '0'));
+  return BigInt(n) * 1000n + BigInt((match[1] ?? '').padEnd(6, '0'));
 }
 export function nowMicros(value: number): bigint {
   if (!Number.isFinite(value) || !Number.isSafeInteger(Math.trunc(value * 1000))) throw invalid();
   return BigInt(Math.trunc(value * 1000));
 }
 export function utcText(value: string): string {
-  utcInstantMicros(value); const fraction = value.match(/\.(\d+)Z$/)?.[1] ?? '';
+  utcInstantMicros(value); const fraction = value.match(/\.(\d+)(?:Z|\+00:00)$/)?.[1] ?? '';
   return value.slice(0, 19) + (/[1-9]/.test(fraction) ? '.' + fraction.padEnd(6, '0') : '') + 'Z';
 }
 function publicSource(value: Json) {
