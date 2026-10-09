@@ -103,7 +103,7 @@ async function syntheticSql(mode='valid') {
     if(query.includes("to_regclass('jungsi_backend.entitlements')"))return [{owner:false,readable:true}];
     if(query.includes('max(expires_at)'))return [{expires_at:'2026-10-08T00:00:00.000500Z'}];
     if(query.includes('to_regclass($1)'))return [{owner:false,readable:true,writable:false}];
-    if(query.includes('c.relname AS name'))return [{name:'admission_results_curated_v21_1',kind:'v',rls:false,force:false,options:['security_invoker=true'],owner:false,readable:true,writable:false,anon_read:mode==='public_grant',authenticated_read:false,definition:mode==='view_changed'?definition+' changed':definition},...['admission_results','curation_overlays','school_scope_overlays'].filter((_,i)=>mode!=='missing_relation'||i!==2).map(name=>({name,kind:'r',rls:true,force:mode!=='force_disabled',options:null,owner:false,readable:true,writable:false,anon_read:false,authenticated_read:false,definition:null}))];
+    if(query.includes('c.relname AS name'))return [{name:'admission_results_curated_v21_1',kind:'v',rls:false,force:false,options:mode==='raw_reloptions'?'{security_invoker=true}':['security_invoker=true'],owner:false,readable:true,writable:false,anon_read:mode==='public_grant',authenticated_read:false,definition:mode==='view_changed'?definition+' changed':definition},...['admission_results','curation_overlays','school_scope_overlays'].filter((_,i)=>mode!=='missing_relation'||i!==2).map(name=>({name,kind:'r',rls:true,force:mode!=='force_disabled',options:null,owner:false,readable:true,writable:false,anon_read:false,authenticated_read:false,definition:null}))];
     if(query.startsWith('WITH selected'))return copy(rows);
     return [];
   }});
@@ -112,9 +112,68 @@ async function syntheticSql(mode='valid') {
   const ports=createOfficialHistoryInfrastructure({databaseUrl:'postgres://SYNTHETIC:SYNTHETIC@127.0.0.1:1/SYNTHETIC',databaseCa:'-----BEGIN CERTIFICATE-----\nSYNTHETIC\n-----END CERTIFICATE-----',supabaseUrl:'https://example.org',publishableKey:'SYNTHETIC-public',storageSecret:'SYNTHETIC-secret',descriptorBucket:'SYNTHETIC-private',descriptorPath:'SYNTHETIC/descriptor.json',descriptorSha256:'a'.repeat(64),descriptorBytes:1},{sqlFactory:factory,environment:'local_verification',now:()=>NOW});
   return {descriptor,rows,ports,statements};
 }
-Deno.test('concrete SQL batches JOIN once with exact scope and separate RLS metadata',async()=>{const f=await syntheticSql();const rows=await f.ports.readRows(f.descriptor);equal(rows.length,3);const data=f.statements.filter(s=>s.query.startsWith('WITH selected'));equal(data.length,1);assert(data[0].query.includes('LEFT JOIN jungsi_data_ingest.curation_overlays'));assert(data[0].query.includes('LEFT JOIN jungsi_data_ingest.school_scope_overlays'));equal((data[0].params as unknown[])[1],f.descriptor.bindings.map(b=>(b.expected_db_row as Row).result_id));const metadata=f.statements.filter(s=>s.query.startsWith('WITH qualified'));equal(metadata.length,1);equal(metadata[0].params,[['admission_results_curated_v21_1','admission_results','curation_overlays','school_scope_overlays'].map(name=>'jungsi_data_ingest.'+name)]);assert(metadata[0].query.includes('to_regclass(scoped.qualified_name)'));assert(metadata[0].query.includes('c.oid=q.target_oid'));for(const guard of ["n.nspname='jungsi_data_ingest'","current_user='jungsi_backend_app'",'NOT r.rolsuper','NOT r.rolbypassrls',"current_setting('row_security')='on'","current_setting('transaction_read_only')='on'","NOT pg_has_role(current_user,'jungsi_backend_owner','MEMBER')","NOT pg_has_role(current_user,'jungsi_backend_owner','USAGE')","NOT pg_has_role(current_user,'postgres','MEMBER')"])assert(metadata[0].query.includes(guard));assert(f.statements.some(s=>s.query.includes('c.relrowsecurity')));assert(!f.statements.some(s=>/^(INSERT|UPDATE|DELETE|GRANT|ALTER)/.test(s.query)));equal((mapScopedCatalog(f.descriptor,rows).history as Row[]).map(r=>r.value),['77.25',0,null]);});
-Deno.test('concrete SQL role RLS invoker drift denies without payload fallback',async()=>{for(const mode of ['bypass','force_disabled','view_changed','public_grant','missing_relation']){const f=await syntheticSql(mode);let failed=false;try{await f.ports.readRows(f.descriptor);}catch{failed=true;}assert(failed,mode);equal(f.statements.filter(s=>s.query.startsWith('WITH selected')).length,0);}});
-Deno.test('unqualified local concrete query is closed before SQL',async()=>{const f=await syntheticSql();delete f.descriptor.read_strategy;let failed=false;try{await f.ports.readRows(f.descriptor);}catch{failed=true;}assert(failed);equal(f.statements,[]);});
+Deno.test('concrete SQL batches JOIN once with exact scope and separate RLS metadata',async()=>{
+  const f=await syntheticSql(),rows=await f.ports.readRows(f.descriptor);equal(rows.length,3);
+  const data=f.statements.filter(s=>s.query.startsWith('WITH selected'));equal(data.length,1);
+  assert(data[0].query.includes('LEFT JOIN jungsi_data_ingest.curation_overlays'));
+  assert(data[0].query.includes('LEFT JOIN jungsi_data_ingest.school_scope_overlays'));
+  const params=data[0].params as unknown[];
+  equal(JSON.parse(params[0] as string),f.descriptor.bindings.map(b=>(b.expected_db_row as Row).release_id));
+  equal(JSON.parse(params[1] as string),f.descriptor.bindings.map(b=>(b.expected_db_row as Row).result_id));
+  equal(JSON.parse(params[2] as string),(f.descriptor.read_strategy as Row).active_curation_release_ids);
+  equal(params[3],f.descriptor.bindings.length+1);
+  for(const slot of [1,2,3])assert(data[0].query.includes('$'+slot+'::text::jsonb'));
+  equal((data[0].query.match(/WITH ORDINALITY/g)??[]).length,3);
+  equal((data[0].query.match(/ORDER BY ordinality/g)??[]).length,3);
+  assert(!params.some(Array.isArray));
+  const metadata=f.statements.filter(s=>s.query.startsWith('WITH qualified'));equal(metadata.length,1);
+  equal(JSON.parse((metadata[0].params as string[])[0]),['admission_results_curated_v21_1','admission_results','curation_overlays','school_scope_overlays'].map(name=>'jungsi_data_ingest.'+name));
+  assert(metadata[0].query.includes('$1::text::jsonb'));
+  assert(metadata[0].query.includes('to_jsonb(c.reloptions) AS options'));
+  assert(metadata[0].query.includes('to_regclass(scoped.qualified_name)'));assert(metadata[0].query.includes('c.oid=q.target_oid'));
+  for(const guard of ["n.nspname='jungsi_data_ingest'","current_user='jungsi_backend_app'",'NOT r.rolsuper','NOT r.rolbypassrls',"current_setting('row_security')='on'","current_setting('transaction_read_only')='on'","NOT pg_has_role(current_user,'jungsi_backend_owner','MEMBER')","NOT pg_has_role(current_user,'jungsi_backend_owner','USAGE')","NOT pg_has_role(current_user,'postgres','MEMBER')"])assert(metadata[0].query.includes(guard));
+  assert(f.statements.some(s=>s.query.includes('c.relrowsecurity')));assert(!f.statements.some(s=>/^(INSERT|UPDATE|DELETE|GRANT|ALTER)/.test(s.query)));
+  equal((mapScopedCatalog(f.descriptor,rows).history as Row[]).map(r=>r.value),['77.25',0,null]);
+});
+Deno.test('concrete JSON text bindings retain escaped paired IDs and approved overlay list',async()=>{
+  const f=await syntheticSql(),release=Array(3).fill('SYNTHETIC,release"\\value'),result=['NULL','SYNTHETIC한글','SYNTHETIC{result}'];
+  for(let i=0;i<f.descriptor.bindings.length;i++){
+    Object.assign(f.descriptor.bindings[i].expected_db_row as Row,{release_id:release[i],result_id:result[i]});
+    Object.assign(f.rows[i],{release_id:release[i],result_id:result[i]});
+  }
+  const overlays=['SYNTHETIC,curation','SYNTHETIC"curation','SYNTHETIC\\curation'];
+  (f.descriptor.read_strategy as Row).active_curation_release_ids=overlays;
+  const rows=await f.ports.readRows(f.descriptor),data=f.statements.find(s=>s.query.startsWith('WITH selected'));
+  if(!data)throw new Error('synthetic_data_query_missing');const params=data.params as string[];
+  equal(JSON.parse(params[0]).map((id:string,i:number)=>[id,JSON.parse(params[1])[i]]),release.map((id,i)=>[id,result[i]]));
+  equal(JSON.parse(params[2]),overlays);equal(rows.map(row=>[row.release_id,row.result_id]),release.map((id,i)=>[id,result[i]]));
+  equal(f.statements.filter(s=>s.query.startsWith('WITH selected')).length,1);
+});
+Deno.test('pinned driver text OID preserves JSON scalar while direct jsonb double encodes',()=>{
+  const options={ssl:false,max:1,idle_timeout:0,connect_timeout:1,max_lifetime:1,max_pipeline:1,backoff:()=>0,keep_alive:0,prepare:false,debug:false,fetch_types:false,publications:'SYNTHETIC',target_session_attrs:'read-write' as const};
+  const driver=postgres('postgres://SYNTHETIC:SYNTHETIC@127.0.0.1:1/SYNTHETIC',options);
+  const values=['',',','"','\\','NULL','null','SYNTHETIC한글'],encoded=JSON.stringify(values);
+  const internals=driver.options as unknown as {shared:{typeArrayMap:Record<number,number>};serializers:Record<number,(value:unknown)=>string>};
+  const serializer=internals.serializers;
+  equal(Object.keys(internals.shared.typeArrayMap),[]);
+  equal(serializer[1009],undefined);
+  equal(serializer[25](values),values.join(','));
+  equal(JSON.parse(serializer[25](encoded)),values);
+  equal(JSON.parse(serializer[3802](encoded)),encoded);
+  assert(typeof JSON.parse(serializer[3802](encoded))==='string');
+  const query=driver.unsafe('SELECT $1::text::jsonb',[encoded]) as unknown as {args:unknown[]};
+  equal(query.args,[encoded]);
+  equal(JSON.parse(serializer[25](JSON.stringify([]))),[]);
+});
+Deno.test('pinned driver JSONB projection preserves reloptions array while raw text array stays unparsed',()=>{
+  const options={ssl:false,max:1,idle_timeout:0,connect_timeout:1,max_lifetime:1,max_pipeline:1,backoff:()=>0,keep_alive:0,prepare:false,debug:false,fetch_types:false,publications:'SYNTHETIC',target_session_attrs:'read-write' as const};
+  const driver=postgres('postgres://SYNTHETIC:SYNTHETIC@127.0.0.1:1/SYNTHETIC',options);
+  const expected=['security_invoker=true'],raw='{security_invoker=true}',parsers=driver.options.parsers;
+  equal(parsers[1009],undefined);equal((parsers[1009]??((value:string)=>value))(raw),raw);
+  equal(parsers[3802](JSON.stringify(expected)),expected);equal(parsers[3802]('null'),null);
+});
+Deno.test('concrete SQL role RLS invoker drift denies without payload fallback',async()=>{for(const mode of ['bypass','force_disabled','view_changed','public_grant','missing_relation','raw_reloptions']){const f=await syntheticSql(mode);let failed=false;try{await f.ports.readRows(f.descriptor);}catch{failed=true;}assert(failed,mode);equal(f.statements.filter(s=>s.query.startsWith('WITH selected')).length,0);}});
+Deno.test('unqualified local concrete query is closed before SQL',async()=>{for(const invalidScope of ['missing_strategy','empty_overlay_list']){const f=await syntheticSql();if(invalidScope==='missing_strategy')delete f.descriptor.read_strategy;else(f.descriptor.read_strategy as Row).active_curation_release_ids=[];let failed=false;try{await f.ports.readRows(f.descriptor);}catch{failed=true;}assert(failed);equal(f.statements,[]);}});
 Deno.test('concrete legacy entitlement SQL preserves UTC microseconds for me',async()=>{const f=await syntheticSql(),until=await f.ports.paidUntil(SUBJECT,NOW);equal(until,'2026-10-08T00:00:00.000500Z');const query=f.statements.find(s=>s.query.includes('max(expires_at)'));assert(query?.query.includes('HH24:MI:SS.US'));equal((query?.params as unknown[])[0],SUBJECT);const http=fixture();http.setPaid(until);equal((await(await http.request('/api/v1/me')).json()).entitlement_expires_at,until);});
 Deno.test('new overlay is not an equivalent raw-PK snapshot',async()=>{const f=await syntheticSql();for(const [key,value]of [['guard_active_curation_release_id','SYNTHETIC overlay'],['guard_school_source_school_id','SYNTHETIC changed school'],['guard_school_after_row_fingerprint','c'.repeat(64)]]as const){const rows=copy(f.rows);Object.assign(rows[0],{[key]:value});let failed=false;try{mapScopedCatalog(f.descriptor,rows);}catch{failed=true;}assert(failed,key);}});
 Deno.test('existing frontend encoded offering ID resolves original namespace',async()=>{const f=fixture();f.setPaid('2026-10-08T01:00:00Z');const encoded=encodeURIComponent('2026:SYNTHETIC-A');const r=await f.request('/api/v1/offerings/'+encoded);equal(r.status,200);equal((await r.json()).offering.offering_id,'2026:SYNTHETIC-A');const recruitment=await f.request('/api/v1/offerings/'+encoded+'/recruitment');equal(recruitment.status,200);equal((await recruitment.json()).recruitment,null);for(const invalid of ['%2F','%ZZ','%252F'])equal((await f.request('/api/v1/offerings/'+invalid)).status,400);});
