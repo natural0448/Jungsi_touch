@@ -1,10 +1,10 @@
 # Supabase 입결 DB와 화면 API 연결
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.17이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.19이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 이미 적재한 비공개 Supabase 입결을 별도 목적 범위의 공식자료 표시용 공급자로 읽어 기존 화면 API에 명시 연결한다.
 
-계약 2026.10.08.v1 · 코드 planned · production_ready=false. 담당 feature/application-pre-data-platform.
+계약 2026.10.09.v3 · 코드 implemented_scoped_synthetic_verified_integration_pending · production_ready=false. 담당 feature/application-pre-data-platform.
 
 ## 연결과 승인 범위
 
@@ -22,6 +22,14 @@
 - 공개 TS와 공유 의존·검수 소스의 전체 본문 SHA를 같은 스냅샷 색인에 결속한다. 기존 Python AST 검사를 유지하며 Deno 타입/런타임 증거를 별도로 기록한다.
 - RLS와 최소 역할 권한을 유지한다. 서버 app 역할은 superuser/BYPASSRLS/자료 소유자가 아니어야 하며 row_security=on, 실제 참조 표의 RLS 정책 적용과 view security_invoker 또는 직접 RLS 표 경로를 확인한다. 이를 확인하지 못하면 응답을 보류한다.
 - 모집행·입결·출처와 승인 선택 PK를 파라미터화한 bounded bulk JOIN으로 같은 READONLY snapshot에서 한 번에 조회한다(data query 1회). 학과/지표별 SELECT 반복 N+1, 검수하지 않은 전체 view/다른 버전/fixture fallback은 금지한다. 역할·권한·인증 사전 조회는 data query와 별도 집계한다.
+- 원 DB offering_pk와 GUIDE 화면용 offering_id는 두 namespace다. source_offering_pk와 full29 기대행·원형 PK·year:rawPK/승인 lineage를 각각 검증하며 raw 모집군/전형을 GUIDE 표기에 덮어쓰지 않는다.
+- TS의 UTC 시각은 Z와 +00:00을 같은 BigInt microseconds로 해석하고 원 catalog 시각 literal은 변경하지 않는다. HTTP는 기존 Z 및 최대6자리 소수초로 정규화한다. UTC 이외 offset·잘못된 날짜·7자리 소수초를 거절하며 issued 포함·expires 제외·최대24h의 정확 경계를 유지한다. legacy 이용권 owner UUID WHERE·현재 활성기간·session v1 세 필드는 그대로다.
+- 안전한 오류 enum만 명시 증분한다. Python 재귀 응답 필터는 유지하고 Edge의 오류 code/status도 허용목록 밖 값은 비밀 없는503으로 필터한다.
+- 외부 base에는 /functions/v1/함수명 prefix가 있으나 함수 내부 Request path는 /함수명 prefix다. 화면 중계의 encoded 모집행 ID는 원 ID로 1회 복원하고 기존 API suffix·query·DTO를 유지한다.
+- 실제 provider 검수에서 SQLSTATE57014를 관측하면 five-second 조회 제한과 원형 source/typed 값·범위·RLS를 유지하며 안전한503으로 닫는다. 파일 수준 keyset 후보 검수와 실제 payload 미실행을 구분하고 성공한 native/값 대조 없이 runtime 최적화로 채택하지 않는다.
+- 이전 metadata EXPLAIN(ANALYZE FALSE)의5초57014·계획 미반환 관측과 원본은 보존한다. 최신 사용자 요청의 단일 fresh v5는 같은 SQL/typed 범위/RLS/5초 제한으로 공급자140지표·12모집행과 HTTP 두 페이지100/40을 확인했다. 실제DB+DI 검수와 실JWT·클라우드·브라우저를 구분하고 원인 미확정인 이전 실패를 새 성공으로 지우지 않는다.
+- 승인된 OID 메타데이터 최적화는 같은 qualified 관계명 집합을 unnest→to_regclass→pg_class OID JOIN으로 조회한다. 원11컬럼·namespace/app/nonowner·RLS/read-only·권한 함수·view 정의/옵션·기저3표 forced RLS 검수와5초 제한을 유지한다. payload JOIN/선택 명부/숫자 투영/회원/default/flags는 불변이다. v4 metadata57014는 보존하고 fresh v5의 실제 공급자·입결HTTP100/40·각 dataJOIN1 성공과 실제JWT/Edge 운영 미검수를 별도로 기록한다.
+- 이전 v4 동결7파일 검수는 role metadata 통과 후 관계 metadata57014·관측execute6968ms·JOIN0/HTTP0/재시도0/DB쓰기0으로 실패한 이력이다. 새 v5는 사용자 요청의1회 original oracle READONLY 검수로 같은5초 제한·SQL·RLS를 유지해140/12와HTTP 대조를 통과했으며 쓰기/재시도0이다. 데이터팀 후속 v35 DiskFull53100 파일 영수증은 별도 관측이고57014의 원인으로 단정하지 않는다. 제한 확대·대체 쿼리·권한 우회·전국/엔진/운영 승인 승격은 하지 않는다.
 
 ## 기존 API와 구현 경로
 
@@ -37,6 +45,10 @@
 | new_logical_API_or_DTO | False |
 | browser_DB_credentials | False |
 | relay_header | X-Jungsi-Relay-Token |
+| python_factory | create_official_history_display_app |
+| edge_factory | createOfficialHistoryDisplayHandler |
+| edge_provider | createOfficialHistoryInfrastructure |
+| logical_operation_count | 5 |
 
 논리 작업: history.search, offerings.search, offering.read, recruitment.read, session.read. 기존22 API 중 명시한 조회 부분만 연결하며 전체 엔진 포팅 완료를 뜻하지 않는다.
 
@@ -48,28 +60,59 @@
 | DBD-02 | 서비스 개발팀 | 명시 표시 공급자와 Python reference·Edge ports/adapter·인증/오류/DTO 호환 구현 |
 | DBD-03 | 시스템기획팀·서비스 개발팀 | 목적별 제한 검수 승인·불변 private descriptor·설정·동일 후보 API 수치 대조 |
 | DBD-04 | 외부 화면팀 | API transport prefix와 서버 relay 연결·실제 로그인·1페이지 원지표/보류/오류 브라우저 검수 |
+| DBD-05 | 외부 화면 개발팀의 Supabase 관리자 | 사용자가 위임한 비공개 Edge 설정 등록을 담당한다. 비공개 전달/정확 후보 확인 후 등록 증거를 제출한다. 제한 함수의 실제 배포는 별도 승인·검수와 구분하며 계정·DB 권한 변경이나 전체 운영 승인으로 확대하지 않음 |
 
 ## 화면팀 연결
 
-- 화면은 기존 API 응답만 읽는다. DATABASE_URL/secret 키/descriptor/원자료/전체 DB는 수령하지 않는다.
+- 브라우저·화면 코드·일반 프런트 환경은 기존 API의 공개 응답만 읽는다. app DATABASE_URL/DB CA/Storage secret/descriptor/원자료/전체 DB를 수령하지 않는다. 지정된 Supabase 관리자가 비공개 app-only 기본7 설정을 등록하는 역할은 별도 인계 범위다. migration-owner 접속값·키는 외부 화면 환경에 전달하지 않는다.
 - 제한 검수 API가 실제 배포·응답 검수된 후 관측한 base URL과 transport prefix·공개 Auth 설정을 받는다. 예측한 주소로 live 전환하지 않는다.
 - relay는 비공개 서버 설정으로 전달하며 사용자 JWT는 BFF에서 재검증해 보낸다. 실제 학생 성적·토큰은 채팅/공유 문서/Git에 넣지 않는다.
 - 다른 PC는 같은 candidate에서 실제 원지표·타입·출처·검색 조건·401/403/503·no-store와 전달물 비노출을 검수한다.
 - DB 행 수가 늘어도 행별 조회를 추가하지 않는다. 같은 요청의 data JOIN 1회 증거와 실제 RLS 영수증을 별도 확인한다.
+- 프로젝트의 Edge Function secret 관리 권한이 없는 현재 계정으로 클라우드 설정/배포를 우회하지 않는다. 권한 있는 프로젝트 담당자가 검토한 불변 descriptor와 app-only 비공개 설정을 받아 제한 검수 함수만 배포하고 실제 URL/응답을 제출해야 한다. 기존 사이트 관리자와 DB SELECT 권한은 Edge secret 관리 권한을 대신하지 않는다.
+- 이 제한 검수 함수의 base는 5개 GET operation 전용이다. 기존 22API의 전역 base를 일괄 live 전환하지 않는다. 1페이지의 history.search/recruitment.read/session.read와 유료 offerings.search/offering.read에만 명시 operation routing으로 연결한다.
+- 미포팅 17API와 2~4페이지의 성적·환산·지원판정 엔진은 이 함수로 준비 완료되지 않았으며 pending/503을 유지한다. 관리자·개발자 계정의 관리 권한을 유료 이용권으로 자동 승격하지 않는다.
+- 화면 팀은 기존 페이지 및 operation별 routing과 transport prefix를 대조하여 연결한다. CSS·화면 구현·BFF 및 브라우저 실수신 검수는 외부 화면 팀 담당이며 서비스 소스·합성 검산으로 대신 완료 처리하지 않는다.
+- 사용자 결정에 따라 비공개 Edge 설정 등록은 화면 개발팀의 Supabase 관리자가 맡는다. 기본7개는 등록 영수증 v2 bytes/SHA와 담당자의 Dashboard 이름·개수·등록시각·digest 목록으로 확인했으며 값은 공개 문서·Git에 넣지 않는다. 현재 계정의 Secret 관리권한은 그대로다. 새 클라우드 표시 승인판은 원형140지표/12모집행·검수자1·5GET·24h·false flags를 유지해 Python/TS 파일 검수에 통과했다. 최종 descriptor PIN3은 비공개 준비 상태이며 실등록은 NOT_RUN이다. 함수 실제 배포/관측 URL·실사용자 JWT/BFF/브라우저·운영 보안3gate 인수는 각각 미완료이고 등록만으로 완료 처리하지 않는다.
+- 설정 인계는 기본7개 실등록과 최종 descriptor PATH/SHA/BYTES3개를 구분한다. 최종 승인판과 불변 PIN은 지정 관리자에게 비공개로 전달하며 일반 화면 담당은 서버 relay-only와 공개 Auth 설정만 받는다. fresh v5 실제 Python DB 공급자140/12·HTTP100/40·각 JOIN1/DTO/no-store는 DI 인증 범위이며 새 TS의 UTC 호환33 합성과 승인판 파일 검수는 별도 증거다. 실등록 전 missing PIN503은 정상 차단이다. 배포 주소는 실제 관측·응답 검수 후 전달하며5GET만 명시 연결하고 기존22 API 전역 live 전환·미포팅17 API/2~4페이지 엔진 승격을 하지 않는다.
 
 ## 증거와 미실행 범위
 
 | 항목 | 상태 |
 | --- | --- |
-| source_db_read_only | PASS_READONLY_TYPED_140_SOURCE_ROWS; runtime_RLS_and_new_JOIN_pending |
-| python_reference_HTTP | NOT_RUN |
-| Deno_check_test | NOT_RUN |
-| restricted_cloud_API | NOT_RUN |
+| source_db_read_only | PASS_FRESH_V5_SCOPED_APP_ROLE_TLS_READONLY_PROVIDER_140_METRICS_12_ANNUAL_OFFERINGS; ORIGINAL_V4_57014_PRESERVED; NOT_FULL_SERVICE_ACCEPTANCE |
+| python_reference_HTTP | PASS_17_NATIVE_SCOPED_SYNTHETIC_AND_FRESH_V5_ACTUAL_DB_HTTP_WITH_SYNTHETIC_DI_AUTH_HISTORY_100_40_ME_3_FIELDS_NEGATIVE_PAYLOAD_ZERO; REAL_JWT_CLOUD_BFF_BROWSER_NOT_RUN |
+| Deno_check_test | PASS_NATIVE_Deno_2.9.7_SHARED_APPLICATION_AND_TEST_CHECK_33_SCOPED_SYNTHETIC_TESTS_EXISTING_28_PLUS_5_UTC_COMPATIBILITY; NO_DB_AUTH_ENV_NETWORK |
+| restricted_cloud_API | NOT_RUN; BASE_7_CONFIGURATION_REGISTRATION_RECEIPT_AND_DASHBOARD_OBSERVED; FINAL_DESCRIPTOR_PIN_3_REGISTRATION_FUNCTION_DEPLOYMENT_REAL_JWT_BFF_BROWSER_PENDING |
 | actual_user_JWT | NOT_RUN |
 | frontend_BFF_browser | NOT_RUN |
 | operational_security_three_gates | NOT_RUN |
-| effective_RLS | NOT_RUN |
-| bulk_JOIN_query_count | NOT_RUN |
+| effective_RLS | PASS_FRESH_V5_ACTUAL_PROVIDER_NONOWNER_NONSUPER_NONBYPASS_APP_ROLE_READONLY_ROW_SECURITY_ON_19_PINNED_INVOKER_VIEWS_3_ENABLE_AND_FORCE_RLS_TABLES; HOSTED_EDGE_RLS_NOT_RUN |
+| bulk_JOIN_query_count | PASS_FRESH_V5_ACTUAL_PROVIDER_DATA_JOIN_1_HISTORY_HTTP_PAGE_100_JOIN_1_PAGE_40_JOIN_1; TOTAL_DATA_JOINS_3; AUTH_ROLE_ENTITLEMENT_METADATA_COUNTED_SEPARATELY_NO_N_PLUS_1 |
+| cloud_deployment | NOT_RUN; NEW_GENERIC_SOURCE_BUNDLE_BUILD_IS_NOT_APPLIED_CONFIGURATION_HOSTED_RUNTIME_OR_DEPLOYMENT; NO_OBSERVED_API_URL |
+| keyset_optimization | PRIVATE_PROPOSAL_SCOPE_EQUIVALENCE_ONLY; REAL_METADATA_TIMEOUT_BEFORE_NEW_PAYLOAD; NOT_ADOPTED_IN_RUNTIME |
+| cloud_configuration_registration | BASE_7_REGISTERED_BY_DESIGNATED_FRONTEND_SUPABASE_OWNER_AND_INDEPENDENTLY_OBSERVED_IN_DASHBOARD; CURRENT_ACCOUNT_SECRET_MANAGEMENT_PERMISSION_UNCHANGED_NO_BYPASS; FINAL_PIN_3_REGISTRATION_NOT_RUN |
+| base_configuration_registration | PASS_RECEIPT_V2_BYTES_SHA_AND_ROOT_DASHBOARD_7_CUSTOM_NAMES_REGISTRATION_TIMESTAMPS_DIGEST_LIST; PRIVATE_VALUES_NOT_EXPOSED; REGISTRATION_NOT_RUNTIME_ACCEPTANCE |
+| final_descriptor_configuration | APPROVED_ISOLATED_CLOUD_REVIEW_FILE_140_METRICS_12_OFFERINGS_ONE_REVIEW_SUBJECT_5_GET_24H; ORIGINAL_COMPONENT_BYTES_AND_FALSE_FLAGS_PRESERVED; PYTHON_AND_TS_FILE_VALIDATION_PASS; PRIVATE_PIN_3_PREPARED_REGISTRATION_NOT_RUN |
+| metadata_plan_diagnostic | FAILED_SQLSTATE_57014_FIVE_SECOND_BOUND; EXPLAIN_ANALYZE_FALSE_RETURNED_NO_PLAN; METADATA_SELECT_AND_PAYLOAD_NOT_RUN_IN_THIS_DIAGNOSTIC; CAUSE_UNCONFIRMED_NO_RETRY |
+| further_real_database_execution | FRESH_USER_REQUEST_AUTHORIZED_SINGLE_V5_ORIGINAL_ORACLE_PROBE_PASS; ATTEMPTS_1_RETRIES_0_WRITES_0; NO_UNBOUNDED_RETRY_TIMEOUT_EXTENSION_FALLBACK_KEYSET_OR_AUTHORITY_CHANGE |
+| before_metadata_optimization_actual_provider | FAILED_SCOPED_ORIGINAL_PROVIDER_OR_METADATA_DIAGNOSTIC_SQLSTATE_57014_WITH_FIVE_SECOND_BOUND; ORIGINAL_FAILURES_PRESERVED |
+| metadata_lookup_optimization | QUALIFIED_NAMES_UNNEST_TO_REGCLASS_PG_CLASS_OID_JOIN_SAME_PREDICATE; FRESH_V5_ACTUAL_PROVIDER_GUARDS_AND_PAYLOAD_HTTP_PASS_WITH_5_SECOND_BOUND; PRIOR_V4_TIMEOUT_PRESERVED_CAUSE_UNCONFIRMED |
+| current_actual_provider_v4 | HISTORICAL_FAIL_AT_OID_RELATION_METADATA_QUERYCANCELED_SQLSTATE_57014_UNDER_CONFIGURED_5_SECOND_BOUND; OBSERVED_EXECUTE_6968MS_ROLE_METADATA_PASS_2172MS_PAYLOAD_JOIN_0_HTTP_0_ATTEMPTS_1_RETRIES_0_WRITES_0_PRESERVED |
+| current_actual_provider_v4_receipt_sha256 | d20051ca7c47ff679702cfa0d86c1ee8697b130972c4fd17aa1813f96771ec9d |
+| current_actual_provider_v4_source_binding | HISTORICAL_SEVEN_FROZEN_RUNTIME_SCHEMA_TEST_SHA256_EXACT_MATCH_SYNTHETIC_DI_AUTH_ONLY; ORIGINAL_FAILURE_PRESERVED_NOT_REPLACED_BY_NEW_SUCCESS |
+| base_configuration_receipt_sha256 | 0c3e2b0f3de09dd2566da17a9619e1d6c0476110cdd0d2bc4de33f5eae01f657 |
+| current_actual_provider_v5 | PASS_SINGLE_FRESH_ORIGINAL_ORACLE_READONLY_140_METRICS_12_ANNUAL_OFFERINGS_PROVIDER_2532MS; HISTORY_HTTP_100_40_TYPED_CLOSED_DTO_NO_STORE_ME_3_FIELDS_STANDARD; RELAY_MISSING_403_BEARER_MISSING_401_OTHER_SUBJECT_403_DATA_ZERO; RETRIES_0_WRITES_0 |
+| current_actual_provider_v5_receipt_sha256 | c69d5311bbb4752c5aea9f3629bdc85eedc09151ffc6588477bbc2c20163b028 |
+| current_actual_provider_v5_source_binding | BASELINE_3C47B07_SEVEN_ORIGINAL_SOURCE_HASHES_FROZEN_BEFORE_UTC_TS_DELTA; UNCHANGED_PYTHON_PROVIDER_SQL_RLS_AND_HTTP_WITH_SYNTHETIC_DI_AUTH_PASS; NEW_TS_FILE_VALIDATION_AND_SYNTHETIC_TESTS_ARE_SEPARATE_NO_REAL_JWT_CLOUD_SQL_BROWSER |
+| UTC_timestamp_compatibility | Z_AND_POSITIVE_ZERO_OFFSET_PLUS_00_00_EQUAL_BIGINT_MICROSECONDS; ORIGINAL_CATALOG_AS_OF_LITERAL_UNCHANGED; HTTP_NORMALIZED_Z_WITH_UP_TO_6_FRACTION_DIGITS; NONZERO_OR_NEGATIVE_ZERO_OFFSET_INVALID_DATE_7_DIGIT_FRACTION_AND_EXCESS_TTL_REJECT; EXACT_ISSUE_EXPIRY_BOUNDARIES_PRESERVED |
+| UTC_TS_file_validation_receipt_sha256 | f7e561ead524fd55b855122f0a06c6959f221921c04043d9b8021473ed86e0e1 |
+| UTC_TS_approved_descriptor_validation | PASS_FILE_ONLY_APPROVED_DESCRIPTOR_AND_EXPIRED_REVOKED_WRONG_ENV_PROPOSED_TTL_ABOVE_24H_NEGATIVE_CASES; COMPONENT_BYTES_UNCHANGED_DB_0_NETWORK_0; ACTUAL_CLOUD_SQL_AND_JWT_NOT_RUN |
+| data_team_intake_observation | FILE_RECEIPTS_REPORT_V33_FULL_APP_READBACK_PASS_AND_TWO_SUBSEQUENT_V35_DISKFULL_SQLSTATE_53100_ROLLBACK_FAILURES; NOT_ASSUMED_CAUSE_OF_PRIOR_57014_NO_DATA_SCOPE_EXPANSION |
+| generic_bundle | PASS_CACHED_OFFICIAL_ESBUILD_0_25_5_SOURCE_ONLY_ESM_THREE_SERVICE_SOURCES_FIXED_POSTGRES_3_4_5_IMPORT_EXPORT_AND_NODE_BUILTIN_ALIAS; PRIOR_DENO_BUNDLE_OS_ERROR_2_FAILURES_PRESERVED_NO_CONFIRMED_CAUSE; HOSTED_RUNTIME_NOT_RUN |
+| generic_bundle_sha256 | b3068379af4a4625113e99be4f5ef10a76f1852a8ffe7e9e68011e66c4728c74 |
+| generic_bundle_bytes | 110796 |
+| local_C_receiver_acceptance | NOT_ACCEPTED_FOR_CLI_RESUME; RECONSTRUCTED_924_BYTE_SELECTION_MATCHED_REPORTED_SHA_AND_SENDER_SCOPE_REVIEW; RECEIVER_ACTUAL_MACHINE_REVIEW_RECEIPT_BYTES_NOT_RECEIVED_INDEPENDENTLY; NO_CACHE_SESSION_OR_API_RESUME |
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -89,4 +132,4 @@
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=8d21ca12aab4b404c5f2b7781dd81043839f571cb070c5eb331f661a07a5364c -->
+<!-- jungsi:generated spec_sha256=5240feb2dc4dfa7c6318e7c46602929ef1b367716981407262bf3add9457a10a -->
