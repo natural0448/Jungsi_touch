@@ -1,4 +1,5 @@
 /** Concrete app-role SQL, verified Supabase Auth and private immutable Storage. */
+import './node_compat_bootstrap.ts';
 import postgres from 'npm:postgres@3.4.5';
 import { DB_FIELDS, DisplayError, nowMicros, parseStrictJson, sameJson, utcInstantMicros, utcText, validateDisplayScope, VIEW } from './official_history_display.ts';
 import type { DisplayDescriptor, OfficialHistoryPorts, Row } from './official_history_display.ts';

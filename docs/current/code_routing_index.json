@@ -5579,6 +5579,41 @@
     "verification": "whole_source_hash_not_type_or_runtime_proof",
     "files": [
       {
+        "path": "supabase/functions/_shared/node_compat_bootstrap.ts",
+        "layer": "data_infrastructure",
+        "status": "implemented_native36_offline_actual_bundle_boot_verified_integration_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "18736bcf332f8cc4a9b708e05383326a5f3992c9a260c8bcb6b7fab9a861a13f",
+        "declared_exports": [
+          "PostgresNodeGlobals",
+          "installPostgresNodeGlobals"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/node_compat_bootstrap_test.ts",
+        "layer": "data_infrastructure",
+        "status": "implemented_native36_offline_actual_bundle_boot_verified_integration_pending",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "f198c5d7e95c6039830f0738415bc354a367a2cdc1bd3e339074bba2eb40c265",
+        "declared_exports": []
+      },
+      {
         "path": "supabase/functions/_shared/official_history_display.ts",
         "layer": "application",
         "status": "implemented_scoped_synthetic_verified_integration_pending",
@@ -5646,7 +5681,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "0519110a716db968131c6a24f3526cc0ccd26642c875a71024bb8b201e0dd348",
+        "source_sha256": "60a8ad0f855168614e16da04ee8f962c84bd623de9cb9336140a5dd95d66c4f4",
         "declared_exports": [
           "createOfficialHistoryInfrastructure",
           "loadPinnedDisplayDescriptor",
