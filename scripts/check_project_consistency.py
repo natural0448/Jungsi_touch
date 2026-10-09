@@ -1468,6 +1468,19 @@ def generated_files(spec):
        "## 확정 요구사항\n\n"+requirement_text+"\n\n## 이번 버전의 변경\n\n"+changes+"\n\n## 준비 상태와 후속 구현\n\n"+pending+
        "\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다."+collaboration["ownership"]+collaboration["drive"])
     operation_rows=[[o["id"],o["method"],o["path"],rights(o["member_tiers"]),"본인" if o["report_owner"] else "해당 없음","필요" if o["confirmed_score_profile"] else "불필요",o["response_scope"]] for o in spec["operations"]]
+
+    current_review_section=""
+    current_review=spec.get("official_history_db_display_contract",{}).get("current_review_connection")
+    if isinstance(current_review,dict) and isinstance(current_review.get("route"),dict):
+        review_labels=["## \ud604\uc7ac \uc815\ubcf8 \uc804\uc218 \uac80\uc218 \uacbd\ub85c","\ud568\uc218","\uc791\uc5c5 ID","\uba54\uc11c\ub4dc\u00b7\uacbd\ub85c","\ub300\uc0c1","\ud604\uc7ac \uc0c1\ud0dc","\uc77c\ubc18 \ud68c\uc6d0 \uacf5\uac1c\ub97c \uc704\ud55c \uae30\ubcf822API\uc640 \ubd84\ub9ac\ub41c \uac80\uc218 \uacbd\ub85c\ub2e4. \uba85\uc2dc subject \ud5c8\uc6a9 \uba85\ubd80\u00b7purpose\u00b7\ub9cc\ub8cc\u00b7\uc11c\ubc84 relay/JWT \uac80\uc0ac\ub97c \ubaa8\ub450 \ud1b5\uacfc\ud574\uc57c \ud55c\ub2e4. \uad00\ub9ac\uc790\u00b7\uc720\ub8cc \ub4f1\uae09\ub9cc\uc73c\ub85c \ud5c8\uc6a9\ud558\uc9c0 \uc54a\ub294\ub2e4. \uae30\uc874 C 5GET\uc740 \uc720\uc9c0\ud55c\ub2e4.","\uac80\uc0c9 \ud544\ub4dc: ","\uc751\ub2f5 \ud615\uc2dd: ","\ud604\uc7ac \uc9c0\ud45c\uc758 \uc6d0\ubb38 literal\u00b7\uc6d0 JSON \ud0c0\uc785\uc744 \ubcf4\uc874\ud55c\ub2e4. \uacf5\uc2dd \uacf5\uac1c \uc815\ubcf4\uac00 \ubbf8\ud655\uc778\uc778 \uacbd\uc6b0 null\uacfc \ubcf4\ub958 \uc0ac\uc720\ub97c \ubc18\ud658\ud558\uba70 \ubc1c\ud45c \uc785\uacb0\ub85c \uc2b9\uaca9\ud558\uc9c0 \uc54a\ub294\ub2e4. \uc6d0 canonical/source ID\u00b7PK\u00b7\uacbd\ub85c\u00b7\ud0a4\ub294 \uc751\ub2f5\uc5d0\uc11c \uc81c\uc678\ud55c\ub2e4.","\ud398\uc774\uc9c0\ub2f9 \ucd5c\ub300100\uac74, limit+1 keyset\uacfc \ub3d9\uc77c SQL \uc2a4\ub0c5\uc0f7\uc758 \uc815\ud655\ud55c \uad00\uce21/\ucd9c\ucc98 \ud559\uad50 \uc9d1\uacc4\ub97c \uc0ac\uc6a9\ud55c\ub2e4. cursor\ub294 \uc11c\ubc84 \uc804\uc6a9 \ud0a4\ub85c \uc554\ud638\ud654\ud558\uace0 \uac80\uc218\uc790\u00b7\uac80\uc0c9\uc870\uac74\u00b7\uc815\ubcf8 \ubcc0\uacbd \uc0c1\ud0dc\u00b7\ud22c\uc601\ud310\u00b7\ub9cc\ub8cc\uc5d0 \uacb0\uc18d\ud55c\ub2e4. \uc0c1\ud0dc\uac00 \ubc14\ub00c\uba74409\ub85c \ub2e4\uc2dc \uc870\ud68c\ud55c\ub2e4. \uc77c\ubc18 \ud68c\uc6d0 \uc6b4\uc601 \uacf5\uac1c\u00b7BFF/\ube0c\ub77c\uc6b0\uc800\u00b7\ubcf4\uc5483gate\u00b7DB \uc815\ub9ac \uc644\ub8cc\ub97c \ub73b\ud558\uc9c0 \uc54a\ub294\ub2e4."]
+        route=current_review["route"]
+        current_review_section=(
+            review_labels[0]+"\n\n"+
+            table(review_labels[1:6],[[current_review["function_name"],current_review["operation"],route["method"]+" "+route["path"],route["audience"],current_review["status"]]])+
+            "\n\n"+review_labels[6]+"\n\n"+review_labels[7]+", ".join(current_review["query_fields"])+".\n\n"+
+            review_labels[8]+current_review["review_DTO"]+".\n\n"+review_labels[9]+"\n\n"+review_labels[10]+' 첫 조회도 승인판의 검증된 변경 명령·내용 SHA·뷰/상태 핀과 대조한다. 아직 승인되지 않은 최신 상태는503 current_review_state_unapproved로 보류하며, 이후 cursor 상태 변경은409로 거절한다.'+"\n\n")
+        files[spec["current_documents"]["planning"]]+="\n\n"+current_review_section
+
     overall_contract=spec.get("overall_analysis_contract")
     overall_section=""
     if overall_contract:
@@ -1493,7 +1506,7 @@ def generated_files(spec):
        "\n\n정적 경로 /offerings/search를 /offerings/{offering_id}보다 먼저 등록한다. report_id와 offering_id의 표기를 통일한다. 검색은 추천 목록과 조인해 대상을 줄이지 않는다.\n\n"+
        "## 권한과 응답 경계\n\n서버가 검증한 세션·현재 이용권으로 Actor를 만든다. 요청 본문의 회원등급·학생 ID를 신뢰하지 않는다. 미인증은 401, 일반가입자의 유료 요청은 403으로 차단하고 결과·건수·상세를 반환하지 않는다. 없는 리포트와 타인 소유 리포트는 같은 404로 처리한다. 본인 분석에 확인한 성적이 없으면 409와 보류 사유다.\n\n"+
        ("FastAPI는 세션 검증 후 업무 서비스를 호출하고 회원별 DTO를 적용한다. DB 이용권·본인 소유권과 자료/모형 승인 검사를 연결했다. 실제 서버·자료 연결 증거는 운영 준비 상태에서 따로 확인한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n" if platform else "권한 모듈은 HTTP 인증이나 응답 필드 제거 기능을 대신하지 않는다. 실제 핸들러에서 입력 검증, 운영 저장소 조회, 회원별 응답 객체, 분포·산식 승인 검사를 연결해야 한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n")+
-       overall_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
+       overall_section+current_review_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
     layers=table(["계층","코드 위치","책임","허용 의존"],[[l["label"],", ".join(l["roots"]),l["responsibility"],", ".join(l["allowed_dependencies"])] for l in spec["layers"]])
     implementation=table(["파일","계층","현재 상태","요구사항"],[[r["path"],r["layer"],{
 "existing_math_foundation":"공통 계산 기반",
