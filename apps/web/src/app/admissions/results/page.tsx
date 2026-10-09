@@ -27,8 +27,6 @@ const LIMIT_PAST = 100;
 /** 학년도별 조회 예산(쪽 수). 예산 안에서 next_cursor 를 이어 받고, 넘치면 잘린 모집행을 버리고 미수집을 알린다 */
 const MAX_PAGES = 3;
 
-/** 지표 열 순서. 발표가 흔한 것부터, 목록에 없는 지표는 받은 순서대로 뒤에 붙인다(이름을 바꾸거나 합치지 않는다) */
-const METRIC_ORDER = ["모집인원", "경쟁률", "충원인원", "최종등록자 50%", "최종등록자 70%", "최종등록자 평균", "최종 합격선"];
 
 /**
  * 1페이지 · 대학 발표 입시결과 (REQ-01)
@@ -153,7 +151,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
           </Form>
           <ChipRow label="지역" cur={cur} k="region" items={REGIONS} />
           <ChipRow label="모집군" cur={cur} k="group" items={[...GROUPS]} suffix="군" />
-          <p className="hint">실제 발행된 2024~2026학년도 결과를 기준으로 모집단위를 보여 드리고, 2027학년도 모집 인원은 확인된 모집행에만 붙입니다. 대학마다 발표하는 지표(모집·충원인원, 경쟁률, 평균·50%·70%·최종 합격선)가 달라 서로 바꾸지 않고 발표한 그대로입니다.</p>
+          <p className="hint">실제 발행된 2024~2026학년도 결과를 기준으로 모집단위를 보여 드리고, 2027학년도 모집 인원은 확인된 모집행에만 붙입니다. 입시결과는 대학이 발표한 최종 50%컷·70%컷을 발표 그대로 보여 드리며, 70%컷 대신 75%컷을 발표한 대학은 75%컷으로 보여 드립니다.</p>
         </section>
 
         {!anyReady ? (
@@ -178,7 +176,6 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
               </p>
             )}
 
-            <CommonLegend units={units} />
 
             {univs.length === 0 ? (
               uncollected.length > 0 ? (
@@ -223,20 +220,31 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
 
 /** 한 모집단위: 2027 모집 인원 한 줄 + 2026~2024 결과 표(경쟁률·추정 지원자/탈락자 포함). 지표 설명은 목록 위 공통 한 번 */
 function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto }; years: Map<number, HistoryMetricDto[]> | undefined; rec: RecruitmentDto | null }) {
-  // 이 모집단위가 발표해 온 지표 열(과거 3개 학년도 기준, 순서 고정)
+  // 최종 관리자 지시(2026-10-09): 입결 지표는 최종 50%컷·최종 70%컷 두 개만 보인다.
+  // 같은 통계는 직접 발표를 어디가 제출보다 먼저 고르고, 70%컷이 없으면 발표된 75%컷을
+  // 대신 보인다(열 이름도 75%로 적는다). 열 순서는 모집인원/경쟁률/추정 총 지원자/
+  // 충원인원/추정 탈락자/최종 50%컷/최종 70%컷 고정. 값·단위·척도는 발표 그대로다
   const seen: string[] = [];
   for (const y of PAST_YEARS) for (const m of years?.get(y) ?? []) if (!seen.includes(m.metric_name)) seen.push(m.metric_name);
-  const metricCols = [...METRIC_ORDER.filter((n) => seen.includes(n)), ...seen.filter((n) => !METRIC_ORDER.includes(n))];
-  // 추정 2열은 재료가 부족해도 열을 없애지 않는다 — 값만 ─ 로 둔다(1.9.13 지적: A/R 결측·C행 없음에서 열 누락 금지).
-  // 자리는 재료 열 바로 뒤가 기본이고, 재료 열이 없으면 표 끝에 둔다
-  type Col = { key: string; label: string; derived?: boolean };
-  const cols: Col[] = metricCols.map((n) => ({ key: n, label: n }));
-  const after = (name: string, col: Col) => {
-    const i = cols.findIndex((c) => c.key === name);
-    cols.splice(i >= 0 ? i + 1 : cols.length, 0, col);
+  const pickCut = (percents: number[]) => {
+    for (const src of ["대학 직접 발표", "대학 제출 어디가"])
+      for (const pct of percents) {
+        const name = seen.find((n) => n.includes(`최종등록자 ${pct}%컷`) && n.includes(src));
+        if (name) return { key: name, label: `최종 ${pct}%컷` };
+      }
+    return null;
   };
-  after("경쟁률", { key: "__applicants", label: "추정 총 지원자", derived: true });
-  after(metricCols.includes("충원인원") ? "충원인원" : "__applicants", { key: "__dropped", label: "추정 탈락자", derived: true });
+  const cuts = [pickCut([50]), pickCut([70, 75])].filter((c): c is { key: string; label: string } => c !== null);
+  // 추정 2열은 재료가 부족해도 열을 없애지 않는다 — 값만 ─ 로 둔다(1.9.13 지적: A/R 결측·C행 없음에서 열 누락 금지)
+  type Col = { key: string; label: string; derived?: boolean };
+  const cols: Col[] = [];
+  if (seen.includes("모집인원")) cols.push({ key: "모집인원", label: "모집인원" });
+  if (seen.includes("경쟁률")) cols.push({ key: "경쟁률", label: "경쟁률" });
+  cols.push({ key: "__applicants", label: "추정 총 지원자", derived: true });
+  if (seen.includes("충원인원")) cols.push({ key: "충원인원", label: "충원인원" });
+  cols.push({ key: "__dropped", label: "추정 탈락자", derived: true });
+  for (const c of cuts) cols.push(c);
+  const metricCols = cols.filter((c) => !c.derived).map((c) => c.key);
   return (
     <li id={o.id} className="rs-off open">
       <div className="rs-offhd plain">
@@ -364,51 +372,6 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
         </div>
       )}
     </li>
-  );
-}
-
-/**
- * 지표 설명을 카드마다 반복하지 않고 목록 위에 한 번만 보여 준다(사용자 요청).
- * 같은 지표라도 대학마다 척도·정의가 다를 수 있어, 화면에 나온 카드들에서 서로 다른
- * 발표 정의가 섞여 있으면 그 사실을 적고 특정 대학의 정의를 전체 정의처럼 쓰지 않는다.
- */
-function CommonLegend({ units }: { units: { years: Map<number, HistoryMetricDto[]> }[] }) {
-  const defs = new Map<string, { scale: string | null; def: string | null }[]>();
-  for (const o of units)
-    for (const y of PAST_YEARS)
-      for (const m of o.years.get(y) ?? []) {
-        const list = defs.get(m.metric_name) ?? [];
-        if (!list.some((d) => d.scale === m.original_scale && d.def === m.metric_definition))
-          list.push({ scale: m.original_scale, def: m.metric_definition });
-        defs.set(m.metric_name, list);
-      }
-  if (defs.size === 0) return null;
-
-  const names = [...METRIC_ORDER.filter((n) => defs.has(n)), ...[...defs.keys()].filter((n) => !METRIC_ORDER.includes(n))];
-  const legend = names.map((n) => {
-    const list = defs.get(n) ?? [];
-    if (list.length === 1) return { name: n, scale: list[0].scale, def: list[0].def ?? (list[0].scale ? null : "대학이 정의를 함께 발표하지 않았습니다.") };
-    return { name: n, scale: null, def: "대학마다 발표 척도·정의가 달라 각 표의 값은 그 대학 발표 기준입니다." };
-  });
-  legend.push({ name: "추정 총 지원자", scale: "모집인원 × 경쟁률(화면 계산, 0.5 이상 올림)", def: "모집인원·경쟁률·충원인원이 그 해에 모두 발표된 경우에만 계산하고, 재료가 부족하면 칸을 ─로 둡니다(열은 항상 보입니다). 발표된 경쟁률이 반올림된 값이라 실제 지원자 수와 다를 수 있고, 공식 지원자 수가 복원되는 것은 아닙니다. 대학이 지원자 수를 직접 발표하면 그 값을 발표 열에 보이고 이 칸은 ─로 둡니다." });
-  legend.push({ name: "추정 탈락자", scale: "추정 총 지원자 − 모집인원 − 충원인원(화면 계산)", def: "합격 후 등록 포기·반복 충원 등을 반영하지 못하는 산술값이라 실제 불합격자 수나 합격 확률을 뜻하지 않습니다. 재료가 하나라도 없거나, '명' 단위가 아니거나, 같은 이름 지표가 중복 발표됐거나, 차감 결과가 음수면 ─로 둡니다." });
-
-  return (
-    <details className="rs-legendbox" open>
-      <summary>지표 설명 · 추정 산식</summary>
-      <dl className="rs-legend">
-        {legend.map((l) => (
-          <div key={l.name}>
-            <dt>{l.name}</dt>
-            <dd>
-              {l.scale && <b>{l.scale}</b>}
-              {l.scale && l.def ? " · " : null}
-              {l.def}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </details>
   );
 }
 
