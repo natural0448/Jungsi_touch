@@ -5655,7 +5655,7 @@
       {
         "path": "supabase/functions/_shared/official_history_display_test.ts",
         "layer": "data_infrastructure",
-        "status": "implemented_array_io_corrected_native39_primary_wire5_actual_provider140_verified_integration_redeployment_pending",
+        "status": "implemented_array_io_corrected_native39_primary_wire5_actual_provider140_verified_integrated_redeployed_freshJWT_BFF_pending",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -5671,7 +5671,7 @@
       {
         "path": "supabase/functions/_shared/official_history_postgres.ts",
         "layer": "data_infrastructure",
-        "status": "implemented_array_io_corrected_native39_primary_wire5_actual_provider140_verified_integration_redeployment_pending",
+        "status": "implemented_array_io_corrected_native39_primary_wire5_actual_provider140_verified_integrated_redeployed_freshJWT_BFF_pending",
         "requirements": [
           "REQ-01",
           "REQ-08",
