@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.35",
-  "source_sha256": "ddee6aeee81942dc734184a258f9571b8d1367adcb76a33950938e7a1e274e6f",
+  "spec_version": "1.9.36",
+  "source_sha256": "3917a92c37cba2ba8b905e39edd1219cf907c237d9887530c2c665953f59ccb6",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3287,7 +3287,7 @@
   "official_history_db_display_contract": {
     "format": "jungsi.official-history-db-display/v1",
     "id": "DEV-011",
-    "revision": "2026.10.10.v18",
+    "revision": "2026.10.10.v19",
     "branch": "feature/application-pre-data-platform",
     "basis_commit": "95a09996c71f9d5b1fc02d743ac3f8e938327870",
     "requirements": [
@@ -3299,7 +3299,7 @@
       "REQ-25",
       "REQ-26"
     ],
-    "code_status": "implemented_live_bounded_v2_committed_native_and_actual_factory_HTTP_PASS_hosted_deployed_negative5PASS_frontend_connection_instructed",
+    "code_status": "implemented_live_bounded_v2_hosted_and_reported_current_API_JWT_BFF_browser_functional_PASS_external_PR18_open_viewer_gate_and_operational_acceptance_pending",
     "production_ready": false,
     "purpose": "승인된 화면팀·관리자에게 현재 단일 정본 입결을 실제 서비스 API로 표시; 일반회원 운영 공개는 별도",
     "operations": [
@@ -3391,7 +3391,8 @@
       "live_bounded v2는 전체 count를 수행하지 않고 matching_observation_count/matching_source_school_count=null 및 count_status=unknown을 반환한다. 최대100 표시행과 제한 scan cursor를 제공하며 items0+next_cursor는 검색 완료가 아니다.",
       "live v2는 같은 READONLY/RLS snapshot에서 최신 command를 첫 페이지에 결속하고 다음 페이지 변경을409로 거절한다. 승인된 정의를 그대로 둔 bounded 물리 복합PK JOIN을 사용하며 raw current 전체 조회·N+1·미검증 fallback은 하지 않는다.",
       "current review의 비공개 descriptor PIN과 cursor 고정키는 Git제외 서버 배포 artifact로 주입할 수 있다. 기존7개의 DB/Auth/Storage/relay 서버env를 재사용하고 브라우저·공개코드·로그에 설정을 전달하지 않는다.",
-      "현재 review API와 학생 1페이지 History DTO는 다른 계약이다. 화면팀은 검수 전용 서버 BFF에서 v2를 소비하고 review_only/not_published·결측/보류와 unknown count를 표시한다."
+      "현재 review API와 학생 1페이지 History DTO는 다른 계약이다. 화면팀은 검수 전용 서버 BFF에서 v2를 소비하고 review_only/not_published·결측/보류와 unknown count를 표시한다.",
+      "현재 검수 화면의 공통 서버 tokenFile 기능검수는 방문자 관리 권한 인수를 대신하지 않는다. 내부 경로는 소비자4페이지에 추가하지 않으며 네트워크 공개 전 방문자 세션·허용 명부 또는 사설 접근 통제와 기존 운영gate를 입증한다. cursor는 서버4096자 범위에서 불투명 원문 그대로 전달하고 절단하지 않는다."
     ],
     "tasks": [
       [
@@ -3440,8 +3441,8 @@
       "python_reference_HTTP": "PASS_17_NATIVE_SCOPED_SYNTHETIC_AND_FRESH_V5_ACTUAL_DB_HTTP_WITH_SYNTHETIC_DI_AUTH_HISTORY_100_40_ME_3_FIELDS_NEGATIVE_PAYLOAD_ZERO; REAL_JWT_CLOUD_BFF_BROWSER_NOT_RUN",
       "Deno_check_test": "PASS_NATIVE_DENO2_9_7_CACHED_ONLY_CHECK_POSTGRES_PUBLIC_TEST_BOOTSTRAP_TEST_PRIVATE_PRIMARY_WIRE_ROOTS; PUBLIC_SERVICE36_PLUS_BOOTSTRAP3_EQUAL39_AND_PRIVATE_REAL_BIND_WIRE5_EQUAL44_TOTAL; EMPTY_SYNTHETIC_PROCESS_ENV_ONLY_NO_SECRET_VALUES_DB_OR_NETWORK; DEPLOYMENT_AND_FRESH_JWT_INTAKE_SEPARATE",
       "restricted_cloud_API": "RECEIVED_FRONTEND_FINAL_REPORT_2026_10_09T14_28_39Z_FRESH_JWT_HISTORY140_EXACT_TYPED_FIELDS_CURSOR100_PLUS40_NO_DUPLICATES_OR_MISSING_RECRUITMENT12_PENDING_NULL_ME200_STANDARD_PAID2_GET403_AUTH_RELAY_NO_STORE_PASS; ONLY_HISTORICAL_C_FIVE_GET_SCOPE; ROOT_NOT_A_NEW_JWT_RERUN",
-      "actual_user_JWT": "RECEIVED_AND_READ_EXTERNAL_FRONTEND_FINAL_FRESH_JWT_REPORT_FOR_APPROVED_C140_AND_RECRUITMENT12; CURRENT_ALL_REVIEW_JWT_BFF_BROWSER_AND_OPERATIONAL_THREE_GATES_NOT_RUN",
-      "frontend_BFF_browser": "NOT_RUN",
+      "actual_user_JWT": "C140_HISTORICAL_REPORT_PRESERVED; CURRENT_REVIEW_API_FRESH_JWT18_REPORTED_PASS_RECEIPT_READ_AND_CAPTURE_SHA_VERIFIED; not_independent_rerun_not_all_API_operation",
+      "frontend_BFF_browser": "RECEIVED_REPORTED_CURRENT_REVIEW_SCOPED_BFF_BROWSER_FUNCTIONAL_PASS_AT_FRONTEND16dea213;100_RENDER_NEXT100_EMPTY_CURSOR_UNKNOWNCOUNT_PENDING_NONEXPOSURE; viewer_gate_actual409_and_operational3gate_NOT_RUN",
       "operational_security_three_gates": "NOT_RUN",
       "effective_RLS": "EXISTING_APPROVED_C_SOURCE_APP_ROLE_GUARDS_PRESERVED; NEW_CURRENT_METADATA13_RELATIONS_PHYSICAL8_RLS_FORCE_VIEW5_INVOKER_BARRIER_APP_SELECT_ONLY_ANON_AUTH_DENIED_PASS; CURRENT_TYPED_PAGE_AND_HOSTED_CURRENT_SERVICE_ACCEPTANCE_NOT_RUN",
       "bulk_JOIN_query_count": "PASS_FRESH_V5_ACTUAL_PROVIDER_DATA_JOIN_1_HISTORY_HTTP_PAGE_100_JOIN_1_PAGE_40_JOIN_1; TOTAL_DATA_JOINS_3; AUTH_ROLE_ENTITLEMENT_METADATA_COUNTED_SEPARATELY_NO_N_PLUS_1",
@@ -3653,7 +3654,8 @@
       "live_bounded_deployment": "APPLIED_CURRENT_ADMISSION_REVIEW_SUPABASE_20261010T1023Z; sourcefa6f412 private_release139047_SHA67a96b; legacyJWT_gatewayON; no_C_or_default22_change",
       "live_bounded_actual_factory_HTTP": "PASS_STORAGE_DB_FULL_FACTORY_HTTP_2PAGES_200100_EACH_1901ms_1931ms; controlled_session_DI_NOT_actualJWT",
       "live_bounded_hosted_negative": "PASS5_NO_CREDENTIAL401_RELAY_MISSING403_RELAY_WRONG403_NO_USER_JWT401_FAKE_JWT401; no_items_or_secret_values; handler_private_no_store; platform401_header_distinct",
-      "live_bounded_frontend_delivery": "PASS_EXISTING_HANDOFF_NEW_FILE7818B_REMOTE_FETCH_CONTENT_SHA_EXACT_OWNER1_WRITER1; actual_BFF_browser_NOT_RUN"
+      "live_bounded_frontend_delivery": "PASS_EXISTING_HANDOFF_NEW_FILE7818B_REMOTE_FETCH_CONTENT_SHA_EXACT_OWNER1_WRITER1; actual_BFF_browser_NOT_RUN",
+      "current_frontend_receipt_intake": "frontend_receipt_intake contains capture SHA/bytes/method and scoped observations; PR18_open is not develop frontend integration"
     },
     "frontend_handoff": [
       "브라우저·화면 코드·일반 프런트 환경은 기존 API의 공개 응답만 읽는다. app DATABASE_URL/DB CA/Storage secret/descriptor/원자료/전체 DB를 수령하지 않는다. 지정된 Supabase 관리자가 비공개 app-only 기본7 설정을 등록하는 역할은 별도 인계 범위다. migration-owner 접속값·키는 외부 화면 환경에 전달하지 않는다.",
@@ -3683,7 +3685,8 @@
       "live v2는 같은 READONLY/RLS snapshot에서 최신 command를 첫 페이지에 결속하고 다음 페이지 변경을409로 거절한다. 승인된 정의를 그대로 둔 bounded 물리 복합PK JOIN을 사용하며 raw current 전체 조회·N+1·미검증 fallback은 하지 않는다.",
       "current review의 비공개 descriptor PIN과 cursor 고정키는 Git제외 서버 배포 artifact로 주입할 수 있다. 기존7개의 DB/Auth/Storage/relay 서버env를 재사용하고 브라우저·공개코드·로그에 설정을 전달하지 않는다.",
       "현재 review API와 학생 1페이지 History DTO는 다른 계약이다. 화면팀은 검수 전용 서버 BFF에서 v2를 소비하고 review_only/not_published·결측/보류와 unknown count를 표시한다.",
-      "current-admission-review v2를 실제 Supabase에 배포했고 무인증/relay/JWT 거절5건을 검수했다. 기존 승인 두 계정·서버 BFF·relay를 재사용하여 현재 정본 검수 화면만 즉시 연결한다. 새 PIN4 등록/read model/census 준비를 화면 연결 선행 조건으로 요구하지 않는다. actual factory Storage+DB 두 페이지200100은 통제 세션DI이며 fresh user JWT·BFF·브라우저 성공은 화면팀 영수증으로 별도 확정한다. 응답v2 unknown count null/empty items+cursor/409새조회 계약을 사용하며 기본22API·기존C는 보존한다."
+      "current-admission-review v2를 실제 Supabase에 배포했고 무인증/relay/JWT 거절5건을 검수했다. 기존 승인 두 계정·서버 BFF·relay를 재사용하여 현재 정본 검수 화면만 즉시 연결한다. 새 PIN4 등록/read model/census 준비를 화면 연결 선행 조건으로 요구하지 않는다. actual factory Storage+DB 두 페이지200100은 통제 세션DI이며 fresh user JWT·BFF·브라우저 성공은 화면팀 영수증으로 별도 확정한다. 응답v2 unknown count null/empty items+cursor/409새조회 계약을 사용하며 기본22API·기존C는 보존한다.",
+      "2026-10-10 화면팀 freshJWT API 및 /management/current-review 검수 목적 BFF/브라우저 기능 영수증을 수신했다.100+100·unknowncount·empty+cursor·보류/원형·비노출을 보고상 확인하고 16dea213의 cursor256절단 수정 후 재시도PASS를 기록한다. 방문자 gate 또는 사설 접근 통제는 미입증이며 외부 노출 전 필요하다. 외부 PR18 미병합·409 실관측·전체 운영3gate·일반 발행·W1/W2/CAP는 별도 미완료다."
     ],
     "query_contract": {
       "parameterized_bulk_join": true,
@@ -3868,7 +3871,7 @@
     },
     "current_review_connection": {
       "id": "DBD-06-CURRENT-ALL-REVIEW",
-      "status": "HOSTED_REVIEW_DEPLOYED_ACTUAL_DB_FACTORY_TWO_PAGES_PASS_FRONTEND_CONNECT_NOW_REAL_USER_JWT_BFF_BROWSER_NOT_RUN",
+      "status": "HOSTED_CURRENT_REVIEW_FRESH_JWT_API_AND_SCOPED_BFF_BROWSER_FUNCTIONAL_RECEIPTS_ACCEPTED_FRONTEND_PR18_OPEN_VIEWER_GATE_409_AND_OPERATIONAL_GATES_NOT_RUN",
       "human_scope": "frontend_team_and_administrators_review_first",
       "source_view": "jungsi_data_ingest.admission_results_current",
       "academic_years": [
@@ -3899,7 +3902,9 @@
       "public_projection": "official_public_metadata_not_verified_remains_null_and_hold_reason; no_published_or_verified_official_inference_from_active_current",
       "recruitment": "approved_recruitment_data_only; otherwise_pending_null_no_zero_or_inferred_count",
       "missing_prerequisites": [
-        "화면팀 기존 승인 계정의 fresh 사용자 JWT로 hosted200·cursor·BFF·브라우저 실자료 표시 검수; 서비스 배포·새 PIN 등록·read model 준비 대기는 없음"
+        "현재 검수 기능 연결은 화면팀 수신 영수증으로 확인; 방문자 권한 gate 또는 사설 접근 통제 증거 전 외부 노출 금지",
+        "외부 PR18의 develop 통합은 별도; 409 실제 관측·전체 운영3gate·일반 발행·W1/W2/CAP는 미완료",
+        "승인 만료 후 재검수는 새 승인판 필요; 자동 갱신·subject 확대 없음"
       ],
       "operational_security_three_gates": "NOT_RUN",
       "nationwide_original_census_complete": false,
@@ -4065,7 +4070,7 @@
         "explicit_entrypoint": "supabase/functions/current-admission-review/index.ts",
         "default_factory_changed": false,
         "current_data_loaded_in_frontend": false,
-        "source_status": "implemented_committed_CI_pass_actual_provider_verified_and_hosted_function_deployed_real_JWT_BFF_browser_external_owner_pending",
+        "source_status": "implemented_committed_develop_integrated_hosted_deployed_current_API_JWT_and_scoped_BFF_browser_functional_receipts_received_external_viewer_gate_pending",
         "native": {
           "status": "PASS_CURRENT_REVIEW37_ALL_CACHED7FILES177_REGISTERED135_UNIQUE",
           "Deno": "2.9.7",
@@ -4094,9 +4099,9 @@
           "actual_admission_values_in_bundle": false,
           "deployment": "APPLIED_CURRENT_REVIEW_FUNCTION"
         },
-        "normal_commit_pre_push_exact_SHA_CI_and_develop_integration": "fa6f412_NORMAL_PRECOMMIT853_PREPUSH853_EXACT_PUSH_CI287_SUCCESS; current_final_status_docs_integration_separate",
+        "normal_commit_pre_push_exact_SHA_CI_and_develop_integration": "fa6f412_SOURCE_AND6124fb5_STATUS_DOCS_NORMAL853_PRECOMMIT_PREPUSH_PASS; PR25_MERGED80b6fe80_EXACT_MERGE_CI290_SUCCESS; new_frontend_receipt_docs_commit_and_CI_pending",
         "new_purpose_approval_and_PIN3_cursor_key_registration": "PASS_NEW_CURRENT_DESCRIPTOR_PRIVATE_STORAGE_RAW_BYTES_SHA; server_only_fixed_config4_in_ignored_backend_release; existing_C_PIN3_unchanged",
-        "new_function_deployment_fresh_JWT_BFF_browser_and_security_three_gates": "HOSTED_FUNCTION_DEPLOYED_NEGATIVE5PASS; fresh_real_user_JWT_and_BFF_browser_and_operational_three_gates_NOT_RUN",
+        "new_function_deployment_fresh_JWT_BFF_browser_and_security_three_gates": "HOSTED_DEPLOYED_NEGATIVE5PASS; EXTERNAL_REPORTED_FRESH_USER_JWT_API_AND_SCOPED_BFF_BROWSER_FUNCTIONAL_PASS; actual409_VIEWER_ACCESS_CONTROL_AND_OPERATIONAL_THREE_GATES_NOT_RUN",
         "actual_readonly_probe_observation": {
           "status": "FAIL_SAME_5_SECOND_QUALIFIED_PAYLOAD_AFTER_PAGE_SEMIFILTER_METADATA_AND_ROLE_PASS",
           "metadata_closure": 12,
@@ -4253,42 +4258,16 @@
           "normal_commit_pre_push_exact_SHA_CI_and_develop_integration": "HOLD_PENDING_FINAL_STAGED_INDEPENDENT_REVIEW; DEVELOPMENT_CANDIDATE_INTEGRATION_IS_NOT_RUNTIME_ACCEPTANCE"
         },
         "source_integration": {
-          "status": "merged_develop_development_candidate_only",
-          "source_commit": "f566c7effefeaeadda6307d62ebba9786c43ca13",
-          "merge_commit": "e59a13a506d551ef086bf58399da751286502288",
-          "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/23",
+          "status": "merged_develop_live_bounded_v2_service_only_external_frontend_PR18_open",
+          "source_commit": "fa6f4126b14fd79be9c91677a9a8ed6999a4061c",
+          "status_document_commit": "6124fb5ff91e6b35d4f0274dfd71269b42ec046e",
+          "merge_commit": "80b6fe80fc512e072b362a22471f3311d5935d70",
+          "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/25",
           "merge_method": "merge",
-          "source_CI": [
-            {
-              "id": 37967820853,
-              "number": 273,
-              "event": "push",
-              "head": "f566c7effefeaeadda6307d62ebba9786c43ca13",
-              "conclusion": "success"
-            },
-            {
-              "id": 37967988310,
-              "number": 274,
-              "event": "pull_request",
-              "head": "f566c7effefeaeadda6307d62ebba9786c43ca13",
-              "conclusion": "success"
-            }
-          ],
-          "merge_tree_equals_tested_source_tree": true,
-          "source_and_merge_tree": "bca9424c0d2c3c81e09d57242a6d4d96d74320f0",
-          "precommit_tests": 853,
-          "prepush_tests": 853,
-          "normal_hook_failure_error_skip_count": 0,
-          "final_service_binding_receipt_sha256": "af41f7eb1634756e23babc00884f846fdf5d5a9e2c909589ac3c65d6c02e746e",
-          "merge_CI": {
-            "id": 37968228996,
-            "number": 275,
-            "head": "e59a13a506d551ef086bf58399da751286502288",
-            "conclusion": "success",
-            "URL": "https://github.com/natural0448/Jungsi_touch/actions/runs/37968228996"
-          },
+          "exact_merge_CI": "https://github.com/natural0448/Jungsi_touch/actions/runs/38046808933",
+          "merge_CI_conclusion": "success",
           "main_changed": false,
-          "actual_new_function_deployment": false
+          "external_frontend_develop_integrated": false
         },
         "historical_before_live_bounded_v2": {
           "basis_commit": "6161ee4454d8a2448b81c74f24b29617a19b5308",
@@ -4579,7 +4558,45 @@
         },
         "live_bounded_source": "five_existing_sources_modified_no_new_migration; v1_and_C_preserved",
         "live_bounded_native": "PASS_DENO_CHECK5_AND_ALL177_REGISTERED_CACHED_TESTS; NEW37_CURRENT_REVIEW_TESTS",
-        "source_pin_codec": "Windows_working_CRLF_bytes; Git_blobs_LF_equivalent_verified_by_independent_review"
+        "source_pin_codec": "Windows_working_CRLF_bytes; Git_blobs_LF_equivalent_verified_by_independent_review",
+        "historical_frozen_v1_source_integration": {
+          "status": "merged_develop_development_candidate_only",
+          "source_commit": "f566c7effefeaeadda6307d62ebba9786c43ca13",
+          "merge_commit": "e59a13a506d551ef086bf58399da751286502288",
+          "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/23",
+          "merge_method": "merge",
+          "source_CI": [
+            {
+              "id": 37967820853,
+              "number": 273,
+              "event": "push",
+              "head": "f566c7effefeaeadda6307d62ebba9786c43ca13",
+              "conclusion": "success"
+            },
+            {
+              "id": 37967988310,
+              "number": 274,
+              "event": "pull_request",
+              "head": "f566c7effefeaeadda6307d62ebba9786c43ca13",
+              "conclusion": "success"
+            }
+          ],
+          "merge_tree_equals_tested_source_tree": true,
+          "source_and_merge_tree": "bca9424c0d2c3c81e09d57242a6d4d96d74320f0",
+          "precommit_tests": 853,
+          "prepush_tests": 853,
+          "normal_hook_failure_error_skip_count": 0,
+          "final_service_binding_receipt_sha256": "af41f7eb1634756e23babc00884f846fdf5d5a9e2c909589ac3c65d6c02e746e",
+          "merge_CI": {
+            "id": 37968228996,
+            "number": 275,
+            "head": "e59a13a506d551ef086bf58399da751286502288",
+            "conclusion": "success",
+            "URL": "https://github.com/natural0448/Jungsi_touch/actions/runs/37968228996"
+          },
+          "main_changed": false,
+          "actual_new_function_deployment": false
+        }
       },
       "normalized_filter_contract": {
         "normalization": "trim_then_ASCII_A_Z_case_fold; exact_shared_application_and_SQL_translate",
@@ -4597,8 +4614,16 @@
           "region"
         ],
         "maximum_limit": 100,
-        "sort": "academic_year_then_canonical_result_id_COLLATE_C",
-        "unknown_or_duplicate_query_field": "invalid_input"
+        "sort": "canonical_result_id_COLLATE_C_for_live_bounded_v2; cursor_internal_year_sentinel2024_only_actual_academic_year_preserved",
+        "unknown_or_duplicate_query_field": "invalid_input",
+        "historical_frozen_v1_sort": "academic_year_then_canonical_result_id_COLLATE_C",
+        "cursor_transport": {
+          "server_maximum_characters": 4096,
+          "external_frontend_input_bound": 8192,
+          "opaque_unmodified": true,
+          "truncation_decryption_rewriting_logging_allowed": false,
+          "empty_items_with_next_cursor": "normal_continue_by_explicit_next_request; only_next_cursor_null_ends_scan"
+        }
       },
       "wire_contract": {
         "recipe": "current_review_live_bounded_v2",
@@ -5701,7 +5726,7 @@
       "live_bounded_v2": {
         "id": "CR-CURRENT-LIVE-02",
         "authority": "2026-10-10 사용자 직접 연결·노출 지시; 화면팀·관리자 전수 검수 범위 유지",
-        "status": "DEPLOYED_ACTUAL_DB_STORAGE_FACTORY_HTTP_PASS_FRONTEND_OPERATION_ROUTING_CONNECT_NOW",
+        "status": "DEPLOYED_CURRENT_API_FRESH_JWT_AND_SCOPED_BFF_BROWSER_FUNCTIONAL_RECEIPTS_RECEIVED_EXTERNAL_FRONTEND_NOT_DEVELOP_INTEGRATED_VIEWER_GATE_NOT_RUN",
         "descriptor_format": "jungsi.current-admission-review/v2",
         "query_mode": "live_bounded",
         "wire_recipe": "current_review_live_bounded_v2",
@@ -5738,7 +5763,10 @@
           "new_PIN4_admin_registration_required": false,
           "review_approval_expiry_KST": "2026-10-11T19:07:14.139+09:00",
           "approved_subject_count": 2,
-          "real_user_JWT_and_BFF_browser": "NOT_RUN_ROOT_NO_FRESH_USER_TOKEN_EXTERNAL_OWNER_CONNECT_NOW"
+          "real_user_JWT_and_BFF_browser": "RECEIVED_EXTERNAL_REPORTED_API_AND_SCOPED_BFF_BROWSER_FUNCTIONAL_PASS; planning_service_independent_rerun0; viewer_gate_actual409_operational3gate_NOT_RUN",
+          "internal_review_path": "/management/current-review",
+          "external_frontend_source_commit": "16dea2131e3c9286c39b35f9d8c9400667632b3b",
+          "external_frontend_develop_integration": "PR18_OPEN_NOT_MERGED"
         },
         "frontend_reply": {
           "url": "https://drive.google.com/file/d/1PveQ1JRK00wWQ4eKGqnisez2VhJMdmiA/view",
@@ -5748,6 +5776,135 @@
           "sharing": "existing_owner1_writer1_no_public_permissions",
           "instruction": "existing_server_BFF_relay_and_approved_login_subjects_reuse; review_only_v2_adapter; leave_default22_and_C_unchanged"
         }
+      },
+      "historical_before_current_frontend_functional_intake": {
+        "status": "HOSTED_REVIEW_DEPLOYED_ACTUAL_DB_FACTORY_TWO_PAGES_PASS_FRONTEND_CONNECT_NOW_REAL_USER_JWT_BFF_BROWSER_NOT_RUN",
+        "missing_prerequisites": [
+          "화면팀 기존 승인 계정의 fresh 사용자 JWT로 hosted200·cursor·BFF·브라우저 실자료 표시 검수; 서비스 배포·새 PIN 등록·read model 준비 대기는 없음"
+        ],
+        "normalized_filter_contract": {
+          "normalization": "trim_then_ASCII_A_Z_case_fold; exact_shared_application_and_SQL_translate",
+          "substring": [
+            "university_q",
+            "department_q"
+          ],
+          "exact": [
+            "track",
+            "group",
+            "metric_kind",
+            "cohort"
+          ],
+          "unsupported": [
+            "region"
+          ],
+          "maximum_limit": 100,
+          "sort": "academic_year_then_canonical_result_id_COLLATE_C",
+          "unknown_or_duplicate_query_field": "invalid_input"
+        },
+        "source_status": "implemented_committed_CI_pass_actual_provider_verified_and_hosted_function_deployed_real_JWT_BFF_browser_external_owner_pending",
+        "real_user_JWT_and_BFF_browser": "NOT_RUN_ROOT_NO_FRESH_USER_TOKEN_EXTERNAL_OWNER_CONNECT_NOW",
+        "code_status": "implemented_live_bounded_v2_committed_native_and_actual_factory_HTTP_PASS_hosted_deployed_negative5PASS_frontend_connection_instructed",
+        "basis_commit": "80b6fe80fc512e072b362a22471f3311d5935d70"
+      },
+      "frontend_receipt_intake": {
+        "format": "jungsi.current-review-frontend-functional-intake/v1",
+        "status": "RECEIVED_REPORTED_PASS_SCOPED_CURRENT_REVIEW_FUNCTION_ONLY_NOT_PUBLIC_OPERATIONAL_ACCEPTANCE",
+        "internal_review_path": "/management/current-review",
+        "purpose": "current_admission_review",
+        "scope": "승인 검수 범위의 실자료 API·검수 목적 BFF/브라우저 기능 수신; 일반 학생 4페이지·발행·엔진·전국 전수 검수·운영 보안3gate 완료 제외",
+        "API_receipt": {
+          "file": "화면팀_전수검수API_실연결검수_PASS-20261010.md",
+          "captured_bytes": 2620,
+          "captured_SHA256": "2cb1089ef4476b236f6a6e2ee4755586dbb50c5f0a792b937ea06a5e2589f152",
+          "read_method": "Google Drive readable fetch saved UTF-8 bytes; provider size matched; provider original raw-byte hash not asserted"
+        },
+        "BFF_browser_receipt": {
+          "file": "화면팀_검수화면_BFF브라우저_수신영수증-20261010.md",
+          "captured_bytes": 3086,
+          "captured_SHA256": "7f2b31a79c9e091cb08253bc3f7694af8f6dff463e8de5970e410853fc6aa6c2",
+          "read_method": "Google Drive readable fetch saved UTF-8 bytes; provider size matched; provider original raw-byte hash not asserted"
+        },
+        "waiting_items_receipt": {
+          "file": "화면팀_대기항목정리_전달-20261010.md",
+          "captured_bytes": 3545,
+          "captured_SHA256": "13af1d258b7c597ae28f13894f05697eaef41e65662bd4c50af8fb37debb0c0d",
+          "read_method": "Google Drive readable fetch saved UTF-8 bytes; provider size matched; provider original raw-byte hash not asserted"
+        },
+        "API_reported_at_UTC": "2026-10-10T11:10:11Z",
+        "API_reported_check_count": 18,
+        "API_count_evidence": "reported aggregate18/18 and grouped PASS table; no independent18-case rerun by planning/service team",
+        "BFF_browser_reported_window_UTC": "2026-10-10 11:2x~11:3xZ",
+        "BFF_browser_exact_observation_time_UTC": null,
+        "runtime_origin_and_deployment_version_in_receipt": "NOT_SPECIFIED_IN_ORIGINAL_RECEIPT; no inferred production-domain or exact-minute claim",
+        "functional_results": {
+          "API_first_and_next_page": "reported200_items100_and100_observation_token_duplicate0",
+          "browser_first_and_next_page": "reported100_render_and_manual_next100_after_cursor_fix; no_automatic_full_collection",
+          "search": "reported_university_substring_plus_academic_year; empty_items_with_nonnull_cursor_normal_branch_and_manual_next200",
+          "counts": "reported_count_status_unknown_two_counts_null; no_zero_page_size_or_estimated_total_substitution",
+          "pending": "reported_review_status_value_availability_hold_reasons_badges_and_literal_JSON_type_preservation",
+          "nonexposure": "reported_server_only_apikey_relay_reviewer_JWT_not_in_static_code_HTML_or_browser_response; no_complete_all_artifact_SEC02_acceptance_claim",
+          "no_store": "reported_private_no_store"
+        },
+        "frontend_source": {
+          "commit": "16dea2131e3c9286c39b35f9d8c9400667632b3b",
+          "branch": "feature/presentation-foundation",
+          "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/18",
+          "PR_state_at_intake": "open",
+          "develop_integration": "NOT_MERGED",
+          "consumers_pages_changed": false
+        },
+        "cursor_defect": {
+          "initial_observation": "reported400_invalid_cursor_after_frontend256_char_truncation",
+          "owner": "external_frontend",
+          "fix": "16dea213_exempts_cursor_from256_truncation; browser_retry_reported_PASS",
+          "frontend_input_bound": 8192,
+          "server_input_bound": 4096,
+          "transport_rule": "불투명 cursor 원문을 변형·절단·해독·기록 없이 전달한다. 서버4096자 상한은 변경하지 않으며 초과·불량 값은 거절한다.",
+          "server_runtime_changed": false
+        },
+        "actual409_changed_current_head": "NOT_RUN_NO_HEAD_CHANGE_OBSERVED; implemented_retry_from_start_not_live_acceptance",
+        "viewer_access_control": "NOT_RUN_EXTERNAL_VISITOR_AUTHORIZATION_OR_PRIVATE_ACCESS_CONTROL_PROOF_REQUIRED_BEFORE_NETWORK_EXPOSURE",
+        "viewer_gate_source_review": {
+          "status": "VISITOR_GATE_OR_VERIFIED_PRIVATE_ACCESS_CONTROL_NOT_PROVEN",
+          "commit": "16dea2131e3c9286c39b35f9d8c9400667632b3b",
+          "path": "apps/web/src/app/management/current-review/page.tsx",
+          "lines": [
+            69,
+            80,
+            89,
+            109
+          ],
+          "finding": "공통 서버 tokenFile 검수 JWT로 Edge를 호출한다. 방문자의 getCaller·subject·관리자/검수허용명부 gate가 해당 페이지에서 확인되지 않았다. root layout/proxy의 쿠키 갱신·no-store는 방문자 인가를 대신하지 않는다.",
+          "request": "https://github.com/natural0448/Jungsi_touch/pull/18#issuecomment-6097491062",
+          "network_runtime_exposure_confirmed": false,
+          "public_exposure_incident_confirmed": false,
+          "review_admin_only_implementation_claim": false
+        },
+        "operational_security_three_gates": "NOT_RUN",
+        "general_member_publication": false,
+        "engine_approved": false,
+        "production_allowed": false,
+        "approval_subject_count": 2,
+        "approval_expiry_KST": "2026-10-11T19:07:14.139+09:00",
+        "renewal": "no_automatic_expiry_extension_or_subject_expansion",
+        "work_items": {
+          "W3": "CLOSED_CURRENT_LIVE_BOUNDED_CONNECTION_CYCLE_ONLY; old_readmodel_DDL_build_PIN4_chain_preserved_candidate_NOT_APPLIED",
+          "W4": "CLOSED_SCOPED_FUNCTIONAL_API_JWT_BFF_BROWSER_RECEIPT_INTAKE_ONLY; visitor_gate_general_publication_and_operational3gate_PENDING",
+          "W1": "PENDING_METRIC_EXPANSION_AND_BONUS_CR_NOT_ADOPTED",
+          "W2": "PENDING_FRESH_CAPACITY_TREND_RECOMMENDATION; original_size_denominator_percentage_inconsistency_requires_reconciliation_no_confirmed_forecast_or_cost",
+          "W5_CAP": "NOT_RUN_STORAGE_ARCHIVE_EXACT_REMOVAL_APPROVAL_CLEANUP_VACUUM_AND_BEFORE_AFTER_RECEIPT"
+        },
+        "viewer_access_followup": {
+          "owner": "external_frontend_feature_presentation_foundation",
+          "request": "https://github.com/natural0448/Jungsi_touch/pull/18#issuecomment-6097491062",
+          "basis_commit": "16dea2131e3c9286c39b35f9d8c9400667632b3b",
+          "required": "방문자의 검증된 세션·관리/허용 검수 명부 또는 검증된 사설 접근 통제를 적용·검수한 후 네트워크 노출을 검토한다. 공통 tokenFile JWT의 서버 보호는 방문자 인가를 대체하지 않는다.",
+          "status": "REQUESTED_NOT_RUN_CURRENT_SCOPE_FUNCTIONAL_RECEIPT_ACCEPTED",
+          "public_exposure_incident_confirmed": false,
+          "runtime_origin_or_deployment_version_confirmed": false,
+          "member_tier_policy": "방문자의 검증된 subject를 승인 검수 명부와 대조한다. 명부에 승인된 일반회원도 허용하며 관리자/유료 등급만으로 승격하거나 일반회원 등급만으로 배제하지 않는다. 기존 승인2계정·purpose·조회범위·TTL·relay/JWT는 유지한다."
+        },
+        "execution_environment_isolation_proof": "NOT_PRESENT_IN_ORIGINAL_RECEIPT_NOT_INFERRED; 검수 목적의 기능 수신은 실행 환경 격리나 네트워크 접근 통제 입증을 뜻하지 않는다."
       }
     },
     "historical_current_review_connection_before_source_registration": {
@@ -5870,6 +6027,10 @@
         "known_source_scalar": "exact_original_literal_JSON_type_numeric_text; no_float_roundtrip",
         "raw_canonical_source_PK_path": "server_only_never_response_or_logs"
       }
+    },
+    "historical_verification_before_current_frontend_intake": {
+      "actual_user_JWT": "RECEIVED_AND_READ_EXTERNAL_FRONTEND_FINAL_FRESH_JWT_REPORT_FOR_APPROVED_C140_AND_RECRUITMENT12; CURRENT_ALL_REVIEW_JWT_BFF_BROWSER_AND_OPERATIONAL_THREE_GATES_NOT_RUN",
+      "frontend_BFF_browser": "NOT_RUN"
     }
   },
   "history_presentation_contract": {
