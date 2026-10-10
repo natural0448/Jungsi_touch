@@ -1,6 +1,6 @@
 # Supabase 실행 자료 연결과 운영 준비
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.32이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.33이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 명시 Supabase 보안 앱 구성·공급자별 설정·선택 실행 자료의 사전 검수·최소 readiness 연결과 배포 준비. 원자료·정제 정본과 실행 발행본을 구분한다.
 
@@ -75,7 +75,7 @@ develop 인수 493232832d663d7fea7b0fbb350de15055cd9ccf · 통합 훅 799 · htt
 
 ## 기존 입결 DB를 화면 API에 연결
 
-[공식 입결 DB 표시 연결](DB_입결_화면연결.md)의 DEV-011을 따른다. 기존 DB를 별도 목적 범위로 명시 조회하며 기본 이용권·엔진/운영 원형 상태·22API/DTO·보안 gate를 유지한다. 코드 historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress; Owner DEP-IO-01-WINDOW의 준수 절을 따른다(02:00~06:00 KST·최대 4시간·경고 시 그날 SKIP·CAP-03 별도 승인·관측 시각 UNCONFIRMED·I/O HOLD); 실제 검수/운영 상태는 같은 문서의 항목별 증거로 확인한다.
+[공식 입결 DB 표시 연결](DB_입결_화면연결.md)의 DEV-011을 따른다. 기존 DB를 별도 목적 범위로 명시 조회하며 기본 이용권·엔진/운영 원형 상태·22API/DTO·보안 gate를 유지한다. 코드 implemented_read_model_code_candidate_native40_distinct82registrations_and_independent_source_review_pass; existing_current_actual5s_FAIL_preserved; actual_DDL_baseline_source_state_seal_job_activation_NOT_READY_IO_HOLD; 실제 검수/운영 상태는 같은 문서의 항목별 증거로 확인한다.
 
 ## 1페이지 추정 2열과 초안 시사
 
@@ -99,4 +99,4 @@ develop 인수 493232832d663d7fea7b0fbb350de15055cd9ccf · 통합 훅 799 · htt
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=e7a0fc38dffac927f3ed20286132d57852f3684768b6dc0f0fd27bddad1b1f84 -->
+<!-- jungsi:generated spec_sha256=c96ab9b938dfccafca1f046c114d99354e36ed182a88a2b10a50fc61fe535397 -->

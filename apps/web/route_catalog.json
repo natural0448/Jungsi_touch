@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.32",
-  "source_sha256": "e7a0fc38dffac927f3ed20286132d57852f3684768b6dc0f0fd27bddad1b1f84",
+  "spec_version": "1.9.33",
+  "source_sha256": "c96ab9b938dfccafca1f046c114d99354e36ed182a88a2b10a50fc61fe535397",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3287,9 +3287,9 @@
   "official_history_db_display_contract": {
     "format": "jungsi.official-history-db-display/v1",
     "id": "DEV-011",
-    "revision": "2026.10.10.v15",
+    "revision": "2026.10.10.v16",
     "branch": "feature/application-pre-data-platform",
-    "basis_commit": "9e03bd6483cffc420aa02ed01a09e93e3c5356c6",
+    "basis_commit": "95a09996c71f9d5b1fc02d743ac3f8e938327870",
     "requirements": [
       "REQ-01",
       "REQ-08",
@@ -3299,7 +3299,7 @@
       "REQ-25",
       "REQ-26"
     ],
-    "code_status": "historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress; Owner DEP-IO-01-WINDOW의 준수 절을 따른다(02:00~06:00 KST·최대 4시간·경고 시 그날 SKIP·CAP-03 별도 승인·관측 시각 UNCONFIRMED·I/O HOLD)",
+    "code_status": "implemented_read_model_code_candidate_native40_distinct82registrations_and_independent_source_review_pass; existing_current_actual5s_FAIL_preserved; actual_DDL_baseline_source_state_seal_job_activation_NOT_READY_IO_HOLD",
     "production_ready": false,
     "purpose": "승인된 동결 역사 입결의 제한 표시 검수; 현재 단일 정본 공급자는 별도 준비 단계",
     "operations": [
@@ -3381,7 +3381,12 @@
       "Owner 준수 절 / 소량 조회: 기존 승인된 유한 소량 검수 요청만 시간창 예외이며 RLS·역할·subject·자료판·범위·만료와 비용 gate를 유지한다. 요청 수나 limit만으로 저비용을 입증하지 못한다. 이전 57014 전수 조회를 소량으로 재분류하거나 자동 재시도하지 않는다. 이번 준비에서 DB·Storage·read model·VACUUM은 NOT_RUN이다.",
       "Owner 준수 절 / CAP-03: 정확한 표·행 PK·열·영향·복구 검산·비삭제 대안을 제시하고 별도 Owner 제거 승인을 받는다. 시간창이나 CAP 절차 동의는 제거 승인이 아니다. registry·overlays의 current/C 의존과 원문·이전 판·실패를 보존하며 Storage 이전·참조 전환·제거·VACUUM을 각각 기록한다. 컴퓨트 업그레이드는 Owner 보류이며 과금 변경은 실행하지 않는다.",
       "Owner 준수 절 / 관측과 승인: 경고 지속은 수신 회신이며 새 Dashboard 실측은 아니다. 원문의 저녁 표기와 오전 작성 시각 불일치로 정확 관측 시각은 UNCONFIRMED다. 실제 회복·원인은 미확정이고 I/O HOLD를 유지한다. 조건부 작업창은 자료판 만료·최대24h·PIN·RLS·subject·발행·live 전환·자동화의 승인을 연장하지 않는다.",
-      "Owner 준수 절 / 후속 CR 상태: CR-HISTORY-METRIC-EXPANSION-01은 인원·비율·발표 단계·코호트·공식 지원자 우선·결측 보류의 데이터 계약 준비안이고, CR-CONVERSION-BONUS-SUMMARY-01은 공식 제도와 학생 실제 적용·성공0점·미확인 보존·유료6개 응답 호환성 준비안이다. 둘 다 미채택이며 공식 자료·public mapping·검수승인/발행·DTO·코드·엔진·실API·BFF/브라우저 인수는 NOT_RUN이다."
+      "Owner 준수 절 / 후속 CR 상태: CR-HISTORY-METRIC-EXPANSION-01은 인원·비율·발표 단계·코호트·공식 지원자 우선·결측 보류의 데이터 계약 준비안이고, CR-CONVERSION-BONUS-SUMMARY-01은 공식 제도와 학생 실제 적용·성공0점·미확인 보존·유료6개 응답 호환성 준비안이다. 둘 다 미채택이며 공식 자료·public mapping·검수승인/발행·DTO·코드·엔진·실API·BFF/브라우저 인수는 NOT_RUN이다.",
+      "읽기 모델 후보 / 사용자 수정 지시: 현재 정본을 보존하고 새7파일 후보의 구현·네이티브 합성 검증·독립 검토·공통 기획 및 라우팅 동기화를 진행한다. 기존 current 쿼리의 실제5초57014·성공페이지0은 해결 증거가 나오기 전까지 실패로 남긴다. 후보 코드나 준비 DDL만으로 실제 성능·DB 적용·발행·화면 연결 완료를 선언하지 않는다.",
+      "읽기 모델 후보 / 경계: 현재 정본이 단일 출처 권위다. 최신 canonical 결정 뒤 정정된 검색 조건을 적용하며 관측 수·학교 복합키 수를 같은 snapshot에서 정확 집계하고100+1 키셋 페이지의 표시 및 검증 근거만 bulk JOIN한다. RAW35·MEMBER32·POP7의 원형 자격을 digest-only 자료로 만들어 내지 않는다. 기존 C·기본22API·이용권·점수 엔진·프런트는 이번 후보의 변경 대상이 아니다.",
+      "읽기 모델 후보 / 승인과 재개: 자료 완전성 독립 증거, source closure·command 외 변경 coverage·fence, 고정 head·서명 issuer/purpose/유효기간/회수, RLS·최소 역할·TLS·5초 제한을 각각 검증한다. producer bool 또는 자기 해시는 독립 승인 증거가 아니다. 실제 기준 receipt 미제공은 NOT_READY이며 준비 DDL·model build·PIN4·함수 배포·실JWT·BFF/브라우저 인수는 별도 단계다.",
+      "I/O 현재 확인 / 새 관측: Supabase UI에서 프로젝트 Healthy와 용량 증가를 확인했지만 IOPS·처리량·연결 지표가 로드되지 않아 budget 회복은 UNCONFIRMED다. 기존 HOLD와 Owner의02:00~06:00 조건부 창을 유지한다. 시간 밖에 대량 모델 생성·전수 조회·DB 정리·VACUUM을 실행하지 않고 만료된 승인판을 연장하지 않는다.",
+      "baseline과 delta의 학년도·학교 복합키·활성/범위·대표 원본·출처 및 모집단위 멀티셋·해시·영수증을 동일한 전체 대조로 검산한다. 유효한 서명과 맞는 학교 수만으로 서로 다른 의미의 정정을 채택하지 않는다."
     ],
     "tasks": [
       [
@@ -3630,7 +3635,13 @@
       },
       "current_review_IO_budget_warning": "USER_REPORTED_DASHBOARD_WARNING_IO_BUDGET_NEAR_DEPLETION_BASE5MB_PER_SECOND_AFTER_EXHAUSTION; ADDITIONAL_IO_INTENSIVE_REAL_DB_EXECUTION_HOLD; ROOT_FRESH_METRICS_AND_CAUSAL_LINK_NOT_RUN; LOCAL_FILE_SOURCE_COMMON_GIT_PREPARATION_CONTINUES",
       "current_review_independent_final_stage_receipt_sha256": "b63a58d1c00d963ddace40a93205cd9a43c6d18698248fa9f674f3670c156ade",
-      "current_review_develop_integration": "PASS_NORMAL_PR23_DEVELOP_ONLY_EXACT_f566c7e_TREE_EQUAL_e59a13_SOURCE_CI273_PR_CI274_MERGE_CI275; MAIN_UNCHANGED; NOT_CURRENT_RUNTIME_ACCEPTANCE"
+      "current_review_develop_integration": "PASS_NORMAL_PR23_DEVELOP_ONLY_EXACT_f566c7e_TREE_EQUAL_e59a13_SOURCE_CI273_PR_CI274_MERGE_CI275; MAIN_UNCHANGED; NOT_CURRENT_RUNTIME_ACCEPTANCE",
+      "read_model_candidate_source": "PASS_EXACT_NEW7_PINS_NO_EXISTING_DEFAULT_C_ENTITLEMENT_22API_CHANGE; original actual5s57014 failure preserved",
+      "read_model_candidate_native_and_HTTP": "PASS_DENO2_9_7_CACHED6FILECHECK_AND40_DISTINCT82REGISTERED_SYNTHETIC_TESTS; independently_signed_baseline_delta_18OBS_mutations_HTTP100_40_public18_query9_UTC_grantTTL_RLS_SQLmock; actualDB_network0",
+      "read_model_candidate_data_and_independent_review": "PASS_LOCAL_FILE_CONTRACT_PREPARATION_AND_FROZEN7_STATIC_READ_NATIVE_RECEIPT_HASH_REUSE; actual baseline_source_fence_publisher_job_seal_lineage_grant remains NOT_READY",
+      "read_model_actual_DDL_GRANT_RLS_build_query": "NOT_RUN_IO_HOLD_AND_PREPARED_ONLY; no space_WAL_cost proof, no full reingestion",
+      "fresh_UI_project_and_IO": "READONLY_DASHBOARD_HEALTHY_CAPACITY_INCREASE_OBSERVED; IOPS_throughput_connection_graphs_unavailable; actual_budget_recovery_UNCONFIRMED",
+      "new_current_approval_and_runtime_activation": "NOT_RUN; prior C expiry not extended; no new descriptor_PIN4_deploy_realJWT_BFF_browser_acceptance"
     },
     "frontend_handoff": [
       "브라우저·화면 코드·일반 프런트 환경은 기존 API의 공개 응답만 읽는다. app DATABASE_URL/DB CA/Storage secret/descriptor/원자료/전체 DB를 수령하지 않는다. 지정된 Supabase 관리자가 비공개 app-only 기본7 설정을 등록하는 역할은 별도 인계 범위다. migration-owner 접속값·키는 외부 화면 환경에 전달하지 않는다.",
@@ -3654,7 +3665,8 @@
       "현재는 current 공개 projection·공개 offering ID 대응·정본 상태 결속·서버 cursor 키·새 승인판이 준비 단계다. 앱 읽기 권한 메타 확인은 완료했고 현재 실제 페이지·함수 배포·화면 수신은 미실행이다. DB 접속·원자료·Storage 경로·새 cursor 키는 브라우저에 전달하지 않는다.",
       "DB 정리 회신에는 registry 직접 의존·보존 판정과 원형 Storage 복사·overlays 정리·참조 전환·제거·일반/FULL VACUUM을 각각 RUN/NOT_RUN으로 적는다. 역사 C/v21_1과 단일 최신 current 정본을 서로 대체하지 않고 둘의 변경0 근거를 보존한다.",
       "별도 current-admission-review 함수의 GET /api/v1/review/current-admissions는 허용 명부에 있는 검수자만 사용한다. 1페이지의 공개 History DTO와 다르며 literal·원 타입·보류 사유와 암호화 cursor를 제공한다. 원 canonical/source ID와 비공개 경로는 응답에서 제외한다. 구체적인 자료판 검수 후 Supabase 관리자가 신규 이름의 PIN3·cursor 키를 등록하며 기존 C 설정은 유지한다.",
-      "registry 용량 요청은 실제 읽기 전용 크기·의존 검수와 함께 회신한다. registry는 현재 정본의 직접 의존 표이며 overlays는 현재 정본과 역사 C 모두가 사용한다. 파일류가 SQL 뷰 의존 목록에 없다는 사실만으로 아카이브·재생 안전을 확인한 것은 아니다. 정확한 복사·복구·제거 범위·유지보수 조건을 인수하기 전까지 두 정리 작업과 VACUUM은 미실행이다."
+      "registry 용량 요청은 실제 읽기 전용 크기·의존 검수와 함께 회신한다. registry는 현재 정본의 직접 의존 표이며 overlays는 현재 정본과 역사 C 모두가 사용한다. 파일류가 SQL 뷰 의존 목록에 없다는 사실만으로 아카이브·재생 안전을 확인한 것은 아니다. 정확한 복사·복구·제거 범위·유지보수 조건을 인수하기 전까지 두 정리 작업과 VACUUM은 미실행이다.",
+      "이번 수정은 explicit 읽기 모델 provider/handler 후보와 native 합성 HTTP 경로를 준비하는 서비스·데이터 계층 작업이다. 실제 DB 스키마·독립 baseline/seal·I/O 비용·5초 페이지·새 검수 승인판·배포가 완료되기 전에는 기존 화면을 live로 전환하거나 전수 검수 완료로 기록하지 않는다. 화면팀은 최종 회신의 코드/문서/검증 경계와 NOT_RUN을 구분해 인수한다."
     ],
     "query_contract": {
       "parameterized_bulk_join": true,
@@ -3839,7 +3851,7 @@
     },
     "current_review_connection": {
       "id": "DBD-06-CURRENT-ALL-REVIEW",
-      "status": "accepted_on_develop_development_candidate_source_native41_committed_bundle_CI_PASS_actual_performance_FAILED_IO_budget_warning_real_DB_HOLD",
+      "status": "read_model_implementation_candidate_native_and_independent_source_verified_not_actual_DB_connected; old_current5s57014_and_success_page0_preserved; fresh_approval_deployment_BFF_NOT_RUN",
       "human_scope": "frontend_team_and_administrators_review_first",
       "source_view": "jungsi_data_ingest.admission_results_current",
       "academic_years": [
@@ -3870,10 +3882,11 @@
       "public_projection": "official_public_metadata_not_verified_remains_null_and_hold_reason; no_published_or_verified_official_inference_from_active_current",
       "recruitment": "approved_recruitment_data_only; otherwise_pending_null_no_zero_or_inferred_count",
       "missing_prerequisites": [
-        "qualified_light_query_projection_or_index_provider_CR_preserving_corrected_current_semantics_and_RLS",
-        "actual_same_snapshot_typed_page_count_keyset_member_link_wire_with_existing_timeout_PASS",
-        "explicit_all_current_subject_purpose_qualified_state_approval_and_four_namespaced_settings",
-        "new_function_deployment_fresh_JWT_BFF_browser_security_gates_after_actual_performance_PASS"
+        "independently pinned complete baseline and source coverage_fence with trusted review evidence",
+        "IO recovery plus finite chunk space_WAL_cost budget and fresh exclusive work lease inside Owner window",
+        "exact prepared schema_RLS_seal_adapter review and separately authorized application",
+        "actual same-snapshot typed page_count_cursor_within_existing5s PASS",
+        "fresh all-current descriptor subject purpose pins and deployment real_JWT_BFF_browser acceptance"
       ],
       "operational_security_three_gates": "NOT_RUN",
       "nationwide_original_census_complete": false,
@@ -4322,7 +4335,7 @@
         "performance_acceptance": "FAILED_ACTUAL_FILTERED_COUNTS_PAGE_KEYS_AND_COMPLETE_PAYLOAD; SQL_shape_regression_or_compilation_is_not_launch_qualification"
       },
       "performance_change_request": {
-        "status": "DOCUMENT_PROPOSAL_V1_PREPARED_AND_SERVICE_DATA_FILE_REVIEW_COMPLETED; REFINEMENT_AND_TECHNICAL_ADOPTION_PENDING; NO_DB_OR_SOURCE_IMPLEMENTATION",
+        "status": "read_model_v2_candidate_code_preparation_authorized_exact7_new_files; actual_DDL_build_performance_release_and_operation_NOT_RUN",
         "authority": "fixed_admission_results_current_definition_and_corrected_curation_head_override_semantics_remain_authoritative",
         "constraints": [
           "single_bounded_payload_statement_with_exact_same_snapshot_counts",
@@ -4361,8 +4374,8 @@
       },
       "IO_budget_guard": {
         "id": "DEP-IO-01",
-        "status": "HOLD_OWNER_REPORT_WARNING_PERSISTS_CONDITIONAL_DAILY_WINDOW_REGISTERED; FILE_ONLY_PREPARATION_CONTINUES",
-        "basis": "user_supplied_dashboard_image_and_user_relayed_Owner_confirmation_2026_10_10; not_Root_live_IO_metrics",
+        "status": "HOLD_FRESH_UI_IOPS_THROUGHPUT_GRAPHS_UNAVAILABLE_BUDGET_RECOVERY_UNCONFIRMED; FILE_ONLY_PREPARATION_CONTINUES",
+        "basis": "2026-10-10 Root read-only Supabase overview and observability UI; project Healthy alone does not prove I/O recovery; no SQL query this turn",
         "reported_warning": "프로젝트의 디스크 I/O 예산이 곧 소진될 예정이며, 소진되면 처리량이 기본5MB/s로 돌아간다는 경고",
         "cause": "unconfirmed; existing_SQLSTATE57014_timeouts_and_budget_warning_are_separate_observations",
         "held_operations": [
@@ -4388,7 +4401,7 @@
         "current_source_and_existing_C_preserved": true,
         "new_SQL_or_timeout_or_role_RLS_change": false,
         "compute_upgrade_or_billing_change": false,
-        "actual_budget_recovery_or_cost_attribution": "NOT_RUN",
+        "actual_budget_recovery_or_cost_attribution": "UNCONFIRMED_CURRENT_METRICS_UNAVAILABLE; previous warning and original 57014 failures preserved",
         "in_flight_transaction_forced_kill_or_rollback": false,
         "team_coordination": "OWNER_WINDOW_AND_WARNING_HOLD_RELAYED_TO_DATA_TEAM; SERVICE_AND_DATA_FILE_ONLY_METRIC_BONUS_CR_REVIEW; ROOT_ACTUAL_DB_THIS_FOLLOWUP0",
         "owner_confirmation_and_conditional_work_window": {
@@ -4429,6 +4442,11 @@
           "registry_overlays": "current_and_C_dependencies_preserved; no_removal_target_or_growth_cause_proven",
           "compute_upgrade": "OWNER_DEFERRED_NO_CHANGE",
           "review_descriptor_expiry": "window_never_extends_existing_approval; fresh_approval_required_when_expired"
+        },
+        "historical_before_fresh_dashboard_20261010": {
+          "status": "HOLD_OWNER_REPORT_WARNING_PERSISTS_CONDITIONAL_DAILY_WINDOW_REGISTERED; FILE_ONLY_PREPARATION_CONTINUES",
+          "basis": "user_supplied_dashboard_image_and_user_relayed_Owner_confirmation_2026_10_10; not_Root_live_IO_metrics",
+          "actual_budget_recovery_or_cost_attribution": "NOT_RUN"
         }
       },
       "historical_before_owner_window_confirmation": {
@@ -4524,6 +4542,195 @@
         "display_code_status": "historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress",
         "supabase_operations_summary": "현재 develop57f74b1daabd2d6a8e94de216f182e8bfe6557b7에 서비스phase2와 승인된 병합 하네스 수정이 통합됐다. 정상precommit/prepush/정확HEAD pushCI/PR병합시험CI/최종developCI각678PASS·실패/오류/skip0이며 main은 보존했다. 최소source-only draft18의신규2 ownerINSERT COMMIT/freshapp18과선별Storage18(fullGET/SHA·비인증72건본문미반환)을확인했다. 최종appTLS READONLY exact18/old16불변/new2exact 독립영수증도PASS이며003/13RLS24policy·공개/Storagebaseline보존을확인했다. 원수능AST source는 보존하고 모평적용child3의 source/applicationContext를 분리 확인했다. engine/production/runtimefalse·publishednull과 기본회원경로유지/명시DI만준비선택은 확정 유지다. 공식입결v2/v3의미실패는보존하고 최소선별v4의일부학교/학교년도local·remote native범위PASS를 수령했다. 신규2개DB메타등록을수령하고최소공식source2의독립native58/frozenRAM39를기록했으며전체draft18/발행0·전국완료false를유지한다. 최종freshapp18독립검수도완료했다. StorageRLS메타는현재보호bucket에클라이언트SELECT허용조건없음을확인했으나실제JWT HTTP/운영SECgate는NOT_RUN이다. v2설계승인·최신v1.1/14경로PLAN_ONLY구현계획은 준비됐으나 코드0·품질/newscopeFE공통계약/모형호환·계산채택은 미완료다. 실제JWT/APIorigin·22API/4페이지/보안운영·live배포는 미인수다. 과거제안/실패/fixture·관측은 보존한다.",
         "supabase_operations_revision": "2026.10.07.v9"
+      },
+      "historical_before_read_model_candidate_code": {
+        "status": "accepted_on_develop_development_candidate_source_native41_committed_bundle_CI_PASS_actual_performance_FAILED_IO_budget_warning_real_DB_HOLD",
+        "implementation_source_status": "implemented_development_candidate_compiled_native41_offline_boot_verified_actual_page_performance_FAILED_not_launch_accepted",
+        "performance_change_request": {
+          "status": "read_model_v2_candidate_code_preparation_authorized_exact7_new_files; actual_DDL_build_performance_release_and_operation_NOT_RUN",
+          "authority": "fixed_admission_results_current_definition_and_corrected_curation_head_override_semantics_remain_authoritative",
+          "constraints": [
+            "single_bounded_payload_statement_with_exact_same_snapshot_counts",
+            "no_N_plus_1_or_unbounded_returned_payload",
+            "existing5second_timeout_role_RLS_TLS_no_row_loss",
+            "no_registry_initial_name_year_active_filter_shortcut",
+            "no_unknown_latest_state_adoption_or_current_C_promotion",
+            "no_DDL_GRANT_cache_fallback_without_new_concrete_authority",
+            "IO_budget_recovery_and_safe_write_checkpoint_before_fresh_actual_validation",
+            "finite_initial_build_and_incremental_update_cost_no_automatic_full_rebuild",
+            "no_COMPUTE_UPGRADE_or_billing_change_without_human_request"
+          ],
+          "id": "CR-CURRENT-REVIEW-READ-MODEL-01",
+          "candidate_technical_gate_requirements": [
+            {
+              "id": "RM-01",
+              "requirement": "exact_single_PK_FK_column_and_descriptor_types_for_all_six_candidate_tables; preserve_existing_canonical_source_command_ID_types"
+            },
+            {
+              "id": "RM-02",
+              "requirement": "immutable_sealed_batch_changes_lineage_control_and_manifest_with_exact_approved_ancestry_and_same_lock_scope"
+            },
+            {
+              "id": "RM-03",
+              "requirement": "explicit_domain_separated_byte_codec_for_content_row_binding_and_leaf_root_manifest; original_lexeme_type_null_missing_zero_duplicates_preserved"
+            },
+            {
+              "id": "RM-04",
+              "requirement": "complete_machine_checkable_source_coverage_dependency_impact_before_after_manifest_and_outside_impact_invariance; latest_journal_or_core_fingerprint_not_sufficient"
+            }
+          ],
+          "independent_candidate_review_sha256": "74c34e890179a4f1c1c1dcd2c733750483a28b49a0dc7bc447c56c197b49017f",
+          "data_candidate_review_sha256": "c2ebc2e6c8fd875fff1179c95e8459edd7b4a5552d179c9ef16cf13ccaf8e1b4",
+          "new_variant_recipe_port_projection_DDL_or_RLS_adopted": false,
+          "complete_source_coverage_and_actual_performance_proven": false
+        },
+        "missing_prerequisites": [
+          "qualified_light_query_projection_or_index_provider_CR_preserving_corrected_current_semantics_and_RLS",
+          "actual_same_snapshot_typed_page_count_keyset_member_link_wire_with_existing_timeout_PASS",
+          "explicit_all_current_subject_purpose_qualified_state_approval_and_four_namespaced_settings",
+          "new_function_deployment_fresh_JWT_BFF_browser_security_gates_after_actual_performance_PASS"
+        ]
+      },
+      "read_model_candidate": {
+        "id": "CR-CURRENT-REVIEW-READ-MODEL-01",
+        "revision": "candidate.v2.implementation.20261010",
+        "status": "IMPLEMENTED_NATIVE_AND_INDEPENDENT_SOURCE_VERIFIED_CANDIDATE_NOT_DB_APPLIED",
+        "authority": "2026-10-10 user requested fix, current verification, reply, and collaboration with development team",
+        "code_basis_commit": "95a09996c71f9d5b1fc02d743ac3f8e938327870",
+        "source_authority": "jungsi_data_ingest.admission_results_current",
+        "explicit_provider_only": true,
+        "existing_default_current_factory_changed": false,
+        "existing_source_files_preserved": [
+          "supabase/functions/_shared/current_admission_review_postgres.ts",
+          "supabase/functions/_shared/current_admission_review_test.ts"
+        ],
+        "source_files": [
+          "supabase/functions/_shared/current_review_model_codec.ts",
+          "supabase/functions/_shared/current_review_model_validation.ts",
+          "supabase/functions/_shared/current_review_model_codec_test.ts",
+          "supabase/functions/_shared/current_review_model_validation_test.ts",
+          "database/migrations/004_current_review_model.prepared.sql",
+          "supabase/functions/_shared/current_review_model_postgres.ts",
+          "supabase/functions/_shared/current_review_model_postgres_test.ts"
+        ],
+        "prepared_schema": "jungsi_review_read_model",
+        "prepared_tables": [
+          "admission_review_batches",
+          "admission_review_changes",
+          "admission_review_seals",
+          "admission_review_lineage_members",
+          "admission_review_subject_grants",
+          "admission_review_revocations"
+        ],
+        "role_policy": "app SELECT-only, nonowner/nonbypass, FORCE RLS and server-bound subject/purpose/head; publisher nonowner unsealed INSERT-only; owner-only lineage/seal; verified TLS, RR read-only, 5s guard",
+        "data_query": "parameterized same-snapshot latest canonical before corrected filters, exact matching observation and source-school tuple counts, C-collation keyset limit100+1, selected-row display and proof, one bounded payload query, no N+1",
+        "wire_policy": "CURRENT35 MEMBER32 POP7 exact typed source receipts; public review item18 and query9 unchanged; raw identity, paths, evidence and issuer keys server-only; no fabricated full-source wire from digest-only model",
+        "integrity_policy": "strict domain-separated typed TLV and multiset digests, compact binary Merkle proofs, separate ROOT BINDING SEAL, exact closed baseline plus no more than4 delta levels, immutable sealed head and tombstones",
+        "baseline_candidate": "closed independently attested full eligible canonical census, source/member/population recipes, composite school frequencies, finite checkpoint no missing/extra, seven source areas plus out-of-command coverage/fence and registration; trusted external receipt pins, issuer/purpose/expiry/revocation, signature separate from data completeness",
+        "unknown_state": "missing actual complete baseline, trust receipt, source closure/fence, permission, fresh pinned head, or valid review approval stays NOT_READY; no producer boolean or hash-only acceptance; changed cursor state409; unapproved first page503",
+        "actual_baseline_receipt": "NOT_READY_NOT_PROVIDED",
+        "actual_database_DDL_GRANT_RLS": "NOT_RUN_PREPARED_ONLY",
+        "actual_minimal_build_and_space_cost": "NOT_RUN_IO_HOLD; no whole-source reingestion or automatic rebuild; finite chunk and binary-proof storage_WAL budget required before DB work",
+        "actual_5s_page_count_cursor_acceptance": "NOT_RUN_EXISTING_QUERY_FAIL_PRESERVED",
+        "new_descriptor_PIN4_and_subject_approval": "NOT_RUN_NO_SILENT_EXTENSION_OF_EXPIRED_APPROVAL",
+        "deployment_real_JWT_BFF_browser_three_gates": "NOT_RUN",
+        "engine_approved": false,
+        "production_allowed": false,
+        "native_verification": {
+          "status": "PASS_NATIVE_SYNTHETIC_ONLY",
+          "runtime": "Deno2.9.7_cached_postgres3.4.5",
+          "check_files": 6,
+          "check_exit": 0,
+          "distinct_tests": 40,
+          "registrations": 82,
+          "passed_registrations": 82,
+          "failed": 0,
+          "source_stable": true,
+          "permissions": [],
+          "receipt_sha256": "eeae6c24b15f2c10b187246599aa12be7bc4644a07e77cdc5a08ff1dc6cd6889",
+          "previous_failure_preserved": "first_native_collation_test_expectation_drift1FAIL; fixed exact DISTINCT_ORDER_C_collation; prior TESTv2_not_executed",
+          "actual_DB_network_env": 0
+        },
+        "independent_review": "PASS_FROZEN7_SOURCE_STATIC_AND_NATIVE_RECEIPT_PIN_READBACK_REUSE; final same-snapshot generated-document receipt follows; actual_DB_and_operation_NOT_READY",
+        "data_contract_review": "PASS_FILE_CONTRACT_PREPARATION_ONLY_CURRENT35_MEMBER32_POP7_NATIVE32_SOURCE29_AND_MULTIPLICITY_BOUNDARIES; actual complete baseline and current freshness receipt NOT_READY",
+        "common_documentation": "same code snapshot registration and generated planning_routing_architecture_branch_handoff_index; existing generators and validators unchanged",
+        "runtime_source_pins": [
+          {
+            "path": "supabase/functions/_shared/current_review_model_codec.ts",
+            "bytes": 23310,
+            "sha256": "1248d01ca3f3695cb85a8f2f25c1abb0702e3a0639b70f14349b874282f36e7e"
+          },
+          {
+            "path": "supabase/functions/_shared/current_review_model_validation.ts",
+            "bytes": 61988,
+            "sha256": "b66356d0cb9b4b274b44fdac55d7258dd225812696fa9b5ef3c7a459a20e3541"
+          },
+          {
+            "path": "supabase/functions/_shared/current_review_model_postgres.ts",
+            "bytes": 19533,
+            "sha256": "0e05d0607c7ddbb5fca5c10972043572e46d3b58ffbc3ac1545be5efdde004cc"
+          },
+          {
+            "path": "database/migrations/004_current_review_model.prepared.sql",
+            "bytes": 20089,
+            "sha256": "407e19f37acde696e34a39e1b6db3a25000120558adb06ecffd260dd36adb1ce"
+          }
+        ],
+        "operational_adapter_gaps": [
+          "actual_complete_census_and_school_frequency_evidence",
+          "live_independent_source_registration_fence_adapter",
+          "runtime_trusted_issuer_policy_and_revocation_pins",
+          "publisher_job_admission_adapter",
+          "independent_seal_lineage_grant_control_adapter",
+          "DDL_application",
+          "read_model_build",
+          "actual_5s_current_page",
+          "descriptor_approval",
+          "deployment_or_live_switch"
+        ],
+        "grant_binding": "descriptor approval_id_issued_expires exact; head_subject_manifest_binding_seal tuple and revocation grant_head_subject tuple; minimum session_descriptor_grant expiration checked again before response",
+        "source_state_port": "mandatory independent cheap registration_coverage_fence qualification in same read-only RR snapshot before page_counts_payload; copied expected/model state never accepted as actual; actual adapter NOT_READY",
+        "signature_and_lease": "externally pinned issuer role keys plus separate current revocation policy/snapshot; specialized source29_native32 and every evidence-kind claims; checkpoint lease REF exact to already verified writer fence lease without contradictory second slot signature",
+        "prepared_004_apply_boundary": "separately approved schema CREATE privilege and independently provisioned NOLOGIN nonowner publisher required; no automatic CREATE ROLE; seal_lineage_grant_publisher-job control adapters deny NOT_READY until separately implemented and reviewed",
+        "source_pins": [
+          {
+            "path": "supabase/functions/_shared/current_review_model_codec.ts",
+            "bytes": 23310,
+            "sha256": "1248d01ca3f3695cb85a8f2f25c1abb0702e3a0639b70f14349b874282f36e7e"
+          },
+          {
+            "path": "supabase/functions/_shared/current_review_model_validation.ts",
+            "bytes": 61988,
+            "sha256": "b66356d0cb9b4b274b44fdac55d7258dd225812696fa9b5ef3c7a459a20e3541"
+          },
+          {
+            "path": "supabase/functions/_shared/current_review_model_postgres.ts",
+            "bytes": 19533,
+            "sha256": "0e05d0607c7ddbb5fca5c10972043572e46d3b58ffbc3ac1545be5efdde004cc"
+          },
+          {
+            "path": "database/migrations/004_current_review_model.prepared.sql",
+            "bytes": 20089,
+            "sha256": "407e19f37acde696e34a39e1b6db3a25000120558adb06ecffd260dd36adb1ce"
+          },
+          {
+            "path": "supabase/functions/_shared/current_review_model_codec_test.ts",
+            "bytes": 13564,
+            "sha256": "23f196015db6157359328c45ec25c5088da983e9a9432960e21bb8db5b8e747d"
+          },
+          {
+            "path": "supabase/functions/_shared/current_review_model_validation_test.ts",
+            "bytes": 67506,
+            "sha256": "65af587f8634bab5b51d1108826a462083b3ef410de8be328af7a57e4c941d38"
+          },
+          {
+            "path": "supabase/functions/_shared/current_review_model_postgres_test.ts",
+            "bytes": 16534,
+            "sha256": "52931377e47e985f66e84c92362e9419935c31cd2e6cf878f663099fbfc9c229"
+          }
+        ],
+        "data_contract_review_sha256": "6cc8ea44c950ae0e19fd17e56e34ed6a5eb3cd806570600bce163e1980f406f2",
+        "qualified_delta_guard": "same full OBS_vs_qualified source check reused in baseline_delta: year_school_tuple_active_scope_representative_member_population_count_recipe_digest_content_filter_display_and_REF; independently re-signed18 mutations reject meaning mismatch despite valid signatures and coherent counts"
       }
     },
     "historical_current_review_connection_before_source_registration": {
