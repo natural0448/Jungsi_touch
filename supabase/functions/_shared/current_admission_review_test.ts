@@ -7,7 +7,7 @@ import { CURRENT_REVIEW_FIELDS, CURRENT_REVIEW_OPERATION, CURRENT_REVIEW_ROUTE, 
   closeCurrentReviewPage, createCurrentAdmissionReviewHandler, currentReviewBinding, currentReviewKey, currentReviewProjectionSha256, currentReviewSha256, currentReviewWireJson,
   parseCurrentReviewQuery, validateCurrentReviewDescriptor, validateCurrentScalar, validateCurrentWireJsonText } from './current_admission_review.ts';
 import type { CurrentReviewDescriptor, CurrentReviewObservation, CurrentReviewPorts, CurrentReviewRawPage } from './current_admission_review.ts';
-import { createCurrentReviewInfrastructure, CURRENT_REVIEW_METADATA_SQL, CURRENT_REVIEW_PAYLOAD_SQL } from './current_admission_review_postgres.ts';
+import { createCurrentReviewInfrastructure, CURRENT_REVIEW_METADATA_SQL, CURRENT_REVIEW_PAYLOAD_SQL, CURRENT_REVIEW_LIVE_PAYLOAD_SQL, buildCurrentReviewLivePayloadSql } from './current_admission_review_postgres.ts';
 const SUBJECT='00000000-0000-0000-0000-000000000001',OTHER='00000000-0000-0000-0000-000000000002';
 const NOW=Date.parse('2026-10-09T00:00:00Z'),RELAY='SYNTHETIC-current-review-relay-not-real-0000',PREFIX='/functions/v1/current-admission-review';
 const SECRET=new Uint8Array(32).fill(13);
@@ -19,15 +19,22 @@ async function rejects(action:()=>unknown|Promise<unknown>,code:string) {
 }
 const query=(q='')=>parseCurrentReviewQuery(new URL('https://example.org/synthetic'+q));
 async function rawSha(text:string):Promise<string>{return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(x=>x.toString(16).padStart(2,'0')).join('');}
-async function descriptor():Promise<CurrentReviewDescriptor> {
+function syntheticDefinition(relation:string,live:boolean):string {
+  if(!live)return 'SYNTHETIC definition '+relation;
+  if(relation==='admission_results_effective')return 'SELECT * FROM jungsi_data_ingest.admission_results';
+  if(relation==='admission_results_source_current')return 'SELECT * FROM jungsi_data_ingest.admission_observation_registry JOIN jungsi_data_ingest.admission_results_effective ON false';
+  if(relation==='admission_results_current'||relation==='admission_result_source_members')return 'SELECT * FROM jungsi_data_ingest.admission_results_source_current JOIN jungsi_data_ingest.admission_observation_registry ON false';
+  return 'SELECT 1 AS "SYNTHETIC-only"';
+}
+async function descriptor(live=false):Promise<CurrentReviewDescriptor> {
   const metadata:Row[]=[];
-  for(const [relation,kind]of [['admission_results_current','v'],['admission_result_source_members','v'],['admission_result_population_links_current','v'],['admission_observation_commands','r']]as const)
+  for(const [relation,kind]of [['admission_results_current','v'],['admission_result_source_members','v'],['admission_result_population_links_current','v'],['admission_observation_commands','r'],...(live?[['admission_results_source_current','v'],['admission_results_effective','v']]:[])]as [string,'v'|'r'][])
     metadata.push({schema:'jungsi_data_ingest',relation,kind,columns:[{name:'SYNTHETIC-column',type:'text',not_null:false}],reloptions:kind==='v'?['security_invoker=true','security_barrier=true']:null,
-      view_definition_sha256:kind==='v'?await rawSha('SYNTHETIC definition '+relation):null});
+      view_definition_sha256:kind==='v'?await rawSha(syntheticDefinition(relation,live)):null});
   const definition={sha256:await currentReviewSha256(metadata),metadata};
-  return {format:'jungsi.current-admission-review/v1',purpose:'current_admission_review',environment:'local_verification',scope:'all_current',source_view:'jungsi_data_ingest.admission_results_current',
-    allowed_years:[2024,2025,2026,2027],source_definition:definition,projection:{version:'SYNTHETIC-current-review-v1',sha256:await currentReviewProjectionSha256(),wire_recipe:'current_review_wire_state_v1'},
-    qualified_state:{command_id:'SYNTHETIC-qualified-command',payload_sha256:'b'.repeat(64),definition_sha256:definition.sha256,wire_recipe:'current_review_wire_state_v1'},
+  return {format:live?'jungsi.current-admission-review/v2':'jungsi.current-admission-review/v1',...(live?{query_mode:'live_bounded'}:{}),purpose:'current_admission_review',environment:'local_verification',scope:'all_current',source_view:'jungsi_data_ingest.admission_results_current',
+    allowed_years:[2024,2025,2026,2027],source_definition:definition,projection:{version:'SYNTHETIC-current-review-v1',sha256:await currentReviewProjectionSha256(live?'live_bounded':'exact'),wire_recipe:live?'current_review_live_bounded_v2':'current_review_wire_state_v1'},
+    qualified_state:live?{mode:'live_current_head',definition_sha256:definition.sha256,wire_recipe:'current_review_live_bounded_v2'}:{command_id:'SYNTHETIC-qualified-command',payload_sha256:'b'.repeat(64),definition_sha256:definition.sha256,wire_recipe:'current_review_wire_state_v1'},
     approval:{status:'approved',approval_id:'SYNTHETIC-review-approval',issued_at:'2026-10-09T00:00:00Z',expires_at:'2026-10-09T01:00:00Z',revoked:false,review_subjects:[SUBJECT],operations:[CURRENT_REVIEW_OPERATION]},
     engine_approved:false,production_allowed:false,general_publication_allowed:false,nationwide_collection_complete:false};
 }
@@ -47,11 +54,11 @@ function observation(i:number,literal='0.1000000000000000000010',type='number',n
 function raw(rows:CurrentReviewObservation[],extra:Partial<CurrentReviewRawPage>={}):CurrentReviewRawPage {
   return {commandId:'SYNTHETIC-qualified-command',commandSha256:'b'.repeat(64),asOf:'2026-10-09T00:00:00.123456+00:00',matchingObservationCount:String(rows.length),matchingSourceSchoolCount:rows.length?'1':'0',rows,...extra};
 }
-async function fixture() {
-  const d=await descriptor(),rows=[observation(1),observation(2)],calls:string[]=[];let subject=SUBJECT,clock=NOW,changed=false;
+async function fixture(live=false) {
+  const d=await descriptor(live),rows=[observation(1),observation(2)],calls:string[]=[];let subject=SUBJECT,clock=NOW,changed=false;
   const ports:CurrentReviewPorts={async verifySession(token){calls.push('verify');return token==='SYNTHETIC-verified'?{subjectId:subject,expiresAt:NOW+7200000}:null;},async loadDescriptor(){calls.push('descriptor');return copy(d);},
     async search(_d,q,after){calls.push('search');const selected=rows.filter(r=>(q.academic_year===null||q.academic_year===r.current.academic_year)&&String(r.current.department).toLowerCase().includes(q.department_q));
-      return raw(selected.filter(r=>after===null||String(r.current.canonical_result_id)>after[4]).slice(0,q.limit+1),{matchingObservationCount:String(selected.length),matchingSourceSchoolCount:selected.length?'1':'0',
+      return raw(selected.filter(r=>after===null||String(r.current.canonical_result_id)>after[4]).slice(0,q.limit+1),{matchingObservationCount:live?null:String(selected.length),matchingSourceSchoolCount:live?null:selected.length?'1':'0',...(live?{scanNextKey:null}:{}),
         ...(changed?{commandId:'SYNTHETIC-unapproved-command'}:{})});}};
   const handler=createCurrentAdmissionReviewHandler(ports,{relayToken:RELAY,cursorKey:SECRET,pathPrefix:PREFIX,environment:'local_verification',now:()=>clock});
   const request=(suffix='',headers:Record<string,string>={},method='GET',route=CURRENT_REVIEW_ROUTE)=>handler(new Request('https://example.org'+PREFIX+route+suffix,{method,headers:{'X-Jungsi-Relay-Token':RELAY,Authorization:'Bearer SYNTHETIC-verified',...headers}}));
@@ -159,19 +166,20 @@ Deno.test('review rejects bad count page limits order keys and private wire extr
     await rejects(()=>closeCurrentReviewPage(p,d,q,b,null,SECRET),'current_review_scope_unverified');
   }
 });
-async function sqlFixture() {
-  const d=await descriptor(),calls:{sql:string;parameters:unknown[]}[]=[],commands:string[]=[];
+async function sqlFixture(live=false) {
+  const d=await descriptor(live),calls:{sql:string;parameters:unknown[]}[]=[],commands:string[]=[];
   const role:Row={current_user:'jungsi_backend_app',rolsuper:false,rolbypassrls:false,row_security:'on',read_only:'on',owner_member:false,owner_usage:false,postgres_member:false};
   const metadata:Row[]=(d.source_definition.metadata as Row[]).map(m=>({...m,rls:m.kind==='r',force:m.kind==='r',owner:false,readable:true,writable:false,anon_read:false,authenticated_read:false,
-    definition:m.kind==='v'?'SYNTHETIC definition '+m.relation:null}));
-  const data={command_id:d.qualified_state.command_id,payload_sha256:d.qualified_state.payload_sha256,observation_count:'2',school_count:'1',as_of:'2026-10-09T00:00:00Z',observations:[observation(1),observation(2)]};
+    definition:m.kind==='v'?syntheticDefinition(m.relation as string,live):null}));
+  const data={command_id:'SYNTHETIC-qualified-command',payload_sha256:'b'.repeat(64),observation_count:live?null:'2',school_count:live?null:'1',as_of:'2026-10-09T00:00:00Z',observations:[observation(1),observation(2)],scan_after_canonical:null};
+  const liveSql=live?buildCurrentReviewLivePayloadSql(metadata):null;
   const tx={async unsafe(sql:string,parameters:unknown[]=[]){calls.push({sql,parameters});if(sql.startsWith('SET LOCAL'))return [];
-    if(sql.includes('SELECT current_user'))return [role];if(sql===CURRENT_REVIEW_METADATA_SQL)return metadata;if(sql===CURRENT_REVIEW_PAYLOAD_SQL)return [data];throw new Error('synthetic unexpected SQL');}};
+    if(sql.includes('SELECT current_user'))return [role];if(sql===CURRENT_REVIEW_METADATA_SQL)return metadata;if(sql===CURRENT_REVIEW_PAYLOAD_SQL||sql===liveSql)return [data];throw new Error('synthetic unexpected SQL');}};
   let options:unknown;
   const factory=(_url:string,o:unknown)=>{options=o;return {async begin(mode:string,work:(t:typeof tx)=>Promise<unknown>){commands.push(mode);return await work(tx);}};};
   const settings={databaseUrl:'postgresql://SYNTHETIC-only',databaseCa:'-----BEGIN CERTIFICATE-----\nSYNTHETIC\n-----END CERTIFICATE-----',supabaseUrl:'https://example.org',publishableKey:'SYNTHETIC-public',storageSecret:'SYNTHETIC-private',descriptorBucket:'SYNTHETIC-private-bucket',descriptorPath:'SYNTHETIC-review.json',descriptorSha256:'a'.repeat(64),descriptorBytes:100};
   const ports=createCurrentReviewInfrastructure(settings,{sqlFactory:factory as unknown as NonNullable<Parameters<typeof createCurrentReviewInfrastructure>[1]>['sqlFactory'],environment:'local_verification',now:()=>NOW});
-  return {d,calls,commands,role,metadata,data,ports,options:()=>options};
+  return {d,calls,commands,role,metadata,data,ports,liveSql,options:()=>options};
 }
 Deno.test('review SQL port uses one bounded payload statement and same-snapshot exact counts with scalar parameters',async()=>{
   const f=await sqlFixture(),q=query('?limit=1');await f.ports.search(f.d,q,null);
@@ -214,4 +222,117 @@ Deno.test('review SQL adapter transports latest state rejection as safe dedicate
 Deno.test('review page opaque namespace is distinct from public IDs and the frozen C cursor',()=>{
   const key=currentReviewKey(observation(1).current);equal(key,[2026,'CURRENT_REVIEW','CANONICAL_OBSERVATIONS','','SYNTHETIC-canonical-1']);
   equal(POPULATION_WIRE_FIELDS.length,7);equal(CURRENT_WIRE_FIELDS.length,35);equal(MEMBER_WIRE_FIELDS.length,32);
+});
+
+Deno.test('live v2 descriptor explicitly adopts dynamic head canonical order and unknown counts recipe only',async()=>{
+  const d=await descriptor(true);await validateCurrentReviewDescriptor(d,'local_verification',NOW);
+  assert(await currentReviewProjectionSha256('live_bounded')!==await currentReviewProjectionSha256());
+  for(const mode of ['query_mode','static_head','recipe','format','extra']) {
+    const x=copy(d);if(mode==='query_mode')x.query_mode='exact';if(mode==='static_head')x.qualified_state={command_id:'SYNTHETIC-command',payload_sha256:'b'.repeat(64),definition_sha256:d.source_definition.sha256,wire_recipe:'current_review_live_bounded_v2'};
+    if(mode==='recipe')x.projection.wire_recipe='current_review_wire_state_v1';if(mode==='format')x.format='jungsi.current-admission-review/v1';if(mode==='extra')x.extra='SYNTHETIC-private';
+    await rejects(()=>validateCurrentReviewDescriptor(x,'local_verification',NOW),'current_review_scope_unverified');
+  }
+  await rejects(()=>query('?query_mode=live_bounded'),'invalid_query');
+});
+Deno.test('live reviewer returns bounded actual typed items with unknown totals and no extra private fields',async()=>{
+  const f=await fixture(true),r=await f.request('?limit=1'),body=await r.json();equal(r.status,200);
+  equal(body.format,'jungsi.current-admission-review-page/v2');equal(body.query_mode,'live_bounded');equal(body.count_status,'unknown');
+  equal(body.matching_observation_count,null);equal(body.matching_source_school_count,null);equal(body.items.length,1);assert(body.next_cursor);
+  equal(Object.keys(body.items[0]).sort(),[...CURRENT_REVIEW_FIELDS].sort());equal(body.items[0].metric_value_literal,'0.1000000000000000000010');
+  for(const secret of ['SYNTHETIC-canonical','SYNTHETIC-original','SYNTHETIC-private','SYNTHETIC-qualified-command','row_fingerprint','source_all29_sha256','source_path'])assert(!JSON.stringify(body).includes(secret));
+  assert(r.headers.get('cache-control')?.includes('no-store'));
+});
+Deno.test('live reviewer uses canonical-only cursor order while retaining each actual admission year',async()=>{
+  const f=await fixture(true);f.rows[0].current.academic_year=2026;f.rows[1].current.academic_year=2024;
+  f.rows[1].members[0].academic_year=2024;f.rows[1].population[0].academic_year=2024;
+  const first=await(await f.request('?limit=1')).json(),second=await(await f.request('?limit=1&cursor='+first.next_cursor)).json();
+  equal(first.items[0].academic_year,2026);equal(second.items[0].academic_year,2024);equal(second.next_cursor,null);
+});
+Deno.test('live first page adopts current head but next page rejects changed head without serving values',async()=>{
+  const f=await fixture(true),first=await(await f.request('?limit=1')).json();f.setChanged();
+  const stale=await f.request('?limit=1&cursor='+first.next_cursor),body=await stale.json();equal(stale.status,409);equal(body.error.code,'cursor_version_mismatch');assert(!Object.hasOwn(body,'items'));
+  const fresh=await f.request('?limit=1');equal(fresh.status,200);equal((await fresh.json()).items.length,1);
+});
+Deno.test('live cursor rejects altered query subject expiry and v1 or observation namespace',async()=>{
+  const f=await fixture(true),first=await(await f.request('?limit=1')).json();
+  equal((await f.request('?limit=1&cohort=changed&cursor='+first.next_cursor)).status,409);
+  equal((await f.request('?limit=1&cursor='+first.items[0].observation_token)).status,400);
+  const v1=await fixture(),old=await(await v1.request('?limit=1')).json();equal((await f.request('?limit=1&cursor='+old.next_cursor)).status,409);
+  f.setSubject(OTHER);equal((await f.request('?limit=1&cursor='+first.next_cursor)).status,403);
+  f.setSubject(SUBJECT);f.setTime(NOW+3600000);equal((await f.request('?limit=1&cursor='+first.next_cursor)).status,503);
+});
+Deno.test('live unknown count mode rejects fabricated totals and malformed dynamic head',async()=>{
+  for(const mode of ['count','mixed','badhead','badhash']) {
+    const f=await fixture(true),original=f.ports.search;f.ports.search=async(...args)=>{
+      const p=await original(...args);if(mode==='count'){p.matchingObservationCount='2';p.matchingSourceSchoolCount='1';}if(mode==='mixed')p.matchingSourceSchoolCount='1';
+      if(mode==='badhead')p.commandId='';if(mode==='badhash')p.commandSha256='SYNTHETIC-not-sha';return p;
+    };equal((await f.request()).status,503);
+  }
+});
+Deno.test('live SQL uses one current page and bulk provenance without global count or current reread',async()=>{
+  const f=await sqlFixture(true);await f.ports.search(f.d,query('?limit=100'),null);
+  equal(f.calls.filter(c=>c.sql===f.liveSql).length,1);equal(f.calls.filter(c=>c.sql===CURRENT_REVIEW_PAYLOAD_SQL).length,0);
+  const params=f.calls.find(c=>c.sql===f.liveSql)!.parameters;equal(params.length,13);equal(params[10],101);equal(params[11],null);equal(params[12],null);
+  const sql=CURRENT_REVIEW_LIVE_PAYLOAD_SQL;assert(!/\bcount\s*\(/i.test(sql));equal((sql.match(/JOIN jungsi_data_ingest\.admission_results_current v/g)??[]).length,1);
+  assert(sql.includes('LIMIT $11::integer'));assert(sql.includes('FROM page_current p JOIN jungsi_data_ingest.admission_result_source_members'));
+  assert(!sql.includes('JOIN jungsi_data_ingest.admission_result_population_links_current'));assert(sql.includes('NULL::text AS observation_count'));
+  assert(sql.includes('UNION ALL')&&!sql.includes('jsonb_agg(DISTINCT'));assert(sql.includes('ORDER BY v.canonical_result_id COLLATE "C"'));
+});
+Deno.test('live SQL still rejects privileged or changed metadata before entering the payload statement',async()=>{
+  for(const mode of ['role','RLS','owner','public','definition']) {
+    const f=await sqlFixture(true);if(mode==='role')f.role.rolbypassrls=true;if(mode==='RLS')f.metadata.find(m=>m.kind==='r')!.force=false;
+    if(mode==='owner')f.metadata[0].owner=true;if(mode==='public')f.metadata[0].authenticated_read=true;if(mode==='definition')f.metadata[0].definition='SYNTHETIC unapproved definition';
+    let rejected=false;try{await f.ports.search(f.d,query(),null);}catch(e){assert(e instanceof DisplayError);rejected=true;}assert(rejected);
+    equal(f.calls.filter(c=>c.sql===f.liveSql).length,0);
+  }
+});
+Deno.test('live SQL validates canonical-only cursor sentinel namespace before any database call',async()=>{
+  const f=await sqlFixture(true);
+  for(const key of [[2026,'CURRENT_REVIEW_LIVE','CANONICAL_OBSERVATIONS','','SYNTHETIC-key'],[2024,'CURRENT_REVIEW','CANONICAL_OBSERVATIONS','','SYNTHETIC-key']]as CurrentKey[])await rejects(()=>f.ports.search(f.d,query(),key),'invalid_cursor');
+  equal(f.calls.length,0);
+});
+Deno.test('review final expiry check runs after asynchronous closed page construction before response',async()=>{
+  const f=await fixture(true);let calls=0;
+  const handler=createCurrentAdmissionReviewHandler(f.ports,{relayToken:RELAY,cursorKey:SECRET,pathPrefix:PREFIX,environment:'local_verification',now:()=>++calls<3?NOW:NOW+3600000});
+  const r=await handler(new Request('https://example.org'+PREFIX+CURRENT_REVIEW_ROUTE,{headers:{'X-Jungsi-Relay-Token':RELAY,Authorization:'Bearer SYNTHETIC-verified'}}));
+  equal(r.status,503);const body=await r.json();assert(!Object.hasOwn(body,'items'));
+});
+
+Deno.test('live sparse filtered scan continues even when a bounded inspected chunk has zero matches',async()=>{
+  const f=await fixture(true),original=f.ports.search;let after:CurrentKey|null=null;
+  f.ports.search=async(d,q,key)=>{after=key;return {...await original(d,q,key),rows:[],scanNextKey:key===null?[2024,'CURRENT_REVIEW_LIVE','CANONICAL_OBSERVATIONS','','SYNTHETIC-scanned-boundary']:null};};
+  const first=await(await f.request('?department_q=no-match')).json();equal(first.items,[]);assert(first.next_cursor);equal(first.count_status,'unknown');
+  const second=await(await f.request('?department_q=no-match&cursor='+first.next_cursor)).json();equal(second.items,[]);equal(second.next_cursor,null);assert(after!==null);
+});
+Deno.test('live filtered scan rejects missing backward wrong-namespace or earlier-than-returned boundary',async()=>{
+  for(const mode of ['missing','wrong','earlier']) {
+    const f=await fixture(true),original=f.ports.search;f.ports.search=async(...args)=>{const p=await original(...args);
+      if(mode==='missing')p.scanNextKey=undefined;if(mode==='wrong')p.scanNextKey=[2026,'CURRENT_REVIEW','CANONICAL_OBSERVATIONS','','SYNTHETIC-z'];
+      if(mode==='earlier')p.scanNextKey=[2024,'CURRENT_REVIEW_LIVE','CANONICAL_OBSERVATIONS','','SYNTHETIC-a'];return p;};equal((await f.request()).status,503);
+  }
+});
+Deno.test('live query first bounds representative canonical index keys before current joins and filters',()=>{
+  const sql=CURRENT_REVIEW_LIVE_PAYLOAD_SQL;
+  assert(sql.includes('FROM jungsi_data_ingest.admission_observation_registry r CROSS JOIN qualified'));
+  assert(sql.includes('r.is_representative=true'));assert(sql.includes('LIMIT 129'));assert(sql.includes('LIMIT 128'));
+  assert(sql.includes('FROM scan_keys k JOIN jungsi_data_ingest.admission_results_current v'));
+  assert(sql.includes('v.canonical_result_id=ANY(ARRAY(SELECT canonical_result_id FROM scan_keys))'));
+  assert(sql.includes('EXISTS(SELECT 1 FROM candidates OFFSET 128)'));assert(!/\bcount\s*\(/i.test(sql));
+});
+
+Deno.test('live bounded definition composer preserves live CASE definitions and changes only exact fixed names',async()=>{
+  const f=await sqlFixture(true),sql=buildCurrentReviewLivePayloadSql(f.metadata);
+  assert(sql.includes('bounded_physical_sources AS MATERIALIZED'));assert(sql.includes('intake.release_id=d.source_release_id AND intake.result_id=d.source_result_id OFFSET 0'));
+  assert(sql.includes('bounded_current AS MATERIALIZED'));assert(sql.includes('bounded_member_rows AS MATERIALIZED'));
+  assert(sql.includes('FROM bounded_current v'));assert(sql.includes('JOIN bounded_member_rows m'));
+  assert(!sql.includes('JOIN jungsi_data_ingest.admission_result_source_members m'));
+  assert(sql.includes('FROM jungsi_data_ingest.admission_results intake'));
+});
+Deno.test('live definition composer rejects absent duplicate wrong-name or multi-statement definitions',async()=>{
+  for(const mode of ['absent','duplicate','wrong','multi']) {
+    const f=await sqlFixture(true),m=f.metadata.find(m=>m.relation==='admission_results_effective')!;
+    if(mode==='absent')m.definition=null;if(mode==='duplicate')m.definition='SELECT * FROM jungsi_data_ingest.admission_results a JOIN jungsi_data_ingest.admission_results b ON false';
+    if(mode==='wrong')m.definition='SELECT * FROM SYNTHETIC_other';if(mode==='multi')m.definition='SELECT * FROM jungsi_data_ingest.admission_results; SELECT 1';
+    await rejects(()=>buildCurrentReviewLivePayloadSql(f.metadata),'current_review_scope_unverified');
+  }
 });

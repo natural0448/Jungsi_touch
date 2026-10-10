@@ -115,6 +115,28 @@ export class EncryptedCurrentCursor {
     const body=new Uint8Array(12+encrypted.byteLength);body.set(iv);body.set(new Uint8Array(encrypted),12);
     const token=encode(body);if(token.length>4096)throw scopeFailure();return token;
   }
+  /** V2 reviewer cursors retain the prior head while validating every other encrypted
+   * binding field. The caller must compare this head with the actual same-snapshot DB head.
+   * This method cannot open a public/C cursor or an observation token.
+   */
+  async openLiveSnapshot(token:string,binding:CurrentPageBinding,now:number):Promise<{after:CurrentKey;sourceStateSha256:string}> {
+    try {
+      if(this.mode!=='cursor'||binding.operation!=='current.review.search'||!token||token.length>4096||!Number.isSafeInteger(now))throw new Error('invalid cursor');
+      const bytes=decode(token);if(bytes.byteLength<29)throw new Error('invalid cursor');
+      const plaintext=await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes.slice(0,12),additionalData:new TextEncoder().encode(CURRENT_REVIEW_VIEW+'|'+this.mode)},await this.key,bytes.slice(12).buffer);
+      const body=parseStrictJson(new TextDecoder('utf-8',{fatal:true}).decode(plaintext));
+      if(!record(body)||!exact(body,['format','binding','after'])||body.format!=='jungsi.current-review-cursor/v1'||!record(body.binding))throw new Error('invalid cursor');
+      const expected=bindingObject(binding),actual=body.binding;
+      if(!exact(actual,Object.keys(expected))||actual.subject!==expected.subject||typeof actual.expires!=='number'||actual.expires<=now||!hash(actual.state))throw new Error('invalid cursor');
+      if(Object.keys(expected).some(k=>k!=='state'&&actual[k]!==expected[k]))throw new DisplayError('cursor_version_mismatch',409);
+      const after=validateCurrentKey(body.after);
+      if(after[0]!==2024||after[1]!=='CURRENT_REVIEW_LIVE'||after[2]!=='CANONICAL_OBSERVATIONS'||after[3]!=='')throw new Error('invalid cursor');
+      return {after,sourceStateSha256:actual.state};
+    } catch(e) {
+      if(e instanceof DisplayError&&e.code==='cursor_version_mismatch')throw e;
+      throw new DisplayError('invalid_cursor',400);
+    }
+  }
   async open(token: string,binding: CurrentPageBinding,now: number): Promise<CurrentKey> {
     try {
       if(!token || token.length>4096 || !Number.isSafeInteger(now))throw new Error('invalid cursor');

@@ -6,7 +6,7 @@ import type { Row } from './official_history_display.ts';
 import { loadPinnedDisplayDescriptor } from './official_history_postgres.ts';
 import type { OfficialHistoryInfrastructureSettings } from './official_history_postgres.ts';
 import { CURRENT_REVIEW_VIEW, validateCurrentKey } from './current_admission_display.ts';
-import { CURRENT_WIRE_FIELDS, MEMBER_WIRE_FIELDS, POPULATION_WIRE_FIELDS, validateCurrentReviewDescriptor, validateCurrentReviewQuery } from './current_admission_review.ts';
+import { CURRENT_WIRE_FIELDS, MEMBER_WIRE_FIELDS, POPULATION_WIRE_FIELDS, validateCurrentReviewDescriptor, validateCurrentReviewQuery, isLiveBoundedReview } from './current_admission_review.ts';
 import type { CurrentReviewDescriptor, CurrentReviewPorts, CurrentReviewRawPage } from './current_admission_review.ts';
 
 export type CurrentReviewInfrastructureSettings=OfficialHistoryInfrastructureSettings;
@@ -79,6 +79,102 @@ export const CURRENT_REVIEW_PAYLOAD_SQL=`WITH latest AS MATERIALIZED (
  COALESCE((SELECT jsonb_agg(observation ORDER BY academic_year,canonical_result_id COLLATE "C") FROM payload),'[]'::jsonb) AS observations
  FROM counts LEFT JOIN latest ON true`;
 
+/** Live reviewer pages avoid a full matching-universe census on the raw current view.
+ * Canonical rows are read once. Only that limit+1 selection joins provenance in bulk.
+ * Null counts mean unknown; neither a page count nor catalog estimate is called exact.
+ */
+export const CURRENT_REVIEW_LIVE_PAYLOAD_SQL=`WITH latest AS MATERIALIZED (
+ SELECT command_id,payload_sha256 FROM ${COMMANDS}
+ WHERE COALESCE((receipt->>'management_events')::integer,0)>0 ORDER BY recorded_at DESC,command_id DESC LIMIT 1
+), qualified AS MATERIALIZED (
+ SELECT command_id,payload_sha256 FROM latest WHERE $12::text IS NULL AND $13::text IS NULL
+), candidates AS MATERIALIZED (
+ SELECT r.canonical_result_id FROM jungsi_data_ingest.admission_observation_registry r CROSS JOIN qualified
+ WHERE r.is_representative=true AND ($9::integer IS NULL OR r.canonical_result_id COLLATE "C">$10::text COLLATE "C")
+ ORDER BY r.canonical_result_id COLLATE "C" LIMIT 129
+), scan_keys AS MATERIALIZED (
+ SELECT canonical_result_id FROM candidates ORDER BY canonical_result_id COLLATE "C" LIMIT 128
+), page_current AS MATERIALIZED (
+ SELECT v.academic_year,v.canonical_result_id,v.offering_pk,v.curation_fields,v.active_service,${wireObject('v',CURRENT_WIRE_FIELDS)} AS current_wire
+ FROM scan_keys k JOIN ${CURRENT_REVIEW_VIEW} v ON v.canonical_result_id=k.canonical_result_id
+ WHERE v.canonical_result_id=ANY(ARRAY(SELECT canonical_result_id FROM scan_keys)) AND v.active_service=true AND v.academic_year=ANY(ARRAY(SELECT value::integer FROM jsonb_array_elements_text($1::text::jsonb)))
+ AND ($2::integer IS NULL OR v.academic_year=$2::integer)
+ AND ($3::text='' OR strpos(${fold("COALESCE(v.university,'')")},$3::text)>0)
+ AND ($4::text='' OR strpos(${fold("COALESCE(v.department,'')")},$4::text)>0)
+ AND ($5::text='' OR ${fold("COALESCE(v.track,'')")}=$5::text)
+ AND ($6::text='' OR ${fold("COALESCE(v.recruit_group,'')")}=$6::text)
+ AND ($7::text='' OR ${fold("COALESCE(v.metric_kind,'')")}=$7::text)
+ AND ($8::text='' OR ${fold("COALESCE(v.cohort,'')")}=$8::text)
+ AND ($9::integer IS NULL OR v.canonical_result_id COLLATE "C">$10::text COLLATE "C")
+ ORDER BY v.canonical_result_id COLLATE "C" LIMIT $11::integer
+), members AS (
+ SELECT m.canonical_result_id,jsonb_agg(${wireObject('m',MEMBER_WIRE_FIELDS)} ORDER BY m.release_id COLLATE "C",m.result_id COLLATE "C") AS member_wire
+ FROM page_current p JOIN ${MEMBERS} m ON m.canonical_result_id=p.canonical_result_id
+ WHERE m.canonical_result_id=ANY(ARRAY(SELECT k.canonical_result_id FROM page_current k)) GROUP BY m.canonical_result_id
+), page_links AS (
+ SELECT p.canonical_result_id AS result_id,p.academic_year,p.academic_year AS population_reference_year,p.offering_pk AS reference_offering_pk,
+ COALESCE(p.curation_fields->>'population_link_kind','same_year_offering') AS link_kind,p.active_service,false AS individual_offering_metric_inference_allowed
+ FROM page_current p WHERE p.offering_pk IS NOT NULL
+ UNION ALL
+ SELECT p.canonical_result_id,p.academic_year,p.academic_year,x.pk,'verified_aggregate_offerings',p.active_service,false
+ FROM page_current p CROSS JOIN LATERAL jsonb_array_elements_text(CASE WHEN p.curation_fields->>'population_link_kind'='verified_aggregate_offerings' THEN p.curation_fields->'offering_pks' ELSE '[]'::jsonb END) x(pk)
+ UNION ALL
+ SELECT p.canonical_result_id,p.academic_year,(p.curation_fields->>'population_reference_year')::integer,x.pk,'official_reorganized_forward_reference',p.active_service,false
+ FROM page_current p CROSS JOIN LATERAL jsonb_array_elements_text(CASE WHEN p.curation_fields->>'population_link_kind'='official_reorganized_forward_reference' THEN p.curation_fields->'reference_offering_pks' ELSE '[]'::jsonb END) x(pk)
+), population AS (
+ SELECT l.result_id,jsonb_agg(${wireObject('l',POPULATION_WIRE_FIELDS)} ORDER BY l.academic_year,l.population_reference_year,l.reference_offering_pk COLLATE "C",l.link_kind COLLATE "C",l.active_service,l.individual_offering_metric_inference_allowed) AS population_wire
+ FROM page_links l GROUP BY l.result_id
+), payload AS (
+ SELECT p.academic_year,p.canonical_result_id,jsonb_build_object('current',p.current_wire,'members',COALESCE(m.member_wire,'[]'::jsonb),'population',COALESCE(l.population_wire,'[]'::jsonb)) AS observation
+ FROM page_current p LEFT JOIN members m ON m.canonical_result_id=p.canonical_result_id LEFT JOIN population l ON l.result_id=p.canonical_result_id
+) SELECT latest.command_id,latest.payload_sha256,NULL::text AS observation_count,NULL::text AS school_count,
+ CASE WHEN EXISTS(SELECT 1 FROM candidates OFFSET 128) THEN (SELECT canonical_result_id FROM scan_keys ORDER BY canonical_result_id COLLATE "C" DESC LIMIT 1) ELSE NULL END AS scan_after_canonical,
+ to_char(transaction_timestamp() AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS as_of,
+ COALESCE((SELECT jsonb_agg(observation ORDER BY canonical_result_id COLLATE "C") FROM payload),'[]'::jsonb) AS observations
+ FROM (SELECT true AS present) AS singleton LEFT JOIN latest ON true`;
+
+/** Reuse the unchanged, approved live definitions after their metadata hashes/RLS
+ * have been verified. Only fixed qualified relation names are substituted, once each.
+ * Composite physical PK lookup + MATERIALIZED boundaries avoid barrier-view full scans.
+ * No descriptor/request text is SQL, and no alternate canonical value is constructed.
+ */
+export function buildCurrentReviewLivePayloadSql(metadata:Row[]):string {
+  const registry=schema+'.admission_observation_registry',physical=schema+'.admission_results';
+  const effective=schema+'.admission_results_effective',source=schema+'.admission_results_source_current';
+  const definition=(relation:string)=>{
+    const row=metadata.find(r=>r.schema===schema&&r.relation===relation&&r.kind==='v');
+    if(!row||typeof row.definition!=='string')throw fail('current_review_scope_unverified');
+    const sql=row.definition.trim().replace(/;$/,'');
+    if(!/^SELECT\s/i.test(sql)||sql.includes(';'))throw fail('current_review_scope_unverified');return sql;
+  };
+  const replace=(sql:string,qualified:string,bounded:string)=>{
+    if(sql.split(qualified).length!==2)throw fail('current_review_scope_unverified');return sql.replace(qualified,bounded);
+  };
+  const boundedEffective=replace(definition('admission_results_effective'),physical,'bounded_physical_sources');
+  const boundedSource=replace(replace(definition('admission_results_source_current'),registry,'bounded_source_registry'),effective,'bounded_effective_sources');
+  const boundedCurrent=replace(replace(definition('admission_results_current'),source,'bounded_actual_sources'),registry,'bounded_actual_registry');
+  const boundedMembers=replace(replace(definition('admission_result_source_members'),source,'bounded_original_sources'),registry,'bounded_source_registry');
+  const ctes=`), bounded_source_registry AS MATERIALIZED (
+ SELECT r.* FROM scan_keys k JOIN ${registry} r ON r.canonical_result_id=k.canonical_result_id
+ WHERE r.canonical_result_id=ANY(ARRAY(SELECT canonical_result_id FROM scan_keys))
+), bounded_actual_registry AS MATERIALIZED (
+ SELECT * FROM bounded_source_registry WHERE is_representative=true
+), bounded_physical_sources AS MATERIALIZED (
+ SELECT b.* FROM bounded_source_registry d CROSS JOIN LATERAL (
+  SELECT intake.* FROM ${physical} intake WHERE intake.release_id=d.source_release_id AND intake.result_id=d.source_result_id OFFSET 0
+ ) b
+), bounded_effective_sources AS MATERIALIZED (${boundedEffective}
+), bounded_original_sources AS MATERIALIZED (${boundedSource}
+), bounded_actual_sources AS MATERIALIZED (
+ SELECT s.* FROM bounded_original_sources s JOIN bounded_actual_registry r ON r.source_result_id=s.result_id AND r.source_release_id=s.release_id
+), bounded_current AS MATERIALIZED (${boundedCurrent}
+), bounded_member_rows AS MATERIALIZED (${boundedMembers}
+), page_current AS MATERIALIZED (`;
+  return CURRENT_REVIEW_LIVE_PAYLOAD_SQL.replace('), page_current AS MATERIALIZED (',ctes)
+    .replace('FROM scan_keys k JOIN '+CURRENT_REVIEW_VIEW+' v ON v.canonical_result_id=k.canonical_result_id','FROM bounded_current v')
+    .replace('JOIN '+MEMBERS+' m ON m.canonical_result_id=p.canonical_result_id','JOIN bounded_member_rows m ON m.canonical_result_id=p.canonical_result_id');
+}
+
 async function bytes(response:Response,max:number):Promise<Uint8Array> {
   if(!response.body)throw fail('auth_unavailable');const declared=response.headers.get('content-length');
   if(declared&&(!/^[0-9]+$/.test(declared)||Number(declared)>max))throw fail('auth_unavailable');
@@ -117,9 +213,9 @@ export function createCurrentReviewInfrastructure(settings:CurrentReviewInfrastr
     async search(descriptor,query,after) {
       descriptor=await validateCurrentReviewDescriptor(descriptor,options.environment??'isolated_cloud_review',(options.now??Date.now)());
       validateCurrentReviewQuery(query);
-      if(after!==null){validateCurrentKey(after);if(after[1]!=='CURRENT_REVIEW'||after[2]!=='CANONICAL_OBSERVATIONS'||after[3]!=='')throw fail('invalid_cursor');}
+      if(after!==null){validateCurrentKey(after);if(after[1]!==(isLiveBoundedReview(descriptor)?'CURRENT_REVIEW_LIVE':'CURRENT_REVIEW')||after[2]!=='CANONICAL_OBSERVATIONS'||after[3]!==''||isLiveBoundedReview(descriptor)&&after[0]!==2024)throw fail('invalid_cursor');}
       try {return (await sql.begin('isolation level repeatable read read only',async tx=>{
-        await tx.unsafe("SET LOCAL TIME ZONE 'UTC'");await tx.unsafe("SET LOCAL statement_timeout='5000ms'");
+        await tx.unsafe("SET LOCAL TIME ZONE 'UTC'");await tx.unsafe("SET LOCAL statement_timeout='5000ms'");await tx.unsafe("SET LOCAL jit=off");
         const role=await tx.unsafe("SELECT current_user,r.rolsuper,r.rolbypassrls,current_setting('row_security') AS row_security,current_setting('transaction_read_only') AS read_only,pg_has_role(current_user,'jungsi_backend_owner','MEMBER') AS owner_member,pg_has_role(current_user,'jungsi_backend_owner','USAGE') AS owner_usage,pg_has_role(current_user,'postgres','MEMBER') AS postgres_member FROM pg_catalog.pg_roles r WHERE r.rolname=current_user");
         if(role.length!==1||role[0].current_user!=='jungsi_backend_app'||role[0].rolsuper!==false||role[0].rolbypassrls!==false||role[0].row_security!=='on'||role[0].read_only!=='on'||
           role[0].owner_member!==false||role[0].owner_usage!==false||role[0].postgres_member!==false)throw fail('current_review_runtime_role_unverified');
@@ -135,12 +231,13 @@ export function createCurrentReviewInfrastructure(settings:CurrentReviewInfrastr
           else if(m.kind!=='r'||m.rls!==true||m.force!==true)throw fail('current_review_runtime_role_unverified');
         }
         const parameters=[JSON.stringify(descriptor.allowed_years),query.academic_year,query.university_q,query.department_q,query.track,query.group,query.metric_kind,query.cohort,
-          after===null?null:after[0],after===null?null:after[4],query.limit+1,descriptor.qualified_state.command_id,descriptor.qualified_state.payload_sha256] as postgres.ParameterOrJSON<never>[];
-        const rows=await tx.unsafe(CURRENT_REVIEW_PAYLOAD_SQL,parameters);
+          after===null?null:after[0],after===null?null:after[4],query.limit+1,isLiveBoundedReview(descriptor)?null:descriptor.qualified_state.command_id,isLiveBoundedReview(descriptor)?null:descriptor.qualified_state.payload_sha256] as postgres.ParameterOrJSON<never>[];
+        const live=isLiveBoundedReview(descriptor);
+        const rows=await tx.unsafe(live?buildCurrentReviewLivePayloadSql(metadata as Row[]):CURRENT_REVIEW_PAYLOAD_SQL,parameters);
         if(rows.length!==1)throw fail('current_review_scope_unverified');const r=rows[0];
-        if(r.command_id!==descriptor.qualified_state.command_id||r.payload_sha256!==descriptor.qualified_state.payload_sha256)throw fail('current_review_state_unapproved');
-        if(typeof r.observation_count!=='string'||typeof r.school_count!=='string'||typeof r.as_of!=='string'||!Array.isArray(r.observations))throw fail('current_review_scope_unverified');
-        return {commandId:r.command_id,commandSha256:r.payload_sha256,asOf:r.as_of,matchingObservationCount:r.observation_count,matchingSourceSchoolCount:r.school_count,rows:r.observations} as CurrentReviewRawPage;
+        if(live?(typeof r.command_id!=='string'||!r.command_id||typeof r.payload_sha256!=='string'||!/^[0-9a-f]{64}$/.test(r.payload_sha256)):(r.command_id!==descriptor.qualified_state.command_id||r.payload_sha256!==descriptor.qualified_state.payload_sha256))throw fail('current_review_state_unapproved');
+        if((live?(r.observation_count!==null||r.school_count!==null||(r.scan_after_canonical!==null&&typeof r.scan_after_canonical!=='string')):(typeof r.observation_count!=='string'||typeof r.school_count!=='string'))||typeof r.as_of!=='string'||!Array.isArray(r.observations))throw fail('current_review_scope_unverified');
+        return {commandId:r.command_id,commandSha256:r.payload_sha256,asOf:r.as_of,matchingObservationCount:r.observation_count,matchingSourceSchoolCount:r.school_count,rows:r.observations,...(live?{scanNextKey:r.scan_after_canonical===null?null:validateCurrentKey([2024,'CURRENT_REVIEW_LIVE','CANONICAL_OBSERVATIONS','',r.scan_after_canonical])}:{})} as CurrentReviewRawPage;
       }));}catch(e){if(e instanceof DisplayError)throw e;throw fail();}
     },
   };
