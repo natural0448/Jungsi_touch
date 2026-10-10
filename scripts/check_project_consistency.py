@@ -1474,11 +1474,25 @@ def generated_files(spec):
     if isinstance(current_review,dict) and isinstance(current_review.get("route"),dict):
         review_labels=["## \ud604\uc7ac \uc815\ubcf8 \uc804\uc218 \uac80\uc218 \uacbd\ub85c","\ud568\uc218","\uc791\uc5c5 ID","\uba54\uc11c\ub4dc\u00b7\uacbd\ub85c","\ub300\uc0c1","\ud604\uc7ac \uc0c1\ud0dc","\uc77c\ubc18 \ud68c\uc6d0 \uacf5\uac1c\ub97c \uc704\ud55c \uae30\ubcf822API\uc640 \ubd84\ub9ac\ub41c \uac80\uc218 \uacbd\ub85c\ub2e4. \uba85\uc2dc subject \ud5c8\uc6a9 \uba85\ubd80\u00b7purpose\u00b7\ub9cc\ub8cc\u00b7\uc11c\ubc84 relay/JWT \uac80\uc0ac\ub97c \ubaa8\ub450 \ud1b5\uacfc\ud574\uc57c \ud55c\ub2e4. \uad00\ub9ac\uc790\u00b7\uc720\ub8cc \ub4f1\uae09\ub9cc\uc73c\ub85c \ud5c8\uc6a9\ud558\uc9c0 \uc54a\ub294\ub2e4. \uae30\uc874 C 5GET\uc740 \uc720\uc9c0\ud55c\ub2e4.","\uac80\uc0c9 \ud544\ub4dc: ","\uc751\ub2f5 \ud615\uc2dd: ","\ud604\uc7ac \uc9c0\ud45c\uc758 \uc6d0\ubb38 literal\u00b7\uc6d0 JSON \ud0c0\uc785\uc744 \ubcf4\uc874\ud55c\ub2e4. \uacf5\uc2dd \uacf5\uac1c \uc815\ubcf4\uac00 \ubbf8\ud655\uc778\uc778 \uacbd\uc6b0 null\uacfc \ubcf4\ub958 \uc0ac\uc720\ub97c \ubc18\ud658\ud558\uba70 \ubc1c\ud45c \uc785\uacb0\ub85c \uc2b9\uaca9\ud558\uc9c0 \uc54a\ub294\ub2e4. \uc6d0 canonical/source ID\u00b7PK\u00b7\uacbd\ub85c\u00b7\ud0a4\ub294 \uc751\ub2f5\uc5d0\uc11c \uc81c\uc678\ud55c\ub2e4.","\ud398\uc774\uc9c0\ub2f9 \ucd5c\ub300100\uac74, limit+1 keyset\uacfc \ub3d9\uc77c SQL \uc2a4\ub0c5\uc0f7\uc758 \uc815\ud655\ud55c \uad00\uce21/\ucd9c\ucc98 \ud559\uad50 \uc9d1\uacc4\ub97c \uc0ac\uc6a9\ud55c\ub2e4. cursor\ub294 \uc11c\ubc84 \uc804\uc6a9 \ud0a4\ub85c \uc554\ud638\ud654\ud558\uace0 \uac80\uc218\uc790\u00b7\uac80\uc0c9\uc870\uac74\u00b7\uc815\ubcf8 \ubcc0\uacbd \uc0c1\ud0dc\u00b7\ud22c\uc601\ud310\u00b7\ub9cc\ub8cc\uc5d0 \uacb0\uc18d\ud55c\ub2e4. \uc0c1\ud0dc\uac00 \ubc14\ub00c\uba74409\ub85c \ub2e4\uc2dc \uc870\ud68c\ud55c\ub2e4. \uc77c\ubc18 \ud68c\uc6d0 \uc6b4\uc601 \uacf5\uac1c\u00b7BFF/\ube0c\ub77c\uc6b0\uc800\u00b7\ubcf4\uc5483gate\u00b7DB \uc815\ub9ac \uc644\ub8cc\ub97c \ub73b\ud558\uc9c0 \uc54a\ub294\ub2e4."]
         route=current_review["route"]
+        review_details=review_labels[10]+' 첫 조회도 승인판의 검증된 변경 명령·내용 SHA·뷰/상태 핀과 대조한다. 아직 승인되지 않은 최신 상태는503 current_review_state_unapproved로 보류하며, 이후 cursor 상태 변경은409로 거절한다.'
+        live_review=current_review.get("live_bounded_v2",{})
+        if isinstance(live_review,dict) and live_review.get("query_mode")=="live_bounded":
+            review_details=("live_bounded v2는 페이지당 최대100개 표시행과 제한된 원형 scan을 사용한다. 전체 관측·출처 학교 count는 계산하지 않고 두 count=null과 count_status=unknown을 반환한다. "
+                            "빈 items와 next_cursor가 함께 있으면 다음 범위가 남은 정상 응답이며, next_cursor=null일 때만 종료한다. 자동 전수 수집을 하지 않는다. "
+                            "정렬은 canonical_result_id의 C 순서다. cursor 내부 year sentinel2024는 실제 학년도를 바꾸지 않는다. cursor는 서버4096자 범위에서 원문 그대로 전달하며 절단·해독·재작성·기록하지 않는다. "
+                            "첫 페이지는 승인된 정의·scope·subject·기간 검수 후 같은 READONLY/RLS 스냅샷의 latest command head에 결속한다. 다음 페이지 head가 바뀌면409로 처음부터 다시 조회한다. "
+                            "기존 frozen v1의 정확 count와 첫 페이지 고정 head 방식은 보존된 이력이며 현재 v2에 적용하지 않는다.")
+            intake=current_review.get("frontend_receipt_intake",{})
+            if isinstance(intake,dict) and intake:
+                review_details+=("\n\n내부 검수 화면: "+intake["internal_review_path"]+". 소비자4페이지·기본22API·기존C 함수와 분리한다. "
+                                 "화면팀의 freshJWT API 및 승인된 검수 목적 BFF/브라우저 기능 수신 영수증은 보고상 PASS이며 독립 재실행이나 전수 census 인수가 아니다. 실행 환경 격리와 실제 runtime origin·배포판은 이 영수증으로 입증되지 않았다. "
+                                 "외부 화면 feature 커밋·PR18 open을 develop 통합 완료로 보지 않는다. 공통 서버 tokenFile 검수는 방문자 관리자 권한을 증명하지 않으므로 네트워크 노출 전 방문자 gate 또는 사설 접근 통제 증거가 필요하다. "
+                                 "409 실제 관측·전체 운영 보안3gate·일반 회원 공개·발행·엔진·DB 정리·W1/W2/CAP 완료는 포함하지 않는다.")
         current_review_section=(
             review_labels[0]+"\n\n"+
             table(review_labels[1:6],[[current_review["function_name"],current_review["operation"],route["method"]+" "+route["path"],route["audience"],current_review["status"]]])+
             "\n\n"+review_labels[6]+"\n\n"+review_labels[7]+", ".join(current_review["query_fields"])+".\n\n"+
-            review_labels[8]+current_review["review_DTO"]+".\n\n"+review_labels[9]+"\n\n"+review_labels[10]+' 첫 조회도 승인판의 검증된 변경 명령·내용 SHA·뷰/상태 핀과 대조한다. 아직 승인되지 않은 최신 상태는503 current_review_state_unapproved로 보류하며, 이후 cursor 상태 변경은409로 거절한다.'+"\n\n")
+            review_labels[8]+current_review["review_DTO"]+".\n\n"+review_labels[9]+"\n\n"+review_details+"\n\n")
         files[spec["current_documents"]["planning"]]+="\n\n"+current_review_section
 
     overall_contract=spec.get("overall_analysis_contract")

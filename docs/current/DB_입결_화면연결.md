@@ -1,10 +1,10 @@
 # Supabase 입결 DB와 화면 API 연결
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.35이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.36이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 승인된 화면팀·관리자에게 현재 단일 정본 입결을 실제 서비스 API로 표시; 일반회원 운영 공개는 별도
 
-계약 2026.10.10.v18 · 코드 implemented_live_bounded_v2_committed_native_and_actual_factory_HTTP_PASS_hosted_deployed_negative5PASS_frontend_connection_instructed · production_ready=false. 담당 feature/application-pre-data-platform.
+계약 2026.10.10.v19 · 코드 implemented_live_bounded_v2_hosted_and_reported_current_API_JWT_BFF_browser_functional_PASS_external_PR18_open_viewer_gate_and_operational_acceptance_pending · production_ready=false. 담당 feature/application-pre-data-platform.
 
 ## 연결과 승인 범위
 
@@ -62,6 +62,7 @@
 - live v2는 같은 READONLY/RLS snapshot에서 최신 command를 첫 페이지에 결속하고 다음 페이지 변경을409로 거절한다. 승인된 정의를 그대로 둔 bounded 물리 복합PK JOIN을 사용하며 raw current 전체 조회·N+1·미검증 fallback은 하지 않는다.
 - current review의 비공개 descriptor PIN과 cursor 고정키는 Git제외 서버 배포 artifact로 주입할 수 있다. 기존7개의 DB/Auth/Storage/relay 서버env를 재사용하고 브라우저·공개코드·로그에 설정을 전달하지 않는다.
 - 현재 review API와 학생 1페이지 History DTO는 다른 계약이다. 화면팀은 검수 전용 서버 BFF에서 v2를 소비하고 review_only/not_published·결측/보류와 unknown count를 표시한다.
+- 현재 검수 화면의 공통 서버 tokenFile 기능검수는 방문자 관리 권한 인수를 대신하지 않는다. 내부 경로는 소비자4페이지에 추가하지 않으며 네트워크 공개 전 방문자 세션·허용 명부 또는 사설 접근 통제와 기존 운영gate를 입증한다. cursor는 서버4096자 범위에서 불투명 원문 그대로 전달하고 절단하지 않는다.
 
 ## 기존 API와 구현 경로
 
@@ -128,6 +129,7 @@
 - current review의 비공개 descriptor PIN과 cursor 고정키는 Git제외 서버 배포 artifact로 주입할 수 있다. 기존7개의 DB/Auth/Storage/relay 서버env를 재사용하고 브라우저·공개코드·로그에 설정을 전달하지 않는다.
 - 현재 review API와 학생 1페이지 History DTO는 다른 계약이다. 화면팀은 검수 전용 서버 BFF에서 v2를 소비하고 review_only/not_published·결측/보류와 unknown count를 표시한다.
 - current-admission-review v2를 실제 Supabase에 배포했고 무인증/relay/JWT 거절5건을 검수했다. 기존 승인 두 계정·서버 BFF·relay를 재사용하여 현재 정본 검수 화면만 즉시 연결한다. 새 PIN4 등록/read model/census 준비를 화면 연결 선행 조건으로 요구하지 않는다. actual factory Storage+DB 두 페이지200100은 통제 세션DI이며 fresh user JWT·BFF·브라우저 성공은 화면팀 영수증으로 별도 확정한다. 응답v2 unknown count null/empty items+cursor/409새조회 계약을 사용하며 기본22API·기존C는 보존한다.
+- 2026-10-10 화면팀 freshJWT API 및 /management/current-review 검수 목적 BFF/브라우저 기능 영수증을 수신했다.100+100·unknowncount·empty+cursor·보류/원형·비노출을 보고상 확인하고 16dea213의 cursor256절단 수정 후 재시도PASS를 기록한다. 방문자 gate 또는 사설 접근 통제는 미입증이며 외부 노출 전 필요하다. 외부 PR18 미병합·409 실관측·전체 운영3gate·일반 발행·W1/W2/CAP는 별도 미완료다.
 
 ## 증거와 미실행 범위
 
@@ -137,8 +139,8 @@
 | python_reference_HTTP | PASS_17_NATIVE_SCOPED_SYNTHETIC_AND_FRESH_V5_ACTUAL_DB_HTTP_WITH_SYNTHETIC_DI_AUTH_HISTORY_100_40_ME_3_FIELDS_NEGATIVE_PAYLOAD_ZERO; REAL_JWT_CLOUD_BFF_BROWSER_NOT_RUN |
 | Deno_check_test | PASS_NATIVE_DENO2_9_7_CACHED_ONLY_CHECK_POSTGRES_PUBLIC_TEST_BOOTSTRAP_TEST_PRIVATE_PRIMARY_WIRE_ROOTS; PUBLIC_SERVICE36_PLUS_BOOTSTRAP3_EQUAL39_AND_PRIVATE_REAL_BIND_WIRE5_EQUAL44_TOTAL; EMPTY_SYNTHETIC_PROCESS_ENV_ONLY_NO_SECRET_VALUES_DB_OR_NETWORK; DEPLOYMENT_AND_FRESH_JWT_INTAKE_SEPARATE |
 | restricted_cloud_API | RECEIVED_FRONTEND_FINAL_REPORT_2026_10_09T14_28_39Z_FRESH_JWT_HISTORY140_EXACT_TYPED_FIELDS_CURSOR100_PLUS40_NO_DUPLICATES_OR_MISSING_RECRUITMENT12_PENDING_NULL_ME200_STANDARD_PAID2_GET403_AUTH_RELAY_NO_STORE_PASS; ONLY_HISTORICAL_C_FIVE_GET_SCOPE; ROOT_NOT_A_NEW_JWT_RERUN |
-| actual_user_JWT | RECEIVED_AND_READ_EXTERNAL_FRONTEND_FINAL_FRESH_JWT_REPORT_FOR_APPROVED_C140_AND_RECRUITMENT12; CURRENT_ALL_REVIEW_JWT_BFF_BROWSER_AND_OPERATIONAL_THREE_GATES_NOT_RUN |
-| frontend_BFF_browser | NOT_RUN |
+| actual_user_JWT | C140_HISTORICAL_REPORT_PRESERVED; CURRENT_REVIEW_API_FRESH_JWT18_REPORTED_PASS_RECEIPT_READ_AND_CAPTURE_SHA_VERIFIED; not_independent_rerun_not_all_API_operation |
+| frontend_BFF_browser | RECEIVED_REPORTED_CURRENT_REVIEW_SCOPED_BFF_BROWSER_FUNCTIONAL_PASS_AT_FRONTEND16dea213;100_RENDER_NEXT100_EMPTY_CURSOR_UNKNOWNCOUNT_PENDING_NONEXPOSURE; viewer_gate_actual409_and_operational3gate_NOT_RUN |
 | operational_security_three_gates | NOT_RUN |
 | effective_RLS | EXISTING_APPROVED_C_SOURCE_APP_ROLE_GUARDS_PRESERVED; NEW_CURRENT_METADATA13_RELATIONS_PHYSICAL8_RLS_FORCE_VIEW5_INVOKER_BARRIER_APP_SELECT_ONLY_ANON_AUTH_DENIED_PASS; CURRENT_TYPED_PAGE_AND_HOSTED_CURRENT_SERVICE_ACCEPTANCE_NOT_RUN |
 | bulk_JOIN_query_count | PASS_FRESH_V5_ACTUAL_PROVIDER_DATA_JOIN_1_HISTORY_HTTP_PAGE_100_JOIN_1_PAGE_40_JOIN_1; TOTAL_DATA_JOINS_3; AUTH_ROLE_ENTITLEMENT_METADATA_COUNTED_SEPARATELY_NO_N_PLUS_1 |
@@ -258,6 +260,7 @@
 | live_bounded_actual_factory_HTTP | PASS_STORAGE_DB_FULL_FACTORY_HTTP_2PAGES_200100_EACH_1901ms_1931ms; controlled_session_DI_NOT_actualJWT |
 | live_bounded_hosted_negative | PASS5_NO_CREDENTIAL401_RELAY_MISSING403_RELAY_WRONG403_NO_USER_JWT401_FAKE_JWT401; no_items_or_secret_values; handler_private_no_store; platform401_header_distinct |
 | live_bounded_frontend_delivery | PASS_EXISTING_HANDOFF_NEW_FILE7818B_REMOTE_FETCH_CONTENT_SHA_EXACT_OWNER1_WRITER1; actual_BFF_browser_NOT_RUN |
+| current_frontend_receipt_intake | frontend_receipt_intake contains capture SHA/bytes/method and scoped observations; PR18_open is not develop frontend integration |
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -277,4 +280,4 @@
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=cdff9c06d3d57f6ee42462d2fc5e53e954267f4269f317e4f06dd07dbeb3c694 -->
+<!-- jungsi:generated spec_sha256=0d376bc02b3f7c0b3af12e89fb74c6dce9b8a77a0090f3bf82cb08e05136264a -->
