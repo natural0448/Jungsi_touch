@@ -11236,6 +11236,15 @@
         "REQ-26"
       ],
       "summary": "관리·검수 전용 현재 입결 전수 검수 화면 추가(/management/current-review, 최종 관리자 지시·담당자 즉시연결 전달문 v2): 브라우저→화면 서버(BFF)→current-admission-review Edge 함수의 검수 GET 만 호출한다. apikey(공개키)·relay·검수자 토큰은 서버 환경에서만 붙이고 브라우저에 내보내지 않는다. v2 DTO 18필드를 원문 그대로 표에 보이고(literal·JSON type·보류 표시 원 값 유지), 전체 건수는 count_status=unknown 그대로 미계산으로 표기한다. cursor 는 불투명 전달(해독·기록 금지, 길이 8192 허용 — 256 절단이 invalid_cursor 를 유발해 수정), 다음 범위는 버튼으로 한 번씩만(자동 전수 수집 루프 금지), 정본 변경 409 는 처음부터 재조회 안내. 소비자 4개 화면·22 API·기존 C 함수는 변경 없음."
+    },
+    {
+      "date": "2026-10-10",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "검수 화면 방문자 접근 통제 보완(담당자 독립 검토 지적): 검수 조회 시작 전에 방문자의 인증 세션을 서버에서 먼저 확인하고, 무로그인·만료 세션은 Edge 호출 없이 화면단에서 거절한다. live 모드는 공통 검수 토큰을 쓰지 않고 방문자 본인의 access token 을 전달해 백엔드 승인 subject 검사가 실제 방문자에게 적용되게 한다(미승인 계정·일반 회원은 Edge 403 거절 그대로 표시). local 모드는 loopback 전용(apiMode 검사+로컬 서버 127.0.0.1 bind) 전제에서 세션 확인 뒤에만 검수 토큰 파일을 읽는다. synthetic/미설정은 안내만 보이고 호출하지 않는다. 경로명·환경변수 존재만으로 접근 통제를 주장하지 않는다."
     }
   ],
   "overall_analysis_contract": {

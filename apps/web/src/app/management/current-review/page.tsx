@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
 import { readFile } from "node:fs/promises";
+import { ConnectionNotice } from "@/components/connection-notice";
 import { PageHead } from "@/components/page-head";
+import { apiMode, getCaller, sessionOrDown, source } from "@/lib/api";
+import { loginHref } from "@/lib/links";
 import "./review.css";
 
 export const metadata: Metadata = { title: "현재 입결 전수 검수" };
@@ -62,26 +65,45 @@ type Fetched =
   | { kind: "stale" }
   | { kind: "ok"; page: ReviewPage };
 
-async function fetchReview(query: URLSearchParams): Promise<Fetched> {
+/*
+  방문자 접근 통제(담당자 독립 검토 지적, 2026-10-10): 검수 조회를 시작하기 전에
+  방문자의 인증된 세션을 서버에서 먼저 확인하고(무로그인·만료 세션은 Edge 호출 없이 거절),
+  Edge 에 보내는 사용자 토큰은 모드별로 방문자 자격에 맞춘다.
+  - live  : 방문자 본인의 Supabase access token 을 그대로 전달한다 — 백엔드의 승인 검수
+            subject 검사가 실제 방문자에게 적용되고, 공통 검수 토큰은 아예 쓰지 않는다.
+            미승인 계정·일반 회원은 Edge 의 403(subject/권한) 거절이 그대로 보인다.
+  - local : 검수 PC 전용(apiMode 가 loopback JUNGSI_API_URL 일 때만 성립, 로컬 검증 서버도
+            127.0.0.1 bind). 로그인 세션 확인을 통과한 뒤에만 검수 토큰 파일을 읽는다.
+  - synthetic/unconfigured : 검수 연결 없음 안내만 보이고 Edge 를 호출하지 않는다.
+*/
+async function reviewBearer(visitorToken: string | null): Promise<string | { kind: "unconfigured"; missing: string[] } | { kind: "no_token" }> {
+  const mode = apiMode();
+  if (mode === "live") return visitorToken ?? { kind: "no_token" };
+  if (mode !== "local") return { kind: "unconfigured", missing: ["JUNGSI_API_MODE(live 또는 local)"] };
+  const tokenFile = process.env.JUNGSI_REVIEW_TOKEN_FILE;
+  if (!tokenFile) return { kind: "unconfigured", missing: ["JUNGSI_REVIEW_TOKEN_FILE"] };
+  try {
+    const token = (await readFile(tokenFile, "utf-8")).trim();
+    return token || { kind: "no_token" };
+  } catch {
+    return { kind: "no_token" };
+  }
+}
+
+async function fetchReview(query: URLSearchParams, visitorToken: string | null): Promise<Fetched> {
   const base = process.env.JUNGSI_CURRENT_REVIEW_URL;
   const apikey = process.env.JUNGSI_CURRENT_REVIEW_APIKEY;
   const relay = process.env.JUNGSI_RELAY_TOKEN;
-  const tokenFile = process.env.JUNGSI_REVIEW_TOKEN_FILE;
   const missing = [
     !base && "JUNGSI_CURRENT_REVIEW_URL",
     !apikey && "JUNGSI_CURRENT_REVIEW_APIKEY",
     !relay && "JUNGSI_RELAY_TOKEN",
-    !tokenFile && "JUNGSI_REVIEW_TOKEN_FILE",
   ].filter((v): v is string => Boolean(v));
   if (missing.length) return { kind: "unconfigured", missing };
 
-  let token: string;
-  try {
-    token = (await readFile(tokenFile!, "utf-8")).trim();
-    if (!token) return { kind: "no_token" };
-  } catch {
-    return { kind: "no_token" };
-  }
+  const bearer = await reviewBearer(visitorToken);
+  if (typeof bearer !== "string") return bearer;
+  const token = bearer;
 
   const url = `${base!.replace(/\/$/, "")}/api/v1/review/current-admissions?${query.toString()}`;
   const res = await fetch(url, {
@@ -108,6 +130,9 @@ const one = (v: string | string[] | undefined, max = 256) => (Array.isArray(v) ?
 
 export default async function Page({ searchParams }: PageProps<"/management/current-review">) {
   const sp = await searchParams;
+  // 방문자 게이트: 인증된 세션이 확인되기 전에는 Edge 검수 호출 자체를 하지 않는다
+  const caller = await getCaller();
+  const { session, down } = await sessionOrDown(source(), caller);
   const filters = new Map<FilterKey, string>();
   for (const k of FILTER_KEYS) {
     const v = one(sp[k]);
@@ -126,19 +151,27 @@ export default async function Page({ searchParams }: PageProps<"/management/curr
   );
 
   let body: React.ReactNode = null;
-  if (!started) {
+  if (down) {
+    body = <ConnectionNotice e={down} />;
+  } else if (!session) {
+    body = (
+      <p className="crv-note">
+        검수 화면은 로그인한 승인 검수 계정에서만 조회할 수 있습니다. <a href={loginHref(PATH)}>로그인</a> 후 다시 열어 주세요.
+      </p>
+    );
+  } else if (!started) {
     body = <p className="crv-hint">조건을 넣거나 그대로 검색을 누르면 첫 범위(최대 {LIMIT}건)를 조회합니다. 전체 건수는 세지 않습니다.</p>;
   } else {
     const query = new URLSearchParams();
     for (const [k, v] of filters) query.set(k, v);
     query.set("limit", String(LIMIT));
     if (cursor) query.set("cursor", cursor);
-    const got = await fetchReview(query);
+    const got = await fetchReview(query, caller.accessToken);
 
     if (got.kind === "unconfigured")
       body = <p className="crv-note">검수 연결 설정이 없습니다(서버 환경변수 {got.missing.join(", ")} 미설정). 이 화면은 검수 설정이 있는 서버에서만 동작합니다.</p>;
     else if (got.kind === "no_token")
-      body = <p className="crv-note">검수 로그인 토큰이 없습니다. 검수 PC 에서 로그인 스크립트(edge_login.py)를 실행해 토큰 파일을 갱신한 뒤 새로고침하세요.</p>;
+      body = <p className="crv-note">검수용 사용자 토큰이 없습니다. live 모드는 로그인 세션을 새로 만들고, 검수 PC(local 모드)는 로그인 스크립트(edge_login.py)로 토큰 파일을 갱신한 뒤 새로고침하세요.</p>;
     else if (got.kind === "stale")
       body = (
         <p className="crv-note">
