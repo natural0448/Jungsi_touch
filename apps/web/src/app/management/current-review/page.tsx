@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { readFile } from "node:fs/promises";
 import { ConnectionNotice } from "@/components/connection-notice";
 import { PageHead } from "@/components/page-head";
@@ -61,25 +62,35 @@ interface ReviewPage {
 type Fetched =
   | { kind: "unconfigured"; missing: string[] }
   | { kind: "no_token" }
+  | { kind: "not_loopback" }
   | { kind: "error"; status: number; code: string | null; requestId: string | null }
   | { kind: "stale" }
   | { kind: "ok"; page: ReviewPage };
 
 /*
-  방문자 접근 통제(담당자 독립 검토 지적, 2026-10-10): 검수 조회를 시작하기 전에
-  방문자의 인증된 세션을 서버에서 먼저 확인하고(무로그인·만료 세션은 Edge 호출 없이 거절),
-  Edge 에 보내는 사용자 토큰은 모드별로 방문자 자격에 맞춘다.
-  - live  : 방문자 본인의 Supabase access token 을 그대로 전달한다 — 백엔드의 승인 검수
-            subject 검사가 실제 방문자에게 적용되고, 공통 검수 토큰은 아예 쓰지 않는다.
-            미승인 계정·일반 회원은 Edge 의 403(subject/권한) 거절이 그대로 보인다.
-  - local : 검수 PC 전용(apiMode 가 loopback JUNGSI_API_URL 일 때만 성립, 로컬 검증 서버도
-            127.0.0.1 bind). 로그인 세션 확인을 통과한 뒤에만 검수 토큰 파일을 읽는다.
+  방문자 접근 통제(담당자 독립 검토 지적 2026-10-10, 후속 소견 v8 반영):
+  - live  : 방문자의 인증 세션을 확인한 뒤 방문자 본인의 Supabase access token 을 그대로
+            전달한다 — 백엔드의 승인 검수 subject 검사가 실제 방문자에게 적용되고, 공통
+            검수 토큰은 아예 쓰지 않는다. 승인 명단에 없는 계정은 등급과 무관하게 Edge 의
+            403 거절이 그대로 보인다(승인된 일반 회원 검수 계정은 등급을 이유로 배제하지
+            않고, 관리자·유료 등급이라고 허용하지도 않는다).
+  - local : 검수 PC 전용. local 의 세션 확인은 서버 시험 토큰 기반 표시라 방문자 인증이
+            아니므로, 공통 검수 토큰 파일을 읽기 전에 **이 BFF 요청 자체가 loopback 인지**를
+            Host 헤더로 검사해 아니면 Edge 호출 없이 거절한다. 실제 격리는 dev 서버의
+            127.0.0.1 바인드(package.json dev 스크립트 -H 127.0.0.1)가 담당하고, Host 검사는
+            그 바인드가 풀린 구성에 대한 2차 방어다. 운영 배포에는 local 모드·토큰 파일을
+            두지 않는다.
   - synthetic/unconfigured : 검수 연결 없음 안내만 보이고 Edge 를 호출하지 않는다.
 */
-async function reviewBearer(visitorToken: string | null): Promise<string | { kind: "unconfigured"; missing: string[] } | { kind: "no_token" }> {
+const LOOPBACK_HOST = /^(127(\.\d{1,3}){3}|localhost|\[::1\])(:\d+)?$/i;
+
+async function reviewBearer(visitorToken: string | null): Promise<string | { kind: "unconfigured"; missing: string[] } | { kind: "no_token" } | { kind: "not_loopback" }> {
   const mode = apiMode();
   if (mode === "live") return visitorToken ?? { kind: "no_token" };
   if (mode !== "local") return { kind: "unconfigured", missing: ["JUNGSI_API_MODE(live 또는 local)"] };
+  // local 전용 2차 방어: 이 BFF 에 들어온 요청 자체가 loopback 이 아니면 공통 토큰을 읽지 않는다
+  const host = (await headers()).get("host") ?? "";
+  if (!LOOPBACK_HOST.test(host)) return { kind: "not_loopback" };
   const tokenFile = process.env.JUNGSI_REVIEW_TOKEN_FILE;
   if (!tokenFile) return { kind: "unconfigured", missing: ["JUNGSI_REVIEW_TOKEN_FILE"] };
   try {
@@ -170,6 +181,8 @@ export default async function Page({ searchParams }: PageProps<"/management/curr
 
     if (got.kind === "unconfigured")
       body = <p className="crv-note">검수 연결 설정이 없습니다(서버 환경변수 {got.missing.join(", ")} 미설정). 이 화면은 검수 설정이 있는 서버에서만 동작합니다.</p>;
+    else if (got.kind === "not_loopback")
+      body = <p className="crv-note">검수 조회는 검수 PC 의 loopback(127.0.0.1) 접속에서만 가능합니다. 외부 주소로 들어온 요청은 거절됩니다.</p>;
     else if (got.kind === "no_token")
       body = <p className="crv-note">검수용 사용자 토큰이 없습니다. live 모드는 로그인 세션을 새로 만들고, 검수 PC(local 모드)는 로그인 스크립트(edge_login.py)로 토큰 파일을 갱신한 뒤 새로고침하세요.</p>;
     else if (got.kind === "stale")

@@ -4,7 +4,7 @@
   "private": true,
   "description": "정시터치 프레젠테이션 계층. 에듀터치 도메인의 /jeongsi 경로로 배포한다(docs/current 참고).",
   "scripts": {
-    "dev": "next dev -p 3003",
+    "dev": "next dev -p 3003 -H 127.0.0.1",
     "build": "next build",
     "start": "next start -p 3003",
     "lint": "eslint",
