@@ -1,10 +1,10 @@
 # Supabase 입결 DB와 화면 API 연결
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.33이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.34이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
-승인된 동결 역사 입결의 제한 표시 검수; 현재 단일 정본 공급자는 별도 준비 단계
+승인된 화면팀·관리자에게 현재 단일 정본 입결을 실제 서비스 API로 표시; 일반회원 운영 공개는 별도
 
-계약 2026.10.10.v16 · 코드 implemented_read_model_code_candidate_native40_distinct82registrations_and_independent_source_review_pass; existing_current_actual5s_FAIL_preserved; actual_DDL_baseline_source_state_seal_job_activation_NOT_READY_IO_HOLD · production_ready=false. 담당 feature/application-pre-data-platform.
+계약 2026.10.10.v17 · 코드 implemented_live_bounded_v2_native177_actual_app_provider101_typed100_PASS_deployment_in_progress · production_ready=false. 담당 feature/application-pre-data-platform.
 
 ## 연결과 승인 범위
 
@@ -57,6 +57,11 @@
 - 읽기 모델 후보 / 승인과 재개: 자료 완전성 독립 증거, source closure·command 외 변경 coverage·fence, 고정 head·서명 issuer/purpose/유효기간/회수, RLS·최소 역할·TLS·5초 제한을 각각 검증한다. producer bool 또는 자기 해시는 독립 승인 증거가 아니다. 실제 기준 receipt 미제공은 NOT_READY이며 준비 DDL·model build·PIN4·함수 배포·실JWT·BFF/브라우저 인수는 별도 단계다.
 - I/O 현재 확인 / 새 관측: Supabase UI에서 프로젝트 Healthy와 용량 증가를 확인했지만 IOPS·처리량·연결 지표가 로드되지 않아 budget 회복은 UNCONFIRMED다. 기존 HOLD와 Owner의02:00~06:00 조건부 창을 유지한다. 시간 밖에 대량 모델 생성·전수 조회·DB 정리·VACUUM을 실행하지 않고 만료된 승인판을 연장하지 않는다.
 - baseline과 delta의 학년도·학교 복합키·활성/범위·대표 원본·출처 및 모집단위 멀티셋·해시·영수증을 동일한 전체 대조로 검산한다. 유효한 서명과 맞는 학교 수만으로 서로 다른 의미의 정정을 채택하지 않는다.
+- CR-CURRENT-LIVE-02: 사용자의 실제 연결 지시에 따라 현재 단일 정본의 승인된 화면팀·관리자 검수 노출용 live_bounded v2를 채택한다. 기존 frozen v1/C/기본22API와 학생 공개 권한은 유지한다. prepared004·Merkle·독립 전수 census는 현재 검수 표시의 실행 조건으로 두지 않는다.
+- live_bounded v2는 전체 count를 수행하지 않고 matching_observation_count/matching_source_school_count=null 및 count_status=unknown을 반환한다. 최대100 표시행과 제한 scan cursor를 제공하며 items0+next_cursor는 검색 완료가 아니다.
+- live v2는 같은 READONLY/RLS snapshot에서 최신 command를 첫 페이지에 결속하고 다음 페이지 변경을409로 거절한다. 승인된 정의를 그대로 둔 bounded 물리 복합PK JOIN을 사용하며 raw current 전체 조회·N+1·미검증 fallback은 하지 않는다.
+- current review의 비공개 descriptor PIN과 cursor 고정키는 Git제외 서버 배포 artifact로 주입할 수 있다. 기존7개의 DB/Auth/Storage/relay 서버env를 재사용하고 브라우저·공개코드·로그에 설정을 전달하지 않는다.
+- 현재 review API와 학생 1페이지 History DTO는 다른 계약이다. 화면팀은 검수 전용 서버 BFF에서 v2를 소비하고 review_only/not_published·결측/보류와 unknown count를 표시한다.
 
 ## 기존 API와 구현 경로
 
@@ -118,6 +123,10 @@
 - 별도 current-admission-review 함수의 GET /api/v1/review/current-admissions는 허용 명부에 있는 검수자만 사용한다. 1페이지의 공개 History DTO와 다르며 literal·원 타입·보류 사유와 암호화 cursor를 제공한다. 원 canonical/source ID와 비공개 경로는 응답에서 제외한다. 구체적인 자료판 검수 후 Supabase 관리자가 신규 이름의 PIN3·cursor 키를 등록하며 기존 C 설정은 유지한다.
 - registry 용량 요청은 실제 읽기 전용 크기·의존 검수와 함께 회신한다. registry는 현재 정본의 직접 의존 표이며 overlays는 현재 정본과 역사 C 모두가 사용한다. 파일류가 SQL 뷰 의존 목록에 없다는 사실만으로 아카이브·재생 안전을 확인한 것은 아니다. 정확한 복사·복구·제거 범위·유지보수 조건을 인수하기 전까지 두 정리 작업과 VACUUM은 미실행이다.
 - 이번 수정은 explicit 읽기 모델 provider/handler 후보와 native 합성 HTTP 경로를 준비하는 서비스·데이터 계층 작업이다. 실제 DB 스키마·독립 baseline/seal·I/O 비용·5초 페이지·새 검수 승인판·배포가 완료되기 전에는 기존 화면을 live로 전환하거나 전수 검수 완료로 기록하지 않는다. 화면팀은 최종 회신의 코드/문서/검증 경계와 NOT_RUN을 구분해 인수한다.
+- live_bounded v2는 전체 count를 수행하지 않고 matching_observation_count/matching_source_school_count=null 및 count_status=unknown을 반환한다. 최대100 표시행과 제한 scan cursor를 제공하며 items0+next_cursor는 검색 완료가 아니다.
+- live v2는 같은 READONLY/RLS snapshot에서 최신 command를 첫 페이지에 결속하고 다음 페이지 변경을409로 거절한다. 승인된 정의를 그대로 둔 bounded 물리 복합PK JOIN을 사용하며 raw current 전체 조회·N+1·미검증 fallback은 하지 않는다.
+- current review의 비공개 descriptor PIN과 cursor 고정키는 Git제외 서버 배포 artifact로 주입할 수 있다. 기존7개의 DB/Auth/Storage/relay 서버env를 재사용하고 브라우저·공개코드·로그에 설정을 전달하지 않는다.
+- 현재 review API와 학생 1페이지 History DTO는 다른 계약이다. 화면팀은 검수 전용 서버 BFF에서 v2를 소비하고 review_only/not_published·결측/보류와 unknown count를 표시한다.
 
 ## 증거와 미실행 범위
 
@@ -241,6 +250,10 @@
 | read_model_actual_DDL_GRANT_RLS_build_query | NOT_RUN_IO_HOLD_AND_PREPARED_ONLY; no space_WAL_cost proof, no full reingestion |
 | fresh_UI_project_and_IO | READONLY_DASHBOARD_HEALTHY_CAPACITY_INCREASE_OBSERVED; IOPS_throughput_connection_graphs_unavailable; actual_budget_recovery_UNCONFIRMED |
 | new_current_approval_and_runtime_activation | NOT_RUN; prior C expiry not extended; no new descriptor_PIN4_deploy_realJWT_BFF_browser_acceptance |
+| live_bounded_actual_first_rows | PASS_APP_NONOWNER_NO_BYPASS_TLS_RLS_READONLY: complete current/member/population101rows bulk payload2877ms; typed public18 closed100items unknowncounts nextcursorPASS. Bounded base101rows987ms. DB writes0. |
+| live_bounded_native | PASS_NATIVE_177_REGISTERED_TESTS_AND_CHECK5_NO_DB_NET; INDEPENDENT37_NEW_CURRENT_TESTS_PASS |
+| live_bounded_remote_approval | PASS_NEW_PRIVATE_IMMUTABLE_DESCRIPTOR_POST200_AND_RAW_GET200_BYTES_SHA_EQUAL; existing_subjects_preserved; NOT_HTTP_USER_ACCEPTANCE |
+| live_bounded_deployment | IN_PROGRESS_NEW_FUNCTION_CURRENT_ADMISSION_REVIEW; old_C_untouched |
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -260,4 +273,4 @@
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=438bb548846cb17bd3c56a773aa8e319ee6f448fd479443aa4c42c9d19109a69 -->
+<!-- jungsi:generated spec_sha256=f34dccb6940901052611e8618576f9624537e84794c9a7ee1710054d82096aa0 -->

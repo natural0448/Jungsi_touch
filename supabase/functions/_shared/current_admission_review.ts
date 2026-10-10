@@ -13,6 +13,8 @@ export const POPULATION_WIRE_FIELDS=['result_id','academic_year','population_ref
 export const REVIEW_QUERY_FIELDS=['academic_year','university_q','department_q','track','group','metric_kind','cohort','limit','cursor'];
 export const CURRENT_REVIEW_FIELDS=['observation_token','academic_year','university','department','track','recruit_group','metric_kind','metric_value_literal','metric_value_json_type','metric_value_numeric_text','cohort','statistic_label','source_member_count','link_scopes','official_metadata','review_status','value_availability','hold_reasons'];
 export const CURRENT_REVIEW_WIRE_RECIPE='current_review_wire_state_v1';
+export const CURRENT_REVIEW_LIVE_WIRE_RECIPE='current_review_live_bounded_v2';
+export function isLiveBoundedReview(d:CurrentReviewDescriptor):boolean { return d.format==='jungsi.current-admission-review/v2'&&d.query_mode==='live_bounded'; }
 const JSONB_FIELDS=['recruit_group_raw','anchor_2027_pks','source_location','original_record_locator','field_presence_types','curation_fields','curation_evidence'];
 const YEARS=[2024,2025,2026,2027];
 const REQUIRED_RELATIONS=['admission_results_current','admission_result_source_members','admission_result_population_links_current','admission_observation_commands'];
@@ -34,7 +36,7 @@ export interface CurrentReviewDescriptor extends Row {
 }
 export interface CurrentReviewObservation { current:Row;members:Row[];population:Row[] }
 export interface CurrentReviewRawPage {
-  commandId:string;commandSha256:string;asOf:string;matchingObservationCount:string;matchingSourceSchoolCount:string;rows:CurrentReviewObservation[];
+  commandId:string;commandSha256:string;asOf:string;matchingObservationCount:string|null;matchingSourceSchoolCount:string|null;rows:CurrentReviewObservation[];scanNextKey?:CurrentKey|null;
 }
 export interface CurrentReviewPorts {
   verifySession(token:string,now:number):Promise<VerifiedReviewSession|null>;
@@ -55,16 +57,18 @@ export function currentReviewWireJson(value:Json):string {
 export async function currentReviewSha256(value:Json):Promise<string> {
   return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(currentReviewWireJson(value)).buffer))].map(v=>v.toString(16).padStart(2,'0')).join('');
 }
-export async function currentReviewProjectionSha256():Promise<string> {
-  return currentReviewSha256({format:'jungsi.current-review-projection/v1',recipe:CURRENT_REVIEW_WIRE_RECIPE,
+export async function currentReviewProjectionSha256(mode:'exact'|'live_bounded'='exact'):Promise<string> {
+  return currentReviewSha256({format:'jungsi.current-review-projection/v1',recipe:mode==='exact'?CURRENT_REVIEW_WIRE_RECIPE:CURRENT_REVIEW_LIVE_WIRE_RECIPE,
     current_fields:CURRENT_WIRE_FIELDS,member_fields:MEMBER_WIRE_FIELDS,population_fields:POPULATION_WIRE_FIELDS,public_fields:CURRENT_REVIEW_FIELDS,
-    query_fields:REVIEW_QUERY_FIELDS,key_order:['academic_year','canonical_result_id'],normalization:'ASCII_case_fold_and_trim'});
+    query_fields:REVIEW_QUERY_FIELDS,key_order:mode==='exact'?['academic_year','canonical_result_id']:['canonical_result_id'],normalization:'ASCII_case_fold_and_trim',
+    ...(mode==='live_bounded'?{pagination:'finite_canonical_scan_then_current_filters',scan_rows:128,totals:'unknown',source_resolution:'pinned_definition_composite_key_v1'}:{})});
 }
 export async function validateCurrentReviewDescriptor(d:CurrentReviewDescriptor,environment:string,now:number):Promise<CurrentReviewDescriptor> {
   try {
+    const live=record(d)&&isLiveBoundedReview(d),recipe=live?CURRENT_REVIEW_LIVE_WIRE_RECIPE:CURRENT_REVIEW_WIRE_RECIPE;
     if(!record(d)||!exact(d,['format','purpose','environment','scope','source_view','allowed_years','source_definition','projection','qualified_state','approval',
-        'engine_approved','production_allowed','general_publication_allowed','nationwide_collection_complete'])||
-       d.format!=='jungsi.current-admission-review/v1'||d.purpose!==CURRENT_REVIEW_PURPOSE||d.environment!==environment||
+        'engine_approved','production_allowed','general_publication_allowed','nationwide_collection_complete',...(live?['query_mode']:[])])||
+       d.format!==(live?'jungsi.current-admission-review/v2':'jungsi.current-admission-review/v1')||d.purpose!==CURRENT_REVIEW_PURPOSE||d.environment!==environment||
        !['isolated_cloud_review','local_verification'].includes(environment)||d.scope!=='all_current'||d.source_view!==CURRENT_REVIEW_VIEW||
        !sameJson(d.allowed_years,YEARS)||d.engine_approved!==false||d.production_allowed!==false||d.general_publication_allowed!==false||d.nationwide_collection_complete!==false)throw fail();
     const a=d.approval,definition=d.source_definition,p=d.projection,state=d.qualified_state;
@@ -90,9 +94,10 @@ export async function validateCurrentReviewDescriptor(d:CurrentReviewDescriptor,
       else if(entry.view_definition_sha256!==null||entry.reloptions!==null)throw fail();
     }
     if(!REQUIRED_RELATIONS.every(name=>names.has(name))||!record(p)||!exact(p,['version','sha256','wire_recipe'])||!text(p.version)||!p.version||p.version.length>128||
-       p.wire_recipe!==CURRENT_REVIEW_WIRE_RECIPE||p.sha256!==await currentReviewProjectionSha256()||!record(state)||
-       !exact(state,['command_id','payload_sha256','definition_sha256','wire_recipe'])||!text(state.command_id)||!state.command_id||!hash(state.payload_sha256)||
-       state.definition_sha256!==definition.sha256||state.wire_recipe!==CURRENT_REVIEW_WIRE_RECIPE)throw fail();
+       p.wire_recipe!==recipe||p.sha256!==await currentReviewProjectionSha256(live?'live_bounded':'exact')||!record(state)||
+       !exact(state,live?['mode','definition_sha256','wire_recipe']:['command_id','payload_sha256','definition_sha256','wire_recipe'])||
+       (live?state.mode!=='live_current_head':(!text(state.command_id)||!state.command_id||!hash(state.payload_sha256)))||
+       state.definition_sha256!==definition.sha256||state.wire_recipe!==recipe)throw fail();
     return d;
   } catch { throw fail(); }
 }
@@ -119,12 +124,20 @@ export function validateCurrentReviewQuery(q:CurrentReviewQuery):void {
     !['university_q','department_q','track','group','metric_kind','cohort'].every(k=>{const v=q[k as keyof CurrentReviewQuery];return text(v)&&v.length<=100&&v===lower(v).trim()&&!/[\x00-\x1f\x7f]/.test(v);})||
     q.cursor!==null&&(!text(q.cursor)||!q.cursor||q.cursor.length>4096||!/^[A-Za-z0-9_-]+$/.test(q.cursor)))throw fail();
 }
-export async function currentReviewBinding(d:CurrentReviewDescriptor,q:CurrentReviewQuery,subject:string,sessionExpires:number):Promise<CurrentPageBinding> {
+export async function currentReviewBinding(d:CurrentReviewDescriptor,q:CurrentReviewQuery,subject:string,sessionExpires:number,head?:Pick<CurrentReviewRawPage,'commandId'|'commandSha256'>):Promise<CurrentPageBinding> {
   validateCurrentReviewQuery(q);if(!uuid(subject)||!Number.isSafeInteger(sessionExpires))throw fail();
   const query={academic_year:q.academic_year,university_q:q.university_q,department_q:q.department_q,track:q.track,group:q.group,metric_kind:q.metric_kind,cohort:q.cohort};
-  const revision=await currentReviewSha256({format:'jungsi.current-review-wire-revision/v1',qualified_state:d.qualified_state,projection_sha256:d.projection.sha256});
+  const revision=await currentReviewHeadSha256(d,head);
   return {subjectId:subject,sourceVersion:d.projection.version as string,sourceStateSha256:revision,projectionSha256:d.projection.sha256 as string,
     operation:CURRENT_REVIEW_OPERATION,querySha256:await currentReviewSha256(query),expiresAtMs:Math.min(sessionExpires,Number(utcInstantMicros(d.approval.expires_at)/1000n))};
+}
+/** Dynamic head is authorized only by the explicit live v2 descriptor. The catalog recipe,
+ * role/schema/purpose/subject/expiry remain pinned while each page adopts its actual DB head.
+ */
+export async function currentReviewHeadSha256(d:CurrentReviewDescriptor,head?:Pick<CurrentReviewRawPage,'commandId'|'commandSha256'>):Promise<string> {
+  if(head&&(!text(head.commandId)||!head.commandId||head.commandId.length>256||!hash(head.commandSha256)))throw fail('current_review_state_unapproved');
+  return currentReviewSha256({format:isLiveBoundedReview(d)?'jungsi.current-review-wire-revision/v2':'jungsi.current-review-wire-revision/v1',
+    qualified_state:d.qualified_state,projection_sha256:d.projection.sha256,...(isLiveBoundedReview(d)&&head?{current_head:{command_id:head.commandId,payload_sha256:head.commandSha256}}:{})});
 }
 /** Syntax validation retains numeric lexemes; nested JSONB is never parsed into JS floating point. */
 export function validateCurrentWireJsonText(value:string):void {
@@ -179,8 +192,8 @@ function wire(row:Row,keys:string[],member=false,population=false):Row {
     member&&(!hash(row.source_all29_sha256)||!hash(row.row_fingerprint)))throw fail();
   return row;
 }
-export function currentReviewKey(row:Row):CurrentKey {
-  return validateCurrentKey([row.academic_year,'CURRENT_REVIEW','CANONICAL_OBSERVATIONS','',row.canonical_result_id]);
+export function currentReviewKey(row:Row,live=false):CurrentKey {
+  return validateCurrentKey([live?2024:row.academic_year,live?'CURRENT_REVIEW_LIVE':'CURRENT_REVIEW','CANONICAL_OBSERVATIONS','',row.canonical_result_id]);
 }
 function matches(row:Row,q:CurrentReviewQuery):boolean {
   return (q.academic_year===null||row.academic_year===q.academic_year)&&lower(String(row.university??'')).includes(q.university_q)&&lower(String(row.department??'')).includes(q.department_q)&&
@@ -192,13 +205,15 @@ function exactCount(value:string):number {
 /** Validate only page-selected private wire. Membership/link raw values remain server-only. */
 export async function closeCurrentReviewPage(raw:CurrentReviewRawPage,d:CurrentReviewDescriptor,q:CurrentReviewQuery,b:CurrentPageBinding,after:CurrentKey|null,secret:Uint8Array):Promise<Row> {
   validateCurrentReviewQuery(q);
-  if(raw.commandId!==d.qualified_state.command_id||raw.commandSha256!==d.qualified_state.payload_sha256)throw fail('current_review_state_unapproved');
-  const obs=exactCount(raw.matchingObservationCount),schools=exactCount(raw.matchingSourceSchoolCount);
-  if(schools>obs||!Array.isArray(raw.rows)||raw.rows.length>q.limit+1||raw.rows.length>obs)throw fail();
+  const live=isLiveBoundedReview(d);
+  if(live?await currentReviewHeadSha256(d,raw)!==b.sourceStateSha256:(raw.commandId!==d.qualified_state.command_id||raw.commandSha256!==d.qualified_state.payload_sha256))throw fail('current_review_state_unapproved');
+  if(live&&(raw.matchingObservationCount!==null||raw.matchingSourceSchoolCount!==null)||!live&&(raw.matchingObservationCount===null||raw.matchingSourceSchoolCount===null))throw fail();
+  const obs=live?null:exactCount(raw.matchingObservationCount as string),schools=live?null:exactCount(raw.matchingSourceSchoolCount as string);
+  if(obs!==null&&schools!==null&&schools>obs||!Array.isArray(raw.rows)||raw.rows.length>q.limit+1||obs!==null&&raw.rows.length>obs)throw fail();
   let previous=after;const seen=new Set<string>(),items:Row[]=[],keys:CurrentKey[]=[];
   const observationCipher=new EncryptedCurrentCursor(secret,'observation');
   for(const selected of raw.rows) {
-    const c=wire(selected.current,CURRENT_WIRE_FIELDS),key=currentReviewKey(c);
+    const c=wire(selected.current,CURRENT_WIRE_FIELDS),key=currentReviewKey(c,live);
     if(!YEARS.includes(c.academic_year as number)||c.active_service!==true||c.result_id!==c.canonical_result_id||!matches(c,q)||
        previous&&compareCurrentKeys(previous,key)>=0||seen.has(c.canonical_result_id as string)||!Array.isArray(selected.members)||!Array.isArray(selected.population))throw fail();
     seen.add(c.canonical_result_id as string);previous=key;keys.push(key);
@@ -220,7 +235,7 @@ export async function closeCurrentReviewPage(raw:CurrentReviewRawPage,d:CurrentR
     // digest is bound inside the observation token, never called native32/source-all29.
     const orderedMembers=[...selected.members].sort((a,b)=>compareCurrentKeys([0,a.release_id as string,a.result_id as string,'',''],[0,b.release_id as string,b.result_id as string,'','']));
     const orderedPopulation=[...selected.population].sort((a,b)=>compareCurrentKeys([0,currentReviewWireJson(a),'','',''],[0,currentReviewWireJson(b),'','','']));
-    const recordDigest=await currentReviewSha256({recipe:CURRENT_REVIEW_WIRE_RECIPE,scope_state_sha256:b.sourceStateSha256,current:c,members:orderedMembers,population:orderedPopulation});
+    const recordDigest=await currentReviewSha256({recipe:live?CURRENT_REVIEW_LIVE_WIRE_RECIPE:CURRENT_REVIEW_WIRE_RECIPE,scope_state_sha256:b.sourceStateSha256,current:c,members:orderedMembers,population:orderedPopulation});
     const value=validateCurrentScalar(c.metric_value_literal,c.metric_value_json_type,c.metric_value_numeric);
     const reasons=['review_only_not_published','public_offering_mapping_not_qualified','official_metadata_not_qualified',...value.reasons];
     if(scopes.some(s=>s.individual_offering_metric_inference_allowed===false))reasons.push('aggregate_or_forward_reference');
@@ -231,9 +246,19 @@ export async function closeCurrentReviewPage(raw:CurrentReviewRawPage,d:CurrentR
       link_scopes:scopes,official_metadata:{metric_definition:null,unit:null,original_scale:null,source_url:null,source_as_of:null,publication_status:null},
       review_status:'review_only',value_availability:value.availability,hold_reasons:reasons});
   }
-  if(new Set(raw.rows.map(r=>currentReviewWireJson([r.current.school_id,r.current.university_code]))).size>schools)throw fail();
-  const next=raw.rows.length>q.limit?await new EncryptedCurrentCursor(secret).seal(b,keys[q.limit-1]):null;
-  return {format:'jungsi.current-admission-review-page/v1',status:'review',items:items.slice(0,q.limit),matching_observation_count:obs,matching_source_school_count:schools,
+  if(schools!==null&&new Set(raw.rows.map(r=>currentReviewWireJson([r.current.school_id,r.current.university_code]))).size>schools)throw fail();
+  let scanNext:CurrentKey|null=null;
+  if(live) {
+    if(!Object.hasOwn(raw,'scanNextKey'))throw fail();
+    if(raw.scanNextKey!==null) {
+      scanNext=validateCurrentKey(raw.scanNextKey);
+      if(scanNext[0]!==2024||scanNext[1]!=='CURRENT_REVIEW_LIVE'||scanNext[2]!=='CANONICAL_OBSERVATIONS'||scanNext[3]!==''||
+        after&&compareCurrentKeys(after,scanNext)>=0||keys.length&&compareCurrentKeys(keys[keys.length-1],scanNext)>0)throw fail();
+    }
+  }
+  const resume=raw.rows.length>q.limit?keys[q.limit-1]:scanNext;
+  const next=resume===null?null:await new EncryptedCurrentCursor(secret).seal(b,resume);
+  return {format:live?'jungsi.current-admission-review-page/v2':'jungsi.current-admission-review-page/v1',...(live?{query_mode:'live_bounded',count_status:'unknown'}:{}),status:'review',items:items.slice(0,q.limit),matching_observation_count:obs,matching_source_school_count:schools,
     review_version:d.projection.version,as_of:utcText(raw.asOf),next_cursor:next,publication_status:'not_published'};
 }
 export function createCurrentAdmissionReviewHandler(ports:CurrentReviewPorts,t:CurrentReviewTransport):(request:Request)=>Promise<Response> {
@@ -255,15 +280,24 @@ export function createCurrentAdmissionReviewHandler(ports:CurrentReviewPorts,t:C
       if(!session||!uuid(session.subjectId)||!Number.isSafeInteger(session.expiresAt)||session.expiresAt<=now)throw fail('authentication_required',401);
       const descriptor=await validateCurrentReviewDescriptor(await ports.loadDescriptor(),t.environment,now);
       if(!(descriptor.approval.review_subjects as string[]).includes(session.subjectId))throw fail('review_subject_not_allowed',403);
-      const q=parseCurrentReviewQuery(url),binding=await currentReviewBinding(descriptor,q,session.subjectId,session.expiresAt);
-      const after=q.cursor===null?null:await cursor.open(q.cursor,binding,now);
+      const q=parseCurrentReviewQuery(url),live=isLiveBoundedReview(descriptor);
+      let binding=await currentReviewBinding(descriptor,q,session.subjectId,session.expiresAt),after:CurrentKey|null=null,adoptedHead:string|null=null;
+      if(q.cursor!==null) {
+        if(live){const saved=await cursor.openLiveSnapshot(q.cursor,binding,now);after=saved.after;adoptedHead=saved.sourceStateSha256;}
+        else after=await cursor.open(q.cursor,binding,now);
+      }
       let raw:CurrentReviewRawPage;
       try {raw=await ports.search(descriptor,q,after);}catch(e){if(q.cursor&&e instanceof DisplayError&&e.code==='current_review_state_unapproved')throw fail('cursor_version_mismatch',409);throw e;}
-      if(q.cursor&&(raw.commandId!==descriptor.qualified_state.command_id||raw.commandSha256!==descriptor.qualified_state.payload_sha256))throw fail('cursor_version_mismatch',409);
+      if(live){binding=await currentReviewBinding(descriptor,q,session.subjectId,session.expiresAt,raw);if(adoptedHead!==null&&adoptedHead!==binding.sourceStateSha256)throw fail('cursor_version_mismatch',409);}
+      else if(q.cursor&&(raw.commandId!==descriptor.qualified_state.command_id||raw.commandSha256!==descriptor.qualified_state.payload_sha256))throw fail('cursor_version_mismatch',409);
       const completed=(t.now??Date.now)();
       if(session.expiresAt<=completed)throw fail('authentication_required',401);
       await validateCurrentReviewDescriptor(descriptor,t.environment,completed);
-      return response(await closeCurrentReviewPage(raw,descriptor,q,binding,after,t.cursorKey));
+      const page=await closeCurrentReviewPage(raw,descriptor,q,binding,after,t.cursorKey);
+      const sending=(t.now??Date.now)();
+      if(session.expiresAt<=sending)throw fail('authentication_required',401);
+      await validateCurrentReviewDescriptor(descriptor,t.environment,sending);
+      return response(page);
     } catch(e) {
       const error=e instanceof DisplayError?e:fail('backend_dependency_unavailable');
       return response({status:'error',error:{code:error.code},request_id:id},error.status);
