@@ -11100,7 +11100,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "summary": "spec1.9.37: v9/bf6435d local 실제JWT200100+100·HTML비밀값 비노출 보고를 수용하고 BFF no-cache/Edge no-store를 구분. Owner 범위를1~4페이지 전체로 확정하여 기존22API·최소native·독립성공/pending·원문/공급자 배지 의미를 명시. 비공개 오프라인 상태CLI와 W6 발행범위·자동/사람판정·검수UI후보·W1합류 기준을 준비. 실제full4 native실행·일반공개·운영3gate·DB정리 미완료 보존, 프런트런타임·RLS·회원정책·env·승인판 변경0."
+      "summary": "spec1.9.37: v9/bf6435d local 실제JWT200100+100·HTML비밀값 비노출 보고를 수용하고 BFF no-cache/Edge no-store를 구분. Owner 범위를1~4페이지 전체로 확정하고 오프라인 상태CLI·W6 발행범위/자동·사람판정/검수UI후보/W1합류 기준을 준비. 목적 한정C catalog+공식시험팩 local cache의51HTTP/362assertion PASS를 수용하되 전체4페이지 계산·실Auth/DB/Storage·브라우저·일반공개·운영3gate·DB정리는 미완료로 보존. 공식 과목팩의 로컬 성적표·총점 목적만 승인하며 hosted 승인판·프런트런타임·RLS·회원정책·env·기본경로 변경0."
     }
   ],
   "overall_analysis_contract": {
