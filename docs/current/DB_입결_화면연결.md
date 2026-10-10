@@ -1,10 +1,10 @@
 # Supabase 입결 DB와 화면 API 연결
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.31이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.32이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 승인된 동결 역사 입결의 제한 표시 검수; 현재 단일 정본 공급자는 별도 준비 단계
 
-계약 2026.10.10.v14 · 코드 historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress · production_ready=false. 담당 feature/application-pre-data-platform.
+계약 2026.10.10.v15 · 코드 historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress; Owner DEP-IO-01-WINDOW의 준수 절을 따른다(02:00~06:00 KST·최대 4시간·경고 시 그날 SKIP·CAP-03 별도 승인·관측 시각 UNCONFIRMED·I/O HOLD) · production_ready=false. 담당 feature/application-pre-data-platform.
 
 ## 연결과 승인 범위
 
@@ -47,6 +47,11 @@
 - 별도 GET /api/v1/review/current-admissions는 허용된 검수자에게만 닫힌 검수 응답을 제공한다. 지표 원문 literal과 원 JSON 타입을 보존한다. 미확인 공식 공개 정보는 null과 보류 사유로 표시하며 active current를 발표 입결로 간주하지 않는다. 기존 C·일반 회원 화면·기본22API·이용권 판정은 유지한다.
 - all_current 검수 목적은 명시 허용된 subject와 승인 만료 안에서만 적용한다(최대24시간). 첫 페이지에서 동일 읽기 전용 SQL 스냅샷의 최근 적격 변경 명령 상태를 결속하고 이후 cursor의 상태가 달라지면409로 거절한다. 새 wire 상태 검증은 기존32필드 정본 codec을 대체하지 않는다. 출처 회원 검증과 모집단 연결의 원 멀티셋을 보존한다.
 - 파일류와 overlays 정리는 원형 bytes·원격 SHA 재수신·참조 및 복구 reader 검산·C/current 변경0 영수증을 먼저 갖춘다. registry는 출처 연결과 원형 근거를 보존하는 영구 자료다. Storage 복사·resolver 전환·제거·일반 VACUUM·VACUUM FULL은 각각 NOT_RUN이며 제거 대상은 아직 승인되지 않았다.
+- Owner 준수 절 / DEP-IO-01-WINDOW: 대량 작업 창은 매일 02:00~06:00 KST, 1회 최대 4시간이다. 시작 전 I/O 배너가 소진 임박·소진 상태면 그날은 건너뛴다. 한 창에 한 팀의 한 작업만 수행하고 새 전용 lease와 안전한 체크포인트를 확인한다. 종료 전에 일관된 체크포인트에서 멈추고, 기존의 더 짧은 배치·bytes·시간·5초 조회 한계를 완화하지 않는다. 이월은 자동 재시작 허가가 아니다.
+- Owner 준수 절 / 소량 조회: 기존 승인된 유한 소량 검수 요청만 시간창 예외이며 RLS·역할·subject·자료판·범위·만료와 비용 gate를 유지한다. 요청 수나 limit만으로 저비용을 입증하지 못한다. 이전 57014 전수 조회를 소량으로 재분류하거나 자동 재시도하지 않는다. 이번 준비에서 DB·Storage·read model·VACUUM은 NOT_RUN이다.
+- Owner 준수 절 / CAP-03: 정확한 표·행 PK·열·영향·복구 검산·비삭제 대안을 제시하고 별도 Owner 제거 승인을 받는다. 시간창이나 CAP 절차 동의는 제거 승인이 아니다. registry·overlays의 current/C 의존과 원문·이전 판·실패를 보존하며 Storage 이전·참조 전환·제거·VACUUM을 각각 기록한다. 컴퓨트 업그레이드는 Owner 보류이며 과금 변경은 실행하지 않는다.
+- Owner 준수 절 / 관측과 승인: 경고 지속은 수신 회신이며 새 Dashboard 실측은 아니다. 원문의 저녁 표기와 오전 작성 시각 불일치로 정확 관측 시각은 UNCONFIRMED다. 실제 회복·원인은 미확정이고 I/O HOLD를 유지한다. 조건부 작업창은 자료판 만료·최대24h·PIN·RLS·subject·발행·live 전환·자동화의 승인을 연장하지 않는다.
+- Owner 준수 절 / 후속 CR 상태: CR-HISTORY-METRIC-EXPANSION-01은 인원·비율·발표 단계·코호트·공식 지원자 우선·결측 보류의 데이터 계약 준비안이고, CR-CONVERSION-BONUS-SUMMARY-01은 공식 제도와 학생 실제 적용·성공0점·미확인 보존·유료6개 응답 호환성 준비안이다. 둘 다 미채택이며 공식 자료·public mapping·검수승인/발행·DTO·코드·엔진·실API·BFF/브라우저 인수는 NOT_RUN이다.
 
 ## 기존 API와 구현 경로
 
@@ -209,8 +214,8 @@
 | current_root_dependency_edges | PASS_ACTUAL_ROOT_SPECIFIC_PG_DEPEND_METADATA_CURRENT_DIRECT_REGISTRY_AND_CURRENT_HISTORICAL_C_OVERLAY_REACHABILITY; FILE_PAYLOAD_RELATIONS_NOT_IN_THOSE_VIEW_CLOSURES_DOES_NOT_PROVE_NO_INGEST_REPLAY_RESOLVER_DEPENDENCY |
 | DB_capacity_execution | STORAGE_ORIGINAL_BYTES_MIGRATION_NOT_RUN; OVERLAY_CLEANUP_NOT_RUN; ARCHIVE_RESOLVER_NOT_RUN; EXACT_DB_REMOVAL_TARGETS_UNAPPROVED_AND_EMPTY; ORDINARY_VACUUM_NOT_RUN; VACUUM_FULL_NOT_RUN; FRONTEND_CONDITIONAL_AGREEMENT_AND_EXTERNAL_REQUEST_ARE_NOT_EXACT_DELETION_APPROVAL |
 | registry_capacity_adjudication | RETAIN_REQUIRED_DIRECT_CURRENT_VIEW_DEPENDENCY_WITH_CANONICAL_AND_SOURCE_IDS_SOURCE_INITIAL_FIELDS_EVIDENCE_AND_HASH_HISTORY; SIZE_MATCHES_NEW_PRIVATE_MEASUREMENT; GROWTH_CAUSE_AND_FUTURE_EXACT_BYTES_NOT_INFERRED_FROM_TIMING_OR_SIZE_ALONE |
-| admission_metric_expansion | REQUEST_RECEIVED_RECRUITMENT_COMPETITION_AND_ADDITIONAL_ADMISSION_COUNTS_REQUIRE_DISTINCT_OFFICIAL_METRIC_DEFINITIONS_CURRENT_ID_SOURCE_PUBLIC_MAPPING_AND_APPROVAL; NOT_CURRENT_HISTORY_OR_FORECAST_AUTO_ADOPTION |
-| bonus_summary_CR | REVIEW_PENDING_OFFICIAL_YEAR_DEPARTMENT_RULE_CONDITIONS_AND_EXPLANATION_CONTRACT; NOT_AN_IMPLEMENTED_ENGINE_OR_PUBLISHED_ADJUSTMENT |
+| admission_metric_expansion | FILE_ONLY_DATA_CONTRACT_REVIEW_PREPARED_COUNTS_VS_RATIO_PHASE_COHORT_OFFICIAL_A_PRIORITY_AND_DASH_ON_MISSING; PROPOSAL_UNADOPTED_OFFICIAL_SOURCE_MAPPING_CATALOG_APPROVAL_PUBLICATION_NOT_RUN |
+| bonus_summary_CR | FILE_ONLY_SERVICE_AND_DATA_CONTRACT_REVIEW_PREPARED_RULE_EXISTENCE_VS_ACTUAL_APPLICATION_SUCCESSFUL_ZERO_UNKNOWN_AND_PARTIAL_HOLD; CR_CONVERSION_BONUS_SUMMARY_01_UNADOPTED_DTO_CODE_ENGINE_RUNTIME_NOT_RUN |
 | current_review_candidate_native | PASS_DENO_CHECK6_AND_SYNTHETIC41; NEW_SOURCE6_DEVELOPMENT_CANDIDATE; NOT_ACTUAL_PERFORMANCE_OR_HOSTED_ACCEPTANCE |
 | current_review_native_receipt_sha256 | a9e6a8b29c916c11458e7b1bcf602f406bfefc871bfde01e2fc931ec5fcba169 |
 | current_review_actual_app_bounded_page | FAIL_ACTUAL_STATEMENT_TIMEOUT57014_QUALIFIED_PAYLOAD_AND_FILTERED_COUNTS_PAGE_KEYS; METADATA12_ROLE_RLS_13SCALAR_PASS_ROWS0; PRIOR_STATE503_PRESERVED; CONCRETE_LIGHT_PROVIDER_CR_REQUIRED_NO_TIMEOUT_OR_SCOPE_RELAXATION |
@@ -243,4 +248,4 @@
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=b0ec5c13165a081af642ee2fc1b89813f8d7ebce6f7168c01cd051f3b1faea84 -->
+<!-- jungsi:generated spec_sha256=e7a0fc38dffac927f3ed20286132d57852f3684768b6dc0f0fd27bddad1b1f84 -->
