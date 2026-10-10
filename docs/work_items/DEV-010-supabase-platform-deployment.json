@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "planned",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.35",
+  "contract_version": "1.9.36",
   "requirements": [
     "REQ-12",
     "REQ-14",
