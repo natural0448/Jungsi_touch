@@ -1,10 +1,10 @@
 # Supabase 입결 DB와 화면 API 연결
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.34이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.35이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 승인된 화면팀·관리자에게 현재 단일 정본 입결을 실제 서비스 API로 표시; 일반회원 운영 공개는 별도
 
-계약 2026.10.10.v17 · 코드 implemented_live_bounded_v2_native177_actual_app_provider101_typed100_PASS_deployment_in_progress · production_ready=false. 담당 feature/application-pre-data-platform.
+계약 2026.10.10.v18 · 코드 implemented_live_bounded_v2_committed_native_and_actual_factory_HTTP_PASS_hosted_deployed_negative5PASS_frontend_connection_instructed · production_ready=false. 담당 feature/application-pre-data-platform.
 
 ## 연결과 승인 범위
 
@@ -118,15 +118,16 @@
 - DB 용량 메타데이터만 실제 앱1연결 READONLY/TLS로 확인했다. 대상3표의 RLS/FORCE·SELECT전용과 gzip NOT NULL·현재/역사 overlay 의존을 확인했지만 사본 원격 bytes/SHA·삭제·VACUUM을 실행한 것은 아니다. 주석 분리 preflight 실패는 접속0으로 보존하고 정정본1회 성공과 구분한다. 최신 실측 bytes와 후보 명부·실행 단계는 별도 비공개 인계 영수증에 보관한다.
 - 1차 WORKER_ERROR/Buffer·2차 subject 제한·3차 history/recruitment503과 정상 보안 응답은 이력으로 보존한다. 배열6개 입력·reloptions 타입 보완과 native39+원형wire5·actual provider140/12/JOIN1, 정상 source/docs 통합·같은 committed 번들 기존 함수 재배포는 완료다. 외부 화면팀은 같은 URL/relay/PIN3/공개Auth에서 fresh JWT140지표100+40·유료403·recruitment pending/null·no-store·BFF 토큰 비노출을 원승인 만료 전에 재검수한다. 만료 후에는 새 승인판이 필요하며 권한·기간을 임의 확대하지 않는다.
 - 전수 current 연결은 화면팀·관리자 검수 환경에서 별도 승인된 purpose/상태/subject와 operation routing으로 제공한다. 기존 C 함수·PIN3를 범위 없는 조회로 바꾸거나 학생 운영 화면에 전체 DB dump를 배포하지 않는다. 승인 후 공급할 base URL과 서버 설정을 정확한 배포 영수증으로 전달한다.
-- 현재는 current 공개 projection·공개 offering ID 대응·정본 상태 결속·서버 cursor 키·새 승인판이 준비 단계다. 앱 읽기 권한 메타 확인은 완료했고 현재 실제 페이지·함수 배포·화면 수신은 미실행이다. DB 접속·원자료·Storage 경로·새 cursor 키는 브라우저에 전달하지 않는다.
+- [이력: live_bounded v2 배포 이전] 현재는 current 공개 projection·공개 offering ID 대응·정본 상태 결속·서버 cursor 키·새 승인판이 준비 단계다. 앱 읽기 권한 메타 확인은 완료했고 현재 실제 페이지·함수 배포·화면 수신은 미실행이다. DB 접속·원자료·Storage 경로·새 cursor 키는 브라우저에 전달하지 않는다.
 - DB 정리 회신에는 registry 직접 의존·보존 판정과 원형 Storage 복사·overlays 정리·참조 전환·제거·일반/FULL VACUUM을 각각 RUN/NOT_RUN으로 적는다. 역사 C/v21_1과 단일 최신 current 정본을 서로 대체하지 않고 둘의 변경0 근거를 보존한다.
-- 별도 current-admission-review 함수의 GET /api/v1/review/current-admissions는 허용 명부에 있는 검수자만 사용한다. 1페이지의 공개 History DTO와 다르며 literal·원 타입·보류 사유와 암호화 cursor를 제공한다. 원 canonical/source ID와 비공개 경로는 응답에서 제외한다. 구체적인 자료판 검수 후 Supabase 관리자가 신규 이름의 PIN3·cursor 키를 등록하며 기존 C 설정은 유지한다.
+- [이력: live_bounded v2 배포 이전] 별도 current-admission-review 함수의 GET /api/v1/review/current-admissions는 허용 명부에 있는 검수자만 사용한다. 1페이지의 공개 History DTO와 다르며 literal·원 타입·보류 사유와 암호화 cursor를 제공한다. 원 canonical/source ID와 비공개 경로는 응답에서 제외한다. 구체적인 자료판 검수 후 Supabase 관리자가 신규 이름의 PIN3·cursor 키를 등록하며 기존 C 설정은 유지한다.
 - registry 용량 요청은 실제 읽기 전용 크기·의존 검수와 함께 회신한다. registry는 현재 정본의 직접 의존 표이며 overlays는 현재 정본과 역사 C 모두가 사용한다. 파일류가 SQL 뷰 의존 목록에 없다는 사실만으로 아카이브·재생 안전을 확인한 것은 아니다. 정확한 복사·복구·제거 범위·유지보수 조건을 인수하기 전까지 두 정리 작업과 VACUUM은 미실행이다.
-- 이번 수정은 explicit 읽기 모델 provider/handler 후보와 native 합성 HTTP 경로를 준비하는 서비스·데이터 계층 작업이다. 실제 DB 스키마·독립 baseline/seal·I/O 비용·5초 페이지·새 검수 승인판·배포가 완료되기 전에는 기존 화면을 live로 전환하거나 전수 검수 완료로 기록하지 않는다. 화면팀은 최종 회신의 코드/문서/검증 경계와 NOT_RUN을 구분해 인수한다.
+- [이력: live_bounded v2 배포 이전] 이번 수정은 explicit 읽기 모델 provider/handler 후보와 native 합성 HTTP 경로를 준비하는 서비스·데이터 계층 작업이다. 실제 DB 스키마·독립 baseline/seal·I/O 비용·5초 페이지·새 검수 승인판·배포가 완료되기 전에는 기존 화면을 live로 전환하거나 전수 검수 완료로 기록하지 않는다. 화면팀은 최종 회신의 코드/문서/검증 경계와 NOT_RUN을 구분해 인수한다.
 - live_bounded v2는 전체 count를 수행하지 않고 matching_observation_count/matching_source_school_count=null 및 count_status=unknown을 반환한다. 최대100 표시행과 제한 scan cursor를 제공하며 items0+next_cursor는 검색 완료가 아니다.
 - live v2는 같은 READONLY/RLS snapshot에서 최신 command를 첫 페이지에 결속하고 다음 페이지 변경을409로 거절한다. 승인된 정의를 그대로 둔 bounded 물리 복합PK JOIN을 사용하며 raw current 전체 조회·N+1·미검증 fallback은 하지 않는다.
 - current review의 비공개 descriptor PIN과 cursor 고정키는 Git제외 서버 배포 artifact로 주입할 수 있다. 기존7개의 DB/Auth/Storage/relay 서버env를 재사용하고 브라우저·공개코드·로그에 설정을 전달하지 않는다.
 - 현재 review API와 학생 1페이지 History DTO는 다른 계약이다. 화면팀은 검수 전용 서버 BFF에서 v2를 소비하고 review_only/not_published·결측/보류와 unknown count를 표시한다.
+- current-admission-review v2를 실제 Supabase에 배포했고 무인증/relay/JWT 거절5건을 검수했다. 기존 승인 두 계정·서버 BFF·relay를 재사용하여 현재 정본 검수 화면만 즉시 연결한다. 새 PIN4 등록/read model/census 준비를 화면 연결 선행 조건으로 요구하지 않는다. actual factory Storage+DB 두 페이지200100은 통제 세션DI이며 fresh user JWT·BFF·브라우저 성공은 화면팀 영수증으로 별도 확정한다. 응답v2 unknown count null/empty items+cursor/409새조회 계약을 사용하며 기본22API·기존C는 보존한다.
 
 ## 증거와 미실행 범위
 
@@ -253,7 +254,10 @@
 | live_bounded_actual_first_rows | PASS_APP_NONOWNER_NO_BYPASS_TLS_RLS_READONLY: complete current/member/population101rows bulk payload2877ms; typed public18 closed100items unknowncounts nextcursorPASS. Bounded base101rows987ms. DB writes0. |
 | live_bounded_native | PASS_NATIVE_177_REGISTERED_TESTS_AND_CHECK5_NO_DB_NET; INDEPENDENT37_NEW_CURRENT_TESTS_PASS |
 | live_bounded_remote_approval | PASS_NEW_PRIVATE_IMMUTABLE_DESCRIPTOR_POST200_AND_RAW_GET200_BYTES_SHA_EQUAL; existing_subjects_preserved; NOT_HTTP_USER_ACCEPTANCE |
-| live_bounded_deployment | IN_PROGRESS_NEW_FUNCTION_CURRENT_ADMISSION_REVIEW; old_C_untouched |
+| live_bounded_deployment | APPLIED_CURRENT_ADMISSION_REVIEW_SUPABASE_20261010T1023Z; sourcefa6f412 private_release139047_SHA67a96b; legacyJWT_gatewayON; no_C_or_default22_change |
+| live_bounded_actual_factory_HTTP | PASS_STORAGE_DB_FULL_FACTORY_HTTP_2PAGES_200100_EACH_1901ms_1931ms; controlled_session_DI_NOT_actualJWT |
+| live_bounded_hosted_negative | PASS5_NO_CREDENTIAL401_RELAY_MISSING403_RELAY_WRONG403_NO_USER_JWT401_FAKE_JWT401; no_items_or_secret_values; handler_private_no_store; platform401_header_distinct |
+| live_bounded_frontend_delivery | PASS_EXISTING_HANDOFF_NEW_FILE7818B_REMOTE_FETCH_CONTENT_SHA_EXACT_OWNER1_WRITER1; actual_BFF_browser_NOT_RUN |
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -273,4 +277,4 @@
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=f34dccb6940901052611e8618576f9624537e84794c9a7ee1710054d82096aa0 -->
+<!-- jungsi:generated spec_sha256=ddee6aeee81942dc734184a258f9571b8d1367adcb76a33950938e7a1e274e6f -->
