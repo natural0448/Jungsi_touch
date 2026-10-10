@@ -127,7 +127,19 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
               ))}
             </div>
 
-            {c?.status === "pending" || shown.length === 0 ? (
+            {/* 상위 analysis_status 가 보류면 후보가 ready·빈 목록이어도 '지원 가능한 대학 없음'·
+                '추천 완료'로 말하지 않는다 — 분석 자료가 아직 결속되지 않았다는 보류이지
+                결과가 0 이라는 판정이 아니다(담당자 지시 2026-10-11) */}
+            {report.analysis_status?.status === "pending" && shown.length === 0 ? (
+              <section className="gate flat">
+                <h2>대학 분석 자료가 아직 준비되지 않았습니다</h2>
+                <p>
+                  성적과 총점은 계산됐지만 올해 모집행·대학 분석 자료가 결속되기 전이라 후보 산출을 보류한 상태입니다
+                  {report.analysis_status.reason_code ? <> (보류 코드 <code>{report.analysis_status.reason_code}</code>)</> : null}.
+                  지원 가능한 대학이 없다는 뜻이 아니며, 자료가 연결되면 이 화면에 후보가 나타납니다.
+                </p>
+              </section>
+            ) : c?.status === "pending" || shown.length === 0 ? (
               <section className="gate flat">
                 <h2>{c?.status === "pending" ? "아직 찾은 학교가 없습니다" : "이 조건에 해당하는 학교가 없습니다"}</h2>
                 <p>다른 조건을 보거나 {p3.label}에서 직접 검색하세요. 목록에 없다는 것이 지원할 수 없다는 뜻은 아닙니다.</p>
