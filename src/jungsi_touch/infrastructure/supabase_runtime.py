@@ -1,9 +1,11 @@
 """Explicit, read-only Supabase native selection and protected readiness."""
 from copy import deepcopy
 from dataclasses import dataclass
+from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import re
 from .settings import ServerSettings
 from .supabase_storage import SupabaseStorageClient, SupabaseStorageDataProvider, MAX_ARTIFACT_BYTES
 from .drive_provider import DriveDataProvider
@@ -355,9 +357,315 @@ def configured_supabase_app():
     return create_supabase_secured_app(security=security,settings=settings,data=data,selection=selection)
 
 
-if __name__ == '__main__':
+REVIEW_STATUS_MAX_BYTES = 1024 * 1024
+_REVIEW_PAGE_FIELDS = frozenset(('format', 'query_mode', 'count_status', 'status', 'items',
+    'matching_observation_count', 'matching_source_school_count', 'review_version', 'as_of',
+    'next_cursor', 'publication_status'))
+_REVIEW_ITEM_FIELDS = frozenset(('observation_token', 'academic_year', 'university', 'department',
+    'track', 'recruit_group', 'metric_kind', 'metric_value_literal', 'metric_value_json_type',
+    'metric_value_numeric_text', 'cohort', 'statistic_label', 'source_member_count', 'link_scopes',
+    'official_metadata', 'review_status', 'value_availability', 'hold_reasons'))
+_REVIEW_METADATA_FIELDS = frozenset(('metric_definition', 'unit', 'original_scale', 'source_url',
+    'source_as_of', 'publication_status'))
+_REVIEW_PROVIDER_HOLDS = ('review_only_not_published', 'public_offering_mapping_not_qualified',
+                        'official_metadata_not_qualified')
+_REVIEW_AVAILABILITY = ('present', 'actual_null', 'missing', 'held')
+_REVIEW_PUBLIC_LINK_KINDS = frozenset(('same_year_offering', 'verified_aggregate_offerings',
+                                     'official_reorganized_forward_reference'))
+
+
+def _review_capture_pairs(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError('duplicate capture field')
+        result[key] = value
+    return result
+
+
+def _review_capture_constant(_value):
+    raise ValueError('non-finite capture number')
+
+
+def _review_page_status(payload):
+    """Summarize one captured v2 page; never probe, print data, or infer row approval."""
+    try:
+        if type(payload) is not bytes or not 0 < len(payload) <= REVIEW_STATUS_MAX_BYTES:
+            raise ValueError('capture size')
+        page = json.loads(payload.decode('utf-8'), object_pairs_hook=_review_capture_pairs,
+                          parse_constant=_review_capture_constant)
+        if (type(page) is not dict or set(page) != _REVIEW_PAGE_FIELDS or
+                page['format'] != 'jungsi.current-admission-review-page/v2' or
+                page['status'] != 'review' or page['query_mode'] != 'live_bounded' or
+                page['publication_status'] != 'not_published' or page['count_status'] != 'unknown' or
+                page['matching_observation_count'] is not None or page['matching_source_school_count'] is not None or
+                type(page['items']) is not list or len(page['items']) > 100 or
+                type(page['review_version']) is not str or
+                re.fullmatch(r'[A-Za-z0-9_.:-]{1,128}', page['review_version']) is None or
+                type(page['as_of']) is not str or len(page['as_of']) > 40 or
+                page['next_cursor'] is not None and
+                (type(page['next_cursor']) is not str or not 0 < len(page['next_cursor']) <= 4096)):
+            raise ValueError('capture envelope')
+        if re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|\+00:00)', page['as_of']) is None:
+            raise ValueError('capture timestamp')
+        instant = datetime.fromisoformat(page['as_of'].replace('Z', '+00:00'))
+        if instant.tzinfo is None or instant.utcoffset() != timezone.utc.utcoffset(instant):
+            raise ValueError('capture timestamp')
+        availability = dict.fromkeys(_REVIEW_AVAILABILITY, 0)
+        links = {}
+        text_fields = _REVIEW_ITEM_FIELDS - {'observation_token', 'academic_year', 'source_member_count',
+            'link_scopes', 'official_metadata', 'review_status', 'value_availability', 'hold_reasons'}
+        for row in page['items']:
+            if (type(row) is not dict or set(row) != _REVIEW_ITEM_FIELDS or
+                    type(row['observation_token']) is not str or not row['observation_token'] or
+                    type(row['academic_year']) is not int or row['academic_year'] not in (2024, 2025, 2026, 2027) or
+                    type(row['source_member_count']) is not int or not 1 <= row['source_member_count'] <= 2**53 - 1 or
+                    any(row[key] is not None and type(row[key]) is not str for key in text_fields) or
+                    row['review_status'] != 'review_only' or row['value_availability'] not in _REVIEW_AVAILABILITY or
+                    type(row['hold_reasons']) is not list or
+                    any(type(reason) is not str for reason in row['hold_reasons']) or
+                    not all(reason in row['hold_reasons'] for reason in _REVIEW_PROVIDER_HOLDS) or
+                    type(row['official_metadata']) is not dict or set(row['official_metadata']) != _REVIEW_METADATA_FIELDS or
+                    any(value is not None for value in row['official_metadata'].values()) or
+                    type(row['link_scopes']) is not list):
+                raise ValueError('capture item')
+            state = row['value_availability']
+            if state in ('held', 'missing'):
+                if row['metric_value_literal'] is not None or row['metric_value_numeric_text'] is not None:
+                    raise ValueError('held value exposed')
+            elif state == 'actual_null':
+                if (row['metric_value_literal'], row['metric_value_json_type'], row['metric_value_numeric_text']) != ('null', 'null', None):
+                    raise ValueError('actual null')
+            elif (not row['metric_value_literal'] or row['metric_value_json_type'] not in ('number', 'integer', 'decimal', 'string') or
+                    row['metric_value_json_type'] != 'string' and row['metric_value_numeric_text'] is None):
+                raise ValueError('present value')
+            availability[state] += 1
+            for link in row['link_scopes']:
+                if (type(link) is not dict or set(link) != {'link_kind', 'population_reference_year', 'individual_offering_metric_inference_allowed'} or
+                        type(link['link_kind']) is not str or not link['link_kind'] or len(link['link_kind']) > 100 or
+                        any(ord(char) < 32 or ord(char) == 127 for char in link['link_kind']) or
+                        type(link['population_reference_year']) is not int or
+                        not -(2**53 - 1) <= link['population_reference_year'] <= 2**53 - 1 or
+                        type(link['individual_offering_metric_inference_allowed']) is not bool):
+                    raise ValueError('capture population link')
+                kind = link['link_kind'] if link['link_kind'] in _REVIEW_PUBLIC_LINK_KINDS else 'unknown'
+                key = (kind, link['population_reference_year'], link['individual_offering_metric_inference_allowed'])
+                links[key] = links.get(key, 0) + 1
+        return dict(format='jungsi.current-review-local-status/v1', evidence_mode='captured_response_not_fresh_probe',
+            fresh_DB_probe='NOT_RUN', publication_status=page['publication_status'], query_mode=page['query_mode'],
+            review_version=page['review_version'], as_of=instant.isoformat(), count_status='unknown',
+            matching_observation_count=None, matching_source_school_count=None, rows_in_page=len(page['items']),
+            value_availability_counts=availability, next_page_available=page['next_cursor'] is not None,
+            provider_hold_reasons=list(_REVIEW_PROVIDER_HOLDS), source_review_status='NOT_EXPOSED',
+            original_metadata_review_status='NOT_EXPOSED',
+            review_badge_meaning='검수 전용 공급자의 표시 제한이며 원본 각 행의 검수 상태를 뜻하지 않음',
+            count_meaning='전국 건수는 미계산이며 집계는 이 반환 페이지 안에서만 수행',
+            value_availability_meaning='present는 표시 가능한 값 상태이며 유효한 성적 또는 공식 검수 통과를 뜻하지 않음',
+            population_links=[dict(link_kind=kind, population_reference_year=year,
+                individual_offering_metric_inference_allowed=allowed, links_in_page=count)
+                for (kind, year, allowed), count in sorted(links.items())])
+    except (ValueError, TypeError, KeyError, OverflowError, RecursionError):
+        raise PlatformError('local_review_capture_invalid', 503) from None
+
+
+def review_status_from_file(value):
+    """Read only a bounded private capture; no env, network, DB, or output files."""
+    try:
+        path = _private_path(value)
+        if not 0 < path.stat().st_size <= REVIEW_STATUS_MAX_BYTES:
+            raise ValueError('capture size')
+        with path.open('rb') as stream:
+            payload = stream.read(REVIEW_STATUS_MAX_BYTES + 1)
+        return _review_page_status(payload)
+    except (OSError, ValueError, PlatformError):
+        raise PlatformError('local_review_capture_invalid', 503) from None
+
+
+_PAGE_READINESS_SETTINGS = ('SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'DATABASE_URL',
+    'SUPABASE_SECRET_KEY', 'JUNGSI_SUPABASE_STORAGE_BUCKET', 'JUNGSI_SUPABASE_STORAGE_PREFIX',
+    'JUNGSI_SUPABASE_RUNTIME_REGISTRY', 'JUNGSI_SUPABASE_RUNTIME_SELECTION', 'JUNGSI_RELAY_TOKEN')
+_PAGE_READINESS_CAPABILITIES = (
+    (1, '/admissions/results', (
+        ('official_history_and_recruitment', ('catalog',)),)),
+    (2, '/reports/me', (
+        ('subject_scores', ('exam_pack',)),
+        ('overall_percentile', ('exam_pack', 'total_model')))),
+    (3, '/admissions/possibilities', (
+        ('converted_score', ('catalog', 'exam_pack', 'conversion')),
+        ('converted_percentile', ('catalog', 'exam_pack', 'conversion', 'percentile')),
+        ('assessment', ('catalog', 'exam_pack', 'analysis')),
+        ('published_forecast_basis', ('forecast_context', 'forecast_inputs', 'forecast_policy')))),
+    (4, '/admissions/favorable', (
+        ('conversion_advantage', ('catalog', 'exam_pack', 'conversion', 'percentile', 'analysis')),
+        ('recommended_candidates', ('catalog', 'exam_pack', 'conversion', 'percentile', 'analysis')),
+        ('advantage_baseline', ('exam_pack', 'total_model')),
+        ('overall_percentile_basis', ('exam_pack', 'total_model')),
+        ('published_forecast_basis', ('forecast_context', 'forecast_inputs', 'forecast_policy')))))
+_PAGE_ENTRY_STATES = ('eligible_metadata_only', 'unverified_storage_scope', 'not_approved',
+                      'missing', 'invalid_reference')
+
+
+def _page_metadata_file(value):
+    """Bounded private metadata only; do not follow artifact or source pointers."""
+    if not value:
+        return 'missing', None
+    try:
+        path = _private_path(value)
+        if not 0 < path.stat().st_size <= REVIEW_STATUS_MAX_BYTES:
+            raise ValueError('metadata size')
+        with path.open('rb') as stream:
+            content = stream.read(REVIEW_STATUS_MAX_BYTES + 1)
+        if not 0 < len(content) <= REVIEW_STATUS_MAX_BYTES:
+            raise ValueError('metadata size')
+        body = json.loads(content.decode('utf-8'), object_pairs_hook=_review_capture_pairs,
+                          parse_constant=_review_capture_constant)
+        if type(body) is not dict:
+            raise ValueError('metadata shape')
+        return 'read', body
+    except FileNotFoundError:
+        return 'missing', None
+    except (OSError, ValueError, TypeError, RecursionError):
+        return 'invalid', None
+
+
+def _page_entry_status(entry, identity, client):
+    """Check reference/approval metadata; no remote bytes or native decoding."""
+    from .supabase_storage import _object_key
+    if entry is None:
+        return 'missing'
+    try:
+        if type(entry) is not dict or (entry.get('kind'), entry.get('key')) != identity:
+            raise ValueError('reference identity')
+        if (entry.get('status') != 'approved' or entry.get('engine_approved') is not True or
+                entry.get('production_allowed') is not True or entry.get('archive_only') is not False):
+            return 'not_approved'
+        if (type(entry.get('bytes')) is not int or not 0 < entry['bytes'] <= MAX_ARTIFACT_BYTES or
+                type(entry.get('sha256')) is not str or re.fullmatch(r'[0-9a-f]{64}', entry['sha256']) is None or
+                type(entry.get('version')) is not str or not entry['version'] or
+                type(entry.get('bucket')) is not str or re.fullmatch(r'[a-z0-9][a-z0-9_-]{0,99}', entry['bucket']) is None):
+            raise ValueError('reference metadata')
+        _object_key(entry.get('object_key'))
+        if identity[0] == 'catalog' and identity[1] != 'service':
+            raise ValueError('catalog key')
+        if client is None:
+            return 'unverified_storage_scope'
+        client.validate_reference(entry)
+        return 'eligible_metadata_only'
+    except (ValueError, TypeError, KeyError):
+        return 'invalid_reference'
+
+
+def four_page_readiness():
+    """Expose four independent metadata checklists, never real connection success.
+
+    This private CLI reads setting existence and two bounded local manifests.
+    No client artifact/probe method, DB/Auth call, source file, decoder, .env
+    loader, or application factory is invoked. Missing inputs remain visible
+    for every page and may not be used to suppress already available results.
+    """
+    def no_remote_reads(*_args, **_kwargs):
+        raise PlatformError('page_readiness_metadata_only', 503)
+    values = {name: os.environ.get(name) for name in _PAGE_READINESS_SETTINGS}
+    missing_settings = [name for name in _PAGE_READINESS_SETTINGS if not values[name]]
+    connection = 'configuration_missing' if missing_settings else 'configured_not_verified'
+    registry_status, registry = _page_metadata_file(values['JUNGSI_SUPABASE_RUNTIME_REGISTRY'])
+    selection_status, manifest = _page_metadata_file(values['JUNGSI_SUPABASE_RUNTIME_SELECTION'])
+    entries, required = {}, None
+    if registry_status == 'read':
+        try:
+            if registry.get('format') != 'jungsi.data-registry/v1' or type(registry.get('entries')) is not list:
+                raise ValueError('registry shape')
+            # Reuse the existing metadata identity/hash guard without a client.
+            # Its constructor never reads referenced artifacts for a dict input.
+            entries = DriveDataProvider(None, registry).entries
+        except (ValueError, TypeError, KeyError):
+            registry_status = 'invalid'
+    if selection_status == 'read':
+        try:
+            required = RuntimeArtifactSelection.from_manifest(manifest).required
+        except (ValueError, TypeError, KeyError):
+            selection_status = 'invalid'
+    client, scope = None, 'not_configured'
+    storage_names = ('SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'JUNGSI_SUPABASE_STORAGE_BUCKET',
+                     'JUNGSI_SUPABASE_STORAGE_PREFIX')
+    if all(values[name] for name in storage_names):
+        try:
+            client = SupabaseStorageClient(values['SUPABASE_URL'], values['SUPABASE_SECRET_KEY'],
+                values['JUNGSI_SUPABASE_STORAGE_BUCKET'], object_prefix=values['JUNGSI_SUPABASE_STORAGE_PREFIX'],
+                opener=no_remote_reads)
+            scope = 'reference_scope_only_not_bucket_verified'
+        except (ValueError, TypeError):
+            scope = 'invalid_configuration'
+    kinds = {}
+    for kind in sorted(RUNTIME_KINDS):
+        selected = None if required is None else [identity for identity in required if identity[0] == kind]
+        counts = dict.fromkeys(_PAGE_ENTRY_STATES, 0)
+        if selected is None or registry_status != 'read':
+            status = 'metadata_unavailable'
+        elif not selected:
+            status = 'not_selected'
+        else:
+            for identity in selected:
+                counts[_page_entry_status(entries.get(identity), identity, client)] += 1
+            if scope == 'invalid_configuration':
+                counts['invalid_reference'] += counts['unverified_storage_scope']
+                counts['unverified_storage_scope'] = 0
+            eligible = counts['eligible_metadata_only']
+            status = ('eligible_metadata_only' if eligible == len(selected) else
+                      'partially_eligible' if eligible else 'blocked')
+        kinds[kind] = dict(kind=kind, selected_count=None if selected is None else len(selected),
+            metadata_status=status, selected_entry_status_counts=counts, native_decode='NOT_RUN',
+            version_and_exam_binding='NOT_RUN', coverage='selected_scope_only_not_nationwide')
+    pages = []
+    for number, path, definitions in _PAGE_READINESS_CAPABILITIES:
+        capabilities = []
+        for capability, dependencies in definitions:
+            missing = [kind for kind in dependencies if kinds[kind]['metadata_status'] == 'not_selected']
+            blocked = [kind for kind in dependencies if kinds[kind]['metadata_status'] not in ('eligible_metadata_only', 'not_selected')]
+            status = ('eligible_metadata_only' if not missing and not blocked else
+                      'metadata_unavailable' if any(kinds[kind]['metadata_status'] == 'metadata_unavailable' for kind in dependencies) else
+                      'missing' if missing else 'blocked')
+            item = dict(capability=capability, required_kinds=list(dependencies),
+                metadata_status=status, missing_kinds=missing, blocked_kinds=blocked,
+                native_decode='NOT_RUN', cross_bindings='NOT_RUN', actual_calculation='NOT_RUN')
+            if number == 4 and capability in ('conversion_advantage', 'recommended_candidates'):
+                # Direct scoring may survive a missing standalone total model.
+                # The existing evaluator can use a separately validated target
+                # total distribution embedded in analysis; metadata cannot
+                # prove that baseline or its population/binding compatibility.
+                item.update(overall_baseline_possible_source='standalone_total_model_or_validated_embedded_analysis_target_total',
+                    standalone_total_model_status=kinds['total_model']['metadata_status'],
+                    embedded_analysis_baseline='NOT_CHECKED')
+            capabilities.append(item)
+        pages.append(dict(page_number=number, path=path, connection=connection,
+            missing_settings=list(missing_settings), capabilities=capabilities, ready=False,
+            runtime_connection='NOT_RUN', browser='NOT_RUN', coverage='selected_scope_only_not_nationwide'))
+    return dict(format='jungsi.four-page-local-readiness/v1', evidence_mode='local_metadata_only_not_live_probe',
+        check_target='configured_supabase_native_metadata_not_local_verification',
+        local_purpose_native_approval='NOT_CHECKED',
+        registry=registry_status, selection=selection_status, storage_scope=scope,
+        database='NOT_RUN', authentication='NOT_RUN', storage_objects='NOT_RUN', engine='NOT_RUN',
+        current_catalog_binding='NOT_RUN', production_ready=False, pages=pages, kinds=list(kinds.values()),
+        meaning='명시 Supabase factory의 네 페이지 최소 선택 메타데이터 점검이며 로컬 목적 승인·실제 연결·산출·전국 범위·일반 공개 완료를 뜻하지 않음')
+
+
+def main(argv=None):
     import argparse
-    parser = argparse.ArgumentParser(description='Explicit Supabase backend configuration check; no live probes.')
-    parser.add_argument('--check-config',action='store_true',required=True)
-    parser.parse_args()
-    print(json.dumps(configuration_status(),ensure_ascii=False))
+    parser = argparse.ArgumentParser(description='Explicit Supabase configuration or private captured review status; no live probes.')
+    modes = parser.add_mutually_exclusive_group(required=True)
+    modes.add_argument('--check-config', action='store_true', help='settings names only; no filesystem or live probes')
+    modes.add_argument('--review-status-file', help='one private captured v2 JSON; no actual values or opaque tokens printed')
+    modes.add_argument('--page-readiness', action='store_true', help='four-page local setting/reference metadata only; no live probes')
+    args = parser.parse_args(argv)
+    try:
+        result = (configuration_status() if args.check_config else four_page_readiness() if args.page_readiness else
+                  review_status_from_file(args.review_status_file))
+        print(json.dumps(result, ensure_ascii=False))
+        return 0
+    except PlatformError:
+        print(json.dumps(dict(status='error', error={'code':'local_review_capture_invalid'})))
+        return 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

@@ -1470,6 +1470,7 @@ def generated_files(spec):
     operation_rows=[[o["id"],o["method"],o["path"],rights(o["member_tiers"]),"본인" if o["report_owner"] else "해당 없음","필요" if o["confirmed_score_profile"] else "불필요",o["response_scope"]] for o in spec["operations"]]
 
     current_review_section=""
+    owner_status_section=""
     current_review=spec.get("official_history_db_display_contract",{}).get("current_review_connection")
     if isinstance(current_review,dict) and isinstance(current_review.get("route"),dict):
         review_labels=["## \ud604\uc7ac \uc815\ubcf8 \uc804\uc218 \uac80\uc218 \uacbd\ub85c","\ud568\uc218","\uc791\uc5c5 ID","\uba54\uc11c\ub4dc\u00b7\uacbd\ub85c","\ub300\uc0c1","\ud604\uc7ac \uc0c1\ud0dc","\uc77c\ubc18 \ud68c\uc6d0 \uacf5\uac1c\ub97c \uc704\ud55c \uae30\ubcf822API\uc640 \ubd84\ub9ac\ub41c \uac80\uc218 \uacbd\ub85c\ub2e4. \uba85\uc2dc subject \ud5c8\uc6a9 \uba85\ubd80\u00b7purpose\u00b7\ub9cc\ub8cc\u00b7\uc11c\ubc84 relay/JWT \uac80\uc0ac\ub97c \ubaa8\ub450 \ud1b5\uacfc\ud574\uc57c \ud55c\ub2e4. \uad00\ub9ac\uc790\u00b7\uc720\ub8cc \ub4f1\uae09\ub9cc\uc73c\ub85c \ud5c8\uc6a9\ud558\uc9c0 \uc54a\ub294\ub2e4. \uae30\uc874 C 5GET\uc740 \uc720\uc9c0\ud55c\ub2e4.","\uac80\uc0c9 \ud544\ub4dc: ","\uc751\ub2f5 \ud615\uc2dd: ","\ud604\uc7ac \uc9c0\ud45c\uc758 \uc6d0\ubb38 literal\u00b7\uc6d0 JSON \ud0c0\uc785\uc744 \ubcf4\uc874\ud55c\ub2e4. \uacf5\uc2dd \uacf5\uac1c \uc815\ubcf4\uac00 \ubbf8\ud655\uc778\uc778 \uacbd\uc6b0 null\uacfc \ubcf4\ub958 \uc0ac\uc720\ub97c \ubc18\ud658\ud558\uba70 \ubc1c\ud45c \uc785\uacb0\ub85c \uc2b9\uaca9\ud558\uc9c0 \uc54a\ub294\ub2e4. \uc6d0 canonical/source ID\u00b7PK\u00b7\uacbd\ub85c\u00b7\ud0a4\ub294 \uc751\ub2f5\uc5d0\uc11c \uc81c\uc678\ud55c\ub2e4.","\ud398\uc774\uc9c0\ub2f9 \ucd5c\ub300100\uac74, limit+1 keyset\uacfc \ub3d9\uc77c SQL \uc2a4\ub0c5\uc0f7\uc758 \uc815\ud655\ud55c \uad00\uce21/\ucd9c\ucc98 \ud559\uad50 \uc9d1\uacc4\ub97c \uc0ac\uc6a9\ud55c\ub2e4. cursor\ub294 \uc11c\ubc84 \uc804\uc6a9 \ud0a4\ub85c \uc554\ud638\ud654\ud558\uace0 \uac80\uc218\uc790\u00b7\uac80\uc0c9\uc870\uac74\u00b7\uc815\ubcf8 \ubcc0\uacbd \uc0c1\ud0dc\u00b7\ud22c\uc601\ud310\u00b7\ub9cc\ub8cc\uc5d0 \uacb0\uc18d\ud55c\ub2e4. \uc0c1\ud0dc\uac00 \ubc14\ub00c\uba74409\ub85c \ub2e4\uc2dc \uc870\ud68c\ud55c\ub2e4. \uc77c\ubc18 \ud68c\uc6d0 \uc6b4\uc601 \uacf5\uac1c\u00b7BFF/\ube0c\ub77c\uc6b0\uc800\u00b7\ubcf4\uc5483gate\u00b7DB \uc815\ub9ac \uc644\ub8cc\ub97c \ub73b\ud558\uc9c0 \uc54a\ub294\ub2e4."]
@@ -1484,15 +1485,52 @@ def generated_files(spec):
                             "기존 frozen v1의 정확 count와 첫 페이지 고정 head 방식은 보존된 이력이며 현재 v2에 적용하지 않는다.")
             intake=current_review.get("frontend_receipt_intake",{})
             if isinstance(intake,dict) and intake:
-                review_details+=("\n\n내부 검수 화면: "+intake["internal_review_path"]+". 소비자4페이지·기본22API·기존C 함수와 분리한다. "
-                                 "화면팀의 freshJWT API 및 승인된 검수 목적 BFF/브라우저 기능 수신 영수증은 보고상 PASS이며 독립 재실행이나 전수 census 인수가 아니다. 실행 환경 격리와 실제 runtime origin·배포판은 이 영수증으로 입증되지 않았다. "
-                                 "외부 화면 feature 커밋·PR18 open을 develop 통합 완료로 보지 않는다. 공통 서버 tokenFile 검수는 방문자 관리자 권한을 증명하지 않으므로 네트워크 노출 전 방문자 gate 또는 사설 접근 통제 증거가 필요하다. "
-                                 "409 실제 관측·전체 운영 보안3gate·일반 회원 공개·발행·엔진·DB 정리·W1/W2/CAP 완료는 포함하지 않는다.")
+                local_owner=intake.get('local_owner_confirmation',{})
+                if isinstance(local_owner,dict) and local_owner:
+                    review_details+=("\n\n내부 검수 화면: "+intake["internal_review_path"]+". 소비자4페이지·기본22API·기존C 함수와 분리한다. "
+                        "원래16dea213 기능 영수증은 이력으로 보존한다. v9/bf6435d local·loopback dev·origin "+local_owner['origin']+
+                        "에서 실JWT 첫100건과 수동 다음100건·HTML 비밀값4종 미출현 보고를 원문/PR 결속으로 수용했다. 승인된 Owner·화면팀의 local 조회를 막는 발견사항은0이다. "
+                        "이는 화면팀 실행 보고의 수용이며 Root의 새 JWT/BFF/브라우저 실행이나 전국 전수 일치가 아니다. BFF의 no-cache,must-revalidate와 Edge의 기존 private,no-store 근거는 구분한다. "
+                        "외부 PR18의 develop 통합·live 방문자 권한 runtime·브라우저 private/no-store·409 실제 관측·운영3gate·일반 발행·전체4페이지 계산·W1/W2/CAP 완료는 포함하지 않는다.")
+                else:
+                    review_details+=("\n\n내부 검수 화면: "+intake["internal_review_path"]+". 소비자4페이지·기본22API·기존C 함수와 분리한다. "
+                                     "화면팀의 freshJWT API 및 승인된 검수 목적 BFF/브라우저 기능 수신 영수증은 보고상 PASS이며 독립 재실행이나 전수 census 인수가 아니다. 실행 환경 격리와 실제 runtime origin·배포판은 이 영수증으로 입증되지 않았다. "
+                                     "외부 화면 feature 커밋·PR18 open을 develop 통합 완료로 보지 않는다. 공통 서버 tokenFile 검수는 방문자 관리자 권한을 증명하지 않으므로 네트워크 노출 전 방문자 gate 또는 사설 접근 통제 증거가 필요하다. "
+                                     "409 실제 관측·전체 운영 보안3gate·일반 회원 공개·발행·엔진·DB 정리·W1/W2/CAP 완료는 포함하지 않는다.")
+        owner_view=spec.get('official_history_db_display_contract',{}).get('owner_status_view',{})
+        if isinstance(owner_view,dict) and owner_view:
+            owner_cli=owner_view['local_status_cli']
+            owner_status_section=("## 로컬 Owner·화면팀의 1~4페이지 확인\n\n"+
+                owner_view['purpose']+". DB/source 등록과 승인 native runtime 선택은 별개다. 검수 화면 하나의 수신을 전체 네 페이지 계산 완료로 표시하지 않는다.\n\n"+
+                table(['페이지','로컬 화면 경로','기존 작업','최소 실제 자료','현재 증거와 보류'],
+                    [[p['page'],p['path'],', '.join(p['operations']),', '.join(p['minimum_data']),p['current_evidence']+' · '+p['preserve']] for p in owner_view['pages']])+
+                "\n\n전체서비스 명시 factory: "+owner_view['full_service_factory']+". localhost bind는127.0.0.1이다. "+owner_view['local_purpose_composition']+
+                " Supabase Owner 권한은 유료 이용권·본인 소유권·승인 subject를 자동 우회하는 조건이 아니다.\n\n"+
+                "### 자료 자체와 현재 공급자의 제한\n\n"+
+                table(['배지/상태','해석'],[[r['badge'],r['meaning']] for r in owner_view['badge_meanings']])+
+                "\n\n"+owner_view['value_count_meaning']+" source_review_status는 현재18필드 DTO에 없다. 공식 메타6개null은 공급자의 미제공 투영이며 DB원문 결측을 뜻하지 않는다. "
+                "C140은 제한된 역사 검수 승인이다. C recruitment는 현재 pending/null로 고정되며 자료 등록만으로 자동ready가 되지 않는다. 최종 합격 예비번호는 추가 합격 인원과 다르다.\n\n"+
+                "### 로컬 상태 점검 명령\n\n"+
+                "프로젝트 src를 PYTHONPATH에 둔 비공개 서버 환경에서 실행한다.\n\n```powershell\n"+
+                owner_cli['four_page_command']+"\n"+owner_cli['review_status_command']+
+                "\n```\n\n네 페이지 명령은 설정 존재성과 비공개 registry/selection metadata만, 단일응답 명령은 제외폴더의 최대1MiB·100행 캡처만 읽는다. "
+                "DB/Auth/Storage/네트워크·엔진·환경파일 변경은 없고 실값·학교명·토큰·cursor·경로를 출력하지 않는다. metadata 적격은 실제 decoder·버전 결속·화면 연결 완료가 아니다. "
+                "부족한 자료는 capability별로 보류하며 다른 페이지 성공을 지우지 않는다. "+owner_view.get('native_execution_summary', '새 실제 계산·브라우저 검수는 NOT_RUN으로 유지한다.')+"\n\n"+
+                "화면팀 구현 기준:\n\n"+'\n'.join('- '+item for item in owner_view['frontend_actions']))
+            w6=current_review.get('frontend_receipt_intake',{}).get('work_items',{}).get('W6',{})
+            if isinstance(w6,dict) and w6:
+                owner_status_section+=("\n\n### W6 첫 발행과 사람 판정 UI 회신\n\n"+
+                    "첫 일반 공개 발행일은 현재 미정이다. local 검수 수신 완료와 별개이며 고정배지3개로 실제 검수 진행률을 산출하지 않는다. 첫 부분 배치 단위: "+w6['first_batch_unit']+
+                    "\n\n자동 검사 대상: "+', '.join(w6['automatic_checks'])+". 사람 판정 대상: "+', '.join(w6['human_cases'])+
+                    ". 자동/수작업 비율은 새 분모를 재측정하지 않아 미확인이다.\n\n"+
+                    "검수 UI 계약은 "+w6['UI_proposal']+" 상태이며 현재22API에 새 쓰기 경로가 등록된 것이 아니다. 후보 입력: "+', '.join(w6['UI_required_fields'])+
+                    "; 판정 "+', '.join(w6['UI_decisions'])+". 서버는 권한·revision409·불변 감사·idempotency를 유지하며 검수 판정만으로 일반 발행이나 엔진 승인을 자동 수행하지 않는다.\n\n"+
+                    "W1 합류: "+w6['W1']+" W3의 bounded 연결과 W4의 제한 기능 수신은 완료 이력을 보존한다. W1~W6 모두가 같은 차단 상태는 아니다.")
         current_review_section=(
             review_labels[0]+"\n\n"+
             table(review_labels[1:6],[[current_review["function_name"],current_review["operation"],route["method"]+" "+route["path"],route["audience"],current_review["status"]]])+
             "\n\n"+review_labels[6]+"\n\n"+review_labels[7]+", ".join(current_review["query_fields"])+".\n\n"+
-            review_labels[8]+current_review["review_DTO"]+".\n\n"+review_labels[9]+"\n\n"+review_details+"\n\n")
+            review_labels[8]+current_review["review_DTO"]+".\n\n"+review_labels[9]+"\n\n"+review_details+"\n\n"+owner_status_section+"\n\n")
         files[spec["current_documents"]["planning"]]+="\n\n"+current_review_section
 
     overall_contract=spec.get("overall_analysis_contract")
@@ -1775,6 +1813,7 @@ def generated_files(spec):
               '\n\n논리 작업: '+', '.join(display['operations'])+'. 기존22 API 중 명시한 조회 부분만 연결하며 전체 엔진 포팅 완료를 뜻하지 않는다.'+
               '\n\n## 담당 작업\n\n'+table(['작업','담당','범위'],display['tasks'])+
               '\n\n## 화면팀 연결\n\n'+'\n'.join('- '+r for r in display['frontend_handoff'])+
+              '\n\n'+owner_status_section+
               '\n\n## 증거와 미실행 범위\n\n'+table(['항목','상태'],[[k,str(v)] for k,v in display['verification'].items()]))
         files[spec['current_documents']['official_history_db_display']]=doc('Supabase 입결 DB와 화면 API 연결',body)
         for key in ('planning','routing','architecture','workflow','presentation_handoff','runtime_connection_preparation','supabase_deployment','supabase_operations_handoff','frontend_reply','frontend_followup'):

@@ -406,7 +406,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "a57dc8be5b164153fd4e586d1a6a234826068d15858d157b21f65317f903e7a9",
+      "source_sha256": "344effcc3923a5b21ef6f233a3d1b55cc8c70613165445b7361456e5e66d2fb8",
       "symbols": [
         {
           "kind": "class",
@@ -4373,7 +4373,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "source_sha256": "575408f3d09fc5e9068bb723fc9f701ce3a28fb24efe05a567cc9554cde2256e",
+      "source_sha256": "a8c8ff8d34722154f8ea26d76a0fbea2bd7306ce3cd14e0bcda2ed9c6fbbe9cd",
       "symbols": [
         {
           "kind": "class",
@@ -4495,8 +4495,38 @@
         },
         {
           "kind": "function",
+          "name": "_page_entry_status",
+          "signature": "def _page_entry_status(entry, identity, client):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_page_metadata_file",
+          "signature": "def _page_metadata_file(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "_private_path",
           "signature": "def _private_path(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_review_capture_constant",
+          "signature": "def _review_capture_constant(_value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_review_capture_pairs",
+          "signature": "def _review_capture_pairs(pairs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_review_page_status",
+          "signature": "def _review_page_status(payload):",
           "decorators": []
         },
         {
@@ -4515,6 +4545,30 @@
           "kind": "function",
           "name": "create_supabase_secured_app",
           "signature": "def create_supabase_secured_app(*, security, settings, data, selection, repository=None, sessions=None, clock=None, forecast_repository=None, forecast_inputs=None, entitlements=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "four_page_readiness",
+          "signature": "def four_page_readiness():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "four_page_readiness.no_remote_reads",
+          "signature": "def no_remote_reads(*_args, **_kwargs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main(argv=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "review_status_from_file",
+          "signature": "def review_status_from_file(value):",
           "decorators": []
         }
       ]
