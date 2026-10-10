@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.36이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.37이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -344,4 +344,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=3917a92c37cba2ba8b905e39edd1219cf907c237d9887530c2c665953f59ccb6 -->
+<!-- jungsi:generated spec_sha256=cc56b975206bcd95a16dfa48f34162bcdb8b9dfa8fa2c8791e934bd418ff63f8 -->

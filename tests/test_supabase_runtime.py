@@ -3,9 +3,12 @@ from copy import deepcopy
 from dataclasses import asdict
 import json
 from hashlib import sha256
-from io import BytesIO
+from io import BytesIO, StringIO
 from pathlib import Path
+from contextlib import redirect_stdout, redirect_stderr
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from backend_synthetic_fixture import SyntheticRepository, synthetic_pack, synthetic_model, SyntheticSessions, FrozenClock, score_input, SyntheticData
 from jungsi_touch.application.platform_ports import PlatformError
@@ -458,5 +461,417 @@ class SupabaseRuntimeTests(unittest.TestCase):
         self.assertEqual(self.ready(self.app(data=self.provider([entry]),selection=Selection((('analysis',key),)))).status_code,503)
     def test_unknown_provider_is_rejected_without_fallback(self):
         with self.assertRaises(PlatformError):self.app(data=object())
+
+class CurrentReviewOfflineStatusTests(unittest.TestCase):
+    """Captured synthetic page safety; no fresh DB, auth, network or file writes."""
+    def item(self, state='present'):
+        row = dict(observation_token='SYNTHETIC-OPAQUE-TOKEN-NOT-PRINTED', academic_year=2026,
+            university='SYNTHETIC-PRIVATE-SCHOOL-NOT-PRINTED', department=None, track=None,
+            recruit_group=None, metric_kind='SYNTHETIC-PRIVATE-METRIC-NOT-PRINTED',
+            metric_value_literal='0', metric_value_json_type='number', metric_value_numeric_text='0',
+            cohort=None, statistic_label=None, source_member_count=1, link_scopes=[],
+            official_metadata=dict(metric_definition=None, unit=None, original_scale=None,
+                source_url=None, source_as_of=None, publication_status=None),
+            review_status='review_only', value_availability=state,
+            hold_reasons=['review_only_not_published', 'public_offering_mapping_not_qualified',
+                'official_metadata_not_qualified', 'SYNTHETIC-PRIVATE-REASON-NOT-PRINTED'])
+        if state == 'actual_null':
+            row.update(metric_value_literal='null', metric_value_json_type='null', metric_value_numeric_text=None)
+        elif state in ('missing', 'held'):
+            row.update(metric_value_literal=None, metric_value_json_type=None if state == 'missing' else 'object',
+                       metric_value_numeric_text=None)
+        return row
+
+    def page(self, items=None, cursor=None):
+        return dict(format='jungsi.current-admission-review-page/v2', query_mode='live_bounded',
+            count_status='unknown', status='review', items=[self.item()] if items is None else items,
+            matching_observation_count=None, matching_source_school_count=None,
+            review_version='SYNTHETIC.review.v2', as_of='2026-10-10T15:00:00Z', next_cursor=cursor,
+            publication_status='not_published')
+
+    def encode(self, page):
+        return json.dumps(page, ensure_ascii=False).encode('utf-8')
+
+    def summary(self, page):
+        before = deepcopy(page)
+        result = runtime._review_page_status(self.encode(page))
+        self.assertEqual(page, before)
+        return result
+
+    def assert_invalid(self, page):
+        with self.assertRaises(PlatformError) as error:
+            runtime._review_page_status(self.encode(page))
+        self.assertEqual((error.exception.code, error.exception.http_status), ('local_review_capture_invalid', 503))
+
+    def test_zero_null_missing_held_and_placeholder_are_distinct_page_states(self):
+        placeholder = self.item()
+        placeholder.update(metric_value_literal='"SYNTHETIC-PLACEHOLDER"', metric_value_json_type='string',
+                           metric_value_numeric_text=None)
+        result = self.summary(self.page([self.item(state) for state in ('present', 'actual_null', 'missing', 'held')] + [placeholder]))
+        self.assertEqual(result['value_availability_counts'], dict(present=2, actual_null=1, missing=1, held=1))
+        self.assertEqual(result['rows_in_page'], 5)
+        self.assertEqual(result['source_review_status'], 'NOT_EXPOSED')
+        self.assertEqual(result['original_metadata_review_status'], 'NOT_EXPOSED')
+        self.assertEqual(result['fresh_DB_probe'], 'NOT_RUN')
+        self.assertIn('공급자', result['review_badge_meaning'])
+        self.assertIn('공식 검수 통과를 뜻하지 않음', result['value_availability_meaning'])
+
+    def test_empty_scan_with_cursor_does_not_become_zero_nationwide_or_complete(self):
+        result = self.summary(self.page([], 'SYNTHETIC-OPAQUE-CURSOR-NOT-PRINTED'))
+        self.assertEqual(result['rows_in_page'], 0)
+        self.assertTrue(result['next_page_available'])
+        self.assertEqual(result['count_status'], 'unknown')
+        self.assertIsNone(result['matching_observation_count'])
+        self.assertIsNone(result['matching_source_school_count'])
+        self.assertNotIn('complete', result)
+        self.assertEqual(result['evidence_mode'], 'captured_response_not_fresh_probe')
+
+    def test_links_preserve_kind_reference_year_permission_and_multiplicity(self):
+        row = self.item()
+        row['link_scopes'] = [dict(link_kind=kind, population_reference_year=year,
+            individual_offering_metric_inference_allowed=allowed) for kind, year, allowed in (
+            ('same_year_offering', 2026, False), ('same_year_offering', 2026, False),
+            ('verified_aggregate_offerings', 2026, False), ('official_reorganized_forward_reference', 2027, False),
+            ('same_year_offering', 2027, False), ('same_year_offering', 2026, True))]
+        scopes = self.summary(self.page([row]))['population_links']
+        self.assertEqual(len(scopes), 5)
+        keyed = {(r['link_kind'], r['population_reference_year'], r['individual_offering_metric_inference_allowed']): r['links_in_page'] for r in scopes}
+        self.assertEqual(keyed[('same_year_offering', 2026, False)], 2)
+        self.assertEqual(keyed[('same_year_offering', 2026, True)], 1)
+        self.assertEqual(keyed[('official_reorganized_forward_reference', 2027, False)], 1)
+
+    def test_only_known_public_link_kinds_can_be_reflected(self):
+        row = self.item()
+        row['link_scopes'] = [dict(link_kind=kind, population_reference_year=2026,
+            individual_offering_metric_inference_allowed=False) for kind in (
+                'SYNTHETIC-SECRET-TOKEN', 'C:/SYNTHETIC-private/path', 'https://synthetic.invalid/signed-token')]
+        result = self.summary(self.page([row], 'SYNTHETIC-OPAQUE-CURSOR-NOT-PRINTED'))
+        self.assertEqual(result['population_links'], [dict(link_kind='unknown', population_reference_year=2026,
+            individual_offering_metric_inference_allowed=False, links_in_page=3)])
+        output = json.dumps(result, ensure_ascii=False)
+        for marker in ('SYNTHETIC-SECRET', 'SYNTHETIC-private', 'signed-token', 'SYNTHETIC-OPAQUE',
+                       'SYNTHETIC-PRIVATE', 'metric_value', 'observation_token', 'next_cursor'):
+            self.assertNotIn(marker, output)
+
+    def test_envelope_is_closed_bounded_review_only_and_unknown_count(self):
+        changes = [dict(format='jungsi.current-admission-review-page/v1'), dict(status='ready'),
+            dict(query_mode='frozen'), dict(publication_status='published'), dict(count_status='exact'),
+            dict(matching_observation_count=0), dict(matching_source_school_count=0), dict(items={}),
+            dict(items=[self.item()] * 101), dict(extra='SYNTHETIC-SECRET'), dict(next_cursor=''),
+            dict(next_cursor=False), dict(next_cursor='SYNTHETIC' * 513)]
+        for change in changes:
+            with self.subTest(fields=list(change)):
+                page = self.page(); page.update(change); self.assert_invalid(page)
+        page = self.page(); del page['as_of']; self.assert_invalid(page)
+
+    def test_version_and_utc_timestamp_have_restricted_output_format(self):
+        for field, value in [('review_version', 'C:/SYNTHETIC-private'), ('review_version', 'SYNTHETIC\nTOKEN'),
+            ('review_version', 'SYNTHETIC token'), ('review_version', False),
+            ('as_of', '2026-10-10'), ('as_of', '2026-10-10T15:00:00'),
+            ('as_of', '2026-10-10T15:00:00+09:00'), ('as_of', '2026-99-99T15:00:00Z'),
+            ('as_of', '2026-10-10X15:00:00Z'), ('as_of', 'SYNTHETIC-SECRET')]:
+            with self.subTest(field=field, value=value):
+                page = self.page(); page[field] = value; self.assert_invalid(page)
+        self.assertEqual(self.summary(self.page())['as_of'], '2026-10-10T15:00:00+00:00')
+
+    def test_row_shape_metadata_provider_holds_and_types_fail_closed(self):
+        changes = [dict(extra='SYNTHETIC-SECRET'), dict(academic_year=True), dict(academic_year='2026'),
+            dict(source_member_count=True), dict(source_member_count=0), dict(source_member_count=1.0),
+            dict(university=13), dict(observation_token=None), dict(review_status='approved'),
+            dict(value_availability='source_verified'), dict(link_scopes={}), dict(hold_reasons=[]),
+            dict(hold_reasons=['review_only_not_published', 'public_offering_mapping_not_qualified']),
+            dict(hold_reasons=['review_only_not_published', 'public_offering_mapping_not_qualified', 'official_metadata_not_qualified', 0])]
+        for change in changes:
+            with self.subTest(fields=list(change)):
+                row = self.item(); row.update(change); self.assert_invalid(self.page([row]))
+        for metadata in ({}, dict(self.item()['official_metadata'], source_url='https://synthetic.invalid/private')):
+            row = self.item(); row['official_metadata'] = metadata; self.assert_invalid(self.page([row]))
+
+    def test_hidden_values_and_actual_null_cannot_be_reinterpreted(self):
+        for state in ('held', 'missing'):
+            for field in ('metric_value_literal', 'metric_value_numeric_text'):
+                row = self.item(state); row[field] = 'SYNTHETIC-PRIVATE-VALUE'; self.assert_invalid(self.page([row]))
+        for field, value in [('metric_value_literal', None), ('metric_value_literal', '0'),
+                             ('metric_value_json_type', None), ('metric_value_numeric_text', '0')]:
+            row = self.item('actual_null'); row[field] = value; self.assert_invalid(self.page([row]))
+        row = self.item(); row['metric_value_numeric_text'] = None; self.assert_invalid(self.page([row]))
+
+    def test_population_link_closed_shape_and_boolean_year_types(self):
+        link = dict(link_kind='same_year_offering', population_reference_year=2026,
+                    individual_offering_metric_inference_allowed=False)
+        for change in (dict(extra='SYNTHETIC'), dict(link_kind=''), dict(link_kind='SYNTHETIC\nSECRET'),
+                       dict(population_reference_year=True), dict(population_reference_year='2026'),
+                       dict(individual_offering_metric_inference_allowed=0)):
+            row = self.item(); row['link_scopes'] = [dict(link, **change)]; self.assert_invalid(self.page([row]))
+
+    def test_duplicate_json_nonfinite_bad_encoding_and_oversize_are_sanitized(self):
+        valid = self.encode(self.page())
+        duplicate = valid.replace(b'"status": "review"', b'"status": "review", "status": "review"')
+        nonfinite = valid.replace(b'"source_member_count": 1', b'"source_member_count": NaN')
+        for payload in (duplicate, nonfinite, b'\xffSYNTHETIC-SECRET', b'{', b'',
+                        b' ' * (1024 * 1024 + 1), 'SYNTHETIC-SECRET', []):
+            with self.subTest(kind=type(payload).__name__, size=len(payload)), self.assertRaises(PlatformError) as error:
+                runtime._review_page_status(payload)
+            self.assertEqual(str(error.exception), 'local_review_capture_invalid')
+
+    def test_file_reader_checks_private_scope_and_bounds_racing_growth(self):
+        with self.assertRaises(PlatformError) as error:
+            runtime.review_status_from_file('src/SYNTHETIC-secret-capture.json')
+        self.assertEqual(error.exception.code, 'local_review_capture_invalid')
+        private = SimpleNamespace(stat=lambda: SimpleNamespace(st_size=1),
+            open=lambda mode: BytesIO(b' ' * (1024 * 1024 + 2)))
+        with patch.object(runtime, '_private_path', return_value=private), self.assertRaises(PlatformError):
+            runtime.review_status_from_file('outputs/SYNTHETIC-capture.json')
+        private = SimpleNamespace(stat=lambda: SimpleNamespace(st_size=1024 * 1024 + 1),
+                                  open=lambda mode: self.fail('oversize file must not be opened'))
+        with patch.object(runtime, '_private_path', return_value=private), self.assertRaises(PlatformError):
+            runtime.review_status_from_file('outputs/SYNTHETIC-capture.json')
+
+    def test_offline_cli_never_checks_configuration_and_does_not_print_input_path(self):
+        capture = self.encode(self.page(cursor='SYNTHETIC-OPAQUE-CURSOR-NOT-PRINTED'))
+        private = SimpleNamespace(stat=lambda: SimpleNamespace(st_size=len(capture)), open=lambda mode: BytesIO(capture))
+        output = StringIO()
+        with patch.object(runtime, '_private_path', return_value=private), \
+                patch.object(runtime, 'configuration_status', side_effect=AssertionError('configuration read forbidden')), \
+                patch.object(runtime, 'configured_supabase_app', side_effect=AssertionError('factory forbidden')), \
+                redirect_stdout(output):
+            code = runtime.main(['--review-status-file', 'outputs/SYNTHETIC-private-capture.json'])
+        self.assertEqual(code, 0)
+        status = json.loads(output.getvalue())
+        self.assertTrue(status['next_page_available'])
+        self.assertNotIn('SYNTHETIC-private-capture', output.getvalue())
+        self.assertNotIn('SYNTHETIC-OPAQUE', output.getvalue())
+
+    def test_cli_error_is_fixed_sanitized_and_check_config_remains_names_only(self):
+        output = StringIO()
+        with patch.object(runtime, 'review_status_from_file', side_effect=PlatformError('SYNTHETIC-secret-path-token')), redirect_stdout(output):
+            code = runtime.main(['--review-status-file', 'outputs/SYNTHETIC-secret.json'])
+        self.assertEqual(code, 2)
+        self.assertEqual(json.loads(output.getvalue()), dict(status='error', error={'code': 'local_review_capture_invalid'}))
+        expected = dict(status='configuration_pending', missing_settings=['SYNTHETIC_SETTING_NAME'], production_ready=False)
+        output = StringIO()
+        with patch.object(runtime, 'configuration_status', return_value=expected), \
+                patch.object(runtime, 'review_status_from_file', side_effect=AssertionError('capture read forbidden')), redirect_stdout(output):
+            self.assertEqual(runtime.main(['--check-config']), 0)
+        self.assertEqual(json.loads(output.getvalue()), expected)
+
+    def test_cli_modes_are_mutually_exclusive(self):
+        with redirect_stderr(StringIO()), self.assertRaises(SystemExit) as error:
+            runtime.main(['--check-config', '--review-status-file', 'outputs/SYNTHETIC-capture.json'])
+        self.assertEqual(error.exception.code, 2)
+
+
+class FourPageReadinessMetadataTests(unittest.TestCase):
+    """All four pages remain visible; metadata never claims a live connection."""
+    def settings(self):
+        return dict(SUPABASE_URL='https://synthetic.supabase.co',
+            SUPABASE_PUBLISHABLE_KEY='sb_publishable_SYNTHETIC-PUBLISHABLE-NOT-PRINTED',
+            DATABASE_URL='postgresql://SYNTHETIC-DB-SECRET-NOT-PRINTED@synthetic.invalid/db',
+            SUPABASE_SECRET_KEY='sb_secret_SYNTHETIC-SERVER-SECRET-NOT-PRINTED',
+            JUNGSI_SUPABASE_STORAGE_BUCKET='synthetic-private-bucket',
+            JUNGSI_SUPABASE_STORAGE_PREFIX='synthetic-private-prefix/',
+            JUNGSI_SUPABASE_RUNTIME_REGISTRY='outputs/SYNTHETIC-private-registry.json',
+            JUNGSI_SUPABASE_RUNTIME_SELECTION='outputs/SYNTHETIC-private-selection.json',
+            JUNGSI_RELAY_TOKEN='SYNTHETIC-RELAY-SECRET-NOT-PRINTED')
+
+    def entry(self, kind, key=None, **changes):
+        row = dict(kind=kind, key=key or ('service' if kind == 'catalog' else 'SYNTHETIC-PRIVATE-ID-' + kind),
+            bucket='synthetic-private-bucket', object_key='synthetic-private-prefix/' + kind + '.json',
+            bytes=1, sha256='a' * 64, version='SYNTHETIC-PRIVATE-VERSION-NOT-PRINTED', status='approved',
+            engine_approved=True, production_allowed=True, archive_only=False,
+            reviewer_uuid='SYNTHETIC-PRIVATE-REVIEWER-UUID-NOT-PRINTED')
+        row.update(changes)
+        return row
+
+    def check(self, entries, *, selected=None, env_change=None, registry=None, manifest=None):
+        env = self.settings()
+        for name, value in (env_change or {}).items():
+            if value is None:
+                env.pop(name, None)
+            else:
+                env[name] = value
+        registry = dict(format='jungsi.data-registry/v1', entries=entries) if registry is None else registry
+        if manifest is None:
+            chosen = entries if selected is None else selected
+            manifest = dict(format='jungsi.runtime-selection/v1', required=[dict(kind=row['kind'], key=row['key']) for row in chosen])
+        reads = []
+        def reader(value):
+            reads.append(value)
+            if not value:
+                return 'missing', None
+            if value == env.get('JUNGSI_SUPABASE_RUNTIME_REGISTRY'):
+                return 'read', deepcopy(registry)
+            if value == env.get('JUNGSI_SUPABASE_RUNTIME_SELECTION'):
+                return 'read', deepcopy(manifest)
+            self.fail('unexpected metadata read')
+        with patch.dict(runtime.os.environ, env, clear=True), patch.object(runtime, '_page_metadata_file', side_effect=reader), \
+                patch.object(runtime, 'configured_supabase_app', side_effect=AssertionError('factory forbidden')), \
+                patch.object(runtime.SupabaseRuntimeReadiness, 'probe', side_effect=AssertionError('native probe forbidden')), \
+                patch.object(runtime.SupabaseStorageClient, 'artifact', side_effect=AssertionError('artifact read forbidden')), \
+                patch.object(runtime.SupabaseStorageClient, '_call', side_effect=AssertionError('network forbidden')):
+            result = runtime.four_page_readiness()
+        self.assertEqual(reads, [env.get('JUNGSI_SUPABASE_RUNTIME_REGISTRY'), env.get('JUNGSI_SUPABASE_RUNTIME_SELECTION')])
+        self.assertEqual([page['page_number'] for page in result['pages']], [1, 2, 3, 4])
+        return result
+
+    def capability(self, result, number, capability):
+        page = next(row for row in result['pages'] if row['page_number'] == number)
+        return next(row for row in page['capabilities'] if row['capability'] == capability)
+
+    def kind(self, result, kind):
+        return next(row for row in result['kinds'] if row['kind'] == kind)
+
+    def test_absent_metadata_returns_every_page_and_not_run_without_throwing(self):
+        with patch.dict(runtime.os.environ, {}, clear=True), \
+                patch.object(runtime, 'configured_supabase_app', side_effect=AssertionError('factory forbidden')):
+            result = runtime.four_page_readiness()
+        self.assertEqual([page['page_number'] for page in result['pages']], [1, 2, 3, 4])
+        self.assertEqual((result['registry'], result['selection']), ('missing', 'missing'))
+        for page in result['pages']:
+            self.assertEqual(page['connection'], 'configuration_missing')
+            self.assertEqual((page['runtime_connection'], page['browser'], page['ready']), ('NOT_RUN', 'NOT_RUN', False))
+            self.assertTrue(all(cap['metadata_status'] == 'metadata_unavailable' for cap in page['capabilities']))
+
+    def test_exam_metadata_can_be_eligible_while_total_model_is_missing(self):
+        result = self.check([self.entry('exam_pack')])
+        self.assertEqual(self.capability(result, 2, 'subject_scores')['metadata_status'], 'eligible_metadata_only')
+        overall = self.capability(result, 2, 'overall_percentile')
+        self.assertEqual((overall['metadata_status'], overall['missing_kinds']), ('missing', ['total_model']))
+        self.assertEqual(overall['actual_calculation'], 'NOT_RUN')
+        self.assertFalse(result['pages'][1]['ready'])
+
+    def test_conversion_metadata_does_not_get_hidden_by_missing_assessment_or_curve(self):
+        result = self.check([self.entry(kind) for kind in ('catalog', 'exam_pack', 'conversion')])
+        self.assertEqual(self.capability(result, 3, 'converted_score')['metadata_status'], 'eligible_metadata_only')
+        self.assertEqual(self.capability(result, 3, 'converted_percentile')['missing_kinds'], ['percentile'])
+        self.assertEqual(self.capability(result, 3, 'assessment')['missing_kinds'], ['analysis'])
+        self.assertEqual(self.capability(result, 1, 'official_history_and_recruitment')['metadata_status'], 'eligible_metadata_only')
+        self.assertEqual(result['current_catalog_binding'], 'NOT_RUN')
+
+    def test_one_eligible_conversion_does_not_make_same_kind_or_all_departments_ready(self):
+        good = self.entry('conversion')
+        draft = self.entry('conversion', 'SYNTHETIC-OTHER-PRIVATE-ID', status='draft')
+        result = self.check([self.entry('catalog'), self.entry('exam_pack'), good, draft])
+        conversion = self.kind(result, 'conversion')
+        self.assertEqual(conversion['metadata_status'], 'partially_eligible')
+        self.assertEqual(conversion['selected_entry_status_counts']['eligible_metadata_only'], 1)
+        self.assertEqual(conversion['selected_entry_status_counts']['not_approved'], 1)
+        self.assertEqual(self.capability(result, 3, 'converted_score')['metadata_status'], 'blocked')
+        self.assertEqual(conversion['coverage'], 'selected_scope_only_not_nationwide')
+
+    def test_unselected_draft_does_not_expand_minimum_selected_requirements(self):
+        selected = [self.entry(kind) for kind in ('catalog', 'exam_pack', 'conversion')]
+        result = self.check(selected + [self.entry('analysis', status='draft')], selected=selected)
+        self.assertEqual(self.capability(result, 3, 'converted_score')['metadata_status'], 'eligible_metadata_only')
+        self.assertEqual(self.kind(result, 'analysis')['metadata_status'], 'not_selected')
+        self.assertIn('analysis', self.capability(result, 3, 'assessment')['missing_kinds'])
+
+    def test_fourth_page_exposes_standalone_baseline_gap_without_losing_direct_conversion(self):
+        entries = [self.entry(kind) for kind in ('catalog', 'exam_pack', 'conversion', 'percentile', 'analysis')]
+        result = self.check(entries)
+        baseline = self.capability(result, 4, 'advantage_baseline')
+        self.assertEqual((baseline['metadata_status'], baseline['missing_kinds']), ('missing', ['total_model']))
+        self.assertEqual(self.capability(result, 3, 'converted_score')['metadata_status'], 'eligible_metadata_only')
+        for capability in ('conversion_advantage', 'recommended_candidates'):
+            state = self.capability(result, 4, capability)
+            self.assertEqual(state['standalone_total_model_status'], 'not_selected')
+            self.assertEqual(state['embedded_analysis_baseline'], 'NOT_CHECKED')
+            self.assertEqual(state['actual_calculation'], 'NOT_RUN')
+            self.assertIn('validated_embedded_analysis_target_total', state['overall_baseline_possible_source'])
+        result = self.check(entries + [self.entry('total_model', production_allowed=False)])
+        self.assertEqual(self.capability(result, 4, 'advantage_baseline')['metadata_status'], 'blocked')
+        self.assertEqual(self.capability(result, 3, 'converted_score')['metadata_status'], 'eligible_metadata_only')
+
+    def test_all_selected_metadata_still_does_not_verify_decoder_bindings_or_live_service(self):
+        kinds = ('catalog', 'exam_pack', 'total_model', 'conversion', 'percentile', 'analysis',
+                 'forecast_context', 'forecast_inputs', 'forecast_policy', 'estimate_receipt')
+        result = self.check([self.entry(kind) for kind in kinds])
+        self.assertTrue(all(row['metadata_status'] == 'eligible_metadata_only' for row in result['kinds']))
+        for page in result['pages']:
+            self.assertEqual(page['connection'], 'configured_not_verified')
+            self.assertFalse(page['ready'])
+            for cap in page['capabilities']:
+                self.assertEqual((cap['native_decode'], cap['cross_bindings'], cap['actual_calculation']), ('NOT_RUN', 'NOT_RUN', 'NOT_RUN'))
+        for key in ('database', 'authentication', 'storage_objects', 'engine', 'current_catalog_binding'):
+            self.assertEqual(result[key], 'NOT_RUN')
+        self.assertFalse(result['production_ready'])
+
+    def test_invalid_selection_and_registry_keep_four_blocked_pages_without_raw_error(self):
+        entry = self.entry('exam_pack')
+        manifests = ({}, dict(format='jungsi.runtime-selection/v1', required=[]),
+            dict(format='jungsi.runtime-selection/v1', required=[dict(kind='exam_pack', key=True)]),
+            dict(format='jungsi.runtime-selection/v1', required=[dict(kind='exam_pack', key=entry['key'])] * 2))
+        for manifest in manifests:
+            with self.subTest(manifest_keys=list(manifest)):
+                result = self.check([entry], manifest=manifest)
+                self.assertEqual(result['selection'], 'invalid')
+                self.assertTrue(all(cap['metadata_status'] == 'metadata_unavailable' for page in result['pages'] for cap in page['capabilities']))
+        for registry in ({}, dict(format='jungsi.data-registry/v1', entries={}),
+                         dict(format='jungsi.data-registry/v1', entries=[entry, entry])):
+            result = self.check([entry], registry=registry)
+            self.assertEqual(result['registry'], 'invalid')
+
+    def test_approval_flags_size_and_missing_selected_reference_are_not_eligible(self):
+        for change in (dict(status='draft'), dict(engine_approved=False), dict(production_allowed=False),
+                       dict(archive_only=True), dict(archive_only=None), dict(bytes=True),
+                       dict(bytes=32 * 1024 * 1024 + 1), dict(object_key='../SYNTHETIC-private')):
+            with self.subTest(fields=list(change)):
+                result = self.check([self.entry('exam_pack', **change)])
+                self.assertEqual(self.kind(result, 'exam_pack')['metadata_status'], 'blocked')
+        selected = [self.entry('exam_pack')]
+        result = self.check([], selected=selected)
+        self.assertEqual(self.kind(result, 'exam_pack')['selected_entry_status_counts']['missing'], 1)
+
+    def test_missing_or_invalid_storage_scope_is_not_an_object_or_bucket_verification(self):
+        result = self.check([self.entry('exam_pack')], env_change=dict(SUPABASE_SECRET_KEY=None))
+        self.assertEqual(result['storage_scope'], 'not_configured')
+        self.assertEqual(self.kind(result, 'exam_pack')['selected_entry_status_counts']['unverified_storage_scope'], 1)
+        result = self.check([self.entry('exam_pack')], env_change=dict(SUPABASE_SECRET_KEY='SYNTHETIC-invalid-secret'))
+        self.assertEqual(result['storage_scope'], 'invalid_configuration')
+        self.assertEqual(self.kind(result, 'exam_pack')['selected_entry_status_counts']['invalid_reference'], 1)
+        result = self.check([self.entry('exam_pack', bucket='synthetic-other-private-bucket')])
+        self.assertEqual(self.kind(result, 'exam_pack')['selected_entry_status_counts']['invalid_reference'], 1)
+
+    def test_settings_private_identifiers_hashes_bucket_paths_secrets_never_appear(self):
+        result = self.check([self.entry(kind) for kind in ('catalog', 'exam_pack', 'conversion')])
+        output = json.dumps(result, ensure_ascii=False)
+        for hidden in ('SYNTHETIC-PRIVATE', 'SYNTHETIC-private', 'SYNTHETIC-SERVER', 'SYNTHETIC-DB',
+                       'SYNTHETIC-RELAY', 'SYNTHETIC-PUBLISHABLE', 'a' * 64,
+                       'synthetic-private-bucket', 'synthetic-private-prefix', 'synthetic.supabase.co'):
+            self.assertNotIn(hidden, output)
+        self.assertEqual(result['check_target'], 'configured_supabase_native_metadata_not_local_verification')
+        self.assertEqual(result['local_purpose_native_approval'], 'NOT_CHECKED')
+
+    def test_metadata_file_private_size_bounds_duplicate_and_nonfinite_guards(self):
+        self.assertEqual(runtime._page_metadata_file(None), ('missing', None))
+        self.assertEqual(runtime._page_metadata_file('src/SYNTHETIC-secret.json'), ('invalid', None))
+        for content in (b'{"format":"a","format":"b"}', b'{"value":NaN}', b'\xff', b'[]', b''):
+            private = SimpleNamespace(stat=lambda: SimpleNamespace(st_size=max(1, len(content))), open=lambda mode: BytesIO(content))
+            with patch.object(runtime, '_private_path', return_value=private):
+                self.assertEqual(runtime._page_metadata_file('outputs/SYNTHETIC-private.json'), ('invalid', None))
+        private = SimpleNamespace(stat=lambda: SimpleNamespace(st_size=1024 * 1024 + 1),
+            open=lambda mode: self.fail('oversize metadata must not be opened'))
+        with patch.object(runtime, '_private_path', return_value=private):
+            self.assertEqual(runtime._page_metadata_file('outputs/SYNTHETIC-private.json'), ('invalid', None))
+        private = SimpleNamespace(stat=lambda: SimpleNamespace(st_size=1), open=lambda mode: BytesIO(b' ' * (1024 * 1024 + 2)))
+        with patch.object(runtime, '_private_path', return_value=private):
+            self.assertEqual(runtime._page_metadata_file('outputs/SYNTHETIC-private.json'), ('invalid', None))
+
+    def test_page_cli_uses_only_four_page_metadata_mode_and_returns_all_missing_pages(self):
+        output = StringIO()
+        with patch.dict(runtime.os.environ, {}, clear=True), \
+                patch.object(runtime, 'configuration_status', side_effect=AssertionError('old mode forbidden')), \
+                patch.object(runtime, 'review_status_from_file', side_effect=AssertionError('capture mode forbidden')), \
+                redirect_stdout(output):
+            self.assertEqual(runtime.main(['--page-readiness']), 0)
+        result = json.loads(output.getvalue())
+        self.assertEqual(result['format'], 'jungsi.four-page-local-readiness/v1')
+        self.assertEqual([page['page_number'] for page in result['pages']], [1, 2, 3, 4])
+        for modes in (['--page-readiness', '--check-config'],
+                      ['--page-readiness', '--review-status-file', 'outputs/SYNTHETIC-capture.json']):
+            with redirect_stderr(StringIO()), self.assertRaises(SystemExit) as error:
+                runtime.main(modes)
+            self.assertEqual(error.exception.code, 2)
+
 
 if __name__ == '__main__': unittest.main()

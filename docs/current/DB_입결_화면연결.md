@@ -1,10 +1,10 @@
 # Supabase 입결 DB와 화면 API 연결
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.36이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.37이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 승인된 화면팀·관리자에게 현재 단일 정본 입결을 실제 서비스 API로 표시; 일반회원 운영 공개는 별도
 
-계약 2026.10.10.v19 · 코드 implemented_live_bounded_v2_hosted_and_reported_current_API_JWT_BFF_browser_functional_PASS_external_PR18_open_viewer_gate_and_operational_acceptance_pending · production_ready=false. 담당 feature/application-pre-data-platform.
+계약 2026.10.11.v1 · 코드 implemented_current_review_local_owner_intake_and_offline_four_page_diagnostics; C_plus_official_exam_local_native_HTTP_partial_success_and_exact_holds_verified; full_calculation_live_and_general_publication_pending · production_ready=false. 담당 feature/application-pre-data-platform.
 
 ## 연결과 승인 범위
 
@@ -129,7 +129,69 @@
 - current review의 비공개 descriptor PIN과 cursor 고정키는 Git제외 서버 배포 artifact로 주입할 수 있다. 기존7개의 DB/Auth/Storage/relay 서버env를 재사용하고 브라우저·공개코드·로그에 설정을 전달하지 않는다.
 - 현재 review API와 학생 1페이지 History DTO는 다른 계약이다. 화면팀은 검수 전용 서버 BFF에서 v2를 소비하고 review_only/not_published·결측/보류와 unknown count를 표시한다.
 - current-admission-review v2를 실제 Supabase에 배포했고 무인증/relay/JWT 거절5건을 검수했다. 기존 승인 두 계정·서버 BFF·relay를 재사용하여 현재 정본 검수 화면만 즉시 연결한다. 새 PIN4 등록/read model/census 준비를 화면 연결 선행 조건으로 요구하지 않는다. actual factory Storage+DB 두 페이지200100은 통제 세션DI이며 fresh user JWT·BFF·브라우저 성공은 화면팀 영수증으로 별도 확정한다. 응답v2 unknown count null/empty items+cursor/409새조회 계약을 사용하며 기본22API·기존C는 보존한다.
-- 2026-10-10 화면팀 freshJWT API 및 /management/current-review 검수 목적 BFF/브라우저 기능 영수증을 수신했다.100+100·unknowncount·empty+cursor·보류/원형·비노출을 보고상 확인하고 16dea213의 cursor256절단 수정 후 재시도PASS를 기록한다. 방문자 gate 또는 사설 접근 통제는 미입증이며 외부 노출 전 필요하다. 외부 PR18 미병합·409 실관측·전체 운영3gate·일반 발행·W1/W2/CAP는 별도 미완료다.
+- [이력: v9 local Owner 회신 수용 이전] 2026-10-10 화면팀 freshJWT API 및 /management/current-review 검수 목적 BFF/브라우저 기능 영수증을 수신했다.100+100·unknowncount·empty+cursor·보류/원형·비노출을 보고상 확인하고 16dea213의 cursor256절단 수정 후 재시도PASS를 기록한다. 방문자 gate 또는 사설 접근 통제는 미입증이며 외부 노출 전 필요하다. 외부 PR18 미병합·409 실관측·전체 운영3gate·일반 발행·W1/W2/CAP는 별도 미완료다.
+- v9/bf6435d local 127.0.0.1:3003 실JWT200100+수동200100 및 HTML4비밀값 미출현 보고를 수용한다. local 조회를 막는 발견사항0이며 BFF no-cache와 Edge no-store 기존근거는 구분한다. live 방문자·409·운영3gate·일반공개·전체4페이지 계산 완료로 확대하지 않는다.
+- Owner 확인 범위는1~4페이지 전체다. current-review18필드와 C5GET만 연결한 것으로 완료 처리하지 않는다. owner_status_view의 페이지별 최소자료·기존22API·독립 성공/pending 보존 규칙을 따른다.
+- 고정hold3개와 null공식메타6개는 현재 공급자의 일반 공개 자격 제한이다. source_review_status는 DTO에 없고 모든 원문/매핑이 미검수라는 뜻이 아니다. aggregate배지는 inference=false에도 붙으므로 link_kind/참조연도를 함께 본다.
+- C140은 제한된 역사 검수 승인이다. 일반 회원 발행과 구분하며 C recruitment pending/null은 공급자 구현 상태로 표시한다. 자료 등록만으로 자동ready가 된다고 안내하지 않는다. 최종 합격 예비번호와 추가 합격 인원은 별도다.
+
+## 로컬 Owner·화면팀의 1~4페이지 확인
+
+Supabase Owner·화면개발자가 local에서1~4페이지의 실제 연결·자료·독립 성공/보류를 모두 확인. DB/source 등록과 승인 native runtime 선택은 별개다. 검수 화면 하나의 수신을 전체 네 페이지 계산 완료로 표시하지 않는다.
+
+| 페이지 | 로컬 화면 경로 | 기존 작업 | 최소 실제 자료 | 현재 증거와 보류 |
+| --- | --- | --- | --- | --- |
+| 1 | /jeongsi/admissions/results | session.read, history.search, recruitment.read | approved_catalog_binding, qualified_official_metric_definition_unit_scale_source_year, approved_recruitment_object | local 결합서버 history100+40의 C140 값·타입·출처·메타 전수동일, 모집행12 pending/null·2024~2026보존 PASS. current-review local100+100 수신도 별도 수용. 일반 회원 전국 발행 인수는미완료. · 발표 지표와 화면 추정열을 분리한다. 실제0·미공개·미확인·해당없음 구분. 모집 pending은 실제0가 아니다. |
+| 2 | /jeongsi/reports/me | session.read, score-profile.create, overall.analyze, report.read, university.analyze, report.export | exam_pack, total_model, owned_score_profile_and_report | 공식9월시험팩+가상성적2건×일반/유료 local native 프로필201→전체분석201→리포트200 PASS. 과목등급·국수탐2총점 보존; 전체누백 pending/total_model_missing. 실제전체누백모형·브라우저는NOT_RUN. · 시험팩 검증 성공 과목·등급·총점을 표시한다. 총점모델 부족이면 누백만pending/null이며 과목 주변분포로 국수탐 공동분포를 대신하지 않는다. |
+| 3 | /jeongsi/admissions/possibilities | session.read, offerings.search, offering.read, university.analyze, shortlist.update | approved_target_exam_year_catalog_offering, exam_pack, UniversityConversionRelease_PK_binding, approved_September_mock_compatibility, approved_university_percentile_curve, approved_offering_analysis_or_published_forecast, approved_year_bridge_for_past_year_comparison | local 유료의 C2026모집행4개 분석: conversion.pending/year_bridge_required, percentile.pending/conversion_not_ready, assessment.pending/analysis_release_missing. 일반은403paid_required. 2027native규칙/곡선 계산·브라우저는NOT_RUN. · conversion·percentile·assessment를 분리한다. 판단pending에도 성공 환산·누백·현재연도 점수를 보존하며 학과별 범위·지원자격을 표시한다. |
+| 4 | /jeongsi/admissions/favorable | session.read, candidates.build, shortlist.update, statistics.read | page3_native_dependencies, compatible_standalone_total_or_approved_embedded_target_total_baseline, approved_university_curve, owned_candidate_and_shortlist_snapshot | local 일반403paid_required. 유료 response.candidates.status=ready+empty는C에2027모집행0인것이며 top analysis_status=pending/offering_analysis_pending. 지원가능대학없음/추천완료로 표시하지않는다. 실제2027환산/곡선/판단·브라우저는NOT_RUN. · 기본학교·학과별범위·와일드카드·판단보류·추천밖·조건미충족을 구분한다. 빈추천과 자료보류는 다르며 동일시험/모집단/동점 기준 확인 전 유불리 폭을 보류한다. candidates.payload의ready·빈목록보다 상위analysis_status와reason을 함께 보며 pending을 추천완료로 표시하지 않는다. |
+
+전체서비스 명시 factory: jungsi_touch.infrastructure.supabase_runtime:configured_supabase_app. localhost bind는127.0.0.1이다. 기존 local_verification의 승인 목적 cache+명시DI+메모리 report로1~4페이지 시사가 가능하다. 운영 factory의 production_allowed gate를 local시사 필수로 확대하지 않는다. local 승인 native가 먼저 필요하며 재시작 유실 경고·역할·loopback을 유지한다. Supabase Owner 권한은 유료 이용권·본인 소유권·승인 subject를 자동 우회하는 조건이 아니다.
+
+### 자료 자체와 현재 공급자의 제한
+
+| 배지/상태 | 해석 |
+| --- | --- |
+| review_only | 검수 전용 응답. 원문 검수 완료 여부는 별도다. |
+| present | 원문 scalar의 타입 보존. 실제0를 보존하며 공란/대시 문자열이 공식 유효점수라는 뜻은 아니다. |
+| actual_null | 원문의 명시null. missing·실제0와 구분한다. |
+| missing | 이 응답에서 사용할 원문 값 없음. 실제0로 채우지 않는다. |
+| held | 정합성 등 사유로 응답 literal/numeric을 보류. 원DB 삭제가 아니다. |
+| review_only_not_published | 모든행 고정: 이 공급자가 일반 공개 자격을 제공하지 않음. 행별 실제 발행 검수 상태 단정 금지. |
+| public_offering_mapping_not_qualified | 모든행 고정: 이 공급자가 소비자 모집단위 연결 자격을 제공하지 않음. 실제 원문 매핑 실패 증거가 아님. |
+| official_metadata_not_qualified | 모든행 고정·공식메타6개null: 이 공급자의 미제공 공개 메타. DB원문 결측 증거가 아님. |
+| aggregate_or_forward_reference | 개별 모집행 추론허용false에도 붙음. link_kind와 참조연도로 실제 집계/전방참조를 구분. |
+
+count_status=unknown·matching count2개null. 페이지 행수는 전국 총건수가 아니다. 빈items+next_cursor면 수동 다음범위가 남는다. source_review_status는 현재18필드 DTO에 없다. 공식 메타6개null은 공급자의 미제공 투영이며 DB원문 결측을 뜻하지 않는다. C140은 제한된 역사 검수 승인이다. C recruitment는 현재 pending/null로 고정되며 자료 등록만으로 자동ready가 되지 않는다. 최종 합격 예비번호는 추가 합격 인원과 다르다.
+
+### 로컬 상태 점검 명령
+
+프로젝트 src를 PYTHONPATH에 둔 비공개 서버 환경에서 실행한다.
+
+```powershell
+python -B -m jungsi_touch.infrastructure.supabase_runtime --page-readiness
+python -B -m jungsi_touch.infrastructure.supabase_runtime --review-status-file <outputs 내 단일 v2 JSON 절대경로>
+```
+
+네 페이지 명령은 설정 존재성과 비공개 registry/selection metadata만, 단일응답 명령은 제외폴더의 최대1MiB·100행 캡처만 읽는다. DB/Auth/Storage/네트워크·엔진·환경파일 변경은 없고 실값·학교명·토큰·cursor·경로를 출력하지 않는다. metadata 적격은 실제 decoder·버전 결속·화면 연결 완료가 아니다. 부족한 자료는 capability별로 보류하며 다른 페이지 성공을 지우지 않는다. 새 목적별 승인 catalog+exam 명부를 실제 local cache/4역할 세션/loopback8001 전체22route 구성에서 검수했다(51HTTP요청·362 assertion PASS). C140·모집행12와 과목성적/총점을 확인하고 누백/대학판단은 정확보류했다. 22operation전수검수·실Auth·DB·Storage·브라우저는NOT_RUN이다.
+
+화면팀 구현 기준:
+
+- local Owner 모드에서 네 소비자 화면 경로를 모두 열고 실제 응답·미연결·자료보류를 각각 표시한다. 일부예시를 실제자료로 대체하지 않는다.
+- current-review는 원문 관측 검수 화면으로 유지하고 고정배지 뜻을 정정한다. 기존18필드·query/cursor 원문·수동진행을 유지한다.
+- 1페이지 History DTO와 current-review DTO는 별도다. 공개 모집행·지표정의·단위·출처·승인 binding을 공급자에서 결속한 뒤 발표 결과로 표시한다.
+- 2~4페이지는 기존 전체22route의 최소 native 공급자와 명시 연결한다. C5GET 주소를 전역base로 적용하거나 합성 응답을 실DB계산 성공으로 표시하지 않는다.
+- 독립 환산/누백 성공은 즉시 표시하고 부족한 후속판단만pending. local시사와 실Auth·실이용권·영속DB·일반공개 인수는 구분한다.
+
+### W6 첫 발행과 사람 판정 UI 회신
+
+첫 일반 공개 발행일은 현재 미정이다. local 검수 수신 완료와 별개이며 고정배지3개로 실제 검수 진행률을 산출하지 않는다. 첫 부분 배치 단위: 학교·캠퍼스·학년도·모집단위·전형·군·공식지표별 부분발행. 학교4개년 요강 연결 근거를 재사용하며 실제 발표 입결 연도만 제공하고 미발표연도는null.
+
+자동 검사 대상: key_year_track_group_binding, scalar_type_unit_scale_definition, source_state_hash_binding, same_observation_deduplication, approved_lineage_reference_scope. 사람 판정 대상: conflicting_official_source, split_merge_reorganization_aggregate_definition, ambiguous_cohort_statistic_unit_phase. 자동/수작업 비율은 새 분모를 재측정하지 않아 미확인이다.
+
+검수 UI 계약은 CR_REVIEW_DECISION_UI_01_candidate_not_current_mutation_API 상태이며 현재22API에 새 쓰기 경로가 등록된 것이 아니다. 후보 입력: opaque_review_item_id, expected_revision_and_fingerprint, decision_dimension, decision, reason_code, evidence_reference, idempotency_key; 판정 approve, hold, reject. 서버는 권한·revision409·불변 감사·idempotency를 유지하며 검수 판정만으로 일반 발행이나 엔진 승인을 자동 수행하지 않는다.
+
+W1 합류: 준비·미채택. 채택 및 개별 공식정의·단위·모집행·발표단계가 검증된 지표는 같은부분발행판에 포함 가능. 미확인 지표는후속판. C덮어쓰기·전량재적재 없음. W3의 bounded 연결과 W4의 제한 기능 수신은 완료 이력을 보존한다. W1~W6 모두가 같은 차단 상태는 아니다.
 
 ## 증거와 미실행 범위
 
@@ -140,7 +202,7 @@
 | Deno_check_test | PASS_NATIVE_DENO2_9_7_CACHED_ONLY_CHECK_POSTGRES_PUBLIC_TEST_BOOTSTRAP_TEST_PRIVATE_PRIMARY_WIRE_ROOTS; PUBLIC_SERVICE36_PLUS_BOOTSTRAP3_EQUAL39_AND_PRIVATE_REAL_BIND_WIRE5_EQUAL44_TOTAL; EMPTY_SYNTHETIC_PROCESS_ENV_ONLY_NO_SECRET_VALUES_DB_OR_NETWORK; DEPLOYMENT_AND_FRESH_JWT_INTAKE_SEPARATE |
 | restricted_cloud_API | RECEIVED_FRONTEND_FINAL_REPORT_2026_10_09T14_28_39Z_FRESH_JWT_HISTORY140_EXACT_TYPED_FIELDS_CURSOR100_PLUS40_NO_DUPLICATES_OR_MISSING_RECRUITMENT12_PENDING_NULL_ME200_STANDARD_PAID2_GET403_AUTH_RELAY_NO_STORE_PASS; ONLY_HISTORICAL_C_FIVE_GET_SCOPE; ROOT_NOT_A_NEW_JWT_RERUN |
 | actual_user_JWT | C140_HISTORICAL_REPORT_PRESERVED; CURRENT_REVIEW_API_FRESH_JWT18_REPORTED_PASS_RECEIPT_READ_AND_CAPTURE_SHA_VERIFIED; not_independent_rerun_not_all_API_operation |
-| frontend_BFF_browser | RECEIVED_REPORTED_CURRENT_REVIEW_SCOPED_BFF_BROWSER_FUNCTIONAL_PASS_AT_FRONTEND16dea213;100_RENDER_NEXT100_EMPTY_CURSOR_UNKNOWNCOUNT_PENDING_NONEXPOSURE; viewer_gate_actual409_and_operational3gate_NOT_RUN |
+| frontend_BFF_browser | ORIGINAL_16dea213_REPORT_PRESERVED_NEW_bf6435d_LOCAL_OWNER_FE_REPORTED200100_PLUS100_AND_HTML4_SECRET_ABSENT_RECEIPTS_MATCH_ROOT_RERUN0_BFF_NO_CACHE_NOT_NO_STORE_LIVE_409_OPERATING3GATE_ALL4_NATIVE_RUNTIME_NOT_RUN |
 | operational_security_three_gates | NOT_RUN |
 | effective_RLS | EXISTING_APPROVED_C_SOURCE_APP_ROLE_GUARDS_PRESERVED; NEW_CURRENT_METADATA13_RELATIONS_PHYSICAL8_RLS_FORCE_VIEW5_INVOKER_BARRIER_APP_SELECT_ONLY_ANON_AUTH_DENIED_PASS; CURRENT_TYPED_PAGE_AND_HOSTED_CURRENT_SERVICE_ACCEPTANCE_NOT_RUN |
 | bulk_JOIN_query_count | PASS_FRESH_V5_ACTUAL_PROVIDER_DATA_JOIN_1_HISTORY_HTTP_PAGE_100_JOIN_1_PAGE_40_JOIN_1; TOTAL_DATA_JOINS_3; AUTH_ROLE_ENTITLEMENT_METADATA_COUNTED_SEPARATELY_NO_N_PLUS_1 |
@@ -261,6 +323,9 @@
 | live_bounded_hosted_negative | PASS5_NO_CREDENTIAL401_RELAY_MISSING403_RELAY_WRONG403_NO_USER_JWT401_FAKE_JWT401; no_items_or_secret_values; handler_private_no_store; platform401_header_distinct |
 | live_bounded_frontend_delivery | PASS_EXISTING_HANDOFF_NEW_FILE7818B_REMOTE_FETCH_CONTENT_SHA_EXACT_OWNER1_WRITER1; actual_BFF_browser_NOT_RUN |
 | current_frontend_receipt_intake | frontend_receipt_intake contains capture SHA/bytes/method and scoped observations; PR18_open is not develop frontend integration |
+| local_owner_status_tools | PASS_FOCUSED71_EXISTING44_PLUS_NEW27_AND_THREE_NATIVE_CLI_PROCESS_SCOPED_SYNTHETIC_FILE_METADATA; OFFLINE_DIAGNOSTICS_DB_NETWORK_ENGINE_BROWSER0; INDEPENDENT_SOURCE_SCOPE_PASS_FINAL_FREEZE_AND_NORMAL_HOOK_PENDING |
+| local_C_and_exam_full22_runtime | PASS_TWO_NATIVE_LOCAL_COMPOSITIONS_EXAM38HTTP277ASSERT_AND_C_PLUS_EXAM51HTTP362ASSERT; REAL_OFFICIAL_PACK_AND_FROZEN_C_BYTES; TWO_VIRTUAL_INPUTS_FOUR_ROLES; DB_AUTH_STORAGE_BROWSER_NOT_RUN; FULL22_REGISTERED_NOT_EXHAUSTIVE |
+| local_C_and_exam_receipt_sha256 | 2d3adfe1b3f282a1d33e72531a2fddce1bde5168fe1129bf8510d36d0a82c2db |
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -280,4 +345,4 @@
 
 [외부접근 데이터보호 개발기준](외부접근_데이터보호_개발기준.md)을 작업 전에 반드시 읽는다. 정본은 service_spec.json의 security_contract와 workflow.development_harness이며 보안 revision은 2026.10.06.v1이다. REQ-24~26 / SEC-01~08은 화면·API·DB 개발의 공통 기준이다. 공개 응답의 재귀 허용목록, 서버 중계와 사용자 권한, 공유 누적 사용량 통제를 함께 구현한다. 기획·라우팅·route_catalog와 AGENTS 필수 참조는 동일 Git 스냅샷에서 하네스가 검사한다. 현재 운영 인수는 production_ready=false이고 3개 보안 release gate는 pending이다. 문서/계약 검사 통과는 런타임 차단 구현·브라우저·운영 DB 검수 완료와 구분한다.
 
-<!-- jungsi:generated spec_sha256=3917a92c37cba2ba8b905e39edd1219cf907c237d9887530c2c665953f59ccb6 -->
+<!-- jungsi:generated spec_sha256=cc56b975206bcd95a16dfa48f34162bcdb8b9dfa8fa2c8791e934bd418ff63f8 -->
