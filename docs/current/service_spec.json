@@ -11423,6 +11423,14 @@
         "REQ-26"
       ],
       "summary": "화면팀 v3 브라우저 영수증v2의 local 숫자·성공환산/보류 분리·역할 게이트를 해당 실행HEAD에 한정해 수용했다. 후속 문구커밋의 browser 미실행과 Root 미재실행을 구분하고 PR29 source 통합/CI를 기록한다. 첫 W1 예비번호 열 수신을 완료로 갱신하되 넓은 통계·가산점CR·누백/연도연계·W6·운영/용량CAP는 보류다. OfferingAnalysis 보류를 환산자료 부재로 오해시키는 문구3종은 기존 화면 담당의 FE-V3-REASON-01 요청으로 기록한다. API/DTO/회원/DB/RLS/일반발행/데이터승인은 변경하지 않는다."
+    },
+    {
+      "date": "2026-10-11",
+      "requirements": [
+        "REQ-05",
+        "REQ-20"
+      ],
+      "summary": "FE-V3-REASON-01: 지원 판단 보류 3코드(analysis_release_missing·analysis_release_not_approved·analysis_pack_mismatch) 문구를 지원 판단 기준 계열로 교체 — OfferingAnalysis 보류는 환산 성공과 독립이므로 환산 자료가 없다는 표현을 제거. DTO·API·산식·숫자·권한 변경 없음."
     }
   ],
   "overall_analysis_contract": {
