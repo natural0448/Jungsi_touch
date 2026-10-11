@@ -243,6 +243,9 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
   cols.push({ key: "__applicants", label: "추정 총 지원자", derived: true });
   if (seen.includes("충원인원")) cols.push({ key: "충원인원", label: "충원인원" });
   cols.push({ key: "__dropped", label: "추정 탈락자", derived: true });
+  // 최종 합격 예비번호(단위 '번')는 독립 지표 열이다 — 충원인원의 별칭이 아니고,
+  // 추정 총 지원자·탈락자 계산의 재료로도 쓰지 않는다(담당자 지시 2026-10-11 v3)
+  if (seen.includes("최종 합격 예비번호")) cols.push({ key: "최종 합격 예비번호", label: "최종 합격 예비번호" });
   for (const c of cuts) cols.push(c);
   const metricCols = cols.filter((c) => !c.derived).map((c) => c.key);
   return (
