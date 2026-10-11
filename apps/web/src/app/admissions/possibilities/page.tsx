@@ -14,7 +14,7 @@ import { REGIONS } from "@/lib/regions";
 import { ensureAnalyses, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
 import { lockFor, page } from "@/lib/routes";
 import { Detail } from "./parts";
-import { GROUPS, hrefWith, LIMIT, parseQuery, toSearch, type Query } from "./query";
+import { GROUPS, hrefWith, LIMIT, parseQuery, toSearch, type Query, YEAR } from "./query";
 import "./possibilities.css";
 
 const route = page("PAGE-03");
@@ -125,11 +125,19 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
               {report && <CategoryLegend />}
             </div>
 
-            {groups.length === 0 ? (
+            {groups.length === 0 && !filtered ? (
+              /* 조건 없이 0건이면 검색이 좁아서가 아니라 올해(YEAR) 모집행 카탈로그가 아직
+                 결속되지 않은 자료 보류다 — '지원 가능한 대학 없음'류 결론으로 말하지 않는다
+                 (담당자 지시 2026-10-11: 카탈로그 부재와 결과 0 판정을 구분) */
+              <section className="gate flat">
+                <h2>올해 모집행 자료가 아직 연결되지 않았습니다</h2>
+                <p>{YEAR}학년도 모집행 카탈로그가 결속되기 전이라 검색 결과를 보여 드릴 수 없습니다. 지원할 수 없다는 뜻이 아니며, 자료가 연결되면 이 화면에서 검색할 수 있습니다.</p>
+              </section>
+            ) : groups.length === 0 ? (
               <section className="gate flat">
                 <h2>조건에 맞는 모집단위가 없습니다</h2>
                 <p>검색어를 줄이거나 지역·모집군을 전체로 바꿔 보세요. 결과가 없다는 것은 지원할 수 없다는 뜻이 아닙니다.</p>
-                {filtered && <div className="acts"><Link className="btn" href={route.path}>조건 지우기</Link></div>}
+                <div className="acts"><Link className="btn" href={route.path}>조건 지우기</Link></div>
               </section>
             ) : (
               <div className="list">

@@ -168,7 +168,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
           </section>
 
           <aside className="fv-side" aria-label="와일드카드">
-            <WildcardDeck picks={wildcards} picked={picked} stats={stats} canPick />
+            <WildcardDeck picks={wildcards} picked={picked} stats={stats} canPick analysisPending={report.analysis_status?.status === "pending"} />
           </aside>
         </div>
       </div>
