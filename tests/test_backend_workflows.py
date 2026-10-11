@@ -165,6 +165,76 @@ class BackendWorkflowTests(unittest.TestCase):
         self.data.catalog=replace(self.data.catalog,version='SYNTHETIC-catalog.v2')
         self.assertEqual(self.request('GET','/api/v1/offerings/search?limit=1&cursor='+first['next_cursor']).status_code,409)
 
+    def test_nullable_search_preserves_unknown_fields_and_one_catalog_read(self):
+        rows=deepcopy(self.data.catalog.offerings);history=deepcopy(self.data.catalog.history)
+        for row in (rows[0],history[0]):row.update(campus=None,region=None,group=None)
+        self.data.catalog=replace(self.data.catalog,offerings=rows,history=history)
+        original=deepcopy(self.data.catalog)
+        for endpoint,owner in (('/api/v1/admission-history',self.standard),('/api/v1/offerings/search',self.owner)):
+            for filters in ('','&university_q=가상a&department_q=가상간호'):
+                with self.subTest(endpoint=endpoint,filters=filters):
+                    calls=len(self.data.calls)
+                    response=self.request('GET',endpoint+'?academic_year=2024'+filters,owner=owner)
+                    self.assertEqual(response.status_code,200,response.text)
+                    self.assertEqual(response.headers['cache-control'],'no-store')
+                    self.assertEqual(self.data.calls[calls:],[('catalog',)])
+                    item=next(row for row in response.json()['items'] if row['offering_id']=='SYNTHETIC-A-2024')
+                    for field in ('campus','region','group'):self.assertIsNone(item[field])
+        self.assertEqual(self.data.catalog,original)
+        calls=len(self.data.calls)
+        denied=self.request('GET','/api/v1/offerings/search?academic_year=2024',owner=self.standard)
+        self.assertEqual(denied.status_code,403,denied.text)
+        self.assertEqual(denied.json()['error']['code'],'paid_required')
+        self.assertEqual(self.data.calls[calls:],[])
+
+    def test_region_and_group_filters_exclude_unknown_rows_without_extra_reads(self):
+        rows=deepcopy(self.data.catalog.offerings);history=deepcopy(self.data.catalog.history)
+        for row in (rows[0],history[0]):row.update(campus=None,region=None,group=None)
+        known=deepcopy(history[0]);known.update(rows[4])
+        self.data.catalog=replace(self.data.catalog,offerings=rows,history=(*history,known))
+        original=deepcopy(self.data.catalog)
+        for endpoint,owner in (('/api/v1/admission-history',self.standard),('/api/v1/offerings/search',self.owner)):
+            for field,value in (('region','가상지역'),('group','가')):
+                with self.subTest(endpoint=endpoint,field=field):
+                    calls=len(self.data.calls)
+                    response=self.request('GET',endpoint+'?academic_year=2024&'+field+'='+value,owner=owner)
+                    self.assertEqual(response.status_code,200,response.text)
+                    self.assertEqual(self.data.calls[calls:],[('catalog',)])
+                    self.assertEqual([row['offering_id'] for row in response.json()['items']],['SYNTHETIC-B-2024'])
+        self.assertEqual(self.data.catalog,original)
+
+    def test_nullable_history_metrics_preserve_three_statistics_and_cursor(self):
+        row=deepcopy(self.data.catalog.offerings[0])
+        for field in ('university_name','campus','department','region','group'):row[field]=None
+        history=[]
+        for index,value in enumerate((None,'0','15')):
+            item=deepcopy(self.data.catalog.history[0]);item.update(row)
+            item.update(metric_name='합성 통계-'+str(index),metric_definition='합성 통계 정의-'+str(index),value=value)
+            history.append(item)
+        self.data.catalog=replace(self.data.catalog,offerings=(row,),history=tuple(history))
+        original=deepcopy(self.data.catalog)
+        pages=[];cursor=None
+        for page_index in range(2):
+            calls=len(self.data.calls)
+            path='/api/v1/admission-history?academic_year=2024&limit=2'
+            if cursor:path+='&cursor='+cursor
+            response=self.request('GET',path,owner=self.standard)
+            self.assertEqual(response.status_code,200,response.text)
+            self.assertEqual(self.data.calls[calls:],[('catalog',)])
+            page=response.json();pages.append(page)
+            self.assertEqual(page['matching_offering_count'],1)
+            self.assertEqual(page['matching_school_count'],1)
+            cursor=page['next_cursor']
+            if page_index==0:self.assertIsNotNone(cursor)
+            else:self.assertIsNone(cursor)
+        items=pages[0]['items']+pages[1]['items']
+        self.assertEqual([len(page['items']) for page in pages],[2,1])
+        self.assertEqual([item['metric_name'] for item in items],[item['metric_name'] for item in history])
+        self.assertEqual([item['value'] for item in items],[None,'0','15'])
+        for item in items:
+            for field in ('university_name','campus','department','region','group'):self.assertIsNone(item[field])
+        self.assertEqual(self.data.catalog,original)
+
     def test_standard_paid_endpoint_denial_contains_no_results_counts_details(self):
         for path in ('/api/v1/offerings/search','/api/v1/offerings/SYNTHETIC-A-2027'):
             response=self.request('GET',path,owner=self.standard)

@@ -309,10 +309,10 @@ class PlatformService:
             service_ids={r['offering_id'] for r in rows}
             rows=[r for r in release.history if r.get('offering_id') in service_ids and r.get('verification_status')=='verified_official']
         rows=[r for r in rows if (year is None or r['academic_year']==year) and
-              clean['university_q'] in (r.get('university_name','')+' '+r.get('campus','')).casefold() and
-              clean['department_q'] in r.get('department','').casefold() and
-              (not clean['region'] or clean['region']==r.get('region','').casefold()) and
-              (not clean['group'] or clean['group']==r.get('group','').casefold())]
+              clean['university_q'] in ((r.get('university_name') or '')+' '+(r.get('campus') or '')).casefold() and
+              clean['department_q'] in (r.get('department') or '').casefold() and
+              (not clean['region'] or clean['region']==(r.get('region') or '').casefold()) and
+              (not clean['group'] or clean['group']==(r.get('group') or '').casefold())]
         rows.sort(key=lambda r:(r['academic_year'],r['university_id'],r['offering_id'],r.get('metric_name','')))
         signature=hashlib.sha256(json.dumps([operation,clean,year],sort_keys=True).encode()).hexdigest()[:16]
         start=0
