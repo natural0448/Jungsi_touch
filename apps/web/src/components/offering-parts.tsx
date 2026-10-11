@@ -24,9 +24,11 @@ const REASON: Record<string, string> = {
   decision_policy_not_approved: "판단 기준을 검수하고 있습니다.",
   decision_evidence_unapproved: "판단 근거 자료를 검수하고 있습니다.",
   comparison_distribution_missing: "비교할 환산 분포가 아직 없습니다.",
-  analysis_release_missing: "이 모집단위의 환산 자료가 아직 없습니다.",
-  analysis_release_not_approved: "환산 자료를 검수하고 있습니다.",
-  analysis_pack_mismatch: "입력한 시험과 환산 자료의 버전이 맞지 않습니다.",
+  // 아래 3코드는 지원 판단용 OfferingAnalysis 자료의 보류를 뜻한다(서버 offering_analysis.py)
+  // — 환산 성공과 독립이라 환산 자료가 없다는 표현을 쓰지 않는다
+  analysis_release_missing: "지원 판단에 필요한 이 모집단위의 분석 기준이 아직 없습니다.",
+  analysis_release_not_approved: "이 모집단위의 지원 판단 기준을 검수하고 있습니다.",
+  analysis_pack_mismatch: "입력한 시험과 지원 판단 자료의 버전이 맞지 않습니다.",
   target_distribution_missing: "그해 비교 분포가 아직 없습니다.",
   total_model_missing: "전체 누적 곡선이 아직 발행되지 않았습니다.",
   year_bridge_required: "과거 학년도 모집행과 올해 성적을 잇는 연도 연계 자료가 아직 없습니다.",
