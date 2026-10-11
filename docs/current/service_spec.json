@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.38",
+  "version": "1.9.39",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -3219,7 +3219,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.38",
+        "contract_version": "1.9.39",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -3393,7 +3393,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.38",
+        "contract_version": "1.9.39",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -3559,7 +3559,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.38",
+        "contract_version": "1.9.39",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -3578,7 +3578,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.38",
+        "contract_version": "1.9.39",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3603,7 +3603,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "planned",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.38",
+        "contract_version": "1.9.39",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3626,9 +3626,9 @@
         "approved_on": "2026-10-08",
         "start_commit": "db50c45127cfb314cc52e2bc8682505e077fffec",
         "branch": "feature/application-pre-data-platform",
-        "status": "local_owner_current_review_receipts_accepted_four_page_status_tools_native_runtime_pending",
+        "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.38",
+        "contract_version": "1.9.39",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -5323,7 +5323,7 @@
               "REQ-13",
               "REQ-14"
             ],
-            "source_sha256": "9af8e6df16d903a823920cc9be9242586b45402d3f5862c3405968f8bd0d1081",
+            "source_sha256": "05f6924789b868df64fb1689cacdddf7811fd784a7f7224a4389d5ad4ca2d5f4",
             "symbols": [
               {
                 "kind": "class",
@@ -11373,6 +11373,21 @@
         "REQ-23"
       ],
       "summary": "4페이지 꾸러미 브라우저 검수 중 보류 표시 보완 2건: ① 3페이지에서 검색 조건 없이 0건이면(올해 모집행 카탈로그 미결속) '조건에 맞는 모집단위 없음' 대신 '올해 모집행 자료가 아직 연결되지 않았습니다' 보류 안내를 보인다 — 카탈로그 부재와 결과 0 판정을 구분. ② 4페이지 와일드카드 빈 칸도 상위 analysis_status 가 pending 이면 '후보가 없습니다' 대신 보류 문구를 보인다. 시험 식별자는 화면 env(JUNGSI_EXAM_ID·JUNGSI_PACK_VERSION)로 실제 시험팩(2027-september-mock/20260930.v1)에 연결(코드 변경 없음)."
+    },
+    {
+      "date": "2026-10-11",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-05",
+        "REQ-14",
+        "REQ-20",
+        "REQ-23",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "PR #18의 develop 병합 39061bef와 CI 880개 통과를 확인하고 과거 OPEN 상태를 이력으로 보존한다. 검산한 공식 2027 반영식 1개와 9월 시험팩의 로컬 목적 승인판으로 실제 HTTP 42개·검수 417개 통과 및 성공 환산 보존을 확인했다. 전체 누백·대학 곡선·지원 판단·과거 연도 동등화는 개별 보류한다. 공식 모집인원·경쟁률·최종 합격 예비번호의 의미를 기존 history DTO에 최소 채택하고, 명시 모집행의 통계 3개를 로컬 실제 HTTP 14개·검수 90개에서 확인했다. null 캠퍼스·지역을 허용한 catalog 검색이 503을 내던 비교 4줄을 수정하고 DTO의 null·권한·조회 1회를 보존했다. 신규 실행은 작업 트리 소스 해시와 결속하고 최종 Git blob 검수와 구분한다. 외부 프런트의 예비번호 열과 새 자료판 브라우저 인수는 별도다. DB 대시보드 분모를 재대조했으나 I/O 그래프 불가·정확 삭제 미승인·작업 창 조건으로 CAP·Storage 정리·VACUUM은 미실행으로 유지한다. 실제 입결·환산값·원식·모집행 ID·키는 Git에 넣지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -12750,7 +12765,43 @@
       "profile_condition_read": "readonly_metadata_admin_active_conditions_confirmed_not_actual_login_JWT_acceptance"
     },
     "security_contract_ref": "security_contract",
-    "security_transition_status": "pending_runtime_implementation"
+    "security_transition_status": "pending_runtime_implementation",
+    "nullable_search_behavior": {
+      "status": "EXISTING_NULLABLE_CONTRACT_SEARCH_FIX",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "paths": [
+        "GET /api/v1/admission-history",
+        "GET /api/v1/offerings/search"
+      ],
+      "fields": [
+        "university_name",
+        "campus",
+        "department",
+        "region",
+        "group"
+      ],
+      "comparison": "unknown/null only uses empty temporary search text; never mutates source or DTO",
+      "explicit_region_or_group_filter": "unknown value does not match a specified filter",
+      "unknown_definition_or_scale": "no inferred value",
+      "catalog_reads_per_request": 1,
+      "new_API_DTO_auth_storage_or_Nplus1": false,
+      "permission": "history standard/paid; offering paid; unauthorized rejected before provider access",
+      "synthetic_HTTP_regressions": "nullable name/campus/department, region/group exclusion, source/DTO null preservation, three metrics cursor2+1, exactly1catalog read; existing tests re-used",
+      "focused_HTTP_tests": {
+        "count": 38,
+        "status": "PASS_WORKTREE_SYNTHETIC_HTTP",
+        "new_distinct_tests": 3,
+        "private_receipt_sha256": "39377697bd4de5fb023c4a4e3692b86274e382bbece4dfc657713c55ef13668f",
+        "full_committed_snapshot_checks": "required separately"
+      }
+    }
   },
   "repository_layout": {
     "reference_branch": "develop",
@@ -13227,7 +13278,30 @@
       "live_server_status": "not_run_configuration_missing",
       "live_data_status": "not_run_configuration_missing",
       "production_rule_status": "operating_release_approval_and_binding_pending",
-      "files_and_branches_preserved": true
+      "files_and_branches_preserved": true,
+      "first_local_official_rule_with_September_native": {
+        "private_receipt": "ACTUAL_NATIVE_HTTP_RECEIPT.v1.json",
+        "bytes": 298198,
+        "sha256": "a822813bbfc6c8d62180f3bc9f75ce38beb42242bfd9a00ca0075525bf28e06c",
+        "status": "PASS_SCOPED_ONE_2027_OFFERING_REAL_OFFICIAL_RULE_WITH_OFFICIAL_SEPTEMBER_PACK_VIRTUAL_INPUTS",
+        "source_HEAD": "39061bef39a89b0012053b7687b4906d81fe073b",
+        "HTTP_requests": 42,
+        "checks_PASS": 417,
+        "registered_operations": 22,
+        "all22_operation_coverage": false,
+        "actual_numeric_values_copied_to_Git": false,
+        "raw_rule_or_source_identity_copied_to_Git": false,
+        "score_basis": "mock_exam",
+        "score_scope": "csat_component",
+        "conversion_success_survives_missing_percentile_and_assessment": true,
+        "overall_distribution": "pending/total_model_missing",
+        "university_percentile": "pending/percentile_release_missing",
+        "support_decision": "pending/analysis_release_missing",
+        "past_year_scores": "pending/year_bridge_required",
+        "favorable_candidates": "pending/approved_candidates_missing_one_offering",
+        "DB_Storage_live_Auth_browser": "NOT_RUN",
+        "production_allowed": false
+      }
     }
   },
   "university_percentile_contract": {
@@ -21197,7 +21271,7 @@
       "basis_planning_commit": "6f61f86c392d8e29c7f557b743a400aef1a4e1f3",
       "frontend_commit": "ab8fb2da595b2b8576e6139f8853b87d98dabef7",
       "evidence_scope": "Exact Git commit and CI, independent synthetic source-excerpt execution, external reply v2; private proposed copy is not a committed fix or browser acceptance",
-      "decision": "기존 추정 열·산술·빈 값 수정과 ready 과거 학년도 가드·커서 과잉 보장 제거를 소스 범위에서 수용한다. pending 학년도와 잔여 커서+빈 카드 두 상태 반례가 남아 PR18 최종 병합·실자료 화면 인수는 보류한다. C 준비와 데이터·서비스 독립 검수는 병행한다.",
+      "decision": "이전반례수정 및 scoped로컬브라우저수신을수용한 화면PR18은develop39061bef로병합됐다. 병합/CI는소스통합이며 새최소통계·환산판브라우저와일반발행/운영인수는별도다.",
       "corrections": [
         [
           "FE-HISTORY-02S",
@@ -21489,6 +21563,20 @@
         ],
         "production_build_and_browser": "NOT_RUN_INDEPENDENTLY_AT_LATEST967",
         "build_manifest_commit": "34b1b5fd01423da61b00fb5d68135c5bf12959a0"
+      },
+      "historical_decision_before_PR18_merge": "기존 추정 열·산술·빈 값 수정과 ready 과거 학년도 가드·커서 과잉 보장 제거를 소스 범위에서 수용한다. pending 학년도와 잔여 커서+빈 카드 두 상태 반례가 남아 PR18 최종 병합·실자료 화면 인수는 보류한다. C 준비와 데이터·서비스 독립 검수는 병행한다.",
+      "PR18_source_integration": {
+        "PR": 18,
+        "status": "MERGED_DEVELOP_SOURCE_INTEGRATION_VERIFIED",
+        "merge_commit": "39061bef39a89b0012053b7687b4906d81fe073b",
+        "frontend_head": "8d28ce25d578547df242978075e63b59f5c8096f",
+        "merged_at": "2026-10-11T06:19:45Z",
+        "CI_run": 38117701300,
+        "CI_conclusion": "success",
+        "CI_tests": 880,
+        "CI_URL": "https://github.com/natural0448/Jungsi_touch/actions/runs/38117701300",
+        "new_browser_runtime_or_operational_acceptance": false,
+        "main_changed": false
       }
     },
     "partial_publication": {
@@ -21544,7 +21632,7 @@
   "official_history_db_display_contract": {
     "format": "jungsi.official-history-db-display/v1",
     "id": "DEV-011",
-    "revision": "2026.10.11.v2",
+    "revision": "2026.10.11.v3",
     "branch": "feature/application-pre-data-platform",
     "basis_commit": "95a09996c71f9d5b1fc02d743ac3f8e938327870",
     "requirements": [
@@ -21912,10 +22000,76 @@
       "live_bounded_actual_factory_HTTP": "PASS_STORAGE_DB_FULL_FACTORY_HTTP_2PAGES_200100_EACH_1901ms_1931ms; controlled_session_DI_NOT_actualJWT",
       "live_bounded_hosted_negative": "PASS5_NO_CREDENTIAL401_RELAY_MISSING403_RELAY_WRONG403_NO_USER_JWT401_FAKE_JWT401; no_items_or_secret_values; handler_private_no_store; platform401_header_distinct",
       "live_bounded_frontend_delivery": "PASS_EXISTING_HANDOFF_NEW_FILE7818B_REMOTE_FETCH_CONTENT_SHA_EXACT_OWNER1_WRITER1; actual_BFF_browser_NOT_RUN",
-      "current_frontend_receipt_intake": "frontend_receipt_intake contains capture SHA/bytes/method and scoped observations; PR18_open is not develop frontend integration",
+      "current_frontend_receipt_intake": "PR18_MERGED_DEVELOP_39061bef_CI880_PASS; prior scoped browser receipts preserved; merge is source integration not new browser runtime or general publication",
       "local_owner_status_tools": "PASS_FOCUSED71_EXISTING44_PLUS_NEW27_AND_THREE_NATIVE_CLI_PROCESS_SCOPED_SYNTHETIC_FILE_METADATA; OFFLINE_DIAGNOSTICS_DB_NETWORK_ENGINE_BROWSER0; INDEPENDENT_SOURCE_SCOPE_PASS_FINAL_FREEZE_AND_NORMAL_HOOK_PENDING",
       "local_C_and_exam_full22_runtime": "PASS_TWO_NATIVE_LOCAL_COMPOSITIONS_EXAM38HTTP277ASSERT_AND_C_PLUS_EXAM51HTTP362ASSERT; REAL_OFFICIAL_PACK_AND_FROZEN_C_BYTES; TWO_VIRTUAL_INPUTS_FOUR_ROLES; DB_AUTH_STORAGE_BROWSER_NOT_RUN; FULL22_REGISTERED_NOT_EXHAUSTIVE",
-      "local_C_and_exam_receipt_sha256": "2d3adfe1b3f282a1d33e72531a2fddce1bde5168fe1129bf8510d36d0a82c2db"
+      "local_C_and_exam_receipt_sha256": "2d3adfe1b3f282a1d33e72531a2fddce1bde5168fe1129bf8510d36d0a82c2db",
+      "historical_before_PR18_merge_current_frontend_receipt_intake": "frontend_receipt_intake contains capture SHA/bytes/method and scoped observations; PR18_open is not develop frontend integration",
+      "frontend_source_develop_integration": {
+        "PR": 18,
+        "status": "MERGED_DEVELOP_SOURCE_INTEGRATION_VERIFIED",
+        "merge_commit": "39061bef39a89b0012053b7687b4906d81fe073b",
+        "frontend_head": "8d28ce25d578547df242978075e63b59f5c8096f",
+        "merged_at": "2026-10-11T06:19:45Z",
+        "CI_run": 38117701300,
+        "CI_conclusion": "success",
+        "CI_tests": 880,
+        "CI_URL": "https://github.com/natural0448/Jungsi_touch/actions/runs/38117701300",
+        "new_browser_runtime_or_operational_acceptance": false,
+        "main_changed": false
+      },
+      "first_local_native_university_conversion": {
+        "private_receipt": "ACTUAL_NATIVE_HTTP_RECEIPT.v1.json",
+        "bytes": 298198,
+        "sha256": "a822813bbfc6c8d62180f3bc9f75ce38beb42242bfd9a00ca0075525bf28e06c",
+        "status": "PASS_SCOPED_ONE_2027_OFFERING_REAL_OFFICIAL_RULE_WITH_OFFICIAL_SEPTEMBER_PACK_VIRTUAL_INPUTS",
+        "source_HEAD": "39061bef39a89b0012053b7687b4906d81fe073b",
+        "HTTP_requests": 42,
+        "checks_PASS": 417,
+        "registered_operations": 22,
+        "all22_operation_coverage": false,
+        "actual_numeric_values_copied_to_Git": false,
+        "raw_rule_or_source_identity_copied_to_Git": false,
+        "score_basis": "mock_exam",
+        "score_scope": "csat_component",
+        "conversion_success_survives_missing_percentile_and_assessment": true,
+        "overall_distribution": "pending/total_model_missing",
+        "university_percentile": "pending/percentile_release_missing",
+        "support_decision": "pending/analysis_release_missing",
+        "past_year_scores": "pending/year_bridge_required",
+        "favorable_candidates": "pending/approved_candidates_missing_one_offering",
+        "DB_Storage_live_Auth_browser": "NOT_RUN",
+        "production_allowed": false
+      },
+      "W1_exact_minimum_local_native": {
+        "status": "PASS_SCOPED_LOCAL_TCP_WORKTREE_NULLABLE_DELTA_SOURCE_HASH_BOUND_FINAL_GIT_SEAL_SEPARATE",
+        "private_receipt": "ACTUAL_W1_MINIMUM_NATIVE_HTTP_RECEIPT.v3.json",
+        "bytes": 202938,
+        "sha256": "265654cb74ece1fe29e8eb274dc6c3a2a4f9d7e45ef68b22b0cefed2472317dd",
+        "source_parent_HEAD": "39061bef39a89b0012053b7687b4906d81fe073b",
+        "source_mode": "worktree_nullable_search_delta_bound_by_SHA_not_final_commit_runtime",
+        "source_hashes": {
+          "src/jungsi_touch/application/platform.py": "05f6924789b868df64fb1689cacdddf7811fd784a7f7224a4389d5ad4ca2d5f4",
+          "src/jungsi_touch/application/university_scoring.py": "9a62c6e08700180b67bdae3adc77e8b1f65b97fd9266b8eeb154d76f1d7749ef",
+          "src/jungsi_touch/infrastructure/drive_provider.py": "3b07f85661a10fa69e75d2c1171b91fb73386fe375f85734223379cc62336b16",
+          "src/jungsi_touch/infrastructure/local_drive.py": "e2144c5241184b48b408cd4e0de6c212de0dd842a5aee159faf3666b6c518deb",
+          "src/jungsi_touch/infrastructure/local_verification.py": "fdb0256b30c83569f8bf7bccaccabfb330c6a471cbe956c6867dce5aa1a913da",
+          "src/jungsi_touch/infrastructure/http_api.py": "8542be563020783489f473a0b2efdf1f767c8635debc8fd0cc6b46a4d23ca8ca",
+          "tests/test_backend_workflows.py": "61257531651e1e70060dd58efd214879b5d5332bd52c12eb5c11fa3fb5d3c5c8"
+        },
+        "HTTP_requests": 14,
+        "checks_PASS": 90,
+        "history_metrics": 143,
+        "catalog_offerings": 14,
+        "new_official_metric_count": 3,
+        "values_copied_to_Git": false,
+        "closed_projection_internal_fields_absent": true,
+        "unknown_fields_preserved_null": true,
+        "estimated_applicants_rejections_approved": false,
+        "DB_Storage_live_Auth_browser": "NOT_RUN",
+        "general_publication": "NOT_RUN",
+        "final_Git_blob_binding": "normal commit exact source seal required; no final commit runtime SHA implied"
+      }
     },
     "frontend_handoff": [
       "브라우저·화면 코드·일반 프런트 환경은 기존 API의 공개 응답만 읽는다. app DATABASE_URL/DB CA/Storage secret/descriptor/원자료/전체 DB를 수령하지 않는다. 지정된 Supabase 관리자가 비공개 app-only 기본7 설정을 등록하는 역할은 별도 인계 범위다. migration-owner 접속값·키는 외부 화면 환경에 전달하지 않는다.",
@@ -22522,7 +22676,7 @@
           "normal_commit_pre_push_exact_SHA_CI_and_develop_integration": "HOLD_PENDING_FINAL_STAGED_INDEPENDENT_REVIEW; DEVELOPMENT_CANDIDATE_INTEGRATION_IS_NOT_RUNTIME_ACCEPTANCE"
         },
         "source_integration": {
-          "status": "merged_develop_live_bounded_v2_service_only_external_frontend_PR18_open",
+          "status": "MERGED_DEVELOP_CURRENT_REVIEW_SERVICE_AND_EXTERNAL_FRONTEND_PR18",
           "source_commit": "fa6f4126b14fd79be9c91677a9a8ed6999a4061c",
           "status_document_commit": "6124fb5ff91e6b35d4f0274dfd71269b42ec046e",
           "merge_commit": "80b6fe80fc512e072b362a22471f3311d5935d70",
@@ -22531,7 +22685,22 @@
           "exact_merge_CI": "https://github.com/natural0448/Jungsi_touch/actions/runs/38046808933",
           "merge_CI_conclusion": "success",
           "main_changed": false,
-          "external_frontend_develop_integrated": false
+          "external_frontend_develop_integrated": true,
+          "historical_external_frontend_develop_integrated_before_PR18_merge": false,
+          "historical_status_before_PR18_merge": "merged_develop_live_bounded_v2_service_only_external_frontend_PR18_open",
+          "frontend_PR18": {
+            "PR": 18,
+            "status": "MERGED_DEVELOP_SOURCE_INTEGRATION_VERIFIED",
+            "merge_commit": "39061bef39a89b0012053b7687b4906d81fe073b",
+            "frontend_head": "8d28ce25d578547df242978075e63b59f5c8096f",
+            "merged_at": "2026-10-11T06:19:45Z",
+            "CI_run": 38117701300,
+            "CI_conclusion": "success",
+            "CI_tests": 880,
+            "CI_URL": "https://github.com/natural0448/Jungsi_touch/actions/runs/38117701300",
+            "new_browser_runtime_or_operational_acceptance": false,
+            "main_changed": false
+          }
         },
         "historical_before_live_bounded_v2": {
           "basis_commit": "6161ee4454d8a2448b81c74f24b29617a19b5308",
@@ -22954,8 +23123,8 @@
       },
       "IO_budget_guard": {
         "id": "DEP-IO-01",
-        "status": "HOLD_FRESH_UI_IOPS_THROUGHPUT_GRAPHS_UNAVAILABLE_BUDGET_RECOVERY_UNCONFIRMED; FILE_ONLY_PREPARATION_CONTINUES",
-        "basis": "2026-10-10 Root read-only Supabase overview and observability UI; project Healthy alone does not prove I/O recovery; no SQL query this turn",
+        "status": "HOLD_FRESH_UI_IOPS_THROUGHPUT_GRAPHS_UNAVAILABLE_BUDGET_RECOVERY_UNCONFIRMED; LOCAL_FILE_AND_LOOPBACK_WORK_CONTINUES",
+        "basis": "2026-10-11 read-only Supabase overview and observability UI; I/O warning absent in observed overview but IOPS/throughput charts unable to load; no SQL query",
         "reported_warning": "프로젝트의 디스크 I/O 예산이 곧 소진될 예정이며, 소진되면 처리량이 기본5MB/s로 돌아간다는 경고",
         "cause": "unconfirmed; existing_SQLSTATE57014_timeouts_and_budget_warning_are_separate_observations",
         "held_operations": [
@@ -22969,7 +23138,8 @@
         "permitted_work": [
           "source_and_local_synthetic_verification",
           "existing_receipt_and_query_plan_file_review",
-          "planning_routing_and_change_request_preparation"
+          "planning_routing_and_change_request_preparation",
+          "bounded_new_local_native_verification"
         ],
         "resume_requirements": [
           "for_bulk_IO_use_Owner_daily02to06KST_max4h_and_warning_clear_before_start_one_team_one_job_safe_checkpoint; a_window_is_not_approval_or_IO_recovery",
@@ -23027,6 +23197,23 @@
           "status": "HOLD_OWNER_REPORT_WARNING_PERSISTS_CONDITIONAL_DAILY_WINDOW_REGISTERED; FILE_ONLY_PREPARATION_CONTINUES",
           "basis": "user_supplied_dashboard_image_and_user_relayed_Owner_confirmation_2026_10_10; not_Root_live_IO_metrics",
           "actual_budget_recovery_or_cost_attribution": "NOT_RUN"
+        },
+        "historical_before_fresh_dashboard_20261011": {
+          "status": "HOLD_FRESH_UI_IOPS_THROUGHPUT_GRAPHS_UNAVAILABLE_BUDGET_RECOVERY_UNCONFIRMED; FILE_ONLY_PREPARATION_CONTINUES",
+          "basis": "2026-10-10 Root read-only Supabase overview and observability UI; project Healthy alone does not prove I/O recovery; no SQL query this turn",
+          "actual_budget_recovery_or_cost_attribution": "UNCONFIRMED_CURRENT_METRICS_UNAVAILABLE; previous warning and original 57014 failures preserved"
+        },
+        "fresh_capacity_UI": {
+          "private_receipt": "CAPACITY_FRESH_UI_OBSERVATION.v1.json",
+          "sha256": "48c761887151e7265d5680cc77fa5a285f7d96a24bf0a6bbec2cb32cf3fa264a",
+          "observed_at": "2026-10-11T07:50:40.863817+00:00",
+          "project_status": "Healthy",
+          "overview_warning": "NOT_VISIBLE_IN_THIS_CAPTURE",
+          "IOPS_throughput": "Unable to load data",
+          "database_size_vs_provisioned_disk_vs_subscription_quota": "distinct_metrics; old denominator not current allocated disk; quota/cost unverified",
+          "registry_and_overlays": "persistent current/C dependencies retained; growth source not newly proven",
+          "new_SQL_export_build_delete_VACUUM": 0,
+          "billing_change": false
         }
       },
       "historical_before_owner_window_confirmation": {
@@ -23085,7 +23272,7 @@
         "format": "jungsi.metric-bonus-CR-preparation-status/v1",
         "reference_commit": "c947f1fb99a34aefcb94ea3ebed6a6cfea1614e6",
         "reference_spec_version": "1.9.31",
-        "status": "FILE_EVIDENCE_REVIEW_PREPARED_CANDIDATES_UNADOPTED",
+        "status": "OFFICIAL_HISTORY_METRIC_MEANING_ADOPTED_EXISTING_DTO; MINIMUM_LOCAL_DATA_PROJECTION_PREPARED; BONUS_OPTIONAL_DTO_CR_NOT_ADOPTED",
         "admission_metrics": {
           "candidate_id": "CR-HISTORY-METRIC-EXPANSION-01",
           "candidate_id_status": "ROOT_PROPOSED_TRACKING_ONLY_NOT_DTO_ENUM_OR_ADOPTION",
@@ -23096,13 +23283,63 @@
           "estimates_are": "presentation_only_arithmetic_not_official_rejection_count_probability_or_DTO_DB_metric",
           "identity": "public_offering_mapping_and_approved_lineage_required; year_prefix_or_same_suffix_is_not_universal_format_or_lineage_proof",
           "minimum_preparation": "approved_definition_unit_scope_phase_source_public_projection_and_catalog; no_whole_reingestion_or_C_overwrite",
-          "admission_data_or_publication": "NOT_RUN",
+          "admission_data_or_publication": "LOCAL_3_SOURCE_QUALIFIED_METRICS_EXACT_PROJECTION_NATIVE14HTTP90PASS_SOURCE_HASH_BOUND; GENERAL_PUBLICATION_NOT_RUN",
           "candidate_document": "data_metrics_contract_review.v1.md",
-          "candidate_review_scope": "limited_1.9.31_contract_fragments_and_Root_pinned_blob_reference; data_team_own_blob_attempt_failed_and_not_claimed_as_PASS"
+          "candidate_review_scope": "limited_1.9.31_contract_fragments_and_Root_pinned_blob_reference; data_team_own_blob_attempt_failed_and_not_claimed_as_PASS",
+          "status": "ACCEPTED_EXISTING_HISTORY_DTO_METRIC_SEMANTICS_EXACT_PURPOSE_DATA_PUBLICATION_SEPARATE",
+          "final_waitlist_number": {
+            "metric_name": "최종 합격 예비번호",
+            "unit": "번",
+            "preserve_original": "additional_admission_rank and observation ID, original title/unit/source/round/year/track/group",
+            "actual_additional_admitted_people_is_same_metric": false,
+            "missing_or_unpublished_is_zero": false,
+            "official_final_rank_definition_required": true,
+            "frontend_current_column": "NOT_RENDERED_IN_MERGED_P1_NEEDS_EXTERNAL_FRONTEND_FOLLOWUP",
+            "estimated_rejection_or_applicant_input": "NOT_ALLOWED_AS_HEADCOUNT"
+          },
+          "source_preparation": {
+            "private_manifest_sha256": "b7efe5d5822c2f8ee2534b364151627c996181ae1ac4974245e48a82d198b8b7",
+            "private_review_sha256": "18f46846b4fa600ad221bcfed4ea4c4c8aaec991641484e7a90ebc398b425b5a",
+            "new_local_catalog_metric_count": 3,
+            "original_values_changed": false,
+            "current_source_or_DB_pointer_changed_by_root": false,
+            "new_full_DB_scan": "NOT_RUN",
+            "general_publication": "NOT_RUN"
+          },
+          "frontend_request": "새 feature에서 별도 최종 합격 예비번호 열을 번 단위로 추가한다. 충원인원 alias/충원C/추정탈락 입력으로 사용하지 않는다. 현재 최소판에 실제충원C가 없어 추정2열은dash가 정상이다.",
+          "local_native": {
+            "status": "PASS_SCOPED_LOCAL_TCP_WORKTREE_NULLABLE_DELTA_SOURCE_HASH_BOUND_FINAL_GIT_SEAL_SEPARATE",
+            "private_receipt": "ACTUAL_W1_MINIMUM_NATIVE_HTTP_RECEIPT.v3.json",
+            "bytes": 202938,
+            "sha256": "265654cb74ece1fe29e8eb274dc6c3a2a4f9d7e45ef68b22b0cefed2472317dd",
+            "source_parent_HEAD": "39061bef39a89b0012053b7687b4906d81fe073b",
+            "source_mode": "worktree_nullable_search_delta_bound_by_SHA_not_final_commit_runtime",
+            "source_hashes": {
+              "src/jungsi_touch/application/platform.py": "05f6924789b868df64fb1689cacdddf7811fd784a7f7224a4389d5ad4ca2d5f4",
+              "src/jungsi_touch/application/university_scoring.py": "9a62c6e08700180b67bdae3adc77e8b1f65b97fd9266b8eeb154d76f1d7749ef",
+              "src/jungsi_touch/infrastructure/drive_provider.py": "3b07f85661a10fa69e75d2c1171b91fb73386fe375f85734223379cc62336b16",
+              "src/jungsi_touch/infrastructure/local_drive.py": "e2144c5241184b48b408cd4e0de6c212de0dd842a5aee159faf3666b6c518deb",
+              "src/jungsi_touch/infrastructure/local_verification.py": "fdb0256b30c83569f8bf7bccaccabfb330c6a471cbe956c6867dce5aa1a913da",
+              "src/jungsi_touch/infrastructure/http_api.py": "8542be563020783489f473a0b2efdf1f767c8635debc8fd0cc6b46a4d23ca8ca",
+              "tests/test_backend_workflows.py": "61257531651e1e70060dd58efd214879b5d5332bd52c12eb5c11fa3fb5d3c5c8"
+            },
+            "HTTP_requests": 14,
+            "checks_PASS": 90,
+            "history_metrics": 143,
+            "catalog_offerings": 14,
+            "new_official_metric_count": 3,
+            "values_copied_to_Git": false,
+            "closed_projection_internal_fields_absent": true,
+            "unknown_fields_preserved_null": true,
+            "estimated_applicants_rejections_approved": false,
+            "DB_Storage_live_Auth_browser": "NOT_RUN",
+            "general_publication": "NOT_RUN",
+            "final_Git_blob_binding": "normal commit exact source seal required; no final commit runtime SHA implied"
+          }
         },
         "bonus_summary": {
           "candidate_id": "CR-CONVERSION-BONUS-SUMMARY-01",
-          "status": "OPTIONAL_CLOSED_NULLABLE_SUMMARY_PROPOSAL_NOT_CURRENT_DTO",
+          "status": "OPTIONAL_CLOSED_NULLABLE_SUMMARY_CR_NOT_ADOPTED; SUCCESSFUL_OFFICIAL_RULE_INCLUDES_SOURCE_BONUS_TREATMENT_WITH_EXISTING_DTO",
           "current_conversion_schema": "required13_optional0_bonus_summary_absent",
           "semantic_decisions": "official_rule_exists_vs_student_applied; available_applied_not_applicable_pending_are_proposals; unknown_absent_null_not_false; partial_rule_confirmation_pending",
           "successful_zero": "existing_success_score0_preserved_and_summary_only_pending_does_not_erase_success",
@@ -23110,13 +23347,15 @@
           "impact_candidate": "existing_paid_roots_overall.analyze_report.read_university.analyze_candidates.build_shortlist.update_report.export; remaining16_routes_standard_roots_unchanged",
           "compatibility": "old_strict_clients_and_saved_report_snapshot_revision_must_be_reviewed_before_optional_field_adoption; no_GET_recalculation_or_Nplus1",
           "DTO_code_rule_engine_browser": "NOT_RUN",
-          "candidate_document": "service_bonus_CR_review.v1.md"
+          "candidate_document": "service_bonus_CR_review.v1.md",
+          "minimum_numeric_runtime": "one real official-rule local conversion verified; no new bonus summary field or source coefficient disclosure"
         },
         "operation_page_permission_source_RLS_C_PIN_default_entitlement_changes": 0,
         "new_database_queries_storage_cleanup_VACUUM_read_model_build": 0,
-        "release_approval_engine_execution_production_readiness": "NOT_RUN",
+        "release_approval_engine_execution_production_readiness": "general/full-engine and production readiness NOT_RUN; scoped local conversion evidence is recorded separately",
         "automatic_resumption": false,
-        "public_candidate_status_only": "private_review_documents_and_receipts_preserved_outside_Git; canonical_runtime_contracts_not_modified"
+        "public_candidate_status_only": "private_review_documents_and_receipts_preserved_outside_Git; canonical_runtime_contracts_not_modified",
+        "historical_before_next_work_status": "FILE_EVIDENCE_REVIEW_PREPARED_CANDIDATES_UNADOPTED"
       },
       "historical_before_owner_window_safe_document_projection": {
         "display_code_status": "historical_C_hosted_freshJWT_final_report_received_current_all_admin_frontend_review_preparation_in_progress",
@@ -24030,7 +24269,8 @@
           "real_user_JWT_and_BFF_browser": "RECEIVED_EXTERNAL_REPORTED_API_AND_SCOPED_BFF_BROWSER_FUNCTIONAL_PASS; planning_service_independent_rerun0; viewer_gate_actual409_operational3gate_NOT_RUN",
           "internal_review_path": "/management/current-review",
           "external_frontend_source_commit": "16dea2131e3c9286c39b35f9d8c9400667632b3b",
-          "external_frontend_develop_integration": "PR18_OPEN_NOT_MERGED"
+          "external_frontend_develop_integration": "PR18_MERGED_39061bef_SOURCE_ONLY_FRESH_OPERATIONAL_BROWSER_SEPARATE",
+          "historical_external_frontend_develop_integration": "PR18_OPEN_NOT_MERGED"
         },
         "frontend_reply": {
           "url": "https://drive.google.com/file/d/1PveQ1JRK00wWQ4eKGqnisez2VhJMdmiA/view",
@@ -24154,11 +24394,11 @@
         "work_items": {
           "W3": "CLOSED_CURRENT_LIVE_BOUNDED_CONNECTION_CYCLE_ONLY; old_readmodel_DDL_build_PIN4_chain_preserved_candidate_NOT_APPLIED",
           "W4": "CLOSED_SCOPED_FUNCTIONAL_API_JWT_BFF_BROWSER_RECEIPT_INTAKE_ONLY; visitor_gate_general_publication_and_operational3gate_PENDING",
-          "W1": "PENDING_METRIC_EXPANSION_AND_BONUS_CR_NOT_ADOPTED",
-          "W2": "PENDING_FRESH_CAPACITY_TREND_RECOMMENDATION; original_size_denominator_percentage_inconsistency_requires_reconciliation_no_confirmed_forecast_or_cost",
-          "W5_CAP": "NOT_RUN_STORAGE_ARCHIVE_EXACT_REMOVAL_APPROVAL_CLEANUP_VACUUM_AND_BEFORE_AFTER_RECEIPT",
+          "W1": "OFFICIAL_METRIC_SEMANTICS_ACCEPTED_EXISTING_HISTORY_DTO; THREE_SOURCE_QUALIFIED_METRICS_ONE_EXPLICIT_OFFICIAL_CONTEXT_LOCAL_NATIVE14HTTP90PASS; FRONTEND_FINAL_WAITLIST_COLUMN_PENDING; OPTIONAL_BONUS_CR_UNADOPTED",
+          "W2": "FRESH_READONLY_DASHBOARD_RECONCILIATION_AND_PRESERVATION_RECOMMENDATION_PREPARED; IO_RECOVERY_AND_SUBSCRIPTION_QUOTA_OR_COST_UNVERIFIED",
+          "W5_CAP": "NOT_RUN; NO_STORAGE_ARCHIVE_EXACT_REMOVAL_APPROVAL_DELETE_OR_VACUUM; CURRENT_AND_C_DEPENDENCIES_PRESERVED; DAILY_OWNER_WINDOW_AND_FRESH_IO_LEASE_GATES_UNCHANGED",
           "W6": {
-            "status": "REPLY_PREPARED_WITH_SCOPED_LOCAL_FOUR_PAGE_NATIVE_RESULTS_FIRST_PUBLICATION_GATES_AND_UI_CANDIDATE; NO_UNVERIFIED_DATE_OR_RATIO",
+            "status": "FIRST_PARTIAL_LOCAL_3_OFFICIAL_STATISTICS_NATIVE_PASS_AND_FIRST_2027_CONVERSION_NATIVE_PASS; EXTERNAL_BROWSER_AND_GENERAL_PUBLICATION_SEPARATE",
             "questions": [
               "first_batch_scope_time",
               "automatic_manual_bottleneck",
@@ -24204,7 +24444,7 @@
               "preserve_source_identity_and_native_approval",
               "review_decision_does_not_auto_publish_or_engine_approve"
             ],
-            "W1": "준비·미채택. 채택 및 개별 공식정의·단위·모집행·발표단계가 검증된 지표는 같은부분발행판에 포함 가능. 미확인 지표는후속판. C덮어쓰기·전량재적재 없음.",
+            "W1": "기존 history DTO의 공식 통계 표시 의미를 최소 목적에 채택한다. 모집단계·정의·단위·출처·명시 모집행이 확인된 항목만 부분판에 포함한다. 단계 미확인 항목은 후속판으로 보존하며 C 덮어쓰기·전량 재인입은 하지 않는다.",
             "all_W1_to_W6_open": false,
             "closed_work_items": [
               "W3_bounded_connection",
@@ -24218,7 +24458,30 @@
             ],
             "source_file": "화면팀_전국발행일정_문의추가-20261010.md",
             "source_Drive_file_id": "1zAkmK888qh_JUyeWd2k9ZsvDup6ZuaHb",
-            "local_four_page_runtime_reply": "C140history·공식시험팩의 성적표/총점과 P3/4권한/정확보류를 actual local HTTP에서 확인. 전체누백·2027native환산·대학곡선·지원구간·브라우저는별도."
+            "local_four_page_runtime_reply": "기존 C140/공식시험팩을 보존한 동일2027 모집행1개 local native 환산 42HTTP/417검수 PASS. 과목/총점과 환산 성공을 유지하고 전체누백·대학곡선·지원판단·과거연도 동등화는 별도 보류한다. 신규공식통계3개의 local projection을 준비했고 일반발행·새브라우저·운영은 미완료다. 추가 W1 local 실제14요청90검수에서143공개지표/14모집행·통계3개정의/타입/단위와null보존·기존환산성공을확인했다. 코드는nullable검색delta파일SHA로결속했으며최종Gitblob수용은별도다.",
+            "historical_before_next_work_local_four_page_reply": "C140history·공식시험팩의 성적표/총점과 P3/4권한/정확보류를 actual local HTTP에서 확인. 전체누백·2027native환산·대학곡선·지원구간·브라우저는별도.",
+            "first_partial_scope_preparation": {
+              "source_qualified_history_metric_count": 3,
+              "offering_context_count": 1,
+              "source_definitions": [
+                "final recruitment count",
+                "official competition ratio",
+                "final admitted reserve number"
+              ],
+              "unqualified_quota_phase_count_held": 1,
+              "explicit_mapping": "one saved official year/PK/university/department/track/group binding, not automatic year-prefix or nationwide lineage adoption",
+              "unknown_campus_region_publication_URL_date": "preserved_null",
+              "official_ratio_denominator_compatible_with_final_quota": false,
+              "estimated_applicants_or_rejections_from_these_three": "NOT_ALLOWED",
+              "publication_date": null,
+              "general_member_release": "NOT_RUN",
+              "automatic_manual_ratio": "UNKNOWN; collected/review_only/present counts are not qualified-publication progress"
+            }
+          },
+          "historical_before_next_work_20261011": {
+            "W1": "PENDING_METRIC_EXPANSION_AND_BONUS_CR_NOT_ADOPTED",
+            "W2": "PENDING_FRESH_CAPACITY_TREND_RECOMMENDATION; original_size_denominator_percentage_inconsistency_requires_reconciliation_no_confirmed_forecast_or_cost",
+            "W5_CAP": "NOT_RUN_STORAGE_ARCHIVE_EXACT_REMOVAL_APPROVAL_CLEANUP_VACUUM_AND_BEFORE_AFTER_RECEIPT"
           }
         },
         "viewer_access_followup": {
@@ -24443,7 +24706,7 @@
       "existing_22_operations_unchanged": true,
       "default_entitlement_and_member_policy_unchanged": true,
       "supabase_owner_is_paid_or_subject_bypass": false,
-      "source_versus_native": "DB/source 등록과 승인 native runtime 선택은 별개다.",
+      "source_versus_native": "DB/source 등록, 목적별 native 선택, 실제 계산/API, 외부 브라우저, 일반발행·운영은 별도다. 같은2027행1개의 local환산 성공을 전국엔진·지원판단 승인으로 확대하지 않는다.",
       "pages": [
         {
           "page": 1,
@@ -24513,7 +24776,7 @@
             "approved_offering_analysis_or_published_forecast",
             "approved_year_bridge_for_past_year_comparison"
           ],
-          "current_evidence": "기존 Root local native/API 증거(당시 Root 브라우저 미실행 범위): local 유료의 C2026모집행4개 분석: conversion.pending/year_bridge_required, percentile.pending/conversion_not_ready, assessment.pending/analysis_release_missing. 일반은403paid_required. 2027native규칙/곡선 계산·브라우저는NOT_RUN. 새 외부 화면팀 수신: 화면팀 새 local 브라우저는 일반유료게이트 PASS와 C에현재2027행이없다는 UI안내를 부분수용한다. ready/items=[]인 기존응답의 조건없는빈범위 표시분기이며 서버pendingDTO·카탈로그발행상태를변경한것이아니다. 역사3보류코드 브라우저·실제환산/누백/판단은NOT_RUN.",
+          "current_evidence": "기존 Root local native/API 증거(당시 Root 브라우저 미실행 범위): local 유료의 C2026모집행4개 분석: conversion.pending/year_bridge_required, percentile.pending/conversion_not_ready, assessment.pending/analysis_release_missing. 일반은403paid_required. 2027native규칙/곡선 계산·브라우저는NOT_RUN. 새 외부 화면팀 수신: 화면팀 새 local 브라우저는 일반유료게이트 PASS와 C에현재2027행이없다는 UI안내를 부분수용한다. ready/items=[]인 기존응답의 조건없는빈범위 표시분기이며 서버pendingDTO·카탈로그발행상태를변경한것이아니다. 역사3보류코드 브라우저·실제환산/누백/판단은NOT_RUN. 후속 Root: 동일2027 모집행1개·검증공식식·9월호환 native HTTP에서 환산ready/mock_exam 성공을 저장리포트까지 확인했다. 대학누백/지원판단은별도보류이며 새판브라우저는NOT_RUN.",
           "preserve": "conversion·percentile·assessment를 분리한다. 판단pending에도 성공 환산·누백·현재연도 점수를 보존하며 학과별 범위·지원자격을 표시한다."
         },
         {
@@ -24535,7 +24798,7 @@
             "approved_university_curve",
             "owned_candidate_and_shortlist_snapshot"
           ],
-          "current_evidence": "기존 Root local native/API 증거(당시 Root 브라우저 미실행 범위): local 일반403paid_required. 유료 response.candidates.status=ready+empty는C에2027모집행0인것이며 top analysis_status=pending/offering_analysis_pending. 지원가능대학없음/추천완료로 표시하지않는다. 실제2027환산/곡선/판단·브라우저는NOT_RUN. 새 외부 화면팀 수신: 화면팀 새 local 브라우저에서 상위pending·와일드카드보류와 추천완료/지원가능대학없음 금지문구DOM0 보고를수용한다. 현재시험학년도카탈로그·규칙/곡선/판단이없어실제추천계산은NOT_RUN이며 내부ready+빈목록을추천완료로표시하지않는다.",
+          "current_evidence": "기존 Root local native/API 증거(당시 Root 브라우저 미실행 범위): local 일반403paid_required. 유료 response.candidates.status=ready+empty는C에2027모집행0인것이며 top analysis_status=pending/offering_analysis_pending. 지원가능대학없음/추천완료로 표시하지않는다. 실제2027환산/곡선/판단·브라우저는NOT_RUN. 새 외부 화면팀 수신: 화면팀 새 local 브라우저에서 상위pending·와일드카드보류와 추천완료/지원가능대학없음 금지문구DOM0 보고를수용한다. 현재시험학년도카탈로그·규칙/곡선/판단이없어실제추천계산은NOT_RUN이며 내부ready+빈목록을추천완료로표시하지않는다. 후속 Root: 2027행1개를결속한 candidates.build는pending/approved_candidates_missing·판단보류1행이다. 전체analyses에성공환산은보존한다. 유불리/추천수치·새판브라우저는NOT_RUN.",
           "preserve": "기본학교·학과별범위·와일드카드·판단보류·추천밖·조건미충족을 구분한다. 빈추천과 자료보류는 다르며 동일시험/모집단/동점 기준 확인 전 유불리 폭을 보류한다. candidates.payload의ready·빈목록보다 상위analysis_status와reason을 함께 보며 pending을 추천완료로 표시하지 않는다."
         }
       ],
@@ -24626,7 +24889,7 @@
       "missing_native_diagnostics": "페이지·capability별 최소 required kind의 선택/적격을 표시. 한 자료 보류가 다른페이지 성공을 지우지 않음. metadata 적격은 decoder/binding/실연결 완료가 아님.",
       "production_allowed": false,
       "engine_approved": false,
-      "minimum_native_next_step": "전체 재인입 없이 동일한2027모집행1개부터 approved catalog+UniversityConversionRelease PK+9월호환을 결속한다. 독립 대학곡선/analysis/동등화는 해당 기능에만 추가한다.",
+      "minimum_native_next_step": "동일2027 모집행1개 첫 실제 local 환산을 확인했다. 외부 화면팀은 새목적명부를 로컬Caller에 결속하여 성공환산+누백/판단보류를 표시한다. 다음수치는 대학곡선·지원판단·과거연도동등화별 최소승인자료를 결속하며 전체재인입으로 대체하지 않는다.",
       "native_execution_summary": "Root의 기존 local native/API 실측 범위: 새 목적별 승인 catalog+exam 명부를 실제 local cache/4역할 세션/loopback8001 전체22route 구성에서 검수했다(51HTTP요청·362 assertion PASS). C140·모집행12와 과목성적/총점을 확인하고 누백/대학판단은 정확보류했다. 22operation전수검수·실Auth·DB·Storage·브라우저는NOT_RUN이다. 이후 별도 화면팀 브라우저 영수증3964B/SHA d92146de758cc5cbb41e629ec7ede697619a2b7ea52c3ad1513307f2b03007ff를 수용했다. P1선정4카드·P2virtual386 과목/총점·P4상위/와일드카드pending 표시 PASS, P3일반유료게이트/2027빈범위 UI 부분PASS다. Root 새브라우저실행0·browser140/cursor/모집행전수·virtual313·P3역사3코드·실Auth/DB/Storage·live409·이번no-store헤더·운영3gate·일반공개는NOT_RUN이다. 영수증의bf6435d+미지정후속수정과별도 source385a506/880CI 성공은동일런타임 SHA증명으로합치지않는다.",
       "local_native_actual_verification": {
         "format": "jungsi.owner-four-page-local-native-evidence/v1",
@@ -24751,14 +25014,130 @@
           "actual_current_state409": "NOT_RUN",
           "production_publication": "NOT_RUN",
           "operational_security_three_gates": "NOT_RUN",
-          "frontend_PR18_merge": "NOT_RUN",
+          "frontend_PR18_merge": "PASS_SOURCE_MERGE_39061bef; NEW_BROWSER_RUNTIME_NOT_RUN",
           "Root_local_native_receipt_browser_NOT_RUN_is_historical": true
         },
-        "next_step": "same 2027 native offering approved catalog/conversion-rule PK/September compatibility first; percentile and assessment releases per capability",
+        "next_step": "외부 화면팀 새 local 최소환산판의 P3 성공환산/개별보류와 P4 pending보존 브라우저 검수. 이전 C+exam 브라우저 PASS는 새자료판 검수를 대신하지 않는다.",
         "existing_operations": 22,
         "production_allowed": false,
-        "new_engine_or_distribution_adopted": false
+        "new_engine_or_distribution_adopted": false,
+        "source_observation_is_historical_before_PR18_merge": true,
+        "current_source_integration": {
+          "PR": 18,
+          "status": "MERGED_DEVELOP_SOURCE_INTEGRATION_VERIFIED",
+          "merge_commit": "39061bef39a89b0012053b7687b4906d81fe073b",
+          "frontend_head": "8d28ce25d578547df242978075e63b59f5c8096f",
+          "merged_at": "2026-10-11T06:19:45Z",
+          "CI_run": 38117701300,
+          "CI_conclusion": "success",
+          "CI_tests": 880,
+          "CI_URL": "https://github.com/natural0448/Jungsi_touch/actions/runs/38117701300",
+          "new_browser_runtime_or_operational_acceptance": false,
+          "main_changed": false
+        },
+        "historical_boundary_frontend_PR18_merge": "NOT_RUN"
+      },
+      "historical_before_first_real_native_conversion_next_step": "전체 재인입 없이 동일한2027모집행1개부터 approved catalog+UniversityConversionRelease PK+9월호환을 결속한다. 독립 대학곡선/analysis/동등화는 해당 기능에만 추가한다.",
+      "first_real_native_conversion": {
+        "private_receipt": "ACTUAL_NATIVE_HTTP_RECEIPT.v1.json",
+        "bytes": 298198,
+        "sha256": "a822813bbfc6c8d62180f3bc9f75ce38beb42242bfd9a00ca0075525bf28e06c",
+        "status": "PASS_SCOPED_ONE_2027_OFFERING_REAL_OFFICIAL_RULE_WITH_OFFICIAL_SEPTEMBER_PACK_VIRTUAL_INPUTS",
+        "source_HEAD": "39061bef39a89b0012053b7687b4906d81fe073b",
+        "HTTP_requests": 42,
+        "checks_PASS": 417,
+        "registered_operations": 22,
+        "all22_operation_coverage": false,
+        "actual_numeric_values_copied_to_Git": false,
+        "raw_rule_or_source_identity_copied_to_Git": false,
+        "score_basis": "mock_exam",
+        "score_scope": "csat_component",
+        "conversion_success_survives_missing_percentile_and_assessment": true,
+        "overall_distribution": "pending/total_model_missing",
+        "university_percentile": "pending/percentile_release_missing",
+        "support_decision": "pending/analysis_release_missing",
+        "past_year_scores": "pending/year_bridge_required",
+        "favorable_candidates": "pending/approved_candidates_missing_one_offering",
+        "DB_Storage_live_Auth_browser": "NOT_RUN",
+        "production_allowed": false
+      },
+      "W1_exact_minimum_local_native": {
+        "status": "PASS_SCOPED_LOCAL_TCP_WORKTREE_NULLABLE_DELTA_SOURCE_HASH_BOUND_FINAL_GIT_SEAL_SEPARATE",
+        "private_receipt": "ACTUAL_W1_MINIMUM_NATIVE_HTTP_RECEIPT.v3.json",
+        "bytes": 202938,
+        "sha256": "265654cb74ece1fe29e8eb274dc6c3a2a4f9d7e45ef68b22b0cefed2472317dd",
+        "source_parent_HEAD": "39061bef39a89b0012053b7687b4906d81fe073b",
+        "source_mode": "worktree_nullable_search_delta_bound_by_SHA_not_final_commit_runtime",
+        "source_hashes": {
+          "src/jungsi_touch/application/platform.py": "05f6924789b868df64fb1689cacdddf7811fd784a7f7224a4389d5ad4ca2d5f4",
+          "src/jungsi_touch/application/university_scoring.py": "9a62c6e08700180b67bdae3adc77e8b1f65b97fd9266b8eeb154d76f1d7749ef",
+          "src/jungsi_touch/infrastructure/drive_provider.py": "3b07f85661a10fa69e75d2c1171b91fb73386fe375f85734223379cc62336b16",
+          "src/jungsi_touch/infrastructure/local_drive.py": "e2144c5241184b48b408cd4e0de6c212de0dd842a5aee159faf3666b6c518deb",
+          "src/jungsi_touch/infrastructure/local_verification.py": "fdb0256b30c83569f8bf7bccaccabfb330c6a471cbe956c6867dce5aa1a913da",
+          "src/jungsi_touch/infrastructure/http_api.py": "8542be563020783489f473a0b2efdf1f767c8635debc8fd0cc6b46a4d23ca8ca",
+          "tests/test_backend_workflows.py": "61257531651e1e70060dd58efd214879b5d5332bd52c12eb5c11fa3fb5d3c5c8"
+        },
+        "HTTP_requests": 14,
+        "checks_PASS": 90,
+        "history_metrics": 143,
+        "catalog_offerings": 14,
+        "new_official_metric_count": 3,
+        "values_copied_to_Git": false,
+        "closed_projection_internal_fields_absent": true,
+        "unknown_fields_preserved_null": true,
+        "estimated_applicants_rejections_approved": false,
+        "DB_Storage_live_Auth_browser": "NOT_RUN",
+        "general_publication": "NOT_RUN",
+        "final_Git_blob_binding": "normal commit exact source seal required; no final commit runtime SHA implied"
       }
+    },
+    "next_work_after_PR18_integration": {
+      "format": "jungsi.next-work-source-and-local-runtime-status/v1",
+      "date": "2026-10-11",
+      "PR18": {
+        "PR": 18,
+        "status": "MERGED_DEVELOP_SOURCE_INTEGRATION_VERIFIED",
+        "merge_commit": "39061bef39a89b0012053b7687b4906d81fe073b",
+        "frontend_head": "8d28ce25d578547df242978075e63b59f5c8096f",
+        "merged_at": "2026-10-11T06:19:45Z",
+        "CI_run": 38117701300,
+        "CI_conclusion": "success",
+        "CI_tests": 880,
+        "CI_URL": "https://github.com/natural0448/Jungsi_touch/actions/runs/38117701300",
+        "new_browser_runtime_or_operational_acceptance": false,
+        "main_changed": false
+      },
+      "first_2027_conversion_native": {
+        "private_receipt": "ACTUAL_NATIVE_HTTP_RECEIPT.v1.json",
+        "bytes": 298198,
+        "sha256": "a822813bbfc6c8d62180f3bc9f75ce38beb42242bfd9a00ca0075525bf28e06c",
+        "status": "PASS_SCOPED_ONE_2027_OFFERING_REAL_OFFICIAL_RULE_WITH_OFFICIAL_SEPTEMBER_PACK_VIRTUAL_INPUTS",
+        "source_HEAD": "39061bef39a89b0012053b7687b4906d81fe073b",
+        "HTTP_requests": 42,
+        "checks_PASS": 417,
+        "registered_operations": 22,
+        "all22_operation_coverage": false,
+        "actual_numeric_values_copied_to_Git": false,
+        "raw_rule_or_source_identity_copied_to_Git": false,
+        "score_basis": "mock_exam",
+        "score_scope": "csat_component",
+        "conversion_success_survives_missing_percentile_and_assessment": true,
+        "overall_distribution": "pending/total_model_missing",
+        "university_percentile": "pending/percentile_release_missing",
+        "support_decision": "pending/analysis_release_missing",
+        "past_year_scores": "pending/year_bridge_required",
+        "favorable_candidates": "pending/approved_candidates_missing_one_offering",
+        "DB_Storage_live_Auth_browser": "NOT_RUN",
+        "production_allowed": false
+      },
+      "W1": "existing metric semantics accepted; exact local three-statistic projection actual TCP14/90 PASS; frontend final-rank column and optional bonus CR separate",
+      "W2": "fresh dashboard denominator reconciliation; budget recovery unavailable; no cost/quota assertion",
+      "CAP": "preserve current/C references; exact removal manifest empty and not approved; archive/delete/VACUUM not run",
+      "W6": "first qualified local three-statistic context; general publication timeline not confirmed; no invented automatic/manual ratio",
+      "existing_factory_operations": 22,
+      "new_operation_or_page_or_auth_policy": false,
+      "new_DB_schema_GRANT_RLS_default_entitlement": false,
+      "general_or_production_publication": "NOT_RUN"
     }
   }
 }
