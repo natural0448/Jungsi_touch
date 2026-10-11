@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
   "contract_ref": "official_history_db_display_contract",
-  "contract_version": "1.9.40",
+  "contract_version": "1.9.41",
   "requirements": [
     "REQ-01",
     "REQ-08",
@@ -3169,9 +3169,10 @@
             "approved_offering_analysis_or_published_forecast",
             "approved_year_bridge_for_past_year_comparison"
           ],
-          "current_evidence": "최신 v3 화면팀 영수증v2 수용: 동일2027행1개와9월호환의 두 기대 환산 표시 PASS; 일반 유료게이트와 과거연도 year_bridge_required 브라우저 관측 PASS. 대학누백·지원판단은 분리 보류다. 후속 문구판의 새 browser는 NOT_RUN이며 지원판단 자료를 환산자료 부재로 표현하는 문구는 FE-V3-REASON-01로 보완 요청한다.",
+          "current_evidence": "v3 숫자/역할/연도 보류 증거를 재사용한다. FE-V3-REASON-01 영수증의 f139bfb 유료 P3에서 성공 환산·대학누백 분포 미발행·지원판단 기준 미결속을 독립 표시한 browser PASS를 수용했다. 문구3코드 소스 일치·PR30 develop 통합 완료. 나머지2코드의 browser와 Root 재실행·운영 인수는 NOT_RUN이다.",
           "preserve": "conversion·percentile·assessment를 분리한다. 판단pending에도 성공 환산·누백·현재연도 점수를 보존하며 학과별 범위·지원자격을 표시한다.",
-          "historical_evidence_before_v3_browser_acceptance": "기존 Root local native/API 증거(당시 Root 브라우저 미실행 범위): local 유료의 C2026모집행4개 분석: conversion.pending/year_bridge_required, percentile.pending/conversion_not_ready, assessment.pending/analysis_release_missing. 일반은403paid_required. 2027native규칙/곡선 계산·브라우저는NOT_RUN. 새 외부 화면팀 수신: 화면팀 새 local 브라우저는 일반유료게이트 PASS와 C에현재2027행이없다는 UI안내를 부분수용한다. ready/items=[]인 기존응답의 조건없는빈범위 표시분기이며 서버pendingDTO·카탈로그발행상태를변경한것이아니다. 역사3보류코드 브라우저·실제환산/누백/판단은NOT_RUN. 후속 Root: 동일2027 모집행1개·검증공식식·9월호환 native HTTP에서 환산ready/mock_exam 성공을 저장리포트까지 확인했다. 대학누백/지원판단은별도보류이며 새판브라우저는NOT_RUN."
+          "historical_evidence_before_v3_browser_acceptance": "기존 Root local native/API 증거(당시 Root 브라우저 미실행 범위): local 유료의 C2026모집행4개 분석: conversion.pending/year_bridge_required, percentile.pending/conversion_not_ready, assessment.pending/analysis_release_missing. 일반은403paid_required. 2027native규칙/곡선 계산·브라우저는NOT_RUN. 새 외부 화면팀 수신: 화면팀 새 local 브라우저는 일반유료게이트 PASS와 C에현재2027행이없다는 UI안내를 부분수용한다. ready/items=[]인 기존응답의 조건없는빈범위 표시분기이며 서버pendingDTO·카탈로그발행상태를변경한것이아니다. 역사3보류코드 브라우저·실제환산/누백/판단은NOT_RUN. 후속 Root: 동일2027 모집행1개·검증공식식·9월호환 native HTTP에서 환산ready/mock_exam 성공을 저장리포트까지 확인했다. 대학누백/지원판단은별도보류이며 새판브라우저는NOT_RUN.",
+          "historical_current_evidence_before_FE_REASON_01": "최신 v3 화면팀 영수증v2 수용: 동일2027행1개와9월호환의 두 기대 환산 표시 PASS; 일반 유료게이트와 과거연도 year_bridge_required 브라우저 관측 PASS. 대학누백·지원판단은 분리 보류다. 후속 문구판의 새 browser는 NOT_RUN이며 지원판단 자료를 환산자료 부재로 표현하는 문구는 FE-V3-REASON-01로 보완 요청한다."
         },
         {
           "page": 4,
@@ -3280,7 +3281,7 @@
         "독립 환산/누백 성공은 즉시 표시하고 부족한 후속판단만pending. local시사와 실Auth·실이용권·영속DB·일반공개 인수는 구분한다.",
         "새 local4페이지 기능수신은 frontend_browser_acceptance에 별도로 기록했다. 기존 Root native브라우저NOT_RUN 역사필드는보존하며 C140전수API와선정입결카드browser를구분한다. P3현재2027 ready/items=[]의자료안내는UI분기이고서버DTO/발행상태변경이아니다.",
         "다음 실제계산 검수는 동일2027모집행1개부터 승인catalog/환산rulePK/9월호환을결속한다. 대학곡선·analysis는기능별로추가하고 역사3보류코드/virtual313·실Auth/DB/Storage·live409·이번private,no-store브라우저헤더·운영3gate는각별도증거로인수한다. PR18open·main유지를기능수신완료와분리한다.",
-        "v3 숫자/보류흐름 수신은 frontend_v3_browser_acceptance를 최신 상태로 참조한다. FE-V3-REASON-01의 지원판단 자료 문구를 고친 뒤 최신커밋의 성공환산+누백/판단 분리 화면만 추가 대조한다. 기존 전수/API/브라우저 증거를 재사용하고 운영3gate는 별도로 유지한다."
+        "v3 숫자/보류흐름은 frontend_v3_browser_acceptance, 지원판단 문구3종과 최신 유료 P3 후속 수신은 frontend_reason01_acceptance를 참조한다. FE-V3-REASON-01의 추가 ACK 대기는 종료한다. 기존 API/역할/브라우저 증거를 재사용하며 운영3gate와 미관측2코드 browser는 별도로 유지한다."
       ],
       "missing_native_diagnostics": "페이지·capability별 최소 required kind의 선택/적격을 표시. 한 자료 보류가 다른페이지 성공을 지우지 않음. metadata 적격은 decoder/binding/실연결 완료가 아님.",
       "production_allowed": false,
@@ -3494,7 +3495,7 @@
         "browser_execution_HEAD": "28c38ad2f316a1b34673144b710fb17a898b7912",
         "source_followup_HEAD": "739e9140187e97bfbe476e38f50a6f218d660d58",
         "source_followup_change": "percentile_release_missing display wording only; no numerical or assessment logic change",
-        "source_followup_browser": "NOT_RUN",
+        "source_followup_browser": "PASS_EXTERNAL_RECEIVER_PAID_P3_f139bfb; no Root browser rerun",
         "execution_reported_by": "external_frontend_on_receiver_PC",
         "Root_browser_reexecution": "NOT_RUN",
         "mode": "local",
@@ -3518,7 +3519,6 @@
         },
         "security_evidence": "Receiver reports server-only Caller, secret non-exposure structure and loopback/Host/no-store maintained. New measured browser no-store header, hosted visitor, actual409 and operational3gate are not claimed by this receipt.",
         "remaining_NOT_RUN": [
-          "source_followup_browser",
           "actual_Supabase_auth_DB_Storage_in_this_cycle",
           "hosted_live_visitor_BFF",
           "actual_409",
@@ -3529,7 +3529,55 @@
         "production_allowed": false,
         "default_entitlement_RLS_or_data_authority_changed": false,
         "new_distribution_forecast_year_bridge_adopted": false,
-        "v1_receipt_preserved_v2_is_authoritative": true
+        "v1_receipt_preserved_v2_is_authoritative": true,
+        "historical_source_followup_browser_before_FE_REASON_01": "NOT_RUN",
+        "source_followup_browser_evidence_ref": "official_history_db_display_contract.owner_status_view.frontend_reason01_acceptance"
+      },
+      "frontend_reason01_acceptance": {
+        "format": "jungsi.frontend-reason-wording-acceptance/v1",
+        "id": "FE-V3-REASON-01",
+        "status": "ACCEPTED_SCOPED_LOCAL_P3_BROWSER_AND_THREE_SOURCE_MAPPINGS",
+        "receipt_name": "화면팀_FE-V3-REASON-01_문구교체_검수영수증-20261011.md",
+        "receipt_bytes_and_sha_verified": true,
+        "private_receipt_and_exact_pins_preserved_outside_Git": true,
+        "source_HEAD": "f139bfb88c168917fd8d311218122aca82c8b018",
+        "source_sync_merge_HEAD": "a204859",
+        "browser_source_binding": "Receiver reports inspected clean working tree equals source_HEAD; TSX unchanged between browser check and commit",
+        "browser_observation_UTC_reported": "2026-10-11 12:5x UTC; approximate minute in receiver receipt, not an exact timestamp",
+        "execution_reported_by": "external_frontend_on_receiver_PC",
+        "Root_browser_reexecution": "NOT_RUN",
+        "mode": "local",
+        "frontend_origin": "http://127.0.0.1:3003",
+        "backend_origin": "http://127.0.0.1:8000",
+        "P3_paid_browser": "PASS successful conversion preserved with independent university-percentile and assessment holds; old conversion-data-absent wording no longer displayed",
+        "percentile_release_missing_browser": "PASS external receiver; prior wording source follow-up browser NOT_RUN resolved for this paid P3 case",
+        "analysis_release_missing_browser": "PASS external receiver paid P3",
+        "analysis_release_not_approved_browser": "NOT_RUN state absent in approved local fixture; exact source mapping verified",
+        "analysis_pack_mismatch_browser": "NOT_RUN state absent in approved local fixture; exact source mapping verified",
+        "prior_evidence_reused": "Existing v3 native numerical/role checks and scoped browser P1-P4 receipt retained; no repeat of full cycle or new exhaustive data comparison",
+        "integration": {
+          "PR": 30,
+          "status": "MERGED",
+          "merge_commit": "5b135a969d75ad816e4421a572a486309a82b4e9",
+          "source_push_CI_run": 38145658317,
+          "source_push_CI_conclusion": "success",
+          "source_PR_CI_run": 38146655781,
+          "source_PR_CI_conclusion": "success",
+          "changed_implementation_files": 1
+        },
+        "default_entitlement_DB_RLS_data_authority_changed": false,
+        "API_DTO_numeric_engine_changed": false,
+        "production_allowed": false,
+        "remaining_NOT_RUN": [
+          "other_two_reason_states_browser",
+          "Root_browser_reexecution",
+          "hosted_live_visitor_BFF",
+          "actual_Supabase_auth_DB_Storage_in_this_cycle",
+          "actual_409",
+          "server_restart_recovery",
+          "operational_three_security_gates",
+          "general_or_production_publication"
+        ]
       }
     },
     "next_work_after_PR18_integration": {
@@ -3587,7 +3635,7 @@
         "browser_execution_HEAD": "28c38ad2f316a1b34673144b710fb17a898b7912",
         "source_followup_HEAD": "739e9140187e97bfbe476e38f50a6f218d660d58",
         "source_followup_change": "percentile_release_missing display wording only; no numerical or assessment logic change",
-        "source_followup_browser": "NOT_RUN",
+        "source_followup_browser": "PASS_EXTERNAL_RECEIVER_PAID_P3_f139bfb; no Root browser rerun",
         "execution_reported_by": "external_frontend_on_receiver_PC",
         "Root_browser_reexecution": "NOT_RUN",
         "mode": "local",
@@ -3611,7 +3659,6 @@
         },
         "security_evidence": "Receiver reports server-only Caller, secret non-exposure structure and loopback/Host/no-store maintained. New measured browser no-store header, hosted visitor, actual409 and operational3gate are not claimed by this receipt.",
         "remaining_NOT_RUN": [
-          "source_followup_browser",
           "actual_Supabase_auth_DB_Storage_in_this_cycle",
           "hosted_live_visitor_BFF",
           "actual_409",
@@ -3622,11 +3669,13 @@
         "production_allowed": false,
         "default_entitlement_RLS_or_data_authority_changed": false,
         "new_distribution_forecast_year_bridge_adopted": false,
-        "v1_receipt_preserved_v2_is_authoritative": true
+        "v1_receipt_preserved_v2_is_authoritative": true,
+        "historical_source_followup_browser_before_FE_REASON_01": "NOT_RUN",
+        "source_followup_browser_evidence_ref": "official_history_db_display_contract.next_work_after_PR18_integration.frontend_reason01_acceptance"
       },
       "remaining_after_v3": {
         "FE-V3-REASON-01": {
-          "status": "REQUESTED_SOURCE_MEANING_FIX_FRONTEND_OWNER_IMPLEMENTATION_NOT_RUN",
+          "status": "COMPLETED_SCOPED_RECEIPT_ACCEPTED_PR30_MERGED",
           "owner_branch": "feature/presentation-foundation",
           "requirements": [
             "REQ-05",
@@ -3641,7 +3690,12 @@
           "analysis_release_not_approved": "이 모집단위의 지원 판단 기준을 검수하고 있습니다.",
           "analysis_pack_mismatch": "입력한 시험과 지원 판단 자료의 버전이 맞지 않습니다.",
           "reason": "OfferingAnalysis qualification is independent of successful UniversityConversionRelease results; these reasons must not assert that conversion data is absent.",
-          "acceptance": "Latest exact HEAD source/dictionary check plus paid P3 successful conversion with independent percentile/assessment holds; standard paid gate remains; no numerical or DTO/API change. Prior native and browser evidence reused."
+          "acceptance": "Latest exact HEAD source/dictionary check plus paid P3 successful conversion with independent percentile/assessment holds; standard paid gate remains; no numerical or DTO/API change. Prior native and browser evidence reused.",
+          "historical_status_before_receipt_acceptance": "REQUESTED_SOURCE_MEANING_FIX_FRONTEND_OWNER_IMPLEMENTATION_NOT_RUN",
+          "source_HEAD": "f139bfb88c168917fd8d311218122aca82c8b018",
+          "integration_PR": 30,
+          "integration_merge_commit": "5b135a969d75ad816e4421a572a486309a82b4e9",
+          "acceptance_evidence_ref": "official_history_db_display_contract.next_work_after_PR18_integration.frontend_reason01_acceptance"
         },
         "total_university_percentiles": "approved compatible overall joint-total model and university conversion-score distribution still missing; subject marginals, score/max or equal-rank matching cannot substitute",
         "year_bridge": "approved source/target exam-year and subject/cohort/tie mapping is required before historical comparison; year_bridge_required remains",
@@ -3649,6 +3703,52 @@
         "W6": "Additional qualified official-statistics contexts and publication batches are separate data-owner decisions; current review and local purpose approval do not automatically qualify consumer publication",
         "W2_CAP": "Screenshot capacity values are historical observations; fresh I/O recovery not confirmed in this turn. No mass query, Storage archive, exact-removal execution, deletion or VACUUM. Owner 02:00-06:00 KST window, fresh exclusive lease and exact-target approval still required.",
         "production_frontend": "hosted live visitor/BFF acceptance, production start binding and operational3gate remain separate; dev loopback binding preserved"
+      },
+      "frontend_reason01_acceptance": {
+        "format": "jungsi.frontend-reason-wording-acceptance/v1",
+        "id": "FE-V3-REASON-01",
+        "status": "ACCEPTED_SCOPED_LOCAL_P3_BROWSER_AND_THREE_SOURCE_MAPPINGS",
+        "receipt_name": "화면팀_FE-V3-REASON-01_문구교체_검수영수증-20261011.md",
+        "receipt_bytes_and_sha_verified": true,
+        "private_receipt_and_exact_pins_preserved_outside_Git": true,
+        "source_HEAD": "f139bfb88c168917fd8d311218122aca82c8b018",
+        "source_sync_merge_HEAD": "a204859",
+        "browser_source_binding": "Receiver reports inspected clean working tree equals source_HEAD; TSX unchanged between browser check and commit",
+        "browser_observation_UTC_reported": "2026-10-11 12:5x UTC; approximate minute in receiver receipt, not an exact timestamp",
+        "execution_reported_by": "external_frontend_on_receiver_PC",
+        "Root_browser_reexecution": "NOT_RUN",
+        "mode": "local",
+        "frontend_origin": "http://127.0.0.1:3003",
+        "backend_origin": "http://127.0.0.1:8000",
+        "P3_paid_browser": "PASS successful conversion preserved with independent university-percentile and assessment holds; old conversion-data-absent wording no longer displayed",
+        "percentile_release_missing_browser": "PASS external receiver; prior wording source follow-up browser NOT_RUN resolved for this paid P3 case",
+        "analysis_release_missing_browser": "PASS external receiver paid P3",
+        "analysis_release_not_approved_browser": "NOT_RUN state absent in approved local fixture; exact source mapping verified",
+        "analysis_pack_mismatch_browser": "NOT_RUN state absent in approved local fixture; exact source mapping verified",
+        "prior_evidence_reused": "Existing v3 native numerical/role checks and scoped browser P1-P4 receipt retained; no repeat of full cycle or new exhaustive data comparison",
+        "integration": {
+          "PR": 30,
+          "status": "MERGED",
+          "merge_commit": "5b135a969d75ad816e4421a572a486309a82b4e9",
+          "source_push_CI_run": 38145658317,
+          "source_push_CI_conclusion": "success",
+          "source_PR_CI_run": 38146655781,
+          "source_PR_CI_conclusion": "success",
+          "changed_implementation_files": 1
+        },
+        "default_entitlement_DB_RLS_data_authority_changed": false,
+        "API_DTO_numeric_engine_changed": false,
+        "production_allowed": false,
+        "remaining_NOT_RUN": [
+          "other_two_reason_states_browser",
+          "Root_browser_reexecution",
+          "hosted_live_visitor_BFF",
+          "actual_Supabase_auth_DB_Storage_in_this_cycle",
+          "actual_409",
+          "server_restart_recovery",
+          "operational_three_security_gates",
+          "general_or_production_publication"
+        ]
       }
     }
   }
