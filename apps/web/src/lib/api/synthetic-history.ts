@@ -37,19 +37,22 @@ const BASE: Base[] = [
 const SRC = "https://example.invalid/synthetic-admission-results";
 
 type MetricDef = { name: string; definition: string; unit: string; scale: string; base: number; step: number; digits: number };
+/** 경쟁률도 대학 발표 지표의 하나로 전달된다(metric_name 계약 그대로). 모든 합성 대학에 공통으로 넣는다 */
+const RATIO = (base: number): MetricDef => ({ name: "경쟁률", definition: "지원 인원을 모집 인원으로 나눈 값", unit: "대 1", scale: "지원자 수 ÷ 모집인원", base, step: 0.45, digits: 2 });
+
 const METRICS: Record<string, MetricDef[]> = {
-  "syn-gaon": [
+  "syn-gaon": [RATIO(7.4), 
     { name: "최종등록자 50%", definition: "최종 등록한 학생을 점수순으로 줄 세웠을 때 가운데 학생의 점수", unit: "점", scale: "대학 환산점수(1000점 만점)", base: 921, step: 1.7, digits: 2 },
     { name: "최종등록자 70%", definition: "최종 등록자 중 위에서 70% 지점 학생의 점수. 최저 합격점이 아님", unit: "점", scale: "대학 환산점수(1000점 만점)", base: 914, step: 1.9, digits: 2 },
   ],
-  "syn-haesol": [{ name: "최종등록자 평균", definition: "최종 등록자 수능 점수의 평균", unit: "점", scale: "국어·수학·탐구 백분위 평균", base: 88, step: 0.6, digits: 1 }],
-  "syn-daon": [{ name: "최종 합격선", definition: "충원 합격까지 포함한 최종 합격자 중 가장 낮은 점수", unit: "점", scale: "대학 환산점수(800점 만점)", base: 695, step: 1.2, digits: 1 }],
-  "syn-raon": [
+  "syn-haesol": [RATIO(9.1), { name: "최종등록자 평균", definition: "최종 등록자 수능 점수의 평균", unit: "점", scale: "국어·수학·탐구 백분위 평균", base: 88, step: 0.6, digits: 1 }],
+  "syn-daon": [RATIO(6.2), { name: "최종 합격선", definition: "충원 합격까지 포함한 최종 합격자 중 가장 낮은 점수", unit: "점", scale: "대학 환산점수(800점 만점)", base: 695, step: 1.2, digits: 1 }],
+  "syn-raon": [RATIO(5.8), 
     { name: "최종등록자 50%", definition: "최종 등록자 점수의 가운데 값", unit: "점", scale: "대학 환산점수(700점 만점)", base: 652, step: 1.1, digits: 2 },
     { name: "최종등록자 70%", definition: "최종 등록자 중 위에서 70% 지점 점수", unit: "점", scale: "대학 환산점수(700점 만점)", base: 646, step: 1.3, digits: 2 },
   ],
-  "syn-saebit": [{ name: "최종등록자 평균", definition: "최종 등록자 환산점수의 평균", unit: "점", scale: "대학 환산점수(500점 만점)", base: 468, step: 0.9, digits: 2 }],
-  "syn-hanbit": [{ name: "최종등록자 70%", definition: "최종 등록자 중 위에서 70% 지점 점수(수능 부분, 면접 제외)", unit: "점", scale: "대학 환산점수(1000점 만점, 수능 부분)", base: 897, step: 2.1, digits: 2 }],
+  "syn-saebit": [RATIO(8.3), { name: "최종등록자 평균", definition: "최종 등록자 환산점수의 평균", unit: "점", scale: "대학 환산점수(500점 만점)", base: 468, step: 0.9, digits: 2 }],
+  "syn-hanbit": [RATIO(4.9), { name: "최종등록자 70%", definition: "최종 등록자 중 위에서 70% 지점 점수(수능 부분, 면접 제외)", unit: "점", scale: "대학 환산점수(1000점 만점, 수능 부분)", base: 897, step: 2.1, digits: 2 }],
 };
 
 const WILD: Record<string, OfferingDto["wildcard_group"]> = { 간호학과: "nursing", 임상병리학과: "health", 물리치료학과: "health", 초등교육과: "education" };
@@ -83,6 +86,14 @@ for (const o of BASE) {
       wildcard_group: WILD[o.unit] ?? null,
     };
     HISTORY_OFFERINGS.push(off);
+    // 과거 학년도의 모집인원·충원인원도 대학 발표 지표로 전달된다(명 단위, 모집단위별 값)
+    if (year < 2027 && !UNPUBLISHED.has(id)) {
+      const cap = Math.max(5, o.initial + ((hash(id + "cap") % 5) - 2) - (2026 - year === 2 ? 1 : 0));
+      const fill = Math.max(0, Math.round(cap * (0.22 + (hash(id + "fill" + year) % 28) / 100)));
+      const src_as = `${year}-03-1${hash(id) % 9}`;
+      HISTORY.push({ ...off, metric_name: "모집인원", metric_definition: "그 학년도 정시 모집인원(최종)", value: String(cap), unit: "명", original_scale: "정시 모집인원", publication_status: "published", source_url: SRC, source_as_of: src_as });
+      HISTORY.push({ ...off, metric_name: "충원인원", metric_definition: "미등록 이월로 추가 합격(충원)된 인원", value: String(fill), unit: "명", original_scale: "추가 합격 인원", publication_status: "published", source_url: SRC, source_as_of: src_as });
+    }
     for (const m of METRICS[o.u.id] ?? []) {
       const published = year < 2027 && !UNPUBLISHED.has(id);
       const wobble = ((hash(id + m.name) % 100) / 100 - 0.5) * m.step * 2;

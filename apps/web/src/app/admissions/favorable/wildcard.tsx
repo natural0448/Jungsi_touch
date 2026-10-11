@@ -1,4 +1,4 @@
-import { CategoryBadge, PickButton, StatsLine } from "@/components/offering-parts";
+import { CategoryBadge, enrichedReasonTexts, PickButton, StatsLine } from "@/components/offering-parts";
 import type { CandidateItemDto, OfferingDto, StatisticsDto } from "@/lib/dto";
 
 /*
@@ -18,7 +18,7 @@ const FEATURED = 3;
 
 const delta = (w: CandidateItemDto) => (w.assessment.advantage ? Number(w.assessment.advantage.delta_pp) : -Infinity);
 
-export function WildcardDeck({ picks, picked, stats, canPick }: { picks: CandidateItemDto[]; picked: Set<string>; stats: Map<string, StatisticsDto | null>; canPick: boolean }) {
+export function WildcardDeck({ picks, picked, stats, canPick, analysisPending }: { picks: CandidateItemDto[]; picked: Set<string>; stats: Map<string, StatisticsDto | null>; canPick: boolean; analysisPending?: boolean }) {
   const sorted = [...picks].sort((a, b) => delta(b) - delta(a));
   const card = (w: CandidateItemDto, i: number) => (
     <li key={w.offering.offering_id} style={{ "--i": i } as React.CSSProperties}>
@@ -37,7 +37,7 @@ export function WildcardDeck({ picks, picked, stats, canPick }: { picks: Candida
       </div>
 
       {picks.length === 0 ? (
-        <p className="wd-empty">이번 성적으로 찾은 간호·보건·교육 계열 후보가 없습니다.</p>
+        <p className="wd-empty">{analysisPending ? "대학 분석 자료가 결속되기 전이라 와일드카드도 보류 상태입니다 — 후보가 없다는 뜻이 아닙니다." : "이번 성적으로 찾은 간호·보건·교육 계열 후보가 없습니다."}</p>
       ) : (
         <>
           <ol className="wd-deck">{sorted.slice(0, FEATURED).map(card)}</ol>
@@ -85,8 +85,11 @@ function WildCard({ w, on, stat, canPick }: { w: CandidateItemDto; on: boolean; 
 
       <p className="wc-why">
         <span>한 수인 이유</span>
-        {a.recommendation_reasons?.[0]?.text ??
-          (n !== null && n > 0 ? `이 학과 환산에서 총점보다 위치가 ${a.advantage!.delta_pp}%p 올라갑니다.` : "내 성적으로 지원 검토 범위에 드는 계열 후보입니다.")}
+        {a.recommendation_reasons?.length
+          ? enrichedReasonTexts(a, 1)[0]
+          : n !== null && n > 0
+            ? `이 학과 환산에서 총점보다 위치가 ${a.advantage!.delta_pp}%p 올라갑니다.`
+            : "내 성적으로 지원 검토 범위에 드는 계열 후보입니다."}
       </p>
 
       <div className="wc-score">

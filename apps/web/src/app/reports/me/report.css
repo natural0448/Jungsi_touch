@@ -111,3 +111,63 @@
   .et .pr-sheet{border:0;padding:0;max-width:none}
   .et .tblwrap{overflow:visible;border:0}
 }
+
+/* ── 과목별 결과: 수능 성적표와 같은 가로 표(읽기 전용) ── */
+.et .rp-sheet{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--ink-2);border-radius:var(--r-sm)}
+.et .rp-sheet table{width:100%;min-width:640px;border-collapse:collapse;table-layout:fixed;font-size:13px}
+.et .rp-sheet col.c-head{width:108px}
+.et .rp-sheet col.c-main{width:16%}
+.et .rp-sheet th,.et .rp-sheet td{border:1px solid var(--line);text-align:center;vertical-align:middle}
+.et .rp-sheet thead th{height:30px;padding:6px 4px;background:var(--sub-2);font-weight:800;color:var(--ink);line-height:1.3;border-color:#D5D9E4}
+.et .rp-sheet thead th.sub{height:26px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.et .rp-sheet thead th.corner{color:var(--muted);font-weight:700}
+.et .rp-sheet tbody th{position:sticky;left:0;z-index:1;padding:6px 8px;background:var(--sub);font-weight:800;color:var(--ink);text-align:left;border-color:#D5D9E4}
+.et .rp-sheet tbody th small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
+.et .rp-sheet tbody td{height:40px;padding:2px 6px}
+.et .rp-sheet tr.key td{box-shadow:inset 0 -3px 0 var(--brand);font-size:16px}
+.et .rp-sheet td .num{font-variant-numeric:tabular-nums;letter-spacing:-.2px}
+.et .rp-sheet td.na{background:var(--sub)}
+.et .rp-sheet .rs-na{color:#C3C7D3;font-weight:700;font-size:12px}
+.et .rp-sheet .rs-wait{display:inline-block;padding:2px 6px;border-radius:3px;background:var(--sub);font-size:11px;font-weight:600;color:var(--muted)}
+.et .rp-sheet-note{margin:0;padding:8px 10px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-2);line-height:1.5}
+
+/* ── 위치 그래프: 상위 % 를 눈금 위에 표시 ── */
+.et .rp-chart{display:grid;gap:7px;border:1px solid var(--line);border-radius:var(--r-card);padding:16px 18px}
+.et .rp-chart header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:2px}
+.et .rp-chart h3{font-size:14px;font-weight:800}
+.et .rp-chart header small{font-size:11px;color:var(--muted)}
+.et .pc-row{display:grid;grid-template-columns:96px 1fr 58px;align-items:center;gap:10px}
+.et .pc-label{min-width:0;font-size:12px;font-weight:800;color:var(--ink);line-height:1.25}
+.et .pc-label small{display:block;font-size:10px;font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.et .pc-track{position:relative;height:16px;border-radius:8px;background:linear-gradient(90deg,var(--brand-soft),var(--sub) 60%);outline:1px solid var(--line);outline-offset:-1px}
+.et .pc-track::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),#D5D9E4 calc(25% - 1px) 25%);border-radius:8px;opacity:.6}
+.et .pc-band{position:absolute;top:3px;bottom:3px;border-radius:5px;background:var(--brand);opacity:.3}
+.et .pc-dot{position:absolute;top:50%;width:11px;height:11px;transform:translate(-50%,-50%);border-radius:50%;background:var(--brand);border:2px solid var(--bg);box-shadow:0 0 0 1.5px var(--brand)}
+.et .pc-band.strong{background:var(--deep);opacity:.35}
+.et .pc-dot.strong{background:var(--deep);box-shadow:0 0 0 1.5px var(--deep)}
+.et .pc-track.pending{display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,var(--sub) 0 6px,var(--bg) 6px 12px)}
+.et .pc-track.pending span{font-size:10px;font-weight:600;color:var(--muted)}
+.et .pc-val{font-size:12px;font-weight:800;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.et .pc-axis .axis{position:relative;display:flex;justify-content:space-between;font-size:9px;color:var(--muted)}
+.et .pc-note{margin:2px 0 0;font-size:11px;color:var(--ink-2);line-height:1.5}
+.et .rp-short-note{margin:8px 0 0;font-size:11px;color:var(--ink-2);line-height:1.6}
+.et .rp-combo-wait{margin:0;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);font-size:12px;color:var(--muted)}
+
+@media (max-width:480px){
+  .et .pc-row{grid-template-columns:72px 1fr 50px;gap:7px}
+  .et .rp-chart{padding:12px}
+}
+@media print{
+  .et .rp-sheet{overflow:visible;border-color:#999;break-inside:avoid}
+  .et .rp-sheet table{min-width:0}
+  /* 흑백 인쇄에서도 점·띠가 또렷하게: 색 의존을 없애고 명도 대비로 */
+  .et .pc-track{outline-color:#999;background:#F2F2F2}
+  .et .pc-track::before{opacity:1}
+  .et .pc-band{background:#777;opacity:.5}
+  .et .pc-dot{background:#333;border-color:#fff;box-shadow:0 0 0 1.5px #333}
+  .et .pc-band.strong{background:#000;opacity:.55}
+  .et .pc-dot.strong{background:#000;box-shadow:0 0 0 1.5px #000}
+  .et .pc-track.pending{background:repeating-linear-gradient(135deg,#EEE 0 6px,#fff 6px 12px)}
+  .et .rp-chart{break-inside:avoid;border-color:#999}
+  .et .rs-wait,.et .rp-combo-wait{color:#555}
+}

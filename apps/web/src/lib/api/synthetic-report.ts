@@ -1,6 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
-import type { AssessmentDto, OverallAnalysisDto, ProfileDto, ReportDto, ScoresInput, ShortlistEntryDto, SubjectResultDto } from "@/lib/dto";
+import type { AssessmentDto, ComboPositionDto, OverallAnalysisDto, ProfileDto, ReportDto, ScoresInput, ShortlistEntryDto, SubjectResultDto } from "@/lib/dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
 import { EXAM, INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "@/lib/exam";
 
@@ -72,6 +72,31 @@ export function computeOverall(s: ScoresInput): OverallAnalysisDto {
       ...(s.english_grade !== undefined ? { 영어: s.english_grade } : {}),
       ...(s.korean_history_grade !== undefined ? { 한국사: s.korean_history_grade } : {}),
     },
+    // 반영 조합별 위치(제안 필드 미리보기, 최종 관리자 확정 7조합).
+    // 탐구 1과목 = 두 과목 중 상위, 2과목 = 평균. 합성 곡선으로 모양만 보여 준다(실연결은 서버 값만).
+    combinations: ((): ComboPositionDto[] => {
+      const combo = (combo_id: string, label: string, total: number, mid: number, spread: number): ComboPositionDto => {
+        const top = curve(total, mid, spread);
+        return {
+          combo_id, label, total_standard_score: Math.round(total * 10) / 10,
+          status: "estimated", reason_code: null,
+          inclusive_top_percent: pct(top), exclusive_top_percent: pct(Math.max(0, top - 0.05)),
+          data_kind: "estimated_weights",
+        };
+      };
+      const k = s.korean.standard_score, m = s.math.standard_score;
+      const hi = Math.max(s.inquiry[0].standard_score, s.inquiry[1].standard_score);
+      const avg = (s.inquiry[0].standard_score + s.inquiry[1].standard_score) / 2;
+      return [
+        combo("korean_math", "국어+수학", k + m, 212, 16),
+        combo("korean_math_inq1", "국어+수학+탐구(1과목)", k + m + hi, 266, 19),
+        combo("korean_math_inq_avg", "국어+수학+탐구(2과목 평균)", k + m + avg, 264, 19),
+        combo("korean_inq1", "국어+탐구(1과목)", k + hi, 159, 11),
+        combo("korean_inq_avg", "국어+탐구(2과목 평균)", k + avg, 157, 11),
+        combo("math_inq1", "수학+탐구(1과목)", m + hi, 162, 12),
+        combo("math_inq_avg", "수학+탐구(2과목 평균)", m + avg, 160, 12),
+      ];
+    })(),
     overall: {
       status: "estimated",
       reason_code: null,

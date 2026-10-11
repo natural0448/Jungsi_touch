@@ -7,7 +7,7 @@ import { seoulDate } from "@/lib/format";
 import { getReportId } from "@/lib/report-ref";
 import { pickedItems, type PickedItem } from "@/lib/report-ops";
 import { page } from "@/lib/routes";
-import { AbsoluteGrades, OverallCard, PickedTable, SubjectsTable } from "../report-view";
+import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "../report-view";
 import { PrintButton } from "./print-button";
 import "../report.css";
 
@@ -74,8 +74,9 @@ export default async function Page() {
 
         <OverallCard a={a} />
         <h2>과목별 결과</h2>
-        <SubjectsTable a={a} />
-        <AbsoluteGrades a={a} />
+        <SubjectsSheet a={a} />
+        <PositionChart a={a} />
+        <ComboChart a={a} />
 
         <h2>핵심 지원 학교 <span className="num">{shortlist.length}</span></h2>
         {shortlist.length === 0 ? (

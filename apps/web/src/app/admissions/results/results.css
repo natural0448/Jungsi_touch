@@ -68,3 +68,36 @@
   .et .rs-off{padding:12px 12px 14px}
   .et .rs-defs div{grid-template-columns:1fr;gap:2px}
 }
+
+/* ── 한 모집단위에 3개년 결과 + 2027 모집 한 줄 ── */
+.et .rs-offhd.plain{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;cursor:default}
+.et .rs-rec{margin-left:auto;display:flex;align-items:baseline;gap:6px;font-size:12px;color:var(--ink-2);flex-wrap:wrap}
+.et .rs-rec>b:first-child{padding:2px 7px;border-radius:4px;background:var(--brand-soft);color:var(--brand);font-size:11px;font-weight:800}
+.et .rs-rec .num{font-weight:800;color:var(--ink)}
+.et .rs-rec small{color:var(--muted)}
+.et .rs-rec small.warn{color:var(--reach);font-weight:700}
+.et .rs-rec.wait,.et .rs-rec .wait{color:var(--muted);font-weight:600}
+.et .rs-years{min-width:560px}
+.et .rs-years thead th{white-space:nowrap}
+.et .rs-years tbody th{font-weight:800;color:var(--ink);background:none;white-space:nowrap}
+.et .rs-years tbody th small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
+.et .rs-years td small{color:var(--muted)}
+/* 미수집 안내: 조회 예산(학년도별 limit) 때문에 아직 안 담긴 범위를 분명히 알린다 */
+.et .rs-uncollected{margin:10px 0 0;padding:9px 14px;border:1px solid var(--line);border-left:3px solid var(--warn, #b45309);border-radius:8px;background:var(--sub);font-size:12px;color:var(--ink-2);line-height:1.6}
+
+/* 지표 설명: 카드마다 반복하지 않고 목록 위 공통 상자 한 번 */
+.et .rs-legendbox{margin:10px 0 2px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.et .rs-legendbox summary{cursor:pointer;padding:9px 16px;font-size:12px;font-weight:800;color:var(--ink)}
+.et .rs-legend{display:grid;gap:3px;margin:0;padding:0 16px 10px;font-size:11px;color:var(--ink-2);line-height:1.55}
+.et .rs-legend div{display:flex;gap:8px}
+.et .rs-legend dt{flex:none;min-width:96px;font-weight:700;color:var(--ink)}
+.et .rs-legend dd b{font-weight:700;color:var(--ink-2)}
+@media (max-width:640px){
+  .et .rs-rec{margin-left:0;width:100%}
+  .et .rs-legend dt{min-width:84px}
+}
+
+/* 추정 열(화면 계산) */
+.et .rs-years th.derived{color:var(--ink-2);font-weight:700}
+.et .rs-years td.derived{background:var(--sub)}
+.et .rs-years td.derived .num{color:var(--ink-2)}

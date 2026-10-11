@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChevronIcon } from "@/components/icons";
-import { AdvantageCell, CATEGORY, CategoryBadge, PickButton, ReasonList, ScoreCell, StatsLine } from "@/components/offering-parts";
+import { AdvantageCell, CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, ScoreCell, StatsLine } from "@/components/offering-parts";
 import type { CandidatesDto, Category, StatisticsDto } from "@/lib/dto";
 import { page } from "@/lib/routes";
 import { hrefWith, type Query } from "./query";
@@ -44,7 +44,7 @@ export function SchoolCard({ g, cur, picked, stats }: { g: Group; cur: Query; pi
         {leadReasons.length > 0 ? (
           <div>
             <b className="lead-unit">{lead.offering.department}</b>
-            <ReasonList items={leadReasons} max={2} />
+            <EnrichedReasonList a={lead.assessment} max={2} />
           </div>
         ) : best !== null && best > 0 ? (
           `이 학교 환산에서 총점보다 위치가 최대 ${best.toFixed(2)}%p 올라가는 학과가 있습니다.`
@@ -105,13 +105,13 @@ export function SchoolCard({ g, cur, picked, stats }: { g: Group; cur: Query; pi
                   <span className="c-adv r"><AdvantageCell a={a} /></span>
                   <span className="c-pick"><PickButton id={o.offering_id} on={picked.has(o.offering_id)} /></span>
                 </div>
-                {(a.recommendation_reasons?.length ?? 0) > 0 && <ReasonList items={a.recommendation_reasons!} max={2} />}
+                {(a.recommendation_reasons?.length ?? 0) > 0 && <EnrichedReasonList a={a} max={2} />}
                 <StatsLine s={stats.get(o.offering_id)} />
               </li>
             ))}
           </ul>
           <p className="sc-note">
-            학과 이름을 누르면 {page("PAGE-03").label}에서 모집 정보와 연도별 근거를 자세히 봅니다. 추천·담음 인원은 이 서비스 안의 집계이며 실제 지원자 수가 아닙니다.
+            학과 이름을 누르면 {page("PAGE-03").label}에서 판단 이유의 체감 근거(과거 발표값과의 대조)와 모집 정보를 자세히 봅니다. 추천·담음 인원은 이 서비스 안의 집계이며 실제 지원자 수가 아닙니다.
           </p>
         </div>
       )}

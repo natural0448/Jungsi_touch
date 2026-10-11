@@ -114,7 +114,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
               <h2 id="basic-t">
                 기본 학교 목록 <span className="num">{count()}</span>
               </h2>
-              <span>환산 유불리가 큰 학교부터 보여 줍니다. 판단은 학과마다 따로 봅니다.</span>
+              <span>이 대학의 점수 계산 방식이 내 과목 구성에 유리한 학교부터 보여 줍니다(환산 유불리 큰 순). 지원가능성 판단은 학과마다 따로 봅니다.</span>
             </div>
             <div className="chips" role="group" aria-label="학과 판단으로 거르기">
               <Link href={hrefWith(cur, { has: undefined, open: undefined })} className={cur.has ? undefined : "on"} aria-current={cur.has ? undefined : "true"} scroll={false}>
@@ -127,7 +127,19 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
               ))}
             </div>
 
-            {c?.status === "pending" || shown.length === 0 ? (
+            {/* 상위 analysis_status 가 보류면 후보가 ready·빈 목록이어도 '지원 가능한 대학 없음'·
+                '추천 완료'로 말하지 않는다 — 분석 자료가 아직 결속되지 않았다는 보류이지
+                결과가 0 이라는 판정이 아니다(담당자 지시 2026-10-11) */}
+            {report.analysis_status?.status === "pending" && shown.length === 0 ? (
+              <section className="gate flat">
+                <h2>대학 분석 자료가 아직 준비되지 않았습니다</h2>
+                <p>
+                  성적과 총점은 계산됐지만 올해 모집행·대학 분석 자료가 결속되기 전이라 후보 산출을 보류한 상태입니다
+                  {report.analysis_status.reason_code ? <> (보류 코드 <code>{report.analysis_status.reason_code}</code>)</> : null}.
+                  지원 가능한 대학이 없다는 뜻이 아니며, 자료가 연결되면 이 화면에 후보가 나타납니다.
+                </p>
+              </section>
+            ) : c?.status === "pending" || shown.length === 0 ? (
               <section className="gate flat">
                 <h2>{c?.status === "pending" ? "아직 찾은 학교가 없습니다" : "이 조건에 해당하는 학교가 없습니다"}</h2>
                 <p>다른 조건을 보거나 {p3.label}에서 직접 검색하세요. 목록에 없다는 것이 지원할 수 없다는 뜻은 아닙니다.</p>
@@ -149,11 +161,14 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
                 자격 확인이나 자료 검수 때문에 판단을 보류한 모집단위 <b className="num">{pendingCount}</b>곳은 목록에 넣지 않았습니다. 보류를 여유로 보지 않습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
               </p>
             )}
-            <p className="fv-note">여유 후보도 합격을 보장하지 않습니다. 지원가능성은 합격 확률이 아니며, 올해 전형과 지원 조건을 함께 확인해야 합니다.</p>
+            <p className="fv-note">
+              환산 유불리는 전체 성적 기준과 견줘 그 대학 계산 방식에서 내 위치가 오르내리는 폭(%p)으로, 비슷한 수준의 학교 중 내 과목 구성에 잘 맞는 곳을 고르는 보조 지표입니다.
+              여유 후보도 합격을 보장하지 않습니다. 지원가능성은 합격 확률이 아니며, 올해 전형과 지원 조건을 함께 확인해야 합니다.
+            </p>
           </section>
 
           <aside className="fv-side" aria-label="와일드카드">
-            <WildcardDeck picks={wildcards} picked={picked} stats={stats} canPick />
+            <WildcardDeck picks={wildcards} picked={picked} stats={stats} canPick analysisPending={report.analysis_status?.status === "pending"} />
           </aside>
         </div>
       </div>

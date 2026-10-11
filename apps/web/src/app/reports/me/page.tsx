@@ -11,7 +11,7 @@ import { loginHref } from "@/lib/links";
 import { getReportId } from "@/lib/report-ref";
 import { ensureAnalyses, pickedItems, type PickedItem } from "@/lib/report-ops";
 import { lockFor, page } from "@/lib/routes";
-import { AbsoluteGrades, OverallCard, PickedTable, SubjectsTable } from "./report-view";
+import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
 import { ScoreForm, type ScoreDefaults } from "./score-form";
 import "./report.css";
 
@@ -97,8 +97,9 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         <OverallCard a={a} />
         <section aria-labelledby="sub-h" className="rp-sec">
           <h2 id="sub-h">과목별 결과</h2>
-          <SubjectsTable a={a} />
-          <AbsoluteGrades a={a} />
+          <SubjectsSheet a={a} />
+          <PositionChart a={a} />
+          <ComboChart a={a} />
         </section>
 
         {paid ? (
