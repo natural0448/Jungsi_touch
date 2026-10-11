@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.37",
+  "version": "1.9.38",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -3219,7 +3219,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.37",
+        "contract_version": "1.9.38",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -3393,7 +3393,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.37",
+        "contract_version": "1.9.38",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -3559,7 +3559,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.37",
+        "contract_version": "1.9.38",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -3578,7 +3578,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.37",
+        "contract_version": "1.9.38",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3603,7 +3603,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "planned",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.37",
+        "contract_version": "1.9.38",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3628,7 +3628,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "local_owner_current_review_receipts_accepted_four_page_status_tools_native_runtime_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.37",
+        "contract_version": "1.9.38",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -11101,6 +11101,22 @@
         "REQ-26"
       ],
       "summary": "spec1.9.37: v9/bf6435d local 실제JWT200100+100·HTML비밀값 비노출 보고를 수용하고 BFF no-cache/Edge no-store를 구분. Owner 범위를1~4페이지 전체로 확정하고 오프라인 상태CLI·W6 발행범위/자동·사람판정/검수UI후보/W1합류 기준을 준비. 목적 한정C catalog+공식시험팩 local cache의51HTTP/362assertion PASS를 수용하되 전체4페이지 계산·실Auth/DB/Storage·브라우저·일반공개·운영3gate·DB정리는 미완료로 보존. 공식 과목팩의 로컬 성적표·총점 목적만 승인하며 hosted 승인판·프런트런타임·RLS·회원정책·env·기본경로 변경0."
+    },
+    {
+      "date": "2026-10-11",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-03",
+        "REQ-04",
+        "REQ-08",
+        "REQ-12",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "spec1.9.38: 화면팀4페이지브라우저3964B 영수증을 별도 local 기능수신으로수용한다. P1 C4학과3년50%/75%표·P2virtual386 일반/유료과목/총점·P4상위/와일드카드pending표시 PASS, P3게이트·2027ready빈범위UI안내 부분PASS다. Root native/API전수와Root browserNOT_RUN 이력은보존하며 browser140/cursor/12모집행전수·virtual313·P3역사3코드·실Auth/DB/Storage·live409·이번no-store헤더·운영3gate·일반공개는NOT_RUN. 입력시험ID/버전은화면팀서버설정정정이며서비스엔진수정0. FEsource385a506·880CI 성공은관측별도이고영수증bf6435d+미지정후속과실runtimeSHA미결속; PR18open/main유지. API/DTO/회원/RLS/기본경로/데이터승격/삭제0이며공통기획·생성문서만갱신."
     }
   ],
   "overall_analysis_contract": {
@@ -21272,7 +21288,7 @@
   "official_history_db_display_contract": {
     "format": "jungsi.official-history-db-display/v1",
     "id": "DEV-011",
-    "revision": "2026.10.11.v1",
+    "revision": "2026.10.11.v2",
     "branch": "feature/application-pre-data-platform",
     "basis_commit": "95a09996c71f9d5b1fc02d743ac3f8e938327870",
     "requirements": [
@@ -24191,7 +24207,7 @@
             "qualified_official_metric_definition_unit_scale_source_year",
             "approved_recruitment_object"
           ],
-          "current_evidence": "local 결합서버 history100+40의 C140 값·타입·출처·메타 전수동일, 모집행12 pending/null·2024~2026보존 PASS. current-review local100+100 수신도 별도 수용. 일반 회원 전국 발행 인수는미완료.",
+          "current_evidence": "기존 Root local native/API 증거(당시 Root 브라우저 미실행 범위): local 결합서버 history100+40의 C140 값·타입·출처·메타 전수동일, 모집행12 pending/null·2024~2026보존 PASS. current-review local100+100 수신도 별도 수용. 일반 회원 전국 발행 인수는미완료. 새 외부 화면팀 수신: 화면팀 새 local 브라우저 보고는 C4학과·2024~2026의50%/75%컷 표·결측보존·2027미연계 안내 표시 PASS로 수용한다. 이번 browser140전수·cursor100+40·모집행12전수는NOT_RUN이며 Root native전수대조와구분한다.",
           "preserve": "발표 지표와 화면 추정열을 분리한다. 실제0·미공개·미확인·해당없음 구분. 모집 pending은 실제0가 아니다."
         },
         {
@@ -24215,7 +24231,7 @@
             "total_model",
             "owned_score_profile_and_report"
           ],
-          "current_evidence": "공식9월시험팩+가상성적2건×일반/유료 local native 프로필201→전체분석201→리포트200 PASS. 과목등급·국수탐2총점 보존; 전체누백 pending/total_model_missing. 실제전체누백모형·브라우저는NOT_RUN.",
+          "current_evidence": "기존 Root local native/API 증거(당시 Root 브라우저 미실행 범위): 공식9월시험팩+가상성적2건×일반/유료 local native 프로필201→전체분석201→리포트200 PASS. 과목등급·국수탐2총점 보존; 전체누백 pending/total_model_missing. 실제전체누백모형·브라우저는NOT_RUN. 새 외부 화면팀 수신: 화면팀 새 local 브라우저에서 virtual386 일반/유료의 과목성적·총점 표시 PASS를 수용했고 전체누백은pending/total_model_missing이다. 시험입력은2027-september-mock/version20260930.v1로 화면팀 서버설정을정정했으며 서비스엔진문제나계약변경이아니다. virtual313 브라우저·전체누백모형계산은NOT_RUN.",
           "preserve": "시험팩 검증 성공 과목·등급·총점을 표시한다. 총점모델 부족이면 누백만pending/null이며 과목 주변분포로 국수탐 공동분포를 대신하지 않는다."
         },
         {
@@ -24241,7 +24257,7 @@
             "approved_offering_analysis_or_published_forecast",
             "approved_year_bridge_for_past_year_comparison"
           ],
-          "current_evidence": "local 유료의 C2026모집행4개 분석: conversion.pending/year_bridge_required, percentile.pending/conversion_not_ready, assessment.pending/analysis_release_missing. 일반은403paid_required. 2027native규칙/곡선 계산·브라우저는NOT_RUN.",
+          "current_evidence": "기존 Root local native/API 증거(당시 Root 브라우저 미실행 범위): local 유료의 C2026모집행4개 분석: conversion.pending/year_bridge_required, percentile.pending/conversion_not_ready, assessment.pending/analysis_release_missing. 일반은403paid_required. 2027native규칙/곡선 계산·브라우저는NOT_RUN. 새 외부 화면팀 수신: 화면팀 새 local 브라우저는 일반유료게이트 PASS와 C에현재2027행이없다는 UI안내를 부분수용한다. ready/items=[]인 기존응답의 조건없는빈범위 표시분기이며 서버pendingDTO·카탈로그발행상태를변경한것이아니다. 역사3보류코드 브라우저·실제환산/누백/판단은NOT_RUN.",
           "preserve": "conversion·percentile·assessment를 분리한다. 판단pending에도 성공 환산·누백·현재연도 점수를 보존하며 학과별 범위·지원자격을 표시한다."
         },
         {
@@ -24263,7 +24279,7 @@
             "approved_university_curve",
             "owned_candidate_and_shortlist_snapshot"
           ],
-          "current_evidence": "local 일반403paid_required. 유료 response.candidates.status=ready+empty는C에2027모집행0인것이며 top analysis_status=pending/offering_analysis_pending. 지원가능대학없음/추천완료로 표시하지않는다. 실제2027환산/곡선/판단·브라우저는NOT_RUN.",
+          "current_evidence": "기존 Root local native/API 증거(당시 Root 브라우저 미실행 범위): local 일반403paid_required. 유료 response.candidates.status=ready+empty는C에2027모집행0인것이며 top analysis_status=pending/offering_analysis_pending. 지원가능대학없음/추천완료로 표시하지않는다. 실제2027환산/곡선/판단·브라우저는NOT_RUN. 새 외부 화면팀 수신: 화면팀 새 local 브라우저에서 상위pending·와일드카드보류와 추천완료/지원가능대학없음 금지문구DOM0 보고를수용한다. 현재시험학년도카탈로그·규칙/곡선/판단이없어실제추천계산은NOT_RUN이며 내부ready+빈목록을추천완료로표시하지않는다.",
           "preserve": "기본학교·학과별범위·와일드카드·판단보류·추천밖·조건미충족을 구분한다. 빈추천과 자료보류는 다르며 동일시험/모집단/동점 기준 확인 전 유불리 폭을 보류한다. candidates.payload의ready·빈목록보다 상위analysis_status와reason을 함께 보며 pending을 추천완료로 표시하지 않는다."
         }
       ],
@@ -24347,13 +24363,15 @@
         "current-review는 원문 관측 검수 화면으로 유지하고 고정배지 뜻을 정정한다. 기존18필드·query/cursor 원문·수동진행을 유지한다.",
         "1페이지 History DTO와 current-review DTO는 별도다. 공개 모집행·지표정의·단위·출처·승인 binding을 공급자에서 결속한 뒤 발표 결과로 표시한다.",
         "2~4페이지는 기존 전체22route의 최소 native 공급자와 명시 연결한다. C5GET 주소를 전역base로 적용하거나 합성 응답을 실DB계산 성공으로 표시하지 않는다.",
-        "독립 환산/누백 성공은 즉시 표시하고 부족한 후속판단만pending. local시사와 실Auth·실이용권·영속DB·일반공개 인수는 구분한다."
+        "독립 환산/누백 성공은 즉시 표시하고 부족한 후속판단만pending. local시사와 실Auth·실이용권·영속DB·일반공개 인수는 구분한다.",
+        "새 local4페이지 기능수신은 frontend_browser_acceptance에 별도로 기록했다. 기존 Root native브라우저NOT_RUN 역사필드는보존하며 C140전수API와선정입결카드browser를구분한다. P3현재2027 ready/items=[]의자료안내는UI분기이고서버DTO/발행상태변경이아니다.",
+        "다음 실제계산 검수는 동일2027모집행1개부터 승인catalog/환산rulePK/9월호환을결속한다. 대학곡선·analysis는기능별로추가하고 역사3보류코드/virtual313·실Auth/DB/Storage·live409·이번private,no-store브라우저헤더·운영3gate는각별도증거로인수한다. PR18open·main유지를기능수신완료와분리한다."
       ],
       "missing_native_diagnostics": "페이지·capability별 최소 required kind의 선택/적격을 표시. 한 자료 보류가 다른페이지 성공을 지우지 않음. metadata 적격은 decoder/binding/실연결 완료가 아님.",
       "production_allowed": false,
       "engine_approved": false,
       "minimum_native_next_step": "전체 재인입 없이 동일한2027모집행1개부터 approved catalog+UniversityConversionRelease PK+9월호환을 결속한다. 독립 대학곡선/analysis/동등화는 해당 기능에만 추가한다.",
-      "native_execution_summary": "새 목적별 승인 catalog+exam 명부를 실제 local cache/4역할 세션/loopback8001 전체22route 구성에서 검수했다(51HTTP요청·362 assertion PASS). C140·모집행12와 과목성적/총점을 확인하고 누백/대학판단은 정확보류했다. 22operation전수검수·실Auth·DB·Storage·브라우저는NOT_RUN이다.",
+      "native_execution_summary": "Root의 기존 local native/API 실측 범위: 새 목적별 승인 catalog+exam 명부를 실제 local cache/4역할 세션/loopback8001 전체22route 구성에서 검수했다(51HTTP요청·362 assertion PASS). C140·모집행12와 과목성적/총점을 확인하고 누백/대학판단은 정확보류했다. 22operation전수검수·실Auth·DB·Storage·브라우저는NOT_RUN이다. 이후 별도 화면팀 브라우저 영수증3964B/SHA d92146de758cc5cbb41e629ec7ede697619a2b7ea52c3ad1513307f2b03007ff를 수용했다. P1선정4카드·P2virtual386 과목/총점·P4상위/와일드카드pending 표시 PASS, P3일반유료게이트/2027빈범위 UI 부분PASS다. Root 새브라우저실행0·browser140/cursor/모집행전수·virtual313·P3역사3코드·실Auth/DB/Storage·live409·이번no-store헤더·운영3gate·일반공개는NOT_RUN이다. 영수증의bf6435d+미지정후속수정과별도 source385a506/880CI 성공은동일런타임 SHA증명으로합치지않는다.",
       "local_native_actual_verification": {
         "format": "jungsi.owner-four-page-local-native-evidence/v1",
         "scope": "local_verification",
@@ -24387,6 +24405,103 @@
         "trial_inputs": "two virtual score profiles; real official subject pack; no invented overall percentiles or university scores",
         "same_exam_year_catalog_required": true,
         "source_aliases_or_year_bridge_not_fabricated": true
+      },
+      "frontend_browser_acceptance": {
+        "format": "jungsi.owner-four-page-browser-receipt-intake/v1",
+        "status": "ACCEPTED_REPORTED_LOCAL_BROWSER_P1_P2_P4_P3_PARTIAL",
+        "purpose": "approved local frontend/Owner functional preview only",
+        "receipt": {
+          "file": "화면팀_4페이지_브라우저수신영수증-20261011.md",
+          "bytes": 3964,
+          "sha256": "d92146de758cc5cbb41e629ec7ede697619a2b7ea52c3ad1513307f2b03007ff"
+        },
+        "raw_admission_values_copied_to_spec": false,
+        "receiver_selection_sha256": "9cc0aacce05021a3c99b1e4f6a5adbf763c924f8bd0b001526ed2e09f947f1de",
+        "receiver_selection_trust": "ACCEPTED_PREVIOUS_RECEIVER_ATTESTATION_NOT_RAW_RECEIVER_HASH_RECOMPUTATION",
+        "reported_runtime": {
+          "mode": "local",
+          "origin": "http://127.0.0.1:3003",
+          "backend": "http://127.0.0.1:8000",
+          "exam_id": "2027-september-mock",
+          "pack_version": "20260930.v1",
+          "baseline_commit": "bf6435d",
+          "followup_commit": null,
+          "exact_runtime_SHA_proven": false,
+          "time_window_as_reported": "2026-10-11 04:5x~05:2xZ",
+          "exact_runtime_time_proven": false,
+          "roles": [
+            "standard",
+            "paid"
+          ]
+        },
+        "source_observation": {
+          "commit": "385a506a688fe00c89e67fe519396392b2156bc0",
+          "PR": 18,
+          "PR_state": "OPEN_UNMERGED",
+          "base_commit": "70b6ae135092963140d7c3a635c6467b81faa477",
+          "source_checked_by_root": true,
+          "P3_ready_empty_unfiltered_scope_UI_notice_only": true,
+          "P4_wildcard_preserves_outer_pending": true,
+          "change_notes_present": true,
+          "bound_to_reported_browser_runtime": false,
+          "CI_run": 38113984484,
+          "CI_conclusion": "success",
+          "CI_tests": 880,
+          "CI_is_browser_or_operational_acceptance": false,
+          "CI_tests_seconds": 78.912
+        },
+        "pages": {
+          "PAGE-01": {
+            "status": "ACCEPTED_REPORTED_PASS_SELECTED_C_HISTORY_DISPLAY",
+            "scope": "four C departments; 2024-2026 displayed 50%/75% cut table with missing preserved; 2027 unlinked guard",
+            "all140_browser_metric_comparison": "NOT_RUN_IN_THIS_RECEIPT",
+            "browser_cursor100_plus40": "NOT_RUN_IN_THIS_RECEIPT",
+            "all12_recruitment_browser_rows": "NOT_RUN_IN_THIS_RECEIPT"
+          },
+          "PAGE-02": {
+            "status": "ACCEPTED_REPORTED_PASS_SUBJECT_PROFILE_AND_TOTAL",
+            "virtual_input": "virtual386_standard_and_paid",
+            "overall_status": "pending",
+            "overall_reason_code": "total_model_missing",
+            "subject_positions": "official subject marginal populations; include/exclude ties, not total score population",
+            "input_binding_corrected": "2027-september-mock / 20260930.v1 in frontend server environment; service engine unchanged",
+            "virtual313_browser": "NOT_RUN"
+          },
+          "PAGE-03": {
+            "status": "ACCEPTED_REPORTED_PARTIAL_PASS",
+            "standard_paid_gate": "REPORTED_PASS",
+            "current2027_catalog_scope": "not included in historical C 2024-2026",
+            "server_response_contract": "EXISTING_READY_ITEMS_EMPTY_UNCHANGED",
+            "empty_scope_notice": "FRONTEND_UI_NOTICE_ONLY_NOT_NEW_PENDING_DTO_OR_PUBLICATION_STATE",
+            "historical_year_bridge_required_conversion_not_ready_analysis_release_missing_browser": "NOT_RUN",
+            "numeric_conversion_percentile_assessment": "NOT_RUN"
+          },
+          "PAGE-04": {
+            "status": "ACCEPTED_REPORTED_PASS_AUTH_AND_PENDING_DISPLAY",
+            "outer_analysis_status": "pending/offering_analysis_pending",
+            "wildcard_pending_message": "REPORTED_PASS",
+            "completed_or_no_eligible_schools_strings": "REPORTED_ZERO_DOM_MATCHES",
+            "empty_candidates_payload_ready_is_recommendation_success": false,
+            "numeric_recommendation": "NOT_RUN"
+          }
+        },
+        "boundaries": {
+          "root_new_browser_execution": 0,
+          "new_response_header_no_store_measurement": "NOT_RUN",
+          "prior_local_native_security_evidence_reused_within_scope": true,
+          "actual_restart": "NOT_RUN_WARNING_ACKNOWLEDGED_ONLY",
+          "actual_Supabase_Auth_DB_Storage": "NOT_RUN",
+          "live_visitor_runtime": "NOT_RUN",
+          "actual_current_state409": "NOT_RUN",
+          "production_publication": "NOT_RUN",
+          "operational_security_three_gates": "NOT_RUN",
+          "frontend_PR18_merge": "NOT_RUN",
+          "Root_local_native_receipt_browser_NOT_RUN_is_historical": true
+        },
+        "next_step": "same 2027 native offering approved catalog/conversion-rule PK/September compatibility first; percentile and assessment releases per capability",
+        "existing_operations": 22,
+        "production_allowed": false,
+        "new_engine_or_distribution_adopted": false
       }
     }
   }
