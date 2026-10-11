@@ -34,6 +34,7 @@ const REASON: Record<string, string> = {
   offering_analysis_pending: "올해 모집행과 대학 분석 자료가 결속되기 전이라 후보 산출을 보류했습니다.",
   counselor_adjustment_unapproved: "상담 조정 기준을 검수하고 있습니다.",
   percentile_curve_unpublished: "이 대학 환산 분포가 아직 발행되지 않았습니다.",
+  percentile_release_missing: "이 대학의 환산 분포 자료가 아직 발행되지 않아 대학 안 위치를 계산하지 않았습니다.",
   percentile_conversion_context_missing: "환산 척도 근거가 없어 대학 위치를 계산하지 않았습니다.",
   advantage_population_mismatch: "비교집단이 전체 응시자와 달라 유불리를 보류합니다.",
   forecast_70_not_published: "올해 70% 예상선이 아직 발행되지 않았습니다.",
