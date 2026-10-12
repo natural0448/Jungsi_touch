@@ -11442,6 +11442,13 @@
         "REQ-26"
       ],
       "summary": "FE-V3-REASON-01 화면팀 검수 영수증 원본과 hash를 보존해 수용했다. f139bfb의 문구3코드가 요청표와 일치하며 최신 유료 P3의 성공환산·대학누백보류·지원판단보류 동시 표시를 scoped browser로 수용하고 PR30 merge commit 통합/CI를 결속한다. 나머지2코드 browser와 Root 재실행·운영 인수는 NOT_RUN이다. API/DTO/회원/산식/DB/RLS/자료 발행 권한은 유지하고 기획·라우팅·인계의 기존 문구 후속 대기를 완료로 갱신한다."
+    },
+    {
+      "date": "2026-10-13",
+      "requirements": [
+        "REQ-01"
+      ],
+      "summary": "오픈 전 접근 관문: JEONGSI_ACCESS_GATE=preview 인 배포판은 화면 proxy에서 에듀터치 로그인(같은 Supabase 세션)을 읽어 에듀터치 관리자(role=admin, status=active)와 JEONGSI_PREVIEW_EMAILS 명단만 통과시키고 나머지는 403 준비 중 화면을 보낸다. 워커 주소 직접 접속(로그인 쿠키 없음)을 막기 위함. 설정 누락 시 막는 쪽. 로컬 dev·local 검수에는 영향 없음. 오픈 때 관문을 지우고 회원·이용권 판단은 서비스 API(public.jeongsi_passes)에 맡긴다. DTO·API·산식 변경 없음."
     }
   ],
   "overall_analysis_contract": {
