@@ -2,6 +2,7 @@
 from copy import deepcopy
 from threading import RLock
 from ..application.platform_ports import PlatformError
+from ..application.forecast_ports import publication_ids
 
 class MemoryForecastRepository:
     production_allowed=False
@@ -13,6 +14,18 @@ class MemoryForecastRepository:
     def published(self,offering_id):
         rows=[r for r in self.releases.values() if r['context']['offering_id']==offering_id]
         return deepcopy(sorted(rows,key=lambda r:(r['published_at'],r['release_id']))[-1]) if rows else None
+    def published_many(self,offering_ids):
+        selected=publication_ids(offering_ids)
+        result=dict.fromkeys(selected);latest={}
+        # One in-memory pass; preserve the existing publication timestamp/ID tie
+        # order and keep equal-valued releases of different offerings separate.
+        for release in self.releases.values():
+            offering=release['context']['offering_id']
+            if offering not in result:continue
+            key=(release['published_at'],release['release_id'])
+            if offering not in latest or key>=latest[offering][0]:latest[offering]=(key,release)
+        for offering,(_,release) in latest.items():result[offering]=deepcopy(release)
+        return result
     def put(self,record):
         self.drafts[record['draft_id']]=deepcopy(record);self.revisions[(record['draft_id'],record['revision'])]=deepcopy(record)
     def publish(self,release):self.releases[release['release_id']]=deepcopy(release)

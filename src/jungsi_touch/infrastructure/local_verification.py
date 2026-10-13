@@ -58,7 +58,10 @@ class LocalSessions:
             return None
         for role, allowed in self.tokens.items():
             if secrets.compare_digest(token, allowed):
-                return VerifiedSession(SUBJECTS[role], self.end)
+                # Explicit local role simulation only. This creates no Supabase
+                # JWT and is not evidence of operational MFA enrollment.
+                assurance='aal2' if role in ('editor','approver') else None
+                return VerifiedSession(SUBJECTS[role],self.end,assurance,'active')
         return None
 
 

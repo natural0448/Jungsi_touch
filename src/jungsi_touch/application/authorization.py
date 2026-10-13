@@ -3,6 +3,7 @@ Never construct Actor from client paid/identity fields. The HTTP adapter must
 resolve a verified session and active entitlement first. No result DTO is built.
 """
 from dataclasses import dataclass
+from datetime import datetime
 import json
 from pathlib import Path
 from .ports import ReportAccessRecord, ReportAccessRepository
@@ -11,6 +12,9 @@ from .ports import ReportAccessRecord, ReportAccessRepository
 class Actor:
     subject_id: str | None
     paid_active: bool = False
+    assurance_level: str | None = None
+    account_status: str | None = None
+    entitlement_expires_at: datetime | None = None
     def __post_init__(self):
         if self.subject_id is not None and (not isinstance(self.subject_id, str) or not self.subject_id.strip()):
             raise ValueError("Verified subject must be a non-empty string.")
@@ -18,6 +22,17 @@ class Actor:
             raise ValueError("Verified entitlement must be a boolean.")
         if self.subject_id is None and self.paid_active:
             raise ValueError("An unauthenticated actor cannot be paid.")
+        if self.assurance_level is not None and self.assurance_level not in ('aal1','aal2'):
+            raise ValueError("Verified assurance must be aal1, aal2 or absent.")
+        if self.subject_id is None and self.assurance_level is not None:
+            raise ValueError("An unauthenticated actor cannot have verified assurance.")
+        if self.account_status is not None and (type(self.account_status) is not str or not self.account_status.strip()):
+            raise ValueError("Verified account status must be a nonempty string or unknown.")
+        if self.subject_id is None and self.account_status is not None:
+            raise ValueError("An unauthenticated actor cannot have a verified account status.")
+        if self.entitlement_expires_at is not None and (not self.paid_active or
+                not isinstance(self.entitlement_expires_at,datetime) or self.entitlement_expires_at.utcoffset() is None):
+            raise ValueError("A request entitlement expiry must belong to a paid verified actor.")
 
 @dataclass(frozen=True)
 class AccessDecision:

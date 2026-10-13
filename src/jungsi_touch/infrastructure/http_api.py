@@ -15,6 +15,7 @@ from ..application.publication import ReportPublicationService
 from .settings import ServerSettings, UnavailableRepository
 from .supabase_session import SupabaseSessionProvider
 from .postgres_repository import PostgresRepository
+from .postgres_entitlements import PostgresJeongsiPassesRepository
 from .drive_provider import DriveClient, DriveDataProvider, MissingDataProvider
 from ..application.forecast_policy import ForecastPolicyService
 from .postgres_forecast_repository import PostgresForecastRepository
@@ -30,6 +31,11 @@ def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=N
     settings=settings or ServerSettings.from_environment()
     clock=clock or UtcClock()
     if repository is None: repository=PostgresRepository(settings.database_url) if settings.database_url else UnavailableRepository()
+    # Production PostgreSQL composition reads the owner's pass authority. The
+    # legacy repository entitlement methods remain available only to explicitly
+    # injected/local fixtures; no failed public lookup falls back to them.
+    if entitlements is None and isinstance(repository,PostgresRepository):
+        entitlements=PostgresJeongsiPassesRepository(settings.database_url)
     if data is None:
         if settings.drive_token and settings.drive_input_folder and settings.drive_registry:
             data=DriveDataProvider(DriveClient(settings.drive_token,settings.drive_input_folder,settings.drive_output_folder),settings.drive_registry)

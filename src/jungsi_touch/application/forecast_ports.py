@@ -1,5 +1,13 @@
 """Application-owned forecast input, authority and immutable revision ports."""
 from typing import Protocol
+from .platform_ports import PlatformError
+
+
+def publication_ids(values):
+    """Trusted scope normalization; no coercion of missing/native ID types."""
+    if not isinstance(values,(tuple,list)) or any(type(value) is not str or not value.strip() for value in values):
+        raise PlatformError('forecast_release_invalid',503)
+    return tuple(dict.fromkeys(values))
 
 class ForecastInputProvider(Protocol):
     def inputs(self, offering_id, input_id, version): ...
@@ -11,4 +19,5 @@ class ForecastRepository(Protocol):
     def get(self, draft_id): ...
     def list(self): ...
     def published(self, offering_id): ...
+    def published_many(self, offering_ids): ...
     def transact(self, subject_id, operation, key, request_hash, callback): ...

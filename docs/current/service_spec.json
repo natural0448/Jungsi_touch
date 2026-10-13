@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.42",
+  "version": "1.9.43",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -1509,9 +1509,14 @@
     {
       "path": "src/jungsi_touch/application/authorization.py",
       "layer": "application",
-      "status": "server_policy_connected_by_HTTP_session_adapter",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
       "requirements": [
-        "REQ-14"
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "symbols": [
         "Actor",
@@ -1578,7 +1583,7 @@
     {
       "path": "src/jungsi_touch/application/platform.py",
       "layer": "application",
-      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
       "requirements": [
         "REQ-01",
         "REQ-02",
@@ -1587,7 +1592,12 @@
         "REQ-10",
         "REQ-11",
         "REQ-13",
-        "REQ-14"
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "symbols": [
         "PlatformService"
@@ -1596,12 +1606,16 @@
     {
       "path": "src/jungsi_touch/application/platform_ports.py",
       "layer": "application",
-      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
       "requirements": [
         "REQ-12",
         "REQ-14",
         "REQ-15",
-        "REQ-19"
+        "REQ-19",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "symbols": [
         "PlatformError",
@@ -1618,10 +1632,14 @@
     {
       "path": "src/jungsi_touch/application/sessions.py",
       "layer": "application",
-      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
       "requirements": [
         "REQ-14",
-        "REQ-15"
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "symbols": [
         "SessionService"
@@ -1678,7 +1696,7 @@
     {
       "path": "src/jungsi_touch/infrastructure/http_api.py",
       "layer": "data_infrastructure",
-      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
       "requirements": [
         "REQ-01",
         "REQ-02",
@@ -1686,7 +1704,11 @@
         "REQ-04",
         "REQ-14",
         "REQ-15",
-        "REQ-18"
+        "REQ-18",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "symbols": [
         "create_app",
@@ -1711,10 +1733,14 @@
     {
       "path": "src/jungsi_touch/infrastructure/supabase_session.py",
       "layer": "data_infrastructure",
-      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
       "requirements": [
         "REQ-14",
-        "REQ-15"
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
       ],
       "symbols": [
         "SupabaseSessionProvider"
@@ -2127,7 +2153,7 @@
     {
       "path": "src/jungsi_touch/infrastructure/supabase_runtime.py",
       "layer": "data_infrastructure",
-      "status": "implemented_synthetic_verified_live_configuration_pending",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
       "requirements": [
         "REQ-12",
         "REQ-14",
@@ -2151,7 +2177,7 @@
     {
       "path": "src/jungsi_touch/infrastructure/official_history_display.py",
       "layer": "data_infrastructure",
-      "status": "implemented_scoped_synthetic_verified_integration_pending",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
       "requirements": [
         "REQ-01",
         "REQ-08",
@@ -2159,7 +2185,10 @@
         "REQ-20",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16"
       ],
       "symbols": [
         "OfficialHistoryDisplayScope",
@@ -2208,7 +2237,7 @@
     {
       "path": "supabase/functions/_shared/official_history_postgres.ts",
       "layer": "data_infrastructure",
-      "status": "implemented_array_io_corrected_native39_primary_wire5_actual_provider140_verified_integrated_redeployed_freshJWT_BFF_pending",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
       "requirements": [
         "REQ-01",
         "REQ-08",
@@ -2216,7 +2245,10 @@
         "REQ-20",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16"
       ],
       "symbols": [
         "createOfficialHistoryInfrastructure",
@@ -2242,7 +2274,7 @@
     {
       "path": "supabase/functions/_shared/official_history_display_test.ts",
       "layer": "data_infrastructure",
-      "status": "implemented_array_io_corrected_native39_primary_wire5_actual_provider140_verified_integrated_redeployed_freshJWT_BFF_pending",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
       "requirements": [
         "REQ-01",
         "REQ-08",
@@ -2250,7 +2282,10 @@
         "REQ-20",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16"
       ],
       "symbols": []
     },
@@ -2683,6 +2718,104 @@
         "REQ-26"
       ],
       "symbols": []
+    },
+    {
+      "path": "src/jungsi_touch/application/forecast_policy.py",
+      "layer": "application",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "ForecastPolicyService"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/application/forecast_ports.py",
+      "layer": "application",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "publication_ids",
+        "ForecastRepository"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/local_verification.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "build_local_app",
+        "LocalSessions"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/memory_forecast_repository.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "MemoryForecastRepository"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/postgres_entitlements.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "PostgresJeongsiPassesRepository"
+      ]
+    },
+    {
+      "path": "src/jungsi_touch/infrastructure/postgres_forecast_repository.py",
+      "layer": "data_infrastructure",
+      "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "PostgresForecastRepository"
+      ]
     }
   ],
   "workflow": {
@@ -3229,7 +3362,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.42",
+        "contract_version": "1.9.43",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -3403,7 +3536,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.42",
+        "contract_version": "1.9.43",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -3569,7 +3702,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.42",
+        "contract_version": "1.9.43",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -3588,7 +3721,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.42",
+        "contract_version": "1.9.43",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3613,7 +3746,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "planned",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.42",
+        "contract_version": "1.9.43",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3638,7 +3771,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.42",
+        "contract_version": "1.9.43",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -4823,11 +4956,16 @@
           {
             "path": "src/jungsi_touch/application/authorization.py",
             "layer": "application",
-            "status": "server_policy_connected_by_HTTP_session_adapter",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
             "requirements": [
-              "REQ-14"
+              "REQ-14",
+              "REQ-15",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
             ],
-            "source_sha256": "1f2ea24129f937b7b801b7d4cb6abd382bd2919796ca142dc305b1ff56792bb4",
+            "source_sha256": "5ef34a3e0d5c4bb771a1b4dcbc7df0cb723017c1012a507b87728882676965db",
             "symbols": [
               {
                 "kind": "class",
@@ -5064,9 +5202,16 @@
           {
             "path": "src/jungsi_touch/application/forecast_policy.py",
             "layer": "application",
-            "status": "support_module_no_direct_operation_registration",
-            "requirements": [],
-            "source_sha256": "adbd5e1a7834a4004ed836def6aaae94d4034ff08367bd3eb0811ded56e58af6",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+            "requirements": [
+              "REQ-14",
+              "REQ-15",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
+            ],
+            "source_sha256": "85ceb35f757976a4b99341b4bcea1a651942ffd55dc7c2e1c01da6ae93cca191",
             "symbols": [
               {
                 "kind": "class",
@@ -5078,6 +5223,12 @@
                 "kind": "function",
                 "name": "ForecastPolicyService.__init__",
                 "signature": "def __init__(self, repository, inputs, clock):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "ForecastPolicyService._validated_release",
+                "signature": "def _validated_release(self, offering_id, release):",
                 "decorators": []
               },
               {
@@ -5133,15 +5284,28 @@
                 "name": "ForecastPolicyService.validated_release",
                 "signature": "def validated_release(self, offering_id):",
                 "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "ForecastPolicyService.validated_releases",
+                "signature": "def validated_releases(self, offering_ids):",
+                "decorators": []
               }
             ]
           },
           {
             "path": "src/jungsi_touch/application/forecast_ports.py",
             "layer": "application",
-            "status": "support_module_no_direct_operation_registration",
-            "requirements": [],
-            "source_sha256": "800d43e3aa87b1b333cfb7cb097bbc416d545af9e228dcb4d344c6dc9a229a97",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+            "requirements": [
+              "REQ-14",
+              "REQ-15",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
+            ],
+            "source_sha256": "ca623d0f948a428c7af559234b09a22f5bc0660dc4c36140ddb265262a9971f5",
             "symbols": [
               {
                 "kind": "class",
@@ -5199,8 +5363,20 @@
               },
               {
                 "kind": "function",
+                "name": "ForecastRepository.published_many",
+                "signature": "def published_many(self, offering_ids):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "ForecastRepository.transact",
                 "signature": "def transact(self, subject_id, operation, key, request_hash, callback):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "publication_ids",
+                "signature": "def publication_ids(values):",
                 "decorators": []
               }
             ]
@@ -5335,7 +5511,7 @@
           {
             "path": "src/jungsi_touch/application/platform.py",
             "layer": "application",
-            "status": "implemented_synthetic_verified_live_configuration_pending",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
             "requirements": [
               "REQ-01",
               "REQ-02",
@@ -5344,9 +5520,14 @@
               "REQ-10",
               "REQ-11",
               "REQ-13",
-              "REQ-14"
+              "REQ-14",
+              "REQ-15",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
             ],
-            "source_sha256": "05f6924789b868df64fb1689cacdddf7811fd784a7f7224a4389d5ad4ca2d5f4",
+            "source_sha256": "482bf1f0587b900dc3c38cf350aca5b3ea9a44b0606f23e715439b6a10067166",
             "symbols": [
               {
                 "kind": "class",
@@ -5487,14 +5668,18 @@
           {
             "path": "src/jungsi_touch/application/platform_ports.py",
             "layer": "application",
-            "status": "implemented_synthetic_verified_live_configuration_pending",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
             "requirements": [
               "REQ-12",
               "REQ-14",
               "REQ-15",
-              "REQ-19"
+              "REQ-19",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
             ],
-            "source_sha256": "ad8ef1491cb16152f8e06e7fff78ff49326b9e3172be09cf6ca417d2c2bf8e82",
+            "source_sha256": "97e30068fc45a05a4a4c42f5e00a90f26c4b99c74f5baab04eceff6747222d53",
             "symbols": [
               {
                 "kind": "class",
@@ -5895,12 +6080,16 @@
           {
             "path": "src/jungsi_touch/application/sessions.py",
             "layer": "application",
-            "status": "implemented_synthetic_verified_live_configuration_pending",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
             "requirements": [
               "REQ-14",
-              "REQ-15"
+              "REQ-15",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
             ],
-            "source_sha256": "48cbc306e9f99787704196ead1d8cc24ad52e283fd9ae5abaf41582a689d75cb",
+            "source_sha256": "5a77d24ff744b2429ea1f0684ad5dd9e76bff9d2d5f1441c4799314f62ab499c",
             "symbols": [
               {
                 "kind": "class",
@@ -6902,7 +7091,7 @@
           {
             "path": "src/jungsi_touch/infrastructure/http_api.py",
             "layer": "data_infrastructure",
-            "status": "implemented_synthetic_verified_live_configuration_pending",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
             "requirements": [
               "REQ-01",
               "REQ-02",
@@ -6910,9 +7099,13 @@
               "REQ-04",
               "REQ-14",
               "REQ-15",
-              "REQ-18"
+              "REQ-18",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
             ],
-            "source_sha256": "8542be563020783489f473a0b2efdf1f767c8635debc8fd0cc6b46a4d23ca8ca",
+            "source_sha256": "67a27e3690d947cf92f9a9551e7ece2f5e40dee818d7f2a2098aa86811aa9598",
             "symbols": [
               {
                 "kind": "function",
@@ -7271,9 +7464,16 @@
           {
             "path": "src/jungsi_touch/infrastructure/local_verification.py",
             "layer": "data_infrastructure",
-            "status": "support_module_no_direct_operation_registration",
-            "requirements": [],
-            "source_sha256": "fdb0256b30c83569f8bf7bccaccabfb330c6a471cbe956c6867dce5aa1a913da",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+            "requirements": [
+              "REQ-14",
+              "REQ-15",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
+            ],
+            "source_sha256": "84b21dfae1969dbaae83ec868620148f0946f599aefb3f70bd17f3ac8fba69e8",
             "symbols": [
               {
                 "kind": "class",
@@ -7358,9 +7558,16 @@
           {
             "path": "src/jungsi_touch/infrastructure/memory_forecast_repository.py",
             "layer": "data_infrastructure",
-            "status": "support_module_no_direct_operation_registration",
-            "requirements": [],
-            "source_sha256": "cb8c494621734252638d4a6158c4abf6fab784a7ec72d1ec17691fb6c5c88aef",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+            "requirements": [
+              "REQ-14",
+              "REQ-15",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
+            ],
+            "source_sha256": "e5d687662ae1050b87756da44d49ae63ebb69e99b167458f7f169a01a24b670d",
             "symbols": [
               {
                 "kind": "class",
@@ -7402,6 +7609,12 @@
                 "kind": "function",
                 "name": "MemoryForecastRepository.published",
                 "signature": "def published(self, offering_id):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "MemoryForecastRepository.published_many",
+                "signature": "def published_many(self, offering_ids):",
                 "decorators": []
               },
               {
@@ -7451,7 +7664,7 @@
           {
             "path": "src/jungsi_touch/infrastructure/official_history_display.py",
             "layer": "data_infrastructure",
-            "status": "implemented_scoped_synthetic_verified_integration_pending",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
             "requirements": [
               "REQ-01",
               "REQ-08",
@@ -7459,9 +7672,12 @@
               "REQ-20",
               "REQ-24",
               "REQ-25",
-              "REQ-26"
+              "REQ-26",
+              "REQ-14",
+              "REQ-15",
+              "REQ-16"
             ],
-            "source_sha256": "4bf59db073feaf95ce0b8784769c2bcc5bcfdfedfebeee7ff8012d14e6e154cb",
+            "source_sha256": "904d7854b1fc3d71f0cd8733a185aaafb6450c48f3c262a70ad9f58c5f4477f6",
             "symbols": [
               {
                 "kind": "class",
@@ -7582,9 +7798,16 @@
           {
             "path": "src/jungsi_touch/infrastructure/postgres_entitlements.py",
             "layer": "data_infrastructure",
-            "status": "support_module_no_direct_operation_registration",
-            "requirements": [],
-            "source_sha256": "e7d64b4e638c28a61302f0227d0b52ca2f5008eeeeb2723146f9be526cc6f429",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+            "requirements": [
+              "REQ-14",
+              "REQ-15",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
+            ],
+            "source_sha256": "ce3ec71fc89200f91f6cc449f0e6b6d78e418c21eb5c003ff760f190d15ea583",
             "symbols": [
               {
                 "kind": "class",
@@ -7601,7 +7824,7 @@
               {
                 "kind": "function",
                 "name": "PostgresJeongsiPassesRepository._schema",
-                "signature": "def _schema(connection):",
+                "signature": "def _schema(connection, subject=None, instant=None):",
                 "decorators": [
                   "staticmethod"
                 ]
@@ -7635,9 +7858,16 @@
           {
             "path": "src/jungsi_touch/infrastructure/postgres_forecast_repository.py",
             "layer": "data_infrastructure",
-            "status": "support_module_no_direct_operation_registration",
-            "requirements": [],
-            "source_sha256": "e510a05b3f47199e085f5c8707a0235314920f07e39faa56645009a2366fa67f",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+            "requirements": [
+              "REQ-14",
+              "REQ-15",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
+            ],
+            "source_sha256": "5c38dd270b93049bd1fb408db487c373cbfd1874072796de55b4d56d6d5aad9c",
             "symbols": [
               {
                 "kind": "class",
@@ -7709,6 +7939,12 @@
                 "kind": "function",
                 "name": "PostgresForecastRepository.published",
                 "signature": "def published(self, offering_id):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "PostgresForecastRepository.published_many",
+                "signature": "def published_many(self, offering_ids):",
                 "decorators": []
               },
               {
@@ -8068,7 +8304,7 @@
           {
             "path": "src/jungsi_touch/infrastructure/supabase_runtime.py",
             "layer": "data_infrastructure",
-            "status": "implemented_synthetic_verified_live_configuration_pending",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
             "requirements": [
               "REQ-12",
               "REQ-14",
@@ -8081,7 +8317,7 @@
               "REQ-25",
               "REQ-26"
             ],
-            "source_sha256": "a8c8ff8d34722154f8ea26d76a0fbea2bd7306ce3cd14e0bcda2ed9c6fbbe9cd",
+            "source_sha256": "571e059a561699aee2cf6d444e1f5f66c9bc51ee21353b38fb6dc517ed7d6526",
             "symbols": [
               {
                 "kind": "class",
@@ -8284,12 +8520,16 @@
           {
             "path": "src/jungsi_touch/infrastructure/supabase_session.py",
             "layer": "data_infrastructure",
-            "status": "implemented_synthetic_verified_live_configuration_pending",
+            "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
             "requirements": [
               "REQ-14",
-              "REQ-15"
+              "REQ-15",
+              "REQ-16",
+              "REQ-24",
+              "REQ-25",
+              "REQ-26"
             ],
-            "source_sha256": "bab1e01dbc55c30ba2d25668083a9d7d764c8147ed9c62b0a855af34a5a8faf7",
+            "source_sha256": "52db5611e80186dea80baf97f65ddf9c9a85a88ee1369f1e65440b85e825b057",
             "symbols": [
               {
                 "kind": "class",
@@ -8301,6 +8541,18 @@
                 "kind": "function",
                 "name": "SupabaseSessionProvider.__init__",
                 "signature": "def __init__(self, url, key, *, opener=urlopen):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "SupabaseSessionProvider._account_status",
+                "signature": "def _account_status(self, token, subject):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "SupabaseSessionProvider._account_status.unique",
+                "signature": "def unique(pairs):",
                 "decorators": []
               },
               {
@@ -9795,7 +10047,7 @@
             {
               "path": "supabase/functions/_shared/official_history_display_test.ts",
               "layer": "data_infrastructure",
-              "status": "implemented_array_io_corrected_native39_primary_wire5_actual_provider140_verified_integrated_redeployed_freshJWT_BFF_pending",
+              "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
               "requirements": [
                 "REQ-01",
                 "REQ-08",
@@ -9803,15 +10055,18 @@
                 "REQ-20",
                 "REQ-24",
                 "REQ-25",
-                "REQ-26"
+                "REQ-26",
+                "REQ-14",
+                "REQ-15",
+                "REQ-16"
               ],
-              "source_sha256": "4c9bb1af51a66c608bbaa5569ac4db9e53e42087173b625dbf41588fdae0ac97",
+              "source_sha256": "37c8547b15edd479faa9272b4e82ed5fbeb0bd032ce53b7929f42bad9cf7b9a9",
               "declared_exports": []
             },
             {
               "path": "supabase/functions/_shared/official_history_postgres.ts",
               "layer": "data_infrastructure",
-              "status": "implemented_array_io_corrected_native39_primary_wire5_actual_provider140_verified_integrated_redeployed_freshJWT_BFF_pending",
+              "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
               "requirements": [
                 "REQ-01",
                 "REQ-08",
@@ -9819,9 +10074,12 @@
                 "REQ-20",
                 "REQ-24",
                 "REQ-25",
-                "REQ-26"
+                "REQ-26",
+                "REQ-14",
+                "REQ-15",
+                "REQ-16"
               ],
-              "source_sha256": "a85e7c502837403736577eadf84dc6c93d5f452e59e87b574ebd09ad1d7cd560",
+              "source_sha256": "1f90978383bb2b9889a89b625f9a09b621f69910adfff7f36594f679cd55f7aa",
               "declared_exports": [
                 "createOfficialHistoryInfrastructure",
                 "loadPinnedDisplayDescriptor",
@@ -9956,12 +10214,18 @@
           "browser28c38ad / wording739e914 / PR29 develop f63fb4c",
           "선정 통계3종·가상2건 유료 첫 환산·독립보류·일반 유료게이트 외부local영수증v2 수용; PR 정확HEAD CI PASS",
           "FE-V3-REASON-01 영수증 원본/해시 확인·문구3코드 소스 대조·최신 유료 P3 scoped browser 수용·PR30 통합 완료. Root browser와 나머지2코드 상태 browser는 NOT_RUN. 전체/대학곡선·연도연계·가산점CR·W6·운영3gate·CAP는 별도 미완료."
+        ],
+        [
+          "서비스·DB / 오픈 전 이용권·관리 인증·배치 조회",
+          "opening_security_operations_contract / spec1.9.43",
+          "합성 Python219·Deno38 및 runtime role의 native 단일 JOIN2회 PASS; feature 통합·실JWT 운영 검수 대기",
+          "public.jeongsi_passes만 읽고 과거 표 fallback/관리자 유료 예외 없이 요청별 회원·만료를 결속한다. 관리8경로에는 서버 검증 aal2·본인 active·기존 학교 권한을 요구한다. 복수 모집단위는 배치1회와 동일 발표본 검증으로 처리하며 성공 환산·결측·개별 보류를 보존한다. Storage 원형175PK/174객체의 원격 bytes/SHA·익명 거절은 완료했고 DB본문 제거·resolver·VACUUM은 NOT_RUN이다."
         ]
       ]
     }
   },
   "pending": [
-    "현재 회원판정은 jungsi_backend.entitlements/session v1을 유지한다. public.jeongsi_passes는 명시 연결 준비만이며 기본 전환을 하지 않는다. 운영 플랫폼은 Google Drive·Supabase와 DEV-010 기준을 따른다.",
+    "이전 명시 연결 결정의 이력(현재 실행 기준 아님): 현재 회원판정은 jungsi_backend.entitlements/session v1을 유지한다. public.jeongsi_passes는 명시 연결 준비만이며 기본 전환을 하지 않는다. 운영 플랫폼은 Google Drive·Supabase와 DEV-010 기준을 따른다. 2026-10-14 사용자 확정 및 opening_security_operations_contract에 따라 실제 PostgreSQL 기본 구성과 Edge 이용권 원본을 public.jeongsi_passes로 연결했다. 관리자 무료 예외는 추가하지 않았고 합성219/Deno38·가상 ID 읽기 전용 native 검수만 완료했다. 실JWT 관리자 MFA·실제 발급/회수 브라우저·Edge 재배포·운영 공개 인수는 별도 NOT_RUN이다.",
     "운영 DB에 추가 마이그레이션 적용 후 실제 UTC/timestamptz/date 및 권한/소유권 트랜잭션 검수",
     "Drive OAuth·토큰갱신운영/필요adapter 별도개발·입출력folder/승인명부·실read/별도write 검수; approved0 HOLD",
     "자체 추정 모형의 실제 캠퍼스 식별·운영 명부 등록/발행과 전국 대학 공식 실행 규칙·연도보정·예상/판단 근거의 검증/승인 및 변경 범위 검산",
@@ -11474,6 +11738,21 @@
         "REQ-26"
       ],
       "summary": "사용자 확정: 실제 PostgreSQL 구성과 hosted 표시의 이용권 기준을 public.jeongsi_passes로 전환하고 관리자 이용권 예외는 보류한다. 관리 8경로에 검증된 aal2·본인 active 상태·기존 편집/승인 학교 범위를 결합하며 학생 서비스에는 MFA를 추가하지 않는다. API22/session3 유지·읽기 전용 RLS/단일 JOIN·비공개 보존형 CAP 및 남은 운영 NOT_RUN을 기획/라우팅/필수 참조에 함께 등록한다."
+    },
+    {
+      "date": "2026-10-14",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-20",
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "spec1.9.43: 서비스 개발팀이 기본 PostgreSQL/명시 Supabase/hosted 표시의 public.jeongsi_passes 단일 권한 읽기와 요청 내 회원·만료 결속을 구현했다. 관리8경로의 검증 aal2·같은 Bearer의 본인 profiles.status active·기존 편집/승인 학교 범위를 적용하되 일반/유료 학생·공개 발표본 조회·API22/session3은 유지했다. university.analyze/candidates.build의 발표본 N+1을 published_many 제한 ID JOIN1회로 변경하고 동일 hash/context/영수증 검증·성공 환산·개별 결측/보류를 보존했다. Python219·Deno38 합성과 실제 app-role의 NULL subject 단일 메타/RLS JOIN(27.187ms), 가상 모집행2개 단일 text[] JOIN(11.239ms/0행/2None)을 범위별로 검증했다. 원 압축175PK/174불변 Storage 사본은 비공개 보존·전건 원격 bytes/SHA·익명 거절을 실제 검수했으며 DB본문 제거0이다. 관리자 유료 예외/legacy fallback/새 GRANT·DDL·RLS 변경/원본 삭제는0이고 실JWT/MFA 등록·발급회수 브라우저·Edge 재배포·resolver·정확 제거·VACUUM·운영 공개는 NOT_RUN으로 보존한다."
     }
   ],
   "overall_analysis_contract": {
@@ -25454,13 +25733,13 @@
   },
   "opening_security_operations_contract": {
     "format": "jungsi.opening-security-operations/v1",
-    "revision": "2026.10.14.v1",
+    "revision": "2026.10.14.v2",
     "requirements": [
       "REQ-24",
       "REQ-25",
       "REQ-26"
     ],
-    "status": "adopted_implementation_verification_pending",
+    "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
     "document": "docs/current/오픈전_보안운영_변경.md",
     "implementation_branch": "feature/application-pre-data-platform",
     "production_ready": false,
@@ -25555,7 +25834,23 @@
       "full_count_for_UI_allowed": false,
       "bounded_before_MATERIALIZED_required": true,
       "duplicate_index_creation_allowed": false,
-      "test_intake_in_production_allowed": false
+      "test_intake_in_production_allowed": false,
+      "publication_batch": {
+        "port": "ForecastRepository.published_many",
+        "application_validation": "ForecastPolicyService.validated_releases",
+        "operations": [
+          "university.analyze",
+          "candidates.build"
+        ],
+        "data_queries_per_selected_offering_batch": 1,
+        "empty_selected_batch_queries": 0,
+        "paid_owner_confirmed_gates_before_batch": true,
+        "publication_hash_context_receipts_validation_preserved": true,
+        "missing_per_key": null,
+        "one_invalid_release_discards_successful_conversion": false,
+        "single_published_fallback_allowed": false,
+        "unknown_or_duplicate_or_missing_return_keys_allowed": false
+      }
     },
     "capacity": {
       "source_files_preserved": true,
@@ -25571,18 +25866,51 @@
       "IO_warning_requires_stop_and_owner_recheck": true,
       "VACUUM_FULL_automatic_allowed": false,
       "normal_VACUUM_guarantees_disk_shrink": false,
-      "Storage_transfer": "NOT_RUN",
+      "Storage_transfer": "PASS_ARCHIVE_175_PK_174_IMMUTABLE_OBJECTS_BYTES_SHA_ANON_DENIAL_DB_PAYLOAD_PRESERVED",
       "payload_or_overlay_removal": "NOT_RUN",
       "VACUUM": "NOT_RUN"
     },
     "verification": {
-      "local_scoped_code": "implementation_pending",
+      "local_scoped_code": "PASS_PYTHON_219_DENO_38_SCOPED_SYNTHETIC",
       "live_catalog_RLS_and_migrations": "read_only_verified",
       "real_JWT_active_aal2_management": "NOT_RUN",
       "OTP_enrollment": "USER_PHONE_REQUIRED_NOT_RUN",
       "Edge_redeployment": "NOT_RUN",
       "browser_paid_after_grant_or_revoke": "NOT_RUN",
-      "production_publication": "NOT_RUN"
+      "production_publication": "NOT_RUN",
+      "native_public_pass_state": "PASS_ONE_READONLY_NULL_SUBJECT_QUERY_27_187_MS_SCHEMA_ROLE_RLS_UTC",
+      "native_publication_batch": "PASS_ONE_READONLY_TEXT_ARRAY_JOIN_TWO_FAKE_IDS_ZERO_ROWS_TWO_MISSING_KEYS_11_239_MS",
+      "Storage_archive": "PASS_PRIVATE_ARCHIVE_ONLY",
+      "implementation_source_paths": [
+        "src/jungsi_touch/application/authorization.py",
+        "src/jungsi_touch/application/forecast_policy.py",
+        "src/jungsi_touch/application/forecast_ports.py",
+        "src/jungsi_touch/application/platform.py",
+        "src/jungsi_touch/application/platform_ports.py",
+        "src/jungsi_touch/application/sessions.py",
+        "src/jungsi_touch/infrastructure/http_api.py",
+        "src/jungsi_touch/infrastructure/local_verification.py",
+        "src/jungsi_touch/infrastructure/memory_forecast_repository.py",
+        "src/jungsi_touch/infrastructure/official_history_display.py",
+        "src/jungsi_touch/infrastructure/postgres_entitlements.py",
+        "src/jungsi_touch/infrastructure/postgres_forecast_repository.py",
+        "src/jungsi_touch/infrastructure/supabase_runtime.py",
+        "src/jungsi_touch/infrastructure/supabase_session.py",
+        "supabase/functions/_shared/official_history_postgres.ts",
+        "supabase/functions/_shared/official_history_display_test.ts"
+      ],
+      "regression_test_paths": [
+        "tests/test_postgres_entitlements.py",
+        "tests/test_default_pass_authority.py",
+        "tests/test_management_mfa.py",
+        "tests/test_backend_adapters.py",
+        "tests/test_forecast_publication_batch.py",
+        "tests/test_forecast_analysis_http.py",
+        "tests/test_forecast_workflows.py",
+        "tests/test_http_entitlement_injection.py",
+        "tests/test_supabase_runtime.py",
+        "supabase/functions/_shared/official_history_display_test.ts"
+      ]
     }
   }
 }

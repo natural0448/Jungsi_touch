@@ -94,14 +94,23 @@ async function syntheticSql(mode='valid') {
   const descriptor=synthetic(),definition="SELECT 'SYNTHETIC'::text",sha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(definition)))].map(v=>v.toString(16).padStart(2,'0')).join('');
   descriptor.read_strategy={name:'uncurated_pk_equivalent',equivalence_receipt_sha256:'e'.repeat(64),rls_receipt_sha256:'f'.repeat(64),join_receipt_sha256:'a'.repeat(64),snapshot_revision:'v21_1',active_view_chain:[{schema:'jungsi_data_ingest',relation:'admission_results_curated_v21_1',view_definition_sha256:sha,reloptions:['security_invoker=true']}],active_curation_release_ids:['SYNTHETIC-curation']};
   const statements:{query:string;params:unknown}[]=[],rows=descriptor.bindings.map(b=>({...copy(b.expected_db_row as Row),guard_active_curation_release_id:null,guard_school_source_school_id:null,guard_school_after_row_fingerprint:null}));
+  const passState:Row={relation_exists:true,runtime_user:'jungsi_backend_app',row_security:'on',read_only:'on',
+    owner_member:false,owner_usage:false,postgres_member:false,
+    columns_native:[['id','int8','NO'],['user_id','uuid','NO'],['starts_at','timestamptz','NO'],['ends_at','timestamptz','NO'],
+      ['note','text','YES'],['granted_by','uuid','YES'],['revoked_at','timestamptz','YES'],['revoked_by','uuid','YES'],['created_at','timestamptz','NO']],
+    constraints_native:[['jeongsi_passes_pkey','p',true,'PRIMARY KEY (id)'],['jeongsi_passes_period','c',true,'CHECK ((ends_at > starts_at))'],
+      ['jeongsi_passes_user_id_fkey','f',true,'FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE']],
+    role_native:[true,false,false,false,true,false,false],
+    policies_native:[['jeongsi_passes: select own or admin','r',true,['public'],'((auth.uid() = user_id) OR public.is_admin())',null],
+      ['jeongsi_passes: jungsi backend read','r',true,['jungsi_backend_app','jungsi_backend_owner'],'true',null]],
+    expires_at:'2026-10-08T00:00:00.000500Z'};
   // Every driver default is explicit; the synthetic suite reads no PG env.
   const driverOptions={ssl:false,max:1,idle_timeout:0,connect_timeout:1,max_lifetime:1,max_pipeline:1,backoff:()=>0,keep_alive:0,prepare:false,debug:false,fetch_types:false,publications:'SYNTHETIC',target_session_attrs:'read-write' as const};
   const client=postgres('postgres://SYNTHETIC:SYNTHETIC@127.0.0.1:1/SYNTHETIC',driverOptions);
   Object.defineProperty(client,'unsafe',{value:async(query:string,params:unknown)=>{
     statements.push({query,params});
     if(query.includes('current_user,r.rolsuper'))return [{current_user:'jungsi_backend_app',rolsuper:false,rolbypassrls:mode==='bypass',row_security:'on',read_only:'on',owner_member:false,owner_usage:false,postgres_member:false}];
-    if(query.includes("to_regclass('jungsi_backend.entitlements')"))return [{owner:false,readable:true}];
-    if(query.includes('max(expires_at)'))return [{expires_at:'2026-10-08T00:00:00.000500Z'}];
+    if(query.includes("to_regclass('public.jeongsi_passes')"))return [copy(passState)];
     if(query.includes('to_regclass($1)'))return [{owner:false,readable:true,writable:false}];
     if(query.includes('c.relname AS name'))return [{name:'admission_results_curated_v21_1',kind:'v',rls:false,force:false,options:mode==='raw_reloptions'?'{security_invoker=true}':['security_invoker=true'],owner:false,readable:true,writable:false,anon_read:mode==='public_grant',authenticated_read:false,definition:mode==='view_changed'?definition+' changed':definition},...['admission_results','curation_overlays','school_scope_overlays'].filter((_,i)=>mode!=='missing_relation'||i!==2).map(name=>({name,kind:'r',rls:true,force:mode!=='force_disabled',options:null,owner:false,readable:true,writable:false,anon_read:false,authenticated_read:false,definition:null}))];
     if(query.startsWith('WITH selected'))return copy(rows);
@@ -110,7 +119,7 @@ async function syntheticSql(mode='valid') {
   Object.defineProperty(client,'begin',{value:async(options:string,callback:(tx:typeof client)=>Promise<unknown>)=>{assert(options.includes('read only'));return await callback(client);}});
   const factory=()=>client;
   const ports=createOfficialHistoryInfrastructure({databaseUrl:'postgres://SYNTHETIC:SYNTHETIC@127.0.0.1:1/SYNTHETIC',databaseCa:'-----BEGIN CERTIFICATE-----\nSYNTHETIC\n-----END CERTIFICATE-----',supabaseUrl:'https://example.org',publishableKey:'SYNTHETIC-public',storageSecret:'SYNTHETIC-secret',descriptorBucket:'SYNTHETIC-private',descriptorPath:'SYNTHETIC/descriptor.json',descriptorSha256:'a'.repeat(64),descriptorBytes:1},{sqlFactory:factory,environment:'local_verification',now:()=>NOW});
-  return {descriptor,rows,ports,statements};
+  return {descriptor,rows,ports,statements,passState};
 }
 Deno.test('concrete SQL batches JOIN once with exact scope and separate RLS metadata',async()=>{
   const f=await syntheticSql(),rows=await f.ports.readRows(f.descriptor);equal(rows.length,3);
@@ -174,6 +183,29 @@ Deno.test('pinned driver JSONB projection preserves reloptions array while raw t
 });
 Deno.test('concrete SQL role RLS invoker drift denies without payload fallback',async()=>{for(const mode of ['bypass','force_disabled','view_changed','public_grant','missing_relation','raw_reloptions']){const f=await syntheticSql(mode);let failed=false;try{await f.ports.readRows(f.descriptor);}catch{failed=true;}assert(failed,mode);equal(f.statements.filter(s=>s.query.startsWith('WITH selected')).length,0);}});
 Deno.test('unqualified local concrete query is closed before SQL',async()=>{for(const invalidScope of ['missing_strategy','empty_overlay_list']){const f=await syntheticSql();if(invalidScope==='missing_strategy')delete f.descriptor.read_strategy;else(f.descriptor.read_strategy as Row).active_curation_release_ids=[];let failed=false;try{await f.ports.readRows(f.descriptor);}catch{failed=true;}assert(failed);equal(f.statements,[]);}});
-Deno.test('concrete legacy entitlement SQL preserves UTC microseconds for me',async()=>{const f=await syntheticSql(),until=await f.ports.paidUntil(SUBJECT,NOW);equal(until,'2026-10-08T00:00:00.000500Z');const query=f.statements.find(s=>s.query.includes('max(expires_at)'));assert(query?.query.includes('HH24:MI:SS.US'));equal((query?.params as unknown[])[0],SUBJECT);const http=fixture();http.setPaid(until);equal((await(await http.request('/api/v1/me')).json()).entitlement_expires_at,until);});
+Deno.test('concrete public pass SQL joins schema role RLS and preserves microseconds without fallback',async()=>{
+  const f=await syntheticSql(),until=await f.ports.paidUntil(SUBJECT,NOW);equal(until,'2026-10-08T00:00:00.000500Z');
+  const queries=f.statements.filter(s=>s.query.includes("to_regclass('public.jeongsi_passes')"));equal(queries.length,1);
+  equal(f.statements.filter(s=>!s.query.startsWith('SET ')).length,1);
+  const query=queries[0];assert(query.query.includes('LEFT JOIN LATERAL'));assert(query.query.includes('HH24:MI:SS.US'));
+  assert(query.query.includes('revoked_at IS NULL AND starts_at<=$2::timestamptz AND ends_at>$2::timestamptz'));
+  equal((query.params as unknown[])[0],SUBJECT);assert(!f.statements.some(s=>s.query.includes('jungsi_backend.entitlements')));
+  const http=fixture();http.setPaid(until);equal((await(await http.request('/api/v1/me')).json()).entitlement_expires_at,until);
+});
+Deno.test('concrete public pass metadata drift fails closed even with a paid expiry',async()=>{
+  const changes:Row[]=[{relation_exists:false},{runtime_user:'jungsi_backend_owner'},{row_security:'off'},
+    {read_only:'off'},{owner_member:true},{owner_usage:true},{postgres_member:true},
+    {columns_native:[]},{constraints_native:[]},{role_native:[true,0,false,false,true,false,false]},
+    {role_native:[true,false,false,false,true,true,false]},{policies_native:[]},{policies_native:'SYNTHETIC-not-native'},
+    {expires_at:'2026-10-08T00:00:00Z'}];
+  for(const change of changes){const f=await syntheticSql();Object.assign(f.passState,change);let failed=false;
+    try{await f.ports.paidUntil(SUBJECT,NOW);}catch{failed=true;}assert(failed);assert(!f.statements.some(s=>s.query.includes('jungsi_backend.entitlements')));}
+});
+Deno.test('concrete public pass next-read grant and revoke do not retain stale membership',async()=>{
+  const f=await syntheticSql();f.passState.expires_at=null;equal(await f.ports.paidUntil(SUBJECT,NOW),null);
+  f.passState.expires_at='2026-10-08T01:00:00Z';equal(await f.ports.paidUntil(SUBJECT,NOW),'2026-10-08T01:00:00Z');
+  f.passState.expires_at=null;equal(await f.ports.paidUntil(SUBJECT,NOW),null);
+  equal(f.statements.filter(s=>s.query.includes("to_regclass('public.jeongsi_passes')")).length,3);
+});
 Deno.test('new overlay is not an equivalent raw-PK snapshot',async()=>{const f=await syntheticSql();for(const [key,value]of [['guard_active_curation_release_id','SYNTHETIC overlay'],['guard_school_source_school_id','SYNTHETIC changed school'],['guard_school_after_row_fingerprint','c'.repeat(64)]]as const){const rows=copy(f.rows);Object.assign(rows[0],{[key]:value});let failed=false;try{mapScopedCatalog(f.descriptor,rows);}catch{failed=true;}assert(failed,key);}});
 Deno.test('existing frontend encoded offering ID resolves original namespace',async()=>{const f=fixture();f.setPaid('2026-10-08T01:00:00Z');const encoded=encodeURIComponent('2026:SYNTHETIC-A');const r=await f.request('/api/v1/offerings/'+encoded);equal(r.status,200);equal((await r.json()).offering.offering_id,'2026:SYNTHETIC-A');const recruitment=await f.request('/api/v1/offerings/'+encoded+'/recruitment');equal(recruitment.status,200);equal((await recruitment.json()).recruitment,null);for(const invalid of ['%2F','%ZZ','%252F'])equal((await f.request('/api/v1/offerings/'+invalid)).status,400);});

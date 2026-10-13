@@ -3,6 +3,13 @@ from copy import deepcopy
 import json
 from ..application.platform_ports import PlatformError
 from ..application.time_contract import utc_instant
+from ..application.forecast_ports import publication_ids
+
+
+PUBLISHED_MANY_SQL='''SELECT DISTINCT ON (f.offering_id) f.offering_id,f.body
+FROM jungsi_backend.forecast_releases f
+JOIN unnest(%s::text[]) AS selected(offering_id) ON selected.offering_id=f.offering_id
+ORDER BY f.offering_id,f.published_at DESC,f.release_id DESC'''
 
 class ForecastTransaction:
     def __init__(self,connection):self.c=connection
@@ -36,6 +43,23 @@ class PostgresForecastRepository:
         with self.repository.transaction(read_only=True) as c:
             row=c.execute('SELECT body FROM jungsi_backend.forecast_releases WHERE offering_id=%s ORDER BY published_at DESC,release_id DESC LIMIT 1',(offering_id,)).fetchone()
             return deepcopy(row[0]) if row else None
+    def published_many(self,offering_ids):
+        selected=publication_ids(offering_ids)
+        if not selected:return {}
+        with self.repository.transaction(read_only=True) as c:
+            rows=c.execute(PUBLISHED_MANY_SQL,(list(selected),)).fetchall()
+        if not isinstance(rows,(tuple,list)):
+            raise PlatformError('forecast_release_invalid',503)
+        result=dict.fromkeys(selected)
+        found=set()
+        for row in rows:
+            if not isinstance(row,(tuple,list)) or len(row)!=2 or type(row[0]) is not str or row[0] not in result or row[0] in found:
+                raise PlatformError('forecast_release_invalid',503)
+            found.add(row[0])
+            # A returned JSON null is a present malformed release, distinct from
+            # an offering absent from this batch's SQL result.
+            result[row[0]]=(PlatformError('forecast_release_invalid',503) if row[1] is None else deepcopy(row[1]))
+        return result
     def transact(self,subject,operation,key,request_hash,callback):
         with self.repository.transaction() as c:
             self.repository.lock(c,subject,operation,key)

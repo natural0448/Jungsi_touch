@@ -18,6 +18,8 @@ class PlatformError(ValueError):
 class VerifiedSession:
     subject_id: str
     expires_at: datetime
+    assurance_level: str | None = None
+    account_status: str | None = None
 
 
 class SessionProvider(Protocol):

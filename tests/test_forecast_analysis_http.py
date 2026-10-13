@@ -109,6 +109,42 @@ class ForecastAnalysisHttpTests(unittest.TestCase):
         self.assertEqual(assessment['status'],'pending');self.assertEqual(assessment['reason_code'],'forecast_public_context_missing')
         self.assertEqual(assessment['conversion']['status'],'ready');self.assertEqual(assessment['percentile']['status'],'ready')
 
+    def test_multiple_offerings_and_candidates_use_one_batch_without_single_lookup(self):
+        second=deepcopy(self.data.offering);second['offering_id']='SYNTHETIC-missing-offering'
+        second['department_id']='SYNTHETIC-other-department'
+        self.data.catalog=replace(self.data.catalog,offerings=(self.data.offering,second))
+        calls=[];original=self.store.published_many
+        def batch(ids):calls.append(tuple(ids));return original(ids)
+        def no_single(oid):raise AssertionError('Per-offering publication lookup was used')
+        self.store.published_many=batch;self.store.published=no_single
+        report=self.report();calls.clear()
+        response=self.request('POST',f"/api/v1/reports/{report['report_id']}/university-results",
+            dict(expected_version=report['report_version'],offering_ids=[self.oid,second['offering_id']]))
+        self.assertEqual(response.status_code,200,response.text);report=response.json()
+        self.assertEqual(calls,[(self.oid,second['offering_id'])])
+        calls.clear()
+        response=self.request('POST',f"/api/v1/reports/{report['report_id']}/candidates",dict(expected_version=report['report_version']))
+        self.assertEqual(response.status_code,200,response.text)
+        self.assertEqual(calls,[(self.oid,second['offering_id'])])
+        results=response.json()['analyses']
+        self.assertEqual(results[self.oid]['conversion']['status'],'ready')
+        self.assertEqual(results[second['offering_id']]['conversion']['status'],'pending')
+
+    def test_unverified_free_foreign_owner_and_unconfirmed_requests_do_not_read_publication_batch(self):
+        report=self.report();calls=[];original=self.store.published_many
+        self.store.published_many=lambda ids:(calls.append(tuple(ids)) or original(ids))
+        path=f"/api/v1/reports/{report['report_id']}/university-results"
+        body=dict(expected_version=report['report_version'],offering_ids=[self.oid])
+        for token,status in (('invalid',401),('SYNTHETIC-student',403)):
+            response=self.client.post(path,json=body,headers={'Authorization':'Bearer '+token,'Idempotency-Key':'SYNTHETIC-denied'})
+            self.assertEqual(response.status_code,status)
+        self.repo.entitlements['SYNTHETIC-other']=dict(active=True,starts_at=self.clock.now()-timedelta(seconds=1),expires_at=self.clock.now()+timedelta(hours=1))
+        response=self.client.post(path,json=body,headers={'Authorization':'Bearer SYNTHETIC-other','Idempotency-Key':'SYNTHETIC-foreign'})
+        self.assertEqual(response.status_code,404)
+        profile_id=self.repo.reports[report['report_id']]['profile_id'];self.repo.profiles[profile_id]['confirmed']=False
+        response=self.request('POST',path,body);self.assertEqual(response.status_code,409)
+        self.assertEqual(calls,[])
+
 
 class CandidateClassificationTests(unittest.TestCase):
     def test_one_school_keeps_ready_outside_ineligible_and_pending_separate(self):
