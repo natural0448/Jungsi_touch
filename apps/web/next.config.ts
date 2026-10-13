@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
     실도메인으로 Workers Routes 를 붙이면 본체·워커 주소 항목은 지운다.
   */
   experimental: {
+    /*
+      화면 스타일(약 60KB)을 별도 파일 대신 HTML 안에 넣는다. 본체 프록시를 거쳐 정적 파일을 따로 받는 구조라
+      네트워크가 불안하면 CSS 요청만 실패해 꾸밈 없는 화면이 보였다(2026-10-13). 운영 빌드에만 적용된다.
+    */
+    inlineCss: true,
     serverActions: {
       allowedOrigins: ["edutouch-web.edutouch-web.workers.dev", "jeongsi-touch.edutouch-web.workers.dev", "localhost:3003", "127.0.0.1:3003"],
     },

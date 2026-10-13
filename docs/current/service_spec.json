@@ -11449,6 +11449,13 @@
         "REQ-01"
       ],
       "summary": "오픈 전 접근 관문: JEONGSI_ACCESS_GATE=preview 인 배포판은 화면 proxy에서 에듀터치 로그인(같은 Supabase 세션)을 읽어 에듀터치 관리자(role=admin, status=active)와 JEONGSI_PREVIEW_EMAILS 명단만 통과시키고 나머지는 403 준비 중 화면을 보낸다. 워커 주소 직접 접속(로그인 쿠키 없음)을 막기 위함. 설정 누락 시 막는 쪽. 로컬 dev·local 검수에는 영향 없음. 오픈 때 관문을 지우고 회원·이용권 판단은 서비스 API(public.jeongsi_passes)에 맡긴다. DTO·API·산식 변경 없음."
+    },
+    {
+      "date": "2026-10-13",
+      "requirements": [
+        "REQ-02"
+      ],
+      "summary": "2페이지 성적 입력 표 디자인 개선(사용자 요청): 성적표 배치·입력 규칙·서버 검사는 그대로 두고, 표 머리를 진한 남색 띠로, 넣는 칸을 테두리 입력란으로(값이 들어가면 파란 테두리), 계산·해당 없음 칸을 평면으로 정리. 필수 6칸 진행 표시, 확인 체크와 저장 버튼을 한 띠로 묶음, 휴대폰 표 너비 조정. 불안정한 네트워크에서 화면이 깨지던 문제 대응: CSS를 HTML에 직접 넣고(experimental.inlineCss) 외부 CDN 글꼴이 화면 표시를 막지 않게 스크립트로 붙임. DTO·API·산식 변경 없음."
     }
   ],
   "overall_analysis_contract": {

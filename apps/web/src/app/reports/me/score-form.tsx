@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState, type FormEvent } from "react";
 import { INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "@/lib/exam";
 import { submitScores, type ScoreFormState } from "./actions";
 
@@ -19,6 +19,14 @@ export interface ScoreDefaults {
 
 const GRADES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
+// 저장에 꼭 필요한 칸: 탐구 두 과목과 국어·수학·탐구 표준점수. 진행 표시용이며 검사는 서버가 한다
+const REQUIRED = ["inq1", "inq2", "korean", "math", "inq1_score", "inq2_score"] as const;
+const filledOf = (get: (k: (typeof REQUIRED)[number]) => unknown) =>
+  REQUIRED.filter((k) => {
+    const v = get(k);
+    return v !== undefined && v !== null && String(v).trim() !== "";
+  }).length;
+
 /**
  * 성적 입력 — 수능 성적표와 같은 가로 표(영역 순서: 한국사 · 국어 · 수학 · 영어 · 탐구).
  * 행은 성적표처럼 선택과목 · 표준점수 · 백분위 · 등급이다.
@@ -34,9 +42,15 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
   const need = (v: unknown) => (missing && (v === undefined || v === "") ? " bad" : "");
   const auto = <span className="sf-auto">저장 후 계산</span>;
   const none = <span className="sf-none" aria-label="해당 없음">─</span>;
+  const [filled, setFilled] = useState(() => filledOf((k) => d[k]));
+  const onInput = (e: FormEvent<HTMLFormElement>) => {
+    const f = e.currentTarget.elements;
+    setFilled(filledOf((k) => (f.namedItem(k) as HTMLInputElement | HTMLSelectElement | null)?.value));
+  };
+  const done = filled === REQUIRED.length;
 
   return (
-    <form key={state?.attempt ?? 0} action={action} className="sf" noValidate>
+    <form key={state?.attempt ?? 0} action={action} className="sf" noValidate onInput={onInput} onChange={onInput}>
       <input type="hidden" name="idem" value={idem} />
       {update && (
         <>
@@ -49,8 +63,12 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
         <div>
           <p className="sf-kicker">성적 입력</p>
           <h2>{examLabel} 성적표</h2>
+          <p>성적표에 적힌 값을 같은 칸에 그대로 옮겨 주세요. 테두리가 있는 칸만 넣으면 됩니다.</p>
         </div>
-        <p>성적표에 적힌 값을 같은 칸에 그대로 옮겨 주세요. 진하게 표시된 칸만 넣으면 됩니다.</p>
+        <p className={`sf-prog${done ? " done" : ""}`} aria-live="polite">
+          <span className="bar" aria-hidden="true"><i style={{ width: `${(filled / REQUIRED.length) * 100}%` }} /></span>
+          {done ? "필수 칸을 모두 넣었습니다" : <>필수 {REQUIRED.length}칸 중 <b>{filled}</b>칸 입력</>}
+        </p>
       </header>
 
       <p className="sf-swipe">표를 옆으로 밀면 수학 · 영어 · 탐구 칸이 이어집니다.</p>
@@ -58,10 +76,10 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
         <table>
           <colgroup>
             <col className="c-head" />
-            <col />
+            <col className="c-grade" />
             <col className="c-main" />
             <col className="c-main" />
-            <col />
+            <col className="c-grade" />
             <col className="c-main" />
             <col className="c-main" />
           </colgroup>
@@ -115,7 +133,7 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
             <tr className="key">
               <th scope="row">
                 표준점수
-                <small>꼭 넣기</small>
+                <small>필수</small>
               </th>
               <td className="na">{none}</td>
               <td className={`in${need(d.korean)}`}>
@@ -170,23 +188,24 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
         <li><i className="k na" />영어·한국사는 절대평가라 등급만 넣고, 전체 위치를 내는 총점(국·수·탐2 표준점수 합)에는 넣지 않습니다.</li>
       </ul>
 
-      <label className={`sf-confirm${state?.field === "confirm" ? " bad" : ""}`}>
-        <input type="checkbox" name="confirm" />
-        <span>입력한 점수가 성적표와 같은지 확인했습니다.</span>
-      </label>
-
       {state?.error && (
         <p className="sf-error" role="alert">
           {state.error}
         </p>
       )}
 
-      <div className="sf-acts">
-        <button className="btn p" type="submit" disabled={pending}>
-          {pending ? "저장하는 중" : update ? "새 성적으로 리포트 갱신" : "성적 저장하고 전체 위치 보기"}
-        </button>
-        <small>저장할 때마다 새 성적 기록이 생기고, 이전 성적은 고치지 않습니다.</small>
+      <div className="sf-foot">
+        <label className={`sf-confirm${state?.field === "confirm" ? " bad" : ""}`}>
+          <input type="checkbox" name="confirm" />
+          <span>입력한 점수가 성적표와 같은지 확인했습니다.</span>
+        </label>
+        <div className="sf-acts">
+          <button className="btn p" type="submit" disabled={pending}>
+            {pending ? "저장하는 중" : update ? "새 성적으로 리포트 갱신" : "성적 저장하고 전체 위치 보기"}
+          </button>
+        </div>
       </div>
+      <p className="sf-note">저장할 때마다 새 성적 기록이 생기고, 이전 성적은 고치지 않습니다.</p>
     </form>
   );
 }

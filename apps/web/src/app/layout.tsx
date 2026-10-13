@@ -12,6 +12,9 @@ import { ConnectionNotice } from "@/components/connection-notice";
 import { ConnectionError, getCaller, source } from "@/lib/api";
 import type { Session } from "@/lib/dto";
 
+const PRETENDARD_CSS = "https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css";
+const PRETENDARD_LOADER = `(function(){var l=document.createElement("link");l.rel="stylesheet";l.href="${PRETENDARD_CSS}";document.head.appendChild(l)})()`;
+
 const montserrat = Montserrat({ variable: "--font-montserrat", subsets: ["latin"], weight: ["800", "900"] });
 
 // 모든 화면이 회원 개인 응답이라 요청마다 그린다(미리 만들어 공유하지 않는다)
@@ -35,8 +38,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ko" className={montserrat.variable}>
       <head>
-        {/* 에듀터치와 같은 글꼴(Pretendard, OFL). 저장소에 글꼴 파일을 넣지 않으려고 공식 CDN 을 쓴다 */}
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+        {/* 에듀터치와 같은 글꼴(Pretendard, OFL). 저장소에 글꼴 파일을 넣지 않으려고 공식 CDN 을 쓴다.
+            <link> 로 직접 걸면 CDN 이 느릴 때 화면 전체가 그 응답을 기다리므로, 스크립트로 붙여 기다리지 않게 한다.
+            글꼴이 늦거나 실패하면 --font-kr 의 시스템 글꼴(Apple SD Gothic Neo·Malgun Gothic)로 보인다 */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="" />
+        <script dangerouslySetInnerHTML={{ __html: PRETENDARD_LOADER }} />
       </head>
       <body>
         <div className="et jt">
