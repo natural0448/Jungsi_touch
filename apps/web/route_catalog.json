@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.41",
-  "source_sha256": "ae03819c907959afbe1514f53955a0d15d57ae1159da159ef5687701b270c6f1",
+  "spec_version": "1.9.42",
+  "source_sha256": "9bf09028f96b9f724a55875b9de73d7675b13e38d882348daf0b2c52192558ea",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1549,7 +1549,7 @@
           "entitlement_expires_at"
         ],
         "rules": [
-          "전용 정시 jungsi_backend.entitlements의 active=true 및 starts_at<=now<expires_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 가장 늦은 expires_at을 UTC Z로 반환한다. 별도 status/product 컬럼을 가정하지 않는다.",
+          "public.jeongsi_passes의 revoked_at IS NULL 및 starts_at<=now<ends_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 MAX(ends_at)를 UTC Z로 반환한다. metadata와 활성 만료를 한 배치 JOIN 질의로 확인하고 같은 요청의 회원 판정·만료 표시에 결속한다. jungsi_backend.entitlements로 장애 대체하지 않는다. 관리자 이용권 예외는 미확정이며 추가하지 않는다. 별도 status/product 컬럼을 가정하지 않는다.",
           "일반 회원 만료는 null. 인증 또는 저장소 장애는 503이며 일반 회원으로 자동 강등하지 않는다. 사용자 ID·등급·역할·JWT·결제 내역을 요청/응답에 포함하지 않는다."
         ]
       },
@@ -3328,8 +3328,8 @@
       "edge_entry": "supabase/functions/official-history-display/index.ts",
       "edge_application": "supabase/functions/_shared/official_history_display.ts",
       "edge_infrastructure": "supabase/functions/_shared/official_history_postgres.ts",
-      "default_factories_changed": false,
-      "entitlement_authority": "jungsi_backend.entitlements",
+      "default_factories_changed": true,
+      "entitlement_authority": "public.jeongsi_passes",
       "existing_API_count": 22,
       "new_logical_API_or_DTO": false,
       "browser_DB_credentials": false,
@@ -3338,7 +3338,8 @@
       "edge_factory": "createOfficialHistoryDisplayHandler",
       "edge_provider": "createOfficialHistoryInfrastructure",
       "logical_operation_count": 5,
-      "edge_node_compatibility_bootstrap": "supabase/functions/_shared/node_compat_bootstrap.ts"
+      "edge_node_compatibility_bootstrap": "supabase/functions/_shared/node_compat_bootstrap.ts",
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "rules": [
       "표시 purpose 승인과 engine/production/native 전체 발행은 구분한다. 기존 Storage 승인 guard와 원본 false/null 상태는 유지한다.",
@@ -7653,5 +7654,138 @@
       }
     ]
   },
-  "mandatory_security_document": "docs/current/외부접근_데이터보호_개발기준.md"
+  "mandatory_security_document": "docs/current/외부접근_데이터보호_개발기준.md",
+  "opening_security_operations_contract": {
+    "format": "jungsi.opening-security-operations/v1",
+    "revision": "2026.10.14.v1",
+    "requirements": [
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "status": "adopted_implementation_verification_pending",
+    "document": "docs/current/오픈전_보안운영_변경.md",
+    "implementation_branch": "feature/application-pre-data-platform",
+    "production_ready": false,
+    "user_decisions": {
+      "paid_authority": "public.jeongsi_passes",
+      "default_Postgres_composition_transition_authorized": true,
+      "admin_paid_override": false,
+      "admin_paid_override_status": "deferred_user_decision",
+      "previous_explicit_only_decision_preserved_as_history": true
+    },
+    "entitlement": {
+      "table": "public.jeongsi_passes",
+      "activation": "revoked_at IS NULL AND starts_at <= now AND now < ends_at",
+      "multiple_active_rows": "MAX(ends_at)",
+      "time_basis": "UTC",
+      "session_format": "jungsi.session/v1",
+      "session_fields": [
+        "format",
+        "member_tier",
+        "entitlement_expires_at"
+      ],
+      "legacy_table_fallback_allowed": false,
+      "failure": {
+        "http": 503,
+        "code_policy": "existing_safe_entitlement_codes_without_SQL_details",
+        "fallback": false
+      },
+      "metadata_and_entitlement_data_queries_per_request": 1,
+      "transaction_configuration_queries_separate": true,
+      "request_local_member_and_expiry_snapshot": true,
+      "cross_request_entitlement_cache_allowed": false,
+      "adapter_writes_allowed": false,
+      "automatic_entitlement_grant_allowed": false,
+      "explicit_dependency_injection_preserved": true,
+      "synthetic_memory_composition_preserved": true
+    },
+    "management": {
+      "operations": [
+        "forecast.capabilities",
+        "forecast.list",
+        "forecast.create",
+        "forecast.read",
+        "forecast.adjust",
+        "forecast.validate",
+        "forecast.approve",
+        "forecast.publish"
+      ],
+      "public_forecast_read_is_management": false,
+      "verified_aal": "aal2",
+      "account_status": "active",
+      "trusted_identity": "exact_Bearer_verified_by_Supabase_Auth_getUser",
+      "trusted_profile": "own_profiles_status_via_same_verified_Bearer_and_publishable_key_RLS",
+      "authority_source": "jungsi_backend.forecast_authorities",
+      "existing_edit_approve_and_school_scope_required": true,
+      "client_roles_or_user_metadata_trusted": false,
+      "profile_admin_override_allowed": false,
+      "new_app_role_profiles_GRANT_allowed": false,
+      "nonstaff_capabilities": "empty_false",
+      "student_or_paid_service_MFA_required": false,
+      "unknown_profile_breaks_student_service": false,
+      "errors": {
+        "aal1": [
+          403,
+          "management_mfa_required"
+        ],
+        "inactive": [
+          403,
+          "management_account_inactive"
+        ],
+        "unknown": [
+          503,
+          "management_account_state_unverified"
+        ]
+      },
+      "JWT_AAL_profile_status_in_public_DTO_allowed": false,
+      "admin_logs_actor_source": "auth.uid()",
+      "admin_logs_metadata_source": "database",
+      "signup_source": "website_only_age14_consents_email_captcha",
+      "signup_via_dashboard_add_user_allowed": false,
+      "SMTP_captcha_leaked_password_settings_change_allowed": false,
+      "external_migration_numbers_reserved": [
+        32,
+        33,
+        34,
+        35
+      ]
+    },
+    "queries": {
+      "parameterized_bounded_JOIN_required": true,
+      "N_plus_1_allowed": false,
+      "unbounded_current_scan_for_UI_allowed": false,
+      "full_count_for_UI_allowed": false,
+      "bounded_before_MATERIALIZED_required": true,
+      "duplicate_index_creation_allowed": false,
+      "test_intake_in_production_allowed": false
+    },
+    "capacity": {
+      "source_files_preserved": true,
+      "private_immutable_Storage_archive_required": true,
+      "archive_remote_bytes_SHA_readback_required": true,
+      "reference_and_current_C_identity_preservation_required": true,
+      "archive_resolver_before_payload_removal_required": true,
+      "exact_row_column_removal_manifest_and_user_approval_required": true,
+      "generic_cleanup_request_is_exact_removal_approval": false,
+      "registry_or_overlays_bulk_deletion_allowed": false,
+      "production_allowed_false_means_unused": false,
+      "historical_0206_window_is_current_requirement": false,
+      "IO_warning_requires_stop_and_owner_recheck": true,
+      "VACUUM_FULL_automatic_allowed": false,
+      "normal_VACUUM_guarantees_disk_shrink": false,
+      "Storage_transfer": "NOT_RUN",
+      "payload_or_overlay_removal": "NOT_RUN",
+      "VACUUM": "NOT_RUN"
+    },
+    "verification": {
+      "local_scoped_code": "implementation_pending",
+      "live_catalog_RLS_and_migrations": "read_only_verified",
+      "real_JWT_active_aal2_management": "NOT_RUN",
+      "OTP_enrollment": "USER_PHONE_REQUIRED_NOT_RUN",
+      "Edge_redeployment": "NOT_RUN",
+      "browser_paid_after_grant_or_revoke": "NOT_RUN",
+      "production_publication": "NOT_RUN"
+    }
+  }
 }

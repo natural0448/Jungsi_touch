@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.41",
+  "version": "1.9.42",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -26,7 +26,8 @@
     "supabase_deployment": "docs/current/Supabase_배포_화면_후속작업.md",
     "history_display": "docs/current/1페이지_공식자료_추정표기_시사.md",
     "development_sync": "docs/current/개발현황_문서동기화.md",
-    "official_history_db_display": "docs/current/DB_입결_화면연결.md"
+    "official_history_db_display": "docs/current/DB_입결_화면연결.md",
+    "opening_security_operations": "docs/current/오픈전_보안운영_변경.md"
   },
   "users": {
     "primary": "학생·학부모",
@@ -951,7 +952,8 @@
         "python_factory": "jungsi_touch.infrastructure.official_history_display.create_official_history_display_app",
         "edge_application": "supabase/functions/_shared/official_history_display.ts",
         "status": "candidate_scoped_verification_in_progress"
-      }
+      },
+      "entitlement_contract_ref": "opening_security_operations_contract.entitlement"
     },
     {
       "id": "forecast.capabilities",
@@ -992,7 +994,8 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
-      }
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management"
     },
     {
       "id": "forecast.list",
@@ -1039,7 +1042,8 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
-      }
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management"
     },
     {
       "id": "forecast.create",
@@ -1088,7 +1092,8 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
-      }
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management"
     },
     {
       "id": "forecast.read",
@@ -1133,7 +1138,8 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
-      }
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management"
     },
     {
       "id": "forecast.adjust",
@@ -1185,7 +1191,8 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
-      }
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management"
     },
     {
       "id": "forecast.validate",
@@ -1233,7 +1240,8 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
-      }
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management"
     },
     {
       "id": "forecast.approve",
@@ -1283,7 +1291,8 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
-      }
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management"
     },
     {
       "id": "forecast.publish",
@@ -1333,7 +1342,8 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
-      }
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management"
     },
     {
       "id": "forecast.published.read",
@@ -3219,7 +3229,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.41",
+        "contract_version": "1.9.42",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -3393,7 +3403,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.41",
+        "contract_version": "1.9.42",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -3559,7 +3569,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.41",
+        "contract_version": "1.9.42",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -3578,7 +3588,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.41",
+        "contract_version": "1.9.42",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3603,7 +3613,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "planned",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.41",
+        "contract_version": "1.9.42",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3628,7 +3638,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.41",
+        "contract_version": "1.9.42",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -3659,10 +3669,11 @@
         "docs/current/외부접근_데이터보호_개발기준.md",
         "docs/current/개발현황_문서동기화.md",
         "docs/current/code_routing_index.json",
-        "docs/current/DB_입결_화면연결.md"
+        "docs/current/DB_입결_화면연결.md",
+        "docs/current/오픈전_보안운영_변경.md"
       ],
       "invariants_required": true,
-      "start_rule": "작업 전에 이 정본을 읽고 현재 develop SHA·REQ-24~26·SEC 영향·담당 브랜치를 확인한다. 선독을 생략해 API/화면/DB를 구현하지 않는다. 모든 에이전트는 최신 검증 커밋과 개발현황/코드 색인에서 시작해 Git 변경 범위부터 확인하고 기획·라우팅을 항상 같은 커밋에서 일치시킨다. 입결 현재 자료 조회/변경 작업은 비공개 현재 정본 포인터와 고정 admission_results_current를 먼저 확인하고, 과거동결검수와 구분한다. 공개 코드/합성CI가 내부 포인터나 자료를 포함하거나 실제 자료 인수를 대신하지 않는다.",
+      "start_rule": "작업 전에 이 정본을 읽고 현재 develop SHA·REQ-24~26·SEC 영향·담당 브랜치를 확인한다. 선독을 생략해 API/화면/DB를 구현하지 않는다. 모든 에이전트는 최신 검증 커밋과 개발현황/코드 색인에서 시작해 Git 변경 범위부터 확인하고 기획·라우팅을 항상 같은 커밋에서 일치시킨다. 입결 현재 자료 조회/변경 작업은 비공개 현재 정본 포인터와 고정 admission_results_current를 먼저 확인하고, 과거동결검수와 구분한다. 공개 코드/합성CI가 내부 포인터나 자료를 포함하거나 실제 자료 인수를 대신하지 않는다. 오픈 전 계정/MFA/이용권/용량 변경은 오픈전_보안운영_변경.md를 먼저 읽고 이력이 아닌 최신 확정 기준을 적용한다.",
       "report_rule": "PR/완료 보고에 보안 revision·영향 operation/SEC ID·합성/브라우저/운영 증거와 NOT_RUN을 각각 적는다. 하네스 PASS는 실제 독서·런타임 보안 증명이 아니다. 승인·적용된 병합 판정은 동일하게 캡처한 index에서 HEAD와 검증된 각 MERGE_HEAD 부모까지의 diff 합집합, 커밋 검사에서는 각 부모부터 해당 merge commit까지의 diff 합집합이다. 부모/zero-parent/diff조회 실패는 실패로 거절하며 빈목록으로 대체하지 않는다. 최종snapshot 내용·계층·권한·삭제·비공개 검사와 branch/정본 소유 규칙은 보존한다. phase1c1cd의645×3 및 phase2 3938/최종develop57의정상678검수는 실제 적용 증거이고 운영자료/실회원/UI 인수와 별개다.",
       "checks": [
         "python -B scripts/check_project_consistency.py --staged",
@@ -4091,7 +4102,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "344effcc3923a5b21ef6f233a3d1b55cc8c70613165445b7361456e5e66d2fb8",
+            "source_sha256": "eb703423c9e3ceed1f377c51849ccb1121aa23016246c4f4de0848f74a7aa655",
             "symbols": [
               {
                 "kind": "class",
@@ -4199,6 +4210,12 @@
                 "kind": "function",
                 "name": "main",
                 "signature": "def main():",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "opening_security_document_body",
+                "signature": "def opening_security_document_body(spec):",
                 "decorators": []
               },
               {
@@ -4409,6 +4426,12 @@
                 "kind": "function",
                 "name": "validate_local_verification_contract.field",
                 "signature": "def field(path):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_opening_security_operations",
+                "signature": "def validate_opening_security_operations(spec):",
                 "decorators": []
               },
               {
@@ -11442,6 +11465,15 @@
         "REQ-26"
       ],
       "summary": "FE-V3-REASON-01 화면팀 검수 영수증 원본과 hash를 보존해 수용했다. f139bfb의 문구3코드가 요청표와 일치하며 최신 유료 P3의 성공환산·대학누백보류·지원판단보류 동시 표시를 scoped browser로 수용하고 PR30 merge commit 통합/CI를 결속한다. 나머지2코드 browser와 Root 재실행·운영 인수는 NOT_RUN이다. API/DTO/회원/산식/DB/RLS/자료 발행 권한은 유지하고 기획·라우팅·인계의 기존 문구 후속 대기를 완료로 갱신한다."
+    },
+    {
+      "date": "2026-10-14",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "사용자 확정: 실제 PostgreSQL 구성과 hosted 표시의 이용권 기준을 public.jeongsi_passes로 전환하고 관리자 이용권 예외는 보류한다. 관리 8경로에 검증된 aal2·본인 active 상태·기존 편집/승인 학교 범위를 결합하며 학생 서비스에는 MFA를 추가하지 않는다. API22/session3 유지·읽기 전용 RLS/단일 JOIN·비공개 보존형 CAP 및 남은 운영 NOT_RUN을 기획/라우팅/필수 참조에 함께 등록한다."
     }
   ],
   "overall_analysis_contract": {
@@ -12124,7 +12156,7 @@
           "entitlement_expires_at"
         ],
         "rules": [
-          "전용 정시 jungsi_backend.entitlements의 active=true 및 starts_at<=now<expires_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 가장 늦은 expires_at을 UTC Z로 반환한다. 별도 status/product 컬럼을 가정하지 않는다.",
+          "public.jeongsi_passes의 revoked_at IS NULL 및 starts_at<=now<ends_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 MAX(ends_at)를 UTC Z로 반환한다. metadata와 활성 만료를 한 배치 JOIN 질의로 확인하고 같은 요청의 회원 판정·만료 표시에 결속한다. jungsi_backend.entitlements로 장애 대체하지 않는다. 관리자 이용권 예외는 미확정이며 추가하지 않는다. 별도 status/product 컬럼을 가정하지 않는다.",
           "일반 회원 만료는 null. 인증 또는 저장소 장애는 503이며 일반 회원으로 자동 강등하지 않는다. 사용자 ID·등급·역할·JWT·결제 내역을 요청/응답에 포함하지 않는다."
         ]
       },
@@ -20450,17 +20482,18 @@
     "composition": {
       "factory": "create_secured_app",
       "required_keyword": "security",
-      "default_factories_unchanged": true,
+      "default_factories_unchanged": false,
       "legacy_factories": [
         "create_app",
         "configured_app"
       ],
-      "default_entitlement_authority": "jungsi_backend.entitlements",
+      "default_entitlement_authority": "public.jeongsi_passes",
       "automatic_storage_or_entitlement_transition": false,
       "local_verification_unchanged": true,
       "existing_API_count": 22,
       "API_or_DTO_additions": false,
-      "session_format": "jungsi.session/v1"
+      "session_format": "jungsi.session/v1",
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "relay": {
       "header": "X-Jungsi-Relay-Token",
@@ -20681,19 +20714,20 @@
       "factory": "create_supabase_secured_app",
       "explicit_selection_required": true,
       "security_contract_ref": "secured_backend_preparation_contract",
-      "default_factories_unchanged": true,
+      "default_factories_unchanged": false,
       "legacy_factories": [
         "create_app",
         "configured_app"
       ],
-      "current_entitlement_authority": "jungsi_backend.entitlements",
+      "current_entitlement_authority": "public.jeongsi_passes",
       "session_format": "jungsi.session/v1",
       "existing_API_count": 22,
       "API_or_DTO_additions": false,
       "local_verification_unchanged": true,
       "environment_factory": "configured_supabase_app",
       "configuration_check_command": "python -m jungsi_touch.infrastructure.supabase_runtime --check-config",
-      "server_factory_command": "python -m uvicorn jungsi_touch.infrastructure.supabase_runtime:configured_supabase_app --factory --host 127.0.0.1 --port 8000 --no-access-log"
+      "server_factory_command": "python -m uvicorn jungsi_touch.infrastructure.supabase_runtime:configured_supabase_app --factory --host 127.0.0.1 --port 8000 --no-access-log",
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "source_lineage": {
       "canonical_private_pointers": [
@@ -20957,7 +20991,7 @@
       "relay_server_only": true,
       "user_Bearer_required": true,
       "user_authorization_in_application_required": true,
-      "current_entitlement_authority": "jungsi_backend.entitlements",
+      "current_entitlement_authority": "public.jeongsi_passes",
       "direct_browser_analysis_allowed": false,
       "secrets_in_browser_allowed": false,
       "shared_atomic_quota_required": true,
@@ -21102,9 +21136,10 @@
     "preservation": {
       "files_deleted": 0,
       "new_branches": 0,
-      "legacy_factory_change_allowed": false,
+      "legacy_factory_change_allowed": true,
       "source_flag_only_promotion_allowed": false,
-      "production_ready_promotion_allowed": false
+      "production_ready_promotion_allowed": false,
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "official_sources": [
       {
@@ -21727,8 +21762,8 @@
       "edge_entry": "supabase/functions/official-history-display/index.ts",
       "edge_application": "supabase/functions/_shared/official_history_display.ts",
       "edge_infrastructure": "supabase/functions/_shared/official_history_postgres.ts",
-      "default_factories_changed": false,
-      "entitlement_authority": "jungsi_backend.entitlements",
+      "default_factories_changed": true,
+      "entitlement_authority": "public.jeongsi_passes",
       "existing_API_count": 22,
       "new_logical_API_or_DTO": false,
       "browser_DB_credentials": false,
@@ -21737,7 +21772,8 @@
       "edge_factory": "createOfficialHistoryDisplayHandler",
       "edge_provider": "createOfficialHistoryInfrastructure",
       "logical_operation_count": 5,
-      "edge_node_compatibility_bootstrap": "supabase/functions/_shared/node_compat_bootstrap.ts"
+      "edge_node_compatibility_bootstrap": "supabase/functions/_shared/node_compat_bootstrap.ts",
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "rules": [
       "표시 purpose 승인과 engine/production/native 전체 발행은 구분한다. 기존 Storage 승인 guard와 원본 false/null 상태는 유지한다.",
@@ -25414,6 +25450,139 @@
           "general_or_production_publication"
         ]
       }
+    }
+  },
+  "opening_security_operations_contract": {
+    "format": "jungsi.opening-security-operations/v1",
+    "revision": "2026.10.14.v1",
+    "requirements": [
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "status": "adopted_implementation_verification_pending",
+    "document": "docs/current/오픈전_보안운영_변경.md",
+    "implementation_branch": "feature/application-pre-data-platform",
+    "production_ready": false,
+    "user_decisions": {
+      "paid_authority": "public.jeongsi_passes",
+      "default_Postgres_composition_transition_authorized": true,
+      "admin_paid_override": false,
+      "admin_paid_override_status": "deferred_user_decision",
+      "previous_explicit_only_decision_preserved_as_history": true
+    },
+    "entitlement": {
+      "table": "public.jeongsi_passes",
+      "activation": "revoked_at IS NULL AND starts_at <= now AND now < ends_at",
+      "multiple_active_rows": "MAX(ends_at)",
+      "time_basis": "UTC",
+      "session_format": "jungsi.session/v1",
+      "session_fields": [
+        "format",
+        "member_tier",
+        "entitlement_expires_at"
+      ],
+      "legacy_table_fallback_allowed": false,
+      "failure": {
+        "http": 503,
+        "code_policy": "existing_safe_entitlement_codes_without_SQL_details",
+        "fallback": false
+      },
+      "metadata_and_entitlement_data_queries_per_request": 1,
+      "transaction_configuration_queries_separate": true,
+      "request_local_member_and_expiry_snapshot": true,
+      "cross_request_entitlement_cache_allowed": false,
+      "adapter_writes_allowed": false,
+      "automatic_entitlement_grant_allowed": false,
+      "explicit_dependency_injection_preserved": true,
+      "synthetic_memory_composition_preserved": true
+    },
+    "management": {
+      "operations": [
+        "forecast.capabilities",
+        "forecast.list",
+        "forecast.create",
+        "forecast.read",
+        "forecast.adjust",
+        "forecast.validate",
+        "forecast.approve",
+        "forecast.publish"
+      ],
+      "public_forecast_read_is_management": false,
+      "verified_aal": "aal2",
+      "account_status": "active",
+      "trusted_identity": "exact_Bearer_verified_by_Supabase_Auth_getUser",
+      "trusted_profile": "own_profiles_status_via_same_verified_Bearer_and_publishable_key_RLS",
+      "authority_source": "jungsi_backend.forecast_authorities",
+      "existing_edit_approve_and_school_scope_required": true,
+      "client_roles_or_user_metadata_trusted": false,
+      "profile_admin_override_allowed": false,
+      "new_app_role_profiles_GRANT_allowed": false,
+      "nonstaff_capabilities": "empty_false",
+      "student_or_paid_service_MFA_required": false,
+      "unknown_profile_breaks_student_service": false,
+      "errors": {
+        "aal1": [
+          403,
+          "management_mfa_required"
+        ],
+        "inactive": [
+          403,
+          "management_account_inactive"
+        ],
+        "unknown": [
+          503,
+          "management_account_state_unverified"
+        ]
+      },
+      "JWT_AAL_profile_status_in_public_DTO_allowed": false,
+      "admin_logs_actor_source": "auth.uid()",
+      "admin_logs_metadata_source": "database",
+      "signup_source": "website_only_age14_consents_email_captcha",
+      "signup_via_dashboard_add_user_allowed": false,
+      "SMTP_captcha_leaked_password_settings_change_allowed": false,
+      "external_migration_numbers_reserved": [
+        32,
+        33,
+        34,
+        35
+      ]
+    },
+    "queries": {
+      "parameterized_bounded_JOIN_required": true,
+      "N_plus_1_allowed": false,
+      "unbounded_current_scan_for_UI_allowed": false,
+      "full_count_for_UI_allowed": false,
+      "bounded_before_MATERIALIZED_required": true,
+      "duplicate_index_creation_allowed": false,
+      "test_intake_in_production_allowed": false
+    },
+    "capacity": {
+      "source_files_preserved": true,
+      "private_immutable_Storage_archive_required": true,
+      "archive_remote_bytes_SHA_readback_required": true,
+      "reference_and_current_C_identity_preservation_required": true,
+      "archive_resolver_before_payload_removal_required": true,
+      "exact_row_column_removal_manifest_and_user_approval_required": true,
+      "generic_cleanup_request_is_exact_removal_approval": false,
+      "registry_or_overlays_bulk_deletion_allowed": false,
+      "production_allowed_false_means_unused": false,
+      "historical_0206_window_is_current_requirement": false,
+      "IO_warning_requires_stop_and_owner_recheck": true,
+      "VACUUM_FULL_automatic_allowed": false,
+      "normal_VACUUM_guarantees_disk_shrink": false,
+      "Storage_transfer": "NOT_RUN",
+      "payload_or_overlay_removal": "NOT_RUN",
+      "VACUUM": "NOT_RUN"
+    },
+    "verification": {
+      "local_scoped_code": "implementation_pending",
+      "live_catalog_RLS_and_migrations": "read_only_verified",
+      "real_JWT_active_aal2_management": "NOT_RUN",
+      "OTP_enrollment": "USER_PHONE_REQUIRED_NOT_RUN",
+      "Edge_redeployment": "NOT_RUN",
+      "browser_paid_after_grant_or_revoke": "NOT_RUN",
+      "production_publication": "NOT_RUN"
     }
   }
 }

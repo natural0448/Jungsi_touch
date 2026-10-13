@@ -1108,7 +1108,7 @@ def validate_runtime_connection_preparation(spec):
         not {'REQ-12','REQ-14','REQ-15','REQ-16','REQ-17','REQ-20','REQ-23','REQ-24','REQ-25','REQ-26'}<=set(c.get('requirements',[]))):
         errors.append('DEV-009 owner or source registration drift')
     if (comp.get('factory')!='create_supabase_secured_app' or comp.get('environment_factory')!='configured_supabase_app' or comp.get('explicit_selection_required')is not True or comp.get('security_contract_ref')!='secured_backend_preparation_contract' or
-        comp.get('default_factories_unchanged')is not True or comp.get('legacy_factories')!=['create_app','configured_app'] or comp.get('current_entitlement_authority')!='jungsi_backend.entitlements' or
+        comp.get('default_factories_unchanged')is not False or comp.get('legacy_factories')!=['create_app','configured_app'] or comp.get('current_entitlement_authority')!='public.jeongsi_passes' or comp.get('opening_change_ref')!='opening_security_operations_contract' or
         comp.get('session_format')!='jungsi.session/v1' or comp.get('existing_API_count')!=len(spec.get('operations',[])) or comp.get('API_or_DTO_additions')is not False or comp.get('local_verification_unchanged')is not True):
         errors.append('DEV-009 explicit composition preservation drift')
     if (lineage.get('canonical_private_pointers')!=['DATA_ACTIVE_SUPABASE_v1.json','DATA_ACTIVE_CSV_v1.json'] or lineage.get('source_snapshots_preserved')is not True or
@@ -1176,11 +1176,11 @@ def validate_supabase_deployment_contract(spec):
     d=spec.get('runtime_connection_preparation_contract',{}).get('deployment',{})
     if (a.get('runtime')!='supabase_edge_typescript_deno' or a.get('python_hosted_unchanged')is not False or a.get('engine_in_browser_allowed')is not False or a.get('API_count')!=len(spec.get('operations',[])) or a.get('API_DTO_session_changes')is not False or a.get('server_timezone')!='UTC' or a.get('source_display_timezone')!='Asia/Seoul' or d.get('architecture')!='supabase_edge_functions' or d.get('hosting_contract_ref')!='supabase_deployment_contract' or d.get('python_reference_only')is not True):
         errors.append('DEV-010 Edge and Python reference boundary drift')
-    if (s.get('contract_ref')!='security_contract' or s.get('revision')!=spec.get('security_contract',{}).get('revision') or s.get('relay_header')!='X-Jungsi-Relay-Token' or s.get('relay_environment_name')!='JUNGSI_RELAY_TOKEN' or any(s.get(k)is not True for k in ('relay_server_only','user_Bearer_required','user_authorization_in_application_required','shared_atomic_quota_required','health_ready_relay_required')) or any(s.get(k)is not False for k in ('direct_browser_analysis_allowed','secrets_in_browser_allowed')) or s.get('health_live_path')!='/health/live' or s.get('health_ready_path')!='/health/ready' or s.get('current_entitlement_authority')!='jungsi_backend.entitlements'):
+    if (s.get('contract_ref')!='security_contract' or s.get('revision')!=spec.get('security_contract',{}).get('revision') or s.get('relay_header')!='X-Jungsi-Relay-Token' or s.get('relay_environment_name')!='JUNGSI_RELAY_TOKEN' or any(s.get(k)is not True for k in ('relay_server_only','user_Bearer_required','user_authorization_in_application_required','shared_atomic_quota_required','health_ready_relay_required')) or any(s.get(k)is not False for k in ('direct_browser_analysis_allowed','secrets_in_browser_allowed')) or s.get('health_live_path')!='/health/live' or s.get('health_ready_path')!='/health/ready' or s.get('current_entitlement_authority')!='public.jeongsi_passes'):
         errors.append('DEV-010 relay or application authorization drift')
     if (n.get('registry_format')!='jungsi.data-registry/v1' or n.get('selection_format')!='jungsi.runtime-selection/v1' or n.get('required_dependencies_only')is not True or n.get('source_snapshots_preserved')is not True or any(n.get(k)is not False for k in ('source_state_only_promotion_allowed','historical_source_count_trigger_allowed','actual_data_in_Git'))):
         errors.append('DEV-010 native publication or historical trigger drift')
-    if (c.get('production_ready')is not False or any(preserve.get(k)is not False for k in ('legacy_factory_change_allowed','source_flag_only_promotion_allowed','production_ready_promotion_allowed')) or v.get('actual_Auth_DB_Storage_Edge_BFF_browser_deployment')!='NOT_RUN' or v.get('actual_billing_and_quota_verification')!='NOT_RUN' or p.get('usage_and_spend_cap_verification')!='NOT_RUN'):
+    if (c.get('production_ready')is not False or preserve.get('legacy_factory_change_allowed')is not True or preserve.get('opening_change_ref')!='opening_security_operations_contract' or any(preserve.get(k)is not False for k in ('source_flag_only_promotion_allowed','production_ready_promotion_allowed')) or v.get('actual_Auth_DB_Storage_Edge_BFF_browser_deployment')!='NOT_RUN' or v.get('actual_billing_and_quota_verification')!='NOT_RUN' or p.get('usage_and_spend_cap_verification')!='NOT_RUN'):
         errors.append('DEV-010 preparation cannot certify operating or billing acceptance')
     precision=c.get('numerical_compatibility',{})
     if (any(precision.get(k)is not True for k in ('exact_rational_and_decimal_preserved','explicit_rule_rounding_preserved','canonical_integer_JSON_keys_preserved','independent_python_edge_comparison_required')) or precision.get('Number_or_Math_round_equivalence_assumed')is not False or precision.get('heavy_model_generation_in_request_allowed')is not False):
@@ -1206,7 +1206,7 @@ def validate_secured_preparation(spec):
         c.get("branch")!="feature/application-pre-data-platform" or c.get("requirements")!=["REQ-24","REQ-25","REQ-26"]):
         errors.append("DEV-008 policy/owner binding drift")
     if (p.get("factory")!="create_secured_app" or p.get("required_keyword")!="security" or
-        p.get("legacy_factories")!=["create_app","configured_app"] or p.get("default_factories_unchanged") is not True or
+        p.get("legacy_factories")!=["create_app","configured_app"] or p.get("default_factories_unchanged") is not False or p.get("default_entitlement_authority")!="public.jeongsi_passes" or p.get("opening_change_ref")!="opening_security_operations_contract" or
         p.get("automatic_storage_or_entitlement_transition") is not False or p.get("local_verification_unchanged") is not True or
         p.get("existing_API_count")!=22 or p.get("API_or_DTO_additions") is not False or p.get("session_format")!="jungsi.session/v1"):
         errors.append("DEV-008 default composition preservation drift")
@@ -1447,6 +1447,62 @@ def validate_security_contract(spec):
             any(r.get("operational_verification")!="passed" for r in control_map.values())):
             errors.append("Security production readiness lacks all required acceptance")
     return sorted(set(errors))
+
+
+
+def validate_opening_security_operations(spec):
+    """Require the adopted authority and management gates without changing old receipts."""
+    c=spec.get('opening_security_operations_contract')
+    if not isinstance(c,dict):return ['Opening security contract missing']
+    errors=[]
+    if c.get('format')!='jungsi.opening-security-operations/v1' or c.get('document')!=spec.get('current_documents',{}).get('opening_security_operations') or c.get('production_ready')is not False:
+        errors.append('Opening security registration or readiness drift')
+    decision=c.get('user_decisions',{}); e=c.get('entitlement',{}); m=c.get('management',{}); q=c.get('queries',{}); cap=c.get('capacity',{})
+    if (decision.get('paid_authority')!='public.jeongsi_passes' or decision.get('default_Postgres_composition_transition_authorized')is not True or decision.get('admin_paid_override')is not False or decision.get('admin_paid_override_status')!='deferred_user_decision' or
+        e.get('table')!='public.jeongsi_passes' or e.get('activation')!='revoked_at IS NULL AND starts_at <= now AND now < ends_at' or e.get('multiple_active_rows')!='MAX(ends_at)' or e.get('time_basis')!='UTC' or
+        e.get('session_format')!='jungsi.session/v1' or e.get('session_fields')!=['format','member_tier','entitlement_expires_at'] or e.get('failure')!={'http':503,'code_policy':'existing_safe_entitlement_codes_without_SQL_details','fallback':False} or
+        e.get('metadata_and_entitlement_data_queries_per_request')!=1 or type(e.get('metadata_and_entitlement_data_queries_per_request'))is not int or
+        any(e.get(k)is not False for k in ('legacy_table_fallback_allowed','cross_request_entitlement_cache_allowed','adapter_writes_allowed','automatic_entitlement_grant_allowed')) or
+        any(e.get(k)is not True for k in ('request_local_member_and_expiry_snapshot','transaction_configuration_queries_separate','explicit_dependency_injection_preserved','synthetic_memory_composition_preserved'))):
+        errors.append('Opening paid authority or failure boundary drift')
+    operations=['forecast.capabilities','forecast.list','forecast.create','forecast.read','forecast.adjust','forecast.validate','forecast.approve','forecast.publish']
+    if (m.get('operations')!=operations or m.get('verified_aal')!='aal2' or m.get('account_status')!='active' or m.get('authority_source')!='jungsi_backend.forecast_authorities' or
+        m.get('trusted_identity')!='exact_Bearer_verified_by_Supabase_Auth_getUser' or m.get('trusted_profile')!='own_profiles_status_via_same_verified_Bearer_and_publishable_key_RLS' or m.get('existing_edit_approve_and_school_scope_required')is not True or
+        m.get('nonstaff_capabilities')!='empty_false' or
+        any(m.get(k)is not False for k in ('public_forecast_read_is_management','client_roles_or_user_metadata_trusted','profile_admin_override_allowed','new_app_role_profiles_GRANT_allowed','student_or_paid_service_MFA_required','unknown_profile_breaks_student_service','JWT_AAL_profile_status_in_public_DTO_allowed')) or
+        m.get('errors')!={'aal1':[403,'management_mfa_required'],'inactive':[403,'management_account_inactive'],'unknown':[503,'management_account_state_unverified']}):
+        errors.append('Opening management MFA or active scope drift')
+    refs={o['id'] for o in spec.get('operations',[]) if o.get('management_security_contract_ref')=='opening_security_operations_contract.management'}
+    if refs!=set(operations):errors.append('Opening management route coverage drift')
+    if (m.get('admin_logs_actor_source')!='auth.uid()' or m.get('admin_logs_metadata_source')!='database' or m.get('signup_source')!='website_only_age14_consents_email_captcha' or m.get('signup_via_dashboard_add_user_allowed')is not False or m.get('SMTP_captcha_leaked_password_settings_change_allowed')is not False or m.get('external_migration_numbers_reserved')!=[32,33,34,35]):
+        errors.append('Opening external security ownership drift')
+    if (any(q.get(k)is not True for k in ('parameterized_bounded_JOIN_required','bounded_before_MATERIALIZED_required')) or any(q.get(k)is not False for k in ('N_plus_1_allowed','unbounded_current_scan_for_UI_allowed','full_count_for_UI_allowed','duplicate_index_creation_allowed','test_intake_in_production_allowed'))):
+        errors.append('Opening bounded query contract drift')
+    if (any(cap.get(k)is not True for k in ('source_files_preserved','private_immutable_Storage_archive_required','archive_remote_bytes_SHA_readback_required','reference_and_current_C_identity_preservation_required','archive_resolver_before_payload_removal_required','exact_row_column_removal_manifest_and_user_approval_required','IO_warning_requires_stop_and_owner_recheck')) or
+        any(cap.get(k)is not False for k in ('generic_cleanup_request_is_exact_removal_approval','registry_or_overlays_bulk_deletion_allowed','production_allowed_false_means_unused','historical_0206_window_is_current_requirement','VACUUM_FULL_automatic_allowed','normal_VACUUM_guarantees_disk_shrink'))):
+        errors.append('Opening capacity preservation contract drift')
+    if c.get('document')not in spec.get('workflow',{}).get('development_harness',{}).get('required_documents',[]):
+        errors.append('Opening mandatory document missing from harness')
+    return errors
+
+
+def opening_security_document_body(spec):
+    c=spec['opening_security_operations_contract']
+    management=[o for o in spec['operations'] if o['id']in c['management']['operations']]
+    return (
+        '2026-10-14 사용자 확정은 public.jeongsi_passes 기준 전환이며 관리자 무료 이용 예외는 추후 결정이다. 과거 명시 연결만 준비하기로 한 결정·이용권 어댑터·검수 영수증은 이력으로 보존한다. 최신 실행 변경의 규범은 이 문서와 opening_security_operations_contract이다.\n\n'
+        '## 이용권 읽기와 기본 서버 구성\n\n'
+        '실제 PostgreSQL 저장소 구성은 public.jeongsi_passes를 읽는다. revoked_at IS NULL이고 starts_at <= UTC now < ends_at인 행 중 MAX(ends_at)를 채택한다. 메타데이터/RLS/역할/필수 열과 현재 만료를 한 배치 JOIN으로 검증하고 /me의 회원 판정과 만료를 같은 요청 값에 결속한다. 트랜잭션 설정 질의는 데이터 조회와 별개다. 요청 간 이용권 캐시는 쓰지 않고 조회 장애는 기존의 안전한 이용권 오류 코드와 503으로 거절하고 SQL 세부 예외를 노출하지 않는다. 기존 이용권 표로 대체하거나 관리자를 유료로 만들지 않는다. 공개 session/v1의 3필드는 유지한다. 명시 의존 주입과 로컬 합성 저장소는 보존한다.\n\n'
+        '## 관리자 MFA·본인 상태·업무 권한\n\n'
+        '관리 요청은 Supabase Auth가 정확한 Bearer를 검증한 뒤 aal2를 신뢰한다. 같은 검증 Bearer와 publishable key로 자신의 profiles.status만 조회해 기존 RLS를 따른다. active가 아니면 403 management_account_inactive, 상태 미확인은 관리만 503 management_account_state_unverified, aal1은 403 management_mfa_required다. 기존 forecast_authorities의 편집/승인·학교 범위도 모두 필요하다. public.is_admin()이나 이메일·클라이언트 role만으로 자체 관리 권한을 부여하지 않는다. staff_roles 테이블은 가정하지 않는다. 일반·유료 학생 조회/분석에는 MFA를 추가하지 않고 관리 상태 조회 실패만으로 성공한 학생 응답을 버리지 않는다. 비직원 capabilities는 empty/false다.\n\n'+
+        table(['관리 operation','HTTP','경로'],[[o['id'],o['method'],o['path']]for o in management])+
+        '\n\nOTP 등록은 계정 주인이 /admin에서 휴대폰 앱으로 수행한다. /jeongsi 미리보기와 관리 기능의 인증 조건은 구분한다. JWT/aal/profile 상태는 서버 내부 값으로 공개 DTO에 넣지 않는다. admin_logs는 auth.uid() 본인 actor만 쓰고 이메일/IP/시각은 DB가 채운다. 시험 계정도 사이트 가입 화면에서 생성한다. 외부 마이그레이션 32~35 번호를 점유하고 SMTP·캡차·유출 비밀번호 설정은 변경하지 않는다.\n\n'
+        '## 조회·용량·보존형 정리\n\n'
+        '화면 조회는 매개변수화된 제한 범위 JOIN과 keyset을 쓴다. 전체 count·전국 FETCH와 N+1을 화면 경로에 붙이지 않는다. 제한 ID를 먼저 고른 MATERIALIZED는 별도이며 제거 자체를 성능 검증으로 간주하지 않는다. 기존 인덱스와 valid/ready·계획을 확인한 후 필요한 것만 제안한다. 시험 적재는 로컬/운영 외 DB에서 한다.\n\n'
+        '원 압축 bytes를 재압축 없이 비공개 불변 Storage에 보관하고 원격 bytes/SHA를 다시 확인한 뒤 archive pointer/resolver·현재/C 근거 보존을 검수한다. csv/support NOT NULL·길이/해시 제약이 있어 업로드만으로 본문 제거가 가능해지지 않는다. 정확 표/PK/열·해시·참조·제거 명부에 사용자가 승인한 범위만 다음 단계에서 적용한다. registry·overlays의 전량 삭제, production_allowed=false를 미사용으로 해석, 무조건 VACUUM FULL은 금지한다. 일반 VACUUM의 내부 공간 재사용과 파일 크기 축소를 구분한다. 과거 02~06 제한은 현재 강제 규칙으로 재등록하지 않는다. I/O 경고가 다시 나타나면 대량 작업을 멈추고 Owner와 재확인한다.\n\n'
+        '## 검증과 재개 조건\n\n'+table(['검수','현재 상태'],[[k,v]for k,v in c['verification'].items()])+
+        '\n\n개발팀 코드는 담당 feature PR로 통합한다. 실제 JWT·MFA 관리·유료 발급/회수 브라우저 검수, Edge 재배포, CAP 실행·발행은 해당 영수증 없이 완료 처리하지 않는다. 검수 descriptor의 subject·purpose·만료·relay·PIN을 이 변경으로 풀거나 연장하지 않는다.'
+    )
 
 
 def generated_files(spec):
@@ -1914,6 +1970,21 @@ def generated_files(spec):
                 op["security_policy"]=canonical["security_policy"]
             files[path]=json.dumps(catalog,ensure_ascii=False,indent=2)+"\n"
 
+    if spec.get('opening_security_operations_contract'):
+        latest=spec['opening_security_operations_contract']['document']
+        files[latest]=doc('오픈 전 보안·운영 변경 · 필수 개발 참조',opening_security_document_body(spec))
+        for path in list(files):
+            if path.endswith('.md') and path!=latest:
+                relative=str(PurePosixPath(latest).name) if path.startswith('docs/current/') else latest
+                note=('\n\n## 2026-10-14 오픈 전 최신 확정\n\n'
+                      '유료 기준은 public.jeongsi_passes이며 관리자 무료 이용 예외는 미확정이다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. '
+                      '이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 ['
+                      '오픈 전 보안운영 변경]('+relative+')와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.\n\n')
+                marker='\n\n<!-- jungsi:generated'
+                files[path]=files[path].replace(marker,note+marker)
+        for path in ('apps/web/route_catalog.json','src/jungsi_touch/application/route_catalog.json'):
+            catalog=json.loads(files[path]);catalog['opening_security_operations_contract']=spec['opening_security_operations_contract']
+            files[path]=json.dumps(catalog,ensure_ascii=False,indent=2)+'\n'
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -1971,7 +2042,7 @@ def validate_forecast_contract(spec):
 
 
 def validate_spec(spec):
-    errors=validate_sync_policy(spec)
+    errors=validate_sync_policy(spec) + validate_opening_security_operations(spec)
     display=spec.get('official_history_db_display_contract')
     try: display_required=tuple(int(v) for v in spec.get('version','0.0.0').split('.')) >= (1,9,17)
     except (ValueError,TypeError): display_required=False
@@ -1993,7 +2064,7 @@ def validate_spec(spec):
             any(scope.get(k)is not True for k in ('explicit_server_selection_required','verified_review_subject_allowlist_required','immutable_descriptor_bytes_sha_required','exact_source_identity_type_PK_year_required','validity_and_revocation_required')) or
             any(scope.get(k)is not False for k in ('global_source_flags_changed','local_C_approval_is_cloud_approval','all_ingested_data_auto_adopted','engine_or_forecast_auto_adopted','actual_values_in_Git'))):
             errors.append('Official history DB display approval boundary drift')
-        if (composition.get('default_factories_changed')is not False or composition.get('entitlement_authority')!='jungsi_backend.entitlements' or
+        if (composition.get('default_factories_changed')is not True or composition.get('entitlement_authority')!='public.jeongsi_passes' or composition.get('opening_change_ref')!='opening_security_operations_contract' or
             composition.get('existing_API_count')!=22 or composition.get('new_logical_API_or_DTO')is not False or
             composition.get('browser_DB_credentials')is not False or composition.get('relay_header')!='X-Jungsi-Relay-Token'):
             errors.append('Official history DB display existing contract preservation drift')
@@ -2095,7 +2166,7 @@ def validate_spec(spec):
         if session[0].get('contract_ref')!='backend_platform_contract.dto_schemas.session' or http.get('response_schema')!='session' or http.get('body')!=[] or http.get('query')!=[] or http.get('idempotency_key_required') is not False or dto.get('format')!='jungsi.session/v1' or dto.get('fields')!=['format','member_tier','entitlement_expires_at']:
             errors.append('Formal session DTO contract drift')
     rules=' '.join(spec.get('backend_platform_contract',{}).get('dto_schemas',{}).get('session',{}).get('rules',[]))
-    if 'jungsi_backend.entitlements' not in rules or 'active=true' not in rules or 'starts_at<=now<expires_at' not in rules or 'status=active' in rules:
+    if 'public.jeongsi_passes' not in rules or 'revoked_at IS NULL' not in rules or 'starts_at<=now<ends_at' not in rules or 'MAX(ends_at)' not in rules or 'status=active' in rules:
         errors.append('Formal session entitlement rule drift')
     if 'session_contract' in spec:errors.append('Superseded proposed session contract must not be revived')
     errors.extend(validate_forecast_contract(spec))

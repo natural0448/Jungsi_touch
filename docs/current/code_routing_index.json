@@ -406,7 +406,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "344effcc3923a5b21ef6f233a3d1b55cc8c70613165445b7361456e5e66d2fb8",
+      "source_sha256": "eb703423c9e3ceed1f377c51849ccb1121aa23016246c4f4de0848f74a7aa655",
       "symbols": [
         {
           "kind": "class",
@@ -514,6 +514,12 @@
           "kind": "function",
           "name": "main",
           "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "opening_security_document_body",
+          "signature": "def opening_security_document_body(spec):",
           "decorators": []
         },
         {
@@ -724,6 +730,12 @@
           "kind": "function",
           "name": "validate_local_verification_contract.field",
           "signature": "def field(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_opening_security_operations",
+          "signature": "def validate_opening_security_operations(spec):",
           "decorators": []
         },
         {

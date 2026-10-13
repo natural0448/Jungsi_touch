@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "accepted_on_develop_scoped_synthetic_verified",
   "contract_ref": "runtime_connection_preparation_contract",
-  "contract_version": "1.9.41",
+  "contract_version": "1.9.42",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -47,19 +47,20 @@
       "factory": "create_supabase_secured_app",
       "explicit_selection_required": true,
       "security_contract_ref": "secured_backend_preparation_contract",
-      "default_factories_unchanged": true,
+      "default_factories_unchanged": false,
       "legacy_factories": [
         "create_app",
         "configured_app"
       ],
-      "current_entitlement_authority": "jungsi_backend.entitlements",
+      "current_entitlement_authority": "public.jeongsi_passes",
       "session_format": "jungsi.session/v1",
       "existing_API_count": 22,
       "API_or_DTO_additions": false,
       "local_verification_unchanged": true,
       "environment_factory": "configured_supabase_app",
       "configuration_check_command": "python -m jungsi_touch.infrastructure.supabase_runtime --check-config",
-      "server_factory_command": "python -m uvicorn jungsi_touch.infrastructure.supabase_runtime:configured_supabase_app --factory --host 127.0.0.1 --port 8000 --no-access-log"
+      "server_factory_command": "python -m uvicorn jungsi_touch.infrastructure.supabase_runtime:configured_supabase_app --factory --host 127.0.0.1 --port 8000 --no-access-log",
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "source_lineage": {
       "canonical_private_pointers": [

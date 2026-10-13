@@ -1197,7 +1197,7 @@ class SecuredPreparationContractTests(unittest.TestCase):
     def setUp(self):
         self.spec=json.loads((ROOT/"docs/current/service_spec.json").read_text(encoding="utf-8"))
     def test_default_factory_cannot_be_automatically_switched(self):
-        spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["composition"]["default_factories_unchanged"]=False
+        spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["composition"]["default_factories_unchanged"]=True
         self.assertIn("DEV-008 default composition preservation drift",validate_spec(spec))
     def test_relay_cannot_replace_user_authorization(self):
         spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["relay"]["relay_alone_grants_user_access"]=True
@@ -1304,7 +1304,7 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
                 wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['runtime_selection'][field]=value
                 self.assertIn('DEV-009 native selection approval or integrity drift',validate_runtime_connection_preparation(wrong))
     def test_source_fix_preserves_default_factories_and_minimal_health(self):
-        wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['composition']['default_factories_unchanged']=False
+        wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['composition']['default_factories_unchanged']=True
         self.assertIn('DEV-009 explicit composition preservation drift',validate_runtime_connection_preparation(wrong))
         wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['readiness']['ready_public_fields'].append('private_registry')
         self.assertIn('DEV-009 provider readiness or public boundary drift',validate_runtime_connection_preparation(wrong))
@@ -1375,3 +1375,33 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
                 self.assertIn('DEV-010 precision or heavy-compute compatibility drift',validate_supabase_deployment_contract(spec))
 
 if __name__=="__main__":unittest.main()
+
+
+class OpeningSecurityOperationsTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+    def test_legacy_fallback_or_admin_paid_override_is_rejected(self):
+        for branch,key in [('entitlement','legacy_table_fallback_allowed'),('user_decisions','admin_paid_override')]:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract'][branch][key]=True
+            self.assertIn('Opening paid authority or failure boundary drift',validate_spec(wrong))
+    def test_management_cannot_trust_client_or_expand_to_students(self):
+        for key in ['client_roles_or_user_metadata_trusted','new_app_role_profiles_GRANT_allowed','student_or_paid_service_MFA_required']:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['management'][key]=True
+            self.assertIn('Opening management MFA or active scope drift',validate_spec(wrong))
+    def test_public_forecast_read_cannot_inherit_management(self):
+        wrong=deepcopy(self.spec);next(o for o in wrong['operations']if o['id']=='forecast.published.read')['management_security_contract_ref']='opening_security_operations_contract.management'
+        self.assertIn('Opening management route coverage drift',validate_spec(wrong))
+    def test_mfa_guard_cannot_omit_a_manage_route(self):
+        wrong=deepcopy(self.spec);next(o for o in wrong['operations']if o['id']=='forecast.publish').pop('management_security_contract_ref')
+        self.assertIn('Opening management route coverage drift',validate_spec(wrong))
+    def test_paid_lookup_cannot_duplicate_or_cross_request_cache(self):
+        for key,value in [('metadata_and_entitlement_data_queries_per_request',2),('cross_request_entitlement_cache_allowed',True)]:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['entitlement'][key]=value
+            self.assertIn('Opening paid authority or failure boundary drift',validate_spec(wrong))
+    def test_cleanup_cannot_be_granted_by_unpublished_flag(self):
+        wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['capacity']['production_allowed_false_means_unused']=True
+        self.assertIn('Opening capacity preservation contract drift',validate_spec(wrong))
+    def test_unbounded_ui_query_or_N_plus_1_is_rejected(self):
+        for key in ['unbounded_current_scan_for_UI_allowed','N_plus_1_allowed','test_intake_in_production_allowed']:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['queries'][key]=True
+            self.assertIn('Opening bounded query contract drift',validate_spec(wrong))

@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "planned",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.41",
+  "contract_version": "1.9.42",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -87,7 +87,7 @@
       "relay_server_only": true,
       "user_Bearer_required": true,
       "user_authorization_in_application_required": true,
-      "current_entitlement_authority": "jungsi_backend.entitlements",
+      "current_entitlement_authority": "public.jeongsi_passes",
       "direct_browser_analysis_allowed": false,
       "secrets_in_browser_allowed": false,
       "shared_atomic_quota_required": true,
@@ -232,9 +232,10 @@
     "preservation": {
       "files_deleted": 0,
       "new_branches": 0,
-      "legacy_factory_change_allowed": false,
+      "legacy_factory_change_allowed": true,
       "source_flag_only_promotion_allowed": false,
-      "production_ready_promotion_allowed": false
+      "production_ready_promotion_allowed": false,
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "official_sources": [
       {
