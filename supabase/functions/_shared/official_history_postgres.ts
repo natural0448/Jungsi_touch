@@ -10,6 +10,71 @@ export interface OfficialHistoryInfrastructureSettings {
   descriptorSha256: string; descriptorBytes: number;
 }
 const fail = (code: string) => new DisplayError(code);
+/** One subject-bound read includes native catalog, role and RLS evidence. */
+export const JEONGSI_PASS_STATE_SQL=`SELECT c.oid IS NOT NULL AS relation_exists,
+ current_user AS runtime_user,current_setting('row_security') AS row_security,
+ current_setting('transaction_read_only') AS read_only,
+ pg_has_role(current_user,'jungsi_backend_owner','MEMBER') AS owner_member,
+ pg_has_role(current_user,'jungsi_backend_owner','USAGE') AS owner_usage,
+ pg_has_role(current_user,'postgres','MEMBER') AS postgres_member,
+ cols.native AS columns_native,cons.native AS constraints_native,
+ jsonb_build_array(c.relrowsecurity,r.rolsuper,r.rolbypassrls,c.relowner=r.oid,
+   has_table_privilege(current_user,c.oid,'SELECT'),
+   has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER'),
+   has_any_column_privilege(current_user,c.oid,'INSERT,UPDATE,REFERENCES')) AS role_native,
+ policies.native AS policies_native,
+ to_char(paid.ends_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS expires_at
+ FROM (SELECT to_regclass('public.jeongsi_passes') AS oid) target
+ LEFT JOIN pg_catalog.pg_class c ON c.oid=target.oid
+ LEFT JOIN pg_catalog.pg_roles r ON r.rolname=current_user AND r.rolname='jungsi_backend_app'
+ LEFT JOIN LATERAL (
+   SELECT jsonb_agg(jsonb_build_array(column_name,udt_name,is_nullable) ORDER BY ordinal_position) AS native
+   FROM information_schema.columns WHERE table_schema='public' AND table_name='jeongsi_passes'
+ ) cols ON true
+ LEFT JOIN LATERAL (
+   SELECT jsonb_agg(jsonb_build_array(conname,contype::text,convalidated,pg_get_constraintdef(oid)) ORDER BY conname) AS native
+   FROM pg_catalog.pg_constraint WHERE conrelid=c.oid
+ ) cons ON true
+ LEFT JOIN LATERAL (
+   SELECT jsonb_agg(jsonb_build_array(polname,polcmd::text,polpermissive,
+     ARRAY(SELECT CASE WHEN role_id=0 THEN 'public' ELSE pg_get_userbyid(role_id) END FROM unnest(polroles) AS policy_role(role_id)),
+     pg_get_expr(polqual,polrelid),pg_get_expr(polwithcheck,polrelid)) ORDER BY polname) AS native
+   FROM pg_catalog.pg_policy WHERE polrelid=c.oid AND polcmd IN ('r','*')
+ ) policies ON true
+ LEFT JOIN LATERAL (
+   SELECT max(ends_at) AS ends_at FROM public.jeongsi_passes
+   WHERE user_id=$1::uuid AND revoked_at IS NULL AND starts_at<=$2::timestamptz AND ends_at>$2::timestamptz
+ ) paid ON true`;
+const PASS_COLUMNS:Record<string,[string,string]>={id:['int8','NO'],user_id:['uuid','NO'],
+  starts_at:['timestamptz','NO'],ends_at:['timestamptz','NO'],note:['text','YES'],
+  granted_by:['uuid','YES'],revoked_at:['timestamptz','YES'],revoked_by:['uuid','YES'],created_at:['timestamptz','NO']};
+const policyExpression=(value:unknown)=>typeof value==='string'?value.replace(/[\s()]/g,'').toLowerCase():null;
+function verifyPassState(row:Row) {
+  if(row.runtime_user!=='jungsi_backend_app'||row.row_security!=='on'||row.read_only!=='on'||
+      row.owner_member!==false||row.owner_usage!==false||row.postgres_member!==false)throw fail('entitlement_unavailable');
+  if(row.relation_exists!==true||!Array.isArray(row.columns_native)||row.columns_native.length!==9)throw fail('entitlement_unavailable');
+  const names=new Set<string>();
+  for(const column of row.columns_native) {
+    if(!Array.isArray(column)||column.length!==3||!column.every(v=>typeof v==='string'))throw fail('entitlement_unavailable');
+    const [name,kind,nullable]=column;
+    if(names.has(name)||!Object.hasOwn(PASS_COLUMNS,name)||!sameJson([kind,nullable],PASS_COLUMNS[name]))throw fail('entitlement_unavailable');
+    names.add(name);
+  }
+  const constraints=row.constraints_native;
+  if(!Array.isArray(constraints)||!constraints.every(v=>Array.isArray(v)&&v.length===4))throw fail('entitlement_unavailable');
+  const checkedConstraints=constraints as unknown[][];
+  if(!checkedConstraints.some(v=>v[0]==='jeongsi_passes_period'&&v[1]==='c'&&v[2]===true&&policyExpression(v[3])==='checkends_at>starts_at')||
+     !checkedConstraints.some(v=>v[1]==='p'&&v[2]===true&&policyExpression(v[3])==='primarykeyid')||
+     !checkedConstraints.some(v=>v[1]==='f'&&v[2]===true&&policyExpression(v[3])==='foreignkeyuser_idreferencesauth.usersidondeletecascade'))throw fail('entitlement_unavailable');
+  if(!sameJson(row.role_native,[true,false,false,false,true,false,false]))throw fail('entitlement_unavailable');
+  const policies=row.policies_native;
+  if(!Array.isArray(policies)||policies.length!==2||!policies.every(v=>Array.isArray(v)&&v.length===6&&
+      typeof v[0]==='string'&&v[1]==='r'&&v[2]===true&&Array.isArray(v[3])&&v[3].every((r:unknown)=>typeof r==='string')&&v[5]===null))throw fail('entitlement_unavailable');
+  const checkedPolicies=policies as [string,string,boolean,string[],unknown,null][];
+  const own=checkedPolicies.find(v=>v[0]==='jeongsi_passes: select own or admin'),backend=checkedPolicies.find(v=>v[0]==='jeongsi_passes: jungsi backend read');
+  if(!own||!backend||!sameJson(own[3],['public'])||!['auth.uid=user_idoris_admin','auth.uid=user_idorpublic.is_admin'].includes(policyExpression(own[4])??'')||
+      backend[3].length!==2||!backend[3].includes('jungsi_backend_app')||!backend[3].includes('jungsi_backend_owner')||policyExpression(backend[4])!=='true')throw fail('entitlement_unavailable');
+}
 async function sha256(bytes: Uint8Array) {
   return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new Uint8Array(bytes).buffer))].map(v=>v.toString(16).padStart(2,'0')).join('');
 }
@@ -60,14 +125,16 @@ export function createOfficialHistoryInfrastructure(settings: OfficialHistoryInf
   // No built-in SUPABASE_DB_URL fallback: only the supplied app-role DSN.
   const sql=(options.sqlFactory??postgres)(settings.databaseUrl,{ssl:{rejectUnauthorized:true,ca:settings.databaseCa},prepare:false,max:1,
     connect_timeout:5,idle_timeout:5,max_lifetime:60,debug:false,fetch_types:false,backoff:()=>0.1,keep_alive:60,publications:'alltables',onnotice:()=>{},connection:{application_name:'jungsi-official-history-display'}});
-  async function read<T>(work:(transaction:postgres.TransactionSql)=>Promise<T>):Promise<{value:T}> {
+  async function read<T>(work:(transaction:postgres.TransactionSql)=>Promise<T>,roleVerifiedInWork=false):Promise<{value:T}> {
     try {
       return await sql.begin('isolation level repeatable read read only', async transaction => {
         await transaction.unsafe("SET LOCAL TIME ZONE 'UTC'");
         await transaction.unsafe("SET LOCAL statement_timeout='5000ms'");
-        const role=await transaction.unsafe("SELECT current_user,r.rolsuper,r.rolbypassrls,current_setting('row_security') AS row_security,current_setting('transaction_read_only') AS read_only,pg_has_role(current_user,'jungsi_backend_owner','MEMBER') AS owner_member,pg_has_role(current_user,'jungsi_backend_owner','USAGE') AS owner_usage,pg_has_role(current_user,'postgres','MEMBER') AS postgres_member FROM pg_catalog.pg_roles r WHERE r.rolname=current_user");
-        if(role.length!==1||role[0].current_user!=='jungsi_backend_app'||role[0].rolsuper!==false||role[0].rolbypassrls!==false||
-          role[0].row_security!=='on'||role[0].read_only!=='on'||role[0].owner_member!==false||role[0].owner_usage!==false||role[0].postgres_member!==false)throw fail('official_history_runtime_role_unverified');
+        if(!roleVerifiedInWork) {
+          const role=await transaction.unsafe("SELECT current_user,r.rolsuper,r.rolbypassrls,current_setting('row_security') AS row_security,current_setting('transaction_read_only') AS read_only,pg_has_role(current_user,'jungsi_backend_owner','MEMBER') AS owner_member,pg_has_role(current_user,'jungsi_backend_owner','USAGE') AS owner_usage,pg_has_role(current_user,'postgres','MEMBER') AS postgres_member FROM pg_catalog.pg_roles r WHERE r.rolname=current_user");
+          if(role.length!==1||role[0].current_user!=='jungsi_backend_app'||role[0].rolsuper!==false||role[0].rolbypassrls!==false||
+            role[0].row_security!=='on'||role[0].read_only!=='on'||role[0].owner_member!==false||role[0].owner_usage!==false||role[0].postgres_member!==false)throw fail('official_history_runtime_role_unverified');
+        }
         return {value:await work(transaction)};
       });
     } catch(e) { if(e instanceof DisplayError)throw e;throw fail('official_history_db_unavailable'); }
@@ -85,19 +152,19 @@ export function createOfficialHistoryInfrastructure(settings: OfficialHistoryInf
         const raw=atob(pieces[1].replace(/-/g,'+').replace(/_/g,'/'));
         const claims=parseStrictJson(new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(raw,c=>c.charCodeAt(0)))) as Row;
         if(claims.sub!==user.id||typeof claims.exp!=='number'||!Number.isSafeInteger(claims.exp)||claims.exp*1000<=now)return null;
+        if(claims.aal!==undefined&&claims.aal!==null&&claims.aal!=='aal1'&&claims.aal!=='aal2')return null;
         return {subjectId:user.id,expiresAt:claims.exp*1000};
       } catch(e) { if(e instanceof DisplayError)throw e;throw fail('auth_unavailable'); }
     },
     async paidUntil(subjectId,now) {
       return (await read(async tx=>{
-        const access=await tx.unsafe("SELECT c.relowner=r.oid AS owner,has_table_privilege(current_user,c.oid,'SELECT') AS readable FROM pg_catalog.pg_class c JOIN pg_catalog.pg_roles r ON r.rolname=current_user WHERE c.oid=to_regclass('jungsi_backend.entitlements')");
-        if(access.length!==1||access[0].owner!==false||access[0].readable!==true)throw fail('entitlement_unavailable');
-        const rows=await tx.unsafe(`SELECT to_char(max(expires_at) AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS expires_at FROM jungsi_backend.entitlements WHERE owner_id=$1 AND active=true AND starts_at<=$2::timestamptz AND expires_at>$2::timestamptz`,[subjectId,new Date(now).toISOString()]);
+        const rows=await tx.unsafe(JEONGSI_PASS_STATE_SQL,[subjectId,new Date(now).toISOString()]);
         if(rows.length!==1)throw fail('entitlement_unavailable');
+        verifyPassState(rows[0]);
         const until=rows[0].expires_at;if(until===null)return null;
         if(typeof until!=='string'||utcInstantMicros(until)<=nowMicros(now))throw fail('entitlement_unavailable');
         return utcText(until);
-      })).value;
+      },true)).value;
     },
     async readRows(descriptor) {
       descriptor=validateDisplayScope(descriptor,options.environment??'isolated_cloud_review',(options.now??Date.now)());

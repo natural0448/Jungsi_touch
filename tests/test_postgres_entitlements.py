@@ -10,7 +10,7 @@ import unittest
 from uuid import UUID
 
 from jungsi_touch.application.platform_ports import PlatformError
-from jungsi_touch.infrastructure.postgres_entitlements import PostgresJeongsiPassesRepository
+from jungsi_touch.infrastructure.postgres_entitlements import PASS_STATE_SQL, PostgresJeongsiPassesRepository
 
 
 OWNER = '00000000-0000-4000-8000-000000000001'
@@ -54,16 +54,20 @@ class SyntheticConnection:
         self.calls.append((query,params))
         if self.failure: raise RuntimeError('SYNTHETIC-private-connection-detail')
         if query.startswith('SET '): return Rows([])
-        if 'to_regclass' in query: return Rows([(self.exists,)])
-        if 'information_schema.columns' in query: return Rows(self.columns)
-        if 'pg_catalog.pg_constraint' in query: return Rows(self.constraints)
-        if 'pg_catalog.pg_class' in query: return Rows([self.role] if params==(self.role_name,) else [])
-        if 'pg_catalog.pg_policy' in query: return Rows(self.policies)
         if 'set_config' in query: return Rows([(params[0],params[1])])
-        if query.startswith('SELECT max(ends_at)'):
-            values = tuple(str(x) if isinstance(x,UUID) else x.isoformat() for x in params)
-            row = self.sql.execute(query.replace('%s','?'),values).fetchone()
-            return Rows([(datetime.fromisoformat(row[0]) if row[0] else None,)])
+        if query == PASS_STATE_SQL:
+            # Execute the submitted statement's actual subject/time predicate in
+            # SQLite; catalog/RLS data remain synthetic PostgreSQL metadata.
+            role,subject,start,end=params
+            expiry=None
+            if subject is not None:
+                predicate=query.split('WHERE user_id=',1)[1].split('\n) paid',1)[0]
+                statement='SELECT max(ends_at) FROM public.jeongsi_passes WHERE user_id='+predicate
+                values=(str(subject),start.isoformat(),end.isoformat())
+                row=self.sql.execute(statement.replace('%s','?'),values).fetchone()
+                expiry=datetime.fromisoformat(row[0]) if row[0] else None
+            return Rows([(self.exists,self.columns,self.constraints,
+                          self.role if role==self.role_name else None,self.policies,expiry)])
         raise AssertionError('Unexpected synthetic query')
 
 
@@ -102,9 +106,38 @@ class EntitlementAdapterTests(unittest.TestCase):
         claim=next(params for query,params in self.c.calls if 'set_config' in query)
         self.assertEqual(claim[0],OWNER); self.assertEqual(json.loads(claim[1]),{'sub':OWNER,'role':'authenticated'})
         query,params=self.c.calls[-1]; self.assertNotIn(OWNER,query)
-        self.assertEqual(params,(UUID(OWNER),NOW,NOW))
+        self.assertEqual(params,('jungsi_backend_app',UUID(OWNER),NOW,NOW))
         self.assertEqual(self.options[0],dict(sslmode='require',connect_timeout=5,prepare_threshold=None))
         self.assertFalse(any(query.startswith(('INSERT','UPDATE','DELETE','DROP','ALTER','GRANT')) for query,_ in self.c.calls))
+
+    def test_metadata_and_current_expiry_use_one_joined_statement(self):
+        self.c.add(OWNER,-1,1)
+        self.assertTrue(self.repo.active_paid(OWNER,NOW))
+        state=[query for query,_ in self.c.calls if query==PASS_STATE_SQL]
+        self.assertEqual(len(state),1)
+        self.assertIn('LEFT JOIN LATERAL',state[0])
+        self.assertEqual(len(self.c.calls),4)  # READ ONLY, UTC, claims, joined read
+
+    def test_grant_revoke_and_schema_drift_are_visible_on_the_next_read(self):
+        self.assertIsNone(self.repo.active_paid_until(OWNER,NOW))
+        self.c.add(OWNER,-1,30)
+        self.assertEqual(self.repo.active_paid_until(OWNER,NOW),NOW+timedelta(seconds=30))
+        self.c.sql.execute('UPDATE public.jeongsi_passes SET revoked_at=? WHERE user_id=?',('revoked',OWNER))
+        self.assertIsNone(self.repo.active_paid_until(OWNER,NOW))
+        self.c.columns=COLUMNS+[('status','text','YES')]
+        with self.assertRaises(PlatformError) as caught:self.repo.active_paid_until(OWNER,NOW)
+        self.assertEqual(caught.exception.code,'entitlement_schema_unverified')
+
+    def test_invalid_joined_metadata_shape_fails_closed(self):
+        original=self.c.execute
+        for state in ([],[(True,)],[(True,COLUMNS,CONSTRAINTS,self.c.role,POLICIES)]):
+            def execute(query,params=()):
+                return Rows(state) if query==PASS_STATE_SQL else original(query,params)
+            self.c.execute=execute
+            with self.subTest(state=state),self.assertRaises(PlatformError) as caught:
+                self.repo.active_paid_until(OWNER,NOW)
+            self.assertEqual(caught.exception.code,'entitlement_schema_unverified')
+        self.c.execute=original
 
     def test_source_types_nulls_and_unexpected_columns_fail_closed(self):
         cases=[COLUMNS[:-1],COLUMNS+[('status','text','YES')],

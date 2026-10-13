@@ -1,4 +1,4 @@
-"""Read-only owner-master entitlement adapter; explicit injection, no migration.
+"""Read-only owner-master entitlement adapter; no migration or legacy fallback.
 
 The source contract was received separately from production schema/history.
 Every read checks the live schema and SELECT-only trusted backend role.
@@ -22,6 +22,43 @@ EXPECTED_COLUMNS = {
     'created_at': ('timestamptz', False),
 }
 
+# One bounded statement joins this relation's catalog evidence and the verified
+# subject's current passes. JSON arrays preserve native metadata booleans/nulls;
+# a schema/policy/role failure is rejected before the expiry leaves this port.
+PASS_STATE_SQL = """SELECT c.oid IS NOT NULL,
+    meta_columns.rows, meta_constraints.rows,
+    CASE WHEN r.rolname=%s THEN jsonb_build_array(
+      c.relrowsecurity,r.rolsuper,r.rolbypassrls,c.relowner=r.oid,
+      has_table_privilege(current_user,c.oid,'SELECT'),
+      has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER'),
+      has_any_column_privilege(current_user,c.oid,'INSERT,UPDATE,REFERENCES')) END,
+    meta_policies.rows, paid.expires_at
+FROM (SELECT to_regclass('public.jeongsi_passes') AS oid) target
+LEFT JOIN pg_catalog.pg_class c ON c.oid=target.oid
+LEFT JOIN pg_catalog.pg_roles r ON r.rolname=current_user
+LEFT JOIN LATERAL (
+  SELECT jsonb_agg(jsonb_build_array(column_name,udt_name,is_nullable)
+                   ORDER BY ordinal_position) AS rows
+  FROM information_schema.columns
+  WHERE table_schema='public' AND table_name='jeongsi_passes'
+) meta_columns ON true
+LEFT JOIN LATERAL (
+  SELECT jsonb_agg(jsonb_build_array(conname,contype::text,convalidated,
+                    pg_get_constraintdef(oid)) ORDER BY conname) AS rows
+  FROM pg_catalog.pg_constraint WHERE conrelid=c.oid
+) meta_constraints ON true
+LEFT JOIN LATERAL (
+  SELECT jsonb_agg(jsonb_build_array(polname,polcmd::text,polpermissive,
+    ARRAY(SELECT CASE WHEN role_id=0 THEN 'public' ELSE pg_get_userbyid(role_id) END
+          FROM unnest(polroles) AS policy_role(role_id)),
+    pg_get_expr(polqual,polrelid),pg_get_expr(polwithcheck,polrelid)) ORDER BY polname) AS rows
+  FROM pg_catalog.pg_policy WHERE polrelid=c.oid AND polcmd IN ('r','*')
+) meta_policies ON true
+LEFT JOIN LATERAL (
+  SELECT max(ends_at) AS expires_at FROM public.jeongsi_passes
+  WHERE user_id=%s AND revoked_at IS NULL AND starts_at<=%s AND ends_at>%s
+) paid ON true"""
+
 
 def _expression(value):
     return re.sub(r'[\s()]', '', value).lower() if type(value) is str else None
@@ -40,16 +77,14 @@ class PostgresJeongsiPassesRepository:
         self._database = PostgresRepository(database_url, connector=connector)
 
     @staticmethod
-    def _schema(connection):
-        exists = connection.execute(
-            "SELECT to_regclass('public.jeongsi_passes') IS NOT NULL"
-        ).fetchone()
-        if not isinstance(exists, (tuple, list)) or len(exists) != 1 or exists[0] is not True:
+    def _schema(connection, subject=None, instant=None):
+        state = connection.execute(PASS_STATE_SQL,
+                                  ('jungsi_backend_app',subject,instant,instant)).fetchone()
+        if not isinstance(state, (tuple, list)) or len(state) != 6:
             raise PlatformError('entitlement_schema_unverified', 503)
-        columns = connection.execute(
-            'SELECT column_name,udt_name,is_nullable FROM information_schema.columns '
-            'WHERE table_schema=%s AND table_name=%s', ('public', 'jeongsi_passes')
-        ).fetchall()
+        exists, columns, constraints, role, policies, expiry = state
+        if exists is not True:
+            raise PlatformError('entitlement_schema_unverified', 503)
         if (not isinstance(columns, (tuple, list)) or len(columns) != len(EXPECTED_COLUMNS)
                 or any(not isinstance(row, (tuple, list)) or len(row) != 3 for row in columns)):
             raise PlatformError('entitlement_schema_unverified', 503)
@@ -59,10 +94,6 @@ class PostgresJeongsiPassesRepository:
         actual = {name: (kind, nullable == 'YES') for name, kind, nullable in columns}
         if actual != EXPECTED_COLUMNS:
             raise PlatformError('entitlement_schema_unverified', 503)
-        constraints = connection.execute(
-            "SELECT conname,contype,convalidated,pg_get_constraintdef(oid) "
-            "FROM pg_catalog.pg_constraint WHERE conrelid='public.jeongsi_passes'::regclass"
-        ).fetchall()
         if (not isinstance(constraints, (tuple, list))
                 or any(not isinstance(row, (tuple, list)) or len(row) != 4 for row in constraints)):
             raise PlatformError('entitlement_schema_unverified', 503)
@@ -76,26 +107,10 @@ class PostgresJeongsiPassesRepository:
                           for _, kind, valid, definition in constraints)
         if not period or not owner_fk or not primary_key:
             raise PlatformError('entitlement_schema_unverified', 503)
-        role = connection.execute(
-            "SELECT c.relrowsecurity,r.rolsuper,r.rolbypassrls,c.relowner=r.oid,"
-            "has_table_privilege(current_user,c.oid,'SELECT'),"
-            "has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER'),"
-            "has_any_column_privilege(current_user,c.oid,'INSERT,UPDATE,REFERENCES') "
-            "FROM pg_catalog.pg_class c JOIN pg_catalog.pg_roles r ON r.rolname=current_user "
-            "WHERE c.oid='public.jeongsi_passes'::regclass AND r.rolname=%s",
-            ('jungsi_backend_app',)
-        ).fetchone()
         if (not isinstance(role, (tuple, list)) or len(role) != 7
                 or any(type(value) is not bool for value in role)
                 or tuple(role) != (True, False, False, False, True, False, False)):
             raise PlatformError('entitlement_runtime_role_unverified', 503)
-        policies = connection.execute(
-            "SELECT polname,polcmd,polpermissive,ARRAY(SELECT CASE WHEN role_id=0 THEN 'public' "
-            "ELSE pg_get_userbyid(role_id) END FROM unnest(polroles) AS policy_role(role_id)),"
-            "pg_get_expr(polqual,polrelid),pg_get_expr(polwithcheck,polrelid) "
-            "FROM pg_catalog.pg_policy WHERE polrelid='public.jeongsi_passes'::regclass "
-            "AND polcmd IN ('r','*')"
-        ).fetchall()
         allowed = {'auth.uid=user_idoris_admin', 'auth.uid=user_idorpublic.is_admin'}
         if (not isinstance(policies, (tuple, list)) or len(policies) != 2
                 or any(not isinstance(row, (tuple, list)) or len(row) != 6 for row in policies)):
@@ -113,6 +128,7 @@ class PostgresJeongsiPassesRepository:
                 or len(backend[3]) != 2 or set(backend[3]) != {'jungsi_backend_app','jungsi_backend_owner'}
                 or _expression(backend[4]) != 'true'):
             raise PlatformError('entitlement_rls_unverified', 503)
+        return expiry
 
     def probe(self):
         with self._database.transaction(read_only=True) as connection:
@@ -128,22 +144,15 @@ class PostgresJeongsiPassesRepository:
         except (TypeError, ValueError, AttributeError):
             raise PlatformError('entitlement_identity_or_time_invalid', 503) from None
         with self._database.transaction(read_only=True) as connection:
-            self._schema(connection)
             # Claims come only from the application's server-verified subject.
             connection.execute("SELECT set_config('request.jwt.claim.sub',%s,true),"
                                "set_config('request.jwt.claims',%s,true)",
                                (str(subject), json.dumps({'sub': str(subject), 'role': 'authenticated'})))
-            row = connection.execute(
-                'SELECT max(ends_at) FROM public.jeongsi_passes '
-                'WHERE user_id=%s AND revoked_at IS NULL AND starts_at<=%s AND ends_at>%s',
-                (subject, instant, instant)
-            ).fetchone()
-            if row is None or len(row) != 1:
-                raise PlatformError('entitlement_result_invalid', 503)
-            if row[0] is None:
+            expiry = self._schema(connection, subject, instant)
+            if expiry is None:
                 return None
             try:
-                expires = utc_instant(row[0])
+                expires = utc_instant(expiry)
             except (TypeError, ValueError):
                 raise PlatformError('entitlement_result_invalid', 503) from None
             if expires <= instant:

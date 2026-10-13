@@ -230,7 +230,7 @@ class SupabaseRuntimeTests(unittest.TestCase):
                          JUNGSI_SUPABASE_RUNTIME_REGISTRY=str(registry),JUNGSI_SUPABASE_RUNTIME_SELECTION=str(selection),
                          JUNGSI_RELAY_TOKEN=TOKEN)
         transport=self.client._open
-        with patch.dict('os.environ',environment,clear=True),patch('jungsi_touch.infrastructure.supabase_storage.build_opener',return_value=SimpleNamespace(open=transport)),patch.object(PostgresRepository,'probe',return_value=dict(status='verified')):
+        with patch.dict('os.environ',environment,clear=True),patch('jungsi_touch.infrastructure.supabase_storage.build_opener',return_value=SimpleNamespace(open=transport)),patch.object(PostgresRepository,'probe',return_value=dict(status='verified')),patch('jungsi_touch.infrastructure.postgres_entitlements.PostgresJeongsiPassesRepository.probe',return_value=dict(status='verified')):
             self.assertEqual(runtime.configuration_status()['status'],'configured_not_verified')
             app=runtime.configured_supabase_app();self.assertFalse(self.network)
             self.assertEqual(self.ready(app).status_code,200)

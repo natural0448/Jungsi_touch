@@ -6,12 +6,20 @@ from .forecast_dto import draft_dto,result_dto,public_context
 from .platform_ports import PlatformError
 from .platform import identifier,shape,revision
 from .time_contract import utc_text
+from .forecast_ports import publication_ids
 
 class ForecastPolicyService:
     def __init__(self,repository,inputs,clock):self.repository,self.inputs,self.clock=repository,inputs,clock
     def authority(self,actor,operation,record=None):
         require(actor.subject_id is not None,'authentication_required',401)
         caps=self.repository.capabilities(actor.subject_id)
+        # The repository keeps active staff roles and school scope authoritative.
+        # Verified AAL strengthens management access only; it neither grants a
+        # role nor synthesizes a paid pass, and published student reads are exempt.
+        if operation!='forecast.published.read' and (caps.get('edit') is True or caps.get('approve') is True):
+            require(actor.assurance_level=='aal2','management_mfa_required',403)
+            require(actor.account_status is not None,'management_account_state_unverified',503)
+            require(actor.account_status=='active','management_account_inactive',403)
         required='approve' if operation in ('forecast.approve','forecast.publish') else 'edit'
         if operation not in ('forecast.published.read','forecast.capabilities'):
             require(caps.get(required) is True or (operation in ('forecast.read','forecast.list') and caps.get('approve') is True),'forecast_forbidden',403)
@@ -122,9 +130,28 @@ class ForecastPolicyService:
         return draft_dto(record)
 
     def validated_release(self,offering_id):
-        release=self.repository.published(offering_id)
+        return self._validated_release(offering_id,self.repository.published(offering_id))
+
+    def validated_releases(self,offering_ids):
+        selected=publication_ids(offering_ids)
+        if not selected:return {}
+        lookup=getattr(self.repository,'published_many',None)
+        if not callable(lookup):raise PlatformError('forecast_not_configured',503)
+        releases=lookup(selected)
+        if type(releases) is not dict or set(releases)!=set(selected):
+            raise PlatformError('forecast_release_invalid',503)
+        result={}
+        for offering in selected:
+            release=releases[offering]
+            if isinstance(release,PlatformError):result[offering]=release;continue
+            try:result[offering]=self._validated_release(offering,release)
+            except PlatformError as error:result[offering]=error
+        return result
+
+    def _validated_release(self,offering_id,release):
         if release is None:return None
         try:
+            require(type(release) is dict,'forecast_release_invalid',503)
             pinned=deepcopy(release);claimed=pinned.pop('release_hash',None)
             require(claimed==digest(pinned) and release.get('approval_hash') and release.get('validation_hash'),'forecast_release_invalid',503)
             require(release['context']==self.inputs.current_context(offering_id),'forecast_base_version_conflict',409)
