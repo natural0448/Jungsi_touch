@@ -11456,6 +11456,13 @@
         "REQ-02"
       ],
       "summary": "2페이지 성적 입력 표 디자인 개선(사용자 요청): 성적표 배치·입력 규칙·서버 검사는 그대로 두고, 표 머리를 진한 남색 띠로, 넣는 칸을 테두리 입력란으로(값이 들어가면 파란 테두리), 계산·해당 없음 칸을 평면으로 정리. 필수 6칸 진행 표시, 확인 체크와 저장 버튼을 한 띠로 묶음, 휴대폰 표 너비 조정. 불안정한 네트워크에서 화면이 깨지던 문제 대응: CSS를 HTML에 직접 넣고(experimental.inlineCss) 외부 CDN 글꼴이 화면 표시를 막지 않게 스크립트로 붙임. DTO·API·산식 변경 없음."
+    },
+    {
+      "date": "2026-10-13",
+      "requirements": [
+        "REQ-02"
+      ],
+      "summary": "서버 액션 허용 Origin에 에듀터치 정식 도메인(edutouch.co.kr, www.edutouch.co.kr) 추가. 본체 프록시를 거친 성적 저장이 Origin 불일치로 500(Invalid Server Actions request)이던 문제 수정. 워커 판 420a50d0 배포, 정문 저장→리포트 표시 확인."
     }
   ],
   "overall_analysis_contract": {
