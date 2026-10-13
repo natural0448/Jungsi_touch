@@ -1,6 +1,6 @@
 # 정시터치 데이터 계층 개발 기준
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.43이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.44이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 이 폴더에는 실제 값이 없는 DB 구조·마이그레이션 코드만 추가할 수 있다. database/migrations/001_pre_data_platform.sql은 추가 정의만 제공한다. 자동 적용하지 않으며 기존 DB를 reset/drop/delete하지 않는다. 전용 jungsi_backend 스키마의 사용자/이용권/리포트 접근은 서버 역할과 SQL owner 조건으로 제한하고 anon/authenticated 직접 접근은 허용하지 않는다. schema_versions와 실제 11개 timestamptz/date 컬럼 형식을 함께 확인한다. 002_forecast_policy.sql은예상기준관리의추가테이블/권한/불변revision과발행저장계약이다. 현재readiness는NOT_RUN이며실제적용·권한·동시성·멱등·게시검증이전에는운영준비완료로표시하지않는다. 원자료·성적·입결·환산표·곡선·모델·덤프·접속 비밀값은 여기에 복사하지 않는다.
 
@@ -74,8 +74,8 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 ## 2026-10-14 오픈 전 최신 확정
 
-유료 기준은 public.jeongsi_passes이며 관리자 무료 이용 예외는 미확정이다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. 이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 [오픈 전 보안운영 변경](docs/current/오픈전_보안운영_변경.md)와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.
+유료 기준은 public.jeongsi_passes이며 관리자 무료 이용 예외는 미확정이다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. 이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 [오픈 전 보안운영 변경](../docs/current/오픈전_보안운영_변경.md)와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.
 
 
 
-<!-- jungsi:generated spec_sha256=88c3b18a1c9e9b4d1dc9469fbc3868cafd52ac20a34bcd03a4abd66f4333cba3 -->
+<!-- jungsi:generated spec_sha256=281e08a7cae23c314e10151eb6f3feda669033d97e814eff896a7f49f42fd778 -->

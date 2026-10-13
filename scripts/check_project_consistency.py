@@ -2,7 +2,7 @@
 No file deletion. --write preserves prior generated content under ignored outputs.
 """
 from __future__ import annotations
-import argparse,ast,datetime,hashlib,json,re,subprocess,sys
+import argparse,ast,datetime,hashlib,json,re,subprocess,sys,posixpath
 from pathlib import Path,PurePosixPath
 from audit_documentation_sync import AGENT_MARKER,generated_sync_files,validate_catalog,validate_sync_policy
 
@@ -1458,6 +1458,16 @@ def validate_opening_security_operations(spec):
     if c.get('format')!='jungsi.opening-security-operations/v1' or c.get('document')!=spec.get('current_documents',{}).get('opening_security_operations') or c.get('production_ready')is not False:
         errors.append('Opening security registration or readiness drift')
     decision=c.get('user_decisions',{}); e=c.get('entitlement',{}); m=c.get('management',{}); q=c.get('queries',{}); cap=c.get('capacity',{})
+    if c.get('status')=='accepted_on_develop_scoped_operating_NOT_RUN':
+        evidence=c.get('verification',{});head=evidence.get('implementation_commit');ci=evidence.get('CI',[])
+        if (not re.fullmatch(r'[0-9a-f]{40}',str(head)) or not re.fullmatch(r'[0-9a-f]{40}',str(evidence.get('integration_commit'))) or
+            evidence.get('pull_request')!='https://github.com/natural0448/Jungsi_touch/pull/31' or
+            type(evidence.get('commit_snapshot_tests'))is not int or evidence.get('commit_snapshot_tests',0)<923 or
+            type(evidence.get('push_snapshot_tests'))is not int or evidence.get('push_snapshot_tests',0)<923 or
+            not isinstance(ci,list) or len(ci)!=2 or any(not isinstance(r,dict)or r.get('headSha')!=head or r.get('conclusion')!='success'for r in ci) or
+            any(evidence.get(k)!='NOT_RUN' for k in ('real_JWT_active_aal2_management','Edge_redeployment','browser_paid_after_grant_or_revoke','production_publication','actual_user_paid_management_browser'))):
+            errors.append('Opening develop acceptance lacks exact scoped evidence')
+
     if (decision.get('paid_authority')!='public.jeongsi_passes' or decision.get('default_Postgres_composition_transition_authorized')is not True or decision.get('admin_paid_override')is not False or decision.get('admin_paid_override_status')!='deferred_user_decision' or
         e.get('table')!='public.jeongsi_passes' or e.get('activation')!='revoked_at IS NULL AND starts_at <= now AND now < ends_at' or e.get('multiple_active_rows')!='MAX(ends_at)' or e.get('time_basis')!='UTC' or
         e.get('session_format')!='jungsi.session/v1' or e.get('session_fields')!=['format','member_tier','entitlement_expires_at'] or e.get('failure')!={'http':503,'code_policy':'existing_safe_entitlement_codes_without_SQL_details','fallback':False} or
@@ -1975,7 +1985,7 @@ def generated_files(spec):
         files[latest]=doc('오픈 전 보안·운영 변경 · 필수 개발 참조',opening_security_document_body(spec))
         for path in list(files):
             if path.endswith('.md') and path!=latest:
-                relative=str(PurePosixPath(latest).name) if path.startswith('docs/current/') else latest
+                relative=posixpath.relpath(latest,str(PurePosixPath(path).parent))
                 note=('\n\n## 2026-10-14 오픈 전 최신 확정\n\n'
                       '유료 기준은 public.jeongsi_passes이며 관리자 무료 이용 예외는 미확정이다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. '
                       '이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 ['

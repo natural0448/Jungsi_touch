@@ -1405,3 +1405,16 @@ class OpeningSecurityOperationsTests(unittest.TestCase):
         for key in ['unbounded_current_scan_for_UI_allowed','N_plus_1_allowed','test_intake_in_production_allowed']:
             wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['queries'][key]=True
             self.assertIn('Opening bounded query contract drift',validate_spec(wrong))
+
+
+class OpeningAcceptanceAndReferenceTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+    def test_wrong_head_or_unrun_CI_cannot_certify_integration(self):
+        for field,value in [('headSha','f'*40),('conclusion','not_run')]:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['verification']['CI'][0][field]=value
+            self.assertIn('Opening develop acceptance lacks exact scoped evidence',validate_spec(wrong))
+    def test_mandatory_reference_resolves_from_other_layer_readmes(self):
+        files=generated_files(self.spec)
+        for path,target in [('apps/web/README.md','../../docs/current/오픈전_보안운영_변경.md'),('database/README.md','../docs/current/오픈전_보안운영_변경.md'),('docs/team_sessions/2026-10-05/DEV006_서비스_DB_응답.md','../../current/오픈전_보안운영_변경.md')]:
+            with self.subTest(path=path):self.assertIn(']('+target+')',files[path].decode('utf-8'))

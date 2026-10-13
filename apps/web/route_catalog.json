@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.43",
-  "source_sha256": "88c3b18a1c9e9b4d1dc9469fbc3868cafd52ac20a34bcd03a4abd66f4333cba3",
+  "spec_version": "1.9.44",
+  "source_sha256": "281e08a7cae23c314e10151eb6f3feda669033d97e814eff896a7f49f42fd778",
   "pages": [
     {
       "id": "PAGE-01",
@@ -7663,7 +7663,7 @@
       "REQ-25",
       "REQ-26"
     ],
-    "status": "implemented_scoped_synthetic_native_readonly_verified_integration_pending",
+    "status": "accepted_on_develop_scoped_operating_NOT_RUN",
     "document": "docs/current/오픈전_보안운영_변경.md",
     "implementation_branch": "feature/application-pre-data-platform",
     "production_ready": false,
@@ -7834,7 +7834,25 @@
         "tests/test_http_entitlement_injection.py",
         "tests/test_supabase_runtime.py",
         "supabase/functions/_shared/official_history_display_test.ts"
-      ]
+      ],
+      "implementation_commit": "e2a8354c1bf3178ec318bdd092da356164bbf8e5",
+      "integration_commit": "b809b6e8d604317994446f84b429de734ac58998",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/31",
+      "commit_snapshot_tests": 923,
+      "push_snapshot_tests": 923,
+      "CI": [
+        {
+          "headSha": "e2a8354c1bf3178ec318bdd092da356164bbf8e5",
+          "conclusion": "success",
+          "run_id": 38434252888
+        },
+        {
+          "headSha": "e2a8354c1bf3178ec318bdd092da356164bbf8e5",
+          "conclusion": "success",
+          "run_id": 38434383943
+        }
+      ],
+      "actual_user_paid_management_browser": "NOT_RUN"
     }
   }
 }

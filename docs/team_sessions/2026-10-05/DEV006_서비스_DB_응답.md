@@ -1,6 +1,6 @@
 # DEV006 서비스·DB 응답과 외부 프런트 인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.43이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.44이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 다음 기존 본문은 1.8.8까지의 준비/관측 이력과 계약 정의다. ②③ 응답 계약은 그대로 유지하고 현재 통합·자료메타 인수는 마지막1.8.9추가관측과current_followup을 따른다.
 
@@ -219,8 +219,8 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 ## 2026-10-14 오픈 전 최신 확정
 
-유료 기준은 public.jeongsi_passes이며 관리자 무료 이용 예외는 미확정이다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. 이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 [오픈 전 보안운영 변경](docs/current/오픈전_보안운영_변경.md)와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.
+유료 기준은 public.jeongsi_passes이며 관리자 무료 이용 예외는 미확정이다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. 이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 [오픈 전 보안운영 변경](../../current/오픈전_보안운영_변경.md)와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.
 
 
 
-<!-- jungsi:generated spec_sha256=88c3b18a1c9e9b4d1dc9469fbc3868cafd52ac20a34bcd03a4abd66f4333cba3 -->
+<!-- jungsi:generated spec_sha256=281e08a7cae23c314e10151eb6f3feda669033d97e814eff896a7f49f42fd778 -->
