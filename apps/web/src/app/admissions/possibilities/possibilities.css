@@ -3,12 +3,15 @@
 
 
 /* 검색 상자 (1페이지와 같은 구성) */
-.et .ps .filter{border:1px solid var(--line);border-radius:var(--r-card);padding:16px 18px 8px}
+.et .ps .filter{border:1px solid var(--line);border-radius:var(--r-card);padding:20px 22px 10px;background:var(--bg);box-shadow:var(--jt-card-shadow)}
 .et .ps .search{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}
 .et .ps .field{display:flex;flex-direction:column;gap:6px;min-width:0}
-.et .ps .field span{font-size:13px;font-weight:700}
-.et .ps .search input{width:100%;min-width:0;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:var(--r-card);font:inherit;color:var(--ink)}
+.et .ps .field span{font-size:12.5px;font-weight:800;color:var(--deep)}
+.et .ps .search input{width:100%;min-width:0;height:46px;padding:0 14px;border:1.5px solid var(--jt-field);border-radius:var(--r-card);background:var(--bg);font:inherit;font-weight:600;color:var(--ink);transition:border-color .15s,box-shadow .15s,background-color .15s}
+.et .ps .search input::placeholder{font-weight:500;color:#B4B9C9}
+.et .ps .search input:hover{border-color:#AEB7CC}
 .et .ps .search input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.et .ps .search input:not(:placeholder-shown){border-color:var(--brand);background:var(--jt-filled)}
 .et .ps .search .btn{height:46px;padding:0 26px;font-size:14px}
 .et .ps .cfilter{margin-bottom:6px}
 .et .ps .cfilter .lab{width:44px}
@@ -22,22 +25,22 @@
 
 /* 대학별 묶음 */
 .et .ps .list{display:grid;gap:12px}
-.et .ps .univ{border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
-.et .ps .univ header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:12px 16px;background:var(--sub);border-bottom:1px solid var(--line)}
-.et .ps .univ h2{font-size:16px;font-weight:900;letter-spacing:-.4px}
-.et .ps .univ .meta{font-size:13px;color:var(--muted)}
-.et .ps .univ .scale{margin-left:auto;font-size:12px;color:var(--ink-2)}
-.et .ps .univ .scale b{font-weight:700}
+.et .ps .univ{border:1px solid #CBD2E1;border-radius:var(--r-card);overflow:hidden;background:var(--bg);box-shadow:var(--jt-card-shadow)}
+.et .ps .univ header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:13px 18px;background:var(--deep);border-bottom:1px solid #22396F}
+.et .ps .univ h2{font-size:16px;font-weight:900;letter-spacing:-.4px;color:#fff}
+.et .ps .univ .meta{font-size:13px;color:#9FB0D8}
+.et .ps .univ .scale{margin-left:auto;font-size:12px;color:#C9D4F0}
+.et .ps .univ .scale b{font-weight:700;color:#fff}
 
 .et .ps .thead,.et .ps .row{display:grid;grid-template-columns:minmax(0,1.7fr) 44px minmax(0,1fr) 120px minmax(0,1.15fr) 66px 22px;gap:12px;align-items:center;padding:0 16px}
-.et .ps .thead{height:34px;font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line)}
+.et .ps .thead{height:36px;font-size:12px;font-weight:800;color:var(--deep);background:var(--jt-head);border-bottom:1px solid var(--jt-head-line)}
 .et .ps .r{text-align:right}
 .et .ps .row{min-height:60px;padding-top:8px;padding-bottom:8px;transition:background .12s}
 .et .ps .item+.item{border-top:1px solid var(--line)}
 .et .ps .row:hover{background:var(--sub)}
 .et .ps .item.open .row{background:var(--jt-picked)}
 .et .ps .unit{display:flex;flex-direction:column;min-width:0}
-.et .ps .unit b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.et .ps .unit b{font-weight:800;color:var(--deep);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .et .ps .unit small{font-size:12px;color:var(--muted)}
 .et .ps .unit:hover b{color:var(--brand)}
 .et .ps .c-chev{display:grid;place-items:center;color:var(--muted)}
@@ -91,9 +94,9 @@
 .et .ps .published .pub-issues{margin:6px 0 0;padding:0;list-style:none;font-size:12px;color:var(--ink-2)}
 .et .ps .published .pub-issues b,.et .ps .evidence li small{font-weight:700;color:var(--ink)}
 .et .ps .evidence li small{font-weight:500;color:var(--muted)}
-.et .ps .card{border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.et .ps .card h3{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px}
-.et .ps .card .big{font-size:26px;font-weight:900;letter-spacing:-.6px}
+.et .ps .card{border:1px solid var(--line);border-top:3px solid var(--deep);border-radius:var(--r-card);background:var(--bg);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0;box-shadow:var(--jt-card-shadow)}
+.et .ps .card h3{font-size:12px;font-weight:800;color:var(--brand);letter-spacing:.5px}
+.et .ps .card .big{font-size:26px;font-weight:900;letter-spacing:-.6px;color:var(--deep);font-variant-numeric:tabular-nums}
 .et .ps .card .big small{font-size:13px;font-weight:600;color:var(--muted);margin-left:4px}
 .et .ps .card .big.hold{font-size:18px;color:var(--muted)}
 .et .ps .card .big.up{color:var(--safe)}
@@ -109,7 +112,7 @@
 .et .ps .years table{width:100%;border-collapse:collapse;font-size:13px}
 .et .ps .years caption{text-align:left;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px;padding-bottom:6px}
 .et .ps .years th,.et .ps .years td{padding:6px 8px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
-.et .ps .years thead th{border-top:0;font-size:12px;color:var(--muted);font-weight:700}
+.et .ps .years thead th{border-top:0;background:var(--jt-head);font-size:12px;color:var(--deep);font-weight:800}
 .et .ps .years .r{text-align:right}
 .et .ps .years .m{display:inline-block;margin-right:14px;color:var(--ink-2)}
 .et .ps .years .m b{color:var(--ink)}

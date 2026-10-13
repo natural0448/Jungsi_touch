@@ -78,16 +78,17 @@
 /* ── 리포트 ── */
 .et .rp-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
 .et .rp-meta .btn{margin-left:auto}
-.et .rp-overall{display:grid;grid-template-columns:1fr 1.4fr;gap:16px;padding:20px 22px;border-radius:var(--r-card);background:var(--sub)}
+.et .rp-overall{display:grid;grid-template-columns:1fr 1.4fr;gap:16px;padding:22px 24px;border:1px solid var(--line);border-top:3px solid var(--deep);border-radius:var(--r-card);background:var(--bg);box-shadow:var(--jt-card-shadow)}
 .et .rp-overall .n{min-width:0}
-.et .rp-overall small{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
-.et .rp-overall .big{font-size:36px;font-weight:900;letter-spacing:-1px}
+.et .rp-overall small{display:block;font-size:12px;font-weight:700;color:var(--brand);margin-bottom:4px}
+.et .rp-overall .big{font-size:36px;font-weight:900;letter-spacing:-1px;color:var(--deep);font-variant-numeric:tabular-nums}
 .et .rp-overall .unit{margin-left:4px;font-size:14px;font-weight:700;color:var(--ink-2)}
 .et .rp-overall .est{margin-left:8px;padding:2px 7px;border-radius:3px;background:var(--reach-soft);color:var(--reach);font-size:12px;font-weight:700;vertical-align:middle}
 .et .rp-overall .wait{font-size:22px;font-weight:900;color:var(--muted)}
 .et .rp-overall .tie{margin:6px 0 0;font-size:12px;color:var(--ink-2);line-height:1.6}
 .et .rp-sec{display:grid;gap:10px}
-.et .rp-sec h2,.et .pr-sheet h2{font-size:18px;font-weight:900;letter-spacing:-.4px}
+.et .rp-sec h2,.et .pr-sheet h2{font-size:18px;font-weight:900;letter-spacing:-.4px;color:var(--deep)}
+.et .rp-sec h2::before{content:"";display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:50%;background:var(--touch);vertical-align:.25em}
 .et .rp-sec h2 .num{color:var(--muted);font-weight:700}
 .et .rp-sechd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .et .rp-subjects{min-width:560px}
@@ -101,7 +102,7 @@
 .et .rp-short tbody th small{font-weight:600;color:var(--ink-2)}
 .et .rp-short .stale-tag{display:inline-block;margin-left:8px;padding:1px 6px;border-radius:4px;background:var(--sub);font-size:11px;font-weight:700;color:var(--muted)}
 .et .rp-short .why{white-space:normal;min-width:220px;color:var(--ink-2)}
-.et .rp-empty{border:1px dashed var(--line);border-radius:var(--r-card);padding:16px}
+.et .rp-empty{border:1.5px dashed var(--jt-field);border-radius:var(--r-card);padding:18px 20px;background:var(--sub)}
 .et .rp-empty p{margin:0 0 10px;font-size:13px;color:var(--ink-2)}
 .et .rp-empty .acts{display:flex;gap:8px;flex-wrap:wrap}
 .et .rp-foot{margin:0;font-size:12px;color:var(--muted)}
@@ -139,28 +140,30 @@
 }
 
 /* ── 과목별 결과: 수능 성적표와 같은 가로 표(읽기 전용) ── */
-.et .rp-sheet{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--ink-2);border-radius:var(--r-sm)}
+.et .rp-sheet{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #CBD2E1;border-radius:var(--r-card);background:var(--bg);box-shadow:var(--jt-card-shadow)}
 .et .rp-sheet table{width:100%;min-width:640px;border-collapse:collapse;table-layout:fixed;font-size:13px}
 .et .rp-sheet col.c-head{width:108px}
 .et .rp-sheet col.c-main{width:16%}
 .et .rp-sheet th,.et .rp-sheet td{border:1px solid var(--line);text-align:center;vertical-align:middle}
-.et .rp-sheet thead th{height:30px;padding:6px 4px;background:var(--sub-2);font-weight:800;color:var(--ink);line-height:1.3;border-color:#D5D9E4}
-.et .rp-sheet thead th.sub{height:26px;font-size:12px;font-weight:700;color:var(--ink-2)}
-.et .rp-sheet thead th.corner{color:var(--muted);font-weight:700}
-.et .rp-sheet tbody th{position:sticky;left:0;z-index:1;padding:6px 8px;background:var(--sub);font-weight:800;color:var(--ink);text-align:left;border-color:#D5D9E4}
+.et .rp-sheet thead th{height:34px;padding:7px 4px;background:var(--deep);font-weight:800;color:#fff;line-height:1.3;border-color:#22396F;letter-spacing:-.2px}
+.et .rp-sheet thead th.sub{height:28px;background:#1A3268;font-size:12px;font-weight:700;color:#C9D4F0}
+.et .rp-sheet thead th.corner{color:#9FB0D8;font-weight:700}
+.et .rp-sheet tbody th{position:sticky;left:0;z-index:1;padding:6px 12px;background:var(--sub);font-weight:800;color:var(--ink);text-align:left;border-color:var(--line)}
 .et .rp-sheet tbody th small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
-.et .rp-sheet tbody td{height:40px;padding:2px 6px}
-.et .rp-sheet tr.key td{box-shadow:inset 0 -3px 0 var(--brand);font-size:16px}
+.et .rp-sheet tbody td{height:44px;padding:2px 6px}
+.et .rp-sheet tr.key td{background:var(--jt-filled);font-size:18px;font-weight:800;color:var(--deep)}
+.et .rp-sheet tr.key td.na{background:var(--sub)}
 .et .rp-sheet td .num{font-variant-numeric:tabular-nums;letter-spacing:-.2px}
 .et .rp-sheet td.na{background:var(--sub)}
+.et .rp-sheet td .num{font-weight:800;color:var(--deep)}
 .et .rp-sheet .rs-na{color:#C3C7D3;font-weight:700;font-size:12px}
 .et .rp-sheet .rs-wait{display:inline-block;padding:2px 6px;border-radius:3px;background:var(--sub);font-size:11px;font-weight:600;color:var(--muted)}
 .et .rp-sheet-note{margin:0;padding:8px 10px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-2);line-height:1.5}
 
 /* ── 위치 그래프: 상위 % 를 눈금 위에 표시 ── */
-.et .rp-chart{display:grid;gap:7px;border:1px solid var(--line);border-radius:var(--r-card);padding:16px 18px}
+.et .rp-chart{display:grid;gap:7px;border:1px solid var(--line);border-radius:var(--r-card);padding:18px 20px;background:var(--bg);box-shadow:var(--jt-card-shadow)}
 .et .rp-chart header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:2px}
-.et .rp-chart h3{font-size:14px;font-weight:800}
+.et .rp-chart h3{font-size:14px;font-weight:900;color:var(--deep)}
 .et .rp-chart header small{font-size:11px;color:var(--muted)}
 .et .pc-row{display:grid;grid-template-columns:96px 1fr 58px;align-items:center;gap:10px}
 .et .pc-label{min-width:0;font-size:12px;font-weight:800;color:var(--ink);line-height:1.25}
@@ -186,6 +189,9 @@
 @media print{
   .et .rp-sheet{overflow:visible;border-color:#999;break-inside:avoid}
   .et .rp-sheet table{min-width:0}
+  /* 남색 머리는 배경 인쇄가 꺼지면 흰 글자만 남으므로 흑백 머리로 */
+  .et .rp-sheet thead th,.et .rp-sheet thead th.sub{background:#fff!important;color:#000!important;border-color:#999!important}
+  .et .rp-overall,.et .rp-chart,.et .rp-sheet{box-shadow:none}
   /* 흑백 인쇄에서도 점·띠가 또렷하게: 색 의존을 없애고 명도 대비로 */
   .et .pc-track{outline-color:#999;background:#F2F2F2}
   .et .pc-track::before{opacity:1}

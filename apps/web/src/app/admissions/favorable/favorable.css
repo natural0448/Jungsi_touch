@@ -10,7 +10,8 @@
 .et .fv-main{display:grid;gap:12px;min-width:0}
 .et .fv-side{position:sticky;top:64px}
 .et .fv-sec-hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.et .fv-sec-hd h2{font-size:18px;font-weight:900;letter-spacing:-.4px}
+.et .fv-sec-hd h2{font-size:18px;font-weight:900;letter-spacing:-.4px;color:var(--deep)}
+.et .fv-sec-hd h2::before{content:"";display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:50%;background:var(--touch);vertical-align:.25em}
 .et .fv-sec-hd h2 .num{color:var(--muted);font-weight:700;margin-left:2px}
 .et .fv-sec-hd>span{font-size:12px;color:var(--muted)}
 .et .fv .chips{margin-bottom:0}
@@ -23,18 +24,19 @@
 .et .fv-note{margin:4px 2px 0;font-size:12px;color:var(--muted)}
 
 /* ── 학교 카드 ── */
-.et .sc{border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:18px 20px 14px;transition:box-shadow .15s,border-color .15s}
+.et .sc{border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:18px 20px 14px;box-shadow:var(--jt-card-shadow);transition:box-shadow .15s,border-color .15s}
 .et .sc:hover{border-color:#D3D8E4;box-shadow:var(--shadow)}
 .et .sc.open{border-color:#D3D8E4}
 .et .sc-hd{display:flex;align-items:flex-start;gap:12px}
 /* 학교 분류는 무채색 꼬리표. 색 있는 판단은 학과에만 */
 .et .bucket{flex:none;display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:var(--r-sm);border:1px solid var(--ink);font-size:12px;font-weight:800;color:var(--ink);white-space:nowrap}
-.et .bucket.core{background:var(--ink);color:var(--bg)}
+.et .bucket{border-color:var(--deep);color:var(--deep)}
+.et .bucket.core{background:var(--deep);color:#fff}
 .et .bucket.room{border-style:dashed}
 .et .sc-hd .ttl{min-width:0}
-.et .sc-hd h3{font-size:18px;font-weight:900;letter-spacing:-.5px}
+.et .sc-hd h3{font-size:18px;font-weight:900;letter-spacing:-.5px;color:var(--deep)}
 .et .sc-hd p{margin:2px 0 0;font-size:12px;color:var(--ink-2)}
-.et .sc-why{display:flex;gap:8px;align-items:baseline;margin:12px 0 0;padding:9px 12px;border-radius:var(--r-sm);background:var(--sub);font-size:13px;line-height:1.5}
+.et .sc-why{display:flex;gap:8px;align-items:baseline;margin:12px 0 0;padding:9px 12px;border-left:3px solid var(--brand);border-radius:var(--r-sm);background:var(--jt-filled);font-size:13px;line-height:1.5}
 .et .sc-why span{flex:none;font-size:11px;font-weight:800;color:var(--brand)}
 .et .sc-why .lead-unit{display:block;font-size:12px;font-weight:800;color:var(--ink);margin-bottom:2px}
 .et .sc-why .reason-list{padding-left:16px}
@@ -45,7 +47,7 @@
 .et .sc-sum .mix{display:flex;gap:8px;flex-wrap:wrap}
 .et .sc-sum .mixi{display:inline-flex;align-items:center;gap:4px}
 .et .sc-sum .mixi b{font-size:14px;font-weight:900}
-.et .sc-sum .big{font-size:20px;font-weight:900;letter-spacing:-.4px}
+.et .sc-sum .big{font-size:20px;font-weight:900;letter-spacing:-.4px;color:var(--deep);font-variant-numeric:tabular-nums}
 .et .sc-sum .big i{font-style:normal;font-size:13px;font-weight:600;color:var(--muted)}
 .et .sc-sum .big.up{color:var(--safe)}
 .et .sc-sum .big.down{color:var(--ink-2)}
@@ -56,12 +58,12 @@
 
 .et .sc-rows{margin-top:10px;border-top:1px solid var(--line)}
 .et .sc-rhd,.et .sc-row .line{display:grid;grid-template-columns:minmax(0,1.5fr) 40px minmax(0,1fr) 112px minmax(0,1fr) 60px;gap:10px;align-items:center}
-.et .sc-rhd{padding:8px 0;font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line)}
+.et .sc-rhd{padding:8px 10px;margin:0 -10px;font-size:12px;font-weight:800;color:var(--deep);background:var(--jt-head);border-bottom:1px solid var(--jt-head-line);border-radius:var(--r-sm) var(--r-sm) 0 0}
 .et .sc .r{text-align:right}
 .et .sc-row{padding:10px 0;border-bottom:1px solid var(--line);display:grid;gap:4px}
 .et .sc-row.inel .line{opacity:.7}
 .et .sc-row .u{display:flex;flex-direction:column;min-width:0}
-.et .sc-row .u b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.et .sc-row .u b{font-weight:800;color:var(--deep);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .et .sc-row .u small{font-size:12px;color:var(--muted)}
 .et .sc-row .u:hover b{color:var(--brand)}
 .et .sc-row .why{margin:0;font-size:12px;color:var(--ink-2);line-height:1.5}

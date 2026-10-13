@@ -1,12 +1,15 @@
 /* 1페이지 · 대학 발표 입시결과 — 3페이지와 같은 검색 상자, 대학별 묶음 안에 모집단위마다 발표 지표 표 */
 .et .rs{display:grid;gap:16px;padding-bottom:40px}
 
-.et .rs-filter{border:1px solid var(--line);border-radius:var(--r-card);padding:16px 18px 8px}
+.et .rs-filter{border:1px solid var(--line);border-radius:var(--r-card);padding:20px 22px 10px;background:var(--bg);box-shadow:var(--jt-card-shadow)}
 .et .rs-search{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}
 .et .rs-field{display:flex;flex-direction:column;gap:6px;min-width:0}
-.et .rs-field span{font-size:13px;font-weight:700}
-.et .rs-search input{width:100%;min-width:0;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:var(--r-card);font:inherit;color:var(--ink)}
+.et .rs-field span{font-size:12.5px;font-weight:800;color:var(--deep)}
+.et .rs-search input{width:100%;min-width:0;height:46px;padding:0 14px;border:1.5px solid var(--jt-field);border-radius:var(--r-card);background:var(--bg);font:inherit;font-weight:600;color:var(--ink);transition:border-color .15s,box-shadow .15s,background-color .15s}
+.et .rs-search input::placeholder{font-weight:500;color:#B4B9C9}
+.et .rs-search input:hover{border-color:#AEB7CC}
 .et .rs-search input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.et .rs-search input:not(:placeholder-shown){border-color:var(--brand);background:var(--jt-filled)}
 .et .rs-search .btn{height:46px;padding:0 26px;font-size:14px}
 .et .rs .cfilter{margin-bottom:6px}
 .et .rs .cfilter .lab{width:44px}
@@ -20,17 +23,17 @@
 .et .rs-note{margin:0;padding:10px 14px;border-radius:var(--r-sm);background:var(--reach-soft);color:var(--ink);font-size:13px}
 
 .et .rs-list{display:grid;gap:12px}
-.et .rs-univ{border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
-.et .rs-univ header{display:flex;align-items:baseline;gap:10px;padding:12px 16px;background:var(--sub);border-bottom:1px solid var(--line)}
-.et .rs-univ h2{font-size:16px;font-weight:900;letter-spacing:-.4px}
-.et .rs-univ .meta{font-size:13px;color:var(--muted)}
-.et .rs-univ .cnt{margin-left:auto;font-size:12px;color:var(--muted)}
+.et .rs-univ{border:1px solid #CBD2E1;border-radius:var(--r-card);overflow:hidden;background:var(--bg);box-shadow:var(--jt-card-shadow)}
+.et .rs-univ header{display:flex;align-items:baseline;gap:10px;padding:13px 18px;background:var(--deep);border-bottom:1px solid #22396F}
+.et .rs-univ h2{font-size:16px;font-weight:900;letter-spacing:-.4px;color:#fff}
+.et .rs-univ .meta{font-size:13px;color:#9FB0D8}
+.et .rs-univ .cnt{margin-left:auto;font-size:12px;font-weight:700;color:#C9D4F0}
 .et .rs-off{padding:12px 16px 14px}
 .et .rs-off+.rs-off{border-top:1px solid var(--line)}
 .et .rs-off.open{background:var(--jt-picked)}
 .et .rs-offhd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .et .rs-offhd .unit{display:flex;flex-direction:column;min-width:0;flex:1}
-.et .rs-offhd .unit b{font-weight:800;font-size:15px}
+.et .rs-offhd .unit b{font-weight:900;font-size:15px;color:var(--deep);letter-spacing:-.3px}
 .et .rs-offhd .unit small{font-size:12px;color:var(--muted)}
 .et .rs-offhd:hover .unit b{color:var(--brand)}
 .et .rs-offhd .go{color:var(--muted);display:grid;place-items:center}
@@ -79,14 +82,15 @@
 .et .rs-rec.wait,.et .rs-rec .wait{color:var(--muted);font-weight:600}
 .et .rs-years{min-width:560px}
 .et .rs-years thead th{white-space:nowrap}
-.et .rs-years tbody th{font-weight:800;color:var(--ink);background:none;white-space:nowrap}
+.et .rs-years tbody th{font-weight:800;color:var(--deep);background:none;white-space:nowrap}
+.et .rs-years td b{color:var(--deep)}
 .et .rs-years tbody th small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
 .et .rs-years td small{color:var(--muted)}
 /* 미수집 안내: 조회 예산(학년도별 limit) 때문에 아직 안 담긴 범위를 분명히 알린다 */
 .et .rs-uncollected{margin:10px 0 0;padding:9px 14px;border:1px solid var(--line);border-left:3px solid var(--warn, #b45309);border-radius:8px;background:var(--sub);font-size:12px;color:var(--ink-2);line-height:1.6}
 
 /* 지표 설명: 카드마다 반복하지 않고 목록 위 공통 상자 한 번 */
-.et .rs-legendbox{margin:10px 0 2px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.et .rs-legendbox{margin:10px 0 2px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--sub)}
 .et .rs-legendbox summary{cursor:pointer;padding:9px 16px;font-size:12px;font-weight:800;color:var(--ink)}
 .et .rs-legend{display:grid;gap:3px;margin:0;padding:0 16px 10px;font-size:11px;color:var(--ink-2);line-height:1.55}
 .et .rs-legend div{display:flex;gap:8px}
@@ -99,5 +103,5 @@
 
 /* 추정 열(화면 계산) */
 .et .rs-years th.derived{color:var(--ink-2);font-weight:700}
-.et .rs-years td.derived{background:var(--sub)}
+.et .rs-years td.derived{background:#F8F9FC}
 .et .rs-years td.derived .num{color:var(--ink-2)}
