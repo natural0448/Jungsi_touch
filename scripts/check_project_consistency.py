@@ -1149,6 +1149,9 @@ def live_execution_document(spec):
     """Render current runtime work from operation IDs, without duplicating routes."""
     c=spec.get('supabase_deployment_contract',{}).get('live_execution')
     if not c:return ''
+    positions=c.get('position_graph')
+    position_text=('\n\n### 위치 그래프의 기준\n\n'+table(['표시 기준','산식','적용 범위'],positions['formula_rows'])+'\n\n'+
+        '\n\n'.join(positions[k]for k in ('comparison_rule','synthetic_rule','live_rule','frontend_handoff')))if positions else ''
     rows=[]
     for o in spec['operations']:
         state=c['operations'][o['id']]
@@ -1156,7 +1159,7 @@ def live_execution_document(spec):
     return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
             table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
             table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
-            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule'])
+            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+position_text)
 
 
 def validate_live_execution(spec):
