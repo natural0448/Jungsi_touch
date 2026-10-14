@@ -157,6 +157,45 @@
       ]
     },
     {
+      "path": "scripts/bootstrap_edge_runtime.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "ee5ffa67de87cb268de6b02e774c84d1936903831943b2f2efc6c1e1e3a56c54",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "bootstrap",
+          "signature": "def bootstrap(destination, lock_path='edge-runtime.lock.json', *, system=None, machine=None, downloader=download_asset, version_probe=probe_version):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "checked_destination",
+          "signature": "def checked_destination(destination):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "download_asset",
+          "signature": "def download_asset(url, limit):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "probe_version",
+          "signature": "def probe_version(executable, destination):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "read_lock",
+          "signature": "def read_lock(lock_path, system, machine):",
+          "decorators": []
+        }
+      ]
+    },
+    {
       "path": "scripts/calculate_overall_percentile.py",
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
@@ -541,7 +580,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "be8071f3d5c038827c601b817bb8a5e496d78ea844cd29329788e2dd628a8354",
+      "source_sha256": "ddeb36e20656171b65bb9953b15e10f03d35e7086117479b1c0c1186ecb1a9ca",
       "symbols": [
         {
           "kind": "class",

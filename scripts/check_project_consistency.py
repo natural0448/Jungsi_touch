@@ -2361,7 +2361,7 @@ def edge_document_text(spec):
       "상태: "+c["state"]+". domain은 애플리케이션 내부 계산 라이브러리다. TS 선언·기본값·반환형·import graph는 고정 snapshot에서 Deno doc/info로 대조한다.\n\n"+
       table(["파일","계층","등록 심볼"],rows)+
       "\n\n같은 Git snapshot에서 기존 Python 전체 검산 다음에 Deno check/lint/fmt·"+
-      str(c["unit_count"])+" 단위검산·Python–Deno "+str(c["oracle_count"])+" 합성 대조를 실행한다. Deno 경로는 명시 입력하며 공급은 미정이다. 미설치·비호환·파서 실패·결과 누락은 실패이고 자동 설치·skip 성공은 없다. foundation 소스가 없는 공통 준비 단계는 NOT_APPLICABLE_NO_FOUNDATION_SOURCE이며 실행 검산 완료가 아니다. 기존 공개 Edge 소스는 현재 문서 동기화 색인으로 결속하며 foundation 선언·graph·39/993 결과에 포함하지 않는다.")
+      str(c["unit_count"])+" 단위검산·Python–Deno "+str(c["oracle_count"])+" 합성 대조를 실행한다. 로컬 훅은 명시한 Deno 경로를 사용한다. CI는 edge-runtime.lock.json의 공식 Deno "+c["runtime"]["deno"]+" 배포 파일을 scripts/bootstrap_edge_runtime.py로 새 보존 폴더에 공급하고 아카이브 해시·크기·실행 버전을 검증한다. 기존 폴더 덮어쓰기·삭제·시스템 설치·최신 버전 대체는 없다. 미설치·비호환·파서 실패·결과 누락은 실패이고 skip 성공은 없다. foundation 소스가 없는 공통 준비 단계는 NOT_APPLICABLE_NO_FOUNDATION_SOURCE이며 실행 검산 완료가 아니다. 실행기 공급 영수증도 서비스 단위검산·oracle 통과를 대신하지 않는다. 기존 공개 Edge 소스는 현재 문서 동기화 색인으로 결속하며 foundation 선언·graph·단위검산·oracle 결과에 포함하지 않는다.")
 
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)

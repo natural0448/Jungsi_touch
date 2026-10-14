@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.46",
+  "version": "1.9.47",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2863,7 +2863,8 @@
       "scripts/audit_documentation_sync.py",
       "scripts/check_edge_contract.py",
       "scripts/run_edge_tests.py",
-      "scripts/edge_source_scope.py"
+      "scripts/edge_source_scope.py",
+      "scripts/bootstrap_edge_runtime.py"
     ],
     "line_endings": "LF for generated documents, route catalogs, hooks and new service foundation",
     "feature_ownership": "시스템기획팀만 develop에서 기획·공통 관리 설정을 직접 관리한다. 시스템·콘텐츠 개발자는 feature/application-pre-data-platform, 화면 개발자는 feature/presentation-foundation을 상시 재사용한다. 다른 팀은 develop에서 직접 구현하지 않고 담당 브랜치의 PR로 누적한다. 3티어는 폴더·포트·의존 관계로 구분한다. 하위 작업은 필요 시 부모·담당·사유를 정본에 등록하며 작업 항목이나 에이전트마다 생성하지 않는다.",
@@ -2874,7 +2875,7 @@
       "implementation": "다른 개발 담당은 각자의 상시 브랜치에서 구현하고 PR로 develop에 통합한다. develop 직접 구현·main 직접 푸시는 금지한다."
     },
     "CI_snapshot_policy": {
-      "runner": "GitHub-hosted ubuntu-24.04의 사전 설치 Git/CPython 3.12만 사용한다. checkout/setup-python 액션과 설치 대체 경로는 사용하지 않는다.",
+      "runner": "GitHub-hosted ubuntu-24.04의 사전 설치 Git/CPython 3.12를 사용하고, Deno 2.9.7은 고정 공식 아카이브를 새 outputs/ci_edge_runtime에 명시적으로 공급한다. checkout/setup-python/외부 설치 액션·시스템 설치·최신 버전 대체는 사용하지 않는다.",
       "destination": "GITHUB_WORKSPACE/retained_snapshots/run_<run_id>_attempt_<run_attempt>가 존재하거나 symlink이면 중단한다. 새 비존재 경로만 생성하고 기존 경로·파일을 보존한다.",
       "commit": "git init 후 github.sha와 전체 부모 이력, refs/heads/develop 및 refs/heads/feature/presentation-foundation을 fetch한다. 두 origin tracking ref의 고정 SHA가 확인돼야 지정 github.sha를 최초 detached checkout한다. 각 HEAD/ref가 확보된 SHA와 다르면 실패한다.",
       "credentials": "GitHub token은 fetch subprocess의 GIT_CONFIG_* http extraheader 환경으로만 전달한다. argv/로그/파일과 init/checkout/test subprocess에는 전달하지 않는다. Git trace 및 외부 config 입력을 차단하며 실패는 원문 진단 없이 안전한 사유로 기록한다.",
@@ -3039,7 +3040,10 @@
         "tests/test_edge_harness.py",
         "tests/test_edge_source_scope.py",
         "scripts/edge_source_scope.py",
-        "scripts/run_committed_tests.py"
+        "scripts/run_committed_tests.py",
+        "scripts/bootstrap_edge_runtime.py",
+        "tests/test_edge_runtime_supply.py",
+        "edge-runtime.lock.json"
       ],
       "child_templates": [
         {
@@ -3374,7 +3378,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.46",
+        "contract_version": "1.9.47",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -3548,7 +3552,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.46",
+        "contract_version": "1.9.47",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -3714,7 +3718,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.46",
+        "contract_version": "1.9.47",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -3733,7 +3737,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.46",
+        "contract_version": "1.9.47",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3758,7 +3762,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "planned",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.46",
+        "contract_version": "1.9.47",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -3783,7 +3787,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.46",
+        "contract_version": "1.9.47",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -3993,6 +3997,45 @@
                 "kind": "function",
                 "name": "bootstrap",
                 "signature": "def bootstrap(destination, lock_path):",
+                "decorators": []
+              }
+            ]
+          },
+          {
+            "path": "scripts/bootstrap_edge_runtime.py",
+            "layer": "planning_tool",
+            "status": "shared_management_or_synthetic_CLI",
+            "requirements": [],
+            "source_sha256": "ee5ffa67de87cb268de6b02e774c84d1936903831943b2f2efc6c1e1e3a56c54",
+            "symbols": [
+              {
+                "kind": "function",
+                "name": "bootstrap",
+                "signature": "def bootstrap(destination, lock_path='edge-runtime.lock.json', *, system=None, machine=None, downloader=download_asset, version_probe=probe_version):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "checked_destination",
+                "signature": "def checked_destination(destination):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "download_asset",
+                "signature": "def download_asset(url, limit):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "probe_version",
+                "signature": "def probe_version(executable, destination):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "read_lock",
+                "signature": "def read_lock(lock_path, system, machine):",
                 "decorators": []
               }
             ]
@@ -4382,7 +4425,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "be8071f3d5c038827c601b817bb8a5e496d78ea844cd29329788e2dd628a8354",
+            "source_sha256": "ddeb36e20656171b65bb9953b15e10f03d35e7086117479b1c0c1186ecb1a9ca",
             "symbols": [
               {
                 "kind": "class",
@@ -10464,6 +10507,12 @@
           "PR31 e2a8354 → merge b809b6e → develop3698534 / spec1.9.44",
           "develop 통합 및 정확 SHA CI PASS; 합성·실제 제한 READONLY JOIN 근거 수용",
           "public.jeongsi_passes 단일 기준과 관리8경로의 검증aal2·본인active·기존 학교 범위를 구현했다. 복수 발표기준은 제한ID 배치JOIN과 같은 hash/context/영수증 검증을 유지한다. 학생 응답/성공 환산·개별 보류를 보존하며 실제 JWT·OTP 등록/회수·Edge 재배포·resolver·CAP 제거/VACUUM·일반 발행은 NOT_RUN이다."
+        ],
+        [
+          "기획·서비스 / DEV-010 동일 스냅샷 Edge 검산의 실행기 공급",
+          "기준 develop f8951cd / spec1.9.46; CI 공급 준비 spec1.9.47",
+          "공식 Deno2.9.7 Linux/Windows x64 아카이브 해시 고정·새 보존 목적지 공급; foundation prepared",
+          "실행기 공급·서비스 단위검산·oracle·실제 운영 연결을 구분한다. 개발팀 후보9파일/합성77건/선언19파일은 아직 제안이고, 정상 feature 통합·현재 결합116/993·최종SHA CI가 필요하다. 이전 staged15·원본·실패 로그를 보존하며 데이터팀 단일DB writer와 JWT/OTP/배포 NOT_RUN을 유지한다."
         ]
       ]
     }
@@ -12029,6 +12078,18 @@
         "REQ-26"
       ],
       "summary": "DEV-010 다음 단계의 공통 검사 준비만 적용: 현재 Edge18의 바이트/등록 검사를 보존하고 foundation scope·선언/graph·현재 Python/Edge 동일 스냅샷 검산을 분리. 새 공존/경로/파서/누락 반례 검사와 fail-closed 게이트를 연결하되 foundation15·API22 이식·실행기 공급·운영 배포는 완료로 처리하지 않는다. 기존 원본/staged15·단일 DB writer·최신 session/권한·기획/라우팅 동기화를 유지한다."
+    },
+    {
+      "date": "2026-10-14",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "DEV-010의 실제 통합 선행 조건인 CI Deno 공급을 고정 공식2.9.7/아카이브SHA/버전 검증·새 보존 폴더 방식으로 구현한다. 현재 훅/CI/10분 제한·문서와 라우팅 동기화·데이터 제외·기존 Edge18 결속을 유지한다. 시스템 설치·기존 경로 초기화·최신 버전 대체·skip 성공은 없으며 준비 단계와 서비스 후보116/993·운영 JWT/OTP/배포 검수를 구분한다."
     }
   ],
   "overall_analysis_contract": {
@@ -26208,7 +26269,7 @@
     }
   },
   "edge_harness": {
-    "CI_supply": "UNDECIDED_NO_AUTO_INSTALL_NO_SKIP_PASS",
+    "CI_supply": "EXPLICIT_PINNED_BOOTSTRAP_NO_SYSTEM_INSTALL_NO_CLEANUP_NO_SKIP_PASS",
     "config": "supabase/functions/deno.json",
     "files": {
       "supabase/functions/_shared/jungsi/application/access.ts": {
@@ -30588,7 +30649,10 @@
       "deno": "2.9.7",
       "doc_json_version": 2,
       "info_json_version": 1,
-      "supply": "UNDECIDED_EXPLICIT_PREINSTALLED_ONLY"
+      "supply": "EXPLICIT_HASH_PINNED_OFFICIAL_RELEASE_FRESH_RETAINED_DIRECTORY",
+      "lock": "edge-runtime.lock.json",
+      "bootstrap": "scripts/bootstrap_edge_runtime.py",
+      "lock_sha256": "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
     },
     "source_scope": {
       "coexisting_source_basis": "workflow.documentation_sync.code_index.edge_sources",

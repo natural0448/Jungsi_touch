@@ -1,5 +1,5 @@
 {
-  "CI_supply": "UNDECIDED_NO_AUTO_INSTALL_NO_SKIP_PASS",
+  "CI_supply": "EXPLICIT_PINNED_BOOTSTRAP_NO_SYSTEM_INSTALL_NO_CLEANUP_NO_SKIP_PASS",
   "config": "supabase/functions/deno.json",
   "files": {
     "supabase/functions/_shared/jungsi/application/access.ts": {
@@ -4376,10 +4376,13 @@
     }
   },
   "runtime": {
+    "bootstrap": "scripts/bootstrap_edge_runtime.py",
     "deno": "2.9.7",
     "doc_json_version": 2,
     "info_json_version": 1,
-    "supply": "UNDECIDED_EXPLICIT_PREINSTALLED_ONLY"
+    "lock": "edge-runtime.lock.json",
+    "lock_sha256": "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98",
+    "supply": "EXPLICIT_HASH_PINNED_OFFICIAL_RELEASE_FRESH_RETAINED_DIRECTORY"
   },
   "source_scope": {
     "coexisting_source_basis": "workflow.documentation_sync.code_index.edge_sources",

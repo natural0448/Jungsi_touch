@@ -132,3 +132,6 @@ Desktop.ini
 !scripts/run_edge_tests.py
 
 !scripts/edge_source_scope.py
+
+# Reviewed hash-pinned official Edge runtime supplier; retained binaries stay private.
+!/scripts/bootstrap_edge_runtime.py
