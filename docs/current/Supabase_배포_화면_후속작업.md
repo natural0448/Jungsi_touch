@@ -130,4 +130,4 @@ Edge 구현 NOT_RUN · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 NOT_R
 
 
 
-<!-- jungsi:generated spec_sha256=4cd63ccdc6aa72c2ce83653ec009612764d7998aa4e034b1c2d66a35369f6e5b -->
+<!-- jungsi:generated spec_sha256=a889eb97d6c895f5313abeacb58dfc80920efe7af4ca393fec937ac578ff16b1 -->

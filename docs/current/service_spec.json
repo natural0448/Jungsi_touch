@@ -12855,6 +12855,18 @@
         "REQ-26"
       ],
       "summary": "DEV-010 구현3845b1e56bdd4a7e35abebf5b1a05eb3a43d78d1의 정상pre-commit 영수증: Python990·Deno116·동일선택snapshot Python/Edge993 PASS, 실패/오류/skip/불일치0 및 source_preserved=true. 과거 준비·제안 이력과 현재 소스/사전권한·합성 검산을 분리했다. 최종 커밋·정상push·정확SHA CI/PR은 별도 영수증에서 확인하며 실제 transport/JWT/OTP/운영 배포·DB/Auth/Storage 쓰기/API22전체 이식은 완료로 표시하지 않는다."
+    },
+    {
+      "date": "2026-10-14",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "DEV-010의 새 foundation/검산21파일만 Windows checkout에서도 LF가 유지되도록 .gitattributes의 경로 규칙3개를 추가한다. 동일 Git snapshot의 소스/선언 해시 결속과 Deno fmt 검증을 보존하며 기존Edge18·업무/DB/운영 경로는 변경하지 않는다. 새 보존 폴더 checkout-index 결과와 선택 index blob의 SHA를 비교하고 정상 훅·최종SHA CI를 계속 요구한다."
     }
   ],
   "overall_analysis_contract": {
