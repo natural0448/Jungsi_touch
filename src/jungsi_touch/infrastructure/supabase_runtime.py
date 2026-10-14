@@ -332,7 +332,7 @@ def configuration_status():
 
 
 def configured_supabase_app():
-    """Opt-in Uvicorn factory. The legacy configured_app remains unchanged."""
+    """Opt-in Storage factory using the shared PostgreSQL pass authority."""
     from .secured_http import SecuritySettings
     from .supabase_storage import _json
     if configuration_status()['missing_settings']:

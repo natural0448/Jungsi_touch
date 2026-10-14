@@ -79,7 +79,8 @@ class SyntheticSessions:
     def __init__(self,clock):self.clock=clock
     def verify(self,token,now):
         if token.startswith('SYNTHETIC-'):
-            return VerifiedSession(token,self.clock.now()+timedelta(hours=1) if token!='SYNTHETIC-expired' else self.clock.now())
+            assurance='aal2' if token in ('SYNTHETIC-editor','SYNTHETIC-approver','SYNTHETIC-other') else None
+            return VerifiedSession(token,self.clock.now()+timedelta(hours=1) if token!='SYNTHETIC-expired' else self.clock.now(),assurance,'active')
         return None
 
 

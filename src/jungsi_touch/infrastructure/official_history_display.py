@@ -1,8 +1,8 @@
 """Opt-in, read-only official history display; never a calculation release.
 
 The immutable private descriptor binds current DB rows to reviewed public
-metadata. Its approval is display-purpose/environment only. Default factories,
-entitlements, runtime Storage approval and source flags remain unchanged.
+metadata. Its approval is display-purpose/environment only. This adapter inherits
+the composition root's entitlement authority; runtime/source approval is separate.
 """
 from __future__ import annotations
 from contextlib import contextmanager
@@ -377,7 +377,7 @@ class _DisplayBoundary(SecuredBoundary):
 
 
 def create_official_history_display_app(*, provider, security, settings, repository, sessions, clock):
-    """Explicit DI only: existing default factory and legacy entitlements unchanged."""
+    """Explicit scope injection; shared PostgreSQL entitlement policy applies."""
     if not isinstance(provider, PostgresOfficialHistoryDisplayProvider):
         raise _invalid()
     from .http_api import _compose_app

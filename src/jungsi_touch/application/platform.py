@@ -150,6 +150,12 @@ class PlatformService:
                     if not isinstance(ids,list) or not 1<=len(ids)<=100 or len(set(map(str,ids)))!=len(ids): raise PlatformError('invalid_offering_ids')
                     rows=[self.offering(release,oid) for oid in ids]
                 else: rows=[row for row in self.service_rows(release) if row['academic_year']==updated['overall']['exam']['academic_year']]
+                published_batch={};published_batch_error=None
+                if self.forecast_repository is not None:
+                    try:
+                        if self.forecast_service is None:raise PlatformError('forecast_not_configured',503)
+                        published_batch=self.forecast_service.validated_releases([row['offering_id'] for row in rows])
+                    except PlatformError as error:published_batch_error=error
                 results={}
                 for offering in rows:
                     conversion=self.scoring.calculate(offering,profile)
@@ -164,8 +170,9 @@ class PlatformService:
                     else:assessment=evaluate_offering(offering,profile,updated['overall'],bundle,conversion=conversion,percentile=percentile)
                     if self.forecast_repository is not None:
                         try:
-                            if self.forecast_service is None:raise PlatformError('forecast_not_configured',503)
-                            published=self.forecast_service.validated_release(offering['offering_id'])
+                            if published_batch_error is not None:raise published_batch_error
+                            published=published_batch[offering['offering_id']]
+                            if isinstance(published,PlatformError):raise published
                             if published is not None:
                                 history=assessment.get('decision_evidence',{}).get('historical_metrics',[])
                                 newer=evaluate_release(offering,profile,conversion,percentile,published,historical_metrics=history)

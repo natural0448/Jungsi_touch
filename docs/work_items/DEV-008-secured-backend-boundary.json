@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "accepted_on_develop_scoped_synthetic_verified",
   "contract_ref": "secured_backend_preparation_contract",
-  "contract_version": "1.9.41",
+  "contract_version": "1.9.54",
   "requirements": [
     "REQ-24",
     "REQ-25",
@@ -40,17 +40,18 @@
     "composition": {
       "factory": "create_secured_app",
       "required_keyword": "security",
-      "default_factories_unchanged": true,
+      "default_factories_unchanged": false,
       "legacy_factories": [
         "create_app",
         "configured_app"
       ],
-      "default_entitlement_authority": "jungsi_backend.entitlements",
+      "default_entitlement_authority": "public.jeongsi_passes",
       "automatic_storage_or_entitlement_transition": false,
       "local_verification_unchanged": true,
       "existing_API_count": 22,
       "API_or_DTO_additions": false,
-      "session_format": "jungsi.session/v1"
+      "session_format": "jungsi.session/v1",
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "relay": {
       "header": "X-Jungsi-Relay-Token",

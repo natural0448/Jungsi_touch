@@ -21,3 +21,8 @@
 /backend-runtime.lock.json text eol=lf
 /scripts/check_branch_policy.py text eol=lf
 /tests/test_branch_policy.py text eol=lf
+
+# DEV-010 exact source/declaration bindings remain LF in Windows checkouts.
+/supabase/functions/_shared/jungsi/** text eol=lf
+/supabase/functions/deno.json text eol=lf
+/tests/edge/** text eol=lf

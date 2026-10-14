@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
   "contract_ref": "official_history_db_display_contract",
-  "contract_version": "1.9.41",
+  "contract_version": "1.9.54",
   "requirements": [
     "REQ-01",
     "REQ-08",
@@ -63,8 +63,8 @@
       "edge_entry": "supabase/functions/official-history-display/index.ts",
       "edge_application": "supabase/functions/_shared/official_history_display.ts",
       "edge_infrastructure": "supabase/functions/_shared/official_history_postgres.ts",
-      "default_factories_changed": false,
-      "entitlement_authority": "jungsi_backend.entitlements",
+      "default_factories_changed": true,
+      "entitlement_authority": "public.jeongsi_passes",
       "existing_API_count": 22,
       "new_logical_API_or_DTO": false,
       "browser_DB_credentials": false,
@@ -73,7 +73,8 @@
       "edge_factory": "createOfficialHistoryDisplayHandler",
       "edge_provider": "createOfficialHistoryInfrastructure",
       "logical_operation_count": 5,
-      "edge_node_compatibility_bootstrap": "supabase/functions/_shared/node_compat_bootstrap.ts"
+      "edge_node_compatibility_bootstrap": "supabase/functions/_shared/node_compat_bootstrap.ts",
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "rules": [
       "표시 purpose 승인과 engine/production/native 전체 발행은 구분한다. 기존 Storage 승인 guard와 원본 false/null 상태는 유지한다.",

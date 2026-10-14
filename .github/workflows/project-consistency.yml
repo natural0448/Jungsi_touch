@@ -103,6 +103,8 @@ jobs:
           cd "$JUNGSI_CI_SNAPSHOT_DIR"
           python3.12 -B scripts/check_branch_policy.py --github-event "$GITHUB_EVENT_PATH" --revision "$GITHUB_SHA"
           python3.12 -B scripts/check_project_consistency.py --revision "$GITHUB_SHA"
+          python3.12 -B scripts/bootstrap_edge_runtime.py --destination outputs/ci_edge_runtime
+          export JUNGSI_DENO="$JUNGSI_CI_SNAPSHOT_DIR/outputs/ci_edge_runtime/bin/deno"
           python3.12 -B scripts/bootstrap_backend_runtime.py --destination outputs/ci_backend_runtime
           export PYTHONPATH="$JUNGSI_CI_SNAPSHOT_DIR/outputs/ci_backend_runtime/site"
           python3.12 -B scripts/run_committed_tests.py --revision "$GITHUB_SHA"

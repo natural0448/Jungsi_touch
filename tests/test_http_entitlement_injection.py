@@ -16,7 +16,9 @@ class IndependentEntitlements:
         if self.failure:raise PlatformError('entitlement_schema_unverified',503)
         return self.paid
     def active_paid_until(self,owner,now):
-        self.calls.append(('until',owner));return now+timedelta(seconds=60) if self.paid else None
+        self.calls.append(('until',owner))
+        if self.failure:raise PlatformError('entitlement_schema_unverified',503)
+        return now+timedelta(seconds=60) if self.paid else None
     def probe(self):return {'status':'failed' if self.failure else 'verified','private_detail':'never expose'}
 
 

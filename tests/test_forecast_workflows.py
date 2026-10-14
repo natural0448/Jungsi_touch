@@ -8,7 +8,7 @@ from forecast_synthetic_fixture import Inputs,CONTEXT
 
 class ForecastWorkflowTests(unittest.TestCase):
     def setUp(self):
-        self.editor=Actor('SYNTHETIC-editor',True);self.approver=Actor('SYNTHETIC-approver',True)
+        self.editor=Actor('SYNTHETIC-editor',True,'aal2','active');self.approver=Actor('SYNTHETIC-approver',True,'aal2','active')
         self.repo=MemoryForecastRepository({self.editor.subject_id:dict(edit=True,approve=True,university_ids=['SYNTHETIC-U']),self.approver.subject_id:dict(edit=False,approve=True,university_ids=['SYNTHETIC-U'])})
         self.inputs=Inputs();self.service=ForecastPolicyService(self.repo,self.inputs,FrozenClock());self.key=0
     def call(self,operation,record=None,actor=None,extra=None,key=None):

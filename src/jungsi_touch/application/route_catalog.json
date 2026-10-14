@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.41",
-  "source_sha256": "e51a0539ab073c1f877f07db6be365ae73317ef8768e3ffe2f40298a11bbe56f",
+  "spec_version": "1.9.54",
+  "source_sha256": "6ec5625c89e38141f0eae98076b8a03a4270aeb31ddfc95a7a9e62c2d80f1f94",
   "pages": [
     {
       "id": "PAGE-01",
@@ -685,6 +685,28 @@
         "python_factory": "jungsi_touch.infrastructure.official_history_display.create_official_history_display_app",
         "edge_application": "supabase/functions/_shared/official_history_display.ts",
         "status": "candidate_scoped_verification_in_progress"
+      },
+      "entitlement_contract_ref": "opening_security_operations_contract.entitlement",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/session_service.ts:readSessionSnapshot",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticSessionReadHandler",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "GET",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/me",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "closed_session_DTO"
       }
     },
     {
@@ -726,6 +748,28 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "GET",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-capabilities",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
       }
     },
     {
@@ -773,6 +817,28 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "GET",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
       }
     },
     {
@@ -822,6 +888,28 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "POST",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/offerings/{offering_id}/forecast-drafts",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
       }
     },
     {
@@ -867,6 +955,28 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "GET",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts/{draft_id}",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
       }
     },
     {
@@ -919,6 +1029,28 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "POST",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts/{draft_id}/adjustments",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
       }
     },
     {
@@ -967,6 +1099,28 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "POST",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts/{draft_id}/validations",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
       }
     },
     {
@@ -1017,6 +1171,28 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "POST",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts/{draft_id}/approvals",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
       }
     },
     {
@@ -1067,6 +1243,29 @@
           "SEC-08"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "POST",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts/{draft_id}/publications",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-22",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
       }
     },
     {
@@ -1718,7 +1917,7 @@
           "entitlement_expires_at"
         ],
         "rules": [
-          "전용 정시 jungsi_backend.entitlements의 active=true 및 starts_at<=now<expires_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 가장 늦은 expires_at을 UTC Z로 반환한다. 별도 status/product 컬럼을 가정하지 않는다.",
+          "public.jeongsi_passes의 revoked_at IS NULL 및 starts_at<=now<ends_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 MAX(ends_at)를 UTC Z로 반환한다. metadata와 활성 만료를 한 배치 JOIN 질의로 확인하고 같은 요청의 회원 판정·만료 표시에 결속한다. jungsi_backend.entitlements로 장애 대체하지 않는다. 관리자 이용권 예외는 미확정이며 추가하지 않는다. 별도 status/product 컬럼을 가정하지 않는다.",
           "일반 회원 만료는 null. 인증 또는 저장소 장애는 503이며 일반 회원으로 자동 강등하지 않는다. 사용자 ID·등급·역할·JWT·결제 내역을 요청/응답에 포함하지 않는다."
         ]
       },
@@ -4747,8 +4946,8 @@
       "edge_entry": "supabase/functions/official-history-display/index.ts",
       "edge_application": "supabase/functions/_shared/official_history_display.ts",
       "edge_infrastructure": "supabase/functions/_shared/official_history_postgres.ts",
-      "default_factories_changed": false,
-      "entitlement_authority": "jungsi_backend.entitlements",
+      "default_factories_changed": true,
+      "entitlement_authority": "public.jeongsi_passes",
       "existing_API_count": 22,
       "new_logical_API_or_DTO": false,
       "browser_DB_credentials": false,
@@ -4757,7 +4956,8 @@
       "edge_factory": "createOfficialHistoryDisplayHandler",
       "edge_provider": "createOfficialHistoryInfrastructure",
       "logical_operation_count": 5,
-      "edge_node_compatibility_bootstrap": "supabase/functions/_shared/node_compat_bootstrap.ts"
+      "edge_node_compatibility_bootstrap": "supabase/functions/_shared/node_compat_bootstrap.ts",
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "rules": [
       "표시 purpose 승인과 engine/production/native 전체 발행은 구분한다. 기존 Storage 승인 guard와 원본 false/null 상태는 유지한다.",
@@ -9072,5 +9272,205 @@
       }
     ]
   },
-  "mandatory_security_document": "docs/current/외부접근_데이터보호_개발기준.md"
+  "mandatory_security_document": "docs/current/외부접근_데이터보호_개발기준.md",
+  "opening_security_operations_contract": {
+    "format": "jungsi.opening-security-operations/v1",
+    "revision": "2026.10.14.v2",
+    "requirements": [
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "status": "accepted_on_develop_scoped_operating_NOT_RUN",
+    "document": "docs/current/오픈전_보안운영_변경.md",
+    "implementation_branch": "feature/application-pre-data-platform",
+    "production_ready": false,
+    "user_decisions": {
+      "paid_authority": "public.jeongsi_passes",
+      "default_Postgres_composition_transition_authorized": true,
+      "admin_paid_override": false,
+      "admin_paid_override_status": "deferred_user_decision",
+      "previous_explicit_only_decision_preserved_as_history": true
+    },
+    "entitlement": {
+      "table": "public.jeongsi_passes",
+      "activation": "revoked_at IS NULL AND starts_at <= now AND now < ends_at",
+      "multiple_active_rows": "MAX(ends_at)",
+      "time_basis": "UTC",
+      "session_format": "jungsi.session/v1",
+      "session_fields": [
+        "format",
+        "member_tier",
+        "entitlement_expires_at"
+      ],
+      "legacy_table_fallback_allowed": false,
+      "failure": {
+        "http": 503,
+        "code_policy": "existing_safe_entitlement_codes_without_SQL_details",
+        "fallback": false
+      },
+      "metadata_and_entitlement_data_queries_per_request": 1,
+      "transaction_configuration_queries_separate": true,
+      "request_local_member_and_expiry_snapshot": true,
+      "cross_request_entitlement_cache_allowed": false,
+      "adapter_writes_allowed": false,
+      "automatic_entitlement_grant_allowed": false,
+      "explicit_dependency_injection_preserved": true,
+      "synthetic_memory_composition_preserved": true
+    },
+    "management": {
+      "operations": [
+        "forecast.capabilities",
+        "forecast.list",
+        "forecast.create",
+        "forecast.read",
+        "forecast.adjust",
+        "forecast.validate",
+        "forecast.approve",
+        "forecast.publish"
+      ],
+      "public_forecast_read_is_management": false,
+      "verified_aal": "aal2",
+      "account_status": "active",
+      "trusted_identity": "exact_Bearer_verified_by_Supabase_Auth_getUser",
+      "trusted_profile": "own_profiles_status_via_same_verified_Bearer_and_publishable_key_RLS",
+      "authority_source": "jungsi_backend.forecast_authorities",
+      "existing_edit_approve_and_school_scope_required": true,
+      "client_roles_or_user_metadata_trusted": false,
+      "profile_admin_override_allowed": false,
+      "new_app_role_profiles_GRANT_allowed": false,
+      "nonstaff_capabilities": "empty_false",
+      "student_or_paid_service_MFA_required": false,
+      "unknown_profile_breaks_student_service": false,
+      "errors": {
+        "aal1": [
+          403,
+          "management_mfa_required"
+        ],
+        "inactive": [
+          403,
+          "management_account_inactive"
+        ],
+        "unknown": [
+          503,
+          "management_account_state_unverified"
+        ]
+      },
+      "JWT_AAL_profile_status_in_public_DTO_allowed": false,
+      "admin_logs_actor_source": "auth.uid()",
+      "admin_logs_metadata_source": "database",
+      "signup_source": "website_only_age14_consents_email_captcha",
+      "signup_via_dashboard_add_user_allowed": false,
+      "SMTP_captcha_leaked_password_settings_change_allowed": false,
+      "external_migration_numbers_reserved": [
+        32,
+        33,
+        34,
+        35
+      ]
+    },
+    "queries": {
+      "parameterized_bounded_JOIN_required": true,
+      "N_plus_1_allowed": false,
+      "unbounded_current_scan_for_UI_allowed": false,
+      "full_count_for_UI_allowed": false,
+      "bounded_before_MATERIALIZED_required": true,
+      "duplicate_index_creation_allowed": false,
+      "test_intake_in_production_allowed": false,
+      "publication_batch": {
+        "port": "ForecastRepository.published_many",
+        "application_validation": "ForecastPolicyService.validated_releases",
+        "operations": [
+          "university.analyze",
+          "candidates.build"
+        ],
+        "data_queries_per_selected_offering_batch": 1,
+        "empty_selected_batch_queries": 0,
+        "paid_owner_confirmed_gates_before_batch": true,
+        "publication_hash_context_receipts_validation_preserved": true,
+        "missing_per_key": null,
+        "one_invalid_release_discards_successful_conversion": false,
+        "single_published_fallback_allowed": false,
+        "unknown_or_duplicate_or_missing_return_keys_allowed": false
+      }
+    },
+    "capacity": {
+      "source_files_preserved": true,
+      "private_immutable_Storage_archive_required": true,
+      "archive_remote_bytes_SHA_readback_required": true,
+      "reference_and_current_C_identity_preservation_required": true,
+      "archive_resolver_before_payload_removal_required": true,
+      "exact_row_column_removal_manifest_and_user_approval_required": true,
+      "generic_cleanup_request_is_exact_removal_approval": false,
+      "registry_or_overlays_bulk_deletion_allowed": false,
+      "production_allowed_false_means_unused": false,
+      "historical_0206_window_is_current_requirement": false,
+      "IO_warning_requires_stop_and_owner_recheck": true,
+      "VACUUM_FULL_automatic_allowed": false,
+      "normal_VACUUM_guarantees_disk_shrink": false,
+      "Storage_transfer": "PASS_ARCHIVE_175_PK_174_IMMUTABLE_OBJECTS_BYTES_SHA_ANON_DENIAL_DB_PAYLOAD_PRESERVED",
+      "payload_or_overlay_removal": "NOT_RUN",
+      "VACUUM": "NOT_RUN"
+    },
+    "verification": {
+      "local_scoped_code": "PASS_PYTHON_219_DENO_38_SCOPED_SYNTHETIC",
+      "live_catalog_RLS_and_migrations": "read_only_verified",
+      "real_JWT_active_aal2_management": "NOT_RUN",
+      "OTP_enrollment": "USER_PHONE_REQUIRED_NOT_RUN",
+      "Edge_redeployment": "NOT_RUN",
+      "browser_paid_after_grant_or_revoke": "NOT_RUN",
+      "production_publication": "NOT_RUN",
+      "native_public_pass_state": "PASS_ONE_READONLY_NULL_SUBJECT_QUERY_27_187_MS_SCHEMA_ROLE_RLS_UTC",
+      "native_publication_batch": "PASS_ONE_READONLY_TEXT_ARRAY_JOIN_TWO_FAKE_IDS_ZERO_ROWS_TWO_MISSING_KEYS_11_239_MS",
+      "Storage_archive": "PASS_PRIVATE_ARCHIVE_ONLY",
+      "implementation_source_paths": [
+        "src/jungsi_touch/application/authorization.py",
+        "src/jungsi_touch/application/forecast_policy.py",
+        "src/jungsi_touch/application/forecast_ports.py",
+        "src/jungsi_touch/application/platform.py",
+        "src/jungsi_touch/application/platform_ports.py",
+        "src/jungsi_touch/application/sessions.py",
+        "src/jungsi_touch/infrastructure/http_api.py",
+        "src/jungsi_touch/infrastructure/local_verification.py",
+        "src/jungsi_touch/infrastructure/memory_forecast_repository.py",
+        "src/jungsi_touch/infrastructure/official_history_display.py",
+        "src/jungsi_touch/infrastructure/postgres_entitlements.py",
+        "src/jungsi_touch/infrastructure/postgres_forecast_repository.py",
+        "src/jungsi_touch/infrastructure/supabase_runtime.py",
+        "src/jungsi_touch/infrastructure/supabase_session.py",
+        "supabase/functions/_shared/official_history_postgres.ts",
+        "supabase/functions/_shared/official_history_display_test.ts"
+      ],
+      "regression_test_paths": [
+        "tests/test_postgres_entitlements.py",
+        "tests/test_default_pass_authority.py",
+        "tests/test_management_mfa.py",
+        "tests/test_backend_adapters.py",
+        "tests/test_forecast_publication_batch.py",
+        "tests/test_forecast_analysis_http.py",
+        "tests/test_forecast_workflows.py",
+        "tests/test_http_entitlement_injection.py",
+        "tests/test_supabase_runtime.py",
+        "supabase/functions/_shared/official_history_display_test.ts"
+      ],
+      "implementation_commit": "e2a8354c1bf3178ec318bdd092da356164bbf8e5",
+      "integration_commit": "b809b6e8d604317994446f84b429de734ac58998",
+      "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/31",
+      "commit_snapshot_tests": 923,
+      "push_snapshot_tests": 923,
+      "CI": [
+        {
+          "headSha": "e2a8354c1bf3178ec318bdd092da356164bbf8e5",
+          "conclusion": "success",
+          "run_id": 38434252888
+        },
+        {
+          "headSha": "e2a8354c1bf3178ec318bdd092da356164bbf8e5",
+          "conclusion": "success",
+          "run_id": 38434383943
+        }
+      ],
+      "actual_user_paid_management_browser": "NOT_RUN"
+    }
+  }
 }

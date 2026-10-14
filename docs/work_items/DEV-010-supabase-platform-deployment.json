@@ -5,9 +5,9 @@
   "approved_on": "2026-10-07",
   "start_commit": "dc59831a9b34e5dbf4bd15955a1f9489847403af",
   "branch": "feature/application-pre-data-platform",
-  "status": "planned",
+  "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.41",
+  "contract_version": "1.9.54",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -25,8 +25,8 @@
   "scope": {
     "format": "jungsi.supabase-deployment/v1",
     "id": "DEV-010",
-    "revision": "2026.10.07.v1",
-    "basis_commit": "dc59831a9b34e5dbf4bd15955a1f9489847403af",
+    "revision": "2026.10.14.v2",
+    "basis_commit": "73f4a4866c3edfae3ed6b6c7e9f2a1055c643117",
     "branch": "feature/application-pre-data-platform",
     "code_status": "planned",
     "production_ready": false,
@@ -42,7 +42,7 @@
       "REQ-25",
       "REQ-26"
     ],
-    "scope": "Google Drive와 기존 Supabase만 사용하는 운영 API 전환 준비 및 화면 담당 인계. 기존 Python 구현의 검산 근거와 미완료 운영 인수를 구분한다.",
+    "scope": "Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.",
     "platform_policy": {
       "allowed": [
         "google_drive",
@@ -77,7 +77,10 @@
       "memory_MiB": 256,
       "active_CPU_seconds_per_request": 2,
       "free_worker_wall_clock_seconds": 150,
-      "cost_rule": "실제 요금제와 포함량은 비공개 운영 확인 대상이다. BFF/내부 호출·재시도도 사용량에 포함하므로 사전 집계·정확 버전의 결과 재사용·공유 예산을 사용한다. CPU/메모리/포함량 초과를 외부 유료 서버로 우회하지 않는다."
+      "cost_rule": "실제 요금제와 포함량은 비공개 운영 확인 대상이다. BFF/내부 호출·재시도도 사용량에 포함하므로 사전 집계·정확 버전의 결과 재사용·공유 예산을 사용한다. CPU/메모리/포함량 초과를 외부 유료 서버로 우회하지 않는다.",
+      "paid_worker_wall_clock_seconds": 400,
+      "request_idle_timeout_seconds": 150,
+      "runtime_lifetime_rule": "공식 플랫폼 상한인 worker 수명 Free150초/유료400초, 요청 idle timeout150초, active CPU2초를 구분한다. 실제 운영 요금제에 맞는 worker 최대 수명과 시계 오차 여유보다 긴 동시작업 lease를 사용하고 클라이언트의 응답 대기 만료나 재시도가 아직 실행 중인 서버 계산의 동시 lease를 초기화하지 않도록 검수한다. 이 수치는 애플리케이션 요청량·계산량 한도나 승인된 실제 운영값을 대신하지 않는다."
     },
     "security": {
       "contract_ref": "security_contract",
@@ -87,7 +90,7 @@
       "relay_server_only": true,
       "user_Bearer_required": true,
       "user_authorization_in_application_required": true,
-      "current_entitlement_authority": "jungsi_backend.entitlements",
+      "current_entitlement_authority": "public.jeongsi_passes",
       "direct_browser_analysis_allowed": false,
       "secrets_in_browser_allowed": false,
       "shared_atomic_quota_required": true,
@@ -198,7 +201,7 @@
       {
         "id": "DEP-02",
         "owner": "서비스 개발팀",
-        "status": "planned",
+        "status": "in_progress",
         "deliverable": "Edge 명시 구성·relay/실사용자 권한·private Storage 명부·DB 포트·안전한 health 및 정밀 계산의 단계적 호환 구현"
       },
       {
@@ -216,7 +219,7 @@
       {
         "id": "DEP-05",
         "owner": "서버 담당·시스템기획팀",
-        "status": "planned",
+        "status": "in_progress",
         "deliverable": "현재 Supabase 요금제/포함량/Spend Cap 확인, 실제 Auth/DB/Storage/공유 예산/Edge 후보 배포와 세 보안 gate 인수"
       }
     ],
@@ -232,9 +235,10 @@
     "preservation": {
       "files_deleted": 0,
       "new_branches": 0,
-      "legacy_factory_change_allowed": false,
+      "legacy_factory_change_allowed": true,
       "source_flag_only_promotion_allowed": false,
-      "production_ready_promotion_allowed": false
+      "production_ready_promotion_allowed": false,
+      "opening_change_ref": "opening_security_operations_contract"
     },
     "official_sources": [
       {
@@ -252,6 +256,10 @@
       {
         "title": "Google Apps Script 웹앱 제공",
         "url": "https://developers.google.com/apps-script/guides/web"
+      },
+      {
+        "title": "Supabase 비용 제어와 Spend Cap 적용 범위",
+        "url": "https://supabase.com/docs/guides/platform/cost-control"
       }
     ],
     "numerical_compatibility": {
@@ -262,6 +270,411 @@
       "Number_or_Math_round_equivalence_assumed": false,
       "heavy_model_generation_in_request_allowed": false,
       "rule": "환산·누백의 유리수/정확 소수·명시 반올림과 경계값을 Python 기준과 독립 대조한다. TypeScript Number/Math.round만으로 동등성을 가정하지 않는다. JSON 정수 키·불리언/비유한 값·버전/학년도/시험/모집행 결속과 UTC/서울 변환을 함께 비교한다. 대규모 모형 생성은 보존된 오프라인 검수 작업과 발행본으로 구분하고 Edge 요청에 그대로 넣지 않는다."
+    },
+    "live_execution": {
+      "format": "jungsi.supabase-live-execution/v1",
+      "status": "IN_PROGRESS",
+      "basis_commit": "73f4a4866c3edfae3ed6b6c7e9f2a1055c643117",
+      "branch": "feature/application-pre-data-platform",
+      "request_date": "2026-10-14",
+      "scope": "사용자가 실제 인증 연결·JWT/OTP 검수·22개 API 이식·운영 배포를 요청했다. 기존 Google Drive와 Supabase만 사용하며 코드 통합·합성 검산·실 연결·배포·공개 인수를 각각 기록한다.",
+      "owner_totp_rule": "계정 주인이 /admin에서 휴대폰 인증 앱으로 등록·입력한다. 검수 계정 식별자·비밀번호·JWT·QR·OTP 비밀키는 공개 명세에 저장하지 않는다. 2026-10-14 계정 주인의 Codex 브라우저 직접 로그인·MFA 완료 회신과 관리자 화면 진입을 수령했다. 입력 대기는 해소됐으며 서버의 실제 getUser·aal2·본인 상태·학교 권한 검수는 계속 진행한다. 이 회신이나 화면 진입만으로 실제 JWT/TOTP 검수 PASS를 기록하지 않는다.",
+      "quota_rule": "승인된 비공개 운영 한도와 기존 요금제 근거가 필요하다. null·미확정 값을 무제한 또는 실제 0으로 치환하지 않는다. 애플리케이션 내부 quota만으로 플랫폼 추가 과금을 방지했다고 판정하지 않는다. 기존 조직의 요금제·모든 프로젝트 사용량·포함량과 해당되는 Spend Cap 범위를 확인한다. Free는 추가 과금하지 않으며 Spend Cap은 Pro에서 적용 가능한 일부 사용량만 대상으로 한다. 실패한 Edge 호출도 invocation 사용량에 포함되므로 신규 요금제·유료 항목·초과 과금 허용을 자동 선택하지 않는다. 공식 플랫폼 상한인 worker 수명 Free150초/유료400초, 요청 idle timeout150초, active CPU2초를 구분한다. 실제 운영 요금제에 맞는 worker 최대 수명과 시계 오차 여유보다 긴 동시작업 lease를 사용하고 클라이언트의 응답 대기 만료나 재시도가 아직 실행 중인 서버 계산의 동시 lease를 초기화하지 않도록 검수한다. 이 수치는 애플리케이션 요청량·계산량 한도나 승인된 실제 운영값을 대신하지 않는다.",
+      "reuse": {
+        "implementation_commit": "b25fcef9e0e9aaa0cb9b61aefb48e4e5e59be22a",
+        "integration_commit": "73f4a4866c3edfae3ed6b6c7e9f2a1055c643117",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/32",
+        "CI": "https://github.com/natural0448/Jungsi_touch/actions/runs/38504571793",
+        "scope": "Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제 Auth·업무22 API·TOTP·공개 배포 인수를 대신하지 않는다."
+      },
+      "stages": {
+        "auth_connection": {
+          "label": "실제 Auth getUser·본인 profiles RLS 연결",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "auth",
+          "evidence_ids": []
+        },
+        "jwt_negative_checks": {
+          "label": "실 JWT·만료·변조·타인 소유권 반례",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "jwt",
+          "evidence_ids": []
+        },
+        "owner_totp_verification": {
+          "label": "계정 주인의 /admin TOTP 등록·aal2 관리 검수",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "totp",
+          "evidence_ids": []
+        },
+        "api_22_port": {
+          "label": "기존 22 API의 업무 처리·DTO·정밀 계산 이식",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "native_api",
+          "evidence_ids": []
+        },
+        "native_business_transactions": {
+          "label": "보고서·초안·멱등·버전 충돌 실제 트랜잭션",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "sql",
+          "evidence_ids": []
+        },
+        "existing_plan_and_quotas": {
+          "label": "기존 요금제·포함량·Spend Cap·승인된 원자적 예산",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "billing",
+          "evidence_ids": []
+        },
+        "edge_deployment": {
+          "label": "기존 프로젝트의 동일 후보 Edge 배포·실 HTTP 인수",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "edge_deployment",
+          "evidence_ids": []
+        },
+        "bff_browser_acceptance": {
+          "label": "허용 플랫폼 BFF·세션/CSRF·브라우저 비노출",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "bff_browser",
+          "evidence_ids": []
+        },
+        "security_gates": {
+          "label": "응답·직접 권한·수집 방지 세 보안 gate",
+          "status": "NOT_RUN",
+          "evidence_kind": "security",
+          "evidence_ids": []
+        }
+      },
+      "operations": {
+        "history.search": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
+            "source_sha256": "31493452aa56f6615f679998d1885fda16686dc760658a07290a0a6f348d791d",
+            "symbol": "CatalogService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "recruitment.read": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
+            "source_sha256": "31493452aa56f6615f679998d1885fda16686dc760658a07290a0a6f348d791d",
+            "symbol": "CatalogService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "score-profile.create": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+            "source_sha256": "14eb611848b5b0d6aaf6563f42a015a79bdc08a9c57e4a3c975c150c359cff80",
+            "symbol": "ProfileReportService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "overall.analyze": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+            "source_sha256": "14eb611848b5b0d6aaf6563f42a015a79bdc08a9c57e4a3c975c150c359cff80",
+            "symbol": "ProfileReportService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "report.read": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+            "source_sha256": "14eb611848b5b0d6aaf6563f42a015a79bdc08a9c57e4a3c975c150c359cff80",
+            "symbol": "ProfileReportService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "offerings.search": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
+            "source_sha256": "31493452aa56f6615f679998d1885fda16686dc760658a07290a0a6f348d791d",
+            "symbol": "CatalogService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "offering.read": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
+            "source_sha256": "31493452aa56f6615f679998d1885fda16686dc760658a07290a0a6f348d791d",
+            "symbol": "CatalogService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "university.analyze": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+            "source_sha256": "0021c82e44126e5a75faafa619809df2f33a6d2e9cd80873398d069d74a4badf",
+            "symbol": "UniversityAnalysisService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "candidates.build": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+            "source_sha256": "0021c82e44126e5a75faafa619809df2f33a6d2e9cd80873398d069d74a4badf",
+            "symbol": "UniversityAnalysisService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "shortlist.update": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/report_actions.ts",
+            "source_sha256": "66ba67f196a5ae4b394ee908276fec4983adda4fa7a65c228ef69dcc3f45447f",
+            "symbol": "ReportActionService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "report.export": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+            "source_sha256": "14eb611848b5b0d6aaf6563f42a015a79bdc08a9c57e4a3c975c150c359cff80",
+            "symbol": "ProfileReportService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "statistics.read": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/report_actions.ts",
+            "source_sha256": "66ba67f196a5ae4b394ee908276fec4983adda4fa7a65c228ef69dcc3f45447f",
+            "symbol": "ReportActionService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "session.read": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/session_service.ts",
+            "source_sha256": "6ffed08966fd788d30827d96b24514fd432301ae940ba787b543f9e71735b336",
+            "symbol": "readSessionSnapshot",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "forecast.capabilities": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "forecast.list": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "forecast.create": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "forecast.read": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "forecast.adjust": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "forecast.validate": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "forecast.approve": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "forecast.publish": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        },
+        "forecast.published.read": {
+          "code": "PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
+          "evidence_ids": []
+        }
+      },
+      "evidence": {},
+      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 현재 정상 /jeongsi 진입 화면은 합성 응답을 명시하고 있다. 합성 회원 유형과 화면 성공은 실제 이용권·JWT·업무22 API 인수 근거가 아니다. 실제 서버 후보와 정상 BFF의 live 연결을 같은 후보 근거로 검수한 후 운영 상태를 갱신한다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다.",
+      "position_graph": {
+        "formula_rows": [
+          [
+            "전체 위치 — 탐구 2과목 합",
+            "K + M + T1 + T2",
+            "현행 overall_analysis_contract 및 StandardScores.total 정의"
+          ],
+          [
+            "국어+수학+탐구 — 2과목 평균",
+            "K + M + (T1 + T2) / 2",
+            "화면 조합별 제안 필드; 전체 합과 다른 탐구 비중"
+          ]
+        ],
+        "comparison_rule": "같은 입력·산식·시험/자료 버전·비교 모집단·승인 모형·동점 기준의 위치는 같은 서버 계산 경로/결과를 사용한다. 합과 평균은 다른 정의이므로 수치 차이만으로 어느 쪽이 정확하다고 판정하지 않는다. 전체 합 정의를 조합 평균으로 임의 변경하지 않는다.",
+        "synthetic_rule": "명시 합성 모드의 위치 그래프마다 화면 확인용 합성임을 표시한다. synthetic-report의 임의 곡선은 검증한 입시 예측/누백으로 표시하거나 실서비스 정확도 근거로 사용하지 않는다.",
+        "live_rule": "live는 승인/발행/선택된 서버 값만 표시한다. 조합별 서버 계약이 미채택이거나 승인 분포가 없으면 자료 대기다. 화면에서 임의 곡선을 만들거나 전체 누백으로 다른 조합을 대체하지 않는다.",
+        "frontend_handoff": "화면 담당은 전체의 탐구 2과목 합과 조합의 2과목 평균을 각 그래프 안에서 명시하고 합성 모드 안내를 붙인다. 프레젠테이션 브랜치에서 최신 develop을 가져와 변경·검수하고 서버의 승인/보류 상태를 유지한다."
+      },
+      "frontend_runtime_rule": "실행 가능한 화면 앱과 명시 합성 응답은 develop에 통합했다. 이전 가상 화면은 기획 이력으로 보존한다. 실제 회원 인증·BFF live·운영 API의 인수 상태는 공통 진행표를 따르며 합성 화면 배포를 실제 연결 완료로 표시하지 않는다.",
+      "source_suite_reporting_rule": "정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다."
     }
   }
 }

@@ -126,3 +126,12 @@ Desktop.ini
 !/scripts/bootstrap_backend_runtime.py
 !/scripts/probe_backend_connection.py
 !/scripts/check_branch_policy.py
+
+!scripts/check_edge_contract.py
+
+!scripts/run_edge_tests.py
+
+!scripts/edge_source_scope.py
+
+# Reviewed hash-pinned official Edge runtime supplier; retained binaries stay private.
+!/scripts/bootstrap_edge_runtime.py

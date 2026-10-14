@@ -8,6 +8,7 @@ from pathlib import Path
 import sys
 import unittest
 from urllib.error import HTTPError
+from urllib.parse import parse_qs,urlsplit
 
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
 from backend_synthetic_fixture import FrozenClock,SyntheticRepository
@@ -91,6 +92,52 @@ class SupabaseSessionTests(unittest.TestCase):
     def test_no_auth_configuration_is_explicit(self):
         with self.assertRaises(PlatformError) as caught:SupabaseSessionProvider(None,None).verify('fabricated',self.clock.now())
         self.assertEqual(caught.exception.code,'auth_not_configured')
+    def test_assurance_is_bound_to_the_verified_exact_token(self):
+        provider=SupabaseSessionProvider('https://example.supabase.co','SYNTHETIC-KEY',opener=self.opener)
+        expires=self.clock.now()+timedelta(hours=1)
+        for assurance in ('aal1','aal2'):
+            session=provider.verify(jwt(self.owner,expires,aal=assurance),self.clock.now())
+            self.assertEqual(session.assurance_level,assurance)
+        self.assertIsNone(provider.verify(jwt(self.owner,expires),self.clock.now()).assurance_level)
+        for assurance in (True,2,'aal3',{'aal':'aal2'}):
+            self.assertIsNone(provider.verify(jwt(self.owner,expires,aal=assurance),self.clock.now()))
+        def rejected(request,timeout):raise HTTPError(request.full_url,401,'Unauthorized',{},None)
+        denied=SupabaseSessionProvider('https://example.supabase.co','SYNTHETIC-KEY',opener=rejected)
+        self.assertIsNone(denied.verify(jwt(self.owner,expires,aal='aal2'),self.clock.now()))
+    def test_profile_status_uses_verified_bearer_and_own_row_rls_once(self):
+        token=jwt(self.owner,self.clock.now()+timedelta(hours=1),aal='aal2')
+        requests=[]
+        def opened(request,timeout):
+            requests.append(request)
+            if '/auth/v1/user' in request.full_url:return Response(dict(id=self.owner,user_metadata={'status':'active','role':'admin'}))
+            self.assertEqual(parse_qs(urlsplit(request.full_url).query),{'select':['status'],'id':['eq.'+self.owner],'limit':['1']})
+            self.assertEqual(request.get_header('Authorization'),'Bearer '+token)
+            self.assertEqual(request.get_header('Apikey'),'SYNTHETIC-KEY')
+            return Response([{'status':'active'}])
+        session=SupabaseSessionProvider('https://example.supabase.co','SYNTHETIC-KEY',opener=opened).verify(token,self.clock.now())
+        self.assertEqual(session.account_status,'active');self.assertEqual(session.assurance_level,'aal2')
+        self.assertEqual(len(requests),2)
+    def test_profile_missing_malformed_or_denied_is_unknown_without_discarding_session(self):
+        token=jwt(self.owner,self.clock.now()+timedelta(hours=1),aal='aal2')
+        values=[[],[{'status':'active'},{'status':'active'}],[{'status':None}],[{'status':True}],
+                [{'status':'active','role':'admin'}],b'[{"status":"suspended","status":"active"}]',b' '*2049]
+        for value in values:
+            def opened(request,timeout):
+                return Response(dict(id=self.owner)) if '/auth/v1/user' in request.full_url else Response(value)
+            with self.subTest(value=value):
+                session=SupabaseSessionProvider('https://example.supabase.co','SYNTHETIC-KEY',opener=opened).verify(token,self.clock.now())
+                self.assertIsNotNone(session);self.assertIsNone(session.account_status)
+        def denied(request,timeout):
+            if '/auth/v1/user' in request.full_url:return Response(dict(id=self.owner,user_metadata={'status':'active'}))
+            raise HTTPError(request.full_url,403,'SYNTHETIC-private',{},None)
+        session=SupabaseSessionProvider('https://example.supabase.co','SYNTHETIC-KEY',opener=denied).verify(token,self.clock.now())
+        self.assertIsNone(session.account_status)
+    def test_nonactive_profile_status_is_preserved_despite_active_client_metadata(self):
+        token=jwt(self.owner,self.clock.now()+timedelta(hours=1),aal='aal2',account_status='active')
+        def opened(request,timeout):
+            return Response(dict(id=self.owner,user_metadata={'status':'active'})) if '/auth/v1/user' in request.full_url else Response([{'status':'suspended'}])
+        session=SupabaseSessionProvider('https://example.supabase.co','SYNTHETIC-KEY',opener=opened).verify(token,self.clock.now())
+        self.assertEqual(session.account_status,'suspended')
     def test_auth_network_error_never_contains_secret_in_public_message(self):
         def failed(*args,**kwargs):raise OSError('SYNTHETIC-PRIVATE-PASSWORD')
         provider=SupabaseSessionProvider('https://example.supabase.co','SYNTHETIC-KEY',opener=failed)

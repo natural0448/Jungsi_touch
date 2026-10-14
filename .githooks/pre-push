@@ -3,6 +3,8 @@ task_python="$(git config --get jungsi.python || true)"
 if [ -z "$task_python" ]; then
   if command -v python3 >/dev/null 2>&1; then task_python=python3; else task_python=python; fi
 fi
+task_deno="$(git config --get jungsi.deno || true)"
+if [ -n "$task_deno" ]; then JUNGSI_DENO="$task_deno"; export JUNGSI_DENO; fi
 while read task_local_ref task_local_sha task_remote_ref task_remote_sha; do
   if [ "$task_remote_ref" = "refs/heads/main" ]; then
     echo "main direct push is blocked. Use a validated pull request from develop." >&2

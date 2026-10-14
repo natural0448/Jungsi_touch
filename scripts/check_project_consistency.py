@@ -2,7 +2,7 @@
 No file deletion. --write preserves prior generated content under ignored outputs.
 """
 from __future__ import annotations
-import argparse,ast,datetime,hashlib,json,re,subprocess,sys
+import argparse,ast,datetime,hashlib,json,re,subprocess,sys,posixpath
 from pathlib import Path,PurePosixPath
 from audit_documentation_sync import AGENT_MARKER,generated_sync_files,validate_catalog,validate_sync_policy
 
@@ -1108,7 +1108,7 @@ def validate_runtime_connection_preparation(spec):
         not {'REQ-12','REQ-14','REQ-15','REQ-16','REQ-17','REQ-20','REQ-23','REQ-24','REQ-25','REQ-26'}<=set(c.get('requirements',[]))):
         errors.append('DEV-009 owner or source registration drift')
     if (comp.get('factory')!='create_supabase_secured_app' or comp.get('environment_factory')!='configured_supabase_app' or comp.get('explicit_selection_required')is not True or comp.get('security_contract_ref')!='secured_backend_preparation_contract' or
-        comp.get('default_factories_unchanged')is not True or comp.get('legacy_factories')!=['create_app','configured_app'] or comp.get('current_entitlement_authority')!='jungsi_backend.entitlements' or
+        comp.get('default_factories_unchanged')is not False or comp.get('legacy_factories')!=['create_app','configured_app'] or comp.get('current_entitlement_authority')!='public.jeongsi_passes' or comp.get('opening_change_ref')!='opening_security_operations_contract' or
         comp.get('session_format')!='jungsi.session/v1' or comp.get('existing_API_count')!=len(spec.get('operations',[])) or comp.get('API_or_DTO_additions')is not False or comp.get('local_verification_unchanged')is not True):
         errors.append('DEV-009 explicit composition preservation drift')
     if (lineage.get('canonical_private_pointers')!=['DATA_ACTIVE_SUPABASE_v1.json','DATA_ACTIVE_CSV_v1.json'] or lineage.get('source_snapshots_preserved')is not True or
@@ -1144,22 +1144,96 @@ def validate_runtime_connection_preparation(spec):
     return errors
 
 
+
+def live_execution_document(spec):
+    """Render current runtime work from operation IDs, without duplicating routes."""
+    c=spec.get('supabase_deployment_contract',{}).get('live_execution')
+    if not c:return ''
+    positions=c.get('position_graph')
+    position_text=('\n\n### 위치 그래프의 기준\n\n'+table(['표시 기준','산식','적용 범위'],positions['formula_rows'])+'\n\n'+
+        '\n\n'.join(positions[k]for k in ('comparison_rule','synthetic_rule','live_rule','frontend_handoff')))if positions else ''
+    rows=[]
+    for o in spec['operations']:
+        state=c['operations'][o['id']]
+        rows.append([o['id'],o['method']+' '+o['path'],state['code'],state['native'],state['deployment']])
+    return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
+            table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
+            table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
+            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+position_text)
+
+
+def validate_live_execution(spec):
+    """Reject route drift or operating PASS without scoped, hash-bound evidence."""
+    c=spec.get('supabase_deployment_contract',{}).get('live_execution')
+    if c is None:
+        return ['DEV-010 live execution missing'] if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,49) else []
+    if not isinstance(c,dict):return ['DEV-010 live execution invalid']
+    errors=[]
+    if (c.get('format')!='jungsi.supabase-live-execution/v1' or c.get('branch')!='feature/application-pre-data-platform' or
+        not re.fullmatch(r'[0-9a-f]{40}',str(c.get('basis_commit',''))) or c.get('status')not in {'IN_PROGRESS','VERIFIED'}):
+        errors.append('DEV-010 live execution basis drift')
+    states=c.get('operations',{});ids={o['id']for o in spec['operations']}
+    if not isinstance(states,dict) or set(states)!=ids:return errors+['DEV-010 live operation coverage drift']
+    stages=c.get('stages',{});kinds={'auth_connection':'auth','jwt_negative_checks':'jwt','owner_totp_verification':'totp','api_22_port':'native_api','native_business_transactions':'sql','existing_plan_and_quotas':'billing','edge_deployment':'edge_deployment','bff_browser_acceptance':'bff_browser','security_gates':'security'}
+    if not isinstance(stages,dict)or set(stages)!=set(kinds):return errors+['DEV-010 live stage coverage drift']
+    registry=c.get('evidence',{})
+    if not isinstance(registry,dict):return errors+['DEV-010 live evidence registry invalid']
+    indexed={v['path']:v['source_sha256']for v in spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']}
+    indexed.update({p:v['declarations']['source_sha256']for p,v in spec['edge_harness']['files'].items()})
+    for key,row in registry.items():
+        if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
+            not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or
+            not re.fullmatch(r'[0-9a-f]{64}',str(row.get('receipt_sha256',''))) or
+            not isinstance(row.get('operations'),list) or not set(row['operations'])<=ids):
+            errors.append('DEV-010 live evidence invalid: '+str(key))
+    for operation,row in states.items():
+        if not isinstance(row,dict):errors.append('DEV-010 live operation state invalid: '+operation);continue
+        if row.get('code')not in {'NOT_PORTED','FOUNDATION_ONLY','PORTED'} or any(row.get(k)not in {'NOT_RUN','PASS'}for k in ('native','deployment')):
+            errors.append('DEV-010 live operation state invalid: '+operation);continue
+        binding=row.get('binding');evidence_ids=row.get('evidence_ids',[])
+        if row['code']=='PORTED' and (not isinstance(binding,dict)or not isinstance(binding.get('path'),str)or indexed.get(binding.get('path'))!=binding.get('source_sha256')or binding.get('path')not in indexed):
+            errors.append('DEV-010 live implementation binding invalid: '+operation)
+        if not isinstance(evidence_ids,list)or any(not isinstance(e,str)or e not in registry for e in evidence_ids):
+            errors.append('DEV-010 live evidence reference invalid: '+operation);continue
+        for status,kind in [('native','native_api'),('deployment','edge_deployment')]:
+            if row[status]=='PASS' and (row['code']!='PORTED' or (status=='deployment'and row['native']!='PASS') or
+                not any(isinstance(registry[e],dict)and registry[e].get('kind')==kind and isinstance(registry[e].get('operations'),list)and operation in registry[e]['operations']for e in evidence_ids)):
+                errors.append('DEV-010 live operating evidence missing: '+operation+'.'+status)
+    for key,row in stages.items():
+        if (not isinstance(row,dict)or row.get('evidence_kind')!=kinds[key]or row.get('status')not in {'NOT_RUN','IN_PROGRESS','PENDING_OWNER','VERIFIED'}):
+            errors.append('DEV-010 live stage invalid: '+key);continue
+        refs=row.get('evidence_ids',[])
+        if not isinstance(refs,list)or any(not isinstance(e,str)or e not in registry for e in refs):errors.append('DEV-010 live stage evidence invalid: '+key);continue
+        if row['status']=='VERIFIED'and not any(isinstance(registry[e],dict)and registry[e].get('kind')==kinds[key]for e in refs):
+            errors.append('DEV-010 live stage evidence missing: '+key)
+    for stage,field in [('api_22_port','native'),('edge_deployment','deployment')]:
+        if stages[stage].get('status')=='VERIFIED'and any(not isinstance(v,dict)or v.get('code')!='PORTED'or v.get(field)!='PASS'for v in states.values()):
+            errors.append('DEV-010 live stage has unfinished operations: '+stage)
+    if c.get('status')=='VERIFIED'and (any(not isinstance(v,dict)or v.get('status')!='VERIFIED'for v in stages.values())or any(not isinstance(v,dict)or v.get('code')!='PORTED'or v.get('native')!='PASS'or v.get('deployment')!='PASS'for v in states.values())):
+        errors.append('DEV-010 live completion has unfinished acceptance')
+    return errors
+
+
 def supabase_deployment_document(spec):
     c=spec['supabase_deployment_contract']; p=c['platform_policy']; a=c['architecture']; s=c['security']; f=c['frontend']; v=c['verification']
+    limits=c['platform_limits']
+    runtime_text='현재 플랫폼 상한은 메모리256MiB, 요청 active CPU2초, Free worker wall clock150초다. 플랫폼 상한은 내부 운영 한도를 뜻하지 않는다.'
+    if 'paid_worker_wall_clock_seconds' in limits and 'request_idle_timeout_seconds' in limits:
+        runtime_text=(f"현재 플랫폼 상한은 메모리{limits['memory_MiB']}MiB, 요청 active CPU{limits['active_CPU_seconds_per_request']}초, Free worker wall clock{limits['free_worker_wall_clock_seconds']}초, 유료 worker wall clock{limits['paid_worker_wall_clock_seconds']}초, 요청 idle timeout{limits['request_idle_timeout_seconds']}초다. "+limits['runtime_lifetime_rule'])
     comparison=f.get('comparison_review')
     comparison_text=('\n\n## 화면 제공 방식 비교 회신의 검토\n\n'+comparison['decision']+'\n\n'+
         table(['항목','확인·정정 기준'],comparison['facts'])+'\n\n실제 호환성/브라우저/비용 '+comparison['actual_compatibility_browser_and_billing']+'. 비교 수신은 배포·화면교체 승인이 아니다.\n\n'+
         '\n'.join('- ['+x['title']+']('+x['url']+')' for x in comparison['official_sources'])) if comparison else ''
     return (c['scope']+'\n\n계약 '+c['revision']+' · 코드 '+c['code_status']+' · 실제 운영 NOT_RUN · production_ready=false. 출발 develop '+c['basis_commit']+'.\n\n'+
             '## 플랫폼과 비용 범위\n\n'+p['rule']+'\n\n허용 플랫폼: '+', '.join(p['allowed'])+' · 기존 요금제/Spend Cap 검수 '+p['usage_and_spend_cap_verification']+'. 추가 비용 없이 사용할 수 있는 범위를 먼저 확인한다.\n\n'+
-            '## 3티어와 기존 Python 구현\n\n'+table(['계층/기준','구성'],[['프레젠테이션',a['presentation']],['애플리케이션',a['application']],['데이터',a['data']],['기존 검산',a['python_reference']]])+'\n\n'+a['rule']+'\n\n서버 UTC · 원자료/화면 Asia/Seoul. '+c['platform_limits']['cost_rule']+' 현재 플랫폼 상한은 메모리256MiB, 요청 active CPU2초, Free worker wall clock150초다. 플랫폼 상한은 내부 운영 한도를 뜻하지 않는다.\n\n'+
+            '## 3티어와 기존 Python 구현\n\n'+table(['계층/기준','구성'],[['프레젠테이션',a['presentation']],['애플리케이션',a['application']],['데이터',a['data']],['기존 검산',a['python_reference']]])+'\n\n'+a['rule']+'\n\n서버 UTC · 원자료/화면 Asia/Seoul. '+limits['cost_rule']+' '+runtime_text+'\n\n'+
             '## 수치와 응답의 호환 검산\n\n'+c['numerical_compatibility']['rule']+'\n\n'+
             '## 서버 계약과 자료 발행\n\n'+s['rule']+'\n\n정확 헤더 '+chr(96)+s['relay_header']+chr(96)+' · 서버 전용 '+chr(96)+s['relay_environment_name']+chr(96)+' · 실제 사용자 Authorization Bearer. relay만으로 사용자 권한이 생기지 않는다. '+s['health_live_path']+'는 최소 공개 생존 확인, '+s['health_ready_path']+'는 relay 보호 검수다.\n\n'+
             c['native_publication']['rule']+'\n\nEdge에서 사용할 private Storage 명부/환경 이름은 서버 담당의 구현 계약과 후보 증거로 확정한다. Python의 로컬 파일 경로·factory 실행 명령을 Edge 배포 명령으로 사용하지 않는다.\n\n'+
             '## 담당별 후속 단계\n\n'+table(['단계','담당','상태','산출물'],[[x['id'],x['owner'],x['status'],x['deliverable']] for x in c['phases']])+'\n\n'+
             '## 화면 담당에게 전달할 작업\n\n화면 제공 범위 '+f['hosting_status']+' · Drive Apps Script 후보 '+f['candidate_permission']+'. 기존 외부 preview와 파일은 이력으로 보존한다. 새 플랫폼으로 채택하지 않는다.\n\n'+'\n'.join('- '+x for x in f['handoff'])+'\n\n'+
             comparison_text+'\n\n## 검증 상태\n\nEdge 구현 '+v['status']+' · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 '+v['actual_Auth_DB_Storage_Edge_BFF_browser_deployment']+' · 실제 비용/요금제 '+v['actual_billing_and_quota_verification']+'. 기존 Python 합성 인수는 Edge 포팅/실운영 인수를 대신하지 않는다.\n\n'+
-            '## 공식 기술 근거\n\n'+'\n'.join('- ['+x['title']+']('+x['url']+')' for x in c['official_sources'])+'\n\n[DEV-010 작업 항목](../work_items/DEV-010-supabase-platform-deployment.json) · [기존 실행 자료 계약](Supabase_실행자료_연결.md)')
+            live_execution_document(spec)+'\n\n## 공식 기술 근거\n\n'+'\n'.join('- ['+x['title']+']('+x['url']+')' for x in c['official_sources'])+'\n\n[DEV-010 작업 항목](../work_items/DEV-010-supabase-platform-deployment.json) · [기존 실행 자료 계약](Supabase_실행자료_연결.md)')
 
 
 def validate_supabase_deployment_contract(spec):
@@ -1176,11 +1250,11 @@ def validate_supabase_deployment_contract(spec):
     d=spec.get('runtime_connection_preparation_contract',{}).get('deployment',{})
     if (a.get('runtime')!='supabase_edge_typescript_deno' or a.get('python_hosted_unchanged')is not False or a.get('engine_in_browser_allowed')is not False or a.get('API_count')!=len(spec.get('operations',[])) or a.get('API_DTO_session_changes')is not False or a.get('server_timezone')!='UTC' or a.get('source_display_timezone')!='Asia/Seoul' or d.get('architecture')!='supabase_edge_functions' or d.get('hosting_contract_ref')!='supabase_deployment_contract' or d.get('python_reference_only')is not True):
         errors.append('DEV-010 Edge and Python reference boundary drift')
-    if (s.get('contract_ref')!='security_contract' or s.get('revision')!=spec.get('security_contract',{}).get('revision') or s.get('relay_header')!='X-Jungsi-Relay-Token' or s.get('relay_environment_name')!='JUNGSI_RELAY_TOKEN' or any(s.get(k)is not True for k in ('relay_server_only','user_Bearer_required','user_authorization_in_application_required','shared_atomic_quota_required','health_ready_relay_required')) or any(s.get(k)is not False for k in ('direct_browser_analysis_allowed','secrets_in_browser_allowed')) or s.get('health_live_path')!='/health/live' or s.get('health_ready_path')!='/health/ready' or s.get('current_entitlement_authority')!='jungsi_backend.entitlements'):
+    if (s.get('contract_ref')!='security_contract' or s.get('revision')!=spec.get('security_contract',{}).get('revision') or s.get('relay_header')!='X-Jungsi-Relay-Token' or s.get('relay_environment_name')!='JUNGSI_RELAY_TOKEN' or any(s.get(k)is not True for k in ('relay_server_only','user_Bearer_required','user_authorization_in_application_required','shared_atomic_quota_required','health_ready_relay_required')) or any(s.get(k)is not False for k in ('direct_browser_analysis_allowed','secrets_in_browser_allowed')) or s.get('health_live_path')!='/health/live' or s.get('health_ready_path')!='/health/ready' or s.get('current_entitlement_authority')!='public.jeongsi_passes'):
         errors.append('DEV-010 relay or application authorization drift')
     if (n.get('registry_format')!='jungsi.data-registry/v1' or n.get('selection_format')!='jungsi.runtime-selection/v1' or n.get('required_dependencies_only')is not True or n.get('source_snapshots_preserved')is not True or any(n.get(k)is not False for k in ('source_state_only_promotion_allowed','historical_source_count_trigger_allowed','actual_data_in_Git'))):
         errors.append('DEV-010 native publication or historical trigger drift')
-    if (c.get('production_ready')is not False or any(preserve.get(k)is not False for k in ('legacy_factory_change_allowed','source_flag_only_promotion_allowed','production_ready_promotion_allowed')) or v.get('actual_Auth_DB_Storage_Edge_BFF_browser_deployment')!='NOT_RUN' or v.get('actual_billing_and_quota_verification')!='NOT_RUN' or p.get('usage_and_spend_cap_verification')!='NOT_RUN'):
+    if (c.get('production_ready')is not False or preserve.get('legacy_factory_change_allowed')is not True or preserve.get('opening_change_ref')!='opening_security_operations_contract' or any(preserve.get(k)is not False for k in ('source_flag_only_promotion_allowed','production_ready_promotion_allowed')) or v.get('actual_Auth_DB_Storage_Edge_BFF_browser_deployment')!='NOT_RUN' or v.get('actual_billing_and_quota_verification')!='NOT_RUN' or p.get('usage_and_spend_cap_verification')!='NOT_RUN'):
         errors.append('DEV-010 preparation cannot certify operating or billing acceptance')
     precision=c.get('numerical_compatibility',{})
     if (any(precision.get(k)is not True for k in ('exact_rational_and_decimal_preserved','explicit_rule_rounding_preserved','canonical_integer_JSON_keys_preserved','independent_python_edge_comparison_required')) or precision.get('Number_or_Math_round_equivalence_assumed')is not False or precision.get('heavy_model_generation_in_request_allowed')is not False):
@@ -1206,7 +1280,7 @@ def validate_secured_preparation(spec):
         c.get("branch")!="feature/application-pre-data-platform" or c.get("requirements")!=["REQ-24","REQ-25","REQ-26"]):
         errors.append("DEV-008 policy/owner binding drift")
     if (p.get("factory")!="create_secured_app" or p.get("required_keyword")!="security" or
-        p.get("legacy_factories")!=["create_app","configured_app"] or p.get("default_factories_unchanged") is not True or
+        p.get("legacy_factories")!=["create_app","configured_app"] or p.get("default_factories_unchanged") is not False or p.get("default_entitlement_authority")!="public.jeongsi_passes" or p.get("opening_change_ref")!="opening_security_operations_contract" or
         p.get("automatic_storage_or_entitlement_transition") is not False or p.get("local_verification_unchanged") is not True or
         p.get("existing_API_count")!=22 or p.get("API_or_DTO_additions") is not False or p.get("session_format")!="jungsi.session/v1"):
         errors.append("DEV-008 default composition preservation drift")
@@ -1449,11 +1523,78 @@ def validate_security_contract(spec):
     return sorted(set(errors))
 
 
+
+def validate_opening_security_operations(spec):
+    """Require the adopted authority and management gates without changing old receipts."""
+    c=spec.get('opening_security_operations_contract')
+    if not isinstance(c,dict):return ['Opening security contract missing']
+    errors=[]
+    if c.get('format')!='jungsi.opening-security-operations/v1' or c.get('document')!=spec.get('current_documents',{}).get('opening_security_operations') or c.get('production_ready')is not False:
+        errors.append('Opening security registration or readiness drift')
+    decision=c.get('user_decisions',{}); e=c.get('entitlement',{}); m=c.get('management',{}); q=c.get('queries',{}); cap=c.get('capacity',{})
+    if c.get('status')=='accepted_on_develop_scoped_operating_NOT_RUN':
+        evidence=c.get('verification',{});head=evidence.get('implementation_commit');ci=evidence.get('CI',[])
+        if (not re.fullmatch(r'[0-9a-f]{40}',str(head)) or not re.fullmatch(r'[0-9a-f]{40}',str(evidence.get('integration_commit'))) or
+            evidence.get('pull_request')!='https://github.com/natural0448/Jungsi_touch/pull/31' or
+            type(evidence.get('commit_snapshot_tests'))is not int or evidence.get('commit_snapshot_tests',0)<923 or
+            type(evidence.get('push_snapshot_tests'))is not int or evidence.get('push_snapshot_tests',0)<923 or
+            not isinstance(ci,list) or len(ci)!=2 or any(not isinstance(r,dict)or r.get('headSha')!=head or r.get('conclusion')!='success'for r in ci) or
+            any(evidence.get(k)!='NOT_RUN' for k in ('real_JWT_active_aal2_management','Edge_redeployment','browser_paid_after_grant_or_revoke','production_publication','actual_user_paid_management_browser'))):
+            errors.append('Opening develop acceptance lacks exact scoped evidence')
+
+    if (decision.get('paid_authority')!='public.jeongsi_passes' or decision.get('default_Postgres_composition_transition_authorized')is not True or decision.get('admin_paid_override')is not False or decision.get('admin_paid_override_status')!='deferred_user_decision' or
+        e.get('table')!='public.jeongsi_passes' or e.get('activation')!='revoked_at IS NULL AND starts_at <= now AND now < ends_at' or e.get('multiple_active_rows')!='MAX(ends_at)' or e.get('time_basis')!='UTC' or
+        e.get('session_format')!='jungsi.session/v1' or e.get('session_fields')!=['format','member_tier','entitlement_expires_at'] or e.get('failure')!={'http':503,'code_policy':'existing_safe_entitlement_codes_without_SQL_details','fallback':False} or
+        e.get('metadata_and_entitlement_data_queries_per_request')!=1 or type(e.get('metadata_and_entitlement_data_queries_per_request'))is not int or
+        any(e.get(k)is not False for k in ('legacy_table_fallback_allowed','cross_request_entitlement_cache_allowed','adapter_writes_allowed','automatic_entitlement_grant_allowed')) or
+        any(e.get(k)is not True for k in ('request_local_member_and_expiry_snapshot','transaction_configuration_queries_separate','explicit_dependency_injection_preserved','synthetic_memory_composition_preserved'))):
+        errors.append('Opening paid authority or failure boundary drift')
+    operations=['forecast.capabilities','forecast.list','forecast.create','forecast.read','forecast.adjust','forecast.validate','forecast.approve','forecast.publish']
+    if (m.get('operations')!=operations or m.get('verified_aal')!='aal2' or m.get('account_status')!='active' or m.get('authority_source')!='jungsi_backend.forecast_authorities' or
+        m.get('trusted_identity')!='exact_Bearer_verified_by_Supabase_Auth_getUser' or m.get('trusted_profile')!='own_profiles_status_via_same_verified_Bearer_and_publishable_key_RLS' or m.get('existing_edit_approve_and_school_scope_required')is not True or
+        m.get('nonstaff_capabilities')!='empty_false' or
+        any(m.get(k)is not False for k in ('public_forecast_read_is_management','client_roles_or_user_metadata_trusted','profile_admin_override_allowed','new_app_role_profiles_GRANT_allowed','student_or_paid_service_MFA_required','unknown_profile_breaks_student_service','JWT_AAL_profile_status_in_public_DTO_allowed')) or
+        m.get('errors')!={'aal1':[403,'management_mfa_required'],'inactive':[403,'management_account_inactive'],'unknown':[503,'management_account_state_unverified']}):
+        errors.append('Opening management MFA or active scope drift')
+    refs={o['id'] for o in spec.get('operations',[]) if o.get('management_security_contract_ref')=='opening_security_operations_contract.management'}
+    if refs!=set(operations):errors.append('Opening management route coverage drift')
+    if (m.get('admin_logs_actor_source')!='auth.uid()' or m.get('admin_logs_metadata_source')!='database' or m.get('signup_source')!='website_only_age14_consents_email_captcha' or m.get('signup_via_dashboard_add_user_allowed')is not False or m.get('SMTP_captcha_leaked_password_settings_change_allowed')is not False or m.get('external_migration_numbers_reserved')!=[32,33,34,35]):
+        errors.append('Opening external security ownership drift')
+    if (any(q.get(k)is not True for k in ('parameterized_bounded_JOIN_required','bounded_before_MATERIALIZED_required')) or any(q.get(k)is not False for k in ('N_plus_1_allowed','unbounded_current_scan_for_UI_allowed','full_count_for_UI_allowed','duplicate_index_creation_allowed','test_intake_in_production_allowed'))):
+        errors.append('Opening bounded query contract drift')
+    if (any(cap.get(k)is not True for k in ('source_files_preserved','private_immutable_Storage_archive_required','archive_remote_bytes_SHA_readback_required','reference_and_current_C_identity_preservation_required','archive_resolver_before_payload_removal_required','exact_row_column_removal_manifest_and_user_approval_required','IO_warning_requires_stop_and_owner_recheck')) or
+        any(cap.get(k)is not False for k in ('generic_cleanup_request_is_exact_removal_approval','registry_or_overlays_bulk_deletion_allowed','production_allowed_false_means_unused','historical_0206_window_is_current_requirement','VACUUM_FULL_automatic_allowed','normal_VACUUM_guarantees_disk_shrink'))):
+        errors.append('Opening capacity preservation contract drift')
+    if c.get('document')not in spec.get('workflow',{}).get('development_harness',{}).get('required_documents',[]):
+        errors.append('Opening mandatory document missing from harness')
+    return errors
+
+
+def opening_security_document_body(spec):
+    c=spec['opening_security_operations_contract']
+    management=[o for o in spec['operations'] if o['id']in c['management']['operations']]
+    return (
+        '2026-10-14 사용자 확정은 public.jeongsi_passes 기준 전환이며 관리자 무료 이용 예외는 추후 결정이다. 과거 명시 연결만 준비하기로 한 결정·이용권 어댑터·검수 영수증은 이력으로 보존한다. 최신 실행 변경의 규범은 이 문서와 opening_security_operations_contract이다.\n\n'
+        '## 이용권 읽기와 기본 서버 구성\n\n'
+        '실제 PostgreSQL 저장소 구성은 public.jeongsi_passes를 읽는다. revoked_at IS NULL이고 starts_at <= UTC now < ends_at인 행 중 MAX(ends_at)를 채택한다. 메타데이터/RLS/역할/필수 열과 현재 만료를 한 배치 JOIN으로 검증하고 /me의 회원 판정과 만료를 같은 요청 값에 결속한다. 트랜잭션 설정 질의는 데이터 조회와 별개다. 요청 간 이용권 캐시는 쓰지 않고 조회 장애는 기존의 안전한 이용권 오류 코드와 503으로 거절하고 SQL 세부 예외를 노출하지 않는다. 기존 이용권 표로 대체하거나 관리자를 유료로 만들지 않는다. 공개 session/v1의 3필드는 유지한다. 명시 의존 주입과 로컬 합성 저장소는 보존한다.\n\n'
+        '## 관리자 MFA·본인 상태·업무 권한\n\n'
+        '관리 요청은 Supabase Auth가 정확한 Bearer를 검증한 뒤 aal2를 신뢰한다. 같은 검증 Bearer와 publishable key로 자신의 profiles.status만 조회해 기존 RLS를 따른다. active가 아니면 403 management_account_inactive, 상태 미확인은 관리만 503 management_account_state_unverified, aal1은 403 management_mfa_required다. 기존 forecast_authorities의 편집/승인·학교 범위도 모두 필요하다. public.is_admin()이나 이메일·클라이언트 role만으로 자체 관리 권한을 부여하지 않는다. staff_roles 테이블은 가정하지 않는다. 일반·유료 학생 조회/분석에는 MFA를 추가하지 않고 관리 상태 조회 실패만으로 성공한 학생 응답을 버리지 않는다. 비직원 capabilities는 empty/false다.\n\n'+
+        table(['관리 operation','HTTP','경로'],[[o['id'],o['method'],o['path']]for o in management])+
+        '\n\nOTP 등록은 계정 주인이 /admin에서 휴대폰 앱으로 수행한다. /jeongsi 미리보기와 관리 기능의 인증 조건은 구분한다. JWT/aal/profile 상태는 서버 내부 값으로 공개 DTO에 넣지 않는다. admin_logs는 auth.uid() 본인 actor만 쓰고 이메일/IP/시각은 DB가 채운다. 시험 계정도 사이트 가입 화면에서 생성한다. 외부 마이그레이션 32~35 번호를 점유하고 SMTP·캡차·유출 비밀번호 설정은 변경하지 않는다.\n\n'
+        '## 조회·용량·보존형 정리\n\n'
+        '화면 조회는 매개변수화된 제한 범위 JOIN과 keyset을 쓴다. 전체 count·전국 FETCH와 N+1을 화면 경로에 붙이지 않는다. 제한 ID를 먼저 고른 MATERIALIZED는 별도이며 제거 자체를 성능 검증으로 간주하지 않는다. 기존 인덱스와 valid/ready·계획을 확인한 후 필요한 것만 제안한다. 시험 적재는 로컬/운영 외 DB에서 한다.\n\n'
+        '원 압축 bytes를 재압축 없이 비공개 불변 Storage에 보관하고 원격 bytes/SHA를 다시 확인한 뒤 archive pointer/resolver·현재/C 근거 보존을 검수한다. csv/support NOT NULL·길이/해시 제약이 있어 업로드만으로 본문 제거가 가능해지지 않는다. 정확 표/PK/열·해시·참조·제거 명부에 사용자가 승인한 범위만 다음 단계에서 적용한다. registry·overlays의 전량 삭제, production_allowed=false를 미사용으로 해석, 무조건 VACUUM FULL은 금지한다. 일반 VACUUM의 내부 공간 재사용과 파일 크기 축소를 구분한다. 과거 02~06 제한은 현재 강제 규칙으로 재등록하지 않는다. I/O 경고가 다시 나타나면 대량 작업을 멈추고 Owner와 재확인한다.\n\n'
+        '## 검증과 재개 조건\n\n'+table(['검수','현재 상태'],[[k,v]for k,v in c['verification'].items()])+
+        '\n\n개발팀 코드는 담당 feature PR로 통합한다. 실제 JWT·MFA 관리·유료 발급/회수 브라우저 검수, Edge 재배포, CAP 실행·발행은 해당 영수증 없이 완료 처리하지 않는다. 검수 descriptor의 subject·purpose·만료·relay·PIN을 이 변경으로 풀거나 연장하지 않는다.'
+    )
+
+
 def generated_files(spec):
     digest=hashlib.sha256(json.dumps(spec,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     def doc(title,body):
         return f"# {title}\n\n이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 {spec['version']}이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.\n\n{body}\n\n<!-- jungsi:generated spec_sha256={digest} -->\n"
     collaboration=collaboration_sections(spec)
+    runtime_progress=live_execution_document(spec)
     page_rows=[[p["number"],p["label"],p["path"],rights(p["member_tiers"]),p["purpose"]] for p in spec["pages"]]
     requirement_text="\n\n".join(f"### {r['id']} {r['title']}\n\n{r['description']}" for r in spec["requirements"])
     pending="\n".join("- "+text for text in spec["pending"])
@@ -1466,7 +1607,7 @@ def generated_files(spec):
        "## 화면과 회원 정책\n\n"+table(["페이지","화면","경로","회원","역할"],page_rows)+
        "\n\n1페이지의 실제 결과 조회 네 학년도는 자료 공개 범위에 따라 별도 확정한다. 2024~2027 성적 환산 비교와 결과 공개 연도를 혼동하지 않는다. 3페이지는 검색부터 상세까지 유료 전용이며 성적이 없어도 유료 검색을 허용한다. 개인 분석이 준비되지 않으면 이유와 함께 보류한다.\n\n"+
        "## 확정 요구사항\n\n"+requirement_text+"\n\n## 이번 버전의 변경\n\n"+changes+"\n\n## 준비 상태와 후속 구현\n\n"+pending+
-       "\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다."+collaboration["ownership"]+collaboration["drive"])
+       runtime_progress+"\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다."+collaboration["ownership"]+collaboration["drive"])
     operation_rows=[[o["id"],o["method"],o["path"],rights(o["member_tiers"]),"본인" if o["report_owner"] else "해당 없음","필요" if o["confirmed_score_profile"] else "불필요",o["response_scope"]] for o in spec["operations"]]
 
     current_review_section=""
@@ -1558,7 +1699,7 @@ def generated_files(spec):
        "\n\n정적 경로 /offerings/search를 /offerings/{offering_id}보다 먼저 등록한다. report_id와 offering_id의 표기를 통일한다. 검색은 추천 목록과 조인해 대상을 줄이지 않는다.\n\n"+
        "## 권한과 응답 경계\n\n서버가 검증한 세션·현재 이용권으로 Actor를 만든다. 요청 본문의 회원등급·학생 ID를 신뢰하지 않는다. 미인증은 401, 일반가입자의 유료 요청은 403으로 차단하고 결과·건수·상세를 반환하지 않는다. 없는 리포트와 타인 소유 리포트는 같은 404로 처리한다. 본인 분석에 확인한 성적이 없으면 409와 보류 사유다.\n\n"+
        ("FastAPI는 세션 검증 후 업무 서비스를 호출하고 회원별 DTO를 적용한다. DB 이용권·본인 소유권과 자료/모형 승인 검사를 연결했다. 실제 서버·자료 연결 증거는 운영 준비 상태에서 따로 확인한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n" if platform else "권한 모듈은 HTTP 인증이나 응답 필드 제거 기능을 대신하지 않는다. 실제 핸들러에서 입력 검증, 운영 저장소 조회, 회원별 응답 객체, 분포·산식 승인 검사를 연결해야 한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n")+
-       overall_section+current_review_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
+       runtime_progress+overall_section+current_review_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
     layers=table(["계층","코드 위치","책임","허용 의존"],[[l["label"],", ".join(l["roots"]),l["responsibility"],", ".join(l["allowed_dependencies"])] for l in spec["layers"]])
     implementation=table(["파일","계층","현재 상태","요구사항"],[[r["path"],r["layer"],{
 "existing_math_foundation":"공통 계산 기반",
@@ -1574,7 +1715,7 @@ def generated_files(spec):
        "\n\n"+chr(96)*3+"mermaid\nflowchart LR\n  WEB[화면과 라우팅] --> API[인증된 서버와 업무 처리]\n  API --> ENGINE[성적 계산 엔진]\n  API --> PORT[저장소 인터페이스]\n  ADAPTER[비공개 저장소 어댑터] -.구현.-> PORT\n  ADAPTER --> DB[DB와 비공개 자료]\n"+chr(96)*3+
        "\n\n애플리케이션은 구체 DB 어댑터를 가져오지 않고 자신이 정의한 포트에 의존한다. 인프라가 포트를 구현한다. 프레젠테이션은 허용된 API 결과만 표시하며 Python 엔진·DB 비밀값·전체 환산표·곡선·모델을 포함하지 않는다.\n\n"+
        "## 커밋된 코드와 새 기반\n\n"+implementation+
-       "\n\n기존 src/jungsi_touch 루트 계산 모듈은 애플리케이션의 엔진 라이브러리다. 경로를 옮겨 기존 사용자를 깨뜨리지 않는다. 새 application과 infrastructure를 통해 입출력·소유권·저장소를 연결한다. 메모리 어댑터는 합성 검산 전용으로 운영 연결을 의미하지 않는다.\n\n"+
+       runtime_progress+"\n\n기존 src/jungsi_touch 루트 계산 모듈은 애플리케이션의 엔진 라이브러리다. 경로를 옮겨 기존 사용자를 깨뜨리지 않는다. 새 application과 infrastructure를 통해 입출력·소유권·저장소를 연결한다. 메모리 어댑터는 합성 검산 전용으로 운영 연결을 의미하지 않는다.\n\n"+
        "## 데이터와 기술 결정\n\n실제 원자료·학생 성적·입결·환산표·곡선·모델과 .env 계열은 모든 브랜치에서 제외한다. database에는 DB 구조·마이그레이션 코드만 둘 수 있다. "+("FastAPI·Supabase PostgreSQL을 채택했다. UTC aware/timestamptz와 date를 구분하고 서버는 환경 설정만 읽는다. 실제 연결 설정·자료 승인·운영 배포는 대기다." if platform else "DB 엔진·웹 프레임워크·HTTP 서버 채택은 미정이다.")+"\n\n"+
        "## 구현과 운영 연결\n\n"+(runtime_intro if platform else "현재 계약과 권한 기반 다음에 실제 인증·저장·각 업무 서비스를 연결한다.")+" 각 단계는 승인된 자료가 없는 값을 사유와 함께 보류한다."+collaboration["ownership"]+collaboration["drive"])
     workflow=spec["workflow"]
@@ -1612,7 +1753,9 @@ def generated_files(spec):
         backend['runtime_status']='HTTP_workflows_implemented_live_configuration_pending'
     files["apps/web/route_catalog.json"]=json.dumps(frontend,ensure_ascii=False,indent=2)+"\n"
     files["src/jungsi_touch/application/route_catalog.json"]=json.dumps(backend,ensure_ascii=False,indent=2)+"\n"
-    files["apps/web/README.md"]=doc("정시터치 프레젠테이션 개발 기준","현재 경로와 회원별 화면 접근 범위는 route_catalog.json을 따른다. [현재 기획](../../docs/current/서비스_기획.md)과 [라우팅 명세](../../docs/current/라우팅_명세.md)를 함께 갱신한다. 기존 가상 화면은 기획 이력이며 이 폴더의 실행 앱이 아니다. 실제 화면 앱·인증·API 연결은 후속 작업이다.\n\n화면은 서버가 허용한 결과만 표시하고 자체 대학 계산이나 DB 직접 조회를 구현하지 않는다. 브라우저의 회원등급 선택값을 운영 권한으로 사용하지 않는다."+collaboration["presentation_intro"])
+    frontend_runtime=spec.get('supabase_deployment_contract',{}).get('live_execution',{}).get('frontend_runtime_rule',
+        '기존 가상 화면은 기획 이력이며 이 폴더의 실행 앱이 아니다. 실제 화면 앱·인증·API 연결은 후속 작업이다.')
+    files["apps/web/README.md"]=doc("정시터치 프레젠테이션 개발 기준","현재 경로와 회원별 화면 접근 범위는 route_catalog.json을 따른다. [현재 기획](../../docs/current/서비스_기획.md)과 [라우팅 명세](../../docs/current/라우팅_명세.md)를 함께 갱신한다. "+frontend_runtime+"\n\n화면은 서버가 허용한 결과만 표시하고 자체 대학 계산이나 DB 직접 조회를 구현하지 않는다. 브라우저의 회원등급 선택값을 운영 권한으로 사용하지 않는다."+collaboration["presentation_intro"])
     files["database/README.md"]=doc("정시터치 데이터 계층 개발 기준","이 폴더에는 실제 값이 없는 DB 구조·마이그레이션 코드만 추가할 수 있다. "+(platform['database'] if platform else "운영 DB 채택과 스키마는 미정이다.")+" 원자료·성적·입결·환산표·곡선·모델·덤프·접속 비밀값은 여기에 복사하지 않는다.\n\n실제 데이터는 Git 제외 폴더 또는 비공개 DB·스토리지에 두고 애플리케이션 포트를 통해 접근한다. [3티어 개발구조](../docs/current/3티어_개발구조.md)를 따른다."+collaboration["drive"])
     if spec["current_documents"].get("presentation_handoff"):
         files[spec["current_documents"]["presentation_handoff"]]=doc("프레젠테이션 담당과 작업 인계",collaboration["handoff"]+("\n\n## 연결할 서버 계약\n\n"+runtime_intro+" HTTP 응답은 UTC Z 시각을 표시 경계에서 Asia/Seoul로 변환하며 YYYY-MM-DD 날짜는 그대로 표시한다. Supabase 검증 access token과 쓰기 요청 Idempotency-Key, expected_version을 보내고 401/403/404/409 및 pending/null을 구분한다. GET print는 고정 revision 상담 DTO이며 인쇄/PDF 렌더링은 화면 담당이다." if platform else ''))
@@ -1914,6 +2057,26 @@ def generated_files(spec):
                 op["security_policy"]=canonical["security_policy"]
             files[path]=json.dumps(catalog,ensure_ascii=False,indent=2)+"\n"
 
+    if spec.get('opening_security_operations_contract'):
+        latest=spec['opening_security_operations_contract']['document']
+        files[latest]=doc('오픈 전 보안·운영 변경 · 필수 개발 참조',opening_security_document_body(spec))
+        for path in list(files):
+            if path.endswith('.md') and path!=latest:
+                relative=posixpath.relpath(latest,str(PurePosixPath(path).parent))
+                note=('\n\n## 2026-10-14 오픈 전 최신 확정\n\n'
+                      '유료 기준은 public.jeongsi_passes이며 관리자 무료 이용 예외는 미확정이다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. '
+                      '이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 ['
+                      '오픈 전 보안운영 변경]('+relative+')와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.\n\n')
+                marker='\n\n<!-- jungsi:generated'
+                files[path]=files[path].replace(marker,note+marker)
+        for path in ('apps/web/route_catalog.json','src/jungsi_touch/application/route_catalog.json'):
+            catalog=json.loads(files[path]);catalog['opening_security_operations_contract']=spec['opening_security_operations_contract']
+            files[path]=json.dumps(catalog,ensure_ascii=False,indent=2)+'\n'
+    if spec.get("edge_harness") is not None:
+        for key in ("planning","routing","architecture","workflow"):
+            target=spec["current_documents"][key]
+            if target in files:files[target]=files[target]+edge_document_text(spec)
+        files["docs/current/edge_contract.json"]=json.dumps(spec["edge_harness"],ensure_ascii=False,sort_keys=True,indent=2)+"\n"
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -1971,7 +2134,7 @@ def validate_forecast_contract(spec):
 
 
 def validate_spec(spec):
-    errors=validate_sync_policy(spec)
+    errors=validate_sync_policy(spec) + validate_opening_security_operations(spec)
     display=spec.get('official_history_db_display_contract')
     try: display_required=tuple(int(v) for v in spec.get('version','0.0.0').split('.')) >= (1,9,17)
     except (ValueError,TypeError): display_required=False
@@ -1993,7 +2156,7 @@ def validate_spec(spec):
             any(scope.get(k)is not True for k in ('explicit_server_selection_required','verified_review_subject_allowlist_required','immutable_descriptor_bytes_sha_required','exact_source_identity_type_PK_year_required','validity_and_revocation_required')) or
             any(scope.get(k)is not False for k in ('global_source_flags_changed','local_C_approval_is_cloud_approval','all_ingested_data_auto_adopted','engine_or_forecast_auto_adopted','actual_values_in_Git'))):
             errors.append('Official history DB display approval boundary drift')
-        if (composition.get('default_factories_changed')is not False or composition.get('entitlement_authority')!='jungsi_backend.entitlements' or
+        if (composition.get('default_factories_changed')is not True or composition.get('entitlement_authority')!='public.jeongsi_passes' or composition.get('opening_change_ref')!='opening_security_operations_contract' or
             composition.get('existing_API_count')!=22 or composition.get('new_logical_API_or_DTO')is not False or
             composition.get('browser_DB_credentials')is not False or composition.get('relay_header')!='X-Jungsi-Relay-Token'):
             errors.append('Official history DB display existing contract preservation drift')
@@ -2095,7 +2258,7 @@ def validate_spec(spec):
         if session[0].get('contract_ref')!='backend_platform_contract.dto_schemas.session' or http.get('response_schema')!='session' or http.get('body')!=[] or http.get('query')!=[] or http.get('idempotency_key_required') is not False or dto.get('format')!='jungsi.session/v1' or dto.get('fields')!=['format','member_tier','entitlement_expires_at']:
             errors.append('Formal session DTO contract drift')
     rules=' '.join(spec.get('backend_platform_contract',{}).get('dto_schemas',{}).get('session',{}).get('rules',[]))
-    if 'jungsi_backend.entitlements' not in rules or 'active=true' not in rules or 'starts_at<=now<expires_at' not in rules or 'status=active' in rules:
+    if 'public.jeongsi_passes' not in rules or 'revoked_at IS NULL' not in rules or 'starts_at<=now<ends_at' not in rules or 'MAX(ends_at)' not in rules or 'status=active' in rules:
         errors.append('Formal session entitlement rule drift')
     if 'session_contract' in spec:errors.append('Superseded proposed session contract must not be revived')
     errors.extend(validate_forecast_contract(spec))
@@ -2104,6 +2267,7 @@ def validate_spec(spec):
     errors.extend(validate_secured_preparation(spec))
     errors.extend(validate_runtime_connection_preparation(spec))
     errors.extend(validate_supabase_deployment_contract(spec))
+    errors.extend(validate_live_execution(spec))
     errors.extend(validate_frontend_reply_contract(spec))
     errors.extend(validate_supabase_actual_update_contract(spec))
     errors.extend(validate_supabase_second_actual_update_contract(spec))
@@ -2238,8 +2402,48 @@ def validate_public_response_registry(paths,read,spec):
     return validate_public_response_catalog(catalog,spec)
 
 
+def edge_registration_errors(paths,read,spec):
+    """Structural preflight only; Deno parser and execution are required by the retained runner."""
+    names=set(paths)
+    from edge_source_scope import classify_sources,ScopeFailure
+    try:scope=classify_sources(paths,read,spec)
+    except ScopeFailure as error:return ["Edge suite scope: "+str(error)]
+    edge={p for p in names if p=="supabase/functions/deno.json" or p.startswith(("supabase/functions/_shared/jungsi/","tests/edge/"))}
+    ts=set(scope["foundation_ts"])
+    c=spec.get("edge_harness")
+    if not edge:
+        return [] if c is None or c.get("state")=="prepared" else ["Active Edge registry has no sources"]
+    if not isinstance(c,dict) or c.get("format")!="jungsi.edge-contract/v1" or c.get("state")!="required":
+        return ["Edge sources require an activated common registry"]
+    errors=[]
+    if ts!=set(c.get("files",{})):errors.append("Edge registration coverage mismatch")
+    for p,row in c.get("files",{}).items():
+        if p not in names:errors.append("Registered Edge file absent: "+p);continue
+        if row.get("layer") not in {"application","data_infrastructure","verification"}:errors.append("Unregistered Edge layer: "+p)
+        if row.get("declarations",{}).get("source_sha256")!=hashlib.sha256(read(p)).hexdigest():errors.append("Edge source/declaration binding drift: "+p)
+        if row.get("layer")!="verification":
+            impl=next((r for r in spec["implementation"] if r["path"]==p),None)
+            if not impl or impl["layer"]!=row["layer"] or set(impl["symbols"])!=set(row["symbols"]):errors.append("Edge implementation registry drift: "+p)
+    required={c.get("config"),c.get("oracle"),*c.get("tests",[])}
+    if None in required or not required<=names:errors.append("Edge suite/config/oracle reference absent")
+    if any(p not in ts for p in c.get("tests",[])):errors.append("Edge test outside TS registry")
+    if type(c.get("unit_count")) is not int or c["unit_count"]<=0 or type(c.get("oracle_count")) is not int or c["oracle_count"]<=0:errors.append("Edge expected test counts invalid")
+    if c.get("runtime",{}).get("doc_json_version")!=2 or c.get("runtime",{}).get("info_json_version")!=1:errors.append("Edge parser schema unsupported")
+    return errors
+
+def edge_document_text(spec):
+    c=spec.get("edge_harness")
+    if c is None:return ""
+    rows=[[p,r["layer"],", ".join(r.get("symbols",[]))] for p,r in c["files"].items()]
+    return ("\n\n## DEV-010 foundation TypeScript 등록과 검산\n\n"+
+      "상태: "+c["state"]+". domain은 애플리케이션 내부 계산 라이브러리다. TS 선언·기본값·반환형·import graph는 고정 snapshot에서 Deno doc/info로 대조한다.\n\n"+
+      table(["파일","계층","등록 심볼"],rows)+
+      "\n\n같은 Git snapshot에서 기존 Python 전체 검산 다음에 Deno check/lint/fmt·"+
+      str(c["unit_count"])+" 단위검산·Python–Deno "+str(c["oracle_count"])+" 합성 대조를 실행한다. 로컬 훅은 명시한 Deno 경로를 사용한다. CI는 edge-runtime.lock.json의 공식 Deno "+c["runtime"]["deno"]+" 배포 파일을 scripts/bootstrap_edge_runtime.py로 새 보존 폴더에 공급하고 아카이브 해시·크기·실행 버전을 검증한다. 기존 폴더 덮어쓰기·삭제·시스템 설치·최신 버전 대체는 없다. 미설치·비호환·파서 실패·결과 누락은 실패이고 skip 성공은 없다. foundation 소스가 없는 공통 준비 단계는 NOT_APPLICABLE_NO_FOUNDATION_SOURCE이며 실행 검산 완료가 아니다. 실행기 공급 영수증도 서비스 단위검산·oracle 통과를 대신하지 않는다. 기존 공개 Edge 소스는 현재 문서 동기화 색인으로 결속하며 foundation 선언·graph·단위검산·oracle 결과에 포함하지 않는다.")
+
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
+    errors.extend(edge_registration_errors(paths,read,spec))
     names=set(paths)
     errors.extend(validate_catalog(paths,read,spec))
     errors.extend(validate_public_response_registry(names,read,spec))
@@ -2366,9 +2570,13 @@ def snapshot_changed_paths(snapshot):
         for parent in parents:
             entries=parse_entries(git("ls-tree","-r","-z",parent),index=False)
             changed.update(path for path in set(captured)|set(entries) if captured.get(path)!=entries.get(path))
-        assert_same_index()
-        if merge_state()!=merge_raw or head_commit()!=head:
-            raise ValueError("Merge state changed while validating the index.")
+        def assert_same_context():
+            assert_same_index()
+            if merge_state()!=merge_raw or head_commit()!=head:
+                raise ValueError("Merge state changed while validating the index.")
+        assert_same_context()
+        snapshot._baseline_parent_commits=tuple(parents)
+        snapshot._assert_baseline_context=assert_same_context
         return sorted(changed)
     elif snapshot.revision:
         revision=commit_oid(snapshot.revision.encode("ascii"))
@@ -2386,6 +2594,37 @@ def snapshot_changed_paths(snapshot):
     else:
         return []
     return sorted({p.decode("utf-8") for p in raw.split(bytes([0])) if p})
+
+
+def validate_snapshot_baseline(snapshot,baseline):
+    """Validate ancestry of the selected result using its fixed parent context."""
+    oid_pattern=r"(?:[0-9a-f]{40}|[0-9a-f]{64})"
+    if not isinstance(baseline,str) or not re.fullmatch(oid_pattern,baseline):
+        raise ValueError("Invalid development baseline commit.")
+    resolved=git("rev-parse","--verify",baseline+"^{commit}").decode("ascii").strip()
+    if resolved!=baseline:
+        raise ValueError("Development baseline must identify the exact commit.")
+    context=None
+    if snapshot.staged:
+        parents=getattr(snapshot,"_baseline_parent_commits",None)
+        context=getattr(snapshot,"_assert_baseline_context",None)
+        if not isinstance(parents,tuple) or not callable(context):
+            raise ValueError("Fixed staged parent context is required for baseline validation.")
+        context()
+    else:
+        selected=snapshot.revision or git("rev-parse","--verify","HEAD^{commit}").decode("ascii").strip()
+        parents=(selected,)
+    if any(not isinstance(parent,str) or not re.fullmatch(oid_pattern,parent) for parent in parents):
+        raise ValueError("Invalid selected baseline parent commit.")
+    accepted=False
+    for parent in parents:
+        result=subprocess.run(["git","merge-base","--is-ancestor",baseline,parent],cwd=ROOT,capture_output=True)
+        if result.returncode not in (0,1):
+            raise ValueError("Development baseline ancestry query failed.")
+        accepted=accepted or result.returncode==0
+    if context is not None:context()
+    return [] if accepted else ["Development baseline is not an ancestor of the selected commit"]
+
 
 def write_generated(spec):
     timestamp=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
@@ -2417,9 +2656,7 @@ def main():
     spec=json.loads(snapshot.text(SPEC_PATH))
     errors=validate_content(snapshot.paths,snapshot.read,spec)
     errors.extend(validate_changed_paths(snapshot_changed_paths(snapshot),spec))
-    commit=snapshot.revision or "HEAD"
-    baseline_check=subprocess.run(["git","merge-base","--is-ancestor",spec["baseline_commit"],commit],cwd=ROOT,capture_output=True)
-    if baseline_check.returncode!=0:errors.append("Development baseline is not an ancestor of the selected commit")
+    errors.extend(validate_snapshot_baseline(snapshot,spec["baseline_commit"]))
     report=dict(checked_files=len(snapshot.paths),pages=len(spec["pages"]),operations=len(spec["operations"]),requirements=len(spec["requirements"]),
                 generated_files=len(generated_files(spec)),snapshot=snapshot.revision or ("index" if args.staged else "working_tree"),passed=not errors,errors=errors)
     print(json.dumps(report,ensure_ascii=False,indent=2))

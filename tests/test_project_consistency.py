@@ -1168,6 +1168,67 @@ class SnapshotChangedPathsTests(unittest.TestCase):
         self.assertEqual(self.checker.snapshot_changed_paths(SimpleNamespace(staged=False,revision=None)),[])
 
 
+
+    def baseline_selected(self,**options):
+            from unittest.mock import patch
+            with patch.object(self.checker,'ROOT',self.repo):
+                snapshot=self.checker.GitSnapshot(**options)
+                self.checker.snapshot_changed_paths(snapshot)
+                return snapshot
+
+    def baseline_check(self,snapshot,baseline):
+            from unittest.mock import patch
+            with patch.object(self.checker,'ROOT',self.repo):
+                return self.checker.validate_snapshot_baseline(snapshot,baseline)
+
+    def test_baseline_ordinary_parent(self):
+            self.write({'src/score.py':'value = 2\n'});self.call('add','.')
+            self.assertEqual(self.baseline_check(self.baseline_selected(staged=True),self.base),[])
+
+    def test_baseline_incoming_parent(self):
+            left,right=self.merge({'src/left.py':'value = 2\n'},{'src/right.py':'value = 3\n'})
+            self.assertEqual(self.baseline_check(self.baseline_selected(staged=True),right),[])
+            self.assertEqual(self.call('merge-base','--is-ancestor',right,left,expected=1),b'')
+
+    def test_baseline_committed_merge(self):
+            _,right=self.merge({'src/left.py':'value = 2\n'},{'src/right.py':'value = 3\n'})
+            self.call('commit','-q','-m','synthetic merge')
+            self.assertEqual(self.baseline_check(self.baseline_selected(revision=self.oid()),right),[])
+
+    def test_baseline_unrelated_commit_rejected(self):
+            tree=self.call('rev-parse','HEAD^{tree}').decode().strip()
+            unrelated=self.call('commit-tree',tree,input=b'synthetic unrelated root\n').decode().strip()
+            self.assertEqual(self.baseline_check(self.baseline_selected(staged=True),unrelated),['Development baseline is not an ancestor of the selected commit'])
+
+    def test_baseline_missing_commit_fails_closed(self):
+            import subprocess
+            with self.assertRaises(subprocess.CalledProcessError):self.baseline_check(self.baseline_selected(staged=True),'f'*40)
+
+    def test_baseline_merge_context_mutation_rejected(self):
+            _,right=self.merge({'src/left.py':'value = 2\n'},{'src/right.py':'value = 3\n'})
+            snapshot=self.baseline_selected(staged=True)
+            target=self.merge_head_path()
+            target.with_name('MERGE_HEAD.retained').write_bytes(target.read_bytes())
+            target.write_text(self.base+'\n',encoding='ascii')
+            with self.assertRaises(ValueError):self.baseline_check(snapshot,right)
+
+    def test_baseline_index_mutation_rejected(self):
+            snapshot=self.baseline_selected(staged=True)
+            self.write({'src/score.py':'value = 5\n'});self.call('add','.')
+            with self.assertRaises(ValueError):self.baseline_check(snapshot,self.base)
+
+    def test_baseline_git_query_failure_rejected(self):
+            from unittest.mock import patch
+            from types import SimpleNamespace
+            snapshot=self.baseline_selected(staged=True)
+            original=self.checker.subprocess.run
+            def failed(args,**kwargs):
+                if args[:2]==['git','merge-base']:return SimpleNamespace(returncode=128)
+                return original(args,**kwargs)
+            with patch.object(self.checker.subprocess,'run',failed):
+                with self.assertRaises(ValueError):self.baseline_check(snapshot,self.base)
+
+
 class MergeValidationBoundaryTests(unittest.TestCase):
     """Use only in-memory payloads; never force-track private paths or credentials."""
     def context(self):
@@ -1197,7 +1258,7 @@ class SecuredPreparationContractTests(unittest.TestCase):
     def setUp(self):
         self.spec=json.loads((ROOT/"docs/current/service_spec.json").read_text(encoding="utf-8"))
     def test_default_factory_cannot_be_automatically_switched(self):
-        spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["composition"]["default_factories_unchanged"]=False
+        spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["composition"]["default_factories_unchanged"]=True
         self.assertIn("DEV-008 default composition preservation drift",validate_spec(spec))
     def test_relay_cannot_replace_user_authorization(self):
         spec=deepcopy(self.spec);spec["secured_backend_preparation_contract"]["relay"]["relay_alone_grants_user_access"]=True
@@ -1304,7 +1365,7 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
                 wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['runtime_selection'][field]=value
                 self.assertIn('DEV-009 native selection approval or integrity drift',validate_runtime_connection_preparation(wrong))
     def test_source_fix_preserves_default_factories_and_minimal_health(self):
-        wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['composition']['default_factories_unchanged']=False
+        wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['composition']['default_factories_unchanged']=True
         self.assertIn('DEV-009 explicit composition preservation drift',validate_runtime_connection_preparation(wrong))
         wrong=deepcopy(self.spec);wrong['runtime_connection_preparation_contract']['readiness']['ready_public_fields'].append('private_registry')
         self.assertIn('DEV-009 provider readiness or public boundary drift',validate_runtime_connection_preparation(wrong))
@@ -1330,6 +1391,31 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
 
 
 class SupabaseDeploymentContractTests(unittest.TestCase):
+
+    def test_live_execution_cannot_omit_one_of_the_existing_routes(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec);spec['supabase_deployment_contract']['live_execution']['operations'].pop('session.read')
+        self.assertIn('DEV-010 live operation coverage drift',validate_live_execution(spec))
+
+    def test_live_native_pass_cannot_reuse_synthetic_foundation_only(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec);row=spec['supabase_deployment_contract']['live_execution']['operations']['session.read'];row['native']='PASS'
+        self.assertIn('DEV-010 live operating evidence missing: session.read.native',validate_live_execution(spec))
+
+    def test_live_port_requires_a_registered_source_hash(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec);row=spec['supabase_deployment_contract']['live_execution']['operations']['report.read']
+        row.update(code='PORTED',binding={'path':'supabase/functions/unregistered/index.ts','source_sha256':'a'*64})
+        self.assertIn('DEV-010 live implementation binding invalid: report.read',validate_live_execution(spec))
+
+    def test_owner_totp_and_final_completion_need_actual_evidence(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec);live=spec['supabase_deployment_contract']['live_execution'];live['status']='VERIFIED';live['stages']['owner_totp_verification']['status']='VERIFIED'
+        result=validate_live_execution(spec)
+        self.assertIn('DEV-010 live stage evidence missing: owner_totp_verification',result)
+        self.assertIn('DEV-010 live completion has unfinished acceptance',result)
+
+
     def setUp(self):
         self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
 
@@ -1375,3 +1461,46 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
                 self.assertIn('DEV-010 precision or heavy-compute compatibility drift',validate_supabase_deployment_contract(spec))
 
 if __name__=="__main__":unittest.main()
+
+
+class OpeningSecurityOperationsTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+    def test_legacy_fallback_or_admin_paid_override_is_rejected(self):
+        for branch,key in [('entitlement','legacy_table_fallback_allowed'),('user_decisions','admin_paid_override')]:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract'][branch][key]=True
+            self.assertIn('Opening paid authority or failure boundary drift',validate_spec(wrong))
+    def test_management_cannot_trust_client_or_expand_to_students(self):
+        for key in ['client_roles_or_user_metadata_trusted','new_app_role_profiles_GRANT_allowed','student_or_paid_service_MFA_required']:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['management'][key]=True
+            self.assertIn('Opening management MFA or active scope drift',validate_spec(wrong))
+    def test_public_forecast_read_cannot_inherit_management(self):
+        wrong=deepcopy(self.spec);next(o for o in wrong['operations']if o['id']=='forecast.published.read')['management_security_contract_ref']='opening_security_operations_contract.management'
+        self.assertIn('Opening management route coverage drift',validate_spec(wrong))
+    def test_mfa_guard_cannot_omit_a_manage_route(self):
+        wrong=deepcopy(self.spec);next(o for o in wrong['operations']if o['id']=='forecast.publish').pop('management_security_contract_ref')
+        self.assertIn('Opening management route coverage drift',validate_spec(wrong))
+    def test_paid_lookup_cannot_duplicate_or_cross_request_cache(self):
+        for key,value in [('metadata_and_entitlement_data_queries_per_request',2),('cross_request_entitlement_cache_allowed',True)]:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['entitlement'][key]=value
+            self.assertIn('Opening paid authority or failure boundary drift',validate_spec(wrong))
+    def test_cleanup_cannot_be_granted_by_unpublished_flag(self):
+        wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['capacity']['production_allowed_false_means_unused']=True
+        self.assertIn('Opening capacity preservation contract drift',validate_spec(wrong))
+    def test_unbounded_ui_query_or_N_plus_1_is_rejected(self):
+        for key in ['unbounded_current_scan_for_UI_allowed','N_plus_1_allowed','test_intake_in_production_allowed']:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['queries'][key]=True
+            self.assertIn('Opening bounded query contract drift',validate_spec(wrong))
+
+
+class OpeningAcceptanceAndReferenceTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+    def test_wrong_head_or_unrun_CI_cannot_certify_integration(self):
+        for field,value in [('headSha','f'*40),('conclusion','not_run')]:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['verification']['CI'][0][field]=value
+            self.assertIn('Opening develop acceptance lacks exact scoped evidence',validate_spec(wrong))
+    def test_mandatory_reference_resolves_from_other_layer_readmes(self):
+        files=generated_files(self.spec)
+        for path,target in [('apps/web/README.md','../../docs/current/오픈전_보안운영_변경.md'),('database/README.md','../docs/current/오픈전_보안운영_변경.md'),('docs/team_sessions/2026-10-05/DEV006_서비스_DB_응답.md','../../current/오픈전_보안운영_변경.md')]:
+            with self.subTest(path=path):self.assertIn(']('+target+')',files[path].decode('utf-8'))
