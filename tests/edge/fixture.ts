@@ -77,3 +77,8 @@ export function rejects(run: () => unknown, code: string) {
   }
   throw new Error("expected " + code);
 }
+
+/** Preserve synchronous stub effects and async rejection/result adoption without an extra turn. */
+export function syncPromise<T>(producer: () => T | PromiseLike<T>): Promise<T> {
+  return new Promise((resolve) => resolve(producer()));
+}

@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.53",
+  "contract_version": "1.9.54",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -345,157 +345,311 @@
       },
       "operations": {
         "history.search": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
+            "source_sha256": "31493452aa56f6615f679998d1885fda16686dc760658a07290a0a6f348d791d",
+            "symbol": "CatalogService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "recruitment.read": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
+            "source_sha256": "31493452aa56f6615f679998d1885fda16686dc760658a07290a0a6f348d791d",
+            "symbol": "CatalogService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "score-profile.create": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+            "source_sha256": "14eb611848b5b0d6aaf6563f42a015a79bdc08a9c57e4a3c975c150c359cff80",
+            "symbol": "ProfileReportService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "overall.analyze": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+            "source_sha256": "14eb611848b5b0d6aaf6563f42a015a79bdc08a9c57e4a3c975c150c359cff80",
+            "symbol": "ProfileReportService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "report.read": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+            "source_sha256": "14eb611848b5b0d6aaf6563f42a015a79bdc08a9c57e4a3c975c150c359cff80",
+            "symbol": "ProfileReportService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "offerings.search": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
+            "source_sha256": "31493452aa56f6615f679998d1885fda16686dc760658a07290a0a6f348d791d",
+            "symbol": "CatalogService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "offering.read": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
+            "source_sha256": "31493452aa56f6615f679998d1885fda16686dc760658a07290a0a6f348d791d",
+            "symbol": "CatalogService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "university.analyze": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+            "source_sha256": "0021c82e44126e5a75faafa619809df2f33a6d2e9cd80873398d069d74a4badf",
+            "symbol": "UniversityAnalysisService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "candidates.build": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+            "source_sha256": "0021c82e44126e5a75faafa619809df2f33a6d2e9cd80873398d069d74a4badf",
+            "symbol": "UniversityAnalysisService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "shortlist.update": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/report_actions.ts",
+            "source_sha256": "66ba67f196a5ae4b394ee908276fec4983adda4fa7a65c228ef69dcc3f45447f",
+            "symbol": "ReportActionService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "report.export": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+            "source_sha256": "14eb611848b5b0d6aaf6563f42a015a79bdc08a9c57e4a3c975c150c359cff80",
+            "symbol": "ProfileReportService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "statistics.read": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/report_actions.ts",
+            "source_sha256": "66ba67f196a5ae4b394ee908276fec4983adda4fa7a65c228ef69dcc3f45447f",
+            "symbol": "ReportActionService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "session.read": {
-          "code": "FOUNDATION_ONLY",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/session_service.ts",
+            "source_sha256": "6ffed08966fd788d30827d96b24514fd432301ae940ba787b543f9e71735b336",
+            "symbol": "readSessionSnapshot",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "forecast.capabilities": {
-          "code": "FOUNDATION_ONLY",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "forecast.list": {
-          "code": "FOUNDATION_ONLY",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "forecast.create": {
-          "code": "FOUNDATION_ONLY",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "forecast.read": {
-          "code": "FOUNDATION_ONLY",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "forecast.adjust": {
-          "code": "FOUNDATION_ONLY",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "forecast.validate": {
-          "code": "FOUNDATION_ONLY",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "forecast.approve": {
-          "code": "FOUNDATION_ONLY",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "forecast.publish": {
-          "code": "FOUNDATION_ONLY",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         },
         "forecast.published.read": {
-          "code": "NOT_PORTED",
+          "code": "PORTED",
           "native": "NOT_RUN",
           "deployment": "NOT_RUN",
-          "binding": null,
+          "binding": {
+            "path": "supabase/functions/_shared/jungsi/application/forecast_policy.ts",
+            "source_sha256": "74fa264eafc0feffc8ff5e0ef2cb750d94b8a8d93033fa6c54a9916338dcc230",
+            "symbol": "ForecastPolicyService.execute",
+            "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
+            "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
+            "scope": "source_registration_only_runtime_entry_NOT_ASSEMBLED"
+          },
           "evidence_ids": []
         }
       },

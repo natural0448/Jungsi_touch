@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.53이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.54이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -111,28 +111,28 @@ Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제
 
 | operation | 계약 경로 | Edge 코드 | 실 연결 검수 | 배포 인수 |
 | --- | --- | --- | --- | --- |
-| history.search | GET /api/v1/admission-history | NOT_PORTED | NOT_RUN | NOT_RUN |
-| recruitment.read | GET /api/v1/offerings/{offering_id}/recruitment | NOT_PORTED | NOT_RUN | NOT_RUN |
-| score-profile.create | POST /api/v1/score-profiles | NOT_PORTED | NOT_RUN | NOT_RUN |
-| overall.analyze | POST /api/v1/overall-reports | NOT_PORTED | NOT_RUN | NOT_RUN |
-| report.read | GET /api/v1/reports/{report_id} | NOT_PORTED | NOT_RUN | NOT_RUN |
-| offerings.search | GET /api/v1/offerings/search | NOT_PORTED | NOT_RUN | NOT_RUN |
-| offering.read | GET /api/v1/offerings/{offering_id} | NOT_PORTED | NOT_RUN | NOT_RUN |
-| university.analyze | POST /api/v1/reports/{report_id}/university-results | NOT_PORTED | NOT_RUN | NOT_RUN |
-| candidates.build | POST /api/v1/reports/{report_id}/candidates | NOT_PORTED | NOT_RUN | NOT_RUN |
-| shortlist.update | PUT /api/v1/reports/{report_id}/shortlist/{offering_id} | NOT_PORTED | NOT_RUN | NOT_RUN |
-| report.export | GET /api/v1/reports/{report_id}/print | NOT_PORTED | NOT_RUN | NOT_RUN |
-| statistics.read | GET /api/v1/reports/{report_id}/offerings/{offering_id}/live-statistics | NOT_PORTED | NOT_RUN | NOT_RUN |
-| session.read | GET /api/v1/me | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
-| forecast.capabilities | GET /api/v1/forecast-capabilities | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
-| forecast.list | GET /api/v1/forecast-drafts | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
-| forecast.create | POST /api/v1/offerings/{offering_id}/forecast-drafts | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
-| forecast.read | GET /api/v1/forecast-drafts/{draft_id} | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
-| forecast.adjust | POST /api/v1/forecast-drafts/{draft_id}/adjustments | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
-| forecast.validate | POST /api/v1/forecast-drafts/{draft_id}/validations | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
-| forecast.approve | POST /api/v1/forecast-drafts/{draft_id}/approvals | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
-| forecast.publish | POST /api/v1/forecast-drafts/{draft_id}/publications | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
-| forecast.published.read | GET /api/v1/offerings/{offering_id}/forecast | NOT_PORTED | NOT_RUN | NOT_RUN |
+| history.search | GET /api/v1/admission-history | PORTED | NOT_RUN | NOT_RUN |
+| recruitment.read | GET /api/v1/offerings/{offering_id}/recruitment | PORTED | NOT_RUN | NOT_RUN |
+| score-profile.create | POST /api/v1/score-profiles | PORTED | NOT_RUN | NOT_RUN |
+| overall.analyze | POST /api/v1/overall-reports | PORTED | NOT_RUN | NOT_RUN |
+| report.read | GET /api/v1/reports/{report_id} | PORTED | NOT_RUN | NOT_RUN |
+| offerings.search | GET /api/v1/offerings/search | PORTED | NOT_RUN | NOT_RUN |
+| offering.read | GET /api/v1/offerings/{offering_id} | PORTED | NOT_RUN | NOT_RUN |
+| university.analyze | POST /api/v1/reports/{report_id}/university-results | PORTED | NOT_RUN | NOT_RUN |
+| candidates.build | POST /api/v1/reports/{report_id}/candidates | PORTED | NOT_RUN | NOT_RUN |
+| shortlist.update | PUT /api/v1/reports/{report_id}/shortlist/{offering_id} | PORTED | NOT_RUN | NOT_RUN |
+| report.export | GET /api/v1/reports/{report_id}/print | PORTED | NOT_RUN | NOT_RUN |
+| statistics.read | GET /api/v1/reports/{report_id}/offerings/{offering_id}/live-statistics | PORTED | NOT_RUN | NOT_RUN |
+| session.read | GET /api/v1/me | PORTED | NOT_RUN | NOT_RUN |
+| forecast.capabilities | GET /api/v1/forecast-capabilities | PORTED | NOT_RUN | NOT_RUN |
+| forecast.list | GET /api/v1/forecast-drafts | PORTED | NOT_RUN | NOT_RUN |
+| forecast.create | POST /api/v1/offerings/{offering_id}/forecast-drafts | PORTED | NOT_RUN | NOT_RUN |
+| forecast.read | GET /api/v1/forecast-drafts/{draft_id} | PORTED | NOT_RUN | NOT_RUN |
+| forecast.adjust | POST /api/v1/forecast-drafts/{draft_id}/adjustments | PORTED | NOT_RUN | NOT_RUN |
+| forecast.validate | POST /api/v1/forecast-drafts/{draft_id}/validations | PORTED | NOT_RUN | NOT_RUN |
+| forecast.approve | POST /api/v1/forecast-drafts/{draft_id}/approvals | PORTED | NOT_RUN | NOT_RUN |
+| forecast.publish | POST /api/v1/forecast-drafts/{draft_id}/publications | PORTED | NOT_RUN | NOT_RUN |
+| forecast.published.read | GET /api/v1/offerings/{offering_id}/forecast | PORTED | NOT_RUN | NOT_RUN |
 
 계정 주인이 /admin에서 휴대폰 인증 앱으로 등록·입력한다. 검수 계정 식별자·비밀번호·JWT·QR·OTP 비밀키는 공개 명세에 저장하지 않는다. 2026-10-14 계정 주인의 Codex 브라우저 직접 로그인·MFA 완료 회신과 관리자 화면 진입을 수령했다. 입력 대기는 해소됐으며 서버의 실제 getUser·aal2·본인 상태·학교 권한 검수는 계속 진행한다. 이 회신이나 화면 진입만으로 실제 JWT/TOTP 검수 PASS를 기록하지 않는다.
 
@@ -197,4 +197,4 @@ live는 승인/발행/선택된 서버 값만 표시한다. 조합별 서버 계
 
 
 
-<!-- jungsi:generated spec_sha256=8e405004e2a9c085e241c28b765e30a4372d900bb13ee018fcdc47c43070709f -->
+<!-- jungsi:generated spec_sha256=aa29198c32430f7f413a15e12b06129fb2864061a2d038c8ab23ca6a9a2fa2fb -->
