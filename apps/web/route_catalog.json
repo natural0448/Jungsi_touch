@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
   "spec_version": "1.9.55",
-  "source_sha256": "077e099be422dfdafeb04a14d825871c902ef5ec15c97b5e83f5bfd24a5b218d",
+  "source_sha256": "95780c4ab7f64f13df3538dcc8a89609d4c2ebacea7f210d7b6ceafc4259bb27",
   "pages": [
     {
       "id": "PAGE-01",
@@ -7900,6 +7900,21 @@
         "status": "REQUESTED_NOT_IMPLEMENTED_IN_SERVICE_SCOPE",
         "path": "apps/web/src/components/site-header.tsx",
         "rule": "paid+null displays administrator access without an expiry-date phrase; actual pass expiry and server gates unchanged"
+      },
+      "verification": {
+        "implementation_commit": "a5be4ddf8ea85b64bc77e2b6e2abee656b24ab69",
+        "implementation_tree": "b54ac0ae937f13b8d629344810de6949cb0d52f5",
+        "normal_precommit_source_manifest_sha256": "acc5fbeb7f47c7fb30e2a8131d0c7d5ddeb4f9343a9e4a44289152e3e756e12e",
+        "Python_tests": 1010,
+        "Deno_units": 500,
+        "oracle_cases": 993,
+        "oracle_mismatches": 0,
+        "scope": "New administrator exception source and synthetic snapshot verification; separate from prior PR31 passes/MFA acceptance",
+        "real_JWT_active_admin_aal2": "NOT_RUN",
+        "runtime_entry_read_budget": "NOT_RUN",
+        "migration005_DDL": "NOT_RUN",
+        "BFF_browser_deployment": "NOT_RUN",
+        "production_ready": false
       }
     }
   }

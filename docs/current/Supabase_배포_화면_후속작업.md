@@ -197,4 +197,4 @@ live는 승인/발행/선택된 서버 값만 표시한다. 조합별 서버 계
 
 
 
-<!-- jungsi:generated spec_sha256=077e099be422dfdafeb04a14d825871c902ef5ec15c97b5e83f5bfd24a5b218d -->
+<!-- jungsi:generated spec_sha256=95780c4ab7f64f13df3538dcc8a89609d4c2ebacea7f210d7b6ceafc4259bb27 -->

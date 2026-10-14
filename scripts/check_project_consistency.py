@@ -1589,7 +1589,7 @@ def opening_security_document_body(spec):
         '## 조회·용량·보존형 정리\n\n'
         '화면 조회는 매개변수화된 제한 범위 JOIN과 keyset을 쓴다. 전체 count·전국 FETCH와 N+1을 화면 경로에 붙이지 않는다. 제한 ID를 먼저 고른 MATERIALIZED는 별도이며 제거 자체를 성능 검증으로 간주하지 않는다. 기존 인덱스와 valid/ready·계획을 확인한 후 필요한 것만 제안한다. 시험 적재는 로컬/운영 외 DB에서 한다.\n\n'
         '원 압축 bytes를 재압축 없이 비공개 불변 Storage에 보관하고 원격 bytes/SHA를 다시 확인한 뒤 archive pointer/resolver·현재/C 근거 보존을 검수한다. csv/support NOT NULL·길이/해시 제약이 있어 업로드만으로 본문 제거가 가능해지지 않는다. 정확 표/PK/열·해시·참조·제거 명부에 사용자가 승인한 범위만 다음 단계에서 적용한다. registry·overlays의 전량 삭제, production_allowed=false를 미사용으로 해석, 무조건 VACUUM FULL은 금지한다. 일반 VACUUM의 내부 공간 재사용과 파일 크기 축소를 구분한다. 과거 02~06 제한은 현재 강제 규칙으로 재등록하지 않는다. I/O 경고가 다시 나타나면 대량 작업을 멈추고 Owner와 재확인한다.\n\n'
-        '## 검증과 재개 조건\n\n'+table(['검수','현재 상태'],[[k,v]for k,v in c['verification'].items()])+
+        '## 검증과 재개 조건\n\n아래 verification 표는 기존 PR31의 이용권·관리 MFA 인수 이력이며 신규 관리자 예외 인수 근거로 승격하지 않는다. 신규 예외의 구현 커밋·현재 검수는 정본 admin_exception_implementation.verification에 별도로 기록한다. 실제 JWT·runtime entry/read budget·005·BFF/배포는 NOT_RUN이다.\n\n'+table(['검수','현재 상태'],[[k,v]for k,v in c['verification'].items()])+
         '\n\n개발팀 코드는 담당 feature PR로 통합한다. 실제 JWT·MFA 관리·유료 발급/회수 브라우저 검수, Edge 재배포, CAP 실행·발행은 해당 영수증 없이 완료 처리하지 않는다. 검수 descriptor의 subject·purpose·만료·relay·PIN을 이 변경으로 풀거나 연장하지 않는다.'
     )
 

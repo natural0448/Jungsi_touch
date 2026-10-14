@@ -6131,7 +6131,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "b93ac5b7596a3d83db2373e1bafe169f67d02709f88632d7edf58933563c86d2",
+            "source_sha256": "bab79069018ba0d49cf7e994c631bf5051a25a548ecb56da41c0bb1dc7024cf5",
             "symbols": [
               {
                 "kind": "class",
@@ -22561,7 +22561,7 @@
             "user_id UUID NOT NULL/auth.users FK·timestamptz/기간 CHECK는 source 원문에서 확인했고 OpenAPI9컬럼 metadata도 수신했다. 현재 DB의 FK/nullable·정책/GRANT/이력·신규 전용role은 별도 미검수다. 신규권한SQL과 IN-DB10의 남은 부분을 계속 요청한다.",
             "master CONNECT/USAGE/SELECT·전용 RLS와 관리자 최소조회, 자체 schema 업무 권한/owner 분리가 실제 원문과 맞으면 조건부 충분성을 검토할 수 있다. DATABASE CREATE/GRANT 이름만으로 기존 객체 owner/RLS 접근을 확정하지 않는다. plain psycopg에서 auth.uid()가 자동 제공된다고 가정하지 않는다.",
             "최신 IN-DB 부분수신 상태는 Supabase 운영 인계의 실제 업데이트/source 수령 절에 기록한다. 원본 명세 요청과 source 원문·현재 DB 효과·서비스 전환을 구분한다.",
-            "profiles 최소 관리자 조회는 별도 예외 계약 이후 부여 여부가 미정이다. 기존 auth.uid() 기반 is_admin을 raw psycopg 검증 subject의 서버 port로 자동 사용하지 않는다.",
+            "관리자 예외는 동일 검증 Bearer·publishable key·기존 본인 RLS로 public.profiles의 role,status를 한 번 조회한다. 새 app-role profiles GRANT나 raw psycopg의 is_admin 우회는 허용하지 않는다. active admin·aal2·요청 내부 origin이 모두 필요하며 실제 JWT/배포 검수는 NOT_RUN이다.",
             "신규 private owner/app primary2·direct대안2 설정을 실제 수령했다. 최신 credentials_received_connection_preflight_pending이며 기존값 부재/발급중 요청은 history다. 실제 SQL/role/RLS·001002/runtime003·최소 관리자 port/운영의 완료로 승격하지 않는다."
           ],
           "dependencies": [
@@ -23171,7 +23171,7 @@
         "connection_delivery": "primary2/directalternatives2 private 수령 후 양계정 실제 TLS 연결·role/master catalog 확인; 운영 process/default 전환 별도",
         "grant_SQL_original": "NOT_RECEIVED",
         "SQL_issuance_or_application_receipt": "001002_private_schema_development_apply_receipt_received_original_role_SQL_NOT_RECEIVED",
-        "profiles_minimal_admin_lookup": "exception_contract_and_minimum_grant_pending"
+        "profiles_minimal_admin_lookup": "same_verified_Bearer_publishable_own_profile_role_status_source_implemented_no_new_app_role_GRANT_actual_JWT_NOT_RUN"
       },
       "database_SQL_reads_executed": true,
       "database_SQL_writes_executed": true,
@@ -30166,6 +30166,21 @@
         "status": "REQUESTED_NOT_IMPLEMENTED_IN_SERVICE_SCOPE",
         "path": "apps/web/src/components/site-header.tsx",
         "rule": "paid+null displays administrator access without an expiry-date phrase; actual pass expiry and server gates unchanged"
+      },
+      "verification": {
+        "implementation_commit": "a5be4ddf8ea85b64bc77e2b6e2abee656b24ab69",
+        "implementation_tree": "b54ac0ae937f13b8d629344810de6949cb0d52f5",
+        "normal_precommit_source_manifest_sha256": "acc5fbeb7f47c7fb30e2a8131d0c7d5ddeb4f9343a9e4a44289152e3e756e12e",
+        "Python_tests": 1010,
+        "Deno_units": 500,
+        "oracle_cases": 993,
+        "oracle_mismatches": 0,
+        "scope": "New administrator exception source and synthetic snapshot verification; separate from prior PR31 passes/MFA acceptance",
+        "real_JWT_active_admin_aal2": "NOT_RUN",
+        "runtime_entry_read_budget": "NOT_RUN",
+        "migration005_DDL": "NOT_RUN",
+        "BFF_browser_deployment": "NOT_RUN",
+        "production_ready": false
       }
     }
   },
