@@ -3066,7 +3066,7 @@
         "REQ-15",
         "REQ-23"
       ],
-      "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+      "status": "implemented_synthetic_verified_runtime_NOT_RUN",
       "symbols": [
         "SyntheticOfferingPort",
         "calculateSyntheticOffering"
@@ -3080,7 +3080,7 @@
         "REQ-12",
         "REQ-15"
       ],
-      "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+      "status": "implemented_synthetic_verified_runtime_NOT_RUN",
       "symbols": [
         "Row",
         "row",
@@ -3097,7 +3097,7 @@
         "REQ-12",
         "REQ-15"
       ],
-      "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+      "status": "implemented_synthetic_verified_runtime_NOT_RUN",
       "symbols": [
         "ContractError",
         "requireContract",
@@ -3117,7 +3117,7 @@
         "REQ-17",
         "REQ-24"
       ],
-      "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+      "status": "implemented_synthetic_verified_runtime_NOT_RUN",
       "symbols": [
         "JsonFloat",
         "NativeJson",
@@ -3135,7 +3135,7 @@
         "REQ-12",
         "REQ-15"
       ],
-      "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+      "status": "implemented_synthetic_verified_runtime_NOT_RUN",
       "symbols": [
         "Frequency",
         "ExactFrequencyDistribution"
@@ -3149,7 +3149,7 @@
         "REQ-13",
         "REQ-15"
       ],
-      "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+      "status": "implemented_synthetic_verified_runtime_NOT_RUN",
       "symbols": [
         "utcInstant",
         "utcText",
@@ -10786,7 +10786,7 @@
             {
               "path": "supabase/functions/_shared/jungsi/application/research_offering.ts",
               "layer": "application",
-              "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+              "status": "implemented_synthetic_verified_runtime_NOT_RUN",
               "requirements": [
                 "REQ-06",
                 "REQ-12",
@@ -10821,7 +10821,7 @@
             {
               "path": "supabase/functions/_shared/jungsi/domain/conversion.ts",
               "layer": "application",
-              "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+              "status": "implemented_synthetic_verified_runtime_NOT_RUN",
               "requirements": [
                 "REQ-06",
                 "REQ-12",
@@ -10838,7 +10838,7 @@
             {
               "path": "supabase/functions/_shared/jungsi/domain/exact.ts",
               "layer": "application",
-              "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+              "status": "implemented_synthetic_verified_runtime_NOT_RUN",
               "requirements": [
                 "REQ-06",
                 "REQ-07",
@@ -10859,7 +10859,7 @@
             {
               "path": "supabase/functions/_shared/jungsi/domain/native_json.ts",
               "layer": "application",
-              "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+              "status": "implemented_synthetic_verified_runtime_NOT_RUN",
               "requirements": [
                 "REQ-12",
                 "REQ-15",
@@ -10878,7 +10878,7 @@
             {
               "path": "supabase/functions/_shared/jungsi/domain/percentile.ts",
               "layer": "application",
-              "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+              "status": "implemented_synthetic_verified_runtime_NOT_RUN",
               "requirements": [
                 "REQ-02",
                 "REQ-07",
@@ -10894,7 +10894,7 @@
             {
               "path": "supabase/functions/_shared/jungsi/domain/time.ts",
               "layer": "application",
-              "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+              "status": "implemented_synthetic_verified_runtime_NOT_RUN",
               "requirements": [
                 "REQ-12",
                 "REQ-13",
@@ -11175,8 +11175,8 @@
         [
           "서비스 개발팀 / DEV-010",
           "feature/application-pre-data-platform / spec1.9.48; 공통 공급27b1b93 기반",
-          "foundation19·session/현재pass/관리8 사전권한 source 구현, 합성77건 검증; 정상 feature 인수 진행",
-          "공급27b1b93의 정확 SHA Linux CI38500065601 SUCCESS. 이전445 체크아웃의 pending merge·원본·인덱스는 보존하고, 같은 원격feature의 독립 통합 복사본을 삭제 없는 fast-forward로27b1b93에 맞췄다. 현재 결합116단위/993oracle·전체Python·정상 훅·최종SHA CI는 아직 미완료다. 기존 Edge18/C/current·API22를 유지하며 actual JWT/OTP/DB/Auth/Storage 쓰기·배포·CAP/VACUUM은 NOT_RUN이다."
+          "foundation19·session/현재pass/관리8 사전권한 source 구현; 정상 인덱스 Python990·Deno116·현재oracle993 PASS",
+          "구현3845b1e56bdd4a7e35abebf5b1a05eb3a43d78d1의 정상pre-commit에서 실패/오류/skip0·oracle불일치0·source_preserved=true를 확인했다. 이전445의 pending merge·원본·인덱스는 별도 보존했다. 최종 문서 정리 커밋·정상pre-push·동일SHA Linux CI와 develop PR은 각각의 정확SHA 영수증에서 확인한다. 기존 Edge18/C/current·기본API22는 보존하며 실제 Auth/SQL transport·JWT/OTP·DB/Auth/Storage 쓰기·배포·CAP/VACUUM·운영3gate는 NOT_RUN이다."
         ],
         [
           "데이터·개발·화면팀 / 최소 catalog·C",
@@ -12842,6 +12842,19 @@
         "REQ-26"
       ],
       "summary": "공통 기준 검사를 선택된 index의 고정 HEAD/MERGE_HEAD 부모 문맥에 결속하고 내용 검사기와 검산 실행기에서 함께 재사용한다. 부모·인덱스 변동/잘못된 기준/조회 실패는 거절하고 새 합성8반례를 추가한다. 기존 pending merge는 보존하고 동일feature의 삭제 없는 통합 복사본에서 일반 단일 부모 커밋·정상 훅/정확SHA CI를 수행한다. baseline 낮추기·참조 강제 변경·훅 생략은 없다."
+    },
+    {
+      "date": "2026-10-14",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-20",
+        "REQ-21",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "DEV-010 구현3845b1e56bdd4a7e35abebf5b1a05eb3a43d78d1의 정상pre-commit 영수증: Python990·Deno116·동일선택snapshot Python/Edge993 PASS, 실패/오류/skip/불일치0 및 source_preserved=true. 과거 준비·제안 이력과 현재 소스/사전권한·합성 검산을 분리했다. 최종 커밋·정상push·정확SHA CI/PR은 별도 영수증에서 확인하며 실제 transport/JWT/OTP/운영 배포·DB/Auth/Storage 쓰기/API22전체 이식은 완료로 표시하지 않는다."
     }
   ],
   "overall_analysis_contract": {

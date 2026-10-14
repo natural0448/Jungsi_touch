@@ -6494,7 +6494,7 @@
       {
         "path": "supabase/functions/_shared/jungsi/application/research_offering.ts",
         "layer": "application",
-        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "status": "implemented_synthetic_verified_runtime_NOT_RUN",
         "requirements": [
           "REQ-06",
           "REQ-12",
@@ -6529,7 +6529,7 @@
       {
         "path": "supabase/functions/_shared/jungsi/domain/conversion.ts",
         "layer": "application",
-        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "status": "implemented_synthetic_verified_runtime_NOT_RUN",
         "requirements": [
           "REQ-06",
           "REQ-12",
@@ -6546,7 +6546,7 @@
       {
         "path": "supabase/functions/_shared/jungsi/domain/exact.ts",
         "layer": "application",
-        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "status": "implemented_synthetic_verified_runtime_NOT_RUN",
         "requirements": [
           "REQ-06",
           "REQ-07",
@@ -6567,7 +6567,7 @@
       {
         "path": "supabase/functions/_shared/jungsi/domain/native_json.ts",
         "layer": "application",
-        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "status": "implemented_synthetic_verified_runtime_NOT_RUN",
         "requirements": [
           "REQ-12",
           "REQ-15",
@@ -6586,7 +6586,7 @@
       {
         "path": "supabase/functions/_shared/jungsi/domain/percentile.ts",
         "layer": "application",
-        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "status": "implemented_synthetic_verified_runtime_NOT_RUN",
         "requirements": [
           "REQ-02",
           "REQ-07",
@@ -6602,7 +6602,7 @@
       {
         "path": "supabase/functions/_shared/jungsi/domain/time.ts",
         "layer": "application",
-        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "status": "implemented_synthetic_verified_runtime_NOT_RUN",
         "requirements": [
           "REQ-12",
           "REQ-13",
