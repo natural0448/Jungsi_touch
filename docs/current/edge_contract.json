@@ -1,0 +1,4399 @@
+{
+  "CI_supply": "UNDECIDED_NO_AUTO_INSTALL_NO_SKIP_PASS",
+  "config": "supabase/functions/deno.json",
+  "files": {
+    "supabase/functions/_shared/jungsi/application/access.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "ContractError",
+            "originalName": "ContractError",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "EntitlementPort",
+            "originalName": "EntitlementPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "ReportAccessPort",
+            "originalName": "ReportAccessPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "UserSessionPort",
+            "originalName": "UserSessionPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "VerifiedUser",
+            "originalName": "VerifiedUser",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          }
+        ],
+        "source_sha256": "e7a962c37c40f1be1bac605a1fe6beeba3f45c83cae82b0c113e4a051059bf44",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(code: string, readonly http: number)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "code",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "http",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "extends": "ContractError"
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "AccessError"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  token: string,\n  sessions: UserSessionPort,\n  nowUtc: bigint,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "token",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "sessions",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "UserSessionPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "UserSessionPort",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "UserSessionPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "nowUtc",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "VerifiedUser",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "VerifiedUser",
+                              "specifier": "./ports.ts"
+                            },
+                            "typeName": "VerifiedUser"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "authorizeUser"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  user: VerifiedUser,\n  entitlements: EntitlementPort,\n  nowUtc: bigint,\n  paid: boolean,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "user",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "VerifiedUser",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "VerifiedUser",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "VerifiedUser"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "entitlements",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "EntitlementPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "EntitlementPort",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "EntitlementPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "nowUtc",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "paid",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "authorizeCurrent"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  user: VerifiedUser,\n  reportId: string,\n  reports: ReportAccessPort,\n  confirmed: boolean,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "user",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "VerifiedUser",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "VerifiedUser",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "VerifiedUser"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "reportId",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "reports",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReportAccessPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ReportAccessPort",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "ReportAccessPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "confirmed",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "authorizeReport"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/exact.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exact.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "AccessError",
+        "authorizeUser",
+        "authorizeCurrent",
+        "authorizeReport"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/application/ports.ts": {
+      "declarations": {
+        "imports": [],
+        "source_sha256": "3d0e8938157ad3e68f49d2815eeba4cee14fce2dd63808506ac810291ac9a0d3",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "subjectId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "expiresAtUtc",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "VerifiedUser"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "verifyUserBearer",
+                      "parameter_source": "(token: string, nowUtc: bigint)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "token",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "nowUtc",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "VerifiedUser",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "VerifiedUser"
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "UserSessionPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "tier",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "standard",
+                            "value": {
+                              "kind": "string",
+                              "string": "standard"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "paid",
+                            "value": {
+                              "kind": "string",
+                              "string": "paid"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "paidUntilUtc",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "CurrentEntitlement"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "current",
+                      "parameter_source": "(subjectId: string)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "subjectId",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "CurrentEntitlement",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "CurrentEntitlement"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "EntitlementPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "ownerId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "confirmed",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ReportAccess"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "find",
+                      "parameter_source": "(reportId: string)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "reportId",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "ReportAccess",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "ReportAccess"
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ReportAccessPort"
+          }
+        ]
+      },
+      "dependencies": [],
+      "layer": "application",
+      "symbols": [
+        "VerifiedUser",
+        "UserSessionPort",
+        "CurrentEntitlement",
+        "EntitlementPort",
+        "ReportAccess",
+        "ReportAccessPort"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/application/research_offering.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "ConversionRule",
+            "jsDoc": {
+              "doc": "Local synthetic comparison only. This is not a production API or approved native adapter."
+            },
+            "originalName": "ConversionRule",
+            "src": "supabase/functions/_shared/jungsi/domain/conversion.ts"
+          },
+          {
+            "importedName": "Row",
+            "jsDoc": {
+              "doc": "Local synthetic comparison only. This is not a production API or approved native adapter."
+            },
+            "originalName": "Row",
+            "src": "supabase/functions/_shared/jungsi/domain/conversion.ts"
+          },
+          {
+            "importedName": "check",
+            "originalName": "requireContract",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "row",
+            "jsDoc": {
+              "doc": "Local synthetic comparison only. This is not a production API or approved native adapter."
+            },
+            "originalName": "row",
+            "src": "supabase/functions/_shared/jungsi/domain/conversion.ts"
+          }
+        ],
+        "source_sha256": "61bce98d94da99f0dbccb0ab918fcafc8f36bbe553a04f25347d6e6930a30dda",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "read",
+                      "parameter_source": "()",
+                      "params": [],
+                      "returnType": {
+                        "kind": "typeLiteral",
+                        "value": {
+                          "properties": [
+                            {
+                              "name": "offering",
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Row",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "Row",
+                                    "specifier": "../domain/conversion.ts"
+                                  },
+                                  "typeName": "Row"
+                                }
+                              }
+                            },
+                            {
+                              "name": "pack",
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Row",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "Row",
+                                    "specifier": "../domain/conversion.ts"
+                                  },
+                                  "typeName": "Row"
+                                }
+                              }
+                            },
+                            {
+                              "name": "bundle",
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Row",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "Row",
+                                    "specifier": "../domain/conversion.ts"
+                                  },
+                                  "typeName": "Row"
+                                }
+                              }
+                            },
+                            {
+                              "name": "profile",
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Row",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "Row",
+                                    "specifier": "../domain/conversion.ts"
+                                  },
+                                  "typeName": "Row"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SyntheticOfferingPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(port: SyntheticOfferingPort)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "port",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SyntheticOfferingPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "SyntheticOfferingPort"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "calculateSyntheticOffering"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "string",
+                      "value": "string"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "CONTEXT"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/conversion.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/conversion.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/exact.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exact.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "SyntheticOfferingPort",
+        "calculateSyntheticOffering"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/domain/conversion.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "ContractError",
+            "jsDoc": {
+              "doc": "Declarative rule interpreter. No eval, Excel, network, approval mutation or model fit."
+            },
+            "originalName": "ContractError",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "Rational",
+            "jsDoc": {
+              "doc": "Declarative rule interpreter. No eval, Excel, network, approval mutation or model fit."
+            },
+            "originalName": "Rational",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "check",
+            "jsDoc": {
+              "doc": "Declarative rule interpreter. No eval, Excel, network, approval mutation or model fit."
+            },
+            "originalName": "requireContract",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "displayExact",
+            "jsDoc": {
+              "doc": "Declarative rule interpreter. No eval, Excel, network, approval mutation or model fit."
+            },
+            "originalName": "displayExact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "exact",
+            "jsDoc": {
+              "doc": "Declarative rule interpreter. No eval, Excel, network, approval mutation or model fit."
+            },
+            "originalName": "exact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "roundExact",
+            "jsDoc": {
+              "doc": "Declarative rule interpreter. No eval, Excel, network, approval mutation or model fit."
+            },
+            "originalName": "roundExact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          }
+        ],
+        "source_sha256": "f17d26ebb957813a3f818bcd2bc1090469c3f190fa99afc15e3d8c6097d43486",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Record",
+                    "value": {
+                      "typeName": "Record",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Row"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown, code = \"INVALID_RULE_SCHEMA\")",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "code",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "INVALID_RULE_SCHEMA"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Row",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Row"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "row"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "score",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Rational",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "Rational",
+                            "specifier": "./exact.ts"
+                          },
+                          "typeName": "Rational"
+                        }
+                      }
+                    },
+                    {
+                      "name": "convertedScore",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "trace",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "Record",
+                              "value": {
+                                "typeName": "Record",
+                                "typeParams": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "unknown",
+                                    "value": "unknown"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "Calculation"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(value: unknown)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "value",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "unknown",
+                            "value": "unknown"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "value",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          },
+                          {
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "research",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "boolean",
+                                "value": "boolean"
+                              }
+                            },
+                            "right": "false"
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Calculation",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Calculation"
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "calculate"
+                    }
+                  ],
+                  "properties": [
+                    {
+                      "accessibility": "private",
+                      "name": "data",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Row",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Row"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "ConversionRule"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown, code: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "unknown",
+                      "value": "unknown"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "items"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown, code = \"INVALID_RULE_METADATA\")",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "code",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "INVALID_RULE_METADATA"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "text"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Record",
+                    "value": {
+                      "typeName": "Record",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "array",
+                          "value": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OPS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown, nodes: Row, inputs: Row, tables: Row, depth = 0)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "nodes",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Row",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Row"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "inputs",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Row",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Row"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "tables",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Row",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Row"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "depth",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "right": "0"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "inspect"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "string",
+                      "value": "string"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "refs"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Rational",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "Rational",
+                        "specifier": "./exact.ts"
+                      },
+                      "typeName": "Rational"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "numeric"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(a: unknown, b: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "a",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "b",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "equal"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "./exact.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exact.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "Row",
+        "row",
+        "Calculation",
+        "ConversionRule"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/domain/exact.ts": {
+      "declarations": {
+        "imports": [],
+        "source_sha256": "ae40f4365f6578b7bb3b571da0365b79382594e59c1e841f71adb287ed7eddf5",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(readonly code: string)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "code",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "extends": "Error"
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "ContractError"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(ok: unknown, code: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "ok",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "asserts ok",
+                    "value": {
+                      "asserts": true,
+                      "param": {
+                        "name": "ok",
+                        "type": "identifier"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "requireContract"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(n: bigint, d = 1n)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "n",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "d",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "bigint",
+                              "value": "bigint"
+                            }
+                          },
+                          "right": "1"
+                        }
+                      ]
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "b",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Rational",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Rational"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Rational",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Rational"
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "add"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "b",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Rational",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Rational"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Rational",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Rational"
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "subtract"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "b",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Rational",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Rational"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Rational",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Rational"
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "multiply"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "b",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Rational",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Rational"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Rational",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Rational"
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "divide"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "b",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Rational",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Rational"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "compare"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "toString"
+                    }
+                  ],
+                  "properties": [
+                    {
+                      "name": "numerator",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "name": "denominator",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "Rational"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Rational",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Rational"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "exact"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "tsType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "literal",
+                        "repr": "half_up",
+                        "value": {
+                          "kind": "string",
+                          "string": "half_up"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "half_even",
+                        "value": {
+                          "kind": "string",
+                          "string": "half_even"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "truncate",
+                        "value": {
+                          "kind": "string",
+                          "string": "truncate"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "floor",
+                        "value": {
+                          "kind": "string",
+                          "string": "floor"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "ceil",
+                        "value": {
+                          "kind": "string",
+                          "string": "ceil"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "RoundingMode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: Rational, places: unknown, mode: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Rational",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Rational"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "places",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "mode",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Rational",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Rational"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "roundExact"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: Rational, places = 6)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Rational",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Rational"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "places",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "right": "6"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "displayExact"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(a: bigint, b: bigint)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "a",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "b",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "bigint",
+                    "value": "bigint"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "gcd"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: Rational, places: number, mode: RoundingMode)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Rational",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Rational"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "places",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "mode",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RoundingMode",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "RoundingMode"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Rational",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Rational"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rounded"
+          }
+        ]
+      },
+      "dependencies": [],
+      "layer": "application",
+      "symbols": [
+        "ContractError",
+        "requireContract",
+        "Rational",
+        "exact",
+        "RoundingMode",
+        "roundExact",
+        "displayExact"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/domain/native_json.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "ContractError",
+            "jsDoc": {
+              "doc": "Lossless lexical JSON reader for private native artifacts, not the HTTP DTO parser."
+            },
+            "originalName": "ContractError",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "requireContract",
+            "jsDoc": {
+              "doc": "Lossless lexical JSON reader for private native artifacts, not the HTTP DTO parser."
+            },
+            "originalName": "requireContract",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          }
+        ],
+        "source_sha256": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(readonly lexeme: string)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "lexeme",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "JsonFloat"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "tsType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      },
+                      {
+                        "kind": "typeRef",
+                        "repr": "JsonFloat",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "JsonFloat"
+                        }
+                      },
+                      {
+                        "kind": "array",
+                        "value": {
+                          "kind": "typeRef",
+                          "repr": "NativeJson",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "NativeJson"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "typeLiteral",
+                        "value": {
+                          "indexSignatures": [
+                            {
+                              "parameter_source": "[key: string]",
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "key",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  }
+                                }
+                              ],
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "NativeJson",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "NativeJson"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "NativeJson"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(text: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "text",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeJson",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "NativeJson"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "parseNativeJson"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Map",
+                    "value": {
+                      "typeName": "Map",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "bigint",
+                          "value": "bigint"
+                        },
+                        {
+                          "kind": "typeRef",
+                          "repr": "NativeJson",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "NativeJson"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "canonicalIntegerKeys"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(text: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "text",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "indexSignatures": [
+                        {
+                          "parameter_source": "[key: string]",
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "key",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "NativeJson",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "NativeJson"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "parseNativeObject"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "./exact.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exact.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "JsonFloat",
+        "NativeJson",
+        "parseNativeJson",
+        "canonicalIntegerKeys",
+        "parseNativeObject"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/domain/percentile.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "ContractError",
+            "jsDoc": {
+              "doc": "Exact cumulative kernel; approval and full native decoding remain separate ports."
+            },
+            "originalName": "ContractError",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "Rational",
+            "jsDoc": {
+              "doc": "Exact cumulative kernel; approval and full native decoding remain separate ports."
+            },
+            "originalName": "Rational",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "check",
+            "jsDoc": {
+              "doc": "Exact cumulative kernel; approval and full native decoding remain separate ports."
+            },
+            "originalName": "requireContract",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "displayExact",
+            "jsDoc": {
+              "doc": "Exact cumulative kernel; approval and full native decoding remain separate ports."
+            },
+            "originalName": "displayExact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "exact",
+            "jsDoc": {
+              "doc": "Exact cumulative kernel; approval and full native decoding remain separate ports."
+            },
+            "originalName": "exact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          }
+        ],
+        "source_sha256": "18e7abec5e173758d78d89d70fdc0d5052aa098a04cba99845f4ec4aeedb7a02",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "score",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "name": "weight",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "Frequency"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(rows: readonly Frequency[], expectedTotal: unknown, observedCounts = false)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "rows",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "typeRef",
+                                  "repr": "Frequency",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "Frequency"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "expectedTotal",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "unknown",
+                            "value": "unknown"
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "observedCounts",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "boolean",
+                              "value": "boolean"
+                            }
+                          },
+                          "right": "false"
+                        }
+                      ]
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "score",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          {
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "tiePolicy",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "literal",
+                                    "repr": "include_equal",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "include_equal"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "exclude_equal",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "exclude_equal"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "right": "include_equal"
+                          },
+                          {
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "places",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              }
+                            },
+                            "right": "6"
+                          }
+                        ]
+                      },
+                      "kind": "method",
+                      "name": "calculate"
+                    }
+                  ],
+                  "properties": [
+                    {
+                      "accessibility": "private",
+                      "name": "scores",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "suffix",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "typeRef",
+                              "repr": "Rational",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "Rational",
+                                  "specifier": "./exact.ts"
+                                },
+                                "typeName": "Rational"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "ExactFrequencyDistribution"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Rational",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "Rational",
+                        "specifier": "./exact.ts"
+                      },
+                      "typeName": "Rational"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "weight"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "./exact.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exact.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "Frequency",
+        "ExactFrequencyDistribution"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/domain/time.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "requireContract",
+            "jsDoc": {
+              "doc": "UTC microsecond instants; calendar dates remain a separate type."
+            },
+            "originalName": "requireContract",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          }
+        ],
+        "source_sha256": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: string, sourceTimezone?: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "sourceTimezone",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "bigint",
+                    "value": "bigint"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "utcInstant"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: bigint)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "utcText"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "calendarDate"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(start: string, end: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "start",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "end",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeOperator",
+                    "value": {
+                      "operator": "readonly",
+                      "tsType": {
+                        "kind": "tuple",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "seoulDateRange"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "1000000",
+                    "value": {
+                      "kind": "bigInt",
+                      "string": "1000000"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "MICROSECOND"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  year: number,\n  month: number,\n  day: number,\n  hour = 0,\n  minute = 0,\n  second = 0,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "year",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "month",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "day",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "hour",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "right": "0"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "minute",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "right": "0"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "second",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "right": "0"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "number",
+                    "value": "number"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "civilMs"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(ms: number)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "ms",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "number",
+                    "value": "number"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "seoulOffset"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "./exact.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exact.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "utcInstant",
+        "utcText",
+        "calendarDate",
+        "seoulDateRange"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Injectable local boundary; no deployed function or actual account configuration."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "EntitlementPort",
+            "originalName": "EntitlementPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "ReportAccessPort",
+            "originalName": "ReportAccessPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "UserSessionPort",
+            "originalName": "UserSessionPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "VerifiedUser",
+            "originalName": "VerifiedUser",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "authorizeCurrent",
+            "jsDoc": {
+              "doc": "Injectable local boundary; no deployed function or actual account configuration."
+            },
+            "originalName": "authorizeCurrent",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "authorizeReport",
+            "jsDoc": {
+              "doc": "Injectable local boundary; no deployed function or actual account configuration."
+            },
+            "originalName": "authorizeReport",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "authorizeUser",
+            "jsDoc": {
+              "doc": "Injectable local boundary; no deployed function or actual account configuration."
+            },
+            "originalName": "authorizeUser",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          }
+        ],
+        "source_sha256": "b2b60d1a1c290753acd6879c5493b973020e53a84840e903b2c9fc54306c4326",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(private readonly expected: string | null)",
+                      "params": [
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "expected",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "null",
+                                "value": "null"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "headers",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Headers",
+                              "value": {
+                                "typeName": "Headers"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "verify"
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "RelayBoundary"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "sessions",
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "UserSessionPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "UserSessionPort",
+                            "specifier": "../application/ports.ts"
+                          },
+                          "typeName": "UserSessionPort"
+                        }
+                      }
+                    },
+                    {
+                      "name": "entitlements",
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "EntitlementPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "EntitlementPort",
+                            "specifier": "../application/ports.ts"
+                          },
+                          "typeName": "EntitlementPort"
+                        }
+                      }
+                    },
+                    {
+                      "name": "reports",
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReportAccessPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ReportAccessPort",
+                            "specifier": "../application/ports.ts"
+                          },
+                          "typeName": "ReportAccessPort"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "BoundaryPorts"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  headers: Headers,\n  relay: RelayBoundary,\n  ports: BoundaryPorts,\n  nowUtc: bigint,\n  policy: { paid: boolean; reportId?: string; reportOwner?: boolean; confirmed?: boolean },\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "headers",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Headers",
+                        "value": {
+                          "typeName": "Headers"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "relay",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RelayBoundary",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "RelayBoundary"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "ports",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "BoundaryPorts",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "BoundaryPorts"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "nowUtc",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "policy",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeLiteral",
+                        "value": {
+                          "properties": [
+                            {
+                              "name": "paid",
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "boolean",
+                                "value": "boolean"
+                              }
+                            },
+                            {
+                              "name": "reportId",
+                              "optional": true,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "name": "reportOwner",
+                              "optional": true,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "boolean",
+                                "value": "boolean"
+                              }
+                            },
+                            {
+                              "name": "confirmed",
+                              "optional": true,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "boolean",
+                                "value": "boolean"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "VerifiedUser",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "VerifiedUser",
+                              "specifier": "../application/ports.ts"
+                            },
+                            "typeName": "VerifiedUser"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "authorizeRelayed"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(error: unknown, requestId: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "error",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "requestId",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Response",
+                    "value": {
+                      "typeName": "Response"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "safeFailure"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "ArrayBuffer",
+                        "value": {
+                          "typeName": "ArrayBuffer"
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "relayBytes"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Set",
+                    "value": {
+                      "typeName": "Set"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SAFE_CODES"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "data_infrastructure",
+      "symbols": [
+        "RelayBoundary",
+        "BoundaryPorts",
+        "authorizeRelayed",
+        "safeFailure"
+      ]
+    },
+    "tests/edge/fixture.ts": {
+      "declarations": {
+        "imports": [],
+        "source_sha256": "02bf2683e529b03ad125a31f310f644b7ce904fc034282bf0dd4d459c504be2f",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": []
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "syntheticFixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown, message = \"assertion failed\")",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "message",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "assertion failed"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "asserts value",
+                    "value": {
+                      "asserts": true,
+                      "param": {
+                        "name": "value",
+                        "type": "identifier"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "assert"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(a: unknown, b: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "a",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "b",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "equal"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(run: () => unknown, code: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "run",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "unknown",
+                            "value": "unknown"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rejects"
+          }
+        ]
+      },
+      "dependencies": [],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/parity_driver.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "ConversionRule",
+            "originalName": "ConversionRule",
+            "src": "supabase/functions/_shared/jungsi/domain/conversion.ts"
+          },
+          {
+            "importedName": "ExactFrequencyDistribution",
+            "originalName": "ExactFrequencyDistribution",
+            "src": "supabase/functions/_shared/jungsi/domain/percentile.ts"
+          },
+          {
+            "importedName": "Frequency",
+            "originalName": "Frequency",
+            "src": "supabase/functions/_shared/jungsi/domain/percentile.ts"
+          },
+          {
+            "importedName": "Rational",
+            "jsDoc": {
+              "doc": "Stdin/stdout only, no network, database, environment or filesystem permission."
+            },
+            "originalName": "Rational",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "calculateSyntheticOffering",
+            "originalName": "calculateSyntheticOffering",
+            "src": "supabase/functions/_shared/jungsi/application/research_offering.ts"
+          },
+          {
+            "importedName": "canonicalIntegerKeys",
+            "originalName": "canonicalIntegerKeys",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "displayExact",
+            "jsDoc": {
+              "doc": "Stdin/stdout only, no network, database, environment or filesystem permission."
+            },
+            "originalName": "displayExact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "exact",
+            "jsDoc": {
+              "doc": "Stdin/stdout only, no network, database, environment or filesystem permission."
+            },
+            "originalName": "exact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "parseNativeJson",
+            "originalName": "parseNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "parseNativeObject",
+            "originalName": "parseNativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "roundExact",
+            "jsDoc": {
+              "doc": "Stdin/stdout only, no network, database, environment or filesystem permission."
+            },
+            "originalName": "roundExact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "row",
+            "originalName": "row",
+            "src": "supabase/functions/_shared/jungsi/domain/conversion.ts"
+          },
+          {
+            "importedName": "seoulDateRange",
+            "originalName": "seoulDateRange",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          },
+          {
+            "importedName": "utcInstant",
+            "originalName": "utcInstant",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          },
+          {
+            "importedName": "utcText",
+            "originalName": "utcText",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          }
+        ],
+        "source_sha256": "8121d1f2d181b4efe5f4c826d5ac2e8b348522ddd5e89fe272517ac7c03ecb9a",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "input"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "typeLiteral",
+                      "value": {
+                        "properties": [
+                          {
+                            "name": "id",
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "name": "kind",
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "name": "payload",
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "cases"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: Rational)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Rational",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "Rational",
+                            "specifier": "../../supabase/functions/_shared/jungsi/domain/exact.ts"
+                          },
+                          "typeName": "Rational"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "ratio"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "results"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/research_offering.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/research_offering.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/conversion.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/conversion.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/exact.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exact.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/native_json.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/percentile.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/percentile.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/test_access_contract.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "BoundaryPorts",
+            "originalName": "BoundaryPorts",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "RelayBoundary",
+            "originalName": "RelayBoundary",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "authorizeRelayed",
+            "originalName": "authorizeRelayed",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "safeFailure",
+            "originalName": "safeFailure",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          }
+        ],
+        "source_sha256": "c826da1f564ddf8a3df8b0344c2d33a87a02b97b7b6895f233310b3756ccc9a0",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-LOCAL-RELAY-NOT-A-SECRET-12345",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-LOCAL-RELAY-NOT-A-SECRET-12345"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "RELAY"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "1000000",
+                    "value": {
+                      "kind": "bigInt",
+                      "string": "1000000"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "NOW"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": []
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(run: () => Promise<unknown>, code: string, http: number)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "run",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "http",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fails"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/test_foundation.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "ConversionRule",
+            "originalName": "ConversionRule",
+            "src": "supabase/functions/_shared/jungsi/domain/conversion.ts"
+          },
+          {
+            "importedName": "ExactFrequencyDistribution",
+            "originalName": "ExactFrequencyDistribution",
+            "src": "supabase/functions/_shared/jungsi/domain/percentile.ts"
+          },
+          {
+            "importedName": "JsonFloat",
+            "originalName": "JsonFloat",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "calculateSyntheticOffering",
+            "originalName": "calculateSyntheticOffering",
+            "src": "supabase/functions/_shared/jungsi/application/research_offering.ts"
+          },
+          {
+            "importedName": "calendarDate",
+            "originalName": "calendarDate",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          },
+          {
+            "importedName": "canonicalIntegerKeys",
+            "originalName": "canonicalIntegerKeys",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "displayExact",
+            "originalName": "displayExact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "exact",
+            "originalName": "exact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "parseNativeJson",
+            "originalName": "parseNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "rejects",
+            "originalName": "rejects",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "roundExact",
+            "originalName": "roundExact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "seoulDateRange",
+            "originalName": "seoulDateRange",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          },
+          {
+            "importedName": "syntheticFixture",
+            "originalName": "syntheticFixture",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "utcInstant",
+            "originalName": "utcInstant",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          },
+          {
+            "importedName": "utcText",
+            "originalName": "utcText",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          }
+        ],
+        "source_sha256": "f6b3b82543e5b1cdd04cf7d03110afbd267f08144b4ec05e70eea8055096d87c",
+        "symbols": []
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/research_offering.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/research_offering.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/conversion.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/conversion.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/exact.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exact.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/native_json.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/percentile.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/percentile.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    }
+  },
+  "format": "jungsi.edge-contract/v1",
+  "oracle": "tests/edge/python_oracle.py",
+  "oracle_count": 993,
+  "python_reference": {
+    "cases_sha256": "44fa14ba3b11c8009903e5211f4d088400ce43cf743edd92422c3527318edfab",
+    "files": {
+      "src/jungsi_touch/application/time_contract.py": "4a52054c38da1faebaab54d4ee8cbc61cb80763ead2b01a255f6e13545be6f26",
+      "src/jungsi_touch/infrastructure/drive_provider.py": "3b07f85661a10fa69e75d2c1171b91fb73386fe375f85734223379cc62336b16",
+      "src/jungsi_touch/infrastructure/supabase_storage.py": "6e0f8781a504dbbe25b9b31bc65917b523ad54c14c0dfb8350ca13ebfd53b579",
+      "src/jungsi_touch/percentile.py": "4c5d40f5b516d2a39c6c17a682a90da71c39f38290cc3d60ce15196900f5f7be",
+      "src/jungsi_touch/university_conversion.py": "9433b49bcf74b434db8bc96bf2c0e856d034bd0118c5fa8e9fa154b1ed146852",
+      "src/jungsi_touch/year_equating.py": "5e01b24cec08342f1901a75f7d6a33012bcc9b7acb740d69b519b0b3dd443d57"
+    }
+  },
+  "runtime": {
+    "deno": "2.9.7",
+    "doc_json_version": 2,
+    "info_json_version": 1,
+    "supply": "UNDECIDED_EXPLICIT_PREINSTALLED_ONLY"
+  },
+  "source_scope": {
+    "coexisting_source_basis": "workflow.documentation_sync.code_index.edge_sources",
+    "format": "jungsi.edge-suite-scope/v1",
+    "source_roots": [
+      "supabase/functions/_shared/jungsi/",
+      "tests/edge/"
+    ],
+    "suite": "DEV010_FOUNDATION"
+  },
+  "state": "prepared",
+  "tests": [
+    "tests/edge/test_foundation.ts",
+    "tests/edge/test_access_contract.ts"
+  ],
+  "unit_count": 39
+}

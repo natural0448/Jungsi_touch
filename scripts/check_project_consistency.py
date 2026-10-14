@@ -1995,6 +1995,11 @@ def generated_files(spec):
         for path in ('apps/web/route_catalog.json','src/jungsi_touch/application/route_catalog.json'):
             catalog=json.loads(files[path]);catalog['opening_security_operations_contract']=spec['opening_security_operations_contract']
             files[path]=json.dumps(catalog,ensure_ascii=False,indent=2)+'\n'
+    if spec.get("edge_harness") is not None:
+        for key in ("planning","routing","architecture","workflow"):
+            target=spec["current_documents"][key]
+            if target in files:files[target]=files[target]+edge_document_text(spec)
+        files["docs/current/edge_contract.json"]=json.dumps(spec["edge_harness"],ensure_ascii=False,sort_keys=True,indent=2)+"\n"
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -2319,8 +2324,48 @@ def validate_public_response_registry(paths,read,spec):
     return validate_public_response_catalog(catalog,spec)
 
 
+def edge_registration_errors(paths,read,spec):
+    """Structural preflight only; Deno parser and execution are required by the retained runner."""
+    names=set(paths)
+    from edge_source_scope import classify_sources,ScopeFailure
+    try:scope=classify_sources(paths,read,spec)
+    except ScopeFailure as error:return ["Edge suite scope: "+str(error)]
+    edge={p for p in names if p=="supabase/functions/deno.json" or p.startswith(("supabase/functions/_shared/jungsi/","tests/edge/"))}
+    ts=set(scope["foundation_ts"])
+    c=spec.get("edge_harness")
+    if not edge:
+        return [] if c is None or c.get("state")=="prepared" else ["Active Edge registry has no sources"]
+    if not isinstance(c,dict) or c.get("format")!="jungsi.edge-contract/v1" or c.get("state")!="required":
+        return ["Edge sources require an activated common registry"]
+    errors=[]
+    if ts!=set(c.get("files",{})):errors.append("Edge registration coverage mismatch")
+    for p,row in c.get("files",{}).items():
+        if p not in names:errors.append("Registered Edge file absent: "+p);continue
+        if row.get("layer") not in {"application","data_infrastructure","verification"}:errors.append("Unregistered Edge layer: "+p)
+        if row.get("declarations",{}).get("source_sha256")!=hashlib.sha256(read(p)).hexdigest():errors.append("Edge source/declaration binding drift: "+p)
+        if row.get("layer")!="verification":
+            impl=next((r for r in spec["implementation"] if r["path"]==p),None)
+            if not impl or impl["layer"]!=row["layer"] or set(impl["symbols"])!=set(row["symbols"]):errors.append("Edge implementation registry drift: "+p)
+    required={c.get("config"),c.get("oracle"),*c.get("tests",[])}
+    if None in required or not required<=names:errors.append("Edge suite/config/oracle reference absent")
+    if any(p not in ts for p in c.get("tests",[])):errors.append("Edge test outside TS registry")
+    if type(c.get("unit_count")) is not int or c["unit_count"]<=0 or type(c.get("oracle_count")) is not int or c["oracle_count"]<=0:errors.append("Edge expected test counts invalid")
+    if c.get("runtime",{}).get("doc_json_version")!=2 or c.get("runtime",{}).get("info_json_version")!=1:errors.append("Edge parser schema unsupported")
+    return errors
+
+def edge_document_text(spec):
+    c=spec.get("edge_harness")
+    if c is None:return ""
+    rows=[[p,r["layer"],", ".join(r.get("symbols",[]))] for p,r in c["files"].items()]
+    return ("\n\n## DEV-010 foundation TypeScript 등록과 검산\n\n"+
+      "상태: "+c["state"]+". domain은 애플리케이션 내부 계산 라이브러리다. TS 선언·기본값·반환형·import graph는 고정 snapshot에서 Deno doc/info로 대조한다.\n\n"+
+      table(["파일","계층","등록 심볼"],rows)+
+      "\n\n같은 Git snapshot에서 기존 Python 전체 검산 다음에 Deno check/lint/fmt·"+
+      str(c["unit_count"])+" 단위검산·Python–Deno "+str(c["oracle_count"])+" 합성 대조를 실행한다. Deno 경로는 명시 입력하며 공급은 미정이다. 미설치·비호환·파서 실패·결과 누락은 실패이고 자동 설치·skip 성공은 없다. foundation 소스가 없는 공통 준비 단계는 NOT_APPLICABLE_NO_FOUNDATION_SOURCE이며 실행 검산 완료가 아니다. 기존 공개 Edge 소스는 현재 문서 동기화 색인으로 결속하며 foundation 선언·graph·39/993 결과에 포함하지 않는다.")
+
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
+    errors.extend(edge_registration_errors(paths,read,spec))
     names=set(paths)
     errors.extend(validate_catalog(paths,read,spec))
     errors.extend(validate_public_response_registry(names,read,spec))

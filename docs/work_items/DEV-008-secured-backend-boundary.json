@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "accepted_on_develop_scoped_synthetic_verified",
   "contract_ref": "secured_backend_preparation_contract",
-  "contract_version": "1.9.45",
+  "contract_version": "1.9.46",
   "requirements": [
     "REQ-24",
     "REQ-25",

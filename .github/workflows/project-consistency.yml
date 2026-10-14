@@ -21,6 +21,7 @@ jobs:
     timeout-minutes: 10
     env:
       PYTHONDONTWRITEBYTECODE: "1"
+      JUNGSI_DENO: '${{ vars.JUNGSI_DENO }}'
     steps:
       - name: Create a fresh retained snapshot with preinstalled Git and Python
         env:

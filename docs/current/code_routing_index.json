@@ -402,11 +402,146 @@
       ]
     },
     {
+      "path": "scripts/check_edge_contract.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "da4ee0f4216743647e2109ca24f38e34f5d64f2b6a111d56d393851fca6be6e5",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "EdgeFailure",
+          "signature": "class EdgeFailure(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "check_workspace",
+          "signature": "def check_workspace(root, manifest, deno, output, *, emit=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "command",
+          "signature": "def command(argv, *, root, output, name, timeout=45, input=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "declaration_model",
+          "signature": "def declaration_model(module, root, path, registered=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "declaration_model.clean",
+          "signature": "def clean(value, location=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "declaration_model.param_slice",
+          "signature": "def param_slice(index, filename=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "digest",
+          "signature": "def digest(raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "dynamic_imports",
+          "signature": "def dynamic_imports(text):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "hashes",
+          "signature": "def hashes(root, paths):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "json_bytes",
+          "signature": "def json_bytes(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "local_url",
+          "signature": "def local_url(url, root):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "normalize_graph",
+          "signature": "def normalize_graph(raw, root, registered, layer_by_path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_contract",
+          "signature": "def parse_contract(root, contract, deno, output, *, spec=None, manifest_names=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_contract.target_url",
+          "signature": "def target_url(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "runtime",
+          "signature": "def runtime(deno, contract, root, output):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "safe_path",
+          "signature": "def safe_path(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "tokens",
+          "signature": "def tokens(text):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "tokens.scan",
+          "signature": "def scan(i, end=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "verify_manifest",
+          "signature": "def verify_manifest(root, manifest):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "write_new",
+          "signature": "def write_new(path, raw):",
+          "decorators": []
+        }
+      ]
+    },
+    {
       "path": "scripts/check_project_consistency.py",
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "b38a9e8b4cec6653fe5c9cc715d221d6d565ada16d3383b1312903d15af11800",
+      "source_sha256": "be8071f3d5c038827c601b817bb8a5e496d78ea844cd29329788e2dd628a8354",
       "symbols": [
         {
           "kind": "class",
@@ -460,6 +595,18 @@
           "kind": "function",
           "name": "deletion_scope_text",
           "signature": "def deletion_scope_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "edge_document_text",
+          "signature": "def edge_document_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "edge_registration_errors",
+          "signature": "def edge_registration_errors(paths, read, spec):",
           "decorators": []
         },
         {
@@ -933,6 +1080,33 @@
       ]
     },
     {
+      "path": "scripts/edge_source_scope.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "c2eecb17c7e79e15d5469ee827c19a36bfd85fee88147d4534177a40c476cbec",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "ScopeFailure",
+          "signature": "class ScopeFailure(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "classify_sources",
+          "signature": "def classify_sources(paths, read, spec, contract=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "foundation_present",
+          "signature": "def foundation_present(paths):",
+          "decorators": []
+        }
+      ]
+    },
+    {
       "path": "scripts/import_kice_exam.py",
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
@@ -1015,12 +1189,69 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "7cee5514ffd4a853c0014ad37df817678545aa80574cd9162c8f4b7c868653c5",
+      "source_sha256": "c36106811c48561cab1788068c8e972e326bfa43d2bda095e73582455c220fde",
+      "symbols": [
+        {
+          "kind": "function",
+          "name": "create",
+          "signature": "def create(p, data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "encode",
+          "signature": "def encode(data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "files_hashes",
+          "signature": "def files_hashes(root, names):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "run_retained",
+          "signature": "def run_retained(workspace, manifest, destination, deno=None):",
+          "decorators": []
+        }
+      ]
+    },
+    {
+      "path": "scripts/run_edge_tests.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "6cadec2e07437a151fe968c7a72b39efdf9797907e7a3280acc2574134174b98",
       "symbols": [
         {
           "kind": "function",
           "name": "main",
           "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_junit",
+          "signature": "def parse_junit(path, expected):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require_oracle",
+          "signature": "def require_oracle(receipt, count, cases_sha):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "run_workspace",
+          "signature": "def run_workspace(root, manifest, deno, python, output):",
           "decorators": []
         }
       ]
