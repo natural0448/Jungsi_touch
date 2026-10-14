@@ -7,7 +7,7 @@ import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from 
 import type { ReportDto } from "@/lib/dto";
 import { EXAM } from "@/lib/exam";
 import { seoulDate } from "@/lib/format";
-import { loginHref } from "@/lib/links";
+import { PASS_HREF, loginHref } from "@/lib/links";
 import { getReportId } from "@/lib/report-ref";
 import { ensureAnalyses, pickedItems, type PickedItem } from "@/lib/report-ops";
 import { lockFor, page } from "@/lib/routes";
@@ -130,7 +130,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
               <h2 id="lock-h">대학 분석과 핵심 지원 학교 리포트는 이용권으로 열립니다</h2>
               <p>담아 둔 학교마다 내 환산점수·지원가능성·환산 유불리를 한 장에 모으고 상담용으로 인쇄할 수 있습니다.</p>
             </div>
-            <span className="btn t off" aria-disabled="true">이용권 결제 연결 전</span>
+            <a className="btn t" href={PASS_HREF}>이용권 보기</a>
           </section>
         )}
       </div>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Session } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
-import { edutouch, loginHref } from "@/lib/links";
+import { PASS_HREF, edutouch, loginHref } from "@/lib/links";
 import { PAGES, lockFor } from "@/lib/routes";
 import { Tabs } from "./tabs";
 
@@ -31,7 +31,10 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
             ) : session.member_tier === "paid" ? (
               <span className="pass">이용권 {seoulDate(session.entitlement_expires_at)}까지</span>
             ) : (
-              <span className="pass off">일반 회원</span>
+              <>
+                <span className="pass off">일반 회원</span>
+                <a className="btn t" href={PASS_HREF}>이용권 보기</a>
+              </>
             )}
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { ConnectionNotice } from "@/components/connection-notice";
+import { PASS_HREF } from "@/lib/links";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
@@ -36,7 +37,7 @@ export default async function Page() {
         <section className="gate">
           <h2>상담 리포트 인쇄는 이용권 회원 전용입니다</h2>
           <p>전체 성적 위치는 내 성적 리포트에서 그대로 볼 수 있습니다.</p>
-          <div className="acts"><Link className="btn" href={back}>내 성적 리포트로</Link></div>
+          <div className="acts"><a className="btn t" href={PASS_HREF}>이용권 보기</a><Link className="btn" href={back}>내 성적 리포트로</Link></div>
         </section>
       </div>
     );

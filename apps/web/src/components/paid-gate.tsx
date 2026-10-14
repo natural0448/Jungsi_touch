@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { loginHref } from "@/lib/links";
+import { PASS_HREF, loginHref } from "@/lib/links";
 import { page, type PageRoute } from "@/lib/routes";
 import { LockIcon } from "./icons";
 
@@ -28,7 +28,7 @@ export function PaidGate({ kind, route, features }: { kind: "login" | "paid"; ro
               ))}
             </ul>
             <div className="acts">
-              <span className="btn t off" aria-disabled="true">이용권 결제 연결 전</span>
+              <a className="btn t" href={PASS_HREF}>이용권 보기</a>
               <Link className="btn" href={p1.path}>{p1.label} 보기</Link>
             </div>
           </>
