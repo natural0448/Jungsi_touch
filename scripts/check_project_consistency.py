@@ -2492,9 +2492,13 @@ def snapshot_changed_paths(snapshot):
         for parent in parents:
             entries=parse_entries(git("ls-tree","-r","-z",parent),index=False)
             changed.update(path for path in set(captured)|set(entries) if captured.get(path)!=entries.get(path))
-        assert_same_index()
-        if merge_state()!=merge_raw or head_commit()!=head:
-            raise ValueError("Merge state changed while validating the index.")
+        def assert_same_context():
+            assert_same_index()
+            if merge_state()!=merge_raw or head_commit()!=head:
+                raise ValueError("Merge state changed while validating the index.")
+        assert_same_context()
+        snapshot._baseline_parent_commits=tuple(parents)
+        snapshot._assert_baseline_context=assert_same_context
         return sorted(changed)
     elif snapshot.revision:
         revision=commit_oid(snapshot.revision.encode("ascii"))
@@ -2512,6 +2516,37 @@ def snapshot_changed_paths(snapshot):
     else:
         return []
     return sorted({p.decode("utf-8") for p in raw.split(bytes([0])) if p})
+
+
+def validate_snapshot_baseline(snapshot,baseline):
+    """Validate ancestry of the selected result using its fixed parent context."""
+    oid_pattern=r"(?:[0-9a-f]{40}|[0-9a-f]{64})"
+    if not isinstance(baseline,str) or not re.fullmatch(oid_pattern,baseline):
+        raise ValueError("Invalid development baseline commit.")
+    resolved=git("rev-parse","--verify",baseline+"^{commit}").decode("ascii").strip()
+    if resolved!=baseline:
+        raise ValueError("Development baseline must identify the exact commit.")
+    context=None
+    if snapshot.staged:
+        parents=getattr(snapshot,"_baseline_parent_commits",None)
+        context=getattr(snapshot,"_assert_baseline_context",None)
+        if not isinstance(parents,tuple) or not callable(context):
+            raise ValueError("Fixed staged parent context is required for baseline validation.")
+        context()
+    else:
+        selected=snapshot.revision or git("rev-parse","--verify","HEAD^{commit}").decode("ascii").strip()
+        parents=(selected,)
+    if any(not isinstance(parent,str) or not re.fullmatch(oid_pattern,parent) for parent in parents):
+        raise ValueError("Invalid selected baseline parent commit.")
+    accepted=False
+    for parent in parents:
+        result=subprocess.run(["git","merge-base","--is-ancestor",baseline,parent],cwd=ROOT,capture_output=True)
+        if result.returncode not in (0,1):
+            raise ValueError("Development baseline ancestry query failed.")
+        accepted=accepted or result.returncode==0
+    if context is not None:context()
+    return [] if accepted else ["Development baseline is not an ancestor of the selected commit"]
+
 
 def write_generated(spec):
     timestamp=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
@@ -2543,9 +2578,7 @@ def main():
     spec=json.loads(snapshot.text(SPEC_PATH))
     errors=validate_content(snapshot.paths,snapshot.read,spec)
     errors.extend(validate_changed_paths(snapshot_changed_paths(snapshot),spec))
-    commit=snapshot.revision or "HEAD"
-    baseline_check=subprocess.run(["git","merge-base","--is-ancestor",spec["baseline_commit"],commit],cwd=ROOT,capture_output=True)
-    if baseline_check.returncode!=0:errors.append("Development baseline is not an ancestor of the selected commit")
+    errors.extend(validate_snapshot_baseline(snapshot,spec["baseline_commit"]))
     report=dict(checked_files=len(snapshot.paths),pages=len(spec["pages"]),operations=len(spec["operations"]),requirements=len(spec["requirements"]),
                 generated_files=len(generated_files(spec)),snapshot=snapshot.revision or ("index" if args.staged else "working_tree"),passed=not errors,errors=errors)
     print(json.dumps(report,ensure_ascii=False,indent=2))

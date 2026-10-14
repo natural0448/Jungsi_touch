@@ -1168,6 +1168,67 @@ class SnapshotChangedPathsTests(unittest.TestCase):
         self.assertEqual(self.checker.snapshot_changed_paths(SimpleNamespace(staged=False,revision=None)),[])
 
 
+
+    def baseline_selected(self,**options):
+            from unittest.mock import patch
+            with patch.object(self.checker,'ROOT',self.repo):
+                snapshot=self.checker.GitSnapshot(**options)
+                self.checker.snapshot_changed_paths(snapshot)
+                return snapshot
+
+    def baseline_check(self,snapshot,baseline):
+            from unittest.mock import patch
+            with patch.object(self.checker,'ROOT',self.repo):
+                return self.checker.validate_snapshot_baseline(snapshot,baseline)
+
+    def test_baseline_ordinary_parent(self):
+            self.write({'src/score.py':'value = 2\n'});self.call('add','.')
+            self.assertEqual(self.baseline_check(self.baseline_selected(staged=True),self.base),[])
+
+    def test_baseline_incoming_parent(self):
+            left,right=self.merge({'src/left.py':'value = 2\n'},{'src/right.py':'value = 3\n'})
+            self.assertEqual(self.baseline_check(self.baseline_selected(staged=True),right),[])
+            self.assertEqual(self.call('merge-base','--is-ancestor',right,left,expected=1),b'')
+
+    def test_baseline_committed_merge(self):
+            _,right=self.merge({'src/left.py':'value = 2\n'},{'src/right.py':'value = 3\n'})
+            self.call('commit','-q','-m','synthetic merge')
+            self.assertEqual(self.baseline_check(self.baseline_selected(revision=self.oid()),right),[])
+
+    def test_baseline_unrelated_commit_rejected(self):
+            tree=self.call('rev-parse','HEAD^{tree}').decode().strip()
+            unrelated=self.call('commit-tree',tree,input=b'synthetic unrelated root\n').decode().strip()
+            self.assertEqual(self.baseline_check(self.baseline_selected(staged=True),unrelated),['Development baseline is not an ancestor of the selected commit'])
+
+    def test_baseline_missing_commit_fails_closed(self):
+            import subprocess
+            with self.assertRaises(subprocess.CalledProcessError):self.baseline_check(self.baseline_selected(staged=True),'f'*40)
+
+    def test_baseline_merge_context_mutation_rejected(self):
+            _,right=self.merge({'src/left.py':'value = 2\n'},{'src/right.py':'value = 3\n'})
+            snapshot=self.baseline_selected(staged=True)
+            target=self.merge_head_path()
+            target.with_name('MERGE_HEAD.retained').write_bytes(target.read_bytes())
+            target.write_text(self.base+'\n',encoding='ascii')
+            with self.assertRaises(ValueError):self.baseline_check(snapshot,right)
+
+    def test_baseline_index_mutation_rejected(self):
+            snapshot=self.baseline_selected(staged=True)
+            self.write({'src/score.py':'value = 5\n'});self.call('add','.')
+            with self.assertRaises(ValueError):self.baseline_check(snapshot,self.base)
+
+    def test_baseline_git_query_failure_rejected(self):
+            from unittest.mock import patch
+            from types import SimpleNamespace
+            snapshot=self.baseline_selected(staged=True)
+            original=self.checker.subprocess.run
+            def failed(args,**kwargs):
+                if args[:2]==['git','merge-base']:return SimpleNamespace(returncode=128)
+                return original(args,**kwargs)
+            with patch.object(self.checker.subprocess,'run',failed):
+                with self.assertRaises(ValueError):self.baseline_check(snapshot,self.base)
+
+
 class MergeValidationBoundaryTests(unittest.TestCase):
     """Use only in-memory payloads; never force-track private paths or credentials."""
     def context(self):

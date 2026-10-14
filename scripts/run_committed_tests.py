@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse,datetime,hashlib,json,os,subprocess,sys
 from pathlib import Path
 from edge_source_scope import classify_sources
-from check_project_consistency import ROOT,GitSnapshot,validate_content,validate_changed_paths,snapshot_changed_paths,SPEC_PATH
+from check_project_consistency import ROOT,GitSnapshot,validate_content,validate_changed_paths,snapshot_changed_paths,validate_snapshot_baseline,SPEC_PATH
 HELPER = """import importlib.util,json,pathlib,sys,unittest
 root=pathlib.Path.cwd()
 sys.path[:0]=[str(root/'src'),str(root/'scripts'),str(root/'tests')]
@@ -92,8 +92,8 @@ def main():
     errors=validate_content(snapshot.paths,snapshot.read,spec)+validate_changed_paths(snapshot_changed_paths(snapshot),spec)
     if errors:raise ValueError("Snapshot fails common gate: "+"; ".join(errors))
     # Keep the existing baseline and fixed parent/index checks before executing selected code.
-    baseline=subprocess.run(["git","merge-base","--is-ancestor",spec["baseline_commit"],snapshot.revision or "HEAD"],cwd=ROOT,capture_output=True)
-    if baseline.returncode:raise ValueError("Selected snapshot baseline mismatch")
+    baseline_errors=validate_snapshot_baseline(snapshot,spec["baseline_commit"])
+    if baseline_errors:raise ValueError("Selected snapshot baseline mismatch: "+"; ".join(baseline_errors))
     stamp=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     destination=ROOT/"outputs/committed_test_runs"/stamp;workspace=destination/"workspace";workspace.mkdir(parents=True,exist_ok=False)
     for name in snapshot.paths:create(workspace/name,snapshot.read(name))

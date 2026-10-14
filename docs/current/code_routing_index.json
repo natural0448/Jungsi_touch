@@ -580,7 +580,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "ddeb36e20656171b65bb9953b15e10f03d35e7086117479b1c0c1186ecb1a9ca",
+      "source_sha256": "88860cf90da4b075370f9b7daab3d4a194e58d7c89f07fd1d43d1106f2f766fe",
       "symbols": [
         {
           "kind": "class",
@@ -772,6 +772,12 @@
           "kind": "function",
           "name": "snapshot_changed_paths",
           "signature": "def snapshot_changed_paths(snapshot):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "snapshot_changed_paths.assert_same_context",
+          "signature": "def assert_same_context():",
           "decorators": []
         },
         {
@@ -970,6 +976,12 @@
           "kind": "function",
           "name": "validate_security_contract",
           "signature": "def validate_security_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_snapshot_baseline",
+          "signature": "def validate_snapshot_baseline(snapshot, baseline):",
           "decorators": []
         },
         {
@@ -1228,7 +1240,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "c36106811c48561cab1788068c8e972e326bfa43d2bda095e73582455c220fde",
+      "source_sha256": "555d37e073182834acd230a98e4bac71b41b81e78d0f3a39c6f48ee8b2b2d4f1",
       "symbols": [
         {
           "kind": "function",
@@ -6409,6 +6421,277 @@
           "createSyntheticBaselineFixture",
           "SyntheticDeltaFixture",
           "createSyntheticDeltaFixture"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/access.ts",
+        "layer": "application",
+        "status": "synthetic_session_and_management_authorization_candidate_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-14",
+          "REQ-15",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "5a715a5372a24bbf83b84f7ca3a90f54fb76c6e7c0b593990621b18358d985f5",
+        "declared_exports": [
+          "AccessError",
+          "authorizeUser",
+          "authorizeCurrent",
+          "authorizeReport"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/management_access.ts",
+        "layer": "application",
+        "status": "synthetic_session_and_management_authorization_candidate_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
+        "declared_exports": [
+          "MANAGEMENT_OPERATIONS",
+          "ManagementOperation",
+          "ManagementDecision",
+          "authorizeManagement",
+          "requireManagementUniversity"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/ports.ts",
+        "layer": "application",
+        "status": "synthetic_session_and_management_authorization_candidate_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-14",
+          "REQ-15",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "af724e486ca6bc0a3a07fb0a98c176e2a620c207fb93aa912a1f2adc633e087e",
+        "declared_exports": [
+          "VerifiedUser",
+          "UserSessionPort",
+          "CurrentEntitlement",
+          "EntitlementPort",
+          "ReportAccess",
+          "ReportAccessPort",
+          "PublicPassState",
+          "PublicPassPort",
+          "ForecastAuthorityState",
+          "ForecastAuthorityPort",
+          "ManagementResourceScope",
+          "ManagementResourcePort",
+          "RequestClockPort"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/research_offering.ts",
+        "layer": "application",
+        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "requirements": [
+          "REQ-06",
+          "REQ-12",
+          "REQ-15",
+          "REQ-23"
+        ],
+        "source_sha256": "61bce98d94da99f0dbccb0ab918fcafc8f36bbe553a04f25347d6e6930a30dda",
+        "declared_exports": [
+          "SyntheticOfferingPort",
+          "calculateSyntheticOffering"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/session_service.ts",
+        "layer": "application",
+        "status": "synthetic_session_and_management_authorization_candidate_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "6ffed08966fd788d30827d96b24514fd432301ae940ba787b543f9e71735b336",
+        "declared_exports": [
+          "SessionSnapshot",
+          "SessionDto",
+          "readSessionSnapshot",
+          "sessionDto",
+          "requirePaidSession"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/domain/conversion.ts",
+        "layer": "application",
+        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "requirements": [
+          "REQ-06",
+          "REQ-12",
+          "REQ-15"
+        ],
+        "source_sha256": "f17d26ebb957813a3f818bcd2bc1090469c3f190fa99afc15e3d8c6097d43486",
+        "declared_exports": [
+          "Row",
+          "row",
+          "Calculation",
+          "ConversionRule"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/domain/exact.ts",
+        "layer": "application",
+        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "requirements": [
+          "REQ-06",
+          "REQ-07",
+          "REQ-12",
+          "REQ-15"
+        ],
+        "source_sha256": "ae40f4365f6578b7bb3b571da0365b79382594e59c1e841f71adb287ed7eddf5",
+        "declared_exports": [
+          "ContractError",
+          "requireContract",
+          "Rational",
+          "exact",
+          "RoundingMode",
+          "roundExact",
+          "displayExact"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/domain/native_json.ts",
+        "layer": "application",
+        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "requirements": [
+          "REQ-12",
+          "REQ-15",
+          "REQ-17",
+          "REQ-24"
+        ],
+        "source_sha256": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a",
+        "declared_exports": [
+          "JsonFloat",
+          "NativeJson",
+          "parseNativeJson",
+          "canonicalIntegerKeys",
+          "parseNativeObject"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/domain/percentile.ts",
+        "layer": "application",
+        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "requirements": [
+          "REQ-02",
+          "REQ-07",
+          "REQ-12",
+          "REQ-15"
+        ],
+        "source_sha256": "18e7abec5e173758d78d89d70fdc0d5052aa098a04cba99845f4ec4aeedb7a02",
+        "declared_exports": [
+          "Frequency",
+          "ExactFrequencyDistribution"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/domain/time.ts",
+        "layer": "application",
+        "status": "implemented_synthetic_verified_runtime_and_common_harness_pending",
+        "requirements": [
+          "REQ-12",
+          "REQ-13",
+          "REQ-15"
+        ],
+        "source_sha256": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
+        "declared_exports": [
+          "utcInstant",
+          "utcText",
+          "calendarDate",
+          "seoulDateRange"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
+        "layer": "data_infrastructure",
+        "status": "synthetic_session_and_management_authorization_candidate_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-14",
+          "REQ-15",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "72afa84549dbc9ef78bd7bd4ffb39a4e1ea13c03d23429738af9de76bf8759ee",
+        "declared_exports": [
+          "RelayBoundary",
+          "BoundaryPorts",
+          "authorizeRelayed",
+          "safeFailure"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts",
+        "layer": "data_infrastructure",
+        "status": "synthetic_session_and_management_authorization_candidate_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "6aa484548fd160da2b45f99a005dc1747fac8c97cb6d0a372c2ce516b09c3139",
+        "declared_exports": [
+          "ReadonlyPassSqlPort",
+          "PASS_STATE_SQL",
+          "PublicJeongsiPassesReader"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts",
+        "layer": "data_infrastructure",
+        "status": "synthetic_session_and_management_authorization_candidate_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-20",
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "70cf3f60478a9a200dc4e8d6c772a04e98ed360e1dc03e0c4d0e296e9420f3d3",
+        "declared_exports": [
+          "SessionReadPorts",
+          "createSyntheticSessionReadHandler",
+          "ManagementGuardPorts",
+          "ManagementRoute",
+          "managementRoute",
+          "createSyntheticManagementGuard"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts",
+        "layer": "data_infrastructure",
+        "status": "synthetic_session_and_management_authorization_candidate_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "d7a94a95f3bf1d70fe670010a5d3b469f5212da74d5f84406b07ba07ede4d84e",
+        "declared_exports": [
+          "NativeSessionReceipt",
+          "NativeSessionVerificationPort",
+          "OwnProfileReceipt",
+          "OwnProfileVerificationPort",
+          "bearerSha256",
+          "BoundVerifiedSessionProvider"
         ]
       },
       {

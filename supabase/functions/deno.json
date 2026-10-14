@@ -1,0 +1,9 @@
+{
+  "compilerOptions": { "strict": true },
+  "lock": false,
+  "fmt": { "lineWidth": 100 },
+  "tasks": {
+    "check": "deno check --no-remote _shared/jungsi/**/*.ts ../../tests/edge/*.ts",
+    "test": "deno test --no-remote ../../tests/edge/test_foundation.ts ../../tests/edge/test_access_contract.ts"
+  }
+}

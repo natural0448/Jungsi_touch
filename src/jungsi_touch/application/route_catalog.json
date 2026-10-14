@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.47",
-  "source_sha256": "6ba140c4d3092892137e53d8185573ea1f5cf86131fa89c7a27e39c2bb5a8da2",
+  "spec_version": "1.9.48",
+  "source_sha256": "2cad6ccbfdd4f20ee385a6b8e739d0f82cbb9a841e23c24fa24f1b7847d4da49",
   "pages": [
     {
       "id": "PAGE-01",
@@ -686,7 +686,28 @@
         "edge_application": "supabase/functions/_shared/official_history_display.ts",
         "status": "candidate_scoped_verification_in_progress"
       },
-      "entitlement_contract_ref": "opening_security_operations_contract.entitlement"
+      "entitlement_contract_ref": "opening_security_operations_contract.entitlement",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/session_service.ts:readSessionSnapshot",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticSessionReadHandler",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "GET",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/me",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "closed_session_DTO"
+      }
     },
     {
       "id": "forecast.capabilities",
@@ -728,7 +749,28 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       },
-      "management_security_contract_ref": "opening_security_operations_contract.management"
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "GET",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-capabilities",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
+      }
     },
     {
       "id": "forecast.list",
@@ -776,7 +818,28 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       },
-      "management_security_contract_ref": "opening_security_operations_contract.management"
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "GET",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
+      }
     },
     {
       "id": "forecast.create",
@@ -826,7 +889,28 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       },
-      "management_security_contract_ref": "opening_security_operations_contract.management"
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "POST",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/offerings/{offering_id}/forecast-drafts",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
+      }
     },
     {
       "id": "forecast.read",
@@ -872,7 +956,28 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       },
-      "management_security_contract_ref": "opening_security_operations_contract.management"
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "GET",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts/{draft_id}",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
+      }
     },
     {
       "id": "forecast.adjust",
@@ -925,7 +1030,28 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       },
-      "management_security_contract_ref": "opening_security_operations_contract.management"
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "POST",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts/{draft_id}/adjustments",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
+      }
     },
     {
       "id": "forecast.validate",
@@ -974,7 +1100,28 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       },
-      "management_security_contract_ref": "opening_security_operations_contract.management"
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "POST",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts/{draft_id}/validations",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
+      }
     },
     {
       "id": "forecast.approve",
@@ -1025,7 +1172,28 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       },
-      "management_security_contract_ref": "opening_security_operations_contract.management"
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "POST",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts/{draft_id}/approvals",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
+      }
     },
     {
       "id": "forecast.publish",
@@ -1076,7 +1244,29 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       },
-      "management_security_contract_ref": "opening_security_operations_contract.management"
+      "management_security_contract_ref": "opening_security_operations_contract.management",
+      "edge_candidate": {
+        "actual_JWT_OTP_DB_Storage_Auth": "NOT_RUN",
+        "application_entry": "supabase/functions/_shared/jungsi/application/management_access.ts:authorizeManagement",
+        "infrastructure_entry": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts:createSyntheticManagementGuard",
+        "member_tiers": [
+          "standard",
+          "paid"
+        ],
+        "method": "POST",
+        "mode": "explicit_synthetic_candidate_default_adapter_unchanged",
+        "path": "/api/v1/forecast-drafts/{draft_id}/publications",
+        "production_ready": false,
+        "report_owner": false,
+        "requirements": [
+          "REQ-21",
+          "REQ-22",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "scope": "authorization_only_business_handler_not_implemented"
+      }
     },
     {
       "id": "forecast.published.read",
