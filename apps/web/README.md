@@ -1,6 +1,6 @@
 # 정시터치 프레젠테이션 개발 기준
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.54이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.55이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 현재 경로와 회원별 화면 접근 범위는 route_catalog.json을 따른다. [현재 기획](../../docs/current/서비스_기획.md)과 [라우팅 명세](../../docs/current/라우팅_명세.md)를 함께 갱신한다. 실행 가능한 화면 앱과 명시 합성 응답은 develop에 통합했다. 이전 가상 화면은 기획 이력으로 보존한다. 실제 회원 인증·BFF live·운영 API의 인수 상태는 공통 진행표를 따르며 합성 화면 배포를 실제 연결 완료로 표시하지 않는다.
 
@@ -50,8 +50,8 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 ## 2026-10-14 오픈 전 최신 확정
 
-유료 기준은 public.jeongsi_passes이며 관리자 무료 이용 예외는 미확정이다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. 이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 [오픈 전 보안운영 변경](../../docs/current/오픈전_보안운영_변경.md)와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.
+유료 이용권 원본은 public.jeongsi_passes이며 관리자 접근 예외는 동일 검증 Bearer·본인 role=admin/status=active·aal2·요청 내부 origin이 모두 필요하다. 실제 만료 우선, 예외만 paid+null, 일반 paid 만료 누락503과 FE-ADMIN-ACCESS-01을 따른다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. 이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 [오픈 전 보안운영 변경](../../docs/current/오픈전_보안운영_변경.md)와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.
 
 
 
-<!-- jungsi:generated spec_sha256=aa29198c32430f7f413a15e12b06129fb2864061a2d038c8ab23ca6a9a2fa2fb -->
+<!-- jungsi:generated spec_sha256=95780c4ab7f64f13df3538dcc8a89609d4c2ebacea7f210d7b6ceafc4259bb27 -->

@@ -18,6 +18,7 @@ export interface OwnProfileReceipt {
   readonly bearerSha256: string;
   readonly subjectId: string;
   readonly status: string | null;
+  readonly role?: string | null;
 }
 export interface OwnProfileVerificationPort {
   readOwnStatus(token: string, subjectId: string): Promise<OwnProfileReceipt | null>;
@@ -57,6 +58,7 @@ export class BoundVerifiedSessionProvider implements UserSessionPort {
       return null;
     }
     let accountStatus: string | null = null;
+    let accountRole: string | null = null;
     try {
       const own = await this.profiles.readOwnStatus(token, verified.subjectId);
       if (
@@ -64,13 +66,19 @@ export class BoundVerifiedSessionProvider implements UserSessionPort {
         own.bearerSha256 === digest && own.subjectId === verified.subjectId &&
         (own.status === null ||
           (typeof own.status === "string" && own.status.trim() && own.status.length <= 64))
-      ) accountStatus = own.status;
+      ) {
+        accountStatus = own.status;
+        if (typeof own.role === "string" && own.role.trim() && own.role.length <= 64) {
+          accountRole = own.role;
+        }
+      }
     } catch { /* Unknown status closes management; student/session reads survive. */ }
     return Object.freeze({
       subjectId: verified.subjectId,
       expiresAtUtc: verified.expiresAtUtc,
       assuranceLevel: verified.assuranceLevel,
       accountStatus,
+      accountRole,
     });
   }
 }

@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.54",
-  "source_sha256": "aa29198c32430f7f413a15e12b06129fb2864061a2d038c8ab23ca6a9a2fa2fb",
+  "spec_version": "1.9.55",
+  "source_sha256": "95780c4ab7f64f13df3538dcc8a89609d4c2ebacea7f210d7b6ceafc4259bb27",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1549,7 +1549,7 @@
           "entitlement_expires_at"
         ],
         "rules": [
-          "public.jeongsi_passes의 revoked_at IS NULL 및 starts_at<=now<ends_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 MAX(ends_at)를 UTC Z로 반환한다. metadata와 활성 만료를 한 배치 JOIN 질의로 확인하고 같은 요청의 회원 판정·만료 표시에 결속한다. jungsi_backend.entitlements로 장애 대체하지 않는다. 관리자 이용권 예외는 미확정이며 추가하지 않는다. 별도 status/product 컬럼을 가정하지 않는다.",
+          "public.jeongsi_passes의 revoked_at IS NULL 및 starts_at<=now<ends_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 MAX(ends_at)를 UTC Z로 반환한다. metadata와 활성 만료를 한 배치 JOIN 질의로 확인하고 같은 요청의 회원 판정·만료 표시에 결속한다. jungsi_backend.entitlements로 장애 대체하지 않는다. 동일 검증 Bearer의 본인 public.profiles.role=admin 및 public.profiles.status=active 및 aal2와 요청 내부 admin-origin이 확인될 때만 관리자 접근 예외를 적용한다. 실제 활성 pass 만료를 우선 보존하고 pass가 없는 예외는 paid+null이다. 일반 paid 만료 누락503, 기존 자료·학교·검수 subject·소유권 범위와3필드는 유지한다. FE-ADMIN-ACCESS-01은 외부 화면팀 표시 요청이다. 별도 status/product 컬럼을 가정하지 않는다.",
           "일반 회원 만료는 null. 인증 또는 저장소 장애는 503이며 일반 회원으로 자동 강등하지 않는다. 사용자 ID·등급·역할·JWT·결제 내역을 요청/응답에 포함하지 않는다."
         ]
       },
@@ -7670,8 +7670,8 @@
     "user_decisions": {
       "paid_authority": "public.jeongsi_passes",
       "default_Postgres_composition_transition_authorized": true,
-      "admin_paid_override": false,
-      "admin_paid_override_status": "deferred_user_decision",
+      "admin_paid_override": true,
+      "admin_paid_override_status": "confirmed_active_admin_aal2",
       "previous_explicit_only_decision_preserved_as_history": true
     },
     "entitlement": {
@@ -7698,7 +7698,40 @@
       "adapter_writes_allowed": false,
       "automatic_entitlement_grant_allowed": false,
       "explicit_dependency_injection_preserved": true,
-      "synthetic_memory_composition_preserved": true
+      "synthetic_memory_composition_preserved": true,
+      "admin_access_exception": {
+        "role": "admin",
+        "account_status": "active",
+        "verified_aal": "aal2",
+        "trusted_identity": "exact_Bearer_verified_by_Supabase_Auth_getUser",
+        "trusted_profile": "own_profiles_role_status_via_same_verified_Bearer_and_publishable_key_RLS",
+        "own_profile_select": [
+          "role",
+          "status"
+        ],
+        "own_profile_queries_per_request": 1,
+        "same_subject_and_bearer_required": true,
+        "internal_origin_required": true,
+        "internal_origin": "verified_own_profile_active_admin_aal2",
+        "request_local_origin_identity_required": true,
+        "member_tier": "paid",
+        "entitlement_expires_at": null,
+        "real_active_pass_priority": true,
+        "real_expiry_preserved": true,
+        "ordinary_paid_null_expiry": "503_entitlement_unavailable",
+        "next_request_profile_reevaluation_required": true,
+        "client_roles_or_user_metadata_trusted": false,
+        "editor_or_approver_is_admin": false,
+        "ownership_school_review_approval_scope_override": false,
+        "pass_mutation_allowed": false,
+        "fake_expiry_allowed": false,
+        "profile_failure_breaks_ordinary_paid": false,
+        "cross_request_admin_cache_allowed": false,
+        "extra_profile_N_plus_one_allowed": false,
+        "pass_failure_fallback_allowed": false,
+        "frontend_request_id": "FE-ADMIN-ACCESS-01",
+        "frontend_owner": "external_frontend_team"
+      }
     },
     "management": {
       "operations": [
@@ -7715,7 +7748,7 @@
       "verified_aal": "aal2",
       "account_status": "active",
       "trusted_identity": "exact_Bearer_verified_by_Supabase_Auth_getUser",
-      "trusted_profile": "own_profiles_status_via_same_verified_Bearer_and_publishable_key_RLS",
+      "trusted_profile": "own_profiles_role_status_via_same_verified_Bearer_and_publishable_key_RLS",
       "authority_source": "jungsi_backend.forecast_authorities",
       "existing_edit_approve_and_school_scope_required": true,
       "client_roles_or_user_metadata_trusted": false,
@@ -7853,6 +7886,36 @@
         }
       ],
       "actual_user_paid_management_browser": "NOT_RUN"
+    },
+    "admin_exception_implementation": {
+      "status": "implemented_scoped_synthetic_verified_integration_pending",
+      "acceptance_plan_cases": 11,
+      "real_JWT_OTP_DB_Storage": "NOT_RUN",
+      "deployment": "NOT_RUN",
+      "production_ready": false,
+      "previous_PR31_verification_scope": "Historical public passes and management MFA implementation without this new administrator exception; original verification preserved",
+      "frontend_request": {
+        "id": "FE-ADMIN-ACCESS-01",
+        "owner": "external_frontend_team",
+        "status": "REQUESTED_NOT_IMPLEMENTED_IN_SERVICE_SCOPE",
+        "path": "apps/web/src/components/site-header.tsx",
+        "rule": "paid+null displays administrator access without an expiry-date phrase; actual pass expiry and server gates unchanged"
+      },
+      "verification": {
+        "implementation_commit": "a5be4ddf8ea85b64bc77e2b6e2abee656b24ab69",
+        "implementation_tree": "b54ac0ae937f13b8d629344810de6949cb0d52f5",
+        "normal_precommit_source_manifest_sha256": "acc5fbeb7f47c7fb30e2a8131d0c7d5ddeb4f9343a9e4a44289152e3e756e12e",
+        "Python_tests": 1010,
+        "Deno_units": 500,
+        "oracle_cases": 993,
+        "oracle_mismatches": 0,
+        "scope": "New administrator exception source and synthetic snapshot verification; separate from prior PR31 passes/MFA acceptance",
+        "real_JWT_active_admin_aal2": "NOT_RUN",
+        "runtime_entry_read_budget": "NOT_RUN",
+        "migration005_DDL": "NOT_RUN",
+        "BFF_browser_deployment": "NOT_RUN",
+        "production_ready": false
+      }
     }
   }
 }

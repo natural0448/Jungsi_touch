@@ -7,6 +7,13 @@ export interface SessionSnapshot {
   readonly evaluatedAtUtc: bigint;
   readonly tier: "standard" | "paid";
   readonly paidUntilUtc: bigint | null;
+  /** Private server origin; never a public DTO field or a client role claim. */
+  readonly adminOrigin?: "verified_own_profile_active_admin_aal2";
+}
+const verifiedAdminSnapshots = new WeakSet<SessionSnapshot>();
+function verifiedAdmin(user: VerifiedUser): boolean {
+  return user.accountRole === "admin" && user.accountStatus === "active" &&
+    user.assuranceLevel === "aal2";
 }
 export interface SessionDto {
   readonly format: "jungsi.session/v1";
@@ -46,12 +53,16 @@ export async function readSessionSnapshot(
   ) {
     throw new AccessError("entitlement_unavailable", 503);
   }
-  return Object.freeze({
+  const admin = verifiedAdmin(user);
+  const snapshot: SessionSnapshot = Object.freeze({
     user,
     evaluatedAtUtc: nowUtc,
-    tier: state.paidUntilUtc === null ? "standard" : "paid",
+    tier: state.paidUntilUtc === null && !admin ? "standard" : "paid",
     paidUntilUtc: state.paidUntilUtc,
+    ...(admin ? { adminOrigin: "verified_own_profile_active_admin_aal2" as const } : {}),
   });
+  if (admin) verifiedAdminSnapshots.add(snapshot);
+  return snapshot;
 }
 export function sessionDto(snapshot: SessionSnapshot, nowUtc: bigint): SessionDto {
   if (typeof nowUtc !== "bigint" || nowUtc < snapshot.evaluatedAtUtc) {
@@ -62,6 +73,17 @@ export function sessionDto(snapshot: SessionSnapshot, nowUtc: bigint): SessionDt
     return Object.freeze({
       format: "jungsi.session/v1",
       member_tier: "standard",
+      entitlement_expires_at: null,
+    });
+  }
+  if (
+    snapshot.paidUntilUtc === null && verifiedAdminSnapshots.has(snapshot) &&
+    snapshot.adminOrigin === "verified_own_profile_active_admin_aal2" &&
+    verifiedAdmin(snapshot.user)
+  ) {
+    return Object.freeze({
+      format: "jungsi.session/v1",
+      member_tier: "paid",
       entitlement_expires_at: null,
     });
   }

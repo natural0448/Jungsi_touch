@@ -580,7 +580,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "ba2e3b776faabb3bf8e2c1140c2b4120c56df475779906b00b91639f46a876aa",
+      "source_sha256": "bab79069018ba0d49cf7e994c631bf5051a25a548ecb56da41c0bb1dc7024cf5",
       "symbols": [
         {
           "kind": "class",
@@ -1436,7 +1436,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "source_sha256": "5ef34a3e0d5c4bb771a1b4dcbc7df0cb723017c1012a507b87728882676965db",
+      "source_sha256": "52ac601eafd5fe80c3153fb26fb4fdf71e77bed02265da352c7fe968aedf11db",
       "symbols": [
         {
           "kind": "class",
@@ -2150,7 +2150,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "source_sha256": "97e30068fc45a05a4a4c42f5e00a90f26c4b99c74f5baab04eceff6747222d53",
+      "source_sha256": "ec81a59ffa32b34c96faada64fcb51256a7f542507229c2bf513ef3f3767bd35",
       "symbols": [
         {
           "kind": "class",
@@ -2560,7 +2560,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "source_sha256": "5a77d24ff744b2429ea1f0684ad5dd9e76bff9d2d5f1441c4799314f62ab499c",
+      "source_sha256": "ea1c675d9b8680e1d5f61a7c1fc0b922aa632433922fd88c61890adee1e37cd3",
       "symbols": [
         {
           "kind": "class",
@@ -5000,7 +5000,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "source_sha256": "52db5611e80186dea80baf97f65ddf9c9a85a88ee1369f1e65440b85e825b057",
+      "source_sha256": "87f927d074df52695f3f71e4c8c611cbbce27eb092f578621842d50d2c260bba",
       "symbols": [
         {
           "kind": "class",
@@ -5016,13 +5016,13 @@
         },
         {
           "kind": "function",
-          "name": "SupabaseSessionProvider._account_status",
-          "signature": "def _account_status(self, token, subject):",
+          "name": "SupabaseSessionProvider._account_profile",
+          "signature": "def _account_profile(self, token, subject):",
           "decorators": []
         },
         {
           "kind": "function",
-          "name": "SupabaseSessionProvider._account_status.unique",
+          "name": "SupabaseSessionProvider._account_profile.unique",
           "signature": "def unique(pairs):",
           "decorators": []
         },
@@ -6453,7 +6453,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "5a715a5372a24bbf83b84f7ca3a90f54fb76c6e7c0b593990621b18358d985f5",
+        "source_sha256": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
         "declared_exports": [
           "AccessError",
           "authorizeUser",
@@ -6754,7 +6754,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "af724e486ca6bc0a3a07fb0a98c176e2a620c207fb93aa912a1f2adc633e087e",
+        "source_sha256": "1c010ebbee398928e0fab7fdb8a4785be06d2d4fb7890714296e95563da340de",
         "declared_exports": [
           "VerifiedUser",
           "UserSessionPort",
@@ -6936,7 +6936,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "6ffed08966fd788d30827d96b24514fd432301ae940ba787b543f9e71735b336",
+        "source_sha256": "6f264ec903947a732012f7683cd740e931afd0a461b7e4c207d8e6615df03cae",
         "declared_exports": [
           "SessionSnapshot",
           "SessionDto",
@@ -7890,7 +7890,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "592239bea3dab5b64eb4059e8f3554d813f187d087e9c4c5490e784f4fa83fed",
+        "source_sha256": "50f5df287dcbb82a7dbc6380ef5954d97c1eb5a0ae0fe076fa1454b4ad296264",
         "declared_exports": [
           "SupabaseAuthSettings",
           "SupabaseNativeAuth"
@@ -7987,7 +7987,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "d7a94a95f3bf1d70fe670010a5d3b469f5212da74d5f84406b07ba07ede4d84e",
+        "source_sha256": "8f08df5c2f455b363d27fb07ea2ea5ec69c623424d328672eb587d61d539ce30",
         "declared_exports": [
           "NativeSessionReceipt",
           "NativeSessionVerificationPort",

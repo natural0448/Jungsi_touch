@@ -36,6 +36,12 @@ class FormalSessionContractTests(unittest.TestCase):
     def test_legacy_status_product_rule_is_not_invented(self):
         self.spec['backend_platform_contract']['dto_schemas']['session']['rules'][0]='status=active and product=jeongsi'
         self.assertIn('Formal session entitlement rule drift',validate_spec(self.spec))
+    def test_confirmed_own_profile_status_does_not_permit_a_pass_status_column(self):
+        self.assertIn('public.profiles.status=active',self.spec['backend_platform_contract']['dto_schemas']['session']['rules'][0])
+        self.assertEqual(validate_spec(self.spec),[])
+        for clause in [' public.jeongsi_passes.status=active',' status=active']:
+            wrong=deepcopy(self.spec);wrong['backend_platform_contract']['dto_schemas']['session']['rules'][0]+=clause
+            self.assertIn('Formal session entitlement rule drift',validate_spec(wrong))
     def test_superseded_proposed_session_is_not_revived(self):
         self.spec['session_contract']={'status':'proposed'}
         self.assertIn('Superseded proposed session contract must not be revived',validate_spec(self.spec))

@@ -2,11 +2,13 @@
 from .authorization import Actor
 from .platform_ports import PlatformError, VerifiedSession
 from .time_contract import utc_instant
+from weakref import WeakValueDictionary
 
 
 class SessionService:
     def __init__(self, sessions, entitlements, clock):
         self.sessions, self.entitlements, self.clock = sessions, entitlements, clock
+        self._admin_actors = WeakValueDictionary()
 
     def actor(self, authorization):
         if not isinstance(authorization, str) or not authorization.startswith('Bearer '):
@@ -40,13 +42,29 @@ class SessionService:
             paid=self.entitlements.active_paid(session.subject_id,now)
         if type(paid) is not bool:
             raise PlatformError('entitlement_unavailable', 503)
-        return Actor(session.subject_id,paid,session.assurance_level,session.account_status,until)
+        role=session.account_role
+        if type(role) is not str or not role.strip() or len(role)>64:role=None
+        admin=role=='admin' and session.account_status=='active' and session.assurance_level=='aal2'
+        actor=Actor(session.subject_id,paid or admin,session.assurance_level,session.account_status,until,
+                    role,'verified_own_profile_active_admin_aal2' if admin else None,
+                    session.expires_at)
+        if admin:self._admin_actors[id(actor)]=actor
+        return actor
 
     def read(self, actor):
         if actor.subject_id is None: raise PlatformError('authentication_required',401)
+        if actor.session_expires_at is not None and utc_instant(actor.session_expires_at)<=utc_instant(self.clock.now()):
+            raise PlatformError('authentication_required',401)
         if not actor.paid_active:
             return dict(format='jungsi.session/v1',member_tier='standard',entitlement_expires_at=None)
         until=actor.entitlement_expires_at
+        if (until is None and self._admin_actors.get(id(actor)) is actor
+                and actor.admin_access_origin=='verified_own_profile_active_admin_aal2'
+                and actor.account_role=='admin' and actor.account_status=='active'
+                and actor.assurance_level=='aal2'):
+            if utc_instant(actor.session_expires_at)<=utc_instant(self.clock.now()):
+                raise PlatformError('authentication_required',401)
+            return dict(format='jungsi.session/v1',member_tier='paid',entitlement_expires_at=None)
         if until is None:
             method=getattr(self.entitlements,'active_paid_until',None)
             if method is None: raise PlatformError('entitlement_unavailable',503)

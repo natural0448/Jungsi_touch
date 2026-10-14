@@ -27,6 +27,7 @@ export async function authorizeUser(
     throw new AccessError("authentication_required", 401);
   }
   const assuranceLevel = user.assuranceLevel ?? null, accountStatus = user.accountStatus ?? null;
+  const accountRole = user.accountRole ?? null;
   if (
     ![null, "aal1", "aal2"].includes(assuranceLevel) ||
     (accountStatus !== null &&
@@ -39,6 +40,10 @@ export async function authorizeUser(
     expiresAtUtc: user.expiresAtUtc,
     assuranceLevel,
     accountStatus,
+    // An unknown/malformed optional profile role never discards a verified paid session.
+    accountRole: typeof accountRole === "string" && accountRole.trim() && accountRole.length <= 64
+      ? accountRole
+      : null,
   });
 }
 export async function authorizeCurrent(

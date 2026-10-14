@@ -4,6 +4,7 @@ export interface VerifiedUser {
   readonly expiresAtUtc: bigint;
   readonly assuranceLevel?: "aal1" | "aal2" | null;
   readonly accountStatus?: string | null;
+  readonly accountRole?: string | null;
 }
 export interface UserSessionPort {
   verifyUserBearer(token: string, nowUtc: bigint): Promise<VerifiedUser | null>;

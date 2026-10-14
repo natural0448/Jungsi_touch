@@ -5,7 +5,15 @@ import {
   bearerSha256,
   BoundVerifiedSessionProvider,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/verified_session.ts";
-import { assert, equal } from "./fixture.ts";
+import { assert, equal, syncPromise } from "./fixture.ts";
+import {
+  readSessionSnapshot,
+  requirePaidSession,
+  sessionDto,
+  type SessionSnapshot,
+} from "../../supabase/functions/_shared/jungsi/application/session_service.ts";
+import { authorizeReport } from "../../supabase/functions/_shared/jungsi/application/access.ts";
+import { authorizeManagement } from "../../supabase/functions/_shared/jungsi/application/management_access.ts";
 
 const UID = "00000000-0000-0000-0000-000000000001";
 const OTHER = "00000000-0000-0000-0000-000000000002";
@@ -144,16 +152,226 @@ Deno.test("native profile uses only same bearer publishable key own id status an
     const target = new URL(url);
     equal(target.origin, CONFIG.url);
     equal(target.pathname, "/rest/v1/profiles");
-    equal([...target.searchParams], [["select", "status"], ["id", "eq." + UID], ["limit", "1"]]);
+    equal([...target.searchParams], [["select", "role,status"], ["id", "eq." + UID], [
+      "limit",
+      "1",
+    ]]);
     equal(new Headers(init.headers).get("Authorization"), "Bearer " + bearer);
     equal(new Headers(init.headers).get("apikey"), CONFIG.publishableKey);
-    return Response.json([{ status: "active" }]);
+    return Response.json([{ status: "active", role: "admin" }]);
   });
   const own = await p.readOwnStatus(bearer, UID);
   assert(own);
   equal(own.subjectId, UID);
   equal(own.status, "active");
+  equal(own.role, "admin");
   equal(own.bearerSha256, await bearerSha256(bearer));
+});
+
+function adminFixture(
+  options: {
+    role?: unknown;
+    status?: unknown;
+    aal?: "aal1" | "aal2";
+    paidUntil?: bigint | null;
+    profileUnavailable?: boolean;
+  } = {},
+) {
+  let role: unknown = Object.hasOwn(options, "role") ? options.role : "admin",
+    status: unknown = Object.hasOwn(options, "status") ? options.status : "active";
+  const calls: string[] = [],
+    bearer = token({ sub: UID, exp: 1700000060, aal: options.aal ?? "aal2", role: "admin" });
+  const native = port((url) => {
+    const target = new URL(url);
+    calls.push(target.pathname);
+    if (target.pathname === "/auth/v1/user") {
+      return Response.json({ id: UID, user_metadata: { role: "admin", paid: true } });
+    }
+    equal(target.searchParams.get("select"), "role,status");
+    equal(target.searchParams.get("id"), "eq." + UID);
+    return options.profileUnavailable
+      ? new Response("unavailable", { status: 503 })
+      : Response.json([{ role, status }]);
+  });
+  const sessions = new BoundVerifiedSessionProvider(native, native);
+  const passes = {
+    readCurrent: (subjectId: string, evaluatedAtUtc: bigint) =>
+      syncPromise(() => ({
+        authority: "public.jeongsi_passes" as const,
+        metadataVerified: true as const,
+        subjectId,
+        evaluatedAtUtc,
+        paidUntilUtc: options.paidUntil ?? null,
+      })),
+  };
+  return {
+    sessions,
+    passes,
+    bearer,
+    calls,
+    changeProfile(nextRole: unknown, nextStatus: unknown) {
+      role = nextRole;
+      status = nextStatus;
+    },
+    read: () => readSessionSnapshot(bearer, sessions, passes, NOW),
+  };
+}
+async function adminRefused(work: () => unknown, code: string, http: number) {
+  let failure: unknown;
+  try {
+    await work();
+  } catch (error) {
+    failure = error;
+  }
+  assert(failure instanceof AccessError);
+  equal(failure.code, code);
+  equal(failure.http, http);
+}
+Deno.test("verified active own-profile aal2 admin receives only the three-field paid-null exception", async () => {
+  const f = adminFixture(), snapshot = await f.read();
+  equal(sessionDto(snapshot, NOW), {
+    format: "jungsi.session/v1",
+    member_tier: "paid",
+    entitlement_expires_at: null,
+  });
+  requirePaidSession(snapshot, NOW);
+  equal(f.calls.filter((path) => path === "/rest/v1/profiles").length, 1);
+});
+Deno.test("verified admin with a real active pass retains its original expiry", async () => {
+  const snapshot = await adminFixture({ paidUntil: NOW + 1234567n }).read();
+  equal(sessionDto(snapshot, NOW).entitlement_expires_at, "2023-11-14T22:13:21.234567Z");
+});
+Deno.test("aal1 inactive ordinary editor and approver profiles never gain the admin exception", async () => {
+  for (
+    const options of [
+      { aal: "aal1" as const },
+      { status: "inactive" },
+      { status: null },
+      { role: "student" },
+      { role: "editor" },
+      { role: "approver" },
+      { role: 1 },
+      { role: "admin " },
+      { role: null },
+      { role: undefined },
+    ]
+  ) {
+    const snapshot = await adminFixture(options).read();
+    equal(sessionDto(snapshot, NOW).member_tier, "standard");
+    await adminRefused(() => requirePaidSession(snapshot, NOW), "paid_required", 403);
+  }
+});
+Deno.test("profile failures and wrong-subject or wrong-bearer profile receipts preserve an ordinary paid pass", async () => {
+  const f = adminFixture({ profileUnavailable: true, paidUntil: NOW + 1000000n });
+  equal(sessionDto(await f.read(), NOW).entitlement_expires_at, "2023-11-14T22:13:21Z");
+  equal(
+    sessionDto(await adminFixture({ profileUnavailable: true }).read(), NOW).member_tier,
+    "standard",
+  );
+  for (const mismatch of ["subject", "bearer"]) {
+    const native = port(() => Response.json({ id: UID }));
+    const digest = await bearerSha256(f.bearer);
+    const profiles = {
+      readOwnStatus: () =>
+        syncPromise(() => ({
+          verification: "own_profile_same_bearer_publishable_RLS" as const,
+          bearerSha256: mismatch === "bearer" ? "wrong" : digest,
+          subjectId: mismatch === "subject" ? OTHER : UID,
+          status: "active",
+          role: "admin",
+        })),
+    };
+    const snapshot = await readSessionSnapshot(
+      f.bearer,
+      new BoundVerifiedSessionProvider(native, profiles),
+      f.passes,
+      NOW,
+    );
+    equal(snapshot.user.accountRole, null);
+    equal(sessionDto(snapshot, NOW).member_tier, "paid");
+    assert(sessionDto(snapshot, NOW).entitlement_expires_at !== null);
+  }
+});
+Deno.test("the same JWT is re-evaluated after administrator demotion or deactivation on the next request", async () => {
+  const f = adminFixture();
+  equal(sessionDto(await f.read(), NOW).member_tier, "paid");
+  f.changeProfile("student", "active");
+  equal(sessionDto(await f.read(), NOW).member_tier, "standard");
+  f.changeProfile("admin", "inactive");
+  equal(sessionDto(await f.read(), NOW).member_tier, "standard");
+  equal(f.calls.filter((path) => path === "/rest/v1/profiles").length, 3);
+  equal(f.calls.filter((path) => path === "/auth/v1/user").length, 3);
+});
+Deno.test("paid-null without this request's verified admin origin remains a 503 even with copied role fields", async () => {
+  const original = await adminFixture().read();
+  const copied: SessionSnapshot = { ...original };
+  await adminRefused(() => sessionDto(copied, NOW), "entitlement_unavailable", 503);
+  await adminRefused(
+    () => sessionDto({ ...copied, adminOrigin: undefined }, NOW),
+    "entitlement_unavailable",
+    503,
+  );
+  await adminRefused(() => sessionDto(original, NOW + 60000000n), "authentication_required", 401);
+});
+Deno.test("verified admin origin never converts an unavailable or wrong-subject pass lookup into success", async () => {
+  const f = adminFixture();
+  await adminRefused(
+    () =>
+      readSessionSnapshot(f.bearer, f.sessions, {
+        readCurrent: () => Promise.reject(new Error("SYNTHETIC")),
+      }, NOW),
+    "entitlement_unavailable",
+    503,
+  );
+  await adminRefused(
+    () =>
+      readSessionSnapshot(f.bearer, f.sessions, {
+        readCurrent: () =>
+          syncPromise(() => ({
+            authority: "public.jeongsi_passes" as const,
+            metadataVerified: true as const,
+            subjectId: OTHER,
+            evaluatedAtUtc: NOW,
+            paidUntilUtc: null,
+          })),
+      }, NOW),
+    "entitlement_unavailable",
+    503,
+  );
+});
+Deno.test("administrator paid access still rejects another owner's report", async () => {
+  const snapshot = await adminFixture().read();
+  await adminRefused(
+    () =>
+      authorizeReport(snapshot.user, "SYNTHETIC-report", {
+        find: () => syncPromise(() => ({ ownerId: OTHER, confirmed: true })),
+      }, true),
+    "report_not_found",
+    404,
+  );
+});
+Deno.test("administrator membership exception does not grant forecast edit or approval authority", async () => {
+  const snapshot = await adminFixture().read();
+  const authorities = {
+    readCurrent: (subjectId: string, evaluatedAtUtc: bigint) =>
+      syncPromise(() => ({
+        authority: "jungsi_backend.forecast_authorities" as const,
+        subjectId,
+        evaluatedAtUtc,
+        edit: false,
+        approve: false,
+        universityIds: [],
+        editUniversityIds: [],
+        approveUniversityIds: [],
+      })),
+  };
+  for (const operation of ["forecast.create", "forecast.approve"] as const) {
+    await adminRefused(
+      () => authorizeManagement(snapshot.user, authorities, NOW, operation),
+      "forecast_forbidden",
+      403,
+    );
+  }
 });
 Deno.test("native profile closes unknown malformed duplicate or oversized status", async () => {
   for (
