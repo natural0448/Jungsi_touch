@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.52",
+  "contract_version": "1.9.53",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -77,7 +77,10 @@
       "memory_MiB": 256,
       "active_CPU_seconds_per_request": 2,
       "free_worker_wall_clock_seconds": 150,
-      "cost_rule": "실제 요금제와 포함량은 비공개 운영 확인 대상이다. BFF/내부 호출·재시도도 사용량에 포함하므로 사전 집계·정확 버전의 결과 재사용·공유 예산을 사용한다. CPU/메모리/포함량 초과를 외부 유료 서버로 우회하지 않는다."
+      "cost_rule": "실제 요금제와 포함량은 비공개 운영 확인 대상이다. BFF/내부 호출·재시도도 사용량에 포함하므로 사전 집계·정확 버전의 결과 재사용·공유 예산을 사용한다. CPU/메모리/포함량 초과를 외부 유료 서버로 우회하지 않는다.",
+      "paid_worker_wall_clock_seconds": 400,
+      "request_idle_timeout_seconds": 150,
+      "runtime_lifetime_rule": "공식 플랫폼 상한인 worker 수명 Free150초/유료400초, 요청 idle timeout150초, active CPU2초를 구분한다. 실제 운영 요금제에 맞는 worker 최대 수명과 시계 오차 여유보다 긴 동시작업 lease를 사용하고 클라이언트의 응답 대기 만료나 재시도가 아직 실행 중인 서버 계산의 동시 lease를 초기화하지 않도록 검수한다. 이 수치는 애플리케이션 요청량·계산량 한도나 승인된 실제 운영값을 대신하지 않는다."
     },
     "security": {
       "contract_ref": "security_contract",
@@ -276,7 +279,7 @@
       "request_date": "2026-10-14",
       "scope": "사용자가 실제 인증 연결·JWT/OTP 검수·22개 API 이식·운영 배포를 요청했다. 기존 Google Drive와 Supabase만 사용하며 코드 통합·합성 검산·실 연결·배포·공개 인수를 각각 기록한다.",
       "owner_totp_rule": "계정 주인이 /admin에서 휴대폰 인증 앱으로 등록·입력한다. 검수 계정 식별자·비밀번호·JWT·QR·OTP 비밀키는 공개 명세에 저장하지 않는다. 2026-10-14 계정 주인의 Codex 브라우저 직접 로그인·MFA 완료 회신과 관리자 화면 진입을 수령했다. 입력 대기는 해소됐으며 서버의 실제 getUser·aal2·본인 상태·학교 권한 검수는 계속 진행한다. 이 회신이나 화면 진입만으로 실제 JWT/TOTP 검수 PASS를 기록하지 않는다.",
-      "quota_rule": "승인된 비공개 운영 한도와 기존 요금제 근거가 필요하다. null·미확정 값을 무제한 또는 실제 0으로 치환하지 않는다. 애플리케이션 내부 quota만으로 플랫폼 추가 과금을 방지했다고 판정하지 않는다. 기존 조직의 요금제·모든 프로젝트 사용량·포함량과 해당되는 Spend Cap 범위를 확인한다. Free는 추가 과금하지 않으며 Spend Cap은 Pro에서 적용 가능한 일부 사용량만 대상으로 한다. 실패한 Edge 호출도 invocation 사용량에 포함되므로 신규 요금제·유료 항목·초과 과금 허용을 자동 선택하지 않는다.",
+      "quota_rule": "승인된 비공개 운영 한도와 기존 요금제 근거가 필요하다. null·미확정 값을 무제한 또는 실제 0으로 치환하지 않는다. 애플리케이션 내부 quota만으로 플랫폼 추가 과금을 방지했다고 판정하지 않는다. 기존 조직의 요금제·모든 프로젝트 사용량·포함량과 해당되는 Spend Cap 범위를 확인한다. Free는 추가 과금하지 않으며 Spend Cap은 Pro에서 적용 가능한 일부 사용량만 대상으로 한다. 실패한 Edge 호출도 invocation 사용량에 포함되므로 신규 요금제·유료 항목·초과 과금 허용을 자동 선택하지 않는다. 공식 플랫폼 상한인 worker 수명 Free150초/유료400초, 요청 idle timeout150초, active CPU2초를 구분한다. 실제 운영 요금제에 맞는 worker 최대 수명과 시계 오차 여유보다 긴 동시작업 lease를 사용하고 클라이언트의 응답 대기 만료나 재시도가 아직 실행 중인 서버 계산의 동시 lease를 초기화하지 않도록 검수한다. 이 수치는 애플리케이션 요청량·계산량 한도나 승인된 실제 운영값을 대신하지 않는다.",
       "reuse": {
         "implementation_commit": "b25fcef9e0e9aaa0cb9b61aefb48e4e5e59be22a",
         "integration_commit": "73f4a4866c3edfae3ed6b6c7e9f2a1055c643117",

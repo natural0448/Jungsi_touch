@@ -1216,13 +1216,17 @@ def validate_live_execution(spec):
 
 def supabase_deployment_document(spec):
     c=spec['supabase_deployment_contract']; p=c['platform_policy']; a=c['architecture']; s=c['security']; f=c['frontend']; v=c['verification']
+    limits=c['platform_limits']
+    runtime_text='현재 플랫폼 상한은 메모리256MiB, 요청 active CPU2초, Free worker wall clock150초다. 플랫폼 상한은 내부 운영 한도를 뜻하지 않는다.'
+    if 'paid_worker_wall_clock_seconds' in limits and 'request_idle_timeout_seconds' in limits:
+        runtime_text=(f"현재 플랫폼 상한은 메모리{limits['memory_MiB']}MiB, 요청 active CPU{limits['active_CPU_seconds_per_request']}초, Free worker wall clock{limits['free_worker_wall_clock_seconds']}초, 유료 worker wall clock{limits['paid_worker_wall_clock_seconds']}초, 요청 idle timeout{limits['request_idle_timeout_seconds']}초다. "+limits['runtime_lifetime_rule'])
     comparison=f.get('comparison_review')
     comparison_text=('\n\n## 화면 제공 방식 비교 회신의 검토\n\n'+comparison['decision']+'\n\n'+
         table(['항목','확인·정정 기준'],comparison['facts'])+'\n\n실제 호환성/브라우저/비용 '+comparison['actual_compatibility_browser_and_billing']+'. 비교 수신은 배포·화면교체 승인이 아니다.\n\n'+
         '\n'.join('- ['+x['title']+']('+x['url']+')' for x in comparison['official_sources'])) if comparison else ''
     return (c['scope']+'\n\n계약 '+c['revision']+' · 코드 '+c['code_status']+' · 실제 운영 NOT_RUN · production_ready=false. 출발 develop '+c['basis_commit']+'.\n\n'+
             '## 플랫폼과 비용 범위\n\n'+p['rule']+'\n\n허용 플랫폼: '+', '.join(p['allowed'])+' · 기존 요금제/Spend Cap 검수 '+p['usage_and_spend_cap_verification']+'. 추가 비용 없이 사용할 수 있는 범위를 먼저 확인한다.\n\n'+
-            '## 3티어와 기존 Python 구현\n\n'+table(['계층/기준','구성'],[['프레젠테이션',a['presentation']],['애플리케이션',a['application']],['데이터',a['data']],['기존 검산',a['python_reference']]])+'\n\n'+a['rule']+'\n\n서버 UTC · 원자료/화면 Asia/Seoul. '+c['platform_limits']['cost_rule']+' 현재 플랫폼 상한은 메모리256MiB, 요청 active CPU2초, Free worker wall clock150초다. 플랫폼 상한은 내부 운영 한도를 뜻하지 않는다.\n\n'+
+            '## 3티어와 기존 Python 구현\n\n'+table(['계층/기준','구성'],[['프레젠테이션',a['presentation']],['애플리케이션',a['application']],['데이터',a['data']],['기존 검산',a['python_reference']]])+'\n\n'+a['rule']+'\n\n서버 UTC · 원자료/화면 Asia/Seoul. '+limits['cost_rule']+' '+runtime_text+'\n\n'+
             '## 수치와 응답의 호환 검산\n\n'+c['numerical_compatibility']['rule']+'\n\n'+
             '## 서버 계약과 자료 발행\n\n'+s['rule']+'\n\n정확 헤더 '+chr(96)+s['relay_header']+chr(96)+' · 서버 전용 '+chr(96)+s['relay_environment_name']+chr(96)+' · 실제 사용자 Authorization Bearer. relay만으로 사용자 권한이 생기지 않는다. '+s['health_live_path']+'는 최소 공개 생존 확인, '+s['health_ready_path']+'는 relay 보호 검수다.\n\n'+
             c['native_publication']['rule']+'\n\nEdge에서 사용할 private Storage 명부/환경 이름은 서버 담당의 구현 계약과 후보 증거로 확정한다. Python의 로컬 파일 경로·factory 실행 명령을 Edge 배포 명령으로 사용하지 않는다.\n\n'+

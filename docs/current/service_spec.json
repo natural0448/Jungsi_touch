@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.52",
+  "version": "1.9.53",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -3825,7 +3825,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.52",
+        "contract_version": "1.9.53",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -3999,7 +3999,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.52",
+        "contract_version": "1.9.53",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -4165,7 +4165,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.52",
+        "contract_version": "1.9.53",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -4184,7 +4184,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.52",
+        "contract_version": "1.9.53",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -4209,7 +4209,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.52",
+        "contract_version": "1.9.53",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -4234,7 +4234,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.52",
+        "contract_version": "1.9.53",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -4872,7 +4872,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "8c831cb8930d6cb9cc240c61a0525faea5c8c9a6dbfe9a369f528d12d7f5ede6",
+            "source_sha256": "ba2e3b776faabb3bf8e2c1140c2b4120c56df475779906b00b91639f46a876aa",
             "symbols": [
               {
                 "kind": "class",
@@ -11175,9 +11175,9 @@
       "development_state": [
         [
           "develop / 최신 검증 기준",
-          "357f34e46d10e25fb81b074b82eb9d3fb07c0ae3 / spec1.9.51",
-          "CI38517089452·정상 commit/push Python994·Deno116·oracle993 PASS 재사용",
-          "계정 주인의 직접 입력 완료와 명시 합성 화면 관측을 보존한다. 등록 코드의 해시 범위와 실제 운영 인수를 구분하고, 새 업무 API의 정상 검사 등록을 지원한다."
+          "c25f9dbba005b12270c9acc51259b2e2d3477791 / spec1.9.52",
+          "CI38521422487·정상 commit/push Python999·Deno116·oracle993 PASS 재사용",
+          "공개 플랫폼의 유료 worker 수명과 요청 idle timeout을 공통 명세에서 구분한다. 실제22 API·JWT/AAL2·native 예산·배포 인수는 계속 진행하며 소스 검수만으로 운영 완료를 표시하지 않는다."
         ],
         [
           "기획·서비스 / 읽기 모델 수정의 검수 이력",
@@ -12930,6 +12930,16 @@
         "REQ-26"
       ],
       "summary": "새 업무 API 등록 뒤에도 모든 소스 검사 결과를 미이식으로 고정하던 표시를 공통 operation별 등록 소스/해시 범위로 바꾼다. 소스 등록·시험과 실제 인증/DB/배포 인수를 명확히 분리하며 소스 시험의 운영 미인수 상태는 보존한다. 통합된 실행 화면 앱과 합성 응답의 현재 상태도 생성 README에 정본에서 반영한다."
+    },
+    {
+      "date": "2026-10-14",
+      "requirements": [
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "공개 Supabase 실행 제한의 유료 worker400초와 요청 idle150초를 공통 명세에 추가하고 같은 생성 규칙으로 배포·기획·라우팅 문서에 반영한다. 동시작업 lease가 실제 worker 수명과 시계 오차 여유보다 길어야 하는 기준을 명시하며 실제 조직 청구·사용량·계정 정보는 기록하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -22437,7 +22447,10 @@
       "memory_MiB": 256,
       "active_CPU_seconds_per_request": 2,
       "free_worker_wall_clock_seconds": 150,
-      "cost_rule": "실제 요금제와 포함량은 비공개 운영 확인 대상이다. BFF/내부 호출·재시도도 사용량에 포함하므로 사전 집계·정확 버전의 결과 재사용·공유 예산을 사용한다. CPU/메모리/포함량 초과를 외부 유료 서버로 우회하지 않는다."
+      "cost_rule": "실제 요금제와 포함량은 비공개 운영 확인 대상이다. BFF/내부 호출·재시도도 사용량에 포함하므로 사전 집계·정확 버전의 결과 재사용·공유 예산을 사용한다. CPU/메모리/포함량 초과를 외부 유료 서버로 우회하지 않는다.",
+      "paid_worker_wall_clock_seconds": 400,
+      "request_idle_timeout_seconds": 150,
+      "runtime_lifetime_rule": "공식 플랫폼 상한인 worker 수명 Free150초/유료400초, 요청 idle timeout150초, active CPU2초를 구분한다. 실제 운영 요금제에 맞는 worker 최대 수명과 시계 오차 여유보다 긴 동시작업 lease를 사용하고 클라이언트의 응답 대기 만료나 재시도가 아직 실행 중인 서버 계산의 동시 lease를 초기화하지 않도록 검수한다. 이 수치는 애플리케이션 요청량·계산량 한도나 승인된 실제 운영값을 대신하지 않는다."
     },
     "security": {
       "contract_ref": "security_contract",
@@ -22636,7 +22649,7 @@
       "request_date": "2026-10-14",
       "scope": "사용자가 실제 인증 연결·JWT/OTP 검수·22개 API 이식·운영 배포를 요청했다. 기존 Google Drive와 Supabase만 사용하며 코드 통합·합성 검산·실 연결·배포·공개 인수를 각각 기록한다.",
       "owner_totp_rule": "계정 주인이 /admin에서 휴대폰 인증 앱으로 등록·입력한다. 검수 계정 식별자·비밀번호·JWT·QR·OTP 비밀키는 공개 명세에 저장하지 않는다. 2026-10-14 계정 주인의 Codex 브라우저 직접 로그인·MFA 완료 회신과 관리자 화면 진입을 수령했다. 입력 대기는 해소됐으며 서버의 실제 getUser·aal2·본인 상태·학교 권한 검수는 계속 진행한다. 이 회신이나 화면 진입만으로 실제 JWT/TOTP 검수 PASS를 기록하지 않는다.",
-      "quota_rule": "승인된 비공개 운영 한도와 기존 요금제 근거가 필요하다. null·미확정 값을 무제한 또는 실제 0으로 치환하지 않는다. 애플리케이션 내부 quota만으로 플랫폼 추가 과금을 방지했다고 판정하지 않는다. 기존 조직의 요금제·모든 프로젝트 사용량·포함량과 해당되는 Spend Cap 범위를 확인한다. Free는 추가 과금하지 않으며 Spend Cap은 Pro에서 적용 가능한 일부 사용량만 대상으로 한다. 실패한 Edge 호출도 invocation 사용량에 포함되므로 신규 요금제·유료 항목·초과 과금 허용을 자동 선택하지 않는다.",
+      "quota_rule": "승인된 비공개 운영 한도와 기존 요금제 근거가 필요하다. null·미확정 값을 무제한 또는 실제 0으로 치환하지 않는다. 애플리케이션 내부 quota만으로 플랫폼 추가 과금을 방지했다고 판정하지 않는다. 기존 조직의 요금제·모든 프로젝트 사용량·포함량과 해당되는 Spend Cap 범위를 확인한다. Free는 추가 과금하지 않으며 Spend Cap은 Pro에서 적용 가능한 일부 사용량만 대상으로 한다. 실패한 Edge 호출도 invocation 사용량에 포함되므로 신규 요금제·유료 항목·초과 과금 허용을 자동 선택하지 않는다. 공식 플랫폼 상한인 worker 수명 Free150초/유료400초, 요청 idle timeout150초, active CPU2초를 구분한다. 실제 운영 요금제에 맞는 worker 최대 수명과 시계 오차 여유보다 긴 동시작업 lease를 사용하고 클라이언트의 응답 대기 만료나 재시도가 아직 실행 중인 서버 계산의 동시 lease를 초기화하지 않도록 검수한다. 이 수치는 애플리케이션 요청량·계산량 한도나 승인된 실제 운영값을 대신하지 않는다.",
       "reuse": {
         "implementation_commit": "b25fcef9e0e9aaa0cb9b61aefb48e4e5e59be22a",
         "integration_commit": "73f4a4866c3edfae3ed6b6c7e9f2a1055c643117",
