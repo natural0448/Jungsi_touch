@@ -580,7 +580,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "88860cf90da4b075370f9b7daab3d4a194e58d7c89f07fd1d43d1106f2f766fe",
+      "source_sha256": "5b18fba1542be38975ac8448c2254afcec03943ddf242aa5993c23ba1246e322",
       "symbols": [
         {
           "kind": "class",
@@ -688,6 +688,12 @@
           "kind": "function",
           "name": "git",
           "signature": "def git(*args, input=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "live_execution_document",
+          "signature": "def live_execution_document(spec):",
           "decorators": []
         },
         {
@@ -910,6 +916,12 @@
           "kind": "function",
           "name": "validate_frontend_reply_contract.strings",
           "signature": "def strings(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_live_execution",
+          "signature": "def validate_live_execution(spec):",
           "decorators": []
         },
         {

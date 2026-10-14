@@ -1,10 +1,10 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.48이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.49이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
-Google Drive와 기존 Supabase만 사용하는 운영 API 전환 준비 및 화면 담당 인계. 기존 Python 구현의 검산 근거와 미완료 운영 인수를 구분한다.
+Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
-계약 2026.10.07.v1 · 코드 planned · 실제 운영 NOT_RUN · production_ready=false. 출발 develop dc59831a9b34e5dbf4bd15955a1f9489847403af.
+계약 2026.10.14.v2 · 코드 planned · 실제 운영 NOT_RUN · production_ready=false. 출발 develop 73f4a4866c3edfae3ed6b6c7e9f2a1055c643117.
 
 ## 플랫폼과 비용 범위
 
@@ -44,10 +44,10 @@ Edge에서 사용할 private Storage 명부/환경 이름은 서버 담당의 �
 | 단계 | 담당 | 상태 | 산출물 |
 | --- | --- | --- | --- |
 | DEP-01 | 서비스 개발팀·시스템기획팀 | in_progress | 기존22 operation·저장소/native 종류·수치/반올림/시각·권한을 Edge 구현에 대응한 변경 경계와 재사용 검산 목록 |
-| DEP-02 | 서비스 개발팀 | planned | Edge 명시 구성·relay/실사용자 권한·private Storage 명부·DB 포트·안전한 health 및 정밀 계산의 단계적 호환 구현 |
+| DEP-02 | 서비스 개발팀 | in_progress | Edge 명시 구성·relay/실사용자 권한·private Storage 명부·DB 포트·안전한 health 및 정밀 계산의 단계적 호환 구현 |
 | DEP-03 | 데이터팀·서비스 개발팀·시스템기획팀 | in_progress | 기존 검수/변환 캐시를 재사용한 기능별 최소 native 후보·독립 검산·승인·불변 발행·명시 선택 |
 | DEP-04 | 화면 담당 | planned | 허용된 화면 제공 방식·BFF relay/세션/CSRF·발행 감지와 기대값·실브라우저 검수 |
-| DEP-05 | 서버 담당·시스템기획팀 | planned | 현재 Supabase 요금제/포함량/Spend Cap 확인, 실제 Auth/DB/Storage/공유 예산/Edge 후보 배포와 세 보안 gate 인수 |
+| DEP-05 | 서버 담당·시스템기획팀 | in_progress | 현재 Supabase 요금제/포함량/Spend Cap 확인, 실제 Auth/DB/Storage/공유 예산/Edge 후보 배포와 세 보안 gate 인수 |
 
 ## 화면 담당에게 전달할 작업
 
@@ -88,6 +88,57 @@ Edge에서 사용할 private Storage 명부/환경 이름은 서버 담당의 �
 ## 검증 상태
 
 Edge 구현 NOT_RUN · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 NOT_RUN · 실제 비용/요금제 NOT_RUN. 기존 Python 합성 인수는 Edge 포팅/실운영 인수를 대신하지 않는다.
+
+
+
+## 실제 인증·22 API·배포 진행
+
+사용자가 실제 인증 연결·JWT/OTP 검수·22개 API 이식·운영 배포를 요청했다. 기존 Google Drive와 Supabase만 사용하며 코드 통합·합성 검산·실 연결·배포·공개 인수를 각각 기록한다.
+
+Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제 Auth·업무22 API·TOTP·공개 배포 인수를 대신하지 않는다.
+
+| 검수 단계 | 상태 |
+| --- | --- |
+| 실제 Auth getUser·본인 profiles RLS 연결 | IN_PROGRESS |
+| 실 JWT·만료·변조·타인 소유권 반례 | IN_PROGRESS |
+| 계정 주인의 /admin TOTP 등록·aal2 관리 검수 | PENDING_OWNER |
+| 기존 22 API의 업무 처리·DTO·정밀 계산 이식 | IN_PROGRESS |
+| 보고서·초안·멱등·버전 충돌 실제 트랜잭션 | IN_PROGRESS |
+| 기존 요금제·포함량·Spend Cap·승인된 원자적 예산 | IN_PROGRESS |
+| 기존 프로젝트의 동일 후보 Edge 배포·실 HTTP 인수 | IN_PROGRESS |
+| 허용 플랫폼 BFF·세션/CSRF·브라우저 비노출 | NOT_RUN |
+| 응답·직접 권한·수집 방지 세 보안 gate | NOT_RUN |
+
+| operation | 계약 경로 | Edge 코드 | 실 연결 검수 | 배포 인수 |
+| --- | --- | --- | --- | --- |
+| history.search | GET /api/v1/admission-history | NOT_PORTED | NOT_RUN | NOT_RUN |
+| recruitment.read | GET /api/v1/offerings/{offering_id}/recruitment | NOT_PORTED | NOT_RUN | NOT_RUN |
+| score-profile.create | POST /api/v1/score-profiles | NOT_PORTED | NOT_RUN | NOT_RUN |
+| overall.analyze | POST /api/v1/overall-reports | NOT_PORTED | NOT_RUN | NOT_RUN |
+| report.read | GET /api/v1/reports/{report_id} | NOT_PORTED | NOT_RUN | NOT_RUN |
+| offerings.search | GET /api/v1/offerings/search | NOT_PORTED | NOT_RUN | NOT_RUN |
+| offering.read | GET /api/v1/offerings/{offering_id} | NOT_PORTED | NOT_RUN | NOT_RUN |
+| university.analyze | POST /api/v1/reports/{report_id}/university-results | NOT_PORTED | NOT_RUN | NOT_RUN |
+| candidates.build | POST /api/v1/reports/{report_id}/candidates | NOT_PORTED | NOT_RUN | NOT_RUN |
+| shortlist.update | PUT /api/v1/reports/{report_id}/shortlist/{offering_id} | NOT_PORTED | NOT_RUN | NOT_RUN |
+| report.export | GET /api/v1/reports/{report_id}/print | NOT_PORTED | NOT_RUN | NOT_RUN |
+| statistics.read | GET /api/v1/reports/{report_id}/offerings/{offering_id}/live-statistics | NOT_PORTED | NOT_RUN | NOT_RUN |
+| session.read | GET /api/v1/me | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
+| forecast.capabilities | GET /api/v1/forecast-capabilities | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
+| forecast.list | GET /api/v1/forecast-drafts | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
+| forecast.create | POST /api/v1/offerings/{offering_id}/forecast-drafts | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
+| forecast.read | GET /api/v1/forecast-drafts/{draft_id} | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
+| forecast.adjust | POST /api/v1/forecast-drafts/{draft_id}/adjustments | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
+| forecast.validate | POST /api/v1/forecast-drafts/{draft_id}/validations | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
+| forecast.approve | POST /api/v1/forecast-drafts/{draft_id}/approvals | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
+| forecast.publish | POST /api/v1/forecast-drafts/{draft_id}/publications | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
+| forecast.published.read | GET /api/v1/offerings/{offering_id}/forecast | NOT_PORTED | NOT_RUN | NOT_RUN |
+
+계정 주인이 /admin에서 휴대폰 인증 앱으로 등록·입력한다. 검수 계정 식별자·비밀번호·JWT·QR·OTP 비밀키는 공개 명세에 저장하지 않는다.
+
+승인된 비공개 운영 한도와 기존 요금제 근거가 필요하다. null·미확정 값을 무제한 또는 실제 0으로 치환하지 않는다.
+
+동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다.
 
 ## 공식 기술 근거
 
@@ -130,4 +181,4 @@ Edge 구현 NOT_RUN · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 NOT_R
 
 
 
-<!-- jungsi:generated spec_sha256=a889eb97d6c895f5313abeacb58dfc80920efe7af4ca393fec937ac578ff16b1 -->
+<!-- jungsi:generated spec_sha256=329e061e1cdcf225d9c9ad0d9939ff0db25f772a2f7bc6dd6e64bbfbd1ec0787 -->

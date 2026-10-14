@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.48",
+  "version": "1.9.49",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -3825,7 +3825,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.48",
+        "contract_version": "1.9.49",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -3999,7 +3999,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.48",
+        "contract_version": "1.9.49",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -4165,7 +4165,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.48",
+        "contract_version": "1.9.49",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -4184,7 +4184,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.48",
+        "contract_version": "1.9.49",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -4207,9 +4207,9 @@
         "approved_on": "2026-10-07",
         "start_commit": "dc59831a9b34e5dbf4bd15955a1f9489847403af",
         "branch": "feature/application-pre-data-platform",
-        "status": "planned",
+        "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.48",
+        "contract_version": "1.9.49",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -4234,7 +4234,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.48",
+        "contract_version": "1.9.49",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -4872,7 +4872,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "88860cf90da4b075370f9b7daab3d4a194e58d7c89f07fd1d43d1106f2f766fe",
+            "source_sha256": "5b18fba1542be38975ac8448c2254afcec03943ddf242aa5993c23ba1246e322",
             "symbols": [
               {
                 "kind": "class",
@@ -4980,6 +4980,12 @@
                 "kind": "function",
                 "name": "git",
                 "signature": "def git(*args, input=None):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "live_execution_document",
+                "signature": "def live_execution_document(spec):",
                 "decorators": []
               },
               {
@@ -5202,6 +5208,12 @@
                 "kind": "function",
                 "name": "validate_frontend_reply_contract.strings",
                 "signature": "def strings(value):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_live_execution",
+                "signature": "def validate_live_execution(spec):",
                 "decorators": []
               },
               {
@@ -11145,7 +11157,8 @@
         "업무 변경은 요구사항 ID·화면/API·권한/소유권·계층·검증과 운영 미완료 상태를 정본에 반영하고 --sync로 기획·라우팅·3티어·브랜치·현황 문서를 함께 생성한다.",
         "이번 파일만 stage하고 --staged --base로 변경 범위를 확인한다. 코드/공유 도구/테스트와 정본·기획·라우팅·3티어·브랜치·현황 문서를 같은 커밋에 포함한다.",
         "기존 동일 스냅샷 문서/코드/계층/비공개/브랜치 검사, 정상 커밋·푸시 훅과 정확 SHA의 CI를 모두 통과시킨다. 전체 자동 정합성 검사는 계속 실행한다.",
-        "완료/인계에 기준·최종 SHA·변경 파일 수·재사용 범위·동기화 문서·검증과 NOT_RUN을 기록한다. 다음 에이전트는 이 검증 커밋 이후부터 확인한다."
+        "완료/인계에 기준·최종 SHA·변경 파일 수·재사용 범위·동기화 문서·검증과 NOT_RUN을 기록한다. 다음 에이전트는 이 검증 커밋 이후부터 확인한다.",
+        "실제 인증/운영 이식은 supabase_deployment_contract.live_execution의 단계와 기존22 operation별 코드·native·배포 상태를 함께 갱신한다. PASS는 등록 Edge 파일/SHA·정확 후보 커밋·비공개 영수증 SHA/범위가 있을 때만 기록하며 계정·토큰·실제 자료는 공개 문서에 넣지 않는다."
       ],
       "expand_only_when": [
         "검증 커밋/색인이 없거나 무효면 최초 공개 코드 색인을 검증하고 기준을 새로 고정한다.",
@@ -11156,9 +11169,9 @@
       "development_state": [
         [
           "develop / 최신 검증 기준",
-          "36985343bc0a2e79a3f20f71cc3f6e746be0bdc3 / spec1.9.44",
-          "정확 SHA의 CI38437476841·Python925 PASS 재사용; 기획팀 PC 동기화 완료",
-          "PR18·PR29·PR30 화면과 PR31 서비스 구현이 이미 통합됐다. 이번 PC에서는 이전7c6475f 이후 변경109경로(추가29/수정80/삭제0)만 대조했다. 새 정상 커밋/푸시·CI SHA는 별도 영수증에서 확인한다. 실제 JWT·MFA·Edge·일반 운영 인수는 합성/소스 통합과 구분한다."
+          "73f4a4866c3edfae3ed6b6c7e9f2a1055c643117 / spec1.9.48",
+          "PR32·정확 SHA CI38504571793 및 Python990/Deno116/oracle993 PASS 재사용",
+          "실제 Auth·JWT/계정 주인 TOTP·22 API 업무 이식·기존 Supabase 배포를 진행한다. 준비 기반과 실제 운영 검수는 live_execution의 단계/operation별 기록을 따른다. 변경 파일과 연결된 계약만 검토하고 동일 스냅샷 자동 검사·정상 훅·CI는 유지한다."
         ],
         [
           "기획·서비스 / 읽기 모델 수정의 검수 이력",
@@ -12867,6 +12880,18 @@
         "REQ-26"
       ],
       "summary": "DEV-010의 새 foundation/검산21파일만 Windows checkout에서도 LF가 유지되도록 .gitattributes의 경로 규칙3개를 추가한다. 동일 Git snapshot의 소스/선언 해시 결속과 Deno fmt 검증을 보존하며 기존Edge18·업무/DB/운영 경로는 변경하지 않는다. 새 보존 폴더 checkout-index 결과와 선택 index blob의 SHA를 비교하고 정상 훅·최종SHA CI를 계속 요구한다."
+    },
+    {
+      "date": "2026-10-14",
+      "requirements": [
+        "REQ-12",
+        "REQ-14",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "사용자 요청에 따라 실제 인증·JWT/계정 주인 TOTP·업무22 API·운영 배포를 진행한다. PR32 기반을 재사용하고 공통 live_execution에서 operation별 구현/native/배포와 단계별 근거를 추적해 기획·라우팅·3티어·배포 문서를 같은 커밋에 생성한다. 실제 자료·검수 계정은 Git에 넣지 않고 기존 Google Drive/Supabase·현재 이용권·입결 단일 writer·파일 보존을 유지한다."
     }
   ],
   "overall_analysis_contract": {
@@ -22322,8 +22347,8 @@
   "supabase_deployment_contract": {
     "format": "jungsi.supabase-deployment/v1",
     "id": "DEV-010",
-    "revision": "2026.10.07.v1",
-    "basis_commit": "dc59831a9b34e5dbf4bd15955a1f9489847403af",
+    "revision": "2026.10.14.v2",
+    "basis_commit": "73f4a4866c3edfae3ed6b6c7e9f2a1055c643117",
     "branch": "feature/application-pre-data-platform",
     "code_status": "planned",
     "production_ready": false,
@@ -22339,7 +22364,7 @@
       "REQ-25",
       "REQ-26"
     ],
-    "scope": "Google Drive와 기존 Supabase만 사용하는 운영 API 전환 준비 및 화면 담당 인계. 기존 Python 구현의 검산 근거와 미완료 운영 인수를 구분한다.",
+    "scope": "Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.",
     "platform_policy": {
       "allowed": [
         "google_drive",
@@ -22495,7 +22520,7 @@
       {
         "id": "DEP-02",
         "owner": "서비스 개발팀",
-        "status": "planned",
+        "status": "in_progress",
         "deliverable": "Edge 명시 구성·relay/실사용자 권한·private Storage 명부·DB 포트·안전한 health 및 정밀 계산의 단계적 호환 구현"
       },
       {
@@ -22513,7 +22538,7 @@
       {
         "id": "DEP-05",
         "owner": "서버 담당·시스템기획팀",
-        "status": "planned",
+        "status": "in_progress",
         "deliverable": "현재 Supabase 요금제/포함량/Spend Cap 확인, 실제 Auth/DB/Storage/공유 예산/Edge 후보 배포와 세 보안 gate 인수"
       }
     ],
@@ -22560,6 +22585,237 @@
       "Number_or_Math_round_equivalence_assumed": false,
       "heavy_model_generation_in_request_allowed": false,
       "rule": "환산·누백의 유리수/정확 소수·명시 반올림과 경계값을 Python 기준과 독립 대조한다. TypeScript Number/Math.round만으로 동등성을 가정하지 않는다. JSON 정수 키·불리언/비유한 값·버전/학년도/시험/모집행 결속과 UTC/서울 변환을 함께 비교한다. 대규모 모형 생성은 보존된 오프라인 검수 작업과 발행본으로 구분하고 Edge 요청에 그대로 넣지 않는다."
+    },
+    "live_execution": {
+      "format": "jungsi.supabase-live-execution/v1",
+      "status": "IN_PROGRESS",
+      "basis_commit": "73f4a4866c3edfae3ed6b6c7e9f2a1055c643117",
+      "branch": "feature/application-pre-data-platform",
+      "request_date": "2026-10-14",
+      "scope": "사용자가 실제 인증 연결·JWT/OTP 검수·22개 API 이식·운영 배포를 요청했다. 기존 Google Drive와 Supabase만 사용하며 코드 통합·합성 검산·실 연결·배포·공개 인수를 각각 기록한다.",
+      "owner_totp_rule": "계정 주인이 /admin에서 휴대폰 인증 앱으로 등록·입력한다. 검수 계정 식별자·비밀번호·JWT·QR·OTP 비밀키는 공개 명세에 저장하지 않는다.",
+      "quota_rule": "승인된 비공개 운영 한도와 기존 요금제 근거가 필요하다. null·미확정 값을 무제한 또는 실제 0으로 치환하지 않는다.",
+      "reuse": {
+        "implementation_commit": "b25fcef9e0e9aaa0cb9b61aefb48e4e5e59be22a",
+        "integration_commit": "73f4a4866c3edfae3ed6b6c7e9f2a1055c643117",
+        "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/32",
+        "CI": "https://github.com/natural0448/Jungsi_touch/actions/runs/38504571793",
+        "scope": "Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제 Auth·업무22 API·TOTP·공개 배포 인수를 대신하지 않는다."
+      },
+      "stages": {
+        "auth_connection": {
+          "label": "실제 Auth getUser·본인 profiles RLS 연결",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "auth",
+          "evidence_ids": []
+        },
+        "jwt_negative_checks": {
+          "label": "실 JWT·만료·변조·타인 소유권 반례",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "jwt",
+          "evidence_ids": []
+        },
+        "owner_totp_verification": {
+          "label": "계정 주인의 /admin TOTP 등록·aal2 관리 검수",
+          "status": "PENDING_OWNER",
+          "evidence_kind": "totp",
+          "evidence_ids": []
+        },
+        "api_22_port": {
+          "label": "기존 22 API의 업무 처리·DTO·정밀 계산 이식",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "native_api",
+          "evidence_ids": []
+        },
+        "native_business_transactions": {
+          "label": "보고서·초안·멱등·버전 충돌 실제 트랜잭션",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "sql",
+          "evidence_ids": []
+        },
+        "existing_plan_and_quotas": {
+          "label": "기존 요금제·포함량·Spend Cap·승인된 원자적 예산",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "billing",
+          "evidence_ids": []
+        },
+        "edge_deployment": {
+          "label": "기존 프로젝트의 동일 후보 Edge 배포·실 HTTP 인수",
+          "status": "IN_PROGRESS",
+          "evidence_kind": "edge_deployment",
+          "evidence_ids": []
+        },
+        "bff_browser_acceptance": {
+          "label": "허용 플랫폼 BFF·세션/CSRF·브라우저 비노출",
+          "status": "NOT_RUN",
+          "evidence_kind": "bff_browser",
+          "evidence_ids": []
+        },
+        "security_gates": {
+          "label": "응답·직접 권한·수집 방지 세 보안 gate",
+          "status": "NOT_RUN",
+          "evidence_kind": "security",
+          "evidence_ids": []
+        }
+      },
+      "operations": {
+        "history.search": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "recruitment.read": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "score-profile.create": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "overall.analyze": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "report.read": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "offerings.search": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "offering.read": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "university.analyze": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "candidates.build": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "shortlist.update": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "report.export": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "statistics.read": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "session.read": {
+          "code": "FOUNDATION_ONLY",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "forecast.capabilities": {
+          "code": "FOUNDATION_ONLY",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "forecast.list": {
+          "code": "FOUNDATION_ONLY",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "forecast.create": {
+          "code": "FOUNDATION_ONLY",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "forecast.read": {
+          "code": "FOUNDATION_ONLY",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "forecast.adjust": {
+          "code": "FOUNDATION_ONLY",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "forecast.validate": {
+          "code": "FOUNDATION_ONLY",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "forecast.approve": {
+          "code": "FOUNDATION_ONLY",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "forecast.publish": {
+          "code": "FOUNDATION_ONLY",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        },
+        "forecast.published.read": {
+          "code": "NOT_PORTED",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "binding": null,
+          "evidence_ids": []
+        }
+      },
+      "evidence": {},
+      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다."
     }
   },
   "history_presentation_contract": {

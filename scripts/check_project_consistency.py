@@ -1144,6 +1144,73 @@ def validate_runtime_connection_preparation(spec):
     return errors
 
 
+
+def live_execution_document(spec):
+    """Render current runtime work from operation IDs, without duplicating routes."""
+    c=spec.get('supabase_deployment_contract',{}).get('live_execution')
+    if not c:return ''
+    rows=[]
+    for o in spec['operations']:
+        state=c['operations'][o['id']]
+        rows.append([o['id'],o['method']+' '+o['path'],state['code'],state['native'],state['deployment']])
+    return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
+            table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
+            table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
+            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule'])
+
+
+def validate_live_execution(spec):
+    """Reject route drift or operating PASS without scoped, hash-bound evidence."""
+    c=spec.get('supabase_deployment_contract',{}).get('live_execution')
+    if c is None:
+        return ['DEV-010 live execution missing'] if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,49) else []
+    if not isinstance(c,dict):return ['DEV-010 live execution invalid']
+    errors=[]
+    if (c.get('format')!='jungsi.supabase-live-execution/v1' or c.get('branch')!='feature/application-pre-data-platform' or
+        not re.fullmatch(r'[0-9a-f]{40}',str(c.get('basis_commit',''))) or c.get('status')not in {'IN_PROGRESS','VERIFIED'}):
+        errors.append('DEV-010 live execution basis drift')
+    states=c.get('operations',{});ids={o['id']for o in spec['operations']}
+    if not isinstance(states,dict) or set(states)!=ids:return errors+['DEV-010 live operation coverage drift']
+    stages=c.get('stages',{});kinds={'auth_connection':'auth','jwt_negative_checks':'jwt','owner_totp_verification':'totp','api_22_port':'native_api','native_business_transactions':'sql','existing_plan_and_quotas':'billing','edge_deployment':'edge_deployment','bff_browser_acceptance':'bff_browser','security_gates':'security'}
+    if not isinstance(stages,dict)or set(stages)!=set(kinds):return errors+['DEV-010 live stage coverage drift']
+    registry=c.get('evidence',{})
+    if not isinstance(registry,dict):return errors+['DEV-010 live evidence registry invalid']
+    indexed={v['path']:v['source_sha256']for v in spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']}
+    indexed.update({p:v['declarations']['source_sha256']for p,v in spec['edge_harness']['files'].items()})
+    for key,row in registry.items():
+        if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
+            not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or
+            not re.fullmatch(r'[0-9a-f]{64}',str(row.get('receipt_sha256',''))) or
+            not isinstance(row.get('operations'),list) or not set(row['operations'])<=ids):
+            errors.append('DEV-010 live evidence invalid: '+str(key))
+    for operation,row in states.items():
+        if not isinstance(row,dict):errors.append('DEV-010 live operation state invalid: '+operation);continue
+        if row.get('code')not in {'NOT_PORTED','FOUNDATION_ONLY','PORTED'} or any(row.get(k)not in {'NOT_RUN','PASS'}for k in ('native','deployment')):
+            errors.append('DEV-010 live operation state invalid: '+operation);continue
+        binding=row.get('binding');evidence_ids=row.get('evidence_ids',[])
+        if row['code']=='PORTED' and (not isinstance(binding,dict)or not isinstance(binding.get('path'),str)or indexed.get(binding.get('path'))!=binding.get('source_sha256')or binding.get('path')not in indexed):
+            errors.append('DEV-010 live implementation binding invalid: '+operation)
+        if not isinstance(evidence_ids,list)or any(not isinstance(e,str)or e not in registry for e in evidence_ids):
+            errors.append('DEV-010 live evidence reference invalid: '+operation);continue
+        for status,kind in [('native','native_api'),('deployment','edge_deployment')]:
+            if row[status]=='PASS' and (row['code']!='PORTED' or (status=='deployment'and row['native']!='PASS') or
+                not any(isinstance(registry[e],dict)and registry[e].get('kind')==kind and isinstance(registry[e].get('operations'),list)and operation in registry[e]['operations']for e in evidence_ids)):
+                errors.append('DEV-010 live operating evidence missing: '+operation+'.'+status)
+    for key,row in stages.items():
+        if (not isinstance(row,dict)or row.get('evidence_kind')!=kinds[key]or row.get('status')not in {'NOT_RUN','IN_PROGRESS','PENDING_OWNER','VERIFIED'}):
+            errors.append('DEV-010 live stage invalid: '+key);continue
+        refs=row.get('evidence_ids',[])
+        if not isinstance(refs,list)or any(not isinstance(e,str)or e not in registry for e in refs):errors.append('DEV-010 live stage evidence invalid: '+key);continue
+        if row['status']=='VERIFIED'and not any(isinstance(registry[e],dict)and registry[e].get('kind')==kinds[key]for e in refs):
+            errors.append('DEV-010 live stage evidence missing: '+key)
+    for stage,field in [('api_22_port','native'),('edge_deployment','deployment')]:
+        if stages[stage].get('status')=='VERIFIED'and any(not isinstance(v,dict)or v.get('code')!='PORTED'or v.get(field)!='PASS'for v in states.values()):
+            errors.append('DEV-010 live stage has unfinished operations: '+stage)
+    if c.get('status')=='VERIFIED'and (any(not isinstance(v,dict)or v.get('status')!='VERIFIED'for v in stages.values())or any(not isinstance(v,dict)or v.get('code')!='PORTED'or v.get('native')!='PASS'or v.get('deployment')!='PASS'for v in states.values())):
+        errors.append('DEV-010 live completion has unfinished acceptance')
+    return errors
+
+
 def supabase_deployment_document(spec):
     c=spec['supabase_deployment_contract']; p=c['platform_policy']; a=c['architecture']; s=c['security']; f=c['frontend']; v=c['verification']
     comparison=f.get('comparison_review')
@@ -1159,7 +1226,7 @@ def supabase_deployment_document(spec):
             '## 담당별 후속 단계\n\n'+table(['단계','담당','상태','산출물'],[[x['id'],x['owner'],x['status'],x['deliverable']] for x in c['phases']])+'\n\n'+
             '## 화면 담당에게 전달할 작업\n\n화면 제공 범위 '+f['hosting_status']+' · Drive Apps Script 후보 '+f['candidate_permission']+'. 기존 외부 preview와 파일은 이력으로 보존한다. 새 플랫폼으로 채택하지 않는다.\n\n'+'\n'.join('- '+x for x in f['handoff'])+'\n\n'+
             comparison_text+'\n\n## 검증 상태\n\nEdge 구현 '+v['status']+' · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 '+v['actual_Auth_DB_Storage_Edge_BFF_browser_deployment']+' · 실제 비용/요금제 '+v['actual_billing_and_quota_verification']+'. 기존 Python 합성 인수는 Edge 포팅/실운영 인수를 대신하지 않는다.\n\n'+
-            '## 공식 기술 근거\n\n'+'\n'.join('- ['+x['title']+']('+x['url']+')' for x in c['official_sources'])+'\n\n[DEV-010 작업 항목](../work_items/DEV-010-supabase-platform-deployment.json) · [기존 실행 자료 계약](Supabase_실행자료_연결.md)')
+            live_execution_document(spec)+'\n\n## 공식 기술 근거\n\n'+'\n'.join('- ['+x['title']+']('+x['url']+')' for x in c['official_sources'])+'\n\n[DEV-010 작업 항목](../work_items/DEV-010-supabase-platform-deployment.json) · [기존 실행 자료 계약](Supabase_실행자료_연결.md)')
 
 
 def validate_supabase_deployment_contract(spec):
@@ -1520,6 +1587,7 @@ def generated_files(spec):
     def doc(title,body):
         return f"# {title}\n\n이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 {spec['version']}이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.\n\n{body}\n\n<!-- jungsi:generated spec_sha256={digest} -->\n"
     collaboration=collaboration_sections(spec)
+    runtime_progress=live_execution_document(spec)
     page_rows=[[p["number"],p["label"],p["path"],rights(p["member_tiers"]),p["purpose"]] for p in spec["pages"]]
     requirement_text="\n\n".join(f"### {r['id']} {r['title']}\n\n{r['description']}" for r in spec["requirements"])
     pending="\n".join("- "+text for text in spec["pending"])
@@ -1532,7 +1600,7 @@ def generated_files(spec):
        "## 화면과 회원 정책\n\n"+table(["페이지","화면","경로","회원","역할"],page_rows)+
        "\n\n1페이지의 실제 결과 조회 네 학년도는 자료 공개 범위에 따라 별도 확정한다. 2024~2027 성적 환산 비교와 결과 공개 연도를 혼동하지 않는다. 3페이지는 검색부터 상세까지 유료 전용이며 성적이 없어도 유료 검색을 허용한다. 개인 분석이 준비되지 않으면 이유와 함께 보류한다.\n\n"+
        "## 확정 요구사항\n\n"+requirement_text+"\n\n## 이번 버전의 변경\n\n"+changes+"\n\n## 준비 상태와 후속 구현\n\n"+pending+
-       "\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다."+collaboration["ownership"]+collaboration["drive"])
+       runtime_progress+"\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다."+collaboration["ownership"]+collaboration["drive"])
     operation_rows=[[o["id"],o["method"],o["path"],rights(o["member_tiers"]),"본인" if o["report_owner"] else "해당 없음","필요" if o["confirmed_score_profile"] else "불필요",o["response_scope"]] for o in spec["operations"]]
 
     current_review_section=""
@@ -1624,7 +1692,7 @@ def generated_files(spec):
        "\n\n정적 경로 /offerings/search를 /offerings/{offering_id}보다 먼저 등록한다. report_id와 offering_id의 표기를 통일한다. 검색은 추천 목록과 조인해 대상을 줄이지 않는다.\n\n"+
        "## 권한과 응답 경계\n\n서버가 검증한 세션·현재 이용권으로 Actor를 만든다. 요청 본문의 회원등급·학생 ID를 신뢰하지 않는다. 미인증은 401, 일반가입자의 유료 요청은 403으로 차단하고 결과·건수·상세를 반환하지 않는다. 없는 리포트와 타인 소유 리포트는 같은 404로 처리한다. 본인 분석에 확인한 성적이 없으면 409와 보류 사유다.\n\n"+
        ("FastAPI는 세션 검증 후 업무 서비스를 호출하고 회원별 DTO를 적용한다. DB 이용권·본인 소유권과 자료/모형 승인 검사를 연결했다. 실제 서버·자료 연결 증거는 운영 준비 상태에서 따로 확인한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n" if platform else "권한 모듈은 HTTP 인증이나 응답 필드 제거 기능을 대신하지 않는다. 실제 핸들러에서 입력 검증, 운영 저장소 조회, 회원별 응답 객체, 분포·산식 승인 검사를 연결해야 한다. 학부모·상담자 위임은 아직 본인 권한으로 간주하지 않는다.\n\n")+
-       overall_section+current_review_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
+       runtime_progress+overall_section+current_review_section+"## 함께 생성하는 계약\n\n화면은 apps/web/route_catalog.json을, 애플리케이션은 src/jungsi_touch/application/route_catalog.json을 사용한다. 두 파일과 이 문서는 공통 명세에서 생성하고 검사한다."+collaboration["api_handoff"])
     layers=table(["계층","코드 위치","책임","허용 의존"],[[l["label"],", ".join(l["roots"]),l["responsibility"],", ".join(l["allowed_dependencies"])] for l in spec["layers"]])
     implementation=table(["파일","계층","현재 상태","요구사항"],[[r["path"],r["layer"],{
 "existing_math_foundation":"공통 계산 기반",
@@ -1640,7 +1708,7 @@ def generated_files(spec):
        "\n\n"+chr(96)*3+"mermaid\nflowchart LR\n  WEB[화면과 라우팅] --> API[인증된 서버와 업무 처리]\n  API --> ENGINE[성적 계산 엔진]\n  API --> PORT[저장소 인터페이스]\n  ADAPTER[비공개 저장소 어댑터] -.구현.-> PORT\n  ADAPTER --> DB[DB와 비공개 자료]\n"+chr(96)*3+
        "\n\n애플리케이션은 구체 DB 어댑터를 가져오지 않고 자신이 정의한 포트에 의존한다. 인프라가 포트를 구현한다. 프레젠테이션은 허용된 API 결과만 표시하며 Python 엔진·DB 비밀값·전체 환산표·곡선·모델을 포함하지 않는다.\n\n"+
        "## 커밋된 코드와 새 기반\n\n"+implementation+
-       "\n\n기존 src/jungsi_touch 루트 계산 모듈은 애플리케이션의 엔진 라이브러리다. 경로를 옮겨 기존 사용자를 깨뜨리지 않는다. 새 application과 infrastructure를 통해 입출력·소유권·저장소를 연결한다. 메모리 어댑터는 합성 검산 전용으로 운영 연결을 의미하지 않는다.\n\n"+
+       runtime_progress+"\n\n기존 src/jungsi_touch 루트 계산 모듈은 애플리케이션의 엔진 라이브러리다. 경로를 옮겨 기존 사용자를 깨뜨리지 않는다. 새 application과 infrastructure를 통해 입출력·소유권·저장소를 연결한다. 메모리 어댑터는 합성 검산 전용으로 운영 연결을 의미하지 않는다.\n\n"+
        "## 데이터와 기술 결정\n\n실제 원자료·학생 성적·입결·환산표·곡선·모델과 .env 계열은 모든 브랜치에서 제외한다. database에는 DB 구조·마이그레이션 코드만 둘 수 있다. "+("FastAPI·Supabase PostgreSQL을 채택했다. UTC aware/timestamptz와 date를 구분하고 서버는 환경 설정만 읽는다. 실제 연결 설정·자료 승인·운영 배포는 대기다." if platform else "DB 엔진·웹 프레임워크·HTTP 서버 채택은 미정이다.")+"\n\n"+
        "## 구현과 운영 연결\n\n"+(runtime_intro if platform else "현재 계약과 권한 기반 다음에 실제 인증·저장·각 업무 서비스를 연결한다.")+" 각 단계는 승인된 자료가 없는 값을 사유와 함께 보류한다."+collaboration["ownership"]+collaboration["drive"])
     workflow=spec["workflow"]
@@ -2190,6 +2258,7 @@ def validate_spec(spec):
     errors.extend(validate_secured_preparation(spec))
     errors.extend(validate_runtime_connection_preparation(spec))
     errors.extend(validate_supabase_deployment_contract(spec))
+    errors.extend(validate_live_execution(spec))
     errors.extend(validate_frontend_reply_contract(spec))
     errors.extend(validate_supabase_actual_update_contract(spec))
     errors.extend(validate_supabase_second_actual_update_contract(spec))

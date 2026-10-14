@@ -1391,6 +1391,31 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
 
 
 class SupabaseDeploymentContractTests(unittest.TestCase):
+
+    def test_live_execution_cannot_omit_one_of_the_existing_routes(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec);spec['supabase_deployment_contract']['live_execution']['operations'].pop('session.read')
+        self.assertIn('DEV-010 live operation coverage drift',validate_live_execution(spec))
+
+    def test_live_native_pass_cannot_reuse_synthetic_foundation_only(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec);row=spec['supabase_deployment_contract']['live_execution']['operations']['session.read'];row['native']='PASS'
+        self.assertIn('DEV-010 live operating evidence missing: session.read.native',validate_live_execution(spec))
+
+    def test_live_port_requires_a_registered_source_hash(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec);row=spec['supabase_deployment_contract']['live_execution']['operations']['report.read']
+        row.update(code='PORTED',binding={'path':'supabase/functions/unregistered/index.ts','source_sha256':'a'*64})
+        self.assertIn('DEV-010 live implementation binding invalid: report.read',validate_live_execution(spec))
+
+    def test_owner_totp_and_final_completion_need_actual_evidence(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec);live=spec['supabase_deployment_contract']['live_execution'];live['status']='VERIFIED';live['stages']['owner_totp_verification']['status']='VERIFIED'
+        result=validate_live_execution(spec)
+        self.assertIn('DEV-010 live stage evidence missing: owner_totp_verification',result)
+        self.assertIn('DEV-010 live completion has unfinished acceptance',result)
+
+
     def setUp(self):
         self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
 
