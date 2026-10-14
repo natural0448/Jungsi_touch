@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.50이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.51이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -101,12 +101,12 @@ Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제
 | --- | --- |
 | 실제 Auth getUser·본인 profiles RLS 연결 | IN_PROGRESS |
 | 실 JWT·만료·변조·타인 소유권 반례 | IN_PROGRESS |
-| 계정 주인의 /admin TOTP 등록·aal2 관리 검수 | PENDING_OWNER |
+| 계정 주인의 /admin TOTP 등록·aal2 관리 검수 | IN_PROGRESS |
 | 기존 22 API의 업무 처리·DTO·정밀 계산 이식 | IN_PROGRESS |
 | 보고서·초안·멱등·버전 충돌 실제 트랜잭션 | IN_PROGRESS |
 | 기존 요금제·포함량·Spend Cap·승인된 원자적 예산 | IN_PROGRESS |
 | 기존 프로젝트의 동일 후보 Edge 배포·실 HTTP 인수 | IN_PROGRESS |
-| 허용 플랫폼 BFF·세션/CSRF·브라우저 비노출 | NOT_RUN |
+| 허용 플랫폼 BFF·세션/CSRF·브라우저 비노출 | IN_PROGRESS |
 | 응답·직접 권한·수집 방지 세 보안 gate | NOT_RUN |
 
 | operation | 계약 경로 | Edge 코드 | 실 연결 검수 | 배포 인수 |
@@ -134,11 +134,11 @@ Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제
 | forecast.publish | POST /api/v1/forecast-drafts/{draft_id}/publications | FOUNDATION_ONLY | NOT_RUN | NOT_RUN |
 | forecast.published.read | GET /api/v1/offerings/{offering_id}/forecast | NOT_PORTED | NOT_RUN | NOT_RUN |
 
-계정 주인이 /admin에서 휴대폰 인증 앱으로 등록·입력한다. 검수 계정 식별자·비밀번호·JWT·QR·OTP 비밀키는 공개 명세에 저장하지 않는다.
+계정 주인이 /admin에서 휴대폰 인증 앱으로 등록·입력한다. 검수 계정 식별자·비밀번호·JWT·QR·OTP 비밀키는 공개 명세에 저장하지 않는다. 2026-10-14 계정 주인의 Codex 브라우저 직접 로그인·MFA 완료 회신과 관리자 화면 진입을 수령했다. 입력 대기는 해소됐으며 서버의 실제 getUser·aal2·본인 상태·학교 권한 검수는 계속 진행한다. 이 회신이나 화면 진입만으로 실제 JWT/TOTP 검수 PASS를 기록하지 않는다.
 
-승인된 비공개 운영 한도와 기존 요금제 근거가 필요하다. null·미확정 값을 무제한 또는 실제 0으로 치환하지 않는다.
+승인된 비공개 운영 한도와 기존 요금제 근거가 필요하다. null·미확정 값을 무제한 또는 실제 0으로 치환하지 않는다. 애플리케이션 내부 quota만으로 플랫폼 추가 과금을 방지했다고 판정하지 않는다. 기존 조직의 요금제·모든 프로젝트 사용량·포함량과 해당되는 Spend Cap 범위를 확인한다. Free는 추가 과금하지 않으며 Spend Cap은 Pro에서 적용 가능한 일부 사용량만 대상으로 한다. 실패한 Edge 호출도 invocation 사용량에 포함되므로 신규 요금제·유료 항목·초과 과금 허용을 자동 선택하지 않는다.
 
-동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다.
+동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 현재 정상 /jeongsi 진입 화면은 합성 응답을 명시하고 있다. 합성 회원 유형과 화면 성공은 실제 이용권·JWT·업무22 API 인수 근거가 아니다. 실제 서버 후보와 정상 BFF의 live 연결을 같은 후보 근거로 검수한 후 운영 상태를 갱신한다.
 
 ### 위치 그래프의 기준
 
@@ -161,6 +161,7 @@ live는 승인/발행/선택된 서버 값만 표시한다. 조합별 서버 계
 - [Edge CPU·메모리·시간 제한](https://supabase.com/docs/guides/functions/limits)
 - [Edge 포함 호출량·추가 과금](https://supabase.com/docs/guides/platform/manage-your-usage/edge-function-invocations)
 - [Google Apps Script 웹앱 제공](https://developers.google.com/apps-script/guides/web)
+- [Supabase 비용 제어와 Spend Cap 적용 범위](https://supabase.com/docs/guides/platform/cost-control)
 
 [DEV-010 작업 항목](../work_items/DEV-010-supabase-platform-deployment.json) · [기존 실행 자료 계약](Supabase_실행자료_연결.md)
 
@@ -196,4 +197,4 @@ live는 승인/발행/선택된 서버 값만 표시한다. 조합별 서버 계
 
 
 
-<!-- jungsi:generated spec_sha256=0a64e540ccd1de67a8c12718326f453d9370c774023f325643538f1bf6a94203 -->
+<!-- jungsi:generated spec_sha256=47517ff547142404599f0056a4bf060ca8977dc71de863cac5410b35f17fd388 -->
