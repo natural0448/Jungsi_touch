@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.47이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.48이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 운영 API 전환 준비 및 화면 담당 인계. 기존 Python 구현의 검산 근거와 미완료 운영 인수를 구분한다.
 
@@ -130,4 +130,4 @@ Edge 구현 NOT_RUN · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 NOT_R
 
 
 
-<!-- jungsi:generated spec_sha256=6ba140c4d3092892137e53d8185573ea1f5cf86131fa89c7a27e39c2bb5a8da2 -->
+<!-- jungsi:generated spec_sha256=a889eb97d6c895f5313abeacb58dfc80920efe7af4ca393fec937ac578ff16b1 -->

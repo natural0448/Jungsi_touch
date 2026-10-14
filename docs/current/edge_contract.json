@@ -29,9 +29,14 @@
             "importedName": "VerifiedUser",
             "originalName": "VerifiedUser",
             "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "utcText",
+            "originalName": "utcText",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "e7a962c37c40f1be1bac605a1fe6beeba3f45c83cae82b0c113e4a051059bf44",
+        "source_sha256": "5a715a5372a24bbf83b84f7ca3a90f54fb76c6e7c0b593990621b18358d985f5",
         "symbols": [
           {
             "declarations": [
@@ -332,6 +337,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "../domain/time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "./ports.ts",
           "targets": [
             {
@@ -349,10 +364,534 @@
         "authorizeReport"
       ]
     },
+    "supabase/functions/_shared/jungsi/application/management_access.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Eight management authorization gates; business mutations are outside this slice."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ForecastAuthorityPort",
+            "originalName": "ForecastAuthorityPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "ForecastAuthorityState",
+            "originalName": "ForecastAuthorityState",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "VerifiedUser",
+            "originalName": "VerifiedUser",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          }
+        ],
+        "source_sha256": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "forecast.capabilities",
+                          "value": {
+                            "kind": "string",
+                            "string": "forecast.capabilities"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "forecast.list",
+                          "value": {
+                            "kind": "string",
+                            "string": "forecast.list"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "forecast.create",
+                          "value": {
+                            "kind": "string",
+                            "string": "forecast.create"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "forecast.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "forecast.read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "forecast.adjust",
+                          "value": {
+                            "kind": "string",
+                            "string": "forecast.adjust"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "forecast.validate",
+                          "value": {
+                            "kind": "string",
+                            "string": "forecast.validate"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "forecast.approve",
+                          "value": {
+                            "kind": "string",
+                            "string": "forecast.approve"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "forecast.publish",
+                          "value": {
+                            "kind": "string",
+                            "string": "forecast.publish"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "MANAGEMENT_OPERATIONS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "tsType": {
+                    "kind": "indexedAccess",
+                    "value": {
+                      "indexType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      },
+                      "objType": {
+                        "kind": "typeQuery",
+                        "repr": "MANAGEMENT_OPERATIONS",
+                        "value": "MANAGEMENT_OPERATIONS"
+                      }
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "ManagementOperation"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "operation",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ManagementOperation",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "ManagementOperation"
+                        }
+                      }
+                    },
+                    {
+                      "name": "subjectId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "evaluatedAtUtc",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "name": "capabilities",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "parenthesized",
+                              "value": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "literal",
+                                    "repr": "editor",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "editor"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "approver",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "approver"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "universityIds",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ManagementDecision"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  user: VerifiedUser,\n  authorities: ForecastAuthorityPort,\n  nowUtc: bigint,\n  operation: ManagementOperation,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "user",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "VerifiedUser",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "VerifiedUser",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "VerifiedUser"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "authorities",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ForecastAuthorityPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ForecastAuthorityPort",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "ForecastAuthorityPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "nowUtc",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "operation",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ManagementOperation",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "ManagementOperation"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "ManagementDecision",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ManagementDecision"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "authorizeManagement"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  decision: ManagementDecision,\n  universityId: string,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "decision",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ManagementDecision",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "ManagementDecision"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "universityId",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "requireManagementUniversity"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "value is ",
+                    "value": {
+                      "param": {
+                        "name": "value",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "ids"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(state: ForecastAuthorityState, user: VerifiedUser, nowUtc: bigint)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "state",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ForecastAuthorityState",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ForecastAuthorityState",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "ForecastAuthorityState"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "user",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "VerifiedUser",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "VerifiedUser",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "VerifiedUser"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "nowUtc",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "stateIsValid"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "./access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "MANAGEMENT_OPERATIONS",
+        "ManagementOperation",
+        "ManagementDecision",
+        "authorizeManagement",
+        "requireManagementUniversity"
+      ]
+    },
     "supabase/functions/_shared/jungsi/application/ports.ts": {
       "declarations": {
         "imports": [],
-        "source_sha256": "3d0e8938157ad3e68f49d2815eeba4cee14fce2dd63808506ac810291ac9a0d3",
+        "source_sha256": "af724e486ca6bc0a3a07fb0a98c176e2a620c207fb93aa912a1f2adc633e087e",
         "symbols": [
           {
             "declarations": [
@@ -376,6 +915,57 @@
                         "kind": "keyword",
                         "repr": "bigint",
                         "value": "bigint"
+                      }
+                    },
+                    {
+                      "name": "assuranceLevel",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "aal1",
+                            "value": {
+                              "kind": "string",
+                              "string": "aal1"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "aal2",
+                            "value": {
+                              "kind": "string",
+                              "string": "aal2"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "accountStatus",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
                       }
                     }
                   ]
@@ -649,6 +1239,488 @@
               }
             ],
             "name": "ReportAccessPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "authority",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "literal",
+                        "repr": "public.jeongsi_passes",
+                        "value": {
+                          "kind": "string",
+                          "string": "public.jeongsi_passes"
+                        }
+                      }
+                    },
+                    {
+                      "name": "metadataVerified",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "literal",
+                        "repr": "true",
+                        "value": {
+                          "boolean": true,
+                          "kind": "boolean"
+                        }
+                      }
+                    },
+                    {
+                      "name": "subjectId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "evaluatedAtUtc",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "name": "paidUntilUtc",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "PublicPassState"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "readCurrent",
+                      "parameter_source": "(subjectId: string, nowUtc: bigint)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "subjectId",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "nowUtc",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "PublicPassState",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "PublicPassState"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "PublicPassPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "authority",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "literal",
+                        "repr": "jungsi_backend.forecast_authorities",
+                        "value": {
+                          "kind": "string",
+                          "string": "jungsi_backend.forecast_authorities"
+                        }
+                      }
+                    },
+                    {
+                      "name": "subjectId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "evaluatedAtUtc",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "name": "edit",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      }
+                    },
+                    {
+                      "name": "approve",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      }
+                    },
+                    {
+                      "name": "universityIds",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "editUniversityIds",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "approveUniversityIds",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ForecastAuthorityState"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "readCurrent",
+                      "parameter_source": "(subjectId: string, nowUtc: bigint)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "subjectId",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "nowUtc",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ForecastAuthorityState",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "ForecastAuthorityState"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ForecastAuthorityPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "kind",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "offering",
+                            "value": {
+                              "kind": "string",
+                              "string": "offering"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "draft",
+                            "value": {
+                              "kind": "string",
+                              "string": "draft"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "id",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "universityId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ManagementResourceScope"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "readScope",
+                      "parameter_source": "(\n    kind: \"offering\" | \"draft\",\n    id: string,\n    subjectId: string,\n  )",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "kind",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "literal",
+                                "repr": "offering",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "offering"
+                                }
+                              },
+                              {
+                                "kind": "literal",
+                                "repr": "draft",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "draft"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "id",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "subjectId",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "ManagementResourceScope",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "ManagementResourceScope"
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ManagementResourcePort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "nowUtc",
+                      "parameter_source": "()",
+                      "params": [],
+                      "returnType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "RequestClockPort"
           }
         ]
       },
@@ -660,7 +1732,14 @@
         "CurrentEntitlement",
         "EntitlementPort",
         "ReportAccess",
-        "ReportAccessPort"
+        "ReportAccessPort",
+        "PublicPassState",
+        "PublicPassPort",
+        "ForecastAuthorityState",
+        "ForecastAuthorityPort",
+        "ManagementResourceScope",
+        "ManagementResourcePort",
+        "RequestClockPort"
       ]
     },
     "supabase/functions/_shared/jungsi/application/research_offering.ts": {
@@ -862,6 +1941,426 @@
       "symbols": [
         "SyntheticOfferingPort",
         "calculateSyntheticOffering"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/application/session_service.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Request-local session projection. No HTTP, concrete database, or default wiring."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "PublicPassPort",
+            "originalName": "PublicPassPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "UserSessionPort",
+            "originalName": "UserSessionPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "VerifiedUser",
+            "originalName": "VerifiedUser",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "authorizeUser",
+            "jsDoc": {
+              "doc": "Request-local session projection. No HTTP, concrete database, or default wiring."
+            },
+            "originalName": "authorizeUser",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "utcText",
+            "originalName": "utcText",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          }
+        ],
+        "source_sha256": "6ffed08966fd788d30827d96b24514fd432301ae940ba787b543f9e71735b336",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "user",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "VerifiedUser",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "VerifiedUser",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "VerifiedUser"
+                        }
+                      }
+                    },
+                    {
+                      "name": "evaluatedAtUtc",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "name": "tier",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "standard",
+                            "value": {
+                              "kind": "string",
+                              "string": "standard"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "paid",
+                            "value": {
+                              "kind": "string",
+                              "string": "paid"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "paidUntilUtc",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SessionSnapshot"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "format",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "literal",
+                        "repr": "jungsi.session/v1",
+                        "value": {
+                          "kind": "string",
+                          "string": "jungsi.session/v1"
+                        }
+                      }
+                    },
+                    {
+                      "name": "member_tier",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "standard",
+                            "value": {
+                              "kind": "string",
+                              "string": "standard"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "paid",
+                            "value": {
+                              "kind": "string",
+                              "string": "paid"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "entitlement_expires_at",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SessionDto"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  token: string,\n  sessions: UserSessionPort,\n  passes: PublicPassPort,\n  nowUtc: bigint,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "token",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "sessions",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "UserSessionPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "UserSessionPort",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "UserSessionPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "passes",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "PublicPassPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "PublicPassPort",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "PublicPassPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "nowUtc",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "SessionSnapshot",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "SessionSnapshot"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "readSessionSnapshot"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(snapshot: SessionSnapshot, nowUtc: bigint)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "snapshot",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SessionSnapshot",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "SessionSnapshot"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "nowUtc",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "SessionDto",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "SessionDto"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sessionDto"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(snapshot: SessionSnapshot, nowUtc: bigint)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "snapshot",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SessionSnapshot",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "SessionSnapshot"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "nowUtc",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "requirePaidSession"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "SessionSnapshot",
+        "SessionDto",
+        "readSessionSnapshot",
+        "sessionDto",
+        "requirePaidSession"
       ]
     },
     "supabase/functions/_shared/jungsi/domain/conversion.ts": {
@@ -3164,7 +4663,7 @@
             "src": "supabase/functions/_shared/jungsi/application/access.ts"
           }
         ],
-        "source_sha256": "b2b60d1a1c290753acd6879c5493b973020e53a84840e903b2c9fc54306c4326",
+        "source_sha256": "72afa84549dbc9ef78bd7bd4ffb39a4e1ea13c03d23429738af9de76bf8759ee",
         "symbols": [
           {
             "declarations": [
@@ -3573,6 +5072,1623 @@
         "BoundaryPorts",
         "authorizeRelayed",
         "safeFailure"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Read-only, request-local public pass reader. SQL execution is explicitly injected."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "PublicPassPort",
+            "originalName": "PublicPassPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "PublicPassState",
+            "originalName": "PublicPassState",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "utcInstant",
+            "originalName": "utcInstant",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          },
+          {
+            "importedName": "utcText",
+            "originalName": "utcText",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          }
+        ],
+        "source_sha256": "6aa484548fd160da2b45f99a005dc1747fac8c97cb6d0a372c2ce516b09c3139",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "readOnlyOne",
+                      "parameter_source": "(statement: string, parameters: readonly unknown[])",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "statement",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "parameters",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ReadonlyPassSqlPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PASS_STATE_SQL"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(private readonly sql: ReadonlyPassSqlPort)",
+                      "params": [
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "sql",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "ReadonlyPassSqlPort",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "ReadonlyPassSqlPort"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "implements": [
+                    {
+                      "kind": "typeRef",
+                      "repr": "PublicPassPort",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "PublicPassPort",
+                          "specifier": "../application/ports.ts"
+                        },
+                        "typeName": "PublicPassPort"
+                      }
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "subjectId",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "nowUtc",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "bigint",
+                              "value": "bigint"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "PublicPassState",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "PublicPassState",
+                                    "specifier": "../application/ports.ts"
+                                  },
+                                  "typeName": "PublicPassState"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "readCurrent"
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "PublicJeongsiPassesReader"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "typeOperator",
+                                "value": {
+                                  "operator": "readonly",
+                                  "tsType": {
+                                    "kind": "tuple",
+                                    "value": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      },
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "EXPECTED_COLUMNS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "expression"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown, size: number, max: number)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "size",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "max",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "value is ",
+                    "value": {
+                      "param": {
+                        "name": "value",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "array",
+                        "value": {
+                          "kind": "array",
+                          "value": {
+                            "kind": "keyword",
+                            "repr": "unknown",
+                            "value": "unknown"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rows"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(state: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "state",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "requireSchema"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "data_infrastructure",
+      "symbols": [
+        "ReadonlyPassSqlPort",
+        "PASS_STATE_SQL",
+        "PublicJeongsiPassesReader"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/infrastructure/session_http.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Synthetic-candidate composition only. No Deno.serve, fetch, DB writer, or default switch."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ForecastAuthorityPort",
+            "originalName": "ForecastAuthorityPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "ManagementDecision",
+            "originalName": "ManagementDecision",
+            "src": "supabase/functions/_shared/jungsi/application/management_access.ts"
+          },
+          {
+            "importedName": "ManagementOperation",
+            "originalName": "ManagementOperation",
+            "src": "supabase/functions/_shared/jungsi/application/management_access.ts"
+          },
+          {
+            "importedName": "ManagementResourcePort",
+            "originalName": "ManagementResourcePort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "PublicPassPort",
+            "originalName": "PublicPassPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "RelayBoundary",
+            "originalName": "RelayBoundary",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "RequestClockPort",
+            "originalName": "RequestClockPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "SessionSnapshot",
+            "originalName": "SessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "UserSessionPort",
+            "originalName": "UserSessionPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "authorizeManagement",
+            "originalName": "authorizeManagement",
+            "src": "supabase/functions/_shared/jungsi/application/management_access.ts"
+          },
+          {
+            "importedName": "readSessionSnapshot",
+            "originalName": "readSessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "requireManagementUniversity",
+            "originalName": "requireManagementUniversity",
+            "src": "supabase/functions/_shared/jungsi/application/management_access.ts"
+          },
+          {
+            "importedName": "safeFailure",
+            "originalName": "safeFailure",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "sessionDto",
+            "originalName": "sessionDto",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          }
+        ],
+        "source_sha256": "70cf3f60478a9a200dc4e8d6c772a04e98ed360e1dc03e0c4d0e296e9420f3d3",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "sessions",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "UserSessionPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "UserSessionPort",
+                            "specifier": "../application/ports.ts"
+                          },
+                          "typeName": "UserSessionPort"
+                        }
+                      }
+                    },
+                    {
+                      "name": "passes",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "PublicPassPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "PublicPassPort",
+                            "specifier": "../application/ports.ts"
+                          },
+                          "typeName": "PublicPassPort"
+                        }
+                      }
+                    },
+                    {
+                      "name": "clock",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RequestClockPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RequestClockPort",
+                            "specifier": "../application/ports.ts"
+                          },
+                          "typeName": "RequestClockPort"
+                        }
+                      }
+                    },
+                    {
+                      "name": "relay",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RelayBoundary",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RelayBoundary",
+                            "specifier": "./auth_relay.ts"
+                          },
+                          "typeName": "RelayBoundary"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SessionReadPorts"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  ports: SessionReadPorts,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "ports",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SessionReadPorts",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "SessionReadPorts"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "fnOrConstructor",
+                    "value": {
+                      "constructor": false,
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "request",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Request",
+                            "value": {
+                              "typeName": "Request"
+                            }
+                          }
+                        }
+                      ],
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "Response",
+                              "value": {
+                                "typeName": "Response"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "createSyntheticSessionReadHandler"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "extends": [
+                    {
+                      "kind": "typeRef",
+                      "repr": "SessionReadPorts",
+                      "value": {
+                        "resolution": {
+                          "kind": "local"
+                        },
+                        "typeName": "SessionReadPorts"
+                      }
+                    }
+                  ],
+                  "properties": [
+                    {
+                      "name": "authorities",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ForecastAuthorityPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ForecastAuthorityPort",
+                            "specifier": "../application/ports.ts"
+                          },
+                          "typeName": "ForecastAuthorityPort"
+                        }
+                      }
+                    },
+                    {
+                      "name": "resources",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ManagementResourcePort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ManagementResourcePort",
+                            "specifier": "../application/ports.ts"
+                          },
+                          "typeName": "ManagementResourcePort"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ManagementGuardPorts"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "operation",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ManagementOperation",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ManagementOperation",
+                            "specifier": "../application/management_access.ts"
+                          },
+                          "typeName": "ManagementOperation"
+                        }
+                      }
+                    },
+                    {
+                      "name": "resourceKind",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "offering",
+                            "value": {
+                              "kind": "string",
+                              "string": "offering"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "draft",
+                            "value": {
+                              "kind": "string",
+                              "string": "draft"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "resourceId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ManagementRoute"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(request: Request)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "request",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Request",
+                        "value": {
+                          "typeName": "Request"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "ManagementRoute",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "ManagementRoute"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "managementRoute"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  ports: ManagementGuardPorts,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "ports",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ManagementGuardPorts",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "ManagementGuardPorts"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "fnOrConstructor",
+                    "value": {
+                      "constructor": false,
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "request",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Request",
+                            "value": {
+                              "typeName": "Request"
+                            }
+                          }
+                        }
+                      ],
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ManagementDecision",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "ManagementDecision",
+                                  "specifier": "../application/management_access.ts"
+                                },
+                                "typeName": "ManagementDecision"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "createSyntheticManagementGuard"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(headers: Headers)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "headers",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Headers",
+                        "value": {
+                          "typeName": "Headers"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "token"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(request: Request, ports: SessionReadPorts)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "request",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Request",
+                        "value": {
+                          "typeName": "Request"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "ports",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SessionReadPorts",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "SessionReadPorts"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "SessionSnapshot",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "SessionSnapshot",
+                              "specifier": "../application/session_service.ts"
+                            },
+                            "typeName": "SessionSnapshot"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "context"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/management_access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/management_access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/session_service.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./auth_relay.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "data_infrastructure",
+      "symbols": [
+        "SessionReadPorts",
+        "createSyntheticSessionReadHandler",
+        "ManagementGuardPorts",
+        "ManagementRoute",
+        "managementRoute",
+        "createSyntheticManagementGuard"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Injectable verification receipts. Real Auth/JWT/profile transport remains NOT_RUN."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "UserSessionPort",
+            "originalName": "UserSessionPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "VerifiedUser",
+            "originalName": "VerifiedUser",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "utcText",
+            "originalName": "utcText",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          }
+        ],
+        "source_sha256": "d7a94a95f3bf1d70fe670010a5d3b469f5212da74d5f84406b07ba07ede4d84e",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "verification",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "literal",
+                        "repr": "supabase_auth_getUser_exact_bearer",
+                        "value": {
+                          "kind": "string",
+                          "string": "supabase_auth_getUser_exact_bearer"
+                        }
+                      }
+                    },
+                    {
+                      "name": "bearerSha256",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "subjectId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "expiresAtUtc",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "name": "assuranceLevel",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "aal1",
+                            "value": {
+                              "kind": "string",
+                              "string": "aal1"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "aal2",
+                            "value": {
+                              "kind": "string",
+                              "string": "aal2"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "NativeSessionReceipt"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "verifyExactBearer",
+                      "parameter_source": "(token: string, nowUtc: bigint)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "token",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "nowUtc",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "NativeSessionReceipt",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "NativeSessionReceipt"
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "NativeSessionVerificationPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "verification",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "literal",
+                        "repr": "own_profile_same_bearer_publishable_RLS",
+                        "value": {
+                          "kind": "string",
+                          "string": "own_profile_same_bearer_publishable_RLS"
+                        }
+                      }
+                    },
+                    {
+                      "name": "bearerSha256",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "subjectId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "status",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "OwnProfileReceipt"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "readOwnStatus",
+                      "parameter_source": "(token: string, subjectId: string)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "token",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "subjectId",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "OwnProfileReceipt",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "OwnProfileReceipt"
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "OwnProfileVerificationPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(token: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "token",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "bearerSha256"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(\n    private readonly auth: NativeSessionVerificationPort,\n    private readonly profiles: OwnProfileVerificationPort,\n  )",
+                      "params": [
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "auth",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "NativeSessionVerificationPort",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "NativeSessionVerificationPort"
+                            }
+                          }
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "profiles",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "OwnProfileVerificationPort",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "OwnProfileVerificationPort"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "implements": [
+                    {
+                      "kind": "typeRef",
+                      "repr": "UserSessionPort",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "UserSessionPort",
+                          "specifier": "../application/ports.ts"
+                        },
+                        "typeName": "UserSessionPort"
+                      }
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "token",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "nowUtc",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "bigint",
+                              "value": "bigint"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "VerifiedUser",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "VerifiedUser",
+                                        "specifier": "../application/ports.ts"
+                                      },
+                                      "typeName": "VerifiedUser"
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "verifyUserBearer"
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "BoundVerifiedSessionProvider"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "data_infrastructure",
+      "symbols": [
+        "NativeSessionReceipt",
+        "NativeSessionVerificationPort",
+        "OwnProfileReceipt",
+        "OwnProfileVerificationPort",
+        "bearerSha256",
+        "BoundVerifiedSessionProvider"
       ]
     },
     "tests/edge/fixture.ts": {
@@ -4359,6 +7475,685 @@
       ],
       "layer": "verification",
       "symbols": []
+    },
+    "tests/edge/test_session_candidate.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Invented identities/rows only. No real JWT, Auth, database, Storage, or business writes."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "BoundVerifiedSessionProvider",
+            "originalName": "BoundVerifiedSessionProvider",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts"
+          },
+          {
+            "importedName": "ForecastAuthorityPort",
+            "originalName": "ForecastAuthorityPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "MANAGEMENT_OPERATIONS",
+            "originalName": "MANAGEMENT_OPERATIONS",
+            "src": "supabase/functions/_shared/jungsi/application/management_access.ts"
+          },
+          {
+            "importedName": "NativeSessionVerificationPort",
+            "originalName": "NativeSessionVerificationPort",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts"
+          },
+          {
+            "importedName": "OwnProfileVerificationPort",
+            "originalName": "OwnProfileVerificationPort",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts"
+          },
+          {
+            "importedName": "PASS_STATE_SQL",
+            "originalName": "PASS_STATE_SQL",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts"
+          },
+          {
+            "importedName": "PublicJeongsiPassesReader",
+            "originalName": "PublicJeongsiPassesReader",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts"
+          },
+          {
+            "importedName": "ReadonlyPassSqlPort",
+            "originalName": "ReadonlyPassSqlPort",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts"
+          },
+          {
+            "importedName": "RelayBoundary",
+            "originalName": "RelayBoundary",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "VerifiedUser",
+            "originalName": "VerifiedUser",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "authorizeManagement",
+            "originalName": "authorizeManagement",
+            "src": "supabase/functions/_shared/jungsi/application/management_access.ts"
+          },
+          {
+            "importedName": "bearerSha256",
+            "originalName": "bearerSha256",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts"
+          },
+          {
+            "importedName": "calculateSyntheticOffering",
+            "originalName": "calculateSyntheticOffering",
+            "src": "supabase/functions/_shared/jungsi/application/research_offering.ts"
+          },
+          {
+            "importedName": "createSyntheticManagementGuard",
+            "originalName": "createSyntheticManagementGuard",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts"
+          },
+          {
+            "importedName": "createSyntheticSessionReadHandler",
+            "originalName": "createSyntheticSessionReadHandler",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "managementRoute",
+            "originalName": "managementRoute",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts"
+          },
+          {
+            "importedName": "readSessionSnapshot",
+            "originalName": "readSessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "requireManagementUniversity",
+            "originalName": "requireManagementUniversity",
+            "src": "supabase/functions/_shared/jungsi/application/management_access.ts"
+          },
+          {
+            "importedName": "requirePaidSession",
+            "originalName": "requirePaidSession",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "sessionDto",
+            "originalName": "sessionDto",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "syntheticFixture",
+            "originalName": "syntheticFixture",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "utcInstant",
+            "originalName": "utcInstant",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          },
+          {
+            "importedName": "utcText",
+            "originalName": "utcText",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          }
+        ],
+        "source_sha256": "03119c5d73a5143b2ec256e8d91c1746f103151da5a90d6e15bfea2615f032eb",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "00000000-0000-4000-8000-000000000001",
+                    "value": {
+                      "kind": "string",
+                      "string": "00000000-0000-4000-8000-000000000001"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SUBJECT"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "00000000-0000-4000-8000-000000000002",
+                    "value": {
+                      "kind": "string",
+                      "string": "00000000-0000-4000-8000-000000000002"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OTHER"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "NOW"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-VERIFIED-SESSION",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-VERIFIED-SESSION"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "TOKEN"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-RELAY-ONLY-FOR-LOCAL-TEST-0001",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-RELAY-ONLY-FOR-LOCAL-TEST-0001"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "RELAY"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(t: bigint)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "t",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sqlTime"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(expiry: string | null)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "expiry",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "unknown",
+                      "value": "unknown"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "schema"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": []
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(path = \"/api/v1/me\", method = \"GET\", body?: string)",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "path",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "/api/v1/me"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "method",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "GET"
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "body",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Request",
+                    "value": {
+                      "typeName": "Request"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "request"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(run: () => Promise<unknown>, code: string, http: number)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "run",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "http",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "failure"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(f: ReturnType<typeof fixture>, edit = true, approve = true)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "f",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReturnType",
+                        "value": {
+                          "typeName": "ReturnType",
+                          "typeParams": [
+                            {
+                              "kind": "typeQuery",
+                              "repr": "fixture",
+                              "value": "fixture"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "edit",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "right": "true"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "approve",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "right": "true"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "staff"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeOperator",
+                    "value": {
+                      "operator": "readonly",
+                      "tsType": {
+                        "kind": "array",
+                        "value": {
+                          "kind": "tuple",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "routes"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/management_access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/management_access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/research_offering.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/research_offering.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/session_service.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/public_passes.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/session_http.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/session_http.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/verified_session.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
     }
   },
   "format": "jungsi.edge-contract/v1",
@@ -4393,10 +8188,11 @@
     ],
     "suite": "DEV010_FOUNDATION"
   },
-  "state": "prepared",
+  "state": "required",
   "tests": [
     "tests/edge/test_foundation.ts",
-    "tests/edge/test_access_contract.ts"
+    "tests/edge/test_access_contract.ts",
+    "tests/edge/test_session_candidate.ts"
   ],
-  "unit_count": 39
+  "unit_count": 116
 }
