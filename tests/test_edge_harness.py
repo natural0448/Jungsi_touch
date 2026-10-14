@@ -90,4 +90,42 @@ class EdgeGateTests(unittest.TestCase):
     def test_symlink_is_rejected(self):
         with patch.object(Path,"is_symlink",return_value=True):
             with self.assertRaises(edge.EdgeFailure):edge.hashes(self.root(),["scripts/check_edge_contract.py"])
+class SourceRegistrationCases(unittest.TestCase):
+    def spec(self,count):
+        path='supabase/functions/_shared/jungsi/application/synthetic_dispatch.ts'
+        sha='a'*64
+        ids=['synthetic-operation-'+str(i)for i in range(22)]
+        states={v:dict(code='PORTED'if i<count else 'NOT_PORTED',
+            binding=dict(path=path,source_sha256=sha)if i<count else None,
+            native='PASS',deployment='PASS')for i,v in enumerate(ids)}
+        return dict(operations=[dict(id=v)for v in ids],
+            supabase_deployment_contract=dict(live_execution=dict(status='VERIFIED',operations=states)),
+            edge_harness=dict(files={path:dict(declarations=dict(source_sha256=sha))}))
+    def test_one_missing_operation_stays_partial(self):
+        result=runner.operation_registration(self.spec(21))
+        self.assertEqual(result['all_22'],'PARTIAL_CODE_REGISTERED')
+        self.assertEqual(result['source_registration']['registered_operation_count'],21)
+    def test_all_source_bindings_never_certify_native_or_production(self):
+        result=runner.operation_registration(self.spec(22))
+        self.assertEqual(result['all_22'],'CODE_REGISTERED')
+        self.assertEqual(result['native_acceptance'],'NOT_VERIFIED_BY_SOURCE_SUITE')
+        self.assertNotIn('production_ready',result)
+    def test_future_unregistered_source_is_rejected(self):
+        spec=self.spec(1)
+        spec['supabase_deployment_contract']['live_execution']['operations']['synthetic-operation-0']['binding']['path']='supabase/functions/future/index.ts'
+        with self.assertRaisesRegex(edge.EdgeFailure,'binding_invalid'):
+            runner.operation_registration(spec)
+    def test_test_fixture_cannot_be_an_implementation_binding(self):
+        spec=self.spec(1)
+        path='tests/edge/synthetic.ts'
+        spec['edge_harness']['files'][path]=dict(declarations=dict(source_sha256='a'*64))
+        spec['supabase_deployment_contract']['live_execution']['operations']['synthetic-operation-0']['binding']['path']=path
+        with self.assertRaisesRegex(edge.EdgeFailure,'binding_invalid'):
+            runner.operation_registration(spec)
+    def test_missing_operation_cannot_be_hidden_by_registered_count(self):
+        spec=self.spec(22)
+        spec['supabase_deployment_contract']['live_execution']['operations'].pop('synthetic-operation-21')
+        with self.assertRaisesRegex(edge.EdgeFailure,'coverage_invalid'):
+            runner.operation_registration(spec)
+
 if __name__=="__main__":unittest.main()

@@ -15,6 +15,42 @@ def parse_junit(path,expected):
 def require_oracle(receipt,count,cases_sha):
     if receipt.get("successful") is not True or receipt.get("case_count")!=count or receipt.get("mismatch_count")!=0 or receipt.get("deno_exit_code")!=0 or receipt.get("cases_sha256")!=cases_sha or receipt.get("oracle_references_match_basis") is not True:
         raise EdgeFailure("oracle_receipt_invalid")
+def operation_registration(spec):
+    """Report declared, hash-bound source registrations; never operating acceptance."""
+    live=spec.get('supabase_deployment_contract',{}).get('live_execution')
+    registered=[]
+    total=None
+    if live is not None:
+        operations=spec.get('operations',[])
+        ids=[row.get('id')for row in operations if isinstance(row,dict)]
+        states=live.get('operations',{})if isinstance(live,dict)else None
+        if (len(ids)!=22 or any(not isinstance(v,str)for v in ids) or len(set(ids))!=22 or
+            not isinstance(states,dict)or set(states)!=set(ids)):
+            raise EdgeFailure('operation_registration_coverage_invalid')
+        total=len(ids)
+        indexed={p:row.get('declarations',{}).get('source_sha256')
+            for p,row in spec.get('edge_harness',{}).get('files',{}).items()}
+        index=spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('edge_sources',{})
+        indexed.update({row['path']:row.get('source_sha256')for row in index.get('files',[])})
+        for operation in ids:
+            state=states[operation]
+            if not isinstance(state,dict)or state.get('code')not in {'NOT_PORTED','FOUNDATION_ONLY','PORTED'}:
+                raise EdgeFailure('operation_registration_state_invalid')
+            if state['code']!='PORTED':continue
+            binding=state.get('binding')
+            path=binding.get('path')if isinstance(binding,dict)else None
+            sha=binding.get('source_sha256')if isinstance(binding,dict)else None
+            if (not isinstance(path,str)or not path.startswith('supabase/functions/') or
+                not isinstance(sha,str)or len(sha)!=64 or any(c not in '0123456789abcdef'for c in sha) or
+                indexed.get(path)!=sha):
+                raise EdgeFailure('operation_registration_binding_invalid')
+            registered.append(operation)
+    status='NOT_PORTED'if not registered else ('CODE_REGISTERED'if len(registered)==total else 'PARTIAL_CODE_REGISTERED')
+    return dict(all_22=status,native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',
+        source_registration=dict(format='jungsi.edge-operation-registration/v1',
+            basis='checked_selected_snapshot_source_hashes',contract_operation_count=total,
+            registered_operation_ids=registered,registered_operation_count=len(registered)))
+
 def run_workspace(root,manifest,deno,python,output):
     root=Path(root).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
     before=verify_manifest(root,manifest);spec=json.loads((root/"docs/current/service_spec.json").read_bytes())
@@ -49,7 +85,7 @@ def run_workspace(root,manifest,deno,python,output):
     result=dict(format="jungsi.edge-suite-result/v1",successful=True,status="PASS",edge_execution=True,
       coverage="DEV010_FOUNDATION",coexisting_edge_sources=len(scope["coexisting_bound"]),unit=unit,oracle=dict(case_count=receipt["case_count"],mismatch_count=receipt["mismatch_count"]),
       source_manifest_sha256=digest(json_bytes(manifest)),contract_receipt_sha256=digest((output/"contract/edge_contract_receipt.json").read_bytes()),
-      oracle_receipt_sha256=digest(receipt_path.read_bytes()),tool=parsed["tool"],production_ready=False,all_22="NOT_PORTED",operating_writes=0)
+      oracle_receipt_sha256=digest(receipt_path.read_bytes()),tool=parsed["tool"],production_ready=False,operating_writes=0,**operation_registration(spec))
     write_new(output/"edge_run_receipt.json",json_bytes(result));return result
 def main():
     p=argparse.ArgumentParser(description=__doc__)

@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.51",
+  "contract_version": "1.9.52",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -497,7 +497,7 @@
         }
       },
       "evidence": {},
-      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 현재 정상 /jeongsi 진입 화면은 합성 응답을 명시하고 있다. 합성 회원 유형과 화면 성공은 실제 이용권·JWT·업무22 API 인수 근거가 아니다. 실제 서버 후보와 정상 BFF의 live 연결을 같은 후보 근거로 검수한 후 운영 상태를 갱신한다.",
+      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 현재 정상 /jeongsi 진입 화면은 합성 응답을 명시하고 있다. 합성 회원 유형과 화면 성공은 실제 이용권·JWT·업무22 API 인수 근거가 아니다. 실제 서버 후보와 정상 BFF의 live 연결을 같은 후보 근거로 검수한 후 운영 상태를 갱신한다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다.",
       "position_graph": {
         "formula_rows": [
           [
@@ -515,7 +515,9 @@
         "synthetic_rule": "명시 합성 모드의 위치 그래프마다 화면 확인용 합성임을 표시한다. synthetic-report의 임의 곡선은 검증한 입시 예측/누백으로 표시하거나 실서비스 정확도 근거로 사용하지 않는다.",
         "live_rule": "live는 승인/발행/선택된 서버 값만 표시한다. 조합별 서버 계약이 미채택이거나 승인 분포가 없으면 자료 대기다. 화면에서 임의 곡선을 만들거나 전체 누백으로 다른 조합을 대체하지 않는다.",
         "frontend_handoff": "화면 담당은 전체의 탐구 2과목 합과 조합의 2과목 평균을 각 그래프 안에서 명시하고 합성 모드 안내를 붙인다. 프레젠테이션 브랜치에서 최신 develop을 가져와 변경·검수하고 서버의 승인/보류 상태를 유지한다."
-      }
+      },
+      "frontend_runtime_rule": "실행 가능한 화면 앱과 명시 합성 응답은 develop에 통합했다. 이전 가상 화면은 기획 이력으로 보존한다. 실제 회원 인증·BFF live·운영 API의 인수 상태는 공통 진행표를 따르며 합성 화면 배포를 실제 연결 완료로 표시하지 않는다.",
+      "source_suite_reporting_rule": "정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다."
     }
   }
 }

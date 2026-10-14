@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.51",
+  "version": "1.9.52",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -3825,7 +3825,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.51",
+        "contract_version": "1.9.52",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -3999,7 +3999,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.51",
+        "contract_version": "1.9.52",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -4165,7 +4165,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.51",
+        "contract_version": "1.9.52",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -4184,7 +4184,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.51",
+        "contract_version": "1.9.52",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -4209,7 +4209,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.51",
+        "contract_version": "1.9.52",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -4234,7 +4234,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.51",
+        "contract_version": "1.9.52",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -4872,7 +4872,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "28d5ce5e730d2a0e6b4b4c5adc2cf9d70b116b9fe58285e080e8abfefd9c1d1d",
+            "source_sha256": "8c831cb8930d6cb9cc240c61a0525faea5c8c9a6dbfe9a369f528d12d7f5ede6",
             "symbols": [
               {
                 "kind": "class",
@@ -5583,12 +5583,18 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "6cadec2e07437a151fe968c7a72b39efdf9797907e7a3280acc2574134174b98",
+            "source_sha256": "2a3ac1f68f05410a3573d822fa2c05967a6eca6e80bb7a18cec3b44564c7999c",
             "symbols": [
               {
                 "kind": "function",
                 "name": "main",
                 "signature": "def main():",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "operation_registration",
+                "signature": "def operation_registration(spec):",
                 "decorators": []
               },
               {
@@ -11169,9 +11175,9 @@
       "development_state": [
         [
           "develop / 최신 검증 기준",
-          "4bbfe8af0ebe3cb7b924274a19c33dd43418a30a / spec1.9.50",
-          "CI38511826133·정상 commit/push Python994·Deno116·oracle993 PASS 재사용",
-          "계정 주인의 로그인·MFA 완료 회신/관리자 화면 진입과 현재 정시 화면의 명시 합성 모드를 구분한다. 실제 getUser·aal2·22 API·BFF live·운영 요금 검수를 이어가며 완료 전 상태를 승격하지 않는다."
+          "357f34e46d10e25fb81b074b82eb9d3fb07c0ae3 / spec1.9.51",
+          "CI38517089452·정상 commit/push Python994·Deno116·oracle993 PASS 재사용",
+          "계정 주인의 직접 입력 완료와 명시 합성 화면 관측을 보존한다. 등록 코드의 해시 범위와 실제 운영 인수를 구분하고, 새 업무 API의 정상 검사 등록을 지원한다."
         ],
         [
           "기획·서비스 / 읽기 모델 수정의 검수 이력",
@@ -12914,6 +12920,16 @@
         "REQ-26"
       ],
       "summary": "계정 주인의 직접 로그인·MFA 완료 회신으로 입력 대기를 해소하고 실제 서버 검수는 진행 중으로 기록한다. 정상 정시 경로의 합성 응답 관측을 BFF 실제 인수와 구분해 기획·라우팅·3티어·배포 진행표를 일치화한다. 서비스 내부 quota와 기존 조직 요금제/포함량/Spend Cap 검수를 분리하며 비밀이나 검수 계정 식별자는 공개 명세에 기록하지 않는다."
+    },
+    {
+      "date": "2026-10-14",
+      "requirements": [
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "새 업무 API 등록 뒤에도 모든 소스 검사 결과를 미이식으로 고정하던 표시를 공통 operation별 등록 소스/해시 범위로 바꾼다. 소스 등록·시험과 실제 인증/DB/배포 인수를 명확히 분리하며 소스 시험의 운영 미인수 상태는 보존한다. 통합된 실행 화면 앱과 합성 응답의 현재 상태도 생성 README에 정본에서 반영한다."
     }
   ],
   "overall_analysis_contract": {
@@ -22841,7 +22857,7 @@
         }
       },
       "evidence": {},
-      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 현재 정상 /jeongsi 진입 화면은 합성 응답을 명시하고 있다. 합성 회원 유형과 화면 성공은 실제 이용권·JWT·업무22 API 인수 근거가 아니다. 실제 서버 후보와 정상 BFF의 live 연결을 같은 후보 근거로 검수한 후 운영 상태를 갱신한다.",
+      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 현재 정상 /jeongsi 진입 화면은 합성 응답을 명시하고 있다. 합성 회원 유형과 화면 성공은 실제 이용권·JWT·업무22 API 인수 근거가 아니다. 실제 서버 후보와 정상 BFF의 live 연결을 같은 후보 근거로 검수한 후 운영 상태를 갱신한다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다.",
       "position_graph": {
         "formula_rows": [
           [
@@ -22859,7 +22875,9 @@
         "synthetic_rule": "명시 합성 모드의 위치 그래프마다 화면 확인용 합성임을 표시한다. synthetic-report의 임의 곡선은 검증한 입시 예측/누백으로 표시하거나 실서비스 정확도 근거로 사용하지 않는다.",
         "live_rule": "live는 승인/발행/선택된 서버 값만 표시한다. 조합별 서버 계약이 미채택이거나 승인 분포가 없으면 자료 대기다. 화면에서 임의 곡선을 만들거나 전체 누백으로 다른 조합을 대체하지 않는다.",
         "frontend_handoff": "화면 담당은 전체의 탐구 2과목 합과 조합의 2과목 평균을 각 그래프 안에서 명시하고 합성 모드 안내를 붙인다. 프레젠테이션 브랜치에서 최신 develop을 가져와 변경·검수하고 서버의 승인/보류 상태를 유지한다."
-      }
+      },
+      "frontend_runtime_rule": "실행 가능한 화면 앱과 명시 합성 응답은 develop에 통합했다. 이전 가상 화면은 기획 이력으로 보존한다. 실제 회원 인증·BFF live·운영 API의 인수 상태는 공통 진행표를 따르며 합성 화면 배포를 실제 연결 완료로 표시하지 않는다.",
+      "source_suite_reporting_rule": "정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다."
     }
   },
   "history_presentation_contract": {

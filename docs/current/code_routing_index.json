@@ -580,7 +580,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "28d5ce5e730d2a0e6b4b4c5adc2cf9d70b116b9fe58285e080e8abfefd9c1d1d",
+      "source_sha256": "8c831cb8930d6cb9cc240c61a0525faea5c8c9a6dbfe9a369f528d12d7f5ede6",
       "symbols": [
         {
           "kind": "class",
@@ -1291,12 +1291,18 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "6cadec2e07437a151fe968c7a72b39efdf9797907e7a3280acc2574134174b98",
+      "source_sha256": "2a3ac1f68f05410a3573d822fa2c05967a6eca6e80bb7a18cec3b44564c7999c",
       "symbols": [
         {
           "kind": "function",
           "name": "main",
           "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "operation_registration",
+          "signature": "def operation_registration(spec):",
           "decorators": []
         },
         {
