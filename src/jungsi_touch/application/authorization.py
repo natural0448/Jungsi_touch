@@ -15,6 +15,9 @@ class Actor:
     assurance_level: str | None = None
     account_status: str | None = None
     entitlement_expires_at: datetime | None = None
+    account_role: str | None = None
+    admin_access_origin: str | None = None
+    session_expires_at: datetime | None = None
     def __post_init__(self):
         if self.subject_id is not None and (not isinstance(self.subject_id, str) or not self.subject_id.strip()):
             raise ValueError("Verified subject must be a non-empty string.")
@@ -33,6 +36,16 @@ class Actor:
         if self.entitlement_expires_at is not None and (not self.paid_active or
                 not isinstance(self.entitlement_expires_at,datetime) or self.entitlement_expires_at.utcoffset() is None):
             raise ValueError("A request entitlement expiry must belong to a paid verified actor.")
+        if self.account_role is not None and (type(self.account_role) is not str
+                or not self.account_role.strip() or len(self.account_role)>64):
+            raise ValueError("Verified account role must be a nonempty string or unknown.")
+        if self.session_expires_at is not None and (self.subject_id is None
+                or not isinstance(self.session_expires_at,datetime) or self.session_expires_at.utcoffset() is None):
+            raise ValueError("A verified session expiry must be an aware server instant.")
+        if self.admin_access_origin is not None and (self.admin_access_origin!='verified_own_profile_active_admin_aal2'
+                or not self.paid_active or self.account_role!='admin' or self.account_status!='active'
+                or self.assurance_level!='aal2' or self.session_expires_at is None):
+            raise ValueError("Administrator access requires the verified active own-profile aal2 origin.")
 
 @dataclass(frozen=True)
 class AccessDecision:

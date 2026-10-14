@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.54",
+  "version": "1.9.55",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -5084,7 +5084,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.54",
+        "contract_version": "1.9.55",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -5258,7 +5258,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.54",
+        "contract_version": "1.9.55",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -5424,7 +5424,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.54",
+        "contract_version": "1.9.55",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -5443,7 +5443,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.54",
+        "contract_version": "1.9.55",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -5468,7 +5468,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.54",
+        "contract_version": "1.9.55",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -5493,7 +5493,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.54",
+        "contract_version": "1.9.55",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -6131,7 +6131,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "ba2e3b776faabb3bf8e2c1140c2b4120c56df475779906b00b91639f46a876aa",
+            "source_sha256": "b93ac5b7596a3d83db2373e1bafe169f67d02709f88632d7edf58933563c86d2",
             "symbols": [
               {
                 "kind": "class",
@@ -6987,7 +6987,7 @@
               "REQ-25",
               "REQ-26"
             ],
-            "source_sha256": "5ef34a3e0d5c4bb771a1b4dcbc7df0cb723017c1012a507b87728882676965db",
+            "source_sha256": "52ac601eafd5fe80c3153fb26fb4fdf71e77bed02265da352c7fe968aedf11db",
             "symbols": [
               {
                 "kind": "class",
@@ -7701,7 +7701,7 @@
               "REQ-25",
               "REQ-26"
             ],
-            "source_sha256": "97e30068fc45a05a4a4c42f5e00a90f26c4b99c74f5baab04eceff6747222d53",
+            "source_sha256": "ec81a59ffa32b34c96faada64fcb51256a7f542507229c2bf513ef3f3767bd35",
             "symbols": [
               {
                 "kind": "class",
@@ -8111,7 +8111,7 @@
               "REQ-25",
               "REQ-26"
             ],
-            "source_sha256": "5a77d24ff744b2429ea1f0684ad5dd9e76bff9d2d5f1441c4799314f62ab499c",
+            "source_sha256": "ea1c675d9b8680e1d5f61a7c1fc0b922aa632433922fd88c61890adee1e37cd3",
             "symbols": [
               {
                 "kind": "class",
@@ -10551,7 +10551,7 @@
               "REQ-25",
               "REQ-26"
             ],
-            "source_sha256": "52db5611e80186dea80baf97f65ddf9c9a85a88ee1369f1e65440b85e825b057",
+            "source_sha256": "87f927d074df52695f3f71e4c8c611cbbce27eb092f578621842d50d2c260bba",
             "symbols": [
               {
                 "kind": "class",
@@ -10567,13 +10567,13 @@
               },
               {
                 "kind": "function",
-                "name": "SupabaseSessionProvider._account_status",
-                "signature": "def _account_status(self, token, subject):",
+                "name": "SupabaseSessionProvider._account_profile",
+                "signature": "def _account_profile(self, token, subject):",
                 "decorators": []
               },
               {
                 "kind": "function",
-                "name": "SupabaseSessionProvider._account_status.unique",
+                "name": "SupabaseSessionProvider._account_profile.unique",
                 "signature": "def unique(pairs):",
                 "decorators": []
               },
@@ -12004,7 +12004,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "5a715a5372a24bbf83b84f7ca3a90f54fb76c6e7c0b593990621b18358d985f5",
+              "source_sha256": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
               "declared_exports": [
                 "AccessError",
                 "authorizeUser",
@@ -12305,7 +12305,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "af724e486ca6bc0a3a07fb0a98c176e2a620c207fb93aa912a1f2adc633e087e",
+              "source_sha256": "1c010ebbee398928e0fab7fdb8a4785be06d2d4fb7890714296e95563da340de",
               "declared_exports": [
                 "VerifiedUser",
                 "UserSessionPort",
@@ -12487,7 +12487,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "6ffed08966fd788d30827d96b24514fd432301ae940ba787b543f9e71735b336",
+              "source_sha256": "6f264ec903947a732012f7683cd740e931afd0a461b7e4c207d8e6615df03cae",
               "declared_exports": [
                 "SessionSnapshot",
                 "SessionDto",
@@ -13441,7 +13441,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "592239bea3dab5b64eb4059e8f3554d813f187d087e9c4c5490e784f4fa83fed",
+              "source_sha256": "50f5df287dcbb82a7dbc6380ef5954d97c1eb5a0ae0fe076fa1454b4ad296264",
               "declared_exports": [
                 "SupabaseAuthSettings",
                 "SupabaseNativeAuth"
@@ -13538,7 +13538,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "d7a94a95f3bf1d70fe670010a5d3b469f5212da74d5f84406b07ba07ede4d84e",
+              "source_sha256": "8f08df5c2f455b363d27fb07ea2ea5ec69c623424d328672eb587d61d539ce30",
               "declared_exports": [
                 "NativeSessionReceipt",
                 "NativeSessionVerificationPort",
@@ -15521,6 +15521,16 @@
         "REQ-26"
       ],
       "summary": "SOURCE_REGISTERED_ONLY / native_DB_JWT_deployment_NOT_RUN. 정상 훅 lint92건/29파일 및 fmt7파일 실패 원본과 승인 source89 핀을 보존하고 총35개 소스를 최소 수정한다. 테스트 대역79개와 native getter6개는 즉시 실행·예외 거절·Promise 채택 시점을 보존하며, 제어문자 거절·Python 공백 집합·수치 정책을 유지한다. 기존491단위 통과와 Promise 경계6사례 동등성을 확인하고 새SHA·AST·의존·22operation binding·문서를 같은1.9.54로 다시 결속한다. 공유검사기·린트규칙·ignore·기존 실패 근거는 보존한다."
+    },
+    {
+      "date": "2026-10-15",
+      "requirements": [
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "사용자 확정: active 관리자·검증된 동일 JWT aal2의 이용권 예외를 허용한다. 본인 profiles role,status 한 조회와 요청 내부 검증 origin으로만 paid+null을 생성하고 실제 pass 만료 우선·일반 paid 만료 누락503·기존22API/session3·자료 승인/소유권/학교/검수 subject 범위를 유지한다. 관리자 확인 장애는 예외만 거절하며 기존 유료 결과를 보존한다. FE-ADMIN-ACCESS-01은 외부 화면팀 소유로 등록하며 실JWT/005/배포는 별도 NOT_RUN이다."
     }
   ],
   "overall_analysis_contract": {
@@ -16203,7 +16213,7 @@
           "entitlement_expires_at"
         ],
         "rules": [
-          "public.jeongsi_passes의 revoked_at IS NULL 및 starts_at<=now<ends_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 MAX(ends_at)를 UTC Z로 반환한다. metadata와 활성 만료를 한 배치 JOIN 질의로 확인하고 같은 요청의 회원 판정·만료 표시에 결속한다. jungsi_backend.entitlements로 장애 대체하지 않는다. 관리자 이용권 예외는 미확정이며 추가하지 않는다. 별도 status/product 컬럼을 가정하지 않는다.",
+          "public.jeongsi_passes의 revoked_at IS NULL 및 starts_at<=now<ends_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 MAX(ends_at)를 UTC Z로 반환한다. metadata와 활성 만료를 한 배치 JOIN 질의로 확인하고 같은 요청의 회원 판정·만료 표시에 결속한다. jungsi_backend.entitlements로 장애 대체하지 않는다. 동일 검증 Bearer의 본인 public.profiles.role=admin 및 public.profiles.status=active 및 aal2와 요청 내부 admin-origin이 확인될 때만 관리자 접근 예외를 적용한다. 실제 활성 pass 만료를 우선 보존하고 pass가 없는 예외는 paid+null이다. 일반 paid 만료 누락503, 기존 자료·학교·검수 subject·소유권 범위와3필드는 유지한다. FE-ADMIN-ACCESS-01은 외부 화면팀 표시 요청이다. 별도 status/product 컬럼을 가정하지 않는다.",
           "일반 회원 만료는 null. 인증 또는 저장소 장애는 503이며 일반 회원으로 자동 강등하지 않는다. 사용자 ID·등급·역할·JWT·결제 내역을 요청/응답에 포함하지 않는다."
         ]
       },
@@ -25469,7 +25479,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/session_service.ts",
-            "source_sha256": "6ffed08966fd788d30827d96b24514fd432301ae940ba787b543f9e71735b336",
+            "source_sha256": "6f264ec903947a732012f7683cd740e931afd0a461b7e4c207d8e6615df03cae",
             "symbol": "readSessionSnapshot",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -29926,8 +29936,8 @@
     "user_decisions": {
       "paid_authority": "public.jeongsi_passes",
       "default_Postgres_composition_transition_authorized": true,
-      "admin_paid_override": false,
-      "admin_paid_override_status": "deferred_user_decision",
+      "admin_paid_override": true,
+      "admin_paid_override_status": "confirmed_active_admin_aal2",
       "previous_explicit_only_decision_preserved_as_history": true
     },
     "entitlement": {
@@ -29954,7 +29964,40 @@
       "adapter_writes_allowed": false,
       "automatic_entitlement_grant_allowed": false,
       "explicit_dependency_injection_preserved": true,
-      "synthetic_memory_composition_preserved": true
+      "synthetic_memory_composition_preserved": true,
+      "admin_access_exception": {
+        "role": "admin",
+        "account_status": "active",
+        "verified_aal": "aal2",
+        "trusted_identity": "exact_Bearer_verified_by_Supabase_Auth_getUser",
+        "trusted_profile": "own_profiles_role_status_via_same_verified_Bearer_and_publishable_key_RLS",
+        "own_profile_select": [
+          "role",
+          "status"
+        ],
+        "own_profile_queries_per_request": 1,
+        "same_subject_and_bearer_required": true,
+        "internal_origin_required": true,
+        "internal_origin": "verified_own_profile_active_admin_aal2",
+        "request_local_origin_identity_required": true,
+        "member_tier": "paid",
+        "entitlement_expires_at": null,
+        "real_active_pass_priority": true,
+        "real_expiry_preserved": true,
+        "ordinary_paid_null_expiry": "503_entitlement_unavailable",
+        "next_request_profile_reevaluation_required": true,
+        "client_roles_or_user_metadata_trusted": false,
+        "editor_or_approver_is_admin": false,
+        "ownership_school_review_approval_scope_override": false,
+        "pass_mutation_allowed": false,
+        "fake_expiry_allowed": false,
+        "profile_failure_breaks_ordinary_paid": false,
+        "cross_request_admin_cache_allowed": false,
+        "extra_profile_N_plus_one_allowed": false,
+        "pass_failure_fallback_allowed": false,
+        "frontend_request_id": "FE-ADMIN-ACCESS-01",
+        "frontend_owner": "external_frontend_team"
+      }
     },
     "management": {
       "operations": [
@@ -29971,7 +30014,7 @@
       "verified_aal": "aal2",
       "account_status": "active",
       "trusted_identity": "exact_Bearer_verified_by_Supabase_Auth_getUser",
-      "trusted_profile": "own_profiles_status_via_same_verified_Bearer_and_publishable_key_RLS",
+      "trusted_profile": "own_profiles_role_status_via_same_verified_Bearer_and_publishable_key_RLS",
       "authority_source": "jungsi_backend.forecast_authorities",
       "existing_edit_approve_and_school_scope_required": true,
       "client_roles_or_user_metadata_trusted": false,
@@ -30109,6 +30152,21 @@
         }
       ],
       "actual_user_paid_management_browser": "NOT_RUN"
+    },
+    "admin_exception_implementation": {
+      "status": "implemented_scoped_synthetic_verified_integration_pending",
+      "acceptance_plan_cases": 11,
+      "real_JWT_OTP_DB_Storage": "NOT_RUN",
+      "deployment": "NOT_RUN",
+      "production_ready": false,
+      "previous_PR31_verification_scope": "Historical public passes and management MFA implementation without this new administrator exception; original verification preserved",
+      "frontend_request": {
+        "id": "FE-ADMIN-ACCESS-01",
+        "owner": "external_frontend_team",
+        "status": "REQUESTED_NOT_IMPLEMENTED_IN_SERVICE_SCOPE",
+        "path": "apps/web/src/components/site-header.tsx",
+        "rule": "paid+null displays administrator access without an expiry-date phrase; actual pass expiry and server gates unchanged"
+      }
     }
   },
   "edge_harness": {
@@ -30149,7 +30207,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "5a715a5372a24bbf83b84f7ca3a90f54fb76c6e7c0b593990621b18358d985f5",
+          "source_sha256": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
           "symbols": [
             {
               "declarations": [
@@ -41208,7 +41266,7 @@
       "supabase/functions/_shared/jungsi/application/ports.ts": {
         "declarations": {
           "imports": [],
-          "source_sha256": "af724e486ca6bc0a3a07fb0a98c176e2a620c207fb93aa912a1f2adc633e087e",
+          "source_sha256": "1c010ebbee398928e0fab7fdb8a4785be06d2d4fb7890714296e95563da340de",
           "symbols": [
             {
               "declarations": [
@@ -41267,6 +41325,26 @@
                       },
                       {
                         "name": "accountStatus",
+                        "optional": true,
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "accountRole",
                         "optional": true,
                         "readonly": true,
                         "tsType": {
@@ -45415,7 +45493,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "6ffed08966fd788d30827d96b24514fd432301ae940ba787b543f9e71735b336",
+          "source_sha256": "6f264ec903947a732012f7683cd740e931afd0a461b7e4c207d8e6615df03cae",
           "symbols": [
             {
               "declarations": [
@@ -45490,6 +45568,19 @@
                               "value": "null"
                             }
                           ]
+                        }
+                      },
+                      {
+                        "name": "adminOrigin",
+                        "optional": true,
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "literal",
+                          "repr": "verified_own_profile_active_admin_aal2",
+                          "value": {
+                            "kind": "string",
+                            "string": "verified_own_profile_active_admin_aal2"
+                          }
                         }
                       }
                     ]
@@ -45751,6 +45842,74 @@
                 }
               ],
               "name": "requirePaidSession"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "WeakSet",
+                      "value": {
+                        "typeName": "WeakSet",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "SessionSnapshot",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "SessionSnapshot"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "verifiedAdminSnapshots"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(user: VerifiedUser)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "user",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "VerifiedUser",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "VerifiedUser",
+                              "specifier": "./ports.ts"
+                            },
+                            "typeName": "VerifiedUser"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "boolean",
+                      "value": "boolean"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "verifiedAdmin"
             }
           ]
         },
@@ -70716,7 +70875,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "592239bea3dab5b64eb4059e8f3554d813f187d087e9c4c5490e784f4fa83fed",
+          "source_sha256": "50f5df287dcbb82a7dbc6380ef5954d97c1eb5a0ae0fe076fa1454b4ad296264",
           "symbols": [
             {
               "declarations": [
@@ -73834,7 +73993,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "d7a94a95f3bf1d70fe670010a5d3b469f5212da74d5f84406b07ba07ede4d84e",
+          "source_sha256": "8f08df5c2f455b363d27fb07ea2ea5ec69c623424d328672eb587d61d539ce30",
           "symbols": [
             {
               "declarations": [
@@ -74025,6 +74184,26 @@
                       },
                       {
                         "name": "status",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "role",
+                        "optional": true,
                         "readonly": true,
                         "tsType": {
                           "kind": "union",
@@ -80948,6 +81127,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts"
             },
             {
+              "importedName": "SessionSnapshot",
+              "originalName": "SessionSnapshot",
+              "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            },
+            {
               "importedName": "SupabaseNativeAuth",
               "originalName": "SupabaseNativeAuth",
               "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts"
@@ -80958,6 +81142,16 @@
               "src": "tests/edge/fixture.ts"
             },
             {
+              "importedName": "authorizeManagement",
+              "originalName": "authorizeManagement",
+              "src": "supabase/functions/_shared/jungsi/application/management_access.ts"
+            },
+            {
+              "importedName": "authorizeReport",
+              "originalName": "authorizeReport",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
               "importedName": "bearerSha256",
               "originalName": "bearerSha256",
               "src": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts"
@@ -80966,9 +81160,29 @@
               "importedName": "equal",
               "originalName": "equal",
               "src": "tests/edge/fixture.ts"
+            },
+            {
+              "importedName": "readSessionSnapshot",
+              "originalName": "readSessionSnapshot",
+              "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            },
+            {
+              "importedName": "requirePaidSession",
+              "originalName": "requirePaidSession",
+              "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            },
+            {
+              "importedName": "sessionDto",
+              "originalName": "sessionDto",
+              "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            },
+            {
+              "importedName": "syncPromise",
+              "originalName": "syncPromise",
+              "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "de2183074b9b3dfb0e3123b5312a17496577322f39a49eb9ab8bd26abc02ce47",
+          "source_sha256": "c6b1781256e4bea7c075ad4c74575f9537013787a09f28fd863ccd4f895ef872",
           "symbols": [
             {
               "declarations": [
@@ -81251,6 +81465,175 @@
                 }
               ],
               "name": "unavailable"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(\n  options: {\n    role?: unknown;\n    status?: unknown;\n    aal?: \"aal1\" | \"aal2\";\n    paidUntil?: bigint | null;\n    profileUnavailable?: boolean;\n  } = {},\n)",
+                    "params": [
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "options",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeLiteral",
+                            "value": {
+                              "properties": [
+                                {
+                                  "name": "role",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "unknown",
+                                    "value": "unknown"
+                                  }
+                                },
+                                {
+                                  "name": "status",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "unknown",
+                                    "value": "unknown"
+                                  }
+                                },
+                                {
+                                  "name": "aal",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "union",
+                                    "value": [
+                                      {
+                                        "kind": "literal",
+                                        "repr": "aal1",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "aal1"
+                                        }
+                                      },
+                                      {
+                                        "kind": "literal",
+                                        "repr": "aal2",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "aal2"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "name": "paidUntil",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "union",
+                                    "value": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "bigint",
+                                        "value": "bigint"
+                                      },
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "null",
+                                        "value": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "name": "profileUnavailable",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "boolean",
+                                    "value": "boolean"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "right": "[UNSUPPORTED]"
+                      }
+                    ]
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "adminFixture"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(work: () => unknown, code: string, http: number)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "work",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [],
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "code",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "http",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "adminRefused"
             }
           ]
         },
@@ -81262,6 +81645,26 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/application/management_access.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/management_access.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/application/session_service.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
               }
             ]
           },
@@ -88802,6 +89205,6 @@
       "tests/edge/test_usage_service.ts",
       "tests/edge/test_year_equating.ts"
     ],
-    "unit_count": 491
+    "unit_count": 500
   }
 }

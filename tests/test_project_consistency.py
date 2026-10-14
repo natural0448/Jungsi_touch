@@ -1466,12 +1466,26 @@ if __name__=="__main__":unittest.main()
 class OpeningSecurityOperationsTests(unittest.TestCase):
     def setUp(self):
         self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
-    def test_legacy_fallback_or_admin_paid_override_is_rejected(self):
-        for branch,key in [('entitlement','legacy_table_fallback_allowed'),('user_decisions','admin_paid_override')]:
-            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract'][branch][key]=True
+    def test_legacy_fallback_or_missing_confirmed_admin_decision_is_rejected(self):
+        for branch,key,value in [('entitlement','legacy_table_fallback_allowed',True),('user_decisions','admin_paid_override',False)]:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract'][branch][key]=value
             self.assertIn('Opening paid authority or failure boundary drift',validate_spec(wrong))
+    def test_confirmed_admin_exception_exact_identity_expiry_and_scope_contract(self):
+        self.assertFalse(validate_spec(self.spec))
+        changes=[('role',None),('account_status','inactive'),('verified_aal','aal1'),
+                 ('internal_origin_required',False),('request_local_origin_identity_required',False),
+                 ('own_profile_queries_per_request',2),('own_profile_queries_per_request',True),
+                 ('entitlement_expires_at','9999-12-31T00:00:00Z'),('real_expiry_preserved',False),
+                 ('ownership_school_review_approval_scope_override',True),
+                 ('next_request_profile_reevaluation_required',False),('editor_or_approver_is_admin',True)]
+        for key,value in changes:
+            with self.subTest(key=key,value=value):
+                wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['entitlement']['admin_access_exception'][key]=value
+                self.assertIn('Opening administrator exception identity, expiry or scope drift',validate_spec(wrong))
+        wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['entitlement']['admin_access_exception'].pop('role')
+        self.assertIn('Opening administrator exception identity, expiry or scope drift',validate_spec(wrong))
     def test_management_cannot_trust_client_or_expand_to_students(self):
-        for key in ['client_roles_or_user_metadata_trusted','new_app_role_profiles_GRANT_allowed','student_or_paid_service_MFA_required']:
+        for key in ['client_roles_or_user_metadata_trusted','new_app_role_profiles_GRANT_allowed','student_or_paid_service_MFA_required','profile_admin_override_allowed']:
             wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['management'][key]=True
             self.assertIn('Opening management MFA or active scope drift',validate_spec(wrong))
     def test_public_forecast_read_cannot_inherit_management(self):

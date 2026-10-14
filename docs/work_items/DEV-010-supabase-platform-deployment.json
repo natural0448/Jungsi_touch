@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.54",
+  "contract_version": "1.9.55",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -518,7 +518,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/session_service.ts",
-            "source_sha256": "6ffed08966fd788d30827d96b24514fd432301ae940ba787b543f9e71735b336",
+            "source_sha256": "6f264ec903947a732012f7683cd740e931afd0a461b7e4c207d8e6615df03cae",
             "symbol": "readSessionSnapshot",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",

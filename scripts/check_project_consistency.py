@@ -1542,16 +1542,21 @@ def validate_opening_security_operations(spec):
             any(evidence.get(k)!='NOT_RUN' for k in ('real_JWT_active_aal2_management','Edge_redeployment','browser_paid_after_grant_or_revoke','production_publication','actual_user_paid_management_browser'))):
             errors.append('Opening develop acceptance lacks exact scoped evidence')
 
-    if (decision.get('paid_authority')!='public.jeongsi_passes' or decision.get('default_Postgres_composition_transition_authorized')is not True or decision.get('admin_paid_override')is not False or decision.get('admin_paid_override_status')!='deferred_user_decision' or
+    if (decision.get('paid_authority')!='public.jeongsi_passes' or decision.get('default_Postgres_composition_transition_authorized')is not True or decision.get('admin_paid_override')is not True or decision.get('admin_paid_override_status')!='confirmed_active_admin_aal2' or
         e.get('table')!='public.jeongsi_passes' or e.get('activation')!='revoked_at IS NULL AND starts_at <= now AND now < ends_at' or e.get('multiple_active_rows')!='MAX(ends_at)' or e.get('time_basis')!='UTC' or
         e.get('session_format')!='jungsi.session/v1' or e.get('session_fields')!=['format','member_tier','entitlement_expires_at'] or e.get('failure')!={'http':503,'code_policy':'existing_safe_entitlement_codes_without_SQL_details','fallback':False} or
         e.get('metadata_and_entitlement_data_queries_per_request')!=1 or type(e.get('metadata_and_entitlement_data_queries_per_request'))is not int or
         any(e.get(k)is not False for k in ('legacy_table_fallback_allowed','cross_request_entitlement_cache_allowed','adapter_writes_allowed','automatic_entitlement_grant_allowed')) or
         any(e.get(k)is not True for k in ('request_local_member_and_expiry_snapshot','transaction_configuration_queries_separate','explicit_dependency_injection_preserved','synthetic_memory_composition_preserved'))):
         errors.append('Opening paid authority or failure boundary drift')
+    expected_admin_access_exception = {'role': 'admin', 'account_status': 'active', 'verified_aal': 'aal2', 'trusted_identity': 'exact_Bearer_verified_by_Supabase_Auth_getUser', 'trusted_profile': 'own_profiles_role_status_via_same_verified_Bearer_and_publishable_key_RLS', 'own_profile_select': ['role', 'status'], 'own_profile_queries_per_request': 1, 'same_subject_and_bearer_required': True, 'internal_origin_required': True, 'internal_origin': 'verified_own_profile_active_admin_aal2', 'request_local_origin_identity_required': True, 'member_tier': 'paid', 'entitlement_expires_at': None, 'real_active_pass_priority': True, 'real_expiry_preserved': True, 'ordinary_paid_null_expiry': '503_entitlement_unavailable', 'next_request_profile_reevaluation_required': True, 'client_roles_or_user_metadata_trusted': False, 'editor_or_approver_is_admin': False, 'ownership_school_review_approval_scope_override': False, 'pass_mutation_allowed': False, 'fake_expiry_allowed': False, 'profile_failure_breaks_ordinary_paid': False, 'cross_request_admin_cache_allowed': False, 'extra_profile_N_plus_one_allowed': False, 'pass_failure_fallback_allowed': False, 'frontend_request_id': 'FE-ADMIN-ACCESS-01', 'frontend_owner': 'external_frontend_team'}
+    exception=e.get('admin_access_exception')
+    if (type(exception)is not dict or set(exception)!=set(expected_admin_access_exception) or
+        any(type(exception[k])is not type(value) or exception[k]!=value for k,value in expected_admin_access_exception.items())):
+        errors.append('Opening administrator exception identity, expiry or scope drift')
     operations=['forecast.capabilities','forecast.list','forecast.create','forecast.read','forecast.adjust','forecast.validate','forecast.approve','forecast.publish']
     if (m.get('operations')!=operations or m.get('verified_aal')!='aal2' or m.get('account_status')!='active' or m.get('authority_source')!='jungsi_backend.forecast_authorities' or
-        m.get('trusted_identity')!='exact_Bearer_verified_by_Supabase_Auth_getUser' or m.get('trusted_profile')!='own_profiles_status_via_same_verified_Bearer_and_publishable_key_RLS' or m.get('existing_edit_approve_and_school_scope_required')is not True or
+        m.get('trusted_identity')!='exact_Bearer_verified_by_Supabase_Auth_getUser' or m.get('trusted_profile')!='own_profiles_role_status_via_same_verified_Bearer_and_publishable_key_RLS' or m.get('existing_edit_approve_and_school_scope_required')is not True or
         m.get('nonstaff_capabilities')!='empty_false' or
         any(m.get(k)is not False for k in ('public_forecast_read_is_management','client_roles_or_user_metadata_trusted','profile_admin_override_allowed','new_app_role_profiles_GRANT_allowed','student_or_paid_service_MFA_required','unknown_profile_breaks_student_service','JWT_AAL_profile_status_in_public_DTO_allowed')) or
         m.get('errors')!={'aal1':[403,'management_mfa_required'],'inactive':[403,'management_account_inactive'],'unknown':[503,'management_account_state_unverified']}):
@@ -1574,13 +1579,13 @@ def opening_security_document_body(spec):
     c=spec['opening_security_operations_contract']
     management=[o for o in spec['operations'] if o['id']in c['management']['operations']]
     return (
-        '2026-10-14 사용자 확정은 public.jeongsi_passes 기준 전환이며 관리자 무료 이용 예외는 추후 결정이다. 과거 명시 연결만 준비하기로 한 결정·이용권 어댑터·검수 영수증은 이력으로 보존한다. 최신 실행 변경의 규범은 이 문서와 opening_security_operations_contract이다.\n\n'
+        '2026-10-15 사용자 확정은 public.jeongsi_passes 원본을 유지하면서 동일 검증 Bearer의 본인 profiles.role=admin/status=active와 aal2를 모두 확인한 관리자에게만 이용권 예외를 허용하는 것이다. 과거 명시 연결만 준비하기로 한 결정·이용권 어댑터·검수 영수증은 이력으로 보존한다. 최신 실행 변경의 규범은 이 문서와 opening_security_operations_contract이다.\n\n'
         '## 이용권 읽기와 기본 서버 구성\n\n'
-        '실제 PostgreSQL 저장소 구성은 public.jeongsi_passes를 읽는다. revoked_at IS NULL이고 starts_at <= UTC now < ends_at인 행 중 MAX(ends_at)를 채택한다. 메타데이터/RLS/역할/필수 열과 현재 만료를 한 배치 JOIN으로 검증하고 /me의 회원 판정과 만료를 같은 요청 값에 결속한다. 트랜잭션 설정 질의는 데이터 조회와 별개다. 요청 간 이용권 캐시는 쓰지 않고 조회 장애는 기존의 안전한 이용권 오류 코드와 503으로 거절하고 SQL 세부 예외를 노출하지 않는다. 기존 이용권 표로 대체하거나 관리자를 유료로 만들지 않는다. 공개 session/v1의 3필드는 유지한다. 명시 의존 주입과 로컬 합성 저장소는 보존한다.\n\n'
+        '실제 PostgreSQL 저장소 구성은 public.jeongsi_passes를 읽는다. revoked_at IS NULL이고 starts_at <= UTC now < ends_at인 행 중 MAX(ends_at)를 채택한다. 메타데이터/RLS/역할/필수 열과 현재 만료를 한 배치 JOIN으로 검증하고 /me의 회원 판정과 만료를 같은 요청 값에 결속한다. 트랜잭션 설정 질의는 데이터 조회와 별개다. 요청 간 이용권 캐시는 쓰지 않고 조회 장애는 기존의 안전한 이용권 오류 코드와 503으로 거절하고 SQL 세부 예외를 노출하지 않는다. 기존 이용권 표로 장애 대체하거나 이용권 행을 생성하지 않는다. 실제 활성 pass가 있으면 원래 만료값을 우선 보존한다. pass가 없고 요청 내부의 검증 관리자 origin이 있을 때만 session/v1의 member_tier=paid, entitlement_expires_at=null로 접근 예외를 표시한다. 일반 paid의 만료 누락은 여전히503이다. 공개3필드·자료 승인·본인소유권·학교/검수 subject 범위는 유지한다. FE-ADMIN-ACCESS-01은 외부 화면팀이 null 만료를 날짜 없이 관리자 이용으로 표시하는 요청이며 프런트 구현은 해당 팀 소유다. 명시 의존 주입과 로컬 합성 저장소는 보존한다.\n\n'
         '## 관리자 MFA·본인 상태·업무 권한\n\n'
-        '관리 요청은 Supabase Auth가 정확한 Bearer를 검증한 뒤 aal2를 신뢰한다. 같은 검증 Bearer와 publishable key로 자신의 profiles.status만 조회해 기존 RLS를 따른다. active가 아니면 403 management_account_inactive, 상태 미확인은 관리만 503 management_account_state_unverified, aal1은 403 management_mfa_required다. 기존 forecast_authorities의 편집/승인·학교 범위도 모두 필요하다. public.is_admin()이나 이메일·클라이언트 role만으로 자체 관리 권한을 부여하지 않는다. staff_roles 테이블은 가정하지 않는다. 일반·유료 학생 조회/분석에는 MFA를 추가하지 않고 관리 상태 조회 실패만으로 성공한 학생 응답을 버리지 않는다. 비직원 capabilities는 empty/false다.\n\n'+
+        '관리 요청은 Supabase Auth가 정확한 Bearer를 검증한 뒤 aal2를 신뢰한다. 같은 검증 Bearer와 publishable key로 자신의 profiles.role,status를 한 번 조회해 기존 RLS를 따른다. 관리자 예외는 같은 요청의 내부 origin으로 결속하며 다음 요청에서 역할·상태를 다시 확인한다. 관리자 확인 장애는 예외만 막고 이미 검증한 일반 유료 이용권을 버리지 않는다. active가 아니면 403 management_account_inactive, 상태 미확인은 관리만 503 management_account_state_unverified, aal1은 403 management_mfa_required다. 기존 forecast_authorities의 편집/승인·학교 범위도 모두 필요하다. public.is_admin()이나 이메일·클라이언트 role만으로 자체 관리 권한을 부여하지 않는다. staff_roles 테이블은 가정하지 않는다. 일반·유료 학생 조회/분석에는 MFA를 추가하지 않고 관리 상태 조회 실패만으로 성공한 학생 응답을 버리지 않는다. 비직원 capabilities는 empty/false다.\n\n'+
         table(['관리 operation','HTTP','경로'],[[o['id'],o['method'],o['path']]for o in management])+
-        '\n\nOTP 등록은 계정 주인이 /admin에서 휴대폰 앱으로 수행한다. /jeongsi 미리보기와 관리 기능의 인증 조건은 구분한다. JWT/aal/profile 상태는 서버 내부 값으로 공개 DTO에 넣지 않는다. admin_logs는 auth.uid() 본인 actor만 쓰고 이메일/IP/시각은 DB가 채운다. 시험 계정도 사이트 가입 화면에서 생성한다. 외부 마이그레이션 32~35 번호를 점유하고 SMTP·캡차·유출 비밀번호 설정은 변경하지 않는다.\n\n'
+        '\n\nOTP 등록은 계정 주인이 /admin에서 휴대폰 앱으로 수행한다. /jeongsi 미리보기와 관리 기능의 인증 조건은 구분한다. JWT/aal/profile 역할·상태와 관리자 origin은 서버 내부 값으로 공개 DTO에 넣지 않는다. admin_logs는 auth.uid() 본인 actor만 쓰고 이메일/IP/시각은 DB가 채운다. 시험 계정도 사이트 가입 화면에서 생성한다. 외부 마이그레이션 32~35 번호를 점유하고 SMTP·캡차·유출 비밀번호 설정은 변경하지 않는다.\n\n'
         '## 조회·용량·보존형 정리\n\n'
         '화면 조회는 매개변수화된 제한 범위 JOIN과 keyset을 쓴다. 전체 count·전국 FETCH와 N+1을 화면 경로에 붙이지 않는다. 제한 ID를 먼저 고른 MATERIALIZED는 별도이며 제거 자체를 성능 검증으로 간주하지 않는다. 기존 인덱스와 valid/ready·계획을 확인한 후 필요한 것만 제안한다. 시험 적재는 로컬/운영 외 DB에서 한다.\n\n'
         '원 압축 bytes를 재압축 없이 비공개 불변 Storage에 보관하고 원격 bytes/SHA를 다시 확인한 뒤 archive pointer/resolver·현재/C 근거 보존을 검수한다. csv/support NOT NULL·길이/해시 제약이 있어 업로드만으로 본문 제거가 가능해지지 않는다. 정확 표/PK/열·해시·참조·제거 명부에 사용자가 승인한 범위만 다음 단계에서 적용한다. registry·overlays의 전량 삭제, production_allowed=false를 미사용으로 해석, 무조건 VACUUM FULL은 금지한다. 일반 VACUUM의 내부 공간 재사용과 파일 크기 축소를 구분한다. 과거 02~06 제한은 현재 강제 규칙으로 재등록하지 않는다. I/O 경고가 다시 나타나면 대량 작업을 멈추고 Owner와 재확인한다.\n\n'
@@ -2064,7 +2069,7 @@ def generated_files(spec):
             if path.endswith('.md') and path!=latest:
                 relative=posixpath.relpath(latest,str(PurePosixPath(path).parent))
                 note=('\n\n## 2026-10-14 오픈 전 최신 확정\n\n'
-                      '유료 기준은 public.jeongsi_passes이며 관리자 무료 이용 예외는 미확정이다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. '
+                      '유료 이용권 원본은 public.jeongsi_passes이며 관리자 접근 예외는 동일 검증 Bearer·본인 role=admin/status=active·aal2·요청 내부 origin이 모두 필요하다. 실제 만료 우선, 예외만 paid+null, 일반 paid 만료 누락503과 FE-ADMIN-ACCESS-01을 따른다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. '
                       '이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 ['
                       '오픈 전 보안운영 변경]('+relative+')와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.\n\n')
                 marker='\n\n<!-- jungsi:generated'
@@ -2258,7 +2263,10 @@ def validate_spec(spec):
         if session[0].get('contract_ref')!='backend_platform_contract.dto_schemas.session' or http.get('response_schema')!='session' or http.get('body')!=[] or http.get('query')!=[] or http.get('idempotency_key_required') is not False or dto.get('format')!='jungsi.session/v1' or dto.get('fields')!=['format','member_tier','entitlement_expires_at']:
             errors.append('Formal session DTO contract drift')
     rules=' '.join(spec.get('backend_platform_contract',{}).get('dto_schemas',{}).get('session',{}).get('rules',[]))
-    if 'public.jeongsi_passes' not in rules or 'revoked_at IS NULL' not in rules or 'starts_at<=now<ends_at' not in rules or 'MAX(ends_at)' not in rules or 'status=active' in rules:
+    # Only the newly confirmed own-profile status clause is exempt from the
+    # prohibition on inventing a status column for the passes authority.
+    pass_rules=rules.replace('public.profiles.status=active','')
+    if 'public.jeongsi_passes' not in rules or 'revoked_at IS NULL' not in rules or 'starts_at<=now<ends_at' not in rules or 'MAX(ends_at)' not in rules or 'status=active' in pass_rules:
         errors.append('Formal session entitlement rule drift')
     if 'session_contract' in spec:errors.append('Superseded proposed session contract must not be revived')
     errors.extend(validate_forecast_contract(spec))
