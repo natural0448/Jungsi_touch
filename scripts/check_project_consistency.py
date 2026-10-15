@@ -1152,6 +1152,14 @@ def live_execution_document(spec):
     positions=c.get('position_graph')
     position_text=('\n\n### 위치 그래프의 기준\n\n'+table(['표시 기준','산식','적용 범위'],positions['formula_rows'])+'\n\n'+
         '\n\n'.join(positions[k]for k in ('comparison_rule','synthetic_rule','live_rule','frontend_handoff')))if positions else ''
+    assembly=c.get('runtime_assembly')
+    assembly_text=''
+    if assembly:
+        assembly_text=('\n\n### 서버 런타임 조립과 입력 계약\n\n'+assembly['status_text']+'\n\n'+
+            table(['소스 진입점','경로','SHA-256'],[[k,v['path'],v['source_sha256']]for k,v in assembly['bindings'].items()])+'\n\n'+
+            table(['서버 설정 이름','현재 상태','입력의 의미'],[[v['name'],v['status'],v['meaning']]for v in assembly['environment']])+'\n\n'+
+            '\n\n'.join(assembly[k]for k in ('scope_rule','precision_rule','request_order_rule','missing_settings_rule','control_source_rule','reuse_rule','verification_rule'))+'\n\n'+
+            table(['실제 연결에 필요한 항목','대기 조건'],assembly['waiting']))
     rows=[]
     for o in spec['operations']:
         state=c['operations'][o['id']]
@@ -1159,7 +1167,7 @@ def live_execution_document(spec):
     return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
             table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
             table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
-            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+position_text)
+            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text)
 
 
 def validate_live_execution(spec):
@@ -1180,6 +1188,46 @@ def validate_live_execution(spec):
     if not isinstance(registry,dict):return errors+['DEV-010 live evidence registry invalid']
     indexed={v['path']:v['source_sha256']for v in spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']}
     indexed.update({p:v['declarations']['source_sha256']for p,v in spec['edge_harness']['files'].items()})
+    assembly=c.get('runtime_assembly')
+    if assembly is None:
+        if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,57):
+            errors.append('DEV-010 runtime assembly missing')
+    elif not isinstance(assembly,dict):
+        errors.append('DEV-010 runtime assembly invalid')
+    else:
+        operations=assembly.get('operation_ids')
+        if (assembly.get('format')!='jungsi.edge-runtime-assembly/v1' or
+            assembly.get('status')!='SOURCE_ASSEMBLED' or
+            not isinstance(operations,list) or len(operations)!=len(ids) or set(operations)!=ids):
+            errors.append('DEV-010 runtime assembly scope drift')
+        bindings=assembly.get('bindings')
+        expected={'native_entry':'supabase/functions/jungsi-api/index.ts',
+            'composition':'supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts'}
+        if not isinstance(bindings,dict) or set(bindings)!=set(expected):
+            errors.append('DEV-010 runtime assembly bindings invalid')
+        else:
+            for key,path in expected.items():
+                binding=bindings[key]
+                if (not isinstance(binding,dict) or binding.get('path')!=path or
+                    not isinstance(indexed.get(path),str) or binding.get('source_sha256')!=indexed.get(path)):
+                    errors.append('DEV-010 runtime assembly source binding drift: '+key)
+        environment=assembly.get('environment')
+        expected_environment={'SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','DATABASE_URL',
+            'JUNGSI_DATABASE_CA','JUNGSI_RELAY_TOKEN','SUPABASE_SECRET_KEY',
+            'JUNGSI_SUPABASE_STORAGE_BUCKET','JUNGSI_SUPABASE_STORAGE_PREFIX',
+            'JUNGSI_API_BINDING_JSON','JUNGSI_API_BINDING_SHA256','JUNGSI_API_BINDING_MAX_BYTES'}
+        if (not isinstance(environment,list) or len(environment)!=len(expected_environment) or
+            any(not isinstance(v,dict) or set(v)!={'name','status','meaning'} for v in environment) or
+            {v['name']for v in environment}!=expected_environment):
+            errors.append('DEV-010 runtime environment contract drift')
+        for key in ('status_text','scope_rule','precision_rule','request_order_rule',
+            'missing_settings_rule','control_source_rule','reuse_rule','verification_rule'):
+            if not isinstance(assembly.get(key),str) or not assembly[key].strip():
+                errors.append('DEV-010 runtime assembly rule missing: '+key)
+        waiting=assembly.get('waiting')
+        if (not isinstance(waiting,list) or not waiting or
+            any(not isinstance(v,list) or len(v)!=2 or any(not isinstance(x,str) or not x.strip()for x in v)for v in waiting)):
+            errors.append('DEV-010 runtime assembly waiting conditions missing')
     for key,row in registry.items():
         if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
             not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or

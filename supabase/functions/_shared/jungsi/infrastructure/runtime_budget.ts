@@ -1,0 +1,314 @@
+/** Private approved policy -> request-local shared reservations. No capacities or approvals default. */
+import { AccessError } from "../application/access.ts";
+import { validateScoreInput } from "../application/overall_analysis.ts";
+import type { PlatformRepositoryPort } from "../application/platform_repository.ts";
+import type { RequestClockPort } from "../application/ports.ts";
+import {
+  BUDGET_OPERATIONS,
+  type BudgetRequest,
+  type RequestBudgetPort,
+} from "../application/request_budget.ts";
+import { sessionDto } from "../application/session_service.ts";
+import {
+  BUDGET_KINDS,
+  type BudgetKind,
+  type UsageBudgetStorePort,
+  type UsageDemand,
+} from "../application/usage_budget.ts";
+import {
+  type ApprovedUsagePlan,
+  SharedRequestBudget,
+  type UsagePlanningPort,
+  type UsageReplayVerificationPort,
+} from "../application/usage_service.ts";
+import { cloneNativeJson, nativeJsonSha256, type NativeObject } from "../domain/json_value.ts";
+import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
+import { utcInstant } from "../domain/time.ts";
+import { type ApprovedRuntimeBinding, runtimeInteger } from "./runtime_settings.ts";
+import type { SupabaseRuntimeControls } from "./runtime_controls.ts";
+const ANALYSIS = [
+  "score-profile.create",
+  "overall.analyze",
+  "university.analyze",
+  "candidates.build",
+];
+const ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+function fail(): never {
+  throw new AccessError("security_policy_unavailable", 503);
+}
+function object(value: unknown): NativeObject {
+  if (
+    value === null || typeof value !== "object" || Array.isArray(value) ||
+    value instanceof JsonFloat
+  ) fail();
+  return value as NativeObject;
+}
+function inputObject(value: unknown): NativeObject {
+  if (
+    value === null || typeof value !== "object" || Array.isArray(value) ||
+    value instanceof JsonFloat
+  ) throw new AccessError("invalid_request", 422);
+  return value as NativeObject;
+}
+function id(value: unknown): string {
+  if (typeof value !== "string" || !ID.test(value)) {
+    throw new AccessError("invalid_identifier", 422);
+  }
+  return value;
+}
+export interface RuntimeExamBudget {
+  readonly examId: string;
+  readonly packVersion: string;
+  readonly academicYear: number;
+  readonly eligibleOfferingCount: bigint;
+}
+interface Dimension {
+  period: bigint;
+  ceiling: bigint;
+  standard: bigint;
+  paid: bigint;
+}
+interface Cost {
+  resultBytes: bigint;
+  base: bigint;
+  perOffering: bigint;
+}
+export class RuntimeUsagePolicy implements UsagePlanningPort {
+  private readonly dimensions: ReadonlyMap<BudgetKind, Dimension>;
+  private readonly costs: ReadonlyMap<string, Cost>;
+  readonly exams: ReadonlyMap<string, RuntimeExamBudget>;
+  readonly version: string;
+  readonly expiresAtUtc: bigint;
+  constructor(
+    raw: Uint8Array,
+    private readonly binding: ApprovedRuntimeBinding,
+    private readonly repository: PlatformRepositoryPort,
+    private readonly clock: RequestClockPort,
+    private readonly replays: UsageReplayVerificationPort,
+  ) {
+    let row: NativeObject;
+    try {
+      row = object(parseNativeJson(new TextDecoder("utf-8", { fatal: true }).decode(raw)));
+    } catch {
+      fail();
+    }
+    if (
+      row.format !== "jungsi.runtime-usage-policy/v1" || row.status !== "approved" ||
+      row.purpose !== "jungsi-api-runtime" ||
+      typeof row.version !== "string" || !ID.test(row.version) ||
+      row.approval_reference_sha256 !== binding.approvalReferenceSha256 ||
+      !Array.isArray(row.exams) || !Array.isArray(row.dimensions) || !Array.isArray(row.operations)
+    ) fail();
+    this.version = row.version;
+    try {
+      this.expiresAtUtc = utcInstant(row.expires_at as string);
+    } catch {
+      fail();
+    }
+    if (this.expiresAtUtc > binding.expiresAtUtc) fail();
+    const dimensions = new Map<BudgetKind, Dimension>();
+    for (const rawDimension of row.dimensions) {
+      const d = object(rawDimension), kind = d.kind as BudgetKind;
+      if (!BUDGET_KINDS.includes(kind) || dimensions.has(kind)) fail();
+      const value = {
+        period: runtimeInteger(d.period_seconds, 1n),
+        ceiling: runtimeInteger(d.ceiling),
+        standard: runtimeInteger(d.standard),
+        paid: runtimeInteger(d.paid),
+      };
+      if (
+        value.standard > value.ceiling || value.paid > value.ceiling ||
+        kind === "concurrent_jobs" && value.period !== 1n
+      ) fail();
+      dimensions.set(kind, Object.freeze(value));
+    }
+    if (dimensions.size !== BUDGET_KINDS.length) fail();
+    this.dimensions = dimensions;
+    const costs = new Map<string, Cost>();
+    for (const rawCost of row.operations) {
+      const c = object(rawCost), operation = c.operation as string;
+      if (
+        !BUDGET_OPERATIONS.includes(operation as typeof BUDGET_OPERATIONS[number]) ||
+        costs.has(operation)
+      ) fail();
+      const value = {
+        resultBytes: runtimeInteger(c.reserved_result_bytes, 1n),
+        base: runtimeInteger(c.base_units),
+        perOffering: runtimeInteger(c.per_offering_units),
+      };
+      if (ANALYSIS.includes(operation) && value.base < 1n) fail();
+      costs.set(operation, Object.freeze(value));
+    }
+    if (
+      binding.operations.filter((op) =>
+        BUDGET_OPERATIONS.includes(op as typeof BUDGET_OPERATIONS[number])
+      ).some((op) => !costs.has(op))
+    ) fail();
+    this.costs = costs;
+    const exams = new Map<string, RuntimeExamBudget>();
+    for (const rawExam of row.exams) {
+      const e = object(rawExam);
+      if (
+        typeof e.exam_id !== "string" || !ID.test(e.exam_id) ||
+        typeof e.pack_version !== "string" || !ID.test(e.pack_version)
+      ) fail();
+      const examId = e.exam_id,
+        packVersion = e.pack_version,
+        y = runtimeInteger(e.academic_year, 1000n);
+      if (
+        y > 9999n || exams.has(examId) ||
+        !binding.artifacts.some((a) => a.kind === "exam_pack" && a.key === examId)
+      ) fail();
+      exams.set(
+        examId,
+        Object.freeze({
+          examId,
+          packVersion,
+          academicYear: Number(y),
+          eligibleOfferingCount: runtimeInteger(e.eligible_offering_count),
+        }),
+      );
+    }
+    if (binding.operations.some((op) => ANALYSIS.includes(op)) && !exams.size) fail();
+    this.exams = exams;
+    this.assertLive();
+  }
+  assertLive(): void {
+    const now = this.clock.nowUtc();
+    if (typeof now !== "bigint" || now >= this.expiresAtUtc || now >= this.binding.expiresAtUtc) {
+      fail();
+    }
+  }
+  private async scores(request: BudgetRequest): Promise<NativeObject> {
+    const body = inputObject(request.body), owner = request.session.user.subjectId;
+    if (request.operation === "score-profile.create") {
+      return validateScoreInput(body.scores) as NativeObject;
+    }
+    if (request.operation === "overall.analyze" && !Object.hasOwn(body, "profile_id")) {
+      return validateScoreInput(body) as NativeObject;
+    }
+    let profileId: string;
+    if (request.operation === "overall.analyze") profileId = id(body.profile_id);
+    else {
+      const report = await this.repository.getReport(owner, id(request.params.report_id));
+      if (report === null || report.owner_id !== owner) {
+        throw new AccessError("report_not_found", 404);
+      }
+      profileId = id(report.profile_id);
+    }
+    const profile = await this.repository.getProfile(owner, profileId);
+    if (profile === null || profile.owner_id !== owner) {
+      throw new AccessError("profile_not_found", 404);
+    }
+    return validateScoreInput(profile.scores) as NativeObject;
+  }
+  async prepare(request: BudgetRequest): Promise<ApprovedUsagePlan> {
+    this.assertLive();
+    sessionDto(request.session, this.clock.nowUtc());
+    if (
+      !this.binding.operations.includes(request.operation as typeof this.binding.operations[number])
+    ) fail();
+    const cost = this.costs.get(request.operation);
+    if (!cost) fail();
+    const analysis = ANALYSIS.includes(request.operation);
+    let scoresHash: string | null = null,
+      contextHash: string | null = null,
+      exam: RuntimeExamBudget | undefined;
+    let count = 0n;
+    if (analysis) {
+      const scores = await this.scores(request);
+      exam = this.exams.get(scores.exam_id as string);
+      if (!exam || scores.pack_version !== exam.packVersion) {
+        throw new AccessError("exam_not_available", 422);
+      }
+      scoresHash = await nativeJsonSha256(scores);
+      if (request.operation === "university.analyze") {
+        const ids = inputObject(request.body).offering_ids;
+        if (
+          !Array.isArray(ids) || !ids.length ||
+          ids.length > this.binding.repositoryLimits.maxBatchIds
+        ) throw new AccessError("invalid_request", 422);
+        count = BigInt(new Set(ids.map(id)).size);
+      } else if (request.operation === "candidates.build") count = exam.eligibleOfferingCount;
+      contextHash = await nativeJsonSha256({
+        registry: this.binding.references.registry.sha256,
+        selection: this.binding.references.selection.sha256,
+        policy: this.version,
+        operation: request.operation,
+        exam_id: exam.examId,
+        pack_version: exam.packVersion,
+        params: cloneNativeJson(request.params),
+        offering_ids: request.operation === "university.analyze"
+          ? inputObject(request.body).offering_ids
+          : [],
+        expected_revision: Object.hasOwn(inputObject(request.body), "expected_version")
+          ? inputObject(request.body).expected_version
+          : null,
+      });
+    }
+    const replay = analysis && await this.replays.exists(request);
+    const demands: UsageDemand[] = [];
+    for (const [kind, d] of this.dimensions) {
+      if (!analysis && ["distinct_scores", "calculation_cost"].includes(kind)) continue;
+      const units = kind === "result_volume"
+        ? cost.resultBytes
+        : kind === "calculation_cost"
+        ? replay ? 0n : cost.base + cost.perOffering * count
+        : 1n;
+      const scope = kind === "distinct_scores" || kind === "calculation_cost"
+        ? exam!.examId
+        : "GLOBAL";
+      demands.push(
+        Object.freeze({
+          kind,
+          scope,
+          periodSeconds: d.period,
+          ceiling: d.ceiling,
+          capacity: request.session.tier === "paid" ? d.paid : d.standard,
+          units,
+          ...(kind === "distinct_scores" ? { fingerprint: scoresHash! } : {}),
+        }),
+      );
+    }
+    this.assertLive();
+    return Object.freeze({
+      status: "approved",
+      policyVersion: this.version,
+      approvalReferenceSha256: this.binding.approvalReferenceSha256,
+      owner: request.session.user.subjectId,
+      operation: request.operation,
+      memberTier: request.session.tier,
+      examId: exam?.examId ?? null,
+      normalizedScoresSha256: scoresHash,
+      calculationContextSha256: contextHash,
+      computation: replay ? "idempotent_replay" : "required",
+      demands: Object.freeze(demands),
+    });
+  }
+}
+export class RuntimeRequestBudget implements RequestBudgetPort {
+  private readonly shared: SharedRequestBudget;
+  constructor(
+    readonly policy: RuntimeUsagePolicy,
+    store: UsageBudgetStorePort,
+    clock: RequestClockPort,
+    replays: UsageReplayVerificationPort,
+    private readonly controls: SupabaseRuntimeControls,
+  ) {
+    this.shared = new SharedRequestBudget(policy, store, clock, replays);
+  }
+  async run<T>(request: BudgetRequest, work: () => Promise<T>): Promise<T> {
+    await this.controls.current();
+    this.policy.assertLive();
+    const result = await this.shared.run(request, async () => {
+      await this.controls.current();
+      const value = await work();
+      await this.controls.current();
+      this.policy.assertLive();
+      return value;
+    });
+    await this.controls.current();
+    this.policy.assertLive();
+    return result;
+  }
+}
