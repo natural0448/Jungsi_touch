@@ -38726,7 +38726,7 @@
             "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
           }
         ],
-        "source_sha256": "f5c52c3754a22d6f9112735552c5ad71f59b3028085412c11af8a534657238c9",
+        "source_sha256": "b5808374392152daeb03989ce3fab86e522affef938d9d3988b400f91d7f94ac",
         "symbols": [
           {
             "declarations": [
@@ -38763,11 +38763,22 @@
                     },
                     {
                       "name": "eligibleOfferingCount",
+                      "optional": true,
                       "readonly": true,
                       "tsType": {
-                        "kind": "keyword",
-                        "repr": "bigint",
-                        "value": "bigint"
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
                       }
                     }
                   ]
@@ -58059,6 +58070,233 @@
       "layer": "verification",
       "symbols": []
     },
+    "tests/edge/test_official_subject_runtime.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Invented graph and approvals only. No operating data, Auth, network or database writes."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "NativeRuntimeRequest",
+            "originalName": "NativeRuntimeRequest",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"
+          },
+          {
+            "importedName": "OverallAnalysisService",
+            "originalName": "OverallAnalysisService",
+            "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
+          },
+          {
+            "importedName": "SYNTHETIC_RUNTIME_NOW",
+            "originalName": "SYNTHETIC_RUNTIME_NOW",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
+            "importedName": "SupabaseSqlTransport",
+            "originalName": "SupabaseSqlTransport",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+          },
+          {
+            "importedName": "SyntheticUniversityData",
+            "originalName": "SyntheticUniversityData",
+            "src": "tests/edge/synthetic_university.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "nativeJsonText",
+            "originalName": "nativeJsonText",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "readBasicRuntimeSettings",
+            "originalName": "readBasicRuntimeSettings",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
+          },
+          {
+            "importedName": "syntheticRuntimeBinding",
+            "originalName": "syntheticRuntimeBinding",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
+            "importedName": "syntheticRuntimePin",
+            "originalName": "syntheticRuntimePin",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          }
+        ],
+        "source_sha256": "7966c31a50c3c1a665bcb6ce0fcfe36b080ea855339b9e5dcb6053faa48cd6f4",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  nullCount: boolean,\n  requested: \"overall.analyze\" | \"candidates.build\" = \"overall.analyze\",\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "nullCount",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "requested",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "literal",
+                              "repr": "overall.analyze",
+                              "value": {
+                                "kind": "string",
+                                "string": "overall.analyze"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "candidates.build",
+                              "value": {
+                                "kind": "string",
+                                "string": "candidates.build"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "right": "overall.analyze"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "subjectFixture"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/overall_analysis.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_runtime_binding.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_runtime_binding.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_university.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_university.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
     "tests/edge/test_overall_service.ts": {
       "declarations": {
         "imports": [
@@ -60723,7 +60961,7 @@
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "aeeeca820c42edcf73e6cf0cec2d087d8dc445acb3a7d3ff5c4ab1fd45dafd8c",
+        "source_sha256": "d25b944138187d15d6f8bc5ef36241dda369fb3a72f5d1bf2240b68198ae02d4",
         "symbols": [
           {
             "declarations": [
@@ -60752,7 +60990,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(change: (policy: NativeObject) => void = () => {})",
+                  "parameter_source": "(change: (policy: NativeObject) => void = () => {}, operations?: string[])",
                   "params": [
                     {
                       "kind": "assign",
@@ -60792,6 +61030,19 @@
                         }
                       },
                       "right": "[UNSUPPORTED]"
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "operations",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "array",
+                        "value": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
                     }
                   ]
                 },
@@ -65447,6 +65698,7 @@
     "tests/edge/test_native_source_selection.ts",
     "tests/edge/test_native_sql.ts",
     "tests/edge/test_offering_analysis.ts",
+    "tests/edge/test_official_subject_runtime.ts",
     "tests/edge/test_overall_service.ts",
     "tests/edge/test_platform_postgres.ts",
     "tests/edge/test_profile_reports.ts",
@@ -65471,5 +65723,5 @@
     "tests/edge/test_usage_service.ts",
     "tests/edge/test_year_equating.ts"
   ],
-  "unit_count": 548
+  "unit_count": 553
 }

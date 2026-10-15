@@ -60,7 +60,7 @@ export interface RuntimeExamBudget {
   readonly examId: string;
   readonly packVersion: string;
   readonly academicYear: number;
-  readonly eligibleOfferingCount: bigint;
+  readonly eligibleOfferingCount?: bigint | null;
 }
 interface Dimension {
   period: bigint;
@@ -159,13 +159,23 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
         y > 9999n || exams.has(examId) ||
         !binding.artifacts.some((a) => a.kind === "exam_pack" && a.key === examId)
       ) fail();
+      const countPresent = Object.hasOwn(e, "eligible_offering_count");
+      const eligibleOfferingCount = !countPresent
+        ? undefined
+        : e.eligible_offering_count === null
+        ? null
+        : runtimeInteger(e.eligible_offering_count);
+      if (
+        binding.operations.includes("candidates.build") &&
+        typeof eligibleOfferingCount !== "bigint"
+      ) fail();
       exams.set(
         examId,
         Object.freeze({
           examId,
           packVersion,
           academicYear: Number(y),
-          eligibleOfferingCount: runtimeInteger(e.eligible_offering_count),
+          ...(countPresent ? { eligibleOfferingCount } : {}),
         }),
       );
     }
@@ -229,7 +239,10 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
           ids.length > this.binding.repositoryLimits.maxBatchIds
         ) throw new AccessError("invalid_request", 422);
         count = BigInt(new Set(ids.map(id)).size);
-      } else if (request.operation === "candidates.build") count = exam.eligibleOfferingCount;
+      } else if (request.operation === "candidates.build") {
+        if (typeof exam.eligibleOfferingCount !== "bigint") fail();
+        count = exam.eligibleOfferingCount;
+      }
       contextHash = await nativeJsonSha256({
         registry: this.binding.references.registry.sha256,
         selection: this.binding.references.selection.sha256,

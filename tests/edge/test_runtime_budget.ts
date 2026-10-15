@@ -16,11 +16,11 @@ import { SyntheticUniversityData } from "./synthetic_university.ts";
 import { SYNTHETIC_RUNTIME_NOW, syntheticRuntimeBinding } from "./synthetic_runtime_binding.ts";
 import { assert, equal } from "./fixture.ts";
 const OWNER = "SYNTHETIC-owner";
-async function fixture(change: (policy: NativeObject) => void = () => {}) {
+async function fixture(change: (policy: NativeObject) => void = () => {}, operations?: string[]) {
   const source = new SyntheticUniversityData(), scores = source.scores();
   const f = await syntheticRuntimeBinding((d) => {
     d.scope = {
-      operations: (d.scope as NativeObject).operations,
+      operations: operations ?? (d.scope as NativeObject).operations,
       artifacts: [{ kind: "exam_pack", key: scores.exam_id }, {
         kind: "catalog",
         key: "service",
@@ -251,6 +251,41 @@ Deno.test("runtime budget invalid server policy exam identifiers remain a depend
     const f = await fixture((p) => {
       (p.exams as NativeObject[])[0][field] = "SYNTHETIC invalid";
     });
+    await denied(() => f.planner(), 503);
+  }
+});
+
+Deno.test("runtime subject-only budget preserves absent and null unused offering counts", async () => {
+  for (const present of [false, true]) {
+    const f = await fixture((p) => {
+      const exam = (p.exams as NativeObject[])[0];
+      if (present) exam.eligible_offering_count = null;
+      else Reflect.deleteProperty(exam, "eligible_offering_count");
+    }, ["score-profile.create", "overall.analyze", "report.read"]);
+    const policy = f.planner(), exam = policy.exams.get(f.scores.exam_id as string)!;
+    equal(Object.hasOwn(exam, "eligibleOfferingCount"), present);
+    equal(exam.eligibleOfferingCount, present ? null : undefined);
+    const plan = await policy.prepare(f.request());
+    assert(plan.demands.some((d) => d.kind === "calculation_cost" && d.units > 0n));
+    await denied(() => policy.prepare(f.request("candidates.build")), 503);
+  }
+});
+Deno.test("runtime candidate-enabled budget still requires a verified native offering count", async () => {
+  for (const present of [false, true]) {
+    const f = await fixture((p) => {
+      const exam = (p.exams as NativeObject[])[0];
+      if (present) exam.eligible_offering_count = null;
+      else Reflect.deleteProperty(exam, "eligible_offering_count");
+    });
+    await denied(() => f.planner(), 503);
+  }
+});
+
+Deno.test("runtime subject-only budget still rejects non-native unused count values", async () => {
+  for (const value of [true, "0", new JsonFloat("0.0")]) {
+    const f = await fixture((p) => {
+      (p.exams as NativeObject[])[0].eligible_offering_count = value;
+    }, ["overall.analyze"]);
     await denied(() => f.planner(), 503);
   }
 });

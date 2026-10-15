@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.58이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.59이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -182,7 +182,7 @@ Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제
 
 정식 설정 이름이 존재하면 빈 값·잘못된 값도 우선하며 오류를 유지한다. 정식 이름이 아예 없을 때만 위 네 기존 DISPLAY 별칭을 허용한다. 기본 privileged SUPABASE_DB_URL·migration DSN·service-role/anon 예전 키·복수 key 배열로 fallback하지 않는다. bucket/prefix·binding/head·예산에는 별칭이나 기본값을 적용하지 않으며 기존 display descriptor를 engine 승인으로 사용하지 않는다. 같은 프로젝트·실제 jungsi_backend_app·TLS·UTC/RLS guard를 유지한다.
 
-서버 승인 binding의 operation·artifact(kind/key) 집합을 실제 selection과 먼저 대조한다. private registry의 선택 항목은 approved·engine_approved=true·production_allowed=true·archive_only=false를 모두 확인한 뒤 artifact를 읽는다. control 객체를 engine 승인 자료로 가장하지 않는다. 선택한 그래프의 원문 버전·연결을 preflight하고 선택하지 않은 모형·대학별 누적·분석 자료는 기존 보류 상태를 유지한다.
+서버 승인 binding의 operation·artifact(kind/key) 집합을 실제 selection과 먼저 대조한다. private registry의 선택 항목은 approved·engine_approved=true·production_allowed=true·archive_only=false를 모두 확인한 뒤 artifact를 읽는다. control 객체를 engine 승인 자료로 가장하지 않는다. 선택한 그래프의 원문 버전·연결을 preflight하고 선택하지 않은 모형·대학별 누적·분석 자료는 기존 보류 상태를 유지한다. 공식 과목 전용 선택에서는 후보조회 미사용 eligible_offering_count의 누락과 null을 보존한다. candidates.build가 승인된 경우에는 native 정수와 실제 선택 catalog의 대상 수 일치를 계속 요구한다. 과목 성적표·국수탐2 합을 catalog·전체모형 없이 계산하고 미승인 전체 위치는 pending/null로 반환하는 합성 검사를 추가했다. 같은 소스·라우팅·선언/의존성 색인을 결속하며 실제 서비스 승인과 배포 인수는 별도다.
 
 control·선택 artifact는 원본 바이트 해시를 검증하고 native JSON의 정수·소수·유리수·조건·필드 존재 여부를 보존한다. 기존 정밀 엔진과 텍스트 SQL JSON·마이크로초 UTC 시각을 연결한다. Number 변환이나 새 모형 생성으로 대체하지 않는다. 기존 Python–Edge 독립 oracle 검산과 실제 자료·DB·엔진 실행 검수는 별개다.
 
@@ -194,7 +194,7 @@ binding의 sources는 private Storage object_key·정확한 bytes·SHA를 갖는
 
 기존 C140·공식 시험·2027 규칙 등의 정리·발행 근거를 먼저 재사용한다. Python용 로컬 registry/selection 경로를 Edge Storage 승인 포인터로 자동 해석하지 않는다. 새 업로드·재수집 없이 기존 목적·scope·현재 hash·승인·expiry가 이 runtime 계약에 맞는지 확인하고, 미보유 포인터와 재검수가 필요한 값만 보완한다. 실제 원자료·CA·비밀값·승인 한도·정본 등록부는 Git에 넣지 않는다.
 
-기존 source suite에 새 설정/현재 head/공유 읽기/예산 planner/조립/선택 그래프 합성검사 48건을 추가한다. 실제 entry는 고정 postgres@3.4.5 lock으로 별도 타입 검사하며 serve를 시작하지 않는다. 동일 후보 전체 훅·CI·oracle 통과 후에도 실제 JWT/TOTP·네이티브 업무 트랜잭션·요금제 근거·Edge/BFF/브라우저 인수가 없으면 운영 PASS를 기록하지 않는다.
+기존 source suite에 새 설정/현재 head/공유 읽기/예산 planner/조립/선택 그래프 합성검사 48건을 추가한다. 실제 entry는 고정 postgres@3.4.5 lock으로 별도 타입 검사하며 serve를 시작하지 않는다. 동일 후보 전체 훅·CI·oracle 통과 후에도 실제 JWT/TOTP·네이티브 업무 트랜잭션·요금제 근거·Edge/BFF/브라우저 인수가 없으면 운영 PASS를 기록하지 않는다. 과목 전용 누락/null 보존·후보 활성 시 정수 필수·모형 없는 과목 계산/보류·범위 밖 후보 조기 차단의 합성 검사 5건을 추가한다. 저장소 요청 상한은 최신성 확인과 예산 예약/정산을 포함한 실제 경로 측정에 맞춰 비공개 승인 설정에서 결속하고, 부족한 상한을 자동 확대하거나 확인을 생략하지 않는다.
 
 | 실제 연결에 필요한 항목 | 대기 조건 |
 | --- | --- |
@@ -202,8 +202,8 @@ binding의 sources는 private Storage object_key·정확한 bytes·SHA를 갖는
 | 네이티브 DB005 — 실제 적용 완료 | 정확Git005의3개 신규 예산 테이블·자료형/제약/인덱스·RLS·최소권한과 기존 객체 메타데이터 보존을 확인했다. 같은 API 드라이버 read-only 재조회도 통과했다. 기존003/005를 다시 적용하지 않고 실제 원자 예산·보고서·소유권·멱등·버전 충돌 검수는 별도로 수행한다. |
 | 공식 과목 시험팩 — 목적별 승인 완료 | 현재native/Python decoder와 저장된 공식 근거를 독립 대조했다. 과목 성적표·4개 표준점수 합만 승인하며 전체/대학별 누백·연도보정·판단·forecast는 승계하지 않는다. 이전localfalse와 정본 전역상태를 보존하고 새 정확승인·불변Storage·readback을 결속한다. |
 | 현재 catalog·모형 — 최소 후보 대기 | 최신 단일정본의 native 후보·검수·출처/타입/연도/모집행 맥락을 고정한다. C140/v21_1은 역사 검수로 보존하며 현재 catalog로 재승격하지 않는다. 미검증 추정모형은 미선택·pending을 유지한다. |
-| 현재 승인 head와 선택 자료 포인터 — 등록 대기 | private bucket/prefix·registry/selection/head/usage_policy의 정확 object_key·bytes·SHA·목적·scope·승인 참조·expiry를 현재 binding에 결속하고 같은 Storage readback 및 preflight를 검수한다. |
-| 승인 요청 예산 — 결정/활성화 구분 | 기존 Pro Spend Cap 활성 기술 관측과 비공개5차원·작업비용·worker/lease 결정을 기록했다. 정확 선택catalog의 eligible수와 시험/pack·결과크기에 결속한 운영정책 파싱·원자적 multiworker 검수는 대기다. ceiling/GLOBAL은 사용자별 범위이며 조직전체금액 상한이 아니다. 실제청구/사용량 원문은 Git/Drive로 내보내지 않는다. |
+| 현재 승인 head와 선택 자료 포인터 — 등록 대기 | private bucket/prefix·registry/selection/head/usage_policy의 정확 object_key·bytes·SHA·목적·scope·승인 참조·expiry를 현재 binding에 결속하고 같은 Storage readback 및 preflight를 검수한다. 기존 private 버킷의 native Storage metadata에서 비공개 여부와 정수 상한을 읽기 전용으로 확인했다. 객체 업로드/readback 및 현재 head 채택은 아직 별도다. |
+| 승인 요청 예산 — 결정/활성화 구분 | 기존 비공개 결정을 보존하고 실제 과목 요청의 읽기량을 측정한다. 후보조회가 미선택이면 eligible 수는 누락/null을 보존하며, 후보 활성 시에만 현재 catalog의 정확한 수가 필요하다. 시험/pack·결과크기·읽기상한에 결속한 운영정책 파싱과 원자적 multiworker 검수는 대기다. ceiling/GLOBAL은 사용자별 범위이며 조직전체금액 상한이 아니다. 실제청구/사용량 원문은 Git/Drive로 내보내지 않는다. |
 | 실제 사용자·관리자 검수 — 정상OTP 완료/새API 대기 | 계정 주인이 정상OTP 입력을 완료했고 같은 브라우저의 /admin 대시보드 진입을 관측했다. 새API와 동일 배포SHA·같은 Bearer의 getUser/본인profiles/aal2·권한 반례는 BFF 연결 후 별도로 검수한다. 토큰·OTP·쿠키·QR비밀은 수집/전달하지 않는다. |
 | 운영 진입점·BFF — 화면 담당 회신 대기 | 사용자가 외부 화면 담당 회신을 전달하기로 했다. 실제 BFF URL/배포설정과 기존플랫폼을 확인한 뒤 같은 Edge후보의 운영연결·CSRF·브라우저·세 보안gate를 검수한다. 새유료addon/호스팅을 도입하지 않는다. |
 
@@ -264,4 +264,4 @@ live는 승인/발행/선택된 서버 값만 표시한다. 조합별 서버 계
 
 
 
-<!-- jungsi:generated spec_sha256=bb25a5a2422e3c942a9d17cf7973f8eca3f29b2c20d3f10a854bee14c52be979 -->
+<!-- jungsi:generated spec_sha256=f01c5110e82da2464f606855c7663d65e6a579e66e0b67790ab587b5883d34b6 -->
