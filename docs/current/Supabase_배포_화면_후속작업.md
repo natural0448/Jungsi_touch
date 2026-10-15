@@ -305,4 +305,4 @@ session → 과목 전용 본인 profile/report → 별도 승인 catalog → �
 
 
 
-<!-- jungsi:generated spec_sha256=d4566c6413a3fa4d36d64a0d646c4bde85653f8d50dc83044e75b58264015d9c -->
+<!-- jungsi:generated spec_sha256=b54ec99ea715d791ad02a87ac92c95c681a3a5d9be9d48e1cfe17c1623834248 -->
