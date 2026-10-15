@@ -1392,6 +1392,28 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
 
 class SupabaseDeploymentContractTests(unittest.TestCase):
 
+    def test_current_external_live_report_preserves_history_and_reports_only_observed_scope(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        self.assertEqual(validate_live_execution(self.spec),[])
+        text=live_execution_document(self.spec)
+        self.assertIn('EXTERNAL_REPORTED_FUNCTIONAL_PASS',text)
+        self.assertIn('operation_scope_not_approved',text)
+        self.assertEqual(self.spec['supabase_deployment_contract']['live_execution']['post_registration_acceptance']['real_user_acceptance'],'NOT_RUN')
+
+    def test_partial_external_live_report_cannot_promote_unrun_business_or_approval(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in [('P2_save_analysis_reread','PASS'),('ownership','PASS'),('business_native_accepted',1),('search_scope_approved',True),('source_fix_deployed',True)]:
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['post_live_receipt'][key]=value
+            self.assertIn('DEV-010 partial BFF report cannot promote unrun business or approval',validate_live_execution(wrong))
+
+    def test_scope_error_cannot_be_success_or_hide_invalid_policy(self):
+        from check_project_consistency import validate_live_execution
+        wrong=deepcopy(self.spec)
+        wrong['supabase_deployment_contract']['live_execution']['post_live_receipt']['scope_error_contract']['invalid_binding_or_policy']['code']='operation_scope_not_approved'
+        self.assertIn('DEV-010 operation scope classification cannot expand approval or bypass policy',validate_live_execution(wrong))
+
+
     def test_post_registration_readiness_cannot_be_used_as_user_business_or_performance_acceptance(self):
         from check_project_consistency import validate_live_execution
         for key,value in (('real_user_acceptance','PASS'),('BFF_live_browser','PASS'),('business_native_accepted',1),('performance_acceptance',True)):

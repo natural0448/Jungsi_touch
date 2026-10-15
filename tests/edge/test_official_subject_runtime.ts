@@ -163,7 +163,7 @@ Deno.test("subject-only approval cannot enable candidate operations or fetch the
     thrown = e;
   }
   assert(thrown instanceof AccessError);
-  equal(thrown.code, "security_policy_unavailable");
+  equal(thrown.code, "operation_scope_not_approved");
   equal(thrown.http, 503);
   equal(f.calls.length, 0);
   equal(f.sqlCalls(), 0);

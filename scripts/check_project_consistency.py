@@ -901,7 +901,7 @@ SECURITY_ANALYSIS={"score-profile.create","overall.analyze","university.analyze"
 SECURITY_READS={"history.search","recruitment.read","report.read","offerings.search",
                 "offering.read","report.export","statistics.read","forecast.published.read","shortlist.update"}
 SECURITY_ERRORS={"rate_limit_exceeded":(429,True),"analysis_quota_exceeded":(429,True),
-                 "security_policy_unavailable":(503,False)}
+                 "security_policy_unavailable":(503,False),"operation_scope_not_approved":(503,False)}
 SECURITY_ERROR_FIELDS={"code","http","retry_after_required","status"}
 SECURITY_BOUNDARY_IDS={
     "forbidden":{"private_source_and_model","unapproved_internal_detail","private_reference_and_download","credential_and_token"},
@@ -1174,12 +1174,12 @@ def live_execution_document(spec):
     intake_text=''
     if intake:
         transport=intake['transport']
-        intake_text=('\n\n### 화면 BFF 회신 수신과 등록·실연결 게이트\n\n'+intake['intake_rule']+'\n\n'+
+        intake_text=('\n\n### 최초 화면 BFF 회신과 등록 이력\n\n'+intake['intake_rule']+'\n\n'+
             table(['소스/외부 보고','참조'],[
                 ['화면 소스',intake['frontend_source_commit']],
                 ['화면팀 보고 Worker / 배포 시각',intake['reported_worker_version']+' / '+intake['reported_deployed_at_UTC']],
                 ['실제 Worker 독립 관측',intake['worker_deployment_independently_observed']],
-                ['현재 모드 / 새 API 호출',intake['reported_state']['mode']+' / '+str(intake['reported_state']['new_API_calls'])],
+                ['최초 회신 당시 모드 / 새 API 호출',intake['reported_state']['mode']+' / '+str(intake['reported_state']['new_API_calls'])],
                 ['Owner 설정 등록',intake['registration']['status']]])+'\n\n'+
             table(['연결 항목','소스에서 대조한 계약'],[
                 ['정상 진입 / API base',transport['normal_entry_path']+' / '+transport['api_base_setting']+' 끝은 '+transport['api_base_ends_with']],
@@ -1192,14 +1192,28 @@ def live_execution_document(spec):
     post_text=''
     if post:
         owner=post['owner_registration'];ready=post['readiness'];boundary=post['boundary_checks']
-        post_text=('\n\n### 설정 등록 후 실제 준비 검수와 제한 BFF live 순서\n\n'+post['interpretation_rule']+'\n\n'+
+        post_text=('\n\n### 설정 등록 직후 준비 검수 이력\n\n'+post['interpretation_rule']+'\n\n'+
             table(['확인 범위','현재 결과','증거 경계'],[
                 ['새5설정',str(owner['matched_setting_count'])+'/5 digest 일치 / '+owner['reported_at_UTC'],'Owner 보고와 승인파일 대조; Dashboard 독립재측정 NOT_RUN'],
                 ['같은 함수 readiness',str(ready['http'])+' '+ready['status']+' / '+ready['at_KST'],ready['cache_control']+'; health 준비검수이며 업무 인수 아님'],
                 ['잘못된 relay',str(boundary['wrong_relay_http'])+' '+boundary['wrong_relay_code'],boundary['at_KST']+' / no-store'],
                 ['실사용자 Bearer 누락',str(boundary['missing_user_Bearer_http'])+' '+boundary['missing_user_Bearer_code'],'실사용자 getUser/본인profiles/aal2 인수 아님'],
-                ['실사용자 / Worker등록 / BFF브라우저',post['real_user_acceptance']+' / '+post['Worker_relay_registration']+' / '+post['BFF_live_browser'],'정상로그인 같은BFF 통로로 다음 검수'],
+                ['등록 직후 실사용자 / Worker등록 / BFF브라우저',post['real_user_acceptance']+' / '+post['Worker_relay_registration']+' / '+post['BFF_live_browser'],'정상로그인 같은BFF 통로로 다음 검수'],
                 ['업무native / 배포인수',str(post['business_native_accepted'])+'/22 / '+str(post['business_deployment_accepted'])+'/22','지속성능·운영3gate·일반공개 미완료']])+'\n\n'+post['next_rule']+'\n\n'+post['scope_rule'])
+    current=c.get('post_live_receipt')
+    current_text=''
+    if current:
+        current_text=('\n\n### 현재 화면팀 실연결 회신과 남은 검수\n\n'+current['interpretation_rule']+'\n\n'+
+            table(['항목','화면팀 보고 / 검수 경계'],[
+                ['현재 화면 / Worker / 모드',current['frontend_source_commit']+' / '+current['worker_version']+' / '+current['mode']],
+                ['Worker relay 등록 / 실제 Bearer 세션',current['Worker_relay_registration']+' / '+current['real_Bearer_session']],
+                ['aal1 / aal2 세션',current['session_observation']],
+                ['P1 / P3 검색',current['search_observation']],
+                ['P2 저장·분석·재조회',current['P2_save_analysis_reread']],
+                ['P4 관측',current['P4_observation']],
+                ['소유권 / CSRF / 만료갱신',current['ownership']+' / '+current['CSRF']+' / '+current['expiry_refresh']],
+                ['업무 native / 배포 인수',str(current['business_native_accepted'])+'/22 / '+str(current['business_deployment_accepted'])+'/22'],
+                ['서비스 오류 분류',current['scope_error_rule']]])+'\n\n'+current['next_rule'])
     rows=[]
     for o in spec['operations']:
         state=c['operations'][o['id']]
@@ -1207,7 +1221,7 @@ def live_execution_document(spec):
     return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
             table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
             table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
-            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text+intake_text+post_text)
+            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text+intake_text+post_text+current_text)
 
 
 def validate_live_execution(spec):
@@ -1418,6 +1432,35 @@ def validate_live_execution(spec):
             source.get('verification')!='HTTP200_PLUS_PINNED_IMPLEMENTATION_PATH' or
             not isinstance(relay,dict)or relay.get('Dashboard_digest_reread')is not False or relay.get('raw_value_published')is not False):
             errors.append('DEV-010 source graph or relay evidence scope drift')
+    current=c.get('post_live_receipt')
+    if current is None:
+        if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,65):
+            errors.append('DEV-010 current BFF live receipt missing')
+    elif not isinstance(current,dict):
+        errors.append('DEV-010 current BFF live receipt invalid')
+    else:
+        evidence=registry.get('OPS-BFF-LIVE-EXTERNAL-20261016',{})
+        if (current.get('format')!='jungsi.external-bff-live-receipt/v1' or
+            current.get('status')!='EXTERNAL_REPORTED_FUNCTIONAL_PASS_PARTIAL' or current.get('mode')!='live' or
+            current.get('Worker_relay_registration')!='EXTERNAL_REPORTED_FUNCTIONAL_PASS' or
+            current.get('real_Bearer_session')!='EXTERNAL_REPORTED_FUNCTIONAL_PASS' or
+            not re.fullmatch(r'[0-9a-f]{40}',str(current.get('frontend_source_commit',''))) or
+            type(current.get('reply_bytes'))is not int or current['reply_bytes']<=0 or
+            not re.fullmatch(r'[0-9a-f]{64}',str(current.get('reply_receipt_sha256',''))) or
+            not isinstance(evidence,dict) or evidence.get('receipt_sha256')!=current.get('reply_receipt_sha256') or
+            evidence.get('operations')!=[] or evidence.get('does_not_imply_operation_acceptance')is not True):
+            errors.append('DEV-010 current BFF functional report needs scoped external evidence')
+        if (any(current.get(k)!='NOT_RUN'for k in ('P2_save_analysis_reread','ownership','CSRF','expiry_refresh')) or
+            any(type(current.get(k))is not int or current[k]!=0 for k in ('business_native_accepted','business_deployment_accepted')) or
+            any(current.get(k)is not False for k in ('independently_observed_browser','production_ready','search_scope_approved','source_fix_deployed'))):
+            errors.append('DEV-010 partial BFF report cannot promote unrun business or approval')
+        if (current.get('selected_runtime_operations')!=['session.read','score-profile.create','overall.analyze','report.read','report.export'] or
+            current.get('search_error')!={'http':503,'reported_code':'security_policy_unavailable','source_candidate_code':'operation_scope_not_approved'} or
+            current.get('scope_error_contract')!={'valid_binding_excluded_operation':{'http':503,'code':'operation_scope_not_approved'},'invalid_binding_or_policy':{'http':503,'code':'security_policy_unavailable'},'success_or_quota_bypass':False}):
+            errors.append('DEV-010 operation scope classification cannot expand approval or bypass policy')
+        for key in ('interpretation_rule','session_observation','search_observation','P4_observation','scope_error_rule','next_rule'):
+            if not isinstance(current.get(key),str) or not current[key].strip():
+                errors.append('DEV-010 current BFF report boundary missing: '+key)
     for key,row in registry.items():
         if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
             not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or

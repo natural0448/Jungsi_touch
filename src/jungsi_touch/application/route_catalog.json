@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.64",
-  "source_sha256": "77503d296e3deda98a8754157d7db897fe73b6cf6295c254a624bdff50c17d90",
+  "spec_version": "1.9.65",
+  "source_sha256": "deb0832d1bb6b0ac0559c3b27c1a608682d81e5b1e29bffdc1ee779ab70e913a",
   "pages": [
     {
       "id": "PAGE-01",
@@ -9300,6 +9300,12 @@
       },
       {
         "code": "security_policy_unavailable",
+        "http": 503,
+        "retry_after_required": false,
+        "status": "in_progress"
+      },
+      {
+        "code": "operation_scope_not_approved",
         "http": 503,
         "retry_after_required": false,
         "status": "in_progress"

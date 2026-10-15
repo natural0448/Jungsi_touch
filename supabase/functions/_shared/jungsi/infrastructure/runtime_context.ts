@@ -42,10 +42,10 @@ export class NativeRuntimeRequest {
   binding(): Promise<ApprovedRuntimeBinding> {
     this.bindingValue ??= (async () => {
       const binding = await readApprovedRuntimeBinding(this.env, this.basic(), this.clock.nowUtc());
-      if (
-        this.operation === null ||
-        this.operation !== "health.ready" && !binding.operations.includes(this.operation)
-      ) fail();
+      if (this.operation === null) fail();
+      if (this.operation !== "health.ready" && !binding.operations.includes(this.operation)) {
+        throw new AccessError("operation_scope_not_approved", 503);
+      }
       return binding;
     })();
     return this.bindingValue;
