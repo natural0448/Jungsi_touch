@@ -26502,7 +26502,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
           }
         ],
-        "source_sha256": "b3f68c8592d35af80731c6df5aa994b5e16b9f21239ba3e914462e9ae11400a5",
+        "source_sha256": "0e65df0c643c91d9420d0e95b5d55b1f4274cfdf52c272c788a5718ab7854820",
         "symbols": [
           {
             "declarations": [
@@ -27198,6 +27198,43 @@
               }
             ],
             "name": "frozen"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Rational",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "Rational",
+                        "specifier": "./exact.ts"
+                      },
+                      "typeName": "Rational"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rationalCurveScore"
           },
           {
             "declarations": [
@@ -56735,7 +56772,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "5f03b609b0fc47565a980371867f8bade4150ba6a00e76e2cefe63f99344c6a0",
+        "source_sha256": "e2207b416ebf3bcbf1cf48fdb3e121e3e055f1b3e54a93d0ad1f7db4cca80ede",
         "symbols": [
           {
             "declarations": [
@@ -57184,6 +57221,64 @@
               }
             ],
             "name": "mockServingFixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  sources: Map<string, NativeObject>,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "sources",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Map",
+                        "value": {
+                          "typeName": "Map",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "selectedRationalCurve"
           }
         ]
       },
@@ -64004,6 +64099,11 @@
             "src": "supabase/functions/_shared/jungsi/domain/university_distribution.ts"
           },
           {
+            "importedName": "Rational",
+            "originalName": "Rational",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
             "importedName": "assert",
             "originalName": "assert",
             "src": "tests/edge/fixture.ts"
@@ -64039,8 +64139,35 @@
             "src": "supabase/functions/_shared/jungsi/domain/university_distribution.ts"
           }
         ],
-        "source_sha256": "f967f924eff434b3d1368141244b7995630d271ca79c709d7adb8f441e7cc77e",
-        "symbols": []
+        "source_sha256": "c7eae343237e52e4233dcf95a89eb09d7e86e9a8d1ffd91ea39e6e4ed389b917",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "syntheticRationalCurve"
+          }
+        ]
       },
       "dependencies": [
         {
@@ -65723,5 +65850,5 @@
     "tests/edge/test_usage_service.ts",
     "tests/edge/test_year_equating.ts"
   ],
-  "unit_count": 553
+  "unit_count": 564
 }
