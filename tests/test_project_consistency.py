@@ -1392,6 +1392,43 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
 
 class SupabaseDeploymentContractTests(unittest.TestCase):
 
+    def test_bff_source_reply_cannot_be_promoted_to_registration_or_live_acceptance(self):
+        from check_project_consistency import validate_live_execution
+        for change in ('owner','native','browser'):
+            wrong=deepcopy(self.spec)
+            intake=wrong['supabase_deployment_contract']['live_execution']['bff_reply_intake']
+            if change=='owner':
+                intake['registration']['settings_registered']=True
+                expected='DEV-010 BFF registration needs owner receipt'
+            elif change=='native':
+                intake['source_review_is_operating_acceptance']=True
+                expected='DEV-010 BFF reply cannot certify live acceptance'
+            else:
+                intake['reported_state']['live_browser']='PASS'
+                expected='DEV-010 BFF synthetic reply is not native evidence'
+            self.assertIn(expected,validate_live_execution(wrong))
+
+    def test_bff_same_bearer_relay_and_ingress_contract_cannot_drift(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in (('caller_appends','/api/v1/api/v1'),('relay_header','X-Other-Relay'),('same_verified_Bearer_required',False),('same_verified_Bearer_required',1)):
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['bff_reply_intake']['transport'][key]=value
+            self.assertIn('DEV-010 BFF source transport contract drift',validate_live_execution(wrong))
+
+    def test_bff_source_hash_and_required_owner_browser_security_gates_are_bound(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        wrong=deepcopy(self.spec)
+        intake=wrong['supabase_deployment_contract']['live_execution']['bff_reply_intake']
+        intake['source_review']['service']['supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts']='f'*64
+        intake['acceptance_gates'].pop()
+        errors=validate_live_execution(wrong)
+        self.assertIn('DEV-010 BFF service source binding drift',errors)
+        self.assertIn('DEV-010 BFF remaining acceptance gates drift',errors)
+        text=live_execution_document(self.spec)
+        for value in ('PENDING_OWNER_RECEIPT','BFF_LIVE_BROWSER','SECURITY_3_GATES','새 API 호출'):
+            self.assertIn(value,text)
+
+
     def test_preconnection_cases_follow_canonical_routes_and_cover_all_operations(self):
         from check_project_consistency import validate_live_execution,live_execution_document
         wrong=deepcopy(self.spec)
