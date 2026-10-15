@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
   "contract_ref": "official_history_db_display_contract",
-  "contract_version": "1.9.63",
+  "contract_version": "1.9.64",
   "requirements": [
     "REQ-01",
     "REQ-08",

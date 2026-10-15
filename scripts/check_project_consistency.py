@@ -1188,6 +1188,18 @@ def live_execution_document(spec):
                 ['캐시 / 쓰기 멱등',transport['fetch_cache']+' / '+transport['write_header']]])+'\n\n'+
             table(['남은 인수','담당','상태','필요 증거'],[[g['id'],g['owner'],g['status'],g['expected']]for g in intake['acceptance_gates']])+'\n\n'+
             intake['registration']['private_delivery_rule']+'\n\n'+intake['verification_rule']+'\n\n'+intake['reuse_rule'])
+    post=c.get('post_registration_acceptance')
+    post_text=''
+    if post:
+        owner=post['owner_registration'];ready=post['readiness'];boundary=post['boundary_checks']
+        post_text=('\n\n### 설정 등록 후 실제 준비 검수와 제한 BFF live 순서\n\n'+post['interpretation_rule']+'\n\n'+
+            table(['확인 범위','현재 결과','증거 경계'],[
+                ['새5설정',str(owner['matched_setting_count'])+'/5 digest 일치 / '+owner['reported_at_UTC'],'Owner 보고와 승인파일 대조; Dashboard 독립재측정 NOT_RUN'],
+                ['같은 함수 readiness',str(ready['http'])+' '+ready['status']+' / '+ready['at_KST'],ready['cache_control']+'; health 준비검수이며 업무 인수 아님'],
+                ['잘못된 relay',str(boundary['wrong_relay_http'])+' '+boundary['wrong_relay_code'],boundary['at_KST']+' / no-store'],
+                ['실사용자 Bearer 누락',str(boundary['missing_user_Bearer_http'])+' '+boundary['missing_user_Bearer_code'],'실사용자 getUser/본인profiles/aal2 인수 아님'],
+                ['실사용자 / Worker등록 / BFF브라우저',post['real_user_acceptance']+' / '+post['Worker_relay_registration']+' / '+post['BFF_live_browser'],'정상로그인 같은BFF 통로로 다음 검수'],
+                ['업무native / 배포인수',str(post['business_native_accepted'])+'/22 / '+str(post['business_deployment_accepted'])+'/22','지속성능·운영3gate·일반공개 미완료']])+'\n\n'+post['next_rule']+'\n\n'+post['scope_rule'])
     rows=[]
     for o in spec['operations']:
         state=c['operations'][o['id']]
@@ -1195,7 +1207,7 @@ def live_execution_document(spec):
     return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
             table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
             table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
-            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text+intake_text)
+            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text+intake_text+post_text)
 
 
 def validate_live_execution(spec):
@@ -1216,6 +1228,10 @@ def validate_live_execution(spec):
     if not isinstance(registry,dict):return errors+['DEV-010 live evidence registry invalid']
     indexed={v['path']:v['source_sha256']for v in spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']}
     indexed.update({p:v['declarations']['source_sha256']for p,v in spec['edge_harness']['files'].items()})
+    post_scope=c.get('post_registration_acceptance')
+    post_scope=post_scope if isinstance(post_scope,dict)else {}
+    post_owner=post_scope.get('owner_registration')
+    post_owner=post_owner if isinstance(post_owner,dict)else {}
     assembly=c.get('runtime_assembly')
     if assembly is None:
         if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,57):
@@ -1307,7 +1323,7 @@ def validate_live_execution(spec):
         errors.append('DEV-010 BFF reply intake invalid')
     else:
         if (intake.get('format')!='jungsi.bff-reply-intake/v1' or
-            intake.get('status')!='SOURCE_REVIEWED_REGISTRATION_PENDING' or
+            intake.get('status')!=('READINESS_VERIFIED_USER_BFF_PENDING'if post_scope else'SOURCE_REVIEWED_REGISTRATION_PENDING') or
             not re.fullmatch(r'[0-9a-f]{40}',str(intake.get('basis_commit',''))) or
             not re.fullmatch(r'[0-9a-f]{40}',str(intake.get('frontend_source_commit',''))) or
             not re.fullmatch(r'[0-9a-f]{64}',str(intake.get('reply_receipt_sha256',''))) or
@@ -1325,9 +1341,14 @@ def validate_live_execution(spec):
         registration=intake.get('registration')
         if (not isinstance(registration,dict) or
             set(registration)!={'status','settings_registered','receipt_sha256','pending_names','owner','private_delivery_rule'} or
-            registration.get('status')!='PENDING_OWNER_RECEIPT' or
-            registration.get('settings_registered')is not False or registration.get('receipt_sha256')is not None or
-            registration.get('pending_names')!=['JUNGSI_SUPABASE_STORAGE_BUCKET', 'JUNGSI_SUPABASE_STORAGE_PREFIX', 'JUNGSI_API_BINDING_JSON', 'JUNGSI_API_BINDING_SHA256', 'JUNGSI_API_BINDING_MAX_BYTES']):
+            (post_scope and(
+                registration.get('status')!='OWNER_REPORTED_REGISTERED' or registration.get('settings_registered')is not True or
+                registration.get('receipt_sha256')!=post_owner.get('receipt_sha256') or
+                not re.fullmatch(r'[0-9a-f]{64}',str(registration.get('receipt_sha256',''))) or registration.get('pending_names')!=[])) or
+            (not post_scope and(
+                registration.get('status')!='PENDING_OWNER_RECEIPT' or registration.get('settings_registered')is not False or
+                registration.get('receipt_sha256')is not None or
+                registration.get('pending_names')!=['JUNGSI_SUPABASE_STORAGE_BUCKET', 'JUNGSI_SUPABASE_STORAGE_PREFIX', 'JUNGSI_API_BINDING_JSON', 'JUNGSI_API_BINDING_SHA256', 'JUNGSI_API_BINDING_MAX_BYTES']))):
             errors.append('DEV-010 BFF registration needs owner receipt')
         reported=intake.get('reported_state',{})
         if (not isinstance(reported,dict) or reported.get('mode')!='synthetic' or
@@ -1344,8 +1365,59 @@ def validate_live_execution(spec):
         if (not isinstance(gates,list) or len(gates)!=len(expected_gates) or
             any(not isinstance(g,dict)or set(g)!={'id','owner','status','expected'}for g in gates) or
             {g.get('id')for g in gates}!=expected_gates or
-            any(g.get('status')!='NOT_RUN'or any(not isinstance(g.get(k),str)or not g[k].strip()for k in ('owner','expected'))for g in gates)):
+            any(g.get('status')!=({'OWNER_REGISTRATION':'OWNER_REPORTED_MATCHED','EDGE_READY_AUTH':'IN_PROGRESS'}.get(g.get('id'),'NOT_RUN')if post_scope else'NOT_RUN')or any(not isinstance(g.get(k),str)or not g[k].strip()for k in ('owner','expected'))for g in gates)):
             errors.append('DEV-010 BFF remaining acceptance gates drift')
+    post=c.get('post_registration_acceptance')
+    if post is None:
+        if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,64):
+            errors.append('DEV-010 post-registration acceptance missing')
+    elif not isinstance(post,dict):
+        errors.append('DEV-010 post-registration acceptance invalid')
+    else:
+        owner=post.get('owner_registration',{});ready=post.get('readiness',{});boundary=post.get('boundary_checks',{})
+        owner_entry=registry.get('OPS-OWNER-SETTINGS-REGISTERED-20261015',{})
+        ready_entry=registry.get('OPS-POSTREG-READINESS-20261015',{})
+        boundary_entry=registry.get('OPS-POSTREG-BOUNDARIES-20261015',{})
+        if (post.get('format')!='jungsi.post-registration-acceptance/v1' or
+            post.get('status')!='READINESS_PASS_PENDING_LIMITED_BFF_LIVE_USER_ACCEPTANCE' or
+            not isinstance(owner,dict) or
+            not re.fullmatch(r'[0-9a-f]{64}',str(owner.get('receipt_sha256',''))) or
+            type(owner.get('matched_setting_count'))is not int or owner['matched_setting_count']!=5 or
+            owner.get('verification')!='OWNER_REPORT_AND_APPROVED_LOCAL_DIGEST_MATCH' or
+            owner.get('independent_Dashboard_reread')is not False or
+            not isinstance(owner_entry,dict) or owner_entry.get('receipt_sha256')!=owner.get('receipt_sha256') or
+            owner_entry.get('operations')!=[] or owner_entry.get('does_not_imply_operation_acceptance')is not True):
+            errors.append('DEV-010 owner report evidence scope drift')
+        if (not isinstance(ready,dict) or type(ready.get('http'))is not int or ready['http']!=200 or
+            ready.get('status')!='ready' or ready.get('cache_control')!='no-store' or
+            ready.get('public_fields')!=['status','server_timezone'] or
+            not re.fullmatch(r'[0-9a-f]{64}',str(ready.get('receipt_sha256',''))) or
+            ready.get('scope')!='ACTUAL_NATIVE_PREPARATION_NOT_USER_BUSINESS_ACCEPTANCE' or
+            not isinstance(ready_entry,dict) or ready_entry.get('receipt_sha256')!=ready.get('receipt_sha256') or
+            ready_entry.get('operations')!=[] or ready_entry.get('does_not_imply_operation_acceptance')is not True):
+            errors.append('DEV-010 readiness requires scoped real response evidence')
+        if (not isinstance(boundary,dict) or
+            boundary.get('wrong_relay_http')!=403 or boundary.get('wrong_relay_code')!='relay_authentication_failed' or
+            boundary.get('missing_user_Bearer_http')!=401 or boundary.get('missing_user_Bearer_code')!='authentication_required' or
+            boundary.get('real_user_Bearer')is not False or boundary.get('cache_control')!='no-store' or
+            not re.fullmatch(r'[0-9a-f]{64}',str(boundary.get('receipt_sha256',''))) or
+            not isinstance(boundary_entry,dict) or boundary_entry.get('receipt_sha256')!=boundary.get('receipt_sha256') or
+            boundary_entry.get('operations')!=[] or boundary_entry.get('does_not_imply_operation_acceptance')is not True):
+            errors.append('DEV-010 post-registration denial evidence drift')
+        if (any(post.get(k)!='NOT_RUN'for k in ('real_user_acceptance','Worker_relay_registration','BFF_live_browser')) or
+            any(type(post.get(k))is not int or post[k]!=0 for k in ('business_native_accepted','business_deployment_accepted')) or
+            any(post.get(k)is not False for k in ('performance_acceptance','production_ready','new_data_or_authority_approval'))):
+            errors.append('DEV-010 readiness cannot promote user business or performance acceptance')
+        expected_sequence=['WORKER_OWNER_REGISTER_VERIFIED_RELAY','FRONTEND_PREVIEW_GATE_LIVE_DEPLOY','OWNER_NORMAL_LOGIN_OTP_SAME_BFF_USER_CHECK','APPROVED_SUBJECT_ONLY_PAGE_CASES','SEPARATELY_APPROVED_CATALOG_CONVERSION_CURVES_CANDIDATES_AND_SECURITY']
+        if (post.get('next_sequence')!=expected_sequence or post.get('preview_gate_preserved')is not True or
+            post.get('selected_runtime_operations')!=['session.read','score-profile.create','overall.analyze','report.read','report.export']):
+            errors.append('DEV-010 limited BFF sequence or approved scope drift')
+        source=post.get('source_graph',{});relay=post.get('relay_match',{})
+        if (not isinstance(source,dict)or source.get('fresh_remote_bundle_download')is not False or
+            source.get('per_call_internal_trace_exported')is not False or
+            source.get('verification')!='HTTP200_PLUS_PINNED_IMPLEMENTATION_PATH' or
+            not isinstance(relay,dict)or relay.get('Dashboard_digest_reread')is not False or relay.get('raw_value_published')is not False):
+            errors.append('DEV-010 source graph or relay evidence scope drift')
     for key,row in registry.items():
         if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
             not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or

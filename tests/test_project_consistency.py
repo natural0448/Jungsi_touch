@@ -1392,13 +1392,41 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
 
 class SupabaseDeploymentContractTests(unittest.TestCase):
 
+    def test_post_registration_readiness_cannot_be_used_as_user_business_or_performance_acceptance(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in (('real_user_acceptance','PASS'),('BFF_live_browser','PASS'),('business_native_accepted',1),('performance_acceptance',True)):
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['post_registration_acceptance'][key]=value
+            self.assertIn('DEV-010 readiness cannot promote user business or performance acceptance',validate_live_execution(wrong))
+
+    def test_post_registration_owner_report_and_readiness_require_their_actual_evidence(self):
+        from check_project_consistency import validate_live_execution
+        wrong=deepcopy(self.spec)
+        post=wrong['supabase_deployment_contract']['live_execution']['post_registration_acceptance']
+        post['owner_registration']['independent_Dashboard_reread']=True
+        post['readiness']['receipt_sha256']='f'*64
+        result=validate_live_execution(wrong)
+        self.assertIn('DEV-010 owner report evidence scope drift',result)
+        self.assertIn('DEV-010 readiness requires scoped real response evidence',result)
+
+    def test_post_registration_limited_bff_sequence_cannot_collect_tokens_or_expand_selected_data_scope(self):
+        from check_project_consistency import validate_live_execution
+        for change in ('sequence','scope','preview'):
+            wrong=deepcopy(self.spec)
+            post=wrong['supabase_deployment_contract']['live_execution']['post_registration_acceptance']
+            if change=='sequence':post['next_sequence']=['OWNER_EXPORT_JWT_TO_SERVICE']
+            elif change=='scope':post['selected_runtime_operations'].append('candidates.build')
+            else:post['preview_gate_preserved']=False
+            self.assertIn('DEV-010 limited BFF sequence or approved scope drift',validate_live_execution(wrong))
+
+
     def test_bff_source_reply_cannot_be_promoted_to_registration_or_live_acceptance(self):
         from check_project_consistency import validate_live_execution
         for change in ('owner','native','browser'):
             wrong=deepcopy(self.spec)
             intake=wrong['supabase_deployment_contract']['live_execution']['bff_reply_intake']
             if change=='owner':
-                intake['registration']['settings_registered']=True
+                intake['registration']['receipt_sha256']=None
                 expected='DEV-010 BFF registration needs owner receipt'
             elif change=='native':
                 intake['source_review_is_operating_acceptance']=True
@@ -1425,7 +1453,7 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         self.assertIn('DEV-010 BFF service source binding drift',errors)
         self.assertIn('DEV-010 BFF remaining acceptance gates drift',errors)
         text=live_execution_document(self.spec)
-        for value in ('PENDING_OWNER_RECEIPT','BFF_LIVE_BROWSER','SECURITY_3_GATES','새 API 호출'):
+        for value in ('OWNER_REPORTED_REGISTERED','BFF_LIVE_BROWSER','SECURITY_3_GATES','새 API 호출'):
             self.assertIn(value,text)
 
 
