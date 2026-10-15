@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.59",
+  "version": "1.9.60",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -5308,7 +5308,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.59",
+        "contract_version": "1.9.60",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -5482,7 +5482,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.59",
+        "contract_version": "1.9.60",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -5648,7 +5648,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.59",
+        "contract_version": "1.9.60",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -5667,7 +5667,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.59",
+        "contract_version": "1.9.60",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -5692,7 +5692,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.59",
+        "contract_version": "1.9.60",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -5717,7 +5717,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.59",
+        "contract_version": "1.9.60",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -14187,7 +14187,7 @@
         "완료/인계에 기준·최종 SHA·변경 파일 수·재사용 범위·동기화 문서·검증과 NOT_RUN을 기록한다. 다음 에이전트는 이 검증 커밋 이후부터 확인한다.",
         "실제 인증/운영 이식은 supabase_deployment_contract.live_execution의 단계와 기존22 operation별 코드·native·배포 상태를 함께 갱신한다. PASS는 등록 Edge 파일/SHA·정확 후보 커밋·비공개 영수증 SHA/범위가 있을 때만 기록하며 계정·토큰·실제 자료는 공개 문서에 넣지 않는다.",
         "현행 상태표는 live_execution 원장의 코드·실 연결·배포와 단계에서 자동 생성한다. latest_verified_source에는 이미 검증한 정확 SHA·CI·소스 검산 범위만 기록하고 이전 development_state를 현재 상태로 복사하지 않는다.",
-        "운영 재개는 최신 live_execution.operating_checkpoint와 연결 영수증의 후보·범위·해시부터 읽는다. 이미 적용된005를 재실행하거나 C140 역사본을 현재정본으로 복구하지 않는다. 자료 목적승인·예산 결정/등록/실제검수·JWT/OTP·BFF와22업무 완료를 구분하고 새 증거가 생긴 범위만 기획·라우팅에 동시 반영한다."
+        "이 재개점의 정확 소스·승인 목적·영수증 범위와 해시부터 재사용한다. 005·불변 발행·성공한 격리 검수 namespace를 다시 실행하지 않는다. 함수 설치/생존·Storage·SQL 검수를 22업무의 native/deployment 완료로 세지 않는다. 새 설정 등록은 기존 소유자/관리자가 수행하고 정상 목록 digest와 같은 배포의 준비 상태로 대조한다. 등록 완료 회신만으로 PASS로 바꾸거나 설정 권한을 우회하지 않는다. 단계가 바뀌면 정본·기획·라우팅·운영 문서를 같은 커밋에서 갱신하며 매 작업 전체 scan을 반복하지 않는다."
       ],
       "expand_only_when": [
         "검증 커밋/색인이 없거나 무효면 최초 공개 코드 색인을 검증하고 기준을 새로 고정한다.",
@@ -14290,14 +14290,14 @@
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "61855c5ccf96bf713e4e820a27f54891c20a6548",
-        "spec_version": "1.9.58",
-        "ci_run_id": 38675565529,
+        "commit": "83e96bc976c84bcf07b0c2c9841741e231397a93",
+        "spec_version": "1.9.59",
+        "ci_run_id": 38678309898,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
           "python": 1020,
-          "deno": 548,
+          "deno": 553,
           "oracle": 993
         }
       }
@@ -16053,6 +16053,18 @@
         "REQ-06"
       ],
       "summary": "공식 과목 전용 선택에서는 후보조회 미사용 eligible_offering_count의 누락과 null을 보존한다. candidates.build가 승인된 경우에는 native 정수와 실제 선택 catalog의 대상 수 일치를 계속 요구한다. 과목 성적표·국수탐2 합을 catalog·전체모형 없이 계산하고 미승인 전체 위치는 pending/null로 반환하는 합성 검사를 추가했다. 같은 소스·라우팅·선언/의존성 색인을 결속하며 실제 서비스 승인과 배포 인수는 별도다."
+    },
+    {
+      "date": "2026-10-15",
+      "requirements": [
+        "REQ-12",
+        "REQ-15",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "PR36의 정확 소스/CI·동일 tree를 재사용해 기존 Supabase 함수 설치·생존/relay 거절, 불변 과목 자료 발행·native Storage, 격리 실제 공유 예산 SQL 검수와 미등록5설정/실제ready503을 구분하여 동기화한다. 사용자 정정에 따라 기존 소유자/관리자용 설정 등록 요청서를 준비하고 BFF 회신·실사용자 JWT/aal2·22업무와 운영 보안 인수는 대기로 유지한다. 새 권한·유료 서비스·자료 승인 확대·원본 삭제 없이 정확 재개점과 모든 에이전트의 변경 범위/문서 일치 규칙을 갱신한다."
     }
   ],
   "overall_analysis_contract": {
@@ -25781,7 +25793,9 @@
           "label": "실 JWT·만료·변조·타인 소유권 반례",
           "status": "IN_PROGRESS",
           "evidence_kind": "jwt",
-          "evidence_ids": []
+          "evidence_ids": [
+            "OPS-EDGE-AUTH-NEGATIVE-20261015"
+          ]
         },
         "owner_totp_verification": {
           "label": "계정 주인의 /admin TOTP 등록·aal2 관리 검수",
@@ -25801,7 +25815,8 @@
           "evidence_kind": "sql",
           "evidence_ids": [
             "OPS-005-APPLIED-20261015",
-            "OPS-005-NATIVE-READBACK-20261015"
+            "OPS-005-NATIVE-READBACK-20261015",
+            "OPS-BUDGET-NATIVE-20261015"
           ]
         },
         "existing_plan_and_quotas": {
@@ -25809,14 +25824,18 @@
           "status": "IN_PROGRESS",
           "evidence_kind": "billing",
           "evidence_ids": [
-            "OPS-BUDGET-DECISION-20261015"
+            "OPS-BUDGET-DECISION-20261015",
+            "OPS-BUDGET-SCOPED-V3-20261015"
           ]
         },
         "edge_deployment": {
           "label": "기존 프로젝트의 동일 후보 Edge 배포·실 HTTP 인수",
           "status": "IN_PROGRESS",
           "evidence_kind": "edge_deployment",
-          "evidence_ids": []
+          "evidence_ids": [
+            "OPS-EDGE-INSTALLED-20261015",
+            "OPS-EDGE-SETTINGS-PENDING-20261015"
+          ]
         },
         "bff_browser_acceptance": {
           "label": "허용 플랫폼 BFF·세션/CSRF·브라우저 비노출",
@@ -26195,6 +26214,54 @@
           "operations": [],
           "scope": "Private initial per-owner usage decision and existing plan/cap technical observation; activation and organization-wide financial usage acceptance pending.",
           "does_not_imply_operation_acceptance": true
+        },
+        "OPS-STORAGE-READBACK-20261015": {
+          "kind": "native_api",
+          "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
+          "receipt_sha256": "a625470e5ef6cf5e8c7b54bb35bf91c33ea54b8de7798f0dc241c1d763bc6d07",
+          "operations": [],
+          "scope": "승인된 과목 자료와 제어 객체의 불변 업로드·정확 bytes/SHA 재조회·익명 공개/인증 경로 차단만 검수했다. 사용자 업무 인수와 다르다.",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-BUDGET-NATIVE-20261015": {
+          "kind": "sql",
+          "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
+          "receipt_sha256": "30cc233f573ea13adad57f048c0e7121e27c4a8f56f5fe54c7dfeb27cb57cce2",
+          "operations": [],
+          "scope": "격리한 합성 소유자/정책으로 실제 앱 역할 SQL 공유 예산의 복수 pool·동시성·재시작·멱등 정산·상한 거절을 검수했다. 검수 행 보존·활성 예약 없음·외부 행 불변이며 실제 사용자/업무 인수와 승인 lease의 실제 만료 대기는 별도다.",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-EDGE-INSTALLED-20261015": {
+          "kind": "edge_deployment",
+          "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
+          "receipt_sha256": "80eea0f355aa7d8a3ac51346c27cc771bc24c01ecfa5793ccf80788a69940755",
+          "operations": [],
+          "scope": "동일 검증 Git 소스와 번들을 기존 Supabase에 설치하고 실제 생존 200/no-store, relay 누락/불일치 403을 관측했다. 기본 JWT 게이트는 유지한다. 각 업무 경로의 배포 인수는 아니다.",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-EDGE-AUTH-NEGATIVE-20261015": {
+          "kind": "jwt",
+          "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
+          "receipt_sha256": "9dc9b2f57c23e9c7e5da8852f81f36070434b2dc6a1a86de0e39db88a975ff0c",
+          "operations": [],
+          "scope": "배포 주소에서 사용자 Bearer 누락·형식 오류·서명 없는 만료 주장 합성 토큰의 거절을 확인했다. 게이트와 앱 거절을 구분하며 실제 사용자 JWT/getUser/본인 profiles/aal2·타인 소유권의 양성/음성 인수를 대신하지 않는다.",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-EDGE-SETTINGS-PENDING-20261015": {
+          "kind": "edge_deployment",
+          "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
+          "receipt_sha256": "ca1c8b0f40adc37a11691599e588fdd58405017d9c12f5ed9a02ad7a6238b205",
+          "operations": [],
+          "scope": "현재 Dashboard에 새 설정 5개가 없고 유효 relay의 실제 readiness가 503/no-store다. 사용자가 실제 등록 전임을 정정하고 담당자 요청 문서화를 지시했다. 등록과 준비 완료는 대기다.",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-BUDGET-SCOPED-V3-20261015": {
+          "kind": "billing",
+          "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
+          "receipt_sha256": "626c1ed18dc42aa3f4711d969964fa80408a90c0824358b184b5ca8818e108a0",
+          "operations": [],
+          "scope": "과목 전용 제한 범위의 비공개 예산·읽기량 실측을 결속한 결정만 기록한다. 기존 Pro/Spend Cap 관측과 조직 전체 추가 비용 보장을 구분하며 신규 요금제/유료 항목/초과 과금 허용은 없다.",
+          "does_not_imply_operation_acceptance": true
         }
       },
       "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 현재 정상 /jeongsi 진입 화면은 합성 응답을 명시하고 있다. 합성 회원 유형과 화면 성공은 실제 이용권·JWT·업무22 API 인수 근거가 아니다. 실제 서버 후보와 정상 BFF의 live 연결을 같은 후보 근거로 검수한 후 운영 상태를 갱신한다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다.",
@@ -26221,7 +26288,7 @@
       "runtime_assembly": {
         "format": "jungsi.edge-runtime-assembly/v1",
         "status": "SOURCE_ASSEMBLED",
-        "status_text": "기존22 operation의 실제 Deno 소스 조립은 develop에서 인수했다. 2026-10-15 검토된005를 실제 원자 적용하고 같은 API 드라이버의 앱 역할·UTC/RLS·005 존재를 확인했다. 공식 과목 시험팩은 현재 decoder와 독립 산술을 대조해 과목 성적표·국수탐2 표준점수 합에 한정한 새 운영 목적 승인을 만들었다. private5차원 예산은 결정했지만 현재 native 발행본/head/binding과의 활성화·실사용자·BFF·22업무 인수는 남았다. 아래 항목과 단일 원장의 native/deployment를 함께 읽으며 SQL/자료 검수를 API완료로 세지 않는다.",
+        "status_text": "기존 22 operation의 Deno 소스와 과목 전용 후보 수 미사용/null 처리는 PR36과 정확 CI를 거쳐 develop에서 인수했다. 검증된 동일 소스 번들을 기존 Supabase에 실제 설치했고 생존 응답과 relay 거절을 확인했다. 005 실제 적용·불변 과목 자료/제어 객체 발행 및 native Storage·격리 공유 예산 SQL 검수는 통과했다. 새 설정 5개는 준비했으나 현재 Dashboard 관리 권한이 없고 아직 등록 전이므로 소유자/관리자에게 요청한다. 실제 준비 응답은 안전한 503이며 사용자 JWT/본인 profiles/aal2·BFF·업무 경로와 운영 세 보안 gate는 미완료다. 각 operation의 native/deployment는 이 부분 검수로 승격하지 않는다.",
         "bindings": {
           "native_entry": {
             "path": "supabase/functions/jungsi-api/index.ts",
@@ -26284,32 +26351,32 @@
           },
           {
             "name": "SUPABASE_SECRET_KEY",
-            "status": "기존 이름·승인 자료 읽기 검수 대기",
+            "status": "기존 이름·승인 범위 native Storage 검수 완료·실사용자 업무 별도",
             "meaning": "private Storage 읽기 전용 서버 경계에서만 사용"
           },
           {
             "name": "JUNGSI_SUPABASE_STORAGE_BUCKET",
-            "status": "기존 이름·실제 범위 승인 대기",
+            "status": "정확 승인값 준비·기존 소유자/관리자 등록 대기; 목록 digest/실제 readiness 미확인",
             "meaning": "공개가 아닌 버킷. 현재 metadata의 private·native 정수 상한을 확인"
           },
           {
             "name": "JUNGSI_SUPABASE_STORAGE_PREFIX",
-            "status": "기존 이름·실제 범위 승인 대기",
+            "status": "정확 승인값 준비·기존 소유자/관리자 등록 대기; 목록 digest/실제 readiness 미확인",
             "meaning": "승인된 control·artifact 객체가 속하는 prefix"
           },
           {
             "name": "JUNGSI_API_BINDING_JSON",
-            "status": "소스 형식 계약·실제 승인값 미등록",
+            "status": "정확 승인값 준비·기존 소유자/관리자 등록 대기; 목록 digest/실제 readiness 미확인",
             "meaning": "jungsi.edge-api-binding/v1: 승인 목적·scope·현재 head와 registry/selection/usage_policy 참조·명시 한도"
           },
           {
             "name": "JUNGSI_API_BINDING_SHA256",
-            "status": "소스 형식 계약·실제 승인값 미등록",
+            "status": "정확 승인값 준비·기존 소유자/관리자 등록 대기; 목록 digest/실제 readiness 미확인",
             "meaning": "위 JSON 원본 UTF-8 바이트의 SHA-256"
           },
           {
             "name": "JUNGSI_API_BINDING_MAX_BYTES",
-            "status": "소스 형식 계약·실제 승인값 미등록",
+            "status": "정확 승인값 준비·기존 소유자/관리자 등록 대기; 목록 digest/실제 readiness 미확인",
             "meaning": "위 JSON의 양의 정수 바이트 상한. 기본값 없음"
           }
         ],
@@ -26330,28 +26397,32 @@
             "정확Git005의3개 신규 예산 테이블·자료형/제약/인덱스·RLS·최소권한과 기존 객체 메타데이터 보존을 확인했다. 같은 API 드라이버 read-only 재조회도 통과했다. 기존003/005를 다시 적용하지 않고 실제 원자 예산·보고서·소유권·멱등·버전 충돌 검수는 별도로 수행한다."
           ],
           [
-            "공식 과목 시험팩 — 목적별 승인 완료",
-            "현재native/Python decoder와 저장된 공식 근거를 독립 대조했다. 과목 성적표·4개 표준점수 합만 승인하며 전체/대학별 누백·연도보정·판단·forecast는 승계하지 않는다. 이전localfalse와 정본 전역상태를 보존하고 새 정확승인·불변Storage·readback을 결속한다."
+            "공식 과목 시험팩 — 목적 승인·비공개 발행 완료",
+            "현재 decoder와 독립 산술 근거를 재사용한다. 승인 범위는 과목 성적표와 네 과목 표준점수 합이며, 불변 Storage 발행·정확 재조회와 native 선택 그래프 검수를 통과했다. 전체/대학 누백·연도 보정·판단·발행 승인은 승계하지 않는다."
           ],
           [
             "현재 catalog·모형 — 최소 후보 대기",
             "최신 단일정본의 native 후보·검수·출처/타입/연도/모집행 맥락을 고정한다. C140/v21_1은 역사 검수로 보존하며 현재 catalog로 재승격하지 않는다. 미검증 추정모형은 미선택·pending을 유지한다."
           ],
           [
-            "현재 승인 head와 선택 자료 포인터 — 등록 대기",
-            "private bucket/prefix·registry/selection/head/usage_policy의 정확 object_key·bytes·SHA·목적·scope·승인 참조·expiry를 현재 binding에 결속하고 같은 Storage readback 및 preflight를 검수한다. 기존 private 버킷의 native Storage metadata에서 비공개 여부와 정수 상한을 읽기 전용으로 확인했다. 객체 업로드/readback 및 현재 head 채택은 아직 별도다."
+            "승인 head·선택 자료 — 발행 완료 / 런타임 등록 대기",
+            "별도 비공개 prefix에 승인 자료·registry/selection/usage_policy/불변 head를 저장하고 현재 head를 마지막에 신규 등록했다. 원문 bytes/SHA·익명 경로 차단·native 읽기를 검수했다. Dashboard용 단일행 binding은 원래 JSON과 native 동등하며 정확 바이트와 해시로 별도 고정했다. 실제 서버 설정 등록·준비 상태 대조는 대기다."
           ],
           [
-            "승인 요청 예산 — 결정/활성화 구분",
-            "기존 비공개 결정을 보존하고 실제 과목 요청의 읽기량을 측정한다. 후보조회가 미선택이면 eligible 수는 누락/null을 보존하며, 후보 활성 시에만 현재 catalog의 정확한 수가 필요하다. 시험/pack·결과크기·읽기상한에 결속한 운영정책 파싱과 원자적 multiworker 검수는 대기다. ceiling/GLOBAL은 사용자별 범위이며 조직전체금액 상한이 아니다. 실제청구/사용량 원문은 Git/Drive로 내보내지 않는다."
+            "공유 예산 — 격리 실제 SQL 통과 / 사용자·만료 검수 구분",
+            "승인된 비공개 과목 전용 정책과 실측 읽기량을 결속했다. 실제 앱 SQL 드라이버의 독립 pool·동시성·재시작·멱등 정산·용량/비용 거절과 검수 외부 행 보존을 확인했다. 검수 행과 이전 실패본은 보존한다. 실제 사용자 요청·승인 lease의 실제 시간 만료·전체 운영 보안은 별도이며 ceiling/GLOBAL을 조직 금액 상한으로 표시하지 않는다."
           ],
           [
             "실제 사용자·관리자 검수 — 정상OTP 완료/새API 대기",
             "계정 주인이 정상OTP 입력을 완료했고 같은 브라우저의 /admin 대시보드 진입을 관측했다. 새API와 동일 배포SHA·같은 Bearer의 getUser/본인profiles/aal2·권한 반례는 BFF 연결 후 별도로 검수한다. 토큰·OTP·쿠키·QR비밀은 수집/전달하지 않는다."
           ],
           [
-            "운영 진입점·BFF — 화면 담당 회신 대기",
-            "사용자가 외부 화면 담당 회신을 전달하기로 했다. 실제 BFF URL/배포설정과 기존플랫폼을 확인한 뒤 같은 Edge후보의 운영연결·CSRF·브라우저·세 보안gate를 검수한다. 새유료addon/호스팅을 도입하지 않는다."
+            "기존 Edge 설치 완료 / 화면 BFF 연결 자료 대기",
+            "검증 소스 번들의 설치와 생존/relay 거절을 확인했고 JWT 게이트를 유지했다. 업무22 경로의 배포 인수는 별도다. 화면 담당자는 실제 BFF URL·서버 설정 위치·배포 SHA·세션/CSRF·서버 전용 relay 송신 증거를 회신한다. 사용자가 자료 전달 예정이며 합성 /jeongsi를 실제 인수로 표시하지 않는다."
+          ],
+          [
+            "새 설정 5개 — 기존 프로젝트 소유자/관리자 등록 요청",
+            "담당자는 비공개 인계 폴더의 정확 설정 파일을 받아 JUNGSI_SUPABASE_STORAGE_BUCKET, JUNGSI_SUPABASE_STORAGE_PREFIX, JUNGSI_API_BINDING_JSON, JUNGSI_API_BINDING_SHA256, JUNGSI_API_BINDING_MAX_BYTES만 기존 프로젝트에 등록한다. 기존 DISPLAY/relay·JWT 게이트·Auth/RLS·요금제는 변경하지 않는다. 원래 바이트/단일행 해시·목록 digest·같은 배포 readiness 순으로 검수하고 비밀/운영 숫자는 Git·채팅에 복사하지 않는다. 현재 권한 부족 및 실제 미등록은 담당자 요청서에 기록한다."
           ]
         ],
         "environment_aliases": {
@@ -26365,27 +26436,36 @@
       "operating_checkpoint": {
         "format": "jungsi.operating-checkpoint/v1",
         "date_KST": "2026-10-15",
-        "source_commit": "0779e804a965457d499282bcb565ef6ed2a2ae2f",
+        "source_commit": "83e96bc976c84bcf07b0c2c9841741e231397a93",
         "schema_005": "APPLIED_AND_VERIFIED",
         "existing_objects_metadata": "UNCHANGED",
         "native_api_driver_005_probe": "PASS_READ_ONLY",
         "official_subject_input": "SCOPED_OPERATION_PURPOSE_APPROVED_AFTER_CURRENT_DECODER_REVIEW",
         "national_or_university_joint_model": "NOT_APPROVED_BY_SUBJECT_INPUT_REVIEW",
         "current_catalog_binding": "AWAITING_CURRENT_CANONICAL_NATIVE_CANDIDATE_NOT_HISTORICAL_C140",
-        "private_usage_policy": "DECIDED_NOT_YET_ACTIVATED_OR_NATIVE_ACCEPTED",
+        "private_usage_policy": "SCOPED_V3_APPROVED_AND_ISOLATED_NATIVE_SQL_VERIFIED_SETTINGS_PENDING_OWNER",
         "OTP": "OWNER_COMPLETED_NORMAL_ADMIN_VISIBLE_NEW_API_SAME_BEARER_PENDING",
-        "frontend_handoff": "USER_WILL_FORWARD_EXTERNAL_OWNER_REPLY",
+        "frontend_handoff": "USER_WILL_FORWARD_EXTERNAL_OWNER_REPLY_NO_BFF_DEPLOYMENT_DETAILS_YET",
         "new_paid_service_or_addon": "NONE",
         "production_ready": false,
         "evidence_ids": [
           "OPS-005-APPLIED-20261015",
           "OPS-005-NATIVE-READBACK-20261015",
           "OPS-EXAM-SCOPED-20261015",
-          "OPS-BUDGET-DECISION-20261015"
+          "OPS-BUDGET-DECISION-20261015",
+          "OPS-STORAGE-READBACK-20261015",
+          "OPS-BUDGET-NATIVE-20261015",
+          "OPS-EDGE-INSTALLED-20261015",
+          "OPS-EDGE-AUTH-NEGATIVE-20261015",
+          "OPS-EDGE-SETTINGS-PENDING-20261015",
+          "OPS-BUDGET-SCOPED-V3-20261015"
         ],
-        "rule": "Reuse exact code/data/purpose pins and receipts from this checkpoint. 005 is already applied: verify its registered schema, never reapply or remove objects. A technical/schema/source-purpose proof does not promote any of the22 native/deployment flags; record same-user real HTTP/BFF/security evidence separately.",
-        "subject_only_runtime": "SOURCE_SCOPED_COUNT_OPTIONAL_SYNTHETIC_CHECKS_NATIVE_PENDING",
-        "storage_native_metadata": "PASS_PRIVATE_BOOL_AND_NATIVE_INTEGER_READ_ONLY_OBJECT_UPLOAD_PENDING"
+        "rule": "이 재개점의 정확 소스·승인 목적·영수증 범위와 해시부터 재사용한다. 005·불변 발행·성공한 격리 검수 namespace를 다시 실행하지 않는다. 함수 설치/생존·Storage·SQL 검수를 22업무의 native/deployment 완료로 세지 않는다. 새 설정 등록은 기존 소유자/관리자가 수행하고 정상 목록 digest와 같은 배포의 준비 상태로 대조한다. 등록 완료 회신만으로 PASS로 바꾸거나 설정 권한을 우회하지 않는다.",
+        "subject_only_runtime": "ACCEPTED_ON_DEVELOP_EXACT_BUNDLE_INSTALLED_OPERATION_ACCEPTANCE_PENDING",
+        "storage_native_metadata": "PRIVATE_NATIVE_METADATA_IMMUTABLE_UPLOAD_READBACK_AND_SINGLE_LINE_PREFLIGHT_PASS",
+        "edge_package": "INSTALLED_SAME_VERIFIED_SOURCE_LIVENESS_AND_RELAY_DENIAL_OBSERVED",
+        "edge_settings": "FIVE_VALUES_PREPARED_NOT_REGISTERED_OWNER_REQUEST_DOCUMENTED",
+        "readiness": "ACTUAL_503_SAFE_FAILURE_SETTINGS_PENDING"
       }
     }
   },
