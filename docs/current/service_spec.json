@@ -16132,6 +16132,14 @@
         "REQ-02"
       ],
       "summary": "정시터치가 직접 쓰는 쿠키(jt_report_id, 합성 모드 jt_syn_*)에 운영 빌드에서 Secure 속성 추가(HttpOnly·SameSite=Lax·Path=/jeongsi 유지). BFF 회신 양식의 쿠키 속성 점검 항목 대응. 로그인 쿠키는 에듀터치 소유라 변경 없음."
+    },
+    {
+      "date": "2026-10-16",
+      "requirements": [
+        "REQ-01",
+        "REQ-02"
+      ],
+      "summary": "BFF live 전환(JUNGSI_API_MODE=live, JUNGSI_API_URL=jungsi-api, 오픈 전 관문 유지). 첫 정문 검수에서 정시터치 proxy 의 토큰 갱신이 미리 불러오기와 겹쳐 Supabase /token 429 → 세션 쿠키 삭제로 에듀터치 로그인이 풀려, 정시터치는 로그인 쿠키를 읽기만 하도록 변경(refresh 요청 차단·쿠키 쓰기 없음). 갱신은 쿠키 주인인 에듀터치 proxy 가 넘기기 전에 한다. 서버 판정·권한 변경 없음."
     }
   ],
   "overall_analysis_contract": {

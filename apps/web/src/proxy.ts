@@ -1,9 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { ignoreCookieWrites, noRefreshFetch } from "@/lib/supabase/read-only";
 
 /*
-  Next.js 16 의 proxy(옛 middleware). 쿠키를 쓸 수 있는 경계에서 Supabase 토큰을 갱신하고,
-  회원 개인 응답과 갱신 응답이 CDN 에 공유되지 않도록 private, no-store 를 붙인다(DEV-006 authentication).
+  Next.js 16 의 proxy(옛 middleware). 회원 개인 응답이 CDN 에 공유되지 않도록 private, no-store 를 붙인다
+  (DEV-006 authentication). Supabase 토큰 갱신은 쿠키 주인인 에듀터치 본체가 넘기기 전에 한다.
   사용자 확인·회원 등급은 여기서 판단하지 않는다(우리 서비스 API 가 판단). 합성 모드에서는 토큰을 쓰지 않는다.
 
   예외: JEONGSI_ACCESS_GATE=preview(오픈 전 배포판)이면 화면 전체를 에듀터치 관리자와
@@ -29,7 +30,8 @@ async function previewAllowed(request: NextRequest, url?: string, key?: string) 
   if (!url || !key) return false;
   // 세션 쿠키의 주인은 에듀터치 본체다 — 여기서는 읽기만 하고 갱신 쿠키를 쓰지 않는다
   const supabase = createServerClient(url, key, {
-    cookies: { getAll: () => request.cookies.getAll(), setAll() {} },
+    cookies: { getAll: () => request.cookies.getAll(), setAll: ignoreCookieWrites },
+    global: { fetch: noRefreshFetch },
   });
   const { data } = await supabase.auth.getUser();
   const user = data.user;
@@ -55,23 +57,8 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  let response = NextResponse.next({ request });
-
-  if (process.env.JUNGSI_API_MODE === "live" && url && key) {
-    const supabase = createServerClient(url, key, {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll(list) {
-          list.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
-          list.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-        },
-      },
-    });
-    // 만료가 가까우면 갱신한다. 검증 결과는 쓰지 않는다(신원 검증은 우리 API 의 /auth/v1/user 확인)
-    await supabase.auth.getUser();
-  }
-
+  // 토큰 갱신은 에듀터치 본체 proxy 가 넘기기 전에 한다. 여기서 갱신하면 쿠키가 지워질 수 있다(lib/supabase/read-only.ts)
+  const response = NextResponse.next({ request });
   response.headers.set("Cache-Control", "private, no-store");
   return response;
 }
