@@ -1392,6 +1392,36 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
 
 class SupabaseDeploymentContractTests(unittest.TestCase):
 
+    def test_preconnection_cases_follow_canonical_routes_and_cover_all_operations(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        wrong=deepcopy(self.spec)
+        prep=wrong['supabase_deployment_contract']['live_execution']['preconnection_preparation']
+        prep['cases'].pop('history.search')
+        self.assertIn('DEV-010 preparation acceptance cases drift',validate_live_execution(wrong))
+        wrong=deepcopy(self.spec)
+        wrong['operations'][0]['path']='/api/v1/synthetic-current-route'
+        body=live_execution_document(wrong)
+        self.assertIn('history.search / GET /api/v1/synthetic-current-route',body)
+        self.assertIn('실제 native/deployment 증거가 아니다',body)
+
+    def test_preconnection_cannot_promote_source_or_prepared_case_to_live_approval(self):
+        from check_project_consistency import validate_live_execution
+        for field in ('source_registration_is_execution_approval','prepared_cases_are_execution_evidence'):
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['preconnection_preparation'][field]=True
+            self.assertIn('DEV-010 preparation cannot promote approval or live acceptance',validate_live_execution(wrong))
+
+    def test_preconnection_requires_all_packages_and_bound_execution_evidence(self):
+        from check_project_consistency import validate_live_execution
+        wrong=deepcopy(self.spec)
+        prep=wrong['supabase_deployment_contract']['live_execution']['preconnection_preparation']
+        prep['packages'][-1]['operation_ids'].pop()
+        self.assertIn('DEV-010 preparation acceptance package omits operations',validate_live_execution(wrong))
+        wrong=deepcopy(self.spec)
+        wrong['supabase_deployment_contract']['live_execution']['preconnection_preparation']['evidence_fields'].remove('artifact_snapshot_sha256')
+        self.assertIn('DEV-010 preparation evidence binding missing',validate_live_execution(wrong))
+
+
     def test_runtime_alias_contract_rejects_privileged_defaults_and_generated_docs_keep_the_boundary(self):
         from check_project_consistency import validate_live_execution,live_execution_document
         for name in ('DATABASE_URL','SUPABASE_SECRET_KEY'):

@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.60",
+  "contract_version": "1.9.61",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -971,6 +971,188 @@
         "edge_package": "INSTALLED_SAME_VERIFIED_SOURCE_LIVENESS_AND_RELAY_DENIAL_OBSERVED",
         "edge_settings": "FIVE_VALUES_PREPARED_NOT_REGISTERED_OWNER_REQUEST_DOCUMENTED",
         "readiness": "ACTUAL_503_SAFE_FAILURE_SETTINGS_PENDING"
+      },
+      "preconnection_preparation": {
+        "format": "jungsi.preconnection-preparation/v1",
+        "basis_commit": "e252c3d3e22746e5090f7deddd8a136abfe23f78",
+        "status": "IN_PROGRESS",
+        "source_registration_is_execution_approval": false,
+        "prepared_cases_are_execution_evidence": false,
+        "packages": [
+          {
+            "id": "PRE-01",
+            "title": "현재 정본의 서비스 카탈로그 발행 준비",
+            "owner": "데이터팀 단일 writer / 개발팀 읽기 전용 연결",
+            "state": "IN_PROGRESS",
+            "operation_ids": [
+              "history.search",
+              "recruitment.read",
+              "offerings.search",
+              "offering.read"
+            ],
+            "completion": "현재 모집행/입결 포인터와 해시·native 자료형·4개년 근거·PK·전형/군/학년도 범위를 고정하고, 별도 목적 승인을 받은 실행 catalog만 발행 후보로 구성한다. 이전 동결 C는 historical baseline으로 보존한다."
+          },
+          {
+            "id": "PRE-02",
+            "title": "실제 대학별 환산 규칙 연결 준비",
+            "owner": "개발팀 / 데이터팀 근거 제공",
+            "state": "IN_PROGRESS",
+            "operation_ids": [
+              "university.analyze",
+              "candidates.build"
+            ],
+            "completion": "기존 공식 규칙·변환표와 독립 검산 근거를 현재 decoder에 연결한다. 수집 요강 문구를 실행식으로 자동 승격하지 않으며 시험·적용 학년도·대학/캠퍼스·전형/군·offering/규칙 버전이 정확히 일치해야 한다."
+          },
+          {
+            "id": "PRE-03",
+            "title": "전체·대학별 자체 추정 누백의 발행 준비",
+            "owner": "개발팀 / 데이터팀 독립 검수",
+            "state": "IN_PROGRESS",
+            "operation_ids": [
+              "overall.analyze",
+              "university.analyze",
+              "candidates.build"
+            ],
+            "completion": "기존 자체 추정 시범·공식 주변도수·holdout/민감도·가중치·직접 계산 근거를 재사용한다. 시험별 모형과 비교 모집단을 분리하고 source/local 승인·엔진 승인·운영 목적 승인을 구분한다. 한 학교 시범을 전국 발행 완료로 확대하지 않는다."
+          },
+          {
+            "id": "PRE-04",
+            "title": "22 API 실연결 인수 입력·기대 결과 준비",
+            "owner": "기획팀 / 개발팀 / 외부 화면 담당",
+            "state": "PREPARED",
+            "operation_ids": [
+              "history.search",
+              "recruitment.read",
+              "score-profile.create",
+              "overall.analyze",
+              "report.read",
+              "offerings.search",
+              "offering.read",
+              "university.analyze",
+              "candidates.build",
+              "shortlist.update",
+              "report.export",
+              "statistics.read",
+              "session.read",
+              "forecast.capabilities",
+              "forecast.list",
+              "forecast.create",
+              "forecast.read",
+              "forecast.adjust",
+              "forecast.validate",
+              "forecast.approve",
+              "forecast.publish",
+              "forecast.published.read"
+            ],
+            "completion": "기존22 operation의 권한·소유권·DTO·입력·안전한 재실행·기대 결과와 증거 필드를 고정한다. 실제 BFF/같은 사용자 JWT·MFA와 배포 SHA가 도착하면 정해진 순서로 실행하며 준비표를 운영 PASS로 세지 않는다."
+          }
+        ],
+        "cases": {
+          "history.search": {
+            "prerequisites": "실 사용자·현재 정본의 범위 승인 catalog·명시 조회 예산",
+            "expected": "발행된 현재 입결·출처·학년도·전형/군 정의와 cursor 경계; 이번 판 미포함과 자료 없음 구분"
+          },
+          "recruitment.read": {
+            "prerequisites": "실 사용자·현재 정본의 범위 승인 catalog·명시 조회 예산",
+            "expected": "정확한 offering/학년도·전형/군 결속과 원문 미공개·조건부 이월 상태 보존"
+          },
+          "score-profile.create": {
+            "prerequisites": "실 사용자·같은 시험 승인 exam pack·과목 전용 예산·안전한 가상 입력",
+            "expected": "같은 시험의 유효 입력을 본인 확인 프로필로 저장; 재시도와 충돌·미응시 구분"
+          },
+          "overall.analyze": {
+            "prerequisites": "실 사용자·같은 시험 승인 exam pack·과목 전용 예산·안전한 가상 입력",
+            "expected": "승인 과목/총점 자료 범위에 따른 ready 또는 total_model_missing; 점수 저장과 판단 보류 독립"
+          },
+          "report.read": {
+            "prerequisites": "실 사용자·본인 confirmed profile/report·revision·명시 예산",
+            "expected": "본인 report/revision의 허용 DTO만 재조회; 생성 당시 성공 점수와 pending 보존"
+          },
+          "offerings.search": {
+            "prerequisites": "실 사용자·현재 정본의 범위 승인 catalog·명시 조회 예산",
+            "expected": "정본 offering·필터·페이지 결속; 제한된 조회 범위와 잔여 cursor를 정직하게 표시"
+          },
+          "offering.read": {
+            "prerequisites": "실 사용자·현재 정본의 범위 승인 catalog·명시 조회 예산",
+            "expected": "정확한 학년도·대학/캠퍼스·전형/군·PK의 공개 상세; 누락을 실제 0으로 치환하지 않음"
+          },
+          "university.analyze": {
+            "prerequisites": "paid 본인 report·같은 시험 실행 규칙/변환표·모집행·독립 누백 승인",
+            "expected": "승인된 실제 규칙의 정확 환산과 동점 포함/제외 누백; conversion·percentile·assessment의 독립 상태"
+          },
+          "candidates.build": {
+            "prerequisites": "paid 본인 report·전체 검색 catalog·승인 분석 자료·후보 수 예산",
+            "expected": "승인 전체 검색 catalog와 명시 예산·판단 자료 범위; 한 학교 시범을 전체 후보로 표시하지 않음"
+          },
+          "shortlist.update": {
+            "prerequisites": "실 사용자·본인 confirmed profile/report·revision·명시 예산",
+            "expected": "본인 report/revision·허용 offering을 대상으로 멱등 변경과 stale revision 충돌 구분"
+          },
+          "report.export": {
+            "prerequisites": "실 사용자·본인 confirmed profile/report·revision·명시 예산",
+            "expected": "같은 본인 report/revision의 인쇄 DTO; 내부 규칙·전체 분포·비밀 미전달"
+          },
+          "statistics.read": {
+            "prerequisites": "paid 본인 report·승인 집계와 최소집단 정책·명시 예산",
+            "expected": "정확한 report/offering·승인 집계 범위와 최소집단 조건; 개인·비공개 관측 비노출"
+          },
+          "session.read": {
+            "prerequisites": "BFF 동일 사용자·실 getUser/본인 profiles·현재 pass",
+            "expected": "동일 Bearer의 getUser·본인 profiles·현재 pass; active/admin/aal2 예외와 실제 만료 우선"
+          },
+          "forecast.capabilities": {
+            "prerequisites": "실제 staff 역할·학교 scope·필요 aal2; 새 권한 발급 없음",
+            "expected": "실제 역할·aal2·학교 scope에 맞는 capability만 반환; staff와 paid를 구분"
+          },
+          "forecast.list": {
+            "prerequisites": "실제 staff 역할·학교 scope·필요 aal2; 새 권한 발급 없음",
+            "expected": "현재 actor의 허용 학교/상태 범위만 조회하며 타인·범위 밖 비노출"
+          },
+          "forecast.create": {
+            "prerequisites": "기존 editor·학교 scope·고정 context·검수 전용 초안 namespace",
+            "expected": "기존 editor/학교 scope의 새 초안과 안전한 멱등 재실행; 현재 발표 자료와 분리"
+          },
+          "forecast.read": {
+            "prerequisites": "실제 staff 역할·학교 scope·필요 aal2; 새 권한 발급 없음",
+            "expected": "역할/학교 scope에 맞는 정확 draft/revision 조회; 허용 영수증 보존"
+          },
+          "forecast.adjust": {
+            "prerequisites": "기존 editor·학교 scope·고정 context·검수 전용 초안 namespace",
+            "expected": "editor·예상 revision·입력/정책/context 결속; 변경 이력 보존과 stale 충돌"
+          },
+          "forecast.validate": {
+            "prerequisites": "기존 editor·학교 scope·고정 context·검수 전용 초안 namespace",
+            "expected": "같은 revision·입력/정책/context의 검증 영수증; 자료 부재/오류를 승인으로 처리하지 않음"
+          },
+          "forecast.approve": {
+            "prerequisites": "기존 독립 approver·aal2·동일 revision/context·editor와 다른 actor",
+            "expected": "독립 approver·aal2·학교 scope·검증 revision; 자기승인과 오래된 검증 거절"
+          },
+          "forecast.publish": {
+            "prerequisites": "기존 독립 approver·aal2·동일 revision/context·editor와 다른 actor",
+            "expected": "같은 승인/revision·유효 context의 발행; 초안과 published_at/유효 발표본 구분"
+          },
+          "forecast.published.read": {
+            "prerequisites": "실 사용자·정확한 모집행의 유효 승인 발행본·명시 조회 예산",
+            "expected": "승인된 해당 학년도/학교/모집행의 유효 발표본만 반환; 초안은 비노출"
+          }
+        },
+        "evidence_fields": [
+          "case_id",
+          "operation_id",
+          "candidate_commit",
+          "deployed_commit",
+          "BFF_commit",
+          "artifact_snapshot_sha256",
+          "policy_revision",
+          "request_class",
+          "expected",
+          "observed",
+          "result",
+          "receipt_sha256"
+        ],
+        "reuse_rule": "최신 검증 SHA와 비공개 현재 포인터/선택 자료의 해시·범위를 먼저 대조한다. 동일한 005·Storage·예산/실제 만료 검수를 반복하지 않는다. 변경되거나 빠진 연결·자료형·시험/모집단 경계만 추가 검수하고, 데이터팀의 진행 중인 단일 정본 쓰기를 읽기 전용 snapshot으로 고정한다.",
+        "execution_rule": "session → 과목 전용 본인 profile/report → 별도 승인 catalog → 대학 환산/누백 → 후보·집계 → 권한 있는 관리 흐름 순서다. 해당 자료/기존 역할이 없으면 NOT_RUN 또는 계약상 pending/거절로 남긴다. 계정·JWT·OTP·실제 성적·원규칙·곡선·운영 한도는 Git/공개 인수표에 넣지 않는다. 실제 값을 취급하는 fixture·원문 영수증은 비공개 폴더에 보관한다."
       }
     }
   }

@@ -1160,6 +1160,16 @@ def live_execution_document(spec):
             table(['서버 설정 이름','허용된 기존 이름','현재 상태','입력의 의미'],[[v['name'],assembly['environment_aliases'].get(v['name'],'없음'),v['status'],v['meaning']]for v in assembly['environment']])+'\n\n'+
             '\n\n'.join(assembly[k]for k in ('environment_alias_rule','scope_rule','precision_rule','request_order_rule','missing_settings_rule','control_source_rule','reuse_rule','verification_rule'))+'\n\n'+
             table(['실제 연결에 필요한 항목','대기 조건'],assembly['waiting']))
+    preparation=c.get('preconnection_preparation')
+    preparation_text=''
+    if preparation:
+        preparation_text=('\n\n### API 연결 전 선행 준비\n\n'+
+            table(['작업','담당','준비 상태','완료 조건'],[[p['id']+' '+p['title'],p['owner'],p['state'],p['completion']]for p in preparation['packages']])+'\n\n'+
+            preparation['reuse_rule']+'\n\n'+preparation['execution_rule']+'\n\n'+
+            '인수 영수증 필드: '+', '.join(preparation['evidence_fields'])+'. 아래 표는 준비 조건이며 실제 native/deployment 증거가 아니다.\n\n'+
+            table(['operation / 계약 경로','실행 전 필요한 조건','인수 시 기대 결과'],[
+                [o['id']+' / '+o['method']+' '+o['path'],preparation['cases'][o['id']]['prerequisites'],preparation['cases'][o['id']]['expected']]
+                for o in spec['operations']]))
     rows=[]
     for o in spec['operations']:
         state=c['operations'][o['id']]
@@ -1167,7 +1177,7 @@ def live_execution_document(spec):
     return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
             table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
             table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
-            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text)
+            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text)
 
 
 def validate_live_execution(spec):
@@ -1234,6 +1244,43 @@ def validate_live_execution(spec):
         if (not isinstance(waiting,list) or not waiting or
             any(not isinstance(v,list) or len(v)!=2 or any(not isinstance(x,str) or not x.strip()for x in v)for v in waiting)):
             errors.append('DEV-010 runtime assembly waiting conditions missing')
+    preparation=c.get('preconnection_preparation')
+    if preparation is None:
+        if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,61):
+            errors.append('DEV-010 preconnection preparation missing')
+    elif not isinstance(preparation,dict):
+        errors.append('DEV-010 preconnection preparation invalid')
+    else:
+        if (preparation.get('format')!='jungsi.preconnection-preparation/v1' or
+            not re.fullmatch(r'[0-9a-f]{40}',str(preparation.get('basis_commit',''))) or
+            preparation.get('status')not in {'IN_PROGRESS','PREPARED'} or
+            preparation.get('source_registration_is_execution_approval')is not False or
+            preparation.get('prepared_cases_are_execution_evidence')is not False):
+            errors.append('DEV-010 preparation cannot promote approval or live acceptance')
+        packages=preparation.get('packages')
+        if (not isinstance(packages,list) or len(packages)!=4 or
+            any(not isinstance(p,dict)for p in packages) or
+            {p.get('id')for p in packages}!={'PRE-01','PRE-02','PRE-03','PRE-04'} or
+            any(p.get('state')not in {'IN_PROGRESS','PREPARED'} or
+                not isinstance(p.get('operation_ids'),list) or not p['operation_ids'] or
+                len(p['operation_ids'])!=len(set(p['operation_ids'])) or not set(p['operation_ids'])<=ids
+                for p in packages)):
+            errors.append('DEV-010 preparation package coverage drift')
+        elif set(next(p for p in packages if p['id']=='PRE-04')['operation_ids'])!=ids:
+            errors.append('DEV-010 preparation acceptance package omits operations')
+        cases=preparation.get('cases')
+        if (not isinstance(cases,dict) or set(cases)!=ids or
+            any(not isinstance(v,dict)or set(v)!={'prerequisites','expected'} or
+                any(not isinstance(x,str)or not x.strip()for x in v.values())for v in cases.values())):
+            errors.append('DEV-010 preparation acceptance cases drift')
+        fields=preparation.get('evidence_fields')
+        if (not isinstance(fields,list)or len(fields)!=len(set(fields))or
+            not {'case_id','operation_id','candidate_commit','deployed_commit','BFF_commit',
+                 'artifact_snapshot_sha256','policy_revision','expected','observed','result','receipt_sha256'}<=set(fields)):
+            errors.append('DEV-010 preparation evidence binding missing')
+        for key in ('reuse_rule','execution_rule'):
+            if not isinstance(preparation.get(key),str)or not preparation[key].strip():
+                errors.append('DEV-010 preparation rule missing: '+key)
     for key,row in registry.items():
         if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
             not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or
