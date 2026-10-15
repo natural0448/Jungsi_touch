@@ -651,3 +651,90 @@ Deno.test("catalog indexes preserve complete multi-binding checks and refuse dup
     });
   }
 });
+
+function selectedRationalCurve(
+  sources: Map<string, NativeObject>,
+): NativeObject {
+  const percentile = [...sources].find(([id]) => id.startsWith("percentile|"))![1];
+  const curve = percentile.curve as NativeObject,
+    metadata = curve.metadata as NativeObject;
+  curve.format = "jungsi.university-score-distribution/v2";
+  metadata.score_representation = "rational_integer_pair";
+  metadata.score_min = { numerator: 1, denominator: 3 };
+  metadata.score_max = { numerator: 100, denominator: 3 };
+  const values = [1, 90, 100];
+  for (const [i, item] of (curve.frequencies as NativeObject[]).entries()) {
+    item.converted_score = { numerator: values[i], denominator: 3 };
+  }
+  return curve;
+}
+Deno.test("selected rational curves reach university percentile through native preflight and retain public DTO only", async () => {
+  const f = await servingFixture((sources) => {
+    selectedRationalCurve(sources);
+  });
+  const receipt = await f.data.preflight();
+  equal(receipt.status, "verified_selected_release_graph");
+  const converted = await new UniversityScoringService(f.data).calculate(
+    f.u.offering,
+    {
+      profile_id: "SYNTHETIC-rational-profile",
+      scores: f.u.scores(),
+    },
+  );
+  assert(converted.ready);
+  const percentile = await new UniversityPercentileService(f.data).calculate(
+    f.u.offering,
+    converted,
+  );
+  assert(percentile.ready);
+  equal(percentile.state.inclusive!.toString(), "7/9");
+  equal(percentile.state.exclusive!.toString(), "4/9");
+  const dto = percentile.dto();
+  equal(dto.top_percent, "77.777778");
+  equal(dto.tie_share_percent, "33.333333");
+  const json = nativeJsonText(dto);
+  for (
+    const privateKey of [
+      "frequencies",
+      "numerator",
+      "denominator",
+      "metadata",
+      "score_representation",
+      "engine_approved",
+      "source_refs",
+    ]
+  ) {
+    assert(!json.includes('"' + privateKey + '"'));
+  }
+  equal(
+    (await f.data.getPercentile(f.oid))!.curve.data.format,
+    "jungsi.university-score-distribution/v2",
+  );
+});
+Deno.test("research rational curves fail selected native preflight and cannot replace a successful converted score", async () => {
+  const f = await servingFixture((sources) => {
+    const curve = selectedRationalCurve(sources),
+      m = curve.metadata as NativeObject;
+    m.status = "research";
+    m.population_verified = false;
+    curve.engine_approved = false;
+    curve.production_allowed = false;
+  });
+  await denied(() => f.data.preflight(), "artifact_not_approved");
+  const converted = await new UniversityScoringService(f.data).calculate(
+    f.u.offering,
+    {
+      profile_id: "SYNTHETIC-research-profile",
+      scores: f.u.scores(),
+    },
+  );
+  assert(converted.ready);
+  const percentile = await new UniversityPercentileService(f.data).calculate(
+    f.u.offering,
+    converted,
+  );
+  assert(!percentile.ready);
+  equal(percentile.state.reason_code, "percentile_curve_not_approved");
+  equal(percentile.dto().top_percent, null);
+  equal(converted.dto().converted_score, "30.00");
+});

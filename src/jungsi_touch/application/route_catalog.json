@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.61",
-  "source_sha256": "cc0c38694ff98302c31ed912941eef189929667b750d4d40ae2a62ed6b44547d",
+  "spec_version": "1.9.62",
+  "source_sha256": "a250a3b829457b6ae6cbe99278b15e9789d131d2601086c0de0f70cccd25b333",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2845,17 +2845,38 @@
     "provider_contract": {
       "port": "PlatformDataProvider.get_percentile(offering_id) → UniversityPercentileRelease | None; 애플리케이션 소유 포트이며 get_conversion/get_analysis와 독립한다.",
       "artifact_format": "jungsi.university-percentile-release/v1; Drive 발행 명부 kind=percentile, key=offering_id. 서버 고정 폴더·파일·version·SHA256·승인 상태를 검증해 읽는다.",
-      "required_fields": "version,status,release_id,academic_year,exam_id,source_pack_version,exam_type,rule_version,curve,bindings. curve는 기존 jungsi.university-score-distribution/v1 형식과 검증기를 재사용한다.",
+      "required_fields": "version,status,release_id,academic_year,exam_id,source_pack_version,exam_type,rule_version,curve,bindings. 기존 Python 참조는 jungsi.university-score-distribution/v1을 유지한다. Deno native 공급자는 같은 승인·모집단·결속 검증을 적용한 v1 또는 명시적 v2 곡선을 읽는다.",
       "bindings": "academic_year,offering_pk,university_id,campus,department,track,group,rule_version,curve_version. 봉투와 곡선·환산 결과에 같은 시험/pack/규칙/모집단 결속을 집행한다.",
       "mock": "mock_exam은 환산의 명시적 승인 호환과 동일한 시험 팩/원곡선 결속을 확인한다. 승인 범위 밖 실제 수능/모평 간 분포 전환은 보류한다.",
-      "numeric_serialization": "점수·도수/가중치·범위·분모는 정수 또는 정확한 소수 문자열이다. bool/이진 float/비유한 값/0 이하 가중치·비정수 observed_counts를 차단한다.",
+      "numeric_serialization": "v1 점수와 모든 형식의 도수/가중치·분모는 기존 정수 또는 정확한 소수 문자열 계약을 유지한다. Deno v2는 metadata.score_representation=rational_integer_pair를 명시하고 converted_score·score_min·score_max에 정확히 numerator/denominator 두 native 정수만 둔다. 분모는 양수이며 이진 float·bool·문자열·비유한·혼합 표현·추가 키를 거절한다. v1 의미를 재해석하거나 순환소수를 유한소수로 반올림하지 않는다. 0 이하 가중치·비정수 observed_counts·동일 유리수의 중복 bin을 차단한다.",
       "legacy": "기존 승인 분석 아티팩트 곡선의 재사용은 기존 보정 경로 의미를 보존한다. 새로운 독립 포트 승인을 임의 추정하지 않으며 기존 성공 누백의 DTO·값을 보존한다. 새 포트가 미존재/명시적 None이면 기존 same-year/승인 보정 분석의 검증된 lookup 성공을 보존한다. 실제 미승인·결속/형식 오류는 다른 곡선으로 우회하지 않는다. 레거시 DTO의 exam_id는 검증된 target exam, pack_version은 analysis가 결속한 원본 성적 팩이다.",
       "isolation": "get_analysis의 부재·자료 오류·정책/근거 승인 대기가 독립 get_percentile 결과를 훼손하지 않는다. 곡선 오류가 독립 conversion 결과를 훼손하지 않는다.",
       "privacy": "파일 경로·원문·도수·가중치·모형·hash·실행 trace·exact 분수·원본 성적은 공개 DTO에 포함하지 않는다. 실제 자료와 검수·발행본은 제외 폴더/비공개 스토리지에만 생성하고 원본을 보존한다.",
       "population_contract": "기본 독립 누백과 레거시는 POPULATION_ID=all_examinees_with_korean_math_two_inquiry_scores 전체 집단을 유지한다. DEV-005 신규 봉투에 서버 승인 comparison_population이 있으면 required_rule_inputs_present의 명시적 별도 집단을 허용한다. 승인/필터/시험/pack/규칙/곡선/ID/검증 버전 결속을 재검사하며 임의 모집단 문자열이나 영어 미응시 누락을 전체 집단으로 표시하지 않는다.",
       "conversion_context": "ScoringResult.context는 검증된 모집행/학년도/원시험/pack/exam_type/rule_id/rule_version/score_scope/score_scale_id/bonus_treatment와 원규칙 시험/pack 및 승인 모평 호환 버전의 불변 튜플이다. 새 포트에 척도·가산처리 근거가 없으면 환산 성공을 보존하고 누백만 percentile_conversion_context_missing으로 보류한다. ScoringResult.required_input_fields는 실제 검증한 규칙 입력의 불변 정렬 튜플이며 공개 conversion DTO에 넣지 않는다.",
       "comparison_population": "선택적 jungsi.university-comparison-population/v1: status=approved, scope=required_rule_inputs_present, population_id, base_population_id=기존 POP, academic_year,exam_id,source_pack_version,rule_version,curve_version,required_input_fields,validation_receipt_version. 서버 승인 명부와 실제 규칙의 필수 입력/곡선 검증 근거를 결속한다. 필터 전 전체/잔존/제외 가중치와 제외 사유는 비공개 영수증에 보존하고 누락 후보를 조용히 버리거나 불완전 집단을 complete로 승인하지 않는다.",
-      "comparison_validation_receipt": "UniversityPercentileRelease.validation_receipt는 별도 서버 승인 명부 kind=estimate_receipt, key=validation_receipt_version으로 고정해 읽는 jungsi.estimate-release-receipt/v1이다. 상태·동일 학년도/시험/팩/규칙/곡선/모집단·실제 ConversionRule.inputs의 정렬된 required_input_fields·모형 버전·곡선 SHA256·모형 채택 체크·규칙 재실행·직렬화·전체/잔존/제외 가중치·제외 사유를 재검사한다. inline approved 표시나 별도 집단 ID만으로 부분집단을 승인하지 않는다."
+      "comparison_validation_receipt": "UniversityPercentileRelease.validation_receipt는 별도 서버 승인 명부 kind=estimate_receipt, key=validation_receipt_version으로 고정해 읽는 jungsi.estimate-release-receipt/v1이다. 상태·동일 학년도/시험/팩/규칙/곡선/모집단·실제 ConversionRule.inputs의 정렬된 required_input_fields·모형 버전·곡선 SHA256·모형 채택 체크·규칙 재실행·직렬화·전체/잔존/제외 가중치·제외 사유를 재검사한다. inline approved 표시나 별도 집단 ID만으로 부분집단을 승인하지 않는다.",
+      "Deno_rational_score_encoding": {
+        "format": "jungsi.university-score-distribution/v2",
+        "score_representation": "rational_integer_pair",
+        "fields": [
+          "metadata.score_min",
+          "metadata.score_max",
+          "frequencies[].converted_score"
+        ],
+        "pair_keys": [
+          "numerator",
+          "denominator"
+        ],
+        "native_integer_only": true,
+        "positive_denominator_required": true,
+        "weights_use_existing_numeric_contract": true,
+        "v1_unchanged": true,
+        "Python_v2_adoption": false,
+        "approval_population_scope_checks_unchanged": true,
+        "private_source_only": true,
+        "public_DTO_changed": false
+      }
     },
     "public_result_contract": {
       "location": "본인 유료 report.analyses[offering_id].percentile",
@@ -2923,7 +2944,8 @@
       "기존 승인 연도 보정·환산·입결·후보·통계·상담 출력 합성 회귀와 문서/계층/참조/제외/브랜치/Git 스냅샷 CI를 통과한 PR만 develop에 통합한다.",
       "로컬 예시의 ready/분포대기/미승인/성적입력전·일반/유료·모바일 화면에서 학교 누백 수치와 각 상태를 확인한다.",
       "실제 데이터 readiness는 기존 정본/검산 근거를 재사용해 별도 기록한다. 전국 학교 승인 또는 실서버 연결을 합성 구현 완료로 주장하지 않는다.",
-      "전체/필수입력보유 집단 구분·missing 영어 비치환·승인 없는 subset 거절·규칙과 필터 불일치·제외 가중치/집계 범위·모집단 차이에서 유불리 보류를 검수한다."
+      "전체/필수입력보유 집단 구분·missing 영어 비치환·승인 없는 subset 거절·규칙과 필터 불일치·제외 가중치/집계 범위·모집단 차이에서 유불리 보류를 검수한다.",
+      "Deno v2 정수 유리수 점수의 정확 정렬·동점 포함/제외·범위·native bigint·잘못된 분모/혼합 표현·중복 bin을 검수한다. NativeDataProvider preflight→환산→독립 누백 경로와 공개 DTO의 내부 분수 비노출을 함께 검사하며 미승인 v2는 성공 환산을 보존하고 누백만 보류한다."
     ],
     "remaining": [
       "사용자 제공 자료 기반 자체 추정 공동분포·대학 환산곡선의 보정/holdout/민감도 검증과 estimated_weights 발행; 기획 추가 계약·자료팀 prototype 연계",
@@ -2950,7 +2972,19 @@
       "pull_request": "https://github.com/natural0448/Jungsi_touch/pull/11",
       "pull_request_ci": "https://github.com/natural0448/Jungsi_touch/actions/runs/37180115088",
       "develop_ci": "https://github.com/natural0448/Jungsi_touch/actions/runs/37180409388",
-      "presentation_evidence": "기획 로컬 outputs/local_screen_preview_20261004_v3/browser_qa/run-2026-10-04T05-58-13-221Z/verification_receipt.json; 원자료·곡선 발행 상태는 변경하지 않음"
+      "presentation_evidence": "기획 로컬 outputs/local_screen_preview_20261004_v3/browser_qa/run-2026-10-04T05-58-13-221Z/verification_receipt.json; 원자료·곡선 발행 상태는 변경하지 않음",
+      "Deno_rational_curve_v2": {
+        "status": "implemented_synthetic_verified_private_readback_not_final_source_acceptance",
+        "new_synthetic_tests": 11,
+        "focused_distribution_and_provider_tests": 39,
+        "private_candidate_Fraction_comparisons": 14,
+        "private_candidate_Fraction_mismatches": 0,
+        "private_readback_scope": "기존 저장 후보 한 개의 형식 읽기와 정확 누적 비교만 수행. 현재 원문·모집단·규칙·캠퍼스/모집행 승인 또는 최종 Git 후보 인수는 별도다. 원모형 재생성·보정·전국 검수는 재실행하지 않았다.",
+        "operating_approval_changed": false,
+        "actual_API_acceptance": "NOT_RUN",
+        "deployment": "NOT_RUN",
+        "production_ready": false
+      }
     },
     "planning_commit": "9ff8a1278d8aa8b6dbb3870af3293c240f34e8d4"
   },

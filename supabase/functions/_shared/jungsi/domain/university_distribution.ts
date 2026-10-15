@@ -35,6 +35,23 @@ function frozen<T extends NativeJson>(v: T): T {
 export function universityNumber(value: unknown): Rational {
   return exact(value instanceof JsonFloat ? value.lexeme : value);
 }
+/** v2 scores are explicit native integer pairs; v1 decimals keep their existing meaning. */
+function rationalCurveScore(value: unknown): Rational {
+  check(
+    value !== null && typeof value === "object" && !Array.isArray(value) &&
+      !(value instanceof JsonFloat),
+    "INVALID_RATIONAL_SCORE",
+  );
+  const r = value as NativeObject;
+  const integer = (v: unknown): v is number | bigint =>
+    typeof v === "bigint" || typeof v === "number" && Number.isSafeInteger(v);
+  check(
+    Object.keys(r).sort().join(",") === "denominator,numerator" &&
+      integer(r.numerator) && integer(r.denominator) && r.denominator > 0,
+    "INVALID_RATIONAL_SCORE",
+  );
+  return new Rational(BigInt(r.numerator), BigInt(r.denominator));
+}
 function ratio(v: Rational): NativeObject {
   return { numerator: v.numerator, denominator: v.denominator };
 }
@@ -93,8 +110,16 @@ export class NativeUniversityScoreDistribution {
   constructor(value: unknown) {
     try {
       const d = cloneNativeJson(row(value));
-      check(d.format === "jungsi.university-score-distribution/v1", "INVALID_CURVE_FORMAT");
+      const rationalScores = d.format === "jungsi.university-score-distribution/v2";
+      check(
+        d.format === "jungsi.university-score-distribution/v1" || rationalScores,
+        "INVALID_CURVE_FORMAT",
+      );
       const m = row(required(d, "metadata")), year = required(m, "academic_year");
+      if (rationalScores) {
+        check(m.score_representation === "rational_integer_pair", "INVALID_SCORE_REPRESENTATION");
+      }
+      const scoreNumber = rationalScores ? rationalCurveScore : universityNumber;
       check(
         typeof year === "number" && Number.isSafeInteger(year) &&
           [2024, 2025, 2026, 2027].includes(year),
@@ -155,8 +180,8 @@ export class NativeUniversityScoreDistribution {
         Array.isArray(required(d, "source_refs")) && (d.source_refs as NativeJson[]).length > 0,
         "SOURCE_REQUIRED",
       );
-      this.minimum = universityNumber(required(m, "score_min"));
-      this.maximum = universityNumber(required(m, "score_max"));
+      this.minimum = scoreNumber(required(m, "score_min"));
+      this.maximum = scoreNumber(required(m, "score_max"));
       check(this.minimum.compare(this.maximum) <= 0, "INVALID_DOMAIN");
       check(
         Array.isArray(required(d, "frequencies")) && (d.frequencies as NativeJson[]).length > 0,
@@ -165,7 +190,7 @@ export class NativeUniversityScoreDistribution {
       const bins = new Map<string, { score: Rational; weight: Rational }>();
       for (const raw of d.frequencies as NativeJson[]) {
         const r = row(raw),
-          score = universityNumber(required(r, "converted_score")),
+          score = scoreNumber(required(r, "converted_score")),
           weight = universityNumber(required(r, "weight"));
         check(!bins.has(score.toString()), "DUPLICATE_SCORE");
         check(weight.compare(exact(0)) > 0, "INVALID_WEIGHT");
