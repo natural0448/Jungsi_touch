@@ -12,6 +12,26 @@ import { assertSupabaseProjectBinding } from "./project_binding.ts";
 export interface RuntimeEnvironment {
   get(name: string): string | undefined;
 }
+const ENVIRONMENT_ALIASES: Readonly<Record<string, string>> = Object.freeze({
+  DATABASE_URL: "JUNGSI_DISPLAY_DATABASE_URL",
+  JUNGSI_DATABASE_CA: "JUNGSI_DISPLAY_DATABASE_CA",
+  SUPABASE_PUBLISHABLE_KEY: "JUNGSI_DISPLAY_PUBLISHABLE_KEY",
+  SUPABASE_SECRET_KEY: "JUNGSI_DISPLAY_STORAGE_SECRET",
+});
+/** Canonical presence wins, including an empty/invalid value. No privileged defaults. */
+export function resolveRuntimeEnvironment(source: RuntimeEnvironment): RuntimeEnvironment {
+  if (!source || typeof source.get !== "function") fail();
+  return Object.freeze({
+    get(name: string): string | undefined {
+      const current = source.get(name);
+      if (current !== undefined) return current;
+      const alias = Object.hasOwn(ENVIRONMENT_ALIASES, name)
+        ? ENVIRONMENT_ALIASES[name]
+        : undefined;
+      return alias === undefined ? undefined : source.get(alias);
+    },
+  });
+}
 export interface BasicRuntimeSettings {
   readonly auth: { readonly url: string; readonly publishableKey: string };
   readonly database: { readonly databaseUrl: string; readonly databaseCa: string };
@@ -109,6 +129,7 @@ function reference(value: unknown): PinnedControlReference {
   return Object.freeze({ objectKey, bytes: size(row.bytes), sha256: hash(row.sha256) });
 }
 export function readBasicRuntimeSettings(env: RuntimeEnvironment): BasicRuntimeSettings {
+  env = resolveRuntimeEnvironment(env);
   const url = required(env, "SUPABASE_URL"), databaseUrl = required(env, "DATABASE_URL");
   const databaseCa = env.get("JUNGSI_DATABASE_CA");
   if (typeof databaseCa !== "string" || !databaseCa.trim()) fail();
@@ -143,8 +164,10 @@ export async function readApprovedRuntimeBinding(
   basic: BasicRuntimeSettings,
   nowUtc: bigint,
 ): Promise<ApprovedRuntimeBinding> {
-  const raw = required(env, "JUNGSI_API_BINDING_JSON"),
-    expected = hash(required(env, "JUNGSI_API_BINDING_SHA256"));
+  env = resolveRuntimeEnvironment(env);
+  const raw = env.get("JUNGSI_API_BINDING_JSON");
+  if (typeof raw !== "string" || !raw.trim()) fail();
+  const expected = hash(required(env, "JUNGSI_API_BINDING_SHA256"));
   const maximumText = required(env, "JUNGSI_API_BINDING_MAX_BYTES");
   if (!/^[1-9][0-9]*$/.test(maximumText)) fail();
   const maximum = size(BigInt(maximumText)), bytes = new TextEncoder().encode(raw);

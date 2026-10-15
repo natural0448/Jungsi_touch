@@ -178,7 +178,10 @@ async function fixture() {
       if (url.pathname === "/auth/v1/user") {
         calls.auth++;
         equal(new Headers(init?.headers).get("Authorization"), "Bearer " + expectedToken);
-        equal(new Headers(init?.headers).get("apikey"), binding.values.SUPABASE_PUBLISHABLE_KEY);
+        equal(
+          new Headers(init?.headers).get("apikey"),
+          binding.values.SUPABASE_PUBLISHABLE_KEY ?? binding.values.JUNGSI_DISPLAY_PUBLISHABLE_KEY,
+        );
         return Promise.resolve(
           Response.json({ id: SUBJECT, user_metadata: { role: "admin" } }, {
             status: state.authStatus,
@@ -378,4 +381,30 @@ Deno.test("runtime composition never leaks CA or DSN when native pool creation f
   });
   await error(await api.fetch(f.request()), 503);
   equal(utcText(SYNTHETIC_RUNTIME_NOW), "2026-10-15T00:00:00Z");
+});
+
+Deno.test("runtime composition accepts explicit existing display aliases with the same verified bearer", async () => {
+  const f = await fixture();
+  for (
+    const [name, alias] of [
+      ["DATABASE_URL", "JUNGSI_DISPLAY_DATABASE_URL"],
+      ["JUNGSI_DATABASE_CA", "JUNGSI_DISPLAY_DATABASE_CA"],
+      ["SUPABASE_PUBLISHABLE_KEY", "JUNGSI_DISPLAY_PUBLISHABLE_KEY"],
+      ["SUPABASE_SECRET_KEY", "JUNGSI_DISPLAY_STORAGE_SECRET"],
+    ]
+  ) {
+    f.binding.values[alias] = f.binding.values[name];
+    Reflect.deleteProperty(f.binding.values, name);
+  }
+  const response = await f.api.fetch(f.request());
+  equal(response.status, 200);
+  equal(await response.json(), {
+    format: "jungsi.session/v1",
+    member_tier: "paid",
+    entitlement_expires_at: null,
+  });
+  equal(f.calls.auth, 1);
+  equal(f.calls.profile, 1);
+  equal(f.calls.pass, 1);
+  equal(f.calls.storage, 0);
 });

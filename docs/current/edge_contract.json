@@ -42172,7 +42172,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "3d6ad67b6c064ac9625c741d0bf13a0db45e77971622584c13ae211c69bb3343",
+        "source_sha256": "87ca3512938ed6c8d46a4578d171df1825e6c55aa930e9cfefdc6f502a473813",
         "symbols": [
           {
             "declarations": [
@@ -42218,6 +42218,46 @@
               }
             ],
             "name": "RuntimeEnvironment"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(source: RuntimeEnvironment)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "source",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RuntimeEnvironment",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "RuntimeEnvironment"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "RuntimeEnvironment",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "RuntimeEnvironment"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "resolveRuntimeEnvironment"
           },
           {
             "declarations": [
@@ -42920,6 +42960,46 @@
               {
                 "declarationKind": "private",
                 "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ENVIRONMENT_ALIASES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
                   "hasBody": true,
                   "parameter_source": "()",
                   "params": [],
@@ -43276,7 +43356,8 @@
         "ApprovedRuntimeBinding",
         "runtimeInteger",
         "readBasicRuntimeSettings",
-        "readApprovedRuntimeBinding"
+        "readApprovedRuntimeBinding",
+        "resolveRuntimeEnvironment"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/session_http.ts": {
@@ -60945,7 +61026,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "51172282eb279122e876c7090984129fd011f0d8ba189dfcc55cd58c93ed677f",
+        "source_sha256": "7d875f7f72a267c3dfd04816f7e505c7327a04afdafd6372a822dc846fc53452",
         "symbols": [
           {
             "declarations": [
@@ -61746,9 +61827,14 @@
             "importedName": "syntheticRuntimeBinding",
             "originalName": "syntheticRuntimeBinding",
             "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
+            "importedName": "syntheticRuntimePin",
+            "originalName": "syntheticRuntimePin",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "bae827d210a3751edf201688c6fa8ba5f74fe010ba80711cacbb8da66544dfd4",
+        "source_sha256": "b3e907e5410e850066cebd7f100c2697da8711d0bdb77fa74eaa2e489fad5dd4",
         "symbols": [
           {
             "declarations": [
@@ -61796,6 +61882,46 @@
               }
             ],
             "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SYNTHETIC_ALIASES"
           }
         ]
       },
@@ -65345,5 +65471,5 @@
     "tests/edge/test_usage_service.ts",
     "tests/edge/test_year_equating.ts"
   ],
-  "unit_count": 540
+  "unit_count": 548
 }

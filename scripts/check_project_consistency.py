@@ -1157,8 +1157,8 @@ def live_execution_document(spec):
     if assembly:
         assembly_text=('\n\n### 서버 런타임 조립과 입력 계약\n\n'+assembly['status_text']+'\n\n'+
             table(['소스 진입점','경로','SHA-256'],[[k,v['path'],v['source_sha256']]for k,v in assembly['bindings'].items()])+'\n\n'+
-            table(['서버 설정 이름','현재 상태','입력의 의미'],[[v['name'],v['status'],v['meaning']]for v in assembly['environment']])+'\n\n'+
-            '\n\n'.join(assembly[k]for k in ('scope_rule','precision_rule','request_order_rule','missing_settings_rule','control_source_rule','reuse_rule','verification_rule'))+'\n\n'+
+            table(['서버 설정 이름','허용된 기존 이름','현재 상태','입력의 의미'],[[v['name'],assembly['environment_aliases'].get(v['name'],'없음'),v['status'],v['meaning']]for v in assembly['environment']])+'\n\n'+
+            '\n\n'.join(assembly[k]for k in ('environment_alias_rule','scope_rule','precision_rule','request_order_rule','missing_settings_rule','control_source_rule','reuse_rule','verification_rule'))+'\n\n'+
             table(['실제 연결에 필요한 항목','대기 조건'],assembly['waiting']))
     rows=[]
     for o in spec['operations']:
@@ -1220,7 +1220,13 @@ def validate_live_execution(spec):
             any(not isinstance(v,dict) or set(v)!={'name','status','meaning'} for v in environment) or
             {v['name']for v in environment}!=expected_environment):
             errors.append('DEV-010 runtime environment contract drift')
-        for key in ('status_text','scope_rule','precision_rule','request_order_rule',
+        expected_aliases={'DATABASE_URL':'JUNGSI_DISPLAY_DATABASE_URL',
+            'JUNGSI_DATABASE_CA':'JUNGSI_DISPLAY_DATABASE_CA',
+            'SUPABASE_PUBLISHABLE_KEY':'JUNGSI_DISPLAY_PUBLISHABLE_KEY',
+            'SUPABASE_SECRET_KEY':'JUNGSI_DISPLAY_STORAGE_SECRET'}
+        if assembly.get('environment_aliases')!=expected_aliases:
+            errors.append('DEV-010 runtime environment aliases drift')
+        for key in ('status_text','environment_alias_rule','scope_rule','precision_rule','request_order_rule',
             'missing_settings_rule','control_source_rule','reuse_rule','verification_rule'):
             if not isinstance(assembly.get(key),str) or not assembly[key].strip():
                 errors.append('DEV-010 runtime assembly rule missing: '+key)

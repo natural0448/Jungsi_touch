@@ -1392,6 +1392,17 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
 
 class SupabaseDeploymentContractTests(unittest.TestCase):
 
+    def test_runtime_alias_contract_rejects_privileged_defaults_and_generated_docs_keep_the_boundary(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        for name in ('DATABASE_URL','SUPABASE_SECRET_KEY'):
+            spec=deepcopy(self.spec)
+            spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['environment_aliases'][name]='SUPABASE_DB_URL'
+            self.assertIn('DEV-010 runtime environment aliases drift',validate_live_execution(spec))
+        text=live_execution_document(self.spec)
+        for value in ('JUNGSI_DISPLAY_DATABASE_URL','JUNGSI_DISPLAY_DATABASE_CA','JUNGSI_DISPLAY_PUBLISHABLE_KEY','JUNGSI_DISPLAY_STORAGE_SECRET','빈 값','복수 key','display descriptor'):
+            self.assertIn(value,text)
+
+
     def test_runtime_assembly_missing_scope_or_stale_entry_cannot_claim_source_assembly(self):
         from check_project_consistency import validate_live_execution
         for field in ('native_entry','composition'):

@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "c8f8e9665d56363b3d3ce7cd6bc09e1649aaf5bc0dee10e219277a574b16da45",
+      "source_sha256": "413d895b91867c39eed3cc862e09cef8cbcc78f4b3167794c748781267d29134",
       "symbols": [
         {
           "kind": "class",
@@ -7921,7 +7921,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "3d6ad67b6c064ac9625c741d0bf13a0db45e77971622584c13ae211c69bb3343",
+        "source_sha256": "87ca3512938ed6c8d46a4578d171df1825e6c55aa930e9cfefdc6f502a473813",
         "declared_exports": [
           "RuntimeEnvironment",
           "BasicRuntimeSettings",
@@ -7933,7 +7933,8 @@
           "ApprovedRuntimeBinding",
           "runtimeInteger",
           "readBasicRuntimeSettings",
-          "readApprovedRuntimeBinding"
+          "readApprovedRuntimeBinding",
+          "resolveRuntimeEnvironment"
         ]
       },
       {

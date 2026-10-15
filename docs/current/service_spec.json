@@ -4713,7 +4713,8 @@
         "ApprovedRuntimeBinding",
         "runtimeInteger",
         "readBasicRuntimeSettings",
-        "readApprovedRuntimeBinding"
+        "readApprovedRuntimeBinding",
+        "resolveRuntimeEnvironment"
       ]
     },
     {
@@ -6360,7 +6361,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "c8f8e9665d56363b3d3ce7cd6bc09e1649aaf5bc0dee10e219277a574b16da45",
+            "source_sha256": "413d895b91867c39eed3cc862e09cef8cbcc78f4b3167794c748781267d29134",
             "symbols": [
               {
                 "kind": "class",
@@ -13695,7 +13696,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "3d6ad67b6c064ac9625c741d0bf13a0db45e77971622584c13ae211c69bb3343",
+              "source_sha256": "87ca3512938ed6c8d46a4578d171df1825e6c55aa930e9cfefdc6f502a473813",
               "declared_exports": [
                 "RuntimeEnvironment",
                 "BasicRuntimeSettings",
@@ -13707,7 +13708,8 @@
                 "ApprovedRuntimeBinding",
                 "runtimeInteger",
                 "readBasicRuntimeSettings",
-                "readApprovedRuntimeBinding"
+                "readApprovedRuntimeBinding",
+                "resolveRuntimeEnvironment"
               ]
             },
             {
@@ -16016,6 +16018,17 @@
         "REQ-26"
       ],
       "summary": "기존22 API의 실제 Deno entry와 네이티브 Auth/SQL·private Storage control/선택 그래프·승인 공유 예산을 소스 조립한다. 새 합성40과 전체540·고정 의존 타입 검사 범위, CA/현재head/예산의 명시 입력·설정누락503·기존 admin 예외·정밀값 보존을 등록하며 실제native/배포0은 유지한다. 직전 검증 develop7d8784e의 공통1.9.56을 정상 병합하고 이전 WIP·파일·원문·검산 근거를 보존한다."
+    },
+    {
+      "date": "2026-10-15",
+      "requirements": [
+        "REQ-12",
+        "REQ-15",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "현재 Edge의 기존 DISPLAY 서버 설정을 네 명시 별칭으로 재사용한다. canonical이 존재하면 빈 값도 우선해 오류이며 부재할 때만 별칭을 허용한다. privileged 기본 DB·migration DSN·복수 key·service-role/anon fallback과 자료 승인/예산/descriptor 자동 승격을 금지한다. 새6 별칭 반례와 raw JSON의 LF/CRLF·해시 반례2를 포함한548 및 정상 훅·CI로 같은 최종 후보를 검증한다. 최초540 검증 커밋과 로그는 보존하고 실제22 native/배포0은 유지한다."
     }
   ],
   "overall_analysis_contract": {
@@ -26242,9 +26255,9 @@
         "precision_rule": "control·선택 artifact는 원본 바이트 해시를 검증하고 native JSON의 정수·소수·유리수·조건·필드 존재 여부를 보존한다. 기존 정밀 엔진과 텍스트 SQL JSON·마이크로초 UTC 시각을 연결한다. Number 변환이나 새 모형 생성으로 대체하지 않는다. 기존 Python–Edge 독립 oracle 검산과 실제 자료·DB·엔진 실행 검수는 별개다.",
         "request_order_rule": "동일 22 API/회원·소유권/학교 범위를 유지한다. relay → 실제 getUser의 동일 Bearer → 같은 Bearer 본인 profiles(role,status) → 현재 pass → 회원·소유권·관리 조건 → 입력 검증 → 해당 13 operation의 공유 예산 예약 → 업무·공개 DTO·최종 만료 확인 순서를 따른다. session.read는 데이터 binding이나 요청 예산을 요구하지 않으며 기존 검증된 active/admin/aal2 예외와 실제 pass 만료 우선을 유지한다.",
         "missing_settings_rule": "CA 또는 필수 서버 설정이 없으면 pool 생성이나 자료 조회 전에 503이다. 데이터 binding·원본 SHA·바이트 상한·명시 한도·현재 head가 없거나 목적/승인/scope/만료가 다르면 데이터 경로는 503으로 닫힌다. /health/live는 최소 생존 확인이고 relay 보호 /health/ready는 기존 005 schema·pass metadata·선택 그래프 검사를 요구한다. 새 grant·RLS 변경·003 재적용·005 실행을 자동 수행하지 않는다.",
-        "control_source_rule": "binding의 sources는 private Storage object_key·정확한 bytes·SHA를 갖는다. 현재 head는 jungsi.native-selection-head/v1의 approved/purpose/project/scope/registry/selection/usage_policy/approval/expiry를 매번 확인하며 요청별 읽기 횟수·실제 바이트 예산을 공유한다. head가 바뀌면 기존 binding과 warm 결과를 거절하고 새 승인 binding이 필요하다. jungsi.runtime-usage-policy/v1은 5개 차원·작업별 비용·허용 시험/pack·최종 결과 바이트 및 worker 수명보다 긴 lease를 명시한다. 운영 한도의 기본값·무제한·합성값 자동 승격은 없다.",
+        "control_source_rule": "binding의 sources는 private Storage object_key·정확한 bytes·SHA를 갖는다. 현재 head는 jungsi.native-selection-head/v1의 approved/purpose/project/scope/registry/selection/usage_policy/approval/expiry를 매번 확인하며 요청별 읽기 횟수·실제 바이트 예산을 공유한다. head가 바뀌면 기존 binding과 warm 결과를 거절하고 새 승인 binding이 필요하다. jungsi.runtime-usage-policy/v1은 5개 차원·작업별 비용·허용 시험/pack·최종 결과 바이트 및 worker 수명보다 긴 lease를 명시한다. 운영 한도의 기본값·무제한·합성값 자동 승격은 없다. binding JSON의 정상 pretty 표기·끝 LF/CRLF를 포함한 원본 UTF-8 바이트를 trim 없이 그대로 크기·SHA·native 파서에 전달한다. 빈/공백뿐인 값과 원본 해시가 다른 바이트는 거절한다. 짧은 식별자·URL·토큰의 앞뒤 공백 거절은 유지한다.",
         "reuse_rule": "기존 C140·공식 시험·2027 규칙 등의 정리·발행 근거를 먼저 재사용한다. Python용 로컬 registry/selection 경로를 Edge Storage 승인 포인터로 자동 해석하지 않는다. 새 업로드·재수집 없이 기존 목적·scope·현재 hash·승인·expiry가 이 runtime 계약에 맞는지 확인하고, 미보유 포인터와 재검수가 필요한 값만 보완한다. 실제 원자료·CA·비밀값·승인 한도·정본 등록부는 Git에 넣지 않는다.",
-        "verification_rule": "기존 source suite에 새 설정/현재 head/공유 읽기/예산 planner/조립/선택 그래프 합성검사 40건을 추가한다. 실제 entry는 고정 postgres@3.4.5 lock으로 별도 타입 검사하며 serve를 시작하지 않는다. 동일 후보 전체 훅·CI·oracle 통과 후에도 실제 JWT/TOTP·네이티브 업무 트랜잭션·요금제 근거·Edge/BFF/브라우저 인수가 없으면 운영 PASS를 기록하지 않는다.",
+        "verification_rule": "기존 source suite에 새 설정/현재 head/공유 읽기/예산 planner/조립/선택 그래프 합성검사 48건을 추가한다. 실제 entry는 고정 postgres@3.4.5 lock으로 별도 타입 검사하며 serve를 시작하지 않는다. 동일 후보 전체 훅·CI·oracle 통과 후에도 실제 JWT/TOTP·네이티브 업무 트랜잭션·요금제 근거·Edge/BFF/브라우저 인수가 없으면 운영 PASS를 기록하지 않는다.",
         "waiting": [
           [
             "현재 CA",
@@ -26270,7 +26283,14 @@
             "운영 진입점",
             "기존 두 함수의 설정을 자동 변경하지 않고 같은 후보의 Edge·BFF·정상 브라우저 경로와 세 보안 gate를 검수"
           ]
-        ]
+        ],
+        "environment_aliases": {
+          "DATABASE_URL": "JUNGSI_DISPLAY_DATABASE_URL",
+          "JUNGSI_DATABASE_CA": "JUNGSI_DISPLAY_DATABASE_CA",
+          "SUPABASE_PUBLISHABLE_KEY": "JUNGSI_DISPLAY_PUBLISHABLE_KEY",
+          "SUPABASE_SECRET_KEY": "JUNGSI_DISPLAY_STORAGE_SECRET"
+        },
+        "environment_alias_rule": "정식 설정 이름이 존재하면 빈 값·잘못된 값도 우선하며 오류를 유지한다. 정식 이름이 아예 없을 때만 위 네 기존 DISPLAY 별칭을 허용한다. 기본 privileged SUPABASE_DB_URL·migration DSN·service-role/anon 예전 키·복수 key 배열로 fallback하지 않는다. bucket/prefix·binding/head·예산에는 별칭이나 기본값을 적용하지 않으며 기존 display descriptor를 engine 승인으로 사용하지 않는다. 같은 프로젝트·실제 jungsi_backend_app·TLS·UTC/RLS guard를 유지한다."
       }
     }
   },
@@ -72994,7 +73014,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "3d6ad67b6c064ac9625c741d0bf13a0db45e77971622584c13ae211c69bb3343",
+          "source_sha256": "87ca3512938ed6c8d46a4578d171df1825e6c55aa930e9cfefdc6f502a473813",
           "symbols": [
             {
               "declarations": [
@@ -73040,6 +73060,46 @@
                 }
               ],
               "name": "RuntimeEnvironment"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(source: RuntimeEnvironment)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "source",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "RuntimeEnvironment",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "RuntimeEnvironment"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "RuntimeEnvironment",
+                      "value": {
+                        "resolution": {
+                          "kind": "local"
+                        },
+                        "typeName": "RuntimeEnvironment"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "resolveRuntimeEnvironment"
             },
             {
               "declarations": [
@@ -73742,6 +73802,46 @@
                 {
                   "declarationKind": "private",
                   "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "Readonly",
+                      "value": {
+                        "typeName": "Readonly",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "Record",
+                            "value": {
+                              "typeName": "Record",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "ENVIRONMENT_ALIASES"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
                     "hasBody": true,
                     "parameter_source": "()",
                     "params": [],
@@ -74098,7 +74198,8 @@
           "ApprovedRuntimeBinding",
           "runtimeInteger",
           "readBasicRuntimeSettings",
-          "readApprovedRuntimeBinding"
+          "readApprovedRuntimeBinding",
+          "resolveRuntimeEnvironment"
         ]
       },
       "supabase/functions/_shared/jungsi/infrastructure/session_http.ts": {
@@ -91767,7 +91868,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "51172282eb279122e876c7090984129fd011f0d8ba189dfcc55cd58c93ed677f",
+          "source_sha256": "7d875f7f72a267c3dfd04816f7e505c7327a04afdafd6372a822dc846fc53452",
           "symbols": [
             {
               "declarations": [
@@ -92568,9 +92669,14 @@
               "importedName": "syntheticRuntimeBinding",
               "originalName": "syntheticRuntimeBinding",
               "src": "tests/edge/synthetic_runtime_binding.ts"
+            },
+            {
+              "importedName": "syntheticRuntimePin",
+              "originalName": "syntheticRuntimePin",
+              "src": "tests/edge/synthetic_runtime_binding.ts"
             }
           ],
-          "source_sha256": "bae827d210a3751edf201688c6fa8ba5f74fe010ba80711cacbb8da66544dfd4",
+          "source_sha256": "b3e907e5410e850066cebd7f100c2697da8711d0bdb77fa74eaa2e489fad5dd4",
           "symbols": [
             {
               "declarations": [
@@ -92618,6 +92724,46 @@
                 }
               ],
               "name": "denied"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "Readonly",
+                      "value": {
+                        "typeName": "Readonly",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "Record",
+                            "value": {
+                              "typeName": "Record",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SYNTHETIC_ALIASES"
             }
           ]
         },
@@ -96167,6 +96313,6 @@
       "tests/edge/test_usage_service.ts",
       "tests/edge/test_year_equating.ts"
     ],
-    "unit_count": 540
+    "unit_count": 548
   }
 }
