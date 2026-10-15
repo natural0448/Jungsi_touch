@@ -1392,6 +1392,85 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
 
 class SupabaseDeploymentContractTests(unittest.TestCase):
 
+    def test_preconnection_cases_follow_canonical_routes_and_cover_all_operations(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        wrong=deepcopy(self.spec)
+        prep=wrong['supabase_deployment_contract']['live_execution']['preconnection_preparation']
+        prep['cases'].pop('history.search')
+        self.assertIn('DEV-010 preparation acceptance cases drift',validate_live_execution(wrong))
+        wrong=deepcopy(self.spec)
+        wrong['operations'][0]['path']='/api/v1/synthetic-current-route'
+        body=live_execution_document(wrong)
+        self.assertIn('history.search / GET /api/v1/synthetic-current-route',body)
+        self.assertIn('실제 native/deployment 증거가 아니다',body)
+
+    def test_preconnection_cannot_promote_source_or_prepared_case_to_live_approval(self):
+        from check_project_consistency import validate_live_execution
+        for field in ('source_registration_is_execution_approval','prepared_cases_are_execution_evidence'):
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['preconnection_preparation'][field]=True
+            self.assertIn('DEV-010 preparation cannot promote approval or live acceptance',validate_live_execution(wrong))
+
+    def test_preconnection_requires_all_packages_and_bound_execution_evidence(self):
+        from check_project_consistency import validate_live_execution
+        wrong=deepcopy(self.spec)
+        prep=wrong['supabase_deployment_contract']['live_execution']['preconnection_preparation']
+        prep['packages'][-1]['operation_ids'].pop()
+        self.assertIn('DEV-010 preparation acceptance package omits operations',validate_live_execution(wrong))
+        wrong=deepcopy(self.spec)
+        wrong['supabase_deployment_contract']['live_execution']['preconnection_preparation']['evidence_fields'].remove('artifact_snapshot_sha256')
+        self.assertIn('DEV-010 preparation evidence binding missing',validate_live_execution(wrong))
+
+
+    def test_runtime_alias_contract_rejects_privileged_defaults_and_generated_docs_keep_the_boundary(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        for name in ('DATABASE_URL','SUPABASE_SECRET_KEY'):
+            spec=deepcopy(self.spec)
+            spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['environment_aliases'][name]='SUPABASE_DB_URL'
+            self.assertIn('DEV-010 runtime environment aliases drift',validate_live_execution(spec))
+        text=live_execution_document(self.spec)
+        for value in ('JUNGSI_DISPLAY_DATABASE_URL','JUNGSI_DISPLAY_DATABASE_CA','JUNGSI_DISPLAY_PUBLISHABLE_KEY','JUNGSI_DISPLAY_STORAGE_SECRET','빈 값','복수 key','display descriptor'):
+            self.assertIn(value,text)
+
+
+    def test_runtime_assembly_missing_scope_or_stale_entry_cannot_claim_source_assembly(self):
+        from check_project_consistency import validate_live_execution
+        for field in ('native_entry','composition'):
+            spec=deepcopy(self.spec)
+            spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['bindings'][field]['source_sha256']='f'*64
+            self.assertIn('DEV-010 runtime assembly source binding drift: '+field,validate_live_execution(spec))
+        spec=deepcopy(self.spec)
+        spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['operation_ids'].pop()
+        self.assertIn('DEV-010 runtime assembly scope drift',validate_live_execution(spec))
+        spec=deepcopy(self.spec)
+        spec['supabase_deployment_contract']['live_execution'].pop('runtime_assembly')
+        self.assertIn('DEV-010 runtime assembly missing',validate_live_execution(spec))
+
+    def test_runtime_assembly_settings_cannot_contain_actual_values_or_drop_pending_inputs(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec)
+        spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['environment'][0]['value']='SYNTHETIC'
+        self.assertIn('DEV-010 runtime environment contract drift',validate_live_execution(spec))
+        spec=deepcopy(self.spec)
+        spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['waiting']=[]
+        self.assertIn('DEV-010 runtime assembly waiting conditions missing',validate_live_execution(spec))
+
+    def test_runtime_assembly_keeps_native_and_deployment_evidence_requirements(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec)
+        live=spec['supabase_deployment_contract']['live_execution']
+        live['operations']['session.read'].update(native='PASS',deployment='PASS')
+        errors=validate_live_execution(spec)
+        self.assertIn('DEV-010 live operating evidence missing: session.read.native',errors)
+        self.assertIn('DEV-010 live operating evidence missing: session.read.deployment',errors)
+
+    def test_runtime_assembly_generated_contract_lists_pending_server_inputs(self):
+        from check_project_consistency import live_execution_document
+        body=live_execution_document(self.spec)
+        for value in ('jungsi-api/index.ts','JUNGSI_DATABASE_CA','JUNGSI_API_BINDING_JSON','JUNGSI_API_BINDING_SHA256','JUNGSI_API_BINDING_MAX_BYTES','runtime-usage-policy/v1','005','실제 연결'):
+            self.assertIn(value,body)
+
+
     def test_live_execution_cannot_omit_one_of_the_existing_routes(self):
         from check_project_consistency import validate_live_execution
         spec=deepcopy(self.spec);spec['supabase_deployment_contract']['live_execution']['operations'].pop('session.read')
@@ -1466,12 +1545,26 @@ if __name__=="__main__":unittest.main()
 class OpeningSecurityOperationsTests(unittest.TestCase):
     def setUp(self):
         self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
-    def test_legacy_fallback_or_admin_paid_override_is_rejected(self):
-        for branch,key in [('entitlement','legacy_table_fallback_allowed'),('user_decisions','admin_paid_override')]:
-            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract'][branch][key]=True
+    def test_legacy_fallback_or_missing_confirmed_admin_decision_is_rejected(self):
+        for branch,key,value in [('entitlement','legacy_table_fallback_allowed',True),('user_decisions','admin_paid_override',False)]:
+            wrong=deepcopy(self.spec);wrong['opening_security_operations_contract'][branch][key]=value
             self.assertIn('Opening paid authority or failure boundary drift',validate_spec(wrong))
+    def test_confirmed_admin_exception_exact_identity_expiry_and_scope_contract(self):
+        self.assertFalse(validate_spec(self.spec))
+        changes=[('role',None),('account_status','inactive'),('verified_aal','aal1'),
+                 ('internal_origin_required',False),('request_local_origin_identity_required',False),
+                 ('own_profile_queries_per_request',2),('own_profile_queries_per_request',True),
+                 ('entitlement_expires_at','9999-12-31T00:00:00Z'),('real_expiry_preserved',False),
+                 ('ownership_school_review_approval_scope_override',True),
+                 ('next_request_profile_reevaluation_required',False),('editor_or_approver_is_admin',True)]
+        for key,value in changes:
+            with self.subTest(key=key,value=value):
+                wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['entitlement']['admin_access_exception'][key]=value
+                self.assertIn('Opening administrator exception identity, expiry or scope drift',validate_spec(wrong))
+        wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['entitlement']['admin_access_exception'].pop('role')
+        self.assertIn('Opening administrator exception identity, expiry or scope drift',validate_spec(wrong))
     def test_management_cannot_trust_client_or_expand_to_students(self):
-        for key in ['client_roles_or_user_metadata_trusted','new_app_role_profiles_GRANT_allowed','student_or_paid_service_MFA_required']:
+        for key in ['client_roles_or_user_metadata_trusted','new_app_role_profiles_GRANT_allowed','student_or_paid_service_MFA_required','profile_admin_override_allowed']:
             wrong=deepcopy(self.spec);wrong['opening_security_operations_contract']['management'][key]=True
             self.assertIn('Opening management MFA or active scope drift',validate_spec(wrong))
     def test_public_forecast_read_cannot_inherit_management(self):

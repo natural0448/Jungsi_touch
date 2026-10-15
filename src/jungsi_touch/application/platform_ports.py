@@ -20,6 +20,7 @@ class VerifiedSession:
     expires_at: datetime
     assurance_level: str | None = None
     account_status: str | None = None
+    account_role: str | None = None
 
 
 class SessionProvider(Protocol):

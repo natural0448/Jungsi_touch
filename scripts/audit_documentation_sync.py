@@ -201,7 +201,52 @@ def validate_sync_policy(spec):
     index = policy.get("code_index", {})
     if not isinstance(index, dict) or index.get("format") != FORMAT or index.get("parser") != PARSER:
         errors.append("Documentation code index parser/format missing")
+    version = str(spec.get("version", "")).split(".")
+    current_reference_required = (len(version) == 3 and all(x.isdigit() for x in version)
+                                  and tuple(map(int, version)) >= (1, 9, 56))
+    reference = policy.get("latest_verified_source")
+    if current_reference_required or reference is not None:
+        if policy.get("execution_ledger_source") != "supabase_deployment_contract.live_execution":
+            errors.append("Documentation current progress must derive from live execution ledger")
+        valid_reference = isinstance(reference, dict)
+        if valid_reference:
+            checks = reference.get("checks", {})
+            valid_reference = (reference.get("format") == "jungsi.verified-source-reference/v1"
+                and isinstance(reference.get("commit"), str)
+                and re.fullmatch(r"[0-9a-f]{40}", reference["commit"]) is not None
+                and isinstance(reference.get("spec_version"), str)
+                and re.fullmatch(r"\d+\.\d+\.\d+", reference["spec_version"]) is not None
+                and type(reference.get("ci_run_id")) is int and reference["ci_run_id"] > 0
+                and reference.get("ci_conclusion") == "success"
+                and reference.get("source_only") is True
+                and isinstance(checks, dict)
+                and all(type(checks.get(key)) is int and checks[key] > 0
+                        for key in ("python", "deno", "oracle")))
+        if not valid_reference:
+            errors.append("Documentation verified source reference missing or invalid")
     return errors
+
+
+def live_execution_progress_rows(spec):
+    """Derive current counts and stages; historical prose cannot override this ledger."""
+    live = spec.get("supabase_deployment_contract", {}).get("live_execution")
+    if not isinstance(live, dict):
+        return []
+    operations = live.get("operations", {})
+    total = len(operations)
+    rows = []
+    for field, accepted, label, meaning in (
+        ("code", "PORTED", "22 API 코드 등록", "등록 소스와 해시 범위이며 실제 실행 조립·연결·배포 완료와 구분한다."),
+        ("native", "PASS", "22 API 실제 연결 검수", "동일 후보·실제 검수 영수증이 있는 operation만 PASS로 센다."),
+        ("deployment", "PASS", "22 API 배포 인수", "같은 후보의 배포·실 HTTP 인수 영수증을 별도로 요구한다."),
+    ):
+        count = sum(row.get(field) == accepted for row in operations.values())
+        rows.append([label, "live_execution.operations.*." + field,
+                     f"{accepted} {count}/{total}", meaning])
+    for key, stage in live.get("stages", {}).items():
+        rows.append([stage["label"], "live_execution.stages." + key, stage["status"],
+                     "해당 단계의 후보·범위·영수증 조건을 따른다. 다른 단계의 PASS를 대용하지 않는다."])
+    return rows
 
 
 def generated_sync_files(spec, doc, table):
@@ -215,11 +260,22 @@ def generated_sync_files(spec, doc, table):
                    o.get("implementation_status", "미등록")] for o in spec["operations"]]
     modules = [[r["path"], r["layer"], ", ".join(r["requirements"]) or "독립 업무 경로 미등록",
                 r["status"], len(r["symbols"]), r["source_sha256"]] for r in rows]
+    reference = policy.get("latest_verified_source")
+    verified_source = ""
+    if reference:
+        checks = reference["checks"]
+        verified_source = ("최근 검증한 소스 기준 " + reference["commit"] + " / spec" + reference["spec_version"] +
+            f" · CI{reference['ci_run_id']} success · Python{checks['python']}/Deno{checks['deno']}/oracle{checks['oracle']}. "
+            "이는 소스 검산 근거이며 실제 JWT·DB·배포 인수를 대신하지 않는다.\n\n")
+    progress = live_execution_progress_rows(spec)
+    current_progress = ("현재 상태는 live_execution 원장에서 자동 계산하며 아래 이력표의 문구·숫자를 현재값으로 재사용하지 않는다.\n\n" +
+        table(["담당/범위", "단일 정본", "현재 상태", "해석과 다음 조건"], progress) + "\n\n") if progress else ""
     body = ("작업 시작점은 develop의 공통 명세, 이 현황표, [코드 색인](code_routing_index.json), 최신 검증 커밋이다. "
             "기획·라우팅·계층·브랜치 운영 문서는 같은 명세에서 생성한다.\n\n"
             "## 현재 개발 기준과 진행 상태\n\n최초 검증 기준 " + policy["initial_verified_commit"] + ". "
             "이후에는 정확한 SHA의 훅·CI와 검사 영수증이 통과한 최신 커밋을 다음 작업의 기준으로 사용한다. "
-            "이 문서 안에 아직 생성되지 않은 자신의 커밋 SHA를 기록하지 않는다.\n\n" +
+            "이 문서 안에 아직 생성되지 않은 자신의 커밋 SHA를 기록하지 않는다.\n\n" + verified_source + current_progress +
+            "## 이전 검수와 연결 근거\n\n각 행은 해당 참조 시점의 검수 이력이다. 현재 실행·운영 상태는 위 원장과 같은 후보의 영수증을 우선한다.\n\n" +
             table(["담당/범위", "참조", "상태", "해석과 다음 조건"], policy["development_state"]) +
             "\n\n## 모든 에이전트의 필수 동기화 순서\n\n" +
             "\n".join(str(i) + ". " + rule for i, rule in enumerate(policy["agent_steps"], 1)) +

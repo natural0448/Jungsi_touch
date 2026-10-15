@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.54이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.62이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -201,7 +201,7 @@ format: jungsi.session/v1
 
 필드: format, member_tier, entitlement_expires_at.
 
-- public.jeongsi_passes의 revoked_at IS NULL 및 starts_at<=now<ends_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 MAX(ends_at)를 UTC Z로 반환한다. metadata와 활성 만료를 한 배치 JOIN 질의로 확인하고 같은 요청의 회원 판정·만료 표시에 결속한다. jungsi_backend.entitlements로 장애 대체하지 않는다. 관리자 이용권 예외는 미확정이며 추가하지 않는다. 별도 status/product 컬럼을 가정하지 않는다.
+- public.jeongsi_passes의 revoked_at IS NULL 및 starts_at<=now<ends_at로 현재 활성 이용권을 확인한다. 복수 활성 이용권은 MAX(ends_at)를 UTC Z로 반환한다. metadata와 활성 만료를 한 배치 JOIN 질의로 확인하고 같은 요청의 회원 판정·만료 표시에 결속한다. jungsi_backend.entitlements로 장애 대체하지 않는다. 동일 검증 Bearer의 본인 public.profiles.role=admin 및 public.profiles.status=active 및 aal2와 요청 내부 admin-origin이 확인될 때만 관리자 접근 예외를 적용한다. 실제 활성 pass 만료를 우선 보존하고 pass가 없는 예외는 paid+null이다. 일반 paid 만료 누락503, 기존 자료·학교·검수 subject·소유권 범위와3필드는 유지한다. FE-ADMIN-ACCESS-01은 외부 화면팀 표시 요청이다. 별도 status/product 컬럼을 가정하지 않는다.
 - 일반 회원 만료는 null. 인증 또는 저장소 장애는 503이며 일반 회원으로 자동 강등하지 않는다. 사용자 ID·등급·역할·JWT·결제 내역을 요청/응답에 포함하지 않는다.
 
 ### forecast_capabilities
@@ -346,8 +346,8 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 ## 2026-10-14 오픈 전 최신 확정
 
-유료 기준은 public.jeongsi_passes이며 관리자 무료 이용 예외는 미확정이다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. 이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 [오픈 전 보안운영 변경](오픈전_보안운영_변경.md)와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.
+유료 이용권 원본은 public.jeongsi_passes이며 관리자 접근 예외는 동일 검증 Bearer·본인 role=admin/status=active·aal2·요청 내부 origin이 모두 필요하다. 실제 만료 우선, 예외만 paid+null, 일반 paid 만료 누락503과 FE-ADMIN-ACCESS-01을 따른다. 관리 8경로의 검증 aal2·본인 active 상태·기존 학교 권한을 결합한다. 이 문서에 남은 과거 어댑터/명시 연결 전용 결정은 당시 이력이다. 현재 변경 범위와 검수 상태는 [오픈 전 보안운영 변경](오픈전_보안운영_변경.md)와 opening_security_operations_contract를 우선한다. API22/session3·자료 승인/보존 경계는 유지한다.
 
 
 
-<!-- jungsi:generated spec_sha256=93b20328dd1b2676ee4e052f731de6fdfc268448691af95b33ab41cc69862c72 -->
+<!-- jungsi:generated spec_sha256=d4566c6413a3fa4d36d64a0d646c4bde85653f8d50dc83044e75b58264015d9c -->

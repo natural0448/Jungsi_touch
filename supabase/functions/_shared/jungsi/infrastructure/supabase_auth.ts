@@ -156,7 +156,11 @@ export class SupabaseNativeAuth
       /^sb_(?:publishable|secret)_/.test(token)
     ) return null;
     try {
-      const query = new URLSearchParams({ select: "status", id: "eq." + subjectId, limit: "1" });
+      const query = new URLSearchParams({
+        select: "role,status",
+        id: "eq." + subjectId,
+        limit: "1",
+      });
       const response = await this.request("/rest/v1/profiles?" + query, token);
       if (response.status !== 200) {
         await response.body?.cancel();
@@ -165,7 +169,8 @@ export class SupabaseNativeAuth
       const rows = await boundedJson(response, 2048);
       if (
         !Array.isArray(rows) || rows.length !== 1 || !object(rows[0]) ||
-        Object.keys(rows[0]).length !== 1 || !Object.hasOwn(rows[0], "status")
+        Object.keys(rows[0]).some((key) => key !== "role" && key !== "status") ||
+        !Object.hasOwn(rows[0], "status")
       ) return null;
       const status = rows[0].status;
       if (typeof status !== "string" || !status.trim() || status.length > 64) return null;
@@ -174,6 +179,9 @@ export class SupabaseNativeAuth
         bearerSha256: await bearerSha256(token),
         subjectId,
         status,
+        role: typeof rows[0].role === "string" && rows[0].role.trim() && rows[0].role.length <= 64
+          ? rows[0].role
+          : null,
       });
     } catch {
       return null;

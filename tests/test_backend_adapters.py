@@ -110,17 +110,18 @@ class SupabaseSessionTests(unittest.TestCase):
         def opened(request,timeout):
             requests.append(request)
             if '/auth/v1/user' in request.full_url:return Response(dict(id=self.owner,user_metadata={'status':'active','role':'admin'}))
-            self.assertEqual(parse_qs(urlsplit(request.full_url).query),{'select':['status'],'id':['eq.'+self.owner],'limit':['1']})
+            self.assertEqual(parse_qs(urlsplit(request.full_url).query),{'select':['role,status'],'id':['eq.'+self.owner],'limit':['1']})
             self.assertEqual(request.get_header('Authorization'),'Bearer '+token)
             self.assertEqual(request.get_header('Apikey'),'SYNTHETIC-KEY')
-            return Response([{'status':'active'}])
+            return Response([{'status':'active','role':'admin'}])
         session=SupabaseSessionProvider('https://example.supabase.co','SYNTHETIC-KEY',opener=opened).verify(token,self.clock.now())
         self.assertEqual(session.account_status,'active');self.assertEqual(session.assurance_level,'aal2')
+        self.assertEqual(session.account_role,'admin')
         self.assertEqual(len(requests),2)
     def test_profile_missing_malformed_or_denied_is_unknown_without_discarding_session(self):
         token=jwt(self.owner,self.clock.now()+timedelta(hours=1),aal='aal2')
         values=[[],[{'status':'active'},{'status':'active'}],[{'status':None}],[{'status':True}],
-                [{'status':'active','role':'admin'}],b'[{"status":"suspended","status":"active"}]',b' '*2049]
+                [{'status':'active','id':self.owner}],b'[{"status":"suspended","status":"active"}]',b' '*2049]
         for value in values:
             def opened(request,timeout):
                 return Response(dict(id=self.owner)) if '/auth/v1/user' in request.full_url else Response(value)
