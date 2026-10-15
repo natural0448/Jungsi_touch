@@ -232,6 +232,7 @@ const SAFE_CODES = new Set([
   "invalid_repository_result",
   "backend_dependency_unavailable",
   "relay_authentication_failed",
+  "operation_scope_not_approved",
   "security_policy_unavailable",
 ]);
 export function safeFailure(error: unknown, requestId: string): Response {

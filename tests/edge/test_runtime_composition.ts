@@ -106,8 +106,18 @@ function passRow(expiry: string | null): unknown[] {
   for (const index of [1, 2, 3, 4]) values[index] = JSON.stringify(values[index]);
   return values;
 }
-async function fixture() {
-  const binding = await syntheticRuntimeBinding();
+async function fixture(subjectOnly = false) {
+  const binding = await syntheticRuntimeBinding((d) => {
+    if (subjectOnly) {
+      (d.scope as Record<string, unknown>).operations = [
+        "session.read",
+        "score-profile.create",
+        "overall.analyze",
+        "report.read",
+        "report.export",
+      ];
+    }
+  });
   const state = {
     now: SYNTHETIC_RUNTIME_NOW,
     role: "admin",
@@ -406,5 +416,26 @@ Deno.test("runtime composition accepts explicit existing display aliases with th
   equal(f.calls.auth, 1);
   equal(f.calls.profile, 1);
   equal(f.calls.pass, 1);
+  equal(f.calls.storage, 0);
+});
+
+Deno.test("runtime composition exposes only safe unselected scope errors after existing relay and paid checks", async () => {
+  const f = await fixture(true);
+  equal((await f.api.fetch(f.request())).status, 200);
+  for (const path of ["/api/v1/admission-history", "/api/v1/offerings/search"]) {
+    await error(await f.api.fetch(f.request(path)), 503, "operation_scope_not_approved");
+  }
+  equal(f.calls.storage, 0);
+  assert(
+    !f.statements.some((q) =>
+      q.sql.includes("usage_budget") || q.sql.includes("admission_results")
+    ),
+  );
+  await error(await f.api.fetch(f.request("/api/v1/offerings/search", "aal1")), 403);
+  await error(
+    await f.api.fetch(f.request("/api/v1/admission-history", "aal2", false)),
+    403,
+    "relay_authentication_failed",
+  );
   equal(f.calls.storage, 0);
 });

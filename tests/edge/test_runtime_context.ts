@@ -1,4 +1,5 @@
 /** Entirely synthetic selected graph. No approved input, network or database operations. */
+import type { ApiOperationId } from "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts";
 import { AccessError } from "../../supabase/functions/_shared/jungsi/application/access.ts";
 import {
   nativeJsonText,
@@ -14,7 +15,13 @@ import {
   syntheticRuntimePin,
 } from "./synthetic_runtime_binding.ts";
 async function fixture(
-  options: { extraSelection?: boolean; unapproved?: boolean; maxReads?: number } = {},
+  options: {
+    extraSelection?: boolean;
+    unapproved?: boolean;
+    maxReads?: number;
+    operation?: ApiOperationId | null;
+    approvedOperations?: ApiOperationId[];
+  } = {},
 ) {
   const catalog = {
     format: "jungsi.catalog-release/v1",
@@ -42,7 +49,7 @@ async function fixture(
   const f = await syntheticRuntimeBinding(
     (d) => {
       d.scope = {
-        operations: ["history.search"],
+        operations: options.approvedOperations ?? ["history.search"],
         artifacts: [{ kind: "catalog", key: "service" }],
       };
       if (options.maxReads) {
@@ -107,7 +114,7 @@ async function fixture(
         },
       }),
     { nowUtc: () => now },
-    "history.search",
+    options.operation === undefined ? "history.search" : options.operation,
     (input, init) => {
       const url = String(input);
       calls.push(url);
@@ -188,4 +195,41 @@ Deno.test("runtime context rejects policy expiry before releasing an already bui
   await f.context.data();
   f.now(SYNTHETIC_RUNTIME_NOW + 1800000000n);
   await denied(() => f.context.assertCurrent(), "security_policy_unavailable");
+});
+
+Deno.test("runtime context distinguishes a valid binding excluding search without reading controls or SQL", async () => {
+  for (const operation of ["history.search", "offerings.search"] as const) {
+    const f = await fixture({
+      operation,
+      approvedOperations: [
+        "session.read",
+        "score-profile.create",
+        "overall.analyze",
+        "report.read",
+        "report.export",
+      ],
+    });
+    await denied(() => f.context.budget(), "operation_scope_not_approved");
+    equal(f.calls.length, 0);
+    equal(f.sqlCalls(), 0);
+  }
+});
+Deno.test("runtime context never labels an invalid, expired or unknown binding as merely unselected", async () => {
+  for (const mode of ["invalid", "expired", "unknown"] as const) {
+    const f = await fixture({ operation: mode === "unknown" ? null : "offerings.search" });
+    if (mode === "invalid") f.f.values.JUNGSI_API_BINDING_JSON = "{}";
+    if (mode === "expired") f.now(SYNTHETIC_RUNTIME_NOW + 86400000000n);
+    await denied(() => f.context.budget(), "security_policy_unavailable");
+    equal(f.calls.length, 0);
+    equal(f.sqlCalls(), 0);
+  }
+});
+Deno.test("runtime context retains policy failure when an approved operation has no approved cost", async () => {
+  const f = await fixture({
+    operation: "offerings.search",
+    approvedOperations: ["history.search", "offerings.search"],
+  });
+  await denied(() => f.context.budget(), "security_policy_unavailable");
+  assert(f.calls.some((url) => url.endsWith("usage_policy.json")));
+  equal(f.sqlCalls(), 0);
 });

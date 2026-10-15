@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.63",
+  "version": "1.9.65",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -5308,7 +5308,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.63",
+        "contract_version": "1.9.65",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -5482,7 +5482,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.63",
+        "contract_version": "1.9.65",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -5648,7 +5648,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.63",
+        "contract_version": "1.9.65",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -5667,7 +5667,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.63",
+        "contract_version": "1.9.65",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -5692,7 +5692,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.63",
+        "contract_version": "1.9.65",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -5717,7 +5717,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.63",
+        "contract_version": "1.9.65",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -6361,7 +6361,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "f0272ba8459d53fbeab777cee59cb82d14175562fda8829ee06a5924a06db005",
+            "source_sha256": "5e52ccbf476f7055391814c0b3ee6a8127754e85bd7aaf208a1f69a1009cea19",
             "symbols": [
               {
                 "kind": "class",
@@ -13229,7 +13229,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "6ca335c32e771a13e1eaf2813e6bf126ea5f171ccdff6c94b899826b2ce26367",
+              "source_sha256": "df529f89a92c376fe220bed77ce04a2e626b1668e722688b79997541042d72a5",
               "declared_exports": [
                 "RelayBoundary",
                 "BoundaryPorts",
@@ -13623,7 +13623,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "413db40da2d30ec1b9aab925611e799b84df62414fa2d0b55a384a2a5a7ab020",
+              "source_sha256": "dc7484cb340b74449b99d133781ab19205a353cc764612c0b2291fece4afb8ee",
               "declared_exports": [
                 "NativeRuntimeRequest"
               ]
@@ -14291,13 +14291,13 @@
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "542b84661d86dfa2778dadd52ee5c4a499a03e64",
-        "spec_version": "1.9.62",
-        "ci_run_id": 38695138840,
+        "commit": "41818e7f83b368ef93b939788eb7b38dcdea3ac0",
+        "spec_version": "1.9.64",
+        "ci_run_id": 38753667737,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
-          "python": 1023,
+          "python": 1029,
           "deno": 564,
           "oracle": 993
         }
@@ -25005,6 +25005,12 @@
         "http": 503,
         "retry_after_required": false,
         "status": "in_progress"
+      },
+      {
+        "code": "operation_scope_not_approved",
+        "http": 503,
+        "retry_after_required": false,
+        "status": "in_progress"
       }
     ],
     "error_rule": "기존 {status:error,error:{code},request_id}를 유지한다. 401/403/404/409의 기존 의미를 우선하며 429/Retry-After는 정식 계약 반영·구현 전 실제 응답이라고 주장하지 않는다. no-store와 안전한 거절 이벤트를 유지한다.",
@@ -25816,7 +25822,7 @@
     "live_execution": {
       "format": "jungsi.supabase-live-execution/v1",
       "status": "IN_PROGRESS",
-      "basis_commit": "73f4a4866c3edfae3ed6b6c7e9f2a1055c643117",
+      "basis_commit": "41818e7f83b368ef93b939788eb7b38dcdea3ac0",
       "branch": "feature/application-pre-data-platform",
       "request_date": "2026-10-14",
       "scope": "사용자가 실제 인증 연결·JWT/OTP 검수·22개 API 이식·운영 배포를 요청했다. 기존 Google Drive와 Supabase만 사용하며 코드 통합·합성 검산·실 연결·배포·공개 인수를 각각 기록한다.",
@@ -25831,7 +25837,7 @@
       },
       "stages": {
         "auth_connection": {
-          "label": "실제 Auth getUser·본인 profiles RLS 연결",
+          "label": "실제 Auth·본인 profiles 연결 — 화면팀 기능 통과 보고 / 반례 검수 진행",
           "status": "IN_PROGRESS",
           "evidence_kind": "auth",
           "evidence_ids": []
@@ -25841,7 +25847,8 @@
           "status": "IN_PROGRESS",
           "evidence_kind": "jwt",
           "evidence_ids": [
-            "OPS-EDGE-AUTH-NEGATIVE-20261015"
+            "OPS-EDGE-AUTH-NEGATIVE-20261015",
+            "OPS-POSTREG-BOUNDARIES-20261015"
           ]
         },
         "owner_totp_verification": {
@@ -25881,14 +25888,18 @@
           "evidence_kind": "edge_deployment",
           "evidence_ids": [
             "OPS-EDGE-INSTALLED-20261015",
-            "OPS-EDGE-SETTINGS-PENDING-20261015"
+            "OPS-EDGE-SETTINGS-PENDING-20261015",
+            "OPS-OWNER-SETTINGS-REGISTERED-20261015",
+            "OPS-POSTREG-READINESS-20261015"
           ]
         },
         "bff_browser_acceptance": {
           "label": "허용 플랫폼 BFF·세션/CSRF·브라우저 비노출",
-          "status": "PENDING_OWNER",
+          "status": "IN_PROGRESS",
           "evidence_kind": "bff_browser",
-          "evidence_ids": []
+          "evidence_ids": [
+            "OPS-BFF-LIVE-EXTERNAL-20261016"
+          ]
         },
         "security_gates": {
           "label": "응답·직접 권한·수집 방지 세 보안 gate",
@@ -26299,8 +26310,13 @@
           "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
           "receipt_sha256": "ca1c8b0f40adc37a11691599e588fdd58405017d9c12f5ed9a02ad7a6238b205",
           "operations": [],
-          "scope": "현재 Dashboard에 새 설정 5개가 없고 유효 relay의 실제 readiness가 503/no-store다. 사용자가 실제 등록 전임을 정정하고 담당자 요청 문서화를 지시했다. 등록과 준비 완료는 대기다.",
-          "does_not_imply_operation_acceptance": true
+          "scope": "[과거 설정 등록 전 관측 — 해당 영수증 시점의 사실이며 현재 상태가 아님] 현재 Dashboard에 새 설정 5개가 없고 유효 relay의 실제 readiness가 503/no-store다. 사용자가 실제 등록 전임을 정정하고 담당자 요청 문서화를 지시했다. 등록과 준비 완료는 대기다.",
+          "does_not_imply_operation_acceptance": true,
+          "historical_observation": true,
+          "superseded_by": [
+            "OPS-OWNER-SETTINGS-REGISTERED-20261015",
+            "OPS-POSTREG-READINESS-20261015"
+          ]
         },
         "OPS-BUDGET-SCOPED-V3-20261015": {
           "kind": "billing",
@@ -26309,9 +26325,42 @@
           "operations": [],
           "scope": "과목 전용 제한 범위의 비공개 예산·읽기량 실측을 결속한 결정만 기록한다. 기존 Pro/Spend Cap 관측과 조직 전체 추가 비용 보장을 구분하며 신규 요금제/유료 항목/초과 과금 허용은 없다.",
           "does_not_imply_operation_acceptance": true
+        },
+        "OPS-OWNER-SETTINGS-REGISTERED-20261015": {
+          "kind": "edge_deployment",
+          "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
+          "receipt_sha256": "a51a511c5f0c8edb23618120f0ede79c043b4f0eccde2facdb42294172ad155a",
+          "operations": [],
+          "scope": "Owner report of five new settings and exact approved file/digest match; no independent Dashboard reread and no user/business acceptance",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-POSTREG-READINESS-20261015": {
+          "kind": "edge_deployment",
+          "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
+          "receipt_sha256": "30e46a3026af0c6691a305cc5762e02411bf369ecbb44e15964b3265f01b09c8",
+          "operations": [],
+          "scope": "Actual health ready200/no-store after registration; source-bound preparation/selection path, not user or business acceptance",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-POSTREG-BOUNDARIES-20261015": {
+          "kind": "jwt",
+          "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
+          "receipt_sha256": "ca770e1be05d7701556d62b56e84987ecbf7057f1057bfbae5eec5fbf9e0a6ee",
+          "operations": [],
+          "scope": "Wrong relay403 and no real user Bearer401/no-store; no actual getUser/profiles/aal2/ownership acceptance",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-BFF-LIVE-EXTERNAL-20261016": {
+          "kind": "bff_browser",
+          "candidate_commit": "41818e7f83b368ef93b939788eb7b38dcdea3ac0",
+          "receipt_sha256": "f49badf4d3067794dfb309069517fd725cb2dcaec6c59d51f1b6ff6a68a698d5",
+          "operations": [],
+          "does_not_imply_operation_acceptance": true,
+          "scope": "EXTERNAL_REPORTED_WORKER_RELAY_LIVE_REAL_BEARER_SESSION_PARTIAL_PAGE_OBSERVATION",
+          "independently_observed": false
         }
       },
-      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 현재 정상 /jeongsi 진입 화면은 합성 응답을 명시하고 있다. 합성 회원 유형과 화면 성공은 실제 이용권·JWT·업무22 API 인수 근거가 아니다. 실제 서버 후보와 정상 BFF의 live 연결을 같은 후보 근거로 검수한 후 운영 상태를 갱신한다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다.",
+      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류 후보와 실제 설치 소스는 두 파일이 다르며 배포 전이다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다.",
       "position_graph": {
         "formula_rows": [
           [
@@ -26335,7 +26384,7 @@
       "runtime_assembly": {
         "format": "jungsi.edge-runtime-assembly/v1",
         "status": "SOURCE_ASSEMBLED",
-        "status_text": "기존 22 operation의 Deno 소스와 과목 전용 후보 수 미사용/null 처리는 PR36과 정확 CI를 거쳐 develop에서 인수했다. 검증된 동일 소스 번들을 기존 Supabase에 실제 설치했고 생존 응답과 relay 거절을 확인했다. 005 실제 적용·불변 과목 자료/제어 객체 발행 및 native Storage·격리 공유 예산 SQL 검수는 통과했다. 새 설정 5개는 준비했으나 현재 Dashboard 관리 권한이 없고 아직 등록 전이므로 소유자/관리자에게 요청한다. 실제 준비 응답은 안전한 503이며 사용자 JWT/본인 profiles/aal2·BFF·업무 경로와 운영 세 보안 gate는 미완료다. 각 operation의 native/deployment는 이 부분 검수로 승격하지 않는다.",
+        "status_text": "기존 22 operation의 Deno 소스와 과목 전용 null 처리는 develop에서 인수했고 기존 고정 번들을 Supabase에 설치했다. 005·과목 자료/제어 객체 발행·native Storage·격리 예산 SQL 근거는 재사용한다. 새 설정5개는 Owner 등록·digest 일치 보고를 수용했고 이후 실제 readiness200과 잘못된 relay403·Bearer누락401을 확인했다. 2026-10-16 화면팀은 Worker relay 등록·preview live·정상 Bearer의 aal1/aal2 세션 기능 통과를 보고했다. 본인 저장·분석·재조회, 소유권·CSRF·만료갱신 및 운영3gate는 별도 미완료다. 현재 새 오류 분류는 runtime_context/auth_relay 두 파일이 설치9e와 다른 배포 전 후보이며 검색 활성화가 아니다. 각 operation의 native/deployment는 부분 관측으로 승격하지 않는다.",
         "bindings": {
           "native_entry": {
             "path": "supabase/functions/jungsi-api/index.ts",
@@ -26373,57 +26422,57 @@
         "environment": [
           {
             "name": "SUPABASE_URL",
-            "status": "기존 이름·프로젝트 일치 확인 필요",
+            "status": "기존프로젝트결속·등록후readiness200확인; 실사용자Auth별도",
             "meaning": "동일 Supabase 프로젝트의 HTTPS 원점"
           },
           {
             "name": "SUPABASE_PUBLISHABLE_KEY",
-            "status": "기존 이름·실제 Auth 검수 대기",
+            "status": "health/거절경로프로젝트공개키사용확인; 실사용자AuthNOT_RUN",
             "meaning": "getUser와 동일 Bearer의 본인 profiles RLS 조회용 공개 키"
           },
           {
             "name": "DATABASE_URL",
-            "status": "기존 이름·실제 SQL 검수 대기",
+            "status": "기존앱역할/TLS/RLS·005검수재사용·등록후schema조회readiness200; 업무트랜잭션별도",
             "meaning": "동일 프로젝트 jungsi_backend_app 전용 DSN"
           },
           {
             "name": "JUNGSI_DATABASE_CA",
-            "status": "이름 채택·유효값과 실제 TLS 검수 대기",
+            "status": "기존정확CA/TLS검수재사용·같은설정readiness200; 설정변경시해당범위재검수",
             "meaning": "PEM 본문. 로컬 파일 경로가 아니며 framing 검사는 인증서 유효성 검증을 대신하지 않는다."
           },
           {
             "name": "JUNGSI_RELAY_TOKEN",
-            "status": "기존 이름·실제 BFF 연결 검수 대기",
+            "status": "현재함수기능수용200·불일치403; Worker등록/BFF실사용자연결대기",
             "meaning": "BFF와 Edge 사이의 서버 전용 relay 헤더 값"
           },
           {
             "name": "SUPABASE_SECRET_KEY",
-            "status": "기존 이름·승인 범위 native Storage 검수 완료·실사용자 업무 별도",
+            "status": "기존nativeStorage검수재사용·등록후선택그래프200; 실사용자업무별도",
             "meaning": "private Storage 읽기 전용 서버 경계에서만 사용"
           },
           {
             "name": "JUNGSI_SUPABASE_STORAGE_BUCKET",
-            "status": "정확 승인값 준비·기존 소유자/관리자 등록 대기; 목록 digest/실제 readiness 미확인",
+            "status": "Owner등록보고·승인파일digest5/5대조수용; 실제readiness200; Dashboard독립재조회NOT_RUN",
             "meaning": "공개가 아닌 버킷. 현재 metadata의 private·native 정수 상한을 확인"
           },
           {
             "name": "JUNGSI_SUPABASE_STORAGE_PREFIX",
-            "status": "정확 승인값 준비·기존 소유자/관리자 등록 대기; 목록 digest/실제 readiness 미확인",
+            "status": "Owner등록보고·승인파일digest5/5대조수용; 실제readiness200; Dashboard독립재조회NOT_RUN",
             "meaning": "승인된 control·artifact 객체가 속하는 prefix"
           },
           {
             "name": "JUNGSI_API_BINDING_JSON",
-            "status": "정확 승인값 준비·기존 소유자/관리자 등록 대기; 목록 digest/실제 readiness 미확인",
+            "status": "Owner등록보고·승인파일digest5/5대조수용; 실제readiness200; Dashboard독립재조회NOT_RUN",
             "meaning": "jungsi.edge-api-binding/v1: 승인 목적·scope·현재 head와 registry/selection/usage_policy 참조·명시 한도"
           },
           {
             "name": "JUNGSI_API_BINDING_SHA256",
-            "status": "정확 승인값 준비·기존 소유자/관리자 등록 대기; 목록 digest/실제 readiness 미확인",
+            "status": "Owner등록보고·승인파일digest5/5대조수용; 실제readiness200; Dashboard독립재조회NOT_RUN",
             "meaning": "위 JSON 원본 UTF-8 바이트의 SHA-256"
           },
           {
             "name": "JUNGSI_API_BINDING_MAX_BYTES",
-            "status": "정확 승인값 준비·기존 소유자/관리자 등록 대기; 목록 digest/실제 readiness 미확인",
+            "status": "Owner등록보고·승인파일digest5/5대조수용; 실제readiness200; Dashboard독립재조회NOT_RUN",
             "meaning": "위 JSON의 양의 정수 바이트 상한. 기본값 없음"
           }
         ],
@@ -26452,24 +26501,20 @@
             "최신 단일정본의 native 후보·검수·출처/타입/연도/모집행 맥락을 고정한다. C140/v21_1은 역사 검수로 보존하며 현재 catalog로 재승격하지 않는다. 미검증 추정모형은 미선택·pending을 유지한다."
           ],
           [
-            "승인 head·선택 자료 — 발행 완료 / 런타임 등록 대기",
-            "별도 비공개 prefix에 승인 자료·registry/selection/usage_policy/불변 head를 저장하고 현재 head를 마지막에 신규 등록했다. 원문 bytes/SHA·익명 경로 차단·native 읽기를 검수했다. Dashboard용 단일행 binding은 원래 JSON과 native 동등하며 정확 바이트와 해시로 별도 고정했다. 실제 서버 설정 등록·준비 상태 대조는 대기다."
+            "승인head·선택자료 — 기존발행재사용 / 등록후readiness통과",
+            "불변Storage·원문bytes/SHA와현재head선택그래프의기존근거를재사용했다. 등록후health200의구현경로에서binding/head/registry/selection/시험팩/사용정책·만료를검수했다. 실제사용자와업무인수는별도다."
           ],
           [
-            "공유 예산 — 격리 실제 SQL 통과 / 사용자·만료 검수 구분",
-            "승인된 비공개 과목 전용 정책과 실측 읽기량을 결속했다. 실제 앱 SQL 드라이버의 독립 pool·동시성·재시작·멱등 정산·용량/비용 거절과 검수 외부 행 보존을 확인했다. 검수 행과 이전 실패본은 보존한다. 실제 사용자 요청·승인 lease의 실제 시간 만료·전체 운영 보안은 별도이며 ceiling/GLOBAL을 조직 금액 상한으로 표시하지 않는다."
+            "공유예산 — 기존격리SQL·실제만료검수재사용 / 실사용자업무별도",
+            "기존승인된과목전용정책·독립pool·동시성·재시작·멱등정산·상한거절과승인lease실시간만료의정확영수증을재사용한다. 검수행과이전실패본은보존한다. 등록후readiness는정책/현재head/만료검사통과이며실사용자의예약·정산·운영3gate인수는별도다. ceiling/GLOBAL을조직금액상한으로표시하지않고성공namespace를재실행하지않는다."
           ],
           [
-            "실제 사용자·관리자 검수 — 정상OTP 완료/새API 대기",
-            "계정 주인이 정상OTP 입력을 완료했고 같은 브라우저의 /admin 대시보드 진입을 관측했다. 새API와 동일 배포SHA·같은 Bearer의 getUser/본인profiles/aal2·권한 반례는 BFF 연결 후 별도로 검수한다. 토큰·OTP·쿠키·QR비밀은 수집/전달하지 않는다."
+            "새 설정5개 — Owner등록보고수용·readiness통과",
+            "기존Owner가새5개등록과원파일/digest5/5일치를보고했다. 서비스팀은실제readiness200·relay403·무Bearer401을확인했다. 기존DISPLAY/relay/Auth/RLS/JWT게이트는보존하고Worker서버relay·preview제한live·실사용자검수는다음단계다."
           ],
           [
-            "기존 Edge 설치·BFF 회신 수신 / 설정·실연결 대기",
-            "화면 소스72aa2de·Worker6b532d27 배포 보고와 BFF 경로/설정 위치/동일Bearer/relay/CSRF 회신을 수신했다. /api/v1·동일Bearer·relay·no-store·멱등은 소스 대조에서 일치했다. 현재 synthetic/새API호출0이며 등록 영수증·같은 배포 readiness/JWT·live 브라우저와 업무22·운영3gate는 별도다."
-          ],
-          [
-            "새 설정 5개 — 기존 프로젝트 소유자/관리자 등록 요청",
-            "담당자는 비공개 인계 폴더의 정확 설정 파일을 받아 JUNGSI_SUPABASE_STORAGE_BUCKET, JUNGSI_SUPABASE_STORAGE_PREFIX, JUNGSI_API_BINDING_JSON, JUNGSI_API_BINDING_SHA256, JUNGSI_API_BINDING_MAX_BYTES만 기존 프로젝트에 등록한다. 기존 DISPLAY/relay·JWT 게이트·Auth/RLS·요금제는 변경하지 않는다. 원래 바이트/단일행 해시·목록 digest·같은 배포 readiness 순으로 검수하고 비밀/운영 숫자는 Git·채팅에 복사하지 않는다. 현재 권한 부족 및 실제 미등록은 담당자 요청서에 기록한다."
+            "현재 실연결 — 화면팀 기능 통과 보고",
+            "Worker relay 등록·preview live·정상 Bearer aal1/aal2 세션 확인 보고를 수용했다. P2 본인 저장·분석·재조회와 소유권·CSRF·만료갱신은 NOT_RUN이며 검색은 미승인 작업 범위와 current catalog 준비를 분리한다."
           ]
         ],
         "environment_aliases": {
@@ -26490,9 +26535,9 @@
         "official_subject_input": "SCOPED_OPERATION_PURPOSE_APPROVED_AFTER_CURRENT_DECODER_REVIEW",
         "national_or_university_joint_model": "NOT_APPROVED_BY_SUBJECT_INPUT_REVIEW",
         "current_catalog_binding": "AWAITING_CURRENT_CANONICAL_NATIVE_CANDIDATE_NOT_HISTORICAL_C140",
-        "private_usage_policy": "SCOPED_V3_APPROVED_AND_ISOLATED_NATIVE_SQL_VERIFIED_SETTINGS_PENDING_OWNER",
+        "private_usage_policy": "SCOPED_V3_APPROVED_EXISTING_SQL_PROOF_REUSED_READY200_USER_PENDING",
         "OTP": "OWNER_COMPLETED_NORMAL_ADMIN_VISIBLE_NEW_API_SAME_BEARER_PENDING",
-        "frontend_handoff": "BFF_REPLY_RECEIVED_SOURCE_REVIEWED_SYNTHETIC_REGISTRATION_AND_SAME_DEPLOYMENT_LIVE_ACCEPTANCE_PENDING",
+        "frontend_handoff": "BFF_SOURCE_RECEIVED_WORKER_RELAY_PREVIEW_LIVE_AND_SAME_BEARER_USER_PENDING",
         "new_paid_service_or_addon": "NONE",
         "production_ready": false,
         "evidence_ids": [
@@ -26505,14 +26550,17 @@
           "OPS-EDGE-INSTALLED-20261015",
           "OPS-EDGE-AUTH-NEGATIVE-20261015",
           "OPS-EDGE-SETTINGS-PENDING-20261015",
-          "OPS-BUDGET-SCOPED-V3-20261015"
+          "OPS-BUDGET-SCOPED-V3-20261015",
+          "OPS-OWNER-SETTINGS-REGISTERED-20261015",
+          "OPS-POSTREG-READINESS-20261015",
+          "OPS-POSTREG-BOUNDARIES-20261015"
         ],
         "rule": "이 재개점의 정확 소스·승인 목적·영수증 범위와 해시부터 재사용한다. 005·불변 발행·성공한 격리 검수 namespace를 다시 실행하지 않는다. 함수 설치/생존·Storage·SQL 검수를 22업무의 native/deployment 완료로 세지 않는다. 새 설정 등록은 기존 소유자/관리자가 수행하고 정상 목록 digest와 같은 배포의 준비 상태로 대조한다. 등록 완료 회신만으로 PASS로 바꾸거나 설정 권한을 우회하지 않는다.",
         "subject_only_runtime": "ACCEPTED_ON_DEVELOP_EXACT_BUNDLE_INSTALLED_OPERATION_ACCEPTANCE_PENDING",
         "storage_native_metadata": "PRIVATE_NATIVE_METADATA_IMMUTABLE_UPLOAD_READBACK_AND_SINGLE_LINE_PREFLIGHT_PASS",
         "edge_package": "INSTALLED_SAME_VERIFIED_SOURCE_LIVENESS_AND_RELAY_DENIAL_OBSERVED",
-        "edge_settings": "FIVE_VALUES_PREPARED_NOT_REGISTERED_OWNER_REQUEST_DOCUMENTED",
-        "readiness": "ACTUAL_503_SAFE_FAILURE_SETTINGS_PENDING"
+        "edge_settings": "OWNER_REPORTED_FIVE_REGISTERED_DIGEST_MATCH_READY200_USER_PENDING",
+        "readiness": "ACTUAL_200_SCOPED_NATIVE_PREPARATION_NOT_BUSINESS_ACCEPTANCE"
       },
       "preconnection_preparation": {
         "format": "jungsi.preconnection-preparation/v1",
@@ -26586,7 +26634,7 @@
               "forecast.publish",
               "forecast.published.read"
             ],
-            "completion": "기존22 operation의 권한·소유권·DTO·입력·안전한 재실행·기대 결과와 증거 필드를 고정한다. BFF 경로·소스/배포 보고를 수신했으며 설정 등록 영수증과 실제 같은 사용자 JWT·MFA·같은 배포 검수는 대기다. 준비표를 운영 PASS로 세지 않는다."
+            "completion": "기존22 API의권한·소유권·DTO·입력·안전한재실행·기대결과를고정했다. 새5설정Owner등록보고와readiness200·relay403·무Bearer401통과. Workerrelay등록→preview제한live→계정주인정상로그인의동일Bearer→승인목적별1~4페이지순서로인수하며준비표를실제업무PASS로세지않는다."
           }
         ],
         "cases": {
@@ -26694,7 +26742,7 @@
           "receipt_sha256"
         ],
         "reuse_rule": "최신 검증 SHA와 비공개 현재 포인터/선택 자료의 해시·범위를 먼저 대조한다. 동일한 005·Storage·예산/실제 만료 검수를 반복하지 않는다. 변경되거나 빠진 연결·자료형·시험/모집단 경계만 추가 검수하고, 데이터팀의 진행 중인 단일 정본 쓰기를 읽기 전용 snapshot으로 고정한다.",
-        "execution_rule": "session → 과목 전용 본인 profile/report → 별도 승인 catalog → 대학 환산/누백 → 후보·집계 → 권한 있는 관리 흐름 순서다. 해당 자료/기존 역할이 없으면 NOT_RUN 또는 계약상 pending/거절로 남긴다. 계정·JWT·OTP·실제 성적·원규칙·곡선·운영 한도는 Git/공개 인수표에 넣지 않는다. 실제 값을 취급하는 fixture·원문 영수증은 비공개 폴더에 보관한다. BFF 회신의 외부 소스/배포 보고는 bff_reply_intake를 따르며 실제 설정 등록·live 검수로 승격하지 않는다.",
+        "execution_rule": "session → 과목 전용 본인 profile/report → 별도 승인 catalog → 대학 환산/누백 → 후보·집계 → 권한 있는 관리 흐름 순서다. 해당 자료/기존 역할이 없으면 NOT_RUN 또는 계약상 pending/거절로 남긴다. 계정·JWT·OTP·실제 성적·원규칙·곡선·운영 한도는 Git/공개 인수표에 넣지 않는다. 실제 값을 취급하는 fixture·원문 영수증은 비공개 폴더에 보관한다. BFF 회신의 외부 소스/배포 보고는 bff_reply_intake를 따르며 실제 설정 등록·live 검수로 승격하지 않는다. 등록후현재상태와Workerrelay/제한live선행순서는post_registration_acceptance를따른다. 계정주인의동일BFF인증을위해토큰을별도수집하지않는다.",
         "backend_format_preparation": {
           "status": "SOURCE_CANDIDATE_PREPARED_OPERATING_NOT_RUN",
           "Deno_curve_formats": [
@@ -26715,7 +26763,7 @@
         "format": "jungsi.bff-reply-intake/v1",
         "date_KST": "2026-10-15",
         "basis_commit": "542b84661d86dfa2778dadd52ee5c4a499a03e64",
-        "status": "SOURCE_REVIEWED_REGISTRATION_PENDING",
+        "status": "READINESS_VERIFIED_USER_BFF_PENDING",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -26735,7 +26783,7 @@
           },
           "service": {
             "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts": "ea79c8bf29653cb16b6bfc57b10ec3b6ad2d29c2c9ccd182cb478116c2182b4d",
-            "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "6ca335c32e771a13e1eaf2813e6bf126ea5f171ccdff6c94b899826b2ce26367"
+            "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "df529f89a92c376fe220bed77ce04a2e626b1668e722688b79997541042d72a5"
           },
           "result": "PATH_HEADERS_AUTH_CACHE_IDEMPOTENCY_SOURCE_MATCH"
         },
@@ -26764,16 +26812,10 @@
           "FE_ADMIN_ACCESS_01": "SOURCE_IMPLEMENTED_REPORTED_DEPLOYED_REAL_ADMIN_JWT_NOT_RUN"
         },
         "registration": {
-          "status": "PENDING_OWNER_RECEIPT",
-          "settings_registered": false,
-          "receipt_sha256": null,
-          "pending_names": [
-            "JUNGSI_SUPABASE_STORAGE_BUCKET",
-            "JUNGSI_SUPABASE_STORAGE_PREFIX",
-            "JUNGSI_API_BINDING_JSON",
-            "JUNGSI_API_BINDING_SHA256",
-            "JUNGSI_API_BINDING_MAX_BYTES"
-          ],
+          "status": "OWNER_REPORTED_REGISTERED",
+          "settings_registered": true,
+          "receipt_sha256": "a51a511c5f0c8edb23618120f0ede79c043b4f0eccde2facdb42294172ad155a",
+          "pending_names": [],
           "owner": "existing project Owner or Administrator",
           "private_delivery_rule": "설정 본문과 다운로드 링크는 공개 요청서·채팅·Git에 넣지 않는다. 기존 Owner/Administrator를 수신자로 확정하고 지정 비공개 경로에서 별도로 전달한다."
         },
@@ -26781,14 +26823,14 @@
           {
             "id": "OWNER_REGISTRATION",
             "owner": "기존 Supabase Owner/Administrator",
-            "status": "NOT_RUN",
-            "expected": "원본 파일 bytes/SHA, 정확한 5개 설정 이름과 목록 digest, 대상 프로젝트, 등록 시각, 같은 배포 참조를 값 없이 회신한다."
+            "status": "OWNER_REPORTED_MATCHED",
+            "expected": "Owner의등록시각·대상·원파일bytes/SHA·5digest대조보고를수용했다. Dashboard독립재측정은NOT_RUN이며Worker설정은별도다."
           },
           {
             "id": "EDGE_READY_AUTH",
             "owner": "서비스팀 / 계정 주인",
-            "status": "NOT_RUN",
-            "expected": "같은 배포 SHA의 readiness와 동일 Bearer의 getUser·본인 profiles role/status·aal2·실제 pass 만료·회수/타인 소유 반례를 검수한다. readiness200 단독은 업무 성공이 아니다."
+            "status": "IN_PROGRESS",
+            "expected": "실제readiness200·relay403·무Bearer401통과. 계정주인의정상로그인/OTP·같은Bearer getUser/본인profiles·active/aal2·현재pass·소유권반례는제한BFF live후검수한다."
           },
           {
             "id": "API22_SCOPED",
@@ -26800,7 +26842,7 @@
             "id": "BFF_LIVE_BROWSER",
             "owner": "외부 화면팀 / 지정 소유자",
             "status": "NOT_RUN",
-            "expected": "서버 relay 등록 후 live와 정확한 API base로 재배포하고 같은 BFF/Edge SHA에서 관리자 표시·실제 pass 만료·CSRF·no-store·비노출을 검수한다."
+            "expected": "실사용자검수 후 Worker설정이라는 순환대기를 해소한다. 기존Worker관리자가 검증relay를 등록하고 외부화면팀이 preview제한을 유지한live로 재배포한 뒤, 계정주인 정상로그인/OTP의 같은Bearer를 기존server-only BFF로 전달해 최초검수한다. JWT·OTP·쿠키를 별도전달받거나 새검사계정/권한으로 우회하지 않는다."
           },
           {
             "id": "SECURITY_3_GATES",
@@ -26812,9 +26854,155 @@
         "source_review_is_operating_acceptance": false,
         "private_setting_values_or_download_links_in_public_contract": false,
         "production_ready": false,
-        "intake_rule": "화면팀의 BFF 경로·설정 위치·소스 SHA와 배포 버전 회신을 수신했고 소스의 경로/헤더/인증/no-store/멱등을 대조했다. Worker 배포·쿠키/CSRF·비노출 주장은 외부 보고이며 이번 검토의 실제 브라우저 관측이 아니다. 현재 synthetic·새API호출0을 유지한다.",
-        "verification_rule": "기존 소유자/관리자의 설정5개 이름·digest·대상·시각 영수증을 먼저 수신하고 같은 배포 readiness와 실제 같은Bearer 검수 후 화면팀 live 전환을 진행한다. 등록 회신이나 readiness만으로 업무22/native/deployment/보안gate를 완료하지 않는다.",
-        "reuse_rule": "005/003 재적용·승인 Storage 재업로드·성공한 예산 namespace 재실행·데이터 writer 재개 없이 기존 정확 근거를 재사용한다. 현재 단일 정본과 승인 목적을 유지하며 historical C140 및 연구곡선을 현재 운영 자료로 승격하지 않는다."
+        "intake_rule": "최초 synthetic 회신의 소스 검토와 등록 이력이다. 현재 실연결 상태는 아래 post_live_receipt의 2026-10-16 화면팀 보고를 기준으로 읽는다. 기존 증거와 NOT_RUN은 그 당시 범위로 보존한다.",
+        "verification_rule": "실사용자검수 후 Worker설정이라는 순환대기를 해소한다. 기존Worker관리자가 검증relay를 등록하고 외부화면팀이 preview제한을 유지한live로 재배포한 뒤, 계정주인 정상로그인/OTP의 같은Bearer를 기존server-only BFF로 전달해 최초검수한다. JWT·OTP·쿠키를 별도전달받거나 새검사계정/권한으로 우회하지 않는다. 등록과health 준비통과를업무22/native/deployment/브라우저/운영gate완료로세지않는다.",
+        "reuse_rule": "005/003 재적용·승인 Storage 재업로드·성공한 예산 namespace 재실행·데이터 writer 재개 없이 기존 정확 근거를 재사용한다. 현재 단일 정본과 승인 목적을 유지하며 historical C140 및 연구곡선을 현재 운영 자료로 승격하지 않는다.",
+        "registration_history": {
+          "before_owner_report_20261015": {
+            "status": "PENDING_OWNER_RECEIPT",
+            "settings_registered": false,
+            "receipt_sha256": null,
+            "pending_names": [
+              "JUNGSI_SUPABASE_STORAGE_BUCKET",
+              "JUNGSI_SUPABASE_STORAGE_PREFIX",
+              "JUNGSI_API_BINDING_JSON",
+              "JUNGSI_API_BINDING_SHA256",
+              "JUNGSI_API_BINDING_MAX_BYTES"
+            ],
+            "owner": "existing project Owner or Administrator",
+            "private_delivery_rule": "설정 본문과 다운로드 링크는 공개 요청서·채팅·Git에 넣지 않는다. 기존 Owner/Administrator를 수신자로 확정하고 지정 비공개 경로에서 별도로 전달한다."
+          }
+        },
+        "historical_observation": true
+      },
+      "post_registration_acceptance": {
+        "format": "jungsi.post-registration-acceptance/v1",
+        "basis_commit": "5556fc1c7c4449ad46d391c4a47c335f3c1bcd05",
+        "status": "READINESS_PASS_PENDING_LIMITED_BFF_LIVE_USER_ACCEPTANCE",
+        "owner_registration": {
+          "receipt_sha256": "a51a511c5f0c8edb23618120f0ede79c043b4f0eccde2facdb42294172ad155a",
+          "receipt_bytes": 2507,
+          "reported_at_UTC": "2026-10-15T13:02:38Z",
+          "matched_setting_count": 5,
+          "verification": "OWNER_REPORT_AND_APPROVED_LOCAL_DIGEST_MATCH",
+          "independent_Dashboard_reread": false
+        },
+        "readiness": {
+          "receipt_sha256": "30e46a3026af0c6691a305cc5762e02411bf369ecbb44e15964b3265f01b09c8",
+          "http": 200,
+          "status": "ready",
+          "at_KST": "2026-10-15 22:52:45 KST",
+          "cache_control": "no-store",
+          "public_fields": [
+            "status",
+            "server_timezone"
+          ],
+          "scope": "ACTUAL_NATIVE_PREPARATION_NOT_USER_BUSINESS_ACCEPTANCE"
+        },
+        "boundary_checks": {
+          "receipt_sha256": "ca770e1be05d7701556d62b56e84987ecbf7057f1057bfbae5eec5fbf9e0a6ee",
+          "at_KST": "2026-10-15 22:54:57 KST",
+          "wrong_relay_http": 403,
+          "wrong_relay_code": "relay_authentication_failed",
+          "missing_user_Bearer_http": 401,
+          "missing_user_Bearer_code": "authentication_required",
+          "cache_control": "no-store",
+          "real_user_Bearer": false
+        },
+        "relay_match": {
+          "status": "FUNCTIONAL_CURRENT_FUNCTION_ACCEPTANCE_PASS",
+          "receipt_sha256": "8a5ee32e6f85efff79c838538b1ef1eb4a540b914d2bacbd73fc38e41acf37d7",
+          "Dashboard_digest_reread": false,
+          "raw_value_published": false
+        },
+        "source_graph": {
+          "receipt_sha256": "77a6743b02d849ec0f1303cc73514d44721e205bce37d37002fb2ae460bb0943",
+          "recorded_installed_source": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
+          "recorded_bundle_sha256": "0e92faf54263e328197c0885cbd8a0220583f70217ae26fc88d02a52870e04d5",
+          "unchanged_core_sources": 6,
+          "fresh_remote_bundle_download": false,
+          "verification": "HTTP200_PLUS_PINNED_IMPLEMENTATION_PATH",
+          "per_call_internal_trace_exported": false
+        },
+        "real_user_acceptance": "NOT_RUN",
+        "Worker_relay_registration": "NOT_RUN",
+        "BFF_live_browser": "NOT_RUN",
+        "business_native_accepted": 0,
+        "business_deployment_accepted": 0,
+        "performance_acceptance": false,
+        "production_ready": false,
+        "selected_runtime_operations": [
+          "session.read",
+          "score-profile.create",
+          "overall.analyze",
+          "report.read",
+          "report.export"
+        ],
+        "next_sequence": [
+          "WORKER_OWNER_REGISTER_VERIFIED_RELAY",
+          "FRONTEND_PREVIEW_GATE_LIVE_DEPLOY",
+          "OWNER_NORMAL_LOGIN_OTP_SAME_BFF_USER_CHECK",
+          "APPROVED_SUBJECT_ONLY_PAGE_CASES",
+          "SEPARATELY_APPROVED_CATALOG_CONVERSION_CURVES_CANDIDATES_AND_SECURITY"
+        ],
+        "preview_gate_preserved": true,
+        "new_data_or_authority_approval": false,
+        "interpretation_rule": "2026-10-15 설정 등록 직후의 제한 준비검수 이력이다. 당시 실사용자·Worker·BFF NOT_RUN은 보존하며, 이후 현재 상태는 2026-10-16 화면팀 실연결 회신으로 갱신한다. readiness와 업무 인수는 구분한다.",
+        "next_rule": "이 준비검수 이후 Worker relay 등록·preview live 배포·정상로그인 Bearer 세션은 화면팀이 기능 통과로 보고했다. 다음 검수는 현재 실연결 회신의 P2 저장·분석·재조회 및 보안 반례 범위를 따른다.",
+        "scope_rule": "현재선택된 과목전용5업무부터 성공점수와 total_model_missing 등 독립보류를 구분한다. 현재catalog·전체/대학누백·추천목적을 확대하거나 historical C140을 승격하지 않는다. 실제1~4페이지의pending/안전거절과 자료/계산성공을 구분하고 운영3gate를 별도로 인수한다.",
+        "historical_observation": true
+      },
+      "post_live_receipt": {
+        "format": "jungsi.external-bff-live-receipt/v1",
+        "status": "EXTERNAL_REPORTED_FUNCTIONAL_PASS_PARTIAL",
+        "reply_bytes": 4727,
+        "reply_receipt_sha256": "f49badf4d3067794dfb309069517fd725cb2dcaec6c59d51f1b6ff6a68a698d5",
+        "frontend_source_commit": "59f01ad774917c57d0664b37698e9748104dc7c4",
+        "worker_version": "84c6703b-a095-43ac-a659-8456b421141b",
+        "deployed_at_UTC": "2026-10-15T15:30:18Z",
+        "observed_at_KST": "2026-10-16 00:35-00:45",
+        "mode": "live",
+        "Worker_relay_registration": "EXTERNAL_REPORTED_FUNCTIONAL_PASS",
+        "real_Bearer_session": "EXTERNAL_REPORTED_FUNCTIONAL_PASS",
+        "independently_observed_browser": false,
+        "P2_save_analysis_reread": "NOT_RUN",
+        "ownership": "NOT_RUN",
+        "CSRF": "NOT_RUN",
+        "expiry_refresh": "NOT_RUN",
+        "business_native_accepted": 0,
+        "business_deployment_accepted": 0,
+        "production_ready": false,
+        "search_scope_approved": false,
+        "source_fix_deployed": false,
+        "selected_runtime_operations": [
+          "session.read",
+          "score-profile.create",
+          "overall.analyze",
+          "report.read",
+          "report.export"
+        ],
+        "search_error": {
+          "http": 503,
+          "reported_code": "security_policy_unavailable",
+          "source_candidate_code": "operation_scope_not_approved"
+        },
+        "scope_error_contract": {
+          "valid_binding_excluded_operation": {
+            "http": 503,
+            "code": "operation_scope_not_approved"
+          },
+          "invalid_binding_or_policy": {
+            "http": 503,
+            "code": "security_policy_unavailable"
+          },
+          "success_or_quota_bypass": false
+        },
+        "interpretation_rule": "화면팀이 운영 정문의 Worker relay·live·실제 Bearer 세션 기능 통과를 보고했다. 서비스가 새 브라우저/토큰을 독립 관측한 것은 아니며, 업무22개·운영3gate·일반공개 완료로 승격하지 않는다. 최초 synthetic 회신과 등록 직후 NOT_RUN은 이력이다.",
+        "session_observation": "aal1 일반 회원 / aal2 관리자 이용 paid+null; 정상 로그인·OTP 이후 탐색 중 세션 유지 보고.",
+        "search_observation": "P1 양 세션 및 P3 aal2에서 503 security_policy_unavailable 보고. 현재 과목전용5작업 binding은 history.search·offerings.search를 제외한다. 고정 소스 합성 재현은 usage policy·업무·projection 전 차단이며 새 native 추적은 NOT_RUN.",
+        "P4_observation": "aal1 유료 gate / aal2 확인된 성적 없음 표시; 후보 생성 업무 성공 근거가 아니다.",
+        "scope_error_rule": "소스 후보는 유효한 승인 binding의 미선택 작업만 503 operation_scope_not_approved로 구분한다. 누락·손상·만료 binding 또는 사용정책·비용 누락은 503 security_policy_unavailable을 유지한다. 배포 전이며 성공 DTO·예산·데이터 승인은 바꾸지 않는다.",
+        "next_rule": "기존 승인된 공식 과목팩과 가상 virtual386 1건으로 본인 성적 저장→분석→재조회 검수를 재개한다. POST별 같은 본문·멱등키와 부분 성공 ID를 보존하고 JWT·OTP·쿠키를 전달받지 않는다. 검색은 current catalog·두 operation·usage policy·binding의 별도 목적 승인 후보를 준비하며 자동 공개·Storage 발행·환경변경을 하지 않는다. 타인 소유권·CSRF·만료갱신과 운영3gate는 실제 실행 후 별도 인수한다."
       }
     }
   },
@@ -61764,7 +61952,7 @@
               }
             }
           ],
-          "source_sha256": "6ca335c32e771a13e1eaf2813e6bf126ea5f171ccdff6c94b899826b2ce26367"
+          "source_sha256": "df529f89a92c376fe220bed77ce04a2e626b1668e722688b79997541042d72a5"
         },
         "dependencies": [
           {
@@ -72719,7 +72907,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
             }
           ],
-          "source_sha256": "413db40da2d30ec1b9aab925611e799b84df62414fa2d0b55a384a2a5a7ab020"
+          "source_sha256": "dc7484cb340b74449b99d133781ab19205a353cc764612c0b2291fece4afb8ee"
         },
         "dependencies": [
           {
@@ -89663,7 +89851,7 @@
               "src": "tests/edge/synthetic_runtime_binding.ts"
             }
           ],
-          "source_sha256": "7966c31a50c3c1a665bcb6ce0fcfe36b080ea855339b9e5dcb6053faa48cd6f4"
+          "source_sha256": "979a33749052649f63fda1c755b3ec06c20459ccf56420a7e62b352771817b51"
         },
         "dependencies": [
           {
@@ -92816,10 +93004,25 @@
                   "declarationKind": "private",
                   "kind": "function",
                   "def": {
-                    "params": [],
+                    "params": [
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "subjectOnly",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        "right": "false"
+                      }
+                    ],
                     "hasBody": true,
                     "isAsync": true,
-                    "parameter_source": "()"
+                    "parameter_source": "(subjectOnly = false)"
                   }
                 }
               ]
@@ -92957,7 +93160,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "7d875f7f72a267c3dfd04816f7e505c7327a04afdafd6372a822dc846fc53452"
+          "source_sha256": "edc277342c859ebd1a74ee42be85486246c4e300e66d32e0018bc036d3f4abc4"
         },
         "dependencies": [
           {
@@ -93081,6 +93284,51 @@
                                     "kind": "keyword",
                                     "value": "number"
                                   }
+                                },
+                                {
+                                  "name": "operation",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "union",
+                                    "value": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "ApiOperationId",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "ApiOperationId",
+                                            "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+                                          },
+                                          "typeName": "ApiOperationId"
+                                        }
+                                      },
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "null",
+                                        "value": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "name": "approvedOperations",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "array",
+                                    "value": {
+                                      "kind": "typeRef",
+                                      "repr": "ApiOperationId",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "ApiOperationId",
+                                          "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+                                        },
+                                        "typeName": "ApiOperationId"
+                                      }
+                                    }
+                                  }
                                 }
                               ]
                             }
@@ -93091,7 +93339,7 @@
                     ],
                     "hasBody": true,
                     "isAsync": true,
-                    "parameter_source": "(\n  options: { extraSelection?: boolean; unapproved?: boolean; maxReads?: number } = {},\n)"
+                    "parameter_source": "(\n  options: {\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)"
                   }
                 }
               ]
@@ -93167,7 +93415,12 @@
             {
               "importedName": "AccessError",
               "originalName": "AccessError",
-              "src": "supabase/functions/_shared/jungsi/application/access.ts",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
+              "importedName": "ApiOperationId",
+              "originalName": "ApiOperationId",
+              "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
               "jsDoc": {
                 "doc": "Entirely synthetic selected graph. No approved input, network or database operations."
               }
@@ -93223,7 +93476,7 @@
               "src": "tests/edge/synthetic_runtime_binding.ts"
             }
           ],
-          "source_sha256": "ca28732aca59d6c328cbf102b5ba81c7051bd6d4577234d4f22e2da58555a41f"
+          "source_sha256": "196d7ba3cc918b951b2ce3fb6b0d49ed7af20181cd862169697135f466b10df9"
         },
         "dependencies": [
           {
@@ -93233,6 +93486,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
               }
             ]
           },
@@ -93287,8 +93550,8 @@
             ]
           },
           {
-            "specifier": "./synthetic_runtime_binding.ts",
             "dynamic": false,
+            "specifier": "./synthetic_runtime_binding.ts",
             "targets": [
               {
                 "kind": "code",
@@ -97216,6 +97479,6 @@
       "tests/edge/test_usage_service.ts",
       "tests/edge/test_year_equating.ts"
     ],
-    "unit_count": 564
+    "unit_count": 568
   }
 }
