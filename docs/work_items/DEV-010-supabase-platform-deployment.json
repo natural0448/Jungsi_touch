@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.57",
+  "contract_version": "1.9.58",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -316,13 +316,18 @@
           "label": "보고서·초안·멱등·버전 충돌 실제 트랜잭션",
           "status": "IN_PROGRESS",
           "evidence_kind": "sql",
-          "evidence_ids": []
+          "evidence_ids": [
+            "OPS-005-APPLIED-20261015",
+            "OPS-005-NATIVE-READBACK-20261015"
+          ]
         },
         "existing_plan_and_quotas": {
           "label": "기존 요금제·포함량·Spend Cap·승인된 원자적 예산",
           "status": "IN_PROGRESS",
           "evidence_kind": "billing",
-          "evidence_ids": []
+          "evidence_ids": [
+            "OPS-BUDGET-DECISION-20261015"
+          ]
         },
         "edge_deployment": {
           "label": "기존 프로젝트의 동일 후보 Edge 배포·실 HTTP 인수",
@@ -332,7 +337,7 @@
         },
         "bff_browser_acceptance": {
           "label": "허용 플랫폼 BFF·세션/CSRF·브라우저 비노출",
-          "status": "IN_PROGRESS",
+          "status": "PENDING_OWNER",
           "evidence_kind": "bff_browser",
           "evidence_ids": []
         },
@@ -675,7 +680,40 @@
           "evidence_ids": []
         }
       },
-      "evidence": {},
+      "evidence": {
+        "OPS-005-APPLIED-20261015": {
+          "kind": "sql",
+          "candidate_commit": "0779e804a965457d499282bcb565ef6ed2a2ae2f",
+          "receipt_sha256": "c92c4aa09df2a5eed61abdf3cfe7b66be6726d211aa8601fcb4e986ef707a2ad",
+          "operations": [],
+          "scope": "Exact Git migration 005 applied atomically; only three new usage tables and minimal app grants/RLS verified; existing object metadata unchanged. No business operation acceptance.",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-005-NATIVE-READBACK-20261015": {
+          "kind": "sql",
+          "candidate_commit": "0779e804a965457d499282bcb565ef6ed2a2ae2f",
+          "receipt_sha256": "19eca06524feea0c1560383b98e6abdf33e539e0135113e25a1bea60d94b0be5",
+          "operations": [],
+          "scope": "Same native API SQL driver: app UTC/RLS guard, 005 presence and pass metadata only; nil subject and no user transaction.",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-EXAM-SCOPED-20261015": {
+          "kind": "native_api",
+          "candidate_commit": "0779e804a965457d499282bcb565ef6ed2a2ae2f",
+          "receipt_sha256": "ad0949d7eecf020b1b7b4a9b8a6230d608b11af1010f0045c7527d2e61711429",
+          "operations": [],
+          "scope": "Official marginal subject input validation and independent frequency/tie arithmetic only; no real user/API acceptance or joint model approval.",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-BUDGET-DECISION-20261015": {
+          "kind": "billing",
+          "candidate_commit": "0779e804a965457d499282bcb565ef6ed2a2ae2f",
+          "receipt_sha256": "8e6275788270ca593896dfcc6a35a7d764af91516e3cf853b1eba99b2460be16",
+          "operations": [],
+          "scope": "Private initial per-owner usage decision and existing plan/cap technical observation; activation and organization-wide financial usage acceptance pending.",
+          "does_not_imply_operation_acceptance": true
+        }
+      },
       "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 현재 정상 /jeongsi 진입 화면은 합성 응답을 명시하고 있다. 합성 회원 유형과 화면 성공은 실제 이용권·JWT·업무22 API 인수 근거가 아니다. 실제 서버 후보와 정상 BFF의 live 연결을 같은 후보 근거로 검수한 후 운영 상태를 갱신한다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다.",
       "position_graph": {
         "formula_rows": [
@@ -700,7 +738,7 @@
       "runtime_assembly": {
         "format": "jungsi.edge-runtime-assembly/v1",
         "status": "SOURCE_ASSEMBLED",
-        "status_text": "기존 22 operation을 실제 Deno 진입점·네이티브 Auth/SQL·공유 요청 예산·선택 자료 그래프로 조립한 소스다. 등록·타입·합성 검수이며 실제 연결·배포 상태는 위 단일 원장의 native/deployment를 따른다.",
+        "status_text": "기존22 operation의 실제 Deno 소스 조립은 develop에서 인수했다. 2026-10-15 검토된005를 실제 원자 적용하고 같은 API 드라이버의 앱 역할·UTC/RLS·005 존재를 확인했다. 공식 과목 시험팩은 현재 decoder와 독립 산술을 대조해 과목 성적표·국수탐2 표준점수 합에 한정한 새 운영 목적 승인을 만들었다. private5차원 예산은 결정했지만 현재 native 발행본/head/binding과의 활성화·실사용자·BFF·22업무 인수는 남았다. 아래 항목과 단일 원장의 native/deployment를 함께 읽으며 SQL/자료 검수를 API완료로 세지 않는다.",
         "bindings": {
           "native_entry": {
             "path": "supabase/functions/jungsi-api/index.ts",
@@ -801,28 +839,36 @@
         "verification_rule": "기존 source suite에 새 설정/현재 head/공유 읽기/예산 planner/조립/선택 그래프 합성검사 48건을 추가한다. 실제 entry는 고정 postgres@3.4.5 lock으로 별도 타입 검사하며 serve를 시작하지 않는다. 동일 후보 전체 훅·CI·oracle 통과 후에도 실제 JWT/TOTP·네이티브 업무 트랜잭션·요금제 근거·Edge/BFF/브라우저 인수가 없으면 운영 PASS를 기록하지 않는다.",
         "waiting": [
           [
-            "현재 CA",
-            "JUNGSI_DATABASE_CA의 유효 PEM·동일 프로젝트 peer 검증. 합성 PEM framing 통과는 대체 근거가 아니다."
+            "현재 CA·프로젝트·앱 역할 — 기술 검수 완료",
+            "공식CA 체인/호스트와 기존 앱DSN·현재 프로젝트 결속·UTC/RLS의 기존 정확 영수증을 재사용한다. 다른 설정/실제 Edge 값이 선택되면 그 범위만 다시 검수한다."
           ],
           [
-            "현재 승인 head와 선택 자료 포인터",
-            "private bucket/prefix·registry/selection/head/usage_policy object_key·bytes·SHA·목적·scope·승인 참조·expiry를 결속한 현재 binding"
+            "네이티브 DB005 — 실제 적용 완료",
+            "정확Git005의3개 신규 예산 테이블·자료형/제약/인덱스·RLS·최소권한과 기존 객체 메타데이터 보존을 확인했다. 같은 API 드라이버 read-only 재조회도 통과했다. 기존003/005를 다시 적용하지 않고 실제 원자 예산·보고서·소유권·멱등·버전 충돌 검수는 별도로 수행한다."
           ],
           [
-            "승인 요청 예산",
-            "현재 조직/프로젝트 요금제·포함량/추가 비용 범위와 5차원 한도·작업 비용·시험/pack·결과 크기·worker/lease 근거"
+            "공식 과목 시험팩 — 목적별 승인 완료",
+            "현재native/Python decoder와 저장된 공식 근거를 독립 대조했다. 과목 성적표·4개 표준점수 합만 승인하며 전체/대학별 누백·연도보정·판단·forecast는 승계하지 않는다. 이전localfalse와 정본 전역상태를 보존하고 새 정확승인·불변Storage·readback을 결속한다."
           ],
           [
-            "네이티브 DB",
-            "기존 003 재적용 없이 005 적용 여부를 별도 승인 범위에서 확인하고 동일 후보의 RLS·소유권·멱등·버전 충돌 검사"
+            "현재 catalog·모형 — 최소 후보 대기",
+            "최신 단일정본의 native 후보·검수·출처/타입/연도/모집행 맥락을 고정한다. C140/v21_1은 역사 검수로 보존하며 현재 catalog로 재승격하지 않는다. 미검증 추정모형은 미선택·pending을 유지한다."
           ],
           [
-            "실제 사용자·관리자 검수",
-            "계정 주인이 정상 /admin에서 JWT·TOTP를 직접 검수. 토큰·OTP·QR 비밀은 수집하지 않는다."
+            "현재 승인 head와 선택 자료 포인터 — 등록 대기",
+            "private bucket/prefix·registry/selection/head/usage_policy의 정확 object_key·bytes·SHA·목적·scope·승인 참조·expiry를 현재 binding에 결속하고 같은 Storage readback 및 preflight를 검수한다."
           ],
           [
-            "운영 진입점",
-            "기존 두 함수의 설정을 자동 변경하지 않고 같은 후보의 Edge·BFF·정상 브라우저 경로와 세 보안 gate를 검수"
+            "승인 요청 예산 — 결정/활성화 구분",
+            "기존 Pro Spend Cap 활성 기술 관측과 비공개5차원·작업비용·worker/lease 결정을 기록했다. 정확 선택catalog의 eligible수와 시험/pack·결과크기에 결속한 운영정책 파싱·원자적 multiworker 검수는 대기다. ceiling/GLOBAL은 사용자별 범위이며 조직전체금액 상한이 아니다. 실제청구/사용량 원문은 Git/Drive로 내보내지 않는다."
+          ],
+          [
+            "실제 사용자·관리자 검수 — 정상OTP 완료/새API 대기",
+            "계정 주인이 정상OTP 입력을 완료했고 같은 브라우저의 /admin 대시보드 진입을 관측했다. 새API와 동일 배포SHA·같은 Bearer의 getUser/본인profiles/aal2·권한 반례는 BFF 연결 후 별도로 검수한다. 토큰·OTP·쿠키·QR비밀은 수집/전달하지 않는다."
+          ],
+          [
+            "운영 진입점·BFF — 화면 담당 회신 대기",
+            "사용자가 외부 화면 담당 회신을 전달하기로 했다. 실제 BFF URL/배포설정과 기존플랫폼을 확인한 뒤 같은 Edge후보의 운영연결·CSRF·브라우저·세 보안gate를 검수한다. 새유료addon/호스팅을 도입하지 않는다."
           ]
         ],
         "environment_aliases": {
@@ -832,6 +878,29 @@
           "SUPABASE_SECRET_KEY": "JUNGSI_DISPLAY_STORAGE_SECRET"
         },
         "environment_alias_rule": "정식 설정 이름이 존재하면 빈 값·잘못된 값도 우선하며 오류를 유지한다. 정식 이름이 아예 없을 때만 위 네 기존 DISPLAY 별칭을 허용한다. 기본 privileged SUPABASE_DB_URL·migration DSN·service-role/anon 예전 키·복수 key 배열로 fallback하지 않는다. bucket/prefix·binding/head·예산에는 별칭이나 기본값을 적용하지 않으며 기존 display descriptor를 engine 승인으로 사용하지 않는다. 같은 프로젝트·실제 jungsi_backend_app·TLS·UTC/RLS guard를 유지한다."
+      },
+      "operating_checkpoint": {
+        "format": "jungsi.operating-checkpoint/v1",
+        "date_KST": "2026-10-15",
+        "source_commit": "0779e804a965457d499282bcb565ef6ed2a2ae2f",
+        "schema_005": "APPLIED_AND_VERIFIED",
+        "existing_objects_metadata": "UNCHANGED",
+        "native_api_driver_005_probe": "PASS_READ_ONLY",
+        "official_subject_input": "SCOPED_OPERATION_PURPOSE_APPROVED_AFTER_CURRENT_DECODER_REVIEW",
+        "national_or_university_joint_model": "NOT_APPROVED_BY_SUBJECT_INPUT_REVIEW",
+        "current_catalog_binding": "AWAITING_CURRENT_CANONICAL_NATIVE_CANDIDATE_NOT_HISTORICAL_C140",
+        "private_usage_policy": "DECIDED_NOT_YET_ACTIVATED_OR_NATIVE_ACCEPTED",
+        "OTP": "OWNER_COMPLETED_NORMAL_ADMIN_VISIBLE_NEW_API_SAME_BEARER_PENDING",
+        "frontend_handoff": "USER_WILL_FORWARD_EXTERNAL_OWNER_REPLY",
+        "new_paid_service_or_addon": "NONE",
+        "production_ready": false,
+        "evidence_ids": [
+          "OPS-005-APPLIED-20261015",
+          "OPS-005-NATIVE-READBACK-20261015",
+          "OPS-EXAM-SCOPED-20261015",
+          "OPS-BUDGET-DECISION-20261015"
+        ],
+        "rule": "Reuse exact code/data/purpose pins and receipts from this checkpoint. 005 is already applied: verify its registered schema, never reapply or remove objects. A technical/schema/source-purpose proof does not promote any of the22 native/deployment flags; record same-user real HTTP/BFF/security evidence separately."
       }
     }
   }
