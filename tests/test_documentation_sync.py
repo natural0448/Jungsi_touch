@@ -219,6 +219,57 @@ class DocumentationSyncTests(unittest.TestCase):
         spec["version"] = "1.9.14"
         self.assertEqual(audit.validate_sync_policy(spec), [])
 
+    def verified_source_fixture(self):
+        spec, _ = self.fixture()
+        spec["version"] = "1.9.56"
+        policy = spec["workflow"]["documentation_sync"]
+        policy["execution_ledger_source"] = "supabase_deployment_contract.live_execution"
+        policy["latest_verified_source"] = {
+            "format": "jungsi.verified-source-reference/v1", "commit": "a" * 40,
+            "spec_version": "1.9.55", "ci_run_id": 123, "ci_conclusion": "success",
+            "source_only": True, "checks": {"python": 10, "deno": 20, "oracle": 30},
+        }
+        return spec
+
+    def test_current_progress_ignores_stale_history_and_does_not_promote_native(self):
+        spec = self.verified_source_fixture()
+        spec["workflow"]["documentation_sync"]["development_state"] = [["stale", "999/999", "PASS", "obsolete"]]
+        spec["supabase_deployment_contract"] = {"live_execution": {"operations": {
+            "one": {"code": "PORTED", "native": "NOT_RUN", "deployment": "NOT_RUN"},
+            "two": {"code": "PORTED", "native": "NOT_RUN", "deployment": "NOT_RUN"},
+        }, "stages": {"entry": {"label": "런타임 조립", "status": "IN_PROGRESS"}}}}
+        rows = audit.live_execution_progress_rows(spec)
+        self.assertEqual([row[2] for row in rows], ["PORTED 2/2", "PASS 0/2", "PASS 0/2", "IN_PROGRESS"])
+        self.assertNotIn("999/999", str(rows))
+
+    def test_current_progress_recomputes_each_independent_acceptance_state(self):
+        spec = {"supabase_deployment_contract": {"live_execution": {"operations": {
+            "one": {"code": "PORTED", "native": "PASS", "deployment": "NOT_RUN"},
+            "two": {"code": "NOT_PORTED", "native": "NOT_RUN", "deployment": "NOT_RUN"},
+        }}}}
+        self.assertEqual([row[2] for row in audit.live_execution_progress_rows(spec)],
+                         ["PORTED 1/2", "PASS 1/2", "PASS 0/2"])
+        self.assertEqual(audit.live_execution_progress_rows({}), [])
+
+    def test_current_specification_requires_verified_source_and_ledger_reference(self):
+        spec, _ = self.fixture()
+        spec["version"] = "1.9.56"
+        errors = audit.validate_sync_policy(spec)
+        self.assertIn("Documentation current progress must derive from live execution ledger", errors)
+        self.assertIn("Documentation verified source reference missing or invalid", errors)
+        self.assertEqual(audit.validate_sync_policy(self.verified_source_fixture()), [])
+
+    def test_verified_source_does_not_accept_failed_ci_or_runtime_promotion(self):
+        original = self.verified_source_fixture()
+        for key, value in (("commit", "bad-sha"), ("ci_conclusion", "failure"),
+                           ("ci_run_id", True), ("source_only", False)):
+            spec = copy.deepcopy(original)
+            spec["workflow"]["documentation_sync"]["latest_verified_source"][key] = value
+            self.assertIn("Documentation verified source reference missing or invalid", audit.validate_sync_policy(spec))
+        spec = copy.deepcopy(original)
+        spec["workflow"]["documentation_sync"]["latest_verified_source"]["checks"]["deno"] = True
+        self.assertIn("Documentation verified source reference missing or invalid", audit.validate_sync_policy(spec))
+
     def test_new_parser_invalidates_prior_signatures(self):
         spec, files = self.fixture()
         spec["workflow"]["documentation_sync"]["code_index"]["parser"] = "unknown-parser"

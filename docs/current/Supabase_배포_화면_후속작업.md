@@ -1,10 +1,27 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.55이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.56이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
 계약 2026.10.14.v2 · 코드 planned · 실제 운영 NOT_RUN · production_ready=false. 출발 develop 73f4a4866c3edfae3ed6b6c7e9f2a1055c643117.
+
+## 현재 소스·실제 연결·배포 상태
+
+| 담당/범위 | 단일 정본 | 현재 상태 | 해석과 다음 조건 |
+| --- | --- | --- | --- |
+| 22 API 코드 등록 | live_execution.operations.*.code | PORTED 22/22 | 등록 소스와 해시 범위이며 실제 실행 조립·연결·배포 완료와 구분한다. |
+| 22 API 실제 연결 검수 | live_execution.operations.*.native | PASS 0/22 | 동일 후보·실제 검수 영수증이 있는 operation만 PASS로 센다. |
+| 22 API 배포 인수 | live_execution.operations.*.deployment | PASS 0/22 | 같은 후보의 배포·실 HTTP 인수 영수증을 별도로 요구한다. |
+| 실제 Auth getUser·본인 profiles RLS 연결 | live_execution.stages.auth_connection | IN_PROGRESS | 해당 단계의 후보·범위·영수증 조건을 따른다. 다른 단계의 PASS를 대용하지 않는다. |
+| 실 JWT·만료·변조·타인 소유권 반례 | live_execution.stages.jwt_negative_checks | IN_PROGRESS | 해당 단계의 후보·범위·영수증 조건을 따른다. 다른 단계의 PASS를 대용하지 않는다. |
+| 계정 주인의 /admin TOTP 등록·aal2 관리 검수 | live_execution.stages.owner_totp_verification | IN_PROGRESS | 해당 단계의 후보·범위·영수증 조건을 따른다. 다른 단계의 PASS를 대용하지 않는다. |
+| 기존 22 API의 업무 처리·DTO·정밀 계산 이식 | live_execution.stages.api_22_port | IN_PROGRESS | 해당 단계의 후보·범위·영수증 조건을 따른다. 다른 단계의 PASS를 대용하지 않는다. |
+| 보고서·초안·멱등·버전 충돌 실제 트랜잭션 | live_execution.stages.native_business_transactions | IN_PROGRESS | 해당 단계의 후보·범위·영수증 조건을 따른다. 다른 단계의 PASS를 대용하지 않는다. |
+| 기존 요금제·포함량·Spend Cap·승인된 원자적 예산 | live_execution.stages.existing_plan_and_quotas | IN_PROGRESS | 해당 단계의 후보·범위·영수증 조건을 따른다. 다른 단계의 PASS를 대용하지 않는다. |
+| 기존 프로젝트의 동일 후보 Edge 배포·실 HTTP 인수 | live_execution.stages.edge_deployment | IN_PROGRESS | 해당 단계의 후보·범위·영수증 조건을 따른다. 다른 단계의 PASS를 대용하지 않는다. |
+| 허용 플랫폼 BFF·세션/CSRF·브라우저 비노출 | live_execution.stages.bff_browser_acceptance | IN_PROGRESS | 해당 단계의 후보·범위·영수증 조건을 따른다. 다른 단계의 PASS를 대용하지 않는다. |
+| 응답·직접 권한·수집 방지 세 보안 gate | live_execution.stages.security_gates | NOT_RUN | 해당 단계의 후보·범위·영수증 조건을 따른다. 다른 단계의 PASS를 대용하지 않는다. |
 
 ## 플랫폼과 비용 범위
 
@@ -197,4 +214,4 @@ live는 승인/발행/선택된 서버 값만 표시한다. 조합별 서버 계
 
 
 
-<!-- jungsi:generated spec_sha256=95780c4ab7f64f13df3538dcc8a89609d4c2ebacea7f210d7b6ceafc4259bb27 -->
+<!-- jungsi:generated spec_sha256=2cfa601ae7a31d7b35e6c73a2db84f606434f6de26bb41948788d363d659b7ec -->

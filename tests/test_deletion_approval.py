@@ -72,6 +72,15 @@ class DeletionApprovalTests(unittest.TestCase):
         self.stage(self.deleted)
         self.assertEqual(policy.validate_staged_snapshot(policy.DELETION_BRANCH,'presentation',self.approved),[])
         self.assertEqual(policy.validate_push_history(policy.DELETION_BRANCH,self.sync,self.deleted,self.approved),[])
+    def test_spec_blob_can_be_read_from_a_retained_long_working_directory(self):
+        # Git's revision/path disambiguation must not stat a >MAX_PATH filename on Windows.
+        padding=max(1,190-len(str(self.repo))-len('/retained_object_read_'))
+        long_root=self.repo/('retained_object_read_'+'x'*padding)
+        long_root.mkdir(parents=True,exist_ok=False)
+        with (long_root/'.git').open('x',encoding='utf-8',newline='\n') as stream:
+            stream.write('gitdir: '+str(self.repo/'.git')+'\n')
+        with patch.object(policy,'ROOT',long_root):
+            self.assertEqual(policy.load_spec(self.grant),self.approved)
     def test_registered_source_PR_passes_and_wrong_parent_fails(self):
         event={'pull_request':{'head':{'ref':policy.DELETION_BRANCH,'sha':self.deleted,'repo':{'full_name':'synthetic/repo'}},'base':{'ref':'develop','sha':self.grant,'repo':{'full_name':'synthetic/repo'}}}}
         self.assertEqual(policy.validate_event('pull_request',event,self.deleted,self.approved),[])

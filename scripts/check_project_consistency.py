@@ -4,7 +4,7 @@ No file deletion. --write preserves prior generated content under ignored output
 from __future__ import annotations
 import argparse,ast,datetime,hashlib,json,re,subprocess,sys,posixpath
 from pathlib import Path,PurePosixPath
-from audit_documentation_sync import AGENT_MARKER,generated_sync_files,validate_catalog,validate_sync_policy
+from audit_documentation_sync import AGENT_MARKER,generated_sync_files,live_execution_progress_rows,validate_catalog,validate_sync_policy
 
 ROOT=Path(__file__).resolve().parents[1]
 SPEC_PATH="docs/current/service_spec.json"
@@ -1225,6 +1225,7 @@ def supabase_deployment_document(spec):
         table(['항목','확인·정정 기준'],comparison['facts'])+'\n\n실제 호환성/브라우저/비용 '+comparison['actual_compatibility_browser_and_billing']+'. 비교 수신은 배포·화면교체 승인이 아니다.\n\n'+
         '\n'.join('- ['+x['title']+']('+x['url']+')' for x in comparison['official_sources'])) if comparison else ''
     return (c['scope']+'\n\n계약 '+c['revision']+' · 코드 '+c['code_status']+' · 실제 운영 NOT_RUN · production_ready=false. 출발 develop '+c['basis_commit']+'.\n\n'+
+            '## 현재 소스·실제 연결·배포 상태\n\n'+table(['담당/범위','단일 정본','현재 상태','해석과 다음 조건'],live_execution_progress_rows(spec))+'\n\n'+
             '## 플랫폼과 비용 범위\n\n'+p['rule']+'\n\n허용 플랫폼: '+', '.join(p['allowed'])+' · 기존 요금제/Spend Cap 검수 '+p['usage_and_spend_cap_verification']+'. 추가 비용 없이 사용할 수 있는 범위를 먼저 확인한다.\n\n'+
             '## 3티어와 기존 Python 구현\n\n'+table(['계층/기준','구성'],[['프레젠테이션',a['presentation']],['애플리케이션',a['application']],['데이터',a['data']],['기존 검산',a['python_reference']]])+'\n\n'+a['rule']+'\n\n서버 UTC · 원자료/화면 Asia/Seoul. '+limits['cost_rule']+' '+runtime_text+'\n\n'+
             '## 수치와 응답의 호환 검산\n\n'+c['numerical_compatibility']['rule']+'\n\n'+

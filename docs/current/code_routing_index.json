@@ -23,7 +23,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "2fbd96d77c9a28ffa0527151bd2c44dc2457c426b9646e872f1aa9cd0ab23945",
+      "source_sha256": "6f31b6fb7f3e3bf37b77bc68f287dc0969665091a5d2a984caeaa6fd6e9909dd",
       "symbols": [
         {
           "kind": "function",
@@ -83,6 +83,12 @@
           "kind": "function",
           "name": "generated_sync_files",
           "signature": "def generated_sync_files(spec, doc, table):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "live_execution_progress_rows",
+          "signature": "def live_execution_progress_rows(spec):",
           "decorators": []
         },
         {
@@ -208,7 +214,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "5693c34c35fc67887eaab688660f130f0b2494e4848a0e74cd7bf4015e15f076",
+      "source_sha256": "9ebb570259840bbab8d6ec1cbb10963f66f60c8c415ae21518f58d3ccc0256c7",
       "symbols": [
         {
           "kind": "class",
@@ -580,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "bab79069018ba0d49cf7e994c631bf5051a25a548ecb56da41c0bb1dc7024cf5",
+      "source_sha256": "c87de2111a4ad7c34858559ee2639d97cc94791cc2bd0b1c2d7a3630a6bca2fb",
       "symbols": [
         {
           "kind": "class",

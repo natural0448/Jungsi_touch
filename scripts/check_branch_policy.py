@@ -327,7 +327,7 @@ def git(*arguments):
     if result.returncode:raise ValueError('Required Git history is unavailable for branch policy')
     return result.stdout
 
-def load_spec(revision):return json.loads(git('show',revision+':'+SPEC_PATH).decode('utf-8'))
+def load_spec(revision):return json.loads(git('cat-file','blob',revision+':'+SPEC_PATH).decode('utf-8'))
 
 def change_records(before=None,after=None,*,staged=False):
     args=['diff','--name-status','--no-renames','-z']
