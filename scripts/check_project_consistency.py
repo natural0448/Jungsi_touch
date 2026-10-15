@@ -1170,6 +1170,24 @@ def live_execution_document(spec):
             table(['operation / 계약 경로','실행 전 필요한 조건','인수 시 기대 결과'],[
                 [o['id']+' / '+o['method']+' '+o['path'],preparation['cases'][o['id']]['prerequisites'],preparation['cases'][o['id']]['expected']]
                 for o in spec['operations']]))
+    intake=c.get('bff_reply_intake')
+    intake_text=''
+    if intake:
+        transport=intake['transport']
+        intake_text=('\n\n### 화면 BFF 회신 수신과 등록·실연결 게이트\n\n'+intake['intake_rule']+'\n\n'+
+            table(['소스/외부 보고','참조'],[
+                ['화면 소스',intake['frontend_source_commit']],
+                ['화면팀 보고 Worker / 배포 시각',intake['reported_worker_version']+' / '+intake['reported_deployed_at_UTC']],
+                ['실제 Worker 독립 관측',intake['worker_deployment_independently_observed']],
+                ['현재 모드 / 새 API 호출',intake['reported_state']['mode']+' / '+str(intake['reported_state']['new_API_calls'])],
+                ['Owner 설정 등록',intake['registration']['status']]])+'\n\n'+
+            table(['연결 항목','소스에서 대조한 계약'],[
+                ['정상 진입 / API base',transport['normal_entry_path']+' / '+transport['api_base_setting']+' 끝은 '+transport['api_base_ends_with']],
+                ['경로 접미 / ingress 제거',transport['caller_appends']+' / '+transport['ingress_removes_only']],
+                ['사용자 / 서버 헤더',transport['user_header']+': '+transport['user_scheme']+' / '+transport['relay_header']],
+                ['캐시 / 쓰기 멱등',transport['fetch_cache']+' / '+transport['write_header']]])+'\n\n'+
+            table(['남은 인수','담당','상태','필요 증거'],[[g['id'],g['owner'],g['status'],g['expected']]for g in intake['acceptance_gates']])+'\n\n'+
+            intake['registration']['private_delivery_rule']+'\n\n'+intake['verification_rule']+'\n\n'+intake['reuse_rule'])
     rows=[]
     for o in spec['operations']:
         state=c['operations'][o['id']]
@@ -1177,7 +1195,7 @@ def live_execution_document(spec):
     return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
             table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
             table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
-            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text)
+            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text+intake_text)
 
 
 def validate_live_execution(spec):
@@ -1281,6 +1299,53 @@ def validate_live_execution(spec):
         for key in ('reuse_rule','execution_rule'):
             if not isinstance(preparation.get(key),str)or not preparation[key].strip():
                 errors.append('DEV-010 preparation rule missing: '+key)
+    intake=c.get('bff_reply_intake')
+    if intake is None:
+        if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,63):
+            errors.append('DEV-010 BFF reply intake missing')
+    elif not isinstance(intake,dict):
+        errors.append('DEV-010 BFF reply intake invalid')
+    else:
+        if (intake.get('format')!='jungsi.bff-reply-intake/v1' or
+            intake.get('status')!='SOURCE_REVIEWED_REGISTRATION_PENDING' or
+            not re.fullmatch(r'[0-9a-f]{40}',str(intake.get('basis_commit',''))) or
+            not re.fullmatch(r'[0-9a-f]{40}',str(intake.get('frontend_source_commit',''))) or
+            not re.fullmatch(r'[0-9a-f]{64}',str(intake.get('reply_receipt_sha256',''))) or
+            type(intake.get('reply_bytes'))is not int or intake['reply_bytes']<=0 or
+            intake.get('source_review_is_operating_acceptance')is not False or
+            intake.get('private_setting_values_or_download_links_in_public_contract')is not False or
+            intake.get('production_ready')is not False or
+            intake.get('worker_deployment_independently_observed')!='NOT_RUN'):
+            errors.append('DEV-010 BFF reply cannot certify live acceptance')
+        expected_transport={'normal_entry_path': '/jeongsi', 'api_base_setting': 'JUNGSI_API_URL', 'api_base_ends_with': '/functions/v1/jungsi-api', 'caller_appends': '/api/v1', 'ingress_removes_only': '/jungsi-api', 'user_header': 'Authorization', 'user_scheme': 'Bearer', 'same_verified_Bearer_required': True, 'relay_header': 'X-Jungsi-Relay-Token', 'relay_setting': 'JUNGSI_RELAY_TOKEN', 'relay_server_only': True, 'fetch_cache': 'no-store', 'write_header': 'Idempotency-Key', 'fallback_to_synthetic_allowed': False}
+        actual_transport=intake.get('transport')
+        if (actual_transport!=expected_transport or not isinstance(actual_transport,dict) or
+            any(type(actual_transport[k])is not type(v)for k,v in expected_transport.items())):
+            errors.append('DEV-010 BFF source transport contract drift')
+        registration=intake.get('registration')
+        if (not isinstance(registration,dict) or
+            set(registration)!={'status','settings_registered','receipt_sha256','pending_names','owner','private_delivery_rule'} or
+            registration.get('status')!='PENDING_OWNER_RECEIPT' or
+            registration.get('settings_registered')is not False or registration.get('receipt_sha256')is not None or
+            registration.get('pending_names')!=['JUNGSI_SUPABASE_STORAGE_BUCKET', 'JUNGSI_SUPABASE_STORAGE_PREFIX', 'JUNGSI_API_BINDING_JSON', 'JUNGSI_API_BINDING_SHA256', 'JUNGSI_API_BINDING_MAX_BYTES']):
+            errors.append('DEV-010 BFF registration needs owner receipt')
+        reported=intake.get('reported_state',{})
+        if (not isinstance(reported,dict) or reported.get('mode')!='synthetic' or
+            any(type(reported.get(k))is not int or reported[k]!=0 for k in ('new_API_calls','native_API_accepted','deployment_API_accepted')) or
+            reported.get('live_browser')!='NOT_RUN'):
+            errors.append('DEV-010 BFF synthetic reply is not native evidence')
+        review=intake.get('source_review',{})
+        service=review.get('service',{})if isinstance(review,dict)else {}
+        if (not isinstance(service,dict) or set(service)!={'supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts', 'supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts'} or
+            any(service[p]!=indexed.get(p)for p in service)):
+            errors.append('DEV-010 BFF service source binding drift')
+        gates=intake.get('acceptance_gates')
+        expected_gates={'OWNER_REGISTRATION','EDGE_READY_AUTH','API22_SCOPED','BFF_LIVE_BROWSER','SECURITY_3_GATES'}
+        if (not isinstance(gates,list) or len(gates)!=len(expected_gates) or
+            any(not isinstance(g,dict)or set(g)!={'id','owner','status','expected'}for g in gates) or
+            {g.get('id')for g in gates}!=expected_gates or
+            any(g.get('status')!='NOT_RUN'or any(not isinstance(g.get(k),str)or not g[k].strip()for k in ('owner','expected'))for g in gates)):
+            errors.append('DEV-010 BFF remaining acceptance gates drift')
     for key,row in registry.items():
         if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
             not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or
