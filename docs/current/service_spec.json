@@ -26302,8 +26302,13 @@
           "candidate_commit": "9e6365e43c748afecf84c9b08e2a70f7ca711c14",
           "receipt_sha256": "ca1c8b0f40adc37a11691599e588fdd58405017d9c12f5ed9a02ad7a6238b205",
           "operations": [],
-          "scope": "현재 Dashboard에 새 설정 5개가 없고 유효 relay의 실제 readiness가 503/no-store다. 사용자가 실제 등록 전임을 정정하고 담당자 요청 문서화를 지시했다. 등록과 준비 완료는 대기다.",
-          "does_not_imply_operation_acceptance": true
+          "scope": "[과거 설정 등록 전 관측 — 해당 영수증 시점의 사실이며 현재 상태가 아님] 현재 Dashboard에 새 설정 5개가 없고 유효 relay의 실제 readiness가 503/no-store다. 사용자가 실제 등록 전임을 정정하고 담당자 요청 문서화를 지시했다. 등록과 준비 완료는 대기다.",
+          "does_not_imply_operation_acceptance": true,
+          "historical_observation": true,
+          "superseded_by": [
+            "OPS-OWNER-SETTINGS-REGISTERED-20261015",
+            "OPS-POSTREG-READINESS-20261015"
+          ]
         },
         "OPS-BUDGET-SCOPED-V3-20261015": {
           "kind": "billing",
