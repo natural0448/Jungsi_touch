@@ -10,7 +10,7 @@ import { EXAM, INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "@/lib/exam
   응답 모양은 실제 DTO(lib/dto.ts)와 같다.
 */
 
-const OPT = { path: "/jeongsi", maxAge: 60 * 60 * 24 * 30, sameSite: "lax" as const, httpOnly: true };
+const OPT = { path: "/jeongsi", maxAge: 60 * 60 * 24 * 30, sameSite: "lax" as const, httpOnly: true, secure: process.env.NODE_ENV === "production" };
 const C = { profile: "jt_syn_profile", report: "jt_syn_report" } as const;
 
 type StoredProfile = ProfileDto & { scores: ScoresInput; key: string };

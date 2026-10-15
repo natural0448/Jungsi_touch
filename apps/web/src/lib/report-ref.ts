@@ -16,5 +16,5 @@ export async function getReportId(): Promise<string | null> {
 }
 
 export async function setReportId(id: string) {
-  (await cookies()).set(NAME, id, { path: "/jeongsi", maxAge: 60 * 60 * 24 * 180, sameSite: "lax", httpOnly: true });
+  (await cookies()).set(NAME, id, { path: "/jeongsi", maxAge: 60 * 60 * 24 * 180, sameSite: "lax", httpOnly: true, secure: process.env.NODE_ENV === "production" });
 }

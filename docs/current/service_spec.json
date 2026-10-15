@@ -16124,6 +16124,14 @@
         "REQ-01"
       ],
       "summary": "FE-ADMIN-ACCESS-01: 머리글에서 member_tier=paid 이고 entitlement_expires_at=null(서버의 관리자 이용권 예외)이면 만료일 문구 없이 \"관리자 이용\"으로 표시. 실제 이용권이 있으면 서버가 보낸 만료일을 그대로 표시. 서버 판정·권한 변경 없음."
+    },
+    {
+      "date": "2026-10-15",
+      "requirements": [
+        "REQ-01",
+        "REQ-02"
+      ],
+      "summary": "정시터치가 직접 쓰는 쿠키(jt_report_id, 합성 모드 jt_syn_*)에 운영 빌드에서 Secure 속성 추가(HttpOnly·SameSite=Lax·Path=/jeongsi 유지). BFF 회신 양식의 쿠키 속성 점검 항목 대응. 로그인 쿠키는 에듀터치 소유라 변경 없음."
     }
   ],
   "overall_analysis_contract": {
