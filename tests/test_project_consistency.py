@@ -1392,6 +1392,55 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
 
 class SupabaseDeploymentContractTests(unittest.TestCase):
 
+    def test_runtime_alias_contract_rejects_privileged_defaults_and_generated_docs_keep_the_boundary(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        for name in ('DATABASE_URL','SUPABASE_SECRET_KEY'):
+            spec=deepcopy(self.spec)
+            spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['environment_aliases'][name]='SUPABASE_DB_URL'
+            self.assertIn('DEV-010 runtime environment aliases drift',validate_live_execution(spec))
+        text=live_execution_document(self.spec)
+        for value in ('JUNGSI_DISPLAY_DATABASE_URL','JUNGSI_DISPLAY_DATABASE_CA','JUNGSI_DISPLAY_PUBLISHABLE_KEY','JUNGSI_DISPLAY_STORAGE_SECRET','빈 값','복수 key','display descriptor'):
+            self.assertIn(value,text)
+
+
+    def test_runtime_assembly_missing_scope_or_stale_entry_cannot_claim_source_assembly(self):
+        from check_project_consistency import validate_live_execution
+        for field in ('native_entry','composition'):
+            spec=deepcopy(self.spec)
+            spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['bindings'][field]['source_sha256']='f'*64
+            self.assertIn('DEV-010 runtime assembly source binding drift: '+field,validate_live_execution(spec))
+        spec=deepcopy(self.spec)
+        spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['operation_ids'].pop()
+        self.assertIn('DEV-010 runtime assembly scope drift',validate_live_execution(spec))
+        spec=deepcopy(self.spec)
+        spec['supabase_deployment_contract']['live_execution'].pop('runtime_assembly')
+        self.assertIn('DEV-010 runtime assembly missing',validate_live_execution(spec))
+
+    def test_runtime_assembly_settings_cannot_contain_actual_values_or_drop_pending_inputs(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec)
+        spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['environment'][0]['value']='SYNTHETIC'
+        self.assertIn('DEV-010 runtime environment contract drift',validate_live_execution(spec))
+        spec=deepcopy(self.spec)
+        spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['waiting']=[]
+        self.assertIn('DEV-010 runtime assembly waiting conditions missing',validate_live_execution(spec))
+
+    def test_runtime_assembly_keeps_native_and_deployment_evidence_requirements(self):
+        from check_project_consistency import validate_live_execution
+        spec=deepcopy(self.spec)
+        live=spec['supabase_deployment_contract']['live_execution']
+        live['operations']['session.read'].update(native='PASS',deployment='PASS')
+        errors=validate_live_execution(spec)
+        self.assertIn('DEV-010 live operating evidence missing: session.read.native',errors)
+        self.assertIn('DEV-010 live operating evidence missing: session.read.deployment',errors)
+
+    def test_runtime_assembly_generated_contract_lists_pending_server_inputs(self):
+        from check_project_consistency import live_execution_document
+        body=live_execution_document(self.spec)
+        for value in ('jungsi-api/index.ts','JUNGSI_DATABASE_CA','JUNGSI_API_BINDING_JSON','JUNGSI_API_BINDING_SHA256','JUNGSI_API_BINDING_MAX_BYTES','runtime-usage-policy/v1','005','실제 연결'):
+            self.assertIn(value,body)
+
+
     def test_live_execution_cannot_omit_one_of_the_existing_routes(self):
         from check_project_consistency import validate_live_execution
         spec=deepcopy(self.spec);spec['supabase_deployment_contract']['live_execution']['operations'].pop('session.read')

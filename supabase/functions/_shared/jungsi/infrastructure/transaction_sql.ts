@@ -126,4 +126,24 @@ export class SupabaseSqlTransport implements ReadonlyPassSqlPort {
   async close(): Promise<void> {
     await this.pool.close();
   }
+  /** Server readiness metadata only; no user claims, row writes or migration execution. */
+  async probeUsageSchema(): Promise<boolean> {
+    try {
+      return await this.pool.transaction(true, async (tx) => {
+        await configure(tx, null);
+        verifyRole(await tx.query(RUNTIME_ROLE_SQL), true);
+        const rows = await tx.query(
+          "SELECT EXISTS(SELECT 1 FROM jungsi_backend.schema_versions WHERE version='005_usage_budget')",
+        );
+        if (
+          !Array.isArray(rows) || rows.length !== 1 || !Array.isArray(rows[0]) ||
+          rows[0].length !== 1 || typeof rows[0][0] !== "boolean"
+        ) throw new AccessError("storage_result_invalid", 503);
+        return rows[0][0];
+      });
+    } catch (error) {
+      if (error instanceof AccessError) throw error;
+      throw new AccessError("storage_unavailable", 503);
+    }
+  }
 }

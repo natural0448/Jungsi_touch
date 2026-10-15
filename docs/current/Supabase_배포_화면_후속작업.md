@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.56이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.57이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -157,6 +157,54 @@ Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제
 
 동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 현재 정상 /jeongsi 진입 화면은 합성 응답을 명시하고 있다. 합성 회원 유형과 화면 성공은 실제 이용권·JWT·업무22 API 인수 근거가 아니다. 실제 서버 후보와 정상 BFF의 live 연결을 같은 후보 근거로 검수한 후 운영 상태를 갱신한다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다.
 
+### 서버 런타임 조립과 입력 계약
+
+기존 22 operation을 실제 Deno 진입점·네이티브 Auth/SQL·공유 요청 예산·선택 자료 그래프로 조립한 소스다. 등록·타입·합성 검수이며 실제 연결·배포 상태는 위 단일 원장의 native/deployment를 따른다.
+
+| 소스 진입점 | 경로 | SHA-256 |
+| --- | --- | --- |
+| native_entry | supabase/functions/jungsi-api/index.ts | 8bd1e57f682b0dc03e3335bb86c4f30bf93eda08d053de0e608aa1e30892525d |
+| composition | supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts | 4973420c1d86ac26f69efa5417d71314a84348d283f398f502e9b2e344847e61 |
+
+| 서버 설정 이름 | 허용된 기존 이름 | 현재 상태 | 입력의 의미 |
+| --- | --- | --- | --- |
+| SUPABASE_URL | 없음 | 기존 이름·프로젝트 일치 확인 필요 | 동일 Supabase 프로젝트의 HTTPS 원점 |
+| SUPABASE_PUBLISHABLE_KEY | JUNGSI_DISPLAY_PUBLISHABLE_KEY | 기존 이름·실제 Auth 검수 대기 | getUser와 동일 Bearer의 본인 profiles RLS 조회용 공개 키 |
+| DATABASE_URL | JUNGSI_DISPLAY_DATABASE_URL | 기존 이름·실제 SQL 검수 대기 | 동일 프로젝트 jungsi_backend_app 전용 DSN |
+| JUNGSI_DATABASE_CA | JUNGSI_DISPLAY_DATABASE_CA | 이름 채택·유효값과 실제 TLS 검수 대기 | PEM 본문. 로컬 파일 경로가 아니며 framing 검사는 인증서 유효성 검증을 대신하지 않는다. |
+| JUNGSI_RELAY_TOKEN | 없음 | 기존 이름·실제 BFF 연결 검수 대기 | BFF와 Edge 사이의 서버 전용 relay 헤더 값 |
+| SUPABASE_SECRET_KEY | JUNGSI_DISPLAY_STORAGE_SECRET | 기존 이름·승인 자료 읽기 검수 대기 | private Storage 읽기 전용 서버 경계에서만 사용 |
+| JUNGSI_SUPABASE_STORAGE_BUCKET | 없음 | 기존 이름·실제 범위 승인 대기 | 공개가 아닌 버킷. 현재 metadata의 private·native 정수 상한을 확인 |
+| JUNGSI_SUPABASE_STORAGE_PREFIX | 없음 | 기존 이름·실제 범위 승인 대기 | 승인된 control·artifact 객체가 속하는 prefix |
+| JUNGSI_API_BINDING_JSON | 없음 | 소스 형식 계약·실제 승인값 미등록 | jungsi.edge-api-binding/v1: 승인 목적·scope·현재 head와 registry/selection/usage_policy 참조·명시 한도 |
+| JUNGSI_API_BINDING_SHA256 | 없음 | 소스 형식 계약·실제 승인값 미등록 | 위 JSON 원본 UTF-8 바이트의 SHA-256 |
+| JUNGSI_API_BINDING_MAX_BYTES | 없음 | 소스 형식 계약·실제 승인값 미등록 | 위 JSON의 양의 정수 바이트 상한. 기본값 없음 |
+
+정식 설정 이름이 존재하면 빈 값·잘못된 값도 우선하며 오류를 유지한다. 정식 이름이 아예 없을 때만 위 네 기존 DISPLAY 별칭을 허용한다. 기본 privileged SUPABASE_DB_URL·migration DSN·service-role/anon 예전 키·복수 key 배열로 fallback하지 않는다. bucket/prefix·binding/head·예산에는 별칭이나 기본값을 적용하지 않으며 기존 display descriptor를 engine 승인으로 사용하지 않는다. 같은 프로젝트·실제 jungsi_backend_app·TLS·UTC/RLS guard를 유지한다.
+
+서버 승인 binding의 operation·artifact(kind/key) 집합을 실제 selection과 먼저 대조한다. private registry의 선택 항목은 approved·engine_approved=true·production_allowed=true·archive_only=false를 모두 확인한 뒤 artifact를 읽는다. control 객체를 engine 승인 자료로 가장하지 않는다. 선택한 그래프의 원문 버전·연결을 preflight하고 선택하지 않은 모형·대학별 누적·분석 자료는 기존 보류 상태를 유지한다.
+
+control·선택 artifact는 원본 바이트 해시를 검증하고 native JSON의 정수·소수·유리수·조건·필드 존재 여부를 보존한다. 기존 정밀 엔진과 텍스트 SQL JSON·마이크로초 UTC 시각을 연결한다. Number 변환이나 새 모형 생성으로 대체하지 않는다. 기존 Python–Edge 독립 oracle 검산과 실제 자료·DB·엔진 실행 검수는 별개다.
+
+동일 22 API/회원·소유권/학교 범위를 유지한다. relay → 실제 getUser의 동일 Bearer → 같은 Bearer 본인 profiles(role,status) → 현재 pass → 회원·소유권·관리 조건 → 입력 검증 → 해당 13 operation의 공유 예산 예약 → 업무·공개 DTO·최종 만료 확인 순서를 따른다. session.read는 데이터 binding이나 요청 예산을 요구하지 않으며 기존 검증된 active/admin/aal2 예외와 실제 pass 만료 우선을 유지한다.
+
+CA 또는 필수 서버 설정이 없으면 pool 생성이나 자료 조회 전에 503이다. 데이터 binding·원본 SHA·바이트 상한·명시 한도·현재 head가 없거나 목적/승인/scope/만료가 다르면 데이터 경로는 503으로 닫힌다. /health/live는 최소 생존 확인이고 relay 보호 /health/ready는 기존 005 schema·pass metadata·선택 그래프 검사를 요구한다. 새 grant·RLS 변경·003 재적용·005 실행을 자동 수행하지 않는다.
+
+binding의 sources는 private Storage object_key·정확한 bytes·SHA를 갖는다. 현재 head는 jungsi.native-selection-head/v1의 approved/purpose/project/scope/registry/selection/usage_policy/approval/expiry를 매번 확인하며 요청별 읽기 횟수·실제 바이트 예산을 공유한다. head가 바뀌면 기존 binding과 warm 결과를 거절하고 새 승인 binding이 필요하다. jungsi.runtime-usage-policy/v1은 5개 차원·작업별 비용·허용 시험/pack·최종 결과 바이트 및 worker 수명보다 긴 lease를 명시한다. 운영 한도의 기본값·무제한·합성값 자동 승격은 없다. binding JSON의 정상 pretty 표기·끝 LF/CRLF를 포함한 원본 UTF-8 바이트를 trim 없이 그대로 크기·SHA·native 파서에 전달한다. 빈/공백뿐인 값과 원본 해시가 다른 바이트는 거절한다. 짧은 식별자·URL·토큰의 앞뒤 공백 거절은 유지한다.
+
+기존 C140·공식 시험·2027 규칙 등의 정리·발행 근거를 먼저 재사용한다. Python용 로컬 registry/selection 경로를 Edge Storage 승인 포인터로 자동 해석하지 않는다. 새 업로드·재수집 없이 기존 목적·scope·현재 hash·승인·expiry가 이 runtime 계약에 맞는지 확인하고, 미보유 포인터와 재검수가 필요한 값만 보완한다. 실제 원자료·CA·비밀값·승인 한도·정본 등록부는 Git에 넣지 않는다.
+
+기존 source suite에 새 설정/현재 head/공유 읽기/예산 planner/조립/선택 그래프 합성검사 48건을 추가한다. 실제 entry는 고정 postgres@3.4.5 lock으로 별도 타입 검사하며 serve를 시작하지 않는다. 동일 후보 전체 훅·CI·oracle 통과 후에도 실제 JWT/TOTP·네이티브 업무 트랜잭션·요금제 근거·Edge/BFF/브라우저 인수가 없으면 운영 PASS를 기록하지 않는다.
+
+| 실제 연결에 필요한 항목 | 대기 조건 |
+| --- | --- |
+| 현재 CA | JUNGSI_DATABASE_CA의 유효 PEM·동일 프로젝트 peer 검증. 합성 PEM framing 통과는 대체 근거가 아니다. |
+| 현재 승인 head와 선택 자료 포인터 | private bucket/prefix·registry/selection/head/usage_policy object_key·bytes·SHA·목적·scope·승인 참조·expiry를 결속한 현재 binding |
+| 승인 요청 예산 | 현재 조직/프로젝트 요금제·포함량/추가 비용 범위와 5차원 한도·작업 비용·시험/pack·결과 크기·worker/lease 근거 |
+| 네이티브 DB | 기존 003 재적용 없이 005 적용 여부를 별도 승인 범위에서 확인하고 동일 후보의 RLS·소유권·멱등·버전 충돌 검사 |
+| 실제 사용자·관리자 검수 | 계정 주인이 정상 /admin에서 JWT·TOTP를 직접 검수. 토큰·OTP·QR 비밀은 수집하지 않는다. |
+| 운영 진입점 | 기존 두 함수의 설정을 자동 변경하지 않고 같은 후보의 Edge·BFF·정상 브라우저 경로와 세 보안 gate를 검수 |
+
 ### 위치 그래프의 기준
 
 | 표시 기준 | 산식 | 적용 범위 |
@@ -214,4 +262,4 @@ live는 승인/발행/선택된 서버 값만 표시한다. 조합별 서버 계
 
 
 
-<!-- jungsi:generated spec_sha256=2cfa601ae7a31d7b35e6c73a2db84f606434f6de26bb41948788d363d659b7ec -->
+<!-- jungsi:generated spec_sha256=a2f28664e35b3851cc32f43954dc7a1ae79e2a0d12cd603604aa3e5fc3276c17 -->
