@@ -3,12 +3,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRightIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
+import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
 import { ScoreBasis } from "@/components/score-basis";
 import { ShortlistTray } from "@/components/shortlist-tray";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { StatisticsDto } from "@/lib/dto";
 import { ensureCandidates, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
+import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { FILTERS, hrefWith, parseQuery } from "./query";
 import { bestDelta, SchoolCard } from "./school-card";
@@ -90,10 +92,13 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   const picked = new Set(picks.map((p) => p.offering_id));
   const count = (f?: string) => groups.filter((g) => !f || g.offerings.some((o) => o.assessment.category === f)).length;
   const shown = groups.filter((g) => !cur.has || g.offerings.some((o) => o.assessment.category === cur.has));
+  // 유료 데이터(유리한 학교 목록)를 그린 화면: 회원 식별 표시 + 조회 기록
+  const view = viewPath(route.path, await searchParams);
 
   return (
     <>
       {head}
+      <MemberMark kind="recommend" path={view} />
       <div className="wrap pg-body fv">
         <ScoreBasis overall={report.overall} emptyText="" />
 

@@ -1,4 +1,5 @@
 import { ConnectionNotice } from "@/components/connection-notice";
+import { MemberMark } from "@/components/member-mark";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LockIcon } from "@/components/icons";
@@ -10,6 +11,7 @@ import { seoulDate } from "@/lib/format";
 import { PASS_HREF, loginHref } from "@/lib/links";
 import { getReportId } from "@/lib/report-ref";
 import { ensureAnalyses, pickedItems, type PickedItem } from "@/lib/report-ops";
+import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
 import { ScoreForm, type ScoreDefaults } from "./score-form";
@@ -87,6 +89,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   return (
     <>
       {head}
+      {/* 이용권 회원의 리포트(핵심 지원 학교 분석 포함): 회원 식별 표시 + 조회 기록 */}
+      {session?.member_tier === "paid" && <MemberMark kind="report" path={viewPath(route.path, sp)} />}
       <div className="wrap pg-body rp">
         <div className="rp-meta">
           <span>{a.exam.academic_year}학년도 {a.exam.exam_type}</span>

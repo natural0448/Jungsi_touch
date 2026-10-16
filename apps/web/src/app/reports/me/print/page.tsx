@@ -1,4 +1,5 @@
 import { ConnectionNotice } from "@/components/connection-notice";
+import { MemberMark } from "@/components/member-mark";
 import { PASS_HREF } from "@/lib/links";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -57,6 +58,8 @@ export default async function Page() {
 
   return (
     <div className="wrap pg-body pr">
+      {/* 상담 리포트 인쇄본: 회원 식별 표시(인쇄·PDF 에도 찍힘) + 조회 기록 */}
+      <MemberMark kind="report" path="/jeongsi/reports/me/print" />
       <div className="pr-tools">
         <Link className="btn" href={back}>돌아가기</Link>
         <PrintButton />

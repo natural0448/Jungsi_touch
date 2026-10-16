@@ -4,6 +4,7 @@ import Form from "next/form";
 import Link from "next/link";
 import { ChevronIcon } from "@/components/icons";
 import { AdvantageCell, CategoryLegend, PickButton, ScoreCell, StatusCell, type Cell } from "@/components/offering-parts";
+import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
 import { ScoreBasis } from "@/components/score-basis";
 import { ShortlistTray } from "@/components/shortlist-tray";
@@ -12,6 +13,7 @@ import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from 
 import type { CatalogSearchDto, ForecastPublicDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
 import { REGIONS } from "@/lib/regions";
 import { ensureAnalyses, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
+import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { Detail } from "./parts";
 import { GROUPS, hrefWith, LIMIT, parseQuery, toSearch, type Query, YEAR } from "./query";
@@ -78,10 +80,13 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     else groups.push({ id: o.university_id, name: o.university_name, rows: [o] });
   }
   const filtered = Boolean(cur.university_q || cur.department_q || cur.region || cur.group);
+  // 유료 데이터를 그린 화면: 회원 식별 표시 + 조회 기록. 모집단위를 펼쳤으면 대학 분석, 아니면 가능성 목록
+  const view = viewPath(route.path, await searchParams);
 
   return (
     <>
       {head}
+      <MemberMark kind={cur.open ? "analysis" : "possibility"} path={view} />
       <div className="wrap pg-body ps">
         <ScoreBasis
           overall={state.kind === "none" ? null : state.report?.overall ?? null}
