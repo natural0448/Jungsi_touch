@@ -2,6 +2,7 @@ import { AdvantageCell, plainReason, reasonText, ScoreCell, StatusCell } from "@
 import type { OverallAnalysisDto } from "@/lib/dto";
 import { DATA_KIND } from "@/lib/analysis-labels";
 import { AREA_LABEL } from "@/lib/exam";
+import { pctText } from "@/lib/format";
 import type { PickedItem } from "@/lib/report-ops";
 
 /* 2페이지 리포트의 전체 성적 부분 — 일반·유료 모두 보는 범위(REQ-02). 인쇄 화면도 같은 부품을 쓴다 */
@@ -20,7 +21,7 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
   return (
     <section className="rp-overall" aria-label="전체 성적 위치">
       <div className="n">
-        <small>{a.score_basis}</small>
+        <small>국어·수학·탐구 2과목 표준점수 합</small>
         <b className="num big">{a.total_standard_score}</b>
         <span className="unit">점</span>
       </div>
@@ -28,11 +29,11 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
         <small>전체 응시자 기준 상위</small>
         {o.status !== "pending" && o.inclusive_top_percent ? (
           <>
-            <b className="num big">{o.inclusive_top_percent}%</b>
+            <b className="num big">{pctText(o.inclusive_top_percent)}%</b>
             {o.status === "estimated" && <span className="est">{kind?.label ?? "추정"}</span>}
             {interval && (
               <p className="tie">
-                나와 총점이 같은 학생들이 있어, 같은 점수인 사람을 빼고 세면 상위 <b className="num">{interval.lower}%</b>, 포함해 세면 상위 <b className="num">{interval.upper}%</b>입니다. 이 구간은 세는 방법의 차이일 뿐, 합격 확률이나 오차 범위가 아닙니다.
+                나와 총점이 같은 학생들이 있어, 같은 점수인 사람을 빼고 세면 상위 <b className="num">{pctText(interval.lower)}%</b>, 포함해 세면 상위 <b className="num">{pctText(interval.upper)}%</b>입니다. 이 구간은 세는 방법의 차이일 뿐, 합격 확률이나 오차 범위가 아닙니다.
               </p>
             )}
             {kind && <p className="tie">{kind.note}</p>}
@@ -55,7 +56,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
   const g = a.absolute_grades;
   const na = <span className="rs-na" aria-label="해당 없음">─</span>;
   const num = (v: number | string | null | undefined, unit = "") => (v === null || v === undefined ? <span className="rs-wait">대기</span> : <b className="num">{v}{unit}</b>);
-  const pctv = (v: string | null | undefined) => (v ? <b className="num">{v}%</b> : <span className="rs-wait">대기</span>);
+  const pctv = (v: string | null | undefined) => (v ? <b className="num">{pctText(v)}%</b> : <span className="rs-wait">대기</span>);
   return (
     <div className="rp-sheet" role="group" aria-label="과목별 결과 성적표">
       <table>
@@ -169,7 +170,7 @@ function ChartRow({ label, sub, incl, excl, strong = false, waitText }: { label:
         <i className={`pc-band${strong ? " strong" : ""}`} style={{ left: `${left}%`, width: `${width}%` }} />
         <i className={`pc-dot${strong ? " strong" : ""}`} style={{ left: `${i}%` }} />
       </div>
-      <span className="pc-val num">{incl}%</span>
+      <span className="pc-val num">{incl != null ? `${pctText(incl)}%` : ""}</span>
     </div>
   );
 }

@@ -16,6 +16,17 @@ export function plainDate(ymd: string | null): string {
   return ymd ? ymd.replaceAll("-", ".") : "─";
 }
 
+/**
+ * 상위 % 표시용 문자열. 서버는 소수 여러 자리 문자열("7.051665")을 보내므로 둘째 자리까지 반올림해 보인다.
+ * 0 보다 크고 0.01 미만이면 "0.01 미만"처럼 0 으로 보이지 않게 한다. 숫자가 아니면 받은 그대로.
+ */
+export function pctText(v: string | number): string {
+  const n = typeof v === "number" ? v : Number(v);
+  if (!Number.isFinite(n)) return String(v);
+  if (n > 0 && n < 0.01) return "<0.01";
+  return n.toFixed(2);
+}
+
 /** 변경분 +2 / -1 / 0 */
 export function signed(n: number): string {
   return n > 0 ? `+${n}` : String(n);

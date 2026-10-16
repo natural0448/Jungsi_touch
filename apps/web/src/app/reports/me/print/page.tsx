@@ -1,4 +1,5 @@
 import { ConnectionNotice } from "@/components/connection-notice";
+import { examTypeLabel } from "@/lib/exam";
 import { MemberMark } from "@/components/member-mark";
 import { PASS_HREF } from "@/lib/links";
 import type { Metadata } from "next";
@@ -68,7 +69,7 @@ export default async function Page() {
         <header className="pr-hd">
           <div>
             <p className="pr-brand">에듀터치 정시터치 · 상담 리포트</p>
-            <h1>{a.exam.academic_year}학년도 {a.exam.exam_type} 기준</h1>
+            <h1>{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)} 기준</h1>
           </div>
           <dl>
             <div><dt>리포트 판</dt><dd className="num">{snap.snapshot_version}</dd></div>

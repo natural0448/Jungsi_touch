@@ -16360,6 +16360,13 @@
         "REQ-02"
       ],
       "summary": "최종 관리자 결정(에듀터치 요청 정시터치-요청-회원식별표시_조회기록-20261016): 유료 화면(P3 가능성·대학 분석, P4 유리한 대학, 이용권 회원 리포트, 리포트 인쇄)에 회원 식별 표시 'ET-회원id앞8자리 · 한국 시각'을 7% 옅은 고정 레이어로 표시(클릭 비차단, 인쇄 포함, 개인정보 없음). 같은 화면에서 회원 본인 세션으로 에듀터치 DB 함수 log_content_view(p_app=jeongsi, p_kind=analysis|possibility|recommend|report)를 1회 호출, 링크 미리 불러오기는 제외, 실패는 무시. live 모드 전용. 회원 id 는 로그인 쿠키에서 읽기만 함. 서버 판정·권한 변경 없음."
+    },
+    {
+      "date": "2026-10-16",
+      "requirements": [
+        "REQ-02"
+      ],
+      "summary": "운영 실데이터 첫 리포트에서 발견한 표시 수정: 시험 종류 코드(september_mock 등)를 한글 이름으로, 상위 %는 소수 둘째 자리 반올림(0 초과 0.01 미만은 <0.01), 전체 카드 제목은 '국어·수학·탐구 2과목 표준점수 합' 고정(score_basis 코드 노출 제거). 조회 기록 IP 는 에듀터치 프록시가 실어 주는 x-edutouch-client-ip 를 먼저 사용(프록시 뒤 cf-connecting-ip 는 Cloudflare 내부 주소). 서버 판정 변경 없음."
     }
   ],
   "overall_analysis_contract": {

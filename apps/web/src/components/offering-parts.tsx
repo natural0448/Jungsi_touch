@@ -1,6 +1,6 @@
 import { togglePick } from "@/app/shortlist-actions";
 import type { AssessmentDto, Category, ReasonDto, StatisticsDto } from "@/lib/dto";
-import { seoulDate } from "@/lib/format";
+import { pctText, seoulDate } from "@/lib/format";
 
 /* 3·4페이지(와 2페이지 유료 부분)가 같이 쓰는 모집단위 칸. 응답 모양은 assessment·statistics DTO */
 
@@ -69,7 +69,7 @@ export function ScoreCell({ a }: { a: Cell }) {
   return (
     <span className="score">
       <b className="num">{a.converted_score}</b>
-      {a.converted_percentile && <small>상위 {a.converted_percentile}%</small>}
+      {a.converted_percentile && <small>상위 {pctText(a.converted_percentile)}%</small>}
     </span>
   );
 }

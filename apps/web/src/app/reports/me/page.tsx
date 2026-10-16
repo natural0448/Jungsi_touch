@@ -6,7 +6,7 @@ import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { ReportDto } from "@/lib/dto";
-import { EXAM } from "@/lib/exam";
+import { EXAM, examTypeLabel } from "@/lib/exam";
 import { seoulDate } from "@/lib/format";
 import { PASS_HREF, loginHref } from "@/lib/links";
 import { getReportId } from "@/lib/report-ref";
@@ -93,7 +93,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
       {session?.member_tier === "paid" && <MemberMark kind="report" path={viewPath(route.path, sp)} />}
       <div className="wrap pg-body rp">
         <div className="rp-meta">
-          <span>{a.exam.academic_year}학년도 {a.exam.exam_type}</span>
+          <span>{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)}</span>
           <span>리포트 {report.report_version}번째 · {seoulDate(report.updated_at)} 저장</span>
           {/* 저장한 성적은 고치지 않는다 — 새 성적을 넣어 리포트의 새 판을 만든다 */}
           <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>

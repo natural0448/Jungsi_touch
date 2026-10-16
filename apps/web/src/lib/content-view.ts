@@ -41,7 +41,9 @@ export async function logContentView(kind: ContentKind, path: string): Promise<v
       p_app: "jeongsi",
       p_path: path.slice(0, 300),
       p_kind: kind,
-      p_ip: h.get("cf-connecting-ip") ?? h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+      // 에듀터치 본체 프록시를 거치면 cf-connecting-ip 는 Cloudflare 내부 주소가 된다(2026-10-16 실측 2a06:98c0:…).
+      // 본체가 원래 방문자 IP 를 x-edutouch-client-ip 로 실어 주면 그것을 먼저 쓴다
+      p_ip: h.get("x-edutouch-client-ip") ?? h.get("cf-connecting-ip") ?? h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
       p_user_agent: h.get("user-agent"),
     });
   } catch {
