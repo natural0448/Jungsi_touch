@@ -16367,6 +16367,13 @@
         "REQ-02"
       ],
       "summary": "운영 실데이터 첫 리포트에서 발견한 표시 수정: 시험 종류 코드(september_mock 등)를 한글 이름으로, 상위 %는 소수 둘째 자리 반올림(0 초과 0.01 미만은 <0.01), 전체 카드 제목은 '국어·수학·탐구 2과목 표준점수 합' 고정(score_basis 코드 노출 제거). 조회 기록 IP 는 에듀터치 프록시가 실어 주는 x-edutouch-client-ip 를 먼저 사용(프록시 뒤 cf-connecting-ip 는 Cloudflare 내부 주소). 서버 판정 변경 없음."
+    },
+    {
+      "date": "2026-10-17",
+      "requirements": [
+        "REQ-01"
+      ],
+      "summary": "조회 기록 IP 위조 방지(에듀터치 재회신 정시터치-재회신-방문자IP전달-20261016): x-edutouch-client-ip 는 받은 cf-connecting-ip 가 Cloudflare 공개 주소 대역(본체 워커 경유)일 때만 사용, 그 밖에는 cf-connecting-ip. B단계 라우트 직결 시 헤더 읽기 제거 예정. 서버 판정 변경 없음."
     }
   ],
   "overall_analysis_contract": {
