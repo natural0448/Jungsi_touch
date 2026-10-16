@@ -1258,7 +1258,15 @@ def live_execution_document(spec):
                     ['담당',backend['branch']],
                     ['서버 전용 허용 필드',', '.join(backend['server_only_fields'])],
                     ['구현 / 검증 / 배포',backend['implementation']+' / '+backend['verification']+' / '+backend['deployment']],
-                    ['소스 결속','후보 SHA 미제공; 정본 완료 소스 아님']]))
+                    ['소스 결속','현재 색인·선언 해시와 소스4개·테스트2개 결속; 자신의 커밋 SHA는 후속 패키지에서 고정'if backend.get('source_bindings')else '후보 SHA 미제공; 정본 완료 소스 아님']]))
+            proof=backend.get('synthetic_verification')
+            if proof:
+                deployment_text+='\n\n'+table(['합성 후보 검증','범위와 결과'],[
+                    ['집중 검사',str(proof['focused_passed'])+' PASS / '+str(proof['focused_failed'])+' FAIL; 신규 '+str(proof['new_tests'])+'개'],
+                    ['전체 스냅샷 검사',str(proof['full_suite_expected'])+'개 실행을 정상 훅·정확 SHA CI에서 별도로 요구'],
+                    ['집중 로그 SHA-256',proof['focused_log_sha256']],
+                    ['실제 업무 / 배포 인수','0/22 / 0/22; 관측 후보 미배포·실사용자 미검수']])
+                deployment_text+='\n\n'+table(['후보 파일','현재 소스 SHA-256'],[[p,h]for p,h in {**backend['source_bindings'],**backend['test_bindings']}.items()])
     if attempt:
         deployment_text+=('\n\n### 현재 P2 단일 제출의 실패 관측\n\n'+attempt['scope']+'\n\n'+
             table(['확인 범위','현재 관측'],[
@@ -1344,16 +1352,6 @@ def validate_frontend_p2_reply(c, registry):
         errors.append('DEV-010 pending P2 diagnostics must keep safe observation and approval boundaries')
     if any(not isinstance(reply.get(k),str)or not reply[k].strip()for k in ('interpretation_rule','partial_success_rule','storage_response_boundary')):
         errors.append('DEV-010 frontend P2 interpretation boundary missing')
-    backend=c.get('backend_safe_observation_plan')
-    if (not isinstance(backend,dict)or backend.get('format')!='jungsi.request-safe-observation-plan/v1' or
-        backend.get('branch')!='feature/application-pre-data-platform' or backend.get('status')!='CONTRACT_PREPARED_IMPLEMENTATION_PENDING' or
-        backend.get('implementation_candidate_commit','missing')is not None or
-        any(backend.get(k)!='NOT_RUN'for k in ('implementation','verification','deployment')) or
-        backend.get('server_only_fields')!=['operation','stage','path','status','code','request_id'] or
-        backend.get('forbidden_fields')!=['subject','account','scores','body','token','keys','cookie','query','stack'] or
-        any(backend.get(k)is not True for k in ('constant_stage_labels','normalized_template_path_only','safe_request_id_only','request_local_context','existing_error_DTO_preserved')) or
-        any(backend.get(k)is not False for k in ('shared_mutable_diagnostic_context','security_or_budget_relaxed','operation_scope_expanded'))):
-        errors.append('DEV-010 backend safe observation remains request-scoped pending implementation')
     admin=reply.get('admin_UI_observation')
     if admin is not None:
         admin_evidence=registry.get(admin.get('evidence_id'),{})if isinstance(admin,dict)else {}
@@ -1364,6 +1362,54 @@ def validate_frontend_p2_reply(c, registry):
             admin.get('earlier_standard_headline_contradicted')is not False):
             errors.append('DEV-010 administrator UI observation cannot certify API JWT or aal2')
     return errors
+
+
+def validate_backend_safe_observation_plan(spec):
+    """Bind diagnostics to registered source while retaining undeployed acceptance."""
+    backend=spec['supabase_deployment_contract']['live_execution'].get('backend_safe_observation_plan')
+    error='DEV-010 backend safe observation requires source-bound scoped evidence without deployment acceptance'
+    if not isinstance(backend,dict):return [error]
+    if (backend.get('format')!='jungsi.request-safe-observation-plan/v1' or
+        backend.get('branch')!='feature/application-pre-data-platform' or
+        backend.get('implementation_candidate_commit','missing')is not None or
+        backend.get('operation_scope')!='existing_22_registered_operations' or
+        any(backend.get(k)is not True for k in ('constant_stage_labels','normalized_template_path_only','safe_request_id_only','request_local_context','existing_error_DTO_preserved')) or
+        any(backend.get(k)is not False for k in ('shared_mutable_diagnostic_context','security_or_budget_relaxed','operation_scope_expanded'))):return [error]
+    forbidden=['subject','account','scores','body','token','keys','cookie','query','stack']
+    if (('native_verification'in backend and backend['native_verification']!='NOT_RUN')or
+        ('production_ready'in backend and backend['production_ready']is not False)or
+        any(k in backend and(type(backend[k])is not int or backend[k]!=0)for k in ('business_native_accepted','business_deployment_accepted'))):return [error]
+    if backend.get('status')=='CONTRACT_PREPARED_IMPLEMENTATION_PENDING':
+        return []if (all(backend.get(k)=='NOT_RUN'for k in ('implementation','verification','deployment')) and
+            backend.get('server_only_fields')==['operation','stage','path','status','code','request_id'] and
+            backend.get('forbidden_fields')==forbidden)else [error]
+    paths={'supabase/functions/_shared/jungsi/infrastructure/'+n+'.ts'for n in ('api_http','runtime_budget','runtime_composition')}
+    paths.add('supabase/functions/jungsi-api/index.ts')
+    tests={'tests/edge/test_runtime_composition.ts','tests/edge/test_runtime_budget.ts'}
+    indexed={v['path']:v['source_sha256']for v in spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']}
+    indexed.update({p:v['declarations']['source_sha256']for p,v in spec['edge_harness']['files'].items()})
+    for key,expected in (('source_bindings',paths),('test_bindings',tests)):
+        bindings=backend.get(key)
+        if (not isinstance(bindings,dict)or set(bindings)!=expected or
+            any(not re.fullmatch(r'[0-9a-f]{64}',str(value))or value!=indexed.get(path)for path,value in bindings.items())):return [error]
+    proof=backend.get('synthetic_verification',{})
+    if (backend.get('status')!='SOURCE_IMPLEMENTED_SYNTHETIC_VERIFIED_DEPLOYMENT_PENDING' or
+        backend.get('implementation')!='SOURCE_IMPLEMENTED' or backend.get('verification')!='SYNTHETIC_FOCUSED_PASS' or backend.get('deployment')!='NOT_RUN' or
+        backend.get('server_only_fields')!=['operation','stage','status','code','request_id'] or
+        backend.get('forbidden_fields')!=forbidden+['path','headers','owner','raw_exception'] or
+        backend.get('event_policy')!='ERRORS_AND_CREATED_WRITES_ONLY' or
+        any(backend.get(k)is not True for k in ('observer_failure_preserves_response','observer_failure_does_not_rerun_work','successful_GET_body_unread','created_response_body_unread','installed_source_history_preserved')) or
+        backend.get('native_verification')!='NOT_RUN' or backend.get('production_ready')is not False or
+        any(type(backend.get(k))is not int or backend[k]!=0 for k in ('business_native_accepted','business_deployment_accepted')) or
+        not isinstance(proof,dict)or proof.get('scope')!='LOCAL_SYNTHETIC_FOCUSED_ONLY' or
+        type(proof.get('new_tests'))is not int or proof['new_tests']!=16 or
+        type(proof.get('focused_passed'))is not int or proof['focused_passed']!=41 or
+        type(proof.get('focused_failed'))is not int or proof['focused_failed']!=0 or
+        type(proof.get('full_suite_expected'))is not int or proof.get('full_suite_expected')!=spec['edge_harness']['unit_count'] or
+        not isinstance(proof.get('focused_log_sha256'),str)or not re.fullmatch(r'[0-9a-f]{64}',proof['focused_log_sha256']) or
+        proof.get('full_snapshot_gate_required')is not True or
+        proof.get('deployment_or_real_user_evidence')is not False):return [error]
+    return []
 
 
 def validate_live_execution(spec):
@@ -1703,6 +1749,7 @@ def validate_live_execution(spec):
             errors.append('DEV-010 editor source update cannot certify unrun business or security acceptance')
     if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,67) or c.get('frontend_P2_reply')is not None:
         errors.extend(validate_frontend_p2_reply(c,registry))
+        errors.extend(validate_backend_safe_observation_plan(spec))
     for key,row in registry.items():
         if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
             not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or

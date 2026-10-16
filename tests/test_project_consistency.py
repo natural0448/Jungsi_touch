@@ -1575,7 +1575,51 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
             with self.subTest(field=field):
                 wrong=deepcopy(self.spec)
                 wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan'][field]=value
-                self.assertIn('DEV-010 backend safe observation remains request-scoped pending implementation',validate_live_execution(wrong))
+                self.assertIn('DEV-010 backend safe observation requires source-bound scoped evidence without deployment acceptance',validate_live_execution(wrong))
+
+    def test_observation_candidate_requires_exact_source_and_test_hash_bindings(self):
+        from check_project_consistency import validate_live_execution
+        for key in ('source_bindings','test_bindings'):
+            for mutation in ('missing','hash','extra'):
+                with self.subTest(key=key,mutation=mutation):
+                    wrong=deepcopy(self.spec);bindings=wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan'][key]
+                    path=next(iter(bindings))
+                    if mutation=='missing':bindings.pop(path)
+                    elif mutation=='hash':bindings[path]='0'*64
+                    else:bindings['unregistered.ts']='0'*64
+                    self.assertIn('DEV-010 backend safe observation requires source-bound scoped evidence without deployment acceptance',validate_live_execution(wrong))
+
+    def test_observation_candidate_cannot_promote_native_or_change_log_scope(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in [('native_verification','PASS'),('business_native_accepted',1),('business_deployment_accepted',True),('production_ready',True),('event_policy','ALL_REQUESTS'),('observer_failure_does_not_rerun_work',False),('created_response_body_unread',False),('forbidden_fields',[]),('status','VERIFIED')]:
+            with self.subTest(key=key):
+                wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan'][key]=value
+                self.assertIn('DEV-010 backend safe observation requires source-bound scoped evidence without deployment acceptance',validate_live_execution(wrong))
+
+    def test_observation_candidate_requires_focused_synthetic_evidence_and_normal_gate(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in [('scope','REAL_USER_PASS'),('new_tests',0),('focused_passed',0),('focused_failed',1),('focused_log_sha256',''),('focused_log_sha256',int('1'*64)),('full_suite_expected',0),('full_suite_expected',584.0),('full_snapshot_gate_required',False),('deployment_or_real_user_evidence',True)]:
+            with self.subTest(key=key):
+                wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan']['synthetic_verification'][key]=value
+                self.assertIn('DEV-010 backend safe observation requires source-bound scoped evidence without deployment acceptance',validate_live_execution(wrong))
+
+    def test_observation_contract_preserves_pending_legacy_and_documents_source_candidate(self):
+        from check_project_consistency import validate_backend_safe_observation_plan,live_execution_document
+        self.assertEqual(validate_backend_safe_observation_plan(self.spec),[])
+        self.assertIn('현재 색인·선언 해시와 소스4개·테스트2개 결속',live_execution_document(self.spec))
+        wrong=deepcopy(self.spec);b=wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan']
+        b.update(status='CONTRACT_PREPARED_IMPLEMENTATION_PENDING',implementation='NOT_RUN',verification='NOT_RUN',deployment='NOT_RUN',server_only_fields=['operation','stage','path','status','code','request_id'],forbidden_fields=['subject','account','scores','body','token','keys','cookie','query','stack'])
+        self.assertEqual(validate_backend_safe_observation_plan(wrong),[])
+        b['implementation']='PASS'
+        self.assertTrue(validate_backend_safe_observation_plan(wrong))
+        b['implementation']='NOT_RUN'
+        for key,value in [('native_verification','PASS'),('production_ready',True),('business_native_accepted',True),('business_native_accepted',1),('business_deployment_accepted',True),('business_deployment_accepted',1)]:
+            with self.subTest(key=key,value=value):
+                pending=deepcopy(wrong);pending['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan'][key]=value
+                self.assertTrue(validate_backend_safe_observation_plan(pending))
+        for key in ('native_verification','production_ready','business_native_accepted','business_deployment_accepted'):b.pop(key)
+        self.assertEqual(validate_backend_safe_observation_plan(wrong),[])
+
 
     def test_scope_error_cannot_be_success_or_hide_invalid_policy(self):
         from check_project_consistency import validate_live_execution

@@ -29,6 +29,23 @@ import {
 } from "../application/session_service.ts";
 import { type NativeJson, parseNativeJson } from "../domain/native_json.ts";
 import { RelayBoundary, safeFailure } from "./auth_relay.ts";
+export const API_REQUEST_STAGES = [
+  "route",
+  "relay",
+  "user_session",
+  "member_access",
+  "owner_access",
+  "management_access",
+  "request_body",
+  "business",
+  "business_session",
+  "response_projection",
+  "budget",
+  "final_session",
+  "final_projection",
+  "response_serialization",
+] as const;
+export type ApiRequestStage = typeof API_REQUEST_STAGES[number];
 export interface ApiHttpPorts {
   readonly relay: RelayBoundary;
   readonly sessions: UserSessionPort;
@@ -42,6 +59,8 @@ export interface ApiHttpPorts {
   readonly projection: PublicResponseProjection;
   readonly budget: RequestBudgetPort;
   readonly business: ApiBusinessPort;
+  /** Constant phase names only. Observation failures cannot change request behavior. */
+  readonly onStage?: (stage: ApiRequestStage) => void;
 }
 interface Route {
   policy: ApiRoutePolicy;
@@ -218,7 +237,16 @@ export function createApiHandler(
   ) configuration();
   return async (request) => {
     const requestId = crypto.randomUUID().replaceAll("-", "");
+    const stage = (value: ApiRequestStage) => {
+      try {
+        const pending: unknown = ports.onStage?.(value);
+        if (pending && typeof (pending as PromiseLike<unknown>).then === "function") {
+          void Promise.resolve(pending).catch(() => {});
+        }
+      } catch { /* Observability is not authorization. */ }
+    };
     try {
+      stage("route");
       const url = new URL(request.url),
         matches = registered.filter((r) => r.pattern.test(url.pathname));
       const route = matches.find((r) => r.policy.method === request.method);
@@ -233,17 +261,21 @@ export function createApiHandler(
         params = Object.fromEntries(
           route.keys.map((key, i) => [key, match[i + 1]]),
         );
+      stage("relay");
       await ports.relay.verify(request.headers);
+      stage("user_session");
       const session = await readSessionSnapshot(
         bearer(request.headers),
         ports.sessions,
         ports.passes,
         ports.clock.nowUtc(),
       );
+      stage("member_access");
       if (!policy.member_tiers.includes(session.tier)) {
         throw new AccessError("paid_required", 403);
       }
       if (policy.report_owner) {
+        stage("owner_access");
         await authorizeReport(session.user, params.report_id ?? "", {
           find: (id) =>
             IDENTIFIER.test(id)
@@ -251,8 +283,10 @@ export function createApiHandler(
               : Promise.resolve(null),
         }, policy.confirmed_score_profile);
       }
+      stage("management_access");
       const decision = await management(policy, session, params, ports);
       // Authorization is complete before consuming any untrusted body or query.
+      stage("request_body");
       const selectedQuery = query(url);
       if (policy.method !== "GET" && Object.keys(selectedQuery).length > 0) {
         throw new AccessError("invalid_request", 422);
@@ -273,6 +307,7 @@ export function createApiHandler(
         requestKey: request.headers.get("Idempotency-Key"),
       };
       const work = async () => {
+        stage("business");
         const result = policy.id === "session.read"
           ? sessionDto(session, ports.clock.nowUtc())
           : await ports.business.execute(selected);
@@ -282,17 +317,23 @@ export function createApiHandler(
             request.headers.get("Content-Length") &&
               request.headers.get("Content-Length") !== "0")
         ) throw new AccessError("invalid_request", 422);
+        stage("business_session");
         sessionDto(session, ports.clock.nowUtc());
+        stage("response_projection");
         return ports.projection.project(policy.id, session.tier, result);
       };
+      stage("budget");
       const result = BUDGET_OPERATIONS.includes(
           policy.id as typeof BUDGET_OPERATIONS[number],
         )
         ? await ports.budget.run(selected, work)
         : await work();
       // Budget settlement or a future cache hit must still pass the final boundary.
+      stage("final_session");
       sessionDto(session, ports.clock.nowUtc());
+      stage("final_projection");
       const approved = ports.projection.project(policy.id, session.tier, result);
+      stage("response_serialization");
       return new Response(publicJsonText(approved), {
         status: ["score-profile.create", "overall.analyze"].includes(policy.id) ? 201 : 200,
         headers: {
