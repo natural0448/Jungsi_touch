@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "c6bfebe0feb77b8ef3aa48d9085ac40b3bae1a097290347df39937fbf91e4d13",
+      "source_sha256": "becfe69f25cebda386cd23888929b0653e2d7b70ba94c817aeef46926fc02f2d",
       "symbols": [
         {
           "kind": "class",
@@ -614,8 +614,20 @@
         },
         {
           "kind": "function",
+          "name": "_validate_observer_deployment",
+          "signature": "def _validate_observer_deployment(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "branch_governance_text",
           "signature": "def branch_governance_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "canonical_public_record_sha256",
+          "signature": "def canonical_public_record_sha256(value):",
           "decorators": []
         },
         {
@@ -706,6 +718,12 @@
           "kind": "function",
           "name": "live_P2_attempt",
           "signature": "def live_P2_attempt(c, evidence_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "live_deployment",
+          "signature": "def live_deployment(c, evidence_id=None, receipt_sha256=None):",
           "decorators": []
         },
         {
@@ -902,6 +920,18 @@
         },
         {
           "kind": "function",
+          "name": "validate_P2_functional_observations",
+          "signature": "def validate_P2_functional_observations(row, registry, source, deployment):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_admin_fix_deployment",
+          "signature": "def validate_admin_fix_deployment(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "validate_admin_session_identity_fix",
           "signature": "def validate_admin_session_identity_fix(spec):",
           "decorators": []
@@ -928,6 +958,18 @@
           "kind": "function",
           "name": "validate_current_deployment",
           "signature": "def validate_current_deployment(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_current_source_verification",
+          "signature": "def validate_current_source_verification(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_deployment_history",
+          "signature": "def validate_deployment_history(spec):",
           "decorators": []
         },
         {
