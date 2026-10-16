@@ -1505,7 +1505,7 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         from check_project_consistency import validate_live_execution,live_execution_document
         live=self.spec['supabase_deployment_contract']['live_execution']
         self.assertIsNone(live['current_P2_attempt']['same_form_idempotency_key'])
-        previous=live['P2_attempt_history'][live['current_P2_attempt']['previous_receipt_evidence_id']]
+        previous=live['P2_attempt_history'][live['frontend_P2_reply']['earlier_root_attempt']['evidence_id']]
         self.assertEqual(previous['idempotency_context_status'],'BROWSER_VALUE_REDACTED_NOT_CAPTURED')
         self.assertIs(previous['idempotency_capture_claim_corrected'],True)
         self.assertIn('NOT_COLLECTED_BY_FRONTEND',live_execution_document(self.spec))
@@ -1566,7 +1566,8 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
                 live['P2_attempt_history'][live['frontend_P2_reply']['earlier_root_attempt']['evidence_id']][field]=value
                 self.assertIn('DEV-010 historical P2 attempt must preserve unknown result and no-retry boundaries',validate_live_execution(wrong))
         wrong=deepcopy(self.spec)
-        wrong['supabase_deployment_contract']['live_execution']['current_P2_attempt']['previous_receipt_evidence_id']='unrelated'
+        live=wrong['supabase_deployment_contract']['live_execution']
+        live['P2_attempt_history'][live['frontend_P2_reply']['current_P2_attempt_evidence_id']]['previous_receipt_evidence_id']='unrelated'
         self.assertIn('DEV-010 frontend P2 reply requires scoped evidence and preserved history',validate_live_execution(wrong))
 
     def test_backend_observation_plan_cannot_claim_deployment_or_share_request_context(self):
@@ -1608,7 +1609,7 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         self.assertEqual(validate_backend_safe_observation_plan(self.spec),[])
         self.assertIn('현재 색인·선언 해시와 소스4개·테스트2개 결속',live_execution_document(self.spec))
         wrong=deepcopy(self.spec);b=wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan']
-        b.update(status='CONTRACT_PREPARED_IMPLEMENTATION_PENDING',implementation='NOT_RUN',verification='NOT_RUN',deployment='NOT_RUN',server_only_fields=['operation','stage','path','status','code','request_id'],forbidden_fields=['subject','account','scores','body','token','keys','cookie','query','stack'])
+        b.update(status='CONTRACT_PREPARED_IMPLEMENTATION_PENDING',implementation_candidate_commit=None,implementation='NOT_RUN',verification='NOT_RUN',deployment='NOT_RUN',native_verification='NOT_RUN',server_only_fields=['operation','stage','path','status','code','request_id'],forbidden_fields=['subject','account','scores','body','token','keys','cookie','query','stack'])
         self.assertEqual(validate_backend_safe_observation_plan(wrong),[])
         b['implementation']='PASS'
         self.assertTrue(validate_backend_safe_observation_plan(wrong))
@@ -1620,6 +1621,92 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         for key in ('native_verification','production_ready','business_native_accepted','business_deployment_accepted'):b.pop(key)
         self.assertEqual(validate_backend_safe_observation_plan(wrong),[])
 
+
+    def test_current_source_deployment_preserves_old_installation_and_failed_attempts(self):
+        from check_project_consistency import validate_live_execution,live_execution_document,live_P2_attempt
+        live=self.spec['supabase_deployment_contract']['live_execution']
+        self.assertEqual(validate_live_execution(self.spec),[])
+        self.assertEqual(live['actual_editor_deployment']['source']['spec_version'],'1.9.65')
+        self.assertEqual(live['current_deployment']['source']['spec_version'],'1.9.68')
+        self.assertNotEqual(live['actual_editor_deployment']['receipt_sha256'],live['current_deployment']['receipt_sha256'])
+        for evidence_id in (live['frontend_P2_reply']['earlier_root_attempt']['evidence_id'],live['frontend_P2_reply']['current_P2_attempt_evidence_id']):
+            row=live_P2_attempt(live,evidence_id)
+            self.assertIsNone(row['HTTP_status']);self.assertIsNone(row['DB_writes_independently_observed'])
+        self.assertIn('TIME_AND_OPERATION_ONLY',live_execution_document(self.spec))
+        self.assertIn('OWNER_CASE_SNAPSHOT_ONLY',live_execution_document(self.spec))
+
+    def test_current_source_deployment_requires_bound_receipt_manifest_and_remote_bytes(self):
+        from check_project_consistency import validate_current_deployment
+        for field,value in [('receipt_sha256','f'*64),('receipt_bytes',True),('remote_readback',{}),('editor_reload_verified',False),('verify_jwt_remained_true',False),('previous_deployment_evidence_id','unrelated'),('business_native_accepted',True),('production_ready',True)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['current_deployment'][field]=value
+                self.assertTrue(validate_current_deployment(wrong))
+        for field,value in [('source_files_count',64.0),('runtime_source_bindings',{}),('source_manifest',{'bytes':True,'sha256':'f'*64})]:
+            wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['current_deployment']['source'][field]=value
+            self.assertTrue(validate_current_deployment(wrong))
+
+    def test_current_readiness_cannot_use_other_deployment_receipt_or_business_proof(self):
+        from check_project_consistency import validate_current_deployment
+        for field,value in [('source_deployment_receipt_sha256','f'*64),('bundle_sha256','f'*64),('actual_user_Bearer_used',True),('DB_student_or_budget_writes_by_probe',False)]:
+            wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['current_deployment']['native_readiness'][field]=value
+            self.assertTrue(validate_current_deployment(wrong))
+        wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+        live['evidence'][live['current_deployment']['native_readiness']['evidence_id']]['source_deployment_receipt_sha256']='f'*64
+        self.assertTrue(validate_current_deployment(wrong))
+
+    def test_current_P2_history_rejects_duplicate_cycle_or_unrelated_previous_receipt(self):
+        from check_project_consistency import validate_P2_attempt_records
+        for mutation in ('duplicate','self','unrelated','cycle','external_http'):
+            with self.subTest(mutation=mutation):
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution'];row=live['current_P2_attempt']
+                external=live['P2_attempt_history'][live['frontend_P2_reply']['current_P2_attempt_evidence_id']]
+                if mutation=='duplicate':live['P2_attempt_history'][row['evidence_id']]=deepcopy(row)
+                elif mutation=='self':row['previous_receipt_evidence_id']=row['evidence_id']
+                elif mutation=='unrelated':row['previous_receipt_evidence_id']=live['current_deployment']['native_readiness']['evidence_id']
+                elif mutation=='cycle':external['previous_receipt_evidence_id']=row['evidence_id']
+                else:external['HTTP_status']=503
+                self.assertTrue(validate_P2_attempt_records(live,live['evidence']))
+
+    def test_current_P2_scoped_logs_and_snapshots_cannot_certify_UI_or_all_writes(self):
+        from check_project_consistency import validate_P2_attempt_records
+        for target,field,value in [('row','UI_HTTP_status',503),('row','DB_writes_independently_observed',0),('log','actor_binding_proven',True),('log','BFF_request_id_binding_proven',True),('log','UI_status_binding_proven',True),('snapshot','all_database_writes_zero_proven',True),('snapshot','browser_Bearer_subject_binding_proven',True),('snapshot','owner_exact_match_count',True)]:
+            with self.subTest(target=target,field=field):
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution'];row=live['current_P2_attempt']
+                selected=row if target=='row'else row['scoped_safe_logs'][0]if target=='log'else row['scoped_readonly_observations'][0]
+                selected[field]=value
+                self.assertTrue(validate_P2_attempt_records(live,live['evidence']))
+
+    def test_current_P2_step_requires_exact_attempt_operation_and_request_binding(self):
+        from check_project_consistency import validate_P2_attempt_records
+        wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution'];row=live['current_P2_attempt']
+        row['steps']['profile_create'].update(status='OBSERVED_FAILURE',HTTP_status=503,safe_error_code='security_policy_unavailable',evidence_id=row['scoped_safe_logs'][0]['evidence_id'])
+        self.assertTrue(validate_P2_attempt_records(live,live['evidence']))
+        proof=deepcopy(live['evidence'][row['evidence_id']]);ref='SYNTHETIC-EXACT-PROFILE-RESPONSE'
+        proof.update(kind='native_api',attempt_evidence_id=row['evidence_id'],operation_id='score-profile.create',observation_scope='EXACT_ATTEMPT_OPERATION_RESPONSE',exact_request_binding_verified=True,receipt_sha256='1'*64)
+        live['evidence'][ref]=proof;row['steps']['profile_create'].update(status='OBSERVED_SUCCESS',HTTP_status=201,safe_error_code=None,evidence_id=ref)
+        self.assertEqual(validate_P2_attempt_records(live,live['evidence']),[])
+        for field,value in [('attempt_evidence_id','unrelated'),('operation_id','overall.analyze'),('exact_request_binding_verified',False)]:
+            changed=deepcopy(live);changed['evidence'][ref][field]=value
+            self.assertTrue(validate_P2_attempt_records(changed,changed['evidence']))
+        row['steps']['profile_create']['HTTP_status']=True
+        self.assertTrue(validate_P2_attempt_records(live,live['evidence']))
+
+    def test_current_deployment_requires_reverse_P2_pointer_and_keeps_synthetic_scope(self):
+        from check_project_consistency import validate_current_deployment,validate_backend_safe_observation_plan
+        for value in (None,'unrelated'):
+            wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['current_deployment']['current_P2_attempt_evidence_id']=value
+            self.assertTrue(validate_current_deployment(wrong))
+        wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan']['synthetic_verification']['deployment_or_real_user_evidence']=True
+        self.assertTrue(validate_backend_safe_observation_plan(wrong))
+
+    def test_current_observer_visible_events_cannot_certify_all_logs_actor_or_business(self):
+        from check_project_consistency import validate_current_deployment
+        for field,value in [('visible_event_count',True),('exact_fields',['operation','stage','status','code','request_id','body']),('all_checked_event_keys_match',False),('all_checked_request_ids_match',False),('whole_log_nonexposure_proven',True),('specific_BFF_actor_binding_proven',True),('business_success_proven',True),('source_deployment_receipt_sha256','f'*64)]:
+            wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['current_deployment']['safe_observer_acceptance'][field]=value
+            self.assertTrue(validate_current_deployment(wrong))
+        wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution'];obs=live['current_deployment']['safe_observer_acceptance']
+        live['evidence'][obs['evidence_id']]['source_deployment_receipt_sha256']='f'*64
+        self.assertTrue(validate_current_deployment(wrong))
 
     def test_scope_error_cannot_be_success_or_hide_invalid_policy(self):
         from check_project_consistency import validate_live_execution

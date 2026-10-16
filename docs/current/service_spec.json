@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.68",
+  "version": "1.9.69",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -5314,7 +5314,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.68",
+        "contract_version": "1.9.69",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -5488,7 +5488,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.68",
+        "contract_version": "1.9.69",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -5654,7 +5654,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.68",
+        "contract_version": "1.9.69",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -5673,7 +5673,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.68",
+        "contract_version": "1.9.69",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -5698,7 +5698,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.68",
+        "contract_version": "1.9.69",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -5723,7 +5723,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.68",
+        "contract_version": "1.9.69",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -6367,7 +6367,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "d18bb4b4b7792504396224e35ff4db922c62c7c54e3a08959eae4b6340b9e4bf",
+            "source_sha256": "830f6e14397b364ff7279a8c132391cce8f549c8fb369e0932d3c6d8ac3721d3",
             "symbols": [
               {
                 "kind": "class",
@@ -6475,6 +6475,12 @@
                 "kind": "function",
                 "name": "git",
                 "signature": "def git(*args, input=None):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "live_P2_attempt",
+                "signature": "def live_P2_attempt(c, evidence_id):",
                 "decorators": []
               },
               {
@@ -6665,6 +6671,12 @@
               },
               {
                 "kind": "function",
+                "name": "validate_P2_attempt_records",
+                "signature": "def validate_P2_attempt_records(c, registry):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "validate_backend_safe_observation_plan",
                 "signature": "def validate_backend_safe_observation_plan(spec):",
                 "decorators": []
@@ -6679,6 +6691,12 @@
                 "kind": "function",
                 "name": "validate_content",
                 "signature": "def validate_content(paths, read, spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_current_deployment",
+                "signature": "def validate_current_deployment(spec):",
                 "decorators": []
               },
               {
@@ -14315,14 +14333,14 @@
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "8ca11e4a5914e5652972fcbff6b39d339930837e",
-        "spec_version": "1.9.67",
-        "ci_run_id": 38842154547,
+        "commit": "2cfb7d8c9990b8c1ff5acce6b275e1ab78f0db3f",
+        "spec_version": "1.9.68",
+        "ci_run_id": 38847087821,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
-          "python": 1047,
-          "deno": 568,
+          "python": 1051,
+          "deno": 584,
           "oracle": 993
         }
       }
@@ -16122,6 +16140,17 @@
         "REQ-26"
       ],
       "summary": "spec1.9.67: 화면팀 P2 저장검수 회신5439B/SHA0c26db23를 해시 결속한다. 이전 Root 시도는 공개시험2설정 미설정의 최초profile 거절 보고로 설명하되 실제422·DB쓰기0은 미확정으로 보존한다. 후속 Worker3f5256fd의 시험/pack·request-time getter 배포 보고는 source SHA미제공·미푸시여서 remote59f와 분리한다. 화면팀의 다른조합 가상386 1회 제출은 generic연결실패만 보고됐고 실제HTTP/단계/code/request_id/키/부분생성/DB쓰기는 미확정, 재시도·새로고침0 및 overall/report성공NOT_RUN이다. profile단계도commit후실패가능하며 StorageGET200·뒤늦은시각은 요청귀속/정책검증/예산/업무성공증거가아니다. §4오류표시·logging수정은배포대기이며 서버전용stage/path/status/code/request_id와사용자단계/안전code만허용하고body/token/query/keys/stack을금지한다. 후속관리자표시·진입UI영수증을별도등록하되실APIJWT/aal2검수로승격하지않는다. 이전영수증/원장·업무0/22·운영3gate·production_ready=false·기존자료/예산승인범위를유지한다. 요청별·상수stage·정규화template 경로의 backend 안전관측 개선은 담당feature의 계획계약만추가하며 동시요청문맥분리·기존오류DTO/보안/예산유지와 구현/검증/배포NOT_RUN을강제한다."
+    },
+    {
+      "date": "2026-10-16",
+      "requirements": [
+        "REQ-02",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "spec1.9.69: ed978/merge2cf/treef41의 실제 설치와 bundle1453885B/SHA80d2·전체reload·legacyJWT ON을 새 current_deployment에 결속하고 기존 cb500 설치를 보존한다. 새 배포 준비/거절5건과 소스CI는 실제사용자업무와분리한다. 원문회신ID를 current/history에서 해석하고 두 실패의 unknown·멱등 정정·배포 결속을 보존한 채 새 단일UI실패를 현재로 기록한다. UI HTTP/code 미확정, 시간·operation만 상관된 budget_plan503 로그, owner/case 전후 snapshot0을 분리해 actor/BFF귀속·전체DB쓰기0·업무PASS로 승격하지 않는다. 새 제출/새로고침0, 분석/재조회NOT_RUN, 0/22·운영3gate·production_ready=false와 자료/예산승인범위를 유지한다. 보존 visible event4개의 허용5필드·32HEX형식관측은 scoped observer 증거로 별도등록하며 전체로그비노출·특정BFFactor·업무성공을 증명하지않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -25936,7 +25965,9 @@
             "OPS-OWNER-SETTINGS-REGISTERED-20261015",
             "OPS-POSTREG-READINESS-20261015",
             "OPS-EDGE-EDITOR-DEPLOYED-20261016",
-            "OPS-EDGE-NATIVE-READINESS-20261016"
+            "OPS-EDGE-NATIVE-READINESS-20261016",
+            "OPS-SAFE-OBSERVER-DEPLOYED-20261016",
+            "OPS-SAFE-OBSERVER-READINESS-20261016"
           ]
         },
         "bff_browser_acceptance": {
@@ -25949,7 +25980,9 @@
             "OPS-P2-ACTUAL-FAILURE-20261016",
             "OPS-FRONTEND-P2-REPLY-20261016",
             "OPS-P2-FRONTEND-FAILURE-20261016",
-            "OPS-ADMIN-BFF-UI-20261016"
+            "OPS-ADMIN-BFF-UI-20261016",
+            "OPS-P2-OBSERVER-ATTEMPT-20261016",
+            "OPS-P2-OBSERVER-SCOPED-LOG-20261016"
           ]
         },
         "security_gates": {
@@ -26504,9 +26537,98 @@
           "scope": "후속 정상 BFF 화면의 관리자 이용 표시·관리자 진입을 관측했다. 실제 API JWT·aal2 추적 인수가 아니며 이전 일반 회원 머리글 관측과는 시점이 달라 모순으로 처리하지 않는다.",
           "does_not_imply_operation_acceptance": true,
           "source_binding_scope": "INSTALLED_API_CANDIDATE_NOT_UNPUSHED_FRONTEND_SOURCE"
+        },
+        "OPS-SAFE-OBSERVER-DEPLOYED-20261016": {
+          "kind": "edge_deployment",
+          "candidate_commit": "ed978c74d8c89bd6fec867b891342c1b6c6c15a3",
+          "receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f",
+          "operations": [],
+          "scope": "기존 함수에 ed978 소스의 정확 번들을 실제 배포했고 reload 후 editor 전체 바이트·SHA 일치와 legacy JWT 관문 ON을 확인했다. 이전 cb500 설치 원장은 보존한다. 실제 설치·준비상태·동일 UI 업무 관측의 증거 범위를 분리하며 업무22개·운영3gate 인수는 미완료다.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f",
+          "source": {
+            "candidate_commit": "ed978c74d8c89bd6fec867b891342c1b6c6c15a3",
+            "accepted_develop_merge": "2cfb7d8c9990b8c1ff5acce6b275e1ab78f0db3f",
+            "tree": "f41d19829467c749ed722b3dfe26f615b9940c51",
+            "spec_version": "1.9.68",
+            "source_files_count": 64,
+            "source_manifest": {
+              "bytes": 17772,
+              "sha256": "662d97d5e9cefe29e32b723460361696ca52221445ed2f678c112dc58988b0ab",
+              "source_files_count": 64
+            },
+            "deployment_package": {
+              "bytes": 20115,
+              "sha256": "781c192af767a5928b578a041ea901209b73d769636850658fe8bf516b68de94"
+            },
+            "bundle": {
+              "bytes": 1453885,
+              "sha256": "80d2be1e6da55fd585c01050f5897a54fc835a0a7512554a5a342165971ed83f"
+            },
+            "runtime_source_bindings": {
+              "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "1a46ee4dbf2ca40c4544ec0d3792d52e7e489856639876316fad56e7e267ec7b",
+              "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "cac4771eb472199188d797a04e32eefc95ac3f42317c5860251e514e0e61ccca",
+              "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "b757ad470d5a3d9cb44b8ad08203ca7d42359dd2657d9d91581674c639e6f557",
+              "supabase/functions/jungsi-api/index.ts": "ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2"
+            }
+          }
+        },
+        "OPS-SAFE-OBSERVER-READINESS-20261016": {
+          "kind": "edge_deployment",
+          "candidate_commit": "ed978c74d8c89bd6fec867b891342c1b6c6c15a3",
+          "receipt_sha256": "e13af4886d60ec54a89eb828a8bbc75ce82d086d7f70d3fd65339f465c2b6d07",
+          "operations": [],
+          "scope": "새 배포의 생존·정상 relay 준비상태·relay 누락/불일치·Bearer 누락5건을03:51:23~30Z에 확인했다. 실제 사용자 JWT·OTP를 사용하지 않은 준비/거절 경계이며 사용자 업무 인수가 아니다.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f"
+        },
+        "OPS-P2-OBSERVER-ATTEMPT-20261016": {
+          "kind": "bff_browser",
+          "candidate_commit": "ed978c74d8c89bd6fec867b891342c1b6c6c15a3",
+          "receipt_sha256": "947aa988b270b30c00834261797c87727f64436c5060a143cd4107072a2bfc89",
+          "operations": [],
+          "scope": "새 배포 후 정상 UI에서03:52:17.659Z에1회 제출했고03:52:32.785Z 공통 저장 실패 안내를 관측했다. UI HTTP·안전 코드·요청ID와 실제 멱등키는 미노출이다. 별도03:52:19Z 로그는 score-profile.create/budget_plan/503/security_policy_unavailable이지만 시간·operation 상관관계만 있으며 actor/BFF 요청 결속은 미증명이다. 이를 실제 UI 요청의 HTTP/code로 확정하지 않는다. 같은 owner·합성 case 범위의 전후 snapshot0건은 전체 DB쓰기0 또는 모든 시점의 부재를 증명하지 않는다. 재제출·새로고침0, 분석·리포트 재조회는 NOT_RUN이며 budget_plan 원인 진단은 진행 중이다.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f"
+        },
+        "OPS-P2-OBSERVER-SCOPED-LOG-20261016": {
+          "kind": "native_api",
+          "candidate_commit": "ed978c74d8c89bd6fec867b891342c1b6c6c15a3",
+          "receipt_sha256": "947aa988b270b30c00834261797c87727f64436c5060a143cd4107072a2bfc89",
+          "operations": [],
+          "scope": "시간·operation만 상관된 서버 안전 로그이며 UI HTTP·actor·BFF 요청 결속 증거가 아니다.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f"
+        },
+        "OPS-P2-OBSERVER-OWNER-PREFLIGHT-20261016": {
+          "kind": "sql",
+          "candidate_commit": "ed978c74d8c89bd6fec867b891342c1b6c6c15a3",
+          "receipt_sha256": "77c248e01e36e88ba18c00ad6503343717537cce4112b48ffce9ccaef093a5a7",
+          "operations": [],
+          "scope": "새 시도 전 owner/case 범위 snapshot; 전체 DB쓰기나 browser subject 결속은 미증명.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f"
+        },
+        "OPS-P2-OBSERVER-OWNER-AFTER-20261016": {
+          "kind": "sql",
+          "candidate_commit": "ed978c74d8c89bd6fec867b891342c1b6c6c15a3",
+          "receipt_sha256": "340566183d5871e5173856317f34347b1ce7c07635af998c1f92d147616fc243",
+          "operations": [],
+          "scope": "새 시도 후 owner/case 범위 snapshot; 전체 DB쓰기나 browser subject 결속은 미증명.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f"
+        },
+        "OPS-SAFE-OBSERVER-VISIBLE-EVENTS-20261016": {
+          "kind": "native_api",
+          "candidate_commit": "ed978c74d8c89bd6fec867b891342c1b6c6c15a3",
+          "receipt_sha256": "a6f7d1460d6d0c0379e13b4af768d81b4b8deabb2a23807f63c316833f715baa",
+          "operations": [],
+          "scope": "기존 보존 로그의 visible event4개를 새 호출 없이 검사해 허용5필드와 request_id의32HEX 형식을 확인했다. 실제 ID 값은 공개하지 않는다. 해당4개 event 객체의 형식 검수이며 전체 로그 비노출·특정 BFF actor/요청 결속·업무 성공은 증명하지 않는다.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f"
         }
       },
-      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다.",
+      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다. 최신 설치는 current_deployment의 ed978 실제 영수증을 따르며 cb500 actual_editor_deployment는 당시 이력이다. current_P2_attempt는 새 실제 시도이고 회신 당시 두 실패는 P2_attempt_history에서 원래 배포·unknown 상태로 보존한다. 소스·준비상태 PASS, 제한된 로그 상관관계, 범위조회 snapshot, UI 업무 인수는 분리한다.",
       "position_graph": {
         "formula_rows": [
           [
@@ -26530,7 +26652,7 @@
       "runtime_assembly": {
         "format": "jungsi.edge-runtime-assembly/v1",
         "status": "SOURCE_ASSEMBLED",
-        "status_text": "기존 22 operation의 Deno 소스와 과목 전용 null 처리는 develop에서 인수했고 기존 고정 번들을 Supabase에 설치했다. 005·과목 자료/제어 객체 발행·native Storage·격리 예산 SQL 근거는 재사용한다. 새 설정5개는 Owner 등록·digest 일치 보고를 수용했고 이후 실제 readiness200과 잘못된 relay403·Bearer누락401을 확인했다. 2026-10-16 화면팀은 Worker relay 등록·preview live·정상 Bearer의 aal1/aal2 세션 기능 통과를 보고했다. 본인 저장·분석·재조회, 소유권·CSRF·만료갱신 및 운영3gate는 별도 미완료다. 새 오류 분류를 포함한 정확 cb500f7 번들을 기존 함수에 배포하고 editor copyback·reload 전체 일치를 확인했다. 이전9e 대비 전체 차이4개와 고정 소스 결속은 실제 배포 기록을 따른다. 새 버전 준비 health·거절 경계는 실제 통과했으며 같은 BFF의 안전 오류 표시만 부분 관측했다. P2 단일 제출은 일반 저장 실패로 단계·DB쓰기가 미확정이고 실JWT 업무 인수·검색 활성화는 미완료다. 각 operation의 native/deployment는 부분 관측으로 승격하지 않는다.",
+        "status_text": "현재 소스 ed978/동일 tree develop2cf의 실제 함수 설치·전체 reload와 준비/거절5건을 별도 영수증으로 확인했다. 이전 cb500 설치·초기 준비·외부회신·두 P2 실패는 이력으로 보존한다. 새 P2 단일 제출은 공통 저장 실패이며 UI HTTP/code 미확정이다. 시간·operation만 상관된 budget_plan503 로그와 owner/case 전후 snapshot0을 별도 기록하고 요청 귀속·전체 DB쓰기0·실업무 성공으로 승격하지 않는다. 업무 인수0/22·소유권·CSRF·만료갱신·운영3gate와 production_ready=false를 유지한다.",
         "bindings": {
           "native_entry": {
             "path": "supabase/functions/jungsi-api/index.ts",
@@ -27253,34 +27375,101 @@
         "historical_P2_attempt_evidence_id": "OPS-P2-ACTUAL-FAILURE-20261016"
       },
       "current_P2_attempt": {
-        "status": "ACTUAL_UI_SAVE_ATTEMPT_FAILED_UNDETAILED",
-        "observation_basis": "EXTERNAL_FRONTEND_REPORT",
-        "evidence_id": "OPS-P2-FRONTEND-FAILURE-20261016",
-        "receipt_sha256": "0c26db23ca927ee8fde77250f1bb9586d3a5b7ea08e7343d6c62758e97c5c016",
-        "source_deployment_receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0",
+        "format": "jungsi.p2-runtime-attempt/v1",
+        "status": "ACTUAL_STEPS_OBSERVED",
+        "observation_basis": "RUNTIME_FOLLOWUP",
+        "evidence_id": "OPS-P2-OBSERVER-ATTEMPT-20261016",
+        "receipt_sha256": "947aa988b270b30c00834261797c87727f64436c5060a143cd4107072a2bfc89",
+        "source_deployment_evidence_id": "OPS-SAFE-OBSERVER-DEPLOYED-20261016",
+        "source_deployment_receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f",
         "submit_count": 1,
         "retry_count": 0,
+        "reload_after_submit": false,
         "same_form_idempotency_key": null,
-        "HTTP_status": null,
-        "safe_error_code": null,
-        "profile_created": null,
-        "report_created": null,
+        "idempotency_context_status": "NOT_COLLECTED",
         "DB_writes_independently_observed": null,
-        "exam_pack_match": "NOT_INDEPENDENTLY_CONFIRMED",
-        "memory_validation_is_actual_request_result": false,
-        "step_2_analyze": "SUCCESS_NOT_CONFIRMED",
-        "step_3_reread": "SUCCESS_NOT_CONFIRMED",
+        "UI_HTTP_status": null,
+        "UI_safe_error_code": null,
+        "UI_request_id": null,
         "business_native_accepted": 0,
         "business_deployment_accepted": 0,
         "production_ready": false,
-        "scope": "화면팀은 2026-10-16T01:45:00Z에 이전 Root 사례와 조합이 다른 가상386 한 건을1회 제출했고 일반 연결 실패 안내를 보았다고 보고했다. 이 문구의503 또는 네트워크 분류는 실제 HTTP503 확정이 아니다. stage·status·code·request_id·멱등키를 수집하지 않았고 profile 부분 생성·DB쓰기는 미확정이다. 재제출0·새로고침0이며 overall/report 성공은 NOT_RUN이다. 상세 합성 점수와 요청 본문은 공개 명세에 복사하지 않는다.",
-        "preservation_rule": "부분 생성과 요청 문맥을 담당자가 범위 한정 확인하기 전 새 키 재제출·새로고침·재생성·삭제를 하지 않는다. 기존 키·부분 성공ID가 확보되면 같은 업무·본문·키의 기존 멱등 절차를 따른다. 시험·pack 적용 보고와 실제 전송값 검증을 구분하고 업무0/22·보안3gate·production_ready=false를 유지한다.",
-        "previous_receipt_evidence_id": "OPS-P2-ACTUAL-FAILURE-20261016",
-        "idempotency_context_status": "NOT_COLLECTED_BY_FRONTEND",
-        "reload_after_submit": false,
-        "exact_key_DB_readback_count": 0,
-        "step_2_success_acceptance": "NOT_RUN",
-        "step_3_success_acceptance": "NOT_RUN"
+        "scope": "새 배포 후 정상 UI에서03:52:17.659Z에1회 제출했고03:52:32.785Z 공통 저장 실패 안내를 관측했다. UI HTTP·안전 코드·요청ID와 실제 멱등키는 미노출이다. 별도03:52:19Z 로그는 score-profile.create/budget_plan/503/security_policy_unavailable이지만 시간·operation 상관관계만 있으며 actor/BFF 요청 결속은 미증명이다. 이를 실제 UI 요청의 HTTP/code로 확정하지 않는다. 같은 owner·합성 case 범위의 전후 snapshot0건은 전체 DB쓰기0 또는 모든 시점의 부재를 증명하지 않는다. 재제출·새로고침0, 분석·리포트 재조회는 NOT_RUN이며 budget_plan 원인 진단은 진행 중이다.",
+        "preservation_rule": "기존 Root·화면팀 두 실패와 정정·배포 영수증은 history에서 보존한다. 내부 사례명은 실제 멱등키가 아니며 공개 기록에 키·점수·계정·요청ID를 복사하지 않는다. 새 키 재제출·재생성·삭제를 하지 않고 후속 원인 진단 결과와 별도 실행 근거를 기다린다.",
+        "previous_receipt_evidence_id": "OPS-P2-FRONTEND-FAILURE-20261016",
+        "submitted_at_UTC": "2026-10-16T03:52:17.659Z",
+        "result_observed_at_UTC": "2026-10-16T03:52:32.785Z",
+        "steps": {
+          "profile_create": {
+            "operation_id": "score-profile.create",
+            "status": "UNCONFIRMED",
+            "HTTP_status": null,
+            "safe_error_code": null,
+            "evidence_id": null
+          },
+          "overall_analyze": {
+            "operation_id": "overall.analyze",
+            "status": "NOT_RUN",
+            "HTTP_status": null,
+            "safe_error_code": null,
+            "evidence_id": null
+          },
+          "report_read": {
+            "operation_id": "report.read",
+            "status": "NOT_RUN",
+            "HTTP_status": null,
+            "safe_error_code": null,
+            "evidence_id": null
+          }
+        },
+        "scoped_safe_logs": [
+          {
+            "evidence_id": "OPS-P2-OBSERVER-SCOPED-LOG-20261016",
+            "operation_id": "score-profile.create",
+            "stage": "budget_plan",
+            "HTTP_status": 503,
+            "safe_error_code": "security_policy_unavailable",
+            "observed_at_UTC": "2026-10-16T03:52:19Z",
+            "correlation_scope": "TIME_AND_OPERATION_ONLY",
+            "actor_binding_proven": false,
+            "BFF_request_id_binding_proven": false,
+            "UI_status_binding_proven": false
+          }
+        ],
+        "scoped_readonly_observations": [
+          {
+            "evidence_id": "OPS-P2-OBSERVER-OWNER-PREFLIGHT-20261016",
+            "receipt_sha256": "77c248e01e36e88ba18c00ad6503343717537cce4112b48ffce9ccaef093a5a7",
+            "receipt_bytes": 757,
+            "observed_at_UTC": "2026-10-16T03:49:59.199838Z",
+            "owner_exact_match_count": 1,
+            "counts": {
+              "profiles": 0,
+              "profile_success_requests": 0,
+              "overall_success_requests": 0,
+              "reports": 0
+            },
+            "scope": "OWNER_CASE_SNAPSHOT_ONLY",
+            "all_database_writes_zero_proven": false,
+            "browser_Bearer_subject_binding_proven": false
+          },
+          {
+            "evidence_id": "OPS-P2-OBSERVER-OWNER-AFTER-20261016",
+            "receipt_sha256": "340566183d5871e5173856317f34347b1ce7c07635af998c1f92d147616fc243",
+            "receipt_bytes": 867,
+            "observed_at_UTC": "2026-10-16T03:54:11.21111Z",
+            "owner_exact_match_count": 1,
+            "counts": {
+              "profiles": 0,
+              "profile_success_requests": 0,
+              "overall_success_requests": 0,
+              "reports": 0
+            },
+            "scope": "OWNER_CASE_SNAPSHOT_ONLY",
+            "all_database_writes_zero_proven": false,
+            "browser_Bearer_subject_binding_proven": false
+          }
+        ]
       },
       "P2_attempt_history": {
         "OPS-P2-ACTUAL-FAILURE-20261016": {
@@ -27311,6 +27500,36 @@
           "same_placeholder_comparison_is_not_key_evidence": true,
           "reload_after_submit": false,
           "exact_key_DB_readback_count": 0
+        },
+        "OPS-P2-FRONTEND-FAILURE-20261016": {
+          "status": "ACTUAL_UI_SAVE_ATTEMPT_FAILED_UNDETAILED",
+          "observation_basis": "EXTERNAL_FRONTEND_REPORT",
+          "evidence_id": "OPS-P2-FRONTEND-FAILURE-20261016",
+          "receipt_sha256": "0c26db23ca927ee8fde77250f1bb9586d3a5b7ea08e7343d6c62758e97c5c016",
+          "source_deployment_receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0",
+          "submit_count": 1,
+          "retry_count": 0,
+          "same_form_idempotency_key": null,
+          "HTTP_status": null,
+          "safe_error_code": null,
+          "profile_created": null,
+          "report_created": null,
+          "DB_writes_independently_observed": null,
+          "exam_pack_match": "NOT_INDEPENDENTLY_CONFIRMED",
+          "memory_validation_is_actual_request_result": false,
+          "step_2_analyze": "SUCCESS_NOT_CONFIRMED",
+          "step_3_reread": "SUCCESS_NOT_CONFIRMED",
+          "business_native_accepted": 0,
+          "business_deployment_accepted": 0,
+          "production_ready": false,
+          "scope": "화면팀은 2026-10-16T01:45:00Z에 이전 Root 사례와 조합이 다른 가상386 한 건을1회 제출했고 일반 연결 실패 안내를 보았다고 보고했다. 이 문구의503 또는 네트워크 분류는 실제 HTTP503 확정이 아니다. stage·status·code·request_id·멱등키를 수집하지 않았고 profile 부분 생성·DB쓰기는 미확정이다. 재제출0·새로고침0이며 overall/report 성공은 NOT_RUN이다. 상세 합성 점수와 요청 본문은 공개 명세에 복사하지 않는다.",
+          "preservation_rule": "부분 생성과 요청 문맥을 담당자가 범위 한정 확인하기 전 새 키 재제출·새로고침·재생성·삭제를 하지 않는다. 기존 키·부분 성공ID가 확보되면 같은 업무·본문·키의 기존 멱등 절차를 따른다. 시험·pack 적용 보고와 실제 전송값 검증을 구분하고 업무0/22·보안3gate·production_ready=false를 유지한다.",
+          "previous_receipt_evidence_id": "OPS-P2-ACTUAL-FAILURE-20261016",
+          "idempotency_context_status": "NOT_COLLECTED_BY_FRONTEND",
+          "reload_after_submit": false,
+          "exact_key_DB_readback_count": 0,
+          "step_2_success_acceptance": "NOT_RUN",
+          "step_3_success_acceptance": "NOT_RUN"
         }
       },
       "frontend_P2_reply": {
@@ -27401,12 +27620,12 @@
       },
       "backend_safe_observation_plan": {
         "format": "jungsi.request-safe-observation-plan/v1",
-        "status": "SOURCE_IMPLEMENTED_SYNTHETIC_VERIFIED_DEPLOYMENT_PENDING",
+        "status": "SOURCE_DEPLOYED_RUNTIME_ACCEPTANCE_PENDING",
         "branch": "feature/application-pre-data-platform",
-        "implementation_candidate_commit": null,
+        "implementation_candidate_commit": "ed978c74d8c89bd6fec867b891342c1b6c6c15a3",
         "implementation": "SOURCE_IMPLEMENTED",
         "verification": "SYNTHETIC_FOCUSED_PASS",
-        "deployment": "NOT_RUN",
+        "deployment": "SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED",
         "operation_scope": "existing_22_registered_operations",
         "server_only_fields": [
           "operation",
@@ -27438,9 +27657,9 @@
         "existing_error_DTO_preserved": true,
         "security_or_budget_relaxed": false,
         "operation_scope_expanded": false,
-        "rule": "기존 feature의 관측 후보 소스4개·테스트2개를 현재 선언/코드 색인 해시로 결속했다. 요청별 operation·상수 stage·HTTP status·정규화한 공개 code·안전한 request_id 다섯 필드만 기존 서버 console에 기록한다. 실제 path·query·headers·성적·body·subject·owner·계정·키·쿠키·예외 원문/stack은 기록하지 않는다. 실패 응답과 201 생성 응답만 관측하고 정상 GET과 응답 본문은 추가 수집하지 않는다. 관측 실패는 기존 응답과 업무 실행 횟수를 바꾸지 않으며 동시 요청의 문맥을 공유하지 않는다. 기존 오류 DTO·인증·예산·승인 scope를 유지한다. 집중 합성41개 통과와 신규16개는 실제 JWT·DB·배포·실업무 성공 근거가 아니다. 정상 전체 스냅샷·훅·정확 SHA CI를 별도로 요구하고 후속 패키지에서 정확한 후보 HEAD를 결속한다. 실제 설치 cb500f7 원본 영수증과 auth_relay.ts/runtime_context.ts의 두 해시 검사는 보존한다. 새 후보는 미배포이며 외부 화면팀 관측 수정의 별도 배포 대기와 0/22 인수 상태를 유지한다.",
+        "rule": "현재 관측 코드 소스는 ed978/동일 tree의 develop2cf이며 실제 배포·전체 editor reload 확인은 current_deployment 영수증에 결속한다. 기존 합성41개·신규16개·전체 소스 훅/CI는 소스 검수이며 실제 사용자 업무·소유권·CSRF·운영3gate를 대신하지 않는다. 서버 허용5필드·요청별 문맥 격리·본문과 키·계정·원자료 미수집·기존 오류 DTO·인증·예산 한도는 유지한다. 이전 cb500 설치와 합성 당시의 NOT_RUN은 보존한다. 후속 P2 실패·제한된 로그 상관관계·전후 범위 조회는 current_P2_attempt의 별도 관측을 따르며 업무 인수0/22와 production_ready=false를 유지한다.",
         "event_policy": "ERRORS_AND_CREATED_WRITES_ONLY",
-        "native_verification": "NOT_RUN",
+        "native_verification": "SCOPED_EVENT_SHAPE_OBSERVED",
         "production_ready": false,
         "business_native_accepted": 0,
         "business_deployment_accepted": 0,
@@ -27468,6 +27687,145 @@
         "test_bindings": {
           "tests/edge/test_runtime_composition.ts": "40670cf3423dca5f0d4718dcfda79ff387d181fae5b3f1c13f14b8ac43dabed6",
           "tests/edge/test_runtime_budget.ts": "d819a63a5a0ca79810733d035d1606e3b567edbced771ed31f98f56c565732a0"
+        },
+        "historical_status_before_actual_deployment": "SOURCE_IMPLEMENTED_SYNTHETIC_VERIFIED_DEPLOYMENT_PENDING",
+        "rule_before_actual_deployment": "기존 feature의 관측 후보 소스4개·테스트2개를 현재 선언/코드 색인 해시로 결속했다. 요청별 operation·상수 stage·HTTP status·정규화한 공개 code·안전한 request_id 다섯 필드만 기존 서버 console에 기록한다. 실제 path·query·headers·성적·body·subject·owner·계정·키·쿠키·예외 원문/stack은 기록하지 않는다. 실패 응답과 201 생성 응답만 관측하고 정상 GET과 응답 본문은 추가 수집하지 않는다. 관측 실패는 기존 응답과 업무 실행 횟수를 바꾸지 않으며 동시 요청의 문맥을 공유하지 않는다. 기존 오류 DTO·인증·예산·승인 scope를 유지한다. 집중 합성41개 통과와 신규16개는 실제 JWT·DB·배포·실업무 성공 근거가 아니다. 정상 전체 스냅샷·훅·정확 SHA CI를 별도로 요구하고 후속 패키지에서 정확한 후보 HEAD를 결속한다. 실제 설치 cb500f7 원본 영수증과 auth_relay.ts/runtime_context.ts의 두 해시 검사는 보존한다. 새 후보는 미배포이며 외부 화면팀 관측 수정의 별도 배포 대기와 0/22 인수 상태를 유지한다.",
+        "deployment_evidence_id": "OPS-SAFE-OBSERVER-DEPLOYED-20261016",
+        "native_observation_evidence_id": "OPS-SAFE-OBSERVER-VISIBLE-EVENTS-20261016"
+      },
+      "current_deployment": {
+        "format": "jungsi.current-source-deployment/v1",
+        "status": "SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED",
+        "evidence_id": "OPS-SAFE-OBSERVER-DEPLOYED-20261016",
+        "receipt_bytes": 1147,
+        "receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f",
+        "source": {
+          "candidate_commit": "ed978c74d8c89bd6fec867b891342c1b6c6c15a3",
+          "accepted_develop_merge": "2cfb7d8c9990b8c1ff5acce6b275e1ab78f0db3f",
+          "tree": "f41d19829467c749ed722b3dfe26f615b9940c51",
+          "spec_version": "1.9.68",
+          "source_files_count": 64,
+          "source_manifest": {
+            "bytes": 17772,
+            "sha256": "662d97d5e9cefe29e32b723460361696ca52221445ed2f678c112dc58988b0ab",
+            "source_files_count": 64
+          },
+          "deployment_package": {
+            "bytes": 20115,
+            "sha256": "781c192af767a5928b578a041ea901209b73d769636850658fe8bf516b68de94"
+          },
+          "bundle": {
+            "bytes": 1453885,
+            "sha256": "80d2be1e6da55fd585c01050f5897a54fc835a0a7512554a5a342165971ed83f"
+          },
+          "runtime_source_bindings": {
+            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "1a46ee4dbf2ca40c4544ec0d3792d52e7e489856639876316fad56e7e267ec7b",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "cac4771eb472199188d797a04e32eefc95ac3f42317c5860251e514e0e61ccca",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "b757ad470d5a3d9cb44b8ad08203ca7d42359dd2657d9d91581674c639e6f557",
+            "supabase/functions/jungsi-api/index.ts": "ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2"
+          }
+        },
+        "previous_deployment_evidence_id": "OPS-EDGE-EDITOR-DEPLOYED-20261016",
+        "previous_bundle": {
+          "bytes": 1446299,
+          "sha256": "d1b75c873a55417d59f0a462912d71ccb06c54ab7791b956f78fbc25235ba213"
+        },
+        "remote_readback": {
+          "bytes": 1453885,
+          "sha256": "80d2be1e6da55fd585c01050f5897a54fc835a0a7512554a5a342165971ed83f"
+        },
+        "observed_at_UTC": "2026-10-16T03:47:20.034Z",
+        "editor_reload_verified": true,
+        "verify_jwt_remained_true": true,
+        "same_existing_project_and_function": true,
+        "auth_or_secret_or_policy_changes": false,
+        "operation_scope_expanded": false,
+        "data_or_budget_approval_changed": false,
+        "business_native_accepted": 0,
+        "business_deployment_accepted": 0,
+        "production_ready": false,
+        "new_version_health": "NATIVE_READINESS_AND_BOUNDARY_PASS",
+        "current_P2_attempt_evidence_id": "OPS-P2-OBSERVER-ATTEMPT-20261016",
+        "scope": "기존 함수에 ed978 소스의 정확 번들을 실제 배포했고 reload 후 editor 전체 바이트·SHA 일치와 legacy JWT 관문 ON을 확인했다. 이전 cb500 설치 원장은 보존한다. 실제 설치·준비상태·동일 UI 업무 관측의 증거 범위를 분리하며 업무22개·운영3gate 인수는 미완료다.",
+        "native_readiness": {
+          "evidence_id": "OPS-SAFE-OBSERVER-READINESS-20261016",
+          "receipt_bytes": 2971,
+          "receipt_sha256": "e13af4886d60ec54a89eb828a8bbc75ce82d086d7f70d3fd65339f465c2b6d07",
+          "source_deployment_receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f",
+          "bundle_sha256": "80d2be1e6da55fd585c01050f5897a54fc835a0a7512554a5a342165971ed83f",
+          "observed_at_UTC": "2026-10-16T03:51:23Z/2026-10-16T03:51:30Z",
+          "cases": {
+            "alive": {
+              "http": 200,
+              "code": null
+            },
+            "normal_relay_ready": {
+              "http": 200,
+              "code": null
+            },
+            "wrong_relay": {
+              "http": 403,
+              "code": "relay_authentication_failed"
+            },
+            "missing_relay": {
+              "http": 403,
+              "code": "relay_authentication_failed"
+            },
+            "missing_user_Bearer": {
+              "http": 401,
+              "code": "authentication_required"
+            }
+          },
+          "cache_control": "no-store",
+          "actual_user_Bearer_used": false,
+          "DB_student_or_budget_writes_by_probe": 0,
+          "scope": "새 배포의 생존·정상 relay 준비상태·relay 누락/불일치·Bearer 누락5건을03:51:23~30Z에 확인했다. 실제 사용자 JWT·OTP를 사용하지 않은 준비/거절 경계이며 사용자 업무 인수가 아니다."
+        },
+        "safe_observer_acceptance": {
+          "evidence_id": "OPS-SAFE-OBSERVER-VISIBLE-EVENTS-20261016",
+          "receipt_bytes": 1554,
+          "receipt_sha256": "a6f7d1460d6d0c0379e13b4af768d81b4b8deabb2a23807f63c316833f715baa",
+          "source_deployment_receipt_sha256": "cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f",
+          "bundle_sha256": "80d2be1e6da55fd585c01050f5897a54fc835a0a7512554a5a342165971ed83f",
+          "visible_event_count": 4,
+          "exact_fields": [
+            "operation",
+            "stage",
+            "status",
+            "code",
+            "request_id"
+          ],
+          "all_checked_event_keys_match": true,
+          "request_id_syntax": "32_HEX",
+          "all_checked_request_ids_match": true,
+          "forbidden_fields_in_checked_events": false,
+          "whole_log_nonexposure_proven": false,
+          "specific_BFF_actor_binding_proven": false,
+          "business_success_proven": false,
+          "safe_summary": [
+            {
+              "operation": "score-profile.create",
+              "stage": "budget_plan",
+              "status": 503,
+              "code": "security_policy_unavailable",
+              "count": 1
+            },
+            {
+              "operation": "session.read",
+              "stage": "user_session",
+              "status": 401,
+              "code": "authentication_required",
+              "count": 1
+            },
+            {
+              "operation": "health.ready",
+              "stage": "relay",
+              "status": 403,
+              "code": "relay_authentication_failed",
+              "count": 2
+            }
+          ],
+          "scope": "기존 보존 로그의 visible event4개를 새 호출 없이 검사해 허용5필드와 request_id의32HEX 형식을 확인했다. 실제 ID 값은 공개하지 않는다. 해당4개 event 객체의 형식 검수이며 전체 로그 비노출·특정 BFF actor/요청 결속·업무 성공은 증명하지 않는다."
         }
       }
     }

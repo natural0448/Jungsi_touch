@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "d18bb4b4b7792504396224e35ff4db922c62c7c54e3a08959eae4b6340b9e4bf",
+      "source_sha256": "830f6e14397b364ff7279a8c132391cce8f549c8fb369e0932d3c6d8ac3721d3",
       "symbols": [
         {
           "kind": "class",
@@ -694,6 +694,12 @@
           "kind": "function",
           "name": "git",
           "signature": "def git(*args, input=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "live_P2_attempt",
+          "signature": "def live_P2_attempt(c, evidence_id):",
           "decorators": []
         },
         {
@@ -884,6 +890,12 @@
         },
         {
           "kind": "function",
+          "name": "validate_P2_attempt_records",
+          "signature": "def validate_P2_attempt_records(c, registry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "validate_backend_safe_observation_plan",
           "signature": "def validate_backend_safe_observation_plan(spec):",
           "decorators": []
@@ -898,6 +910,12 @@
           "kind": "function",
           "name": "validate_content",
           "signature": "def validate_content(paths, read, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_current_deployment",
+          "signature": "def validate_current_deployment(spec):",
           "decorators": []
         },
         {
