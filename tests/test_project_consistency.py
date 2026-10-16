@@ -1399,13 +1399,118 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         self.assertIn('EXTERNAL_REPORTED_FUNCTIONAL_PASS',text)
         self.assertIn('operation_scope_not_approved',text)
         self.assertEqual(self.spec['supabase_deployment_contract']['live_execution']['post_registration_acceptance']['real_user_acceptance'],'NOT_RUN')
+        self.assertIn('SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED',text)
+        self.assertIn('0/22 / 0/22',text)
+        live=self.spec['supabase_deployment_contract']['live_execution']
+        self.assertIs(live['post_live_receipt']['source_fix_deployed'],True)
+        self.assertIs(live['post_live_receipt']['historical_source_fix_deployed_before_editor_update'],False)
+        self.assertEqual(live['post_registration_acceptance']['source_graph']['recorded_installed_source'],'9e6365e43c748afecf84c9b08e2a70f7ca711c14')
 
     def test_partial_external_live_report_cannot_promote_unrun_business_or_approval(self):
         from check_project_consistency import validate_live_execution
-        for key,value in [('P2_save_analysis_reread','PASS'),('ownership','PASS'),('business_native_accepted',1),('search_scope_approved',True),('source_fix_deployed',True)]:
+        for key,value in [('P2_save_analysis_reread','PASS'),('ownership','PASS'),('business_native_accepted',1),('search_scope_approved',True)]:
             wrong=deepcopy(self.spec)
             wrong['supabase_deployment_contract']['live_execution']['post_live_receipt'][key]=value
             self.assertIn('DEV-010 partial BFF report cannot promote unrun business or approval',validate_live_execution(wrong))
+
+    def test_deployed_source_true_requires_actual_receipt_and_registry_entry(self):
+        from check_project_consistency import validate_live_execution
+        for target in ('deployment','registry'):
+            with self.subTest(target=target):
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+                if target=='deployment':live.pop('actual_editor_deployment')
+                else:live['evidence'].pop(live['actual_editor_deployment']['evidence_id'])
+                self.assertIn('DEV-010 actual editor deployment requires receipt-bound evidence',validate_live_execution(wrong))
+
+    def test_actual_deployment_candidate_bundle_and_editor_receipt_must_match(self):
+        from check_project_consistency import validate_live_execution
+        for field in ('candidate_commit','accepted_develop_merge','tree','bundle','editor_receipt','receipt_sha256','remote_readback'):
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);deployment=wrong['supabase_deployment_contract']['live_execution']['actual_editor_deployment']
+                if field in ('candidate_commit','accepted_develop_merge','tree'):deployment['source'][field]='f'*40
+                elif field=='bundle':deployment['source']['bundle']['sha256']='f'*64
+                elif field in ('editor_receipt','remote_readback'):deployment[field]['sha256']='f'*64
+                else:deployment[field]='f'*64
+                self.assertIn('DEV-010 actual editor deployment requires receipt-bound evidence',validate_live_execution(wrong))
+
+    def test_actual_deployment_source_hash_must_match_indexed_runtime_code(self):
+        from check_project_consistency import validate_live_execution
+        wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+        deployment=live['actual_editor_deployment']
+        path='supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts'
+        deployment['source']['runtime_source_bindings'][path]='f'*64
+        live['evidence'][deployment['evidence_id']]['source']=deepcopy(deployment['source'])
+        self.assertIn('DEV-010 actual editor deployment source binding drift',validate_live_execution(wrong))
+
+    def test_editor_install_receipt_cannot_certify_operation_or_security_acceptance(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('native','PASS'),('deployment','PASS'),('security_3_gates','PASS'),('production_ready',True),('operation_scope_expanded',True)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+                if field in ('native','deployment'):live['operations']['report.read'][field]=value
+                else:live['actual_editor_deployment'][field]=value
+                self.assertIn('DEV-010 editor source update cannot certify unrun business or security acceptance',validate_live_execution(wrong))
+        wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+        live['evidence'][live['actual_editor_deployment']['evidence_id']]['operations']=['report.read']
+        self.assertIn('DEV-010 actual editor deployment requires receipt-bound evidence',validate_live_execution(wrong))
+
+    def test_actual_deployment_cannot_relax_verify_jwt_or_remote_source_match(self):
+        from check_project_consistency import validate_live_execution
+        for field in ('verify_jwt_remained_true','editor_copyback_match','remote_reload_match','same_existing_project_and_function'):
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['actual_editor_deployment'][field]=False
+                self.assertIn('DEV-010 actual editor deployment requires receipt-bound evidence',validate_live_execution(wrong))
+
+    def test_post_deployment_health_and_BFF_observations_need_their_own_receipts(self):
+        from check_project_consistency import validate_live_execution
+        for field in ('native_readiness','same_BFF_error_observation'):
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+                observation=live['actual_editor_deployment'][field]
+                live['evidence'].pop(observation['evidence_id'])
+                self.assertIn('DEV-010 deployed follow-up requires scoped receipt-bound evidence: '+field,validate_live_execution(wrong))
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+                live['actual_editor_deployment'][field]['bundle_sha256']='f'*64
+                self.assertIn('DEV-010 deployed follow-up requires scoped receipt-bound evidence: '+field,validate_live_execution(wrong))
+
+    def test_readiness_and_UI_error_cannot_claim_real_user_or_captured_HTTP_or_aal2(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('actual_user_Bearer_used',True),('DB_student_or_budget_writes_by_probe',1)]:
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['actual_editor_deployment']['native_readiness'][field]=value
+            self.assertIn('DEV-010 readiness preparation cannot imply real-user or student-write acceptance',validate_live_execution(wrong))
+        for field in ('HTTP_status_independently_captured','independent_aal2_admin_verification'):
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['actual_editor_deployment']['same_BFF_error_observation'][field]=True
+            self.assertIn('DEV-010 BFF safe error observation cannot certify HTTP status or administrator aal2',validate_live_execution(wrong))
+
+    def test_current_failed_P2_attempt_preserves_unknown_HTTP_creation_and_writes(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        live=self.spec['supabase_deployment_contract']['live_execution']
+        self.assertEqual(live['post_live_receipt']['P2_save_analysis_reread'],'NOT_RUN')
+        self.assertIn('ACTUAL_UI_SAVE_ATTEMPT_FAILED_UNDETAILED',live_execution_document(self.spec))
+        for field,value in [('HTTP_status',422),('safe_error_code','invalid_request'),('profile_created',False),('report_created',True),('DB_writes_independently_observed',0),('retry_count',1),('memory_validation_is_actual_request_result',True)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['current_P2_attempt'][field]=value
+                self.assertIn('DEV-010 current P2 failed attempt requires receipt and preserves unconfirmed stages',validate_live_execution(wrong))
+        for target in ('current_P2_attempt','evidence'):
+            wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+            if target=='current_P2_attempt':live.pop(target)
+            else:live['evidence'].pop(live['current_P2_attempt']['evidence_id'])
+            self.assertIn('DEV-010 current P2 failed attempt requires receipt and preserves unconfirmed stages',validate_live_execution(wrong))
+
+    def test_redacted_browser_value_cannot_prove_idempotency_preservation_or_key_DB_readback(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        live=self.spec['supabase_deployment_contract']['live_execution']
+        self.assertIsNone(live['current_P2_attempt']['same_form_idempotency_key'])
+        self.assertIn('BROWSER_VALUE_REDACTED_NOT_CAPTURED',live_execution_document(self.spec))
+        for field,value in [('same_form_idempotency_key',True),('idempotency_context_status','KEY_PRESERVED'),('idempotency_capture_claim_corrected',False),('same_placeholder_comparison_is_not_key_evidence',False),('reload_after_submit',True),('exact_key_DB_readback_count',1)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['current_P2_attempt'][field]=value
+                self.assertIn('DEV-010 current P2 failed attempt requires receipt and preserves unconfirmed stages',validate_live_execution(wrong))
 
     def test_scope_error_cannot_be_success_or_hide_invalid_policy(self):
         from check_project_consistency import validate_live_execution

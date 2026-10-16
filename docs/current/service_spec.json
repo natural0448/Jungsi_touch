@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.65",
+  "version": "1.9.66",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -5308,7 +5308,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.65",
+        "contract_version": "1.9.66",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -5482,7 +5482,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.65",
+        "contract_version": "1.9.66",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -5648,7 +5648,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.65",
+        "contract_version": "1.9.66",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -5667,7 +5667,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.65",
+        "contract_version": "1.9.66",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -5692,7 +5692,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.65",
+        "contract_version": "1.9.66",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -5717,7 +5717,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.65",
+        "contract_version": "1.9.66",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -6361,7 +6361,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "5e52ccbf476f7055391814c0b3ee6a8127754e85bd7aaf208a1f69a1009cea19",
+            "source_sha256": "b90af51b88c4f81e807cbc73d6a2671c4ddd17a5d30507c59bd2d0fcfb6ac0e2",
             "symbols": [
               {
                 "kind": "class",
@@ -16078,6 +16078,15 @@
         "REQ-26"
       ],
       "summary": "기획1.9.61을 기준으로 Deno native 대학별 누백 곡선에 명시적 v2 정수 유리수 점수 표현을 추가한다. 기존 v1·정확 가중치·승인/모집단/시험/규칙 결속과 공개 DTO는 유지하고 공급자 preflight에서 독립 누백까지 합성11건을 보완한다. 기존 네 자료 묶음과 저장 후보 읽기·14개 Fraction 비교 근거는 비공개로 보존한다. 실제 자료·운영 승인·22 API 인수는 승격하지 않는다."
+    },
+    {
+      "date": "2026-10-16",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "spec1.9.66: 기존 jungsi-api의 고정 cb500f7/동일tree develop1ba331c 번들 실제 배포와 editor 전체 copyback·reload 일치, verify_jwt=true 유지를 해시 결속 영수증으로 반영한다. 과거9e·초기준비·외부회신은 보존하며 소스 배포만 현재로 기록한다. 업무native/deployment0/22·P2·소유권·CSRF·만료갱신·운영3gate·production_ready=false를 유지하고 검색/자료/예산 승인을 확대하지 않는다. 영수증 없는 배포true와 소스·후보·번들 불일치 및 업무 완료 승격을 공통 검사에서 거절한다. 후속 동일 후보 readiness·relay/Bearer 누락 거절의 실제5건과 같은 BFF 안전 오류 표시만 각각 해시 결속하며 HTTP/관리aal2를 추정하지 않는다. P2 새 명시 합성1건의 단일 UI 제출 실패·재시도0·새로고침0·가림에 따른 멱등키 문맥 미수집·단계/쓰기 미확정을 별도 원장에 기록하고 선행 합성검산을 실제422/쓰기0으로 대체하지 않는다. 초기 키 동등·보존 주장은 가림 placeholder 비교의 오류로 정정하고 v1 실패 캡처는 이력으로 보존한다. 현재 same_form_idempotency_key=null과 정확 키 DB조회0을 강제하며 담당자 서버 문맥 확인 전 새 키 재시도를 금지한다."
     }
   ],
   "overall_analysis_contract": {
@@ -25890,7 +25899,9 @@
             "OPS-EDGE-INSTALLED-20261015",
             "OPS-EDGE-SETTINGS-PENDING-20261015",
             "OPS-OWNER-SETTINGS-REGISTERED-20261015",
-            "OPS-POSTREG-READINESS-20261015"
+            "OPS-POSTREG-READINESS-20261015",
+            "OPS-EDGE-EDITOR-DEPLOYED-20261016",
+            "OPS-EDGE-NATIVE-READINESS-20261016"
           ]
         },
         "bff_browser_acceptance": {
@@ -25898,7 +25909,9 @@
           "status": "IN_PROGRESS",
           "evidence_kind": "bff_browser",
           "evidence_ids": [
-            "OPS-BFF-LIVE-EXTERNAL-20261016"
+            "OPS-BFF-LIVE-EXTERNAL-20261016",
+            "OPS-BFF-SAFE-ERROR-20261016",
+            "OPS-P2-ACTUAL-FAILURE-20261016"
           ]
         },
         "security_gates": {
@@ -26358,9 +26371,76 @@
           "does_not_imply_operation_acceptance": true,
           "scope": "EXTERNAL_REPORTED_WORKER_RELAY_LIVE_REAL_BEARER_SESSION_PARTIAL_PAGE_OBSERVATION",
           "independently_observed": false
+        },
+        "OPS-EDGE-EDITOR-DEPLOYED-20261016": {
+          "kind": "edge_deployment",
+          "candidate_commit": "cb500f7ac10755de9f7b1977b60fa0eb77f2da3f",
+          "receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0",
+          "operations": [],
+          "scope": "기존 jungsi-api 한 개에 정확 번들을 입력하고 copyback 전체 바이트/SHA, Deploy updates 완료와 reload 후 서버 editor 소스 전체 일치를 확인했다. 기존 verify_jwt=true와 설정·다른 함수를 유지했다. 배포 count3은 화면 관측값이며 고유 배포 버전·새 버전 health·실JWT 업무 인수의 대용이 아니다.",
+          "does_not_imply_operation_acceptance": true,
+          "source": {
+            "candidate_commit": "cb500f7ac10755de9f7b1977b60fa0eb77f2da3f",
+            "accepted_develop_merge": "1ba331c0577f709fb7a8f812f5e227cb9e355f19",
+            "tree": "c7034d4a623f5b48d3687166caf66378421735ee",
+            "spec_version": "1.9.65",
+            "source_files_count": 64,
+            "bundle": {
+              "bytes": 1446299,
+              "sha256": "d1b75c873a55417d59f0a462912d71ccb06c54ab7791b956f78fbc25235ba213"
+            },
+            "runtime_source_bindings": {
+              "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "df529f89a92c376fe220bed77ce04a2e626b1668e722688b79997541042d72a5",
+              "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "dc7484cb340b74449b99d133781ab19205a353cc764612c0b2291fece4afb8ee"
+            }
+          },
+          "editor_receipt": {
+            "bytes": 707,
+            "sha256": "1bfdfd0e43dd82e95602c2027a474f6ef4024326bb6950ba8dd05a78e29ddd13"
+          }
+        },
+        "OPS-EDGE-NATIVE-READINESS-20261016": {
+          "kind": "edge_deployment",
+          "candidate_commit": "cb500f7ac10755de9f7b1977b60fa0eb77f2da3f",
+          "receipt_sha256": "4b5cc87abc718fc4ad581e5f4d1d849efd9e8e3277895fe4c4e2a1a343d45494",
+          "operations": [],
+          "scope": "새 배포에서 live200·정상 relay readiness200·relay 누락/불일치403·사용자 Bearer 누락401과 5건 no-store를 실제 확인했다. 사용자 JWT 접근 없이 수행한 준비·거절 경계이며 실제 사용자 업무·소유권·보안3gate 인수가 아니다.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0"
+        },
+        "OPS-BFF-SAFE-ERROR-20261016": {
+          "kind": "bff_browser",
+          "candidate_commit": "cb500f7ac10755de9f7b1977b60fa0eb77f2da3f",
+          "receipt_sha256": "bfa56eaf3c4c75fa31f06581abc3a2c5f5f4b57303dc80342b43606e5c9a5995",
+          "operations": [],
+          "scope": "기존 정상 로그인 브라우저의 같은 BFF 화면에서 operation_scope_not_approved 코드가 표시되는 것을 독립 관측했다. 실제 HTTP 상태는 직접 캡처하지 않았고 머리글은 일반 회원이었다. 관리자 aal2·유료 권한·업무 성공을 확인한 관측이 아니다.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0"
+        },
+        "OPS-P2-ACTUAL-FAILURE-20261016": {
+          "kind": "bff_browser",
+          "candidate_commit": "cb500f7ac10755de9f7b1977b60fa0eb77f2da3f",
+          "receipt_sha256": "c68d6fa3d8869e8e8af124e2d1eebf049dd5efeb2149aeab1862ccf13ae5236e",
+          "operations": [],
+          "scope": "새 명시 합성 사례1건의 단일 UI 제출에서 일반 저장 실패 안내를 관측했다. 브라우저 도구가 가린 placeholder는 실제 멱등키가 아니며 전후 동등 비교와 키 보존 주장을 정정한다. 제출1회·재시도0회·새로고침0회만 확인했고 실제 키 문맥은 수집하지 않았다. HTTP·안전 코드·profile/report 생성·DB쓰기와 부분 성공은 미확정이며 정확 키 제한 DB조회도0회다. 선행 합성 검산은 실제422·쓰기0을 증명하지 않는다.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0"
+        },
+        "OPS-P2-ACTUAL-FAILURE-20261016-V1-HISTORICAL": {
+          "kind": "bff_browser",
+          "candidate_commit": "cb500f7ac10755de9f7b1977b60fa0eb77f2da3f",
+          "receipt_sha256": "27a4f49f25bf2b8ba9efc3443a93fa56efbfda6a3e21a043a3d509b99aa5a0ae",
+          "operations": [],
+          "scope": "초기 P2 단일 UI 저장 실패 관측을 보존한다. 해당 영수증의 멱등키 동일·보존 주장은 가림 placeholder 비교를 실제 값으로 해석한 오류여서 무효다. 현재 정정 영수증을 따르며 실제 키 문맥·부분 생성·DB쓰기는 미확정이다.",
+          "does_not_imply_operation_acceptance": true,
+          "source_deployment_receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0",
+          "historical_observation": true,
+          "superseded_by": [
+            "OPS-P2-ACTUAL-FAILURE-20261016"
+          ]
         }
       },
-      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류 후보와 실제 설치 소스는 두 파일이 다르며 배포 전이다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다.",
+      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다.",
       "position_graph": {
         "formula_rows": [
           [
@@ -26384,7 +26464,7 @@
       "runtime_assembly": {
         "format": "jungsi.edge-runtime-assembly/v1",
         "status": "SOURCE_ASSEMBLED",
-        "status_text": "기존 22 operation의 Deno 소스와 과목 전용 null 처리는 develop에서 인수했고 기존 고정 번들을 Supabase에 설치했다. 005·과목 자료/제어 객체 발행·native Storage·격리 예산 SQL 근거는 재사용한다. 새 설정5개는 Owner 등록·digest 일치 보고를 수용했고 이후 실제 readiness200과 잘못된 relay403·Bearer누락401을 확인했다. 2026-10-16 화면팀은 Worker relay 등록·preview live·정상 Bearer의 aal1/aal2 세션 기능 통과를 보고했다. 본인 저장·분석·재조회, 소유권·CSRF·만료갱신 및 운영3gate는 별도 미완료다. 현재 새 오류 분류는 runtime_context/auth_relay 두 파일이 설치9e와 다른 배포 전 후보이며 검색 활성화가 아니다. 각 operation의 native/deployment는 부분 관측으로 승격하지 않는다.",
+        "status_text": "기존 22 operation의 Deno 소스와 과목 전용 null 처리는 develop에서 인수했고 기존 고정 번들을 Supabase에 설치했다. 005·과목 자료/제어 객체 발행·native Storage·격리 예산 SQL 근거는 재사용한다. 새 설정5개는 Owner 등록·digest 일치 보고를 수용했고 이후 실제 readiness200과 잘못된 relay403·Bearer누락401을 확인했다. 2026-10-16 화면팀은 Worker relay 등록·preview live·정상 Bearer의 aal1/aal2 세션 기능 통과를 보고했다. 본인 저장·분석·재조회, 소유권·CSRF·만료갱신 및 운영3gate는 별도 미완료다. 새 오류 분류를 포함한 정확 cb500f7 번들을 기존 함수에 배포하고 editor copyback·reload 전체 일치를 확인했다. 이전9e 대비 전체 차이4개와 고정 소스 결속은 실제 배포 기록을 따른다. 새 버전 준비 health·거절 경계는 실제 통과했으며 같은 BFF의 안전 오류 표시만 부분 관측했다. P2 단일 제출은 일반 저장 실패로 단계·DB쓰기가 미확정이고 실JWT 업무 인수·검색 활성화는 미완료다. 각 operation의 native/deployment는 부분 관측으로 승격하지 않는다.",
         "bindings": {
           "native_entry": {
             "path": "supabase/functions/jungsi-api/index.ts",
@@ -26560,7 +26640,9 @@
         "storage_native_metadata": "PRIVATE_NATIVE_METADATA_IMMUTABLE_UPLOAD_READBACK_AND_SINGLE_LINE_PREFLIGHT_PASS",
         "edge_package": "INSTALLED_SAME_VERIFIED_SOURCE_LIVENESS_AND_RELAY_DENIAL_OBSERVED",
         "edge_settings": "OWNER_REPORTED_FIVE_REGISTERED_DIGEST_MATCH_READY200_USER_PENDING",
-        "readiness": "ACTUAL_200_SCOPED_NATIVE_PREPARATION_NOT_BUSINESS_ACCEPTANCE"
+        "readiness": "ACTUAL_200_SCOPED_NATIVE_PREPARATION_NOT_BUSINESS_ACCEPTANCE",
+        "historical_observation": true,
+        "current_source_deployment_ref": "supabase_deployment_contract.live_execution.actual_editor_deployment"
       },
       "preconnection_preparation": {
         "format": "jungsi.preconnection-preparation/v1",
@@ -26947,7 +27029,7 @@
         ],
         "preview_gate_preserved": true,
         "new_data_or_authority_approval": false,
-        "interpretation_rule": "2026-10-15 설정 등록 직후의 제한 준비검수 이력이다. 당시 실사용자·Worker·BFF NOT_RUN은 보존하며, 이후 현재 상태는 2026-10-16 화면팀 실연결 회신으로 갱신한다. readiness와 업무 인수는 구분한다.",
+        "interpretation_rule": "2026-10-15 설정 등록 직후의 제한 준비검수 이력이다. 당시 실사용자·Worker·BFF NOT_RUN은 보존하며, 이후 현재 상태는 2026-10-16 화면팀 실연결 회신으로 갱신한다. readiness와 업무 인수는 구분한다. 후속 새 함수 소스 배포는 actual_editor_deployment의 독립 영수증으로 구분한다.",
         "next_rule": "이 준비검수 이후 Worker relay 등록·preview live 배포·정상로그인 Bearer 세션은 화면팀이 기능 통과로 보고했다. 다음 검수는 현재 실연결 회신의 P2 저장·분석·재조회 및 보안 반례 범위를 따른다.",
         "scope_rule": "현재선택된 과목전용5업무부터 성공점수와 total_model_missing 등 독립보류를 구분한다. 현재catalog·전체/대학누백·추천목적을 확대하거나 historical C140을 승격하지 않는다. 실제1~4페이지의pending/안전거절과 자료/계산성공을 구분하고 운영3gate를 별도로 인수한다.",
         "historical_observation": true
@@ -26973,7 +27055,7 @@
         "business_deployment_accepted": 0,
         "production_ready": false,
         "search_scope_approved": false,
-        "source_fix_deployed": false,
+        "source_fix_deployed": true,
         "selected_runtime_operations": [
           "session.read",
           "score-profile.create",
@@ -26997,12 +27079,139 @@
           },
           "success_or_quota_bypass": false
         },
-        "interpretation_rule": "화면팀이 운영 정문의 Worker relay·live·실제 Bearer 세션 기능 통과를 보고했다. 서비스가 새 브라우저/토큰을 독립 관측한 것은 아니며, 업무22개·운영3gate·일반공개 완료로 승격하지 않는다. 최초 synthetic 회신과 등록 직후 NOT_RUN은 이력이다.",
+        "interpretation_rule": "화면팀이 운영 정문의 Worker relay·live·실제 Bearer 세션 기능 통과를 보고했다. 서비스가 새 브라우저/토큰을 독립 관측한 것은 아니며, 업무22개·운영3gate·일반공개 완료로 승격하지 않는다. 최초 synthetic 회신과 등록 직후 NOT_RUN은 이력이다. 이 외부 회신 당시의 배포 전 관측은 보존하며 후속 실제 함수 소스 배포는 actual_editor_deployment의 독립 영수증을 따른다.",
         "session_observation": "aal1 일반 회원 / aal2 관리자 이용 paid+null; 정상 로그인·OTP 이후 탐색 중 세션 유지 보고.",
         "search_observation": "P1 양 세션 및 P3 aal2에서 503 security_policy_unavailable 보고. 현재 과목전용5작업 binding은 history.search·offerings.search를 제외한다. 고정 소스 합성 재현은 usage policy·업무·projection 전 차단이며 새 native 추적은 NOT_RUN.",
         "P4_observation": "aal1 유료 gate / aal2 확인된 성적 없음 표시; 후보 생성 업무 성공 근거가 아니다.",
-        "scope_error_rule": "소스 후보는 유효한 승인 binding의 미선택 작업만 503 operation_scope_not_approved로 구분한다. 누락·손상·만료 binding 또는 사용정책·비용 누락은 503 security_policy_unavailable을 유지한다. 배포 전이며 성공 DTO·예산·데이터 승인은 바꾸지 않는다.",
-        "next_rule": "기존 승인된 공식 과목팩과 가상 virtual386 1건으로 본인 성적 저장→분석→재조회 검수를 재개한다. POST별 같은 본문·멱등키와 부분 성공 ID를 보존하고 JWT·OTP·쿠키를 전달받지 않는다. 검색은 current catalog·두 operation·usage policy·binding의 별도 목적 승인 후보를 준비하며 자동 공개·Storage 발행·환경변경을 하지 않는다. 타인 소유권·CSRF·만료갱신과 운영3gate는 실제 실행 후 별도 인수한다."
+        "scope_error_rule": "배포한 소스는 유효한 승인 binding의 미선택 작업만 503 operation_scope_not_approved로 구분한다. 누락·손상·만료 binding 또는 사용정책·비용 누락은 503 security_policy_unavailable을 유지한다. 정확 번들 배포·editor 재조회까지 확인했으며 새 준비 health·거절 경계는 통과했고 후속 BFF 화면의 해당 코드 표시만 독립 관측했다. HTTP 상태 직접 캡처·관리 aal2·업무 인수는 미완료다. 성공 DTO·예산·데이터 승인은 바꾸지 않는다.",
+        "next_rule": "외부 회신 당시의 기존 가상 사례 P2 재개 지침은 이력으로 보존한다. 후속 current_P2_attempt의 새 명시 합성1건은 단일 UI 제출에서 일반 저장 실패를 보였고 HTTP·profile/report 생성·DB쓰기는 미확정이다. 가림값 비교로 실제 키 보존을 확인하지 못했다. 양식을 그대로 두고 담당자가 서버에서 요청 문맥과 부분 성공 여부를 확인하며 새 키 재시도·재생성·삭제 없이 실제 시험/pack·단계별 안전 코드·범위 한정 확인을 기다린다. 검색 목적·자료·예산 승인을 확대하지 않으며 업무22개·보안3gate 성공으로 세지 않는다.",
+        "historical_source_fix_deployed_before_editor_update": false,
+        "source_fix_deployment_evidence_id": "OPS-EDGE-EDITOR-DEPLOYED-20261016",
+        "historical_P2_next_rule_before_current_attempt": "기존 승인된 공식 과목팩과 가상 virtual386 1건으로 본인 성적 저장→분석→재조회 검수를 재개한다. POST별 같은 본문·멱등키와 부분 성공 ID를 보존하고 JWT·OTP·쿠키를 전달받지 않는다. 검색은 current catalog·두 operation·usage policy·binding의 별도 목적 승인 후보를 준비하며 자동 공개·Storage 발행·환경변경을 하지 않는다. 타인 소유권·CSRF·만료갱신과 운영3gate는 실제 실행 후 별도 인수한다."
+      },
+      "actual_editor_deployment": {
+        "format": "jungsi.actual-editor-deployment-acceptance/v1",
+        "status": "SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED",
+        "evidence_id": "OPS-EDGE-EDITOR-DEPLOYED-20261016",
+        "receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0",
+        "source": {
+          "candidate_commit": "cb500f7ac10755de9f7b1977b60fa0eb77f2da3f",
+          "accepted_develop_merge": "1ba331c0577f709fb7a8f812f5e227cb9e355f19",
+          "tree": "c7034d4a623f5b48d3687166caf66378421735ee",
+          "spec_version": "1.9.65",
+          "source_files_count": 64,
+          "bundle": {
+            "bytes": 1446299,
+            "sha256": "d1b75c873a55417d59f0a462912d71ccb06c54ab7791b956f78fbc25235ba213"
+          },
+          "runtime_source_bindings": {
+            "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "df529f89a92c376fe220bed77ce04a2e626b1668e722688b79997541042d72a5",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "dc7484cb340b74449b99d133781ab19205a353cc764612c0b2291fece4afb8ee"
+          }
+        },
+        "editor_receipt": {
+          "bytes": 707,
+          "sha256": "1bfdfd0e43dd82e95602c2027a474f6ef4024326bb6950ba8dd05a78e29ddd13"
+        },
+        "remote_readback": {
+          "bytes": 1446299,
+          "sha256": "d1b75c873a55417d59f0a462912d71ccb06c54ab7791b956f78fbc25235ba213"
+        },
+        "observed_at_UTC": "2026-10-16T00:27:29.241Z",
+        "editor_copyback_match": true,
+        "remote_reload_match": true,
+        "deployment_count_observed": 3,
+        "verify_jwt_remained_true": true,
+        "same_existing_project_and_function": true,
+        "secrets_or_other_function_changes": false,
+        "new_version_health": "NATIVE_READINESS_AND_BOUNDARY_PASS",
+        "same_BFF_actual_JWT": "SAFE_ERROR_CODE_VISIBLE_PARTIAL",
+        "P2_save_analysis_reread": "NOT_RUN",
+        "ownership": "NOT_RUN",
+        "CSRF": "NOT_RUN",
+        "expiry_refresh": "NOT_RUN",
+        "security_3_gates": "NOT_RUN",
+        "business_native_accepted": 0,
+        "business_deployment_accepted": 0,
+        "production_ready": false,
+        "operation_scope_expanded": false,
+        "data_or_budget_approval_changed": false,
+        "scope": "기존 jungsi-api 한 개에 정확 번들을 입력하고 copyback 전체 바이트/SHA, Deploy updates 완료와 reload 후 서버 editor 소스 전체 일치를 확인했다. 기존 verify_jwt=true와 설정·다른 함수를 유지했다. 배포 count3은 화면 관측값이며 고유 배포 버전·새 버전 health·실JWT 업무 인수의 대용이 아니다.",
+        "preservation_rule": "9e 설치·준비 health·최초 synthetic/BFF 회신은 당시 이력으로 보존한다. 기존 승인 과목5작업·binding·Storage·예산·모집행 단일 writer를 유지한다. 9e 대비 전체 소스 차이4개는 오류분류2TS·기존 대학분포v2 1TS·생성 catalog1JSON이며 자료·검색·모형 목적 승인을 추가하지 않는다. 이후 기획 문서 커밋을 이 고정 배포 소스 커밋으로 소급 치환하지 않는다. 전체 업무0/22·운영3gate·본인P2·소유권·CSRF·만료갱신 미완료를 유지하고 정상 기존 세션의 안전 오류 표시와 현재 P2 단일 실패를 별도 영수증으로 기록한다. HTTP/단계·부분 성공·실제 시험/pack·관리 aal2는 미확정이며 재시도하지 않는다.",
+        "native_readiness": {
+          "evidence_id": "OPS-EDGE-NATIVE-READINESS-20261016",
+          "receipt_sha256": "4b5cc87abc718fc4ad581e5f4d1d849efd9e8e3277895fe4c4e2a1a343d45494",
+          "source_deployment_receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0",
+          "bundle_sha256": "d1b75c873a55417d59f0a462912d71ccb06c54ab7791b956f78fbc25235ba213",
+          "cases": {
+            "alive": {
+              "http": 200,
+              "code": null
+            },
+            "normal_relay_ready": {
+              "http": 200,
+              "code": null
+            },
+            "wrong_relay": {
+              "http": 403,
+              "code": "relay_authentication_failed"
+            },
+            "missing_relay": {
+              "http": 403,
+              "code": "relay_authentication_failed"
+            },
+            "missing_user_Bearer": {
+              "http": 401,
+              "code": "authentication_required"
+            }
+          },
+          "cache_control": "no-store",
+          "actual_user_Bearer_used": false,
+          "DB_student_or_budget_writes_by_probe": 0,
+          "scope": "새 배포에서 live200·정상 relay readiness200·relay 누락/불일치403·사용자 Bearer 누락401과 5건 no-store를 실제 확인했다. 사용자 JWT 접근 없이 수행한 준비·거절 경계이며 실제 사용자 업무·소유권·보안3gate 인수가 아니다."
+        },
+        "same_BFF_error_observation": {
+          "evidence_id": "OPS-BFF-SAFE-ERROR-20261016",
+          "receipt_sha256": "bfa56eaf3c4c75fa31f06581abc3a2c5f5f4b57303dc80342b43606e5c9a5995",
+          "source_deployment_receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0",
+          "bundle_sha256": "d1b75c873a55417d59f0a462912d71ccb06c54ab7791b956f78fbc25235ba213",
+          "observed_error_code": "operation_scope_not_approved",
+          "normal_existing_browser_session": true,
+          "HTTP_status_independently_captured": false,
+          "independent_aal2_admin_verification": false,
+          "observed_headline": "일반 회원",
+          "scope": "기존 정상 로그인 브라우저의 같은 BFF 화면에서 operation_scope_not_approved 코드가 표시되는 것을 독립 관측했다. 실제 HTTP 상태는 직접 캡처하지 않았고 머리글은 일반 회원이었다. 관리자 aal2·유료 권한·업무 성공을 확인한 관측이 아니다."
+        },
+        "current_P2_attempt_evidence_id": "OPS-P2-ACTUAL-FAILURE-20261016"
+      },
+      "current_P2_attempt": {
+        "status": "ACTUAL_UI_SAVE_ATTEMPT_FAILED_UNDETAILED",
+        "evidence_id": "OPS-P2-ACTUAL-FAILURE-20261016",
+        "receipt_sha256": "c68d6fa3d8869e8e8af124e2d1eebf049dd5efeb2149aeab1862ccf13ae5236e",
+        "source_deployment_receipt_sha256": "9049d9a0b41978c3ea804701de05b99ecfaa9e35b2c210ef64c5a007b0c8a3b0",
+        "submit_count": 1,
+        "retry_count": 0,
+        "same_form_idempotency_key": null,
+        "HTTP_status": null,
+        "safe_error_code": null,
+        "profile_created": null,
+        "report_created": null,
+        "DB_writes_independently_observed": null,
+        "exam_pack_match": "NOT_INDEPENDENTLY_CONFIRMED",
+        "memory_validation_is_actual_request_result": false,
+        "step_2_analyze": "SUCCESS_NOT_CONFIRMED",
+        "step_3_reread": "NOT_RUN",
+        "business_native_accepted": 0,
+        "business_deployment_accepted": 0,
+        "production_ready": false,
+        "scope": "새 명시 합성 사례1건의 단일 UI 제출에서 일반 저장 실패 안내를 관측했다. 브라우저 도구가 가린 placeholder는 실제 멱등키가 아니며 전후 동등 비교와 키 보존 주장을 정정한다. 제출1회·재시도0회·새로고침0회만 확인했고 실제 키 문맥은 수집하지 않았다. HTTP·안전 코드·profile/report 생성·DB쓰기와 부분 성공은 미확정이며 정확 키 제한 DB조회도0회다. 선행 합성 검산은 실제422·쓰기0을 증명하지 않는다.",
+        "preservation_rule": "과거 실패 캡처와 정정 전 영수증은 이력으로 보존하되 가림값 비교를 실제 키·보존 증거로 쓰지 않는다. 브라우저 양식을 그대로 두고 담당자가 서버에서 요청 문맥을 확인할 때까지 새 키 재시도·재생성·삭제를 하지 않는다. P2 성공·부분 생성·DB쓰기를 추정하지 않고 단계별 안전 코드·실제 시험/pack 확인을 기다린다.",
+        "previous_receipt_evidence_id": "OPS-P2-ACTUAL-FAILURE-20261016-V1-HISTORICAL",
+        "idempotency_context_status": "BROWSER_VALUE_REDACTED_NOT_CAPTURED",
+        "idempotency_capture_claim_corrected": true,
+        "same_placeholder_comparison_is_not_key_evidence": true,
+        "reload_after_submit": false,
+        "exact_key_DB_readback_count": 0
       }
     }
   },

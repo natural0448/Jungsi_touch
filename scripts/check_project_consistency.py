@@ -1214,6 +1214,37 @@ def live_execution_document(spec):
                 ['소유권 / CSRF / 만료갱신',current['ownership']+' / '+current['CSRF']+' / '+current['expiry_refresh']],
                 ['업무 native / 배포 인수',str(current['business_native_accepted'])+'/22 / '+str(current['business_deployment_accepted'])+'/22'],
                 ['서비스 오류 분류',current['scope_error_rule']]])+'\n\n'+current['next_rule'])
+    deployment=c.get('actual_editor_deployment')
+    deployment_text=''
+    if deployment:
+        source=deployment['source'];bundle=source['bundle']
+        deployment_text=('\n\n### 실제 함수 소스 배포와 남은 업무 인수\n\n'+deployment['scope']+'\n\n'+
+            table(['확인 범위','결과'],[
+                ['소스 후보 / develop / tree',source['candidate_commit']+' / '+source['accepted_develop_merge']+' / '+source['tree']],
+                ['고정 번들',str(bundle['bytes'])+' bytes / SHA-256 '+bundle['sha256']],
+                ['배포 관측 시각',deployment['observed_at_UTC']],
+                ['editor 입력·reload 재조회',deployment['status']],
+                ['기존 함수 / verify_jwt', '기존 함수 유지 / true 유지'],
+                ['배포 영수증 SHA-256',deployment['receipt_sha256']],
+                ['새 버전 health / 같은 BFF 안전 오류 관측',deployment['new_version_health']+' / '+deployment['same_BFF_actual_JWT']],
+                ['P2 / 소유권 / CSRF / 만료갱신', 'NOT_RUN / NOT_RUN / NOT_RUN / NOT_RUN'],
+                ['업무 native / 배포 인수','0/22 / 0/22']])+'\n\n'+deployment['preservation_rule'])
+        for key in ('native_readiness','same_BFF_error_observation'):
+            observation=deployment.get(key)
+            if observation:
+                deployment_text+='\n\n'+observation['scope']+' 영수증 SHA-256 '+observation['receipt_sha256']+'.'
+    attempt=c.get('current_P2_attempt')
+    if attempt:
+        deployment_text+=('\n\n### 현재 P2 단일 제출의 실패 관측\n\n'+attempt['scope']+'\n\n'+
+            table(['확인 범위','현재 관측'],[
+                ['실행 / 재시도',str(attempt['submit_count'])+'회 / '+str(attempt['retry_count'])+'회'],
+                ['실제 상태',attempt['status']],
+                ['멱등키 문맥',attempt['idempotency_context_status']],
+                ['제출 후 새로고침 / 정확 키 제한 DB조회','0회 / 0회'],
+                ['HTTP / 안전 오류 코드 / profile·report 생성 / DB쓰기','미확정 / 미확정 / 미확정 / 미확정'],
+                ['시험·pack 실제 제출 일치',attempt['exam_pack_match']],
+                ['분석 / 재조회',attempt['step_2_analyze']+' / '+attempt['step_3_reread']],
+                ['실패 영수증 SHA-256',attempt['receipt_sha256']]])+'\n\n'+attempt['preservation_rule'])
     rows=[]
     for o in spec['operations']:
         state=c['operations'][o['id']]
@@ -1221,7 +1252,7 @@ def live_execution_document(spec):
     return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
             table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
             table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
-            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text+intake_text+post_text+current_text)
+            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text+intake_text+post_text+current_text+deployment_text)
 
 
 def validate_live_execution(spec):
@@ -1452,7 +1483,7 @@ def validate_live_execution(spec):
             errors.append('DEV-010 current BFF functional report needs scoped external evidence')
         if (any(current.get(k)!='NOT_RUN'for k in ('P2_save_analysis_reread','ownership','CSRF','expiry_refresh')) or
             any(type(current.get(k))is not int or current[k]!=0 for k in ('business_native_accepted','business_deployment_accepted')) or
-            any(current.get(k)is not False for k in ('independently_observed_browser','production_ready','search_scope_approved','source_fix_deployed'))):
+            any(current.get(k)is not False for k in ('independently_observed_browser','production_ready','search_scope_approved'))):
             errors.append('DEV-010 partial BFF report cannot promote unrun business or approval')
         if (current.get('selected_runtime_operations')!=['session.read','score-profile.create','overall.analyze','report.read','report.export'] or
             current.get('search_error')!={'http':503,'reported_code':'security_policy_unavailable','source_candidate_code':'operation_scope_not_approved'} or
@@ -1461,6 +1492,102 @@ def validate_live_execution(spec):
         for key in ('interpretation_rule','session_observation','search_observation','P4_observation','scope_error_rule','next_rule'):
             if not isinstance(current.get(key),str) or not current[key].strip():
                 errors.append('DEV-010 current BFF report boundary missing: '+key)
+    deployment=c.get('actual_editor_deployment')
+    if deployment is None:
+        if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,66) or (isinstance(current,dict)and current.get('source_fix_deployed')is not False):
+            errors.append('DEV-010 actual editor deployment requires receipt-bound evidence')
+    elif not isinstance(deployment,dict):
+        errors.append('DEV-010 actual editor deployment requires receipt-bound evidence')
+    else:
+        source=deployment.get('source',{});bundle=source.get('bundle',{})if isinstance(source,dict)else {}
+        source_binding=source if isinstance(source,dict)else {}
+        bundle_binding=bundle if isinstance(bundle,dict)else {}
+        evidence_id=deployment.get('evidence_id')
+        entry=registry.get(evidence_id,{})if isinstance(evidence_id,str)else {}
+        edge_stage=stages.get('edge_deployment')
+        edge_stage=edge_stage if isinstance(edge_stage,dict)else {}
+        editor=deployment.get('editor_receipt',{});readback=deployment.get('remote_readback',{})
+        if (deployment.get('format')!='jungsi.actual-editor-deployment-acceptance/v1' or
+            deployment.get('status')!='SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED' or
+            not isinstance(source,dict) or
+            any(not re.fullmatch(r'[0-9a-f]{40}',str(source.get(k,'')))for k in ('candidate_commit','accepted_develop_merge','tree')) or
+            source.get('spec_version')!='1.9.65' or type(source.get('source_files_count'))is not int or source['source_files_count']!=64 or
+            not isinstance(bundle,dict) or type(bundle.get('bytes'))is not int or bundle.get('bytes',0)<=0 or
+            not re.fullmatch(r'[0-9a-f]{64}',str(bundle.get('sha256',''))) or
+            not re.fullmatch(r'[0-9a-f]{64}',str(deployment.get('receipt_sha256',''))) or
+            not isinstance(entry,dict) or entry.get('kind')!='edge_deployment' or
+            entry.get('candidate_commit')!=source.get('candidate_commit') or entry.get('source')!=source or
+            entry.get('receipt_sha256')!=deployment.get('receipt_sha256') or
+            entry.get('operations')!=[] or entry.get('does_not_imply_operation_acceptance')is not True or
+            not isinstance(editor,dict) or type(editor.get('bytes'))is not int or editor.get('bytes',0)<=0 or
+            not re.fullmatch(r'[0-9a-f]{64}',str(editor.get('sha256',''))) or entry.get('editor_receipt')!=editor or
+            not isinstance(readback,dict) or readback!=bundle or
+            any(deployment.get(k)is not True for k in ('editor_copyback_match','remote_reload_match','verify_jwt_remained_true','same_existing_project_and_function')) or
+            type(deployment.get('deployment_count_observed'))is not int or deployment.get('deployment_count_observed',0)<=0 or
+            any(not isinstance(deployment.get(k),str)or not deployment[k].strip()for k in ('observed_at_UTC','scope','preservation_rule'))):
+            errors.append('DEV-010 actual editor deployment requires receipt-bound evidence')
+        bindings=source.get('runtime_source_bindings',{})if isinstance(source,dict)else {}
+        if (not isinstance(bindings,dict) or set(bindings)!={'supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts','supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts'} or
+            any(not isinstance(v,str)or indexed.get(p)!=v for p,v in bindings.items())):
+            errors.append('DEV-010 actual editor deployment source binding drift')
+        if (not isinstance(current,dict) or current.get('source_fix_deployed')is not True or
+            current.get('source_fix_deployment_evidence_id')!=deployment.get('evidence_id') or
+            current.get('historical_source_fix_deployed_before_editor_update')is not False):
+            errors.append('DEV-010 deployed source status lacks its actual editor evidence')
+        health_status=deployment.get('new_version_health');bff_status=deployment.get('same_BFF_actual_JWT')
+        for field,kind,status_key,accepted_status in [('native_readiness','edge_deployment','new_version_health','NATIVE_READINESS_AND_BOUNDARY_PASS'),('same_BFF_error_observation','bff_browser','same_BFF_actual_JWT','SAFE_ERROR_CODE_VISIBLE_PARTIAL')]:
+            observation=deployment.get(field)
+            if deployment.get(status_key)==accepted_status:
+                evidence=registry.get(observation.get('evidence_id'),{})if isinstance(observation,dict)and isinstance(observation.get('evidence_id'),str)else {}
+                evidence=evidence if isinstance(evidence,dict)else {}
+                if (not isinstance(observation,dict) or evidence.get('kind')!=kind or evidence.get('candidate_commit')!=source_binding.get('candidate_commit') or
+                    not re.fullmatch(r'[0-9a-f]{64}',str(observation.get('receipt_sha256',''))) or evidence.get('receipt_sha256')!=observation.get('receipt_sha256') or
+                    evidence.get('operations')!=[] or evidence.get('does_not_imply_operation_acceptance')is not True or
+                    observation.get('source_deployment_receipt_sha256')!=deployment.get('receipt_sha256') or evidence.get('source_deployment_receipt_sha256')!=deployment.get('receipt_sha256') or
+                    observation.get('bundle_sha256')!=bundle_binding.get('sha256') or
+                    not isinstance(observation.get('scope'),str)or not observation['scope'].strip()):
+                    errors.append('DEV-010 deployed follow-up requires scoped receipt-bound evidence: '+field)
+            elif observation is not None:
+                errors.append('DEV-010 deployed follow-up status lacks its scoped receipt: '+field)
+        readiness=deployment.get('native_readiness')
+        if health_status=='NATIVE_READINESS_AND_BOUNDARY_PASS' and isinstance(readiness,dict):
+            expected={'alive':{'http':200,'code':None},'normal_relay_ready':{'http':200,'code':None},'wrong_relay':{'http':403,'code':'relay_authentication_failed'},'missing_relay':{'http':403,'code':'relay_authentication_failed'},'missing_user_Bearer':{'http':401,'code':'authentication_required'}}
+            if (readiness.get('cases')!=expected or readiness.get('cache_control')!='no-store' or
+                readiness.get('actual_user_Bearer_used')is not False or type(readiness.get('DB_student_or_budget_writes_by_probe'))is not int or readiness['DB_student_or_budget_writes_by_probe']!=0):
+                errors.append('DEV-010 readiness preparation cannot imply real-user or student-write acceptance')
+        bff=deployment.get('same_BFF_error_observation')
+        if bff_status=='SAFE_ERROR_CODE_VISIBLE_PARTIAL' and isinstance(bff,dict):
+            if (bff.get('observed_error_code')!='operation_scope_not_approved' or bff.get('normal_existing_browser_session')is not True or
+                bff.get('HTTP_status_independently_captured')is not False or bff.get('independent_aal2_admin_verification')is not False or bff.get('observed_headline')!='일반 회원'):
+                errors.append('DEV-010 BFF safe error observation cannot certify HTTP status or administrator aal2')
+        attempt=c.get('current_P2_attempt')
+        if deployment.get('current_P2_attempt_evidence_id')is not None or attempt is not None:
+            attempt_evidence=registry.get(attempt.get('evidence_id'),{})if isinstance(attempt,dict)and isinstance(attempt.get('evidence_id'),str)else {}
+            attempt_evidence=attempt_evidence if isinstance(attempt_evidence,dict)else {}
+            if (not isinstance(attempt,dict) or attempt.get('status')!='ACTUAL_UI_SAVE_ATTEMPT_FAILED_UNDETAILED' or
+                attempt.get('evidence_id')!=deployment.get('current_P2_attempt_evidence_id') or
+                attempt_evidence.get('kind')!='bff_browser' or attempt_evidence.get('candidate_commit')!=source_binding.get('candidate_commit') or
+                not re.fullmatch(r'[0-9a-f]{64}',str(attempt.get('receipt_sha256',''))) or attempt_evidence.get('receipt_sha256')!=attempt.get('receipt_sha256') or
+                attempt_evidence.get('operations')!=[] or attempt_evidence.get('does_not_imply_operation_acceptance')is not True or
+                attempt.get('source_deployment_receipt_sha256')!=deployment.get('receipt_sha256') or
+                type(attempt.get('submit_count'))is not int or attempt['submit_count']!=1 or type(attempt.get('retry_count'))is not int or attempt['retry_count']!=0 or
+                'same_form_idempotency_key'not in attempt or attempt['same_form_idempotency_key']is not None or
+                attempt.get('idempotency_context_status')!='BROWSER_VALUE_REDACTED_NOT_CAPTURED' or
+                attempt.get('idempotency_capture_claim_corrected')is not True or attempt.get('same_placeholder_comparison_is_not_key_evidence')is not True or
+                attempt.get('reload_after_submit')is not False or type(attempt.get('exact_key_DB_readback_count'))is not int or attempt['exact_key_DB_readback_count']!=0 or
+                any(k not in attempt or attempt[k]is not None for k in ('HTTP_status','safe_error_code','profile_created','report_created','DB_writes_independently_observed')) or
+                attempt.get('exam_pack_match')!='NOT_INDEPENDENTLY_CONFIRMED' or attempt.get('memory_validation_is_actual_request_result')is not False or
+                attempt.get('step_2_analyze')!='SUCCESS_NOT_CONFIRMED' or attempt.get('step_3_reread')!='NOT_RUN' or
+                any(type(attempt.get(k))is not int or attempt[k]!=0 for k in ('business_native_accepted','business_deployment_accepted')) or attempt.get('production_ready')is not False or
+                any(not isinstance(attempt.get(k),str)or not attempt[k].strip()for k in ('scope','preservation_rule'))):
+                errors.append('DEV-010 current P2 failed attempt requires receipt and preserves unconfirmed stages')
+        if (health_status not in {'NOT_RUN_PENDING_SEPARATE_NATIVE_RECEIPT','NATIVE_READINESS_AND_BOUNDARY_PASS'} or bff_status not in {'NOT_RUN','SAFE_ERROR_CODE_VISIBLE_PARTIAL'} or
+            any(deployment.get(k)!='NOT_RUN'for k in ('P2_save_analysis_reread','ownership','CSRF','expiry_refresh','security_3_gates')) or
+            any(type(deployment.get(k))is not int or deployment[k]!=0 for k in ('business_native_accepted','business_deployment_accepted')) or
+            any(deployment.get(k)is not False for k in ('production_ready','operation_scope_expanded','data_or_budget_approval_changed','secrets_or_other_function_changes')) or
+            any(row.get(k)!='NOT_RUN'for row in states.values()if isinstance(row,dict)for k in ('native','deployment')) or
+            edge_stage.get('status')!='IN_PROGRESS' or not isinstance(edge_stage.get('evidence_ids'),list)or evidence_id not in edge_stage['evidence_ids']):
+            errors.append('DEV-010 editor source update cannot certify unrun business or security acceptance')
     for key,row in registry.items():
         if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
             not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or
@@ -1505,7 +1632,7 @@ def supabase_deployment_document(spec):
     comparison_text=('\n\n## 화면 제공 방식 비교 회신의 검토\n\n'+comparison['decision']+'\n\n'+
         table(['항목','확인·정정 기준'],comparison['facts'])+'\n\n실제 호환성/브라우저/비용 '+comparison['actual_compatibility_browser_and_billing']+'. 비교 수신은 배포·화면교체 승인이 아니다.\n\n'+
         '\n'.join('- ['+x['title']+']('+x['url']+')' for x in comparison['official_sources'])) if comparison else ''
-    return (c['scope']+'\n\n계약 '+c['revision']+' · 코드 '+c['code_status']+' · 실제 운영 NOT_RUN · production_ready=false. 출발 develop '+c['basis_commit']+'.\n\n'+
+    return (c['scope']+'\n\n계약 '+c['revision']+' · 코드 '+c['code_status']+' · 전체 운영 인수 미완료 · production_ready=false. 현재 부분 배포·검수는 live_execution 원장을 따른다. 출발 develop '+c['basis_commit']+'.\n\n'+
             '## 현재 소스·실제 연결·배포 상태\n\n'+table(['담당/범위','단일 정본','현재 상태','해석과 다음 조건'],live_execution_progress_rows(spec))+'\n\n'+
             '## 플랫폼과 비용 범위\n\n'+p['rule']+'\n\n허용 플랫폼: '+', '.join(p['allowed'])+' · 기존 요금제/Spend Cap 검수 '+p['usage_and_spend_cap_verification']+'. 추가 비용 없이 사용할 수 있는 범위를 먼저 확인한다.\n\n'+
             '## 3티어와 기존 Python 구현\n\n'+table(['계층/기준','구성'],[['프레젠테이션',a['presentation']],['애플리케이션',a['application']],['데이터',a['data']],['기존 검산',a['python_reference']]])+'\n\n'+a['rule']+'\n\n서버 UTC · 원자료/화면 Asia/Seoul. '+limits['cost_rule']+' '+runtime_text+'\n\n'+
@@ -1514,7 +1641,7 @@ def supabase_deployment_document(spec):
             c['native_publication']['rule']+'\n\nEdge에서 사용할 private Storage 명부/환경 이름은 서버 담당의 구현 계약과 후보 증거로 확정한다. Python의 로컬 파일 경로·factory 실행 명령을 Edge 배포 명령으로 사용하지 않는다.\n\n'+
             '## 담당별 후속 단계\n\n'+table(['단계','담당','상태','산출물'],[[x['id'],x['owner'],x['status'],x['deliverable']] for x in c['phases']])+'\n\n'+
             '## 화면 담당에게 전달할 작업\n\n화면 제공 범위 '+f['hosting_status']+' · Drive Apps Script 후보 '+f['candidate_permission']+'. 기존 외부 preview와 파일은 이력으로 보존한다. 새 플랫폼으로 채택하지 않는다.\n\n'+'\n'.join('- '+x for x in f['handoff'])+'\n\n'+
-            comparison_text+'\n\n## 검증 상태\n\nEdge 구현 '+v['status']+' · 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 '+v['actual_Auth_DB_Storage_Edge_BFF_browser_deployment']+' · 실제 비용/요금제 '+v['actual_billing_and_quota_verification']+'. 기존 Python 합성 인수는 Edge 포팅/실운영 인수를 대신하지 않는다.\n\n'+
+            comparison_text+'\n\n## 초기 준비 검증 이력\n\n당시 Edge 구현 '+v['status']+' · 당시 실제 Auth/DB/Storage/Edge/BFF/브라우저/배포 '+v['actual_Auth_DB_Storage_Edge_BFF_browser_deployment']+' · 당시 실제 비용/요금제 '+v['actual_billing_and_quota_verification']+'. 현재 부분 배포·검수는 live_execution 원장을 따른다. 기존 Python 합성 인수는 Edge 포팅/실운영 인수를 대신하지 않는다.\n\n'+
             live_execution_document(spec)+'\n\n## 공식 기술 근거\n\n'+'\n'.join('- ['+x['title']+']('+x['url']+')' for x in c['official_sources'])+'\n\n[DEV-010 작업 항목](../work_items/DEV-010-supabase-platform-deployment.json) · [기존 실행 자료 계약](Supabase_실행자료_연결.md)')
 
 
@@ -2003,7 +2130,7 @@ def generated_files(spec):
        "\n\n애플리케이션은 구체 DB 어댑터를 가져오지 않고 자신이 정의한 포트에 의존한다. 인프라가 포트를 구현한다. 프레젠테이션은 허용된 API 결과만 표시하며 Python 엔진·DB 비밀값·전체 환산표·곡선·모델을 포함하지 않는다.\n\n"+
        "## 커밋된 코드와 새 기반\n\n"+implementation+
        runtime_progress+"\n\n기존 src/jungsi_touch 루트 계산 모듈은 애플리케이션의 엔진 라이브러리다. 경로를 옮겨 기존 사용자를 깨뜨리지 않는다. 새 application과 infrastructure를 통해 입출력·소유권·저장소를 연결한다. 메모리 어댑터는 합성 검산 전용으로 운영 연결을 의미하지 않는다.\n\n"+
-       "## 데이터와 기술 결정\n\n실제 원자료·학생 성적·입결·환산표·곡선·모델과 .env 계열은 모든 브랜치에서 제외한다. database에는 DB 구조·마이그레이션 코드만 둘 수 있다. "+("FastAPI·Supabase PostgreSQL을 채택했다. UTC aware/timestamptz와 date를 구분하고 서버는 환경 설정만 읽는다. 실제 연결 설정·자료 승인·운영 배포는 대기다." if platform else "DB 엔진·웹 프레임워크·HTTP 서버 채택은 미정이다.")+"\n\n"+
+       "## 데이터와 기술 결정\n\n실제 원자료·학생 성적·입결·환산표·곡선·모델과 .env 계열은 모든 브랜치에서 제외한다. database에는 DB 구조·마이그레이션 코드만 둘 수 있다. "+("FastAPI·Supabase PostgreSQL을 채택했다. UTC aware/timestamptz와 date를 구분하고 서버는 환경 설정만 읽는다. 제한된 실제 연결·자료 목적 승인·함수 배포의 현재 근거는 live_execution 원장을 따르며 전체 운영 인수는 미완료다." if platform else "DB 엔진·웹 프레임워크·HTTP 서버 채택은 미정이다.")+"\n\n"+
        "## 구현과 운영 연결\n\n"+(runtime_intro if platform else "현재 계약과 권한 기반 다음에 실제 인증·저장·각 업무 서비스를 연결한다.")+" 각 단계는 승인된 자료가 없는 값을 사유와 함께 보류한다."+collaboration["ownership"]+collaboration["drive"])
     workflow=spec["workflow"]
     tools="\n".join("- "+p for p in workflow["shared_tools"])
