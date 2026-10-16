@@ -41,6 +41,7 @@ export interface ReportWrite {
   readonly key: string;
   readonly digest: string;
   readonly noOp?: boolean;
+  readonly paidOrigin?: import("./score_input_ports.ts").PaidResultOriginWrite;
 }
 export interface PlatformRepositoryPort {
   replay(

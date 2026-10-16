@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.72이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.73이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -588,4 +588,24 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=1d415b221151297ea1c386f73541cc0de22a2734dd0e0703e430686833d49aa9 -->
+<!-- jungsi:generated spec_sha256=76ef1df0c95468ea626ce901938fe86c8c7d1ddc8e8d8fc6ccde07ed2bd4a6cd -->
+
+
+## 기존 운영 조회의 후속 검수
+
+RECOVERY_READINESS_VERIFIED_REPORT_OWNER_REPORTED. 기존 운영 조회의 구성 복구 보고 및 독립 준비 확인을 수신했다. 실제 저장 결과 재조회 성공은 Owner의 외부 증거이며 별도 요청을 재실행한 검수와 구분한다. 상세 운영 근거는 비공개 영수증에 보존한다. 새 정책 후보의 배포·활성화와 분리한다. 이전 성공 증거는 보존한다. 복구 상태는 READINESS_VERIFIED_REPORT_READ_EXTERNAL_EVIDENCE로 구분한다.
+
+
+## REQ-27 서비스 정책 후보
+
+서비스 API/DTO·애플리케이션·저장소·준비 SQL·검증. 화면 구현은 화면팀 담당이다.
+
+기존22 API와 신규3 API를 각각 검증한 현재 계약은 총25개다. session/v1은 기존3개 공개 필드를 유지한다. 신규 경로: score-input.status.read, score-input.correction.grant, report.sample.read.
+
+예산 예약은 먼저 독립 원자 커밋하여 실패 요청의 빈도 기록을 보존한다. 요청별 SQL fork의 동일 transaction frame에 프로필·입력권·예산 정산을 참여시켜 응답 투영·직렬화·마지막 인증/정책 검증 뒤 커밋한다. 실패 frame은 롤백 후 기존 lease를 정산하며 COMMIT 전송 확인 불명은 동일 key/status 복구로 구분한다. 성공한 프로필 POST 이후 분리된 overall 5xx는 기존 프로필/소비를 보존하고 profile_id로 재개한다.
+
+개인 일일 distinct_scores/calculation_cost는 단계별 최초1회+관리자 정정1회로 대체하며 빈도·공유 동시성·요청당 물리 비용/시간·반환량·저장소 보호를 유지한다. 미설정·legacy 미전환·미승인 단계는 fail closed다.
+
+첫 유료 결과는 해당 유료 작업의 공개 숫자 결과를 기준으로 생성 출처 이용권/현재 접근 이용권을 분리한다. 본인 read/export는 저장 원결과의 미전달 근거만 복구한다. 고정 가상 견본·단순 페이지 진입·통계·관리·전부 pending은 소비로 기록하지 않는다.
+
+런타임별 상태: 서비스 구현 후보; 새 승인 usage-policy/v2·006·전환·범위/비용/배포 검수 전 개인 입력 503 hold / REQ-27 입력권/정정/첫사용 미구현. 운영 경로는 개인 새 입력/분석 및 신규 API를 503 hold; legacy_synthetic 검증은 명시적 모드로 분리한다.. 006 상태: APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED. 공개 RPC·기존 프로필 전환·신규 scope/비용·정책 활성화·배포/실계정 검수: NOT_RUN. 기존003 승인은 새006의 실행 승인이 아니다.

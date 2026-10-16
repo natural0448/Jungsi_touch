@@ -54,9 +54,15 @@ class AccessDecision:
     http_status: int
 
 class AccessController:
-    def __init__(self, reports: ReportAccessRepository):
+    def __init__(self, reports: ReportAccessRepository, *, operating_mode="rights"):
         catalog=json.loads(Path(__file__).with_name("route_catalog.json").read_text(encoding="utf-8"))
         self._operations={row["id"]:row for row in catalog["operations"]}
+        if operating_mode not in ("rights","legacy_synthetic"):raise ValueError("Unknown operating mode")
+        if operating_mode=="legacy_synthetic":
+            for operation in ("score-profile.create","overall.analyze"):
+                self._operations[operation]["member_tiers"]=["standard","paid"]
+            self._operations["report.export"]["member_tiers"]=["paid"]
+            self._operations["report.export"]["confirmed_score_profile"]=True
         self._pages={row["id"]:row for row in catalog["pages"]}
         self._reports=reports
 

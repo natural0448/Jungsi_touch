@@ -30,6 +30,8 @@ export interface PublicPassState {
   readonly subjectId: string;
   readonly evaluatedAtUtc: bigint;
   readonly paidUntilUtc: bigint | null;
+  /** Private stable source pass identity; never added to session/v1. */
+  readonly passId?: string | null;
 }
 export interface PublicPassPort {
   readCurrent(subjectId: string, nowUtc: bigint): Promise<PublicPassState>;

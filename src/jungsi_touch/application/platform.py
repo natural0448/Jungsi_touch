@@ -71,12 +71,14 @@ def changes_dto(rows, *, source_timezone=None):
 
 
 class PlatformService:
-    def __init__(self, repository, data, clock, forecast_repository=None, forecast_service=None, session_service=None):
+    def __init__(self, repository, data, clock, forecast_repository=None, forecast_service=None, session_service=None, operating_mode="rights"):
         self.forecast_repository=forecast_repository
         self.forecast_service=forecast_service
         self.session_service=session_service
         self.repository, self.data, self.clock = repository, data, clock
-        self.access = AccessController(repository)
+        if operating_mode not in ("rights","legacy_synthetic"):raise ValueError("Unknown operating mode")
+        self.operating_mode=operating_mode
+        self.access = AccessController(repository,operating_mode=operating_mode)
         self.overall = OverallAnalysisService(self.access, data)
         self.scoring = UniversityScoringService(data)
         self.percentile = UniversityPercentileService(data)
@@ -93,6 +95,12 @@ class PlatformService:
         # Policy lookup precedes shape validation, data access and replay lookup.
         decision = self.access.operation_access(operation, actor, report_id=params.get('report_id'))
         if not decision.allowed: raise PlatformError(decision.status, decision.http_status)
+        if operation=='score-input.correction.grant' and not (actor.admin_access_origin=='verified_own_profile_active_admin_aal2' and actor.account_role=='admin' and actor.account_status=='active' and actor.assurance_level=='aal2'):
+            raise PlatformError('management_mfa_required',403)
+        # Python is a reference/explicit synthetic path. New policy rights have no Python DB adapter.
+        # Fail closed before replay, calculations or writes; do not claim the Edge implementation here.
+        if operation in {'score-input.status.read','score-input.correction.grant','report.sample.read'} or (self.operating_mode=='rights' and operation in {'score-profile.create','overall.analyze','university.analyze','candidates.build'}):
+            raise PlatformError('score_input_policy_unavailable',503)
         body = {} if body is None else body
         if operation in WRITES:
             identifier(key)

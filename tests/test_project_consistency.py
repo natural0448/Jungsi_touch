@@ -171,9 +171,9 @@ class ConsistencyTests(unittest.TestCase):
         self.assertFalse(protected_path("scripts/check_project_consistency.py",self.spec["workflow"]["shared_tools"]))
         self.assertFalse(protected_path("database/structure.sql",self.spec["workflow"]["shared_tools"]))
 
-    def test_overall_service_must_remain_available_to_standard_and_paid(self):
+    def test_overall_service_requires_paid_in_current_policy(self):
         spec=deepcopy(self.spec)
-        next(row for row in spec["operations"] if row["id"]=="overall.analyze")["member_tiers"]=["paid"]
+        next(row for row in spec["operations"] if row["id"]=="overall.analyze")["member_tiers"]=["standard","paid"]
         self.assertIn("Overall analysis access policy drift",validate_spec(spec))
 
     def test_overall_http_flag_must_match_registered_platform_adapter(self):
@@ -337,7 +337,7 @@ class LocalVerificationContractTests(unittest.TestCase):
         self.assertNotIn('composition',frontend)
         self.assertNotIn('source_provenance',frontend)
         self.assertNotIn('local_filesystem_selection',frontend)
-        self.assertEqual(len(self.spec['operations']),22)
+        self.assertEqual(len(self.spec['operations']),25)
 
     def test_local_guide_cannot_be_redirected_or_contract_removed(self):
         for path in ('.env','outputs/private.md','docs/current/임의가이드.md'):
@@ -1336,7 +1336,7 @@ class PublicResponseRegistryContractTests(unittest.TestCase):
             dto=self.spec["backend_platform_contract"]["dto_schemas"][operation["http_contract"]["response_schema"]]
             roots={}
             for role in ("standard","paid"):
-                fields=dto["fields"]+(dto.get("paid_fields",[]) if role=="paid" else [])
+                fields=dto["fields"]+dto.get("optional_role_fields",{}).get(role,[])+(dto.get("paid_fields",[]) if role=="paid" else [])
                 name=operation["id"]+"."+role
                 self.catalog["schemas"][name]={"type":"object","properties":{f:{"type":"string","nullable":True} for f in fields},"required":[],"optional":fields}
                 roots[role]={"ref":name}
@@ -1675,7 +1675,8 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         self.assertTrue(deployed_observer_contract_pinned(epoch_spec))
         live=epoch_spec['supabase_deployment_contract']['live_execution']
         self.assertEqual(live['backend_safe_observation_plan']['synthetic_verification']['full_suite_expected'],584)
-        self.assertEqual(epoch_spec['edge_harness']['unit_count'],590)
+        self.assertEqual(live['admin_session_identity_fix']['synthetic_verification']['full_suite_expected'],590)
+        self.assertEqual(epoch_spec['edge_harness']['unit_count'],624)
         self.assertIn('관리자 세션의 예산 연결 수정 후보 · 미배포',live_execution_document(epoch_spec))
 
     def test_admin_identity_fix_rejects_missing_or_stale_source_and_test_binding(self):

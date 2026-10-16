@@ -2,7 +2,7 @@
 import type { ManagementDecision } from "./management_access.ts";
 import type { SessionSnapshot } from "./session_service.ts";
 import type { NativeJson } from "../domain/native_json.ts";
-export const API_OPERATION_IDS = [
+export const LEGACY_API_OPERATION_IDS = [
   "history.search",
   "recruitment.read",
   "score-profile.create",
@@ -25,6 +25,16 @@ export const API_OPERATION_IDS = [
   "forecast.approve",
   "forecast.publish",
   "forecast.published.read",
+] as const;
+export const SCORE_POLICY_OPERATION_IDS = [
+  "score-input.status.read",
+  "score-input.correction.grant",
+  "report.sample.read",
+] as const;
+/** Preserve every legacy operation and register policy extensions explicitly. */
+export const API_OPERATION_IDS = [
+  ...LEGACY_API_OPERATION_IDS,
+  ...SCORE_POLICY_OPERATION_IDS,
 ] as const;
 export type ApiOperationId = typeof API_OPERATION_IDS[number];
 export interface ApiRoutePolicy {

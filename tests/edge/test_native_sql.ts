@@ -13,7 +13,7 @@ import { assert, equal } from "./fixture.ts";
 
 const UID = "00000000-0000-0000-0000-000000000001";
 const WHEN = "2026-10-14T00:00:00.000001Z";
-const PASS = [true, ["columns"], ["constraints"], [true, false], ["policies"], null];
+const PASS = [true, ["columns"], ["constraints"], [true, false], ["policies"], null, null];
 function fixture(transform?: (rows: unknown[][]) => unknown[][]) {
   const calls: { statement: string; parameters: readonly unknown[] }[] = [], modes: boolean[] = [];
   let closed = 0;
@@ -69,7 +69,7 @@ async function errorCode(run: () => Promise<unknown>, code: string, status = 503
   equal(error.code, code);
   equal(error.http, status);
 }
-Deno.test("SQL pass metadata role guard and MAX use one positional data query", async () => {
+Deno.test("SQL pass metadata role guard maximum expiry and ID use one positional data query", async () => {
   const f = fixture();
   equal(await f.port.readOnlyOne(PASS_STATE_SQL, ["jungsi_backend_app", UID, WHEN, WHEN]), PASS);
   equal(f.modes, [true]);

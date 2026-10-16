@@ -12,7 +12,7 @@ class AccessPolicyTests(unittest.TestCase):
         self.repository=SyntheticReportAccessRepository({
             "synthetic-confirmed":ReportAccessRecord("synthetic-owner",True),
             "synthetic-unconfirmed":ReportAccessRecord("synthetic-owner",False)})
-        self.policy=AccessController(self.repository)
+        self.policy=AccessController(self.repository, operating_mode="legacy_synthetic")
         self.free=Actor("synthetic-owner")
         self.paid=Actor("synthetic-owner",True)
     def test_free_history_requires_no_scores(self):
@@ -45,7 +45,7 @@ class AccessPolicyTests(unittest.TestCase):
         class BrokenRepository:
             def lookup_access(self,report_id):
                 raise AssertionError("Unpaid request must not reach repository")
-        self.assertEqual(AccessController(BrokenRepository()).operation_access("university.analyze",self.free,report_id="synthetic-confirmed").http_status,403)
+        self.assertEqual(AccessController(BrokenRepository(), operating_mode="legacy_synthetic").operation_access("university.analyze",self.free,report_id="synthetic-confirmed").http_status,403)
     def test_anonymous_denied(self):
         self.assertEqual(self.policy.operation_access("history.search",Actor(None)).http_status,401)
     def test_client_dict_is_not_verified_actor(self):
@@ -64,7 +64,7 @@ class AccessPolicyTests(unittest.TestCase):
         class InvalidRepository:
             def lookup_access(self,report_id):
                 return {"owner_id":"synthetic-owner","confirmed_score_profile":True}
-        self.assertEqual(AccessController(InvalidRepository()).operation_access("university.analyze",self.paid,report_id="synthetic-confirmed").http_status,503)
+        self.assertEqual(AccessController(InvalidRepository(), operating_mode="legacy_synthetic").operation_access("university.analyze",self.paid,report_id="synthetic-confirmed").http_status,503)
     def test_repository_copies_synthetic_input(self):
         source={"synthetic-confirmed":ReportAccessRecord("synthetic-owner",True)}
         repository=SyntheticReportAccessRepository(source)

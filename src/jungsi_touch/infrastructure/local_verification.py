@@ -165,7 +165,7 @@ def build_local_app(*, sessions, cache=None, registry_sha256=None, hold_no_data=
     # An explicit blank settings object prevents inherited operational env/DB,
     # network sessions and Drive writers from entering the local factory.
     app = create_app(settings=ServerSettings(allowed_origins=tuple(origins)), repository=repository,
-                     sessions=auth, data=data, clock=clock, forecast_repository=forecast)
+                     sessions=auth, data=data, clock=clock, forecast_repository=forecast,operating_mode="legacy_synthetic")
     app.state.local_repository = repository
     return LocalBoundary(app, origins=origins, port=port, diagnostic=diagnostic)
 

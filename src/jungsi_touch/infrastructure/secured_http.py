@@ -69,8 +69,8 @@ class SecuredBoundary:
 
 
 def create_secured_app(*, security, settings=None, repository=None, data=None, sessions=None, clock=None,
-                       forecast_repository=None, forecast_inputs=None, entitlements=None):
+                       forecast_repository=None, forecast_inputs=None, entitlements=None, operating_mode="rights"):
     from .http_api import _compose_app
     return _compose_app(settings=settings, repository=repository, data=data, sessions=sessions, clock=clock,
                         forecast_repository=forecast_repository, forecast_inputs=forecast_inputs,
-                        entitlements=entitlements, boundary=SecuredBoundary(security))
+                        entitlements=entitlements, boundary=SecuredBoundary(security),operating_mode=operating_mode)

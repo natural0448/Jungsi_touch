@@ -37,7 +37,7 @@ class ForecastAnalysisHttpTests(unittest.TestCase):
         for history in ('history_70','acceptance_history'):
             for row in self.inputs.data[history]:row.update(population_id=context['population_id'],comparison_value='30')
         self.inputs.inputs=lambda oid,input_id,version:deepcopy(self.inputs.data)
-        self.app=create_app(repository=self.repo,data=self.data,sessions=SyntheticSessions(self.clock),clock=self.clock,forecast_repository=self.store,forecast_inputs=self.inputs)
+        self.app=create_app(repository=self.repo,data=self.data,sessions=SyntheticSessions(self.clock),clock=self.clock,forecast_repository=self.store,forecast_inputs=self.inputs, operating_mode="legacy_synthetic")
         self.client=TestClient(self.app);self.key=0
 
     def request(self,method,path,body=None):

@@ -107,6 +107,7 @@ function passRow(expiry: string | null): unknown[] {
       ],
     ],
     expiry,
+    expiry === null ? null : "1",
   ];
   for (const index of [1, 2, 3, 4]) values[index] = JSON.stringify(values[index]);
   return values;

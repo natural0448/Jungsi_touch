@@ -35,7 +35,7 @@ function clone(value: unknown): unknown {
   return value;
 }
 const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
-export function validateScoreInput(value: unknown): ExamRow {
+export function validateScoreStructure(value: unknown): ExamRow {
   const required = ["exam_id", "pack_version", "korean", "math", "inquiry"],
     allowed = [...required, "english_grade", "korean_history_grade"];
   if (
@@ -60,17 +60,35 @@ export function validateScoreInput(value: unknown): ExamRow {
       Object.keys(x).some((k) => !["subject", "standard_score", "percentile", "grade"].includes(k))
     )
   ) invalid();
+  const integer = (v: unknown) =>
+    typeof v === "bigint" ||
+    typeof v === "number" && Number.isSafeInteger(v);
   for (const item of [value.korean, value.math, ...value.inquiry] as ExamRow[]) {
-    for (const [field, lo, hi] of [["percentile", 0, 100], ["grade", 1, 9]] as const) {
-      if (
-        Object.hasOwn(item, field) &&
-        (typeof item[field] !== "number" || !Number.isSafeInteger(item[field]) ||
-          (item[field] as number) < lo || (item[field] as number) > hi)
-      ) invalid("invalid_reported_" + field);
+    if (!integer(item.standard_score)) invalid("invalid_integer");
+    for (const field of ["percentile", "grade"]) {
+      if (Object.hasOwn(item, field) && !integer(item[field])) invalid("invalid_reported_" + field);
     }
+  }
+  for (const field of ["english_grade", "korean_history_grade"]) {
+    if (Object.hasOwn(value, field) && value[field] !== null && !integer(value[field])) invalid();
   }
   return clone(value) as ExamRow;
 }
+export function validateScoreInput(value: unknown): ExamRow {
+  const result = validateScoreStructure(value);
+  for (const item of [result.korean, result.math, ...result.inquiry as ExamRow[]] as ExamRow[]) {
+    for (const [field, lo, hi] of [["percentile", 0, 100], ["grade", 1, 9]] as const) {
+      if (
+        Object.hasOwn(item, field) &&
+        ((item[field] as number | bigint) < lo || (item[field] as number | bigint) > hi)
+      ) {
+        invalid("invalid_reported_" + field);
+      }
+    }
+  }
+  return result;
+}
+
 function pending(reason: string): ExamRow {
   return {
     status: "pending",

@@ -23,7 +23,7 @@ class ManagementMfaTests(unittest.TestCase):
         self.sessions=AssuranceSessions(self.clock,'aal1')
         self.store=MemoryForecastRepository({'SYNTHETIC-editor':dict(edit=True,approve=True,university_ids=['SYNTHETIC-U'])})
         self.client=TestClient(create_app(repository=self.repository,data=SyntheticData(self.clock),sessions=self.sessions,
-            clock=self.clock,forecast_repository=self.store,forecast_inputs=Inputs(False)))
+            clock=self.clock,forecast_repository=self.store,forecast_inputs=Inputs(False), operating_mode="legacy_synthetic"))
         self.headers={'Authorization':'Bearer SYNTHETIC-editor','Idempotency-Key':'SYNTHETIC-mfa-only'}
 
     def tearDown(self):self.client.close()

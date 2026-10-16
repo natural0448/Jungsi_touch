@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.72",
-  "source_sha256": "1d415b221151297ea1c386f73541cc0de22a2734dd0e0703e430686833d49aa9",
+  "spec_version": "1.9.73",
+  "source_sha256": "76ef1df0c95468ea626ce901938fe86c8c7d1ddc8e8d8fc6ccde07ed2bd4a6cd",
   "pages": [
     {
       "id": "PAGE-01",
@@ -160,7 +160,6 @@
       "method": "POST",
       "path": "/api/v1/score-profiles",
       "member_tiers": [
-        "standard",
         "paid"
       ],
       "report_owner": false,
@@ -171,16 +170,18 @@
         "REQ-14",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-27"
       ],
       "response_scope": "본인에게 귀속되는 성적 프로필의 생성 결과",
-      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "http_contract": {
         "body": [
           "scores: 기존 overall_analysis_contract 입력",
-          "confirmed: boolean"
+          "confirmed: boolean",
+          "stage?: mock|provisional|final (서버 승인 단계만)"
         ],
         "query": [],
         "response": "profile",
@@ -201,6 +202,11 @@
           "SEC-06"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "runtime_policy_status": {
+        "native_edge": "candidate_not_deployed_or_activated",
+        "python_current": "score_input_policy_unavailable503",
+        "legacy_synthetic": "explicit_baseline_only"
       }
     },
     {
@@ -208,7 +214,6 @@
       "method": "POST",
       "path": "/api/v1/overall-reports",
       "member_tiers": [
-        "standard",
         "paid"
       ],
       "report_owner": false,
@@ -221,20 +226,20 @@
         "REQ-15",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-27"
       ],
-      "response_scope": "입력 검증 후 본인의 총점·승인 전체 누적·자료 상태",
+      "response_scope": "본인의 저장된 현재 프로필을 사용한 분석; 동일 계산 자료 버전은 저장 결과 재사용. flat 입력은 명시적 legacy_synthetic 검증 모드에만 존재한다.",
       "application_service": "jungsi_touch.application.platform.PlatformService.execute",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
-      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "http_contract": {
         "body": [
-          "profile_id",
-          "report_id (갱신 시 선택)",
-          "expected_version (report_id 갱신 시 필수)",
-          "또는 DEV-001 flat 성적 입력; 이때 unconfirmed 프로필 생성"
+          "profile_id: 본인이 저장한 현재 입력 프로필",
+          "report_id (선택)",
+          "expected_version (report_id 사용 시 필수)"
         ],
         "query": [],
         "response": "report",
@@ -254,6 +259,11 @@
           "SEC-06"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "runtime_policy_status": {
+        "native_edge": "candidate_not_deployed_or_activated",
+        "python_current": "score_input_policy_unavailable503",
+        "legacy_synthetic": "explicit_baseline_only"
       }
     },
     {
@@ -271,7 +281,8 @@
         "REQ-14",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-27"
       ],
       "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
@@ -427,7 +438,7 @@
         "REQ-26"
       ],
       "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
-      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "http_contract": {
@@ -456,6 +467,11 @@
           "SEC-06"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "runtime_policy_status": {
+        "native_edge": "candidate_not_deployed_or_activated",
+        "python_current": "score_input_policy_unavailable503",
+        "legacy_synthetic": "explicit_baseline_only"
       }
     },
     {
@@ -477,7 +493,7 @@
         "REQ-26"
       ],
       "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
-      "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
+      "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "http_contract": {
@@ -505,6 +521,11 @@
           "SEC-06"
         ],
         "enforcement_status": "pending_runtime_implementation"
+      },
+      "runtime_policy_status": {
+        "native_edge": "candidate_not_deployed_or_activated",
+        "python_current": "score_input_policy_unavailable503",
+        "legacy_synthetic": "explicit_baseline_only"
       }
     },
     {
@@ -558,18 +579,20 @@
       "method": "GET",
       "path": "/api/v1/reports/{report_id}/print",
       "member_tiers": [
+        "standard",
         "paid"
       ],
       "report_owner": true,
-      "confirmed_score_profile": true,
+      "confirmed_score_profile": false,
       "requirements": [
         "REQ-11",
         "REQ-14",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-27"
       ],
-      "response_scope": "발행 버전이 고정된 본인 전체 상담 리포트",
+      "response_scope": "현재 등급과 무관한 본인 저장 리포트 읽기·출력; 승인 출처가 있는 저장 유료 결과만 read_only_snapshot으로 제공하고 새 계산은 하지 않는다.",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -1310,6 +1333,147 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       }
+    },
+    {
+      "id": "score-input.status.read",
+      "method": "GET",
+      "path": "/api/v1/me/score-input-status",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "response_scope": "본인의 현재 단계별 사용/잔여·정정·마지막 시도 결과·기존 리포트와 현재 이용권 첫 결과 시각",
+      "implementation_status": "native_edge_candidate_prepared_not_activated",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [
+          "exam_id",
+          "stage?"
+        ],
+        "response": "score_input_status",
+        "idempotency_key_required": false,
+        "response_schema": "score_input_status"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.score_input_status",
+      "native_application_service": "ScoreInputService.execute",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-05",
+          "SEC-06",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
+    },
+    {
+      "id": "score-input.correction.grant",
+      "method": "POST",
+      "path": "/api/v1/management/score-input-corrections",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "response_scope": "서버 검증 active admin/AAL2만 현재 열린 단계의 1회 정정을 승인하고 원래 시도와 티켓 근거를 보존한다.",
+      "implementation_status": "native_edge_candidate_prepared_not_activated",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [
+          "subject_id",
+          "exam_id",
+          "stage",
+          "ticket_ref",
+          "expected_version",
+          "reason_code=score_correction"
+        ],
+        "query": [],
+        "response": "score_input_correction",
+        "idempotency_key_required": true,
+        "response_schema": "score_input_correction"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.score_input_correction",
+      "native_application_service": "ScoreInputService.execute",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-05",
+          "SEC-06",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
+    },
+    {
+      "id": "report.sample.read",
+      "method": "GET",
+      "path": "/api/v1/report-sample",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "response_scope": "수정·저장하지 않는 고정 합성 학생의 견본; 실제 관측이나 모집단 백분위로 표시하지 않는다.",
+      "implementation_status": "native_edge_candidate_prepared_not_activated",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "sample_report",
+        "idempotency_key_required": false,
+        "response_schema": "sample_report"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.sample_report",
+      "native_application_service": "ScoreInputService.execute",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-05",
+          "SEC-06",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     }
   ],
   "runtime_status": "HTTP_workflows_implemented_live_configuration_pending",
@@ -1578,11 +1742,16 @@
           "analysis_status"
         ],
         "rules": [
-          "overall은 기존 jungsi.overall-analysis/v1 학생 DTO다.",
-          "일반회원 응답은 paid_fields를 제외한다. 조회와 멱등 재응답에서도 현재 이용권을 다시 적용한다.",
-          "report_version은 정수 revision이며 갱신 요청의 expected_version과 비교한다.",
-          "성적 변경은 새 프로필을 연결한 리포트 revision을 만들고 기존 분석/후보를 무효화하며 선택 항목은 needs_revalidation으로 보존한다."
-        ]
+          "overall은 저장된 본인의 기존 학생 DTO다.",
+          "유료 요청은 기존 paid_fields를 유지한다. 만료·무이용권 본인 read/export는 승인된 저장 출처가 있는 결과만 닫힌 read_only_snapshot으로 읽으며 새 계산은 하지 않는다.",
+          "미확인 legacy 출처는 유료 결과를 임의 확장하거나 first-use 날짜를 추정하지 않는다.",
+          "정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다."
+        ],
+        "optional_role_fields": {
+          "standard": [
+            "read_only_snapshot"
+          ]
+        }
       },
       "catalog_search": {
         "format": null,
@@ -2184,6 +2353,68 @@
             "upper"
           ]
         }
+      },
+      "score_input_status": {
+        "format": "jungsi.score-input-status/v1",
+        "fields": [
+          "format",
+          "exam_id",
+          "pack_version",
+          "academic_year",
+          "stage",
+          "stage_state",
+          "opens_at",
+          "closes_at",
+          "paid_input_allowed",
+          "input_limit_mode",
+          "initial_used",
+          "initial_remaining",
+          "correction_granted",
+          "correction_used",
+          "correction_request_remaining",
+          "effective_save_remaining",
+          "entry_version",
+          "current_profile_id",
+          "current_report_id",
+          "last_attempt_outcome",
+          "last_rejection_code",
+          "legacy_transition_status",
+          "current_pass_first_paid_result_at"
+        ],
+        "rules": [
+          "REQ-27 및 score_input_policy_contract; 공개 필드만 닫힌 재귀 스키마로 투영한다. 실제 정책 한도·회원 식별자·비밀/출처 파일은 반환하지 않는다."
+        ]
+      },
+      "score_input_correction": {
+        "format": "jungsi.score-input-correction/v1",
+        "fields": [
+          "format",
+          "command_id",
+          "ticket_ref",
+          "exam_id",
+          "stage",
+          "entry_version",
+          "granted",
+          "correction_request_remaining",
+          "effective_save_remaining",
+          "previous_entry_id"
+        ],
+        "rules": [
+          "REQ-27 및 score_input_policy_contract; 공개 필드만 닫힌 재귀 스키마로 투영한다. 실제 정책 한도·회원 식별자·비밀/출처 파일은 반환하지 않는다."
+        ]
+      },
+      "sample_report": {
+        "format": "jungsi.sample-report/v1",
+        "fields": [
+          "format",
+          "synthetic",
+          "sample_id",
+          "label",
+          "report"
+        ],
+        "rules": [
+          "REQ-27 및 score_input_policy_contract; 공개 필드만 닫힌 재귀 스키마로 투영한다. 실제 정책 한도·회원 식별자·비밀/출처 파일은 반환하지 않는다."
+        ]
       }
     },
     "operation_gaps": [
@@ -2384,6 +2615,33 @@
         "verification": "확정 adc684/74fd Git 스냅샷 정상 훅493건 PASS; PR13 및 develop947cee8 CI success; 실제 운영 NOT_RUN",
         "external_settings": "Supabase최소GET읽기확인; 실제검수사용자token·DB/Drive·우리22API연결설정은대기. 기존외부API를동일계약으로간주하지않는다.",
         "live_data": "데이터팀 입결과 비교값·정책 승인 대기"
+      },
+      {
+        "operation": "score-input.status.read",
+        "before": "신규 REQ-27 확장 API",
+        "after": "Edge 서비스 구현 후보; Python 운영은 정책 미지원 503으로 보류",
+        "storage": "006 준비 SQL 및 검증된 legacy 전환이 필요",
+        "verification": "tests/edge/test_score_input_policy.ts",
+        "external_settings": "현재 운영 5 operation scope 유지; 신규 3 operation의 scope/cost/활성화 별도 승인 필요",
+        "live_data": "NOT_RUN; 원자료·실계정·운영 DB 변경 없음"
+      },
+      {
+        "operation": "score-input.correction.grant",
+        "before": "신규 REQ-27 확장 API",
+        "after": "Edge 서비스 구현 후보; Python 운영은 정책 미지원 503으로 보류",
+        "storage": "006 준비 SQL 및 검증된 legacy 전환이 필요",
+        "verification": "tests/edge/test_score_input_policy.ts",
+        "external_settings": "현재 운영 5 operation scope 유지; 신규 3 operation의 scope/cost/활성화 별도 승인 필요",
+        "live_data": "NOT_RUN; 원자료·실계정·운영 DB 변경 없음"
+      },
+      {
+        "operation": "report.sample.read",
+        "before": "신규 REQ-27 확장 API",
+        "after": "Edge 서비스 구현 후보; Python 운영은 정책 미지원 503으로 보류",
+        "storage": "006 준비 SQL 및 검증된 legacy 전환이 필요",
+        "verification": "tests/edge/test_score_input_policy.ts",
+        "external_settings": "현재 운영 5 operation scope 유지; 신규 3 operation의 scope/cost/활성화 별도 승인 필요",
+        "live_data": "NOT_RUN; 원자료·실계정·운영 DB 변경 없음"
       }
     ],
     "configuration": [

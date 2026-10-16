@@ -35,7 +35,7 @@ class SecuredWorkflowTests(workflow.BackendWorkflowTests):
             return original(*args)
         sessions.verify = verify
         self.app = create_secured_app(security=SecuritySettings(TOKEN), settings=ServerSettings(),
-                                      repository=self.repo, data=self.data, sessions=sessions, clock=self.clock)
+                                      repository=self.repo, data=self.data, sessions=sessions, clock=self.clock, operating_mode="legacy_synthetic")
         self.client = TestClient(self.app, headers=HEADER)
 
     def test_every_operation_rejects_direct_and_duplicate_relay_before_user_or_data(self):
@@ -75,21 +75,21 @@ class SecuredWorkflowTests(workflow.BackendWorkflowTests):
     def test_config_boundaries_and_environment_are_explicit_and_repr_safe(self):
         for token in (None, '', 'x'*31, 'x'*513, 'x'*31+' ', 'x'*31+',', 'x'*31+'한'):
             app = create_secured_app(security=SecuritySettings(token), settings=ServerSettings(),
-                                     repository=self.repo, data=self.data, sessions=SyntheticSessions(self.clock), clock=self.clock)
+                                     repository=self.repo, data=self.data, sessions=SyntheticSessions(self.clock), clock=self.clock, operating_mode="legacy_synthetic")
             client = TestClient(app, headers=HEADER)
             self.assertEqual(client.get('/api/v1/me').status_code, 503)
             self.assertEqual(client.get('/health/live').status_code, 200)
         for count in (32,512):
             token = 'x'*count
             app = create_secured_app(security=SecuritySettings(token), settings=ServerSettings(),
-                                     repository=self.repo, data=self.data, sessions=SyntheticSessions(self.clock), clock=self.clock)
+                                     repository=self.repo, data=self.data, sessions=SyntheticSessions(self.clock), clock=self.clock, operating_mode="legacy_synthetic")
             self.assertEqual(TestClient(app).get('/api/v1/me', headers={'X-Jungsi-Relay-Token':token,'Authorization':'Bearer '+self.owner}).status_code, 200)
         with self.assertRaises(TypeError):
-            create_secured_app()
+            create_secured_app(operating_mode="legacy_synthetic")
         self.assertNotIn(TOKEN, repr(SecuritySettings(TOKEN)))
         with patch.dict('os.environ', {'JUNGSI_RELAY_TOKEN':TOKEN}):
             self.assertEqual(SecuritySettings.from_environment().relay_token, TOKEN)
-            self.assertEqual(TestClient(workflow.create_app(settings=ServerSettings(),repository=self.repo,data=self.data,sessions=SyntheticSessions(self.clock),clock=self.clock)).get('/api/v1/me',headers={'Authorization':'Bearer '+self.owner}).status_code,200)
+            self.assertEqual(TestClient(workflow.create_app(settings=ServerSettings(),repository=self.repo,data=self.data,sessions=SyntheticSessions(self.clock),clock=self.clock, operating_mode="legacy_synthetic")).get('/api/v1/me',headers={'Authorization':'Bearer '+self.owner}).status_code,200)
 
     def test_constant_time_bytes_comparison_after_format_validation(self):
         import jungsi_touch.infrastructure.secured_http as secured
@@ -186,7 +186,7 @@ class SecuredWorkflowTests(workflow.BackendWorkflowTests):
     def test_catalog_load_failure_denies_before_session_and_keeps_live(self):
         with patch('jungsi_touch.infrastructure.secured_http.PublicResponseProjection',side_effect=RuntimeError(MARKER)):
             app=create_secured_app(security=SecuritySettings(TOKEN),settings=ServerSettings(),repository=self.repo,
-                                   data=self.data,sessions=SyntheticSessions(self.clock),clock=self.clock)
+                                   data=self.data,sessions=SyntheticSessions(self.clock),clock=self.clock, operating_mode="legacy_synthetic")
         client=TestClient(app,headers=HEADER)
         for path in ('/api/v1/me','/health/ready'):
             result=client.get(path)
@@ -227,7 +227,7 @@ class SecuredForecastTests(forecast_http.ForecastHttpTests):
         super().setUp()
         self.app=create_secured_app(security=SecuritySettings(TOKEN),settings=ServerSettings(),repository=self.repository,
                                    data=forecast_http.SyntheticData(self.clock),sessions=SyntheticSessions(self.clock),
-                                   clock=self.clock,forecast_repository=self.store,forecast_inputs=self.inputs)
+                                   clock=self.clock,forecast_repository=self.store,forecast_inputs=self.inputs, operating_mode="legacy_synthetic")
         self.client=TestClient(self.app,headers=HEADER)
 
     def test_staff_receipts_nested_extras_removed_and_public_context_preserved(self):

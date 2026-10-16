@@ -20,14 +20,20 @@ def operation_registration(spec):
     live=spec.get('supabase_deployment_contract',{}).get('live_execution')
     registered=[]
     total=None
+    policy=spec.get('score_input_policy_contract');extension_registration=None;pinned_legacy=[]
     if live is not None:
         operations=spec.get('operations',[])
         ids=[row.get('id')for row in operations if isinstance(row,dict)]
         states=live.get('operations',{})if isinstance(live,dict)else None
+        all_ids=ids
+        if policy is not None:
+            from check_project_consistency import validate_score_input_policy
+            if validate_score_input_policy(spec):raise EdgeFailure('operation_registration_coverage_or_extension_binding_invalid')
+            ids=policy['legacy_operation_ids']
         if (len(ids)!=22 or any(not isinstance(v,str)for v in ids) or len(set(ids))!=22 or
             not isinstance(states,dict)or set(states)!=set(ids)):
             raise EdgeFailure('operation_registration_coverage_invalid')
-        total=len(ids)
+        total=len(all_ids)
         indexed={p:row.get('declarations',{}).get('source_sha256')
             for p,row in spec.get('edge_harness',{}).get('files',{}).items()}
         index=spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('edge_sources',{})
@@ -40,16 +46,31 @@ def operation_registration(spec):
             binding=state.get('binding')
             path=binding.get('path')if isinstance(binding,dict)else None
             sha=binding.get('source_sha256')if isinstance(binding,dict)else None
+            matches=indexed.get(path)==sha
+            if policy is not None and not matches:
+                from check_project_consistency import policy_baseline_source_matches
+                matches=policy_baseline_source_matches(spec,path,sha,indexed)
+                if matches:pinned_legacy.append(operation)
             if (not isinstance(path,str)or not path.startswith('supabase/functions/') or
-                not isinstance(sha,str)or len(sha)!=64 or any(c not in '0123456789abcdef'for c in sha) or
-                indexed.get(path)!=sha):
+                not isinstance(sha,str)or len(sha)!=64 or any(c not in '0123456789abcdef'for c in sha) or not matches):
                 raise EdgeFailure('operation_registration_binding_invalid')
             registered.append(operation)
-    status='NOT_PORTED'if not registered else ('CODE_REGISTERED'if len(registered)==total else 'PARTIAL_CODE_REGISTERED')
-    return dict(all_22=status,native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',
+        if policy is not None:
+            extension_registration=dict(format='jungsi.edge-policy-extension-source-registration/v1',
+                basis='checked_selected_snapshot_implementation_runtime_and_test_hashes',
+                contract_operation_count=3,registered_operation_ids=policy['extension_operation_ids'],
+                registered_operation_count=3,status='CODE_REGISTERED',
+                implementation_bindings=policy['extension_implementation_bindings'],
+                runtime_test_bindings=policy['extension_runtime_test_bindings'],
+                native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN')
+    status='NOT_PORTED'if not registered else ('CODE_REGISTERED'if len(registered)==22 else 'PARTIAL_CODE_REGISTERED')
+    result=dict(all_22=status,native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',
         source_registration=dict(format='jungsi.edge-operation-registration/v1',
-            basis='checked_selected_snapshot_source_hashes',contract_operation_count=total,
+            basis='checked_selected_snapshot_and_exact_pinned_legacy_hashes'if pinned_legacy else 'checked_selected_snapshot_source_hashes',contract_operation_count=total,
+            legacy_scope_operation_count=22,pinned_legacy_binding_operation_ids=pinned_legacy,
             registered_operation_ids=registered,registered_operation_count=len(registered)))
+    if extension_registration is not None:result['policy_extension_source_registration']=extension_registration
+    return result
 
 def run_workspace(root,manifest,deno,python,output):
     root=Path(root).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
