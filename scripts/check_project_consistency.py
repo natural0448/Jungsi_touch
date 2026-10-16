@@ -1258,12 +1258,12 @@ def live_execution_document(spec):
                     ['담당',backend['branch']],
                     ['서버 전용 허용 필드',', '.join(backend['server_only_fields'])],
                     ['구현 / 검증 / 배포',backend['implementation']+' / '+backend['verification']+' / '+backend['deployment']],
-                    ['소스 결속',('현재 색인·선언 해시와 소스4개·테스트2개 결속; 후보 '+backend['implementation_candidate_commit'])if backend.get('implementation_candidate_commit')else('현재 색인·선언 해시와 소스4개·테스트2개 결속; 자신의 커밋 SHA는 후속 패키지에서 고정'if backend.get('source_bindings')else '후보 SHA 미제공; 정본 완료 소스 아님')]]))
+                    ['소스 결속',('설치 당시 관측 계약·소스4개·테스트2개 고정; 새 수정 후보는 아래 현재 해시로 별도 검증'if deployed_observer_contract_pinned(spec)else('현재 색인·선언 해시와 소스4개·테스트2개 결속; 후보 '+backend['implementation_candidate_commit']))if backend.get('implementation_candidate_commit')else('현재 색인·선언 해시와 소스4개·테스트2개 결속; 자신의 커밋 SHA는 후속 패키지에서 고정'if backend.get('source_bindings')else '후보 SHA 미제공; 정본 완료 소스 아님')]]))
             proof=backend.get('synthetic_verification')
             if proof:
                 deployment_text+='\n\n'+table(['합성 후보 검증','범위와 결과'],[
                     ['집중 검사',str(proof['focused_passed'])+' PASS / '+str(proof['focused_failed'])+' FAIL; 신규 '+str(proof['new_tests'])+'개'],
-                    ['전체 스냅샷 검사',str(proof['full_suite_expected'])+'개 실행을 정상 훅·정확 SHA CI에서 별도로 요구'],
+                    ['전체 스냅샷 검사',str(proof['full_suite_expected'])+('개는 설치 당시 소스 검수 이력; 새 후보의 전체 검사는 아래 별도 요구'if deployed_observer_contract_pinned(spec)else '개 실행을 정상 훅·정확 SHA CI에서 별도로 요구')],
                     ['집중 로그 SHA-256',proof['focused_log_sha256']],
                     ['소스 배포 / 실제 업무·배포 인수',backend['deployment']+' / 0/22 · 0/22; 합성 검수와 실제 인수 분리']])
                 deployment_text+='\n\n'+table(['후보 파일','현재 소스 SHA-256'],[[p,h]for p,h in {**backend['source_bindings'],**backend['test_bindings']}.items()])
@@ -1285,6 +1285,17 @@ def live_execution_document(spec):
             deployment_text+='\n\n'+observer['scope']+' 영수증 SHA-256 '+observer['receipt_sha256']+'.\n\n'+table(['관측 범위','상태'],[
                 ['visible event 형식',str(observer['visible_event_count'])+'개 / 허용5필드·32HEX 형식 확인'],
                 ['전체 로그 비노출 / 특정 BFF actor / 업무 성공','미증명 / 미증명 / 미증명']])
+    fix=c.get('admin_session_identity_fix')
+    if fix:
+        proof=fix['synthetic_verification']
+        deployment_text+='\n\n### 관리자 세션의 예산 연결 수정 후보 · 미배포\n\n'+fix['rule']+'\n\n'+table(['확인 범위','현재 후보'],[
+            ['출발 커밋 / 준비 당시 검증',fix['basis_commit']+' / '+fix['basis_verification']],
+            ['구현 / 합성 / 실제 배포',fix['implementation']+' / '+fix['verification']+' / '+fix['deployment']],
+            ['수정 전 / 후 집중 회귀',str(proof['before_passed'])+' PASS / '+str(proof['before_failed'])+' FAIL → '+str(proof['focused_passed'])+' PASS / '+str(proof['focused_failed'])+' FAIL'],
+            ['신규 / 전체 스냅샷 검사',str(proof['new_tests'])+'개 추가 / '+str(proof['full_suite_expected'])+'개 정상 훅·정확 SHA CI 필수'],
+            ['배포 관측 이력 고정 SHA-256',fix['deployed_observer_contract_sha256']],
+            ['실제 요청·DB 조회·업무 native/배포 인수','0 / 0 / 0/22 · 0/22']])
+        deployment_text+='\n\n'+table(['새 후보 파일','현재 소스 SHA-256'],[[p,h]for p,h in {**fix['source_bindings'],**fix['test_bindings']}.items()])
     history=c.get('P2_attempt_history',{})
     if history:
         deployment_text+='\n\n### 보존된 P2 시도 이력\n\n'+table(['증거 ID','당시 상태','멱등키 문맥','영수증 SHA-256'],[[key,row['status'],row['idempotency_context_status'],row['receipt_sha256']]for key,row in history.items()])
@@ -1612,6 +1623,55 @@ def validate_current_deployment(spec):
     return []
 
 
+DEPLOYED_OBSERVER_1_9_69_SHA256='dd2c9334439a9f5757fa9d1febf42d58050a4b3154ac8271711feac8eb83a551'
+
+
+def deployed_observer_contract_pinned(spec):
+    """Keep the already-deployed observation contract byte-bound while new tests evolve."""
+    live=spec['supabase_deployment_contract']['live_execution']
+    fix=live.get('admin_session_identity_fix')
+    backend=live.get('backend_safe_observation_plan')
+    return (isinstance(fix,dict)and isinstance(backend,dict)and
+        fix.get('deployed_observer_contract_sha256')==DEPLOYED_OBSERVER_1_9_69_SHA256 and
+        hashlib.sha256(json.dumps(backend,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()==DEPLOYED_OBSERVER_1_9_69_SHA256)
+
+
+def validate_admin_session_identity_fix(spec):
+    """Bind the immutable-session fix to current source without promoting installed history."""
+    live=spec['supabase_deployment_contract']['live_execution'];fix=live.get('admin_session_identity_fix')
+    error='DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance'
+    if not isinstance(fix,dict):return [error]
+    if (fix.get('format')!='jungsi.admin-session-identity-fix/v1' or
+        fix.get('status')!='SOURCE_IMPLEMENTED_SYNTHETIC_FOCUSED_PASS_DEPLOYMENT_PENDING' or
+        fix.get('branch')!='feature/application-pre-data-platform' or
+        fix.get('basis_commit')!='7112f2c633c658f00494b44d6b430dd7e4aba5c1' or
+        fix.get('basis_verification')!='LOCAL_VERIFIED_COMMIT_ORIGIN_CI_PENDING_AT_PREPARATION' or
+        fix.get('implementation_candidate_commit','missing')is not None or
+        fix.get('implementation')!='SOURCE_IMPLEMENTED' or fix.get('verification')!='SYNTHETIC_FOCUSED_PASS' or
+        any(fix.get(k)!='NOT_RUN'for k in ('deployment','native_verification'))or
+        fix.get('owner_layer')!='application' or fix.get('requirements')!=['REQ-24','REQ-25','REQ-26'] or
+        fix.get('operation_scope')!='EXISTING_BUDGET_OPERATIONS_ONLY' or
+        not deployed_observer_contract_pinned(spec) or
+        any(fix.get(k)is not True for k in ('both_frozen_required','immutable_snapshot_identity_preserved','mutable_session_copy_defense_preserved','body_query_params_copy_preserved','forged_admin_refused','expiry_and_role_guards_preserved','normal_snapshot_hooks_exact_CI_required'))or
+        any(fix.get(k)is not False for k in ('weakset_mutated','serialized_admin_origin_trusted','auth_or_expiry_relaxed','policy_or_scope_changed','actual_failed_request_fully_attributed','production_ready'))or
+        any(type(fix.get(k))is not int or fix[k]!=0 for k in ('actual_HTTP_requests','direct_DB_queries','business_native_accepted','business_deployment_accepted'))):return [error]
+    indexed={v['path']:v['source_sha256']for v in spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']}
+    indexed.update({p:v['declarations']['source_sha256']for p,v in spec['edge_harness']['files'].items()})
+    for key,paths in (('source_bindings',{'supabase/functions/_shared/jungsi/application/usage_service.ts'}),('test_bindings',{'tests/edge/test_usage_service.ts','tests/edge/test_runtime_budget.ts'})):
+        bindings=fix.get(key)
+        if (not isinstance(bindings,dict)or set(bindings)!=paths or any(not isinstance(h,str)or not re.fullmatch(r'[0-9a-f]{64}',h)or h!=indexed.get(p)for p,h in bindings.items())):return [error]
+    proof=fix.get('synthetic_verification')
+    if not isinstance(proof,dict):return [error]
+    for key,expected in (('new_tests',6),('before_passed',27),('before_failed',4),('focused_passed',108),('focused_failed',0),('full_suite_expected',590)):
+        if type(proof.get(key))is not int or proof[key]!=expected:return [error]
+    if (proof['full_suite_expected']!=spec['edge_harness']['unit_count']or proof.get('scope')!='LOCAL_SYNTHETIC_SESSION_AND_BUDGET_ONLY'or
+        proof.get('full_snapshot_gate_required')is not True or proof.get('deployment_or_real_user_evidence')is not False):return [error]
+    for key in ('before_log_sha256','focused_log_sha256'):
+        if not isinstance(proof.get(key),str)or not re.fullmatch(r'[0-9a-f]{64}',proof[key]):return [error]
+    if not isinstance(fix.get('rule'),str)or not fix['rule'].strip():return [error]
+    return []
+
+
 def validate_backend_safe_observation_plan(spec):
     """Bind diagnostics to registered source while retaining undeployed acceptance."""
     backend=spec['supabase_deployment_contract']['live_execution'].get('backend_safe_observation_plan')
@@ -1636,10 +1696,13 @@ def validate_backend_safe_observation_plan(spec):
     tests={'tests/edge/test_runtime_composition.ts','tests/edge/test_runtime_budget.ts'}
     indexed={v['path']:v['source_sha256']for v in spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']}
     indexed.update({p:v['declarations']['source_sha256']for p,v in spec['edge_harness']['files'].items()})
+    pinned_history=deployed_observer_contract_pinned(spec)
+    fix_present=isinstance(spec['supabase_deployment_contract']['live_execution'].get('admin_session_identity_fix'),dict)
+    if fix_present and backend.get('status')=='SOURCE_DEPLOYED_RUNTIME_ACCEPTANCE_PENDING'and not pinned_history:return [error]
     for key,expected in (('source_bindings',paths),('test_bindings',tests)):
         bindings=backend.get(key)
         if (not isinstance(bindings,dict)or set(bindings)!=expected or
-            any(not re.fullmatch(r'[0-9a-f]{64}',str(value))or value!=indexed.get(path)for path,value in bindings.items())):return [error]
+            any(not isinstance(value,str)or not re.fullmatch(r'[0-9a-f]{64}',value)or (not(key=='test_bindings'and pinned_history)and value!=indexed.get(path))for path,value in bindings.items())):return [error]
     proof=backend.get('synthetic_verification',{})
     deployed=backend.get('status')=='SOURCE_DEPLOYED_RUNTIME_ACCEPTANCE_PENDING'
     current=spec['supabase_deployment_contract']['live_execution'].get('current_deployment',{})
@@ -1661,7 +1724,7 @@ def validate_backend_safe_observation_plan(spec):
         type(proof.get('new_tests'))is not int or proof['new_tests']!=16 or
         type(proof.get('focused_passed'))is not int or proof['focused_passed']!=41 or
         type(proof.get('focused_failed'))is not int or proof['focused_failed']!=0 or
-        type(proof.get('full_suite_expected'))is not int or proof.get('full_suite_expected')!=spec['edge_harness']['unit_count'] or
+        type(proof.get('full_suite_expected'))is not int or proof.get('full_suite_expected')!=(584 if pinned_history else spec['edge_harness']['unit_count']) or
         not isinstance(proof.get('focused_log_sha256'),str)or not re.fullmatch(r'[0-9a-f]{64}',proof['focused_log_sha256']) or
         proof.get('full_snapshot_gate_required')is not True or
         proof.get('deployment_or_real_user_evidence')is not False):return [error]
@@ -1989,6 +2052,8 @@ def validate_live_execution(spec):
         errors.extend(validate_P2_attempt_records(c,registry))
     if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,69) or c.get('current_deployment')is not None:
         errors.extend(validate_current_deployment(spec))
+    if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,70) or c.get('admin_session_identity_fix')is not None:
+        errors.extend(validate_admin_session_identity_fix(spec))
     for key,row in registry.items():
         if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
             not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or

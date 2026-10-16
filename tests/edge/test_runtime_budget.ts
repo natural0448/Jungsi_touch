@@ -1,3 +1,4 @@
+import { readSessionSnapshot } from "../../supabase/functions/_shared/jungsi/application/session_service.ts";
 /** Invented capacities and policy metadata. No real quota approval or DB counters. */
 import {
   RuntimeRequestBudget,
@@ -445,5 +446,115 @@ Deno.test("failed settlement stays distinct after successful or failed business 
     equal(calls.work, 1);
     equal(calls.reserve, 1);
     equal(calls.settle, 1);
+  }
+});
+
+async function runtimeTrustedSession(kind: "standard" | "paid" | "admin_null" | "admin_paid") {
+  const admin = kind.startsWith("admin"), paid = kind === "paid" || kind === "admin_paid";
+  return await readSessionSnapshot("SYNTHETIC-runtime-token", {
+    verifyUserBearer: () =>
+      Promise.resolve({
+        subjectId: OWNER,
+        expiresAtUtc: SYNTHETIC_RUNTIME_NOW + 3600000000n,
+        accountRole: admin ? "admin" : "user",
+        accountStatus: "active",
+        assuranceLevel: admin ? "aal2" as const : "aal1" as const,
+      }),
+  }, {
+    readCurrent: () =>
+      Promise.resolve({
+        authority: "public.jeongsi_passes" as const,
+        metadataVerified: true as const,
+        subjectId: OWNER,
+        evaluatedAtUtc: SYNTHETIC_RUNTIME_NOW,
+        paidUntilUtc: paid ? SYNTHETIC_RUNTIME_NOW + 1800000000n : null,
+      }),
+  }, SYNTHETIC_RUNTIME_NOW);
+}
+Deno.test("runtime approved plan supports verified admin without a pass and standard explicit paid controls", async () => {
+  for (const kind of ["standard", "paid", "admin_null", "admin_paid"] as const) {
+    const f = await fixture(),
+      session = await runtimeTrustedSession(kind),
+      r = { ...f.request("score-profile.create", { scores: f.scores, confirmed: true }), session };
+    let reserved = 0, worked = 0, settled = 0;
+    const store: UsageBudgetStorePort = {
+      reserve: (value) => {
+        reserved++;
+        equal(value.owner, session.user.subjectId);
+        equal(value.demands.length, 5);
+        assert(
+          value.demands.every((d) =>
+            [d.capacity, d.ceiling, d.units, d.periodSeconds].every((v) => typeof v === "bigint")
+          ),
+        );
+        return Promise.resolve({
+          allowed: true as const,
+          lease: {
+            id: "SYNTHETIC-runtime-lease",
+            owner: value.owner,
+            policyVersion: value.policyVersion,
+            createdAtUtc: SYNTHETIC_RUNTIME_NOW,
+            expiresAtUtc: SYNTHETIC_RUNTIME_NOW + 10000000n,
+          },
+        });
+      },
+      settle: () => {
+        settled++;
+        return Promise.resolve();
+      },
+    };
+    const budget = new RuntimeRequestBudget(
+      f.planner(),
+      store,
+      { nowUtc: () => SYNTHETIC_RUNTIME_NOW },
+      { exists: () => Promise.resolve(false) },
+      { current: () => Promise.resolve() } as unknown as SupabaseRuntimeControls,
+    );
+    equal(
+      await budget.run(r, () => {
+        worked++;
+        return Promise.resolve({ ok: true });
+      }),
+      { ok: true },
+    );
+    equal([reserved, worked, settled], [1, 1, 1]);
+  }
+});
+Deno.test("runtime budget never mints admin trust for mutable or frozen copied sessions", async () => {
+  const f = await fixture(), trusted = await runtimeTrustedSession("admin_null");
+  for (
+    const session of [
+      { ...trusted, user: { ...trusted.user } },
+      Object.freeze({ ...trusted }),
+      Object.freeze({ ...trusted, user: Object.freeze({ ...trusted.user }) }),
+    ]
+  ) {
+    let reserved = 0, worked = 0, settled = 0;
+    const store: UsageBudgetStorePort = {
+      reserve: () => {
+        reserved++;
+        return Promise.reject(new Error("SYNTHETIC-unexpected-reserve"));
+      },
+      settle: () => {
+        settled++;
+        return Promise.resolve();
+      },
+    };
+    const budget = new RuntimeRequestBudget(
+      f.planner(),
+      store,
+      { nowUtc: () => SYNTHETIC_RUNTIME_NOW },
+      { exists: () => Promise.resolve(false) },
+      { current: () => Promise.resolve() } as unknown as SupabaseRuntimeControls,
+    );
+    await denied(
+      () =>
+        budget.run({ ...f.request("score-profile.create", { scores: f.scores }), session }, () => {
+          worked++;
+          return Promise.resolve({ ok: true });
+        }),
+      503,
+    );
+    equal([reserved, worked, settled], [0, 0, 0]);
   }
 });

@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "830f6e14397b364ff7279a8c132391cce8f549c8fb369e0932d3c6d8ac3721d3",
+      "source_sha256": "c6bfebe0feb77b8ef3aa48d9085ac40b3bae1a097290347df39937fbf91e4d13",
       "symbols": [
         {
           "kind": "class",
@@ -640,6 +640,12 @@
           "kind": "function",
           "name": "deletion_scope_text",
           "signature": "def deletion_scope_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "deployed_observer_contract_pinned",
+          "signature": "def deployed_observer_contract_pinned(spec):",
           "decorators": []
         },
         {
@@ -892,6 +898,12 @@
           "kind": "function",
           "name": "validate_P2_attempt_records",
           "signature": "def validate_P2_attempt_records(c, registry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_admin_session_identity_fix",
+          "signature": "def validate_admin_session_identity_fix(spec):",
           "decorators": []
         },
         {
@@ -7112,7 +7124,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "47ceb939478521a74e7060eefd625a9861a2f81c6d9b15c94011045a31945bae",
+        "source_sha256": "11c89eeb624783e231c65b4578db631eab4757be95cf4231f288490ea2518c2c",
         "declared_exports": [
           "ApprovedUsagePlan",
           "RepositoryUsageReplays",
