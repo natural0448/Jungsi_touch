@@ -20423,7 +20423,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "47ceb939478521a74e7060eefd625a9861a2f81c6d9b15c94011045a31945bae",
+        "source_sha256": "11c89eeb624783e231c65b4578db631eab4757be95cf4231f288490ea2518c2c",
         "symbols": [
           {
             "declarations": [
@@ -62079,12 +62079,17 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
+            "importedName": "readSessionSnapshot",
+            "originalName": "readSessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
             "importedName": "syntheticRuntimeBinding",
             "originalName": "syntheticRuntimeBinding",
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "d819a63a5a0ca79810733d035d1606e3b567edbced771ed31f98f56c565732a0",
+        "source_sha256": "be79bc0786bce16b28d76d46927d7bfc81e8acbb2f19524e3766ad332607d08e",
         "symbols": [
           {
             "declarations": [
@@ -62260,6 +62265,64 @@
               }
             ],
             "name": "observedBudgetFixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(kind: \"standard\" | \"paid\" | \"admin_null\" | \"admin_paid\")",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "kind",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "standard",
+                            "value": {
+                              "kind": "string",
+                              "string": "standard"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "paid",
+                            "value": {
+                              "kind": "string",
+                              "string": "paid"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "admin_null",
+                            "value": {
+                              "kind": "string",
+                              "string": "admin_null"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "admin_paid",
+                            "value": {
+                              "kind": "string",
+                              "string": "admin_paid"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "runtimeTrustedSession"
           }
         ]
       },
@@ -62281,6 +62344,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/session_service.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
             }
           ]
         },
@@ -66429,6 +66502,11 @@
             "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
           },
           {
+            "importedName": "SessionSnapshot",
+            "originalName": "SessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
             "importedName": "SharedRequestBudget",
             "originalName": "SharedRequestBudget",
             "src": "supabase/functions/_shared/jungsi/application/usage_service.ts"
@@ -66459,12 +66537,27 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
+            "importedName": "readSessionSnapshot",
+            "originalName": "readSessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "requirePaidSession",
+            "originalName": "requirePaidSession",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "sessionDto",
+            "originalName": "sessionDto",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
             "importedName": "syncPromise",
             "originalName": "syncPromise",
             "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "b622fae0832209c920b80bc5dac5a8b4c92ed503f947595d67cdb737ee4f9360",
+        "source_sha256": "1488f2be2b2197fb05fffa32d976e6b9ee972daacb08a13364baebbe7db0eb9b",
         "symbols": [
           {
             "declarations": [
@@ -66725,6 +66818,183 @@
               }
             ],
             "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(options: {\n  owner?: string;\n  role?: string;\n  status?: string;\n  aal?: \"aal1\" | \"aal2\";\n  expiry?: bigint;\n} = {})",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "options",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "owner",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "role",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "status",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "aal",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "union",
+                                  "value": [
+                                    {
+                                      "kind": "literal",
+                                      "repr": "aal1",
+                                      "value": {
+                                        "kind": "string",
+                                        "string": "aal1"
+                                      }
+                                    },
+                                    {
+                                      "kind": "literal",
+                                      "repr": "aal2",
+                                      "value": {
+                                        "kind": "string",
+                                        "string": "aal2"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "expiry",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "bigint",
+                                  "value": "bigint"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "SessionSnapshot",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "SessionSnapshot",
+                              "specifier": "../../supabase/functions/_shared/jungsi/application/session_service.ts"
+                            },
+                            "typeName": "SessionSnapshot"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "trustedBudgetSession"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  inspect: (protectedRequest: BudgetRequest) => void = () => {},\n  now = NOW,\n)",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "inspect",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [
+                              {
+                                "kind": "identifier",
+                                "name": "protectedRequest",
+                                "optional": false,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "BudgetRequest",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "BudgetRequest",
+                                      "specifier": "../../supabase/functions/_shared/jungsi/application/request_budget.ts"
+                                    },
+                                    "typeName": "BudgetRequest"
+                                  }
+                                }
+                              }
+                            ],
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "now",
+                        "optional": false
+                      },
+                      "right": "NOW"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sessionIdentityBudget"
           }
         ]
       },
@@ -66746,6 +67016,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/session_service.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
             }
           ]
         },
@@ -67048,5 +67328,5 @@
     "tests/edge/test_usage_service.ts",
     "tests/edge/test_year_equating.ts"
   ],
-  "unit_count": 584
+  "unit_count": 590
 }

@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.69이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.70이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -384,12 +384,12 @@ score-profile.create도 DB COMMIT 이후의 세션·응답 projection·현재 �
 | 담당 | feature/application-pre-data-platform |
 | 서버 전용 허용 필드 | operation, stage, status, code, request_id |
 | 구현 / 검증 / 배포 | SOURCE_IMPLEMENTED / SYNTHETIC_FOCUSED_PASS / SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED |
-| 소스 결속 | 현재 색인·선언 해시와 소스4개·테스트2개 결속; 후보 ed978c74d8c89bd6fec867b891342c1b6c6c15a3 |
+| 소스 결속 | 설치 당시 관측 계약·소스4개·테스트2개 고정; 새 수정 후보는 아래 현재 해시로 별도 검증 |
 
 | 합성 후보 검증 | 범위와 결과 |
 | --- | --- |
 | 집중 검사 | 41 PASS / 0 FAIL; 신규 16개 |
-| 전체 스냅샷 검사 | 584개 실행을 정상 훅·정확 SHA CI에서 별도로 요구 |
+| 전체 스냅샷 검사 | 584개는 설치 당시 소스 검수 이력; 새 후보의 전체 검사는 아래 별도 요구 |
 | 집중 로그 SHA-256 | 39ed3638e3494f66c8ec916f5627352251feece05163b38bcd8c48da315d073d |
 | 소스 배포 / 실제 업무·배포 인수 | SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED / 0/22 · 0/22; 합성 검수와 실제 인수 분리 |
 
@@ -423,6 +423,25 @@ score-profile.create도 DB COMMIT 이후의 세션·응답 projection·현재 �
 | --- | --- |
 | visible event 형식 | 4개 / 허용5필드·32HEX 형식 확인 |
 | 전체 로그 비노출 / 특정 BFF actor / 업무 성공 | 미증명 / 미증명 / 미증명 |
+
+### 관리자 세션의 예산 연결 수정 후보 · 미배포
+
+SharedRequestBudget가 세션과 사용자 둘 다 이미 동결된 경우에만 검증된 원본 snapshot 참조를 보존한다. 가변 입력은 기존 독립 동결 복제를 유지하며 body·query·params의 복제/보호도 유지한다. WeakSet 등록이나 직렬화 adminOrigin·역할 문자열만으로 신뢰를 새로 만들지 않는다. 정식 active/admin/aal2·만료값 null 세션의 전체 예산 흐름을 합성 검수했고 위조·복제 관리자, 만료·inactive·aal1·일반 역할의 특권 위조, planner 권한 변조와 사용자 격리 반례를 검사했다. 승인된 meter5종·정수·정책·예산·기존 operation 범위는 바꾸지 않는다. 기존 ed978 실배포/관측41·전체584 및 P2 실패 기록은 부모7112의 관측 계약 전체 SHA로 고정하고 현재 후보의 소스·테스트 해시와 합성108·전체590 요구는 별도로 검증한다. 실제 P2 요청의 완전한 actor/BFF 요청ID 귀속은 미확정이다. 새 후보는 미배포·실업무 미검수이고 정상 전체 스냅샷·훅·정확 SHA CI가 필수다. 준비 시 부모7112는 로컬 훅 통과·원격 확인 대기이며 승인된 원격 확인 통지 전 origin push하지 않는다. 후속 패키지에서 자신의 정확한 최종 HEAD와 원격 근거를 결속한다.
+
+| 확인 범위 | 현재 후보 |
+| --- | --- |
+| 출발 커밋 / 준비 당시 검증 | 7112f2c633c658f00494b44d6b430dd7e4aba5c1 / LOCAL_VERIFIED_COMMIT_ORIGIN_CI_PENDING_AT_PREPARATION |
+| 구현 / 합성 / 실제 배포 | SOURCE_IMPLEMENTED / SYNTHETIC_FOCUSED_PASS / NOT_RUN |
+| 수정 전 / 후 집중 회귀 | 27 PASS / 4 FAIL → 108 PASS / 0 FAIL |
+| 신규 / 전체 스냅샷 검사 | 6개 추가 / 590개 정상 훅·정확 SHA CI 필수 |
+| 배포 관측 이력 고정 SHA-256 | dd2c9334439a9f5757fa9d1febf42d58050a4b3154ac8271711feac8eb83a551 |
+| 실제 요청·DB 조회·업무 native/배포 인수 | 0 / 0 / 0/22 · 0/22 |
+
+| 새 후보 파일 | 현재 소스 SHA-256 |
+| --- | --- |
+| supabase/functions/_shared/jungsi/application/usage_service.ts | 11c89eeb624783e231c65b4578db631eab4757be95cf4231f288490ea2518c2c |
+| tests/edge/test_usage_service.ts | 1488f2be2b2197fb05fffa32d976e6b9ee972daacb08a13364baebbe7db0eb9b |
+| tests/edge/test_runtime_budget.ts | be79bc0786bce16b28d76d46927d7bfc81e8acbb2f19524e3766ad332607d08e |
 
 ### 보존된 P2 시도 이력
 
@@ -502,4 +521,4 @@ score-profile.create도 DB COMMIT 이후의 세션·응답 projection·현재 �
 
 
 
-<!-- jungsi:generated spec_sha256=0283df0700d6a4bd231e774c5aad4745cfe0b136f5a2fdf423b6187ddc5bd21f -->
+<!-- jungsi:generated spec_sha256=fc348d5650de3faff86fec95d5146c0a6b5eb8d3e3c9576a93c1113763d048ec -->

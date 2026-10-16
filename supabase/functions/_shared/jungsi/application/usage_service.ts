@@ -134,10 +134,14 @@ export class SharedRequestBudget implements RequestBudgetPort {
       body: cloneNativeJson(request.body),
       params: Object.freeze({ ...request.params }),
       query: Object.freeze({ ...request.query }),
-      session: Object.freeze({
-        ...request.session,
-        user: Object.freeze({ ...request.session.user }),
-      }),
+      // Factory-verified admin provenance is bound to the immutable snapshot identity.
+      // Mutable inputs still receive the existing independent frozen copy.
+      session: Object.isFrozen(request.session) && Object.isFrozen(request.session.user)
+        ? request.session
+        : Object.freeze({
+          ...request.session,
+          user: Object.freeze({ ...request.session.user }),
+        }),
     };
     let plan: ApprovedUsagePlan | null;
     try {

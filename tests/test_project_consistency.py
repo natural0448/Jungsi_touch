@@ -1607,7 +1607,7 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
     def test_observation_contract_preserves_pending_legacy_and_documents_source_candidate(self):
         from check_project_consistency import validate_backend_safe_observation_plan,live_execution_document
         self.assertEqual(validate_backend_safe_observation_plan(self.spec),[])
-        self.assertIn('현재 색인·선언 해시와 소스4개·테스트2개 결속',live_execution_document(self.spec))
+        self.assertIn('설치 당시 관측 계약·소스4개·테스트2개 고정',live_execution_document(self.spec))
         wrong=deepcopy(self.spec);b=wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan']
         b.update(status='CONTRACT_PREPARED_IMPLEMENTATION_PENDING',implementation_candidate_commit=None,implementation='NOT_RUN',verification='NOT_RUN',deployment='NOT_RUN',native_verification='NOT_RUN',server_only_fields=['operation','stage','path','status','code','request_id'],forbidden_fields=['subject','account','scores','body','token','keys','cookie','query','stack'])
         self.assertEqual(validate_backend_safe_observation_plan(wrong),[])
@@ -1621,6 +1621,56 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         for key in ('native_verification','production_ready','business_native_accepted','business_deployment_accepted'):b.pop(key)
         self.assertEqual(validate_backend_safe_observation_plan(wrong),[])
 
+
+    def test_admin_identity_fix_preserves_deployed_observer_and_requires_current_hashes(self):
+        from check_project_consistency import validate_live_execution,deployed_observer_contract_pinned,live_execution_document
+        self.assertEqual(validate_live_execution(self.spec),[])
+        self.assertTrue(deployed_observer_contract_pinned(self.spec))
+        live=self.spec['supabase_deployment_contract']['live_execution']
+        self.assertEqual(live['backend_safe_observation_plan']['synthetic_verification']['full_suite_expected'],584)
+        self.assertEqual(self.spec['edge_harness']['unit_count'],590)
+        self.assertIn('관리자 세션의 예산 연결 수정 후보 · 미배포',live_execution_document(self.spec))
+
+    def test_admin_identity_fix_rejects_missing_or_stale_source_and_test_binding(self):
+        from check_project_consistency import validate_live_execution
+        for key in ('source_bindings','test_bindings'):
+            for kind in ('missing','hash','extra'):
+                wrong=deepcopy(self.spec);bindings=wrong['supabase_deployment_contract']['live_execution']['admin_session_identity_fix'][key]
+                path=next(iter(bindings))
+                if kind=='missing':bindings.pop(path)
+                elif kind=='hash':bindings[path]='0'*64
+                else:bindings['unregistered.ts']='0'*64
+                self.assertIn('DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance',validate_live_execution(wrong))
+
+    def test_admin_identity_fix_cannot_mint_brand_relax_guards_or_promote_native(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in [('both_frozen_required',False),('mutable_session_copy_defense_preserved',False),('body_query_params_copy_preserved',False),('weakset_mutated',True),('serialized_admin_origin_trusted',True),('auth_or_expiry_relaxed',True),('policy_or_scope_changed',True),('actual_failed_request_fully_attributed',True),('production_ready',True),('deployment','PASS'),('native_verification','PASS'),('business_native_accepted',True),('business_deployment_accepted',1),('actual_HTTP_requests',1),('implementation_candidate_commit','f'*40)]:
+            wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['admin_session_identity_fix'][key]=value
+            self.assertIn('DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance',validate_live_execution(wrong))
+
+    def test_admin_identity_fix_requires_native_counts_hashes_and_full_snapshot_gate(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in [('new_tests',0),('before_failed',0),('focused_passed',108.0),('focused_failed',True),('full_suite_expected',590.0),('focused_log_sha256',int('1'*64)),('before_log_sha256',''),('full_snapshot_gate_required',False),('deployment_or_real_user_evidence',True)]:
+            wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['admin_session_identity_fix']['synthetic_verification'][key]=value
+            self.assertIn('DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance',validate_live_execution(wrong))
+
+    def test_admin_identity_fix_cannot_rewrite_deployed_observer_contract(self):
+        from check_project_consistency import validate_live_execution
+        for target in ('historical_count','historical_test','pin'):
+            wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+            if target=='historical_count':live['backend_safe_observation_plan']['synthetic_verification']['full_suite_expected']=590
+            elif target=='historical_test':live['backend_safe_observation_plan']['test_bindings']['tests/edge/test_runtime_budget.ts']=live['admin_session_identity_fix']['test_bindings']['tests/edge/test_runtime_budget.ts']
+            else:live['admin_session_identity_fix']['deployed_observer_contract_sha256']='0'*64
+            self.assertIn('DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance',validate_live_execution(wrong))
+
+    def test_admin_identity_fix_is_required_and_preparation_parent_cannot_be_forged(self):
+        from check_project_consistency import validate_live_execution
+        for target in ('missing','parent','status'):
+            wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+            if target=='missing':live.pop('admin_session_identity_fix')
+            elif target=='parent':live['admin_session_identity_fix']['basis_commit']='f'*40
+            else:live['admin_session_identity_fix']['basis_verification']='UNVERIFIED_READY'
+            self.assertIn('DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance',validate_live_execution(wrong))
 
     def test_current_source_deployment_preserves_old_installation_and_failed_attempts(self):
         from check_project_consistency import validate_live_execution,live_execution_document,live_P2_attempt
