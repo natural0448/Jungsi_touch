@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, type FormEvent } from "react";
+import { useActionState, useRef, useState, type FormEvent } from "react";
 import { INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "@/lib/exam";
 import { submitScores, type ScoreFormState } from "./actions";
 
@@ -49,8 +49,42 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
   };
   const done = filled === REQUIRED.length;
 
+  // 저장 전 확인 창. 저장한 성적은 고칠 수 없고 하루에 저장할 수 있는 성적 조합 수가 정해져 있어서,
+  // 넣은 값을 한 번 더 보여 주고 '이대로 저장'을 눌러야 서버로 보낸다. 빈 칸·범위 밖 값은 서버에 보내기 전에 막는다
+  const formRef = useRef<HTMLFormElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [review, setReview] = useState<{ rows: [string, string][]; problem: string | null } | null>(null);
+  const openReview = () => {
+    const f = formRef.current;
+    if (!f) return;
+    const v = (k: string) => String((f.elements.namedItem(k) as HTMLInputElement | HTMLSelectElement | null)?.value ?? "").trim();
+    const n = (k: string) => (v(k) === "" ? NaN : Number(v(k)));
+    let problem: string | null = null;
+    if (REQUIRED.some((k) => v(k) === "")) problem = "국어·수학·탐구 두 과목의 표준점수와 탐구 과목을 모두 넣어 주세요.";
+    else if (v("inq1") === v("inq2")) problem = "탐구 두 과목은 서로 달라야 합니다.";
+    else if (![n("korean"), n("math")].every((x) => Number.isInteger(x) && x >= 40 && x <= 160)) problem = "국어·수학 표준점수는 40~160 사이 정수입니다.";
+    else if (![n("inq1_score"), n("inq2_score")].every((x) => Number.isInteger(x) && x >= 20 && x <= 80)) problem = "탐구 표준점수는 20~80 사이 정수입니다.";
+    const choice = (k: string) => (v(k) ? ` (${v(k)})` : "");
+    setReview({
+      problem,
+      rows: [
+        [`국어${choice("korean_choice")}`, v("korean")],
+        [`수학${choice("math_choice")}`, v("math")],
+        [`탐구 1 · ${v("inq1") || "미선택"}`, v("inq1_score")],
+        [`탐구 2 · ${v("inq2") || "미선택"}`, v("inq2_score")],
+        ["영어 등급", v("english") || "입력 안 함"],
+        ["한국사 등급", v("history") || "입력 안 함"],
+      ],
+    });
+    dialogRef.current?.showModal();
+  };
+  const confirmSave = () => {
+    dialogRef.current?.close();
+    formRef.current?.requestSubmit();
+  };
+
   return (
-    <form key={state?.attempt ?? 0} action={action} className="sf" noValidate onInput={onInput} onChange={onInput}>
+    <form ref={formRef} key={state?.attempt ?? 0} action={action} className="sf" noValidate onInput={onInput} onChange={onInput}>
       <input type="hidden" name="idem" value={idem} />
       {update && (
         <>
@@ -194,18 +228,51 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
         </p>
       )}
 
+      {/* 확인 창에서 '이대로 저장'을 눌러 제출된 것만 서버가 받는다(actions.ts 의 confirm 검사) */}
+      <input type="hidden" name="confirm" value="on" />
       <div className="sf-foot">
-        <label className={`sf-confirm${state?.field === "confirm" ? " bad" : ""}`}>
-          <input type="checkbox" name="confirm" />
-          <span>입력한 점수가 성적표와 같은지 확인했습니다.</span>
-        </label>
+        <p className="sf-confirm-note">저장하기 전에 넣은 점수를 한 번 더 보여 드립니다.</p>
         <div className="sf-acts">
-          <button className="btn p" type="submit" disabled={pending}>
+          <button className="btn p" type="button" disabled={pending} onClick={openReview}>
             {pending ? "저장하는 중" : update ? "새 성적으로 리포트 갱신" : "성적 저장하고 전체 위치 보기"}
           </button>
         </div>
       </div>
-      <p className="sf-note">저장할 때마다 새 성적 기록이 생기고, 이전 성적은 고치지 않습니다.</p>
+      <p className="sf-note">저장한 성적은 고칠 수 없습니다. 다시 저장하면 새 성적 기록이 생기며, 하루에 저장할 수 있는 성적 조합 수가 정해져 있습니다.</p>
+
+      <dialog ref={dialogRef} className="sf-dialog" aria-labelledby="sf-dialog-h" onClose={() => setReview(null)}>
+        {review && (
+          <div className="sf-dialog-in">
+            <h3 id="sf-dialog-h">{review.problem ? "입력을 확인해 주세요" : "이 점수로 저장할까요?"}</h3>
+            {review.problem ? (
+              <p className="sf-dialog-problem">{review.problem}</p>
+            ) : (
+              <>
+                <p>저장한 성적은 <b>고칠 수 없습니다.</b> 성적표와 한 칸씩 대조해 주세요.</p>
+                <dl className="sf-dialog-rows">
+                  {review.rows.map(([k, val]) => (
+                    <div key={k}>
+                      <dt>{k}</dt>
+                      <dd>{val}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="sf-dialog-note">다시 저장하면 새 기록이 생기고, 하루에 저장할 수 있는 성적 조합 수가 정해져 있습니다.</p>
+              </>
+            )}
+            <div className="sf-dialog-acts">
+              <button type="button" className="btn t" onClick={() => dialogRef.current?.close()}>
+                {review.problem ? "돌아가서 고치기" : "다시 확인하기"}
+              </button>
+              {!review.problem && (
+                <button type="button" className="btn p" onClick={confirmSave} autoFocus>
+                  이대로 저장
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </dialog>
     </form>
   );
 }

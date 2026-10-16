@@ -91,7 +91,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         <div className="rp-meta">
           <span>{a.exam.academic_year}학년도 {a.exam.exam_type}</span>
           <span>리포트 {report.report_version}번째 · {seoulDate(report.updated_at)} 저장</span>
-          <Link className="btn" href={`${route.path}?edit=1`}>성적 고치기</Link>
+          {/* 저장한 성적은 고치지 않는다 — 새 성적을 넣어 리포트의 새 판을 만든다 */}
+          <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>
         </div>
 
         <OverallCard a={a} />

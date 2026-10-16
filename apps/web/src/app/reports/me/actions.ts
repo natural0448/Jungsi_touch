@@ -15,7 +15,9 @@ export type ScoreFormState = { error: string; field?: string; values: ScoreDefau
 
 /** 서버 오류 코드 → 고칠 방법을 알려 주는 문장 */
 const MESSAGE: Record<string, string> = {
-  engine_input_code: "점수 범위를 확인해 주세요. 국어·수학 표준점수는 40~160, 탐구는 20~80, 등급은 1~9입니다.",
+  // 시험 공식 분포표에 없는 표준점수(422). 성적표를 옮겨 적다 틀린 경우가 대부분이다
+  unobserved_standard_score: "이 시험 성적표에 나올 수 없는 표준점수가 있습니다. 국어·수학·탐구 표준점수를 성적표와 다시 대조해 주세요.",
+  engine_input_code:"점수 범위를 확인해 주세요. 국어·수학 표준점수는 40~160, 탐구는 20~80, 등급은 1~9입니다.",
   invalid_request: "입력 칸을 다시 확인해 주세요.",
   invalid_choice: "선택과목을 목록에서 골라 주세요.",
   invalid_subject: "탐구 과목을 목록에서 골라 주세요.",
@@ -86,7 +88,9 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
     if (e instanceof AccessDenied) return fail("로그인이 필요합니다. 다시 로그인한 뒤 저장해 주세요.");
     if (e instanceof ConnectionError)
       return fail(
-        e.kind === "rate_limited"
+        e.kind === "rate_limited" && e.code === "analysis_quota_exceeded"
+          ? `오늘 분석할 수 있는 서로 다른 성적 조합을 모두 썼습니다. 이미 저장한 성적과 리포트는 그대로 볼 수 있습니다.${e.retryAt ? ` ${seoulTime(e.retryAt.toISOString())} 이후 다시 저장할 수 있습니다.` : ""}`
+          : e.kind === "rate_limited"
           ? e.retryAt
             ? `요청이 많아 잠시 제한되었습니다. ${seoulTime(e.retryAt.toISOString())} 이후 다시 저장해 주세요. 입력한 값은 그대로 남아 있습니다.`
             : "요청이 많아 잠시 제한되었습니다. 잠시 뒤 다시 저장해 주세요. 입력한 값은 그대로 남아 있습니다."

@@ -21,11 +21,24 @@ export function signed(n: number): string {
   return n > 0 ? `+${n}` : String(n);
 }
 
-/** UTC 시각 → 서울 시각 "14:05:30" (요청 제한 재시도 안내용. 초 단위 제한이 흔해 초까지 보인다) */
-export function seoulTime(isoUtc: string): string {
-  const p = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).formatToParts(new Date(isoUtc));
-  const get = (t: string) => p.find((x) => x.type === t)?.value ?? "";
-  return `${get("hour")}:${get("minute")}:${get("second")}`;
+/**
+ * UTC 시각 → 서울 시각 (요청 제한 재시도 안내용).
+ * 오늘이면 "14:05:30"(초 단위 제한이 흔해 초까지), 내일이면 "내일 09:00", 그 뒤면 "10월 18일 09:00".
+ * 시각만 보이면 오늘인지 내일인지 알 수 없다(2026-10-16 하루 한도 안내에서 실측).
+ */
+export function seoulTime(isoUtc: string, now: Date = new Date()): string {
+  const parts = (d: Date) => {
+    const p = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).formatToParts(d);
+    const get = (t: string) => p.find((x) => x.type === t)?.value ?? "";
+    return { y: get("year"), m: get("month"), d: get("day"), hh: get("hour"), mm: get("minute"), ss: get("second") };
+  };
+  const t = parts(new Date(isoUtc));
+  const today = parts(now);
+  const tomorrow = parts(new Date(now.getTime() + 24 * 60 * 60 * 1000));
+  const same = (a: typeof t, b: typeof t) => a.y === b.y && a.m === b.m && a.d === b.d;
+  if (same(t, today)) return `${t.hh}:${t.mm}:${t.ss}`;
+  if (same(t, tomorrow)) return `내일 ${t.hh}:${t.mm}`;
+  return `${t.m}월 ${t.d}일 ${t.hh}:${t.mm}`;
 }
 
 /** UTC 시각 → 서울 날짜·시각 "2027.02.28 14:05" */

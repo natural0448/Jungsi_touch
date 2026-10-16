@@ -74,6 +74,24 @@
 .et .sf-acts .btn{height:48px;padding:0 26px;font-size:14.5px;font-weight:800;box-shadow:0 4px 12px rgba(30,86,214,.22)}
 .et .sf-acts .btn:disabled{box-shadow:none;opacity:.7}
 .et .sf-note{margin:0;font-size:12px;color:var(--muted)}
+.et .sf-confirm-note{margin:0;font-size:13px;font-weight:700;color:var(--ink)}
+
+/* 저장 전 확인 창: 넣은 값을 성적표처럼 한 줄씩 다시 보여 준다 */
+.et .sf-dialog{width:min(440px,calc(100vw - 32px));padding:0;border:0;border-radius:var(--r-card);background:var(--bg);color:var(--ink);box-shadow:0 18px 48px rgba(15,30,70,.28)}
+.et .sf-dialog::backdrop{background:rgba(12,22,48,.45)}
+.et .sf-dialog-in{display:flex;flex-direction:column;gap:14px;padding:22px 22px 18px}
+.et .sf-dialog h3{margin:0;font-size:18px;font-weight:800;color:var(--deep)}
+.et .sf-dialog p{margin:0;font-size:13.5px;line-height:1.6}
+.et .sf-dialog p b{color:var(--risk)}
+.et .sf-dialog-problem{padding:10px 12px;border-left:3px solid var(--risk);border-radius:var(--r-sm);background:var(--risk-soft);color:var(--risk);font-weight:700}
+.et .sf-dialog-rows{display:flex;flex-direction:column;margin:0;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.et .sf-dialog-rows div{display:flex;justify-content:space-between;gap:12px;padding:9px 12px;border-top:1px solid var(--line)}
+.et .sf-dialog-rows div:first-child{border-top:0}
+.et .sf-dialog-rows dt{font-size:13px;color:var(--muted)}
+.et .sf-dialog-rows dd{margin:0;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.et .sf-dialog-note{font-size:12px!important;color:var(--muted)}
+.et .sf-dialog-acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.et .sf-dialog-acts .btn{height:44px;padding:0 20px;font-weight:800}
 
 /* ── 리포트 ── */
 .et .rp-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
