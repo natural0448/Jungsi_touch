@@ -6,6 +6,50 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
 from check_project_consistency import validate_supabase_deployment_contract,validate_runtime_connection_preparation,validate_public_response_catalog,validate_public_response_registry,PUBLIC_RESPONSE_SCHEMA_PATH,validate_spec,generated_files,validate_content,protected_path,validate_changed_paths,validate_security_contract,validate_frontend_reply_contract,validate_frontend_followup_contract,FRONTEND_REPLY_DOCUMENT,FRONTEND_FOLLOWUP_DOCUMENT,SECURITY_DOCUMENT,SECURITY_CASES,SECURITY_GATES
 
+def observer_epoch_spec(spec):
+    """Explicit legacy-only view; preserve the supplied current spec and every original record."""
+    view=deepcopy(spec)
+    current_live=view["supabase_deployment_contract"]["live_execution"]
+    deployment_id="OPS-SAFE-OBSERVER-DEPLOYED-20261016"
+    attempt_id="OPS-P2-OBSERVER-ATTEMPT-20261016"
+    installation=current_live.get("current_deployment")
+    if not isinstance(installation,dict) or installation.get("evidence_id")!=deployment_id:
+        deployments=current_live.get("deployment_history",{})
+        installation=deployments.get(deployment_id) if isinstance(deployments,dict) else None
+    if not isinstance(installation,dict) or installation.get("evidence_id")!=deployment_id:
+        raise AssertionError("The preserved observer installation is required for this legacy fixture")
+    history=current_live.get("P2_attempt_history",{})
+    if not isinstance(history,dict):
+        raise AssertionError("The preserved P2 history is required for this legacy fixture")
+    attempt=current_live.get("current_P2_attempt")
+    if not isinstance(attempt,dict) or attempt.get("evidence_id")!=attempt_id:
+        attempt=history.get(attempt_id)
+    if not isinstance(attempt,dict) or attempt.get("evidence_id")!=attempt_id:
+        raise AssertionError("The preserved observer P2 attempt is required for this legacy fixture")
+    # Keep only predecessors of the old attempt; later attempts belong to the actual-current tests.
+    earlier={}
+    cursor=attempt.get("previous_receipt_evidence_id")
+    while cursor in history:
+        if cursor==attempt_id or cursor in earlier:
+            raise AssertionError("The preserved observer predecessor chain must not contain a cycle")
+        record=history[cursor]
+        if not isinstance(record,dict) or record.get("evidence_id")!=cursor:
+            raise AssertionError("The preserved observer predecessor reference is malformed")
+        earlier[cursor]=record
+        cursor=record.get("previous_receipt_evidence_id")
+    current_live["current_deployment"]=installation
+    current_live["current_P2_attempt"]=attempt
+    current_live["P2_attempt_history"]=earlier
+    current_live.pop("deployment_history",None)
+    fix=current_live.get("admin_session_identity_fix")
+    if isinstance(fix,dict) and "historical_preparation" in fix:
+        if not isinstance(fix["historical_preparation"],dict):
+            raise AssertionError("The original identity-fix preparation snapshot is required")
+        current_live["admin_session_identity_fix"]=fix["historical_preparation"]
+    view["version"]="1.9.70"
+    return view
+
+
 class ConsistencyTests(unittest.TestCase):
     def setUp(self):
         self.spec=json.loads((ROOT/"docs/current/service_spec.json").read_text(encoding="utf-8"))
@@ -1392,6 +1436,467 @@ class RuntimeConnectionPreparationContractTests(unittest.TestCase):
 
 class SupabaseDeploymentContractTests(unittest.TestCase):
 
+    def test_current_external_live_report_preserves_history_and_reports_only_observed_scope(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        self.assertEqual(validate_live_execution(self.spec),[])
+        text=live_execution_document(self.spec)
+        self.assertIn('EXTERNAL_REPORTED_FUNCTIONAL_PASS',text)
+        self.assertIn('operation_scope_not_approved',text)
+        self.assertEqual(self.spec['supabase_deployment_contract']['live_execution']['post_registration_acceptance']['real_user_acceptance'],'NOT_RUN')
+        self.assertIn('SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED',text)
+        self.assertIn('0/22 / 0/22',text)
+        live=self.spec['supabase_deployment_contract']['live_execution']
+        self.assertIs(live['post_live_receipt']['source_fix_deployed'],True)
+        self.assertIs(live['post_live_receipt']['historical_source_fix_deployed_before_editor_update'],False)
+        self.assertEqual(live['post_registration_acceptance']['source_graph']['recorded_installed_source'],'9e6365e43c748afecf84c9b08e2a70f7ca711c14')
+
+    def test_partial_external_live_report_cannot_promote_unrun_business_or_approval(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in [('P2_save_analysis_reread','PASS'),('ownership','PASS'),('business_native_accepted',1),('search_scope_approved',True)]:
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['post_live_receipt'][key]=value
+            self.assertIn('DEV-010 partial BFF report cannot promote unrun business or approval',validate_live_execution(wrong))
+
+    def test_deployed_source_true_requires_actual_receipt_and_registry_entry(self):
+        from check_project_consistency import validate_live_execution
+        for target in ('deployment','registry'):
+            with self.subTest(target=target):
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+                if target=='deployment':live.pop('actual_editor_deployment')
+                else:live['evidence'].pop(live['actual_editor_deployment']['evidence_id'])
+                self.assertIn('DEV-010 actual editor deployment requires receipt-bound evidence',validate_live_execution(wrong))
+
+    def test_actual_deployment_candidate_bundle_and_editor_receipt_must_match(self):
+        from check_project_consistency import validate_live_execution
+        for field in ('candidate_commit','accepted_develop_merge','tree','bundle','editor_receipt','receipt_sha256','remote_readback'):
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);deployment=wrong['supabase_deployment_contract']['live_execution']['actual_editor_deployment']
+                if field in ('candidate_commit','accepted_develop_merge','tree'):deployment['source'][field]='f'*40
+                elif field=='bundle':deployment['source']['bundle']['sha256']='f'*64
+                elif field in ('editor_receipt','remote_readback'):deployment[field]['sha256']='f'*64
+                else:deployment[field]='f'*64
+                self.assertIn('DEV-010 actual editor deployment requires receipt-bound evidence',validate_live_execution(wrong))
+
+    def test_actual_deployment_source_hash_must_match_indexed_runtime_code(self):
+        from check_project_consistency import validate_live_execution
+        wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+        deployment=live['actual_editor_deployment']
+        path='supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts'
+        deployment['source']['runtime_source_bindings'][path]='f'*64
+        live['evidence'][deployment['evidence_id']]['source']=deepcopy(deployment['source'])
+        self.assertIn('DEV-010 actual editor deployment source binding drift',validate_live_execution(wrong))
+
+    def test_editor_install_receipt_cannot_certify_operation_or_security_acceptance(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('native','PASS'),('deployment','PASS'),('security_3_gates','PASS'),('production_ready',True),('operation_scope_expanded',True)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+                if field in ('native','deployment'):live['operations']['report.read'][field]=value
+                else:live['actual_editor_deployment'][field]=value
+                self.assertIn('DEV-010 editor source update cannot certify unrun business or security acceptance',validate_live_execution(wrong))
+        wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+        live['evidence'][live['actual_editor_deployment']['evidence_id']]['operations']=['report.read']
+        self.assertIn('DEV-010 actual editor deployment requires receipt-bound evidence',validate_live_execution(wrong))
+
+    def test_actual_deployment_cannot_relax_verify_jwt_or_remote_source_match(self):
+        from check_project_consistency import validate_live_execution
+        for field in ('verify_jwt_remained_true','editor_copyback_match','remote_reload_match','same_existing_project_and_function'):
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['actual_editor_deployment'][field]=False
+                self.assertIn('DEV-010 actual editor deployment requires receipt-bound evidence',validate_live_execution(wrong))
+
+    def test_post_deployment_health_and_BFF_observations_need_their_own_receipts(self):
+        from check_project_consistency import validate_live_execution
+        for field in ('native_readiness','same_BFF_error_observation'):
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+                observation=live['actual_editor_deployment'][field]
+                live['evidence'].pop(observation['evidence_id'])
+                self.assertIn('DEV-010 deployed follow-up requires scoped receipt-bound evidence: '+field,validate_live_execution(wrong))
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+                live['actual_editor_deployment'][field]['bundle_sha256']='f'*64
+                self.assertIn('DEV-010 deployed follow-up requires scoped receipt-bound evidence: '+field,validate_live_execution(wrong))
+
+    def test_readiness_and_UI_error_cannot_claim_real_user_or_captured_HTTP_or_aal2(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('actual_user_Bearer_used',True),('DB_student_or_budget_writes_by_probe',1)]:
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['actual_editor_deployment']['native_readiness'][field]=value
+            self.assertIn('DEV-010 readiness preparation cannot imply real-user or student-write acceptance',validate_live_execution(wrong))
+        for field in ('HTTP_status_independently_captured','independent_aal2_admin_verification'):
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['actual_editor_deployment']['same_BFF_error_observation'][field]=True
+            self.assertIn('DEV-010 BFF safe error observation cannot certify HTTP status or administrator aal2',validate_live_execution(wrong))
+
+    def test_current_failed_P2_attempt_preserves_unknown_HTTP_creation_and_writes(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_live_execution,live_execution_document
+        live=epoch_spec['supabase_deployment_contract']['live_execution']
+        self.assertEqual(live['post_live_receipt']['P2_save_analysis_reread'],'NOT_RUN')
+        self.assertIn('ACTUAL_UI_SAVE_ATTEMPT_FAILED_UNDETAILED',live_execution_document(epoch_spec))
+        for field,value in [('HTTP_status',422),('safe_error_code','invalid_request'),('profile_created',False),('report_created',True),('DB_writes_independently_observed',0),('retry_count',1),('memory_validation_is_actual_request_result',True),('step_2_analyze','NOT_RUN'),('step_3_reread','NOT_RUN'),('step_2_success_acceptance','PASS')]:
+            with self.subTest(field=field):
+                wrong=deepcopy(epoch_spec)
+                wrong['supabase_deployment_contract']['live_execution']['current_P2_attempt'][field]=value
+                self.assertIn('DEV-010 current P2 failed attempt requires receipt and preserves unconfirmed stages',validate_live_execution(wrong))
+        for target in ('current_P2_attempt','evidence'):
+            wrong=deepcopy(epoch_spec);live=wrong['supabase_deployment_contract']['live_execution']
+            if target=='current_P2_attempt':live.pop(target)
+            else:live['evidence'].pop(live['current_P2_attempt']['evidence_id'])
+            self.assertIn('DEV-010 current P2 failed attempt requires receipt and preserves unconfirmed stages',validate_live_execution(wrong))
+
+    def test_redacted_browser_value_cannot_prove_idempotency_preservation_or_key_DB_readback(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_live_execution,live_execution_document
+        live=epoch_spec['supabase_deployment_contract']['live_execution']
+        self.assertIsNone(live['current_P2_attempt']['same_form_idempotency_key'])
+        previous=live['P2_attempt_history'][live['frontend_P2_reply']['earlier_root_attempt']['evidence_id']]
+        self.assertEqual(previous['idempotency_context_status'],'BROWSER_VALUE_REDACTED_NOT_CAPTURED')
+        self.assertIs(previous['idempotency_capture_claim_corrected'],True)
+        self.assertIn('NOT_COLLECTED_BY_FRONTEND',live_execution_document(epoch_spec))
+        for field,value in [('same_form_idempotency_key',True),('idempotency_context_status','KEY_PRESERVED'),('reload_after_submit',True),('exact_key_DB_readback_count',1)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(epoch_spec)
+                wrong['supabase_deployment_contract']['live_execution']['current_P2_attempt'][field]=value
+                self.assertIn('DEV-010 current P2 failed attempt requires receipt and preserves unconfirmed stages',validate_live_execution(wrong))
+
+    def test_frontend_P2_reply_preserves_previous_attempt_and_separates_unpushed_worker(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        live=self.spec['supabase_deployment_contract']['live_execution'];reply=live['frontend_P2_reply']
+        self.assertEqual(validate_live_execution(self.spec),[])
+        self.assertNotEqual(reply['earlier_root_attempt']['evidence_id'],reply['current_P2_attempt_evidence_id'])
+        self.assertIn('PENDING_DEPLOYMENT_AND_SOURCE_SHA',live_execution_document(self.spec))
+        for field,value in [('source_commit','f'*40),('source_pushed',True),('independent_source_binding_verified',True)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['frontend_P2_reply']['reported_worker_deployment'][field]=value
+                self.assertIn('DEV-010 external P2 report cannot certify source HTTP stage or zero writes',validate_live_execution(wrong))
+
+    def test_frontend_P2_generic_failure_cannot_prove_HTTP_stage_or_zero_writes(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('HTTP_status',503),('stage','overall.analyze'),('safe_error_code','security_policy_unavailable'),('request_id','captured'),('idempotency_key','captured'),('DB_writes_independently_observed',0),('partial_profile_possible',False),('same_fixture_as_root_attempt',True),('overall_success','PASS'),('retry_count',1)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['frontend_P2_reply']['separate_frontend_attempt'][field]=value
+                self.assertIn('DEV-010 external P2 report cannot certify source HTTP stage or zero writes',validate_live_execution(wrong))
+        wrong=deepcopy(self.spec)
+        wrong['supabase_deployment_contract']['live_execution']['frontend_P2_reply']['earlier_root_attempt']['HTTP_status']=422
+        self.assertIn('DEV-010 external P2 report cannot certify source HTTP stage or zero writes',validate_live_execution(wrong))
+
+    def test_P2_pending_diagnostics_cannot_expose_keys_or_claim_deployment(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('deployed',True),('source_commit','f'*40),('server_only_fields',['stage','path','status','code','request_id','body']),('user_visible_fields',['stage','safe_error_code','request_id']),('forbidden_fields',[])]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['frontend_P2_reply']['safe_observation_followup'][field]=value
+                self.assertIn('DEV-010 pending P2 diagnostics must keep safe observation and approval boundaries',validate_live_execution(wrong))
+
+    def test_frontend_P2_reply_cannot_drop_history_receipt_or_promote_admin_UI(self):
+        from check_project_consistency import validate_live_execution
+        for target in ('frontend_P2_reply','P2_attempt_history','reply_evidence'):
+            wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+            if target=='reply_evidence':live['evidence'].pop(live['frontend_P2_reply']['evidence_id'])
+            else:live.pop(target)
+            self.assertIn('DEV-010 frontend P2 reply requires scoped evidence and preserved history',validate_live_execution(wrong))
+        for field in ('independent_API_JWT_trace','independent_aal2_trace','earlier_standard_headline_contradicted'):
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['frontend_P2_reply']['admin_UI_observation'][field]=True
+            self.assertIn('DEV-010 administrator UI observation cannot certify API JWT or aal2',validate_live_execution(wrong))
+
+    def test_preserved_root_P2_history_cannot_gain_inferred_HTTP_or_zero_writes(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('HTTP_status',422),('safe_error_code','exam_not_available'),('profile_created',False),('report_created',False),('DB_writes_independently_observed',0),('retry_count',1),('reload_after_submit',True),('exact_key_DB_readback_count',1),('production_ready',True),('step_2_analyze','PASS')]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+                live['P2_attempt_history'][live['frontend_P2_reply']['earlier_root_attempt']['evidence_id']][field]=value
+                self.assertIn('DEV-010 historical P2 attempt must preserve unknown result and no-retry boundaries',validate_live_execution(wrong))
+        wrong=deepcopy(self.spec)
+        live=wrong['supabase_deployment_contract']['live_execution']
+        live['P2_attempt_history'][live['frontend_P2_reply']['current_P2_attempt_evidence_id']]['previous_receipt_evidence_id']='unrelated'
+        self.assertIn('DEV-010 frontend P2 reply requires scoped evidence and preserved history',validate_live_execution(wrong))
+
+    def test_backend_observation_plan_cannot_claim_deployment_or_share_request_context(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('implementation','PASS'),('verification','PASS'),('deployment','PASS'),('implementation_candidate_commit','f'*40),('shared_mutable_diagnostic_context',True),('request_local_context',False),('normalized_template_path_only',False),('existing_error_DTO_preserved',False),('security_or_budget_relaxed',True),('server_only_fields',['operation','stage','path','status','code','request_id','subject'])]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan'][field]=value
+                self.assertIn('DEV-010 backend safe observation requires source-bound scoped evidence without deployment acceptance',validate_live_execution(wrong))
+
+    def test_observation_candidate_requires_exact_source_and_test_hash_bindings(self):
+        from check_project_consistency import validate_live_execution
+        for key in ('source_bindings','test_bindings'):
+            for mutation in ('missing','hash','extra'):
+                with self.subTest(key=key,mutation=mutation):
+                    wrong=deepcopy(self.spec);bindings=wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan'][key]
+                    path=next(iter(bindings))
+                    if mutation=='missing':bindings.pop(path)
+                    elif mutation=='hash':bindings[path]='0'*64
+                    else:bindings['unregistered.ts']='0'*64
+                    self.assertIn('DEV-010 backend safe observation requires source-bound scoped evidence without deployment acceptance',validate_live_execution(wrong))
+
+    def test_observation_candidate_cannot_promote_native_or_change_log_scope(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in [('native_verification','PASS'),('business_native_accepted',1),('business_deployment_accepted',True),('production_ready',True),('event_policy','ALL_REQUESTS'),('observer_failure_does_not_rerun_work',False),('created_response_body_unread',False),('forbidden_fields',[]),('status','VERIFIED')]:
+            with self.subTest(key=key):
+                wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan'][key]=value
+                self.assertIn('DEV-010 backend safe observation requires source-bound scoped evidence without deployment acceptance',validate_live_execution(wrong))
+
+    def test_observation_candidate_requires_focused_synthetic_evidence_and_normal_gate(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in [('scope','REAL_USER_PASS'),('new_tests',0),('focused_passed',0),('focused_failed',1),('focused_log_sha256',''),('focused_log_sha256',int('1'*64)),('full_suite_expected',0),('full_suite_expected',584.0),('full_snapshot_gate_required',False),('deployment_or_real_user_evidence',True)]:
+            with self.subTest(key=key):
+                wrong=deepcopy(self.spec);wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan']['synthetic_verification'][key]=value
+                self.assertIn('DEV-010 backend safe observation requires source-bound scoped evidence without deployment acceptance',validate_live_execution(wrong))
+
+    def test_observation_contract_preserves_pending_legacy_and_documents_source_candidate(self):
+        from check_project_consistency import validate_backend_safe_observation_plan,live_execution_document
+        self.assertEqual(validate_backend_safe_observation_plan(self.spec),[])
+        self.assertIn('설치 당시 관측 계약·소스4개·테스트2개 고정',live_execution_document(self.spec))
+        wrong=deepcopy(self.spec);b=wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan']
+        b.update(status='CONTRACT_PREPARED_IMPLEMENTATION_PENDING',implementation_candidate_commit=None,implementation='NOT_RUN',verification='NOT_RUN',deployment='NOT_RUN',native_verification='NOT_RUN',server_only_fields=['operation','stage','path','status','code','request_id'],forbidden_fields=['subject','account','scores','body','token','keys','cookie','query','stack'])
+        self.assertEqual(validate_backend_safe_observation_plan(wrong),[])
+        b['implementation']='PASS'
+        self.assertTrue(validate_backend_safe_observation_plan(wrong))
+        b['implementation']='NOT_RUN'
+        for key,value in [('native_verification','PASS'),('production_ready',True),('business_native_accepted',True),('business_native_accepted',1),('business_deployment_accepted',True),('business_deployment_accepted',1)]:
+            with self.subTest(key=key,value=value):
+                pending=deepcopy(wrong);pending['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan'][key]=value
+                self.assertTrue(validate_backend_safe_observation_plan(pending))
+        for key in ('native_verification','production_ready','business_native_accepted','business_deployment_accepted'):b.pop(key)
+        self.assertEqual(validate_backend_safe_observation_plan(wrong),[])
+
+
+    def test_admin_identity_fix_preserves_deployed_observer_and_requires_current_hashes(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_live_execution,deployed_observer_contract_pinned,live_execution_document
+        self.assertEqual(validate_live_execution(epoch_spec),[])
+        self.assertTrue(deployed_observer_contract_pinned(epoch_spec))
+        live=epoch_spec['supabase_deployment_contract']['live_execution']
+        self.assertEqual(live['backend_safe_observation_plan']['synthetic_verification']['full_suite_expected'],584)
+        self.assertEqual(epoch_spec['edge_harness']['unit_count'],590)
+        self.assertIn('관리자 세션의 예산 연결 수정 후보 · 미배포',live_execution_document(epoch_spec))
+
+    def test_admin_identity_fix_rejects_missing_or_stale_source_and_test_binding(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_live_execution
+        for key in ('source_bindings','test_bindings'):
+            for kind in ('missing','hash','extra'):
+                wrong=deepcopy(epoch_spec);bindings=wrong['supabase_deployment_contract']['live_execution']['admin_session_identity_fix'][key]
+                path=next(iter(bindings))
+                if kind=='missing':bindings.pop(path)
+                elif kind=='hash':bindings[path]='0'*64
+                else:bindings['unregistered.ts']='0'*64
+                self.assertIn('DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance',validate_live_execution(wrong))
+
+    def test_admin_identity_fix_cannot_mint_brand_relax_guards_or_promote_native(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_live_execution
+        for key,value in [('both_frozen_required',False),('mutable_session_copy_defense_preserved',False),('body_query_params_copy_preserved',False),('weakset_mutated',True),('serialized_admin_origin_trusted',True),('auth_or_expiry_relaxed',True),('policy_or_scope_changed',True),('actual_failed_request_fully_attributed',True),('production_ready',True),('deployment','PASS'),('native_verification','PASS'),('business_native_accepted',True),('business_deployment_accepted',1),('actual_HTTP_requests',1),('actual_HTTP_requests',False),('implementation_candidate_commit','f'*40)]:
+            wrong=deepcopy(epoch_spec);wrong['supabase_deployment_contract']['live_execution']['admin_session_identity_fix'][key]=value
+            self.assertIn('DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance',validate_live_execution(wrong))
+
+    def test_admin_identity_fix_requires_native_counts_hashes_and_full_snapshot_gate(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_live_execution
+        for key,value in [('new_tests',0),('before_failed',0),('focused_passed',108.0),('focused_failed',True),('focused_failed',False),('full_suite_expected',590.0),('focused_log_sha256',int('1'*64)),('focused_log_sha256','g'*64),('before_log_sha256',''),('full_snapshot_gate_required',False),('deployment_or_real_user_evidence',True)]:
+            wrong=deepcopy(epoch_spec);wrong['supabase_deployment_contract']['live_execution']['admin_session_identity_fix']['synthetic_verification'][key]=value
+            self.assertIn('DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance',validate_live_execution(wrong))
+
+    def test_admin_identity_fix_cannot_rewrite_deployed_observer_contract(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_live_execution
+        for target in ('historical_count','historical_test','pin'):
+            wrong=deepcopy(epoch_spec);live=wrong['supabase_deployment_contract']['live_execution']
+            if target=='historical_count':live['backend_safe_observation_plan']['synthetic_verification']['full_suite_expected']=590
+            elif target=='historical_test':live['backend_safe_observation_plan']['test_bindings']['tests/edge/test_runtime_budget.ts']=live['admin_session_identity_fix']['test_bindings']['tests/edge/test_runtime_budget.ts']
+            else:live['admin_session_identity_fix']['deployed_observer_contract_sha256']='0'*64
+            self.assertIn('DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance',validate_live_execution(wrong))
+
+    def test_admin_identity_fix_is_required_and_preparation_parent_cannot_be_forged(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_live_execution
+        for target in ('missing','parent','status'):
+            wrong=deepcopy(epoch_spec);live=wrong['supabase_deployment_contract']['live_execution']
+            if target=='missing':live.pop('admin_session_identity_fix')
+            elif target=='parent':live['admin_session_identity_fix']['basis_commit']='f'*40
+            else:live['admin_session_identity_fix']['basis_verification']='UNVERIFIED_READY'
+            self.assertIn('DEV-010 admin session identity fix requires immutable provenance current hashes and undeployed acceptance',validate_live_execution(wrong))
+
+    def test_current_source_deployment_preserves_old_installation_and_failed_attempts(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_live_execution,live_execution_document,live_P2_attempt
+        live=epoch_spec['supabase_deployment_contract']['live_execution']
+        self.assertEqual(validate_live_execution(epoch_spec),[])
+        self.assertEqual(live['actual_editor_deployment']['source']['spec_version'],'1.9.65')
+        self.assertEqual(live['current_deployment']['source']['spec_version'],'1.9.68')
+        self.assertNotEqual(live['actual_editor_deployment']['receipt_sha256'],live['current_deployment']['receipt_sha256'])
+        for evidence_id in (live['frontend_P2_reply']['earlier_root_attempt']['evidence_id'],live['frontend_P2_reply']['current_P2_attempt_evidence_id']):
+            row=live_P2_attempt(live,evidence_id)
+            self.assertIsNone(row['HTTP_status']);self.assertIsNone(row['DB_writes_independently_observed'])
+        self.assertIn('TIME_AND_OPERATION_ONLY',live_execution_document(epoch_spec))
+        self.assertIn('OWNER_CASE_SNAPSHOT_ONLY',live_execution_document(epoch_spec))
+
+    def test_current_source_deployment_requires_bound_receipt_manifest_and_remote_bytes(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_current_deployment
+        for field,value in [('receipt_sha256','f'*64),('receipt_bytes',True),('remote_readback',{}),('editor_reload_verified',False),('verify_jwt_remained_true',False),('previous_deployment_evidence_id','unrelated'),('business_native_accepted',True),('production_ready',True)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(epoch_spec);wrong['supabase_deployment_contract']['live_execution']['current_deployment'][field]=value
+                self.assertTrue(validate_current_deployment(wrong))
+        for field,value in [('source_files_count',64.0),('runtime_source_bindings',{}),('source_manifest',{'bytes':True,'sha256':'f'*64})]:
+            wrong=deepcopy(epoch_spec);wrong['supabase_deployment_contract']['live_execution']['current_deployment']['source'][field]=value
+            self.assertTrue(validate_current_deployment(wrong))
+
+    def test_current_readiness_cannot_use_other_deployment_receipt_or_business_proof(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_current_deployment
+        for field,value in [('source_deployment_receipt_sha256','f'*64),('bundle_sha256','f'*64),('actual_user_Bearer_used',True),('DB_student_or_budget_writes_by_probe',False)]:
+            wrong=deepcopy(epoch_spec);wrong['supabase_deployment_contract']['live_execution']['current_deployment']['native_readiness'][field]=value
+            self.assertTrue(validate_current_deployment(wrong))
+        wrong=deepcopy(epoch_spec);live=wrong['supabase_deployment_contract']['live_execution']
+        live['evidence'][live['current_deployment']['native_readiness']['evidence_id']]['source_deployment_receipt_sha256']='f'*64
+        self.assertTrue(validate_current_deployment(wrong))
+
+    def test_current_P2_history_rejects_duplicate_cycle_or_unrelated_previous_receipt(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_P2_attempt_records
+        for mutation in ('duplicate','self','unrelated','cycle','external_http'):
+            with self.subTest(mutation=mutation):
+                wrong=deepcopy(epoch_spec);live=wrong['supabase_deployment_contract']['live_execution'];row=live['current_P2_attempt']
+                external=live['P2_attempt_history'][live['frontend_P2_reply']['current_P2_attempt_evidence_id']]
+                if mutation=='duplicate':live['P2_attempt_history'][row['evidence_id']]=deepcopy(row)
+                elif mutation=='self':row['previous_receipt_evidence_id']=row['evidence_id']
+                elif mutation=='unrelated':row['previous_receipt_evidence_id']=live['current_deployment']['native_readiness']['evidence_id']
+                elif mutation=='cycle':external['previous_receipt_evidence_id']=row['evidence_id']
+                else:external['HTTP_status']=503
+                self.assertTrue(validate_P2_attempt_records(live,live['evidence']))
+
+    def test_current_P2_scoped_logs_and_snapshots_cannot_certify_UI_or_all_writes(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_P2_attempt_records
+        for target,field,value in [('row','UI_HTTP_status',503),('row','DB_writes_independently_observed',0),('log','actor_binding_proven',True),('log','BFF_request_id_binding_proven',True),('log','UI_status_binding_proven',True),('snapshot','all_database_writes_zero_proven',True),('snapshot','browser_Bearer_subject_binding_proven',True),('snapshot','owner_exact_match_count',True)]:
+            with self.subTest(target=target,field=field):
+                wrong=deepcopy(epoch_spec);live=wrong['supabase_deployment_contract']['live_execution'];row=live['current_P2_attempt']
+                selected=row if target=='row'else row['scoped_safe_logs'][0]if target=='log'else row['scoped_readonly_observations'][0]
+                selected[field]=value
+                self.assertTrue(validate_P2_attempt_records(live,live['evidence']))
+
+    def test_current_P2_step_requires_exact_attempt_operation_and_request_binding(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_P2_attempt_records
+        wrong=deepcopy(epoch_spec);live=wrong['supabase_deployment_contract']['live_execution']
+        previous=deepcopy(live['current_P2_attempt'])
+        live['P2_attempt_history'][previous['evidence_id']]=previous
+        row=deepcopy(previous);row['evidence_id']='SYNTHETIC-EXACT-ATTEMPT'
+        row['receipt_sha256']='6'*64;row['previous_receipt_evidence_id']=previous['evidence_id']
+        row['scope']='Synthetic exact-response unit fixture; the original failed attempt is preserved.'
+        live['current_P2_attempt']=row
+        live['evidence'][row['evidence_id']]=dict(deepcopy(live['evidence'][previous['evidence_id']]),receipt_sha256=row['receipt_sha256'])
+        row['steps']['profile_create'].update(status='OBSERVED_FAILURE',HTTP_status=503,safe_error_code='security_policy_unavailable',evidence_id=row['scoped_safe_logs'][0]['evidence_id'])
+        self.assertTrue(validate_P2_attempt_records(live,live['evidence']))
+        proof=deepcopy(live['evidence'][row['evidence_id']]);ref='SYNTHETIC-EXACT-PROFILE-RESPONSE'
+        proof.update(kind='native_api',attempt_evidence_id=row['evidence_id'],operation_id='score-profile.create',observation_scope='EXACT_ATTEMPT_OPERATION_RESPONSE',exact_request_binding_verified=True,receipt_sha256='1'*64)
+        live['evidence'][ref]=proof;row['steps']['profile_create'].update(status='OBSERVED_SUCCESS',HTTP_status=201,safe_error_code=None,evidence_id=ref)
+        self.assertEqual(validate_P2_attempt_records(live,live['evidence']),[])
+        for field,value in [('attempt_evidence_id','unrelated'),('operation_id','overall.analyze'),('exact_request_binding_verified',False)]:
+            changed=deepcopy(live);changed['evidence'][ref][field]=value
+            self.assertTrue(validate_P2_attempt_records(changed,changed['evidence']))
+        row['steps']['profile_create']['HTTP_status']=True
+        self.assertTrue(validate_P2_attempt_records(live,live['evidence']))
+
+    def test_current_deployment_requires_reverse_P2_pointer_and_keeps_synthetic_scope(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_current_deployment,validate_backend_safe_observation_plan
+        for value in (None,'unrelated'):
+            wrong=deepcopy(epoch_spec);wrong['supabase_deployment_contract']['live_execution']['current_deployment']['current_P2_attempt_evidence_id']=value
+            self.assertTrue(validate_current_deployment(wrong))
+        wrong=deepcopy(epoch_spec);wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan']['synthetic_verification']['deployment_or_real_user_evidence']=True
+        self.assertTrue(validate_backend_safe_observation_plan(wrong))
+
+    def test_current_observer_visible_events_cannot_certify_all_logs_actor_or_business(self):
+        epoch_spec=observer_epoch_spec(self.spec)
+        from check_project_consistency import validate_current_deployment
+        for field,value in [('visible_event_count',True),('exact_fields',['operation','stage','status','code','request_id','body']),('all_checked_event_keys_match',False),('all_checked_request_ids_match',False),('whole_log_nonexposure_proven',True),('specific_BFF_actor_binding_proven',True),('business_success_proven',True),('source_deployment_receipt_sha256','f'*64)]:
+            wrong=deepcopy(epoch_spec);wrong['supabase_deployment_contract']['live_execution']['current_deployment']['safe_observer_acceptance'][field]=value
+            self.assertTrue(validate_current_deployment(wrong))
+        wrong=deepcopy(epoch_spec);live=wrong['supabase_deployment_contract']['live_execution'];obs=live['current_deployment']['safe_observer_acceptance']
+        live['evidence'][obs['evidence_id']]['source_deployment_receipt_sha256']='f'*64
+        self.assertTrue(validate_current_deployment(wrong))
+
+    def test_scope_error_cannot_be_success_or_hide_invalid_policy(self):
+        from check_project_consistency import validate_live_execution
+        wrong=deepcopy(self.spec)
+        wrong['supabase_deployment_contract']['live_execution']['post_live_receipt']['scope_error_contract']['invalid_binding_or_policy']['code']='operation_scope_not_approved'
+        self.assertIn('DEV-010 operation scope classification cannot expand approval or bypass policy',validate_live_execution(wrong))
+
+
+    def test_post_registration_readiness_cannot_be_used_as_user_business_or_performance_acceptance(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in (('real_user_acceptance','PASS'),('BFF_live_browser','PASS'),('business_native_accepted',1),('performance_acceptance',True)):
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['post_registration_acceptance'][key]=value
+            self.assertIn('DEV-010 readiness cannot promote user business or performance acceptance',validate_live_execution(wrong))
+
+    def test_post_registration_owner_report_and_readiness_require_their_actual_evidence(self):
+        from check_project_consistency import validate_live_execution
+        wrong=deepcopy(self.spec)
+        post=wrong['supabase_deployment_contract']['live_execution']['post_registration_acceptance']
+        post['owner_registration']['independent_Dashboard_reread']=True
+        post['readiness']['receipt_sha256']='f'*64
+        result=validate_live_execution(wrong)
+        self.assertIn('DEV-010 owner report evidence scope drift',result)
+        self.assertIn('DEV-010 readiness requires scoped real response evidence',result)
+
+    def test_post_registration_limited_bff_sequence_cannot_collect_tokens_or_expand_selected_data_scope(self):
+        from check_project_consistency import validate_live_execution
+        for change in ('sequence','scope','preview'):
+            wrong=deepcopy(self.spec)
+            post=wrong['supabase_deployment_contract']['live_execution']['post_registration_acceptance']
+            if change=='sequence':post['next_sequence']=['OWNER_EXPORT_JWT_TO_SERVICE']
+            elif change=='scope':post['selected_runtime_operations'].append('candidates.build')
+            else:post['preview_gate_preserved']=False
+            self.assertIn('DEV-010 limited BFF sequence or approved scope drift',validate_live_execution(wrong))
+
+
+    def test_bff_source_reply_cannot_be_promoted_to_registration_or_live_acceptance(self):
+        from check_project_consistency import validate_live_execution
+        for change in ('owner','native','browser'):
+            wrong=deepcopy(self.spec)
+            intake=wrong['supabase_deployment_contract']['live_execution']['bff_reply_intake']
+            if change=='owner':
+                intake['registration']['receipt_sha256']=None
+                expected='DEV-010 BFF registration needs owner receipt'
+            elif change=='native':
+                intake['source_review_is_operating_acceptance']=True
+                expected='DEV-010 BFF reply cannot certify live acceptance'
+            else:
+                intake['reported_state']['live_browser']='PASS'
+                expected='DEV-010 BFF synthetic reply is not native evidence'
+            self.assertIn(expected,validate_live_execution(wrong))
+
+    def test_bff_same_bearer_relay_and_ingress_contract_cannot_drift(self):
+        from check_project_consistency import validate_live_execution
+        for key,value in (('caller_appends','/api/v1/api/v1'),('relay_header','X-Other-Relay'),('same_verified_Bearer_required',False),('same_verified_Bearer_required',1)):
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['bff_reply_intake']['transport'][key]=value
+            self.assertIn('DEV-010 BFF source transport contract drift',validate_live_execution(wrong))
+
+    def test_bff_source_hash_and_required_owner_browser_security_gates_are_bound(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        wrong=deepcopy(self.spec)
+        intake=wrong['supabase_deployment_contract']['live_execution']['bff_reply_intake']
+        intake['source_review']['service']['supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts']='f'*64
+        intake['acceptance_gates'].pop()
+        errors=validate_live_execution(wrong)
+        self.assertIn('DEV-010 BFF service source binding drift',errors)
+        self.assertIn('DEV-010 BFF remaining acceptance gates drift',errors)
+        text=live_execution_document(self.spec)
+        for value in ('OWNER_REPORTED_REGISTERED','BFF_LIVE_BROWSER','SECURITY_3_GATES','새 API 호출'):
+            self.assertIn(value,text)
+
+
     def test_preconnection_cases_follow_canonical_routes_and_cover_all_operations(self):
         from check_project_consistency import validate_live_execution,live_execution_document
         wrong=deepcopy(self.spec)
@@ -1538,6 +2043,604 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
             with self.subTest(field=field):
                 spec=deepcopy(self.spec);spec['supabase_deployment_contract']['numerical_compatibility'][field]=value
                 self.assertIn('DEV-010 precision or heavy-compute compatibility drift',validate_supabase_deployment_contract(spec))
+
+# Planning1.9.71 regressions share the existing authorized test path.
+# The standalone source module remains preserved and is not imported here.
+import check_project_consistency as _planning1971_checker
+_PLANNING1971_ROOT = ROOT
+
+_PLANNING1971_SYNTHETIC_DEPLOYMENT = 'SYNTHETIC-UNIT-DEPLOYMENT'
+_PLANNING1971_SYNTHETIC_ATTEMPT = 'SYNTHETIC-UNIT-P2-V2'
+_PLANNING1971_SYNTHETIC_COMMIT = _planning1971_checker.ADMIN_FIX_SOURCE_COMMIT
+_PLANNING1971_SYNTHETIC_DEPLOYMENT_SHA = 'b' * 64
+_PLANNING1971_SYNTHETIC_ATTEMPT_SHA = 'c' * 64
+
+def _planning1971_observer_epoch_spec(spec):
+    """Explicit legacy-only view; preserve the supplied current spec and every original record."""
+    view = deepcopy(spec)
+    current_live = view['supabase_deployment_contract']['live_execution']
+    deployment_id = 'OPS-SAFE-OBSERVER-DEPLOYED-20261016'
+    attempt_id = 'OPS-P2-OBSERVER-ATTEMPT-20261016'
+    installation = current_live.get('current_deployment')
+    if not isinstance(installation, dict) or installation.get('evidence_id') != deployment_id:
+        deployments = current_live.get('deployment_history', {})
+        installation = deployments.get(deployment_id) if isinstance(deployments, dict) else None
+    if not isinstance(installation, dict) or installation.get('evidence_id') != deployment_id:
+        raise AssertionError('The preserved observer installation is required for this legacy fixture')
+    history = current_live.get('P2_attempt_history', {})
+    if not isinstance(history, dict):
+        raise AssertionError('The preserved P2 history is required for this legacy fixture')
+    attempt = current_live.get('current_P2_attempt')
+    if not isinstance(attempt, dict) or attempt.get('evidence_id') != attempt_id:
+        attempt = history.get(attempt_id)
+    if not isinstance(attempt, dict) or attempt.get('evidence_id') != attempt_id:
+        raise AssertionError('The preserved observer P2 attempt is required for this legacy fixture')
+    earlier = {}
+    cursor = attempt.get('previous_receipt_evidence_id')
+    while cursor in history:
+        if cursor == attempt_id or cursor in earlier:
+            raise AssertionError('The preserved observer predecessor chain must not contain a cycle')
+        record = history[cursor]
+        if not isinstance(record, dict) or record.get('evidence_id') != cursor:
+            raise AssertionError('The preserved observer predecessor reference is malformed')
+        earlier[cursor] = record
+        cursor = record.get('previous_receipt_evidence_id')
+    current_live['current_deployment'] = installation
+    current_live['current_P2_attempt'] = attempt
+    current_live['P2_attempt_history'] = earlier
+    current_live.pop('deployment_history', None)
+    fix = current_live.get('admin_session_identity_fix')
+    if isinstance(fix, dict) and 'historical_preparation' in fix:
+        if not isinstance(fix['historical_preparation'], dict):
+            raise AssertionError('The original identity-fix preparation snapshot is required')
+        current_live['admin_session_identity_fix'] = fix['historical_preparation']
+    view['version'] = '1.9.70'
+    return view
+
+def _planning1971_live(spec):
+    return spec['supabase_deployment_contract']['live_execution']
+
+def _planning1971_synthetic_proof(candidate, deployment_sha, digest, kind='bff_browser', **extra):
+    return {'kind': kind, 'candidate_commit': candidate, 'source_deployment_receipt_sha256': deployment_sha, 'receipt_sha256': digest, 'operations': [], 'does_not_imply_operation_acceptance': True, **extra}
+
+class Planning1971DeploymentHistoryTests(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.baseline = json.loads((_PLANNING1971_ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+
+    def spec(self):
+        return _planning1971_observer_epoch_spec(self.baseline)
+
+    def history_model(self):
+        spec = _planning1971_observer_epoch_spec(self.spec())
+        spec['version'] = '1.9.71'
+        current_live = _planning1971_live(spec)
+        installed = deepcopy(current_live['current_deployment'])
+        current_live['deployment_history'] = {installed['evidence_id']: installed}
+        current_live['current_deployment'] = {'evidence_id': _PLANNING1971_SYNTHETIC_DEPLOYMENT, 'receipt_sha256': _PLANNING1971_SYNTHETIC_DEPLOYMENT_SHA, 'source': {'candidate_commit': _PLANNING1971_SYNTHETIC_COMMIT}}
+        return spec
+
+    def runtime_model(self):
+        """Keep real baseline records in memory; all added records use synthetic keys and values."""
+        spec = self.history_model()
+        current_live = _planning1971_live(spec)
+        previous = deepcopy(current_live['current_P2_attempt'])
+        current_live['P2_attempt_history'][previous['evidence_id']] = previous
+        row = {'format': 'jungsi.p2-runtime-attempt/v2', 'status': 'ACTUAL_STEPS_OBSERVED', 'observation_basis': 'RUNTIME_FOLLOWUP', 'evidence_id': _PLANNING1971_SYNTHETIC_ATTEMPT, 'receipt_sha256': _PLANNING1971_SYNTHETIC_ATTEMPT_SHA, 'source_deployment_evidence_id': _PLANNING1971_SYNTHETIC_DEPLOYMENT, 'source_deployment_receipt_sha256': _PLANNING1971_SYNTHETIC_DEPLOYMENT_SHA, 'submit_count': 1, 'retry_count': 0, 'reload_after_submit': False, 'same_form_idempotency_key': None, 'idempotency_context_status': 'PRIVATE_REFERENCE_ONLY', 'DB_writes_independently_observed': None, 'UI_HTTP_status': None, 'UI_safe_error_code': None, 'UI_request_id': None, 'business_native_accepted': 0, 'business_deployment_accepted': 0, 'production_ready': False, 'scope': 'Synthetic unit model of an unconfirmed single submission.', 'preservation_rule': 'Preserve old failures; no service acceptance or actual execution is implied.', 'previous_receipt_evidence_id': previous['evidence_id'], 'steps': {name: {'operation_id': operation, 'status': 'UNCONFIRMED', 'HTTP_status': None, 'safe_error_code': None, 'evidence_id': None} for name, operation in (('profile_create', 'score-profile.create'), ('overall_analyze', 'overall.analyze'), ('report_read', 'report.read'))}, 'scoped_safe_logs': [], 'scoped_readonly_observations': [], 'submitted_at_UTC': '2030-01-01T00:00:00Z', 'result_observed_at_UTC': '2030-01-01T00:00:01Z', 'functional_observations': {name: {'status': 'NOT_RUN' if name == 'report_reload_ui' else 'UNCONFIRMED', 'evidence_id': None} for name in ('save_analysis_ui', 'report_reload_ui')}, 'report_reload_count': 0}
+        current_live['current_P2_attempt'] = row
+        current_live['evidence'][_PLANNING1971_SYNTHETIC_ATTEMPT] = _planning1971_synthetic_proof(_PLANNING1971_SYNTHETIC_COMMIT, _PLANNING1971_SYNTHETIC_DEPLOYMENT_SHA, _PLANNING1971_SYNTHETIC_ATTEMPT_SHA)
+        return spec
+
+    def with_functional_success(self):
+        spec = self.runtime_model()
+        current_live = _planning1971_live(spec)
+        row = current_live['current_P2_attempt']
+        for index, name in enumerate(('save_analysis_ui', 'report_reload_ui'), start=1):
+            ref = 'SYNTHETIC-UNIT-UI-' + name
+            current_live['evidence'][ref] = _planning1971_synthetic_proof(_PLANNING1971_SYNTHETIC_COMMIT, _PLANNING1971_SYNTHETIC_DEPLOYMENT_SHA, str(index) * 64, attempt_evidence_id=_PLANNING1971_SYNTHETIC_ATTEMPT, functional_id=name, observation_scope='SINGLE_OWNER_CASE_UI', exact_request_binding_verified=False)
+            row['functional_observations'][name] = {'status': 'OBSERVED_SUCCESS', 'evidence_id': ref}
+        row['report_reload_count'] = 1
+        row['reload_after_submit'] = True
+        return spec
+
+    def synthetic_admin_installation_model(self):
+        """Generic in-memory unit fixture; every new receipt is synthetic, never operating evidence."""
+        spec = self.history_model()
+        current_live = _planning1971_live(spec)
+        previous = next(iter(current_live['deployment_history'].values()))
+        plan = current_live['backend_safe_observation_plan']
+        fix = current_live['admin_session_identity_fix']
+        preparation = deepcopy(fix)
+        source = {'candidate_commit': _planning1971_checker.ADMIN_FIX_SOURCE_COMMIT, 'accepted_develop_merge': 'd' * 40, 'tree': 'e' * 40, 'spec_version': '1.9.70', 'source_files_count': 64, 'bundle': deepcopy(_planning1971_checker.ADMIN_FIX_BUNDLE), 'source_manifest': {'bytes': 1, 'sha256': '1' * 64, 'source_files_count': 64}, 'deployment_package': {'bytes': 1, 'sha256': '2' * 64}, 'runtime_source_bindings': {**plan['source_bindings'], **fix['source_bindings']}}
+        ref = 'SYNTHETIC-UNIT-SOURCE032-RECEIPT'
+        deployment = {'format': 'jungsi.current-source-deployment/v1', 'status': 'SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED', 'evidence_id': ref, 'source': source, 'receipt_bytes': 17, 'receipt_sha256': '3' * 64, 'previous_deployment_evidence_id': previous['evidence_id'], 'previous_bundle': deepcopy(previous['source']['bundle']), 'remote_readback': deepcopy(_planning1971_checker.ADMIN_FIX_BUNDLE), 'editor_reload_verified': True, 'verify_jwt_remained_true': True, 'same_existing_project_and_function': True, 'auth_or_secret_or_policy_changes': False, 'operation_scope_expanded': False, 'data_or_budget_approval_changed': False, 'production_ready': False, 'business_native_accepted': 0, 'business_deployment_accepted': 0, 'scope': 'synthetic unit scope', 'observed_at_UTC': '2030-01-01T00:00:00Z', 'new_version_health': 'NOT_RUN', 'native_readiness': None, 'safe_observer_acceptance': None, 'current_P2_attempt_evidence_id': None}
+        current_live['current_deployment'] = deployment
+        current_live['evidence'][ref] = _planning1971_synthetic_proof(_planning1971_checker.ADMIN_FIX_SOURCE_COMMIT, deployment['receipt_sha256'], deployment['receipt_sha256'], kind='edge_deployment', source=deepcopy(source))
+        current_live['stages']['edge_deployment']['evidence_ids'].append(ref)
+        fix.update(status='SOURCE_DEPLOYED_FUNCTIONAL_FOLLOWUP_PENDING', implementation_candidate_commit=_planning1971_checker.ADMIN_FIX_SOURCE_COMMIT, deployment='SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED', actual_deployment_evidence_id=ref, historical_preparation=preparation)
+        return spec
+
+    def assert_p2_valid(self, spec):
+        current_live = _planning1971_live(spec)
+        self.assertEqual(_planning1971_checker.validate_P2_attempt_records(current_live, current_live['evidence']), [])
+
+    def assert_p2_invalid(self, spec):
+        current_live = _planning1971_live(spec)
+        self.assertTrue(_planning1971_checker.validate_P2_attempt_records(current_live, current_live['evidence']))
+
+    def test_actual_source_ci_counts_remain_source_only_and_runtime_rendering_is_scoped(self):
+        baseline = deepcopy(self.baseline)
+        self.assertEqual(_planning1971_checker.validate_current_source_verification(baseline), [])
+        proof = _planning1971_live(baseline)['current_source_verification']
+        self.assertEqual(proof['spec_version'], '1.9.70')
+        self.assertEqual(proof['verified_source_test_counts'], {'python': 1065, 'deno': 590, 'oracle': 993, 'oracle_mismatches': 0})
+        self.assertEqual(len(proof['ci_runs']), 3)
+        self.assertIs(proof['source_only'], True)
+        self.assertEqual(proof['business_native_accepted'], 0)
+        self.assertEqual(proof['business_deployment_accepted'], 0)
+        self.assertIs(proof['production_ready'], False)
+        self.assertEqual(_planning1971_live(baseline)['current_P2_attempt']['business_native_accepted'], 0)
+        self.assertIs(_planning1971_live(baseline)['current_P2_attempt']['production_ready'], False)
+        for mutation in ('deno_float', 'oracle_bool', 'source_only_false', 'CI_head', 'CI_oracle_bool'):
+            with self.subTest(mutation=mutation):
+                changed = deepcopy(self.baseline)
+                changed_proof = _planning1971_live(changed)['current_source_verification']
+                if mutation == 'deno_float':
+                    changed_proof['verified_source_test_counts']['deno'] = 590.0
+                elif mutation == 'oracle_bool':
+                    changed_proof['verified_source_test_counts']['oracle_mismatches'] = False
+                elif mutation == 'source_only_false':
+                    changed_proof['source_only'] = False
+                elif mutation == 'CI_head':
+                    changed_proof['ci_runs'][0]['headSha'] = '0' * 40
+                else:
+                    changed_proof['ci_runs'][0]['verified_source_test_counts']['oracle_mismatches'] = False
+                self.assertTrue(_planning1971_checker.validate_current_source_verification(changed))
+        rendered = _planning1971_checker.live_execution_document(self.baseline)
+        self.assertIn('201 / 없음', rendered)
+        self.assertIn('전체 누백·조합분포는 미발행 pending', rendered)
+        self.assertIn('UNCONFIRMED', rendered)
+
+    def test_actual_baseline_current_is_validated_without_an_epoch_view(self):
+        self.assertEqual(_planning1971_checker.validate_live_execution(deepcopy(self.baseline)), [])
+
+    def test_observer_epoch_view_resolves_history_without_mutating_actual_current(self):
+        spec = self.runtime_model()
+        current_live = _planning1971_live(spec)
+        preparation = deepcopy(current_live['admin_session_identity_fix'])
+        current_live['admin_session_identity_fix']['historical_preparation'] = preparation
+        before = deepcopy(spec)
+        epoch = _planning1971_observer_epoch_spec(spec)
+        self.assertEqual(spec, before)
+        self.assertEqual(_planning1971_live(spec)['current_deployment']['evidence_id'], _PLANNING1971_SYNTHETIC_DEPLOYMENT)
+        self.assertEqual(_planning1971_live(spec)['current_P2_attempt']['evidence_id'], _PLANNING1971_SYNTHETIC_ATTEMPT)
+        self.assertEqual(epoch['version'], '1.9.70')
+        self.assertEqual(_planning1971_live(epoch)['current_deployment']['evidence_id'], 'OPS-SAFE-OBSERVER-DEPLOYED-20261016')
+        self.assertEqual(_planning1971_live(epoch)['current_P2_attempt']['evidence_id'], 'OPS-P2-OBSERVER-ATTEMPT-20261016')
+        self.assertNotIn('deployment_history', _planning1971_live(epoch))
+        self.assertNotIn('OPS-P2-OBSERVER-ATTEMPT-20261016', _planning1971_live(epoch)['P2_attempt_history'])
+        self.assertEqual(_planning1971_live(epoch)['admin_session_identity_fix'], preparation)
+
+    def test_minor_zero_bool_and_nonhex_log_hash_regressions(self):
+        for group, key, value in ((None, 'actual_HTTP_requests', False), ('synthetic_verification', 'focused_failed', False), ('synthetic_verification', 'focused_log_sha256', 'g' * 64)):
+            with self.subTest(group=group, key=key):
+                spec = _planning1971_observer_epoch_spec(self.spec())
+                target = _planning1971_live(spec)['admin_session_identity_fix']
+                if group is not None:
+                    target = target[group]
+                target[key] = value
+                self.assertTrue(_planning1971_checker.validate_admin_session_identity_fix(spec))
+
+    def test_deployment_resolver_selects_unique_current_and_history(self):
+        model = {'actual_editor_deployment': {'evidence_id': 'SYNTHETIC-OLD', 'receipt_sha256': '1' * 64}, 'current_deployment': {'evidence_id': 'SYNTHETIC-CURRENT', 'receipt_sha256': '2' * 64}, 'deployment_history': {'SYNTHETIC-HISTORY': {'evidence_id': 'SYNTHETIC-HISTORY', 'receipt_sha256': '3' * 64}}}
+        for ref, digest in (('SYNTHETIC-CURRENT', '2' * 64), ('SYNTHETIC-HISTORY', '3' * 64)):
+            with self.subTest(ref=ref):
+                self.assertEqual(_planning1971_checker.live_deployment(model, evidence_id=ref)['receipt_sha256'], digest)
+                self.assertEqual(_planning1971_checker.live_deployment(model, receipt_sha256=digest)['evidence_id'], ref)
+                self.assertEqual(_planning1971_checker.live_deployment(model, evidence_id=ref, receipt_sha256=digest)['evidence_id'], ref)
+
+    def test_deployment_resolver_rejects_missing_crossed_or_wrong_type_selectors(self):
+        model = {'current_deployment': {'evidence_id': 'SYNTHETIC-CURRENT', 'receipt_sha256': '2' * 64}, 'deployment_history': {}}
+        for kwargs in ({}, {'evidence_id': 'missing'}, {'receipt_sha256': '0' * 64}, {'evidence_id': 'SYNTHETIC-CURRENT', 'receipt_sha256': '0' * 64}, {'evidence_id': []}, {'receipt_sha256': False}):
+            with self.subTest(kwargs=kwargs):
+                self.assertEqual(_planning1971_checker.live_deployment(model, **kwargs), {})
+
+    def test_deployment_resolver_rejects_duplicate_id_or_receipt(self):
+        for field in ('evidence_id', 'receipt_sha256'):
+            model = {'current_deployment': {'evidence_id': 'SYNTHETIC-CURRENT', 'receipt_sha256': '2' * 64}, 'deployment_history': {'SYNTHETIC-HISTORY': {'evidence_id': 'SYNTHETIC-HISTORY', 'receipt_sha256': '3' * 64}}}
+            model['deployment_history']['SYNTHETIC-HISTORY'][field] = model['current_deployment'][field]
+            self.assertEqual(_planning1971_checker.live_deployment(model, **{field: model['current_deployment'][field]}), {})
+
+    def test_history_is_optional_only_for_baseline_and_required_for_1971(self):
+        spec = _planning1971_observer_epoch_spec(self.spec())
+        _planning1971_live(spec).pop('deployment_history', None)
+        self.assertEqual(_planning1971_checker.validate_deployment_history(spec), [])
+        spec['version'] = '1.9.71'
+        self.assertTrue(_planning1971_checker.validate_deployment_history(spec))
+        self.assertEqual(_planning1971_checker.validate_deployment_history(self.history_model()), [])
+
+    def test_history_rejects_malformed_missing_duplicate_and_changed_old_installation(self):
+        for change in ('type', 'empty', 'value', 'wrong_key', 'duplicate_id', 'duplicate_sha', 'old_hash'):
+            with self.subTest(change=change):
+                spec = self.history_model()
+                current_live = _planning1971_live(spec)
+                history = current_live['deployment_history']
+                old_ref = next(iter(history))
+                if change == 'type':
+                    current_live['deployment_history'] = []
+                elif change == 'empty':
+                    current_live['deployment_history'] = {}
+                elif change == 'value':
+                    history[old_ref] = None
+                elif change == 'wrong_key':
+                    history['SYNTHETIC-WRONG-HISTORY-KEY'] = history.pop(old_ref)
+                elif change == 'duplicate_id':
+                    current_live['current_deployment']['evidence_id'] = old_ref
+                elif change == 'duplicate_sha':
+                    current_live['current_deployment']['receipt_sha256'] = history[old_ref]['receipt_sha256']
+                else:
+                    history[old_ref]['source']['bundle']['bytes'] += 1
+                self.assertTrue(_planning1971_checker.validate_deployment_history(spec))
+
+    def test_history_accepts_new_current_and_preserved_v1_failure_in_history(self):
+        self.assertEqual(_planning1971_checker.validate_deployment_history(self.runtime_model()), [])
+
+    def test_history_rejects_rewriting_the_preserved_v1_failure(self):
+        spec = self.history_model()
+        _planning1971_live(spec)['current_P2_attempt']['UI_HTTP_status'] = 503
+        self.assertTrue(_planning1971_checker.validate_deployment_history(spec))
+
+    def test_actual_admin_fix_requires_native_outer_zero_counters(self):
+        spec = self.synthetic_admin_installation_model()
+        self.assertEqual(_planning1971_checker.validate_admin_session_identity_fix(spec), [])
+        for field in ('actual_HTTP_requests', 'business_native_accepted'):
+            with self.subTest(field=field):
+                changed = deepcopy(spec)
+                _planning1971_live(changed)['admin_session_identity_fix'][field] = False
+                self.assertTrue(_planning1971_checker.validate_admin_session_identity_fix(changed))
+
+    def test_admin_installation_rejects_bad_reference_and_non_native_nested_counts(self):
+        spec = self.synthetic_admin_installation_model()
+        self.assertEqual(_planning1971_checker.validate_admin_fix_deployment(spec), [])
+        for change in ('readiness_bad_id', 'observer_bad_id', 'registry_source_float', 'previous_bundle_float', 'current_extra', 'source_extra'):
+            with self.subTest(change=change):
+                changed = deepcopy(spec)
+                current_live = _planning1971_live(changed)
+                deployment = current_live['current_deployment']
+                if change == 'readiness_bad_id':
+                    deployment['new_version_health'] = 'OBSERVED_PARTIAL'
+                    deployment['native_readiness'] = {'evidence_id': []}
+                elif change == 'observer_bad_id':
+                    deployment['safe_observer_acceptance'] = {'evidence_id': []}
+                elif change == 'registry_source_float':
+                    current_live['evidence'][deployment['evidence_id']]['source']['source_files_count'] = 64.0
+                elif change == 'previous_bundle_float':
+                    deployment['previous_bundle']['bytes'] = float(deployment['previous_bundle']['bytes'])
+                elif change == 'current_extra':
+                    deployment['raw_request_id'] = 'synthetic-unit-value'
+                else:
+                    deployment['source']['scores'] = 'synthetic-unit-value'
+                result = _planning1971_checker.validate_admin_fix_deployment(changed)
+                self.assertIsInstance(result, list)
+                self.assertTrue(result)
+
+    def test_preserved_editor_and_first_two_failures_reject_one_cell_metadata_changes(self):
+        baseline = deepcopy(self.baseline)
+        self.assertEqual(_planning1971_checker.validate_deployment_history(baseline), [])
+        self.assert_p2_valid(baseline)
+        cases = (('editor', 'scope', 'synthetic historical scope mutation'), ('editor', 'observed_at_UTC', '2030-01-01T00:00:00Z'), ('root', 'scope', 'synthetic historical scope mutation'), ('root', 'submitted_at_UTC', '2030-01-01T00:00:00Z'), ('frontend', 'scope', 'synthetic historical scope mutation'), ('frontend', 'submitted_at_UTC', '2030-01-01T00:00:00Z'))
+        for target, field, value in cases:
+            with self.subTest(target=target, field=field):
+                changed = deepcopy(self.baseline)
+                current_live = _planning1971_live(changed)
+                if target == 'editor':
+                    record = current_live['actual_editor_deployment']
+                else:
+                    reply = current_live['frontend_P2_reply']
+                    ref = reply['earlier_root_attempt']['evidence_id'] if target == 'root' else reply['current_P2_attempt_evidence_id']
+                    record = _planning1971_checker.live_P2_attempt(current_live, ref)
+                record[field] = value
+                self.assertTrue(_planning1971_checker.validate_deployment_history(changed))
+                if target != 'editor':
+                    self.assert_p2_invalid(changed)
+                self.assertEqual(current_live['current_P2_attempt']['business_native_accepted'], 0)
+                self.assertIs(current_live['current_P2_attempt']['production_ready'], False)
+
+    def test_admin_installation_requires_scopes_and_exact_metadata_shapes(self):
+        model = self.synthetic_admin_installation_model()
+        self.assertEqual(_planning1971_checker.validate_admin_fix_deployment(model), [])
+        source = _planning1971_live(model)['current_deployment']['source']
+        self.assertEqual(set(source['source_manifest']), {'bytes', 'sha256', 'source_files_count'})
+        self.assertEqual(set(source['deployment_package']), {'bytes', 'sha256'})
+        for name in ('source_manifest', 'deployment_package'):
+            for mutation in ('extra', 'bytes_float'):
+                with self.subTest(metadata=name, mutation=mutation):
+                    changed = deepcopy(model)
+                    meta = _planning1971_live(changed)['current_deployment']['source'][name]
+                    if mutation == 'extra':
+                        meta['scores'] = 'synthetic-unit-value'
+                    else:
+                        meta['bytes'] = float(meta['bytes'])
+                    self.assertTrue(_planning1971_checker.validate_admin_fix_deployment(changed))
+        actual = deepcopy(self.baseline)
+        self.assertEqual(_planning1971_checker.validate_admin_fix_deployment(actual), [])
+        for component in ('current_deployment', 'native_readiness', 'safe_observer_acceptance'):
+            for mutation in ('absent', 'null', 'empty', 'number', 'extra'):
+                with self.subTest(component=component, mutation=mutation):
+                    changed = deepcopy(actual)
+                    deployment = _planning1971_live(changed)['current_deployment']
+                    record = deployment if component == 'current_deployment' else deployment[component]
+                    self.assertIsInstance(record, dict)
+                    if mutation == 'absent':
+                        record.pop('scope', None)
+                    elif mutation == 'null':
+                        record['scope'] = None
+                    elif mutation == 'empty':
+                        record['scope'] = ''
+                    elif mutation == 'number':
+                        record['scope'] = 3
+                    else:
+                        record['synthetic_extra'] = 'synthetic-unit-value'
+                    result = _planning1971_checker.validate_admin_fix_deployment(changed)
+                    self.assertIsInstance(result, list)
+                    self.assertTrue(result)
+
+    def test_generic_admin_installation_model_is_not_service_acceptance(self):
+        spec = self.synthetic_admin_installation_model()
+        self.assertEqual(_planning1971_checker.validate_admin_fix_deployment(spec), [])
+        self.assertEqual(_planning1971_live(spec)['current_deployment']['business_native_accepted'], 0)
+        self.assertFalse(_planning1971_live(spec)['current_deployment']['production_ready'])
+
+    def test_source032_requires_new_receipt_instead_of_missing_or_copied_evidence(self):
+        for change in ('missing_entry', 'missing_sha', 'numeric_sha', 'copied_readiness'):
+            with self.subTest(change=change):
+                spec = self.synthetic_admin_installation_model()
+                current_live = _planning1971_live(spec)
+                deployment = current_live['current_deployment']
+                if change == 'missing_entry':
+                    current_live['evidence'].pop(deployment['evidence_id'])
+                elif change == 'missing_sha':
+                    deployment.pop('receipt_sha256')
+                elif change == 'numeric_sha':
+                    deployment['receipt_sha256'] = int('1' * 64)
+                else:
+                    previous = next(iter(current_live['deployment_history'].values()))
+                    deployment['native_readiness'] = deepcopy(previous['native_readiness'])
+                    deployment['new_version_health'] = previous['new_version_health']
+                self.assertTrue(_planning1971_checker.validate_admin_fix_deployment(spec))
+
+    def test_v1_baseline_remains_valid_and_immutable_after_v2_is_added(self):
+        self.assert_p2_valid(_planning1971_observer_epoch_spec(self.spec()))
+        spec = self.runtime_model()
+        self.assert_p2_valid(spec)
+        previous_id = _planning1971_live(spec)['current_P2_attempt']['previous_receipt_evidence_id']
+        _planning1971_live(spec)['P2_attempt_history'][previous_id]['UI_HTTP_status'] = 503
+        self.assert_p2_invalid(spec)
+
+    def test_v2_unconfirmed_ui_does_not_invent_http_or_functional_success(self):
+        spec = self.runtime_model()
+        self.assert_p2_valid(spec)
+        for key in ('UI_HTTP_status', 'UI_safe_error_code', 'UI_request_id'):
+            changed = deepcopy(spec)
+            _planning1971_live(changed)['current_P2_attempt'][key] = 503 if key == 'UI_HTTP_status' else 'synthetic'
+            self.assert_p2_invalid(changed)
+
+    def test_v2_functional_success_and_reload_leave_all_steps_unconfirmed(self):
+        spec = self.with_functional_success()
+        self.assert_p2_valid(spec)
+        row = _planning1971_live(spec)['current_P2_attempt']
+        self.assertTrue(all((step['status'] == 'UNCONFIRMED' for step in row['steps'].values())))
+        self.assertEqual(row['business_native_accepted'], 0)
+        self.assertEqual(row['business_deployment_accepted'], 0)
+        self.assertIs(row['production_ready'], False)
+
+    def test_v2_functional_proof_cannot_cross_attempt_or_functional_scope(self):
+        for field, value in (('attempt_evidence_id', 'unrelated'), ('functional_id', 'report_reload_ui'), ('observation_scope', 'EXACT_ATTEMPT_OPERATION_RESPONSE'), ('candidate_commit', '0' * 40), ('source_deployment_receipt_sha256', '0' * 64), ('kind', 'sql')):
+            with self.subTest(field=field):
+                spec = self.with_functional_success()
+                current_live = _planning1971_live(spec)
+                ref = current_live['current_P2_attempt']['functional_observations']['save_analysis_ui']['evidence_id']
+                current_live['evidence'][ref][field] = value
+                self.assert_p2_invalid(spec)
+
+    def test_v2_functional_proof_rejects_extra_private_fields(self):
+        for field in ('raw_request_id', 'account', 'scores'):
+            with self.subTest(field=field):
+                spec = self.with_functional_success()
+                current_live = _planning1971_live(spec)
+                ref = current_live['current_P2_attempt']['functional_observations']['save_analysis_ui']['evidence_id']
+                current_live['evidence'][ref][field] = 'synthetic-unit-value'
+                self.assert_p2_invalid(spec)
+
+    def test_v2_reload_requires_native_count_and_matching_boolean(self):
+        for count, reloaded in ((True, True), (1.0, True), (2, True), (1, False), (0, True)):
+            with self.subTest(count=count, reloaded=reloaded):
+                spec = self.with_functional_success()
+                _planning1971_live(spec)['current_P2_attempt'].update(report_reload_count=count, reload_after_submit=reloaded)
+                self.assert_p2_invalid(spec)
+
+    def test_v2_ui_positive_cannot_be_reused_as_exact_operation_response(self):
+        spec = self.with_functional_success()
+        row = _planning1971_live(spec)['current_P2_attempt']
+        row['steps']['profile_create'].update(status='OBSERVED_SUCCESS', HTTP_status=201, safe_error_code=None, evidence_id=row['functional_observations']['save_analysis_ui']['evidence_id'])
+        self.assert_p2_invalid(spec)
+
+    def test_v2_exact_operation_proof_can_succeed_without_global_acceptance(self):
+        spec = self.with_functional_success()
+        current_live = _planning1971_live(spec)
+        ref = 'SYNTHETIC-UNIT-EXACT-PROFILE'
+        current_live['evidence'][ref] = _planning1971_synthetic_proof(_PLANNING1971_SYNTHETIC_COMMIT, _PLANNING1971_SYNTHETIC_DEPLOYMENT_SHA, '4' * 64, kind='native_api', attempt_evidence_id=_PLANNING1971_SYNTHETIC_ATTEMPT, operation_id='score-profile.create', observation_scope='EXACT_ATTEMPT_OPERATION_RESPONSE', exact_request_binding_verified=True)
+        current_live['current_P2_attempt']['steps']['profile_create'].update(status='OBSERVED_SUCCESS', HTTP_status=201, safe_error_code=None, evidence_id=ref)
+        self.assert_p2_valid(spec)
+        for field, value in (('operation_id', 'overall.analyze'), ('exact_request_binding_verified', False)):
+            changed = deepcopy(spec)
+            _planning1971_live(changed)['evidence'][ref][field] = value
+            self.assert_p2_invalid(changed)
+
+    def test_v2_complete_log_is_time_only_without_ui_or_exact_response_promotion(self):
+        spec = self.runtime_model()
+        current_live = _planning1971_live(spec)
+        row = current_live['current_P2_attempt']
+        ref = 'SYNTHETIC-UNIT-COMPLETE-LOG'
+        current_live['evidence'][ref] = _planning1971_synthetic_proof(_PLANNING1971_SYNTHETIC_COMMIT, _PLANNING1971_SYNTHETIC_DEPLOYMENT_SHA, '7' * 64, kind='native_api')
+        row['scoped_safe_logs'].append({'evidence_id': ref, 'operation_id': 'overall.analyze', 'stage': 'complete', 'HTTP_status': 201, 'safe_error_code': None, 'observed_at_UTC': '2030-01-01T00:00:03Z', 'correlation_scope': 'TIME_AND_OPERATION_ONLY', 'actor_binding_proven': False, 'BFF_request_id_binding_proven': False, 'UI_status_binding_proven': False})
+        self.assert_p2_valid(spec)
+        self.assertIsNone(row['UI_HTTP_status'])
+        self.assertTrue(all((step['status'] == 'UNCONFIRMED' for step in row['steps'].values())))
+        self.assertEqual(row['business_native_accepted'], 0)
+        self.assertIs(row['production_ready'], False)
+        for field, value in (('stage', 'budget_plan'), ('HTTP_status', True), ('safe_error_code', 'invalid_request'), ('actor_binding_proven', True)):
+            with self.subTest(field=field):
+                changed = deepcopy(spec)
+                _planning1971_live(changed)['current_P2_attempt']['scoped_safe_logs'][0][field] = value
+                self.assert_p2_invalid(changed)
+        changed = deepcopy(spec)
+        _planning1971_live(changed)['current_P2_attempt']['UI_HTTP_status'] = 201
+        self.assert_p2_invalid(changed)
+        changed = deepcopy(spec)
+        _planning1971_live(changed)['current_P2_attempt']['steps']['overall_analyze'].update(status='OBSERVED_SUCCESS', HTTP_status=201, safe_error_code=None, evidence_id=ref)
+        self.assert_p2_invalid(changed)
+
+    def test_v2_four_point_display_is_metadata_only_with_distribution_pending(self):
+        spec = self.with_functional_success()
+        current_live = _planning1971_live(spec)
+        row = current_live['current_P2_attempt']
+        ref = 'SYNTHETIC-UNIT-FOUR-POINT-DISPLAY'
+        current_live['evidence'][ref] = _planning1971_synthetic_proof(_PLANNING1971_SYNTHETIC_COMMIT, _PLANNING1971_SYNTHETIC_DEPLOYMENT_SHA, '8' * 64, kind='bff_browser', attempt_evidence_id=_PLANNING1971_SYNTHETIC_ATTEMPT, observation_scope='APPROVED_FOUR_POINT_SUBJECT_DISPLAY_ONLY', exact_request_binding_verified=False)
+        row.update(analysis_result_scope='SAVED_PROFILE_AND_SUBJECT_RESULTS_WITH_OVERALL_DISTRIBUTION_PENDING', overall_percentile_computed=False, combination_percentiles_computed=False, subject_display_verification={'evidence_id': ref, 'receipt_bytes': 31, 'receipt_sha256': '8' * 64, 'confirmed_point_count': 4, 'actual_values_published': False, 'whole_or_combination_percentile_accepted': False, 'JWT_subject_or_BFF_authority_independently_proven': False})
+        self.assert_p2_valid(spec)
+        self.assertTrue(all((step['status'] == 'UNCONFIRMED' for step in row['steps'].values())))
+        self.assertEqual(row['business_native_accepted'], 0)
+        self.assertIs(row['production_ready'], False)
+        cases = (('subject', 'confirmed_point_count', True), ('subject', 'confirmed_point_count', 4.0), ('subject', 'actual_values_published', True), ('subject', 'whole_or_combination_percentile_accepted', True), ('subject', 'JWT_subject_or_BFF_authority_independently_proven', True), ('row', 'overall_percentile_computed', True), ('row', 'combination_percentiles_computed', True), ('proof', 'attempt_evidence_id', 'unrelated'), ('proof', 'exact_request_binding_verified', True))
+        for target, field, value in cases:
+            with self.subTest(target=target, field=field, value=value):
+                changed = deepcopy(spec)
+                changed_live = _planning1971_live(changed)
+                changed_row = changed_live['current_P2_attempt']
+                selected = changed_row['subject_display_verification'] if target == 'subject' else changed_row if target == 'row' else changed_live['evidence'][ref]
+                selected[field] = value
+                self.assert_p2_invalid(changed)
+
+    def test_v2_positive_owner_aggregate_remains_snapshot_only(self):
+        spec = self.with_functional_success()
+        current_live = _planning1971_live(spec)
+        ref = 'SYNTHETIC-UNIT-OWNER-SNAPSHOT'
+        current_live['evidence'][ref] = _planning1971_synthetic_proof(_PLANNING1971_SYNTHETIC_COMMIT, _PLANNING1971_SYNTHETIC_DEPLOYMENT_SHA, '5' * 64, kind='sql')
+        snapshot = {'evidence_id': ref, 'receipt_sha256': '5' * 64, 'receipt_bytes': 11, 'observed_at_UTC': '2030-01-01T00:00:02Z', 'owner_exact_match_count': 1, 'counts': {'profiles': 1, 'profile_success_requests': 1, 'overall_success_requests': 1, 'reports': 1}, 'scope': 'OWNER_CASE_SNAPSHOT_ONLY', 'all_database_writes_zero_proven': False, 'browser_Bearer_subject_binding_proven': False}
+        current_live['current_P2_attempt']['scoped_readonly_observations'].append(snapshot)
+        self.assert_p2_valid(spec)
+        for field in ('all_database_writes_zero_proven', 'browser_Bearer_subject_binding_proven'):
+            changed = deepcopy(spec)
+            _planning1971_live(changed)['current_P2_attempt']['scoped_readonly_observations'][0][field] = True
+            self.assert_p2_invalid(changed)
+
+    def test_v2_cannot_promote_native_or_add_write_retry(self):
+        for field, value in (('retry_count', 1), ('business_native_accepted', False), ('business_deployment_accepted', 1), ('production_ready', True)):
+            with self.subTest(field=field):
+                spec = self.with_functional_success()
+                _planning1971_live(spec)['current_P2_attempt'][field] = value
+                self.assert_p2_invalid(spec)
+
+class FrontendFollowup1972Tests(unittest.TestCase):
+    """현재 화면 메타데이터의 범위와 이전 API·P2 원장 보존만 검사한다."""
+    @classmethod
+    def setUpClass(cls):
+        import check_project_consistency
+        cls.checker=check_project_consistency
+        cls.baseline=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+
+    def fixture(self):
+        return deepcopy(self.baseline)
+
+    def model(self,spec):
+        return spec['supabase_deployment_contract']['live_execution']['current_BFF_deployment']
+
+    def invalid(self,spec):
+        self.assertTrue(self.checker.validate_frontend_bff_followup(spec))
+
+    def test_current_metadata_and_limited_evidence_are_valid(self):
+        self.assertEqual([],self.checker.validate_frontend_bff_followup(self.baseline))
+
+    def test_current_metadata_is_required(self):
+        spec=self.fixture();del spec['supabase_deployment_contract']['live_execution']['current_BFF_deployment'];self.invalid(spec)
+
+    def test_nested_extra_private_payload_keys_are_rejected(self):
+        paths=[(),('owner_report',),('owner_report','receipt'),('git_source_verification',),('git_source_verification','CI'),('git_source_verification','lineage'),('git_source_verification','required_develop_sync'),('search_failure_correlations',),('search_failure_correlations','rows',0),('root_readonly_UI_observation',),('followup_contract',)]
+        for path in paths:
+            with self.subTest(path=path):
+                spec=self.fixture();row=self.model(spec)
+                for key in path:row=row[key]
+                row['private_payload']='SYNTHETIC-UNIT-EXTRA';self.invalid(spec)
+
+    def test_required_scope_is_nonempty_text(self):
+        for key in ('owner_report','git_source_verification','search_failure_correlations','root_readonly_UI_observation','followup_contract'):
+            for value in (None,'',False,1,[]):
+                with self.subTest(key=key,value=value):
+                    spec=self.fixture();self.model(spec)[key]['scope']=value;self.invalid(spec)
+            spec=self.fixture();del self.model(spec)[key]['scope'];self.invalid(spec)
+
+    def test_boolean_counts_and_text_ids_are_rejected(self):
+        paths=[('owner_report','reported_POST_count'),('owner_report','receipt','bytes'),('git_source_verification','CI','run_id'),('git_source_verification','CI','job_id'),('git_source_verification','changed_files','tests'),('search_failure_correlations','matched_count'),('search_failure_correlations','rows',0,'HTTP_status'),('root_readonly_UI_observation','GET_count'),('business_native_accepted',)]
+        for path in paths:
+            for value in (False,True,'2',2.0):
+                with self.subTest(path=path,value=value):
+                    spec=self.fixture();row=self.model(spec)
+                    for key in path[:-1]:row=row[key]
+                    row[path[-1]]=value;self.invalid(spec)
+
+    def test_receipt_hash_and_source_bindings_are_exact(self):
+        for key in ('owner_report','search_failure_correlations','root_readonly_UI_observation'):
+            for value in (False,'g'*64,'a'*64):
+                spec=self.fixture();self.model(spec)[key]['receipt']['sha256']=value;self.invalid(spec)
+        for key in ('owner_report','git_source_verification'):
+            spec=self.fixture();self.model(spec)[key]['source_commit']='a'*40;self.invalid(spec)
+        spec=self.fixture();self.model(spec)['git_source_verification']['CI']['head_commit']='a'*40;self.invalid(spec)
+
+    def test_git_and_ci_cannot_certify_worker_bytes(self):
+        spec=self.fixture();self.model(spec)['git_source_verification']['worker_bytes_independently_verified']=True;self.invalid(spec)
+        spec=self.fixture();self.model(spec)['owner_report']['deployment_source_mapping']='INDEPENDENTLY_VERIFIED';self.invalid(spec)
+        spec=self.fixture();self.model(spec)['git_source_verification']['CI']['scope']='OPERATING_ACCEPTANCE';self.invalid(spec)
+
+    def test_older_frontend_planning_requires_develop_sync(self):
+        mutations=[(('frontend_source_spec_version',),'1.9.72'),(('planning_sync_pending',),False),(('required_develop_sync','integration_status'),'PASS'),(('lineage','current_planning_synchronized_into_frontend'),True),(('lineage','planning_is_frontend_ancestor'),True),(('lineage','frontend_is_planning_ancestor'),True),(('lineage','merge_base'),'a'*40)]
+        for path,value in mutations:
+            spec=self.fixture();row=self.model(spec)['git_source_verification']
+            for key in path[:-1]:row=row[key]
+            row[path[-1]]=value;self.invalid(spec)
+
+    def test_exact_two_failed_responses_cannot_promote_auth_or_p2(self):
+        for key in ('raw_request_ids_published','JWT_subject_binding_proven','actor_binding_proven','P2_operation_exact_proven','native_acceptance_implied'):
+            spec=self.fixture();self.model(spec)['search_failure_correlations'][key]=True;self.invalid(spec)
+        for path,value in [(('matched_count',),1),(('rows',0,'operation'),'overall.analyze'),(('rows',1,'HTTP_status'),200),(('rows',1,'stage'),'complete')]:
+            spec=self.fixture();row=self.model(spec)['search_failure_correlations']
+            for key in path[:-1]:row=row[key]
+            row[path[-1]]=value;self.invalid(spec)
+
+    def test_root_readonly_gets_are_separate_from_correlated_responses(self):
+        for key in ('request_ids_captured','same_requests_as_correlated_receipt_proven','JWT_subject_binding_proven','actor_binding_proven','P2_operation_exact_proven'):
+            spec=self.fixture();self.model(spec)['root_readonly_UI_observation'][key]=True;self.invalid(spec)
+        spec=self.fixture();self.model(spec)['root_readonly_UI_observation']['POST_count']=1;self.invalid(spec)
+
+    def test_prepared_followup_is_not_deployed_or_verified(self):
+        for key,value in [('status','DEPLOYED'),('verification','PASS'),('deployment','PASS'),('published_candidate_commit','a'*40)]:
+            spec=self.fixture();self.model(spec)['followup_contract'][key]=value;self.invalid(spec)
+        spec=self.fixture();self.model(spec)['followup_contract']['planned_runtime_guards'].remove('CONSTANT_ROUTE_TEMPLATE_INCLUDING_GENERIC_ERROR');self.invalid(spec)
+
+    def test_native_security_and_permission_boundaries_stay_closed(self):
+        for key,value in [('business_native_accepted',1),('business_deployment_accepted',1),('production_ready',True),('operation_scope_expanded',True),('purpose_or_budget_changed',True),('key_or_role_changed',True)]:
+            spec=self.fixture();self.model(spec)[key]=value;self.invalid(spec)
+
+    def test_installed_api_and_successful_p2_remain_canonical(self):
+        for key in ('current_deployment','current_P2_attempt'):
+            spec=self.fixture();spec['supabase_deployment_contract']['live_execution'][key]['scope']='SYNTHETIC-UNIT-CHANGED';self.invalid(spec)
+
+    def test_renderer_separates_current_frontend_and_historical_reply(self):
+        rendered=self.checker.live_execution_document(self.baseline)
+        for expected in ('현재 화면 BFF 배포 보고','이전 화면팀 P2 저장 검수 회신 이력','1.9.62','최신 develop 1.9.72 통합 대기','검색 실패 응답 2건만의 정확 대조','PREPARED_NOT_DEPLOYED','0/22 / 0/22'):
+            self.assertIn(expected,rendered)
+        self.assertNotIn('SYNTHETIC-UNIT-EXTRA',rendered)
 
 if __name__=="__main__":unittest.main()
 

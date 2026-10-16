@@ -1,6 +1,11 @@
 /** Invented bearer, metadata and fetch responses. No network, real TLS, DB or deployment proof. */
 import { AccessError } from "../../supabase/functions/_shared/jungsi/application/access.ts";
-import { NativeRuntimeApi } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts";
+import {
+  NativeRuntimeApi,
+  observeRuntimeResponse,
+  type RuntimeComposition,
+  type SafeRuntimeObservation,
+} from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts";
 import {
   type NativeSqlPool,
   RUNTIME_ROLE_SQL,
@@ -106,8 +111,18 @@ function passRow(expiry: string | null): unknown[] {
   for (const index of [1, 2, 3, 4]) values[index] = JSON.stringify(values[index]);
   return values;
 }
-async function fixture() {
-  const binding = await syntheticRuntimeBinding();
+async function fixture(subjectOnly = false, observe?: RuntimeComposition["observe"]) {
+  const binding = await syntheticRuntimeBinding((d) => {
+    if (subjectOnly) {
+      (d.scope as Record<string, unknown>).operations = [
+        "session.read",
+        "score-profile.create",
+        "overall.analyze",
+        "report.read",
+        "report.export",
+      ];
+    }
+  });
   const state = {
     now: SYNTHETIC_RUNTIME_NOW,
     role: "admin",
@@ -165,6 +180,7 @@ async function fixture() {
     },
   };
   const api = new NativeRuntimeApi({
+    observe,
     environment: binding.env,
     policies,
     responseSchemas: schemas(),
@@ -407,4 +423,305 @@ Deno.test("runtime composition accepts explicit existing display aliases with th
   equal(f.calls.profile, 1);
   equal(f.calls.pass, 1);
   equal(f.calls.storage, 0);
+});
+
+Deno.test("runtime composition exposes only safe unselected scope errors after existing relay and paid checks", async () => {
+  const f = await fixture(true);
+  equal((await f.api.fetch(f.request())).status, 200);
+  for (const path of ["/api/v1/admission-history", "/api/v1/offerings/search"]) {
+    await error(await f.api.fetch(f.request(path)), 503, "operation_scope_not_approved");
+  }
+  equal(f.calls.storage, 0);
+  assert(
+    !f.statements.some((q) =>
+      q.sql.includes("usage_budget") || q.sql.includes("admission_results")
+    ),
+  );
+  await error(await f.api.fetch(f.request("/api/v1/offerings/search", "aal1")), 403);
+  await error(
+    await f.api.fetch(f.request("/api/v1/admission-history", "aal2", false)),
+    403,
+    "relay_authentication_failed",
+  );
+  equal(f.calls.storage, 0);
+});
+
+Deno.test("safe runtime observation logs only five fields and the actual response request id for relay refusal", async () => {
+  const events: SafeRuntimeObservation[] = [],
+    f = await fixture(false, (event) => {
+      events.push(event);
+    });
+  const response = await f.api.fetch(f.request("/api/v1/me", "aal2", false));
+  const body = await response.clone().json();
+  equal(response.status, 403);
+  equal(events.length, 1);
+  equal(Object.keys(events[0]).sort(), ["code", "operation", "request_id", "stage", "status"]);
+  equal(events[0].operation, "session.read");
+  equal(events[0].stage, "relay");
+  equal(events[0].status, 403);
+  equal(events[0].code, "relay_authentication_failed");
+  equal(events[0].request_id, body.request_id);
+  equal(events[0].request_id, response.headers.get("X-Request-ID"));
+  assert(Object.isFrozen(events[0]));
+  const text = JSON.stringify(events[0]);
+  assert(!text.includes(SUBJECT));
+  assert(!text.includes("SYNTHETIC"));
+  assert(!text.includes("Bearer"));
+});
+Deno.test("safe runtime observation identifies native Auth dependency stage without response or secret drift", async () => {
+  const events: SafeRuntimeObservation[] = [],
+    f = await fixture(false, (event) => {
+      events.push(event);
+    });
+  f.state.authStatus = 503;
+  const response = await f.api.fetch(f.request());
+  const body = await response.json();
+  equal(response.status, 503);
+  equal(events.length, 1);
+  equal(events[0].stage, "user_session");
+  equal(events[0].status, response.status);
+  equal(events[0].code, body.error.code);
+  equal(response.headers.get("Cache-Control"), "no-store");
+  equal(f.calls.pass, 0);
+});
+Deno.test("safe runtime observation cannot log path query headers or subject from unknown routes", async () => {
+  const events: SafeRuntimeObservation[] = [],
+    f = await fixture(false, (event) => {
+      events.push(event);
+    });
+  const response = await f.api.fetch(
+    f.request("/api/v1/PRIVATE-" + SUBJECT + "?query=SYNTHETIC-private"),
+  );
+  equal(response.status, 404);
+  equal(events.length, 1);
+  equal(events[0].operation, null);
+  equal(events[0].stage, "route");
+  const text = JSON.stringify(events[0]);
+  assert(!text.includes(SUBJECT));
+  assert(!text.includes("PRIVATE"));
+  assert(!text.includes("query"));
+});
+Deno.test("safe runtime observation preserves existing scoped denial and identifies budget initialization", async () => {
+  const events: SafeRuntimeObservation[] = [],
+    f = await fixture(true, (event) => {
+      events.push(event);
+    });
+  const response = await f.api.fetch(f.request("/api/v1/admission-history"));
+  equal(response.status, 503);
+  equal(events.length, 1);
+  equal(events[0].operation, "history.search");
+  equal(events[0].code, "operation_scope_not_approved");
+  equal(events[0].stage, "budget_initialize");
+  equal(f.calls.storage, 0);
+});
+Deno.test("synchronous and rejected-promise observation sinks cannot mask errors or rerun Auth or business", async () => {
+  for (const asyncFailure of [false, true]) {
+    let observed = 0;
+    const f = await fixture(false, () => {
+      observed++;
+      if (asyncFailure) return Promise.reject(new Error("SYNTHETIC-secret"));
+      throw new Error("SYNTHETIC-secret");
+    });
+    const response = await f.api.fetch(f.request("/api/v1/me", "aal2", false));
+    await Promise.resolve();
+    equal(response.status, 403);
+    equal((await response.json()).error.code, "relay_authentication_failed");
+    equal(observed, 1);
+    equal(f.calls.auth, 0);
+    equal(f.calls.pool, 0);
+  }
+});
+Deno.test("ordinary successful GET does not emit observation data", async () => {
+  const events: SafeRuntimeObservation[] = [],
+    f = await fixture(false, (event) => {
+      events.push(event);
+    });
+  equal((await f.api.fetch(f.request())).status, 200);
+  equal(events.length, 0);
+});
+Deno.test("created observation never consumes successful private result body", async () => {
+  const events: SafeRuntimeObservation[] = [];
+  const response = Response.json({ private_score: "SYNTHETIC-private" }, {
+    status: 201,
+    headers: { "X-Request-ID": "1".repeat(32) },
+  });
+  const returned = await observeRuntimeResponse(
+    (event) => {
+      events.push(event);
+    },
+    response,
+    "score-profile.create",
+    "complete",
+    "2".repeat(32),
+  );
+  assert(returned === response);
+  assert(!response.bodyUsed);
+  equal(events.length, 1);
+  equal(events[0].status, 201);
+  equal(events[0].code, null);
+  equal(events[0].stage, "complete");
+  assert(!JSON.stringify(events).includes("private_score"));
+  assert(!JSON.stringify(events).includes("SYNTHETIC"));
+});
+Deno.test("observation canonicalizes unknown error codes and ignores extra response fields", async () => {
+  const events: SafeRuntimeObservation[] = [];
+  const response = Response.json({
+    error: { code: "private_secret_code" },
+    body: { subject: SUBJECT, key: "SYNTHETIC-secret" },
+  }, { status: 503, headers: { "X-Request-ID": "SYNTHETIC-injected" } });
+  await observeRuntimeResponse(
+    (event) => {
+      events.push(event);
+    },
+    response,
+    "overall.analyze",
+    "budget_plan",
+    "3".repeat(32),
+  );
+  equal(events[0].code, "backend_dependency_unavailable");
+  equal(events[0].request_id, "3".repeat(32));
+  assert(!JSON.stringify(events).includes("private_secret"));
+  assert(!JSON.stringify(events).includes(SUBJECT));
+  assert(!JSON.stringify(events).includes("SYNTHETIC"));
+});
+
+Deno.test("safe observation preserves both public 429 codes without quota details", async () => {
+  for (const code of ["rate_limit_exceeded", "analysis_quota_exceeded"]) {
+    const events: SafeRuntimeObservation[] = [];
+    const response = Response.json({ error: { code }, capacity: "SYNTHETIC-private" }, {
+      status: 429,
+    });
+    await observeRuntimeResponse(
+      (event) => {
+        events.push(event);
+      },
+      response,
+      "overall.analyze",
+      "budget_reserve",
+      "4".repeat(32),
+    );
+    equal(events[0].status, 429);
+    equal(events[0].code, code);
+    assert(!JSON.stringify(events).includes("capacity"));
+  }
+});
+Deno.test("native pool exception observation excludes raw DSN CA stack and request headers", async () => {
+  const f = await syntheticRuntimeBinding(), events: SafeRuntimeObservation[] = [];
+  const api = new NativeRuntimeApi({
+    environment: f.env,
+    policies,
+    responseSchemas: schemas(),
+    observe: (event) => {
+      events.push(event);
+    },
+    clock: { nowUtc: () => SYNTHETIC_RUNTIME_NOW },
+    createPool: () => {
+      throw new Error("postgresql://SYNTHETIC-password SYNTHETIC-CA");
+    },
+  });
+  const response = await api.fetch(
+    new Request("https://synthetic.invalid/health/ready", {
+      headers: {
+        "X-Jungsi-Relay-Token": f.values.JUNGSI_RELAY_TOKEN,
+        "Idempotency-Key": "SYNTHETIC-key",
+      },
+    }),
+  );
+  equal(response.status, 503);
+  equal(events.length, 1);
+  equal(events[0].operation, "health.ready");
+  equal(events[0].stage, "runtime_pool");
+  equal(events[0].code, "backend_dependency_unavailable");
+  const text = JSON.stringify(events);
+  assert(!text.includes("SYNTHETIC"));
+  assert(!text.includes("postgresql"));
+  assert(!text.includes("stack"));
+  await api.close();
+});
+Deno.test("concurrent observations keep each operation phase and response request id separate", async () => {
+  const events: SafeRuntimeObservation[] = [],
+    f = await fixture(false, (event) => {
+      events.push(event);
+    });
+  const [relay, route] = await Promise.all([
+    f.api.fetch(f.request("/api/v1/me", "aal2", false)),
+    f.api.fetch(f.request("/api/v1/SYNTHETIC-unknown")),
+  ]);
+  equal(events.length, 2);
+  const byId = new Map(events.map((event) => [event.request_id, event]));
+  equal(byId.size, 2);
+  equal(byId.get(relay.headers.get("X-Request-ID")!)!.stage, "relay");
+  equal(byId.get(relay.headers.get("X-Request-ID")!)!.operation, "session.read");
+  equal(byId.get(route.headers.get("X-Request-ID")!)!.stage, "route");
+  equal(byId.get(route.headers.get("X-Request-ID")!)!.operation, null);
+});
+
+Deno.test("observation rejects unregistered operation stage and invalid fallback request id", async () => {
+  const events: SafeRuntimeObservation[] = [];
+  const response = Response.json({ error: { code: "authentication_required" } }, {
+    status: 401,
+    headers: { "X-Request-ID": "SYNTHETIC-private-header" },
+  });
+  await observeRuntimeResponse(
+    (event) => {
+      events.push(event);
+    },
+    response,
+    "SYNTHETIC-private-operation" as never,
+    "SYNTHETIC-private-stage" as never,
+    "5".repeat(32),
+  );
+  equal(events.length, 1);
+  equal(events[0].operation, null);
+  equal(events[0].stage, "entry");
+  equal(events[0].request_id, "5".repeat(32));
+  assert(!JSON.stringify(events).includes("SYNTHETIC"));
+  const returned = await observeRuntimeResponse(
+    (event) => {
+      events.push(event);
+    },
+    response,
+    "overall.analyze",
+    "budget_plan",
+    "SYNTHETIC-private-fallback",
+  );
+  assert(returned === response);
+  equal(events.length, 1);
+  assert(!response.bodyUsed);
+  for (
+    const fallback of [
+      { toString: () => "7".repeat(32), private: "SYNTHETIC-private-object" },
+      ["8".repeat(32)],
+    ]
+  ) {
+    const rejected = await observeRuntimeResponse(
+      (event) => {
+        events.push(event);
+      },
+      response,
+      "overall.analyze",
+      "budget_plan",
+      fallback as never,
+    );
+    assert(rejected === response);
+    equal(events.length, 1);
+    assert(!response.bodyUsed);
+  }
+  const validHeader = Response.json({ error: { code: "authentication_required" } }, {
+    status: 401,
+    headers: { "X-Request-ID": "6".repeat(32) },
+  });
+  await observeRuntimeResponse(
+    (event) => {
+      events.push(event);
+    },
+    validHeader,
+    "health.ready",
+    "relay",
+    "SYNTHETIC-private-fallback",
+  );
+  equal(events.length, 2);
+  equal(events[1].operation, "health.ready");
+  equal(events[1].request_id, "6".repeat(32));
+  assert(!JSON.stringify(events).includes("SYNTHETIC"));
 });

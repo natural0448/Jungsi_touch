@@ -20423,7 +20423,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "47ceb939478521a74e7060eefd625a9861a2f81c6d9b15c94011045a31945bae",
+        "source_sha256": "11c89eeb624783e231c65b4578db631eab4757be95cf4231f288490ea2518c2c",
         "symbols": [
           {
             "declarations": [
@@ -29150,8 +29150,166 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "871c19de5ce95839e92602713ec0ff626f09b42d8e9bf44ff2ff466d9f2db92d",
+        "source_sha256": "1a46ee4dbf2ca40c4544ec0d3792d52e7e489856639876316fad56e7e267ec7b",
         "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "route",
+                          "value": {
+                            "kind": "string",
+                            "string": "route"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "relay",
+                          "value": {
+                            "kind": "string",
+                            "string": "relay"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "user_session",
+                          "value": {
+                            "kind": "string",
+                            "string": "user_session"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "member_access",
+                          "value": {
+                            "kind": "string",
+                            "string": "member_access"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "owner_access",
+                          "value": {
+                            "kind": "string",
+                            "string": "owner_access"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "management_access",
+                          "value": {
+                            "kind": "string",
+                            "string": "management_access"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "request_body",
+                          "value": {
+                            "kind": "string",
+                            "string": "request_body"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "business",
+                          "value": {
+                            "kind": "string",
+                            "string": "business"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "business_session",
+                          "value": {
+                            "kind": "string",
+                            "string": "business_session"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "response_projection",
+                          "value": {
+                            "kind": "string",
+                            "string": "response_projection"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "budget",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "final_session",
+                          "value": {
+                            "kind": "string",
+                            "string": "final_session"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "final_projection",
+                          "value": {
+                            "kind": "string",
+                            "string": "final_projection"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "response_serialization",
+                          "value": {
+                            "kind": "string",
+                            "string": "response_serialization"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "API_REQUEST_STAGES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "tsType": {
+                    "kind": "indexedAccess",
+                    "value": {
+                      "indexType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      },
+                      "objType": {
+                        "kind": "typeQuery",
+                        "repr": "API_REQUEST_STAGES",
+                        "value": "API_REQUEST_STAGES"
+                      }
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "ApiRequestStage"
+          },
           {
             "declarations": [
               {
@@ -29368,6 +29526,39 @@
                             "specifier": "../application/api_dispatch.ts"
                           },
                           "typeName": "ApiBusinessPort"
+                        }
+                      }
+                    },
+                    {
+                      "name": "onStage",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "stage",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "ApiRequestStage",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "ApiRequestStage"
+                                }
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
                         }
                       }
                     }
@@ -29955,7 +30146,9 @@
       "layer": "data_infrastructure",
       "symbols": [
         "ApiHttpPorts",
-        "createApiHandler"
+        "createApiHandler",
+        "API_REQUEST_STAGES",
+        "ApiRequestStage"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": {
@@ -30019,7 +30212,7 @@
             "src": "supabase/functions/_shared/jungsi/application/access.ts"
           }
         ],
-        "source_sha256": "6ca335c32e771a13e1eaf2813e6bf126ea5f171ccdff6c94b899826b2ce26367",
+        "source_sha256": "df529f89a92c376fe220bed77ce04a2e626b1668e722688b79997541042d72a5",
         "symbols": [
           {
             "declarations": [
@@ -38763,7 +38956,7 @@
             "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
           }
         ],
-        "source_sha256": "b5808374392152daeb03989ce3fab86e522affef938d9d3988b400f91d7f94ac",
+        "source_sha256": "cac4771eb472199188d797a04e32eefc95ac3f42317c5860251e514e0e61ccca",
         "symbols": [
           {
             "declarations": [
@@ -39177,11 +39370,129 @@
               {
                 "declarationKind": "export",
                 "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "budget_current",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget_current"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "budget_plan",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget_plan"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "budget_replay",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget_replay"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "budget_reserve",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget_reserve"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "budget_business",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget_business"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "budget_business_current",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget_business_current"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "budget_settle_success",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget_settle_success"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "budget_settle_failure",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget_settle_failure"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "budget_final_current",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget_final_current"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "RUNTIME_BUDGET_STAGES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "tsType": {
+                    "kind": "indexedAccess",
+                    "value": {
+                      "indexType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      },
+                      "objType": {
+                        "kind": "typeQuery",
+                        "repr": "RUNTIME_BUDGET_STAGES",
+                        "value": "RUNTIME_BUDGET_STAGES"
+                      }
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "RuntimeBudgetStage"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
                   "constructors": [
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    readonly policy: RuntimeUsagePolicy,\n    store: UsageBudgetStorePort,\n    clock: RequestClockPort,\n    replays: UsageReplayVerificationPort,\n    private readonly controls: SupabaseRuntimeControls,\n  )",
+                      "parameter_source": "(\n    readonly policy: RuntimeUsagePolicy,\n    private readonly store: UsageBudgetStorePort,\n    private readonly clock: RequestClockPort,\n    private readonly replays: UsageReplayVerificationPort,\n    private readonly controls: SupabaseRuntimeControls,\n  )",
                       "params": [
                         {
                           "kind": "identifier",
@@ -39200,9 +39511,11 @@
                           }
                         },
                         {
+                          "accessibility": "private",
                           "kind": "identifier",
                           "name": "store",
                           "optional": false,
+                          "readonly": true,
                           "tsType": {
                             "kind": "typeRef",
                             "repr": "UsageBudgetStorePort",
@@ -39217,9 +39530,11 @@
                           }
                         },
                         {
+                          "accessibility": "private",
                           "kind": "identifier",
                           "name": "clock",
                           "optional": false,
+                          "readonly": true,
                           "tsType": {
                             "kind": "typeRef",
                             "repr": "RequestClockPort",
@@ -39234,9 +39549,11 @@
                           }
                         },
                         {
+                          "accessibility": "private",
                           "kind": "identifier",
                           "name": "replays",
                           "optional": false,
+                          "readonly": true,
                           "tsType": {
                             "kind": "typeRef",
                             "repr": "UsageReplayVerificationPort",
@@ -39338,6 +39655,59 @@
                                       }
                                     ]
                                   }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "onStage",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [
+                                  {
+                                    "kind": "identifier",
+                                    "name": "stage",
+                                    "optional": false,
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "RuntimeBudgetStage",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "RuntimeBudgetStage"
+                                      }
+                                    }
+                                  }
+                                ],
+                                "tsType": {
+                                  "kind": "union",
+                                  "value": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    },
+                                    {
+                                      "kind": "parenthesized",
+                                      "value": {
+                                        "kind": "fnOrConstructor",
+                                        "value": {
+                                          "constructor": false,
+                                          "params": [],
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "void",
+                                            "value": "void"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
                                 }
                               }
                             }
@@ -39642,6 +40012,36 @@
               }
             ],
             "name": "Cost"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "ignoreStageCompletion"
           }
         ]
       },
@@ -39781,12 +40181,24 @@
       "symbols": [
         "RuntimeExamBudget",
         "RuntimeUsagePolicy",
-        "RuntimeRequestBudget"
+        "RuntimeRequestBudget",
+        "RUNTIME_BUDGET_STAGES",
+        "RuntimeBudgetStage"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": {
       "declarations": {
         "imports": [
+          {
+            "importedName": "API_OPERATION_IDS",
+            "originalName": "API_OPERATION_IDS",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "API_REQUEST_STAGES",
+            "originalName": "API_REQUEST_STAGES",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
           {
             "importedName": "AccessError",
             "jsDoc": {
@@ -39804,6 +40216,11 @@
             "importedName": "ApiOperationId",
             "originalName": "ApiOperationId",
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "ApiRequestStage",
+            "originalName": "ApiRequestStage",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
           },
           {
             "importedName": "ApiRoutePolicy",
@@ -39896,6 +40313,11 @@
             "src": "supabase/functions/_shared/jungsi/application/report_actions.ts"
           },
           {
+            "importedName": "RUNTIME_BUDGET_STAGES",
+            "originalName": "RUNTIME_BUDGET_STAGES",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+          },
+          {
             "importedName": "RelayBoundary",
             "originalName": "RelayBoundary",
             "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
@@ -39909,6 +40331,11 @@
             "importedName": "RequestClockPort",
             "originalName": "RequestClockPort",
             "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "RuntimeBudgetStage",
+            "originalName": "RuntimeBudgetStage",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
           },
           {
             "importedName": "RuntimeEnvironment",
@@ -39971,7 +40398,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "4973420c1d86ac26f69efa5417d71314a84348d283f398f502e9b2e344847e61",
+        "source_sha256": "b757ad470d5a3d9cb44b8ad08203ca7d42359dd2657d9d91581674c639e6f557",
         "symbols": [
           {
             "declarations": [
@@ -40008,6 +40435,104 @@
               }
             ],
             "name": "RuntimeRoutePolicy"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "operation",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "ApiOperationId",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "ApiOperationId",
+                                "specifier": "../application/api_dispatch.ts"
+                              },
+                              "typeName": "ApiOperationId"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "health.ready",
+                            "value": {
+                              "kind": "string",
+                              "string": "health.ready"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "stage",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ObservationStage",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "ObservationStage"
+                        }
+                      }
+                    },
+                    {
+                      "name": "status",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "name": "code",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "request_id",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SafeRuntimeObservation"
           },
           {
             "declarations": [
@@ -40143,6 +40668,58 @@
                         "repr": "fetch",
                         "value": "fetch"
                       }
+                    },
+                    {
+                      "name": "observe",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "event",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "SafeRuntimeObservation",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "SafeRuntimeObservation"
+                                }
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
                     }
                   ]
                 },
@@ -40150,6 +40727,138 @@
               }
             ],
             "name": "RuntimeComposition"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  observe: RuntimeComposition[\"observe\"],\n  response: Response,\n  operationId: ApiOperationId | \"health.ready\" | null,\n  stage: ObservationStage,\n  fallbackId: string,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "observe",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "indexedAccess",
+                        "value": {
+                          "indexType": {
+                            "kind": "literal",
+                            "repr": "observe",
+                            "value": {
+                              "kind": "string",
+                              "string": "observe"
+                            }
+                          },
+                          "objType": {
+                            "kind": "typeRef",
+                            "repr": "RuntimeComposition",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "RuntimeComposition"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "response",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Response",
+                        "value": {
+                          "typeName": "Response"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "operationId",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "ApiOperationId",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "ApiOperationId",
+                                "specifier": "../application/api_dispatch.ts"
+                              },
+                              "typeName": "ApiOperationId"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "health.ready",
+                            "value": {
+                              "kind": "string",
+                              "string": "health.ready"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "stage",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ObservationStage",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "ObservationStage"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "fallbackId",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Response",
+                          "value": {
+                            "typeName": "Response"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "observeRuntimeResponse"
           },
           {
             "declarations": [
@@ -40335,6 +41044,291 @@
               {
                 "declarationKind": "private",
                 "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "entry",
+                          "value": {
+                            "kind": "string",
+                            "string": "entry"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "runtime_settings",
+                          "value": {
+                            "kind": "string",
+                            "string": "runtime_settings"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "runtime_pool",
+                          "value": {
+                            "kind": "string",
+                            "string": "runtime_pool"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "readiness_schema",
+                          "value": {
+                            "kind": "string",
+                            "string": "readiness_schema"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "readiness_data",
+                          "value": {
+                            "kind": "string",
+                            "string": "readiness_data"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "budget_initialize",
+                          "value": {
+                            "kind": "string",
+                            "string": "budget_initialize"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "runtime_final_current",
+                          "value": {
+                            "kind": "string",
+                            "string": "runtime_final_current"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "platform_replay",
+                          "value": {
+                            "kind": "string",
+                            "string": "platform_replay"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "profile_store",
+                          "value": {
+                            "kind": "string",
+                            "string": "profile_store"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "profile_after_store",
+                          "value": {
+                            "kind": "string",
+                            "string": "profile_after_store"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "profile_read",
+                          "value": {
+                            "kind": "string",
+                            "string": "profile_read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "report_store",
+                          "value": {
+                            "kind": "string",
+                            "string": "report_store"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "report_after_store",
+                          "value": {
+                            "kind": "string",
+                            "string": "report_after_store"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "report_read",
+                          "value": {
+                            "kind": "string",
+                            "string": "report_read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "report_access",
+                          "value": {
+                            "kind": "string",
+                            "string": "report_access"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "active_reports",
+                          "value": {
+                            "kind": "string",
+                            "string": "active_reports"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "exam_provider",
+                          "value": {
+                            "kind": "string",
+                            "string": "exam_provider"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "total_model_provider",
+                          "value": {
+                            "kind": "string",
+                            "string": "total_model_provider"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "catalog_provider",
+                          "value": {
+                            "kind": "string",
+                            "string": "catalog_provider"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "conversion_provider",
+                          "value": {
+                            "kind": "string",
+                            "string": "conversion_provider"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "percentile_provider",
+                          "value": {
+                            "kind": "string",
+                            "string": "percentile_provider"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "analysis_provider",
+                          "value": {
+                            "kind": "string",
+                            "string": "analysis_provider"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "complete",
+                          "value": {
+                            "kind": "string",
+                            "string": "complete"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "COMPOSITION_STAGES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "ApiRequestStage",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ApiRequestStage",
+                            "specifier": "./api_http.ts"
+                          },
+                          "typeName": "ApiRequestStage"
+                        }
+                      },
+                      {
+                        "kind": "typeRef",
+                        "repr": "RuntimeBudgetStage",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RuntimeBudgetStage",
+                            "specifier": "./runtime_budget.ts"
+                          },
+                          "typeName": "RuntimeBudgetStage"
+                        }
+                      },
+                      {
+                        "kind": "indexedAccess",
+                        "value": {
+                          "indexType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          },
+                          "objType": {
+                            "kind": "typeQuery",
+                            "repr": "COMPOSITION_STAGES",
+                            "value": "COMPOSITION_STAGES"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "ObservationStage"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Set",
+                    "value": {
+                      "typeName": "Set",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OBSERVATION_STAGES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
                   "hasBody": true,
                   "parameter_source": "(policies: readonly ApiRoutePolicy[], request: Request)",
                   "params": [
@@ -40422,6 +41416,10 @@
           "dynamic": false,
           "specifier": "../application/api_dispatch.ts",
           "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+            },
             {
               "kind": "type",
               "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
@@ -40590,6 +41588,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "./runtime_budget.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "./runtime_context.ts",
           "targets": [
             {
@@ -40643,7 +41651,9 @@
       "symbols": [
         "RuntimeRoutePolicy",
         "RuntimeComposition",
-        "NativeRuntimeApi"
+        "NativeRuntimeApi",
+        "SafeRuntimeObservation",
+        "observeRuntimeResponse"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": {
@@ -40768,7 +41778,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
           }
         ],
-        "source_sha256": "413db40da2d30ec1b9aab925611e799b84df62414fa2d0b55a384a2a5a7ab020",
+        "source_sha256": "dc7484cb340b74449b99d133781ab19205a353cc764612c0b2291fece4afb8ee",
         "symbols": [
           {
             "declarations": [
@@ -58237,7 +59247,7 @@
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "7966c31a50c3c1a665bcb6ce0fcfe36b080ea855339b9e5dcb6053faa48cd6f4",
+        "source_sha256": "979a33749052649f63fda1c755b3ec06c20459ccf56420a7e62b352771817b51",
         "symbols": [
           {
             "declarations": [
@@ -61008,6 +62018,14 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
+            "importedName": "RuntimeRequestBudget",
+            "jsDoc": {
+              "doc": "Invented capacities and policy metadata. No real quota approval or DB counters."
+            },
+            "originalName": "RuntimeRequestBudget",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+          },
+          {
             "importedName": "RuntimeUsagePolicy",
             "jsDoc": {
               "doc": "Invented capacities and policy metadata. No real quota approval or DB counters."
@@ -61021,6 +62039,11 @@
             "src": "tests/edge/synthetic_runtime_binding.ts"
           },
           {
+            "importedName": "SupabaseRuntimeControls",
+            "originalName": "SupabaseRuntimeControls",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
+          },
+          {
             "importedName": "SyntheticNativeRepository",
             "originalName": "SyntheticNativeRepository",
             "src": "tests/edge/synthetic_platform_repository.ts"
@@ -61029,6 +62052,11 @@
             "importedName": "SyntheticUniversityData",
             "originalName": "SyntheticUniversityData",
             "src": "tests/edge/synthetic_university.ts"
+          },
+          {
+            "importedName": "UsageBudgetStorePort",
+            "originalName": "UsageBudgetStorePort",
+            "src": "supabase/functions/_shared/jungsi/application/usage_budget.ts"
           },
           {
             "importedName": "assert",
@@ -61051,12 +62079,17 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
+            "importedName": "readSessionSnapshot",
+            "originalName": "readSessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
             "importedName": "syntheticRuntimeBinding",
             "originalName": "syntheticRuntimeBinding",
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "d25b944138187d15d6f8bc5ef36241dda369fb3a72f5d1bf2240b68198ae02d4",
+        "source_sha256": "be79bc0786bce16b28d76d46927d7bfc81e8acbb2f19524e3766ad332607d08e",
         "symbols": [
           {
             "declarations": [
@@ -61202,6 +62235,94 @@
               }
             ],
             "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(failSettle = false)",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "failSettle",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "right": "false"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "observedBudgetFixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(kind: \"standard\" | \"paid\" | \"admin_null\" | \"admin_paid\")",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "kind",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "standard",
+                            "value": {
+                              "kind": "string",
+                              "string": "standard"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "paid",
+                            "value": {
+                              "kind": "string",
+                              "string": "paid"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "admin_null",
+                            "value": {
+                              "kind": "string",
+                              "string": "admin_null"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "admin_paid",
+                            "value": {
+                              "kind": "string",
+                              "string": "admin_paid"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "runtimeTrustedSession"
           }
         ]
       },
@@ -61223,6 +62344,26 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/session_service.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/usage_budget.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/usage_budget.ts"
             }
           ]
         },
@@ -61253,6 +62394,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
             }
           ]
         },
@@ -61327,6 +62478,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
           },
           {
+            "importedName": "RuntimeComposition",
+            "originalName": "RuntimeComposition",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+          },
+          {
             "importedName": "SUBJECT_CONTEXT_SQL",
             "originalName": "SUBJECT_CONTEXT_SQL",
             "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
@@ -61340,6 +62496,11 @@
             "importedName": "SYNTHETIC_RUNTIME_URL",
             "originalName": "SYNTHETIC_RUNTIME_URL",
             "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
+            "importedName": "SafeRuntimeObservation",
+            "originalName": "SafeRuntimeObservation",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
           },
           {
             "importedName": "SupabaseSqlTransport",
@@ -61357,6 +62518,11 @@
             "src": "tests/edge/fixture.ts"
           },
           {
+            "importedName": "observeRuntimeResponse",
+            "originalName": "observeRuntimeResponse",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+          },
+          {
             "importedName": "syntheticApiPolicies",
             "originalName": "syntheticApiPolicies",
             "src": "tests/edge/synthetic_api_contract.ts"
@@ -61372,7 +62538,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "7d875f7f72a267c3dfd04816f7e505c7327a04afdafd6372a822dc846fc53452",
+        "source_sha256": "40670cf3423dca5f0d4718dcfda79ff387d181fae5b3f1c13f14b8ac43dabed6",
         "symbols": [
           {
             "declarations": [
@@ -61521,8 +62687,53 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "()",
-                  "params": []
+                  "parameter_source": "(subjectOnly = false, observe?: RuntimeComposition[\"observe\"])",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "subjectOnly",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "right": "false"
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "observe",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "indexedAccess",
+                        "value": {
+                          "indexType": {
+                            "kind": "literal",
+                            "repr": "observe",
+                            "value": {
+                              "kind": "string",
+                              "string": "observe"
+                            }
+                          },
+                          "objType": {
+                            "kind": "typeRef",
+                            "repr": "RuntimeComposition",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "RuntimeComposition",
+                                "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+                              },
+                              "typeName": "RuntimeComposition"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
                 },
                 "kind": "function"
               }
@@ -61673,11 +62884,16 @@
         "imports": [
           {
             "importedName": "AccessError",
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ApiOperationId",
             "jsDoc": {
               "doc": "Entirely synthetic selected graph. No approved input, network or database operations."
             },
-            "originalName": "AccessError",
-            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            "originalName": "ApiOperationId",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           },
           {
             "importedName": "NativeObject",
@@ -61730,7 +62946,7 @@
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "ca28732aca59d6c328cbf102b5ba81c7051bd6d4577234d4f22e2da58555a41f",
+        "source_sha256": "196d7ba3cc918b951b2ce3fb6b0d49ed7af20181cd862169697135f466b10df9",
         "symbols": [
           {
             "declarations": [
@@ -61739,7 +62955,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(\n  options: { extraSelection?: boolean; unapproved?: boolean; maxReads?: number } = {},\n)",
+                  "parameter_source": "(\n  options: {\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
                   "params": [
                     {
                       "kind": "assign",
@@ -61776,6 +62992,51 @@
                                   "kind": "keyword",
                                   "repr": "number",
                                   "value": "number"
+                                }
+                              },
+                              {
+                                "name": "operation",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "union",
+                                  "value": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "ApiOperationId",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "ApiOperationId",
+                                          "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+                                        },
+                                        "typeName": "ApiOperationId"
+                                      }
+                                    },
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "null",
+                                      "value": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "approvedOperations",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiOperationId",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiOperationId",
+                                        "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiOperationId"
+                                    }
+                                  }
                                 }
                               }
                             ]
@@ -61867,6 +63128,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
             }
           ]
         },
@@ -65231,6 +66502,11 @@
             "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
           },
           {
+            "importedName": "SessionSnapshot",
+            "originalName": "SessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
             "importedName": "SharedRequestBudget",
             "originalName": "SharedRequestBudget",
             "src": "supabase/functions/_shared/jungsi/application/usage_service.ts"
@@ -65261,12 +66537,27 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
+            "importedName": "readSessionSnapshot",
+            "originalName": "readSessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "requirePaidSession",
+            "originalName": "requirePaidSession",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "sessionDto",
+            "originalName": "sessionDto",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
             "importedName": "syncPromise",
             "originalName": "syncPromise",
             "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "b622fae0832209c920b80bc5dac5a8b4c92ed503f947595d67cdb737ee4f9360",
+        "source_sha256": "1488f2be2b2197fb05fffa32d976e6b9ee972daacb08a13364baebbe7db0eb9b",
         "symbols": [
           {
             "declarations": [
@@ -65527,6 +66818,183 @@
               }
             ],
             "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(options: {\n  owner?: string;\n  role?: string;\n  status?: string;\n  aal?: \"aal1\" | \"aal2\";\n  expiry?: bigint;\n} = {})",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "options",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "owner",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "role",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "status",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "aal",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "union",
+                                  "value": [
+                                    {
+                                      "kind": "literal",
+                                      "repr": "aal1",
+                                      "value": {
+                                        "kind": "string",
+                                        "string": "aal1"
+                                      }
+                                    },
+                                    {
+                                      "kind": "literal",
+                                      "repr": "aal2",
+                                      "value": {
+                                        "kind": "string",
+                                        "string": "aal2"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "expiry",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "bigint",
+                                  "value": "bigint"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "SessionSnapshot",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "SessionSnapshot",
+                              "specifier": "../../supabase/functions/_shared/jungsi/application/session_service.ts"
+                            },
+                            "typeName": "SessionSnapshot"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "trustedBudgetSession"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  inspect: (protectedRequest: BudgetRequest) => void = () => {},\n  now = NOW,\n)",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "inspect",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [
+                              {
+                                "kind": "identifier",
+                                "name": "protectedRequest",
+                                "optional": false,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "BudgetRequest",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "BudgetRequest",
+                                      "specifier": "../../supabase/functions/_shared/jungsi/application/request_budget.ts"
+                                    },
+                                    "typeName": "BudgetRequest"
+                                  }
+                                }
+                              }
+                            ],
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "now",
+                        "optional": false
+                      },
+                      "right": "NOW"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sessionIdentityBudget"
           }
         ]
       },
@@ -65548,6 +67016,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/session_service.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
             }
           ]
         },
@@ -65850,5 +67328,5 @@
     "tests/edge/test_usage_service.ts",
     "tests/edge/test_year_equating.ts"
   ],
-  "unit_count": 564
+  "unit_count": 590
 }

@@ -1,3 +1,9 @@
+import {
+  readSessionSnapshot,
+  requirePaidSession,
+  sessionDto,
+  type SessionSnapshot,
+} from "../../supabase/functions/_shared/jungsi/application/session_service.ts";
 import { syncPromise } from "./fixture.ts";
 import { AccessError } from "../../supabase/functions/_shared/jungsi/application/access.ts";
 import {
@@ -276,4 +282,179 @@ Deno.test("repository budget replay reads exact owner operation key and native r
     "idempotency_conflict",
     409,
   );
+});
+
+async function trustedBudgetSession(options: {
+  owner?: string;
+  role?: string;
+  status?: string;
+  aal?: "aal1" | "aal2";
+  expiry?: bigint;
+} = {}): Promise<SessionSnapshot> {
+  const owner = options.owner ?? OWNER;
+  return await readSessionSnapshot("SYNTHETIC-budget-token", {
+    verifyUserBearer: () =>
+      Promise.resolve({
+        subjectId: owner,
+        expiresAtUtc: options.expiry ?? NOW + 1000000n,
+        accountRole: options.role ?? "admin",
+        accountStatus: options.status ?? "active",
+        assuranceLevel: options.aal ?? "aal2",
+      }),
+  }, {
+    readCurrent: () =>
+      Promise.resolve({
+        authority: "public.jeongsi_passes" as const,
+        metadataVerified: true as const,
+        subjectId: owner,
+        evaluatedAtUtc: NOW,
+        paidUntilUtc: null,
+      }),
+  }, NOW);
+}
+function sessionIdentityBudget(
+  inspect: (protectedRequest: BudgetRequest) => void = () => {},
+  now = NOW,
+) {
+  const owners: string[] = [];
+  let planned = 0, worked = 0, settled = 0;
+  const budget = new SharedRequestBudget(
+    {
+      prepare: (r) =>
+        syncPromise(() => {
+          planned++;
+          inspect(r);
+          sessionDto(r.session, now);
+          return { ...plan(), owner: r.session.user.subjectId, memberTier: r.session.tier };
+        }),
+    },
+    {
+      reserve: (r) => {
+        owners.push(r.owner);
+        return Promise.resolve({
+          allowed: true as const,
+          lease: {
+            id: "SYNTHETIC-lease",
+            owner: r.owner,
+            policyVersion: r.policyVersion,
+            createdAtUtc: now,
+            expiresAtUtc: now + 10000000n,
+          },
+        });
+      },
+      settle: () => {
+        settled++;
+        return Promise.resolve();
+      },
+    },
+    { nowUtc: () => now },
+    { exists: () => Promise.resolve(false) },
+  );
+  return {
+    budget,
+    owners,
+    counts: () => ({ planned, worked, settled }),
+    work: () => {
+      worked++;
+      return Promise.resolve({ ok: true });
+    },
+  };
+}
+Deno.test("shared budget retains verified frozen admin identity and blocks planner authorization mutation", async () => {
+  const session = await trustedBudgetSession(), r = { ...request(), session };
+  const f = sessionIdentityBudget((protectedRequest) => {
+    assert(protectedRequest.session === session);
+    assert(protectedRequest.session.user === session.user);
+    assert(Object.isFrozen(protectedRequest.session));
+    assert(Object.isFrozen(protectedRequest.session.user));
+    equal(Reflect.set(protectedRequest.session, "tier", "standard"), false);
+    equal(Reflect.set(protectedRequest.session, "paidUntilUtc", NOW + 1n), false);
+    equal(Reflect.set(protectedRequest.session.user, "subjectId", "SYNTHETIC-other"), false);
+    equal(Reflect.set(protectedRequest.session.user, "accountRole", "user"), false);
+  });
+  equal(await f.budget.run(r, f.work), { ok: true });
+  equal(f.owners, [OWNER]);
+  equal(f.counts(), { planned: 1, worked: 1, settled: 1 });
+  equal(sessionDto(session, NOW).member_tier, "paid");
+});
+Deno.test("shared budget keeps body query params copies and clones every mutable authorization shape", async () => {
+  for (const frozenSession of [false, true]) {
+    for (const frozenUser of [false, true]) {
+      const original = request(), user = { ...original.session.user };
+      if (frozenUser) Object.freeze(user);
+      const session = { ...original.session, user };
+      if (frozenSession) Object.freeze(session);
+      const body = { scores: { marker: "SYNTHETIC-original" } },
+        query = { key: "SYNTHETIC-query" },
+        params = { report_id: "SYNTHETIC-report" };
+      const r = { ...original, session, body, query, params };
+      const f = sessionIdentityBudget((p) => {
+        equal(p.session === session, frozenSession && frozenUser);
+        equal(p.session.user === user, frozenSession && frozenUser);
+        assert(Object.isFrozen(p.session) && Object.isFrozen(p.session.user));
+        equal(Reflect.set(p.session, "tier", "paid"), false);
+        equal(Reflect.set(p.session.user, "subjectId", "SYNTHETIC-other"), false);
+        assert(p.query !== query && p.params !== params && p.body !== body);
+        assert(Object.isFrozen(p.query) && Object.isFrozen(p.params));
+        equal(Reflect.set(p.query, "key", "SYNTHETIC-mutated"), false);
+        equal(Reflect.set(p.params, "report_id", "SYNTHETIC-mutated"), false);
+        const copied = p.body as { scores: { marker: string } };
+        assert(copied.scores !== body.scores);
+        copied.scores.marker = "SYNTHETIC-private-copy";
+      });
+      await f.budget.run(r, f.work);
+      equal(body.scores.marker, "SYNTHETIC-original");
+      equal(query.key, "SYNTHETIC-query");
+      equal(params.report_id, "SYNTHETIC-report");
+      equal(session.tier, "standard");
+      equal(session.user.subjectId, OWNER);
+      equal(f.counts(), { planned: 1, worked: 1, settled: 1 });
+    }
+  }
+});
+Deno.test("shared budget rejects copied admin brands and keeps verified owners isolated", async () => {
+  const first = await trustedBudgetSession(),
+    second = await trustedBudgetSession({ owner: "00000000-0000-0000-0000-000000000002" }),
+    f = sessionIdentityBudget();
+  for (const session of [first, second]) {
+    await f.budget.run({ ...request(), session }, f.work);
+  }
+  equal(f.owners, [first.user.subjectId, second.user.subjectId]);
+  for (
+    const session of [
+      Object.freeze({ ...first }),
+      Object.freeze({ ...first, user: Object.freeze({ ...first.user }) }),
+      Object.freeze({ ...first, user: second.user }),
+    ]
+  ) {
+    await denied(() => f.budget.run({ ...request(), session }, f.work), "entitlement_unavailable");
+  }
+  equal(f.counts(), { planned: 2, worked: 2, settled: 2 });
+  equal(f.owners.length, 2);
+});
+Deno.test("shared budget keeps expiry inactive aal1 and role qualification boundaries", async () => {
+  const expired = await trustedBudgetSession({ expiry: NOW + 1n }),
+    expiredBudget = sessionIdentityBudget(() => {}, NOW + 1n);
+  await denied(
+    () => expiredBudget.budget.run({ ...request(), session: expired }, expiredBudget.work),
+    "authentication_required",
+    401,
+  );
+  equal(expiredBudget.counts(), { planned: 0, worked: 0, settled: 0 });
+  for (const options of [{ status: "inactive" }, { aal: "aal1" as const }, { role: "user" }]) {
+    const session = await trustedBudgetSession(options), f = sessionIdentityBudget();
+    equal(session.tier, "standard");
+    await denied(() => syncPromise(() => requirePaidSession(session, NOW)), "paid_required", 403);
+    const forged = Object.freeze({
+      ...session,
+      tier: "paid" as const,
+      paidUntilUtc: null,
+      adminOrigin: "verified_own_profile_active_admin_aal2" as const,
+    });
+    await denied(
+      () => f.budget.run({ ...request(), session: forged }, f.work),
+      "entitlement_unavailable",
+    );
+    equal(f.counts(), { planned: 0, worked: 0, settled: 0 });
+  }
 });

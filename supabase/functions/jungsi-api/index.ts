@@ -16,5 +16,6 @@ const runtime = new NativeRuntimeApi({
   policies: routeCatalog.operations as readonly RuntimeRoutePolicy[],
   responseSchemas,
   createPool: createNativePostgresPool,
+  observe: (event) => console.info(JSON.stringify(event)),
 });
 Deno.serve(createSupabaseApiIngress(runtime.fetch));

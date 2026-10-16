@@ -5,6 +5,7 @@ import type {
   ApiOperationId,
   ApiRoutePolicy,
 } from "../application/api_dispatch.ts";
+import { API_OPERATION_IDS } from "../application/api_dispatch.ts";
 import {
   CATALOG_OPERATIONS,
   type CatalogDataPort,
@@ -24,7 +25,8 @@ import {
   UniversityAnalysisService,
 } from "../application/university_analysis.ts";
 import { utcText } from "../domain/time.ts";
-import { createApiHandler } from "./api_http.ts";
+import { API_REQUEST_STAGES, type ApiRequestStage, createApiHandler } from "./api_http.ts";
+import { RUNTIME_BUDGET_STAGES, type RuntimeBudgetStage } from "./runtime_budget.ts";
 import { RelayBoundary, safeFailure } from "./auth_relay.ts";
 import { SupabaseForecastAuthorities, SupabaseManagementResources } from "./management_postgres.ts";
 import { NativeForecastInputs } from "./native_data_provider.ts";
@@ -41,6 +43,44 @@ import { BoundVerifiedSessionProvider } from "./verified_session.ts";
 export interface RuntimeRoutePolicy extends ApiRoutePolicy {
   readonly contract_ref: string;
 }
+const COMPOSITION_STAGES = [
+  "entry",
+  "runtime_settings",
+  "runtime_pool",
+  "readiness_schema",
+  "readiness_data",
+  "budget_initialize",
+  "runtime_final_current",
+  "platform_replay",
+  "profile_store",
+  "profile_after_store",
+  "profile_read",
+  "report_store",
+  "report_after_store",
+  "report_read",
+  "report_access",
+  "active_reports",
+  "exam_provider",
+  "total_model_provider",
+  "catalog_provider",
+  "conversion_provider",
+  "percentile_provider",
+  "analysis_provider",
+  "complete",
+] as const;
+type ObservationStage = ApiRequestStage | RuntimeBudgetStage | typeof COMPOSITION_STAGES[number];
+const OBSERVATION_STAGES = new Set<string>([
+  ...API_REQUEST_STAGES,
+  ...RUNTIME_BUDGET_STAGES,
+  ...COMPOSITION_STAGES,
+]);
+export interface SafeRuntimeObservation {
+  readonly operation: ApiOperationId | "health.ready" | null;
+  readonly stage: ObservationStage;
+  readonly status: number;
+  readonly code: string | null;
+  readonly request_id: string;
+}
 export interface RuntimeComposition {
   readonly environment: RuntimeEnvironment;
   readonly policies: readonly RuntimeRoutePolicy[];
@@ -48,6 +88,8 @@ export interface RuntimeComposition {
   readonly createPool: (settings: BasicRuntimeSettings["database"]) => NativeSqlPool;
   readonly clock?: RequestClockPort;
   readonly fetcher?: typeof fetch;
+  /** Receives exactly five safe fields; never request data or exception objects. */
+  readonly observe?: (event: SafeRuntimeObservation) => void | Promise<void>;
 }
 function operation(policies: readonly ApiRoutePolicy[], request: Request): ApiOperationId | null {
   const pathname = new URL(request.url).pathname;
@@ -62,6 +104,53 @@ function operation(policies: readonly ApiRoutePolicy[], request: Request): ApiOp
     if (new RegExp("^" + pattern + "$", "u").test(pathname)) return policy.id;
   }
   return null;
+}
+export async function observeRuntimeResponse(
+  observe: RuntimeComposition["observe"],
+  response: Response,
+  operationId: ApiOperationId | "health.ready" | null,
+  stage: ObservationStage,
+  fallbackId: string,
+): Promise<Response> {
+  if (!observe || response.status < 400 && response.status !== 201) return response;
+  try {
+    const headerId = response.headers.get("X-Request-ID");
+    const requestId = headerId && /^[a-f0-9]{32}$/.test(headerId)
+      ? headerId
+      : typeof fallbackId === "string" && /^[a-f0-9]{32}$/.test(fallbackId)
+      ? fallbackId
+      : null;
+    if (!requestId) return response;
+    const safeOperation = operationId === "health.ready" ||
+        API_OPERATION_IDS.includes(operationId as ApiOperationId)
+      ? operationId
+      : null;
+    let code: string | null = null;
+    if (response.status >= 400) {
+      const body = await response.clone().json();
+      const candidate =
+        typeof body?.error?.code === "string" && /^[a-z][a-z0-9_]{1,79}$/.test(body.error.code)
+          ? body.error.code
+          : "backend_dependency_unavailable";
+      if (
+        response.status === 429 &&
+        ["rate_limit_exceeded", "analysis_quota_exceeded"].includes(candidate)
+      ) code = candidate;
+      else {code =
+          (await safeFailure(new AccessError(candidate, response.status), requestId).json()).error
+            .code;}
+    }
+    const event: SafeRuntimeObservation = Object.freeze({
+      operation: safeOperation,
+      stage: OBSERVATION_STAGES.has(stage) ? stage : "entry",
+      status: response.status,
+      code,
+      request_id: requestId,
+    });
+    // Do not await a sink, retry business work, or alter the response on sink failure.
+    void Promise.resolve(observe(event)).catch(() => {});
+  } catch { /* Public responses remain authoritative if observation itself fails. */ }
+  return response;
 }
 export class NativeRuntimeApi {
   private readonly clock: RequestClockPort;
@@ -79,6 +168,22 @@ export class NativeRuntimeApi {
   }
   readonly fetch = async (request: Request): Promise<Response> => {
     const requestId = crypto.randomUUID().replaceAll("-", "");
+    let stage: ObservationStage = "entry";
+    let selectedOperation: ApiOperationId | "health.ready" | null = null;
+    const mark = (next: ObservationStage) => {
+      const before = stage;
+      stage = next;
+      return () => {
+        stage = before;
+      };
+    };
+    const phase = async <T>(next: ObservationStage, work: () => Promise<T>): Promise<T> => {
+      const before = stage;
+      stage = next;
+      const value = await work();
+      stage = before;
+      return value;
+    };
     try {
       const pathname = new URL(request.url).pathname;
       if (pathname === "/health/live" && request.method === "GET") {
@@ -89,19 +194,30 @@ export class NativeRuntimeApi {
         }, { headers: { "Cache-Control": "no-store" } });
       }
       let basicValue: BasicRuntimeSettings | undefined;
-      const basic = () => basicValue ??= readBasicRuntimeSettings(this.config.environment);
+      const basic = () => {
+        if (!basicValue) {
+          const before = stage;
+          stage = "runtime_settings";
+          basicValue = readBasicRuntimeSettings(this.config.environment);
+          stage = before;
+        }
+        return basicValue;
+      };
       const sql = () => {
         const settings = basic().database,
           key = JSON.stringify([settings.databaseUrl, settings.databaseCa]);
         let transport = this.pools.get(key);
         if (!transport) {
+          const before = stage;
+          stage = "runtime_pool";
           transport = new SupabaseSqlTransport(this.config.createPool(settings));
+          stage = before;
           this.pools.set(key, transport);
         }
         return transport;
       };
       const relay = new RelayBoundary(this.config.environment.get("JUNGSI_RELAY_TOKEN") ?? null);
-      const selectedOperation = pathname === "/health/ready"
+      selectedOperation = pathname === "/health/ready"
         ? "health.ready"
         : operation(this.config.policies, request);
       const context = new NativeRuntimeRequest(
@@ -113,7 +229,9 @@ export class NativeRuntimeApi {
         this.fetcher,
       );
       if (pathname === "/health/ready" && request.method === "GET") {
+        stage = "relay";
         await relay.verify(request.headers);
+        stage = "readiness_schema";
         if (!await sql().probeUsageSchema()) {
           throw new AccessError("security_policy_unavailable", 503);
         }
@@ -122,28 +240,64 @@ export class NativeRuntimeApi {
           "00000000-0000-0000-0000-000000000000",
           this.clock.nowUtc(),
         );
+        stage = "readiness_data";
         await context.data();
+        stage = "runtime_final_current";
         await context.assertCurrent();
         return Response.json({ status: "ready", server_timezone: "UTC" }, {
           headers: { "Cache-Control": "no-store" },
         });
       }
       const platform: PlatformRepositoryPort = {
-        replay: async (...a) => (await context.platform()).replay(...a),
-        createProfile: async (...a) => (await context.platform()).createProfile(...a),
-        getProfile: async (...a) => (await context.platform()).getProfile(...a),
-        getReport: async (...a) => (await context.platform()).getReport(...a),
-        lookupAccess: async (...a) => (await context.platform()).lookupAccess(...a),
-        writeReport: async (...a) => (await context.platform()).writeReport(...a),
-        activeReports: async (...a) => (await context.platform()).activeReports(...a),
+        replay: async (...a) =>
+          await phase("platform_replay", async () => (await context.platform()).replay(...a)),
+        createProfile: async (...a) => {
+          const value = await phase(
+            "profile_store",
+            async () => (await context.platform()).createProfile(...a),
+          );
+          stage = "profile_after_store";
+          return value;
+        },
+        getProfile: async (...a) =>
+          await phase("profile_read", async () => (await context.platform()).getProfile(...a)),
+        getReport: async (...a) =>
+          await phase("report_read", async () => (await context.platform()).getReport(...a)),
+        lookupAccess: async (...a) =>
+          await phase("report_access", async () => (await context.platform()).lookupAccess(...a)),
+        writeReport: async (...a) => {
+          const value = await phase(
+            "report_store",
+            async () => (await context.platform()).writeReport(...a),
+          );
+          stage = "report_after_store";
+          return value;
+        },
+        activeReports: async (...a) =>
+          await phase("active_reports", async () => (await context.platform()).activeReports(...a)),
       };
       const data: UniversityAnalysisDataPort & OverallDataPort & CatalogDataPort = {
-        getCatalog: async () => (await context.data()).getCatalog(),
-        getExamPack: async (...a) => (await context.data()).getExamPack(...a),
-        getTotalModel: async (...a) => (await context.data()).getTotalModel(...a),
-        getConversion: async (...a) => (await context.data()).getConversion(...a),
-        getPercentile: async (...a) => (await context.data()).getPercentile(...a),
-        getAnalysis: async (...a) => (await context.data()).getAnalysis(...a),
+        getCatalog: async () =>
+          await phase("catalog_provider", async () => (await context.data()).getCatalog()),
+        getExamPack: async (...a) =>
+          await phase("exam_provider", async () => (await context.data()).getExamPack(...a)),
+        getTotalModel: async (...a) =>
+          await phase(
+            "total_model_provider",
+            async () => (await context.data()).getTotalModel(...a),
+          ),
+        getConversion: async (...a) =>
+          await phase(
+            "conversion_provider",
+            async () => (await context.data()).getConversion(...a),
+          ),
+        getPercentile: async (...a) =>
+          await phase(
+            "percentile_provider",
+            async () => (await context.data()).getPercentile(...a),
+          ),
+        getAnalysis: async (...a) =>
+          await phase("analysis_provider", async () => (await context.data()).getAnalysis(...a)),
       };
       const catalog = new CatalogService(data, this.clock);
       const authorities = {
@@ -220,13 +374,35 @@ export class NativeRuntimeApi {
           readCurrent: (subject, now) =>
             new PublicJeongsiPassesReader(sql()).readCurrent(subject, now),
         },
-        budget: { run: async (r, work) => (await context.budget()).run(r, work) },
+        onStage: mark,
+        budget: {
+          run: async (r, work) => {
+            const budget = await phase("budget_initialize", () => context.budget());
+            return await budget.run(r, work, mark);
+          },
+        },
       });
       const response = await handler(request);
-      if (response.ok) await context.assertCurrent();
-      return response;
+      if (response.ok) {
+        stage = "runtime_final_current";
+        await context.assertCurrent();
+        stage = "complete";
+      }
+      return await observeRuntimeResponse(
+        this.config.observe,
+        response,
+        selectedOperation,
+        stage,
+        requestId,
+      );
     } catch (error) {
-      return safeFailure(error, requestId);
+      return await observeRuntimeResponse(
+        this.config.observe,
+        safeFailure(error, requestId),
+        selectedOperation,
+        stage,
+        requestId,
+      );
     }
   };
   async close(): Promise<void> {

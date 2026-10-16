@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "0592a91f6938e6b3d7af5d4371e8d38d8001ff41ed8441e40fc5f27d86084e0f",
+      "source_sha256": "33776cfe43bd7ed4f33f93c15c5d93ec4f6c32e3bceea6501a34876090a7a14e",
       "symbols": [
         {
           "kind": "class",
@@ -614,8 +614,20 @@
         },
         {
           "kind": "function",
+          "name": "_validate_observer_deployment",
+          "signature": "def _validate_observer_deployment(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "branch_governance_text",
           "signature": "def branch_governance_text(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "canonical_public_record_sha256",
+          "signature": "def canonical_public_record_sha256(value):",
           "decorators": []
         },
         {
@@ -644,6 +656,12 @@
         },
         {
           "kind": "function",
+          "name": "deployed_observer_contract_pinned",
+          "signature": "def deployed_observer_contract_pinned(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "edge_document_text",
           "signature": "def edge_document_text(spec):",
           "decorators": []
@@ -652,6 +670,24 @@
           "kind": "function",
           "name": "edge_registration_errors",
           "signature": "def edge_registration_errors(paths, read, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "frontend_bff_followup_document",
+          "signature": "def frontend_bff_followup_document(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "frontend_bff_followup_shape",
+          "signature": "def frontend_bff_followup_shape():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "frontend_bff_followup_shape.receipt",
+          "signature": "def receipt(size, digest):",
           "decorators": []
         },
         {
@@ -698,6 +734,18 @@
         },
         {
           "kind": "function",
+          "name": "live_P2_attempt",
+          "signature": "def live_P2_attempt(c, evidence_id):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "live_deployment",
+          "signature": "def live_deployment(c, evidence_id=None, receipt_sha256=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "live_execution_document",
           "signature": "def live_execution_document(spec):",
           "decorators": []
@@ -724,6 +772,12 @@
           "kind": "function",
           "name": "protected_path",
           "signature": "def protected_path(path, shared_tools):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "public_metadata_matches_shape",
+          "signature": "def public_metadata_matches_shape(value, shape):",
           "decorators": []
         },
         {
@@ -884,6 +938,36 @@
         },
         {
           "kind": "function",
+          "name": "validate_P2_attempt_records",
+          "signature": "def validate_P2_attempt_records(c, registry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_P2_functional_observations",
+          "signature": "def validate_P2_functional_observations(row, registry, source, deployment):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_admin_fix_deployment",
+          "signature": "def validate_admin_fix_deployment(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_admin_session_identity_fix",
+          "signature": "def validate_admin_session_identity_fix(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_backend_safe_observation_plan",
+          "signature": "def validate_backend_safe_observation_plan(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "validate_changed_paths",
           "signature": "def validate_changed_paths(changed, spec):",
           "decorators": []
@@ -896,8 +980,32 @@
         },
         {
           "kind": "function",
+          "name": "validate_current_deployment",
+          "signature": "def validate_current_deployment(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_current_source_verification",
+          "signature": "def validate_current_source_verification(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_deployment_history",
+          "signature": "def validate_deployment_history(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "validate_forecast_contract",
           "signature": "def validate_forecast_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_frontend_bff_followup",
+          "signature": "def validate_frontend_bff_followup(spec):",
           "decorators": []
         },
         {
@@ -910,6 +1018,12 @@
           "kind": "function",
           "name": "validate_frontend_followup_contract.strings",
           "signature": "def strings(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_frontend_p2_reply",
+          "signature": "def validate_frontend_p2_reply(c, registry):",
           "decorators": []
         },
         {
@@ -7082,7 +7196,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "47ceb939478521a74e7060eefd625a9861a2f81c6d9b15c94011045a31945bae",
+        "source_sha256": "11c89eeb624783e231c65b4578db631eab4757be95cf4231f288490ea2518c2c",
         "declared_exports": [
           "ApprovedUsagePlan",
           "RepositoryUsageReplays",
@@ -7436,10 +7550,12 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "871c19de5ce95839e92602713ec0ff626f09b42d8e9bf44ff2ff466d9f2db92d",
+        "source_sha256": "1a46ee4dbf2ca40c4544ec0d3792d52e7e489856639876316fad56e7e267ec7b",
         "declared_exports": [
           "ApiHttpPorts",
-          "createApiHandler"
+          "createApiHandler",
+          "API_REQUEST_STAGES",
+          "ApiRequestStage"
         ]
       },
       {
@@ -7454,7 +7570,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "6ca335c32e771a13e1eaf2813e6bf126ea5f171ccdff6c94b899826b2ce26367",
+        "source_sha256": "df529f89a92c376fe220bed77ce04a2e626b1668e722688b79997541042d72a5",
         "declared_exports": [
           "RelayBoundary",
           "BoundaryPorts",
@@ -7772,11 +7888,13 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "b5808374392152daeb03989ce3fab86e522affef938d9d3988b400f91d7f94ac",
+        "source_sha256": "cac4771eb472199188d797a04e32eefc95ac3f42317c5860251e514e0e61ccca",
         "declared_exports": [
           "RuntimeExamBudget",
           "RuntimeUsagePolicy",
-          "RuntimeRequestBudget"
+          "RuntimeRequestBudget",
+          "RUNTIME_BUDGET_STAGES",
+          "RuntimeBudgetStage"
         ]
       },
       {
@@ -7810,11 +7928,13 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "4973420c1d86ac26f69efa5417d71314a84348d283f398f502e9b2e344847e61",
+        "source_sha256": "b757ad470d5a3d9cb44b8ad08203ca7d42359dd2657d9d91581674c639e6f557",
         "declared_exports": [
           "RuntimeRoutePolicy",
           "RuntimeComposition",
-          "NativeRuntimeApi"
+          "NativeRuntimeApi",
+          "SafeRuntimeObservation",
+          "observeRuntimeResponse"
         ]
       },
       {
@@ -7848,7 +7968,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "413db40da2d30ec1b9aab925611e799b84df62414fa2d0b55a384a2a5a7ab020",
+        "source_sha256": "dc7484cb340b74449b99d133781ab19205a353cc764612c0b2291fece4afb8ee",
         "declared_exports": [
           "NativeRuntimeRequest"
         ]
@@ -8362,7 +8482,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "8bd1e57f682b0dc03e3335bb86c4f30bf93eda08d053de0e608aa1e30892525d",
+        "source_sha256": "ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2",
         "declared_exports": []
       },
       {
