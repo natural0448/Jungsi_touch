@@ -1237,14 +1237,14 @@ def live_execution_document(spec):
     reply=c.get('frontend_P2_reply')
     if reply:
         worker=reply['reported_worker_deployment'];logging=reply['safe_observation_followup']
-        deployment_text+=('\n\n### 화면팀 P2 저장 검수 후속 회신\n\n'+reply['interpretation_rule']+'\n\n'+
+        deployment_text+=('\n\n### 이전 화면팀 P2 저장 검수 회신 이력\n\n'+reply['interpretation_rule']+'\n\n'+
             table(['확인 범위','보고와 남은 확인'],[
                 ['회신 원문',str(reply['reply_bytes'])+' bytes / SHA-256 '+reply['reply_receipt_sha256']],
                 ['이전 Root 시도',reply['earlier_root_attempt']['scope']],
-                ['외부 Worker 배포 보고',worker['worker_version']+' / '+worker['deployed_at_UTC']+' / source SHA 미제공·미푸시'],
-                ['공개 저장소 화면 소스',worker['last_pushed_source_commit']+'; 새 Worker와 소스 결속 미확인'],
+                ['외부 Worker 배포 보고',worker['worker_version']+' / '+worker['deployed_at_UTC']+' / 당시 source SHA 미제공·미푸시'],
+                ['공개 저장소 화면 소스',worker['last_pushed_source_commit']+'; 당시 새 Worker와 소스 결속 미확인'],
                 ['화면팀 별도 시도',reply['separate_frontend_attempt']['scope']],
-                ['오류 표시·관측 수정',logging['status']+' / source SHA 미제공; 배포·재검수 미완료'],
+                ['오류 표시·관측 수정',logging['status']+' / 당시 source SHA 미제공; 당시 배포·재검수 미완료'],
                 ['서버 전용 안전 관측',', '.join(logging['server_only_fields'])],
                 ['사용자 화면',', '.join(logging['user_visible_fields'])]])+'\n\n'+
             reply['partial_success_rule']+'\n\n'+reply['storage_response_boundary']+'\n\n'+logging['rule'])
@@ -1355,7 +1355,7 @@ def live_execution_document(spec):
     return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
             table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
             table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
-            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text+intake_text+post_text+current_text+deployment_text)
+            c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text+intake_text+post_text+current_text+deployment_text+frontend_bff_followup_document(spec))
 
 
 def live_P2_attempt(c, evidence_id):
@@ -1617,6 +1617,103 @@ ADMIN_FIX_PREPARATION_SHA256='2e3d0a718c4e54de423103b1d90ad6784f4bdb34d4db6c5354
 
 def canonical_public_record_sha256(value):
     return hashlib.sha256(json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+
+
+BFF_FOLLOWUP_SOURCE_COMMIT='44bd51231f84b1fa76a77fcc9aba00182e4e6882'
+BFF_FOLLOWUP_PLANNING_BASIS='937b7dd8a073ed34c3fe0586c27b307d40b8cbde'
+BFF_FOLLOWUP_API_DEPLOYMENT_SHA256='212e3ea927f2d8313e968b60796a9d67e71b2b945b295c4848a02f7586764269'
+BFF_FOLLOWUP_API_P2_SHA256='ed628acf22cdcd5b3846ec10b76ba2c1630415c2605c91b827f0a7667d1b1343'
+
+
+def frontend_bff_followup_shape():
+    """공개 메타데이터만 허용하며 외부 보고·소스 검증·실패 대조의 범위를 분리한다."""
+    def receipt(size,digest):return {'bytes':size,'sha256':digest}
+    return {
+        'format':'jungsi.current-bff-deployment/v1',
+        'status':'OWNER_REPORTED_SOURCE_VERIFIED_CONDITIONAL',
+        'basis_commit':BFF_FOLLOWUP_PLANNING_BASIS,
+        'supersedes_missing_final_SHA_current_state':True,
+        'owner_report':{
+            'receipt':receipt(3988,'4446b76a29e862a47eded4bfc660314544ce5aadc07485f5b935a70b8c5209da'),
+            'source_commit':BFF_FOLLOWUP_SOURCE_COMMIT,
+            'worker_version':'49fcffd9-5aeb-4629-9bcc-d02148bf097b',
+            'deployed_at_UTC':'2026-10-16T07:09:11Z',
+            'deployment_source_mapping':'OWNER_REPORTED_ONLY',
+            'reported_POST_count':0,'raw_settings_values_published':False,'scope':str},
+        'git_source_verification':{
+            'status':'INDEPENDENTLY_GIT_VERIFIED_SOURCE_ONLY_WITH_FOLLOWUPS',
+            'source_commit':BFF_FOLLOWUP_SOURCE_COMMIT,
+            'parent_commit':'59f01ad774917c57d0664b37698e9748104dc7c4',
+            'tree':'ba309cb4dec640d06166052bf53acf413b090e3c',
+            'frontend_source_spec_version':'1.9.62',
+            'source_review_receipt':receipt(5320,'56b4f57a5d33f784112dc87a78851360a4c35d7d8f5c2400489dc6885197f3e1'),
+            'CI':{'run_id':38866270866,'job_id':116859715461,'event':'push','head_commit':BFF_FOLLOWUP_SOURCE_COMMIT,'conclusion':'success','job_conclusion':'success','scope':'SOURCE_ONLY','local_hook_independently_verified':False},
+            'changed_files':{'total':35,'runtime':4,'configuration':1,'documentation_catalog':30,'tests':0},
+            'worker_bytes_independently_verified':False,
+            'planning_sync_pending':True,
+            'required_develop_sync':{'spec_version':'1.9.72','integration_status':'NOT_RUN','runtime_blob_and_patch_check_required':True,'normal_test_build_deploy_required':True},
+            'lineage':{'verification':'INDEPENDENTLY_GIT_VERIFIED','receipt':receipt(989,'12c26c3b75410aa45063519c102a1544182c026cbd4a1475a75f39b23199bddd'),'planning_commit':BFF_FOLLOWUP_PLANNING_BASIS,'planning_spec_version':'1.9.71','merge_base':'542b84661d86dfa2778dadd52ee5c4a499a03e64','planning_is_frontend_ancestor':False,'frontend_is_planning_ancestor':False,'current_planning_synchronized_into_frontend':False},
+            'scope':str},
+        'search_failure_correlations':{
+            'status':'EXACT_FAILED_RESPONSE_ID_MATCH_VERIFIED',
+            'receipt':receipt(5102,'30b7370d0ba9652dfaf1e7e9ebdd39c6c0b0f589ec1b78fcce6c201dee7e7eb2'),
+            'independent_review_receipt':receipt(1115,'b061f21512da61cdccd64ceaf1dc0717464e7090b3dc6c7cb935ddc4898d593e'),
+            'acceptance_matrix_receipt':receipt(19009,'2c50ca6c2b5df72392ab6a44a5f8ed151423bf88d8d869fd39176a456fe37ad7'),
+            'frontend_source_commit':BFF_FOLLOWUP_SOURCE_COMMIT,'API_source_commit':ADMIN_FIX_SOURCE_COMMIT,
+            'compared_count':2,'matched_count':2,
+            'rows':[
+                {'page':'PAGE-01','operation':'history.search','method':'GET','stage':'budget_initialize','HTTP_status':503,'safe_code':'operation_scope_not_approved','event_at_UTC':'2026-10-16T07:09:38Z','exact_failed_response_id_match':True},
+                {'page':'PAGE-03','operation':'offerings.search','method':'GET','stage':'budget_initialize','HTTP_status':503,'safe_code':'operation_scope_not_approved','event_at_UTC':'2026-10-16T07:09:44Z','exact_failed_response_id_match':True}],
+            'raw_request_ids_published':False,'JWT_subject_binding_proven':False,'actor_binding_proven':False,'P2_operation_exact_proven':False,'native_acceptance_implied':False,'scope':str},
+        'root_readonly_UI_observation':{
+            'receipt':receipt(5102,'30b7370d0ba9652dfaf1e7e9ebdd39c6c0b0f589ec1b78fcce6c201dee7e7eb2'),
+            'pages':['PAGE-01','PAGE-03'],'new_notice_observed':True,'administrator_headline_observed':True,
+            'GET_count':2,'POST_count':0,'request_ids_captured':False,
+            'same_requests_as_correlated_receipt_proven':False,'JWT_subject_binding_proven':False,'actor_binding_proven':False,'P2_operation_exact_proven':False,'scope':str},
+        'followup_contract':{
+            'status':'PREPARED_NOT_DEPLOYED','findings':['FE-LOG-01','FE-P2-01'],
+            'published_candidate_commit':None,'verification':'NOT_RUN_FINAL_INTEGRATED_SOURCE','deployment':'NOT_RUN',
+            'planned_runtime_guards':['NATIVE_FINITE_HTTP_STATUS','BOUNDED_PUBLIC_CODE_SYNTAX','REQUEST_ID_32_LOWER_HEX','CONSTANT_ROUTE_TEMPLATE_INCLUDING_GENERIC_ERROR','LOGGER_FAILURE_ISOLATION','SAVED_PROFILE_STATE_AND_THROWN_OVERALL_FAILURE','NO_AUTOMATIC_RETRY_OR_NEW_KEY'],
+            'scope':str},
+        'business_native_accepted':0,'business_deployment_accepted':0,'production_ready':False,
+        'operation_scope_expanded':False,'purpose_or_budget_changed':False,'key_or_role_changed':False,
+        'preservation_rule':str}
+
+
+def public_metadata_matches_shape(value,shape):
+    """모든 계층의 추가 키를 거절하고 bool을 정수와 구분한다."""
+    if shape is str:return isinstance(value,str)and bool(value.strip())
+    if isinstance(shape,dict):return isinstance(value,dict)and set(value)==set(shape)and all(public_metadata_matches_shape(value[key],expected)for key,expected in shape.items())
+    if isinstance(shape,list):return isinstance(value,list)and len(value)==len(shape)and all(public_metadata_matches_shape(item,expected)for item,expected in zip(value,shape))
+    return type(value)is type(shape)and value==shape
+
+
+def validate_frontend_bff_followup(spec):
+    """현재 화면의 제한된 근거를 API·과거 P2·인증 성공으로 승격하지 않는다."""
+    if tuple(int(v)for v in spec['version'].split('.'))<(1,9,72):return []
+    c=spec['supabase_deployment_contract']['live_execution']
+    errors=[]
+    if not public_metadata_matches_shape(c.get('current_BFF_deployment'),frontend_bff_followup_shape()):
+        errors.append('DEV-010 current BFF metadata or limited correlation scope drift')
+    if canonical_public_record_sha256(c.get('current_deployment'))!=BFF_FOLLOWUP_API_DEPLOYMENT_SHA256 or canonical_public_record_sha256(c.get('current_P2_attempt'))!=BFF_FOLLOWUP_API_P2_SHA256:
+        errors.append('DEV-010 frontend followup must preserve installed API and P2 observations')
+    return errors
+
+
+def frontend_bff_followup_document(spec):
+    """현재 화면 보고와 독립 대조 및 미배포 보완을 구분해 표시한다."""
+    c=spec['supabase_deployment_contract']['live_execution'];current=c.get('current_BFF_deployment')
+    if not current:return ''
+    owner=current['owner_report'];git=current['git_source_verification'];correlation=current['search_failure_correlations'];ui=current['root_readonly_UI_observation'];followup=current['followup_contract']
+    return ('\n\n### 현재 화면 BFF 배포 보고와 독립 소스 확인\n\n'+owner['scope']+'\n\n'+table(['확인 범위','상태'],[
+        ['화면 소스 / 부모',git['source_commit']+' / '+git['parent_commit']],
+        ['소유자 보고 Worker / UTC',owner['worker_version']+' / '+owner['deployed_at_UTC']],
+        ['정확 소스 CI',str(git['CI']['run_id'])+' / '+git['CI']['conclusion']+'; Worker 바이트 결속은 미확인'],
+        ['화면 소스의 기획 버전',git['frontend_source_spec_version']+'; 최신 develop '+git['required_develop_sync']['spec_version']+' 통합 대기'],
+        ['독립 Git 계보',git['lineage']['verification']+'; 양방향 ancestor 없음'],
+        ['소스 보완',followup['status']+' / 검증 '+followup['verification']+' / 배포 '+followup['deployment']],
+        ['실제 API 소스',ADMIN_FIX_SOURCE_COMMIT+' / spec1.9.70 유지'],
+        ['업무 native / 배포 인수','0/22 / 0/22; production_ready=false']])+'\n\n'+git['scope']+'\n\n### 검색 실패 응답 2건만의 정확 대조\n\n'+correlation['scope']+'\n\n'+table(['화면 / operation','단계 / HTTP / 안전코드','UTC'],[[row['page']+' / '+row['operation'],row['stage']+' / '+str(row['HTTP_status'])+' / '+row['safe_code'],row['event_at_UTC']]for row in correlation['rows']])+'\n\n'+ui['scope']+' GET '+str(ui['GET_count'])+' / POST '+str(ui['POST_count'])+' .\n\n'+followup['scope']+'\n\n'+current['preservation_rule'])
 
 
 def live_deployment(c,evidence_id=None,receipt_sha256=None):
@@ -2326,6 +2423,7 @@ def validate_live_execution(spec):
         errors.extend(validate_deployment_history(spec))
     if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,71):
         errors.extend(validate_current_source_verification(spec))
+    errors.extend(validate_frontend_bff_followup(spec))
     if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,70) or c.get('admin_session_identity_fix')is not None:
         errors.extend(validate_admin_session_identity_fix(spec))
     for key,row in registry.items():

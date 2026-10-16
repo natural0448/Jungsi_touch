@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.71",
+  "contract_version": "1.9.72",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -2804,6 +2804,169 @@
         "business_deployment_accepted": 0,
         "production_ready": false,
         "rule": "최종source032/spec1.9.70 및0024 merge의 정상1065/590/993·불일치0와 두source CI/merge CI만을 기록한다. 새공통기획1.9.71은 이 변경에서 미커밋이며 정상 전체검사·커밋·푸시·정확SHA CI는 별도다. 준비문서에 남은 freshP2 대기는 당시 이력이며 현재P2는 새Root receipt를 따른다."
+      },
+      "current_BFF_deployment": {
+        "format": "jungsi.current-bff-deployment/v1",
+        "status": "OWNER_REPORTED_SOURCE_VERIFIED_CONDITIONAL",
+        "basis_commit": "937b7dd8a073ed34c3fe0586c27b307d40b8cbde",
+        "supersedes_missing_final_SHA_current_state": true,
+        "owner_report": {
+          "receipt": {
+            "bytes": 3988,
+            "sha256": "4446b76a29e862a47eded4bfc660314544ce5aadc07485f5b935a70b8c5209da"
+          },
+          "source_commit": "44bd51231f84b1fa76a77fcc9aba00182e4e6882",
+          "worker_version": "49fcffd9-5aeb-4629-9bcc-d02148bf097b",
+          "deployed_at_UTC": "2026-10-16T07:09:11Z",
+          "deployment_source_mapping": "OWNER_REPORTED_ONLY",
+          "reported_POST_count": 0,
+          "raw_settings_values_published": false,
+          "scope": "소유자 회신의 Worker 배포 보고이다. Git 소스·CI는 독립 확인했으나 실제 Worker 바이트와 소스의 결속은 독립 검증하지 않았다. 설정값과 원문 본문은 비공개로 보존한다."
+        },
+        "git_source_verification": {
+          "status": "INDEPENDENTLY_GIT_VERIFIED_SOURCE_ONLY_WITH_FOLLOWUPS",
+          "source_commit": "44bd51231f84b1fa76a77fcc9aba00182e4e6882",
+          "parent_commit": "59f01ad774917c57d0664b37698e9748104dc7c4",
+          "tree": "ba309cb4dec640d06166052bf53acf413b090e3c",
+          "frontend_source_spec_version": "1.9.62",
+          "source_review_receipt": {
+            "bytes": 5320,
+            "sha256": "56b4f57a5d33f784112dc87a78851360a4c35d7d8f5c2400489dc6885197f3e1"
+          },
+          "CI": {
+            "run_id": 38866270866,
+            "job_id": 116859715461,
+            "event": "push",
+            "head_commit": "44bd51231f84b1fa76a77fcc9aba00182e4e6882",
+            "conclusion": "success",
+            "job_conclusion": "success",
+            "scope": "SOURCE_ONLY",
+            "local_hook_independently_verified": false
+          },
+          "changed_files": {
+            "total": 35,
+            "runtime": 4,
+            "configuration": 1,
+            "documentation_catalog": 30,
+            "tests": 0
+          },
+          "worker_bytes_independently_verified": false,
+          "planning_sync_pending": true,
+          "required_develop_sync": {
+            "spec_version": "1.9.72",
+            "integration_status": "NOT_RUN",
+            "runtime_blob_and_patch_check_required": true,
+            "normal_test_build_deploy_required": true
+          },
+          "lineage": {
+            "verification": "INDEPENDENTLY_GIT_VERIFIED",
+            "receipt": {
+              "bytes": 989,
+              "sha256": "12c26c3b75410aa45063519c102a1544182c026cbd4a1475a75f39b23199bddd"
+            },
+            "planning_commit": "937b7dd8a073ed34c3fe0586c27b307d40b8cbde",
+            "planning_spec_version": "1.9.71",
+            "merge_base": "542b84661d86dfa2778dadd52ee5c4a499a03e64",
+            "planning_is_frontend_ancestor": false,
+            "frontend_is_planning_ancestor": false,
+            "current_planning_synchronized_into_frontend": false
+          },
+          "scope": "정확 44 소스와 push CI만 검증했다. 소스 기획은 1.9.62이며 현재 기획과 양방향 ancestor가 아니다. 최신 develop 1.9.72 통합, 기존 런타임 블롭·패치 확인과 정상 검사·빌드·배포가 필요하다. 소스 검토의 당시 대조 미확인은 후속 독립 대조 영수증으로 갱신했으며 업무 인수나 Worker 바이트 검증으로 승격하지 않는다."
+        },
+        "search_failure_correlations": {
+          "status": "EXACT_FAILED_RESPONSE_ID_MATCH_VERIFIED",
+          "receipt": {
+            "bytes": 5102,
+            "sha256": "30b7370d0ba9652dfaf1e7e9ebdd39c6c0b0f589ec1b78fcce6c201dee7e7eb2"
+          },
+          "independent_review_receipt": {
+            "bytes": 1115,
+            "sha256": "b061f21512da61cdccd64ceaf1dc0717464e7090b3dc6c7cb935ddc4898d593e"
+          },
+          "acceptance_matrix_receipt": {
+            "bytes": 19009,
+            "sha256": "2c50ca6c2b5df72392ab6a44a5f8ed151423bf88d8d869fd39176a456fe37ad7"
+          },
+          "frontend_source_commit": "44bd51231f84b1fa76a77fcc9aba00182e4e6882",
+          "API_source_commit": "032a5647bc0b56e091eda279506aa534d559ea2f",
+          "compared_count": 2,
+          "matched_count": 2,
+          "rows": [
+            {
+              "page": "PAGE-01",
+              "operation": "history.search",
+              "method": "GET",
+              "stage": "budget_initialize",
+              "HTTP_status": 503,
+              "safe_code": "operation_scope_not_approved",
+              "event_at_UTC": "2026-10-16T07:09:38Z",
+              "exact_failed_response_id_match": true
+            },
+            {
+              "page": "PAGE-03",
+              "operation": "offerings.search",
+              "method": "GET",
+              "stage": "budget_initialize",
+              "HTTP_status": 503,
+              "safe_code": "operation_scope_not_approved",
+              "event_at_UTC": "2026-10-16T07:09:44Z",
+              "exact_failed_response_id_match": true
+            }
+          ],
+          "raw_request_ids_published": false,
+          "JWT_subject_binding_proven": false,
+          "actor_binding_proven": false,
+          "P2_operation_exact_proven": false,
+          "native_acceptance_implied": false,
+          "scope": "화면팀이 보존한 실패 응답 2건의 요청 식별자와 기존 Edge 안전 로그를 정확 대조한 범위만 확인했다. 식별자 원문은 공개하지 않는다. JWT 주체·actor 권한·P2 정확 단계·22개 업무 인수의 증거가 아니다. 이전 P2 관측과 범위·자료·예산 승인은 그대로 유지한다. API 소스032 표기는 기존 설치 영수증에 근거하며 이번 로그 대조가 배포 바이트를 독립 검증했다는 뜻은 아니다."
+        },
+        "root_readonly_UI_observation": {
+          "receipt": {
+            "bytes": 5102,
+            "sha256": "30b7370d0ba9652dfaf1e7e9ebdd39c6c0b0f589ec1b78fcce6c201dee7e7eb2"
+          },
+          "pages": [
+            "PAGE-01",
+            "PAGE-03"
+          ],
+          "new_notice_observed": true,
+          "administrator_headline_observed": true,
+          "GET_count": 2,
+          "POST_count": 0,
+          "request_ids_captured": false,
+          "same_requests_as_correlated_receipt_proven": false,
+          "JWT_subject_binding_proven": false,
+          "actor_binding_proven": false,
+          "P2_operation_exact_proven": false,
+          "scope": "Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로 확인했다. Root UI 요청 식별자를 수집하지 않아 앞의 화면팀 실패 응답 2건과 같은 요청이라는 결속은 미증명이다. 표시를 JWT·actor·관리자 AAL2·P2 성공으로 승격하지 않는다."
+        },
+        "followup_contract": {
+          "status": "PREPARED_NOT_DEPLOYED",
+          "findings": [
+            "FE-LOG-01",
+            "FE-P2-01"
+          ],
+          "published_candidate_commit": null,
+          "verification": "NOT_RUN_FINAL_INTEGRATED_SOURCE",
+          "deployment": "NOT_RUN",
+          "planned_runtime_guards": [
+            "NATIVE_FINITE_HTTP_STATUS",
+            "BOUNDED_PUBLIC_CODE_SYNTAX",
+            "REQUEST_ID_32_LOWER_HEX",
+            "CONSTANT_ROUTE_TEMPLATE_INCLUDING_GENERIC_ERROR",
+            "LOGGER_FAILURE_ISOLATION",
+            "SAVED_PROFILE_STATE_AND_THROWN_OVERALL_FAILURE",
+            "NO_AUTOMATIC_RETRY_OR_NEW_KEY"
+          ],
+          "scope": "비공개 보완안만 준비되었으며 현재 배포의 수정 완료나 재검수로 기록하지 않는다. 로그의 HTTP·공개 코드의 길이 제한·문자 형식과 요청 식별자를 실행 중 검증하고 동적 경로와 genericError의 원문 경로·쿼리를 상수 경로 틀로 제한한다. 로그 오류는 업무 실행에 영향을 주지 않는다. 프로필 저장 후 전체분석 예외에도 저장 상태와 단계·안전코드를 보존하며 자동 재시도·새 키를 만들지 않는다. 실제 완료에는 후속 소스·정상 검사·배포 영수증이 필요하다. 별도 비공개 후보는 합성45건 통과 보고만 있으며 최종 develop 통합판 검증·Next 타입 검사·빌드·브라우저 재연결은 미실행이다. 후보는 원본에 미적용·미배포 상태다."
+        },
+        "business_native_accepted": 0,
+        "business_deployment_accepted": 0,
+        "production_ready": false,
+        "operation_scope_expanded": false,
+        "purpose_or_budget_changed": false,
+        "key_or_role_changed": false,
+        "preservation_rule": "기존 cb500·ed978·032 설치 원장, 세 P2 실패와 현재 제한된 P2 기능 성공 근거는 그대로 보존한다. 이전 회신의 최종 SHA 미확보는 당시 이력이며 새 현재 상태는 이 객체를 따른다. 현재 API는 032/spec1.9.70이다. 새 화면 소스 검토는 조건부 수락이며 보완은 미배포·미검수다. 22개 native·배포 인수 0, 보안 3개 gate 미완료와 production_ready=false를 유지하며 범위·목적·예산·키·역할을 변경하지 않는다. 현재 공통기획1.9.72는 검증된 develop937/spec1.9.71에서 준비한 미커밋 변경이며 정상 훅·커밋·푸시·정확 SHA CI는 별도다."
       }
     }
   }

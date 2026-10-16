@@ -2543,6 +2543,105 @@ class Planning1971DeploymentHistoryTests(unittest.TestCase):
                 _planning1971_live(spec)['current_P2_attempt'][field] = value
                 self.assert_p2_invalid(spec)
 
+class FrontendFollowup1972Tests(unittest.TestCase):
+    """현재 화면 메타데이터의 범위와 이전 API·P2 원장 보존만 검사한다."""
+    @classmethod
+    def setUpClass(cls):
+        import check_project_consistency
+        cls.checker=check_project_consistency
+        cls.baseline=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+
+    def fixture(self):
+        return deepcopy(self.baseline)
+
+    def model(self,spec):
+        return spec['supabase_deployment_contract']['live_execution']['current_BFF_deployment']
+
+    def invalid(self,spec):
+        self.assertTrue(self.checker.validate_frontend_bff_followup(spec))
+
+    def test_current_metadata_and_limited_evidence_are_valid(self):
+        self.assertEqual([],self.checker.validate_frontend_bff_followup(self.baseline))
+
+    def test_current_metadata_is_required(self):
+        spec=self.fixture();del spec['supabase_deployment_contract']['live_execution']['current_BFF_deployment'];self.invalid(spec)
+
+    def test_nested_extra_private_payload_keys_are_rejected(self):
+        paths=[(),('owner_report',),('owner_report','receipt'),('git_source_verification',),('git_source_verification','CI'),('git_source_verification','lineage'),('git_source_verification','required_develop_sync'),('search_failure_correlations',),('search_failure_correlations','rows',0),('root_readonly_UI_observation',),('followup_contract',)]
+        for path in paths:
+            with self.subTest(path=path):
+                spec=self.fixture();row=self.model(spec)
+                for key in path:row=row[key]
+                row['private_payload']='SYNTHETIC-UNIT-EXTRA';self.invalid(spec)
+
+    def test_required_scope_is_nonempty_text(self):
+        for key in ('owner_report','git_source_verification','search_failure_correlations','root_readonly_UI_observation','followup_contract'):
+            for value in (None,'',False,1,[]):
+                with self.subTest(key=key,value=value):
+                    spec=self.fixture();self.model(spec)[key]['scope']=value;self.invalid(spec)
+            spec=self.fixture();del self.model(spec)[key]['scope'];self.invalid(spec)
+
+    def test_boolean_counts_and_text_ids_are_rejected(self):
+        paths=[('owner_report','reported_POST_count'),('owner_report','receipt','bytes'),('git_source_verification','CI','run_id'),('git_source_verification','CI','job_id'),('git_source_verification','changed_files','tests'),('search_failure_correlations','matched_count'),('search_failure_correlations','rows',0,'HTTP_status'),('root_readonly_UI_observation','GET_count'),('business_native_accepted',)]
+        for path in paths:
+            for value in (False,True,'2',2.0):
+                with self.subTest(path=path,value=value):
+                    spec=self.fixture();row=self.model(spec)
+                    for key in path[:-1]:row=row[key]
+                    row[path[-1]]=value;self.invalid(spec)
+
+    def test_receipt_hash_and_source_bindings_are_exact(self):
+        for key in ('owner_report','search_failure_correlations','root_readonly_UI_observation'):
+            for value in (False,'g'*64,'a'*64):
+                spec=self.fixture();self.model(spec)[key]['receipt']['sha256']=value;self.invalid(spec)
+        for key in ('owner_report','git_source_verification'):
+            spec=self.fixture();self.model(spec)[key]['source_commit']='a'*40;self.invalid(spec)
+        spec=self.fixture();self.model(spec)['git_source_verification']['CI']['head_commit']='a'*40;self.invalid(spec)
+
+    def test_git_and_ci_cannot_certify_worker_bytes(self):
+        spec=self.fixture();self.model(spec)['git_source_verification']['worker_bytes_independently_verified']=True;self.invalid(spec)
+        spec=self.fixture();self.model(spec)['owner_report']['deployment_source_mapping']='INDEPENDENTLY_VERIFIED';self.invalid(spec)
+        spec=self.fixture();self.model(spec)['git_source_verification']['CI']['scope']='OPERATING_ACCEPTANCE';self.invalid(spec)
+
+    def test_older_frontend_planning_requires_develop_sync(self):
+        mutations=[(('frontend_source_spec_version',),'1.9.72'),(('planning_sync_pending',),False),(('required_develop_sync','integration_status'),'PASS'),(('lineage','current_planning_synchronized_into_frontend'),True),(('lineage','planning_is_frontend_ancestor'),True),(('lineage','frontend_is_planning_ancestor'),True),(('lineage','merge_base'),'a'*40)]
+        for path,value in mutations:
+            spec=self.fixture();row=self.model(spec)['git_source_verification']
+            for key in path[:-1]:row=row[key]
+            row[path[-1]]=value;self.invalid(spec)
+
+    def test_exact_two_failed_responses_cannot_promote_auth_or_p2(self):
+        for key in ('raw_request_ids_published','JWT_subject_binding_proven','actor_binding_proven','P2_operation_exact_proven','native_acceptance_implied'):
+            spec=self.fixture();self.model(spec)['search_failure_correlations'][key]=True;self.invalid(spec)
+        for path,value in [(('matched_count',),1),(('rows',0,'operation'),'overall.analyze'),(('rows',1,'HTTP_status'),200),(('rows',1,'stage'),'complete')]:
+            spec=self.fixture();row=self.model(spec)['search_failure_correlations']
+            for key in path[:-1]:row=row[key]
+            row[path[-1]]=value;self.invalid(spec)
+
+    def test_root_readonly_gets_are_separate_from_correlated_responses(self):
+        for key in ('request_ids_captured','same_requests_as_correlated_receipt_proven','JWT_subject_binding_proven','actor_binding_proven','P2_operation_exact_proven'):
+            spec=self.fixture();self.model(spec)['root_readonly_UI_observation'][key]=True;self.invalid(spec)
+        spec=self.fixture();self.model(spec)['root_readonly_UI_observation']['POST_count']=1;self.invalid(spec)
+
+    def test_prepared_followup_is_not_deployed_or_verified(self):
+        for key,value in [('status','DEPLOYED'),('verification','PASS'),('deployment','PASS'),('published_candidate_commit','a'*40)]:
+            spec=self.fixture();self.model(spec)['followup_contract'][key]=value;self.invalid(spec)
+        spec=self.fixture();self.model(spec)['followup_contract']['planned_runtime_guards'].remove('CONSTANT_ROUTE_TEMPLATE_INCLUDING_GENERIC_ERROR');self.invalid(spec)
+
+    def test_native_security_and_permission_boundaries_stay_closed(self):
+        for key,value in [('business_native_accepted',1),('business_deployment_accepted',1),('production_ready',True),('operation_scope_expanded',True),('purpose_or_budget_changed',True),('key_or_role_changed',True)]:
+            spec=self.fixture();self.model(spec)[key]=value;self.invalid(spec)
+
+    def test_installed_api_and_successful_p2_remain_canonical(self):
+        for key in ('current_deployment','current_P2_attempt'):
+            spec=self.fixture();spec['supabase_deployment_contract']['live_execution'][key]['scope']='SYNTHETIC-UNIT-CHANGED';self.invalid(spec)
+
+    def test_renderer_separates_current_frontend_and_historical_reply(self):
+        rendered=self.checker.live_execution_document(self.baseline)
+        for expected in ('현재 화면 BFF 배포 보고','이전 화면팀 P2 저장 검수 회신 이력','1.9.62','최신 develop 1.9.72 통합 대기','검색 실패 응답 2건만의 정확 대조','PREPARED_NOT_DEPLOYED','0/22 / 0/22'):
+            self.assertIn(expected,rendered)
+        self.assertNotIn('SYNTHETIC-UNIT-EXTRA',rendered)
+
 if __name__=="__main__":unittest.main()
 
 

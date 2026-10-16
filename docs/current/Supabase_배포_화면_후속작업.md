@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.71이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.72이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -352,7 +352,7 @@ session → 과목 전용 본인 profile/report → 별도 승인 catalog → �
 
 기존 정상 로그인 브라우저의 같은 BFF 화면에서 operation_scope_not_approved 코드가 표시되는 것을 독립 관측했다. 실제 HTTP 상태는 직접 캡처하지 않았고 머리글은 일반 회원이었다. 관리자 aal2·유료 권한·업무 성공을 확인한 관측이 아니다. 영수증 SHA-256 bfa56eaf3c4c75fa31f06581abc3a2c5f5f4b57303dc80342b43606e5c9a5995.
 
-### 화면팀 P2 저장 검수 후속 회신
+### 이전 화면팀 P2 저장 검수 회신 이력
 
 원문 회신을 해시 결속한 외부 보고로 수용한다. 이전 Root 실패의 설명, 새 Worker 배포 보고, 화면팀 별도 가상1건 실패를 분리한다. 새 Worker source SHA가 제공·push되지 않아 공개 remote59f 소스와 같은 런타임으로 결속하지 않는다. source 배포 보고와 오류 표시 수정 배포대기·실제 업무 성공을 구분한다. 외부 Worker 배포 보고 수신은 신규 호스팅·추가 클라우드 승인이 아니며 Root 작업 환경은 Google Drive·기존 Supabase만 유지한다. 새 설정·한도·권한·요금 변경을 승인하거나 실행하지 않는다.
 
@@ -360,10 +360,10 @@ session → 과목 전용 본인 profile/report → 별도 승인 catalog → �
 | --- | --- |
 | 회신 원문 | 5439 bytes / SHA-256 0c26db23ca927ee8fde77250f1bb9586d3a5b7ea08e7343d6c62758e97c5c016 |
 | 이전 Root 시도 | 화면팀은 이전 Root 합성 사례가 공개 시험·pack 설정2개 미설정으로 최초 profile 단계에서 거절됐다고 회신했다. 실제 HTTP422나 DB쓰기0은 별도 요청 영수증으로 확인되지 않아 미확정이다. 기존 Root 실패·가림 placeholder 정정 영수증을 보존한다. |
-| 외부 Worker 배포 보고 | 3f5256fd-becb-4f80-b854-b73318d6ab86 / 2026-10-16T01:30:31Z / source SHA 미제공·미푸시 |
-| 공개 저장소 화면 소스 | 59f01ad774917c57d0664b37698e9748104dc7c4; 새 Worker와 소스 결속 미확인 |
+| 외부 Worker 배포 보고 | 3f5256fd-becb-4f80-b854-b73318d6ab86 / 2026-10-16T01:30:31Z / 당시 source SHA 미제공·미푸시 |
+| 공개 저장소 화면 소스 | 59f01ad774917c57d0664b37698e9748104dc7c4; 당시 새 Worker와 소스 결속 미확인 |
 | 화면팀 별도 시도 | 화면팀은 2026-10-16T01:45:00Z에 이전 Root 사례와 조합이 다른 가상386 한 건을1회 제출했고 일반 연결 실패 안내를 보았다고 보고했다. 이 문구의503 또는 네트워크 분류는 실제 HTTP503 확정이 아니다. stage·status·code·request_id·멱등키를 수집하지 않았고 profile 부분 생성·DB쓰기는 미확정이다. 재제출0·새로고침0이며 overall/report 성공은 NOT_RUN이다. 상세 합성 점수와 요청 본문은 공개 명세에 복사하지 않는다. |
-| 오류 표시·관측 수정 | PENDING_DEPLOYMENT_AND_SOURCE_SHA / source SHA 미제공; 배포·재검수 미완료 |
+| 오류 표시·관측 수정 | PENDING_DEPLOYMENT_AND_SOURCE_SHA / 당시 source SHA 미제공; 당시 배포·재검수 미완료 |
 | 서버 전용 안전 관측 | stage, path, status, code, request_id |
 | 사용자 화면 | stage, safe_error_code |
 
@@ -514,6 +514,38 @@ score-profile.create도 DB COMMIT 이후의 세션·응답 projection·현재 �
 
 cb500/ed978 설치 원장과 세 실패의 당시 unknown·영수증·정정은 보존한다. 실제 성적·계정·멱등키·요청ID·비공개URL을 공개하지 않는다. 한정 UI/표시·재조회 성공과 전체22업무·권한·CSRF·만료·보안3gate 인수를 구분한다.
 
+### 현재 화면 BFF 배포 보고와 독립 소스 확인
+
+소유자 회신의 Worker 배포 보고이다. Git 소스·CI는 독립 확인했으나 실제 Worker 바이트와 소스의 결속은 독립 검증하지 않았다. 설정값과 원문 본문은 비공개로 보존한다.
+
+| 확인 범위 | 상태 |
+| --- | --- |
+| 화면 소스 / 부모 | 44bd51231f84b1fa76a77fcc9aba00182e4e6882 / 59f01ad774917c57d0664b37698e9748104dc7c4 |
+| 소유자 보고 Worker / UTC | 49fcffd9-5aeb-4629-9bcc-d02148bf097b / 2026-10-16T07:09:11Z |
+| 정확 소스 CI | 38866270866 / success; Worker 바이트 결속은 미확인 |
+| 화면 소스의 기획 버전 | 1.9.62; 최신 develop 1.9.72 통합 대기 |
+| 독립 Git 계보 | INDEPENDENTLY_GIT_VERIFIED; 양방향 ancestor 없음 |
+| 소스 보완 | PREPARED_NOT_DEPLOYED / 검증 NOT_RUN_FINAL_INTEGRATED_SOURCE / 배포 NOT_RUN |
+| 실제 API 소스 | 032a5647bc0b56e091eda279506aa534d559ea2f / spec1.9.70 유지 |
+| 업무 native / 배포 인수 | 0/22 / 0/22; production_ready=false |
+
+정확 44 소스와 push CI만 검증했다. 소스 기획은 1.9.62이며 현재 기획과 양방향 ancestor가 아니다. 최신 develop 1.9.72 통합, 기존 런타임 블롭·패치 확인과 정상 검사·빌드·배포가 필요하다. 소스 검토의 당시 대조 미확인은 후속 독립 대조 영수증으로 갱신했으며 업무 인수나 Worker 바이트 검증으로 승격하지 않는다.
+
+### 검색 실패 응답 2건만의 정확 대조
+
+화면팀이 보존한 실패 응답 2건의 요청 식별자와 기존 Edge 안전 로그를 정확 대조한 범위만 확인했다. 식별자 원문은 공개하지 않는다. JWT 주체·actor 권한·P2 정확 단계·22개 업무 인수의 증거가 아니다. 이전 P2 관측과 범위·자료·예산 승인은 그대로 유지한다. API 소스032 표기는 기존 설치 영수증에 근거하며 이번 로그 대조가 배포 바이트를 독립 검증했다는 뜻은 아니다.
+
+| 화면 / operation | 단계 / HTTP / 안전코드 | UTC |
+| --- | --- | --- |
+| PAGE-01 / history.search | budget_initialize / 503 / operation_scope_not_approved | 2026-10-16T07:09:38Z |
+| PAGE-03 / offerings.search | budget_initialize / 503 / operation_scope_not_approved | 2026-10-16T07:09:44Z |
+
+Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로 확인했다. Root UI 요청 식별자를 수집하지 않아 앞의 화면팀 실패 응답 2건과 같은 요청이라는 결속은 미증명이다. 표시를 JWT·actor·관리자 AAL2·P2 성공으로 승격하지 않는다. GET 2 / POST 0 .
+
+비공개 보완안만 준비되었으며 현재 배포의 수정 완료나 재검수로 기록하지 않는다. 로그의 HTTP·공개 코드의 길이 제한·문자 형식과 요청 식별자를 실행 중 검증하고 동적 경로와 genericError의 원문 경로·쿼리를 상수 경로 틀로 제한한다. 로그 오류는 업무 실행에 영향을 주지 않는다. 프로필 저장 후 전체분석 예외에도 저장 상태와 단계·안전코드를 보존하며 자동 재시도·새 키를 만들지 않는다. 실제 완료에는 후속 소스·정상 검사·배포 영수증이 필요하다. 별도 비공개 후보는 합성45건 통과 보고만 있으며 최종 develop 통합판 검증·Next 타입 검사·빌드·브라우저 재연결은 미실행이다. 후보는 원본에 미적용·미배포 상태다.
+
+기존 cb500·ed978·032 설치 원장, 세 P2 실패와 현재 제한된 P2 기능 성공 근거는 그대로 보존한다. 이전 회신의 최종 SHA 미확보는 당시 이력이며 새 현재 상태는 이 객체를 따른다. 현재 API는 032/spec1.9.70이다. 새 화면 소스 검토는 조건부 수락이며 보완은 미배포·미검수다. 22개 native·배포 인수 0, 보안 3개 gate 미완료와 production_ready=false를 유지하며 범위·목적·예산·키·역할을 변경하지 않는다. 현재 공통기획1.9.72는 검증된 develop937/spec1.9.71에서 준비한 미커밋 변경이며 정상 훅·커밋·푸시·정확 SHA CI는 별도다.
+
 ## 공식 기술 근거
 
 - [Supabase Edge Functions 실행 언어](https://supabase.com/docs/guides/functions)
@@ -556,4 +588,4 @@ cb500/ed978 설치 원장과 세 실패의 당시 unknown·영수증·정정은 
 
 
 
-<!-- jungsi:generated spec_sha256=e4c580413b5478c505a3772155cd9e0f97569574bfa3616b66660f56fe1b8830 -->
+<!-- jungsi:generated spec_sha256=1d415b221151297ea1c386f73541cc0de22a2734dd0e0703e430686833d49aa9 -->

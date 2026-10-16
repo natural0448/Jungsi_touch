@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "becfe69f25cebda386cd23888929b0653e2d7b70ba94c817aeef46926fc02f2d",
+      "source_sha256": "33776cfe43bd7ed4f33f93c15c5d93ec4f6c32e3bceea6501a34876090a7a14e",
       "symbols": [
         {
           "kind": "class",
@@ -674,6 +674,24 @@
         },
         {
           "kind": "function",
+          "name": "frontend_bff_followup_document",
+          "signature": "def frontend_bff_followup_document(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "frontend_bff_followup_shape",
+          "signature": "def frontend_bff_followup_shape():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "frontend_bff_followup_shape.receipt",
+          "signature": "def receipt(size, digest):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "frontend_followup_text",
           "signature": "def frontend_followup_text(spec):",
           "decorators": []
@@ -754,6 +772,12 @@
           "kind": "function",
           "name": "protected_path",
           "signature": "def protected_path(path, shared_tools):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "public_metadata_matches_shape",
+          "signature": "def public_metadata_matches_shape(value, shape):",
           "decorators": []
         },
         {
@@ -976,6 +1000,12 @@
           "kind": "function",
           "name": "validate_forecast_contract",
           "signature": "def validate_forecast_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_frontend_bff_followup",
+          "signature": "def validate_frontend_bff_followup(spec):",
           "decorators": []
         },
         {
