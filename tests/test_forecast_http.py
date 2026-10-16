@@ -15,7 +15,7 @@ class ForecastHttpTests(unittest.TestCase):
     def setUp(self):
         self.clock=FrozenClock();self.repository=Entitlements();self.inputs=Inputs(False)
         self.store=MemoryForecastRepository({'SYNTHETIC-editor':dict(edit=True,approve=True,university_ids=['SYNTHETIC-U'])})
-        self.app=create_app(repository=self.repository,data=SyntheticData(self.clock),sessions=SyntheticSessions(self.clock),clock=self.clock,forecast_repository=self.store,forecast_inputs=self.inputs)
+        self.app=create_app(repository=self.repository,data=SyntheticData(self.clock),sessions=SyntheticSessions(self.clock),clock=self.clock,forecast_repository=self.store,forecast_inputs=self.inputs, operating_mode="legacy_synthetic")
         self.client=TestClient(self.app);self.key=0
     def request(self,method,path,body=None,owner='SYNTHETIC-editor'):
         self.key+=1;headers={'Authorization':'Bearer '+owner,'Idempotency-Key':'SYNTHETIC-http-'+str(self.key)} if owner else {}

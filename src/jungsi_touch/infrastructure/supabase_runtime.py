@@ -294,7 +294,7 @@ class SupabaseRuntimeReadiness:
 
 def create_supabase_secured_app(*, security, settings, data, selection, repository=None,
                                sessions=None, clock=None, forecast_repository=None,
-                               forecast_inputs=None, entitlements=None):
+                               forecast_inputs=None, entitlements=None, operating_mode="rights"):
     from .http_api import _compose_app
     if type(settings) is not ServerSettings:
         raise PlatformError('storage_configuration_invalid', 503)
@@ -302,7 +302,7 @@ def create_supabase_secured_app(*, security, settings, data, selection, reposito
     app = _compose_app(settings=settings, repository=repository, data=data, sessions=sessions,
                         clock=clock, forecast_repository=forecast_repository,
                         forecast_inputs=forecast_inputs, entitlements=entitlements,
-                        boundary=SecuredBoundary(security), readiness_policy=policy)
+                        boundary=SecuredBoundary(security), readiness_policy=policy,operating_mode=operating_mode)
     app.state.runtime_readiness = policy
     return app
 

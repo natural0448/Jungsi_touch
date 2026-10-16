@@ -57,7 +57,21 @@ Deno.test("runtime approved binding preserves exact source pins and paid worker 
   );
   equal(binding.usageStoreLimits.runtimeHardLimitSeconds.toString(), "400");
   equal(binding.usageStoreLimits.leaseSeconds.toString(), "406");
-  equal(binding.operations.length, 22);
+  equal(binding.operations.length, 25);
+  equal(
+    binding.operations.filter((id) =>
+      ["score-input.status.read", "score-input.correction.grant", "report.sample.read"].includes(id)
+    ).length,
+    3,
+  );
+  equal(
+    binding.operations.filter((id) =>
+      !["score-input.status.read", "score-input.correction.grant", "report.sample.read"].includes(
+        id,
+      )
+    ).length,
+    22,
+  );
   equal(binding.artifacts, [{ kind: "catalog", key: "service" }]);
 });
 Deno.test("runtime unapproved wrong-purpose or expired descriptor cannot enable data", async () => {

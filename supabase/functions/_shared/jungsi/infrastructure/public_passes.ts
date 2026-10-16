@@ -7,7 +7,7 @@ export interface ReadonlyPassSqlPort {
   readOnlyOne(statement: string, parameters: readonly unknown[]): Promise<unknown>;
 }
 export const PASS_STATE_SQL =
-  "SELECT c.oid IS NOT NULL,\n    meta_columns.rows, meta_constraints.rows,\n    CASE WHEN r.rolname=$1 THEN jsonb_build_array(\n      c.relrowsecurity,r.rolsuper,r.rolbypassrls,c.relowner=r.oid,\n      has_table_privilege(current_user,c.oid,'SELECT'),\n      has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER'),\n      has_any_column_privilege(current_user,c.oid,'INSERT,UPDATE,REFERENCES')) END,\n    meta_policies.rows, to_char(paid.expires_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')\nFROM (SELECT to_regclass('public.jeongsi_passes') AS oid) target\nLEFT JOIN pg_catalog.pg_class c ON c.oid=target.oid\nLEFT JOIN pg_catalog.pg_roles r ON r.rolname=current_user\nLEFT JOIN LATERAL (\n  SELECT jsonb_agg(jsonb_build_array(column_name,udt_name,is_nullable)\n                   ORDER BY ordinal_position) AS rows\n  FROM information_schema.columns\n  WHERE table_schema='public' AND table_name='jeongsi_passes'\n) meta_columns ON true\nLEFT JOIN LATERAL (\n  SELECT jsonb_agg(jsonb_build_array(conname,contype::text,convalidated,\n                    pg_get_constraintdef(oid)) ORDER BY conname) AS rows\n  FROM pg_catalog.pg_constraint WHERE conrelid=c.oid\n) meta_constraints ON true\nLEFT JOIN LATERAL (\n  SELECT jsonb_agg(jsonb_build_array(polname,polcmd::text,polpermissive,\n    ARRAY(SELECT CASE WHEN role_id=0 THEN 'public' ELSE pg_get_userbyid(role_id) END\n          FROM unnest(polroles) AS policy_role(role_id)),\n    pg_get_expr(polqual,polrelid),pg_get_expr(polwithcheck,polrelid)) ORDER BY polname) AS rows\n  FROM pg_catalog.pg_policy WHERE polrelid=c.oid AND polcmd IN ('r','*')\n) meta_policies ON true\nLEFT JOIN LATERAL (\n  SELECT max(ends_at) AS expires_at FROM public.jeongsi_passes\n  WHERE user_id=$2 AND revoked_at IS NULL AND starts_at<=$3 AND ends_at>$4\n) paid ON true";
+  "SELECT c.oid IS NOT NULL,\n    meta_columns.rows, meta_constraints.rows,\n    CASE WHEN r.rolname=$1 THEN jsonb_build_array(\n      c.relrowsecurity,r.rolsuper,r.rolbypassrls,c.relowner=r.oid,\n      has_table_privilege(current_user,c.oid,'SELECT'),\n      has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER'),\n      has_any_column_privilege(current_user,c.oid,'INSERT,UPDATE,REFERENCES')) END,\n    meta_policies.rows, to_char(paid.expires_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"'), paid.pass_id\nFROM (SELECT to_regclass('public.jeongsi_passes') AS oid) target\nLEFT JOIN pg_catalog.pg_class c ON c.oid=target.oid\nLEFT JOIN pg_catalog.pg_roles r ON r.rolname=current_user\nLEFT JOIN LATERAL (\n  SELECT jsonb_agg(jsonb_build_array(column_name,udt_name,is_nullable)\n                   ORDER BY ordinal_position) AS rows\n  FROM information_schema.columns\n  WHERE table_schema='public' AND table_name='jeongsi_passes'\n) meta_columns ON true\nLEFT JOIN LATERAL (\n  SELECT jsonb_agg(jsonb_build_array(conname,contype::text,convalidated,\n                    pg_get_constraintdef(oid)) ORDER BY conname) AS rows\n  FROM pg_catalog.pg_constraint WHERE conrelid=c.oid\n) meta_constraints ON true\nLEFT JOIN LATERAL (\n  SELECT jsonb_agg(jsonb_build_array(polname,polcmd::text,polpermissive,\n    ARRAY(SELECT CASE WHEN role_id=0 THEN 'public' ELSE pg_get_userbyid(role_id) END\n          FROM unnest(polroles) AS policy_role(role_id)),\n    pg_get_expr(polqual,polrelid),pg_get_expr(polwithcheck,polrelid)) ORDER BY polname) AS rows\n  FROM pg_catalog.pg_policy WHERE polrelid=c.oid AND polcmd IN ('r','*')\n) meta_policies ON true\nLEFT JOIN LATERAL (\n  SELECT ends_at AS expires_at,id::text AS pass_id FROM public.jeongsi_passes\n  WHERE user_id=$2 AND revoked_at IS NULL AND starts_at<=$3 AND ends_at>$4 ORDER BY ends_at DESC,id DESC LIMIT 1\n) paid ON true";
 const EXPECTED_COLUMNS: Readonly<Record<string, readonly [string, string]>> = {
   id: ["int8", "NO"],
   user_id: ["uuid", "NO"],
@@ -26,11 +26,11 @@ function rows(value: unknown, size: number, max: number): value is unknown[][] {
   return Array.isArray(value) && value.length <= max &&
     value.every((r) => Array.isArray(r) && r.length === size);
 }
-function requireSchema(state: unknown): string | null {
-  if (!Array.isArray(state) || state.length !== 6 || state[0] !== true) {
+function requireSchema(state: unknown): { expiry: string | null; passId: string | null } {
+  if (!Array.isArray(state) || state.length !== 7 || state[0] !== true) {
     throw new AccessError("entitlement_schema_unverified", 503);
   }
-  const [, _columns, constraints, role, policies, expiry] = state;
+  const [, _columns, constraints, role, policies, expiry, passId] = state;
   const columns = _columns;
   if (
     !rows(columns, 3, 9) || columns.length !== 9 || new Set(columns.map((r) => r[0])).size !== 9 ||
@@ -85,7 +85,13 @@ function requireSchema(state: unknown): string | null {
   if (expiry !== null && typeof expiry !== "string") {
     throw new AccessError("entitlement_result_invalid", 503);
   }
-  return expiry;
+  if (
+    (expiry === null) !== (passId === null) ||
+    passId !== null &&
+      (typeof passId !== "string" || !/^[1-9][0-9]*$/.test(passId) ||
+        BigInt(passId) > 9223372036854775807n)
+  ) throw new AccessError("entitlement_result_invalid", 503);
+  return { expiry, passId: passId as string | null };
 }
 export class PublicJeongsiPassesReader implements PublicPassPort {
   constructor(private readonly sql: ReadonlyPassSqlPort) {}
@@ -112,7 +118,7 @@ export class PublicJeongsiPassesReader implements PublicPassPort {
     } catch {
       throw new AccessError("entitlement_unavailable", 503);
     }
-    const expiry = requireSchema(raw);
+    const { expiry, passId } = requireSchema(raw);
     let paidUntilUtc: bigint | null = null;
     if (expiry !== null) {
       try {
@@ -131,6 +137,7 @@ export class PublicJeongsiPassesReader implements PublicPassPort {
       subjectId,
       evaluatedAtUtc: nowUtc,
       paidUntilUtc,
+      passId,
     });
   }
 }

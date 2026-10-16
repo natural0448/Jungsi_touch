@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "accepted_on_develop_scoped_synthetic_verified",
   "contract_ref": "runtime_connection_preparation_contract",
-  "contract_version": "1.9.72",
+  "contract_version": "1.9.73",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -60,7 +60,8 @@
       "environment_factory": "configured_supabase_app",
       "configuration_check_command": "python -m jungsi_touch.infrastructure.supabase_runtime --check-config",
       "server_factory_command": "python -m uvicorn jungsi_touch.infrastructure.supabase_runtime:configured_supabase_app --factory --host 127.0.0.1 --port 8000 --no-access-log",
-      "opening_change_ref": "opening_security_operations_contract"
+      "opening_change_ref": "opening_security_operations_contract",
+      "native_policy_extension_ref": "score_input_policy_contract"
     },
     "source_lineage": {
       "canonical_private_pointers": [

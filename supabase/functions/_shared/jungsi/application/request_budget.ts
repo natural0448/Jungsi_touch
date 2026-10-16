@@ -42,4 +42,7 @@ export const BUDGET_OPERATIONS = [
   "report.export",
   "statistics.read",
   "forecast.published.read",
+  "score-input.status.read",
+  "score-input.correction.grant",
+  "report.sample.read",
 ] as const;

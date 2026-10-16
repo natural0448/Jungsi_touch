@@ -38,8 +38,8 @@ class DefaultPassAuthorityTests(unittest.TestCase):
             options['data']=SupabaseStorageDataProvider(client,dict(format='jungsi.data-registry/v1',entries=[]))
             return supabase_runtime.create_supabase_secured_app(**options,
                 security=SecuritySettings('SYNTHETIC-relay-token-for-testing-only-000000'),
-                selection=supabase_runtime.RuntimeArtifactSelection((('exam_pack','SYNTHETIC-mock'),)))
-        return http_api.create_app(**options)
+                selection=supabase_runtime.RuntimeArtifactSelection((('exam_pack','SYNTHETIC-mock'),)), operating_mode="legacy_synthetic")
+        return http_api.create_app(**options, operating_mode="legacy_synthetic")
 
     def test_both_factories_select_public_authority_and_never_use_legacy_paid_row(self):
         self.repository.entitlements['SYNTHETIC-owner']=dict(active=True,
@@ -77,13 +77,13 @@ class DefaultPassAuthorityTests(unittest.TestCase):
                     self.assertIn('no-store',response.headers['cache-control'])
 
     def test_uninjected_real_factory_constructs_public_reader_without_connecting(self):
-        app=http_api.create_app(settings=self.settings)
+        app=http_api.create_app(settings=self.settings, operating_mode="legacy_synthetic")
         self.assertIsInstance(app.state.platform.session_service.entitlements,PostgresJeongsiPassesRepository)
 
     def test_explicit_local_or_test_entitlement_injection_is_retained(self):
         with patch.object(http_api,'PostgresJeongsiPassesRepository') as automatic:
             app=http_api.create_app(settings=self.settings,repository=self.repository,
-                data=SyntheticData(self.clock),sessions=SyntheticSessions(self.clock),clock=self.clock,entitlements=self.port)
+                data=SyntheticData(self.clock),sessions=SyntheticSessions(self.clock),clock=self.clock,entitlements=self.port, operating_mode="legacy_synthetic")
             self.assertIs(app.state.platform.session_service.entitlements,self.port)
             automatic.assert_not_called()
 

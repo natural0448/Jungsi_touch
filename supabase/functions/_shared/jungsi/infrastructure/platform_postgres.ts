@@ -220,6 +220,20 @@ export class SupabasePlatformRepository implements PlatformRepositoryPort {
     ]);
   }
   async createProfile(input: ProfileWrite): Promise<StoredProfile> {
+    operation(input.operation ?? "score-profile.create", input.key, input.digest);
+    ownerId(input.owner);
+    if (typeof input.confirmed !== "boolean" || !object(input.scores)) {
+      throw new AccessError("storage_parameters_invalid", 503);
+    }
+    encoded(input.scores, this.maxRecordBytes);
+    utcText(input.nowUtc);
+    return await this.sql.write(input.owner, (tx) => this.createProfileInTransaction(tx, input));
+  }
+  /** Infrastructure composition can enlist the profile in the rights/response acceptance transaction. */
+  async createProfileInTransaction(
+    tx: NativeSqlTransaction,
+    input: ProfileWrite,
+  ): Promise<StoredProfile> {
     const { owner, key, digest, scores, confirmed } = input,
       op = input.operation ?? "score-profile.create";
     operation(op, key, digest);
@@ -228,48 +242,77 @@ export class SupabasePlatformRepository implements PlatformRepositoryPort {
       throw new AccessError("storage_parameters_invalid", 503);
     }
     const now = utcText(input.nowUtc), scoreText = encoded(scores, this.maxRecordBytes);
-    return await this.sql.write(owner, async (tx) => {
-      await lock(tx, owner, op, key);
-      const replay = await this.replayIn(tx, owner, op, key, digest);
-      if (replay) {
-        if (!("scores" in replay)) invalid();
-        return replay;
-      }
-      const result: StoredProfile = {
-        profile_id: this.newId("profile-"),
-        owner_id: owner,
-        scores: sqlObjectText(scoreText, this.maxRecordBytes),
-        confirmed,
-        created_at: now,
-      };
-      await tx.query(PROFILE_INSERT_SQL, [result.profile_id, owner, scoreText, confirmed, now]);
-      await this.remember(tx, owner, op, key, digest, result, now);
-      return result;
-    });
+    await lock(tx, owner, op, key);
+    const replay = await this.replayIn(tx, owner, op, key, digest);
+    if (replay) {
+      if (!("scores" in replay)) invalid();
+      return replay;
+    }
+    const result: StoredProfile = {
+      profile_id: this.newId("profile-"),
+      owner_id: owner,
+      scores: sqlObjectText(scoreText, this.maxRecordBytes),
+      confirmed,
+      created_at: now,
+    };
+    await tx.query(PROFILE_INSERT_SQL, [result.profile_id, owner, scoreText, confirmed, now]);
+    await this.remember(tx, owner, op, key, digest, result, now);
+    return result;
   }
   async getProfile(owner: string, pid: string): Promise<StoredProfile | null> {
     ownerId(owner);
     identifier(pid);
-    return await this.sql.read(owner, async (tx) => {
-      const row = one(await tx.query(PROFILE_READ_SQL, [pid, owner]), 5);
-      return row
-        ? profile({
-          profile_id: row[0],
-          owner_id: row[1],
-          scores: sqlObjectText(row[2], this.maxRecordBytes),
-          confirmed: row[3],
-          created_at: sqlUtcText(row[4]),
-        }, owner)
-        : null;
-    });
+    return await this.sql.read(owner, (tx) => this.getProfileInTransaction(tx, owner, pid));
+  }
+  async getProfileInTransaction(
+    tx: NativeSqlTransaction,
+    owner: string,
+    pid: string,
+  ): Promise<StoredProfile | null> {
+    ownerId(owner);
+    identifier(pid);
+    const row = one(await tx.query(PROFILE_READ_SQL, [pid, owner]), 5);
+    return row
+      ? profile({
+        profile_id: row[0],
+        owner_id: row[1],
+        scores: sqlObjectText(row[2], this.maxRecordBytes),
+        confirmed: row[3],
+        created_at: sqlUtcText(row[4]),
+      }, owner)
+      : null;
   }
   async getReport(owner: string, rid: string): Promise<StoredReport | null> {
     ownerId(owner);
     identifier(rid);
-    return await this.sql.read(owner, async (tx) => {
-      const row = one(await tx.query(REPORT_READ_SQL, [rid, owner]), 6);
-      return row ? reportRow(row, owner, this.maxRecordBytes) : null;
-    });
+    return await this.sql.read(owner, (tx) => this.getReportInTransaction(tx, owner, rid));
+  }
+  async getReportInTransaction(
+    tx: NativeSqlTransaction,
+    owner: string,
+    rid: string,
+  ): Promise<StoredReport | null> {
+    ownerId(owner);
+    identifier(rid);
+    const row = one(await tx.query(REPORT_READ_SQL, [rid, owner]), 6);
+    return row ? reportRow(row, owner, this.maxRecordBytes) : null;
+  }
+  async latestReportInTransaction(
+    tx: NativeSqlTransaction,
+    owner: string,
+    pid: string,
+  ): Promise<StoredReport | null> {
+    ownerId(owner);
+    identifier(pid);
+    const row = one(
+      await tx.query(
+        REPORT_SELECT +
+          " WHERE r.owner_id=$1 AND r.profile_id=$2 ORDER BY r.updated_at DESC,r.report_id DESC LIMIT 1",
+        [owner, pid],
+      ),
+      6,
+    );
+    return row ? reportRow(row, owner, this.maxRecordBytes) : null;
   }
   async lookupAccess(owner: string, rid: string): Promise<ReportAccess | null> {
     ownerId(owner);
@@ -344,6 +387,59 @@ export class SupabasePlatformRepository implements PlatformRepositoryPort {
         updated_at: now,
       };
       await tx.query(REVISION_INSERT_SQL, [rid, owner, profileId, String(version), bodyText, now]);
+      if (input.paidOrigin) {
+        const origin = input.paidOrigin;
+        if (
+          origin.operation !== op ||
+          !["overall.analyze", "university.analyze", "candidates.build"].includes(op) ||
+          !Array.isArray(origin.componentKeys) ||
+          new Set(origin.componentKeys).size !== origin.componentKeys.length ||
+          origin.componentKeys.some((c) =>
+            typeof c !== "string" ||
+            !(op === "overall.analyze"
+              ? c === "overall"
+              : op === "candidates.build"
+              ? c === "candidates"
+              : /^analysis:[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(c))
+          )
+        ) {
+          throw new AccessError("storage_parameters_invalid", 503);
+        }
+        if (origin.accessBasis === "customer_pass") {
+          if (
+            typeof origin.passId !== "string" || !/^[1-9][0-9]*$/.test(origin.passId) ||
+            one(
+                await tx.query(
+                  "SELECT id::text FROM public.jeongsi_passes WHERE id=$1::bigint AND user_id::text=$2",
+                  [origin.passId, owner],
+                ),
+                1,
+              ) === null
+          ) invalid();
+        } else if (origin.accessBasis !== "verified_admin" || origin.passId !== null) invalid();
+        if (origin.componentKeys.length) {
+          const rows = origin.componentKeys.map((component) => ({
+            origin_id: this.newId("origin-"),
+            component_key: component,
+          }));
+          await tx.query(
+            `INSERT INTO jungsi_backend.score_result_origins
+           (origin_id,owner_id,report_id,revision,component_key,source_operation,pass_id,access_basis,created_at)
+           SELECT x.origin_id,$2,$3,$4::bigint,x.component_key,$5,$6::bigint,$7,$8::timestamptz
+           FROM jsonb_to_recordset($1::jsonb) AS x(origin_id text,component_key text)`,
+            [
+              JSON.stringify(rows),
+              owner,
+              rid,
+              String(version),
+              op,
+              origin.passId,
+              origin.accessBasis,
+              now,
+            ],
+          );
+        }
+      }
       await this.remember(tx, owner, op, key, digest, result, now);
       return result;
     });

@@ -362,7 +362,7 @@ def validate_local_verification_contract(spec):
             for name in ('production_ready','actual_model_operating_registration'):
                 if acceptance.get(name) is not False:
                     errors.append('Local verification invariant drift: implementation_acceptance.'+name)
-    if len(spec['operations'])!=22:errors.append('Local verification 22 API boundary drift')
+    if {o['id'] for o in spec['operations'] if o['id'] in LEGACY_API_IDS}!=LEGACY_API_IDS or (not spec.get('score_input_policy_contract') and len(spec['operations'])!=22):errors.append('Local verification 22 API boundary drift')
     fields={
         'source_provenance.drive_required':{'registry_sha256','file_id','parents','input_folder','drive_version','plaintext_sha256','plaintext_bytes','downloaded_at','reviewer','source_receipt_sha256'},
         'source_provenance.local_required':{'selection_sha256','local_artifact_id','local_version','payload_version','plaintext_sha256','plaintext_bytes','captured_at','reviewer','source_receipt_sha256'},
@@ -871,6 +871,63 @@ def supabase_operations_route_metadata(spec):
 
 
 SECURITY_DOCUMENT="docs/current/외부접근_데이터보호_개발기준.md"
+LEGACY_API_IDS={"history.search","recruitment.read","score-profile.create","overall.analyze","report.read","offerings.search","offering.read","university.analyze","candidates.build","shortlist.update","report.export","statistics.read","session.read","forecast.capabilities","forecast.list","forecast.create","forecast.read","forecast.adjust","forecast.validate","forecast.approve","forecast.publish","forecast.published.read"}
+SCORE_POLICY_ROUTES={"score-input.status.read":("GET","/api/v1/me/score-input-status",["standard","paid"]),"score-input.correction.grant":("POST","/api/v1/management/score-input-corrections",["paid"]),"report.sample.read":("GET","/api/v1/report-sample",["standard","paid"])}
+REQ27_BASELINE_SOURCE_MANIFEST_SHA256='3eb6dd06220eed171ade8b9bdc24c8059e9aeb62ab00befedb1076c34ef54b47'
+def policy_baseline_source_matches(spec,path,digest,indexed):
+    if digest==indexed.get(path):return True
+    c=spec.get("score_input_policy_contract")
+    if not isinstance(c,dict) or c.get("baseline_commit")!="63337281332fcfb441f7b6c9638035061cee0636":return False
+    prior=c.get("prior_source_bindings",{})
+    if not isinstance(prior,dict) or hashlib.sha256(json.dumps(prior,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()!=REQ27_BASELINE_SOURCE_MANIFEST_SHA256:return False
+    return prior.get(path)==digest and c.get("current_source_bindings",{}).get(path)==indexed.get(path)
+def validate_score_input_policy(spec):
+    c=spec.get("score_input_policy_contract");errors=[]
+    required=tuple(int(x) for x in spec.get("version","0.0.0").split("."))>=(1,9,73)
+    if c is None:return ["REQ-27 policy contract missing"] if required else []
+    if not isinstance(c,dict):return ["REQ-27 policy contract invalid"]
+    rows=spec.get("operations",[]);by_id={o.get("id"):o for o in rows}
+    if (set(c.get("legacy_operation_ids",[]))!=LEGACY_API_IDS or len(c.get("legacy_operation_ids",[]))!=22 or
+        set(c.get("extension_operation_ids",[]))!=set(SCORE_POLICY_ROUTES) or len(c.get("extension_operation_ids",[]))!=3 or
+        set(by_id)!=LEGACY_API_IDS|set(SCORE_POLICY_ROUTES) or len(rows)!=25 or c.get("operation_count")!=25):errors.append("REQ-27 exact legacy22 plus extension3 scope drift")
+    if c.get("format")!="jungsi.score-input-policy-contract/v1" or c.get("requirement")!="REQ-27" or c.get("public_session_fields")!=["format","member_tier","entitlement_expires_at"]:errors.append("REQ-27 version/session boundary drift")
+    for key in ("activation_status","actual_new_policy_requests"):
+        if c.get(key)!="NOT_RUN":errors.append("REQ-27 unverified operational promotion: "+key)
+    migration=c.get("actual_migration_status")
+    if migration not in {"NOT_RUN","APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED"}:errors.append("REQ-27 migration state invalid")
+    if migration=="APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED":
+        evidence=c.get("migration_evidence",{})
+        if (evidence.get("sql_sha256")!="448c4d7a9463054219c54fb0e524bc6a0d55831f25c0cab99abab5bd893ecd55" or evidence.get("sql_path")!="database/migrations/006_score_input_policy.prepared.sql" or not re.fullmatch(r"[a-f0-9]{64}",str(evidence.get("native_receipt_sha256",""))) or evidence.get("new_tables")!=7 or evidence.get("new_table_rows")!=0 or evidence.get("app_select_tables")!=7 or evidence.get("app_insert_tables")!=5 or evidence.get("new_rls_policies")!=12 or evidence.get("schema_version")!="006_score_input_policy" or any(evidence.get(key)is not True for key in ("ACL_RLS_FK_verified","empty_ledgers_verified","005_retained")) or any(type(evidence.get(key))is not int or evidence.get(key)!=0 for key in ("student_data_DML","admission_data_DML","rollout_rows","new_policy_requests")) or evidence.get("activation")!="NOT_RUN" or evidence.get("public_RPC_006a")!="NOT_RUN"):errors.append("REQ-27 applied empty schema requires exact SQL/native evidence and no activation")
+    native=c.get("native_SQL_preparation_evidence",{}).get("guard")
+    if native is not None:
+        if (not isinstance(native,dict) or native.get("status")!="PASS_BOUNDED_READONLY_EMPTY_ROLLOUT" or native.get("receipt_sha256")!="0eca093fd02e40f6878b321ed99275684d7bbf790ba437c2bc220d554894b677" or native.get("source_sha256")!=c.get("current_source_bindings",{}).get(native.get("source_path")) or native.get("expected_http_status")!=503 or native.get("expected_code")!="score_input_transition_pending" or native.get("writes")!=0 or native.get("authenticated_API_verified")is not False or native.get("rollout_approved")is not False):errors.append("REQ-27 native empty guard evidence boundary drift")
+    for oid,(method,path,tiers) in SCORE_POLICY_ROUTES.items():
+        row=by_id.get(oid,{})
+        if row.get("method")!=method or row.get("path")!=path or row.get("member_tiers")!=tiers or row.get("report_owner")is not False or row.get("confirmed_score_profile")is not False or "REQ-27" not in row.get("requirements",[]):errors.append("REQ-27 route policy drift: "+oid)
+    for oid in ("score-profile.create","overall.analyze"):
+        if by_id.get(oid,{}).get("member_tiers")!=["paid"]:errors.append("REQ-27 personal score input must be paid")
+    export=by_id.get("report.export",{})
+    if export.get("member_tiers")!=["standard","paid"] or export.get("confirmed_score_profile")is not False:errors.append("REQ-27 expired own export retention drift")
+    rights=c.get("input_rights",{})
+    if (type(rights.get("initial_attempts"))is not int or rights.get("initial_attempts")!=1 or type(rights.get("correction_grants"))is not int or rights.get("correction_grants")!=1 or rights.get("semantic_rejection_consumes")is not True or rights.get("structural_auth_rate_and_known_precommit_failure_consumes")is not False):errors.append("REQ-27 one-plus-one debit boundary drift")
+    daily=c.get("daily_limits",{})
+    if any(daily.get(k)!="replaced_by_stage_rights" for k in ("distinct_scores","calculation_cost")) or set(daily.get("preserved",[]))!={"request_window","concurrent_jobs","per_request_calculation_units","per_request_runtime","result_volume","storage_fail_closed"} or daily.get("private_policy_required")is not True:errors.append("REQ-27 daily replacement/physical protection drift")
+    if set(c.get("delivery",{}).get("producer_operations",[]))!={"overall.analyze","university.analyze","candidates.build"}:errors.append("REQ-27 financial producer scope drift")
+    if any(c.get("preservation",{}).get(k)is not False for k in ("existing_files_deleted","existing_passes_modified","original_P2_replayed","003_approval_extends_to_006")):errors.append("REQ-27 preservation boundary drift")
+    if set(c.get("runtime_matrix",{}))!={"native_edge","python_fastapi"}:errors.append("REQ-27 runtime-specific status missing")
+    prior=c.get("prior_source_bindings",{});current=c.get("current_source_bindings",{})
+    indexed_sources={p:v.get("declarations",{}).get("source_sha256") for p,v in spec.get("edge_harness",{}).get("files",{}).items()}
+    if not isinstance(prior,dict) or c.get("baseline_commit")!="63337281332fcfb441f7b6c9638035061cee0636" or hashlib.sha256(json.dumps(prior,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()!=REQ27_BASELINE_SOURCE_MANIFEST_SHA256 or c.get("prior_source_manifest_sha256")!=REQ27_BASELINE_SOURCE_MANIFEST_SHA256 or current!=indexed_sources:errors.append("REQ-27 prior snapshot/current candidate source separation drift")
+    verification=c.get("verification",{});bindings=c.get("current_descendant_source_bindings",{})
+    expected_paths={"supabase/functions/_shared/jungsi/application/usage_service.ts","tests/edge/test_runtime_budget.ts","tests/edge/test_usage_service.ts"}
+    indexed={p:v.get("declarations",{}).get("source_sha256") for p,v in spec.get("edge_harness",{}).get("files",{}).items()}
+    if (verification.get("baseline_edge_unit_count")!=590 or verification.get("new_policy_test_path")!="tests/edge/test_score_input_policy.ts" or verification.get("new_policy_test_count")!=31 or spec.get("edge_harness",{}).get("unit_count")!=624 or verification.get("extension_route_case_count")!=3 or set(bindings)!=expected_paths or any(not re.fullmatch(r"[a-f0-9]{64}",str(value)) or value!=indexed.get(path) for path,value in bindings.items())):errors.append("REQ-27 current descendant source/test registration drift")
+    extension=c.get("extension_implementation_bindings",{});evidence=c.get("extension_runtime_test_bindings",{})
+    expected_service="supabase/functions/_shared/jungsi/application/score_input_service.ts"
+    expected_evidence={"supabase/functions/_shared/jungsi/application/api_dispatch.ts","supabase/functions/_shared/jungsi/infrastructure/api_http.ts","supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts","tests/edge/test_score_input_policy.ts","tests/edge/public_api_contract_fixture.ts","tests/edge/synthetic_api_contract.ts"}
+    if (not isinstance(extension,dict) or set(extension)!=set(SCORE_POLICY_ROUTES) or any(not isinstance(binding,dict) or set(binding)!={"path","source_sha256","symbol"} or binding.get("path")!=expected_service or binding.get("symbol")!="ScoreInputService.execute" or not re.fullmatch(r"[a-f0-9]{64}",str(binding.get("source_sha256",""))) or binding.get("source_sha256")!=indexed.get(expected_service) for binding in extension.values()) or not isinstance(evidence,dict) or set(evidence)!=expected_evidence or any(not re.fullmatch(r"[a-f0-9]{64}",str(value)) or value!=indexed.get(path) for path,value in evidence.items())):errors.append("REQ-27 extension implementation/runtime/test source binding drift")
+    return errors
+
 SECURITY_REQUIREMENTS={"REQ-24","REQ-25","REQ-26"}
 SECURITY_GATES={
     "security_response_artifacts":{"SEC-QA-01","SEC-QA-02"},
@@ -972,7 +1029,7 @@ def security_document_body(spec):
         ["화면을 거치지 않고 API 직접 호출","SEC-03·04: 서버 중계 신원과 실제 사용자 권한을 각각 확인",
          "서버 신원 누락·타인·무료 유료기능·만료·scope 밖 결과 거절"],
         ["정상 계정으로 점수·결과를 반복 수집","SEC-05·06·07: 원자적 공유 예산과 계산/반환량·탐지",
-         "무료 누백까지 적용; ID/JWT/worker/재시작 교체로 예산 초기화 불가"],
+         ("무료 견본·본인 저장본 조회·유료 개인 분석에 적용; ID/JWT/worker/재시작 교체로 예산 초기화 불가" if spec.get("score_input_policy_contract") else "무료 누백까지 적용; ID/JWT/worker/재시작 교체로 예산 초기화 불가")],
     ])
     flow=(ticks*3+"mermaid\nflowchart LR\n"+
           '    U["학생·학부모 브라우저<br/>허용 결과만 수신"] --> P["프레젠테이션 서버<br/>세션·CSRF·중계"]\n'+
@@ -1109,7 +1166,7 @@ def validate_runtime_connection_preparation(spec):
         errors.append('DEV-009 owner or source registration drift')
     if (comp.get('factory')!='create_supabase_secured_app' or comp.get('environment_factory')!='configured_supabase_app' or comp.get('explicit_selection_required')is not True or comp.get('security_contract_ref')!='secured_backend_preparation_contract' or
         comp.get('default_factories_unchanged')is not False or comp.get('legacy_factories')!=['create_app','configured_app'] or comp.get('current_entitlement_authority')!='public.jeongsi_passes' or comp.get('opening_change_ref')!='opening_security_operations_contract' or
-        comp.get('session_format')!='jungsi.session/v1' or comp.get('existing_API_count')!=len(spec.get('operations',[])) or comp.get('API_or_DTO_additions')is not False or comp.get('local_verification_unchanged')is not True):
+        comp.get('session_format')!='jungsi.session/v1' or comp.get('existing_API_count')!=(len(LEGACY_API_IDS) if spec.get('score_input_policy_contract') else len(spec.get('operations',[]))) or comp.get('API_or_DTO_additions')is not False or comp.get('local_verification_unchanged')is not True):
         errors.append('DEV-009 explicit composition preservation drift')
     if (lineage.get('canonical_private_pointers')!=['DATA_ACTIVE_SUPABASE_v1.json','DATA_ACTIVE_CSV_v1.json'] or lineage.get('source_snapshots_preserved')is not True or
         any(lineage.get(k)is not False for k in ('historical_source_only_records_are_canonical','source_validation_is_engine_approval','source_or_archive_auto_adoption','actual_source_data_in_Git'))):
@@ -1169,7 +1226,7 @@ def live_execution_document(spec):
             '인수 영수증 필드: '+', '.join(preparation['evidence_fields'])+'. 아래 표는 준비 조건이며 실제 native/deployment 증거가 아니다.\n\n'+
             table(['operation / 계약 경로','실행 전 필요한 조건','인수 시 기대 결과'],[
                 [o['id']+' / '+o['method']+' '+o['path'],preparation['cases'][o['id']]['prerequisites'],preparation['cases'][o['id']]['expected']]
-                for o in spec['operations']]))
+                for o in spec['operations'] if o['id'] in preparation['cases']]))
     intake=c.get('bff_reply_intake')
     intake_text=''
     if intake:
@@ -1350,6 +1407,7 @@ def live_execution_document(spec):
                 ['실패 영수증 SHA-256',attempt['receipt_sha256']]])+'\n\n'+attempt['preservation_rule'])
     rows=[]
     for o in spec['operations']:
+        if o['id'] not in c['operations']:continue  # REQ-27 extension evidence is a separately validated matrix.
         state=c['operations'][o['id']]
         rows.append([o['id'],o['method']+' '+o['path'],state['code'],state['native'],state['deployment']])
     return ('\n\n## 실제 인증·22 API·배포 진행\n\n'+c['scope']+'\n\n'+c['reuse']['scope']+'\n\n'+
@@ -1787,7 +1845,7 @@ def validate_admin_fix_deployment(spec):
         any(d.get(k)is not False for k in ('auth_or_secret_or_policy_changes','operation_scope_expanded','data_or_budget_approval_changed','production_ready'))or
         any(type(d.get(k))is not int or d[k]!=0 for k in ('business_native_accepted','business_deployment_accepted'))or
         not isinstance(bindings,dict)or set(expected_bindings)!={*plan.get('source_bindings',{}),'supabase/functions/_shared/jungsi/application/usage_service.ts'}or bindings!=expected_bindings or
-        any(not isinstance(h,str)or not re.fullmatch(r'[0-9a-f]{64}',h)or indexed.get(path)!=h for path,h in bindings.items())or
+        any(not isinstance(h,str)or not re.fullmatch(r'[0-9a-f]{64}',h)or not policy_baseline_source_matches(spec,path,h,indexed) for path,h in bindings.items())or
         fix.get('implementation_candidate_commit')!=ADMIN_FIX_SOURCE_COMMIT or fix.get('deployment')!='SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED'or fix.get('actual_deployment_evidence_id')!=ref or
         not isinstance(d.get('observed_at_UTC'),str)or not d['observed_at_UTC'].strip()):return [error]
     for key in ('source_manifest','deployment_package'):
@@ -1913,7 +1971,7 @@ def _validate_observer_deployment(spec):
         d.get('remote_readback')!=bundle or any(d.get(k)is not True for k in ('editor_reload_verified','verify_jwt_remained_true','same_existing_project_and_function'))or
         any(d.get(k)is not False for k in ('auth_or_secret_or_policy_changes','operation_scope_expanded','data_or_budget_approval_changed','production_ready'))or
         any(type(d.get(k))is not int or d[k]!=0 for k in ('business_native_accepted','business_deployment_accepted'))or
-        not isinstance(bindings,dict)or bindings!=plan.get('source_bindings')or any(not isinstance(h,str)or indexed.get(p)!=h for p,h in bindings.items())or
+        not isinstance(bindings,dict)or bindings!=plan.get('source_bindings')or any(not isinstance(h,str)or not policy_baseline_source_matches(spec,p,h,indexed) for p,h in bindings.items())or
         plan.get('status')!='SOURCE_DEPLOYED_RUNTIME_ACCEPTANCE_PENDING'or plan.get('deployment_evidence_id')!=ref or plan.get('implementation_candidate_commit')!=source.get('candidate_commit')or
         not isinstance(d.get('observed_at_UTC'),str)or not d['observed_at_UTC'].strip()):return [error]
     for key in ('source_manifest','deployment_package'):
@@ -2022,12 +2080,12 @@ def validate_admin_session_identity_fix(spec):
     indexed.update({p:v['declarations']['source_sha256']for p,v in spec['edge_harness']['files'].items()})
     for key,paths in (('source_bindings',{'supabase/functions/_shared/jungsi/application/usage_service.ts'}),('test_bindings',{'tests/edge/test_usage_service.ts','tests/edge/test_runtime_budget.ts'})):
         bindings=fix.get(key)
-        if (not isinstance(bindings,dict)or set(bindings)!=paths or any(not isinstance(h,str)or not re.fullmatch(r'[0-9a-f]{64}',h)or h!=indexed.get(p)for p,h in bindings.items())):return [error]
+        if (not isinstance(bindings,dict)or set(bindings)!=paths or any(not isinstance(h,str)or not re.fullmatch(r'[0-9a-f]{64}',h)or not policy_baseline_source_matches(spec,p,h,indexed)for p,h in bindings.items())):return [error]
     proof=fix.get('synthetic_verification')
     if not isinstance(proof,dict):return [error]
     for key,expected in (('new_tests',6),('before_passed',27),('before_failed',4),('focused_passed',108),('focused_failed',0),('full_suite_expected',590)):
         if type(proof.get(key))is not int or proof[key]!=expected:return [error]
-    if (proof['full_suite_expected']!=spec['edge_harness']['unit_count']or proof.get('scope')!='LOCAL_SYNTHETIC_SESSION_AND_BUDGET_ONLY'or
+    if (proof['full_suite_expected']!=(spec['score_input_policy_contract']['verification']['baseline_edge_unit_count'] if spec.get('score_input_policy_contract') else spec['edge_harness']['unit_count'])or proof.get('scope')!='LOCAL_SYNTHETIC_SESSION_AND_BUDGET_ONLY'or
         proof.get('full_snapshot_gate_required')is not True or proof.get('deployment_or_real_user_evidence')is not False):return [error]
     for key in ('before_log_sha256','focused_log_sha256'):
         if not isinstance(proof.get(key),str)or not re.fullmatch(r'[0-9a-f]{64}',proof[key]):return [error]
@@ -2065,7 +2123,7 @@ def validate_backend_safe_observation_plan(spec):
     for key,expected in (('source_bindings',paths),('test_bindings',tests)):
         bindings=backend.get(key)
         if (not isinstance(bindings,dict)or set(bindings)!=expected or
-            any(not isinstance(value,str)or not re.fullmatch(r'[0-9a-f]{64}',value)or (not(key=='test_bindings'and pinned_history)and value!=indexed.get(path))for path,value in bindings.items())):return [error]
+            any(not isinstance(value,str)or not re.fullmatch(r'[0-9a-f]{64}',value)or (not(key=='test_bindings'and pinned_history)and not policy_baseline_source_matches(spec,path,value,indexed))for path,value in bindings.items())):return [error]
     proof=backend.get('synthetic_verification',{})
     deployed=backend.get('status')=='SOURCE_DEPLOYED_RUNTIME_ACCEPTANCE_PENDING'
     current=spec['supabase_deployment_contract']['live_execution'].get('current_deployment',{})
@@ -2108,7 +2166,7 @@ def validate_live_execution(spec):
     if (c.get('format')!='jungsi.supabase-live-execution/v1' or c.get('branch')!='feature/application-pre-data-platform' or
         not re.fullmatch(r'[0-9a-f]{40}',str(c.get('basis_commit',''))) or c.get('status')not in {'IN_PROGRESS','VERIFIED'}):
         errors.append('DEV-010 live execution basis drift')
-    states=c.get('operations',{});ids={o['id']for o in spec['operations']}
+    states=c.get('operations',{});ids=LEGACY_API_IDS if spec.get('score_input_policy_contract') else {o['id']for o in spec['operations']}
     if not isinstance(states,dict) or set(states)!=ids:return errors+['DEV-010 live operation coverage drift']
     stages=c.get('stages',{});kinds={'auth_connection':'auth','jwt_negative_checks':'jwt','owner_totp_verification':'totp','api_22_port':'native_api','native_business_transactions':'sql','existing_plan_and_quotas':'billing','edge_deployment':'edge_deployment','bff_browser_acceptance':'bff_browser','security_gates':'security'}
     if not isinstance(stages,dict)or set(stages)!=set(kinds):return errors+['DEV-010 live stage coverage drift']
@@ -2141,7 +2199,7 @@ def validate_live_execution(spec):
             for key,path in expected.items():
                 binding=bindings[key]
                 if (not isinstance(binding,dict) or binding.get('path')!=path or
-                    not isinstance(indexed.get(path),str) or binding.get('source_sha256')!=indexed.get(path)):
+                    not isinstance(indexed.get(path),str) or not policy_baseline_source_matches(spec,path,binding.get('source_sha256'),indexed)):
                     errors.append('DEV-010 runtime assembly source binding drift: '+key)
         environment=assembly.get('environment')
         expected_environment={'SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','DATABASE_URL',
@@ -2246,7 +2304,7 @@ def validate_live_execution(spec):
         review=intake.get('source_review',{})
         service=review.get('service',{})if isinstance(review,dict)else {}
         if (not isinstance(service,dict) or set(service)!={'supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts', 'supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts'} or
-            any(service[p]!=indexed.get(p)for p in service)):
+            any(not policy_baseline_source_matches(spec,p,service[p],indexed)for p in service)):
             errors.append('DEV-010 BFF service source binding drift')
         gates=intake.get('acceptance_gates')
         expected_gates={'OWNER_REGISTRATION','EDGE_READY_AUTH','API22_SCOPED','BFF_LIVE_BROWSER','SECURITY_3_GATES'}
@@ -2371,7 +2429,7 @@ def validate_live_execution(spec):
             errors.append('DEV-010 actual editor deployment requires receipt-bound evidence')
         bindings=source.get('runtime_source_bindings',{})if isinstance(source,dict)else {}
         if (not isinstance(bindings,dict) or set(bindings)!={'supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts','supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts'} or
-            any(not isinstance(v,str)or indexed.get(p)!=v for p,v in bindings.items())):
+            any(not isinstance(v,str)or not policy_baseline_source_matches(spec,p,v,indexed) for p,v in bindings.items())):
             errors.append('DEV-010 actual editor deployment source binding drift')
         if (not isinstance(current,dict) or current.get('source_fix_deployed')is not True or
             current.get('source_fix_deployment_evidence_id')!=deployment.get('evidence_id') or
@@ -2437,7 +2495,7 @@ def validate_live_execution(spec):
         if row.get('code')not in {'NOT_PORTED','FOUNDATION_ONLY','PORTED'} or any(row.get(k)not in {'NOT_RUN','PASS'}for k in ('native','deployment')):
             errors.append('DEV-010 live operation state invalid: '+operation);continue
         binding=row.get('binding');evidence_ids=row.get('evidence_ids',[])
-        if row['code']=='PORTED' and (not isinstance(binding,dict)or not isinstance(binding.get('path'),str)or indexed.get(binding.get('path'))!=binding.get('source_sha256')or binding.get('path')not in indexed):
+        if row['code']=='PORTED' and (not isinstance(binding,dict)or not isinstance(binding.get('path'),str)or not policy_baseline_source_matches(spec,binding.get('path'),binding.get('source_sha256'),indexed)or binding.get('path')not in indexed):
             errors.append('DEV-010 live implementation binding invalid: '+operation)
         if not isinstance(evidence_ids,list)or any(not isinstance(e,str)or e not in registry for e in evidence_ids):
             errors.append('DEV-010 live evidence reference invalid: '+operation);continue
@@ -2495,7 +2553,7 @@ def validate_supabase_deployment_contract(spec):
     if (p.get('allowed')!=['google_drive','supabase'] or p.get('existing_plan_only')is not True or any(p.get(k)is not False for k in ('external_hosting_allowed','additional_billable_service_allowed','plan_upgrade_allowed','paid_add_on_allowed','automatic_overage_opt_in_allowed'))):
         errors.append('DEV-010 platform or additional-cost constraint drift')
     d=spec.get('runtime_connection_preparation_contract',{}).get('deployment',{})
-    if (a.get('runtime')!='supabase_edge_typescript_deno' or a.get('python_hosted_unchanged')is not False or a.get('engine_in_browser_allowed')is not False or a.get('API_count')!=len(spec.get('operations',[])) or a.get('API_DTO_session_changes')is not False or a.get('server_timezone')!='UTC' or a.get('source_display_timezone')!='Asia/Seoul' or d.get('architecture')!='supabase_edge_functions' or d.get('hosting_contract_ref')!='supabase_deployment_contract' or d.get('python_reference_only')is not True):
+    if (a.get('runtime')!='supabase_edge_typescript_deno' or a.get('python_hosted_unchanged')is not False or a.get('engine_in_browser_allowed')is not False or a.get('API_count')!=len(spec.get('operations',[])) or a.get('API_DTO_session_changes')is not bool(spec.get('score_input_policy_contract')) or a.get('server_timezone')!='UTC' or a.get('source_display_timezone')!='Asia/Seoul' or d.get('architecture')!='supabase_edge_functions' or d.get('hosting_contract_ref')!='supabase_deployment_contract' or d.get('python_reference_only')is not True):
         errors.append('DEV-010 Edge and Python reference boundary drift')
     if (s.get('contract_ref')!='security_contract' or s.get('revision')!=spec.get('security_contract',{}).get('revision') or s.get('relay_header')!='X-Jungsi-Relay-Token' or s.get('relay_environment_name')!='JUNGSI_RELAY_TOKEN' or any(s.get(k)is not True for k in ('relay_server_only','user_Bearer_required','user_authorization_in_application_required','shared_atomic_quota_required','health_ready_relay_required')) or any(s.get(k)is not False for k in ('direct_browser_analysis_allowed','secrets_in_browser_allowed')) or s.get('health_live_path')!='/health/live' or s.get('health_ready_path')!='/health/ready' or s.get('current_entitlement_authority')!='public.jeongsi_passes'):
         errors.append('DEV-010 relay or application authorization drift')
@@ -2841,7 +2899,7 @@ def opening_security_document_body(spec):
     )
 
 
-def generated_files(spec):
+def generated_files(spec,read=None):
     digest=hashlib.sha256(json.dumps(spec,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     def doc(title,body):
         return f"# {title}\n\n이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 {spec['version']}이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.\n\n{body}\n\n<!-- jungsi:generated spec_sha256={digest} -->\n"
@@ -2860,6 +2918,8 @@ def generated_files(spec):
        "\n\n1페이지의 실제 결과 조회 네 학년도는 자료 공개 범위에 따라 별도 확정한다. 2024~2027 성적 환산 비교와 결과 공개 연도를 혼동하지 않는다. 3페이지는 검색부터 상세까지 유료 전용이며 성적이 없어도 유료 검색을 허용한다. 개인 분석이 준비되지 않으면 이유와 함께 보류한다.\n\n"+
        "## 확정 요구사항\n\n"+requirement_text+"\n\n## 이번 버전의 변경\n\n"+changes+"\n\n## 준비 상태와 후속 구현\n\n"+pending+
        runtime_progress+"\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다."+collaboration["ownership"]+collaboration["drive"])
+    if spec.get("score_input_policy_contract"):
+        runtime_intro="현재 논리 API 계약은 기존22+확장3=25개다. Edge는 REQ-27 구현 후보이며 운영 활성화 전이다. Python은 기존22 업무의 명시 legacy_synthetic 회귀 경로를 보존하고 현재 운영 모드의 새 입력/분석·신규3은 미구현 503 hold다. 기존 실제 설치·배포·P2 증거는 아래 별도 이력으로 구분한다."
     operation_rows=[[o["id"],o["method"],o["path"],rights(o["member_tiers"]),"본인" if o["report_owner"] else "해당 없음","필요" if o["confirmed_score_profile"] else "불필요",o["response_scope"]] for o in spec["operations"]]
 
     current_review_section=""
@@ -3329,6 +3389,35 @@ def generated_files(spec):
             target=spec["current_documents"][key]
             if target in files:files[target]=files[target]+edge_document_text(spec)
         files["docs/current/edge_contract.json"]=json.dumps(spec["edge_harness"],ensure_ascii=False,sort_keys=True,indent=2)+"\n"
+    if spec.get("score_input_policy_contract"):
+        reader=read or (lambda path:(ROOT/path).read_bytes())
+        schemas=json.loads(reader("src/jungsi_touch/application/public_response_schemas.json"))
+        policies=[{k:o[k] for k in ("id","method","path","member_tiers","report_owner","confirmed_score_profile","contract_ref")} for o in spec["operations"]]
+        header="/** Generated public contract fixtures; no private data/config. Regenerate from service_spec and the closed schema registry. */\n"
+        declarations='import type { ApiRoutePolicy } from "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts";\n'
+        def fixture(signature,value):
+            text=json.dumps(value,ensure_ascii=False,separators=(',',':'))
+            literal=chr(39)+text.replace(chr(92),chr(92)*2).replace(chr(39),chr(92)+chr(39)).replace(chr(0x2028),chr(92)+'u2028').replace(chr(0x2029),chr(92)+'u2029')+chr(39)
+            return signature+" {\n  return JSON.parse(\n    "+literal+",\n  );\n}\n"
+        files["tests/edge/public_api_contract_fixture.ts"]=(header+declarations+
+            fixture('export function canonicalApiPolicies(): (ApiRoutePolicy & { readonly contract_ref: string })[]',policies)+
+            fixture('export function canonicalPublicResponseSchemas(): unknown',schemas))
+        structure=[{k:v for k,v in o.items() if k!="contract_ref"} for o in policies]
+        files["tests/edge/synthetic_api_contract.ts"]=header+declarations+fixture('export function syntheticApiPolicies(): ApiRoutePolicy[]',structure)
+    followup=spec.get("service_runtime_followup")
+    if followup:
+        section=("\n\n## 기존 운영 조회의 후속 검수\n\n"+followup["status"]+". "+followup["scope"]+" "+followup["new_policy_relation"]+" 복구 상태는 "+followup.get("recovery_verification_status","NOT_RUN")+"로 구분한다.\n")
+        for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync"):
+            target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
+    policy=spec.get("score_input_policy_contract")
+    if policy:
+        section=("\n\n## REQ-27 서비스 정책 후보\n\n"+policy["source_scope"]+"\n\n기존22 API와 신규3 API를 각각 검증한 현재 계약은 총25개다. session/v1은 기존3개 공개 필드를 유지한다. 신규 경로: "+", ".join(policy["extension_operation_ids"])+".\n\n"+policy["input_rights"]["atomic_boundary"]+" "+policy["input_rights"]["partial_success"]+"\n\n개인 일일 distinct_scores/calculation_cost는 단계별 최초1회+관리자 정정1회로 대체하며 빈도·공유 동시성·요청당 물리 비용/시간·반환량·저장소 보호를 유지한다. 미설정·legacy 미전환·미승인 단계는 fail closed다.\n\n첫 유료 결과는 해당 유료 작업의 공개 숫자 결과를 기준으로 생성 출처 이용권/현재 접근 이용권을 분리한다. 본인 read/export는 저장 원결과의 미전달 근거만 복구한다. 고정 가상 견본·단순 페이지 진입·통계·관리·전부 pending은 소비로 기록하지 않는다.\n\n런타임별 상태: "+policy["runtime_matrix"]["native_edge"]+" / "+policy["runtime_matrix"]["python_fastapi"]+". 006 상태: "+policy["actual_migration_status"]+". 공개 RPC·기존 프로필 전환·신규 scope/비용·정책 활성화·배포/실계정 검수: NOT_RUN. 기존003 승인은 새006의 실행 승인이 아니다.\n")
+        for key in ("planning","routing","architecture","workflow","supabase_deployment"):
+            target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
+        for path in list(files):
+            if "개발현황_문서동기화" in path and isinstance(files[path],str):files[path]+=section
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -3386,7 +3475,7 @@ def validate_forecast_contract(spec):
 
 
 def validate_spec(spec):
-    errors=validate_sync_policy(spec) + validate_opening_security_operations(spec)
+    errors=validate_sync_policy(spec) + validate_opening_security_operations(spec) + validate_score_input_policy(spec)
     display=spec.get('official_history_db_display_contract')
     try: display_required=tuple(int(v) for v in spec.get('version','0.0.0').split('.')) >= (1,9,17)
     except (ValueError,TypeError): display_required=False
@@ -3451,14 +3540,14 @@ def validate_spec(spec):
         if "{report_id}" in row["path"] and not row["report_owner"]:errors.append("Report path missing ownership check")
         if row["id"] in {"offerings.search","offering.read"} and (row["member_tiers"]!=["paid"] or row["report_owner"] or row["confirmed_score_profile"]):
             errors.append("Paid catalog search policy drift")
-        if row["id"] in {"university.analyze","candidates.build","report.export","statistics.read","shortlist.update"} and row["member_tiers"]!=["paid"]:
+        if row["id"] in ({"university.analyze","candidates.build","statistics.read","shortlist.update"} if spec.get("score_input_policy_contract") else {"university.analyze","candidates.build","report.export","statistics.read","shortlist.update"}) and row["member_tiers"]!=["paid"]:
             errors.append("Paid personal operation policy drift")
         unknown=set(re.findall(r"\{([^}]+)\}",row["path"]))-set(spec["routing_policy"]["template_placeholders"])
         if unknown:errors.append("Unregistered API parameter")
     contract=spec.get("overall_analysis_contract")
     if contract:
         operation=next((o for o in ops if o["id"]=="overall.analyze"),None)
-        if not operation or operation["member_tiers"]!=["standard","paid"] or operation["report_owner"] or operation["confirmed_score_profile"]:
+        if not operation or operation["member_tiers"]!=(["paid"] if spec.get("score_input_policy_contract") else ["standard","paid"]) or operation["report_owner"] or operation["confirmed_score_profile"]:
             errors.append("Overall analysis access policy drift")
         if operation and operation.get('engine_service',operation.get("application_service"))!=contract["application_service"]:
             errors.append("Overall analysis service reference drift")
@@ -3620,7 +3709,7 @@ def validate_public_response_catalog(catalog,spec):
         for role,root in roots.items():
             try:
                 visit(root);actual=properties(root)
-                expected=set(dto["fields"])|(set(dto.get("paid_fields",[])) if role=="paid" else set())
+                expected=set(dto["fields"])|set(dto.get("optional_role_fields",{}).get(role,[]))|(set(dto.get("paid_fields",[])) if role=="paid" else set())
                 if actual!=expected:errors.append("DEV-008 public response schema field boundary drift")
             except (ValueError,TypeError,KeyError,RecursionError):errors.append(graph_error)
     if seen!=set(by_id):errors.append("DEV-008 public response schema operation binding drift")
@@ -3698,6 +3787,10 @@ def edge_document_text(spec):
 
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
+    migration=spec.get("score_input_policy_contract",{})
+    if migration.get("actual_migration_status")=="APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED":
+        evidence=migration.get("migration_evidence",{});sql_path=evidence.get("sql_path")
+        if sql_path not in paths or hashlib.sha256(read(sql_path)).hexdigest()!=evidence.get("sql_sha256"):errors.append("REQ-27 applied SQL bytes differ from exact native schema receipt")
     errors.extend(edge_registration_errors(paths,read,spec))
     names=set(paths)
     errors.extend(validate_catalog(paths,read,spec))
@@ -3706,7 +3799,7 @@ def validate_content(paths,read,spec):
     if transition.get('implementation_mode')=='explicit_prepared_default_unchanged':
         for path in transition.get('implementation_code_paths',[]):
             if path not in names:errors.append('Explicit prepared implementation reference absent from selected snapshot: '+path)
-    for path,expected in generated_files(spec).items():
+    for path,expected in generated_files(spec,read=read).items():
         if path not in names:errors.append("Missing generated file: "+path)
         elif read(path)!=expected:errors.append("Document or route drift: "+path)
     for path in paths:
@@ -3884,7 +3977,7 @@ def validate_snapshot_baseline(snapshot,baseline):
 def write_generated(spec):
     timestamp=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     backup=ROOT/"outputs/document_sync"/timestamp
-    for name,content in generated_files(spec).items():
+    for name,content in generated_files(spec,read=snapshot.read).items():
         target=ROOT/name
         if target.exists() and target.read_bytes()==content:continue
         if target.exists():

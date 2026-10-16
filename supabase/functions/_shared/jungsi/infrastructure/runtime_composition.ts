@@ -15,6 +15,13 @@ import type { OverallDataPort } from "../application/overall_analysis.ts";
 import { FORECAST_OPERATIONS, ForecastPolicyService } from "../application/forecast_policy.ts";
 import type { ForecastRepositoryPort } from "../application/forecast_ports.ts";
 import type { PlatformRepositoryPort } from "../application/platform_repository.ts";
+import type { PreparedUsageAdmission } from "../application/usage_service.ts";
+import { isCommittedScoreRejection } from "./score_input_postgres.ts";
+import { ScoreInputService } from "../application/score_input_service.ts";
+import { SCORE_POLICY_OPERATION_IDS } from "../application/api_dispatch.ts";
+import type { ScoreInputWorkflowPort } from "../application/score_input_ports.ts";
+import { resultObject } from "../application/paid_result_components.ts";
+import { requirePaidSession, sessionDto } from "../application/session_service.ts";
 import { ProfileReportService } from "../application/profile_reports.ts";
 import { PublicResponseProjection } from "../application/public_response.ts";
 import { REPORT_ACTION_OPERATIONS, ReportActionService } from "../application/report_actions.ts";
@@ -203,7 +210,9 @@ export class NativeRuntimeApi {
         }
         return basicValue;
       };
+      let requestSql: SupabaseSqlTransport | undefined;
       const sql = () => {
+        if (requestSql) return requestSql;
         const settings = basic().database,
           key = JSON.stringify([settings.databaseUrl, settings.databaseCa]);
         let transport = this.pools.get(key);
@@ -214,7 +223,8 @@ export class NativeRuntimeApi {
           stage = before;
           this.pools.set(key, transport);
         }
-        return transport;
+        requestSql = transport.fork();
+        return requestSql;
       };
       const relay = new RelayBoundary(this.config.environment.get("JUNGSI_RELAY_TOKEN") ?? null);
       selectedOperation = pathname === "/health/ready"
@@ -332,7 +342,33 @@ export class NativeRuntimeApi {
         resources,
         this.clock,
       );
-      const profiles = new ProfileReportService(platform, data, this.clock);
+      let scoreValue: ScoreInputService | undefined;
+      const scores = async () => {
+        if (scoreValue) return scoreValue;
+        const [repo, budget] = await Promise.all([context.scoreInputs(), context.budget()]);
+        if (!budget.policy.operating) throw new AccessError("score_input_policy_unavailable", 503);
+        scoreValue = new ScoreInputService(repo, budget.policy.operating, data, this.clock);
+        return scoreValue;
+      };
+      const workflow: ScoreInputWorkflowPort = {
+        saveProfile: async (a) => (await scores()).saveProfile(a),
+        assertProfile: async (...a) => (await scores()).assertProfile(...a),
+        reusableOverall: async (...a) => (await scores()).reusableOverall(...a),
+        analysisContext: async (...a) => (await scores()).analysisContext(...a),
+        origin: (...a) => {
+          if (!scoreValue) throw new AccessError("score_input_policy_unavailable", 503);
+          return scoreValue.origin(...a);
+        },
+        snapshotScope: async (...a) =>
+          (await context.budget()).policy.operating
+            ? (await scores()).snapshotScope(...a)
+            : { overall: false, analysisIds: [], candidates: false, legacyVerified: false },
+        deliver: async (...a) => {
+          if ((await context.budget()).policy.operating) await (await scores()).deliver(...a);
+        },
+      };
+      const mode = { mode: "rights" as const, workflow };
+      const profiles = new ProfileReportService(platform, data, this.clock, mode);
       const actions = new ReportActionService(platform, catalog, this.clock);
       const universities = new UniversityAnalysisService(
         platform,
@@ -340,9 +376,13 @@ export class NativeRuntimeApi {
         data,
         this.clock,
         forecasts,
+        mode,
       );
       const business: ApiBusinessPort = {
         execute: async (r) => {
+          if (SCORE_POLICY_OPERATION_IDS.some((id) => id === r.operation)) {
+            return await (await scores()).execute(r);
+          }
           if (CATALOG_OPERATIONS.some((id) => id === r.operation)) return await catalog.execute(r);
           if (REPORT_ACTION_OPERATIONS.some((id) => id === r.operation)) {
             return await actions.execute(r);
@@ -356,6 +396,7 @@ export class NativeRuntimeApi {
           return await profiles.execute(r);
         },
       };
+      let inputAdmission: PreparedUsageAdmission | undefined;
       const handler = createApiHandler(this.config.policies, {
         relay,
         clock: this.clock,
@@ -364,6 +405,58 @@ export class NativeRuntimeApi {
         authorities,
         resources,
         business,
+        completion: {
+          accept: async (r, work) => {
+            if (
+              ["score-profile.create", "overall.analyze", "university.analyze", "candidates.build"]
+                .includes(r.operation)
+            ) requirePaidSession(r.session, this.clock.nowUtc());
+            if (r.operation !== "score-profile.create") return await work();
+            const repo = await context.scoreInputs(), budget = await context.budget();
+            // Commit the request reservation first. The one-slot pool is released before input work.
+            inputAdmission = await phase("budget_reserve", () => budget.admit(r));
+            try {
+              return await repo.accept(r.session.user.subjectId, work, async () => {
+                sessionDto(r.session, this.clock.nowUtc());
+                await context.assertCurrent();
+                budget.assertAdmission(inputAdmission!, r);
+              });
+            } catch (error) {
+              // A committed content rejection already includes its failure settlement.
+              // Other failed frames release the existing lease after rollback, preserving request attempts.
+              if (!isCommittedScoreRejection(error)) await budget.cancelAdmission(inputAdmission);
+              throw error;
+            } finally {
+              inputAdmission = undefined;
+            }
+          },
+          current: async () => {
+            await phase("runtime_final_current", () => context.assertCurrent());
+          },
+          deliver: async (r, result, id) => {
+            if (
+              resultObject(result) &&
+              [
+                "overall.analyze",
+                "university.analyze",
+                "candidates.build",
+                "report.read",
+                "report.export",
+              ].includes(r.operation)
+            ) {
+              await workflow.deliver(
+                r.session,
+                r.operation,
+                result,
+                id,
+                r.operation === "university.analyze" && resultObject(r.body) &&
+                  Array.isArray(r.body.offering_ids)
+                  ? r.body.offering_ids as string[]
+                  : undefined,
+              );
+            }
+          },
+        },
         sessions: {
           verifyUserBearer: async (token, now) => {
             const auth = new SupabaseNativeAuth(basic().auth, this.fetcher);
@@ -378,16 +471,14 @@ export class NativeRuntimeApi {
         budget: {
           run: async (r, work) => {
             const budget = await phase("budget_initialize", () => context.budget());
-            return await budget.run(r, work, mark);
+            return inputAdmission
+              ? await budget.runAdmitted(inputAdmission, r, work, mark)
+              : await budget.run(r, work, mark);
           },
         },
       });
       const response = await handler(request);
-      if (response.ok) {
-        stage = "runtime_final_current";
-        await context.assertCurrent();
-        stage = "complete";
-      }
+      if (response.ok) stage = "complete";
       return await observeRuntimeResponse(
         this.config.observe,
         response,

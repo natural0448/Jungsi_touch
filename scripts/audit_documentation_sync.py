@@ -358,7 +358,7 @@ def delta_audit(paths, read, spec, base_paths, base_read, base_spec=None):
             errors.append("Changed source parse failure: " + path)
     required = [spec["current_documents"][k] for k in ("planning", "routing", "architecture", "workflow", "development_sync")]
     from check_project_consistency import generated_files
-    for path, expected in generated_files(spec).items():
+    for path, expected in generated_files(spec,read=read).items():
         if path not in paths or read(path) != expected:
             errors.append("Document or route drift: " + path)
     if "AGENTS.md" not in paths or AGENT_MARKER not in read("AGENTS.md"):
@@ -398,7 +398,7 @@ def main():
         errors = validate_spec(spec) + validate_catalog(snapshot.paths, snapshot.read, spec)
         if errors:
             raise ValueError("Synchronization failed: " + "; ".join(errors))
-        generated = generated_files(spec)
+        generated = generated_files(spec,read=snapshot.read)
         for relative in [SPEC_PATH, *generated]:
             target = ROOT / relative
             if not target.resolve().is_relative_to(ROOT.resolve()) or any(p.is_symlink() for p in [target, *target.parents] if p.is_relative_to(ROOT)):

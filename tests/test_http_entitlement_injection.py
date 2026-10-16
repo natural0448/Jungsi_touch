@@ -26,7 +26,7 @@ class EntitlementInjectionHTTPTests(unittest.TestCase):
     def setUp(self):
         self.clock=FrozenClock();self.repository=SyntheticRepository();self.entitlements=IndependentEntitlements(self.clock)
         self.client=TestClient(create_app(settings=ServerSettings(),repository=self.repository,data=SyntheticData(self.clock),
-                                         sessions=SyntheticSessions(self.clock),clock=self.clock,entitlements=self.entitlements))
+                                         sessions=SyntheticSessions(self.clock),clock=self.clock,entitlements=self.entitlements, operating_mode="legacy_synthetic"))
     def tearDown(self):self.client.close()
 
     def test_separate_authority_ignores_legacy_repository_paid_row(self):
@@ -67,7 +67,7 @@ class EntitlementInjectionHTTPTests(unittest.TestCase):
             def probe(self):raise RuntimeError('SYNTHETIC-private-detail')
         for port,status in ((Broken(),'unavailable'),(object(),'not_run_probe_missing')):
             with TestClient(create_app(settings=settings,repository=self.repository,data=SyntheticData(self.clock),
-                                       sessions=SyntheticSessions(self.clock),clock=self.clock,entitlements=port)) as client:
+                                       sessions=SyntheticSessions(self.clock),clock=self.clock,entitlements=port, operating_mode="legacy_synthetic")) as client:
                 response=client.get('/health/ready')
                 self.assertEqual(response.status_code,503)
                 self.assertEqual(response.json()['entitlements'],{'status':status})

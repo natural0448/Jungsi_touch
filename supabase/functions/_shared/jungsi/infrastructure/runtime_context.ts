@@ -7,6 +7,7 @@ import { RepositoryUsageReplays } from "../application/usage_service.ts";
 import { NativeDataProvider } from "./native_data_provider.ts";
 import { NativeSourceSelection } from "./native_source_selection.ts";
 import { SupabaseArtifactClient } from "./supabase_artifacts.ts";
+import { SupabaseScoreInputRepository } from "./score_input_postgres.ts";
 import { SupabasePlatformRepository } from "./platform_postgres.ts";
 import { SupabaseForecastRepository } from "./forecast_postgres.ts";
 import { SupabaseUsageBudgetStore } from "./usage_postgres.ts";
@@ -31,6 +32,7 @@ export class NativeRuntimeRequest {
   private forecastsValue?: Promise<SupabaseForecastRepository>;
   private budgetValue?: Promise<RuntimeRequestBudget>;
   private dataValue?: Promise<NativeDataProvider>;
+  private scoresValue?: Promise<SupabaseScoreInputRepository>;
   constructor(
     private readonly env: RuntimeEnvironment,
     private readonly basic: () => BasicRuntimeSettings,
@@ -102,6 +104,15 @@ export class NativeRuntimeRequest {
       );
     })();
     return this.budgetValue;
+  }
+  scoreInputs(): Promise<SupabaseScoreInputRepository> {
+    this.scoresValue ??= (async () => {
+      const [budget, platform] = await Promise.all([this.budget(), this.platform()]);
+      const policy = budget.policy.operating;
+      if (!policy) throw new AccessError("score_input_policy_unavailable", 503);
+      return new SupabaseScoreInputRepository(this.sql(), platform, policy, this.clock);
+    })();
+    return this.scoresValue;
   }
   private assertArtifactScope(raw: Uint8Array, binding: ApprovedRuntimeBinding): void {
     let selected: NativeObject;

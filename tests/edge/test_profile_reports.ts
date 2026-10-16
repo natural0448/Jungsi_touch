@@ -76,20 +76,25 @@ function fixture(
     pack = new NativeExamPack(syntheticNativePackData()),
     model = new NativeExamTotalModel(syntheticNativeModelData());
   let calls = 0, now = NOW;
-  const service = new ProfileReportService(repo, {
-    getExamPack() {
-      return syncPromise(() => {
-        calls++;
-        if (options.expireAtPack) now = NOW + 2000000n;
-        return options.missingPack ? null : pack;
-      });
+  const service = new ProfileReportService(
+    repo,
+    {
+      getExamPack() {
+        return syncPromise(() => {
+          calls++;
+          if (options.expireAtPack) now = NOW + 2000000n;
+          return options.missingPack ? null : pack;
+        });
+      },
+      getTotalModel() {
+        return syncPromise(() => {
+          return options.missingModel ? null : { model, distributionId: model.distributionId };
+        });
+      },
     },
-    getTotalModel() {
-      return syncPromise(() => {
-        return options.missingModel ? null : { model, distributionId: model.distributionId };
-      });
-    },
-  }, { nowUtc: () => now });
+    { nowUtc: () => now },
+    { mode: "legacy_synthetic" },
+  );
   return { service, repo, calls: () => calls };
 }
 async function denied(run: () => Promise<unknown>, code: string, http: number) {
