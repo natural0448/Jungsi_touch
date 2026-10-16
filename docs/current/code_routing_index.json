@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "b90af51b88c4f81e807cbc73d6a2671c4ddd17a5d30507c59bd2d0fcfb6ac0e2",
+      "source_sha256": "5029d13b544e361b05ac6f862021e146bb81442e41ff46cbdc0517bb5603ab3b",
       "symbols": [
         {
           "kind": "class",
@@ -910,6 +910,12 @@
           "kind": "function",
           "name": "validate_frontend_followup_contract.strings",
           "signature": "def strings(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_frontend_p2_reply",
+          "signature": "def validate_frontend_p2_reply(c, registry):",
           "decorators": []
         },
         {

@@ -1203,9 +1203,9 @@ def live_execution_document(spec):
     current=c.get('post_live_receipt')
     current_text=''
     if current:
-        current_text=('\n\n### 현재 화면팀 실연결 회신과 남은 검수\n\n'+current['interpretation_rule']+'\n\n'+
+        current_text=('\n\n### 최초 화면팀 실연결 회신 이력과 남은 검수\n\n'+current['interpretation_rule']+'\n\n'+
             table(['항목','화면팀 보고 / 검수 경계'],[
-                ['현재 화면 / Worker / 모드',current['frontend_source_commit']+' / '+current['worker_version']+' / '+current['mode']],
+                ['회신 당시 화면 / Worker / 모드',current['frontend_source_commit']+' / '+current['worker_version']+' / '+current['mode']],
                 ['Worker relay 등록 / 실제 Bearer 세션',current['Worker_relay_registration']+' / '+current['real_Bearer_session']],
                 ['aal1 / aal2 세션',current['session_observation']],
                 ['P1 / P3 검색',current['search_observation']],
@@ -1234,6 +1234,31 @@ def live_execution_document(spec):
             if observation:
                 deployment_text+='\n\n'+observation['scope']+' 영수증 SHA-256 '+observation['receipt_sha256']+'.'
     attempt=c.get('current_P2_attempt')
+    reply=c.get('frontend_P2_reply')
+    if reply:
+        worker=reply['reported_worker_deployment'];logging=reply['safe_observation_followup']
+        deployment_text+=('\n\n### 화면팀 P2 저장 검수 후속 회신\n\n'+reply['interpretation_rule']+'\n\n'+
+            table(['확인 범위','보고와 남은 확인'],[
+                ['회신 원문',str(reply['reply_bytes'])+' bytes / SHA-256 '+reply['reply_receipt_sha256']],
+                ['이전 Root 시도',reply['earlier_root_attempt']['scope']],
+                ['외부 Worker 배포 보고',worker['worker_version']+' / '+worker['deployed_at_UTC']+' / source SHA 미제공·미푸시'],
+                ['공개 저장소 화면 소스',worker['last_pushed_source_commit']+'; 새 Worker와 소스 결속 미확인'],
+                ['화면팀 별도 시도',reply['separate_frontend_attempt']['scope']],
+                ['오류 표시·관측 수정',logging['status']+' / source SHA 미제공; 배포·재검수 미완료'],
+                ['서버 전용 안전 관측',', '.join(logging['server_only_fields'])],
+                ['사용자 화면',', '.join(logging['user_visible_fields'])]])+'\n\n'+
+            reply['partial_success_rule']+'\n\n'+reply['storage_response_boundary']+'\n\n'+logging['rule'])
+        admin=reply.get('admin_UI_observation')
+        if admin:
+            deployment_text+='\n\n'+admin['scope']+' 영수증 SHA-256 '+admin['receipt_sha256']+'.'
+        backend=c.get('backend_safe_observation_plan')
+        if backend:
+            deployment_text+=('\n\n### 서비스 요청별 안전 관측 개선 계약\n\n'+backend['rule']+'\n\n'+
+                table(['항목','계획 계약과 인수 경계'],[
+                    ['담당',backend['branch']],
+                    ['서버 전용 허용 필드',', '.join(backend['server_only_fields'])],
+                    ['구현 / 검증 / 배포',backend['implementation']+' / '+backend['verification']+' / '+backend['deployment']],
+                    ['소스 결속','후보 SHA 미제공; 정본 완료 소스 아님']]))
     if attempt:
         deployment_text+=('\n\n### 현재 P2 단일 제출의 실패 관측\n\n'+attempt['scope']+'\n\n'+
             table(['확인 범위','현재 관측'],[
@@ -1243,7 +1268,8 @@ def live_execution_document(spec):
                 ['제출 후 새로고침 / 정확 키 제한 DB조회','0회 / 0회'],
                 ['HTTP / 안전 오류 코드 / profile·report 생성 / DB쓰기','미확정 / 미확정 / 미확정 / 미확정'],
                 ['시험·pack 실제 제출 일치',attempt['exam_pack_match']],
-                ['분석 / 재조회',attempt['step_2_analyze']+' / '+attempt['step_3_reread']],
+                ['분석 / 재조회 결과',attempt['step_2_analyze']+' / '+attempt['step_3_reread']],
+                ['분석 / 재조회 성공 인수',attempt.get('step_2_success_acceptance','NOT_RUN')+' / '+attempt.get('step_3_success_acceptance','NOT_RUN')],
                 ['실패 영수증 SHA-256',attempt['receipt_sha256']]])+'\n\n'+attempt['preservation_rule'])
     rows=[]
     for o in spec['operations']:
@@ -1253,6 +1279,91 @@ def live_execution_document(spec):
             table(['검수 단계','상태'],[[v['label'],v['status']]for v in c['stages'].values()])+'\n\n'+
             table(['operation','계약 경로','Edge 코드','실 연결 검수','배포 인수'],rows)+'\n\n'+
             c['owner_totp_rule']+'\n\n'+c['quota_rule']+'\n\n'+c['rule']+assembly_text+position_text+preparation_text+intake_text+post_text+current_text+deployment_text)
+
+
+def validate_frontend_p2_reply(c, registry):
+    """Keep an external failed submission and undeployed diagnostics below acceptance."""
+    reply=c.get('frontend_P2_reply');errors=[]
+    if not isinstance(reply,dict):return ['DEV-010 frontend P2 reply requires scoped evidence and preserved history']
+    evidence=registry.get(reply.get('evidence_id'),{})
+    history=c.get('P2_attempt_history',{});earlier=reply.get('earlier_root_attempt',{})
+    earlier=earlier if isinstance(earlier,dict)else {}
+    previous=history.get(earlier.get('evidence_id'),{})if isinstance(history,dict)else {}
+    historical_evidence=registry.get(earlier.get('evidence_id'),{})
+    historical_evidence=historical_evidence if isinstance(historical_evidence,dict)else {}
+    deployment=c.get('actual_editor_deployment',{})
+    deployment=deployment if isinstance(deployment,dict)else {}
+    attempt=c.get('current_P2_attempt',{})
+    if (reply.get('format')!='jungsi.external-frontend-p2-reply/v1' or
+        reply.get('status')!='EXTERNAL_REPORTED_FAILED_SUBMISSION_UNRESOLVED' or
+        type(reply.get('reply_bytes'))is not int or reply['reply_bytes']<=0 or
+        not re.fullmatch(r'[0-9a-f]{64}',str(reply.get('reply_receipt_sha256',''))) or
+        not isinstance(evidence,dict)or evidence.get('kind')!='bff_browser' or evidence.get('receipt_sha256')!=reply.get('reply_receipt_sha256') or
+        evidence.get('operations')!=[] or evidence.get('does_not_imply_operation_acceptance')is not True or
+        not isinstance(previous,dict)or previous.get('evidence_id')!=earlier.get('evidence_id') or
+        previous.get('receipt_sha256')!=historical_evidence.get('receipt_sha256') or
+        previous.get('same_form_idempotency_key','missing')is not None or
+        previous.get('idempotency_capture_claim_corrected')is not True or previous.get('same_placeholder_comparison_is_not_key_evidence')is not True or
+        not isinstance(attempt,dict)or attempt.get('evidence_id')!=reply.get('current_P2_attempt_evidence_id') or attempt.get('observation_basis')!='EXTERNAL_FRONTEND_REPORT' or
+        attempt.get('previous_receipt_evidence_id')!=earlier.get('evidence_id') or
+        deployment.get('historical_P2_attempt_evidence_id')!=earlier.get('evidence_id') or
+        reply.get('independently_replayed')is not False or reply.get('detailed_synthetic_scores_published')is not False):
+        errors.append('DEV-010 frontend P2 reply requires scoped evidence and preserved history')
+    if (not isinstance(previous,dict)or previous.get('status')!='ACTUAL_UI_SAVE_ATTEMPT_FAILED_UNDETAILED' or
+        any(k not in previous or previous[k]is not None for k in ('HTTP_status','safe_error_code','profile_created','report_created','DB_writes_independently_observed')) or
+        any(type(previous.get(k))is not int or previous[k]!=v for k,v in [('submit_count',1),('retry_count',0),('exact_key_DB_readback_count',0),('business_native_accepted',0),('business_deployment_accepted',0)]) or
+        previous.get('reload_after_submit')is not False or previous.get('production_ready')is not False or
+        previous.get('memory_validation_is_actual_request_result')is not False or
+        previous.get('exam_pack_match')!='NOT_INDEPENDENTLY_CONFIRMED' or
+        previous.get('idempotency_context_status')!='BROWSER_VALUE_REDACTED_NOT_CAPTURED' or
+        previous.get('step_2_analyze')!='SUCCESS_NOT_CONFIRMED' or previous.get('step_3_reread')!='NOT_RUN'):
+        errors.append('DEV-010 historical P2 attempt must preserve unknown result and no-retry boundaries')
+    worker=reply.get('reported_worker_deployment',{});separate=reply.get('separate_frontend_attempt',{})
+    if (not isinstance(worker,dict)or worker.get('source_commit','missing')is not None or
+        worker.get('source_pushed')is not False or worker.get('independent_source_binding_verified')is not False or
+        not re.fullmatch(r'[0-9a-f]{40}',str(worker.get('last_pushed_source_commit',''))) or
+        not re.fullmatch(r'[0-9a-f-]{36}',str(worker.get('worker_version',''))) or
+        worker.get('public_exam_settings')!='EXTERNAL_REPORTED_APPLIED' or worker.get('request_time_getter_fix')!='EXTERNAL_REPORTED_DEPLOYED' or
+        not isinstance(earlier,dict)or earlier.get('reported_failure_stage')!='score-profile.create' or
+        earlier.get('HTTP_status','missing')is not None or earlier.get('DB_writes_independently_observed','missing')is not None or
+        not isinstance(separate,dict)or separate.get('same_fixture_as_root_attempt')is not False or
+        separate.get('HTTP_status','missing')is not None or separate.get('stage','missing')is not None or
+        separate.get('safe_error_code','missing')is not None or separate.get('request_id','missing')is not None or
+        separate.get('idempotency_key','missing')is not None or separate.get('DB_writes_independently_observed','missing')is not None or
+        separate.get('partial_profile_possible')is not True or separate.get('overall_success')!='NOT_RUN' or separate.get('report_success')!='NOT_RUN' or
+        any(type(separate.get(k))is not int or separate[k]!=v for k,v in [('submit_count',1),('retry_count',0),('reload_count',0)])):
+        errors.append('DEV-010 external P2 report cannot certify source HTTP stage or zero writes')
+    observation=reply.get('safe_observation_followup',{})
+    if (not isinstance(observation,dict)or observation.get('status')!='PENDING_DEPLOYMENT_AND_SOURCE_SHA' or
+        observation.get('source_commit','missing')is not None or observation.get('deployed')is not False or
+        observation.get('server_only_fields')!=['stage','path','status','code','request_id'] or
+        observation.get('user_visible_fields')!=['stage','safe_error_code'] or
+        observation.get('forbidden_fields')!=['body','token','cookie','query','keys','stack'] or
+        reply.get('operation_scope_expanded')is not False or reply.get('data_or_budget_approval_changed')is not False or
+        reply.get('production_ready')is not False):
+        errors.append('DEV-010 pending P2 diagnostics must keep safe observation and approval boundaries')
+    if any(not isinstance(reply.get(k),str)or not reply[k].strip()for k in ('interpretation_rule','partial_success_rule','storage_response_boundary')):
+        errors.append('DEV-010 frontend P2 interpretation boundary missing')
+    backend=c.get('backend_safe_observation_plan')
+    if (not isinstance(backend,dict)or backend.get('format')!='jungsi.request-safe-observation-plan/v1' or
+        backend.get('branch')!='feature/application-pre-data-platform' or backend.get('status')!='CONTRACT_PREPARED_IMPLEMENTATION_PENDING' or
+        backend.get('implementation_candidate_commit','missing')is not None or
+        any(backend.get(k)!='NOT_RUN'for k in ('implementation','verification','deployment')) or
+        backend.get('server_only_fields')!=['operation','stage','path','status','code','request_id'] or
+        backend.get('forbidden_fields')!=['subject','account','scores','body','token','keys','cookie','query','stack'] or
+        any(backend.get(k)is not True for k in ('constant_stage_labels','normalized_template_path_only','safe_request_id_only','request_local_context','existing_error_DTO_preserved')) or
+        any(backend.get(k)is not False for k in ('shared_mutable_diagnostic_context','security_or_budget_relaxed','operation_scope_expanded'))):
+        errors.append('DEV-010 backend safe observation remains request-scoped pending implementation')
+    admin=reply.get('admin_UI_observation')
+    if admin is not None:
+        admin_evidence=registry.get(admin.get('evidence_id'),{})if isinstance(admin,dict)else {}
+        if (not isinstance(admin,dict)or not isinstance(admin_evidence,dict)or
+            not re.fullmatch(r'[0-9a-f]{64}',str(admin.get('receipt_sha256',''))) or admin_evidence.get('receipt_sha256')!=admin.get('receipt_sha256') or
+            admin_evidence.get('operations')!=[] or admin_evidence.get('does_not_imply_operation_acceptance')is not True or
+            admin.get('independent_API_JWT_trace')is not False or admin.get('independent_aal2_trace')is not False or
+            admin.get('earlier_standard_headline_contradicted')is not False):
+            errors.append('DEV-010 administrator UI observation cannot certify API JWT or aal2')
+    return errors
 
 
 def validate_live_execution(spec):
@@ -1562,6 +1673,7 @@ def validate_live_execution(spec):
                 errors.append('DEV-010 BFF safe error observation cannot certify HTTP status or administrator aal2')
         attempt=c.get('current_P2_attempt')
         if deployment.get('current_P2_attempt_evidence_id')is not None or attempt is not None:
+            external_reply=c.get('frontend_P2_reply')is not None
             attempt_evidence=registry.get(attempt.get('evidence_id'),{})if isinstance(attempt,dict)and isinstance(attempt.get('evidence_id'),str)else {}
             attempt_evidence=attempt_evidence if isinstance(attempt_evidence,dict)else {}
             if (not isinstance(attempt,dict) or attempt.get('status')!='ACTUAL_UI_SAVE_ATTEMPT_FAILED_UNDETAILED' or
@@ -1572,12 +1684,13 @@ def validate_live_execution(spec):
                 attempt.get('source_deployment_receipt_sha256')!=deployment.get('receipt_sha256') or
                 type(attempt.get('submit_count'))is not int or attempt['submit_count']!=1 or type(attempt.get('retry_count'))is not int or attempt['retry_count']!=0 or
                 'same_form_idempotency_key'not in attempt or attempt['same_form_idempotency_key']is not None or
-                attempt.get('idempotency_context_status')!='BROWSER_VALUE_REDACTED_NOT_CAPTURED' or
-                attempt.get('idempotency_capture_claim_corrected')is not True or attempt.get('same_placeholder_comparison_is_not_key_evidence')is not True or
+                attempt.get('idempotency_context_status')!=('NOT_COLLECTED_BY_FRONTEND'if external_reply else 'BROWSER_VALUE_REDACTED_NOT_CAPTURED') or
+                (not external_reply and (attempt.get('idempotency_capture_claim_corrected')is not True or attempt.get('same_placeholder_comparison_is_not_key_evidence')is not True)) or
                 attempt.get('reload_after_submit')is not False or type(attempt.get('exact_key_DB_readback_count'))is not int or attempt['exact_key_DB_readback_count']!=0 or
                 any(k not in attempt or attempt[k]is not None for k in ('HTTP_status','safe_error_code','profile_created','report_created','DB_writes_independently_observed')) or
                 attempt.get('exam_pack_match')!='NOT_INDEPENDENTLY_CONFIRMED' or attempt.get('memory_validation_is_actual_request_result')is not False or
-                attempt.get('step_2_analyze')!='SUCCESS_NOT_CONFIRMED' or attempt.get('step_3_reread')!='NOT_RUN' or
+                attempt.get('step_2_analyze')!='SUCCESS_NOT_CONFIRMED' or attempt.get('step_3_reread')!=('SUCCESS_NOT_CONFIRMED'if external_reply else 'NOT_RUN') or
+                (external_reply and any(attempt.get(k)!='NOT_RUN'for k in ('step_2_success_acceptance','step_3_success_acceptance'))) or
                 any(type(attempt.get(k))is not int or attempt[k]!=0 for k in ('business_native_accepted','business_deployment_accepted')) or attempt.get('production_ready')is not False or
                 any(not isinstance(attempt.get(k),str)or not attempt[k].strip()for k in ('scope','preservation_rule'))):
                 errors.append('DEV-010 current P2 failed attempt requires receipt and preserves unconfirmed stages')
@@ -1588,6 +1701,8 @@ def validate_live_execution(spec):
             any(row.get(k)!='NOT_RUN'for row in states.values()if isinstance(row,dict)for k in ('native','deployment')) or
             edge_stage.get('status')!='IN_PROGRESS' or not isinstance(edge_stage.get('evidence_ids'),list)or evidence_id not in edge_stage['evidence_ids']):
             errors.append('DEV-010 editor source update cannot certify unrun business or security acceptance')
+    if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,67) or c.get('frontend_P2_reply')is not None:
+        errors.extend(validate_frontend_p2_reply(c,registry))
     for key,row in registry.items():
         if (not isinstance(row,dict) or row.get('kind')not in set(kinds.values()) or
             not re.fullmatch(r'[0-9a-f]{40}',str(row.get('candidate_commit',''))) or

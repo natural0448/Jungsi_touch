@@ -1490,7 +1490,7 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         live=self.spec['supabase_deployment_contract']['live_execution']
         self.assertEqual(live['post_live_receipt']['P2_save_analysis_reread'],'NOT_RUN')
         self.assertIn('ACTUAL_UI_SAVE_ATTEMPT_FAILED_UNDETAILED',live_execution_document(self.spec))
-        for field,value in [('HTTP_status',422),('safe_error_code','invalid_request'),('profile_created',False),('report_created',True),('DB_writes_independently_observed',0),('retry_count',1),('memory_validation_is_actual_request_result',True)]:
+        for field,value in [('HTTP_status',422),('safe_error_code','invalid_request'),('profile_created',False),('report_created',True),('DB_writes_independently_observed',0),('retry_count',1),('memory_validation_is_actual_request_result',True),('step_2_analyze','NOT_RUN'),('step_3_reread','NOT_RUN'),('step_2_success_acceptance','PASS')]:
             with self.subTest(field=field):
                 wrong=deepcopy(self.spec)
                 wrong['supabase_deployment_contract']['live_execution']['current_P2_attempt'][field]=value
@@ -1505,12 +1505,77 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         from check_project_consistency import validate_live_execution,live_execution_document
         live=self.spec['supabase_deployment_contract']['live_execution']
         self.assertIsNone(live['current_P2_attempt']['same_form_idempotency_key'])
-        self.assertIn('BROWSER_VALUE_REDACTED_NOT_CAPTURED',live_execution_document(self.spec))
-        for field,value in [('same_form_idempotency_key',True),('idempotency_context_status','KEY_PRESERVED'),('idempotency_capture_claim_corrected',False),('same_placeholder_comparison_is_not_key_evidence',False),('reload_after_submit',True),('exact_key_DB_readback_count',1)]:
+        previous=live['P2_attempt_history'][live['current_P2_attempt']['previous_receipt_evidence_id']]
+        self.assertEqual(previous['idempotency_context_status'],'BROWSER_VALUE_REDACTED_NOT_CAPTURED')
+        self.assertIs(previous['idempotency_capture_claim_corrected'],True)
+        self.assertIn('NOT_COLLECTED_BY_FRONTEND',live_execution_document(self.spec))
+        for field,value in [('same_form_idempotency_key',True),('idempotency_context_status','KEY_PRESERVED'),('reload_after_submit',True),('exact_key_DB_readback_count',1)]:
             with self.subTest(field=field):
                 wrong=deepcopy(self.spec)
                 wrong['supabase_deployment_contract']['live_execution']['current_P2_attempt'][field]=value
                 self.assertIn('DEV-010 current P2 failed attempt requires receipt and preserves unconfirmed stages',validate_live_execution(wrong))
+
+    def test_frontend_P2_reply_preserves_previous_attempt_and_separates_unpushed_worker(self):
+        from check_project_consistency import validate_live_execution,live_execution_document
+        live=self.spec['supabase_deployment_contract']['live_execution'];reply=live['frontend_P2_reply']
+        self.assertEqual(validate_live_execution(self.spec),[])
+        self.assertNotEqual(reply['earlier_root_attempt']['evidence_id'],reply['current_P2_attempt_evidence_id'])
+        self.assertIn('PENDING_DEPLOYMENT_AND_SOURCE_SHA',live_execution_document(self.spec))
+        for field,value in [('source_commit','f'*40),('source_pushed',True),('independent_source_binding_verified',True)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['frontend_P2_reply']['reported_worker_deployment'][field]=value
+                self.assertIn('DEV-010 external P2 report cannot certify source HTTP stage or zero writes',validate_live_execution(wrong))
+
+    def test_frontend_P2_generic_failure_cannot_prove_HTTP_stage_or_zero_writes(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('HTTP_status',503),('stage','overall.analyze'),('safe_error_code','security_policy_unavailable'),('request_id','captured'),('idempotency_key','captured'),('DB_writes_independently_observed',0),('partial_profile_possible',False),('same_fixture_as_root_attempt',True),('overall_success','PASS'),('retry_count',1)]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['frontend_P2_reply']['separate_frontend_attempt'][field]=value
+                self.assertIn('DEV-010 external P2 report cannot certify source HTTP stage or zero writes',validate_live_execution(wrong))
+        wrong=deepcopy(self.spec)
+        wrong['supabase_deployment_contract']['live_execution']['frontend_P2_reply']['earlier_root_attempt']['HTTP_status']=422
+        self.assertIn('DEV-010 external P2 report cannot certify source HTTP stage or zero writes',validate_live_execution(wrong))
+
+    def test_P2_pending_diagnostics_cannot_expose_keys_or_claim_deployment(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('deployed',True),('source_commit','f'*40),('server_only_fields',['stage','path','status','code','request_id','body']),('user_visible_fields',['stage','safe_error_code','request_id']),('forbidden_fields',[])]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['frontend_P2_reply']['safe_observation_followup'][field]=value
+                self.assertIn('DEV-010 pending P2 diagnostics must keep safe observation and approval boundaries',validate_live_execution(wrong))
+
+    def test_frontend_P2_reply_cannot_drop_history_receipt_or_promote_admin_UI(self):
+        from check_project_consistency import validate_live_execution
+        for target in ('frontend_P2_reply','P2_attempt_history','reply_evidence'):
+            wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+            if target=='reply_evidence':live['evidence'].pop(live['frontend_P2_reply']['evidence_id'])
+            else:live.pop(target)
+            self.assertIn('DEV-010 frontend P2 reply requires scoped evidence and preserved history',validate_live_execution(wrong))
+        for field in ('independent_API_JWT_trace','independent_aal2_trace','earlier_standard_headline_contradicted'):
+            wrong=deepcopy(self.spec)
+            wrong['supabase_deployment_contract']['live_execution']['frontend_P2_reply']['admin_UI_observation'][field]=True
+            self.assertIn('DEV-010 administrator UI observation cannot certify API JWT or aal2',validate_live_execution(wrong))
+
+    def test_preserved_root_P2_history_cannot_gain_inferred_HTTP_or_zero_writes(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('HTTP_status',422),('safe_error_code','exam_not_available'),('profile_created',False),('report_created',False),('DB_writes_independently_observed',0),('retry_count',1),('reload_after_submit',True),('exact_key_DB_readback_count',1),('production_ready',True),('step_2_analyze','PASS')]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec);live=wrong['supabase_deployment_contract']['live_execution']
+                live['P2_attempt_history'][live['frontend_P2_reply']['earlier_root_attempt']['evidence_id']][field]=value
+                self.assertIn('DEV-010 historical P2 attempt must preserve unknown result and no-retry boundaries',validate_live_execution(wrong))
+        wrong=deepcopy(self.spec)
+        wrong['supabase_deployment_contract']['live_execution']['current_P2_attempt']['previous_receipt_evidence_id']='unrelated'
+        self.assertIn('DEV-010 frontend P2 reply requires scoped evidence and preserved history',validate_live_execution(wrong))
+
+    def test_backend_observation_plan_cannot_claim_deployment_or_share_request_context(self):
+        from check_project_consistency import validate_live_execution
+        for field,value in [('implementation','PASS'),('verification','PASS'),('deployment','PASS'),('implementation_candidate_commit','f'*40),('shared_mutable_diagnostic_context',True),('request_local_context',False),('normalized_template_path_only',False),('existing_error_DTO_preserved',False),('security_or_budget_relaxed',True),('server_only_fields',['operation','stage','path','status','code','request_id','subject'])]:
+            with self.subTest(field=field):
+                wrong=deepcopy(self.spec)
+                wrong['supabase_deployment_contract']['live_execution']['backend_safe_observation_plan'][field]=value
+                self.assertIn('DEV-010 backend safe observation remains request-scoped pending implementation',validate_live_execution(wrong))
 
     def test_scope_error_cannot_be_success_or_hide_invalid_policy(self):
         from check_project_consistency import validate_live_execution
