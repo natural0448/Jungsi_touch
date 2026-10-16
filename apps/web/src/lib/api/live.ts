@@ -33,14 +33,36 @@ class Stale extends Error {}
 
 type ErrBody = { error?: { code?: string }; request_id?: string } | null;
 
+/** 이 모듈이 부르는 경로의 고정 마디. 나머지 마디(리포트·모집단위·draft 번호)는 기록에서 ":id" 로 바꾼다 */
+const STATIC_SEGMENTS = new Set([
+  "functions", "v1", "jungsi-api", "api", "me", "admission-history", "offerings", "search", "recruitment", "forecast",
+  "forecast-drafts", "forecast-capabilities", "adjustments", "approvals", "publications", "validations",
+  "reports", "candidates", "live-statistics", "print", "shortlist", "university-results", "score-profiles", "overall-reports",
+]);
+/** 경로 → 템플릿. 쿼리·개별 식별자를 남기지 않는다 */
+export function pathTemplate(path: string): string {
+  const pathname = path.split(/[?#]/)[0];
+  return pathname.split("/").map((s) => (s === "" || STATIC_SEGMENTS.has(s) ? s : ":id")).join("/");
+}
+const SAFE_CODE = /^[a-z][a-z0-9_]{0,63}$/;
+const SAFE_REQUEST_ID = /^[0-9a-f]{32}$/;
+
 /**
- * 실패 응답의 공개 오류코드. 담당자가 서버 기록과 맞춰 볼 수 있게 경로·상태·코드·request_id 한 줄을
- * 서버 기록(wrangler tail)에 남긴다. 본문·토큰·쿼리 문자열은 남기지 않는다.
+ * 실패 응답의 공개 오류코드. 담당자가 서버 기록과 맞춰 볼 수 있게 경로 템플릿·상태·코드·request_id 한 줄을
+ * 서버 기록(wrangler tail)에 남긴다. 코드·request_id 는 형식이 맞을 때만 그대로 쓰고, 본문·토큰·쿼리·개별
+ * 식별자는 남기지 않는다. 기록이 실패해도 업무 결과는 바뀌지 않는다.
  */
-async function codeOf(res: Response) {
+async function codeOf(res: Response, path: string) {
   const err = (await res.json().catch(() => null)) as ErrBody;
-  const code = err?.error?.code;
-  console.warn(`[jungsi-api] ${new URL(res.url || "http://x/").pathname} ${res.status} ${code ?? "-"} request_id=${err?.request_id ?? "-"}`);
+  const raw = err?.error?.code;
+  const code = typeof raw === "string" && SAFE_CODE.test(raw) ? raw : undefined;
+  try {
+    const rid = typeof err?.request_id === "string" && SAFE_REQUEST_ID.test(err.request_id) ? err.request_id : "-";
+    const status = Number.isInteger(res.status) ? res.status : 0;
+    console.warn(`[jungsi-api] ${pathTemplate(path)} ${status} ${code ?? (raw === undefined ? "-" : "invalid_code")} request_id=${rid}`);
+  } catch {
+    // 기록 실패는 무시한다
+  }
   return code;
 }
 
@@ -72,16 +94,16 @@ function retryAfterAt(header: string | null): Date | null {
 }
 
 /** 401·403·429·503 은 공통으로 올린다. 나머지는 호출한 쪽이 판단한다 */
-async function guard(res: Response) {
+async function guard(res: Response, path: string) {
   if (res.status === 401 || res.status === 403) {
-    const code = await codeOf(res);
+    const code = await codeOf(res, path);
     throw new AccessDenied(res.status, code ?? (res.status === 401 ? "authentication_required" : "paid_required"));
   }
   // 429(요청 제한, SEC-07): 코드와 Retry-After 만 받아 안내한다. 성공으로 숨기지 않는다
   if (res.status === 429) {
-    throw new ConnectionError("rate_limited", (await codeOf(res)) ?? "rate_limit_exceeded", retryAfterAt(res.headers.get("Retry-After")));
+    throw new ConnectionError("rate_limited", (await codeOf(res, path)) ?? "rate_limit_exceeded", retryAfterAt(res.headers.get("Retry-After")));
   }
-  if (res.status === 503) throw new ConnectionError("unavailable", (await codeOf(res)) ?? "backend_dependency_unavailable");
+  if (res.status === 503) throw new ConnectionError("unavailable", (await codeOf(res, path)) ?? "backend_dependency_unavailable");
 }
 
 function auth(caller: Caller, extra?: Record<string, string>) {
@@ -96,18 +118,25 @@ function auth(caller: Caller, extra?: Record<string, string>) {
 
 async function call<T>(caller: Caller, path: string): Promise<T> {
   const res = await send(path, { headers: auth(caller) });
-  await guard(res);
-  if (res.status === 404) throw new NotFound(path);
-  if (res.status === 409) throw new Stale(path);
-  if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res)) ?? ""}: ${path}`);
+  await guard(res, path);
+  // 404·409 도 기록만 남기고 뜻은 그대로(없음 / 버전 바뀜). 예외 문장에도 쿼리·식별자 없는 템플릿만 쓴다
+  if (res.status === 404) {
+    await codeOf(res, path);
+    throw new NotFound(pathTemplate(path));
+  }
+  if (res.status === 409) {
+    await codeOf(res, path);
+    throw new Stale(pathTemplate(path));
+  }
+  if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res, path)) ?? ""}: ${pathTemplate(path)}`);
   return (await res.json()) as T;
 }
 
 /** POST/PUT 은 Idempotency-Key 가 필수. 같은 키의 재시도는 처음 결과를 돌려받는다 */
 async function write<T>(caller: Caller, method: "POST" | "PUT", path: string, body: unknown, key: string): Promise<Result<T>> {
   const res = await send(path, { method, headers: auth(caller, { "Content-Type": "application/json", "Idempotency-Key": key }), body: JSON.stringify(body) });
-  await guard(res);
-  if (!res.ok) return { ok: false, code: (await codeOf(res)) ?? "request_failed", status: res.status };
+  await guard(res, path);
+  if (!res.ok) return { ok: false, code: (await codeOf(res, path)) ?? "request_failed", status: res.status };
   return { ok: true, value: (await res.json()) as T };
 }
 

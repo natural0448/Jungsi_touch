@@ -57,6 +57,7 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
   const openReview = () => {
     const f = formRef.current;
     if (!f) return;
+    sentRef.current = false;
     const v = (k: string) => String((f.elements.namedItem(k) as HTMLInputElement | HTMLSelectElement | null)?.value ?? "").trim();
     const n = (k: string) => (v(k) === "" ? NaN : Number(v(k)));
     let problem: string | null = null;
@@ -78,7 +79,13 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
     });
     dialogRef.current?.showModal();
   };
+  // '이대로 저장'을 눌렀을 때만 확인 표지를 채워 보낸다. 연달아 눌러도 한 번만 제출한다
+  const confirmRef = useRef<HTMLInputElement>(null);
+  const sentRef = useRef(false);
   const confirmSave = () => {
+    if (sentRef.current || pending) return;
+    sentRef.current = true;
+    if (confirmRef.current) confirmRef.current.value = "on";
     dialogRef.current?.close();
     formRef.current?.requestSubmit();
   };
@@ -229,7 +236,7 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
       )}
 
       {/* 확인 창에서 '이대로 저장'을 눌러 제출된 것만 서버가 받는다(actions.ts 의 confirm 검사) */}
-      <input type="hidden" name="confirm" value="on" />
+      <input ref={confirmRef} type="hidden" name="confirm" defaultValue="" />
       <div className="sf-foot">
         <p className="sf-confirm-note">저장하기 전에 넣은 점수를 한 번 더 보여 드립니다.</p>
         <div className="sf-acts">
@@ -261,11 +268,11 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
               </>
             )}
             <div className="sf-dialog-acts">
-              <button type="button" className="btn t" onClick={() => dialogRef.current?.close()}>
+              <button type="button" className="btn t" onClick={() => dialogRef.current?.close()} autoFocus>
                 {review.problem ? "돌아가서 고치기" : "다시 확인하기"}
               </button>
               {!review.problem && (
-                <button type="button" className="btn p" onClick={confirmSave} autoFocus>
+                <button type="button" className="btn p" onClick={confirmSave}>
                   이대로 저장
                 </button>
               )}

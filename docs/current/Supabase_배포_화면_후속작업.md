@@ -588,4 +588,4 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=42b7aaff901dc68c54b0a29b749d6cdafd3ca56142eff04e9c45c2fc10c4b14d -->
+<!-- jungsi:generated spec_sha256=517062ac2d3746f4096de9396d1541a983e1c5da04e3bfd183658db294f58bc5 -->

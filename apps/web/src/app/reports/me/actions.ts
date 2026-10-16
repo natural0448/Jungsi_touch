@@ -28,6 +28,10 @@ const MESSAGE: Record<string, string> = {
   report_not_found: "리포트를 찾지 못했습니다. 성적을 새로 입력해 주세요.",
 };
 
+/** 성적 저장 뒤 전체 분석 단계에서 멈췄을 때. 공개 오류코드만 붙인다 */
+const partial = (code: string) =>
+  `성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 이 화면을 다시 열어 주세요. (전체 분석 단계 · 사유 코드 ${code})`;
+
 const int = (fd: FormData, k: string) => {
   const v = String(fd.get(k) ?? "").trim();
   return v === "" ? undefined : Number(v);
@@ -54,7 +58,7 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
   const ks = int(fd, "korean"), ms = int(fd, "math"), i1 = int(fd, "inq1_score"), i2 = int(fd, "inq2_score");
   const s1 = String(fd.get("inq1") ?? ""), s2 = String(fd.get("inq2") ?? "");
   if ([ks, ms, i1, i2].some((v) => v === undefined || Number.isNaN(v)) || !s1 || !s2) return fail("국어·수학·탐구 두 과목의 표준점수를 모두 넣어 주세요.");
-  if (fd.get("confirm") !== "on") return fail("입력한 성적이 성적표와 같은지 확인하고 체크해 주세요.", "confirm");
+  if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 입력값을 확인하고 '이대로 저장'을 눌러 주세요.", "confirm");
 
   const scores: ScoresInput = {
     exam_id: EXAM.exam_id,
@@ -82,9 +86,12 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
     if (!profile.ok) return fail(MESSAGE[profile.code] ?? `저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요. (사유 코드 ${profile.code})`);
     step = "전체 분석";
     const report = await src.analyzeOverall(caller, { profile_id: profile.value.profile_id, ...(reportId ? { report_id: reportId, expected_version: version } : {}) }, `${key}:report`);
-    if (!report.ok) return fail(MESSAGE[report.code] ?? `성적은 저장했지만 리포트를 만들지 못했습니다. 잠시 뒤 다시 시도해 주세요. (사유 코드 ${report.code})`);
+    if (!report.ok) return fail(partial(report.code));
     await setReportId(report.value.report_id);
   } catch (e) {
+    // 성적은 저장됐고 분석만 못 한 경우: 어떤 실패든 같은 부분 성공 안내. 성적을 다시 저장하라고 하지 않는다
+    // (다시 저장하면 새 성적 기록이 생기고 하루 한도를 쓴다). 자동 재시도·새 키도 만들지 않는다
+    if (step === "전체 분석" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(partial(e.code));
     if (e instanceof AccessDenied) return fail("로그인이 필요합니다. 다시 로그인한 뒤 저장해 주세요.");
     if (e instanceof ConnectionError)
       return fail(
