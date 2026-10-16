@@ -9,10 +9,15 @@ import { seoulTime } from "@/lib/format";
  */
 export function ConnectionNotice({ e }: { e: ConnectionError }) {
   const missing = e.kind === "unconfigured" ? missingConfig() : [];
-  const heading =
-    e.kind === "unconfigured" ? "정시터치 서버 연결 설정을 기다리고 있습니다" : e.kind === "rate_limited" ? "요청이 많아 잠시 제한되었습니다" : "정시터치 서버에 잠시 연결할 수 없습니다";
-  const body =
-    e.kind === "unconfigured"
+  // 서버가 이 기능의 자료를 아직 승인·연결하지 않았다(503 operation_scope_not_approved). 장애나 이용권 문제가 아니다.
+  // 이 코드만 따로 안내하고 다른 503(security_policy_unavailable 등)은 아래 일반 문구 그대로 둔다
+  const pendingScope = e.code === "operation_scope_not_approved";
+  const heading = pendingScope
+    ? "이 화면의 자료를 연결하고 있습니다"
+    : e.kind === "unconfigured" ? "정시터치 서버 연결 설정을 기다리고 있습니다" : e.kind === "rate_limited" ? "요청이 많아 잠시 제한되었습니다" : "정시터치 서버에 잠시 연결할 수 없습니다";
+  const body = pendingScope
+    ? "대학 입시결과·모집단위 검색 자료가 아직 서비스에 연결되지 않았습니다. 연결이 끝나면 이 화면에서 바로 보여 드립니다. 이용권이 있어도 연결 전까지는 같은 안내가 나오며, 지원 가능 여부를 뜻하지 않습니다."
+    : e.kind === "unconfigured"
       ? "이 화면이 쓸 서비스 연결이 아직 설정되지 않았습니다. 설정이 끝나면 결과를 보여 드립니다."
       : e.kind === "rate_limited"
         ? e.retryAt

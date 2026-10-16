@@ -25,6 +25,10 @@
     // 주소에는 /api/v1 을 붙이지 않는다(live.ts 가 붙인다). relay 는 워커 Secret JUNGSI_RELAY_TOKEN(소유자 등록).
     "JUNGSI_API_MODE": "live",
     "JUNGSI_API_URL": "https://ksrpnhvyfdwysrexdhrd.supabase.co/functions/v1/jungsi-api",
+    // 성적 입력 시험 식별자(비밀값 아님). 없으면 lib/exam.ts 가 합성 토큰을 보내 서버가 저장을 거절한다(2026-10-16 실측).
+    // 승인 binding·시험팩의 값과 같아야 한다. 시험이 바뀌면 담당자가 알려 준 값으로 함께 바꾼다
+    "JUNGSI_EXAM_ID": "2027-september-mock",
+    "JUNGSI_PACK_VERSION": "20260930.v1",
     // 2026-10-13 사용자 결정: 오픈 전에는 에듀터치 관리자와 허용 명단(JEONGSI_PREVIEW_EMAILS, wrangler secret)만
     // 들어온다(src/proxy.ts). Supabase 두 공개값은 빌드 때 .env.production(Git 제외)으로 넣는다. 오픈 때 지운다.
     "JEONGSI_ACCESS_GATE": "preview"

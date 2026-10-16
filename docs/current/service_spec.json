@@ -16140,6 +16140,15 @@
         "REQ-02"
       ],
       "summary": "BFF live 전환(JUNGSI_API_MODE=live, JUNGSI_API_URL=jungsi-api, 오픈 전 관문 유지). 첫 정문 검수에서 정시터치 proxy 의 토큰 갱신이 미리 불러오기와 겹쳐 Supabase /token 429 → 세션 쿠키 삭제로 에듀터치 로그인이 풀려, 정시터치는 로그인 쿠키를 읽기만 하도록 변경(refresh 요청 차단·쿠키 쓰기 없음). 갱신은 쿠키 주인인 에듀터치 proxy 가 넘기기 전에 한다. 서버 판정·권한 변경 없음."
+    },
+    {
+      "date": "2026-10-16",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-12"
+      ],
+      "summary": "운영 워커에 공개 시험 식별자 JUNGSI_EXAM_ID=2027-september-mock·JUNGSI_PACK_VERSION=20260930.v1 적용(없으면 합성 토큰이 전송돼 score-profile.create 거절). EXAM 은 요청 시점에 읽음. P2 저장 실패 문구에 멈춘 단계(성적 저장/전체 분석)와 공개 오류코드 표시, 실패 응답마다 서버 기록에 경로·status·code·request_id 한 줄(본문·토큰·쿼리 제외). 503 operation_scope_not_approved 는 '이 화면의 자료를 연결하고 있습니다' 로 따로 안내하고 다른 503 은 기존 문구 유지. 서버 판정·권한 변경 없음."
     }
   ],
   "overall_analysis_contract": {

@@ -6,9 +6,14 @@
 */
 
 export const EXAM = {
-  // 합성 응답용 토큰. 실제 연결 때 서버가 알려 준 값으로 바꾼다
-  exam_id: process.env.JUNGSI_EXAM_ID ?? "SYNTHETIC-2027-09-mock",
-  pack_version: process.env.JUNGSI_PACK_VERSION ?? "SYNTHETIC-pack-v1",
+  // 합성 응답용 토큰이 기본값. 운영은 wrangler.jsonc vars 의 승인 식별자를 쓴다.
+  // 워커는 요청 때 환경값을 채우므로 모듈을 불러올 때가 아니라 쓸 때 읽는다
+  get exam_id() {
+    return process.env.JUNGSI_EXAM_ID ?? "SYNTHETIC-2027-09-mock";
+  },
+  get pack_version() {
+    return process.env.JUNGSI_PACK_VERSION ?? "SYNTHETIC-pack-v1";
+  },
   label: "2027학년도 9월 모의평가",
 } as const;
 

@@ -72,11 +72,15 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
 
   const caller = await getCaller();
   const src = source();
+  // 어느 단계에서 멈췄는지(성적 저장 / 전체 분석). 성적만 저장된 부분 성공을 구분하려고 문구에 붙인다
+  let step = "성적 저장";
   try {
     const profile = await src.createScoreProfile(caller, scores, true, `${key}:profile`);
-    if (!profile.ok) return fail(MESSAGE[profile.code] ?? "저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요.");
+    // 문장이 없는 코드는 사유 코드를 같이 보여 준다 — 담당자가 서버 기록과 맞춰 볼 수 있게
+    if (!profile.ok) return fail(MESSAGE[profile.code] ?? `저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요. (사유 코드 ${profile.code})`);
+    step = "전체 분석";
     const report = await src.analyzeOverall(caller, { profile_id: profile.value.profile_id, ...(reportId ? { report_id: reportId, expected_version: version } : {}) }, `${key}:report`);
-    if (!report.ok) return fail(MESSAGE[report.code] ?? "리포트를 만들지 못했습니다. 잠시 뒤 다시 시도해 주세요.");
+    if (!report.ok) return fail(MESSAGE[report.code] ?? `성적은 저장했지만 리포트를 만들지 못했습니다. 잠시 뒤 다시 시도해 주세요. (사유 코드 ${report.code})`);
     await setReportId(report.value.report_id);
   } catch (e) {
     if (e instanceof AccessDenied) return fail("로그인이 필요합니다. 다시 로그인한 뒤 저장해 주세요.");
@@ -86,7 +90,7 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
           ? e.retryAt
             ? `요청이 많아 잠시 제한되었습니다. ${seoulTime(e.retryAt.toISOString())} 이후 다시 저장해 주세요. 입력한 값은 그대로 남아 있습니다.`
             : "요청이 많아 잠시 제한되었습니다. 잠시 뒤 다시 저장해 주세요. 입력한 값은 그대로 남아 있습니다."
-          : "정시터치 서버에 연결할 수 없어 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요.",
+          : `정시터치 서버에 연결할 수 없어 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요. (${step} 단계 · 사유 코드 ${e.code})`,
       );
     throw e;
   }

@@ -31,8 +31,18 @@ class NotFound extends Error {}
 /** 409: 자료·정책·카탈로그 버전이 바뀌었다. 조회 화면에서는 '없음'으로 받고 다른 근거와 합치지 않는다 */
 class Stale extends Error {}
 
-type ErrBody = { error?: { code?: string } } | null;
-const codeOf = async (res: Response) => ((await res.json().catch(() => null)) as ErrBody)?.error?.code;
+type ErrBody = { error?: { code?: string }; request_id?: string } | null;
+
+/**
+ * 실패 응답의 공개 오류코드. 담당자가 서버 기록과 맞춰 볼 수 있게 경로·상태·코드·request_id 한 줄을
+ * 서버 기록(wrangler tail)에 남긴다. 본문·토큰·쿼리 문자열은 남기지 않는다.
+ */
+async function codeOf(res: Response) {
+  const err = (await res.json().catch(() => null)) as ErrBody;
+  const code = err?.error?.code;
+  console.warn(`[jungsi-api] ${new URL(res.url || "http://x/").pathname} ${res.status} ${code ?? "-"} request_id=${err?.request_id ?? "-"}`);
+  return code;
+}
 
 async function send(path: string, init: RequestInit): Promise<Response> {
   try {
