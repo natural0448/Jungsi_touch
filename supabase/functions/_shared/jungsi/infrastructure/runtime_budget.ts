@@ -299,27 +299,99 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
     });
   }
 }
+export const RUNTIME_BUDGET_STAGES = [
+  "budget_current",
+  "budget_plan",
+  "budget_replay",
+  "budget_reserve",
+  "budget_business",
+  "budget_business_current",
+  "budget_settle_success",
+  "budget_settle_failure",
+  "budget_final_current",
+] as const;
+export type RuntimeBudgetStage = typeof RUNTIME_BUDGET_STAGES[number];
+function ignoreStageCompletion(value: unknown): void {
+  try {
+    if (value && typeof (value as PromiseLike<unknown>).then === "function") {
+      void Promise.resolve(value).catch(() => {});
+    }
+  } catch { /* A phase observer never controls business execution. */ }
+}
 export class RuntimeRequestBudget implements RequestBudgetPort {
   private readonly shared: SharedRequestBudget;
   constructor(
     readonly policy: RuntimeUsagePolicy,
-    store: UsageBudgetStorePort,
-    clock: RequestClockPort,
-    replays: UsageReplayVerificationPort,
+    private readonly store: UsageBudgetStorePort,
+    private readonly clock: RequestClockPort,
+    private readonly replays: UsageReplayVerificationPort,
     private readonly controls: SupabaseRuntimeControls,
   ) {
     this.shared = new SharedRequestBudget(policy, store, clock, replays);
   }
-  async run<T>(request: BudgetRequest, work: () => Promise<T>): Promise<T> {
+  async run<T>(
+    request: BudgetRequest,
+    work: () => Promise<T>,
+    onStage?: (stage: RuntimeBudgetStage) => void | (() => void),
+  ): Promise<T> {
+    const stage = (value: RuntimeBudgetStage) => {
+      try {
+        const restore = onStage?.(value);
+        ignoreStageCompletion(restore);
+        return () => {
+          try {
+            if (typeof restore === "function") ignoreStageCompletion(restore());
+          } catch { /* A failed observer restore cannot affect settlement or work. */ }
+        };
+      } catch {
+        return () => {};
+      }
+    };
+    const shared = onStage
+      ? new SharedRequestBudget(
+        {
+          prepare: (r) => {
+            stage("budget_plan");
+            return this.policy.prepare(r);
+          },
+        },
+        {
+          reserve: (r) => {
+            stage("budget_reserve");
+            return this.store.reserve(r);
+          },
+          settle: async (lease, outcome, usage) => {
+            const restore = stage(
+              outcome === "success" ? "budget_settle_success" : "budget_settle_failure",
+            );
+            await this.store.settle(lease, outcome, usage);
+            // Successful failure cleanup must not hide the original failing phase.
+            if (outcome === "failure") restore();
+          },
+        },
+        this.clock,
+        {
+          exists: (r) => {
+            stage("budget_replay");
+            return this.replays.exists(r);
+          },
+        },
+      )
+      : this.shared;
+    stage("budget_current");
     await this.controls.current();
     this.policy.assertLive();
-    const result = await this.shared.run(request, async () => {
+    const result = await shared.run(request, async () => {
+      stage("budget_business_current");
       await this.controls.current();
+      stage("budget_business");
       const value = await work();
+      stage("budget_business_current");
       await this.controls.current();
       this.policy.assertLive();
       return value;
     });
+    stage("budget_final_current");
     await this.controls.current();
     this.policy.assertLive();
     return result;

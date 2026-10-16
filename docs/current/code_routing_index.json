@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "5029d13b544e361b05ac6f862021e146bb81442e41ff46cbdc0517bb5603ab3b",
+      "source_sha256": "d18bb4b4b7792504396224e35ff4db922c62c7c54e3a08959eae4b6340b9e4bf",
       "symbols": [
         {
           "kind": "class",
@@ -880,6 +880,12 @@
           "kind": "function",
           "name": "table.cell",
           "signature": "def cell(v):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_backend_safe_observation_plan",
+          "signature": "def validate_backend_safe_observation_plan(spec):",
           "decorators": []
         },
         {
@@ -7442,10 +7448,12 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "871c19de5ce95839e92602713ec0ff626f09b42d8e9bf44ff2ff466d9f2db92d",
+        "source_sha256": "1a46ee4dbf2ca40c4544ec0d3792d52e7e489856639876316fad56e7e267ec7b",
         "declared_exports": [
           "ApiHttpPorts",
-          "createApiHandler"
+          "createApiHandler",
+          "API_REQUEST_STAGES",
+          "ApiRequestStage"
         ]
       },
       {
@@ -7778,11 +7786,13 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "b5808374392152daeb03989ce3fab86e522affef938d9d3988b400f91d7f94ac",
+        "source_sha256": "cac4771eb472199188d797a04e32eefc95ac3f42317c5860251e514e0e61ccca",
         "declared_exports": [
           "RuntimeExamBudget",
           "RuntimeUsagePolicy",
-          "RuntimeRequestBudget"
+          "RuntimeRequestBudget",
+          "RUNTIME_BUDGET_STAGES",
+          "RuntimeBudgetStage"
         ]
       },
       {
@@ -7816,11 +7826,13 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "4973420c1d86ac26f69efa5417d71314a84348d283f398f502e9b2e344847e61",
+        "source_sha256": "b757ad470d5a3d9cb44b8ad08203ca7d42359dd2657d9d91581674c639e6f557",
         "declared_exports": [
           "RuntimeRoutePolicy",
           "RuntimeComposition",
-          "NativeRuntimeApi"
+          "NativeRuntimeApi",
+          "SafeRuntimeObservation",
+          "observeRuntimeResponse"
         ]
       },
       {
@@ -8368,7 +8380,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "8bd1e57f682b0dc03e3335bb86c4f30bf93eda08d053de0e608aa1e30892525d",
+        "source_sha256": "ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2",
         "declared_exports": []
       },
       {

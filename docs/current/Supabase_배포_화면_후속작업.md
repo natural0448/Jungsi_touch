@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.67이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.68이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -163,8 +163,8 @@ Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제
 
 | 소스 진입점 | 경로 | SHA-256 |
 | --- | --- | --- |
-| native_entry | supabase/functions/jungsi-api/index.ts | 8bd1e57f682b0dc03e3335bb86c4f30bf93eda08d053de0e608aa1e30892525d |
-| composition | supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts | 4973420c1d86ac26f69efa5417d71314a84348d283f398f502e9b2e344847e61 |
+| native_entry | supabase/functions/jungsi-api/index.ts | ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2 |
+| composition | supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts | b757ad470d5a3d9cb44b8ad08203ca7d42359dd2657d9d91581674c639e6f557 |
 
 | 서버 설정 이름 | 허용된 기존 이름 | 현재 상태 | 입력의 의미 |
 | --- | --- | --- | --- |
@@ -377,14 +377,30 @@ score-profile.create도 DB COMMIT 이후의 세션·응답 projection·현재 �
 
 ### 서비스 요청별 안전 관측 개선 계약
 
-서비스 개발팀은 기존 feature에서 요청별 operation·정해진 상수 stage·정규화한 정적 경로 template·HTTP status·안전 code·request_id만 서버 전용으로 기록하는 개선을 준비한다. subject·계정·성적·body·토큰·키·쿠키·query·stack은 금지하고 동시 요청의 관측 문맥을 공유 가변 상태로 섞지 않는다. 기존 오류 DTO·인증·보안·예산 한도와 승인 범위를 유지한다. 이번 변경은 계획 계약이며 코드 구현·검증·배포와 동시성 인수는 미완료다. 미제공 후보 SHA를 정본 완료 소스로 세지 않으며 외부 화면팀 §4 UI·logging 수정의 별도 배포 대기를 해제하지 않는다. 후속 개발 PR이 runtime_context.ts를 수정하면 실제 설치 cb500f7의 원본 영수증·소스 결속과 미배포 후보 결속을 별도로 보존하는 공통 검사 보완을 검토한다. 실제 설치 기록을 미래 후보로 덮지 않으며 현재1.9.67의 설치 소스·색인 해시 일치 검사는 완화하지 않는다.
+기존 feature의 관측 후보 소스4개·테스트2개를 현재 선언/코드 색인 해시로 결속했다. 요청별 operation·상수 stage·HTTP status·정규화한 공개 code·안전한 request_id 다섯 필드만 기존 서버 console에 기록한다. 실제 path·query·headers·성적·body·subject·owner·계정·키·쿠키·예외 원문/stack은 기록하지 않는다. 실패 응답과 201 생성 응답만 관측하고 정상 GET과 응답 본문은 추가 수집하지 않는다. 관측 실패는 기존 응답과 업무 실행 횟수를 바꾸지 않으며 동시 요청의 문맥을 공유하지 않는다. 기존 오류 DTO·인증·예산·승인 scope를 유지한다. 집중 합성41개 통과와 신규16개는 실제 JWT·DB·배포·실업무 성공 근거가 아니다. 정상 전체 스냅샷·훅·정확 SHA CI를 별도로 요구하고 후속 패키지에서 정확한 후보 HEAD를 결속한다. 실제 설치 cb500f7 원본 영수증과 auth_relay.ts/runtime_context.ts의 두 해시 검사는 보존한다. 새 후보는 미배포이며 외부 화면팀 관측 수정의 별도 배포 대기와 0/22 인수 상태를 유지한다.
 
 | 항목 | 계획 계약과 인수 경계 |
 | --- | --- |
 | 담당 | feature/application-pre-data-platform |
-| 서버 전용 허용 필드 | operation, stage, path, status, code, request_id |
-| 구현 / 검증 / 배포 | NOT_RUN / NOT_RUN / NOT_RUN |
-| 소스 결속 | 후보 SHA 미제공; 정본 완료 소스 아님 |
+| 서버 전용 허용 필드 | operation, stage, status, code, request_id |
+| 구현 / 검증 / 배포 | SOURCE_IMPLEMENTED / SYNTHETIC_FOCUSED_PASS / NOT_RUN |
+| 소스 결속 | 현재 색인·선언 해시와 소스4개·테스트2개 결속; 자신의 커밋 SHA는 후속 패키지에서 고정 |
+
+| 합성 후보 검증 | 범위와 결과 |
+| --- | --- |
+| 집중 검사 | 41 PASS / 0 FAIL; 신규 16개 |
+| 전체 스냅샷 검사 | 584개 실행을 정상 훅·정확 SHA CI에서 별도로 요구 |
+| 집중 로그 SHA-256 | 39ed3638e3494f66c8ec916f5627352251feece05163b38bcd8c48da315d073d |
+| 실제 업무 / 배포 인수 | 0/22 / 0/22; 관측 후보 미배포·실사용자 미검수 |
+
+| 후보 파일 | 현재 소스 SHA-256 |
+| --- | --- |
+| supabase/functions/_shared/jungsi/infrastructure/api_http.ts | 1a46ee4dbf2ca40c4544ec0d3792d52e7e489856639876316fad56e7e267ec7b |
+| supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts | cac4771eb472199188d797a04e32eefc95ac3f42317c5860251e514e0e61ccca |
+| supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts | b757ad470d5a3d9cb44b8ad08203ca7d42359dd2657d9d91581674c639e6f557 |
+| supabase/functions/jungsi-api/index.ts | ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2 |
+| tests/edge/test_runtime_composition.ts | 40670cf3423dca5f0d4718dcfda79ff387d181fae5b3f1c13f14b8ac43dabed6 |
+| tests/edge/test_runtime_budget.ts | d819a63a5a0ca79810733d035d1606e3b567edbced771ed31f98f56c565732a0 |
 
 ### 현재 P2 단일 제출의 실패 관측
 
@@ -446,4 +462,4 @@ score-profile.create도 DB COMMIT 이후의 세션·응답 projection·현재 �
 
 
 
-<!-- jungsi:generated spec_sha256=8d67e5da6c9b406a509220ffc78cafc8137b032e9783e9d997713bbce808a9bb -->
+<!-- jungsi:generated spec_sha256=b75f607c2cd34b5c21129e4109fc0d86f0db48726827265ee24a66fab54e4351 -->
