@@ -790,3 +790,43 @@ Deno.test("current recruitment keeps conditional text and literal state through 
   equal(recruitment.initial_count, null);
   equal(recruitment.final_count, null);
 });
+
+Deno.test("current unrepresentable value or scale is held per observation through the strict DTO", async () => {
+  const projection = new PublicResponseProjection(
+    currentPublicResponseSchemas(schemas),
+    routeCatalog.operations,
+  );
+  for (const literal of ["1e400", "-1e400", null]) {
+    const r = row();
+    r.row.curation_fields = {
+      qualification_status: "verified_official",
+      metric_definition: "SYNTHETIC-DEFINITION",
+      unit: "SYNTHETIC-UNIT",
+      source_url: "https://admission.synthetic.example/notice",
+      source_as_of: "2026-10-18",
+      original_scale: literal === null ? new JsonFloat("1e400") : null,
+    };
+    if (literal !== null) {
+      r.row.metric_value_literal = literal;
+      r.row.metric_value_numeric = literal;
+      r.row.metric_value_json_type = "decimal";
+    }
+    const response = await fixture([r]).service.execute(request());
+    const dto = projection.project("history.search", "paid", response) as NativeObject;
+    const displayed = (dto.items as NativeObject[])[0];
+    equal(
+      displayed.publication_status,
+      literal === null ? "pending_metadata" : "pending_value_type",
+    );
+    equal(displayed.value, literal === null ? 0 : null);
+    equal(displayed.original_scale, null);
+  }
+});
+
+Deno.test("current known practical or inactive guide cannot escape through an active admission row", async () => {
+  for (const field of ["practical_required", "active_service"] as const) {
+    const r = row();
+    r.guide![field] = field === "practical_required";
+    await denied(() => fixture([r]).service.execute(request()), "current_catalog_page_invalid");
+  }
+});

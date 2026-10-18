@@ -115,7 +115,7 @@ export interface PublicPreparedKeyPage {
   keys: readonly PublicPreparedKey[];
   nextAfter: PublicCatalogKey | null;
   admissionHead: { command_id: string; payload_sha256: string };
-  coverage: "all_current_db_observations_at_head";
+  coverage: "all_eligible_current_db_observations_at_head";
   indexSha256: string;
 }
 /** A separately approved metadata projection selects keys; every actual value is reread from DB. */
@@ -162,7 +162,7 @@ function shape(v: unknown, names: readonly string[] = []): NativeObject {
 function scalar(v: unknown): v is NativeJson {
   return v === null || typeof v === "string" || typeof v === "boolean" ||
     typeof v === "bigint" || typeof v === "number" && Number.isSafeInteger(v) ||
-    v instanceof JsonFloat;
+    v instanceof JsonFloat && Number.isFinite(Number(v.lexeme));
 }
 function field(row: NativeObject, k: string): string | null {
   return TEXT(row[k]) ? row[k] as string : null;
@@ -313,7 +313,7 @@ export async function publicCatalogHistory(
   const row = record.row,
     meta = object(row.curation_fields) ? row.curation_fields : {},
     location = object(row.source_location) ? row.source_location : {};
-  let value: NativeJson = null;
+  let value: NativeJson = null, valueHeld = false;
   const raw = ["array", "object"].includes(String(row.metric_value_json_type))
     ? { availability: "held", reasons: ["value_type_unqualified"] }
     : validateCurrentScalar(
@@ -328,7 +328,10 @@ export async function publicCatalogHistory(
     try {
       const parsed = parseNativeJson(row.metric_value_literal);
       if (scalar(parsed)) value = parsed;
-    } catch { /* A malformed original stays held. */ }
+      else valueHeld = true;
+    } catch {
+      valueHeld = true;
+    }
   }
   const definition = field(meta, "metric_definition"),
     unit = field(meta, "unit"),
@@ -336,11 +339,12 @@ export async function publicCatalogHistory(
   const url = publicUrl(meta.source_url ?? location.source_url ?? location.url),
     asOf = date(meta.source_as_of ?? location.source_as_of);
   const qualified = meta.qualification_status === "verified_official" &&
-    definition !== null && unit !== null && url !== null && asOf !== null;
+    definition !== null && unit !== null && url !== null && asOf !== null &&
+    (meta.original_scale === undefined || scalar(meta.original_scale));
   const officialNotPublished = meta.publication_status === "not_published" &&
     meta.qualification_status === "verified_official" && url !== null &&
     asOf !== null;
-  const status = raw.availability === "held"
+  const status = raw.availability === "held" || valueHeld
     ? "pending_value_type"
     : raw.availability === "missing"
     ? (officialNotPublished ? "not_published" : "pending_value_missing")
@@ -627,6 +631,9 @@ export class CurrentPublicCatalogService extends CatalogService {
     let last: PublicCatalogKey | null = null;
     for (const r of page.rows) {
       const key = publicCatalogKey(r.key);
+      if (r.guide?.active_service === false || r.guide?.practical_required === true) {
+        fail("current_catalog_page_invalid");
+      }
       if (
         !object(r.row) || (typeof r.row.canonical_result_id === "string"
           ? r.row.active_service !== true

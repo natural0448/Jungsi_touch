@@ -1441,7 +1441,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "4ba07983ebf46d99f7da5462e41ff1415923e358de25703c947522f3754476fb",
+      "source_sha256": "53038cb5760def5ed39fc3d777e44e6e8d42e28e3dbb1006a2967892d113fae8",
       "symbols": [
         {
           "kind": "function",
@@ -6457,7 +6457,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog.ts",
         "layer": "application",
-        "status": "candidate_public_provider_synthetic46_operating_NOT_RUN",
+        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6468,7 +6468,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "7bfeaad9cc1c88cafcb4fdddcdd677ffd2b22df3e8382290f311a66f46ad5f33",
+        "source_sha256": "9895946f7e869a79baa7aae0235aa869263ab70549c8ab31cce5dd52b3abbc13",
         "declared_exports": [
           "CURRENT_PUBLIC_OPERATIONS",
           "parsePublicCatalogQuery",
@@ -6486,7 +6486,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic46_operating_NOT_RUN",
+        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6507,7 +6507,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog_runtime.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic46_operating_NOT_RUN",
+        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6527,7 +6527,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog_sql.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic46_operating_NOT_RUN",
+        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6538,7 +6538,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "1b7886432137bf73b346f55b9cfedc1d994032e756f5fac41b5f37e4893430ec",
+        "source_sha256": "dc53a8a1aaba061b3c2227cb104c463551988b5d7dceafdcc008141869d7faff",
         "declared_exports": [
           "CURRENT_PUBLIC_SOURCE_VIEWS",
           "CURRENT_PUBLIC_METADATA_SQL",
@@ -6559,7 +6559,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog_sql_test.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic46_operating_NOT_RUN",
+        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6570,13 +6570,13 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "42d1754971d0ac04de28b11e8fb3e832f617af4b033c1722ed3b818ab30604a3",
+        "source_sha256": "08be04403ca06e2d8fcdfbcd2bba5d3a352d9a678c4c2e865ec2a7c3b2c2cc0f",
         "declared_exports": []
       },
       {
         "path": "supabase/functions/_shared/current_public_catalog_test.ts",
         "layer": "application",
-        "status": "candidate_public_provider_synthetic46_operating_NOT_RUN",
+        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6587,13 +6587,13 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "261a98661becf9b124ce8915505718b7f9f1fcb0c5a4b1b65f9b551a79eafc4a",
+        "source_sha256": "5d00de4c82041140d1c7fd112b4ace1621d2fad730487a852ad9a1d9b08826d8",
         "declared_exports": []
       },
       {
         "path": "supabase/functions/_shared/current_public_key_index.ts",
         "layer": "application",
-        "status": "candidate_public_provider_synthetic46_operating_NOT_RUN",
+        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6604,7 +6604,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "85b30ffe1c2f9c05a911543b4fc8ad3d216b6e2caa0b28e0a88bd495c831a637",
+        "source_sha256": "b4ab37c82fee4cf50105228d9aacb671419bd3f977b9e60c64e353bdd734a106",
         "declared_exports": [
           "publicKeyRawHash",
           "CurrentPublicMetadataKeyIndex",
@@ -6614,7 +6614,7 @@
       {
         "path": "supabase/functions/_shared/current_public_key_index_test.ts",
         "layer": "application",
-        "status": "candidate_public_provider_synthetic46_operating_NOT_RUN",
+        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6625,13 +6625,13 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "d39844eeb7da623f44e8fc18c686a25277c2908031ba45416678ab667b63323a",
+        "source_sha256": "2e8ceb963e8786266581168a5ba7a5c46a787e1a079a4d2de077366548c45562",
         "declared_exports": []
       },
       {
         "path": "supabase/functions/_shared/current_public_key_storage.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic46_operating_NOT_RUN",
+        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6650,7 +6650,7 @@
       {
         "path": "supabase/functions/_shared/current_public_key_storage_test.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic46_operating_NOT_RUN",
+        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",

@@ -40,7 +40,7 @@ export interface PublicKeyIndexRoot {
   guide_command_state_sha256: string;
   admission_head: { command_id: string; payload_sha256: string };
   coverage: {
-    scope: "all_current_db_observations_at_head";
+    scope: "all_eligible_current_db_observations_at_head";
     review_receipt_sha256: string;
     snapshot_sha256: string;
     history_rows: number;
@@ -207,7 +207,7 @@ export class CurrentPublicMetadataKeyIndex implements CurrentPublicKeySelectionP
         raw.guide_command_state_sha256 !== this.basis.guideCommandStateSha256 ||
         h.command_id !== this.basis.admissionHead.command_id ||
         h.payload_sha256 !== this.basis.admissionHead.payload_sha256 ||
-        coverage.scope !== "all_current_db_observations_at_head" ||
+        coverage.scope !== "all_eligible_current_db_observations_at_head" ||
         coverage.review_receipt_sha256 !== this.basis.coverageReceiptSha256 ||
         !HASH.test(String(coverage.snapshot_sha256)) ||
         !Number.isSafeInteger(coverage.history_rows) ||
@@ -397,7 +397,7 @@ export async function prepareCurrentPublicKeyIndex(
     "history_rows",
   ]);
   if (
-    coverage.scope !== "all_current_db_observations_at_head" ||
+    coverage.scope !== "all_eligible_current_db_observations_at_head" ||
     !HASH.test(String(coverage.review_receipt_sha256)) ||
     !HASH.test(String(coverage.snapshot_sha256)) ||
     coverage.history_rows !== input.history.length

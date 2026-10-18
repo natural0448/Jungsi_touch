@@ -155,7 +155,7 @@ async function setup() {
     }],
     nextAfter: null,
     admissionHead,
-    coverage: "all_current_db_observations_at_head",
+    coverage: "all_eligible_current_db_observations_at_head",
     indexSha256: "d".repeat(64),
   };
   const state = {

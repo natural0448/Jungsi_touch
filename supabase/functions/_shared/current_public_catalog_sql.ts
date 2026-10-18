@@ -439,12 +439,10 @@ export const CURRENT_PUBLIC_HISTORY_BY_KEYS_SQL =
     guideColumns("g")
   } FROM (SELECT DISTINCT academic_year,offering_pk FROM page_keys WHERE offering_pk IS NOT NULL AND offering_pk<>'') k CROSS JOIN LATERAL (SELECT ${
     guideColumns("selected")
-  } FROM ${G} selected WHERE selected.academic_year=k.academic_year AND selected.offering_pk=k.offering_pk OFFSET 0) g WHERE ${
-    serviceGuide("g")
-  }),
+  } FROM ${G} selected WHERE selected.academic_year=k.academic_year AND selected.offering_pk=k.offering_pk OFFSET 0) g),
  page_guide AS MATERIALIZED (SELECT g.academic_year,g.offering_pk,CASE WHEN count(*)=1 THEN jsonb_agg(${
     guideWire("g")
-  })->0 ELSE NULL END AS wire FROM page_guide_rows g GROUP BY g.academic_year,g.offering_pk),
+  })->0 ELSE NULL END AS wire,bool_or(g.metadata->'practical_required'='true'::jsonb OR g.metadata->'active_service'='false'::jsonb) AS service_excluded FROM page_guide_rows g GROUP BY g.academic_year,g.offering_pk),
  selected_guides AS MATERIALIZED (SELECT ${
     guideColumns("g")
   },k.expected_key,k.expected_fingerprint FROM page_keys k CROSS JOIN LATERAL (SELECT ${
@@ -456,7 +454,7 @@ export const CURRENT_PUBLIC_HISTORY_BY_KEYS_SQL =
  SELECT p.academic_year AS year,COALESCE(p.school_id,'') AS school,COALESCE(p.offering_pk,'') AS offering,COALESCE(p.metric_kind,'') AS metric,p.canonical_result_id AS tie,
  jsonb_build_object('key',p.expected_key,'row',${
     admissionWire("p")
-  }||jsonb_build_object('row_fingerprint',p.row_fingerprint),'guide',g.wire) AS wire FROM page_current p LEFT JOIN page_guide g ON g.academic_year=p.academic_year AND g.offering_pk=p.offering_pk
+  }||jsonb_build_object('row_fingerprint',p.row_fingerprint),'guide',g.wire) AS wire FROM page_current p LEFT JOIN page_guide g ON g.academic_year=p.academic_year AND g.offering_pk=p.offering_pk WHERE g.service_excluded IS DISTINCT FROM true
  UNION ALL SELECT g.academic_year,COALESCE(g.school_id,''),g.offering_pk,''::text,g.release_id,jsonb_build_object('key',g.expected_key,'row',${
     guideWire("g")
   }||jsonb_build_object('row_fingerprint',g.row_sha256),'guide',${
@@ -477,7 +475,9 @@ export const CURRENT_PUBLIC_LOOKUP_SQL =
     offeringId("g")
   } AS requested_id,CASE WHEN NOT $2::boolean THEN 'unrequested' WHEN g.academic_year=2027 THEN 'verified' WHEN cardinality(t.pks)=1 AND n.offering_pk IS NOT NULL THEN 'verified' ELSE 'unqualified' END AS link_status,
  CASE WHEN $2::boolean AND g.academic_year<>2027 AND cardinality(t.pks)=1 AND n.offering_pk IS NOT NULL THEN to_jsonb(n) ELSE to_jsonb(g) END AS selected_guide
- FROM original g LEFT JOIN targets t ON t.original_year=g.academic_year AND t.original_pk=g.offering_pk LEFT JOIN ${G} n ON $2::boolean AND cardinality(t.pks)=1 AND n.academic_year=2027 AND n.offering_pk=t.pks[1]
+ FROM original g LEFT JOIN targets t ON t.original_year=g.academic_year AND t.original_pk=g.offering_pk LEFT JOIN ${G} n ON $2::boolean AND cardinality(t.pks)=1 AND n.academic_year=2027 AND n.offering_pk=t.pks[1] AND ${
+    serviceGuide("n")
+  }
 ),selected_guide AS MATERIALIZED (SELECT ${
     guideColumns("g")
   },s.link_status,s.requested_id FROM selected s CROSS JOIN LATERAL jsonb_populate_record(NULL::${schema}.guide_offerings,s.selected_guide) g),
@@ -660,7 +660,7 @@ export class CurrentPublicCatalogSql implements CurrentPublicCatalogPort {
       if (prepared) {
         if (
           prepared.indexSha256 !== descriptor.key_index.sha256 ||
-          prepared.coverage !== "all_current_db_observations_at_head" ||
+          prepared.coverage !== "all_eligible_current_db_observations_at_head" ||
           prepared.admissionHead.command_id !==
             descriptor.admission_head.command_id ||
           prepared.admissionHead.payload_sha256 !==

@@ -70,7 +70,7 @@ async function setup(
       payload_sha256: "c".repeat(64),
     },
     coverage: {
-      scope: "all_current_db_observations_at_head",
+      scope: "all_eligible_current_db_observations_at_head",
       review_receipt_sha256: "d".repeat(64),
       snapshot_sha256: await nativeJsonSha256({ history, offerings, lookups }),
       history_rows: history.length,
