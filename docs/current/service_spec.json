@@ -16417,6 +16417,14 @@
         "REQ-24"
       ],
       "summary": "화면 내용 불러오는 중 안내(app/loading.tsx) 추가: 머리글·탭은 먼저 보이고 내용 자리에 안내와 자리 표시만(숫자·학교 이름 없음). 정시 API 요청당 약 2.2초(history.search·recruitment.read)와 순차 호출로 1페이지 첫 바이트가 약 21초였던 빈 화면 문제 완화. 1·3페이지 대학명 검색칸 예시를 합성 이름에서 실제 대학명(강원대, 홍익대)으로."
+    },
+    {
+      "date": "2026-10-18",
+      "requirements": [
+        "REQ-01",
+        "SEC-07"
+      ],
+      "summary": "관리자 결정: 계정당 동시 한도 429 rate_limit_exceeded 는 화면 BFF 가 3초 뒤 한 번만 같은 요청을 다시 보냄(쓰기는 같은 Idempotency-Key, 무한 재시도·한도 변경 없음, analysis_quota_exceeded 는 재시도 안 함). 제한 안내는 '보통 몇 초 뒤 다시 열면 됨 (늦어도 HH:MM 이후)'로 — 서버 Retry-After 는 최악의 경우 만료 시각이라 실제 대기(2~4초)보다 훨씬 늦음. 하루 분석 한도는 별도 문구."
     }
   ],
   "overall_analysis_contract": {

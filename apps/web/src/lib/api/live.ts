@@ -97,6 +97,21 @@ async function withLane<T>(key: string, run: () => Promise<T>): Promise<T> {
   }
 }
 
+/*
+  계정당 동시 한도(429 rate_limit_exceeded)로 거절되면 3초 뒤 **딱 한 번만** 같은 요청을 다시 보낸다(관리자 결정 2026-10-18).
+  겹친 요청은 보통 2~4초 안에 정산된다(담당자 DB 요약: 거절 9건 모두 2.3~4.0초 뒤 성공). 무한 재시도·한도 변경 없음.
+  하루 분석 한도(analysis_quota_exceeded)는 다시 보내지 않는다. 쓰기는 같은 Idempotency-Key 로 다시 보내므로 중복되지 않는다.
+*/
+const CONTENTION_RETRY_MS = 3000;
+async function sendOnceMore(path: string, init: RequestInit): Promise<Response> {
+  const res = await send(path, init);
+  if (res.status !== 429) return res;
+  const code = ((await res.clone().json().catch(() => null)) as ErrBody)?.error?.code;
+  if (code !== "rate_limit_exceeded") return res;
+  await new Promise((r) => setTimeout(r, CONTENTION_RETRY_MS));
+  return send(path, init);
+}
+
 async function send(path: string, init: RequestInit): Promise<Response> {
   const key = new Headers(init.headers).get("Authorization") ?? "anonymous";
   return withLane(key, async () => {
@@ -151,7 +166,7 @@ function auth(caller: Caller, extra?: Record<string, string>) {
 }
 
 async function call<T>(caller: Caller, path: string): Promise<T> {
-  const res = await send(path, { headers: auth(caller) });
+  const res = await sendOnceMore(path, { headers: auth(caller) });
   await guard(res, path);
   // 404·409 도 기록만 남기고 뜻은 그대로(없음 / 버전 바뀜). 예외 문장에도 쿼리·식별자 없는 템플릿만 쓴다
   if (res.status === 404) {
@@ -168,7 +183,7 @@ async function call<T>(caller: Caller, path: string): Promise<T> {
 
 /** POST/PUT 은 Idempotency-Key 가 필수. 같은 키의 재시도는 처음 결과를 돌려받는다 */
 async function write<T>(caller: Caller, method: "POST" | "PUT", path: string, body: unknown, key: string): Promise<Result<T>> {
-  const res = await send(path, { method, headers: auth(caller, { "Content-Type": "application/json", "Idempotency-Key": key }), body: JSON.stringify(body) });
+  const res = await sendOnceMore(path, { method, headers: auth(caller, { "Content-Type": "application/json", "Idempotency-Key": key }), body: JSON.stringify(body) });
   await guard(res, path);
   if (!res.ok) return { ok: false, code: (await codeOf(res, path)) ?? "request_failed", status: res.status };
   return { ok: true, value: (await res.json()) as T };
