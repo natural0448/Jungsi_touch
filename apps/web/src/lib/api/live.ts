@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import type {
   CatalogSearchDto,
   ForecastCapabilitiesDto,
@@ -68,12 +69,17 @@ async function codeOf(res: Response, path: string) {
 
 /*
   계정당 동시 요청 줄 세우기. 서버는 계정당 동시 2건(concurrent_jobs)까지만 받고 넘치면 429 rate_limit_exceeded 다.
-  1페이지는 학년도 3개를 동시에 검색해 세 번째가 거절됐다(2026-10-18 실측). 같은 워커 안의 요청을 사용자 Bearer 별로
-  최대 MAX_PER_CALLER 건만 내보내고 나머지는 앞 요청이 끝날 때까지 기다린다. 대기열은 비면 지운다(토큰을 오래 들고 있지 않음).
+  1페이지는 학년도 3개를 동시에 검색해 세 번째가 거절됐다(2026-10-18 실측). 한 화면 요청 안에서 사용자 Bearer 별로
+  최대 MAX_PER_CALLER 건만 내보내고 나머지는 앞 요청이 끝날 때까지 기다린다.
+  대기열은 **요청 하나 안에서만** 쓴다(React cache = 요청마다 새 Map). 워커 전체에서 공유하면 한 요청이 다른 요청의
+  대기를 풀어 주게 되는데, Cloudflare 워커는 요청 사이의 promise 해제를 막아 기다리던 요청이 멈춘다(8c3d9fc 배포 실측, 되돌림).
+  React cache 가 없는 곳(서버 액션 등)에서는 호출마다 새 Map 이라 줄 세우기 없이 그대로 보낸다.
 */
 const MAX_PER_CALLER = 2;
-const lanes = new Map<string, { active: number; waiting: (() => void)[] }>();
+type Lanes = Map<string, { active: number; waiting: (() => void)[] }>;
+const requestLanes = cache((): Lanes => new Map());
 async function withLane<T>(key: string, run: () => Promise<T>): Promise<T> {
+  const lanes = requestLanes();
   let lane = lanes.get(key);
   if (!lane) lanes.set(key, (lane = { active: 0, waiting: [] }));
   if (lane.active >= MAX_PER_CALLER) await new Promise<void>((go) => lane!.waiting.push(go));

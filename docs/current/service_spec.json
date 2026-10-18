@@ -16382,6 +16382,13 @@
         "REQ-24"
       ],
       "summary": "1~4페이지 최소 연결 첫 관측: 1페이지가 학년도 3개 history.search 를 동시에 보내 계정당 동시 2건(concurrent_jobs) 초과로 429 rate_limit_exceeded. 화면 BFF 가 사용자 Bearer 별 동시 요청을 최대 2건으로 줄 세우고, 탭·머리글·페이지 이동 버튼 링크의 자동 미리 불러오기를 끔(동시 서버 렌더·API 호출과 에듀터치 토큰 동시 갱신 감소). 서버 판정·한도 변경 없음."
+    },
+    {
+      "date": "2026-10-18",
+      "requirements": [
+        "REQ-01"
+      ],
+      "summary": "8c3d9fc 의 계정당 동시 요청 줄 세우기가 워커 전역 대기열이라 요청 사이 promise 해제가 막혀 1페이지 요청이 멈춤(Worker threw exception) → 운영을 ca7ed211 로 되돌림. 대기열을 React cache 로 요청 하나 안에서만 쓰도록 수정."
     }
   ],
   "overall_analysis_contract": {
