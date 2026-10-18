@@ -191,3 +191,23 @@ class PolicyExtensionRegistrationCases(unittest.TestCase):
                 self.rejects(wrong)
 
 if __name__=="__main__":unittest.main()
+
+class OwnerReviewRegistrationCases(unittest.TestCase):
+    def current(self):
+        spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
+        bindings=spec['owner_current_review_contract']['verification']['source_bindings']
+        return spec,{b['path']:b['sha256']for b in bindings}
+    def test_owner_suite_is_separate_and_bound_to_current_source(self):
+        s,b=self.current();self.assertEqual(runner.owner_review_registration(s,b)['test_count'],28)
+        self.assertEqual(s['edge_harness']['unit_count'],656)
+    def test_owner_source_cannot_silently_drop_its_contract(self):
+        s,b=self.current();s.pop('owner_current_review_contract')
+        with self.assertRaisesRegex(edge.EdgeFailure,'owner_review_contract_missing'):runner.owner_review_registration(s,b)
+    def test_owner_suite_rejects_hash_or_count_drift(self):
+        for mode in ('hash','count'):
+            s,b=self.current();v=s['owner_current_review_contract']['verification']
+            if mode=='hash':v['source_bindings'][0]['sha256']='f'*64
+            else:v['test_count']=27
+            with self.assertRaisesRegex(edge.EdgeFailure,'owner_review_'):runner.owner_review_registration(s,b)
+    def test_original_fixtures_without_owner_source_keep_their_scope(self):
+        self.assertIsNone(runner.owner_review_registration({},{}))

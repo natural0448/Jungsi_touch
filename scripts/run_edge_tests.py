@@ -72,6 +72,27 @@ def operation_registration(spec):
     if extension_registration is not None:result['policy_extension_source_registration']=extension_registration
     return result
 
+def owner_review_registration(spec,before):
+    """Separate pure Owner suite; foundation 656 and legacy22+extension3 stay exact."""
+    c=spec.get('owner_current_review_contract')
+    entry='supabase/functions/_shared/current_admission_owner_test.ts'
+    if c is None:
+        if entry in before:raise EdgeFailure('owner_review_contract_missing')
+        return None
+    v=c.get('verification',{})
+    if (c.get('format')!='jungsi.owner-current-review-contract/v1' or
+        v.get('test_path')!=entry or v.get('test_count')!=28 or
+        not isinstance(v.get('source_bindings'),list) or not v['source_bindings']):
+        raise EdgeFailure('owner_review_verification_invalid')
+    required={entry,*['supabase/functions/_shared/'+name+'.ts' for name in
+      ['current_admission_owner','current_admission_owner_sql','current_admission_review',
+       'current_admission_review_sql','current_admission_display','official_history_display']]}
+    bindings=v['source_bindings']
+    if (len(bindings)!=len(required) or {b.get('path')for b in bindings}!=required or
+        any(not isinstance(b.get('sha256'),str) or before.get(b['path'])!=b['sha256']for b in bindings)):
+        raise EdgeFailure('owner_review_source_binding_invalid')
+    return v
+
 def run_workspace(root,manifest,deno,python,output):
     root=Path(root).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
     before=verify_manifest(root,manifest);spec=json.loads((root/"docs/current/service_spec.json").read_bytes())
@@ -91,6 +112,15 @@ def run_workspace(root,manifest,deno,python,output):
     if junit.exists():raise EdgeFailure("deno_test_output_exists")
     command([deno,"test",*common,"--reporter=dot","--junit-path",str(junit),*cfg["tests"]],root=root,output=output,name="unit")
     unit=parse_junit(junit,cfg["unit_count"])
+    owner_registration=owner_review_registration(spec,before);owner_unit=None
+    if owner_registration is not None:
+        owner_junit=output.resolve()/"owner_review.junit.xml"
+        command([deno,"test","--no-config","--no-lock","--no-remote","--no-npm",
+          "--reporter=dot","--junit-path",str(owner_junit),owner_registration['test_path']],
+          root=root,output=output,name="owner_review_unit")
+        owner_unit=dict(**parse_junit(owner_junit,owner_registration['test_count']),
+          coverage='OWNER_CURRENT_REVIEW_V3_SYNTHETIC',source_bindings=owner_registration['source_bindings'],
+          actual_DB='NOT_RUN',deployment='NOT_RUN')
     references=cfg["python_reference"]
     reference=dict(format="jungsi.edge-python-reference/v1",basis="selected_snapshot",
       files=references["files"],source_files={p:before[p] for p in [*paths,cfg["config"],cfg["oracle"]]},
@@ -107,6 +137,7 @@ def run_workspace(root,manifest,deno,python,output):
       coverage="DEV010_FOUNDATION",coexisting_edge_sources=len(scope["coexisting_bound"]),unit=unit,oracle=dict(case_count=receipt["case_count"],mismatch_count=receipt["mismatch_count"]),
       source_manifest_sha256=digest(json_bytes(manifest)),contract_receipt_sha256=digest((output/"contract/edge_contract_receipt.json").read_bytes()),
       oracle_receipt_sha256=digest(receipt_path.read_bytes()),tool=parsed["tool"],production_ready=False,operating_writes=0,**operation_registration(spec))
+    if owner_unit is not None:result['owner_review_unit']=owner_unit
     write_new(output/"edge_run_receipt.json",json_bytes(result));return result
 def main():
     p=argparse.ArgumentParser(description=__doc__)
