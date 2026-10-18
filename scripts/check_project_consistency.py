@@ -3017,6 +3017,8 @@ def generated_files(spec,read=None):
               "source_member_count>1은 추가 출처일 수 있어 중복 오류로 판정하지 않는다. 기대 모집행 명부 anti-JOIN은NOT_RUN이며 누락 학교 전수 확인 완료를 뜻하지 않는다. "
               "v3 descriptor 새 승인·정의/bytes/SHA 고정, Root 실제 DB 검증·배포, 화면팀 URL/APIKEY 설정과 v3 렌더링·브라우저 검수가 남았다. "
               "기존 v2 배포/화면 영수증은 이력이며 v3 운영 인수가 아니다. REQ27 전체 배포는 이 검수 API의 선행 조건이 아니다.")
+            if owner_v3.get("deployment_progress_note"):
+                review_details=owner_v3["deployment_progress_note"]
             review_labels[9]="Owner v3는 승인된 current canonical/source ID·offering PK·활성 상태·원문 scalar·출처 지문·두 정본 버전을 반환한다. 비공개 경로와 formula/evidence 본문은 반환하지 않는다. 기존 v2의 닫힌18필드 투영을 보존한다."
         current_review_section=(
             review_labels[0]+"\n\n"+
@@ -3468,6 +3470,21 @@ def generated_files(spec,read=None):
     if scoped:
         section=("\n\n## 카탈로그 전용 본문 선택 로딩 후속 후보\n\n"+scoped["id"]+" / "+scoped["status"]+". 별도 보존한 첫 캐시 후보7d53dda는 정상 훅/source·PR CI Python1125·Edge644·oracle993 PASS다. 현재 후속은 기존644+신규12=656 합성 회귀로 따로 검수한다.\n\n"+", ".join(scoped["operations"])+"만 catalog 본문을 읽는다. registry/selection의 전체선택 참조·승인·scope·형식·크기와 fresh 비공개 버킷의 전체선택 최대길이를 검사한다. policy exam의 선택참조 version/명시year도 일치시킨다. 실제 소비 catalog의 SHA·길이·버전·native decode는 그대로다. 사용하지 않은 exam/conversion 본문은 읽지도 검증했다고 기록하지도 않는다. 잘못된 참조 메타데이터는 이 분리로 통과시키지 않는다.\n\n미로딩 scoring 자료를 요구하면 runtime_dependency_not_loaded503이며 미선택 null/pending과 구분한다. 카탈로그 preflight는 catalog_payload_and_all_selected_reference_metadata만 검증했다고 기록한다. 나머지21 operation은 자료가 필요한 기존 경로에서 전체 선택 그래프 검사를 유지하고 health.ready도 전체 검사를 유지한다. JWT/현재권한/소유권/head·만료·공유 원자 예산·기존 작업 비용·반환량·읽기/시간 상한은 바꾸지 않는다. 캐시 적중은 해당 소비 본문의 cold 논리읽기 차감을 유지한다.\n\nSource 합성/오프라인 I/O 계수와 실제 응답시간 인수는 별도다. 새 API·운영 승인 확대·REQ27전환·032 drop-in·실제 DB/배포/활성화는 NOT_RUN이다.\n")
         for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync"):
+            target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
+    national=spec.get("current_public_supply_contract")
+    if national:
+        section=("\n\n## 현재 정본 전국 공개 연결 · 최신 채택\n\n"+
+            national["id"]+" / "+national["status"]+". "+national["decision"]+"\n\n"+
+            "적용 경로: "+", ".join(national["pages"])+". 기존 작업: "+", ".join(national["operations"])+". "+national["access"]+"\n\n"+
+            national["scope"]+"\n\n"+national["source_flags"]+"\n\n"+national["public_projection"]+"\n\n"+
+            national["missingness"]+" "+national["year_link"]+"\n\n"+
+            "P1은 기존 history.search에서 academic_year를 생략해 2024·2025·2026을 함께 읽는다. 전체 UI 조회는 최대6페이지×100=600지표이며 기존 서버의 요청별 상한과 계정 공유 예산을 보존한다. 이 값은 새 전역 상한이지 이전의 연도별 합산과 같다는 주장이 아니다. 잔여 cursor는 조회 미완료이며 마지막 미완전 모집행을 보류한다. 신규 batch API는 미채택이다.\n\n"+
+            national["query"]+"\n\n"+national["security"]+"\n\n"+
+            "기존 학교별 부분 발행/C 묶음 설명은 이전 절차의 보존 이력이다. 이번 전국 검색 공급의 선행 조건으로 다시 적용하지 않는다. "+national["REQ27"]+"\n\n"+
+            national["data_team_work"]+"\n\n"+
+            "현재 구현 "+national["implementation"]+" · hosted 전환 "+national["hosted_activation"]+" · 전국 브라우저 인수 "+national["nationwide_browser_acceptance"]+". 자료 보완 중인 상태와 연결 구현/배포 완료를 혼동하지 않는다.\n")
+        for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync","history_display","presentation_handoff","frontend_reply","frontend_followup","api_dto"):
             target=spec["current_documents"].get(key)
             if target in files:files[target]+=section
     return {p:t.encode("utf-8") for p,t in files.items()}

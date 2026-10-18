@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.77",
+  "version": "1.9.79",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -43,7 +43,7 @@
     {
       "id": "REQ-01",
       "title": "공식 입시결과 조회",
-      "description": "1페이지는 개인 성적 없이 대학·학과를 검색하고 대학 발표 지표명·결과치·단위·출처를 제공한다. 자체 누적·예상컷·개인 분석으로 미발표 값을 채우지 않는다. 추정 총 지원자·추정 탈락자 2열은 공식 값과 분리된 화면 파생값으로 유지한다. 산식·오차·실제 불합격자수와의 차이를 표시하고 동일 학년도/모집행/통계 분모·자료 결측을 검사한다. 공식 DTO·발행 자료에 추정값을 추가하지 않는다."
+      "description": "1페이지는 개인 성적 없이 대학·학과를 검색하고 대학 발표 지표명·결과치·단위·출처를 제공한다. 자체 누적·예상컷·개인 분석으로 미발표 값을 채우지 않는다. 추정 총 지원자·추정 탈락자 2열은 공식 값과 분리된 화면 파생값으로 유지한다. 산식·오차·실제 불합격자수와의 차이를 표시하고 동일 학년도/모집행/통계 분모·자료 결측을 검사한다. 공식 DTO·발행 자료에 추정값을 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다."
     },
     {
       "id": "REQ-02",
@@ -195,7 +195,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "purpose": "개인 성적 없이 공식 결과를 검색하고, 분리된 추정 2열은 표기·산술 조건에 따라 표시한다.",
+      "purpose": "개인 성적 없이 공식 결과를 검색하고, 분리된 추정 2열은 표기·산술 조건에 따라 표시한다. 현재 서비스 대상 정본 전체를 검색하며 일부 고정 검수 묶음을 전국 범위로 설명하지 않는다.",
       "score_required_to_browse": false,
       "operations": [
         "session.read",
@@ -5736,7 +5736,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.77",
+        "contract_version": "1.9.79",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -5910,7 +5910,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.77",
+        "contract_version": "1.9.79",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -6076,7 +6076,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.77",
+        "contract_version": "1.9.79",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6095,7 +6095,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.77",
+        "contract_version": "1.9.79",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6120,7 +6120,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.77",
+        "contract_version": "1.9.79",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6145,7 +6145,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.77",
+        "contract_version": "1.9.79",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -6789,7 +6789,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "080db9df53ac05bda099e34e07eaf7ad40f8d12ca1b4c0a5e74c22e2bfb24aab",
+            "source_sha256": "ffee09aef1383b2e4e40381fa26fcccfc5fab59906afafc68b230751bcd78a43",
             "symbols": [
               {
                 "kind": "class",
@@ -15123,9 +15123,9 @@
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
-        "spec_version": "1.9.76",
-        "ci_run_id": 39132557621,
+        "commit": "5c9ed1c54daed9d5d32526d74029965a49ae7569",
+        "spec_version": "1.9.77",
+        "ci_run_id": 39148270736,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
@@ -17029,6 +17029,35 @@
         "REQ-26"
       ],
       "summary": "정본 검수 cursor409 조사: 고정 세션·head에서14초 전진은 기존 소스도 통과했다. 동등 UTC 표기 차이의 재현409를 정규화하고 세 거절 지점을 값 없는 reason으로 구분했다. 실제 운영 장애 원인은 미확정이며 만료·권한·head 거절을 보존한다."
+    },
+    {
+      "date": "2026-10-19",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-08",
+        "REQ-13",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "관리자 전국 전체 공개 결정을 채택했다. 기존 고정 최소 묶음/학교별 부분 발행 대기와 분리해 현재 정본 전체를 기존 공개 DTO·RLS·relay·회원/유료·원자예산으로 읽는 공급자 구현과 명시 binding 전환을 요청한다. P1 학년도 생략/전체6페이지·600지표 상한을 채택하며 미래연도 추정연결·무제한 추출·N+1을 금지한다. Owner v3 배포/설정4+BFF2 보고와 Root 실제 첫100행/scan128 성공을 수용하고 다음409 재현은 미해결로 기록했다. REQ27·P4 판단과 전국 누백 수치 완성은 별도 상태이며 새 DB쓰기/삭제/권한 완화는 없다."
+    },
+    {
+      "date": "2026-10-19",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-08",
+        "REQ-12",
+        "REQ-13",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "기획 1.9.78의 전국 현재 공개 4조회·기존 032/14소비자·REQ27 분리 계약과 커서 5c9 후보를 상시 서비스 브랜치 merge로 통합한다. 현재 배포는 기존 7d48 v3·Root 첫100 PASS/다음409이며 새 UTC동등성·안전 reason 후보의 source/PR CI 통과와 배포 NOT_RUN을 구분한다. 실제409 원인은 미확정이고 만료·head 변경 거절을 유지한다. 전국 조회 구현 중 소스는 미스테이징 사본으로 보존하며 이번 커서 병합에 포함하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -29590,7 +29619,7 @@
       "recruitment.read"
     ],
     "status": "FE_967_SOURCE_REVIEWED_C_LOCAL_APPROVED_ACTUAL_TCP31_PASS_EXTERNAL_BROWSER_AND_THREE_FE_FIXES_PENDING",
-    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다.",
+    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다.",
     "estimated_columns": [
       {
         "id": "estimated_applicants",
@@ -30114,7 +30143,9 @@
       "operational_publication": "NOT_RUN",
       "new_operating_deployment_authorized": false,
       "deletion_allowed": false,
-      "default_entitlement_change_allowed": false
+      "default_entitlement_change_allowed": false,
+      "superseded_for_current_consumer_scope": true,
+      "historical_boundary": "2026-10-08 최소 C/학교별 부분 발행의 보존 이력이다. 2026-10-19 전국 현재 정본 공개 결정의 선행 조건으로 재적용하지 않는다."
     }
   },
   "official_history_db_display_contract": {
@@ -30778,7 +30809,7 @@
     },
     "current_review_connection": {
       "id": "DBD-06-CURRENT-ALL-REVIEW",
-      "status": "V3_HOSTED_FIRST_PAGE_PASS_NEXT_PAGE409_REPORTED_SAFE_CURSOR_DIAGNOSTIC_CANDIDATE_NOT_DEPLOYED",
+      "status": "OWNER_WHOLE_CURRENT_V3_SOURCE_SYNTHETIC_NOT_DEPLOYED_LEGACY_V2_RECEIPTS_PRESERVED",
       "human_scope": "frontend_team_and_administrators_review_first",
       "source_view": "jungsi_data_ingest.admission_results_current",
       "academic_years": [
@@ -33025,7 +33056,7 @@
       },
       "owner_whole_v3": {
         "format": "jungsi.owner-current-review-contract/v1",
-        "status": "CURSOR_TIMESTAMP_NORMALIZATION_AND_SAFE_DIAGNOSTIC_SOURCE_CANDIDATE_INCIDENT_CAUSE_UNCONFIRMED",
+        "status": "HOSTED_FIRST_PAGE_ROOT_VERIFIED_NEXT_CURSOR_409_OPEN",
         "basis_commit": "45fcb44c1821c187816174fc90563f6e313bc423",
         "operation": "current.review.search",
         "route": {
@@ -33120,8 +33151,8 @@
           ]
         },
         "actual_DB": "PASS_SCOPED_EXACT_ID_SQL_AND_SAVED_DTO_WORKING_TREE_ONLY_NOT_FINAL_SNAPSHOT",
-        "hosted_deployment": "NOT_RUN",
-        "browser": "NOT_RUN",
+        "hosted_deployment": "OWNER_REPORTED_BUNDLE_READBACK_MATCH_AND_ROOT_FIRST_PAGE_RUNTIME_VERIFIED",
+        "browser": "ROOT_FIRST_PAGE100_SCAN128_PASS_NEXT_CURSOR409_REPRODUCED_FIX_PENDING",
         "engine_approved": false,
         "production_allowed": false,
         "actual_DB_evidence": {
@@ -33201,6 +33232,16 @@
           "activation": 0,
           "receipt_sha256": "d16a383b2d32ae2d31e0702d87530f7a1176596ed208d61f0239b15a8416f3e5",
           "boundary": "prior_exact_ID_SQL_used_18_view_dependencies; final_guard_adds_direct_release_table_and_preserves_identical_payload_SQL_SHA"
+        },
+        "deployment_progress_note": "Owner가 v3 함수 배포·동일 번들 대조·설정4개 및 BFF설정2개 등록을 보고했다. Root도 실제 관리자 브라우저에서 첫100행/scan128/전체건수미계산/누백 산출·보류·미검토 표시를 독립 확인했다. 수동 다음 범위는409 cursor_version_mismatch로 재현돼 원인별 진단·수정·최종 SHA 재검수를 진행한다. 이미 끝난 등록을 미완료로 다시 요구하지 않는다. 이 검수 API의 제한 승인과 일반 P1 전국 공개 공급은 별개다. 공개 binding 전환·전국 검색 및 REQ27 운영 활성화를 이 영수증으로 완료 처리하지 않는다.",
+        "latest_receipt_intake": {
+          "date": "2026-10-19",
+          "frontend_commit": "e806aafea348c14d0c127858c48153beeb3cebec",
+          "external_receipt_sha256": "c121e83ca7abde958bfefde0bd3489047683ece45b3fa0f7d9812d89f16deb0c",
+          "Root_private_intake_sha256": "be225f5cd86f1584ff622b364009d4a8822c7142a98d60206f8539126680d5ef",
+          "first_page": "PASS_ACTUAL_ROOT_BROWSER_100_SCAN128",
+          "next_page": "FAIL_409_CURSOR_VERSION_MISMATCH_ROOT_REPRODUCED",
+          "scope": "No Auth token/incident identifier/data value in shared contract; no stored score mutation, forced head change or full scan."
         },
         "previous_deployed_v3": {
           "source_commit": "ccfe7cebf0ca1d3ebe8ce487e43572bb28c6e891",
@@ -33288,8 +33329,20 @@
           "expiry": "exact_existing_session_approval_min_binding_and_24h_guard_unchanged_no_extension",
           "metadata_readonly": "current_heads_older_than_incident_no_new_command_or_release_in_bounded_incident_window; not_historical_head_audit",
           "deployment": "NOT_RUN",
-          "live_retest": "NOT_RUN"
-        }
+          "live_retest": "NOT_RUN",
+          "candidate_source_commit": "5c9ed1c54daed9d5d32526d74029965a49ae7569",
+          "source_ci_run_id": "39148270736",
+          "initial_PR_ci_run_id": "39148388333",
+          "exact_flat_bundle": {
+            "bytes": 166028,
+            "sha256": "be2afb80d6650a7e172ec61a59e9410cf32a59c8c30098da934eede1c7781749",
+            "deployment": "NOT_RUN"
+          },
+          "current_operating_bundle_source": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
+          "actual_next_page_retest": "NOT_RUN",
+          "incident_cause": "UNCONFIRMED"
+        },
+        "candidate_status": "CURSOR_NORMALIZATION_AND_SAFE_REASON_SOURCE_CI_PASSED_NOT_DEPLOYED_INCIDENT_CAUSE_UNCONFIRMED"
       },
       "legacy_v2_DTO_contract": {
         "format": "jungsi.current-admission-review/v2",
@@ -115864,11 +115917,12 @@
       "id": "CR-P1-BOUNDED-READ-20261018-01",
       "status": "PROPOSED_NOT_IMPLEMENTED",
       "registered_operation_count": 25,
-      "existing_option": "history.search academic_year omission returns one bounded, year-ascending page. UI may group only returned rows; no hidden cursor drain, per-year completeness assumption or automatic future-year display. Preserve filters, cursor/version, counts and truncation; /me stays fresh.",
+      "existing_option": "기존 history.search의 academic_year 생략을 채택한다. 전체 조회에서 최대6페이지/100개/600지표 상한을 명시하며, 기존과 같은 총량이라고 주장하지 않는다. 반환된 원래 학년도·PK만 묶고 미해소 cursor와 마지막 미완전 모집행을 보류한다. 미래 학년도로 바꾸지 않는다.",
       "year_mapping": "historical offering_id does not imply a target2027 offering. Use explicit verified school4year mapping and exact target ID; never prefix/name substitution. Existing public history DTO has no mapped target field. Skip target recruitment request unless independently verified target ID is available; missing link remains pending.",
-      "proposed_extension": "Only after contract adoption: P1 bounded composite read with session3 public fields, requested allowed years, bounded history page and explicit verified target-ID recruitment batch. New operation/auth/security/DTO/budget entries and independent extension proof are required; existing22 and REQ27 extension3 remain pinned separately.",
+      "proposed_extension": "신규 합성/batch API는 여전히 미채택이다. 이번에는 기존 history.search 선택 필드를 사용한다. 새 operation을 추가하려면 별도 DTO·권한·예산·확장 검증이 필요하다.",
       "query": "one bounded in-memory catalog pass or parameterized selected-ID ANY/unnest JOIN; at most one bounded recruitment query for unique verified target IDs; no N+1, bulk hidden loop, inferred merge or widened school scope",
-      "bounds": "explicit year-set, page/result bytes, target-ID count and deadline before implementation; do not infer operational quotas; combined logical calls and result-volume charges defined before adoption"
+      "bounds": "explicit year-set, page/result bytes, target-ID count and deadline before implementation; do not infer operational quotas; combined logical calls and result-volume charges defined before adoption",
+      "existing_option_status": "ADOPTED_EXISTING_HISTORY_MULTIYEAR_OPTION"
     },
     "retry": {
       "server_wait": "NOT_IMPLEMENTED_NO_SOCKET_OR_TRANSACTION_QUEUE",
@@ -115958,7 +116012,7 @@
   },
   "owner_current_review_contract": {
     "format": "jungsi.owner-current-review-contract/v1",
-    "status": "CURSOR_TIMESTAMP_NORMALIZATION_AND_SAFE_DIAGNOSTIC_SOURCE_CANDIDATE_INCIDENT_CAUSE_UNCONFIRMED",
+    "status": "HOSTED_FIRST_PAGE_ROOT_VERIFIED_NEXT_CURSOR_409_OPEN",
     "basis_commit": "45fcb44c1821c187816174fc90563f6e313bc423",
     "operation": "current.review.search",
     "route": {
@@ -116053,8 +116107,8 @@
       ]
     },
     "actual_DB": "PASS_SCOPED_EXACT_ID_SQL_AND_SAVED_DTO_WORKING_TREE_ONLY_NOT_FINAL_SNAPSHOT",
-    "hosted_deployment": "NOT_RUN",
-    "browser": "NOT_RUN",
+    "hosted_deployment": "OWNER_REPORTED_BUNDLE_READBACK_MATCH_AND_ROOT_FIRST_PAGE_RUNTIME_VERIFIED",
+    "browser": "ROOT_FIRST_PAGE100_SCAN128_PASS_NEXT_CURSOR409_REPRODUCED_FIX_PENDING",
     "engine_approved": false,
     "production_allowed": false,
     "actual_DB_evidence": {
@@ -116134,6 +116188,16 @@
       "activation": 0,
       "receipt_sha256": "d16a383b2d32ae2d31e0702d87530f7a1176596ed208d61f0239b15a8416f3e5",
       "boundary": "prior_exact_ID_SQL_used_18_view_dependencies; final_guard_adds_direct_release_table_and_preserves_identical_payload_SQL_SHA"
+    },
+    "deployment_progress_note": "Owner가 v3 함수 배포·동일 번들 대조·설정4개 및 BFF설정2개 등록을 보고했다. Root도 실제 관리자 브라우저에서 첫100행/scan128/전체건수미계산/누백 산출·보류·미검토 표시를 독립 확인했다. 수동 다음 범위는409 cursor_version_mismatch로 재현돼 원인별 진단·수정·최종 SHA 재검수를 진행한다. 이미 끝난 등록을 미완료로 다시 요구하지 않는다. 이 검수 API의 제한 승인과 일반 P1 전국 공개 공급은 별개다. 공개 binding 전환·전국 검색 및 REQ27 운영 활성화를 이 영수증으로 완료 처리하지 않는다.",
+    "latest_receipt_intake": {
+      "date": "2026-10-19",
+      "frontend_commit": "e806aafea348c14d0c127858c48153beeb3cebec",
+      "external_receipt_sha256": "c121e83ca7abde958bfefde0bd3489047683ece45b3fa0f7d9812d89f16deb0c",
+      "Root_private_intake_sha256": "be225f5cd86f1584ff622b364009d4a8822c7142a98d60206f8539126680d5ef",
+      "first_page": "PASS_ACTUAL_ROOT_BROWSER_100_SCAN128",
+      "next_page": "FAIL_409_CURSOR_VERSION_MISMATCH_ROOT_REPRODUCED",
+      "scope": "No Auth token/incident identifier/data value in shared contract; no stored score mutation, forced head change or full scan."
     },
     "previous_deployed_v3": {
       "source_commit": "ccfe7cebf0ca1d3ebe8ce487e43572bb28c6e891",
@@ -116221,7 +116285,100 @@
       "expiry": "exact_existing_session_approval_min_binding_and_24h_guard_unchanged_no_extension",
       "metadata_readonly": "current_heads_older_than_incident_no_new_command_or_release_in_bounded_incident_window; not_historical_head_audit",
       "deployment": "NOT_RUN",
-      "live_retest": "NOT_RUN"
-    }
+      "live_retest": "NOT_RUN",
+      "candidate_source_commit": "5c9ed1c54daed9d5d32526d74029965a49ae7569",
+      "source_ci_run_id": "39148270736",
+      "initial_PR_ci_run_id": "39148388333",
+      "exact_flat_bundle": {
+        "bytes": 166028,
+        "sha256": "be2afb80d6650a7e172ec61a59e9410cf32a59c8c30098da934eede1c7781749",
+        "deployment": "NOT_RUN"
+      },
+      "current_operating_bundle_source": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
+      "actual_next_page_retest": "NOT_RUN",
+      "incident_cause": "UNCONFIRMED"
+    },
+    "candidate_status": "CURSOR_NORMALIZATION_AND_SAFE_REASON_SOURCE_CI_PASSED_NOT_DEPLOYED_INCIDENT_CAUSE_UNCONFIRMED"
+  },
+  "current_public_supply_contract": {
+    "format": "jungsi.current-national-public-supply/v1",
+    "id": "CR-CURRENT-NATIONAL-PUBLIC-20261019-01",
+    "decision_date": "2026-10-19",
+    "status": "ADOPTED_IMPLEMENTATION_AND_HOSTED_ACTIVATION_PENDING",
+    "basis_commit": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
+    "requirements": [
+      "REQ-01",
+      "REQ-03",
+      "REQ-08",
+      "REQ-13",
+      "REQ-20",
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "decision": "2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다.",
+    "pages": [
+      "/admissions/results",
+      "/admissions/possibilities"
+    ],
+    "operations": [
+      "history.search",
+      "offerings.search",
+      "offering.read",
+      "recruitment.read"
+    ],
+    "source": "jungsi_data_ingest.admission_results_current and independently verified current offering/guide metadata; never promote an older frozen release as the current canonical source",
+    "access": "P1 standard/paid without a personal score; P3 offerings/search/detail remains paid, existing active+aal2 admin exception and ownership/auth/relay rules unchanged",
+    "scope": "All currently available eligible national canonical rows, not only an approved school subset; preserve active_service=false and actual-practical exclusions. All searchable does not mean a single unbounded response or automatic bulk retrieval.",
+    "source_flags": "No DB production_allowed/engine_approved/source release flag rewrite; authorise the explicit read provider and public projection separately. Missing unpublished fields remain distinct from source eligibility.",
+    "public_projection": "Existing public history/offering/recruitment DTO and recursive allowlist. Preserve original statistic/cohort/score kind/scale/unit/year/source and scalar types allowed by that DTO; unrepresentable source fields are explicit pending, not fabricated.",
+    "private_exclusions": [
+      "Owner-only diagnostics and raw registry rows",
+      "private filesystem/Storage paths and signed URLs",
+      "row fingerprints and internal command/definition digests",
+      "formula/model/CDF payloads and raw source member bodies",
+      "subject lists, tokens, keys, connection strings and operational limits"
+    ],
+    "missingness": "Missing value, unread/unqualified metadata, officially unpublished, inapplicable and actual zero are distinct. Never fill missing cells with 0 or estimates. Final reserve number is not additional admitted count.",
+    "year_link": "2024-2026 observations are not 2027 offerings. Target recruitment only uses the exact verified target PK; no prefix/name replacement, automatic lineage merge, or invented future-year quota.",
+    "query": "Parameterized bounded page query and selected-page IDs JOIN, stable deterministic cursor sorting with query/user/source binding and head-change409. No per-row DB fetch, N+1, hidden cursor drain, COUNT(*) census, full payload download or implicit new materialization.",
+    "multi_year_history": {
+      "academic_year": "Omitted uses existing history.search optional field",
+      "requested_display_years": [
+        2024,
+        2025,
+        2026
+      ],
+      "global_page_max": 6,
+      "page_size_max": 100,
+      "global_metric_max": 600,
+      "interpretation": "New explicit whole-query UI cap, not a claim that prior three-year page arithmetic was 600. Server per-request ceilings and account-wide atomic charge remain authoritative.",
+      "partial": "Remaining cursor means incomplete query. Only the final unfinished offering group is held; preserve original PK/year and do not claim unseen years complete.",
+      "new_operation": false
+    },
+    "security": "Fresh verified JWT, relay, public.jeongsi_passes, active+aal2 admin exception, RLS app role, no-store, recursive output filtering, shared atomic quota and timeout/read/result caps unchanged. No bypass to repair409.",
+    "expiry": "Reuse current consumer binding expiry unless separately approved; no automatic review approval renewal or access-period extension.",
+    "REQ27": "Source registration/006a/profile migration/usage-v2/new policy activation remain separate and are not accepted by this read-provider change.",
+    "data_team_work": "Existing DB stays readable while national numerical supplementation is prepared locally and cross-reviewed, followed by one final authorised writer batch. No per-school DB upload/recombine/COPY/full reread for this request.",
+    "owners": {
+      "planning": "develop SSOT/generated documents and final review",
+      "service": "feature/application-pre-data-platform current public read adapter, binding validation and tests",
+      "presentation": "feature/presentation-foundation bounded multi-year consumer/BFF/browser intake",
+      "data": "Reuse saved current source/PK/year lineage references; locally prepare missing calculations, no new school DB writes",
+      "Supabase_Owner": "Register exact prepared binding settings after immutable objects/readback and provide digests"
+    },
+    "acceptance": [
+      "Exact source SHA, normal pre-commit/pre-push and CI",
+      "Current public projection scoped real DB read via non-bypass RLS app role, unchanged original canonical heads",
+      "New immutable binding/ref bytes+SHA readback before switching settings",
+      "Standard P1 national school search beyond prior frozen subset; paid P3 year/filter/detail/recruitment consistency",
+      "Pagination/order/partial flags, null/zero/rank semantics and P2/P4 existing behaviour preserved",
+      "No-token/paid/owner/relay/expiry/quota/no-store/nonexposure regression at actual hosted boundary"
+    ],
+    "implementation": "IN_PROGRESS_SERVICE_TEAM",
+    "DB_writes": 0,
+    "hosted_activation": "NOT_RUN",
+    "nationwide_browser_acceptance": "NOT_RUN",
+    "production_ready": false
   }
 }

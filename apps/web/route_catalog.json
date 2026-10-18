@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.77",
-  "source_sha256": "16d3833c9d6ad3da8336108c76ed5cb997f5c1084f3d6f47c65933ab6902a4cf",
+  "spec_version": "1.9.79",
+  "source_sha256": "39f9d928e1387bb39b8d9c20c5c8d7e42e5c7c26f8bfb993619efb83108d2477",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4145,7 +4145,7 @@
     },
     "current_review_connection": {
       "id": "DBD-06-CURRENT-ALL-REVIEW",
-      "status": "V3_HOSTED_FIRST_PAGE_PASS_NEXT_PAGE409_REPORTED_SAFE_CURSOR_DIAGNOSTIC_CANDIDATE_NOT_DEPLOYED",
+      "status": "OWNER_WHOLE_CURRENT_V3_SOURCE_SYNTHETIC_NOT_DEPLOYED_LEGACY_V2_RECEIPTS_PRESERVED",
       "human_scope": "frontend_team_and_administrators_review_first",
       "source_view": "jungsi_data_ingest.admission_results_current",
       "academic_years": [
@@ -6392,7 +6392,7 @@
       },
       "owner_whole_v3": {
         "format": "jungsi.owner-current-review-contract/v1",
-        "status": "CURSOR_TIMESTAMP_NORMALIZATION_AND_SAFE_DIAGNOSTIC_SOURCE_CANDIDATE_INCIDENT_CAUSE_UNCONFIRMED",
+        "status": "HOSTED_FIRST_PAGE_ROOT_VERIFIED_NEXT_CURSOR_409_OPEN",
         "basis_commit": "45fcb44c1821c187816174fc90563f6e313bc423",
         "operation": "current.review.search",
         "route": {
@@ -6487,8 +6487,8 @@
           ]
         },
         "actual_DB": "PASS_SCOPED_EXACT_ID_SQL_AND_SAVED_DTO_WORKING_TREE_ONLY_NOT_FINAL_SNAPSHOT",
-        "hosted_deployment": "NOT_RUN",
-        "browser": "NOT_RUN",
+        "hosted_deployment": "OWNER_REPORTED_BUNDLE_READBACK_MATCH_AND_ROOT_FIRST_PAGE_RUNTIME_VERIFIED",
+        "browser": "ROOT_FIRST_PAGE100_SCAN128_PASS_NEXT_CURSOR409_REPRODUCED_FIX_PENDING",
         "engine_approved": false,
         "production_allowed": false,
         "actual_DB_evidence": {
@@ -6568,6 +6568,16 @@
           "activation": 0,
           "receipt_sha256": "d16a383b2d32ae2d31e0702d87530f7a1176596ed208d61f0239b15a8416f3e5",
           "boundary": "prior_exact_ID_SQL_used_18_view_dependencies; final_guard_adds_direct_release_table_and_preserves_identical_payload_SQL_SHA"
+        },
+        "deployment_progress_note": "Owner가 v3 함수 배포·동일 번들 대조·설정4개 및 BFF설정2개 등록을 보고했다. Root도 실제 관리자 브라우저에서 첫100행/scan128/전체건수미계산/누백 산출·보류·미검토 표시를 독립 확인했다. 수동 다음 범위는409 cursor_version_mismatch로 재현돼 원인별 진단·수정·최종 SHA 재검수를 진행한다. 이미 끝난 등록을 미완료로 다시 요구하지 않는다. 이 검수 API의 제한 승인과 일반 P1 전국 공개 공급은 별개다. 공개 binding 전환·전국 검색 및 REQ27 운영 활성화를 이 영수증으로 완료 처리하지 않는다.",
+        "latest_receipt_intake": {
+          "date": "2026-10-19",
+          "frontend_commit": "e806aafea348c14d0c127858c48153beeb3cebec",
+          "external_receipt_sha256": "c121e83ca7abde958bfefde0bd3489047683ece45b3fa0f7d9812d89f16deb0c",
+          "Root_private_intake_sha256": "be225f5cd86f1584ff622b364009d4a8822c7142a98d60206f8539126680d5ef",
+          "first_page": "PASS_ACTUAL_ROOT_BROWSER_100_SCAN128",
+          "next_page": "FAIL_409_CURSOR_VERSION_MISMATCH_ROOT_REPRODUCED",
+          "scope": "No Auth token/incident identifier/data value in shared contract; no stored score mutation, forced head change or full scan."
         },
         "previous_deployed_v3": {
           "source_commit": "ccfe7cebf0ca1d3ebe8ce487e43572bb28c6e891",
@@ -6655,8 +6665,20 @@
           "expiry": "exact_existing_session_approval_min_binding_and_24h_guard_unchanged_no_extension",
           "metadata_readonly": "current_heads_older_than_incident_no_new_command_or_release_in_bounded_incident_window; not_historical_head_audit",
           "deployment": "NOT_RUN",
-          "live_retest": "NOT_RUN"
-        }
+          "live_retest": "NOT_RUN",
+          "candidate_source_commit": "5c9ed1c54daed9d5d32526d74029965a49ae7569",
+          "source_ci_run_id": "39148270736",
+          "initial_PR_ci_run_id": "39148388333",
+          "exact_flat_bundle": {
+            "bytes": 166028,
+            "sha256": "be2afb80d6650a7e172ec61a59e9410cf32a59c8c30098da934eede1c7781749",
+            "deployment": "NOT_RUN"
+          },
+          "current_operating_bundle_source": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
+          "actual_next_page_retest": "NOT_RUN",
+          "incident_cause": "UNCONFIRMED"
+        },
+        "candidate_status": "CURSOR_NORMALIZATION_AND_SAFE_REASON_SOURCE_CI_PASSED_NOT_DEPLOYED_INCIDENT_CAUSE_UNCONFIRMED"
       },
       "legacy_v2_DTO_contract": {
         "format": "jungsi.current-admission-review/v2",
@@ -7544,7 +7566,7 @@
       "recruitment.read"
     ],
     "status": "FE_967_SOURCE_REVIEWED_C_LOCAL_APPROVED_ACTUAL_TCP31_PASS_EXTERNAL_BROWSER_AND_THREE_FE_FIXES_PENDING",
-    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다.",
+    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다.",
     "estimated_columns": [
       {
         "id": "estimated_applicants",
@@ -8068,7 +8090,9 @@
       "operational_publication": "NOT_RUN",
       "new_operating_deployment_authorized": false,
       "deletion_allowed": false,
-      "default_entitlement_change_allowed": false
+      "default_entitlement_change_allowed": false,
+      "superseded_for_current_consumer_scope": true,
+      "historical_boundary": "2026-10-08 최소 C/학교별 부분 발행의 보존 이력이다. 2026-10-19 전국 현재 정본 공개 결정의 선행 조건으로 재적용하지 않는다."
     }
   },
   "security_contract": {
