@@ -1441,7 +1441,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "24c4da61b1ec59e651514af197de2cee1426752de4f5bf891b07ede247722e0a",
+      "source_sha256": "2c438f6fc514c97eea5cfd2b23fb6863cb0e8cb5f76365fb02b9d30035b5b675",
       "symbols": [
         {
           "kind": "function",
@@ -6238,7 +6238,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "572b81a7dbd09e2798cf8ab2d5067335287e51bef44162baa60391ba2818a631",
+        "source_sha256": "c1f85c6180ed635bd6dff5b1fa95bd4323687c5ab4488d53db2b068fe3b3b498",
         "declared_exports": [
           "CURRENT_REVIEW_VIEW",
           "CURRENT_REVIEW_YEARS",
@@ -6254,7 +6254,9 @@
           "validateCurrentKey",
           "compareCurrentKeys",
           "EncryptedCurrentCursor",
-          "closeCurrentPage"
+          "closeCurrentPage",
+          "CurrentCursorMismatchReason",
+          "CurrentCursorVersionError"
         ]
       },
       {
@@ -6335,7 +6337,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "99dba6a386ca35bc14dd8a744d6af7b9973d4a9534e51a51995b6253fa08a316",
+        "source_sha256": "ca42fe919cf79aef39fb00baa82e8900edb0d0a85d5dc325827810f65f41fd3c",
         "declared_exports": []
       },
       {
@@ -6351,7 +6353,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "3765b4e8198141fbc3d55a37e587714f7b5018b7867c2304301a5dc9aeddff3a",
+        "source_sha256": "b77246963fb325731308eb3420a3c82790f9049e47a8a2d24a41692e2332296c",
         "declared_exports": [
           "CURRENT_REVIEW_ROUTE",
           "CURRENT_REVIEW_PURPOSE",
@@ -8718,7 +8720,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "7aa664c3bbc719fe9240f70d03cfa2aed6ecfee8e5a9b376fa36575c3d4360eb",
+        "source_sha256": "5f08a7968f17fb9dfb1751f67a33814ae2eadd8e3cc7b2526a4a5877338c8c93",
         "declared_exports": []
       },
       {

@@ -2,7 +2,7 @@ import { isOwnerCurrentReview, OWNER_REVIEW_FORMAT, OWNER_REVIEW_WIRE_RECIPE, OW
 /** Reviewer-only current observations. No publication, engine, default-member or frozen-C transition. */
 import { DB_FIELDS, DisplayError, nowMicros, sameJson, utcInstantMicros, utcText } from './official_history_display.ts';
 import type { Json, Row, VerifiedReviewSession } from './official_history_display.ts';
-import { CURRENT_REVIEW_VIEW, compareCurrentKeys, EncryptedCurrentCursor, validateCurrentKey } from './current_admission_display.ts';
+import { CURRENT_REVIEW_VIEW, CurrentCursorVersionError, compareCurrentKeys, EncryptedCurrentCursor, validateCurrentKey } from './current_admission_display.ts';
 import type { CurrentKey, CurrentPageBinding } from './current_admission_display.ts';
 
 export const CURRENT_REVIEW_ROUTE='/api/v1/review/current-admissions';
@@ -44,7 +44,7 @@ export interface CurrentReviewPorts {
   loadDescriptor():Promise<CurrentReviewDescriptor>;
   search(descriptor:CurrentReviewDescriptor,query:CurrentReviewQuery,after:CurrentKey|null):Promise<CurrentReviewRawPage>;
 }
-export interface CurrentReviewTransport { relayToken:string;cursorKey:Uint8Array;pathPrefix:string;environment:'isolated_cloud_review'|'local_verification';now?:()=>number }
+export interface CurrentReviewTransport { relayToken:string;cursorKey:Uint8Array;pathPrefix:string;environment:'isolated_cloud_review'|'local_verification';now?:()=>number;reportCursorMismatch?:(event:{requestId:string;reason:string})=>void }
 
 /** Safe native scalars / raw wire strings only. This is never the old Decimal/native32 codec. */
 export function currentReviewWireJson(value:Json):string {
@@ -140,7 +140,8 @@ export async function currentReviewBinding(d:CurrentReviewDescriptor,q:CurrentRe
 export async function currentReviewHeadSha256(d:CurrentReviewDescriptor,head?:Pick<CurrentReviewRawPage,'commandId'|'commandSha256'|'percentileHead'>):Promise<string> {
   if(head&&(!text(head.commandId)||!head.commandId||head.commandId.length>256||!hash(head.commandSha256)))throw fail('current_review_state_unapproved');
   if(isOwnerCurrentReview(d)&&head)validatePercentileHead(head.percentileHead);
-  return currentReviewSha256({...(isOwnerCurrentReview(d)&&head?{percentile_head:head.percentileHead??null}:{}),format:isOwnerCurrentReview(d)?'jungsi.current-review-wire-revision/v3':isLiveBoundedReview(d)?'jungsi.current-review-wire-revision/v2':'jungsi.current-review-wire-revision/v1',
+  const percentileHead=isOwnerCurrentReview(d)&&head&&head.percentileHead!==null&&head.percentileHead!==undefined?{...(head.percentileHead as Row),updated_at:utcText((head.percentileHead as Row).updated_at as string)}:head?.percentileHead;
+  return currentReviewSha256({...(isOwnerCurrentReview(d)&&head?{percentile_head:percentileHead??null}:{}),format:isOwnerCurrentReview(d)?'jungsi.current-review-wire-revision/v3':isLiveBoundedReview(d)?'jungsi.current-review-wire-revision/v2':'jungsi.current-review-wire-revision/v1',
     qualified_state:d.qualified_state,projection_sha256:d.projection.sha256,...(isLiveBoundedReview(d)&&head?{current_head:{command_id:head.commandId,payload_sha256:head.commandSha256}}:{})});
 }
 /** Syntax validation retains numeric lexemes; nested JSONB is never parsed into JS floating point. */
@@ -292,8 +293,8 @@ export function createCurrentAdmissionReviewHandler(ports:CurrentReviewPorts,t:C
         else after=await cursor.open(q.cursor,binding,now);
       }
       let raw:CurrentReviewRawPage;
-      try {raw=await ports.search(descriptor,q,after);}catch(e){if(q.cursor&&e instanceof DisplayError&&e.code==='current_review_state_unapproved')throw fail('cursor_version_mismatch',409);throw e;}
-      if(live){binding=await currentReviewBinding(descriptor,q,session.subjectId,session.expiresAt,raw);if(adoptedHead!==null&&adoptedHead!==binding.sourceStateSha256)throw fail('cursor_version_mismatch',409);}
+      try {raw=await ports.search(descriptor,q,after);}catch(e){if(q.cursor&&e instanceof DisplayError&&e.code==='current_review_state_unapproved')throw new CurrentCursorVersionError('source_state_unapproved');throw e;}
+      if(live){binding=await currentReviewBinding(descriptor,q,session.subjectId,session.expiresAt,raw);if(adoptedHead!==null&&adoptedHead!==binding.sourceStateSha256)throw new CurrentCursorVersionError('source_heads_changed');}
       else if(q.cursor&&(raw.commandId!==descriptor.qualified_state.command_id||raw.commandSha256!==descriptor.qualified_state.payload_sha256))throw fail('cursor_version_mismatch',409);
       const completed=(t.now??Date.now)();
       if(session.expiresAt<=completed)throw fail('authentication_required',401);
@@ -305,7 +306,8 @@ export function createCurrentAdmissionReviewHandler(ports:CurrentReviewPorts,t:C
       return response(page);
     } catch(e) {
       const error=e instanceof DisplayError?e:fail('backend_dependency_unavailable');
-      return response({status:'error',error:{code:error.code},request_id:id},error.status);
+      if(error instanceof CurrentCursorVersionError){try{t.reportCursorMismatch?.({requestId:id,reason:error.reason});}catch{/* Diagnostic sink never changes the rejection. */}}
+      return response({status:'error',error:{code:error.code,...(error instanceof CurrentCursorVersionError?{reason:error.reason}:{})},request_id:id},error.status);
     }
   };
 }

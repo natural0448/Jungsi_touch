@@ -15,7 +15,7 @@ try {
     descriptorBytes:Number(value('JUNGSI_CURRENT_REVIEW_DESCRIPTOR_BYTES')),
   });
   Deno.serve(createCurrentAdmissionReviewHandler(ports,{relayToken:value('JUNGSI_RELAY_TOKEN'),cursorKey,
-    environment:'isolated_cloud_review',pathPrefix:'/current-admission-review'}));
+    environment:'isolated_cloud_review',pathPrefix:'/current-admission-review',reportCursorMismatch:event=>console.warn(JSON.stringify({event:'current_review_cursor_mismatch',request_id:event.requestId,reason:event.reason}))}));
 } catch {
   Deno.serve(()=>new Response(JSON.stringify({status:'error',error:{code:'security_policy_unavailable'},request_id:crypto.randomUUID().replace(/-/g,'')}),
     {status:503,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}}));

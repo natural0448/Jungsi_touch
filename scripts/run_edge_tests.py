@@ -81,7 +81,7 @@ def owner_review_registration(spec,before):
         return None
     v=c.get('verification',{})
     if (c.get('format')!='jungsi.owner-current-review-contract/v1' or
-        v.get('test_path')!=entry or v.get('test_count')!=28 or
+        v.get('test_path')!=entry or v.get('test_count')!=36 or
         not isinstance(v.get('source_bindings'),list) or not v['source_bindings']):
         raise EdgeFailure('owner_review_verification_invalid')
     required={entry,*['supabase/functions/_shared/'+name+'.ts' for name in
