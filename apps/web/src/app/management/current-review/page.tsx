@@ -6,6 +6,7 @@ import { readFile } from "node:fs/promises";
 import { ConnectionNotice } from "@/components/connection-notice";
 import { PageHead } from "@/components/page-head";
 import { apiMode, getCaller, sessionOrDown, source } from "@/lib/api";
+import { seoulTime } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import "./review.css";
 
@@ -13,7 +14,8 @@ export const metadata: Metadata = { title: "현재 입결 전수 검수" };
 export const dynamic = "force-dynamic";
 
 /*
-  관리·화면팀 전용 전수 검수 화면(현재 정본, 담당자 즉시연결 전달문 2026-10-10 v2).
+  관리·화면팀 전용 전수 검수 화면(현재 정본, 담당자 즉시연결 전달문 2026-10-10 v2 →
+  2026-10-18 v3: 입결 원 관측 + 그 입결에서 계산한 대학식 추정 상위누백·검수 O/X·진단).
   소비자 4개 화면·22 API 와 분리된 검수 경로 호출만 한다. 브라우저 → 이 서버(BFF) →
   current-admission-review Edge 함수. apikey(공개키)·relay·검수자 토큰은 서버에서만 붙이고
   브라우저·HTML 에 내보내지 않는다. cursor 는 불투명 문자열 그대로 전달하며 해독·재작성·
@@ -24,9 +26,23 @@ export const dynamic = "force-dynamic";
 
 const PATH = "/management/current-review";
 const LIMIT = 100;
-const FILTER_KEYS = ["academic_year", "university_q", "department_q", "track", "group", "metric_kind", "cohort"] as const;
+const FILTER_KEYS = ["academic_year", "university_q", "department_q", "track", "group", "metric_kind", "cohort", "activity", "offering_pk", "canonical_result_id"] as const;
 type FilterKey = (typeof FILTER_KEYS)[number];
 
+interface PercentileVariant {
+  upper_cumulative_percent: string | null;
+  strictly_above_percent: string | null;
+  tie_share_percent: string | null;
+  status: string;
+  eligibility_ox: string;
+  reason_code: string | null;
+  release_id: string;
+}
+interface PercentileReview {
+  item: string;
+  ox: string;
+  reason_code: string;
+}
 interface ReviewItem {
   observation_token: string;
   academic_year: number;
@@ -46,6 +62,21 @@ interface ReviewItem {
   review_status: string | null;
   value_availability: string | null;
   hold_reasons: string[] | null;
+  // v3 — 정본·출처 식별, 진단, 산출 누백
+  canonical_result_id?: string | null;
+  source_result_id?: string | null;
+  offering_pk?: string | null;
+  active_service?: boolean | null;
+  management_status?: string | null;
+  row_fingerprint?: string | null;
+  diagnostics?: {
+    missing_current_fields?: string[];
+    integrity_reasons?: string[];
+    overlap_marker_present?: boolean;
+  };
+  calculated_percentiles?: PercentileVariant[];
+  percentile_reviews?: PercentileReview[];
+  percentile_state?: string;
 }
 interface ReviewPage {
   format: string;
@@ -57,6 +88,16 @@ interface ReviewPage {
   matching_source_school_count: number | null;
   items: ReviewItem[];
   next_cursor: string | null;
+  // v3
+  review_version?: string;
+  as_of?: string;
+  approval_expires_at?: string;
+  source_version?: {
+    admission_command_id: string;
+    admission_command_sha256: string;
+    percentile_head: { release_id: string; updated_at: string } | null;
+  };
+  current_scope?: { activity_filter: string; scanned_rows: number | null; empty_items_is_global_no_match: boolean };
 }
 
 type Fetched =
@@ -196,7 +237,11 @@ export default async function Page({ searchParams }: PageProps<"/management/curr
         <p className="crv-note">
           서버가 요청을 거절했습니다 — HTTP {got.status}
           {got.code ? ` · ${got.code}` : ""}{got.requestId ? ` · 요청 ID ${got.requestId}` : ""}.{" "}
-          {got.status === 401 ? "검수 로그인 토큰이 만료됐을 수 있습니다(로그인 스크립트 재실행 후 새로고침)." : "같은 내용이 반복되면 상태·코드·요청 ID 를 담당자에게 전달하세요."}
+          {got.status === 401
+            ? "검수 로그인 토큰이 만료됐을 수 있습니다(로그인 스크립트 재실행 후 새로고침)."
+            : got.status === 403
+              ? "이 계정은 검수 승인 명단에 없거나 승인 기간이 끝났습니다. 등급(관리자·이용권)과 무관하게 승인된 계정만 열립니다."
+              : "같은 내용이 반복되면 상태·코드·요청 ID 를 담당자에게 전달하세요."}
         </p>
       );
     else body = <Results page={got.page} filters={filters} />;
@@ -217,6 +262,16 @@ export default async function Page({ searchParams }: PageProps<"/management/curr
               <label>모집군(정확값)<input name="group" defaultValue={filters.get("group") ?? ""} /></label>
               <label>지표 종류(정확값)<input name="metric_kind" defaultValue={filters.get("metric_kind") ?? ""} /></label>
               <label>집단(정확값)<input name="cohort" defaultValue={filters.get("cohort") ?? ""} /></label>
+              <label>
+                운영 범위
+                <select name="activity" defaultValue={filters.get("activity") ?? "all"}>
+                  <option value="all">전체(활성·비활성)</option>
+                  <option value="active">활성만</option>
+                  <option value="inactive">비활성만</option>
+                </select>
+              </label>
+              <label>모집행 ID(정확값)<input name="offering_pk" defaultValue={filters.get("offering_pk") ?? ""} /></label>
+              <label>정본 ID(정확값)<input name="canonical_result_id" defaultValue={filters.get("canonical_result_id") ?? ""} /></label>
             </div>
             <button className="btn p" type="submit">검색(처음부터)</button>
           </Form>
@@ -233,16 +288,49 @@ function hrefFirst(filters: Map<FilterKey, string>): string {
   return `${PATH}?${q.toString()}`;
 }
 
+const STATE_LABEL: Record<string, string> = {
+  calculated_model_estimate: "산출(모델 추정)",
+  hold: "보류",
+  multiple_variants: "산출본 여러 개",
+  inactive_source: "비활성 원천",
+  percentile_release_not_registered: "누백 릴리스 미등록",
+  not_reviewed_in_current_percentile_release: "현재 릴리스 미검토",
+};
+
 function Results({ page, filters }: { page: ReviewPage; filters: Map<FilterKey, string> }) {
   const items = page.items ?? [];
+  const sv = page.source_version;
+  const scope = page.current_scope;
+  // v3 는 '빈 결과 = 전체 0건'인지 서버가 알려 준다. v2 이하는 next_cursor 유무로만 판단한다
+  const globalNoMatch = scope ? scope.empty_items_is_global_no_match : !page.next_cursor;
   return (
     <>
       <p className="crv-meta num">
-        응답 {page.format} · {page.query_mode} · 이 범위 {items.length}건 · 전체 건수 미계산(count_status: {page.count_status}) ·{" "}
+        응답 {page.format} · {page.query_mode} · 이 범위 {items.length}건
+        {scope?.scanned_rows != null ? `(훑은 행 ${scope.scanned_rows})` : ""} · 전체 건수 미계산(count_status: {page.count_status}) ·{" "}
         {page.publication_status === "not_published" ? "검수 상태 표기(미발행) — 자료가 없다는 뜻이 아님" : page.publication_status}
+        {scope ? ` · 운영 범위 ${scope.activity_filter}` : ""}
       </p>
+      {(sv || page.as_of) && (
+        <p className="crv-meta num">
+          {page.as_of && <>기준 {seoulTime(page.as_of)} · </>}
+          {page.review_version && <>검수판 {page.review_version} · </>}
+          {sv && (
+            <>
+              입결 command {sv.admission_command_id}({sv.admission_command_sha256.slice(0, 12)}) · 누백 릴리스{" "}
+              {sv.percentile_head ? `${sv.percentile_head.release_id}(갱신 ${seoulTime(sv.percentile_head.updated_at)})` : "미등록"}
+            </>
+          )}
+          {page.approval_expires_at && <> · 검수 승인 만료 {seoulTime(page.approval_expires_at)}</>}
+        </p>
+      )}
+      {sv && (
+        <p className="crv-hint">
+          누백은 <b>과거 입결 점수의 대학식 추정 상위누백</b>입니다. 지금 학생의 전체 누백이나 실제 지원자 순위·합격 확률이 아닙니다. 출처가 여러 개이거나 겹침 표시가 있어도 중복 오류로 확정하지 않습니다.
+        </p>
+      )}
       {items.length === 0 ? (
-        <p className="crv-hint">{page.next_cursor ? "이 범위에는 결과가 없지만 다음 범위가 남아 있습니다 — 아래에서 이어 보세요." : "조회 완료 — 조건에 맞는 관측이 없습니다."}</p>
+        <p className="crv-hint">{globalNoMatch ? "조회 완료 — 조건에 맞는 관측이 없습니다." : "이 범위에는 결과가 없지만 다음 범위가 남아 있습니다 — 전체 0건이 아닙니다. 아래에서 이어 보세요."}</p>
       ) : (
         <div className="tblwrap">
           <table className="tb crv-tb">
@@ -254,7 +342,9 @@ function Results({ page, filters }: { page: ReviewPage; filters: Map<FilterKey, 
                 <th scope="col">지표</th>
                 <th scope="col" className="r">값(원문)</th>
                 <th scope="col" className="r">출처 회원</th>
-                <th scope="col">상태</th>
+                <th scope="col">대학식 추정 상위누백</th>
+                <th scope="col">상태 · 진단</th>
+                <th scope="col">식별</th>
               </tr>
             </thead>
             <tbody>
@@ -270,12 +360,29 @@ function Results({ page, filters }: { page: ReviewPage; filters: Map<FilterKey, 
                   </td>
                   <td className="r num">{it.source_member_count ?? "─"}</td>
                   <td>
-                    {[it.review_status, it.value_availability].filter(Boolean).map((s) => (
+                    <Percentiles item={it} />
+                  </td>
+                  <td>
+                    {it.active_service === false && <span className="crv-badge hold">비활성</span>}
+                    {[it.review_status, it.value_availability, it.management_status].filter(Boolean).map((s) => (
                       <span key={s} className="crv-badge">{s}</span>
                     ))}
                     {(it.hold_reasons ?? []).map((h) => (
                       <span key={h} className="crv-badge hold">{h}</span>
                     ))}
+                    {(it.diagnostics?.missing_current_fields ?? []).map((f) => (
+                      <span key={`m-${f}`} className="crv-badge hold">누락 {f}</span>
+                    ))}
+                    {(it.diagnostics?.integrity_reasons ?? []).map((r) => (
+                      <span key={`i-${r}`} className="crv-badge hold">{r}</span>
+                    ))}
+                    {it.diagnostics?.overlap_marker_present && <span className="crv-badge">겹침 표시(중복 확정 아님)</span>}
+                  </td>
+                  <td className="crv-id">
+                    {it.canonical_result_id && <div>정본 {it.canonical_result_id}</div>}
+                    {it.source_result_id && it.source_result_id !== it.canonical_result_id && <div>대표 {it.source_result_id}</div>}
+                    {it.offering_pk !== undefined && <div>모집행 {it.offering_pk ?? "─"}</div>}
+                    {it.row_fingerprint && <div title={it.row_fingerprint}>지문 {it.row_fingerprint.slice(0, 12)}</div>}
                   </td>
                 </tr>
               ))}
@@ -295,5 +402,42 @@ function Results({ page, filters }: { page: ReviewPage; filters: Map<FilterKey, 
         </Form>
       )}
     </>
+  );
+}
+
+/** 산출 누백은 서버가 준 정밀 문자열 그대로 보인다(반올림·0 대체 없음). 산출본이 없으면 그 사유 상태만 보인다 */
+function Percentiles({ item }: { item: ReviewItem }) {
+  const variants = item.calculated_percentiles;
+  if (variants === undefined) return <>─</>;
+  const state = item.percentile_state ?? "";
+  const reviews = item.percentile_reviews ?? [];
+  return (
+    <div className="crv-pct">
+      {variants.length === 0 && <span className="crv-badge hold">{STATE_LABEL[state] ?? state}</span>}
+      {variants.length > 1 && <span className="crv-badge">{STATE_LABEL.multiple_variants}</span>}
+      {variants.map((v, i) => (
+        <div key={`${v.release_id}-${i}`} className="crv-pct-row">
+          <span className={`crv-badge${v.status === "hold" ? " hold" : ""}`}>{STATE_LABEL[v.status] ?? v.status}</span>
+          <span className={`crv-ox ${v.eligibility_ox === "O" ? "o" : "x"}`}>{v.eligibility_ox}</span>
+          {v.upper_cumulative_percent !== null ? (
+            <span className="num" title={`초과 ${v.strictly_above_percent ?? "─"}% · 동점 ${v.tie_share_percent ?? "─"}%`}>
+              상위 {v.upper_cumulative_percent}%
+            </span>
+          ) : (
+            <span className="crv-type">값 없음</span>
+          )}
+          {v.reason_code && <small className="crv-type">{v.reason_code}</small>}
+        </div>
+      ))}
+      {reviews.length > 0 && (
+        <div className="crv-rev">
+          {reviews.map((r, i) => (
+            <span key={`${r.item}-${i}`} className={`crv-badge${r.ox === "X" ? " hold" : ""}`}>
+              {r.item} {r.ox} · {r.reason_code}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

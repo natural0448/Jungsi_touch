@@ -16441,6 +16441,15 @@
         "REQ-24"
       ],
       "summary": "관리자 결정: P1 은 입시결과 표를 먼저 보이고 2027 모집 인원(recruitment.read)은 모집단위마다 Suspense 로 이어 채움(칸에 '불러오는 중', 연결 실패는 그 칸만 '연결 대기', 권한 거절은 '연계 확인 전'). 표 전체를 recruitment 응답까지 기다리던 지연(첫 바이트 약 21초) 완화. history.search 학년도 순차·동시 상한은 그대로."
+    },
+    {
+      "date": "2026-10-19",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "화면팀 변경: 현재 입결 전수 검수(/management/current-review)를 담당자 정본 전체 검수 v3(jungsi.current-admission-review-page/v3, develop 7d48da0 owner_current_review_contract)에 맞춤. 조회 조건에 운영 범위(activity all/active/inactive)·모집행 ID(offering_pk)·정본 ID(canonical_result_id) 추가. 표에 '대학식 추정 상위누백'(calculated_percentiles 의 upper/strictly-above/tie 정밀 문자열 그대로, 반올림·0 대체 없음, 산출/보류·적격 O/X·reason_code)과 percentile_reviews O/X·이유, percentile_state(미등록·미검토·비활성 원천·여러 산출본), 진단(누락 필드·무결성 사유·겹침 표시는 중복 확정 아님), 식별(정본·대표·모집행 ID·행 지문 앞 12자) 표시. 머리에 as_of·review_version·입결 command·누백 릴리스·검수 승인 만료 표시. 빈 items 는 current_scope.empty_items_is_global_no_match 로만 전체 0건 판정. 403 은 승인 명단·기간 안내. 누백은 과거 입결 점수의 대학식 추정값이며 학생 전체 누백·지원자 순위·합격 확률이 아니라고 명시. wrangler vars 에 JUNGSI_CURRENT_REVIEW_URL(공개 함수 주소), APIKEY(공개 publishable 키)는 워커 secret. 방문자 본인 JWT·기존 relay 전달, 공통 검수 토큰 live 미사용, cursor 불투명 전달·자동 수집 없음 유지."
     }
   ],
   "overall_analysis_contract": {
