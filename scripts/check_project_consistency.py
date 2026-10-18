@@ -3006,6 +3006,18 @@ def generated_files(spec,read=None):
                     "검수 UI 계약은 "+w6['UI_proposal']+" 상태이며 현재22API에 새 쓰기 경로가 등록된 것이 아니다. 후보 입력: "+', '.join(w6['UI_required_fields'])+
                     "; 판정 "+', '.join(w6['UI_decisions'])+". 서버는 권한·revision409·불변 감사·idempotency를 유지하며 검수 판정만으로 일반 발행이나 엔진 승인을 자동 수행하지 않는다.\n\n"+
                     "W1 합류: "+w6['W1']+" W3의 bounded 연결과 W4의 제한 기능 수신은 완료 이력을 보존한다. W1~W6 모두가 같은 차단 상태는 아니다.")
+        owner_v3=spec.get('owner_current_review_contract')
+        if isinstance(owner_v3,dict):
+            review_details=("Owner v3 소스 후보는 현재 입결과 현재 입결 기반 대학식 누백을 같은 읽기 전용 RR 스냅샷에서 연결한다. "
+              "입결 command와 누백 release head 중 하나라도 바뀌면 다음 cursor는409다. relay·fresh Auth·명시 승인 subject·최대24시간 승인을 유지한다. "
+              "activity=all/active/inactive와 offering_pk/canonical_result_id 필터를 추가하며 비활성·미산출·보류·여러 검수항목과 변형을 구분한다. "
+              "대학식 누백은 과거 입결 점수의 상위누백이며 학생 전체누백이나 실제 지원자 순위가 아니다. "
+              "현재 원형 scan128·표시100·진단16+overflow 표시, 전체 count는null이다. 빈 items와 cursor는 남은 구간을 뜻한다. "
+              "C 정렬을 보존하므로 DB 기본 collation 색인에서는 대표키 전체 정렬 비용이 남을 수 있다. 128개 인덱스 seek나 실제 지연시간을 보장하지 않는다. "
+              "source_member_count>1은 추가 출처일 수 있어 중복 오류로 판정하지 않는다. 기대 모집행 명부 anti-JOIN은NOT_RUN이며 누락 학교 전수 확인 완료를 뜻하지 않는다. "
+              "v3 descriptor 새 승인·정의/bytes/SHA 고정, Root 실제 DB 검증·배포, 화면팀 URL/APIKEY 설정과 v3 렌더링·브라우저 검수가 남았다. "
+              "기존 v2 배포/화면 영수증은 이력이며 v3 운영 인수가 아니다. REQ27 전체 배포는 이 검수 API의 선행 조건이 아니다.")
+            review_labels[9]="Owner v3는 승인된 current canonical/source ID·offering PK·활성 상태·원문 scalar·출처 지문·두 정본 버전을 반환한다. 비공개 경로와 formula/evidence 본문은 반환하지 않는다. 기존 v2의 닫힌18필드 투영을 보존한다."
         current_review_section=(
             review_labels[0]+"\n\n"+
             table(review_labels[1:6],[[current_review["function_name"],current_review["operation"],route["method"]+" "+route["path"],route["audience"],current_review["status"]]])+

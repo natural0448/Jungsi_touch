@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "bd0f5d4cd94d5db0303939d11511cf2466a675f7716b00b09341a7a37933302a",
+      "source_sha256": "080db9df53ac05bda099e34e07eaf7ad40f8d12ca1b4c0a5e74c22e2bfb24aab",
       "symbols": [
         {
           "kind": "class",
@@ -1441,7 +1441,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "cc0a41942fdcfc709f8f49b6de0f9f5a9a09c63c80fed1569ef8dcd83f16ac65",
+      "source_sha256": "c1ce0b2d674354a7c7bb454a7530c22b14ba14ae427f446347aa5cc24b50b572",
       "symbols": [
         {
           "kind": "function",
@@ -1453,6 +1453,12 @@
           "kind": "function",
           "name": "operation_registration",
           "signature": "def operation_registration(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "owner_review_registration",
+          "signature": "def owner_review_registration(spec, before):",
           "decorators": []
         },
         {
@@ -6268,9 +6274,9 @@
         "declared_exports": []
       },
       {
-        "path": "supabase/functions/_shared/current_admission_review.ts",
+        "path": "supabase/functions/_shared/current_admission_owner.ts",
         "layer": "application",
-        "status": "implemented_live_bounded_v2_actual_connection_verification_in_progress",
+        "status": "implemented_owner_v3_source_synthetic_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -6280,7 +6286,71 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "ddd4f24a92e10b88714aced0fff45a72b77d5885e06c0b65a0b36b23189e4012",
+        "source_sha256": "7b53bad066b6dfa8759b4aacf3aae25431cea6cc8cb136660247a04d98ba2fec",
+        "declared_exports": [
+          "OWNER_REVIEW_FORMAT",
+          "OWNER_REVIEW_PAGE_FORMAT",
+          "OWNER_REVIEW_WIRE_RECIPE",
+          "OWNER_PERCENTILE_VIEW",
+          "OWNER_REVIEW_QUERY_FIELDS",
+          "OWNER_PERCENTILE_FIELDS",
+          "OWNER_REVIEW_FIELDS",
+          "isOwnerCurrentReview",
+          "parseOwnerCurrentQuery",
+          "validateOwnerCurrentQuery",
+          "ownerCurrentProjectionSha256",
+          "validatePercentileHead",
+          "closeOwnerCurrentPage"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_admission_owner_sql.ts",
+        "layer": "infrastructure",
+        "status": "implemented_owner_v3_source_synthetic_operating_NOT_RUN",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "6fa0cde6ec73a9f232c8629626ff615e9698e02b7845424e4391546229bd4b58",
+        "declared_exports": [
+          "buildOwnerCurrentReviewPayloadSql"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_admission_owner_test.ts",
+        "layer": "application",
+        "status": "implemented_owner_v3_source_synthetic_operating_NOT_RUN",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "2870a81494942e350d9639ad07e825f28fd9ffa7e3ebf3d9af04dcec4c0b5ecf",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/current_admission_review.ts",
+        "layer": "application",
+        "status": "implemented_owner_v3_source_synthetic_operating_NOT_RUN",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "3765b4e8198141fbc3d55a37e587714f7b5018b7867c2304301a5dc9aeddff3a",
         "declared_exports": [
           "CURRENT_REVIEW_ROUTE",
           "CURRENT_REVIEW_PURPOSE",
@@ -6311,13 +6381,14 @@
           "createCurrentAdmissionReviewHandler",
           "CURRENT_REVIEW_LIVE_WIRE_RECIPE",
           "isLiveBoundedReview",
-          "currentReviewHeadSha256"
+          "currentReviewHeadSha256",
+          "currentReviewWireRow"
         ]
       },
       {
         "path": "supabase/functions/_shared/current_admission_review_postgres.ts",
         "layer": "data_infrastructure",
-        "status": "implemented_live_bounded_v2_actual_connection_verification_in_progress",
+        "status": "implemented_owner_v3_source_synthetic_operating_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -6327,12 +6398,33 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "f8e44761438e1bb91acfef2dd71fb0eefef7b6ce76f2e866e97cb524de25c66f",
+        "source_sha256": "3cda4b3bbc07092b3a0c8f35b3aee01d7457f6e08626b49a3e704ed2aa365f38",
         "declared_exports": [
           "CurrentReviewInfrastructureSettings",
           "CURRENT_REVIEW_METADATA_SQL",
           "CURRENT_REVIEW_PAYLOAD_SQL",
           "createCurrentReviewInfrastructure",
+          "CURRENT_REVIEW_LIVE_PAYLOAD_SQL",
+          "buildCurrentReviewLivePayloadSql"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_admission_review_sql.ts",
+        "layer": "infrastructure",
+        "status": "implemented_owner_v3_source_synthetic_operating_NOT_RUN",
+        "requirements": [
+          "REQ-01",
+          "REQ-08",
+          "REQ-12",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "1602c4819468694a9416b180da3054eb09db4ef17926615ab3e696a81fbab1f8",
+        "declared_exports": [
+          "CURRENT_REVIEW_METADATA_SQL",
+          "CURRENT_REVIEW_PAYLOAD_SQL",
           "CURRENT_REVIEW_LIVE_PAYLOAD_SQL",
           "buildCurrentReviewLivePayloadSql"
         ]
