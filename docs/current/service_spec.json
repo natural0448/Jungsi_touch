@@ -16425,6 +16425,13 @@
         "SEC-07"
       ],
       "summary": "관리자 결정: 계정당 동시 한도 429 rate_limit_exceeded 는 화면 BFF 가 3초 뒤 한 번만 같은 요청을 다시 보냄(쓰기는 같은 Idempotency-Key, 무한 재시도·한도 변경 없음, analysis_quota_exceeded 는 재시도 안 함). 제한 안내는 '보통 몇 초 뒤 다시 열면 됨 (늦어도 HH:MM 이후)'로 — 서버 Retry-After 는 최악의 경우 만료 시각이라 실제 대기(2~4초)보다 훨씬 늦음. 하루 분석 한도는 별도 문구."
+    },
+    {
+      "date": "2026-10-18",
+      "requirements": [
+        "REQ-24"
+      ],
+      "summary": "불러오는 중 안내를 페이지별 문구로(공통 LoadingNotice + 각 경로 loading.tsx): 1페이지는 '대학 발표 입시결과', 2페이지 '내 성적 리포트', 3페이지 '대학·학과 가능성', 4페이지 '유리한 대학'. 공통 문구가 1페이지에서도 '내 성적 분석'을 말하던 문제 수정."
     }
   ],
   "overall_analysis_contract": {
