@@ -66,12 +66,37 @@ async function codeOf(res: Response, path: string) {
   return code;
 }
 
-async function send(path: string, init: RequestInit): Promise<Response> {
+/*
+  계정당 동시 요청 줄 세우기. 서버는 계정당 동시 2건(concurrent_jobs)까지만 받고 넘치면 429 rate_limit_exceeded 다.
+  1페이지는 학년도 3개를 동시에 검색해 세 번째가 거절됐다(2026-10-18 실측). 같은 워커 안의 요청을 사용자 Bearer 별로
+  최대 MAX_PER_CALLER 건만 내보내고 나머지는 앞 요청이 끝날 때까지 기다린다. 대기열은 비면 지운다(토큰을 오래 들고 있지 않음).
+*/
+const MAX_PER_CALLER = 2;
+const lanes = new Map<string, { active: number; waiting: (() => void)[] }>();
+async function withLane<T>(key: string, run: () => Promise<T>): Promise<T> {
+  let lane = lanes.get(key);
+  if (!lane) lanes.set(key, (lane = { active: 0, waiting: [] }));
+  if (lane.active >= MAX_PER_CALLER) await new Promise<void>((go) => lane!.waiting.push(go));
+  lane.active++;
   try {
-    return await fetch(`${base()}${path}`, { ...init, cache: "no-store" });
-  } catch {
-    throw new ConnectionError("unavailable", "backend_unreachable");
+    return await run();
+  } finally {
+    lane.active--;
+    const next = lane.waiting.shift();
+    if (next) next();
+    else if (lane.active === 0) lanes.delete(key);
   }
+}
+
+async function send(path: string, init: RequestInit): Promise<Response> {
+  const key = new Headers(init.headers).get("Authorization") ?? "anonymous";
+  return withLane(key, async () => {
+    try {
+      return await fetch(`${base()}${path}`, { ...init, cache: "no-store" });
+    } catch {
+      throw new ConnectionError("unavailable", "backend_unreachable");
+    }
+  });
 }
 
 /**

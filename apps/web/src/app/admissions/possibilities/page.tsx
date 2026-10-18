@@ -29,7 +29,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
       kicker={`PAGE ${route.number} · 유료`}
       title={route.label}
       desc="보고 싶은 대학과 학과를 직접 검색하고, 모집단위마다 내 환산점수 · 지원가능성 · 환산 유불리를 따로 확인하세요."
-      side={<Link className="btn" href={page("PAGE-04").path}>유리한 대학 찾기로</Link>}
+      side={<Link prefetch={false} className="btn" href={page("PAGE-04").path}>유리한 대학 찾기로</Link>}
     />
   );
 

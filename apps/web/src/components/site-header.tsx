@@ -20,7 +20,7 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
             <i>touch</i>
           </a>
           <span className="jt-sep" aria-hidden="true" />
-          <Link href="/" className="jt-name">
+          <Link prefetch={false} href="/" className="jt-name">
             정시<em>터치</em>
           </Link>
           <div className="jt-user">
