@@ -40740,7 +40740,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "55d886f7227699cd4141a16012c8d400dfa6faf32787c25fa71d0ee0bf78cbc5",
+        "source_sha256": "5381ed632b7f13a2e9658c8fe3a771a6bbfa71717bba67ad0c642676f2175c9e",
         "symbols": [
           {
             "declarations": [
@@ -42476,7 +42476,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "bc8e80d2875eccf710f32f3e6efbb21bfa0b1d29eb685b7631fc012d87054418",
+        "source_sha256": "227ad4c99b789974d557e158a4f817c33d4e352dfea6b5e42736b3ae1919c31e",
         "symbols": [
           {
             "declarations": [
@@ -42609,6 +42609,38 @@
               {
                 "declarationKind": "export",
                 "def": {
+                  "tsType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "literal",
+                        "repr": "all",
+                        "value": {
+                          "kind": "string",
+                          "string": "all"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "catalog_only",
+                        "value": {
+                          "kind": "string",
+                          "string": "catalog_only"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "NativePayloadMode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
                   "properties": [
                     {
                       "name": "bytes",
@@ -42701,7 +42733,7 @@
                       "accessibility": "private",
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    artifacts: ReadonlyMap<string, SelectedNativeArtifact>,\n    readonly registryHash: string,\n    readonly selectionHash: string,\n  )",
+                      "parameter_source": "(\n    artifacts: ReadonlyMap<string, SelectedNativeArtifact>,\n    readonly registryHash: string,\n    readonly selectionHash: string,\n    selected: ReadonlyMap<string, NativeObject>,\n    readonly payloadMode: NativePayloadMode,\n  )",
                       "params": [
                         {
                           "kind": "identifier",
@@ -42752,6 +42784,53 @@
                             "kind": "keyword",
                             "repr": "string",
                             "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "selected",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "ReadonlyMap",
+                            "value": {
+                              "typeName": "ReadonlyMap",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                },
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "NativeObject",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "NativeObject",
+                                      "specifier": "../domain/json_value.ts"
+                                    },
+                                    "typeName": "NativeObject"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "payloadMode",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "NativePayloadMode",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "NativePayloadMode"
+                            }
                           }
                         }
                       ]
@@ -42809,6 +42888,25 @@
                                 "typeName": "PinnedSourceBytes"
                               }
                             }
+                          },
+                          {
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "payloadMode",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "NativePayloadMode",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "NativePayloadMode"
+                                }
+                              }
+                            },
+                            "right": "all"
                           }
                         ],
                         "returnType": {
@@ -42834,6 +42932,62 @@
                       "isStatic": true,
                       "kind": "method",
                       "name": "prepare"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "kind",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "NativeRuntimeKind",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "NativeRuntimeKind"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "key",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "kind": "method",
+                      "name": "reference"
                     },
                     {
                       "functionDef": {
@@ -42979,6 +43133,37 @@
                                   "kind": "local"
                                 },
                                 "typeName": "SelectedNativeArtifact"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "references",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReadonlyMap",
+                        "value": {
+                          "typeName": "ReadonlyMap",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
                               }
                             }
                           ]
@@ -43240,6 +43425,7 @@
       "layer": "data_infrastructure",
       "symbols": [
         "NATIVE_RUNTIME_KINDS",
+        "NativePayloadMode",
         "NativeRuntimeKind",
         "NativeSourceSelection",
         "PinnedSourceBytes",
@@ -49533,6 +49719,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
           },
           {
+            "importedName": "CATALOG_OPERATIONS",
+            "originalName": "CATALOG_OPERATIONS",
+            "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
+          },
+          {
             "importedName": "CatalogService",
             "originalName": "CatalogService",
             "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
@@ -49638,7 +49829,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
           }
         ],
-        "source_sha256": "f6000b4276e863490065c51e465b327a035f1e4f61873de29d2daed167d6a3f9",
+        "source_sha256": "5fdc8e7553128ed216a6a33bcb462cb59aedf11096e79ff89a86a7dac6e5c162",
         "symbols": [
           {
             "declarations": [
@@ -56285,7 +56476,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "e378654985045b034881ffee7380178bf25571011176c93f6bc36a4997c08e82",
+        "source_sha256": "babf667b18a8d9bacdd2f78a2d17babb2140e6177bdd32141b6c5f53d7c33905",
         "symbols": [
           {
             "declarations": [
@@ -57066,6 +57257,100 @@
                       },
                       "kind": "method",
                       "name": "get"
+                    },
+                    {
+                      "accessibility": "private",
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "bytes",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "assertBucket"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "entries",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeOperator",
+                              "value": {
+                                "operator": "readonly",
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "kind": "typeRef",
+                                    "repr": "Readonly",
+                                    "value": {
+                                      "typeName": "Readonly",
+                                      "typeParams": [
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "NativeObject",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "import",
+                                              "name": "NativeObject",
+                                              "specifier": "../domain/json_value.ts"
+                                            },
+                                            "typeName": "NativeObject"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "assertSelectedMetadata"
                     },
                     {
                       "functionDef": {
@@ -69924,6 +70209,14 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
+            "importedName": "NativePayloadMode",
+            "jsDoc": {
+              "doc": "Invented private registry pins only. Source-byte acceptance is never engine or live acceptance."
+            },
+            "originalName": "NativePayloadMode",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+          },
+          {
             "importedName": "NativeSourceSelection",
             "jsDoc": {
               "doc": "Invented private registry pins only. Source-byte acceptance is never engine or live acceptance."
@@ -69965,7 +70258,7 @@
             "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "b5c1bdb56bc3c5849a702227a99eb71ba7fe5e31d5d0b963d8eecb4c3626a40e",
+        "source_sha256": "3d9ae377491a6f5cc6e3dc172b403fab93760f71ea61c8790cc6863bde72a008",
         "symbols": [
           {
             "declarations": [
@@ -70021,7 +70314,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(text?: string)",
+                  "parameter_source": "(text?: string, bucketCap = 16384)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -70032,6 +70325,20 @@
                         "repr": "string",
                         "value": "string"
                       }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "bucketCap",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "right": "16384"
                     }
                   ]
                 },
@@ -70105,6 +70412,70 @@
               }
             ],
             "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(f: Awaited<ReturnType<typeof fixture>>, patch: NativeObject = {})",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "f",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Awaited",
+                        "value": {
+                          "typeName": "Awaited",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ReturnType",
+                              "value": {
+                                "typeName": "ReturnType",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeQuery",
+                                    "repr": "fixture",
+                                    "value": "fixture"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "patch",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "deferred"
           }
         ]
       },
@@ -74351,6 +74722,14 @@
       "declarations": {
         "imports": [
           {
+            "importedName": "API_OPERATION_IDS",
+            "jsDoc": {
+              "doc": "Entirely synthetic selected graph. No approved input, network or database operations."
+            },
+            "originalName": "API_OPERATION_IDS",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
             "importedName": "AccessError",
             "originalName": "AccessError",
             "src": "supabase/functions/_shared/jungsi/application/access.ts"
@@ -74419,7 +74798,7 @@
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "256ba39712b79bc1c877419ec918aee51e688128950b47ce1333673c649b4a4e",
+        "source_sha256": "3677b27128eead750b9046fb52f96eb886b028f8b2800f10ad272a42bca89c01",
         "symbols": [
           {
             "declarations": [
@@ -74428,7 +74807,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(\n  options: {\n    artifactCache?: VerifiedArtifactCache;\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
+                  "parameter_source": "(\n  options: {\n    artifactCache?: VerifiedArtifactCache;\n    deferredExam?: boolean;\n    deferredVersion?: string;\n    costsForApproved?: boolean;\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | \"health.ready\" | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
                   "params": [
                     {
                       "kind": "assign",
@@ -74454,6 +74833,33 @@
                                     },
                                     "typeName": "VerifiedArtifactCache"
                                   }
+                                }
+                              },
+                              {
+                                "name": "deferredExam",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              },
+                              {
+                                "name": "deferredVersion",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "costsForApproved",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
                                 }
                               },
                               {
@@ -74499,6 +74905,14 @@
                                           "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts"
                                         },
                                         "typeName": "ApiOperationId"
+                                      }
+                                    },
+                                    {
+                                      "kind": "literal",
+                                      "repr": "health.ready",
+                                      "value": {
+                                        "kind": "string",
+                                        "string": "health.ready"
                                       }
                                     },
                                     {
@@ -74625,7 +75039,7 @@
           "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
           "targets": [
             {
-              "kind": "type",
+              "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
             }
           ]
@@ -80456,5 +80870,5 @@
     "tests/edge/test_year_equating.ts",
     "tests/edge/test_score_input_policy.ts"
   ],
-  "unit_count": 644
+  "unit_count": 656
 }

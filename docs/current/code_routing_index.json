@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "a9f2a58cc5e159855d42961e7bbe1c2c511dc144b7dc7dc5c16da623a39743d3",
+      "source_sha256": "bd0f5d4cd94d5db0303939d11511cf2466a675f7716b00b09341a7a37933302a",
       "symbols": [
         {
           "kind": "class",
@@ -976,6 +976,12 @@
           "kind": "function",
           "name": "validate_backend_safe_observation_plan",
           "signature": "def validate_backend_safe_observation_plan(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_catalog_payload_scope",
+          "signature": "def validate_catalog_payload_scope(spec):",
           "decorators": []
         },
         {
@@ -7865,7 +7871,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "55d886f7227699cd4141a16012c8d400dfa6faf32787c25fa71d0ee0bf78cbc5",
+        "source_sha256": "5381ed632b7f13a2e9658c8fe3a771a6bbfa71717bba67ad0c642676f2175c9e",
         "declared_exports": [
           "NativeDataProvider",
           "NativeForecastInputs",
@@ -7900,13 +7906,14 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "bc8e80d2875eccf710f32f3e6efbb21bfa0b1d29eb685b7631fc012d87054418",
+        "source_sha256": "227ad4c99b789974d557e158a4f817c33d4e352dfea6b5e42736b3ae1919c31e",
         "declared_exports": [
           "NATIVE_RUNTIME_KINDS",
           "NativeRuntimeKind",
           "NativeSourceSelection",
           "PinnedSourceBytes",
-          "SelectedNativeArtifact"
+          "SelectedNativeArtifact",
+          "NativePayloadMode"
         ]
       },
       {
@@ -8119,7 +8126,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "f6000b4276e863490065c51e465b327a035f1e4f61873de29d2daed167d6a3f9",
+        "source_sha256": "5fdc8e7553128ed216a6a33bcb462cb59aedf11096e79ff89a86a7dac6e5c162",
         "declared_exports": [
           "NativeRuntimeRequest"
         ]
@@ -8344,7 +8351,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "e378654985045b034881ffee7380178bf25571011176c93f6bc36a4997c08e82",
+        "source_sha256": "babf667b18a8d9bacdd2f78a2d17babb2140e6177bdd32141b6c5f53d7c33905",
         "declared_exports": [
           "StorageArtifactLimits",
           "StorageArtifactSettings",

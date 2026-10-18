@@ -310,10 +310,7 @@ export class SupabaseArtifactClient {
       clearTimeout(timer);
     }
   }
-  async artifact(raw: Readonly<NativeObject>): Promise<VerifiedStorageArtifact> {
-    // Snapshot the selected entry before any await; later caller mutations cannot repin a read.
-    const entry = cloneNativeJson(object(raw)), key = this.validateSelectedReference(entry);
-    const bytes = Number(entry.bytes);
+  private async assertBucket(bytes: number): Promise<void> {
     const bucket = parsed(
       await this.get(
         "bucket/" + encodeURIComponent(this.settings.bucket),
@@ -327,6 +324,22 @@ export class SupabaseArtifactClient {
     if (!positiveInteger(cap) || cap > this.settings.limits.maxBucketBytes || cap < bytes) {
       fail("storage_bucket_limit_unverified");
     }
+  }
+  /** One fresh metadata response checks every selected reference, including deferred bodies. */
+  async assertSelectedMetadata(entries: readonly Readonly<NativeObject>[]): Promise<void> {
+    if (!entries.length) fail("storage_reference_invalid");
+    let maximum = 0;
+    for (const entry of entries) {
+      this.validateSelectedReference(entry);
+      maximum = Math.max(maximum, Number(entry.bytes));
+    }
+    await this.assertBucket(maximum);
+  }
+  async artifact(raw: Readonly<NativeObject>): Promise<VerifiedStorageArtifact> {
+    // Snapshot the selected entry before any await; later caller mutations cannot repin a read.
+    const entry = cloneNativeJson(object(raw)), key = this.validateSelectedReference(entry);
+    const bytes = Number(entry.bytes);
+    await this.assertBucket(bytes);
     const path = "object/authenticated/" + encodeURIComponent(this.settings.bucket) + "/" +
       key.split("/").map(encodeURIComponent).join("/");
     const load = () => this.get(path, bytes);

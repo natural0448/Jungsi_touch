@@ -1,7 +1,7 @@
 /** One request owns one binding, read budget, current-head reader and native provider graph. */
 import { AccessError } from "../application/access.ts";
 import type { ApiOperationId } from "../application/api_dispatch.ts";
-import { CatalogService } from "../application/catalog.ts";
+import { CATALOG_OPERATIONS, CatalogService } from "../application/catalog.ts";
 import type { RequestClockPort } from "../application/ports.ts";
 import { RepositoryUsageReplays } from "../application/usage_service.ts";
 import { NativeDataProvider } from "./native_data_provider.ts";
@@ -152,6 +152,7 @@ export class NativeRuntimeRequest {
         controls.read("selection"),
       ]);
       this.assertArtifactScope(selection, binding);
+      const catalogOnly = CATALOG_OPERATIONS.some((id) => id === this.operation);
       const snapshot = await NativeSourceSelection.prepare(
         new SupabaseArtifactClient(
           { projectUrl: binding.projectUrl, ...binding.storage },
@@ -173,6 +174,7 @@ export class NativeRuntimeRequest {
           sha256: binding.references.selection.sha256,
           maxBytes: binding.references.selection.bytes,
         },
+        catalogOnly ? "catalog_only" : "all",
       );
       const data = new NativeDataProvider(snapshot, {
         heads: controls,
@@ -183,6 +185,15 @@ export class NativeRuntimeRequest {
       await data.preflight();
       const policy = (await this.budget()).policy;
       for (const exam of policy.exams.values()) {
+        if (catalogOnly) {
+          const reference = snapshot.reference("exam_pack", exam.examId);
+          if (
+            !reference || reference.version !== exam.packVersion ||
+            Object.hasOwn(reference, "academic_year") &&
+              reference.academic_year !== exam.academicYear
+          ) fail();
+          continue;
+        }
         const pack = await data.getExamPack(exam.examId);
         if (
           !pack || pack.packVersion !== exam.packVersion || pack.academicYear !== exam.academicYear

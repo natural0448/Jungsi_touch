@@ -1676,7 +1676,7 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         live=epoch_spec['supabase_deployment_contract']['live_execution']
         self.assertEqual(live['backend_safe_observation_plan']['synthetic_verification']['full_suite_expected'],584)
         self.assertEqual(live['admin_session_identity_fix']['synthetic_verification']['full_suite_expected'],590)
-        self.assertEqual(epoch_spec['edge_harness']['unit_count'],644)
+        self.assertEqual(epoch_spec['edge_harness']['unit_count'],656)
         self.assertIn('관리자 세션의 예산 연결 수정 후보 · 미배포',live_execution_document(epoch_spec))
 
     def test_admin_identity_fix_rejects_missing_or_stale_source_and_test_binding(self):
@@ -2726,3 +2726,22 @@ class ServicePerformanceBoundaryTests(unittest.TestCase):
         for section,field,value in [('batch_cr','status','IMPLEMENTED'),('activation','deploy','PASS'),('activation','006_sql_changed',True)]:
             spec=self.source();spec['service_performance_contract'][section][field]=value
             self.assertTrue(validate_service_performance(spec))
+
+
+class CatalogPayloadBoundaryTests(unittest.TestCase):
+    def source(self):
+        return json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
+
+    def test_catalog_projection_cannot_skip_reference_auth_or_whole_readiness(self):
+        from check_project_consistency import validate_catalog_payload_scope
+        spec=self.source();self.assertEqual(validate_catalog_payload_scope(spec),[])
+        for field,value in [('operations',['history.search','university.analyze']),('all_selected_reference_metadata',False),('health_ready','catalog_only'),('current_checks',[])]:
+            changed=deepcopy(spec);changed['catalog_payload_scope_contract'][field]=value
+            self.assertTrue(validate_catalog_payload_scope(changed))
+
+    def test_catalog_projection_requires_separate_parent_and_additive_test_evidence(self):
+        from check_project_consistency import validate_catalog_payload_scope
+        spec=self.source();spec['catalog_payload_scope_contract']['verification']['added_edge_tests']=0
+        self.assertTrue(validate_catalog_payload_scope(spec))
+        spec=self.source();spec['service_performance_contract']['parent_cache_candidate']['preserved']=False
+        self.assertTrue(validate_catalog_payload_scope(spec))

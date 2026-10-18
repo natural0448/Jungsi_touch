@@ -921,7 +921,7 @@ def validate_score_input_policy(spec):
     verification=c.get("verification",{});bindings=c.get("current_descendant_source_bindings",{})
     expected_paths={"supabase/functions/_shared/jungsi/application/usage_service.ts","tests/edge/test_runtime_budget.ts","tests/edge/test_usage_service.ts"}
     indexed={p:v.get("declarations",{}).get("source_sha256") for p,v in spec.get("edge_harness",{}).get("files",{}).items()}
-    if (verification.get("baseline_edge_unit_count")!=590 or verification.get("new_policy_test_path")!="tests/edge/test_score_input_policy.ts" or verification.get("new_policy_test_count")!=31 or spec.get("edge_harness",{}).get("unit_count")!=(644 if spec.get("service_performance_contract") else 624) or verification.get("extension_route_case_count")!=3 or set(bindings)!=expected_paths or any(not re.fullmatch(r"[a-f0-9]{64}",str(value)) or value!=indexed.get(path) for path,value in bindings.items())):errors.append("REQ-27 current descendant source/test registration drift")
+    if (verification.get("baseline_edge_unit_count")!=590 or verification.get("new_policy_test_path")!="tests/edge/test_score_input_policy.ts" or verification.get("new_policy_test_count")!=31 or spec.get("edge_harness",{}).get("unit_count")!=(656 if spec.get("catalog_payload_scope_contract") else 644 if spec.get("service_performance_contract") else 624) or verification.get("extension_route_case_count")!=3 or set(bindings)!=expected_paths or any(not re.fullmatch(r"[a-f0-9]{64}",str(value)) or value!=indexed.get(path) for path,value in bindings.items())):errors.append("REQ-27 current descendant source/test registration drift")
     extension=c.get("extension_implementation_bindings",{});evidence=c.get("extension_runtime_test_bindings",{})
     expected_service="supabase/functions/_shared/jungsi/application/score_input_service.ts"
     expected_evidence={"supabase/functions/_shared/jungsi/application/api_dispatch.ts","supabase/functions/_shared/jungsi/infrastructure/api_http.ts","supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts","tests/edge/test_score_input_policy.ts","tests/edge/public_api_contract_fixture.ts","tests/edge/synthetic_api_contract.ts"}
@@ -937,10 +937,22 @@ def validate_service_performance(spec):
         (cache.get("max_entries"),cache.get("max_source_bytes"),cache.get("max_age_ms"))!=(16,4194304,60000) or cache.get("logical_charge_on_hit")is not True or cache.get("cross_request_queue")is not False or
         set(cache.get("fresh_checks",[]))!={"binding","expiry","head","registry_selection_approval","bucket_privacy_and_cap","relay_JWT","current_tier","ownership","shared_atomic_usage"} or
         set(cache.get("excluded",[]))!={"head","registry_selection_decisions","usage_policy","user_responses","authorization","reservations","pending_promises"}):errors.append("Service performance cache trust/budget boundary drift")
-    if (proof.get("baseline_edge_tests")!=624 or proof.get("added_edge_tests")!=20 or proof.get("current_edge_tests")!=644 or spec.get("edge_harness",{}).get("unit_count")!=644 or
+    if (proof.get("baseline_edge_tests")!=624 or proof.get("added_edge_tests")!=20 or proof.get("current_edge_tests")!=(656 if spec.get("catalog_payload_scope_contract") else 644) or spec.get("edge_harness",{}).get("unit_count")!=(656 if spec.get("catalog_payload_scope_contract") else 644) or
         set(proof.get("test_paths",[]))!={"tests/edge/test_supabase_artifacts.ts","tests/edge/test_runtime_controls.ts","tests/edge/test_runtime_context.ts"} or proof.get("live_auth_DB_Storage")!="NOT_RUN" or proof.get("deployment")!="NOT_RUN"):errors.append("Service performance additive test/evidence drift")
     if (batch.get("status")!="PROPOSED_NOT_IMPLEMENTED" or batch.get("registered_operation_count")!=25 or len(spec.get("operations",[]))!=25 or c.get("retry",{}).get("server_wait")!="NOT_IMPLEMENTED_NO_SOCKET_OR_TRANSACTION_QUEUE" or
         activation.get("006_sql_changed")is not False or activation.get("deploy")!="NOT_RUN" or activation.get("candidate_includes_REQ27")is not True):errors.append("Service performance proposed API/activation boundary drift")
+    return errors
+
+def validate_catalog_payload_scope(spec):
+    c=spec.get("catalog_payload_scope_contract");errors=[]
+    required=tuple(int(x) for x in spec.get("version","0.0.0").split("."))>=(1,9,75)
+    if c is None:return ["Catalog payload scope contract missing"] if required else []
+    if (c.get("format")!="jungsi.catalog-payload-scope/v1" or c.get("status")!="SOURCE_CANDIDATE_NOT_DEPLOYED" or set(c.get("operations",[]))!={"history.search","recruitment.read","offerings.search","offering.read"} or
+        c.get("all_selected_reference_metadata")is not True or c.get("health_ready")!="all" or c.get("payload_mode")!="catalog_only" or c.get("new_API_or_scope_approval")is not False or c.get("rollout_or_deployment")is not False or c.get("source032_drop_in_accepted")is not False or
+        set(c.get("current_checks",[]))!={"binding","expiry","head","registry_selection_scope_and_approval","all_reference_shape_and_limits","fresh_private_bucket_and_maximum_selected_bytes","relay_JWT","current_tier","ownership","shared_atomic_usage","logical_charge_on_cache_hit"}):errors.append("Catalog payload trust/operation boundary drift")
+    v=c.get("verification",{});parent=spec.get("service_performance_contract",{}).get("parent_cache_candidate",{})
+    if (v.get("parent_edge_tests")!=644 or v.get("added_edge_tests")!=12 or v.get("current_edge_tests")!=656 or spec.get("edge_harness",{}).get("unit_count")!=656 or v.get("live_latency")!="NOT_RUN" or v.get("deployment")!="NOT_RUN" or
+        parent.get("commit")!="7d53ddad081115c97a23faa7f1a4784866612410" or parent.get("Edge")!=644 or parent.get("preserved")is not True):errors.append("Catalog payload additive parent/test evidence drift")
     return errors
 
 SECURITY_REQUIREMENTS={"REQ-24","REQ-25","REQ-26"}
@@ -3436,7 +3448,13 @@ def generated_files(spec,read=None):
     performance=spec.get("service_performance_contract")
     if performance:
         cache=performance["cache"];proof=performance["verification"];batch=performance["batch_cr"];activation=performance["activation"]
-        section=("\n\n## 서비스 성능 후보와 P1 조회 계약\n\n"+performance["id"]+" / "+performance["status"]+". SHA·길이·버전이 검증된 불변 본문만 worker 메모리에서 재사용한다. 최대16항목·원문4MiB·60초이며 파싱 트리의 추가 heap 비용이 있다. 현재 head·만료·registry/selection·버킷 비공개/상한·relay/JWT·현재 이용권/소유권·공유 원자 사용량은 매 요청 검사한다. 적중도 논리 요청/바이트를 차감하고 실제 GET/바이트를 별도 계수한다. 사용자 응답·권한·예산·진행 Promise는 저장하지 않는다. 동시 miss는 독립된 요청 한도/timeout으로 읽으며 공유 큐가 없다.\n\n검증은 기존624+신규20=644 합성 회귀와 기존 oracle993이다. 오프라인 fake-fetch 계수는 실 지연/전체HTTP 인수를 증명하지 않는다. 실제 Auth/DB/Storage 및 배포는 "+proof["deployment"]+".\n\n"+batch["id"]+"는 "+batch["status"]+"다. "+batch["existing_option"]+" "+batch["year_mapping"]+" "+batch["proposed_extension"]+" "+batch["query"]+"\n\n재시도: "+performance["retry"]["client_rule"]+" 서버 대기는 별도 설계이며 현재 추가하지 않는다.\n\n배포 차이: "+activation["drop_in_032_compatibility"]+" "+activation["path"]+" 006a·기존 프로필 전환·usage/v2·신규3 scope·실제 반례·배포/활성화는 NOT_RUN이다.\n")
+        section=("\n\n## 서비스 성능 후보와 P1 조회 계약\n\n"+performance["id"]+" / "+performance["status"]+". SHA·길이·버전이 검증된 불변 본문만 worker 메모리에서 재사용한다. 최대16항목·원문4MiB·60초이며 파싱 트리의 추가 heap 비용이 있다. 현재 head·만료·registry/selection·버킷 비공개/상한·relay/JWT·현재 이용권/소유권·공유 원자 사용량은 매 요청 검사한다. 적중도 논리 요청/바이트를 차감하고 실제 GET/바이트를 별도 계수한다. 사용자 응답·권한·예산·진행 Promise는 저장하지 않는다. 동시 miss는 독립된 요청 한도/timeout으로 읽으며 공유 큐가 없다.\n\n첫 캐시 후보의 검증은 기존624+신규20=644 합성 회귀와 기존 oracle993이다. 오프라인 fake-fetch 계수는 실 지연/전체HTTP 인수를 증명하지 않는다. 실제 Auth/DB/Storage 및 배포는 "+proof["deployment"]+".\n\n"+batch["id"]+"는 "+batch["status"]+"다. "+batch["existing_option"]+" "+batch["year_mapping"]+" "+batch["proposed_extension"]+" "+batch["query"]+"\n\n재시도: "+performance["retry"]["client_rule"]+" 서버 대기는 별도 설계이며 현재 추가하지 않는다.\n\n배포 차이: "+activation["drop_in_032_compatibility"]+" "+activation["path"]+" 006a·기존 프로필 전환·usage/v2·신규3 scope·실제 반례·배포/활성화는 NOT_RUN이다.\n")
+        for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync"):
+            target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
+    scoped=spec.get("catalog_payload_scope_contract")
+    if scoped:
+        section=("\n\n## 카탈로그 전용 본문 선택 로딩 후속 후보\n\n"+scoped["id"]+" / "+scoped["status"]+". 별도 보존한 첫 캐시 후보7d53dda는 정상 훅/source·PR CI Python1125·Edge644·oracle993 PASS다. 현재 후속은 기존644+신규12=656 합성 회귀로 따로 검수한다.\n\n"+", ".join(scoped["operations"])+"만 catalog 본문을 읽는다. registry/selection의 전체선택 참조·승인·scope·형식·크기와 fresh 비공개 버킷의 전체선택 최대길이를 검사한다. policy exam의 선택참조 version/명시year도 일치시킨다. 실제 소비 catalog의 SHA·길이·버전·native decode는 그대로다. 사용하지 않은 exam/conversion 본문은 읽지도 검증했다고 기록하지도 않는다. 잘못된 참조 메타데이터는 이 분리로 통과시키지 않는다.\n\n미로딩 scoring 자료를 요구하면 runtime_dependency_not_loaded503이며 미선택 null/pending과 구분한다. 카탈로그 preflight는 catalog_payload_and_all_selected_reference_metadata만 검증했다고 기록한다. 나머지21 operation은 자료가 필요한 기존 경로에서 전체 선택 그래프 검사를 유지하고 health.ready도 전체 검사를 유지한다. JWT/현재권한/소유권/head·만료·공유 원자 예산·기존 작업 비용·반환량·읽기/시간 상한은 바꾸지 않는다. 캐시 적중은 해당 소비 본문의 cold 논리읽기 차감을 유지한다.\n\nSource 합성/오프라인 I/O 계수와 실제 응답시간 인수는 별도다. 새 API·운영 승인 확대·REQ27전환·032 drop-in·실제 DB/배포/활성화는 NOT_RUN이다.\n")
         for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync"):
             target=spec["current_documents"].get(key)
             if target in files:files[target]+=section
@@ -3497,7 +3515,7 @@ def validate_forecast_contract(spec):
 
 
 def validate_spec(spec):
-    errors=validate_sync_policy(spec) + validate_opening_security_operations(spec) + validate_score_input_policy(spec) + validate_service_performance(spec)
+    errors=validate_sync_policy(spec) + validate_opening_security_operations(spec) + validate_score_input_policy(spec) + validate_service_performance(spec) + validate_catalog_payload_scope(spec)
     display=spec.get('official_history_db_display_contract')
     try: display_required=tuple(int(v) for v in spec.get('version','0.0.0').split('.')) >= (1,9,17)
     except (ValueError,TypeError): display_required=False

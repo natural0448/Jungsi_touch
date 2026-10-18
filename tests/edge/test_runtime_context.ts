@@ -1,5 +1,8 @@
 /** Entirely synthetic selected graph. No approved input, network or database operations. */
-import type { ApiOperationId } from "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts";
+import {
+  API_OPERATION_IDS,
+  type ApiOperationId,
+} from "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts";
 import { AccessError } from "../../supabase/functions/_shared/jungsi/application/access.ts";
 import {
   nativeJsonText,
@@ -18,10 +21,13 @@ import {
 async function fixture(
   options: {
     artifactCache?: VerifiedArtifactCache;
+    deferredExam?: boolean;
+    deferredVersion?: string;
+    costsForApproved?: boolean;
     extraSelection?: boolean;
     unapproved?: boolean;
     maxReads?: number;
-    operation?: ApiOperationId | null;
+    operation?: ApiOperationId | "health.ready" | null;
     approvedOperations?: ApiOperationId[];
   } = {},
 ) {
@@ -48,11 +54,24 @@ async function fixture(
     archive_only: false,
     source_timezone: "Asia/Seoul",
   };
+  const unused = new TextEncoder().encode("SYNTHETIC-unused-body-not-JSON");
+  const examEntry: NativeObject = {
+    ...entry,
+    kind: "exam_pack",
+    key: "SYNTHETIC-exam",
+    version: options.deferredVersion ?? "SYNTHETIC-pack",
+    object_key: "SYNTHETIC/unused-exam.json",
+    bytes: unused.length,
+    sha256: "a".repeat(64),
+  };
   const f = await syntheticRuntimeBinding(
     (d) => {
       d.scope = {
         operations: options.approvedOperations ?? ["history.search"],
-        artifacts: [{ kind: "catalog", key: "service" }],
+        artifacts: [
+          { kind: "catalog", key: "service" },
+          ...(options.deferredExam ? [{ kind: "exam_pack", key: "SYNTHETIC-exam" }] : []),
+        ],
       };
       if (options.maxReads) {
         ((d.limits as NativeObject).read as NativeObject).max_requests = options.maxReads;
@@ -60,11 +79,15 @@ async function fixture(
     },
     () => {},
     (bodies) => {
-      bodies.registry = nativeJsonText({ format: "jungsi.data-registry/v1", entries: [entry] });
+      bodies.registry = nativeJsonText({
+        format: "jungsi.data-registry/v1",
+        entries: [entry, ...(options.deferredExam ? [examEntry] : [])],
+      });
       bodies.selection = nativeJsonText({
         format: "jungsi.runtime-selection/v1",
         required: [
           { kind: "catalog", key: "service" },
+          ...(options.deferredExam ? [{ kind: "exam_pack", key: "SYNTHETIC-exam" }] : []),
           ...(options.extraSelection ? [{ kind: "exam_pack", key: "SYNTHETIC-extra" }] : []),
         ],
       });
@@ -75,7 +98,14 @@ async function fixture(
         version: "SYNTHETIC-policy",
         approval_reference_sha256: "a".repeat(64),
         expires_at: "2026-10-15T00:30:00Z",
-        exams: [],
+        exams: options.deferredExam
+          ? [{
+            exam_id: "SYNTHETIC-exam",
+            pack_version: "SYNTHETIC-pack",
+            academic_year: 2027,
+            eligible_offering_count: 0,
+          }]
+          : [],
         dimensions: [
           "request_window",
           "distinct_scores",
@@ -90,12 +120,20 @@ async function fixture(
             standard: 100,
             paid: 100,
           })),
-        operations: [{
-          operation: "history.search",
-          reserved_result_bytes: 512,
-          base_units: 0,
-          per_offering_units: 0,
-        }],
+        operations: (options.costsForApproved
+          ? options.approvedOperations ?? ["history.search"]
+          : ["history.search"])
+          .filter((operation) =>
+            operation !== "session.read"
+          ).map((operation) => ({
+            operation,
+            reserved_result_bytes: 512,
+            base_units:
+              ["overall.analyze", "university.analyze", "candidates.build"].includes(operation)
+                ? 1
+                : 0,
+            per_offering_units: 0,
+          })),
       });
     },
   );
@@ -126,6 +164,7 @@ async function fixture(
       if (path.includes("/bucket/")) {
         body = '{"id":"synthetic-private","public":false,"file_size_limit":65536}';
       } else if (path.endsWith("/catalog.json")) body = artifact.bytes;
+      else if (path.endsWith("/unused-exam.json")) body = unused;
       else {
         const name = path.split("/").at(-1)!.replace(".json", "");
         assert(Object.hasOwn(f.body, name));
@@ -259,4 +298,69 @@ Deno.test("warm artifact cannot bypass a fresh binding operation scope or expiry
   expired.now(999999999999999999n);
   await denied(() => expired.context.data());
   equal(expired.calls.length, 0);
+});
+
+Deno.test("only the four catalog reads omit unused payloads under approved metadata", async () => {
+  for (
+    const operation of [
+      "history.search",
+      "recruitment.read",
+      "offerings.search",
+      "offering.read",
+    ] as const
+  ) {
+    const f = await fixture({
+      deferredExam: true,
+      operation,
+      approvedOperations: [operation],
+      costsForApproved: true,
+    });
+    const data = await f.context.data();
+    assert(await data.getCatalog());
+    const receipt = await data.preflight();
+    equal(receipt.verification_scope, "catalog_payload_and_all_selected_reference_metadata");
+    assert(!f.calls.some((url) => url.endsWith("unused-exam.json")));
+    equal(f.sqlCalls(), 0);
+  }
+});
+Deno.test("catalog graph cannot silently supply deferred scoring data as missing", async () => {
+  const f = await fixture({ deferredExam: true }), data = await f.context.data();
+  await denied(() => data.getExamPack("SYNTHETIC-exam"), "runtime_dependency_not_loaded");
+  assert(!f.calls.some((url) => url.endsWith("unused-exam.json")));
+});
+Deno.test("catalog graph rejects usage exam metadata version conflicts without reading unused body", async () => {
+  const f = await fixture({ deferredExam: true, deferredVersion: "SYNTHETIC-wrong" });
+  await denied(() => f.context.data(), "security_policy_unavailable");
+  assert(!f.calls.some((url) => url.endsWith("unused-exam.json")));
+});
+Deno.test("catalog projection warm body still consumes the same logical read budget", async () => {
+  const cache = new VerifiedArtifactCache(),
+    cold = await fixture({ deferredExam: true, artifactCache: cache });
+  await cold.context.data();
+  const limited = await fixture({
+    deferredExam: true,
+    artifactCache: cache,
+    maxReads: cold.calls.length - 1,
+  });
+  await denied(() => limited.context.data());
+  equal(limited.sqlCalls(), 0);
+});
+Deno.test("all other operation contexts and full readiness retain noncatalog body integrity checks", async () => {
+  const catalog = ["history.search", "recruitment.read", "offerings.search", "offering.read"];
+  for (
+    const operation of [
+      ...API_OPERATION_IDS.filter((op) => !catalog.includes(op)),
+      "health.ready",
+    ] as const
+  ) {
+    const f = await fixture({
+      deferredExam: true,
+      operation,
+      approvedOperations: operation === "health.ready" ? ["history.search"] : [operation],
+      costsForApproved: true,
+    });
+    await denied(() => f.context.data(), "storage_hash_mismatch");
+    assert(f.calls.some((url) => url.endsWith("unused-exam.json")));
+    equal(f.sqlCalls(), 0);
+  }
 });
