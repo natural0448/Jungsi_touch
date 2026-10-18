@@ -1,4 +1,5 @@
 import { ConnectionNotice } from "@/components/connection-notice";
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
@@ -110,25 +111,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
     }
   const units = univs.flatMap((u) => u.offerings);
 
-  // 올해 모집 인원(화면에 보이는 모집단위만). 권한 거절은 빈칸으로 두고, 연결 실패는 화면 전체 안내로
-  const recs = new Map<string, RecruitmentDto | null>();
-  try {
-    // 모집단위마다 recruitment.read. 실제 동시 호출 수는 BFF(lib/api/live.ts)가 회원 등급별 상한(일반 1·유료 2)으로 줄 세운다
-    await Promise.all(
-      units.map(async (o) => {
-        try {
-          // 2027 모집 인원은 같은 PK 의 최신 발행 학년도 offering_id 로 묻는다(결합 키는 API id 가 아니다)
-          recs.set(o.id, await src.readRecruitment(caller, o.first.offering_id));
-        } catch (e) {
-          if (e instanceof ConnectionError) throw e;
-          recs.set(o.id, null);
-        }
-      }),
-    );
-  } catch (e) {
-    if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
-    throw e;
-  }
+  // 올해 모집 인원은 표를 먼저 보여 준 뒤 모집단위마다 따로 채운다(RecruitSlot, Suspense).
+  // recruitment.read 가 요청당 2초 안팎이라 모두 기다리면 첫 화면이 20초 넘게 늦었다(2026-10-18)
 
   const filtered = Boolean(cur.university || cur.unit || cur.region || cur.group);
   const words = [cur.university, cur.unit].filter(Boolean).join(" · ");
@@ -205,7 +189,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
                     </header>
                     <ul>
                       {u.offerings.map((o) => (
-                        <UnitCard key={o.id} o={o} years={o.years} rec={recs.get(o.id) ?? null} />
+                        <UnitCard key={o.id} o={o} years={o.years} />
                       ))}
                     </ul>
                   </section>
@@ -222,7 +206,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
 }
 
 /** 한 모집단위: 2027 모집 인원 한 줄 + 2026~2024 결과 표(경쟁률·추정 지원자/탈락자 포함). 지표 설명은 목록 위 공통 한 번 */
-function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto }; years: Map<number, HistoryMetricDto[]> | undefined; rec: RecruitmentDto | null }) {
+function UnitCard({ o, years }: { o: { id: string; first: HistoryMetricDto }; years: Map<number, HistoryMetricDto[]> | undefined }) {
   // 최종 관리자 지시(2026-10-09): 입결 지표는 최종 50%컷·최종 70%컷 두 개만 보인다.
   // 같은 통계는 직접 발표를 어디가 제출보다 먼저 고르고, 70%컷이 없으면 발표된 75%컷을
   // 대신 보인다(열 이름도 75%로 적는다). 열 순서는 모집인원/경쟁률/추정 총 지원자/
@@ -259,7 +243,9 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
           <b>{o.first.department}</b>
           <small>{[o.first.campus, o.first.track].filter(Boolean).join(" · ")}</small>
         </span>
-        <RecruitLine rec={rec} />
+        <Suspense fallback={<span className="rs-rec wait">2027 모집 인원 불러오는 중</span>}>
+          <RecruitSlot offeringId={o.first.offering_id} />
+        </Suspense>
       </div>
       {metricCols.length === 0 ? (
         <p className="rs-wait">이 모집단위의 2024~2026학년도 발표 결과가 아직 없습니다.</p>
@@ -379,6 +365,22 @@ function UnitCard({ o, years, rec }: { o: { id: string; first: HistoryMetricDto 
       )}
     </li>
   );
+}
+
+/**
+ * 2027 모집 인원 한 칸을 따로 불러온다. 2027 모집 인원은 같은 PK 의 최신 발행 학년도 offering_id 로 묻는다
+ * (결합 키는 API id 가 아니다). 권한 거절은 빈칸(연계 확인 전), 연결 실패는 이 칸만 '연결 대기'로 둔다 —
+ * 표 전체를 오류로 바꾸지 않고, 숫자를 지어내지 않는다. 동시 호출 수는 BFF 가 회원 등급별 상한으로 줄 세운다.
+ */
+async function RecruitSlot({ offeringId }: { offeringId: string }) {
+  let rec: RecruitmentDto | null = null;
+  try {
+    rec = await source().readRecruitment(await getCaller(), offeringId);
+  } catch (e) {
+    if (e instanceof ConnectionError) return <span className="rs-rec wait">2027 모집 정보 연결 대기</span>;
+    rec = null;
+  }
+  return <RecruitLine rec={rec} />;
 }
 
 /** 2027 모집 인원 요약 한 줄. 미공개는 0 이 아니라 미공개(REQ-13).
