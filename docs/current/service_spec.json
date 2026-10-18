@@ -16409,6 +16409,14 @@
         "SEC-06"
       ],
       "summary": "FE-LIVE-P1-CONCURRENCY-01 반영: P1 학년도 3개 history.search 를 학년도 순서대로 순차 호출(cursor·최대 쪽 수·불완전 모집행 처리·미수집 안내 유지). BFF 동시 호출 상한을 서버 승인 동시성에 맞춰 회원 등급별(일반 1·유료 2, /me 이전 1)로 줄 세움 — recruitment.read, P3 상세 조합, P4 statistics 등 병렬 지점 모두 적용. 429 는 자료 없음으로 숨기지 않고 제한 안내 유지, 자동 재시도·한도 변경 없음. DTO·회원 기준·운영 예산 변경 없음."
+    },
+    {
+      "date": "2026-10-18",
+      "requirements": [
+        "REQ-01",
+        "REQ-24"
+      ],
+      "summary": "화면 내용 불러오는 중 안내(app/loading.tsx) 추가: 머리글·탭은 먼저 보이고 내용 자리에 안내와 자리 표시만(숫자·학교 이름 없음). 정시 API 요청당 약 2.2초(history.search·recruitment.read)와 순차 호출로 1페이지 첫 바이트가 약 21초였던 빈 화면 문제 완화. 1·3페이지 대학명 검색칸 예시를 합성 이름에서 실제 대학명(강원대, 홍익대)으로."
     }
   ],
   "overall_analysis_contract": {

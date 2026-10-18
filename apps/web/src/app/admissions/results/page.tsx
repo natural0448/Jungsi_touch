@@ -142,7 +142,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
           <Form action={PATH} className="rs-search" role="search">
             <label className="rs-field">
               <span>대학명</span>
-              <input type="search" name="university" defaultValue={cur.university} placeholder="예: 가온, 해솔" maxLength={40} />
+              <input type="search" name="university" defaultValue={cur.university} placeholder="예: 강원대, 홍익대" maxLength={40} />
             </label>
             <label className="rs-field">
               <span>학과명</span>

@@ -106,3 +106,16 @@ body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;lin
 /* 연결 대기 안내: 설정 이름과 사유 코드 */
 .et .conn-missing,.et .conn-code{margin:6px 0 0;font-size:12px;color:var(--ink-2)}
 .et .conn-missing code,.et .conn-code code{padding:1px 5px;border-radius:3px;background:var(--sub);font-size:11px;word-break:break-all}
+
+/* 화면 내용 불러오는 중(app/loading.tsx). 머리글·탭은 먼저 보이고 이 자리만 바뀐다 */
+.et .jt-loading{display:flex;flex-direction:column;gap:18px;padding-top:28px;padding-bottom:40px}
+.et .jt-loading-card{display:flex;align-items:center;gap:14px;max-width:640px;margin:0 auto;width:100%;padding:20px 22px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg)}
+.et .jt-loading-title{margin:0;font-size:15px;font-weight:800;color:var(--deep)}
+.et .jt-loading-desc{margin:4px 0 0;font-size:13px;color:var(--ink-2)}
+.et .jt-spinner{flex:none;width:26px;height:26px;border-radius:50%;border:3px solid var(--brand-soft);border-top-color:var(--brand);animation:jt-spin .9s linear infinite}
+.et .jt-skel{display:flex;flex-direction:column;gap:12px;max-width:960px;margin:0 auto;width:100%}
+.et .jt-skel i{display:block;height:72px;border-radius:var(--r-card);background:linear-gradient(90deg,var(--sub) 0%,var(--sub-2) 50%,var(--sub) 100%);background-size:200% 100%;animation:jt-shimmer 1.4s ease-in-out infinite}
+.et .jt-skel i:nth-child(2){height:120px}
+@keyframes jt-spin{to{transform:rotate(360deg)}}
+@keyframes jt-shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@media (prefers-reduced-motion:reduce){.et .jt-spinner,.et .jt-skel i{animation:none}}
