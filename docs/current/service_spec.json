@@ -16396,6 +16396,19 @@
         "REQ-01"
       ],
       "summary": "최종 관리자 결정: 유료 화면 회원 식별 표시 불투명도 7% → 4%(캡처·인쇄 식별은 유지, 화면 가독성 개선)."
+    },
+    {
+      "date": "2026-10-18",
+      "requirements": [
+        "REQ-01",
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "SEC-05",
+        "SEC-06"
+      ],
+      "summary": "FE-LIVE-P1-CONCURRENCY-01 반영: P1 학년도 3개 history.search 를 학년도 순서대로 순차 호출(cursor·최대 쪽 수·불완전 모집행 처리·미수집 안내 유지). BFF 동시 호출 상한을 서버 승인 동시성에 맞춰 회원 등급별(일반 1·유료 2, /me 이전 1)로 줄 세움 — recruitment.read, P3 상세 조합, P4 statistics 등 병렬 지점 모두 적용. 429 는 자료 없음으로 숨기지 않고 제한 안내 유지, 자동 재시도·한도 변경 없음. DTO·회원 기준·운영 예산 변경 없음."
     }
   ],
   "overall_analysis_contract": {

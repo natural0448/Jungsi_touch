@@ -70,19 +70,22 @@ async function codeOf(res: Response, path: string) {
 /*
   계정당 동시 요청 줄 세우기. 서버는 계정당 동시 2건(concurrent_jobs)까지만 받고 넘치면 429 rate_limit_exceeded 다.
   1페이지는 학년도 3개를 동시에 검색해 세 번째가 거절됐다(2026-10-18 실측). 한 화면 요청 안에서 사용자 Bearer 별로
-  최대 MAX_PER_CALLER 건만 내보내고 나머지는 앞 요청이 끝날 때까지 기다린다.
+  회원 등급별 상한(일반 1·유료 2)만큼만 내보내고 나머지는 앞 요청이 끝날 때까지 기다린다.
   대기열은 **요청 하나 안에서만** 쓴다(React cache = 요청마다 새 Map). 워커 전체에서 공유하면 한 요청이 다른 요청의
   대기를 풀어 주게 되는데, Cloudflare 워커는 요청 사이의 promise 해제를 막아 기다리던 요청이 멈춘다(8c3d9fc 배포 실측, 되돌림).
   React cache 가 없는 곳(서버 액션 등)에서는 호출마다 새 Map 이라 줄 세우기 없이 그대로 보낸다.
 */
-const MAX_PER_CALLER = 2;
-type Lanes = Map<string, { active: number; waiting: (() => void)[] }>;
-const requestLanes = cache((): Lanes => new Map());
+// 서버 승인 동시성: 일반 1 · 유료(관리자 예외 포함) 2(담당자 FE-LIVE-P1-CONCURRENCY-01, 2026-10-18).
+// 세션(/me)을 받기 전에는 1로 시작하고, 받은 뒤 회원 등급으로 맞춘다. 서버 제한을 대신하지 않는 호출부 조절이다
+const LIMIT_BY_TIER = { paid: 2, standard: 1 } as const;
+type RequestLanes = { limit: number; lanes: Map<string, { active: number; waiting: (() => void)[] }> };
+const requestLanes = cache((): RequestLanes => ({ limit: LIMIT_BY_TIER.standard, lanes: new Map() }));
 async function withLane<T>(key: string, run: () => Promise<T>): Promise<T> {
-  const lanes = requestLanes();
+  const state = requestLanes();
+  const lanes = state.lanes;
   let lane = lanes.get(key);
   if (!lane) lanes.set(key, (lane = { active: 0, waiting: [] }));
-  if (lane.active >= MAX_PER_CALLER) await new Promise<void>((go) => lane!.waiting.push(go));
+  if (lane.active >= state.limit) await new Promise<void>((go) => lane!.waiting.push(go));
   lane.active++;
   try {
     return await run();
@@ -194,7 +197,10 @@ export const liveSource: JungsiSource = {
   async getSession(caller) {
     if (!caller.accessToken) return null;
     try {
-      return await call<Session>(caller, "/me");
+      const s = await call<Session>(caller, "/me");
+      // 이 요청의 동시 호출 상한을 회원 등급에 맞춘다
+      requestLanes().limit = s?.member_tier === "paid" ? LIMIT_BY_TIER.paid : LIMIT_BY_TIER.standard;
+      return s;
     } catch (e) {
       // 인증 거부·만료는 비로그인으로 본다. 503 은 일반 회원으로 낮추지 않고 그대로 올린다
       if (e instanceof AccessDenied && e.status === 401) return null;

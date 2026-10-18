@@ -73,7 +73,9 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   }
   let past: { items: HistoryMetricDto[]; ready: boolean; as_of: string | null; truncated: boolean }[];
   try {
-    past = await Promise.all(PAST_YEARS.map((y) => searchYear(y)));
+    // 학년도 순서대로 하나씩(동시 조회는 계정당 승인 동시성을 넘긴다 — FE-LIVE-P1-CONCURRENCY-01)
+    past = [];
+    for (const y of PAST_YEARS) past.push(await searchYear(y));
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
@@ -111,6 +113,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   // 올해 모집 인원(화면에 보이는 모집단위만). 권한 거절은 빈칸으로 두고, 연결 실패는 화면 전체 안내로
   const recs = new Map<string, RecruitmentDto | null>();
   try {
+    // 모집단위마다 recruitment.read. 실제 동시 호출 수는 BFF(lib/api/live.ts)가 회원 등급별 상한(일반 1·유료 2)으로 줄 세운다
     await Promise.all(
       units.map(async (o) => {
         try {
