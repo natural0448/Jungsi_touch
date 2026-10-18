@@ -586,7 +586,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "4b80190f45bdce24554d1a42884cec21a9b2a8a8279e056ea25174be67bcc846",
+      "source_sha256": "a9f2a58cc5e159855d42961e7bbe1c2c511dc144b7dc7dc5c16da623a39743d3",
       "symbols": [
         {
           "kind": "class",
@@ -1126,6 +1126,12 @@
           "kind": "function",
           "name": "validate_security_contract",
           "signature": "def validate_security_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_service_performance",
+          "signature": "def validate_service_performance(spec):",
           "decorators": []
         },
         {
@@ -8072,7 +8078,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "7dd7db2174f65a1780c65e72d85a7bfd558468d7b9e78a6b9e99b4962dbdc3dc",
+        "source_sha256": "01f6f0de573c93b547f0adfc800b4402d56345fefbabc8cf0e0f2454a7b603d9",
         "declared_exports": [
           "RuntimeRoutePolicy",
           "RuntimeComposition",
@@ -8113,7 +8119,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "fa289ae8764adaadad2ecac2c3d2439a7ce473defa874bb2553ce0a6d1a54f34",
+        "source_sha256": "f6000b4276e863490065c51e465b327a035f1e4f61873de29d2daed167d6a3f9",
         "declared_exports": [
           "NativeRuntimeRequest"
         ]
@@ -8149,7 +8155,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "620eb224e943c6562acad41e4c038075289d3b63640327662eab8a9203ae8900",
+        "source_sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b",
         "declared_exports": [
           "RuntimeReadBudget",
           "SupabaseRuntimeControls"
@@ -8338,12 +8344,14 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "0dec28a66dcaa6cb83ab7260e390450f08dd7bc15125f994cb47c2c7106f62ce",
+        "source_sha256": "e378654985045b034881ffee7380178bf25571011176c93f6bc36a4997c08e82",
         "declared_exports": [
           "StorageArtifactLimits",
           "StorageArtifactSettings",
           "SupabaseArtifactClient",
-          "VerifiedStorageArtifact"
+          "VerifiedStorageArtifact",
+          "VerifiedArtifactCache",
+          "StorageArtifactReuse"
         ]
       },
       {

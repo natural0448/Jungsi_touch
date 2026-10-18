@@ -3,6 +3,7 @@ import { syncPromise } from "./fixture.ts";
 import {
   type StorageArtifactSettings,
   SupabaseArtifactClient,
+  VerifiedArtifactCache,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts";
 import { AccessError } from "../../supabase/functions/_shared/jungsi/application/access.ts";
 import { JsonFloat } from "../../supabase/functions/_shared/jungsi/domain/native_json.ts";
@@ -255,4 +256,224 @@ Deno.test("Storage constructor rejects missing limits weak project URL and brows
       "storage_configuration_invalid",
     );
   }
+});
+
+Deno.test("artifact reuse avoids only the immutable object GET and isolates mutable payloads", async () => {
+  const f = await fixture(), cache = new VerifiedArtifactCache();
+  const reused: number[] = [];
+  const client = new SupabaseArtifactClient(SETTINGS, f.fetcher, {
+    cache,
+    onReuse: (n) => reused.push(n),
+  });
+  const first = await client.artifact(f.entry);
+  first.payload.count = 0;
+  const second = await client.artifact(f.entry);
+  equal(f.calls.length, 3);
+  equal(reused, [f.bytes.length]);
+  assert(second.payload.count === 9007199254740993n);
+  assert(second.payload.float instanceof JsonFloat);
+  equal(second.payload.float.lexeme, "1e0");
+  assert(second.payload.negative instanceof JsonFloat);
+  equal(second.payload.negative.lexeme, "-0e0");
+});
+Deno.test("warm artifact still rejects revoked selection before GET", async () => {
+  const f = await fixture(),
+    client = new SupabaseArtifactClient(SETTINGS, f.fetcher, {
+      cache: new VerifiedArtifactCache(),
+      onReuse: () => {},
+    });
+  await client.artifact(f.entry);
+  f.entry.engine_approved = false;
+  await denied(() => client.artifact(f.entry), "artifact_not_approved");
+  equal(f.calls.length, 2);
+});
+Deno.test("warm artifact still rereads bucket privacy", async () => {
+  const f = await fixture(),
+    client = new SupabaseArtifactClient(SETTINGS, f.fetcher, {
+      cache: new VerifiedArtifactCache(),
+      onReuse: () => {},
+    });
+  await client.artifact(f.entry);
+  f.setBucket('{"id":"synthetic-private","public":true,"file_size_limit":8192}');
+  await denied(() => client.artifact(f.entry), "storage_bucket_not_private");
+  equal(f.calls.length, 3);
+});
+Deno.test("warm artifact still rereads bucket cap", async () => {
+  const f = await fixture(),
+    client = new SupabaseArtifactClient(SETTINGS, f.fetcher, {
+      cache: new VerifiedArtifactCache(),
+      onReuse: () => {},
+    });
+  await client.artifact(f.entry);
+  f.setBucket('{"id":"synthetic-private","public":false,"file_size_limit":1}');
+  await denied(() => client.artifact(f.entry), "storage_bucket_limit_unverified");
+});
+Deno.test("failed hash and failed length never populate reuse", async () => {
+  const f = await fixture(), cache = new VerifiedArtifactCache();
+  const client = new SupabaseArtifactClient(SETTINGS, f.fetcher, { cache, onReuse: () => {} });
+  f.setBytes(new Uint8Array(f.bytes.length));
+  await denied(() => client.artifact(f.entry), "storage_hash_mismatch");
+  equal(cache.snapshot().entries, 0);
+  f.setBytes(new Uint8Array([32]));
+  await denied(() => client.artifact(f.entry), "storage_size_mismatch");
+  equal(cache.snapshot().entries, 0);
+  f.setBytes(f.bytes);
+  await client.artifact(f.entry);
+  equal(f.calls.length, 6);
+});
+Deno.test("version mismatch is verified before reuse adoption", async () => {
+  const f = await fixture(), cache = new VerifiedArtifactCache();
+  const client = new SupabaseArtifactClient(SETTINGS, f.fetcher, { cache, onReuse: () => {} });
+  f.entry.version = "SYNTHETIC-other";
+  await denied(() => client.artifact(f.entry), "artifact_version_mismatch");
+  equal(cache.snapshot().entries, 0);
+  f.entry.version = "SYNTHETIC-v";
+  await client.artifact(f.entry);
+  equal(f.calls.length, 4);
+});
+Deno.test("artifact identity separates project credential bucket path SHA length and version", async () => {
+  const f = await fixture(), cache = new VerifiedArtifactCache();
+  let loads = 0;
+  const load = () => {
+    loads++;
+    return Promise.resolve(Uint8Array.from(f.bytes));
+  };
+  await cache.artifact(SETTINGS, f.entry, load, () => {});
+  for (
+    const settings of [
+      { ...SETTINGS, projectUrl: "https://zyxwvutsrqponmlkjihg.supabase.co" },
+      { ...SETTINGS, secretKey: "sb_secret_ROTATED_SYNTHETIC" },
+      { ...SETTINGS, bucket: "synthetic-other" },
+    ]
+  ) await cache.artifact(settings, f.entry, load, () => {});
+  await cache.artifact(
+    SETTINGS,
+    { ...f.entry, object_key: "SYNTHETIC/other.json" },
+    load,
+    () => {},
+  );
+  for (
+    const [patch, code] of [
+      [{ sha256: "a".repeat(64) }, "storage_hash_mismatch"],
+      [{ bytes: f.bytes.length + 1 }, "storage_size_mismatch"],
+      [{ version: "SYNTHETIC-other" }, "artifact_version_mismatch"],
+    ] as const
+  ) await denied(() => cache.artifact(SETTINGS, { ...f.entry, ...patch }, load, () => {}), code);
+  equal(loads, 8);
+});
+Deno.test("artifact reuse entry limit evicts least recently used completed source", async () => {
+  const f = await fixture(), cache = new VerifiedArtifactCache(2);
+  let loads = 0;
+  const read = (id: string) =>
+    cache.artifact(SETTINGS, { ...f.entry, object_key: id }, () => {
+      loads++;
+      return Promise.resolve(Uint8Array.from(f.bytes));
+    }, () => {});
+  await read("a");
+  await read("b");
+  await read("a");
+  await read("c");
+  await read("b");
+  equal(loads, 4);
+  equal(cache.snapshot().entries, 2);
+});
+Deno.test("artifact reuse byte limit bounds retained verified source bytes", async () => {
+  const f = await fixture(), cache = new VerifiedArtifactCache(16, f.bytes.length * 2);
+  let loads = 0;
+  for (const id of ["a", "b", "c", "a"]) {
+    await cache.artifact(SETTINGS, { ...f.entry, object_key: id }, () => {
+      loads++;
+      return Promise.resolve(Uint8Array.from(f.bytes));
+    }, () => {});
+    assert(cache.snapshot().bytes <= f.bytes.length * 2);
+  }
+  equal(loads, 4);
+  equal(cache.snapshot().entries, 2);
+});
+Deno.test("artifact reuse TTL expiry rechecks source bytes without caching a failure", async () => {
+  const f = await fixture();
+  let now = 0;
+  const cache = new VerifiedArtifactCache(16, 4096, 10, () => now);
+  const client = new SupabaseArtifactClient(SETTINGS, f.fetcher, { cache, onReuse: () => {} });
+  await client.artifact(f.entry);
+  now = 9;
+  await client.artifact(f.entry);
+  equal(f.calls.length, 3);
+  now = 10;
+  f.setBytes(new Uint8Array(f.bytes.length));
+  await denied(() => client.artifact(f.entry), "storage_hash_mismatch");
+  equal(cache.snapshot().entries, 0);
+});
+Deno.test("artifact reuse clock rollback discards completed entries", async () => {
+  const f = await fixture();
+  let now = 20;
+  const cache = new VerifiedArtifactCache(16, 4096, 10, () => now);
+  const client = new SupabaseArtifactClient(SETTINGS, f.fetcher, { cache, onReuse: () => {} });
+  await client.artifact(f.entry);
+  now = 19;
+  await client.artifact(f.entry);
+  equal(f.calls.length, 4);
+  equal(cache.snapshot().entries, 1);
+});
+Deno.test("concurrent artifact misses share no promise failure timeout or request queue", async () => {
+  const f = await fixture(), cache = new VerifiedArtifactCache();
+  let release!: () => void;
+  const wait = new Promise<void>((resolve) => release = resolve);
+  const failed = cache.artifact(SETTINGS, f.entry, async () => {
+    await wait;
+    throw new Error("synthetic_abort");
+  }, () => {});
+  const successful = await cache.artifact(
+    SETTINGS,
+    f.entry,
+    () => Promise.resolve(Uint8Array.from(f.bytes)),
+    () => {},
+  );
+  equal(successful.verifiedBytes, f.bytes.length);
+  release();
+  try {
+    await failed;
+    assert(false);
+  } catch (error) {
+    assert(error instanceof Error);
+    equal(error.message, "synthetic_abort");
+  }
+  let hit = false;
+  await cache.artifact(SETTINGS, f.entry, () => {
+    throw new Error("unexpected_load");
+  }, () => hit = true);
+  assert(hit);
+  equal(cache.snapshot().entries, 1);
+});
+Deno.test("artifact larger than cache capacity remains a verified uncached read", async () => {
+  const f = await fixture(), cache = new VerifiedArtifactCache(16, 1);
+  const client = new SupabaseArtifactClient(SETTINGS, f.fetcher, {
+    cache,
+    onReuse: () => assert(false),
+  });
+  await client.artifact(f.entry);
+  await client.artifact(f.entry);
+  equal(f.calls.length, 4);
+  equal(cache.snapshot().bytes, 0);
+});
+Deno.test("invalid reuse configuration is denied and invalid cache clock falls back to verification", async () => {
+  for (
+    const work of [
+      () => new VerifiedArtifactCache(0),
+      () => new VerifiedArtifactCache(17),
+      () => new VerifiedArtifactCache(1, 0),
+      () => new VerifiedArtifactCache(1, 1, 60_001),
+    ]
+  ) {
+    await denied(work, "storage_configuration_invalid");
+  }
+  const f = await fixture(), cache = new VerifiedArtifactCache(16, 4096, 10, () => NaN);
+  const client = new SupabaseArtifactClient(SETTINGS, f.fetcher, {
+    cache,
+    onReuse: () => assert(false),
+  });
+  await client.artifact(f.entry);
+  await client.artifact(f.entry);
+  equal(f.calls.length, 4);
+  equal(cache.snapshot().entries, 0);
 });

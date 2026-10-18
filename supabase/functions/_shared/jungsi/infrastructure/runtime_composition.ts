@@ -38,6 +38,7 @@ import { RelayBoundary, safeFailure } from "./auth_relay.ts";
 import { SupabaseForecastAuthorities, SupabaseManagementResources } from "./management_postgres.ts";
 import { NativeForecastInputs } from "./native_data_provider.ts";
 import { PublicJeongsiPassesReader } from "./public_passes.ts";
+import { VerifiedArtifactCache } from "./supabase_artifacts.ts";
 import { NativeRuntimeRequest } from "./runtime_context.ts";
 import {
   type BasicRuntimeSettings,
@@ -164,6 +165,7 @@ export class NativeRuntimeApi {
   private readonly fetcher: typeof fetch;
   private readonly projection: PublicResponseProjection;
   private readonly pools = new Map<string, SupabaseSqlTransport>();
+  private readonly artifactCache = new VerifiedArtifactCache();
   constructor(private readonly config: RuntimeComposition) {
     if (
       !config || typeof config.environment?.get !== "function" ||
@@ -237,6 +239,7 @@ export class NativeRuntimeApi {
         this.clock,
         selectedOperation,
         this.fetcher,
+        this.artifactCache,
       );
       if (pathname === "/health/ready" && request.method === "GET") {
         stage = "relay";

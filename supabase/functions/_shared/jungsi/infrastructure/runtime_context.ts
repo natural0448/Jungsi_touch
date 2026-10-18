@@ -6,7 +6,7 @@ import type { RequestClockPort } from "../application/ports.ts";
 import { RepositoryUsageReplays } from "../application/usage_service.ts";
 import { NativeDataProvider } from "./native_data_provider.ts";
 import { NativeSourceSelection } from "./native_source_selection.ts";
-import { SupabaseArtifactClient } from "./supabase_artifacts.ts";
+import { SupabaseArtifactClient, type VerifiedArtifactCache } from "./supabase_artifacts.ts";
 import { SupabaseScoreInputRepository } from "./score_input_postgres.ts";
 import { SupabasePlatformRepository } from "./platform_postgres.ts";
 import { SupabaseForecastRepository } from "./forecast_postgres.ts";
@@ -40,6 +40,7 @@ export class NativeRuntimeRequest {
     private readonly clock: RequestClockPort,
     private readonly operation: ApiOperationId | "health.ready" | null,
     private readonly fetcher: typeof fetch = fetch,
+    private readonly artifactCache?: VerifiedArtifactCache,
   ) {}
   binding(): Promise<ApprovedRuntimeBinding> {
     this.bindingValue ??= (async () => {
@@ -155,6 +156,12 @@ export class NativeRuntimeRequest {
         new SupabaseArtifactClient(
           { projectUrl: binding.projectUrl, ...binding.storage },
           controls.fetcher,
+          this.artifactCache
+            ? {
+              cache: this.artifactCache,
+              onReuse: (bytes) => controls.reuseArtifact(bytes),
+            }
+            : undefined,
         ),
         {
           bytes: registry,

@@ -2,7 +2,7 @@ import { hasAsciiControl } from "../domain/text.ts";
 /** Read-only private Storage source bytes. No upload, registry adoption or source rewriting. */
 import { AccessError } from "../application/access.ts";
 import { cloneNativeJson, type NativeObject } from "../domain/json_value.ts";
-import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
+import { JsonFloat, type NativeJson, parseNativeJson } from "../domain/native_json.ts";
 export interface StorageArtifactLimits {
   readonly maxArtifactBytes: number;
   readonly maxBucketBytes: number;
@@ -64,10 +64,136 @@ async function rawHash(content: Uint8Array<ArrayBuffer>): Promise<string> {
   return [...new Uint8Array(await crypto.subtle.digest("SHA-256", content))]
     .map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
+/** Only completed, SHA-verified immutable source payloads live here. No pending promises or users. */
+export class VerifiedArtifactCache {
+  private readonly entries = new Map<string, {
+    value: VerifiedStorageArtifact;
+    cachedAt: number;
+  }>();
+  private retainedBytes = 0;
+  private lastTime = 0;
+  constructor(
+    private readonly maxEntries = 16,
+    private readonly maxBytes = 4 * 1024 * 1024,
+    private readonly maxAgeMs = 60_000,
+    private readonly now: () => number = () => performance.now(),
+  ) {
+    if (
+      !Number.isSafeInteger(maxEntries) || maxEntries < 1 || maxEntries > 16 ||
+      !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 4 * 1024 * 1024 ||
+      !Number.isSafeInteger(maxAgeMs) || maxAgeMs < 1 || maxAgeMs > 60_000 ||
+      typeof now !== "function"
+    ) fail("storage_configuration_invalid");
+  }
+  private time(): number | null {
+    let time: number;
+    try {
+      time = this.now();
+    } catch {
+      time = NaN;
+    }
+    if (!Number.isFinite(time) || time < this.lastTime || time < 0) {
+      this.entries.clear();
+      this.retainedBytes = 0;
+      this.lastTime = 0;
+      return null;
+    }
+    this.lastTime = time;
+    return time;
+  }
+  snapshot(): Readonly<{ entries: number; bytes: number }> {
+    return Object.freeze({ entries: this.entries.size, bytes: this.retainedBytes });
+  }
+  async artifact(
+    settings: Readonly<StorageArtifactSettings>,
+    selected: Readonly<NativeObject>,
+    load: () => Promise<Uint8Array<ArrayBuffer>>,
+    onReuse: (bytes: number) => void,
+  ): Promise<VerifiedStorageArtifact> {
+    const entry = cloneNativeJson(object(selected));
+    // Credential rotation also separates entries, without retaining a plaintext credential key.
+    const key = await rawHash(new TextEncoder().encode(JSON.stringify([
+      settings.projectUrl,
+      settings.secretKey,
+      settings.bucket,
+      entry.object_key,
+      entry.sha256,
+      String(entry.bytes),
+      entry.version,
+    ])));
+    const time = this.time(), cached = this.entries.get(key);
+    if (cached && time !== null && time - cached.cachedAt < this.maxAgeMs) {
+      onReuse(cached.value.verifiedBytes);
+      this.entries.delete(key);
+      this.entries.set(key, cached);
+      return copyArtifact(cached.value);
+    }
+    if (cached) {
+      this.entries.delete(key);
+      this.retainedBytes -= cached.value.verifiedBytes;
+    }
+    // Concurrent misses load independently under their own timeout/read budget. Never share a
+    // request's promise, abort signal, queue, authorization, reservation or dependency failure.
+    const value = await verifyContent(await load(), entry), completed = this.time();
+    if (completed === null || value.verifiedBytes > this.maxBytes) return value;
+    const prior = this.entries.get(key);
+    if (prior) {
+      this.entries.delete(key);
+      this.retainedBytes -= prior.value.verifiedBytes;
+    }
+    while (
+      this.entries.size >= this.maxEntries ||
+      this.retainedBytes + value.verifiedBytes > this.maxBytes
+    ) {
+      const oldest = this.entries.keys().next().value!;
+      this.retainedBytes -= this.entries.get(oldest)!.value.verifiedBytes;
+      this.entries.delete(oldest);
+    }
+    freezePayload(value.payload);
+    this.entries.set(key, { value, cachedAt: completed });
+    this.retainedBytes += value.verifiedBytes;
+    return copyArtifact(value);
+  }
+}
+function freezePayload(value: NativeJson): void {
+  if (value === null || typeof value !== "object" || value instanceof JsonFloat) return;
+  for (const child of Object.values(value)) freezePayload(child);
+  Object.freeze(value);
+}
+function copyPayload(value: NativeJson): NativeJson {
+  if (value === null || typeof value !== "object" || value instanceof JsonFloat) return value;
+  if (Array.isArray(value)) return value.map(copyPayload);
+  const result: NativeObject = Object.create(null);
+  for (const [key, child] of Object.entries(value)) result[key] = copyPayload(child);
+  return result;
+}
+function copyArtifact(value: VerifiedStorageArtifact): VerifiedStorageArtifact {
+  return Object.freeze({ ...value, payload: copyPayload(value.payload) as NativeObject });
+}
+async function verifyContent(
+  content: Uint8Array<ArrayBuffer>,
+  entry: Readonly<NativeObject>,
+): Promise<VerifiedStorageArtifact> {
+  const bytes = Number(entry.bytes);
+  if (content.length !== bytes) fail("storage_size_mismatch");
+  if (await rawHash(content) !== entry.sha256) fail("storage_hash_mismatch");
+  const payload = parsed(content);
+  const version = Object.hasOwn(payload, "version") ? payload.version : payload.pack_version;
+  if (version !== entry.version) fail("artifact_version_mismatch");
+  return Object.freeze({ payload, verifiedSha256: entry.sha256 as string, verifiedBytes: bytes });
+}
+export interface StorageArtifactReuse {
+  readonly cache: VerifiedArtifactCache;
+  readonly onReuse: (bytes: number) => void;
+}
 export class SupabaseArtifactClient {
   private readonly origin: string;
   private readonly settings: Readonly<StorageArtifactSettings>;
-  constructor(settings: StorageArtifactSettings, private readonly fetcher: typeof fetch = fetch) {
+  constructor(
+    settings: StorageArtifactSettings,
+    private readonly fetcher: typeof fetch = fetch,
+    private readonly reuse?: StorageArtifactReuse,
+  ) {
     try {
       const url = new URL(settings.projectUrl);
       if (
@@ -203,12 +329,10 @@ export class SupabaseArtifactClient {
     }
     const path = "object/authenticated/" + encodeURIComponent(this.settings.bucket) + "/" +
       key.split("/").map(encodeURIComponent).join("/");
-    const content = await this.get(path, bytes);
-    if (content.length !== bytes) fail("storage_size_mismatch");
-    if (await rawHash(content) !== entry.sha256) fail("storage_hash_mismatch");
-    const payload = parsed(content);
-    const version = Object.hasOwn(payload, "version") ? payload.version : payload.pack_version;
-    if (version !== entry.version) fail("artifact_version_mismatch");
-    return Object.freeze({ payload, verifiedSha256: entry.sha256 as string, verifiedBytes: bytes });
+    const load = () => this.get(path, bytes);
+    if (this.reuse) {
+      return await this.reuse.cache.artifact(this.settings, entry, load, this.reuse.onReuse);
+    }
+    return await verifyContent(await load(), entry);
   }
 }

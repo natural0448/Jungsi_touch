@@ -5,6 +5,7 @@ import {
   nativeJsonText,
   type NativeObject,
 } from "../../supabase/functions/_shared/jungsi/domain/json_value.ts";
+import { VerifiedArtifactCache } from "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts";
 import { NativeRuntimeRequest } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts";
 import { readBasicRuntimeSettings } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts";
 import { SupabaseSqlTransport } from "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts";
@@ -16,6 +17,7 @@ import {
 } from "./synthetic_runtime_binding.ts";
 async function fixture(
   options: {
+    artifactCache?: VerifiedArtifactCache;
     extraSelection?: boolean;
     unapproved?: boolean;
     maxReads?: number;
@@ -133,6 +135,7 @@ async function fixture(
       Object.defineProperty(response, "url", { value: url });
       return Promise.resolve(response);
     },
+    options.artifactCache,
   );
   return {
     context,
@@ -232,4 +235,28 @@ Deno.test("runtime context retains policy failure when an approved operation has
   await denied(() => f.context.budget(), "security_policy_unavailable");
   assert(f.calls.some((url) => url.endsWith("usage_policy.json")));
   equal(f.sqlCalls(), 0);
+});
+
+Deno.test("warm artifact request still reads fresh head and rejects its revocation", async () => {
+  const cache = new VerifiedArtifactCache(), first = await fixture({ artifactCache: cache });
+  await first.context.data();
+  const second = await fixture({ artifactCache: cache });
+  await second.context.data();
+  equal(second.calls.filter((url) => url.endsWith("/catalog.json")).length, 0);
+  second.f.body.head = second.f.body.head.replace('"approved"', '"revoked"');
+  await denied(() => second.context.assertCurrent());
+  equal(second.sqlCalls(), 0);
+});
+Deno.test("warm artifact cannot bypass a fresh binding operation scope or expiry", async () => {
+  const cache = new VerifiedArtifactCache(), first = await fixture({ artifactCache: cache });
+  await first.context.data();
+  const limited = await fixture({ artifactCache: cache, maxReads: first.calls.length - 1 });
+  await denied(() => limited.context.data());
+  const wrong = await fixture({ artifactCache: cache, operation: "offering.read" });
+  await denied(() => wrong.context.data(), "operation_scope_not_approved");
+  equal(wrong.calls.length, 0);
+  const expired = await fixture({ artifactCache: cache });
+  expired.now(999999999999999999n);
+  await denied(() => expired.context.data());
+  equal(expired.calls.length, 0);
 });

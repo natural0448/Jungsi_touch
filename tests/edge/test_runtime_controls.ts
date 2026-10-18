@@ -128,3 +128,38 @@ Deno.test("runtime read byte budget charges actual stream bytes and never resets
   await denied(() => controls.current());
   equal(f.calls.length, 1);
 });
+
+Deno.test("reused artifact keeps logical read charges separate from physical streamed IO", async () => {
+  const budget = new RuntimeReadBudget({ maxRequests: 3, maxBytes: 20 });
+  const fetcher = budget.fetch(() => Promise.resolve(new Response("abc")));
+  await (await fetcher("https://synthetic.invalid")).arrayBuffer();
+  budget.reuseArtifact(7);
+  equal(budget.snapshot(), {
+    requests: 2,
+    bytes: 10,
+    physicalRequests: 1,
+    physicalBytes: 3,
+    reusedArtifacts: 1,
+  });
+});
+Deno.test("reused artifact cannot bypass the logical request cap", async () => {
+  const budget = new RuntimeReadBudget({ maxRequests: 1, maxBytes: 20 });
+  budget.reuseArtifact(7);
+  await denied(() => Promise.resolve(budget.reuseArtifact(7)));
+  equal(budget.snapshot().requests, 1);
+  equal(budget.snapshot().bytes, 7);
+});
+Deno.test("reused artifact cannot bypass the logical byte cap or partially charge a failed reuse", async () => {
+  const budget = new RuntimeReadBudget({ maxRequests: 3, maxBytes: 10 });
+  budget.reuseArtifact(7);
+  await denied(() => Promise.resolve(budget.reuseArtifact(7)));
+  equal(budget.snapshot().requests, 1);
+  equal(budget.snapshot().bytes, 7);
+});
+Deno.test("artifact reuse accounting requires a still live request binding", async () => {
+  const f = await fixture();
+  f.controls.reuseArtifact(1);
+  f.setTime(f.binding.expiresAtUtc);
+  await denied(() => Promise.resolve(f.controls.reuseArtifact(1)));
+  equal(f.calls.length, 0);
+});

@@ -48116,6 +48116,11 @@
             "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
           },
           {
+            "importedName": "VerifiedArtifactCache",
+            "originalName": "VerifiedArtifactCache",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+          },
+          {
             "importedName": "createApiHandler",
             "originalName": "createApiHandler",
             "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
@@ -48156,7 +48161,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "7dd7db2174f65a1780c65e72d85a7bfd558468d7b9e78a6b9e99b4962dbdc3dc",
+        "source_sha256": "01f6f0de573c93b547f0adfc800b4402d56345fefbabc8cf0e0f2454a7b603d9",
         "symbols": [
           {
             "declarations": [
@@ -48747,6 +48752,23 @@
                               }
                             }
                           ]
+                        }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "artifactCache",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "VerifiedArtifactCache",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "VerifiedArtifactCache",
+                            "specifier": "./supabase_artifacts.ts"
+                          },
+                          "typeName": "VerifiedArtifactCache"
                         }
                       }
                     },
@@ -49436,6 +49458,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "./supabase_artifacts.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "./supabase_auth.ts",
           "targets": [
             {
@@ -49591,6 +49623,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/usage_postgres.ts"
           },
           {
+            "importedName": "VerifiedArtifactCache",
+            "originalName": "VerifiedArtifactCache",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+          },
+          {
             "importedName": "parseNativeJson",
             "originalName": "parseNativeJson",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
@@ -49601,7 +49638,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
           }
         ],
-        "source_sha256": "fa289ae8764adaadad2ecac2c3d2439a7ce473defa874bb2553ce0a6d1a54f34",
+        "source_sha256": "f6000b4276e863490065c51e465b327a035f1e4f61873de29d2daed167d6a3f9",
         "symbols": [
           {
             "declarations": [
@@ -49612,7 +49649,7 @@
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    private readonly env: RuntimeEnvironment,\n    private readonly basic: () => BasicRuntimeSettings,\n    private readonly sql: () => SupabaseSqlTransport,\n    private readonly clock: RequestClockPort,\n    private readonly operation: ApiOperationId | \"health.ready\" | null,\n    private readonly fetcher: typeof fetch = fetch,\n  )",
+                      "parameter_source": "(\n    private readonly env: RuntimeEnvironment,\n    private readonly basic: () => BasicRuntimeSettings,\n    private readonly sql: () => SupabaseSqlTransport,\n    private readonly clock: RequestClockPort,\n    private readonly operation: ApiOperationId | \"health.ready\" | null,\n    private readonly fetcher: typeof fetch = fetch,\n    private readonly artifactCache?: VerifiedArtifactCache,\n  )",
                       "params": [
                         {
                           "accessibility": "private",
@@ -49756,6 +49793,25 @@
                           },
                           "readonly": true,
                           "right": "fetch"
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "artifactCache",
+                          "optional": true,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "VerifiedArtifactCache",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "VerifiedArtifactCache",
+                                "specifier": "./supabase_artifacts.ts"
+                              },
+                              "typeName": "VerifiedArtifactCache"
+                            }
+                          }
                         }
                       ]
                     }
@@ -50492,7 +50548,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "620eb224e943c6562acad41e4c038075289d3b63640327662eab8a9203ae8900",
+        "source_sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b",
         "symbols": [
           {
             "declarations": [
@@ -50571,6 +50627,94 @@
                         "params": [
                           {
                             "kind": "identifier",
+                            "name": "bytes",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "reuseArtifact"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Readonly",
+                          "value": {
+                            "typeName": "Readonly",
+                            "typeParams": [
+                              {
+                                "kind": "typeLiteral",
+                                "value": {
+                                  "properties": [
+                                    {
+                                      "name": "requests",
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    },
+                                    {
+                                      "name": "bytes",
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    },
+                                    {
+                                      "name": "physicalRequests",
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    },
+                                    {
+                                      "name": "physicalBytes",
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    },
+                                    {
+                                      "name": "reusedArtifacts",
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "snapshot"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
                             "name": "base",
                             "optional": false,
                             "tsType": {
@@ -50608,6 +50752,33 @@
                         "repr": "number",
                         "value": "number"
                       }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "physicalRequests",
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "physicalBytes",
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "reusedArtifacts",
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
                     }
                   ]
                 },
@@ -50625,7 +50796,7 @@
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    private readonly binding: ApprovedRuntimeBinding,\n    private readonly clock: RequestClockPort,\n    readBudget: RuntimeReadBudget,\n    fetcher: typeof fetch = fetch,\n  )",
+                      "parameter_source": "(\n    private readonly binding: ApprovedRuntimeBinding,\n    private readonly clock: RequestClockPort,\n    private readonly readBudget: RuntimeReadBudget,\n    fetcher: typeof fetch = fetch,\n  )",
                       "params": [
                         {
                           "accessibility": "private",
@@ -50666,9 +50837,11 @@
                           }
                         },
                         {
+                          "accessibility": "private",
                           "kind": "identifier",
                           "name": "readBudget",
                           "optional": false,
+                          "readonly": true,
                           "tsType": {
                             "kind": "typeRef",
                             "repr": "RuntimeReadBudget",
@@ -50712,6 +50885,30 @@
                     }
                   ],
                   "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "bytes",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "reuseArtifact"
+                    },
                     {
                       "accessibility": "private",
                       "functionDef": {
@@ -56063,6 +56260,11 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           },
           {
+            "importedName": "NativeJson",
+            "originalName": "NativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
             "importedName": "NativeObject",
             "originalName": "NativeObject",
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
@@ -56083,7 +56285,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "0dec28a66dcaa6cb83ab7260e390450f08dd7bc15125f994cb47c2c7106f62ce",
+        "source_sha256": "e378654985045b034881ffee7380178bf25571011176c93f6bc36a4997c08e82",
         "symbols": [
           {
             "declarations": [
@@ -56253,7 +56455,429 @@
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(settings: StorageArtifactSettings, private readonly fetcher: typeof fetch = fetch)",
+                      "parameter_source": "(\n    private readonly maxEntries = 16,\n    private readonly maxBytes = 4 * 1024 * 1024,\n    private readonly maxAgeMs = 60_000,\n    private readonly now: () => number = () => performance.now(),\n  )",
+                      "params": [
+                        {
+                          "accessibility": "private",
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "maxEntries",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          "readonly": true,
+                          "right": "16"
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "maxBytes",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          "readonly": true,
+                          "right": "[UNSUPPORTED]"
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "maxAgeMs",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          "readonly": true,
+                          "right": "60000"
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "now",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [],
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              }
+                            }
+                          },
+                          "readonly": true,
+                          "right": "[UNSUPPORTED]"
+                        }
+                      ]
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "accessibility": "private",
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "kind": "method",
+                      "name": "time"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Readonly",
+                          "value": {
+                            "typeName": "Readonly",
+                            "typeParams": [
+                              {
+                                "kind": "typeLiteral",
+                                "value": {
+                                  "properties": [
+                                    {
+                                      "name": "entries",
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    },
+                                    {
+                                      "name": "bytes",
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "snapshot"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "settings",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Readonly",
+                              "value": {
+                                "typeName": "Readonly",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "StorageArtifactSettings",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "StorageArtifactSettings"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "selected",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Readonly",
+                              "value": {
+                                "typeName": "Readonly",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "NativeObject",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "NativeObject",
+                                        "specifier": "../domain/json_value.ts"
+                                      },
+                                      "typeName": "NativeObject"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "load",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [],
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Promise",
+                                  "value": {
+                                    "typeName": "Promise",
+                                    "typeParams": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "Uint8Array",
+                                        "value": {
+                                          "typeName": "Uint8Array",
+                                          "typeParams": [
+                                            {
+                                              "kind": "typeRef",
+                                              "repr": "ArrayBuffer",
+                                              "value": {
+                                                "typeName": "ArrayBuffer"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "onReuse",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [
+                                  {
+                                    "kind": "identifier",
+                                    "name": "bytes",
+                                    "optional": false,
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "number",
+                                      "value": "number"
+                                    }
+                                  }
+                                ],
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "void",
+                                  "value": "void"
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "VerifiedStorageArtifact",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "VerifiedStorageArtifact"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "artifact"
+                    }
+                  ],
+                  "properties": [
+                    {
+                      "accessibility": "private",
+                      "name": "entries",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Map",
+                        "value": {
+                          "typeName": "Map",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "properties": [
+                                  {
+                                    "name": "value",
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "VerifiedStorageArtifact",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "VerifiedStorageArtifact"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "cachedAt",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "number",
+                                      "value": "number"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "retainedBytes",
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "lastTime",
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "VerifiedArtifactCache"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "cache",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "VerifiedArtifactCache",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "VerifiedArtifactCache"
+                        }
+                      }
+                    },
+                    {
+                      "name": "onReuse",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "bytes",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "StorageArtifactReuse"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(\n    settings: StorageArtifactSettings,\n    private readonly fetcher: typeof fetch = fetch,\n    private readonly reuse?: StorageArtifactReuse,\n  )",
                       "params": [
                         {
                           "kind": "identifier",
@@ -56285,6 +56909,23 @@
                           },
                           "readonly": true,
                           "right": "fetch"
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "reuse",
+                          "optional": true,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "StorageArtifactReuse",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "StorageArtifactReuse"
+                            }
+                          }
                         }
                       ]
                     }
@@ -56760,6 +57401,209 @@
               }
             ],
             "name": "rawHash"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: NativeJson)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeJson",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeJson",
+                            "specifier": "../domain/native_json.ts"
+                          },
+                          "typeName": "NativeJson"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "freezePayload"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: NativeJson)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeJson",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeJson",
+                            "specifier": "../domain/native_json.ts"
+                          },
+                          "typeName": "NativeJson"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeJson",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeJson",
+                        "specifier": "../domain/native_json.ts"
+                      },
+                      "typeName": "NativeJson"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "copyPayload"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: VerifiedStorageArtifact)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "VerifiedStorageArtifact",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "VerifiedStorageArtifact"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "VerifiedStorageArtifact",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "VerifiedStorageArtifact"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "copyArtifact"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  content: Uint8Array<ArrayBuffer>,\n  entry: Readonly<NativeObject>,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "content",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Uint8Array",
+                        "value": {
+                          "typeName": "Uint8Array",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ArrayBuffer",
+                              "value": {
+                                "typeName": "ArrayBuffer"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "entry",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "VerifiedStorageArtifact",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "VerifiedStorageArtifact"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyContent"
           }
         ]
       },
@@ -56808,8 +57652,10 @@
       "layer": "data_infrastructure",
       "symbols": [
         "StorageArtifactLimits",
+        "StorageArtifactReuse",
         "StorageArtifactSettings",
         "SupabaseArtifactClient",
+        "VerifiedArtifactCache",
         "VerifiedStorageArtifact"
       ]
     },
@@ -73538,6 +74384,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
           },
           {
+            "importedName": "VerifiedArtifactCache",
+            "originalName": "VerifiedArtifactCache",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+          },
+          {
             "importedName": "assert",
             "originalName": "assert",
             "src": "tests/edge/fixture.ts"
@@ -73568,7 +74419,7 @@
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "196d7ba3cc918b951b2ce3fb6b0d49ed7af20181cd862169697135f466b10df9",
+        "source_sha256": "256ba39712b79bc1c877419ec918aee51e688128950b47ce1333673c649b4a4e",
         "symbols": [
           {
             "declarations": [
@@ -73577,7 +74428,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(\n  options: {\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
+                  "parameter_source": "(\n  options: {\n    artifactCache?: VerifiedArtifactCache;\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
                   "params": [
                     {
                       "kind": "assign",
@@ -73589,6 +74440,22 @@
                           "kind": "typeLiteral",
                           "value": {
                             "properties": [
+                              {
+                                "name": "artifactCache",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "VerifiedArtifactCache",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "VerifiedArtifactCache",
+                                      "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+                                    },
+                                    "typeName": "VerifiedArtifactCache"
+                                  }
+                                }
+                              },
                               {
                                 "name": "extraSelection",
                                 "optional": true,
@@ -73795,6 +74662,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts",
           "targets": [
             {
@@ -73866,7 +74743,7 @@
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "b080dcc94fffb10503648e9b954e024b7be2988e12f3a34f5fe6001fcfe40db2",
+        "source_sha256": "19826d20cfce311dd5d77d1689769f4eb8aaf8185ce88d76d4a5adc1a55de8d4",
         "symbols": [
           {
             "declarations": [
@@ -76763,6 +77640,14 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
           },
           {
+            "importedName": "VerifiedArtifactCache",
+            "jsDoc": {
+              "doc": "Invented Storage responses and limits only; no network, private source or runtime approval."
+            },
+            "originalName": "VerifiedArtifactCache",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+          },
+          {
             "importedName": "assert",
             "originalName": "assert",
             "src": "tests/edge/fixture.ts"
@@ -76778,7 +77663,7 @@
             "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "ce9585987580fb43d85d514ee6e0ac422a540aae0c61c04f410ba8ccf390eb53",
+        "source_sha256": "696a544287932c18a62c867d297165fc3d93145ad223b8811de820311d8dab67",
         "symbols": [
           {
             "declarations": [
@@ -79571,5 +80456,5 @@
     "tests/edge/test_year_equating.ts",
     "tests/edge/test_score_input_policy.ts"
   ],
-  "unit_count": 624
+  "unit_count": 644
 }

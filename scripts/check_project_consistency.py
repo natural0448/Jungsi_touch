@@ -921,11 +921,26 @@ def validate_score_input_policy(spec):
     verification=c.get("verification",{});bindings=c.get("current_descendant_source_bindings",{})
     expected_paths={"supabase/functions/_shared/jungsi/application/usage_service.ts","tests/edge/test_runtime_budget.ts","tests/edge/test_usage_service.ts"}
     indexed={p:v.get("declarations",{}).get("source_sha256") for p,v in spec.get("edge_harness",{}).get("files",{}).items()}
-    if (verification.get("baseline_edge_unit_count")!=590 or verification.get("new_policy_test_path")!="tests/edge/test_score_input_policy.ts" or verification.get("new_policy_test_count")!=31 or spec.get("edge_harness",{}).get("unit_count")!=624 or verification.get("extension_route_case_count")!=3 or set(bindings)!=expected_paths or any(not re.fullmatch(r"[a-f0-9]{64}",str(value)) or value!=indexed.get(path) for path,value in bindings.items())):errors.append("REQ-27 current descendant source/test registration drift")
+    if (verification.get("baseline_edge_unit_count")!=590 or verification.get("new_policy_test_path")!="tests/edge/test_score_input_policy.ts" or verification.get("new_policy_test_count")!=31 or spec.get("edge_harness",{}).get("unit_count")!=(644 if spec.get("service_performance_contract") else 624) or verification.get("extension_route_case_count")!=3 or set(bindings)!=expected_paths or any(not re.fullmatch(r"[a-f0-9]{64}",str(value)) or value!=indexed.get(path) for path,value in bindings.items())):errors.append("REQ-27 current descendant source/test registration drift")
     extension=c.get("extension_implementation_bindings",{});evidence=c.get("extension_runtime_test_bindings",{})
     expected_service="supabase/functions/_shared/jungsi/application/score_input_service.ts"
     expected_evidence={"supabase/functions/_shared/jungsi/application/api_dispatch.ts","supabase/functions/_shared/jungsi/infrastructure/api_http.ts","supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts","tests/edge/test_score_input_policy.ts","tests/edge/public_api_contract_fixture.ts","tests/edge/synthetic_api_contract.ts"}
     if (not isinstance(extension,dict) or set(extension)!=set(SCORE_POLICY_ROUTES) or any(not isinstance(binding,dict) or set(binding)!={"path","source_sha256","symbol"} or binding.get("path")!=expected_service or binding.get("symbol")!="ScoreInputService.execute" or not re.fullmatch(r"[a-f0-9]{64}",str(binding.get("source_sha256",""))) or binding.get("source_sha256")!=indexed.get(expected_service) for binding in extension.values()) or not isinstance(evidence,dict) or set(evidence)!=expected_evidence or any(not re.fullmatch(r"[a-f0-9]{64}",str(value)) or value!=indexed.get(path) for path,value in evidence.items())):errors.append("REQ-27 extension implementation/runtime/test source binding drift")
+    return errors
+
+def validate_service_performance(spec):
+    c=spec.get("service_performance_contract");errors=[]
+    required=tuple(int(x) for x in spec.get("version","0.0.0").split("."))>=(1,9,74)
+    if c is None:return ["Service performance contract missing"] if required else []
+    cache=c.get("cache",{});proof=c.get("verification",{});batch=c.get("batch_cr",{});activation=c.get("activation",{})
+    if (c.get("format")!="jungsi.service-performance/v1" or c.get("status")!="SOURCE_CANDIDATE_NOT_DEPLOYED" or c.get("production_ready")is not False or cache.get("scope")!="completed_SHA_verified_immutable_artifact_payloads_only" or
+        (cache.get("max_entries"),cache.get("max_source_bytes"),cache.get("max_age_ms"))!=(16,4194304,60000) or cache.get("logical_charge_on_hit")is not True or cache.get("cross_request_queue")is not False or
+        set(cache.get("fresh_checks",[]))!={"binding","expiry","head","registry_selection_approval","bucket_privacy_and_cap","relay_JWT","current_tier","ownership","shared_atomic_usage"} or
+        set(cache.get("excluded",[]))!={"head","registry_selection_decisions","usage_policy","user_responses","authorization","reservations","pending_promises"}):errors.append("Service performance cache trust/budget boundary drift")
+    if (proof.get("baseline_edge_tests")!=624 or proof.get("added_edge_tests")!=20 or proof.get("current_edge_tests")!=644 or spec.get("edge_harness",{}).get("unit_count")!=644 or
+        set(proof.get("test_paths",[]))!={"tests/edge/test_supabase_artifacts.ts","tests/edge/test_runtime_controls.ts","tests/edge/test_runtime_context.ts"} or proof.get("live_auth_DB_Storage")!="NOT_RUN" or proof.get("deployment")!="NOT_RUN"):errors.append("Service performance additive test/evidence drift")
+    if (batch.get("status")!="PROPOSED_NOT_IMPLEMENTED" or batch.get("registered_operation_count")!=25 or len(spec.get("operations",[]))!=25 or c.get("retry",{}).get("server_wait")!="NOT_IMPLEMENTED_NO_SOCKET_OR_TRANSACTION_QUEUE" or
+        activation.get("006_sql_changed")is not False or activation.get("deploy")!="NOT_RUN" or activation.get("candidate_includes_REQ27")is not True):errors.append("Service performance proposed API/activation boundary drift")
     return errors
 
 SECURITY_REQUIREMENTS={"REQ-24","REQ-25","REQ-26"}
@@ -3418,6 +3433,13 @@ def generated_files(spec,read=None):
             if target in files:files[target]+=section
         for path in list(files):
             if "개발현황_문서동기화" in path and isinstance(files[path],str):files[path]+=section
+    performance=spec.get("service_performance_contract")
+    if performance:
+        cache=performance["cache"];proof=performance["verification"];batch=performance["batch_cr"];activation=performance["activation"]
+        section=("\n\n## 서비스 성능 후보와 P1 조회 계약\n\n"+performance["id"]+" / "+performance["status"]+". SHA·길이·버전이 검증된 불변 본문만 worker 메모리에서 재사용한다. 최대16항목·원문4MiB·60초이며 파싱 트리의 추가 heap 비용이 있다. 현재 head·만료·registry/selection·버킷 비공개/상한·relay/JWT·현재 이용권/소유권·공유 원자 사용량은 매 요청 검사한다. 적중도 논리 요청/바이트를 차감하고 실제 GET/바이트를 별도 계수한다. 사용자 응답·권한·예산·진행 Promise는 저장하지 않는다. 동시 miss는 독립된 요청 한도/timeout으로 읽으며 공유 큐가 없다.\n\n검증은 기존624+신규20=644 합성 회귀와 기존 oracle993이다. 오프라인 fake-fetch 계수는 실 지연/전체HTTP 인수를 증명하지 않는다. 실제 Auth/DB/Storage 및 배포는 "+proof["deployment"]+".\n\n"+batch["id"]+"는 "+batch["status"]+"다. "+batch["existing_option"]+" "+batch["year_mapping"]+" "+batch["proposed_extension"]+" "+batch["query"]+"\n\n재시도: "+performance["retry"]["client_rule"]+" 서버 대기는 별도 설계이며 현재 추가하지 않는다.\n\n배포 차이: "+activation["drop_in_032_compatibility"]+" "+activation["path"]+" 006a·기존 프로필 전환·usage/v2·신규3 scope·실제 반례·배포/활성화는 NOT_RUN이다.\n")
+        for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync"):
+            target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -3475,7 +3497,7 @@ def validate_forecast_contract(spec):
 
 
 def validate_spec(spec):
-    errors=validate_sync_policy(spec) + validate_opening_security_operations(spec) + validate_score_input_policy(spec)
+    errors=validate_sync_policy(spec) + validate_opening_security_operations(spec) + validate_score_input_policy(spec) + validate_service_performance(spec)
     display=spec.get('official_history_db_display_contract')
     try: display_required=tuple(int(v) for v in spec.get('version','0.0.0').split('.')) >= (1,9,17)
     except (ValueError,TypeError): display_required=False
