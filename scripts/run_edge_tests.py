@@ -93,6 +93,28 @@ def owner_review_registration(spec,before):
         raise EdgeFailure('owner_review_source_binding_invalid')
     return v
 
+def current_public_registration(spec,before):
+    """Exact separate provider proposal suite; no activation or legacy-count change."""
+    prefix='supabase/functions/_shared/'
+    names=['current_public_catalog','current_public_catalog_compat','current_public_catalog_runtime',
+      'current_public_catalog_sql','current_public_catalog_sql_test','current_public_catalog_test',
+      'current_public_key_index','current_public_key_index_test','current_public_key_storage',
+      'current_public_key_storage_test']
+    required={prefix+n+'.ts' for n in names}
+    c=spec.get('current_public_supply_contract',{}).get('verification')
+    if c is None:
+        if required.intersection(before):raise EdgeFailure('current_public_verification_missing')
+        return None
+    tests=[prefix+n+'.ts'for n in names if n.endswith('_test')]
+    bindings=c.get('source_bindings')
+    if (c.get('format')!='jungsi.current-public-provider-verification/v1' or
+        c.get('test_paths')!=tests or c.get('test_count')!=46 or
+        not isinstance(bindings,list) or len(bindings)!=len(required) or
+        {b.get('path')for b in bindings}!=required or
+        any(not isinstance(b.get('sha256'),str)or before.get(b['path'])!=b['sha256']for b in bindings)):
+        raise EdgeFailure('current_public_source_or_test_binding_invalid')
+    return c
+
 def run_workspace(root,manifest,deno,python,output):
     root=Path(root).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
     before=verify_manifest(root,manifest);spec=json.loads((root/"docs/current/service_spec.json").read_bytes())
@@ -121,6 +143,19 @@ def run_workspace(root,manifest,deno,python,output):
         owner_unit=dict(**parse_junit(owner_junit,owner_registration['test_count']),
           coverage='OWNER_CURRENT_REVIEW_V3_SYNTHETIC',source_bindings=owner_registration['source_bindings'],
           actual_DB='NOT_RUN',deployment='NOT_RUN')
+    public_registration=current_public_registration(spec,before);public_unit=None
+    if public_registration is not None:
+        public_paths=[b['path']for b in public_registration['source_bindings']]
+        command([deno,'check',*common,*public_paths],root=root,output=output,name='current_public_check')
+        command([deno,'lint','--config',cfg['config'],*public_paths],root=root,output=output,name='current_public_lint')
+        command([deno,'fmt','--check','--config',cfg['config'],*public_paths],root=root,output=output,name='current_public_fmt')
+        public_junit=output.resolve()/'current_public.junit.xml'
+        command([deno,'test',*common,'--reporter=dot','--junit-path',str(public_junit),
+          *public_registration['test_paths']],root=root,output=output,name='current_public_unit')
+        public_unit=dict(**parse_junit(public_junit,public_registration['test_count']),
+          coverage='CURRENT_PUBLIC_PROVIDER_CANDIDATE_SYNTHETIC',
+          source_bindings=public_registration['source_bindings'],
+          actual_DB='NOT_VERIFIED_BY_SOURCE_SUITE',publication='NOT_APPROVED_BY_SOURCE_SUITE',deployment='NOT_RUN')
     references=cfg["python_reference"]
     reference=dict(format="jungsi.edge-python-reference/v1",basis="selected_snapshot",
       files=references["files"],source_files={p:before[p] for p in [*paths,cfg["config"],cfg["oracle"]]},
@@ -138,6 +173,7 @@ def run_workspace(root,manifest,deno,python,output):
       source_manifest_sha256=digest(json_bytes(manifest)),contract_receipt_sha256=digest((output/"contract/edge_contract_receipt.json").read_bytes()),
       oracle_receipt_sha256=digest(receipt_path.read_bytes()),tool=parsed["tool"],production_ready=False,operating_writes=0,**operation_registration(spec))
     if owner_unit is not None:result['owner_review_unit']=owner_unit
+    if public_unit is not None:result['current_public_unit']=public_unit
     write_new(output/"edge_run_receipt.json",json_bytes(result));return result
 def main():
     p=argparse.ArgumentParser(description=__doc__)

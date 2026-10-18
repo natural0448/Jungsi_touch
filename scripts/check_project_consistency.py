@@ -3484,6 +3484,11 @@ def generated_files(spec,read=None):
             "기존 학교별 부분 발행/C 묶음 설명은 이전 절차의 보존 이력이다. 이번 전국 검색 공급의 선행 조건으로 다시 적용하지 않는다. "+national["REQ27"]+"\n\n"+
             national["data_team_work"]+"\n\n"+
             "현재 구현 "+national["implementation"]+" · hosted 전환 "+national["hosted_activation"]+" · 전국 브라우저 인수 "+national["nationwide_browser_acceptance"]+". 자료 보완 중인 상태와 연결 구현/배포 완료를 혼동하지 않는다.\n")
+        if national.get('adapter_candidate'):
+            candidate=national['adapter_candidate']
+            section+=("\n### 서비스 어댑터 후보와 미채택 공급 방식\n\n"+candidate['status']+". "+candidate['mechanism']+"\n\n"+
+                candidate['approval_boundary']+"\n\n"+candidate['compatibility']+"\n\n"+candidate['dto']+"\n\n"+
+                candidate['pagination_boundary']+"\n\n"+candidate['remaining']+"\n")
         for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync","history_display","presentation_handoff","frontend_reply","frontend_followup","api_dto"):
             target=spec["current_documents"].get(key)
             if target in files:files[target]+=section
