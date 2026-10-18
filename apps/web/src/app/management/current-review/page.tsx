@@ -105,7 +105,7 @@ type Fetched =
   | { kind: "no_token" }
   | { kind: "not_loopback" }
   | { kind: "error"; status: number; code: string | null; requestId: string | null }
-  | { kind: "stale" }
+  | { kind: "stale"; code: string | null; requestId: string | null }
   | { kind: "ok"; page: ReviewPage };
 
 /*
@@ -162,7 +162,6 @@ async function fetchReview(query: URLSearchParams, visitorToken: string | null):
     cache: "no-store",
     headers: { apikey: apikey!, Authorization: `Bearer ${token}`, "X-Jungsi-Relay-Token": relay! },
   });
-  if (res.status === 409) return { kind: "stale" };
   if (!res.ok) {
     let code: string | null = null;
     let requestId: string | null = null;
@@ -173,6 +172,9 @@ async function fetchReview(query: URLSearchParams, visitorToken: string | null):
     } catch {
       /* 오류 본문이 JSON 이 아니면 상태만 보인다 */
     }
+    // 담당자 진단용: 사유 코드와 요청 ID 만 남긴다(토큰·cursor·본문은 기록하지 않음)
+    console.log(`[current-review] ${res.status} ${code ?? "-"} request_id=${requestId ?? "-"}`);
+    if (res.status === 409) return { kind: "stale", code, requestId };
     return { kind: "error", status: res.status, code, requestId };
   }
   return { kind: "ok", page: (await res.json()) as ReviewPage };
@@ -229,7 +231,8 @@ export default async function Page({ searchParams }: PageProps<"/management/curr
     else if (got.kind === "stale")
       body = (
         <p className="crv-note">
-          조회 중 현재 정본이 변경되었습니다(409). 이전 페이지와 섞지 않도록 <Link href={hrefFirst(filters)}>처음부터 다시 조회</Link>하세요.
+          조회 중 현재 정본이 변경되었습니다(409{got.code ? ` · ${got.code}` : ""}{got.requestId ? ` · 요청 ID ${got.requestId}` : ""}). 이전 페이지와 섞지 않도록{" "}
+          <Link href={hrefFirst(filters)}>처음부터 다시 조회</Link>하세요. 처음부터 다시 조회해도 계속 반복되면 이 요청 ID 를 담당자에게 전달하세요.
         </p>
       );
     else if (got.kind === "error")
