@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.73",
+  "version": "1.9.75",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -4415,7 +4415,8 @@
         "NativeRuntimeKind",
         "NativeSourceSelection",
         "PinnedSourceBytes",
-        "SelectedNativeArtifact"
+        "SelectedNativeArtifact",
+        "NativePayloadMode"
       ]
     },
     {
@@ -4595,7 +4596,9 @@
         "StorageArtifactLimits",
         "StorageArtifactSettings",
         "SupabaseArtifactClient",
-        "VerifiedStorageArtifact"
+        "VerifiedStorageArtifact",
+        "VerifiedArtifactCache",
+        "StorageArtifactReuse"
       ]
     },
     {
@@ -5648,7 +5651,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.73",
+        "contract_version": "1.9.75",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -5822,7 +5825,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.73",
+        "contract_version": "1.9.75",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -5988,7 +5991,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.73",
+        "contract_version": "1.9.75",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6007,7 +6010,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.73",
+        "contract_version": "1.9.75",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6032,7 +6035,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.73",
+        "contract_version": "1.9.75",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6057,7 +6060,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.73",
+        "contract_version": "1.9.75",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -6701,7 +6704,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "4b80190f45bdce24554d1a42884cec21a9b2a8a8279e056ea25174be67bcc846",
+            "source_sha256": "bd0f5d4cd94d5db0303939d11511cf2466a675f7716b00b09341a7a37933302a",
             "symbols": [
               {
                 "kind": "class",
@@ -7095,6 +7098,12 @@
               },
               {
                 "kind": "function",
+                "name": "validate_catalog_payload_scope",
+                "signature": "def validate_catalog_payload_scope(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "validate_changed_paths",
                 "signature": "def validate_changed_paths(changed, spec):",
                 "decorators": []
@@ -7241,6 +7250,12 @@
                 "kind": "function",
                 "name": "validate_security_contract",
                 "signature": "def validate_security_contract(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_service_performance",
+                "signature": "def validate_service_performance(spec):",
                 "decorators": []
               },
               {
@@ -13974,7 +13989,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "55d886f7227699cd4141a16012c8d400dfa6faf32787c25fa71d0ee0bf78cbc5",
+              "source_sha256": "5381ed632b7f13a2e9658c8fe3a771a6bbfa71717bba67ad0c642676f2175c9e",
               "declared_exports": [
                 "NativeDataProvider",
                 "NativeForecastInputs",
@@ -14009,13 +14024,14 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "bc8e80d2875eccf710f32f3e6efbb21bfa0b1d29eb685b7631fc012d87054418",
+              "source_sha256": "227ad4c99b789974d557e158a4f817c33d4e352dfea6b5e42736b3ae1919c31e",
               "declared_exports": [
                 "NATIVE_RUNTIME_KINDS",
                 "NativeRuntimeKind",
                 "NativeSourceSelection",
                 "PinnedSourceBytes",
-                "SelectedNativeArtifact"
+                "SelectedNativeArtifact",
+                "NativePayloadMode"
               ]
             },
             {
@@ -14187,7 +14203,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "7dd7db2174f65a1780c65e72d85a7bfd558468d7b9e78a6b9e99b4962dbdc3dc",
+              "source_sha256": "01f6f0de573c93b547f0adfc800b4402d56345fefbabc8cf0e0f2454a7b603d9",
               "declared_exports": [
                 "RuntimeRoutePolicy",
                 "RuntimeComposition",
@@ -14228,7 +14244,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "fa289ae8764adaadad2ecac2c3d2439a7ce473defa874bb2553ce0a6d1a54f34",
+              "source_sha256": "5fdc8e7553128ed216a6a33bcb462cb59aedf11096e79ff89a86a7dac6e5c162",
               "declared_exports": [
                 "NativeRuntimeRequest"
               ]
@@ -14264,7 +14280,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "620eb224e943c6562acad41e4c038075289d3b63640327662eab8a9203ae8900",
+              "source_sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b",
               "declared_exports": [
                 "RuntimeReadBudget",
                 "SupabaseRuntimeControls"
@@ -14453,12 +14469,14 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "0dec28a66dcaa6cb83ab7260e390450f08dd7bc15125f994cb47c2c7106f62ce",
+              "source_sha256": "babf667b18a8d9bacdd2f78a2d17babb2140e6177bdd32141b6c5f53d7c33905",
               "declared_exports": [
                 "StorageArtifactLimits",
                 "StorageArtifactSettings",
                 "SupabaseArtifactClient",
-                "VerifiedStorageArtifact"
+                "VerifiedStorageArtifact",
+                "VerifiedArtifactCache",
+                "StorageArtifactReuse"
               ]
             },
             {
@@ -14925,14 +14943,14 @@
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "0024d665c48d73d79a3e2b496d4fa1f75f2415e8",
-        "spec_version": "1.9.70",
-        "ci_run_id": 38853300254,
+        "commit": "7d53ddad081115c97a23faa7f1a4784866612410",
+        "spec_version": "1.9.74",
+        "ci_run_id": 39123160804,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
-          "python": 1065,
-          "deno": 590,
+          "python": 1125,
+          "deno": 644,
           "oracle": 993
         }
       }
@@ -16783,6 +16801,28 @@
         "REQ-26"
       ],
       "summary": "최신 사용자 운영정책 REQ-27이 기존 무료 개인 누백 유지 지침의 해당 범위를 갱신한다. PAGE-02·REQ-02·REQ-14·SEC-05/QA-05를 무료 고정 견본·본인 저장본 읽기와 유료/검증 관리자 새 개인 분석으로 일치시킨다. 원본 read_only_snapshot 예외와 입력권 대체를 명시하되 보안 필수 gate·빈도·공유·물리 한도를 완화하지 않는다. 006 빈 스키마 적용과 정책 활성화 NOT_RUN을 구분한다."
+    },
+    {
+      "date": "2026-10-18",
+      "requirements": [
+        "REQ-01",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "summary": "검증된 불변 Storage 본문만 용량·개수·TTL 내에서 재사용하고 매 요청의 현재 신뢰·권한·공유 원자 예산과 적중 시 논리 읽기 차감을 유지한다. 기존624+신규20 합성 회귀와 정확 소스 CI를 구분한다. P1 bounded조회/검수된2027연계 CR·Retry-After/빈도 분류·REQ27전환 계획을 기록하며 새 API·서버대기·실 DB·배포·활성화는 수행하지 않는다."
+    },
+    {
+      "date": "2026-10-18",
+      "requirements": [
+        "REQ-01",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "summary": "별도 보존한 캐시7d53dda의 정상 훅/source·PR CI1125/644/993 이후, 카탈로그4조회만 본문 선택 로딩한다. 전체선택 참조·승인·scope·버킷 최대길이는 검사하며 미사용팩 본문의 무결성을 검증했다고 기록하지 않는다. 실제소비 본문의 SHA/native decode와 다른21요청·readiness 전체검증·사용자권한/원자예산을 보존한다. 기존644+신규12 회귀·실제운영 미배포·설치032 비호환 경계를 구분한다."
     }
   ],
   "overall_analysis_contract": {
@@ -70345,7 +70385,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "55d886f7227699cd4141a16012c8d400dfa6faf32787c25fa71d0ee0bf78cbc5"
+          "source_sha256": "5381ed632b7f13a2e9658c8fe3a771a6bbfa71717bba67ad0c642676f2175c9e"
         },
         "dependencies": [
           {
@@ -70665,6 +70705,38 @@
                 {
                   "declarationKind": "export",
                   "def": {
+                    "tsType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "all",
+                          "value": {
+                            "kind": "string",
+                            "string": "all"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "catalog_only",
+                          "value": {
+                            "kind": "string",
+                            "string": "catalog_only"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "NativePayloadMode"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
                     "properties": [
                       {
                         "name": "bytes",
@@ -70757,7 +70829,7 @@
                         "accessibility": "private",
                         "hasBody": true,
                         "name": "constructor",
-                        "parameter_source": "(\n    artifacts: ReadonlyMap<string, SelectedNativeArtifact>,\n    readonly registryHash: string,\n    readonly selectionHash: string,\n  )",
+                        "parameter_source": "(\n    artifacts: ReadonlyMap<string, SelectedNativeArtifact>,\n    readonly registryHash: string,\n    readonly selectionHash: string,\n    selected: ReadonlyMap<string, NativeObject>,\n    readonly payloadMode: NativePayloadMode,\n  )",
                         "params": [
                           {
                             "kind": "identifier",
@@ -70808,6 +70880,53 @@
                               "kind": "keyword",
                               "repr": "string",
                               "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "selected",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "ReadonlyMap",
+                              "value": {
+                                "typeName": "ReadonlyMap",
+                                "typeParams": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  },
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "NativeObject",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "NativeObject",
+                                        "specifier": "../domain/json_value.ts"
+                                      },
+                                      "typeName": "NativeObject"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "payloadMode",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "NativePayloadMode",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "NativePayloadMode"
+                              }
                             }
                           }
                         ]
@@ -70865,6 +70984,25 @@
                                   "typeName": "PinnedSourceBytes"
                                 }
                               }
+                            },
+                            {
+                              "kind": "assign",
+                              "left": {
+                                "kind": "identifier",
+                                "name": "payloadMode",
+                                "optional": false,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "NativePayloadMode",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "NativePayloadMode"
+                                  }
+                                }
+                              },
+                              "right": "all"
                             }
                           ],
                           "returnType": {
@@ -70890,6 +71028,62 @@
                         "isStatic": true,
                         "kind": "method",
                         "name": "prepare"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "kind",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "NativeRuntimeKind",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "NativeRuntimeKind"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "key",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "NativeObject",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "NativeObject",
+                                    "specifier": "../domain/json_value.ts"
+                                  },
+                                  "typeName": "NativeObject"
+                                }
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "null",
+                                "value": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "kind": "method",
+                        "name": "reference"
                       },
                       {
                         "functionDef": {
@@ -71035,6 +71229,37 @@
                                     "kind": "local"
                                   },
                                   "typeName": "SelectedNativeArtifact"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "references",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ReadonlyMap",
+                          "value": {
+                            "typeName": "ReadonlyMap",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "NativeObject",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "NativeObject",
+                                    "specifier": "../domain/json_value.ts"
+                                  },
+                                  "typeName": "NativeObject"
                                 }
                               }
                             ]
@@ -71275,7 +71500,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "bc8e80d2875eccf710f32f3e6efbb21bfa0b1d29eb685b7631fc012d87054418"
+          "source_sha256": "227ad4c99b789974d557e158a4f817c33d4e352dfea6b5e42736b3ae1919c31e"
         },
         "dependencies": [
           {
@@ -71342,6 +71567,7 @@
         "layer": "data_infrastructure",
         "symbols": [
           "NATIVE_RUNTIME_KINDS",
+          "NativePayloadMode",
           "NativeRuntimeKind",
           "NativeSourceSelection",
           "PinnedSourceBytes",
@@ -76602,6 +76828,23 @@
                         }
                       },
                       {
+                        "accessibility": "private",
+                        "name": "artifactCache",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "VerifiedArtifactCache",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "VerifiedArtifactCache",
+                              "specifier": "./supabase_artifacts.ts"
+                            },
+                            "typeName": "VerifiedArtifactCache"
+                          }
+                        }
+                      },
+                      {
                         "name": "fetch",
                         "readonly": true,
                         "tsType": {
@@ -77219,6 +77462,11 @@
               "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
             },
             {
+              "importedName": "VerifiedArtifactCache",
+              "originalName": "VerifiedArtifactCache",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+            },
+            {
               "importedName": "createApiHandler",
               "originalName": "createApiHandler",
               "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
@@ -77259,7 +77507,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "7dd7db2174f65a1780c65e72d85a7bfd558468d7b9e78a6b9e99b4962dbdc3dc"
+          "source_sha256": "01f6f0de573c93b547f0adfc800b4402d56345fefbabc8cf0e0f2454a7b603d9"
         },
         "dependencies": [
           {
@@ -77538,6 +77786,16 @@
           },
           {
             "dynamic": false,
+            "specifier": "./supabase_artifacts.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
             "specifier": "./supabase_auth.ts",
             "targets": [
               {
@@ -77588,7 +77846,7 @@
                       {
                         "hasBody": true,
                         "name": "constructor",
-                        "parameter_source": "(\n    private readonly env: RuntimeEnvironment,\n    private readonly basic: () => BasicRuntimeSettings,\n    private readonly sql: () => SupabaseSqlTransport,\n    private readonly clock: RequestClockPort,\n    private readonly operation: ApiOperationId | \"health.ready\" | null,\n    private readonly fetcher: typeof fetch = fetch,\n  )",
+                        "parameter_source": "(\n    private readonly env: RuntimeEnvironment,\n    private readonly basic: () => BasicRuntimeSettings,\n    private readonly sql: () => SupabaseSqlTransport,\n    private readonly clock: RequestClockPort,\n    private readonly operation: ApiOperationId | \"health.ready\" | null,\n    private readonly fetcher: typeof fetch = fetch,\n    private readonly artifactCache?: VerifiedArtifactCache,\n  )",
                         "params": [
                           {
                             "accessibility": "private",
@@ -77732,6 +77990,25 @@
                             },
                             "readonly": true,
                             "right": "fetch"
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "artifactCache",
+                            "optional": true,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "VerifiedArtifactCache",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "VerifiedArtifactCache",
+                                  "specifier": "./supabase_artifacts.ts"
+                                },
+                                "typeName": "VerifiedArtifactCache"
+                              }
+                            }
                           }
                         ]
                       }
@@ -78243,6 +78520,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
             },
             {
+              "importedName": "CATALOG_OPERATIONS",
+              "originalName": "CATALOG_OPERATIONS",
+              "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
+            },
+            {
               "importedName": "CatalogService",
               "originalName": "CatalogService",
               "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
@@ -78333,6 +78615,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/usage_postgres.ts"
             },
             {
+              "importedName": "VerifiedArtifactCache",
+              "originalName": "VerifiedArtifactCache",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+            },
+            {
               "importedName": "parseNativeJson",
               "originalName": "parseNativeJson",
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
@@ -78343,7 +78630,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
             }
           ],
-          "source_sha256": "fa289ae8764adaadad2ecac2c3d2439a7ce473defa874bb2553ce0a6d1a54f34"
+          "source_sha256": "5fdc8e7553128ed216a6a33bcb462cb59aedf11096e79ff89a86a7dac6e5c162"
         },
         "dependencies": [
           {
@@ -78612,6 +78899,94 @@
                           "params": [
                             {
                               "kind": "identifier",
+                              "name": "bytes",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        },
+                        "kind": "method",
+                        "name": "reuseArtifact"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Readonly",
+                            "value": {
+                              "typeName": "Readonly",
+                              "typeParams": [
+                                {
+                                  "kind": "typeLiteral",
+                                  "value": {
+                                    "properties": [
+                                      {
+                                        "name": "requests",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "number",
+                                          "value": "number"
+                                        }
+                                      },
+                                      {
+                                        "name": "bytes",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "number",
+                                          "value": "number"
+                                        }
+                                      },
+                                      {
+                                        "name": "physicalRequests",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "number",
+                                          "value": "number"
+                                        }
+                                      },
+                                      {
+                                        "name": "physicalBytes",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "number",
+                                          "value": "number"
+                                        }
+                                      },
+                                      {
+                                        "name": "reusedArtifacts",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "number",
+                                          "value": "number"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "snapshot"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
                               "name": "base",
                               "optional": false,
                               "tsType": {
@@ -78649,6 +79024,33 @@
                           "repr": "number",
                           "value": "number"
                         }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "physicalRequests",
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "physicalBytes",
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "reusedArtifacts",
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
                       }
                     ]
                   },
@@ -78666,7 +79068,7 @@
                       {
                         "hasBody": true,
                         "name": "constructor",
-                        "parameter_source": "(\n    private readonly binding: ApprovedRuntimeBinding,\n    private readonly clock: RequestClockPort,\n    readBudget: RuntimeReadBudget,\n    fetcher: typeof fetch = fetch,\n  )",
+                        "parameter_source": "(\n    private readonly binding: ApprovedRuntimeBinding,\n    private readonly clock: RequestClockPort,\n    private readonly readBudget: RuntimeReadBudget,\n    fetcher: typeof fetch = fetch,\n  )",
                         "params": [
                           {
                             "accessibility": "private",
@@ -78707,9 +79109,11 @@
                             }
                           },
                           {
+                            "accessibility": "private",
                             "kind": "identifier",
                             "name": "readBudget",
                             "optional": false,
+                            "readonly": true,
                             "tsType": {
                               "kind": "typeRef",
                               "repr": "RuntimeReadBudget",
@@ -78753,6 +79157,30 @@
                       }
                     ],
                     "methods": [
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "bytes",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        },
+                        "kind": "method",
+                        "name": "reuseArtifact"
+                      },
                       {
                         "accessibility": "private",
                         "functionDef": {
@@ -79053,7 +79481,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "620eb224e943c6562acad41e4c038075289d3b63640327662eab8a9203ae8900"
+          "source_sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b"
         },
         "dependencies": [
           {
@@ -81875,7 +82303,429 @@
                       {
                         "hasBody": true,
                         "name": "constructor",
-                        "parameter_source": "(settings: StorageArtifactSettings, private readonly fetcher: typeof fetch = fetch)",
+                        "parameter_source": "(\n    private readonly maxEntries = 16,\n    private readonly maxBytes = 4 * 1024 * 1024,\n    private readonly maxAgeMs = 60_000,\n    private readonly now: () => number = () => performance.now(),\n  )",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "maxEntries",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              }
+                            },
+                            "readonly": true,
+                            "right": "16"
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "maxBytes",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              }
+                            },
+                            "readonly": true,
+                            "right": "[UNSUPPORTED]"
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "maxAgeMs",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              }
+                            },
+                            "readonly": true,
+                            "right": "60000"
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "now",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "fnOrConstructor",
+                                "value": {
+                                  "constructor": false,
+                                  "params": [],
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "number",
+                                    "value": "number"
+                                  }
+                                }
+                              }
+                            },
+                            "readonly": true,
+                            "right": "[UNSUPPORTED]"
+                          }
+                        ]
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "accessibility": "private",
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [],
+                          "returnType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "null",
+                                "value": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "kind": "method",
+                        "name": "time"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Readonly",
+                            "value": {
+                              "typeName": "Readonly",
+                              "typeParams": [
+                                {
+                                  "kind": "typeLiteral",
+                                  "value": {
+                                    "properties": [
+                                      {
+                                        "name": "entries",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "number",
+                                          "value": "number"
+                                        }
+                                      },
+                                      {
+                                        "name": "bytes",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "number",
+                                          "value": "number"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "snapshot"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "settings",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Readonly",
+                                "value": {
+                                  "typeName": "Readonly",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "StorageArtifactSettings",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "StorageArtifactSettings"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "selected",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Readonly",
+                                "value": {
+                                  "typeName": "Readonly",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "NativeObject",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "NativeObject",
+                                          "specifier": "../domain/json_value.ts"
+                                        },
+                                        "typeName": "NativeObject"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "load",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "fnOrConstructor",
+                                "value": {
+                                  "constructor": false,
+                                  "params": [],
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "Promise",
+                                    "value": {
+                                      "typeName": "Promise",
+                                      "typeParams": [
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "Uint8Array",
+                                          "value": {
+                                            "typeName": "Uint8Array",
+                                            "typeParams": [
+                                              {
+                                                "kind": "typeRef",
+                                                "repr": "ArrayBuffer",
+                                                "value": {
+                                                  "typeName": "ArrayBuffer"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "onReuse",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "fnOrConstructor",
+                                "value": {
+                                  "constructor": false,
+                                  "params": [
+                                    {
+                                      "kind": "identifier",
+                                      "name": "bytes",
+                                      "optional": false,
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    }
+                                  ],
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "void",
+                                    "value": "void"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "VerifiedStorageArtifact",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "VerifiedStorageArtifact"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "artifact"
+                      }
+                    ],
+                    "properties": [
+                      {
+                        "accessibility": "private",
+                        "name": "entries",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Map",
+                          "value": {
+                            "typeName": "Map",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "typeLiteral",
+                                "value": {
+                                  "properties": [
+                                    {
+                                      "name": "value",
+                                      "tsType": {
+                                        "kind": "typeRef",
+                                        "repr": "VerifiedStorageArtifact",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "local"
+                                          },
+                                          "typeName": "VerifiedStorageArtifact"
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "name": "cachedAt",
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "retainedBytes",
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "lastTime",
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "VerifiedArtifactCache"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "cache",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "VerifiedArtifactCache",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "VerifiedArtifactCache"
+                          }
+                        }
+                      },
+                      {
+                        "name": "onReuse",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [
+                              {
+                                "kind": "identifier",
+                                "name": "bytes",
+                                "optional": false,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              }
+                            ],
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "StorageArtifactReuse"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(\n    settings: StorageArtifactSettings,\n    private readonly fetcher: typeof fetch = fetch,\n    private readonly reuse?: StorageArtifactReuse,\n  )",
                         "params": [
                           {
                             "kind": "identifier",
@@ -81907,6 +82757,23 @@
                             },
                             "readonly": true,
                             "right": "fetch"
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "reuse",
+                            "optional": true,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "StorageArtifactReuse",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "StorageArtifactReuse"
+                              }
+                            }
                           }
                         ]
                       }
@@ -82047,6 +82914,100 @@
                         },
                         "kind": "method",
                         "name": "get"
+                      },
+                      {
+                        "accessibility": "private",
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "bytes",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "void",
+                                  "value": "void"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "assertBucket"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "entries",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeOperator",
+                                "value": {
+                                  "operator": "readonly",
+                                  "tsType": {
+                                    "kind": "array",
+                                    "value": {
+                                      "kind": "typeRef",
+                                      "repr": "Readonly",
+                                      "value": {
+                                        "typeName": "Readonly",
+                                        "typeParams": [
+                                          {
+                                            "kind": "typeRef",
+                                            "repr": "NativeObject",
+                                            "value": {
+                                              "resolution": {
+                                                "kind": "import",
+                                                "name": "NativeObject",
+                                                "specifier": "../domain/json_value.ts"
+                                              },
+                                              "typeName": "NativeObject"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "void",
+                                  "value": "void"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "assertSelectedMetadata"
                       },
                       {
                         "functionDef": {
@@ -82382,6 +83343,209 @@
                 }
               ],
               "name": "rawHash"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: NativeJson)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeJson",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeJson",
+                              "specifier": "../domain/native_json.ts"
+                            },
+                            "typeName": "NativeJson"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "void",
+                      "value": "void"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "freezePayload"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: NativeJson)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeJson",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeJson",
+                              "specifier": "../domain/native_json.ts"
+                            },
+                            "typeName": "NativeJson"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "NativeJson",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "NativeJson",
+                          "specifier": "../domain/native_json.ts"
+                        },
+                        "typeName": "NativeJson"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "copyPayload"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: VerifiedStorageArtifact)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "VerifiedStorageArtifact",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "VerifiedStorageArtifact"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "VerifiedStorageArtifact",
+                      "value": {
+                        "resolution": {
+                          "kind": "local"
+                        },
+                        "typeName": "VerifiedStorageArtifact"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "copyArtifact"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  content: Uint8Array<ArrayBuffer>,\n  entry: Readonly<NativeObject>,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "content",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Uint8Array",
+                          "value": {
+                            "typeName": "Uint8Array",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "ArrayBuffer",
+                                "value": {
+                                  "typeName": "ArrayBuffer"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "entry",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Readonly",
+                          "value": {
+                            "typeName": "Readonly",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "NativeObject",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "NativeObject",
+                                    "specifier": "../domain/json_value.ts"
+                                  },
+                                  "typeName": "NativeObject"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "VerifiedStorageArtifact",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "VerifiedStorageArtifact"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "verifyContent"
             }
           ],
           "imports": [
@@ -82396,6 +83560,11 @@
             {
               "importedName": "JsonFloat",
               "originalName": "JsonFloat",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "NativeJson",
+              "originalName": "NativeJson",
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             },
             {
@@ -82419,7 +83588,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "0dec28a66dcaa6cb83ab7260e390450f08dd7bc15125f994cb47c2c7106f62ce"
+          "source_sha256": "babf667b18a8d9bacdd2f78a2d17babb2140e6177bdd32141b6c5f53d7c33905"
         },
         "dependencies": [
           {
@@ -82466,8 +83635,10 @@
         "layer": "data_infrastructure",
         "symbols": [
           "StorageArtifactLimits",
+          "StorageArtifactReuse",
           "StorageArtifactSettings",
           "SupabaseArtifactClient",
+          "VerifiedArtifactCache",
           "VerifiedStorageArtifact"
         ]
       },
@@ -94668,7 +95839,7 @@
                   "def": {
                     "hasBody": true,
                     "isAsync": true,
-                    "parameter_source": "(text?: string)",
+                    "parameter_source": "(text?: string, bucketCap = 16384)",
                     "params": [
                       {
                         "kind": "identifier",
@@ -94679,6 +95850,20 @@
                           "repr": "string",
                           "value": "string"
                         }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "bucketCap",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          }
+                        },
+                        "right": "16384"
                       }
                     ]
                   },
@@ -94752,6 +95937,70 @@
                 }
               ],
               "name": "denied"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(f: Awaited<ReturnType<typeof fixture>>, patch: NativeObject = {})",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "f",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Awaited",
+                          "value": {
+                            "typeName": "Awaited",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "ReturnType",
+                                "value": {
+                                  "typeName": "ReturnType",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeQuery",
+                                      "repr": "fixture",
+                                      "value": "fixture"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "patch",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "NativeObject",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeObject",
+                                "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                              },
+                              "typeName": "NativeObject"
+                            }
+                          }
+                        },
+                        "right": "[UNSUPPORTED]"
+                      }
+                    ]
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "deferred"
             }
           ],
           "imports": [
@@ -94769,6 +96018,14 @@
               "importedName": "NativeObject",
               "originalName": "NativeObject",
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "NativePayloadMode",
+              "jsDoc": {
+                "doc": "Invented private registry pins only. Source-byte acceptance is never engine or live acceptance."
+              },
+              "originalName": "NativePayloadMode",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
             },
             {
               "importedName": "NativeSourceSelection",
@@ -94812,7 +96069,7 @@
               "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "b5c1bdb56bc3c5849a702227a99eb71ba7fe5e31d5d0b963d8eecb4c3626a40e"
+          "source_sha256": "3d9ae377491a6f5cc6e3dc172b403fab93760f71ea61c8790cc6863bde72a008"
         },
         "dependencies": [
           {
@@ -99063,7 +100320,7 @@
                   "def": {
                     "hasBody": true,
                     "isAsync": true,
-                    "parameter_source": "(\n  options: {\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
+                    "parameter_source": "(\n  options: {\n    artifactCache?: VerifiedArtifactCache;\n    deferredExam?: boolean;\n    deferredVersion?: string;\n    costsForApproved?: boolean;\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | \"health.ready\" | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
                     "params": [
                       {
                         "kind": "assign",
@@ -99075,6 +100332,49 @@
                             "kind": "typeLiteral",
                             "value": {
                               "properties": [
+                                {
+                                  "name": "artifactCache",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "VerifiedArtifactCache",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "VerifiedArtifactCache",
+                                        "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+                                      },
+                                      "typeName": "VerifiedArtifactCache"
+                                    }
+                                  }
+                                },
+                                {
+                                  "name": "deferredExam",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "boolean",
+                                    "value": "boolean"
+                                  }
+                                },
+                                {
+                                  "name": "deferredVersion",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  }
+                                },
+                                {
+                                  "name": "costsForApproved",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "boolean",
+                                    "value": "boolean"
+                                  }
+                                },
                                 {
                                   "name": "extraSelection",
                                   "optional": true,
@@ -99118,6 +100418,14 @@
                                             "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts"
                                           },
                                           "typeName": "ApiOperationId"
+                                        }
+                                      },
+                                      {
+                                        "kind": "literal",
+                                        "repr": "health.ready",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "health.ready"
                                         }
                                       },
                                       {
@@ -99229,6 +100537,14 @@
           ],
           "imports": [
             {
+              "importedName": "API_OPERATION_IDS",
+              "jsDoc": {
+                "doc": "Entirely synthetic selected graph. No approved input, network or database operations."
+              },
+              "originalName": "API_OPERATION_IDS",
+              "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+            },
+            {
               "importedName": "AccessError",
               "originalName": "AccessError",
               "src": "supabase/functions/_shared/jungsi/application/access.ts"
@@ -99262,6 +100578,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
             },
             {
+              "importedName": "VerifiedArtifactCache",
+              "originalName": "VerifiedArtifactCache",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+            },
+            {
               "importedName": "assert",
               "originalName": "assert",
               "src": "tests/edge/fixture.ts"
@@ -99292,7 +100613,7 @@
               "src": "tests/edge/synthetic_runtime_binding.ts"
             }
           ],
-          "source_sha256": "196d7ba3cc918b951b2ce3fb6b0d49ed7af20181cd862169697135f466b10df9"
+          "source_sha256": "3677b27128eead750b9046fb52f96eb886b028f8b2800f10ad272a42bca89c01"
         },
         "dependencies": [
           {
@@ -99310,7 +100631,7 @@
             "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
             "targets": [
               {
-                "kind": "type",
+                "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
               }
             ]
@@ -99342,6 +100663,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
               }
             ]
           },
@@ -99524,7 +100855,7 @@
               "src": "tests/edge/synthetic_runtime_binding.ts"
             }
           ],
-          "source_sha256": "b080dcc94fffb10503648e9b954e024b7be2988e12f3a34f5fe6001fcfe40db2"
+          "source_sha256": "19826d20cfce311dd5d77d1689769f4eb8aaf8185ce88d76d4a5adc1a55de8d4"
         },
         "dependencies": [
           {
@@ -100941,6 +102272,14 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
             },
             {
+              "importedName": "VerifiedArtifactCache",
+              "jsDoc": {
+                "doc": "Invented Storage responses and limits only; no network, private source or runtime approval."
+              },
+              "originalName": "VerifiedArtifactCache",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+            },
+            {
               "importedName": "assert",
               "originalName": "assert",
               "src": "tests/edge/fixture.ts"
@@ -100956,7 +102295,7 @@
               "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "ce9585987580fb43d85d514ee6e0ac422a540aae0c61c04f410ba8ccf390eb53"
+          "source_sha256": "696a544287932c18a62c867d297165fc3d93145ad223b8811de820311d8dab67"
         },
         "dependencies": [
           {
@@ -113440,7 +114779,7 @@
       "tests/edge/test_year_equating.ts",
       "tests/edge/test_score_input_policy.ts"
     ],
-    "unit_count": 624
+    "unit_count": 656
   },
   "score_input_policy_contract": {
     "format": "jungsi.score-input-policy-contract/v1",
@@ -113748,20 +115087,20 @@
       "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts": "40e88ae7691183f88ecaa4e7584bf6fc9139b7fddecd95d1392ff3201c644502",
       "supabase/functions/_shared/jungsi/infrastructure/jsonb_value.ts": "c106b4ac8f93fbd3cc803f3db218dc7a707398e38ac4dac3727f95711b79916a",
       "supabase/functions/_shared/jungsi/infrastructure/management_postgres.ts": "a80ccb35c33703d76a765b530a2d9e02d3cd86d9ba72d15cd3db51c481435032",
-      "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "55d886f7227699cd4141a16012c8d400dfa6faf32787c25fa71d0ee0bf78cbc5",
-      "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "bc8e80d2875eccf710f32f3e6efbb21bfa0b1d29eb685b7631fc012d87054418",
+      "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "5381ed632b7f13a2e9658c8fe3a771a6bbfa71717bba67ad0c642676f2175c9e",
+      "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "227ad4c99b789974d557e158a4f817c33d4e352dfea6b5e42736b3ae1919c31e",
       "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts": "0cf3047b473e69ebb7efc4fd433988606eb7139846edd6f5b554931c02a03128",
       "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
       "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "69ea7f37981e478532369d916011afe827acb12850c6b73bfd4107d28d32f72e",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "7dd7db2174f65a1780c65e72d85a7bfd558468d7b9e78a6b9e99b4962dbdc3dc",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "fa289ae8764adaadad2ecac2c3d2439a7ce473defa874bb2553ce0a6d1a54f34",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "620eb224e943c6562acad41e4c038075289d3b63640327662eab8a9203ae8900",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "01f6f0de573c93b547f0adfc800b4402d56345fefbabc8cf0e0f2454a7b603d9",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "5fdc8e7553128ed216a6a33bcb462cb59aedf11096e79ff89a86a7dac6e5c162",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "87ca3512938ed6c8d46a4578d171df1825e6c55aa930e9cfefdc6f502a473813",
       "supabase/functions/_shared/jungsi/infrastructure/session_http.ts": "70cf3f60478a9a200dc4e8d6c772a04e98ed360e1dc03e0c4d0e296e9420f3d3",
       "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts": "b1ca87261edb42ed5d47f564d8389c46799bdab4d13dc4038f31081d07c66b4b",
       "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts": "ea79c8bf29653cb16b6bfc57b10ec3b6ad2d29c2c9ccd182cb478116c2182b4d",
-      "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "0dec28a66dcaa6cb83ab7260e390450f08dd7bc15125f994cb47c2c7106f62ce",
+      "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "babf667b18a8d9bacdd2f78a2d17babb2140e6177bdd32141b6c5f53d7c33905",
       "supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts": "50f5df287dcbb82a7dbc6380ef5954d97c1eb5a0ae0fe076fa1454b4ad296264",
       "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts": "5b3cac593782fd6ca55da78cc14f0e3b1b0919875f01659f11eaa39a76ca25a1",
       "supabase/functions/_shared/jungsi/infrastructure/usage_postgres.ts": "117dfa9141f400e8cafde122121c2237e3cdad513abafdca78997a18aa371424",
@@ -113794,7 +115133,7 @@
       "tests/edge/test_management_postgres.ts": "7ddf2f25ea346cb73ed0505b470fc228728635942e5418accca26b3c282e12c2",
       "tests/edge/test_native_auth.ts": "c6b1781256e4bea7c075ad4c74575f9537013787a09f28fd863ccd4f895ef872",
       "tests/edge/test_native_data_provider.ts": "e2207b416ebf3bcbf1cf48fdb3e121e3e055f1b3e54a93d0ad1f7db4cca80ede",
-      "tests/edge/test_native_source_selection.ts": "b5c1bdb56bc3c5849a702227a99eb71ba7fe5e31d5d0b963d8eecb4c3626a40e",
+      "tests/edge/test_native_source_selection.ts": "3d9ae377491a6f5cc6e3dc172b403fab93760f71ea61c8790cc6863bde72a008",
       "tests/edge/test_native_sql.ts": "1a36c576d0c4b1d7c548ff7bd55c3fbb6837d221fc2a46e2a40a644828561697",
       "tests/edge/test_offering_analysis.ts": "6b725fb51e791c36c614d4c79d7739c2c3f8610c7f168f4d6d74aa0397bc32c0",
       "tests/edge/test_official_subject_runtime.ts": "979a33749052649f63fda1c755b3ec06c20459ccf56420a7e62b352771817b51",
@@ -113807,13 +115146,13 @@
       "tests/edge/test_report_actions.ts": "5aa914b0a1e338a38828aeccaeb0bc522ccf7c31200ad27ad40cec44e01399d0",
       "tests/edge/test_runtime_budget.ts": "4e87eb4cb6779edfd03be5d4a6b236227f3f7ae0d9d504cc413080faec43492e",
       "tests/edge/test_runtime_composition.ts": "256479d822937cf7d183e759a2bb03f158dc00c55ae8f3e6368dcbacccc0fb98",
-      "tests/edge/test_runtime_context.ts": "196d7ba3cc918b951b2ce3fb6b0d49ed7af20181cd862169697135f466b10df9",
-      "tests/edge/test_runtime_controls.ts": "b080dcc94fffb10503648e9b954e024b7be2988e12f3a34f5fe6001fcfe40db2",
+      "tests/edge/test_runtime_context.ts": "3677b27128eead750b9046fb52f96eb886b028f8b2800f10ad272a42bca89c01",
+      "tests/edge/test_runtime_controls.ts": "19826d20cfce311dd5d77d1689769f4eb8aaf8185ce88d76d4a5adc1a55de8d4",
       "tests/edge/test_runtime_settings.ts": "d708a0205b1a9aeedef4130e130aefc0f85515e0d12dd3297cd365f82bd7e005",
       "tests/edge/test_session_candidate.ts": "8f05110f32d7285671e33b7f2f04500ef1b227be319c792ea99fde1b99c1b3d5",
       "tests/edge/test_sql_values.ts": "85c8f851e0389572ddf658c42d488c6c2a9d81d675df5f4f7e8949bf583080bd",
       "tests/edge/test_supabase_api_ingress.ts": "94e3f05ffa572daa35519dc722a22199e73441df5da3524fa7de19e4979e7fb7",
-      "tests/edge/test_supabase_artifacts.ts": "ce9585987580fb43d85d514ee6e0ac422a540aae0c61c04f410ba8ccf390eb53",
+      "tests/edge/test_supabase_artifacts.ts": "696a544287932c18a62c867d297165fc3d93145ad223b8811de820311d8dab67",
       "tests/edge/test_university_analysis.ts": "8fec57d36d8797910597cff27df3dd93b317d0276adfb889bfa489ead65f7be7",
       "tests/edge/test_university_distribution.ts": "c7eae343237e52e4233dcf95a89eb09d7e86e9a8d1ffd91ea39e6e4ed389b917",
       "tests/edge/test_university_percentile.ts": "ae18a54fa515c95eb6f4d23ccb3404f053e7571d1ef1238aa5be514a5960e13f",
@@ -113912,7 +115251,7 @@
     "extension_runtime_test_bindings": {
       "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "2fec41f63ac22a4501fae71e47c96666d551bfec536138e83587762969c343ef",
       "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "5d588fdbd2887b544bf8a74a24bd0ecbe2c48b5d4339ec64122690bc350cf362",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "7dd7db2174f65a1780c65e72d85a7bfd558468d7b9e78a6b9e99b4962dbdc3dc",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "01f6f0de573c93b547f0adfc800b4402d56345fefbabc8cf0e0f2454a7b603d9",
       "tests/edge/test_score_input_policy.ts": "c4d1adfb34a55997f8c69158f2ac6125b3fc2082f5a51717e2d3e9812576f5a9",
       "tests/edge/public_api_contract_fixture.ts": "ea80cec682c7596c7b01f44ba363183ba4a3b42311cdaf5feadcc422f05c6fd3",
       "tests/edge/synthetic_api_contract.ts": "a856ab6d53a83d44be4698af62145b1dec1a9160569e48ce9943e2e0468b577d"
@@ -113940,5 +115279,171 @@
     "recovery_verification_status": "READINESS_VERIFIED_REPORT_READ_EXTERNAL_EVIDENCE",
     "readiness_verified": true,
     "report_read_owner_reported": true
+  },
+  "service_performance_contract": {
+    "format": "jungsi.service-performance/v1",
+    "id": "CR-SERVICE-PERFORMANCE-20261018-01",
+    "basis_commit": "8e11c0399d328a9fe6190a7a71d280e10b871ad9",
+    "requirements": [
+      "REQ-01",
+      "REQ-24",
+      "REQ-25",
+      "REQ-26",
+      "REQ-27"
+    ],
+    "status": "SOURCE_CANDIDATE_NOT_DEPLOYED",
+    "production_ready": false,
+    "cache": {
+      "source": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
+      "symbol": "VerifiedArtifactCache",
+      "scope": "completed_SHA_verified_immutable_artifact_payloads_only",
+      "max_entries": 16,
+      "max_source_bytes": 4194304,
+      "max_age_ms": 60000,
+      "key": [
+        "project",
+        "credential_digest",
+        "bucket",
+        "immutable_object_path",
+        "SHA256",
+        "exact_allowed_bytes",
+        "version"
+      ],
+      "fresh_checks": [
+        "binding",
+        "expiry",
+        "head",
+        "registry_selection_approval",
+        "bucket_privacy_and_cap",
+        "relay_JWT",
+        "current_tier",
+        "ownership",
+        "shared_atomic_usage"
+      ],
+      "excluded": [
+        "head",
+        "registry_selection_decisions",
+        "usage_policy",
+        "user_responses",
+        "authorization",
+        "reservations",
+        "pending_promises"
+      ],
+      "logical_charge_on_hit": true,
+      "cross_request_queue": false,
+      "concurrent_misses": "independent_bounded_request_loads",
+      "payload_isolation": "frozen_private_native_tree_and_per_read_structural_copy_preserving_JsonFloat_bigint",
+      "clock": "monotonic_TTL_rollback_invalidates_memory_only",
+      "retention": "wire_source_bytes_and_entry_bounds; native tree heap overhead is additional and bounded by source shape; no files"
+    },
+    "verification": {
+      "baseline_edge_tests": 624,
+      "added_edge_tests": 20,
+      "current_edge_tests": 656,
+      "test_paths": [
+        "tests/edge/test_supabase_artifacts.ts",
+        "tests/edge/test_runtime_controls.ts",
+        "tests/edge/test_runtime_context.ts"
+      ],
+      "measurement": "offline_fake_fetch_and_preserved_private_bytes; physical_IO_separate_from_logical_read_budget; no_live_latency_claim",
+      "live_auth_DB_Storage": "NOT_RUN",
+      "deployment": "NOT_RUN",
+      "catalog_followup_added_edge_tests": 12
+    },
+    "batch_cr": {
+      "id": "CR-P1-BOUNDED-READ-20261018-01",
+      "status": "PROPOSED_NOT_IMPLEMENTED",
+      "registered_operation_count": 25,
+      "existing_option": "history.search academic_year omission returns one bounded, year-ascending page. UI may group only returned rows; no hidden cursor drain, per-year completeness assumption or automatic future-year display. Preserve filters, cursor/version, counts and truncation; /me stays fresh.",
+      "year_mapping": "historical offering_id does not imply a target2027 offering. Use explicit verified school4year mapping and exact target ID; never prefix/name substitution. Existing public history DTO has no mapped target field. Skip target recruitment request unless independently verified target ID is available; missing link remains pending.",
+      "proposed_extension": "Only after contract adoption: P1 bounded composite read with session3 public fields, requested allowed years, bounded history page and explicit verified target-ID recruitment batch. New operation/auth/security/DTO/budget entries and independent extension proof are required; existing22 and REQ27 extension3 remain pinned separately.",
+      "query": "one bounded in-memory catalog pass or parameterized selected-ID ANY/unnest JOIN; at most one bounded recruitment query for unique verified target IDs; no N+1, bulk hidden loop, inferred merge or widened school scope",
+      "bounds": "explicit year-set, page/result bytes, target-ID count and deadline before implementation; do not infer operational quotas; combined logical calls and result-volume charges defined before adoption"
+    },
+    "retry": {
+      "server_wait": "NOT_IMPLEMENTED_NO_SOCKET_OR_TRANSACTION_QUEUE",
+      "rate_limit_exceeded_dimensions": [
+        "request_window",
+        "concurrent_jobs"
+      ],
+      "client_rule": "Do not retry generic429 after an unconditional3seconds. Parse safe Retry-After (seconds or HTTP date), keep finite retry count and UI deadline; unknown/long wait requires user action. Do not promise a lease expiry is the actual completion time. No automatic quota retry. Each retry repeats JWT/current entitlement/ownership/head/shared atomic admission; POST/PUT preserve identical body and Idempotency-Key.",
+      "future_wait": "separate approval contract: acquire no DB slot or lease while waiting, explicit short total deadline, cancellation, shared fairness and fresh atomic re-admission; no worker-global queue/burst bypass"
+    },
+    "activation": {
+      "installed_source": "032a5647bc0b56e091eda279506aa534d559ea2f",
+      "candidate_includes_REQ27": true,
+      "drop_in_032_compatibility": "NOT_ACCEPTED; usage/v1 data-only smoke does not accept rights-mode HTTP. New save/analysis needs approved operating policy and rollout; preserve503 hold.",
+      "006_sql_changed": false,
+      "006a_RPC": "PREPARED_NOT_RUN",
+      "legacy_profiles": "MAPPING_BACKFILL_NOT_RUN",
+      "usage_v2": "APPROVAL_AND_REGISTRATION_NOT_RUN",
+      "new3_scopes": "NOT_RUN",
+      "negative_auth_checks": "NOT_RUN",
+      "deploy": "NOT_RUN",
+      "path": "exact develop+REQ27 candidate requires complete transition before deployment; cache-only032 alternative requires planning-registered maintenance parent/target/source manifest and separate exact-source proof before any branch or bundle. Never mix unbound032/9c files or turn off policy guards."
+    },
+    "parent_cache_candidate": {
+      "commit": "7d53ddad081115c97a23faa7f1a4784866612410",
+      "spec_version": "1.9.74",
+      "normal_hooks": "PASS",
+      "source_CI_run": 39123160804,
+      "PR_CI_run": 39123188089,
+      "python": 1125,
+      "Edge": 644,
+      "oracle": 993,
+      "mismatch": 0,
+      "source_preserved": true,
+      "preserved": true
+    }
+  },
+  "catalog_payload_scope_contract": {
+    "format": "jungsi.catalog-payload-scope/v1",
+    "id": "CR-CATALOG-PAYLOAD-SCOPE-20261018-01",
+    "status": "SOURCE_CANDIDATE_NOT_DEPLOYED",
+    "parent_commit": "7d53ddad081115c97a23faa7f1a4784866612410",
+    "operations": [
+      "history.search",
+      "recruitment.read",
+      "offerings.search",
+      "offering.read"
+    ],
+    "all_other_operations": "unchanged_full_graph_if_the_business_path_requests_source_data",
+    "health_ready": "all",
+    "payload_mode": "catalog_only",
+    "consumed_body_verification": "exact_SHA_length_version_and_native_catalog_decode_preserved",
+    "all_selected_reference_metadata": true,
+    "all_selected_bucket_cap": "one_fresh_private_bucket_response_checks_maximum_selected_bytes_including_deferred_references; consumed_artifact_keeps_its_own_fresh_bucket_check",
+    "usage_exam_binding": "selected_exam_reference_version_and_optional_year_match_policy; unused_pack_body_is_not_decoded_for_catalog",
+    "deferred_access": "runtime_dependency_not_loaded503; unselected remains null; never silently turn deferred scoring dependency into pending",
+    "current_checks": [
+      "binding",
+      "expiry",
+      "head",
+      "registry_selection_scope_and_approval",
+      "all_reference_shape_and_limits",
+      "fresh_private_bucket_and_maximum_selected_bytes",
+      "relay_JWT",
+      "current_tier",
+      "ownership",
+      "shared_atomic_usage",
+      "logical_charge_on_cache_hit"
+    ],
+    "acceptance_scope": "catalog_payload_and_all_selected_reference_metadata; never_verified_selected_release_graph_for_catalog_only",
+    "unused_payload_validity": "not_read_and_not_attested; missing/corrupt unused payload no longer blocks catalog if all reference metadata is valid; full calculation/readiness still rejects that body",
+    "cache_and_usage": "catalog cache hit keeps cold logical_read request/byte charge. Truly unused body reads are omitted, not relabeled as cache hits. Existing public-operation costs/shared reservations/result-volume/time/read ceilings stay unchanged.",
+    "verification": {
+      "parent_edge_tests": 644,
+      "added_edge_tests": 12,
+      "current_edge_tests": 656,
+      "test_paths": [
+        "tests/edge/test_native_source_selection.ts",
+        "tests/edge/test_runtime_context.ts"
+      ],
+      "live_latency": "NOT_RUN",
+      "deployment": "NOT_RUN"
+    },
+    "new_API_or_scope_approval": false,
+    "rollout_or_deployment": false,
+    "source032_drop_in_accepted": false
   }
 }

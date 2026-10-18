@@ -1,6 +1,7 @@
 import { syncPromise } from "./fixture.ts";
 /** Invented private registry pins only. Source-byte acceptance is never engine or live acceptance. */
 import {
+  type NativePayloadMode,
   NativeSourceSelection,
   type PinnedSourceBytes,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts";
@@ -19,7 +20,7 @@ async function pinned(text: string): Promise<PinnedSourceBytes> {
   ).join("");
   return { bytes, sha256: hash, maxBytes: 16384 };
 }
-async function fixture(text?: string) {
+async function fixture(text?: string, bucketCap = 16384) {
   const payload = await pinned(
     text ?? '{"version":"SYNTHETIC-a-v","large":9007199254740993,"float":1e3}',
   );
@@ -48,7 +49,7 @@ async function fixture(text?: string) {
       calls.push(url);
       const result = new Response(
         url.includes("/bucket/")
-          ? '{"id":"synthetic-private","public":false,"file_size_limit":16384}'
+          ? JSON.stringify({ id: "synthetic-private", public: false, file_size_limit: bucketCap })
           : Uint8Array.from(payload.bytes),
       );
       Object.defineProperty(result, "url", { value: url });
@@ -72,11 +73,12 @@ async function fixture(text?: string) {
     selection,
     entry,
     calls,
-    prepare: async () =>
+    prepare: async (mode: NativePayloadMode = "all") =>
       NativeSourceSelection.prepare(
         client,
         await pinned(nativeJsonText(registry)),
         await pinned(nativeJsonText(selection)),
+        mode,
       ),
   };
 }
@@ -204,4 +206,106 @@ Deno.test("native selection rejects an oversized later source before fetching an
   });
   await denied(f.prepare, "storage_artifact_too_large");
   equal(f.calls.length, 0);
+});
+
+function deferred(f: Awaited<ReturnType<typeof fixture>>, patch: NativeObject = {}) {
+  const entry: NativeObject = {
+    ...f.entry,
+    kind: "exam_pack",
+    key: "SYNTHETIC-exam",
+    object_key: "SYNTHETIC/unused.json",
+    sha256: "a".repeat(64),
+    ...patch,
+  };
+  (f.registry.entries as NativeObject[]).push(entry);
+  (f.selection.required as NativeObject[]).push({ kind: entry.kind, key: entry.key });
+  return entry;
+}
+Deno.test("catalog projection validates all reference metadata but reads only catalog body", async () => {
+  const f = await fixture();
+  deferred(f);
+  const snapshot = await f.prepare("catalog_only"), receipt = snapshot.privateReceipt();
+  equal(receipt.selected_metadata_count, 2);
+  equal(receipt.loaded_payload_count, 1);
+  equal(receipt.deferred_payload_count, 1);
+  equal(snapshot.identities().length, 1);
+  assert(!f.calls.some((url) => url.endsWith("unused.json")));
+  equal(f.calls.length, 3);
+});
+Deno.test("catalog projection rejects every invalid deferred approval and reference before artifact IO", async () => {
+  for (
+    const [patch, code] of [
+      [{ status: "revoked" }, "artifact_not_approved"],
+      [{ engine_approved: false }, "artifact_not_approved"],
+      [{ production_allowed: false }, "artifact_not_approved"],
+      [{ archive_only: true }, "storage_archive_only"],
+      [{ sha256: "broken" }, "storage_reference_invalid"],
+      [{ bytes: 0 }, "storage_reference_invalid"],
+      [{ bytes: 8193 }, "storage_artifact_too_large"],
+      [{ object_key: "SYNTHETIC/../bad" }, "storage_reference_invalid"],
+      [{ bucket: "other" }, "storage_reference_scope_mismatch"],
+      [{ version: null }, "storage_reference_invalid"],
+      [{ source_timezone: 123 }, "artifact_time_invalid"],
+    ] as const
+  ) {
+    const f = await fixture();
+    deferred(f, patch);
+    await denied(() => f.prepare("catalog_only"), code);
+    equal(f.calls.length, 0);
+  }
+});
+Deno.test("catalog projection cannot ignore duplicate missing or invalid selected metadata", async () => {
+  for (const mode of ["duplicate", "missing", "unknown"] as const) {
+    const f = await fixture();
+    deferred(f);
+    if (mode === "duplicate") {
+      (f.selection.required as NativeObject[]).push({ kind: "exam_pack", key: "SYNTHETIC-exam" });
+    }
+    if (mode === "missing") {
+      (f.selection.required as NativeObject[]).push({ kind: "exam_pack", key: "missing" });
+    }
+    if (mode === "unknown") {
+      (f.selection.required as NativeObject[]).push({ kind: "unknown", key: "unknown" });
+    }
+    await denied(
+      () => f.prepare("catalog_only"),
+      mode === "duplicate"
+        ? "registry_identity_conflict"
+        : mode === "missing"
+        ? "runtime_dependency_missing"
+        : "registry_format_invalid",
+    );
+    equal(f.calls.length, 0);
+  }
+});
+Deno.test("catalog projection checks deferred byte lengths against fresh private bucket metadata", async () => {
+  const f = await fixture(undefined, 4096);
+  deferred(f, { bytes: 8000 });
+  await denied(() => f.prepare("catalog_only"), "storage_bucket_limit_unverified");
+  equal(f.calls.length, 1);
+  assert(f.calls[0].includes("/bucket/"));
+});
+Deno.test("deferred payload access fails closed and reference clones cannot change selection", async () => {
+  const f = await fixture();
+  deferred(f);
+  const snapshot = await f.prepare("catalog_only"),
+    ref = snapshot.reference("exam_pack", "SYNTHETIC-exam")!;
+  ref.engine_approved = false;
+  equal(snapshot.reference("exam_pack", "SYNTHETIC-exam")!.engine_approved, true);
+  await denied(
+    () => Promise.resolve(snapshot.load("exam_pack", "SYNTHETIC-exam")),
+    "runtime_dependency_not_loaded",
+  );
+  equal(snapshot.load("exam_pack", "unselected"), null);
+});
+Deno.test("unknown payload selection mode is rejected without network reads", async () => {
+  const f = await fixture();
+  await denied(() => f.prepare("unsafe" as NativePayloadMode), "storage_configuration_invalid");
+  equal(f.calls.length, 0);
+});
+Deno.test("default full selection still reads and rejects an invalid noncatalog body", async () => {
+  const f = await fixture();
+  deferred(f);
+  await denied(() => f.prepare(), "storage_hash_mismatch");
+  equal(f.calls.length, 4);
 });

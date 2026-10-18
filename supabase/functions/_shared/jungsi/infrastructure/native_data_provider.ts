@@ -182,12 +182,33 @@ export class NativeDataProvider
       fail(code);
     }
   }
-  /** Decode every selected release before exposing a runtime. This is not live data acceptance. */
+  /** Decode the explicit payload scope; full readiness retains every selected release check. */
   async preflight(): Promise<NativeObject> {
     try {
       await this.assertCurrentSelection(true);
       const identities = this.selection.identities();
       const catalog = await this.getCatalog();
+      if (this.selection.payloadMode === "catalog_only") {
+        if (identities.some(({ kind, key }) => kind !== "catalog" || key !== "service")) {
+          fail("artifact_not_approved");
+        }
+        await this.assertCurrentSelection(true);
+        return Object.freeze({
+          format: "jungsi.native-provider-preflight/v1",
+          status: "verified_catalog_payload",
+          registry_sha256: this.selection.registryHash,
+          selection_sha256: this.selection.selectionHash,
+          approval_reference_sha256: this.freshness!.approvalReferenceSha256,
+          artifacts: identities.length,
+          verification_scope: "catalog_payload_and_all_selected_reference_metadata",
+          source_selection: this.selection.privateReceipt(),
+          optional_missing: catalog
+            ? []
+            : [{ kind: "catalog", key: "service", reason_code: "catalog_not_selected" }],
+          production_ready: false,
+          native_acceptance: "NOT_VERIFIED_BY_SOURCE_PREFLIGHT",
+        });
+      }
       const offerings = catalog?.offerings ?? [];
       // Build once for the selected catalog. Null preserves ambiguity instead of deduplicating it.
       const offeringIndex = new Map<string, NativeObject | null>();

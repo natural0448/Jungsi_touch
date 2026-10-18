@@ -18,6 +18,7 @@ export const NATIVE_RUNTIME_KINDS = [
   "forecast_context",
 ] as const;
 export type NativeRuntimeKind = typeof NATIVE_RUNTIME_KINDS[number];
+export type NativePayloadMode = "all" | "catalog_only";
 export interface PinnedSourceBytes {
   readonly bytes: Uint8Array;
   readonly sha256: string;
@@ -68,11 +69,15 @@ async function pinned(raw: PinnedSourceBytes): Promise<{ body: NativeObject; has
 }
 export class NativeSourceSelection {
   private readonly artifacts: ReadonlyMap<string, SelectedNativeArtifact>;
+  private readonly references: ReadonlyMap<string, NativeObject>;
   private constructor(
     artifacts: ReadonlyMap<string, SelectedNativeArtifact>,
     readonly registryHash: string,
     readonly selectionHash: string,
+    selected: ReadonlyMap<string, NativeObject>,
+    readonly payloadMode: NativePayloadMode,
   ) {
+    this.references = new Map([...selected].map(([id, entry]) => [id, cloneNativeJson(entry)]));
     this.artifacts = new Map([...artifacts].map(([id, row]) => [id, {
       entry: cloneNativeJson(row.entry),
       payload: cloneNativeJson(row.payload),
@@ -83,8 +88,13 @@ export class NativeSourceSelection {
     client: SupabaseArtifactClient,
     registrySource: PinnedSourceBytes,
     selectionSource: PinnedSourceBytes,
+    payloadMode: NativePayloadMode = "all",
   ): Promise<NativeSourceSelection> {
-    if (!(client instanceof SupabaseArtifactClient)) fail("storage_configuration_invalid");
+    if (
+      !(client instanceof SupabaseArtifactClient) || !["all", "catalog_only"].includes(payloadMode)
+    ) {
+      fail("storage_configuration_invalid");
+    }
     const [registry, selection] = await Promise.all([
       pinned(registrySource),
       pinned(selectionSource),
@@ -115,10 +125,17 @@ export class NativeSourceSelection {
       const entry = entries.get(id);
       if (!entry) fail("runtime_dependency_missing");
       client.validateSelectedReference(entry);
+      if (entry.source_timezone != null && typeof entry.source_timezone !== "string") {
+        fail("artifact_time_invalid");
+      }
       chosen.set(id, entry);
+    }
+    if (payloadMode === "catalog_only" && [...chosen.values()].some((e) => e.kind !== "catalog")) {
+      await client.assertSelectedMetadata([...chosen.values()]);
     }
     const artifacts = new Map<string, SelectedNativeArtifact>();
     for (const [id, entry] of chosen) {
+      if (payloadMode === "catalog_only" && entry.kind !== "catalog") continue;
       const verified = await client.artifact(entry), payload = verified.payload;
       if (Object.hasOwn(payload, "as_of") && payload.as_of !== null && payload.as_of !== "") {
         if (
@@ -136,10 +153,15 @@ export class NativeSourceSelection {
       }
       artifacts.set(id, { entry, payload });
     }
-    return new NativeSourceSelection(artifacts, registry.hash, selection.hash);
+    return new NativeSourceSelection(artifacts, registry.hash, selection.hash, chosen, payloadMode);
+  }
+  reference(kind: NativeRuntimeKind, key: string): NativeObject | null {
+    const entry = this.references.get(identity(kind, key));
+    return entry ? cloneNativeJson(entry) : null;
   }
   load(kind: NativeRuntimeKind, key: string): SelectedNativeArtifact | null {
-    const row = this.artifacts.get(identity(kind, key));
+    const id = identity(kind, key), row = this.artifacts.get(id);
+    if (!row && this.references.has(id)) fail("runtime_dependency_not_loaded");
     return row
       ? { entry: cloneNativeJson(row.entry), payload: cloneNativeJson(row.payload) }
       : null;
@@ -159,6 +181,15 @@ export class NativeSourceSelection {
       selection_sha256: this.selectionHash,
       production_ready: false,
       engine_acceptance: "NOT_VERIFIED_BY_RAW_SOURCE_SELECTION",
+      ...(this.payloadMode === "catalog_only"
+        ? {
+          payload_mode: this.payloadMode,
+          metadata_status: "validated_all_selected_references",
+          selected_metadata_count: this.references.size,
+          loaded_payload_count: this.artifacts.size,
+          deferred_payload_count: this.references.size - this.artifacts.size,
+        }
+        : {}),
       artifacts: [...this.artifacts.values()].map(({ entry }) => ({
         kind: entry.kind,
         key: entry.key,

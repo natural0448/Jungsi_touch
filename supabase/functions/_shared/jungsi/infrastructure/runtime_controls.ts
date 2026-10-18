@@ -24,6 +24,9 @@ function object(value: unknown): NativeObject {
 export class RuntimeReadBudget {
   private requests = 0;
   private bytes = 0;
+  private physicalRequests = 0;
+  private physicalBytes = 0;
+  private reusedArtifacts = 0;
   constructor(private readonly limits: RuntimeReadLimits) {
     if (
       !limits ||
@@ -41,10 +44,35 @@ export class RuntimeReadBudget {
     }
     this.bytes += bytes;
   }
+  reuseArtifact(bytes: number): void {
+    if (
+      this.requests >= this.limits.maxRequests || !Number.isSafeInteger(bytes) || bytes < 1 ||
+      bytes > this.limits.maxBytes - this.bytes
+    ) fail();
+    this.requests++;
+    this.bytes += bytes;
+    this.reusedArtifacts++;
+  }
+  snapshot(): Readonly<{
+    requests: number;
+    bytes: number;
+    physicalRequests: number;
+    physicalBytes: number;
+    reusedArtifacts: number;
+  }> {
+    return Object.freeze({
+      requests: this.requests,
+      bytes: this.bytes,
+      physicalRequests: this.physicalRequests,
+      physicalBytes: this.physicalBytes,
+      reusedArtifacts: this.reusedArtifacts,
+    });
+  }
   /** The same fetch wrapper must serve control and selected-artifact reads for this request. */
   fetch(base: typeof fetch): typeof fetch {
     return (async (input: RequestInfo | URL, init?: RequestInit) => {
       this.request();
+      this.physicalRequests++;
       const response = await base(input, init);
       if (!response.body || response.status < 200 || response.status > 599) return response;
       const reader = response.body.getReader();
@@ -57,6 +85,7 @@ export class RuntimeReadBudget {
               reader.releaseLock();
               return;
             }
+            this.physicalBytes += chunk.value.byteLength;
             this.consume(chunk.value.byteLength);
             controller.enqueue(Uint8Array.from(chunk.value));
           } catch (error) {
@@ -91,7 +120,7 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
   constructor(
     private readonly binding: ApprovedRuntimeBinding,
     private readonly clock: RequestClockPort,
-    readBudget: RuntimeReadBudget,
+    private readonly readBudget: RuntimeReadBudget,
     fetcher: typeof fetch = fetch,
   ) {
     if (
@@ -102,6 +131,10 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
     new SupabaseArtifactClient({ projectUrl: binding.projectUrl, ...binding.storage }, fetcher);
     this.fetcher = readBudget.fetch(fetcher);
     this.assertLive();
+  }
+  reuseArtifact(bytes: number): void {
+    this.assertLive();
+    this.readBudget.reuseArtifact(bytes);
   }
   private assertLive(): void {
     const now = this.clock.nowUtc();

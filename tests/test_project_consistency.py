@@ -1676,7 +1676,7 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
         live=epoch_spec['supabase_deployment_contract']['live_execution']
         self.assertEqual(live['backend_safe_observation_plan']['synthetic_verification']['full_suite_expected'],584)
         self.assertEqual(live['admin_session_identity_fix']['synthetic_verification']['full_suite_expected'],590)
-        self.assertEqual(epoch_spec['edge_harness']['unit_count'],624)
+        self.assertEqual(epoch_spec['edge_harness']['unit_count'],656)
         self.assertIn('관리자 세션의 예산 연결 수정 후보 · 미배포',live_execution_document(epoch_spec))
 
     def test_admin_identity_fix_rejects_missing_or_stale_source_and_test_binding(self):
@@ -2701,3 +2701,47 @@ class OpeningAcceptanceAndReferenceTests(unittest.TestCase):
         files=generated_files(self.spec)
         for path,target in [('apps/web/README.md','../../docs/current/오픈전_보안운영_변경.md'),('database/README.md','../docs/current/오픈전_보안운영_변경.md'),('docs/team_sessions/2026-10-05/DEV006_서비스_DB_응답.md','../../current/오픈전_보안운영_변경.md')]:
             with self.subTest(path=path):self.assertIn(']('+target+')',files[path].decode('utf-8'))
+
+
+class ServicePerformanceBoundaryTests(unittest.TestCase):
+    def source(self):
+        return json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
+
+    def test_cache_cannot_adopt_authorization_or_remove_logical_charges(self):
+        from check_project_consistency import validate_service_performance
+        spec=self.source();self.assertEqual(validate_service_performance(spec),[])
+        for field,value in [('logical_charge_on_hit',False),('max_entries',17),('fresh_checks',[])]:
+            changed=deepcopy(spec);changed['service_performance_contract']['cache'][field]=value
+            self.assertTrue(validate_service_performance(changed))
+
+    def test_performance_tests_are_additive_to_req27_source_baseline(self):
+        from check_project_consistency import validate_service_performance
+        spec=self.source();spec['service_performance_contract']['verification']['baseline_edge_tests']=0
+        self.assertTrue(validate_service_performance(spec))
+        spec=self.source();spec['edge_harness']['unit_count']=624
+        self.assertTrue(validate_service_performance(spec))
+
+    def test_batch_proposal_and_cache_cannot_activate_operations_or_deployment(self):
+        from check_project_consistency import validate_service_performance
+        for section,field,value in [('batch_cr','status','IMPLEMENTED'),('activation','deploy','PASS'),('activation','006_sql_changed',True)]:
+            spec=self.source();spec['service_performance_contract'][section][field]=value
+            self.assertTrue(validate_service_performance(spec))
+
+
+class CatalogPayloadBoundaryTests(unittest.TestCase):
+    def source(self):
+        return json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
+
+    def test_catalog_projection_cannot_skip_reference_auth_or_whole_readiness(self):
+        from check_project_consistency import validate_catalog_payload_scope
+        spec=self.source();self.assertEqual(validate_catalog_payload_scope(spec),[])
+        for field,value in [('operations',['history.search','university.analyze']),('all_selected_reference_metadata',False),('health_ready','catalog_only'),('current_checks',[])]:
+            changed=deepcopy(spec);changed['catalog_payload_scope_contract'][field]=value
+            self.assertTrue(validate_catalog_payload_scope(changed))
+
+    def test_catalog_projection_requires_separate_parent_and_additive_test_evidence(self):
+        from check_project_consistency import validate_catalog_payload_scope
+        spec=self.source();spec['catalog_payload_scope_contract']['verification']['added_edge_tests']=0
+        self.assertTrue(validate_catalog_payload_scope(spec))
+        spec=self.source();spec['service_performance_contract']['parent_cache_candidate']['preserved']=False
+        self.assertTrue(validate_catalog_payload_scope(spec))

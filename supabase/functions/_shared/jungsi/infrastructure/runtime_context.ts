@@ -1,12 +1,12 @@
 /** One request owns one binding, read budget, current-head reader and native provider graph. */
 import { AccessError } from "../application/access.ts";
 import type { ApiOperationId } from "../application/api_dispatch.ts";
-import { CatalogService } from "../application/catalog.ts";
+import { CATALOG_OPERATIONS, CatalogService } from "../application/catalog.ts";
 import type { RequestClockPort } from "../application/ports.ts";
 import { RepositoryUsageReplays } from "../application/usage_service.ts";
 import { NativeDataProvider } from "./native_data_provider.ts";
 import { NativeSourceSelection } from "./native_source_selection.ts";
-import { SupabaseArtifactClient } from "./supabase_artifacts.ts";
+import { SupabaseArtifactClient, type VerifiedArtifactCache } from "./supabase_artifacts.ts";
 import { SupabaseScoreInputRepository } from "./score_input_postgres.ts";
 import { SupabasePlatformRepository } from "./platform_postgres.ts";
 import { SupabaseForecastRepository } from "./forecast_postgres.ts";
@@ -40,6 +40,7 @@ export class NativeRuntimeRequest {
     private readonly clock: RequestClockPort,
     private readonly operation: ApiOperationId | "health.ready" | null,
     private readonly fetcher: typeof fetch = fetch,
+    private readonly artifactCache?: VerifiedArtifactCache,
   ) {}
   binding(): Promise<ApprovedRuntimeBinding> {
     this.bindingValue ??= (async () => {
@@ -151,10 +152,17 @@ export class NativeRuntimeRequest {
         controls.read("selection"),
       ]);
       this.assertArtifactScope(selection, binding);
+      const catalogOnly = CATALOG_OPERATIONS.some((id) => id === this.operation);
       const snapshot = await NativeSourceSelection.prepare(
         new SupabaseArtifactClient(
           { projectUrl: binding.projectUrl, ...binding.storage },
           controls.fetcher,
+          this.artifactCache
+            ? {
+              cache: this.artifactCache,
+              onReuse: (bytes) => controls.reuseArtifact(bytes),
+            }
+            : undefined,
         ),
         {
           bytes: registry,
@@ -166,6 +174,7 @@ export class NativeRuntimeRequest {
           sha256: binding.references.selection.sha256,
           maxBytes: binding.references.selection.bytes,
         },
+        catalogOnly ? "catalog_only" : "all",
       );
       const data = new NativeDataProvider(snapshot, {
         heads: controls,
@@ -176,6 +185,15 @@ export class NativeRuntimeRequest {
       await data.preflight();
       const policy = (await this.budget()).policy;
       for (const exam of policy.exams.values()) {
+        if (catalogOnly) {
+          const reference = snapshot.reference("exam_pack", exam.examId);
+          if (
+            !reference || reference.version !== exam.packVersion ||
+            Object.hasOwn(reference, "academic_year") &&
+              reference.academic_year !== exam.academicYear
+          ) fail();
+          continue;
+        }
         const pack = await data.getExamPack(exam.examId);
         if (
           !pack || pack.packVersion !== exam.packVersion || pack.academicYear !== exam.academicYear
