@@ -16389,6 +16389,13 @@
         "REQ-01"
       ],
       "summary": "8c3d9fc 의 계정당 동시 요청 줄 세우기가 워커 전역 대기열이라 요청 사이 promise 해제가 막혀 1페이지 요청이 멈춤(Worker threw exception) → 운영을 ca7ed211 로 되돌림. 대기열을 React cache 로 요청 하나 안에서만 쓰도록 수정."
+    },
+    {
+      "date": "2026-10-18",
+      "requirements": [
+        "REQ-01"
+      ],
+      "summary": "최종 관리자 결정: 유료 화면 회원 식별 표시 불투명도 7% → 4%(캡처·인쇄 식별은 유지, 화면 가독성 개선)."
     }
   ],
   "overall_analysis_contract": {
