@@ -81,7 +81,7 @@ def owner_review_registration(spec,before):
         return None
     v=c.get('verification',{})
     if (c.get('format')!='jungsi.owner-current-review-contract/v1' or
-        v.get('test_path')!=entry or v.get('test_count')!=26 or
+        v.get('test_path')!=entry or v.get('test_count')!=28 or
         not isinstance(v.get('source_bindings'),list) or not v['source_bindings']):
         raise EdgeFailure('owner_review_verification_invalid')
     required={entry,*['supabase/functions/_shared/'+name+'.ts' for name in
@@ -137,6 +137,7 @@ def run_workspace(root,manifest,deno,python,output):
       coverage="DEV010_FOUNDATION",coexisting_edge_sources=len(scope["coexisting_bound"]),unit=unit,oracle=dict(case_count=receipt["case_count"],mismatch_count=receipt["mismatch_count"]),
       source_manifest_sha256=digest(json_bytes(manifest)),contract_receipt_sha256=digest((output/"contract/edge_contract_receipt.json").read_bytes()),
       oracle_receipt_sha256=digest(receipt_path.read_bytes()),tool=parsed["tool"],production_ready=False,operating_writes=0,**operation_registration(spec))
+    if owner_unit is not None:result['owner_review_unit']=owner_unit
     write_new(output/"edge_run_receipt.json",json_bytes(result));return result
 def main():
     p=argparse.ArgumentParser(description=__doc__)

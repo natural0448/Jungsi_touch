@@ -1,5 +1,5 @@
-import { isOwnerCurrentReview, OWNER_PERCENTILE_VIEW, validatePercentileHead } from './current_admission_owner.ts';
-import { buildOwnerCurrentReviewPayloadSql } from './current_admission_owner_sql.ts';
+import { isOwnerCurrentReview, validatePercentileHead } from './current_admission_owner.ts';
+import { buildOwnerCurrentReviewPayloadSql, OWNER_CURRENT_REVIEW_METADATA_SEEDS } from './current_admission_owner_sql.ts';
 /** App-role, verified-TLS, read-only current review. Fixed views; one bounded payload statement. */
 import './node_compat_bootstrap.ts';
 import { CURRENT_REVIEW_METADATA_SQL, CURRENT_REVIEW_PAYLOAD_SQL, CURRENT_REVIEW_LIVE_PAYLOAD_SQL, buildCurrentReviewLivePayloadSql } from './current_admission_review_sql.ts';
@@ -63,7 +63,7 @@ export function createCurrentReviewInfrastructure(settings:CurrentReviewInfrastr
         const role=await tx.unsafe("SELECT current_user,r.rolsuper,r.rolbypassrls,current_setting('row_security') AS row_security,current_setting('transaction_read_only') AS read_only,pg_has_role(current_user,'jungsi_backend_owner','MEMBER') AS owner_member,pg_has_role(current_user,'jungsi_backend_owner','USAGE') AS owner_usage,pg_has_role(current_user,'postgres','MEMBER') AS postgres_member FROM pg_catalog.pg_roles r WHERE r.rolname=current_user");
         if(role.length!==1||role[0].current_user!=='jungsi_backend_app'||role[0].rolsuper!==false||role[0].rolbypassrls!==false||role[0].row_security!=='on'||role[0].read_only!=='on'||
           role[0].owner_member!==false||role[0].owner_usage!==false||role[0].postgres_member!==false)throw fail('current_review_runtime_role_unverified');
-        const seeds=[CURRENT_REVIEW_VIEW,MEMBERS,POPULATION,COMMANDS,...(owner?[OWNER_PERCENTILE_VIEW]:[])];
+        const seeds=owner?[...OWNER_CURRENT_REVIEW_METADATA_SEEDS]:[CURRENT_REVIEW_VIEW,MEMBERS,POPULATION,COMMANDS];
         const metadata=await tx.unsafe(CURRENT_REVIEW_METADATA_SQL,[JSON.stringify(seeds)]);
         const expected=descriptor.source_definition.metadata as Row[];
         if(metadata.length!==expected.length||metadata.length>128)throw fail('current_review_scope_unverified');

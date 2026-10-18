@@ -249,7 +249,10 @@ import {
   OWNER_REVIEW_WIRE_RECIPE,
   ownerCurrentProjectionSha256,
 } from "./current_admission_owner.ts";
-import { buildOwnerCurrentReviewPayloadSql } from "./current_admission_owner_sql.ts";
+import {
+  buildOwnerCurrentReviewPayloadSql,
+  OWNER_CURRENT_REVIEW_METADATA_SEEDS,
+} from "./current_admission_owner_sql.ts";
 const PCT_DEF =
   "SELECT c.*, v.upper_cumulative_percent FROM jungsi_data_ingest.admission_percentile_heads_v1 h JOIN jungsi_data_ingest.admission_percentile_reviews_v1 r ON false JOIN jungsi_data_ingest.admission_results_current c ON false LEFT JOIN jungsi_data_ingest.admission_percentile_members_v1 l ON false LEFT JOIN jungsi_data_ingest.admission_percentile_values_v1 v ON false LEFT JOIN jungsi_data_ingest.admission_percentile_methods_v1 m ON false WHERE c.active_service AND r.item='actual_cutoff_percentile_application'";
 function head() {
@@ -759,4 +762,32 @@ Deno.test("bounded percentile definitions preserve replacement tokens without du
   equal(sql.match(/page_current AS MATERIALIZED/g)?.length, 1);
   equal(sql.match(/bounded_percentile_variants AS MATERIALIZED/g)?.length, 1);
   assert(sql.includes("'^SYNTHETIC$'"));
+});
+
+Deno.test("owner metadata seeds include the release table directly read outside the current view", () => {
+  assert(
+    OWNER_CURRENT_REVIEW_METADATA_SEEDS.includes(
+      "jungsi_data_ingest.admission_percentile_releases_v1",
+    ),
+  );
+  assert(
+    OWNER_CURRENT_REVIEW_METADATA_SEEDS.includes(
+      "jungsi_data_ingest.admission_result_percentiles_current",
+    ),
+  );
+  equal(OWNER_CURRENT_REVIEW_METADATA_SEEDS.length, 6);
+});
+Deno.test("owner full descriptor rejects missing direct release dependency even with valid hash", async () => {
+  const d = await ownerDescriptor();
+  d.source_definition.metadata = (d.source_definition.metadata as Row[]).filter(
+    (x) => x.relation !== "admission_percentile_releases_v1",
+  );
+  d.source_definition.sha256 = await currentReviewSha256(
+    d.source_definition.metadata,
+  );
+  d.qualified_state.definition_sha256 = d.source_definition.sha256;
+  await rejects(
+    () => validateCurrentReviewDescriptor(d, "local_verification", NOW),
+    "current_review_scope_unverified",
+  );
 });

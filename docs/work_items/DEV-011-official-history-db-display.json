@@ -2990,7 +2990,7 @@
         ],
         "verification": {
           "test_path": "supabase/functions/_shared/current_admission_owner_test.ts",
-          "test_count": 26,
+          "test_count": 28,
           "source_bindings": [
             {
               "path": "supabase/functions/_shared/current_admission_owner.ts",
@@ -2998,11 +2998,11 @@
             },
             {
               "path": "supabase/functions/_shared/current_admission_owner_sql.ts",
-              "sha256": "6fa0cde6ec73a9f232c8629626ff615e9698e02b7845424e4391546229bd4b58"
+              "sha256": "9320f5bff26111f1acf0785e21cd57c78ece8601205abc97e9d68764298823bc"
             },
             {
               "path": "supabase/functions/_shared/current_admission_owner_test.ts",
-              "sha256": "2870a81494942e350d9639ad07e825f28fd9ffa7e3ebf3d9af04dcec4c0b5ecf"
+              "sha256": "99dba6a386ca35bc14dd8a744d6af7b9973d4a9534e51a51995b6253fa08a316"
             },
             {
               "path": "supabase/functions/_shared/current_admission_review_sql.ts",
@@ -3053,8 +3053,8 @@
           },
           {
             "path": "supabase/functions/_shared/current_admission_owner_sql.ts",
-            "bytes": 6030,
-            "sha256": "6fa0cde6ec73a9f232c8629626ff615e9698e02b7845424e4391546229bd4b58"
+            "bytes": 6431,
+            "sha256": "9320f5bff26111f1acf0785e21cd57c78ece8601205abc97e9d68764298823bc"
           },
           {
             "path": "supabase/functions/_shared/current_admission_review.ts",
@@ -3063,8 +3063,8 @@
           },
           {
             "path": "supabase/functions/_shared/current_admission_review_postgres.ts",
-            "bytes": 10320,
-            "sha256": "3cda4b3bbc07092b3a0c8f35b3aee01d7457f6e08626b49a3e704ed2aa365f38"
+            "bytes": 10343,
+            "sha256": "453b6319ed712c3fa89d44d9f66d20d13e81d19a0cd4f0ab86af46cd42e650c6"
           },
           {
             "path": "supabase/functions/_shared/current_admission_review_sql.ts",
@@ -3091,7 +3091,20 @@
             "bytes": 1678,
             "sha256": "7aa664c3bbc719fe9240f70d03cfa2aed6ecfee8e5a9b376fa36575c3d4360eb"
           }
-        ]
+        ],
+        "metadata_seeds": "current_view_source_members_population_commands_percentile_current_view_and_directly_read_percentile_releases; recursive_closure_of_all_six_seeds",
+        "full_descriptor_preflight": {
+          "status": "PASS_READONLY_FULL_METADATA_AND_IN_MEMORY_APPROVED_SHAPE_ONLY",
+          "current_metadata_dependency_closure": 19,
+          "direct_release_dependency_required": true,
+          "required_validator_relation_removed": false,
+          "pending_saved_candidate_rejected": true,
+          "application_data_queries": 0,
+          "DB_writes": 0,
+          "activation": 0,
+          "receipt_sha256": "d16a383b2d32ae2d31e0702d87530f7a1176596ed208d61f0239b15a8416f3e5",
+          "boundary": "prior_exact_ID_SQL_used_18_view_dependencies; final_guard_adds_direct_release_table_and_preserves_identical_payload_SQL_SHA"
+        }
       },
       "legacy_v2_DTO_contract": {
         "format": "jungsi.current-admission-review/v2",

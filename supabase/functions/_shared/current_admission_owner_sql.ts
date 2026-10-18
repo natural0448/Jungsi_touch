@@ -3,6 +3,14 @@ import { DisplayError } from "./official_history_display.ts";
 import type { Row } from "./official_history_display.ts";
 import { buildCurrentReviewLivePayloadSql } from "./current_admission_review_sql.ts";
 import { OWNER_PERCENTILE_FIELDS } from "./current_admission_owner.ts";
+export const OWNER_CURRENT_REVIEW_METADATA_SEEDS = [
+  "jungsi_data_ingest.admission_results_current",
+  "jungsi_data_ingest.admission_result_source_members",
+  "jungsi_data_ingest.admission_result_population_links_current",
+  "jungsi_data_ingest.admission_observation_commands",
+  "jungsi_data_ingest.admission_result_percentiles_current",
+  "jungsi_data_ingest.admission_percentile_releases_v1",
+];
 const schema = "jungsi_data_ingest";
 const fail = () => new DisplayError("current_review_scope_unverified");
 function once(sql: string, from: string, to: string): string {
