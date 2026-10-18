@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.76",
-  "source_sha256": "e23f12407a6dd7d0ea0895b66c5313239ae2ae280dae25a97b9b3d2408a9641b",
+  "spec_version": "1.9.78",
+  "source_sha256": "8fcb3ab0651a18b66bfbf7e1e8067ec82bc28b3d183cf82c2bbba2c98b1af8fc",
   "pages": [
     {
       "id": "PAGE-01",
@@ -9167,7 +9167,7 @@
       "recruitment.read"
     ],
     "status": "FE_967_SOURCE_REVIEWED_C_LOCAL_APPROVED_ACTUAL_TCP31_PASS_EXTERNAL_BROWSER_AND_THREE_FE_FIXES_PENDING",
-    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다.",
+    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다.",
     "estimated_columns": [
       {
         "id": "estimated_applicants",
@@ -9691,7 +9691,9 @@
       "operational_publication": "NOT_RUN",
       "new_operating_deployment_authorized": false,
       "deletion_allowed": false,
-      "default_entitlement_change_allowed": false
+      "default_entitlement_change_allowed": false,
+      "superseded_for_current_consumer_scope": true,
+      "historical_boundary": "2026-10-08 최소 C/학교별 부분 발행의 보존 이력이다. 2026-10-19 전국 현재 정본 공개 결정의 선행 조건으로 재적용하지 않는다."
     }
   },
   "security_contract": {
