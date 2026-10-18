@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.78",
+  "version": "1.9.79",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -2720,7 +2720,9 @@
         "validateCurrentKey",
         "compareCurrentKeys",
         "EncryptedCurrentCursor",
-        "closeCurrentPage"
+        "closeCurrentPage",
+        "CurrentCursorMismatchReason",
+        "CurrentCursorVersionError"
       ]
     },
     {
@@ -5734,7 +5736,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.78",
+        "contract_version": "1.9.79",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -5908,7 +5910,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.78",
+        "contract_version": "1.9.79",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -6074,7 +6076,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.78",
+        "contract_version": "1.9.79",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6093,7 +6095,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.78",
+        "contract_version": "1.9.79",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6118,7 +6120,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.78",
+        "contract_version": "1.9.79",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6143,7 +6145,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.78",
+        "contract_version": "1.9.79",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -7642,7 +7644,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "24c4da61b1ec59e651514af197de2cee1426752de4f5bf891b07ede247722e0a",
+            "source_sha256": "2c438f6fc514c97eea5cfd2b23fb6863cb0e8cb5f76365fb02b9d30035b5b675",
             "symbols": [
               {
                 "kind": "function",
@@ -12439,7 +12441,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "572b81a7dbd09e2798cf8ab2d5067335287e51bef44162baa60391ba2818a631",
+              "source_sha256": "c1f85c6180ed635bd6dff5b1fa95bd4323687c5ab4488d53db2b068fe3b3b498",
               "declared_exports": [
                 "CURRENT_REVIEW_VIEW",
                 "CURRENT_REVIEW_YEARS",
@@ -12455,7 +12457,9 @@
                 "validateCurrentKey",
                 "compareCurrentKeys",
                 "EncryptedCurrentCursor",
-                "closeCurrentPage"
+                "closeCurrentPage",
+                "CurrentCursorMismatchReason",
+                "CurrentCursorVersionError"
               ]
             },
             {
@@ -12536,7 +12540,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "99dba6a386ca35bc14dd8a744d6af7b9973d4a9534e51a51995b6253fa08a316",
+              "source_sha256": "ca42fe919cf79aef39fb00baa82e8900edb0d0a85d5dc325827810f65f41fd3c",
               "declared_exports": []
             },
             {
@@ -12552,7 +12556,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "3765b4e8198141fbc3d55a37e587714f7b5018b7867c2304301a5dc9aeddff3a",
+              "source_sha256": "b77246963fb325731308eb3420a3c82790f9049e47a8a2d24a41692e2332296c",
               "declared_exports": [
                 "CURRENT_REVIEW_ROUTE",
                 "CURRENT_REVIEW_PURPOSE",
@@ -14919,7 +14923,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "7aa664c3bbc719fe9240f70d03cfa2aed6ecfee8e5a9b376fa36575c3d4360eb",
+              "source_sha256": "5f08a7968f17fb9dfb1751f67a33814ae2eadd8e3cc7b2526a4a5877338c8c93",
               "declared_exports": []
             },
             {
@@ -15119,15 +15123,14 @@
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
-        "spec_version": "1.9.76",
-        "ci_run_id": 39132557621,
+        "commit": "5c9ed1c54daed9d5d32526d74029965a49ae7569",
+        "spec_version": "1.9.77",
+        "ci_run_id": 39148270736,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
           "python": 1131,
           "deno": 656,
-          "owner_review": 28,
           "oracle": 993
         }
       }
@@ -17018,6 +17021,19 @@
       "date": "2026-10-19",
       "requirements": [
         "REQ-01",
+        "REQ-08",
+        "REQ-12",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "정본 검수 cursor409 조사: 고정 세션·head에서14초 전진은 기존 소스도 통과했다. 동등 UTC 표기 차이의 재현409를 정규화하고 세 거절 지점을 값 없는 reason으로 구분했다. 실제 운영 장애 원인은 미확정이며 만료·권한·head 거절을 보존한다."
+    },
+    {
+      "date": "2026-10-19",
+      "requirements": [
+        "REQ-01",
         "REQ-03",
         "REQ-08",
         "REQ-13",
@@ -17027,6 +17043,21 @@
         "REQ-26"
       ],
       "summary": "관리자 전국 전체 공개 결정을 채택했다. 기존 고정 최소 묶음/학교별 부분 발행 대기와 분리해 현재 정본 전체를 기존 공개 DTO·RLS·relay·회원/유료·원자예산으로 읽는 공급자 구현과 명시 binding 전환을 요청한다. P1 학년도 생략/전체6페이지·600지표 상한을 채택하며 미래연도 추정연결·무제한 추출·N+1을 금지한다. Owner v3 배포/설정4+BFF2 보고와 Root 실제 첫100행/scan128 성공을 수용하고 다음409 재현은 미해결로 기록했다. REQ27·P4 판단과 전국 누백 수치 완성은 별도 상태이며 새 DB쓰기/삭제/권한 완화는 없다."
+    },
+    {
+      "date": "2026-10-19",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-08",
+        "REQ-12",
+        "REQ-13",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "기획 1.9.78의 전국 현재 공개 4조회·기존 032/14소비자·REQ27 분리 계약과 커서 5c9 후보를 상시 서비스 브랜치 merge로 통합한다. 현재 배포는 기존 7d48 v3·Root 첫100 PASS/다음409이며 새 UTC동등성·안전 reason 후보의 source/PR CI 통과와 배포 NOT_RUN을 구분한다. 실제409 원인은 미확정이고 만료·head 변경 거절을 유지한다. 전국 조회 구현 중 소스는 미스테이징 사본으로 보존하며 이번 커서 병합에 포함하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -33025,7 +33056,7 @@
       },
       "owner_whole_v3": {
         "format": "jungsi.owner-current-review-contract/v1",
-        "status": "SOURCE_SYNTHETIC_CANDIDATE_NOT_DEPLOYED",
+        "status": "HOSTED_FIRST_PAGE_ROOT_VERIFIED_NEXT_CURSOR_409_OPEN",
         "basis_commit": "45fcb44c1821c187816174fc90563f6e313bc423",
         "operation": "current.review.search",
         "route": {
@@ -33087,7 +33118,7 @@
         ],
         "verification": {
           "test_path": "supabase/functions/_shared/current_admission_owner_test.ts",
-          "test_count": 28,
+          "test_count": 36,
           "source_bindings": [
             {
               "path": "supabase/functions/_shared/current_admission_owner.ts",
@@ -33099,7 +33130,7 @@
             },
             {
               "path": "supabase/functions/_shared/current_admission_owner_test.ts",
-              "sha256": "99dba6a386ca35bc14dd8a744d6af7b9973d4a9534e51a51995b6253fa08a316"
+              "sha256": "ca42fe919cf79aef39fb00baa82e8900edb0d0a85d5dc325827810f65f41fd3c"
             },
             {
               "path": "supabase/functions/_shared/current_admission_review_sql.ts",
@@ -33107,11 +33138,11 @@
             },
             {
               "path": "supabase/functions/_shared/current_admission_review.ts",
-              "sha256": "3765b4e8198141fbc3d55a37e587714f7b5018b7867c2304301a5dc9aeddff3a"
+              "sha256": "b77246963fb325731308eb3420a3c82790f9049e47a8a2d24a41692e2332296c"
             },
             {
               "path": "supabase/functions/_shared/current_admission_display.ts",
-              "sha256": "572b81a7dbd09e2798cf8ab2d5067335287e51bef44162baa60391ba2818a631"
+              "sha256": "c1f85c6180ed635bd6dff5b1fa95bd4323687c5ab4488d53db2b068fe3b3b498"
             },
             {
               "path": "supabase/functions/_shared/official_history_display.ts",
@@ -33120,8 +33151,8 @@
           ]
         },
         "actual_DB": "PASS_SCOPED_EXACT_ID_SQL_AND_SAVED_DTO_WORKING_TREE_ONLY_NOT_FINAL_SNAPSHOT",
-        "hosted_deployment": "NOT_RUN",
-        "browser": "NOT_RUN",
+        "hosted_deployment": "OWNER_REPORTED_BUNDLE_READBACK_MATCH_AND_ROOT_FIRST_PAGE_RUNTIME_VERIFIED",
+        "browser": "ROOT_FIRST_PAGE100_SCAN128_PASS_NEXT_CURSOR409_REPRODUCED_FIX_PENDING",
         "engine_approved": false,
         "production_allowed": false,
         "actual_DB_evidence": {
@@ -33140,8 +33171,8 @@
         "runtime_source_bindings": [
           {
             "path": "supabase/functions/_shared/current_admission_display.ts",
-            "bytes": 15685,
-            "sha256": "572b81a7dbd09e2798cf8ab2d5067335287e51bef44162baa60391ba2818a631"
+            "bytes": 16507,
+            "sha256": "c1f85c6180ed635bd6dff5b1fa95bd4323687c5ab4488d53db2b068fe3b3b498"
           },
           {
             "path": "supabase/functions/_shared/current_admission_owner.ts",
@@ -33155,8 +33186,8 @@
           },
           {
             "path": "supabase/functions/_shared/current_admission_review.ts",
-            "bytes": 29630,
-            "sha256": "3765b4e8198141fbc3d55a37e587714f7b5018b7867c2304301a5dc9aeddff3a"
+            "bytes": 30251,
+            "sha256": "b77246963fb325731308eb3420a3c82790f9049e47a8a2d24a41692e2332296c"
           },
           {
             "path": "supabase/functions/_shared/current_admission_review_postgres.ts",
@@ -33185,8 +33216,8 @@
           },
           {
             "path": "supabase/functions/current-admission-review/index.ts",
-            "bytes": 1678,
-            "sha256": "7aa664c3bbc719fe9240f70d03cfa2aed6ecfee8e5a9b376fa36575c3d4360eb"
+            "bytes": 1824,
+            "sha256": "5f08a7968f17fb9dfb1751f67a33814ae2eadd8e3cc7b2526a4a5877338c8c93"
           }
         ],
         "metadata_seeds": "current_view_source_members_population_commands_percentile_current_view_and_directly_read_percentile_releases; recursive_closure_of_all_six_seeds",
@@ -33201,7 +33232,117 @@
           "activation": 0,
           "receipt_sha256": "d16a383b2d32ae2d31e0702d87530f7a1176596ed208d61f0239b15a8416f3e5",
           "boundary": "prior_exact_ID_SQL_used_18_view_dependencies; final_guard_adds_direct_release_table_and_preserves_identical_payload_SQL_SHA"
-        }
+        },
+        "deployment_progress_note": "Owner가 v3 함수 배포·동일 번들 대조·설정4개 및 BFF설정2개 등록을 보고했다. Root도 실제 관리자 브라우저에서 첫100행/scan128/전체건수미계산/누백 산출·보류·미검토 표시를 독립 확인했다. 수동 다음 범위는409 cursor_version_mismatch로 재현돼 원인별 진단·수정·최종 SHA 재검수를 진행한다. 이미 끝난 등록을 미완료로 다시 요구하지 않는다. 이 검수 API의 제한 승인과 일반 P1 전국 공개 공급은 별개다. 공개 binding 전환·전국 검색 및 REQ27 운영 활성화를 이 영수증으로 완료 처리하지 않는다.",
+        "latest_receipt_intake": {
+          "date": "2026-10-19",
+          "frontend_commit": "e806aafea348c14d0c127858c48153beeb3cebec",
+          "external_receipt_sha256": "c121e83ca7abde958bfefde0bd3489047683ece45b3fa0f7d9812d89f16deb0c",
+          "Root_private_intake_sha256": "be225f5cd86f1584ff622b364009d4a8822c7142a98d60206f8539126680d5ef",
+          "first_page": "PASS_ACTUAL_ROOT_BROWSER_100_SCAN128",
+          "next_page": "FAIL_409_CURSOR_VERSION_MISMATCH_ROOT_REPRODUCED",
+          "scope": "No Auth token/incident identifier/data value in shared contract; no stored score mutation, forced head change or full scan."
+        },
+        "previous_deployed_v3": {
+          "source_commit": "ccfe7cebf0ca1d3ebe8ce487e43572bb28c6e891",
+          "develop_merge": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
+          "bundle_bytes": 164832,
+          "bundle_sha256": "21dcb3edd3956c9cf55205a6dec8775190b5a6f77281dab2bbaca1c9e7a43c6d",
+          "runtime_source_bindings": [
+            {
+              "path": "supabase/functions/_shared/current_admission_display.ts",
+              "bytes": 15685,
+              "sha256": "572b81a7dbd09e2798cf8ab2d5067335287e51bef44162baa60391ba2818a631"
+            },
+            {
+              "path": "supabase/functions/_shared/current_admission_owner.ts",
+              "bytes": 18562,
+              "sha256": "7b53bad066b6dfa8759b4aacf3aae25431cea6cc8cb136660247a04d98ba2fec"
+            },
+            {
+              "path": "supabase/functions/_shared/current_admission_owner_sql.ts",
+              "bytes": 6431,
+              "sha256": "9320f5bff26111f1acf0785e21cd57c78ece8601205abc97e9d68764298823bc"
+            },
+            {
+              "path": "supabase/functions/_shared/current_admission_review.ts",
+              "bytes": 29630,
+              "sha256": "3765b4e8198141fbc3d55a37e587714f7b5018b7867c2304301a5dc9aeddff3a"
+            },
+            {
+              "path": "supabase/functions/_shared/current_admission_review_postgres.ts",
+              "bytes": 10343,
+              "sha256": "453b6319ed712c3fa89d44d9f66d20d13e81d19a0cd4f0ab86af46cd42e650c6"
+            },
+            {
+              "path": "supabase/functions/_shared/current_admission_review_sql.ts",
+              "bytes": 15261,
+              "sha256": "1602c4819468694a9416b180da3054eb09db4ef17926615ab3e696a81fbab1f8"
+            },
+            {
+              "path": "supabase/functions/_shared/node_compat_bootstrap.ts",
+              "bytes": 985,
+              "sha256": "18736bcf332f8cc4a9b708e05383326a5f3992c9a260c8bcb6b7fab9a861a13f"
+            },
+            {
+              "path": "supabase/functions/_shared/official_history_display.ts",
+              "bytes": 25760,
+              "sha256": "91def2f8a5755f9ea53e1164b689a27f769957a8d6c1fa110611d6c1addb413f"
+            },
+            {
+              "path": "supabase/functions/_shared/official_history_postgres.ts",
+              "bytes": 19683,
+              "sha256": "1f90978383bb2b9889a89b625f9a09b621f69910adfff7f36594f679cd55f7aa"
+            },
+            {
+              "path": "supabase/functions/current-admission-review/index.ts",
+              "bytes": 1678,
+              "sha256": "7aa664c3bbc719fe9240f70d03cfa2aed6ecfee8e5a9b376fa36575c3d4360eb"
+            }
+          ],
+          "actual_status": "OWNER_REPORTED_DEPLOYED_SECRETS4_RE_REGISTERED_FIRST_PAGE_AND_EXACT_ID_PASS_NEXT_PAGE409_REPRODUCED",
+          "BFF": "FRONTEND_REPORTED_e806aaf_DEPLOYED"
+        },
+        "cursor_incident_followup": {
+          "basis_commit": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
+          "reported_date_KST": "2026-10-19",
+          "actual_incident_cause": "UNCONFIRMED_PENDING_SAFE_STAGE_REASON",
+          "unchanged_head_fixed_session_advancing_clock_14s": "PASS_BEFORE_AND_AFTER",
+          "equivalent_UTC_timestamp_representation": "BEFORE_409_AFTER_200_SYNTHETIC_REPRODUCED",
+          "normalization": "utcText_preserves_actual_microsecond_instant",
+          "comparison_stages": [
+            "binding",
+            "source_heads",
+            "source_state_unapproved"
+          ],
+          "safe_reasons": [
+            "binding_version_changed",
+            "binding_projection_changed",
+            "binding_operation_changed",
+            "binding_query_changed",
+            "binding_expiry_changed",
+            "source_heads_changed",
+            "source_state_unapproved"
+          ],
+          "error_contract": "HTTP409_error.code_cursor_version_mismatch_preserved_optional_error.reason_closed_enum",
+          "private_log_contract": "current_review_cursor_mismatch_event_request_id_and_reason_only_no_cursor_JWT_subject_claim_values_or_head_values",
+          "expiry": "exact_existing_session_approval_min_binding_and_24h_guard_unchanged_no_extension",
+          "metadata_readonly": "current_heads_older_than_incident_no_new_command_or_release_in_bounded_incident_window; not_historical_head_audit",
+          "deployment": "NOT_RUN",
+          "live_retest": "NOT_RUN",
+          "candidate_source_commit": "5c9ed1c54daed9d5d32526d74029965a49ae7569",
+          "source_ci_run_id": "39148270736",
+          "initial_PR_ci_run_id": "39148388333",
+          "exact_flat_bundle": {
+            "bytes": 166028,
+            "sha256": "be2afb80d6650a7e172ec61a59e9410cf32a59c8c30098da934eede1c7781749",
+            "deployment": "NOT_RUN"
+          },
+          "current_operating_bundle_source": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
+          "actual_next_page_retest": "NOT_RUN",
+          "incident_cause": "UNCONFIRMED"
+        },
+        "candidate_status": "CURSOR_NORMALIZATION_AND_SAFE_REASON_SOURCE_CI_PASSED_NOT_DEPLOYED_INCIDENT_CAUSE_UNCONFIRMED"
       },
       "legacy_v2_DTO_contract": {
         "format": "jungsi.current-admission-review/v2",
@@ -115933,7 +116074,7 @@
     ],
     "verification": {
       "test_path": "supabase/functions/_shared/current_admission_owner_test.ts",
-      "test_count": 28,
+      "test_count": 36,
       "source_bindings": [
         {
           "path": "supabase/functions/_shared/current_admission_owner.ts",
@@ -115945,7 +116086,7 @@
         },
         {
           "path": "supabase/functions/_shared/current_admission_owner_test.ts",
-          "sha256": "99dba6a386ca35bc14dd8a744d6af7b9973d4a9534e51a51995b6253fa08a316"
+          "sha256": "ca42fe919cf79aef39fb00baa82e8900edb0d0a85d5dc325827810f65f41fd3c"
         },
         {
           "path": "supabase/functions/_shared/current_admission_review_sql.ts",
@@ -115953,11 +116094,11 @@
         },
         {
           "path": "supabase/functions/_shared/current_admission_review.ts",
-          "sha256": "3765b4e8198141fbc3d55a37e587714f7b5018b7867c2304301a5dc9aeddff3a"
+          "sha256": "b77246963fb325731308eb3420a3c82790f9049e47a8a2d24a41692e2332296c"
         },
         {
           "path": "supabase/functions/_shared/current_admission_display.ts",
-          "sha256": "572b81a7dbd09e2798cf8ab2d5067335287e51bef44162baa60391ba2818a631"
+          "sha256": "c1f85c6180ed635bd6dff5b1fa95bd4323687c5ab4488d53db2b068fe3b3b498"
         },
         {
           "path": "supabase/functions/_shared/official_history_display.ts",
@@ -115986,8 +116127,8 @@
     "runtime_source_bindings": [
       {
         "path": "supabase/functions/_shared/current_admission_display.ts",
-        "bytes": 15685,
-        "sha256": "572b81a7dbd09e2798cf8ab2d5067335287e51bef44162baa60391ba2818a631"
+        "bytes": 16507,
+        "sha256": "c1f85c6180ed635bd6dff5b1fa95bd4323687c5ab4488d53db2b068fe3b3b498"
       },
       {
         "path": "supabase/functions/_shared/current_admission_owner.ts",
@@ -116001,8 +116142,8 @@
       },
       {
         "path": "supabase/functions/_shared/current_admission_review.ts",
-        "bytes": 29630,
-        "sha256": "3765b4e8198141fbc3d55a37e587714f7b5018b7867c2304301a5dc9aeddff3a"
+        "bytes": 30251,
+        "sha256": "b77246963fb325731308eb3420a3c82790f9049e47a8a2d24a41692e2332296c"
       },
       {
         "path": "supabase/functions/_shared/current_admission_review_postgres.ts",
@@ -116031,8 +116172,8 @@
       },
       {
         "path": "supabase/functions/current-admission-review/index.ts",
-        "bytes": 1678,
-        "sha256": "7aa664c3bbc719fe9240f70d03cfa2aed6ecfee8e5a9b376fa36575c3d4360eb"
+        "bytes": 1824,
+        "sha256": "5f08a7968f17fb9dfb1751f67a33814ae2eadd8e3cc7b2526a4a5877338c8c93"
       }
     ],
     "metadata_seeds": "current_view_source_members_population_commands_percentile_current_view_and_directly_read_percentile_releases; recursive_closure_of_all_six_seeds",
@@ -116057,7 +116198,107 @@
       "first_page": "PASS_ACTUAL_ROOT_BROWSER_100_SCAN128",
       "next_page": "FAIL_409_CURSOR_VERSION_MISMATCH_ROOT_REPRODUCED",
       "scope": "No Auth token/incident identifier/data value in shared contract; no stored score mutation, forced head change or full scan."
-    }
+    },
+    "previous_deployed_v3": {
+      "source_commit": "ccfe7cebf0ca1d3ebe8ce487e43572bb28c6e891",
+      "develop_merge": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
+      "bundle_bytes": 164832,
+      "bundle_sha256": "21dcb3edd3956c9cf55205a6dec8775190b5a6f77281dab2bbaca1c9e7a43c6d",
+      "runtime_source_bindings": [
+        {
+          "path": "supabase/functions/_shared/current_admission_display.ts",
+          "bytes": 15685,
+          "sha256": "572b81a7dbd09e2798cf8ab2d5067335287e51bef44162baa60391ba2818a631"
+        },
+        {
+          "path": "supabase/functions/_shared/current_admission_owner.ts",
+          "bytes": 18562,
+          "sha256": "7b53bad066b6dfa8759b4aacf3aae25431cea6cc8cb136660247a04d98ba2fec"
+        },
+        {
+          "path": "supabase/functions/_shared/current_admission_owner_sql.ts",
+          "bytes": 6431,
+          "sha256": "9320f5bff26111f1acf0785e21cd57c78ece8601205abc97e9d68764298823bc"
+        },
+        {
+          "path": "supabase/functions/_shared/current_admission_review.ts",
+          "bytes": 29630,
+          "sha256": "3765b4e8198141fbc3d55a37e587714f7b5018b7867c2304301a5dc9aeddff3a"
+        },
+        {
+          "path": "supabase/functions/_shared/current_admission_review_postgres.ts",
+          "bytes": 10343,
+          "sha256": "453b6319ed712c3fa89d44d9f66d20d13e81d19a0cd4f0ab86af46cd42e650c6"
+        },
+        {
+          "path": "supabase/functions/_shared/current_admission_review_sql.ts",
+          "bytes": 15261,
+          "sha256": "1602c4819468694a9416b180da3054eb09db4ef17926615ab3e696a81fbab1f8"
+        },
+        {
+          "path": "supabase/functions/_shared/node_compat_bootstrap.ts",
+          "bytes": 985,
+          "sha256": "18736bcf332f8cc4a9b708e05383326a5f3992c9a260c8bcb6b7fab9a861a13f"
+        },
+        {
+          "path": "supabase/functions/_shared/official_history_display.ts",
+          "bytes": 25760,
+          "sha256": "91def2f8a5755f9ea53e1164b689a27f769957a8d6c1fa110611d6c1addb413f"
+        },
+        {
+          "path": "supabase/functions/_shared/official_history_postgres.ts",
+          "bytes": 19683,
+          "sha256": "1f90978383bb2b9889a89b625f9a09b621f69910adfff7f36594f679cd55f7aa"
+        },
+        {
+          "path": "supabase/functions/current-admission-review/index.ts",
+          "bytes": 1678,
+          "sha256": "7aa664c3bbc719fe9240f70d03cfa2aed6ecfee8e5a9b376fa36575c3d4360eb"
+        }
+      ],
+      "actual_status": "OWNER_REPORTED_DEPLOYED_SECRETS4_RE_REGISTERED_FIRST_PAGE_AND_EXACT_ID_PASS_NEXT_PAGE409_REPRODUCED",
+      "BFF": "FRONTEND_REPORTED_e806aaf_DEPLOYED"
+    },
+    "cursor_incident_followup": {
+      "basis_commit": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
+      "reported_date_KST": "2026-10-19",
+      "actual_incident_cause": "UNCONFIRMED_PENDING_SAFE_STAGE_REASON",
+      "unchanged_head_fixed_session_advancing_clock_14s": "PASS_BEFORE_AND_AFTER",
+      "equivalent_UTC_timestamp_representation": "BEFORE_409_AFTER_200_SYNTHETIC_REPRODUCED",
+      "normalization": "utcText_preserves_actual_microsecond_instant",
+      "comparison_stages": [
+        "binding",
+        "source_heads",
+        "source_state_unapproved"
+      ],
+      "safe_reasons": [
+        "binding_version_changed",
+        "binding_projection_changed",
+        "binding_operation_changed",
+        "binding_query_changed",
+        "binding_expiry_changed",
+        "source_heads_changed",
+        "source_state_unapproved"
+      ],
+      "error_contract": "HTTP409_error.code_cursor_version_mismatch_preserved_optional_error.reason_closed_enum",
+      "private_log_contract": "current_review_cursor_mismatch_event_request_id_and_reason_only_no_cursor_JWT_subject_claim_values_or_head_values",
+      "expiry": "exact_existing_session_approval_min_binding_and_24h_guard_unchanged_no_extension",
+      "metadata_readonly": "current_heads_older_than_incident_no_new_command_or_release_in_bounded_incident_window; not_historical_head_audit",
+      "deployment": "NOT_RUN",
+      "live_retest": "NOT_RUN",
+      "candidate_source_commit": "5c9ed1c54daed9d5d32526d74029965a49ae7569",
+      "source_ci_run_id": "39148270736",
+      "initial_PR_ci_run_id": "39148388333",
+      "exact_flat_bundle": {
+        "bytes": 166028,
+        "sha256": "be2afb80d6650a7e172ec61a59e9410cf32a59c8c30098da934eede1c7781749",
+        "deployment": "NOT_RUN"
+      },
+      "current_operating_bundle_source": "7d48da041ae40c0aa0e83f988fbfba29fd5bf9b0",
+      "actual_next_page_retest": "NOT_RUN",
+      "incident_cause": "UNCONFIRMED"
+    },
+    "candidate_status": "CURSOR_NORMALIZATION_AND_SAFE_REASON_SOURCE_CI_PASSED_NOT_DEPLOYED_INCIDENT_CAUSE_UNCONFIRMED"
   },
   "current_public_supply_contract": {
     "format": "jungsi.current-national-public-supply/v1",

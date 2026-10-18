@@ -351,15 +351,19 @@ async function ownerFixture() {
   let pct: Row | null = head(),
     admission = "SYNTHETIC-qualified-command",
     subject = SUBJECT,
-    clock = NOW;
+    clock = NOW,
+    sessionExpiry = NOW + 7200000,
+    unapproved = false;
+  const mismatchEvents: { requestId: string; reason: string }[] = [];
   const ports: CurrentReviewPorts = {
     async verifySession() {
-      return { subjectId: subject, expiresAt: NOW + 7200000 };
+      return { subjectId: subject, expiresAt: sessionExpiry };
     },
     async loadDescriptor() {
       return copy(d);
     },
     async search(_d, q, after) {
+      if (unapproved) throw new DisplayError("current_review_state_unapproved");
       return raw(
         rows.filter((r) =>
           after === null || String(r.current.canonical_result_id) > after[4]
@@ -381,6 +385,9 @@ async function ownerFixture() {
     pathPrefix: PREFIX,
     environment: "local_verification",
     now: () => clock,
+    reportCursorMismatch: (event) => {
+      mismatchEvents.push(event);
+    },
   });
   const request = (suffix = "", headers: Record<string, string> = {}) =>
     handler(
@@ -399,6 +406,13 @@ async function ownerFixture() {
     d,
     rows,
     request,
+    mismatchEvents,
+    setSessionExpiry: (v: number) => {
+      sessionExpiry = v;
+    },
+    setUnapproved: () => {
+      unapproved = true;
+    },
     setHead: (v: Row | null) => {
       pct = v;
     },
@@ -790,4 +804,101 @@ Deno.test("owner full descriptor rejects missing direct release dependency even 
     () => validateCurrentReviewDescriptor(d, "local_verification", NOW),
     "current_review_scope_unverified",
   );
+});
+
+Deno.test("owner stable head session and query survive fourteen seconds of wall clock advance", async () => {
+  const f = await ownerFixture();
+  const first = await (await f.request("?limit=1")).json();
+  f.setClock(NOW + 14000);
+  const response = await f.request("?limit=1&cursor=" + first.next_cursor);
+  equal(response.status, 200);
+  equal((await response.json()).items.length, 1);
+  equal(f.mismatchEvents, []);
+});
+Deno.test("owner stable short JWT expiry cap permits advance and still rejects actual expiry", async () => {
+  const f = await ownerFixture();
+  f.setSessionExpiry(NOW + 45000);
+  const first = await (await f.request("?limit=1")).json();
+  f.setClock(NOW + 14000);
+  equal((await f.request("?limit=1&cursor=" + first.next_cursor)).status, 200);
+  f.setClock(NOW + 45000);
+  equal((await f.request("?limit=1&cursor=" + first.next_cursor)).status, 401);
+});
+Deno.test("owner equivalent UTC timestamp spellings keep the same head revision", async () => {
+  for (
+    const stamp of [
+      "2026-10-09T00:00:00.000000Z",
+      "2026-10-09T00:00:00+00:00",
+      "2026-10-09T00:00:00.000000+00:00",
+    ]
+  ) {
+    const f = await ownerFixture();
+    const first = await (await f.request("?limit=1")).json();
+    f.setClock(NOW + 14000);
+    f.setHead({ ...head(), updated_at: stamp });
+    equal(
+      (await f.request("?limit=1&cursor=" + first.next_cursor)).status,
+      200,
+    );
+  }
+});
+Deno.test("owner changing the actual timestamp by one microsecond remains a head rejection", async () => {
+  const f = await ownerFixture();
+  const first = await (await f.request("?limit=1")).json();
+  f.setHead({ ...head(), updated_at: "2026-10-09T00:00:00.000001Z" });
+  const r = await f.request("?limit=1&cursor=" + first.next_cursor),
+    b = await r.json();
+  equal(r.status, 409);
+  equal(b.error.reason, "source_heads_changed");
+  assert(!Object.hasOwn(b, "items"));
+});
+Deno.test("owner actual admission and percentile revisions report the source comparison stage", async () => {
+  for (const kind of ["admission", "percentile"]) {
+    const f = await ownerFixture();
+    const first = await (await f.request("?limit=1")).json();
+    if (kind === "admission") f.setAdmission("SYNTHETIC-new-command");
+    else f.setHead({ ...head(), release_id: "SYNTHETIC-new-percentile" });
+    const r = await f.request("?limit=1&cursor=" + first.next_cursor);
+    equal(r.status, 409);
+    equal((await r.json()).error.reason, "source_heads_changed");
+  }
+});
+Deno.test("owner changed session expiry remains rejected and reports only safe enum and request ID", async () => {
+  const f = await ownerFixture();
+  f.setSessionExpiry(NOW + 45000);
+  const first = await (await f.request("?limit=1")).json();
+  f.setClock(NOW + 14000);
+  f.setSessionExpiry(NOW + 59000);
+  const r = await f.request("?limit=1&cursor=" + first.next_cursor),
+    b = await r.json();
+  equal(r.status, 409);
+  equal(b.error.code, "cursor_version_mismatch");
+  equal(b.error.reason, "binding_expiry_changed");
+  equal(Object.keys(f.mismatchEvents[0]).sort(), ["reason", "requestId"]);
+  equal(f.mismatchEvents[0].requestId, b.request_id);
+  assert(!JSON.stringify(f.mismatchEvents).includes(first.next_cursor));
+});
+Deno.test("owner changed query subject and approval expiry are still denied", async () => {
+  const f = await ownerFixture();
+  const first = await (await f.request("?limit=1")).json();
+  let r = await f.request("?limit=1&cohort=new&cursor=" + first.next_cursor);
+  equal(r.status, 409);
+  equal((await r.json()).error.reason, "binding_query_changed");
+  f.setSubject(OTHER);
+  equal((await f.request("?limit=1&cursor=" + first.next_cursor)).status, 403);
+  f.setSubject(SUBJECT);
+  f.d.approval.expires_at = "2026-10-09T00:59:00Z";
+  r = await f.request("?limit=1&cursor=" + first.next_cursor);
+  equal(r.status, 409);
+  equal((await r.json()).error.reason, "binding_expiry_changed");
+});
+Deno.test("owner current state unapproved maps to distinct safe third comparison reason", async () => {
+  const f = await ownerFixture();
+  const first = await (await f.request("?limit=1")).json();
+  f.setUnapproved();
+  const r = await f.request("?limit=1&cursor=" + first.next_cursor),
+    b = await r.json();
+  equal(r.status, 409);
+  equal(b.error.reason, "source_state_unapproved");
+  assert(!Object.hasOwn(b, "items"));
 });

@@ -102,6 +102,11 @@ function bindingObject(binding: CurrentPageBinding): Row {
   return {subject:binding.subjectId,version:binding.sourceVersion,state:binding.sourceStateSha256,projection:binding.projectionSha256,
     operation:binding.operation,query:binding.querySha256,expires:binding.expiresAtMs};
 }
+export type CurrentCursorMismatchReason = 'binding_version_changed'|'binding_projection_changed'|'binding_operation_changed'|'binding_query_changed'|'binding_expiry_changed'|'source_heads_changed'|'source_state_unapproved';
+/** Bounded stage/field enum only; never includes cursor, subject, claims or head values. */
+export class CurrentCursorVersionError extends DisplayError {
+  constructor(readonly reason:CurrentCursorMismatchReason){super('cursor_version_mismatch',409);}
+}
 export class EncryptedCurrentCursor {
   private readonly key: Promise<CryptoKey>;
   constructor(secret: Uint8Array,private readonly mode:'cursor'|'observation'='cursor') {
@@ -128,7 +133,9 @@ export class EncryptedCurrentCursor {
       if(!record(body)||!exact(body,['format','binding','after'])||body.format!=='jungsi.current-review-cursor/v1'||!record(body.binding))throw new Error('invalid cursor');
       const expected=bindingObject(binding),actual=body.binding;
       if(!exact(actual,Object.keys(expected))||actual.subject!==expected.subject||typeof actual.expires!=='number'||actual.expires<=now||!hash(actual.state))throw new Error('invalid cursor');
-      if(Object.keys(expected).some(k=>k!=='state'&&actual[k]!==expected[k]))throw new DisplayError('cursor_version_mismatch',409);
+      const mismatch=Object.keys(expected).find(k=>k!=='state'&&actual[k]!==expected[k]);
+      if(mismatch){const reasons:Record<string,CurrentCursorMismatchReason>={version:'binding_version_changed',projection:'binding_projection_changed',operation:'binding_operation_changed',query:'binding_query_changed',expires:'binding_expiry_changed'};
+        const reason=reasons[mismatch];if(!reason)throw new Error('invalid cursor');throw new CurrentCursorVersionError(reason);} 
       const after=validateCurrentKey(body.after);
       if(after[0]!==2024||after[1]!=='CURRENT_REVIEW_LIVE'||after[2]!=='CANONICAL_OBSERVATIONS'||after[3]!=='')throw new Error('invalid cursor');
       return {after,sourceStateSha256:actual.state};
