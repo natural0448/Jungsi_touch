@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.86",
+  "version": "1.9.87",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -5181,7 +5181,7 @@
     {
       "path": "supabase/functions/_shared/current_public_catalog.ts",
       "layer": "application",
-      "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+      "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -5209,7 +5209,7 @@
     {
       "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
       "layer": "infrastructure",
-      "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+      "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -5232,7 +5232,7 @@
     {
       "path": "supabase/functions/_shared/current_public_catalog_runtime.ts",
       "layer": "infrastructure",
-      "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+      "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -5251,7 +5251,7 @@
     {
       "path": "supabase/functions/_shared/current_public_catalog_sql.ts",
       "layer": "infrastructure",
-      "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+      "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -5282,7 +5282,7 @@
     {
       "path": "supabase/functions/_shared/current_public_catalog_sql_test.ts",
       "layer": "infrastructure",
-      "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+      "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -5298,7 +5298,7 @@
     {
       "path": "supabase/functions/_shared/current_public_catalog_test.ts",
       "layer": "application",
-      "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+      "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -5314,7 +5314,7 @@
     {
       "path": "supabase/functions/_shared/current_public_key_index.ts",
       "layer": "application",
-      "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+      "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -5328,13 +5328,14 @@
       "symbols": [
         "publicKeyRawHash",
         "CurrentPublicMetadataKeyIndex",
-        "prepareCurrentPublicKeyIndex"
+        "prepareCurrentPublicKeyIndex",
+        "prepareCurrentPublicKeyIndexV3"
       ]
     },
     {
       "path": "supabase/functions/_shared/current_public_key_index_test.ts",
       "layer": "application",
-      "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+      "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -5350,7 +5351,7 @@
     {
       "path": "supabase/functions/_shared/current_public_key_storage.ts",
       "layer": "infrastructure",
-      "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+      "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -5368,7 +5369,7 @@
     {
       "path": "supabase/functions/_shared/current_public_key_storage_test.ts",
       "layer": "infrastructure",
-      "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+      "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -6070,7 +6071,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.86",
+        "contract_version": "1.9.87",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -6244,7 +6245,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.86",
+        "contract_version": "1.9.87",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -6410,7 +6411,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.86",
+        "contract_version": "1.9.87",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6429,7 +6430,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.86",
+        "contract_version": "1.9.87",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6454,7 +6455,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.86",
+        "contract_version": "1.9.87",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6479,7 +6480,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.86",
+        "contract_version": "1.9.87",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -7165,7 +7166,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "59ce096a502f7e409f9f62c963f2f435459963eb422211eb4394257cd4a77b1a",
+            "source_sha256": "0f579664053809ff277d3f93b669a499a387c5f197d8ad76b1fe5fb2d903d6a8",
             "symbols": [
               {
                 "kind": "class",
@@ -8026,7 +8027,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "be95f6e82ac60a65bcaee2da119d155eb3f74a7a3b372e4307da16a1f5fe74e6",
+            "source_sha256": "4fc428e13ad6da17688e820d85a5d3cb5b32335f1f817c20085052953e436544",
             "symbols": [
               {
                 "kind": "function",
@@ -13074,7 +13075,7 @@
             {
               "path": "supabase/functions/_shared/current_public_catalog.ts",
               "layer": "application",
-              "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+              "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -13103,7 +13104,7 @@
             {
               "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
               "layer": "infrastructure",
-              "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+              "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -13127,7 +13128,7 @@
             {
               "path": "supabase/functions/_shared/current_public_catalog_runtime.ts",
               "layer": "infrastructure",
-              "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+              "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -13138,7 +13139,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "aec1271ff70afca89d3a323b54077295704527e995edae252735612ff05a9a08",
+              "source_sha256": "a330ab31675d6846566582d14af31e27de026929cb86da4bec5123b77f624b60",
               "declared_exports": [
                 "INSTALLED032_CONSUMER_OPERATIONS",
                 "createCurrentPublicCatalogService"
@@ -13147,7 +13148,7 @@
             {
               "path": "supabase/functions/_shared/current_public_catalog_sql.ts",
               "layer": "infrastructure",
-              "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+              "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -13179,7 +13180,7 @@
             {
               "path": "supabase/functions/_shared/current_public_catalog_sql_test.ts",
               "layer": "infrastructure",
-              "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+              "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -13196,7 +13197,7 @@
             {
               "path": "supabase/functions/_shared/current_public_catalog_test.ts",
               "layer": "application",
-              "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+              "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -13213,7 +13214,7 @@
             {
               "path": "supabase/functions/_shared/current_public_key_index.ts",
               "layer": "application",
-              "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+              "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -13224,17 +13225,18 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "e63c35f8c7e1014871bba2a5e737bea82481a6f2c9e1b2b2b76079ce8c58a928",
+              "source_sha256": "20c12799757b25a74947ddf3b19889b0538e2e27a6004a74464c1ea882c80c22",
               "declared_exports": [
                 "publicKeyRawHash",
                 "CurrentPublicMetadataKeyIndex",
-                "prepareCurrentPublicKeyIndex"
+                "prepareCurrentPublicKeyIndex",
+                "prepareCurrentPublicKeyIndexV3"
               ]
             },
             {
               "path": "supabase/functions/_shared/current_public_key_index_test.ts",
               "layer": "application",
-              "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+              "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -13245,13 +13247,13 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "4a46a80ff93817ab893752a1f7b5f8da704283d8c1e62e3d673b44bb1abf3b97",
+              "source_sha256": "d86063116f62e4f9f2affe51e3d6478c15c89f2cd4ef5c081b36b6eea672fe43",
               "declared_exports": []
             },
             {
               "path": "supabase/functions/_shared/current_public_key_storage.ts",
               "layer": "infrastructure",
-              "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+              "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -13270,7 +13272,7 @@
             {
               "path": "supabase/functions/_shared/current_public_key_storage_test.ts",
               "layer": "infrastructure",
-              "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
+              "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -17824,6 +17826,20 @@
         "REQ-25",
         "REQ-26"
       ]
+    },
+    {
+      "date": "2026-10-20",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-08",
+        "REQ-13",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "spec1.9.87: 실제 기존 공유 읽기 한도에서 필수자료+lookup100 cold/warm 실패를 확인해 v1/v2를 보존하는 별도 두 버킷 v3 lookup으로 중복 주소 메타데이터만 줄인다. 원래 PK 문자열·기존 byte/전체논리행 상한·fresh head·권한 검사는 유지한다. 별도58+14 회귀·최소032 전체요청 로컬검증과 실제 hosted 인수는 구분한다. Windows 문서쓰기 회귀의 시간 이름 충돌은 UUID 보존 폴더로 수정하며 검증/파일 삭제는 없다."
     }
   ],
   "overall_analysis_contract": {
@@ -118682,7 +118698,7 @@
     "production_ready": false,
     "adapter_candidate": {
       "status": "NATIONAL_SCOPE_ADOPTED_EXACT_PROVIDER_BINDING_AND_HOSTED_ACTIVATION_PENDING",
-      "mechanism": "점수·모집인원 원값 없이 키와 검색 메타데이터만 분할한다. 요청마다 최대101개 키를 선택하고 같은 READ ONLY 트랜잭션에서 현재 DB 원행·요강을 일괄 JOIN한다. 기존 5초·페이지·물리 읽기·객체 크기 상한을 유지한다. v2 lookup은 닫힌 사전/8정수 tuple과 8개 버킷으로 최대100개 ID를 처리한다. source head·schema·8종 guide command 상태와 준비 키가 어긋나면 첫503/후속409다.",
+      "mechanism": "점수·정원 원값 없이 키·검색 메타데이터만 분할한다. 요청마다 최대101개 키를 선택해 같은 READ ONLY 트랜잭션에서 현재 DB를 일괄 JOIN한다. 기존 5초·객체 byte·페이지·요청 공유 예산과 fresh head 검사는 유지한다. 별도 root/lookup v3는 두 hash 버킷과 엄격한 가역 guide tuple2(학년도/학교 코드, 원래 PK 문자열) 및 기존 사전 tuple8 fallback으로 중복 주소만 제거한다. v1/v2 파서·행·byte 검사는 보존하며 v3 전체 lookup 논리 상한도 종전과 같다. namespace·schema·8종 guide command 상태가 어긋나면 첫503/후속409다.",
       "approval_boundary": "전국 현재 정본 공급 범위는 사용자 채택 상태다. 이번 키 인덱스 v2의 정확 snapshot·coverage 검수·불변 객체와 publication/v2 결속 및 hosted 전환은 최종 운영 승인으로 분리한다. 준비·표본 실제 읽기는 DB 전체 값 인수나 브라우저 인수를 대신하지 않는다.",
       "compatibility": "설치032의 정확 runtime_composition/index 두 입력을 패치하고, P2 v2는 exam_pack/overall_analysis/native_data_provider 세 입력의 정확032 해시를 따로 확인한다. 새 domain 한 파일만 기존 exact/native_json/percentile/exam_pack/time 의존성에 연결한다. 최신 platform 전체를 반입하지 않고 consumer14·usage-v1·기존032 입력검증/프로필/역할/소유권을 보존한다. REQ27·006a·profile migration·usage-v2 활성화는 별도다.",
       "dto": "원래 DB offering_pk는 보존한다. 현재 DB 조회의 공개 offering_id는 실제 academic_year와 native PK의 가역 주소(year:PK)로 학년도 사이 중복을 구분하며 2027 계보를 만들지 않는다. PK 없는 관측은 기존 current-public-observation|year|canonical ID의 SHA 주소를 쓴다. guide tuple의 다섯째 키는 같은 공개 주소이며 버전은 별도 head/command 상태에 결속한다. 미검증 지표 정의/단위/출처는 pending_metadata이고 의미가 다른 충원인원·예비번호·컷을 임의 별칭으로 통합하지 않는다. 제어문자 이름은 기존 공개 필드의 null/빈 검색 처리와 동일하게 보류하고 원자료는 바꾸지 않는다.",
@@ -118703,6 +118719,30 @@
         "national_key_index_coverage": "NOT_RUN",
         "index_tuple_identity": "NOT_RUN",
         "actual_Auth_API_browser": "NOT_RUN"
+      },
+      "lookup_v3": {
+        "root_format": "jungsi.current-public-key-index/v3",
+        "lookup_format": "jungsi.current-public-key-lookup/v3",
+        "fields": [
+          "format",
+          "prefix",
+          "schools",
+          "guides",
+          "strings",
+          "entries"
+        ],
+        "buckets": 2,
+        "guide_tuple_fields": [
+          "year_school_code",
+          "original_PK_string"
+        ],
+        "year_school_code": "(academic_year-2024)*schools.length+school_index",
+        "guide_requirements": "metric empty; canonical tie and nativeOfferingId exactly actual year:original PK; null fingerprint only, otherwise original8-field fallback",
+        "fallback": "existing strict dictionary8 with <=4096 entries",
+        "max_total_entries_per_object": 16384,
+        "global_lookup_entry_ceiling_unchanged": 32768,
+        "max_object_bytes_unchanged": 262144,
+        "operating_limits_changed": false
       }
     },
     "verification": {
@@ -118713,7 +118753,7 @@
         "supabase/functions/_shared/current_public_key_index_test.ts",
         "supabase/functions/_shared/current_public_key_storage_test.ts"
       ],
-      "test_count": 54,
+      "test_count": 58,
       "source_bindings": [
         {
           "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -118725,7 +118765,7 @@
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog_runtime.ts",
-          "sha256": "aec1271ff70afca89d3a323b54077295704527e995edae252735612ff05a9a08"
+          "sha256": "a330ab31675d6846566582d14af31e27de026929cb86da4bec5123b77f624b60"
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog_sql.ts",
@@ -118741,11 +118781,11 @@
         },
         {
           "path": "supabase/functions/_shared/current_public_key_index.ts",
-          "sha256": "e63c35f8c7e1014871bba2a5e737bea82481a6f2c9e1b2b2b76079ce8c58a928"
+          "sha256": "20c12799757b25a74947ddf3b19889b0538e2e27a6004a74464c1ea882c80c22"
         },
         {
           "path": "supabase/functions/_shared/current_public_key_index_test.ts",
-          "sha256": "4a46a80ff93817ab893752a1f7b5f8da704283d8c1e62e3d673b44bb1abf3b97"
+          "sha256": "d86063116f62e4f9f2affe51e3d6478c15c89f2cd4ef5c081b36b6eea672fe43"
         },
         {
           "path": "supabase/functions/_shared/current_public_key_storage.ts",

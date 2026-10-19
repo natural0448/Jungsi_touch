@@ -10,6 +10,7 @@ import {
   CurrentPublicMetadataKeyIndex,
   prepareCurrentPublicKeyIndex,
   prepareCurrentPublicKeyIndexV2,
+  prepareCurrentPublicKeyIndexV3,
   type PublicKeyIndexBasis,
   type PublicKeyIndexEntry,
   type PublicKeyIndexPreparation,
@@ -71,6 +72,7 @@ async function setup(
   offerings: PublicKeyIndexEntry[] = [],
   lookups: PublicKeyIndexEntry[] = history,
   compact = false,
+  packed = false,
 ) {
   const input: PublicKeyIndexPreparation = {
     history,
@@ -91,7 +93,11 @@ async function setup(
     objectPrefix: "SYNTHETIC/keys/",
   };
   const prepared =
-      await (compact ? prepareCurrentPublicKeyIndexV2(input) : prepareCurrentPublicKeyIndex(input)),
+      await (packed
+        ? prepareCurrentPublicKeyIndexV3(input)
+        : compact
+        ? prepareCurrentPublicKeyIndexV2(input)
+        : prepareCurrentPublicKeyIndex(input)),
     basis: PublicKeyIndexBasis = {
       root: prepared.root,
       metadataSha256: input.metadataSha256,
@@ -137,6 +143,66 @@ async function changedCompactObject(
     root: { ...f.basis.root, bytes: rootBytes.length, sha256: await publicKeyRawHash(rootBytes) },
   }, f.read);
 }
+Deno.test("packed national lookup resolves 100 IDs with root and two byte-bounded objects", async () => {
+  const rows = Array.from({ length: 24000 }, (_, i) => {
+    const row = guideItem(i), pk = "S" + String(i).padStart(9, "0");
+    return {
+      ...row,
+      key: [2027, row.key[1], pk, "", `2027:${pk}`] as PublicCatalogKey,
+      nativeOfferingId: `2027:${pk}`,
+    };
+  });
+  const f = await setup([], rows, rows, true, true),
+    ids = rows.filter((_, i) => i % 239 === 0).slice(0, 100).map((e) => e.nativeOfferingId!);
+  const result = await f.reader.resolve(ids, false);
+  equal(result.keys.length, 100);
+  assert(f.reads() <= 3);
+  const root = JSON.parse(
+    new TextDecoder().decode(f.prepared.objects.get(f.prepared.root.object_key)!),
+  );
+  equal(root.format, "jungsi.current-public-key-index/v3");
+  assert(Object.keys(root.lookups).length <= 2);
+  assert(Object.values(root.lookups).every((r) => (r as { bytes: number }).bytes <= 262144));
+});
+Deno.test("packed guide tuples preserve original PK lexemes and retain separate admission fallback", async () => {
+  const guides = ["0000123", "SYNTHETIC-PK"].map((pk, i) => ({
+    ...guideItem(i),
+    key: [2027, "SYNTHETIC-SCHOOL", pk, "", `2027:${pk}`] as PublicCatalogKey,
+    nativeOfferingId: `2027:${pk}`,
+  }));
+  const a = item(5);
+  a.nativeOfferingId = `2024:${a.key[2]}`;
+  const f = await setup([], guides, [...guides, a], true, true),
+    result = await f.reader.resolve(
+      [...guides.map((g) => g.nativeOfferingId), a.nativeOfferingId],
+      false,
+    );
+  equal(
+    result.keys.map((k) => k.nativeOfferingId).sort(),
+    [a.nativeOfferingId, ...guides.map((g) => g.nativeOfferingId)].sort(),
+  );
+  assert(result.keys.some((k) => k.key[2] === "0000123"));
+});
+Deno.test("packed lookup rejects a signed invalid year-school code", async () => {
+  const row = guideItem(1), f = await setup([], [row], [row], true, true);
+  const reader = await changedCompactObject(f, (raw) => {
+    (raw.guides as unknown[][])[0][0] = (raw.schools as unknown[]).length * 4;
+  });
+  await rejects(() => reader.resolve([row.nativeOfferingId!], false));
+});
+Deno.test("packed lookup retains a closed tuple shape and bounded total entry count", async () => {
+  for (
+    const change of [(raw: Record<string, unknown>) => {
+      (raw.guides as unknown[][])[0].push("extra");
+    }, (raw: Record<string, unknown>) => {
+      raw.guides = Array.from({ length: 16385 }, () => [0, "x"]);
+    }]
+  ) {
+    const row = guideItem(1), f = await setup([], [row], [row], true, true);
+    const reader = await changedCompactObject(f, change);
+    await rejects(() => reader.resolve([row.nativeOfferingId!], false));
+  }
+});
 Deno.test("compact lookup resolves 100 native IDs from a national-sized metadata set within eight reads", async () => {
   const source = Array.from({ length: 24000 }, (_, i) => guideItem(i));
   const f = await setup([], [], source, true);

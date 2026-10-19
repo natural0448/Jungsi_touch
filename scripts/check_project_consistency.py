@@ -3534,7 +3534,7 @@ def generated_files(spec,read=None):
         section=("\n\n## 전체 응시자 추정 모형의 별도 v2 계약\n\n"+whole['id']+" / "+whole['status']+". "+whole['purpose']+"\n\n"+
           whole['legacy_boundary']+"\n\n"+whole['strict_v2']+"\n\n"+whole['population_semantics']+"\n\n"+
           whole['approval_boundary']+"\n\n"+whole['saved_profile_transition']+"\n\n"+whole['installed032']+"\n\n"+
-          "공개 응답은 기존 overall 필드만 사용한다. 원자료·모형 가정·분포·정책·출처 해시는 서버에만 보관한다. 별도 합성14건은 기존 foundation656·Owner36·public-provider54 및 legacy22+extension3 등록과 구분한다. 실제 모형 채택·운영 binding·배포·저장 리포트 화면 인수는 별도 근거가 필요하다.\n")
+          "공개 응답은 기존 overall 필드만 사용한다. 원자료·모형 가정·분포·정책·출처 해시는 서버에만 보관한다. 별도 합성14건은 기존 foundation656·Owner36·public-provider58 및 legacy22+extension3 등록과 구분한다. 실제 모형 채택·운영 binding·배포·저장 리포트 화면 인수는 별도 근거가 필요하다.\n")
         for key in ('planning','routing','architecture','workflow','supabase_deployment','development_sync','presentation_handoff','frontend_reply','frontend_followup','api_dto'):
             target=spec['current_documents'].get(key)
             if target in files:files[target]+=section

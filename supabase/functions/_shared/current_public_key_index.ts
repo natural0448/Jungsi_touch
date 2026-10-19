@@ -35,7 +35,10 @@ interface KeyShard {
   universities: readonly string[] | null;
 }
 export interface PublicKeyIndexRoot {
-  format: "jungsi.current-public-key-index/v1" | "jungsi.current-public-key-index/v2";
+  format:
+    | "jungsi.current-public-key-index/v1"
+    | "jungsi.current-public-key-index/v2"
+    | "jungsi.current-public-key-index/v3";
   metadata_sha256: string;
   guide_command_state_sha256: string;
   admission_head: { command_id: string; payload_sha256: string };
@@ -51,7 +54,7 @@ export interface PublicKeyIndexRoot {
   limits: { max_shards_per_search: 12; max_shard_rows: 256 };
 }
 export interface PublicKeyIndexBasis {
-  requiredFormat?: "jungsi.current-public-key-index/v2";
+  requiredFormat?: "jungsi.current-public-key-index/v2" | "jungsi.current-public-key-index/v3";
   root: PublicKeyObjectReference;
   metadataSha256: string;
   guideCommandStateSha256: string;
@@ -229,9 +232,55 @@ function decodeCompactLookup(raw: Record<string, unknown>): PublicKeyIndexEntry[
     }, true);
   });
 }
-async function lookupPrefix(id: string, compact: boolean): Promise<string> {
+/** Year/school code plus the original PK string; derived addresses are never stored twice. */
+function packedLookup(prefix: string, entries: readonly PublicKeyIndexEntry[]): unknown {
+  const guides = entries.filter((e) => e.sourceKind === "guide" && e.expectedFingerprint === null);
+  const schools = [...new Set(guides.map((e) => e.key[1]))].sort();
+  const positions = new Map(schools.map((school, i) => [school, i]));
+  const fallback = compactLookup(
+    prefix,
+    entries.filter((e) => e.sourceKind !== "guide" || e.expectedFingerprint !== null),
+  ) as Record<string, unknown>;
+  if ((fallback.entries as unknown[]).length > 4096) return fail();
+  return {
+    format: "jungsi.current-public-key-lookup/v3",
+    prefix,
+    schools,
+    guides: guides.map((
+      e,
+    ) => [(e.key[0] - 2024) * schools.length + positions.get(e.key[1])!, e.key[2]]),
+    strings: fallback.strings,
+    entries: fallback.entries,
+  };
+}
+function decodePackedLookup(raw: Record<string, unknown>): PublicKeyIndexEntry[] {
+  if (
+    !Array.isArray(raw.schools) || raw.schools.length > 16384 ||
+    raw.schools.some((s) => !text(s)) || new Set(raw.schools).size !== raw.schools.length ||
+    !Array.isArray(raw.guides) || !Array.isArray(raw.entries) ||
+    raw.guides.length + raw.entries.length > 16384
+  ) return fail();
+  const schools = raw.schools as string[];
+  const guides = raw.guides.map((tuple) => {
+    if (
+      !Array.isArray(tuple) || tuple.length !== 2 || !Number.isSafeInteger(tuple[0]) ||
+      tuple[0] < 0 || tuple[0] >= schools.length * 4 || !text(tuple[1]) || !tuple[1]
+    ) return fail();
+    const year = 2024 + Math.floor(tuple[0] / schools.length), pk = tuple[1], id = `${year}:${pk}`;
+    return entry({
+      key: [year, schools[tuple[0] % schools.length], pk, "", id],
+      sourceKind: "guide",
+      guide: null,
+      nativeOfferingId: id,
+      expectedFingerprint: null,
+      search: { university: "", department: "", region: "", group: "" },
+    }, true);
+  });
+  return [...guides, ...decodeCompactLookup(raw)];
+}
+async function lookupPrefix(id: string, compact: boolean, packed = false): Promise<string> {
   const first = (await publicKeyRawHash(new TextEncoder().encode(id))).slice(0, 2);
-  return compact ? (Number.parseInt(first, 16) & 7).toString(16) : first;
+  return compact ? (Number.parseInt(first, 16) & (packed ? 1 : 7)).toString(16) : first;
 }
 
 /** Bounded IO, hash-pinned partitions and exclusive tuple continuation; no value cache. */
@@ -263,7 +312,11 @@ export class CurrentPublicMetadataKeyIndex implements CurrentPublicKeySelectionP
         ]),
         limits = exact(raw.limits, ["max_shards_per_search", "max_shard_rows"]);
       if (
-        !["jungsi.current-public-key-index/v1", "jungsi.current-public-key-index/v2"].includes(
+        ![
+          "jungsi.current-public-key-index/v1",
+          "jungsi.current-public-key-index/v2",
+          "jungsi.current-public-key-index/v3",
+        ].includes(
           String(raw.format),
         ) ||
         this.basis.requiredFormat !== undefined && raw.format !== this.basis.requiredFormat ||
@@ -292,12 +345,17 @@ export class CurrentPublicMetadataKeyIndex implements CurrentPublicKeySelectionP
         (raw.history as KeyShard[]).reduce((n, s) => n + s.rows, 0) !==
           coverage.history_rows
       ) return fail();
-      const compact = raw.format === "jungsi.current-public-key-index/v2";
-      if (!record(raw.lookups) || Object.keys(raw.lookups).length > (compact ? 8 : 256)) {
+      const packed = raw.format === "jungsi.current-public-key-index/v3",
+        compact = packed || raw.format === "jungsi.current-public-key-index/v2";
+      if (
+        !record(raw.lookups) || Object.keys(raw.lookups).length > (packed ? 2 : compact ? 8 : 256)
+      ) {
         return fail();
       }
       for (const [prefix, ref] of Object.entries(raw.lookups)) {
-        if (!(compact ? /^[0-7]$/ : /^[0-9a-f]{2}$/).test(prefix)) return fail();
+        if (!(packed ? /^[01]$/ : compact ? /^[0-7]$/ : /^[0-9a-f]{2}$/).test(prefix)) {
+          return fail();
+        }
         reference(ref, 262144);
       }
       return raw as unknown as PublicKeyIndexRoot;
@@ -357,7 +415,7 @@ export class CurrentPublicMetadataKeyIndex implements CurrentPublicKeySelectionP
         raw.entries.length !== d.rows
       ) return fail();
       const entries = raw.entries.map((value) =>
-        entry(value, root.format === "jungsi.current-public-key-index/v2")
+        entry(value, root.format !== "jungsi.current-public-key-index/v1")
       );
       for (let j = 0; j < entries.length; j++) {
         const e = entries[j];
@@ -394,9 +452,10 @@ export class CurrentPublicMetadataKeyIndex implements CurrentPublicKeySelectionP
     ) return fail();
     const root = await this.root(),
       groups = new Map<string, string[]>(),
-      compact = root.format === "jungsi.current-public-key-index/v2";
+      packed = root.format === "jungsi.current-public-key-index/v3",
+      compact = packed || root.format === "jungsi.current-public-key-index/v2";
     for (const id of ids) {
-      const prefix = await lookupPrefix(id, compact);
+      const prefix = await lookupPrefix(id, compact, packed);
       groups.set(prefix, [...(groups.get(prefix) ?? []), id]);
     }
     // An over-budget batch fails closed instead of returning false 404s for unread shards.
@@ -407,23 +466,33 @@ export class CurrentPublicMetadataKeyIndex implements CurrentPublicKeySelectionP
       if (!ref) continue;
       const raw = exact(
         await checked(this.read, ref),
-        compact ? ["format", "prefix", "strings", "entries"] : ["format", "prefix", "entries"],
+        packed
+          ? ["format", "prefix", "schools", "guides", "strings", "entries"]
+          : compact
+          ? ["format", "prefix", "strings", "entries"]
+          : ["format", "prefix", "entries"],
       );
       if (
         raw.format !==
-          (compact
+          (packed
+            ? "jungsi.current-public-key-lookup/v3"
+            : compact
             ? "jungsi.current-public-key-lookup/v2"
             : "jungsi.current-public-key-lookup/v1") ||
         raw.prefix !== prefix || !Array.isArray(raw.entries) ||
         raw.entries.length > (compact ? 4096 : 2048)
       ) return fail();
       const seen = new Set<string>();
-      const values = compact ? decodeCompactLookup(raw) : raw.entries.map((value) => entry(value));
+      const values = packed
+        ? decodePackedLookup(raw)
+        : compact
+        ? decodeCompactLookup(raw)
+        : raw.entries.map((value) => entry(value));
       for (const e of values) {
         const id = e.nativeOfferingId!;
         if (
           seen.has(id) ||
-          await lookupPrefix(id, compact) !== prefix
+          await lookupPrefix(id, compact, packed) !== prefix
         ) return fail();
         seen.add(id);
         if (requested.includes(id)) out.push(bare(e));
@@ -456,9 +525,16 @@ export async function prepareCurrentPublicKeyIndexV2(
 ): ReturnType<typeof prepareIndex> {
   return await prepareIndex(input, true);
 }
+/** Two byte-bounded lookup objects, with reversible two-field guide tuples and native-string PKs. */
+export async function prepareCurrentPublicKeyIndexV3(
+  input: PublicKeyIndexPreparation,
+): ReturnType<typeof prepareIndex> {
+  return await prepareIndex(input, true, true);
+}
 async function prepareIndex(
   input: PublicKeyIndexPreparation,
   compact: boolean,
+  packed = false,
 ): Promise<
   {
     status: "PREPARED_REQUIRES_EXTERNAL_COVERAGE_REVIEW";
@@ -507,7 +583,11 @@ async function prepareIndex(
     return ref;
   };
   const root: PublicKeyIndexRoot = {
-    format: compact ? "jungsi.current-public-key-index/v2" : "jungsi.current-public-key-index/v1",
+    format: packed
+      ? "jungsi.current-public-key-index/v3"
+      : compact
+      ? "jungsi.current-public-key-index/v2"
+      : "jungsi.current-public-key-index/v1",
     metadata_sha256: input.metadataSha256,
     guide_command_state_sha256: input.guideCommandStateSha256,
     admission_head: { ...input.admissionHead },
@@ -553,15 +633,15 @@ async function prepareIndex(
     const e = entry(value, compact), id = e.nativeOfferingId!;
     if (seen.has(id)) return fail();
     seen.add(id);
-    const prefix = await lookupPrefix(id, compact);
+    const prefix = await lookupPrefix(id, compact, packed);
     lookup.set(prefix, [...(lookup.get(prefix) ?? []), e]);
   }
   const refs: Record<string, PublicKeyObjectReference> = {};
   for (const [prefix, entries] of lookup) {
-    if (entries.length > (compact ? 4096 : 2048)) return fail();
+    if (entries.length > (packed ? 16384 : compact ? 4096 : 2048)) return fail();
     refs[prefix] = await put(
       "lookup-" + prefix,
-      compact ? compactLookup(prefix, entries) : {
+      packed ? packedLookup(prefix, entries) : compact ? compactLookup(prefix, entries) : {
         format: "jungsi.current-public-key-lookup/v1",
         prefix,
         entries,
