@@ -11,6 +11,17 @@ export function seoulDate(isoUtc: string | null): string {
   return `${get("year")}.${get("month")}.${get("day")}`;
 }
 
+/**
+ * 서버 as_of 를 '자료 기준' 날짜로. 날짜만 있는 원문("2026-09-10")은 시간대 변환 없이 그대로 쓰고,
+ * 시각이 붙은 값은 Asia/Seoul 날짜로 바꾼다. 형식이 맞지 않으면 null — 오늘 날짜로 채우지 않는다
+ */
+export function asOfDate(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return plainDate(raw);
+  if (!/^\d{4}-\d{2}-\d{2}T/.test(raw) || Number.isNaN(new Date(raw).getTime())) return null;
+  return seoulDate(raw);
+}
+
 /** 날짜만 있는 값 "2026-09-10" → "2026.09.10" */
 export function plainDate(ymd: string | null): string {
   return ymd ? ymd.replaceAll("-", ".") : "─";

@@ -6,7 +6,7 @@ import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { CatalogSearchDto, HistoryMetricDto } from "@/lib/dto";
-import { plainDate } from "@/lib/format";
+import { asOfDate } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { lockFor, page } from "@/lib/routes";
 import { GROUPS, PATH, REGIONS, hrefWith, parseQuery, type Query } from "./query";
@@ -152,7 +152,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
             <div className="rs-count">
               <span>
                 <b className="num">{univs.length}</b>개 대학 · <b className="num">{units.length}</b>개 모집단위 · 2024~2026 발행 결과 기준
-                {asOf && <small> · 자료 기준 {plainDate(asOf)}</small>}
+                {asOfDate(asOf) && <small> · 자료 기준 {asOfDate(asOf)}</small>}
               </span>
               {filtered && <Link href={hrefWith(cur, { university: undefined, unit: undefined, region: undefined, group: undefined })}>조건 지우기</Link>}
             </div>
