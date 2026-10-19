@@ -6566,7 +6566,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
         "layer": "infrastructure",
-        "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
+        "status": "exact032_hash_guarded_overall_payload_scope_candidate_native_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6577,14 +6577,16 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "a8cb07a62412da503d6349afdc64d38781397c9339d5947f1cee5ea47253fae1",
+        "source_sha256": "0005839a9aeddb4e0c427ee4d4adde95a56e2c748a96444b6eebf9e89a740b5e",
         "declared_exports": [
           "CURRENT_PUBLIC_COMPAT_BASE",
           "CURRENT_PUBLIC_COMPAT_INPUTS",
           "TOTAL_MODEL_V2_COMPAT_INPUTS",
           "TOTAL_MODEL_V2_COMPAT_NEW_SOURCE",
           "patchInstalled032CatalogSources",
-          "patchInstalled032TotalModelSources"
+          "patchInstalled032TotalModelSources",
+          "PAYLOAD_SCOPE_COMPAT_INPUTS",
+          "patchInstalled032PayloadScopeSources"
         ]
       },
       {
@@ -8295,7 +8297,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "6ab65854e39a2767385cb4fc2e5c6dca2fceac6647b271000b7df84a39b92bac",
+        "source_sha256": "0e829cbea5702f5659ac40d12a398fa4e2a7d6fba4d73c7c62fcfd3fb59ad1d2",
         "declared_exports": [
           "NativeDataProvider",
           "NativeForecastInputs",
@@ -8330,7 +8332,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "227ad4c99b789974d557e158a4f817c33d4e352dfea6b5e42736b3ae1919c31e",
+        "source_sha256": "2748e8128a41e2c1bfe106ba57d5ecb8f3b7652331ba1572567b8b59cef099ec",
         "declared_exports": [
           "NATIVE_RUNTIME_KINDS",
           "NativeRuntimeKind",
@@ -8550,7 +8552,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "5fdc8e7553128ed216a6a33bcb462cb59aedf11096e79ff89a86a7dac6e5c162",
+        "source_sha256": "da44c6b6f4cf8f7e9d06a3d1ce6a819f652ea7d568955e03255bbdbf2a87c1b3",
         "declared_exports": [
           "NativeRuntimeRequest"
         ]

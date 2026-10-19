@@ -188,7 +188,11 @@ export class NativeDataProvider
     try {
       await this.assertCurrentSelection(true);
       const identities = this.selection.identities();
-      const catalog = await this.getCatalog();
+      const overallOnly = this.selection.payloadMode === "overall_only";
+      if (
+        overallOnly && identities.some(({ kind }) => !["exam_pack", "total_model"].includes(kind))
+      ) fail("artifact_not_approved");
+      const catalog = overallOnly ? null : await this.getCatalog();
       if (this.selection.payloadMode === "catalog_only") {
         if (identities.some(({ kind, key }) => kind !== "catalog" || key !== "service")) {
           fail("artifact_not_approved");
@@ -486,12 +490,15 @@ export class NativeDataProvider
       }
       return Object.freeze({
         format: "jungsi.native-provider-preflight/v1",
-        status: "verified_selected_release_graph",
+        status: overallOnly ? "verified_overall_payloads" : "verified_selected_release_graph",
         registry_sha256: this.selection.registryHash,
         selection_sha256: this.selection.selectionHash,
         approval_reference_sha256: this.freshness!.approvalReferenceSha256,
         artifacts: identities.length,
-        verification_scope: "selected_native_envelopes_and_release_bindings",
+        verification_scope: overallOnly
+          ? "exam_model_payloads_and_all_selected_reference_metadata"
+          : "selected_native_envelopes_and_release_bindings",
+        ...(overallOnly ? { source_selection: this.selection.privateReceipt() } : {}),
         optional_missing: missing,
         production_ready: false,
         native_acceptance: "NOT_VERIFIED_BY_SOURCE_PREFLIGHT",

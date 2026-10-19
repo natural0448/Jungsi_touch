@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.88",
-  "source_sha256": "8029dd653e46e1125c75f6d15bfce3449c0afd406021d8dea0279d5df81e2d14",
+  "spec_version": "1.9.89",
+  "source_sha256": "fdfe02087020e1e0760f07dad54915f274b17e2733211b7041bbbaae88bffee5",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1637,7 +1637,7 @@
       "분포 전체·도수·성별/동점 인원·가중치·정확 내부비율",
       "출처 로컬 경로·원문 전체·해시·연구 플래그·승인 필드"
     ],
-    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 22개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다.",
+    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 22개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다. overall.analyze는 명시적 overall_only로 시험팩·총모형 본문만 읽고 전체 선택 metadata의 승인·핀·private bucket·현재 head·마지막 확인·공유 예산을 유지한다. 기존 all/catalog_only와 v1 모집단 검증은 보존한다. 추가 세 operation의 범위 변경은 별도 직접 승인 대기이며 운영 인수는 NOT_RUN이다.",
     "whole_population_transition": {
       "format": "jungsi.whole-population-model-transition/v1",
       "id": "CR-OVERALL-ALL-EXAMINEES-V2-20261020-01",
@@ -1718,11 +1718,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-            "sha256": "6ab65854e39a2767385cb4fc2e5c6dca2fceac6647b271000b7df84a39b92bac"
+            "sha256": "0e829cbea5702f5659ac40d12a398fa4e2a7d6fba4d73c7c62fcfd3fb59ad1d2"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
-            "sha256": "a8cb07a62412da503d6349afdc64d38781397c9339d5947f1cee5ea47253fae1"
+            "sha256": "0005839a9aeddb4e0c427ee4d4adde95a56e2c748a96444b6eebf9e89a740b5e"
           },
           {
             "path": "supabase/functions/_shared/all_examinees_total_model_test.ts",
@@ -1743,6 +1743,41 @@
         "active_registry_selection_and_real_saved_report_reanalysis": "NOT_RUN",
         "no_score_profile_resave_for_model_transition": true
       }
+    },
+    "request_dependency_scope": {
+      "format": "jungsi.operation-payload-scope/v1",
+      "id": "CR-OVERALL-PAYLOAD-SCOPE-20261020-01",
+      "operation": "overall.analyze",
+      "mode": "overall_only",
+      "payload_kinds": [
+        "exam_pack",
+        "total_model"
+      ],
+      "selected_metadata": "All selected references retain approval, pin, scope, private bucket and byte-cap validation before scoped body reads. Deferred selected bodies raise runtime_dependency_not_loaded on access.",
+      "preflight": "Existing pack/model constructors, exam/version/year bindings and v1 population guards are reused. No Catalog or Conversion body/getter is used by this scope.",
+      "unchanged": [
+        "all default full graph",
+        "catalog_only",
+        "current head before/after native decoding",
+        "runtime final current and private bucket",
+        "shared atomic usage and read/byte limits",
+        "operation/member/owner/DTO boundaries"
+      ],
+      "verification": "11 additive synthetic regressions; exact032 NativeRuntimeApi RAM complete-request evidence retained privately; normal hooks and exact source CI required.",
+      "operating_acceptance": "NOT_RUN",
+      "remaining_three_operations": "score-profile.create, university.analyze and candidates.build remain unchanged. RAM request failures and an approval-required proposal are retained privately; implementation is not inferred from delegation.",
+      "regressions": {
+        "top_level_foundation_tests_preserved": 656,
+        "additional_executed_scenarios": 11,
+        "paths": [
+          "tests/edge/test_native_source_selection.ts",
+          "tests/edge/test_native_data_provider.ts",
+          "tests/edge/test_runtime_context.ts"
+        ],
+        "entrypoint": "verifyAdditionalOverallScopeCases; invoked unconditionally by an existing strict test in each file; no skip/filter or common checker change"
+      },
+      "previous_owner_packet_v2": "FAIL_COMPLETE_HTTP_FINISH_BUDGET_DO_NOT_DEPLOY",
+      "previous_source_CI": "historical_source_only_PASS_not_complete_HTTP_acceptance"
     }
   },
   "backend_platform_contract": {

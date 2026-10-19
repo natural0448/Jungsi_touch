@@ -174,7 +174,11 @@ export class NativeRuntimeRequest {
           sha256: binding.references.selection.sha256,
           maxBytes: binding.references.selection.bytes,
         },
-        catalogOnly ? "catalog_only" : "all",
+        catalogOnly
+          ? "catalog_only"
+          : this.operation === "overall.analyze"
+          ? "overall_only"
+          : "all",
       );
       const data = new NativeDataProvider(snapshot, {
         heads: controls,

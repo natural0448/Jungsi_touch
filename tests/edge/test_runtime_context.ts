@@ -363,4 +363,33 @@ Deno.test("all other operation contexts and full readiness retain noncatalog bod
     assert(f.calls.some((url) => url.endsWith("unused-exam.json")));
     equal(f.sqlCalls(), 0);
   }
+  await verifyAdditionalOverallScopeCases();
 });
+
+/** Additive scenarios run inside the existing strict foundation suite; no test is skipped. */
+async function verifyAdditionalOverallScopeCases(): Promise<void> {
+  const cases: readonly [string, () => Promise<void>][] = [
+    [
+      "overall operation chooses its scope in the real context before reading unused catalog",
+      async () => {
+        const f = await fixture({
+          deferredExam: true,
+          operation: "overall.analyze",
+          approvedOperations: ["overall.analyze"],
+          costsForApproved: true,
+        });
+        await denied(() => f.context.data(), "storage_hash_mismatch");
+        assert(f.calls.some((url) => url.endsWith("unused-exam.json")));
+        assert(!f.calls.some((url) => url.endsWith("catalog.json")));
+        equal(f.sqlCalls(), 0);
+      },
+    ],
+  ];
+  for (const [name, run] of cases) {
+    try {
+      await run();
+    } catch (error) {
+      throw new Error(name, { cause: error });
+    }
+  }
+}
