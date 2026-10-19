@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.81",
+  "version": "1.9.82",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -5814,7 +5814,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.81",
+        "contract_version": "1.9.82",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -5988,7 +5988,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.81",
+        "contract_version": "1.9.82",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -6154,7 +6154,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.81",
+        "contract_version": "1.9.82",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6173,7 +6173,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.81",
+        "contract_version": "1.9.82",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6198,7 +6198,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.81",
+        "contract_version": "1.9.82",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6223,7 +6223,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.81",
+        "contract_version": "1.9.82",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -15256,18 +15256,24 @@
           "기획1.9.81 / 사용자2026-10-19 범위 위임",
           "정문362a02b/운영6288d397 직접만료·paging 보고 수용; PR43 head11a CI2·화면code0 확인",
           "화면팀은 허용 application 서비스/DTO/API를 기존 브랜치에서 자율 개발한다. DB/산출 본체·혼합 통계는 보호하고 정상 문서/계층/보안/hook/CI를 유지한다. 쿠키 분기02/04/05/06 잔여와 전체 운영 gate는 별도다."
+        ],
+        [
+          "기획·개발·데이터 / 공유 DB 용량 후속 DB-CAP-01",
+          "spec1.9.82 / 기준 e789313;화면 ebb3d2d CI2",
+          "읽기전용 메타데이터·소규모 릴리스 등록부 조사/실패 보존;정상 writer/schema 변경 없음",
+          "현재값과 과거 회원/OX 이력 구분·필수 PK 유지·제한 먼저 조회. 보관/복구/정리 범위와 구현·실제 재검수는 별도이며 새로운 DB/요금 권한은 없다."
         ]
       ],
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "5c9ed1c54daed9d5d32526d74029965a49ae7569",
-        "spec_version": "1.9.77",
-        "ci_run_id": 39148270736,
+        "commit": "e789313c1d761bc5edc64f26daeaa1b585ce7ad4",
+        "spec_version": "1.9.81",
+        "ci_run_id": 39197188354,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
-          "python": 1131,
+          "python": 1148,
           "deno": 656,
           "oracle": 993
         }
@@ -15311,7 +15317,8 @@
     "spec1.9.29 current 최종 개발 후보: source6/native41·source-only 번들 기동은 PASS지만 실제 filtered/count/page-key와 전체 payload는 기존5초에서57014 FAIL이다. 같은 전체SQL 재시도·JIT 설정·고정연도 IN 진단을 운영 해결책으로 채택하지 않는다. 정본 교정 의미·RLS·정확 count·단일 bounded JOIN·행 보존을 유지하는 경량조회/projection·색인 공급자 변경 CR과 실제 성능 PASS가 필요하다. 신규 목적승인/PIN4/배포/실JWT/BFF/브라우저/보안3gate는 NOT_RUN이며 기존C/22API·기본이용권·falseflags를 유지한다.",
     "DEP-IO-01: 사용자 제공 Supabase 디스크 I/O 예산 경고로 추가 I/O 집약 DB 작업은 HOLD한다. 실제 I/O 예산 회복·작업 중첩·부하 원인은 아직 확인하지 않았으며 57014와의 인과를 확정하지 않는다. 개발팀은 성능CR의 초기 구축/증분 갱신·유한 배치·중단 조건을 파일로 준비하고, 데이터팀은 진행 중 작업의 안전한 체크포인트를 정리한다. 실제 성능 검수·대량복사·전체 재적재·VACUUM·새 read model DB 구축은 NOT_RUN이며 source/local synthetic/Git 검수만 계속한다.",
     "spec1.9.31: 전수 검수 API 후보의 source/docs는 PR23으로 develop에 정상 통합되고 853+853/native41/번들/독립 검토/CI273·274가 PASS했다. 실제 전수 payload·집계는 기존5초에서57014 FAIL/성공페이지0이며 I/O 집약 실제DB 작업은 DEP-IO-01 HOLD다. 조회 모델 CR 문서의 타입/FK·봉인lineage·정확bytecodec·완전dependency 영향명부를 보완하고 독립 기술 검토·실제 I/O 재개 조건·Owner 적용범위를 갖춰야 한다. 새로운 승인/PIN4/DB구축/함수배포/실JWT/BFF/브라우저/보안3gate·일반회원 공개는 NOT_RUN이다.",
-    "DEP-AUTH-COOKIE-01: 정문 수정/직접 자연만료·첫다음 PASS는 화면팀 보고 수용. chunk/redirect/오류/fetch no-store,실제만료/head·동시성/회수·비승인계정 잔여 NOT_RUN을 유지한다."
+    "DEP-AUTH-COOKIE-01: 정문 수정/직접 자연만료·첫다음 PASS는 화면팀 보고 수용. chunk/redirect/오류/fetch no-store,실제만료/head·동시성/회수·비승인계정 잔여 NOT_RUN을 유지한다.",
+    "DB-CAP-01: 공유 DB 용량은 현재값과 릴리스별 회원/검수 이력의 grain을 구분해 기존 근거와 제한 메타데이터로 진단한다. 기본키·사용통계·dead tuple·실행계획을 구분하며 단순 seq_scan/캐시비율로 새 인덱스나 삭제를 확정하지 않는다. 현재 head/원본/값/방법과 기존 writer·보안·요청 상한을 보존한다. 보관·이관/정리 범위와 전후 검수·복구 근거,실제 디스크/요금 상태가 미확정이므로 DB변경/재구축/요금변경/전체 운영 인수는 미완료다. 실제 수치와 SQL 영수증은 비공개 Drive에 보관한다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -17220,6 +17227,17 @@
         "REQ-26"
       ],
       "summary": "spec1.9.81: 사용자 지시에 따라 화면팀에 서버 서비스 함수 공동 개발 권한을 위임한다. 기존 DB·산출 소유권/3티어/보안 유지,함수별 사전승인 없이 기존 화면 branch→develop PR. 보호 경로·혼합 Python 산출 AST·신뢰된 정책/merge 동기화를 검사하고 문서생성 --write의 미정의 snapshot NameError를 수정한다. 정문수정/자연만료 paging 보고와 PR43 11a CI2·화면코드불변을 수용하되 잔여분기/실운영 인수는 구분한다."
+    },
+    {
+      "date": "2026-10-19",
+      "requirements": [
+        "REQ-16",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "spec1.9.82: PR43 ebb3d2d의 e789313 일반 merge·정상 --write·CI2/CLEAN과 서비스 함수 권한 수용을 기록한다. 공유 DB 용량 DB-CAP-01은 현재값/릴리스별 회원/OX 이력 grain·사용 중 제약 인덱스·제한 조회/timeout 실측·아카이브/보관·비용 확인으로 나눠 후속 관리한다. 실제 운영 수치/SQL은 비공개 보관하며 DB삭제/DDL/권한·요금/배포 및 기존 인수 gate를 변경하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -17432,9 +17450,9 @@
     ],
     "existing_application_feature": "feature/application-pre-data-platform",
     "presentation_branch_example": "feature/presentation-foundation",
-    "presentation_branch_status": "PR43 head11a346f가 develop3c87239를 일반 merge했고 충돌없이 MERGEABLE/CLEAN, 정확 head push39191126822/PR39191131045 CI success를 확인했다. Draft와 미병합 상태는 유지한다. e806 대비 apps/web/src·package·wrangler 변경0이며 기존 워커75e4a1dc 재배포는 없었다. 이후 최신 기획의 일반 merge와 정상 검사·서비스 공동 개발 범위를 적용한다. 이전 PR/브랜치 이력은 보존한다.",
+    "presentation_branch_status": "PR43 headebb3d2d가 develop e789313/기획1.9.81을 일반 merge했다. 정상 --write 생성/검사와 정확 head push39213665734·PR39213667946 CI success 및 MERGEABLE/CLEAN을 확인했다. Draft·미병합이며 e806 대비 화면 소스/package/wrangler 변경0으로 운영 재배포는 없다. 화면팀이 서비스 함수 공동 개발 범위를 수용했고 새 서비스 구현 완료로 확대하지 않는다. 이후 기획 변경은 기존 브랜치의 정상 merge/생성/검사를 따른다.",
     "generated_files_rule": "route_catalog.json과 생성 README/현재 문서는 직접 편집하지 않는다. 계약 변경은 service_spec.json과 생성 도구에서 수정하고 생성 결과를 같은 커밋에 포함한다.",
-    "handoff_rule": "두 개발 담당은 origin/develop의 같은 커밋에 있는 service_spec과 생성 문서를 가져가 구현한다. 계약·필드·오류/보류 사유가 바뀌면 시스템기획팀과 해당 계층 담당에게 인계한다. 통합되지 않은 feature의 코드·가상 응답을 develop에 구현된 기능으로 기록하지 않는다. 현재 기획팀과 서비스·DB 개발팀은 외부 프런트 담당에게 확정 공통 계약과 백엔드 인수 증거를 전달한다. 외부 프런트의 수정·브라우저 인수검증은 해당 담당자의 완료 증거를 별도로 확인한다. 화면팀은 service_delegation_policy의 허용 서비스 함수를 스스로 구현한다. 새 DB/산출 작업만 기존 담당에게 인계하며 일반 노출 필드/서비스 함수마다 사전 승인을 요구하지 않는다.",
+    "handoff_rule": "두 개발 담당은 origin/develop의 같은 커밋에 있는 service_spec과 생성 문서를 가져가 구현한다. 계약·필드·오류/보류 사유가 바뀌면 시스템기획팀과 해당 계층 담당에게 인계한다. 통합되지 않은 feature의 코드·가상 응답을 develop에 구현된 기능으로 기록하지 않는다. 현재 기획팀과 서비스·DB 개발팀은 외부 프런트 담당에게 확정 공통 계약과 백엔드 인수 증거를 전달한다. 외부 프런트의 수정·브라우저 인수검증은 해당 담당자의 완료 증거를 별도로 확인한다. 화면팀은 service_delegation_policy의 허용 서비스 함수를 스스로 구현한다. 새 DB/산출 작업만 기존 담당에게 인계하며 일반 노출 필드/서비스 함수마다 사전 승인을 요구하지 않는다. 공유 DB 용량 후속 DB-CAP-01은 현재값과 릴리스별 검수/회원 이력의 단위를 구분해 읽기 전용으로 진단한다. 파일/이전 버전·현재 head를 보존하고 보관 정책·변경 범위/전후 인수 없이 정리·이관·인덱스/요금 변경을 하지 않는다. 전국 로컬 준비와 승인된 최종 단일 writer는 별도 현재 체크포인트를 따른다.",
     "verification_rule": "Git 변경 범위와 해당 계약·필수 커밋 검산을 확인한다. 원자료 전수검수나 전국 재집계를 매 개발 작업에서 반복하지 않는다. 하위 브랜치 병합은 등록된 직계 부모 또는 승인된 develop 인입과 결속한 Git merge-tree 결과를 기준으로 확인한다. 충돌 해결 근거와 별도 직접 수정의 승인 범위를 구분하며 삭제 차단·팀 권한·main 승격·등록 부모·fast-forward 규칙을 유지한다. merge_scope_policy 표식이 있는 커밋부터 병합 재구성 정책을 적용한다. 과거 병합은 소급 판정하지 않으며, 기획 경로 충돌 해결과 비기획 자동 병합 결과를 구분한다.",
     "planning_default_branch": "develop",
     "planning_source": "origin/develop:docs/current/service_spec.json 및 동일 커밋의 docs/current 생성 문서",
@@ -33395,7 +33413,7 @@
           "receipt_sha256": "d16a383b2d32ae2d31e0702d87530f7a1176596ed208d61f0239b15a8416f3e5",
           "boundary": "prior_exact_ID_SQL_used_18_view_dependencies; final_guard_adds_direct_release_table_and_preserves_identical_payload_SQL_SHA"
         },
-        "deployment_progress_note": "화면팀 영수증에서 정문362a02b 수정과 운영6288d397 배포, 자연 만료 후 /를 거치지 않은 /jeongsi 진입의 쿠키 저장/다음 요청 재사용 및 첫/다음 범위 PASS를 보고했다. Root는 받은 영수증과 PR43 head11a346f/정확 CI2 및 e806 대비 화면 실행 코드 변경0을 확인했다. 정문 소스/운영 응답의 Root 독립 재실행은 NOT_RUN이다. FD-AUTH-02는 chunk/redirect/오류/fetch경로 no-store 미실측,04/05는 NOT_RUN,06은 비승인계정 NOT_RUN이며07은 원인 미확정 관찰이다. 임시 루트방문 대기는 최신 보고상 종료하고 기존 만료/head409·read-only 쿠키 소유권·Secrets/역할/승인을 유지한다. PR43은 Draft·미병합이며 CI 통과를 운영전체/보안3gate/전국공급/REQ27 인수로 확대하지 않는다.",
+        "deployment_progress_note": "화면팀 영수증에서 정문362a02b 수정과 운영6288d397 배포, 자연 만료 후 /를 거치지 않은 /jeongsi 진입의 쿠키 저장/다음 요청 재사용 및 첫/다음 범위 PASS를 보고했다. Root는 받은 영수증과 PR43 headebb3d2d/기획1.9.81 동기화·정상 --write/정확 CI2 및 e806 대비 화면 실행 코드 변경0을 확인했다. 정문 소스/운영 응답의 Root 독립 재실행은 NOT_RUN이다. FD-AUTH-02는 chunk/redirect/오류/fetch경로 no-store 미실측,04/05는 NOT_RUN,06은 비승인계정 NOT_RUN이며07은 원인 미확정 관찰이다. 임시 루트방문 대기는 최신 보고상 종료하고 기존 만료/head409·read-only 쿠키 소유권·Secrets/역할/승인을 유지한다. PR43은 Draft·미병합이며 CI 통과를 운영전체/보안3gate/전국공급/REQ27 인수로 확대하지 않는다. 공유 DB 용량 요청은 별도 읽기 전용 메타데이터/릴리스 grain 조사로 접수했다. 현재 검수의 회원/검수 관계와 기본키를 임시·미사용으로 간주하지 않으며, DB 정리/새 인덱스/배포·실제 timeout 적용값 인수는 이번 보고로 완료하지 않는다.",
         "latest_receipt_intake": {
           "date": "2026-10-19",
           "frontend_worker_unchanged": "75e4a1dc",
@@ -33669,9 +33687,9 @@
           "frontdoor_source_commit": "362a02b208041b091eaa8c90197473ef61d0c1cc",
           "frontdoor_deployment": "6288d397-9afb-44ed-83aa-d370e0501300",
           "source_evidence": "EXTERNAL_RECEIPT_NOT_ROOT_UPSTREAM_REPOSITORY_READBACK",
-          "frontend_source_commit": "11a346f6b162c926b3792e4a9837e865c156266d",
+          "frontend_source_commit": "ebb3d2d8e3b9c1a7bb84017181eb2bbafaea99ad",
           "deployed_frontend_source_unchanged": "e806aafea348c14d0c127858c48153beeb3cebec",
-          "external_receipt_sha256": "fbcbea388bd732fcd2643ed480b7040a61fbc694038fa61150bc04ed11239231",
+          "external_receipt_sha256": "7b68972ee485214cc1d2f6e4cab39f0ec056f3c7477cbeaa4d647e5f5ddb2f38",
           "temporary_root_visit_workaround": "NO_LONGER_NEEDED_BY_FRONTEND_DIRECT_EXPIRY_REPORT"
         },
         "historical_cookie_followup_before_latest_receipt": {
@@ -116391,6 +116409,35 @@
       "mismatch": 0,
       "source_preserved": true,
       "preserved": true
+    },
+    "shared_db_capacity_followup": {
+      "format": "jungsi.shared-db-capacity-followup/v1",
+      "id": "DB-CAP-01",
+      "status": "READ_ONLY_TRIAGE_COMPLETE_RETENTION_AND_IMPLEMENTATION_PENDING",
+      "scope": [
+        "current review first/next range",
+        "current public history.search bounded supply",
+        "percentile current values and release membership/review history"
+      ],
+      "owners": {
+        "planning": "Current spec/routing,private evidence and retention/change decision intake",
+        "data": "Existing local packages and approved final single writer;reuse archive/receipts",
+        "service": "Query plans/bounded joins/timeout readback and schema proposal on existing application branch",
+        "presentation": "Existing branch DTO compatibility and first/next/P1 regression after exact change receipt",
+        "operator": "Retention/removal scope and actual provisioned-disk/spend-cap decision"
+      },
+      "grain_rule": "Current observations and per-release membership/OX history are different grains. Do not infer duplicate or disposable rows by comparing their total counts. Preserve current head,values,methods,originals and source/native semantics.",
+      "index_rule": "Treat primary/unique indexes and zero-scan counters separately;use constraint dependencies,stats-reset period and actual query plans. No automatic index removal/addition.",
+      "growth_rule": "Keep nationwide local preparation and final single-writer policy. Do not emit full DB snapshots for each school or review round. Future no-change release/compact storage needs an explicit reviewed writer/schema contract.",
+      "query_rule": "Limit current head and observation keys before expensive relationships;aggregate each relationship before joining. Validate actual session timeout in the existing read-only transaction;statement timeout does not prove whole-request latency. Keep existing security/budgets and failed query evidence.",
+      "archive_rule": "Reuse preserved native COPY/manifest/readback evidence and prepare lossless archive/restore and dependent-consumer inventory before any old-row disposition. Removing rows is not equivalent to shrinking provisioned disk.",
+      "cost_rule": "Database bytes,provisioned disk,WAL and billing/spend-cap state are distinct. Existing Google Drive/Supabase only;no plan,cap or disk changes from this task.",
+      "actual_evidence": "Private Drive operational checkpoint only;no actual row counts,sizes,credentials or source rows in Git.",
+      "DB_mutations": 0,
+      "index_DDL": "NOT_RUN",
+      "retention_or_prune": "NOT_RUN",
+      "runtime_deployment": "NOT_RUN",
+      "production_ready": false
     }
   },
   "catalog_payload_scope_contract": {
@@ -116622,7 +116669,7 @@
       "receipt_sha256": "d16a383b2d32ae2d31e0702d87530f7a1176596ed208d61f0239b15a8416f3e5",
       "boundary": "prior_exact_ID_SQL_used_18_view_dependencies; final_guard_adds_direct_release_table_and_preserves_identical_payload_SQL_SHA"
     },
-    "deployment_progress_note": "화면팀 영수증에서 정문362a02b 수정과 운영6288d397 배포, 자연 만료 후 /를 거치지 않은 /jeongsi 진입의 쿠키 저장/다음 요청 재사용 및 첫/다음 범위 PASS를 보고했다. Root는 받은 영수증과 PR43 head11a346f/정확 CI2 및 e806 대비 화면 실행 코드 변경0을 확인했다. 정문 소스/운영 응답의 Root 독립 재실행은 NOT_RUN이다. FD-AUTH-02는 chunk/redirect/오류/fetch경로 no-store 미실측,04/05는 NOT_RUN,06은 비승인계정 NOT_RUN이며07은 원인 미확정 관찰이다. 임시 루트방문 대기는 최신 보고상 종료하고 기존 만료/head409·read-only 쿠키 소유권·Secrets/역할/승인을 유지한다. PR43은 Draft·미병합이며 CI 통과를 운영전체/보안3gate/전국공급/REQ27 인수로 확대하지 않는다.",
+    "deployment_progress_note": "화면팀 영수증에서 정문362a02b 수정과 운영6288d397 배포, 자연 만료 후 /를 거치지 않은 /jeongsi 진입의 쿠키 저장/다음 요청 재사용 및 첫/다음 범위 PASS를 보고했다. Root는 받은 영수증과 PR43 headebb3d2d/기획1.9.81 동기화·정상 --write/정확 CI2 및 e806 대비 화면 실행 코드 변경0을 확인했다. 정문 소스/운영 응답의 Root 독립 재실행은 NOT_RUN이다. FD-AUTH-02는 chunk/redirect/오류/fetch경로 no-store 미실측,04/05는 NOT_RUN,06은 비승인계정 NOT_RUN이며07은 원인 미확정 관찰이다. 임시 루트방문 대기는 최신 보고상 종료하고 기존 만료/head409·read-only 쿠키 소유권·Secrets/역할/승인을 유지한다. PR43은 Draft·미병합이며 CI 통과를 운영전체/보안3gate/전국공급/REQ27 인수로 확대하지 않는다. 공유 DB 용량 요청은 별도 읽기 전용 메타데이터/릴리스 grain 조사로 접수했다. 현재 검수의 회원/검수 관계와 기본키를 임시·미사용으로 간주하지 않으며, DB 정리/새 인덱스/배포·실제 timeout 적용값 인수는 이번 보고로 완료하지 않는다.",
     "latest_receipt_intake": {
       "date": "2026-10-19",
       "frontend_worker_unchanged": "75e4a1dc",
@@ -116896,9 +116943,9 @@
       "frontdoor_source_commit": "362a02b208041b091eaa8c90197473ef61d0c1cc",
       "frontdoor_deployment": "6288d397-9afb-44ed-83aa-d370e0501300",
       "source_evidence": "EXTERNAL_RECEIPT_NOT_ROOT_UPSTREAM_REPOSITORY_READBACK",
-      "frontend_source_commit": "11a346f6b162c926b3792e4a9837e865c156266d",
+      "frontend_source_commit": "ebb3d2d8e3b9c1a7bb84017181eb2bbafaea99ad",
       "deployed_frontend_source_unchanged": "e806aafea348c14d0c127858c48153beeb3cebec",
-      "external_receipt_sha256": "fbcbea388bd732fcd2643ed480b7040a61fbc694038fa61150bc04ed11239231",
+      "external_receipt_sha256": "7b68972ee485214cc1d2f6e4cab39f0ec056f3c7477cbeaa4d647e5f5ddb2f38",
       "temporary_root_visit_workaround": "NO_LONGER_NEEDED_BY_FRONTEND_DIRECT_EXPIRY_REPORT"
     },
     "historical_cookie_followup_before_latest_receipt": {
