@@ -35,6 +35,48 @@ import {
   CURRENT_PUBLIC_SOURCE_VIEWS,
   verifyPublicCatalogDescriptor,
 } from "./current_public_catalog_sql.ts";
+Deno.test("current DB address preserves native PK while distinguishing its actual academic year", async () => {
+  const base = {
+    academic_year: 2024,
+    offering_pk: "SYNTHETIC-PK",
+    offering_id: "2024:SYNTHETIC-PK",
+  };
+  equal(await publicCatalogOfferingId(base), "2024:SYNTHETIC-PK");
+  equal(
+    await publicCatalogOfferingId({
+      ...base,
+      academic_year: 2025,
+      offering_id: "2025:SYNTHETIC-PK",
+    }),
+    "2025:SYNTHETIC-PK",
+  );
+  let error: unknown;
+  try {
+    await publicCatalogOfferingId({ ...base, offering_id: "2027:SYNTHETIC-PK" });
+  } catch (e) {
+    error = e;
+  }
+  assert(error instanceof AccessError);
+  equal(base.offering_pk, "SYNTHETIC-PK");
+});
+Deno.test("current empty native PK uses the same observation address with an explicit SQL null", async () => {
+  const base = {
+    academic_year: 2024,
+    offering_pk: null,
+    canonical_result_id: "SYNTHETIC-OBSERVATION",
+  };
+  const id = await publicCatalogOfferingId(base);
+  assert(/^observation:[0-9a-f]{64}$/.test(id));
+  equal(await publicCatalogOfferingId({ ...base, offering_id: null }), id);
+  equal(await publicCatalogOfferingId({ ...base, offering_id: id }), id);
+  let error: unknown;
+  try {
+    await publicCatalogOfferingId({ ...base, offering_id: "2024:invented" });
+  } catch (e) {
+    error = e;
+  }
+  assert(error instanceof AccessError);
+});
 function assert(v: unknown, message = "assertion_failed"): asserts v {
   if (!v) throw new Error(message);
 }

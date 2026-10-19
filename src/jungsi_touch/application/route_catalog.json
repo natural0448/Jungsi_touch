@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.85",
-  "source_sha256": "f0e01606b68a87037df265da1d2b630060f744db5829b5cbe945359cb299abbc",
+  "spec_version": "1.9.86",
+  "source_sha256": "cff0bb3f4162dc2c1ab27d16e5123f97fb21f8e6152f7cd38b5a1658ec9bb96e",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1637,7 +1637,104 @@
       "분포 전체·도수·성별/동점 인원·가중치·정확 내부비율",
       "출처 로컬 경로·원문 전체·해시·연구 플래그·승인 필드"
     ],
-    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 22개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다."
+    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 22개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다.",
+    "whole_population_transition": {
+      "format": "jungsi.whole-population-model-transition/v1",
+      "id": "CR-OVERALL-ALL-EXAMINEES-V2-20261020-01",
+      "status": "FORMAT_IMPLEMENTED_SELECTION_AND_HOSTED_ACTIVATION_PENDING",
+      "requirements": [
+        "REQ-02",
+        "REQ-04",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "operation": "overall.analyze",
+      "public_response_format": "jungsi.overall-analysis/v1",
+      "purpose": "기존 완전응답 교집합 모형과 공식 전체 응시자 분모의 추정 모형을 별도 형식으로 검증한다. 사용자가 지정한 전체 분모 자체와 모형 시나리오/운영 채택은 구분한다.",
+      "legacy_boundary": "jungsi.exam-total-model/v1·exam_population·complete-response population ID·pack.populationBounds·approved population_verified=true 검사는 그대로 유지한다. 원래 시험팩 bytes/버전/target_population은 수정하지 않는다. 같은 pack participants.total을 읽는 readonly getter만 추가한다.",
+      "strict_v2": "jungsi.exam-total-model/v2·official_all_examinees_estimate는 정확6필드 봉투와 닫힌27필드 population_policy, 기존 distribution3/metadata13/row2 필드만 허용한다. source/정책/시나리오 검수 해시를 필수로 검증하며 명시된 시나리오 외 기본 선택은 없다.",
+      "population_semantics": "population_id=official_all_examinees·kind=estimated_weights만 허용한다. official_total_verified=true와 joint_scores_observed=false·population_verified=false를 구분한다. 전체 modeled weight 합, 완전응답+결측모형 인원 합과 같은 시험팩 participants.total이 정확히 같아야 한다. complete는 모형 질량 완결이며 관측 공동분포 완결이 아니다. null/-1·결측모형 정책을 보존한다.",
+      "approval_boundary": "reference/synthetic 모형은 수치를 반환하지 않는다. approved에는 별도 scenario_selection_sha256가 필요하다. 형식 구현 수용은 base/lower/higher 시나리오 채택·원본 reference→approved 변경·registry/selection/runtime binding 또는 배포 승인이 아니다. 같은 공개 필드에서 estimated·population_id·model_version·data_kind와 정확 동점 포함/제외 구간을 반환한다.",
+      "saved_profile_transition": "report.read는 저장 snapshot을 읽고 계산하지 않는다. 기존 profile_id로 overall.analyze를 명시 호출하고 새 request key와 현재 report_id/expected_version을 보낸다. 같은 key의 과거 응답은 보존하며 새 분석은 새 report revision에 저장한다. 프로필/점수를 다시 저장하거나 입력권을 차감하지 않는다. 자료 채택에는 registry/selection/context 변경과 fresh head 검증이 필요하며 percentile DB head 변화만으로 캐시가 자동 갱신되지는 않는다.",
+      "installed032": "설치032의 세 파일 exact hash를 확인하는 v2 패치와 새 domain closure만 추가한다. consumer14·usage-v1·기존 응답/역할/소유권·입력권 경로를 유지한다. 최신 platform·REQ27/006a/25operation으로 전환하지 않는다.",
+      "envelope_fields": [
+        "format",
+        "exam_id",
+        "pack_version",
+        "basis",
+        "population_policy",
+        "distribution"
+      ],
+      "policy_fields": [
+        "format",
+        "population_id",
+        "denominator_basis",
+        "official_total",
+        "official_total_verified",
+        "joint_scores_observed",
+        "missing_scores",
+        "estimate_basis",
+        "complete_semantics",
+        "complete_response_profiles",
+        "model_imputed_profiles",
+        "observed_missing_value",
+        "internal_missing_sentinel",
+        "total_point_curve",
+        "imputation_kind",
+        "missing_domain_subject_choice",
+        "inquiry_one_subject_extra_score",
+        "rank_bounds",
+        "official_n_is_not_complete_subject_intersection",
+        "scenario_id",
+        "within_band_correlation",
+        "official_population_decision_sha256",
+        "source_model_config_sha256",
+        "source_curve_sha256",
+        "scenario_profiles_sha256",
+        "independent_validation_sha256",
+        "scenario_selection_sha256"
+      ],
+      "legacy_v1_source_sha256": "3d4d810703481517f8f60b0fc3efe2f3042deaf930e10a81d2f1e78214b21953",
+      "verification": {
+        "format": "jungsi.whole-population-v2-verification/v1",
+        "test_path": "supabase/functions/_shared/all_examinees_total_model_test.ts",
+        "test_count": 14,
+        "source_bindings": [
+          {
+            "path": "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts",
+            "sha256": "9e9210da291261207e6bd49969c22c62e9c7ee06c76edafa71bb9105fd4c821d"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts",
+            "sha256": "d5cc15329ad273d7434cab5be0e1cd9d2cb8ad585cbadb3d2a330a2820e864ab"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/overall_analysis.ts",
+            "sha256": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
+            "sha256": "6ab65854e39a2767385cb4fc2e5c6dca2fceac6647b271000b7df84a39b92bac"
+          },
+          {
+            "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
+            "sha256": "a8cb07a62412da503d6349afdc64d38781397c9339d5947f1cee5ea47253fae1"
+          },
+          {
+            "path": "supabase/functions/_shared/all_examinees_total_model_test.ts",
+            "sha256": "0bc56c4daec720a4989092bf2961f8c9829fbc341471852d4d8849d70f07fd7d"
+          }
+        ]
+      },
+      "model_adoption": "NOT_RUN",
+      "runtime_selection": "NOT_RUN",
+      "deployment": "NOT_RUN",
+      "production_ready": false
+    }
   },
   "backend_platform_contract": {
     "format": "jungsi.backend-platform/v1",

@@ -98,6 +98,7 @@ export function createCurrentPublicCatalogService(
       context.controls(),
     ]);
     const index = new CurrentPublicMetadataKeyIndex({
+      requiredFormat: "jungsi.current-public-key-index/v2",
       root: descriptor.key_index,
       metadataSha256: descriptor.metadata_sha256,
       guideCommandStateSha256: await nativeJsonSha256(

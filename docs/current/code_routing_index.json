@@ -1489,7 +1489,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "53038cb5760def5ed39fc3d777e44e6e8d42e28e3dbb1006a2967892d113fae8",
+      "source_sha256": "be95f6e82ac60a65bcaee2da119d155eb3f74a7a3b372e4307da16a1f5fe74e6",
       "symbols": [
         {
           "kind": "function",
@@ -1531,6 +1531,12 @@
           "kind": "function",
           "name": "run_workspace",
           "signature": "def run_workspace(root, manifest, deno, python, output):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "whole_population_registration",
+          "signature": "def whole_population_registration(spec, before):",
           "decorators": []
         }
       ]
@@ -6280,6 +6286,32 @@
     "verification": "whole_source_hash_not_type_or_runtime_proof",
     "files": [
       {
+        "path": "supabase/functions/_shared/all_examinees_total_model_test.ts",
+        "layer": "application",
+        "status": "synthetic_whole_population_v2_regression_only",
+        "requirements": [
+          "REQ-02",
+          "REQ-04",
+          "REQ-05",
+          "REQ-06",
+          "REQ-07",
+          "REQ-08",
+          "REQ-09",
+          "REQ-10",
+          "REQ-11",
+          "REQ-12",
+          "REQ-14",
+          "REQ-15",
+          "REQ-21",
+          "REQ-22",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "0bc56c4daec720a4989092bf2961f8c9829fbc341471852d4d8849d70f07fd7d",
+        "declared_exports": []
+      },
+      {
         "path": "supabase/functions/_shared/current_admission_display.ts",
         "layer": "application",
         "status": "implemented_current_cursor_exact_and_live_snapshot_namespace_verified",
@@ -6505,7 +6537,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog.ts",
         "layer": "application",
-        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
+        "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6516,7 +6548,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "9895946f7e869a79baa7aae0235aa869263ab70549c8ab31cce5dd52b3abbc13",
+        "source_sha256": "fca7478156569133496c272279cfa7456fb31eade328555913522f18204133e0",
         "declared_exports": [
           "CURRENT_PUBLIC_OPERATIONS",
           "parsePublicCatalogQuery",
@@ -6534,7 +6566,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
+        "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6545,17 +6577,20 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "e804eac38638d873558a921de21426616a0cb05c9daf27538144efa64b511cfe",
+        "source_sha256": "a8cb07a62412da503d6349afdc64d38781397c9339d5947f1cee5ea47253fae1",
         "declared_exports": [
           "CURRENT_PUBLIC_COMPAT_BASE",
           "CURRENT_PUBLIC_COMPAT_INPUTS",
-          "patchInstalled032CatalogSources"
+          "TOTAL_MODEL_V2_COMPAT_INPUTS",
+          "TOTAL_MODEL_V2_COMPAT_NEW_SOURCE",
+          "patchInstalled032CatalogSources",
+          "patchInstalled032TotalModelSources"
         ]
       },
       {
         "path": "supabase/functions/_shared/current_public_catalog_runtime.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
+        "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6566,7 +6601,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "f90086de63d7b97fcc620170edc855476f2b84884da4b33b55885af9121a83a4",
+        "source_sha256": "aec1271ff70afca89d3a323b54077295704527e995edae252735612ff05a9a08",
         "declared_exports": [
           "INSTALLED032_CONSUMER_OPERATIONS",
           "createCurrentPublicCatalogService"
@@ -6575,7 +6610,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog_sql.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
+        "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6586,7 +6621,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "dc53a8a1aaba061b3c2227cb104c463551988b5d7dceafdcc008141869d7faff",
+        "source_sha256": "b32cb672332eb4559260cbcd9d43b8434a694fd0d3c0e5ca2583befe0c6fd735",
         "declared_exports": [
           "CURRENT_PUBLIC_SOURCE_VIEWS",
           "CURRENT_PUBLIC_METADATA_SQL",
@@ -6607,7 +6642,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog_sql_test.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
+        "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6624,7 +6659,7 @@
       {
         "path": "supabase/functions/_shared/current_public_catalog_test.ts",
         "layer": "application",
-        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
+        "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6635,13 +6670,13 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "5d00de4c82041140d1c7fd112b4ace1621d2fad730487a852ad9a1d9b08826d8",
+        "source_sha256": "bd5cbac98db68f3739f85a43270ae8998c6744360fe970dea76054ba2802f8dd",
         "declared_exports": []
       },
       {
         "path": "supabase/functions/_shared/current_public_key_index.ts",
         "layer": "application",
-        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
+        "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6652,7 +6687,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "b4ab37c82fee4cf50105228d9aacb671419bd3f977b9e60c64e353bdd734a106",
+        "source_sha256": "e63c35f8c7e1014871bba2a5e737bea82481a6f2c9e1b2b2b76079ce8c58a928",
         "declared_exports": [
           "publicKeyRawHash",
           "CurrentPublicMetadataKeyIndex",
@@ -6662,7 +6697,7 @@
       {
         "path": "supabase/functions/_shared/current_public_key_index_test.ts",
         "layer": "application",
-        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
+        "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6673,13 +6708,13 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "2e8ceb963e8786266581168a5ba7a5c46a787e1a079a4d2de077366548c45562",
+        "source_sha256": "4a46a80ff93817ab893752a1f7b5f8da704283d8c1e62e3d673b44bb1abf3b97",
         "declared_exports": []
       },
       {
         "path": "supabase/functions/_shared/current_public_key_storage.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
+        "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -6698,7 +6733,7 @@
       {
         "path": "supabase/functions/_shared/current_public_key_storage_test.ts",
         "layer": "infrastructure",
-        "status": "candidate_public_provider_synthetic48_operating_NOT_RUN",
+        "status": "candidate_national_provider_synthetic54_hosted_activation_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-03",
@@ -7238,7 +7273,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "27c6634a7e0e98024e0f4ef5f0e42767dde3373837d32e290aa3ce54846c335e",
+        "source_sha256": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7",
         "declared_exports": [
           "OverallAnalysisService",
           "OverallDataPort",
@@ -7692,6 +7727,35 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts",
+        "layer": "application",
+        "status": "strict_separate_v2_synthetic14_adoption_and_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-02",
+          "REQ-04",
+          "REQ-05",
+          "REQ-06",
+          "REQ-07",
+          "REQ-08",
+          "REQ-09",
+          "REQ-10",
+          "REQ-11",
+          "REQ-12",
+          "REQ-14",
+          "REQ-15",
+          "REQ-21",
+          "REQ-22",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "9e9210da291261207e6bd49969c22c62e9c7ee06c76edafa71bb9105fd4c821d",
+        "declared_exports": [
+          "ALL_EXAMINEES_POPULATION_ID",
+          "NativeAllExamineesTotalModel"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/domain/conversion.ts",
         "layer": "application",
         "status": "implemented_synthetic_verified_runtime_NOT_RUN",
@@ -7776,7 +7840,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "1f168890ca9c22ac4f9939162b6af495ee8b2f1f418a4efb5864d8f7317c1dca",
+        "source_sha256": "d5cc15329ad273d7434cab5be0e1cd9d2cb8ad585cbadb3d2a330a2820e864ab",
         "declared_exports": [
           "ExamRow",
           "NativeExamAnalysis",
@@ -8230,7 +8294,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "5381ed632b7f13a2e9658c8fe3a771a6bbfa71717bba67ad0c642676f2175c9e",
+        "source_sha256": "6ab65854e39a2767385cb4fc2e5c6dca2fceac6647b271000b7df84a39b92bac",
         "declared_exports": [
           "NativeDataProvider",
           "NativeForecastInputs",

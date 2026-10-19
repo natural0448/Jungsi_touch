@@ -9,9 +9,11 @@ import {
 import {
   CurrentPublicMetadataKeyIndex,
   prepareCurrentPublicKeyIndex,
+  prepareCurrentPublicKeyIndexV2,
   type PublicKeyIndexBasis,
   type PublicKeyIndexEntry,
   type PublicKeyIndexPreparation,
+  publicKeyRawHash,
 } from "./current_public_key_index.ts";
 function assert(v: unknown, message = "assertion_failed"): asserts v {
   if (!v) throw new Error(message);
@@ -54,10 +56,21 @@ function item(i: number): PublicKeyIndexEntry {
     },
   };
 }
+function guideItem(i: number): PublicKeyIndexEntry {
+  const row = item(i);
+  return {
+    ...row,
+    key: [2027, row.key[1], row.key[2], "", `2027:${row.key[2]}`],
+    sourceKind: "guide",
+    nativeOfferingId: `2027:${row.key[2]}`,
+    expectedFingerprint: null,
+  };
+}
 async function setup(
   history: PublicKeyIndexEntry[],
   offerings: PublicKeyIndexEntry[] = [],
   lookups: PublicKeyIndexEntry[] = history,
+  compact = false,
 ) {
   const input: PublicKeyIndexPreparation = {
     history,
@@ -77,7 +90,8 @@ async function setup(
     },
     objectPrefix: "SYNTHETIC/keys/",
   };
-  const prepared = await prepareCurrentPublicKeyIndex(input),
+  const prepared =
+      await (compact ? prepareCurrentPublicKeyIndexV2(input) : prepareCurrentPublicKeyIndex(input)),
     basis: PublicKeyIndexBasis = {
       root: prepared.root,
       metadataSha256: input.metadataSha256,
@@ -102,6 +116,72 @@ async function setup(
     reads: () => reads,
   };
 }
+async function changedCompactObject(
+  f: Awaited<ReturnType<typeof setup>>,
+  change: (raw: Record<string, unknown>) => void,
+): Promise<CurrentPublicMetadataKeyIndex> {
+  const decode = (bytes: Uint8Array) => JSON.parse(new TextDecoder().decode(bytes));
+  const encode = (raw: unknown) => new TextEncoder().encode(nativeJsonText(raw, true));
+  const root = decode(f.prepared.objects.get(f.prepared.root.object_key)!);
+  const objects = f.prepared.objects as Map<string, Uint8Array>;
+  const prefix = Object.keys(root.lookups)[0], ref = root.lookups[prefix];
+  const raw = decode(f.prepared.objects.get(ref.object_key)!);
+  change(raw);
+  const bytes = encode(raw);
+  objects.set(ref.object_key, bytes);
+  root.lookups[prefix] = { ...ref, bytes: bytes.length, sha256: await publicKeyRawHash(bytes) };
+  const rootBytes = encode(root);
+  objects.set(f.prepared.root.object_key, rootBytes);
+  return new CurrentPublicMetadataKeyIndex({
+    ...f.basis,
+    root: { ...f.basis.root, bytes: rootBytes.length, sha256: await publicKeyRawHash(rootBytes) },
+  }, f.read);
+}
+Deno.test("compact lookup resolves 100 native IDs from a national-sized metadata set within eight reads", async () => {
+  const source = Array.from({ length: 24000 }, (_, i) => guideItem(i));
+  const f = await setup([], [], source, true);
+  const ids = source.slice(10000, 10100).map((row) => row.nativeOfferingId!);
+  const page = await f.reader.resolve(ids, true);
+  equal(page.keys.map((row) => row.nativeOfferingId), ids);
+  assert(f.reads() <= 9); // One pinned root plus at most eight bounded lookup objects.
+  assert([...f.prepared.objects.values()].every((bytes) => bytes.length <= 262144));
+  equal(page.keys[0].expectedFingerprint, null);
+});
+Deno.test("compact lookup rejects a signed object containing an invalid dictionary reference", async () => {
+  const row = guideItem(1), f = await setup([], [], [row], true);
+  const changed = await changedCompactObject(f, (raw) => {
+    (raw.entries as number[][])[0][6] = 999999;
+  });
+  await rejects(() => changed.resolve([row.nativeOfferingId!], false));
+});
+Deno.test("compact lookup rejects oversized signed tuples without widening its object budget", async () => {
+  const row = guideItem(1), f = await setup([], [], [row], true);
+  const changed = await changedCompactObject(f, (raw) => {
+    raw.entries = Array.from({ length: 4097 }, () => (raw.entries as number[][])[0]);
+  });
+  await rejects(() => changed.resolve([row.nativeOfferingId!], false));
+});
+Deno.test("compact preparation retains duplicate-ID and exact-coverage guards", async () => {
+  const row = guideItem(1), f = await setup([], [], [row], true);
+  const duplicate = [row, row];
+  const snapshot = await nativeJsonSha256({ history: [], offerings: [], lookups: duplicate });
+  await rejects(() =>
+    prepareCurrentPublicKeyIndexV2({
+      ...f.input,
+      lookups: duplicate,
+      coverage: {
+        ...f.input.coverage,
+        snapshot_sha256: snapshot,
+      },
+    })
+  );
+  await rejects(() =>
+    prepareCurrentPublicKeyIndexV2({
+      ...f.input,
+      coverage: { ...f.input.coverage, snapshot_sha256: "0".repeat(64) },
+    })
+  );
+});
 Deno.test("key index preparation is not DB-wide coverage or publication acceptance", async () => {
   const f = await setup([item(1)]);
   equal(f.prepared.status, "PREPARED_REQUIRES_EXTERNAL_COVERAGE_REVIEW");

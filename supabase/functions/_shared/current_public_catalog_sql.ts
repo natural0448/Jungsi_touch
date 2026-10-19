@@ -216,7 +216,7 @@ const schema = "jungsi_data_ingest",
   G = CURRENT_PUBLIC_SOURCE_VIEWS.offerings,
   R = CURRENT_PUBLIC_SOURCE_VIEWS.relations;
 const C = (x: string) => `COALESCE(${x},'') COLLATE "C"`;
-const offeringId = (alias: string) => `${alias}.offering_pk`;
+const offeringId = (alias: string) => `(${alias}.academic_year::text||':'||${alias}.offering_pk)`;
 const observationId = (alias: string) =>
   `('observation:'||encode(sha256(convert_to('current-public-observation|'||${alias}.academic_year::text||'|'||${alias}.canonical_result_id,'UTF8')),'hex'))`;
 const metadata = (alias: string, keys: readonly string[]) =>
@@ -234,12 +234,12 @@ const guideMeta = (a: string) =>
     "wildcard_group",
   ]);
 function guideWire(a: string, link = "'unrequested'::text"): string {
-  return `jsonb_build_object('release_id',${a}.release_id,'academic_year',${a}.academic_year,'school_id',${a}.school_id,'offering_pk',${a}.offering_pk,'university_code',${a}.university_code,'university',${a}.university,'department',${a}.department,'track',${a}.track,'recruit_group',${a}.recruit_group,'location',${a}.location,'campus',${a}.metadata->'campus','wildcard_group',${a}.metadata->'wildcard_group','quota_value',${a}.quota_value,'quota_literal_state',${a}.quota_literal_state,'metadata',${
+  return `jsonb_build_object('release_id',${a}.release_id,'academic_year',${a}.academic_year,'school_id',${a}.school_id,'offering_pk',${a}.offering_pk,'offering_id',(${a}.academic_year::text||':'||${a}.offering_pk),'university_code',${a}.university_code,'university',${a}.university,'department',${a}.department,'track',${a}.track,'recruit_group',${a}.recruit_group,'location',${a}.location,'campus',${a}.metadata->'campus','wildcard_group',${a}.metadata->'wildcard_group','quota_value',${a}.quota_value,'quota_literal_state',${a}.quota_literal_state,'metadata',${
     guideMeta(a)
   },'active_service',${a}.metadata->'active_service','practical_required',${a}.metadata->'practical_required','source_kind','current_guide','recruitment_link_status',${link})`;
 }
 const admissionWire = (a: string) =>
-  `jsonb_build_object('academic_year',${a}.academic_year,'school_id',${a}.school_id,'offering_pk',${a}.offering_pk,'university_code',${a}.university_code,'university',${a}.university,'department',${a}.department,'track',${a}.track,'recruit_group',${a}.recruit_group,'active_service',${a}.active_service,'canonical_result_id',${a}.canonical_result_id,'metric_kind',${a}.metric_kind,'statistic_label',${a}.statistic_label,'cohort',${a}.cohort,'metric_value_literal',${a}.metric_value_literal,'metric_value_json_type',${a}.metric_value_json_type,'metric_value_numeric',${a}.metric_value_numeric::text,'curation_fields',${
+  `jsonb_build_object('academic_year',${a}.academic_year,'school_id',${a}.school_id,'offering_pk',${a}.offering_pk,'offering_id',(${a}.academic_year::text||':'||${a}.offering_pk),'university_code',${a}.university_code,'university',${a}.university,'department',${a}.department,'track',${a}.track,'recruit_group',${a}.recruit_group,'active_service',${a}.active_service,'canonical_result_id',${a}.canonical_result_id,'metric_kind',${a}.metric_kind,'statistic_label',${a}.statistic_label,'cohort',${a}.cohort,'metric_value_literal',${a}.metric_value_literal,'metric_value_json_type',${a}.metric_value_json_type,'metric_value_numeric',${a}.metric_value_numeric::text,'curation_fields',${
     metadata(a + ".curation_fields", [
       "metric_definition",
       "unit",
@@ -415,15 +415,19 @@ export const CURRENT_PUBLIC_OFFERINGS_SQL = `WITH ${headCTE},page_offerings AS M
 } FROM ${G} g WHERE g.academic_year=ANY(ARRAY[2024,2025,2026,2027]) AND ${serviceGuide("g")} AND ${
   filters("g")
 } AND ($4::text='' OR lower(COALESCE(g.location,''))=$4::text) AND ${
-  after("g", "''::text", "g.release_id")
+  after("g", "''::text", offeringId("g"))
 }
- ORDER BY g.academic_year,${C("g.school_id")},${
-  C("g.offering_pk")
-},g.release_id COLLATE "C" LIMIT $11::integer
-),payload AS (SELECT g.academic_year AS year,COALESCE(g.school_id,'') AS school,g.offering_pk AS offering,''::text AS metric,g.release_id AS tie,
- jsonb_build_object('key',jsonb_build_array(g.academic_year,COALESCE(g.school_id,''),g.offering_pk,'',g.release_id),'row',${
+ ORDER BY g.academic_year,${C("g.school_id")},${C("g.offering_pk")},${
+  offeringId("g")
+} COLLATE "C" LIMIT $11::integer
+),payload AS (SELECT g.academic_year AS year,COALESCE(g.school_id,'') AS school,g.offering_pk AS offering,''::text AS metric,${
+  offeringId("g")
+} AS tie,
+ jsonb_build_object('key',jsonb_build_array(g.academic_year,COALESCE(g.school_id,''),g.offering_pk,'',${
+  offeringId("g")
+}), 'row',${guideWire("g")},'guide',${
   guideWire("g")
-},'guide',${guideWire("g")}) AS wire FROM page_offerings g) ${headSelect}`;
+}) AS wire FROM page_offerings g) ${headSelect}`;
 /** Prepared keys are private metadata; every value and guide body is reread in one DB snapshot. */
 const preparedKeysCTE = `page_keys AS MATERIALIZED (
  SELECT (v->'key'->>0)::integer AS academic_year,v->'key'->>1 AS school_id,v->'key'->>2 AS offering_pk,v->'key'->>3 AS metric_kind,v->'key'->>4 AS canonical_result_id,v->>'sourceKind' AS source_kind,v->>'nativeOfferingId' AS native_offering_id,v->>'expectedFingerprint' AS expected_fingerprint,v->'key' AS expected_key
@@ -447,7 +451,7 @@ export const CURRENT_PUBLIC_HISTORY_BY_KEYS_SQL =
     guideColumns("g")
   },k.expected_key,k.expected_fingerprint FROM page_keys k CROSS JOIN LATERAL (SELECT ${
     guideColumns("selected")
-  } FROM ${G} selected WHERE k.source_kind='guide' AND selected.academic_year=k.academic_year AND selected.offering_pk=k.offering_pk AND selected.release_id=k.canonical_result_id OFFSET 0) g WHERE ${
+  } FROM ${G} selected WHERE k.source_kind='guide' AND selected.academic_year=k.academic_year AND selected.offering_pk=k.offering_pk AND (selected.academic_year::text||':'||selected.offering_pk)=k.canonical_result_id OFFSET 0) g WHERE ${
     serviceGuide("g")
   }),
  payload AS (
@@ -493,7 +497,11 @@ missing_current AS MATERIALIZED (SELECT ${
     C("v.offering_pk")
   },v.canonical_result_id COLLATE "C" LIMIT 101),
 payload AS (
- SELECT g.academic_year AS year,COALESCE(g.school_id,'') AS school,g.offering_pk AS offering,''::text AS metric,g.release_id AS tie,jsonb_build_object('key',jsonb_build_array(g.academic_year,COALESCE(g.school_id,''),g.offering_pk,'',g.release_id),'row',${
+ SELECT g.academic_year AS year,COALESCE(g.school_id,'') AS school,g.offering_pk AS offering,''::text AS metric,${
+    offeringId("g")
+  } AS tie,jsonb_build_object('key',jsonb_build_array(g.academic_year,COALESCE(g.school_id,''),g.offering_pk,'',${
+    offeringId("g")
+  }), 'row',${
     guideWire("g", "g.link_status")
   }||jsonb_build_object('lookup_requested_id',g.requested_id),'guide',${
     guideWire("g", "g.link_status")

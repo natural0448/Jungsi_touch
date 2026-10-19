@@ -108,11 +108,31 @@ def current_public_registration(spec,before):
     tests=[prefix+n+'.ts'for n in names if n.endswith('_test')]
     bindings=c.get('source_bindings')
     if (c.get('format')!='jungsi.current-public-provider-verification/v1' or
-        c.get('test_paths')!=tests or c.get('test_count')!=48 or
+        c.get('test_paths')!=tests or c.get('test_count')!=54 or
         not isinstance(bindings,list) or len(bindings)!=len(required) or
         {b.get('path')for b in bindings}!=required or
         any(not isinstance(b.get('sha256'),str)or before.get(b['path'])!=b['sha256']for b in bindings)):
         raise EdgeFailure('current_public_source_or_test_binding_invalid')
+    return c
+
+def whole_population_registration(spec,before):
+    """Separate strict v2 regressions; keep the foundation and v1 checks exact."""
+    prefix='supabase/functions/_shared/'
+    test=prefix+'all_examinees_total_model_test.ts'
+    contract=spec.get('overall_analysis_contract',{}).get('whole_population_transition')
+    if contract is None:
+        if test in before:raise EdgeFailure('whole_population_contract_missing')
+        return None
+    c=contract.get('verification',{})
+    required={test,prefix+'current_public_catalog_compat.ts',*[prefix+'jungsi/'+p+'.ts'for p in
+      ['domain/all_examinees_total_model','domain/exam_pack','application/overall_analysis','infrastructure/native_data_provider']]}
+    bindings=c.get('source_bindings')
+    if (contract.get('format')!='jungsi.whole-population-model-transition/v1' or
+        c.get('test_path')!=test or c.get('test_count')!=14 or
+        not isinstance(bindings,list) or len(bindings)!=len(required) or
+        {b.get('path')for b in bindings}!=required or
+        any(not isinstance(b.get('sha256'),str)or before.get(b['path'])!=b['sha256']for b in bindings)):
+        raise EdgeFailure('whole_population_source_or_test_binding_invalid')
     return c
 
 def run_workspace(root,manifest,deno,python,output):
@@ -156,6 +176,18 @@ def run_workspace(root,manifest,deno,python,output):
           coverage='CURRENT_PUBLIC_PROVIDER_CANDIDATE_SYNTHETIC',
           source_bindings=public_registration['source_bindings'],
           actual_DB='NOT_VERIFIED_BY_SOURCE_SUITE',publication='NOT_APPROVED_BY_SOURCE_SUITE',deployment='NOT_RUN')
+    whole_population_unit=None
+    whole_population=whole_population_registration(spec,before)
+    if whole_population is not None:
+        whole_paths=[b['path']for b in whole_population['source_bindings']]
+        command([deno,'check',*common,*whole_paths],root=root,output=output,name='whole_population_check')
+        command([deno,'lint','--config',cfg['config'],*whole_paths],root=root,output=output,name='whole_population_lint')
+        command([deno,'fmt','--check','--config',cfg['config'],*whole_paths],root=root,output=output,name='whole_population_fmt')
+        whole_junit=output.resolve()/'whole_population_unit.junit.xml'
+        command([deno,'test',*common,'--reporter=dot','--junit-path',str(whole_junit),whole_population['test_path']],root=root,output=output,name='whole_population_unit')
+        whole_population_unit=dict(**parse_junit(whole_junit,whole_population['test_count']),
+          coverage='STRICT_WHOLE_POPULATION_V2_SYNTHETIC',source_bindings=whole_population['source_bindings'],
+          native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN')
     references=cfg["python_reference"]
     reference=dict(format="jungsi.edge-python-reference/v1",basis="selected_snapshot",
       files=references["files"],source_files={p:before[p] for p in [*paths,cfg["config"],cfg["oracle"]]},
@@ -174,6 +206,7 @@ def run_workspace(root,manifest,deno,python,output):
       oracle_receipt_sha256=digest(receipt_path.read_bytes()),tool=parsed["tool"],production_ready=False,operating_writes=0,**operation_registration(spec))
     if owner_unit is not None:result['owner_review_unit']=owner_unit
     if public_unit is not None:result['current_public_unit']=public_unit
+    if whole_population_unit is not None:result['whole_population_unit']=whole_population_unit
     write_new(output/"edge_run_receipt.json",json_bytes(result));return result
 def main():
     p=argparse.ArgumentParser(description=__doc__)

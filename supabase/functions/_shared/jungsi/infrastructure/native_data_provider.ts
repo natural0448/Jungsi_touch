@@ -20,6 +20,7 @@ import type {
 } from "../application/university_percentile.ts";
 import { NativeExamPack } from "../domain/exam_pack.ts";
 import { NativeExamTotalModel } from "../domain/total_model.ts";
+import { NativeAllExamineesTotalModel } from "../domain/all_examinees_total_model.ts";
 import { conversionBindingKey, NativeConversionRelease } from "../domain/conversion_release.ts";
 import { NativeUniversityScoreDistribution } from "../domain/university_distribution.ts";
 import {
@@ -516,7 +517,11 @@ export class NativeDataProvider
         examId + ":" + packVersion,
         "model_unverified",
         (raw, entry) => {
-          const model = new NativeExamTotalModel(raw);
+          const model = raw.format === "jungsi.exam-total-model/v2"
+            ? new NativeAllExamineesTotalModel(raw)
+            : raw.format === "jungsi.exam-total-model/v1"
+            ? new NativeExamTotalModel(raw)
+            : fail("model_unverified");
           if (
             model.examId !== examId || model.packVersion !== packVersion ||
             entry.distribution_id !== model.distributionId

@@ -276,6 +276,17 @@ export async function publicCatalogOfferingId(
     ![2024, 2025, 2026, 2027].includes(row.academic_year as number)
   ) fail("current_catalog_page_invalid");
   const id = String(row.offering_pk ?? "");
+  if (Object.hasOwn(row, "offering_id") && TEXT(row.offering_pk) && row.offering_pk) {
+    // The bounded DB projection addresses its original (academic_year, offering_pk) tuple.
+    // Raw PKs repeat across years; this address never implies a future-year lineage link.
+    const address = `${row.academic_year}:${id}`;
+    if (
+      !TEXT(row.offering_pk) || !row.offering_pk || !ID.test(address) || row.offering_id !== address
+    ) {
+      fail("current_catalog_page_invalid");
+    }
+    return address;
+  }
   if (TEXT(row.offering_pk) && row.offering_pk && ID.test(id)) return id;
   if (!TEXT(row.canonical_result_id) || !row.canonical_result_id) {
     fail("current_catalog_page_invalid");
@@ -284,11 +295,17 @@ export async function publicCatalogOfferingId(
     "current-public-observation|" + row.academic_year + "|" +
       row.canonical_result_id,
   );
-  return "observation:" +
+  const observation = "observation:" +
     Array.from(
       new Uint8Array(await crypto.subtle.digest("SHA-256", plain)),
       (x) => x.toString(16).padStart(2, "0"),
     ).join("");
+  if (
+    Object.hasOwn(row, "offering_id") && row.offering_id !== null && row.offering_id !== observation
+  ) {
+    fail("current_catalog_page_invalid");
+  }
+  return observation;
 }
 export async function publicCatalogOffering(
   row: NativeObject,
@@ -645,7 +662,7 @@ export class CurrentPublicCatalogService extends CatalogService {
         String(r.row.school_id ?? "") !== key[1] ||
         String(r.row.offering_pk ?? "") !== key[2] ||
         String(r.row.metric_kind ?? "") !== key[3] ||
-        String(r.row.canonical_result_id ?? r.row.release_id ?? "") !==
+        String(r.row.canonical_result_id ?? r.row.offering_id ?? r.row.release_id ?? "") !==
           key[4] ||
         last && comparePublicCatalogKeys(last, key) >= 0
       ) {
