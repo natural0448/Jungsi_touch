@@ -158,6 +158,21 @@ class RetainedGitHistoryTests(unittest.TestCase):
         adoption=self.commit(self.files(**{'src/jungsi_touch/application/platform.py':b'old implementation\n'}),(historic,))
         with patch.object(policy,'ROOT',self.repo):
             self.assertEqual(policy.validate_push_history('develop',first,adoption,self.spec),[])
+    def test_initial_governance_adoption_cannot_introduce_runtime_work(self):
+        old=deepcopy(self.spec);old['workflow'].pop('branch_governance')
+        first=self.commit(self.files(old))
+        adoption=self.commit(self.files(**{'src/jungsi_touch/application/platform.py':b'new runtime implementation\n'}),(first,))
+        with patch.object(policy,'ROOT',self.repo):
+            errors=policy.validate_push_history('develop',first,adoption,self.spec)
+            self.assertTrue(any('Direct planning change outside' in error for error in errors))
+    def test_initial_governance_adoption_validates_reserved_core_registry(self):
+        old=deepcopy(self.spec);old['workflow'].pop('branch_governance')
+        first=self.commit(self.files(old))
+        candidate=deepcopy(self.spec)
+        candidate['workflow']['branch_governance']['service_delegation_policy']['protected_paths']=[]
+        adoption=self.commit(self.files(candidate),(first,))
+        with patch.object(policy,'ROOT',self.repo):
+            self.assertTrue(policy.validate_push_history('develop',first,adoption,self.spec))
     def test_github_pr_enforces_parent_from_base_policy(self):
         first=self.commit(self.files())
         work=self.commit(self.files(**{'apps/web/src/app/page.tsx':b'synthetic screen\n'}),(first,))
@@ -525,5 +540,67 @@ class RetainedMergeScopeTests(unittest.TestCase):
         left,right=self.divergent();old=deepcopy(self.spec);old['workflow']['branch_governance'].pop('merge_scope_policy')
         staged=self.commit(self.files(old));self.stage(left,right,staged,merge_head=False)
         self.assertIn('Adopted merge scope policy cannot be removed',self.check(candidate=old))
+
+
+
+class FrontendServiceDelegationTests(unittest.TestCase):
+    def setUp(self):
+        self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
+        self.web=self.spec['workflow']['presentation_work_branch']
+        self.server=self.spec['workflow']['server_work_branch']
+        self.path='src/jungsi_touch/application/platform.py'
+        self.source=b'FACTOR = 2\nclass PlatformService:\n    def statistics(self, values):\n        return sorted(value * FACTOR for value in values)\n    def report(self):\n        return "old"\n'
+    def inspect(self,after,before=None):
+        return policy.validate_delegated_python_symbols(self.web,[self.path],self.spec,
+            lambda p:self.source if before is None else before,lambda p:after)
+    def test_screen_team_can_write_services_DTO_and_shared_HTTP_adapters(self):
+        paths=['database/README.md','src/jungsi_touch/application/screen_catalog.py','supabase/functions/_shared/jungsi/application/screen_report.ts',
+               'src/jungsi_touch/application/platform.py',*self.spec['workflow']['branch_governance']['service_delegation_policy']['shared_http_paths']]
+        self.assertEqual(policy.validate_staged(self.web,'presentation',[('M',p) for p in paths],self.spec),[])
+    def test_screen_team_cannot_edit_DB_or_calculation_core(self):
+        paths=['database/migrations/new.sql','src/jungsi_touch/university_conversion.py','src/jungsi_touch/application/overall_analysis.py',
+               'src/jungsi_touch/infrastructure/postgres_repository.py','supabase/functions/_shared/jungsi/domain/percentile.ts',
+               'supabase/functions/_shared/current_admission_owner_sql.ts','supabase/functions/_shared/jungsi/application/report_actions.ts']
+        for path in paths:
+            with self.subTest(path=path):
+                self.assertTrue(policy.validate_staged(self.web,'presentation',[('M',path)],self.spec))
+                self.assertTrue(policy.validate_pr(self.web,'develop',[('M',path)],self.spec))
+    def test_existing_system_owner_keeps_DB_and_engine_scope(self):
+        self.assertEqual(policy.validate_staged(self.server,'development',[('M','database/migrations/new.sql'),('M','src/jungsi_touch/percentile.py')],self.spec),[])
+    def test_registered_screen_child_has_same_boundary(self):
+        s=deepcopy(self.spec);name='feature/presentation-task/synthetic-services'
+        s['workflow']['branch_governance']['additional_branches'].append(dict(name=name,kind='presentation_task',owner='synthetic',parent=self.web,pr_target=self.web,status='active',temporary=True,purpose='test',base_commit='a'*40))
+        self.assertTrue(policy.validate_delegated_service_paths(name,['database/synthetic.sql'],s))
+        self.assertEqual(policy.validate_delegated_service_paths(name,['src/jungsi_touch/application/synthetic.py'],s),[])
+    def test_authorized_incoming_develop_core_is_not_a_direct_screen_edit(self):
+        changes=[('M','database/migrations/approved.sql'),('M','src/jungsi_touch/percentile.py')]
+        self.assertEqual(policy.validate_staged(self.web,'presentation',changes,self.spec,direct_changes=[('M','docs/current/service_spec.json')]),[])
+        self.assertTrue(policy.validate_staged(self.web,'presentation',changes,self.spec))
+    def test_screen_cannot_self_relax_ownership_registry(self):
+        candidate=deepcopy(self.spec);candidate['workflow']['branch_governance']['service_delegation_policy']['protected_paths']=[]
+        self.assertTrue(policy.delegation_policy_edit_errors(self.web,self.spec,candidate))
+        self.assertEqual(policy.delegation_policy_edit_errors('develop',self.spec,candidate),[])
+        candidate['workflow']['branch_governance'].pop('service_delegation_policy')
+        self.assertIn('Adopted service delegation policy cannot be removed',policy.delegation_policy_edit_errors(self.web,self.spec,candidate))
+    def test_missing_historical_governance_never_authorizes_a_new_feature_policy(self):
+        legacy={'workflow':{}}
+        self.assertEqual(policy.delegation_policy_edit_errors(self.web,legacy,legacy),[])
+        self.assertTrue(policy.delegation_policy_edit_errors(self.web,legacy,self.spec))
+    def test_non_calculation_service_body_in_mixed_file_is_editable(self):
+        self.assertEqual(self.inspect(self.source.replace(b'return "old"',b'return "new UI heading"')),[])
+    def test_calculation_body_cannot_change_under_service_authority(self):
+        changed=self.source.replace(b'value * FACTOR',b'value + FACTOR')
+        self.assertTrue(self.inspect(changed))
+    def test_calculation_global_binding_and_class_base_are_protected(self):
+        self.assertTrue(self.inspect(self.source.replace(b'FACTOR = 2',b'FACTOR = 3')))
+        self.assertTrue(self.inspect(self.source.replace(b'class PlatformService:',b'class PlatformService(NewBase):')))
+    def test_new_global_cannot_shadow_used_calculation_builtin(self):
+        self.assertTrue(self.inspect(self.source+b'\ndef sorted(value):\n    return []\n'))
+    def test_missing_or_unparseable_calculation_never_passes(self):
+        self.assertTrue(self.inspect(self.source.replace(b'def statistics(',b'def renamed(')))
+        self.assertTrue(self.inspect(b'broken ('))
+    def test_whitespace_and_comments_do_not_lock_mixed_file(self):
+        changed=self.source.replace(b'FACTOR = 2',b'FACTOR=2 # same meaning').replace(b'return sorted',b'# retained calculation\n        return sorted')
+        self.assertEqual(self.inspect(changed),[])
 
 if __name__=='__main__':unittest.main()
