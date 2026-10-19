@@ -25,3 +25,10 @@ export const SCORE_BASIS: Record<ScoreBasis, string> = {
 };
 
 export const scoreBasisLabel = (b: string | null | undefined) => (b && b in SCORE_BASIS ? SCORE_BASIS[b as ScoreBasis] : b ?? "");
+
+/**
+ * 전체 위치(총점 누백)가 비어 있을 때의 짧은 표시. total_model_missing 은 그 시험의 총점 분포 자료가
+ * 운영에 연결되지 않은 상태라(담당자 PR43 요청 2026-10-18) '계산 대기'처럼 계산이 진행 중이거나 기다리면
+ * 자동으로 끝난다는 인상을 주지 않는다. 다른 보류 코드는 지금 표시를 그대로 둔다(일괄 합치지 않음)
+ */
+export const overallWaitLabel = (code: string | null | undefined) => (code === "total_model_missing" ? "자료 연결 대기" : "계산 대기");

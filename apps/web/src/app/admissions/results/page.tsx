@@ -1,13 +1,12 @@
 import { ConnectionNotice } from "@/components/connection-notice";
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
 import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import type { CatalogSearchDto, HistoryMetricDto, RecruitmentDto } from "@/lib/dto";
-import { plainDate, signed } from "@/lib/format";
+import type { CatalogSearchDto, HistoryMetricDto } from "@/lib/dto";
+import { plainDate } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { lockFor, page } from "@/lib/routes";
 import { GROUPS, PATH, REGIONS, hrefWith, parseQuery, type Query } from "./query";
@@ -17,16 +16,19 @@ const route = page("PAGE-01");
 export const metadata: Metadata = { title: route.label };
 
 /*
-  목록의 축은 실제 발행된 2024~2026 입시결과다(1.9.12 지시). 학년도마다 한 번씩(각 정수 단일 요청,
-  limit 100 — 지표 행 기준) 조회하고, next_cursor 가 남으면 미수집 범위를 화면에 분명히 알린다.
-  숨은 전국 전량 읽기를 추가하지 않는다. 연도 묶음은 발표 자료의 같은 모집행 PK(offering_id)가
-  같을 때만 합치고, PK 접미사를 지워 계보를 추정하지 않는다. 2027 모집 인원 상자는 같은 PK 의
-  recruitment.read 가 ready 일 때만 채운다(2027 입결 placeholder 를 만들지 않는다).
+  목록의 축은 실제 발행된 2024~2026 입시결과다(1.9.12 지시). history.search 를 academic_year 없이
+  한 번에 읽는다(CR-P1-BOUNDED-READ-20261018-01 existing_option 채택, 기획 1.9.78~). 한 화면 조회는
+  최대 6쪽 × 지표 100개 = 600지표가 상한이고(이전 학년도별 합산과 같은 양이라고 하지 않는다),
+  next_cursor 가 남으면 '조회 미완료'로 알리고 마지막 미완전 모집행을 보류한다. 숨은 전국 전량 읽기를
+  추가하지 않는다. 받은 행의 원래 학년도·PK 를 그대로 쓰고 2024~2026 밖의 학년도(2027 등)는 입결 표에
+  넣지 않는다. 연도 묶음은 발표 자료의 같은 모집행 PK 가 같을 때만 합치고 접미사 계보를 추정하지 않는다.
+  2027 모집 정보: 과거 offering_id 는 2027 목표 모집행을 뜻하지 않고(year_mapping), 공개 history DTO 에는
+  검증된 목표 ID 필드가 없다 — 그래서 recruitment.read 를 부르지 않고 '연계 확인 전'으로 둔다.
 */
 const PAST_YEARS = [2026, 2025, 2024] as const;
 const LIMIT_PAST = 100;
-/** 학년도별 조회 예산(쪽 수). 예산 안에서 next_cursor 를 이어 받고, 넘치면 잘린 모집행을 버리고 미수집을 알린다 */
-const MAX_PAGES = 3;
+/** 한 화면 조회 예산(쪽 수, 학년도 합산). 예산 안에서 next_cursor 를 이어 받고, 넘치면 잘린 모집행을 버리고 미완료를 알린다 */
+const MAX_PAGES = 6;
 
 
 /**
@@ -34,14 +36,14 @@ const MAX_PAGES = 3;
  * 한 모집단위에서 2024~2026 발표 결과(경쟁률 포함)와 2027 모집 인원을 한 번에 본다.
  * 대학이 발표한 지표의 이름·정의·값·단위·척도·출처를 그대로 보이고, 자체 누적·예상 컷·개인 분석으로
  * 빈칸을 채우지 않는다(REQ-13: 미발표는 0 이 아니라 미발표). 개인 성적은 쓰지 않는다.
- * 응답 모양: history.search(catalog_search, items=history_metric) · recruitment.read — lib/dto.ts
+ * 응답 모양: history.search(catalog_search, items=history_metric) — lib/dto.ts. recruitment.read 는 검증된 2027 목표 ID 가 생길 때까지 부르지 않는다
  */
 export default async function Page({ searchParams }: PageProps<"/admissions/results">) {
   const head = (
     <PageHead
       kicker={`PAGE ${route.number}`}
       title={route.label}
-      desc="성적 입력 없이, 대학이 발표한 3개 학년도 입시결과와 올해 모집 인원을 한 번에 확인하세요."
+      desc="성적 입력 없이, 대학이 발표한 3개 학년도 입시결과를 한 번에 확인하세요. 올해 모집 인원은 모집행 연계가 확인된 곳에 함께 보여 드립니다."
       side={<Link prefetch={false} className="btn" href={page("PAGE-03").path}>내 성적으로 가능성 보기</Link>}
     />
   );
@@ -54,15 +56,16 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
 
   const cur = parseQuery(await searchParams);
   const base = { university_q: cur.university, department_q: cur.unit, region: cur.region, group: cur.group };
-  /** 한 학년도를 예산(MAX_PAGES×limit) 안에서 이어 받는다. 예산을 넘겨 잘린 꼬리 모집행은
-   *  지표 일부만 담겨 표·산술이 틀려 보일 수 있으므로 버리고(완전한 모집행만 표시) 미수집으로 알린다 */
-  async function searchYear(y: (typeof PAST_YEARS)[number]): Promise<{ items: HistoryMetricDto[]; ready: boolean; as_of: string | null; truncated: boolean }> {
+  /** 학년도를 정하지 않고 예산(MAX_PAGES×limit) 안에서 이어 받는다. 쪽은 순서대로 하나씩 받는다
+   *  (동시 조회는 계정당 승인 동시성을 넘긴다 — FE-LIVE-P1-CONCURRENCY-01). 예산을 넘겨 잘린 꼬리
+   *  모집행은 지표 일부만 담겨 표·산술이 틀려 보일 수 있으므로 버리고(완전한 모집행만 표시) 미완료로 알린다 */
+  async function searchAll(): Promise<{ items: HistoryMetricDto[]; ready: boolean; as_of: string | null; truncated: boolean }> {
     const items: HistoryMetricDto[] = [];
     let cursor: string | undefined;
     let ready = false;
     let as_of: string | null = null;
     for (let i = 0; i < MAX_PAGES; i++) {
-      const r: CatalogSearchDto<HistoryMetricDto> = await src.searchHistory(caller, { ...base, academic_year: y, cursor, limit: LIMIT_PAST });
+      const r: CatalogSearchDto<HistoryMetricDto> = await src.searchHistory(caller, { ...base, cursor, limit: LIMIT_PAST });
       if (r.status === "ready" && r.items !== null) ready = true;
       if (r.as_of) as_of = r.as_of;
       items.push(...(r.items ?? []));
@@ -72,21 +75,22 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
     const tail = items.at(-1)?.offering_id;
     return { items: items.filter((m) => m.offering_id !== tail), ready, as_of, truncated: true };
   }
-  let past: { items: HistoryMetricDto[]; ready: boolean; as_of: string | null; truncated: boolean }[];
+  let all: { items: HistoryMetricDto[]; ready: boolean; as_of: string | null; truncated: boolean };
   try {
-    // 학년도 순서대로 하나씩(동시 조회는 계정당 승인 동시성을 넘긴다 — FE-LIVE-P1-CONCURRENCY-01)
-    past = [];
-    for (const y of PAST_YEARS) past.push(await searchYear(y));
+    all = await searchAll();
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
     throw e;
   }
 
+  // 받은 행을 원래 학년도로 나눈다. 2024~2026 밖의 학년도(2027 모집행 등)는 입결 표에 넣지 않는다
+  const pastYear = (y: number): y is (typeof PAST_YEARS)[number] => (PAST_YEARS as readonly number[]).includes(y);
+  const past = [{ items: all.items.filter((m) => pastYear(m.academic_year)) }];
   // 발행된 과거 결과를 대학 → 모집행(PK 그대로) → 학년도로 묶는다. 최신 학년도의 행이 카드 머리가 된다
-  const anyReady = past.some((r) => r.ready);
-  const uncollected = PAST_YEARS.filter((_, i) => past[i].truncated);
-  const asOf = past.map((r) => r.as_of).filter(Boolean).sort().at(-1) ?? null;
+  const anyReady = all.ready;
+  const truncated = all.truncated;
+  const asOf = all.as_of;
   type Off = { id: string; first: HistoryMetricDto; years: Map<number, HistoryMetricDto[]> };
   const univs: { id: string; name: string; region: string | null; offerings: Off[] }[] = [];
   const byId = new Map<string, Off>();
@@ -106,13 +110,10 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
       if (!o) {
         byId.set(pk, (o = { id: pk, first: m, years: new Map() }));
         u.offerings.push(o);
-      }
+      } else if (m.academic_year > o.first.academic_year) o.first = m; // 서버 정렬과 무관하게 최신 학년도 행이 머리
       o.years.set(m.academic_year, [...(o.years.get(m.academic_year) ?? []), m]);
     }
   const units = univs.flatMap((u) => u.offerings);
-
-  // 올해 모집 인원은 표를 먼저 보여 준 뒤 모집단위마다 따로 채운다(RecruitSlot, Suspense).
-  // recruitment.read 가 요청당 2초 안팎이라 모두 기다리면 첫 화면이 20초 넘게 늦었다(2026-10-18)
 
   const filtered = Boolean(cur.university || cur.unit || cur.region || cur.group);
   const words = [cur.university, cur.unit].filter(Boolean).join(" · ");
@@ -156,16 +157,15 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
               {filtered && <Link href={hrefWith(cur, { university: undefined, unit: undefined, region: undefined, group: undefined })}>조건 지우기</Link>}
             </div>
 
-            {uncollected.length > 0 && (
+            {truncated && (
               <p className="rs-uncollected">
-                <b>{uncollected.join("·")}학년도</b> 결과는 일부만 조회됐습니다(학년도마다 {MAX_PAGES}쪽 × 지표 {LIMIT_PAST}개 예산으로 조회하며,
-                지표가 일부만 담긴 잘린 모집행은 표에서 뺐습니다). 대학명·학과명으로 조건을 좁히면 조회 범위를 줄일 수 있으나, 이 안내가 보이는 동안은 일부 조회입니다. 담기지 않은 결과는 미발표·자료 없음이 아닙니다.
+                <b>조회 미완료</b> — 결과의 일부만 조회됐습니다. 한 번에 최대 {MAX_PAGES}쪽 × 지표 {LIMIT_PAST}개(학년도 합산)까지 조회하며,
+                지표가 일부만 담긴 마지막 모집행은 표에서 뺐습니다. 대학명·학과명으로 조건을 좁히면 조회 범위를 줄일 수 있으나, 이 안내가 보이는 동안은 일부 조회입니다. 담기지 않은 결과는 미발표·자료 없음이 아닙니다.
               </p>
             )}
 
-
             {univs.length === 0 ? (
-              uncollected.length > 0 ? (
+              truncated ? (
                 /* FE-HISTORY-03S: 잔여 커서가 있는 동안은 빈 화면이어도 '없음'을 단정하지 않는다 —
                    예산 종료로 지표가 일부만 담긴 모집행을 보류해 카드가 0개일 수 있다 */
                 <section className="gate flat">
@@ -243,9 +243,8 @@ function UnitCard({ o, years }: { o: { id: string; first: HistoryMetricDto }; ye
           <b>{o.first.department}</b>
           <small>{[o.first.campus, o.first.track].filter(Boolean).join(" · ")}</small>
         </span>
-        <Suspense fallback={<span className="rs-rec wait">2027 모집 인원 불러오는 중</span>}>
-          <RecruitSlot offeringId={o.first.offering_id} />
-        </Suspense>
+        {/* 공개 history DTO 에 검증된 2027 목표 모집행 ID 가 없어 recruitment.read 를 부르지 않는다(year_mapping) */}
+        <span className="rs-rec wait">2027 모집행 연계 확인 전</span>
       </div>
       {metricCols.length === 0 ? (
         <p className="rs-wait">이 모집단위의 2024~2026학년도 발표 결과가 아직 없습니다.</p>
@@ -364,56 +363,6 @@ function UnitCard({ o, years }: { o: { id: string; first: HistoryMetricDto }; ye
         </div>
       )}
     </li>
-  );
-}
-
-/**
- * 2027 모집 인원 한 칸을 따로 불러온다. 2027 모집 인원은 같은 PK 의 최신 발행 학년도 offering_id 로 묻는다
- * (결합 키는 API id 가 아니다). 권한 거절은 빈칸(연계 확인 전), 연결 실패는 이 칸만 '연결 대기'로 둔다 —
- * 표 전체를 오류로 바꾸지 않고, 숫자를 지어내지 않는다. 동시 호출 수는 BFF 가 회원 등급별 상한으로 줄 세운다.
- */
-async function RecruitSlot({ offeringId }: { offeringId: string }) {
-  let rec: RecruitmentDto | null = null;
-  try {
-    rec = await source().readRecruitment(await getCaller(), offeringId);
-  } catch (e) {
-    if (e instanceof ConnectionError) return <span className="rs-rec wait">2027 모집 정보 연결 대기</span>;
-    rec = null;
-  }
-  return <RecruitLine rec={rec} />;
-}
-
-/** 2027 모집 인원 요약 한 줄. 미공개는 0 이 아니라 미공개(REQ-13).
- *  과거 모집행에 2027 연계가 확인되지 않은 것과 '2027 모집이 있는데 비공개'를 섞어 쓰지 않는다(1.9.13 지적).
- *  FE-HISTORY-02R: 응답 offering.academic_year 가 2027 일 때만 '2027 모집' 상자를 채운다 —
- *  recruitment.read 는 요청 모집행의 학년도를 그대로 돌려주므로, 과거 학년도 ready 응답을 2027 로 재명명하지 않는다 */
-function RecruitLine({ rec }: { rec: RecruitmentDto | null }) {
-  // FE-HISTORY-02S: 학년도·모집행 결속을 상태 문구보다 먼저 본다 — 2027 결속이 확인되지 않은 응답은
-  // ready/pending 을 가리지 않고 '연계 확인 전'. 과거·미확인 pending 을 '2027 미발행'으로 표시하지 않는다
-  if (!rec || rec.offering?.academic_year !== 2027)
-    return <span className="rs-rec wait">2027 모집행 연계 확인 전</span>;
-  if (rec.status !== "ready" || !rec.recruitment)
-    return <span className="rs-rec wait">2027 모집 정보 미발행</span>;
-  const x = rec.recruitment;
-  return (
-    <span className="rs-rec">
-      <b>2027 모집</b>
-      {x.final_count !== null ? (
-        <>
-          최종 <b className="num">{x.final_count}</b>명
-          {x.initial_count !== null && (
-            <small>
-              (최초 {x.initial_count}
-              {x.rollover_change !== null && x.rollover_change !== 0 ? ` ${signed(x.rollover_change)}` : ""})
-            </small>
-          )}
-          {x.count_status !== "confirmed" && <small className="warn">최종 미확정</small>}
-        </>
-      ) : (
-        <span className="wait">인원 미확정</span>
-      )}
-      {x.deadline && <small>· 원서마감 {plainDate(x.deadline)}</small>}
-    </span>
   );
 }
 

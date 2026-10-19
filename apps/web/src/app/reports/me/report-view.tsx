@@ -1,6 +1,6 @@
 import { AdvantageCell, plainReason, reasonText, ScoreCell, StatusCell } from "@/components/offering-parts";
 import type { OverallAnalysisDto } from "@/lib/dto";
-import { DATA_KIND } from "@/lib/analysis-labels";
+import { DATA_KIND, overallWaitLabel } from "@/lib/analysis-labels";
 import { AREA_LABEL } from "@/lib/exam";
 import { pctText } from "@/lib/format";
 import type { PickedItem } from "@/lib/report-ops";
@@ -8,7 +8,7 @@ import type { PickedItem } from "@/lib/report-ops";
 /* 2페이지 리포트의 전체 성적 부분 — 일반·유료 모두 보는 범위(REQ-02). 인쇄 화면도 같은 부품을 쓴다 */
 
 const PENDING: Record<string, string> = {
-  total_model_missing: "이 시험의 전체 누적 곡선이 아직 발행되지 않았습니다.",
+  total_model_missing: "이 시험의 전체 누백 분포 자료가 아직 서비스에 연결되지 않았습니다. 계산이 진행 중인 것이 아니며, 자료가 연결되면 이 자리에 표시됩니다. 같은 성적을 다시 저장할 필요는 없습니다.",
   total_model_not_approved: "전체 누적 곡선을 검수하고 있습니다.",
   score_outside_domain: "입력한 총점이 곡선의 검증 범위 밖이라 위치를 계산하지 않았습니다.",
 };
@@ -40,7 +40,7 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
           </>
         ) : (
           <>
-            <b className="wait">계산 대기</b>
+            <b className="wait">{overallWaitLabel(o.reason_code)}</b>
             <p className="tie">{(o.reason_code && PENDING[o.reason_code]) ?? "전체 위치를 계산할 자료가 아직 준비되지 않았습니다."} 총점과 과목 결과는 그대로 보입니다.</p>
           </>
         )}
@@ -140,7 +140,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
 
 const COMBO_PENDING: Record<string, string> = {
   combo_model_missing: "이 조합의 분포가 아직 발행되지 않았습니다",
-  total_model_missing: "분포 미발행",
+  total_model_missing: "전체 누백 분포 자료 연결 대기",
   total_model_not_approved: "분포 검수 중",
 };
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { pctText } from "@/lib/format";
+import { overallWaitLabel } from "@/lib/analysis-labels";
 import { examTypeLabel } from "@/lib/exam";
 import type { OverallAnalysisDto } from "@/lib/dto";
 import { page } from "@/lib/routes";
@@ -26,7 +27,7 @@ export function ScoreBasis({ overall, emptyText }: { overall: OverallAnalysisDto
         국·수·탐2 표준점수 합 <b className="num">{overall.total_standard_score}</b>
       </span>
       <span className="it">
-        전체 상위 <b className="num">{o.status !== "pending" && o.inclusive_top_percent ? `${pctText(o.inclusive_top_percent)}%` : "계산 대기"}</b>
+        전체 상위 <b className="num">{o.status !== "pending" && o.inclusive_top_percent ? `${pctText(o.inclusive_top_percent)}%` : overallWaitLabel(o.reason_code)}</b>
         {o.status === "estimated" && <span className="est">추정</span>}
       </span>
       <Link className="btn go" href={p2}>성적 바꾸기</Link>
