@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.80",
-  "source_sha256": "a0ed8ccb58011ed19e0f078cc31e865715e540dc2c4c64bc66b6eb55b2dc61f6",
+  "spec_version": "1.9.81",
+  "source_sha256": "c5819f059e1e6a5a7716c45c9f6a419ee0a6f78000d9ec3be00ec3581a004f59",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4145,7 +4145,7 @@
     },
     "current_review_connection": {
       "id": "DBD-06-CURRENT-ALL-REVIEW",
-      "status": "HOSTED_CURSOR_BUNDLE_REPORTED_DEPLOYED_FIRST_NEXT_PASS_FRONTDOOR_COOKIE_FIX_PENDING",
+      "status": "HOSTED_CURSOR_AND_FRONTDOOR_REFRESH_REPORTED_PASS_RESIDUAL_BRANCH_TESTS_OPEN",
       "human_scope": "frontend_team_and_administrators_review_first",
       "source_view": "jungsi_data_ingest.admission_results_current",
       "academic_years": [
@@ -6392,7 +6392,7 @@
       },
       "owner_whole_v3": {
         "format": "jungsi.owner-current-review-contract/v1",
-        "status": "HOSTED_CURSOR_BUNDLE_REPORTED_DEPLOYED_FIRST_NEXT_PASS_FRONTDOOR_COOKIE_FIX_PENDING",
+        "status": "HOSTED_CURSOR_AND_FRONTDOOR_REFRESH_REPORTED_PASS_RESIDUAL_BRANCH_TESTS_OPEN",
         "basis_commit": "45fcb44c1821c187816174fc90563f6e313bc423",
         "operation": "current.review.search",
         "route": {
@@ -6488,7 +6488,7 @@
         },
         "actual_DB": "PASS_SCOPED_EXACT_ID_SQL_AND_SAVED_DTO_WORKING_TREE_ONLY_NOT_FINAL_SNAPSHOT",
         "hosted_deployment": "OWNER_REPORTED_FINAL_BUNDLE_READBACK_MATCH_SOURCE_90eb30b_ACCEPTED_ee226b6",
-        "browser": "FRONTEND_REPORTED_FIRST_NEXT_PASS_AFTER_ROOT_COOKIE_REFRESH_DIRECT_JEONGSI_REFRESH_FIX_NOT_RUN",
+        "browser": "FRONTEND_REPORTED_DIRECT_EXPIRY_FIRST_NEXT_PASS_ROOT_FRESH_BROWSER_NOT_RUN",
         "engine_approved": false,
         "production_allowed": false,
         "actual_DB_evidence": {
@@ -6569,7 +6569,7 @@
           "receipt_sha256": "d16a383b2d32ae2d31e0702d87530f7a1176596ed208d61f0239b15a8416f3e5",
           "boundary": "prior_exact_ID_SQL_used_18_view_dependencies; final_guard_adds_direct_release_table_and_preserves_identical_payload_SQL_SHA"
         },
-        "deployment_progress_note": "화면팀의 2026-10-19 영수증을 수용했다. PR46의 최종90eb30b 번들(166028B/SHA89d60987)은 같은 함수에 교체 배포·코드 readback 일치로 보고됐고, 정문에서 수동 첫/다음 제한 범위와 비중복 연결이 통과했다. 이는 화면팀 실측 보고 수용이며 Root 새 브라우저 재실행은 NOT_RUN이다. 수정 후409의 safe reason은 binding_expiry_changed였고, /jeongsi 갱신 쿠키가 브라우저에 저장되지 않아 세션이 반복 갱신됐다는 화면팀 진단과 일반 첫 화면 방문 후 정상화 결과를 기록한다. 영구 수정 DEP-AUTH-COOKIE-01은 사용자 지정 화면 담당자가 맡는다. /jeongsi 직접 진입의 만료 갱신·최종 응답 Set-Cookie/동일 요청 SSR 전달·캐시 방지·첫/다음 검수 및 정확한 소스/배포 SHA 회신 전에는 완료로 처리하지 않는다. 기존 세션/승인 만료·head 변경409를 유지하며 승인 연장·Secrets/역할/JWT 정책 변경을 하지 않는다. 배포 직후 일시503 뒤 정상화는 보고됐으나 콜드스타트 원인은 미확정이다. 비승인 계정403·일반 전국 공급·REQ27 운영 활성화·보안3gate는 별도 미완료다.",
+        "deployment_progress_note": "화면팀 영수증에서 정문362a02b 수정과 운영6288d397 배포, 자연 만료 후 /를 거치지 않은 /jeongsi 진입의 쿠키 저장/다음 요청 재사용 및 첫/다음 범위 PASS를 보고했다. Root는 받은 영수증과 PR43 head11a346f/정확 CI2 및 e806 대비 화면 실행 코드 변경0을 확인했다. 정문 소스/운영 응답의 Root 독립 재실행은 NOT_RUN이다. FD-AUTH-02는 chunk/redirect/오류/fetch경로 no-store 미실측,04/05는 NOT_RUN,06은 비승인계정 NOT_RUN이며07은 원인 미확정 관찰이다. 임시 루트방문 대기는 최신 보고상 종료하고 기존 만료/head409·read-only 쿠키 소유권·Secrets/역할/승인을 유지한다. PR43은 Draft·미병합이며 CI 통과를 운영전체/보안3gate/전국공급/REQ27 인수로 확대하지 않는다.",
         "latest_receipt_intake": {
           "date": "2026-10-19",
           "frontend_worker_unchanged": "75e4a1dc",
@@ -6740,6 +6740,115 @@
           "candidate_status": "CURSOR_NORMALIZATION_AND_SAFE_REASON_SOURCE_CI_PASSED_NOT_DEPLOYED_INCIDENT_CAUSE_UNCONFIRMED"
         },
         "frontdoor_session_refresh_followup": {
+          "format": "jungsi.frontdoor-session-refresh-followup/v1",
+          "id": "DEP-AUTH-COOKIE-01",
+          "requirements": [
+            "REQ-24",
+            "REQ-25",
+            "REQ-26"
+          ],
+          "controls": [
+            "SEC-02",
+            "SEC-03",
+            "SEC-04",
+            "SEC-07",
+            "SEC-08"
+          ],
+          "owner": "external_frontend_owner_confirmed_by_user_20261019",
+          "layer": "presentation",
+          "source_scope": "EduTouch front-door /jeongsi proxy and response-cookie forwarding; external repository source not available in current connection",
+          "frontend_branch": "feature/presentation-foundation for Jungsi_touch BFF changes; EduTouch front-door source and deployed SHA to be supplied by frontend owner",
+          "paths": [
+            "/jeongsi",
+            "/jeongsi/*",
+            "/jeongsi/management/current-review"
+          ],
+          "status": "FRONTEND_REPORTED_DEPLOYED_DIRECT_EXPIRY_AND_PAGING_PASS_RESIDUAL_CASES_NOT_RUN",
+          "reported_failure": "Expired browser session refreshed per request through /jeongsi without cookie persistence, changing min(JWT expiry,approval expiry) cursor binding. Root-page refresh temporarily restored bounded paging.",
+          "invariants": [
+            "Keep exact cursor session/approval expiry and source head checks; do not ignore binding_expiry_changed or extend review approval",
+            "Verified refreshed session must reach the same request SSR/BFF and the browser final response",
+            "Forward all auth cookie chunks and options through rewrite/proxy/redirect; preserve existing secure cookie policy and private,no-store/cache prevention",
+            "Refresh before committing or streaming final response; do not replace the response and drop refreshed cookies",
+            "Do not repair this by changing JWT TTL,auth rate limits,Secrets,roles,paid rights or storage binding",
+            "Legitimate session expiry or source head change may require a fresh first page; never replay all ranges automatically",
+            "No tokens,cookies,JWT claims,cursor values or source data in logs or handoff"
+          ],
+          "acceptance": [
+            {
+              "id": "FD-AUTH-01",
+              "case": "Using an owner-controlled naturally expired or isolated approved test session, enter /jeongsi directly without visiting /",
+              "expected": "Refreshed cookie is persisted on final response and usable by subsequent request",
+              "status": "FRONTEND_REPORTED_PASS_DIRECT_NATURAL_EXPIRY"
+            },
+            {
+              "id": "FD-AUTH-02",
+              "case": "Same refreshed request reaches SSR and BFF, including rewrite/error/redirect paths",
+              "expected": "Fresh verified session propagated with all required Set-Cookie chunks/options and cache prevention; no repeated refresh caused by stale request cookie",
+              "status": "PARTIAL_REPORTED_REQUEST_RESPONSE_COOKIE_PASS_CHUNKS_REDIRECT_ERRORS_FETCH_NO_STORE_NOT_RUN"
+            },
+            {
+              "id": "FD-AUTH-03",
+              "case": "Same unexpired session and approved source heads, manual bounded first then next range",
+              "expected": "No binding_expiry_changed; disjoint ordered ranges; empty+cursor and unknown count semantics preserved",
+              "status": "FRONTEND_REPORTED_PASS_FIRST_NEXT_NO409"
+            },
+            {
+              "id": "FD-AUTH-04",
+              "case": "Actual JWT/approval expiry or canonical head change",
+              "expected": "Existing 401/403/409 fail-closed semantics remain; guide to fresh first page without extending approval",
+              "status": "NOT_RUN"
+            },
+            {
+              "id": "FD-AUTH-05",
+              "case": "Two bounded concurrent requests and invalid or revoked refresh session",
+              "expected": "No repeated refresh loop or unauthorized success; existing request controls and verified-user checks preserved",
+              "status": "NOT_RUN"
+            },
+            {
+              "id": "FD-AUTH-06",
+              "case": "Unapproved account and no-relay/no-JWT negative checks",
+              "expected": "Existing scoped access denied; front-door gate limitation recorded separately",
+              "status": "PARTIAL_REPORTED_NO_RELAY403_NO_JWT401_UNAPPROVED_ACCOUNT_NOT_RUN"
+            },
+            {
+              "id": "FD-AUTH-07",
+              "case": "Transient current_review_db_unavailable",
+              "expected": "Safe 503 without repeated load or implied cold-start root-cause proof; recovery and request identifiers retained privately",
+              "status": "REPORTED_OBSERVATION_PASS_CAUSE_UNCONFIRMED"
+            }
+          ],
+          "required_reply": [
+            "exact front-door source commit and deployed version/time",
+            "changed proxy/middleware/response-cookie paths and pinned framework/SSR package versions",
+            "sanitized acceptance case O/X/NOT_RUN with request correlation only",
+            "final no-store and no secret exposure evidence",
+            "confirm cursor/approval expiry,Secrets,JWT settings and roles unchanged"
+          ],
+          "references": [
+            {
+              "title": "Supabase server-side cookie propagation",
+              "url": "https://supabase.com/docs/guides/auth/server-side/creating-a-client"
+            },
+            {
+              "title": "Supabase SSR refresh and caching",
+              "url": "https://supabase.com/docs/guides/auth/server-side/advanced-guide"
+            },
+            {
+              "title": "NextResponse final response cookies/rewrite",
+              "url": "https://nextjs.org/docs/app/api-reference/functions/next-response"
+            }
+          ],
+          "production_ready": false,
+          "frontdoor_source_commit": "362a02b208041b091eaa8c90197473ef61d0c1cc",
+          "frontdoor_deployment": "6288d397-9afb-44ed-83aa-d370e0501300",
+          "source_evidence": "EXTERNAL_RECEIPT_NOT_ROOT_UPSTREAM_REPOSITORY_READBACK",
+          "frontend_source_commit": "11a346f6b162c926b3792e4a9837e865c156266d",
+          "deployed_frontend_source_unchanged": "e806aafea348c14d0c127858c48153beeb3cebec",
+          "external_receipt_sha256": "fbcbea388bd732fcd2643ed480b7040a61fbc694038fa61150bc04ed11239231",
+          "temporary_root_visit_workaround": "NO_LONGER_NEEDED_BY_FRONTEND_DIRECT_EXPIRY_REPORT"
+        },
+        "historical_cookie_followup_before_latest_receipt": {
           "format": "jungsi.frontdoor-session-refresh-followup/v1",
           "id": "DEP-AUTH-COOKIE-01",
           "requirements": [

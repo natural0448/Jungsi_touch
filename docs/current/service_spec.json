@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.80",
+  "version": "1.9.81",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -1793,7 +1793,7 @@
         "supabase/functions/_shared/jungsi/domain",
         "supabase/functions/_shared/jungsi/application"
       ],
-      "responsibility": "현재 개발팀의 서버 권한·검증·계산·API 계약과 애플리케이션 소유 공급/저장 포트. 프레젠테이션과 구체 Drive/DB 어댑터에 의존하지 않는다.",
+      "responsibility": "기존 DB·산출 담당의 보호 엔진/산출 본체와 화면팀도 작성하는 서버 서비스 함수·입력 검증·조회/조합·DTO/API·애플리케이션 소유 포트. 작성 팀과 무관하게 구체 DB/Drive·프레젠테이션에 직접 의존하지 않는다.",
       "allowed_dependencies": [
         "application_ports",
         "domain_engine"
@@ -5272,7 +5272,7 @@
           "parent": "develop",
           "pr_target": "develop",
           "status": "active",
-          "scope": "시스템·콘텐츠 계약, 애플리케이션, 엔진, 인증/API, DB·Drive 인프라. 기존 이름을 상시 재사용."
+          "scope": "사용자 주도 DB·정본/저장소·산출 본체와 시스템 서비스. 화면팀과 서비스 함수 공동 개발; DB/산출 소유권 유지."
         },
         {
           "name": "feature/presentation-foundation",
@@ -5281,7 +5281,7 @@
           "parent": "develop",
           "pr_target": "develop",
           "status": "active",
-          "scope": "화면 구성·입력·이동·노출·인쇄와 허용 API 표시. PR #6의 head와 이름 보존."
+          "scope": "화면·BFF와 허용 서비스/애플리케이션 함수·DTO/API 흐름 공동 개발. DB/산출 보호 범위 제외. 기존 상시 브랜치 재사용."
         }
       ],
       "additional_branches": [
@@ -5458,7 +5458,7 @@
       "sync_rule": "origin/develop의 최신 기획·HEAD를 확인해 자기 상시 브랜치에 일반 merge로 가져온다. 충돌은 해당 담당이 현재 공통 명세와 코드 변경 범위로 해결한다. 다른 체크아웃을 reset하거나 원자료를 재집계하지 않는다.",
       "merge_rule": "임시 개발 작업은 등록된 직계 부모에 먼저 PR한다. 일반적으로 부모는 담당 상시 브랜치이며 기존 PR #9처럼 등록한 임시 부모가 있으면 그 단계를 따른다. 상시 시스템/화면 브랜치는 develop에 PR한다. 최종 main PR은 develop에서만 연다. GitHub 병합은 merge commit으로 수행해 상시 브랜치의 이력을 이어 간다.",
       "lifecycle_rule": "기본 노드는 상시 4개뿐이다. 임시 작업은 등록 후 필요할 때만 만들며 종료 시 status=retired_merged와 병합 PR/커밋을 기록한다. 브랜치 ref·로컬 파일·worktree·캐시·잠금 파일 삭제는 자동화하지 않는다. 삭제 대상·범위를 사용자에게 명시해 허용받기 전 보존한다.",
-      "review_rule": "develop의 기획/계약 최종 검토와 통합 조율은 시스템기획팀이 담당한다. 두 개발자는 담당 브랜치에서 작업한다. 계약 변경에는 작업 요구사항·API·DTO·소유권·계층과 변경 검증을 같은 커밋에 포함한다. 상시 브랜치 간 직접 병합으로 develop을 우회하지 않는다. REQ-24~26·보안 개발기준은 모든 구현의 필수 참조이며 보안 gate/operation/증거 누락은 인수하지 않는다.",
+      "review_rule": "develop의 기획/계약 최종 검토와 통합 조율은 시스템기획팀이 담당한다. 두 개발자는 담당 브랜치에서 작업한다. 계약 변경에는 작업 요구사항·API·DTO·소유권·계층과 변경 검증을 같은 커밋에 포함한다. 상시 브랜치 간 직접 병합으로 develop을 우회하지 않는다. REQ-24~26·보안 개발기준은 모든 구현의 필수 참조이며 보안 gate/operation/증거 누락은 인수하지 않는다. 2026-10-19 서비스 함수 공동 개발은 service_delegation_policy를 따른다. 허용 기능은 함수별 사전 승인 없이 화면팀이 구현하고 정상 PR로 통합한다.",
       "github_settings": {
         "default_branch": "main",
         "allow_merge_commit": true,
@@ -5718,6 +5718,84 @@
           "default_and_record_unchanged": true,
           "meaning": "기본deny·고정source/최초origin/단회소비/선행등록은유지한다. 관측기록은새삭제승인이나다른경로허용이아니다."
         }
+      },
+      "service_delegation_policy": {
+        "format": "jungsi.frontend-service-delegation/v1",
+        "decision_date": "2026-10-19 사용자 지시",
+        "developer_branch": "feature/presentation-foundation",
+        "frontend_owner": "화면구현팀(서비스 함수 공동 개발)",
+        "reserved_owner": "사용자 주도 기존 DB·산출 담당 / feature/application-pre-data-platform",
+        "requires_per_function_prior_approval": false,
+        "normal_PR_review_required": true,
+        "allowed_work": "기존 승인 저장소 포트·엔진 결과를 이용하는 서버 조회·조합·업무 흐름·입력 검증·오류 매핑·DTO·공개 응답/경로·표시용 파생값을 직접 신규 작성·수정한다. 표시용 단위·상태·문자열·페이지 건수와 승인된 기존 표시 추정식을 재사용하며 새로운 환산·누백·분포·지원판정 산출을 만들지 않는다.",
+        "reserved_work": "DB 스키마/마이그레이션·SQL·실저장소/공급 어댑터·정본/발행 writer 및 수능/대학 환산·누백·동등화·분포/모형·지원판정 산출 본체·가중치와 집단/동점 정의.",
+        "autonomy_rule": "허용 서비스 함수는 매 함수별 사전 승인 없이 기존 화면 브랜치에서 자율 개발한다. 코드·명세·라우팅·검증을 같은 커밋에 포함해 develop PR로 통합한다. 정본 기획/공통 검사 직접 수정은 기획팀이 담당하고, 기능 계약 변경 제안은 해당 feature PR에 함께 둔다. 새 DB/산출 본체 작업이 필요할 때만 기존 담당 범위로 인계한다.",
+        "runtime_boundary": "개발자 권한과 실행 계층을 구분한다. 화면팀이 작성한 서비스 함수도 서버 application에서 승인된 포트와 엔진을 이용한다. 브라우저 DB/비공개 모형 접근, 실제 값 하드코딩, 결측의0/ready 치환,인증·소유권·입력권·멱등·예산·relay·응답 허용목록 우회를 허용하지 않는다. DB/Secrets/역할/운영 승인 권한을 새로 부여하지 않는다.",
+        "mixed_file_rule": "혼합 Python platform.py의 서비스 조회/조합/DTO는 공동 수정하되 PlatformService.statistics의 산출 AST·참조 전역 바인딩·클래스 기반은 유지한다. TypeScript report_actions/paid_result_components와 산출 혼합 본체는 현 보호 파일로 유지하고 화면 확장은 별도 application 서비스 함수에서 기존 포트/엔진을 호출한다. 기존 승인 표시 추정식의 계약은 유지한다.",
+        "same_snapshot_rule": "최신 검증 develop부터 변경 범위만 확인하고 기획·라우팅·요구사항·권한/소유권·계층·검증 상태를 같은 명세/커밋에서 일치시킨다. 정상 pre-commit/pre-push·정확 SHA CI·기존 보안/데이터 제외 검사를 유지한다.",
+        "protected_prefixes": [
+          "database/",
+          "src/jungsi_touch/infrastructure/",
+          "supabase/functions/_shared/jungsi/domain/",
+          "supabase/functions/_shared/jungsi/infrastructure/"
+        ],
+        "protected_globs": [
+          "*.sql",
+          "supabase/functions/**/*_sql.ts",
+          "supabase/functions/**/*_postgres.ts",
+          "supabase/functions/**/postgres_pool.ts"
+        ],
+        "protected_paths": [
+          "src/jungsi_touch/admission_result_percentile.py",
+          "src/jungsi_touch/application/estimated_population.py",
+          "src/jungsi_touch/application/forecast_assessment.py",
+          "src/jungsi_touch/application/forecast_policy.py",
+          "src/jungsi_touch/application/offering_analysis.py",
+          "src/jungsi_touch/application/overall_analysis.py",
+          "src/jungsi_touch/application/university_percentile.py",
+          "src/jungsi_touch/application/university_scoring.py",
+          "src/jungsi_touch/estimated_curves.py",
+          "src/jungsi_touch/estimated_fitting.py",
+          "src/jungsi_touch/estimated_profiles.py",
+          "src/jungsi_touch/estimated_validation.py",
+          "src/jungsi_touch/exam_pack.py",
+          "src/jungsi_touch/forecasting.py",
+          "src/jungsi_touch/joint_distribution.py",
+          "src/jungsi_touch/percentile.py",
+          "src/jungsi_touch/percentile_cli.py",
+          "src/jungsi_touch/profile_percentile.py",
+          "src/jungsi_touch/reference_curve.py",
+          "src/jungsi_touch/reported_score_mapping.py",
+          "src/jungsi_touch/school_screening.py",
+          "src/jungsi_touch/university_conversion.py",
+          "src/jungsi_touch/year_comparison.py",
+          "src/jungsi_touch/year_equating.py",
+          "supabase/functions/_shared/current_review_model_codec.ts",
+          "supabase/functions/_shared/current_review_model_validation.ts",
+          "supabase/functions/_shared/jungsi/application/forecast_assessment.ts",
+          "supabase/functions/_shared/jungsi/application/forecast_calculation.ts",
+          "supabase/functions/_shared/jungsi/application/offering_analysis.ts",
+          "supabase/functions/_shared/jungsi/application/overall_analysis.ts",
+          "supabase/functions/_shared/jungsi/application/paid_result_components.ts",
+          "supabase/functions/_shared/jungsi/application/report_actions.ts",
+          "supabase/functions/_shared/jungsi/application/university_percentile.ts",
+          "supabase/functions/_shared/jungsi/application/university_scoring.ts"
+        ],
+        "shared_http_paths": [
+          "src/jungsi_touch/infrastructure/http_api.py",
+          "src/jungsi_touch/infrastructure/secured_http.py",
+          "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+          "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts"
+        ],
+        "protected_python_symbols": {
+          "src/jungsi_touch/application/platform.py": [
+            "PlatformService.statistics"
+          ]
+        },
+        "enforcement_limits": "로컬 훅/CI는 등록 경로·보호 Python 산출 AST/바인딩·정본 소유 정책을 검사하며 승인된 develop 인입을 새 화면 변경과 구분한다. TypeScript 혼합 본체는 파일 단위로 보호한다. 이는 GitHub 계정/DB 권한 분리나 모든 의미 변경의 자동 증명이 아니다. 공통 명세·보안/3티어·회귀 검토를 유지한다. 정책 변경은 기획 develop에서만 하고 기존 브랜치·원본·파일은 삭제하지 않는다.",
+        "shared_document_paths": [
+          "database/README.md"
+        ]
       }
     },
     "synchronized_work_items": {
@@ -5736,7 +5814,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.80",
+        "contract_version": "1.9.81",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -5910,7 +5988,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.80",
+        "contract_version": "1.9.81",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -6076,7 +6154,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.80",
+        "contract_version": "1.9.81",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6095,7 +6173,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.80",
+        "contract_version": "1.9.81",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6120,7 +6198,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.80",
+        "contract_version": "1.9.81",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6145,7 +6223,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.80",
+        "contract_version": "1.9.81",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -6417,7 +6495,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "9ebb570259840bbab8d6ec1cbb10963f66f60c8c415ae21518f58d3ccc0256c7",
+            "source_sha256": "da4f5ed3da6639c949c273b2cf82df45904d0485e4404dec229618eff2fa45e9",
             "symbols": [
               {
                 "kind": "class",
@@ -6517,6 +6595,12 @@
               },
               {
                 "kind": "function",
+                "name": "delegation_policy_edit_errors",
+                "signature": "def delegation_policy_edit_errors(branch, trusted, candidate):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "deletion_record",
                 "signature": "def deletion_record(spec):",
                 "decorators": []
@@ -6571,6 +6655,12 @@
               },
               {
                 "kind": "function",
+                "name": "service_delegation",
+                "signature": "def service_delegation(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "staged_merge_head",
                 "signature": "def staged_merge_head():",
                 "decorators": []
@@ -6579,6 +6669,30 @@
                 "kind": "function",
                 "name": "unresolved_markers",
                 "signature": "def unresolved_markers(conflicts, revision=None):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_delegated_python_symbols",
+                "signature": "def validate_delegated_python_symbols(branch, paths, spec, read_before, read_after):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_delegated_python_symbols.protected",
+                "signature": "def protected(raw):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_delegated_python_symbols.protected.visit",
+                "signature": "def visit(node, prefix=''):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_delegated_service_paths",
+                "signature": "def validate_delegated_service_paths(branch, paths, spec):",
                 "decorators": []
               },
               {
@@ -6627,6 +6741,12 @@
                 "kind": "function",
                 "name": "validate_push_history",
                 "signature": "def validate_push_history(branch, before, after, spec, *, team=None, local=False):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_service_delegation",
+                "signature": "def validate_service_delegation(spec):",
                 "decorators": []
               },
               {
@@ -6789,7 +6909,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "ffee09aef1383b2e4e40381fa26fcccfc5fab59906afafc68b230751bcd78a43",
+            "source_sha256": "6f7711a3aee008d353b7c6d060e4d552563b55f5fe880f4e26af832cce262b8b",
             "symbols": [
               {
                 "kind": "class",
@@ -7047,6 +7167,12 @@
                 "kind": "function",
                 "name": "security_reference",
                 "signature": "def security_reference(spec, link):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "service_delegation_section",
+                "signature": "def service_delegation_section(spec):",
                 "decorators": []
               },
               {
@@ -15124,6 +15250,12 @@
           "PR46 source90eb30b/develop ee226b6 · 기획1.9.80",
           "최종 번들 readback·첫/다음 범위 PASS 보고 영수증 수용; Root 로컬 번들 hash 대조",
           "DEP-AUTH-COOKIE-01은 사용자 지정 화면 담당자가 수정·배포·직접 만료 갱신 검수 후 SHA 회신. 임시 루트방문 정상화와 영구수정을 구분하고 기존 만료409·최대승인·Secrets·REQ27 미활성화를 유지한다."
+        ],
+        [
+          "화면팀 / 서비스 함수 공동 개발과 정문 쿠키 후속",
+          "기획1.9.81 / 사용자2026-10-19 범위 위임",
+          "정문362a02b/운영6288d397 직접만료·paging 보고 수용; PR43 head11a CI2·화면code0 확인",
+          "화면팀은 허용 application 서비스/DTO/API를 기존 브랜치에서 자율 개발한다. DB/산출 본체·혼합 통계는 보호하고 정상 문서/계층/보안/hook/CI를 유지한다. 쿠키 분기02/04/05/06 잔여와 전체 운영 gate는 별도다."
         ]
       ],
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
@@ -15179,7 +15311,7 @@
     "spec1.9.29 current 최종 개발 후보: source6/native41·source-only 번들 기동은 PASS지만 실제 filtered/count/page-key와 전체 payload는 기존5초에서57014 FAIL이다. 같은 전체SQL 재시도·JIT 설정·고정연도 IN 진단을 운영 해결책으로 채택하지 않는다. 정본 교정 의미·RLS·정확 count·단일 bounded JOIN·행 보존을 유지하는 경량조회/projection·색인 공급자 변경 CR과 실제 성능 PASS가 필요하다. 신규 목적승인/PIN4/배포/실JWT/BFF/브라우저/보안3gate는 NOT_RUN이며 기존C/22API·기본이용권·falseflags를 유지한다.",
     "DEP-IO-01: 사용자 제공 Supabase 디스크 I/O 예산 경고로 추가 I/O 집약 DB 작업은 HOLD한다. 실제 I/O 예산 회복·작업 중첩·부하 원인은 아직 확인하지 않았으며 57014와의 인과를 확정하지 않는다. 개발팀은 성능CR의 초기 구축/증분 갱신·유한 배치·중단 조건을 파일로 준비하고, 데이터팀은 진행 중 작업의 안전한 체크포인트를 정리한다. 실제 성능 검수·대량복사·전체 재적재·VACUUM·새 read model DB 구축은 NOT_RUN이며 source/local synthetic/Git 검수만 계속한다.",
     "spec1.9.31: 전수 검수 API 후보의 source/docs는 PR23으로 develop에 정상 통합되고 853+853/native41/번들/독립 검토/CI273·274가 PASS했다. 실제 전수 payload·집계는 기존5초에서57014 FAIL/성공페이지0이며 I/O 집약 실제DB 작업은 DEP-IO-01 HOLD다. 조회 모델 CR 문서의 타입/FK·봉인lineage·정확bytecodec·완전dependency 영향명부를 보완하고 독립 기술 검토·실제 I/O 재개 조건·Owner 적용범위를 갖춰야 한다. 새로운 승인/PIN4/DB구축/함수배포/실JWT/BFF/브라우저/보안3gate·일반회원 공개는 NOT_RUN이다.",
-    "DEP-AUTH-COOKIE-01: 화면 담당자의 /jeongsi 갱신 쿠키 최종응답/동일요청 SSR 전달 수정·정확 소스/배포 SHA·직접 만료갱신 및 첫/다음 제한 검수 대기. 커서 함수 교체/임시 루트방문 후 PASS 보고와 영구수정을 구분하며 세션/승인 만료·source head409는 유지한다."
+    "DEP-AUTH-COOKIE-01: 정문 수정/직접 자연만료·첫다음 PASS는 화면팀 보고 수용. chunk/redirect/오류/fetch no-store,실제만료/head·동시성/회수·비승인계정 잔여 NOT_RUN을 유지한다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -17079,6 +17211,17 @@
       "summary": "spec1.9.80: 화면팀 최종90eb 커서함수 배포/readback·첫다음 제한 범위 PASS 보고를 수용하고 이전 Root409 재현 이력을 보존한다. binding_expiry_changed와 /jeongsi 반복갱신 쿠키미저장 보고는 화면 담당자 영구수정 DEP-AUTH-COOKIE-01로 분리한다. 임시 루트방문 정상화·일시503원인 미확정·Root 재실행NOT_RUN과 비승인403/보안3gate/전국공급/REQ27 미완료를 유지한다. API코드·만료·헤드·Secrets·자료·DB변경0."
     },
     {
+      "date": "2026-10-19",
+      "requirements": [
+        "REQ-16",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "spec1.9.81: 사용자 지시에 따라 화면팀에 서버 서비스 함수 공동 개발 권한을 위임한다. 기존 DB·산출 소유권/3티어/보안 유지,함수별 사전승인 없이 기존 화면 branch→develop PR. 보호 경로·혼합 Python 산출 AST·신뢰된 정책/merge 동기화를 검사하고 문서생성 --write의 미정의 snapshot NameError를 수정한다. 정문수정/자연만료 paging 보고와 PR43 11a CI2·화면코드불변을 수용하되 잔여분기/실운영 인수는 구분한다."
+    },
+    {
       "date": "2026-10-13",
       "requirements": [
         "REQ-01"
@@ -17437,7 +17580,7 @@
   },
   "collaboration": {
     "integration_branch": "develop",
-    "description": "기획 정본은 시스템기획팀이 develop에서 직접 관리·배포한다. 실제 개발은 시스템·콘텐츠 담당과 프레젠테이션 담당 두 명이 각각 하나의 상시 브랜치를 재사용한다. 다른 팀은 develop의 기획을 가져가 담당 브랜치에서 구현하고 PR로 누적한다.",
+    "description": "기획 정본은 시스템기획팀이 develop에서 관리한다. 사용자 주도 DB·산출 담당자는 DB/엔진 본체를 유지하고, 화면 담당자는 화면과 허용 서버 서비스 함수를 기존 상시 브랜치에서 자율 개발한다. 두 담당은 develop PR로 통합하며 실행3티어·데이터/보안 경계는 유지한다.",
     "start_rule": "시스템기획팀은 develop의 현재 HEAD와 원격 동기화 상태를 확인하고 기획 정본을 검증·공유한다. 서버 개발팀과 별도 프레젠테이션 담당은 최신 origin/develop의 기획 기준과 출발 SHA를 확인하고 각자의 기존 작업 브랜치를 재사용한다. 다른 작업자의 미커밋 변경을 기준으로 삼지 않는다. AGENTS.md와 외부접근_데이터보호_개발기준.md를 반드시 읽고 변경 operation의 SEC 통제를 확인한다.",
     "branch_rule": "시스템기획팀만 develop에서 기획·공통 관리 설정을 직접 관리한다. 시스템·콘텐츠 개발자는 feature/application-pre-data-platform, 화면 개발자는 feature/presentation-foundation을 상시 재사용한다. 다른 팀은 develop에서 직접 구현하지 않고 담당 브랜치의 PR로 누적한다. 3티어는 폴더·포트·의존 관계로 구분한다. 하위 작업은 필요 시 부모·담당·사유를 정본에 등록하며 작업 항목이나 에이전트마다 생성하지 않는다. 상시 시스템/화면 브랜치의 통합 대상은 develop이고, 하위 개발 작업은 등록된 직계 부모에 먼저 통합한다. main에는 작업이 모두 끝나고 최종 검증·인계가 정리된 develop만 PR로 반영하며 라이브 배포는 별도 승인한다.",
     "owners": [
@@ -17458,21 +17601,21 @@
           "apps/web"
         ],
         "branch_pattern": "feature/presentation-foundation (상시); 등록된 presentation_task만 하위 작업",
-        "scope": "프런트 코드·화면·폼·이동·허용 API 결과 표시. 현재 기획/서비스/DB 작업자는 이 계층의 구현·수정을 수행하지 않는다."
+        "scope": "화면·BFF 및 service_delegation_policy의 서버 서비스 함수 공동 개발. 함수별 사전 승인 없이 진행하며 DB/산출 본체는 변경하지 않는다."
       },
       {
         "layer": "애플리케이션",
-        "owner": "시스템·콘텐츠 개발 담당 / 현재 개발팀",
+        "owner": "기존 DB·산출 담당과 화면구현팀 공동(보호 본체 제외)",
         "roots": [
           "src/jungsi_touch/application",
           "src/jungsi_touch"
         ],
-        "branch_pattern": "feature/application-pre-data-platform",
-        "scope": "서버 권한·입력 검증·계산·학생 응답·공급/저장 포트"
+        "branch_pattern": "feature/application-pre-data-platform 또는 feature/presentation-foundation",
+        "scope": "보호 산출 본체는 기존 담당; 조회·조합·DTO·API/서비스 흐름은 화면팀도 직접 작성·수정"
       },
       {
         "layer": "데이터와 인프라",
-        "owner": "시스템·콘텐츠 개발 담당; 데이터팀은 비공개 자료 정리 담당",
+        "owner": "사용자 주도 기존 DB·산출 담당; 데이터팀 비공개 자료 정리",
         "roots": [
           "src/jungsi_touch/infrastructure",
           "database"
@@ -17483,9 +17626,9 @@
     ],
     "existing_application_feature": "feature/application-pre-data-platform",
     "presentation_branch_example": "feature/presentation-foundation",
-    "presentation_branch_status": "화면 상시 브랜치 feature/presentation-foundation는 유지하며 PR6 head6b2는 develop2624에 통합됐다. 두 CI success는 해당6b head에 한정한다. 347 빈 학교 표시 fix는 develop 미포함이고 Retry-After 보완과 함께 FE-05 후속 PR/정확 fullSHA·CI·브라우저 증거가 필요하다. PR5 closed/superseded head/ref와 PR7/9 종료 이력은 보존한다. 서비스·DB PR13/develop947 인수 이력도 그대로다. 실Caller/화면·보안·승인 수치/운영 인수는 별도 pending/NOT_RUN이다.",
+    "presentation_branch_status": "PR43 head11a346f가 develop3c87239를 일반 merge했고 충돌없이 MERGEABLE/CLEAN, 정확 head push39191126822/PR39191131045 CI success를 확인했다. Draft와 미병합 상태는 유지한다. e806 대비 apps/web/src·package·wrangler 변경0이며 기존 워커75e4a1dc 재배포는 없었다. 이후 최신 기획의 일반 merge와 정상 검사·서비스 공동 개발 범위를 적용한다. 이전 PR/브랜치 이력은 보존한다.",
     "generated_files_rule": "route_catalog.json과 생성 README/현재 문서는 직접 편집하지 않는다. 계약 변경은 service_spec.json과 생성 도구에서 수정하고 생성 결과를 같은 커밋에 포함한다.",
-    "handoff_rule": "두 개발 담당은 origin/develop의 같은 커밋에 있는 service_spec과 생성 문서를 가져가 구현한다. 계약·필드·오류/보류 사유가 바뀌면 시스템기획팀과 해당 계층 담당에게 인계한다. 통합되지 않은 feature의 코드·가상 응답을 develop에 구현된 기능으로 기록하지 않는다. 현재 기획팀과 서비스·DB 개발팀은 외부 프런트 담당에게 확정 공통 계약과 백엔드 인수 증거를 전달한다. 외부 프런트의 수정·브라우저 인수검증은 해당 담당자의 완료 증거를 별도로 확인한다.",
+    "handoff_rule": "두 개발 담당은 origin/develop의 같은 커밋에 있는 service_spec과 생성 문서를 가져가 구현한다. 계약·필드·오류/보류 사유가 바뀌면 시스템기획팀과 해당 계층 담당에게 인계한다. 통합되지 않은 feature의 코드·가상 응답을 develop에 구현된 기능으로 기록하지 않는다. 현재 기획팀과 서비스·DB 개발팀은 외부 프런트 담당에게 확정 공통 계약과 백엔드 인수 증거를 전달한다. 외부 프런트의 수정·브라우저 인수검증은 해당 담당자의 완료 증거를 별도로 확인한다. 화면팀은 service_delegation_policy의 허용 서비스 함수를 스스로 구현한다. 새 DB/산출 작업만 기존 담당에게 인계하며 일반 노출 필드/서비스 함수마다 사전 승인을 요구하지 않는다.",
     "verification_rule": "Git 변경 범위와 해당 계약·필수 커밋 검산을 확인한다. 원자료 전수검수나 전국 재집계를 매 개발 작업에서 반복하지 않는다. 하위 브랜치 병합은 등록된 직계 부모 또는 승인된 develop 인입과 결속한 Git merge-tree 결과를 기준으로 확인한다. 충돌 해결 근거와 별도 직접 수정의 승인 범위를 구분하며 삭제 차단·팀 권한·main 승격·등록 부모·fast-forward 규칙을 유지한다. merge_scope_policy 표식이 있는 커밋부터 병합 재구성 정책을 적용한다. 과거 병합은 소급 판정하지 않으며, 기획 경로 충돌 해결과 비기획 자동 병합 결과를 구분한다.",
     "planning_default_branch": "develop",
     "planning_source": "origin/develop:docs/current/service_spec.json 및 동일 커밋의 docs/current 생성 문서",
@@ -18797,8 +18940,8 @@
       [
         "src/jungsi_touch/application/",
         "애플리케이션",
-        "현재 서버 개발팀",
-        "권한·입력 검증·업무 흐름·학생 DTO·애플리케이션 소유 포트",
+        "기존 DB·산출 담당 + 화면구현팀(허용 서비스)",
+        "보호 산출 본체 유지; 조회/조합·서비스 흐름·DTO·포트는 공동 개발",
         "공유 코드·생성 라우팅 계약"
       ],
       [
@@ -31022,7 +31165,7 @@
     },
     "current_review_connection": {
       "id": "DBD-06-CURRENT-ALL-REVIEW",
-      "status": "HOSTED_CURSOR_BUNDLE_REPORTED_DEPLOYED_FIRST_NEXT_PASS_FRONTDOOR_COOKIE_FIX_PENDING",
+      "status": "HOSTED_CURSOR_AND_FRONTDOOR_REFRESH_REPORTED_PASS_RESIDUAL_BRANCH_TESTS_OPEN",
       "human_scope": "frontend_team_and_administrators_review_first",
       "source_view": "jungsi_data_ingest.admission_results_current",
       "academic_years": [
@@ -33269,7 +33412,7 @@
       },
       "owner_whole_v3": {
         "format": "jungsi.owner-current-review-contract/v1",
-        "status": "HOSTED_CURSOR_BUNDLE_REPORTED_DEPLOYED_FIRST_NEXT_PASS_FRONTDOOR_COOKIE_FIX_PENDING",
+        "status": "HOSTED_CURSOR_AND_FRONTDOOR_REFRESH_REPORTED_PASS_RESIDUAL_BRANCH_TESTS_OPEN",
         "basis_commit": "45fcb44c1821c187816174fc90563f6e313bc423",
         "operation": "current.review.search",
         "route": {
@@ -33365,7 +33508,7 @@
         },
         "actual_DB": "PASS_SCOPED_EXACT_ID_SQL_AND_SAVED_DTO_WORKING_TREE_ONLY_NOT_FINAL_SNAPSHOT",
         "hosted_deployment": "OWNER_REPORTED_FINAL_BUNDLE_READBACK_MATCH_SOURCE_90eb30b_ACCEPTED_ee226b6",
-        "browser": "FRONTEND_REPORTED_FIRST_NEXT_PASS_AFTER_ROOT_COOKIE_REFRESH_DIRECT_JEONGSI_REFRESH_FIX_NOT_RUN",
+        "browser": "FRONTEND_REPORTED_DIRECT_EXPIRY_FIRST_NEXT_PASS_ROOT_FRESH_BROWSER_NOT_RUN",
         "engine_approved": false,
         "production_allowed": false,
         "actual_DB_evidence": {
@@ -33446,7 +33589,7 @@
           "receipt_sha256": "d16a383b2d32ae2d31e0702d87530f7a1176596ed208d61f0239b15a8416f3e5",
           "boundary": "prior_exact_ID_SQL_used_18_view_dependencies; final_guard_adds_direct_release_table_and_preserves_identical_payload_SQL_SHA"
         },
-        "deployment_progress_note": "화면팀의 2026-10-19 영수증을 수용했다. PR46의 최종90eb30b 번들(166028B/SHA89d60987)은 같은 함수에 교체 배포·코드 readback 일치로 보고됐고, 정문에서 수동 첫/다음 제한 범위와 비중복 연결이 통과했다. 이는 화면팀 실측 보고 수용이며 Root 새 브라우저 재실행은 NOT_RUN이다. 수정 후409의 safe reason은 binding_expiry_changed였고, /jeongsi 갱신 쿠키가 브라우저에 저장되지 않아 세션이 반복 갱신됐다는 화면팀 진단과 일반 첫 화면 방문 후 정상화 결과를 기록한다. 영구 수정 DEP-AUTH-COOKIE-01은 사용자 지정 화면 담당자가 맡는다. /jeongsi 직접 진입의 만료 갱신·최종 응답 Set-Cookie/동일 요청 SSR 전달·캐시 방지·첫/다음 검수 및 정확한 소스/배포 SHA 회신 전에는 완료로 처리하지 않는다. 기존 세션/승인 만료·head 변경409를 유지하며 승인 연장·Secrets/역할/JWT 정책 변경을 하지 않는다. 배포 직후 일시503 뒤 정상화는 보고됐으나 콜드스타트 원인은 미확정이다. 비승인 계정403·일반 전국 공급·REQ27 운영 활성화·보안3gate는 별도 미완료다.",
+        "deployment_progress_note": "화면팀 영수증에서 정문362a02b 수정과 운영6288d397 배포, 자연 만료 후 /를 거치지 않은 /jeongsi 진입의 쿠키 저장/다음 요청 재사용 및 첫/다음 범위 PASS를 보고했다. Root는 받은 영수증과 PR43 head11a346f/정확 CI2 및 e806 대비 화면 실행 코드 변경0을 확인했다. 정문 소스/운영 응답의 Root 독립 재실행은 NOT_RUN이다. FD-AUTH-02는 chunk/redirect/오류/fetch경로 no-store 미실측,04/05는 NOT_RUN,06은 비승인계정 NOT_RUN이며07은 원인 미확정 관찰이다. 임시 루트방문 대기는 최신 보고상 종료하고 기존 만료/head409·read-only 쿠키 소유권·Secrets/역할/승인을 유지한다. PR43은 Draft·미병합이며 CI 통과를 운영전체/보안3gate/전국공급/REQ27 인수로 확대하지 않는다.",
         "latest_receipt_intake": {
           "date": "2026-10-19",
           "frontend_worker_unchanged": "75e4a1dc",
@@ -33617,6 +33760,115 @@
           "candidate_status": "CURSOR_NORMALIZATION_AND_SAFE_REASON_SOURCE_CI_PASSED_NOT_DEPLOYED_INCIDENT_CAUSE_UNCONFIRMED"
         },
         "frontdoor_session_refresh_followup": {
+          "format": "jungsi.frontdoor-session-refresh-followup/v1",
+          "id": "DEP-AUTH-COOKIE-01",
+          "requirements": [
+            "REQ-24",
+            "REQ-25",
+            "REQ-26"
+          ],
+          "controls": [
+            "SEC-02",
+            "SEC-03",
+            "SEC-04",
+            "SEC-07",
+            "SEC-08"
+          ],
+          "owner": "external_frontend_owner_confirmed_by_user_20261019",
+          "layer": "presentation",
+          "source_scope": "EduTouch front-door /jeongsi proxy and response-cookie forwarding; external repository source not available in current connection",
+          "frontend_branch": "feature/presentation-foundation for Jungsi_touch BFF changes; EduTouch front-door source and deployed SHA to be supplied by frontend owner",
+          "paths": [
+            "/jeongsi",
+            "/jeongsi/*",
+            "/jeongsi/management/current-review"
+          ],
+          "status": "FRONTEND_REPORTED_DEPLOYED_DIRECT_EXPIRY_AND_PAGING_PASS_RESIDUAL_CASES_NOT_RUN",
+          "reported_failure": "Expired browser session refreshed per request through /jeongsi without cookie persistence, changing min(JWT expiry,approval expiry) cursor binding. Root-page refresh temporarily restored bounded paging.",
+          "invariants": [
+            "Keep exact cursor session/approval expiry and source head checks; do not ignore binding_expiry_changed or extend review approval",
+            "Verified refreshed session must reach the same request SSR/BFF and the browser final response",
+            "Forward all auth cookie chunks and options through rewrite/proxy/redirect; preserve existing secure cookie policy and private,no-store/cache prevention",
+            "Refresh before committing or streaming final response; do not replace the response and drop refreshed cookies",
+            "Do not repair this by changing JWT TTL,auth rate limits,Secrets,roles,paid rights or storage binding",
+            "Legitimate session expiry or source head change may require a fresh first page; never replay all ranges automatically",
+            "No tokens,cookies,JWT claims,cursor values or source data in logs or handoff"
+          ],
+          "acceptance": [
+            {
+              "id": "FD-AUTH-01",
+              "case": "Using an owner-controlled naturally expired or isolated approved test session, enter /jeongsi directly without visiting /",
+              "expected": "Refreshed cookie is persisted on final response and usable by subsequent request",
+              "status": "FRONTEND_REPORTED_PASS_DIRECT_NATURAL_EXPIRY"
+            },
+            {
+              "id": "FD-AUTH-02",
+              "case": "Same refreshed request reaches SSR and BFF, including rewrite/error/redirect paths",
+              "expected": "Fresh verified session propagated with all required Set-Cookie chunks/options and cache prevention; no repeated refresh caused by stale request cookie",
+              "status": "PARTIAL_REPORTED_REQUEST_RESPONSE_COOKIE_PASS_CHUNKS_REDIRECT_ERRORS_FETCH_NO_STORE_NOT_RUN"
+            },
+            {
+              "id": "FD-AUTH-03",
+              "case": "Same unexpired session and approved source heads, manual bounded first then next range",
+              "expected": "No binding_expiry_changed; disjoint ordered ranges; empty+cursor and unknown count semantics preserved",
+              "status": "FRONTEND_REPORTED_PASS_FIRST_NEXT_NO409"
+            },
+            {
+              "id": "FD-AUTH-04",
+              "case": "Actual JWT/approval expiry or canonical head change",
+              "expected": "Existing 401/403/409 fail-closed semantics remain; guide to fresh first page without extending approval",
+              "status": "NOT_RUN"
+            },
+            {
+              "id": "FD-AUTH-05",
+              "case": "Two bounded concurrent requests and invalid or revoked refresh session",
+              "expected": "No repeated refresh loop or unauthorized success; existing request controls and verified-user checks preserved",
+              "status": "NOT_RUN"
+            },
+            {
+              "id": "FD-AUTH-06",
+              "case": "Unapproved account and no-relay/no-JWT negative checks",
+              "expected": "Existing scoped access denied; front-door gate limitation recorded separately",
+              "status": "PARTIAL_REPORTED_NO_RELAY403_NO_JWT401_UNAPPROVED_ACCOUNT_NOT_RUN"
+            },
+            {
+              "id": "FD-AUTH-07",
+              "case": "Transient current_review_db_unavailable",
+              "expected": "Safe 503 without repeated load or implied cold-start root-cause proof; recovery and request identifiers retained privately",
+              "status": "REPORTED_OBSERVATION_PASS_CAUSE_UNCONFIRMED"
+            }
+          ],
+          "required_reply": [
+            "exact front-door source commit and deployed version/time",
+            "changed proxy/middleware/response-cookie paths and pinned framework/SSR package versions",
+            "sanitized acceptance case O/X/NOT_RUN with request correlation only",
+            "final no-store and no secret exposure evidence",
+            "confirm cursor/approval expiry,Secrets,JWT settings and roles unchanged"
+          ],
+          "references": [
+            {
+              "title": "Supabase server-side cookie propagation",
+              "url": "https://supabase.com/docs/guides/auth/server-side/creating-a-client"
+            },
+            {
+              "title": "Supabase SSR refresh and caching",
+              "url": "https://supabase.com/docs/guides/auth/server-side/advanced-guide"
+            },
+            {
+              "title": "NextResponse final response cookies/rewrite",
+              "url": "https://nextjs.org/docs/app/api-reference/functions/next-response"
+            }
+          ],
+          "production_ready": false,
+          "frontdoor_source_commit": "362a02b208041b091eaa8c90197473ef61d0c1cc",
+          "frontdoor_deployment": "6288d397-9afb-44ed-83aa-d370e0501300",
+          "source_evidence": "EXTERNAL_RECEIPT_NOT_ROOT_UPSTREAM_REPOSITORY_READBACK",
+          "frontend_source_commit": "11a346f6b162c926b3792e4a9837e865c156266d",
+          "deployed_frontend_source_unchanged": "e806aafea348c14d0c127858c48153beeb3cebec",
+          "external_receipt_sha256": "fbcbea388bd732fcd2643ed480b7040a61fbc694038fa61150bc04ed11239231",
+          "temporary_root_visit_workaround": "NO_LONGER_NEEDED_BY_FRONTEND_DIRECT_EXPIRY_REPORT"
+        },
+        "historical_cookie_followup_before_latest_receipt": {
           "format": "jungsi.frontdoor-session-refresh-followup/v1",
           "id": "DEP-AUTH-COOKIE-01",
           "requirements": [
@@ -116387,7 +116639,7 @@
   },
   "owner_current_review_contract": {
     "format": "jungsi.owner-current-review-contract/v1",
-    "status": "HOSTED_CURSOR_BUNDLE_REPORTED_DEPLOYED_FIRST_NEXT_PASS_FRONTDOOR_COOKIE_FIX_PENDING",
+    "status": "HOSTED_CURSOR_AND_FRONTDOOR_REFRESH_REPORTED_PASS_RESIDUAL_BRANCH_TESTS_OPEN",
     "basis_commit": "45fcb44c1821c187816174fc90563f6e313bc423",
     "operation": "current.review.search",
     "route": {
@@ -116483,7 +116735,7 @@
     },
     "actual_DB": "PASS_SCOPED_EXACT_ID_SQL_AND_SAVED_DTO_WORKING_TREE_ONLY_NOT_FINAL_SNAPSHOT",
     "hosted_deployment": "OWNER_REPORTED_FINAL_BUNDLE_READBACK_MATCH_SOURCE_90eb30b_ACCEPTED_ee226b6",
-    "browser": "FRONTEND_REPORTED_FIRST_NEXT_PASS_AFTER_ROOT_COOKIE_REFRESH_DIRECT_JEONGSI_REFRESH_FIX_NOT_RUN",
+    "browser": "FRONTEND_REPORTED_DIRECT_EXPIRY_FIRST_NEXT_PASS_ROOT_FRESH_BROWSER_NOT_RUN",
     "engine_approved": false,
     "production_allowed": false,
     "actual_DB_evidence": {
@@ -116564,7 +116816,7 @@
       "receipt_sha256": "d16a383b2d32ae2d31e0702d87530f7a1176596ed208d61f0239b15a8416f3e5",
       "boundary": "prior_exact_ID_SQL_used_18_view_dependencies; final_guard_adds_direct_release_table_and_preserves_identical_payload_SQL_SHA"
     },
-    "deployment_progress_note": "화면팀의 2026-10-19 영수증을 수용했다. PR46의 최종90eb30b 번들(166028B/SHA89d60987)은 같은 함수에 교체 배포·코드 readback 일치로 보고됐고, 정문에서 수동 첫/다음 제한 범위와 비중복 연결이 통과했다. 이는 화면팀 실측 보고 수용이며 Root 새 브라우저 재실행은 NOT_RUN이다. 수정 후409의 safe reason은 binding_expiry_changed였고, /jeongsi 갱신 쿠키가 브라우저에 저장되지 않아 세션이 반복 갱신됐다는 화면팀 진단과 일반 첫 화면 방문 후 정상화 결과를 기록한다. 영구 수정 DEP-AUTH-COOKIE-01은 사용자 지정 화면 담당자가 맡는다. /jeongsi 직접 진입의 만료 갱신·최종 응답 Set-Cookie/동일 요청 SSR 전달·캐시 방지·첫/다음 검수 및 정확한 소스/배포 SHA 회신 전에는 완료로 처리하지 않는다. 기존 세션/승인 만료·head 변경409를 유지하며 승인 연장·Secrets/역할/JWT 정책 변경을 하지 않는다. 배포 직후 일시503 뒤 정상화는 보고됐으나 콜드스타트 원인은 미확정이다. 비승인 계정403·일반 전국 공급·REQ27 운영 활성화·보안3gate는 별도 미완료다.",
+    "deployment_progress_note": "화면팀 영수증에서 정문362a02b 수정과 운영6288d397 배포, 자연 만료 후 /를 거치지 않은 /jeongsi 진입의 쿠키 저장/다음 요청 재사용 및 첫/다음 범위 PASS를 보고했다. Root는 받은 영수증과 PR43 head11a346f/정확 CI2 및 e806 대비 화면 실행 코드 변경0을 확인했다. 정문 소스/운영 응답의 Root 독립 재실행은 NOT_RUN이다. FD-AUTH-02는 chunk/redirect/오류/fetch경로 no-store 미실측,04/05는 NOT_RUN,06은 비승인계정 NOT_RUN이며07은 원인 미확정 관찰이다. 임시 루트방문 대기는 최신 보고상 종료하고 기존 만료/head409·read-only 쿠키 소유권·Secrets/역할/승인을 유지한다. PR43은 Draft·미병합이며 CI 통과를 운영전체/보안3gate/전국공급/REQ27 인수로 확대하지 않는다.",
     "latest_receipt_intake": {
       "date": "2026-10-19",
       "frontend_worker_unchanged": "75e4a1dc",
@@ -116735,6 +116987,115 @@
       "candidate_status": "CURSOR_NORMALIZATION_AND_SAFE_REASON_SOURCE_CI_PASSED_NOT_DEPLOYED_INCIDENT_CAUSE_UNCONFIRMED"
     },
     "frontdoor_session_refresh_followup": {
+      "format": "jungsi.frontdoor-session-refresh-followup/v1",
+      "id": "DEP-AUTH-COOKIE-01",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "controls": [
+        "SEC-02",
+        "SEC-03",
+        "SEC-04",
+        "SEC-07",
+        "SEC-08"
+      ],
+      "owner": "external_frontend_owner_confirmed_by_user_20261019",
+      "layer": "presentation",
+      "source_scope": "EduTouch front-door /jeongsi proxy and response-cookie forwarding; external repository source not available in current connection",
+      "frontend_branch": "feature/presentation-foundation for Jungsi_touch BFF changes; EduTouch front-door source and deployed SHA to be supplied by frontend owner",
+      "paths": [
+        "/jeongsi",
+        "/jeongsi/*",
+        "/jeongsi/management/current-review"
+      ],
+      "status": "FRONTEND_REPORTED_DEPLOYED_DIRECT_EXPIRY_AND_PAGING_PASS_RESIDUAL_CASES_NOT_RUN",
+      "reported_failure": "Expired browser session refreshed per request through /jeongsi without cookie persistence, changing min(JWT expiry,approval expiry) cursor binding. Root-page refresh temporarily restored bounded paging.",
+      "invariants": [
+        "Keep exact cursor session/approval expiry and source head checks; do not ignore binding_expiry_changed or extend review approval",
+        "Verified refreshed session must reach the same request SSR/BFF and the browser final response",
+        "Forward all auth cookie chunks and options through rewrite/proxy/redirect; preserve existing secure cookie policy and private,no-store/cache prevention",
+        "Refresh before committing or streaming final response; do not replace the response and drop refreshed cookies",
+        "Do not repair this by changing JWT TTL,auth rate limits,Secrets,roles,paid rights or storage binding",
+        "Legitimate session expiry or source head change may require a fresh first page; never replay all ranges automatically",
+        "No tokens,cookies,JWT claims,cursor values or source data in logs or handoff"
+      ],
+      "acceptance": [
+        {
+          "id": "FD-AUTH-01",
+          "case": "Using an owner-controlled naturally expired or isolated approved test session, enter /jeongsi directly without visiting /",
+          "expected": "Refreshed cookie is persisted on final response and usable by subsequent request",
+          "status": "FRONTEND_REPORTED_PASS_DIRECT_NATURAL_EXPIRY"
+        },
+        {
+          "id": "FD-AUTH-02",
+          "case": "Same refreshed request reaches SSR and BFF, including rewrite/error/redirect paths",
+          "expected": "Fresh verified session propagated with all required Set-Cookie chunks/options and cache prevention; no repeated refresh caused by stale request cookie",
+          "status": "PARTIAL_REPORTED_REQUEST_RESPONSE_COOKIE_PASS_CHUNKS_REDIRECT_ERRORS_FETCH_NO_STORE_NOT_RUN"
+        },
+        {
+          "id": "FD-AUTH-03",
+          "case": "Same unexpired session and approved source heads, manual bounded first then next range",
+          "expected": "No binding_expiry_changed; disjoint ordered ranges; empty+cursor and unknown count semantics preserved",
+          "status": "FRONTEND_REPORTED_PASS_FIRST_NEXT_NO409"
+        },
+        {
+          "id": "FD-AUTH-04",
+          "case": "Actual JWT/approval expiry or canonical head change",
+          "expected": "Existing 401/403/409 fail-closed semantics remain; guide to fresh first page without extending approval",
+          "status": "NOT_RUN"
+        },
+        {
+          "id": "FD-AUTH-05",
+          "case": "Two bounded concurrent requests and invalid or revoked refresh session",
+          "expected": "No repeated refresh loop or unauthorized success; existing request controls and verified-user checks preserved",
+          "status": "NOT_RUN"
+        },
+        {
+          "id": "FD-AUTH-06",
+          "case": "Unapproved account and no-relay/no-JWT negative checks",
+          "expected": "Existing scoped access denied; front-door gate limitation recorded separately",
+          "status": "PARTIAL_REPORTED_NO_RELAY403_NO_JWT401_UNAPPROVED_ACCOUNT_NOT_RUN"
+        },
+        {
+          "id": "FD-AUTH-07",
+          "case": "Transient current_review_db_unavailable",
+          "expected": "Safe 503 without repeated load or implied cold-start root-cause proof; recovery and request identifiers retained privately",
+          "status": "REPORTED_OBSERVATION_PASS_CAUSE_UNCONFIRMED"
+        }
+      ],
+      "required_reply": [
+        "exact front-door source commit and deployed version/time",
+        "changed proxy/middleware/response-cookie paths and pinned framework/SSR package versions",
+        "sanitized acceptance case O/X/NOT_RUN with request correlation only",
+        "final no-store and no secret exposure evidence",
+        "confirm cursor/approval expiry,Secrets,JWT settings and roles unchanged"
+      ],
+      "references": [
+        {
+          "title": "Supabase server-side cookie propagation",
+          "url": "https://supabase.com/docs/guides/auth/server-side/creating-a-client"
+        },
+        {
+          "title": "Supabase SSR refresh and caching",
+          "url": "https://supabase.com/docs/guides/auth/server-side/advanced-guide"
+        },
+        {
+          "title": "NextResponse final response cookies/rewrite",
+          "url": "https://nextjs.org/docs/app/api-reference/functions/next-response"
+        }
+      ],
+      "production_ready": false,
+      "frontdoor_source_commit": "362a02b208041b091eaa8c90197473ef61d0c1cc",
+      "frontdoor_deployment": "6288d397-9afb-44ed-83aa-d370e0501300",
+      "source_evidence": "EXTERNAL_RECEIPT_NOT_ROOT_UPSTREAM_REPOSITORY_READBACK",
+      "frontend_source_commit": "11a346f6b162c926b3792e4a9837e865c156266d",
+      "deployed_frontend_source_unchanged": "e806aafea348c14d0c127858c48153beeb3cebec",
+      "external_receipt_sha256": "fbcbea388bd732fcd2643ed480b7040a61fbc694038fa61150bc04ed11239231",
+      "temporary_root_visit_workaround": "NO_LONGER_NEEDED_BY_FRONTEND_DIRECT_EXPIRY_REPORT"
+    },
+    "historical_cookie_followup_before_latest_receipt": {
       "format": "jungsi.frontdoor-session-refresh-followup/v1",
       "id": "DEP-AUTH-COOKIE-01",
       "requirements": [

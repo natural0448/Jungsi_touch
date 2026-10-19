@@ -214,7 +214,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "9ebb570259840bbab8d6ec1cbb10963f66f60c8c415ae21518f58d3ccc0256c7",
+      "source_sha256": "da4f5ed3da6639c949c273b2cf82df45904d0485e4404dec229618eff2fa45e9",
       "symbols": [
         {
           "kind": "class",
@@ -314,6 +314,12 @@
         },
         {
           "kind": "function",
+          "name": "delegation_policy_edit_errors",
+          "signature": "def delegation_policy_edit_errors(branch, trusted, candidate):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "deletion_record",
           "signature": "def deletion_record(spec):",
           "decorators": []
@@ -368,6 +374,12 @@
         },
         {
           "kind": "function",
+          "name": "service_delegation",
+          "signature": "def service_delegation(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "staged_merge_head",
           "signature": "def staged_merge_head():",
           "decorators": []
@@ -376,6 +388,30 @@
           "kind": "function",
           "name": "unresolved_markers",
           "signature": "def unresolved_markers(conflicts, revision=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_delegated_python_symbols",
+          "signature": "def validate_delegated_python_symbols(branch, paths, spec, read_before, read_after):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_delegated_python_symbols.protected",
+          "signature": "def protected(raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_delegated_python_symbols.protected.visit",
+          "signature": "def visit(node, prefix=''):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_delegated_service_paths",
+          "signature": "def validate_delegated_service_paths(branch, paths, spec):",
           "decorators": []
         },
         {
@@ -424,6 +460,12 @@
           "kind": "function",
           "name": "validate_push_history",
           "signature": "def validate_push_history(branch, before, after, spec, *, team=None, local=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_service_delegation",
+          "signature": "def validate_service_delegation(spec):",
           "decorators": []
         },
         {
@@ -586,7 +628,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "ffee09aef1383b2e4e40381fa26fcccfc5fab59906afafc68b230751bcd78a43",
+      "source_sha256": "6f7711a3aee008d353b7c6d060e4d552563b55f5fe880f4e26af832cce262b8b",
       "symbols": [
         {
           "kind": "class",
@@ -844,6 +886,12 @@
           "kind": "function",
           "name": "security_reference",
           "signature": "def security_reference(spec, link):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "service_delegation_section",
+          "signature": "def service_delegation_section(spec):",
           "decorators": []
         },
         {

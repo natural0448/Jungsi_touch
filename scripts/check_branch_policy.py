@@ -2,7 +2,7 @@
 Local JUNGSI_TEAM is a declaration, not authenticated GitHub authorization.
 """
 from __future__ import annotations
-import argparse,hashlib,json,os,re,subprocess,sys
+import argparse,ast,fnmatch,hashlib,json,os,re,subprocess,sys
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -282,6 +282,7 @@ def validate_governance(spec):
     if gate.get('state')=='ready' and any(c.get('status')!='passed' or not c.get('evidence') for c in gate['checks']):
         errors.append('Release ready requires every acceptance check and evidence')
     errors.extend(validate_deletion_registry(spec))
+    errors.extend(validate_service_delegation(spec))
     return sorted(set(errors))
 
 def validate_work_branch(branch,spec):
@@ -289,6 +290,98 @@ def validate_work_branch(branch,spec):
     if row is None:return ['Unregistered branch: '+branch]
     if row.get('status')!='active':return ['Retired branch cannot receive new work: '+branch]
     return []
+
+SERVICE_DELEGATION_FORMAT='jungsi.frontend-service-delegation/v1'
+
+def service_delegation(spec):
+    return spec.get('workflow',{}).get('branch_governance',{}).get('service_delegation_policy')
+
+def validate_service_delegation(spec):
+    p=service_delegation(spec)
+    if p is None:return []
+    fields=('protected_prefixes','protected_paths','protected_globs','shared_http_paths')
+    valid=(isinstance(p,dict) and p.get('format')==SERVICE_DELEGATION_FORMAT and
+        p.get('developer_branch')==spec['workflow']['presentation_work_branch'] and
+        p.get('requires_per_function_prior_approval') is False and p.get('normal_PR_review_required') is True and
+        all(isinstance(p.get(k),list) and p[k] and all(isinstance(v,str) and v and '..' not in v and not v.startswith('/') for v in p[k]) for k in fields))
+    if not valid:return ['Invalid frontend service delegation policy']
+    symbols=p.get('protected_python_symbols')
+    if not isinstance(symbols,dict) or not symbols or any(not path.endswith('.py') or not isinstance(names,list) or not names or any(not isinstance(name,str) or not re.fullmatch(r'[A-Za-z_][A-Za-z_0-9.]*',name) for name in names) for path,names in symbols.items()):
+        return ['Invalid protected Python calculation symbol registry']
+    required={'database/','supabase/functions/_shared/jungsi/domain/'}
+    engines={'src/jungsi_touch/university_conversion.py','src/jungsi_touch/percentile.py','src/jungsi_touch/application/overall_analysis.py'}
+    if not required.issubset(p['protected_prefixes']) or not engines.issubset(p['protected_paths']) or '*.sql' not in p['protected_globs']:
+        return ['DB and calculation ownership boundaries are incomplete']
+    if set(p['shared_http_paths'])&set(p['protected_paths']):return ['Shared HTTP paths cannot override reserved calculation files']
+    if p.get('shared_document_paths')!=['database/README.md']:return ['Only generated database README may bypass protected DB paths']
+    return []
+
+def validate_delegated_service_paths(branch,paths,spec):
+    p=service_delegation(spec)
+    if p is None or branches(spec).get(branch,{}).get('kind') not in {'presentation','presentation_task'}:return []
+    invalid=validate_service_delegation(spec)
+    if invalid:return invalid
+    shared={v.casefold() for v in [*p['shared_http_paths'],*p.get('shared_document_paths',[])]}
+    exact={v.casefold() for v in p['protected_paths']}
+    prefixes=tuple(v.casefold() for v in p['protected_prefixes'])
+    patterns=[v.casefold() for v in p['protected_globs']]
+    errors=[]
+    for path in paths:
+        normalized=path.replace('\\','/').casefold()
+        reserved=normalized in exact or normalized.startswith(prefixes) or any(fnmatch.fnmatchcase(normalized,v) for v in patterns)
+        if reserved and normalized not in shared:
+            errors.append('Reserved DB/calculation implementation requires its existing owner: '+path)
+    return errors
+
+def validate_delegated_python_symbols(branch,paths,spec,read_before,read_after):
+    """Keep registered calculation AST and referenced global bindings unchanged."""
+    p=service_delegation(spec)
+    if p is None or branches(spec).get(branch,{}).get('kind') not in {'presentation','presentation_task'}:return []
+    selected=set(paths);errors=[]
+    for path,names in p.get('protected_python_symbols',{}).items():
+        if path not in selected:continue
+        def protected(raw):
+            tree=ast.parse(raw.decode('utf-8-sig') if isinstance(raw,bytes) else raw)
+            found={}
+            def visit(node,prefix=''):
+                if isinstance(node,(ast.ClassDef,ast.FunctionDef,ast.AsyncFunctionDef)):
+                    name=prefix+node.name
+                    found[name]=node;prefix=name+'.'
+                for child in ast.iter_child_nodes(node):visit(child,prefix)
+            visit(tree)
+            values={}
+            for name in names:
+                if name not in found:raise ValueError('Required protected calculation symbol missing: '+path+' '+name)
+                node=found[name];used={n.id for n in ast.walk(node) if isinstance(n,ast.Name) and isinstance(n.ctx,ast.Load)}
+                bindings=[]
+                for statement in tree.body:
+                    if isinstance(statement,(ast.Import,ast.ImportFrom)):
+                        defined={a.asname or (a.name.split('.')[0] if isinstance(statement,ast.Import) else a.name) for a in statement.names}
+                    elif isinstance(statement,(ast.ClassDef,ast.FunctionDef,ast.AsyncFunctionDef)):defined={statement.name}
+                    else:defined={n.id for n in ast.walk(statement) if isinstance(n,ast.Name) and isinstance(n.ctx,ast.Store)}
+                    if used&defined:bindings.append(ast.dump(statement,include_attributes=False))
+                parents=[];parts=name.split('.')
+                for i in range(1,len(parts)):
+                    parent=found.get('.'.join(parts[:i]))
+                    if isinstance(parent,ast.ClassDef):parents.append(ast.dump(ast.ClassDef(name=parent.name,bases=parent.bases,keywords=parent.keywords,body=[],decorator_list=parent.decorator_list),include_attributes=False))
+                values[name]=(ast.dump(node,include_attributes=False),bindings,parents)
+            return values
+        try:
+            if protected(read_before(path))!=protected(read_after(path)):
+                errors.append('Reserved calculation symbol or binding changed: '+path)
+        except (ValueError,SyntaxError,UnicodeError,KeyError,OSError) as error:
+            errors.append('Protected calculation inspection failed: '+path+' ('+str(error)+')')
+    return errors
+
+
+def delegation_policy_edit_errors(branch,trusted,candidate):
+    before=service_delegation(trusted);after=service_delegation(candidate)
+    if before is not None and after is None:return ['Adopted service delegation policy cannot be removed']
+    kind=branches(trusted).get(branch,{}).get('kind') if trusted.get('workflow',{}).get('branch_governance') else None
+    if before!=after and kind not in {'integration','planning_task'}:
+        return ['Service delegation ownership policy is managed on planning develop']
+    return []
+
 
 def validate_planning_paths(paths,spec):
     policy=spec['workflow']['branch_governance']
@@ -304,6 +397,7 @@ def validate_staged(branch,team,changes,spec,*,direct_changes=None,approved=()):
     direct=changes if direct_changes is None else direct_changes
     errors=validate_work_branch(branch,spec)+validate_deletions(changes,approved)+validate_deletions(direct,approved)
     row=branches(spec).get(branch,{})
+    errors.extend(validate_delegated_service_paths(branch,[name for _,name in direct],spec))
     if branch=='main':errors.append('main accepts final develop pull requests, not local commits')
     if branch=='develop':
         if team!='planning':errors.append('develop direct work requires JUNGSI_TEAM=planning declaration')
@@ -314,6 +408,7 @@ def validate_staged(branch,team,changes,spec,*,direct_changes=None,approved=()):
 def validate_pr(head,base,changes,spec,*,approved=()):
     errors=validate_work_branch(head,spec)+validate_work_branch(base,spec)+validate_deletions(changes,approved)
     row=branches(spec).get(head,{})
+    errors.extend(validate_delegated_service_paths(head,[name for _,name in changes],spec))
     if row.get('pr_target')!=base:errors.append('PR target must be registered parent: '+head+' -> '+base)
     if head=='main':errors.append('main is a release destination, not a work branch')
     if base=='main':
@@ -415,8 +510,13 @@ def validate_staged_snapshot(branch,team,spec):
     trusted=load_spec('HEAD')
     sticky=[] if not merge_scope_adopted(trusted) or merge_scope_adopted(spec) else ['Adopted merge scope policy cannot be removed']
     sticky+=deletion_registry_sticky(trusted,spec)
+    authority=trusted if incoming is None else load_spec(incoming)
+    sticky+=delegation_policy_edit_errors(branch,authority,spec)
+    if incoming is None:sticky+=validate_delegated_service_paths(branch,[name for _,name in changes],trusted)
     approved,deletion_errors=inspect_deletion_events(branch,git('rev-parse','HEAD').decode().strip(),None,staged=True) if incoming is None else (set(),[])
-    if incoming is None:return sorted(set(sticky+deletion_errors+validate_staged(branch,team,changes,spec,approved=approved)))
+    if incoming is None:
+        sticky+=validate_delegated_python_symbols(branch,[name for _,name in changes],trusted,lambda p:git('show','HEAD:'+p),lambda p:git('show',':'+p))
+        return sorted(set(sticky+deletion_errors+validate_staged(branch,team,changes,spec,approved=approved)))
     errors=sticky+validate_governance(trusted)+validate_work_branch(branch,trusted)
     row=branches(trusted).get(branch,{})
     if row.get('kind') not in {'planning_task','system','presentation'} or row.get('parent')!='develop':
@@ -455,6 +555,24 @@ def new_merge_history_errors(branch,before,after,spec,*,approved=()):
         inherited=bool(parents and merge_scope_adopted(load_spec(parents[0])))
         if inherited and not merge_scope_adopted(current):
             errors.append('Adopted merge scope policy cannot be removed')
+        if parents:
+            authority=load_spec(parents[1]) if len(parents)==2 else load_spec(parents[0])
+            # A first governance adoption on the canonical integration branch still
+            # validates the entire registry and every direct planning path. Later
+            # ownership edits always use the preexisting parent authority.
+            initial_integration_adoption=(len(parents)==1 and branch=='develop'
+                and not authority.get('workflow',{}).get('branch_governance')
+                and bool(current.get('workflow',{}).get('branch_governance')))
+            if initial_integration_adoption:
+                errors+=validate_governance(current)
+                errors+=validate_planning_paths([name for _,name in change_records(parents[0],commit)],current)
+            else:
+                errors+=delegation_policy_edit_errors(branch,authority,current)
+            if len(parents)==1:
+                paths=[name for _,name in change_records(parents[0],commit)]
+                errors+=validate_delegated_service_paths(branch,paths,current)
+                errors+=validate_delegated_service_paths(branch,paths,authority)
+                errors+=validate_delegated_python_symbols(branch,paths,authority,lambda p:git('show',parents[0]+':'+p),lambda p:git('show',commit+':'+p))
         if not merge_scope_adopted(current):continue
         if parents:errors.extend(validate_deletions(change_records(parents[0],commit),approved))
         if len(parents)>1:errors.extend(validate_merge_commit(branch,commit,spec))
@@ -500,6 +618,9 @@ def validate_event(event_name,event,revision,spec):
         common=git('merge-base',pr['base']['sha'],pr['head']['sha']).decode().strip()
         approved,deletion_errors=inspect_deletion_events(head,common,pr['head']['sha'])
         errors+=deletion_errors+deletion_registry_sticky(spec,candidate)
+        errors+=delegation_policy_edit_errors(head,spec,candidate)
+        paths=[path for _,path in change_records(common,pr['head']['sha'])]
+        errors+=validate_delegated_python_symbols(head,paths,spec,lambda p:git('show',common+':'+p),lambda p:git('show',pr['head']['sha']+':'+p))
         errors.extend(validate_pr(head,base,change_records(common,pr['head']['sha']),spec,approved=approved))
         errors.extend(new_merge_history_errors(head,common,pr['head']['sha'],spec,approved=approved))
         if base=='main' and candidate['workflow']['branch_governance']['release_gate']['state']!='ready':errors.append('Release candidate acceptance is not ready')
