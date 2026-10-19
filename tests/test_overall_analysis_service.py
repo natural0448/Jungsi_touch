@@ -84,7 +84,7 @@ class OverallAnalysisServiceTests(unittest.TestCase):
     def setUp(self):
         self.pack = synthetic_pack()
         self.provider = SyntheticExamAnalysisProvider(self.pack)
-        self.access = AccessController(SyntheticReportAccessRepository({}))
+        self.access = AccessController(SyntheticReportAccessRepository({}), operating_mode="legacy_synthetic")
         self.service = OverallAnalysisService(self.access, self.provider)
         self.actor = Actor("SYNTHETIC-owner")
         self.request = {"exam_id": self.pack.exam_id, "pack_version": self.pack.pack_version,

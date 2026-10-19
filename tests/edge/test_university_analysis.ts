@@ -187,6 +187,7 @@ function fixture(forecasts: PublishedForecastPort | null = null) {
       data,
       clock,
       forecasts,
+      { mode: "legacy_synthetic" },
     ),
   };
 }

@@ -37,7 +37,9 @@ Deno.test("HTTP declared forecast business errors retain safe status while unkno
     const f = fixture({ staff: true, aal: "aal2" });
     f.businessFailure(new AccessError(code, status));
     await error(
-      await f.handler(request("/api/v1/forecast-drafts/SYNTHETIC-id/approvals", "POST", "{}")),
+      await f.handler(
+        request("/api/v1/forecast-drafts/SYNTHETIC-id/approvals", "POST", "{}"),
+      ),
       code,
       status,
     );
@@ -45,22 +47,36 @@ Deno.test("HTTP declared forecast business errors retain safe status while unkno
   const f = fixture({ staff: true, aal: "aal2" });
   f.businessFailure(new AccessError("forecast_not_a_declared_code", 403));
   await error(
-    await f.handler(request("/api/v1/forecast-drafts/SYNTHETIC-id/approvals", "POST", "{}")),
+    await f.handler(
+      request("/api/v1/forecast-drafts/SYNTHETIC-id/approvals", "POST", "{}"),
+    ),
     "backend_dependency_unavailable",
     503,
   );
 });
 Deno.test("every HTTP write rejects extra query after authorization and before any budget cache hit", async () => {
   for (const p of syntheticApiPolicies().filter((p) => p.method !== "GET")) {
-    const f = fixture({ staff: true, aal: "aal2" });
+    const f = fixture({
+      staff: true,
+      aal: "aal2",
+      admin: p.id === "score-input.correction.grant",
+    });
     f.ports.budget.run = <
       T,
     >() =>
       syncPromise(
-        () => ({ operation: p.id, items: [{ shown: "SYNTHETIC-cache" }] } as unknown as T),
+        () => ({
+          operation: p.id,
+          items: [{ shown: "SYNTHETIC-cache" }],
+        } as unknown as T),
       );
-    const path = p.path.replace(/\{[^}]+\}/g, "SYNTHETIC-id") + "?unexpected=SYNTHETIC";
-    await error(await f.handler(request(path, p.method, "{}")), "invalid_request", 422);
+    const path = p.path.replace(/\{[^}]+\}/g, "SYNTHETIC-id") +
+      "?unexpected=SYNTHETIC";
+    await error(
+      await f.handler(request(path, p.method, "{}")),
+      "invalid_request",
+      422,
+    );
     equal(f.calls.business, 0);
     equal(f.calls.budget, 0);
     assert(f.calls.auth > 0);
@@ -134,6 +150,7 @@ function fixture(
     own?: boolean;
     aal?: "aal1" | "aal2";
     staff?: boolean;
+    admin?: boolean;
   } = {},
 ) {
   const calls = {
@@ -163,6 +180,7 @@ function fixture(
             expiresAtUtc: NOW + 1000000n,
             assuranceLevel: options.aal ?? "aal2",
             accountStatus: "active",
+            ...(options.admin ? { accountRole: "admin" } : {}),
           };
         });
       },
@@ -286,7 +304,7 @@ async function error(response: Response, code: string, status: number) {
 }
 for (const policy of syntheticApiPolicies()) {
   Deno.test("HTTP transport dispatch and closed DTO " + policy.id, async () => {
-    const f = fixture(),
+    const f = fixture({ admin: policy.id === "score-input.correction.grant" }),
       path = policy.path.replace(/\{[a-z_]+\}/g, "SYNTHETIC-id"),
       r = await f.handler(
         request(path, policy.method, policy.method === "GET" ? null : "{}", {
@@ -525,7 +543,10 @@ Deno.test("HTTP budget cache results still pass final recursive public projectio
   equal(r.status, 200);
   const text = await r.text();
   assert(!text.includes(PRIVATE));
-  equal(JSON.parse(text), { operation: "report.read", items: [{ shown: "SYNTHETIC-cache" }] });
+  equal(JSON.parse(text), {
+    operation: "report.read",
+    items: [{ shown: "SYNTHETIC-cache" }],
+  });
   equal(f.calls.business, 0);
 });
 Deno.test("HTTP method and unknown paths are safe and do not touch authentication", async () => {

@@ -234,6 +234,22 @@ const SAFE_CODES = new Set([
   "relay_authentication_failed",
   "operation_scope_not_approved",
   "security_policy_unavailable",
+  "invalid_score",
+  "score_input_policy_unavailable",
+  "score_stage_unavailable",
+  "score_stage_closed",
+  "invalid_score_stage",
+  "score_input_transition_pending",
+  "score_input_exhausted",
+  "score_input_version_conflict",
+  "score_correction_unavailable",
+  "score_profile_superseded",
+  "score_input_acceptance_unavailable",
+  "entitlement_identity_unavailable",
+  "paid_delivery_provenance_unavailable",
+  "paid_delivery_scope_unavailable",
+  "storage_transaction_context_invalid",
+  "profile_required",
 ]);
 export function safeFailure(error: unknown, requestId: string): Response {
   const known = error instanceof AccessError && SAFE_CODES.has(error.code) &&

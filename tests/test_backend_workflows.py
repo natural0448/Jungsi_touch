@@ -26,7 +26,7 @@ class BackendWorkflowTests(unittest.TestCase):
         self.clock=FrozenClock();self.repo=SyntheticRepository();self.data=SyntheticData(self.clock)
         self.owner='SYNTHETIC-owner';self.other='SYNTHETIC-other';self.standard='SYNTHETIC-standard'
         for owner in (self.owner,self.other):self.repo.entitlements[owner]=dict(active=True,starts_at=self.clock.now()-timedelta(days=1),expires_at=self.clock.now()+timedelta(days=1))
-        self.app=create_app(settings=ServerSettings(),repository=self.repo,data=self.data,sessions=SyntheticSessions(self.clock),clock=self.clock)
+        self.app=create_app(settings=ServerSettings(),repository=self.repo,data=self.data,sessions=SyntheticSessions(self.clock),clock=self.clock, operating_mode="legacy_synthetic")
         self.client=TestClient(self.app);self.keys=0
     def request(self,method,path,body=None,owner=None,key=None):
         self.keys+=1
@@ -101,7 +101,10 @@ class BackendWorkflowTests(unittest.TestCase):
         spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
         self.assertEqual(len(catalog['operations']),len(spec['operations']))
         self.assertEqual({o['id'] for o in catalog['operations']},{o['id'] for o in spec['operations']})
-        for operation in catalog['operations']:
+        # This fixture explicitly runs legacy_synthetic: current 25-route auth is covered by the rights-mode suite.
+        legacy_operations=[o for o in catalog['operations'] if o['id'] not in {'score-input.status.read','score-input.correction.grant','report.sample.read'}]
+        self.assertEqual(len(legacy_operations),22)
+        for operation in legacy_operations:
             with self.subTest(operation=operation['id']):
                 path=operation['path'].replace('{report_id}','SYNTHETIC-missing').replace('{offering_id}','SYNTHETIC-A-2027').replace('{draft_id}','SYNTHETIC-missing')
                 result=self.client.request(operation['method'],path,content=b'{bad json')
@@ -300,7 +303,7 @@ class BackendWorkflowTests(unittest.TestCase):
         self.assertTrue(self.repo.revisions[(r['report_id'],old_version+1)]['body']['shortlist']['SYNTHETIC-A-2027']['selected'])
 
     def test_stale_revision_and_concurrent_writers_have_one_winner(self):
-        r=self.report();service=PlatformService(self.repo,self.data,self.clock)
+        r=self.report();service=PlatformService(self.repo,self.data,self.clock, operating_mode="legacy_synthetic")
         def write(n):
             try:return service.execute('shortlist.update',Actor(self.owner,True),body=dict(selected=True,expected_version=1),params=dict(report_id=r['report_id'],offering_id='SYNTHETIC-A-2027'),key='SYNTHETIC-race-'+str(n))
             except PlatformError as e:return e.code
@@ -424,7 +427,7 @@ class BackendWorkflowTests(unittest.TestCase):
         self.assertEqual(error.headers['cache-control'],'no-store')
 
     def test_no_configuration_has_health_but_no_synthetic_operational_fallback(self):
-        client=TestClient(create_app(settings=ServerSettings(),clock=self.clock))
+        client=TestClient(create_app(settings=ServerSettings(),clock=self.clock, operating_mode="legacy_synthetic"))
         self.assertEqual(client.get('/health/live').status_code,200)
         ready=client.get('/health/ready')
         self.assertEqual(ready.status_code,503);self.assertEqual(ready.json()['database']['status'],'not_run_configuration_missing')
@@ -432,7 +435,7 @@ class BackendWorkflowTests(unittest.TestCase):
         self.assertNotIn('SYNTHETIC',ready.text)
 
     def test_absent_data_returns_pending_without_zero_counts(self):
-        app=create_app(settings=ServerSettings(),repository=self.repo,data=MissingDataProvider(),sessions=SyntheticSessions(self.clock),clock=self.clock)
+        app=create_app(settings=ServerSettings(),repository=self.repo,data=MissingDataProvider(),sessions=SyntheticSessions(self.clock),clock=self.clock, operating_mode="legacy_synthetic")
         response=TestClient(app).get('/api/v1/offerings/search',headers={'Authorization':'Bearer '+self.owner})
         self.assertEqual(response.status_code,200);self.assertIsNone(response.json()['matching_offering_count']);self.assertEqual(response.json()['status'],'pending')
 

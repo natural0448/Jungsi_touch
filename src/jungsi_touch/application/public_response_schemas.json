@@ -308,6 +308,48 @@
           "nullable": false
         }
       }
+    },
+    {
+      "id": "score-input.status.read",
+      "contract_ref": "backend_platform_contract.dto_schemas.score_input_status",
+      "roots": {
+        "standard": {
+          "ref": "score_input_status",
+          "nullable": false
+        },
+        "paid": {
+          "ref": "score_input_status",
+          "nullable": false
+        }
+      }
+    },
+    {
+      "id": "score-input.correction.grant",
+      "contract_ref": "backend_platform_contract.dto_schemas.score_input_correction",
+      "roots": {
+        "standard": {
+          "ref": "score_input_correction",
+          "nullable": false
+        },
+        "paid": {
+          "ref": "score_input_correction",
+          "nullable": false
+        }
+      }
+    },
+    {
+      "id": "report.sample.read",
+      "contract_ref": "backend_platform_contract.dto_schemas.sample_report",
+      "roots": {
+        "standard": {
+          "ref": "sample_report",
+          "nullable": false
+        },
+        "paid": {
+          "ref": "sample_report",
+          "nullable": false
+        }
+      }
     }
   ],
   "schemas": {
@@ -2931,6 +2973,10 @@
         "overall": {
           "ref": "overall_analysis",
           "nullable": false
+        },
+        "read_only_snapshot": {
+          "ref": "read_only_snapshot",
+          "nullable": false
         }
       },
       "required": [
@@ -2941,7 +2987,9 @@
         "updated_at",
         "overall"
       ],
-      "optional": []
+      "optional": [
+        "read_only_snapshot"
+      ]
     },
     "analysis_status": {
       "type": "object",
@@ -4075,6 +4123,7 @@
         "empty_feasible_support",
         "empty_population",
         "entitlement_identity_or_time_invalid",
+        "entitlement_identity_unavailable",
         "entitlement_result_invalid",
         "entitlement_rls_unverified",
         "entitlement_runtime_role_unverified",
@@ -4275,6 +4324,7 @@
         "invalid_schema",
         "invalid_score",
         "invalid_score_domain",
+        "invalid_score_stage",
         "invalid_scores",
         "invalid_selection",
         "invalid_sensitivity_fraction",
@@ -4338,6 +4388,8 @@
         "official_history_runtime_role_unverified",
         "official_history_scope_unverified",
         "pack_version_mismatch",
+        "paid_delivery_provenance_unavailable",
+        "paid_delivery_scope_unavailable",
         "paid_required",
         "percentile_binding_ambiguous",
         "percentile_binding_mismatch",
@@ -4365,6 +4417,7 @@
         "population_mismatch",
         "population_total_mismatch",
         "profile_not_found",
+        "profile_required",
         "proposal_assumptions_required",
         "public_source_invalid",
         "published_metric_invalid",
@@ -4397,7 +4450,16 @@
         "rule_estimate_context_mismatch",
         "school_identity_conflict",
         "score_confirmation_required",
+        "score_correction_unavailable",
+        "score_input_acceptance_unavailable",
+        "score_input_exhausted",
+        "score_input_policy_unavailable",
+        "score_input_transition_pending",
+        "score_input_version_conflict",
         "score_outside_domain",
+        "score_profile_superseded",
+        "score_stage_closed",
+        "score_stage_unavailable",
         "security_policy_unavailable",
         "sensitivity_provenance_mismatch",
         "sensitivity_scenario_unchanged",
@@ -4415,6 +4477,7 @@
         "storage_reference_scope_mismatch",
         "storage_registry_unavailable",
         "storage_size_mismatch",
+        "storage_transaction_context_invalid",
         "storage_unavailable",
         "subject_coverage_mismatch",
         "subject_key_mismatch",
@@ -4444,6 +4507,477 @@
         "vocational_common_subject_required",
         "year_bridge_required"
       ]
+    },
+    "read_only_analysis_status": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "read_only"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "saved_snapshot_only"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "reason_code"
+      ],
+      "optional": []
+    },
+    "read_only_snapshot": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "analyses": {
+          "type": "map",
+          "nullable": false,
+          "keys": {
+            "ref": "identifier",
+            "nullable": false
+          },
+          "values": {
+            "ref": "assessment",
+            "nullable": false
+          }
+        },
+        "candidates": {
+          "ref": "candidates",
+          "nullable": true
+        },
+        "shortlist": {
+          "ref": "shortlist",
+          "nullable": false
+        },
+        "analysis_status": {
+          "ref": "read_only_analysis_status",
+          "nullable": false
+        }
+      },
+      "required": [
+        "analyses",
+        "candidates",
+        "shortlist",
+        "analysis_status"
+      ],
+      "optional": []
+    },
+    "score_input_status": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.score-input-status/v1"
+          ]
+        },
+        "exam_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "pack_version": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "academic_year": {
+          "type": "integer",
+          "nullable": false
+        },
+        "stage": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "mock",
+            "provisional",
+            "final"
+          ]
+        },
+        "stage_state": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "open",
+            "not_open",
+            "closed"
+          ]
+        },
+        "opens_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "closes_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "paid_input_allowed": {
+          "type": "boolean",
+          "nullable": false
+        },
+        "input_limit_mode": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "stage_rights",
+            "preview_exempt"
+          ]
+        },
+        "initial_used": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "initial_remaining": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "correction_granted": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "correction_used": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "correction_request_remaining": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "effective_save_remaining": {
+          "type": "integer",
+          "nullable": true,
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "entry_version": {
+          "type": "integer",
+          "nullable": false
+        },
+        "current_profile_id": {
+          "ref": "identifier",
+          "nullable": true
+        },
+        "current_report_id": {
+          "ref": "identifier",
+          "nullable": true
+        },
+        "last_attempt_outcome": {
+          "type": "string",
+          "nullable": true,
+          "enum": [
+            "accepted",
+            "rejected"
+          ]
+        },
+        "last_rejection_code": {
+          "ref": "safe_code",
+          "nullable": true
+        },
+        "legacy_transition_status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "ready"
+          ]
+        },
+        "current_pass_first_paid_result_at": {
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "required": [
+        "format",
+        "exam_id",
+        "pack_version",
+        "academic_year",
+        "stage",
+        "stage_state",
+        "opens_at",
+        "closes_at",
+        "paid_input_allowed",
+        "input_limit_mode",
+        "initial_used",
+        "initial_remaining",
+        "correction_granted",
+        "correction_used",
+        "correction_request_remaining",
+        "effective_save_remaining",
+        "entry_version",
+        "current_profile_id",
+        "current_report_id",
+        "last_attempt_outcome",
+        "last_rejection_code",
+        "legacy_transition_status",
+        "current_pass_first_paid_result_at"
+      ],
+      "optional": []
+    },
+    "score_input_correction": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.score-input-correction/v1"
+          ]
+        },
+        "command_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "ticket_ref": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "exam_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "stage": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "mock",
+            "provisional",
+            "final"
+          ]
+        },
+        "entry_version": {
+          "type": "integer",
+          "nullable": false
+        },
+        "granted": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            true
+          ]
+        },
+        "correction_request_remaining": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            0
+          ]
+        },
+        "effective_save_remaining": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "previous_entry_id": {
+          "ref": "identifier",
+          "nullable": false
+        }
+      },
+      "required": [
+        "format",
+        "command_id",
+        "ticket_ref",
+        "exam_id",
+        "stage",
+        "entry_version",
+        "granted",
+        "correction_request_remaining",
+        "effective_save_remaining",
+        "previous_entry_id"
+      ],
+      "optional": []
+    },
+    "sample_subject": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "area": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "korean",
+            "math",
+            "inquiry1",
+            "inquiry2"
+          ]
+        },
+        "standard_score": {
+          "type": "integer",
+          "nullable": false
+        }
+      },
+      "required": [
+        "area",
+        "standard_score"
+      ],
+      "optional": []
+    },
+    "sample_analysis": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.sample-analysis/v1"
+          ]
+        },
+        "source_kind": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "synthetic"
+          ]
+        },
+        "total_standard_score": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            386
+          ]
+        },
+        "subjects": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "sample_subject",
+            "nullable": false
+          }
+        },
+        "overall": {
+          "type": "object",
+          "nullable": false,
+          "properties": {
+            "status": {
+              "type": "string",
+              "nullable": false,
+              "enum": [
+                "pending"
+              ]
+            },
+            "reason_code": {
+              "type": "string",
+              "nullable": false,
+              "enum": [
+                "sample_no_population"
+              ]
+            },
+            "top_percent": {
+              "type": "number",
+              "nullable": true
+            }
+          },
+          "required": [
+            "status",
+            "reason_code",
+            "top_percent"
+          ],
+          "optional": []
+        },
+        "input_editable": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            false
+          ]
+        },
+        "persisted": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "source_kind",
+        "total_standard_score",
+        "subjects",
+        "overall",
+        "input_editable",
+        "persisted"
+      ],
+      "optional": []
+    },
+    "sample_report": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.sample-report/v1"
+          ]
+        },
+        "synthetic": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            true
+          ]
+        },
+        "sample_id": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "SYNTHETIC-virtual386-v1"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "가상 학생 고정 견본"
+          ]
+        },
+        "report": {
+          "ref": "sample_analysis",
+          "nullable": false
+        }
+      },
+      "required": [
+        "format",
+        "synthetic",
+        "sample_id",
+        "label",
+        "report"
+      ],
+      "optional": []
     }
   },
   "auxiliary_roots": {

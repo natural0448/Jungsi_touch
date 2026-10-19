@@ -88,6 +88,7 @@ async function fixture(change: (policy: NativeObject) => void = () => {}, operat
           return Promise.resolve(replay);
         },
       },
+      "legacy_synthetic",
     );
   function request(
     operation = "overall.analyze",

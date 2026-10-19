@@ -57,12 +57,12 @@ class SupabaseRuntimeTests(unittest.TestCase):
         args=dict(security=SecuritySettings(TOKEN), settings=self.settings, data=self.provider(),
                   selection=self.selection, repository=self.repository)
         args.update(changes)
-        return runtime.create_supabase_secured_app(**args)
+        return runtime.create_supabase_secured_app(**args, operating_mode="legacy_synthetic")
     def ready(self, app, token=TOKEN):
         with TestClient(app) as c: return c.get('/health/ready', headers={'X-Jungsi-Relay-Token':token})
     def test_baseline_legacy_drive_requirement_is_reproduced_and_preserved(self):
         app=create_secured_app(security=SecuritySettings(TOKEN), settings=self.settings,
-                               repository=self.repository, data=self.provider())
+                               repository=self.repository, data=self.provider(), operating_mode="legacy_synthetic")
         self.assertEqual(self.ready(app).status_code,503)
         self.assertEqual(set(self.settings.missing()), {'GOOGLE_DRIVE_ACCESS_TOKEN','GOOGLE_DRIVE_INPUT_FOLDER',
                                                       'GOOGLE_DRIVE_OUTPUT_FOLDER','JUNGSI_DRIVE_REGISTRY'})
@@ -118,10 +118,12 @@ class SupabaseRuntimeTests(unittest.TestCase):
         self.assertFalse(self.db);self.assertFalse(self.network)
     def test_existing_API_bindings_and_user_authentication_are_retained(self):
         app=self.app();ops=json.loads((BASE_HTTP.parents[1]/'application/route_catalog.json').read_text(encoding='utf-8'))['operations']
-        self.assertEqual(len(ops),22)
+        self.assertEqual(len(ops),25)
+        legacy_ops=[o for o in ops if o['id'] not in {'score-input.status.read','score-input.correction.grant','report.sample.read'}]
+        self.assertEqual(len(legacy_ops),22)
         with TestClient(app) as c:
             self.assertEqual(c.get('/api/v1/me',headers={'X-Jungsi-Relay-Token':TOKEN}).status_code,401)
-            for op in ops:
+            for op in legacy_ops:
                 path=op['path'].replace('{report_id}','SYNTHETIC-report').replace('{offering_id}','SYNTHETIC-offering').replace('{draft_id}','SYNTHETIC-draft')
                 self.assertEqual(c.request(op['method'],path).status_code,403)
         self.assertFalse(self.network)

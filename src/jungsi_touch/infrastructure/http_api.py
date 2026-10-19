@@ -22,12 +22,12 @@ from .postgres_forecast_repository import PostgresForecastRepository
 from .forecast_inputs import DriveForecastInputProvider
 
 
-def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None,entitlements=None):
+def create_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None,entitlements=None,operating_mode="rights"):
     return _compose_app(settings=settings,repository=repository,data=data,sessions=sessions,clock=clock,
-                        forecast_repository=forecast_repository,forecast_inputs=forecast_inputs,entitlements=entitlements)
+                        forecast_repository=forecast_repository,forecast_inputs=forecast_inputs,entitlements=entitlements,operating_mode=operating_mode)
 
 
-def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None,entitlements=None,boundary=None,readiness_policy=None):
+def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=None,forecast_repository=None,forecast_inputs=None,entitlements=None,boundary=None,readiness_policy=None,operating_mode="rights"):
     settings=settings or ServerSettings.from_environment()
     clock=clock or UtcClock()
     if repository is None: repository=PostgresRepository(settings.database_url) if settings.database_url else UnavailableRepository()
@@ -43,7 +43,7 @@ def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=N
     sessions=sessions or SupabaseSessionProvider(settings.supabase_url,settings.supabase_key)
     auth=SessionService(sessions,repository if entitlements is None else entitlements,clock)
     forecast_store=forecast_repository or (PostgresForecastRepository(repository) if isinstance(repository,PostgresRepository) else None)
-    service=(PlatformService if boundary is None else boundary.platform)(repository,data,clock,forecast_repository=forecast_store)
+    service=(PlatformService if boundary is None else boundary.platform)(repository,data,clock,forecast_repository=forecast_store,operating_mode=operating_mode)
     forecasts=ForecastPolicyService(forecast_store or UnavailableRepository(),forecast_inputs or DriveForecastInputProvider(data),clock)
     service.forecast_service=forecasts
     service.session_service=auth
@@ -125,6 +125,7 @@ def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=N
             elif operation!='session.read':
                 access=await run_in_threadpool(service.access.operation_access,operation,actor,report_id=request.path_params.get('report_id'))
                 if not access.allowed:raise PlatformError(access.status,access.http_status)
+                if operation=='score-input.correction.grant' and actor.admin_access_origin!='verified_own_profile_active_admin_aal2':raise PlatformError('management_mfa_required',403)
             body=None
             if request.method in ('POST','PUT'):
                 length=request.headers.get('content-length')
@@ -142,12 +143,14 @@ def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=N
         return endpoint
     catalog=json.loads(Path(__file__).parents[1].joinpath('application/route_catalog.json').read_text(encoding='utf-8'))
     # Static paths, especially /offerings/search, are registered before parameters.
-    operations=sorted(catalog['operations'],key=lambda o:('{' in o['path'],o['path']))
+    selected=[o for o in catalog['operations'] if operating_mode!='legacy_synthetic' or o['id'] not in {'score-input.status.read','score-input.correction.grant','report.sample.read'}]
+    operations=sorted(selected,key=lambda o:('{' in o['path'],o['path']))
     for operation in operations:
         app.add_api_route(operation['path'],handler(operation['id']),methods=[operation['method']],
                           operation_id=operation['id'].replace('.','_'),openapi_extra={'x-jungsi-operation':operation['id']})
     app.state.forecasts=forecasts
     app.state.platform=service
+    app.state.operating_mode=operating_mode
     writer=DriveClient(settings.drive_token,settings.drive_input_folder,settings.drive_output_folder) if settings.drive_token and settings.drive_output_folder else None
     app.state.publication=ReportPublicationService(service,writer)
     return app

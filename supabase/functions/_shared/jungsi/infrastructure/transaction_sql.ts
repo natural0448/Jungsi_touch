@@ -28,10 +28,10 @@ const PASS_WITH_RUNTIME_SQL = `WITH runtime_guard AS MATERIALIZED (
  AND NOT pg_has_role(current_user,'jungsi_backend_owner','MEMBER')
  AND NOT pg_has_role(current_user,'jungsi_backend_owner','USAGE')
  AND NOT pg_has_role(current_user,'postgres','MEMBER')
-), payload(exists_native,columns_native,constraints_native,role_native,policies_native,expiry_native) AS (
+), payload(exists_native,columns_native,constraints_native,role_native,policies_native,expiry_native,pass_id_native) AS (
 ${PASS_STATE_SQL}
 ) SELECT exists_native,columns_native::text,constraints_native::text,
- role_native::text,policies_native::text,expiry_native
+ role_native::text,policies_native::text,expiry_native,pass_id_native
  FROM payload CROSS JOIN runtime_guard WHERE runtime_guard.ok`;
 async function configure(tx: NativeSqlTransaction, subject: string | null): Promise<void> {
   await tx.query("SET LOCAL TIME ZONE 'UTC'");
@@ -68,7 +68,29 @@ function verifyRole(rows: unknown[][], readOnly: boolean): void {
   ) throw new AccessError("storage_runtime_role_unverified", 503);
 }
 export class SupabaseSqlTransport implements ReadonlyPassSqlPort {
-  constructor(private readonly pool: NativeSqlPool) {}
+  private frame: { readonly subject: string; readonly tx: NativeSqlTransaction } | null = null;
+  constructor(private readonly pool: NativeSqlPool, private readonly requestLocal = false) {}
+  /** Reuse only the pool. Transaction state is confined to one request-local fork. */
+  fork(): SupabaseSqlTransport {
+    return new SupabaseSqlTransport(this.pool, true);
+  }
+  async requestWrite<T>(
+    subject: string,
+    work: (tx: NativeSqlTransaction) => Promise<T>,
+  ): Promise<T> {
+    if (!this.requestLocal || this.frame) {
+      throw new AccessError("storage_transaction_context_invalid", 503);
+    }
+    const selected = subjectId(subject);
+    return await this.run(false, selected, async (tx) => {
+      this.frame = { subject: selected, tx };
+      try {
+        return await work(tx);
+      } finally {
+        this.frame = null;
+      }
+    });
+  }
   async readOnlyOne(statement: string, parameters: readonly unknown[]): Promise<unknown> {
     if (
       statement !== PASS_STATE_SQL || !Array.isArray(parameters) || parameters.length !== 4 ||
@@ -82,11 +104,11 @@ export class SupabaseSqlTransport implements ReadonlyPassSqlPort {
       return await this.pool.transaction(true, async (tx) => {
         const subject = parameters[1] === null ? null : subjectId(parameters[1] as string);
         await configure(tx, subject);
-        // Metadata, role guard and MAX expiry are one positional-row query.
+        // Metadata, role guard, maximum expiry and its stable pass ID are one positional-row query.
         const rows = await tx.query(PASS_WITH_RUNTIME_SQL, parameters);
         if (
           !Array.isArray(rows) || rows.length !== 1 || !Array.isArray(rows[0]) ||
-          rows[0].length !== 6
+          rows[0].length !== 7
         ) {
           throw new AccessError("entitlement_unavailable", 503);
         }
@@ -112,6 +134,12 @@ export class SupabaseSqlTransport implements ReadonlyPassSqlPort {
     work: (tx: NativeSqlTransaction) => Promise<T>,
   ): Promise<T> {
     const selected = subjectId(subject);
+    if (this.frame) {
+      if (!this.requestLocal || this.frame.subject !== selected) {
+        throw new AccessError("storage_transaction_context_invalid", 503);
+      }
+      return await work(this.frame.tx);
+    }
     try {
       return await this.pool.transaction(readOnly, async (tx) => {
         await configure(tx, selected);

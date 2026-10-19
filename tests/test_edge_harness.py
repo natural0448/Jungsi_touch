@@ -128,4 +128,86 @@ class SourceRegistrationCases(unittest.TestCase):
         with self.assertRaisesRegex(edge.EdgeFailure,'coverage_invalid'):
             runner.operation_registration(spec)
 
+class PolicyExtensionRegistrationCases(unittest.TestCase):
+    def setUp(self):
+        self.source=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+    def rejects(self,spec):
+        with self.assertRaisesRegex(edge.EdgeFailure,'operation_registration_'):
+            runner.operation_registration(spec)
+    def test_current25_has_distinct_legacy22_and_extension3_source_only(self):
+        result=runner.operation_registration(self.source)
+        self.assertEqual(result['all_22'],'CODE_REGISTERED')
+        legacy=result['source_registration'];extension=result['policy_extension_source_registration']
+        self.assertEqual((legacy['contract_operation_count'],legacy['legacy_scope_operation_count'],legacy['registered_operation_count']),(25,22,22))
+        self.assertEqual((extension['contract_operation_count'],extension['registered_operation_count']),(3,3))
+        self.assertEqual(set(legacy['registered_operation_ids'])|set(extension['registered_operation_ids']),{o['id']for o in self.source['operations']})
+        self.assertFalse(set(legacy['registered_operation_ids'])&set(extension['registered_operation_ids']))
+        self.assertEqual(extension['activation_status'],'NOT_RUN')
+        self.assertEqual(extension['native_acceptance'],'NOT_VERIFIED_BY_SOURCE_SUITE')
+        self.assertNotIn('all_25',result);self.assertNotIn('production_ready',result)
+    def test_current25_cannot_use_legacy22_without_req27(self):
+        wrong=copy.deepcopy(self.source);wrong.pop('score_input_policy_contract');self.rejects(wrong)
+    def test_legacy_missing_duplicate_or_unregistered_state_is_rejected(self):
+        for mode in ('state_missing','state_extra','operation_missing','legacy_missing','legacy_duplicate'):
+            with self.subTest(mode=mode):
+                wrong=copy.deepcopy(self.source);c=wrong['score_input_policy_contract'];states=wrong['supabase_deployment_contract']['live_execution']['operations']
+                oid=c['legacy_operation_ids'][0]
+                if mode=='state_missing':states.pop(oid)
+                elif mode=='state_extra':states['unregistered.operation']=copy.deepcopy(states[oid])
+                elif mode=='operation_missing':wrong['operations']=[o for o in wrong['operations']if o['id']!=oid]
+                elif mode=='legacy_missing':c['legacy_operation_ids'].remove(oid)
+                else:c['legacy_operation_ids'].append(oid)
+                self.rejects(wrong)
+    def test_extension_missing_duplicate_or_unregistered_operation_is_rejected(self):
+        for mode in ('operation_missing','operation_duplicate','extension_missing','extension_duplicate','extension_extra'):
+            with self.subTest(mode=mode):
+                wrong=copy.deepcopy(self.source);c=wrong['score_input_policy_contract'];oid=c['extension_operation_ids'][0]
+                if mode=='operation_missing':wrong['operations']=[o for o in wrong['operations']if o['id']!=oid]
+                elif mode=='operation_duplicate':wrong['operations'].append(copy.deepcopy(next(o for o in wrong['operations']if o['id']==oid)))
+                elif mode=='extension_missing':c['extension_operation_ids'].remove(oid)
+                elif mode=='extension_duplicate':c['extension_operation_ids'].append(oid)
+                else:c['extension_operation_ids'].append('unregistered.operation')
+                self.rejects(wrong)
+    def test_extension_implementation_and_runtime_test_bindings_are_exact(self):
+        for mode in ('missing','extra','hash','test_path','symbol','evidence_missing','evidence_hash','evidence_extra'):
+            with self.subTest(mode=mode):
+                wrong=copy.deepcopy(self.source);c=wrong['score_input_policy_contract'];bindings=c['extension_implementation_bindings'];oid=c['extension_operation_ids'][0]
+                if mode=='missing':bindings.pop(oid)
+                elif mode=='extra':bindings['unregistered.operation']=copy.deepcopy(bindings[oid])
+                elif mode=='hash':bindings[oid]['source_sha256']='0'*64
+                elif mode=='test_path':bindings[oid]['path']='tests/edge/test_score_input_policy.ts'
+                elif mode=='symbol':bindings[oid]['symbol']='Unregistered.execute'
+                elif mode=='evidence_missing':c['extension_runtime_test_bindings'].pop(next(iter(c['extension_runtime_test_bindings'])))
+                elif mode=='evidence_hash':c['extension_runtime_test_bindings'][next(iter(c['extension_runtime_test_bindings']))]='0'*64
+                else:c['extension_runtime_test_bindings']['tests/edge/unregistered.ts']='0'*64
+                self.rejects(wrong)
+    def test_pinned_legacy_hash_or_current_candidate_cannot_be_forged(self):
+        for mode in ('prior','current','live_binding'):
+            with self.subTest(mode=mode):
+                wrong=copy.deepcopy(self.source);c=wrong['score_input_policy_contract']
+                if mode=='prior':c['prior_source_bindings'][next(iter(c['prior_source_bindings']))]='0'*64
+                elif mode=='current':c['current_source_bindings'][next(iter(c['current_source_bindings']))]='0'*64
+                else:wrong['supabase_deployment_contract']['live_execution']['operations']['overall.analyze']['binding']['source_sha256']='0'*64
+                self.rejects(wrong)
+
 if __name__=="__main__":unittest.main()
+
+class OwnerReviewRegistrationCases(unittest.TestCase):
+    def current(self):
+        spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
+        bindings=spec['owner_current_review_contract']['verification']['source_bindings']
+        return spec,{b['path']:b['sha256']for b in bindings}
+    def test_owner_suite_is_separate_and_bound_to_current_source(self):
+        s,b=self.current();self.assertEqual(runner.owner_review_registration(s,b)['test_count'],36)
+        self.assertEqual(s['edge_harness']['unit_count'],656)
+    def test_owner_source_cannot_silently_drop_its_contract(self):
+        s,b=self.current();s.pop('owner_current_review_contract')
+        with self.assertRaisesRegex(edge.EdgeFailure,'owner_review_contract_missing'):runner.owner_review_registration(s,b)
+    def test_owner_suite_rejects_hash_or_count_drift(self):
+        for mode in ('hash','count'):
+            s,b=self.current();v=s['owner_current_review_contract']['verification']
+            if mode=='hash':v['source_bindings'][0]['sha256']='f'*64
+            else:v['test_count']=35
+            with self.assertRaisesRegex(edge.EdgeFailure,'owner_review_'):runner.owner_review_registration(s,b)
+    def test_original_fixtures_without_owner_source_keep_their_scope(self):
+        self.assertIsNone(runner.owner_review_registration({},{}))

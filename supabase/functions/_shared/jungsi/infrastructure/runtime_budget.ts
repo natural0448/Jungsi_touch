@@ -1,6 +1,7 @@
 /** Private approved policy -> request-local shared reservations. No capacities or approvals default. */
 import { AccessError } from "../application/access.ts";
-import { validateScoreInput } from "../application/overall_analysis.ts";
+import { ApprovedOperatingPolicy } from "../application/operating_policy.ts";
+import { validateScoreInput, validateScoreStructure } from "../application/overall_analysis.ts";
 import type { PlatformRepositoryPort } from "../application/platform_repository.ts";
 import type { RequestClockPort } from "../application/ports.ts";
 import {
@@ -8,7 +9,7 @@ import {
   type BudgetRequest,
   type RequestBudgetPort,
 } from "../application/request_budget.ts";
-import { sessionDto } from "../application/session_service.ts";
+import { requirePaidSession, sessionDto } from "../application/session_service.ts";
 import {
   BUDGET_KINDS,
   type BudgetKind,
@@ -17,6 +18,7 @@ import {
 } from "../application/usage_budget.ts";
 import {
   type ApprovedUsagePlan,
+  type PreparedUsageAdmission,
   SharedRequestBudget,
   type UsagePlanningPort,
   type UsageReplayVerificationPort,
@@ -79,12 +81,14 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
   readonly exams: ReadonlyMap<string, RuntimeExamBudget>;
   readonly version: string;
   readonly expiresAtUtc: bigint;
+  readonly operating: ApprovedOperatingPolicy | null;
   constructor(
     raw: Uint8Array,
     private readonly binding: ApprovedRuntimeBinding,
     private readonly repository: PlatformRepositoryPort,
     private readonly clock: RequestClockPort,
     private readonly replays: UsageReplayVerificationPort,
+    private readonly mode: "rights" | "legacy_synthetic" = "rights",
   ) {
     let row: NativeObject;
     try {
@@ -93,7 +97,9 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
       fail();
     }
     if (
-      row.format !== "jungsi.runtime-usage-policy/v1" || row.status !== "approved" ||
+      !["jungsi.runtime-usage-policy/v1", "jungsi.runtime-usage-policy/v2"].includes(
+        row.format as string,
+      ) || row.status !== "approved" ||
       row.purpose !== "jungsi-api-runtime" ||
       typeof row.version !== "string" || !ID.test(row.version) ||
       row.approval_reference_sha256 !== binding.approvalReferenceSha256 ||
@@ -181,6 +187,19 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
     }
     if (binding.operations.some((op) => ANALYSIS.includes(op)) && !exams.size) fail();
     this.exams = exams;
+    this.operating = row.format === "jungsi.runtime-usage-policy/v2"
+      ? new ApprovedOperatingPolicy(row.operating_policy, {
+        policyVersion: this.version,
+        approvalSha256: binding.approvalReferenceSha256,
+        expiresAtUtc: this.expiresAtUtc,
+        exams,
+        registrySha256: binding.references.registry.sha256,
+        selectionSha256: binding.references.selection.sha256,
+      })
+      : null;
+    if (row.format === "jungsi.runtime-usage-policy/v1" && Object.hasOwn(row, "operating_policy")) {
+      fail();
+    }
     this.assertLive();
   }
   assertLive(): void {
@@ -191,11 +210,15 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
   }
   private async scores(request: BudgetRequest): Promise<NativeObject> {
     const body = inputObject(request.body), owner = request.session.user.subjectId;
+    const validate = this.operating ? validateScoreStructure : validateScoreInput;
     if (request.operation === "score-profile.create") {
-      return validateScoreInput(body.scores) as NativeObject;
+      return validate(body.scores) as NativeObject;
     }
     if (request.operation === "overall.analyze" && !Object.hasOwn(body, "profile_id")) {
-      return validateScoreInput(body) as NativeObject;
+      if (this.operating || this.mode !== "legacy_synthetic") {
+        throw new AccessError("profile_required", 422);
+      }
+      return validate(body) as NativeObject;
     }
     let profileId: string;
     if (request.operation === "overall.analyze") profileId = id(body.profile_id);
@@ -221,6 +244,10 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
     const cost = this.costs.get(request.operation);
     if (!cost) fail();
     const analysis = ANALYSIS.includes(request.operation);
+    if (analysis && this.mode !== "legacy_synthetic") {
+      requirePaidSession(request.session, this.clock.nowUtc());
+      if (!this.operating) throw new AccessError("score_input_policy_unavailable", 503);
+    }
     let scoresHash: string | null = null,
       contextHash: string | null = null,
       exam: RuntimeExamBudget | undefined;
@@ -260,9 +287,19 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
       });
     }
     const replay = analysis && await this.replays.exists(request);
+    const stageProof = analysis && this.operating
+      ? this.operating.budgetProof(
+        request.session,
+        request.operation,
+        replay ? 0n : cost.base + cost.perOffering * count,
+        this.clock.nowUtc(),
+      )
+      : undefined;
     const demands: UsageDemand[] = [];
     for (const [kind, d] of this.dimensions) {
-      if (!analysis && ["distinct_scores", "calculation_cost"].includes(kind)) continue;
+      if ((!analysis || stageProof) && ["distinct_scores", "calculation_cost"].includes(kind)) {
+        continue;
+      }
       const units = kind === "result_volume"
         ? cost.resultBytes
         : kind === "calculation_cost"
@@ -296,6 +333,7 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
       calculationContextSha256: contextHash,
       computation: replay ? "idempotent_replay" : "required",
       demands: Object.freeze(demands),
+      ...(stageProof ? { stageProof } : {}),
     });
   }
 }
@@ -328,6 +366,48 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
     private readonly controls: SupabaseRuntimeControls,
   ) {
     this.shared = new SharedRequestBudget(policy, store, clock, replays);
+  }
+  async admit(request: BudgetRequest): Promise<PreparedUsageAdmission> {
+    await this.controls.current();
+    this.policy.assertLive();
+    return await this.shared.admit(request);
+  }
+  async runAdmitted<T>(
+    admission: PreparedUsageAdmission,
+    request: BudgetRequest,
+    work: () => Promise<T>,
+    onStage?: (stage: RuntimeBudgetStage) => void | (() => void),
+  ): Promise<T> {
+    const stage = (name: RuntimeBudgetStage) => {
+      try {
+        ignoreStageCompletion(onStage?.(name));
+      } catch {
+        // Diagnostic completion callbacks must not change the business result.
+      }
+    };
+    stage("budget_business_current");
+    await this.controls.current();
+    this.policy.assertLive();
+    const result = await this.shared.runAdmitted(admission, async () => {
+      stage("budget_business");
+      const value = await work();
+      stage("budget_business_current");
+      await this.controls.current();
+      this.policy.assertLive();
+      return value;
+    }, request);
+    stage("budget_final_current");
+    await this.controls.current();
+    this.policy.assertLive();
+    this.shared.assertAdmission(admission, request);
+    return result;
+  }
+  assertAdmission(admission: PreparedUsageAdmission, request: BudgetRequest): void {
+    this.policy.assertLive();
+    this.shared.assertAdmission(admission, request);
+  }
+  cancelAdmission(admission: PreparedUsageAdmission): Promise<void> {
+    return this.shared.cancel(admission);
   }
   async run<T>(
     request: BudgetRequest,

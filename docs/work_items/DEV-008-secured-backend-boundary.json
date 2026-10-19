@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "accepted_on_develop_scoped_synthetic_verified",
   "contract_ref": "secured_backend_preparation_contract",
-  "contract_version": "1.9.72",
+  "contract_version": "1.9.80",
   "requirements": [
     "REQ-24",
     "REQ-25",
@@ -105,7 +105,10 @@
       "forecast.validate",
       "forecast.approve",
       "forecast.publish",
-      "forecast.published.read"
+      "forecast.published.read",
+      "score-input.status.read",
+      "score-input.correction.grant",
+      "report.sample.read"
     ],
     "health": {
       "public_path": "/health/live",

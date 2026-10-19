@@ -1,8 +1,9 @@
-/** All 22 HTTP routes. Concrete business/provider/budget wiring is supplied separately. */
+/** All 25 HTTP routes (legacy 22 plus policy 3). Concrete business/provider/budget wiring is supplied separately. */
 import { AccessError, authorizeReport } from "../application/access.ts";
 import {
   API_OPERATION_IDS,
   type ApiBusinessPort,
+  type ApiExecution,
   type ApiRoutePolicy,
 } from "../application/api_dispatch.ts";
 import {
@@ -23,6 +24,7 @@ import type {
 import { publicJsonText, PublicResponseProjection } from "../application/public_response.ts";
 import { BUDGET_OPERATIONS, type RequestBudgetPort } from "../application/request_budget.ts";
 import {
+  isVerifiedAdminSnapshot,
   readSessionSnapshot,
   sessionDto,
   type SessionSnapshot,
@@ -44,6 +46,9 @@ export const API_REQUEST_STAGES = [
   "final_session",
   "final_projection",
   "response_serialization",
+  "response_current",
+  "response_delivery",
+  "response_acceptance",
 ] as const;
 export type ApiRequestStage = typeof API_REQUEST_STAGES[number];
 export interface ApiHttpPorts {
@@ -59,6 +64,11 @@ export interface ApiHttpPorts {
   readonly projection: PublicResponseProjection;
   readonly budget: RequestBudgetPort;
   readonly business: ApiBusinessPort;
+  readonly completion?: {
+    accept<T>(request: ApiExecution, work: () => Promise<T>): Promise<T>;
+    deliver(request: ApiExecution, result: unknown, requestId: string): Promise<void>;
+    current(): Promise<void>;
+  };
   /** Constant phase names only. Observation failures cannot change request behavior. */
   readonly onStage?: (stage: ApiRequestStage) => void;
 }
@@ -284,6 +294,9 @@ export function createApiHandler(
         }, policy.confirmed_score_profile);
       }
       stage("management_access");
+      if (policy.id === "score-input.correction.grant" && !isVerifiedAdminSnapshot(session)) {
+        throw new AccessError("management_mfa_required", 403);
+      }
       const decision = await management(policy, session, params, ports);
       // Authorization is complete before consuming any untrusted body or query.
       stage("request_body");
@@ -322,27 +335,39 @@ export function createApiHandler(
         stage("response_projection");
         return ports.projection.project(policy.id, session.tier, result);
       };
-      stage("budget");
-      const result = BUDGET_OPERATIONS.includes(
-          policy.id as typeof BUDGET_OPERATIONS[number],
-        )
-        ? await ports.budget.run(selected, work)
-        : await work();
-      // Budget settlement or a future cache hit must still pass the final boundary.
-      stage("final_session");
-      sessionDto(session, ports.clock.nowUtc());
-      stage("final_projection");
-      const approved = ports.projection.project(policy.id, session.tier, result);
-      stage("response_serialization");
-      return new Response(publicJsonText(approved), {
-        status: ["score-profile.create", "overall.analyze"].includes(policy.id) ? 201 : 200,
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          "Cache-Control": "private, no-store",
-          "X-Content-Type-Options": "nosniff",
-          "X-Request-ID": requestId,
-        },
-      });
+      const complete = async () => {
+        stage("budget");
+        const result = BUDGET_OPERATIONS.includes(
+            policy.id as typeof BUDGET_OPERATIONS[number],
+          )
+          ? await ports.budget.run(selected, work)
+          : await work();
+        // Budget settlement or a future cache hit must still pass the final boundary.
+        stage("final_session");
+        sessionDto(session, ports.clock.nowUtc());
+        stage("final_projection");
+        const approved = ports.projection.project(policy.id, session.tier, result);
+        stage("response_serialization");
+        const response = new Response(publicJsonText(approved), {
+          status: ["score-profile.create", "overall.analyze"].includes(policy.id) ? 201 : 200,
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+            "X-Request-ID": requestId,
+          },
+        });
+        stage("response_current");
+        await ports.completion?.current();
+        sessionDto(session, ports.clock.nowUtc());
+        stage("response_delivery");
+        await ports.completion?.deliver(selected, approved, requestId);
+        return response;
+      };
+      stage("response_acceptance");
+      return ports.completion
+        ? await ports.completion.accept(selected, complete)
+        : await complete();
     } catch (error) {
       return safeFailure(error, requestId);
     }

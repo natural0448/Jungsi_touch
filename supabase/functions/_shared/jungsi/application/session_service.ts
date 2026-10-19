@@ -7,6 +7,7 @@ export interface SessionSnapshot {
   readonly evaluatedAtUtc: bigint;
   readonly tier: "standard" | "paid";
   readonly paidUntilUtc: bigint | null;
+  readonly paidPassId?: string | null;
   /** Private server origin; never a public DTO field or a client role claim. */
   readonly adminOrigin?: "verified_own_profile_active_admin_aal2";
 }
@@ -48,6 +49,11 @@ export async function readSessionSnapshot(
   if (
     !state || state.authority !== "public.jeongsi_passes" || state.metadataVerified !== true ||
     state.subjectId !== user.subjectId || state.evaluatedAtUtc !== nowUtc ||
+    (state.passId !== undefined &&
+      ((state.passId === null) !== (state.paidUntilUtc === null) ||
+        state.passId !== null &&
+          (typeof state.passId !== "string" || !/^[1-9][0-9]*$/.test(state.passId) ||
+            BigInt(state.passId) > 9223372036854775807n))) ||
     (state.paidUntilUtc !== null &&
       (typeof state.paidUntilUtc !== "bigint" || state.paidUntilUtc <= nowUtc))
   ) {
@@ -59,6 +65,7 @@ export async function readSessionSnapshot(
     evaluatedAtUtc: nowUtc,
     tier: state.paidUntilUtc === null && !admin ? "standard" : "paid",
     paidUntilUtc: state.paidUntilUtc,
+    paidPassId: state.passId ?? null,
     ...(admin ? { adminOrigin: "verified_own_profile_active_admin_aal2" as const } : {}),
   });
   if (admin) verifiedAdminSnapshots.add(snapshot);
@@ -105,4 +112,11 @@ export function sessionDto(snapshot: SessionSnapshot, nowUtc: bigint): SessionDt
 export function requirePaidSession(snapshot: SessionSnapshot, nowUtc: bigint): void {
   const dto = sessionDto(snapshot, nowUtc);
   if (dto.member_tier !== "paid") throw new AccessError("paid_required", 403);
+}
+
+/** Private identity proof; neither client role fields nor a copied snapshot grant exemption. */
+export function isVerifiedAdminSnapshot(snapshot: SessionSnapshot): boolean {
+  return verifiedAdminSnapshots.has(snapshot) &&
+    snapshot.adminOrigin === "verified_own_profile_active_admin_aal2" &&
+    verifiedAdmin(snapshot.user);
 }

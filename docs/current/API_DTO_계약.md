@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.72이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.80이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -8,14 +8,14 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 
 권한은 body·query 검증/자료 조회/멱등 조회보다 먼저 검사한다. unknown field와 중복 query key는 거절한다. 숫자 점수/누적은 엔진의 소수 문자열이며 원자료/전체 분포/가중치/비밀값/로컬 출처 경로는 제공하지 않는다. 모든 응답은 Cache-Control: no-store다.
 
-## 22개 요청과 응답
+## 25개 요청과 응답
 
 | API | 메서드/경로 | 본문 | 쿼리 | 응답 DTO | 키 필수 |
 | --- | --- | --- | --- | --- | --- |
 | history.search | GET /api/v1/admission-history | 없음 | academic_year (2024~2027 선택), university_q, department_q, region, group, cursor, limit (1~100; 기본 50) | catalog_search (items=history_metric); backend_platform_contract.dto_schemas.catalog_search | False |
 | recruitment.read | GET /api/v1/offerings/{offering_id}/recruitment | 없음 | 없음 | recruitment; backend_platform_contract.dto_schemas.recruitment | False |
-| score-profile.create | POST /api/v1/score-profiles | scores: 기존 overall_analysis_contract 입력; confirmed: boolean | 없음 | profile; backend_platform_contract.dto_schemas.profile | True |
-| overall.analyze | POST /api/v1/overall-reports | profile_id; report_id (갱신 시 선택); expected_version (report_id 갱신 시 필수); 또는 DEV-001 flat 성적 입력; 이때 unconfirmed 프로필 생성 | 없음 | report; backend_platform_contract.dto_schemas.report | True |
+| score-profile.create | POST /api/v1/score-profiles | scores: 기존 overall_analysis_contract 입력; confirmed: boolean; stage?: mock/provisional/final (서버 승인 단계만) | 없음 | profile; backend_platform_contract.dto_schemas.profile | True |
+| overall.analyze | POST /api/v1/overall-reports | profile_id: 본인이 저장한 현재 입력 프로필; report_id (선택); expected_version (report_id 사용 시 필수) | 없음 | report; backend_platform_contract.dto_schemas.report | True |
 | report.read | GET /api/v1/reports/{report_id} | 없음 | 없음 | report; backend_platform_contract.dto_schemas.report | False |
 | offerings.search | GET /api/v1/offerings/search | 없음 | academic_year (2024~2027 선택), university_q, department_q, region, group, cursor, limit (1~100; 기본 50) | catalog_search (items=offering); backend_platform_contract.dto_schemas.catalog_search | False |
 | offering.read | GET /api/v1/offerings/{offering_id} | 없음 | 없음 | {status, reason_code, offering, catalog_version}; backend_platform_contract.dto_schemas.offering_detail | False |
@@ -34,6 +34,9 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 | forecast.approve | POST /api/v1/forecast-drafts/{draft_id}/approvals | expected_revision; base_result_hash; policy_version; validation_receipt_hash; reason | 없음 | forecast_draft; backend_platform_contract.dto_schemas.forecast_draft | True |
 | forecast.publish | POST /api/v1/forecast-drafts/{draft_id}/publications | expected_revision; base_result_hash; policy_version; approval_receipt_hash | 없음 | forecast_draft; backend_platform_contract.dto_schemas.forecast_draft | True |
 | forecast.published.read | GET /api/v1/offerings/{offering_id}/forecast | 없음 | 없음 | forecast_public; backend_platform_contract.dto_schemas.forecast_public | False |
+| score-input.status.read | GET /api/v1/me/score-input-status | 없음 | exam_id, stage? | score_input_status; backend_platform_contract.dto_schemas.score_input_status | False |
+| score-input.correction.grant | POST /api/v1/management/score-input-corrections | subject_id; exam_id; stage; ticket_ref; expected_version; reason_code=score_correction | 없음 | score_input_correction; backend_platform_contract.dto_schemas.score_input_correction | True |
+| report.sample.read | GET /api/v1/report-sample | 없음 | 없음 | sample_report; backend_platform_contract.dto_schemas.sample_report | False |
 
 모든 HTTP 업무 서비스는 PlatformService.execute이며 FastAPI create_app이 경로를 등록한다. 요청은 operations[].http_contract, 응답은 해당 contract_ref를 따른다. overall.analyze의 HTTP 응답은 persisted report이고 내부 overall 필드만 기존 OverallAnalysisService의 jungsi.overall-analysis/v1 엔진 DTO다. 두 객체를 루트 응답으로 혼동하지 않는다.
 
@@ -70,10 +73,10 @@ format: jungsi.persisted-report/v1
 
 유료 추가 필드: analyses, candidates, shortlist, analysis_status.
 
-- overall은 기존 jungsi.overall-analysis/v1 학생 DTO다.
-- 일반회원 응답은 paid_fields를 제외한다. 조회와 멱등 재응답에서도 현재 이용권을 다시 적용한다.
-- report_version은 정수 revision이며 갱신 요청의 expected_version과 비교한다.
-- 성적 변경은 새 프로필을 연결한 리포트 revision을 만들고 기존 분석/후보를 무효화하며 선택 항목은 needs_revalidation으로 보존한다.
+- overall은 저장된 본인의 기존 학생 DTO다.
+- 유료 요청은 기존 paid_fields를 유지한다. 만료·무이용권 본인 read/export는 승인된 저장 출처가 있는 결과만 닫힌 read_only_snapshot으로 읽으며 새 계산은 하지 않는다.
+- 미확인 legacy 출처는 유료 결과를 임의 확장하거나 first-use 날짜를 추정하지 않는다.
+- 정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다.
 
 ### catalog_search
 
@@ -277,6 +280,30 @@ format: jungsi.forecast-public/v1
 - status는 published|pending이다. pending이면 release_version/context/policy_version/input_version/forecast_70/expected_acceptance_range는 null이다.
 - context는 승인 발표본의 공개 허용 projection이며 학생 decision_evidence와 동일하다. 없는 값을 기본값으로 가공하지 않는다.
 
+### score_input_status
+
+format: jungsi.score-input-status/v1
+
+필드: format, exam_id, pack_version, academic_year, stage, stage_state, opens_at, closes_at, paid_input_allowed, input_limit_mode, initial_used, initial_remaining, correction_granted, correction_used, correction_request_remaining, effective_save_remaining, entry_version, current_profile_id, current_report_id, last_attempt_outcome, last_rejection_code, legacy_transition_status, current_pass_first_paid_result_at.
+
+- REQ-27 및 score_input_policy_contract; 공개 필드만 닫힌 재귀 스키마로 투영한다. 실제 정책 한도·회원 식별자·비밀/출처 파일은 반환하지 않는다.
+
+### score_input_correction
+
+format: jungsi.score-input-correction/v1
+
+필드: format, command_id, ticket_ref, exam_id, stage, entry_version, granted, correction_request_remaining, effective_save_remaining, previous_entry_id.
+
+- REQ-27 및 score_input_policy_contract; 공개 필드만 닫힌 재귀 스키마로 투영한다. 실제 정책 한도·회원 식별자·비밀/출처 파일은 반환하지 않는다.
+
+### sample_report
+
+format: jungsi.sample-report/v1
+
+필드: format, synthetic, sample_id, label, report.
+
+- REQ-27 및 score_input_policy_contract; 공개 필드만 닫힌 재귀 스키마로 투영한다. 실제 정책 한도·회원 식별자·비밀/출처 파일은 반환하지 않는다.
+
 ## 시간 표시
 
 서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.
@@ -324,7 +351,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 ## 1페이지 추정 2열과 초안 시사
 
-[공식 자료·추정 표기·시사 계약](1페이지_공식자료_추정표기_시사.md)을 따른다. 추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 동일 학년도/모집행/통계 분모와 결측·실제0·음수를 검사하고 실제 불합격자수와의 차이를 표시한다. API의 공식 history_metric과 회원 권한은 유지한다. 학교별 부분 발행은 단일 활성 catalog의 누적 불변 판으로 착수하며 source 승격·자동 병합을 하지 않는다. 실제 발행된 과거 입결의 목록/검수 계보·부분 조회를 화면에서 대조하고 승인·선택·수신·브라우저·운영 발행은 별도 인수다.
+[공식 자료·추정 표기·시사 계약](1페이지_공식자료_추정표기_시사.md)을 따른다. 추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 동일 학년도/모집행/통계 분모와 결측·실제0·음수를 검사하고 실제 불합격자수와의 차이를 표시한다. API의 공식 history_metric과 회원 권한은 유지한다. 학교별 부분 발행은 단일 활성 catalog의 누적 불변 판으로 착수하며 source 승격·자동 병합을 하지 않는다. 실제 발행된 과거 입결의 목록/검수 계보·부분 조회를 화면에서 대조하고 승인·선택·수신·브라우저·운영 발행은 별도 인수다.
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -350,4 +377,31 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=1e5e27e3f897856deb05b2612e4a4ea150aff2de0e70556035d035e1ece4251b -->
+<!-- jungsi:generated spec_sha256=a0ed8ccb58011ed19e0f078cc31e865715e540dc2c4c64bc66b6eb55b2dc61f6 -->
+
+
+## 현재 정본 전국 공개 연결 · 최신 채택
+
+CR-CURRENT-NATIONAL-PUBLIC-20261019-01 / ADOPTED_IMPLEMENTATION_AND_HOSTED_ACTIVATION_PENDING. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다.
+
+적용 경로: /admissions/results, /admissions/possibilities. 기존 작업: history.search, offerings.search, offering.read, recruitment.read. P1 standard/paid without a personal score; P3 offerings/search/detail remains paid, existing active+aal2 admin exception and ownership/auth/relay rules unchanged
+
+All currently available eligible national canonical rows, not only an approved school subset; preserve active_service=false and actual-practical exclusions. All searchable does not mean a single unbounded response or automatic bulk retrieval.
+
+No DB production_allowed/engine_approved/source release flag rewrite; authorise the explicit read provider and public projection separately. Missing unpublished fields remain distinct from source eligibility.
+
+Existing public history/offering/recruitment DTO and recursive allowlist. Preserve original statistic/cohort/score kind/scale/unit/year/source and scalar types allowed by that DTO; unrepresentable source fields are explicit pending, not fabricated.
+
+Missing value, unread/unqualified metadata, officially unpublished, inapplicable and actual zero are distinct. Never fill missing cells with 0 or estimates. Final reserve number is not additional admitted count. 2024-2026 observations are not 2027 offerings. Target recruitment only uses the exact verified target PK; no prefix/name replacement, automatic lineage merge, or invented future-year quota.
+
+P1은 기존 history.search에서 academic_year를 생략해 2024·2025·2026을 함께 읽는다. 전체 UI 조회는 최대6페이지×100=600지표이며 기존 서버의 요청별 상한과 계정 공유 예산을 보존한다. 이 값은 새 전역 상한이지 이전의 연도별 합산과 같다는 주장이 아니다. 잔여 cursor는 조회 미완료이며 마지막 미완전 모집행을 보류한다. 신규 batch API는 미채택이다.
+
+Parameterized bounded page query and selected-page IDs JOIN, stable deterministic cursor sorting with query/user/source binding and head-change409. No per-row DB fetch, N+1, hidden cursor drain, COUNT(*) census, full payload download or implicit new materialization.
+
+Fresh verified JWT, relay, public.jeongsi_passes, active+aal2 admin exception, RLS app role, no-store, recursive output filtering, shared atomic quota and timeout/read/result caps unchanged. No bypass to repair409.
+
+기존 학교별 부분 발행/C 묶음 설명은 이전 절차의 보존 이력이다. 이번 전국 검색 공급의 선행 조건으로 다시 적용하지 않는다. Source registration/006a/profile migration/usage-v2/new policy activation remain separate and are not accepted by this read-provider change.
+
+Existing DB stays readable while national numerical supplementation is prepared locally and cross-reviewed, followed by one final authorised writer batch. No per-school DB upload/recombine/COPY/full reread for this request.
+
+현재 구현 IN_PROGRESS_SERVICE_TEAM · hosted 전환 NOT_RUN · 전국 브라우저 인수 NOT_RUN. 자료 보완 중인 상태와 연결 구현/배포 완료를 혼동하지 않는다.

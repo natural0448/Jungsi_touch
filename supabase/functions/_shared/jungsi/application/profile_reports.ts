@@ -9,7 +9,7 @@ import type {
   StoredReport,
 } from "./platform_repository.ts";
 import type { RequestClockPort } from "./ports.ts";
-import { sessionDto, type SessionSnapshot } from "./session_service.ts";
+import { requirePaidSession, sessionDto, type SessionSnapshot } from "./session_service.ts";
 import { cloneNativeJson, nativeJsonSha256, type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat } from "../domain/native_json.ts";
 import { utcText } from "../domain/time.ts";
@@ -61,7 +61,15 @@ export function profileDto(profile: StoredProfile): NativeObject {
     created_at: profile.created_at,
   };
 }
-export function reportDto(session: SessionSnapshot, record: StoredReport): NativeObject {
+export type ScoreWorkflowMode = {
+  readonly mode: "rights";
+  readonly workflow: import("./score_input_ports.ts").ScoreInputWorkflowPort | null;
+} | { readonly mode: "legacy_synthetic" };
+export function reportDto(
+  session: SessionSnapshot,
+  record: StoredReport,
+  scope?: import("./score_input_ports.ts").SavedSnapshotScope,
+): NativeObject {
   own(record, session.user.subjectId);
   if (!object(record.body) || !object(record.body.overall)) invalid();
   const result: NativeObject = {
@@ -78,6 +86,34 @@ export function reportDto(session: SessionSnapshot, record: StoredReport): Nativ
       result[key] = cloneNativeJson(record.body[key]);
     }
   }
+  if (session.tier !== "paid" && scope) {
+    const saved: NativeObject = {
+      analyses: {},
+      candidates: null,
+      shortlist: {},
+      analysis_status: { status: "read_only", reason_code: "saved_snapshot_only" },
+    };
+    if (object(record.body.analyses)) {
+      for (const key of scope.analysisIds) {
+        if (Object.hasOwn(record.body.analyses, key)) {
+          (saved.analyses as NativeObject)[key] = cloneNativeJson(record.body.analyses[key]);
+        }
+      }
+    }
+    if (scope.candidates && record.body.candidates !== undefined) {
+      saved.candidates = cloneNativeJson(record.body.candidates);
+    }
+    if (scope.analysisIds.length || scope.candidates || scope.legacyVerified) {
+      if (object(record.body.shortlist)) {
+        for (const [key, value] of Object.entries(record.body.shortlist)) {
+          if (scope.analysisIds.includes(key)) {
+            (saved.shortlist as NativeObject)[key] = cloneNativeJson(value);
+          }
+        }
+      }
+      result.read_only_snapshot = saved;
+    }
+  }
   return result;
 }
 export class ProfileReportService implements ApiBusinessPort {
@@ -86,6 +122,7 @@ export class ProfileReportService implements ApiBusinessPort {
     private readonly repository: PlatformRepositoryPort,
     data: OverallDataPort,
     private readonly clock: RequestClockPort,
+    private readonly policyMode: ScoreWorkflowMode = { mode: "rights", workflow: null },
   ) {
     this.overall = new OverallAnalysisService(data);
   }
@@ -120,17 +157,22 @@ export class ProfileReportService implements ApiBusinessPort {
       throw new AccessError("route_not_found", 404);
     }
     this.fresh(session);
-    if (op === "report.export" && session.tier !== "paid") {
+    const legacy = this.policyMode.mode === "legacy_synthetic";
+    const workflow = this.policyMode.mode === "rights" ? this.policyMode.workflow : null;
+    if (legacy && op === "report.export" && session.tier !== "paid") {
       throw new AccessError("paid_required", 403);
     }
     if (op === "report.read" || op === "report.export") {
-      await this.access(session, params.report_id, op === "report.export");
+      await this.access(session, params.report_id, legacy && op === "report.export");
     }
     if (op === "report.read" || op === "report.export") {
       shape(body);
       shape(query);
       const record = await this.report(session, params.report_id);
-      const now = this.fresh(session), result = reportDto(session, record);
+      const scope = workflow && session.tier !== "paid"
+        ? await workflow.snapshotScope(session.user.subjectId, record.report_id, record.revision)
+        : undefined;
+      const now = this.fresh(session), result = reportDto(session, record, scope);
       return op === "report.read" ? result : {
         format: "jungsi.counseling-snapshot/v1",
         status: "ready",
@@ -139,9 +181,15 @@ export class ProfileReportService implements ApiBusinessPort {
         report: result,
       };
     }
+    if (!legacy) {
+      requirePaidSession(session, this.fresh(session));
+      if (!workflow) throw new AccessError("score_input_policy_unavailable", 503);
+    }
     shape(query);
     const key = identifier(request.requestKey), digest = await nativeJsonSha256([body, params]);
-    const replay = await this.repository.replay(session.user.subjectId, op, key, digest);
+    const replay = !legacy && op === "score-profile.create"
+      ? null
+      : await this.repository.replay(session.user.subjectId, op, key, digest);
     if (replay !== null) {
       own(replay, session.user.subjectId);
       this.fresh(session);
@@ -153,8 +201,22 @@ export class ProfileReportService implements ApiBusinessPort {
       return reportDto(session, replay);
     }
     if (op === "score-profile.create") {
-      const input = shape(body, ["scores", "confirmed"]);
+      const input = shape(body, ["scores", "confirmed"], legacy ? [] : ["stage"]);
       if (typeof input.confirmed !== "boolean") throw new AccessError("invalid_confirmation", 422);
+      if (workflow) {
+        const { profile } = await workflow.saveProfile({
+          session,
+          scores: input.scores,
+          stage: input.stage,
+          confirmed: input.confirmed,
+          key,
+          digest,
+          analyze: async (scores) => await this.overall.analyze(session, scores) as NativeObject,
+        });
+        own(profile, session.user.subjectId);
+        this.fresh(session);
+        return profileDto(profile);
+      }
       await this.overall.analyze(session, input.scores);
       if (!object(input.scores)) throw new AccessError("invalid_request", 422);
       const result = await this.repository.createProfile({
@@ -175,6 +237,7 @@ export class ProfileReportService implements ApiBusinessPort {
       expected: number | null = null,
       result: NativeObject;
     if (!Object.hasOwn(body, "profile_id")) {
+      if (!legacy) throw new AccessError("profile_required", 422);
       result = await this.overall.analyze(session, body) as NativeObject;
       profile = await this.repository.createProfile({
         owner: session.user.subjectId,
@@ -195,12 +258,40 @@ export class ProfileReportService implements ApiBusinessPort {
       if (stored === null) throw new AccessError("profile_not_found", 404);
       own(stored, session.user.subjectId);
       profile = stored;
+      if (workflow) await workflow.assertProfile(session, profile);
       if (input.report_id !== null && input.report_id !== undefined) {
         rid = identifier(input.report_id);
         await this.access(session, rid);
         expected = revision(input.expected_version);
       } else if (Object.hasOwn(input, "expected_version")) {
         throw new AccessError("invalid_request", 422);
+      }
+      if (workflow) {
+        if (rid !== null) {
+          const old = await this.report(session, rid);
+          if (old.revision !== expected) throw new AccessError("revision_conflict", 409);
+          if (old.profile_id !== profile.profile_id) {
+            rid = null;
+            expected = null;
+          }
+        }
+        const cached = await workflow.reusableOverall(session, profile);
+        if (cached && (rid === null || rid === cached.report_id)) {
+          const reused = await this.repository.writeReport({
+            owner: session.user.subjectId,
+            reportId: cached.report_id,
+            profileId: profile.profile_id,
+            body: cached.body,
+            expected: cached.revision,
+            nowUtc: this.fresh(session),
+            operation: "overall.analyze",
+            key,
+            digest,
+            noOp: true,
+          });
+          this.fresh(session);
+          return reportDto(session, reused);
+        }
       }
       result = await this.overall.analyze(session, profile.scores) as NativeObject;
     }
@@ -222,6 +313,9 @@ export class ProfileReportService implements ApiBusinessPort {
       catalog_version: null,
       analysis_status: { status: "pending", reason_code: "offering_analysis_not_requested" },
     };
+    if (workflow) {
+      snapshot.operation_contexts = { overall: await workflow.analysisContext(profile.profile_id) };
+    }
     const written = await this.repository.writeReport({
       owner: session.user.subjectId,
       reportId: rid,
@@ -230,6 +324,7 @@ export class ProfileReportService implements ApiBusinessPort {
       expected,
       nowUtc: this.fresh(session),
       operation: "overall.analyze",
+      ...(workflow ? { paidOrigin: workflow.origin(session, "overall.analyze", ["overall"]) } : {}),
       key,
       digest,
     });

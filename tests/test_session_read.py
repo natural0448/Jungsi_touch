@@ -73,7 +73,7 @@ class AdministratorExceptionTests(unittest.TestCase):
                 with self.assertRaises(PlatformError)as failure:self.service.read(actor)
                 self.assertEqual(failure.exception.code,'entitlement_unavailable')
     def test_admin_exception_does_not_grant_other_report_ownership(self):
-        controller=AccessController(SimpleNamespace(lookup_access=lambda rid:ReportAccessRecord('SYNTHETIC-other',True)))
+        controller=AccessController(SimpleNamespace(lookup_access=lambda rid:ReportAccessRecord('SYNTHETIC-other',True)), operating_mode="legacy_synthetic")
         decision=controller.operation_access('report.export',self.actor(),report_id='SYNTHETIC-report')
         self.assertFalse(decision.allowed);self.assertEqual(decision.http_status,404)
     def test_public_projection_preserves_nullable_expiry_and_removes_private_admin_origin(self):

@@ -1,4 +1,5 @@
 /** Approved server plans compose atomic budgets with work; no unapproved fallback. */
+import { type StageBudgetProof, verifyStageBudgetProof } from "./operating_policy.ts";
 import { AccessError } from "./access.ts";
 import type { PlatformRepositoryPort } from "./platform_repository.ts";
 import type { RequestClockPort } from "./ports.ts";
@@ -12,6 +13,7 @@ import { sessionDto } from "./session_service.ts";
 import type {
   UsageBudgetStorePort,
   UsageDemand,
+  UsageLease,
   UsageReservationDecision,
 } from "./usage_budget.ts";
 import { cloneNativeJson, nativeJsonSha256, nativeJsonText } from "../domain/json_value.ts";
@@ -27,7 +29,18 @@ export interface ApprovedUsagePlan {
   readonly calculationContextSha256: string | null;
   readonly computation: "required" | "idempotent_replay";
   readonly demands: readonly UsageDemand[];
+  readonly stageProof?: StageBudgetProof;
 }
+export interface PreparedUsageAdmission {
+  readonly originalRequest: BudgetRequest;
+  readonly request: BudgetRequest;
+  readonly plan: ApprovedUsagePlan;
+  readonly lease: UsageLease;
+}
+const admissions = new WeakMap<
+  PreparedUsageAdmission,
+  { issuer: object; state: "prepared" | "running" | "settled" | "cancelled" }
+>();
 export interface UsagePlanningPort {
   /** Resolve owned profile/direct scores, registered exam and adopted versions.
    * Capacities come from approved private configuration, never body/query fields.
@@ -98,13 +111,24 @@ export class SharedRequestBudget implements RequestBudgetPort {
         typeof plan.calculationContextSha256 !== "string" ||
         !HASH.test(plan.calculationContextSha256))
     ) unavailable();
+    const stageRights = verifyStageBudgetProof(
+      plan.stageProof,
+      request,
+      plan.approvalReferenceSha256,
+      this.clock.nowUtc(),
+    );
+    if (
+      stageRights &&
+      (!analysis ||
+        plan.demands.some((d) => ["distinct_scores", "calculation_cost"].includes(d.kind)))
+    ) unavailable();
     const kinds = new Set(plan.demands.map((d) => d.kind));
     for (
       const kind of [
         "request_window",
         "concurrent_jobs",
         "result_volume",
-        ...(analysis ? ["distinct_scores", "calculation_cost"] : []),
+        ...(analysis && !stageRights ? ["distinct_scores", "calculation_cost"] : []),
       ]
     ) if (!kinds.has(kind as UsageDemand["kind"])) unavailable();
     for (const d of plan.demands) {
@@ -124,7 +148,7 @@ export class SharedRequestBudget implements RequestBudgetPort {
       ) unavailable();
     }
   }
-  async run<T>(request: BudgetRequest, work: () => Promise<T>): Promise<T> {
+  async admit(request: BudgetRequest): Promise<PreparedUsageAdmission> {
     if (!BUDGET_OPERATIONS.includes(request.operation as typeof BUDGET_OPERATIONS[number])) {
       unavailable();
     }
@@ -180,25 +204,93 @@ export class SharedRequestBudget implements RequestBudgetPort {
       !lease || lease.owner !== protectedRequest.session.user.subjectId ||
       lease.policyVersion !== plan.policyVersion
     ) unavailable();
+    const admission = Object.freeze({
+      originalRequest: request,
+      request: protectedRequest,
+      plan,
+      lease,
+    });
+    admissions.set(admission, { issuer: this, state: "prepared" });
+    return admission;
+  }
+  assertAdmission(admission: PreparedUsageAdmission, request: BudgetRequest): void {
+    const record = admissions.get(admission);
+    if (
+      !record || record.issuer !== this || record.state === "cancelled" ||
+      admission.originalRequest !== request
+    ) unavailable();
+    sessionDto(request.session, this.clock.nowUtc());
+    verifyStageBudgetProof(
+      admission.plan.stageProof,
+      admission.request,
+      admission.plan.approvalReferenceSha256,
+      this.clock.nowUtc(),
+    );
+  }
+  /** Reservation precedes the profile transaction so failed requests retain frequency accounting. */
+  async runAdmitted<T>(
+    admission: PreparedUsageAdmission,
+    work: () => Promise<T>,
+    request: BudgetRequest = admission.originalRequest,
+  ): Promise<T> {
+    this.assertAdmission(admission, request);
+    const record = admissions.get(admission)!;
+    if (record.state !== "prepared") unavailable();
+    record.state = "running";
+    const { request: protectedRequest, plan, lease } = admission;
     let result: T, resultBytes = 0n;
     try {
       sessionDto(request.session, this.clock.nowUtc());
       result = await work();
       resultBytes = BigInt(new TextEncoder().encode(nativeJsonText(result)).byteLength);
+      verifyStageBudgetProof(
+        plan.stageProof,
+        protectedRequest,
+        plan.approvalReferenceSha256,
+        this.clock.nowUtc(),
+      );
     } catch (e) {
       try {
         await this.store.settle(lease, "failure");
+        record.state = "settled";
       } catch {
         return unavailable();
       }
+      verifyStageBudgetProof(
+        plan.stageProof,
+        protectedRequest,
+        plan.approvalReferenceSha256,
+        this.clock.nowUtc(),
+      );
       throw e;
     }
     try {
       await this.store.settle(lease, "success", { resultBytes });
+      record.state = "settled";
     } catch {
       return unavailable();
     }
     sessionDto(request.session, this.clock.nowUtc());
+    verifyStageBudgetProof(
+      plan.stageProof,
+      protectedRequest,
+      plan.approvalReferenceSha256,
+      this.clock.nowUtc(),
+    );
     return result;
+  }
+  async cancel(admission: PreparedUsageAdmission): Promise<void> {
+    const record = admissions.get(admission);
+    if (!record || record.issuer !== this) unavailable();
+    if (record.state === "cancelled") return;
+    try {
+      await this.store.settle(admission.lease, "failure");
+      record.state = "cancelled";
+    } catch {
+      unavailable();
+    }
+  }
+  async run<T>(request: BudgetRequest, work: () => Promise<T>): Promise<T> {
+    return await this.runAdmitted(await this.admit(request), work, request);
   }
 }

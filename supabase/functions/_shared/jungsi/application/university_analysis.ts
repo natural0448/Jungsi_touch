@@ -5,7 +5,7 @@ import { CatalogService, offeringDto } from "./catalog.ts";
 import { evaluateOffering, type OfferingAnalysisDataPort } from "./offering_analysis.ts";
 import type { PlatformRepositoryPort, StoredProfile, StoredReport } from "./platform_repository.ts";
 import type { RequestClockPort } from "./ports.ts";
-import { reportDto } from "./profile_reports.ts";
+import { reportDto, type ScoreWorkflowMode } from "./profile_reports.ts";
 import { sessionDto, type SessionSnapshot } from "./session_service.ts";
 import {
   ScoringResult,
@@ -19,6 +19,7 @@ import {
 } from "./university_percentile.ts";
 import { cloneNativeJson, nativeJsonSha256, type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat, type NativeJson } from "../domain/native_json.ts";
+import { personalAssessment, personalResultComponents } from "./paid_result_components.ts";
 export const UNIVERSITY_ANALYSIS_OPERATIONS = ["university.analyze", "candidates.build"] as const;
 export interface UniversityAnalysisDataPort
   extends UniversityScoringDataPort, UniversityPercentileDataPort, OfferingAnalysisDataPort {}
@@ -129,6 +130,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
     private readonly data: UniversityAnalysisDataPort,
     private readonly clock: RequestClockPort,
     private readonly forecasts: PublishedForecastPort | null,
+    private readonly policyMode: ScoreWorkflowMode = { mode: "rights", workflow: null },
   ) {
     this.scoring = new UniversityScoringService(data);
     this.percentile = new UniversityPercentileService(data);
@@ -161,6 +163,8 @@ export class UniversityAnalysisService implements ApiBusinessPort {
     ) fail("route_not_found", 404);
     this.fresh(session);
     if (session.tier !== "paid") fail("paid_required", 403);
+    const workflow = this.policyMode.mode === "rights" ? this.policyMode.workflow : null;
+    if (this.policyMode.mode === "rights" && !workflow) fail("score_input_policy_unavailable", 503);
     const rid = identifier(params.report_id);
     await authorizeReport(session.user, rid, {
       find: (id) => this.repository.lookupAccess(session.user.subjectId, id),
@@ -189,6 +193,8 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       !profile || profile.owner_id !== session.user.subjectId ||
       profile.profile_id !== record.profile_id || profile.confirmed !== true
     ) fail();
+    if (workflow) await workflow.assertProfile(session, profile);
+    const originKeys: string[] = [];
     if (!release) {
       updated.analysis_status = { status: "pending", reason_code: "catalog_release_missing" };
     } else {
@@ -220,6 +226,42 @@ export class UniversityAnalysisService implements ApiBusinessPort {
             ? e
             : new AccessError("forecast_release_invalid", 503);
         }
+      }
+      const context = workflow
+        ? await nativeJsonSha256({
+          base: await workflow.analysisContext(profile.profile_id),
+          catalog_version: release.version,
+          forecasts: [...batch.entries()].map((
+            [id, value],
+          ) => [id, value instanceof AccessError ? { error: value.code } : value]),
+          forecast_error: batchError?.code ?? null,
+        })
+        : null;
+      if (!object(updated.operation_contexts)) updated.operation_contexts = {};
+      const contexts = updated.operation_contexts as NativeObject;
+      const cached = context !== null && batchError === null &&
+        (op === "candidates.build"
+          ? contexts.candidates === context && object(updated.candidates)
+          : object(updated.analyses) &&
+            rows.every((r) =>
+              contexts["analysis:" + r.offering_id] === context &&
+              object((updated.analyses as NativeObject)[r.offering_id as string])
+            ));
+      if (cached) {
+        const result = await this.repository.writeReport({
+          owner: session.user.subjectId,
+          reportId: record.report_id,
+          profileId: record.profile_id,
+          body: record.body,
+          expected,
+          nowUtc: this.fresh(session),
+          operation: op as "university.analyze" | "candidates.build",
+          key,
+          digest,
+          noOp: true,
+        });
+        this.fresh(session);
+        return reportDto(session, result);
       }
       const results: NativeObject = {};
       for (const offering of rows) {
@@ -297,7 +339,12 @@ export class UniversityAnalysisService implements ApiBusinessPort {
             });
           }
         }
-        results[offering.offering_id as string] = assessment;
+        const oid = offering.offering_id as string;
+        results[oid] = assessment;
+        if (context !== null) contexts["analysis:" + oid] = context;
+        if (op === "university.analyze" && personalAssessment(assessment)) {
+          originKeys.push("analysis:" + oid);
+        }
       }
       if (!object(updated.analyses) || !object(updated.shortlist)) fail();
       Object.assign(updated.analyses, results);
@@ -309,6 +356,10 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       };
       if (op === "candidates.build") {
         updated.candidates = candidateGroups(rows, results, release.version);
+        if (context !== null) contexts.candidates = context;
+        if (personalResultComponents({ candidates: updated.candidates }).includes("candidates")) {
+          originKeys.push("candidates");
+        }
       }
       for (const [oid, value] of Object.entries(updated.shortlist)) {
         if (!object(value)) fail();
@@ -324,6 +375,15 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       expected,
       nowUtc: this.fresh(session),
       operation: op as "university.analyze" | "candidates.build",
+      ...(workflow && originKeys.length
+        ? {
+          paidOrigin: workflow.origin(
+            session,
+            op as "university.analyze" | "candidates.build",
+            originKeys,
+          ),
+        }
+        : {}),
       key,
       digest,
     });

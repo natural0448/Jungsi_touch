@@ -87,6 +87,7 @@ function schema(expiry: string | null): unknown[] {
       ],
     ],
     expiry,
+    expiry === null ? null : "1",
   ];
 }
 function fixture() {
@@ -571,7 +572,7 @@ Deno.test("SQL uses one bounded metadata/current pass query and exact period pre
   assert(!PASS_STATE_SQL.includes(";"));
   for (
     const part of [
-      "max(ends_at)",
+      "ORDER BY ends_at DESC,id DESC LIMIT 1",
       "public.jeongsi_passes",
       "user_id=$2",
       "revoked_at IS NULL",
