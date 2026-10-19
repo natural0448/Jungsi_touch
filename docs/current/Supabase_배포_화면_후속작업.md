@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.82이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.84이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -588,7 +588,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=4f85b0f5a21336e7714ba16ea0fdbdd3eae8f68fb6faf8452c713d172c10e39f -->
+<!-- jungsi:generated spec_sha256=3aa768c3ca556cdc71594449cf6dfbfc46600e961832edd1208ba076f22041c6 -->
 
 
 ## 기존 운영 조회의 후속 검수
@@ -622,6 +622,54 @@ CR-P1-BOUNDED-READ-20261018-01는 PROPOSED_NOT_IMPLEMENTED다. 기존 history.se
 재시도: Do not retry generic429 after an unconditional3seconds. Parse safe Retry-After (seconds or HTTP date), keep finite retry count and UI deadline; unknown/long wait requires user action. Do not promise a lease expiry is the actual completion time. No automatic quota retry. Each retry repeats JWT/current entitlement/ownership/head/shared atomic admission; POST/PUT preserve identical body and Idempotency-Key. 서버 대기는 별도 설계이며 현재 추가하지 않는다.
 
 배포 차이: NOT_ACCEPTED; usage/v1 data-only smoke does not accept rights-mode HTTP. New save/analysis needs approved operating policy and rollout; preserve503 hold. exact develop+REQ27 candidate requires complete transition before deployment; cache-only032 alternative requires planning-registered maintenance parent/target/source manifest and separate exact-source proof before any branch or bundle. Never mix unbound032/9c files or turn off policy guards. 006a·기존 프로필 전환·usage/v2·신규3 scope·실제 반례·배포/활성화는 NOT_RUN이다.
+
+
+## 누백 릴리스 보관·정리 실행 경계
+
+DB-CAP-01-RETENTION / POLICY_APPROVED_NOT_A_DELETE_EXECUTION_APPROVAL. 보관 원칙 승인과 정확 대상의 실제 실행 승인은 별개다.
+
+| 항목 | 기준 |
+| --- | --- |
+| DB 유지 | 현재 정본 릴리스; 검증된 채택 계보의 직전 완료 릴리스 2개; 보존 리포트·검수/발행 기록·현재/후보 포인터·Storage descriptor/binding·Edge/view 등 실제 소비자가 참조하는 모든 릴리스; 보관 근거가 아직 연결되지 않은 정정 릴리스 1건; 모든 원본/로컬파일/과거 산출물 및 현재값·공유 방법 정의 |
+| 직전 계보 | 정본 채택·완료·부모 영수증으로 직전2개를 고정한다. 릴리스ID 문자열이나 추정 시각 정렬로 대체하지 않는다. 계보 또는 참조가 미확인인 버전은 보존한다. |
+| 참조 확인 | 보존 소비자 root와 의존관계를 제한 명부로 조사한다. 한 릴리스 내부 회원/OX 행은 함께 보관할 대상 단위이며 자기 release_id만으로 독립 소비자 참조라고 세지 않는다. 보존되는 외부 검수/리포트가 해당 릴리스를 실제 필요로 하면 유지한다. 미확인 참조는 삭제 후보에서 제외한다. |
+| 보관·복구 | 기존 비공개 Storage/Drive만 사용한다. 후보별 native 스키마·자료형·NULL/Decimal·행키·값/방법/검수/회원 관계·행수·bytes·SHA256을 고정한다. 불변 보관본 재다운로드 대조와 격리 환경의 복구·전체필드/ID/해시 대조를 완료한다. 기존 원본 파일과 보관본은 삭제하지 않는다. |
+| 실행 승인 | 정확 제거 계획을 관리자에게 제출하고 그 대상에 대한 별도 실행 승인 후만 진행한다. 이번 보관 원칙·계획 작성은 DELETE·파일삭제·운영전환·요금변경 승인이 아니다. |
+| 실행·정비 | 승인 후 기존 단일 writer가 제약/RLS/매개변수와 정확 과거행 범위를 유지하며 배치별 커밋 영수증과 새 참조 경쟁을 확인한다. CASCADE·FK/trigger 해제·광범위 TRUNCATE·현재head 변경은 금지한다. 대상표 일반 VACUUM(ANALYZE)은 DELETE 커밋 뒤 별도 유지보수로 실행한다. 일반 VACUUM은 dead 공간을 재사용하게 하며 할당디스크/요금 축소를 보장하지 않는다. 잠금·I/O·장기 snapshot을 확인하고 승인된 대상표로 한정한다. VACUUM FULL·pg_repack·REINDEX·PK/UNIQUE/인덱스 제거·테이블 재작성은 제외한다. |
+| 전후 증거 | DB와 대상별 heap/index/TOAST 크기, 유지/제거 행수, 보관SHA, 현재head/원형값/방법/연결 불변 및 할당디스크 사용을 기록한다. 추정 재사용량·실측 재사용·청구 관측을 구분한다. |
+| 미래 writer | no-op은 숫자만 비교하지 않고 값/방법/검수 의미·native형·관측정의·출처 맥락을 비교한다. 같으면 기존릴리스/멱등 영수증을 재사용하고 전량 snapshot을 만들지 않는다. 변경분/공유정의 저장은 재구성·출처·예상이전해시·구소비자 호환을 검증한 별도 writer/schema 제안으로 준비하며 이번에 전환하지 않는다. |
+| 용량·비용 | 다음 승인 대량배치 전 현재 디스크/I/O·보관공간·WAL/index/temp 증가·백업/snapshot·서비스부하를 제한 메타데이터/계획과 기존 재조회로 확인한다. 한도 위험 시 배치 전에 관리자에게 알리고 compute/disk/부가기능을 자동 변경하지 않는다. 현재 Spend Cap 켜짐을 유지한다. 일부 사용량만 제한하므로 compute·PITR 등 별도 부가항목까지 총추가요금0을 보장한다고 기록하지 않는다. 실제 설정·청구 적용범위를 별도로 확인한다. |
+
+| 단계 | 산출물 | 상태 |
+| --- | --- | --- |
+| RET-00 | current lineage and consumer reference inventory | PREPARATION_PENDING |
+| RET-01 | native archive/readback/isolated restore proof | PREPARATION_PENDING |
+| RET-02 | exact removal plan and administrator execution approval | NOT_APPROVED |
+| RET-03 | approved single-writer historical-row cleanup | NOT_RUN |
+| RET-04 | affected-table ordinary VACUUM ANALYZE and before/after receipt | NOT_RUN |
+| RET-05 | frontend scoped post-maintenance recheck | NOT_RUN |
+
+공식 참고: https://www.postgresql.org/docs/current/sql-vacuum.html / https://supabase.com/docs/guides/platform/cost-control. 실제 ID·대상행·용량·계정·SQL·보관위치는 비공개 계획에 고정한다.
+
+
+## P1·P2 화면 변경의 한정 수용
+
+cde233fc026116b99b2289b2886b6158e75f71b0 / ACCEPTED_SCOPED_SOURCE_AND_REPORTED_GET_ONLY_BROWSER_RECEIPT_NOT_DEVELOP_MERGE. Frontend reports new worker serving that commit, frontdoor P1 small frozen supply and own P2 saved report GET-only PASS; Root independent current-browser rerun NOT_RUN. Private receipt binds worker/time and observations.
+
+Preserve original year/PK,only2024-2026 result rows,exact same IDs for cross-year grouping. Six-page remaining cursor means incomplete; withhold last incomplete offering and never conclude empty/no result while cursor remains. Unverified2027 target stays pending with no per-card historical recruitment call.
+
+Only total_model_missing says 자료 연결 대기 / 전체 누백 분포 자료 연결 대기. Explain that no total-model computation is in progress and no score re-save is needed; preserve scores/subjects and other pending-code distinctions.
+
+One observed small-binding frontdoor result, not an SLA, nationwide coverage or server-only latency claim. Actual timing and result cardinality stay in private evidence.
+
+| 후속 | 상태 | 조건 |
+| --- | --- | --- |
+| FE-P1-NATIONAL-BOUNDARY | NOT_RUN | After nationwide provider: exactly full6 pages with/no cursor,empty items with remaining cursor,last incomplete offering,head409 and permission/quota failures; explicit filters and original PK/year preserved. |
+| FE-P1-ASOF-KST | ASSIGNED_NEXT_FRONTEND_CHANGE | Render validated ISO instant using explicit Asia/Seoul YYYY.MM.DD, preserve original source instant; missing/invalid remains pending,never current-day fallback. Date-only official values remain date-only without invented timezone shift. No standalone redeploy required for this intake. |
+| FE-P1-VERIFIED-2027 | CONTRACT_AND_DATA_PENDING | Use only exact qualified target metadata; propose compatible optional public DTO/versioned mapping through normal PR before connecting recruitment. No ID prefix/name guesses or N+1. |
+| FE-RECEIPT-CARDINALITY | CLARIFICATION_REQUESTED | Correct ambiguous listed department labels versus unit cardinality using observed actual offering IDs; no new score or data save. |
+
+PR 통합/전국 binding/9월 total_model/REQ27·보안 인수는 이 영수증 수용으로 완료되지 않는다.
 
 
 ## 카탈로그 전용 본문 선택 로딩 후속 후보
