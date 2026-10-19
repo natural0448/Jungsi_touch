@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.87",
-  "source_sha256": "31f23201e61971801f21beb9c49c4430e63c2ad20d95075ed58d30dd4b1dc9c0",
+  "spec_version": "1.9.88",
+  "source_sha256": "8029dd653e46e1125c75f6d15bfce3449c0afd406021d8dea0279d5df81e2d14",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1733,7 +1733,16 @@
       "model_adoption": "NOT_RUN",
       "runtime_selection": "NOT_RUN",
       "deployment": "NOT_RUN",
-      "production_ready": false
+      "production_ready": false,
+      "source_acceptance": {
+        "source_commit": "fbff9f070f8162a25dbe097b1bedbd655eb59135",
+        "normal_hooks_and_source_CI": "PASS",
+        "strict_v2_tests": 14,
+        "private_reference_math_and_negative_native_parser_review": "PASS",
+        "original_reference_model_or_exact_base_adoption": "NOT_RUN",
+        "active_registry_selection_and_real_saved_report_reanalysis": "NOT_RUN",
+        "no_score_profile_resave_for_model_transition": true
+      }
     }
   },
   "backend_platform_contract": {
