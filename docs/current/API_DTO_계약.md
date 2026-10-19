@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.83이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.85이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -377,7 +377,27 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=17c82245e54def2637d46c56f929b2b59ca2b26c16616c41a0d5651124c86156 -->
+<!-- jungsi:generated spec_sha256=f0e01606b68a87037df265da1d2b630060f744db5829b5cbe945359cb299abbc -->
+
+
+## P1·P2 화면 변경의 한정 수용
+
+cde233fc026116b99b2289b2886b6158e75f71b0 / ACCEPTED_SCOPED_SOURCE_AND_REPORTED_GET_ONLY_BROWSER_RECEIPT_NOT_DEVELOP_MERGE. Frontend reports new worker serving that commit, frontdoor P1 small frozen supply and own P2 saved report GET-only PASS; Root independent current-browser rerun NOT_RUN. Private receipt binds worker/time and observations.
+
+Preserve original year/PK,only2024-2026 result rows,exact same IDs for cross-year grouping. Six-page remaining cursor means incomplete; withhold last incomplete offering and never conclude empty/no result while cursor remains. Unverified2027 target stays pending with no per-card historical recruitment call.
+
+Only total_model_missing says 자료 연결 대기 / 전체 누백 분포 자료 연결 대기. Explain that no total-model computation is in progress and no score re-save is needed; preserve scores/subjects and other pending-code distinctions.
+
+One observed small-binding frontdoor result, not an SLA, nationwide coverage or server-only latency claim. Actual timing and result cardinality stay in private evidence.
+
+| 후속 | 상태 | 조건 |
+| --- | --- | --- |
+| FE-P1-NATIONAL-BOUNDARY | NOT_RUN | After nationwide provider: exactly full6 pages with/no cursor,empty items with remaining cursor,last incomplete offering,head409 and permission/quota failures; explicit filters and original PK/year preserved. |
+| FE-P1-ASOF-KST | ASSIGNED_NEXT_FRONTEND_CHANGE | Render validated ISO instant using explicit Asia/Seoul YYYY.MM.DD, preserve original source instant; missing/invalid remains pending,never current-day fallback. Date-only official values remain date-only without invented timezone shift. No standalone redeploy required for this intake. |
+| FE-P1-VERIFIED-2027 | CONTRACT_AND_DATA_PENDING | Use only exact qualified target metadata; propose compatible optional public DTO/versioned mapping through normal PR before connecting recruitment. No ID prefix/name guesses or N+1. |
+| FE-RECEIPT-CARDINALITY | CLARIFICATION_REQUESTED | Correct ambiguous listed department labels versus unit cardinality using observed actual offering IDs; no new score or data save. |
+
+PR 통합/전국 binding/9월 total_model/REQ27·보안 인수는 이 영수증 수용으로 완료되지 않는다.
 
 
 ## 현재 정본 전국 공개 연결 · 최신 채택
@@ -406,7 +426,7 @@ Existing DB stays readable while national numerical supplementation is prepared 
 
 현재 구현 CANDIDATE_SOURCE_AND_SYNTHETIC_VERIFIED_PUBLICATION_PROTOCOL_REVIEW_PENDING · hosted 전환 NOT_RUN · 전국 브라우저 인수 NOT_RUN. 자료 보완 중인 상태와 연결 구현/배포 완료를 혼동하지 않는다.
 
-### 서비스 어댑터 후보와 미채택 공급 방식
+### 서비스 어댑터 후보와 최종 결속 경계
 
 PROPOSED_METADATA_KEY_INDEX_NOT_ADOPTED_OR_ACTIVATED. 분할된 비공개 메타데이터 키에서 최대101개를 선택하고 현재 DB의 같은 READ ONLY 스냅샷에서 원래 값과 요강을 다시 읽는다. 원성적·입결값·모형은 키 인덱스에 저장하지 않는다. source head·schema·8개 기존 요강 command 상태와 키·원행 지문이 달라지면 첫503/후속409로 거절한다. 새 DB 표·인덱스·RPC는 만들지 않는다. 같은 키의 실제 요강에 실기 반영 또는 비활성이 확인되면 공개 조회에서 차단한다. coverage 대상은 적격 현재 정본 전체이며 비활성·실기 제외를 포함한 검수 근거를 따로 요구한다.
 

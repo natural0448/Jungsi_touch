@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.83",
+  "version": "1.9.85",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -6014,7 +6014,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.83",
+        "contract_version": "1.9.85",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -6188,7 +6188,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.83",
+        "contract_version": "1.9.85",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -6354,7 +6354,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.83",
+        "contract_version": "1.9.85",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6373,7 +6373,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.83",
+        "contract_version": "1.9.85",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6398,7 +6398,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.83",
+        "contract_version": "1.9.85",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6423,7 +6423,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.83",
+        "contract_version": "1.9.85",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -7109,7 +7109,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "2933b6ca9a2dc33bf2a3cb0a2cc551b4e3257ce912fe73274fd3199a6fe2a6e9",
+            "source_sha256": "59ce096a502f7e409f9f62c963f2f435459963eb422211eb4394257cd4a77b1a",
             "symbols": [
               {
                 "kind": "class",
@@ -15734,7 +15734,8 @@
     "DEP-IO-01: 사용자 제공 Supabase 디스크 I/O 예산 경고로 추가 I/O 집약 DB 작업은 HOLD한다. 실제 I/O 예산 회복·작업 중첩·부하 원인은 아직 확인하지 않았으며 57014와의 인과를 확정하지 않는다. 개발팀은 성능CR의 초기 구축/증분 갱신·유한 배치·중단 조건을 파일로 준비하고, 데이터팀은 진행 중 작업의 안전한 체크포인트를 정리한다. 실제 성능 검수·대량복사·전체 재적재·VACUUM·새 read model DB 구축은 NOT_RUN이며 source/local synthetic/Git 검수만 계속한다.",
     "spec1.9.31: 전수 검수 API 후보의 source/docs는 PR23으로 develop에 정상 통합되고 853+853/native41/번들/독립 검토/CI273·274가 PASS했다. 실제 전수 payload·집계는 기존5초에서57014 FAIL/성공페이지0이며 I/O 집약 실제DB 작업은 DEP-IO-01 HOLD다. 조회 모델 CR 문서의 타입/FK·봉인lineage·정확bytecodec·완전dependency 영향명부를 보완하고 독립 기술 검토·실제 I/O 재개 조건·Owner 적용범위를 갖춰야 한다. 새로운 승인/PIN4/DB구축/함수배포/실JWT/BFF/브라우저/보안3gate·일반회원 공개는 NOT_RUN이다.",
     "DEP-AUTH-COOKIE-01: 정문 수정/직접 자연만료·첫다음 PASS는 화면팀 보고 수용. chunk/redirect/오류/fetch no-store,실제만료/head·동시성/회수·비승인계정 잔여 NOT_RUN을 유지한다.",
-    "DB-CAP-01: 공유 DB 용량은 현재값과 릴리스별 회원/검수 이력의 grain을 구분해 기존 근거와 제한 메타데이터로 진단한다. 기본키·사용통계·dead tuple·실행계획을 구분하며 단순 seq_scan/캐시비율로 새 인덱스나 삭제를 확정하지 않는다. 현재 head/원본/값/방법과 기존 writer·보안·요청 상한을 보존한다. 보관·이관/정리 범위와 전후 검수·복구 근거,실제 디스크/요금 상태가 미확정이므로 DB변경/재구축/요금변경/전체 운영 인수는 미완료다. 실제 수치와 SQL 영수증은 비공개 Drive에 보관한다."
+    "DB-CAP-01: 관리자 보관 정책은 채택됐다. 현재+직전2+참조중을 보존하고 미연결 정정본을 유지한다. 정확 과거행 대상과 native 보관·복구·참조·백업·작업창·회귀 계획을 갖춘 별도 실행 승인 및 실제 정리·정비·전후 인수가 남아 있다. 인덱스/요금/산출·현재head는 바꾸지 않으며 실제 운영 수치·SQL은 비공개로 보관한다.",
+    "DB-CAP-01-RETENTION: 관리자 보관 원칙은 현재+검증된직전2+참조중 릴리스 유지다. 미연결 정정본·불명확 참조는 유지한다. 과거 native 보관/해시/행수/격리복구 검증과 정확 목록·백업·작업창·되돌림 계획의 별도 실행 승인 전 DELETE/VACUUM은 NOT_RUN이다. 원본/현재값/방법/파일·RLS·제약·PK인덱스 보존, FULL/repack/REINDEX 제외, no-op/delta는 검토할 writer규약이며 자동 전환하지 않는다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -17669,6 +17670,20 @@
         "REQ-26"
       ],
       "summary": "spec1.9.83: 다른 PC의 develop a4f6de1 기획 3개 커밋을 기존 서비스 be02268 후보와 일반 merge로 동기화한다. 화면팀 서비스 함수 공동 개발·기존 DB/산출 소유권·커서 배포 수용/정문 후속·공유 DB 용량 후속을 보존하고 공개 provider10개/독립48개 검증과 키 인덱스의 별도 채택·발행 대기 경계를 유지한다. 기능 소스·DB·설정·배포 변경 없이 문서/공통 검사 이력을 결합하며 데이터 v97 일시정지 상태를 재개하지 않는다."
+    },
+    {
+      "date": "2026-10-19",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-13",
+        "REQ-16",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "spec1.9.84: 관리자 누백릴리스 현재+직전2+참조중 보관 원칙을 채택하고 정확 삭제계획/격리복구/별도실행승인·일반VACUUM·SpendCap 경계를 RET-00~05로 명시한다. cde233f P1 연도생략6쪽순차조회·미검증2027호출제거와 P2 total_model_missing 전용문구의 source/소형GET 보고를 수용하되 PR43미병합·전국6쪽경계·날짜표시·목표ID/DTO 후속·모형/REQ27/보안 인수는 구분한다. DB삭제/DDL/파일삭제/배포0."
     }
   ],
   "overall_analysis_contract": {
@@ -116804,7 +116819,8 @@
       "proposed_extension": "신규 합성/batch API는 여전히 미채택이다. 이번에는 기존 history.search 선택 필드를 사용한다. 새 operation을 추가하려면 별도 DTO·권한·예산·확장 검증이 필요하다.",
       "query": "one bounded in-memory catalog pass or parameterized selected-ID ANY/unnest JOIN; at most one bounded recruitment query for unique verified target IDs; no N+1, bulk hidden loop, inferred merge or widened school scope",
       "bounds": "explicit year-set, page/result bytes, target-ID count and deadline before implementation; do not infer operational quotas; combined logical calls and result-volume charges defined before adoption",
-      "existing_option_status": "ADOPTED_EXISTING_HISTORY_MULTIYEAR_OPTION"
+      "existing_option_status": "ADOPTED_EXISTING_HISTORY_MULTIYEAR_OPTION",
+      "frontend_existing_option_status": "IMPLEMENTED_IN_CDE233F_REPORTED_SMALL_BINDING_GET_PASS_NOT_MERGED_NATIONAL_BOUNDARY_NOT_RUN"
     },
     "retry": {
       "server_wait": "NOT_IMPLEMENTED_NO_SOCKET_OR_TRANSACTION_QUEUE",
@@ -116844,7 +116860,7 @@
     "shared_db_capacity_followup": {
       "format": "jungsi.shared-db-capacity-followup/v1",
       "id": "DB-CAP-01",
-      "status": "READ_ONLY_TRIAGE_COMPLETE_RETENTION_AND_IMPLEMENTATION_PENDING",
+      "status": "RETENTION_POLICY_ADOPTED_EXACT_EXECUTION_PLAN_PENDING",
       "scope": [
         "current review first/next range",
         "current public history.search bounded supply",
@@ -116861,13 +116877,139 @@
       "index_rule": "Treat primary/unique indexes and zero-scan counters separately;use constraint dependencies,stats-reset period and actual query plans. No automatic index removal/addition.",
       "growth_rule": "Keep nationwide local preparation and final single-writer policy. Do not emit full DB snapshots for each school or review round. Future no-change release/compact storage needs an explicit reviewed writer/schema contract.",
       "query_rule": "Limit current head and observation keys before expensive relationships;aggregate each relationship before joining. Validate actual session timeout in the existing read-only transaction;statement timeout does not prove whole-request latency. Keep existing security/budgets and failed query evidence.",
-      "archive_rule": "Reuse preserved native COPY/manifest/readback evidence and prepare lossless archive/restore and dependent-consumer inventory before any old-row disposition. Removing rows is not equivalent to shrinking provisioned disk.",
-      "cost_rule": "Database bytes,provisioned disk,WAL and billing/spend-cap state are distinct. Existing Google Drive/Supabase only;no plan,cap or disk changes from this task.",
+      "archive_rule": "Administrator retention policy adopted; exact reference/native archive/restore plan and separate execution approval required. No historic row or local file removed by policy intake.",
+      "cost_rule": "Keep the current Spend Cap enabled. It covers selected usage only and does not guarantee zero total/add-on charges; compute,PITR and other opted-in items require separate actual configuration/billing review. Before each next large authorised batch assess current disk/I/O,archive/storage,WAL/index/temp growth,backup/snapshot and application load using bounded metadata/plans and saved readback. Notify administrator before a capacity-risk batch; no implicit compute/disk/add-on change.",
       "actual_evidence": "Private Drive operational checkpoint only;no actual row counts,sizes,credentials or source rows in Git.",
       "DB_mutations": 0,
       "index_DDL": "NOT_RUN",
       "retention_or_prune": "NOT_RUN",
       "runtime_deployment": "NOT_RUN",
+      "production_ready": false,
+      "prior_status_before_retention_decision": "READ_ONLY_TRIAGE_COMPLETE_RETENTION_AND_IMPLEMENTATION_PENDING",
+      "retention_contract": {
+        "format": "jungsi.percentile-release-retention/v1",
+        "id": "DB-CAP-01-RETENTION",
+        "decision_date": "2026-10-19",
+        "status": "POLICY_APPROVED_NOT_A_DELETE_EXECUTION_APPROVAL",
+        "requirements": [
+          "REQ-13",
+          "REQ-16",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "preserve": [
+          "현재 정본 릴리스",
+          "검증된 채택 계보의 직전 완료 릴리스 2개",
+          "보존 리포트·검수/발행 기록·현재/후보 포인터·Storage descriptor/binding·Edge/view 등 실제 소비자가 참조하는 모든 릴리스",
+          "보관 근거가 아직 연결되지 않은 정정 릴리스 1건",
+          "모든 원본/로컬파일/과거 산출물 및 현재값·공유 방법 정의"
+        ],
+        "lineage": "정본 채택·완료·부모 영수증으로 직전2개를 고정한다. 릴리스ID 문자열이나 추정 시각 정렬로 대체하지 않는다. 계보 또는 참조가 미확인인 버전은 보존한다.",
+        "reference_graph": "보존 소비자 root와 의존관계를 제한 명부로 조사한다. 한 릴리스 내부 회원/OX 행은 함께 보관할 대상 단위이며 자기 release_id만으로 독립 소비자 참조라고 세지 않는다. 보존되는 외부 검수/리포트가 해당 릴리스를 실제 필요로 하면 유지한다. 미확인 참조는 삭제 후보에서 제외한다.",
+        "archive": "기존 비공개 Storage/Drive만 사용한다. 후보별 native 스키마·자료형·NULL/Decimal·행키·값/방법/검수/회원 관계·행수·bytes·SHA256을 고정한다. 불변 보관본 재다운로드 대조와 격리 환경의 복구·전체필드/ID/해시 대조를 완료한다. 기존 원본 파일과 보관본은 삭제하지 않는다.",
+        "execution_plan": [
+          "exact release IDs/table-specific PK or predicates and expected row counts with keep/removal reasons",
+          "reference consumers and dependency closure including unresolved references",
+          "archive manifest/readback/isolated restore receipts and needed software/schema version",
+          "measured current head/lineage/row-count basis and expected internal reusable bytes separately from provisioned disk",
+          "actual daily-backup/PITR availability and restore point, rollback/import order and permission requirements",
+          "single writer/work window,current I/O/disk/WAL/temp headroom,small transaction checkpoints/timeouts and stop criteria",
+          "fresh head/reference recheck at execution; drift or new reference invalidates candidate/approval scope"
+        ],
+        "approval": "정확 제거 계획을 관리자에게 제출하고 그 대상에 대한 별도 실행 승인 후만 진행한다. 이번 보관 원칙·계획 작성은 DELETE·파일삭제·운영전환·요금변경 승인이 아니다.",
+        "execution": "승인 후 기존 단일 writer가 제약/RLS/매개변수와 정확 과거행 범위를 유지하며 배치별 커밋 영수증과 새 참조 경쟁을 확인한다. CASCADE·FK/trigger 해제·광범위 TRUNCATE·현재head 변경은 금지한다. 대상표 일반 VACUUM(ANALYZE)은 DELETE 커밋 뒤 별도 유지보수로 실행한다.",
+        "maintenance": "일반 VACUUM은 dead 공간을 재사용하게 하며 할당디스크/요금 축소를 보장하지 않는다. 잠금·I/O·장기 snapshot을 확인하고 승인된 대상표로 한정한다. VACUUM FULL·pg_repack·REINDEX·PK/UNIQUE/인덱스 제거·테이블 재작성은 제외한다.",
+        "before_after": "DB와 대상별 heap/index/TOAST 크기, 유지/제거 행수, 보관SHA, 현재head/원형값/방법/연결 불변 및 할당디스크 사용을 기록한다. 추정 재사용량·실측 재사용·청구 관측을 구분한다.",
+        "screen_recheck": [
+          "current-review first/next exact IDs/order/no overlap, percentile/OX,next cursor and unknown count",
+          "standard P1 search/partial state and paid P3 search with original year/PK",
+          "P2 existing stored report readability and successful score preservation; no new save"
+        ],
+        "future_writer": "no-op은 숫자만 비교하지 않고 값/방법/검수 의미·native형·관측정의·출처 맥락을 비교한다. 같으면 기존릴리스/멱등 영수증을 재사용하고 전량 snapshot을 만들지 않는다. 변경분/공유정의 저장은 재구성·출처·예상이전해시·구소비자 호환을 검증한 별도 writer/schema 제안으로 준비하며 이번에 전환하지 않는다.",
+        "batch_preflight": "다음 승인 대량배치 전 현재 디스크/I/O·보관공간·WAL/index/temp 증가·백업/snapshot·서비스부하를 제한 메타데이터/계획과 기존 재조회로 확인한다. 한도 위험 시 배치 전에 관리자에게 알리고 compute/disk/부가기능을 자동 변경하지 않는다.",
+        "spend_cap": "현재 Spend Cap 켜짐을 유지한다. 일부 사용량만 제한하므로 compute·PITR 등 별도 부가항목까지 총추가요금0을 보장한다고 기록하지 않는다. 실제 설정·청구 적용범위를 별도로 확인한다.",
+        "separation": "curation_overlays/admission_results scan and nationwide public-provider performance remain separate work. No old input/engine/total-model activation or new API follows from retention.",
+        "stages": [
+          {
+            "id": "RET-00",
+            "deliverable": "current lineage and consumer reference inventory",
+            "status": "PREPARATION_PENDING"
+          },
+          {
+            "id": "RET-01",
+            "deliverable": "native archive/readback/isolated restore proof",
+            "status": "PREPARATION_PENDING"
+          },
+          {
+            "id": "RET-02",
+            "deliverable": "exact removal plan and administrator execution approval",
+            "status": "NOT_APPROVED"
+          },
+          {
+            "id": "RET-03",
+            "deliverable": "approved single-writer historical-row cleanup",
+            "status": "NOT_RUN"
+          },
+          {
+            "id": "RET-04",
+            "deliverable": "affected-table ordinary VACUUM ANALYZE and before/after receipt",
+            "status": "NOT_RUN"
+          },
+          {
+            "id": "RET-05",
+            "deliverable": "frontend scoped post-maintenance recheck",
+            "status": "NOT_RUN"
+          }
+        ],
+        "DB_delete": "NOT_RUN",
+        "archive_restore": "NOT_RUN",
+        "DDL": "NOT_RUN",
+        "ordinary_VACUUM": "NOT_RUN",
+        "production_ready": false,
+        "official_references": [
+          "https://www.postgresql.org/docs/current/sql-vacuum.html",
+          "https://supabase.com/docs/guides/platform/cost-control"
+        ]
+      }
+    },
+    "frontend_P1_P2_intake": {
+      "format": "jungsi.frontend-p1p2-scoped-acceptance/v1",
+      "source_commit": "cde233fc026116b99b2289b2886b6158e75f71b0",
+      "PR": 43,
+      "status": "ACCEPTED_SCOPED_SOURCE_AND_REPORTED_GET_ONLY_BROWSER_RECEIPT_NOT_DEVELOP_MERGE",
+      "source_review": "Checked exact cde commit diff: existing history.search optional academic_year omitted,limit100 up to6 sequential pages; no composite API; unverified past-ID recruitment calls removed; total_model_missing only changes label.",
+      "runtime_report": "Frontend reports new worker serving that commit, frontdoor P1 small frozen supply and own P2 saved report GET-only PASS; Root independent current-browser rerun NOT_RUN. Private receipt binds worker/time and observations.",
+      "P1": "Preserve original year/PK,only2024-2026 result rows,exact same IDs for cross-year grouping. Six-page remaining cursor means incomplete; withhold last incomplete offering and never conclude empty/no result while cursor remains. Unverified2027 target stays pending with no per-card historical recruitment call.",
+      "P2": "Only total_model_missing says 자료 연결 대기 / 전체 누백 분포 자료 연결 대기. Explain that no total-model computation is in progress and no score re-save is needed; preserve scores/subjects and other pending-code distinctions.",
+      "timing": "One observed small-binding frontdoor result, not an SLA, nationwide coverage or server-only latency claim. Actual timing and result cardinality stay in private evidence.",
+      "followups": [
+        {
+          "id": "FE-P1-NATIONAL-BOUNDARY",
+          "status": "NOT_RUN",
+          "rule": "After nationwide provider: exactly full6 pages with/no cursor,empty items with remaining cursor,last incomplete offering,head409 and permission/quota failures; explicit filters and original PK/year preserved."
+        },
+        {
+          "id": "FE-P1-ASOF-KST",
+          "status": "ASSIGNED_NEXT_FRONTEND_CHANGE",
+          "rule": "Render validated ISO instant using explicit Asia/Seoul YYYY.MM.DD, preserve original source instant; missing/invalid remains pending,never current-day fallback. Date-only official values remain date-only without invented timezone shift. No standalone redeploy required for this intake."
+        },
+        {
+          "id": "FE-P1-VERIFIED-2027",
+          "status": "CONTRACT_AND_DATA_PENDING",
+          "rule": "Use only exact qualified target metadata; propose compatible optional public DTO/versioned mapping through normal PR before connecting recruitment. No ID prefix/name guesses or N+1."
+        },
+        {
+          "id": "FE-RECEIPT-CARDINALITY",
+          "status": "CLARIFICATION_REQUESTED",
+          "rule": "Correct ambiguous listed department labels versus unit cardinality using observed actual offering IDs; no new score or data save."
+        }
+      ],
+      "PR_merge": "NOT_RUN_DRAFT_REVIEW_SEPARATE",
+      "national_binding": "NOT_RUN",
+      "September_total_model": "NOT_CONNECTED",
+      "REQ27_activation": "NOT_RUN",
       "production_ready": false
     }
   },
@@ -117641,6 +117783,7 @@
       "legacy_unit_count": 656,
       "owner_unit_count": 36,
       "operating_acceptance": "NOT_RUN"
-    }
+    },
+    "frontend_existing_option_intake_ref": "service_performance_contract.frontend_P1_P2_intake"
   }
 }
