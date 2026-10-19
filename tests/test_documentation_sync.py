@@ -288,9 +288,9 @@ class DocumentationSyncTests(unittest.TestCase):
 
 class GeneratedWriteModeRegressionTests(unittest.TestCase):
     def fixture(self):
-        import datetime
+        import datetime,uuid
         import check_project_consistency as checker
-        directory=ROOT/'outputs/document_write_regression'/datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+        directory=ROOT/'outputs/document_write_regression'/(datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'-'+uuid.uuid4().hex)
         directory.mkdir(parents=True,exist_ok=False)
         source=directory/'source.txt';source.write_bytes(b'current working tree source')
         target=directory/'docs/doc.md';target.parent.mkdir(parents=True);target.write_bytes(b'previous document')

@@ -8,11 +8,15 @@ import {
   OVERALL_POPULATION_ID,
 } from "../domain/exam_pack.ts";
 import { NativeExamTotalModel } from "../domain/total_model.ts";
+import {
+  ALL_EXAMINEES_POPULATION_ID,
+  NativeAllExamineesTotalModel,
+} from "../domain/all_examinees_total_model.ts";
 import { ContractError } from "../domain/exact.ts";
 import { JsonFloat } from "../domain/native_json.ts";
 
 export interface TotalModelBinding {
-  readonly model: NativeExamTotalModel;
+  readonly model: NativeExamTotalModel | NativeAllExamineesTotalModel;
   readonly distributionId: string;
 }
 export interface OverallDataPort {
@@ -89,7 +93,7 @@ export function validateScoreInput(value: unknown): ExamRow {
   return result;
 }
 
-function pending(reason: string): ExamRow {
+function pending(reason: string, population = OVERALL_POPULATION_ID): ExamRow {
   return {
     status: "pending",
     reason_code: reason,
@@ -99,7 +103,7 @@ function pending(reason: string): ExamRow {
     tie_share_percent: null,
     tie_interval_percent: null,
     tie_policy: "include_equal",
-    population_id: OVERALL_POPULATION_ID,
+    population_id: population,
     model_version: null,
     data_kind: null,
   };
@@ -181,14 +185,23 @@ export class OverallAnalysisService {
       return pending(e instanceof TypeError ? "total_model_invalid" : "total_model_unavailable");
     }
     if (binding === null) return pending("total_model_missing");
-    if (!binding || !(binding.model instanceof NativeExamTotalModel)) {
+    if (
+      !binding ||
+      !(binding.model instanceof NativeExamTotalModel ||
+        binding.model instanceof NativeAllExamineesTotalModel)
+    ) {
       return pending("total_model_invalid");
     }
+    const population = binding.model instanceof NativeAllExamineesTotalModel
+      ? ALL_EXAMINEES_POPULATION_ID
+      : OVERALL_POPULATION_ID;
     if (
       typeof binding.distributionId !== "string" || !IDENTIFIER.test(binding.distributionId) ||
       binding.distributionId !== binding.model.distributionId
-    ) return pending("model_version_mismatch");
-    if (binding.model.metadata.status !== "approved") return pending("total_model_not_approved");
+    ) return pending("model_version_mismatch", population);
+    if (binding.model.metadata.status !== "approved") {
+      return pending("total_model_not_approved", population);
+    }
     try {
       return binding.model.calculate(pack, analysis);
     } catch (e) {
@@ -202,6 +215,7 @@ export class OverallAnalysisService {
       ];
       return pending(
         e instanceof ContractError && allowed.includes(e.code) ? e.code : "total_model_invalid",
+        population,
       );
     }
   }

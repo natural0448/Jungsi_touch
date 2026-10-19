@@ -3521,8 +3521,22 @@ def generated_files(spec,read=None):
             "기존 학교별 부분 발행/C 묶음 설명은 이전 절차의 보존 이력이다. 이번 전국 검색 공급의 선행 조건으로 다시 적용하지 않는다. "+national["REQ27"]+"\n\n"+
             national["data_team_work"]+"\n\n"+
             "현재 구현 "+national["implementation"]+" · hosted 전환 "+national["hosted_activation"]+" · 전국 브라우저 인수 "+national["nationwide_browser_acceptance"]+". 자료 보완 중인 상태와 연결 구현/배포 완료를 혼동하지 않는다.\n")
+        if national.get('adapter_candidate'):
+            candidate=national['adapter_candidate']
+            section+=("\n### 서비스 어댑터 후보와 최종 결속 경계\n\n"+candidate['status']+". "+candidate['mechanism']+"\n\n"+
+                candidate['approval_boundary']+"\n\n"+candidate['compatibility']+"\n\n"+candidate['dto']+"\n\n"+
+                candidate['pagination_boundary']+"\n\n"+candidate['remaining']+"\n")
         for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync","history_display","presentation_handoff","frontend_reply","frontend_followup","api_dto"):
             target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
+    whole=spec.get('overall_analysis_contract',{}).get('whole_population_transition')
+    if whole:
+        section=("\n\n## 전체 응시자 추정 모형의 별도 v2 계약\n\n"+whole['id']+" / "+whole['status']+". "+whole['purpose']+"\n\n"+
+          whole['legacy_boundary']+"\n\n"+whole['strict_v2']+"\n\n"+whole['population_semantics']+"\n\n"+
+          whole['approval_boundary']+"\n\n"+whole['saved_profile_transition']+"\n\n"+whole['installed032']+"\n\n"+
+          "공개 응답은 기존 overall 필드만 사용한다. 원자료·모형 가정·분포·정책·출처 해시는 서버에만 보관한다. 별도 합성14건은 기존 foundation656·Owner36·public-provider58 및 legacy22+extension3 등록과 구분한다. 실제 모형 채택·운영 binding·배포·저장 리포트 화면 인수는 별도 근거가 필요하다.\n")
+        for key in ('planning','routing','architecture','workflow','supabase_deployment','development_sync','presentation_handoff','frontend_reply','frontend_followup','api_dto'):
+            target=spec['current_documents'].get(key)
             if target in files:files[target]+=section
     return {p:t.encode("utf-8") for p,t in files.items()}
 
