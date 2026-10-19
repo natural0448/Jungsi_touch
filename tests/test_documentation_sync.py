@@ -284,5 +284,35 @@ class DocumentationSyncTests(unittest.TestCase):
         self.assertIn("Documentation code index parser/format missing", self.delta(spec, files, prior, files)["errors"])
 
 
+
+
+class GeneratedWriteModeRegressionTests(unittest.TestCase):
+    def fixture(self):
+        import datetime
+        import check_project_consistency as checker
+        directory=ROOT/'outputs/document_write_regression'/datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+        directory.mkdir(parents=True,exist_ok=False)
+        source=directory/'source.txt';source.write_bytes(b'current working tree source')
+        target=directory/'docs/doc.md';target.parent.mkdir(parents=True);target.write_bytes(b'previous document')
+        class Snapshot:
+            def read(self,path):return (directory/path).read_bytes()
+        return checker,directory,source,target,Snapshot()
+    def test_write_mode_uses_local_snapshot_reader_and_preserves_backup(self):
+        checker,directory,source,target,snapshot=self.fixture()
+        def generated(spec,*,read):return {'docs/doc.md':read('source.txt')}
+        with patch.object(checker,'ROOT',directory),patch.object(checker,'GitSnapshot',return_value=snapshot),patch.object(checker,'generated_files',side_effect=generated):
+            checker.write_generated({'version':'synthetic'})
+        self.assertEqual(target.read_bytes(),b'current working tree source')
+        backups=list((directory/'outputs/document_sync').rglob('doc.md'))
+        self.assertEqual(len(backups),1);self.assertEqual(backups[0].read_bytes(),b'previous document')
+        self.assertEqual(source.read_bytes(),b'current working tree source')
+    def test_write_mode_does_not_rewrite_or_backup_identical_output(self):
+        checker,directory,source,target,snapshot=self.fixture()
+        before=target.stat().st_mtime_ns
+        with patch.object(checker,'ROOT',directory),patch.object(checker,'GitSnapshot',return_value=snapshot),patch.object(checker,'generated_files',return_value={'docs/doc.md':b'previous document'}):
+            checker.write_generated({'version':'synthetic'})
+        self.assertEqual(target.stat().st_mtime_ns,before)
+        self.assertFalse((directory/'outputs/document_sync').exists())
+
 if __name__ == "__main__":
     unittest.main()

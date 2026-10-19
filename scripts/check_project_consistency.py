@@ -78,6 +78,28 @@ def table(headers,rows):
     return "\n".join(["| "+" | ".join(headers)+" |","| "+" | ".join("---" for _ in headers)+" |"]+
                     ["| "+" | ".join(cell(v) for v in row)+" |" for row in rows])
 
+def service_delegation_section(spec):
+    """Render developer authority separately from runtime layer dependencies."""
+    p=spec.get('workflow',{}).get('branch_governance',{}).get('service_delegation_policy')
+    if not p:return ''
+    matrix=table(['업무','담당과 허용 범위'],[
+        ['화면과 서비스 함수',p['frontend_owner']+' / '+p['allowed_work']],
+        ['DB·저장소와 산출 본체',p['reserved_owner']+' / '+p['reserved_work']],
+        ['사전 승인과 통합',p['autonomy_rule']],
+        ['계층·보안',p['runtime_boundary']],
+        ['혼합 파일',p['mixed_file_rule']]])
+    paths=table(['분류','경로'],[
+        ['기존 DB/엔진 보호 prefix',', '.join(p['protected_prefixes'])],
+        ['DB/SQL 보호 pattern',', '.join(p['protected_globs'])],
+        ['계산/혼합 본체 보호 파일',', '.join(p['protected_paths'])],
+        ['공동 수정 HTTP 어댑터',', '.join(p['shared_http_paths'])],
+        ['보호 경로 안의 생성 문서',', '.join(p['shared_document_paths'])],
+        ['혼합 Python 산출 보호', '; '.join(path+': '+', '.join(names) for path,names in p['protected_python_symbols'].items())]])
+    return ('\n\n## 화면팀 서비스 함수 공동 개발 · '+p['decision_date']+'\n\n'+matrix+
+            '\n\n담당 브랜치: '+p['developer_branch']+' → develop. '+p['same_snapshot_rule']+
+            '\n\n'+paths+'\n\n'+p['enforcement_limits'])
+
+
 def collaboration_sections(spec):
     """Render committed ownership and data-exchange decisions for each reader."""
     c=spec.get("collaboration")
@@ -90,6 +112,8 @@ def collaboration_sections(spec):
         c["presentation_branch_example"]+"를 화면 담당의 상시 브랜치로 재사용한다. "+
         c["presentation_branch_status"]+"\n\n"+c["generated_files_rule"]+"\n\n"+c["handoff_rule"]+
         "\n\n"+c["verification_rule"])
+    delegated=service_delegation_section(spec)
+    ownership+=delegated
     drive=""
     d=spec.get("data_exchange")
     if d:
@@ -102,7 +126,7 @@ def collaboration_sections(spec):
         c["existing_application_feature"]+"와 브랜치를 공유하지 않는다. "+c["generated_files_rule"]+
         " [프레젠테이션 작업 인계](../../docs/current/프레젠테이션_작업인계.md)를 읽고 출발 커밋과 API 계약을 맞춘다.")
     api_handoff=("\n\n## 프레젠테이션 작업 인계\n\n화면 담당은 별도 작업자이며 "+c["presentation_branch_example"]+"를 상시 사용한다. "+
-        "현재 개발팀은 서버 API와 애플리케이션·데이터/인프라를 담당한다. "+
+        "서버 서비스 함수는 아래 공동 개발 범위를 따르며 DB·산출 본체는 기존 담당자가 유지한다. "+
         "[프레젠테이션 작업 인계](프레젠테이션_작업인계.md)에 담당·브랜치·연동 경계를 기록한다. "+
         (d["presentation_boundary"] if d else ""))
     handoff=("이 문서는 별도 프레젠테이션 작업자가 화면 개발을 시작할 때 사용할 담당·브랜치·API 경계다. "+
@@ -122,7 +146,7 @@ def collaboration_sections(spec):
         "성적 또는 모델이 준비되지 않았으면 서버가 반환한 자료 대기 사유를 표시하고 임의 값을 만들지 않는다.\n\n"+
         "인계 시 출발·결과 커밋, 변경 화면과 API 작업 ID, 허용 응답·오류/보류 사유, 합성 응답 사용 여부와 실제 연동 상태를 함께 남긴다. "+
         c["verification_rule"]+"\n\n## 담당과 소유권\n\n"+c["description"]+"\n\n"+matrix+drive)
-    return dict(ownership=ownership,drive=drive,handoff=handoff,presentation_intro=intro,api_handoff=api_handoff)
+    return dict(ownership=ownership,drive=drive,handoff=handoff+delegated,presentation_intro=intro,api_handoff=api_handoff+delegated)
 
 
 def branch_governance_text(spec):
@@ -4044,6 +4068,7 @@ def validate_snapshot_baseline(snapshot,baseline):
 
 
 def write_generated(spec):
+    snapshot=GitSnapshot()
     timestamp=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     backup=ROOT/"outputs/document_sync"/timestamp
     for name,content in generated_files(spec,read=snapshot.read).items():
