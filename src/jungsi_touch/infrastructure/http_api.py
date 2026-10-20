@@ -143,7 +143,10 @@ def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=N
         return endpoint
     catalog=json.loads(Path(__file__).parents[1].joinpath('application/route_catalog.json').read_text(encoding='utf-8'))
     # Static paths, especially /offerings/search, are registered before parameters.
-    selected=[o for o in catalog['operations'] if operating_mode!='legacy_synthetic' or o['id'] not in {'score-input.status.read','score-input.correction.grant','report.sample.read'}]
+    # These exact three reads have an independently registered Edge implementation.
+    # Keep the Python reference at its existing 25 / explicit legacy22 boundary.
+    edge_read_views={'history.snapshot.head','history.snapshot.read','report.list-own'}
+    selected=[o for o in catalog['operations'] if o['id'] not in edge_read_views and (operating_mode!='legacy_synthetic' or o['id'] not in {'score-input.status.read','score-input.correction.grant','report.sample.read'})]
     operations=sorted(selected,key=lambda o:('{' in o['path'],o['path']))
     for operation in operations:
         app.add_api_route(operation['path'],handler(operation['id']),methods=[operation['method']],

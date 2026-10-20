@@ -1,4 +1,5 @@
 /** Private shared-counter contracts. Limits are supplied only by approved server policy. */
+import type { AdministratorUsageProof } from "./administrator_usage_policy.ts";
 export const BUDGET_KINDS = [
   "request_window",
   "distinct_scores",
@@ -25,6 +26,7 @@ export interface UsageReservationRequest {
   readonly operation: string;
   readonly policyVersion: string;
   readonly demands: readonly UsageDemand[];
+  readonly administratorProof?: AdministratorUsageProof;
 }
 export interface UsageLease {
   readonly id: string;

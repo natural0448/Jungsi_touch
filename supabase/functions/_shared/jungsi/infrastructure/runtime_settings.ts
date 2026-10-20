@@ -1,6 +1,12 @@
 /** Server-only runtime configuration. Missing approval never enables data or unlimited budgets. */
 import { AccessError } from "../application/access.ts";
-import { API_OPERATION_IDS, type ApiOperationId } from "../application/api_dispatch.ts";
+import {
+  API_OPERATION_IDS,
+  type ApiOperationId,
+  READ_VIEW_CONSUMER_OPERATION_IDS,
+  REGISTERED_API_OPERATION_IDS,
+} from "../application/api_dispatch.ts";
+import type { SnapshotTrustBinding } from "./history_snapshot_source.ts";
 import type { UsageStoreLimits } from "../application/usage_budget.ts";
 import { nativeJsonSha256, type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
@@ -71,6 +77,11 @@ export interface ApprovedRuntimeBinding {
   readonly readLimits: RuntimeReadLimits;
   readonly repositoryLimits: RuntimeRepositoryLimits;
   readonly usageStoreLimits: UsageStoreLimits;
+  readonly readViews?: {
+    readonly snapshot: SnapshotTrustBinding;
+    readonly cursorLifetimeMicroseconds: bigint;
+    readonly maxCursorCharacters: number;
+  };
 }
 function fail(): never {
   throw new AccessError("security_policy_unavailable", 503);
@@ -178,7 +189,8 @@ export async function readApprovedRuntimeBinding(
   if (actual !== expected) fail();
   let row: NativeObject;
   try {
-    row = object(parseNativeJson(raw), [
+    const parsed = object(parseNativeJson(raw));
+    row = object(parsed, [
       "format",
       "status",
       "purpose",
@@ -189,12 +201,14 @@ export async function readApprovedRuntimeBinding(
       "scope",
       "sources",
       "limits",
+      ...(parsed.format === "jungsi.edge-api-binding/v2" ? ["read_views"] : []),
     ]);
   } catch {
     fail();
   }
   if (
-    row.format !== "jungsi.edge-api-binding/v1" || row.status !== "approved" ||
+    !["jungsi.edge-api-binding/v1", "jungsi.edge-api-binding/v2"].includes(row.format as string) ||
+    row.status !== "approved" ||
     row.purpose !== "jungsi-api-runtime" ||
     row.project_url !== new URL(basic.auth.url).origin || typeof nowUtc !== "bigint"
   ) fail();
@@ -211,10 +225,18 @@ export async function readApprovedRuntimeBinding(
     !Array.isArray(scope.artifacts) || !scope.artifacts.length
   ) fail();
   const operations = scope.operations.map((value) => {
-    if (!API_OPERATION_IDS.includes(value as ApiOperationId)) fail();
+    const allowed: readonly string[] = row.format === "jungsi.edge-api-binding/v2"
+      ? REGISTERED_API_OPERATION_IDS
+      : API_OPERATION_IDS;
+    if (typeof value !== "string" || !allowed.includes(value)) fail();
     return value as ApiOperationId;
   });
   if (new Set(operations).size !== operations.length) fail();
+  if (
+    row.format === "jungsi.edge-api-binding/v2" &&
+    (operations.length !== READ_VIEW_CONSUMER_OPERATION_IDS.length ||
+      READ_VIEW_CONSUMER_OPERATION_IDS.some((id) => !operations.includes(id)))
+  ) fail();
   const artifacts = scope.artifacts.map((value) => {
     const entry = object(value, ["kind", "key"]);
     if (!NATIVE_RUNTIME_KINDS.includes(entry.kind as NativeRuntimeKind)) fail();
@@ -263,6 +285,70 @@ export async function readApprovedRuntimeBinding(
   if (CONTROL_SOURCE_NAMES.some((name) => !references[name].objectKey.startsWith(objectPrefix))) {
     fail();
   }
+  let readViews: ApprovedRuntimeBinding["readViews"];
+  if (row.format === "jungsi.edge-api-binding/v2") {
+    const views = object(row.read_views, ["format", "status", "snapshot", "report_locator"]);
+    if (views.format !== "jungsi.read-view-runtime/v1" || views.status !== "approved") fail();
+    const s = object(views.snapshot, [
+      "artifact_kind",
+      "lineage",
+      "minimum_sequence",
+      "scope_sha256",
+      "normalization_rules_version",
+      "normalization_rules_sha256",
+      "selection_rules_version",
+      "selection_rules_sha256",
+      "publisher_references",
+      "reviewer_references",
+      "object_prefix",
+      "max_metadata_bytes",
+      "max_gzip_bytes",
+      "max_decoded_bytes",
+      "max_rows",
+      "max_parts",
+      "max_depth",
+      "max_in_memory_bytes",
+      "expires_at",
+    ]);
+    if (!Array.isArray(s.publisher_references) || !Array.isArray(s.reviewer_references)) fail();
+    const snapshot = Object.freeze({
+      artifactKind: text(s.artifact_kind),
+      lineage: text(s.lineage),
+      minimumSequence: runtimeInteger(s.minimum_sequence, 1n),
+      scopeSha256: hash(s.scope_sha256),
+      normalizationRulesVersion: text(s.normalization_rules_version),
+      normalizationRulesSha256: hash(s.normalization_rules_sha256),
+      selectionRulesVersion: text(s.selection_rules_version),
+      selectionRulesSha256: hash(s.selection_rules_sha256),
+      publisherReferences: Object.freeze(s.publisher_references.map(text)),
+      reviewerReferences: Object.freeze(s.reviewer_references.map(text)),
+      objectPrefix: text(s.object_prefix),
+      maxMetadataBytes: size(s.max_metadata_bytes),
+      maxGzipBytes: size(s.max_gzip_bytes),
+      maxDecodedBytes: size(s.max_decoded_bytes),
+      maxRows: size(s.max_rows),
+      maxParts: size(s.max_parts),
+      maxDepth: size(s.max_depth),
+      maxInMemoryBytes: size(s.max_in_memory_bytes),
+      expiresAtUtc: utcInstant(text(s.expires_at)),
+    });
+    if (
+      snapshot.expiresAtUtc > expiresAtUtc || snapshot.expiresAtUtc <= nowUtc ||
+      !snapshot.objectPrefix.startsWith(objectPrefix) ||
+      snapshot.maxInMemoryBytes > size(read.max_bytes)
+    ) fail();
+    const locator = object(views.report_locator, [
+        "cursor_lifetime_seconds",
+        "max_cursor_characters",
+      ]),
+      maxCursorCharacters = size(locator.max_cursor_characters);
+    if (maxCursorCharacters > size(repositories.max_record_bytes)) fail();
+    readViews = Object.freeze({
+      snapshot,
+      cursorLifetimeMicroseconds: runtimeInteger(locator.cursor_lifetime_seconds, 1n) * 1000000n,
+      maxCursorCharacters,
+    });
+  }
   return Object.freeze({
     descriptorSha256: expected,
     projectUrl: new URL(basic.auth.url).origin,
@@ -293,5 +379,6 @@ export async function readApprovedRuntimeBinding(
       maxBatchIds: size(repositories.max_batch_ids),
     }),
     usageStoreLimits,
+    ...(readViews ? { readViews } : {}),
   });
 }

@@ -1,5 +1,6 @@
 /** Shared atomic usage reservations. Requires separately adopted prepared migration 005. */
 import { AccessError } from "../application/access.ts";
+import { verifyAdministratorUsageProof } from "../application/administrator_usage_policy.ts";
 import { BUDGET_OPERATIONS } from "../application/request_budget.ts";
 import {
   BUDGET_KINDS,
@@ -217,7 +218,13 @@ export class SupabaseUsageBudgetStore implements UsageBudgetStorePort {
       !Array.isArray(request.demands) || request.demands.length < 1 || request.demands.length > 64
     ) unavailable();
     const keys = new Set<string>();
+    const exempt = verifyAdministratorUsageProof(
+      request.administratorProof,
+      request,
+      request.administratorProof?.issuedAtUtc ?? 0n,
+    );
     let requests = 0;
+    let concurrent = 0;
     for (const d of request.demands) {
       if (
         !d || !BUDGET_KINDS.includes(d.kind) || typeof d.scope !== "string" || !ID.test(d.scope) ||
@@ -229,6 +236,7 @@ export class SupabaseUsageBudgetStore implements UsageBudgetStorePort {
             !/^[a-f0-9]{64}$/.test(d.fingerprint)) ||
         d.kind !== "distinct_scores" && d.fingerprint !== undefined
       ) unavailable();
+      if (exempt.includes(d.kind) && d.periodSeconds === 86400n) unavailable();
       if (d.kind === "request_window") {
         if (d.units !== 1n) unavailable();
         requests++;
@@ -237,11 +245,13 @@ export class SupabaseUsageBudgetStore implements UsageBudgetStorePort {
         d.kind === "concurrent_jobs" &&
         (d.units !== 1n || d.periodSeconds !== 1n || d.scope !== "GLOBAL")
       ) unavailable();
+      if (d.kind === "concurrent_jobs") concurrent++;
       const signature = [d.kind, d.scope, String(d.periodSeconds)].join("\0");
       if (keys.has(signature)) unavailable();
       keys.add(signature);
     }
-    if (!requests) unavailable();
+    if (!requests && !exempt.includes("request_window")) unavailable();
+    if (request.administratorProof && concurrent !== 1) unavailable();
   }
   async reserve(request: UsageReservationRequest): Promise<UsageReservationDecision> {
     this.validate(request);
@@ -252,6 +262,8 @@ export class SupabaseUsageBudgetStore implements UsageBudgetStorePort {
           id = crypto.randomUUID(),
           counters: Counter[] = [],
           blocked: Counter[] = [];
+        // Check database time under the existing advisory lock before touching counters.
+        verifyAdministratorUsageProof(request.administratorProof, request, now);
         for (const d of request.demands) {
           const period = d.periodSeconds * MICROSECOND;
           let index = now / period;

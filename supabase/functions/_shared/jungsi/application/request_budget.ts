@@ -45,4 +45,7 @@ export const BUDGET_OPERATIONS = [
   "score-input.status.read",
   "score-input.correction.grant",
   "report.sample.read",
+  "history.snapshot.head",
+  "history.snapshot.read",
+  "report.list-own",
 ] as const;

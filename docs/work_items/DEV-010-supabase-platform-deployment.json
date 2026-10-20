@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.93",
+  "contract_version": "1.9.94",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -67,7 +67,7 @@
       "engine_in_browser_allowed": false,
       "runtime": "supabase_edge_typescript_deno",
       "hosting_target_status": "selected_migration_pending",
-      "API_count": 25,
+      "API_count": 28,
       "API_DTO_session_changes": true,
       "server_timezone": "UTC",
       "source_display_timezone": "Asia/Seoul",
@@ -3209,6 +3209,21 @@
           "new snapshot API or admin policy",
           "production_ready"
         ]
+      },
+      "read_view_candidate": {
+        "source_operations": 28,
+        "consumer_operations": 17,
+        "operations": [
+          "history.snapshot.head",
+          "history.snapshot.read",
+          "report.list-own"
+        ],
+        "code_registration": "SOURCE_ONLY",
+        "live_business_DB_Storage": "NOT_RUN",
+        "Secrets": "NOT_RUN",
+        "deployment": "NOT_RUN",
+        "REQ27_006a_activation": "UNCHANGED_NOT_RUN",
+        "entrypoint": "supabase/functions/jungsi-api/read_view_entry.ts"
       }
     }
   }

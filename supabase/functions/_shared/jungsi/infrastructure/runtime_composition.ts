@@ -2,10 +2,12 @@
 import { AccessError } from "../application/access.ts";
 import type {
   ApiBusinessPort,
+  ApiExecution,
   ApiOperationId,
   ApiRoutePolicy,
 } from "../application/api_dispatch.ts";
-import { API_OPERATION_IDS } from "../application/api_dispatch.ts";
+import { REGISTERED_API_OPERATION_IDS } from "../application/api_dispatch.ts";
+import { READ_VIEW_OPERATION_IDS } from "../application/api_dispatch.ts";
 import {
   CATALOG_OPERATIONS,
   type CatalogDataPort,
@@ -48,6 +50,7 @@ import {
 import { SupabaseNativeAuth } from "./supabase_auth.ts";
 import { type NativeSqlPool, SupabaseSqlTransport } from "./transaction_sql.ts";
 import { BoundVerifiedSessionProvider } from "./verified_session.ts";
+import type { ReadViewCatalogFactory } from "./read_view_catalog_runtime.ts";
 export interface RuntimeRoutePolicy extends ApiRoutePolicy {
   readonly contract_ref: string;
 }
@@ -90,6 +93,8 @@ export interface SafeRuntimeObservation {
   readonly request_id: string;
 }
 export interface RuntimeComposition {
+  readonly readViewExtensions?: true;
+  readonly candidateCatalog?: ReadViewCatalogFactory;
   readonly environment: RuntimeEnvironment;
   readonly policies: readonly RuntimeRoutePolicy[];
   readonly responseSchemas: unknown;
@@ -130,7 +135,7 @@ export async function observeRuntimeResponse(
       : null;
     if (!requestId) return response;
     const safeOperation = operationId === "health.ready" ||
-        API_OPERATION_IDS.includes(operationId as ApiOperationId)
+        REGISTERED_API_OPERATION_IDS.includes(operationId as ApiOperationId)
       ? operationId
       : null;
     let code: string | null = null;
@@ -240,6 +245,7 @@ export class NativeRuntimeApi {
         selectedOperation,
         this.fetcher,
         this.artifactCache,
+        request.headers.get("If-None-Match"),
       );
       if (pathname === "/health/ready" && request.method === "GET") {
         stage = "relay";
@@ -312,7 +318,9 @@ export class NativeRuntimeApi {
         getAnalysis: async (...a) =>
           await phase("analysis_provider", async () => (await context.data()).getAnalysis(...a)),
       };
-      const catalog = new CatalogService(data, this.clock);
+      const catalog = this.config.readViewExtensions && this.config.candidateCatalog
+        ? this.config.candidateCatalog(data, this.clock, sql, this.config.environment, context)
+        : new CatalogService(data, this.clock);
       const authorities = {
         readCurrent: (subject: string, now: bigint) =>
           new SupabaseForecastAuthorities(sql()).readCurrent(subject, now),
@@ -383,10 +391,18 @@ export class NativeRuntimeApi {
       );
       const business: ApiBusinessPort = {
         execute: async (r) => {
+          if (READ_VIEW_OPERATION_IDS.some((id) => id === r.operation)) {
+            return await context.readView(r);
+          }
           if (SCORE_POLICY_OPERATION_IDS.some((id) => id === r.operation)) {
             return await (await scores()).execute(r);
           }
-          if (CATALOG_OPERATIONS.some((id) => id === r.operation)) return await catalog.execute(r);
+          if (CATALOG_OPERATIONS.some((id) => id === r.operation)) {
+            if (this.config.readViewExtensions && !this.config.candidateCatalog) {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            return await catalog.execute(r);
+          }
           if (REPORT_ACTION_OPERATIONS.some((id) => id === r.operation)) {
             return await actions.execute(r);
           }
@@ -401,6 +417,14 @@ export class NativeRuntimeApi {
       };
       let inputAdmission: PreparedUsageAdmission | undefined;
       const handler = createApiHandler(this.config.policies, {
+        ...(this.config.readViewExtensions
+          ? {
+            readViewScope: { assert: () => context.assertReadViewScope() },
+            representation: {
+              encode: (r: ApiExecution, result: unknown) => context.encodeReadView(r, result),
+            },
+          }
+          : {}),
         relay,
         clock: this.clock,
         projection: this.projection,

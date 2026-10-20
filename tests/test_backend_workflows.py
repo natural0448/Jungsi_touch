@@ -102,7 +102,8 @@ class BackendWorkflowTests(unittest.TestCase):
         self.assertEqual(len(catalog['operations']),len(spec['operations']))
         self.assertEqual({o['id'] for o in catalog['operations']},{o['id'] for o in spec['operations']})
         # This fixture explicitly runs legacy_synthetic: current 25-route auth is covered by the rights-mode suite.
-        legacy_operations=[o for o in catalog['operations'] if o['id'] not in {'score-input.status.read','score-input.correction.grant','report.sample.read'}]
+        self.assertEqual(set(spec['read_view_extension_contract']['operation_ids']),{'history.snapshot.head','history.snapshot.read','report.list-own'})
+        legacy_operations=[o for o in catalog['operations'] if o['id'] in spec['score_input_policy_contract']['legacy_operation_ids']]
         self.assertEqual(len(legacy_operations),22)
         for operation in legacy_operations:
             with self.subTest(operation=operation['id']):

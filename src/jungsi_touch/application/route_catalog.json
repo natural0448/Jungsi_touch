@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.93",
-  "source_sha256": "62e663de0a9b9098f3c83fe9fdb3acb591a1832519d8bae9685ad96f60b010dc",
+  "spec_version": "1.9.94",
+  "source_sha256": "d8d040632d42f02ce8b234c83783ff40d86b86c95220b4e84b5ab6752f9d1d14",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1474,6 +1474,156 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       }
+    },
+    {
+      "id": "history.snapshot.head",
+      "method": "GET",
+      "path": "/api/v1/admission-history/snapshot/head",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-28",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "response_scope": "닫힌 공개 스냅샷",
+      "implementation_status": "source_registered_synthetic_verified_live_activation_NOT_RUN",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [],
+        "response": "history_snapshot_head",
+        "idempotency_key_required": false,
+        "response_schema": "history_snapshot_head"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.history_snapshot_head",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      },
+      "runtime_implementation": {
+        "native_edge": "HistorySnapshotService.head",
+        "python_fastapi": "NOT_REGISTERED_NOT_PORTED_LOGICAL_COORDINATOR_REFERENCE_ONLY",
+        "actual_new_path": "NOT_RUN"
+      }
+    },
+    {
+      "id": "history.snapshot.read",
+      "method": "GET",
+      "path": "/api/v1/admission-history/snapshots/{snapshot_id}",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-28",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "response_scope": "닫힌 공개 스냅샷",
+      "implementation_status": "source_registered_synthetic_verified_live_activation_NOT_RUN",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [
+          "part_id"
+        ],
+        "response": "history_snapshot_body",
+        "idempotency_key_required": false,
+        "response_schema": "history_snapshot_body"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.history_snapshot_body",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      },
+      "runtime_implementation": {
+        "native_edge": "HistorySnapshotService.read",
+        "python_fastapi": "NOT_REGISTERED_NOT_PORTED_LOGICAL_COORDINATOR_REFERENCE_ONLY",
+        "actual_new_path": "NOT_RUN"
+      }
+    },
+    {
+      "id": "report.list-own",
+      "method": "GET",
+      "path": "/api/v1/me/reports",
+      "member_tiers": [
+        "standard",
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-30",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "response_scope": "현재 인증 주체 본인 리포트 요약만",
+      "implementation_status": "source_registered_synthetic_verified_live_activation_NOT_RUN",
+      "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
+      "http_contract": {
+        "body": [],
+        "query": [
+          "exam_id",
+          "cursor",
+          "limit (1~20; default 10)"
+        ],
+        "response": "own_report_list",
+        "idempotency_key_required": false,
+        "response_schema": "own_report_list"
+      },
+      "application_service": "jungsi_touch.application.platform.PlatformService.execute",
+      "contract_ref": "backend_platform_contract.dto_schemas.own_report_list",
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      },
+      "runtime_implementation": {
+        "native_edge": "OwnReportListService.execute",
+        "python_fastapi": "NOT_REGISTERED_NOT_PORTED_LOGICAL_COORDINATOR_REFERENCE_ONLY",
+        "actual_new_path": "NOT_RUN"
+      }
     }
   ],
   "runtime_status": "HTTP_workflows_implemented_live_configuration_pending",
@@ -2578,6 +2728,56 @@
         "rules": [
           "REQ-27 및 score_input_policy_contract; 공개 필드만 닫힌 재귀 스키마로 투영한다. 실제 정책 한도·회원 식별자·비밀/출처 파일은 반환하지 않는다."
         ]
+      },
+      "history_snapshot_head": {
+        "format": "jungsi.history-snapshot-head/v1",
+        "fields": [
+          "format",
+          "status",
+          "snapshot_id",
+          "publication_sha256",
+          "source_head_sha256",
+          "generated_at",
+          "source_as_of",
+          "schema_version",
+          "normalization_rules_version",
+          "selection_rules_version",
+          "counts",
+          "delivery_mode",
+          "full",
+          "parts",
+          "expires_at"
+        ],
+        "rules": [
+          "Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.",
+          "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN."
+        ]
+      },
+      "history_snapshot_body": {
+        "format": "jungsi.history-snapshot/v1",
+        "fields": [
+          "format",
+          "payload_id",
+          "part_id",
+          "rows"
+        ],
+        "rules": [
+          "Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.",
+          "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN."
+        ]
+      },
+      "own_report_list": {
+        "format": "jungsi.own-report-list/v1",
+        "fields": [
+          "format",
+          "items",
+          "next_cursor",
+          "has_more"
+        ],
+        "rules": [
+          "Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.",
+          "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN."
+        ]
       }
     },
     "operation_gaps": [
@@ -2805,6 +3005,33 @@
         "verification": "tests/edge/test_score_input_policy.ts",
         "external_settings": "현재 운영 5 operation scope 유지; 신규 3 operation의 scope/cost/활성화 별도 승인 필요",
         "live_data": "NOT_RUN; 원자료·실계정·운영 DB 변경 없음"
+      },
+      {
+        "operation": "history.snapshot.head",
+        "before": "기획 계약",
+        "after": "명시 Edge 서비스·별도 합성 검사 등록",
+        "storage": "기존 app SELECT와 해시 지정 비공개 Storage GET",
+        "verification": "read_view_extension_contract.verification",
+        "external_settings": "새 운영 binding/Owner 등록 NOT_RUN",
+        "live_data": "실제 API 업무 호출 NOT_RUN"
+      },
+      {
+        "operation": "history.snapshot.read",
+        "before": "기획 계약",
+        "after": "명시 Edge 서비스·별도 합성 검사 등록",
+        "storage": "기존 app SELECT와 해시 지정 비공개 Storage GET",
+        "verification": "read_view_extension_contract.verification",
+        "external_settings": "새 운영 binding/Owner 등록 NOT_RUN",
+        "live_data": "실제 API 업무 호출 NOT_RUN"
+      },
+      {
+        "operation": "report.list-own",
+        "before": "기획 계약",
+        "after": "명시 Edge 서비스·별도 합성 검사 등록",
+        "storage": "현재 주체 본인 report/profile JOIN 및 RLS",
+        "verification": "read_view_extension_contract.verification",
+        "external_settings": "새 운영 binding/Owner 등록 NOT_RUN",
+        "live_data": "실제 API 업무 호출 NOT_RUN"
       }
     ],
     "configuration": [

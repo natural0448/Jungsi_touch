@@ -118,8 +118,10 @@ class SupabaseRuntimeTests(unittest.TestCase):
         self.assertFalse(self.db);self.assertFalse(self.network)
     def test_existing_API_bindings_and_user_authentication_are_retained(self):
         app=self.app();ops=json.loads((BASE_HTTP.parents[1]/'application/route_catalog.json').read_text(encoding='utf-8'))['operations']
-        self.assertEqual(len(ops),25)
-        legacy_ops=[o for o in ops if o['id'] not in {'score-input.status.read','score-input.correction.grant','report.sample.read'}]
+        self.assertEqual(len(ops),28)
+        policy_ops=[o for o in ops if o['id'] not in {'history.snapshot.head','history.snapshot.read','report.list-own'}]
+        self.assertEqual(len(policy_ops),25)
+        legacy_ops=[o for o in policy_ops if o['id'] not in {'score-input.status.read','score-input.correction.grant','report.sample.read'}]
         self.assertEqual(len(legacy_ops),22)
         with TestClient(app) as c:
             self.assertEqual(c.get('/api/v1/me',headers={'X-Jungsi-Relay-Token':TOKEN}).status_code,401)

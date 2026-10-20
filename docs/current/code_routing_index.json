@@ -3831,7 +3831,7 @@
         "REQ-26",
         "REQ-27"
       ],
-      "source_sha256": "66d3101a477c3cf61b233ed843abe83b08d95cfa280946a1269193a0948ddc48",
+      "source_sha256": "2363dbe48a3c092cc6f7389efbc55d43d05553805c7e1766ef88a638f1614f1b",
       "symbols": [
         {
           "kind": "function",
@@ -7051,6 +7051,27 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts",
+        "layer": "application",
+        "status": "read_view_source_candidate_native_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
+        "declared_exports": [
+          "ADMINISTRATOR_DAILY_KINDS",
+          "AdministratorUsageBinding",
+          "AdministratorUsageProof",
+          "ApprovedAdministratorUsagePolicy",
+          "verifyAdministratorUsageProof"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
         "layer": "application",
         "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
@@ -7078,7 +7099,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "2fec41f63ac22a4501fae71e47c96666d551bfec536138e83587762969c343ef",
+        "source_sha256": "cd06a6af4e5492d8380d70681953877e0adcb38d5ff163bcbafcb92a5bbf1441",
         "declared_exports": [
           "API_OPERATION_IDS",
           "ApiBusinessPort",
@@ -7223,6 +7244,29 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
+        "layer": "application",
+        "status": "read_view_source_candidate_native_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "665824501cd3268a58c54a0d0b027a6d3d6597b496b4d8761a366fe6d4e56a65",
+        "declared_exports": [
+          "HISTORY_PUBLICATION_STATUSES",
+          "HISTORY_SNAPSHOT_SLOTS",
+          "HistorySnapshotPort",
+          "HistorySnapshotService",
+          "SnapshotPart",
+          "SnapshotPublication",
+          "validateHistorySnapshotPayload"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/application/management_access.ts",
         "layer": "application",
         "status": "synthetic_session_and_management_authorization_candidate_verified_runtime_NOT_RUN",
@@ -7319,6 +7363,28 @@
           "TotalModelBinding",
           "validateScoreInput",
           "validateScoreStructure"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/own_report_list.ts",
+        "layer": "application",
+        "status": "read_view_source_candidate_native_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "e9a9d595fb770ebd538eb80987c038baa220228deae49ec98395778ab077ed74",
+        "declared_exports": [
+          "OWN_REPORT_LIST_MAX_LIMIT",
+          "OwnReportCursorPort",
+          "OwnReportListPort",
+          "OwnReportListRow",
+          "OwnReportListService",
+          "OwnReportPosition"
         ]
       },
       {
@@ -7514,7 +7580,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "d10cab9a2c1e9936ba1c414ba822bb31f540cd4367cf2eba3b63f21139bc41e3",
+        "source_sha256": "e1b7da8d671fabf542d0e5fd881302227a2a9864969709538d19af718eac8bf4",
         "declared_exports": [
           "BUDGET_OPERATIONS",
           "BudgetRequest",
@@ -7715,7 +7781,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "0e5d69a2ed293c7c3ffc8e7c1245795dfbae3bee574ff050cb3fbdf724a094e2",
+        "source_sha256": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
         "declared_exports": [
           "BUDGET_KINDS",
           "BudgetKind",
@@ -7755,7 +7821,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "b71e147ba5f682a23f4c22d0479d4766fd48b4f70b210418a89f25fa19aee2b7",
+        "source_sha256": "3bcf4e629dad73cf7101a881696753fb5f7b7eb82d3ff306733fa0c39c6483e5",
         "declared_exports": [
           "ApprovedUsagePlan",
           "RepositoryUsageReplays",
@@ -8163,7 +8229,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "5d588fdbd2887b544bf8a74a24bd0ecbe2c48b5d4339ec64122690bc350cf362",
+        "source_sha256": "97f26fad6727fb95728647f64b2ee24f1cf0ec34ee047e85d213f53f93adf939",
         "declared_exports": [
           "ApiHttpPorts",
           "createApiHandler",
@@ -8184,7 +8250,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "04ec816caea9d0a31608dec237ae0e81131e06838aa40fe642f0ae769adb801e",
+        "source_sha256": "23b166d7ed7e5109acf95f2786296332f0291060ae5ce574f3649d7a57e46874",
         "declared_exports": [
           "BoundaryPorts",
           "RelayBoundary",
@@ -8236,6 +8302,32 @@
           "FORECAST_REVISION_INSERT_SQL",
           "ForecastSqlLimits",
           "SupabaseForecastRepository"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts",
+        "layer": "data_infrastructure",
+        "status": "read_view_source_candidate_native_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "d855087933085af77f16ec3cc57e9841280318464da5cd39c4af7d095cd4ea9e",
+        "declared_exports": [
+          "HistorySnapshotSource",
+          "SNAPSHOT_HEAD_SQL",
+          "SnapshotHeadPort",
+          "SnapshotHeadRow",
+          "SnapshotResourceEnvelope",
+          "SnapshotTrustBinding",
+          "SupabaseSnapshotHead",
+          "parseBoundedSnapshotJson",
+          "readBoundedSnapshotStream",
+          "snapshotBytesSha256"
         ]
       },
       {
@@ -8379,6 +8471,41 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/own_report_cursor.ts",
+        "layer": "data_infrastructure",
+        "status": "read_view_source_candidate_native_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "b2273effe7558e9f27abc5e92c21c2f8d89653e67e30f450a96b12db8219c538",
+        "declared_exports": [
+          "OwnReportCursor"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts",
+        "layer": "data_infrastructure",
+        "status": "read_view_source_candidate_native_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "cd8753d36e9060b36d54d41fe03bf6e92823a6630f6bcd2550c55f7bca24407e",
+        "declared_exports": [
+          "OWN_REPORT_LIST_SQL",
+          "SupabaseOwnReportList"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts",
         "layer": "data_infrastructure",
         "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
@@ -8475,6 +8602,24 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts",
+        "layer": "data_infrastructure",
+        "status": "read_view_source_candidate_native_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "abd6cdc1eba62c095f35835201495896b2bacff8151f637261646fabb057ba31",
+        "declared_exports": [
+          "ReadViewCatalogContext",
+          "ReadViewCatalogFactory"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
         "layer": "data_infrastructure",
         "status": "source_assembled_synthetic_verified_native_deployment_NOT_RUN",
@@ -8506,7 +8651,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "69ea7f37981e478532369d916011afe827acb12850c6b73bfd4107d28d32f72e",
+        "source_sha256": "ef96711525ecbb29c6e8fa638eab6ba86dead33b98414f91aa039414e55e2754",
         "declared_exports": [
           "RuntimeExamBudget",
           "RuntimeUsagePolicy",
@@ -8547,7 +8692,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "01f6f0de573c93b547f0adfc800b4402d56345fefbabc8cf0e0f2454a7b603d9",
+        "source_sha256": "eeac06ed226b310e3f780fa30a8ac75fa17d726014a9bb8428b378abb76a8797",
         "declared_exports": [
           "RuntimeRoutePolicy",
           "RuntimeComposition",
@@ -8588,7 +8733,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "a4cbfb203a445e07a62c5a89b27b1106bf0fcf7f826f1daefc7e49b03e02b1b8",
+        "source_sha256": "27951970a48e043420b5df908061b5b0c2984668f679fc81e5927170e38e4663",
         "declared_exports": [
           "NativeRuntimeRequest"
         ]
@@ -8661,7 +8806,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "87ca3512938ed6c8d46a4578d171df1825e6c55aa930e9cfefdc6f502a473813",
+        "source_sha256": "bae59c379c1048a64ca5abb48707c775108acac090e8b270cafc6bd4d998f565",
         "declared_exports": [
           "RuntimeEnvironment",
           "BasicRuntimeSettings",
@@ -8920,7 +9065,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "117dfa9141f400e8cafde122121c2237e3cdad513abafdca78997a18aa371424",
+        "source_sha256": "6f18fff45c14e97d02379cc8ef13c13ee414a605ff287f1807be9c0f980cdd9a",
         "declared_exports": [
           "SupabaseUsageBudgetStore",
           "USAGE_ACTIVE_EXPIRY_SQL",
@@ -9075,6 +9220,21 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/read_view_catalog_runtime.ts",
+        "layer": "data_infrastructure",
+        "status": "read_view_source_candidate_native_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "00acd4306c8e258b7b9ef9a17c6ccaff32ab3314e173b7c7120552f6b2e34b07",
+        "declared_exports": []
+      },
+      {
         "path": "supabase/functions/current-admission-review/index.ts",
         "layer": "data_infrastructure",
         "status": "implemented_live_bounded_v2_actual_connection_verification_in_progress",
@@ -9140,6 +9300,21 @@
           "PostgresPoolSettings",
           "createNativePostgresPool"
         ]
+      },
+      {
+        "path": "supabase/functions/jungsi-api/read_view_entry.ts",
+        "layer": "data_infrastructure",
+        "status": "read_view_candidate_entry_source_only_NOT_DEPLOYED",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "b91074c13ec0c4dce24fba60840aca903316ca49c68b8c1257d06181fae4b448",
+        "declared_exports": []
       },
       {
         "path": "supabase/functions/official-history-display/index.ts",

@@ -47,6 +47,7 @@ class FormalSessionContractTests(unittest.TestCase):
         self.assertIn('Superseded proposed session contract must not be revived',validate_spec(self.spec))
     def test_generated_API_title_uses_current_operations_count(self):
         path=self.spec['current_documents']['api_dto'];text=generated_files(self.spec)[path].decode()
-        self.assertEqual(len(self.spec['operations']),25)
-        self.assertIn('## 25개 요청과 응답',text);self.assertNotIn('## 22개 요청과 응답',text)
+        self.assertEqual(len(self.spec['operations']),28)
+        self.assertEqual(len([o for o in self.spec['operations'] if o['id'] not in {'history.snapshot.head','history.snapshot.read','report.list-own'}]),25)
+        self.assertIn('## 28개 요청과 응답',text);self.assertNotIn('## 22개 요청과 응답',text)
 if __name__=='__main__':unittest.main()
