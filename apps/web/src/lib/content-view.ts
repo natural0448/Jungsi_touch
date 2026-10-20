@@ -14,13 +14,17 @@ import { supabaseServer } from "@/lib/supabase/server";
 
 export type ContentKind = "analysis" | "possibility" | "recommend" | "report";
 
-/** 지금 요청의 에듀터치 회원 id. 없거나 live 가 아니면 null */
+/**
+ * 지금 요청의 에듀터치 회원 id. 없거나 live 가 아니면 null.
+ * 쿠키를 풀어 읽은 값(getSession)은 쿠키 안 사용자 정보를 바꿔 넣을 수 있으므로 쓰지 않는다 — Supabase Auth 가
+ * 토큰을 확인해 돌려준 사용자(getUser)만 쓴다(담당자 독립 검토 P2, 2026-10-21). 토큰 갱신은 하지 않는다
+ */
 export async function viewerId(): Promise<string | null> {
   if (apiMode() !== "live") return null;
   try {
     const supabase = await supabaseServer();
-    const { data } = (await supabase?.auth.getSession()) ?? { data: { session: null } };
-    return data.session?.user?.id ?? null;
+    const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
+    return data.user?.id ?? null;
   } catch {
     return null;
   }
@@ -52,7 +56,9 @@ export async function logContentView(kind: ContentKind, path: string): Promise<v
 /*
   방문자 IP. 에듀터치 본체 프록시를 거치면 cf-connecting-ip 는 Cloudflare 내부 주소가 된다(2026-10-16 실측 2a06:98c0:…).
   본체는 원래 방문자 IP 를 x-edutouch-client-ip 로 덮어써 넘긴다(에듀터치 PR #210). 워커 주소로 직접 온 요청은
-  누구나 이 헤더를 넣을 수 있으므로, 받은 cf-connecting-ip 가 Cloudflare 주소(본체 워커가 넘긴 경우)일 때만 믿는다.
+  누구나 이 헤더를 넣을 수 있으므로 두 조건이 모두 맞을 때만 믿는다(담당자 독립 검토 P2, 2026-10-21 보완):
+  ① cf-connecting-ip 가 Cloudflare 주소(워커가 넘긴 요청) ② CF-Worker 가 edutouch.co.kr — Cloudflare 가 워커의 하위 요청에
+  그 워커의 영역 이름으로 붙이는 표지라 다른 영역의 워커는 이 값을 만들 수 없다(2026-10-21 운영 기록 52/52 확인).
   B단계(edutouch.co.kr/jeongsi* 라우트를 이 워커에 직결)가 되면 cf-connecting-ip 가 다시 방문자 IP 이므로 헤더 읽기를 뺀다.
 */
 const CF_V4 = ["173.245.48.0/20", "103.21.244.0/22", "103.22.200.0/22", "103.31.4.0/22", "141.101.64.0/18", "108.162.192.0/18", "190.93.240.0/20", "188.114.96.0/20", "197.234.240.0/22", "198.41.128.0/17", "162.158.0.0/15", "104.16.0.0/13", "104.24.0.0/14", "172.64.0.0/13", "131.0.72.0/22"];
@@ -98,10 +104,12 @@ export function isCloudflareIp(ip: string): boolean {
     return samePrefix6(n6, v6(base) as number[], Number(bits));
   });
 }
+/** 방문자 IP 를 넘겨도 되는 본체 워커의 영역 */
+const EDUTOUCH_ZONE = "edutouch.co.kr";
 export function visitorIp(h: Headers): string | null {
   const cf = h.get("cf-connecting-ip")?.trim() || null;
   const forwarded = h.get("x-edutouch-client-ip")?.trim() || null;
-  if (cf && forwarded && isCloudflareIp(cf)) return forwarded;
+  if (cf && forwarded && isCloudflareIp(cf) && h.get("cf-worker")?.trim().toLowerCase() === EDUTOUCH_ZONE) return forwarded;
   return cf ?? h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
 }
 
