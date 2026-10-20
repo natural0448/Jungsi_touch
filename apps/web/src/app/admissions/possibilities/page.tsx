@@ -2,7 +2,6 @@ import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import Form from "next/form";
 import Link from "next/link";
-import { ChevronIcon } from "@/components/icons";
 import { AdvantageCell, CategoryLegend, PickButton, ScoreCell, StatusCell, type Cell } from "@/components/offering-parts";
 import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
@@ -10,11 +9,12 @@ import { ScoreBasis } from "@/components/score-basis";
 import { ShortlistTray } from "@/components/shortlist-tray";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import type { CatalogSearchDto, ForecastPublicDto, OfferingDto, RecruitmentDto } from "@/lib/dto";
+import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
 import { REGIONS } from "@/lib/regions";
 import { ensureAnalyses, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
+import { ItemShell } from "./item-shell";
 import { Detail } from "./parts";
 import { GROUPS, hrefWith, LIMIT, parseQuery, toSearch, type Query, YEAR } from "./query";
 import "./possibilities.css";
@@ -44,8 +44,6 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
   const cur = parseQuery(await searchParams);
   let res: CatalogSearchDto<OfferingDto>;
   let state: ReportState;
-  let rec: RecruitmentDto | null = null;
-  let pub: ForecastPublicDto | null = null;
   let picks: PickedItem[] = [];
   try {
     const [found, mine] = await Promise.all([src.searchOfferings(caller, toSearch(cur)), loadMine(src, caller)]);
@@ -54,13 +52,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     // 보이는 모집행만 분석한다. 리포트가 없으면(성적 전) 검색과 모집 정보만
     state = mine ? await ensureAnalyses(src, caller, mine, items.map((o) => o.offering_id)) : { kind: "none" };
     const report = state.kind === "none" ? null : state.report;
-    const open = items.find((o) => o.offering_id === cur.open);
-    [rec, picks, pub] = await Promise.all([
-      open ? src.readRecruitment(caller, open.offering_id) : null,
-      report ? pickedItems(src, caller, report, items) : [],
-      // 발행된 학과 기준(공개 근거). 성적과 무관하게 펼친 모집행만
-      open ? src.readPublishedForecast(caller, open.offering_id) : null,
-    ]);
+    // 펼친 모집행의 2027 모집 정보·발행 기준은 화면에서 펼친 뒤 따로 받는다(item-shell.tsx · extras-actions.ts)
+    picks = report ? await pickedItems(src, caller, report, items) : [];
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
@@ -166,33 +159,35 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                         const a = an(o.offering_id);
                         const open = cur.open === o.offering_id;
                         const on = picked.has(o.offering_id);
-                        const toggle = `${hrefWith(cur, { open: open ? undefined : o.offering_id })}#${o.offering_id}`;
                         return (
-                          <li key={o.offering_id} id={o.offering_id} className={`item${open ? " open" : ""}`}>
-                            <div className="row">
-                              <Link className="unit" href={toggle} scroll={false} aria-expanded={open}>
+                          <ItemShell
+                            key={o.offering_id}
+                            o={o}
+                            a={a}
+                            initialOpen={open}
+                            unit={
+                              <>
                                 <b>{o.department}</b>
                                 <small>{o.track ?? "일반전형"}</small>
-                              </Link>
-                              <span className="c-grp"><span className="grp">{o.group}</span></span>
-                              <span className="c-score r"><ScoreCell a={a} /></span>
-                              <span className="c-st"><StatusCell a={a} /></span>
-                              <span className="c-adv r"><AdvantageCell a={a} /></span>
-                              <span className="c-pick">{report && <PickButton id={o.offering_id} on={on} />}</span>
-                              <Link className="c-chev" href={toggle} scroll={false} aria-label={open ? "접기" : "자세히"}>
-                                <ChevronIcon />
-                              </Link>
+                              </>
+                            }
+                            cells={
+                              <>
+                                <span className="c-grp"><span className="grp">{o.group}</span></span>
+                                <span className="c-score r"><ScoreCell a={a} /></span>
+                                <span className="c-st"><StatusCell a={a} /></span>
+                                <span className="c-adv r"><AdvantageCell a={a} /></span>
+                                <span className="c-pick">{report && <PickButton id={o.offering_id} on={on} />}</span>
+                              </>
+                            }
+                            mmeta={
                               <span className="mmeta">
                                 <span className="grp">{o.group}</span>
                                 <span>{o.group}군</span>
                               </span>
-                            </div>
-                            {open && (
-                              <div className="detail">
-                                <Detail o={o} a={a} rec={rec} pub={pub} picked={on} />
-                              </div>
-                            )}
-                          </li>
+                            }
+                            detail={<Detail o={o} a={a} extras={null} picked={on} />}
+                          />
                         );
                       })}
                     </ul>
