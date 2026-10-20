@@ -70,6 +70,15 @@ def operation_registration(spec):
             legacy_scope_operation_count=22,pinned_legacy_binding_operation_ids=pinned_legacy,
             registered_operation_ids=registered,registered_operation_count=len(registered)))
     if extension_registration is not None:result['policy_extension_source_registration']=extension_registration
+    view=spec.get('read_view_extension_contract')
+    if view is not None:
+        from check_project_consistency import validate_read_view_extension
+        if validate_read_view_extension(spec):raise EdgeFailure('read_view_extension_registration_invalid')
+        result['read_view_extension_source_registration']=dict(
+          format='jungsi.edge-read-view-extension-source-registration/v1',
+          contract_operation_count=3,registered_operation_ids=view['operation_ids'],registered_operation_count=3,
+          implementation_bindings=view['implementation_bindings'],runtime_test_bindings=view['runtime_test_bindings'],
+          status='CODE_REGISTERED',native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN')
     return result
 
 def owner_review_registration(spec,before):
@@ -135,6 +144,17 @@ def whole_population_registration(spec,before):
         raise EdgeFailure('whole_population_source_or_test_binding_invalid')
     return c
 
+def read_view_registration(spec,before):
+    """Exact read3 suite, independently counted from legacy foundation and policy3."""
+    from check_project_consistency import validate_read_view_extension
+    if validate_read_view_extension(spec):raise EdgeFailure('read_view_extension_registration_invalid')
+    contract=spec.get('read_view_extension_contract')
+    if contract is None:return None
+    v=contract['verification']
+    if any(before.get(b['path'])!=b['sha256']for b in v['source_bindings']):
+        raise EdgeFailure('read_view_extension_snapshot_binding_invalid')
+    return v
+
 def run_workspace(root,manifest,deno,python,output):
     root=Path(root).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
     before=verify_manifest(root,manifest);spec=json.loads((root/"docs/current/service_spec.json").read_bytes())
@@ -188,6 +208,16 @@ def run_workspace(root,manifest,deno,python,output):
         whole_population_unit=dict(**parse_junit(whole_junit,whole_population['test_count']),
           coverage='STRICT_WHOLE_POPULATION_V2_SYNTHETIC',source_bindings=whole_population['source_bindings'],
           native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN')
+    read_view_unit=None
+    read_view=read_view_registration(spec,before)
+    if read_view is not None:
+        read_view_junit=output.resolve()/'read_view_extension.junit.xml'
+        command([deno,'test',*common,'--reporter=dot','--junit-path',str(read_view_junit),
+          *read_view['test_paths']],root=root,output=output,name='read_view_extension_unit')
+        read_view_unit=dict(**parse_junit(read_view_junit,read_view['test_count']),
+          coverage='READ_VIEW_EXTENSION_SYNTHETIC',source_bindings=read_view['source_bindings'],
+          baseline_foundation_count=656,native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',
+          activation_status='NOT_RUN',operating_writes=0)
     references=cfg["python_reference"]
     reference=dict(format="jungsi.edge-python-reference/v1",basis="selected_snapshot",
       files=references["files"],source_files={p:before[p] for p in [*paths,cfg["config"],cfg["oracle"]]},
@@ -207,6 +237,7 @@ def run_workspace(root,manifest,deno,python,output):
     if owner_unit is not None:result['owner_review_unit']=owner_unit
     if public_unit is not None:result['current_public_unit']=public_unit
     if whole_population_unit is not None:result['whole_population_unit']=whole_population_unit
+    if read_view_unit is not None:result['read_view_extension_unit']=read_view_unit
     write_new(output/"edge_run_receipt.json",json_bytes(result));return result
 def main():
     p=argparse.ArgumentParser(description=__doc__)

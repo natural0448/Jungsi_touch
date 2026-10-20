@@ -628,7 +628,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "106d3f7c3fe0da5bc7dcf71d60010d231b69678a32bc8267dd918d2a7e381e34",
+      "source_sha256": "a82a5ee09ccf06d27eb2b9be346ddcb80b40f7dd5457c8ec5cdf0cd282be335e",
       "symbols": [
         {
           "kind": "class",
@@ -832,6 +832,12 @@
           "kind": "function",
           "name": "public_metadata_matches_shape",
           "signature": "def public_metadata_matches_shape(value, shape):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "registered_read_view_ids",
+          "signature": "def registered_read_view_ids(spec):",
           "decorators": []
         },
         {
@@ -1156,6 +1162,18 @@
           "kind": "function",
           "name": "validate_public_response_registry.unique",
           "signature": "def unique(pairs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_read_view_extension",
+          "signature": "def validate_read_view_extension(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_read_view_extension.exact_list",
+          "signature": "def exact_list(value, expected):",
           "decorators": []
         },
         {
@@ -1489,7 +1507,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "4fc428e13ad6da17688e820d85a5d3cb5b32335f1f817c20085052953e436544",
+      "source_sha256": "9ca0c481a5453fd2bf25222bca2001bb36002dfaea23bfdca995ac472abcee6b",
       "symbols": [
         {
           "kind": "function",
@@ -1519,6 +1537,12 @@
           "kind": "function",
           "name": "parse_junit",
           "signature": "def parse_junit(path, expected):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "read_view_registration",
+          "signature": "def read_view_registration(spec, before):",
           "decorators": []
         },
         {

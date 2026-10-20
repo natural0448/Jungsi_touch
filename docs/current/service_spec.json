@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.91",
+  "version": "1.9.92",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -6088,7 +6088,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.91",
+        "contract_version": "1.9.92",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -6262,7 +6262,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.91",
+        "contract_version": "1.9.92",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -6428,7 +6428,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.91",
+        "contract_version": "1.9.92",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6447,7 +6447,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.91",
+        "contract_version": "1.9.92",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6472,7 +6472,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.91",
+        "contract_version": "1.9.92",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6497,7 +6497,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.91",
+        "contract_version": "1.9.92",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -7183,7 +7183,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "106d3f7c3fe0da5bc7dcf71d60010d231b69678a32bc8267dd918d2a7e381e34",
+            "source_sha256": "a82a5ee09ccf06d27eb2b9be346ddcb80b40f7dd5457c8ec5cdf0cd282be335e",
             "symbols": [
               {
                 "kind": "class",
@@ -7387,6 +7387,12 @@
                 "kind": "function",
                 "name": "public_metadata_matches_shape",
                 "signature": "def public_metadata_matches_shape(value, shape):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "registered_read_view_ids",
+                "signature": "def registered_read_view_ids(spec):",
                 "decorators": []
               },
               {
@@ -7711,6 +7717,18 @@
                 "kind": "function",
                 "name": "validate_public_response_registry.unique",
                 "signature": "def unique(pairs):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_read_view_extension",
+                "signature": "def validate_read_view_extension(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_read_view_extension.exact_list",
+                "signature": "def exact_list(value, expected):",
                 "decorators": []
               },
               {
@@ -8044,7 +8062,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "4fc428e13ad6da17688e820d85a5d3cb5b32335f1f817c20085052953e436544",
+            "source_sha256": "9ca0c481a5453fd2bf25222bca2001bb36002dfaea23bfdca995ac472abcee6b",
             "symbols": [
               {
                 "kind": "function",
@@ -8074,6 +8092,12 @@
                 "kind": "function",
                 "name": "parse_junit",
                 "signature": "def parse_junit(path, expected):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "read_view_registration",
+                "signature": "def read_view_registration(spec, before):",
                 "decorators": []
               },
               {
@@ -17928,6 +17952,19 @@
         "REQ-30"
       ],
       "summary": "Owner/화면팀 v3 배포판15·782Storage인증GET·6설정·실제P1/P2재분석 영수증을 제한 수용하고 기존22별 현재배포/관측 원장을 보완한다. 실제 Root live 재검수와 보안·P3·입력권 잔량 인수는 미실행으로 보존한다. P1 판별 화면 정리본·점수기준/코호트/단위/출처 정규화와 서버 공개 cache, 명시 active+aal2 관리자 일일 검수 예외, 다른PC 본인리포트 locator를 요구사항으로 채택한다. 신규 읽기 API·SQL/포트/정리본·정책은 후속 동일 코드/기획 PR에서 구현·확장 등록하고 이번 문서 변경으로 활성화하지 않는다. 일반·유료 한도/입력권·정정권·원자 동시성·물리한도·RLS·인증·멱등·최종 현재성·원본/모형 bytes를 유지한다."
+    },
+    {
+      "version": "1.9.92",
+      "date": "2026-10-20",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28",
+        "REQ-29",
+        "REQ-30"
+      ],
+      "summary": "기존22+입력권 확장3을 유지하며 조회 전용3의 엄격한 선택 등록·별도 실행 검사를 준비한다. 새 논리 API/운영 scope는 이 변경에서 등록하지 않는다. 미연결 관측의 원래 null PK·관측 주소와 판별 cache 계량을 명시하고, 관리자 일일 예외의 직접 사용자 코드 승인 및 보존/실행 경계를 기록한다. 본인 목록의 SQL/application 동일 C 정렬·JOIN/keyset을 요구하며 normal 훅·정확 SHA CI와 후속 서비스 PR/실제 등록 인수를 구분한다."
     }
   ],
   "overall_analysis_contract": {
@@ -119581,7 +119618,7 @@
     ],
     "page": "/admissions/results",
     "source": "DATA_ACTIVE_ADMISSION_CURRENT_v1.json / jungsi_data_ingest.admission_results_current; trusted local current caches and school source evidence reused; no request-path full view aggregate",
-    "grain": "one display row per academic_year:original_PK_string; separate verified identity and year links; no inferred 2027 ID",
+    "grain": "one display row per academic_year:original_PK_string with verified identity/year links; observations without a verified PK keep original null and their existing opaque observation address in an explicitly counted mapping_pending domain; never fabricate an offering PK or inferred 2027 ID",
     "cells": [
       "recruitment_count_with_stage",
       "competition_ratio",
@@ -119600,12 +119637,14 @@
       "Initial recruitment, carryover increment and final recruitment are separate stages. A carryover increment is never a final total.",
       "Missing units/official qualification are not upgraded from numbers or labels alone. Definition-backed display units retain original null and derivation evidence.",
       "Unknown metric kinds remain a data review item with neutral display label and original code preserved for inspection; no guessed official score definition.",
-      "Each cell retains verified_official/pending_metadata/pending_value_type/pending_value_missing/not_published and a precise missing/held reason. No null-to-zero, rank-to-count or unsupported ready conversion."
+      "Each cell retains verified_official/pending_metadata/pending_value_type/pending_value_missing/not_published and a precise missing/held reason. No null-to-zero, rank-to-count or unsupported ready conversion.",
+      "Apply established direct-university versus official-adiga source priority only to qualified comparable observations. Same-priority conflicting values remain held; retain lower-priority conflicting provenance rather than silently dropping it.",
+      "A metadata-only export deliberately omits original value/source fields. Missing metadata in that export is not proof that the native original lacks it. Reuse full immutable native references and qualified overlays."
     ],
-    "manifest": "Deterministic semantic version/content SHA, rule version/SHA, input current-head binding, payload bytes/encoding/decompressed size, actual school/row/year counts and creation time. Shared source/basis/cohort definitions are references, not repeated audit bodies.",
+    "manifest": "Deterministic semantic version/content SHA, rule version/SHA, input current-head binding, payload bytes/encoding/decompressed size, actual school/row/year counts and creation time. Shared source/basis/cohort definitions are references, not repeated audit bodies. Separate source observations, mapped display rows and unmapped held observations; reconcile all included/excluded selections to the declared source head. Measure gzip/decompressed sizes; a proposed estimate is not a physical bound or acceptance result.",
     "read_API": "Two explicit read-only operations: small current head and a version-bound gzip/full or bounded-part body. Final routes/DTO/bounds are registered with implementation. No direct browser Storage permission.",
     "refresh": "New current head/rules produce one cross-reviewed immutable snapshot; identical content reuses existing bytes. Stable trust anchor, publisher scope, expected-head CAS and rollback must be defined; never remove pins to trust arbitrary mutable content.",
-    "cache": "Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization.",
+    "cache": "Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization. Actual authenticated head/body API calls retain request/result accounting; a BFF/KV hit with no API call is not charged a fictional full-body API read. Existing personal/engine logical cache accounting stays unchanged. No cache_delivery intent or client quota waiver flag is introduced.",
     "pagination": "Snapshot-backed page/search covers its entire manifest domain with server-side university paging and exact filtered counts. Legacy history.search retains its original bounded cursor and six-page UI behavior until the new path is live; no claim that a partial600 metric result is a whole snapshot.",
     "performance": "Frontend target first page within2s and local search within1s; separate cold version acquisition from warm server-cache page/search timing. These are acceptance targets, not measured PASS.",
     "acceptance": [
@@ -119625,7 +119664,35 @@
     },
     "implementation": "NOT_RUN_NEW_SNAPSHOT_PATH",
     "actual_publication": "NOT_RUN",
-    "existing_canonical_data_or_percentile_model_changed": false
+    "existing_canonical_data_or_percentile_model_changed": false,
+    "strict_extension_registration": {
+      "format": "jungsi.prepared-read-view-registration-policy/v1",
+      "status": "COMMON_HARNESS_PREPARED_NO_NEW_OPERATION_REGISTERED",
+      "contract_key": "read_view_extension_contract",
+      "exact_operations": [
+        {
+          "id": "history.snapshot.head",
+          "method": "GET",
+          "path": "/api/v1/admission-history/snapshot/head"
+        },
+        {
+          "id": "history.snapshot.read",
+          "method": "GET",
+          "path": "/api/v1/admission-history/snapshots/{snapshot_id}"
+        },
+        {
+          "id": "report.list-own",
+          "method": "GET",
+          "path": "/api/v1/me/reports"
+        }
+      ],
+      "preserved": "legacy22 and REQ27 extension3 remain exact; their activation and counters are not changed by read3 source registration",
+      "source_boundary": "current operations stay25 until service implementation and exact source/runtime/test registration; then exactly28, not an arbitrary operation set",
+      "tests": "new read/admin/locator cases run as a separate exact retained-snapshot suite; foundation656/Owner36/public58/whole14 and oracle993 remain separately counted",
+      "gates": "exact method/path/tiers/requirements, application source SHA, runtime/test SHA, no alias/writer/operational promotion, no unregistered or double-counted separate test source",
+      "implementation": "NOT_RUN_NEW_SERVICE_SOURCE_ON_THIS_PLANNING_COMMIT",
+      "activation": "NOT_RUN_NEW_OPERATING_BINDING"
+    }
   },
   "administrator_verification_quota_contract": {
     "format": "jungsi.admin-verification-quota-contract/v1",
@@ -119657,7 +119724,15 @@
     ],
     "read_overlap": "Prepare bounded resource-safe handling of overlapping ordinary P1 read requests, preferably the snapshot path and reuse. Any queue/concurrency policy change is explicit and tested; no unbounded in-process wait.",
     "verification": "Admin daily exemption, aal1/inactive/forged/missing-role rejection or ordinary behavior, paid-without-admin unchanged, concurrent reservation/finish/failure release, native budget provenance and fresh-hosted negative acceptance.",
-    "actual_policy_registration": "NOT_RUN_NEW_POLICY"
+    "actual_policy_registration": "NOT_RUN_NEW_POLICY",
+    "direct_code_approval": {
+      "status": "DIRECT_USER_APPROVED_EXACT_CODE_TEST_DOCUMENT_PR_SCOPE",
+      "review_file_sha256": "dac567061518b06fa0d1413682db83da6c64066f447826140d9b130a5f3a3bdb",
+      "verified_private_approval_receipt_sha256": "a912252f509d616f2304d9d203eeabc8c04238f14ce33ddf5ebb63e7dee070f0",
+      "scope": "same-Bearer verified active admin aal2 proof-bound four daily dimensions; code/regression/docs/normal hooks/CI/PR only",
+      "preservation": "ordinary/paid counters and policy identity, shared atomic concurrency, per-request physical/result/time bounds, ownership/RLS/relay/current/finish/input/correction/idempotency",
+      "operating_policy_Secrets_DB_Storage_deployment": "NOT_AUTHORIZED_BY_THIS_CODE_APPROVAL"
+    }
   },
   "owned_report_locator_contract": {
     "format": "jungsi.owned-report-locator-contract/v1",
@@ -119673,6 +119748,7 @@
     "scope": "Only current verified subject; bounded exam-filtered keyset query joining report/profile ownership and existing RLS. No new table/index assumed.",
     "summary": "Approved public own-report summary only; no JWT/internal paths/raw score bodies/other users. Final schema and cursor semantics are registered with implementation.",
     "selection": "Frontend server validates selected report ownership and CSRF before setting existing HttpOnly cookie. Empty/new-PC list is not permission failure; no automatic POST analysis or score save.",
-    "actual_execution": "NOT_RUN_NEW_PATH"
+    "actual_execution": "NOT_RUN_NEW_PATH",
+    "ordering": "Single owner-filtered JOIN, limit+1 without COUNT/body fetch, and identical explicit C/ASCII report-ID keyset ordering in SQL and application at equal microsecond timestamps. Observe existing indexes/privileges without assuming a prepared migration was activated."
   }
 }
