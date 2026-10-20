@@ -71,6 +71,11 @@ export const READ_VIEW_CONSUMER_OPERATION_IDS = [
   ...LEGACY_CONSUMER_OPERATION_IDS,
   ...READ_VIEW_OPERATION_IDS,
 ] as const;
+/** Explicit future operating-policy + administrator composition; never upgrades the read17 binding. */
+export const COMBINED_POLICY_CONSUMER_OPERATION_IDS = [
+  ...READ_VIEW_CONSUMER_OPERATION_IDS,
+  ...SCORE_POLICY_OPERATION_IDS,
+] as const;
 export type ApiOperationId = typeof REGISTERED_API_OPERATION_IDS[number];
 export interface ApiRoutePolicy {
   readonly id: ApiOperationId;

@@ -6348,6 +6348,24 @@
         "declared_exports": []
       },
       {
+        "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
+        "layer": "data_infrastructure",
+        "status": "explicit_combined20_source_candidate_006_006a_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "df02468a2d6f45429462fe2c1caed4dff6d151b8835c8b78626b6967095e9464",
+        "declared_exports": [
+          "createCombinedPolicyCatalogService"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/current_admission_display.ts",
         "layer": "application",
         "status": "implemented_current_cursor_exact_and_live_snapshot_namespace_verified",
@@ -7099,7 +7117,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "cd06a6af4e5492d8380d70681953877e0adcb38d5ff163bcbafcb92a5bbf1441",
+        "source_sha256": "45162b8a2ccd8d405dddeeef4ec128f41954169d6adaa8578b89a1e21dead88e",
         "declared_exports": [
           "API_OPERATION_IDS",
           "ApiBusinessPort",
@@ -8651,7 +8669,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "ef96711525ecbb29c6e8fa638eab6ba86dead33b98414f91aa039414e55e2754",
+        "source_sha256": "1cf7fa5b599f5a55deef7dda5f3dd282c176e7fe99859255a2d0c5e1a1a0a82c",
         "declared_exports": [
           "RuntimeExamBudget",
           "RuntimeUsagePolicy",
@@ -8806,7 +8824,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "bae59c379c1048a64ca5abb48707c775108acac090e8b270cafc6bd4d998f565",
+        "source_sha256": "81617698fdf4c30348d18acfb11ca2f48ee8394aab8c75e840cc2f3b6e3124b4",
         "declared_exports": [
           "RuntimeEnvironment",
           "BasicRuntimeSettings",
@@ -9248,6 +9266,22 @@
           "REQ-26"
         ],
         "source_sha256": "5f08a7968f17fb9dfb1751f67a33814ae2eadd8e3cc7b2526a4a5877338c8c93",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/jungsi-api/combined_policy_entry.ts",
+        "layer": "data_infrastructure",
+        "status": "explicit_combined20_source_candidate_006_006a_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "c89aefaf4e39acaf20bff2acffdb99ec6e0db3da74d7f47da370adb3490bd281",
         "declared_exports": []
       },
       {
