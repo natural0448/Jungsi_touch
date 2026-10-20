@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.89",
+  "version": "1.9.90",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -5209,7 +5209,7 @@
     {
       "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
       "layer": "infrastructure",
-      "status": "exact032_hash_guarded_overall_payload_scope_candidate_native_NOT_RUN",
+      "status": "exact032_hash_guarded_operation_payload_scopes_candidate_operating_NOT_RUN",
       "requirements": [
         "REQ-01",
         "REQ-03",
@@ -6073,7 +6073,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.89",
+        "contract_version": "1.9.90",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -6247,7 +6247,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.89",
+        "contract_version": "1.9.90",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -6413,7 +6413,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.89",
+        "contract_version": "1.9.90",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6432,7 +6432,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.89",
+        "contract_version": "1.9.90",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6457,7 +6457,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.89",
+        "contract_version": "1.9.90",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6482,7 +6482,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.89",
+        "contract_version": "1.9.90",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -13106,7 +13106,7 @@
             {
               "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
               "layer": "infrastructure",
-              "status": "exact032_hash_guarded_overall_payload_scope_candidate_native_NOT_RUN",
+              "status": "exact032_hash_guarded_operation_payload_scopes_candidate_operating_NOT_RUN",
               "requirements": [
                 "REQ-01",
                 "REQ-03",
@@ -13117,7 +13117,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "0005839a9aeddb4e0c427ee4d4adde95a56e2c748a96444b6eebf9e89a740b5e",
+              "source_sha256": "edd27bf82475200cb5a79c05683c480457f634e7e6d2db03fd186ab6e9734396",
               "declared_exports": [
                 "CURRENT_PUBLIC_COMPAT_BASE",
                 "CURRENT_PUBLIC_COMPAT_INPUTS",
@@ -14837,7 +14837,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "0e829cbea5702f5659ac40d12a398fa4e2a7d6fba4d73c7c62fcfd3fb59ad1d2",
+              "source_sha256": "1d6c439d0a561dfc6901ecb5ad519c3185e091a4283332d281e1c031c4dd9cd3",
               "declared_exports": [
                 "NativeDataProvider",
                 "NativeForecastInputs",
@@ -14872,7 +14872,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "2748e8128a41e2c1bfe106ba57d5ecb8f3b7652331ba1572567b8b59cef099ec",
+              "source_sha256": "efe87ef57a444da897d072223d5575c65aae51d1064f36021cc483e63048185c",
               "declared_exports": [
                 "NATIVE_RUNTIME_KINDS",
                 "NativeRuntimeKind",
@@ -15092,7 +15092,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "da44c6b6f4cf8f7e9d06a3d1ce6a819f652ea7d568955e03255bbdbf2a87c1b3",
+              "source_sha256": "a4cbfb203a445e07a62c5a89b27b1106bf0fcf7f826f1daefc7e49b03e02b1b8",
               "declared_exports": [
                 "NativeRuntimeRequest"
               ]
@@ -17878,6 +17878,26 @@
         "REQ-26"
       ],
       "summary": "전체 NativeRuntimeApi HTTP finish까지 확인해 기존 관리자 꾸러미v2의 읽기 예산 실패와 저장 후503 경계를 발견했다. 이전1.9.88 source CI 성공은 과거 소스 근거로 보존한다. overall.analyze만 명시적 overall_only로 수정하고 전체 selected metadata 승인·핀·버킷·현재head·finish·원래 한도와 all/catalog_only/v1 검증을 유지한다. 기존656 상위검사에 새11개 시나리오를 추가하며 공통 검사 코드는 바꾸지 않는다. P1 네 읽기와 overall의 RAM 응답 완료 근거는 별도로 보존하고 추가 score-profile.create/university.analyze/candidates.build 수정은 직접 승인 대기로 미적용이다. 기존 꾸러미v2는 사용·배포 금지이며 모형 채택·운영 등록·실제 재분석·배포는 NOT_RUN이다."
+    },
+    {
+      "version": "1.9.90",
+      "date": "2026-10-20",
+      "requirements": [
+        "REQ-02",
+        "REQ-03",
+        "REQ-04",
+        "REQ-05",
+        "REQ-06",
+        "REQ-08",
+        "REQ-09",
+        "REQ-12",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "summary": "직접 승인한 세 경로의 payload scope와 중복 읽기 감소를 적용했다. score-profile.create는 overall_only, university.analyze/candidates.build는 university_only를 명시한다. 선택 metadata 승인·핀·비공개 버킷·원래 한도·사용량·마지막 확인·기존 all/catalog/v1을 유지한다. 656개 상위 검사 내부에 새14개 시나리오를 추가하고 기존11개 시나리오를 보존했다. Guarded032 원래14개 경로의 원구성/모형포함36개 RAM HTTP 요청과 기존 프로필의 2개 연속 흐름을 검수했다. 모형 없는 성적 저장, 이전 request/revision과 성공 환산·추정 전체 누백·후보 보류의 독립 상태를 유지했다. 최초 컴파일·fixture 실패와 호환 위치 보정 근거는 보존한다. 최종 새 관리자 등록물 검수·실제 DB/배포는 NOT_RUN이며 과거 꾸러미v2는 적용 금지로 보존한다. 정확한 base 추정 모형 채택은 직접 승인된 결정으로 별도 비공개 영수증에 결속하며 과거 연구 바이트·PENDING 상태를 보존한다. 기존 공개 DTO를 소비하는 전체 누백 집단·추정 표시와 기존 프로필 새 revision 요건을 기획·라우팅에 함께 반영하고 실제 화면 코드·등록·배포는 변경하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -18040,7 +18060,7 @@
       "분포 전체·도수·성별/동점 인원·가중치·정확 내부비율",
       "출처 로컬 경로·원문 전체·해시·연구 플래그·승인 필드"
     ],
-    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 22개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다. overall.analyze는 명시적 overall_only로 시험팩·총모형 본문만 읽고 전체 선택 metadata의 승인·핀·private bucket·현재 head·마지막 확인·공유 예산을 유지한다. 기존 all/catalog_only와 v1 모집단 검증은 보존한다. 추가 세 operation의 범위 변경은 별도 직접 승인 대기이며 운영 인수는 NOT_RUN이다.",
+    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 22개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다. overall.analyze는 명시적 overall_only로 시험팩·총모형 본문만 읽고 전체 선택 metadata의 승인·핀·private bucket·현재 head·마지막 확인·공유 예산을 유지한다. 기존 all/catalog_only와 v1 모집단 검증은 보존한다. 추가 세 operation은 직접 승인으로 같은 원래 한도 안에서 의존 범위를 명시했다. 가상 전체 요청과 기존 프로필 연속 흐름은 통과했으며 최종 관리자 등록물·실제 운영 인수는 NOT_RUN이다.",
     "whole_population_transition": {
       "format": "jungsi.whole-population-model-transition/v1",
       "id": "CR-OVERALL-ALL-EXAMINEES-V2-20261020-01",
@@ -18061,7 +18081,7 @@
       "legacy_boundary": "jungsi.exam-total-model/v1·exam_population·complete-response population ID·pack.populationBounds·approved population_verified=true 검사는 그대로 유지한다. 원래 시험팩 bytes/버전/target_population은 수정하지 않는다. 같은 pack participants.total을 읽는 readonly getter만 추가한다.",
       "strict_v2": "jungsi.exam-total-model/v2·official_all_examinees_estimate는 정확6필드 봉투와 닫힌27필드 population_policy, 기존 distribution3/metadata13/row2 필드만 허용한다. source/정책/시나리오 검수 해시를 필수로 검증하며 명시된 시나리오 외 기본 선택은 없다.",
       "population_semantics": "population_id=official_all_examinees·kind=estimated_weights만 허용한다. official_total_verified=true와 joint_scores_observed=false·population_verified=false를 구분한다. 전체 modeled weight 합, 완전응답+결측모형 인원 합과 같은 시험팩 participants.total이 정확히 같아야 한다. complete는 모형 질량 완결이며 관측 공동분포 완결이 아니다. null/-1·결측모형 정책을 보존한다.",
-      "approval_boundary": "reference/synthetic 모형은 수치를 반환하지 않는다. approved에는 별도 scenario_selection_sha256가 필요하다. 형식 구현 수용은 base/lower/higher 시나리오 채택·원본 reference→approved 변경·registry/selection/runtime binding 또는 배포 승인이 아니다. 같은 공개 필드에서 estimated·population_id·model_version·data_kind와 정확 동점 포함/제외 구간을 반환한다.",
+      "approval_boundary": "2026-10-20 사용자가 정확한 base 추정 모형 채택을 직접 승인했다. 원래 연구/시나리오 파일의 바이트와 과거 PENDING 표시는 보존하고, 현재 채택 결정은 별도 비공개 승인 영수증과 새 approval에 결속한다. registry/selection/runtime binding 등록·배포·실사용자 재분석은 NOT_RUN이다. reference/synthetic 모형을 자동 승격하지 않고 기존 승인·선택 경계를 유지한다. 같은 기존 공개 필드(status/data_kind/population_id/model_version 및 동점 포함/제외·구간)를 사용한다. 실제 분모·모형 SHA·가중치·운영키는 공개 명세에 기록하지 않는다.",
       "saved_profile_transition": "report.read는 저장 snapshot을 읽고 계산하지 않는다. 기존 profile_id로 overall.analyze를 명시 호출하고 새 request key와 현재 report_id/expected_version을 보낸다. 같은 key의 과거 응답은 보존하며 새 분석은 새 report revision에 저장한다. 프로필/점수를 다시 저장하거나 입력권을 차감하지 않는다. 자료 채택에는 registry/selection/context 변경과 fresh head 검증이 필요하며 percentile DB head 변화만으로 캐시가 자동 갱신되지는 않는다.",
       "installed032": "설치032의 세 파일 exact hash를 확인하는 v2 패치와 새 domain closure만 추가한다. consumer14·usage-v1·기존 응답/역할/소유권·입력권 경로를 유지한다. 최신 platform·REQ27/006a/25operation으로 전환하지 않는다.",
       "envelope_fields": [
@@ -18121,11 +18141,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-            "sha256": "0e829cbea5702f5659ac40d12a398fa4e2a7d6fba4d73c7c62fcfd3fb59ad1d2"
+            "sha256": "1d6c439d0a561dfc6901ecb5ad519c3185e091a4283332d281e1c031c4dd9cd3"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
-            "sha256": "0005839a9aeddb4e0c427ee4d4adde95a56e2c748a96444b6eebf9e89a740b5e"
+            "sha256": "edd27bf82475200cb5a79c05683c480457f634e7e6d2db03fd186ab6e9734396"
           },
           {
             "path": "supabase/functions/_shared/all_examinees_total_model_test.ts",
@@ -18133,7 +18153,7 @@
           }
         ]
       },
-      "model_adoption": "NOT_RUN",
+      "model_adoption": "APPROVED_EXACT_BASE_PRIVATE_RECEIPT_HOSTED_NOT_RUN",
       "runtime_selection": "NOT_RUN",
       "deployment": "NOT_RUN",
       "production_ready": false,
@@ -18148,39 +18168,54 @@
       }
     },
     "request_dependency_scope": {
-      "format": "jungsi.operation-payload-scope/v1",
-      "id": "CR-OVERALL-PAYLOAD-SCOPE-20261020-01",
-      "operation": "overall.analyze",
-      "mode": "overall_only",
-      "payload_kinds": [
-        "exam_pack",
-        "total_model"
-      ],
-      "selected_metadata": "All selected references retain approval, pin, scope, private bucket and byte-cap validation before scoped body reads. Deferred selected bodies raise runtime_dependency_not_loaded on access.",
-      "preflight": "Existing pack/model constructors, exam/version/year bindings and v1 population guards are reused. No Catalog or Conversion body/getter is used by this scope.",
+      "format": "jungsi.operation-payload-scope/v2",
+      "id": "CR-OPERATION-PAYLOAD-SCOPE-20261020-02",
+      "operation_modes": {
+        "overall.analyze": "overall_only",
+        "score-profile.create": "overall_only",
+        "university.analyze": "university_only",
+        "candidates.build": "university_only"
+      },
+      "payload_kinds": {
+        "overall_only": [
+          "exam_pack",
+          "total_model"
+        ],
+        "university_only": "All selected payload kinds except total_model"
+      },
+      "approval_status": "direct_human_approved_source_tests_documents_existing_PR",
+      "selected_metadata": "All selected references retain approval, hash pin, scope, timezone, fresh private bucket and byte-cap validation. Selected deferred bodies raise runtime_dependency_not_loaded on access.",
+      "preflight": "Same NativeExamPack constructor/exam identity and policy pack/year checks. university_only skips redundant warm pack/provider reads inside outer current-head checks; actual calculation getters retain their before/after checks.",
+      "candidate_count": "Same preflight-validated catalog offerings, practical_required===false and policy academic_year; exact count comparison is retained without defaulting missing data to zero.",
+      "missing_model": "An unselected total_model remains optional missing. Original model-free score-profile.create still succeeds; a future model is not a new prerequisite for score storage. University scope cannot accidentally read a selected deferred total_model.",
       "unchanged": [
         "all default full graph",
         "catalog_only",
-        "current head before/after native decoding",
-        "runtime final current and private bucket",
-        "shared atomic usage and read/byte limits",
-        "operation/member/owner/DTO boundaries"
+        "strict v1 population guard",
+        "operation/member/owner/DTO/input-right boundaries",
+        "final head and private bucket checks",
+        "original read/byte and atomic usage limits",
+        "SQL/RLS/roles and existing profiles/reports"
       ],
-      "verification": "11 additive synthetic regressions; exact032 NativeRuntimeApi RAM complete-request evidence retained privately; normal hooks and exact source CI required.",
-      "operating_acceptance": "NOT_RUN",
-      "remaining_three_operations": "score-profile.create, university.analyze and candidates.build remain unchanged. RAM request failures and an approval-required proposal are retained privately; implementation is not inferred from delegation.",
       "regressions": {
-        "top_level_foundation_tests_preserved": 656,
-        "additional_executed_scenarios": 11,
+        "foundation_top_level_tests_preserved": 656,
+        "previous_overall_scenarios": 11,
+        "additional_approved_scenarios": 14,
+        "additional_scenarios_total": 25,
         "paths": [
           "tests/edge/test_native_source_selection.ts",
           "tests/edge/test_native_data_provider.ts",
           "tests/edge/test_runtime_context.ts"
         ],
-        "entrypoint": "verifyAdditionalOverallScopeCases; invoked unconditionally by an existing strict test in each file; no skip/filter or common checker change"
+        "entrypoint": "verifyAdditionalOverallScopeCases and verifyAdditionalUniversityScopeCases; unconditional execution inside existing strict foundation tests; no skip/filter/common checker change"
       },
-      "previous_owner_packet_v2": "FAIL_COMPLETE_HTTP_FINISH_BUDGET_DO_NOT_DEPLOY",
-      "previous_source_CI": "historical_source_only_PASS_not_complete_HTTP_acceptance"
+      "complete_request_verification": "PASS_RAM_36_requests_original14_operations_original_and_model_included_bindings_with_two_virtual_scores_and_final_current",
+      "sequential_verification": "PASS_RAM_2_existing_profile_flows_overall_revision2_university_revision3_candidates_revision4_read_revision4_profile_create0_previous_requests_and_revisions_preserved_usage_settled",
+      "compatibility": "Guarded exact032 code mirror keeps 14 operations and usage-v1, independently of current25/REQ27/006a source registration.",
+      "current_build_limits": "No operational limit or policy changes. Historical source-only CI and failed candidates are preserved.",
+      "previous_owner_packet_v2": "FAILED_CANDIDATE_PRESERVED_DO_NOT_DEPLOY",
+      "final_owner_packet_v3": "NOT_RUN_REQUIRES_NEW_EXACT_CONTROL_BINDING_DESCRIPTOR_INPUTS_AND_SEPARATE_RAM_READBACK",
+      "operating_acceptance": "NOT_RUN"
     }
   },
   "collaboration": {
@@ -20833,7 +20868,11 @@
       "초안 시사는 기존 로컬 경로의 최소 catalog 후보 준비부터 진행한다. 별도 preview 상태/DTO나 source-only 승인 우회를 도입하지 않으며 운영 native 발행·4페이지 수치 검수와 구분한다.",
       "PAGE-03 과거 입결과 연도별 학생 환산점수는 연도·모집행·통계 정의/단계·점수 척도·단위·범위·보너스·모집집단 일치를 입증한 경우에만 비교한다. 같은 70% 이름의 첫 지표나 현재 분석 context17은 연도별 비교 증거가 아니다. 평균백분위/등급/다른 만점·집단이면 개별 공개값을 보존하고 비교를 보류한다. 과거와 올해 판정의 방향 차이만으로 올해 기준 변화의 원인을 단정하지 않는다.",
       "내부 판단 기준 수치 비노출과 정상 공개 근거 보존은 함께 적용한다. 학생 분석의 채택본에 결속된 이슈·상담조정 요약·버전은 최신 별도 발표본이 null/409/다른판이어도 삭제하거나 새 발표본으로 덮어쓰지 않는다. 성공한 환산점수·누백·공식 입결은 비교/판단 보류와 독립적으로 유지한다.",
-      "유불리 설명은 등록된 converted_score_position_gain/loss/equal 코드·ready 상태·정확한 부호와 일치시킨다. 음수는 반영식에 잘 맞는다는 설명으로 표현하지 않고, 0은 상승/하락이 아닌 같은 위치로 설명한다. 알 수 없는 코드·보류 delta는 정상 이유 텍스트와 상태를 보존하고 새 이득 이유로 해석하지 않는다."
+      "유불리 설명은 등록된 converted_score_position_gain/loss/equal 코드·ready 상태·정확한 부호와 일치시킨다. 음수는 반영식에 잘 맞는다는 설명으로 표현하지 않고, 0은 상승/하락이 아닌 같은 위치로 설명한다. 알 수 없는 코드·보류 delta는 정상 이유 텍스트와 상태를 보존하고 새 이득 이유로 해석하지 않는다.",
+      "population_id=official_all_examinees 및 data_kind=estimated_weights인 전체 분석 결과는 “공식 전체 응시자 기준 추정 전체 누백”으로 표시한다. PositionChart와 인쇄에 국수탐2 완전응시자라는 고정 설명을 적용하지 않는다.",
+      "과목별 성적 집단과 전체 누백 집단을 구분하고, 알 수 없는 population_id에는 중립적인 집단 안내를 사용한다. 공식 분모를 코드에 하드코딩하거나 확인되지 않은 집단으로 해석하지 않는다.",
+      "기존 공개 DTO의 status/data_kind/population_id/model_version 및 tie 필드만 소비한다. estimated=true나 population_size 같은 미등록 필드를 새로 가정하지 않는다.",
+      "모형 연결 후 결과 갱신은 같은 기존 profile_id와 새 요청 키·report_id/expected_version으로 전체 분석을 실행해 새 리포트 revision을 만든 뒤 조회한다. 성적 재저장/정정권 차감은 하지 않으며 report.read만으로 자동 재계산된다고 표시하지 않는다."
     ],
     "mode_rules": [
       "합성 모드는 명시적 synthetic 설정만 사용하며 실서버 실패에서 자동 합성 대체하지 않는다.",
@@ -27124,7 +27163,7 @@
         "url": "https://supabase.com/docs/guides/api/securing-your-api"
       }
     ],
-    "limitation": "사용자에게 정상 제공한 개별 결과 저장을 완전히 막는다고 약속하지 않는다. 내부자료 비전달·권한 밖 조회 거절·대량 수집 규모/비용 통제를 인수 범위로 한다. overall_only는 전체 selected metadata 승인·핀·버킷, pack/model 검증, finish fresh-head와 원래 한도를 유지한다. RAM 요청 검증은 hosted 운영 인수가 아니다. 추가 세 operation은 직접 승인 전 미적용이다.",
+    "limitation": "사용자에게 정상 제공한 개별 결과 저장을 완전히 막는다고 약속하지 않는다. 내부자료 비전달·권한 밖 조회 거절·대량 수집 규모/비용 통제를 인수 범위로 한다. overall_only는 전체 selected metadata 승인·핀·버킷, pack/model 검증, finish fresh-head와 원래 한도를 유지한다. RAM 요청 검증은 hosted 운영 인수가 아니다. 추가 세 operation은 직접 승인으로 적용했고, university_only는 total_model 본문만 유예하며 나머지 release 검증과 전체 selected metadata·현재 head·마지막 확인·원래 한도를 유지한다. 새 관리자 등록물과 실제 운영 검수는 NOT_RUN이다.",
     "implementation_commit": "5f9618c447be95f6a858b4bb24a31a30433be337",
     "evidence_fields": [
       "case_id",
@@ -28010,7 +28049,13 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "payload_scope_candidate": {
+            "mode": "overall_only",
+            "source_spec_version": "1.9.90",
+            "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
+            "deployment": "NOT_RUN"
+          }
         },
         "overall.analyze": {
           "code": "PORTED",
@@ -28025,7 +28070,13 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "payload_scope_candidate": {
+            "mode": "overall_only",
+            "source_spec_version": "1.9.90",
+            "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
+            "deployment": "NOT_RUN"
+          }
         },
         "report.read": {
           "code": "PORTED",
@@ -28085,7 +28136,13 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "payload_scope_candidate": {
+            "mode": "university_only",
+            "source_spec_version": "1.9.90",
+            "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
+            "deployment": "NOT_RUN"
+          }
         },
         "candidates.build": {
           "code": "PORTED",
@@ -28100,7 +28157,13 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "payload_scope_candidate": {
+            "mode": "university_only",
+            "source_spec_version": "1.9.90",
+            "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
+            "deployment": "NOT_RUN"
+          }
         },
         "shortlist.update": {
           "code": "PORTED",
@@ -30554,6 +30617,25 @@
         "purpose_or_budget_changed": false,
         "key_or_role_changed": false,
         "preservation_rule": "기존 cb500·ed978·032 설치 원장, 세 P2 실패와 현재 제한된 P2 기능 성공 근거는 그대로 보존한다. 이전 회신의 최종 SHA 미확보는 당시 이력이며 새 현재 상태는 이 객체를 따른다. 현재 API는 032/spec1.9.70이다. 새 화면 소스 검토는 조건부 수락이며 보완은 미배포·미검수다. 22개 native·배포 인수 0, 보안 3개 gate 미완료와 production_ready=false를 유지하며 범위·목적·예산·키·역할을 변경하지 않는다. 현재 공통기획1.9.72는 검증된 develop937/spec1.9.71에서 준비한 미커밋 변경이며 정상 훅·커밋·푸시·정확 SHA CI는 별도다."
+      },
+      "request_payload_scope_candidate": {
+        "format": "jungsi.live-request-payload-scope-candidate/v1",
+        "source_parent": "73746db2380d244e363c6b3c593992d33b5b898e",
+        "spec_version": "1.9.90",
+        "source_status": "SCOPED_SOURCE_AND_RAM_VERIFIED_NORMAL_HOOKS_AND_EXACT_CI_REQUIRED",
+        "operation_modes": {
+          "overall.analyze": "overall_only",
+          "score-profile.create": "overall_only",
+          "university.analyze": "university_only",
+          "candidates.build": "university_only"
+        },
+        "complete_RAM_requests": 36,
+        "sequential_RAM_flows": 2,
+        "actual_deployment": "NOT_RUN",
+        "real_profile_writes": 0,
+        "final_packet_binding": "NOT_RUN_NEW_CONTROLS_REQUIRED",
+        "previous_packet_v2": "PRESERVED_DO_NOT_DEPLOY",
+        "rule": "These are code and denied-network RAM proofs, not deployed activation or real user acceptance. Historical current deployment/source receipts remain separate."
       }
     }
   },
@@ -78675,7 +78757,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "0e829cbea5702f5659ac40d12a398fa4e2a7d6fba4d73c7c62fcfd3fb59ad1d2"
+          "source_sha256": "1d6c439d0a561dfc6901ecb5ad519c3185e091a4283332d281e1c031c4dd9cd3"
         },
         "dependencies": [
           {
@@ -79032,6 +79114,14 @@
                           "value": {
                             "kind": "string",
                             "string": "overall_only"
+                          }
+                        },
+                        {
+                          "repr": "university_only",
+                          "kind": "literal",
+                          "value": {
+                            "kind": "string",
+                            "string": "university_only"
                           }
                         }
                       ]
@@ -79808,7 +79898,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "2748e8128a41e2c1bfe106ba57d5ecb8f3b7652331ba1572567b8b59cef099ec"
+          "source_sha256": "efe87ef57a444da897d072223d5575c65aae51d1064f36021cc483e63048185c"
         },
         "dependencies": [
           {
@@ -86848,6 +86938,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
             },
             {
+              "importedName": "NativeExamPack",
+              "originalName": "NativeExamPack",
+              "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+            },
+            {
               "importedName": "NativeObject",
               "originalName": "NativeObject",
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
@@ -86938,7 +87033,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
             }
           ],
-          "source_sha256": "da44c6b6f4cf8f7e9d06a3d1ce6a819f652ea7d568955e03255bbdbf2a87c1b3"
+          "source_sha256": "a4cbfb203a445e07a62c5a89b27b1106bf0fcf7f826f1daefc7e49b03e02b1b8"
         },
         "dependencies": [
           {
@@ -86988,6 +87083,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/application/usage_service.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../domain/exam_pack.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
               }
             ]
           },
@@ -106160,11 +106265,25 @@
                           }
                         },
                         "right": "all"
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "revokeAtHeadCall",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "number",
+                            "kind": "keyword",
+                            "value": "number"
+                          }
+                        },
+                        "right": "0"
                       }
                     ],
                     "hasBody": true,
                     "isAsync": true,
-                    "parameter_source": "(\n  change: (sources: Map<string, NativeObject>) => void = () => {},\n  mode: NativePayloadMode = \"all\",\n)"
+                    "parameter_source": "(\n  change: (sources: Map<string, NativeObject>) => void = () => {},\n  mode: NativePayloadMode = \"all\",\n  revokeAtHeadCall = 0,\n)"
                   }
                 }
               ]
@@ -106459,6 +106578,35 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "verifyAdditionalUniversityScopeCases",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "void",
+                            "kind": "keyword",
+                            "value": "void"
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
             }
           ],
           "imports": [
@@ -106569,7 +106717,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "eaaa8494e65898cab126372f7f4fe071fb56fd4d6b433f607f2803932949e2bf"
+          "source_sha256": "01d66cdf1b12697c50ab8762eb09155c5e19ed72f7e84c8c6e00a9c126568ddf"
         },
         "dependencies": [
           {
@@ -106964,6 +107112,35 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "verifyAdditionalUniversityScopeCases",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "void",
+                            "kind": "keyword",
+                            "value": "void"
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
             }
           ],
           "imports": [
@@ -107032,7 +107209,7 @@
               "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "4e488749b623faf8ba004f3595f42ab781c2e2ca58c40550cb60fb0090991f9c"
+          "source_sha256": "58d06b56856ea32c959a152eabc5ad30fb33cef235e735c97877e13ea7e6ff34"
         },
         "dependencies": [
           {
@@ -111320,12 +111497,57 @@
                                   }
                                 },
                                 {
+                                  "name": "validExam",
+                                  "optional": true,
+                                  "tsType": {
+                                    "repr": "boolean",
+                                    "kind": "keyword",
+                                    "value": "boolean"
+                                  }
+                                },
+                                {
+                                  "name": "deferredModel",
+                                  "optional": true,
+                                  "tsType": {
+                                    "repr": "boolean",
+                                    "kind": "keyword",
+                                    "value": "boolean"
+                                  }
+                                },
+                                {
                                   "name": "deferredVersion",
                                   "optional": true,
                                   "tsType": {
                                     "repr": "string",
                                     "kind": "keyword",
                                     "value": "string"
+                                  }
+                                },
+                                {
+                                  "name": "policyPackVersion",
+                                  "optional": true,
+                                  "tsType": {
+                                    "repr": "string",
+                                    "kind": "keyword",
+                                    "value": "string"
+                                  }
+                                },
+                                {
+                                  "name": "policyAcademicYear",
+                                  "optional": true,
+                                  "tsType": {
+                                    "repr": "number",
+                                    "kind": "keyword",
+                                    "value": "number"
+                                  }
+                                },
+                                {
+                                  "name": "policyEligibleCount",
+                                  "optional": true,
+                                  "tsType": {
+                                    "repr": "number",
+                                    "kind": "keyword",
+                                    "value": "number"
                                   }
                                 },
                                 {
@@ -111426,7 +111648,7 @@
                     ],
                     "hasBody": true,
                     "isAsync": true,
-                    "parameter_source": "(\n  options: {\n    artifactCache?: VerifiedArtifactCache;\n    deferredExam?: boolean;\n    deferredVersion?: string;\n    costsForApproved?: boolean;\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | \"health.ready\" | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)"
+                    "parameter_source": "(\n  options: {\n    artifactCache?: VerifiedArtifactCache;\n    deferredExam?: boolean;\n    validExam?: boolean;\n    deferredModel?: boolean;\n    deferredVersion?: string;\n    policyPackVersion?: string;\n    policyAcademicYear?: number;\n    policyEligibleCount?: number;\n    costsForApproved?: boolean;\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | \"health.ready\" | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)"
                   }
                 }
               ]
@@ -111525,6 +111747,35 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "verifyAdditionalUniversityScopeCases",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "void",
+                            "kind": "keyword",
+                            "value": "void"
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
             }
           ],
           "imports": [
@@ -111570,6 +111821,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
             },
             {
+              "importedName": "SyntheticUniversityData",
+              "originalName": "SyntheticUniversityData",
+              "src": "tests/edge/synthetic_university.ts"
+            },
+            {
               "importedName": "VerifiedArtifactCache",
               "originalName": "VerifiedArtifactCache",
               "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
@@ -111605,7 +111861,7 @@
               "src": "tests/edge/synthetic_runtime_binding.ts"
             }
           ],
-          "source_sha256": "b80912451b0768728df0f3d2215d2b6aed05bb8b4d2e59a2f9d9cecfbbfe1401"
+          "source_sha256": "cd290fc91801cde50a886406804ac8c0cacf657f1ad6880df051e2057afce502"
         },
         "dependencies": [
           {
@@ -111695,6 +111951,16 @@
               {
                 "kind": "code",
                 "path": "tests/edge/synthetic_runtime_binding.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./synthetic_university.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "tests/edge/synthetic_university.ts"
               }
             ]
           }
@@ -117768,14 +118034,14 @@
       "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts": "40e88ae7691183f88ecaa4e7584bf6fc9139b7fddecd95d1392ff3201c644502",
       "supabase/functions/_shared/jungsi/infrastructure/jsonb_value.ts": "c106b4ac8f93fbd3cc803f3db218dc7a707398e38ac4dac3727f95711b79916a",
       "supabase/functions/_shared/jungsi/infrastructure/management_postgres.ts": "a80ccb35c33703d76a765b530a2d9e02d3cd86d9ba72d15cd3db51c481435032",
-      "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "0e829cbea5702f5659ac40d12a398fa4e2a7d6fba4d73c7c62fcfd3fb59ad1d2",
-      "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "2748e8128a41e2c1bfe106ba57d5ecb8f3b7652331ba1572567b8b59cef099ec",
+      "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "1d6c439d0a561dfc6901ecb5ad519c3185e091a4283332d281e1c031c4dd9cd3",
+      "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "efe87ef57a444da897d072223d5575c65aae51d1064f36021cc483e63048185c",
       "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts": "0cf3047b473e69ebb7efc4fd433988606eb7139846edd6f5b554931c02a03128",
       "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
       "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "69ea7f37981e478532369d916011afe827acb12850c6b73bfd4107d28d32f72e",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "01f6f0de573c93b547f0adfc800b4402d56345fefbabc8cf0e0f2454a7b603d9",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "da44c6b6f4cf8f7e9d06a3d1ce6a819f652ea7d568955e03255bbdbf2a87c1b3",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "a4cbfb203a445e07a62c5a89b27b1106bf0fcf7f826f1daefc7e49b03e02b1b8",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "87ca3512938ed6c8d46a4578d171df1825e6c55aa930e9cfefdc6f502a473813",
       "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "382bf346858bc3eb5d5fec2f939b9cffd6dd337bf9b6fc42acfd6c6b56684b8a",
@@ -117815,8 +118081,8 @@
       "tests/edge/test_jsonb_value.ts": "17f322987f3b1884f0cfdc3db43d9e2a975d6623b5240b91051a79e27c130157",
       "tests/edge/test_management_postgres.ts": "7ddf2f25ea346cb73ed0505b470fc228728635942e5418accca26b3c282e12c2",
       "tests/edge/test_native_auth.ts": "c6b1781256e4bea7c075ad4c74575f9537013787a09f28fd863ccd4f895ef872",
-      "tests/edge/test_native_data_provider.ts": "eaaa8494e65898cab126372f7f4fe071fb56fd4d6b433f607f2803932949e2bf",
-      "tests/edge/test_native_source_selection.ts": "4e488749b623faf8ba004f3595f42ab781c2e2ca58c40550cb60fb0090991f9c",
+      "tests/edge/test_native_data_provider.ts": "01d66cdf1b12697c50ab8762eb09155c5e19ed72f7e84c8c6e00a9c126568ddf",
+      "tests/edge/test_native_source_selection.ts": "58d06b56856ea32c959a152eabc5ad30fb33cef235e735c97877e13ea7e6ff34",
       "tests/edge/test_native_sql.ts": "1a36c576d0c4b1d7c548ff7bd55c3fbb6837d221fc2a46e2a40a644828561697",
       "tests/edge/test_offering_analysis.ts": "6b725fb51e791c36c614d4c79d7739c2c3f8610c7f168f4d6d74aa0397bc32c0",
       "tests/edge/test_official_subject_runtime.ts": "979a33749052649f63fda1c755b3ec06c20459ccf56420a7e62b352771817b51",
@@ -117829,7 +118095,7 @@
       "tests/edge/test_report_actions.ts": "5aa914b0a1e338a38828aeccaeb0bc522ccf7c31200ad27ad40cec44e01399d0",
       "tests/edge/test_runtime_budget.ts": "4e87eb4cb6779edfd03be5d4a6b236227f3f7ae0d9d504cc413080faec43492e",
       "tests/edge/test_runtime_composition.ts": "256479d822937cf7d183e759a2bb03f158dc00c55ae8f3e6368dcbacccc0fb98",
-      "tests/edge/test_runtime_context.ts": "b80912451b0768728df0f3d2215d2b6aed05bb8b4d2e59a2f9d9cecfbbfe1401",
+      "tests/edge/test_runtime_context.ts": "cd290fc91801cde50a886406804ac8c0cacf657f1ad6880df051e2057afce502",
       "tests/edge/test_runtime_controls.ts": "19826d20cfce311dd5d77d1689769f4eb8aaf8185ce88d76d4a5adc1a55de8d4",
       "tests/edge/test_runtime_settings.ts": "d708a0205b1a9aeedef4130e130aefc0f85515e0d12dd3297cd365f82bd7e005",
       "tests/edge/test_score_input_policy.ts": "c4d1adfb34a55997f8c69158f2ac6125b3fc2082f5a51717e2d3e9812576f5a9",
@@ -119017,7 +119283,7 @@
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
-          "sha256": "0005839a9aeddb4e0c427ee4d4adde95a56e2c748a96444b6eebf9e89a740b5e"
+          "sha256": "edd27bf82475200cb5a79c05683c480457f634e7e6d2db03fd186ab6e9734396"
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog_runtime.ts",

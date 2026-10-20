@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.89",
-  "source_sha256": "fdfe02087020e1e0760f07dad54915f274b17e2733211b7041bbbaae88bffee5",
+  "spec_version": "1.9.90",
+  "source_sha256": "0f1c35764f669e549dff0ce51667d9df1ab6d0b8931e7ea60c10c1d616244c95",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1637,7 +1637,7 @@
       "분포 전체·도수·성별/동점 인원·가중치·정확 내부비율",
       "출처 로컬 경로·원문 전체·해시·연구 플래그·승인 필드"
     ],
-    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 22개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다. overall.analyze는 명시적 overall_only로 시험팩·총모형 본문만 읽고 전체 선택 metadata의 승인·핀·private bucket·현재 head·마지막 확인·공유 예산을 유지한다. 기존 all/catalog_only와 v1 모집단 검증은 보존한다. 추가 세 operation의 범위 변경은 별도 직접 승인 대기이며 운영 인수는 NOT_RUN이다.",
+    "integration": "DEV-001 계산 서비스는 stateless로 유지한다. PlatformService가 프로필/리포트 저장과 현재 권한별 DTO를 담당하고 FastAPI가 22개 경로를 등록한다. overall.analyze HTTP 응답은 jungsi.persisted-report/v1의 overall 필드에 이 계산 DTO를 포함한다. 실제 인증·DB·자료 연결 증거는 운영준비 문서의 상태를 따른다. overall.analyze는 명시적 overall_only로 시험팩·총모형 본문만 읽고 전체 선택 metadata의 승인·핀·private bucket·현재 head·마지막 확인·공유 예산을 유지한다. 기존 all/catalog_only와 v1 모집단 검증은 보존한다. 추가 세 operation은 직접 승인으로 같은 원래 한도 안에서 의존 범위를 명시했다. 가상 전체 요청과 기존 프로필 연속 흐름은 통과했으며 최종 관리자 등록물·실제 운영 인수는 NOT_RUN이다.",
     "whole_population_transition": {
       "format": "jungsi.whole-population-model-transition/v1",
       "id": "CR-OVERALL-ALL-EXAMINEES-V2-20261020-01",
@@ -1658,7 +1658,7 @@
       "legacy_boundary": "jungsi.exam-total-model/v1·exam_population·complete-response population ID·pack.populationBounds·approved population_verified=true 검사는 그대로 유지한다. 원래 시험팩 bytes/버전/target_population은 수정하지 않는다. 같은 pack participants.total을 읽는 readonly getter만 추가한다.",
       "strict_v2": "jungsi.exam-total-model/v2·official_all_examinees_estimate는 정확6필드 봉투와 닫힌27필드 population_policy, 기존 distribution3/metadata13/row2 필드만 허용한다. source/정책/시나리오 검수 해시를 필수로 검증하며 명시된 시나리오 외 기본 선택은 없다.",
       "population_semantics": "population_id=official_all_examinees·kind=estimated_weights만 허용한다. official_total_verified=true와 joint_scores_observed=false·population_verified=false를 구분한다. 전체 modeled weight 합, 완전응답+결측모형 인원 합과 같은 시험팩 participants.total이 정확히 같아야 한다. complete는 모형 질량 완결이며 관측 공동분포 완결이 아니다. null/-1·결측모형 정책을 보존한다.",
-      "approval_boundary": "reference/synthetic 모형은 수치를 반환하지 않는다. approved에는 별도 scenario_selection_sha256가 필요하다. 형식 구현 수용은 base/lower/higher 시나리오 채택·원본 reference→approved 변경·registry/selection/runtime binding 또는 배포 승인이 아니다. 같은 공개 필드에서 estimated·population_id·model_version·data_kind와 정확 동점 포함/제외 구간을 반환한다.",
+      "approval_boundary": "2026-10-20 사용자가 정확한 base 추정 모형 채택을 직접 승인했다. 원래 연구/시나리오 파일의 바이트와 과거 PENDING 표시는 보존하고, 현재 채택 결정은 별도 비공개 승인 영수증과 새 approval에 결속한다. registry/selection/runtime binding 등록·배포·실사용자 재분석은 NOT_RUN이다. reference/synthetic 모형을 자동 승격하지 않고 기존 승인·선택 경계를 유지한다. 같은 기존 공개 필드(status/data_kind/population_id/model_version 및 동점 포함/제외·구간)를 사용한다. 실제 분모·모형 SHA·가중치·운영키는 공개 명세에 기록하지 않는다.",
       "saved_profile_transition": "report.read는 저장 snapshot을 읽고 계산하지 않는다. 기존 profile_id로 overall.analyze를 명시 호출하고 새 request key와 현재 report_id/expected_version을 보낸다. 같은 key의 과거 응답은 보존하며 새 분석은 새 report revision에 저장한다. 프로필/점수를 다시 저장하거나 입력권을 차감하지 않는다. 자료 채택에는 registry/selection/context 변경과 fresh head 검증이 필요하며 percentile DB head 변화만으로 캐시가 자동 갱신되지는 않는다.",
       "installed032": "설치032의 세 파일 exact hash를 확인하는 v2 패치와 새 domain closure만 추가한다. consumer14·usage-v1·기존 응답/역할/소유권·입력권 경로를 유지한다. 최신 platform·REQ27/006a/25operation으로 전환하지 않는다.",
       "envelope_fields": [
@@ -1718,11 +1718,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-            "sha256": "0e829cbea5702f5659ac40d12a398fa4e2a7d6fba4d73c7c62fcfd3fb59ad1d2"
+            "sha256": "1d6c439d0a561dfc6901ecb5ad519c3185e091a4283332d281e1c031c4dd9cd3"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
-            "sha256": "0005839a9aeddb4e0c427ee4d4adde95a56e2c748a96444b6eebf9e89a740b5e"
+            "sha256": "edd27bf82475200cb5a79c05683c480457f634e7e6d2db03fd186ab6e9734396"
           },
           {
             "path": "supabase/functions/_shared/all_examinees_total_model_test.ts",
@@ -1730,7 +1730,7 @@
           }
         ]
       },
-      "model_adoption": "NOT_RUN",
+      "model_adoption": "APPROVED_EXACT_BASE_PRIVATE_RECEIPT_HOSTED_NOT_RUN",
       "runtime_selection": "NOT_RUN",
       "deployment": "NOT_RUN",
       "production_ready": false,
@@ -1745,39 +1745,54 @@
       }
     },
     "request_dependency_scope": {
-      "format": "jungsi.operation-payload-scope/v1",
-      "id": "CR-OVERALL-PAYLOAD-SCOPE-20261020-01",
-      "operation": "overall.analyze",
-      "mode": "overall_only",
-      "payload_kinds": [
-        "exam_pack",
-        "total_model"
-      ],
-      "selected_metadata": "All selected references retain approval, pin, scope, private bucket and byte-cap validation before scoped body reads. Deferred selected bodies raise runtime_dependency_not_loaded on access.",
-      "preflight": "Existing pack/model constructors, exam/version/year bindings and v1 population guards are reused. No Catalog or Conversion body/getter is used by this scope.",
+      "format": "jungsi.operation-payload-scope/v2",
+      "id": "CR-OPERATION-PAYLOAD-SCOPE-20261020-02",
+      "operation_modes": {
+        "overall.analyze": "overall_only",
+        "score-profile.create": "overall_only",
+        "university.analyze": "university_only",
+        "candidates.build": "university_only"
+      },
+      "payload_kinds": {
+        "overall_only": [
+          "exam_pack",
+          "total_model"
+        ],
+        "university_only": "All selected payload kinds except total_model"
+      },
+      "approval_status": "direct_human_approved_source_tests_documents_existing_PR",
+      "selected_metadata": "All selected references retain approval, hash pin, scope, timezone, fresh private bucket and byte-cap validation. Selected deferred bodies raise runtime_dependency_not_loaded on access.",
+      "preflight": "Same NativeExamPack constructor/exam identity and policy pack/year checks. university_only skips redundant warm pack/provider reads inside outer current-head checks; actual calculation getters retain their before/after checks.",
+      "candidate_count": "Same preflight-validated catalog offerings, practical_required===false and policy academic_year; exact count comparison is retained without defaulting missing data to zero.",
+      "missing_model": "An unselected total_model remains optional missing. Original model-free score-profile.create still succeeds; a future model is not a new prerequisite for score storage. University scope cannot accidentally read a selected deferred total_model.",
       "unchanged": [
         "all default full graph",
         "catalog_only",
-        "current head before/after native decoding",
-        "runtime final current and private bucket",
-        "shared atomic usage and read/byte limits",
-        "operation/member/owner/DTO boundaries"
+        "strict v1 population guard",
+        "operation/member/owner/DTO/input-right boundaries",
+        "final head and private bucket checks",
+        "original read/byte and atomic usage limits",
+        "SQL/RLS/roles and existing profiles/reports"
       ],
-      "verification": "11 additive synthetic regressions; exact032 NativeRuntimeApi RAM complete-request evidence retained privately; normal hooks and exact source CI required.",
-      "operating_acceptance": "NOT_RUN",
-      "remaining_three_operations": "score-profile.create, university.analyze and candidates.build remain unchanged. RAM request failures and an approval-required proposal are retained privately; implementation is not inferred from delegation.",
       "regressions": {
-        "top_level_foundation_tests_preserved": 656,
-        "additional_executed_scenarios": 11,
+        "foundation_top_level_tests_preserved": 656,
+        "previous_overall_scenarios": 11,
+        "additional_approved_scenarios": 14,
+        "additional_scenarios_total": 25,
         "paths": [
           "tests/edge/test_native_source_selection.ts",
           "tests/edge/test_native_data_provider.ts",
           "tests/edge/test_runtime_context.ts"
         ],
-        "entrypoint": "verifyAdditionalOverallScopeCases; invoked unconditionally by an existing strict test in each file; no skip/filter or common checker change"
+        "entrypoint": "verifyAdditionalOverallScopeCases and verifyAdditionalUniversityScopeCases; unconditional execution inside existing strict foundation tests; no skip/filter/common checker change"
       },
-      "previous_owner_packet_v2": "FAIL_COMPLETE_HTTP_FINISH_BUDGET_DO_NOT_DEPLOY",
-      "previous_source_CI": "historical_source_only_PASS_not_complete_HTTP_acceptance"
+      "complete_request_verification": "PASS_RAM_36_requests_original14_operations_original_and_model_included_bindings_with_two_virtual_scores_and_final_current",
+      "sequential_verification": "PASS_RAM_2_existing_profile_flows_overall_revision2_university_revision3_candidates_revision4_read_revision4_profile_create0_previous_requests_and_revisions_preserved_usage_settled",
+      "compatibility": "Guarded exact032 code mirror keeps 14 operations and usage-v1, independently of current25/REQ27/006a source registration.",
+      "current_build_limits": "No operational limit or policy changes. Historical source-only CI and failed candidates are preserved.",
+      "previous_owner_packet_v2": "FAILED_CANDIDATE_PRESERVED_DO_NOT_DEPLOY",
+      "final_owner_packet_v3": "NOT_RUN_REQUIRES_NEW_EXACT_CONTROL_BINDING_DESCRIPTOR_INPUTS_AND_SEPARATE_RAM_READBACK",
+      "operating_acceptance": "NOT_RUN"
     }
   },
   "backend_platform_contract": {
@@ -3971,7 +3986,11 @@
       "초안 시사는 기존 로컬 경로의 최소 catalog 후보 준비부터 진행한다. 별도 preview 상태/DTO나 source-only 승인 우회를 도입하지 않으며 운영 native 발행·4페이지 수치 검수와 구분한다.",
       "PAGE-03 과거 입결과 연도별 학생 환산점수는 연도·모집행·통계 정의/단계·점수 척도·단위·범위·보너스·모집집단 일치를 입증한 경우에만 비교한다. 같은 70% 이름의 첫 지표나 현재 분석 context17은 연도별 비교 증거가 아니다. 평균백분위/등급/다른 만점·집단이면 개별 공개값을 보존하고 비교를 보류한다. 과거와 올해 판정의 방향 차이만으로 올해 기준 변화의 원인을 단정하지 않는다.",
       "내부 판단 기준 수치 비노출과 정상 공개 근거 보존은 함께 적용한다. 학생 분석의 채택본에 결속된 이슈·상담조정 요약·버전은 최신 별도 발표본이 null/409/다른판이어도 삭제하거나 새 발표본으로 덮어쓰지 않는다. 성공한 환산점수·누백·공식 입결은 비교/판단 보류와 독립적으로 유지한다.",
-      "유불리 설명은 등록된 converted_score_position_gain/loss/equal 코드·ready 상태·정확한 부호와 일치시킨다. 음수는 반영식에 잘 맞는다는 설명으로 표현하지 않고, 0은 상승/하락이 아닌 같은 위치로 설명한다. 알 수 없는 코드·보류 delta는 정상 이유 텍스트와 상태를 보존하고 새 이득 이유로 해석하지 않는다."
+      "유불리 설명은 등록된 converted_score_position_gain/loss/equal 코드·ready 상태·정확한 부호와 일치시킨다. 음수는 반영식에 잘 맞는다는 설명으로 표현하지 않고, 0은 상승/하락이 아닌 같은 위치로 설명한다. 알 수 없는 코드·보류 delta는 정상 이유 텍스트와 상태를 보존하고 새 이득 이유로 해석하지 않는다.",
+      "population_id=official_all_examinees 및 data_kind=estimated_weights인 전체 분석 결과는 “공식 전체 응시자 기준 추정 전체 누백”으로 표시한다. PositionChart와 인쇄에 국수탐2 완전응시자라는 고정 설명을 적용하지 않는다.",
+      "과목별 성적 집단과 전체 누백 집단을 구분하고, 알 수 없는 population_id에는 중립적인 집단 안내를 사용한다. 공식 분모를 코드에 하드코딩하거나 확인되지 않은 집단으로 해석하지 않는다.",
+      "기존 공개 DTO의 status/data_kind/population_id/model_version 및 tie 필드만 소비한다. estimated=true나 population_size 같은 미등록 필드를 새로 가정하지 않는다.",
+      "모형 연결 후 결과 갱신은 같은 기존 profile_id와 새 요청 키·report_id/expected_version으로 전체 분석을 실행해 새 리포트 revision을 만든 뒤 조회한다. 성적 재저장/정정권 차감은 하지 않으며 report.read만으로 자동 재계산된다고 표시하지 않는다."
     ],
     "mode_rules": [
       "합성 모드는 명시적 synthetic 설정만 사용하며 실서버 실패에서 자동 합성 대체하지 않는다.",

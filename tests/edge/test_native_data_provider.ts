@@ -303,6 +303,7 @@ Deno.test("native provider preserves raw source timestamps when catalog adapter 
 async function servingFixture(
   change: (sources: Map<string, NativeObject>) => void = () => {},
   mode: NativePayloadMode = "all",
+  revokeAtHeadCall = 0,
 ) {
   const f = await fixture((sources) => {
     const model = [...sources].find(([id]) => id.startsWith("total_model|"))![1];
@@ -327,6 +328,7 @@ async function servingFixture(
     heads: {
       current: () => {
         headCalls++;
+        if (headCalls === revokeAtHeadCall) head.status = "revoked";
         return Promise.resolve({ ...head });
       },
     },
@@ -746,6 +748,7 @@ Deno.test("research rational curves fail selected native preflight and cannot re
   equal(percentile.dto().top_percent, null);
   equal(converted.dto().converted_score, "30.00");
   await verifyAdditionalOverallScopeCases();
+  await verifyAdditionalUniversityScopeCases();
 });
 
 /** Additive scenarios run inside the existing strict foundation suite; no test is skipped. */
@@ -799,6 +802,76 @@ async function verifyAdditionalOverallScopeCases(): Promise<void> {
         "artifact_version_mismatch",
       );
       await denied(() => f.data.preflight(), "artifact_version_mismatch");
+    }],
+  ];
+  for (const [name, run] of cases) {
+    try {
+      await run();
+    } catch (error) {
+      throw new Error(name, { cause: error });
+    }
+  }
+}
+
+/** Additional guards for the explicitly approved university payload scope. */
+async function verifyAdditionalUniversityScopeCases(): Promise<void> {
+  const cases: readonly [string, () => Promise<void>][] = [
+    [
+      "university preflight retains scoring releases while refusing its deferred model getter",
+      async () => {
+        const f = await servingFixture(() => {}, "university_only");
+        const receipt = await f.data.preflight();
+        equal(receipt.status, "verified_university_payloads");
+        equal(
+          receipt.verification_scope,
+          "university_payloads_and_all_selected_reference_metadata",
+        );
+        assert(f.selected.reference("total_model", f.u.pack!.examId + ":" + f.u.pack!.packVersion));
+        assert(!f.selected.identities().some((row) => row.kind === "total_model"));
+        assert(
+          !(receipt.optional_missing as NativeObject[]).some((row) => row.kind === "total_model"),
+        );
+        await denied(
+          () => f.data.getTotalModel(f.u.pack!.examId, f.u.pack!.packVersion),
+          "runtime_dependency_not_loaded",
+        );
+        const converted = await new UniversityScoringService(f.data).calculate(f.u.offering, {
+          profile_id: "SYNTHETIC-university-scope",
+          scores: f.u.scores(),
+        });
+        assert(converted.ready);
+        equal(converted.dto().converted_score, "30.00");
+      },
+    ],
+    ["university scope does not turn an absent model into a required dependency", async () => {
+      const f = await servingFixture((sources) => {
+        for (const key of sources.keys()) if (key.startsWith("total_model|")) sources.delete(key);
+      }, "university_only");
+      const receipt = await f.data.preflight();
+      assert(
+        (receipt.optional_missing as NativeObject[]).some((row) => row.kind === "total_model"),
+      );
+      equal(await f.data.getTotalModel(f.u.pack!.examId, f.u.pack!.packVersion), null);
+    }],
+    ["university immutable-pack preflight still rejects a wrong exam identity", async () => {
+      const f = await servingFixture((sources) => {
+        const raw = [...sources].find(([key]) => key.startsWith("exam_pack|"))![1];
+        (raw.exam as NativeObject).exam_id = "SYNTHETIC-wrong-exam";
+      }, "university_only");
+      await denied(() => f.data.preflight(), "artifact_exam_mismatch");
+    }],
+    ["university warm getters and final preflight reject current-head revocation", async () => {
+      const f = await servingFixture(() => {}, "university_only");
+      await f.data.preflight();
+      assert(await f.data.getExamPack(f.u.pack!.examId));
+      f.head.status = "revoked";
+      await denied(() => f.data.getExamPack(f.u.pack!.examId), "artifact_version_mismatch");
+      await denied(() => f.data.preflight(), "artifact_version_mismatch");
+    }],
+    ["university preflight rejects revocation between its fresh-head checks", async () => {
+      const f = await servingFixture(() => {}, "university_only", 2);
+      await denied(() => f.data.preflight(), "artifact_version_mismatch");
+      assert(f.headCalls() >= 2);
     }],
   ];
   for (const [name, run] of cases) {

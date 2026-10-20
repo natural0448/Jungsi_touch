@@ -289,6 +289,72 @@ export async function patchInstalled032PayloadScopeSources(
     '        verification_scope: "selected_native_envelopes_and_release_bindings",',
     '        verification_scope: overallOnly ? "exam_model_payloads_and_all_selected_reference_metadata" : "selected_native_envelopes_and_release_bindings",\n        ...(overallOnly ? {source_selection:this.selection.privateReceipt()} : {}),',
   );
+  // Match the directly approved three-operation scope on the exact guarded032 inputs.
+  text["supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"],
+    'export type NativePayloadMode = "all" | "catalog_only" | "overall_only";',
+    'export type NativePayloadMode = "all" | "catalog_only" | "overall_only" | "university_only";',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"],
+    '["all", "catalog_only", "overall_only"].includes(payloadMode)',
+    '["all", "catalog_only", "overall_only", "university_only"].includes(payloadMode)',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"],
+    'const loads = (kind: unknown) => payloadMode === "all" || (payloadMode === "catalog_only" ? kind === "catalog" : kind === "exam_pack" || kind === "total_model");',
+    'const loads = (kind: unknown) => payloadMode === "all" || (payloadMode === "catalog_only" ? kind === "catalog" : payloadMode === "university_only" ? kind !== "total_model" : kind === "exam_pack" || kind === "total_model");',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"],
+    'import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";',
+    'import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";\nimport { NativeExamPack } from "../domain/exam_pack.ts";',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"],
+    "const catalogOnly = CATALOG_OPERATIONS.some(id => id === this.operation);",
+    'const catalogOnly = CATALOG_OPERATIONS.some(id => id === this.operation);\n      const universityOnly = ["university.analyze", "candidates.build"].some(id => id === this.operation);',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"],
+    'catalogOnly ? "catalog_only" : this.operation === "overall.analyze" ? "overall_only" : "all",',
+    'catalogOnly ? "catalog_only" : universityOnly ? "university_only" : this.operation === "overall.analyze" || this.operation === "score-profile.create" ? "overall_only" : "all",',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"],
+    "        const pack = await data.getExamPack(exam.examId);",
+    '        if (universityOnly) {\n          const raw = snapshot.load("exam_pack", exam.examId);\n          const pack = raw ? new NativeExamPack(raw.payload) : null;\n          if (!pack || pack.packVersion !== exam.packVersion || pack.academicYear !== exam.academicYear) fail();\n          if (this.operation === "candidates.build") {\n            const catalog = snapshot.load("catalog", "service")?.payload;\n            if (!catalog || !Array.isArray(catalog.offerings) || BigInt(catalog.offerings.filter(row => row !== null && typeof row === "object" && !Array.isArray(row) && !(row instanceof JsonFloat) && row.practical_required === false && row.academic_year === exam.academicYear).length) !== exam.eligibleOfferingCount) fail();\n          }\n          continue;\n        }\n        const pack = await data.getExamPack(exam.examId);',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"],
+    'const overallOnly = this.selection.payloadMode === "overall_only";',
+    'const overallOnly = this.selection.payloadMode === "overall_only";\n      const universityOnly = this.selection.payloadMode === "university_only";',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"],
+    '          case "exam_pack":\n            await this.getExamPack(key);',
+    '          case "exam_pack":\n            if (universityOnly) {\n              const pack = new NativeExamPack(raw);\n              if (pack.examId !== key) fail("artifact_exam_mismatch");\n            } else await this.getExamPack(key);',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"],
+    '          const modelKey = key + ":" + text(pack.pack_version);',
+    '          const modelKey = key + ":" + text(pack.pack_version);\n          if (universityOnly && this.selection.reference("total_model", modelKey)) continue;',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"],
+    'status: overallOnly ? "verified_overall_payloads" : "verified_selected_release_graph",',
+    'status: overallOnly ? "verified_overall_payloads" : universityOnly ? "verified_university_payloads" : "verified_selected_release_graph",',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"],
+    'verification_scope: overallOnly ? "exam_model_payloads_and_all_selected_reference_metadata" : "selected_native_envelopes_and_release_bindings",',
+    'verification_scope: overallOnly ? "exam_model_payloads_and_all_selected_reference_metadata" : universityOnly ? "university_payloads_and_all_selected_reference_metadata" : "selected_native_envelopes_and_release_bindings",',
+  );
+  text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"] = once(
+    text["supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"],
+    "...(overallOnly ? {source_selection:this.selection.privateReceipt()} : {}),",
+    "...(overallOnly || universityOnly ? {source_selection:this.selection.privateReceipt()} : {}),",
+  );
   return Object.freeze(
     Object.fromEntries(
       Object.entries(text).map(([path, value]) => [path, new TextEncoder().encode(value)]),

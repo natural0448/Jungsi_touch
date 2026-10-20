@@ -21,6 +21,7 @@ import {
 } from "./runtime_settings.ts";
 import { SupabaseSqlTransport } from "./transaction_sql.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
+import { NativeExamPack } from "../domain/exam_pack.ts";
 import type { NativeObject } from "../domain/json_value.ts";
 function fail(): never {
   throw new AccessError("security_policy_unavailable", 503);
@@ -153,6 +154,9 @@ export class NativeRuntimeRequest {
       ]);
       this.assertArtifactScope(selection, binding);
       const catalogOnly = CATALOG_OPERATIONS.some((id) => id === this.operation);
+      const universityOnly = ["university.analyze", "candidates.build"].some((id) =>
+        id === this.operation
+      );
       const snapshot = await NativeSourceSelection.prepare(
         new SupabaseArtifactClient(
           { projectUrl: binding.projectUrl, ...binding.storage },
@@ -176,7 +180,9 @@ export class NativeRuntimeRequest {
         },
         catalogOnly
           ? "catalog_only"
-          : this.operation === "overall.analyze"
+          : universityOnly
+          ? "university_only"
+          : this.operation === "overall.analyze" || this.operation === "score-profile.create"
           ? "overall_only"
           : "all",
       );
@@ -196,6 +202,29 @@ export class NativeRuntimeRequest {
             Object.hasOwn(reference, "academic_year") &&
               reference.academic_year !== exam.academicYear
           ) fail();
+          continue;
+        }
+        if (universityOnly) {
+          // Revalidate the same immutable body already decoded under preflight fresh heads.
+          const raw = snapshot.load("exam_pack", exam.examId);
+          const pack = raw ? new NativeExamPack(raw.payload) : null;
+          if (
+            !pack || pack.packVersion !== exam.packVersion ||
+            pack.academicYear !== exam.academicYear
+          ) fail();
+          if (this.operation === "candidates.build") {
+            const catalog = snapshot.load("catalog", "service")?.payload;
+            if (
+              !catalog || !Array.isArray(catalog.offerings) ||
+              BigInt(
+                  catalog.offerings.filter((row) =>
+                    row !== null && typeof row === "object" && !Array.isArray(row) &&
+                    !(row instanceof JsonFloat) && row.practical_required === false &&
+                    row.academic_year === exam.academicYear
+                  ).length,
+                ) !== exam.eligibleOfferingCount
+            ) fail();
+          }
           continue;
         }
         const pack = await data.getExamPack(exam.examId);

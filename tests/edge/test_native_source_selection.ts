@@ -309,6 +309,7 @@ Deno.test("default full selection still reads and rejects an invalid noncatalog 
   await denied(() => f.prepare(), "storage_hash_mismatch");
   equal(f.calls.length, 4);
   await verifyAdditionalOverallScopeCases();
+  await verifyAdditionalUniversityScopeCases();
 });
 
 /** Additive scenarios run inside the existing strict foundation suite; no test is skipped. */
@@ -366,6 +367,73 @@ async function verifyAdditionalOverallScopeCases(): Promise<void> {
         "storage_configuration_invalid",
       );
       equal(f.calls.length, 0);
+    }],
+  ];
+  for (const [name, run] of cases) {
+    try {
+      await run();
+    } catch (error) {
+      throw new Error(name, { cause: error });
+    }
+  }
+}
+
+/** University scope keeps every reference guard and defers only the total-model body. */
+async function verifyAdditionalUniversityScopeCases(): Promise<void> {
+  const cases: readonly [string, () => Promise<void>][] = [
+    [
+      "university scope defers only the selected total model and refuses accidental access",
+      async () => {
+        const f = await fixture();
+        deferred(f, { kind: "total_model", key: "SYNTHETIC-exam:SYNTHETIC-pack" });
+        const selected = await f.prepare("university_only"), receipt = selected.privateReceipt();
+        equal(receipt.payload_mode, "university_only");
+        equal(receipt.selected_metadata_count, 2);
+        equal(receipt.loaded_payload_count, 1);
+        equal(receipt.deferred_payload_count, 1);
+        assert(selected.load("catalog", "service"));
+        equal(f.calls.length, 3);
+        assert(!f.calls.some((url) => url.endsWith("unused.json")));
+        await denied(
+          () => Promise.resolve(selected.load("total_model", "SYNTHETIC-exam:SYNTHETIC-pack")),
+          "runtime_dependency_not_loaded",
+        );
+        equal(selected.load("total_model", "unselected"), null);
+      },
+    ],
+    [
+      "deferred university model approval and pin metadata are still checked before IO",
+      async () => {
+        for (
+          const [patch, code] of [
+            [{ status: "revoked" }, "artifact_not_approved"],
+            [{ engine_approved: false }, "artifact_not_approved"],
+            [{ production_allowed: false }, "artifact_not_approved"],
+            [{ archive_only: true }, "storage_archive_only"],
+            [{ sha256: "invalid" }, "storage_reference_invalid"],
+            [{ bucket: "other" }, "storage_reference_scope_mismatch"],
+            [{ object_key: "OTHER/model.json" }, "storage_reference_scope_mismatch"],
+            [{ source_timezone: 123 }, "artifact_time_invalid"],
+          ] as const
+        ) {
+          const f = await fixture();
+          deferred(f, { kind: "total_model", key: "SYNTHETIC-model", ...patch });
+          await denied(() => f.prepare("university_only"), code);
+          equal(f.calls.length, 0);
+        }
+      },
+    ],
+    ["deferred university model still requires fresh private bucket byte capacity", async () => {
+      const f = await fixture(undefined, 4096);
+      deferred(f, { kind: "total_model", key: "SYNTHETIC-model", bytes: 8000 });
+      await denied(() => f.prepare("university_only"), "storage_bucket_limit_unverified");
+      equal(f.calls.length, 1);
+    }],
+    ["university scope does not defer a selected conversion body", async () => {
+      const f = await fixture();
+      deferred(f, { kind: "conversion", key: "SYNTHETIC-conversion" });
+      await denied(() => f.prepare("university_only"), "storage_hash_mismatch");
+      equal(f.calls.length, 4);
     }],
   ];
   for (const [name, run] of cases) {

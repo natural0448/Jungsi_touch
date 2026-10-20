@@ -41468,7 +41468,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "0e829cbea5702f5659ac40d12a398fa4e2a7d6fba4d73c7c62fcfd3fb59ad1d2",
+        "source_sha256": "1d6c439d0a561dfc6901ecb5ad519c3185e091a4283332d281e1c031c4dd9cd3",
         "symbols": [
           {
             "declarations": [
@@ -43214,7 +43214,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "2748e8128a41e2c1bfe106ba57d5ecb8f3b7652331ba1572567b8b59cef099ec",
+        "source_sha256": "efe87ef57a444da897d072223d5575c65aae51d1064f36021cc483e63048185c",
         "symbols": [
           {
             "declarations": [
@@ -43372,6 +43372,14 @@
                         "value": {
                           "kind": "string",
                           "string": "overall_only"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "university_only",
+                        "value": {
+                          "kind": "string",
+                          "string": "university_only"
                         }
                       }
                     ]
@@ -50485,6 +50493,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
           },
           {
+            "importedName": "NativeExamPack",
+            "originalName": "NativeExamPack",
+            "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+          },
+          {
             "importedName": "NativeObject",
             "originalName": "NativeObject",
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
@@ -50575,7 +50588,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
           }
         ],
-        "source_sha256": "da44c6b6f4cf8f7e9d06a3d1ce6a819f652ea7d568955e03255bbdbf2a87c1b3",
+        "source_sha256": "a4cbfb203a445e07a62c5a89b27b1106bf0fcf7f826f1daefc7e49b03e02b1b8",
         "symbols": [
           {
             "declarations": [
@@ -51284,6 +51297,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/usage_service.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
             }
           ]
         },
@@ -70286,7 +70309,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "eaaa8494e65898cab126372f7f4fe071fb56fd4d6b433f607f2803932949e2bf",
+        "source_sha256": "01d66cdf1b12697c50ab8762eb09155c5e19ed72f7e84c8c6e00a9c126568ddf",
         "symbols": [
           {
             "declarations": [
@@ -70491,7 +70514,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(\n  change: (sources: Map<string, NativeObject>) => void = () => {},\n  mode: NativePayloadMode = \"all\",\n)",
+                  "parameter_source": "(\n  change: (sources: Map<string, NativeObject>) => void = () => {},\n  mode: NativePayloadMode = \"all\",\n  revokeAtHeadCall = 0,\n)",
                   "params": [
                     {
                       "kind": "assign",
@@ -70566,6 +70589,20 @@
                         }
                       },
                       "right": "all"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "revokeAtHeadCall",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "right": "0"
                     }
                   ]
                 },
@@ -70864,6 +70901,35 @@
               }
             ],
             "name": "verifyAdditionalOverallScopeCases"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyAdditionalUniversityScopeCases"
           }
         ]
       },
@@ -71080,7 +71146,7 @@
             "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "4e488749b623faf8ba004f3595f42ab781c2e2ca58c40550cb60fb0090991f9c",
+        "source_sha256": "58d06b56856ea32c959a152eabc5ad30fb33cef235e735c97877e13ea7e6ff34",
         "symbols": [
           {
             "declarations": [
@@ -71327,6 +71393,35 @@
               }
             ],
             "name": "verifyAdditionalOverallScopeCases"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyAdditionalUniversityScopeCases"
           }
         ]
       },
@@ -75614,6 +75709,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
           },
           {
+            "importedName": "SyntheticUniversityData",
+            "originalName": "SyntheticUniversityData",
+            "src": "tests/edge/synthetic_university.ts"
+          },
+          {
             "importedName": "VerifiedArtifactCache",
             "originalName": "VerifiedArtifactCache",
             "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
@@ -75649,7 +75749,7 @@
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "b80912451b0768728df0f3d2215d2b6aed05bb8b4d2e59a2f9d9cecfbbfe1401",
+        "source_sha256": "cd290fc91801cde50a886406804ac8c0cacf657f1ad6880df051e2057afce502",
         "symbols": [
           {
             "declarations": [
@@ -75658,7 +75758,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(\n  options: {\n    artifactCache?: VerifiedArtifactCache;\n    deferredExam?: boolean;\n    deferredVersion?: string;\n    costsForApproved?: boolean;\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | \"health.ready\" | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
+                  "parameter_source": "(\n  options: {\n    artifactCache?: VerifiedArtifactCache;\n    deferredExam?: boolean;\n    validExam?: boolean;\n    deferredModel?: boolean;\n    deferredVersion?: string;\n    policyPackVersion?: string;\n    policyAcademicYear?: number;\n    policyEligibleCount?: number;\n    costsForApproved?: boolean;\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | \"health.ready\" | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
                   "params": [
                     {
                       "kind": "assign",
@@ -75696,12 +75796,57 @@
                                 }
                               },
                               {
+                                "name": "validExam",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              },
+                              {
+                                "name": "deferredModel",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              },
+                              {
                                 "name": "deferredVersion",
                                 "optional": true,
                                 "tsType": {
                                   "kind": "keyword",
                                   "repr": "string",
                                   "value": "string"
+                                }
+                              },
+                              {
+                                "name": "policyPackVersion",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "policyAcademicYear",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              },
+                              {
+                                "name": "policyEligibleCount",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
                                 }
                               },
                               {
@@ -75900,6 +76045,35 @@
               }
             ],
             "name": "verifyAdditionalOverallScopeCases"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyAdditionalUniversityScopeCases"
           }
         ]
       },
@@ -75991,6 +76165,16 @@
             {
               "kind": "code",
               "path": "tests/edge/synthetic_runtime_binding.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_university.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_university.ts"
             }
           ]
         }
