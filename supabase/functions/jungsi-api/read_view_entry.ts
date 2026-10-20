@@ -12,12 +12,13 @@ import {
 import { createSupabaseApiIngress } from "../_shared/jungsi/infrastructure/supabase_api_ingress.ts";
 import { createNativePostgresPool } from "./postgres_pool.ts";
 import { createReadViewCatalogService } from "../_shared/read_view_catalog_runtime.ts";
+import { currentPublicResponseSchemas } from "../_shared/current_public_catalog.ts";
 const runtime = new NativeRuntimeApi({
   readViewExtensions: true,
   candidateCatalog: createReadViewCatalogService,
   environment: { get: (name) => Deno.env.get(name) },
   policies: routeCatalog.operations as readonly RuntimeRoutePolicy[],
-  responseSchemas,
+  responseSchemas: currentPublicResponseSchemas(responseSchemas),
   createPool: createNativePostgresPool,
   observe: (event) => console.info(JSON.stringify(event)),
 });
