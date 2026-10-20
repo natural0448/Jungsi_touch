@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.95이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.96이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -588,7 +588,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=56e84acdfb62bbdf0b706ef538fb5cae8b59e58f6bc95c877e5eb5144de1642f -->
+<!-- jungsi:generated spec_sha256=4a17662c7b58b94f264150fbd258634ae0556f66e76a72dd00722f4ef54f88b9 -->
 
 
 ## 기존 운영 조회의 후속 검수
