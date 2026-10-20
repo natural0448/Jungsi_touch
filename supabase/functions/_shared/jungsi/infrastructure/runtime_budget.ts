@@ -1,5 +1,6 @@
 /** Private approved policy -> request-local shared reservations. No capacities or approvals default. */
 import { AccessError } from "../application/access.ts";
+import { COMBINED_POLICY_CONSUMER_OPERATION_IDS } from "../application/api_dispatch.ts";
 import { ApprovedAdministratorUsagePolicy } from "../application/administrator_usage_policy.ts";
 import { ApprovedOperatingPolicy } from "../application/operating_policy.ts";
 import { validateScoreInput, validateScoreStructure } from "../application/overall_analysis.ts";
@@ -104,6 +105,7 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
         "jungsi.runtime-usage-policy/v1",
         "jungsi.runtime-usage-policy/v2",
         "jungsi.runtime-usage-policy/v3",
+        "jungsi.runtime-usage-policy/v4",
       ].includes(
         row.format as string,
       ) || row.status !== "approved" ||
@@ -114,15 +116,30 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
     ) fail();
     this.version = row.version;
     if (
-      row.format === "jungsi.runtime-usage-policy/v3" &&
+      ["jungsi.runtime-usage-policy/v3", "jungsi.runtime-usage-policy/v4"].includes(
+        row.format as string,
+      ) &&
       (typeof row.policy_revision !== "string" || !ID.test(row.policy_revision))
     ) fail();
-    this.policyRevision = row.format === "jungsi.runtime-usage-policy/v3"
-      ? row.policy_revision as string
-      : null;
+    this.policyRevision =
+      ["jungsi.runtime-usage-policy/v3", "jungsi.runtime-usage-policy/v4"].includes(
+          row.format as string,
+        )
+        ? row.policy_revision as string
+        : null;
     if (
-      row.format !== "jungsi.runtime-usage-policy/v3" &&
+      !["jungsi.runtime-usage-policy/v3", "jungsi.runtime-usage-policy/v4"].includes(
+        row.format as string,
+      ) &&
       (Object.hasOwn(row, "administrator_policy") || Object.hasOwn(row, "policy_revision"))
+    ) fail();
+    const combined = row.format === "jungsi.runtime-usage-policy/v4";
+    if (
+      combined !== (binding.consumerGeneration === "operating-admin-20") ||
+      combined && (mode !== "rights" || !binding.readViews ||
+          binding.operations.length !== COMBINED_POLICY_CONSUMER_OPERATION_IDS.length ||
+          COMBINED_POLICY_CONSUMER_OPERATION_IDS.some((id) => !binding.operations.includes(id)) ||
+          !Object.hasOwn(row, "operating_policy") || !Object.hasOwn(row, "administrator_policy"))
     ) fail();
     try {
       this.expiresAtUtc = utcInstant(row.expires_at as string);
@@ -205,7 +222,9 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
     }
     if (binding.operations.some((op) => ANALYSIS.includes(op)) && !exams.size) fail();
     this.exams = exams;
-    this.operating = row.format === "jungsi.runtime-usage-policy/v2"
+    this.operating = ["jungsi.runtime-usage-policy/v2", "jungsi.runtime-usage-policy/v4"].includes(
+        row.format as string,
+      )
       ? new ApprovedOperatingPolicy(row.operating_policy, {
         policyVersion: this.version,
         approvalSha256: binding.approvalReferenceSha256,
@@ -215,18 +234,25 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
         selectionSha256: binding.references.selection.sha256,
       })
       : null;
-    if (row.format !== "jungsi.runtime-usage-policy/v2" && Object.hasOwn(row, "operating_policy")) {
+    if (
+      !["jungsi.runtime-usage-policy/v2", "jungsi.runtime-usage-policy/v4"].includes(
+        row.format as string,
+      ) && Object.hasOwn(row, "operating_policy")
+    ) {
       fail();
     }
     // v3 revises budget admission only. It does not enable REQ-27 rights or rename counters.
-    this.administrator = row.format === "jungsi.runtime-usage-policy/v3"
-      ? new ApprovedAdministratorUsagePolicy(row.administrator_policy, {
-        approvalSha256: binding.approvalReferenceSha256,
-        policyVersion: this.version,
-        expiresAtUtc: this.expiresAtUtc,
-        requestRuntimeMicroseconds: binding.usageStoreLimits.runtimeHardLimitSeconds * 1000000n,
-      })
-      : null;
+    this.administrator =
+      ["jungsi.runtime-usage-policy/v3", "jungsi.runtime-usage-policy/v4"].includes(
+          row.format as string,
+        )
+        ? new ApprovedAdministratorUsagePolicy(row.administrator_policy, {
+          approvalSha256: binding.approvalReferenceSha256,
+          policyVersion: this.version,
+          expiresAtUtc: this.expiresAtUtc,
+          requestRuntimeMicroseconds: binding.usageStoreLimits.runtimeHardLimitSeconds * 1000000n,
+        })
+        : null;
     this.assertLive();
   }
   assertLive(): void {

@@ -1215,7 +1215,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "cd06a6af4e5492d8380d70681953877e0adcb38d5ff163bcbafcb92a5bbf1441",
+        "source_sha256": "45162b8a2ccd8d405dddeeef4ec128f41954169d6adaa8578b89a1e21dead88e",
         "symbols": [
           {
             "declarations": [
@@ -2295,6 +2295,186 @@
               }
             ],
             "name": "READ_VIEW_CONSUMER_OPERATION_IDS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "session.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "session.read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "history.search",
+                          "value": {
+                            "kind": "string",
+                            "string": "history.search"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "recruitment.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "recruitment.read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "score-profile.create",
+                          "value": {
+                            "kind": "string",
+                            "string": "score-profile.create"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "overall.analyze",
+                          "value": {
+                            "kind": "string",
+                            "string": "overall.analyze"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "report.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "report.read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "offerings.search",
+                          "value": {
+                            "kind": "string",
+                            "string": "offerings.search"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "offering.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "offering.read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "university.analyze",
+                          "value": {
+                            "kind": "string",
+                            "string": "university.analyze"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "candidates.build",
+                          "value": {
+                            "kind": "string",
+                            "string": "candidates.build"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "shortlist.update",
+                          "value": {
+                            "kind": "string",
+                            "string": "shortlist.update"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "report.export",
+                          "value": {
+                            "kind": "string",
+                            "string": "report.export"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "statistics.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "statistics.read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "forecast.published.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "forecast.published.read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "history.snapshot.head",
+                          "value": {
+                            "kind": "string",
+                            "string": "history.snapshot.head"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "history.snapshot.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "history.snapshot.read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "report.list-own",
+                          "value": {
+                            "kind": "string",
+                            "string": "report.list-own"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "score-input.status.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "score-input.status.read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "score-input.correction.grant",
+                          "value": {
+                            "kind": "string",
+                            "string": "score-input.correction.grant"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "report.sample.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "report.sample.read"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "COMBINED_POLICY_CONSUMER_OPERATION_IDS"
           },
           {
             "declarations": [
@@ -54424,6 +54604,11 @@
             "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
           },
           {
+            "importedName": "COMBINED_POLICY_CONSUMER_OPERATION_IDS",
+            "originalName": "COMBINED_POLICY_CONSUMER_OPERATION_IDS",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
             "importedName": "JsonFloat",
             "originalName": "JsonFloat",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
@@ -54529,7 +54714,7 @@
             "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
           }
         ],
-        "source_sha256": "ef96711525ecbb29c6e8fa638eab6ba86dead33b98414f91aa039414e55e2754",
+        "source_sha256": "1cf7fa5b599f5a55deef7dda5f3dd282c176e7fe99859255a2d0c5e1a1a0a82c",
         "symbols": [
           {
             "declarations": [
@@ -56111,6 +56296,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/api_dispatch.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
             }
           ]
         },
@@ -60238,6 +60433,11 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           },
           {
+            "importedName": "COMBINED_POLICY_CONSUMER_OPERATION_IDS",
+            "originalName": "COMBINED_POLICY_CONSUMER_OPERATION_IDS",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
             "importedName": "JsonFloat",
             "originalName": "JsonFloat",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
@@ -60308,7 +60508,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "bae59c379c1048a64ca5abb48707c775108acac090e8b270cafc6bd4d998f565",
+        "source_sha256": "81617698fdf4c30348d18acfb11ca2f48ee8394aab8c75e840cc2f3b6e3124b4",
         "symbols": [
           {
             "declarations": [
@@ -60670,6 +60870,32 @@
                 "declarationKind": "export",
                 "def": {
                   "properties": [
+                    {
+                      "name": "consumerGeneration",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "read-view-17",
+                            "value": {
+                              "kind": "string",
+                              "string": "read-view-17"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "operating-admin-20",
+                            "value": {
+                              "kind": "string",
+                              "string": "operating-admin-20"
+                            }
+                          }
+                        ]
+                      }
+                    },
                     {
                       "name": "descriptorSha256",
                       "readonly": true,
@@ -76802,6 +77028,568 @@
             {
               "kind": "code",
               "path": "tests/edge/synthetic_catalog.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/test_combined_operating_admin.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "ADMINISTRATOR_DAILY_KINDS",
+            "originalName": "ADMINISTRATOR_DAILY_KINDS",
+            "src": "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts"
+          },
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Opt-in policy composition only. No actual activation, migration, Storage or student writes."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "BUDGET_OPERATIONS",
+            "originalName": "BUDGET_OPERATIONS",
+            "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+          },
+          {
+            "importedName": "BudgetRequest",
+            "originalName": "BudgetRequest",
+            "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+          },
+          {
+            "importedName": "COMBINED_POLICY_CONSUMER_OPERATION_IDS",
+            "originalName": "COMBINED_POLICY_CONSUMER_OPERATION_IDS",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "NOW",
+            "originalName": "SYNTHETIC_RUNTIME_NOW",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "READ_VIEW_CONSUMER_OPERATION_IDS",
+            "originalName": "READ_VIEW_CONSUMER_OPERATION_IDS",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "RuntimeUsagePolicy",
+            "originalName": "RuntimeUsagePolicy",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+          },
+          {
+            "importedName": "SyntheticNativeRepository",
+            "originalName": "SyntheticNativeRepository",
+            "src": "tests/edge/synthetic_platform_repository.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "cloneNativeJson",
+            "originalName": "cloneNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "consumeScoreInput",
+            "originalName": "consumeScoreInput",
+            "src": "supabase/functions/_shared/jungsi/domain/score_input_rights.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "grantScoreCorrection",
+            "originalName": "grantScoreCorrection",
+            "src": "supabase/functions/_shared/jungsi/domain/score_input_rights.ts"
+          },
+          {
+            "importedName": "initialScoreInputState",
+            "originalName": "initialScoreInputState",
+            "src": "supabase/functions/_shared/jungsi/domain/score_input_rights.ts"
+          },
+          {
+            "importedName": "nativeJsonText",
+            "originalName": "nativeJsonText",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "readSessionSnapshot",
+            "originalName": "readSessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "scoreInputBalance",
+            "originalName": "scoreInputBalance",
+            "src": "supabase/functions/_shared/jungsi/domain/score_input_rights.ts"
+          },
+          {
+            "importedName": "syntheticRuntimeBinding",
+            "originalName": "syntheticRuntimeBinding",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          }
+        ],
+        "source_sha256": "2f95ec71aea7378a804ecbdcb1168cf672cf7cb14b5b936fd4ba562ce19605c5",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "00000000-0000-0000-0000-000000000001",
+                    "value": {
+                      "kind": "string",
+                      "string": "00000000-0000-0000-0000-000000000001"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OWNER"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "2026-10-15T00:01:00Z",
+                    "value": {
+                      "kind": "string",
+                      "string": "2026-10-15T00:01:00Z"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "EXPIRY"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "views"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  change: (r: NativeObject) => void = () => {},\n  changeBinding: (r: NativeObject) => void = () => {},\n)",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "change",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [
+                              {
+                                "kind": "identifier",
+                                "name": "r",
+                                "optional": false,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "NativeObject",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "NativeObject",
+                                      "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                                    },
+                                    "typeName": "NativeObject"
+                                  }
+                                }
+                              }
+                            ],
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "changeBinding",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [
+                              {
+                                "kind": "identifier",
+                                "name": "r",
+                                "optional": false,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "NativeObject",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "NativeObject",
+                                      "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                                    },
+                                    "typeName": "NativeObject"
+                                  }
+                                }
+                              }
+                            ],
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(role = \"admin\", aal: \"aal1\" | \"aal2\" = \"aal2\", status = \"active\")",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "role",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "admin"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "aal",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "literal",
+                              "repr": "aal1",
+                              "value": {
+                                "kind": "string",
+                                "string": "aal1"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "aal2",
+                              "value": {
+                                "kind": "string",
+                                "string": "aal2"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "right": "aal2"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "status",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "active"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "actor"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(work: () => unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "work",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "unknown",
+                            "value": "unknown"
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(session: Awaited<ReturnType<typeof actor>>)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "session",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Awaited",
+                        "value": {
+                          "typeName": "Awaited",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ReturnType",
+                              "value": {
+                                "typeName": "ReturnType",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeQuery",
+                                    "repr": "actor",
+                                    "value": "actor"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "BudgetRequest",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "BudgetRequest",
+                        "specifier": "../../supabase/functions/_shared/jungsi/application/request_budget.ts"
+                      },
+                      "typeName": "BudgetRequest"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "request"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/request_budget.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/session_service.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/score_input_rights.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/score_input_rights.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_platform_repository.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_platform_repository.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_runtime_binding.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_runtime_binding.ts"
             }
           ]
         }

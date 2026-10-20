@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.94",
+  "contract_version": "1.9.95",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -3224,6 +3224,15 @@
         "deployment": "NOT_RUN",
         "REQ27_006a_activation": "UNCHANGED_NOT_RUN",
         "entrypoint": "supabase/functions/jungsi-api/read_view_entry.ts"
+      },
+      "combined20_candidate": {
+        "contract_ref": "combined_operating_administrator_contract",
+        "source_operations": 28,
+        "consumer_operations": 20,
+        "previous_candidate_scope": 17,
+        "source_status": "CODE_CANDIDATE",
+        "activation": "NOT_RUN",
+        "new_input_regression": "CURRENT17_201_TO503_HOLD_REQUIRES_COMBINED_POLICY_AND_LEDGER_ACCEPTANCE"
       }
     }
   }
