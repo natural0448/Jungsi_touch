@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import type { ScoresInput } from "@/lib/dto";
 import { EXAM } from "@/lib/exam";
-import { setReportId } from "@/lib/report-ref";
+import { getReportId, setReportId } from "@/lib/report-ref";
 
 import type { ScoreDefaults } from "./score-form";
 
@@ -104,6 +104,47 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
     throw e;
   }
   // 자바스크립트 없이 보낸 양식은 basePath 가 붙지 않은 주소로 돌아가므로 직접 붙인다
+  const viaJs = (await headers()).has("next-action");
+  redirect(viaJs ? "/reports/me" : "/jeongsi/reports/me");
+}
+
+export type RefreshState = { error: string } | null;
+
+/**
+ * 전체 위치 다시 계산: 저장된 리포트의 profile_id·report_id·현재 report_version 으로 overall.analyze 만 부른다.
+ * score-profile.create(submitScores)를 부르지 않으므로 성적을 다시 저장하지 않고 입력권·정정권도 쓰지 않는다
+ * (담당자 후속 요청 v3 §3). 리포트 번호는 이 브라우저의 httpOnly 쿠키에서만 읽고, 소유권은 서버가 report.read 로 확인한다.
+ * 요청 키는 화면을 그릴 때 새로 만든 값 — 예전 키를 다시 쓰면 보류 응답이 재생될 수 있다. 버전 충돌(409)은 재시도하지 않는다
+ */
+export async function refreshOverall(_prev: RefreshState, fd: FormData): Promise<RefreshState> {
+  const key = String(fd.get("idem") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
+  const reportId = await getReportId();
+  if (!reportId) return { error: MESSAGE.report_not_found };
+  const caller = await getCaller();
+  const src = source();
+  try {
+    const report = await src.readReport(caller, reportId);
+    if (!report) return { error: MESSAGE.report_not_found };
+    const r = await src.analyzeOverall(caller, { profile_id: report.profile_id, report_id: report.report_id, expected_version: report.report_version }, `${key}:refresh`);
+    if (!r.ok)
+      return {
+        error:
+          r.status === 409 || r.code === "revision_conflict"
+            ? "다른 화면에서 리포트가 먼저 바뀌었습니다. 화면을 새로 고쳐 최신 리포트를 확인해 주세요."
+            : `전체 위치를 다시 계산하지 못했습니다. 저장한 성적과 리포트는 그대로입니다. (사유 코드 ${r.code})`,
+      };
+  } catch (e) {
+    if (e instanceof AccessDenied) return { error: "로그인이 필요합니다. 다시 로그인한 뒤 눌러 주세요." };
+    if (e instanceof ConnectionError)
+      return {
+        error:
+          e.kind === "rate_limited"
+            ? `요청이 많아 잠시 제한되었습니다. 저장한 성적과 리포트는 그대로입니다.${e.retryAt ? ` ${seoulTime(e.retryAt.toISOString())} 이후 다시 눌러 주세요.` : " 잠시 뒤 다시 눌러 주세요."}`
+            : `정시터치 서버에 연결할 수 없어 계산하지 못했습니다. 잠시 뒤 다시 눌러 주세요. (사유 코드 ${e.code})`,
+      };
+    throw e;
+  }
   const viaJs = (await headers()).has("next-action");
   redirect(viaJs ? "/reports/me" : "/jeongsi/reports/me");
 }

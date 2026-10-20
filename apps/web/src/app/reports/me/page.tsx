@@ -14,10 +14,13 @@ import { ensureAnalyses, pickedItems, type PickedItem } from "@/lib/report-ops";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
+import { RefreshOverall } from "./refresh-overall";
 import { ScoreForm, type ScoreDefaults } from "./score-form";
 import "./report.css";
 
 const route = page("PAGE-02");
+/** 자료가 연결되면 다시 계산으로 풀릴 수 있는 보류 사유. 입력 범위 밖 등 다시 계산해도 같은 결과인 사유는 넣지 않는다 */
+const REFRESHABLE = new Set(["total_model_missing", "total_model_not_approved"]);
 export const metadata: Metadata = { title: route.label };
 
 /**
@@ -100,6 +103,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         </div>
 
         <OverallCard a={a} />
+        {/* 저장 스냅샷이 자료 연결 전 상태로 남은 리포트만. 사용자가 한 번 누를 때만 계산한다(자동 요청 없음) */}
+        {a.overall.status === "pending" && REFRESHABLE.has(a.overall.reason_code ?? "") && <RefreshOverall idem={idem} />}
         <section aria-labelledby="sub-h" className="rp-sec">
           <h2 id="sub-h">과목별 결과</h2>
           <SubjectsSheet a={a} />

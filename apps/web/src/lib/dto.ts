@@ -37,9 +37,13 @@ export interface OfferingDto {
 
 /** history_metric — offering 필드 + 대학이 발표한 지표 하나 */
 export interface HistoryMetricDto extends OfferingDto {
-  metric_name: string;
+  metric_name: string; // 전국 현재 정본은 원본 지표 종류 코드(예: competition_ratio)
   metric_definition: string | null;
-  value: string | null; // 미발표면 null
+  /** 전국 현재 정본(1.9.90~): 대학 원문 통계 구분(예: 70%컷·평균)과 대상 집단. 이전 묶음에는 없다 */
+  statistic_label?: string | null;
+  cohort?: string | null;
+  value_json_type?: string | null;
+  value: string | number | null; // 미발표면 null. 전국 정본은 원문 JSON 스칼라(숫자 포함) 그대로
   unit: string | null;
   original_scale: string | null;
   publication_status: string; // 발표 상태. 미발표 값은 null 과 함께 온다

@@ -8,16 +8,22 @@ import type { PickedItem } from "@/lib/report-ops";
 /* 2페이지 리포트의 전체 성적 부분 — 일반·유료 모두 보는 범위(REQ-02). 인쇄 화면도 같은 부품을 쓴다 */
 
 const PENDING: Record<string, string> = {
-  total_model_missing: "이 시험의 전체 누백 분포 자료가 아직 서비스에 연결되지 않았습니다. 계산이 진행 중인 것이 아니며, 자료가 연결되면 이 자리에 표시됩니다. 같은 성적을 다시 저장할 필요는 없습니다.",
+  total_model_missing: "이 리포트를 저장할 때는 전체 누백 분포 자료가 서비스에 연결되어 있지 않았습니다. 계산이 진행 중인 것이 아니며, 자료가 연결된 뒤 '전체 위치 다시 계산'을 누르면 이 자리에 표시됩니다. 같은 성적을 다시 저장할 필요는 없습니다.",
   total_model_not_approved: "전체 누적 곡선을 검수하고 있습니다.",
   score_outside_domain: "입력한 총점이 곡선의 검증 범위 밖이라 위치를 계산하지 않았습니다.",
 };
 
-/** 전체 위치: 국·수·탐2 표준점수 합과 같은 비교집단에서 위에서 몇 % */
+/** 공식 전체 응시자를 분모로 한 추정 전체 누백인가(서버 DTO 의 실제 필드로만 판정, 인원 분모는 화면에 하드코딩하지 않는다) */
+const officialEstimate = (o: OverallAnalysisDto["overall"]) =>
+  o.status === "estimated" && o.data_kind === "estimated_weights" && o.population_id === OFFICIAL_ALL;
+const OFFICIAL_ALL = "official_all_examinees";
+
+/** 전체 위치: 국·수·탐2 표준점수 합을 점수축으로, 서버가 밝힌 비교집단에서 위에서 몇 % */
 export function OverallCard({ a }: { a: OverallAnalysisDto }) {
   const o = a.overall;
   const interval = o.tie_interval_percent && typeof o.tie_interval_percent === "object" ? o.tie_interval_percent : null;
   const kind = o.data_kind ? DATA_KIND[o.data_kind] : null;
+  const official = officialEstimate(o);
   return (
     <section className="rp-overall" aria-label="전체 성적 위치">
       <div className="n">
@@ -26,17 +32,30 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
         <span className="unit">점</span>
       </div>
       <div className="n">
-        <small>전체 응시자 기준 상위</small>
+        <small>{official ? "공식 전체 응시자 기준 추정 전체 누백" : "전체 응시자 기준 상위"}</small>
         {o.status !== "pending" && o.inclusive_top_percent ? (
           <>
             <b className="num big">{pctText(o.inclusive_top_percent)}%</b>
-            {o.status === "estimated" && <span className="est">{kind?.label ?? "추정"}</span>}
-            {interval && (
+            {o.status === "estimated" && <span className="est">{official ? "추정" : kind?.label ?? "추정"}</span>}
+            {interval &&
+              (official ? (
+                // 추정 분포의 동점 비중을 실제로 센 학생 수로 말하지 않는다
+                <p className="tie">
+                  추정 분포에서 나와 같은 총점이 차지하는 부분을 빼면 상위 <b className="num">{pctText(interval.lower)}%</b>, 포함하면 상위 <b className="num">{pctText(interval.upper)}%</b>입니다. 이 구간은 세는 방법의 차이일 뿐, 합격 확률이나 오차 범위가 아닙니다.
+                </p>
+              ) : (
+                <p className="tie">
+                  나와 총점이 같은 학생들이 있어, 같은 점수인 사람을 빼고 세면 상위 <b className="num">{pctText(interval.lower)}%</b>, 포함해 세면 상위 <b className="num">{pctText(interval.upper)}%</b>입니다. 이 구간은 세는 방법의 차이일 뿐, 합격 확률이나 오차 범위가 아닙니다.
+                </p>
+              ))}
+            {official ? (
               <p className="tie">
-                나와 총점이 같은 학생들이 있어, 같은 점수인 사람을 빼고 세면 상위 <b className="num">{pctText(interval.lower)}%</b>, 포함해 세면 상위 <b className="num">{pctText(interval.upper)}%</b>입니다. 이 구간은 세는 방법의 차이일 뿐, 합격 확률이나 오차 범위가 아닙니다.
+                공식 전체 응시자를 분모로 한 추정 위치입니다. 응시하지 않았거나 비어 있는 과목은 모형으로 보완했으며, 실제 학생별 성적을 모아 센 결과가 아닙니다.
+                {o.model_version && <> 모형 {o.model_version}.</>}
               </p>
+            ) : (
+              kind && <p className="tie">{kind.note}</p>
             )}
-            {kind && <p className="tie">{kind.note}</p>}
           </>
         ) : (
           <>
@@ -188,6 +207,7 @@ function Axis() {
 /** 과목·전체 위치 그래프 */
 export function PositionChart({ a }: { a: OverallAnalysisDto }) {
   const o = a.overall;
+  const official = officialEstimate(o);
   return (
     <section className="rp-chart" aria-label="상위 위치 그래프">
       <header>
@@ -198,8 +218,12 @@ export function PositionChart({ a }: { a: OverallAnalysisDto }) {
       {a.subjects.map((s) => (
         <ChartRow key={s.area} label={AREA_LABEL[s.area] ?? s.area} sub={s.area === "korean" || s.area === "math" ? (s.choice ?? undefined) : s.subject} incl={s.top_percent_inclusive} excl={s.top_percent_exclusive} />
       ))}
-      <ChartRow label="전체" sub="국·수·탐2" strong incl={o.inclusive_top_percent} excl={o.exclusive_top_percent} waitText={(o.reason_code && COMBO_PENDING[o.reason_code]) ?? "계산 대기"} />
-      <p className="pc-note">과목 줄은 그 과목을 본 응시자, 전체 줄은 국·수·탐 2과목을 모두 본 응시자 중의 내 위치입니다. 비교하는 집단이 서로 달라 줄끼리 길이를 견주지 않습니다.</p>
+      <ChartRow label="전체" sub={official ? "공식 전체 응시자 · 추정" : "국·수·탐2"} strong incl={o.inclusive_top_percent} excl={o.exclusive_top_percent} waitText={(o.reason_code && COMBO_PENDING[o.reason_code]) ?? "계산 대기"} />
+      <p className="pc-note">
+        {official
+          ? "과목 줄은 그 과목을 본 응시자 중의 내 위치, 전체 줄은 국·수·탐2 표준점수 합으로 본 공식 전체 응시자 기준 추정 위치입니다(미응시·결측 과목은 모형으로 보완). 비교하는 집단이 서로 달라 줄끼리 길이를 견주지 않습니다."
+          : "과목 줄은 그 과목을 본 응시자 중의 내 위치, 전체 줄은 국·수·탐2 표준점수 합으로 본 서버 비교 집단 중의 내 위치입니다. 비교하는 집단이 서로 달라 줄끼리 길이를 견주지 않습니다."}
+      </p>
     </section>
   );
 }

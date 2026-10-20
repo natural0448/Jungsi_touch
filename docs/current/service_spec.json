@@ -18110,6 +18110,15 @@
         "REQ-13"
       ],
       "summary": "화면팀 변경(담당자 회신 1.9.84 후속): P1 '자료 기준'이 서버 as_of 원문 시각(2026.10.11T08:15:15.252994Z)을 그대로 보이던 결함 수정. 날짜만 있는 원문은 시간대 변환 없이 그대로, 시각이 붙은 값은 Asia/Seoul 날짜로 표시하고(lib/format.ts asOfDate), 형식이 맞지 않거나 없으면 표시하지 않는다 — 오늘 날짜로 채우지 않는다."
+    },
+    {
+      "date": "2026-10-20",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-13"
+      ],
+      "summary": "화면팀 변경(담당자 v3 전국 정본·P2 전체 누백 후속, 관리자 등록 직후): ① P1 — 전국 현재 정본 history 항목(metric_name=원본 지표 종류 코드, statistic_label·cohort 원문 표기)을 기존 고정 열에 억지로 옮기지 않고 받은 그대로 원문 지표 표로 보인다(app/admissions/results/raw-metrics.tsx). 줄 키는 지표 종류·통계 구분·대상 집단·단위·정의 원문 — 하나라도 다르면 합치지 않고, 우리말 이름·표기 정리는 표시용이며 겉보기가 같아지면 원문 표기를 함께 적는다. 발표 상태 5가지(verified_official·pending_metadata·pending_value_type·pending_value_missing·not_published)를 구분하고 값이 없으면 0 을 만들지 않는다. 경쟁률·모집·충원·50/70%컷 줄을 위에 두고 나머지는 접는다(순서만). 이전 묶음에서 고정 열에 맞는 지표가 없으면 '수신한 지표 중 현재 표에서 표시할 항목이 없습니다'. ② P2 — '전체 위치 다시 계산'(refreshOverall): 자료 연결 전 저장된 리포트(total_model_missing·total_model_not_approved)에만, 사용자가 누를 때 한 번 overall.analyze 를 기존 profile_id·report_id·현재 report_version(expected_version)·새 요청 키로 호출한다. score-profile.create 를 부르지 않아 성적 재저장·입력/정정권 차감이 없고, 409 는 재시도하지 않는다. ③ overall.status=estimated·data_kind=estimated_weights·population_id=official_all_examinees 이면 '공식 전체 응시자 기준 추정 전체 누백'으로 표시하고 위치 그래프·인쇄 설명을 새 모집단(미응시·결측 모형 보완, 실제 학생별 성적 집계 아님)에 맞춘다. 그 밖의 모집단은 완전응답자로 단정하지 않는 중립 문구. 인원 분모·새 필드를 만들지 않는다."
     }
   ],
   "overall_analysis_contract": {

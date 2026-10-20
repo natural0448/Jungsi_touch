@@ -105,3 +105,16 @@
 .et .rs-years th.derived{color:var(--ink-2);font-weight:700}
 .et .rs-years td.derived{background:#F8F9FC}
 .et .rs-years td.derived .num{color:var(--ink-2)}
+
+/* 전국 현재 정본: 받은 지표 그대로(줄=지표·통계·대상, 열=학년도) */
+.et .rs-rawwrap{display:grid;gap:6px}
+.et .rs-raw{min-width:420px}
+.et .rs-raw thead th{white-space:nowrap}
+.et .rs-raw tbody th{font-weight:700;color:var(--deep);background:none;min-width:160px}
+.et .rs-raw tbody th small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
+.et .rs-raw td b{color:var(--deep)}
+.et .rs-raw td small{color:var(--muted)}
+.et .rs-raw td .unpub{font-size:12px;font-weight:600;color:var(--muted)}
+.et .rs-raw td small.rs-chk{color:var(--warn, #b45309);font-weight:700}
+.et .rs-more summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--ink-2);padding:4px 0}
+.et .rs-rawnote{margin:0;font-size:11px;color:var(--muted)}

@@ -51,7 +51,9 @@ function subject(area: SubjectResultDto["area"], name: string, choice: string | 
   return { area, subject: name, choice, standard_score: v, grade: grade(top), top_percent_exclusive: pct(Math.max(0, top - 0.3)), top_percent_inclusive: pct(top), basis: "합성 곡선(화면 확인용)" };
 }
 
-export function computeOverall(s: ScoresInput): OverallAnalysisDto {
+/** pendingTotal: 화면 확인용 — 전체 누백 자료 연결 전에 저장된 리포트(total_model_missing)를 흉내 낸다.
+ *  JUNGSI_SYNTHETIC_TOTAL_PENDING_UNTIL=N 이면 N번째 판까지가 연결 전 리포트(다시 계산하면 N+1 번째 판부터 계산됨) */
+export function computeOverall(s: ScoresInput, pendingTotal = false): OverallAnalysisDto {
   const total = s.korean.standard_score + s.math.standard_score + s.inquiry[0].standard_score + s.inquiry[1].standard_score;
   const inc = curve(total, 307, 22);
   const tie = 0.04;
@@ -97,19 +99,22 @@ export function computeOverall(s: ScoresInput): OverallAnalysisDto {
         combo("math_inq_avg", "수학+탐구(2과목 평균)", m + avg, 160, 12),
       ];
     })(),
-    overall: {
-      status: "estimated",
-      reason_code: null,
-      top_percent: pct(inc),
-      inclusive_top_percent: pct(inc),
-      exclusive_top_percent: pct(exc),
-      tie_share_percent: pct(tie),
-      tie_interval_percent: { lower: pct(exc), upper: pct(inc) },
-      tie_policy: "include_equal",
-      population_id: "SYNTHETIC-2027-09-KMI2",
-      model_version: "SYNTHETIC-curve-v1",
-      data_kind: "estimated_weights",
-    },
+    // 운영과 같은 모양: 공식 전체 응시자 기준 추정 전체 누백(population_id=official_all_examinees, 1.9.90)
+    overall: pendingTotal
+      ? { status: "pending", reason_code: "total_model_missing", top_percent: null, inclusive_top_percent: null, exclusive_top_percent: null, tie_share_percent: null, tie_interval_percent: null, tie_policy: null, population_id: null, model_version: null, data_kind: null }
+      : {
+          status: "estimated",
+          reason_code: null,
+          top_percent: pct(inc),
+          inclusive_top_percent: pct(inc),
+          exclusive_top_percent: pct(exc),
+          tie_share_percent: pct(tie),
+          tie_interval_percent: { lower: pct(exc), upper: pct(inc) },
+          tie_policy: "include_equal",
+          population_id: "official_all_examinees",
+          model_version: "SYNTHETIC-curve-v1",
+          data_kind: "estimated_weights",
+        },
   };
 }
 
@@ -224,7 +229,7 @@ function analysesFor(scores: ScoresInput, ids: string[]): Record<string, Assessm
 }
 
 function build(r: StoredReport, p: StoredProfile, paid: boolean): ReportDto {
-  const report: ReportDto = { format: "jungsi.persisted-report/v1", report_id: r.report_id, report_version: r.report_version, profile_id: p.profile_id, updated_at: r.updated_at, overall: computeOverall(p.scores) };
+  const report: ReportDto = { format: "jungsi.persisted-report/v1", report_id: r.report_id, report_version: r.report_version, profile_id: p.profile_id, updated_at: r.updated_at, overall: computeOverall(p.scores, r.report_version <= Number(process.env.JUNGSI_SYNTHETIC_TOTAL_PENDING_UNTIL ?? 0)) };
   if (!paid) return report;
   const analyses = analysesFor(p.scores, r.analyzed ?? []);
   const shortlist = Object.fromEntries(

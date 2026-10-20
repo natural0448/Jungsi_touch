@@ -10,6 +10,7 @@ import { asOfDate } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { lockFor, page } from "@/lib/routes";
 import { GROUPS, PATH, REGIONS, hrefWith, parseQuery, type Query } from "./query";
+import { RawMetricTable } from "./raw-metrics";
 import "./results.css";
 
 const route = page("PAGE-01");
@@ -211,6 +212,10 @@ function UnitCard({ o, years }: { o: { id: string; first: HistoryMetricDto }; ye
   // 같은 통계는 직접 발표를 어디가 제출보다 먼저 고르고, 70%컷이 없으면 발표된 75%컷을
   // 대신 보인다(열 이름도 75%로 적는다). 열 순서는 모집인원/경쟁률/추정 총 지원자/
   // 충원인원/추정 탈락자/최종 50%컷/최종 70%컷 고정. 값·단위·척도는 발표 그대로다
+  // 전국 현재 정본(statistic_label·cohort 를 함께 주는 묶음)은 지표 이름이 원본 종류 코드라 아래 고정 열에
+  // 맞지 않는다 — 고정 열로 억지로 옮기지 않고 받은 그대로 원문 지표 표로 보인다(raw-metrics.tsx)
+  const flat = PAST_YEARS.flatMap((y) => years?.get(y) ?? []);
+  const national = flat.some((m) => m.statistic_label !== undefined || m.cohort !== undefined);
   const seen: string[] = [];
   for (const y of PAST_YEARS) for (const m of years?.get(y) ?? []) if (!seen.includes(m.metric_name)) seen.push(m.metric_name);
   const pickCut = (percents: number[]) => {
@@ -246,8 +251,14 @@ function UnitCard({ o, years }: { o: { id: string; first: HistoryMetricDto }; ye
         {/* 공개 history DTO 에 검증된 2027 목표 모집행 ID 가 없어 recruitment.read 를 부르지 않는다(year_mapping) */}
         <span className="rs-rec wait">2027 모집행 연계 확인 전</span>
       </div>
-      {metricCols.length === 0 ? (
-        <p className="rs-wait">이 모집단위의 2024~2026학년도 발표 결과가 아직 없습니다.</p>
+      {national ? (
+        <RawMetricTable rows={flat} years={PAST_YEARS} />
+      ) : metricCols.length === 0 ? (
+        flat.length > 0 ? (
+          <p className="rs-wait">수신한 지표 중 현재 표에서 표시할 항목이 없습니다.</p>
+        ) : (
+          <p className="rs-wait">이 모집단위의 2024~2026학년도 발표 결과가 아직 없습니다.</p>
+        )
       ) : (
         <div className="tblwrap">
           <table className="tb rs-years">
