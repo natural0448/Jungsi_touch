@@ -14,7 +14,7 @@ type Kv = {
 };
 
 const MEM_MAX = 64;
-const mem = new Map<string, { until: number; value: unknown }>();
+const mem = new Map<string, Entry<unknown>>();
 
 async function kv(): Promise<Kv | null> {
   try {
@@ -30,42 +30,71 @@ export async function cacheKey(parts: unknown): Promise<string> {
   return Array.from(new Uint8Array(d), (x) => x.toString(16).padStart(2, "0")).join("");
 }
 
+type Entry<T> = { fresh: number; stale: number; value: T };
+const refreshing = new Set<string>();
+
 /**
- * key 로 저장본이 있으면 돌려주고, 없으면 load() 를 불러 keep 이 참일 때만 ttl 초 동안 저장한다.
- * load 가 던진 예외는 그대로 올린다(오류는 저장하지 않는다).
+ * key 로 저장본을 돌려준다. 신선(freshSec 이내)하면 그대로, 오래됐지만 보관 기간(staleSec) 안이면 **먼저 돌려주고**
+ * 뒤에서 load() 로 새로 받아 바꿔 둔다(같은 인스턴스에서 같은 key 는 한 번만). 저장본이 없으면 load() 를 기다린다.
+ * keep 이 거짓인 결과(오류 뒤 일부·미발행)는 저장하지 않는다. load 가 던진 예외는 저장본이 없을 때만 올린다.
  */
-export async function sharedCached<T>(key: string, ttlSec: number, load: () => Promise<{ value: T; keep: boolean }>): Promise<T> {
+export async function sharedCached<T>(
+  key: string,
+  freshSec: number,
+  staleSec: number,
+  load: () => Promise<{ value: T; keep: boolean }>,
+): Promise<T> {
   const now = Date.now();
-  const hit = mem.get(key);
-  if (hit && hit.until > now) return hit.value as T;
   const store = await kv();
-  if (store) {
+  let entry = mem.get(key) as Entry<T> | undefined;
+  if ((!entry || entry.stale <= now) && store) {
     try {
-      const v = (await store.get(key, "json")) as { until: number; value: T } | null;
-      if (v && v.until > now) {
-        remember(key, v.until, v.value);
-        return v.value;
-      }
+      entry = ((await store.get(key, "json")) as Entry<T> | null) ?? undefined;
+      if (entry) remember(key, entry);
     } catch {
       /* KV 읽기 실패는 원래 조회로 넘어간다 */
     }
   }
-  const { value, keep } = await load();
-  if (keep) {
-    const until = now + ttlSec * 1000;
-    remember(key, until, value);
+  const save = async (r: { value: T; keep: boolean }) => {
+    if (!r.keep) return;
+    const at = Date.now();
+    const e: Entry<T> = { fresh: at + freshSec * 1000, stale: at + staleSec * 1000, value: r.value };
+    remember(key, e);
     if (store) {
       try {
-        await store.put(key, JSON.stringify({ until, value }), { expirationTtl: Math.max(60, ttlSec) });
+        await store.put(key, JSON.stringify(e), { expirationTtl: Math.max(60, staleSec) });
       } catch {
         /* 저장 실패는 무시 — 다음 요청이 다시 조회한다 */
       }
     }
+  };
+  if (entry && entry.stale > now) {
+    if (entry.fresh <= now && !refreshing.has(key)) {
+      refreshing.add(key);
+      const job = load()
+        .then(save)
+        .catch(() => undefined)
+        .finally(() => refreshing.delete(key));
+      await background(job);
+    }
+    return entry.value;
   }
-  return value;
+  const r = await load();
+  await save(r);
+  return r.value;
 }
 
-function remember(key: string, until: number, value: unknown) {
-  if (mem.size >= MEM_MAX) mem.delete(mem.keys().next().value as string);
-  mem.set(key, { until, value });
+/** 응답을 돌려준 뒤에도 워커가 작업을 마치게 한다(waitUntil). 워커 밖(로컬 개발)에서는 기다리지 않고 흘려보낸다 */
+async function background(job: Promise<unknown>) {
+  try {
+    const { ctx } = await getCloudflareContext({ async: true });
+    (ctx as { waitUntil(p: Promise<unknown>): void }).waitUntil(job);
+  } catch {
+    void job;
+  }
+}
+
+function remember(key: string, e: Entry<unknown>) {
+  if (mem.size >= MEM_MAX && !mem.has(key)) mem.delete(mem.keys().next().value as string);
+  mem.set(key, e);
 }
