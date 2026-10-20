@@ -9,12 +9,16 @@ import type {
   HistorySearchQuery,
   OfferingDetailDto,
   OfferingDto,
+  OwnReportListDto,
   ProfileDto,
   RecruitmentDto,
   ReportDto,
+  SampleReportDto,
+  ScoreInputStatusDto,
   ScoresInput,
   Session,
   SnapshotDto,
+  SnapshotHeadDto,
   StatisticsDto,
 } from "@/lib/dto";
 
@@ -48,6 +52,13 @@ export class ConnectionError extends Error {
   }
 }
 
+/** 정리본 현재판이 바뀌었다(409 publication_changed). 받던 판을 버리고 처음부터 다시 준비한다 */
+export class SnapshotChanged extends Error {
+  constructor() {
+    super("publication_changed");
+  }
+}
+
 /** offerings.search 쿼리 (history.search 와 같은 조건, 기본 정보만) */
 export type OfferingSearchQuery = HistorySearchQuery;
 
@@ -64,6 +75,10 @@ export interface JungsiSource {
 
   /** history.search (일반·유료). 대학 발표 지표 한 줄씩 */
   searchHistory(caller: Caller, query: HistorySearchQuery): Promise<CatalogSearchDto<HistoryMetricDto>>;
+  /** history.snapshot.head (일반·유료). 1페이지 전국 정리본의 현재 발행판 머리 */
+  readSnapshotHead(caller: Caller): Promise<SnapshotHeadDto>;
+  /** history.snapshot.read (일반·유료). manifest 에 열거된 분할 하나의 받은 bytes 그대로(검증은 호출한 쪽). 판이 바뀌었으면 SnapshotChanged */
+  readSnapshotPart(caller: Caller, snapshotId: string, partId: string): Promise<Uint8Array>;
   /** recruitment.read (일반·유료). 없는 모집행이면 null */
   readRecruitment(caller: Caller, offeringId: string): Promise<RecruitmentDto | null>;
 
@@ -73,6 +88,12 @@ export interface JungsiSource {
   analyzeOverall(caller: Caller, body: { profile_id: string; report_id?: string; expected_version?: number }, idempotencyKey: string): Promise<Result<ReportDto>>;
   /** report.read (본인). 없거나 남의 리포트면 null(서버는 같은 404). 일반 회원 응답에는 유료 필드가 없다 */
   readReport(caller: Caller, reportId: string): Promise<ReportDto | null>;
+  /** report.list-own (일반·유료). 현재 로그인한 본인 리포트 요약만. cursor 는 받은 그대로 되돌려 준다 */
+  listOwnReports(caller: Caller, q: { exam_id?: string; cursor?: string; limit?: number }): Promise<OwnReportListDto>;
+  /** score-input.status.read (일반·유료). 이 시험·단계의 입력권 상태 */
+  readScoreInputStatus(caller: Caller, examId: string, stage?: string): Promise<ScoreInputStatusDto>;
+  /** report.sample.read (일반·유료). 가상 학생 견본 리포트 */
+  readReportSample(caller: Caller): Promise<SampleReportDto>;
   /** report.export (유료·본인·확인 성적). 일반 회원이면 AccessDenied(403) */
   exportReport(caller: Caller, reportId: string): Promise<SnapshotDto | null>;
 

@@ -26,7 +26,17 @@ const MESSAGE: Record<string, string> = {
   revision_conflict: "다른 화면에서 리포트가 먼저 바뀌었습니다. 새로 고친 뒤 다시 저장해 주세요.",
   profile_not_found: "성적을 다시 저장해 주세요.",
   report_not_found: "리포트를 찾지 못했습니다. 성적을 새로 입력해 주세요.",
+  score_input_exhausted: "이 시험 단계의 성적 입력 횟수를 모두 사용했습니다. 저장한 리포트는 그대로 볼 수 있고, 성적 정정은 고객센터에 요청해 주세요.",
+  score_input_transition_pending: "성적 입력 기록을 새 기준으로 옮기는 중이라 지금은 저장할 수 없습니다. 입력 횟수는 쓰이지 않았습니다. 잠시 뒤 다시 시도해 주세요.",
+  paid_required: "성적 입력은 이용권 회원만 할 수 있습니다.",
 };
+
+/** 성적표에 없는 점수 등 정상 거절(입력 1회 소모)되는 코드 — 서버 SCORE_CONTENT_REJECTION_CODES 와 같다 */
+const CONTENT_REJECTIONS = new Set([
+  "unobserved_standard_score", "invalid_score", "invalid_integer", "invalid_grade",
+  "invalid_reported_grade", "invalid_reported_percentile", "reported_grade_conflict", "reported_percentile_conflict",
+]);
+
 
 /** 성적 저장 뒤 전체 분석 단계에서 멈췄을 때. 공개 오류코드만 붙인다 */
 const partial = (code: string) =>
@@ -83,7 +93,15 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
   try {
     const profile = await src.createScoreProfile(caller, scores, true, `${key}:profile`);
     // 문장이 없는 코드는 사유 코드를 같이 보여 준다 — 담당자가 서버 기록과 맞춰 볼 수 있게
-    if (!profile.ok) return fail(MESSAGE[profile.code] ?? `저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요. (사유 코드 ${profile.code})`);
+    if (!profile.ok) {
+      // 정상 거절은 이 단계의 입력 1회를 쓴다. 남은 정정 횟수는 서버 상태를 다시 읽어 그대로 안내한다(추정하지 않는다)
+      if (profile.status === 422 && CONTENT_REJECTIONS.has(profile.code)) {
+        const st = await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null);
+        const left = st ? `남은 성적 정정 가능 횟수는 ${st.correction_request_remaining}회이며, 정정은 고객센터에 요청해 주세요.` : "정정은 고객센터에 요청해 주세요.";
+        return fail(`실제 성적표의 표준점수를 입력하지 않아 정상적인 계산이 불가능합니다. ${left} (사유 코드 ${profile.code})`);
+      }
+      return fail(MESSAGE[profile.code] ?? `저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요. (사유 코드 ${profile.code})`);
+    }
     step = "전체 분석";
     const report = await src.analyzeOverall(caller, { profile_id: profile.value.profile_id, ...(reportId ? { report_id: reportId, expected_version: version } : {}) }, `${key}:report`);
     if (!report.ok) return fail(partial(report.code));
@@ -143,6 +161,29 @@ export async function refreshOverall(_prev: RefreshState, fd: FormData): Promise
             ? `요청이 많아 잠시 제한되었습니다. 저장한 성적과 리포트는 그대로입니다.${e.retryAt ? ` ${seoulTime(e.retryAt.toISOString())} 이후 다시 눌러 주세요.` : " 잠시 뒤 다시 눌러 주세요."}`
             : `정시터치 서버에 연결할 수 없어 계산하지 못했습니다. 잠시 뒤 다시 눌러 주세요. (사유 코드 ${e.code})`,
       };
+    throw e;
+  }
+  const viaJs = (await headers()).has("next-action");
+  redirect(viaJs ? "/reports/me" : "/jeongsi/reports/me");
+}
+
+export type PickState = { error: string } | null;
+
+/**
+ * 본인 리포트 목록에서 고른 리포트를 이 브라우저에서 열기(다른 기기에서 저장한 리포트). 서버 report.read 로 본인
+ * 것인지 다시 확인한 뒤에만 HttpOnly 쿠키에 담는다. 성적 저장·분석은 부르지 않는다(입력권을 쓰지 않음).
+ * 서버 동작은 Next 의 같은 출처 확인(CSRF)을 거친다
+ */
+export async function pickReport(_prev: PickState, fd: FormData): Promise<PickState> {
+  const id = String(fd.get("report_id") ?? "");
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(id)) return { error: "고른 리포트를 확인할 수 없습니다. 화면을 새로 고쳐 주세요." };
+  try {
+    const report = await source().readReport(await getCaller(), id);
+    if (!report) return { error: "이 계정의 리포트가 아니거나 찾을 수 없습니다." };
+    await setReportId(report.report_id);
+  } catch (e) {
+    if (e instanceof AccessDenied) return { error: "로그인이 필요합니다. 다시 로그인한 뒤 골라 주세요." };
+    if (e instanceof ConnectionError) return { error: `정시터치 서버에 연결할 수 없어 열지 못했습니다. 잠시 뒤 다시 골라 주세요. (사유 코드 ${e.code})` };
     throw e;
   }
   const viaJs = (await headers()).has("next-action");

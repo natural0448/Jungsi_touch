@@ -245,3 +245,20 @@ function build(r: StoredReport, p: StoredProfile, paid: boolean): ReportDto {
     analysis_status: (r.analyzed ?? []).length === 0 ? { status: "pending", reason_code: "offering_analysis_not_requested" } : { status: ready ? "ready" : "pending", reason_code: ready ? null : "offering_analysis_pending" },
   };
 }
+/** 합성 report.list-own: 이 브라우저의 합성 리포트(하나)만 본인 목록으로 돌려준다 */
+export async function listOwn(): Promise<{ report_id: string; exam_id: string | null; report_version: number; updated_at: string }[]> {
+  const r = await read<StoredReport>(C.report);
+  return r ? [{ report_id: r.report_id, exam_id: process.env.JUNGSI_EXAM_ID ?? null, report_version: r.report_version, updated_at: r.updated_at }] : [];
+}
+
+/** 합성 score-input.status: 저장한 성적이 있으면 이 단계의 최초 입력 1회를 쓴 상태로 보인다 */
+export async function inputUsed(): Promise<{ profileId: string | null; reportId: string | null }> {
+  const p = await read<StoredProfile>(C.profile);
+  const r = await read<StoredReport>(C.report);
+  return { profileId: p?.profile_id ?? null, reportId: r && p && r.profile_id === p.profile_id ? r.report_id : null };
+}
+
+/** 합성: 이 요청 키가 이미 저장한 프로필의 키인지(멱등 재시도) */
+export async function sameProfileKey(key: string): Promise<boolean> {
+  return (await read<StoredProfile>(C.profile))?.key === key;
+}

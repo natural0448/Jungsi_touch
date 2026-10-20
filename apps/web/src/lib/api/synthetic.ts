@@ -5,7 +5,8 @@ import { AccessDenied, type JungsiSource, type Result } from "./source";
 import * as fc from "./synthetic-forecast";
 import { CATALOG, statistics } from "./synthetic-assessment";
 import { HISTORY, syntheticRecruitment } from "./synthetic-history";
-import { analyzeIds, assessFor, buildCands, loadReport, saveProfile, saveReport, setPick, validateScores } from "./synthetic-report";
+import { analyzeIds, assessFor, buildCands, inputUsed, listOwn, sameProfileKey, loadReport, saveProfile, saveReport, setPick, validateScores } from "./synthetic-report";
+import { syntheticSnapshotHead, syntheticSnapshotPart } from "./synthetic-snapshot";
 
 /*
   HTTP 핸들러 연결 전 화면 제작용 합성 응답(프레젠테이션 작업 인계: '명시적인 합성 응답').
@@ -99,13 +100,82 @@ export const syntheticSource: JungsiSource = {
     return page(match(HISTORY, q), key, q.cursor, q.limit ?? 50);
   },
 
+  async readSnapshotHead() {
+    await requireMember();
+    return syntheticSnapshotHead();
+  },
+
+  async readSnapshotPart(_caller, snapshotId, partId) {
+    await requireMember();
+    return syntheticSnapshotPart(snapshotId, partId);
+  },
+
+  async listOwnReports() {
+    await requireMember();
+    return { format: "jungsi.own-report-list/v1", items: await listOwn(), next_cursor: null, has_more: false };
+  },
+
+  async readScoreInputStatus(_caller, examId, stage) {
+    const s = await requireMember();
+    const used = await inputUsed();
+    const paid = s === "paid" || s === "noscore";
+    const spent = used.profileId ? 1 : 0;
+    return {
+      format: "jungsi.score-input-status/v1",
+      exam_id: examId,
+      pack_version: process.env.JUNGSI_PACK_VERSION ?? "SYNTHETIC",
+      academic_year: 2027,
+      stage: stage ?? "final",
+      stage_state: "open",
+      opens_at: null,
+      closes_at: null,
+      paid_input_allowed: paid,
+      input_limit_mode: "stage_rights",
+      initial_used: spent,
+      initial_remaining: 1 - spent,
+      correction_granted: 0,
+      correction_used: 0,
+      correction_request_remaining: 1,
+      effective_save_remaining: paid ? 1 - spent : 0,
+      entry_version: spent,
+      current_profile_id: used.profileId,
+      current_report_id: used.reportId,
+      last_attempt_outcome: spent ? "accepted" : null,
+      last_rejection_code: null,
+      legacy_transition_status: "ready",
+    };
+  },
+
+  async readReportSample() {
+    await requireMember();
+    return {
+      format: "jungsi.sample-report/v1",
+      synthetic: true,
+      sample_id: "SYNTHETIC-virtual386-v1",
+      label: "가상 학생 고정 견본",
+      report: {
+        format: "jungsi.sample-analysis/v1",
+        source_kind: "synthetic",
+        total_standard_score: 386,
+        subjects: [{ area: "korean", standard_score: 120 }, { area: "math", standard_score: 130 }, { area: "inquiry1", standard_score: 68 }, { area: "inquiry2", standard_score: 68 }],
+        overall: { status: "pending", reason_code: "sample_no_population", top_percent: null },
+        input_editable: false,
+        persisted: false,
+      },
+    };
+  },
+
   async readRecruitment(_caller, offeringId) {
     await requireMember();
     return syntheticRecruitment(offeringId);
   },
 
   async createScoreProfile(_caller, scores, confirmed, key) {
-    await requireMember();
+    const s = await requireMember();
+    // 결합 20 정책: 성적 입력은 유료 회원만, 시험 단계마다 1회(같은 요청 키 재시도는 처음 결과)
+    if (s === "standard" || s === "operator") return { ok: false, code: "paid_required", status: 403 };
+    const used = await inputUsed();
+    if (used.profileId && !(await sameProfileKey(key))) return { ok: false, code: "score_input_exhausted", status: 409 };
     const bad = validateScores(scores);
     if (bad) return { ok: false, code: bad, status: bad === "pack_version_mismatch" ? 409 : 422 };
     return { ok: true, value: await saveProfile(scores, confirmed, key) };

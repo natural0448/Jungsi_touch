@@ -532,3 +532,90 @@ export interface ForecastPublicDto {
   recommendation_reasons: ReasonDto[];
   adjustment_summary: AdjustmentSummaryDto;
 }
+
+/* ── 1페이지 전국 정리본(history.snapshot.*, 기획 1.9.95) ── */
+
+/** 정리본 분할 하나의 고정값(pins). 받은 bytes 의 길이·SHA 를 이 값과 대조한다 */
+export interface SnapshotPartPin {
+  part_id: string;
+  payload_id: string;
+  gzip_bytes: number;
+  gzip_sha256: string;
+  decoded_bytes: number;
+  decoded_sha256: string;
+  rows: number;
+  mapped_rows: number;
+  mapping_pending_rows: number;
+}
+
+/** history_snapshot_head — 현재 발행판의 작은 머리 */
+export interface SnapshotHeadDto {
+  format: "jungsi.history-snapshot-head/v1";
+  status: "approved";
+  snapshot_id: string;
+  publication_sha256: string;
+  source_head_sha256: string;
+  generated_at: string;
+  source_as_of: string | null;
+  schema_version: string;
+  normalization_rules_version: string;
+  selection_rules_version: string;
+  counts: { rows: number; mapped_rows: number; mapping_pending_rows: number; schools: number; observations?: number };
+  delivery_mode: "full" | "parts";
+  full: SnapshotPartPin | null;
+  parts: SnapshotPartPin[];
+  expires_at: string;
+}
+
+/* ── 2페이지 입력권·본인 목록·예시(기획 1.9.95, 결합 20) ── */
+
+/** own_report_list — 현재 로그인한 본인의 리포트 요약 */
+export interface OwnReportListDto {
+  format: "jungsi.own-report-list/v1";
+  items: { report_id: string; exam_id: string | null; report_version: number; updated_at: string }[];
+  next_cursor: string | null;
+  has_more: boolean;
+}
+
+/** score_input_status — 이 시험·단계의 입력권 상태. 숫자는 서버 값 그대로 쓴다(추정 금지) */
+export interface ScoreInputStatusDto {
+  format: "jungsi.score-input-status/v1";
+  exam_id: string;
+  pack_version: string;
+  academic_year: number;
+  stage: string;
+  stage_state: "open" | "not_open" | "closed";
+  opens_at: string | null;
+  closes_at: string | null;
+  paid_input_allowed: boolean;
+  input_limit_mode: "stage_rights" | "preview_exempt";
+  initial_used: number;
+  initial_remaining: number;
+  correction_granted: number;
+  correction_used: number;
+  correction_request_remaining: number;
+  effective_save_remaining: number | null;
+  entry_version: number;
+  current_profile_id: string | null;
+  current_report_id: string | null;
+  last_attempt_outcome: string | null;
+  last_rejection_code: string | null;
+  legacy_transition_status: string;
+}
+
+/** sample_report — 무료 회원에게 보이는 가상 학생 견본. 실제 개인 성적이 아니다 */
+export interface SampleReportDto {
+  format: "jungsi.sample-report/v1";
+  synthetic: true;
+  sample_id: string;
+  label: string;
+  report: {
+    format: "jungsi.sample-analysis/v1";
+    source_kind: "synthetic";
+    total_standard_score: number;
+    subjects: { area: string; standard_score: number }[];
+    overall: { status: string; reason_code: string | null; top_percent: string | number | null };
+    input_editable: false;
+    persisted: false;
+  };
+}

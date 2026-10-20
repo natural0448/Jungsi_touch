@@ -245,7 +245,7 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
           </button>
         </div>
       </div>
-      <p className="sf-note">저장한 성적은 고칠 수 없습니다. 다시 저장하면 새 성적 기록이 생기며, 하루에 저장할 수 있는 성적 조합 수가 정해져 있습니다.</p>
+      <p className="sf-note">저장하면 이 시험 단계의 성적 입력 1회를 사용합니다. 저장한 성적은 직접 고칠 수 없고, 정정은 고객센터에 요청하면 1회 처리해 드립니다. 성적표에 없는 점수로 저장하면 계산되지 않고 입력 1회가 사용됩니다.</p>
 
       <dialog ref={dialogRef} className="sf-dialog" aria-labelledby="sf-dialog-h" onClose={() => setReview(null)}>
         {review && (
@@ -255,7 +255,7 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
               <p className="sf-dialog-problem">{review.problem}</p>
             ) : (
               <>
-                <p>저장한 성적은 <b>고칠 수 없습니다.</b> 성적표와 한 칸씩 대조해 주세요.</p>
+                <p><b>저장하면 이 단계의 입력 1회를 사용합니다.</b> 저장한 성적은 직접 고칠 수 없으니 성적표와 한 칸씩 대조해 주세요.</p>
                 <dl className="sf-dialog-rows">
                   {review.rows.map(([k, val]) => (
                     <div key={k}>
@@ -264,7 +264,7 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
                     </div>
                   ))}
                 </dl>
-                <p className="sf-dialog-note">다시 저장하면 새 기록이 생기고, 하루에 저장할 수 있는 성적 조합 수가 정해져 있습니다.</p>
+                <p className="sf-dialog-note">성적표에 없는 점수는 계산되지 않고 입력 1회가 사용됩니다. 정정은 고객센터에 요청해 주세요(1회).</p>
               </>
             )}
             <div className="sf-dialog-acts">

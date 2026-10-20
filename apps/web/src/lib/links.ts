@@ -17,3 +17,6 @@ export const PASS_HREF = edutouch("/pass");
 export function loginHref(jungsiPath: string): string {
   return edutouch(`/login?next=${encodeURIComponent(`/jeongsi${jungsiPath}`)}`);
 }
+
+/** 고객센터(성적 정정 요청 등). 에듀터치 본체의 기존 문의 접수 화면을 쓴다 — 새 주소를 만들지 않는다 */
+export const SUPPORT_HREF = edutouch("/contact");

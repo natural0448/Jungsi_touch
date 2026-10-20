@@ -5,7 +5,7 @@ import Link from "@/components/link";
 import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import type { ReportDto } from "@/lib/dto";
+import type { OwnReportListDto, ReportDto, SampleReportDto, ScoreInputStatusDto } from "@/lib/dto";
 import { EXAM, examTypeLabel } from "@/lib/exam";
 import { seoulDate } from "@/lib/format";
 import { PASS_HREF, loginHref } from "@/lib/links";
@@ -14,7 +14,9 @@ import { ensureAnalyses, pickedItems, type PickedItem } from "@/lib/report-ops";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
+import { OwnReports } from "./own-reports";
 import { RefreshOverall } from "./refresh-overall";
+import { InputStatus, NoInput, SampleReport, canInput } from "./rights";
 import { ScoreForm, type ScoreDefaults } from "./score-form";
 import "./report.css";
 
@@ -25,7 +27,9 @@ export const metadata: Metadata = { title: route.label };
 
 /**
  * 2페이지 · 내 성적 리포트 (REQ-02, REQ-11)
- * 일반·유료: 성적 입력(score-profile.create) → 전체 분석(overall.analyze) → 리포트(report.read)
+ * 유료: 입력권 확인(score-input.status.read) → 성적 입력(score-profile.create, 단계마다 1회) → 전체 분석 → 리포트
+ * 일반: 가상 학생 예시 리포트(report.sample.read)와 이용권 안내. 이미 저장된 본인 리포트는 서버 응답대로 본다
+ * 공통: 본인 리포트 목록(report.list-own)에서 다른 기기에서 저장한 리포트를 골라 연다
  * 유료만: 핵심 지원 학교 분석과 상담 리포트 인쇄(report.export)
  * 응답 모양: lib/dto.ts (API_DTO_계약 report·profile·overall-analysis)
  */
@@ -45,6 +49,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
 
   const sp = await searchParams;
   const editing = sp.edit === "1";
+  const picking = sp.pick === "1";
+  const paid = session?.member_tier === "paid";
   const reportId = await getReportId();
   let report: ReportDto | null = null;
   try {
@@ -54,26 +60,49 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
     throw e;
   }
+  // 입력권 상태(유료만). 확인하지 못하면 저장을 열지 않는다(횟수를 추정하지 않는다)
+  let status: ScoreInputStatusDto | null = null;
+  if (paid) status = await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null);
+  const inputOpen = canInput(status);
+  // 본인 리포트 목록: 이 브라우저에 리포트가 없을 때, 또는 '다른 리포트 열기'를 눌렀을 때만 부른다
+  let own: OwnReportListDto | null = null;
+  if (!report || picking) own = await src.listOwnReports(caller, { exam_id: EXAM.exam_id, limit: 10 }).catch(() => null);
+  const ownBlock = own && own.items.length > 0 && <OwnReports items={own.items} currentId={report?.report_id ?? null} hasMore={own.has_more} />;
   const idem = crypto.randomUUID();
 
   if (!report || editing) {
+    let sample: SampleReportDto | null = null;
+    if (!paid) sample = await src.readReportSample(caller).catch(() => null);
     return (
       <>
         {head}
         <div className="wrap pg-body rp">
-          {report && (
-            <p className="rp-note">
-              새 성적을 저장하면 리포트가 새로 계산됩니다. 담아 둔 학교는 남아 있고, 새 성적으로 다시 확인할 때까지 &lsquo;다시 확인 필요&rsquo;로 표시됩니다.
-            </p>
+          {!paid ? (
+            <SampleReport s={sample} />
+          ) : (
+            <>
+              {status && <InputStatus st={status} />}
+              {inputOpen ? (
+                <>
+                  {report && (
+                    <p className="rp-note">
+                      새 성적을 저장하면 리포트가 새로 계산됩니다. 담아 둔 학교는 남아 있고, 새 성적으로 다시 확인할 때까지 &lsquo;다시 확인 필요&rsquo;로 표시됩니다.
+                    </p>
+                  )}
+                  <ScoreForm examLabel={EXAM.label} idem={idem} defaults={report ? defaultsFrom(report) : {}} update={report ? { reportId: report.report_id, version: report.report_version } : undefined} />
+                </>
+              ) : (
+                <NoInput st={status} />
+              )}
+            </>
           )}
-          <ScoreForm examLabel={EXAM.label} idem={idem} defaults={report ? defaultsFrom(report) : {}} update={report ? { reportId: report.report_id, version: report.report_version } : undefined} />
+          {ownBlock}
           {report && <Link className="btn" href={route.path}>고치지 않고 돌아가기</Link>}
         </div>
       </>
     );
   }
 
-  const paid = session?.member_tier === "paid";
   let shortlist: PickedItem[] = [];
   if (paid) {
     try {
@@ -98,10 +127,12 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         <div className="rp-meta">
           <span>{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)}</span>
           <span>리포트 {report.report_version}번째 · {seoulDate(report.updated_at)} 저장</span>
-          {/* 저장한 성적은 고치지 않는다 — 새 성적을 넣어 리포트의 새 판을 만든다 */}
-          <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>
+          {/* 저장한 성적은 고치지 않는다 — 입력권이 남은 유료 회원만 새 성적으로 리포트의 새 판을 만든다 */}
+          {inputOpen && <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>}
+          <Link className="btn" href={`${route.path}?pick=1`}>다른 리포트 열기</Link>
         </div>
 
+        {picking && ownBlock}
         <OverallCard a={a} />
         {/* 저장 스냅샷이 자료 연결 전 상태로 남은 리포트만. 사용자가 한 번 누를 때만 계산한다(자동 요청 없음) */}
         {a.overall.status === "pending" && REFRESHABLE.has(a.overall.reason_code ?? "") && <RefreshOverall idem={idem} />}

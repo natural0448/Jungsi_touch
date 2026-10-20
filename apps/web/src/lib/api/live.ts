@@ -10,14 +10,18 @@ import type {
   HistorySearchQuery,
   OfferingDetailDto,
   OfferingDto,
+  OwnReportListDto,
   ProfileDto,
   RecruitmentDto,
   ReportDto,
+  SampleReportDto,
+  ScoreInputStatusDto,
   Session,
   SnapshotDto,
+  SnapshotHeadDto,
   StatisticsDto,
 } from "@/lib/dto";
-import { AccessDenied, ConnectionError, type Caller, type JungsiSource, type Result } from "./source";
+import { AccessDenied, ConnectionError, SnapshotChanged, type Caller, type JungsiSource, type Result } from "./source";
 
 /*
   우리 서비스 API(애플리케이션 계층, FastAPI)를 부르는 쪽. 서버에서만 돈다.
@@ -39,6 +43,7 @@ const STATIC_SEGMENTS = new Set([
   "functions", "v1", "jungsi-api", "api", "me", "admission-history", "offerings", "search", "recruitment", "forecast",
   "forecast-drafts", "forecast-capabilities", "adjustments", "approvals", "publications", "validations",
   "reports", "candidates", "live-statistics", "print", "shortlist", "university-results", "score-profiles", "overall-reports",
+  "snapshot", "snapshots", "head", "score-input-status", "report-sample",
 ]);
 /** 경로 → 템플릿. 쿼리·개별 식별자를 남기지 않는다 */
 export function pathTemplate(path: string): string {
@@ -189,6 +194,21 @@ async function call<T>(caller: Caller, path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+/**
+ * 정리본 분할: 본문을 JSON 으로 풀지 않고 받은 bytes 그대로 돌려준다(호출한 쪽이 pins 의 길이·SHA 를 대조하고
+ * 숫자 원문을 잃지 않게 읽는다). 409 는 판 변경, 그 밖의 실패는 조회 실패로 올린다(빈 결과로 바꾸지 않는다)
+ */
+async function callBytes(caller: Caller, path: string): Promise<Uint8Array> {
+  const res = await sendOnceMore(path, { headers: auth(caller) });
+  await guard(res, path);
+  if (res.status === 409) {
+    await codeOf(res, path);
+    throw new SnapshotChanged();
+  }
+  if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res, path)) ?? ""}: ${pathTemplate(path)}`);
+  return new Uint8Array(await res.arrayBuffer());
+}
+
 /** POST/PUT 은 Idempotency-Key 가 필수. 같은 키의 재시도는 처음 결과를 돌려받는다 */
 async function write<T>(caller: Caller, method: "POST" | "PUT", path: string, body: unknown, key: string): Promise<Result<T>> {
   const res = await sendOnceMore(path, { method, headers: auth(caller, { "Content-Type": "application/json", "Idempotency-Key": key }), body: JSON.stringify(body) });
@@ -232,11 +252,16 @@ export const liveSource: JungsiSource = {
   },
 
   searchHistory: (caller, q: HistorySearchQuery) => call<CatalogSearchDto<HistoryMetricDto>>(caller, `/admission-history${qs({ ...q })}`),
+  readSnapshotHead: (caller) => call<SnapshotHeadDto>(caller, "/admission-history/snapshot/head"),
+  readSnapshotPart: (caller, snapshotId, partId) => callBytes(caller, `/admission-history/snapshots/${enc(snapshotId)}${qs({ part_id: partId })}`),
   readRecruitment: (caller, id) => orNull(call<RecruitmentDto>(caller, `/offerings/${enc(id)}/recruitment`)),
 
   createScoreProfile: (caller, scores, confirmed, key) => write<ProfileDto>(caller, "POST", "/score-profiles", { scores, confirmed }, key),
   analyzeOverall: (caller, body, key) => write<ReportDto>(caller, "POST", "/overall-reports", body, key),
   readReport: (caller, reportId) => orNull(call<ReportDto>(caller, `/reports/${enc(reportId)}`)),
+  listOwnReports: (caller, q) => call<OwnReportListDto>(caller, `/me/reports${qs({ ...q })}`),
+  readScoreInputStatus: (caller, examId, stage) => call<ScoreInputStatusDto>(caller, `/me/score-input-status${qs({ exam_id: examId, stage })}`),
+  readReportSample: (caller) => call<SampleReportDto>(caller, "/report-sample"),
   exportReport: (caller, reportId) => orNull(call<SnapshotDto>(caller, `/reports/${enc(reportId)}/print`)),
 
   searchOfferings: (caller, q) => call<CatalogSearchDto<OfferingDto>>(caller, `/offerings/search${qs({ ...q })}`),

@@ -51,7 +51,9 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
             {official ? (
               <p className="tie">
                 공식 전체 응시자를 분모로 한 추정 위치입니다. 응시하지 않았거나 비어 있는 과목은 모형으로 보완했으며, 실제 학생별 성적을 모아 센 결과가 아닙니다.
-                {o.model_version && <> 모형 {o.model_version}.</>}
+                {/* 중립 표시명을 쓰고 정확한 model_version 은 근거로 남긴다(담당자 연결계약 v3 §6 — 모형 bytes·ID 는 바꾸지 않음) */}
+                {" "}공식 전체 응시자 기준 채택 추정 누백 모형으로 계산했습니다.
+                {o.model_version && <small className="model-ref" title="모형 정확 버전(근거)"> (모형 버전 {o.model_version})</small>}
               </p>
             ) : (
               kind && <p className="tie">{kind.note}</p>
