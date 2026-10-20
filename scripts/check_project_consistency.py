@@ -897,6 +897,100 @@ def supabase_operations_route_metadata(spec):
 SECURITY_DOCUMENT="docs/current/외부접근_데이터보호_개발기준.md"
 LEGACY_API_IDS={"history.search","recruitment.read","score-profile.create","overall.analyze","report.read","offerings.search","offering.read","university.analyze","candidates.build","shortlist.update","report.export","statistics.read","session.read","forecast.capabilities","forecast.list","forecast.create","forecast.read","forecast.adjust","forecast.validate","forecast.approve","forecast.publish","forecast.published.read"}
 SCORE_POLICY_ROUTES={"score-input.status.read":("GET","/api/v1/me/score-input-status",["standard","paid"]),"score-input.correction.grant":("POST","/api/v1/management/score-input-corrections",["paid"]),"report.sample.read":("GET","/api/v1/report-sample",["standard","paid"])}
+
+READ_VIEW_EXTENSION_ROUTES={
+    "history.snapshot.head":("GET","/api/v1/admission-history/snapshot/head","REQ-28"),
+    "history.snapshot.read":("GET","/api/v1/admission-history/snapshots/{snapshot_id}","REQ-28"),
+    "report.list-own":("GET","/api/v1/me/reports","REQ-30"),
+}
+READ_VIEW_RUNTIME_PATHS={
+    "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+}
+
+def validate_read_view_extension(spec):
+    """Only these exact three source-bound reads may extend the preserved 22+3.
+
+    Absence keeps the old 25-operation contract. Registration is source evidence,
+    never a deployed scope/permission or REQ-27 activation assertion.
+    """
+    c=spec.get("read_view_extension_contract")
+    cfg=spec.get("edge_harness",{})
+    files=cfg.get("files",{})
+    if not isinstance(files,dict):files={}
+    foundation_tests=cfg.get("tests",[])
+    separate_tests={p for p in files if p.startswith("tests/edge/test_")and p.endswith(".ts")} - set(foundation_tests)
+    if c is None:return ["Read-view unregistered separate test source"]if separate_tests else []
+    if not isinstance(c,dict):return ["Read-view extension contract invalid"]
+    errors=[]
+    def exact_list(value,expected):
+        return isinstance(value,list) and all(isinstance(x,str)for x in value) and len(value)==len(expected) and set(value)==set(expected)
+    if (c.get("format")!="jungsi.read-view-extension-contract/v1" or
+        c.get("status")!="SOURCE_REGISTERED_NOT_ACTIVATED" or c.get("operation_aliases",[])!=[] or
+        not exact_list(c.get("operation_ids"),READ_VIEW_EXTENSION_ROUTES) or
+        type(c.get("operation_count"))is not int or c.get("operation_count")!=3 or
+        type(c.get("source_operation_count"))is not int or c.get("source_operation_count")!=28 or
+        not exact_list(c.get("legacy_operation_ids"),LEGACY_API_IDS) or
+        not exact_list(c.get("score_policy_operation_ids"),SCORE_POLICY_ROUTES)):
+        errors.append("Read-view exact legacy22 plus policy3 plus read3 scope drift")
+    if (c.get("activation_status")!="NOT_RUN" or
+        c.get("native_acceptance")!="NOT_VERIFIED_BY_SOURCE_SUITE" or
+        c.get("REQ27_activation_unchanged")is not True or
+        c.get("new_API_writer")is not False):
+        errors.append("Read-view source versus activation/writer boundary drift")
+    rows=spec.get("operations",[])
+    by_id={o.get("id"):o for o in rows if isinstance(o,dict)}
+    if len(rows)!=28 or len(by_id)!=28 or set(by_id)!=LEGACY_API_IDS|set(SCORE_POLICY_ROUTES)|set(READ_VIEW_EXTENSION_ROUTES):
+        errors.append("Read-view complete operation registration drift")
+    for oid,(method,path,requirement)in READ_VIEW_EXTENSION_ROUTES.items():
+        row=by_id.get(oid,{})
+        if (row.get("method")!=method or row.get("path")!=path or
+            row.get("member_tiers")!=["standard","paid"] or row.get("aliases",[])!=[] or row.get("report_owner")is not False or
+            row.get("confirmed_score_profile")is not False or
+            not {requirement,"REQ-24","REQ-25","REQ-26"}<=set(row.get("requirements",[]))):
+            errors.append("Read-view route/access boundary drift: "+oid)
+    indexed={path:row.get("declarations",{}).get("source_sha256") for path,row in files.items() if isinstance(row,dict)}
+    bindings=c.get("implementation_bindings")
+    if not isinstance(bindings,dict)or set(bindings)!=set(READ_VIEW_EXTENSION_ROUTES):
+        errors.append("Read-view implementation coverage drift")
+    else:
+        for oid,b in bindings.items():
+            if (not isinstance(b,dict)or set(b)!={"path","source_sha256","symbol"}or
+                not isinstance(b.get("path"),str)or not b.get("path","").startswith("supabase/functions/_shared/jungsi/application/")or
+                not re.fullmatch(r"[a-f0-9]{64}",str(b.get("source_sha256","")))or
+                b.get("source_sha256")!=indexed.get(b.get("path"))or
+                files.get(b.get("path"),{}).get("layer")!="application"or
+                not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*",str(b.get("symbol","")))):
+                errors.append("Read-view implementation source binding drift: "+oid)
+    tests=c.get("verification",{})
+    paths=tests.get("test_paths")if isinstance(tests,dict)else None
+    paths_valid=(isinstance(paths,list)and bool(paths)and all(isinstance(x,str)and x.startswith("tests/edge/test_")and x.endswith(".ts")for x in paths)and len(paths)==len(set(paths)))
+    if (not isinstance(tests,dict)or tests.get("coverage")!="READ_VIEW_EXTENSION_SYNTHETIC"or
+        type(tests.get("baseline_foundation_count"))is not int or tests.get("baseline_foundation_count")!=656 or type(tests.get("test_count"))is not int or
+        tests.get("test_count",0)<1 or not paths_valid or
+        (paths_valid and (set(paths)!=separate_tests or set(paths)&set(foundation_tests)or
+                         any(files.get(path,{}).get("layer")!="verification"for path in paths)))):
+        errors.append("Read-view separate exact suite registration drift")
+    expected_runtime=READ_VIEW_RUNTIME_PATHS|set(paths or [])if paths_valid else READ_VIEW_RUNTIME_PATHS
+    runtime=c.get("runtime_test_bindings")
+    if (not isinstance(runtime,dict)or set(runtime)!=expected_runtime or
+        any(not re.fullmatch(r"[a-f0-9]{64}",str(value))or value!=indexed.get(path)for path,value in (runtime.items()if isinstance(runtime,dict)else []))):
+        errors.append("Read-view runtime/test source binding drift")
+    proofs=tests.get("source_bindings")if isinstance(tests,dict)else None
+    required=expected_runtime|{b.get("path")for b in (bindings.values()if isinstance(bindings,dict)else [])if isinstance(b,dict)and isinstance(b.get("path"),str)}
+    if (not isinstance(proofs,list)or len(proofs)!=len(required)or
+        any(not isinstance(b,dict)or set(b)!={"path","sha256"}or not isinstance(b.get("path"),str)or
+            not re.fullmatch(r"[a-f0-9]{64}",str(b.get("sha256","")))or b.get("sha256")!=indexed.get(b.get("path"))for b in (proofs if isinstance(proofs,list)else []))or
+        {b.get("path")for b in (proofs if isinstance(proofs,list)else [])if isinstance(b,dict)}!=required):
+        errors.append("Read-view suite/source receipt binding drift")
+    return errors
+
+def registered_read_view_ids(spec):
+    c=spec.get("read_view_extension_contract")
+    return set(READ_VIEW_EXTENSION_ROUTES)if c is not None and not validate_read_view_extension(spec)else set()
+
+
 REQ27_BASELINE_SOURCE_MANIFEST_SHA256='3eb6dd06220eed171ade8b9bdc24c8059e9aeb62ab00befedb1076c34ef54b47'
 def policy_baseline_source_matches(spec,path,digest,indexed):
     if digest==indexed.get(path):return True
@@ -911,9 +1005,10 @@ def validate_score_input_policy(spec):
     if c is None:return ["REQ-27 policy contract missing"] if required else []
     if not isinstance(c,dict):return ["REQ-27 policy contract invalid"]
     rows=spec.get("operations",[]);by_id={o.get("id"):o for o in rows}
+    errors.extend(validate_read_view_extension(spec));read_view_ids=registered_read_view_ids(spec)
     if (set(c.get("legacy_operation_ids",[]))!=LEGACY_API_IDS or len(c.get("legacy_operation_ids",[]))!=22 or
         set(c.get("extension_operation_ids",[]))!=set(SCORE_POLICY_ROUTES) or len(c.get("extension_operation_ids",[]))!=3 or
-        set(by_id)!=LEGACY_API_IDS|set(SCORE_POLICY_ROUTES) or len(rows)!=25 or c.get("operation_count")!=25):errors.append("REQ-27 exact legacy22 plus extension3 scope drift")
+        set(by_id)!=LEGACY_API_IDS|set(SCORE_POLICY_ROUTES)|read_view_ids or len(rows)!=25+len(read_view_ids) or c.get("operation_count")!=25):errors.append("REQ-27 exact legacy22 plus extension3 scope drift")
     if c.get("format")!="jungsi.score-input-policy-contract/v1" or c.get("requirement")!="REQ-27" or c.get("public_session_fields")!=["format","member_tier","entitlement_expires_at"]:errors.append("REQ-27 version/session boundary drift")
     for key in ("activation_status","actual_new_policy_requests"):
         if c.get(key)!="NOT_RUN":errors.append("REQ-27 unverified operational promotion: "+key)
@@ -963,7 +1058,7 @@ def validate_service_performance(spec):
         set(cache.get("excluded",[]))!={"head","registry_selection_decisions","usage_policy","user_responses","authorization","reservations","pending_promises"}):errors.append("Service performance cache trust/budget boundary drift")
     if (proof.get("baseline_edge_tests")!=624 or proof.get("added_edge_tests")!=20 or proof.get("current_edge_tests")!=(656 if spec.get("catalog_payload_scope_contract") else 644) or spec.get("edge_harness",{}).get("unit_count")!=(656 if spec.get("catalog_payload_scope_contract") else 644) or
         set(proof.get("test_paths",[]))!={"tests/edge/test_supabase_artifacts.ts","tests/edge/test_runtime_controls.ts","tests/edge/test_runtime_context.ts"} or proof.get("live_auth_DB_Storage")!="NOT_RUN" or proof.get("deployment")!="NOT_RUN"):errors.append("Service performance additive test/evidence drift")
-    if (batch.get("status")!="PROPOSED_NOT_IMPLEMENTED" or batch.get("registered_operation_count")!=25 or len(spec.get("operations",[]))!=25 or c.get("retry",{}).get("server_wait")!="NOT_IMPLEMENTED_NO_SOCKET_OR_TRANSACTION_QUEUE" or
+    if (batch.get("status")!="PROPOSED_NOT_IMPLEMENTED" or batch.get("registered_operation_count")!=25 or len(spec.get("operations",[]))!=25+len(registered_read_view_ids(spec)) or c.get("retry",{}).get("server_wait")!="NOT_IMPLEMENTED_NO_SOCKET_OR_TRANSACTION_QUEUE" or
         activation.get("006_sql_changed")is not False or activation.get("deploy")!="NOT_RUN" or activation.get("candidate_includes_REQ27")is not True):errors.append("Service performance proposed API/activation boundary drift")
     return errors
 
@@ -2970,7 +3065,7 @@ def generated_files(spec,read=None):
        "## 확정 요구사항\n\n"+requirement_text+"\n\n## 이번 버전의 변경\n\n"+changes+"\n\n## 준비 상태와 후속 구현\n\n"+pending+
        runtime_progress+"\n\n현재 구현 기준은 [라우팅 명세](라우팅_명세.md), [3티어 개발구조](3티어_개발구조.md), [개발 브랜치 운영](개발_브랜치_운영.md)과 함께 읽는다."+collaboration["ownership"]+collaboration["drive"])
     if spec.get("score_input_policy_contract"):
-        runtime_intro="현재 논리 API 계약은 기존22+확장3=25개다. Edge는 REQ-27 구현 후보이며 운영 활성화 전이다. Python은 기존22 업무의 명시 legacy_synthetic 회귀 경로를 보존하고 현재 운영 모드의 새 입력/분석·신규3은 미구현 503 hold다. 기존 실제 설치·배포·P2 증거는 아래 별도 이력으로 구분한다."
+        runtime_intro="현재 논리 API 계약은 기존22+입력권 확장3"+("+조회 확장3=28개"if registered_read_view_ids(spec)else"=25개")+"다. Edge는 REQ-27 구현 후보이며 해당 정책의 운영 활성화 전이다. Python은 기존22 업무의 명시 legacy_synthetic 회귀 경로를 보존하고 현재 운영 모드의 새 입력/분석·입력권 신규3은 미구현 503 hold다. 별도 조회 확장은 등록/런타임별 상태를 따르며 기존 실제 설치·배포·P2 증거는 아래 이력으로 구분한다."
     operation_rows=[[o["id"],o["method"],o["path"],rights(o["member_tiers"]),"본인" if o["report_owner"] else "해당 없음","필요" if o["confirmed_score_profile"] else "불필요",o["response_scope"]] for o in spec["operations"]]
 
     current_review_section=""
@@ -3563,6 +3658,17 @@ def generated_files(spec,read=None):
                  locator['id']+" / "+locator['status']+". 제안 "+locator['proposed_operation']+' / '+locator['proposed_path']+". "+locator['scope']+"\n\n"+
                  locator['summary']+" "+locator['selection']+"\n\n"+
                  "작성 팀과 실행 계층은 다르다. 화면팀의 승인 포트/엔진 결과 조회·조합·입력/DTO/오류 흐름은 기존 서버 application 서비스 공동 개발 정책을 따르며 DB·SQL·자료 어댑터·정본 writer·산출 본체는 기존 담당 범위다. 신규 Secret·DB 역할·배포 권한은 이 문서로 부여하지 않는다.\n")
+        prepared=snapshot.get('strict_extension_registration')
+        if prepared:
+            section+=("\n### 조회 전용 확장의 엄격 등록 검사\n\n"+prepared['status']+". "+prepared['source_boundary']+"\n\n"+
+                      prepared['preserved']+" "+prepared['tests']+" "+prepared['gates']+"\n\n"+
+                      table(['operation','method','경로'],[[r['id'],r['method'],r['path']]for r in prepared['exact_operations']])+"\n\n"+
+                      "현재 준비 상태: "+prepared['implementation']+" / "+prepared['activation']+".\n")
+        registered=spec.get('read_view_extension_contract')
+        if registered:
+            section+=("\n별도 조회 소스 등록: "+registered['status']+" / "+', '.join(registered['operation_ids'])+
+                      ". 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 별도 시험 "+str(registered['verification']['test_count'])+
+                      "개이며 실제 인수 "+registered['native_acceptance']+", 새 binding 활성화 "+registered['activation_status']+"다.\n")
         if peer:
             section+=("\n### 최신 Owner·화면팀 운영 영수증의 한정 수용\n\n"+peer['status']+". 비공개 영수증 SHA256 "+peer['receipt_sha256']+" / 소스 "+peer['candidate_commit']+" / 파생 배포 번들 "+peer['bundle_sha256']+".\n\n"+
                       peer['Storage_authenticated_GET']+". "+peer['Secrets']+". "+peer['P1']+". "+peer['P2']+".\n\n"+
