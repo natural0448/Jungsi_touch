@@ -9,6 +9,7 @@ import type { CatalogSearchDto, HistoryMetricDto } from "@/lib/dto";
 import { asOfDate } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { lockFor, page } from "@/lib/routes";
+import { cacheKey, sharedCached } from "@/lib/shared-cache";
 import { GROUPS, PATH, REGIONS, hrefWith, parseQuery, type Query } from "./query";
 import { RawMetricTable } from "./raw-metrics";
 import "./results.css";
@@ -30,6 +31,9 @@ const PAST_YEARS = [2026, 2025, 2024] as const;
 const LIMIT_PAST = 100;
 /** 한 화면 조회 예산(쪽 수, 학년도 합산). 예산 안에서 next_cursor 를 이어 받고, 넘치면 잘린 모집행을 버리고 미완료를 알린다 */
 const MAX_PAGES = 6;
+/** 회원 공유 저장 시간(초)과 저장 형식 판. 자료 판이 바뀌어도 늦어도 이 시간 뒤에는 새 자료로 바뀐다 */
+const SHARED_TTL = 600;
+const SHARED_VER = 1;
 
 
 /**
@@ -78,7 +82,13 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   }
   let all: { items: HistoryMetricDto[]; ready: boolean; as_of: string | null; truncated: boolean };
   try {
-    all = await searchAll();
+    // 같은 조건·같은 회원 등급의 조회 결과를 회원끼리 SHARED_TTL 동안 함께 쓴다(공개 발표 자료만, 커서는 저장하지 않음).
+    // 첫 1명만 6쪽 조회를 기다리고 나머지는 저장본을 받는다. 자료가 발행되지 않은(ready 아님) 응답·오류는 저장하지 않는다
+    const key = await cacheKey(["p1-history", SHARED_VER, src.kind, session?.member_tier ?? null, base]);
+    all = await sharedCached(`p1:${key}`, SHARED_TTL, async () => {
+      const r = await searchAll();
+      return { value: r, keep: r.ready };
+    });
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
