@@ -3516,7 +3516,7 @@ def generated_files(spec,read=None):
             "적용 경로: "+", ".join(national["pages"])+". 기존 작업: "+", ".join(national["operations"])+". "+national["access"]+"\n\n"+
             national["scope"]+"\n\n"+national["source_flags"]+"\n\n"+national["public_projection"]+"\n\n"+
             national["missingness"]+" "+national["year_link"]+"\n\n"+
-            "P1은 기존 history.search에서 academic_year를 생략해 2024·2025·2026을 함께 읽는다. 전체 UI 조회는 최대6페이지×100=600지표이며 기존 서버의 요청별 상한과 계정 공유 예산을 보존한다. 이 값은 새 전역 상한이지 이전의 연도별 합산과 같다는 주장이 아니다. 잔여 cursor는 조회 미완료이며 마지막 미완전 모집행을 보류한다. 신규 batch API는 미채택이다.\n\n"+
+            "기존 P1 원문 경로는 history.search에서 academic_year를 생략해 2024·2025·2026을 함께 읽는다. 해당 경로의 UI는 최대6페이지×100=600지표이며 기존 서버 요청별 상한과 계정 공유 예산을 보존한다. 잔여 cursor는 조회 미완료이며 마지막 미완전 모집행을 보류한다. 이 한계를 없애는 판별 화면 정리본은 별도 채택/구현/운영 상태를 따르며 원문 경로에 전수 cursor를 추가해 대신하지 않는다.\n\n"+
             national["query"]+"\n\n"+national["security"]+"\n\n"+
             "기존 학교별 부분 발행/C 묶음 설명은 이전 절차의 보존 이력이다. 이번 전국 검색 공급의 선행 조건으로 다시 적용하지 않는다. "+national["REQ27"]+"\n\n"+
             national["data_team_work"]+"\n\n"+
@@ -3536,6 +3536,42 @@ def generated_files(spec,read=None):
           whole['approval_boundary']+"\n\n"+whole['saved_profile_transition']+"\n\n"+whole['installed032']+"\n\n"+
           "공개 응답은 기존 overall 필드만 사용한다. 원자료·모형 가정·분포·정책·출처 해시는 서버에만 보관한다. 별도 합성14건은 기존 foundation656·Owner36·public-provider58 및 legacy22+extension3 등록과 구분한다. 실제 모형 채택·운영 binding·배포·저장 리포트 화면 인수는 별도 근거가 필요하다.\n")
         for key in ('planning','routing','architecture','workflow','supabase_deployment','development_sync','presentation_handoff','frontend_reply','frontend_followup','api_dto'):
+            target=spec['current_documents'].get(key)
+            if target in files:files[target]+=section
+    snapshot=spec.get('P1_display_snapshot_contract')
+    if snapshot:
+        admin=spec['administrator_verification_quota_contract']
+        locator=spec['owned_report_locator_contract']
+        peer=spec['supabase_deployment_contract']['live_execution'].get('latest_owner_frontend_receipt_20261020')
+        section=("\n\n## 판별 입결 정리본·관리자 반복 검수·본인 리포트 찾기\n\n"+
+                 snapshot['id']+" / "+snapshot['status']+". 신규 API는 구현/확장 등록과 Owner 활성화 전에는 사용할 수 없다.\n\n"+
+                 table(['항목','계약'],[
+                     ['원천·단위',snapshot['source']+' '+snapshot['grain']],
+                     ['고정 칸',', '.join(snapshot['cells'])],
+                     ['추정 열',snapshot['derived_columns']],
+                     ['manifest',snapshot['manifest']],
+                     ['읽기 API',snapshot['read_API']],
+                     ['갱신·신뢰',snapshot['refresh']],
+                     ['공유 서버 cache',snapshot['cache']],
+                     ['목록·검색',snapshot['pagination']],
+                     ['성능 목표',snapshot['performance']],
+                 ])+"\n\n정규화·선택 규칙:\n\n"+
+                 '\n'.join('- '+r for r in snapshot['normalization'])+"\n\n인수 기준:\n\n"+
+                 '\n'.join('- '+r for r in snapshot['acceptance'])+"\n\n"+
+                 admin['id']+" / "+admin['status']+". "+admin['authorization']+"\n\n"+
+                 admin['exemption']+" 보존: "+'; '.join(admin['preserved'])+". "+admin['read_overlap']+"\n\n"+
+                 locator['id']+" / "+locator['status']+". 제안 "+locator['proposed_operation']+' / '+locator['proposed_path']+". "+locator['scope']+"\n\n"+
+                 locator['summary']+" "+locator['selection']+"\n\n"+
+                 "작성 팀과 실행 계층은 다르다. 화면팀의 승인 포트/엔진 결과 조회·조합·입력/DTO/오류 흐름은 기존 서버 application 서비스 공동 개발 정책을 따르며 DB·SQL·자료 어댑터·정본 writer·산출 본체는 기존 담당 범위다. 신규 Secret·DB 역할·배포 권한은 이 문서로 부여하지 않는다.\n")
+        if peer:
+            section+=("\n### 최신 Owner·화면팀 운영 영수증의 한정 수용\n\n"+peer['status']+". 비공개 영수증 SHA256 "+peer['receipt_sha256']+" / 소스 "+peer['candidate_commit']+" / 파생 배포 번들 "+peer['bundle_sha256']+".\n\n"+
+                      peer['Storage_authenticated_GET']+". "+peer['Secrets']+". "+peer['P1']+". "+peer['P2']+".\n\n"+
+                      "Root 독립 live 재실행: "+peer['Root_independent_live_rerun']+". 형식상 native/deployment PASS는 전체 인수 조건의 증거가 있을 때만 기록하며, 실제 배포/부분 화면 관측 사실은 아래 현재 원장으로 구분한다.\n\n"+
+                      table(['기존 operation','현재 배포 보고','이번 화면 관측','공식 인수 경계'],[
+                          [op,state['current_owner_receipt']['source_deployment'],state['current_owner_receipt']['new_BFF_observation'],state['current_owner_receipt']['formal_native_and_operating_acceptance']]
+                          for op,state in spec['supabase_deployment_contract']['live_execution']['operations'].items()
+                      ])+"\n\n남은 인수: "+'; '.join(peer['residual'])+".\n")
+        for key in ('planning','routing','architecture','workflow','supabase_deployment','development_sync','history_display','presentation_handoff','frontend_reply','frontend_followup','api_dto','security'):
             target=spec['current_documents'].get(key)
             if target in files:files[target]+=section
     return {p:t.encode("utf-8") for p,t in files.items()}
