@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Form from "next/form";
-import Link from "next/link";
+import Link from "@/components/link";
 import { headers } from "next/headers";
 import { readFile } from "node:fs/promises";
 import { ConnectionNotice } from "@/components/connection-notice";
@@ -255,7 +255,7 @@ export default async function Page({ searchParams }: PageProps<"/management/curr
       {head}
       <div className="crv">
         <section className="crv-search">
-          <Form action={PATH}>
+          <Form action={PATH} prefetch={false}>
             <input type="hidden" name="q" value="1" />
             <div className="crv-grid">
               <label>학년도<input name="academic_year" inputMode="numeric" placeholder="2024~2027" defaultValue={filters.get("academic_year") ?? ""} /></label>
@@ -394,7 +394,7 @@ function Results({ page, filters }: { page: ReviewPage; filters: Map<FilterKey, 
         </div>
       )}
       {page.next_cursor && (
-        <Form action={PATH} className="crv-next">
+        <Form action={PATH} prefetch={false} className="crv-next">
           <input type="hidden" name="q" value="1" />
           {[...filters].map(([k, v]) => (
             <input key={k} type="hidden" name={k} value={v} />

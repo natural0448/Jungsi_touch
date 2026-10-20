@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/link";
 import { PASS_HREF, loginHref } from "@/lib/links";
 import { page, type PageRoute } from "@/lib/routes";
 import { LockIcon } from "./icons";

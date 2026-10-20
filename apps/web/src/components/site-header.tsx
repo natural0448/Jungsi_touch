@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/link";
 import type { Session } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { PASS_HREF, edutouch, loginHref } from "@/lib/links";

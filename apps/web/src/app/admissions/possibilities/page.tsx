@@ -1,7 +1,7 @@
 import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import Form from "next/form";
-import Link from "next/link";
+import Link from "@/components/link";
 import { AdvantageCell, CategoryLegend, PickButton, ScoreCell, StatusCell, type Cell } from "@/components/offering-parts";
 import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
@@ -90,7 +90,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
         )}
 
         <section className="filter" aria-label="검색 조건">
-          <Form action={route.path} className="search" role="search">
+          <Form action={route.path} prefetch={false} className="search" role="search">
             <label className="field">
               <span>대학명</span>
               <input type="search" name="university" defaultValue={cur.university_q} placeholder="예: 강원대, 홍익대" maxLength={40} />

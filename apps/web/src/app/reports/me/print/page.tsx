@@ -3,7 +3,7 @@ import { examTypeLabel } from "@/lib/exam";
 import { MemberMark } from "@/components/member-mark";
 import { PASS_HREF } from "@/lib/links";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/link";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import type { SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";

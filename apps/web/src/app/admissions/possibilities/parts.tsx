@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/link";
 import { CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, reasonText, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { ReactNode } from "react";

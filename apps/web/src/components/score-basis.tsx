@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/link";
 import { pctText } from "@/lib/format";
 import { overallWaitLabel } from "@/lib/analysis-labels";
 import { examTypeLabel } from "@/lib/exam";

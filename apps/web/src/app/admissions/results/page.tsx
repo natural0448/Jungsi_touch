@@ -1,7 +1,7 @@
 import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import Form from "next/form";
-import Link from "next/link";
+import Link from "@/components/link";
 import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
@@ -151,7 +151,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
       {head}
       <div className="wrap pg-body rs">
         <section className="rs-filter" aria-label="검색 조건">
-          <Form action={PATH} className="rs-search" role="search">
+          <Form action={PATH} prefetch={false} className="rs-search" role="search">
             <label className="rs-field">
               <span>대학명</span>
               <input type="search" name="university" defaultValue={cur.university} placeholder="예: 강원대, 홍익대" maxLength={40} />

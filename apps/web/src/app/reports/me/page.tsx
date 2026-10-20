@@ -1,7 +1,7 @@
 import { ConnectionNotice } from "@/components/connection-notice";
 import { MemberMark } from "@/components/member-mark";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/link";
 import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";

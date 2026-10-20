@@ -1,6 +1,6 @@
 import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/link";
 import { ArrowRightIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { MemberMark } from "@/components/member-mark";
