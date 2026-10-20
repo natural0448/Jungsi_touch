@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.92",
+  "version": "1.9.93",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -6088,7 +6088,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.92",
+        "contract_version": "1.9.93",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -6262,7 +6262,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.92",
+        "contract_version": "1.9.93",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -6428,7 +6428,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.92",
+        "contract_version": "1.9.93",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6447,7 +6447,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.92",
+        "contract_version": "1.9.93",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6472,7 +6472,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.92",
+        "contract_version": "1.9.93",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -6497,7 +6497,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.92",
+        "contract_version": "1.9.93",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -7183,7 +7183,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "a82a5ee09ccf06d27eb2b9be346ddcb80b40f7dd5457c8ec5cdf0cd282be335e",
+            "source_sha256": "413405b818bc7bdb097a8ee68478e3f88c2f0d3690f2bd87a7e361de287743b3",
             "symbols": [
               {
                 "kind": "class",
@@ -7333,6 +7333,18 @@
                 "kind": "function",
                 "name": "git",
                 "signature": "def git(*args, input=None):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "legacy_policy_fixture_inputs",
+                "signature": "def legacy_policy_fixture_inputs(spec, schemas):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "legacy_policy_fixture_inputs.references",
+                "signature": "def references(node):",
                 "decorators": []
               },
               {
@@ -17965,6 +17977,19 @@
         "REQ-30"
       ],
       "summary": "기존22+입력권 확장3을 유지하며 조회 전용3의 엄격한 선택 등록·별도 실행 검사를 준비한다. 새 논리 API/운영 scope는 이 변경에서 등록하지 않는다. 미연결 관측의 원래 null PK·관측 주소와 판별 cache 계량을 명시하고, 관리자 일일 예외의 직접 사용자 코드 승인 및 보존/실행 경계를 기록한다. 본인 목록의 SQL/application 동일 C 정렬·JOIN/keyset을 요구하며 normal 훅·정확 SHA CI와 후속 서비스 PR/실제 등록 인수를 구분한다."
+    },
+    {
+      "version": "1.9.93",
+      "date": "2026-10-20",
+      "requirements": [
+        "REQ-02",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28",
+        "REQ-30"
+      ],
+      "summary": "새28 실제 catalog/schema와 기존25 fixture를 분리하고 전체 스키마 참조를 먼저 검증해 기존656 검증의 범위를 유지한다. 실제 P1 후보의 source/native·인코딩 검수를 재사용해 eligible 동일 basis 표시 우선순위를 채택하되 identity 동등성·숫자 산출·공식 메타 승격은 승인하지 않는다. 미확정 명칭/전형/군의 원문·검색 변형과 경고, 미연결 관측, 원문 LF 보존, 정확 보류 문구·추정 모형 표시를 기획/라우팅과 함께 기록한다. 실물 API 변환·Owner 등록·BFF/브라우저 인수는 별도이며 기존 원본/기록·분포·모형·DB head를 변경하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -119691,7 +119716,70 @@
       "tests": "new read/admin/locator cases run as a separate exact retained-snapshot suite; foundation656/Owner36/public58/whole14 and oracle993 remain separately counted",
       "gates": "exact method/path/tiers/requirements, application source SHA, runtime/test SHA, no alias/writer/operational promotion, no unregistered or double-counted separate test source",
       "implementation": "NOT_RUN_NEW_SERVICE_SOURCE_ON_THIS_PLANNING_COMMIT",
-      "activation": "NOT_RUN_NEW_OPERATING_BINDING"
+      "activation": "NOT_RUN_NEW_OPERATING_BINDING",
+      "legacy_fixture_partition": "Existing TypeScript policy/schema fixtures retain exact legacy22+REQ27policy3=25, while the actual catalog/schema registry stays28 after strict read3 registration. Validate complete28 schema operation IDs and all references before producing legacy closure; preserve error/readiness and legacy auxiliary public_error_code. New read3 is exercised in the separate suite using the real complete registry. No arbitrary operation/schema filter or skipped execution is permitted."
+    },
+    "display_selection_policy": {
+      "status": "ADOPTED_DISPLAY_ONLY_NOT_NUMERICAL_OR_IDENTITY_EQUIVALENCE_APPROVAL",
+      "private_decision_sha256": "b60474f6850d157724491306bbb06c6362297439e33d89d943a1af86d7c99995",
+      "basis_preference": {
+        "decision": "Adopt the candidate's explicit 20-kind order as a display preference only after eligibility and exact signature grouping. It does not establish numerical scale equivalence or authorize a new score formula.",
+        "eligible_only": "Use an explicitly identified aggregate score basis, same fullmark/component/scope/mean-basis signature and qualified final-registrant cohort. A kind name alone does not prove an aggregate. Subject-specific/same-rank-subject values cannot fill the primary two cuts.",
+        "order": [
+          "university_converted_score",
+          "university_csat_component_score",
+          "university_total_score",
+          "university_selection_total_score",
+          "university_reflected_percentile",
+          "university_weighted_percentile",
+          "university_published_csat_percentile",
+          "university_published_csat_percentile_score",
+          "mean_subject_percentile",
+          "selected_subject_percentile_mean",
+          "csat_average_percentile",
+          "mean_subject_grade",
+          "csat_mean_grade",
+          "university_csat_reflected_grade",
+          "university_reflected_grade",
+          "university_published_csat_grade",
+          "csat_grade",
+          "published_grade",
+          "student_record_grade",
+          "school_record_grade"
+        ],
+        "pair": "Choose one exact eligible basis for both50/70. Missing50 stays missing even if another basis has50.75 stays an explicitly labelled alternate.",
+        "source_preference": "Direct university before official Adiga only for proven comparable definition/cohort/publication event. Source tier alone never resolves a conflicting value.",
+        "same_priority_conflict": "Hold the affected selected cell with a precise reason and retained alternatives/provenance; no first-row or maximum-score winner."
+      },
+      "identity_representation": {
+        "normal": "Keep one original year:string-PK row and existing source-verified aliases only. NULL plus one nonempty label is not a new admission or a conflict.",
+        "unresolved_nonempty_variants": "Do not declare different names/tracks/groups equivalent merely because the current PK matches. Prefer an exact-year/PK authoritative guide display label if verified. Otherwise use a clearly marked display label and retain distinct original identity variants for search/review. Mark identity review pending; do not silently choose one source label and imply that all selected cells are scope-verified.",
+        "value_context": "Retain each selected cell's original source context by public-safe identity/provenance references and an explicit identity-scope review reason where necessary. Known source-track/PK conflicts remain alternative-only with a warning. No estimate or analysis may use a cell whose required identity compatibility is held.",
+        "schema": "The application adapter may add a closed, bounded public identity-review/variant structure to support this representation. No private paths, unreviewed source payloads, keys or credentials are exposed. The final DTO must be documented and independently validated.",
+        "canonical_correction": "NOT_GRANTED_BY_THIS_DISPLAY_DECISION"
+      },
+      "metadata_and_numeric_review": "Missing publication date remains null and is not a numeric-value review failure. Selected known values remain visible as pending_metadata with precise reasons. Do not promote verified_official, invent a date/unit or recompute native values to clear a display hold.",
+      "other_statistics": "Original statistics outside fixed slots are optional under the requested display contract. Any omission is an explicit projection scope, never a statement that the source is missing/unpublished. A supported alternate retains its true percentage and basis; no75-to70 or subject-to-total promotion.",
+      "preservation": "Reuse sealed evidence, source locators and compact candidate. No additional full current-graph/DB reread, no source/native value/ID mutation, no model/CDF/forecast change, no shared pointer or DB writer, no deletion.",
+      "actual_adapter_application_independent_acceptance": "NOT_RUN_ON_THIS_PLANNING_COMMIT"
+    },
+    "text_transport": "Preserve original normal line-feed U+000A only in explicitly identified human department/track/statistic fields under the closed public DTO. Keep ID/URL/header/code control-character rules and secret/private URL protection strict. Do not strip source originals, invent PKs or suppress otherwise known values to satisfy a string check.",
+    "P2_display_model_alias": "For an approved estimated_weights/official_all_examinees result use a neutral human label such as 공식 전체 응시자 기준 채택 추정 누백 모형. Keep exact model_version and immutable model bytes; do not hardcode a real model ID/hash or numerical model into frontend source.",
+    "display_reason_messages": {
+      "SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING": "발표 지표의 기준·단위·출처 정보를 확인하고 있습니다.",
+      "NO_QUALIFIED_CANDIDATE_IN_CURRENT_SOURCE_SCOPE": "현재 연결된 자료에서 이 표시 기준에 맞는 값을 확인하지 못했습니다.",
+      "FINAL_WAITLIST_SOURCE_QUALIFICATION_UNCONFIRMED": "최종 합격 예비번호인지 확인하고 있습니다.",
+      "NO_CUT_ALTERNATIVE_IN_SELECTED_SCOPE": "선택한 표시 범위에서 별도의 대체 컷을 확인하지 못했습니다.",
+      "MULTIPLE_SAME_PRIORITY_BASIS_DEFINITIONS_UNRESOLVED": "서로 다른 점수 기준이 있어 대표값을 확인하고 있습니다.",
+      "OTHER_BASIS_OR_EXPLICIT75_RETAINED_NOT70_BACKFILL": "다른 점수 기준 또는 별도 비율의 발표값이며 70%컷을 대신하지 않습니다.",
+      "NO_FINAL_REGISTRANT_SAME_BASIS_CUT50": "선택한 점수 기준의 최종등록자 50%컷을 확인하지 못했습니다.",
+      "NO_FINAL_REGISTRANT_SAME_BASIS_CUT70": "선택한 점수 기준의 최종등록자 70%컷을 확인하지 못했습니다.",
+      "MULTIPLE_CURRENT_CANDIDATES_DEFINITION_EVENT_OR_VALUE_CONFLICT": "발표 근거나 값이 여러 가지여서 확인하고 있습니다.",
+      "NONNUMERIC_LITERAL_REQUIRES_SOURCE_REVIEW": "원문 표기를 확인하고 있습니다.",
+      "UNCLASSIFIED_BASIS_NEEDS_SOURCE_DEFINITION_NO_TOTAL_CUT_PROMOTION": "점수 기준이 확인되지 않아 대표 컷으로 표시하지 않습니다.",
+      "IDENTITY_SCOPE_REVIEW_PENDING": "모집단위 명칭·전형·모집군의 연결을 확인하고 있습니다.",
+      "SOURCE_TRACK_PK_CONFLICT": "원문 전형과 연결된 모집행이 달라 확인하고 있습니다.",
+      "OFFERING_MAPPING_PENDING": "이 자료의 모집행 연결을 확인하고 있습니다."
     }
   },
   "administrator_verification_quota_contract": {
