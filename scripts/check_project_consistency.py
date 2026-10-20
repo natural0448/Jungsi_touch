@@ -3490,6 +3490,19 @@ def generated_files(spec,read=None):
         for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync"):
             target=spec["current_documents"].get(key)
             if target in files:files[target]+=section
+    followup=performance.get("shared_db_capacity_followup",{}) if performance else {}
+    retention=followup.get("retention_contract")
+    frontend=performance.get("frontend_P1_P2_intake") if performance else None
+    if retention:
+        section=("\n\n## 누백 릴리스 보관·정리 실행 경계\n\n"+retention["id"]+" / "+retention["status"]+". 보관 원칙 승인과 정확 대상의 실제 실행 승인은 별개다.\n\n"+table(["항목","기준"],[["DB 유지", "; ".join(retention["preserve"])],["직전 계보",retention["lineage"]],["참조 확인",retention["reference_graph"]],["보관·복구",retention["archive"]],["실행 승인",retention["approval"]],["실행·정비",retention["execution"]+" "+retention["maintenance"]],["전후 증거",retention["before_after"]],["미래 writer",retention["future_writer"]],["용량·비용",retention["batch_preflight"]+" "+retention["spend_cap"]]])+"\n\n"+table(["단계","산출물","상태"],[[s["id"],s["deliverable"],s["status"]] for s in retention["stages"]])+"\n\n공식 참고: "+" / ".join(retention["official_references"])+". 실제 ID·대상행·용량·계정·SQL·보관위치는 비공개 계획에 고정한다.\n")
+        for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync","frontend_followup"):
+            target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
+    if frontend:
+        section=("\n\n## P1·P2 화면 변경의 한정 수용\n\n"+frontend["source_commit"]+" / "+frontend["status"]+". "+frontend["runtime_report"]+"\n\n"+frontend["P1"]+"\n\n"+frontend["P2"]+"\n\n"+frontend["timing"]+"\n\n"+table(["후속","상태","조건"],[[f["id"],f["status"],f["rule"]] for f in frontend["followups"]])+"\n\nPR 통합/전국 binding/9월 total_model/REQ27·보안 인수는 이 영수증 수용으로 완료되지 않는다.\n")
+        for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync","history_display","presentation_handoff","frontend_reply","frontend_followup","api_dto"):
+            target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
     scoped=spec.get("catalog_payload_scope_contract")
     if scoped:
         section=("\n\n## 카탈로그 전용 본문 선택 로딩 후속 후보\n\n"+scoped["id"]+" / "+scoped["status"]+". 별도 보존한 첫 캐시 후보7d53dda는 정상 훅/source·PR CI Python1125·Edge644·oracle993 PASS다. 현재 후속은 기존644+신규12=656 합성 회귀로 따로 검수한다.\n\n"+", ".join(scoped["operations"])+"만 catalog 본문을 읽는다. registry/selection의 전체선택 참조·승인·scope·형식·크기와 fresh 비공개 버킷의 전체선택 최대길이를 검사한다. policy exam의 선택참조 version/명시year도 일치시킨다. 실제 소비 catalog의 SHA·길이·버전·native decode는 그대로다. 사용하지 않은 exam/conversion 본문은 읽지도 검증했다고 기록하지도 않는다. 잘못된 참조 메타데이터는 이 분리로 통과시키지 않는다.\n\n미로딩 scoring 자료를 요구하면 runtime_dependency_not_loaded503이며 미선택 null/pending과 구분한다. 카탈로그 preflight는 catalog_payload_and_all_selected_reference_metadata만 검증했다고 기록한다. 나머지21 operation은 자료가 필요한 기존 경로에서 전체 선택 그래프 검사를 유지하고 health.ready도 전체 검사를 유지한다. JWT/현재권한/소유권/head·만료·공유 원자 예산·기존 작업 비용·반환량·읽기/시간 상한은 바꾸지 않는다. 캐시 적중은 해당 소비 본문의 cold 논리읽기 차감을 유지한다.\n\nSource 합성/오프라인 I/O 계수와 실제 응답시간 인수는 별도다. 새 API·운영 승인 확대·REQ27전환·032 drop-in·실제 DB/배포/활성화는 NOT_RUN이다.\n")
@@ -3508,8 +3521,22 @@ def generated_files(spec,read=None):
             "기존 학교별 부분 발행/C 묶음 설명은 이전 절차의 보존 이력이다. 이번 전국 검색 공급의 선행 조건으로 다시 적용하지 않는다. "+national["REQ27"]+"\n\n"+
             national["data_team_work"]+"\n\n"+
             "현재 구현 "+national["implementation"]+" · hosted 전환 "+national["hosted_activation"]+" · 전국 브라우저 인수 "+national["nationwide_browser_acceptance"]+". 자료 보완 중인 상태와 연결 구현/배포 완료를 혼동하지 않는다.\n")
+        if national.get('adapter_candidate'):
+            candidate=national['adapter_candidate']
+            section+=("\n### 서비스 어댑터 후보와 최종 결속 경계\n\n"+candidate['status']+". "+candidate['mechanism']+"\n\n"+
+                candidate['approval_boundary']+"\n\n"+candidate['compatibility']+"\n\n"+candidate['dto']+"\n\n"+
+                candidate['pagination_boundary']+"\n\n"+candidate['remaining']+"\n")
         for key in ("planning","routing","architecture","workflow","supabase_deployment","development_sync","history_display","presentation_handoff","frontend_reply","frontend_followup","api_dto"):
             target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
+    whole=spec.get('overall_analysis_contract',{}).get('whole_population_transition')
+    if whole:
+        section=("\n\n## 전체 응시자 추정 모형의 별도 v2 계약\n\n"+whole['id']+" / "+whole['status']+". "+whole['purpose']+"\n\n"+
+          whole['legacy_boundary']+"\n\n"+whole['strict_v2']+"\n\n"+whole['population_semantics']+"\n\n"+
+          whole['approval_boundary']+"\n\n"+whole['saved_profile_transition']+"\n\n"+whole['installed032']+"\n\n"+
+          "공개 응답은 기존 overall 필드만 사용한다. 원자료·모형 가정·분포·정책·출처 해시는 서버에만 보관한다. 별도 합성14건은 기존 foundation656·Owner36·public-provider58 및 legacy22+extension3 등록과 구분한다. 실제 모형 채택·운영 binding·배포·저장 리포트 화면 인수는 별도 근거가 필요하다.\n")
+        for key in ('planning','routing','architecture','workflow','supabase_deployment','development_sync','presentation_handoff','frontend_reply','frontend_followup','api_dto'):
+            target=spec['current_documents'].get(key)
             if target in files:files[target]+=section
     return {p:t.encode("utf-8") for p,t in files.items()}
 

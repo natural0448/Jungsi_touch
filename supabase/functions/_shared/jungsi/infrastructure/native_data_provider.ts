@@ -20,6 +20,7 @@ import type {
 } from "../application/university_percentile.ts";
 import { NativeExamPack } from "../domain/exam_pack.ts";
 import { NativeExamTotalModel } from "../domain/total_model.ts";
+import { NativeAllExamineesTotalModel } from "../domain/all_examinees_total_model.ts";
 import { conversionBindingKey, NativeConversionRelease } from "../domain/conversion_release.ts";
 import { NativeUniversityScoreDistribution } from "../domain/university_distribution.ts";
 import {
@@ -187,7 +188,12 @@ export class NativeDataProvider
     try {
       await this.assertCurrentSelection(true);
       const identities = this.selection.identities();
-      const catalog = await this.getCatalog();
+      const overallOnly = this.selection.payloadMode === "overall_only";
+      const universityOnly = this.selection.payloadMode === "university_only";
+      if (
+        overallOnly && identities.some(({ kind }) => !["exam_pack", "total_model"].includes(kind))
+      ) fail("artifact_not_approved");
+      const catalog = overallOnly ? null : await this.getCatalog();
       if (this.selection.payloadMode === "catalog_only") {
         if (identities.some(({ kind, key }) => kind !== "catalog" || key !== "service")) {
           fail("artifact_not_approved");
@@ -306,7 +312,11 @@ export class NativeDataProvider
             }
             break;
           case "exam_pack":
-            await this.getExamPack(key);
+            if (universityOnly) {
+              // Scoped preflight retains fresh-head checks around all pinned body decoders.
+              const pack = new NativeExamPack(raw);
+              if (pack.examId !== key) fail("artifact_exam_mismatch");
+            } else await this.getExamPack(key);
             break;
           case "total_model": {
             const examId = text(raw.exam_id), packVersion = text(raw.pack_version);
@@ -465,6 +475,7 @@ export class NativeDataProvider
         if (kind === "exam_pack") {
           const pack = this.selection.load(kind, key)!.payload;
           const modelKey = key + ":" + text(pack.pack_version);
+          if (universityOnly && this.selection.reference("total_model", modelKey)) continue;
           if (!this.selection.load("total_model", modelKey)) {
             missing.push({
               kind: "total_model",
@@ -485,12 +496,23 @@ export class NativeDataProvider
       }
       return Object.freeze({
         format: "jungsi.native-provider-preflight/v1",
-        status: "verified_selected_release_graph",
+        status: overallOnly
+          ? "verified_overall_payloads"
+          : universityOnly
+          ? "verified_university_payloads"
+          : "verified_selected_release_graph",
         registry_sha256: this.selection.registryHash,
         selection_sha256: this.selection.selectionHash,
         approval_reference_sha256: this.freshness!.approvalReferenceSha256,
         artifacts: identities.length,
-        verification_scope: "selected_native_envelopes_and_release_bindings",
+        verification_scope: overallOnly
+          ? "exam_model_payloads_and_all_selected_reference_metadata"
+          : universityOnly
+          ? "university_payloads_and_all_selected_reference_metadata"
+          : "selected_native_envelopes_and_release_bindings",
+        ...(overallOnly || universityOnly
+          ? { source_selection: this.selection.privateReceipt() }
+          : {}),
         optional_missing: missing,
         production_ready: false,
         native_acceptance: "NOT_VERIFIED_BY_SOURCE_PREFLIGHT",
@@ -516,7 +538,11 @@ export class NativeDataProvider
         examId + ":" + packVersion,
         "model_unverified",
         (raw, entry) => {
-          const model = new NativeExamTotalModel(raw);
+          const model = raw.format === "jungsi.exam-total-model/v2"
+            ? new NativeAllExamineesTotalModel(raw)
+            : raw.format === "jungsi.exam-total-model/v1"
+            ? new NativeExamTotalModel(raw)
+            : fail("model_unverified");
           if (
             model.examId !== examId || model.packVersion !== packVersion ||
             entry.distribution_id !== model.distributionId

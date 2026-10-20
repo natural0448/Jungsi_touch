@@ -18,7 +18,7 @@ export const NATIVE_RUNTIME_KINDS = [
   "forecast_context",
 ] as const;
 export type NativeRuntimeKind = typeof NATIVE_RUNTIME_KINDS[number];
-export type NativePayloadMode = "all" | "catalog_only";
+export type NativePayloadMode = "all" | "catalog_only" | "overall_only" | "university_only";
 export interface PinnedSourceBytes {
   readonly bytes: Uint8Array;
   readonly sha256: string;
@@ -91,7 +91,8 @@ export class NativeSourceSelection {
     payloadMode: NativePayloadMode = "all",
   ): Promise<NativeSourceSelection> {
     if (
-      !(client instanceof SupabaseArtifactClient) || !["all", "catalog_only"].includes(payloadMode)
+      !(client instanceof SupabaseArtifactClient) ||
+      !["all", "catalog_only", "overall_only", "university_only"].includes(payloadMode)
     ) {
       fail("storage_configuration_invalid");
     }
@@ -133,9 +134,26 @@ export class NativeSourceSelection {
     if (payloadMode === "catalog_only" && [...chosen.values()].some((e) => e.kind !== "catalog")) {
       await client.assertSelectedMetadata([...chosen.values()]);
     }
+    if (
+      payloadMode === "overall_only" &&
+      [...chosen.values()].some((e) => !["exam_pack", "total_model"].includes(e.kind as string))
+    ) {
+      await client.assertSelectedMetadata([...chosen.values()]);
+    }
+    if (
+      payloadMode === "university_only" &&
+      [...chosen.values()].some((e) => e.kind === "total_model")
+    ) {
+      await client.assertSelectedMetadata([...chosen.values()]);
+    }
     const artifacts = new Map<string, SelectedNativeArtifact>();
     for (const [id, entry] of chosen) {
       if (payloadMode === "catalog_only" && entry.kind !== "catalog") continue;
+      if (payloadMode === "university_only" && entry.kind === "total_model") continue;
+      if (
+        payloadMode === "overall_only" &&
+        !["exam_pack", "total_model"].includes(entry.kind as string)
+      ) continue;
       const verified = await client.artifact(entry), payload = verified.payload;
       if (Object.hasOwn(payload, "as_of") && payload.as_of !== null && payload.as_of !== "") {
         if (
@@ -181,7 +199,7 @@ export class NativeSourceSelection {
       selection_sha256: this.selectionHash,
       production_ready: false,
       engine_acceptance: "NOT_VERIFIED_BY_RAW_SOURCE_SELECTION",
-      ...(this.payloadMode === "catalog_only"
+      ...(this.payloadMode !== "all"
         ? {
           payload_mode: this.payloadMode,
           metadata_status: "validated_all_selected_references",

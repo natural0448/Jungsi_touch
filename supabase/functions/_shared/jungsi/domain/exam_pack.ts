@@ -276,6 +276,9 @@ export class NativeExamPack {
       count: target.count === null ? null : integer(target.count),
     };
   }
+  officialParticipantTotal(): bigint {
+    return integer(row(this.data.participants).total, 1n);
+  }
   subjectResult(subject: unknown, standardScore: unknown): ExamRow {
     const rawSubject = row(this.data.subjects)[examSubjectKey(subject)];
     check(rawSubject !== undefined, "invalid_subject");

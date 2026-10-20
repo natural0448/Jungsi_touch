@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.82",
+  "contract_version": "1.9.90",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -423,7 +423,13 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "payload_scope_candidate": {
+            "mode": "overall_only",
+            "source_spec_version": "1.9.90",
+            "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
+            "deployment": "NOT_RUN"
+          }
         },
         "overall.analyze": {
           "code": "PORTED",
@@ -438,7 +444,13 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "payload_scope_candidate": {
+            "mode": "overall_only",
+            "source_spec_version": "1.9.90",
+            "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
+            "deployment": "NOT_RUN"
+          }
         },
         "report.read": {
           "code": "PORTED",
@@ -498,7 +510,13 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "payload_scope_candidate": {
+            "mode": "university_only",
+            "source_spec_version": "1.9.90",
+            "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
+            "deployment": "NOT_RUN"
+          }
         },
         "candidates.build": {
           "code": "PORTED",
@@ -513,7 +531,13 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "payload_scope_candidate": {
+            "mode": "university_only",
+            "source_spec_version": "1.9.90",
+            "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
+            "deployment": "NOT_RUN"
+          }
         },
         "shortlist.update": {
           "code": "PORTED",
@@ -2967,6 +2991,25 @@
         "purpose_or_budget_changed": false,
         "key_or_role_changed": false,
         "preservation_rule": "기존 cb500·ed978·032 설치 원장, 세 P2 실패와 현재 제한된 P2 기능 성공 근거는 그대로 보존한다. 이전 회신의 최종 SHA 미확보는 당시 이력이며 새 현재 상태는 이 객체를 따른다. 현재 API는 032/spec1.9.70이다. 새 화면 소스 검토는 조건부 수락이며 보완은 미배포·미검수다. 22개 native·배포 인수 0, 보안 3개 gate 미완료와 production_ready=false를 유지하며 범위·목적·예산·키·역할을 변경하지 않는다. 현재 공통기획1.9.72는 검증된 develop937/spec1.9.71에서 준비한 미커밋 변경이며 정상 훅·커밋·푸시·정확 SHA CI는 별도다."
+      },
+      "request_payload_scope_candidate": {
+        "format": "jungsi.live-request-payload-scope-candidate/v1",
+        "source_parent": "73746db2380d244e363c6b3c593992d33b5b898e",
+        "spec_version": "1.9.90",
+        "source_status": "SCOPED_SOURCE_AND_RAM_VERIFIED_NORMAL_HOOKS_AND_EXACT_CI_REQUIRED",
+        "operation_modes": {
+          "overall.analyze": "overall_only",
+          "score-profile.create": "overall_only",
+          "university.analyze": "university_only",
+          "candidates.build": "university_only"
+        },
+        "complete_RAM_requests": 36,
+        "sequential_RAM_flows": 2,
+        "actual_deployment": "NOT_RUN",
+        "real_profile_writes": 0,
+        "final_packet_binding": "NOT_RUN_NEW_CONTROLS_REQUIRED",
+        "previous_packet_v2": "PRESERVED_DO_NOT_DEPLOY",
+        "rule": "These are code and denied-network RAM proofs, not deployed activation or real user acceptance. Historical current deployment/source receipts remain separate."
       }
     }
   }

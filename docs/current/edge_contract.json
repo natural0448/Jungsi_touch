@@ -11092,6 +11092,11 @@
       "declarations": {
         "imports": [
           {
+            "importedName": "ALL_EXAMINEES_POPULATION_ID",
+            "originalName": "ALL_EXAMINEES_POPULATION_ID",
+            "src": "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts"
+          },
+          {
             "importedName": "AccessError",
             "jsDoc": {
               "doc": "Server-owned pack/model ports; valid subject results survive total-model holds."
@@ -11113,6 +11118,11 @@
             "importedName": "JsonFloat",
             "originalName": "JsonFloat",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "NativeAllExamineesTotalModel",
+            "originalName": "NativeAllExamineesTotalModel",
+            "src": "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts"
           },
           {
             "importedName": "NativeExamAnalysis",
@@ -11140,7 +11150,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "27c6634a7e0e98024e0f4ef5f0e42767dde3373837d32e290aa3ce54846c335e",
+        "source_sha256": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7",
         "symbols": [
           {
             "declarations": [
@@ -11152,16 +11162,33 @@
                       "name": "model",
                       "readonly": true,
                       "tsType": {
-                        "kind": "typeRef",
-                        "repr": "NativeExamTotalModel",
-                        "value": {
-                          "resolution": {
-                            "kind": "import",
-                            "name": "NativeExamTotalModel",
-                            "specifier": "../domain/total_model.ts"
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "NativeExamTotalModel",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeExamTotalModel",
+                                "specifier": "../domain/total_model.ts"
+                              },
+                              "typeName": "NativeExamTotalModel"
+                            }
                           },
-                          "typeName": "NativeExamTotalModel"
-                        }
+                          {
+                            "kind": "typeRef",
+                            "repr": "NativeAllExamineesTotalModel",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeAllExamineesTotalModel",
+                                "specifier": "../domain/all_examinees_total_model.ts"
+                              },
+                              "typeName": "NativeAllExamineesTotalModel"
+                            }
+                          }
+                        ]
                       }
                     },
                     {
@@ -11670,7 +11697,7 @@
                 "declarationKind": "private",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(reason: string)",
+                  "parameter_source": "(reason: string, population = OVERALL_POPULATION_ID)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -11681,6 +11708,15 @@
                         "repr": "string",
                         "value": "string"
                       }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "population",
+                        "optional": false
+                      },
+                      "right": "OVERALL_POPULATION_ID"
                     }
                   ],
                   "returnType": {
@@ -11704,6 +11740,16 @@
         ]
       },
       "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/all_examinees_total_model.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts"
+            }
+          ]
+        },
         {
           "dynamic": false,
           "specifier": "../domain/exact.ts",
@@ -27235,6 +27281,670 @@
         "PreparedUsageAdmission"
       ]
     },
+    "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "ContractError",
+            "jsDoc": {
+              "doc": "Explicit whole-population estimate. The complete-response v1 contract stays separate."
+            },
+            "originalName": "ContractError",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "ExactFrequencyDistribution",
+            "originalName": "ExactFrequencyDistribution",
+            "src": "supabase/functions/_shared/jungsi/domain/percentile.ts"
+          },
+          {
+            "importedName": "JsonFloat",
+            "originalName": "JsonFloat",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "NativeExamAnalysis",
+            "originalName": "NativeExamAnalysis",
+            "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+          },
+          {
+            "importedName": "NativeExamPack",
+            "originalName": "NativeExamPack",
+            "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+          },
+          {
+            "importedName": "OVERALL_METRIC_ID",
+            "originalName": "OVERALL_METRIC_ID",
+            "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+          },
+          {
+            "importedName": "Rational",
+            "jsDoc": {
+              "doc": "Explicit whole-population estimate. The complete-response v1 contract stays separate."
+            },
+            "originalName": "Rational",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "check",
+            "jsDoc": {
+              "doc": "Explicit whole-population estimate. The complete-response v1 contract stays separate."
+            },
+            "originalName": "requireContract",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "displayExact",
+            "jsDoc": {
+              "doc": "Explicit whole-population estimate. The complete-response v1 contract stays separate."
+            },
+            "originalName": "displayExact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "exact",
+            "jsDoc": {
+              "doc": "Explicit whole-population estimate. The complete-response v1 contract stays separate."
+            },
+            "originalName": "exact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
+            "importedName": "parseNativeJson",
+            "originalName": "parseNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "utcInstant",
+            "originalName": "utcInstant",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          }
+        ],
+        "source_sha256": "9e9210da291261207e6bd49969c22c62e9c7ee06c76edafa71bb9105fd4c821d",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "official_all_examinees",
+                    "value": {
+                      "kind": "string",
+                      "string": "official_all_examinees"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ALL_EXAMINEES_POPULATION_ID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(value: unknown)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "value",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "unknown",
+                            "value": "unknown"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "text",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "NativeAllExamineesTotalModel",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "NativeAllExamineesTotalModel"
+                          }
+                        }
+                      },
+                      "isStatic": true,
+                      "kind": "method",
+                      "name": "fromJson"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "pack",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "NativeExamPack",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeExamPack",
+                                  "specifier": "./exam_pack.ts"
+                                },
+                                "typeName": "NativeExamPack"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "analysis",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "NativeExamAnalysis",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeExamAnalysis",
+                                  "specifier": "./exam_pack.ts"
+                                },
+                                "typeName": "NativeExamAnalysis"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Row",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Row"
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "calculate"
+                    }
+                  ],
+                  "properties": [
+                    {
+                      "name": "examId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "packVersion",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "distributionId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "metadata",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "Row",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Row"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "name": "populationPolicy",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "Row",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Row"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "name": "expectedTotal",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Rational",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "Rational",
+                            "specifier": "./exact.ts"
+                          },
+                          "typeName": "Rational"
+                        }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "curve",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ExactFrequencyDistribution",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ExactFrequencyDistribution",
+                            "specifier": "./percentile.ts"
+                          },
+                          "typeName": "ExactFrequencyDistribution"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "NativeAllExamineesTotalModel"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Record",
+                    "value": {
+                      "typeName": "Record",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Row"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Row",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Row"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "row"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: Row, expected: string[])",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Row",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Row"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "expected",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "array",
+                        "value": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "keys"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "text"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "number",
+                    "value": "number"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "integer"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Rational",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "Rational",
+                        "specifier": "./exact.ts"
+                      },
+                      "typeName": "Rational"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "weight"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Row",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Row"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "POLICY_LITERALS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "string",
+                      "value": "string"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "POLICY_HASHES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[a-f0-9]{64}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "HASH"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "./exact.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exact.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./native_json.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./percentile.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/percentile.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "ALL_EXAMINEES_POPULATION_ID",
+        "NativeAllExamineesTotalModel"
+      ]
+    },
     "supabase/functions/_shared/jungsi/domain/conversion.ts": {
       "declarations": {
         "imports": [
@@ -29362,7 +30072,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "1f168890ca9c22ac4f9939162b6af495ee8b2f1f418a4efb5864d8f7317c1dca",
+        "source_sha256": "d5cc15329ad273d7434cab5be0e1cd9d2cb8ad585cbadb3d2a330a2820e864ab",
         "symbols": [
           {
             "declarations": [
@@ -29674,6 +30384,19 @@
                       },
                       "kind": "method",
                       "name": "populationBounds"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "bigint",
+                          "value": "bigint"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "officialParticipantTotal"
                     },
                     {
                       "functionDef": {
@@ -40610,6 +41333,11 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           },
           {
+            "importedName": "NativeAllExamineesTotalModel",
+            "originalName": "NativeAllExamineesTotalModel",
+            "src": "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts"
+          },
+          {
             "importedName": "NativeBridgePolicy",
             "originalName": "NativeBridgePolicy",
             "src": "supabase/functions/_shared/jungsi/domain/year_equating.ts"
@@ -40740,7 +41468,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "5381ed632b7f13a2e9658c8fe3a771a6bbfa71717bba67ad0c642676f2175c9e",
+        "source_sha256": "1d6c439d0a561dfc6901ecb5ad519c3185e091a4283332d281e1c031c4dd9cd3",
         "symbols": [
           {
             "declarations": [
@@ -42332,6 +43060,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "../domain/all_examinees_total_model.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "../domain/conversion_release.ts",
           "targets": [
             {
@@ -42476,7 +43214,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "227ad4c99b789974d557e158a4f817c33d4e352dfea6b5e42736b3ae1919c31e",
+        "source_sha256": "efe87ef57a444da897d072223d5575c65aae51d1064f36021cc483e63048185c",
         "symbols": [
           {
             "declarations": [
@@ -42626,6 +43364,22 @@
                         "value": {
                           "kind": "string",
                           "string": "catalog_only"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "overall_only",
+                        "value": {
+                          "kind": "string",
+                          "string": "overall_only"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "university_only",
+                        "value": {
+                          "kind": "string",
+                          "string": "university_only"
                         }
                       }
                     ]
@@ -49739,6 +50493,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
           },
           {
+            "importedName": "NativeExamPack",
+            "originalName": "NativeExamPack",
+            "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+          },
+          {
             "importedName": "NativeObject",
             "originalName": "NativeObject",
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
@@ -49829,7 +50588,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
           }
         ],
-        "source_sha256": "5fdc8e7553128ed216a6a33bcb462cb59aedf11096e79ff89a86a7dac6e5c162",
+        "source_sha256": "a4cbfb203a445e07a62c5a89b27b1106bf0fcf7f826f1daefc7e49b03e02b1b8",
         "symbols": [
           {
             "declarations": [
@@ -50538,6 +51297,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/usage_service.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
             }
           ]
         },
@@ -69460,6 +70229,11 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
+            "importedName": "NativePayloadMode",
+            "originalName": "NativePayloadMode",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+          },
+          {
             "importedName": "NativeSourceSelection",
             "originalName": "NativeSourceSelection",
             "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
@@ -69535,7 +70309,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "e2207b416ebf3bcbf1cf48fdb3e121e3e055f1b3e54a93d0ad1f7db4cca80ede",
+        "source_sha256": "01d66cdf1b12697c50ab8762eb09155c5e19ed72f7e84c8c6e00a9c126568ddf",
         "symbols": [
           {
             "declarations": [
@@ -69570,7 +70344,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(\n  change: (sources: Map<string, NativeObject>) => void = () => {},\n)",
+                  "parameter_source": "(\n  change: (sources: Map<string, NativeObject>) => void = () => {},\n  mode: NativePayloadMode = \"all\",\n)",
                   "params": [
                     {
                       "kind": "assign",
@@ -69624,6 +70398,27 @@
                         }
                       },
                       "right": "[UNSUPPORTED]"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "mode",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativePayloadMode",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativePayloadMode",
+                              "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+                            },
+                            "typeName": "NativePayloadMode"
+                          }
+                        }
+                      },
+                      "right": "all"
                     }
                   ]
                 },
@@ -69719,7 +70514,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(change: (sources: Map<string, NativeObject>) => void = () => {})",
+                  "parameter_source": "(\n  change: (sources: Map<string, NativeObject>) => void = () => {},\n  mode: NativePayloadMode = \"all\",\n  revokeAtHeadCall = 0,\n)",
                   "params": [
                     {
                       "kind": "assign",
@@ -69773,6 +70568,41 @@
                         }
                       },
                       "right": "[UNSUPPORTED]"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "mode",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativePayloadMode",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativePayloadMode",
+                              "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+                            },
+                            "typeName": "NativePayloadMode"
+                          }
+                        }
+                      },
+                      "right": "all"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "revokeAtHeadCall",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "right": "0"
                     }
                   ]
                 },
@@ -70042,6 +70872,64 @@
               }
             ],
             "name": "selectedRationalCurve"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyAdditionalOverallScopeCases"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyAdditionalUniversityScopeCases"
           }
         ]
       },
@@ -70258,7 +71146,7 @@
             "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "3d9ae377491a6f5cc6e3dc172b403fab93760f71ea61c8790cc6863bde72a008",
+        "source_sha256": "58d06b56856ea32c959a152eabc5ad30fb33cef235e735c97877e13ea7e6ff34",
         "symbols": [
           {
             "declarations": [
@@ -70476,6 +71364,64 @@
               }
             ],
             "name": "deferred"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyAdditionalOverallScopeCases"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyAdditionalUniversityScopeCases"
           }
         ]
       },
@@ -74763,6 +75709,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
           },
           {
+            "importedName": "SyntheticUniversityData",
+            "originalName": "SyntheticUniversityData",
+            "src": "tests/edge/synthetic_university.ts"
+          },
+          {
             "importedName": "VerifiedArtifactCache",
             "originalName": "VerifiedArtifactCache",
             "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
@@ -74798,7 +75749,7 @@
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "3677b27128eead750b9046fb52f96eb886b028f8b2800f10ad272a42bca89c01",
+        "source_sha256": "cd290fc91801cde50a886406804ac8c0cacf657f1ad6880df051e2057afce502",
         "symbols": [
           {
             "declarations": [
@@ -74807,7 +75758,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(\n  options: {\n    artifactCache?: VerifiedArtifactCache;\n    deferredExam?: boolean;\n    deferredVersion?: string;\n    costsForApproved?: boolean;\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | \"health.ready\" | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
+                  "parameter_source": "(\n  options: {\n    artifactCache?: VerifiedArtifactCache;\n    deferredExam?: boolean;\n    validExam?: boolean;\n    deferredModel?: boolean;\n    deferredVersion?: string;\n    policyPackVersion?: string;\n    policyAcademicYear?: number;\n    policyEligibleCount?: number;\n    costsForApproved?: boolean;\n    extraSelection?: boolean;\n    unapproved?: boolean;\n    maxReads?: number;\n    operation?: ApiOperationId | \"health.ready\" | null;\n    approvedOperations?: ApiOperationId[];\n  } = {},\n)",
                   "params": [
                     {
                       "kind": "assign",
@@ -74845,12 +75796,57 @@
                                 }
                               },
                               {
+                                "name": "validExam",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              },
+                              {
+                                "name": "deferredModel",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              },
+                              {
                                 "name": "deferredVersion",
                                 "optional": true,
                                 "tsType": {
                                   "kind": "keyword",
                                   "repr": "string",
                                   "value": "string"
+                                }
+                              },
+                              {
+                                "name": "policyPackVersion",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "policyAcademicYear",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              },
+                              {
+                                "name": "policyEligibleCount",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
                                 }
                               },
                               {
@@ -75020,6 +76016,64 @@
               }
             ],
             "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyAdditionalOverallScopeCases"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyAdditionalUniversityScopeCases"
           }
         ]
       },
@@ -75111,6 +76165,16 @@
             {
               "kind": "code",
               "path": "tests/edge/synthetic_runtime_binding.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_university.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_university.ts"
             }
           ]
         }
