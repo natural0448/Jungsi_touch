@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.90이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.95이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.
 
@@ -588,7 +588,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=57834b0d8e738f4839fc4484e69eeeb28c844eca339aae2c16b1a72e669fa84f -->
+<!-- jungsi:generated spec_sha256=3dd1287661d43570adfaaedc5a148eb1783ff2b5ddcc7f3d5a62bac07cc6b861 -->
 
 
 ## 기존 운영 조회의 후속 검수
@@ -608,7 +608,7 @@ RECOVERY_READINESS_VERIFIED_REPORT_OWNER_REPORTED. 기존 운영 조회의 구�
 
 첫 유료 결과는 해당 유료 작업의 공개 숫자 결과를 기준으로 생성 출처 이용권/현재 접근 이용권을 분리한다. 본인 read/export는 저장 원결과의 미전달 근거만 복구한다. 고정 가상 견본·단순 페이지 진입·통계·관리·전부 pending은 소비로 기록하지 않는다.
 
-런타임별 상태: 서비스 구현 후보; 새 승인 usage-policy/v2·006·전환·범위/비용/배포 검수 전 개인 입력 503 hold / REQ-27 입력권/정정/첫사용 미구현. 운영 경로는 개인 새 입력/분석 및 신규 API를 503 hold; legacy_synthetic 검증은 명시적 모드로 분리한다.. 006 상태: APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED. 공개 RPC·기존 프로필 전환·신규 scope/비용·정책 활성화·배포/실계정 검수: NOT_RUN. 기존003 승인은 새006의 실행 승인이 아니다.
+런타임별 상태: 서비스 구현 후보; 새 승인 usage-policy/v2·006·전환·범위/비용/배포 검수 전 개인 입력 503 hold; 별도 binding/v3 소비20과 usage-policy/v4는 기존 입력권+관리자 일일예외를 함께 검증하는 소스 후보이며 006/006a/기존profile 전환/실제 운영 활성화는 NOT_RUN. / REQ-27 입력권/정정/첫사용 미구현. 운영 경로는 개인 새 입력/분석 및 신규 API를 503 hold; legacy_synthetic 검증은 명시적 모드로 분리한다.. 006 상태: APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED. 공개 RPC·기존 프로필 전환·신규 scope/비용·정책 활성화·배포/실계정 검수: NOT_RUN. 기존003 승인은 새006의 실행 승인이 아니다.
 
 
 ## 서비스 성능 후보와 P1 조회 계약
@@ -697,7 +697,7 @@ Existing public history/offering/recruitment DTO and recursive allowlist. Preser
 
 Missing value, unread/unqualified metadata, officially unpublished, inapplicable and actual zero are distinct. Never fill missing cells with 0 or estimates. Final reserve number is not additional admitted count. 2024-2026 observations are not 2027 offerings. Target recruitment only uses the exact verified target PK; no prefix/name replacement, automatic lineage merge, or invented future-year quota.
 
-P1은 기존 history.search에서 academic_year를 생략해 2024·2025·2026을 함께 읽는다. 전체 UI 조회는 최대6페이지×100=600지표이며 기존 서버의 요청별 상한과 계정 공유 예산을 보존한다. 이 값은 새 전역 상한이지 이전의 연도별 합산과 같다는 주장이 아니다. 잔여 cursor는 조회 미완료이며 마지막 미완전 모집행을 보류한다. 신규 batch API는 미채택이다.
+기존 P1 원문 경로는 history.search에서 academic_year를 생략해 2024·2025·2026을 함께 읽는다. 해당 경로의 UI는 최대6페이지×100=600지표이며 기존 서버 요청별 상한과 계정 공유 예산을 보존한다. 잔여 cursor는 조회 미완료이며 마지막 미완전 모집행을 보류한다. 이 한계를 없애는 판별 화면 정리본은 별도 채택/구현/운영 상태를 따르며 원문 경로에 전수 cursor를 추가해 대신하지 않는다.
 
 Parameterized bounded page query and selected-page IDs JOIN, stable deterministic cursor sorting with query/user/source binding and head-change409. No per-row DB fetch, N+1, hidden cursor drain, COUNT(*) census, full payload download or implicit new materialization.
 
@@ -707,7 +707,7 @@ Fresh verified JWT, relay, public.jeongsi_passes, active+aal2 admin exception, R
 
 Existing DB stays readable while national numerical supplementation is prepared locally and cross-reviewed, followed by one final authorised writer batch. No per-school DB upload/recombine/COPY/full reread for this request.
 
-현재 구현 SOURCE_COMMITTED_NORMAL_HOOKS_CI_AND_PRIVATE_BOUNDED_DB_AND_KEY_COVERAGE_VERIFIED · hosted 전환 NOT_RUN · 전국 브라우저 인수 NOT_RUN. 자료 보완 중인 상태와 연결 구현/배포 완료를 혼동하지 않는다.
+현재 구현 SOURCE_COMMITTED_NORMAL_HOOKS_CI_AND_PRIVATE_BOUNDED_DB_AND_KEY_COVERAGE_VERIFIED · hosted 전환 OWNER_REPORTED_V15_REGISTERED_EXACT_BUNDLE_AND_SETTINGS · 전국 브라우저 인수 PEER_REPORTED_FIRST_RANGE_SEARCH_PASS_FULL_DOMAIN_UI_PENDING_SNAPSHOT. 자료 보완 중인 상태와 연결 구현/배포 완료를 혼동하지 않는다.
 
 ### 서비스 어댑터 후보와 최종 결속 경계
 
@@ -741,3 +741,137 @@ report.read는 저장 snapshot을 읽고 계산하지 않는다. 기존 profile_
 설치032의 세 파일 exact hash를 확인하는 v2 패치와 새 domain closure만 추가한다. consumer14·usage-v1·기존 응답/역할/소유권·입력권 경로를 유지한다. 최신 platform·REQ27/006a/25operation으로 전환하지 않는다.
 
 공개 응답은 기존 overall 필드만 사용한다. 원자료·모형 가정·분포·정책·출처 해시는 서버에만 보관한다. 별도 합성14건은 기존 foundation656·Owner36·public-provider58 및 legacy22+extension3 등록과 구분한다. 실제 모형 채택·운영 binding·배포·저장 리포트 화면 인수는 별도 근거가 필요하다.
+
+
+## 판별 입결 정리본·관리자 반복 검수·본인 리포트 찾기
+
+P1-DISPLAY-SNAPSHOT-01 / ADOPTED_REQUIREMENTS_IMPLEMENTATION_AND_FINAL_DATA_CANDIDATE_PENDING. 신규 API는 구현/확장 등록과 Owner 활성화 전에는 사용할 수 없다.
+
+| 항목 | 계약 |
+| --- | --- |
+| 원천·단위 | DATA_ACTIVE_ADMISSION_CURRENT_v1.json / jungsi_data_ingest.admission_results_current; trusted local current caches and school source evidence reused; no request-path full view aggregate one display row per academic_year:original_PK_string with verified identity/year links; observations without a verified PK keep original null and their existing opaque observation address in an explicitly counted mapping_pending domain; never fabricate an offering PK or inferred 2027 ID |
+| 고정 칸 | recruitment_count_with_stage, competition_ratio, additional_admission_count, final_additional_admission_rank, final_50_percent_cut, final_70_percent_cut |
+| 추정 열 | Estimated applicant/rejected counts remain frontend display-only under the approved compatible valid-input rules. Never substitute final reserve rank for additional admitted headcount. |
+| manifest | Deterministic semantic version/content SHA, rule version/SHA, input current-head binding, payload bytes/encoding/decompressed size, actual school/row/year counts and creation time. Shared source/basis/cohort definitions are references, not repeated audit bodies. Separate source observations, mapped display rows and unmapped held observations; reconcile all included/excluded selections to the declared source head. Measure gzip/decompressed sizes; a proposed estimate is not a physical bound or acceptance result. |
+| 읽기 API | Two explicit read-only operations: small current head and a version-bound gzip/full or bounded-part body. Final routes/DTO/bounds are registered with implementation. No direct browser Storage permission. |
+| 갱신·신뢰 | New current head/rules produce one cross-reviewed immutable snapshot; identical content reuses existing bytes. Stable trust anchor, publisher scope, expected-head CAS and rollback must be defined; never remove pins to trust arbitrary mutable content. |
+| 공유 서버 cache | Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization. Actual authenticated head/body API calls retain request/result accounting; a BFF/KV hit with no API call is not charged a fictional full-body API read. Existing personal/engine logical cache accounting stays unchanged. No cache_delivery intent or client quota waiver flag is introduced. |
+| 목록·검색 | Snapshot-backed page/search covers its entire manifest domain with server-side university paging and exact filtered counts. Legacy history.search retains its original bounded cursor and six-page UI behavior until the new path is live; no claim that a partial600 metric result is a whole snapshot. |
+| 성능 목표 | Frontend target first page within2s and local search within1s; separate cold version acquisition from warm server-cache page/search timing. These are acceptance targets, not measured PASS. |
+
+정규화·선택 규칙:
+
+- Keep original values/native scalar types, statistic_label/cohort/unit/definition and provenance; normalized codes and display labels are separate.
+- Direct university official source precedes official adiga submission only where source authority is established. Select compatible score basis and final-registrant cohort before choosing 50/70 cuts.
+- Do not combine subject-specific cuts, average/lowest, registered/admitted cohorts or different score axes based on text resemblance.
+- A 75% cut never becomes a 70% cut. Carry an explicitly labelled alternate cut and retain missing true70 status.
+- Equivalent display observations may share a selected cell only with compatible value/type/basis/cohort/unit and preserved alternative provenance. Conflicts remain null+reason, not first-row wins.
+- Initial recruitment, carryover increment and final recruitment are separate stages. A carryover increment is never a final total.
+- Missing units/official qualification are not upgraded from numbers or labels alone. Definition-backed display units retain original null and derivation evidence.
+- Unknown metric kinds remain a data review item with neutral display label and original code preserved for inspection; no guessed official score definition.
+- Each cell retains verified_official/pending_metadata/pending_value_type/pending_value_missing/not_published and a precise missing/held reason. No null-to-zero, rank-to-count or unsupported ready conversion.
+- Apply established direct-university versus official-adiga source priority only to qualified comparable observations. Same-priority conflicting values remain held; retain lower-priority conflicting provenance rather than silently dropping it.
+- A metadata-only export deliberately omits original value/source fields. Missing metadata in that export is not proof that the native original lacks it. Reuse full immutable native references and qualified overlays.
+
+인수 기준:
+
+- Exact manifest/payload SHA and observed row/school/year counts; no duplicate academic_year:original_PK row
+- Ten diverse named school/offering samples match current source and selection rules; independently review conflicting/multiple-basis/75cut/stage cases
+- Zero null-to-zero, reserve-rank-to-headcount, source/type loss, unauthorized source/normalization status upgrades
+- No full current-view COUNT/GROUP/FETCH or N+1 in request path; preserve existing dataset and RLS
+- JWT/relay/ownership/current role, public-cache segregation, response allowlist/no-store, physical bounds and new operation negative cases
+- Exact candidate source/normal hooks/CI; private final artifact proof; Owner upload/readback/settings; fresh deployed BFF/browser observations remain distinct
+
+ADMIN-VERIFY-QUOTA-01 / SOURCE_IMPLEMENTED_SYNTHETIC_VERIFIED_OPERATING_POLICY_NOT_REGISTERED. Fresh same-Bearer Supabase Auth verification, own profiles role=admin/status=active and aal2; server internal origin only, revalidated each request. No client admin flag or cached privilege.
+
+Explicit policy semantics for confirmed administrator, not null/huge-capacity coercion. Counters and policy keys for normal/paid users are preserved; no reset through role/JWT/profile/key rotation. 보존: shared atomic concurrent_jobs; per-request physical reads/bytes and timeout; current approvals/head/pins; ownership and RLS; idempotency; score-input/correction rights and activation boundary; normal and paid member quotas; security storage fail closed. Prepare bounded resource-safe handling of overlapping ordinary P1 read requests, preferably the snapshot path and reuse. Any queue/concurrency policy change is explicit and tested; no unbounded in-process wait.
+
+REPORT-LOCATOR-01 / SOURCE_IMPLEMENTED_SYNTHETIC_VERIFIED_ACTUAL_PATH_NOT_RUN. 제안 report.list-own / GET /api/v1/me/reports. Only current verified subject; bounded exam-filtered keyset query joining report/profile ownership and existing RLS. No new table/index assumed.
+
+report_id, nullable exam_id, report_version, updated_at; next_cursor/has_more. AES-GCM purpose-bound owner/filter/high-water cursor; limit+1 max21 rows; C/ASCII order. No COUNT or report body. Frontend server validates selected report ownership and CSRF before setting existing HttpOnly cookie. Empty/new-PC list is not permission failure; no automatic POST analysis or score save.
+
+작성 팀과 실행 계층은 다르다. 화면팀의 승인 포트/엔진 결과 조회·조합·입력/DTO/오류 흐름은 기존 서버 application 서비스 공동 개발 정책을 따르며 DB·SQL·자료 어댑터·정본 writer·산출 본체는 기존 담당 범위다. 신규 Secret·DB 역할·배포 권한은 이 문서로 부여하지 않는다.
+
+### 조회 전용 확장의 엄격 등록 검사
+
+COMMON_HARNESS_PREPARED_NO_NEW_OPERATION_REGISTERED. current operations stay25 until service implementation and exact source/runtime/test registration; then exactly28, not an arbitrary operation set
+
+legacy22 and REQ27 extension3 remain exact; their activation and counters are not changed by read3 source registration new read/admin/locator cases run as a separate exact retained-snapshot suite; foundation656/Owner36/public58/whole14 and oracle993 remain separately counted exact method/path/tiers/requirements, application source SHA, runtime/test SHA, no alias/writer/operational promotion, no unregistered or double-counted separate test source
+
+| operation | method | 경로 |
+| --- | --- | --- |
+| history.snapshot.head | GET | /api/v1/admission-history/snapshot/head |
+| history.snapshot.read | GET | /api/v1/admission-history/snapshots/{snapshot_id} |
+| report.list-own | GET | /api/v1/me/reports |
+
+현재 준비 상태: NOT_RUN_NEW_SERVICE_SOURCE_ON_THIS_PLANNING_COMMIT / NOT_RUN_NEW_OPERATING_BINDING.
+
+Existing TypeScript policy/schema fixtures retain exact legacy22+REQ27policy3=25, while the actual catalog/schema registry stays28 after strict read3 registration. Validate complete28 schema operation IDs and all references before producing legacy closure; preserve error/readiness and legacy auxiliary public_error_code. New read3 is exercised in the separate suite using the real complete registry. No arbitrary operation/schema filter or skipped execution is permitted.
+
+### 표시 선택과 원문 검수의 구분
+
+ADOPTED_DISPLAY_ONLY_NOT_NUMERICAL_OR_IDENTITY_EQUIVALENCE_APPROVAL. Adopt the candidate's explicit 20-kind order as a display preference only after eligibility and exact signature grouping. It does not establish numerical scale equivalence or authorize a new score formula.
+
+Use an explicitly identified aggregate score basis, same fullmark/component/scope/mean-basis signature and qualified final-registrant cohort. A kind name alone does not prove an aggregate. Subject-specific/same-rank-subject values cannot fill the primary two cuts. Choose one exact eligible basis for both50/70. Missing50 stays missing even if another basis has50.75 stays an explicitly labelled alternate. Hold the affected selected cell with a precise reason and retained alternatives/provenance; no first-row or maximum-score winner.
+
+Do not declare different names/tracks/groups equivalent merely because the current PK matches. Prefer an exact-year/PK authoritative guide display label if verified. Otherwise use a clearly marked display label and retain distinct original identity variants for search/review. Mark identity review pending; do not silently choose one source label and imply that all selected cells are scope-verified. Retain each selected cell's original source context by public-safe identity/provenance references and an explicit identity-scope review reason where necessary. Known source-track/PK conflicts remain alternative-only with a warning. No estimate or analysis may use a cell whose required identity compatibility is held.
+
+Missing publication date remains null and is not a numeric-value review failure. Selected known values remain visible as pending_metadata with precise reasons. Do not promote verified_official, invent a date/unit or recompute native values to clear a display hold. Original statistics outside fixed slots are optional under the requested display contract. Any omission is an explicit projection scope, never a statement that the source is missing/unpublished. A supported alternate retains its true percentage and basis; no75-to70 or subject-to-total promotion.
+
+Preserve original normal line-feed U+000A only in explicitly identified human department/track/statistic fields under the closed public DTO. Keep ID/URL/header/code control-character rules and secret/private URL protection strict. Do not strip source originals, invent PKs or suppress otherwise known values to satisfy a string check.
+
+For an approved estimated_weights/official_all_examinees result use a neutral human label such as 공식 전체 응시자 기준 채택 추정 누백 모형. Keep exact model_version and immutable model bytes; do not hardcode a real model ID/hash or numerical model into frontend source.
+
+| 보류 코드 | 화면 안내 |
+| --- | --- |
+| SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING | 발표 지표의 기준·단위·출처 정보를 확인하고 있습니다. |
+| NO_QUALIFIED_CANDIDATE_IN_CURRENT_SOURCE_SCOPE | 현재 연결된 자료에서 이 표시 기준에 맞는 값을 확인하지 못했습니다. |
+| FINAL_WAITLIST_SOURCE_QUALIFICATION_UNCONFIRMED | 최종 합격 예비번호인지 확인하고 있습니다. |
+| NO_CUT_ALTERNATIVE_IN_SELECTED_SCOPE | 선택한 표시 범위에서 별도의 대체 컷을 확인하지 못했습니다. |
+| MULTIPLE_SAME_PRIORITY_BASIS_DEFINITIONS_UNRESOLVED | 서로 다른 점수 기준이 있어 대표값을 확인하고 있습니다. |
+| OTHER_BASIS_OR_EXPLICIT75_RETAINED_NOT70_BACKFILL | 다른 점수 기준 또는 별도 비율의 발표값이며 70%컷을 대신하지 않습니다. |
+| NO_FINAL_REGISTRANT_SAME_BASIS_CUT50 | 선택한 점수 기준의 최종등록자 50%컷을 확인하지 못했습니다. |
+| NO_FINAL_REGISTRANT_SAME_BASIS_CUT70 | 선택한 점수 기준의 최종등록자 70%컷을 확인하지 못했습니다. |
+| MULTIPLE_CURRENT_CANDIDATES_DEFINITION_EVENT_OR_VALUE_CONFLICT | 발표 근거나 값이 여러 가지여서 확인하고 있습니다. |
+| NONNUMERIC_LITERAL_REQUIRES_SOURCE_REVIEW | 원문 표기를 확인하고 있습니다. |
+| UNCLASSIFIED_BASIS_NEEDS_SOURCE_DEFINITION_NO_TOTAL_CUT_PROMOTION | 점수 기준이 확인되지 않아 대표 컷으로 표시하지 않습니다. |
+| IDENTITY_SCOPE_REVIEW_PENDING | 모집단위 명칭·전형·모집군의 연결을 확인하고 있습니다. |
+| SOURCE_TRACK_PK_CONFLICT | 원문 전형과 연결된 모집행이 달라 확인하고 있습니다. |
+| OFFERING_MAPPING_PENDING | 이 자료의 모집행 연결을 확인하고 있습니다. |
+
+별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 별도 시험 88개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
+
+### 최신 Owner·화면팀 운영 영수증의 한정 수용
+
+PEER_REPORTED_INSTALLATION_AND_P1_P2_BROWSER_PASS_OTHER_CASES_OPEN. 비공개 영수증 SHA256 536edf363e4372360c37b5524022b9f2e7be9a0f64391eecb1bf3b186743c6fb / 소스 0a0f5d18b2c71c778c312081a220ec47fce2fad8 / 파생 배포 번들 7b2abbbf8463cd2e537ec9ccf1f1a288f40ed9d15c466348f401ab467db53bff.
+
+OWNER_REPORTED_ALL782_BYTES_SHA_MATCH. OWNER_REPORTED_EXPECTED6_DIGESTS_MATCH; supplied document abbreviates digest values. FRONTDOOR_AAL1_MEMBER_REPORTED_NATIONWIDE_SOURCE_ROWS_AND_SEARCH_PASS_WITH_INCOMPLETE600_METRIC_CAP. FRONTDOOR_EXISTING_OWN_REPORT_OVERALL_REFRESH_REPORTED_PASS_NEW_REVISION_ESTIMATED_AND_SUBJECT_RESULTS_PRESERVED.
+
+Root 독립 live 재실행: NOT_RUN. 형식상 native/deployment PASS는 전체 인수 조건의 증거가 있을 때만 기록하며, 실제 배포/부분 화면 관측 사실은 아래 현재 원장으로 구분한다.
+
+| 기존 operation | 현재 배포 보고 | 이번 화면 관측 | 공식 인수 경계 |
+| --- | --- | --- | --- |
+| history.search | OWNER_REPORTED_V15 | PEER_REPORTED_P1_SEARCH_PASS | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| recruitment.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| score-profile.create | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| overall.analyze | OWNER_REPORTED_V15 | PEER_REPORTED_OWN_REPORT_REFRESH_PASS | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| report.read | OWNER_REPORTED_V15 | PEER_REPORTED_OWN_REPORT_READ_PASS | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| offerings.search | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| offering.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| university.analyze | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| candidates.build | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| shortlist.update | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| report.export | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| statistics.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| session.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.capabilities | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.list | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.create | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.read | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.adjust | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.validate | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.approve | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.publish | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.published.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+
+남은 인수: fresh-version P3 exact2027/paid path; input/correction ledger comparison; other-user/CSRF/no-token/bad-relay/paid403/no-store reacceptance; last incomplete row at legacy six-page boundary; new-PC report locator; admin aal2 daily exemption new policy.

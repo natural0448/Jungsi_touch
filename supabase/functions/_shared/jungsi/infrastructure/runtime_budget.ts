@@ -1,5 +1,7 @@
 /** Private approved policy -> request-local shared reservations. No capacities or approvals default. */
 import { AccessError } from "../application/access.ts";
+import { COMBINED_POLICY_CONSUMER_OPERATION_IDS } from "../application/api_dispatch.ts";
+import { ApprovedAdministratorUsagePolicy } from "../application/administrator_usage_policy.ts";
 import { ApprovedOperatingPolicy } from "../application/operating_policy.ts";
 import { validateScoreInput, validateScoreStructure } from "../application/overall_analysis.ts";
 import type { PlatformRepositoryPort } from "../application/platform_repository.ts";
@@ -82,6 +84,8 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
   readonly version: string;
   readonly expiresAtUtc: bigint;
   readonly operating: ApprovedOperatingPolicy | null;
+  readonly administrator: ApprovedAdministratorUsagePolicy | null;
+  readonly policyRevision: string | null;
   constructor(
     raw: Uint8Array,
     private readonly binding: ApprovedRuntimeBinding,
@@ -97,7 +101,12 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
       fail();
     }
     if (
-      !["jungsi.runtime-usage-policy/v1", "jungsi.runtime-usage-policy/v2"].includes(
+      ![
+        "jungsi.runtime-usage-policy/v1",
+        "jungsi.runtime-usage-policy/v2",
+        "jungsi.runtime-usage-policy/v3",
+        "jungsi.runtime-usage-policy/v4",
+      ].includes(
         row.format as string,
       ) || row.status !== "approved" ||
       row.purpose !== "jungsi-api-runtime" ||
@@ -106,6 +115,32 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
       !Array.isArray(row.exams) || !Array.isArray(row.dimensions) || !Array.isArray(row.operations)
     ) fail();
     this.version = row.version;
+    if (
+      ["jungsi.runtime-usage-policy/v3", "jungsi.runtime-usage-policy/v4"].includes(
+        row.format as string,
+      ) &&
+      (typeof row.policy_revision !== "string" || !ID.test(row.policy_revision))
+    ) fail();
+    this.policyRevision =
+      ["jungsi.runtime-usage-policy/v3", "jungsi.runtime-usage-policy/v4"].includes(
+          row.format as string,
+        )
+        ? row.policy_revision as string
+        : null;
+    if (
+      !["jungsi.runtime-usage-policy/v3", "jungsi.runtime-usage-policy/v4"].includes(
+        row.format as string,
+      ) &&
+      (Object.hasOwn(row, "administrator_policy") || Object.hasOwn(row, "policy_revision"))
+    ) fail();
+    const combined = row.format === "jungsi.runtime-usage-policy/v4";
+    if (
+      combined !== (binding.consumerGeneration === "operating-admin-20") ||
+      combined && (mode !== "rights" || !binding.readViews ||
+          binding.operations.length !== COMBINED_POLICY_CONSUMER_OPERATION_IDS.length ||
+          COMBINED_POLICY_CONSUMER_OPERATION_IDS.some((id) => !binding.operations.includes(id)) ||
+          !Object.hasOwn(row, "operating_policy") || !Object.hasOwn(row, "administrator_policy"))
+    ) fail();
     try {
       this.expiresAtUtc = utcInstant(row.expires_at as string);
     } catch {
@@ -187,7 +222,9 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
     }
     if (binding.operations.some((op) => ANALYSIS.includes(op)) && !exams.size) fail();
     this.exams = exams;
-    this.operating = row.format === "jungsi.runtime-usage-policy/v2"
+    this.operating = ["jungsi.runtime-usage-policy/v2", "jungsi.runtime-usage-policy/v4"].includes(
+        row.format as string,
+      )
       ? new ApprovedOperatingPolicy(row.operating_policy, {
         policyVersion: this.version,
         approvalSha256: binding.approvalReferenceSha256,
@@ -197,9 +234,25 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
         selectionSha256: binding.references.selection.sha256,
       })
       : null;
-    if (row.format === "jungsi.runtime-usage-policy/v1" && Object.hasOwn(row, "operating_policy")) {
+    if (
+      !["jungsi.runtime-usage-policy/v2", "jungsi.runtime-usage-policy/v4"].includes(
+        row.format as string,
+      ) && Object.hasOwn(row, "operating_policy")
+    ) {
       fail();
     }
+    // v3 revises budget admission only. It does not enable REQ-27 rights or rename counters.
+    this.administrator =
+      ["jungsi.runtime-usage-policy/v3", "jungsi.runtime-usage-policy/v4"].includes(
+          row.format as string,
+        )
+        ? new ApprovedAdministratorUsagePolicy(row.administrator_policy, {
+          approvalSha256: binding.approvalReferenceSha256,
+          policyVersion: this.version,
+          expiresAtUtc: this.expiresAtUtc,
+          requestRuntimeMicroseconds: binding.usageStoreLimits.runtimeHardLimitSeconds * 1000000n,
+        })
+        : null;
     this.assertLive();
   }
   assertLive(): void {
@@ -207,6 +260,12 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
     if (typeof now !== "bigint" || now >= this.expiresAtUtc || now >= this.binding.expiresAtUtc) {
       fail();
     }
+  }
+  responseLimit(operation: string): bigint {
+    this.assertLive();
+    const cost = this.costs.get(operation);
+    if (!cost) fail();
+    return cost.resultBytes;
   }
   private async scores(request: BudgetRequest): Promise<NativeObject> {
     const body = inputObject(request.body), owner = request.session.user.subjectId;
@@ -295,8 +354,24 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
         this.clock.nowUtc(),
       )
       : undefined;
+    const calculationUnits = analysis && !replay ? cost.base + cost.perOffering * count : 0n;
+    const resultCapacity = this.dimensions.get("result_volume")!.paid;
+    const maximumResultBytes = cost.resultBytes < resultCapacity
+      ? cost.resultBytes
+      : resultCapacity;
+    const administratorProof = this.administrator?.issue(
+      request,
+      new Map([...this.dimensions].map(([kind, d]) => [kind, d.period])),
+      {
+        calculationUnits,
+        maximumCalculationUnits: this.dimensions.get("calculation_cost")!.paid,
+        maximumResultBytes,
+      },
+      this.clock.nowUtc(),
+    );
     const demands: UsageDemand[] = [];
     for (const [kind, d] of this.dimensions) {
+      if (administratorProof?.exemptKinds.includes(kind)) continue;
       if ((!analysis || stageProof) && ["distinct_scores", "calculation_cost"].includes(kind)) {
         continue;
       }
@@ -334,6 +409,7 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
       computation: replay ? "idempotent_replay" : "required",
       demands: Object.freeze(demands),
       ...(stageProof ? { stageProof } : {}),
+      ...(administratorProof ? { administratorProof, maximumResultBytes } : {}),
     });
   }
 }
@@ -364,8 +440,9 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
     private readonly clock: RequestClockPort,
     private readonly replays: UsageReplayVerificationPort,
     private readonly controls: SupabaseRuntimeControls,
+    private readonly measureResult?: (request: BudgetRequest, result: unknown) => Promise<bigint>,
   ) {
-    this.shared = new SharedRequestBudget(policy, store, clock, replays);
+    this.shared = new SharedRequestBudget(policy, store, clock, replays, measureResult);
   }
   async admit(request: BudgetRequest): Promise<PreparedUsageAdmission> {
     await this.controls.current();
@@ -456,6 +533,7 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
             return this.replays.exists(r);
           },
         },
+        this.measureResult,
       )
       : this.shared;
     stage("budget_current");

@@ -337,7 +337,8 @@ class LocalVerificationContractTests(unittest.TestCase):
         self.assertNotIn('composition',frontend)
         self.assertNotIn('source_provenance',frontend)
         self.assertNotIn('local_filesystem_selection',frontend)
-        self.assertEqual(len(self.spec['operations']),25)
+        self.assertEqual(len(self.spec['operations']),28)
+        self.assertEqual(len([o for o in self.spec['operations'] if o['id'] not in {'history.snapshot.head','history.snapshot.read','report.list-own'}]),25)
 
     def test_local_guide_cannot_be_redirected_or_contract_removed(self):
         for path in ('.env','outputs/private.md','docs/current/임의가이드.md'):

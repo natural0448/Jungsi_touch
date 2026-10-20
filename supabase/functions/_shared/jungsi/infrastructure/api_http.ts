@@ -5,6 +5,9 @@ import {
   type ApiBusinessPort,
   type ApiExecution,
   type ApiRoutePolicy,
+  READ_VIEW_OPERATION_IDS,
+  READ_VIEW_ROUTE_PATHS,
+  REGISTERED_API_OPERATION_IDS,
 } from "../application/api_dispatch.ts";
 import {
   authorizeManagement,
@@ -52,6 +55,23 @@ export const API_REQUEST_STAGES = [
 ] as const;
 export type ApiRequestStage = typeof API_REQUEST_STAGES[number];
 export interface ApiHttpPorts {
+  readonly representation?: {
+    encode(
+      request: ApiExecution,
+      result: unknown,
+    ): Promise<
+      {
+        body: Uint8Array<ArrayBuffer> | null;
+        status: 200 | 304;
+        etag: string;
+        gzip: boolean;
+        snapshotId?: string;
+        publicationSha256?: string;
+      } | null
+    >;
+  };
+  /** Explicit candidate opt-in; must verify the approved v2 binding before any new work. */
+  readonly readViewScope?: { assert(operation: ApiExecution["operation"]): Promise<void> };
   readonly relay: RelayBoundary;
   readonly sessions: UserSessionPort;
   readonly passes: PublicPassPort;
@@ -81,14 +101,25 @@ const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 function configuration(): never {
   throw new AccessError("security_policy_unavailable", 503);
 }
-function routes(policies: readonly ApiRoutePolicy[]): Route[] {
+function routes(policies: readonly ApiRoutePolicy[], extended = false): Route[] {
+  const expected = extended ? REGISTERED_API_OPERATION_IDS : API_OPERATION_IDS;
   if (
-    !Array.isArray(policies) || policies.length !== API_OPERATION_IDS.length ||
-    new Set(policies.map((p) => p?.id)).size !== API_OPERATION_IDS.length
+    !Array.isArray(policies) || policies.length !== expected.length ||
+    new Set(policies.map((p) => p?.id)).size !== expected.length ||
+    expected.some((id) => !policies.some((p) => p?.id === id))
   ) configuration();
   const result = policies.map((policy: ApiRoutePolicy) => {
+    if (policy && READ_VIEW_OPERATION_IDS.some((id) => id === policy.id)) {
+      const id = policy.id as typeof READ_VIEW_OPERATION_IDS[number];
+      if (
+        policy.method !== "GET" || policy.path !== READ_VIEW_ROUTE_PATHS[id] ||
+        policy.member_tiers?.length !== 2 || !policy.member_tiers.includes("standard") ||
+        !policy.member_tiers.includes("paid") || policy.report_owner !== false ||
+        policy.confirmed_score_profile !== false
+      ) configuration();
+    }
     if (
-      !policy || !API_OPERATION_IDS.includes(policy.id) ||
+      !policy || !REGISTERED_API_OPERATION_IDS.includes(policy.id) ||
       !["GET", "POST", "PUT"].includes(policy.method) ||
       typeof policy.path !== "string" ||
       !/^\/api\/v1\/[A-Za-z0-9_{}./:-]+$/.test(policy.path) ||
@@ -103,7 +134,7 @@ function routes(policies: readonly ApiRoutePolicy[]): Route[] {
       const match = /^\{([a-z_]+)\}$/.exec(part);
       if (match) {
         if (
-          !["offering_id", "report_id", "draft_id"].includes(match[1]) ||
+          !["offering_id", "report_id", "draft_id", "snapshot_id"].includes(match[1]) ||
           keys.includes(match[1])
         ) configuration();
         keys.push(match[1]);
@@ -239,7 +270,8 @@ export function createApiHandler(
   policies: readonly ApiRoutePolicy[],
   ports: ApiHttpPorts,
 ): (request: Request) => Promise<Response> {
-  const registered = routes(policies);
+  const registered = routes(policies, ports.readViewScope !== undefined);
+  if (ports.readViewScope && typeof ports.readViewScope.assert !== "function") configuration();
   if (
     !ports?.budget || typeof ports.budget.run !== "function" ||
     !ports.business ||
@@ -283,6 +315,10 @@ export function createApiHandler(
       stage("member_access");
       if (!policy.member_tiers.includes(session.tier)) {
         throw new AccessError("paid_required", 403);
+      }
+      if (READ_VIEW_OPERATION_IDS.some((id) => id === policy.id)) {
+        if (!ports.readViewScope) configuration();
+        await ports.readViewScope.assert(policy.id);
       }
       if (policy.report_owner) {
         stage("owner_access");
@@ -348,13 +384,34 @@ export function createApiHandler(
         stage("final_projection");
         const approved = ports.projection.project(policy.id, session.tier, result);
         stage("response_serialization");
-        const response = new Response(publicJsonText(approved), {
-          status: ["score-profile.create", "overall.analyze"].includes(policy.id) ? 201 : 200,
+        const encoded = await ports.representation?.encode(selected, approved);
+        if (
+          encoded &&
+          (!READ_VIEW_OPERATION_IDS.some((id) => id === policy.id) ||
+            !/^"[a-f0-9]{64}"$/.test(encoded.etag) || ![200, 304].includes(encoded.status) ||
+            encoded.status === 304 && encoded.body !== null ||
+            encoded.status === 200 && !(encoded.body instanceof Uint8Array) ||
+            encoded.snapshotId !== undefined && !IDENTIFIER.test(encoded.snapshotId) ||
+            encoded.publicationSha256 !== undefined &&
+              !/^[a-f0-9]{64}$/.test(encoded.publicationSha256))
+        ) configuration();
+        const response = new Response(encoded ? encoded.body : publicJsonText(approved), {
+          status: encoded
+            ? encoded.status
+            : ["score-profile.create", "overall.analyze"].includes(policy.id)
+            ? 201
+            : 200,
           headers: {
             "Content-Type": "application/json; charset=utf-8",
             "Cache-Control": "private, no-store",
             "X-Content-Type-Options": "nosniff",
             "X-Request-ID": requestId,
+            ...(encoded ? { ETag: encoded.etag } : {}),
+            ...(encoded?.gzip ? { "Content-Encoding": "gzip", Vary: "Accept-Encoding" } : {}),
+            ...(encoded?.snapshotId ? { "X-Jungsi-Snapshot-ID": encoded.snapshotId } : {}),
+            ...(encoded?.publicationSha256
+              ? { "X-Publication-SHA256": encoded.publicationSha256 }
+              : {}),
           },
         });
         stage("response_current");

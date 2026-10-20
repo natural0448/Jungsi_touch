@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.90",
+  "contract_version": "1.9.95",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -67,7 +67,7 @@
       "engine_in_browser_allowed": false,
       "runtime": "supabase_edge_typescript_deno",
       "hosting_target_status": "selected_migration_pending",
-      "API_count": 25,
+      "API_count": 28,
       "API_DTO_session_changes": true,
       "server_timezone": "UTC",
       "source_display_timezone": "Asia/Seoul",
@@ -350,7 +350,8 @@
             "OPS-SAFE-OBSERVER-DEPLOYED-20261016",
             "OPS-SAFE-OBSERVER-READINESS-20261016",
             "OPS-ADMIN-SESSION-FIX-DEPLOYED-20261016",
-            "OPS-ADMIN-SESSION-FIX-READINESS-20261016"
+            "OPS-ADMIN-SESSION-FIX-READINESS-20261016",
+            "OPS-OWNER-P1-P2-V3-20261020"
           ]
         },
         "bff_browser_acceptance": {
@@ -369,7 +370,8 @@
             "OPS-P2-ADMIN-SESSION-FIX-ATTEMPT-20261016",
             "OPS-P2-ADMIN-SESSION-FIX-SAVE-UI-20261016",
             "OPS-P2-ADMIN-SESSION-FIX-RELOAD-UI-20261016",
-            "OPS-P2-ADMIN-SESSION-FIX-SUBJECT-DISPLAY-20261016"
+            "OPS-P2-ADMIN-SESSION-FIX-SUBJECT-DISPLAY-20261016",
+            "OPS-OWNER-P1-P2-V3-20261020"
           ]
         },
         "security_gates": {
@@ -393,7 +395,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "PEER_REPORTED_P1_SEARCH_PASS",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "recruitment.read": {
           "code": "PORTED",
@@ -408,7 +417,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "score-profile.create": {
           "code": "PORTED",
@@ -429,6 +445,13 @@
             "source_spec_version": "1.9.90",
             "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
             "deployment": "NOT_RUN"
+          },
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
           }
         },
         "overall.analyze": {
@@ -450,6 +473,13 @@
             "source_spec_version": "1.9.90",
             "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
             "deployment": "NOT_RUN"
+          },
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "PEER_REPORTED_OWN_REPORT_REFRESH_PASS",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
           }
         },
         "report.read": {
@@ -465,7 +495,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "PEER_REPORTED_OWN_REPORT_READ_PASS",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "offerings.search": {
           "code": "PORTED",
@@ -480,7 +517,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "offering.read": {
           "code": "PORTED",
@@ -495,7 +539,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "university.analyze": {
           "code": "PORTED",
@@ -516,6 +567,13 @@
             "source_spec_version": "1.9.90",
             "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
             "deployment": "NOT_RUN"
+          },
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
           }
         },
         "candidates.build": {
@@ -537,6 +595,13 @@
             "source_spec_version": "1.9.90",
             "verification": "RAM_COMPLETE_REQUEST_FINISH_PASS",
             "deployment": "NOT_RUN"
+          },
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
           }
         },
         "shortlist.update": {
@@ -552,7 +617,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "report.export": {
           "code": "PORTED",
@@ -567,7 +639,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "statistics.read": {
           "code": "PORTED",
@@ -582,7 +661,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "session.read": {
           "code": "PORTED",
@@ -597,7 +683,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "forecast.capabilities": {
           "code": "PORTED",
@@ -612,7 +705,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "forecast.list": {
           "code": "PORTED",
@@ -627,7 +727,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "forecast.create": {
           "code": "PORTED",
@@ -642,7 +749,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "forecast.read": {
           "code": "PORTED",
@@ -657,7 +771,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "forecast.adjust": {
           "code": "PORTED",
@@ -672,7 +793,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "forecast.validate": {
           "code": "PORTED",
@@ -687,7 +815,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "forecast.approve": {
           "code": "PORTED",
@@ -702,7 +837,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "forecast.publish": {
           "code": "PORTED",
@@ -717,7 +859,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         },
         "forecast.published.read": {
           "code": "PORTED",
@@ -732,7 +881,14 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": []
+          "evidence_ids": [],
+          "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V15",
+            "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
+          }
         }
       },
       "evidence": {
@@ -1165,6 +1321,14 @@
           "operations": [],
           "does_not_imply_operation_acceptance": true,
           "scope": "해당 owner/case·시점의 집계 snapshot; 전체쓰기/브라우저subject 증명 아님"
+        },
+        "OPS-OWNER-P1-P2-V3-20261020": {
+          "kind": "bff_browser",
+          "candidate_commit": "0a0f5d18b2c71c778c312081a220ec47fce2fad8",
+          "receipt_sha256": "536edf363e4372360c37b5524022b9f2e7be9a0f64391eecb1bf3b186743c6fb",
+          "operations": [],
+          "scope": "Owner/frontend supplied installation and limited browser receipt; independent Root source/file binding only. No full native22 or final security acceptance.",
+          "does_not_imply_operation_acceptance": true
         }
       },
       "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다. 최신 설치는 current_deployment의 ed978 실제 영수증을 따르며 cb500 actual_editor_deployment는 당시 이력이다. current_P2_attempt는 새 실제 시도이고 회신 당시 두 실패는 P2_attempt_history에서 원래 배포·unknown 상태로 보존한다. 소스·준비상태 PASS, 제한된 로그 상관관계, 범위조회 snapshot, UI 업무 인수는 분리한다.",
@@ -3010,6 +3174,65 @@
         "final_packet_binding": "NOT_RUN_NEW_CONTROLS_REQUIRED",
         "previous_packet_v2": "PRESERVED_DO_NOT_DEPLOY",
         "rule": "These are code and denied-network RAM proofs, not deployed activation or real user acceptance. Historical current deployment/source receipts remain separate."
+      },
+      "latest_owner_frontend_receipt_20261020": {
+        "format": "jungsi.owner-frontend-runtime-receipt-intake/v1",
+        "date_KST": "2026-10-20",
+        "status": "PEER_REPORTED_INSTALLATION_AND_P1_P2_BROWSER_PASS_OTHER_CASES_OPEN",
+        "receipt_sha256": "536edf363e4372360c37b5524022b9f2e7be9a0f64391eecb1bf3b186743c6fb",
+        "candidate_commit": "0a0f5d18b2c71c778c312081a220ec47fce2fad8",
+        "develop_merge_commit": "4f6fce3050e0751166251ab503c0d62586b95ec6",
+        "bundle_sha256": "7b2abbbf8463cd2e537ec9ccf1f1a288f40ed9d15c466348f401ab467db53bff",
+        "registered_entry": "supabase/functions/jungsi-api/index.ts",
+        "guarded_source_recipe": "supabase/functions/_shared/current_public_catalog_compat.ts",
+        "function_version_reported": 15,
+        "verify_jwt_reported": true,
+        "Storage_authenticated_GET": "OWNER_REPORTED_ALL782_BYTES_SHA_MATCH",
+        "Secrets": "OWNER_REPORTED_EXPECTED6_DIGESTS_MATCH; supplied document abbreviates digest values",
+        "frontend_source_reported": "c198ead",
+        "frontend_PR43": "OPEN_DRAFT_NOT_DEVELOP_ACCEPTANCE",
+        "P1": "FRONTDOOR_AAL1_MEMBER_REPORTED_NATIONWIDE_SOURCE_ROWS_AND_SEARCH_PASS_WITH_INCOMPLETE600_METRIC_CAP",
+        "P2": "FRONTDOOR_EXISTING_OWN_REPORT_OVERALL_REFRESH_REPORTED_PASS_NEW_REVISION_ESTIMATED_AND_SUBJECT_RESULTS_PRESERVED",
+        "Root_independent_live_rerun": "NOT_RUN",
+        "residual": [
+          "fresh-version P3 exact2027/paid path",
+          "input/correction ledger comparison",
+          "other-user/CSRF/no-token/bad-relay/paid403/no-store reacceptance",
+          "last incomplete row at legacy six-page boundary",
+          "new-PC report locator",
+          "admin aal2 daily exemption new policy"
+        ],
+        "does_not_certify": [
+          "all22 native business operations",
+          "all22 operating acceptance",
+          "security3gates",
+          "new snapshot API or admin policy",
+          "production_ready"
+        ]
+      },
+      "read_view_candidate": {
+        "source_operations": 28,
+        "consumer_operations": 17,
+        "operations": [
+          "history.snapshot.head",
+          "history.snapshot.read",
+          "report.list-own"
+        ],
+        "code_registration": "SOURCE_ONLY",
+        "live_business_DB_Storage": "NOT_RUN",
+        "Secrets": "NOT_RUN",
+        "deployment": "NOT_RUN",
+        "REQ27_006a_activation": "UNCHANGED_NOT_RUN",
+        "entrypoint": "supabase/functions/jungsi-api/read_view_entry.ts"
+      },
+      "combined20_candidate": {
+        "contract_ref": "combined_operating_administrator_contract",
+        "source_operations": 28,
+        "consumer_operations": 20,
+        "previous_candidate_scope": 17,
+        "source_status": "CODE_CANDIDATE",
+        "activation": "NOT_RUN",
+        "new_input_regression": "CURRENT17_201_TO503_HOLD_REQUIRES_COMBINED_POLICY_AND_LEDGER_ACCEPTANCE"
       }
     }
   }

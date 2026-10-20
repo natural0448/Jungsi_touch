@@ -26,6 +26,8 @@ class ScoreInputPolicyContractTests(unittest.TestCase):
         self.assertEqual(self.app.state.operating_mode,'rights')
         self.assertEqual(len([r for r in self.app.routes if r.path.startswith('/api/v1/')]),25)
         operations=json.loads((ROOT/'src/jungsi_touch/application/route_catalog.json').read_text(encoding='utf-8'))['operations']
+        self.assertEqual(len(operations),28)
+        operations=[o for o in operations if o['id'] not in {'history.snapshot.head','history.snapshot.read','report.list-own'}]
         self.assertEqual(len(operations),25)
         for operation in operations:
             with self.subTest(operation=operation['id']):
@@ -38,6 +40,14 @@ class ScoreInputPolicyContractTests(unittest.TestCase):
         self.assertEqual((r.status_code,r.json()['error']['code']),(503,'score_input_policy_unavailable'))
         self.assertEqual(self.repository.profiles,{})
         self.assertEqual(self.repository.audit,[])
+    def test_edge_read_views_are_not_inherited_by_python_or_legacy_reference(self):
+        for mode,expected in [('rights',25),('legacy_synthetic',22)]:
+            app=create_app(settings=ServerSettings(),repository=self.repository,data=self.data,sessions=SyntheticSessions(self.clock),clock=self.clock,operating_mode=mode)
+            routes={r.path for r in app.routes if r.path.startswith('/api/v1/')}
+            self.assertEqual(len(routes),expected)
+            self.assertTrue(routes.isdisjoint({'/api/v1/admission-history/snapshot/head','/api/v1/admission-history/snapshots/{snapshot_id}','/api/v1/me/reports'}))
+        self.assertEqual(self.repository.access_calls,[])
+        self.assertEqual(self.data.calls,[])
     def test_free_personal_input_is_403_and_never_falls_back_to_old_overall(self):
         for path,body in [('/api/v1/score-profiles',dict(scores=score_input(),confirmed=True)),('/api/v1/overall-reports',score_input())]:
             r=self.request('POST',path,body,'SYNTHETIC-standard')

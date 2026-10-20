@@ -23,6 +23,19 @@ import { SupabaseSqlTransport } from "./transaction_sql.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
 import { NativeExamPack } from "../domain/exam_pack.ts";
 import type { NativeObject } from "../domain/json_value.ts";
+import { nativeJsonText } from "../domain/json_value.ts";
+import type { BudgetRequest } from "../application/request_budget.ts";
+import type { ApiExecution } from "../application/api_dispatch.ts";
+import { HistorySnapshotService } from "../application/history_snapshot.ts";
+import { OwnReportListService } from "../application/own_report_list.ts";
+import { publicJsonText } from "../application/public_response.ts";
+import {
+  HistorySnapshotSource,
+  snapshotBytesSha256,
+  SupabaseSnapshotHead,
+} from "./history_snapshot_source.ts";
+import { SupabaseOwnReportList } from "./own_report_list_postgres.ts";
+import { OwnReportCursor } from "./own_report_cursor.ts";
 function fail(): never {
   throw new AccessError("security_policy_unavailable", 503);
 }
@@ -34,6 +47,8 @@ export class NativeRuntimeRequest {
   private budgetValue?: Promise<RuntimeRequestBudget>;
   private dataValue?: Promise<NativeDataProvider>;
   private scoresValue?: Promise<SupabaseScoreInputRepository>;
+  private snapshotValue?: Promise<HistorySnapshotSource>;
+  private snapshotOwner?: string;
   constructor(
     private readonly env: RuntimeEnvironment,
     private readonly basic: () => BasicRuntimeSettings,
@@ -42,6 +57,7 @@ export class NativeRuntimeRequest {
     private readonly operation: ApiOperationId | "health.ready" | null,
     private readonly fetcher: typeof fetch = fetch,
     private readonly artifactCache?: VerifiedArtifactCache,
+    private readonly ifNoneMatch: string | null = null,
   ) {}
   binding(): Promise<ApprovedRuntimeBinding> {
     this.bindingValue ??= (async () => {
@@ -103,6 +119,7 @@ export class NativeRuntimeRequest {
         this.clock,
         replays,
         controls,
+        (request, result) => this.measureResult(request, result),
       );
     })();
     return this.budgetValue;
@@ -115,6 +132,112 @@ export class NativeRuntimeRequest {
       return new SupabaseScoreInputRepository(this.sql(), platform, policy, this.clock);
     })();
     return this.scoresValue;
+  }
+  async assertReadViewScope(): Promise<void> {
+    const binding = await this.binding();
+    if (!binding.readViews) throw new AccessError("operation_scope_not_approved", 503);
+  }
+  private snapshot(owner: string): Promise<HistorySnapshotSource> {
+    if (this.snapshotOwner !== undefined && this.snapshotOwner !== owner) fail();
+    this.snapshotOwner = owner;
+    this.snapshotValue ??= (async () => {
+      const [binding, controls, budget] = await Promise.all([
+        this.binding(),
+        this.controls(),
+        this.budget(),
+      ]);
+      if (!binding.readViews) fail();
+      return new HistorySnapshotSource(
+        new SupabaseSnapshotHead(this.sql(), owner),
+        binding.readViews.snapshot,
+        { projectUrl: binding.projectUrl, ...binding.storage },
+        this.clock,
+        {
+          maxReadBytes: binding.readLimits.maxBytes,
+          maxResultBytes: budget.policy.responseLimit("history.snapshot.read"),
+          runtimeMilliseconds: Number(binding.usageStoreLimits.runtimeHardLimitSeconds * 1000n),
+        },
+        controls.fetcher,
+      );
+    })();
+    return this.snapshotValue;
+  }
+  async readView(request: ApiExecution): Promise<unknown> {
+    await this.assertReadViewScope();
+    const binding = await this.binding();
+    if (request.operation === "report.list-own") {
+      const hex = this.env.get("JUNGSI_DISPLAY_CURSOR_KEY_HEX");
+      if (typeof hex !== "string" || !/^[a-f0-9]{64}$/i.test(hex) || !binding.readViews) fail();
+      const remaining = binding.expiresAtUtc - this.clock.nowUtc(),
+        configured = binding.readViews.cursorLifetimeMicroseconds;
+      if (remaining < 1n) fail();
+      return await new OwnReportListService(
+        new SupabaseOwnReportList(this.sql()),
+        new OwnReportCursor(
+          Uint8Array.from(hex.match(/../g)!, (x) => parseInt(x, 16)),
+          binding.readViews.maxCursorCharacters,
+        ),
+        this.clock,
+        configured < remaining ? configured : remaining,
+      ).execute(request.session, request.query);
+    }
+    const source = await this.snapshot(request.session.user.subjectId),
+      service = new HistorySnapshotService(
+        source,
+        this.clock,
+        binding.readViews!.snapshot.scopeSha256,
+      );
+    if (request.operation === "history.snapshot.head") {
+      return await service.head(request.session, request.query);
+    }
+    if (request.operation === "history.snapshot.read") {
+      return await service.read(request.session, request.params.snapshot_id, request.query);
+    }
+    fail();
+  }
+  private conditional(etag: string): boolean {
+    return this.ifNoneMatch === etag || this.ifNoneMatch === "*";
+  }
+  async encodeReadView(
+    request: Pick<BudgetRequest, "operation" | "session">,
+    result: unknown,
+  ): Promise<
+    {
+      body: Uint8Array<ArrayBuffer> | null;
+      status: 200 | 304;
+      etag: string;
+      gzip: boolean;
+      snapshotId?: string;
+      publicationSha256?: string;
+    } | null
+  > {
+    if (request.operation === "history.snapshot.read") {
+      const wire = await (await this.snapshot(request.session.user.subjectId)).representation(
+          result,
+        ),
+        cached = this.conditional(wire.etag);
+      return {
+        body: cached ? null : wire.bytes,
+        status: cached ? 304 : 200,
+        etag: wire.etag,
+        gzip: true,
+        snapshotId: wire.snapshotId,
+        publicationSha256: wire.publicationSha256,
+      };
+    }
+    if (request.operation === "history.snapshot.head") {
+      const bytes = new TextEncoder().encode(publicJsonText(result)),
+        etag = '"' + await snapshotBytesSha256(bytes) + '"',
+        cached = this.conditional(etag);
+      return { body: cached ? null : bytes, status: cached ? 304 : 200, etag, gzip: false };
+    }
+    return null;
+  }
+  private async measureResult(request: BudgetRequest, result: unknown): Promise<bigint> {
+    const wire = await this.encodeReadView(request, result);
+    return wire
+      ? BigInt(wire.body?.length ?? 0)
+      : BigInt(new TextEncoder().encode(nativeJsonText(result)).length);
   }
   private assertArtifactScope(raw: Uint8Array, binding: ApprovedRuntimeBinding): void {
     let selected: NativeObject;
@@ -253,5 +376,9 @@ export class NativeRuntimeRequest {
       await controls.current();
     }
     if (this.budgetValue) (await this.budget()).policy.assertLive();
+    if (this.snapshotValue) {
+      const source = await this.snapshotValue;
+      await source.assertCurrent(await source.current());
+    }
   }
 }

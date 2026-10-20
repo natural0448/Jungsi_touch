@@ -88,6 +88,12 @@ export async function authorizeRelayed(
 }
 
 const SAFE_CODES = new Set([
+  "snapshot_invalid",
+  "snapshot_unavailable",
+  "publication_changed",
+  "snapshot_part_not_found",
+  "cursor_expired",
+  "part_required",
   "acceptance_evidence_missing",
   "comparable_history_missing",
   "decision_range_unconfirmed",

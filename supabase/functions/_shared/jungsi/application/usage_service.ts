@@ -1,6 +1,10 @@
 /** Approved server plans compose atomic budgets with work; no unapproved fallback. */
 import { type StageBudgetProof, verifyStageBudgetProof } from "./operating_policy.ts";
 import { AccessError } from "./access.ts";
+import {
+  type AdministratorUsageProof,
+  verifyAdministratorUsageProof,
+} from "./administrator_usage_policy.ts";
 import type { PlatformRepositoryPort } from "./platform_repository.ts";
 import type { RequestClockPort } from "./ports.ts";
 import {
@@ -11,6 +15,7 @@ import {
 } from "./request_budget.ts";
 import { sessionDto } from "./session_service.ts";
 import type {
+  BudgetKind,
   UsageBudgetStorePort,
   UsageDemand,
   UsageLease,
@@ -30,6 +35,8 @@ export interface ApprovedUsagePlan {
   readonly computation: "required" | "idempotent_replay";
   readonly demands: readonly UsageDemand[];
   readonly stageProof?: StageBudgetProof;
+  readonly administratorProof?: AdministratorUsageProof;
+  readonly maximumResultBytes?: bigint;
 }
 export interface PreparedUsageAdmission {
   readonly originalRequest: BudgetRequest;
@@ -86,7 +93,17 @@ export class SharedRequestBudget implements RequestBudgetPort {
     private readonly store: UsageBudgetStorePort,
     private readonly clock: RequestClockPort,
     private readonly replays: UsageReplayVerificationPort,
+    private readonly measureResult?: (request: BudgetRequest, result: unknown) => Promise<bigint>,
   ) {}
+  private administrator(request: BudgetRequest, plan: ApprovedUsagePlan): readonly BudgetKind[] {
+    return verifyAdministratorUsageProof(plan.administratorProof, {
+      owner: request.session.user.subjectId,
+      operation: request.operation,
+      policyVersion: plan.policyVersion,
+      session: request.session,
+      approvalSha256: plan.approvalReferenceSha256,
+    }, this.clock.nowUtc());
+  }
   private validate(request: BudgetRequest, plan: ApprovedUsagePlan): void {
     if (
       !plan || plan.status !== "approved" || typeof plan.policyVersion !== "string" ||
@@ -123,6 +140,16 @@ export class SharedRequestBudget implements RequestBudgetPort {
         plan.demands.some((d) => ["distinct_scores", "calculation_cost"].includes(d.kind)))
     ) unavailable();
     const kinds = new Set(plan.demands.map((d) => d.kind));
+    const exempt = this.administrator(request, plan);
+    if (
+      plan.administratorProof &&
+      (typeof plan.maximumResultBytes !== "bigint" ||
+        plan.maximumResultBytes !== plan.administratorProof.maximumResultBytes)
+    ) unavailable();
+    if (
+      plan.maximumResultBytes !== undefined &&
+      (typeof plan.maximumResultBytes !== "bigint" || plan.maximumResultBytes < 1n)
+    ) unavailable();
     for (
       const kind of [
         "request_window",
@@ -130,8 +157,13 @@ export class SharedRequestBudget implements RequestBudgetPort {
         "result_volume",
         ...(analysis && !stageRights ? ["distinct_scores", "calculation_cost"] : []),
       ]
-    ) if (!kinds.has(kind as UsageDemand["kind"])) unavailable();
+    ) {
+      if (
+        !kinds.has(kind as UsageDemand["kind"]) && !exempt.includes(kind as UsageDemand["kind"])
+      ) unavailable();
+    }
     for (const d of plan.demands) {
+      if (exempt.includes(d.kind) && d.periodSeconds === 86400n) unavailable();
       if (d.kind === "concurrent_jobs" && (d.scope !== "GLOBAL" || d.periodSeconds !== 1n)) {
         unavailable();
       }
@@ -194,6 +226,7 @@ export class SharedRequestBudget implements RequestBudgetPort {
         operation: protectedRequest.operation,
         policyVersion: plan.policyVersion,
         demands,
+        ...(plan.administratorProof ? { administratorProof: plan.administratorProof } : {}),
       });
     } catch {
       return unavailable();
@@ -220,6 +253,7 @@ export class SharedRequestBudget implements RequestBudgetPort {
       admission.originalRequest !== request
     ) unavailable();
     sessionDto(request.session, this.clock.nowUtc());
+    this.administrator(admission.request, admission.plan);
     verifyStageBudgetProof(
       admission.plan.stageProof,
       admission.request,
@@ -233,16 +267,36 @@ export class SharedRequestBudget implements RequestBudgetPort {
     work: () => Promise<T>,
     request: BudgetRequest = admission.originalRequest,
   ): Promise<T> {
-    this.assertAdmission(admission, request);
-    const record = admissions.get(admission)!;
-    if (record.state !== "prepared") unavailable();
+    const record = admissions.get(admission);
+    if (
+      !record || record.issuer !== this || record.state !== "prepared" ||
+      admission.originalRequest !== request
+    ) unavailable();
+    try {
+      this.assertAdmission(admission, request);
+    } catch (error) {
+      try {
+        await this.store.settle(admission.lease, "failure");
+        record.state = "settled";
+      } catch {
+        return unavailable();
+      }
+      throw error;
+    }
     record.state = "running";
     const { request: protectedRequest, plan, lease } = admission;
     let result: T, resultBytes = 0n;
     try {
       sessionDto(request.session, this.clock.nowUtc());
       result = await work();
-      resultBytes = BigInt(new TextEncoder().encode(nativeJsonText(result)).byteLength);
+      resultBytes = this.measureResult
+        ? await this.measureResult(protectedRequest, result)
+        : BigInt(new TextEncoder().encode(nativeJsonText(result)).byteLength);
+      if (
+        typeof resultBytes !== "bigint" || resultBytes < 0n ||
+        plan.maximumResultBytes !== undefined && resultBytes > plan.maximumResultBytes
+      ) unavailable();
+      this.administrator(protectedRequest, plan);
       verifyStageBudgetProof(
         plan.stageProof,
         protectedRequest,
@@ -256,6 +310,7 @@ export class SharedRequestBudget implements RequestBudgetPort {
       } catch {
         return unavailable();
       }
+      this.administrator(protectedRequest, plan);
       verifyStageBudgetProof(
         plan.stageProof,
         protectedRequest,
@@ -271,6 +326,7 @@ export class SharedRequestBudget implements RequestBudgetPort {
       return unavailable();
     }
     sessionDto(request.session, this.clock.nowUtc());
+    this.administrator(protectedRequest, plan);
     verifyStageBudgetProof(
       plan.stageProof,
       protectedRequest,
