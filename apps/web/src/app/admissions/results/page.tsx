@@ -4,8 +4,8 @@ import Form from "next/form";
 import Link from "next/link";
 import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
-import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import type { CatalogSearchDto, HistoryMetricDto } from "@/lib/dto";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
+import type { CatalogSearchDto, HistoryMetricDto, HistorySearchQuery } from "@/lib/dto";
 import { asOfDate } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { lockFor, page } from "@/lib/routes";
@@ -34,7 +34,27 @@ const MAX_PAGES = 6;
 /** 회원 공유 저장 시간(초)과 저장 형식 판. 자료 판이 바뀌어도 늦어도 이 시간 뒤에는 새 자료로 바뀐다 */
 const SHARED_TTL = 600;
 const SHARED_VER = 1;
+/** 동시 처리 제한 때 다시 받기: 최대 횟수와 한 번 기다리는 최대 시간 */
+const RETRY_MAX = 3;
+const RETRY_WAIT_MAX_MS = 3000;
 
+
+
+/** 읽기 조회 한 쪽. 계정 동시 처리 제한(rate_limited)에 걸리면 서버가 알려 준 시각(없으면 0.8초)까지 기다렸다
+ *  다시 받는다 — 앞서 연 화면의 조회가 서버에서 아직 끝나지 않아 겹친 경우가 대부분이라 몇 초면 풀린다.
+ *  읽기 전용이라 다시 불러도 상태가 바뀌지 않는다. 기다림은 한 번에 최대 3초, 최대 3회 */
+async function pageWithRetry(src: JungsiSource, caller: Caller, q: HistorySearchQuery): Promise<CatalogSearchDto<HistoryMetricDto>> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await src.searchHistory(caller, q);
+    } catch (e) {
+      if (!(e instanceof ConnectionError) || e.kind !== "rate_limited" || attempt >= RETRY_MAX) throw e;
+      const wait = e.retryAt ? e.retryAt.getTime() - Date.now() : 800;
+      if (wait > RETRY_WAIT_MAX_MS) throw e;
+      await new Promise((ok) => setTimeout(ok, Math.max(300, wait)));
+    }
+  }
+}
 
 /**
  * 1페이지 · 대학 발표 입시결과 (REQ-01)
@@ -64,30 +84,42 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   /** 학년도를 정하지 않고 예산(MAX_PAGES×limit) 안에서 이어 받는다. 쪽은 순서대로 하나씩 받는다
    *  (동시 조회는 계정당 승인 동시성을 넘긴다 — FE-LIVE-P1-CONCURRENCY-01). 예산을 넘겨 잘린 꼬리
    *  모집행은 지표 일부만 담겨 표·산술이 틀려 보일 수 있으므로 버리고(완전한 모집행만 표시) 미완료로 알린다 */
-  async function searchAll(): Promise<{ items: HistoryMetricDto[]; ready: boolean; as_of: string | null; truncated: boolean }> {
+  async function searchAll(): Promise<{ items: HistoryMetricDto[]; ready: boolean; as_of: string | null; truncated: boolean; partial: boolean }> {
     const items: HistoryMetricDto[] = [];
     let cursor: string | undefined;
     let ready = false;
     let as_of: string | null = null;
+    const cut = () => {
+      const tail = items.at(-1)?.offering_id;
+      return items.filter((m) => m.offering_id !== tail);
+    };
     for (let i = 0; i < MAX_PAGES; i++) {
-      const r: CatalogSearchDto<HistoryMetricDto> = await src.searchHistory(caller, { ...base, cursor, limit: LIMIT_PAST });
+      let r: CatalogSearchDto<HistoryMetricDto>;
+      try {
+        r = await pageWithRetry(src, caller, { ...base, cursor, limit: LIMIT_PAST });
+      } catch (e) {
+        // 다시 받아도 동시 처리 제한이 풀리지 않으면: 앞 쪽을 이미 받았으면 그만큼 보이고 '조회 미완료'로 알린다
+        // (이 결과는 공유 저장하지 않는다). 하나도 못 받았으면 원래대로 오류 안내
+        if (i > 0 && e instanceof ConnectionError && e.kind === "rate_limited") return { items: cut(), ready, as_of, truncated: true, partial: true };
+        throw e;
+      }
       if (r.status === "ready" && r.items !== null) ready = true;
       if (r.as_of) as_of = r.as_of;
       items.push(...(r.items ?? []));
-      if (!r.next_cursor) return { items, ready, as_of, truncated: false };
+      if (!r.next_cursor) return { items, ready, as_of, truncated: false, partial: false };
       cursor = r.next_cursor;
     }
-    const tail = items.at(-1)?.offering_id;
-    return { items: items.filter((m) => m.offering_id !== tail), ready, as_of, truncated: true };
+    return { items: cut(), ready, as_of, truncated: true, partial: false };
   }
-  let all: { items: HistoryMetricDto[]; ready: boolean; as_of: string | null; truncated: boolean };
+
+  let all: { items: HistoryMetricDto[]; ready: boolean; as_of: string | null; truncated: boolean; partial: boolean };
   try {
     // 같은 조건·같은 회원 등급의 조회 결과를 회원끼리 SHARED_TTL 동안 함께 쓴다(공개 발표 자료만, 커서는 저장하지 않음).
     // 첫 1명만 6쪽 조회를 기다리고 나머지는 저장본을 받는다. 자료가 발행되지 않은(ready 아님) 응답·오류는 저장하지 않는다
     const key = await cacheKey(["p1-history", SHARED_VER, src.kind, session?.member_tier ?? null, base]);
     all = await sharedCached(`p1:${key}`, SHARED_TTL, async () => {
       const r = await searchAll();
-      return { value: r, keep: r.ready };
+      return { value: r, keep: r.ready && !r.partial };
     });
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
