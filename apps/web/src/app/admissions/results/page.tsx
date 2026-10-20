@@ -4,8 +4,8 @@ import Form from "next/form";
 import Link from "next/link";
 import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
-import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
-import type { CatalogSearchDto, HistoryMetricDto, HistorySearchQuery } from "@/lib/dto";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
+import type { CatalogSearchDto, HistoryMetricDto } from "@/lib/dto";
 import { asOfDate } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { lockFor, page } from "@/lib/routes";
@@ -36,27 +36,8 @@ const MAX_PAGES = 6;
 const SHARED_FRESH = 1800;
 const SHARED_STALE = 7 * 24 * 3600;
 const SHARED_VER = 2;
-/** 동시 처리 제한 때 다시 받기: 최대 횟수와 한 번 기다리는 최대 시간 */
-const RETRY_MAX = 3;
-const RETRY_WAIT_MAX_MS = 3000;
 
 
-
-/** 읽기 조회 한 쪽. 계정 동시 처리 제한(rate_limited)에 걸리면 서버가 알려 준 시각(없으면 0.8초)까지 기다렸다
- *  다시 받는다 — 앞서 연 화면의 조회가 서버에서 아직 끝나지 않아 겹친 경우가 대부분이라 몇 초면 풀린다.
- *  읽기 전용이라 다시 불러도 상태가 바뀌지 않는다. 기다림은 한 번에 최대 3초, 최대 3회 */
-async function pageWithRetry(src: JungsiSource, caller: Caller, q: HistorySearchQuery): Promise<CatalogSearchDto<HistoryMetricDto>> {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      return await src.searchHistory(caller, q);
-    } catch (e) {
-      if (!(e instanceof ConnectionError) || e.kind !== "rate_limited" || attempt >= RETRY_MAX) throw e;
-      const wait = e.retryAt ? e.retryAt.getTime() - Date.now() : 800;
-      if (wait > RETRY_WAIT_MAX_MS) throw e;
-      await new Promise((ok) => setTimeout(ok, Math.max(300, wait)));
-    }
-  }
-}
 
 /**
  * 1페이지 · 대학 발표 입시결과 (REQ-01)
@@ -98,9 +79,10 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
     for (let i = 0; i < MAX_PAGES; i++) {
       let r: CatalogSearchDto<HistoryMetricDto>;
       try {
-        r = await pageWithRetry(src, caller, { ...base, cursor, limit: LIMIT_PAST });
+        // 동시 처리 제한 재시도는 lib/api/live.ts 가 공통으로 한다(최대 3번)
+        r = await src.searchHistory(caller, { ...base, cursor, limit: LIMIT_PAST });
       } catch (e) {
-        // 다시 받아도 동시 처리 제한이 풀리지 않으면: 앞 쪽을 이미 받았으면 그만큼 보이고 '조회 미완료'로 알린다
+        // 공통 재시도 뒤에도 동시 처리 제한이 풀리지 않으면: 앞 쪽을 이미 받았으면 그만큼 보이고 '조회 미완료'로 알린다
         // (이 결과는 공유 저장하지 않는다). 하나도 못 받았으면 원래대로 오류 안내
         if (i > 0 && e instanceof ConnectionError && e.kind === "rate_limited") return { items: cut(), ready, as_of, truncated: true, partial: true };
         throw e;

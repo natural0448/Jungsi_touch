@@ -98,18 +98,26 @@ async function withLane<T>(key: string, run: () => Promise<T>): Promise<T> {
 }
 
 /*
-  계정당 동시 한도(429 rate_limit_exceeded)로 거절되면 3초 뒤 **딱 한 번만** 같은 요청을 다시 보낸다(관리자 결정 2026-10-18).
-  겹친 요청은 보통 2~4초 안에 정산된다(담당자 DB 요약: 거절 9건 모두 2.3~4.0초 뒤 성공). 무한 재시도·한도 변경 없음.
+  계정당 동시 한도(429 rate_limit_exceeded)로 거절되면 잠시 기다렸다 같은 요청을 다시 보낸다. 최대 3번(3초·3초·4초,
+  서버 Retry-After 가 5초 이하면 그 값). 2026-10-18 결정은 '3초 뒤 한 번'이었으나, 다른 화면에서 시작된 요청이 서버에서
+  아직 끝나지 않아 겹치는 경우 한 번으로는 풀리지 않아 확인 자체가 막혔다(2026-10-20 사용자 지적으로 3번으로 늘림).
   하루 분석 한도(analysis_quota_exceeded)는 다시 보내지 않는다. 쓰기는 같은 Idempotency-Key 로 다시 보내므로 중복되지 않는다.
 */
-const CONTENTION_RETRY_MS = 3000;
+const CONTENTION_WAITS_MS = [3000, 3000, 4000];
+const CONTENTION_HINT_MAX_MS = 5000;
 async function sendOnceMore(path: string, init: RequestInit): Promise<Response> {
-  const res = await send(path, init);
-  if (res.status !== 429) return res;
-  const code = ((await res.clone().json().catch(() => null)) as ErrBody)?.error?.code;
-  if (code !== "rate_limit_exceeded") return res;
-  await new Promise((r) => setTimeout(r, CONTENTION_RETRY_MS));
-  return send(path, init);
+  let res = await send(path, init);
+  for (const fallback of CONTENTION_WAITS_MS) {
+    if (res.status !== 429) return res;
+    const code = ((await res.clone().json().catch(() => null)) as ErrBody)?.error?.code;
+    if (code !== "rate_limit_exceeded") return res;
+    const hint = retryAfterAt(res.headers.get("Retry-After"));
+    const hintMs = hint ? hint.getTime() - Date.now() : null;
+    const wait = hintMs !== null && hintMs >= 0 && hintMs <= CONTENTION_HINT_MAX_MS ? Math.max(500, hintMs) : fallback;
+    await new Promise((r) => setTimeout(r, wait));
+    res = await send(path, init);
+  }
+  return res;
 }
 
 async function send(path: string, init: RequestInit): Promise<Response> {

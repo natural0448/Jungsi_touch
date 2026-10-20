@@ -18147,6 +18147,16 @@
         "REQ-03"
       ],
       "summary": "화면팀 변경(사용자 지적 2026-10-20: 3페이지 모집단위 펼치기가 너무 느림): 펼치기·접기를 화면에서 바로 처리한다(item-shell.tsx). 이전에는 펼칠 때마다 ?open= 링크로 페이지 전체를 서버에서 다시 그려 offerings.search·report.read·(필요 시)university.analyze·담은 학교·recruitment.read·forecast.published.read 를 다시 불렀다. 이제 환산·누백·판단 카드는 목록을 받을 때 함께 그려 두고, 2027 모집 정보·발행 기준만 처음 펼칠 때 그 모집단위만 서버 액션(loadExtras, 유료 동시 2 안에서 두 조회)으로 받는다. 펼친 모집단위 조회 기록은 전과 같이 'analysis' 로 남기고, 주소 ?open= 은 화면 이동 없이 갱신한다. 2027 모집 정보·발행 기준 부품은 recruit-parts.tsx 로 분리."
+    },
+    {
+      "date": "2026-10-20",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-03",
+        "REQ-04"
+      ],
+      "summary": "화면팀 변경(사용자 지적 2026-10-20: '요청이 많아 잠시 제한' 화면이 자꾸 나오면 확인이 불가능): lib/api/live.ts 공통 재시도를 '429 rate_limit_exceeded 때 3초 뒤 1회'(2026-10-18 결정)에서 '최대 3회(3·3·4초, Retry-After 가 5초 이하면 그 값)'로 늘린다. 다른 화면에서 시작된 요청이 서버에서 아직 끝나지 않아 겹치는 경우 1회로 풀리지 않았다. analysis_quota_exceeded 는 다시 보내지 않고, 쓰기는 같은 Idempotency-Key 로만 다시 보낸다. P1 화면 자체 재시도는 공통 재시도와 겹치지 않게 뺐고, 앞 쪽을 받은 뒤 실패하면 받은 만큼 보이는 동작은 유지한다. 근본 해결(동시 처리 한도 상향·관리자 무제한)은 담당자 요청서 부록 A."
     }
   ],
   "overall_analysis_contract": {
