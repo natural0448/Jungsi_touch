@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.93이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.94이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -8,7 +8,7 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 
 권한은 body·query 검증/자료 조회/멱등 조회보다 먼저 검사한다. unknown field와 중복 query key는 거절한다. 숫자 점수/누적은 엔진의 소수 문자열이며 원자료/전체 분포/가중치/비밀값/로컬 출처 경로는 제공하지 않는다. 모든 응답은 Cache-Control: no-store다.
 
-## 25개 요청과 응답
+## 28개 요청과 응답
 
 | API | 메서드/경로 | 본문 | 쿼리 | 응답 DTO | 키 필수 |
 | --- | --- | --- | --- | --- | --- |
@@ -37,6 +37,9 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 | score-input.status.read | GET /api/v1/me/score-input-status | 없음 | exam_id, stage? | score_input_status; backend_platform_contract.dto_schemas.score_input_status | False |
 | score-input.correction.grant | POST /api/v1/management/score-input-corrections | subject_id; exam_id; stage; ticket_ref; expected_version; reason_code=score_correction | 없음 | score_input_correction; backend_platform_contract.dto_schemas.score_input_correction | True |
 | report.sample.read | GET /api/v1/report-sample | 없음 | 없음 | sample_report; backend_platform_contract.dto_schemas.sample_report | False |
+| history.snapshot.head | GET /api/v1/admission-history/snapshot/head | 없음 | 없음 | history_snapshot_head; backend_platform_contract.dto_schemas.history_snapshot_head | False |
+| history.snapshot.read | GET /api/v1/admission-history/snapshots/{snapshot_id} | 없음 | part_id | history_snapshot_body; backend_platform_contract.dto_schemas.history_snapshot_body | False |
+| report.list-own | GET /api/v1/me/reports | 없음 | exam_id, cursor, limit (1~20; default 10) | own_report_list; backend_platform_contract.dto_schemas.own_report_list | False |
 
 모든 HTTP 업무 서비스는 PlatformService.execute이며 FastAPI create_app이 경로를 등록한다. 요청은 operations[].http_contract, 응답은 해당 contract_ref를 따른다. overall.analyze의 HTTP 응답은 persisted report이고 내부 overall 필드만 기존 OverallAnalysisService의 jungsi.overall-analysis/v1 엔진 DTO다. 두 객체를 루트 응답으로 혼동하지 않는다.
 
@@ -304,6 +307,33 @@ format: jungsi.sample-report/v1
 
 - REQ-27 및 score_input_policy_contract; 공개 필드만 닫힌 재귀 스키마로 투영한다. 실제 정책 한도·회원 식별자·비밀/출처 파일은 반환하지 않는다.
 
+### history_snapshot_head
+
+format: jungsi.history-snapshot-head/v1
+
+필드: format, status, snapshot_id, publication_sha256, source_head_sha256, generated_at, source_as_of, schema_version, normalization_rules_version, selection_rules_version, counts, delivery_mode, full, parts, expires_at.
+
+- Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.
+- Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.
+
+### history_snapshot_body
+
+format: jungsi.history-snapshot/v1
+
+필드: format, payload_id, part_id, rows.
+
+- Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.
+- Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.
+
+### own_report_list
+
+format: jungsi.own-report-list/v1
+
+필드: format, items, next_cursor, has_more.
+
+- Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.
+- Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.
+
 ## 시간 표시
 
 서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.
@@ -377,7 +407,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=62e663de0a9b9098f3c83fe9fdb3acb591a1832519d8bae9685ad96f60b010dc -->
+<!-- jungsi:generated spec_sha256=7adbcd750fd35f89867ced9ec21d7abe6bb809e047b89aa59e035900edcb98fd -->
 
 
 ## P1·P2 화면 변경의 한정 수용
@@ -499,13 +529,13 @@ P1-DISPLAY-SNAPSHOT-01 / ADOPTED_REQUIREMENTS_IMPLEMENTATION_AND_FINAL_DATA_CAND
 - JWT/relay/ownership/current role, public-cache segregation, response allowlist/no-store, physical bounds and new operation negative cases
 - Exact candidate source/normal hooks/CI; private final artifact proof; Owner upload/readback/settings; fresh deployed BFF/browser observations remain distinct
 
-ADMIN-VERIFY-QUOTA-01 / ADOPTED_EXPLICIT_POLICY_IMPLEMENTATION_PENDING. Fresh same-Bearer Supabase Auth verification, own profiles role=admin/status=active and aal2; server internal origin only, revalidated each request. No client admin flag or cached privilege.
+ADMIN-VERIFY-QUOTA-01 / SOURCE_IMPLEMENTED_SYNTHETIC_VERIFIED_OPERATING_POLICY_NOT_REGISTERED. Fresh same-Bearer Supabase Auth verification, own profiles role=admin/status=active and aal2; server internal origin only, revalidated each request. No client admin flag or cached privilege.
 
 Explicit policy semantics for confirmed administrator, not null/huge-capacity coercion. Counters and policy keys for normal/paid users are preserved; no reset through role/JWT/profile/key rotation. 보존: shared atomic concurrent_jobs; per-request physical reads/bytes and timeout; current approvals/head/pins; ownership and RLS; idempotency; score-input/correction rights and activation boundary; normal and paid member quotas; security storage fail closed. Prepare bounded resource-safe handling of overlapping ordinary P1 read requests, preferably the snapshot path and reuse. Any queue/concurrency policy change is explicit and tested; no unbounded in-process wait.
 
-REPORT-LOCATOR-01 / ADOPTED_SERVICE_PATH_AND_DTO_PENDING. 제안 report.list-own / GET /api/v1/me/reports. Only current verified subject; bounded exam-filtered keyset query joining report/profile ownership and existing RLS. No new table/index assumed.
+REPORT-LOCATOR-01 / SOURCE_IMPLEMENTED_SYNTHETIC_VERIFIED_ACTUAL_PATH_NOT_RUN. 제안 report.list-own / GET /api/v1/me/reports. Only current verified subject; bounded exam-filtered keyset query joining report/profile ownership and existing RLS. No new table/index assumed.
 
-Approved public own-report summary only; no JWT/internal paths/raw score bodies/other users. Final schema and cursor semantics are registered with implementation. Frontend server validates selected report ownership and CSRF before setting existing HttpOnly cookie. Empty/new-PC list is not permission failure; no automatic POST analysis or score save.
+report_id, nullable exam_id, report_version, updated_at; next_cursor/has_more. AES-GCM purpose-bound owner/filter/high-water cursor; limit+1 max21 rows; C/ASCII order. No COUNT or report body. Frontend server validates selected report ownership and CSRF before setting existing HttpOnly cookie. Empty/new-PC list is not permission failure; no automatic POST analysis or score save.
 
 작성 팀과 실행 계층은 다르다. 화면팀의 승인 포트/엔진 결과 조회·조합·입력/DTO/오류 흐름은 기존 서버 application 서비스 공동 개발 정책을 따르며 DB·SQL·자료 어댑터·정본 writer·산출 본체는 기존 담당 범위다. 신규 Secret·DB 역할·배포 권한은 이 문서로 부여하지 않는다.
 
@@ -555,6 +585,8 @@ For an approved estimated_weights/official_all_examinees result use a neutral hu
 | IDENTITY_SCOPE_REVIEW_PENDING | 모집단위 명칭·전형·모집군의 연결을 확인하고 있습니다. |
 | SOURCE_TRACK_PK_CONFLICT | 원문 전형과 연결된 모집행이 달라 확인하고 있습니다. |
 | OFFERING_MAPPING_PENDING | 이 자료의 모집행 연결을 확인하고 있습니다. |
+
+별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 별도 시험 76개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
 
 ### 최신 Owner·화면팀 운영 영수증의 한정 수용
 

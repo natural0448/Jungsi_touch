@@ -138,9 +138,14 @@ class PolicyExtensionRegistrationCases(unittest.TestCase):
         result=runner.operation_registration(self.source)
         self.assertEqual(result['all_22'],'CODE_REGISTERED')
         legacy=result['source_registration'];extension=result['policy_extension_source_registration']
-        self.assertEqual((legacy['contract_operation_count'],legacy['legacy_scope_operation_count'],legacy['registered_operation_count']),(25,22,22))
+        self.assertEqual((legacy['contract_operation_count'],legacy['legacy_scope_operation_count'],legacy['registered_operation_count']),(28,22,22))
         self.assertEqual((extension['contract_operation_count'],extension['registered_operation_count']),(3,3))
-        self.assertEqual(set(legacy['registered_operation_ids'])|set(extension['registered_operation_ids']),{o['id']for o in self.source['operations']})
+        prior=set(legacy['registered_operation_ids'])|set(extension['registered_operation_ids'])
+        self.assertEqual(len(prior),25)
+        read=result['read_view_extension_source_registration']
+        self.assertEqual(set(read['registered_operation_ids']),{'history.snapshot.head','history.snapshot.read','report.list-own'})
+        self.assertFalse(prior&set(read['registered_operation_ids']))
+        self.assertEqual(prior|set(read['registered_operation_ids']),{o['id']for o in self.source['operations']})
         self.assertFalse(set(legacy['registered_operation_ids'])&set(extension['registered_operation_ids']))
         self.assertEqual(extension['activation_status'],'NOT_RUN')
         self.assertEqual(extension['native_acceptance'],'NOT_VERIFIED_BY_SOURCE_SUITE')

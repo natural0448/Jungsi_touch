@@ -350,6 +350,48 @@
           "nullable": false
         }
       }
+    },
+    {
+      "id": "history.snapshot.head",
+      "contract_ref": "backend_platform_contract.dto_schemas.history_snapshot_head",
+      "roots": {
+        "standard": {
+          "ref": "history_snapshot_head",
+          "nullable": false
+        },
+        "paid": {
+          "ref": "history_snapshot_head",
+          "nullable": false
+        }
+      }
+    },
+    {
+      "id": "history.snapshot.read",
+      "contract_ref": "backend_platform_contract.dto_schemas.history_snapshot_body",
+      "roots": {
+        "standard": {
+          "ref": "history_snapshot_body",
+          "nullable": false
+        },
+        "paid": {
+          "ref": "history_snapshot_body",
+          "nullable": false
+        }
+      }
+    },
+    {
+      "id": "report.list-own",
+      "contract_ref": "backend_platform_contract.dto_schemas.own_report_list",
+      "roots": {
+        "standard": {
+          "ref": "own_report_list",
+          "nullable": false
+        },
+        "paid": {
+          "ref": "own_report_list",
+          "nullable": false
+        }
+      }
     }
   ],
   "schemas": {
@@ -4976,6 +5018,871 @@
         "sample_id",
         "label",
         "report"
+      ],
+      "optional": []
+    },
+    "history_snapshot_source_context": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "observation_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "identity_variant_index": {
+          "type": "integer",
+          "nullable": false
+        },
+        "scope_status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "source_consistent",
+            "review_pending"
+          ]
+        }
+      },
+      "required": [
+        "observation_id",
+        "identity_variant_index",
+        "scope_status"
+      ],
+      "optional": []
+    },
+    "history_snapshot_cell": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "value": {
+          "type": "union",
+          "nullable": true,
+          "options": [
+            {
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "type": "number",
+              "nullable": false
+            }
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "nullable": true
+        },
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "verified_official",
+            "pending_metadata",
+            "pending_value_type",
+            "pending_value_missing",
+            "not_published"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_url": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_as_of": {
+          "type": "string",
+          "nullable": true
+        },
+        "statistic_label": {
+          "type": "string",
+          "nullable": true
+        },
+        "cohort": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_context": {
+          "ref": "history_snapshot_source_context",
+          "nullable": true
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "status",
+        "reason_code",
+        "source_url",
+        "source_as_of",
+        "statistic_label",
+        "cohort",
+        "source_context"
+      ],
+      "optional": []
+    },
+    "history_snapshot_recruitment_cell": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "value": {
+          "type": "union",
+          "nullable": true,
+          "options": [
+            {
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "type": "number",
+              "nullable": false
+            }
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "nullable": true
+        },
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "verified_official",
+            "pending_metadata",
+            "pending_value_type",
+            "pending_value_missing",
+            "not_published"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_url": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_as_of": {
+          "type": "string",
+          "nullable": true
+        },
+        "statistic_label": {
+          "type": "string",
+          "nullable": true
+        },
+        "cohort": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_context": {
+          "ref": "history_snapshot_source_context",
+          "nullable": true
+        },
+        "stage": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "initial",
+            "carryover",
+            "final",
+            "unspecified"
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "status",
+        "reason_code",
+        "source_url",
+        "source_as_of",
+        "statistic_label",
+        "cohort",
+        "source_context",
+        "stage"
+      ],
+      "optional": []
+    },
+    "history_snapshot_cut_cell": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "value": {
+          "type": "union",
+          "nullable": true,
+          "options": [
+            {
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "type": "number",
+              "nullable": false
+            }
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "nullable": true
+        },
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "verified_official",
+            "pending_metadata",
+            "pending_value_type",
+            "pending_value_missing",
+            "not_published"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_url": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_as_of": {
+          "type": "string",
+          "nullable": true
+        },
+        "statistic_label": {
+          "type": "string",
+          "nullable": true
+        },
+        "cohort": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_context": {
+          "ref": "history_snapshot_source_context",
+          "nullable": true
+        },
+        "statistic_percent": {
+          "type": "integer",
+          "nullable": true
+        },
+        "basis_code": {
+          "type": "string",
+          "nullable": true
+        },
+        "basis_label": {
+          "type": "string",
+          "nullable": true
+        },
+        "cohort_code": {
+          "type": "string",
+          "nullable": true
+        },
+        "cohort_label": {
+          "type": "string",
+          "nullable": true
+        },
+        "selection_rule_ref": {
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "status",
+        "reason_code",
+        "source_url",
+        "source_as_of",
+        "statistic_label",
+        "cohort",
+        "source_context",
+        "statistic_percent",
+        "basis_code",
+        "basis_label",
+        "cohort_code",
+        "cohort_label",
+        "selection_rule_ref"
+      ],
+      "optional": []
+    },
+    "history_snapshot_alternate_cell": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "value": {
+          "type": "union",
+          "nullable": true,
+          "options": [
+            {
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "type": "number",
+              "nullable": false
+            }
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "nullable": true
+        },
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "verified_official",
+            "pending_metadata",
+            "pending_value_type",
+            "pending_value_missing",
+            "not_published"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_url": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_as_of": {
+          "type": "string",
+          "nullable": true
+        },
+        "statistic_label": {
+          "type": "string",
+          "nullable": true
+        },
+        "cohort": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_context": {
+          "ref": "history_snapshot_source_context",
+          "nullable": true
+        },
+        "statistic_percent": {
+          "type": "integer",
+          "nullable": true
+        },
+        "basis_code": {
+          "type": "string",
+          "nullable": true
+        },
+        "basis_label": {
+          "type": "string",
+          "nullable": true
+        },
+        "cohort_code": {
+          "type": "string",
+          "nullable": true
+        },
+        "cohort_label": {
+          "type": "string",
+          "nullable": true
+        },
+        "selection_rule_ref": {
+          "type": "string",
+          "nullable": true
+        },
+        "entries": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "history_snapshot_cut_cell",
+            "nullable": false
+          }
+        },
+        "omitted_other_basis_count": {
+          "type": "integer",
+          "nullable": false
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "status",
+        "reason_code",
+        "source_url",
+        "source_as_of",
+        "statistic_label",
+        "cohort",
+        "source_context",
+        "statistic_percent",
+        "basis_code",
+        "basis_label",
+        "cohort_code",
+        "cohort_label",
+        "selection_rule_ref",
+        "entries",
+        "omitted_other_basis_count"
+      ],
+      "optional": []
+    },
+    "history_snapshot_identity_variant": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "university_name": {
+          "type": "string",
+          "nullable": true
+        },
+        "department": {
+          "type": "string",
+          "nullable": true
+        },
+        "admission_track": {
+          "type": "string",
+          "nullable": true
+        },
+        "group": {
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "required": [
+        "university_name",
+        "department",
+        "admission_track",
+        "group"
+      ],
+      "optional": []
+    },
+    "history_snapshot_identity_review": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "source_consistent",
+            "metadata_pending",
+            "review_pending",
+            "mapping_pending"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "nullable": true
+        },
+        "variants": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "history_snapshot_identity_variant",
+            "nullable": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "reason_code",
+        "variants"
+      ],
+      "optional": []
+    },
+    "history_snapshot_row": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "offering_id": {
+          "type": "string",
+          "nullable": true
+        },
+        "academic_year": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            2024,
+            2025,
+            2026,
+            2027
+          ]
+        },
+        "original_pk": {
+          "type": "string",
+          "nullable": true
+        },
+        "observation_key": {
+          "type": "string",
+          "nullable": true
+        },
+        "mapping_status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "mapped",
+            "mapping_pending"
+          ]
+        },
+        "identity_review": {
+          "ref": "history_snapshot_identity_review",
+          "nullable": false
+        },
+        "university_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "university_name": {
+          "type": "string",
+          "nullable": true
+        },
+        "region": {
+          "type": "string",
+          "nullable": true
+        },
+        "campus": {
+          "type": "string",
+          "nullable": true
+        },
+        "department": {
+          "type": "string",
+          "nullable": true
+        },
+        "admission_track": {
+          "type": "string",
+          "nullable": true
+        },
+        "group": {
+          "type": "string",
+          "nullable": true
+        },
+        "recruitment_count_with_stage": {
+          "ref": "history_snapshot_recruitment_cell",
+          "nullable": false
+        },
+        "competition_ratio": {
+          "ref": "history_snapshot_cell",
+          "nullable": false
+        },
+        "additional_admission_count": {
+          "ref": "history_snapshot_cell",
+          "nullable": false
+        },
+        "final_additional_admission_rank": {
+          "ref": "history_snapshot_cell",
+          "nullable": false
+        },
+        "final_50_percent_cut": {
+          "ref": "history_snapshot_cut_cell",
+          "nullable": false
+        },
+        "final_70_percent_cut": {
+          "ref": "history_snapshot_cut_cell",
+          "nullable": false
+        },
+        "alternate_cut": {
+          "ref": "history_snapshot_alternate_cell",
+          "nullable": false
+        }
+      },
+      "required": [
+        "offering_id",
+        "academic_year",
+        "original_pk",
+        "observation_key",
+        "mapping_status",
+        "identity_review",
+        "university_id",
+        "university_name",
+        "region",
+        "campus",
+        "department",
+        "admission_track",
+        "group",
+        "recruitment_count_with_stage",
+        "competition_ratio",
+        "additional_admission_count",
+        "final_additional_admission_rank",
+        "final_50_percent_cut",
+        "final_70_percent_cut",
+        "alternate_cut"
+      ],
+      "optional": []
+    },
+    "history_snapshot_part": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "part_id": {
+          "type": "string",
+          "nullable": true
+        },
+        "payload_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "gzip_bytes": {
+          "type": "integer",
+          "nullable": false
+        },
+        "gzip_sha256": {
+          "type": "string",
+          "nullable": false
+        },
+        "decoded_bytes": {
+          "type": "integer",
+          "nullable": false
+        },
+        "decoded_sha256": {
+          "type": "string",
+          "nullable": false
+        },
+        "rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "mapped_rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "mapping_pending_rows": {
+          "type": "integer",
+          "nullable": false
+        }
+      },
+      "required": [
+        "part_id",
+        "payload_id",
+        "gzip_bytes",
+        "gzip_sha256",
+        "decoded_bytes",
+        "decoded_sha256",
+        "rows",
+        "mapped_rows",
+        "mapping_pending_rows"
+      ],
+      "optional": []
+    },
+    "history_snapshot_counts": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "mapped_rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "mapping_pending_rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "observations": {
+          "type": "integer",
+          "nullable": false
+        },
+        "schools": {
+          "type": "integer",
+          "nullable": false
+        }
+      },
+      "required": [
+        "rows",
+        "mapped_rows",
+        "mapping_pending_rows",
+        "observations",
+        "schools"
+      ],
+      "optional": []
+    },
+    "history_snapshot_head": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.history-snapshot-head/v1"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "approved"
+          ]
+        },
+        "snapshot_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "publication_sha256": {
+          "type": "string",
+          "nullable": false
+        },
+        "source_head_sha256": {
+          "type": "string",
+          "nullable": false
+        },
+        "generated_at": {
+          "type": "string",
+          "nullable": false
+        },
+        "source_as_of": {
+          "type": "string",
+          "nullable": true
+        },
+        "schema_version": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.history-snapshot/v1"
+          ]
+        },
+        "normalization_rules_version": {
+          "type": "string",
+          "nullable": false
+        },
+        "selection_rules_version": {
+          "type": "string",
+          "nullable": false
+        },
+        "counts": {
+          "ref": "history_snapshot_counts",
+          "nullable": false
+        },
+        "delivery_mode": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "full",
+            "parts"
+          ]
+        },
+        "full": {
+          "ref": "history_snapshot_part",
+          "nullable": true
+        },
+        "parts": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "history_snapshot_part",
+            "nullable": false
+          }
+        },
+        "expires_at": {
+          "type": "string",
+          "nullable": false
+        }
+      },
+      "required": [
+        "format",
+        "status",
+        "snapshot_id",
+        "publication_sha256",
+        "source_head_sha256",
+        "generated_at",
+        "source_as_of",
+        "schema_version",
+        "normalization_rules_version",
+        "selection_rules_version",
+        "counts",
+        "delivery_mode",
+        "full",
+        "parts",
+        "expires_at"
+      ],
+      "optional": []
+    },
+    "history_snapshot_body": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.history-snapshot/v1"
+          ]
+        },
+        "payload_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "part_id": {
+          "type": "string",
+          "nullable": true
+        },
+        "rows": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "history_snapshot_row",
+            "nullable": false
+          }
+        }
+      },
+      "required": [
+        "format",
+        "payload_id",
+        "part_id",
+        "rows"
+      ],
+      "optional": []
+    },
+    "own_report_list": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.own-report-list/v1"
+          ]
+        },
+        "items": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "type": "object",
+            "nullable": false,
+            "properties": {
+              "report_id": {
+                "type": "string",
+                "nullable": false
+              },
+              "exam_id": {
+                "type": "string",
+                "nullable": true
+              },
+              "report_version": {
+                "type": "integer",
+                "nullable": false
+              },
+              "updated_at": {
+                "type": "string",
+                "nullable": false
+              }
+            },
+            "required": [
+              "report_id",
+              "exam_id",
+              "report_version",
+              "updated_at"
+            ],
+            "optional": []
+          }
+        },
+        "next_cursor": {
+          "type": "string",
+          "nullable": true
+        },
+        "has_more": {
+          "type": "boolean",
+          "nullable": false
+        }
+      },
+      "required": [
+        "format",
+        "items",
+        "next_cursor",
+        "has_more"
       ],
       "optional": []
     }
