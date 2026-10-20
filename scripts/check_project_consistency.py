@@ -990,6 +990,44 @@ def registered_read_view_ids(spec):
     c=spec.get("read_view_extension_contract")
     return set(READ_VIEW_EXTENSION_ROUTES)if c is not None and not validate_read_view_extension(spec)else set()
 
+def legacy_policy_fixture_inputs(spec,schemas):
+    """Keep exact existing25 fixtures; validate full28 registry before separating read3.
+
+    New read routes run in their independent suite using the real full registry.
+    Existing error/readiness roots and the legacy auxiliary public_error_code remain.
+    """
+    operations=spec["operations"]
+    if spec.get("read_view_extension_contract")is None:return operations,schemas
+    if validate_score_input_policy(spec):raise ValueError("Read-view fixture scope invalid")
+    ids=registered_read_view_ids(spec)
+    old=[o for o in operations if o["id"]not in ids]
+    if len(old)!=25 or {o["id"]for o in old}!=LEGACY_API_IDS|set(SCORE_POLICY_ROUTES):
+        raise ValueError("Legacy25 fixture coverage drift")
+    if not isinstance(schemas,dict)or not isinstance(schemas.get("operations"),list)or not isinstance(schemas.get("schemas"),dict):
+        raise ValueError("Public schema fixture registry invalid")
+    schema_ops=schemas["operations"];definitions=schemas["schemas"]
+    schema_ids=[o.get("id")for o in schema_ops if isinstance(o,dict)]
+    if len(schema_ops)!=28 or len(schema_ids)!=28 or any(not isinstance(x,str)for x in schema_ids)or len(set(schema_ids))!=28 or set(schema_ids)!={o["id"]for o in operations}:
+        raise ValueError("Full28 schema fixture coverage drift")
+    def references(node):
+        if isinstance(node,list):
+            for item in node:yield from references(item)
+        elif isinstance(node,dict):
+            if isinstance(node.get("ref"),str):yield node["ref"]
+            for item in node.values():yield from references(item)
+    if any(name not in definitions for name in references(schemas)):
+        raise ValueError("Public schema fixture dangling reference")
+    old_schemas=[row for row in schema_ops if row["id"]not in ids]
+    roots=schemas.get("auxiliary_roots",{})
+    if not isinstance(roots,dict)or set(roots)!={"error","readiness"}or "public_error_code"not in definitions:
+        raise ValueError("Legacy schema auxiliary roots drift")
+    todo=[*references(old_schemas),*references(roots),"public_error_code"];seen=set()
+    while todo:
+        name=todo.pop()
+        if name in seen:continue
+        seen.add(name);todo.extend(references(definitions[name]))
+    return old,{**schemas,"operations":old_schemas,"schemas":{name:value for name,value in definitions.items()if name in seen}}
+
 
 REQ27_BASELINE_SOURCE_MANIFEST_SHA256='3eb6dd06220eed171ade8b9bdc24c8059e9aeb62ab00befedb1076c34ef54b47'
 def policy_baseline_source_matches(spec,path,digest,indexed):
@@ -3552,7 +3590,8 @@ def generated_files(spec,read=None):
     if spec.get("score_input_policy_contract"):
         reader=read or (lambda path:(ROOT/path).read_bytes())
         schemas=json.loads(reader("src/jungsi_touch/application/public_response_schemas.json"))
-        policies=[{k:o[k] for k in ("id","method","path","member_tiers","report_owner","confirmed_score_profile","contract_ref")} for o in spec["operations"]]
+        fixture_operations,schemas=legacy_policy_fixture_inputs(spec,schemas)
+        policies=[{k:o[k] for k in ("id","method","path","member_tiers","report_owner","confirmed_score_profile","contract_ref")} for o in fixture_operations]
         header="/** Generated public contract fixtures; no private data/config. Regenerate from service_spec and the closed schema registry. */\n"
         declarations='import type { ApiRoutePolicy } from "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts";\n'
         def fixture(signature,value):
@@ -3664,6 +3703,16 @@ def generated_files(spec,read=None):
                       prepared['preserved']+" "+prepared['tests']+" "+prepared['gates']+"\n\n"+
                       table(['operation','method','경로'],[[r['id'],r['method'],r['path']]for r in prepared['exact_operations']])+"\n\n"+
                       "현재 준비 상태: "+prepared['implementation']+" / "+prepared['activation']+".\n")
+            if prepared.get('legacy_fixture_partition'):
+                section+='\n'+prepared['legacy_fixture_partition']+'\n'
+        selection=snapshot.get('display_selection_policy')
+        if selection:
+            section+=("\n### 표시 선택과 원문 검수의 구분\n\n"+selection['status']+". "+selection['basis_preference']['decision']+"\n\n"+
+                      selection['basis_preference']['eligible_only']+" "+selection['basis_preference']['pair']+" "+selection['basis_preference']['same_priority_conflict']+"\n\n"+
+                      selection['identity_representation']['unresolved_nonempty_variants']+" "+selection['identity_representation']['value_context']+"\n\n"+
+                      selection['metadata_and_numeric_review']+" "+selection['other_statistics']+"\n\n"+
+                      snapshot['text_transport']+"\n\n"+snapshot['P2_display_model_alias']+"\n\n"+
+                      table(['보류 코드','화면 안내'],[[code,message]for code,message in snapshot['display_reason_messages'].items()])+"\n")
         registered=spec.get('read_view_extension_contract')
         if registered:
             section+=("\n별도 조회 소스 등록: "+registered['status']+" / "+', '.join(registered['operation_ids'])+

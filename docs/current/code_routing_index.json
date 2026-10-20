@@ -628,7 +628,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "a82a5ee09ccf06d27eb2b9be346ddcb80b40f7dd5457c8ec5cdf0cd282be335e",
+      "source_sha256": "413405b818bc7bdb097a8ee68478e3f88c2f0d3690f2bd87a7e361de287743b3",
       "symbols": [
         {
           "kind": "class",
@@ -778,6 +778,18 @@
           "kind": "function",
           "name": "git",
           "signature": "def git(*args, input=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "legacy_policy_fixture_inputs",
+          "signature": "def legacy_policy_fixture_inputs(spec, schemas):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "legacy_policy_fixture_inputs.references",
+          "signature": "def references(node):",
           "decorators": []
         },
         {

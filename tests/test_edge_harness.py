@@ -225,7 +225,7 @@ sys.path.insert(0, str(ROOT / 'scripts'))
 from check_project_consistency import (  # noqa: E402
     LEGACY_API_IDS, SCORE_POLICY_ROUTES, READ_VIEW_EXTENSION_ROUTES,
     READ_VIEW_RUNTIME_PATHS, registered_read_view_ids,
-    validate_read_view_extension, validate_score_input_policy,
+    validate_read_view_extension, validate_score_input_policy, legacy_policy_fixture_inputs,
 )
 from run_edge_tests import read_view_registration, operation_registration  # noqa: E402
 from check_edge_contract import EdgeFailure  # noqa: E402
@@ -270,6 +270,44 @@ def candidate():
 
 
 class ReadViewExtensionContractTests(unittest.TestCase):
+    def registry(self):
+        registry=json.loads((ROOT/'src/jungsi_touch/application/public_response_schemas.json').read_text(encoding='utf-8'))
+        registry['operations']=[row for row in registry['operations']if row['id']not in READ_VIEW_EXTENSION_ROUTES]
+        registry['schemas']['synthetic_read3_only']={'type':'string','nullable':False}
+        for oid in READ_VIEW_EXTENSION_ROUTES:
+            registry['operations'].append(dict(id=oid,roots={'standard':{'ref':'synthetic_read3_only','nullable':False},'paid':{'ref':'synthetic_read3_only','nullable':False}}))
+        return registry
+
+    def test_legacy_fixture_keeps25_and_new_registry_stays28_unchanged(self):
+        spec=candidate();registry=self.registry();original=deepcopy(registry)
+        operations,filtered=legacy_policy_fixture_inputs(spec,registry)
+        self.assertEqual(len(operations),25)
+        self.assertEqual({o['id']for o in operations},LEGACY_API_IDS|set(SCORE_POLICY_ROUTES))
+        self.assertEqual(len(filtered['operations']),25)
+        self.assertNotIn('synthetic_read3_only',filtered['schemas'])
+        self.assertIn('public_error_code',filtered['schemas'])
+        self.assertEqual(registry,original)
+        self.assertEqual(len(spec['operations']),28)
+
+    def test_legacy_fixture_closure_preserves_shared_and_rejects_dangling_new_refs(self):
+        spec=candidate();registry=self.registry()
+        registry['schemas']['synthetic_shared']={'type':'string','nullable':False}
+        registry['schemas']['identifier']={'ref':'synthetic_shared','nullable':False}
+        _,filtered=legacy_policy_fixture_inputs(spec,registry)
+        self.assertIn('synthetic_shared',filtered['schemas'])
+        registry['schemas']['synthetic_read3_only']={'ref':'synthetic_missing','nullable':False}
+        with self.assertRaisesRegex(ValueError,'dangling reference'):
+            legacy_policy_fixture_inputs(spec,registry)
+
+    def test_schema_fixture_cannot_hide_duplicate_extra_or_missing_operations(self):
+        for mode in ('duplicate','extra','missing'):
+            registry=self.registry()
+            if mode=='duplicate':registry['operations'][-1]=deepcopy(registry['operations'][-2])
+            elif mode=='extra':registry['operations'].append(dict(id='unregistered.read',roots={}))
+            else:registry['operations'].pop(0)
+            with self.assertRaisesRegex(ValueError,'coverage drift'):
+                legacy_policy_fixture_inputs(candidate(),registry)
+
     def test_old_scope_absence_is_not_an_implicit_extension(self):
         spec = candidate()
         spec.pop('read_view_extension_contract')
