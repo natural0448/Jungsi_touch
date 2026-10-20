@@ -3,7 +3,7 @@
   // 2026-10-05 사용자(정시터치 최종 관리자) 결정: 에듀터치 본체가 /jeongsi 를 넘기는 기존 jeongsi-touch 워커를
   // 이 앱으로 교체한다(본체 JEONGSI_PREVIEW_ORIGIN 은 그대로). 되돌릴 때는 `wrangler rollback` 으로 이전 판을 다시 올린다.
   "name": "jeongsi-touch",
-  "main": ".open-next/worker.js",
+  "main": "worker.mjs",
   "compatibility_date": "2025-09-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -13,6 +13,16 @@
   "observability": {
     "enabled": true
   },
+  // 2026-10-20 사용자 결정: 1페이지 대학 발표 입시결과(개인 정보 없는 공개 발표 자료) 조회 결과를 회원끼리 잠시 공유 저장해
+  // 같은 조건을 다시 부르지 않는다(lib/shared-cache.ts). 워커가 workers.dev 로 연결돼 Cache API 가 동작하지 않아 KV 를 쓴다
+  "kv_namespaces": [
+    { "binding": "JT_SHARED_CACHE", "id": "67431841ff264ded90c2a53f89c8b0a6" }
+  ],
+  // Source preparation only. Owner must review resource registration before deployment.
+  "durable_objects": {
+    "bindings": [{ "name": "JT_P1_COORDINATOR", "class_name": "P1SnapshotCoordinator" }]
+  },
+  "migrations": [{ "tag": "p1-coordinator-v1", "new_sqlite_classes": ["P1SnapshotCoordinator"] }],
   "vars": {
     // 우리 서비스 API 주소(애플리케이션 계층)는 담당자가 운영 주소를 주면 "JUNGSI_API_URL" 로 넣는다. 비밀값이 아니다.
     // synthetic: 명시적으로 고른 화면 제작·검토용 합성 응답 / live: 우리 서비스 API + 에듀터치 Supabase 로그인
@@ -21,6 +31,17 @@
     // Supabase 두 값은 에듀터치 본체(web)와 같은 프로젝트의 URL·publishable 키다(비밀값이 아니다).
     // 2026-10-06 사용자 결정: 운영 API 주소를 받기 전까지 배포 화면을 예시 응답(synthetic)으로 둔다.
     // 상단 '합성 응답' 띠가 보인다. 주소가 오면 "live" 와 JUNGSI_API_URL·Supabase 두 값을 넣어 다시 배포한다.
-    "JUNGSI_API_MODE": "synthetic"
+    // 2026-10-16 사용자 결정: Supabase 설정 5개 등록·readiness 통과 뒤 실제 연결(live)로 바꾼다. 오픈 전 관문은 그대로 둔다.
+    // 주소에는 /api/v1 을 붙이지 않는다(live.ts 가 붙인다). relay 는 워커 Secret JUNGSI_RELAY_TOKEN(소유자 등록).
+    "JUNGSI_API_MODE": "live",
+    "JUNGSI_API_URL": "https://ksrpnhvyfdwysrexdhrd.supabase.co/functions/v1/jungsi-api",
+    // 성적 입력 시험 식별자(비밀값 아님). 없으면 lib/exam.ts 가 합성 토큰을 보내 서버가 저장을 거절한다(2026-10-16 실측).
+    // 승인 binding·시험팩의 값과 같아야 한다. 시험이 바뀌면 담당자가 알려 준 값으로 함께 바꾼다
+    "JUNGSI_EXAM_ID": "2027-september-mock",
+    "JUNGSI_PACK_VERSION": "20260930.v1",
+    "JUNGSI_CURRENT_REVIEW_URL": "https://ksrpnhvyfdwysrexdhrd.supabase.co/functions/v1/current-admission-review",
+    // 2026-10-13 사용자 결정: 오픈 전에는 에듀터치 관리자와 허용 명단(JEONGSI_PREVIEW_EMAILS, wrangler secret)만
+    // 들어온다(src/proxy.ts). Supabase 두 공개값은 빌드 때 .env.production(Git 제외)으로 넣는다. 오픈 때 지운다.
+    "JEONGSI_ACCESS_GATE": "preview"
   }
 }

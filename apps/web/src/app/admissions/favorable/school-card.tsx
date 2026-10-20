@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/link";
 import { ChevronIcon } from "@/components/icons";
 import { AdvantageCell, CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, ScoreCell, StatsLine } from "@/components/offering-parts";
 import type { CandidatesDto, Category, StatisticsDto } from "@/lib/dto";

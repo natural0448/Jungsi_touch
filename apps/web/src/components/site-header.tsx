@@ -1,7 +1,7 @@
-import Link from "next/link";
+import Link from "@/components/link";
 import type { Session } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
-import { edutouch, loginHref } from "@/lib/links";
+import { PASS_HREF, edutouch, loginHref } from "@/lib/links";
 import { PAGES, lockFor } from "@/lib/routes";
 import { Tabs } from "./tabs";
 
@@ -20,7 +20,7 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
             <i>touch</i>
           </a>
           <span className="jt-sep" aria-hidden="true" />
-          <Link href="/" className="jt-name">
+          <Link prefetch={false} href="/" className="jt-name">
             정시<em>터치</em>
           </Link>
           <div className="jt-user">
@@ -29,9 +29,18 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
             ) : !session ? (
               <a className="btn p" href={loginHref("/")}>로그인</a>
             ) : session.member_tier === "paid" ? (
-              <span className="pass">이용권 {seoulDate(session.entitlement_expires_at)}까지</span>
+              // 유료인데 만료일이 없으면 서버가 관리자 이용권 예외로 연 것이다(FE-ADMIN-ACCESS-01).
+              // 실제 이용권이 있는 관리자는 서버가 그 만료일을 보내므로 날짜가 그대로 나온다
+              session.entitlement_expires_at ? (
+                <span className="pass">이용권 {seoulDate(session.entitlement_expires_at)}까지</span>
+              ) : (
+                <span className="pass">관리자 이용</span>
+              )
             ) : (
-              <span className="pass off">일반 회원</span>
+              <>
+                <span className="pass off">일반 회원</span>
+                <a className="btn t" href={PASS_HREF}>이용권 보기</a>
+              </>
             )}
           </div>
         </div>

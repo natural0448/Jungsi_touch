@@ -1,0 +1,87 @@
+"use client";
+
+import { useRef, useState } from "react";
+import { ChevronIcon } from "@/components/icons";
+import { reasonText, YearTable } from "./snapshot-table";
+import { loadUnitRows, type UnitRows } from "./unit-actions";
+
+/** 접힌 줄 하나의 작은 요약 자료. 칸은 [원문 값, 단위, 확인 중 사유 코드(없으면 null)] */
+export type SumCell = [string | null, string | null, string | null];
+export type SumItem = { k: string; g: string | null; d: string; sub: string; y: number; c: [SumCell, SumCell, SumCell, SumCell] };
+
+const LABELS = ["모집", "경쟁률", "50%", "70%"] as const;
+
+function V({ c }: { c: SumCell }) {
+  const [v, u, hold] = c;
+  return (
+    <>
+      {v === null ? <span className="unpub">─</span> : <b className="num">{v}</b>}
+      {v !== null && u && <small>{u}</small>}
+      {hold && <i className="q" title={reasonText(hold) ?? undefined}>{v === null ? "확인 중" : "확인"}</i>}
+    </>
+  );
+}
+
+/**
+ * 한 학교의 모집단위 목록. 처음에는 요약 줄만 그리고, 줄을 누르면 그 자리에서 학년도별 고정 표를 펼친다.
+ * 표는 화면 서버의 정리본 저장본에서 그 모집단위만 받는다(처음 펼칠 때 한 번)
+ */
+export function UnitList({ pub, schoolId, schoolName, items }: { pub: string; schoolId: string; schoolName: string; items: SumItem[] }) {
+  return (
+    <ul>
+      {items.map((it) => (
+        <Item key={it.k} pub={pub} schoolId={schoolId} schoolName={schoolName} it={it} />
+      ))}
+    </ul>
+  );
+}
+
+function Item({ pub, schoolId, schoolName, it }: { pub: string; schoolId: string; schoolName: string; it: SumItem }) {
+  const [open, setOpen] = useState(false);
+  const [got, setGot] = useState<UnitRows | null>(null);
+  const asked = useRef(false);
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    if (next && !asked.current) {
+      asked.current = true;
+      loadUnitRows(pub, schoolId, it.k)
+        .then(setGot)
+        .catch(() => setGot({ ok: false, code: "request_failed" }));
+    }
+    if (!next && got && !got.ok) {
+      asked.current = false; // 실패했으면 다시 펼칠 때 다시 받는다
+      setGot(null);
+    }
+  };
+  return (
+    <li className={`rs-off${open ? " open" : ""}`}>
+      <button type="button" className="rs-offhd rs-btn" onClick={toggle} aria-expanded={open}>
+        <span className="grp">{it.g ?? "─"}</span>
+        <span className="unit">
+          <b>{it.d}</b>
+          {it.sub && <small>{it.sub}</small>}
+        </span>
+        <span className="rs-sum">
+          <span className="y num">{it.y}</span>
+          {it.c.map((c, i) => (
+            <span key={i}>
+              <small>{LABELS[i]}</small> <V c={c} />
+            </span>
+          ))}
+        </span>
+        <span className="go"><ChevronIcon /></span>
+      </button>
+      {open &&
+        (got === null ? (
+          <p className="rs-wait">학년도별 결과를 불러오는 중…</p>
+        ) : got.ok ? (
+          <YearTable rows={got.rows} schoolName={schoolName} />
+        ) : (
+          <p className="rs-wait">
+            {got.code === "publication_changed" ? "입시결과 정리본이 새 판으로 바뀌었습니다. 화면을 새로 고쳐 주세요." : `불러오지 못했습니다(사유 코드 ${got.code}). 접었다가 다시 펼쳐 보세요.`}
+          </p>
+        ))}
+    </li>
+  );
+}

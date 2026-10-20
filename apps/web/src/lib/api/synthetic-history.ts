@@ -142,3 +142,31 @@ export function syntheticRecruitment(offeringId: string): RecruitmentDto | null 
     catalog_version: "SYNTHETIC-catalog-v1",
   };
 }
+
+/* 전국 현재 정본 형식(1.9.90~) 미리보기: metric_name 은 원본 지표 종류 코드, 통계 구분·대상 집단은
+   대학 원문 표기 그대로(같은 70%컷도 표기가 다르면 다른 줄). offering_id 는 "{학년도}:{모집행 PK}".
+   발표 상태 5가지를 모두 섞어 화면이 0 을 만들지 않고 구분하는지 본다. 2027 모집행은 만들지 않는다 */
+const NAT = { id: "SYN-N01", name: "합성전국대학교", region: "충남" };
+const NAT_UNITS = [
+  { pk: "9000000101", unit: "간호학과", group: "나", track: "수능(일반전형)" },
+  { pk: "9000000102", unit: "컴퓨터공학과", group: "가", track: "수능(일반전형)" },
+];
+const NAT_METRICS: { kind: string; stat: string | null; cohort: string | null; unit: string | null; def: string; v: (y: number, i: number) => string | number | null; status?: (y: number) => string }[] = [
+  { kind: "competition_ratio", stat: "경쟁률", cohort: "published_admissions_recruitment_context", unit: ":1", def: "정시 경쟁률(발표 원문)", v: (y, i) => (4.1 + i + (2026 - y) * 0.3).toFixed(2) },
+  { kind: "recruitment_quota_final", stat: "모집인원 / 최종 (A)+(B)", cohort: "published_admissions_recruitment_context", unit: "명", def: "최종 모집인원(이월 포함)", v: (y, i) => 20 + i * 5 - (2026 - y) },
+  { kind: "additional_admission_rank", stat: "충원합격순위", cohort: "최종등록자", unit: "번", def: "충원 합격 마지막 순위", v: (y, i) => 11 + i * 3 + (2026 - y) },
+  { kind: "university_converted_score", stat: "70%컷", cohort: "final_registrants", unit: "점", def: "대학 환산점수(발표 원문)", v: (y, i) => (812.4 - i * 9 - (2026 - y) * 2.1).toFixed(1) },
+  { kind: "university_converted_score", stat: "70_percent_cut", cohort: "최종등록자", unit: "점", def: "대학 환산점수(발표 원문)", v: (y, i) => (y === 2024 ? (809.0 - i * 9).toFixed(1) : null), status: (y) => (y === 2024 ? "verified_official" : "not_published") },
+  { kind: "csat_subject_percentile", stat: "50%컷", cohort: "최종등록자", unit: "백분위", def: "수능 과목 백분위 평균", v: (y, i) => (91.5 - i * 2 - (2026 - y) * 0.4).toFixed(1), status: (y) => (y === 2025 ? "pending_metadata" : "verified_official") },
+  { kind: "mean_subject_percentile", stat: "평균", cohort: "final_registrants", unit: "백분위", def: "반영 과목 백분위 평균", v: (y) => (y === 2026 ? null : "88.2"), status: (y) => (y === 2026 ? "pending_value_missing" : "verified_official") },
+  { kind: "published_standard_deviation", stat: "표준편차", cohort: "최종등록자", unit: null, def: "발표 표준편차", v: () => "3.1" },
+];
+for (const [i, u] of NAT_UNITS.entries())
+  for (const year of [2026, 2025, 2024]) {
+    const off: OfferingDto = { offering_id: `${year}:${u.pk}`, academic_year: year, university_id: NAT.id, university_name: NAT.name, campus: null, department: u.unit, track: u.track, group: u.group, region: NAT.region, wildcard_group: null };
+    for (const m of NAT_METRICS) {
+      const v = m.v(year, i);
+      const status = m.status?.(year) ?? "verified_official";
+      HISTORY.push({ ...off, metric_name: m.kind, statistic_label: m.stat, cohort: m.cohort, value_json_type: typeof v === "number" ? "number" : "string", metric_definition: m.def, value: v, unit: m.unit, original_scale: null, publication_status: status, source_url: SRC, source_as_of: `${year}-03-15` });
+    }
+  }

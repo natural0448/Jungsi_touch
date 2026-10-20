@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/link";
 import { ConnectionNotice } from "@/components/connection-notice";
 import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";

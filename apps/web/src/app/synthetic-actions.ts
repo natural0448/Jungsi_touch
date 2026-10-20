@@ -10,6 +10,6 @@ export async function setSyntheticState(fd: FormData) {
   if (source().kind !== "synthetic") return;
   const v = String(fd.get("state") ?? "");
   if (!SYN_STATES.some((s) => s.v === v)) return;
-  (await cookies()).set(SYN_COOKIE.state, v, { path: "/jeongsi", maxAge: 60 * 60 * 24 * 30, sameSite: "lax" });
+  (await cookies()).set(SYN_COOKIE.state, v, { path: "/jeongsi", maxAge: 60 * 60 * 24 * 30, sameSite: "lax", secure: process.env.NODE_ENV === "production" });
   revalidatePath("/", "layout");
 }

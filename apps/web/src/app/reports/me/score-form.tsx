@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState, type FormEvent } from "react";
 import { INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "@/lib/exam";
 import { submitScores, type ScoreFormState } from "./actions";
 
@@ -19,6 +19,14 @@ export interface ScoreDefaults {
 
 const GRADES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
+// 저장에 꼭 필요한 칸: 탐구 두 과목과 국어·수학·탐구 표준점수. 진행 표시용이며 검사는 서버가 한다
+const REQUIRED = ["inq1", "inq2", "korean", "math", "inq1_score", "inq2_score"] as const;
+const filledOf = (get: (k: (typeof REQUIRED)[number]) => unknown) =>
+  REQUIRED.filter((k) => {
+    const v = get(k);
+    return v !== undefined && v !== null && String(v).trim() !== "";
+  }).length;
+
 /**
  * 성적 입력 — 수능 성적표와 같은 가로 표(영역 순서: 한국사 · 국어 · 수학 · 영어 · 탐구).
  * 행은 성적표처럼 선택과목 · 표준점수 · 백분위 · 등급이다.
@@ -34,9 +42,56 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
   const need = (v: unknown) => (missing && (v === undefined || v === "") ? " bad" : "");
   const auto = <span className="sf-auto">저장 후 계산</span>;
   const none = <span className="sf-none" aria-label="해당 없음">─</span>;
+  const [filled, setFilled] = useState(() => filledOf((k) => d[k]));
+  const onInput = (e: FormEvent<HTMLFormElement>) => {
+    const f = e.currentTarget.elements;
+    setFilled(filledOf((k) => (f.namedItem(k) as HTMLInputElement | HTMLSelectElement | null)?.value));
+  };
+  const done = filled === REQUIRED.length;
+
+  // 저장 전 확인 창. 저장한 성적은 고칠 수 없고 하루에 저장할 수 있는 성적 조합 수가 정해져 있어서,
+  // 넣은 값을 한 번 더 보여 주고 '이대로 저장'을 눌러야 서버로 보낸다. 빈 칸·범위 밖 값은 서버에 보내기 전에 막는다
+  const formRef = useRef<HTMLFormElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [review, setReview] = useState<{ rows: [string, string][]; problem: string | null } | null>(null);
+  const openReview = () => {
+    const f = formRef.current;
+    if (!f) return;
+    sentRef.current = false;
+    const v = (k: string) => String((f.elements.namedItem(k) as HTMLInputElement | HTMLSelectElement | null)?.value ?? "").trim();
+    const n = (k: string) => (v(k) === "" ? NaN : Number(v(k)));
+    let problem: string | null = null;
+    if (REQUIRED.some((k) => v(k) === "")) problem = "국어·수학·탐구 두 과목의 표준점수와 탐구 과목을 모두 넣어 주세요.";
+    else if (v("inq1") === v("inq2")) problem = "탐구 두 과목은 서로 달라야 합니다.";
+    else if (![n("korean"), n("math")].every((x) => Number.isInteger(x) && x >= 40 && x <= 160)) problem = "국어·수학 표준점수는 40~160 사이 정수입니다.";
+    else if (![n("inq1_score"), n("inq2_score")].every((x) => Number.isInteger(x) && x >= 20 && x <= 80)) problem = "탐구 표준점수는 20~80 사이 정수입니다.";
+    const choice = (k: string) => (v(k) ? ` (${v(k)})` : "");
+    setReview({
+      problem,
+      rows: [
+        [`국어${choice("korean_choice")}`, v("korean")],
+        [`수학${choice("math_choice")}`, v("math")],
+        [`탐구 1 · ${v("inq1") || "미선택"}`, v("inq1_score")],
+        [`탐구 2 · ${v("inq2") || "미선택"}`, v("inq2_score")],
+        ["영어 등급", v("english") || "입력 안 함"],
+        ["한국사 등급", v("history") || "입력 안 함"],
+      ],
+    });
+    dialogRef.current?.showModal();
+  };
+  // '이대로 저장'을 눌렀을 때만 확인 표지를 채워 보낸다. 연달아 눌러도 한 번만 제출한다
+  const confirmRef = useRef<HTMLInputElement>(null);
+  const sentRef = useRef(false);
+  const confirmSave = () => {
+    if (sentRef.current || pending) return;
+    sentRef.current = true;
+    if (confirmRef.current) confirmRef.current.value = "on";
+    dialogRef.current?.close();
+    formRef.current?.requestSubmit();
+  };
 
   return (
-    <form key={state?.attempt ?? 0} action={action} className="sf" noValidate>
+    <form ref={formRef} key={state?.attempt ?? 0} action={action} className="sf" noValidate onInput={onInput} onChange={onInput}>
       <input type="hidden" name="idem" value={idem} />
       {update && (
         <>
@@ -49,8 +104,12 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
         <div>
           <p className="sf-kicker">성적 입력</p>
           <h2>{examLabel} 성적표</h2>
+          <p>성적표에 적힌 값을 같은 칸에 그대로 옮겨 주세요. 테두리가 있는 칸만 넣으면 됩니다.</p>
         </div>
-        <p>성적표에 적힌 값을 같은 칸에 그대로 옮겨 주세요. 진하게 표시된 칸만 넣으면 됩니다.</p>
+        <p className={`sf-prog${done ? " done" : ""}`} aria-live="polite">
+          <span className="bar" aria-hidden="true"><i style={{ width: `${(filled / REQUIRED.length) * 100}%` }} /></span>
+          {done ? "필수 칸을 모두 넣었습니다" : <>필수 {REQUIRED.length}칸 중 <b>{filled}</b>칸 입력</>}
+        </p>
       </header>
 
       <p className="sf-swipe">표를 옆으로 밀면 수학 · 영어 · 탐구 칸이 이어집니다.</p>
@@ -58,10 +117,10 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
         <table>
           <colgroup>
             <col className="c-head" />
-            <col />
+            <col className="c-grade" />
             <col className="c-main" />
             <col className="c-main" />
-            <col />
+            <col className="c-grade" />
             <col className="c-main" />
             <col className="c-main" />
           </colgroup>
@@ -115,7 +174,7 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
             <tr className="key">
               <th scope="row">
                 표준점수
-                <small>꼭 넣기</small>
+                <small>필수</small>
               </th>
               <td className="na">{none}</td>
               <td className={`in${need(d.korean)}`}>
@@ -170,23 +229,57 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
         <li><i className="k na" />영어·한국사는 절대평가라 등급만 넣고, 전체 위치를 내는 총점(국·수·탐2 표준점수 합)에는 넣지 않습니다.</li>
       </ul>
 
-      <label className={`sf-confirm${state?.field === "confirm" ? " bad" : ""}`}>
-        <input type="checkbox" name="confirm" />
-        <span>입력한 점수가 성적표와 같은지 확인했습니다.</span>
-      </label>
-
       {state?.error && (
         <p className="sf-error" role="alert">
           {state.error}
         </p>
       )}
 
-      <div className="sf-acts">
-        <button className="btn p" type="submit" disabled={pending}>
-          {pending ? "저장하는 중" : update ? "새 성적으로 리포트 갱신" : "성적 저장하고 전체 위치 보기"}
-        </button>
-        <small>저장할 때마다 새 성적 기록이 생기고, 이전 성적은 고치지 않습니다.</small>
+      {/* 확인 창에서 '이대로 저장'을 눌러 제출된 것만 서버가 받는다(actions.ts 의 confirm 검사) */}
+      <input ref={confirmRef} type="hidden" name="confirm" defaultValue="" />
+      <div className="sf-foot">
+        <p className="sf-confirm-note">저장하기 전에 넣은 점수를 한 번 더 보여 드립니다.</p>
+        <div className="sf-acts">
+          <button className="btn p" type="button" disabled={pending} onClick={openReview}>
+            {pending ? "저장하는 중" : update ? "새 성적으로 리포트 갱신" : "성적 저장하고 전체 위치 보기"}
+          </button>
+        </div>
       </div>
+      <p className="sf-note">저장하면 이 시험 단계의 성적 입력 1회를 사용합니다. 저장한 성적은 직접 고칠 수 없고, 정정은 고객센터에 요청하면 1회 처리해 드립니다. 성적표에 없는 점수로 저장하면 계산되지 않고 입력 1회가 사용됩니다.</p>
+
+      <dialog ref={dialogRef} className="sf-dialog" aria-labelledby="sf-dialog-h" onClose={() => setReview(null)}>
+        {review && (
+          <div className="sf-dialog-in">
+            <h3 id="sf-dialog-h">{review.problem ? "입력을 확인해 주세요" : "이 점수로 저장할까요?"}</h3>
+            {review.problem ? (
+              <p className="sf-dialog-problem">{review.problem}</p>
+            ) : (
+              <>
+                <p><b>저장하면 이 단계의 입력 1회를 사용합니다.</b> 저장한 성적은 직접 고칠 수 없으니 성적표와 한 칸씩 대조해 주세요.</p>
+                <dl className="sf-dialog-rows">
+                  {review.rows.map(([k, val]) => (
+                    <div key={k}>
+                      <dt>{k}</dt>
+                      <dd>{val}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="sf-dialog-note">성적표에 없는 점수는 계산되지 않고 입력 1회가 사용됩니다. 정정은 고객센터에 요청해 주세요(1회).</p>
+              </>
+            )}
+            <div className="sf-dialog-acts">
+              <button type="button" className="btn t" onClick={() => dialogRef.current?.close()} autoFocus>
+                {review.problem ? "돌아가서 고치기" : "다시 확인하기"}
+              </button>
+              {!review.problem && (
+                <button type="button" className="btn p" onClick={confirmSave}>
+                  이대로 저장
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </dialog>
     </form>
   );
 }

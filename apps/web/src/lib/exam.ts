@@ -6,9 +6,14 @@
 */
 
 export const EXAM = {
-  // 합성 응답용 토큰. 실제 연결 때 서버가 알려 준 값으로 바꾼다
-  exam_id: process.env.JUNGSI_EXAM_ID ?? "SYNTHETIC-2027-09-mock",
-  pack_version: process.env.JUNGSI_PACK_VERSION ?? "SYNTHETIC-pack-v1",
+  // 합성 응답용 토큰이 기본값. 운영은 wrangler.jsonc vars 의 승인 식별자를 쓴다.
+  // 워커는 요청 때 환경값을 채우므로 모듈을 불러올 때가 아니라 쓸 때 읽는다
+  get exam_id() {
+    return process.env.JUNGSI_EXAM_ID ?? "SYNTHETIC-2027-09-mock";
+  },
+  get pack_version() {
+    return process.env.JUNGSI_PACK_VERSION ?? "SYNTHETIC-pack-v1";
+  },
   label: "2027학년도 9월 모의평가",
 } as const;
 
@@ -21,3 +26,13 @@ export const INQUIRY_SUBJECTS: { group: string; subjects: string[] }[] = [
 ];
 
 export const AREA_LABEL: Record<string, string> = { korean: "국어", math: "수학", inquiry1: "탐구 1", inquiry2: "탐구 2" };
+
+/** 서버의 시험 종류 코드 → 화면 이름. 모르는 코드는 그대로(합성 응답은 이미 한글이다) */
+const EXAM_TYPE_LABEL: Record<string, string> = {
+  september_mock: "9월 모의평가",
+  june_mock: "6월 모의평가",
+  csat: "대학수학능력시험",
+  csat_provisional: "수능 가채점",
+  csat_final: "수능 실채점",
+};
+export const examTypeLabel = (t: string) => EXAM_TYPE_LABEL[t] ?? t;

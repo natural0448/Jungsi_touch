@@ -10,7 +10,7 @@ import { EXAM, INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "@/lib/exam
   응답 모양은 실제 DTO(lib/dto.ts)와 같다.
 */
 
-const OPT = { path: "/jeongsi", maxAge: 60 * 60 * 24 * 30, sameSite: "lax" as const, httpOnly: true };
+const OPT = { path: "/jeongsi", maxAge: 60 * 60 * 24 * 30, sameSite: "lax" as const, httpOnly: true, secure: process.env.NODE_ENV === "production" };
 const C = { profile: "jt_syn_profile", report: "jt_syn_report" } as const;
 
 type StoredProfile = ProfileDto & { scores: ScoresInput; key: string };
@@ -51,7 +51,9 @@ function subject(area: SubjectResultDto["area"], name: string, choice: string | 
   return { area, subject: name, choice, standard_score: v, grade: grade(top), top_percent_exclusive: pct(Math.max(0, top - 0.3)), top_percent_inclusive: pct(top), basis: "합성 곡선(화면 확인용)" };
 }
 
-export function computeOverall(s: ScoresInput): OverallAnalysisDto {
+/** pendingTotal: 화면 확인용 — 전체 누백 자료 연결 전에 저장된 리포트(total_model_missing)를 흉내 낸다.
+ *  JUNGSI_SYNTHETIC_TOTAL_PENDING_UNTIL=N 이면 N번째 판까지가 연결 전 리포트(다시 계산하면 N+1 번째 판부터 계산됨) */
+export function computeOverall(s: ScoresInput, pendingTotal = false): OverallAnalysisDto {
   const total = s.korean.standard_score + s.math.standard_score + s.inquiry[0].standard_score + s.inquiry[1].standard_score;
   const inc = curve(total, 307, 22);
   const tie = 0.04;
@@ -97,19 +99,22 @@ export function computeOverall(s: ScoresInput): OverallAnalysisDto {
         combo("math_inq_avg", "수학+탐구(2과목 평균)", m + avg, 160, 12),
       ];
     })(),
-    overall: {
-      status: "estimated",
-      reason_code: null,
-      top_percent: pct(inc),
-      inclusive_top_percent: pct(inc),
-      exclusive_top_percent: pct(exc),
-      tie_share_percent: pct(tie),
-      tie_interval_percent: { lower: pct(exc), upper: pct(inc) },
-      tie_policy: "include_equal",
-      population_id: "SYNTHETIC-2027-09-KMI2",
-      model_version: "SYNTHETIC-curve-v1",
-      data_kind: "estimated_weights",
-    },
+    // 운영과 같은 모양: 공식 전체 응시자 기준 추정 전체 누백(population_id=official_all_examinees, 1.9.90)
+    overall: pendingTotal
+      ? { status: "pending", reason_code: "total_model_missing", top_percent: null, inclusive_top_percent: null, exclusive_top_percent: null, tie_share_percent: null, tie_interval_percent: null, tie_policy: null, population_id: null, model_version: null, data_kind: null }
+      : {
+          status: "estimated",
+          reason_code: null,
+          top_percent: pct(inc),
+          inclusive_top_percent: pct(inc),
+          exclusive_top_percent: pct(exc),
+          tie_share_percent: pct(tie),
+          tie_interval_percent: { lower: pct(exc), upper: pct(inc) },
+          tie_policy: "include_equal",
+          population_id: "official_all_examinees",
+          model_version: "SYNTHETIC-curve-v1",
+          data_kind: "estimated_weights",
+        },
   };
 }
 
@@ -224,7 +229,7 @@ function analysesFor(scores: ScoresInput, ids: string[]): Record<string, Assessm
 }
 
 function build(r: StoredReport, p: StoredProfile, paid: boolean): ReportDto {
-  const report: ReportDto = { format: "jungsi.persisted-report/v1", report_id: r.report_id, report_version: r.report_version, profile_id: p.profile_id, updated_at: r.updated_at, overall: computeOverall(p.scores) };
+  const report: ReportDto = { format: "jungsi.persisted-report/v1", report_id: r.report_id, report_version: r.report_version, profile_id: p.profile_id, updated_at: r.updated_at, overall: computeOverall(p.scores, r.report_version <= Number(process.env.JUNGSI_SYNTHETIC_TOTAL_PENDING_UNTIL ?? 0)) };
   if (!paid) return report;
   const analyses = analysesFor(p.scores, r.analyzed ?? []);
   const shortlist = Object.fromEntries(
@@ -239,4 +244,21 @@ function build(r: StoredReport, p: StoredProfile, paid: boolean): ReportDto {
     shortlist,
     analysis_status: (r.analyzed ?? []).length === 0 ? { status: "pending", reason_code: "offering_analysis_not_requested" } : { status: ready ? "ready" : "pending", reason_code: ready ? null : "offering_analysis_pending" },
   };
+}
+/** 합성 report.list-own: 이 브라우저의 합성 리포트(하나)만 본인 목록으로 돌려준다 */
+export async function listOwn(): Promise<{ report_id: string; exam_id: string | null; report_version: number; updated_at: string }[]> {
+  const r = await read<StoredReport>(C.report);
+  return r ? [{ report_id: r.report_id, exam_id: process.env.JUNGSI_EXAM_ID ?? null, report_version: r.report_version, updated_at: r.updated_at }] : [];
+}
+
+/** 합성 score-input.status: 저장한 성적이 있으면 이 단계의 최초 입력 1회를 쓴 상태로 보인다 */
+export async function inputUsed(): Promise<{ profileId: string | null; reportId: string | null }> {
+  const p = await read<StoredProfile>(C.profile);
+  const r = await read<StoredReport>(C.report);
+  return { profileId: p?.profile_id ?? null, reportId: r && p && r.profile_id === p.profile_id ? r.report_id : null };
+}
+
+/** 합성: 이 요청 키가 이미 저장한 프로필의 키인지(멱등 재시도) */
+export async function sameProfileKey(key: string): Promise<boolean> {
+  return (await read<StoredProfile>(C.profile))?.key === key;
 }

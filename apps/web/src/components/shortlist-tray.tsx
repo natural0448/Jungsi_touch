@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/link";
 import type { PickedItem } from "@/lib/report-ops";
 import { page } from "@/lib/routes";
 

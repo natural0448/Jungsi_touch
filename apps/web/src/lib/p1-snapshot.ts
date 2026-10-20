@@ -1,0 +1,396 @@
+import "server-only";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import type { SnapshotHeadDto, SnapshotPartPin } from "@/lib/dto";
+import { ConnectionError, SnapshotChanged, type Caller, type JungsiSource } from "@/lib/api/source";
+import { P1CoordinationCore, P1CoordinationError, localP1CoordinatorClient, p1CoordinatorClient, validatePublicHead,
+  type CoordinatorState, type CoordinationStore, type CoordinationView, type PublicDocument } from "./p1-coordinator-core";
+import { unitKey, type Cell, type Row, type School } from "./p1-shape";
+export type { Cell, Row, School } from "./p1-shape";
+
+/** Only immutable public bundles live in KV. The actor owns head/progress/ready and fences every commit.
+ * Credentials and request-scoped I/O promises never enter shared state. Authenticate at each page/action.
+ * Version 1 is retained; a new namespace cannot accidentally consume its unfenced ready/progress keys.
+ */
+const FORMAT = 2;
+const PARTS_PER_STEP = 6;
+const SCHOOLS_PER_STEP = 12;
+const INDEX_SCHOOLS_PER_STEP = 20;
+const MAX_FRAGMENT_READS = 20;
+const KEEP_SEC = 60 * 24 * 3600;
+type Mode = "synthetic" | "live";
+type Kv = { get(key: string, type: "text"): Promise<string | null>; put(key: string, value: string, opts?: { expirationTtl?: number }): Promise<void> };
+type Stub = { fetch(request: Request): Promise<Response> };
+type Namespace = { getByName?: (name: string) => Stub; idFromName?: (name: string) => unknown; get?: (id: unknown) => Stub };
+type Client = ReturnType<typeof p1CoordinatorClient>;
+type Services = { kv: Kv; coordinator: Client };
+type Local = { cache: Map<string, string>; state: CoordinatorState | null };
+function env() { return (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {}; }
+function configuredMode(): Mode { return env().JUNGSI_API_MODE === "synthetic" ? "synthetic" : "live"; }
+function servicesFailure(error: unknown): never {
+  if (error instanceof P1CoordinationError) throw new ConnectionError("unavailable", error.code);
+  throw error;
+}
+async function services(mode: Mode): Promise<Services> {
+  let bindings: Record<string, unknown> | null = null;
+  try { bindings = (await getCloudflareContext({ async: true })).env as Record<string, unknown>; } catch { /* Explicit local synthetic mode is checked below. */ }
+  const store = bindings?.JT_SHARED_CACHE as Kv | undefined, ns = bindings?.JT_P1_COORDINATOR as Namespace | undefined;
+  if (store && typeof store.get === "function" && typeof store.put === "function" && ns) {
+    const actorName = mode === "live" ? "public-v2:live" : "public-v2:synthetic";
+    const stub = ns.getByName ? ns.getByName(actorName) : ns.idFromName && ns.get ? ns.get(ns.idFromName(actorName)) : null;
+    if (stub) return { kv: store, coordinator: p1CoordinatorClient(stub) };
+  }
+  if (mode !== "synthetic" || !["development", "test"].includes(env().NODE_ENV ?? ""))
+    throw new ConnectionError("unconfigured", "p1_shared_coordination_unconfigured");
+  const g = globalThis as { __jtP1ExplicitLocalV2?: Local };
+  const local = g.__jtP1ExplicitLocalV2 ??= { cache: new Map(), state: null };
+  const atomic: CoordinationStore = { read: () => local.state, atomic: change => { const next = change(local.state); local.state = next.state; return next.result; } };
+  return { kv: { get: async k => local.cache.get(k) ?? null, put: async (k, v) => { local.cache.set(k, v); } }, coordinator: localP1CoordinatorClient(new P1CoordinationCore(atomic)) };
+}
+async function getJson<T>(store: Kv, key: string): Promise<T | null> {
+  const text = await store.get(key, "text"); return text === null ? null : JSON.parse(text) as T;
+}
+async function putJson(store: Kv, key: string, value: unknown): Promise<void> {
+  // A claim's fenced prefix is never reused by another execution. No mutable KV checkpoint exists.
+  await store.put(key, JSON.stringify(value), { expirationTtl: KEEP_SEC });
+}
+function document(value: object): PublicDocument { return value as unknown as PublicDocument; }
+const pause = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+/** One claimant performs the authenticated API read; other requests poll metadata for at most 700ms.
+ * Polling never holds another request's I/O promise. A busy boundary stays pending, never stale-ready.
+ */
+async function checkedHead(src: JungsiSource, caller: Caller, coordinator: Client, afterRevision?: number): Promise<CoordinationView | null> {
+  let claim = await coordinator.claimHead(afterRevision);
+  for (const ms of [100, 200, 400]) {
+    if (claim.state !== "busy") break;
+    await pause(ms); claim = await coordinator.claimHead(afterRevision);
+  }
+  if (claim.state === "busy") return null;
+  if (claim.state === "cached") return claim.view;
+  try {
+    const head = validatePublicHead(await src.readSnapshotHead(caller), Date.now());
+    return (await coordinator.commitHead(claim.token, head)).view;
+  } catch (error) {
+    await coordinator.failHead(claim.token).catch(() => undefined);
+    throw error;
+  }
+}
+type Index = { schools: School[]; units: [number, string, string, string, string, string][]; school_keys: Record<string, string> };
+type IndexSegment = { schools: School[]; units: Index["units"]; rows: number; pending: number };
+export type Ready = {
+  snapshot_id: string; publication_sha256: string; source_head_sha256: string;
+  normalization_rules_version: string; selection_rules_version: string;
+  generated_at: string; source_as_of: string | null; expires_at: string; counts: SnapshotHeadDto["counts"];
+  warmed_at: string; pub: string; index_key: string; cache_mode: Mode;
+};
+type Progress = {
+  snapshot_id: string; publication_sha256: string; done: string[]; part_keys: Record<string, string>;
+  schoolParts: Record<string, string[]>; school_keys: Record<string, string>;
+  phase: "parts" | "schools" | "index" | "ready"; schoolsDone: number; indexDone: number;
+  index_segments: string[]; started_at: string;
+};
+
+class Raw {
+  constructor(public text: string) {}
+}
+function parseLossless(text: string): unknown {
+  let ok = true;
+  const v = JSON.parse(text, function (_k, val, ctx?: { source?: string }) {
+    if (typeof val === "number") {
+      if (!ctx || typeof ctx.source !== "string") ok = false;
+      return new Raw(ctx?.source ?? String(val));
+    }
+    return val;
+  });
+  if (!ok) throw new Error("p1_lossless_parse_unavailable");
+  return v;
+}
+type Obj = Record<string, unknown>;
+const str = (v: unknown): string | null => (v === null || v === undefined ? null : v instanceof Raw ? v.text : String(v));
+const int = (v: unknown): number => (v instanceof Raw ? Number(v.text) : Number(v));
+function cell(o: unknown, extra?: "stage" | "cut"): Cell {
+  const c = (o ?? {}) as Obj;
+  const out: Cell = { v: str(c.value), s: String(c.status ?? ""), r: str(c.reason_code), u: str(c.unit), l: str(c.statistic_label) };
+  if (c.value instanceof Raw) out.n = 1;
+  if (extra === "stage") out.st = String(c.stage ?? "unspecified");
+  if (extra === "cut") {
+    out.b = str(c.basis_label);
+    out.co = str(c.cohort_label ?? c.cohort);
+  }
+  const url = str(c.source_url);
+  if (url) out.url = url;
+  return out;
+}
+function compact(r: Obj): Row {
+  const alt = (r.alternate_cut ?? {}) as Obj;
+  const idr = (r.identity_review ?? null) as Obj | null;
+  return {
+    y: int(r.academic_year),
+    pk: str(r.original_pk),
+    ob: str(r.observation_key),
+    n: String(r.university_name ?? ""),
+    d: String(r.department ?? ""),
+    t: str(r.admission_track),
+    g: str(r.group),
+    c: str(r.campus),
+    rg: str(r.region),
+    idv: Array.isArray(idr?.variants) ? (idr.variants as unknown[]).length : 0,
+    rc: cell(r.recruitment_count_with_stage, "stage"),
+    cr: cell(r.competition_ratio),
+    ad: cell(r.additional_admission_count),
+    rk: cell(r.final_additional_admission_rank),
+    c50: cell(r.final_50_percent_cut, "cut"),
+    c70: cell(r.final_70_percent_cut, "cut"),
+    alt: {
+      s: String(alt.status ?? ""),
+      r: str(alt.reason_code),
+      om: int(alt.omitted_other_basis_count ?? 0),
+      e: Array.isArray(alt.entries) ? (alt.entries as unknown[]).map((e) => cell(e, "cut")) : [],
+    },
+  };
+}
+
+/* ── 받은 bytes 검증 ── */
+
+async function sha256(b: Uint8Array): Promise<string> {
+  const d = await crypto.subtle.digest("SHA-256", b as BufferSource);
+  return Array.from(new Uint8Array(d), (x) => x.toString(16).padStart(2, "0")).join("");
+}
+async function gunzip(b: Uint8Array): Promise<Uint8Array> {
+  const s = new Blob([b as BlobPart]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return new Uint8Array(await new Response(s).arrayBuffer());
+}
+/** 압축 그대로 받았으면 gzip pins, 풀린 원문이면 decoded pins 와 길이·SHA 를 맞춘다(서로 바꿔 비교하지 않는다) */
+async function verifiedText(got: Uint8Array, pin: SnapshotPartPin): Promise<string> {
+  let decoded = got;
+  if (got[0] === 0x1f && got[1] === 0x8b) {
+    if (got.length !== pin.gzip_bytes || (await sha256(got)) !== pin.gzip_sha256) throw new Error(`p1_gzip_pin_mismatch ${pin.part_id}`);
+    decoded = await gunzip(got);
+  }
+  if (decoded.length !== pin.decoded_bytes || (await sha256(decoded)) !== pin.decoded_sha256) throw new Error(`p1_decoded_pin_mismatch ${pin.part_id}`);
+  return new TextDecoder("utf-8", { fatal: true }).decode(decoded);
+}
+
+async function pubKeyOf(h: Pick<SnapshotHeadDto, "publication_sha256" | "source_head_sha256" | "normalization_rules_version" | "selection_rules_version">) {
+  const k = [FORMAT, "p1-public", h.publication_sha256, h.source_head_sha256, h.normalization_rules_version, h.selection_rules_version].join("|");
+  return (await sha256(new TextEncoder().encode(k))).slice(0, 32);
+}
+
+
+/* ── 준비(관리자) ── */
+export type WarmStatus =
+  | { state: "running"; phase: Progress["phase"]; parts_done: number; parts_total: number; schools_done: number; schools_total: number; retry_after_ms?: number }
+  | { state: "ready"; ready: Ready }
+  | { state: "changed" };
+function initialProgress(head: SnapshotHeadDto): Progress {
+  return { snapshot_id: head.snapshot_id, publication_sha256: head.publication_sha256, done: [], part_keys: {}, schoolParts: {}, school_keys: {}, phase: "parts", schoolsDone: 0, indexDone: 0, index_segments: [], started_at: new Date().toISOString() };
+}
+function running(pg: Progress, total: number, retry = 0): WarmStatus {
+  return { state: "running", phase: pg.phase, parts_done: pg.done.length, parts_total: total, schools_done: pg.schoolsDone,
+    schools_total: Object.keys(pg.schoolParts).length, ...(retry ? { retry_after_ms: retry } : {}) };
+}
+async function cacheValue<T>(store: Kv, key: string | undefined): Promise<T> {
+  if (!key) throw new ConnectionError("unavailable", "p1_cache_reference_missing");
+  const value = await getJson<T>(store, key);
+  if (value === null) throw new ConnectionError("unavailable", "p1_cache_visibility_pending");
+  return value;
+}
+async function readyOf(view: CoordinationView, mode: Mode): Promise<Ready | null> {
+  if (!view.headFresh || !view.head || !view.ready) return null;
+  const r = view.ready as unknown as Ready, h = view.head;
+  if (r.snapshot_id !== h.snapshot_id || r.publication_sha256 !== h.publication_sha256 || r.source_head_sha256 !== h.source_head_sha256 ||
+      r.normalization_rules_version !== h.normalization_rules_version || r.selection_rules_version !== h.selection_rules_version ||
+      r.expires_at !== h.expires_at || Date.parse(r.expires_at) <= Date.now() || r.cache_mode !== mode ||
+      r.pub !== await pubKeyOf(h) || typeof r.index_key !== "string") throw new ConnectionError("unavailable", "p1_ready_binding_invalid");
+  return r;
+}
+
+/** One fenced step. Partial writes use unique keys and cannot overwrite a later step or ready marker. */
+export async function warmStep(src: JungsiSource, caller: Caller): Promise<WarmStatus> {
+  try { return await coordinatedWarmStep(src, caller); } catch (error) { return servicesFailure(error); }
+}
+async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<WarmStatus> {
+  const mode = src.kind, { kv: store, coordinator } = await services(mode);
+  const view = await checkedHead(src, caller, coordinator);
+  if (!view?.head) return running(initialProgress({ snapshot_id: "checking", publication_sha256: "" } as SnapshotHeadDto), 0, 1000);
+  const head = view.head, pub = await pubKeyOf(head), claim = await coordinator.claimWarm(head.publication_sha256);
+  if (claim.state === "ready") {
+    const ready = await readyOf(claim.view, mode);
+    if (!ready) throw new ConnectionError("unavailable", "p1_ready_binding_invalid");
+    return { state: "ready", ready };
+  }
+  const pg = (claim.view.progress ? structuredClone(claim.view.progress) as unknown as Progress : initialProgress(head));
+  if (pg.snapshot_id !== head.snapshot_id || pg.publication_sha256 !== head.publication_sha256) throw new SnapshotChanged();
+  if (claim.state === "busy") return running(pg, head.parts.length, 1000);
+  const token = claim.token, P = token.writePrefix!;
+  const write = async (key: string, value: unknown) => {
+    if (Date.now() >= token.expiresAt) throw new P1CoordinationError("p1_coordinator_fence_stale");
+    await putJson(store, key, value);
+    if (Date.now() >= token.expiresAt) throw new P1CoordinationError("p1_coordinator_fence_stale");
+  };
+  try {
+    let ready: Ready | null = null;
+    if (pg.phase === "parts") {
+      const next = head.parts.filter(p => !pg.done.includes(p.part_id)).slice(0, PARTS_PER_STEP);
+      for (const pin of next) {
+        const text = await verifiedText(await src.readSnapshotPart(caller, head.snapshot_id, pin.part_id), pin);
+        const body = parseLossless(text) as Obj;
+        if (body.format !== "jungsi.history-snapshot/v1" || body.part_id !== pin.part_id || body.payload_id !== pin.payload_id || !Array.isArray(body.rows)) throw new Error(`p1_part_invalid ${pin.part_id}`);
+        const rows = (body.rows as Obj[]).map(r => [String(r.university_id ?? ""), compact(r)] as const);
+        const mapped = rows.filter(([, r]) => r.pk !== null).length;
+        if (rows.length !== pin.rows || mapped !== pin.mapped_rows || rows.length - mapped !== pin.mapping_pending_rows) throw new Error(`p1_part_counts_mismatch ${pin.part_id}`);
+        const bySchool: Record<string, Row[]> = {};
+        for (const [u, r] of rows) {
+          if (!/^[A-Za-z0-9._:-]{1,64}$/.test(u)) throw new Error(`p1_part_invalid ${pin.part_id}`);
+          (bySchool[u] ??= []).push(r);
+        }
+        const key = `${P}:frag:${pin.part_id}`;
+        await write(key, bySchool); pg.part_keys[pin.part_id] = key;
+        for (const u of Object.keys(bySchool)) (pg.schoolParts[u] ??= []).push(pin.part_id);
+        pg.done.push(pin.part_id);
+      }
+      if (pg.done.length === head.parts.length) pg.phase = "schools";
+    } else if (pg.phase === "schools") {
+      const ids = Object.keys(pg.schoolParts).sort(), frags = new Map<string, Record<string, Row[]>>();
+      let completed = 0;
+      for (const u of ids.slice(pg.schoolsDone, pg.schoolsDone + SCHOOLS_PER_STEP)) {
+        const missing = pg.schoolParts[u].filter(part => !frags.has(part));
+        if (frags.size + missing.length > MAX_FRAGMENT_READS) {
+          if (completed === 0) throw new ConnectionError("unavailable", "p1_cache_layout_budget_exceeded");
+          break;
+        }
+        const rows: Row[] = [];
+        for (const part of pg.schoolParts[u]) {
+          if (!frags.has(part)) frags.set(part, await cacheValue<Record<string, Row[]>>(store, pg.part_keys[part]));
+          const found = frags.get(part)![u];
+          if (!found) throw new ConnectionError("unavailable", "p1_cache_reference_missing");
+          rows.push(...found);
+        }
+        const key = `${P}:school:${u}`; await write(key, rows); pg.school_keys[u] = key; completed++;
+      }
+      pg.schoolsDone += completed;
+      if (pg.schoolsDone === ids.length) pg.phase = "index";
+    } else if (pg.phase === "index") {
+      const ids = Object.keys(pg.schoolParts).sort(), segment: IndexSegment = { schools: [], units: [], rows: 0, pending: 0 };
+      for (let at = pg.indexDone; at < Math.min(ids.length, pg.indexDone + INDEX_SCHOOLS_PER_STEP); at++) {
+        const u = ids[at], rows = await cacheValue<Row[]>(store, pg.school_keys[u]); segment.rows += rows.length;
+        const names = [...new Set([...rows].sort((a, b) => b.y - a.y).map(r => r.n))];
+        const regions = [...new Set(rows.map(r => r.rg).filter((x): x is string => !!x))], by = new Map<string, Row[]>();
+        for (const r of rows) by.set(unitKey(r), [...(by.get(unitKey(r)) ?? []), r]);
+        let pending = 0;
+        for (const [k, rs] of by) {
+          if (k.startsWith("ob:")) pending++;
+          const uniq = (f: (r: Row) => string | null) => [...new Set(rs.map(f).filter((x): x is string => !!x))].join("\n");
+          segment.units.push([at, k, uniq(r => r.d), uniq(r => r.g), uniq(r => r.rg), uniq(r => r.n)]);
+        }
+        segment.pending += pending;
+        segment.schools.push({ id: u, name: names[0] ?? u, names, region: regions.length === 1 ? regions[0] : regions.join("·") || null, units: by.size - pending, pending });
+      }
+      const segmentKey = `${P}:index-segment:${pg.indexDone}`; await write(segmentKey, segment);
+      pg.index_segments.push(segmentKey); pg.indexDone += segment.schools.length;
+      if (pg.indexDone === ids.length) {
+        const all = await Promise.all(pg.index_segments.map(key => cacheValue<IndexSegment>(store, key)));
+        const schools = all.flatMap(s => s.schools), units = all.flatMap(s => s.units);
+        if (all.reduce((n, s) => n + s.rows, 0) !== head.counts.rows || schools.length !== head.counts.schools || all.reduce((n, s) => n + s.pending, 0) !== head.counts.mapping_pending_rows) throw new Error("p1_totals_mismatch");
+        schools.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+        const order = new Map(schools.map((s, i) => [s.id, i]));
+        const index: Index = { schools, units: units.map(([si, ...rest]) => [order.get(ids[si])!, ...rest]), school_keys: pg.school_keys };
+        const indexKey = `${P}:index`; await write(indexKey, index);
+        // Revalidate the actual head after construction. A newer publication invalidates this lease.
+        const beforeFinalCheck = await coordinator.inspect();
+        const finalView = await checkedHead(src, caller, coordinator, beforeFinalCheck.headRevision);
+        if (!finalView?.head || await pubKeyOf(finalView.head) !== pub) throw new SnapshotChanged();
+        ready = { snapshot_id: head.snapshot_id, publication_sha256: head.publication_sha256, source_head_sha256: head.source_head_sha256,
+          normalization_rules_version: head.normalization_rules_version, selection_rules_version: head.selection_rules_version,
+          generated_at: head.generated_at, source_as_of: head.source_as_of, expires_at: head.expires_at, counts: head.counts,
+          warmed_at: new Date().toISOString(), pub, index_key: indexKey, cache_mode: mode };
+        pg.phase = "ready";
+      }
+    }
+    const committed = await coordinator.commitWarm(token, document(pg), ready ? document(ready) : null);
+    if (ready) {
+      const confirmed = await readyOf(committed.view, mode);
+      if (!confirmed) throw new ConnectionError("unavailable", "p1_ready_binding_invalid");
+      return { state: "ready", ready: confirmed };
+    }
+    return running(pg, head.parts.length);
+  } catch (error) {
+    await coordinator.failWarm(token).catch(() => undefined);
+    if (error instanceof SnapshotChanged) {
+      await checkedHead(src, caller, coordinator, view.headRevision).catch(() => null);
+      return { state: "changed" };
+    }
+    if (error instanceof P1CoordinationError && error.code === "p1_coordinator_fence_stale") {
+      const latest = await coordinator.inspect();
+      return running((latest.progress as unknown as Progress | null) ?? initialProgress(head), head.parts.length, 1000);
+    }
+    throw error;
+  }
+}
+
+/** Admin status only; an unfresh actor never exposes the stored ready as current. */
+export async function warmInfo(): Promise<{ ready: Ready | null }> {
+  try { const mode = configuredMode(), { coordinator } = await services(mode); return { ready: await readyOf(await coordinator.inspect(), mode) }; }
+  catch (error) { return servicesFailure(error); }
+}
+
+/* ── 조회(회원): no shared I/O promises or private results ── */
+const memIndex = new Map<string, Index>(), memSchool = new Map<string, Row[]>();
+export type Current = { state: "ready"; ready: Ready } | { state: "none" | "changed" | "expired" | "checking" };
+export async function currentSnapshot(src: JungsiSource, caller: Caller): Promise<Current> {
+  try {
+    const { coordinator } = await services(src.kind), previous = await coordinator.inspect();
+    const current = await checkedHead(src, caller, coordinator);
+    if (!current) return { state: "checking" };
+    const ready = await readyOf(current, src.kind);
+    if (ready) return { state: "ready", ready };
+    if (previous.head && current.head && await pubKeyOf(previous.head) !== await pubKeyOf(current.head)) return { state: "changed" };
+    return { state: "none" };
+  } catch (error) { return servicesFailure(error); }
+}
+async function index(ready: Ready): Promise<Index> {
+  let ix = memIndex.get(ready.index_key);
+  if (!ix) {
+    ix = await cacheValue<Index>((await services(ready.cache_mode)).kv, ready.index_key);
+    if (!Array.isArray(ix.schools) || !Array.isArray(ix.units) || !ix.school_keys) throw new ConnectionError("unavailable", "p1_snapshot_index_missing");
+    memIndex.clear(); memIndex.set(ready.index_key, ix);
+  }
+  return ix;
+}
+async function school(ready: Ready, id: string): Promise<Row[]> {
+  const k = `${ready.index_key}:${id}`;
+  let rows = memSchool.get(k);
+  if (!rows) {
+    const ix = await index(ready); rows = await cacheValue<Row[]>((await services(ready.cache_mode)).kv, ix.school_keys[id]);
+    if (!Array.isArray(rows)) throw new ConnectionError("unavailable", "p1_snapshot_school_missing");
+    if (memSchool.size >= 120) memSchool.delete(memSchool.keys().next().value as string);
+    memSchool.set(k, rows);
+  }
+  return rows;
+}
+export const PAGE_SCHOOLS = 20;
+const norm = (s: string) => s.normalize("NFC").replace(/\s+/g, "").toLowerCase();
+export type SearchResult = { total_schools: number; total_units: number; total_pending: number; page: number; pages: number; schools: { school: School; rows: Row[]; keys: Set<string> }[] };
+export async function searchSnapshot(ready: Ready, q: { university?: string; unit?: string; region?: string; group?: string; page?: number }): Promise<SearchResult> {
+  const ix = await index(ready), uq = q.university ? norm(q.university) : "", dq = q.unit ? norm(q.unit) : "";
+  const schoolHit = ix.schools.map(s => !uq || s.names.some(n => norm(n).includes(uq)));
+  const matched = new Map<number, Set<string>>(); let units = 0, pending = 0;
+  for (const [si, key, deps, groups, regions, names] of ix.units) {
+    if (!schoolHit[si] && !(uq && names.split("\n").some(n => norm(n).includes(uq)))) continue;
+    if (dq && !deps.split("\n").some(d => norm(d).includes(dq))) continue;
+    if (q.group && !groups.split("\n").includes(q.group)) continue;
+    if (q.region && !regions.split("\n").includes(q.region)) continue;
+    let set = matched.get(si); if (!set) matched.set(si, set = new Set()); set.add(key);
+    if (key.startsWith("ob:")) pending++; else units++;
+  }
+  const order = [...matched.keys()].sort((a, b) => a - b), pages = Math.max(1, Math.ceil(order.length / PAGE_SCHOOLS));
+  const requestedPage = Number.isSafeInteger(q.page) ? q.page! : 1, page = Math.min(Math.max(1, requestedPage), pages);
+  const schools = await Promise.all(order.slice((page - 1) * PAGE_SCHOOLS, page * PAGE_SCHOOLS).map(async si => {
+    const s = ix.schools[si], keys = matched.get(si)!;
+    return { school: s, rows: (await school(ready, s.id)).filter(r => keys.has(unitKey(r))), keys };
+  }));
+  return { total_schools: order.length, total_units: units, total_pending: pending, page, pages, schools };
+}
+export async function unitRows(ready: Ready, schoolId: string, key: string): Promise<Row[]> {
+  return (await school(ready, schoolId)).filter(r => unitKey(r) === key);
+}

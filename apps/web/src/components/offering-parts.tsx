@@ -1,6 +1,6 @@
 import { togglePick } from "@/app/shortlist-actions";
 import type { AssessmentDto, Category, ReasonDto, StatisticsDto } from "@/lib/dto";
-import { seoulDate } from "@/lib/format";
+import { pctText, seoulDate } from "@/lib/format";
 
 /* 3·4페이지(와 2페이지 유료 부분)가 같이 쓰는 모집단위 칸. 응답 모양은 assessment·statistics DTO */
 
@@ -30,7 +30,7 @@ const REASON: Record<string, string> = {
   analysis_release_not_approved: "이 모집단위의 지원 판단 기준을 검수하고 있습니다.",
   analysis_pack_mismatch: "입력한 시험과 지원 판단 자료의 버전이 맞지 않습니다.",
   target_distribution_missing: "그해 비교 분포가 아직 없습니다.",
-  total_model_missing: "전체 누적 곡선이 아직 발행되지 않았습니다.",
+  total_model_missing: "전체 누백 분포 자료가 아직 연결되지 않았습니다(계산 진행 중이 아님).",
   year_bridge_required: "과거 학년도 모집행과 올해 성적을 잇는 연도 연계 자료가 아직 없습니다.",
   conversion_not_ready: "환산 결과가 준비되지 않아 이 대학 위치를 계산하지 않았습니다.",
   offering_analysis_pending: "올해 모집행과 대학 분석 자료가 결속되기 전이라 후보 산출을 보류했습니다.",
@@ -69,7 +69,7 @@ export function ScoreCell({ a }: { a: Cell }) {
   return (
     <span className="score">
       <b className="num">{a.converted_score}</b>
-      {a.converted_percentile && <small>상위 {a.converted_percentile}%</small>}
+      {a.converted_percentile && <small>상위 {pctText(a.converted_percentile)}%</small>}
     </span>
   );
 }

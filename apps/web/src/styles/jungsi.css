@@ -86,6 +86,36 @@ body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;lin
   body{background:#fff}
 }
 
+/* ── 정시터치 공통 다듬기(2026-10-13): 2페이지 성적 입력 표와 같은 시각 언어 ──
+   남색 머리 띠(--deep) · 테두리 입력란 · 은은한 그림자 카드 · 주황 점 소제목 · 남색 선택 칩.
+   base.css(에듀터치 사본)는 고치지 않고 여기서 덧씌운다 */
+.et{--jt-head:#EEF2FA; --jt-head-line:#D9E0EE; --jt-field:#D3D8E4; --jt-filled:#F7F9FF; --jt-card-shadow:0 1px 2px rgba(16,37,84,.05)}
+.et .btn{transition:border-color .15s,box-shadow .15s,background-color .15s}
+.et .btn:not(.p):not(.t):hover{border-color:#B9C1D3;color:var(--ink)}
+.et .btn.p{font-weight:800;box-shadow:0 4px 12px rgba(30,86,214,.2)}
+.et .btn.p:hover{box-shadow:0 6px 16px rgba(30,86,214,.28)}
+.et .chips button,.et .chips a{transition:border-color .15s,background-color .15s}
+.et .chips button:hover,.et .chips a:hover{border-color:#B9C1D3}
+.et .chips button.on,.et .chips a.on{background:var(--deep);border-color:var(--deep);color:#fff;font-weight:700}
+.et .card{box-shadow:var(--jt-card-shadow)}
+.et .tblwrap{border-color:#CBD2E1}
+.et table.tb th{background:var(--jt-head);color:var(--deep);font-weight:800;border-bottom-color:var(--jt-head-line)}
+/* 큰 표: 성적표처럼 남색 머리 */
+.et .tblwrap.sheet table.tb thead th{background:var(--deep);color:#fff;border-bottom-color:#22396F}
+
 /* 연결 대기 안내: 설정 이름과 사유 코드 */
 .et .conn-missing,.et .conn-code{margin:6px 0 0;font-size:12px;color:var(--ink-2)}
 .et .conn-missing code,.et .conn-code code{padding:1px 5px;border-radius:3px;background:var(--sub);font-size:11px;word-break:break-all}
+
+/* 화면 내용 불러오는 중(app/loading.tsx). 머리글·탭은 먼저 보이고 이 자리만 바뀐다 */
+.et .jt-loading{display:flex;flex-direction:column;gap:18px;padding-top:28px;padding-bottom:40px}
+.et .jt-loading-card{display:flex;align-items:center;gap:14px;max-width:640px;margin:0 auto;width:100%;padding:20px 22px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg)}
+.et .jt-loading-title{margin:0;font-size:15px;font-weight:800;color:var(--deep)}
+.et .jt-loading-desc{margin:4px 0 0;font-size:13px;color:var(--ink-2)}
+.et .jt-spinner{flex:none;width:26px;height:26px;border-radius:50%;border:3px solid var(--brand-soft);border-top-color:var(--brand);animation:jt-spin .9s linear infinite}
+.et .jt-skel{display:flex;flex-direction:column;gap:12px;max-width:960px;margin:0 auto;width:100%}
+.et .jt-skel i{display:block;height:72px;border-radius:var(--r-card);background:linear-gradient(90deg,var(--sub) 0%,var(--sub-2) 50%,var(--sub) 100%);background-size:200% 100%;animation:jt-shimmer 1.4s ease-in-out infinite}
+.et .jt-skel i:nth-child(2){height:120px}
+@keyframes jt-spin{to{transform:rotate(360deg)}}
+@keyframes jt-shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@media (prefers-reduced-motion:reduce){.et .jt-spinner,.et .jt-skel i{animation:none}}

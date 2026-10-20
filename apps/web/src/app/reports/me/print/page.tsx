@@ -1,6 +1,9 @@
 import { ConnectionNotice } from "@/components/connection-notice";
+import { examTypeLabel } from "@/lib/exam";
+import { MemberMark } from "@/components/member-mark";
+import { PASS_HREF } from "@/lib/links";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/link";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import type { SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
@@ -36,7 +39,7 @@ export default async function Page() {
         <section className="gate">
           <h2>상담 리포트 인쇄는 이용권 회원 전용입니다</h2>
           <p>전체 성적 위치는 내 성적 리포트에서 그대로 볼 수 있습니다.</p>
-          <div className="acts"><Link className="btn" href={back}>내 성적 리포트로</Link></div>
+          <div className="acts"><a className="btn t" href={PASS_HREF}>이용권 보기</a><Link className="btn" href={back}>내 성적 리포트로</Link></div>
         </section>
       </div>
     );
@@ -56,6 +59,8 @@ export default async function Page() {
 
   return (
     <div className="wrap pg-body pr">
+      {/* 상담 리포트 인쇄본: 회원 식별 표시(인쇄·PDF 에도 찍힘) + 조회 기록 */}
+      <MemberMark kind="report" path="/jeongsi/reports/me/print" />
       <div className="pr-tools">
         <Link className="btn" href={back}>돌아가기</Link>
         <PrintButton />
@@ -64,7 +69,7 @@ export default async function Page() {
         <header className="pr-hd">
           <div>
             <p className="pr-brand">에듀터치 정시터치 · 상담 리포트</p>
-            <h1>{a.exam.academic_year}학년도 {a.exam.exam_type} 기준</h1>
+            <h1>{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)} 기준</h1>
           </div>
           <dl>
             <div><dt>리포트 판</dt><dd className="num">{snap.snapshot_version}</dd></div>
