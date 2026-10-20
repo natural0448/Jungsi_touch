@@ -13,6 +13,7 @@ import { NativeRuntimeRequest } from "../../supabase/functions/_shared/jungsi/in
 import { readBasicRuntimeSettings } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts";
 import { SupabaseSqlTransport } from "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts";
 import { assert, equal } from "./fixture.ts";
+import { SyntheticUniversityData } from "./synthetic_university.ts";
 import {
   SYNTHETIC_RUNTIME_NOW,
   syntheticRuntimeBinding,
@@ -22,7 +23,12 @@ async function fixture(
   options: {
     artifactCache?: VerifiedArtifactCache;
     deferredExam?: boolean;
+    validExam?: boolean;
+    deferredModel?: boolean;
     deferredVersion?: string;
+    policyPackVersion?: string;
+    policyAcademicYear?: number;
+    policyEligibleCount?: number;
     costsForApproved?: boolean;
     extraSelection?: boolean;
     unapproved?: boolean;
@@ -54,13 +60,28 @@ async function fixture(
     archive_only: false,
     source_timezone: "Asia/Seoul",
   };
-  const unused = new TextEncoder().encode("SYNTHETIC-unused-body-not-JSON");
+  const rawPack = new SyntheticUniversityData().rawPack;
+  (rawPack.exam as NativeObject).exam_id = "SYNTHETIC-exam";
+  rawPack.pack_version = "SYNTHETIC-pack";
+  const validPack = await syntheticRuntimePin(nativeJsonText(rawPack));
+  const unused = options.validExam
+    ? validPack.bytes
+    : new TextEncoder().encode("SYNTHETIC-unused-body-not-JSON");
   const examEntry: NativeObject = {
     ...entry,
     kind: "exam_pack",
     key: "SYNTHETIC-exam",
     version: options.deferredVersion ?? "SYNTHETIC-pack",
     object_key: "SYNTHETIC/unused-exam.json",
+    bytes: unused.length,
+    sha256: options.validExam ? validPack.sha256 : "a".repeat(64),
+  };
+  const modelEntry: NativeObject = {
+    ...entry,
+    kind: "total_model",
+    key: "SYNTHETIC-exam:SYNTHETIC-pack",
+    object_key: "SYNTHETIC/unused-model.json",
+    version: "SYNTHETIC-pack",
     bytes: unused.length,
     sha256: "a".repeat(64),
   };
@@ -71,6 +92,9 @@ async function fixture(
         artifacts: [
           { kind: "catalog", key: "service" },
           ...(options.deferredExam ? [{ kind: "exam_pack", key: "SYNTHETIC-exam" }] : []),
+          ...(options.deferredModel
+            ? [{ kind: "total_model", key: "SYNTHETIC-exam:SYNTHETIC-pack" }]
+            : []),
         ],
       };
       if (options.maxReads) {
@@ -81,13 +105,20 @@ async function fixture(
     (bodies) => {
       bodies.registry = nativeJsonText({
         format: "jungsi.data-registry/v1",
-        entries: [entry, ...(options.deferredExam ? [examEntry] : [])],
+        entries: [
+          entry,
+          ...(options.deferredExam ? [examEntry] : []),
+          ...(options.deferredModel ? [modelEntry] : []),
+        ],
       });
       bodies.selection = nativeJsonText({
         format: "jungsi.runtime-selection/v1",
         required: [
           { kind: "catalog", key: "service" },
           ...(options.deferredExam ? [{ kind: "exam_pack", key: "SYNTHETIC-exam" }] : []),
+          ...(options.deferredModel
+            ? [{ kind: "total_model", key: "SYNTHETIC-exam:SYNTHETIC-pack" }]
+            : []),
           ...(options.extraSelection ? [{ kind: "exam_pack", key: "SYNTHETIC-extra" }] : []),
         ],
       });
@@ -101,9 +132,9 @@ async function fixture(
         exams: options.deferredExam
           ? [{
             exam_id: "SYNTHETIC-exam",
-            pack_version: "SYNTHETIC-pack",
-            academic_year: 2027,
-            eligible_offering_count: 0,
+            pack_version: options.policyPackVersion ?? "SYNTHETIC-pack",
+            academic_year: options.policyAcademicYear ?? 2027,
+            eligible_offering_count: options.policyEligibleCount ?? 0,
           }]
           : [],
         dimensions: [
@@ -129,7 +160,8 @@ async function fixture(
             operation,
             reserved_result_bytes: 512,
             base_units:
-              ["overall.analyze", "university.analyze", "candidates.build"].includes(operation)
+              ["score-profile.create", "overall.analyze", "university.analyze", "candidates.build"]
+                  .includes(operation)
                 ? 1
                 : 0,
             per_offering_units: 0,
@@ -165,6 +197,7 @@ async function fixture(
         body = '{"id":"synthetic-private","public":false,"file_size_limit":65536}';
       } else if (path.endsWith("/catalog.json")) body = artifact.bytes;
       else if (path.endsWith("/unused-exam.json")) body = unused;
+      else if (path.endsWith("/unused-model.json")) body = unused;
       else {
         const name = path.split("/").at(-1)!.replace(".json", "");
         assert(Object.hasOwn(f.body, name));
@@ -363,4 +396,141 @@ Deno.test("all other operation contexts and full readiness retain noncatalog bod
     assert(f.calls.some((url) => url.endsWith("unused-exam.json")));
     equal(f.sqlCalls(), 0);
   }
+  await verifyAdditionalOverallScopeCases();
+  await verifyAdditionalUniversityScopeCases();
 });
+
+/** Additive scenarios run inside the existing strict foundation suite; no test is skipped. */
+async function verifyAdditionalOverallScopeCases(): Promise<void> {
+  const cases: readonly [string, () => Promise<void>][] = [
+    [
+      "overall operation chooses its scope in the real context before reading unused catalog",
+      async () => {
+        const f = await fixture({
+          deferredExam: true,
+          operation: "overall.analyze",
+          approvedOperations: ["overall.analyze"],
+          costsForApproved: true,
+        });
+        await denied(() => f.context.data(), "storage_hash_mismatch");
+        assert(f.calls.some((url) => url.endsWith("unused-exam.json")));
+        assert(!f.calls.some((url) => url.endsWith("catalog.json")));
+        equal(f.sqlCalls(), 0);
+      },
+    ],
+  ];
+  for (const [name, run] of cases) {
+    try {
+      await run();
+    } catch (error) {
+      throw new Error(name, { cause: error });
+    }
+  }
+}
+
+/** Real operation-to-scope mapping with unchanged policy and final-current guards. */
+async function verifyAdditionalUniversityScopeCases(): Promise<void> {
+  const cases: readonly [string, () => Promise<void>][] = [
+    ["score creation explicitly selects overall scope before a malformed exam body", async () => {
+      const f = await fixture({
+        deferredExam: true,
+        operation: "score-profile.create",
+        approvedOperations: ["score-profile.create"],
+        costsForApproved: true,
+      });
+      await denied(() => f.context.data(), "storage_hash_mismatch");
+      assert(f.calls.some((url) => url.endsWith("unused-exam.json")));
+      assert(!f.calls.some((url) => url.endsWith("catalog.json")));
+      equal(f.sqlCalls(), 0);
+    }],
+    [
+      "university operations defer total-model body but keep getter and final-current rejection",
+      async () => {
+        for (const operation of ["university.analyze", "candidates.build"] as const) {
+          const f = await fixture({
+            deferredModel: true,
+            deferredExam: true,
+            validExam: true,
+            operation,
+            approvedOperations: [operation],
+            costsForApproved: true,
+          });
+          const data = await f.context.data();
+          equal(
+            (await data.preflight()).verification_scope,
+            "university_payloads_and_all_selected_reference_metadata",
+          );
+          assert(!f.calls.some((url) => url.endsWith("unused-model.json")));
+          await denied(
+            () => data.getTotalModel("SYNTHETIC-exam", "SYNTHETIC-pack"),
+            "runtime_dependency_not_loaded",
+          );
+          f.f.body.head = f.f.body.head.replace('"status":"approved"', '"status":"revoked"');
+          await denied(() => f.context.assertCurrent(), "security_policy_unavailable");
+          equal(f.sqlCalls(), 0);
+        }
+      },
+    ],
+    ["score creation still accepts a valid exam without any selected total model", async () => {
+      const f = await fixture({
+        deferredExam: true,
+        validExam: true,
+        operation: "score-profile.create",
+        approvedOperations: ["score-profile.create"],
+        costsForApproved: true,
+      });
+      const data = await f.context.data();
+      equal((await data.preflight()).status, "verified_overall_payloads");
+      equal(await data.getTotalModel("SYNTHETIC-exam", "SYNTHETIC-pack"), null);
+      assert(!f.calls.some((url) => url.endsWith("catalog.json")));
+      await f.context.assertCurrent();
+      equal(f.sqlCalls(), 0);
+    }],
+    [
+      "university policy retains pack version academic year and exact candidates count",
+      async () => {
+        for (
+          const patch of [
+            { policyPackVersion: "SYNTHETIC-other" },
+            { policyAcademicYear: 2026 },
+            { policyEligibleCount: 1 },
+          ]
+        ) {
+          const f = await fixture({
+            deferredExam: true,
+            validExam: true,
+            operation: "candidates.build",
+            approvedOperations: ["candidates.build"],
+            costsForApproved: true,
+            ...patch,
+          });
+          await denied(() => f.context.data(), "security_policy_unavailable");
+          equal(f.sqlCalls(), 0);
+        }
+      },
+    ],
+    [
+      "score creation and default read contexts still require selected model integrity",
+      async () => {
+        for (const operation of ["score-profile.create", "report.read"] as const) {
+          const f = await fixture({
+            deferredModel: true,
+            operation,
+            approvedOperations: [operation],
+            costsForApproved: true,
+          });
+          await denied(() => f.context.data(), "storage_hash_mismatch");
+          assert(f.calls.some((url) => url.endsWith("unused-model.json")));
+          equal(f.sqlCalls(), 0);
+        }
+      },
+    ],
+  ];
+  for (const [name, run] of cases) {
+    try {
+      await run();
+    } catch (error) {
+      throw new Error(name, { cause: error });
+    }
+  }
+}

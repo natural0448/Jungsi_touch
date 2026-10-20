@@ -4,7 +4,10 @@ import {
   NativeDataProvider,
   NativeForecastInputs,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts";
-import { NativeSourceSelection } from "../../supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts";
+import {
+  type NativePayloadMode,
+  NativeSourceSelection,
+} from "../../supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts";
 import { SupabaseArtifactClient } from "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts";
 import { UniversityScoringService } from "../../supabase/functions/_shared/jungsi/application/university_scoring.ts";
 import { UniversityPercentileService } from "../../supabase/functions/_shared/jungsi/application/university_percentile.ts";
@@ -30,6 +33,7 @@ async function pin(text: string) {
 }
 async function fixture(
   change: (sources: Map<string, NativeObject>) => void = () => {},
+  mode: NativePayloadMode = "all",
 ) {
   const u = new SyntheticUniversityData(),
     pack = u.pack!,
@@ -187,6 +191,7 @@ async function fixture(
         required: entries.map((e) => ({ kind: e.kind, key: e.key })),
       }),
     ),
+    mode,
   );
   return { data: new NativeDataProvider(selected), selected, u, oid, calls, context };
 }
@@ -295,7 +300,11 @@ Deno.test("native provider preserves raw source timestamps when catalog adapter 
 });
 
 // Freshness is a server-owned port. These approvals are fictional, not live selections.
-async function servingFixture(change: (sources: Map<string, NativeObject>) => void = () => {}) {
+async function servingFixture(
+  change: (sources: Map<string, NativeObject>) => void = () => {},
+  mode: NativePayloadMode = "all",
+  revokeAtHeadCall = 0,
+) {
   const f = await fixture((sources) => {
     const model = [...sources].find(([id]) => id.startsWith("total_model|"))![1];
     (model.distribution as NativeObject).metadata = {
@@ -303,7 +312,7 @@ async function servingFixture(change: (sources: Map<string, NativeObject>) => vo
       status: "approved",
     };
     change(sources);
-  });
+  }, mode);
   let now = 10n, headCalls = 0;
   const head = {
     status: "approved",
@@ -319,6 +328,7 @@ async function servingFixture(change: (sources: Map<string, NativeObject>) => vo
     heads: {
       current: () => {
         headCalls++;
+        if (headCalls === revokeAtHeadCall) head.status = "revoked";
         return Promise.resolve({ ...head });
       },
     },
@@ -737,4 +747,138 @@ Deno.test("research rational curves fail selected native preflight and cannot re
   equal(percentile.state.reason_code, "percentile_curve_not_approved");
   equal(percentile.dto().top_percent, null);
   equal(converted.dto().converted_score, "30.00");
+  await verifyAdditionalOverallScopeCases();
+  await verifyAdditionalUniversityScopeCases();
 });
+
+/** Additive scenarios run inside the existing strict foundation suite; no test is skipped. */
+async function verifyAdditionalOverallScopeCases(): Promise<void> {
+  const cases: readonly [string, () => Promise<void>][] = [
+    ["overall preflight decodes only pack and model and records its exact scope", async () => {
+      const f = await servingFixture(() => {}, "overall_only");
+      const receipt = await f.data.preflight();
+      equal(receipt.status, "verified_overall_payloads");
+      equal(receipt.verification_scope, "exam_model_payloads_and_all_selected_reference_metadata");
+      equal(f.selected.identities().map((x) => x.kind).sort(), ["exam_pack", "total_model"]);
+      assert(await f.data.getExamPack(f.u.pack!.examId));
+      assert(await f.data.getTotalModel(f.u.pack!.examId, f.u.pack!.packVersion));
+      assert(f.headCalls() > 0);
+    }],
+    ["overall provider refuses an unexpected catalog or conversion getter", async () => {
+      const f = await servingFixture(() => {}, "overall_only");
+      await f.data.preflight();
+      await denied(() => f.data.getCatalog(), "runtime_dependency_not_loaded");
+      await denied(() => f.data.getConversion(f.oid), "runtime_dependency_not_loaded");
+    }],
+    ["overall preflight retains the strict legacy population guard", async () => {
+      const f = await servingFixture((sources) => {
+        const model = [...sources].find(([id]) => id.startsWith("total_model|"))![1];
+        ((model.distribution as NativeObject).metadata as NativeObject).population_id =
+          "official_all_examinees";
+      }, "overall_only");
+      await denied(() => f.data.preflight(), "model_unverified");
+    }],
+    ["overall preflight still binds model pack and academic year", async () => {
+      const f = await servingFixture((sources) => {
+        const model = [...sources].find(([id]) => id.startsWith("total_model|"))![1];
+        ((model.distribution as NativeObject).metadata as NativeObject).academic_year = 2026;
+      }, "overall_only");
+      await denied(() => f.data.preflight(), "artifact_not_approved");
+    }],
+    ["overall without a selected model preserves the optional missing hold", async () => {
+      const f = await servingFixture((sources) => {
+        for (const k of sources.keys()) if (k.startsWith("total_model|")) sources.delete(k);
+      }, "overall_only");
+      const receipt = await f.data.preflight();
+      assert((receipt.optional_missing as NativeObject[]).some((x) => x.kind === "total_model"));
+      equal(await f.data.getTotalModel(f.u.pack!.examId, f.u.pack!.packVersion), null);
+    }],
+    ["overall warm model and final preflight reject a revoked current head", async () => {
+      const f = await servingFixture(() => {}, "overall_only");
+      await f.data.preflight();
+      f.head.status = "revoked";
+      await denied(
+        () => f.data.getTotalModel(f.u.pack!.examId, f.u.pack!.packVersion),
+        "artifact_version_mismatch",
+      );
+      await denied(() => f.data.preflight(), "artifact_version_mismatch");
+    }],
+  ];
+  for (const [name, run] of cases) {
+    try {
+      await run();
+    } catch (error) {
+      throw new Error(name, { cause: error });
+    }
+  }
+}
+
+/** Additional guards for the explicitly approved university payload scope. */
+async function verifyAdditionalUniversityScopeCases(): Promise<void> {
+  const cases: readonly [string, () => Promise<void>][] = [
+    [
+      "university preflight retains scoring releases while refusing its deferred model getter",
+      async () => {
+        const f = await servingFixture(() => {}, "university_only");
+        const receipt = await f.data.preflight();
+        equal(receipt.status, "verified_university_payloads");
+        equal(
+          receipt.verification_scope,
+          "university_payloads_and_all_selected_reference_metadata",
+        );
+        assert(f.selected.reference("total_model", f.u.pack!.examId + ":" + f.u.pack!.packVersion));
+        assert(!f.selected.identities().some((row) => row.kind === "total_model"));
+        assert(
+          !(receipt.optional_missing as NativeObject[]).some((row) => row.kind === "total_model"),
+        );
+        await denied(
+          () => f.data.getTotalModel(f.u.pack!.examId, f.u.pack!.packVersion),
+          "runtime_dependency_not_loaded",
+        );
+        const converted = await new UniversityScoringService(f.data).calculate(f.u.offering, {
+          profile_id: "SYNTHETIC-university-scope",
+          scores: f.u.scores(),
+        });
+        assert(converted.ready);
+        equal(converted.dto().converted_score, "30.00");
+      },
+    ],
+    ["university scope does not turn an absent model into a required dependency", async () => {
+      const f = await servingFixture((sources) => {
+        for (const key of sources.keys()) if (key.startsWith("total_model|")) sources.delete(key);
+      }, "university_only");
+      const receipt = await f.data.preflight();
+      assert(
+        (receipt.optional_missing as NativeObject[]).some((row) => row.kind === "total_model"),
+      );
+      equal(await f.data.getTotalModel(f.u.pack!.examId, f.u.pack!.packVersion), null);
+    }],
+    ["university immutable-pack preflight still rejects a wrong exam identity", async () => {
+      const f = await servingFixture((sources) => {
+        const raw = [...sources].find(([key]) => key.startsWith("exam_pack|"))![1];
+        (raw.exam as NativeObject).exam_id = "SYNTHETIC-wrong-exam";
+      }, "university_only");
+      await denied(() => f.data.preflight(), "artifact_exam_mismatch");
+    }],
+    ["university warm getters and final preflight reject current-head revocation", async () => {
+      const f = await servingFixture(() => {}, "university_only");
+      await f.data.preflight();
+      assert(await f.data.getExamPack(f.u.pack!.examId));
+      f.head.status = "revoked";
+      await denied(() => f.data.getExamPack(f.u.pack!.examId), "artifact_version_mismatch");
+      await denied(() => f.data.preflight(), "artifact_version_mismatch");
+    }],
+    ["university preflight rejects revocation between its fresh-head checks", async () => {
+      const f = await servingFixture(() => {}, "university_only", 2);
+      await denied(() => f.data.preflight(), "artifact_version_mismatch");
+      assert(f.headCalls() >= 2);
+    }],
+  ];
+  for (const [name, run] of cases) {
+    try {
+      await run();
+    } catch (error) {
+      throw new Error(name, { cause: error });
+    }
+  }
+}
