@@ -18,14 +18,40 @@ DELETION_PATHS=frozenset({
 USER_EVIDENCE_IDS=('01a0ccde-6f3d-7772-acd3-3eaca9a67b65','01a10bf5-8841-74a3-93e2-f2e2de8ac674','01a10bf5-898b-7180-8442-3bfd4d1c2914')
 USER_APPROVAL_TEXT='그럼 완료될 때까지 작업해 필요하다면 개발팀과 데이터팀 두군대와 협력해서 작업해'
 REQUEST_SHA256='686e51deb7f29cc259e5fb8d63e1c16456b16aebfa5fc9f4c04e9988d0d694e3'
+RAW_METRICS_APPROVAL_ID='FE-P1-RAW-METRICS-20261020'
+RAW_METRICS_PATH='apps/web/src/app/admissions/results/raw-metrics.tsx'
+RAW_METRICS_ROW={'path':RAW_METRICS_PATH,'mode':'100644','blob':'68ffdd44d08cbcc2e6019166b3cfd2b0541b1eb7','sha256':'1a00f2971e85408ea7ddc6327889594c80822abf65f3f57ffde183475719f121'}
+RAW_METRICS_EVIDENCE={'thread_id':'01a0ccde-6f3d-7772-acd3-3eaca9a67b65','question_call_id':'call_e73eb92e24064873800e5fd807712c6f','text':'이 파일 1개 삭제 승인'}
+REGISTERED_DELETION_PATHS=DELETION_PATHS|{RAW_METRICS_PATH}
 
 
 def canonical_hash(value):
     return hashlib.sha256(json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode('utf-8')).hexdigest()
 
 
-def deletion_record(spec):
-    return spec.get('workflow',{}).get('branch_governance',{}).get('file_deletion_policy',{}).get('record')
+def deletion_record(spec,record_id=None):
+    policy=spec.get('workflow',{}).get('branch_governance',{}).get('file_deletion_policy',{})
+    if record_id is None:return policy.get('record')
+    return next((r for r in policy.get('additional_records',[]) if isinstance(r,dict) and r.get('id')==record_id),None)
+
+
+def validate_additional_deletion_records(spec):
+    """One separately granted path; the historical four-file grant is untouched."""
+    policy=spec.get('workflow',{}).get('branch_governance',{}).get('file_deletion_policy',{})
+    records=policy.get('additional_records',[])
+    try:
+        if not isinstance(records,list) or len(records)>1:raise ValueError()
+        for r in records:
+            if set(r)!={'id','origin_branch','target_parent','source_commit','scope','reason','user_evidence','files','preservation','activation','record_sha256'}:raise ValueError()
+            if r['id']!=RAW_METRICS_APPROVAL_ID or r['origin_branch']!=DELETION_BRANCH or r['target_parent']!='develop':raise ValueError()
+            if r['scope']!='exact_one_file_first_deletion_only' or r['activation']!='preexisting_trusted_develop_registration_required':raise ValueError()
+            if not re.fullmatch('[0-9a-f]{40}',r['source_commit']) or r['source_commit']==ZERO or not r['reason']:raise ValueError()
+            if r['user_evidence']!=RAW_METRICS_EVIDENCE or r['files']!=[RAW_METRICS_ROW]:raise ValueError()
+            if r['preservation']!={'source_commit_and_blobs_retained':True,'originals_and_previous_versions_retained':True,'manifest_sha256':canonical_hash(r['files'])}:raise ValueError()
+            if r['record_sha256']!=canonical_hash({k:v for k,v in r.items() if k!='record_sha256'}):raise ValueError()
+    except (ValueError,KeyError,TypeError,AttributeError):
+        return ['Invalid additional exact file deletion approval registry']
+    return []
 
 
 def validate_deletion_registry(spec):
@@ -84,22 +110,26 @@ def validate_deletion_registry(spec):
             raise ValueError('Invalid exact file deletion approval registry')
     except (ValueError, KeyError, TypeError, AttributeError):
         return ['Invalid exact file deletion approval registry']
-    return []
+    return validate_additional_deletion_records(spec)
 
 
 
 def deletion_registry_sticky(trusted,candidate):
     old=deletion_record(trusted)
-    return ['Preexisting deletion approval cannot be removed or rewritten'] if old and old!=deletion_record(candidate) else []
+    errors=['Preexisting deletion approval cannot be removed or rewritten'] if old and old!=deletion_record(candidate) else []
+    extra=deletion_record(trusted,RAW_METRICS_APPROVAL_ID)
+    if extra and extra!=deletion_record(candidate,RAW_METRICS_APPROVAL_ID):errors.append('Preexisting additional deletion approval cannot be removed or rewritten')
+    return errors
 
 
 class DeletionAuthority:
     """Only preexisting registration on the trusted develop first-parent history."""
-    def __init__(self,observed_tips=()):
+    def __init__(self,observed_tips=(),record_id=None):
         if git('rev-parse','--is-shallow-repository').decode().strip()!='false':raise ValueError('Complete trusted deletion history is required')
         self.tip=approved_develop_tip();self.spec=load_spec(self.tip)
         if validate_deletion_registry(self.spec):raise ValueError('Invalid trusted deletion approval')
-        self.record=deletion_record(self.spec)
+        self.record_id=record_id
+        self.record=deletion_record(self.spec,record_id)
         if not self.record:raise ValueError('Deletion approval is not registered on trusted develop')
         self.source=self.record['source_commit'];self.rows={r['path']:r for r in self.record['files']}
         self.cache={};self.histories={};self.origins={}
@@ -108,7 +138,7 @@ class DeletionAuthority:
         commits=git('rev-list','--first-parent','--reverse',self.tip,'--').decode().split()
         for commit in commits:
             if not git('ls-tree',commit,'--',SPEC_PATH):continue
-            if deletion_record(load_spec(commit))==self.record:
+            if deletion_record(load_spec(commit),self.record_id)==self.record:
                 self.grant=commit;break
         if not self.grant:raise ValueError('Preexisting develop registration history is unavailable')
         for path,row in self.rows.items():
@@ -139,7 +169,7 @@ class DeletionAuthority:
     def origin_deletions(self,tip,path):
         """Distinct one-parent deletion origins in the entire retained DAG."""
         if tip not in self.origins:
-            origins={name:set() for name in DELETION_PATHS}
+            origins={name:set() for name in self.rows}
             for commit in self.since_source(tip):
                 parents,changes=self.changes(commit)
                 if len(parents)==1:
@@ -163,8 +193,8 @@ class DeletionAuthority:
 
     def first(self,commit,parent,path,branch,event_tip):
         if not ancestor(self.grant,parent) or not ancestor(self.source,parent):return False
-        if commit!='INDEX' and deletion_record(load_spec(commit))!=self.record:return False
-        if deletion_record(load_spec(parent))!=self.record:return False
+        if commit!='INDEX' and deletion_record(load_spec(commit),self.record_id)!=self.record:return False
+        if deletion_record(load_spec(parent),self.record_id)!=self.record:return False
         if self.entry(parent,path)!=(self.rows[path]['mode'],self.rows[path]['blob']):return False
         lineage=git('rev-list','--first-parent',event_tip,'--').decode().split()
         if branch==DELETION_BRANCH and (commit=='INDEX' or commit in lineage):pass
@@ -181,7 +211,7 @@ class DeletionAuthority:
 
     def inherited(self,commit,parents,path):
         if len(parents)!=2 or self.entry(parents[1],path) is not None:return False
-        if deletion_record(load_spec(commit))!=self.record:return False
+        if deletion_record(load_spec(commit),self.record_id)!=self.record:return False
         expected,_=automatic_merge(parents[0],parents[1],self.spec)
         if change_records(expected,commit):
             if any(name==path for status,name in change_records(expected,commit)):return False
@@ -225,13 +255,14 @@ def inspect_deletion_events(branch,before,after,*,staged=False):
                 events.extend((commit,parents,name) for status,name in change_records(parents[0],commit) if status=='D')
     history_errors=[] if staged else registry_history_errors(before,after)
     if not events:return set(),history_errors
-    authority=None;errors=history_errors;allowed=set()
-    try:authority=DeletionAuthority((before,after))
-    except ValueError as error:errors.append(str(error))
+    authorities={};errors=history_errors;allowed=set()
     for commit,parents,path in events:
         valid=False
-        if authority and path in DELETION_PATHS:
+        if path in REGISTERED_DELETION_PATHS:
             try:
+                record_id=RAW_METRICS_APPROVAL_ID if path==RAW_METRICS_PATH else None
+                if record_id not in authorities:authorities[record_id]=DeletionAuthority((before,after),record_id)
+                authority=authorities[record_id]
                 if commit=='INDEX' or len(parents)==1:
                     valid=authority.first(commit,parents[0],path,branch,before if staged else after)
                 elif len(parents)==2:valid=authority.inherited(commit,parents,path)
@@ -391,7 +422,7 @@ def validate_planning_paths(paths,spec):
             if path not in allowed and not path.startswith(tuple(policy['planning_direct_prefixes']))]
 
 def validate_deletions(changes,approved=()):
-    return ['File deletion requires explicit user scope: '+name for status,name in changes if status=='D' and not (name in approved and name in DELETION_PATHS)]
+    return ['File deletion requires explicit user scope: '+name for status,name in changes if status=='D' and not (name in approved and name in REGISTERED_DELETION_PATHS)]
 
 def validate_staged(branch,team,changes,spec,*,direct_changes=None,approved=()):
     direct=changes if direct_changes is None else direct_changes

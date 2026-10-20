@@ -221,4 +221,93 @@ class DeletionApprovalTests(unittest.TestCase):
         self.assertTrue(policy.validate_push_history(policy.DELETION_BRANCH,self.deleted,self.sync,self.approved))
         self.assertTrue(policy.validate_pr(policy.DELETION_BRANCH,'main',[],self.approved))
 
+class RawMetricsDeletionApprovalTests(unittest.TestCase):
+    """Exercise the separate grant in retained synthetic Git trees, without removing files."""
+    call=DeletionApprovalTests.__dict__['call']
+    commit=DeletionApprovalTests.__dict__['commit']
+    stage=DeletionApprovalTests.stage
+    rehash=DeletionApprovalTests.__dict__['rehash']
+
+    @classmethod
+    def files(cls,spec,removed=False):
+        return {'docs/current/service_spec.json':(json.dumps(spec,ensure_ascii=False,indent=2)+'\n').encode(),
+                'README.md':b'SYNTHETIC preserved\n',**({} if removed else {policy.RAW_METRICS_PATH:cls.payload})}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.repo=ROOT/'outputs/deletion_tests'/datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+        cls.repo.mkdir(parents=True,exist_ok=False)
+        cls.git_env={k:v for k,v in os.environ.items() if not k.startswith('GIT_')}
+        cls.call('init','--initial-branch=fixture')
+        cls.spec=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
+        old=deepcopy(cls.spec);old['workflow']['branch_governance']['file_deletion_policy'].pop('additional_records',None)
+        cls.payload=b'SYNTHETIC unused raw metrics fixture\n'
+        cls.row={'path':policy.RAW_METRICS_PATH,'mode':'100644','blob':cls.call('hash-object','--stdin',input=cls.payload).decode(),
+                 'sha256':hashlib.sha256(cls.payload).hexdigest()}
+        cls.base=cls.commit(cls.files(old))
+        cls.source=cls.commit(cls.files(old),(cls.base,))
+        cls.approved=deepcopy(cls.spec)
+        r=cls.approved['workflow']['branch_governance']['file_deletion_policy']['additional_records'][0]
+        r['source_commit']=cls.source;r['files']=[cls.row];cls.rehash(r)
+        cls.grant=cls.commit(cls.files(cls.approved),(cls.base,))
+        cls.sync=cls.commit(cls.files(cls.approved),(cls.source,cls.grant))
+        cls.deleted=cls.commit(cls.files(cls.approved,removed=True),(cls.sync,))
+
+    def setUp(self):
+        DeletionApprovalTests.setUp(self)
+        expected=patch.object(policy,'RAW_METRICS_ROW',self.row);expected.start();self.addCleanup(expected.stop)
+
+    def test_exact_separate_grant_passes_and_historical_grant_is_unchanged(self):
+        self.assertEqual(policy.deletion_record(self.approved),policy.deletion_record(self.spec))
+        self.assertEqual(policy.validate_deletion_registry(self.approved),[])
+        self.stage(self.deleted)
+        self.assertEqual(policy.validate_staged_snapshot(policy.DELETION_BRANCH,'presentation',self.approved),[])
+        self.assertEqual(policy.validate_push_history(policy.DELETION_BRANCH,self.sync,self.deleted,self.approved),[])
+
+    def test_missing_trusted_registration_rejects_candidate_self_approval(self):
+        self.call('update-ref','refs/remotes/origin/develop',self.base)
+        self.stage(self.deleted)
+        self.assertTrue(policy.validate_staged_snapshot(policy.DELETION_BRANCH,'presentation',self.approved))
+
+    def test_wrong_branch_or_extra_path_is_rejected(self):
+        self.stage(self.deleted,branch=self.spec['workflow']['server_work_branch'])
+        self.assertTrue(policy.validate_staged_snapshot(self.spec['workflow']['server_work_branch'],'development',self.approved))
+        files=self.files(self.approved,removed=True);files.pop('README.md')
+        extra=self.commit(files,(self.sync,));self.stage(extra)
+        self.assertIn('File deletion requires explicit user scope: README.md',policy.validate_staged_snapshot(policy.DELETION_BRANCH,'presentation',self.approved))
+
+    def test_changed_approval_or_payload_pin_is_rejected(self):
+        wrong=deepcopy(self.approved);r=wrong['workflow']['branch_governance']['file_deletion_policy']['additional_records'][0]
+        r['files'][0]['sha256']='0'*64;self.rehash(r)
+        self.assertTrue(policy.validate_deletion_registry(wrong))
+        self.assertTrue(policy.deletion_registry_sticky(self.approved,wrong))
+
+    def test_wrong_user_proof_and_unknown_additional_grants_are_rejected(self):
+        for mutate in [lambda r:r['user_evidence'].update(question_call_id='unverified'),
+                       lambda r:r.update(id='unapproved'),lambda r:r['files'][0].update(path='apps/web/src/**')]:
+            wrong=deepcopy(self.approved);r=wrong['workflow']['branch_governance']['file_deletion_policy']['additional_records'][0]
+            mutate(r);self.rehash(r)
+            self.assertTrue(policy.validate_deletion_registry(wrong))
+        wrong=deepcopy(self.approved);wrong['workflow']['branch_governance']['file_deletion_policy']['additional_records']*=2
+        self.assertTrue(policy.validate_deletion_registry(wrong))
+
+    def test_modify_restore_cannot_reuse_exact_grant(self):
+        files=self.files(self.approved);files[policy.RAW_METRICS_PATH]=b'SYNTHETIC changed\n'
+        changed=self.commit(files,(self.sync,));restored=self.commit(self.files(self.approved),(changed,))
+        deleted=self.commit(self.files(self.approved,removed=True),(restored,));self.stage(deleted,head=restored)
+        self.assertTrue(policy.validate_staged_snapshot(policy.DELETION_BRANCH,'presentation',self.approved))
+
+    def test_parallel_origin_and_delete_restore_reuse_are_rejected(self):
+        other=self.commit(self.files(self.approved,removed=True),(self.sync,),message='SYNTHETIC second deletion origin')
+        self.call('update-ref','refs/remotes/origin/'+policy.DELETION_BRANCH,self.deleted)
+        self.assertTrue(policy.validate_push_history(policy.DELETION_BRANCH,self.sync,other,self.approved))
+        restored=self.commit(self.files(self.approved),(self.deleted,));again=self.commit(self.files(self.approved,removed=True),(restored,))
+        self.stage(again,head=restored)
+        self.assertTrue(policy.validate_staged_snapshot(policy.DELETION_BRANCH,'presentation',self.approved))
+
+    def test_inherited_normal_merge_keeps_same_single_origin(self):
+        self.call('update-ref','refs/remotes/origin/'+policy.DELETION_BRANCH,self.deleted)
+        merged=self.commit(self.files(self.approved,removed=True),(self.grant,self.deleted))
+        self.assertEqual(policy.validate_push_history('develop',self.grant,merged,self.approved),[])
+
 if __name__=='__main__':unittest.main()

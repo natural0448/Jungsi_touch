@@ -214,7 +214,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "da4f5ed3da6639c949c273b2cf82df45904d0485e4404dec229618eff2fa45e9",
+      "source_sha256": "bfbeb0039a95076bc518042a99cd3fa8b3937a1d1df2c1bd766851ba5ed2dec0",
       "symbols": [
         {
           "kind": "class",
@@ -225,7 +225,7 @@
         {
           "kind": "function",
           "name": "DeletionAuthority.__init__",
-          "signature": "def __init__(self, observed_tips=()):",
+          "signature": "def __init__(self, observed_tips=(), record_id=None):",
           "decorators": []
         },
         {
@@ -321,7 +321,7 @@
         {
           "kind": "function",
           "name": "deletion_record",
-          "signature": "def deletion_record(spec):",
+          "signature": "def deletion_record(spec, record_id=None):",
           "decorators": []
         },
         {
@@ -388,6 +388,12 @@
           "kind": "function",
           "name": "unresolved_markers",
           "signature": "def unresolved_markers(conflicts, revision=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_additional_deletion_records",
+          "signature": "def validate_additional_deletion_records(spec):",
           "decorators": []
         },
         {
@@ -628,7 +634,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "413405b818bc7bdb097a8ee68478e3f88c2f0d3690f2bd87a7e361de287743b3",
+      "source_sha256": "3b20b304a91dd198e447a5a5642bd8560a9502f06b05b18b4239ebd473c09fb0",
       "symbols": [
         {
           "kind": "class",

@@ -185,8 +185,12 @@ def deletion_scope_text(spec):
     policy=spec['workflow']['branch_governance'].get('file_deletion_policy')
     if not policy:return ''
     record=policy['record']
-    return ('\n\n## DEV006⑦ 정확한 파일 삭제 승인 검사\n\n기본값은 deny다. develop947 이후 등록·공통 검사는 시스템기획팀, 실제 삭제와 화면 검증은 외부 화면 개발팀의 범위다. 서비스 개발팀은 서비스 계층만 담당한다. 삭제 승인 등록 당시의 역사 관측 상태: '+policy['execution_state']+'. 이 관측을 현재 PR 통합 상태로 취급하지 않는다. 별도 develop 선행 등록 전에는 후보가 스스로 승인할 수 없다.\n\n'+
+    text=('\n\n## DEV006⑦ 정확한 파일 삭제 승인 검사\n\n기본값은 deny다. develop947 이후 등록·공통 검사는 시스템기획팀, 실제 삭제와 화면 검증은 외부 화면 개발팀의 범위다. 서비스 개발팀은 서비스 계층만 담당한다. 삭제 승인 등록 당시의 역사 관측 상태: '+policy['execution_state']+'. 이 관측을 현재 PR 통합 상태로 취급하지 않는다. 별도 develop 선행 등록 전에는 후보가 스스로 승인할 수 없다.\n\n'+
         table(['정확한 경로','mode','고정 Git blob','원본 바이트 SHA256'],[[r['path'],r['mode'],r['blob'],r['sha256']] for r in record['files']])+'\n\n출발 브랜치: '+record['origin_branch']+'; 출발 커밋: '+record['source_commit']+'; 사용자 메시지: '+record['user_evidence']['message_id']+'; 요청서 SHA256: '+record['source_request_sha256']+'. 원본과 이전 버전은 보존한다. 최초 삭제와 승인된 삭제의 부모 병합 승계를 구분하고 다른 경로·수정/복원 후 재사용·병렬 삭제 origin의 재소비·과거 소급·숨긴 sideparent·ref 삭제·force를 거절한다. 동일한 승인 삭제 origin을 develop/main으로 운반하는 정상 병합과 새로운 삭제 사건은 구분한다.')
+    for extra in policy.get('additional_records',[]):
+        text+='\n\n### 별도 정확 승인 '+extra['id']+'\n\n'+table(['정확한 경로','mode','고정 Git blob','원본 바이트 SHA256'],[[r['path'],r['mode'],r['blob'],r['sha256']] for r in extra['files']])
+        text+='\n\n사용자 답: '+extra['user_evidence']['text']+'; 근거 질문: '+extra['user_evidence']['question_call_id']+'; 출발 커밋: '+extra['source_commit']+'. '+extra['reason']+' 이전 4개 승인 기록은 보존한다. 이 별도 1개에도 선행 develop 등록·정확 원문 지문·최초 삭제 1회·정상 부모 승계 검사를 동일하게 적용한다. 실제 실행 결과는 별도 정확 커밋으로 기록한다.'
+    return text
 
 
 def common_tools_acceptance_text(spec):
