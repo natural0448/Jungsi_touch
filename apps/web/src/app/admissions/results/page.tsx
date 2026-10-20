@@ -165,9 +165,11 @@ function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
   };
 }
 
-function NotReady({ state }: { state: "none" | "changed" | "expired" | "ready" }) {
+function NotReady({ state }: { state: "none" | "changed" | "expired" | "checking" | "ready" }) {
   const text =
-    state === "changed"
+    state === "checking"
+      ? { h: "입시결과의 현재판을 확인하고 있습니다", p: "현재판 확인을 함께 처리하고 있습니다. 잠시 후 다시 열어 주세요. 이전 판을 최신처럼 보여 드리지는 않습니다." }
+      : state === "changed"
       ? { h: "입시결과 새 판을 준비하고 있습니다", p: "대학 발표 정리본이 새 판으로 바뀌어, 확인을 마칠 때까지 잠시 보여 드리지 않습니다. 이전 판을 최신처럼 보이지 않기 위해서입니다." }
       : state === "expired"
         ? { h: "입시결과 정리본의 확인 기간이 지났습니다", p: "새로 확인된 판을 준비하는 동안 잠시 보여 드리지 않습니다." }

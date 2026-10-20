@@ -28,6 +28,9 @@ export function WarmRunner() {
       }
       tries = 0;
       if (r.status.state !== "running") break;
+      // A different tab/instance owns the short lease. Do not hammer its coordinator.
+      const retryAfter = r.status.retry_after_ms;
+      if (retryAfter) await new Promise((resolve) => setTimeout(resolve, Math.max(1000, retryAfter)));
     }
     setBusy(false);
   };
@@ -56,7 +59,7 @@ export function WarmRunner() {
                 ? "현재판이 바뀌었습니다. 다시 누르면 새 판을 처음부터 준비합니다."
                 : s?.state === "running"
                   ? s.phase === "parts"
-                    ? `분할 받기·검증 ${s.parts_done} / ${s.parts_total}`
+                    ? s.retry_after_ms ? "다른 준비 작업이나 현재판 확인이 진행 중입니다. 잠시 후 진행 상태를 확인합니다." : `분할 받기·검증 ${s.parts_done} / ${s.parts_total}`
                     : s.phase === "schools"
                       ? `학교별 묶음 저장 ${s.schools_done} / ${s.schools_total}`
                       : "검색 색인 만드는 중"

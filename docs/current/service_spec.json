@@ -19016,6 +19016,18 @@
         "REQ-28"
       ],
       "summary": "사용자 정확 승인 FE-P1-RAW-METRICS-20261020을 기존 4개 불변 기록과 분리 등록한다. 원문 blob/SHA·출발 commit·선행 develop 등록·최초 1회 소비·병렬/복원 재사용 거절을 보존해 raw-metrics.tsx 한 개만 정상 화면 branch에서 삭제할 수 있다. 새 P1의 KV 연속 쓰기·head 중복·동시 준비·live 메모리 대체 4건은 서버 전용 조정과 운영 누락 fail closed로 수정 중이며 현재 source/검수 준비와 실제 리소스 등록·배포·부하 인수 NOT_RUN을 구분한다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "기존 개발팀 세션과 공동으로 FE-CONC-01~04 보완: KV 같은 진행 키 연속 갱신을 없애고 claim별 불변 분할/학교/색인만 저장한다. native SQLite 조정자에서 짧은 원자 head/준비 lease와 fence·멱등 체크포인트를 관리해 20동시 재확인은 head1회, 관리자2인 준비의 중복 수신을 억제한다. 외부 I/O Promise·JWT·권한·개인 성적은 공유하지 않는다. 최종 조립 뒤 head 재확인과 live/synthetic 상태 분리, 전파 지연·재시작·오래된 실행·모드 부재 회귀36건 및 기존121분할 전체 로컬 재생을 검수했다. 실제 자원 생성·배포·운영 부하 NOT_RUN. 사용자 별도 승인 FE-P1-RAW-METRICS-20261020에 정확히 결속된 raw-metrics.tsx 1개만 첫 삭제하며 원본 SHA·Git 이력·기존 전달물을 보존한다. 정상 훅/정확 SHA CI에서 Node24 회귀를 생략 없이 Python snapshot suite로 함께 실행한다."
     }
   ],
   "overall_analysis_contract": {
@@ -132999,7 +133011,7 @@
     "manifest": "Deterministic semantic version/content SHA, rule version/SHA, input current-head binding, payload bytes/encoding/decompressed size, actual school/row/year counts and creation time. Shared source/basis/cohort definitions are references, not repeated audit bodies. Separate source observations, mapped display rows and unmapped held observations; reconcile all included/excluded selections to the declared source head. Measure gzip/decompressed sizes; a proposed estimate is not a physical bound or acceptance result.",
     "read_API": "Two explicit read-only operations: small current head and a version-bound gzip/full or bounded-part body. Final routes/DTO/bounds are registered with implementation. No direct browser Storage permission.",
     "refresh": "New current head/rules produce one cross-reviewed immutable snapshot; identical content reuses existing bytes. Stable trust anchor, publisher scope, expected-head CAS and rollback must be defined; never remove pins to trust arbitrary mutable content.",
-    "cache": "Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization. Actual authenticated head/body API calls retain request/result accounting; a BFF/KV hit with no API call is not charged a fictional full-body API read. Existing personal/engine logical cache accounting stays unchanged. No cache_delivery intent or client quota waiver flag is introduced.",
+    "cache": "Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization. Actual authenticated head/body API calls retain request/result accounting; a BFF/KV hit with no API call is not charged a fictional full-body API read. Existing personal/engine logical cache accounting stays unchanged. No cache_delivery intent or client quota waiver flag is introduced. FE-CONC-01~04의 화면 소스는 불변 KV 키와 native SQLite 조정자(JT_P1_COORDINATOR/P1SnapshotCoordinator)로 준비한다. head/progress/ready를 KV 잠금으로 처리하지 않고, 복수 인스턴스의 head 재확인·관리자 단일 준비·만료 fence를 원자적으로 조정한다. 최종 색인 작성 직후 최신 head를 다시 확인하며 live/synthetic 조정 상태는 서버 고정 이름으로 분리한다. 필수 KV·조정 바인딩이 없는 실연결/배포는 실패로 표시하고, 명시 synthetic+development/test에서만 같은 상태 기계의 메모리 저장소를 허용한다. 동시 합성36건과 기존 전체 후보의 로컬 재생은 통과했지만 native 자원 생성·worker packaging·실제 배포·운영 혼합 부하는 NOT_RUN이다. CPU 멀티스레딩이나 이용자 무대기를 확정하지 않는다.",
     "pagination": "Snapshot-backed page/search covers its entire manifest domain with server-side university paging and exact filtered counts. Legacy history.search retains its original bounded cursor and six-page UI behavior until the new path is live; no claim that a partial600 metric result is a whole snapshot.",
     "performance": "Frontend target first page within2s and local search within1s; separate cold version acquisition from warm server-cache page/search timing. These are acceptance targets, not measured PASS.",
     "acceptance": [
@@ -133118,7 +133130,7 @@
     },
     "concurrency_repair": {
       "format": "jungsi.p1-snapshot-coordination/v1",
-      "status": "implementation_in_progress_source_only",
+      "status": "SOURCE_IMPLEMENTED_INDEPENDENT_SYNTHETIC36_AND_WHOLE_CANDIDATE_REPLAY_VERIFIED",
       "owner_branch": "feature/presentation-foundation",
       "issues": [
         "FE-CONC-01",
@@ -133126,7 +133138,7 @@
         "FE-CONC-03",
         "FE-CONC-04"
       ],
-      "coordinator": "server_only_cloudflare_native_actor_prepared_no_operating_registration",
+      "coordinator": "server_only_cloudflare_native_sqlite_actor_source_registered_no_operating_resource_created",
       "rules": [
         "KV는 불변 공개 분할·학교 묶음·색인만 보관한다. 작은 준비 진행·head 검증·lease/fencing은 단일 조정자가 관리하며 KV를 잠금으로 사용하지 않는다.",
         "요청별 사용자 인증과 원 API의 JWT/relay/예산·승인·만료·native 값과 pins 검증을 유지하고 토큰·권한·성적을 공유 저장하지 않는다.",
@@ -133135,7 +133147,36 @@
       ],
       "operating_registration": "NOT_RUN",
       "hosted_load_acceptance": "NOT_RUN",
-      "no_operating_DB_Secrets_or_budget_change": true
+      "no_operating_DB_Secrets_or_budget_change": true,
+      "source_files": [
+        "apps/web/src/lib/p1-coordinator-core.ts",
+        "apps/web/src/worker/p1-coordinator.ts",
+        "apps/web/src/lib/p1-snapshot.ts",
+        "apps/web/worker.mjs"
+      ],
+      "binding": {
+        "name": "JT_P1_COORDINATOR",
+        "class_name": "P1SnapshotCoordinator",
+        "source_migration_tag": "p1-coordinator-v1",
+        "storage": "native_sqlite_metadata_only",
+        "actor_names": [
+          "public-v2:live",
+          "public-v2:synthetic"
+        ]
+      },
+      "verification": {
+        "node_regressions": {
+          "passed": 36,
+          "skipped": 0,
+          "shared_state": "native_sqlite_in_memory",
+          "framework_bindings": "test_replaced"
+        },
+        "whole_prior_candidate": "all_parts_pins_rows_native_cells_and_pagination_replayed_offline_no_operating_calls",
+        "typescript": "existing_actual_SDK_strict_noEmit_verified",
+        "normal_hooks_and_exact_CI": "required_separate_exact_source_receipts"
+      },
+      "hosted_BFF_browser_acceptance": "NOT_RUN",
+      "unrequested_cpu_thread_pool_or_unlimited_users_claim": false
     }
   },
   "administrator_verification_quota_contract": {

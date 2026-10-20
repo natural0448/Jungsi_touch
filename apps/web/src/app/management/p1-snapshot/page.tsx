@@ -4,6 +4,7 @@ import { isEdutouchAdmin } from "@/lib/admin";
 import { seoulDateTime } from "@/lib/format";
 import { warmInfo } from "@/lib/p1-snapshot";
 import { WarmRunner } from "./runner";
+import { ConnectionError } from "@/lib/api/source";
 
 export const metadata: Metadata = { title: "1페이지 정리본 준비" };
 export const dynamic = "force-dynamic";
@@ -26,7 +27,12 @@ export default async function Page() {
         </div>
       </>
     );
-  const { ready } = await warmInfo();
+  let ready: Awaited<ReturnType<typeof warmInfo>>["ready"];
+  try { ({ ready } = await warmInfo()); }
+  catch (error) {
+    if (!(error instanceof ConnectionError)) throw error;
+    return <>{head}<div className="wrap pg-body"><section className="gate flat"><h2>공유 준비 저장소 연결이 필요합니다</h2><p>운영용 저장소와 준비 조정자가 연결되지 않아 준비를 시작하지 않았습니다. 설정을 확인한 뒤 다시 열어 주세요.</p></section></div></>;
+  }
   return (
     <>
       {head}
@@ -45,7 +51,7 @@ export default async function Page() {
         </section>
         <WarmRunner />
         <p style={{ fontSize: 12, color: "var(--muted)" }}>
-          한 번에 분할 6개씩 받습니다. 동시 처리 제한이 나오면 5초 뒤 같은 곳부터 이어 하고, 그 밖의 실패는 멈춥니다. 판이 바뀌면 새 판을 처음부터 준비합니다.
+          한 단계에서 분할을 최대 6개 순서대로 받습니다. 여러 탭에서 시작해도 같은 판은 한 작업만 진행합니다. 동시 처리 제한은 잠시 뒤 이어 하고, 그 밖의 실패는 멈춥니다. 판이 바뀌면 새 판을 처음부터 준비합니다.
         </p>
       </div>
     </>
