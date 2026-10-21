@@ -346,6 +346,7 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     "org_name",
     "contract_id",
     "academic_year",
+    "contract_version",
     "role",
     "contract_status",
     "contract_expires_at",
@@ -1073,4 +1074,4 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=8c4eb658f388afd12215bbb0b716cef89310e1f0bad1160e0a16bfdafe871c9b -->
+<!-- jungsi:generated spec_sha256=20e8de2af8a677a05dade31d60bd5d822651ed003cd9da29cce518013e80f24e -->

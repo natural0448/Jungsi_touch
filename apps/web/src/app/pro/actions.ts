@@ -26,7 +26,7 @@ function parse(fd: FormData): { input: ProStudentInput; values: Record<string, s
   if (values.class_number && !/^\d{1,3}$/.test(values.class_number)) return { error: "번호는 숫자로 넣어 주세요.", values };
   if (values.memo.length > 300) return { error: "메모는 300자 안으로 넣어 주세요.", values };
   const tags = values.tags ? values.tags.split(/[,\s]+/).filter(Boolean).slice(0, 5).map((t) => t.slice(0, 12)) : [];
-  return { input: { display_name: name, class_label: values.class_label || null, class_number: values.class_number ? Number(values.class_number) : null, tags, memo: values.memo || null }, values };
+  return { input: { display_name: name, class_label: values.class_label || null, class_number: values.class_number || null, tags, memo: values.memo || null }, values };
 }
 
 function failText(e: unknown): string | null {

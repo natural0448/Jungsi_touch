@@ -47,7 +47,7 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
     if (!(e instanceof AccessDenied)) throw e;
   }
   if (!svc || !student) return <>{head}<NotFound back={back} /></>;
-  const cls = [student.class_label, student.class_number !== null ? `${student.class_number}번` : null].filter(Boolean).join(" ");
+  const cls = [student.class_label, student.class_number ? `${student.class_number}번` : null].filter(Boolean).join(" ");
   const self = `/pro/students/${encodeURIComponent(student.student_id)}?org=${encodeURIComponent(svc.org_id)}`;
 
   return (

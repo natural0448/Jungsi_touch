@@ -31,7 +31,7 @@ export function StudentForm({ orgId, idem, contractVersion, student, onDone }: {
       </label>
       <label>
         <span>번호</span>
-        <input name="class_number" inputMode="numeric" maxLength={3} defaultValue={v("class_number", student?.class_number?.toString() ?? "")} placeholder="예: 15" />
+        <input name="class_number" inputMode="numeric" maxLength={3} defaultValue={v("class_number", student?.class_number ?? "")} placeholder="예: 15" />
       </label>
       <label className="w2">
         <span>태그(쉼표로 구분, 5개까지)</span>

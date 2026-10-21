@@ -72,7 +72,7 @@ async function write<T>(caller: Caller, method: "POST" | "PATCH" | "PUT", path: 
 }
 
 const liveSource: ProSource = {
-  session: async (caller) => (await get<ProSessionDto>(caller, "/session")) ?? { organizations: [] },
+  session: async (caller) => (await get<ProSessionDto>(caller, "/session")) ?? { organizations: [], org_id: null, role: null, contract_status: "selection_required" },
   listStudents: async (caller, orgId, q) => (await get<ProStudentPageDto>(caller, `/organizations/${enc(orgId)}/students${qs(q)}`)) ?? { items: [], next_cursor: null, has_more: false },
   createStudent: (caller, orgId, input, v, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students`, { ...input, expected_contract_version: v }, key),
   readStudent: (caller, orgId, id) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`),
@@ -88,24 +88,25 @@ const syn: SynStore = ((globalThis as { __jtProSyn?: SynStore }).__jtProSyn ??= 
 function seed(): ProStudentDto[] {
   const at = "2026-11-20T01:00:00Z";
   return [
-    ["김하늘", "3-2", 7, ["정시"]],
-    ["이서준", "3-2", 15, []],
-    ["박지민", "3-4", 3, ["재수"]],
+    ["김하늘", "3-2", "7", ["정시"]],
+    ["이서준", "3-2", "15", []],
+    ["박지민", "3-4", "3", ["재수"]],
   ].map(([name, cls, no, tags], i) => ({
-    org_id: "1", student_id: `syn-stu-${i + 1}`, display_name: name as string, class_label: cls as string, class_number: no as number,
+    org_id: "1", student_id: `syn-stu-${i + 1}`, display_name: name as string, class_label: cls as string, class_number: no as string,
     tags: tags as string[], memo: null, archived: false, version: 1, assigned_teacher_ids: ["syn-teacher-1"], created_at_utc: at,
   }));
 }
-const SYN_ORG = { org_id: "1", org_name: "합성 시범고등학교", role: "teacher" as const, contract_status: "active" as const, contract_expires_at: "2027-01-10T14:59:59Z", contract_version: 1, contracted_student_count: 30 };
+const SYN_ORG = { org_id: "1", org_name: "합성 시범고등학교", contract_id: "syn-contract-1", academic_year: 2027, role: "teacher" as const, contract_status: "active" as const, contract_expires_at: "2027-01-10T14:59:59Z", contract_version: 1, contracted_student_count: 30 };
 const synSource: ProSource = {
   async session() {
-    return { organizations: [{ ...SYN_ORG, used_student_count: syn.used, remaining_student_count: SYN_ORG.contracted_student_count - syn.used }] };
+    const o = { ...SYN_ORG, used_student_count: syn.used, remaining_student_count: SYN_ORG.contracted_student_count - syn.used };
+    return { organizations: [o], org_id: o.org_id, role: o.role, contract_status: "active" };
   },
   async listStudents(_c, orgId, q) {
     if (orgId !== SYN_ORG.org_id) return { items: [], next_cursor: null, has_more: false };
     const word = q.q?.trim();
     const items = syn.students.filter((s) => !s.archived && (!word || s.display_name.includes(word) || (s.class_label ?? "").includes(word)) && (!q.class_label || s.class_label === q.class_label));
-    items.sort((a, b) => (a.class_label ?? "").localeCompare(b.class_label ?? "") || (a.class_number ?? 0) - (b.class_number ?? 0));
+    items.sort((a, b) => (a.class_label ?? "").localeCompare(b.class_label ?? "") || Number(a.class_number ?? 0) - Number(b.class_number ?? 0));
     return { items, next_cursor: null, has_more: false };
   },
   async createStudent(_c, orgId, input, v, key) {

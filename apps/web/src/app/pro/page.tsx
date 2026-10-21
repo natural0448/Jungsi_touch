@@ -104,7 +104,9 @@ export default async function Page({ searchParams }: PageProps<"/pro">) {
                   )}
                 </div>
                 {adding && svc.role !== "viewer" && (
-                  svc.remaining_student_count > 0 ? (
+                  svc.contract_version === undefined ? (
+                    <p className="pro-empty">학생 추가는 서버가 계약 판 정보를 알려 준 뒤 열립니다(연결 준비 중).</p>
+                  ) : svc.remaining_student_count > 0 ? (
                     <StudentForm orgId={svc.org_id} idem={crypto.randomUUID()} contractVersion={svc.contract_version} onDone={`/pro?${orgQ}`} />
                   ) : (
                     <p className="pro-empty">계약한 학생 수({svc.contracted_student_count}명)를 모두 사용했습니다. 기관 관리자에게 계약 학생 수 조정을 요청해 주세요.</p>
@@ -125,7 +127,7 @@ export default async function Page({ searchParams }: PageProps<"/pro">) {
                       <tbody>
                         {page.items.map((s) => (
                           <tr key={s.student_id}>
-                            <td className="num">{[s.class_label, s.class_number !== null ? `${s.class_number}번` : null].filter(Boolean).join(" ") || "─"}</td>
+                            <td className="num">{[s.class_label, s.class_number ? `${s.class_number}번` : null].filter(Boolean).join(" ") || "─"}</td>
                             <th scope="row">
                               <Link href={`/pro/students/${encodeURIComponent(s.student_id)}?${orgQ}`}>{s.display_name}</Link>
                             </th>

@@ -475,6 +475,8 @@ export class ProfessionalService {
             org_name: a.contract.orgName,
             contract_id: a.contract.contractId,
             academic_year: a.contract.academicYear,
+            // 학생 추가의 expected_contract_version 근거(권한 원본의 계약 판). 2026-10-21 화면 담당 Owner
+            contract_version: a.contract.version,
             role: a.membership!.role,
             contract_status: "active",
             contract_expires_at: utcText(a.contract.expiresAtUtc),

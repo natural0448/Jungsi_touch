@@ -1,6 +1,6 @@
 /*
   정시터치 전문가용 응답 모양(docs/current/professional_service_api_contract.json, 기획 1.9.99 — NOT_REGISTERED_CONTRACT_ONLY).
-  서버(jungsi-pro-api)는 개발 중이고 화면은 이 계약의 필드 이름으로 합성 응답과 연결한다. 기관·학생 권한은 서버가 판단한다.
+  서버 구현(develop 00c8d795, supabase/functions/jungsi-pro-api · professional_projection.ts)과 같은 필드 이름을 쓴다. 기관·학생 권한은 서버가 판단한다.
 */
 
 export type ProRole = "org_admin" | "teacher" | "viewer";
@@ -8,7 +8,7 @@ export type ProRole = "org_admin" | "teacher" | "viewer";
 /** 모든 전문가용 응답의 겉봉 */
 export interface ProEnvelope<T> {
   format: string;
-  status: "ok" | "pending";
+  status: "ready" | "pending";
   org_id: string | null;
   student_id: string | null;
   data: T;
@@ -16,14 +16,17 @@ export interface ProEnvelope<T> {
   request_id: string;
 }
 
+/** organization_item(서버 professional_projection.ts 와 같은 필드) */
 export interface ProOrganization {
   org_id: string;
   org_name: string;
+  contract_id: string;
+  academic_year: number;
   role: ProRole;
-  contract_status: "active" | "expired" | "not_started" | "unavailable";
-  contract_expires_at: string | null;
-  /** 학생 추가 때 기대 계약 판(expected_contract_version). 계약 문서의 create 본문 필드에 대응 */
-  contract_version: number;
+  contract_status: "active";
+  contract_expires_at: string;
+  /** 학생 추가의 expected_contract_version. 서버 계약 행에는 있으나 세션 DTO 에 아직 없다 — 담당자 추가 요청 중(없으면 추가를 열지 않는다) */
+  contract_version?: number;
   contracted_student_count: number;
   used_student_count: number;
   remaining_student_count: number;
@@ -32,6 +35,10 @@ export interface ProOrganization {
 /** pro_session — 내 기관·역할·계약·학생 수 */
 export interface ProSessionDto {
   organizations: ProOrganization[];
+  /** 기관이 하나면 그 기관, 여럿이면 null(selection_required) */
+  org_id: string | null;
+  role: ProRole | null;
+  contract_status: "active" | "selection_required";
 }
 
 /** student — 기관 소유 학생 */
@@ -40,7 +47,7 @@ export interface ProStudentDto {
   student_id: string;
   display_name: string;
   class_label: string | null;
-  class_number: number | null;
+  class_number: string | null;
   tags: string[];
   memo: string | null;
   archived: boolean;
@@ -75,7 +82,7 @@ export interface ProScoreStatusDto {
 export interface ProStudentInput {
   display_name: string;
   class_label: string | null;
-  class_number: number | null;
+  class_number: string | null;
   tags: string[];
   memo: string | null;
 }
