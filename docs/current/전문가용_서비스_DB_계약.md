@@ -1,14 +1,14 @@
 # 정시터치 전문가용 서비스·DB 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.99이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.101이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 
 
 ## 정시터치 전문가용 · 기관 소유 학생 상담
 
-IMPLEMENTATION_IN_PROGRESS_OWNER_REPLY_NOT_A_PREREQUISITE. 기존 개인용 배포와 독립된 확장 계약이다. 기관 DB/API 활성화·운영은 NOT_RUN이다.
+SOURCE_IMPLEMENTED_ADDITIVE_SCHEMA_VERIFIED_RUNTIME_NOT_ACTIVATED. 기존 개인용 배포와 독립된 확장 계약이다. 기관 DB/API 활성화·운영은 NOT_RUN이다.
 
-DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 검수와 실제 운영 인수를 구분한다.
+DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTERED_RUNTIME_NOT_ACTIVATED. 합성 검수와 실제 운영 인수를 구분한다.
 
 요금은 교사 1명이 분석하는 학생 1명당 33,000원이며 계약 학생 수까지 원자적으로 추가한다. 학생별 단계 입력1+고객센터 정정1을 적용하고 기관 관리자에게 정정권을 주지 않는다.
 
@@ -33,33 +33,33 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
 | 에듀터치 본체 Owner | 기관/계약/구성원 원본·초대/담당 관리자 화면·기존 계정·수동 계약 등록·기관 알림 전달 |
 | 기획팀 | 공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분 |
 
-개발팀은 기존 서비스 브랜치에서 기관 DB/실저장소·21개 API를 구현하고 기획팀은 별도 소스 등록/합성 검수와 문서를 함께 인수한다. Owner 회신은 이 구현의 선행 조건이 아니다. Owner의 시스템/화면·기관/계약 원본·최종 운영 연결과 사용자 DB/환산 소유권은 유지한다. 실제 기관 등록·정책 수치·공식 일정·엔진 연결과 운영 검수 전에는 기관을 자동 활성화하지 않는다. 개인용 Owner v2 등록은 독립 진행한다.
+21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다.
 
 ## 별도 후보 API
 
 | 별도 ID | method | 서비스 경로 | 권한 | 응답 | 효과 | 소스 상태 |
 | --- | --- | --- | --- | --- | --- | --- |
-| pro.session | GET | /api/v1/pro/session | verified_member | pro_session | read_only | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.student.list | GET | /api/v1/pro/organizations/{org_id}/students | assigned_teacher_or_org_admin | student_page | read_only | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.student.create | POST | /api/v1/pro/organizations/{org_id}/students | teacher_or_org_admin_with_contract_seat | student | idempotent_seat_reservation_and_create | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.student.read | GET | /api/v1/pro/organizations/{org_id}/students/{student_id} | assigned_teacher_or_org_admin | student | read_only | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.student.update | PATCH | /api/v1/pro/organizations/{org_id}/students/{student_id} | assigned_teacher_or_org_admin | student | expected_version_metadata_update_not_score | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.student.archive | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/archive | org_admin_aal2 | student | expected_version_archive_no_delete_or_seat_refund | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.student.assign | PUT | /api/v1/pro/organizations/{org_id}/students/{student_id}/assignments | org_admin_aal2 | assignment | expected_version_assignment_change | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.member.list | GET | /api/v1/pro/organizations/{org_id}/members | org_admin | member_page | read_only | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.score.status | GET | /api/v1/pro/organizations/{org_id}/students/{student_id}/score-input-status | assigned_teacher_or_org_admin | student_score_status | read_only | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.score.create | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/score-profiles | assigned_teacher | student_profile | idempotent_student_stage_input_right | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.overall.analyze | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/overall-analysis | assigned_teacher | student_overall | reuse_approved_engine_no_new_input_right | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.report.list | GET | /api/v1/pro/organizations/{org_id}/students/{student_id}/reports | assigned_teacher_or_authorized_viewer_or_org_admin | student_report_page | read_only | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.report.read | GET | /api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id} | assigned_teacher_or_authorized_viewer_or_org_admin | student_report | read_only | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.university.analyze | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/university-analysis | assigned_teacher | student_university_result | reuse_approved_engine | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.candidates | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/candidates | assigned_teacher | student_candidates | reuse_approved_engine | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.bookmark.list | GET | /api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks | assigned_teacher_or_authorized_viewer_or_org_admin | student_bookmarks | read_only | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.bookmark.add | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks | assigned_teacher | student_bookmarks | idempotent_bookmark | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.report.export | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}/export | assigned_teacher_or_authorized_viewer_or_org_admin | student_print_projection | CSRF_protected_audited_private_output | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.correction.grant | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/management/score-input-corrections | customer_support_active_admin_aal2_exact_ticket_scope | student_score_status | ticket_expected_version_idempotent_single_correction_grant | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.retention.preview | POST | /api/v1/pro/organizations/{org_id}/management/retention-preview | platform_retention_operator_aal2 | retention_manifest | dry_run_only_no_delete | NOT_REGISTERED_CONTRACT_ONLY |
-| pro.retention.notice-targets | GET | /api/v1/pro/organizations/{org_id}/management/retention-notice-targets | platform_retention_operator_aal2 | retention_notice_targets | read_only | NOT_REGISTERED_CONTRACT_ONLY |
+| pro.session | GET | /api/v1/pro/session | verified_member | pro_session | read_only | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.student.list | GET | /api/v1/pro/organizations/{org_id}/students | assigned_teacher_or_org_admin | student_page | read_only | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.student.create | POST | /api/v1/pro/organizations/{org_id}/students | teacher_or_org_admin_with_contract_seat | student | idempotent_seat_reservation_and_create | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.student.read | GET | /api/v1/pro/organizations/{org_id}/students/{student_id} | assigned_teacher_or_org_admin | student | read_only | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.student.update | PATCH | /api/v1/pro/organizations/{org_id}/students/{student_id} | assigned_teacher_or_org_admin | student | expected_version_metadata_update_not_score | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.student.archive | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/archive | org_admin_aal2 | student | expected_version_archive_no_delete_or_seat_refund | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.student.assign | PUT | /api/v1/pro/organizations/{org_id}/students/{student_id}/assignments | org_admin_aal2 | assignment | expected_version_assignment_change | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.member.list | GET | /api/v1/pro/organizations/{org_id}/members | org_admin | member_page | read_only | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.score.status | GET | /api/v1/pro/organizations/{org_id}/students/{student_id}/score-input-status | assigned_teacher_or_org_admin | student_score_status | read_only | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.score.create | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/score-profiles | assigned_teacher | student_profile | idempotent_student_stage_input_right | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.overall.analyze | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/overall-analysis | assigned_teacher | student_overall | reuse_approved_engine_no_new_input_right | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.report.list | GET | /api/v1/pro/organizations/{org_id}/students/{student_id}/reports | assigned_teacher_or_authorized_viewer_or_org_admin | student_report_page | read_only | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.report.read | GET | /api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id} | assigned_teacher_or_authorized_viewer_or_org_admin | student_report | read_only | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.university.analyze | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/university-analysis | assigned_teacher | student_university_result | reuse_approved_engine | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.candidates | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/candidates | assigned_teacher | student_candidates | reuse_approved_engine | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.bookmark.list | GET | /api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks | assigned_teacher_or_authorized_viewer_or_org_admin | student_bookmarks | read_only | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.bookmark.add | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks | assigned_teacher | student_bookmarks | idempotent_bookmark | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.report.export | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}/export | assigned_teacher_or_authorized_viewer_or_org_admin | student_print_projection | CSRF_protected_audited_private_output | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.correction.grant | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/management/score-input-corrections | customer_support_active_admin_aal2_exact_ticket_scope | student_score_status | ticket_expected_version_idempotent_single_correction_grant | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.retention.preview | POST | /api/v1/pro/organizations/{org_id}/management/retention-preview | platform_retention_operator_aal2 | retention_manifest | dry_run_only_no_delete | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.retention.notice-targets | GET | /api/v1/pro/organizations/{org_id}/management/retention-notice-targets | platform_retention_operator_aal2 | retention_notice_targets | read_only | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
 
 기존 operation 등록과 구현/운영 인수는 그대로이며 다음 계약으로 합성 포트·화면/서비스 개발을 시작한다.
 
@@ -340,6 +340,48 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "notice_days_before",
     "authorized_member_ids",
     "counts"
+  ],
+  "organization_item": [
+    "org_id",
+    "org_name",
+    "contract_id",
+    "academic_year",
+    "role",
+    "contract_status",
+    "contract_expires_at",
+    "contracted_student_count",
+    "used_student_count",
+    "remaining_student_count"
+  ],
+  "member_item": [
+    "member_id",
+    "subject_id",
+    "role",
+    "status",
+    "version"
+  ],
+  "comparison_context": [
+    "academic_year",
+    "reference_year",
+    "metric",
+    "score_scale",
+    "population_id"
+  ],
+  "public_basis": [
+    "title",
+    "url",
+    "source_year"
+  ],
+  "watermark": [
+    "organization_name",
+    "teacher_code",
+    "printed_at_seoul",
+    "student_name"
+  ],
+  "retention_fingerprints": [
+    "students",
+    "profiles",
+    "revisions"
   ]
 }
 ```
@@ -377,7 +419,9 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
   "expected_version_changed": 409,
   "input_right_exhausted": 409,
   "rate_limited": 429,
-  "engine_basis_pending": "normal_pending_response_no_fabricated_values"
+  "engine_basis_pending": "normal_pending_response_no_fabricated_values",
+  "student_archived": 409,
+  "initial_overall_report_required": 409
 }
 ```
 
@@ -392,7 +436,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "verified_member",
     "response_schema": "pro_session",
     "effect": "read_only",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [],
       "body_fields": [],
@@ -410,7 +454,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher_or_org_admin",
     "response_schema": "student_page",
     "effect": "read_only",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id"
@@ -435,7 +479,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "teacher_or_org_admin_with_contract_seat",
     "response_schema": "student",
     "effect": "idempotent_seat_reservation_and_create",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id"
@@ -462,7 +506,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher_or_org_admin",
     "response_schema": "student",
     "effect": "read_only",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -483,7 +527,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher_or_org_admin",
     "response_schema": "student",
     "effect": "expected_version_metadata_update_not_score",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -511,7 +555,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "org_admin_aal2",
     "response_schema": "student",
     "effect": "expected_version_archive_no_delete_or_seat_refund",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -534,7 +578,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "org_admin_aal2",
     "response_schema": "assignment",
     "effect": "expected_version_assignment_change",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -558,7 +602,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "org_admin",
     "response_schema": "member_page",
     "effect": "read_only",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id"
@@ -566,9 +610,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
       "body_fields": [],
       "query_fields": [
         "limit",
-        "cursor",
-        "q",
-        "class_label"
+        "cursor"
       ],
       "Idempotency_Key_required": false,
       "BFF_CSRF_required": false,
@@ -583,7 +625,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher_or_org_admin",
     "response_schema": "student_score_status",
     "effect": "read_only",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -608,7 +650,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher",
     "response_schema": "student_profile",
     "effect": "idempotent_student_stage_input_right",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -636,7 +678,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher",
     "response_schema": "student_overall",
     "effect": "reuse_approved_engine_no_new_input_right",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -660,7 +702,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
     "response_schema": "student_report_page",
     "effect": "read_only",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -669,9 +711,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
       "body_fields": [],
       "query_fields": [
         "limit",
-        "cursor",
-        "q",
-        "class_label"
+        "cursor"
       ],
       "Idempotency_Key_required": false,
       "BFF_CSRF_required": false,
@@ -686,7 +726,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
     "response_schema": "student_report",
     "effect": "read_only",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -708,7 +748,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher",
     "response_schema": "student_university_result",
     "effect": "reuse_approved_engine",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -733,7 +773,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher",
     "response_schema": "student_candidates",
     "effect": "reuse_approved_engine",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -758,7 +798,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
     "response_schema": "student_bookmarks",
     "effect": "read_only",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -766,10 +806,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
       ],
       "body_fields": [],
       "query_fields": [
-        "limit",
-        "cursor",
-        "q",
-        "class_label"
+        "report_id"
       ],
       "Idempotency_Key_required": false,
       "BFF_CSRF_required": false,
@@ -784,7 +821,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher",
     "response_schema": "student_bookmarks",
     "effect": "idempotent_bookmark",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -808,7 +845,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
     "response_schema": "student_print_projection",
     "effect": "CSRF_protected_audited_private_output",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -832,7 +869,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "customer_support_active_admin_aal2_exact_ticket_scope",
     "response_schema": "student_score_status",
     "effect": "ticket_expected_version_idempotent_single_correction_grant",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id",
@@ -858,7 +895,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "platform_retention_operator_aal2",
     "response_schema": "retention_manifest",
     "effect": "dry_run_only_no_delete",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id"
@@ -883,7 +920,7 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
     "access": "platform_retention_operator_aal2",
     "response_schema": "retention_notice_targets",
     "effect": "read_only",
-    "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
     "request": {
       "path_parameters": [
         "org_id"
@@ -1036,4 +1073,4 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=ec9b00acff69fa56b25ff0842fa3f73297efc5bf3ebce2c0269bcdba68c731bd -->
+<!-- jungsi:generated spec_sha256=8c4eb658f388afd12215bbb0b716cef89310e1f0bad1160e0a16bfdafe871c9b -->

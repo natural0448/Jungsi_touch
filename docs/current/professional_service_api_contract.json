@@ -1,14 +1,14 @@
 {
   "format": "jungsi.professional-api-contract/v1",
-  "spec_version": "1.9.99",
-  "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+  "spec_version": "1.9.101",
+  "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
   "contract": {
     "format": "jungsi.professional-service-contract/v1",
     "id": "PRO-01",
     "requirement": "REQ-31",
     "decision_date": "2026-10-21",
     "display_name": "정시터치 전문가용",
-    "status": "IMPLEMENTATION_IN_PROGRESS_OWNER_REPLY_NOT_A_PREREQUISITE",
+    "status": "SOURCE_IMPLEMENTED_ADDITIVE_SCHEMA_VERIFIED_RUNTIME_NOT_ACTIVATED",
     "source_documents": [
       {
         "file_name": "정시터치-기획-기관단체이용경로-20261021.md",
@@ -23,9 +23,9 @@
     ],
     "individual_deployment_is_independent": true,
     "existing_individual_API_count": 28,
-    "candidate_API_registration": "separate_contract_only_not_added_to_existing_operations",
+    "candidate_API_registration": "separate_source_registered_not_added_to_existing_operations",
     "runtime_activation": "NOT_RUN",
-    "DB_schema_application": "NOT_RUN",
+    "DB_schema_application": "APPLIED_ADDITIVE_SCHEMA_READBACK",
     "production_ready": false,
     "pages": [
       {
@@ -163,7 +163,7 @@
         "access": "verified_member",
         "response_schema": "pro_session",
         "effect": "read_only",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [],
           "body_fields": [],
@@ -181,7 +181,7 @@
         "access": "assigned_teacher_or_org_admin",
         "response_schema": "student_page",
         "effect": "read_only",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id"
@@ -206,7 +206,7 @@
         "access": "teacher_or_org_admin_with_contract_seat",
         "response_schema": "student",
         "effect": "idempotent_seat_reservation_and_create",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id"
@@ -233,7 +233,7 @@
         "access": "assigned_teacher_or_org_admin",
         "response_schema": "student",
         "effect": "read_only",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -254,7 +254,7 @@
         "access": "assigned_teacher_or_org_admin",
         "response_schema": "student",
         "effect": "expected_version_metadata_update_not_score",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -282,7 +282,7 @@
         "access": "org_admin_aal2",
         "response_schema": "student",
         "effect": "expected_version_archive_no_delete_or_seat_refund",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -305,7 +305,7 @@
         "access": "org_admin_aal2",
         "response_schema": "assignment",
         "effect": "expected_version_assignment_change",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -329,7 +329,7 @@
         "access": "org_admin",
         "response_schema": "member_page",
         "effect": "read_only",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id"
@@ -337,9 +337,7 @@
           "body_fields": [],
           "query_fields": [
             "limit",
-            "cursor",
-            "q",
-            "class_label"
+            "cursor"
           ],
           "Idempotency_Key_required": false,
           "BFF_CSRF_required": false,
@@ -354,7 +352,7 @@
         "access": "assigned_teacher_or_org_admin",
         "response_schema": "student_score_status",
         "effect": "read_only",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -379,7 +377,7 @@
         "access": "assigned_teacher",
         "response_schema": "student_profile",
         "effect": "idempotent_student_stage_input_right",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -407,7 +405,7 @@
         "access": "assigned_teacher",
         "response_schema": "student_overall",
         "effect": "reuse_approved_engine_no_new_input_right",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -431,7 +429,7 @@
         "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
         "response_schema": "student_report_page",
         "effect": "read_only",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -440,9 +438,7 @@
           "body_fields": [],
           "query_fields": [
             "limit",
-            "cursor",
-            "q",
-            "class_label"
+            "cursor"
           ],
           "Idempotency_Key_required": false,
           "BFF_CSRF_required": false,
@@ -457,7 +453,7 @@
         "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
         "response_schema": "student_report",
         "effect": "read_only",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -479,7 +475,7 @@
         "access": "assigned_teacher",
         "response_schema": "student_university_result",
         "effect": "reuse_approved_engine",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -504,7 +500,7 @@
         "access": "assigned_teacher",
         "response_schema": "student_candidates",
         "effect": "reuse_approved_engine",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -529,7 +525,7 @@
         "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
         "response_schema": "student_bookmarks",
         "effect": "read_only",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -537,10 +533,7 @@
           ],
           "body_fields": [],
           "query_fields": [
-            "limit",
-            "cursor",
-            "q",
-            "class_label"
+            "report_id"
           ],
           "Idempotency_Key_required": false,
           "BFF_CSRF_required": false,
@@ -555,7 +548,7 @@
         "access": "assigned_teacher",
         "response_schema": "student_bookmarks",
         "effect": "idempotent_bookmark",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -579,7 +572,7 @@
         "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
         "response_schema": "student_print_projection",
         "effect": "CSRF_protected_audited_private_output",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -603,7 +596,7 @@
         "access": "customer_support_active_admin_aal2_exact_ticket_scope",
         "response_schema": "student_score_status",
         "effect": "ticket_expected_version_idempotent_single_correction_grant",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id",
@@ -629,7 +622,7 @@
         "access": "platform_retention_operator_aal2",
         "response_schema": "retention_manifest",
         "effect": "dry_run_only_no_delete",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id"
@@ -654,7 +647,7 @@
         "access": "platform_retention_operator_aal2",
         "response_schema": "retention_notice_targets",
         "effect": "read_only",
-        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
         "request": {
           "path_parameters": [
             "org_id"
@@ -816,6 +809,48 @@
         "notice_days_before",
         "authorized_member_ids",
         "counts"
+      ],
+      "organization_item": [
+        "org_id",
+        "org_name",
+        "contract_id",
+        "academic_year",
+        "role",
+        "contract_status",
+        "contract_expires_at",
+        "contracted_student_count",
+        "used_student_count",
+        "remaining_student_count"
+      ],
+      "member_item": [
+        "member_id",
+        "subject_id",
+        "role",
+        "status",
+        "version"
+      ],
+      "comparison_context": [
+        "academic_year",
+        "reference_year",
+        "metric",
+        "score_scale",
+        "population_id"
+      ],
+      "public_basis": [
+        "title",
+        "url",
+        "source_year"
+      ],
+      "watermark": [
+        "organization_name",
+        "teacher_code",
+        "printed_at_seoul",
+        "student_name"
+      ],
+      "retention_fingerprints": [
+        "students",
+        "profiles",
+        "revisions"
       ]
     },
     "ports": [
@@ -953,7 +988,7 @@
         "공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분"
       ]
     ],
-    "next_steps": "개발팀은 기존 서비스 브랜치에서 기관 DB/실저장소·21개 API를 구현하고 기획팀은 별도 소스 등록/합성 검수와 문서를 함께 인수한다. Owner 회신은 이 구현의 선행 조건이 아니다. Owner의 시스템/화면·기관/계약 원본·최종 운영 연결과 사용자 DB/환산 소유권은 유지한다. 실제 기관 등록·정책 수치·공식 일정·엔진 연결과 운영 검수 전에는 기관을 자동 활성화하지 않는다. 개인용 Owner v2 등록은 독립 진행한다.",
+    "next_steps": "21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다.",
     "DTO_contract_refs": {
       "student_profile": "backend_platform_contract.dto_schemas.profile",
       "student_overall": "backend_platform_contract.dto_schemas.report",
@@ -974,7 +1009,9 @@
       "expected_version_changed": 409,
       "input_right_exhausted": 409,
       "rate_limited": 429,
-      "engine_basis_pending": "normal_pending_response_no_fabricated_values"
+      "engine_basis_pending": "normal_pending_response_no_fabricated_values",
+      "student_archived": 409,
+      "initial_overall_report_required": 409
     },
     "implementation_support": {
       "user_direction": "2026-10-21 Owner 회신과 독립하여 개발팀과 DB/API 구현 계속",
@@ -994,7 +1031,346 @@
         "runtime_acceptance": "NOT_RUN; native compilation does not activate DB/JWT/BFF/deployment",
         "lock_binding": "existing exact Git LF bytes; only CRLF to LF canonicalization; selected-snapshot raw SHA remains mandatory and no semantic or whitespace substitution is allowed"
       },
-      "source_registration_scope": "all professional application/infrastructure/entrypoint and root _shared/professional_*.ts support sources are hash bound; only _test.ts files count as executed suites; support cannot bind an API handler"
+      "source_registration_scope": "all professional application/infrastructure/entrypoint and root _shared/professional_*.ts support sources are hash bound; only _test.ts files count as executed suites; support cannot bind an API handler",
+      "actual_schema_RLS_verification": {
+        "status": "PASS_ACTUAL_RUNTIME_RLS_ROLLBACK",
+        "receipt_sha256": "0e7531ae904a19363c1228bce00df5d25728d890142b97ccc61029ddb2f18821",
+        "new_private_tables": 15,
+        "existing_personal_data_or_grants_changed": false,
+        "real_JWT_OTP_BFF": "NOT_RUN",
+        "professional_function_deployment": "NOT_RUN",
+        "source_commit": "b03c25921c0446278d1a3a884985408bd32ab04b"
+      },
+      "actual_repository_rollback_verification": {
+        "status": "PASS_REPOSITORY_ROUNDTRIP_ROLLED_BACK",
+        "scope": "REPOSITORY_ONLY_SYNTHETIC_NOT_AUTHORITY_HTTP_OR_OPERATING_ACCEPTANCE",
+        "receipt_sha256": "ac396bef268ebffd76131bd634aebcf3cc02d0a59da91044b039b86c548145fa",
+        "execution_receipt_sha256": "c31e63284353cd251aae7df2301a90932527c399b732ebf9994df196a8f2dcb5",
+        "passed_case_count": 7,
+        "remaining_synthetic_rows": 0,
+        "actual_auth_HTTP_or_operating_acceptance": "NOT_RUN"
+      }
+    },
+    "wire_details": {
+      "envelope_format": "jungsi.professional-response/v1",
+      "member_and_report_list_queries": [
+        "limit",
+        "cursor"
+      ],
+      "student_list_queries": [
+        "limit",
+        "cursor",
+        "q",
+        "class_label"
+      ],
+      "bookmark_list_query": "exact report_id required; approved shortlist item map; no silent q/class_label/limit/cursor ignore",
+      "expected_profile_version": "immutable profile.profile_version identifier, equal to the selected profile_id; entry/student CAS versions remain integers",
+      "organization_item_privacy": "minimum own organization contract/membership only; no emails contacts source records or model data",
+      "student_metadata_encryption": "versioned format/key_id envelope, approved active/previous key ring; cursor purpose kept separate; no key issuance by code",
+      "physical_tables": 15,
+      "logical_draft_relations": 14,
+      "new_entrypoint": "supabase/functions/jungsi-pro-api/index.ts",
+      "schema_writer": "Root single writer; source/synthetic/isolated rollback/actual apply/operational acceptance separate",
+      "candidate_filters": [
+        "region",
+        "group",
+        "university_id",
+        "search"
+      ],
+      "CSRF": "BFF cookie mutation verifies same-origin CSRF then forwards approved Origin and X-Jungsi-CSRF-Verified=1; API also verifies relay and the same user Bearer",
+      "counseling_basis_state": "counseling_basis_not_connected in reason_codes; no unverified numeric tips",
+      "bookmark_projection": "Report lists preserve calculated revision snapshots. Single read, overall reanalysis and print combine current report-scoped bookmarks as separate annotations without altering immutable calculated bodies; no per-list-row lookup.",
+      "encryption": "Separate metadata/operation/cursor formats and AAD; plaintext limits 1MiB/8MiB; ciphertext storage limits 2MiB/16MiB include encoding overhead",
+      "shared_usage": "Original owner/policy/exam calculation-cost bucket and GLOBAL request/concurrency/result buckets; no personal distinct_scores dimension. Institution window shared by all teachers. Verified replay refunds only duplicate computation; request/result controls remain.",
+      "native_limits": "Worker hard limit, lease length and clock margin must exactly match the existing approved binding. Request deadline includes ingress/auth/configuration/body/business/projection.",
+      "authority_connection": "Prepared Owner-approved 5arg STABLE jsonb function with exact owner/definition SHA/fixed pg_catalog search_path and app-only EXECUTE. Existing EduTouch source permissions are unchanged; real connection NOT_RUN."
+    },
+    "source_registration": {
+      "format": "jungsi.professional-source-registration/v1",
+      "status": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
+      "entrypoint": "supabase/functions/jungsi-pro-api/index.ts",
+      "operation_bindings": {
+        "pro.session": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.list": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.create": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.read": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.update": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.archive": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.assign": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.member.list": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.score.status": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.score.create": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.overall.analyze": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.report.list": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.report.read": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.university.analyze": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.candidates": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.bookmark.list": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.bookmark.add": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.report.export": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.correction.grant": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.retention.preview": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        },
+        "pro.retention.notice-targets": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "symbol": "ProfessionalService"
+        }
+      },
+      "source_bindings": [
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_analysis.ts",
+          "sha256": "7fe7d976fc42ad8b7cda24d8d6480de635e190071976735c40261f586c4068f6"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts",
+          "sha256": "27e0dbac33ce78f908be366bb68fbbeb423e16a702873b32eac5c14111fed779"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_policy.ts",
+          "sha256": "6171a83c31dafe240b0d3595cd19b6cddf65f7041a6d5134d0aa9fcdc34ff8af"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_ports.ts",
+          "sha256": "9d15b9297bae2f0a9658f607207609d9d71b22ccd4ed76c7267f46ad880765e1"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_projection.ts",
+          "sha256": "2424580e9f3964a90b3a17a166d4c6aef27036483e6967bcb98104354fec9f3b"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_usage.ts",
+          "sha256": "4f211c6fdf0fcb0161de676431eade07845a87d8ccf993efa8ed8ee793fd81f6"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_authority.ts",
+          "sha256": "71b2c3a0c074523c732f92f121e137041efb7bd586e31644ea9a0d7fcb41d880"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_crypto.ts",
+          "sha256": "287461fa8a1188d24d3c86fb952c708251d8a6667e8b025b37f0450e8f096b08"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_http.ts",
+          "sha256": "6c69f122dc2481ecb8d66a7cf3f844a1abec437c0e50dfbdc9a6317c40efb6fe"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_postgres.ts",
+          "sha256": "14655911862194fad474937e6cbf59754652cc0fc381ab85238430801c24da11"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_runtime.ts",
+          "sha256": "23dc074c9cf32934896e201b14d0116151c297b9a26f45ca8d30ab280d44f660"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_usage_admission.ts",
+          "sha256": "2f6e50d969c8926a07118e0219242b4f3ddef276912ee8750a8604a736abebc3"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_usage_postgres.ts",
+          "sha256": "7f36e6dbd4faffbb3e1050865e10ee42737929d9752b51b463d25b2dba1ceabc"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_budget_support.ts",
+          "sha256": "e1aaf3a0b75b576f60af4544562ddb99682970fa0f0c1d365ab08f90ef92e2c9"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_budget_test.ts",
+          "sha256": "618e9ea0b6c27c1dea6552c6f8ad2f3fa9fcfef1d7b908516b4fe1e136b676eb"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_http_test.ts",
+          "sha256": "c2b71a546c470e78afea0b63470b2778468e6bb70bd8b4d0f61a31dc651f7e30"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_runtime_test.ts",
+          "sha256": "86facfdbbf05ecf5e7633eeb77909a5fa16b4f07f0d511ec1dbbe466c523b266"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_security_test.ts",
+          "sha256": "1fff33bbadb0ff74939d11c1beaf113c965ab2a14e5c8bbb324c94f0daea19b8"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_support.ts",
+          "sha256": "356cd4def2fcf60926872ae68191167c681b491a4cab4804ac1db3e6841e0e8f"
+        },
+        {
+          "path": "supabase/functions/jungsi-pro-api/index.ts",
+          "sha256": "8b980255403974fb49a7a7d90ee310526b7390ad18a60febc0abd7429af37ff8"
+        }
+      ],
+      "migrations": [
+        {
+          "path": "database/migrations/007_professional_platform.prepared.sql",
+          "sha256": "531c3093ecf704f5ae1c8f3de8f329366aab9961b9348375df779a8fa55f9c2d"
+        }
+      ],
+      "verification": {
+        "test_paths": [
+          "supabase/functions/_shared/professional_budget_test.ts",
+          "supabase/functions/_shared/professional_http_test.ts",
+          "supabase/functions/_shared/professional_runtime_test.ts",
+          "supabase/functions/_shared/professional_security_test.ts"
+        ],
+        "test_count": 74,
+        "operation_test_names": {
+          "pro.session": [
+            "professional HTTP pro.session executes authorized workflow"
+          ],
+          "pro.student.list": [
+            "professional HTTP pro.student.list executes authorized workflow"
+          ],
+          "pro.student.create": [
+            "professional HTTP pro.student.create executes authorized workflow"
+          ],
+          "pro.student.read": [
+            "professional HTTP pro.student.read executes authorized workflow"
+          ],
+          "pro.student.update": [
+            "professional HTTP pro.student.update executes authorized workflow"
+          ],
+          "pro.student.archive": [
+            "professional HTTP pro.student.archive executes authorized workflow"
+          ],
+          "pro.student.assign": [
+            "professional HTTP pro.student.assign executes authorized workflow"
+          ],
+          "pro.member.list": [
+            "professional HTTP pro.member.list executes authorized workflow"
+          ],
+          "pro.score.status": [
+            "professional HTTP pro.score.status executes authorized workflow"
+          ],
+          "pro.score.create": [
+            "professional HTTP pro.score.create executes authorized workflow"
+          ],
+          "pro.overall.analyze": [
+            "professional HTTP pro.overall.analyze executes authorized workflow"
+          ],
+          "pro.report.list": [
+            "professional HTTP pro.report.list executes authorized workflow"
+          ],
+          "pro.report.read": [
+            "professional HTTP pro.report.read executes authorized workflow"
+          ],
+          "pro.university.analyze": [
+            "professional HTTP pro.university.analyze executes authorized workflow"
+          ],
+          "pro.candidates": [
+            "professional HTTP pro.candidates executes authorized workflow"
+          ],
+          "pro.bookmark.list": [
+            "professional HTTP pro.bookmark.list executes authorized workflow"
+          ],
+          "pro.bookmark.add": [
+            "professional HTTP pro.bookmark.add executes authorized workflow"
+          ],
+          "pro.report.export": [
+            "professional HTTP pro.report.export executes authorized workflow"
+          ],
+          "pro.correction.grant": [
+            "professional HTTP pro.correction.grant executes authorized workflow"
+          ],
+          "pro.retention.preview": [
+            "professional HTTP pro.retention.preview executes authorized workflow"
+          ],
+          "pro.retention.notice-targets": [
+            "professional HTTP pro.retention.notice-targets executes authorized workflow"
+          ]
+        }
+      },
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "schema_application_evidence": {
+      "result": "PASS_ACTUAL_ADDITIVE_SCHEMA_READBACK",
+      "migration_sha256": "531c3093ecf704f5ae1c8f3de8f329366aab9961b9348375df779a8fa55f9c2d",
+      "receipt_sha256": "4a3ec9ec384cbfaac574a101a5a6ba2513fbe756da0ad61a369be49db1eb1836",
+      "institution_records_created": 0
     }
   }
 }
