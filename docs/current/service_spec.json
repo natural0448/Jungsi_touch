@@ -20027,6 +20027,39 @@
         "REQ-26"
       ],
       "summary": "기관 원본 authority008 준비: 실제 원본 helper 의미와 public의 기존 postgres 권한을 재사용하고 계약/회원 version 및 명시 승인시험을 무시드·set-based로 결속한다. 현재 정의SHA는 미등록이며 support/retention은 닫힘이다. 격리/메타데이터 검수와 실제 적용·Secrets·배포 NOT_RUN을 구분하고007/개인용28/기관21 등록은 유지한다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31"
+      ],
+      "summary": "화면팀 변경(최종 관리자 확정): 2027학년도 전문가용 학생 기록 파기일 2027-01-08(정시 원서접수 2027.1.4~1.7 다음날, 1월 7일까지 열람). 합성 모드의 가상 계약 기간·파기일(2027-01-07 종료·2027-01-08 파기)을 같은 날짜로 맞췄다. 에듀터치에 계약 purge_on 값과 알림일(2026-12-25·2027-01-05) 전달."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "전문가용 실제 연결 사전검토: BFF 쓰기가 professionalMutationGuard의 Origin/CSRF proof를 전달하지 않아 모든 학생 입력·분석·인쇄POST가403이 될 누락을 수정했다. JUNGSI_PRO_BFF_ORIGIN과 원래 요청 Origin을 검증한 뒤 두 헤더를 서버에서 생성한다. 외부/누락 Origin과 설정 누락은 네트워크 호출 전 거절하며 JWT·relay·멱등·공유 예산·API guard를 유지한다. 실제 pro-source 오프라인 전달과 반례 포함 Node13건 및 정상 Python wrapper를 추가했다. 운영 설정·DB·Secrets·배포는 변경하지 않았다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31"
+      ],
+      "summary": "전문가용 병렬 화면 확장에서 합성 상태 모듈이 추가되었으므로 실제 BFF 전송 반례 로더가 해당 미사용 합성 의존성도 명시 대역 처리한다. 실제 pro-source 모듈과 Origin/CSRF proof·무전송 거절13건의 검증 범위는 유지한다. 제품의 합성/실제 데이터나 보안 가드는 변경하지 않는다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-28",
+        "REQ-29",
+        "REQ-30"
+      ],
+      "summary": "Owner 5단계 P1 발행 실행판을 실제 PG17.6 권한과 대조해 보완했다. postgres의 기존 스키마 owner SET 권한은 false이므로 새 GRANT 대신 이미 발급된 전용 owner 연결을 사용한다. 006a/007은 기존 설치를 보존하고 재실행하지 않는다. 129개 Storage closure를 선행하고 최신 원자료 lock/CAS·재실행 검증·DB 실행 후 영수증 저장 실패 UNKNOWN 처리를 유지한 정확 v2 ZIP을 준비했다. 안전12·격리SQL4·실제 READ ONLY 준비 확인만 PASS이며 DB 발행·Secrets·배포는 NOT_RUN이다."
     }
   ],
   "overall_analysis_contract": {
@@ -33114,7 +33147,27 @@
         "Secrets_registration": "NOT_RUN_NEW_PACKET",
         "actual_deployment_and_JWT_OTP_BFF_acceptance": "NOT_RUN_NEW_PACKET",
         "source_checks_are_runtime_acceptance": false,
-        "production_ready": false
+        "production_ready": false,
+        "stage5_existing_schema_owner_preparation": {
+          "status": "EXACT_SUPPLEMENT_PREPARED_READONLY_READY_PUBLICATION_NOT_RUN",
+          "packet": "Owner_5단계_기존전용계정_실행보완_20261021.v2.zip",
+          "packet_bytes": 30263,
+          "packet_sha256": "5353a08941db2381634b4a3b9cfb9f123441144808668de70d5110502001b2d0",
+          "exact_publication_sql_sha256": "df2912915487ed7facc41a080f2cdf195cc3bb89d7e1a31f20b070e7654d72b9",
+          "actual_readonly_role_fact": "postgres member true but SET permission false; use already-issued direct jungsi_backend_owner connection, no new grant",
+          "existing_006a": "installed definition b920f0c7149ba1cd6aeb6cb0fecff0f32f003cd7df4f9a24b1f815fc5ea5a208; only CRLF differs from prepared; never reapply 006a/007",
+          "storage_precondition": "exact 129-object GET/length/SHA closure receipt before explicit --apply",
+          "publication_concurrency": "latest source checked under SHARE lock before exact replay; prior/current CAS preserved",
+          "uncertain_commit": "record intent first; post-DB receipt failure remains UNKNOWN and requires readback",
+          "verification": {
+            "safety_cases": 12,
+            "isolated_SQL_cases": 4,
+            "actual_PG17_6_readonly_readiness": "PASS",
+            "DB_mutations": 0
+          },
+          "retained": "existing personal v3 artifact/policy/code/settings5/limits/expiry; legacy writes remain separate HOLD",
+          "actual_Storage_publication_Secrets_deployment": "NOT_RUN"
+        }
       }
     }
   },
@@ -154878,6 +154931,23 @@
         "passed_case_count": 7,
         "remaining_synthetic_rows": 0,
         "actual_auth_HTTP_or_operating_acceptance": "NOT_RUN"
+      },
+      "frontend_bff_csrf_transport": {
+        "status": "SOURCE_IMPLEMENTED_OFFLINE_TRANSPORT_VERIFIED_RUNTIME_NOT_RUN",
+        "request": "REQ-31",
+        "paths": [
+          "apps/web/src/lib/api/pro-source.ts",
+          "apps/web/src/lib/professional-bff-origin.ts"
+        ],
+        "server_setting": "JUNGSI_PRO_BFF_ORIGIN",
+        "setting_rule": "기존 approved_bff_origin과 같은 정확 HTTPS origin을 서버 설정으로 등록한다. 경로·쿼리·사용자정보·trailing slash나 미설정을 허용하지 않는다.",
+        "proof_rule": "Next 서버 액션의 원래 Origin이 설정과 일치하고 Sec-Fetch-Site가 미지정/same-origin/same-site일 때만 Origin과 X-Jungsi-CSRF-Verified=1을 생성한다. 브라우저가 보낸 verified 값은 신뢰하지 않는다.",
+        "fail_closed": "다른/누락 Origin은 fetch 전403 professional_csrf_failed, 설정 누락/잘못된 origin은 fetch 전503 pro_bff_origin_not_configured. 기존 JWT·relay·멱등키와 API mutation guard는 유지한다.",
+        "offline_verification": "순수 판정10건+실제 pro-source 모듈의 오프라인 전달/거절3건. 신규 Python wrapper로 정확 스냅샷 Node24 필수 실행. 실제 기관/JWT/브라우저/배포 NOT_RUN.",
+        "tests": [
+          "apps/web/tests/professional-bff-origin.test.mjs",
+          "tests/test_professional_bff_node.py"
+        ]
       },
       "authority_source_preparation": {
         "format": "jungsi.professional-authority-preparation/v1",

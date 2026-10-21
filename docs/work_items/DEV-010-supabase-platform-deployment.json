@@ -3268,7 +3268,27 @@
         "Secrets_registration": "NOT_RUN_NEW_PACKET",
         "actual_deployment_and_JWT_OTP_BFF_acceptance": "NOT_RUN_NEW_PACKET",
         "source_checks_are_runtime_acceptance": false,
-        "production_ready": false
+        "production_ready": false,
+        "stage5_existing_schema_owner_preparation": {
+          "status": "EXACT_SUPPLEMENT_PREPARED_READONLY_READY_PUBLICATION_NOT_RUN",
+          "packet": "Owner_5단계_기존전용계정_실행보완_20261021.v2.zip",
+          "packet_bytes": 30263,
+          "packet_sha256": "5353a08941db2381634b4a3b9cfb9f123441144808668de70d5110502001b2d0",
+          "exact_publication_sql_sha256": "df2912915487ed7facc41a080f2cdf195cc3bb89d7e1a31f20b070e7654d72b9",
+          "actual_readonly_role_fact": "postgres member true but SET permission false; use already-issued direct jungsi_backend_owner connection, no new grant",
+          "existing_006a": "installed definition b920f0c7149ba1cd6aeb6cb0fecff0f32f003cd7df4f9a24b1f815fc5ea5a208; only CRLF differs from prepared; never reapply 006a/007",
+          "storage_precondition": "exact 129-object GET/length/SHA closure receipt before explicit --apply",
+          "publication_concurrency": "latest source checked under SHARE lock before exact replay; prior/current CAS preserved",
+          "uncertain_commit": "record intent first; post-DB receipt failure remains UNKNOWN and requires readback",
+          "verification": {
+            "safety_cases": 12,
+            "isolated_SQL_cases": 4,
+            "actual_PG17_6_readonly_readiness": "PASS",
+            "DB_mutations": 0
+          },
+          "retained": "existing personal v3 artifact/policy/code/settings5/limits/expiry; legacy writes remain separate HOLD",
+          "actual_Storage_publication_Secrets_deployment": "NOT_RUN"
+        }
       }
     }
   }

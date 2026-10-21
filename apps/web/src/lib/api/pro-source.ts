@@ -1,4 +1,6 @@
 import "server-only";
+import { headers as incomingHeaders } from "next/headers";
+import { professionalMutationOrigin } from "../professional-bff-origin";
 import type { ProfileDto, ReportDto, ScoresInput } from "@/lib/dto";
 import type { ProAssignmentDto, ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProMemberPageDto, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
@@ -89,7 +91,15 @@ async function get<T>(caller: Caller, path: string): Promise<T | null> {
   return ((await res.json()) as ProEnvelope<T>).data;
 }
 async function write<T>(caller: Caller, method: "POST" | "PATCH" | "PUT", path: string, body: unknown, key: string): Promise<Result<T>> {
-  const res = await send(path, { method, headers: headers(caller, { "Content-Type": "application/json", "Idempotency-Key": key }), body: JSON.stringify(body) });
+  const proof = professionalMutationOrigin(process.env.JUNGSI_PRO_BFF_ORIGIN, await incomingHeaders());
+  if (!proof.ok) {
+    if (proof.status === 503) throw new ConnectionError("unconfigured", proof.code);
+    throw new AccessDenied(403, proof.code);
+  }
+  const outgoing = headers(caller, { "Content-Type": "application/json", "Idempotency-Key": key });
+  outgoing.set("Origin", proof.origin);
+  outgoing.set("X-Jungsi-CSRF-Verified", "1");
+  const res = await send(path, { method, headers: outgoing, body: JSON.stringify(body) });
   await guard(res);
   if (!res.ok) return { ok: false, code: (await code(res)) ?? "request_failed", status: res.status };
   return { ok: true, value: ((await res.json()) as ProEnvelope<T>).data };
@@ -151,7 +161,7 @@ const SYN_MEMBERS: ProMemberPageDto["items"] = [
   { member_id: "3", subject_id: "syn-teacher-2", role: "teacher", status: "active", version: 1 },
   { member_id: "4", subject_id: "syn-viewer-1", role: "viewer", status: "active", version: 1 },
 ];
-const SYN_ORG = { org_id: "1", org_name: "합성 시범고등학교", contract_id: "syn-contract-1", academic_year: 2027, role: "teacher" as const, contract_status: "active" as const, contract_expires_at: "2027-01-10T14:59:59Z", contract_version: 1, contracted_student_count: 30 };
+const SYN_ORG = { org_id: "1", org_name: "합성 시범고등학교", contract_id: "syn-contract-1", academic_year: 2027, role: "teacher" as const, contract_status: "active" as const, contract_expires_at: "2027-01-07T14:59:59Z", contract_version: 1, contracted_student_count: 30 };
 const synSource: ProSource = {
   async session() {
     const role = (await readSyntheticState()) === "operator" ? ("org_admin" as const) : ("teacher" as const);
