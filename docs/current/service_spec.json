@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.101",
+  "version": "1.9.102",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -6283,6 +6283,18 @@
         "REQ-31"
       ],
       "symbols": []
+    },
+    {
+      "path": "database/migrations/008_professional_authority.prepared.sql",
+      "layer": "data_infrastructure",
+      "status": "prepared_original_authority_owner_application_NOT_RUN",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -6978,7 +6990,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.101",
+        "contract_version": "1.9.102",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7152,7 +7164,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.101",
+        "contract_version": "1.9.102",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7318,7 +7330,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.101",
+        "contract_version": "1.9.102",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7337,7 +7349,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.101",
+        "contract_version": "1.9.102",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7362,7 +7374,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.101",
+        "contract_version": "1.9.102",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7387,7 +7399,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.101",
+        "contract_version": "1.9.102",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -20005,6 +20017,16 @@
         "REQ-02"
       ],
       "summary": "화면팀 변경(전문가용 4·5묶음, 합성): ① /pro/management(계약 pro.members, 기관 관리자만): 구성원 목록(이메일·이름 없이 구성원 번호·역할), 학생 담당 변경(교사·열람 전용 체크 → pro.student.assign, expected_version·멱등키), 학생 보관(확인란 필수 → pro.student.archive). 둘 다 서버가 aal2 를 다시 확인하고 management_mfa_required 를 OTP 안내로 보인다. 홈에 '기관 관리' 링크. ② /management/score-corrections(에듀터치 관리자만 화면, 서버가 fresh active·aal2·접수 번호·대상·기대 판·멱등키 확인): 개인 회원 정정(score-input.correction.grant, reason_code=score_correction)과 전문가용 학생 정정(pro.correction.grant)을 한 화면에 둔다. 409 는 자동 재시도하지 않는다. 계약 문서의 pro.support 경로(/management/pro-score-input-corrections) 대신 개인·전문가용 공통 화면으로 합쳤다 — 기획 경로 갱신 제안. 기관 관리자 경로에는 정정 기능이 없다. 합성 모드에서는 정정 승인이 연결 대기로 보인다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "기관 원본 authority008 준비: 실제 원본 helper 의미와 public의 기존 postgres 권한을 재사용하고 계약/회원 version 및 명시 승인시험을 무시드·set-based로 결속한다. 현재 정의SHA는 미등록이며 support/retention은 닫힘이다. 격리/메타데이터 검수와 실제 적용·Secrets·배포 NOT_RUN을 구분하고007/개인용28/기관21 등록은 유지한다."
     }
   ],
   "overall_analysis_contract": {
@@ -154795,7 +154817,7 @@
         "공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분"
       ]
     ],
-    "next_steps": "21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다.",
+    "next_steps": "21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다. 원본 authority용008은 별도 PREPARED_NOT_APPLIED 후보로 public의 기존 postgres CREATE 범위에 준비했다. set-based 원본 JOIN·계약/회원 version·무시드 승인시험·앱 EXECUTE 한정 및 support/retention 닫힘을 격리24건/바인딩144건/기존기관보안13건으로 확인했다. 실제008 적용·정의SHA/최종바인딩·시험등록·Secrets·실JWT/BFF/배포는 NOT_RUN이며 기존007/개인용28/기관21의 등록과 검증을 유지한다.",
     "DTO_contract_refs": {
       "student_profile": "backend_platform_contract.dto_schemas.profile",
       "student_overall": "backend_platform_contract.dto_schemas.report",
@@ -154856,6 +154878,71 @@
         "passed_case_count": 7,
         "remaining_synthetic_rows": 0,
         "actual_auth_HTTP_or_operating_acceptance": "NOT_RUN"
+      },
+      "authority_source_preparation": {
+        "format": "jungsi.professional-authority-preparation/v1",
+        "status": "PREPARED_NOT_APPLIED",
+        "requirements": [
+          "REQ-31",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "prepared_migration": {
+          "path": "database/migrations/008_professional_authority.prepared.sql",
+          "sha256": "be7784adf517e05b91b67862c22d6bfc7e8426aadbc39c1ae8574f2faaa80977"
+        },
+        "function": {
+          "schema": "public",
+          "name": "jeongsi_pro_authority",
+          "arguments": [
+            "uuid",
+            "text",
+            "text",
+            "text",
+            "timestamp with time zone"
+          ],
+          "returns": "single jsonb",
+          "owner": "postgres",
+          "volatility": "STABLE",
+          "security_definer": true,
+          "search_path": [
+            "pg_catalog"
+          ],
+          "max_result_bytes": 1048576,
+          "installed_definition_sha256": null,
+          "binding_status": "NOT_REGISTERED"
+        },
+        "query": "Materialize the existing original access function once, preaggregate members and explicit exam approvals, then set-based JOIN/JSON aggregate. No per-organization procedural query.",
+        "source_authority": "Existing public.jeongsi_pro_access()/org_active_contract meanings and exact reviewed source pins; no guessed payment/contract selection or broad source table grants.",
+        "versioning": "Explicit new original contract/member bigint version columns, first instrumented state1, insert1/update OLD+1 with safe-integer bound. Content-bound source_version, not query timestamp or reconstructed historical counts.",
+        "exam_authority": "Owner-managed explicit academic-year/exam approval table, no seed or automatic year expansion; policy exam/pack/stage registry remains independently mandatory.",
+        "closed_modes": [
+          "support",
+          "retention"
+        ],
+        "closed_mode_reason": "Exact ticket/student/exam/stage and official retention target approval are not registered; no manufactured authorized_mode.",
+        "permissions": "Existing postgres CREATE/USAGE in public only; original RLS/grants preserved; new function app EXECUTE only, anon/authenticated/service_role denied. New exam table denies all table/column privileges to non-owner roles.",
+        "binding_verification": "Read-only actual definition SHA after exact LF or CRLF prosrc match only; exact trigger relation/type/enabled/nargs/noqual/function metadata; all96 table/column privileges checked. Never use isolated DB SHA as operating binding.",
+        "verification": {
+          "isolated_SQL_actual_adapter_cases": 24,
+          "isolated_engine": "PostgreSQL18.6/PGlite0.5.10 memory only; not existing Supabase17.6 application",
+          "binding_metadata_cases": 144,
+          "existing_professional_security_cases": 13,
+          "SQL_receipt_sha256": "a720b11b7d43a5f87eeaf1bf0f3a6bad196799aa7801df530166d4cfb194c0cb",
+          "binding_receipt_sha256": "188c900baf35f382eda08b4158c85f5070928f0b1d466a7e699283cb9edca89d",
+          "existing_DB_function_metadata": "NOT_REGISTERED_NO_BINDING_CREATED",
+          "operating_DB_writes": 0,
+          "real_customer_rows_read": 0
+        },
+        "operation_registry": "Existing personal28/foundation656 and separate professional21 unchanged; 007 applied evidence retained separately.",
+        "NOT_RUN": [
+          "008 production application",
+          "source exam approval registration",
+          "installed function readback/binding/Secrets",
+          "actual17.6 function/RLS/institution account acceptance",
+          "JWT/OTP/BFF/deployment acceptance"
+        ]
       }
     },
     "wire_details": {
