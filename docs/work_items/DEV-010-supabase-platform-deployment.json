@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.96",
+  "contract_version": "1.9.99",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -42,7 +42,7 @@
       "REQ-25",
       "REQ-26"
     ],
-    "scope": "Google Drive와 기존 Supabase만 사용하는 실제 인증·22 API 이식·운영 배포 진행. 기존 Python 참조와 Edge foundation 검산은 재사용하고 실제 운영 인수와 구분한다.",
+    "scope": "기존 Supabase 기반 실제 인증·기존22와 신규6 논리 API 계약의 코드·선택 연결·운영 배포를 구분한다. Google Drive와 기존 Supabase를 사용하고 P1 조정 메타데이터 Durable Object 한정 예외만 적용한다. 현재 결합20 후보·기존14 운영판·미연결8을 혼동하지 않는다.",
     "platform_policy": {
       "allowed": [
         "google_drive",
@@ -56,7 +56,23 @@
       "existing_plan_only": true,
       "usage_and_spend_cap_verification": "NOT_RUN",
       "render_proposal": "withdrawn_before_files_or_commits_or_service_creation",
-      "rule": "사용자 최신 지시가 별도 FastAPI 유료 호스팅 제안보다 우선한다. 기존 요금제·포함 사용량·Spend Cap을 확인하며 추가 서버·DB·Redis·유료 도메인·요금제 업그레이드를 도입하지 않는다. 포함량 초과를 추가 과금으로 자동 전환하거나 무제한 기본값으로 해석하지 않는다."
+      "rule": "사용자 최신 지시가 별도 FastAPI 유료 호스팅 제안보다 우선한다. 기존 요금제·포함 사용량·Spend Cap을 확인하며 추가 서버·DB·Redis·유료 도메인·요금제 업그레이드를 도입하지 않는다. 포함량 초과를 추가 과금으로 자동 전환하거나 무제한 기본값으로 해석하지 않는다. 2026-10-21 사용자 결정 P1-DO-ONLY-20261021은 기존 화면의 P1 조정 메타데이터용 Durable Object 하나만 허용하는 한정 예외다. 기본 서버/DB/자료 배포는 기존 Supabase이며, 요금제 변경·추가 과금 금지와 실제 비용 검수 조건은 유지한다.",
+      "scoped_resource_exceptions": [
+        {
+          "id": "P1-DO-ONLY-20261021",
+          "resource": "cloudflare_durable_object",
+          "scope": "P1_snapshot_coordination_metadata_only",
+          "user_authorized": true,
+          "existing_frontend_deployment_only": true,
+          "plan_change_allowed": false,
+          "additional_charge_allowed": false,
+          "new_hosting_DB_or_calculation_allowed": false,
+          "free_tier_assumed": false,
+          "actual_billing_verification": "NOT_RUN",
+          "operating_resource_registration": "NOT_RUN",
+          "rule": "사용자가 이번 P1의 작은 준비/head/lease/fencing 메타데이터 조정자만 예외 허용했다. 실제 계정의 요금제·사용량·비용 차단을 확인하며 요금제 변경·추가 과금은 불허한다. 무료 제공량·소량 예상만으로 과금 방지 PASS를 기록하지 않는다."
+        }
+      ]
     },
     "architecture": {
       "presentation": "담당 화면/BFF; 제공 방식의 플랫폼 범위 확인 중",
@@ -122,7 +138,8 @@
         "API 기본 주소·공개 Auth 설정·비공개 relay 전달·native 기대값은 같은 승인 후보에서 받는다. 주소를 임의로 만들거나 source-only 응답으로 live 전환하지 않는다.",
         "Google Drive Apps Script 웹앱은 검토 후보 포함이 승인됐다. 기존 Next.js/쿠키 세션·사용자 JWT·BFF/CSRF·relay·HTTP 계약·호출 제한의 호환성을 먼저 검토하고 실제 배포는 별도 결정한다.",
         "실제 브라우저 HTML/JS/JSON/source map/저장소·401/403/503·성공 점수와 판단 pending·서울 시각 표시를 같은 후보로 검수한다.",
-        "DEP-04 비교의 사실 정정과 FE-SEC03 live 송신 증거를 반영한다. Supabase Edge의 API 구현 후보와 현행 Next.js 화면 서빙은 별도 문제며 기본 도메인 HTML 제한/추가 비용/인증·서버 중계 인수를 확인한다."
+        "DEP-04 비교의 사실 정정과 FE-SEC03 live 송신 증거를 반영한다. Supabase Edge의 API 구현 후보와 현행 Next.js 화면 서빙은 별도 문제며 기본 도메인 HTML 제한/추가 비용/인증·서버 중계 인수를 확인한다.",
+        "최종 Secrets는 화면 담당 Owner/Administrator가 등록한다. 기획/개발은 자리표시 없는 설정·기존 성적 전환/보존·006a 적용과 권한 회수 복귀 SQL·객체 closure·정확 소스/해시·적용 순서를 먼저 준비한다. 새 코드와 구형 설정을 분리 선배포하지 않는다. 관리자 정정 POST 화면은 fresh active admin aal2·ticket_ref·expected_version·멱등키 계약을 지키며 별도 구현/인수 상태를 기록한다."
       ],
       "candidate_decision": {
         "date": "2026-10-07",
@@ -1331,7 +1348,7 @@
           "does_not_imply_operation_acceptance": true
         }
       },
-      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다. 최신 설치는 current_deployment의 ed978 실제 영수증을 따르며 cb500 actual_editor_deployment는 당시 이력이다. current_P2_attempt는 새 실제 시도이고 회신 당시 두 실패는 P2_attempt_history에서 원래 배포·unknown 상태로 보존한다. 소스·준비상태 PASS, 제한된 로그 상관관계, 범위조회 snapshot, UI 업무 인수는 분리한다.",
+      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다. 최신 설치는 current_deployment의 ed978 실제 영수증을 따르며 cb500 actual_editor_deployment는 당시 이력이다. current_P2_attempt는 새 실제 시도이고 회신 당시 두 실패는 P2_attempt_history에서 원래 배포·unknown 상태로 보존한다. 소스·준비상태 PASS, 제한된 로그 상관관계, 범위조회 snapshot, UI 업무 인수는 분리한다. 2026-10-21 재개는 owner_registration_20261021을 따른다. 기본 배포 대상은 기존 Supabase이며 P1 조정 메타데이터 DO만 한정 예외다. 최종 Secrets는 화면 담당 Owner가 등록한다. 정확 코드/정책/바인딩/객체 closure·기존 성적 보존 전환·006a 복귀 준비 후 같은 전환 구간에 적용하며, 실제 JWT/OTP/BFF·비용 검수 전 완료로 표시하지 않는다.",
       "position_graph": {
         "formula_rows": [
           [
@@ -3233,6 +3250,25 @@
         "source_status": "CODE_CANDIDATE",
         "activation": "NOT_RUN",
         "new_input_regression": "CURRENT17_201_TO503_HOLD_REQUIRES_COMBINED_POLICY_AND_LEDGER_ACCEPTANCE"
+      },
+      "owner_registration_20261021": {
+        "status": "FINAL_PACKET_PREPARATION",
+        "source_baseline": "2d6d4aa3ec67109a49f4e1b3fc824a0a4d38ad36",
+        "frontend_followup": "510bf929872785a84b2790366ae89b0ac0ec5667",
+        "backend_target": "existing_supabase_project",
+        "final_Secrets_registrar": "frontend_project_Owner_or_Administrator",
+        "current_Secrets_permission": "additional_management_permissions_required",
+        "operating_source_backup": "ACTUAL_DOWNLOAD_BYTES_AND_SHA_VERIFIED_PRIVATE_RECEIPT",
+        "legacy_transition": "BOUNDED_READONLY_PARTIAL_METADATA_RECEIVED_NO_WRITES_CURRENT_PROFILE_SELECTION_REQUIRES_EVIDENCE",
+        "cutover": "exact_code_policy_binding_control_and_object_closure_in_one_coordinated_window",
+        "six_additional_consumer_operations": "FINAL_OWNER_BINDING_NOT_REGISTERED",
+        "physical_limit_delta": "explicit_reviewed_request_2_to_8MiB_metadata_64_to_128KiB_not_limits_unchanged",
+        "DB_application": "NOT_RUN_THIS_RESUME",
+        "Storage_publication": "NOT_RUN_THIS_RESUME",
+        "Secrets_registration": "NOT_RUN_NEW_PACKET",
+        "actual_deployment_and_JWT_OTP_BFF_acceptance": "NOT_RUN_NEW_PACKET",
+        "source_checks_are_runtime_acceptance": false,
+        "production_ready": false
       }
     }
   }

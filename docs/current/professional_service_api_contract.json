@@ -1,0 +1,1000 @@
+{
+  "format": "jungsi.professional-api-contract/v1",
+  "spec_version": "1.9.99",
+  "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+  "contract": {
+    "format": "jungsi.professional-service-contract/v1",
+    "id": "PRO-01",
+    "requirement": "REQ-31",
+    "decision_date": "2026-10-21",
+    "display_name": "정시터치 전문가용",
+    "status": "IMPLEMENTATION_IN_PROGRESS_OWNER_REPLY_NOT_A_PREREQUISITE",
+    "source_documents": [
+      {
+        "file_name": "정시터치-기획-기관단체이용경로-20261021.md",
+        "bytes": 14567,
+        "sha256": "825e400012737b99f51506133c4f7e1aa8e79b88178032f3471486792666d65a"
+      },
+      {
+        "file_name": "정시터치-화면팀요청-전문가용경로_서비스DB설계-20261021.md",
+        "bytes": 5839,
+        "sha256": "57816708cd9d6af0ea5bb740f3847d4a2f0d2b075affafcce75373a02ad42a07"
+      }
+    ],
+    "individual_deployment_is_independent": true,
+    "existing_individual_API_count": 28,
+    "candidate_API_registration": "separate_contract_only_not_added_to_existing_operations",
+    "runtime_activation": "NOT_RUN",
+    "DB_schema_application": "NOT_RUN",
+    "production_ready": false,
+    "pages": [
+      {
+        "id": "pro.home",
+        "front_door": "/jeongsi/pro",
+        "app_route": "/pro",
+        "purpose": "기관·계약·잔여 학생 수와 담당 학생 목록"
+      },
+      {
+        "id": "pro.student",
+        "front_door": "/jeongsi/pro/students/{student_id}",
+        "app_route": "/pro/students/{student_id}",
+        "purpose": "고정 학생 띠·학생별 기존2~4페이지 기능·저장 전 이름/성적 확인"
+      },
+      {
+        "id": "pro.report",
+        "front_door": "/jeongsi/pro/students/{student_id}/reports/{report_id}",
+        "app_route": "/pro/students/{student_id}/reports/{report_id}",
+        "purpose": "학생별 판 목록·재열람·비공개 PDF/인쇄"
+      },
+      {
+        "id": "pro.members",
+        "front_door": "/jeongsi/pro/management",
+        "app_route": "/pro/management",
+        "purpose": "기관 관리자 구성원/담당 변경; 성적 정정 기능 없음"
+      },
+      {
+        "id": "pro.support",
+        "front_door": "/jeongsi/management/pro-score-input-corrections",
+        "app_route": "/management/pro-score-input-corrections",
+        "purpose": "고객센터 전용 정정 접수·대상 확인·단일 정정권 승인"
+      }
+    ],
+    "identity": {
+      "login": "existing_EduTouch_same_Bearer_Supabase_Auth",
+      "new_student_accounts": false,
+      "student_share_links": false,
+      "request_authorization_order": [
+        "verified_user",
+        "active_contract",
+        "active_org_membership_and_role",
+        "same_org_student",
+        "current_assignment_or_org_admin_read_scope",
+        "operation_rights"
+      ],
+      "cross_org_or_unassigned_student_response": "same_404_without_existence_disclosure",
+      "client_org_role_or_student_claim_trusted": false,
+      "revocation": "fresh per-request authority; deactivation/reassignment/contract expiry applies on next request",
+      "support_rule": "고객센터 정정만 검증된 active admin aal2와 해당 기관/학생/시험의 접수번호·명시 지원 범위로 허용한다. 기관 관리자 역할만으로 정정권을 주지 않는다."
+    },
+    "ownership": {
+      "record_owner": "organization",
+      "key": [
+        "org_id",
+        "student_id"
+      ],
+      "assignment_separate_from_ownership": true,
+      "personal_report_mixing_allowed": false,
+      "user_impersonation_or_org_id_as_personal_owner_id": false,
+      "teacher_departure": "기관 자료 보존; 담당 권한만 회수하고 재배정은 감사/CAS로 처리",
+      "repository_boundary": "개인용 owner UUID를 교사/기관 ID로 덮어쓰지 않는다. 별도의 기관 학생 principal과 저장소 포트를 사용하고 실제 DB 구조·SQL·RLS는 사용자 DB 담당이 확정한다."
+    },
+    "roles": [
+      {
+        "role": "org_admin",
+        "allows": "구성원/담당 관리, 전체 기관 학생 열람, 보관 요청",
+        "denies": "고객센터 정정권 발급, 기관 밖 접근"
+      },
+      {
+        "role": "teacher",
+        "allows": "담당 학생 추가·입력·분석·목록·인쇄",
+        "denies": "비담당 학생, 기관 밖 접근, 정정권 발급"
+      },
+      {
+        "role": "viewer",
+        "allows": "명시 배정된 학생 리포트 조회·인쇄",
+        "denies": "학생/성적 생성·수정·분석·담당 변경·정정권 발급"
+      }
+    ],
+    "contract_and_price": {
+      "currency": "KRW",
+      "price_per_analyzed_student": 33000,
+      "billing_description": "교사 1명이 분석하는 학생 1명당 33,000원; 최초에는 견적/계약으로 학생 수를 정하고 수동 등록한다.",
+      "capacity_authority": "verified_active_organization_contract.contracted_student_count",
+      "seat_rule": "학생 추가와 계약 수 소모를 동일 transaction/CAS·멱등키로 처리한다. 담당 변경/보관은 새 학생으로 세지 않으며 임의로 소비 슬롯을 환급해 한도를 우회하지 않는다.",
+      "automatic_payment_or_plan_change": false,
+      "bulk_payment_UI": "DEFERRED",
+      "minimum_design_students_per_teacher": 20
+    },
+    "score_input": {
+      "key": [
+        "org_id",
+        "student_id",
+        "canonical_input_scope",
+        "stage"
+      ],
+      "initial_attempts": 1,
+      "support_correction_grants": 1,
+      "semantic_impossible_score_rejection_consumes": true,
+      "auth_structure_rate_or_known_precommit_failure_consumes": false,
+      "org_admin_self_correction_allowed": false,
+      "support_requires": [
+        "fresh_active_admin_aal2",
+        "exact_org_student_ticket_scope",
+        "ticket_ref",
+        "expected_version",
+        "idempotency_key"
+      ],
+      "partial_success": "저장 성공 후 분리 분석 실패는 기존 profile_id·소비 상태로 재개; 자동 재저장 금지",
+      "calendar": "개인용과 같은 승인 시험/pack 및 mock/provisional/final 공식 개방 창. 미연결/미확정 단계 fail closed."
+    },
+    "budget": {
+      "status": "CONTRACT_SCALE_POLICY_DESIGN_ACTUAL_VALUES_NOT_REGISTERED",
+      "identity": [
+        "org_id",
+        "contract_id",
+        "verified_teacher_id",
+        "student_id",
+        "input_scope",
+        "stage"
+      ],
+      "student_rights_not_teacher_daily_distinct_score_limit": true,
+      "acceptance": "계약·담당·학생별 권리가 유효한 교사가 20명 이상을 순차 처리해도 개인 계정의 3/10개 성적 한도를 일괄 적용해 차단하지 않는다.",
+      "scaling": "학생별 입력권과 계약 학생 수에 따라 업무 예산을 명시 설정한다. 요청 빈도는 교사/기관·전체 단위로, 동시 실행·물리 bytes/시간·반환량은 공유 원자 한도로 보호한다.",
+      "administrator_exemption_substitute": false,
+      "unlimited_or_null_fallback": false,
+      "capacity_twenty_means_twenty_parallel_jobs": false,
+      "shared_concurrency_or_physical_limit_change": "별도 근거와 기존 비용 한도 내 검증 전 변경하지 않는다."
+    },
+    "candidate_operations": [
+      {
+        "id": "pro.session",
+        "method": "GET",
+        "path": "/api/v1/pro/session",
+        "access": "verified_member",
+        "response_schema": "pro_session",
+        "effect": "read_only",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [],
+          "body_fields": [],
+          "query_fields": [],
+          "Idempotency_Key_required": false,
+          "BFF_CSRF_required": false,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.student.list",
+        "method": "GET",
+        "path": "/api/v1/pro/organizations/{org_id}/students",
+        "access": "assigned_teacher_or_org_admin",
+        "response_schema": "student_page",
+        "effect": "read_only",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id"
+          ],
+          "body_fields": [],
+          "query_fields": [
+            "limit",
+            "cursor",
+            "q",
+            "class_label"
+          ],
+          "Idempotency_Key_required": false,
+          "BFF_CSRF_required": false,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.student.create",
+        "method": "POST",
+        "path": "/api/v1/pro/organizations/{org_id}/students",
+        "access": "teacher_or_org_admin_with_contract_seat",
+        "response_schema": "student",
+        "effect": "idempotent_seat_reservation_and_create",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id"
+          ],
+          "body_fields": [
+            "display_name",
+            "class_label",
+            "class_number",
+            "tags",
+            "memo",
+            "expected_contract_version"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.student.read",
+        "method": "GET",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}",
+        "access": "assigned_teacher_or_org_admin",
+        "response_schema": "student",
+        "effect": "read_only",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [],
+          "query_fields": [],
+          "Idempotency_Key_required": false,
+          "BFF_CSRF_required": false,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.student.update",
+        "method": "PATCH",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}",
+        "access": "assigned_teacher_or_org_admin",
+        "response_schema": "student",
+        "effect": "expected_version_metadata_update_not_score",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [
+            "display_name",
+            "class_label",
+            "class_number",
+            "tags",
+            "memo",
+            "expected_version"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.student.archive",
+        "method": "POST",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/archive",
+        "access": "org_admin_aal2",
+        "response_schema": "student",
+        "effect": "expected_version_archive_no_delete_or_seat_refund",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [
+            "expected_version"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.student.assign",
+        "method": "PUT",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/assignments",
+        "access": "org_admin_aal2",
+        "response_schema": "assignment",
+        "effect": "expected_version_assignment_change",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [
+            "assigned_teacher_ids",
+            "expected_version"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.member.list",
+        "method": "GET",
+        "path": "/api/v1/pro/organizations/{org_id}/members",
+        "access": "org_admin",
+        "response_schema": "member_page",
+        "effect": "read_only",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id"
+          ],
+          "body_fields": [],
+          "query_fields": [
+            "limit",
+            "cursor",
+            "q",
+            "class_label"
+          ],
+          "Idempotency_Key_required": false,
+          "BFF_CSRF_required": false,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.score.status",
+        "method": "GET",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/score-input-status",
+        "access": "assigned_teacher_or_org_admin",
+        "response_schema": "student_score_status",
+        "effect": "read_only",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [],
+          "query_fields": [
+            "exam_id",
+            "pack_version",
+            "stage"
+          ],
+          "Idempotency_Key_required": false,
+          "BFF_CSRF_required": false,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.score.create",
+        "method": "POST",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/score-profiles",
+        "access": "assigned_teacher",
+        "response_schema": "student_profile",
+        "effect": "idempotent_student_stage_input_right",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [
+            "exam_id",
+            "pack_version",
+            "stage",
+            "scores",
+            "confirmed",
+            "expected_entry_version"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.overall.analyze",
+        "method": "POST",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/overall-analysis",
+        "access": "assigned_teacher",
+        "response_schema": "student_overall",
+        "effect": "reuse_approved_engine_no_new_input_right",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [
+            "profile_id",
+            "expected_profile_version"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.report.list",
+        "method": "GET",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/reports",
+        "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
+        "response_schema": "student_report_page",
+        "effect": "read_only",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [],
+          "query_fields": [
+            "limit",
+            "cursor",
+            "q",
+            "class_label"
+          ],
+          "Idempotency_Key_required": false,
+          "BFF_CSRF_required": false,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.report.read",
+        "method": "GET",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}",
+        "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
+        "response_schema": "student_report",
+        "effect": "read_only",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id",
+            "report_id"
+          ],
+          "body_fields": [],
+          "query_fields": [],
+          "Idempotency_Key_required": false,
+          "BFF_CSRF_required": false,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.university.analyze",
+        "method": "POST",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/university-analysis",
+        "access": "assigned_teacher",
+        "response_schema": "student_university_result",
+        "effect": "reuse_approved_engine",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [
+            "profile_id",
+            "offering_id",
+            "expected_profile_version"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.candidates",
+        "method": "POST",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/candidates",
+        "access": "assigned_teacher",
+        "response_schema": "student_candidates",
+        "effect": "reuse_approved_engine",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [
+            "profile_id",
+            "filters",
+            "expected_profile_version"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.bookmark.list",
+        "method": "GET",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks",
+        "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
+        "response_schema": "student_bookmarks",
+        "effect": "read_only",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [],
+          "query_fields": [
+            "limit",
+            "cursor",
+            "q",
+            "class_label"
+          ],
+          "Idempotency_Key_required": false,
+          "BFF_CSRF_required": false,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.bookmark.add",
+        "method": "POST",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks",
+        "access": "assigned_teacher",
+        "response_schema": "student_bookmarks",
+        "effect": "idempotent_bookmark",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [
+            "report_id",
+            "offering_id"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.report.export",
+        "method": "POST",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}/export",
+        "access": "assigned_teacher_or_authorized_viewer_or_org_admin",
+        "response_schema": "student_print_projection",
+        "effect": "CSRF_protected_audited_private_output",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id",
+            "report_id"
+          ],
+          "body_fields": [
+            "revision_id"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.correction.grant",
+        "method": "POST",
+        "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/management/score-input-corrections",
+        "access": "customer_support_active_admin_aal2_exact_ticket_scope",
+        "response_schema": "student_score_status",
+        "effect": "ticket_expected_version_idempotent_single_correction_grant",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id",
+            "student_id"
+          ],
+          "body_fields": [
+            "exam_id",
+            "stage",
+            "ticket_ref",
+            "expected_version"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.retention.preview",
+        "method": "POST",
+        "path": "/api/v1/pro/organizations/{org_id}/management/retention-preview",
+        "access": "platform_retention_operator_aal2",
+        "response_schema": "retention_manifest",
+        "effect": "dry_run_only_no_delete",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id"
+          ],
+          "body_fields": [
+            "contract_id",
+            "academic_year",
+            "official_deadline_reference",
+            "cutoff_at_utc"
+          ],
+          "query_fields": [],
+          "Idempotency_Key_required": true,
+          "BFF_CSRF_required": true,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      },
+      {
+        "id": "pro.retention.notice-targets",
+        "method": "GET",
+        "path": "/api/v1/pro/organizations/{org_id}/management/retention-notice-targets",
+        "access": "platform_retention_operator_aal2",
+        "response_schema": "retention_notice_targets",
+        "effect": "read_only",
+        "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
+        "request": {
+          "path_parameters": [
+            "org_id"
+          ],
+          "body_fields": [],
+          "query_fields": [],
+          "Idempotency_Key_required": false,
+          "BFF_CSRF_required": false,
+          "unknown_fields": "reject",
+          "tenant_and_actor_from_client_body": "forbidden"
+        }
+      }
+    ],
+    "DTOs": {
+      "envelope": [
+        "format",
+        "status",
+        "org_id",
+        "student_id",
+        "data",
+        "reason_codes",
+        "request_id"
+      ],
+      "pro_session": [
+        "organizations",
+        "org_id",
+        "role",
+        "contract_status",
+        "contract_expires_at",
+        "contracted_student_count",
+        "used_student_count",
+        "remaining_student_count"
+      ],
+      "student": [
+        "org_id",
+        "student_id",
+        "display_name",
+        "class_label",
+        "class_number",
+        "tags",
+        "memo",
+        "archived",
+        "version",
+        "assigned_teacher_ids",
+        "created_at_utc"
+      ],
+      "student_page": [
+        "items",
+        "next_cursor",
+        "has_more"
+      ],
+      "student_score_status": [
+        "org_id",
+        "student_id",
+        "exam_id",
+        "pack_version",
+        "stage",
+        "initial_used",
+        "initial_remaining",
+        "correction_granted",
+        "correction_used",
+        "entry_version",
+        "current_profile_id",
+        "current_report_id",
+        "last_rejection_code"
+      ],
+      "student_report": [
+        "org_id",
+        "student_id",
+        "report_id",
+        "revision_id",
+        "exam_id",
+        "stage",
+        "profile_id",
+        "published_result",
+        "counseling_reasons",
+        "created_at_utc"
+      ],
+      "reason": [
+        "code",
+        "status",
+        "academic_year",
+        "comparison_context",
+        "values",
+        "public_basis",
+        "missing_reason"
+      ],
+      "reason_value": [
+        "name",
+        "value",
+        "unit"
+      ],
+      "rules": "합성 계약으로 먼저 구현한다. 모든 학생 DTO는 org_id/student_id와 버전·소유권을 재검증한다. native 수치·null·미확정 상태를 보존하고 실제 데이터·비밀값·private 모형/분포는 공개 응답에 넣지 않는다.",
+      "assignment": [
+        "org_id",
+        "student_id",
+        "assigned_teacher_ids",
+        "version"
+      ],
+      "member_page": [
+        "org_id",
+        "items",
+        "next_cursor",
+        "has_more"
+      ],
+      "student_profile": [
+        "org_id",
+        "student_id",
+        "profile"
+      ],
+      "student_overall": [
+        "org_id",
+        "student_id",
+        "report"
+      ],
+      "student_university_result": [
+        "org_id",
+        "student_id",
+        "assessment"
+      ],
+      "student_candidates": [
+        "org_id",
+        "student_id",
+        "candidates"
+      ],
+      "student_bookmarks": [
+        "org_id",
+        "student_id",
+        "shortlist"
+      ],
+      "student_print_projection": [
+        "org_id",
+        "student_id",
+        "snapshot",
+        "watermark"
+      ],
+      "student_report_page": [
+        "org_id",
+        "student_id",
+        "items",
+        "next_cursor",
+        "has_more"
+      ],
+      "retention_manifest": [
+        "org_id",
+        "contract_id",
+        "academic_year",
+        "official_deadline_reference",
+        "cutoff_at_utc",
+        "manifest_sha256",
+        "counts",
+        "expected_previous_fingerprints",
+        "approval_required"
+      ],
+      "retention_notice_targets": [
+        "org_id",
+        "contract_id",
+        "due_at_utc",
+        "notice_days_before",
+        "authorized_member_ids",
+        "counts"
+      ]
+    },
+    "ports": [
+      {
+        "name": "ProfessionalAuthorityPort",
+        "responsibility": "same Bearer user + active org contract/member/assignment fresh snapshot; platform support exact ticket scope"
+      },
+      {
+        "name": "OrganizationStudentRepositoryPort",
+        "responsibility": "parameterized scoped list/read/create/update/archive/assignment; contract seat CAS/idempotency in same transaction"
+      },
+      {
+        "name": "StudentScoreInputPort",
+        "responsibility": "student-scoped stage rights/attempts/corrections and profile transaction; preserve old records/known partial success"
+      },
+      {
+        "name": "StudentReportPort",
+        "responsibility": "same-org same-student profile/report revision/basis linkage, stable cursor, owner recheck at every read/export"
+      },
+      {
+        "name": "ApprovedAnalysisPort",
+        "responsibility": "call unchanged approved engine/exam pack/model; return typed ready/pending evidence; no private model in browser"
+      },
+      {
+        "name": "ProfessionalUsagePort",
+        "responsibility": "approved contract-scale policy; atomic reserve/finish and global physical/concurrency fail closed"
+      },
+      {
+        "name": "ProfessionalAuditPort",
+        "responsibility": "opaque IDs/action/result/request_id/ticket/time; no names, scores, tokens or free-text payload in logs"
+      },
+      {
+        "name": "ProfessionalRetentionPort",
+        "responsibility": "deadline evidence, scoped preview/counts/fingerprints/approvals; execution requires exact approved manifest and no global file deletion"
+      }
+    ],
+    "counseling_tips": {
+      "student_specific": "승인된 엔진/공식 자료 결과에서 검증된 사유 코드+정확 수치+단위+학년도/비교 맥락만 전달하고 화면의 고정 문장 틀로 표시한다.",
+      "codes": [
+        {
+          "code": "subject_weight_strength",
+          "basis": "당해 반영 비율·영역별 위치·환산 기준/전체 기준의 같은 집단 비교",
+          "numeric_owner": "DB_engine_owner"
+        },
+        {
+          "code": "comparable_historical_cut_delta",
+          "basis": "동일 모집행/전형/척도/코호트의 과거 컷·당해 학생 환산값",
+          "numeric_owner": "DB_engine_owner"
+        },
+        {
+          "code": "admission_capacity_change",
+          "basis": "연결이 검증된 모집행의 학년도별 공식 모집인원",
+          "numeric_owner": "DB_engine_owner"
+        },
+        {
+          "code": "historical_cut_spread",
+          "basis": "같은 의미·척도의 검증된 3개년 컷; 누락/변경은 보류",
+          "numeric_owner": "DB_engine_owner"
+        },
+        {
+          "code": "english_deduction",
+          "basis": "당해 영어 반영 규칙의 실제 엔진 적용 결과",
+          "numeric_owner": "DB_engine_owner"
+        },
+        {
+          "code": "history_deduction",
+          "basis": "당해 한국사 반영 규칙의 실제 엔진 적용 결과",
+          "numeric_owner": "DB_engine_owner"
+        }
+      ],
+      "current_basis_connection": "2027 대학별 환산·누백·판정 연결 범위의 실제 영수증 전 NOT_RUN; ready로 만들지 않는다.",
+      "missing_basis": "사유 배열을 비우고 근거 자료 연결 전을 표시; 결측0·합격 단정·다른 집단 누백 비교·임의 산식 금지",
+      "general_guide": "Owner/화면팀이 원문·출처 대조 후 버전별 공개. 개인 학생 실명·성적을 외부 모델로 전송하지 않는다.",
+      "AI_external_generation": false
+    },
+    "privacy_and_retention": {
+      "collect": [
+        "display_name",
+        "class_label",
+        "class_number",
+        "tags",
+        "memo"
+      ],
+      "reject": [
+        "phone",
+        "resident_registration_number",
+        "student_email_login"
+      ],
+      "storage_design_owner": "user_DB_owner; encrypted student names and scoped lookup/key lifecycle design before live",
+      "print": "기관명·교사 코드·서울 출력시각 워터마크, 이름은 본인 전달 출력물만. 공개 링크/공유 캐시/URL/로그에 실명·성적을 넣지 않는다.",
+      "policy": "해당 학년도 정시 원서접수 종료일 다음날 학생 이름·성적·리포트 파기",
+      "deadline_timezone": "Asia/Seoul; persist instants UTC",
+      "official_deadline_source": "https://kcue.or.kr/news/sub02/sub01.php?at=view&idx=2764313",
+      "official_deadline_status": "2027 공식 개정본 위치 확인; 계약 적용 날짜/범위 전사·검수 전 자동 실행 금지",
+      "notices_days_before": [
+        14,
+        3
+      ],
+      "notice_sender": "EduTouch; recipients only under verified tenant authority",
+      "execution": "파기 정책 합의와 개별 실행 승인을 구분한다. 정확 계약/학년도/학생·profile/report ID·DB행·Storage/캐시·백업 범위, 건수/이전 해시/보존 제외 근거의 dry-run 명부를 확정하고 기존 A–F/단일 writer 절차로 실행한다. 이번 기획은 파일·폴더·과거 원문·이전 버전·모형의 삭제 허용이 아니다.",
+      "result_receipt": "파기 건수·시각·승인 명부 지문·실제 재조회 결과만 보존; 학생 식별 본문을 감사 기록에 복제하지 않는다.",
+      "automatic_job_created": false
+    },
+    "acceptance_cases": [
+      "two_orgs_same_teacher_no_cross_tenant_or_personal_report_leak",
+      "teacher_unassigned_student_404_even_known_ID",
+      "viewer_and_org_admin_cannot_grant_score_correction",
+      "fresh_support_aal2_ticket_expected_version_idempotent_only",
+      "contract_last_seat_two_concurrent_creates_one_commit",
+      "teacher_with_20_authorized_students_sequential_input_without_personal_distinct_limit",
+      "same_student_second_initial_rejected_correction_exactly_once",
+      "semantic_rejection_consumes_structure_auth_429_precommit_failure_does_not",
+      "reassignment_revocation_expiry_checked_next_request",
+      "partial_profile_success_analysis_5xx_no_resave",
+      "report_cursor_bind_org_student_subject_scope_no_swap",
+      "browser_artifact_no_private_names_models_keys_scores_or_shared_personal_cache",
+      "tip_pending_missing_incomparable_basis_no_fabricated_numeric_or_admission_guarantee",
+      "retention_preview_official_date_scoped_approval_no_automatic_global_delete"
+    ],
+    "work_split": [
+      [
+        "사용자·DB/환산 담당",
+        "기관 DB/SQL/RLS·실저장소/정본 writer·암호화/보존 설계·환산/누백/분포/판정·수치 근거 포트"
+      ],
+      [
+        "Owner·화면팀",
+        "서버 서비스·API/DTO·인증/조직 권한·CSRF/relay·입력권/예산 흐름·화면/합성 응답·상담 문장·감사 호출·테스트·기존 Supabase 배포"
+      ],
+      [
+        "에듀터치 본체 Owner",
+        "기관/계약/구성원 원본·초대/담당 관리자 화면·기존 계정·수동 계약 등록·기관 알림 전달"
+      ],
+      [
+        "기획팀",
+        "공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분"
+      ]
+    ],
+    "next_steps": "개발팀은 기존 서비스 브랜치에서 기관 DB/실저장소·21개 API를 구현하고 기획팀은 별도 소스 등록/합성 검수와 문서를 함께 인수한다. Owner 회신은 이 구현의 선행 조건이 아니다. Owner의 시스템/화면·기관/계약 원본·최종 운영 연결과 사용자 DB/환산 소유권은 유지한다. 실제 기관 등록·정책 수치·공식 일정·엔진 연결과 운영 검수 전에는 기관을 자동 활성화하지 않는다. 개인용 Owner v2 등록은 독립 진행한다.",
+    "DTO_contract_refs": {
+      "student_profile": "backend_platform_contract.dto_schemas.profile",
+      "student_overall": "backend_platform_contract.dto_schemas.report",
+      "student_university_result": "backend_platform_contract.dto_schemas.assessment",
+      "student_candidates": "backend_platform_contract.dto_schemas.candidates",
+      "student_bookmarks": "backend_platform_contract.dto_schemas.shortlist",
+      "student_print_projection": "backend_platform_contract.dto_schemas.snapshot",
+      "student_score_status": "backend_platform_contract.dto_schemas.score_input_status"
+    },
+    "cursor_and_idempotency": "목록 cursor는 목적·현재 subject·org/student·필터·판·만료를 서명에 결속한다. 개인 리포트 cursor를 기관용으로 재사용하지 않는다. 쓰기는 principal+작업+stage+정규화 본문 SHA에 멱등키를 결속하고 재시도에도 fresh 권한/계약/담당·예산을 확인한다.",
+    "error_contract": {
+      "unauthenticated": 401,
+      "other_org_or_unassigned_student": 404,
+      "wrong_role_in_known_authorized_scope": 403,
+      "contract_expired": 403,
+      "contract_or_authority_unavailable": 503,
+      "student_seat_limit_reached": 409,
+      "expected_version_changed": 409,
+      "input_right_exhausted": 409,
+      "rate_limited": 429,
+      "engine_basis_pending": "normal_pending_response_no_fabricated_values"
+    },
+    "implementation_support": {
+      "user_direction": "2026-10-21 Owner 회신과 독립하여 개발팀과 DB/API 구현 계속",
+      "entrypoint": "supabase/functions/jungsi-pro-api/index.ts",
+      "prepared_migration": "database/migrations/007_professional_platform.prepared.sql",
+      "source_registration_contract": "jungsi.professional-source-registration/v1",
+      "separate_test_suite": "strict pro source/SQL bindings and actually executed operation-test names; personal28/foundation656 unchanged",
+      "authoring_support_does_not_transfer_ownership": true,
+      "DB_and_scoring_owner": "사용자 주도 기존 DB/환산 담당; 개발팀이 담당 feature에서 작성",
+      "system_and_frontend_owner": "지정 Owner; 개발팀이 API 작성 지원, Owner의 화면/BFF·기관 원본·최종 운영 책임 유지",
+      "institution_seed_or_automatic_activation": false,
+      "infrastructure": "existing Supabase and Google Drive only; no new professional DO",
+      "native_entrypoint_check": {
+        "mode": "static pool import; exact existing frozen npm:postgres@3.4.5 lock; actual native typecheck and closed dependency graph",
+        "lock": "supabase/functions/jungsi-api/deno.lock",
+        "foundation_and_professional_business_tests": "remain --no-remote --no-npm; native shell is a separately recorded compile/graph check",
+        "runtime_acceptance": "NOT_RUN; native compilation does not activate DB/JWT/BFF/deployment",
+        "lock_binding": "existing exact Git LF bytes; only CRLF to LF canonicalization; selected-snapshot raw SHA remains mandatory and no semantic or whitespace substitution is allowed"
+      },
+      "source_registration_scope": "all professional application/infrastructure/entrypoint and root _shared/professional_*.ts support sources are hash bound; only _test.ts files count as executed suites; support cannot bind an API handler"
+    }
+  }
+}

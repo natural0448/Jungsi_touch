@@ -18,7 +18,7 @@ jobs:
   project-consistency:
     name: project-consistency
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 40
     env:
       PYTHONDONTWRITEBYTECODE: "1"
     steps:

@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.96이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.99이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -415,7 +415,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=7f1fbd773509900f594c10115ff94e36b72270c52ad3a95795b3102b322b754a -->
+<!-- jungsi:generated spec_sha256=4f1f1aa487582119ba31a87341e2669d5b17dd53fd2e0ed4040fadf41c417591 -->
 
 
 ## P1·P2 화면 변경의 한정 수용
@@ -510,7 +510,7 @@ P1-DISPLAY-SNAPSHOT-01 / ADOPTED_REQUIREMENTS_IMPLEMENTATION_AND_FINAL_DATA_CAND
 | manifest | Deterministic semantic version/content SHA, rule version/SHA, input current-head binding, payload bytes/encoding/decompressed size, actual school/row/year counts and creation time. Shared source/basis/cohort definitions are references, not repeated audit bodies. Separate source observations, mapped display rows and unmapped held observations; reconcile all included/excluded selections to the declared source head. Measure gzip/decompressed sizes; a proposed estimate is not a physical bound or acceptance result. |
 | 읽기 API | Two explicit read-only operations: small current head and a version-bound gzip/full or bounded-part body. Final routes/DTO/bounds are registered with implementation. No direct browser Storage permission. |
 | 갱신·신뢰 | New current head/rules produce one cross-reviewed immutable snapshot; identical content reuses existing bytes. Stable trust anchor, publisher scope, expected-head CAS and rollback must be defined; never remove pins to trust arbitrary mutable content. |
-| 공유 서버 cache | Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization. Actual authenticated head/body API calls retain request/result accounting; a BFF/KV hit with no API call is not charged a fictional full-body API read. Existing personal/engine logical cache accounting stays unchanged. No cache_delivery intent or client quota waiver flag is introduced. FE-CONC-01~04의 화면 소스는 불변 KV 키와 native SQLite 조정자(JT_P1_COORDINATOR/P1SnapshotCoordinator)로 준비한다. head/progress/ready를 KV 잠금으로 처리하지 않고, 복수 인스턴스의 head 재확인·관리자 단일 준비·만료 fence를 원자적으로 조정한다. 최종 색인 작성 직후 최신 head를 다시 확인하며 live/synthetic 조정 상태는 서버 고정 이름으로 분리한다. 필수 KV·조정 바인딩이 없는 실연결/배포는 실패로 표시하고, 명시 synthetic+development/test에서만 같은 상태 기계의 메모리 저장소를 허용한다. 동시 합성36건과 기존 전체 후보의 로컬 재생은 통과했지만 native 자원 생성·worker packaging·실제 배포·운영 혼합 부하는 NOT_RUN이다. CPU 멀티스레딩이나 이용자 무대기를 확정하지 않는다. |
+| 공유 서버 cache | Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization. Actual authenticated head/body API calls retain request/result accounting; a BFF/KV hit with no API call is not charged a fictional full-body API read. Existing personal/engine logical cache accounting stays unchanged. No cache_delivery intent or client quota waiver flag is introduced. FE-CONC-01~04의 화면 소스는 불변 KV 키와 native SQLite 조정자(JT_P1_COORDINATOR/P1SnapshotCoordinator)로 준비한다. head/progress/ready를 KV 잠금으로 처리하지 않고, 복수 인스턴스의 head 재확인·관리자 단일 준비·만료 fence를 원자적으로 조정한다. 최종 색인 작성 직후 최신 head를 다시 확인하며 live/synthetic 조정 상태는 서버 고정 이름으로 분리한다. 필수 KV·조정 바인딩이 없는 실연결/배포는 실패로 표시하고, 명시 synthetic+development/test에서만 같은 상태 기계의 메모리 저장소를 허용한다. 동시 합성36건과 기존 전체 후보의 로컬 재생은 통과했지만 native 자원 생성·worker packaging·실제 배포·운영 혼합 부하는 NOT_RUN이다. CPU 멀티스레딩이나 이용자 무대기를 확정하지 않는다. 사용자 P1-DO-ONLY-20261021에 따라 해당 조정자만 예외 허용됐으며, 실제 계정의 비용 검수·자원 등록·배포·정문 인수는 별도 영수증 전까지 NOT_RUN이다. 회원 표시 getUser 전환과 방문 기록 헤더 조건 보완의 소스 검토를 수용하되 영역 표지나 정상 관측만으로 중계 인증을 완료 처리하지 않는다. |
 | 목록·검색 | Snapshot-backed page/search covers its entire manifest domain with server-side university paging and exact filtered counts. Legacy history.search retains its original bounded cursor and six-page UI behavior until the new path is live; no claim that a partial600 metric result is a whole snapshot. |
 | 성능 목표 | Frontend target first page within2s and local search within1s; separate cold version acquisition from warm server-cache page/search timing. These are acceptance targets, not measured PASS. |
 
@@ -630,3 +630,35 @@ Root 독립 live 재실행: NOT_RUN. 형식상 native/deployment PASS는 전체 
 | forecast.published.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
 
 남은 인수: fresh-version P3 exact2027/paid path; input/correction ledger comparison; other-user/CSRF/no-token/bad-relay/paid403/no-store reacceptance; last incomplete row at legacy six-page boundary; new-PC report locator; admin aal2 daily exemption new policy.
+
+
+## 정시터치 전문가용 · 기관 소유 학생 상담
+
+IMPLEMENTATION_IN_PROGRESS_OWNER_REPLY_NOT_A_PREREQUISITE. 기존 개인용 배포와 독립된 확장 계약이다. 기관 DB/API 활성화·운영은 NOT_RUN이다.
+
+DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 검수와 실제 운영 인수를 구분한다.
+
+요금은 교사 1명이 분석하는 학생 1명당 33,000원이며 계약 학생 수까지 원자적으로 추가한다. 학생별 단계 입력1+고객센터 정정1을 적용하고 기관 관리자에게 정정권을 주지 않는다.
+
+기록은 기관 소유이며 담당 교사는 매 요청 확인한다. 다른 기관/비담당 학생은 같은404로 거절하고 개인 내 리포트와 섞지 않는다. 계약·담당·학생별 권리가 유효한 교사가 20명 이상을 순차 처리해도 개인 계정의 3/10개 성적 한도를 일괄 적용해 차단하지 않는다. 관리자 일일 예외나 무제한으로 대체하지 않는다.
+
+| 표시 경로 | 역할 |
+| --- | --- |
+| /jeongsi/pro | 기관·계약·잔여 학생 수와 담당 학생 목록 |
+| /jeongsi/pro/students/{student_id} | 고정 학생 띠·학생별 기존2~4페이지 기능·저장 전 이름/성적 확인 |
+| /jeongsi/pro/students/{student_id}/reports/{report_id} | 학생별 판 목록·재열람·비공개 PDF/인쇄 |
+| /jeongsi/pro/management | 기관 관리자 구성원/담당 변경; 성적 정정 기능 없음 |
+| /jeongsi/management/pro-score-input-corrections | 고객센터 전용 정정 접수·대상 확인·단일 정정권 승인 |
+
+승인된 엔진/공식 자료 결과에서 검증된 사유 코드+정확 수치+단위+학년도/비교 맥락만 전달하고 화면의 고정 문장 틀로 표시한다. 사유 배열을 비우고 근거 자료 연결 전을 표시; 결측0·합격 단정·다른 집단 누백 비교·임의 산식 금지
+
+파기는 학년도 공식 일정과 계약별 정확 명부·이전 해시·개별 승인 후 수행하며 현재 자동 작업/삭제는 없다. [전문가용 서비스·DB 계약](전문가용_서비스_DB_계약.md)과 [별도 API 계약](professional_service_api_contract.json)을 따른다.
+
+| 담당 | 범위 |
+| --- | --- |
+| 사용자·DB/환산 담당 | 기관 DB/SQL/RLS·실저장소/정본 writer·암호화/보존 설계·환산/누백/분포/판정·수치 근거 포트 |
+| Owner·화면팀 | 서버 서비스·API/DTO·인증/조직 권한·CSRF/relay·입력권/예산 흐름·화면/합성 응답·상담 문장·감사 호출·테스트·기존 Supabase 배포 |
+| 에듀터치 본체 Owner | 기관/계약/구성원 원본·초대/담당 관리자 화면·기존 계정·수동 계약 등록·기관 알림 전달 |
+| 기획팀 | 공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분 |
+
+개발팀은 기존 서비스 브랜치에서 기관 DB/실저장소·21개 API를 구현하고 기획팀은 별도 소스 등록/합성 검수와 문서를 함께 인수한다. Owner 회신은 이 구현의 선행 조건이 아니다. Owner의 시스템/화면·기관/계약 원본·최종 운영 연결과 사용자 DB/환산 소유권은 유지한다. 실제 기관 등록·정책 수치·공식 일정·엔진 연결과 운영 검수 전에는 기관을 자동 활성화하지 않는다. 개인용 Owner v2 등록은 독립 진행한다.

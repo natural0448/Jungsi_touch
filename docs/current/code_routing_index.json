@@ -214,7 +214,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "bfbeb0039a95076bc518042a99cd3fa8b3937a1d1df2c1bd766851ba5ed2dec0",
+      "source_sha256": "c19bb1c4ec9e3282ded18f20d46ef4ae33e0c5a9f6547dac85c7383b81322085",
       "symbols": [
         {
           "kind": "class",
@@ -334,6 +334,12 @@
           "kind": "function",
           "name": "git",
           "signature": "def git(*arguments):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "history_delegation_policy_edit_errors",
+          "signature": "def history_delegation_policy_edit_errors(branch, commit, authority, current, spec):",
           "decorators": []
         },
         {
@@ -634,7 +640,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "3b20b304a91dd198e447a5a5642bd8560a9502f06b05b18b4239ebd473c09fb0",
+      "source_sha256": "e51bd0479084dc11d33a2a1ff6ac7cf04a8e35fa8e751066c4f3168435018a28",
       "symbols": [
         {
           "kind": "class",
@@ -838,6 +844,24 @@
           "kind": "function",
           "name": "policy_baseline_source_matches",
           "signature": "def policy_baseline_source_matches(spec, path, digest, indexed):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_service_section",
+          "signature": "def professional_service_section(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_source_path",
+          "signature": "def professional_source_path(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_typescript_contract",
+          "signature": "def professional_typescript_contract(literal):",
           "decorators": []
         },
         {
@@ -1150,6 +1174,30 @@
           "kind": "function",
           "name": "validate_opening_security_operations",
           "signature": "def validate_opening_security_operations(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_professional_service_contract",
+          "signature": "def validate_professional_service_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_professional_source_registration",
+          "signature": "def validate_professional_source_registration(spec, source_hashes=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_professional_source_registration.safe",
+          "signature": "def safe(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_professional_source_registration.sha",
+          "signature": "def sha(value):",
           "decorators": []
         },
         {
@@ -1486,7 +1534,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "555d37e073182834acd230a98e4bac71b41b81e78d0f3a39c6f48ee8b2b2d4f1",
+      "source_sha256": "f6b574db5815e5d630dd82b3d2611a986ee50484feffcf04b44a2e1de534d028",
       "symbols": [
         {
           "kind": "function",
@@ -1525,8 +1573,14 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "9ca0c481a5453fd2bf25222bca2001bb36002dfaea23bfdca995ac472abcee6b",
+      "source_sha256": "30070b4f064148fb18179e9c7e3ec07a07d7bf8734eef52c308c501f2d55b7fc",
       "symbols": [
+        {
+          "kind": "function",
+          "name": "check_professional_native_entrypoint",
+          "signature": "def check_professional_native_entrypoint(root, before, deno, config, output, entrypoint):",
+          "decorators": []
+        },
         {
           "kind": "function",
           "name": "current_public_registration",
@@ -1559,6 +1613,24 @@
         },
         {
           "kind": "function",
+          "name": "professional_native_dependency_inputs",
+          "signature": "def professional_native_dependency_inputs(entrypoint, lock_bytes, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_native_graph",
+          "signature": "def professional_native_graph(info, root, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_suite_registration",
+          "signature": "def professional_suite_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "read_view_registration",
           "signature": "def read_view_registration(spec, before):",
           "decorators": []
@@ -1567,6 +1639,12 @@
           "kind": "function",
           "name": "require_oracle",
           "signature": "def require_oracle(receipt, count, cases_sha):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require_professional_operation_tests",
+          "signature": "def require_professional_operation_tests(junit, names_by_operation):",
           "decorators": []
         },
         {
