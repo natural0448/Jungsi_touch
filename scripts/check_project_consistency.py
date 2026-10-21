@@ -93,6 +93,7 @@ def service_delegation_section(spec):
         ['DB/SQL 보호 pattern',', '.join(p['protected_globs'])],
         ['계산/혼합 본체 보호 파일',', '.join(p['protected_paths'])],
         ['공동 수정 HTTP 어댑터',', '.join(p['shared_http_paths'])],
+        ['Owner 시스템·인증·런타임 공동 경로',', '.join(p.get('shared_system_paths',[])) or '별도 등록 없음'],
         ['보호 경로 안의 생성 문서',', '.join(p['shared_document_paths'])],
         ['혼합 Python 산출 보호', '; '.join(path+': '+', '.join(names) for path,names in p['protected_python_symbols'].items())]])
     return ('\n\n## 화면팀 서비스 함수 공동 개발 · '+p['decision_date']+'\n\n'+matrix+
@@ -2740,6 +2741,24 @@ def validate_supabase_deployment_contract(spec):
         errors.append('DEV-010 owner or document registration drift')
     if (p.get('allowed')!=['google_drive','supabase'] or p.get('existing_plan_only')is not True or any(p.get(k)is not False for k in ('external_hosting_allowed','additional_billable_service_allowed','plan_upgrade_allowed','paid_add_on_allowed','automatic_overage_opt_in_allowed'))):
         errors.append('DEV-010 platform or additional-cost constraint drift')
+    exceptions=p.get('scoped_resource_exceptions',[])
+    try: coordinator_required=tuple(int(x) for x in spec.get('version','0.0.0').split('.')) >= (1,9,97)
+    except (ValueError,TypeError): coordinator_required=False
+    if coordinator_required and not exceptions:
+        errors.append('DEV-010 current source must retain the scoped P1 coordinator decision')
+    if exceptions:
+        if not isinstance(exceptions,list) or len(exceptions)!=1 or not isinstance(exceptions[0],dict):
+            errors.append('DEV-010 scoped resource exception must name exactly one P1 coordinator')
+        else:
+            exception=exceptions[0]
+            if (exception.get('id')!='P1-DO-ONLY-20261021' or
+                exception.get('resource')!='cloudflare_durable_object' or
+                exception.get('scope')!='P1_snapshot_coordination_metadata_only' or
+                any(exception.get(k)is not True for k in ('user_authorized','existing_frontend_deployment_only')) or
+                any(exception.get(k)is not False for k in ('plan_change_allowed','additional_charge_allowed','new_hosting_DB_or_calculation_allowed','free_tier_assumed'))):
+                errors.append('DEV-010 P1-only authorization cannot expand hosting, computation or billing')
+            if spec.get('P1_display_snapshot_contract',{}).get('concurrency_repair',{}).get('resource_authorization_ref')!='supabase_deployment_contract.platform_policy.scoped_resource_exceptions.P1-DO-ONLY-20261021':
+                errors.append('DEV-010 P1 coordinator authorization reference drift')
     d=spec.get('runtime_connection_preparation_contract',{}).get('deployment',{})
     if (a.get('runtime')!='supabase_edge_typescript_deno' or a.get('python_hosted_unchanged')is not False or a.get('engine_in_browser_allowed')is not False or a.get('API_count')!=len(spec.get('operations',[])) or a.get('API_DTO_session_changes')is not bool(spec.get('score_input_policy_contract')) or a.get('server_timezone')!='UTC' or a.get('source_display_timezone')!='Asia/Seoul' or d.get('architecture')!='supabase_edge_functions' or d.get('hosting_contract_ref')!='supabase_deployment_contract' or d.get('python_reference_only')is not True):
         errors.append('DEV-010 Edge and Python reference boundary drift')
@@ -3085,6 +3104,71 @@ def opening_security_document_body(spec):
         '## 검증과 재개 조건\n\n아래 verification 표는 기존 PR31의 이용권·관리 MFA 인수 이력이며 신규 관리자 예외 인수 근거로 승격하지 않는다. 신규 예외의 구현 커밋·현재 검수는 정본 admin_exception_implementation.verification에 별도로 기록한다. 실제 JWT·runtime entry/read budget·005·BFF/배포는 NOT_RUN이다.\n\n'+table(['검수','현재 상태'],[[k,v]for k,v in c['verification'].items()])+
         '\n\n개발팀 코드는 담당 feature PR로 통합한다. 실제 JWT·MFA 관리·유료 발급/회수 브라우저 검수, Edge 재배포, CAP 실행·발행은 해당 영수증 없이 완료 처리하지 않는다. 검수 descriptor의 subject·purpose·만료·relay·PIN을 이 변경으로 풀거나 연장하지 않는다.'
     )
+
+
+def professional_service_section(spec):
+    """Render the separately adopted professional contract without registering a live API."""
+    c=spec.get('professional_service_contract')
+    if not c:return ''
+    return ('\n\n## 정시터치 전문가용 · 기관 소유 학생 상담\n\n'+c['status']+
+        '. 기존 개인용 배포와 독립된 확장 계약이다. 기관 DB/API 활성화·운영은 '+c['runtime_activation']+'이다.\n\n'+
+        '요금은 교사 1명이 분석하는 학생 1명당 '+format(c['contract_and_price']['price_per_analyzed_student'],',')+
+        '원이며 계약 학생 수까지 원자적으로 추가한다. 학생별 단계 입력1+고객센터 정정1을 적용하고 기관 관리자에게 정정권을 주지 않는다.\n\n'+
+        '기록은 기관 소유이며 담당 교사는 매 요청 확인한다. 다른 기관/비담당 학생은 같은404로 거절하고 개인 내 리포트와 섞지 않는다. '+
+        c['budget']['acceptance']+' 관리자 일일 예외나 무제한으로 대체하지 않는다.\n\n'+
+        table(['표시 경로','역할'],[[p['front_door'],p['purpose']]for p in c['pages']])+'\n\n'+
+        c['counseling_tips']['student_specific']+' '+c['counseling_tips']['missing_basis']+'\n\n'+
+        '파기는 학년도 공식 일정과 계약별 정확 명부·이전 해시·개별 승인 후 수행하며 현재 자동 작업/삭제는 없다. '+
+        '[전문가용 서비스·DB 계약](전문가용_서비스_DB_계약.md)과 [별도 API 계약](professional_service_api_contract.json)을 따른다.\n\n'+
+        table(['담당','범위'],c['work_split'])+'\n\n'+c['next_steps'])
+
+
+def validate_professional_service_contract(spec):
+    """Reject contract drift that would mix personal ownership or silently activate a new tenant API."""
+    c=spec.get('professional_service_contract')
+    if c is None:return []
+    if not isinstance(c,dict):return ['Professional service contract must be an object']
+    errors=[]
+    if (c.get('format')!='jungsi.professional-service-contract/v1' or c.get('requirement')!='REQ-31' or
+        c.get('display_name')!='정시터치 전문가용' or c.get('individual_deployment_is_independent')is not True or
+        c.get('existing_individual_API_count')!=len(spec.get('operations',[])) or
+        c.get('candidate_API_registration')!='separate_contract_only_not_added_to_existing_operations' or
+        c.get('runtime_activation')!='NOT_RUN' or c.get('production_ready')is not False):
+        errors.append('Professional contract cannot claim unimplemented API or operating acceptance')
+    owner=c.get('ownership',{});rights=c.get('score_input',{});identity=c.get('identity',{})
+    if (owner.get('record_owner')!='organization' or owner.get('key')!=['org_id','student_id'] or
+        any(owner.get(k)is not False for k in ('personal_report_mixing_allowed','user_impersonation_or_org_id_as_personal_owner_id')) or
+        owner.get('assignment_separate_from_ownership')is not True or
+        identity.get('cross_org_or_unassigned_student_response')!='same_404_without_existence_disclosure' or
+        identity.get('client_org_role_or_student_claim_trusted')is not False):
+        errors.append('Professional tenant/student ownership must be separate and verified')
+    if (rights.get('initial_attempts')!=1 or rights.get('support_correction_grants')!=1 or
+        rights.get('org_admin_self_correction_allowed')is not False or
+        rights.get('key')!=['org_id','student_id','canonical_input_scope','stage'] or
+        not {'fresh_active_admin_aal2','exact_org_student_ticket_scope','ticket_ref','expected_version','idempotency_key'}<=set(rights.get('support_requires',[]))):
+        errors.append('Professional input/correction rights or support boundary drift')
+    price=c.get('contract_and_price',{});budget=c.get('budget',{});retention=c.get('privacy_and_retention',{})
+    if price.get('price_per_analyzed_student')!=33000 or price.get('currency')!='KRW' or price.get('minimum_design_students_per_teacher',0)<20:
+        errors.append('Professional accepted price or student capacity drift')
+    if (budget.get('student_rights_not_teacher_daily_distinct_score_limit')is not True or
+        any(budget.get(k)is not False for k in ('administrator_exemption_substitute','unlimited_or_null_fallback','capacity_twenty_means_twenty_parallel_jobs'))):
+        errors.append('Professional workload cannot bypass approved shared physical budgets')
+    if retention.get('automatic_job_created')is not False or retention.get('notices_days_before')!=[14,3]:
+        errors.append('Professional retention requires a separately scoped execution manifest')
+    candidates=c.get('candidate_operations',[]);existing={(o['method'],o['path'])for o in spec.get('operations',[])}
+    if (not candidates or len({o.get('id')for o in candidates})!=len(candidates) or
+        len({(o.get('method'),o.get('path'))for o in candidates})!=len(candidates) or
+        any(not o.get('path','').startswith('/api/v1/pro/') or (o.get('method'),o.get('path'))in existing or
+            o.get('response_schema')not in c.get('DTOs',{}) or
+            o.get('runtime_registration')!='NOT_REGISTERED_CONTRACT_ONLY' for o in candidates)):
+        errors.append('Professional candidate routes must remain a distinct closed contract')
+    for operation in candidates:
+        request=operation.get('request',{})
+        if (not isinstance(request,dict) or request.get('unknown_fields')!='reject' or
+            request.get('tenant_and_actor_from_client_body')!='forbidden' or
+            any(request.get(key)is not (operation.get('method')!='GET') for key in ('Idempotency_Key_required','BFF_CSRF_required'))):
+            errors.append('Professional request principal, CSRF or idempotency contract drift')
+    return errors
 
 
 def generated_files(spec,read=None):
@@ -3733,6 +3817,18 @@ def generated_files(spec,read=None):
         for key in ('planning','routing','architecture','workflow','supabase_deployment','development_sync','history_display','presentation_handoff','frontend_reply','frontend_followup','api_dto','security'):
             target=spec['current_documents'].get(key)
             if target in files:files[target]+=section
+    professional=spec.get('professional_service_contract')
+    if professional:
+        section=professional_service_section(spec)
+        for key in ('planning','routing','architecture','workflow','supabase_deployment','development_sync','presentation_handoff','frontend_reply','frontend_followup','api_dto','security'):
+            target=spec['current_documents'].get(key)
+            if target in files:files[target]+=section
+        operations=table(['후보 ID','method','서비스 경로','권한','응답','효과'],[
+            [o['id'],o['method'],o['path'],o['access'],o['response_schema'],o['effect']]for o in professional['candidate_operations']])
+        details='\n\n'.join('### '+key+'\n\n'+chr(96)*3+'json\n'+json.dumps(professional[key],ensure_ascii=False,indent=2)+'\n'+chr(96)*3
+            for key in ('identity','ownership','roles','contract_and_price','score_input','budget','DTOs','DTO_contract_refs','cursor_and_idempotency','error_contract','candidate_operations','ports','counseling_tips','privacy_and_retention','acceptance_cases'))
+        files[spec['current_documents']['professional_service']]=doc('정시터치 전문가용 서비스·DB 계약',section+'\n\n## 별도 후보 API\n\n'+operations+'\n\n기존 operation 등록과 구현/운영 인수는 그대로이며 다음 계약으로 합성 포트·화면/서비스 개발을 시작한다.\n\n'+details)
+        files[spec['current_documents']['professional_API']]=json.dumps({'format':'jungsi.professional-api-contract/v1','spec_version':spec['version'],'runtime_registration':'NOT_REGISTERED_CONTRACT_ONLY','contract':professional},ensure_ascii=False,indent=2)+'\n'
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -3790,7 +3886,7 @@ def validate_forecast_contract(spec):
 
 
 def validate_spec(spec):
-    errors=validate_sync_policy(spec) + validate_opening_security_operations(spec) + validate_score_input_policy(spec) + validate_service_performance(spec) + validate_catalog_payload_scope(spec)
+    errors=validate_sync_policy(spec) + validate_opening_security_operations(spec) + validate_score_input_policy(spec) + validate_service_performance(spec) + validate_catalog_payload_scope(spec) + validate_professional_service_contract(spec)
     display=spec.get('official_history_db_display_contract')
     try: display_required=tuple(int(v) for v in spec.get('version','0.0.0').split('.')) >= (1,9,17)
     except (ValueError,TypeError): display_required=False

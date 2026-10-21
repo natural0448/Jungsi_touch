@@ -214,7 +214,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "bfbeb0039a95076bc518042a99cd3fa8b3937a1d1df2c1bd766851ba5ed2dec0",
+      "source_sha256": "7e04648aaeed99061b6a2a7533a651acd0e1e019272afedb03d61a5596477b68",
       "symbols": [
         {
           "kind": "class",
@@ -634,7 +634,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "3b20b304a91dd198e447a5a5642bd8560a9502f06b05b18b4239ebd473c09fb0",
+      "source_sha256": "632561eccca4c913b47ad306c499a53fa98627dc94217b1c5381382afd245e6e",
       "symbols": [
         {
           "kind": "class",
@@ -838,6 +838,12 @@
           "kind": "function",
           "name": "policy_baseline_source_matches",
           "signature": "def policy_baseline_source_matches(spec, path, digest, indexed):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_service_section",
+          "signature": "def professional_service_section(spec):",
           "decorators": []
         },
         {
@@ -1150,6 +1156,12 @@
           "kind": "function",
           "name": "validate_opening_security_operations",
           "signature": "def validate_opening_security_operations(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_professional_service_contract",
+          "signature": "def validate_professional_service_contract(spec):",
           "decorators": []
         },
         {

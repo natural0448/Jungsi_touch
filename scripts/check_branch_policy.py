@@ -323,6 +323,13 @@ def validate_work_branch(branch,spec):
     return []
 
 SERVICE_DELEGATION_FORMAT='jungsi.frontend-service-delegation/v1'
+OWNER_SYSTEM_PATHS=frozenset('supabase/functions/_shared/jungsi/infrastructure/'+name+'.ts' for name in (
+    'auth_relay','supabase_auth','verified_session','session_http','project_binding','runtime_settings',
+    'runtime_context','runtime_composition','runtime_controls','runtime_budget','read_view_catalog_runtime','own_report_cursor'))
+OWNER_HTTP_PATHS=frozenset((
+    'src/jungsi_touch/infrastructure/http_api.py','src/jungsi_touch/infrastructure/secured_http.py',
+    'supabase/functions/_shared/jungsi/infrastructure/api_http.ts',
+    'supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts'))
 
 def service_delegation(spec):
     return spec.get('workflow',{}).get('branch_governance',{}).get('service_delegation_policy')
@@ -344,6 +351,17 @@ def validate_service_delegation(spec):
     if not required.issubset(p['protected_prefixes']) or not engines.issubset(p['protected_paths']) or '*.sql' not in p['protected_globs']:
         return ['DB and calculation ownership boundaries are incomplete']
     if set(p['shared_http_paths'])&set(p['protected_paths']):return ['Shared HTTP paths cannot override reserved calculation files']
+    if not set(p['shared_http_paths'])<=OWNER_HTTP_PATHS:return ['Shared HTTP authority cannot be used as a data-adapter exception']
+    system=p.get('shared_system_paths',[])
+    if (not isinstance(system,list) or any(not isinstance(path,str) or path not in OWNER_SYSTEM_PATHS for path in system)
+        or len(system)!=len(set(system))):
+        return ['Owner system authority must use the approved authentication/runtime paths']
+    for path in [*p['shared_http_paths'],*system]:
+        normalized=path.replace('\\','/').casefold()
+        if (normalized.startswith(('database/','supabase/functions/_shared/jungsi/domain/')) or
+            normalized in {v.casefold() for v in p['protected_paths']} or
+            any(fnmatch.fnmatchcase(normalized,v.casefold()) for v in p['protected_globs'])):
+            return ['Owner system authority cannot override SQL, data repositories or calculation core']
     if p.get('shared_document_paths')!=['database/README.md']:return ['Only generated database README may bypass protected DB paths']
     return []
 
@@ -352,7 +370,7 @@ def validate_delegated_service_paths(branch,paths,spec):
     if p is None or branches(spec).get(branch,{}).get('kind') not in {'presentation','presentation_task'}:return []
     invalid=validate_service_delegation(spec)
     if invalid:return invalid
-    shared={v.casefold() for v in [*p['shared_http_paths'],*p.get('shared_document_paths',[])]}
+    shared={v.casefold() for v in [*p['shared_http_paths'],*p.get('shared_system_paths',[]),*p.get('shared_document_paths',[])]}
     exact={v.casefold() for v in p['protected_paths']}
     prefixes=tuple(v.casefold() for v in p['protected_prefixes'])
     patterns=[v.casefold() for v in p['protected_globs']]
