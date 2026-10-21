@@ -3,6 +3,8 @@
   서버 구현(develop 00c8d795, supabase/functions/jungsi-pro-api · professional_projection.ts)과 같은 필드 이름을 쓴다. 기관·학생 권한은 서버가 판단한다.
 */
 
+import type { ReportDto } from "@/lib/dto";
+
 export type ProRole = "org_admin" | "teacher" | "viewer";
 
 /** 모든 전문가용 응답의 겉봉 */
@@ -85,4 +87,26 @@ export interface ProStudentInput {
   class_number: string | null;
   tags: string[];
   memo: string | null;
+}
+
+/** student_report — 학생별 리포트 판. published_result 는 개인용과 같은 persisted-report 모양 */
+export interface ProStudentReportDto {
+  org_id: string;
+  student_id: string;
+  report_id: string;
+  revision_id: number;
+  exam_id: string;
+  stage: string;
+  profile_id: string;
+  published_result: ReportDto;
+  counseling_reasons: unknown[];
+  created_at_utc: string;
+}
+
+export interface ProStudentReportPageDto {
+  org_id: string;
+  student_id: string;
+  items: ProStudentReportDto[];
+  next_cursor: string | null;
+  has_more: boolean;
 }

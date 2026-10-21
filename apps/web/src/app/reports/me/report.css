@@ -243,3 +243,5 @@
 .et .rp-own .cur{font-size:12px;font-weight:700;color:var(--brand)}
 .et .rp-own .err{margin:0;color:var(--reach);font-size:13px}
 .et .rp .model-ref{color:var(--muted);font-size:11px}
+
+.et .sf-dialog-subject{margin:4px 0 10px;padding:10px 14px;border-radius:var(--r-sm);background:var(--touch,#F46A3C);color:#fff;font-size:22px;font-weight:900;letter-spacing:-.5px;text-align:center}

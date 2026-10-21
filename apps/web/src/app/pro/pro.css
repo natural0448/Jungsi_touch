@@ -45,3 +45,6 @@
 .et .pro .rp-rights>b{color:var(--deep)}
 .et .pro .rp-rights .warn{color:var(--reach);font-weight:700}
 .et .pro .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.et .pro-hist{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.et .pro-hist li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.et .pro-hist .cur{font-size:12px;font-weight:700;color:var(--brand)}

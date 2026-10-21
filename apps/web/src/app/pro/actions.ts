@@ -4,7 +4,11 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller } from "@/lib/api";
 import { proSource, validId } from "@/lib/api/pro-source";
+import type { ScoresInput } from "@/lib/dto";
+import { EXAM } from "@/lib/exam";
 import type { ProStudentInput } from "@/lib/pro-dto";
+import type { ScoreFormState } from "../reports/me/actions";
+import type { ScoreDefaults } from "../reports/me/score-form";
 
 export type StudentFormState = { error: string; values: Partial<Record<keyof ProStudentInput, string>> } | null;
 
@@ -76,6 +80,69 @@ export async function updateStudent(_prev: StudentFormState, fd: FormData): Prom
   } catch (e) {
     const t = failText(e);
     if (t) return { error: t, values: p.values };
+    throw e;
+  }
+  return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+}
+
+const SCORE_MESSAGE: Record<string, string> = {
+  input_right_exhausted: "이 학생은 이 시험 단계의 성적 입력 1회를 이미 사용했습니다. 정정은 고객센터에 요청해 주세요.",
+  expected_version_changed: "다른 화면에서 이 학생의 성적이 먼저 저장되었습니다. 화면을 새로 고쳐 확인해 주세요.",
+  professional_student_archived: "보관된 학생이라 성적을 저장할 수 없습니다.",
+  pack_version_mismatch: "시험 자료가 새로 바뀌었습니다. 화면을 새로 고친 뒤 다시 입력해 주세요.",
+};
+/** 성적표에 없는 점수 등 정상 거절(입력 1회 사용) — 서버 SCORE_CONTENT_REJECTION_CODES */
+const CONTENT_REJECTIONS = new Set(["unobserved_standard_score", "invalid_score", "invalid_integer", "invalid_grade", "invalid_reported_grade", "invalid_reported_percentile", "reported_grade_conflict", "reported_percentile_conflict"]);
+
+/**
+ * 전문가용 학생 성적 저장 → 전체 위치. 학생×시험×단계 입력 1회(개인용과 같은 규칙). 같은 화면에서 두 번 눌러도
+ * 같은 요청 키라 한 번만 저장된다. 성적은 저장됐는데 분석만 못 했으면 그 사실을 알리고 다시 저장하지 말라고 한다
+ */
+export async function submitStudentScores(prev: ScoreFormState, fd: FormData): Promise<ScoreFormState> {
+  const int = (k: string) => {
+    const v = String(fd.get(k) ?? "").trim();
+    return v === "" ? undefined : Number(v);
+  };
+  const values: ScoreDefaults = {
+    korean_choice: String(fd.get("korean_choice") ?? "") || undefined, korean: int("korean"),
+    math_choice: String(fd.get("math_choice") ?? "") || undefined, math: int("math"),
+    inq1: String(fd.get("inq1") ?? "") || undefined, inq1_score: int("inq1_score"),
+    inq2: String(fd.get("inq2") ?? "") || undefined, inq2_score: int("inq2_score"),
+    english: int("english"), history: int("history"),
+  };
+  const fail = (error: string, field?: string): ScoreFormState => ({ error, field, values, attempt: (prev?.attempt ?? 0) + 1 });
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), key = String(fd.get("idem") ?? "");
+  const entry = Number(fd.get("entry_version")), stage = String(fd.get("stage") ?? "");
+  if (!validId(orgId) || !validId(studentId) || !/^[0-9a-f-]{36}$/i.test(key) || !Number.isSafeInteger(entry) || !["mock", "provisional", "final"].includes(stage)) return fail("화면을 새로 고친 뒤 다시 저장해 주세요.");
+  const ks = values.korean, ms = values.math, i1 = values.inq1_score, i2 = values.inq2_score;
+  if ([ks, ms, i1, i2].some((v) => v === undefined || Number.isNaN(v)) || !values.inq1 || !values.inq2) return fail("국어·수학·탐구 두 과목의 표준점수를 모두 넣어 주세요.");
+  if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 학생 이름과 점수를 확인하고 '이대로 저장'을 눌러 주세요.", "confirm");
+  const scores: ScoresInput = {
+    exam_id: EXAM.exam_id,
+    pack_version: EXAM.pack_version,
+    korean: { standard_score: ks!, ...(values.korean_choice ? { choice: values.korean_choice } : {}) },
+    math: { standard_score: ms!, ...(values.math_choice ? { choice: values.math_choice } : {}) },
+    inquiry: [{ subject: values.inq1, standard_score: i1! }, { subject: values.inq2, standard_score: i2! }],
+    ...(values.english !== undefined ? { english_grade: values.english } : {}),
+    ...(values.history !== undefined ? { korean_history_grade: values.history } : {}),
+  };
+  const caller = await getCaller();
+  const src = proSource();
+  let step = "성적 저장";
+  try {
+    const saved = await src.createScore(caller, orgId, studentId, { exam_id: EXAM.exam_id, pack_version: EXAM.pack_version, stage, scores, expected_entry_version: entry }, `${key}:profile`);
+    if (!saved.ok) {
+      if (saved.status === 422 && CONTENT_REJECTIONS.has(saved.code)) return fail(`실제 성적표의 표준점수를 입력하지 않아 정상적인 계산이 불가능합니다. 이 학생의 입력 1회가 사용되었습니다. 정정은 고객센터에 요청해 주세요. (사유 코드 ${saved.code})`);
+      return fail(SCORE_MESSAGE[saved.code] ?? MESSAGE[saved.code] ?? `저장하지 못했습니다. (사유 코드 ${saved.code})`);
+    }
+    step = "전체 분석";
+    const p = saved.value.profile;
+    const r = await src.analyzeOverall(caller, orgId, studentId, p.profile_id, p.profile_version, `${key}:overall`);
+    if (!r.ok) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (사유 코드 ${r.code})`);
+  } catch (e) {
+    if (step === "전체 분석" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 마세요. (사유 코드 ${e.code})`);
+    const t = failText(e);
+    if (t) return fail(t);
     throw e;
   }
   return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);

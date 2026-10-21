@@ -19983,6 +19983,13 @@
         "REQ-31"
       ],
       "summary": "화면 담당 Owner 변경(서비스 위임 범위 — application 서비스·DTO): 전문가용 pro.session 의 organization_item 에 contract_version(권한 원본 계약 판, a.contract.version)을 추가했다. pro.student.create 가 expected_contract_version 을 요구하지만 화면이 그 값을 받을 경로가 없었다. 보호 파일(professional_authority.ts)은 이미 version 을 읽으므로 바꾸지 않았다. 화면 BFF(lib/pro-dto.ts·pro-source.ts)를 실제 서버 형식에 맞췄다: 응답 status ready/pending, class_number 문자열, 기관 항목 contract_id·academic_year·contract_version, 세션 최상위 org_id/role/contract_status. contract_version 이 없으면 학생 추가를 열지 않는다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31"
+      ],
+      "summary": "화면팀 변경(전문가용 2묶음, 합성): 학생 화면에서 담당 교사가 성적을 입력한다(개인용 성적 입력 양식 재사용, 확인 창에 학생 이름을 크게, 버튼에 학생 이름). pro.score.create(exam_id·pack_version·stage=mock·scores·confirmed·expected_entry_version, 멱등키) → pro.overall.analyze(profile_id·expected_profile_version) 순서로 저장·분석하고, 성적만 저장되고 분석이 실패하면 다시 저장하지 말라고 안내한다. 정상 거절 8코드는 학생 입력 1회 사용 문구. 최근 리포트를 개인용 전체 위치 화면(OverallCard·SubjectsSheet·PositionChart)으로 보이고, pro.report.list 판 목록에서 이전 판을 연다. 상담 tip 자리는 counseling_basis 연결 전 안내. 기관 관리자·열람 전용은 입력하지 않는다. pro.score.status 는 계약대로 stage 를 필수로 보낸다."
     }
   ],
   "overall_analysis_contract": {

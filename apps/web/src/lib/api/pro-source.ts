@@ -1,5 +1,7 @@
 import "server-only";
-import type { ProEnvelope, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto } from "@/lib/pro-dto";
+import type { ProfileDto, ReportDto, ScoresInput } from "@/lib/dto";
+import type { ProEnvelope, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
+import { computeOverall } from "./synthetic-report";
 import { apiMode } from "./index";
 import { AccessDenied, ConnectionError, type Caller, type Result } from "./source";
 
@@ -17,7 +19,13 @@ export interface ProSource {
   createStudent(caller: Caller, orgId: string, input: ProStudentInput, expectedContractVersion: number, key: string): Promise<Result<ProStudentDto>>;
   readStudent(caller: Caller, orgId: string, studentId: string): Promise<ProStudentDto | null>;
   updateStudent(caller: Caller, orgId: string, studentId: string, input: ProStudentInput, expectedVersion: number, key: string): Promise<Result<ProStudentDto>>;
-  scoreStatus(caller: Caller, orgId: string, studentId: string, examId: string, packVersion: string, stage?: string): Promise<ProScoreStatusDto | null>;
+  scoreStatus(caller: Caller, orgId: string, studentId: string, examId: string, packVersion: string, stage: string): Promise<ProScoreStatusDto | null>;
+  /** pro.score.create — 학생×시험×단계 입력 1회. 성적표에 없는 점수의 정상 거절도 1회 사용(422) */
+  createScore(caller: Caller, orgId: string, studentId: string, body: { exam_id: string; pack_version: string; stage: string; scores: ScoresInput; expected_entry_version: number }, key: string): Promise<Result<{ profile: ProfileDto }>>;
+  /** pro.overall.analyze — 저장한 성적으로 전체 위치(새 리포트 판) */
+  analyzeOverall(caller: Caller, orgId: string, studentId: string, profileId: string, expectedProfileVersion: string | number, key: string): Promise<Result<{ report: ReportDto }>>;
+  listReports(caller: Caller, orgId: string, studentId: string): Promise<ProStudentReportPageDto>;
+  readReport(caller: Caller, orgId: string, studentId: string, reportId: string): Promise<ProStudentReportDto | null>;
 }
 
 const enc = encodeURIComponent;
@@ -79,12 +87,25 @@ const liveSource: ProSource = {
   updateStudent: (caller, orgId, id, input, v, key) => write(caller, "PATCH", `/organizations/${enc(orgId)}/students/${enc(id)}`, { ...input, expected_version: v }, key),
   scoreStatus: (caller, orgId, id, examId, packVersion, stage) =>
     get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/score-input-status${qs({ exam_id: examId, pack_version: packVersion, stage })}`),
+  createScore: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/score-profiles`, { ...body, confirmed: true }, key),
+  analyzeOverall: (caller, orgId, id, profileId, v, key) =>
+    write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/overall-analysis`, { profile_id: profileId, expected_profile_version: v }, key),
+  listReports: async (caller, orgId, id) =>
+    (await get<ProStudentReportPageDto>(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports${qs({ limit: 20 })}`)) ?? { org_id: orgId, student_id: id, items: [], next_cursor: null, has_more: false },
+  readReport: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}`),
 };
 
 /* ── synthetic(화면 제작용 메모리) ── */
 
-type SynStore = { students: ProStudentDto[]; keys: Map<string, ProStudentDto>; used: number };
-const syn: SynStore = ((globalThis as { __jtProSyn?: SynStore }).__jtProSyn ??= { students: seed(), keys: new Map(), used: 3 });
+type SynScore = { entry: number; profile: (ProfileDto & { scores: ScoresInput }) | null; reports: ProStudentReportDto[]; keys: Map<string, unknown> };
+type SynStore = { students: ProStudentDto[]; keys: Map<string, ProStudentDto>; used: number; scores: Map<string, SynScore> };
+const syn: SynStore = ((globalThis as { __jtProSyn?: SynStore }).__jtProSyn ??= { students: seed(), keys: new Map(), used: 3, scores: new Map() });
+syn.scores ??= new Map();
+const synScore = (id: string): SynScore => {
+  let x = syn.scores.get(id);
+  if (!x) syn.scores.set(id, (x = { entry: 0, profile: null, reports: [], keys: new Map() }));
+  return x;
+};
 function seed(): ProStudentDto[] {
   const at = "2026-11-20T01:00:00Z";
   return [
@@ -136,7 +157,42 @@ const synSource: ProSource = {
   },
   async scoreStatus(_c, orgId, id, examId, packVersion, stage) {
     if (!syn.students.some((s) => s.org_id === orgId && s.student_id === id)) return null;
-    return { org_id: orgId, student_id: id, exam_id: examId, pack_version: packVersion, stage: stage ?? "mock", initial_used: 0, initial_remaining: 1, correction_granted: 0, correction_used: 0, entry_version: 0, current_profile_id: null, current_report_id: null, last_rejection_code: null };
+    const x = synScore(id);
+    const used = x.entry > 0 ? 1 : 0;
+    return { org_id: orgId, student_id: id, exam_id: examId, pack_version: packVersion, stage, initial_used: used, initial_remaining: 1 - used, correction_granted: 0, correction_used: 0, entry_version: x.entry, current_profile_id: x.profile?.profile_id ?? null, current_report_id: x.reports.at(-1)?.report_id ?? null, last_rejection_code: null };
+  },
+  async createScore(_c, orgId, id, body, key) {
+    if (!syn.students.some((s) => s.org_id === orgId && s.student_id === id)) return { ok: false, code: "not_found", status: 404 };
+    const x = synScore(id);
+    const prior = x.keys.get(key) as { profile: ProfileDto } | undefined;
+    if (prior) return { ok: true, value: prior };
+    if (x.entry > 0) return { ok: false, code: "input_right_exhausted", status: 409 };
+    if (body.expected_entry_version !== x.entry) return { ok: false, code: "expected_version_changed", status: 409 };
+    const created = new Date().toISOString();
+    x.entry = 1;
+    x.profile = { profile_id: `syn-pro-profile-${id}-1`, profile_version: 1, confirmed: true, created_at: created, scores: body.scores };
+    const value = { profile: { profile_id: x.profile.profile_id, profile_version: 1, confirmed: true, created_at: created } };
+    x.keys.set(key, value);
+    return { ok: true, value };
+  },
+  async analyzeOverall(_c, orgId, id, profileId, _v, key) {
+    const x = synScore(id);
+    const prior = x.keys.get(key) as { report: ReportDto } | undefined;
+    if (prior) return { ok: true, value: prior };
+    if (!x.profile || x.profile.profile_id !== profileId) return { ok: false, code: "profile_not_found", status: 404 };
+    const n = x.reports.length + 1;
+    const now = new Date().toISOString();
+    const report: ReportDto = { format: "jungsi.persisted-report/v1", report_id: `syn-pro-report-${id}`, report_version: n, profile_id: profileId, updated_at: now, overall: computeOverall(x.profile.scores) };
+    x.reports.push({ org_id: orgId, student_id: id, report_id: report.report_id, revision_id: n, exam_id: x.profile.scores.exam_id, stage: "mock", profile_id: profileId, published_result: report, counseling_reasons: [], created_at_utc: now });
+    const value = { report };
+    x.keys.set(key, value);
+    return { ok: true, value };
+  },
+  async listReports(_c, orgId, id) {
+    return { org_id: orgId, student_id: id, items: [...synScore(id).reports].reverse(), next_cursor: null, has_more: false };
+  },
+  async readReport(_c, _orgId, id, reportId) {
+    return [...synScore(id).reports].reverse().find((r) => r.report_id === reportId) ?? null;
   },
 };
 
