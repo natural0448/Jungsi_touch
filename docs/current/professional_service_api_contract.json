@@ -1,6 +1,6 @@
 {
   "format": "jungsi.professional-api-contract/v1",
-  "spec_version": "1.9.100",
+  "spec_version": "1.9.101",
   "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
   "contract": {
     "format": "jungsi.professional-service-contract/v1",
@@ -8,7 +8,7 @@
     "requirement": "REQ-31",
     "decision_date": "2026-10-21",
     "display_name": "정시터치 전문가용",
-    "status": "IMPLEMENTATION_IN_PROGRESS_OWNER_REPLY_NOT_A_PREREQUISITE",
+    "status": "SOURCE_IMPLEMENTED_ADDITIVE_SCHEMA_VERIFIED_RUNTIME_NOT_ACTIVATED",
     "source_documents": [
       {
         "file_name": "정시터치-기획-기관단체이용경로-20261021.md",
@@ -25,7 +25,7 @@
     "existing_individual_API_count": 28,
     "candidate_API_registration": "separate_source_registered_not_added_to_existing_operations",
     "runtime_activation": "NOT_RUN",
-    "DB_schema_application": "NOT_RUN",
+    "DB_schema_application": "APPLIED_ADDITIVE_SCHEMA_READBACK",
     "production_ready": false,
     "pages": [
       {
@@ -988,7 +988,7 @@
         "공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분"
       ]
     ],
-    "next_steps": "21개 API와 기관 저장소 소스·합성 검수를 별도로 등록한다. 실제 기관 원본 함수·정책 수치·공식 일정·BFF/JWT/운영 연결은 NOT_RUN이며 자동 활성화하지 않는다. SQL007의 실제 적용·재조회는 Root 단일 writer가 정확 Git/CI 후보로 수행한다. 개인용28/656과 Owner v2는 독립 유지한다.",
+    "next_steps": "21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다.",
     "DTO_contract_refs": {
       "student_profile": "backend_platform_contract.dto_schemas.profile",
       "student_overall": "backend_platform_contract.dto_schemas.report",
@@ -1031,7 +1031,25 @@
         "runtime_acceptance": "NOT_RUN; native compilation does not activate DB/JWT/BFF/deployment",
         "lock_binding": "existing exact Git LF bytes; only CRLF to LF canonicalization; selected-snapshot raw SHA remains mandatory and no semantic or whitespace substitution is allowed"
       },
-      "source_registration_scope": "all professional application/infrastructure/entrypoint and root _shared/professional_*.ts support sources are hash bound; only _test.ts files count as executed suites; support cannot bind an API handler"
+      "source_registration_scope": "all professional application/infrastructure/entrypoint and root _shared/professional_*.ts support sources are hash bound; only _test.ts files count as executed suites; support cannot bind an API handler",
+      "actual_schema_RLS_verification": {
+        "status": "PASS_ACTUAL_RUNTIME_RLS_ROLLBACK",
+        "receipt_sha256": "0e7531ae904a19363c1228bce00df5d25728d890142b97ccc61029ddb2f18821",
+        "new_private_tables": 15,
+        "existing_personal_data_or_grants_changed": false,
+        "real_JWT_OTP_BFF": "NOT_RUN",
+        "professional_function_deployment": "NOT_RUN",
+        "source_commit": "b03c25921c0446278d1a3a884985408bd32ab04b"
+      },
+      "actual_repository_rollback_verification": {
+        "status": "PASS_REPOSITORY_ROUNDTRIP_ROLLED_BACK",
+        "scope": "REPOSITORY_ONLY_SYNTHETIC_NOT_AUTHORITY_HTTP_OR_OPERATING_ACCEPTANCE",
+        "receipt_sha256": "ac396bef268ebffd76131bd634aebcf3cc02d0a59da91044b039b86c548145fa",
+        "execution_receipt_sha256": "c31e63284353cd251aae7df2301a90932527c399b732ebf9994df196a8f2dcb5",
+        "passed_case_count": 7,
+        "remaining_synthetic_rows": 0,
+        "actual_auth_HTTP_or_operating_acceptance": "NOT_RUN"
+      }
     },
     "wire_details": {
       "envelope_format": "jungsi.professional-response/v1",
@@ -1347,6 +1365,12 @@
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
       "operating_writes": 0
+    },
+    "schema_application_evidence": {
+      "result": "PASS_ACTUAL_ADDITIVE_SCHEMA_READBACK",
+      "migration_sha256": "531c3093ecf704f5ae1c8f3de8f329366aab9961b9348375df779a8fa55f9c2d",
+      "receipt_sha256": "4a3ec9ec384cbfaac574a101a5a6ba2513fbe756da0ad61a369be49db1eb1836",
+      "institution_records_created": 0
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.100",
+  "version": "1.9.101",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -6978,7 +6978,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.100",
+        "contract_version": "1.9.101",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7152,7 +7152,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.100",
+        "contract_version": "1.9.101",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7318,7 +7318,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.100",
+        "contract_version": "1.9.101",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7337,7 +7337,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.100",
+        "contract_version": "1.9.101",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7362,7 +7362,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.100",
+        "contract_version": "1.9.101",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7387,7 +7387,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.100",
+        "contract_version": "1.9.101",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -17411,14 +17411,14 @@
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "837254b54ee2122e5be406a1121a167069c8d9e9",
-        "spec_version": "1.9.99",
-        "ci_run_id": 39546828410,
+        "commit": "b03c25921c0446278d1a3a884985408bd32ab04b",
+        "spec_version": "1.9.100",
+        "ci_run_id": 39553841616,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
-          "python": 1195,
-          "deno": 852,
+          "python": 1200,
+          "deno": 926,
           "node": 36,
           "oracle": 993
         },
@@ -19952,6 +19952,16 @@
         "REQ-26"
       ],
       "summary": "서비스 브랜치가 일반 FF로 받은 승인 develop의53507f6 소유 정책을 새 기능팀 변경으로 오인한 푸시 오류를 재현·수정한다. 실제 origin/develop 조상인 정책 이력만 planning 권한으로 분류하고 정책 삭제·미승인 변경/원복·누락 참조·현재 스냅샷/삭제/병합/보호 검사를 유지한다. Owner의 별도 professional_http/runtime 조립 두 경로를 공동 서비스 범위에 등록하며 DB/암호/원본·실저장소·SQL·환산 본체는 보호한다. 실제007 적용과 기관 API 활성화는 아직 NOT_RUN이다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "전문가용21 API/저장소 소스를 통합하고 정확 SQL007의15개 빈 private 테이블과 실제 앱 RLS·저장소7항목의 합성 왕복/롤백을 별도 native 영수증으로 확인했다. 승인 공통 기획에서 등록한 Owner의 pure professional_http/runtime 조립 공동 경로와 원본 권한·암호/실저장소·SQL·환산 본체 보호를 유지한다. 기존 개인용28/656과 개인용 Owner v2를 유지하며 기관 원본·Secrets·실JWT/OTP/BFF·배포 인수는 NOT_RUN이다."
     }
   ],
   "overall_analysis_contract": {
@@ -153761,7 +153771,7 @@
     "requirement": "REQ-31",
     "decision_date": "2026-10-21",
     "display_name": "정시터치 전문가용",
-    "status": "IMPLEMENTATION_IN_PROGRESS_OWNER_REPLY_NOT_A_PREREQUISITE",
+    "status": "SOURCE_IMPLEMENTED_ADDITIVE_SCHEMA_VERIFIED_RUNTIME_NOT_ACTIVATED",
     "source_documents": [
       {
         "file_name": "정시터치-기획-기관단체이용경로-20261021.md",
@@ -153778,7 +153788,7 @@
     "existing_individual_API_count": 28,
     "candidate_API_registration": "separate_source_registered_not_added_to_existing_operations",
     "runtime_activation": "NOT_RUN",
-    "DB_schema_application": "NOT_RUN",
+    "DB_schema_application": "APPLIED_ADDITIVE_SCHEMA_READBACK",
     "production_ready": false,
     "pages": [
       {
@@ -154741,7 +154751,7 @@
         "공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분"
       ]
     ],
-    "next_steps": "21개 API와 기관 저장소 소스·합성 검수를 별도로 등록한다. 실제 기관 원본 함수·정책 수치·공식 일정·BFF/JWT/운영 연결은 NOT_RUN이며 자동 활성화하지 않는다. SQL007의 실제 적용·재조회는 Root 단일 writer가 정확 Git/CI 후보로 수행한다. 개인용28/656과 Owner v2는 독립 유지한다.",
+    "next_steps": "21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다.",
     "DTO_contract_refs": {
       "student_profile": "backend_platform_contract.dto_schemas.profile",
       "student_overall": "backend_platform_contract.dto_schemas.report",
@@ -154784,7 +154794,25 @@
         "runtime_acceptance": "NOT_RUN; native compilation does not activate DB/JWT/BFF/deployment",
         "lock_binding": "existing exact Git LF bytes; only CRLF to LF canonicalization; selected-snapshot raw SHA remains mandatory and no semantic or whitespace substitution is allowed"
       },
-      "source_registration_scope": "all professional application/infrastructure/entrypoint and root _shared/professional_*.ts support sources are hash bound; only _test.ts files count as executed suites; support cannot bind an API handler"
+      "source_registration_scope": "all professional application/infrastructure/entrypoint and root _shared/professional_*.ts support sources are hash bound; only _test.ts files count as executed suites; support cannot bind an API handler",
+      "actual_schema_RLS_verification": {
+        "status": "PASS_ACTUAL_RUNTIME_RLS_ROLLBACK",
+        "receipt_sha256": "0e7531ae904a19363c1228bce00df5d25728d890142b97ccc61029ddb2f18821",
+        "new_private_tables": 15,
+        "existing_personal_data_or_grants_changed": false,
+        "real_JWT_OTP_BFF": "NOT_RUN",
+        "professional_function_deployment": "NOT_RUN",
+        "source_commit": "b03c25921c0446278d1a3a884985408bd32ab04b"
+      },
+      "actual_repository_rollback_verification": {
+        "status": "PASS_REPOSITORY_ROUNDTRIP_ROLLED_BACK",
+        "scope": "REPOSITORY_ONLY_SYNTHETIC_NOT_AUTHORITY_HTTP_OR_OPERATING_ACCEPTANCE",
+        "receipt_sha256": "ac396bef268ebffd76131bd634aebcf3cc02d0a59da91044b039b86c548145fa",
+        "execution_receipt_sha256": "c31e63284353cd251aae7df2301a90932527c399b732ebf9994df196a8f2dcb5",
+        "passed_case_count": 7,
+        "remaining_synthetic_rows": 0,
+        "actual_auth_HTTP_or_operating_acceptance": "NOT_RUN"
+      }
     },
     "wire_details": {
       "envelope_format": "jungsi.professional-response/v1",
@@ -155100,6 +155128,12 @@
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
       "operating_writes": 0
+    },
+    "schema_application_evidence": {
+      "result": "PASS_ACTUAL_ADDITIVE_SCHEMA_READBACK",
+      "migration_sha256": "531c3093ecf704f5ae1c8f3de8f329366aab9961b9348375df779a8fa55f9c2d",
+      "receipt_sha256": "4a3ec9ec384cbfaac574a101a5a6ba2513fbe756da0ad61a369be49db1eb1836",
+      "institution_records_created": 0
     }
   }
 }
