@@ -6,6 +6,7 @@ import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
   (+ 75%컷 등 별도 발표가 있을 때만 '별도 컷' 칸). 값은 원문 표기 그대로, null 은 0 이 아니다.
   값이 있는데 확인 중(pending_metadata)이면 값과 확인 사유를 함께 보인다. 예비번호는 '번', 충원은 '명'.
   추정 2열만 기존 승인 산식(모집인원×경쟁률 반올림, −모집−충원)으로 계산하고 발표 칸을 덮지 않는다.
+  추정 총 지원자는 충원인원 없이도 계산하고, 추정 탈락자만 충원인원이 있어야 계산한다.
 */
 
 export const PAST_YEARS = [2026, 2025, 2024] as const;
@@ -82,16 +83,19 @@ const ratioOf = (c: Cell): { n: number; s: number } | null => {
   if ((t[1] + frac).length > 10) return null;
   return { n: Number(t[1] + frac), s: 10 ** frac.length };
 };
-function derived(r: Row): { applicants: number | null; dropped: number | null; held: boolean } {
+/* 추정 총 지원자 = 모집인원×경쟁률(충원 불필요), 추정 탈락자 = 그 값 − 모집인원 − 충원인원(충원이 있을 때만). 2026-10-22 사용자 확인 */
+function derived(r: Row): { applicants: number | null; dropped: number | null; heldA: boolean; heldD: boolean } {
   const cap = personInt(r.rc);
   const fill = personInt(r.ad);
   const ratio = ratioOf(r.cr);
-  if (cap === null || fill === null || ratio === null || cap >= 1e5) return { applicants: null, dropped: null, held: false };
+  const isHeld = (c: Cell) => c.s !== "verified_official" && c.s.startsWith("pending");
+  if (cap === null || ratio === null || cap >= 1e5) return { applicants: null, dropped: null, heldA: false, heldD: false };
   // half-up(Q×R)을 정수 분수로: floor((2QR + s) / 2s)
   const applicants = Math.floor((2 * cap * ratio.n + ratio.s) / (2 * ratio.s));
+  const heldA = isHeld(r.rc) || isHeld(r.cr);
+  if (fill === null) return { applicants, dropped: null, heldA, heldD: false };
   const d = applicants - cap - fill;
-  const held = [r.rc, r.cr, r.ad].some((c) => c.s !== "verified_official" && c.s.startsWith("pending"));
-  return { applicants, dropped: d >= 0 ? d : null, held };
+  return { applicants, dropped: d >= 0 ? d : null, heldA, heldD: heldA || isHeld(r.ad) };
 }
 
 export const latestOf = (rows: Row[]) => [...rows].sort((a, b) => b.y - a.y)[0];
@@ -146,11 +150,11 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
                     </td>
                     <td className="r"><Value c={r.cr} /></td>
                     <td className="r derived">
-                      {dv.applicants === null ? <span className="unpub">─</span> : <><b className="num">{dv.applicants}</b><small> 명</small>{dv.held && <Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
+                      {dv.applicants === null ? <span className="unpub">─</span> : <><b className="num">{dv.applicants}</b><small> 명</small>{dv.heldA && <Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
                     </td>
                     <td className="r"><Value c={r.ad} /></td>
                     <td className="r derived">
-                      {dv.dropped === null ? <span className="unpub">─</span> : <><b className="num">{dv.dropped}</b><small> 명</small>{dv.held && <Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
+                      {dv.dropped === null ? <span className="unpub">─</span> : <><b className="num">{dv.dropped}</b><small> 명</small>{dv.heldD &&<Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
                     </td>
                     <td className="r"><Value c={r.rk} /></td>
                     <td className="r"><Cut c={r.c50} /></td>

@@ -145,7 +145,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
             )}
           </>
         )}
-        <p className="rs-foot">대학 발표 자료만 보여 줍니다. 추정 총 지원자·추정 탈락자 두 칸만 모집인원·경쟁률·충원인원으로 계산한 값이고, 그 밖의 정시터치 추정값은 이 화면에 넣지 않습니다. 내 성적과 견주어 보려면 {p3.label}를 이용하세요.</p>
+        <p className="rs-foot">대학 발표 자료만 보여 줍니다. 추정 총 지원자(모집인원×경쟁률)와 추정 탈락자(추정 총 지원자−모집인원−충원인원) 두 칸만 계산한 값이고, 그 밖의 정시터치 추정값은 이 화면에 넣지 않습니다. 내 성적과 견주어 보려면 {p3.label}를 이용하세요.</p>
       </div>
     </>
   );
