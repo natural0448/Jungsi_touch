@@ -39,6 +39,16 @@ class OwnerSystemBoundaryTests(unittest.TestCase):
         self.assertTrue(policy.delegation_policy_edit_errors(self.branch,self.spec,s))
         self.assertEqual(policy.delegation_policy_edit_errors('develop',self.spec,s),[])
 
+    def test_professional_HTTP_runtime_are_shared_and_DB_authority_crypto_remain_reserved(self):
+        prefix='supabase/functions/_shared/jungsi/infrastructure/'
+        for field,path in (('shared_http_paths','professional_http.ts'),('shared_system_paths','professional_runtime.ts')):
+            self.assertIn(prefix+path,self.registry[field])
+            self.assertEqual(policy.validate_delegated_service_paths(self.branch,[prefix+path],self.spec),[])
+        for path in ('professional_authority.ts','professional_crypto.ts','professional_postgres.ts',
+                     'professional_usage_postgres.ts','professional_usage_admission.ts'):
+            self.assertTrue(policy.validate_delegated_service_paths(self.branch,[prefix+path],self.spec))
+        self.assertTrue(policy.validate_delegated_service_paths(self.branch,['database/migrations/007_professional_platform.prepared.sql'],self.spec))
+
     def test_student_contract_stays_separate_from_registered_personal_API(self):
         self.assertEqual(validate_professional_service_contract(self.spec),[])
         current={(o['method'],o['path'])for o in self.spec['operations']}

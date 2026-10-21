@@ -325,11 +325,12 @@ def validate_work_branch(branch,spec):
 SERVICE_DELEGATION_FORMAT='jungsi.frontend-service-delegation/v1'
 OWNER_SYSTEM_PATHS=frozenset('supabase/functions/_shared/jungsi/infrastructure/'+name+'.ts' for name in (
     'auth_relay','supabase_auth','verified_session','session_http','project_binding','runtime_settings',
-    'runtime_context','runtime_composition','runtime_controls','runtime_budget','read_view_catalog_runtime','own_report_cursor'))
+    'runtime_context','runtime_composition','runtime_controls','runtime_budget','read_view_catalog_runtime','own_report_cursor','professional_runtime'))
 OWNER_HTTP_PATHS=frozenset((
     'src/jungsi_touch/infrastructure/http_api.py','src/jungsi_touch/infrastructure/secured_http.py',
     'supabase/functions/_shared/jungsi/infrastructure/api_http.ts',
-    'supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts'))
+    'supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts',
+    'supabase/functions/_shared/jungsi/infrastructure/professional_http.ts'))
 
 def service_delegation(spec):
     return spec.get('workflow',{}).get('branch_governance',{}).get('service_delegation_policy')
@@ -596,6 +597,25 @@ def validate_merge_commit(branch,commit,spec):
     errors+=unresolved_markers(conflicts,commit)
     return sorted(set(errors))
 
+def history_delegation_policy_edit_errors(branch,commit,authority,current,spec):
+    """Only confirmed develop ancestors carry planning's historical policy authority."""
+    errors=delegation_policy_edit_errors(branch,authority,current)
+    managed='Service delegation ownership policy is managed on planning develop'
+    row=branches(spec).get(branch,{})
+    if managed not in errors or row.get('status')!='active' or row.get('kind') not in {
+        'planning_task','system','system_task','presentation','presentation_task'}:
+        return errors
+    try:
+        confirmed=approved_develop_tip()
+    except ValueError:
+        return errors+['Approved origin/develop history is unavailable for policy inheritance']
+    if ancestor(commit,confirmed):
+        # Keep removal/sticky checks. Current-snapshot, deletion, merge and reserved
+        # code checks still run; a local develop ref or endpoint equality is insufficient.
+        return delegation_policy_edit_errors('develop',authority,current)
+    return errors
+
+
 def new_merge_history_errors(branch,before,after,spec,*,approved=()):
     errors=[]
     for commit in git('rev-list','--first-parent','--reverse',before+'..'+after,'--').decode().split():
@@ -616,7 +636,7 @@ def new_merge_history_errors(branch,before,after,spec,*,approved=()):
                 errors+=validate_governance(current)
                 errors+=validate_planning_paths([name for _,name in change_records(parents[0],commit)],current)
             else:
-                errors+=delegation_policy_edit_errors(branch,authority,current)
+                errors+=history_delegation_policy_edit_errors(branch,commit,authority,current,spec)
             if len(parents)==1:
                 paths=[name for _,name in change_records(parents[0],commit)]
                 errors+=validate_delegated_service_paths(branch,paths,current)

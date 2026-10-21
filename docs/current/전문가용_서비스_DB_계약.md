@@ -1036,4 +1036,4 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=6b5708479142faa7ffba8938c07ecb056e9ec6036d91335ffb0c38a6f08d8a97 -->
+<!-- jungsi:generated spec_sha256=6030c91445ba8c92cd489cfc0b8a724c1d032747a5637128b17470c73433d591 -->

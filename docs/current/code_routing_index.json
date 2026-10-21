@@ -214,7 +214,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "7e04648aaeed99061b6a2a7533a651acd0e1e019272afedb03d61a5596477b68",
+      "source_sha256": "c19bb1c4ec9e3282ded18f20d46ef4ae33e0c5a9f6547dac85c7383b81322085",
       "symbols": [
         {
           "kind": "class",
@@ -334,6 +334,12 @@
           "kind": "function",
           "name": "git",
           "signature": "def git(*arguments):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "history_delegation_policy_edit_errors",
+          "signature": "def history_delegation_policy_edit_errors(branch, commit, authority, current, spec):",
           "decorators": []
         },
         {

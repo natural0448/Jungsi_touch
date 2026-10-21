@@ -530,6 +530,45 @@ class RetainedMergeScopeTests(unittest.TestCase):
             errors=policy.validate_push_history(self.spec['workflow']['server_work_branch'],self.base,restored,self.spec)
             self.assertIn('File deletion requires explicit user scope: README.md',errors)
 
+    def test_confirmed_develop_policy_history_is_not_a_new_service_policy_edit(self):
+        approved=deepcopy(self.spec)
+        approved['workflow']['branch_governance']['service_delegation_policy']['allowed_work']+=' Synthetic approved planning note.'
+        integration=self.commit(self.files(approved),(self.base,))
+        candidate=self.commit(self.files(approved,**{'docs/current/pro_note.md':b'Synthetic service note'}),(integration,))
+        self.call('update-ref','refs/remotes/origin/develop',integration)
+        with patch.object(policy,'ROOT',self.repo):
+            self.assertEqual(policy.validate_push_history(self.spec['workflow']['server_work_branch'],self.base,candidate,approved),[])
+
+    def test_unapproved_policy_edit_then_restore_is_rejected_despite_equal_final_policy(self):
+        forged=deepcopy(self.spec)
+        forged['workflow']['branch_governance']['service_delegation_policy']['allowed_work']+=' Synthetic unapproved policy edit.'
+        changed=self.commit(self.files(forged),(self.base,))
+        restored=self.commit(self.files(),(changed,))
+        self.call('update-ref','refs/remotes/origin/develop',self.base)
+        with patch.object(policy,'ROOT',self.repo):
+            self.assertIn('Service delegation ownership policy is managed on planning develop',
+                policy.validate_push_history(self.spec['workflow']['server_work_branch'],self.base,restored,self.spec))
+
+    def test_local_develop_ref_cannot_approve_policy_history_without_origin(self):
+        approved=deepcopy(self.spec)
+        approved['workflow']['branch_governance']['service_delegation_policy']['allowed_work']+=' Synthetic local ref only.'
+        candidate=self.commit(self.files(approved),(self.base,))
+        self.call('update-ref','refs/heads/develop',candidate)
+        with patch.object(policy,'ROOT',self.repo):
+            errors=policy.validate_push_history(self.spec['workflow']['server_work_branch'],self.base,candidate,approved)
+            self.assertIn('Service delegation ownership policy is managed on planning develop',errors)
+            self.assertIn('Approved origin/develop history is unavailable for policy inheritance',errors)
+
+    def test_confirmed_ancestry_cannot_hide_policy_removal_and_restore(self):
+        removed=deepcopy(self.spec)
+        removed['workflow']['branch_governance'].pop('service_delegation_policy')
+        removal=self.commit(self.files(removed),(self.base,))
+        restored=self.commit(self.files(),(removal,))
+        self.call('update-ref','refs/remotes/origin/develop',restored)
+        with patch.object(policy,'ROOT',self.repo):
+            self.assertIn('Adopted service delegation policy cannot be removed',
+                policy.validate_push_history(self.spec['workflow']['server_work_branch'],self.base,restored,self.spec))
+
     def test_new_octopus_merge_cannot_receive_a_merge_exemption(self):
         left,right=self.divergent();tree,_=self.expected(left,right)
         merged=self.call('commit-tree',tree,'-p',left,'-p',right,'-p',self.seed,'-m','Retained octopus fixture').decode()
