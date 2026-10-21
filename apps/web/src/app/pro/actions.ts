@@ -202,3 +202,47 @@ export async function exportStudentReport(_prev: PrintState, fd: FormData): Prom
     throw e;
   }
 }
+
+const ADMIN_MESSAGE: Record<string, string> = {
+  management_mfa_required: "담당 변경과 보관은 2단계 인증(OTP)을 마친 세션에서만 할 수 있습니다. 에듀터치에서 OTP 인증 후 다시 시도해 주세요.",
+  professional_access_denied: "기관 관리자만 할 수 있습니다.",
+  expected_version_changed: "다른 화면에서 이 학생 정보가 먼저 바뀌었습니다. 화면을 새로 고쳐 주세요.",
+  invalid_request: "고른 담당자가 이 기관의 교사·열람 전용 구성원이 아닙니다.",
+};
+const adminText = (code: string) => ADMIN_MESSAGE[code] ?? `처리하지 못했습니다. (사유 코드 ${code})`;
+
+/** 기관 관리자: 학생 담당 교사(·열람 전용) 목록을 새로 정한다(체크한 구성원 전체로 바꿈) */
+export async function assignStudentAction(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), key = String(fd.get("idem") ?? "");
+  const v = Number(fd.get("version"));
+  const ids = fd.getAll("teacher").map(String);
+  if (!validId(orgId) || !validId(studentId) || !/^[0-9a-f-]{36}$/i.test(key) || !Number.isSafeInteger(v) || ids.some((x) => !validId(x)) || new Set(ids).size !== ids.length) return { error: "화면을 새로 고친 뒤 다시 저장해 주세요." };
+  try {
+    const r = await proSource().assignStudent(await getCaller(), orgId, studentId, ids, v, key);
+    if (!r.ok) return { error: adminText(r.code) };
+  } catch (e) {
+    if (e instanceof AccessDenied && e.status === 403) return { error: adminText(e.code) };
+    const t = failText(e);
+    if (t) return { error: t };
+    throw e;
+  }
+  return back(`/pro/management?org=${encodeURIComponent(orgId)}`);
+}
+
+/** 기관 관리자: 학생 보관(목록에서 숨김, 기록은 남음, 계약 학생 수는 돌아오지 않음) */
+export async function archiveStudentAction(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), key = String(fd.get("idem") ?? "");
+  const v = Number(fd.get("version"));
+  if (fd.get("confirm") !== "on") return { error: "보관하려면 확인란을 체크해 주세요." };
+  if (!validId(orgId) || !validId(studentId) || !/^[0-9a-f-]{36}$/i.test(key) || !Number.isSafeInteger(v)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
+  try {
+    const r = await proSource().archiveStudent(await getCaller(), orgId, studentId, v, key);
+    if (!r.ok) return { error: adminText(r.code) };
+  } catch (e) {
+    if (e instanceof AccessDenied && e.status === 403) return { error: adminText(e.code) };
+    const t = failText(e);
+    if (t) return { error: t };
+    throw e;
+  }
+  return back(`/pro/management?org=${encodeURIComponent(orgId)}`);
+}

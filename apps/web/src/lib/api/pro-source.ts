@@ -1,10 +1,11 @@
 import "server-only";
 import type { ProfileDto, ReportDto, ScoresInput } from "@/lib/dto";
-import type { ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
+import type { ProAssignmentDto, ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProMemberPageDto, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
 import { computeOverall } from "./synthetic-report";
 import { apiMode } from "./index";
 import { AccessDenied, ConnectionError, type Caller, type Result } from "./source";
+import { readSyntheticState } from "./synthetic";
 
 /*
   전문가용 서비스 API(jungsi-pro-api) 창구. 화면 서버에서만 부른다. 기관·역할·담당은 클라이언트가 보내지 않고
@@ -33,6 +34,14 @@ export interface ProSource {
   addBookmark(caller: Caller, orgId: string, studentId: string, reportId: string, offeringId: string, key: string): Promise<Result<ProBookmarksDto>>;
   /** pro.report.export — 고정 판 인쇄본. 워터마크(기관·교사 코드·인쇄 시각·학생 이름)를 서버가 준다 */
   exportReport(caller: Caller, orgId: string, studentId: string, reportId: string, revisionId: number, key: string): Promise<Result<ProPrintDto>>;
+  /** pro.member.list(기관 관리자) */
+  listMembers(caller: Caller, orgId: string): Promise<ProMemberPageDto | null>;
+  /** pro.student.assign(기관 관리자·2단계 인증) — 담당 교사 전체를 새 목록으로 바꾼다 */
+  assignStudent(caller: Caller, orgId: string, studentId: string, teacherIds: string[], expectedVersion: number, key: string): Promise<Result<ProAssignmentDto>>;
+  /** pro.student.archive(기관 관리자·2단계 인증) — 보관해도 계약 학생 수는 돌아오지 않는다 */
+  archiveStudent(caller: Caller, orgId: string, studentId: string, expectedVersion: number, key: string): Promise<Result<ProStudentDto>>;
+  /** pro.correction.grant(고객센터·플랫폼 관리자 aal2·접수 번호) — 학생 정정권 1회 */
+  grantCorrection(caller: Caller, orgId: string, studentId: string, body: { exam_id: string; stage: string; ticket_ref: string; expected_version: number }, key: string): Promise<Result<ProScoreStatusDto>>;
 }
 
 const enc = encodeURIComponent;
@@ -107,6 +116,11 @@ const liveSource: ProSource = {
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks`, { report_id: reportId, offering_id: offeringId }, key),
   exportReport: (caller, orgId, id, reportId, revisionId, key) =>
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}/export`, { revision_id: revisionId }, key),
+  listMembers: (caller, orgId) => get(caller, `/organizations/${enc(orgId)}/members${qs({ limit: 100 })}`),
+  assignStudent: (caller, orgId, id, ids, v, key) =>
+    write(caller, "PUT", `/organizations/${enc(orgId)}/students/${enc(id)}/assignments`, { assigned_teacher_ids: ids, expected_version: v }, key),
+  archiveStudent: (caller, orgId, id, v, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/archive`, { expected_version: v }, key),
+  grantCorrection: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/management/score-input-corrections`, body, key),
 };
 
 /* ── synthetic(화면 제작용 메모리) ── */
@@ -131,11 +145,18 @@ function seed(): ProStudentDto[] {
     tags: tags as string[], memo: null, archived: false, version: 1, assigned_teacher_ids: ["syn-teacher-1"], created_at_utc: at,
   }));
 }
+const SYN_MEMBERS: ProMemberPageDto["items"] = [
+  { member_id: "1", subject_id: "syn-admin-1", role: "org_admin", status: "active", version: 1 },
+  { member_id: "2", subject_id: "syn-teacher-1", role: "teacher", status: "active", version: 1 },
+  { member_id: "3", subject_id: "syn-teacher-2", role: "teacher", status: "active", version: 1 },
+  { member_id: "4", subject_id: "syn-viewer-1", role: "viewer", status: "active", version: 1 },
+];
 const SYN_ORG = { org_id: "1", org_name: "합성 시범고등학교", contract_id: "syn-contract-1", academic_year: 2027, role: "teacher" as const, contract_status: "active" as const, contract_expires_at: "2027-01-10T14:59:59Z", contract_version: 1, contracted_student_count: 30 };
 const synSource: ProSource = {
   async session() {
-    const o = { ...SYN_ORG, used_student_count: syn.used, remaining_student_count: SYN_ORG.contracted_student_count - syn.used };
-    return { organizations: [o], org_id: o.org_id, role: o.role, contract_status: "active" };
+    const role = (await readSyntheticState()) === "operator" ? ("org_admin" as const) : ("teacher" as const);
+    const o = { ...SYN_ORG, role, used_student_count: syn.used, remaining_student_count: SYN_ORG.contracted_student_count - syn.used };
+    return { organizations: [o], org_id: o.org_id, role, contract_status: "active" };
   },
   async listStudents(_c, orgId, q) {
     if (orgId !== SYN_ORG.org_id) return { items: [], next_cursor: null, has_more: false };
@@ -242,6 +263,33 @@ const synSource: ProSource = {
     const value = { org_id: orgId, student_id: id, shortlist };
     x.keys.set(key, value);
     return { ok: true, value };
+  },
+  async listMembers(_c, orgId) {
+    return { org_id: orgId, items: SYN_MEMBERS, next_cursor: null, has_more: false };
+  },
+  async assignStudent(_c, orgId, id, ids, v, key) {
+    const prior = syn.keys.get(key);
+    if (prior) return { ok: true, value: { org_id: orgId, student_id: id, assigned_teacher_ids: prior.assigned_teacher_ids, version: prior.version } };
+    const i = syn.students.findIndex((s) => s.org_id === orgId && s.student_id === id);
+    if (i < 0) return { ok: false, code: "not_found", status: 404 };
+    if (syn.students[i].version !== v) return { ok: false, code: "expected_version_changed", status: 409 };
+    if (ids.some((t) => !SYN_MEMBERS.some((m) => m.subject_id === t && m.role !== "org_admin"))) return { ok: false, code: "invalid_request", status: 422 };
+    syn.students[i] = { ...syn.students[i], assigned_teacher_ids: ids, version: v + 1 };
+    syn.keys.set(key, syn.students[i]);
+    return { ok: true, value: { org_id: orgId, student_id: id, assigned_teacher_ids: ids, version: v + 1 } };
+  },
+  async archiveStudent(_c, orgId, id, v, key) {
+    const prior = syn.keys.get(key);
+    if (prior) return { ok: true, value: prior };
+    const i = syn.students.findIndex((s) => s.org_id === orgId && s.student_id === id);
+    if (i < 0) return { ok: false, code: "not_found", status: 404 };
+    if (syn.students[i].version !== v) return { ok: false, code: "expected_version_changed", status: 409 };
+    syn.students[i] = { ...syn.students[i], archived: true, version: v + 1 };
+    syn.keys.set(key, syn.students[i]);
+    return { ok: true, value: syn.students[i] };
+  },
+  async grantCorrection() {
+    return { ok: false, code: "professional_authority_unavailable", status: 503 };
   },
   async exportReport(_c, orgId, id, reportId, revisionId) {
     const r = synScore(id).reports.find((x) => x.report_id === reportId && x.revision_id === revisionId);

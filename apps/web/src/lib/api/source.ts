@@ -92,6 +92,8 @@ export interface JungsiSource {
   listOwnReports(caller: Caller, q: { exam_id?: string; cursor?: string; limit?: number }): Promise<OwnReportListDto>;
   /** score-input.status.read (일반·유료). 이 시험·단계의 입력권 상태 */
   readScoreInputStatus(caller: Caller, examId: string, stage?: string): Promise<ScoreInputStatusDto>;
+  /** score-input.correction.grant (고객센터·관리자 aal2). 접수 번호·대상·기대 판으로 정정권 1회 */
+  grantScoreCorrection(caller: Caller, body: { subject_id: string; exam_id: string; stage: string; ticket_ref: string; expected_version: number }, key: string): Promise<Result<ScoreInputStatusDto>>;
   /** report.sample.read (일반·유료). 가상 학생 견본 리포트 */
   readReportSample(caller: Caller): Promise<SampleReportDto>;
   /** report.export (유료·본인·확인 성적). 일반 회원이면 AccessDenied(403) */

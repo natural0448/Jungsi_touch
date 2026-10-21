@@ -56,3 +56,8 @@
 .et .pro .cat{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:800;background:var(--sub);color:var(--ink-2)}
 .et .pro .cat.reach{background:#FFF1E8;color:#C2410C}.et .pro .cat.core{background:var(--brand-soft);color:var(--brand)}.et .pro .cat.safe{background:#EAF7EF;color:#15803D}.et .pro .cat.inel{background:#FDECEC;color:#B91C1C}
 .et .pro td .cur{font-size:12px;font-weight:700;color:var(--brand)}
+.et .pro-assign{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12.5px}
+.et .pro-assign label{display:inline-flex;gap:4px;align-items:center}
+.et .pro-assign .err{color:var(--reach);font-weight:700}
+.et .pro-form .ok{margin:0;color:var(--brand);font-size:13px;font-weight:700}
+.et .pro-form select{height:40px;padding:0 10px;border:1.5px solid var(--jt-field);border-radius:var(--r-sm);font:inherit}

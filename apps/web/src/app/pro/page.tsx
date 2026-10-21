@@ -99,6 +99,7 @@ export default async function Page({ searchParams }: PageProps<"/pro">) {
                     <input type="search" name="q" defaultValue={q} placeholder="이름·반 검색" maxLength={40} />
                     <button className="btn" type="submit">검색</button>
                   </Form>
+                  {svc.role === "org_admin" && <Link className="btn" href={`/pro/management?${orgQ}`}>기관 관리</Link>}
                   {svc.role !== "viewer" && !adding && (
                     <Link className="btn p" href={`/pro?${orgQ}&add=1`}>학생 추가</Link>
                   )}

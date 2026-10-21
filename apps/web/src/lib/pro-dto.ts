@@ -132,3 +132,19 @@ export interface ProPrintDto {
   snapshot: SnapshotDto;
   watermark: { organization_name: string; teacher_code: string; printed_at_seoul: string; student_name: string };
 }
+
+/** member_page — 기관 구성원(이메일·이름 없이 구성원 번호·로그인 ID·역할만) */
+export interface ProMemberPageDto {
+  org_id: string;
+  items: { member_id: string; subject_id: string; role: ProRole; status: "active" | "inactive"; version: number }[];
+  next_cursor: string | null;
+  has_more: boolean;
+}
+
+/** assignment — 학생 담당(교사·열람 전용의 로그인 ID) */
+export interface ProAssignmentDto {
+  org_id: string;
+  student_id: string;
+  assigned_teacher_ids: string[];
+  version: number;
+}
