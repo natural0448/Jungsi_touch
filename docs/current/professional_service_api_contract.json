@@ -1,6 +1,6 @@
 {
   "format": "jungsi.professional-api-contract/v1",
-  "spec_version": "1.9.101",
+  "spec_version": "1.9.102",
   "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
   "contract": {
     "format": "jungsi.professional-service-contract/v1",
@@ -989,7 +989,7 @@
         "공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분"
       ]
     ],
-    "next_steps": "21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다.",
+    "next_steps": "21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다. 원본 authority용008은 별도 PREPARED_NOT_APPLIED 후보로 public의 기존 postgres CREATE 범위에 준비했다. set-based 원본 JOIN·계약/회원 version·무시드 승인시험·앱 EXECUTE 한정 및 support/retention 닫힘을 격리24건/바인딩144건/기존기관보안13건으로 확인했다. 실제008 적용·정의SHA/최종바인딩·시험등록·Secrets·실JWT/BFF/배포는 NOT_RUN이며 기존007/개인용28/기관21의 등록과 검증을 유지한다.",
     "DTO_contract_refs": {
       "student_profile": "backend_platform_contract.dto_schemas.profile",
       "student_overall": "backend_platform_contract.dto_schemas.report",
@@ -1066,6 +1066,71 @@
         "tests": [
           "apps/web/tests/professional-bff-origin.test.mjs",
           "tests/test_professional_bff_node.py"
+        ]
+      },
+      "authority_source_preparation": {
+        "format": "jungsi.professional-authority-preparation/v1",
+        "status": "PREPARED_NOT_APPLIED",
+        "requirements": [
+          "REQ-31",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "prepared_migration": {
+          "path": "database/migrations/008_professional_authority.prepared.sql",
+          "sha256": "be7784adf517e05b91b67862c22d6bfc7e8426aadbc39c1ae8574f2faaa80977"
+        },
+        "function": {
+          "schema": "public",
+          "name": "jeongsi_pro_authority",
+          "arguments": [
+            "uuid",
+            "text",
+            "text",
+            "text",
+            "timestamp with time zone"
+          ],
+          "returns": "single jsonb",
+          "owner": "postgres",
+          "volatility": "STABLE",
+          "security_definer": true,
+          "search_path": [
+            "pg_catalog"
+          ],
+          "max_result_bytes": 1048576,
+          "installed_definition_sha256": null,
+          "binding_status": "NOT_REGISTERED"
+        },
+        "query": "Materialize the existing original access function once, preaggregate members and explicit exam approvals, then set-based JOIN/JSON aggregate. No per-organization procedural query.",
+        "source_authority": "Existing public.jeongsi_pro_access()/org_active_contract meanings and exact reviewed source pins; no guessed payment/contract selection or broad source table grants.",
+        "versioning": "Explicit new original contract/member bigint version columns, first instrumented state1, insert1/update OLD+1 with safe-integer bound. Content-bound source_version, not query timestamp or reconstructed historical counts.",
+        "exam_authority": "Owner-managed explicit academic-year/exam approval table, no seed or automatic year expansion; policy exam/pack/stage registry remains independently mandatory.",
+        "closed_modes": [
+          "support",
+          "retention"
+        ],
+        "closed_mode_reason": "Exact ticket/student/exam/stage and official retention target approval are not registered; no manufactured authorized_mode.",
+        "permissions": "Existing postgres CREATE/USAGE in public only; original RLS/grants preserved; new function app EXECUTE only, anon/authenticated/service_role denied. New exam table denies all table/column privileges to non-owner roles.",
+        "binding_verification": "Read-only actual definition SHA after exact LF or CRLF prosrc match only; exact trigger relation/type/enabled/nargs/noqual/function metadata; all96 table/column privileges checked. Never use isolated DB SHA as operating binding.",
+        "verification": {
+          "isolated_SQL_actual_adapter_cases": 24,
+          "isolated_engine": "PostgreSQL18.6/PGlite0.5.10 memory only; not existing Supabase17.6 application",
+          "binding_metadata_cases": 144,
+          "existing_professional_security_cases": 13,
+          "SQL_receipt_sha256": "a720b11b7d43a5f87eeaf1bf0f3a6bad196799aa7801df530166d4cfb194c0cb",
+          "binding_receipt_sha256": "188c900baf35f382eda08b4158c85f5070928f0b1d466a7e699283cb9edca89d",
+          "existing_DB_function_metadata": "NOT_REGISTERED_NO_BINDING_CREATED",
+          "operating_DB_writes": 0,
+          "real_customer_rows_read": 0
+        },
+        "operation_registry": "Existing personal28/foundation656 and separate professional21 unchanged; 007 applied evidence retained separately.",
+        "NOT_RUN": [
+          "008 production application",
+          "source exam approval registration",
+          "installed function readback/binding/Secrets",
+          "actual17.6 function/RLS/institution account acceptance",
+          "JWT/OTP/BFF/deployment acceptance"
         ]
       }
     },
