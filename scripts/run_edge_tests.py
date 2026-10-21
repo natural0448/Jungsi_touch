@@ -1,5 +1,6 @@
 """Run the registered Edge suite in exactly the retained Python-suite snapshot.
-No runtime install, source fallback, skipped green result, cleanup or remote services.
+No runtime install, source fallback, skipped green result, cleanup or live service calls.
+A separate native shell check may resolve only the existing frozen driver package.
 """
 from __future__ import annotations
 import argparse,json,os,sys,xml.etree.ElementTree as ET
@@ -164,6 +165,73 @@ def professional_suite_registration(spec,before):
     return contract.get('source_registration')
 
 
+PROFESSIONAL_NATIVE_ENTRYPOINT='supabase/functions/jungsi-pro-api/index.ts'
+PROFESSIONAL_NATIVE_LOCK='supabase/functions/jungsi-api/deno.lock'
+PROFESSIONAL_NATIVE_SOURCES=('supabase/functions/jungsi-api/postgres_pool.ts','supabase/functions/_shared/node_compat_bootstrap.ts')
+PROFESSIONAL_NATIVE_LOCK_SHA256='774160ee9e5942b0bc50eac30caf68fb282210a319ed12b3f88940c7da0b8e26'
+
+def professional_native_dependency_inputs(entrypoint,lock_bytes,before):
+    """The native shell may resolve only the already pinned PostgreSQL dependency."""
+    if entrypoint!=PROFESSIONAL_NATIVE_ENTRYPOINT or digest(lock_bytes.replace(b'\r\n',b'\n'))!=PROFESSIONAL_NATIVE_LOCK_SHA256:
+        raise EdgeFailure('professional_native_entrypoint_or_lock_not_pinned')
+    bindings={}
+    for path in (entrypoint,PROFESSIONAL_NATIVE_LOCK,*PROFESSIONAL_NATIVE_SOURCES):
+        value=before.get(path)
+        if not isinstance(value,str)or len(value)!=64 or any(c not in '0123456789abcdef'for c in value):
+            raise EdgeFailure('professional_native_dependency_snapshot_binding_missing:'+path)
+        bindings[path]=value
+    if bindings[PROFESSIONAL_NATIVE_LOCK]!=digest(lock_bytes):
+        raise EdgeFailure('professional_native_lock_snapshot_mismatch')
+    return bindings
+
+def professional_native_graph(info,root,before):
+    """Require the deployable static pool/bootstrap closure, not a hidden dynamic import."""
+    from check_edge_contract import local_url
+    if not isinstance(info,dict)or not isinstance(info.get('modules'),list)or not isinstance(info.get('roots'),list):
+        raise EdgeFailure('professional_native_graph_invalid')
+    if len(info['roots'])!=1 or local_url(info['roots'][0],root)!=PROFESSIONAL_NATIVE_ENTRYPOINT:
+        raise EdgeFailure('professional_native_graph_root_invalid')
+    packages=info.get('npmPackages')
+    if not isinstance(packages,dict)or set(packages)!={'postgres@3.4.5'}:
+        raise EdgeFailure('professional_native_npm_dependency_drift')
+    package=packages['postgres@3.4.5']
+    if not isinstance(package,dict)or package.get('name')!='postgres'or package.get('version')!='3.4.5'or package.get('dependencies')!=[]or package.get('registryUrl')!='https://registry.npmjs.org/':
+        raise EdgeFailure('professional_native_npm_dependency_drift')
+    files={};npm_nodes=0
+    for module in info['modules']:
+        if not isinstance(module,dict)or 'error'in module or not isinstance(module.get('specifier'),str):
+            raise EdgeFailure('professional_native_graph_module_invalid')
+        url=module['specifier']
+        if url.startswith('file:'):
+            path=local_url(url,root)
+            if path in files or path not in before:
+                raise EdgeFailure('professional_native_graph_file_unbound')
+            files[path]=module
+        elif module.get('kind')=='npm'and module.get('npmPackage')=='postgres@3.4.5'and url=='npm:/postgres@3.4.5':npm_nodes+=1
+        elif not url.startswith('node:'):raise EdgeFailure('professional_native_graph_external_dependency')
+    if npm_nodes!=1 or not {PROFESSIONAL_NATIVE_ENTRYPOINT,*PROFESSIONAL_NATIVE_SOURCES}<=set(files):
+        raise EdgeFailure('professional_native_static_pool_closure_missing')
+    for parent,child in ((PROFESSIONAL_NATIVE_ENTRYPOINT,PROFESSIONAL_NATIVE_SOURCES[0]),(PROFESSIONAL_NATIVE_SOURCES[0],PROFESSIONAL_NATIVE_SOURCES[1])):
+        edges=[edge for edge in files[parent].get('dependencies',[])if isinstance(edge,dict)and isinstance(edge.get('code'),dict)and edge['code'].get('specifier','').startswith('file:')and local_url(edge['code']['specifier'],root)==child]
+        if len(edges)!=1 or edges[0].get('isDynamic')is True:
+            raise EdgeFailure('professional_native_static_pool_edge_missing')
+    return dict(local_sources={path:before[path]for path in sorted(files)},npm_package='postgres@3.4.5',static_pool_and_bootstrap=True)
+
+def check_professional_native_entrypoint(root,before,deno,config,output,entrypoint):
+    lock_path=Path(root)/PROFESSIONAL_NATIVE_LOCK
+    lock_bytes=lock_path.read_bytes()
+    bindings=professional_native_dependency_inputs(entrypoint,lock_bytes,before)
+    native=['--no-remote','--node-modules-dir=none','--lock',PROFESSIONAL_NATIVE_LOCK,'--frozen-lockfile','--config',config]
+    command([deno,'check',*native,entrypoint],root=root,output=output,name='professional_native_check')
+    raw=command([deno,'info','--json',*native,entrypoint],root=root,output=output,name='professional_native_info')
+    try:graph=json.loads(raw)
+    except (UnicodeError,ValueError)as error:raise EdgeFailure('professional_native_graph_JSON_invalid')from error
+    closure=professional_native_graph(graph,root,before)
+    if lock_path.read_bytes()!=lock_bytes:raise EdgeFailure('professional_native_lock_changed')
+    return dict(status='PASS_PINNED_NATIVE_TYPECHECK_AND_STATIC_GRAPH',source_bindings=bindings,closure=closure,
+        fixed_lock=True,local_node_modules_created=False,foundation_and_business_tests_no_npm=True,
+        actual_DB='NOT_RUN',JWT_OTP_BFF='NOT_RUN',deployment='NOT_RUN')
+
 def require_professional_operation_tests(junit,names_by_operation):
     """A declared route cannot borrow evidence from a testcase that never ran."""
     ran={case.get('name')for case in junit.iter('testcase')}
@@ -239,7 +307,9 @@ def run_workspace(root,manifest,deno,python,output):
     if professional is not None:
         professional_paths=[binding['path']for binding in professional['source_bindings']]
         verification=professional['verification']
-        command([deno,'check',*common,*professional_paths],root=root,output=output,name='professional_check')
+        core_paths=[path for path in professional_paths if path!=professional['entrypoint']]
+        command([deno,'check',*common,*core_paths],root=root,output=output,name='professional_check')
+        native_entrypoint=check_professional_native_entrypoint(root,before,deno,cfg['config'],output,professional['entrypoint'])
         command([deno,'lint','--config',cfg['config'],*professional_paths],root=root,output=output,name='professional_lint')
         command([deno,'fmt','--check','--config',cfg['config'],*professional_paths],root=root,output=output,name='professional_fmt')
         professional_junit=output.resolve()/'professional.junit.xml'
@@ -247,7 +317,7 @@ def run_workspace(root,manifest,deno,python,output):
             *verification['test_paths']],root=root,output=output,name='professional_unit')
         counted=parse_junit(professional_junit,verification['test_count'])
         require_professional_operation_tests(ET.fromstring(professional_junit.read_bytes()),verification['operation_test_names'])
-        professional_unit=dict(**counted,coverage='PROFESSIONAL_SEPARATE_TENANT_SYNTHETIC',
+        professional_unit=dict(**counted,coverage='PROFESSIONAL_SEPARATE_TENANT_SYNTHETIC',native_entrypoint_verification=native_entrypoint,
             source_bindings=professional['source_bindings'],migration_bindings=professional['migrations'],
             registered_operation_ids=sorted(professional['operation_bindings']),registered_operation_count=21,
             existing_individual_operation_count=len(spec['operations']),baseline_foundation_count=656,

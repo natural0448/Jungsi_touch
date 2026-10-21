@@ -634,7 +634,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "e0f33d48b880b00c6e916adcee13839beaaac56252d3800475618a9228d33bbd",
+      "source_sha256": "e51bd0479084dc11d33a2a1ff6ac7cf04a8e35fa8e751066c4f3168435018a28",
       "symbols": [
         {
           "kind": "class",
@@ -1567,8 +1567,14 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "291fca73e3c4dc2371be31ac8d1125d3f8ce6c495200bcf009b1d56bc7cbfec5",
+      "source_sha256": "30070b4f064148fb18179e9c7e3ec07a07d7bf8734eef52c308c501f2d55b7fc",
       "symbols": [
+        {
+          "kind": "function",
+          "name": "check_professional_native_entrypoint",
+          "signature": "def check_professional_native_entrypoint(root, before, deno, config, output, entrypoint):",
+          "decorators": []
+        },
         {
           "kind": "function",
           "name": "current_public_registration",
@@ -1597,6 +1603,18 @@
           "kind": "function",
           "name": "parse_junit",
           "signature": "def parse_junit(path, expected):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_native_dependency_inputs",
+          "signature": "def professional_native_dependency_inputs(entrypoint, lock_bytes, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_native_graph",
+          "signature": "def professional_native_graph(info, root, before):",
           "decorators": []
         },
         {

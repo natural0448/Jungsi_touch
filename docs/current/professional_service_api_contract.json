@@ -1,6 +1,6 @@
 {
   "format": "jungsi.professional-api-contract/v1",
-  "spec_version": "1.9.98",
+  "spec_version": "1.9.99",
   "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
   "contract": {
     "format": "jungsi.professional-service-contract/v1",
@@ -986,7 +986,15 @@
       "DB_and_scoring_owner": "사용자 주도 기존 DB/환산 담당; 개발팀이 담당 feature에서 작성",
       "system_and_frontend_owner": "지정 Owner; 개발팀이 API 작성 지원, Owner의 화면/BFF·기관 원본·최종 운영 책임 유지",
       "institution_seed_or_automatic_activation": false,
-      "infrastructure": "existing Supabase and Google Drive only; no new professional DO"
+      "infrastructure": "existing Supabase and Google Drive only; no new professional DO",
+      "native_entrypoint_check": {
+        "mode": "static pool import; exact existing frozen npm:postgres@3.4.5 lock; actual native typecheck and closed dependency graph",
+        "lock": "supabase/functions/jungsi-api/deno.lock",
+        "foundation_and_professional_business_tests": "remain --no-remote --no-npm; native shell is a separately recorded compile/graph check",
+        "runtime_acceptance": "NOT_RUN; native compilation does not activate DB/JWT/BFF/deployment",
+        "lock_binding": "existing exact Git LF bytes; only CRLF to LF canonicalization; selected-snapshot raw SHA remains mandatory and no semantic or whitespace substitution is allowed"
+      },
+      "source_registration_scope": "all professional application/infrastructure/entrypoint and root _shared/professional_*.ts support sources are hash bound; only _test.ts files count as executed suites; support cannot bind an API handler"
     }
   }
 }

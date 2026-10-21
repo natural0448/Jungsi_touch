@@ -77,18 +77,18 @@ class ProfessionalSourceRegistrationTests(unittest.TestCase):
         c['candidate_API_registration']='separate_source_registered_not_added_to_existing_operations'
         for operation in c['candidate_operations']:operation['runtime_registration']=PROFESSIONAL_SOURCE_STATUS
         app=PROFESSIONAL_APP+'service.ts';infra=PROFESSIONAL_INFRA+'postgres.ts'
-        test=PROFESSIONAL_TEST+'api_test.ts'
-        bodies={PROFESSIONAL_ENTRY:b'entry fixture',app:b'app fixture',infra:b'infra fixture',test:b'test fixture',PROFESSIONAL_GENERATED:b'generated fixture',PROFESSIONAL_MIGRATION:b'SELECT 1; -- prepared fixture only'}
+        test=PROFESSIONAL_TEST+'api_test.ts';support=PROFESSIONAL_TEST+'support.ts'
+        bodies={PROFESSIONAL_ENTRY:b'entry fixture',app:b'app fixture',infra:b'infra fixture',test:b'test fixture',support:b'support fixture',PROFESSIONAL_GENERATED:b'generated fixture',PROFESSIONAL_MIGRATION:b'SELECT 1; -- prepared fixture only'}
         hashes={p:hashlib.sha256(blob).hexdigest()for p,blob in bodies.items()}
-        for path in (PROFESSIONAL_ENTRY,app,infra,test,PROFESSIONAL_GENERATED):
-            layer='application'if path.startswith(PROFESSIONAL_APP)else('verification'if path==test else'data_infrastructure')
+        for path in (PROFESSIONAL_ENTRY,app,infra,test,support,PROFESSIONAL_GENERATED):
+            layer='application'if path.startswith(PROFESSIONAL_APP)else('verification'if path.startswith(PROFESSIONAL_TEST)else'data_infrastructure')
             s['implementation'].append(dict(path=path,layer=layer,requirements=['REQ-31'],symbols=['execute']if path==app else[],status='synthetic_registry_fixture'))
             s['workflow']['documentation_sync']['code_index']['edge_sources']['files'].append(dict(path=path,source_sha256=hashes[path]))
             if path.startswith((PROFESSIONAL_APP,PROFESSIONAL_INFRA)):s['edge_harness']['files'][path]=dict(layer=layer,declarations=dict(source_sha256=hashes[path]))
         c['source_registration']=dict(format='jungsi.professional-source-registration/v1',status=PROFESSIONAL_SOURCE_STATUS,
             entrypoint=PROFESSIONAL_ENTRY,
             operation_bindings={o['id']:dict(path=app,source_sha256=hashes[app],symbol='execute')for o in c['candidate_operations']},
-            source_bindings=[dict(path=p,sha256=hashes[p])for p in (PROFESSIONAL_ENTRY,app,infra,test,PROFESSIONAL_GENERATED)],
+            source_bindings=[dict(path=p,sha256=hashes[p])for p in (PROFESSIONAL_ENTRY,app,infra,test,support,PROFESSIONAL_GENERATED)],
             migrations=[dict(path=PROFESSIONAL_MIGRATION,sha256=hashes[PROFESSIONAL_MIGRATION])],
             verification=dict(test_paths=[test],test_count=1,operation_test_names={o['id']:['synthetic registered routes']for o in c['candidate_operations']}),
             native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN',operating_writes=0)
@@ -117,11 +117,12 @@ class ProfessionalSourceRegistrationTests(unittest.TestCase):
             with self.subTest(mode=mode):self.assertTrue(validate_professional_service_contract(s))
 
     def test_missing_extra_source_or_changed_SQL_cannot_reuse_a_receipt(self):
-        from check_project_consistency import validate_professional_source_registration, PROFESSIONAL_APP, PROFESSIONAL_MIGRATION
-        for mode in ('missing','extra','sql','hash'):
+        from check_project_consistency import validate_professional_source_registration, PROFESSIONAL_APP, PROFESSIONAL_MIGRATION, PROFESSIONAL_TEST
+        for mode in ('missing','extra','support','sql','hash'):
             s,hashes=self.fixture()
             if mode=='missing':hashes.pop(next(iter(hashes)))
             elif mode=='extra':hashes[PROFESSIONAL_APP+'unregistered.ts']='a'*64
+            elif mode=='support':hashes[PROFESSIONAL_TEST+'unregistered_support.ts']='a'*64
             elif mode=='sql':hashes[PROFESSIONAL_MIGRATION]='a'*64
             else:hashes[PROFESSIONAL_APP+'service.ts']='a'*64
             with self.subTest(mode=mode):self.assertTrue(validate_professional_source_registration(s,hashes))
@@ -175,6 +176,89 @@ class ProfessionalSourceRegistrationTests(unittest.TestCase):
         root=ET.fromstring('<testsuite><testcase name="ran"/></testsuite>')
         require_professional_operation_tests(root,{'pro.a':['ran']})
         with self.assertRaises(EdgeFailure):require_professional_operation_tests(root,{'pro.a':['did not run']})
+
+
+class ProfessionalNativeEntrypointTests(unittest.TestCase):
+    def fixture(self):
+        from run_edge_tests import PROFESSIONAL_NATIVE_ENTRYPOINT as entry, PROFESSIONAL_NATIVE_SOURCES as sources, PROFESSIONAL_NATIVE_LOCK as lock
+        from hashlib import sha256
+        raw=(ROOT/lock).read_bytes()
+        before={path:'a'*64 for path in (entry,*sources)};before[lock]=sha256(raw).hexdigest()
+        uri=lambda path:(ROOT/path).as_uri()
+        graph={'roots':[uri(entry)],'modules':[
+            {'specifier':uri(entry),'kind':'esm','dependencies':[{'code':{'specifier':uri(sources[0])}}]},
+            {'specifier':uri(sources[0]),'kind':'esm','dependencies':[{'code':{'specifier':uri(sources[1])}}]},
+            {'specifier':uri(sources[1]),'kind':'esm','dependencies':[]},
+            {'specifier':'npm:/postgres@3.4.5','kind':'npm','npmPackage':'postgres@3.4.5'},
+            {'specifier':'node:buffer','kind':'node'}],
+            'npmPackages':{'postgres@3.4.5':{'name':'postgres','version':'3.4.5','dependencies':[],'registryUrl':'https://registry.npmjs.org/'}}}
+        return entry,raw,before,graph
+
+    def test_native_shell_requires_existing_exact_lock_and_static_pool_closure(self):
+        from run_edge_tests import professional_native_dependency_inputs,professional_native_graph
+        entry,raw,before,graph=self.fixture()
+        from run_edge_tests import PROFESSIONAL_NATIVE_LOCK
+        from hashlib import sha256
+        canonical=raw.replace(b'\r\n',b'\n')
+        for source in (canonical,canonical.replace(b'\n',b'\r\n')):
+            bindings={**before,PROFESSIONAL_NATIVE_LOCK:sha256(source).hexdigest()}
+            with self.subTest(line_endings='CRLF'if b'\r'in source else'LF'):
+                self.assertEqual(len(professional_native_dependency_inputs(entry,source,bindings)),4)
+        self.assertTrue(professional_native_graph(graph,ROOT,before)['static_pool_and_bootstrap'])
+
+    def test_native_lock_or_snapshot_binding_cannot_be_replaced(self):
+        from run_edge_tests import professional_native_dependency_inputs,PROFESSIONAL_NATIVE_LOCK
+        from check_edge_contract import EdgeFailure
+        entry,raw,before,_=self.fixture()
+        for lock_bytes,binding in ((raw+b' ',before),(raw,{**before,PROFESSIONAL_NATIVE_LOCK:'b'*64}),(raw,{})):
+            with self.subTest(binding=binding):
+                with self.assertRaises(EdgeFailure):professional_native_dependency_inputs(entry,lock_bytes,binding)
+        with self.assertRaises(EdgeFailure):professional_native_dependency_inputs('another/index.ts',raw,before)
+
+    def test_missing_or_dynamic_native_pool_cannot_hide_behind_core_check(self):
+        from run_edge_tests import professional_native_graph
+        from check_edge_contract import EdgeFailure
+        _,_,before,graph=self.fixture()
+        for mode in ('missing','dynamic'):
+            candidate=deepcopy(graph)
+            if mode=='missing':candidate['modules'].pop(1)
+            else:candidate['modules'][0]['dependencies'][0]['isDynamic']=True
+            with self.subTest(mode=mode):
+                with self.assertRaises(EdgeFailure):professional_native_graph(candidate,ROOT,before)
+
+    def test_native_graph_rejects_additional_or_substituted_npm_packages(self):
+        from run_edge_tests import professional_native_graph
+        from check_edge_contract import EdgeFailure
+        _,_,before,graph=self.fixture()
+        for mode in ('extra','version','registry','dependency'):
+            candidate=deepcopy(graph);package=candidate['npmPackages']['postgres@3.4.5']
+            if mode=='extra':candidate['npmPackages']['extra@1.0.0']={}
+            elif mode=='version':package['version']='3.4.6'
+            elif mode=='registry':package['registryUrl']='https://unapproved.invalid/'
+            else:package['dependencies']=['extra@1.0.0']
+            with self.subTest(mode=mode):
+                with self.assertRaises(EdgeFailure):professional_native_graph(candidate,ROOT,before)
+
+    def test_native_graph_rejects_unbound_local_or_remote_modules(self):
+        from run_edge_tests import professional_native_graph
+        from check_edge_contract import EdgeFailure
+        _,_,before,graph=self.fixture()
+        for url in ((ROOT/'unbound.ts').as_uri(),'https://unapproved.invalid/module.ts'):
+            candidate=deepcopy(graph);candidate['modules'].append({'specifier':url,'kind':'esm'})
+            with self.subTest(url=url):
+                with self.assertRaises(EdgeFailure):professional_native_graph(candidate,ROOT,before)
+
+    def test_native_graph_errors_and_wrong_roots_fail_closed(self):
+        from run_edge_tests import professional_native_graph
+        from check_edge_contract import EdgeFailure
+        _,_,before,graph=self.fixture()
+        for mode in ('error','root','malformed'):
+            candidate=deepcopy(graph)
+            if mode=='error':candidate['modules'][0]['error']='unresolved'
+            elif mode=='root':candidate['roots']=[(ROOT/'another.ts').as_uri()]
+            else:candidate['modules']=None
+            with self.subTest(mode=mode):
+                with self.assertRaises(EdgeFailure):professional_native_graph(candidate,ROOT,before)
 
 
 if __name__=='__main__':unittest.main()

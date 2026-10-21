@@ -3120,7 +3120,7 @@ def professional_source_path(path):
     """Select the separately registered pro family; existing foundation stays exact."""
     return isinstance(path,str) and path.endswith('.ts') and (
         path==PROFESSIONAL_ENTRY or path.startswith((PROFESSIONAL_APP,PROFESSIONAL_INFRA)) or
-        (path.startswith(PROFESSIONAL_TEST) and path.endswith('_test.ts')))
+        path.startswith(PROFESSIONAL_TEST))
 
 
 def validate_professional_source_registration(spec,source_hashes=None):
