@@ -1073,4 +1073,4 @@ DB 적용: NOT_RUN / 별도 소스 등록: CODE_REGISTERED_RUNTIME_NOT_ACTIVATED
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=d36a7281ea31359149d8f7ff4e62bb35b116ad07ab2a37192b59f3224b5ef96e -->
+<!-- jungsi:generated spec_sha256=396613da30dd49a0fc48596649ffe5c0dc1d16c19e07e29f04b013d402070fa7 -->

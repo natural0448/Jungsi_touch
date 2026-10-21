@@ -6923,7 +6923,8 @@
           "src/jungsi_touch/infrastructure/http_api.py",
           "src/jungsi_touch/infrastructure/secured_http.py",
           "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
-          "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts"
+          "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts",
+          "supabase/functions/_shared/jungsi/infrastructure/professional_http.ts"
         ],
         "protected_python_symbols": {
           "src/jungsi_touch/application/platform.py": [
@@ -6946,7 +6947,8 @@
           "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
           "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
           "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts",
-          "supabase/functions/_shared/jungsi/infrastructure/own_report_cursor.ts"
+          "supabase/functions/_shared/jungsi/infrastructure/own_report_cursor.ts",
+          "supabase/functions/_shared/jungsi/infrastructure/professional_runtime.ts"
         ],
         "system_delegation": {
           "format": "jungsi.owner-system-delegation/v1",
@@ -7429,7 +7431,8 @@
         "동일 캡처 index와 부모별 diff 합집합을 사용하고 이미HEAD의 승인문서·최종snapshot 내용/정본 결속을 함께 검사한다.",
         "부모/zero-parent/diff조회 실패를 거절한다. phase1정상645×3·phase2정상678검수의 코드 인수와 실제JWT/운영/모형·화면 인수는 서로 다른 범위다.",
         "python -B scripts/audit_documentation_sync.py --staged --base <verified-commit>; 필수 동일 스냅샷/보안/브랜치/정상 훅/CI는 유지",
-        "정확 스냅샷의 전체 Python1193+ 시험과 모든 Edge/Node/oracle를 생략하지 않는다. Python 전체 검증1800초·보존 runner2200초·CI job40분의 유한 검증 시간만 적용하며 시험 ID/진행 시간만 기록한다. 실제 Supabase 요청·예산·concurrency·과금/플랜·합격/skip 기준은 변경하지 않는다."
+        "정확 스냅샷의 전체 Python1193+ 시험과 모든 Edge/Node/oracle를 생략하지 않는다. Python 전체 검증1800초·보존 runner2200초·CI job40분의 유한 검증 시간만 적용하며 시험 ID/진행 시간만 기록한다. 실제 Supabase 요청·예산·concurrency·과금/플랜·합격/skip 기준은 변경하지 않는다.",
+        "작업 브랜치의 승인 이력은 고정 origin/develop의 실제 조상인 기획 정책 커밋에 한해서만 상속한다. 로컬 develop 참조·최종 정책의 값 일치·정책 변경 후 원복은 승인 근거가 아니다. 현재 스냅샷·삭제·병합·DB/산출 보호 검사는 유지하고 참조/조상 조회 실패는 거절한다."
       ]
     },
     "documentation_sync": {
@@ -7658,7 +7661,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "7e04648aaeed99061b6a2a7533a651acd0e1e019272afedb03d61a5596477b68",
+            "source_sha256": "c19bb1c4ec9e3282ded18f20d46ef4ae33e0c5a9f6547dac85c7383b81322085",
             "symbols": [
               {
                 "kind": "class",
@@ -7778,6 +7781,12 @@
                 "kind": "function",
                 "name": "git",
                 "signature": "def git(*arguments):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "history_delegation_policy_edit_errors",
+                "signature": "def history_delegation_policy_edit_errors(branch, commit, authority, current, spec):",
                 "decorators": []
               },
               {
@@ -17402,13 +17411,13 @@
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "a11655bd16c338be791de0aaa58b522daacb5bd2",
-        "spec_version": "1.9.98",
-        "ci_run_id": 39531609736,
+        "commit": "837254b54ee2122e5be406a1121a167069c8d9e9",
+        "spec_version": "1.9.99",
+        "ci_run_id": 39546828410,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
-          "python": 1187,
+          "python": 1195,
           "deno": 852,
           "node": 36,
           "oracle": 993
@@ -19933,6 +19942,16 @@
         "REQ-26"
       ],
       "summary": "전문가용 소스 성장으로 전체 Python 검증이900초에 도달한 실패를 보존한다. 전체 suite/스냅샷/오류·skip 거절과 기존 Edge 실행을 유지하고 검증 전용 유한 시간1800초/runner2200초/CI40분 및 값 없는 시험ID·시간 진행 기록을 적용한다. 업무 요청·물리 예산/플랜/보안 권한은 불변이며 이 진단을 운영 완료로 기록하지 않는다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "서비스 브랜치가 일반 FF로 받은 승인 develop의53507f6 소유 정책을 새 기능팀 변경으로 오인한 푸시 오류를 재현·수정한다. 실제 origin/develop 조상인 정책 이력만 planning 권한으로 분류하고 정책 삭제·미승인 변경/원복·누락 참조·현재 스냅샷/삭제/병합/보호 검사를 유지한다. Owner의 별도 professional_http/runtime 조립 두 경로를 공동 서비스 범위에 등록하며 DB/암호/원본·실저장소·SQL·환산 본체는 보호한다. 실제007 적용과 기관 API 활성화는 아직 NOT_RUN이다."
     }
   ],
   "overall_analysis_contract": {
