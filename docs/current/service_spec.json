@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.97",
+  "version": "1.9.98",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -6618,7 +6618,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.97",
+        "contract_version": "1.9.98",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -6792,7 +6792,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.97",
+        "contract_version": "1.9.98",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -6958,7 +6958,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.97",
+        "contract_version": "1.9.98",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -6977,7 +6977,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.97",
+        "contract_version": "1.9.98",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7002,7 +7002,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.97",
+        "contract_version": "1.9.98",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7027,7 +7027,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.97",
+        "contract_version": "1.9.98",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -7719,7 +7719,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "632561eccca4c913b47ad306c499a53fa98627dc94217b1c5381382afd245e6e",
+            "source_sha256": "e0f33d48b880b00c6e916adcee13839beaaac56252d3800475618a9228d33bbd",
             "symbols": [
               {
                 "kind": "class",
@@ -7929,6 +7929,18 @@
                 "kind": "function",
                 "name": "professional_service_section",
                 "signature": "def professional_service_section(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "professional_source_path",
+                "signature": "def professional_source_path(path):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "professional_typescript_contract",
+                "signature": "def professional_typescript_contract(literal):",
                 "decorators": []
               },
               {
@@ -8247,6 +8259,24 @@
                 "kind": "function",
                 "name": "validate_professional_service_contract",
                 "signature": "def validate_professional_service_contract(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_professional_source_registration",
+                "signature": "def validate_professional_source_registration(spec, source_hashes=None):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_professional_source_registration.safe",
+                "signature": "def safe(path):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_professional_source_registration.sha",
+                "signature": "def sha(value):",
                 "decorators": []
               },
               {
@@ -8622,7 +8652,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "9ca0c481a5453fd2bf25222bca2001bb36002dfaea23bfdca995ac472abcee6b",
+            "source_sha256": "291fca73e3c4dc2371be31ac8d1125d3f8ce6c495200bcf009b1d56bc7cbfec5",
             "symbols": [
               {
                 "kind": "function",
@@ -8656,6 +8686,12 @@
               },
               {
                 "kind": "function",
+                "name": "professional_suite_registration",
+                "signature": "def professional_suite_registration(spec, before):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "read_view_registration",
                 "signature": "def read_view_registration(spec, before):",
                 "decorators": []
@@ -8664,6 +8700,12 @@
                 "kind": "function",
                 "name": "require_oracle",
                 "signature": "def require_oracle(receipt, count, cases_sha):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "require_professional_operation_tests",
+                "signature": "def require_professional_operation_tests(junit, names_by_operation):",
                 "decorators": []
               },
               {
@@ -16617,13 +16659,13 @@
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "2d6d4aa3ec67109a49f4e1b3fc824a0a4d38ad36",
-        "spec_version": "1.9.96",
-        "ci_run_id": 39457233689,
+        "commit": "53507f6884ea9a12ec213c75a5ed95dcab64a7d5",
+        "spec_version": "1.9.97",
+        "ci_run_id": 39526053730,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
-          "python": 1172,
+          "python": 1178,
           "deno": 852,
           "node": 36,
           "oracle": 993
@@ -19108,6 +19150,16 @@
         "REQ-31"
       ],
       "summary": "사용자 확정 전문가용 v3를 REQ31·별도 후보 API/DTO·기관 소유/학생별 권리·계약33000원/학생수·교사20명·상담 근거·감사/파기 포트에 등록한다. 개인용28경로·진행 중 Supabase Owner 등록과 분리한다. Owner의 시스템 서비스/인증/운영 조립·기존 프로젝트 배포 위임을 명시 경로까지 넓히고 DB/SQL/RLS·실저장소·자료 writer·환산/누백/분포/판정 보호는 유지한다. 기관의 실제 DB·API·사용량 정책·운영 및 신규 파기 실행은 NOT_RUN이다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "Owner 회신과 독립한 전문가용 DB/API 구현을 시작한다. 정확21 별도 경로·전체 TS/007 SQL hash·실행된 시험 이름을 결속하는 공통 등록과 별도 Deno suite를 준비한다. 개인용28/기존656·DB/엔진/Owner 역할·운영 NOT_RUN을 유지한다. 이번 공통 변경은 아직 전문가용 업무 구현/DB 적용이 아니다."
     }
   ],
   "overall_analysis_contract": {
@@ -133579,7 +133631,7 @@
     "requirement": "REQ-31",
     "decision_date": "2026-10-21",
     "display_name": "정시터치 전문가용",
-    "status": "USER_POLICY_ACCEPTED_CONTRACT_REGISTERED_IMPLEMENTATION_PENDING",
+    "status": "IMPLEMENTATION_IN_PROGRESS_OWNER_REPLY_NOT_A_PREREQUISITE",
     "source_documents": [
       {
         "file_name": "정시터치-기획-기관단체이용경로-20261021.md",
@@ -134524,7 +134576,7 @@
         "공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분"
       ]
     ],
-    "next_steps": "Owner는 이 계약과 합성 포트로 즉시 서비스/화면 개발을 시작한다. 실제 기관 DB 설계·정확 날짜·정책 수치와 승인 시험/엔진 연결·보안/운영 검수 후 기관 시범만 별도 개방한다. 개인용 현재 Owner 등록을 이 작업으로 대기시키지 않는다.",
+    "next_steps": "개발팀은 기존 서비스 브랜치에서 기관 DB/실저장소·21개 API를 구현하고 기획팀은 별도 소스 등록/합성 검수와 문서를 함께 인수한다. Owner 회신은 이 구현의 선행 조건이 아니다. Owner의 시스템/화면·기관/계약 원본·최종 운영 연결과 사용자 DB/환산 소유권은 유지한다. 실제 기관 등록·정책 수치·공식 일정·엔진 연결과 운영 검수 전에는 기관을 자동 활성화하지 않는다. 개인용 Owner v2 등록은 독립 진행한다.",
     "DTO_contract_refs": {
       "student_profile": "backend_platform_contract.dto_schemas.profile",
       "student_overall": "backend_platform_contract.dto_schemas.report",
@@ -134546,6 +134598,18 @@
       "input_right_exhausted": 409,
       "rate_limited": 429,
       "engine_basis_pending": "normal_pending_response_no_fabricated_values"
+    },
+    "implementation_support": {
+      "user_direction": "2026-10-21 Owner 회신과 독립하여 개발팀과 DB/API 구현 계속",
+      "entrypoint": "supabase/functions/jungsi-pro-api/index.ts",
+      "prepared_migration": "database/migrations/007_professional_platform.prepared.sql",
+      "source_registration_contract": "jungsi.professional-source-registration/v1",
+      "separate_test_suite": "strict pro source/SQL bindings and actually executed operation-test names; personal28/foundation656 unchanged",
+      "authoring_support_does_not_transfer_ownership": true,
+      "DB_and_scoring_owner": "사용자 주도 기존 DB/환산 담당; 개발팀이 담당 feature에서 작성",
+      "system_and_frontend_owner": "지정 Owner; 개발팀이 API 작성 지원, Owner의 화면/BFF·기관 원본·최종 운영 책임 유지",
+      "institution_seed_or_automatic_activation": false,
+      "infrastructure": "existing Supabase and Google Drive only; no new professional DO"
     }
   }
 }

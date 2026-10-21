@@ -155,6 +155,22 @@ def read_view_registration(spec,before):
         raise EdgeFailure('read_view_extension_snapshot_binding_invalid')
     return v
 
+def professional_suite_registration(spec,before):
+    """Separate exact pro source/SQL suite; source registration never opens an institution."""
+    from check_project_consistency import validate_professional_source_registration
+    if validate_professional_source_registration(spec,before):
+        raise EdgeFailure('professional_source_or_SQL_registration_invalid')
+    contract=spec.get('professional_service_contract',{})
+    return contract.get('source_registration')
+
+
+def require_professional_operation_tests(junit,names_by_operation):
+    """A declared route cannot borrow evidence from a testcase that never ran."""
+    ran={case.get('name')for case in junit.iter('testcase')}
+    if any(not set(names)<=ran for names in names_by_operation.values()):
+        raise EdgeFailure('professional_operation_test_did_not_run')
+
+
 def run_workspace(root,manifest,deno,python,output):
     root=Path(root).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
     before=verify_manifest(root,manifest);spec=json.loads((root/"docs/current/service_spec.json").read_bytes())
@@ -218,6 +234,25 @@ def run_workspace(root,manifest,deno,python,output):
           coverage='READ_VIEW_EXTENSION_SYNTHETIC',source_bindings=read_view['source_bindings'],
           baseline_foundation_count=656,native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',
           activation_status='NOT_RUN',operating_writes=0)
+    professional_unit=None
+    professional=professional_suite_registration(spec,before)
+    if professional is not None:
+        professional_paths=[binding['path']for binding in professional['source_bindings']]
+        verification=professional['verification']
+        command([deno,'check',*common,*professional_paths],root=root,output=output,name='professional_check')
+        command([deno,'lint','--config',cfg['config'],*professional_paths],root=root,output=output,name='professional_lint')
+        command([deno,'fmt','--check','--config',cfg['config'],*professional_paths],root=root,output=output,name='professional_fmt')
+        professional_junit=output.resolve()/'professional.junit.xml'
+        command([deno,'test',*common,'--reporter=dot','--junit-path',str(professional_junit),
+            *verification['test_paths']],root=root,output=output,name='professional_unit')
+        counted=parse_junit(professional_junit,verification['test_count'])
+        require_professional_operation_tests(ET.fromstring(professional_junit.read_bytes()),verification['operation_test_names'])
+        professional_unit=dict(**counted,coverage='PROFESSIONAL_SEPARATE_TENANT_SYNTHETIC',
+            source_bindings=professional['source_bindings'],migration_bindings=professional['migrations'],
+            registered_operation_ids=sorted(professional['operation_bindings']),registered_operation_count=21,
+            existing_individual_operation_count=len(spec['operations']),baseline_foundation_count=656,
+            actual_DB='NOT_VERIFIED_BY_SOURCE_SUITE',native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',
+            activation_status='NOT_RUN',operating_writes=0)
     references=cfg["python_reference"]
     reference=dict(format="jungsi.edge-python-reference/v1",basis="selected_snapshot",
       files=references["files"],source_files={p:before[p] for p in [*paths,cfg["config"],cfg["oracle"]]},
@@ -238,6 +273,7 @@ def run_workspace(root,manifest,deno,python,output):
     if public_unit is not None:result['current_public_unit']=public_unit
     if whole_population_unit is not None:result['whole_population_unit']=whole_population_unit
     if read_view_unit is not None:result['read_view_extension_unit']=read_view_unit
+    if professional_unit is not None:result['professional_unit']=professional_unit
     write_new(output/"edge_run_receipt.json",json_bytes(result));return result
 def main():
     p=argparse.ArgumentParser(description=__doc__)

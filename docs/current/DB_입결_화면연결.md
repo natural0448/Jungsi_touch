@@ -1,6 +1,6 @@
 # Supabase 입결 DB와 화면 API 연결
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.97이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.98이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 승인된 화면팀·관리자에게 현재 단일 정본 입결을 실제 서비스 API로 표시; 일반회원 운영 공개는 별도
 
@@ -359,4 +359,4 @@ W1 합류: 기존 history DTO의 공식 통계 표시 의미를 최소 목적에
 
 
 
-<!-- jungsi:generated spec_sha256=d10f2229dfdccb942f694c707a05ae2b15252728547eabb1a59926c8e91ba317 -->
+<!-- jungsi:generated spec_sha256=e2ae96910b62c5d42d9db85a7fbb4a6e12736e8a7eeb91015eefd1f90e4d7c93 -->

@@ -227,3 +227,12 @@
 - 전문가용 확정 계약은 professional_service_contract/REQ-31 및 전문가용_서비스_DB_계약.md다. 같은 로그인·기관 소유+별도 담당·학생별1+고객센터 정정1·학생당33,000원/계약 수·20명 이상 처리·근거 코드/수치 상담 tip·감사/파기 계약을 개인용과 분리한다. 기관 관리자에게 성적 정정권을 주지 않는다.
 - 새 기관 API는 별도 후보 계약이며 기존 개인용28 operation을 구현 없이 바꾸지 않는다. 기관 DB·실제 정책/일정·배포·보안 검수는 NOT_RUN을 구분하고, 진행 중 개인용 Supabase Owner 등록을 기관 개발 때문에 멈추지 않는다.
 - 새 역할/비밀 발급·보안 완화·요금제/추가 과금·업무 규칙 변경·실제 자료/비밀값 Git 업로드·미허용 삭제를 위임한 것이 아니다. 기획/라우팅/색인·정상 훅/정확 SHA CI와 기존 파일 보존 규칙을 계속 지킨다.
+
+
+## 전문가용 DB/API 구현과 Owner 회신의 분리 (2026-10-21 사용자 지시)
+
+<!-- jungsi:professional-implementation-without-owner-wait -->
+
+- 전문가용 DB/실저장소와 API 구현은 개발팀과 기존 feature/application-pre-data-platform에서 계속하며 개인용 Owner 등록 회신을 선행 조건으로 삼지 않는다. 작업 작성 지원과 소유권을 구분한다. DB/SQL/RLS·실저장소/writer·환산/누백 본체는 사용자 주도 담당, 시스템/서비스·화면/BFF·기관/계약 원본·최종 운영 연결은 지정 Owner 책임을 유지한다.
+- 기존 개인용28 API와 foundation656 검수는 유지하고 전문가용21은 별도 소스/SQL/실행 시험 명부에 결속한다. CODE_REGISTERED_RUNTIME_NOT_ACTIVATED는 코드 검수이며 실제 DB 적용·기관 계약 등록·JWT/OTP/BFF·배포 인수와 구분한다. 기관 원본/정책 미연결은 fail closed이며 임의 실제 기관/학생/이용권을 생성하지 않는다.
+- 이번 전문가용은 기존 Supabase와 Google Drive만 사용한다. 새로운 호스팅·플랜·과금·전문가용 Durable Object를 추가하지 않는다. 기존 개인용 Owner v2 실행본과 미커밋 작업·이전 자료를 보존하고 기획/라우팅·정상 훅·정확 SHA CI를 같은 변경에 유지한다.

@@ -1,6 +1,6 @@
 {
   "format": "jungsi.professional-api-contract/v1",
-  "spec_version": "1.9.97",
+  "spec_version": "1.9.98",
   "runtime_registration": "NOT_REGISTERED_CONTRACT_ONLY",
   "contract": {
     "format": "jungsi.professional-service-contract/v1",
@@ -8,7 +8,7 @@
     "requirement": "REQ-31",
     "decision_date": "2026-10-21",
     "display_name": "정시터치 전문가용",
-    "status": "USER_POLICY_ACCEPTED_CONTRACT_REGISTERED_IMPLEMENTATION_PENDING",
+    "status": "IMPLEMENTATION_IN_PROGRESS_OWNER_REPLY_NOT_A_PREREQUISITE",
     "source_documents": [
       {
         "file_name": "정시터치-기획-기관단체이용경로-20261021.md",
@@ -953,7 +953,7 @@
         "공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분"
       ]
     ],
-    "next_steps": "Owner는 이 계약과 합성 포트로 즉시 서비스/화면 개발을 시작한다. 실제 기관 DB 설계·정확 날짜·정책 수치와 승인 시험/엔진 연결·보안/운영 검수 후 기관 시범만 별도 개방한다. 개인용 현재 Owner 등록을 이 작업으로 대기시키지 않는다.",
+    "next_steps": "개발팀은 기존 서비스 브랜치에서 기관 DB/실저장소·21개 API를 구현하고 기획팀은 별도 소스 등록/합성 검수와 문서를 함께 인수한다. Owner 회신은 이 구현의 선행 조건이 아니다. Owner의 시스템/화면·기관/계약 원본·최종 운영 연결과 사용자 DB/환산 소유권은 유지한다. 실제 기관 등록·정책 수치·공식 일정·엔진 연결과 운영 검수 전에는 기관을 자동 활성화하지 않는다. 개인용 Owner v2 등록은 독립 진행한다.",
     "DTO_contract_refs": {
       "student_profile": "backend_platform_contract.dto_schemas.profile",
       "student_overall": "backend_platform_contract.dto_schemas.report",
@@ -975,6 +975,18 @@
       "input_right_exhausted": 409,
       "rate_limited": 429,
       "engine_basis_pending": "normal_pending_response_no_fabricated_values"
+    },
+    "implementation_support": {
+      "user_direction": "2026-10-21 Owner 회신과 독립하여 개발팀과 DB/API 구현 계속",
+      "entrypoint": "supabase/functions/jungsi-pro-api/index.ts",
+      "prepared_migration": "database/migrations/007_professional_platform.prepared.sql",
+      "source_registration_contract": "jungsi.professional-source-registration/v1",
+      "separate_test_suite": "strict pro source/SQL bindings and actually executed operation-test names; personal28/foundation656 unchanged",
+      "authoring_support_does_not_transfer_ownership": true,
+      "DB_and_scoring_owner": "사용자 주도 기존 DB/환산 담당; 개발팀이 담당 feature에서 작성",
+      "system_and_frontend_owner": "지정 Owner; 개발팀이 API 작성 지원, Owner의 화면/BFF·기관 원본·최종 운영 책임 유지",
+      "institution_seed_or_automatic_activation": false,
+      "infrastructure": "existing Supabase and Google Drive only; no new professional DO"
     }
   }
 }

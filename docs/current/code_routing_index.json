@@ -634,7 +634,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "632561eccca4c913b47ad306c499a53fa98627dc94217b1c5381382afd245e6e",
+      "source_sha256": "e0f33d48b880b00c6e916adcee13839beaaac56252d3800475618a9228d33bbd",
       "symbols": [
         {
           "kind": "class",
@@ -844,6 +844,18 @@
           "kind": "function",
           "name": "professional_service_section",
           "signature": "def professional_service_section(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_source_path",
+          "signature": "def professional_source_path(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_typescript_contract",
+          "signature": "def professional_typescript_contract(literal):",
           "decorators": []
         },
         {
@@ -1162,6 +1174,24 @@
           "kind": "function",
           "name": "validate_professional_service_contract",
           "signature": "def validate_professional_service_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_professional_source_registration",
+          "signature": "def validate_professional_source_registration(spec, source_hashes=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_professional_source_registration.safe",
+          "signature": "def safe(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_professional_source_registration.sha",
+          "signature": "def sha(value):",
           "decorators": []
         },
         {
@@ -1537,7 +1567,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "9ca0c481a5453fd2bf25222bca2001bb36002dfaea23bfdca995ac472abcee6b",
+      "source_sha256": "291fca73e3c4dc2371be31ac8d1125d3f8ce6c495200bcf009b1d56bc7cbfec5",
       "symbols": [
         {
           "kind": "function",
@@ -1571,6 +1601,12 @@
         },
         {
           "kind": "function",
+          "name": "professional_suite_registration",
+          "signature": "def professional_suite_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "read_view_registration",
           "signature": "def read_view_registration(spec, before):",
           "decorators": []
@@ -1579,6 +1615,12 @@
           "kind": "function",
           "name": "require_oracle",
           "signature": "def require_oracle(receipt, count, cases_sha):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require_professional_operation_tests",
+          "signature": "def require_professional_operation_tests(junit, names_by_operation):",
           "decorators": []
         },
         {

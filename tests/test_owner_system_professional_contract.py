@@ -60,4 +60,121 @@ class OwnerSystemBoundaryTests(unittest.TestCase):
             with self.subTest(key=key):self.assertTrue(validate_professional_service_contract(s))
 
 
+
+class ProfessionalSourceRegistrationTests(unittest.TestCase):
+    def fixture(self):
+        import hashlib
+        from check_project_consistency import (PROFESSIONAL_ENTRY, PROFESSIONAL_APP,
+            PROFESSIONAL_INFRA, PROFESSIONAL_TEST, PROFESSIONAL_MIGRATION, PROFESSIONAL_SOURCE_STATUS,
+            PROFESSIONAL_GENERATED, professional_source_path)
+        s=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
+        c=s['professional_service_contract'];c.pop('source_registration',None);c.pop('schema_application_evidence',None)
+        s['implementation']=[r for r in s['implementation']if not professional_source_path(r['path'])]
+        edge_index=s['workflow']['documentation_sync']['code_index']['edge_sources']['files']
+        edge_index[:]=[r for r in edge_index if not professional_source_path(r['path'])]
+        for path in list(s['edge_harness']['files']):
+            if professional_source_path(path):s['edge_harness']['files'].pop(path)
+        c['candidate_API_registration']='separate_source_registered_not_added_to_existing_operations'
+        for operation in c['candidate_operations']:operation['runtime_registration']=PROFESSIONAL_SOURCE_STATUS
+        app=PROFESSIONAL_APP+'service.ts';infra=PROFESSIONAL_INFRA+'postgres.ts'
+        test=PROFESSIONAL_TEST+'api_test.ts'
+        bodies={PROFESSIONAL_ENTRY:b'entry fixture',app:b'app fixture',infra:b'infra fixture',test:b'test fixture',PROFESSIONAL_GENERATED:b'generated fixture',PROFESSIONAL_MIGRATION:b'SELECT 1; -- prepared fixture only'}
+        hashes={p:hashlib.sha256(blob).hexdigest()for p,blob in bodies.items()}
+        for path in (PROFESSIONAL_ENTRY,app,infra,test,PROFESSIONAL_GENERATED):
+            layer='application'if path.startswith(PROFESSIONAL_APP)else('verification'if path==test else'data_infrastructure')
+            s['implementation'].append(dict(path=path,layer=layer,requirements=['REQ-31'],symbols=['execute']if path==app else[],status='synthetic_registry_fixture'))
+            s['workflow']['documentation_sync']['code_index']['edge_sources']['files'].append(dict(path=path,source_sha256=hashes[path]))
+            if path.startswith((PROFESSIONAL_APP,PROFESSIONAL_INFRA)):s['edge_harness']['files'][path]=dict(layer=layer,declarations=dict(source_sha256=hashes[path]))
+        c['source_registration']=dict(format='jungsi.professional-source-registration/v1',status=PROFESSIONAL_SOURCE_STATUS,
+            entrypoint=PROFESSIONAL_ENTRY,
+            operation_bindings={o['id']:dict(path=app,source_sha256=hashes[app],symbol='execute')for o in c['candidate_operations']},
+            source_bindings=[dict(path=p,sha256=hashes[p])for p in (PROFESSIONAL_ENTRY,app,infra,test,PROFESSIONAL_GENERATED)],
+            migrations=[dict(path=PROFESSIONAL_MIGRATION,sha256=hashes[PROFESSIONAL_MIGRATION])],
+            verification=dict(test_paths=[test],test_count=1,operation_test_names={o['id']:['synthetic registered routes']for o in c['candidate_operations']}),
+            native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN',operating_writes=0)
+        c['DB_schema_application']='PREPARED_NOT_APPLIED'
+        return s,hashes
+
+    def test_bound_source_fixture_is_not_operating_acceptance(self):
+        from check_project_consistency import validate_professional_source_registration
+        s,hashes=self.fixture()
+        self.assertEqual(validate_professional_service_contract(s),[])
+        self.assertEqual(validate_professional_source_registration(s,hashes),[])
+        self.assertFalse(s['professional_service_contract']['production_ready'])
+        self.assertEqual(s['professional_service_contract']['runtime_activation'],'NOT_RUN')
+
+    def test_unregistered_professional_family_cannot_be_silently_skipped(self):
+        from check_project_consistency import validate_professional_source_registration, PROFESSIONAL_ENTRY
+        s=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
+        self.assertTrue(validate_professional_source_registration(s,{PROFESSIONAL_ENTRY:'a'*64}))
+
+    def test_route_drop_relabel_and_method_change_are_rejected(self):
+        for mode in ('drop','relabel','method'):
+            s,_=self.fixture();operations=s['professional_service_contract']['candidate_operations']
+            if mode=='drop':operations.pop()
+            elif mode=='relabel':operations[0]['id']='pro.other'
+            else:operations[0]['method']='POST'
+            with self.subTest(mode=mode):self.assertTrue(validate_professional_service_contract(s))
+
+    def test_missing_extra_source_or_changed_SQL_cannot_reuse_a_receipt(self):
+        from check_project_consistency import validate_professional_source_registration, PROFESSIONAL_APP, PROFESSIONAL_MIGRATION
+        for mode in ('missing','extra','sql','hash'):
+            s,hashes=self.fixture()
+            if mode=='missing':hashes.pop(next(iter(hashes)))
+            elif mode=='extra':hashes[PROFESSIONAL_APP+'unregistered.ts']='a'*64
+            elif mode=='sql':hashes[PROFESSIONAL_MIGRATION]='a'*64
+            else:hashes[PROFESSIONAL_APP+'service.ts']='a'*64
+            with self.subTest(mode=mode):self.assertTrue(validate_professional_source_registration(s,hashes))
+
+    def test_operation_binding_cannot_point_to_SQL_infrastructure_or_an_unregistered_symbol(self):
+        from check_project_consistency import validate_professional_source_registration, PROFESSIONAL_INFRA
+        for mode in ('missing','path','symbol','hash','layer'):
+            s,hashes=self.fixture();r=s['professional_service_contract']['source_registration'];key=next(iter(r['operation_bindings']));b=r['operation_bindings'][key]
+            if mode=='missing':r['operation_bindings'].pop(key)
+            elif mode=='path':b['path']=PROFESSIONAL_INFRA+'postgres.ts'
+            elif mode=='symbol':b['symbol']='absent'
+            elif mode=='hash':b['source_sha256']='0'*64
+            else:next(i for i in s['implementation']if i['path']==b['path'])['layer']='data_infrastructure'
+            with self.subTest(mode=mode):self.assertTrue(validate_professional_source_registration(s,hashes))
+
+    def test_missing_overlapping_or_boolean_test_counts_are_rejected(self):
+        from check_project_consistency import validate_professional_source_registration
+        for mode in ('none','boolean','zero','overlap','name','coverage'):
+            s,hashes=self.fixture();v=s['professional_service_contract']['source_registration']['verification']
+            if mode=='none':v['test_paths']=[]
+            elif mode=='boolean':v['test_count']=True
+            elif mode=='zero':v['test_count']=0
+            elif mode=='overlap':s['edge_harness']['tests']+=v['test_paths']
+            elif mode=='name':v['operation_test_names'][next(iter(v['operation_test_names']))]=[]
+            else:v['operation_test_names'].pop(next(iter(v['operation_test_names'])))
+            with self.subTest(mode=mode):self.assertTrue(validate_professional_source_registration(s,hashes))
+
+    def test_DB_application_requires_exact_migration_and_separate_actual_evidence(self):
+        from check_project_consistency import validate_professional_source_registration
+        for mode in ('absent','hash','boolean','records'):
+            s,hashes=self.fixture();c=s['professional_service_contract'];r=c['source_registration']
+            c['DB_schema_application']='APPLIED_ADDITIVE_SCHEMA_READBACK'
+            c['schema_application_evidence']=dict(result='PASS_ACTUAL_ADDITIVE_SCHEMA_READBACK',migration_sha256=r['migrations'][0]['sha256'],receipt_sha256='a'*64,institution_records_created=0)
+            if mode=='absent':c.pop('schema_application_evidence')
+            elif mode=='hash':c['schema_application_evidence']['migration_sha256']='b'*64
+            elif mode=='boolean':c['schema_application_evidence']['institution_records_created']=False
+            else:c['schema_application_evidence']['institution_records_created']=1
+            with self.subTest(mode=mode):self.assertTrue(validate_professional_source_registration(s,hashes))
+
+    def test_source_registration_does_not_expand_runtime_or_claim_operating_writes(self):
+        from check_project_consistency import validate_professional_source_registration
+        for key,value in (('activation_status','PASS'),('operating_writes',1),('operating_writes',False),('native_acceptance','PASS')):
+            s,hashes=self.fixture();s['professional_service_contract']['source_registration'][key]=value
+            with self.subTest(key=key,value=value):self.assertTrue(validate_professional_source_registration(s,hashes))
+
+    def test_registered_test_names_must_be_present_in_executed_junit(self):
+        import xml.etree.ElementTree as ET
+        from run_edge_tests import require_professional_operation_tests
+        from check_edge_contract import EdgeFailure
+        _,_=self.fixture()
+        root=ET.fromstring('<testsuite><testcase name="ran"/></testsuite>')
+        require_professional_operation_tests(root,{'pro.a':['ran']})
+        with self.assertRaises(EdgeFailure):require_professional_operation_tests(root,{'pro.a':['did not run']})
+
+
 if __name__=='__main__':unittest.main()

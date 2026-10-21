@@ -3106,12 +3106,157 @@ def opening_security_document_body(spec):
     )
 
 
+PROFESSIONAL_ENTRY = 'supabase/functions/jungsi-pro-api/index.ts'
+PROFESSIONAL_APP = 'supabase/functions/_shared/jungsi/application/professional_'
+PROFESSIONAL_INFRA = 'supabase/functions/_shared/jungsi/infrastructure/professional_'
+PROFESSIONAL_TEST = 'supabase/functions/_shared/professional_'
+PROFESSIONAL_MIGRATION = 'database/migrations/007_professional_platform.prepared.sql'
+PROFESSIONAL_SOURCE_STATUS = 'CODE_REGISTERED_RUNTIME_NOT_ACTIVATED'
+PROFESSIONAL_GENERATED = PROFESSIONAL_APP + 'contract.generated.ts'
+PROFESSIONAL_ROUTES = {'pro.session': ('GET', '/api/v1/pro/session'), 'pro.student.list': ('GET', '/api/v1/pro/organizations/{org_id}/students'), 'pro.student.create': ('POST', '/api/v1/pro/organizations/{org_id}/students'), 'pro.student.read': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}'), 'pro.student.update': ('PATCH', '/api/v1/pro/organizations/{org_id}/students/{student_id}'), 'pro.student.archive': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/archive'), 'pro.student.assign': ('PUT', '/api/v1/pro/organizations/{org_id}/students/{student_id}/assignments'), 'pro.member.list': ('GET', '/api/v1/pro/organizations/{org_id}/members'), 'pro.score.status': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/score-input-status'), 'pro.score.create': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/score-profiles'), 'pro.overall.analyze': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/overall-analysis'), 'pro.report.list': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports'), 'pro.report.read': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}'), 'pro.university.analyze': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/university-analysis'), 'pro.candidates': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/candidates'), 'pro.bookmark.list': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks'), 'pro.bookmark.add': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks'), 'pro.report.export': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}/export'), 'pro.correction.grant': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/management/score-input-corrections'), 'pro.retention.preview': ('POST', '/api/v1/pro/organizations/{org_id}/management/retention-preview'), 'pro.retention.notice-targets': ('GET', '/api/v1/pro/organizations/{org_id}/management/retention-notice-targets')}
+
+
+def professional_source_path(path):
+    """Select the separately registered pro family; existing foundation stays exact."""
+    return isinstance(path,str) and path.endswith('.ts') and (
+        path==PROFESSIONAL_ENTRY or path.startswith((PROFESSIONAL_APP,PROFESSIONAL_INFRA)) or
+        (path.startswith(PROFESSIONAL_TEST) and path.endswith('_test.ts')))
+
+
+def validate_professional_source_registration(spec,source_hashes=None):
+    """Bind all pro routes, sources, SQL and executed-test names without live claims."""
+    contract=spec.get('professional_service_contract')
+    present={p for p in source_hashes or {} if professional_source_path(p) or p==PROFESSIONAL_MIGRATION}
+    if not isinstance(contract,dict):
+        return ['Professional source contract missing'] if present else []
+    registration=contract.get('source_registration')
+    operations=contract.get('candidate_operations',[])
+    if registration is None:
+        if present:return ['Professional source family exists without its separate registry']
+        if (contract.get('candidate_API_registration')!='separate_contract_only_not_added_to_existing_operations' or
+            any(o.get('runtime_registration')!='NOT_REGISTERED_CONTRACT_ONLY' for o in operations)):
+            return ['Professional contract-only source state drift']
+        if contract.get('DB_schema_application')!='NOT_RUN':return ['Professional schema cannot be applied without registered SQL']
+        return []
+    try:
+        required={'format','status','entrypoint','operation_bindings','source_bindings','migrations','verification',
+                  'native_acceptance','activation_status','operating_writes'}
+        if (not isinstance(registration,dict) or set(registration)!=required or
+            registration['format']!='jungsi.professional-source-registration/v1' or
+            registration['status']!=PROFESSIONAL_SOURCE_STATUS or
+            registration['entrypoint']!=PROFESSIONAL_ENTRY or
+            registration['native_acceptance']!='NOT_VERIFIED_BY_SOURCE_SUITE' or
+            registration['activation_status']!='NOT_RUN' or type(registration['operating_writes'])is not int or
+            registration['operating_writes']!=0 or
+            contract.get('candidate_API_registration')!='separate_source_registered_not_added_to_existing_operations' or
+            any(o.get('runtime_registration')!=PROFESSIONAL_SOURCE_STATUS for o in operations)):
+            raise ValueError('state')
+        def safe(path):
+            return isinstance(path,str) and path and not path.startswith('/') and '\\' not in path and ':' not in path and all(x not in ('','.','..')for x in path.split('/'))
+        def sha(value):return isinstance(value,str) and re.fullmatch('[0-9a-f]{64}',value)is not None
+        bindings=registration['source_bindings']
+        if (not isinstance(bindings,list) or not bindings or
+            any(not isinstance(b,dict) or set(b)!={'path','sha256'} or not safe(b['path']) or
+                not professional_source_path(b['path']) or not sha(b['sha256']) for b in bindings)):
+            raise ValueError('source bindings')
+        sources={b['path']:b['sha256']for b in bindings}
+        if (len(sources)!=len(bindings) or PROFESSIONAL_ENTRY not in sources or PROFESSIONAL_GENERATED not in sources or
+            not any(p.startswith(PROFESSIONAL_APP)for p in sources) or
+            not any(p.startswith(PROFESSIONAL_INFRA)for p in sources)):
+            raise ValueError('source coverage')
+        implementations={r.get('path'):r for r in spec.get('implementation',[])if isinstance(r,dict)}
+        indexed={r.get('path'):r.get('source_sha256')for r in spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('edge_sources',{}).get('files',[])if isinstance(r,dict)}
+        foundation=spec.get('edge_harness',{}).get('files',{})
+        for path,expected in sources.items():
+            row=implementations.get(path,{})
+            layer='application'if path.startswith(PROFESSIONAL_APP)else('verification'if path.startswith(PROFESSIONAL_TEST)else'data_infrastructure')
+            if row.get('layer')!=layer or 'REQ-31'not in row.get('requirements',[]) or indexed.get(path)!=expected:
+                raise ValueError('implementation index')
+            if path.startswith((PROFESSIONAL_APP,PROFESSIONAL_INFRA)) and foundation.get(path,{}).get('declarations',{}).get('source_sha256')!=expected:
+                raise ValueError('foundation source binding')
+        api=registration['operation_bindings']
+        if not isinstance(api,dict) or set(api)!=set(PROFESSIONAL_ROUTES):raise ValueError('operation coverage')
+        for operation,binding in api.items():
+            if (not isinstance(binding,dict) or set(binding)!={'path','source_sha256','symbol'} or
+                not isinstance(binding['path'],str) or not binding['path'].startswith(PROFESSIONAL_APP) or binding['path']==PROFESSIONAL_GENERATED or
+                sources.get(binding['path'])!=binding['source_sha256'] or not sha(binding['source_sha256']) or
+                not isinstance(binding['symbol'],str) or not binding['symbol'] or
+                binding['symbol']not in implementations.get(binding['path'],{}).get('symbols',[])):
+                raise ValueError('application operation binding')
+        migrations=registration['migrations']
+        if (not isinstance(migrations,list) or len(migrations)!=1 or not isinstance(migrations[0],dict) or
+            set(migrations[0])!={'path','sha256'} or migrations[0]['path']!=PROFESSIONAL_MIGRATION or not sha(migrations[0]['sha256'])):
+            raise ValueError('migration binding')
+        verification=registration['verification']
+        if (not isinstance(verification,dict) or set(verification)!={'test_paths','test_count','operation_test_names'} or
+            not isinstance(verification['test_paths'],list) or not verification['test_paths'] or
+            len(set(verification['test_paths']))!=len(verification['test_paths']) or
+            set(verification['test_paths'])!={p for p in sources if p.startswith(PROFESSIONAL_TEST) and p.endswith('_test.ts')} or
+            type(verification['test_count'])is not int or verification['test_count']<=0 or
+            set(verification['test_paths'])&set(spec.get('edge_harness',{}).get('tests',[])) or
+            not isinstance(verification['operation_test_names'],dict) or set(verification['operation_test_names'])!=set(PROFESSIONAL_ROUTES)):
+            raise ValueError('separate test coverage')
+        for names in verification['operation_test_names'].values():
+            if (not isinstance(names,list) or not names or len(set(names))!=len(names) or
+                any(not isinstance(n,str) or not n.strip() for n in names)):
+                raise ValueError('operation test name')
+        if source_hashes is not None:
+            expected={**sources,PROFESSIONAL_MIGRATION:migrations[0]['sha256']}
+            if present!=set(expected) or any(source_hashes.get(p)!=h for p,h in expected.items()):
+                raise ValueError('selected snapshot coverage/hash')
+        database=contract.get('DB_schema_application')
+        if database not in {'NOT_RUN','PREPARED_NOT_APPLIED','APPLIED_ADDITIVE_SCHEMA_READBACK'}:
+            raise ValueError('DB state')
+        if database=='APPLIED_ADDITIVE_SCHEMA_READBACK':
+            evidence=contract.get('schema_application_evidence')
+            if (not isinstance(evidence,dict) or
+                set(evidence)!={'result','migration_sha256','receipt_sha256','institution_records_created'} or
+                evidence['result']!='PASS_ACTUAL_ADDITIVE_SCHEMA_READBACK' or
+                evidence['migration_sha256']!=migrations[0]['sha256'] or not sha(evidence['receipt_sha256']) or
+                type(evidence['institution_records_created'])is not int or evidence['institution_records_created']!=0):
+                raise ValueError('actual DB evidence')
+    except (KeyError,TypeError,ValueError,AttributeError):
+        return ['Professional source/SQL/operation/test registration invalid']
+    return []
+
+
+def professional_typescript_contract(literal):
+    """Public route/DTO metadata only; generated after feature source registration."""
+    return """/** Generated public professional protocol; no institution data or operating configuration. */
+export type ProfessionalRoute = {
+  readonly id: string;
+  readonly method: string;
+  readonly path: string;
+  readonly access: string;
+  readonly response_schema: string;
+  readonly request: {
+    readonly path_parameters: readonly string[];
+    readonly body_fields: readonly string[];
+    readonly query_fields: readonly string[];
+    readonly Idempotency_Key_required: boolean;
+    readonly BFF_CSRF_required: boolean;
+    readonly unknown_fields: string;
+    readonly tenant_and_actor_from_client_body: string;
+  };
+};
+export type ProfessionalContract = {
+  readonly routes: readonly ProfessionalRoute[];
+  readonly DTOs: Readonly<Record<string, readonly string[] | string>>;
+  readonly DTO_contract_refs: Readonly<Record<string, string>>;
+  readonly cursor_and_idempotency: string;
+  readonly error_contract: Readonly<Record<string, string | number>>;
+};
+export const PROFESSIONAL_CONTRACT: ProfessionalContract = JSON.parse(
+  """+literal+",\n);\n"
+
+
 def professional_service_section(spec):
     """Render the separately adopted professional contract without registering a live API."""
     c=spec.get('professional_service_contract')
     if not c:return ''
     return ('\n\n## 정시터치 전문가용 · 기관 소유 학생 상담\n\n'+c['status']+
         '. 기존 개인용 배포와 독립된 확장 계약이다. 기관 DB/API 활성화·운영은 '+c['runtime_activation']+'이다.\n\n'+
+        'DB 적용: '+c['DB_schema_application']+' / 별도 소스 등록: '+c.get('source_registration',{}).get('status','NOT_REGISTERED_CONTRACT_ONLY')+'. 합성 검수와 실제 운영 인수를 구분한다.\n\n'+
         '요금은 교사 1명이 분석하는 학생 1명당 '+format(c['contract_and_price']['price_per_analyzed_student'],',')+
         '원이며 계약 학생 수까지 원자적으로 추가한다. 학생별 단계 입력1+고객센터 정정1을 적용하고 기관 관리자에게 정정권을 주지 않는다.\n\n'+
         '기록은 기관 소유이며 담당 교사는 매 요청 확인한다. 다른 기관/비담당 학생은 같은404로 거절하고 개인 내 리포트와 섞지 않는다. '+
@@ -3132,7 +3277,6 @@ def validate_professional_service_contract(spec):
     if (c.get('format')!='jungsi.professional-service-contract/v1' or c.get('requirement')!='REQ-31' or
         c.get('display_name')!='정시터치 전문가용' or c.get('individual_deployment_is_independent')is not True or
         c.get('existing_individual_API_count')!=len(spec.get('operations',[])) or
-        c.get('candidate_API_registration')!='separate_contract_only_not_added_to_existing_operations' or
         c.get('runtime_activation')!='NOT_RUN' or c.get('production_ready')is not False):
         errors.append('Professional contract cannot claim unimplemented API or operating acceptance')
     owner=c.get('ownership',{});rights=c.get('score_input',{});identity=c.get('identity',{})
@@ -3160,15 +3304,16 @@ def validate_professional_service_contract(spec):
         len({(o.get('method'),o.get('path'))for o in candidates})!=len(candidates) or
         any(not o.get('path','').startswith('/api/v1/pro/') or (o.get('method'),o.get('path'))in existing or
             o.get('response_schema')not in c.get('DTOs',{}) or
-            o.get('runtime_registration')!='NOT_REGISTERED_CONTRACT_ONLY' for o in candidates)):
-        errors.append('Professional candidate routes must remain a distinct closed contract')
+            (o.get('method'),o.get('path'))!=PROFESSIONAL_ROUTES.get(o.get('id')) for o in candidates) or
+        {o.get('id')for o in candidates}!=set(PROFESSIONAL_ROUTES)):
+        errors.append('Professional routes must match all21 separate tenant contracts')
     for operation in candidates:
         request=operation.get('request',{})
         if (not isinstance(request,dict) or request.get('unknown_fields')!='reject' or
             request.get('tenant_and_actor_from_client_body')!='forbidden' or
             any(request.get(key)is not (operation.get('method')!='GET') for key in ('Idempotency_Key_required','BFF_CSRF_required'))):
             errors.append('Professional request principal, CSRF or idempotency contract drift')
-    return errors
+    return errors+validate_professional_source_registration(spec)
 
 
 def generated_files(spec,read=None):
@@ -3823,12 +3968,18 @@ def generated_files(spec,read=None):
         for key in ('planning','routing','architecture','workflow','supabase_deployment','development_sync','presentation_handoff','frontend_reply','frontend_followup','api_dto','security'):
             target=spec['current_documents'].get(key)
             if target in files:files[target]+=section
-        operations=table(['후보 ID','method','서비스 경로','권한','응답','효과'],[
-            [o['id'],o['method'],o['path'],o['access'],o['response_schema'],o['effect']]for o in professional['candidate_operations']])
+        operations=table(['별도 ID','method','서비스 경로','권한','응답','효과','소스 상태'],[
+            [o['id'],o['method'],o['path'],o['access'],o['response_schema'],o['effect'],o['runtime_registration']]for o in professional['candidate_operations']])
         details='\n\n'.join('### '+key+'\n\n'+chr(96)*3+'json\n'+json.dumps(professional[key],ensure_ascii=False,indent=2)+'\n'+chr(96)*3
             for key in ('identity','ownership','roles','contract_and_price','score_input','budget','DTOs','DTO_contract_refs','cursor_and_idempotency','error_contract','candidate_operations','ports','counseling_tips','privacy_and_retention','acceptance_cases'))
         files[spec['current_documents']['professional_service']]=doc('정시터치 전문가용 서비스·DB 계약',section+'\n\n## 별도 후보 API\n\n'+operations+'\n\n기존 operation 등록과 구현/운영 인수는 그대로이며 다음 계약으로 합성 포트·화면/서비스 개발을 시작한다.\n\n'+details)
-        files[spec['current_documents']['professional_API']]=json.dumps({'format':'jungsi.professional-api-contract/v1','spec_version':spec['version'],'runtime_registration':'NOT_REGISTERED_CONTRACT_ONLY','contract':professional},ensure_ascii=False,indent=2)+'\n'
+        files[spec['current_documents']['professional_API']]=json.dumps({'format':'jungsi.professional-api-contract/v1','spec_version':spec['version'],'runtime_registration':professional.get('source_registration',{}).get('status','NOT_REGISTERED_CONTRACT_ONLY'),'contract':professional},ensure_ascii=False,indent=2)+'\n'
+        if professional.get('source_registration'):
+            payload={key:professional[key]for key in ('DTOs','DTO_contract_refs','cursor_and_idempotency','error_contract')}
+            payload['routes']=[{key:o[key]for key in ('id','method','path','access','response_schema','request')}for o in professional['candidate_operations']]
+            encoded=json.dumps(payload,ensure_ascii=False,separators=(',',':'))
+            literal=chr(39)+encoded.replace(chr(92),chr(92)*2).replace(chr(39),chr(92)+chr(39)).replace(chr(0x2028),chr(92)+'u2028').replace(chr(0x2029),chr(92)+'u2029')+chr(39)
+            files[PROFESSIONAL_GENERATED]=professional_typescript_contract(literal)
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -4202,6 +4353,8 @@ def validate_content(paths,read,spec):
     if migration.get("actual_migration_status")=="APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED":
         evidence=migration.get("migration_evidence",{});sql_path=evidence.get("sql_path")
         if sql_path not in paths or hashlib.sha256(read(sql_path)).hexdigest()!=evidence.get("sql_sha256"):errors.append("REQ-27 applied SQL bytes differ from exact native schema receipt")
+    pro_sources={p:hashlib.sha256(read(p)).hexdigest()for p in paths if professional_source_path(p) or p==PROFESSIONAL_MIGRATION}
+    errors.extend(validate_professional_source_registration(spec,pro_sources))
     errors.extend(edge_registration_errors(paths,read,spec))
     names=set(paths)
     errors.extend(validate_catalog(paths,read,spec))

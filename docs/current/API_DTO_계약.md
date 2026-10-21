@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.97이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.98이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -415,7 +415,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=d10f2229dfdccb942f694c707a05ae2b15252728547eabb1a59926c8e91ba317 -->
+<!-- jungsi:generated spec_sha256=e2ae96910b62c5d42d9db85a7fbb4a6e12736e8a7eeb91015eefd1f90e4d7c93 -->
 
 
 ## P1·P2 화면 변경의 한정 수용
@@ -634,7 +634,9 @@ Root 독립 live 재실행: NOT_RUN. 형식상 native/deployment PASS는 전체 
 
 ## 정시터치 전문가용 · 기관 소유 학생 상담
 
-USER_POLICY_ACCEPTED_CONTRACT_REGISTERED_IMPLEMENTATION_PENDING. 기존 개인용 배포와 독립된 확장 계약이다. 기관 DB/API 활성화·운영은 NOT_RUN이다.
+IMPLEMENTATION_IN_PROGRESS_OWNER_REPLY_NOT_A_PREREQUISITE. 기존 개인용 배포와 독립된 확장 계약이다. 기관 DB/API 활성화·운영은 NOT_RUN이다.
+
+DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 검수와 실제 운영 인수를 구분한다.
 
 요금은 교사 1명이 분석하는 학생 1명당 33,000원이며 계약 학생 수까지 원자적으로 추가한다. 학생별 단계 입력1+고객센터 정정1을 적용하고 기관 관리자에게 정정권을 주지 않는다.
 
@@ -659,4 +661,4 @@ USER_POLICY_ACCEPTED_CONTRACT_REGISTERED_IMPLEMENTATION_PENDING. 기존 개인�
 | 에듀터치 본체 Owner | 기관/계약/구성원 원본·초대/담당 관리자 화면·기존 계정·수동 계약 등록·기관 알림 전달 |
 | 기획팀 | 공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분 |
 
-Owner는 이 계약과 합성 포트로 즉시 서비스/화면 개발을 시작한다. 실제 기관 DB 설계·정확 날짜·정책 수치와 승인 시험/엔진 연결·보안/운영 검수 후 기관 시범만 별도 개방한다. 개인용 현재 Owner 등록을 이 작업으로 대기시키지 않는다.
+개발팀은 기존 서비스 브랜치에서 기관 DB/실저장소·21개 API를 구현하고 기획팀은 별도 소스 등록/합성 검수와 문서를 함께 인수한다. Owner 회신은 이 구현의 선행 조건이 아니다. Owner의 시스템/화면·기관/계약 원본·최종 운영 연결과 사용자 DB/환산 소유권은 유지한다. 실제 기관 등록·정책 수치·공식 일정·엔진 연결과 운영 검수 전에는 기관을 자동 활성화하지 않는다. 개인용 Owner v2 등록은 독립 진행한다.
