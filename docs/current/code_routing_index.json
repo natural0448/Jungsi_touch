@@ -7565,6 +7565,148 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/application/professional_analysis.ts",
+        "layer": "application",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "7fe7d976fc42ad8b7cda24d8d6480de635e190071976735c40261f586c4068f6",
+        "declared_exports": [
+          "ProfessionalAnalysisDataPort",
+          "ProfessionalApprovedAnalysis"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts",
+        "layer": "application",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "27e0dbac33ce78f908be366bb68fbbeb423e16a702873b32eac5c14111fed779",
+        "declared_exports": [
+          "PROFESSIONAL_CONTRACT",
+          "ProfessionalContract",
+          "ProfessionalRoute"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/professional_policy.ts",
+        "layer": "application",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "6171a83c31dafe240b0d3595cd19b6cddf65f7041a6d5134d0aa9fcdc34ff8af",
+        "declared_exports": [
+          "ProfessionalPolicy",
+          "proFresh",
+          "proFreshAdmin",
+          "proId",
+          "proInteger",
+          "proObject",
+          "proShape"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/professional_ports.ts",
+        "layer": "application",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "9d15b9297bae2f0a9658f607207609d9d71b22ccd4ed76c7267f46ad880765e1",
+        "declared_exports": [
+          "ApprovedAnalysisPort",
+          "OrganizationStudentRepositoryPort",
+          "ProfessionalAuditPort",
+          "ProfessionalAuthority",
+          "ProfessionalAuthorityPort",
+          "ProfessionalCommand",
+          "ProfessionalContract",
+          "ProfessionalContractState",
+          "ProfessionalCursorCodec",
+          "ProfessionalExecution",
+          "ProfessionalMembership",
+          "ProfessionalMetadataCipher",
+          "ProfessionalProfile",
+          "ProfessionalReplay",
+          "ProfessionalReport",
+          "ProfessionalResponse",
+          "ProfessionalRetentionPort",
+          "ProfessionalRole",
+          "ProfessionalRoute",
+          "ProfessionalScope",
+          "ProfessionalStudent",
+          "ProfessionalUsageLease",
+          "ProfessionalUsagePort",
+          "StudentReportPort",
+          "StudentScoreInputPort"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/professional_projection.ts",
+        "layer": "application",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "2424580e9f3964a90b3a17a166d4c6aef27036483e6967bcb98104354fec9f3b",
+        "declared_exports": [
+          "ProfessionalProjection"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+        "layer": "application",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+        "declared_exports": [
+          "ProfessionalDelivery",
+          "ProfessionalOutcome",
+          "ProfessionalService",
+          "ProfessionalServicePorts"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/professional_usage.ts",
+        "layer": "application",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "4f211c6fdf0fcb0161de676431eade07845a87d8ccf993efa8ed8ee793fd81f6",
+        "declared_exports": [
+          "ProfessionalSharedUsage",
+          "ProfessionalUsageAdmissionPort"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
         "layer": "application",
         "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
@@ -8647,6 +8789,119 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/professional_authority.ts",
+        "layer": "data_infrastructure",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "71b2c3a0c074523c732f92f121e137041efb7bd586e31644ea9a0d7fcb41d880",
+        "declared_exports": [
+          "ProfessionalAuthorityFunctionBinding",
+          "ProfessionalAuthorityQuery",
+          "SupabaseProfessionalAuthority"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/professional_crypto.ts",
+        "layer": "data_infrastructure",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "287461fa8a1188d24d3c86fb952c708251d8a6667e8b025b37f0450e8f096b08",
+        "declared_exports": [
+          "ProfessionalCursor",
+          "ProfessionalMetadataKeyRing",
+          "ProfessionalOperationCipher",
+          "ProfessionalStudentMetadataCipher"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/professional_http.ts",
+        "layer": "data_infrastructure",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "6c69f122dc2481ecb8d66a7cf3f844a1abec437c0e50dfbdc9a6317c40efb6fe",
+        "declared_exports": [
+          "ProfessionalHttpPorts",
+          "createProfessionalHandler",
+          "professionalMutationGuard"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/professional_postgres.ts",
+        "layer": "data_infrastructure",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "14655911862194fad474937e6cbf59754652cc0fc381ab85238430801c24da11",
+        "declared_exports": [
+          "ProfessionalRetentionAuthority",
+          "SupabaseProfessionalStore"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/professional_runtime.ts",
+        "layer": "data_infrastructure",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "23dc074c9cf32934896e201b14d0116151c297b9a26f45ca8d30ab280d44f660",
+        "declared_exports": [
+          "NativeProfessionalRuntime"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/professional_usage_admission.ts",
+        "layer": "data_infrastructure",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "2f6e50d969c8926a07118e0219242b4f3ddef276912ee8750a8604a736abebc3",
+        "declared_exports": [
+          "SupabaseProfessionalUsageAdmission"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/professional_usage_postgres.ts",
+        "layer": "data_infrastructure",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "7f36e6dbd4faffbb3e1050865e10ee42737929d9752b51b463d25b2dba1ceabc",
+        "declared_exports": [
+          "SupabaseProfessionalUsageBudgetStore"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts",
         "layer": "data_infrastructure",
         "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
@@ -9316,6 +9571,104 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/professional_budget_support.ts",
+        "layer": "verification",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "e1aaf3a0b75b576f60af4544562ddb99682970fa0f0c1d365ab08f90ef92e2c9",
+        "declared_exports": [
+          "budgetSql"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/professional_budget_test.ts",
+        "layer": "verification",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "618e9ea0b6c27c1dea6552c6f8ad2f3fa9fcfef1d7b908516b4fe1e136b676eb",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/professional_http_test.ts",
+        "layer": "verification",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "c2b71a546c470e78afea0b63470b2778468e6bb70bd8b4d0f61a31dc651f7e30",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/professional_runtime_test.ts",
+        "layer": "verification",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "86facfdbbf05ecf5e7633eeb77909a5fa16b4f07f0d511ec1dbbe466c523b266",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/professional_security_test.ts",
+        "layer": "verification",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "1fff33bbadb0ff74939d11c1beaf113c965ab2a14e5c8bbb324c94f0daea19b8",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/professional_support.ts",
+        "layer": "verification",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "356cd4def2fcf60926872ae68191167c681b491a4cab4804ac1db3e6841e0e8f",
+        "declared_exports": [
+          "ACTOR",
+          "EXPIRY",
+          "HASH",
+          "NOW",
+          "ORG",
+          "ORIGIN",
+          "OTHER",
+          "PROFILE",
+          "RELAY",
+          "REPORT",
+          "STUDENT",
+          "assert",
+          "denied",
+          "equal",
+          "fixture",
+          "policyRaw",
+          "scores"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/read_view_catalog_runtime.ts",
         "layer": "data_infrastructure",
         "status": "read_view_source_candidate_native_activation_NOT_RUN",
@@ -9426,6 +9779,19 @@
           "REQ-30"
         ],
         "source_sha256": "7f72a9e6ac9374f8b94a5cde4beb30adda656a1c3d860ffad90176ab276b51f5",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/jungsi-pro-api/index.ts",
+        "layer": "data_infrastructure",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "8b980255403974fb49a7a7d90ee310526b7390ad18a60febc0abd7429af37ff8",
         "declared_exports": []
       },
       {
