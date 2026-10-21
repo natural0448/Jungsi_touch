@@ -19028,6 +19028,14 @@
         "REQ-28"
       ],
       "summary": "기존 개발팀 세션과 공동으로 FE-CONC-01~04 보완: KV 같은 진행 키 연속 갱신을 없애고 claim별 불변 분할/학교/색인만 저장한다. native SQLite 조정자에서 짧은 원자 head/준비 lease와 fence·멱등 체크포인트를 관리해 20동시 재확인은 head1회, 관리자2인 준비의 중복 수신을 억제한다. 외부 I/O Promise·JWT·권한·개인 성적은 공유하지 않는다. 최종 조립 뒤 head 재확인과 live/synthetic 상태 분리, 전파 지연·재시작·오래된 실행·모드 부재 회귀36건 및 기존121분할 전체 로컬 재생을 검수했다. 실제 자원 생성·배포·운영 부하 NOT_RUN. 사용자 별도 승인 FE-P1-RAW-METRICS-20261020에 정확히 결속된 raw-metrics.tsx 1개만 첫 삭제하며 원본 SHA·Git 이력·기존 전달물을 보존한다. 정상 훅/정확 SHA CI에서 Node24 회귀를 생략 없이 Python snapshot suite로 함께 실행한다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-01",
+        "REQ-11"
+      ],
+      "summary": "화면팀 변경(담당자 동시처리 4건 수정 a288669 수신 후속): ① 독립 검토 P2 — 유료 화면 회원 식별 표시·조회 기록의 회원 id 를 쿠키 해석값(getSession) 대신 Supabase Auth 가 확인한 사용자(getUser)로 결속. ② 독립 검토 P2 — x-edutouch-client-ip 는 cf-connecting-ip 가 Cloudflare 주소이고 CF-Worker 가 edutouch.co.kr(Cloudflare 가 워커 하위 요청에 붙이는 영역 표지, 운영 기록 52/52 확인)일 때만 방문자 IP 로 믿는다. ③ next dev 의 플랫폼 대역은 Durable Object 클래스를 띄우지 않아 P1 조정자 호출이 internal error — 명시 합성+development 에서만 메모리 상태 기계를 쓴다(배포·live 는 KV+조정자 필수 그대로)."
     }
   ],
   "overall_analysis_contract": {

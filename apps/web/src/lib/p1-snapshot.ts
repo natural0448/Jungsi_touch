@@ -34,7 +34,10 @@ async function services(mode: Mode): Promise<Services> {
   let bindings: Record<string, unknown> | null = null;
   try { bindings = (await getCloudflareContext({ async: true })).env as Record<string, unknown>; } catch { /* Explicit local synthetic mode is checked below. */ }
   const store = bindings?.JT_SHARED_CACHE as Kv | undefined, ns = bindings?.JT_P1_COORDINATOR as Namespace | undefined;
-  if (store && typeof store.get === "function" && typeof store.put === "function" && ns) {
+  // next dev 의 플랫폼 대역은 Durable Object 이름표만 주고 클래스를 띄우지 않는다(호출하면 internal error).
+  // 명시한 합성+development 에서는 아래 메모리 상태 기계를 쓴다 — 배포(production)·live 는 이 분기를 타지 않는다
+  const localDev = mode === "synthetic" && env().NODE_ENV === "development";
+  if (!localDev && store && typeof store.get === "function" && typeof store.put === "function" && ns) {
     const actorName = mode === "live" ? "public-v2:live" : "public-v2:synthetic";
     const stub = ns.getByName ? ns.getByName(actorName) : ns.idFromName && ns.get ? ns.get(ns.idFromName(actorName)) : null;
     if (stub) return { kv: store, coordinator: p1CoordinatorClient(stub) };
