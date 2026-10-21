@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.99이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.100이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 기존 Supabase 기반 실제 인증·기존22와 신규6 논리 API 계약의 코드·선택 연결·운영 배포를 구분한다. Google Drive와 기존 Supabase를 사용하고 P1 조정 메타데이터 Durable Object 한정 예외만 적용한다. 현재 결합20 후보·기존14 운영판·미연결8을 혼동하지 않는다.
 
@@ -589,7 +589,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=6030c91445ba8c92cd489cfc0b8a724c1d032747a5637128b17470c73433d591 -->
+<!-- jungsi:generated spec_sha256=396613da30dd49a0fc48596649ffe5c0dc1d16c19e07e29f04b013d402070fa7 -->
 
 
 ## 기존 운영 조회의 후속 검수
@@ -882,7 +882,7 @@ Root 독립 live 재실행: NOT_RUN. 형식상 native/deployment PASS는 전체 
 
 IMPLEMENTATION_IN_PROGRESS_OWNER_REPLY_NOT_A_PREREQUISITE. 기존 개인용 배포와 독립된 확장 계약이다. 기관 DB/API 활성화·운영은 NOT_RUN이다.
 
-DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 검수와 실제 운영 인수를 구분한다.
+DB 적용: NOT_RUN / 별도 소스 등록: CODE_REGISTERED_RUNTIME_NOT_ACTIVATED. 합성 검수와 실제 운영 인수를 구분한다.
 
 요금은 교사 1명이 분석하는 학생 1명당 33,000원이며 계약 학생 수까지 원자적으로 추가한다. 학생별 단계 입력1+고객센터 정정1을 적용하고 기관 관리자에게 정정권을 주지 않는다.
 
@@ -907,4 +907,4 @@ DB 적용: NOT_RUN / 별도 소스 등록: NOT_REGISTERED_CONTRACT_ONLY. 합성 
 | 에듀터치 본체 Owner | 기관/계약/구성원 원본·초대/담당 관리자 화면·기존 계정·수동 계약 등록·기관 알림 전달 |
 | 기획팀 | 공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분 |
 
-개발팀은 기존 서비스 브랜치에서 기관 DB/실저장소·21개 API를 구현하고 기획팀은 별도 소스 등록/합성 검수와 문서를 함께 인수한다. Owner 회신은 이 구현의 선행 조건이 아니다. Owner의 시스템/화면·기관/계약 원본·최종 운영 연결과 사용자 DB/환산 소유권은 유지한다. 실제 기관 등록·정책 수치·공식 일정·엔진 연결과 운영 검수 전에는 기관을 자동 활성화하지 않는다. 개인용 Owner v2 등록은 독립 진행한다.
+21개 API와 기관 저장소 소스·합성 검수를 별도로 등록한다. 실제 기관 원본 함수·정책 수치·공식 일정·BFF/JWT/운영 연결은 NOT_RUN이며 자동 활성화하지 않는다. SQL007의 실제 적용·재조회는 Root 단일 writer가 정확 Git/CI 후보로 수행한다. 개인용28/656과 Owner v2는 독립 유지한다.
