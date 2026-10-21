@@ -4,7 +4,10 @@ import argparse,datetime,hashlib,json,os,subprocess,sys
 from pathlib import Path
 from edge_source_scope import classify_sources
 from check_project_consistency import ROOT,GitSnapshot,validate_content,validate_changed_paths,snapshot_changed_paths,validate_snapshot_baseline,SPEC_PATH
-HELPER = """import importlib.util,json,pathlib,sys,unittest
+PYTHON_SUITE_TIMEOUT_SECONDS = 1800
+RETAINED_RUNNER_TIMEOUT_SECONDS = 2200
+
+HELPER = """import importlib.util,json,pathlib,re,sys,time,unittest
 root=pathlib.Path.cwd()
 sys.path[:0]=[str(root/'src'),str(root/'scripts'),str(root/'tests')]
 suite=unittest.TestSuite()
@@ -13,7 +16,22 @@ for path in json.load(sys.stdin):
     spec=importlib.util.spec_from_file_location(name,root/path)
     module=importlib.util.module_from_spec(spec);sys.modules[name]=module;spec.loader.exec_module(module)
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(module))
-result=unittest.TextTestRunner(verbosity=1).run(suite)
+class ProgressResult(unittest.TextTestResult):
+    def startTest(self,test):
+        super().startTest(test)
+        self.started=time.monotonic()
+        name=test.__class__.__module__+'.'+test.__class__.__qualname__+'.'+getattr(test,'_testMethodName','unknown')
+        self.progress_id=name if re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*(?:[.][A-Za-z_][A-Za-z_0-9]*)+',name) else 'unregistered_test_id'
+        if self.testsRun%100==1:
+            self.stream.write('JUNGSI_TEST_PROGRESS='+json.dumps(dict(test_number=self.testsRun,test_id=self.progress_id,phase='start'))+chr(10))
+            self.stream.flush()
+    def stopTest(self,test):
+        elapsed=time.monotonic()-self.started
+        if elapsed>=5 or self.testsRun%100==0:
+            self.stream.write('JUNGSI_TEST_PROGRESS='+json.dumps(dict(test_number=self.testsRun,test_id=self.progress_id,phase='complete',elapsed_seconds=round(elapsed,3)))+chr(10))
+            self.stream.flush()
+        super().stopTest(test)
+result=unittest.TextTestRunner(verbosity=1,resultclass=ProgressResult).run(suite)
 print('JUNGSI_TEST_RESULT='+json.dumps(dict(tests_run=result.testsRun,failures=len(result.failures),errors=len(result.errors),skipped=len(result.skipped),successful=result.wasSuccessful())))
 sys.exit(0 if result.wasSuccessful() else 1)
 """
@@ -45,7 +63,7 @@ def run_retained(workspace,manifest,destination,deno=None):
     if not tests:raise ValueError("No selected Python tests")
     env={**os.environ,"PYTHONDONTWRITEBYTECODE":"1"}
     try:
-        result=subprocess.run([sys.executable,"-B","-X","utf8","-c",HELPER],cwd=workspace,input=json.dumps(tests).encode(),capture_output=True,env=env,timeout=900)
+        result=subprocess.run([sys.executable,"-B","-X","utf8","-c",HELPER],cwd=workspace,input=json.dumps(tests).encode(),capture_output=True,env=env,timeout=PYTHON_SUITE_TIMEOUT_SECONDS)
     except subprocess.TimeoutExpired as error:
         create(destination/"python.stdout",error.stdout or b"");create(destination/"python.stderr",error.stderr or b"")
         summary=dict(format="jungsi.combined-snapshot-tests/v1",successful=False,python=dict(successful=False,timeout=True),edge=dict(status="NOT_RUN_PYTHON_TIMEOUT"),snapshot=manifest["snapshot"],source_manifest_sha256=hashlib.sha256(encode(manifest)).hexdigest())
@@ -101,7 +119,7 @@ def main():
     create(destination/"source_manifest.json",encode(manifest))
     argv=[sys.executable,"-B","-X","utf8",str(workspace/"scripts/run_committed_tests.py"),"--snapshot-root",str(workspace),"--source-manifest",str(destination/"source_manifest.json"),"--output-root",str(destination/"results")]
     if args.deno:argv+=["--deno",args.deno]
-    selected=subprocess.run(argv,cwd=workspace,capture_output=True,env={**os.environ,"PYTHONDONTWRITEBYTECODE":"1"},timeout=1250)
+    selected=subprocess.run(argv,cwd=workspace,capture_output=True,env={**os.environ,"PYTHONDONTWRITEBYTECODE":"1"},timeout=RETAINED_RUNNER_TIMEOUT_SECONDS)
     create(destination/"runner.stdout",selected.stdout);create(destination/"runner.stderr",selected.stderr)
     result_path=destination/"results/verification.json"
     summary=json.loads(result_path.read_bytes()) if result_path.is_file() else dict(successful=False,missing_combined_receipt=True)

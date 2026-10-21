@@ -6151,7 +6151,8 @@
         "scripts/bootstrap_edge_runtime.py",
         "tests/test_edge_runtime_supply.py",
         "edge-runtime.lock.json",
-        "tests/test_owner_system_professional_contract.py"
+        "tests/test_owner_system_professional_contract.py",
+        "tests/test_committed_runner_progress.py"
       ],
       "child_templates": [
         {
@@ -7070,7 +7071,8 @@
         "정상 pre-commit/pre-push 및 정확 commit CI의 스냅샷 검산",
         "동일 캡처 index와 부모별 diff 합집합을 사용하고 이미HEAD의 승인문서·최종snapshot 내용/정본 결속을 함께 검사한다.",
         "부모/zero-parent/diff조회 실패를 거절한다. phase1정상645×3·phase2정상678검수의 코드 인수와 실제JWT/운영/모형·화면 인수는 서로 다른 범위다.",
-        "python -B scripts/audit_documentation_sync.py --staged --base <verified-commit>; 필수 동일 스냅샷/보안/브랜치/정상 훅/CI는 유지"
+        "python -B scripts/audit_documentation_sync.py --staged --base <verified-commit>; 필수 동일 스냅샷/보안/브랜치/정상 훅/CI는 유지",
+        "정확 스냅샷의 전체 Python1193+ 시험과 모든 Edge/Node/oracle를 생략하지 않는다. Python 전체 검증1800초·보존 runner2200초·CI job40분의 유한 검증 시간만 적용하며 시험 ID/진행 시간만 기록한다. 실제 Supabase 요청·예산·concurrency·과금/플랜·합격/skip 기준은 변경하지 않는다."
       ]
     },
     "documentation_sync": {
@@ -8613,7 +8615,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "555d37e073182834acd230a98e4bac71b41b81e78d0f3a39c6f48ee8b2b2d4f1",
+            "source_sha256": "f6b574db5815e5d630dd82b3d2611a986ee50484feffcf04b44a2e1de534d028",
             "symbols": [
               {
                 "kind": "function",
@@ -19198,6 +19200,16 @@
         "REQ-26"
       ],
       "summary": "전문가용 시험 지원 모듈도 전체 소스 결속에 포함해 helper 변경이 기존 영수증으로 누락되지 않게 한다. 실제 실행 suite는 _test.ts에 한정하고 지원 파일의 API handler 결속은 허용하지 않는다. 공통99 계약을 완성하는 검사 보완이며 개인용/운영 권한은 불변이다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "전문가용 소스 성장으로 전체 Python 검증이900초에 도달한 실패를 보존한다. 전체 suite/스냅샷/오류·skip 거절과 기존 Edge 실행을 유지하고 검증 전용 유한 시간1800초/runner2200초/CI40분 및 값 없는 시험ID·시간 진행 기록을 적용한다. 업무 요청·물리 예산/플랜/보안 권한은 불변이며 이 진단을 운영 완료로 기록하지 않는다."
     }
   ],
   "overall_analysis_contract": {
