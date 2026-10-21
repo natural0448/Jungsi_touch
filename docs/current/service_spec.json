@@ -19036,6 +19036,13 @@
         "REQ-11"
       ],
       "summary": "화면팀 변경(담당자 동시처리 4건 수정 a288669 수신 후속): ① 독립 검토 P2 — 유료 화면 회원 식별 표시·조회 기록의 회원 id 를 쿠키 해석값(getSession) 대신 Supabase Auth 가 확인한 사용자(getUser)로 결속. ② 독립 검토 P2 — x-edutouch-client-ip 는 cf-connecting-ip 가 Cloudflare 주소이고 CF-Worker 가 edutouch.co.kr(Cloudflare 가 워커 하위 요청에 붙이는 영역 표지, 운영 기록 52/52 확인)일 때만 방문자 IP 로 믿는다. ③ next dev 의 플랫폼 대역은 Durable Object 클래스를 띄우지 않아 P1 조정자 호출이 internal error — 명시 합성+development 에서만 메모리 상태 기계를 쓴다(배포·live 는 KV+조정자 필수 그대로)."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-02"
+      ],
+      "summary": "화면팀 변경(최종 관리자 확정 계획서 '정시터치 전문가용' v3 · 에듀터치 재회신 함수 형식 확정): 오픈 전 관문이 /pro 아래만 에듀터치 jeongsi_pro_access()(로그인 본인 토큰, 활성 계약 구성원만 줄이 옴)에 줄이 있는 회원에게도 열린다(개인용 경로는 그대로 관리자·지정 이메일만). 전문가용 홈 /pro 뼈대: 기관 선택(여러 기관이면, 주소 번호는 내 목록에 있을 때만), 기관·역할·대상 학년도·계약 기간·학생 수·파기일(D-day, 2주 안이면 PDF 저장 안내) 띠, 담당 학생 자리(학생 API 연결 전 '준비 중'). 합성 모드는 가상 기관 하나."
     }
   ],
   "overall_analysis_contract": {
