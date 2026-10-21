@@ -1050,6 +1050,23 @@
         "passed_case_count": 7,
         "remaining_synthetic_rows": 0,
         "actual_auth_HTTP_or_operating_acceptance": "NOT_RUN"
+      },
+      "frontend_bff_csrf_transport": {
+        "status": "SOURCE_IMPLEMENTED_OFFLINE_TRANSPORT_VERIFIED_RUNTIME_NOT_RUN",
+        "request": "REQ-31",
+        "paths": [
+          "apps/web/src/lib/api/pro-source.ts",
+          "apps/web/src/lib/professional-bff-origin.ts"
+        ],
+        "server_setting": "JUNGSI_PRO_BFF_ORIGIN",
+        "setting_rule": "기존 approved_bff_origin과 같은 정확 HTTPS origin을 서버 설정으로 등록한다. 경로·쿼리·사용자정보·trailing slash나 미설정을 허용하지 않는다.",
+        "proof_rule": "Next 서버 액션의 원래 Origin이 설정과 일치하고 Sec-Fetch-Site가 미지정/same-origin/same-site일 때만 Origin과 X-Jungsi-CSRF-Verified=1을 생성한다. 브라우저가 보낸 verified 값은 신뢰하지 않는다.",
+        "fail_closed": "다른/누락 Origin은 fetch 전403 professional_csrf_failed, 설정 누락/잘못된 origin은 fetch 전503 pro_bff_origin_not_configured. 기존 JWT·relay·멱등키와 API mutation guard는 유지한다.",
+        "offline_verification": "순수 판정10건+실제 pro-source 모듈의 오프라인 전달/거절3건. 신규 Python wrapper로 정확 스냅샷 Node24 필수 실행. 실제 기관/JWT/브라우저/배포 NOT_RUN.",
+        "tests": [
+          "apps/web/tests/professional-bff-origin.test.mjs",
+          "tests/test_professional_bff_node.py"
+        ]
       }
     },
     "wire_details": {
