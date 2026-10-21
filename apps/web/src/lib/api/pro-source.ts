@@ -151,7 +151,7 @@ const SYN_MEMBERS: ProMemberPageDto["items"] = [
   { member_id: "3", subject_id: "syn-teacher-2", role: "teacher", status: "active", version: 1 },
   { member_id: "4", subject_id: "syn-viewer-1", role: "viewer", status: "active", version: 1 },
 ];
-const SYN_ORG = { org_id: "1", org_name: "합성 시범고등학교", contract_id: "syn-contract-1", academic_year: 2027, role: "teacher" as const, contract_status: "active" as const, contract_expires_at: "2027-01-10T14:59:59Z", contract_version: 1, contracted_student_count: 30 };
+const SYN_ORG = { org_id: "1", org_name: "합성 시범고등학교", contract_id: "syn-contract-1", academic_year: 2027, role: "teacher" as const, contract_status: "active" as const, contract_expires_at: "2027-01-07T14:59:59Z", contract_version: 1, contracted_student_count: 30 };
 const synSource: ProSource = {
   async session() {
     const role = (await readSyntheticState()) === "operator" ? ("org_admin" as const) : ("teacher" as const);

@@ -20005,6 +20005,13 @@
         "REQ-02"
       ],
       "summary": "화면팀 변경(전문가용 4·5묶음, 합성): ① /pro/management(계약 pro.members, 기관 관리자만): 구성원 목록(이메일·이름 없이 구성원 번호·역할), 학생 담당 변경(교사·열람 전용 체크 → pro.student.assign, expected_version·멱등키), 학생 보관(확인란 필수 → pro.student.archive). 둘 다 서버가 aal2 를 다시 확인하고 management_mfa_required 를 OTP 안내로 보인다. 홈에 '기관 관리' 링크. ② /management/score-corrections(에듀터치 관리자만 화면, 서버가 fresh active·aal2·접수 번호·대상·기대 판·멱등키 확인): 개인 회원 정정(score-input.correction.grant, reason_code=score_correction)과 전문가용 학생 정정(pro.correction.grant)을 한 화면에 둔다. 409 는 자동 재시도하지 않는다. 계약 문서의 pro.support 경로(/management/pro-score-input-corrections) 대신 개인·전문가용 공통 화면으로 합쳤다 — 기획 경로 갱신 제안. 기관 관리자 경로에는 정정 기능이 없다. 합성 모드에서는 정정 승인이 연결 대기로 보인다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31"
+      ],
+      "summary": "화면팀 변경(최종 관리자 확정): 2027학년도 전문가용 학생 기록 파기일 2027-01-08(정시 원서접수 2027.1.4~1.7 다음날, 1월 7일까지 열람). 합성 모드의 가상 계약 기간·파기일(2027-01-07 종료·2027-01-08 파기)을 같은 날짜로 맞췄다. 에듀터치에 계약 purge_on 값과 알림일(2026-12-25·2027-01-05) 전달."
     }
   ],
   "overall_analysis_contract": {
