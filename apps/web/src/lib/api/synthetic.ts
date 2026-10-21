@@ -146,6 +146,11 @@ export const syntheticSource: JungsiSource = {
     };
   },
 
+  async grantScoreCorrection() {
+    // 합성 모드에는 고객센터 정정 대상이 없다 — 연결 대기로 보인다
+    return { ok: false, code: "correction_not_available_in_synthetic", status: 503 };
+  },
+
   async readReportSample() {
     await requireMember();
     return {

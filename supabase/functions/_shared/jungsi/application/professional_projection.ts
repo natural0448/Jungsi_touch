@@ -50,6 +50,7 @@ export class ProfessionalProjection {
         org_name: text,
         contract_id: id,
         academic_year: integer,
+        contract_version: integer,
         role: scalar("string", false, { enum: ["teacher", "org_admin", "viewer"] }),
         contract_status: scalar("string", false, { enum: ["active"] }),
         contract_expires_at: text,

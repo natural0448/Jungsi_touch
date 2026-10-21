@@ -8,7 +8,7 @@ import { ignoreCookieWrites, noRefreshFetch } from "@/lib/supabase/read-only";
   사용자 확인·회원 등급은 여기서 판단하지 않는다(우리 서비스 API 가 판단). 합성 모드에서는 토큰을 쓰지 않는다.
 
   예외: JEONGSI_ACCESS_GATE=preview(오픈 전 배포판)이면 화면 전체를 에듀터치 관리자와
-  JEONGSI_PREVIEW_EMAILS 명단에만 연다. 에듀터치 본체 프록시가 /jeongsi 를 넘길 때 같은 도메인의
+  JEONGSI_PREVIEW_EMAILS 명단에만 연다. 전문가용(/pro 아래)은 유효 계약 기관의 구성원에게도 연다(jeongsi_pro_access). 에듀터치 본체 프록시가 /jeongsi 를 넘길 때 같은 도메인의
   로그인 쿠키가 따라오므로, 워커 주소로 직접 온 요청은 로그인이 없어 막힌다(2026-10-13 사용자 결정).
   설정이 빠지면 막는 쪽으로 동작한다. 오픈 때 이 관문을 지우고 회원·이용권 확인은 서비스 API 에 맡긴다.
 */
@@ -42,7 +42,20 @@ async function previewAllowed(request: NextRequest, url?: string, key?: string) 
     .filter(Boolean);
   if (user.email && listed.includes(user.email.toLowerCase())) return true;
   const { data: profile } = await supabase.from("profiles").select("role, status").eq("id", user.id).maybeSingle();
-  return profile?.role === "admin" && profile?.status === "active";
+  if (profile?.role === "admin" && profile?.status === "active") return true;
+  // 전문가용(/pro)만: 유효 계약 기관의 구성원이면 연다(2026-10-21 에듀터치 재회신 — 본체 proxy 와 같은 함수 하나로 판정).
+  // 줄이 하나라도 있으면 활성 구성원이다. 실패·빈 배열은 막는다. 개인용 경로는 그대로 닫힘
+  if (isProPath(request)) {
+    const { data, error } = await supabase.rpc("jeongsi_pro_access");
+    return !error && Array.isArray(data) && data.length > 0;
+  }
+  return false;
+}
+
+/** basePath(/jeongsi) 뒤의 /pro 와 그 아래. nextUrl.pathname 은 basePath 를 뺀 값이지만 붙은 경우도 같은 뜻으로 본다 */
+function isProPath(request: NextRequest) {
+  const p = request.nextUrl.pathname.replace(/^\/jeongsi(?=\/|$)/, "") || "/";
+  return p === "/pro" || p.startsWith("/pro/");
 }
 
 export async function proxy(request: NextRequest) {

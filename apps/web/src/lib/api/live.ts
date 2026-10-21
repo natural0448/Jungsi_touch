@@ -43,7 +43,7 @@ const STATIC_SEGMENTS = new Set([
   "functions", "v1", "jungsi-api", "api", "me", "admission-history", "offerings", "search", "recruitment", "forecast",
   "forecast-drafts", "forecast-capabilities", "adjustments", "approvals", "publications", "validations",
   "reports", "candidates", "live-statistics", "print", "shortlist", "university-results", "score-profiles", "overall-reports",
-  "snapshot", "snapshots", "head", "score-input-status", "report-sample",
+  "snapshot", "snapshots", "head", "score-input-status", "report-sample", "management", "score-input-corrections",
 ]);
 /** 경로 → 템플릿. 쿼리·개별 식별자를 남기지 않는다 */
 export function pathTemplate(path: string): string {
@@ -262,6 +262,7 @@ export const liveSource: JungsiSource = {
   listOwnReports: (caller, q) => call<OwnReportListDto>(caller, `/me/reports${qs({ ...q })}`),
   readScoreInputStatus: (caller, examId, stage) => call<ScoreInputStatusDto>(caller, `/me/score-input-status${qs({ exam_id: examId, stage })}`),
   readReportSample: (caller) => call<SampleReportDto>(caller, "/report-sample"),
+  grantScoreCorrection: (caller, body, key) => write<ScoreInputStatusDto>(caller, "POST", "/management/score-input-corrections", { ...body, reason_code: "score_correction" }, key),
   exportReport: (caller, reportId) => orNull(call<SnapshotDto>(caller, `/reports/${enc(reportId)}/print`)),
 
   searchOfferings: (caller, q) => call<CatalogSearchDto<OfferingDto>>(caller, `/offerings/search${qs({ ...q })}`),

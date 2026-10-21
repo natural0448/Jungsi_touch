@@ -34,8 +34,27 @@ const filledOf = (get: (k: (typeof REQUIRED)[number]) => unknown) =>
  * 서버 엔진이 시험 자료로 계산하므로 칸만 두고 비워 둔다(화면이 계산하지 않는다).
  * 새로 저장할 때마다 새 성적 프로필이 생기고, 이전 성적은 고치지 않는다.
  */
-export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: string; idem: string; defaults: ScoreDefaults; update?: { reportId: string; version: number } }) {
-  const [state, action, pending] = useActionState<ScoreFormState, FormData>(submitScores, null);
+export function ScoreForm({
+  examLabel,
+  idem,
+  defaults,
+  update,
+  submit,
+  hidden,
+  subject,
+}: {
+  examLabel: string;
+  idem: string;
+  defaults: ScoreDefaults;
+  update?: { reportId: string; version: number };
+  /** 전문가용: 학생 성적 저장 서버 동작(없으면 개인용 submitScores) */
+  submit?: (prev: ScoreFormState, fd: FormData) => Promise<ScoreFormState>;
+  /** 전문가용: 기관·학생·입력 판 등 숨은 칸 */
+  hidden?: Record<string, string>;
+  /** 전문가용: 확인 창·버튼에 크게 보일 학생 이름(잘못 고른 학생에 저장하지 않게) */
+  subject?: string;
+}) {
+  const [state, action, pending] = useActionState<ScoreFormState, FormData>(submit ?? submitScores, null);
   // 실패하면 넣었던 값으로 양식을 새로 그린다(React 는 서버 액션 뒤 양식을 비운다)
   const d = state?.values ?? defaults;
   const missing = Boolean(state?.error) && !state?.field;
@@ -93,6 +112,7 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
   return (
     <form ref={formRef} key={state?.attempt ?? 0} action={action} className="sf" noValidate onInput={onInput} onChange={onInput}>
       <input type="hidden" name="idem" value={idem} />
+      {hidden && Object.entries(hidden).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
       {update && (
         <>
           <input type="hidden" name="report_id" value={update.reportId} />
@@ -241,7 +261,7 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
         <p className="sf-confirm-note">저장하기 전에 넣은 점수를 한 번 더 보여 드립니다.</p>
         <div className="sf-acts">
           <button className="btn p" type="button" disabled={pending} onClick={openReview}>
-            {pending ? "저장하는 중" : update ? "새 성적으로 리포트 갱신" : "성적 저장하고 전체 위치 보기"}
+            {pending ? "저장하는 중" : subject ? `${subject} 학생 성적 저장하고 전체 위치 보기` : update ? "새 성적으로 리포트 갱신" : "성적 저장하고 전체 위치 보기"}
           </button>
         </div>
       </div>
@@ -250,7 +270,8 @@ export function ScoreForm({ examLabel, idem, defaults, update }: { examLabel: st
       <dialog ref={dialogRef} className="sf-dialog" aria-labelledby="sf-dialog-h" onClose={() => setReview(null)}>
         {review && (
           <div className="sf-dialog-in">
-            <h3 id="sf-dialog-h">{review.problem ? "입력을 확인해 주세요" : "이 점수로 저장할까요?"}</h3>
+            <h3 id="sf-dialog-h">{review.problem ? "입력을 확인해 주세요" : subject ? "이 학생의 성적으로 저장할까요?" : "이 점수로 저장할까요?"}</h3>
+            {subject && !review.problem && <p className="sf-dialog-subject">{subject}</p>}
             {review.problem ? (
               <p className="sf-dialog-problem">{review.problem}</p>
             ) : (

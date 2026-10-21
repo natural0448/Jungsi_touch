@@ -15043,7 +15043,7 @@
                 "REQ-26",
                 "REQ-31"
               ],
-              "source_sha256": "27e0dbac33ce78f908be366bb68fbbeb423e16a702873b32eac5c14111fed779",
+              "source_sha256": "70975a18317dfd7234c245fe88505441820cef1eebbc3cd764a9ae06e683f299",
               "declared_exports": [
                 "PROFESSIONAL_CONTRACT",
                 "ProfessionalContract",
@@ -15120,7 +15120,7 @@
                 "REQ-26",
                 "REQ-31"
               ],
-              "source_sha256": "2424580e9f3964a90b3a17a166d4c6aef27036483e6967bcb98104354fec9f3b",
+              "source_sha256": "9ed364f0aec2a8f24ffa122a2ae774a60bb36663af8d1019de4edd448830056f",
               "declared_exports": [
                 "ProfessionalProjection"
               ]
@@ -15135,7 +15135,7 @@
                 "REQ-26",
                 "REQ-31"
               ],
-              "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+              "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
               "declared_exports": [
                 "ProfessionalDelivery",
                 "ProfessionalOutcome",
@@ -19962,6 +19962,49 @@
         "REQ-26"
       ],
       "summary": "전문가용21 API/저장소 소스를 통합하고 정확 SQL007의15개 빈 private 테이블과 실제 앱 RLS·저장소7항목의 합성 왕복/롤백을 별도 native 영수증으로 확인했다. 승인 공통 기획에서 등록한 Owner의 pure professional_http/runtime 조립 공동 경로와 원본 권한·암호/실저장소·SQL·환산 본체 보호를 유지한다. 기존 개인용28/656과 개인용 Owner v2를 유지하며 기관 원본·Secrets·실JWT/OTP/BFF·배포 인수는 NOT_RUN이다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-02"
+      ],
+      "summary": "화면팀 변경(최종 관리자 확정 계획서 '정시터치 전문가용' v3 · 에듀터치 재회신 함수 형식 확정): 오픈 전 관문이 /pro 아래만 에듀터치 jeongsi_pro_access()(로그인 본인 토큰, 활성 계약 구성원만 줄이 옴)에 줄이 있는 회원에게도 열린다(개인용 경로는 그대로 관리자·지정 이메일만). 전문가용 홈 /pro 뼈대: 기관 선택(여러 기관이면, 주소 번호는 내 목록에 있을 때만), 기관·역할·대상 학년도·계약 기간·학생 수·파기일(D-day, 2주 안이면 PDF 저장 안내) 띠, 담당 학생 자리(학생 API 연결 전 '준비 중'). 합성 모드는 가상 기관 하나."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31"
+      ],
+      "summary": "화면팀 변경(전문가용 계약 1.9.99 합성 개발 1묶음, Owner 위임 인계): BFF 창구 lib/api/pro-source.ts(live=JUNGSI_PRO_API_URL 의 /api/v1/pro/*, 기관·역할을 본문으로 보내지 않음, 404=없음·401/403/429/503 공통 처리, 쓰기는 Idempotency-Key·expected_version / expected_contract_version) 와 합성 메모리 응답. /pro 홈: 기관 띠에 서비스의 사용/남은 학생 수, 담당 학생(기관 관리자는 기관 학생) 목록·이름·반 검색, 학생 추가(좌석 1명 사용 안내, 남은 수 0이면 막음, 열람 전용은 숨김). /pro/students/{id}: 지금 보는 학생 띠(고정), 학생 정보 수정, 학생×시험 입력 상태(최초 1회·고객센터 정정 승인 남은 수). 다른 기관·담당 아닌 학생은 같은 '찾을 수 없음'. 실명 허용, 연락처·주민번호 칸 없음. 성적 입력·분석·리포트·인쇄·관리자 담당 변경은 다음 묶음. 계약에 없는 가정: pro_session 기관 항목의 contract_version·org_name 필드(학생 추가의 expected_contract_version 용) — 개발팀 확인 요청."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31"
+      ],
+      "summary": "화면 담당 Owner 변경(서비스 위임 범위 — application 서비스·DTO): 전문가용 pro.session 의 organization_item 에 contract_version(권한 원본 계약 판, a.contract.version)을 추가했다. pro.student.create 가 expected_contract_version 을 요구하지만 화면이 그 값을 받을 경로가 없었다. 보호 파일(professional_authority.ts)은 이미 version 을 읽으므로 바꾸지 않았다. 화면 BFF(lib/pro-dto.ts·pro-source.ts)를 실제 서버 형식에 맞췄다: 응답 status ready/pending, class_number 문자열, 기관 항목 contract_id·academic_year·contract_version, 세션 최상위 org_id/role/contract_status. contract_version 이 없으면 학생 추가를 열지 않는다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31"
+      ],
+      "summary": "화면팀 변경(전문가용 2묶음, 합성): 학생 화면에서 담당 교사가 성적을 입력한다(개인용 성적 입력 양식 재사용, 확인 창에 학생 이름을 크게, 버튼에 학생 이름). pro.score.create(exam_id·pack_version·stage=mock·scores·confirmed·expected_entry_version, 멱등키) → pro.overall.analyze(profile_id·expected_profile_version) 순서로 저장·분석하고, 성적만 저장되고 분석이 실패하면 다시 저장하지 말라고 안내한다. 정상 거절 8코드는 학생 입력 1회 사용 문구. 최근 리포트를 개인용 전체 위치 화면(OverallCard·SubjectsSheet·PositionChart)으로 보이고, pro.report.list 판 목록에서 이전 판을 연다. 상담 tip 자리는 counseling_basis 연결 전 안내. 기관 관리자·열람 전용은 입력하지 않는다. pro.score.status 는 계약대로 stage 를 필수로 보낸다."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31"
+      ],
+      "summary": "화면팀 변경(전문가용 3묶음, 합성): 학생 화면에 유리한 대학 찾기(pro.candidates, profile_id·expected_profile_version=profile_id, 결과는 새 리포트 판), 대학별 묶음·와일드카드 표(분류·환산점수·환산 유불리는 서버 값 그대로), 줄마다 담기(pro.bookmark.add, 줄별 멱등키), 담은 학교 목록, 상담 리포트 인쇄·PDF(/pro/students/{id}/print: 인쇄본 만들기 서버 동작 → pro.report.export(revision_id) 고정 판, 머리에 학생 이름·판·인쇄 시각·기관, 화면 전체에 기관·교사 코드·인쇄 시각 워터마크). 담기 후 같은 주소로 되돌려 바로 갱신. 교사만 찾기·담기, 기관 관리자·열람 전용은 보기·인쇄."
+    },
+    {
+      "date": "2026-10-21",
+      "requirements": [
+        "REQ-31",
+        "REQ-02"
+      ],
+      "summary": "화면팀 변경(전문가용 4·5묶음, 합성): ① /pro/management(계약 pro.members, 기관 관리자만): 구성원 목록(이메일·이름 없이 구성원 번호·역할), 학생 담당 변경(교사·열람 전용 체크 → pro.student.assign, expected_version·멱등키), 학생 보관(확인란 필수 → pro.student.archive). 둘 다 서버가 aal2 를 다시 확인하고 management_mfa_required 를 OTP 안내로 보인다. 홈에 '기관 관리' 링크. ② /management/score-corrections(에듀터치 관리자만 화면, 서버가 fresh active·aal2·접수 번호·대상·기대 판·멱등키 확인): 개인 회원 정정(score-input.correction.grant, reason_code=score_correction)과 전문가용 학생 정정(pro.correction.grant)을 한 화면에 둔다. 409 는 자동 재시도하지 않는다. 계약 문서의 pro.support 경로(/management/pro-score-input-corrections) 대신 개인·전문가용 공통 화면으로 합쳤다 — 기획 경로 갱신 제안. 기관 관리자 경로에는 정정 기능이 없다. 합성 모드에서는 정정 승인이 연결 대기로 보인다."
     }
   ],
   "overall_analysis_contract": {
@@ -133447,7 +133490,7 @@
             }
           ],
           "imports": [],
-          "source_sha256": "27e0dbac33ce78f908be366bb68fbbeb423e16a702873b32eac5c14111fed779"
+          "source_sha256": "70975a18317dfd7234c245fe88505441820cef1eebbc3cd764a9ae06e683f299"
         },
         "dependencies": []
       },
@@ -139378,7 +139421,7 @@
               "src": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
             }
           ],
-          "source_sha256": "2424580e9f3964a90b3a17a166d4c6aef27036483e6967bcb98104354fec9f3b"
+          "source_sha256": "9ed364f0aec2a8f24ffa122a2ae774a60bb36663af8d1019de4edd448830056f"
         },
         "dependencies": [
           {
@@ -141333,7 +141376,7 @@
               "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
             }
           ],
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a"
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66"
         },
         "dependencies": [
           {
@@ -152049,11 +152092,11 @@
       "tests/edge/test_read_view_runtime.ts": "3eba5d7e5ef64c7106b6b547d6eaa9557c5476692b2f88bfb215f3a4308483c4",
       "tests/edge/test_combined_operating_admin.ts": "2f95ec71aea7378a804ecbdcb1168cf672cf7cb14b5b936fd4ba562ce19605c5",
       "supabase/functions/_shared/jungsi/application/professional_analysis.ts": "7fe7d976fc42ad8b7cda24d8d6480de635e190071976735c40261f586c4068f6",
-      "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts": "27e0dbac33ce78f908be366bb68fbbeb423e16a702873b32eac5c14111fed779",
+      "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts": "70975a18317dfd7234c245fe88505441820cef1eebbc3cd764a9ae06e683f299",
       "supabase/functions/_shared/jungsi/application/professional_policy.ts": "6171a83c31dafe240b0d3595cd19b6cddf65f7041a6d5134d0aa9fcdc34ff8af",
       "supabase/functions/_shared/jungsi/application/professional_ports.ts": "9d15b9297bae2f0a9658f607207609d9d71b22ccd4ed76c7267f46ad880765e1",
-      "supabase/functions/_shared/jungsi/application/professional_projection.ts": "2424580e9f3964a90b3a17a166d4c6aef27036483e6967bcb98104354fec9f3b",
-      "supabase/functions/_shared/jungsi/application/professional_service.ts": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+      "supabase/functions/_shared/jungsi/application/professional_projection.ts": "9ed364f0aec2a8f24ffa122a2ae774a60bb36663af8d1019de4edd448830056f",
+      "supabase/functions/_shared/jungsi/application/professional_service.ts": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
       "supabase/functions/_shared/jungsi/application/professional_usage.ts": "4f211c6fdf0fcb0161de676431eade07845a87d8ccf993efa8ed8ee793fd81f6",
       "supabase/functions/_shared/jungsi/infrastructure/professional_authority.ts": "71b2c3a0c074523c732f92f121e137041efb7bd586e31644ea9a0d7fcb41d880",
       "supabase/functions/_shared/jungsi/infrastructure/professional_crypto.ts": "287461fa8a1188d24d3c86fb952c708251d8a6667e8b025b37f0450e8f096b08",
@@ -154578,6 +154621,7 @@
         "org_name",
         "contract_id",
         "academic_year",
+        "contract_version",
         "role",
         "contract_status",
         "contract_expires_at",
@@ -154855,107 +154899,107 @@
       "operation_bindings": {
         "pro.session": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.student.list": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.student.create": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.student.read": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.student.update": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.student.archive": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.student.assign": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.member.list": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.score.status": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.score.create": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.overall.analyze": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.report.list": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.report.read": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.university.analyze": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.candidates": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.bookmark.list": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.bookmark.add": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.report.export": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.correction.grant": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.retention.preview": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         },
         "pro.retention.notice-targets": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a",
+          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
           "symbol": "ProfessionalService"
         }
       },
@@ -154966,7 +155010,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts",
-          "sha256": "27e0dbac33ce78f908be366bb68fbbeb423e16a702873b32eac5c14111fed779"
+          "sha256": "70975a18317dfd7234c245fe88505441820cef1eebbc3cd764a9ae06e683f299"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_policy.ts",
@@ -154978,11 +155022,11 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_projection.ts",
-          "sha256": "2424580e9f3964a90b3a17a166d4c6aef27036483e6967bcb98104354fec9f3b"
+          "sha256": "9ed364f0aec2a8f24ffa122a2ae774a60bb36663af8d1019de4edd448830056f"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "sha256": "0e54c4c52cd53871e21c05c38865855ed39d2065846d4041237a014f93fd757a"
+          "sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_usage.ts",
