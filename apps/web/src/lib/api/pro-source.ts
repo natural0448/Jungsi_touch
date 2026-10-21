@@ -1,6 +1,7 @@
 import "server-only";
 import type { ProfileDto, ReportDto, ScoresInput } from "@/lib/dto";
-import type { ProEnvelope, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
+import type { ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
+import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
 import { computeOverall } from "./synthetic-report";
 import { apiMode } from "./index";
 import { AccessDenied, ConnectionError, type Caller, type Result } from "./source";
@@ -26,6 +27,12 @@ export interface ProSource {
   analyzeOverall(caller: Caller, orgId: string, studentId: string, profileId: string, expectedProfileVersion: string | number, key: string): Promise<Result<{ report: ReportDto }>>;
   listReports(caller: Caller, orgId: string, studentId: string): Promise<ProStudentReportPageDto>;
   readReport(caller: Caller, orgId: string, studentId: string, reportId: string): Promise<ProStudentReportDto | null>;
+  /** pro.candidates — 저장한 성적으로 유리한 대학 찾기(새 리포트 판에 남는다) */
+  candidates(caller: Caller, orgId: string, studentId: string, profileId: string, expectedProfileVersion: string | number, key: string): Promise<Result<ProCandidatesDto>>;
+  listBookmarks(caller: Caller, orgId: string, studentId: string, reportId?: string): Promise<ProBookmarksDto | null>;
+  addBookmark(caller: Caller, orgId: string, studentId: string, reportId: string, offeringId: string, key: string): Promise<Result<ProBookmarksDto>>;
+  /** pro.report.export — 고정 판 인쇄본. 워터마크(기관·교사 코드·인쇄 시각·학생 이름)를 서버가 준다 */
+  exportReport(caller: Caller, orgId: string, studentId: string, reportId: string, revisionId: number, key: string): Promise<Result<ProPrintDto>>;
 }
 
 const enc = encodeURIComponent;
@@ -93,6 +100,13 @@ const liveSource: ProSource = {
   listReports: async (caller, orgId, id) =>
     (await get<ProStudentReportPageDto>(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports${qs({ limit: 20 })}`)) ?? { org_id: orgId, student_id: id, items: [], next_cursor: null, has_more: false },
   readReport: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}`),
+  candidates: (caller, orgId, id, profileId, v, key) =>
+    write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/candidates`, { profile_id: profileId, filters: {}, expected_profile_version: v }, key),
+  listBookmarks: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks${qs({ report_id: reportId })}`),
+  addBookmark: (caller, orgId, id, reportId, offeringId, key) =>
+    write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks`, { report_id: reportId, offering_id: offeringId }, key),
+  exportReport: (caller, orgId, id, reportId, revisionId, key) =>
+    write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}/export`, { revision_id: revisionId }, key),
 };
 
 /* ── synthetic(화면 제작용 메모리) ── */
@@ -193,6 +207,55 @@ const synSource: ProSource = {
   },
   async readReport(_c, _orgId, id, reportId) {
     return [...synScore(id).reports].reverse().find((r) => r.report_id === reportId) ?? null;
+  },
+  async candidates(_c, orgId, id, profileId, _v, key) {
+    const x = synScore(id);
+    const prior = x.keys.get(key) as ProCandidatesDto | undefined;
+    if (prior) return { ok: true, value: prior };
+    if (!x.profile || x.profile.profile_id !== profileId) return { ok: false, code: "profile_not_found", status: 404 };
+    const last = x.reports.at(-1);
+    if (!last) return { ok: false, code: "initial_overall_report_required", status: 409 };
+    const overall = last.published_result.overall;
+    const analyses = Object.fromEntries(CATALOG.map((o) => [o.offering_id, assess(o, x.profile!.scores, overall)]));
+    const candidates = buildCandidates(analyses);
+    const now = new Date().toISOString();
+    const n = x.reports.length + 1;
+    const report: ReportDto = { ...last.published_result, report_version: n, updated_at: now, analyses, candidates, shortlist: last.published_result.shortlist ?? {} };
+    x.reports.push({ ...last, revision_id: n, published_result: report, created_at_utc: now });
+    const value = { org_id: orgId, student_id: id, candidates };
+    x.keys.set(key, value);
+    return { ok: true, value };
+  },
+  async listBookmarks(_c, orgId, id) {
+    const last = synScore(id).reports.at(-1);
+    return { org_id: orgId, student_id: id, shortlist: last?.published_result.shortlist ?? {} };
+  },
+  async addBookmark(_c, orgId, id, reportId, offeringId, key) {
+    const x = synScore(id);
+    const prior = x.keys.get(key) as ProBookmarksDto | undefined;
+    if (prior) return { ok: true, value: prior };
+    const last = x.reports.at(-1);
+    if (!last || last.report_id !== reportId) return { ok: false, code: "professional_report_not_found", status: 404 };
+    const a = last.published_result.analyses?.[offeringId];
+    const shortlist = { ...(last.published_result.shortlist ?? {}), [offeringId]: { selected: true, changed_at: new Date().toISOString(), assessment_status: a?.status ?? "pending", profile_id: last.profile_id, catalog_version: "SYNTHETIC-catalog-v1" } };
+    last.published_result = { ...last.published_result, shortlist };
+    const value = { org_id: orgId, student_id: id, shortlist };
+    x.keys.set(key, value);
+    return { ok: true, value };
+  },
+  async exportReport(_c, orgId, id, reportId, revisionId) {
+    const r = synScore(id).reports.find((x) => x.report_id === reportId && x.revision_id === revisionId);
+    const s = syn.students.find((x) => x.student_id === id);
+    if (!r || !s) return { ok: false, code: "professional_report_not_found", status: 404 };
+    const printed = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", dateStyle: "short", timeStyle: "short" }).format(new Date());
+    return {
+      ok: true,
+      value: {
+        org_id: orgId, student_id: id,
+        snapshot: { format: "jungsi.counseling-snapshot/v1", status: "ready", snapshot_version: revisionId, generated_at: r.created_at_utc, report: r.published_result },
+        watermark: { organization_name: SYN_ORG.org_name, teacher_code: "SYNTEACH01", printed_at_seoul: printed, student_name: s.display_name },
+      },
+    };
   },
 };
 

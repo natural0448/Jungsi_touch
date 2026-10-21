@@ -11,7 +11,9 @@ import type { ProOrganization, ProScoreStatusDto, ProStudentDto, ProStudentRepor
 import { proAccess } from "@/lib/pro-access";
 import { OverallCard, PositionChart, SubjectsSheet } from "../../../reports/me/report-view";
 import { ScoreForm } from "../../../reports/me/score-form";
-import { submitStudentScores } from "../../actions";
+import { findCandidates, submitStudentScores } from "../../actions";
+import { ActionButton } from "../../action-button";
+import { CandidatesView, PickedList } from "../../candidates-view";
 import { StudentForm } from "../../student-form";
 import "../../../reports/me/report.css";
 import "../../pro.css";
@@ -67,6 +69,10 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
   const self = `/pro/students/${encodeURIComponent(student.student_id)}?org=${encodeURIComponent(svc.org_id)}`;
   const canInput = svc.role === "teacher" && !student.archived && status !== null && status.initial_remaining > 0;
   const a = shown?.published_result.overall ?? null;
+  // 담은 학교의 이름은 같은 판의 후보 목록에서 찾는다(별도 조회 없음)
+  const names = new Map(
+    [...(shown?.published_result.candidates?.basic_university_groups.flatMap((g) => g.offerings) ?? []), ...(shown?.published_result.candidates?.wildcards ?? [])].map((it) => [it.offering.offering_id, it.offering]),
+  );
 
   return (
     <>
@@ -128,6 +134,44 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
             <SubjectsSheet a={a} />
             <PositionChart a={a} />
             <p className="pro-note">상담 tip(이 학생에게 유리한 이유 설명)은 서버의 근거 자료가 연결되면 이 자리에 보입니다. 지금은 근거 연결 전입니다.</p>
+            <div className="pro-sechd">
+              <Link className="btn" href={`/pro/students/${encodeURIComponent(student.student_id)}/print?org=${encodeURIComponent(svc.org_id)}&report=${encodeURIComponent(shown.report_id)}&rev=${shown.revision_id}`}>
+                상담 리포트 인쇄·PDF
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {shown && a && (
+          <section className="pro-sec" aria-labelledby="cand-h">
+            <div className="pro-sechd">
+              <h2 id="cand-h">유리한 대학 찾기</h2>
+              {svc.role === "teacher" && !student.archived && (
+                <ActionButton
+                  act={findCandidates}
+                  primary
+                  label={shown.published_result.candidates ? "다시 찾기" : "이 학생에게 유리한 대학 찾기"}
+                  busy="찾는 중…"
+                  fields={{ org_id: svc.org_id, student_id: student.student_id, profile_id: shown.profile_id, profile_version: shown.profile_id, idem: crypto.randomUUID() }}
+                />
+              )}
+            </div>
+            {shown.published_result.candidates ? (
+              <CandidatesView
+                c={shown.published_result.candidates}
+                shortlist={shown.published_result.shortlist ?? {}}
+                fields={svc.role === "teacher" ? { org_id: svc.org_id, student_id: student.student_id, report_id: shown.report_id } : null}
+              />
+            ) : (
+              <p className="pro-note">아직 찾지 않았습니다. 저장한 성적으로 대학별 환산·유불리와 와일드카드 후보를 찾습니다.</p>
+            )}
+          </section>
+        )}
+
+        {shown && (
+          <section className="pro-sec" aria-labelledby="picked-h">
+            <h2 id="picked-h">담은 학교</h2>
+            <PickedList shortlist={shown.published_result.shortlist ?? {}} analyses={shown.published_result.analyses ?? {}} names={names} />
           </section>
         )}
 

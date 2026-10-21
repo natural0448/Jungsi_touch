@@ -6,7 +6,7 @@ import { AccessDenied, ConnectionError, getCaller } from "@/lib/api";
 import { proSource, validId } from "@/lib/api/pro-source";
 import type { ScoresInput } from "@/lib/dto";
 import { EXAM } from "@/lib/exam";
-import type { ProStudentInput } from "@/lib/pro-dto";
+import type { ProPrintDto, ProStudentInput } from "@/lib/pro-dto";
 import type { ScoreFormState } from "../reports/me/actions";
 import type { ScoreDefaults } from "../reports/me/score-form";
 
@@ -146,4 +146,59 @@ export async function submitStudentScores(prev: ScoreFormState, fd: FormData): P
     throw e;
   }
   return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+}
+
+export type ProActionState = { error: string } | null;
+
+/** 유리한 대학 찾기: 지금 학생의 최근 성적(profile)으로 pro.candidates. 결과는 새 리포트 판에 남는다 */
+export async function findCandidates(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), profileId = String(fd.get("profile_id") ?? "");
+  const pv = String(fd.get("profile_version") ?? ""), key = String(fd.get("idem") ?? "");
+  if (!validId(orgId) || !validId(studentId) || !validId(profileId) || !pv || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
+  try {
+    const r = await proSource().candidates(await getCaller(), orgId, studentId, profileId, /^\d+$/.test(pv) ? Number(pv) : pv, key);
+    if (!r.ok) return { error: r.code === "initial_overall_report_required" ? "먼저 전체 위치 리포트를 만든 뒤 찾을 수 있습니다." : `대학을 찾지 못했습니다. (사유 코드 ${r.code})` };
+  } catch (e) {
+    const t = failText(e);
+    if (t) return { error: t };
+    throw e;
+  }
+  return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+}
+
+/** 학생별 담기(찜). 고정된 리포트 판에 결속된다 */
+export async function addStudentBookmark(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), reportId = String(fd.get("report_id") ?? "");
+  const offeringId = String(fd.get("offering_id") ?? ""), key = String(fd.get("idem") ?? "");
+  if (!validId(orgId) || !validId(studentId) || !validId(reportId) || !validId(offeringId) || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
+  try {
+    const r = await proSource().addBookmark(await getCaller(), orgId, studentId, reportId, offeringId, key);
+    if (!r.ok) return { error: `담지 못했습니다. (사유 코드 ${r.code})` };
+  } catch (e) {
+    const t = failText(e);
+    if (t) return { error: t };
+    throw e;
+  }
+  return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+}
+
+export type PrintState = { ok: true; data: ProPrintDto } | { ok: false; error: string } | null;
+
+/**
+ * 상담 리포트 인쇄본(pro.report.export). 쓰기 경로(멱등키)라 서버 동작으로만 부른다(Next 같은 출처 확인).
+ * 워터마크의 기관·교사 코드·인쇄 시각·학생 이름은 서버가 준 값을 그대로 찍는다
+ */
+export async function exportStudentReport(_prev: PrintState, fd: FormData): Promise<PrintState> {
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), reportId = String(fd.get("report_id") ?? "");
+  const rev = Number(fd.get("revision_id")), key = String(fd.get("idem") ?? "");
+  if (!validId(orgId) || !validId(studentId) || !validId(reportId) || !Number.isSafeInteger(rev) || rev < 1 || !/^[0-9a-f-]{36}$/i.test(key)) return { ok: false, error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
+  try {
+    const r = await proSource().exportReport(await getCaller(), orgId, studentId, reportId, rev, key);
+    if (!r.ok) return { ok: false, error: `인쇄본을 만들지 못했습니다. (사유 코드 ${r.code})` };
+    return { ok: true, data: r.value };
+  } catch (e) {
+    const t = failText(e);
+    if (t) return { ok: false, error: t };
+    throw e;
+  }
 }
