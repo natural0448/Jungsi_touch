@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.105",
+  "version": "1.9.106",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -6995,7 +6995,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.105",
+        "contract_version": "1.9.106",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7169,7 +7169,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.105",
+        "contract_version": "1.9.106",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7335,7 +7335,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.105",
+        "contract_version": "1.9.106",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7354,7 +7354,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.105",
+        "contract_version": "1.9.106",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7379,7 +7379,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.105",
+        "contract_version": "1.9.106",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7404,7 +7404,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.105",
+        "contract_version": "1.9.106",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -20119,6 +20119,16 @@
         "REQ-26"
       ],
       "summary": "Owner의 기존 전국 P1 실제 실행 회신과 Root의 현재 head·대상 표 재조회를 접수했다. 최신 실제 설치는 날짜별 v17 Owner 영수증 포인터로 찾고 source032 등 동결 current_*는 과거 회귀 기준으로 보존해 현재 운영판과 혼동하지 않는다. 기존 다섯 설정 등록·P1 전환·세 화면 읽기 회귀와 전체22/JWT·소유권/CSRF·보안·새 seq2 인수를 분리한다. 서비스/화면의 발표 통계 확장 PR을 통합했으며 새 자료판은 선택/독립 검수·발행·운영 화면 검수 대기다. 회복 refs 읽기 2시도/1봉인과 이후 새 CID만 읽는 범위를 명시하고 기존 통계/원문/실패본/모형 제어를 보존한다."
+    },
+    {
+      "date": "2026-10-22",
+      "requirements": [
+        "REQ-28",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "대학 발표 통계의 서비스/화면 PR 통합과 정확 SHA CI 완료를 하위 구현 상태까지 일치시켰다. 기존 CI 대기 문구를 실제 검증 커밋·merge·CI로 정정하고, 새 불변 객체/seq2 실행 도구와 실제 화면 모듈의 합성 하네스 준비 근거를 결속했다. 준비·합성 PASS는 실제 새 자료판·DB SQL·Storage·Secrets·배포·JWT/OTP·화면 인수로 승격하지 않으며 현재 운영판과 보호 정책을 유지한다."
     }
   ],
   "overall_analysis_contract": {
@@ -154003,7 +154013,7 @@
     "published_statistics_extension": {
       "format": "jungsi.p1-published-statistics-extension/v1",
       "id": "P1-PUBLISHED-STATISTICS-20261022",
-      "status": "ADOPTED_REQUIREMENTS_CODE_DATA_AND_LIVE_ACCEPTANCE_IN_PROGRESS",
+      "status": "SOURCE_INTEGRATED_PRIVATE_DATA_PREPARATION_AND_NEW_OPERATING_ACCEPTANCE_PENDING",
       "requirements": [
         "REQ-28",
         "REQ-24",
@@ -154038,7 +154048,7 @@
       "new_publication": "NOT_RUN",
       "new_live_browser": "NOT_RUN",
       "frontend_implementation": {
-        "status": "SOURCE_IMPLEMENTED_SCOPED_SDK_AND_SYNTHETIC38_VERIFIED_NOT_DEPLOYED",
+        "status": "SOURCE_INTEGRATED_EXACT_SHA_CI_SCOPED_SDK_AND_SYNTHETIC38_VERIFIED_NOT_DEPLOYED",
         "branch": "feature/presentation-foundation",
         "source_files": [
           "apps/web/src/lib/p1-snapshot.ts",
@@ -154069,7 +154079,7 @@
         "new_live_browser": "NOT_RUN"
       },
       "service_implementation": {
-        "status": "SOURCE_AND_SYNTHETIC_HTTP_PASS_FULL_SNAPSHOT_AND_CI_PENDING",
+        "status": "SOURCE_INTEGRATED_NORMAL_HOOKS_AND_EXACT_SHA_CI_PASS_NEW_DEPLOYMENT_NOT_RUN",
         "review_base_commit": "8a73fa34dbd277dc73ec7508a74757c80a3a9c63",
         "production_source": {
           "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
@@ -154085,7 +154095,8 @@
         "native_preservation": "문자열·정수·소수 원문과 실제0·null·알려진 값의 metadata 보류를 구분한다. 비율을 다른 고정 칸으로 치환하지 않는다.",
         "runtime_application": "NOT_RUN_CURRENT_INSTALLED_SOURCE_AND_PREVIOUS_MODULE_SHA_MUST_MATCH_BEFORE_OWNER_PATCH",
         "new_publication": "NOT_RUN",
-        "new_live_browser": "NOT_RUN"
+        "new_live_browser": "NOT_RUN",
+        "exact_source_integration_ref": "P1_display_snapshot_contract.published_statistics_extension.integration"
       },
       "integration": {
         "service_PR": 56,
@@ -154094,7 +154105,55 @@
         "service_merge": "f840da9e15bfac3dac5701ad595c27e7751f73e8",
         "frontend_PR": 57,
         "frontend_source_commit": "d310fc1920b5435e5ecf6232d3cf252bf0cee250",
-        "frontend_sync_head": "2635ea115a63b0205e461e522b52a11a82571e56"
+        "frontend_sync_head": "2635ea115a63b0205e461e522b52a11a82571e56",
+        "frontend_merge": "285c11bd25f2de5dbeeae323c4d6d67ecbda8e70",
+        "service_exact_push_CI": {
+          "run_id": 39725990190,
+          "conclusion": "success"
+        },
+        "service_exact_PR_CI": {
+          "run_id": 39725996342,
+          "conclusion": "success"
+        },
+        "frontend_exact_push_CI": {
+          "run_id": 39729110813,
+          "conclusion": "success"
+        },
+        "frontend_exact_PR_CI": {
+          "run_id": 39729250708,
+          "conclusion": "success"
+        },
+        "verified_planning_baseline": "dac5067d37eb22ecc55b4751e9f945da09533437",
+        "verified_planning_baseline_CI": {
+          "run_id": 39732623109,
+          "conclusion": "success"
+        },
+        "normal_source_snapshot": {
+          "Python_passed": 1202,
+          "Edge_passed": 932,
+          "source_preserved": true
+        },
+        "note": "Normal merge commits retain the source tested at the exact service/frontend sync heads. Source CI is distinct from actual new-data publication, full Next build, JWT/OTP and browser operating acceptance."
+      },
+      "private_execution_preparation": {
+        "status": "PREPARED_SOURCE_AND_SYNTHETIC_CHECKED_ACTUAL_DATA_PACKET_NOT_READY",
+        "Root_scoped_review_sha256": "4418439def63b6d849bfbc71ebb34d416d089ffae45cbc8158dc66b9985e3778",
+        "closure_reuse": "Use the Owner actual-execution report with the exact sealed predecessor object pinset. Do not claim the missing original readback receipt body was inspected or old objects were freshly GET-verified.",
+        "publication_guard": "Reuse the existing publisher advisory and source SHARE locks. Verify the exact current source command/hash before identical replay as well as new insertion; require expected previous publication, immutable delta direct-GET proof, exact data/settings review and actual readback.",
+        "scope": "Existing Supabase and Drive only. No schema reapplication, new role/resource/plan, profile/counter reset, policy/budget expansion or file deletion.",
+        "actual_native_SQL": "NOT_RUN",
+        "actual_Storage_delta_upload_and_GET": "NOT_RUN",
+        "actual_Secrets_and_new_operating_deployment": "NOT_RUN",
+        "toolkit_manifest_evidence_sha256": "273990fa50ae62358af6f92bfc6684111ffb535ae60801fe8c5c3df732061a8f"
+      },
+      "offline_harness_preparation": {
+        "status": "ACTUAL_MODULE_SYNTHETIC_HARNESS_PASS_ACTUAL_CANDIDATE_NOT_RUN",
+        "source_commit": "dac5067d37eb22ecc55b4751e9f945da09533437",
+        "preparation_evidence_sha256": "06070a5e10ef0571b878c6e81b3f196ba50815b4c699e7f0bfddcc174874eaee",
+        "Root_source_pin_review_sha256": "898e4aeabcea1696f29ec6faebdda21e58888816cb5832b47c0cf8fa94ad32fb",
+        "scope": "Import unchanged pinned warm/lossless compact/search/group/React modules. Substitute local source/control/KV/DO I/O only; measure memory stages separately. Synthetic approved-control assumptions are not actual authorization or operating evidence.",
+        "full_Next_build": "NOT_RUN",
+        "actual_new_data_API_and_browser_acceptance": "NOT_RUN"
       }
     },
     "latest_scoped_observation_20261022": {

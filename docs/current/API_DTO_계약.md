@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.105이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.106이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -415,7 +415,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=18905e4b1939dd17b33d2fc8cf8c98fa1464fe114ac59070e7120f7ccd6d7637 -->
+<!-- jungsi:generated spec_sha256=dc71ad50a282713976e2bdb104bc8c279beee65c4f34396200d09f266eb987d1 -->
 
 
 ## P1·P2 화면 변경의 한정 수용
@@ -600,7 +600,7 @@ For an approved estimated_weights/official_all_examinees result use a neutral hu
 
 ### 대학 발표 통계의 원형 노출
 
-P1-PUBLISHED-STATISTICS-20261022 / ADOPTED_REQUIREMENTS_CODE_DATA_AND_LIVE_ACCEPTANCE_IN_PROGRESS.
+P1-PUBLISHED-STATISTICS-20261022 / SOURCE_INTEGRATED_PRIVATE_DATA_PREPARATION_AND_NEW_OPERATING_ACCEPTANCE_PENDING.
 
 | 항목 | 확정 범위 |
 | --- | --- |
