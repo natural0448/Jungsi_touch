@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.102",
+  "contract_version": "1.9.103",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -3289,6 +3289,14 @@
           "retained": "existing personal v3 artifact/policy/code/settings5/limits/expiry; legacy writes remain separate HOLD",
           "actual_Storage_publication_Secrets_deployment": "NOT_RUN"
         }
+      },
+      "latest_scoped_P1_read_20261022": {
+        "status": "BASELINE_DB_PUBLICATION_APPROVED_AND_LOGGED_IN_TARGET_UI_OBSERVED",
+        "evidence_ref": "P1_display_snapshot_contract.latest_scoped_observation_20261022",
+        "source_verification": "fc3097d9 source CI success reused; observed hosted source binding not newly certified",
+        "operation_native_or_deployment_acceptance": "NOT_CERTIFIED_BY_THIS_SCOPED_READ",
+        "new_statistics_extension_activation": "NOT_RUN",
+        "production_ready": false
       }
     }
   }

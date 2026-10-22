@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.102이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.103이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 기존 Supabase 기반 실제 인증·기존22와 신규6 논리 API 계약의 코드·선택 연결·운영 배포를 구분한다. Google Drive와 기존 Supabase를 사용하고 P1 조정 메타데이터 Durable Object 한정 예외만 적용한다. 현재 결합20 후보·기존14 운영판·미연결8을 혼동하지 않는다.
 
@@ -589,7 +589,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=ae54052c050d4c2fc1705494dea9f3f82ea59200f1d7041ccebe44ef45b68c49 -->
+<!-- jungsi:generated spec_sha256=24d32f73f3dd296d771cbb109aba23b3e798ac96eec4d1a5f241aa53b9144d71 -->
 
 
 ## 기존 운영 조회의 후속 검수
@@ -746,7 +746,7 @@ report.read는 저장 snapshot을 읽고 계산하지 않는다. 기존 profile_
 
 ## 판별 입결 정리본·관리자 반복 검수·본인 리포트 찾기
 
-P1-DISPLAY-SNAPSHOT-01 / ADOPTED_REQUIREMENTS_IMPLEMENTATION_AND_FINAL_DATA_CANDIDATE_PENDING. 신규 API는 구현/확장 등록과 Owner 활성화 전에는 사용할 수 없다.
+P1-DISPLAY-SNAPSHOT-01 / PUBLISHED_BASELINE_SCOPED_READ_OBSERVED_PUBLISHED_STATISTICS_EXTENSION_IN_PROGRESS. 신규 API는 구현/확장 등록과 Owner 활성화 전에는 사용할 수 없다.
 
 | 항목 | 계약 |
 | --- | --- |
@@ -773,6 +773,10 @@ P1-DISPLAY-SNAPSHOT-01 / ADOPTED_REQUIREMENTS_IMPLEMENTATION_AND_FINAL_DATA_CAND
 - Each cell retains verified_official/pending_metadata/pending_value_type/pending_value_missing/not_published and a precise missing/held reason. No null-to-zero, rank-to-count or unsupported ready conversion.
 - Apply established direct-university versus official-adiga source priority only to qualified comparable observations. Same-priority conflicting values remain held; retain lower-priority conflicting provenance rather than silently dropping it.
 - A metadata-only export deliberately omits original value/source fields. Missing metadata in that export is not proof that the native original lacks it. Reuse full immutable native references and qualified overlays.
+- 대학 발표 점수 통계를 50/70/75라는 이유만으로 선필터링하지 않는다. 기존 current/source reader에서 이미 수집된 통계와 원문 근거를 재사용하고, 조회 대상 모집행·학년도와 원문 기준을 유지해 별도 entries에 연결한다.
+- 50/70 대표 컷의 기존 동일 점수 기준·최종등록자 자격은 유지한다. 다른 코호트·평균·최저·다른 과목 축은 별도 발표 목록으로만 표시하며 50/70의 결측을 채우지 않는다.
+- 별도 발표 통계의 실제 비율은 1~100 정수 또는 null이다. 평균·최저 등 비백분위 통계는 null을 보존하고 원래 통계 라벨로 표시한다. 새 DTO의 닫힌 필드·개별 항목 수·전체 bytes/행 경계는 계속 검증한다.
+- 기존 수집된 예비순위와 최종 발표 범위의 근거를 관측별로 확인한다. 날짜·URL metadata 결측만으로 이미 확인된 숫자를 지우지 않으며, 최종 예비번호 자격 미확정·다른 차수/전형 충돌은 원문 독립 검수 후에만 해소한다. 순위를 인원으로 치환하지 않는다.
 
 인수 기준:
 
@@ -817,7 +821,7 @@ Use an explicitly identified aggregate score basis, same fullmark/component/scop
 
 Do not declare different names/tracks/groups equivalent merely because the current PK matches. Prefer an exact-year/PK authoritative guide display label if verified. Otherwise use a clearly marked display label and retain distinct original identity variants for search/review. Mark identity review pending; do not silently choose one source label and imply that all selected cells are scope-verified. Retain each selected cell's original source context by public-safe identity/provenance references and an explicit identity-scope review reason where necessary. Known source-track/PK conflicts remain alternative-only with a warning. No estimate or analysis may use a cell whose required identity compatibility is held.
 
-Missing publication date remains null and is not a numeric-value review failure. Selected known values remain visible as pending_metadata with precise reasons. Do not promote verified_official, invent a date/unit or recompute native values to clear a display hold. Original statistics outside fixed slots are optional under the requested display contract. Any omission is an explicit projection scope, never a statement that the source is missing/unpublished. A supported alternate retains its true percentage and basis; no75-to70 or subject-to-total promotion.
+Missing publication date remains null and is not a numeric-value review failure. Selected known values remain visible as pending_metadata with precise reasons. Do not promote verified_official, invent a date/unit or recompute native values to clear a display hold. 2026-10-22 사용자 요청으로 대학이 실제 발표하고 현재 정본에 수집된 점수 통계도 표시 범위에 포함한다. 50/70 고정 칸 밖의 비율·평균·최저·최고·중앙값·원문 정의 통계를 기존 alternate_cut.entries로 구분해 보인다. 원문 기준·점수 축·대상 집단·단위·native 값과 검수 상태를 유지하고 비율이 없는 통계에 백분위를 만들지 않는다. 별도 통계를 대표50/70 또는 학생의 합격판정 근거로 자동 승격하지 않는다.
 
 Preserve original normal line-feed U+000A only in explicitly identified human department/track/statistic fields under the closed public DTO. Keep ID/URL/header/code control-character rules and secret/private URL protection strict. Do not strip source originals, invent PKs or suppress otherwise known values to satisfy a string check.
 
@@ -839,6 +843,31 @@ For an approved estimated_weights/official_all_examinees result use a neutral hu
 | IDENTITY_SCOPE_REVIEW_PENDING | 모집단위 명칭·전형·모집군의 연결을 확인하고 있습니다. |
 | SOURCE_TRACK_PK_CONFLICT | 원문 전형과 연결된 모집행이 달라 확인하고 있습니다. |
 | OFFERING_MAPPING_PENDING | 이 자료의 모집행 연결을 확인하고 있습니다. |
+
+### 대학 발표 통계의 원형 노출
+
+P1-PUBLISHED-STATISTICS-20261022 / ADOPTED_REQUIREMENTS_CODE_DATA_AND_LIVE_ACCEPTANCE_IN_PROGRESS.
+
+| 항목 | 확정 범위 |
+| --- | --- |
+| 공개 표현 | 기존 alternate_cut.entries를 대학 발표 통계 목록으로 확장한다. 통계 라벨·실제 비율(비백분위는 null)·점수 기준·대상 집단·원문 단위·값/native 자료형·출처/기준일·검수 상태/사유를 함께 유지한다. 기존 explicit75 판 수신과 true50/70 의미를 보존한다. |
+| 관측 선택 | 현재 정본의 모집행·학년도에 연결된 실제 점수 관측을 사용한다. 출처·통계·코호트·척도·과목/성분·발표 범위가 다른 관측은 합치지 않는다. 같은 관측을 기준별로 복제하지 않으며 동등한 값 선택과 충돌 근거를 보존한다. |
+| 화면 | 대학 발표 통계를 별도 영역에 원래 명칭·비율·점수 기준·집단별로 표시한다. 값이 있고 metadata만 미확인이면 값과 확인 사유를 함께 보인다. 현재 선택 범위 제외를 대학 미발표로 표현하지 않는다. |
+| 결측/충돌 | 실제0, null, 원자료 없음, 선택 범위 제외, 자격 미확정, 값/정의 충돌, 공식 미발표를 구분한다. 평균→50/최저→70/75→70/등급→환산점수 변환은 하지 않는다. |
+| 보안/상한 | 닫힌 DTO·기존 entries 수/행/객체 bytes 제한·현재 user/relay/승인/만료/공유 예산/no-store를 유지한다. 항목 상한으로 일부가 빠지면 잔여를 정확히 표시하고 완료·미발표로 표현하지 않는다. 원자료·전체 검수 본문·비밀·내부 파일 경로는 브라우저로 보내지 않는다. |
+| 자료 담당 | 기존 학교별 원문·불변 native 참조·O/X 검수를 재사용한다. 대상 통계의 upstream50/70/75 선필터와 source qualification을 좁혀 보완한다. 전국 누백 로컬 일괄 준비/단일 writer 및 다른 팀의 live 제어를 변경하지 않는다. |
+| 코드/자료/새 발행/실제 화면 | IN_PROGRESS / IN_PROGRESS / NOT_RUN / NOT_RUN |
+
+검수 조건:
+
+- 50/70 고정 칸과 기존75 판은 이전과 같은 의미로 수신
+- 실제 다른 비율과 비백분위 통계가 원문 라벨/축/집단/native 값·타입을 보존하고 API→화면으로 이어짐
+- 서로 다른 cohort/과목/만점/척도 통계의 혼합 및75→70/평균→50/최저→70 변환0
+- 정확 SHA 소스/훅/CI와 불변 새 발행판의 독립 검수·Owner 적용·표적 실제 화면 검수 분리
+
+### 현재 정리본 읽기 관측
+
+READ_ONLY_BASELINE_PUBLICATION_AND_TARGET_RENDERING_OBSERVED. 기존 DB 발행 head approved와 로그인된 P1 전국 요약·대상 모집단위의 연도별 자격 보류/결측 표시를 대조했다. 과거 head0/소수 학교 화면 관측은 역사다. 실제 사용자 JWT·토큰/계정/실제 자료 지문을 공개하지 않는다. 배포 source/Storage 직접GET/전체 보안·전체학교 인수는 이 읽기 증거만으로 PASS로 바꾸지 않는다.
 
 별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 별도 시험 88개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
 

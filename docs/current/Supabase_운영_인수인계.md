@@ -1,6 +1,6 @@
 # Supabase 운영 인수인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.102이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.103이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 SUP01은 separate_Jungsi_FastAPI_deployment, SUP02의 목표 단일 원본은 public.jeongsi_passes로 확정했다. 현재 코드는 여전히 jungsi_backend.entitlements를 조회하며 목표 어댑터 전환·실DB/실Auth·배포·보안 인수는 NOT_RUN이다. production_ready=false / NOT_READY를 유지한다.
 
@@ -687,4 +687,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=ae54052c050d4c2fc1705494dea9f3f82ea59200f1d7041ccebe44ef45b68c49 -->
+<!-- jungsi:generated spec_sha256=24d32f73f3dd296d771cbb109aba23b3e798ac96eec4d1a5f241aa53b9144d71 -->

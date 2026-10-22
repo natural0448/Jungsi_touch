@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.102",
-  "source_sha256": "ae54052c050d4c2fc1705494dea9f3f82ea59200f1d7041ccebe44ef45b68c49",
+  "spec_version": "1.9.103",
+  "source_sha256": "24d32f73f3dd296d771cbb109aba23b3e798ac96eec4d1a5f241aa53b9144d71",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1521,7 +1521,9 @@
         "native_edge": "HistorySnapshotService.head",
         "python_fastapi": "NOT_REGISTERED_NOT_PORTED_LOGICAL_COORDINATOR_REFERENCE_ONLY",
         "actual_new_path": "NOT_RUN"
-      }
+      },
+      "latest_scoped_P1_observation_ref": "P1_display_snapshot_contract.latest_scoped_observation_20261022",
+      "published_statistics_extension_ref": "P1_display_snapshot_contract.published_statistics_extension"
     },
     {
       "id": "history.snapshot.read",
@@ -1571,7 +1573,9 @@
         "native_edge": "HistorySnapshotService.read",
         "python_fastapi": "NOT_REGISTERED_NOT_PORTED_LOGICAL_COORDINATOR_REFERENCE_ONLY",
         "actual_new_path": "NOT_RUN"
-      }
+      },
+      "latest_scoped_P1_observation_ref": "P1_display_snapshot_contract.latest_scoped_observation_20261022",
+      "published_statistics_extension_ref": "P1_display_snapshot_contract.published_statistics_extension"
     },
     {
       "id": "report.list-own",
