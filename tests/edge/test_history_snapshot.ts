@@ -5,13 +5,17 @@ import {
   HistorySnapshotService,
   validateHistorySnapshotPayload,
 } from "../../supabase/functions/_shared/jungsi/application/history_snapshot.ts";
-import type { NativeObject } from "../../supabase/functions/_shared/jungsi/domain/json_value.ts";
+import {
+  nativeJsonText,
+  type NativeObject,
+} from "../../supabase/functions/_shared/jungsi/domain/json_value.ts";
 import { JsonFloat } from "../../supabase/functions/_shared/jungsi/domain/native_json.ts";
 import { SYNTHETIC_RUNTIME_NOW as NOW } from "./synthetic_runtime_binding.ts";
 import {
   syntheticSnapshotBody,
   syntheticSnapshotPart,
   syntheticSnapshotPublication,
+  syntheticSnapshotStatisticsBody,
 } from "./synthetic_history_snapshot.ts";
 import { assert, equal } from "./fixture.ts";
 const session = {
@@ -22,18 +26,21 @@ const session = {
 };
 Deno.test("snapshot strict IDs reject controls while preserving PK 001 and 0 strings", async () => {
   for (const pk of ["001", "0"]) {
-    const body = syntheticSnapshotBody(), row = (body.rows as NativeObject[])[0];
+    const body = syntheticSnapshotBody(),
+      row = (body.rows as NativeObject[])[0];
     row.original_pk = pk;
     row.offering_id = "2026:" + pk;
     equal(
-      (validateHistorySnapshotPayload(body, syntheticSnapshotPart()).rows as NativeObject[])[0]
+      (validateHistorySnapshotPayload(body, syntheticSnapshotPart())
+        .rows as NativeObject[])[0]
         .original_pk,
       pk,
     );
   }
   for (const control of ["\u0000", "\n", "\r"]) {
     for (const field of ["original_pk", "offering_id", "university_id"]) {
-      const body = syntheticSnapshotBody(), row = (body.rows as NativeObject[])[0];
+      const body = syntheticSnapshotBody(),
+        row = (body.rows as NativeObject[])[0];
       if (field === "original_pk") {
         row.original_pk = "001" + control;
         row.offering_id = "2026:001" + control;
@@ -69,7 +76,7 @@ Deno.test("snapshot explicit 75 alternatives retain native values and source var
   cut.entries = [entry];
   cut.omitted_other_basis_count = 3;
   validateHistorySnapshotPayload(body, syntheticSnapshotPart());
-  entry.statistic_percent = 70;
+  entry.statistic_percent = 0;
   await denied(
     () => validateHistorySnapshotPayload(body, syntheticSnapshotPart()),
     "snapshot_invalid",
@@ -141,7 +148,8 @@ Deno.test("snapshot original PK stays a string with leading zeros and approved a
   r.original_pk = "000123";
   r.offering_id = "2026:000123";
   equal(
-    (validateHistorySnapshotPayload(body, syntheticSnapshotPart()).rows as NativeObject[])[0]
+    (validateHistorySnapshotPayload(body, syntheticSnapshotPart())
+      .rows as NativeObject[])[0]
       .original_pk,
     "000123",
   );
@@ -176,7 +184,15 @@ Deno.test("snapshot paired 50 and 70 cuts require the same basis cohort and unit
   }
   validateHistorySnapshotPayload(body, syntheticSnapshotPart());
   const upper = r.final_70_percent_cut as NativeObject;
-  for (const field of ["basis_code", "cohort_code", "unit", "basis_label", "cohort_label"]) {
+  for (
+    const field of [
+      "basis_code",
+      "cohort_code",
+      "unit",
+      "basis_label",
+      "cohort_label",
+    ]
+  ) {
     const original = upper[field];
     upper[field] = field.endsWith("label") ? null : "SYNTHETIC-other";
     await denied(
@@ -198,7 +214,8 @@ Deno.test("snapshot public source links reject signed storage and sensitive quer
     ]
   ) {
     const body = syntheticSnapshotBody();
-    ((body.rows as NativeObject[])[0].competition_ratio as NativeObject).source_url = url;
+    ((body.rows as NativeObject[])[0].competition_ratio as NativeObject)
+      .source_url = url;
     await denied(
       () => validateHistorySnapshotPayload(body, syntheticSnapshotPart()),
       "snapshot_invalid",
@@ -206,7 +223,12 @@ Deno.test("snapshot public source links reject signed storage and sensitive quer
   }
 });
 Deno.test("snapshot verified reserve and headcount require reviewed units and nonblank values", async () => {
-  for (const slot of ["final_additional_admission_rank", "additional_admission_count"]) {
+  for (
+    const slot of [
+      "final_additional_admission_rank",
+      "additional_admission_count",
+    ]
+  ) {
     const body = syntheticSnapshotBody(),
       c = (body.rows as NativeObject[])[0][slot] as NativeObject;
     c.status = "verified_official";
@@ -227,7 +249,11 @@ Deno.test("snapshot verified reserve and headcount require reviewed units and no
     );
   }
 });
-async function denied(work: () => unknown | Promise<unknown>, code: string, http = 503) {
+async function denied(
+  work: () => unknown | Promise<unknown>,
+  code: string,
+  http = 503,
+) {
   let error: unknown;
   try {
     await work();
@@ -262,7 +288,10 @@ function fixture(
       read: () => {
         reads++;
         return Promise.resolve(
-          syntheticSnapshotBody(options.pending, options.partsOnly ? "SYNTHETIC-part" : null),
+          syntheticSnapshotBody(
+            options.pending,
+            options.partsOnly ? "SYNTHETIC-part" : null,
+          ),
         );
       },
       assertCurrent: () => {
@@ -275,7 +304,12 @@ function fixture(
     { nowUtc: () => now },
     "a".repeat(64),
   );
-  return { service, p, counts: () => ({ reads, heads, finishes }), setNow: (v: bigint) => now = v };
+  return {
+    service,
+    p,
+    counts: () => ({ reads, heads, finishes }),
+    setNow: (v: bigint) => now = v,
+  };
 }
 Deno.test("snapshot head returns bounded public descriptors without object keys", async () => {
   const f = fixture(), head = await f.service.head(session, {});
@@ -302,19 +336,29 @@ Deno.test("snapshot full read uses one selected body and a final current check",
 });
 Deno.test("snapshot parts mode requires a listed part and never falls back to full", async () => {
   const f = fixture({ partsOnly: true });
-  await denied(() => f.service.read(session, f.p.snapshotId, {}), "part_required", 422);
+  await denied(
+    () => f.service.read(session, f.p.snapshotId, {}),
+    "part_required",
+    422,
+  );
   await denied(
     () => f.service.read(session, f.p.snapshotId, { part_id: "SYNTHETIC-unknown" }),
     "snapshot_part_not_found",
     404,
   );
   equal(f.counts().reads, 0);
-  const result = await f.service.read(session, f.p.snapshotId, { part_id: "SYNTHETIC-part" });
+  const result = await f.service.read(session, f.p.snapshotId, {
+    part_id: "SYNTHETIC-part",
+  });
   equal(result.part_id, "SYNTHETIC-part");
 });
 Deno.test("snapshot stale edition and changed final head never return a body", async () => {
   const f = fixture();
-  await denied(() => f.service.read(session, "SYNTHETIC-old", {}), "publication_changed", 409);
+  await denied(
+    () => f.service.read(session, "SYNTHETIC-old", {}),
+    "publication_changed",
+    409,
+  );
   equal(f.counts().reads, 0);
   await denied(
     () => fixture({ change: true }).service.read(session, f.p.snapshotId, {}),
@@ -324,11 +368,18 @@ Deno.test("snapshot stale edition and changed final head never return a body", a
 });
 Deno.test("snapshot enforces session policy expiry and approved public scope", async () => {
   for (const option of [{ scope: "b".repeat(64) }, { expired: true }]) {
-    await denied(() => fixture(option).service.head(session, {}), "snapshot_invalid");
+    await denied(
+      () => fixture(option).service.head(session, {}),
+      "snapshot_invalid",
+    );
   }
   const f = fixture();
   f.setNow(NOW + 120000000n);
-  await denied(() => f.service.head(session, {}), "authentication_required", 401);
+  await denied(
+    () => f.service.head(session, {}),
+    "authentication_required",
+    401,
+  );
   equal(f.counts().heads, 0);
 });
 Deno.test("snapshot preserves unmapped observations under null original PK and separate counts", () => {
@@ -343,14 +394,19 @@ Deno.test("snapshot preserves unmapped observations under null original PK and s
   assert(String(row.observation_key).startsWith("observation:"));
 });
 Deno.test("snapshot rejects fake PKs and silently dropped pending rows", async () => {
-  const body = syntheticSnapshotBody(true), row = (body.rows as NativeObject[])[0];
+  const body = syntheticSnapshotBody(true),
+    row = (body.rows as NativeObject[])[0];
   row.original_pk = "SYNTHETIC-fake";
   await denied(
     () => validateHistorySnapshotPayload(body, syntheticSnapshotPart(true)),
     "snapshot_invalid",
   );
   await denied(
-    () => validateHistorySnapshotPayload(syntheticSnapshotBody(true), syntheticSnapshotPart(false)),
+    () =>
+      validateHistorySnapshotPayload(
+        syntheticSnapshotBody(true),
+        syntheticSnapshotPart(false),
+      ),
     "snapshot_invalid",
   );
 });
@@ -362,14 +418,21 @@ Deno.test("snapshot strict public schema rejects private nested and top-level fi
     "snapshot_invalid",
   );
   const body = syntheticSnapshotBody();
-  ((body.rows as NativeObject[])[0].competition_ratio as NativeObject).raw_scores = {};
+  ((body.rows as NativeObject[])[0].competition_ratio as NativeObject)
+    .raw_scores = {};
   await denied(
     () => validateHistorySnapshotPayload(body, syntheticSnapshotPart()),
     "snapshot_invalid",
   );
 });
 Deno.test("snapshot never turns missing unpublished or conflicting values into zero", async () => {
-  for (const status of ["not_published", "pending_value_missing", "pending_value_type"]) {
+  for (
+    const status of [
+      "not_published",
+      "pending_value_missing",
+      "pending_value_type",
+    ]
+  ) {
     const body = syntheticSnapshotBody(),
       cell = (body.rows as NativeObject[])[0].competition_ratio as NativeObject;
     cell.status = status;
@@ -414,12 +477,16 @@ Deno.test("snapshot rejects duplicate offering identity and inconsistent recruit
   (body.rows as NativeObject[]).push((body.rows as NativeObject[])[0]);
   await denied(
     () =>
-      validateHistorySnapshotPayload(body, { ...syntheticSnapshotPart(), rows: 2, mappedRows: 2 }),
+      validateHistorySnapshotPayload(body, {
+        ...syntheticSnapshotPart(),
+        rows: 2,
+        mappedRows: 2,
+      }),
     "snapshot_invalid",
   );
   const other = syntheticSnapshotBody();
-  ((other.rows as NativeObject[])[0].recruitment_count_with_stage as NativeObject).stage =
-    "SYNTHETIC-unknown";
+  ((other.rows as NativeObject[])[0]
+    .recruitment_count_with_stage as NativeObject).stage = "SYNTHETIC-unknown";
   await denied(
     () => validateHistorySnapshotPayload(other, syntheticSnapshotPart()),
     "snapshot_invalid",
@@ -432,7 +499,8 @@ Deno.test("snapshot row requires every fixed cell and preserves five publication
     () => validateHistorySnapshotPayload(body, syntheticSnapshotPart()),
     "snapshot_invalid",
   );
-  const valid = syntheticSnapshotBody(), row = (valid.rows as NativeObject[])[0];
+  const valid = syntheticSnapshotBody(),
+    row = (valid.rows as NativeObject[])[0];
   for (
     const [i, status] of [
       "verified_official",
@@ -453,4 +521,173 @@ Deno.test("snapshot row requires every fixed cell and preserves five publication
     }
   }
   validateHistorySnapshotPayload(valid, syntheticSnapshotPart());
+});
+
+Deno.test("snapshot published statistics retain original labels nullable percent and native values", () => {
+  const body = syntheticSnapshotStatisticsBody();
+  const result = validateHistorySnapshotPayload(body, syntheticSnapshotPart());
+  equal(nativeJsonText(result, true), nativeJsonText(body, true));
+  const entries = ((result.rows as NativeObject[])[0].alternate_cut as NativeObject)
+    .entries as NativeObject[];
+  equal(entries.length, 9);
+  equal(entries.map((e) => e.statistic_percent), [
+    75,
+    80,
+    90,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+  ]);
+  assert(
+    entries[3].value instanceof JsonFloat &&
+      entries[3].value.lexeme === "6.500",
+  );
+  equal(entries[4].value, 0);
+  equal(entries[5].value, "0");
+  assert(entries[7].value === 9007199254740993n);
+  equal(entries[8].status, "pending_metadata");
+  equal(entries[8].statistic_label, null);
+  equal(entries[8].source_url, null);
+  assert(
+    entries[8].value instanceof JsonFloat && entries[8].value.lexeme === "0.00",
+  );
+});
+Deno.test("snapshot alternate percentages span reviewed integer ratios without populating fixed cuts", () => {
+  const body = syntheticSnapshotStatisticsBody(),
+    row = (body.rows as NativeObject[])[0],
+    alternate = row.alternate_cut as NativeObject;
+  const entry = (alternate.entries as NativeObject[])[0];
+  alternate.entries = [1, 50, 70, 75, 80, 90, 100].map((percent) => ({
+    ...entry,
+    statistic_percent: percent,
+    statistic_label: "SYNTHETIC " + percent + "%",
+    source_context: {
+      ...(entry.source_context as NativeObject),
+      observation_id: "observation:" + percent.toString(16).padStart(64, "0"),
+    },
+  }));
+  const result = validateHistorySnapshotPayload(body, syntheticSnapshotPart());
+  const r = (result.rows as NativeObject[])[0];
+  equal((r.final_50_percent_cut as NativeObject).value, null);
+  equal((r.final_70_percent_cut as NativeObject).value, null);
+  equal(
+    ((r.alternate_cut as NativeObject).entries as NativeObject[]).map((e) => e.statistic_percent),
+    [1, 50, 70, 75, 80, 90, 100],
+  );
+});
+Deno.test("snapshot alternate percentages reject zero fractional string and out of range metadata", async () => {
+  for (const percent of [0, -1, 101, 1.5, "80", 80n, new JsonFloat("75.0")]) {
+    const body = syntheticSnapshotStatisticsBody();
+    const entry = (((body.rows as NativeObject[])[0].alternate_cut as NativeObject)
+      .entries as NativeObject[])[
+        0
+      ];
+    entry.statistic_percent = percent;
+    await denied(
+      () => validateHistorySnapshotPayload(body, syntheticSnapshotPart()),
+      "snapshot_invalid",
+    );
+  }
+});
+Deno.test("snapshot verified nonpercent statistic needs its original label and reviewed comparison metadata", async () => {
+  for (
+    const field of [
+      "statistic_label",
+      "basis_code",
+      "basis_label",
+      "cohort_code",
+      "cohort_label",
+      "selection_rule_ref",
+      "unit",
+      "source_url",
+      "source_as_of",
+    ]
+  ) {
+    const body = syntheticSnapshotStatisticsBody();
+    const entry = (((body.rows as NativeObject[])[0].alternate_cut as NativeObject)
+      .entries as NativeObject[])[
+        3
+      ];
+    entry[field] = null;
+    await denied(
+      () => validateHistorySnapshotPayload(body, syntheticSnapshotPart()),
+      "snapshot_invalid",
+    );
+  }
+  const legacy = syntheticSnapshotStatisticsBody(),
+    alternate = (legacy.rows as NativeObject[])[0]
+      .alternate_cut as NativeObject;
+  const old = (alternate.entries as NativeObject[])[0];
+  old.statistic_label = null;
+  alternate.entries = [old];
+  validateHistorySnapshotPayload(legacy, syntheticSnapshotPart());
+});
+Deno.test("snapshot expanded statistics keep closed fields and exact source context bounds", async () => {
+  for (const field of ["raw_scores", "private_rule", "statistic_kind"]) {
+    const body = syntheticSnapshotStatisticsBody();
+    const entry = (((body.rows as NativeObject[])[0].alternate_cut as NativeObject)
+      .entries as NativeObject[])[
+        3
+      ];
+    entry[field] = "SYNTHETIC_PRIVATE_CANARY";
+    await denied(
+      () => validateHistorySnapshotPayload(body, syntheticSnapshotPart()),
+      "snapshot_invalid",
+    );
+  }
+  for (
+    const context of [null, {
+      observation_id: "observation:" + "a".repeat(64),
+      identity_variant_index: 1,
+      scope_status: "source_consistent",
+    }, {
+      observation_id: "observation:" + "a".repeat(64),
+      identity_variant_index: 0,
+      scope_status: "source_consistent",
+      private_path: "SYNTHETIC_PRIVATE_CANARY",
+    }]
+  ) {
+    const body = syntheticSnapshotStatisticsBody();
+    const entry = (((body.rows as NativeObject[])[0].alternate_cut as NativeObject)
+      .entries as NativeObject[])[
+        3
+      ];
+    entry.source_context = context as NativeObject | null;
+    await denied(
+      () => validateHistorySnapshotPayload(body, syntheticSnapshotPart()),
+      "snapshot_invalid",
+    );
+  }
+});
+Deno.test("snapshot nonpercent statistics retain source URL and missing value safety rules", async () => {
+  const body = syntheticSnapshotStatisticsBody();
+  const entry = (((body.rows as NativeObject[])[0].alternate_cut as NativeObject)
+    .entries as NativeObject[])[3];
+  entry.source_url =
+    "https://abcdefghijklmnopqrst.supabase.co/storage/v1/object/sign/private/a?token=SYNTHETIC";
+  await denied(
+    () => validateHistorySnapshotPayload(body, syntheticSnapshotPart()),
+    "snapshot_invalid",
+  );
+  entry.source_url = "https://synthetic.invalid/official-statistics";
+  for (
+    const status of [
+      "pending_value_missing",
+      "pending_value_type",
+      "not_published",
+    ]
+  ) {
+    entry.status = status;
+    entry.reason_code = "SYNTHETIC_MISSING";
+    entry.value = 0;
+    await denied(
+      () => validateHistorySnapshotPayload(body, syntheticSnapshotPart()),
+      "snapshot_invalid",
+    );
+    entry.value = null;
+    validateHistorySnapshotPayload(body, syntheticSnapshotPart());
+  }
 });

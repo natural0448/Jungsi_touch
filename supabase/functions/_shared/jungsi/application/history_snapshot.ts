@@ -150,10 +150,7 @@ function cell(
       !Number.isSafeInteger(row.omitted_other_basis_count) ||
       Number(row.omitted_other_basis_count) < 0
     ) invalid();
-    for (const entry of row.entries) {
-      cell(entry, "alternate_cut", true);
-      if ((entry as NativeObject).statistic_percent !== 75) invalid();
-    }
+    for (const entry of row.entries) cell(entry, "alternate_cut", true);
   }
   if (
     slot === "recruitment_count_with_stage" &&
@@ -234,9 +231,14 @@ function cell(
     }
     if (
       row.value !== null && (slot !== "alternate_cut" || row.status === "verified_official") &&
-      (row.statistic_percent === null || row.basis_code === null || row.basis_label === null ||
-        row.cohort_code === null || row.cohort_label === null ||
+      ((!alternateEntry && row.statistic_percent === null) || row.basis_code === null ||
+        row.basis_label === null || row.cohort_code === null || row.cohort_label === null ||
         row.selection_rule_ref === null)
+    ) invalid();
+    // A reviewed nonpercent entry is named by its original publication label; do not infer a cut.
+    if (
+      alternateEntry && row.statistic_percent === null && row.status === "verified_official" &&
+      row.statistic_label === null
     ) invalid();
   }
 }
