@@ -5769,7 +5769,8 @@
         "syntheticSnapshotCell",
         "syntheticSnapshotPart",
         "syntheticSnapshotPublication",
-        "syntheticSnapshotRow"
+        "syntheticSnapshotRow",
+        "syntheticSnapshotStatisticsBody"
       ]
     },
     {
@@ -14826,7 +14827,7 @@
                 "REQ-29",
                 "REQ-30"
               ],
-              "source_sha256": "665824501cd3268a58c54a0d0b027a6d3d6597b496b4d8761a366fe6d4e56a65",
+              "source_sha256": "35d0d98ed5fa003c0e8a747ca8bd9702450b12ea06498ca0c0d311625a9a7ad1",
               "declared_exports": [
                 "HISTORY_PUBLICATION_STATUSES",
                 "HISTORY_SNAPSHOT_SLOTS",
@@ -124616,7 +124617,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "665824501cd3268a58c54a0d0b027a6d3d6597b496b4d8761a366fe6d4e56a65"
+          "source_sha256": "35d0d98ed5fa003c0e8a747ca8bd9702450b12ea06498ca0c0d311625a9a7ad1"
         },
         "dependencies": [
           {
@@ -128548,7 +128549,8 @@
           "syntheticSnapshotCell",
           "syntheticSnapshotPart",
           "syntheticSnapshotPublication",
-          "syntheticSnapshotRow"
+          "syntheticSnapshotRow",
+          "syntheticSnapshotStatisticsBody"
         ],
         "declarations": {
           "symbols": [
@@ -128824,6 +128826,32 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "syntheticSnapshotStatisticsBody",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "NativeObject",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "NativeObject",
+                        "resolution": {
+                          "kind": "import",
+                          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+                          "name": "NativeObject"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
             }
           ],
           "imports": [
@@ -128834,6 +128862,11 @@
               "jsDoc": {
                 "doc": "Invented public projection and private part reference. No admission data."
               }
+            },
+            {
+              "importedName": "JsonFloat",
+              "originalName": "JsonFloat",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             },
             {
               "importedName": "NOW",
@@ -128862,7 +128895,7 @@
               }
             }
           ],
-          "source_sha256": "f4432263345b5e17b43006f23699356742b6b511f8b29dc12097f9fc94d2ada7"
+          "source_sha256": "6c99a28934d88962f0e2c849d94f45e48e89d313bbd30c0d95d3e5d81fdc0ffb"
         },
         "dependencies": [
           {
@@ -128882,6 +128915,16 @@
               {
                 "kind": "type",
                 "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/native_json.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
               }
             ]
           },
@@ -130020,7 +130063,7 @@
                     },
                     "hasBody": true,
                     "isAsync": true,
-                    "parameter_source": "(work: () => unknown | Promise<unknown>, code: string, http = 503)"
+                    "parameter_source": "(\n  work: () => unknown | Promise<unknown>,\n  code: string,\n  http = 503,\n)"
                   }
                 }
               ]
@@ -130147,6 +130190,11 @@
               "src": "tests/edge/fixture.ts"
             },
             {
+              "importedName": "nativeJsonText",
+              "originalName": "nativeJsonText",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
               "importedName": "syntheticSnapshotBody",
               "originalName": "syntheticSnapshotBody",
               "src": "tests/edge/synthetic_history_snapshot.ts"
@@ -130162,12 +130210,17 @@
               "src": "tests/edge/synthetic_history_snapshot.ts"
             },
             {
+              "importedName": "syntheticSnapshotStatisticsBody",
+              "originalName": "syntheticSnapshotStatisticsBody",
+              "src": "tests/edge/synthetic_history_snapshot.ts"
+            },
+            {
               "importedName": "validateHistorySnapshotPayload",
               "originalName": "validateHistorySnapshotPayload",
               "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
             }
           ],
-          "source_sha256": "d893a7c6208f5df243b218a6865a7f9eaba0b3ec98dd7653f51e7480ec9ee9fa"
+          "source_sha256": "7d167a9ed25cb3cd8a29bc8eb891b12093384267d1b88269e388f2707b53907b"
         },
         "dependencies": [
           {
@@ -130195,7 +130248,7 @@
             "dynamic": false,
             "targets": [
               {
-                "kind": "type",
+                "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
               }
             ]
@@ -152190,15 +152243,15 @@
       "tests/edge/test_usage_service.ts": "1488f2be2b2197fb05fffa32d976e6b9ee972daacb08a13364baebbe7db0eb9b",
       "tests/edge/test_year_equating.ts": "fd49e41b550b6f53582a591298d0b315b5bbfa6e949b15c9dc6f6e594ca23713",
       "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
-      "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "665824501cd3268a58c54a0d0b027a6d3d6597b496b4d8761a366fe6d4e56a65",
+      "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "35d0d98ed5fa003c0e8a747ca8bd9702450b12ea06498ca0c0d311625a9a7ad1",
       "supabase/functions/_shared/jungsi/application/own_report_list.ts": "e9a9d595fb770ebd538eb80987c038baa220228deae49ec98395778ab077ed74",
       "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "d855087933085af77f16ec3cc57e9841280318464da5cd39c4af7d095cd4ea9e",
       "supabase/functions/_shared/jungsi/infrastructure/own_report_cursor.ts": "b2273effe7558e9f27abc5e92c21c2f8d89653e67e30f450a96b12db8219c538",
       "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts": "cd8753d36e9060b36d54d41fe03bf6e92823a6630f6bcd2550c55f7bca24407e",
       "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "abd6cdc1eba62c095f35835201495896b2bacff8151f637261646fabb057ba31",
-      "tests/edge/synthetic_history_snapshot.ts": "f4432263345b5e17b43006f23699356742b6b511f8b29dc12097f9fc94d2ada7",
+      "tests/edge/synthetic_history_snapshot.ts": "6c99a28934d88962f0e2c849d94f45e48e89d313bbd30c0d95d3e5d81fdc0ffb",
       "tests/edge/test_administrator_usage.ts": "858ff65182a8c55df6571e3dc34394a3670f6c1f35309655a331bb1f25828178",
-      "tests/edge/test_history_snapshot.ts": "d893a7c6208f5df243b218a6865a7f9eaba0b3ec98dd7653f51e7480ec9ee9fa",
+      "tests/edge/test_history_snapshot.ts": "7d167a9ed25cb3cd8a29bc8eb891b12093384267d1b88269e388f2707b53907b",
       "tests/edge/test_history_snapshot_source.ts": "62529377670897d60c722367979bf3b6b36bd97cd3f2410326e436a23305d6fa",
       "tests/edge/test_own_report_list.ts": "594d8ca9a8abdf77074a7f37268f6cdfe8204369fc28c0069058455b656a683f",
       "tests/edge/test_own_report_list_postgres.ts": "930ad76a417ca082e08b3e9f61c0ab079e9fbde7784dbe4b9306774f2d6c9178",
@@ -153684,7 +153737,26 @@
       "source_implementation": "IN_PROGRESS",
       "data_candidate": "IN_PROGRESS",
       "new_publication": "NOT_RUN",
-      "new_live_browser": "NOT_RUN"
+      "new_live_browser": "NOT_RUN",
+      "service_implementation": {
+        "status": "SOURCE_AND_SYNTHETIC_HTTP_PASS_FULL_SNAPSHOT_AND_CI_PENDING",
+        "review_base_commit": "8a73fa34dbd277dc73ec7508a74757c80a3a9c63",
+        "production_source": {
+          "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
+          "sha256": "35d0d98ed5fa003c0e8a747ca8bd9702450b12ea06498ca0c0d311625a9a7ad1"
+        },
+        "contract": "기존 alternate_cut.entries에서 실제 정수 비율 1~100과 비백분위 null을 허용한다. 검증된 비백분위 값에는 원문 통계 명칭과 기준·집단·단위·출처를 요구한다. 고정50/70 및 기존75 판과 닫힌 응답·상한·권한은 유지한다.",
+        "synthetic_acceptance": {
+          "tests": 28,
+          "test_path": "tests/edge/test_history_snapshot.ts",
+          "fixture_path": "tests/edge/synthetic_history_snapshot.ts",
+          "status": "PASS_TARGETED_SERVICE_PRIVATE_HTTP_RECORDED_SEPARATELY"
+        },
+        "native_preservation": "문자열·정수·소수 원문과 실제0·null·알려진 값의 metadata 보류를 구분한다. 비율을 다른 고정 칸으로 치환하지 않는다.",
+        "runtime_application": "NOT_RUN_CURRENT_INSTALLED_SOURCE_AND_PREVIOUS_MODULE_SHA_MUST_MATCH_BEFORE_OWNER_PATCH",
+        "new_publication": "NOT_RUN",
+        "new_live_browser": "NOT_RUN"
+      }
     },
     "latest_scoped_observation_20261022": {
       "status": "READ_ONLY_BASELINE_PUBLICATION_AND_TARGET_RENDERING_OBSERVED",
@@ -153801,12 +153873,12 @@
       "history.snapshot.head": {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
         "symbol": "HistorySnapshotService.head",
-        "source_sha256": "665824501cd3268a58c54a0d0b027a6d3d6597b496b4d8761a366fe6d4e56a65"
+        "source_sha256": "35d0d98ed5fa003c0e8a747ca8bd9702450b12ea06498ca0c0d311625a9a7ad1"
       },
       "history.snapshot.read": {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
         "symbol": "HistorySnapshotService.read",
-        "source_sha256": "665824501cd3268a58c54a0d0b027a6d3d6597b496b4d8761a366fe6d4e56a65"
+        "source_sha256": "35d0d98ed5fa003c0e8a747ca8bd9702450b12ea06498ca0c0d311625a9a7ad1"
       },
       "report.list-own": {
         "path": "supabase/functions/_shared/jungsi/application/own_report_list.ts",
@@ -153819,7 +153891,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "97f26fad6727fb95728647f64b2ee24f1cf0ec34ee047e85d213f53f93adf939",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "eeac06ed226b310e3f780fa30a8ac75fa17d726014a9bb8428b378abb76a8797",
       "tests/edge/test_administrator_usage.ts": "858ff65182a8c55df6571e3dc34394a3670f6c1f35309655a331bb1f25828178",
-      "tests/edge/test_history_snapshot.ts": "d893a7c6208f5df243b218a6865a7f9eaba0b3ec98dd7653f51e7480ec9ee9fa",
+      "tests/edge/test_history_snapshot.ts": "7d167a9ed25cb3cd8a29bc8eb891b12093384267d1b88269e388f2707b53907b",
       "tests/edge/test_history_snapshot_source.ts": "62529377670897d60c722367979bf3b6b36bd97cd3f2410326e436a23305d6fa",
       "tests/edge/test_own_report_list.ts": "594d8ca9a8abdf77074a7f37268f6cdfe8204369fc28c0069058455b656a683f",
       "tests/edge/test_own_report_list_postgres.ts": "930ad76a417ca082e08b3e9f61c0ab079e9fbde7784dbe4b9306774f2d6c9178",
@@ -153838,7 +153910,7 @@
         "tests/edge/test_read_view_runtime.ts",
         "tests/edge/test_combined_operating_admin.ts"
       ],
-      "test_count": 88,
+      "test_count": 94,
       "source_bindings": [
         {
           "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
@@ -153846,7 +153918,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
-          "sha256": "665824501cd3268a58c54a0d0b027a6d3d6597b496b4d8761a366fe6d4e56a65"
+          "sha256": "35d0d98ed5fa003c0e8a747ca8bd9702450b12ea06498ca0c0d311625a9a7ad1"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/own_report_list.ts",
@@ -153866,7 +153938,7 @@
         },
         {
           "path": "tests/edge/test_history_snapshot.ts",
-          "sha256": "d893a7c6208f5df243b218a6865a7f9eaba0b3ec98dd7653f51e7480ec9ee9fa"
+          "sha256": "7d167a9ed25cb3cd8a29bc8eb891b12093384267d1b88269e388f2707b53907b"
         },
         {
           "path": "tests/edge/test_history_snapshot_source.ts",

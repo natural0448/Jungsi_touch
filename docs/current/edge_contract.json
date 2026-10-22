@@ -9285,7 +9285,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "665824501cd3268a58c54a0d0b027a6d3d6597b496b4d8761a366fe6d4e56a65",
+        "source_sha256": "35d0d98ed5fa003c0e8a747ca8bd9702450b12ea06498ca0c0d311625a9a7ad1",
         "symbols": [
           {
             "declarations": [
@@ -92130,6 +92130,11 @@
             "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
           },
           {
+            "importedName": "JsonFloat",
+            "originalName": "JsonFloat",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
             "importedName": "NOW",
             "originalName": "SYNTHETIC_RUNTIME_NOW",
             "src": "tests/edge/synthetic_runtime_binding.ts"
@@ -92156,7 +92161,7 @@
             "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
           }
         ],
-        "source_sha256": "f4432263345b5e17b43006f23699356742b6b511f8b29dc12097f9fc94d2ada7",
+        "source_sha256": "6c99a28934d88962f0e2c849d94f45e48e89d313bbd30c0d95d3e5d81fdc0ffb",
         "symbols": [
           {
             "declarations": [
@@ -92430,6 +92435,32 @@
               }
             ],
             "name": "syntheticSnapshotPublication"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "syntheticSnapshotStatisticsBody"
           }
         ]
       },
@@ -92456,6 +92487,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/native_json.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "./synthetic_runtime_binding.ts",
           "targets": [
             {
@@ -92471,7 +92512,8 @@
         "syntheticSnapshotCell",
         "syntheticSnapshotPart",
         "syntheticSnapshotPublication",
-        "syntheticSnapshotRow"
+        "syntheticSnapshotRow",
+        "syntheticSnapshotStatisticsBody"
       ]
     },
     "tests/edge/synthetic_offering_analysis.ts": {
@@ -98677,6 +98719,11 @@
             "src": "tests/edge/fixture.ts"
           },
           {
+            "importedName": "nativeJsonText",
+            "originalName": "nativeJsonText",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
             "importedName": "syntheticSnapshotBody",
             "originalName": "syntheticSnapshotBody",
             "src": "tests/edge/synthetic_history_snapshot.ts"
@@ -98692,12 +98739,17 @@
             "src": "tests/edge/synthetic_history_snapshot.ts"
           },
           {
+            "importedName": "syntheticSnapshotStatisticsBody",
+            "originalName": "syntheticSnapshotStatisticsBody",
+            "src": "tests/edge/synthetic_history_snapshot.ts"
+          },
+          {
             "importedName": "validateHistorySnapshotPayload",
             "originalName": "validateHistorySnapshotPayload",
             "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
           }
         ],
-        "source_sha256": "d893a7c6208f5df243b218a6865a7f9eaba0b3ec98dd7653f51e7480ec9ee9fa",
+        "source_sha256": "7d167a9ed25cb3cd8a29bc8eb891b12093384267d1b88269e388f2707b53907b",
         "symbols": [
           {
             "declarations": [
@@ -98768,7 +98820,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(work: () => unknown | Promise<unknown>, code: string, http = 503)",
+                  "parameter_source": "(\n  work: () => unknown | Promise<unknown>,\n  code: string,\n  http = 503,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -98955,7 +99007,7 @@
           "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
           "targets": [
             {
-              "kind": "type",
+              "kind": "code",
               "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             }
           ]
