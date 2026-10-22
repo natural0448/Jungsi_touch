@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.103이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.104이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -415,7 +415,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=514847bc1fe4e82654afc6716d125aece012c45bf31aa58967d6606341b60561 -->
+<!-- jungsi:generated spec_sha256=9e44fad71bdd1ffe17ae77ae1d3405d1d914c2b43e3b78bf1d3588a8bb9adace -->
 
 
 ## P1·P2 화면 변경의 한정 수용
@@ -623,7 +623,7 @@ P1-PUBLISHED-STATISTICS-20261022 / ADOPTED_REQUIREMENTS_CODE_DATA_AND_LIVE_ACCEP
 
 READ_ONLY_BASELINE_PUBLICATION_AND_TARGET_RENDERING_OBSERVED. 기존 DB 발행 head approved와 로그인된 P1 전국 요약·대상 모집단위의 연도별 자격 보류/결측 표시를 대조했다. 과거 head0/소수 학교 화면 관측은 역사다. 실제 사용자 JWT·토큰/계정/실제 자료 지문을 공개하지 않는다. 배포 source/Storage 직접GET/전체 보안·전체학교 인수는 이 읽기 증거만으로 PASS로 바꾸지 않는다.
 
-별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 별도 시험 88개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
+별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 별도 시험 94개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
 
 ### 최신 Owner·화면팀 운영 영수증의 한정 수용
 
