@@ -14,6 +14,8 @@ class DeletionApprovalTests(unittest.TestCase):
         cls.repo.mkdir(parents=True,exist_ok=False)
         cls.git_env={k:v for k,v in os.environ.items() if not k.startswith('GIT_')}
         cls.call('init','--initial-branch=fixture')
+        # Retained snapshot paths can exceed MAX_PATH on Windows; only this synthetic repository is configured.
+        cls.call('config','core.longpaths','true')
         cls.spec=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
         old=deepcopy(cls.spec);old['workflow']['branch_governance'].pop('file_deletion_policy',None)
         cls.payload={path:('SYNTHETIC retained '+path+'\n').encode() for path in policy.DELETION_PATHS}
@@ -239,6 +241,8 @@ class RawMetricsDeletionApprovalTests(unittest.TestCase):
         cls.repo.mkdir(parents=True,exist_ok=False)
         cls.git_env={k:v for k,v in os.environ.items() if not k.startswith('GIT_')}
         cls.call('init','--initial-branch=fixture')
+        # Retained snapshot paths can exceed MAX_PATH on Windows; only this synthetic repository is configured.
+        cls.call('config','core.longpaths','true')
         cls.spec=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
         old=deepcopy(cls.spec);old['workflow']['branch_governance']['file_deletion_policy'].pop('additional_records',None)
         cls.payload=b'SYNTHETIC unused raw metrics fixture\n'
