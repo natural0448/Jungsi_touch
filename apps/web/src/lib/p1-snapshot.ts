@@ -119,7 +119,13 @@ function cell(o: unknown, extra?: "stage" | "cut"): Cell {
   if (extra === "cut") {
     out.b = str(c.basis_label);
     out.co = str(c.cohort_label ?? c.cohort);
+    out.p = c.statistic_percent === null || c.statistic_percent === undefined ? null : int(c.statistic_percent);
+    out.bc = str(c.basis_code);
+    out.cc = str(c.cohort_code);
   }
+  out.at = str(c.source_as_of);
+  const context = c.source_context as Obj | null | undefined;
+  out.ctx = context ? { identity_variant_index: int(context.identity_variant_index), scope_status: String(context.scope_status) } : null;
   const url = str(c.source_url);
   if (url) out.url = url;
   return out;

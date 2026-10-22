@@ -25,7 +25,7 @@ const encode = new TextEncoder(), realNow = Date.now;
 const sha = async b => Buffer.from(await crypto.subtle.digest("SHA-256", b)).toString("hex");
 let serial = 0;
 
-async function world(t, { parts = 2, schools = 1, missing = false } = {}) {
+async function world(t, { parts = 2, schools = 1, missing = false, row = {} } = {}) {
   const priorMode = process.env.JUNGSI_API_MODE, priorNode = process.env.NODE_ENV;
   process.env.JUNGSI_API_MODE = "live"; process.env.NODE_ENV = "test";
   const w = { now: Date.parse("2026-10-21T00:00:00Z"), headCalls: 0, partCalls: 0, writes: [], cache: new Map(), delayedKey: null };
@@ -57,7 +57,8 @@ async function world(t, { parts = 2, schools = 1, missing = false } = {}) {
       university_id: university, university_name: `가상대학교${i % schools}`, academic_year: 2026,
       original_pk: `pk${i}`, department: `가상학과${i}`, region: "가상지역", group: "가",
       competition_ratio: { value: "__EXACT_NUMBER__", status: "ready", unit: "대1" },
-    }] }).replace('"__EXACT_NUMBER__"', "9.71000000000000009");
+      ...row,
+    }] }).replace('"__EXACT_NUMBER__"', "9.71000000000000009").replace('"__STAT_NUMBER__"', "84.10000000000000009");
     const decoded = encode.encode(json), gzip = gzipSync(decoded);
     pins.push({ part_id: part, payload_id: `payload${i}`, gzip_bytes: gzip.length, gzip_sha256: await sha(gzip), decoded_bytes: decoded.length, decoded_sha256: await sha(decoded), rows: 1, mapped_rows: 1, mapping_pending_rows: 0 });
     bodies.set(part, i % 2 ? decoded : gzip);
@@ -214,4 +215,38 @@ test("live and synthetic use separate server-selected actors on the same native 
   assert.equal((await w.module.currentSnapshot(w.source, w.caller)).state, "ready");
   assert.equal(ready.cache_mode, "live");
   assert.ok(names.includes("public-v2:live")); assert.ok(names.includes("public-v2:synthetic"));
+});
+
+test("published statistics retain their own percent, cohort, source context and native numeric text through warming", async t => {
+  const context = { observation_id: `observation:${"d".repeat(64)}`, identity_variant_index: 1, scope_status: "review_pending" };
+  const cell = { value: "84.10", status: "pending_metadata", reason_code: "SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING",
+    unit: "점", statistic_label: "평균", statistic_percent: null, basis_code: "published_standard_score", basis_label: "표준점수",
+    cohort: "initial_admits", cohort_code: "initial_admits", cohort_label: "최초합격자", source_as_of: "2026-09-10",
+    source_url: "https://example.edu/results", source_context: context };
+  const entries = [cell, { ...cell, value: "__STAT_NUMBER__", statistic_label: "90%컷", statistic_percent: 90 },
+    { ...cell, value: 0, statistic_label: "최저" }, { ...cell, value: null, statistic_label: "최고" }];
+  const w = await world(t, { parts: 1, row: { alternate_cut: { status: "pending_metadata", reason_code: "SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING", omitted_other_basis_count: 2, entries } } });
+  const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
+  const alt = result.schools[0].rows[0].alt;
+  assert.equal(alt.e.length, 4); assert.equal(alt.om, 2);
+  const [mean, cut90, minimum, maximum] = alt.e;
+  assert.equal(mean.v, "84.10"); assert.equal(mean.n, undefined); assert.equal(mean.p, null); assert.equal(mean.l, "평균");
+  assert.equal(mean.bc, "published_standard_score"); assert.equal(mean.cc, "initial_admits"); assert.equal(mean.co, "최초합격자");
+  assert.equal(mean.at, "2026-09-10"); assert.equal(mean.url, "https://example.edu/results"); assert.deepEqual(mean.ctx, { identity_variant_index: 1, scope_status: "review_pending" });
+  assert.equal(JSON.stringify(result).includes(context.observation_id), false);
+  assert.equal(mean.s, "pending_metadata");
+  assert.equal(cut90.v, "84.10000000000000009"); assert.equal(cut90.n, 1); assert.equal(cut90.p, 90);
+  assert.equal(minimum.v, "0"); assert.equal(minimum.n, 1); assert.equal(minimum.p, null);
+  assert.equal(maximum.v, null); assert.equal(maximum.p, null);
+  assert.equal(result.schools[0].rows[0].c50.v, null); assert.equal(result.schools[0].rows[0].c70.v, null);
+});
+
+test("published statistic labels preserve source wording and do not turn a mean or missing percent into a cut", async () => {
+  const { publishedStatisticLabel } = await import("../src/lib/p1-shape.ts");
+  const base = { v: "10.00", s: "pending_metadata", r: "SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING", u: "점", l: null };
+  assert.equal(publishedStatisticLabel({ ...base, l: "최초합격자\n평균", p: null }), "최초합격자\n평균");
+  assert.equal(publishedStatisticLabel({ ...base, p: 80 }), "80%컷");
+  assert.equal(publishedStatisticLabel({ ...base, p: null }), "발표 기준 확인 중");
+  assert.equal(publishedStatisticLabel({ ...base, p: 0 }), "발표 기준 확인 중");
+  assert.equal(publishedStatisticLabel({ ...base, p: 101 }), "발표 기준 확인 중");
 });
