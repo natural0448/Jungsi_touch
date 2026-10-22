@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.104",
+  "version": "1.9.105",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -6995,7 +6995,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.104",
+        "contract_version": "1.9.105",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7169,7 +7169,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.104",
+        "contract_version": "1.9.105",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7335,7 +7335,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.104",
+        "contract_version": "1.9.105",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7354,7 +7354,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.104",
+        "contract_version": "1.9.105",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7379,7 +7379,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.104",
+        "contract_version": "1.9.105",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7404,7 +7404,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.104",
+        "contract_version": "1.9.105",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -7456,7 +7456,8 @@
         "behavior": "Retained Windows snapshot paths may exceed MAX_PATH. Immediately after init, set core.longpaths=true in that newly created synthetic repository only.",
         "invariants": "No global or operating Git settings, source/fixture files, test assertions, denial rules, security gates or deletion approvals are changed. Prior failed receipts and retained repositories are preserved.",
         "evidence": "The previous presentation checkout runs failed at synthetic update-ref with Filename too long before policy evaluation; all 1202 tests remain mandatory."
-      }
+      },
+      "operating_receipt_resolution": "Current installed runtime identity is this dated Owner receipt. Frozen current_deployment/current_source_verification/current_BFF_deployment objects are retained historical regression evidence; their old field names do not supersede this receipt. Read this pointer, the new-statistics extension and the private checkpoint before examining Git deltas."
     },
     "documentation_sync": {
       "format": "jungsi.documentation-sync-policy/v1",
@@ -8110,7 +8111,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "60edab348f15fbfc0033708f65d76dc5ac297f082aa3cc57c4b310541d62cf18",
+            "source_sha256": "3464dba2a549d5d09ea1de25e3f287364221b35a23eee213c559e00ed4add8a6",
             "symbols": [
               {
                 "kind": "class",
@@ -20108,6 +20109,16 @@
         "REQ-28"
       ],
       "summary": "대학 발표 통계 화면 브랜치의 정상 전체 검사에서 보존된 합성 Git fixture 경로가 Windows MAX_PATH를 넘어 정책 판정 전에 실패하는 원인을 확인했다. 파일 삭제 허용 검수용 새 저장소에만 init 직후 core.longpaths=true를 설정해 기존 branch fixture와 같은 경로 호환을 적용한다. 외부 GIT_* 환경을 제거하는 보안·모든 판정/1202검사·실파일 보존·운영 설정은 유지하며 검사나 훅을 생략하지 않는다."
+    },
+    {
+      "date": "2026-10-22",
+      "requirements": [
+        "REQ-28",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "Owner의 기존 전국 P1 실제 실행 회신과 Root의 현재 head·대상 표 재조회를 접수했다. 최신 실제 설치는 날짜별 v17 Owner 영수증 포인터로 찾고 source032 등 동결 current_*는 과거 회귀 기준으로 보존해 현재 운영판과 혼동하지 않는다. 기존 다섯 설정 등록·P1 전환·세 화면 읽기 회귀와 전체22/JWT·소유권/CSRF·보안·새 seq2 인수를 분리한다. 서비스/화면의 발표 통계 확장 PR을 통합했으며 새 자료판은 선택/독립 검수·발행·운영 화면 검수 대기다. 회복 refs 읽기 2시도/1봉인과 이후 새 CID만 읽는 범위를 명시하고 기존 통계/원문/실패본/모형 제어를 보존한다."
     }
   ],
   "overall_analysis_contract": {
@@ -30295,7 +30306,8 @@
             "OPS-SAFE-OBSERVER-READINESS-20261016",
             "OPS-ADMIN-SESSION-FIX-DEPLOYED-20261016",
             "OPS-ADMIN-SESSION-FIX-READINESS-20261016",
-            "OPS-OWNER-P1-P2-V3-20261020"
+            "OPS-OWNER-P1-P2-V3-20261020",
+            "OPS-OWNER-NATIONWIDE-RUNTIME-20261022"
           ]
         },
         "bff_browser_acceptance": {
@@ -30315,7 +30327,8 @@
             "OPS-P2-ADMIN-SESSION-FIX-SAVE-UI-20261016",
             "OPS-P2-ADMIN-SESSION-FIX-RELOAD-UI-20261016",
             "OPS-P2-ADMIN-SESSION-FIX-SUBJECT-DISPLAY-20261016",
-            "OPS-OWNER-P1-P2-V3-20261020"
+            "OPS-OWNER-P1-P2-V3-20261020",
+            "OPS-OWNER-NATIONWIDE-BROWSER-20261022"
           ]
         },
         "security_gates": {
@@ -30343,6 +30356,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
             "new_BFF_observation": "PEER_REPORTED_P1_SEARCH_PASS",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30363,6 +30384,14 @@
           },
           "evidence_ids": [],
           "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
@@ -30393,6 +30422,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
             "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30421,6 +30458,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
             "new_BFF_observation": "PEER_REPORTED_OWN_REPORT_REFRESH_PASS",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30441,6 +30486,14 @@
           },
           "evidence_ids": [],
           "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
@@ -30465,6 +30518,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
             "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30485,6 +30546,14 @@
           },
           "evidence_ids": [],
           "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
@@ -30515,6 +30584,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
             "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30543,6 +30620,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
             "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30563,6 +30648,14 @@
           },
           "evidence_ids": [],
           "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
@@ -30587,6 +30680,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
             "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30607,6 +30708,14 @@
           },
           "evidence_ids": [],
           "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
@@ -30631,6 +30740,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
             "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30651,6 +30768,14 @@
           },
           "evidence_ids": [],
           "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": false,
             "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
@@ -30675,6 +30800,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": false,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
             "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
             "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30695,6 +30828,14 @@
           },
           "evidence_ids": [],
           "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": false,
             "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
@@ -30719,6 +30860,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": false,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
             "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
             "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30739,6 +30888,14 @@
           },
           "evidence_ids": [],
           "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": false,
             "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
@@ -30763,6 +30920,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": false,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
             "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
             "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30783,6 +30948,14 @@
           },
           "evidence_ids": [],
           "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": false,
             "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
@@ -30807,6 +30980,14 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": false,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": false,
             "source_deployment": "NOT_ACTIVATED_BY_EXISTING14_BINDING",
             "new_BFF_observation": "NOT_RUN_IN_SUPPLIED_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES"
@@ -30827,6 +31008,14 @@
           },
           "evidence_ids": [],
           "current_owner_receipt": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION",
+            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
             "source_deployment": "OWNER_REPORTED_V15",
@@ -31273,9 +31462,25 @@
           "operations": [],
           "scope": "Owner/frontend supplied installation and limited browser receipt; independent Root source/file binding only. No full native22 or final security acceptance.",
           "does_not_imply_operation_acceptance": true
+        },
+        "OPS-OWNER-NATIONWIDE-RUNTIME-20261022": {
+          "kind": "edge_deployment",
+          "candidate_commit": "fc3097d9cb932b55c24fbf007144e27db73b24ab",
+          "receipt_sha256": "5b325f1bf3a266dc624c6baeaf6b6a0a677b500df729b18b29284c82f0ac69e3",
+          "operations": [],
+          "scope": "Owner-reported baseline seq1 deployment/admin preparation and read-only page regression; Root indexed head/target P1 readback only. New seq2, full native22 and security not certified.",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-OWNER-NATIONWIDE-BROWSER-20261022": {
+          "kind": "bff_browser",
+          "candidate_commit": "fc3097d9cb932b55c24fbf007144e27db73b24ab",
+          "receipt_sha256": "5b325f1bf3a266dc624c6baeaf6b6a0a677b500df729b18b29284c82f0ac69e3",
+          "operations": [],
+          "scope": "Owner-reported baseline seq1 deployment/admin preparation and read-only page regression; Root indexed head/target P1 readback only. New seq2, full native22 and security not certified.",
+          "does_not_imply_operation_acceptance": true
         }
       },
-      "rule": "동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다. 최신 설치는 current_deployment의 ed978 실제 영수증을 따르며 cb500 actual_editor_deployment는 당시 이력이다. current_P2_attempt는 새 실제 시도이고 회신 당시 두 실패는 P2_attempt_history에서 원래 배포·unknown 상태로 보존한다. 소스·준비상태 PASS, 제한된 로그 상관관계, 범위조회 snapshot, UI 업무 인수는 분리한다. 2026-10-21 재개는 owner_registration_20261021을 따른다. 기본 배포 대상은 기존 Supabase이며 P1 조정 메타데이터 DO만 한정 예외다. 최종 Secrets는 화면 담당 Owner가 등록한다. 정확 코드/정책/바인딩/객체 closure·기존 성적 보존 전환·006a 복귀 준비 후 같은 전환 구간에 적용하며, 실제 JWT/OTP/BFF·비용 검수 전 완료로 표시하지 않는다.",
+      "rule": "2026-10-22 현재 설치와 기존 전국 P1 전환은 effective_current_runtime_ref의 날짜별 Owner 영수증을 따른다. 아래 source032 등 날짜별 상태와 동결 current_* 객체는 당시의 보존된 회귀 기준이며 현재 v17을 덮어쓰는 기준이 아니다. 새 통계 seq2는 기존 전환 완료와 분리하며 미발행이다. 동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다. 최신 설치는 current_deployment의 ed978 실제 영수증을 따르며 cb500 actual_editor_deployment는 당시 이력이다. current_P2_attempt는 새 실제 시도이고 회신 당시 두 실패는 P2_attempt_history에서 원래 배포·unknown 상태로 보존한다. 소스·준비상태 PASS, 제한된 로그 상관관계, 범위조회 snapshot, UI 업무 인수는 분리한다. 2026-10-21 재개는 owner_registration_20261021을 따른다. 기본 배포 대상은 기존 Supabase이며 P1 조정 메타데이터 DO만 한정 예외다. 최종 Secrets는 화면 담당 Owner가 등록한다. 정확 코드/정책/바인딩/객체 closure·기존 성적 보존 전환·006a 복귀 준비 후 같은 전환 구간에 적용하며, 실제 JWT/OTP/BFF·비용 검수 전 완료로 표시하지 않는다.",
       "position_graph": {
         "formula_rows": [
           [
@@ -31299,7 +31504,7 @@
       "runtime_assembly": {
         "format": "jungsi.edge-runtime-assembly/v1",
         "status": "SOURCE_ASSEMBLED",
-        "status_text": "실제 API source032/spec1.9.70을 기존 함수에 설치·reload 결속했고 준비5경계를 검수했다. 새 정상 UI1회 저장·과목표시·GETreload와4point 표시검산은 한정 기능 관측이다. 전체누백·조합분포는 미발행pending, 정확HTTP/BFFactor 귀속은 미확정이며 전22native/배포인수0·보안3gate 미완료·production_ready=false다. cb500/ed978와 세실패·41/584 합성 이력은 보존한다.",
+        "status_text": "현재 운영 설치는 effective_current_runtime_ref의 Owner v17·고정 combined20 번들 보고를 따른다. 기존 전국 P1 발행·준비·관리자 정문과 P2/P3/P4 읽기 화면 회귀를 접수했고 Root는 현재 head와 대상 P1 표를 다시 읽었다. 새 통계 seq2 발행·새 화면 운영 검수, 전체22 native와 보안 gate는 별도다. source032 등 이전 조립·관측 결과는 historical_status_text_before_owner_20261022와 동결 원장에 보존한다.",
         "bindings": {
           "native_entry": {
             "path": "supabase/functions/jungsi-api/index.ts",
@@ -31412,6 +31617,48 @@
             "현재 decoder와 독립 산술 근거를 재사용한다. 승인 범위는 과목 성적표와 네 과목 표준점수 합이며, 불변 Storage 발행·정확 재조회와 native 선택 그래프 검수를 통과했다. 전체/대학 누백·연도 보정·판단·발행 승인은 승계하지 않는다."
           ],
           [
+            "현재 전국 P1 — Owner 전환 완료 회신 / 새 통계 자료판 준비",
+            "기존 approved head와 대상 화면을 실제 재조회했다. 다른 발표 기준과 가야대 두 관측은 별도 seq2 후보·독립 검수·불변 발행을 진행한다. 누백 모형의 승인/발행을 입결 표시 완료로 승계하지 않는다."
+          ],
+          [
+            "기존 정책·자료 연결 — 정확 지문 재사용",
+            "Owner의 현재 코드·설정 지문을 기존 비공개 준비판과 대조한다. 새 적용 직전 설치 버전/지문과 current source/P1 head를 다시 결속하고, 달라지면 중단한다."
+          ],
+          [
+            "공유예산 — 기존격리SQL·실제만료검수재사용 / 실사용자업무별도",
+            "기존승인된과목전용정책·독립pool·동시성·재시작·멱등정산·상한거절과승인lease실시간만료의정확영수증을재사용한다. 검수행과이전실패본은보존한다. 등록후readiness는정책/현재head/만료검사통과이며실사용자의예약·정산·운영3gate인수는별도다. ceiling/GLOBAL을조직금액상한으로표시하지않고성공namespace를재실행하지않는다."
+          ],
+          [
+            "기존 설정5개 — Owner 등록 보고 접수",
+            "Owner가 기존 패킷의 다섯 지문 일치를 보고했다. 새 통계 판의 설정은 별도로 측정·검수해 같은 전환 구간에 적용한다. Root의 Secrets 관리 권한을 새로 부여하거나 값·키를 공개하지 않는다."
+          ],
+          [
+            "현재 BFF — 기존 P1 운영 및 세 화면 읽기 회귀 접수",
+            "Root가 대상 P1을 새로 읽었고 Owner가 P2/P3/P4 화면 열림을 보고했다. 실제 새 저장/소유권/CSRF/만료/전체 보안 인수는 해당 영수증 없이 완료로 표시하지 않는다."
+          ]
+        ],
+        "environment_aliases": {
+          "DATABASE_URL": "JUNGSI_DISPLAY_DATABASE_URL",
+          "JUNGSI_DATABASE_CA": "JUNGSI_DISPLAY_DATABASE_CA",
+          "SUPABASE_PUBLISHABLE_KEY": "JUNGSI_DISPLAY_PUBLISHABLE_KEY",
+          "SUPABASE_SECRET_KEY": "JUNGSI_DISPLAY_STORAGE_SECRET"
+        },
+        "environment_alias_rule": "정식 설정 이름이 존재하면 빈 값·잘못된 값도 우선하며 오류를 유지한다. 정식 이름이 아예 없을 때만 위 네 기존 DISPLAY 별칭을 허용한다. 기본 privileged SUPABASE_DB_URL·migration DSN·service-role/anon 예전 키·복수 key 배열로 fallback하지 않는다. bucket/prefix·binding/head·예산에는 별칭이나 기본값을 적용하지 않으며 기존 display descriptor를 engine 승인으로 사용하지 않는다. 같은 프로젝트·실제 jungsi_backend_app·TLS·UTC/RLS guard를 유지한다.",
+        "historical_status_text_before_owner_20261022": "실제 API source032/spec1.9.70을 기존 함수에 설치·reload 결속했고 준비5경계를 검수했다. 새 정상 UI1회 저장·과목표시·GETreload와4point 표시검산은 한정 기능 관측이다. 전체누백·조합분포는 미발행pending, 정확HTTP/BFFactor 귀속은 미확정이며 전22native/배포인수0·보안3gate 미완료·production_ready=false다. cb500/ed978와 세실패·41/584 합성 이력은 보존한다.",
+        "historical_waiting_before_owner_20261022": [
+          [
+            "현재 CA·프로젝트·앱 역할 — 기술 검수 완료",
+            "공식CA 체인/호스트와 기존 앱DSN·현재 프로젝트 결속·UTC/RLS의 기존 정확 영수증을 재사용한다. 다른 설정/실제 Edge 값이 선택되면 그 범위만 다시 검수한다."
+          ],
+          [
+            "네이티브 DB005 — 실제 적용 완료",
+            "정확Git005의3개 신규 예산 테이블·자료형/제약/인덱스·RLS·최소권한과 기존 객체 메타데이터 보존을 확인했다. 같은 API 드라이버 read-only 재조회도 통과했다. 기존003/005를 다시 적용하지 않고 실제 원자 예산·보고서·소유권·멱등·버전 충돌 검수는 별도로 수행한다."
+          ],
+          [
+            "공식 과목 시험팩 — 목적 승인·비공개 발행 완료",
+            "현재 decoder와 독립 산술 근거를 재사용한다. 승인 범위는 과목 성적표와 네 과목 표준점수 합이며, 불변 Storage 발행·정확 재조회와 native 선택 그래프 검수를 통과했다. 전체/대학 누백·연도 보정·판단·발행 승인은 승계하지 않는다."
+          ],
+          [
             "현재 catalog·모형 — 최소 후보 대기",
             "최신 단일정본의 native 후보·검수·출처/타입/연도/모집행 맥락을 고정한다. C140/v21_1은 역사 검수로 보존하며 현재 catalog로 재승격하지 않는다. 미검증 추정모형은 미선택·pending을 유지한다."
           ],
@@ -31431,14 +31678,7 @@
             "현재 실연결 — 화면팀 기능 통과 보고",
             "Worker relay 등록·preview live·정상 Bearer aal1/aal2 세션 확인 보고를 수용했다. P2 본인 저장·분석·재조회와 소유권·CSRF·만료갱신은 NOT_RUN이며 검색은 미승인 작업 범위와 current catalog 준비를 분리한다."
           ]
-        ],
-        "environment_aliases": {
-          "DATABASE_URL": "JUNGSI_DISPLAY_DATABASE_URL",
-          "JUNGSI_DATABASE_CA": "JUNGSI_DISPLAY_DATABASE_CA",
-          "SUPABASE_PUBLISHABLE_KEY": "JUNGSI_DISPLAY_PUBLISHABLE_KEY",
-          "SUPABASE_SECRET_KEY": "JUNGSI_DISPLAY_STORAGE_SECRET"
-        },
-        "environment_alias_rule": "정식 설정 이름이 존재하면 빈 값·잘못된 값도 우선하며 오류를 유지한다. 정식 이름이 아예 없을 때만 위 네 기존 DISPLAY 별칭을 허용한다. 기본 privileged SUPABASE_DB_URL·migration DSN·service-role/anon 예전 키·복수 key 배열로 fallback하지 않는다. bucket/prefix·binding/head·예산에는 별칭이나 기본값을 적용하지 않으며 기존 display descriptor를 engine 승인으로 사용하지 않는다. 같은 프로젝트·실제 jungsi_backend_app·TLS·UTC/RLS guard를 유지한다."
+        ]
       },
       "operating_checkpoint": {
         "format": "jungsi.operating-checkpoint/v1",
@@ -33179,21 +33419,21 @@
         "new_input_regression": "CURRENT17_201_TO503_HOLD_REQUIRES_COMBINED_POLICY_AND_LEDGER_ACCEPTANCE"
       },
       "owner_registration_20261021": {
-        "status": "FINAL_PACKET_PREPARATION",
+        "status": "OWNER_SEQ1_ACTIVATION_RECEIVED_NEW_STATISTICS_SEQ2_PENDING",
         "source_baseline": "2d6d4aa3ec67109a49f4e1b3fc824a0a4d38ad36",
         "frontend_followup": "510bf929872785a84b2790366ae89b0ac0ec5667",
         "backend_target": "existing_supabase_project",
         "final_Secrets_registrar": "frontend_project_Owner_or_Administrator",
         "current_Secrets_permission": "additional_management_permissions_required",
-        "operating_source_backup": "ACTUAL_DOWNLOAD_BYTES_AND_SHA_VERIFIED_PRIVATE_RECEIPT",
+        "operating_source_backup": "HISTORICAL_BACKUP_PRESERVED_CURRENT_V17_OWNER_VERSION_HASH_REPORT_NEW_REMOTE_DOWNLOAD_NOT_RUN",
         "legacy_transition": "BOUNDED_READONLY_PARTIAL_METADATA_RECEIVED_NO_WRITES_CURRENT_PROFILE_SELECTION_REQUIRES_EVIDENCE",
         "cutover": "exact_code_policy_binding_control_and_object_closure_in_one_coordinated_window",
-        "six_additional_consumer_operations": "FINAL_OWNER_BINDING_NOT_REGISTERED",
+        "six_additional_consumer_operations": "OWNER_REPORTED_COMBINED20_BINDING_SOURCE_PRESENCE_NOT_FULL_NATIVE_ACCEPTANCE",
         "physical_limit_delta": "explicit_reviewed_request_2_to_8MiB_metadata_64_to_128KiB_not_limits_unchanged",
-        "DB_application": "NOT_RUN_THIS_RESUME",
-        "Storage_publication": "NOT_RUN_THIS_RESUME",
-        "Secrets_registration": "NOT_RUN_NEW_PACKET",
-        "actual_deployment_and_JWT_OTP_BFF_acceptance": "NOT_RUN_NEW_PACKET",
+        "DB_application": "P1_PUBLICATION_OWNER_REPORTED_READBACK_MATCH_EXISTING_006_006A_007_NOT_REAPPLIED",
+        "Storage_publication": "OWNER_REPORTED_BASELINE_IMMUTABLE_CLOSURE_PASS_NEW_SEQ2_NOT_RUN",
+        "Secrets_registration": "OWNER_REPORTED_BASELINE_FIVE_REGISTERED_EXACT_DIGEST_MATCH_NEW_SEQ2_NOT_RUN",
+        "actual_deployment_and_JWT_OTP_BFF_acceptance": "OWNER_REPORTED_V17_P1_ADMIN_AND_READONLY_REGRESSION_COMPLETE_FULL_SECURITY_PENDING",
         "source_checks_are_runtime_acceptance": false,
         "production_ready": false,
         "stage5_existing_schema_owner_preparation": {
@@ -33215,7 +33455,17 @@
           },
           "retained": "existing personal v3 artifact/policy/code/settings5/limits/expiry; legacy writes remain separate HOLD",
           "actual_Storage_publication_Secrets_deployment": "NOT_RUN"
-        }
+        },
+        "historical_state_before_owner_20261022": {
+          "status": "FINAL_PACKET_PREPARATION",
+          "operating_source_backup": "ACTUAL_DOWNLOAD_BYTES_AND_SHA_VERIFIED_PRIVATE_RECEIPT",
+          "six_additional_consumer_operations": "FINAL_OWNER_BINDING_NOT_REGISTERED",
+          "DB_application": "NOT_RUN_THIS_RESUME",
+          "Storage_publication": "NOT_RUN_THIS_RESUME",
+          "Secrets_registration": "NOT_RUN_NEW_PACKET",
+          "actual_deployment_and_JWT_OTP_BFF_acceptance": "NOT_RUN_NEW_PACKET"
+        },
+        "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
       },
       "latest_scoped_P1_read_20261022": {
         "status": "BASELINE_DB_PUBLICATION_APPROVED_AND_LOGGED_IN_TARGET_UI_OBSERVED",
@@ -33224,7 +33474,39 @@
         "operation_native_or_deployment_acceptance": "NOT_CERTIFIED_BY_THIS_SCOPED_READ",
         "new_statistics_extension_activation": "NOT_RUN",
         "production_ready": false
-      }
+      },
+      "latest_owner_activation_20261022": {
+        "format": "jungsi.owner-frontend-runtime-receipt-intake/v2",
+        "date_KST": "2026-10-22",
+        "status": "OWNER_REPORTED_BASELINE_SEQ1_ACTIVATION_COMPLETE_TARGETED_ROOT_HEAD_AND_UI_MATCH",
+        "receipt_sha256": "5b325f1bf3a266dc624c6baeaf6b6a0a677b500df729b18b29284c82f0ac69e3",
+        "source_markdown_sha256": "6b6ca1cc6be8fb21ba5ba0a03358b5f63276a88966ac92bef755f83eff1fab54",
+        "candidate_commit": "fc3097d9cb932b55c24fbf007144e27db73b24ab",
+        "frontend_followup_commit": "218222dfeef28fded33fcdaa40c9a1a71186ef01",
+        "bundle_sha256": "5c8840c8bb07855a03bb2fdda72ac9c618cf8b656ec47b88fcb7094739320943",
+        "function_version_reported": 17,
+        "verify_jwt_reported": true,
+        "worker_version_reported": "7c21245e-0d9b-4589-809b-7d6bb4e662c5",
+        "Storage_authenticated_GET": "OWNER_REPORTED_IMMUTABLE_OBJECT_CLOSURE_BYTES_AND_HASH_MATCH; Root did not repeat all Storage GETs",
+        "Secrets": "OWNER_REPORTED_EXPECTED_FIVE_DIGESTS_MATCH_PREPARED_VALUES; actual values/digests remain private",
+        "P1": "OWNER_REPORTED_APPROVED_BASELINE_PUBLICATION_ADMIN_PREPARE_AND_NATIONWIDE_FRONTDOOR_COMPLETE; standard-member preopen gate retained",
+        "P2": "OWNER_REPORTED_READONLY_P2_P3_P4_PAGE_OPEN_REGRESSION; no fresh save or per-operation native transaction acceptance inferred",
+        "Root_independent_live_rerun": "INDEXED_SOURCE_AND_P1_HEAD_READBACK_MATCH_PLUS_RELOADED_KAYA_THREE_YEAR_TABLE; target qualifications remain held in seq1",
+        "current_pointer_rule": "Current installed runtime identity is this dated Owner receipt. Frozen current_deployment/current_source_verification/current_BFF_deployment objects are retained historical regression evidence; their old field names do not supersede this receipt. Read this pointer, the new-statistics extension and the private checkpoint before examining Git deltas.",
+        "private_evidence_directory": "outputs/p1_kaya_and_published_statistics_20261022.v1",
+        "remote_source_redownload_by_Root": "NOT_RUN_OWNER_REPORTED_EXACT_VERSION_AND_BUNDLE_HASH_ONLY",
+        "residual": [
+          "new collected-statistics/Kaya seq2 independent candidate review and immutable publication",
+          "new compatible code/settings and exact installed-version/hash guard immediately before application",
+          "new exact-build frontend deployment and targeted actual-data browser acceptance",
+          "complete JWT/ownership/CSRF/expiry/security and operation-specific native acceptance remain separately required"
+        ],
+        "new_statistics_seq2_activation": "NOT_RUN",
+        "all_business_native_accepted": false,
+        "all_security_gates_passed": false,
+        "production_ready": false
+      },
+      "effective_current_runtime_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
     }
   },
   "history_presentation_contract": {
@@ -153509,7 +153791,7 @@
     "format": "jungsi.P1-display-snapshot-contract/v1",
     "id": "P1-DISPLAY-SNAPSHOT-01",
     "decision_date": "2026-10-22",
-    "status": "PUBLISHED_BASELINE_SCOPED_READ_OBSERVED_PUBLISHED_STATISTICS_EXTENSION_IN_PROGRESS",
+    "status": "BASELINE_OWNER_ACTIVATION_RECEIVED_NEW_STATISTICS_SOURCE_INTEGRATED_SEQ2_PENDING",
     "requirements": [
       "REQ-02",
       "REQ-24",
@@ -153568,12 +153850,12 @@
       "Owner": "existing private runtime installation and Secrets management"
     },
     "implementation": {
-      "status": "SOURCE_REGISTERED_SYNTHETIC76_ACTUAL_PUBLICATION_NOT_RUN",
-      "runtime_scope": "source28_consumer17",
+      "status": "BASELINE_ACTIVE_REPORTED_EXTENSION_SOURCE_INTEGRATED_NOT_NEW_DEPLOYMENT",
+      "runtime_scope": "source28_consumer20_OWNER_REPORTED_COMBINED_BASELINE",
       "closed_DTO": "native scalar + NULL; identity variants/source context; explicit75 entries; strict IDs, field-specific LF",
       "Python": "NOT_PORTED_DEFAULT25_AND_EXPLICIT_LEGACY22_RETAINED"
     },
-    "actual_publication": "EXISTING_BASELINE_DB_APPROVED_AND_SCOPED_LOGGED_IN_P1_READ_OBSERVED_NOT_FULL_OPERATING_ACCEPTANCE",
+    "actual_publication": "BASELINE_SEQ1_OWNER_REPORTED_ACTIVE_ROOT_CURRENT_HEAD_AND_TARGET_UI_MATCH_NEW_SEQ2_NOT_RUN",
     "existing_canonical_data_or_percentile_model_changed": false,
     "strict_extension_registration": {
       "format": "jungsi.prepared-read-view-registration-policy/v1",
@@ -153645,7 +153927,7 @@
       },
       "metadata_and_numeric_review": "Missing publication date remains null and is not a numeric-value review failure. Selected known values remain visible as pending_metadata with precise reasons. Do not promote verified_official, invent a date/unit or recompute native values to clear a display hold.",
       "other_statistics": "2026-10-22 사용자 요청으로 대학이 실제 발표하고 현재 정본에 수집된 점수 통계도 표시 범위에 포함한다. 50/70 고정 칸 밖의 비율·평균·최저·최고·중앙값·원문 정의 통계를 기존 alternate_cut.entries로 구분해 보인다. 원문 기준·점수 축·대상 집단·단위·native 값과 검수 상태를 유지하고 비율이 없는 통계에 백분위를 만들지 않는다. 별도 통계를 대표50/70 또는 학생의 합격판정 근거로 자동 승격하지 않는다.",
-      "preservation": "Reuse sealed evidence, source locators and compact candidate. No additional full current-graph/DB reread, no source/native value/ID mutation, no model/CDF/forecast change, no shared pointer or DB writer, no deletion.",
+      "preservation": "Reuse sealed evidence/source locators/current typed snapshot. The expanded-statistics request required a bounded refs-only recovery with two documented attempts and one successful seal; preserve both attempts. After sealing, read only newly selected CID original fields, not another global graph/DB census. No source/native value/ID, model/CDF/forecast or percentile control mutation; no shared current pointer/DB writer or deletion.",
       "actual_adapter_application_independent_acceptance": "NOT_RUN_ON_THIS_PLANNING_COMMIT",
       "historical_other_statistics_before_20261022": "Original statistics outside fixed slots are optional under the requested display contract. Any omission is an explicit projection scope, never a statement that the source is missing/unpublished. A supported alternate retains its true percentage and basis; no75-to70 or subject-to-total promotion."
     },
@@ -153735,7 +154017,7 @@
       "page": "/admissions/results",
       "representation": "기존 alternate_cut.entries를 대학 발표 통계 목록으로 확장한다. 통계 라벨·실제 비율(비백분위는 null)·점수 기준·대상 집단·원문 단위·값/native 자료형·출처/기준일·검수 상태/사유를 함께 유지한다. 기존 explicit75 판 수신과 true50/70 의미를 보존한다.",
       "selection": "현재 정본의 모집행·학년도에 연결된 실제 점수 관측을 사용한다. 출처·통계·코호트·척도·과목/성분·발표 범위가 다른 관측은 합치지 않는다. 같은 관측을 기준별로 복제하지 않으며 동등한 값 선택과 충돌 근거를 보존한다.",
-      "display": "대학 발표 통계를 별도 영역에 원래 명칭·비율·점수 기준·집단별로 표시한다. 값이 있고 metadata만 미확인이면 값과 확인 사유를 함께 보인다. 현재 선택 범위 제외를 대학 미발표로 표현하지 않는다. 화면 소스의 합성38건·실제 SDK 표 엄격 타입·실제 React 표 렌더 검수는 통과했다. 비율/코호트/기준일을 보존하고 entries가 없더라도 실제 잔여건수가 있으면 영역을 유지한다. 원자료의 내부 관측 ID를 새 브라우저 props에 추가하지 않는다. 새 발행판·운영 빌드/배포/실자료 화면은 별도 미실행이다.",
+      "display": "대학 발표 통계를 별도 영역에 원래 명칭·비율·점수 기준·집단별로 표시한다. 값이 있고 metadata만 미확인이면 값과 확인 사유를 함께 보인다. 현재 선택 범위 제외를 대학 미발표로 표현하지 않는다. 화면 소스의 합성38건·실제 SDK 표 엄격 타입·실제 React 표 렌더 검수는 통과했다. 비율/코호트/기준일을 보존하고 entries가 없더라도 실제 잔여건수가 있으면 영역을 유지한다. 원자료의 내부 관측 ID를 새 브라우저 props에 추가하지 않는다. 새 발행판·운영 빌드/배포/실자료 화면은 별도 미실행이다. 원문 결속·지표/집단/표시 문맥을 확인한 알려진 값은 세부정의가 공란이어도 pending_metadata로 표시한다. inline basis_definition 텍스트가 없다는 사실만으로 다른 발표 통계를 일괄 제외하지 않는다. 기존 exact-kind 표시 사전의 파생명과 검증된 대학 원문 제목은 구분하고, 불완전한 척도 정의를 같은50/70 기준이나 verified_official로 승격하지 않는다.",
       "missingness": "실제0, null, 원자료 없음, 선택 범위 제외, 자격 미확정, 값/정의 충돌, 공식 미발표를 구분한다. 평균→50/최저→70/75→70/등급→환산점수 변환은 하지 않는다.",
       "limits_and_security": "닫힌 DTO·기존 entries 수/행/객체 bytes 제한·현재 user/relay/승인/만료/공유 예산/no-store를 유지한다. 항목 상한으로 일부가 빠지면 잔여를 정확히 표시하고 완료·미발표로 표현하지 않는다. 원자료·전체 검수 본문·비밀·내부 파일 경로는 브라우저로 보내지 않는다.",
       "data_work": "기존 학교별 원문·불변 native 참조·O/X 검수를 재사용한다. 대상 통계의 upstream50/70/75 선필터와 source qualification을 좁혀 보완한다. 전국 누백 로컬 일괄 준비/단일 writer 및 다른 팀의 live 제어를 변경하지 않는다.",
@@ -153751,8 +154033,8 @@
         "서로 다른 cohort/과목/만점/척도 통계의 혼합 및75→70/평균→50/최저→70 변환0",
         "정확 SHA 소스/훅/CI와 불변 새 발행판의 독립 검수·Owner 적용·표적 실제 화면 검수 분리"
       ],
-      "source_implementation": "IN_PROGRESS",
-      "data_candidate": "IN_PROGRESS",
+      "source_implementation": "SERVICE_AND_FRONTEND_REVIEWED_PR_INTEGRATED_EXACT_SOURCE_CI_PASS_NEW_DEPLOYMENT_NOT_RUN",
+      "data_candidate": "SEALED_TYPED_REFS_COMPLETE_SELECTED_NEW_CID_ASSEMBLY_AND_INDEPENDENT_PROJECTION_REVIEW_IN_PROGRESS",
       "new_publication": "NOT_RUN",
       "new_live_browser": "NOT_RUN",
       "frontend_implementation": {
@@ -153804,6 +154086,15 @@
         "runtime_application": "NOT_RUN_CURRENT_INSTALLED_SOURCE_AND_PREVIOUS_MODULE_SHA_MUST_MATCH_BEFORE_OWNER_PATCH",
         "new_publication": "NOT_RUN",
         "new_live_browser": "NOT_RUN"
+      },
+      "integration": {
+        "service_PR": 56,
+        "service_source_commit": "dce225e718f00a091943d87f18fc272798011655",
+        "service_sync_head": "964842e7a644ff097de353f4c913aeaa3724d88a",
+        "service_merge": "f840da9e15bfac3dac5701ad595c27e7751f73e8",
+        "frontend_PR": 57,
+        "frontend_source_commit": "d310fc1920b5435e5ecf6232d3cf252bf0cee250",
+        "frontend_sync_head": "2635ea115a63b0205e461e522b52a11a82571e56"
       }
     },
     "latest_scoped_observation_20261022": {
@@ -153812,7 +154103,8 @@
       "private_receipts": "outputs/sync_additional_admission_20261022.v1; hashes in private source receipt, actual source values excluded from Git",
       "observed": "기존 DB 발행 head approved와 로그인된 P1 전국 요약·대상 모집단위의 연도별 자격 보류/결측 표시를 대조했다. 과거 head0/소수 학교 화면 관측은 역사다.",
       "boundary": "실제 사용자 JWT·토큰/계정/실제 자료 지문을 공개하지 않는다. 배포 source/Storage 직접GET/전체 보안·전체학교 인수는 이 읽기 증거만으로 PASS로 바꾸지 않는다.",
-      "target_correction": "IN_PROGRESS_SOURCE_QUALIFICATION_AND_MISSING_SOURCE_CHECK"
+      "target_correction": "SOURCE_QUALIFICATION_EXACT_TWO_REVIEWED_NEW_PROJECTION_AND_LIVE_ACCEPTANCE_PENDING",
+      "owner_activation_receipt_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
     }
   },
   "administrator_verification_quota_contract": {

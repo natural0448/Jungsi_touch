@@ -1518,10 +1518,11 @@ def live_execution_document(spec):
     installations=c.get('deployment_history',{})
     if installations:
         deployment_text+='\n\n### 보존된 후속 설치원장\n\n'+table(['증거 ID','설치 소스 / bundle SHA-256','당시 상태 / 준비 / visible event 수','배포 영수증 SHA-256'],[[key,row['source']['candidate_commit']+' / '+row['source']['bundle']['sha256'],row['status']+' / '+row['new_version_health']+' / '+str((row.get('safe_observer_acceptance')or{}).get('visible_event_count','미검수')),row['receipt_sha256']]for key,row in installations.items()])
+    owner_current=c.get(c.get('effective_current_runtime_ref','').rsplit('.',1)[-1])
     latest=c.get('current_deployment')
     if latest:
         source=latest['source'];bundle=source['bundle']
-        deployment_text+=('\n\n### 현재 실제 설치와 후속 준비상태\n\n'+latest['scope']+'\n\n'+
+        deployment_text+=('\n\n### '+('보존된 source032 회귀 기준 설치원장 — 현재 운영은 최신 Owner 영수증'if owner_current else '현재 실제 설치와 후속 준비상태')+'\n\n'+latest['scope']+'\n\n'+
             table(['확인 범위','현재 설치 영수증'],[
                 ['소스 후보 / develop / tree',source['candidate_commit']+' / '+source['accepted_develop_merge']+' / '+source['tree']],
                 ['번들 / source manifest',str(bundle['bytes'])+' bytes / '+bundle['sha256']+' / '+str(source['source_files_count'])+'개'],
@@ -3909,7 +3910,7 @@ def generated_files(spec,read=None):
     if snapshot:
         admin=spec['administrator_verification_quota_contract']
         locator=spec['owned_report_locator_contract']
-        peer=spec['supabase_deployment_contract']['live_execution'].get('latest_owner_frontend_receipt_20261020')
+        peer=(spec['supabase_deployment_contract']['live_execution'].get(spec['supabase_deployment_contract']['live_execution'].get('effective_current_runtime_ref','').rsplit('.',1)[-1])or spec['supabase_deployment_contract']['live_execution'].get('latest_owner_frontend_receipt_20261020'))
         section=("\n\n## 판별 입결 정리본·관리자 반복 검수·본인 리포트 찾기\n\n"+
                  snapshot['id']+" / "+snapshot['status']+". 신규 API는 구현/확장 등록과 Owner 활성화 전에는 사용할 수 없다.\n\n"+
                  table(['항목','계약'],[
@@ -3961,9 +3962,10 @@ def generated_files(spec,read=None):
         registered=spec.get('read_view_extension_contract')
         if registered:
             section+=("\n별도 조회 소스 등록: "+registered['status']+" / "+', '.join(registered['operation_ids'])+
-                      ". 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 별도 시험 "+str(registered['verification']['test_count'])+
+                      ". 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 다음 NOT_RUN은 등록 소스의 합성/별도 인수 기록이며 현재 combined 운영 보고는 아래 날짜별 Owner 영수증을 따른다. 별도 시험 "+str(registered['verification']['test_count'])+
                       "개이며 실제 인수 "+registered['native_acceptance']+", 새 binding 활성화 "+registered['activation_status']+"다.\n")
         if peer:
+            if peer.get('current_pointer_rule'):section+='\n\n현재 운영 기준: '+peer['current_pointer_rule']+'\n'
             section+=("\n### 최신 Owner·화면팀 운영 영수증의 한정 수용\n\n"+peer['status']+". 비공개 영수증 SHA256 "+peer['receipt_sha256']+" / 소스 "+peer['candidate_commit']+" / 파생 배포 번들 "+peer['bundle_sha256']+".\n\n"+
                       peer['Storage_authenticated_GET']+". "+peer['Secrets']+". "+peer['P1']+". "+peer['P2']+".\n\n"+
                       "Root 독립 live 재실행: "+peer['Root_independent_live_rerun']+". 형식상 native/deployment PASS는 전체 인수 조건의 증거가 있을 때만 기록하며, 실제 배포/부분 화면 관측 사실은 아래 현재 원장으로 구분한다.\n\n"+
