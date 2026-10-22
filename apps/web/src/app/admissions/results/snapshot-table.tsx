@@ -1,9 +1,10 @@
-import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
+import { asOfDate } from "@/lib/format";
+import { publishedStatisticLabel, unitKey, type Cell, type Row } from "@/lib/p1-shape";
 
 /*
   정리본 한 모집단위: 학년도별 한 줄, 이전 고정 표 배치(연결계약 v3 §5).
   모집인원 · 경쟁률 · 추정 총 지원자 · 충원인원 · 추정 탈락자 · 최종 합격 예비번호 · 최종 50%컷 · 최종 70%컷
-  (+ 75%컷 등 별도 발표가 있을 때만 '별도 컷' 칸). 값은 원문 표기 그대로, null 은 0 이 아니다.
+  (+ 다른 비율·평균·최저 등 수집된 발표는 '대학 발표 통계' 칸). 값은 원문 표기 그대로, null 은 0 이 아니다.
   값이 있는데 확인 중(pending_metadata)이면 값과 확인 사유를 함께 보인다. 예비번호는 '번', 충원은 '명'.
   추정 2열만 기존 승인 산식(모집인원×경쟁률 반올림, −모집−충원)으로 계산하고 발표 칸을 덮지 않는다.
   추정 총 지원자는 충원인원 없이도 계산하고, 추정 탈락자만 충원인원이 있어야 계산한다.
@@ -14,13 +15,13 @@ export const PAST_YEARS = [2026, 2025, 2024] as const;
 /** 확인 사유 코드 → 화면 문장. 모르는 코드는 코드 그대로 보인다(뜻을 지어내지 않는다) */
 const REASON: Record<string, string> = {
   SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING: "발표 정의·단위·자격 확인 중",
-  NO_QUALIFIED_CANDIDATE_IN_CURRENT_SOURCE_SCOPE: "현재 자료 범위에 해당 발표 없음",
-  NO_CUT_ALTERNATIVE_IN_SELECTED_SCOPE: "별도 컷 발표 없음",
+  NO_QUALIFIED_CANDIDATE_IN_CURRENT_SOURCE_SCOPE: "현재 연결된 자료에서 이 표시 기준에 맞는 값을 확인하지 못했습니다.",
+  NO_CUT_ALTERNATIVE_IN_SELECTED_SCOPE: "선택한 표시 범위에서 별도의 발표값을 확인하지 못했습니다.",
   OTHER_BASIS_OR_EXPLICIT75_RETAINED_NOT70_BACKFILL: "다른 기준·75%컷은 70%컷 대신 쓰지 않고 따로 보존",
   FINAL_WAITLIST_SOURCE_QUALIFICATION_UNCONFIRMED: "최종 예비번호 발표 자격 확인 중",
   MULTIPLE_SAME_PRIORITY_BASIS_DEFINITIONS_UNRESOLVED: "같은 우선순위의 기준이 여럿이라 확인 중",
-  NO_FINAL_REGISTRANT_SAME_BASIS_CUT50: "최종등록자 같은 기준 50%컷 발표 없음",
-  NO_FINAL_REGISTRANT_SAME_BASIS_CUT70: "최종등록자 같은 기준 70%컷 발표 없음",
+  NO_FINAL_REGISTRANT_SAME_BASIS_CUT50: "선택한 점수 기준의 최종등록자 50%컷을 확인하지 못했습니다.",
+  NO_FINAL_REGISTRANT_SAME_BASIS_CUT70: "선택한 점수 기준의 최종등록자 70%컷을 확인하지 못했습니다.",
   MULTIPLE_CURRENT_CANDIDATES_DEFINITION_EVENT_OR_VALUE_CONFLICT: "발표가 여러 건이고 정의·시점·값이 달라 확인 중",
   EXPLICIT75_ALTERNATE_NOT70_REPLACEMENT: "대학이 75%컷으로 발표(70%컷 대체 아님)",
   UNCLASSIFIED_BASIS_NEEDS_SOURCE_DEFINITION_NO_TOTAL_CUT_PROMOTION: "점수 기준 분류 전 — 원문 정의 확인 중",
@@ -29,7 +30,10 @@ const REASON: Record<string, string> = {
 };
 export const reasonText = (code: string | null) => (code ? (REASON[code] ?? code) : null);
 
-const COHORT: Record<string, string> = { final_registrants: "최종등록자" };
+const COHORT: Record<string, string> = {
+  final_registrants: "최종등록자", initial_admits: "최초합격자", final_admits: "최종합격자",
+  final_enrolled_students: "최종입학생", registrants_finality_not_specified: "등록자(최종 여부 확인 중)",
+};
 const cohortText = (c: string | null | undefined) => (c ? (COHORT[c] ?? c) : null);
 const STAGE: Record<string, string> = { initial: "최초", rollover: "이월", final: "최종", unspecified: "단계 미명시" };
 
@@ -59,11 +63,14 @@ function Value({ c, unitOverride }: { c: Cell; unitOverride?: string }) {
 }
 
 function Cut({ c }: { c: Cell }) {
-  const basis = [c.b, cohortText(c.co)].filter(Boolean).join(" · ");
+  const basis = [c.b, cohortText(c.co ?? c.cc)].filter(Boolean).join(" · ");
+  const asOf = asOfDate(c.at);
   return (
     <>
       <Value c={c} />
       {c.v !== null && basis && <small className="rs-bs">{basis}</small>}
+      {c.v !== null && asOf && <small className="rs-bs">자료 기준 {asOf}</small>}
+      {c.v !== null && c.url && <small className="rs-bs"><a href={c.url} target="_blank" rel="noopener noreferrer" aria-label={`${publishedStatisticLabel(c)} 원문`}>원문</a></small>}
     </>
   );
 }
@@ -106,7 +113,7 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
   const byYear = new Map<number, Row[]>();
   for (const r of rows) byYear.set(r.y, [...(byYear.get(r.y) ?? []), r]);
   const years = [...byYear.keys()].sort((a, b) => b - a);
-  const hasAlt = rows.some((r) => r.alt.e.length > 0);
+  const hasAlt = rows.some((r) => r.alt.e.length > 0 || r.alt.om > 0);
   const pending = latest.pk === null;
   const variants = Math.max(...rows.map((r) => r.idv));
   const urls = [...new Set(rows.flatMap((r) => [r.rc, r.cr, r.ad, r.rk, r.c50, r.c70, ...r.alt.e].map((c) => c.url).filter((u): u is string => !!u)))].slice(0, 3);
@@ -127,7 +134,7 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
               <th scope="col" className="r">최종 합격 예비번호</th>
               <th scope="col" className="r">최종 50%컷</th>
               <th scope="col" className="r">최종 70%컷</th>
-              {hasAlt && <th scope="col" className="r">별도 컷</th>}
+              {hasAlt && <th scope="col" className="r">대학 발표 통계</th>}
             </tr>
           </thead>
           <tbody>
@@ -166,12 +173,12 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
                         ) : (
                           r.alt.e.map((e, k) => (
                             <div key={k}>
-                              {e.l && <small>{e.l} </small>}
+                              <small style={{ whiteSpace: "pre-line" }}>{publishedStatisticLabel(e)} </small>
                               <Cut c={e} />
                             </div>
                           ))
                         )}
-                        {r.alt.om > 0 && <small className="rs-bs">다른 기준 {r.alt.om}건 원문 보존</small>}
+                        {r.alt.om > 0 && <small className="rs-bs">이 판에 표시하지 않은 다른 기준 {r.alt.om}건</small>}
                       </td>
                     )}
                   </tr>
