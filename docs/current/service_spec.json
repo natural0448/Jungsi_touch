@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.103",
+  "version": "1.9.104",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -6995,7 +6995,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.103",
+        "contract_version": "1.9.104",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7169,7 +7169,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.103",
+        "contract_version": "1.9.104",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7335,7 +7335,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.103",
+        "contract_version": "1.9.104",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7354,7 +7354,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.103",
+        "contract_version": "1.9.104",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7379,7 +7379,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.103",
+        "contract_version": "1.9.104",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7404,7 +7404,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.103",
+        "contract_version": "1.9.104",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -7450,7 +7450,13 @@
         "python -B scripts/audit_documentation_sync.py --staged --base <verified-commit>; 필수 동일 스냅샷/보안/브랜치/정상 훅/CI는 유지",
         "정확 스냅샷의 전체 Python1193+ 시험과 모든 Edge/Node/oracle를 생략하지 않는다. Python 전체 검증1800초·보존 runner2200초·CI job40분의 유한 검증 시간만 적용하며 시험 ID/진행 시간만 기록한다. 실제 Supabase 요청·예산·concurrency·과금/플랜·합격/skip 기준은 변경하지 않는다.",
         "작업 브랜치의 승인 이력은 고정 origin/develop의 실제 조상인 기획 정책 커밋에 한해서만 상속한다. 로컬 develop 참조·최종 정책의 값 일치·정책 변경 후 원복은 승인 근거가 아니다. 현재 스냅샷·삭제·병합·DB/산출 보호 검사는 유지하고 참조/조상 조회 실패는 거절한다."
-      ]
+      ],
+      "retained_synthetic_git_longpath_compatibility": {
+        "scope": "tests/test_deletion_approval.py synthetic fixture only",
+        "behavior": "Retained Windows snapshot paths may exceed MAX_PATH. Immediately after init, set core.longpaths=true in that newly created synthetic repository only.",
+        "invariants": "No global or operating Git settings, source/fixture files, test assertions, denial rules, security gates or deletion approvals are changed. Prior failed receipts and retained repositories are preserved.",
+        "evidence": "The previous presentation checkout runs failed at synthetic update-ref with Filename too long before policy evaluation; all 1202 tests remain mandatory."
+      }
     },
     "documentation_sync": {
       "format": "jungsi.documentation-sync-policy/v1",
@@ -20075,6 +20081,16 @@
         "REQ-26"
       ],
       "summary": "사용자 요청으로 현재 수집된 대학 발표 입결을 50/70/75에 한정하지 않고 별도 통계 목록에 표시하도록 범위를 확장한다. 실제 비율/비백분위null·원문 라벨·점수 축·코호트·단위/native·자격/충돌 상태를 보존한다. 최종 예비번호의 관측별 자격 검수와 누락 원문 보완을 병행하고 순위를 인원으로 바꾸지 않는다. 기존 approved 발행과 로그인 P1 표적 읽기를 현재 관측으로 분리하며 새 코드·자료·발행·화면 인수는 진행/미실행을 정확히 기록한다. 기획/라우팅/계층/운영문서를 같은 정본에서 생성한다."
+    },
+    {
+      "date": "2026-10-22",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "대학 발표 통계 화면 브랜치의 정상 전체 검사에서 보존된 합성 Git fixture 경로가 Windows MAX_PATH를 넘어 정책 판정 전에 실패하는 원인을 확인했다. 파일 삭제 허용 검수용 새 저장소에만 init 직후 core.longpaths=true를 설정해 기존 branch fixture와 같은 경로 호환을 적용한다. 외부 GIT_* 환경을 제거하는 보안·모든 판정/1202검사·실파일 보존·운영 설정은 유지하며 검사나 훅을 생략하지 않는다."
     }
   ],
   "overall_analysis_contract": {
