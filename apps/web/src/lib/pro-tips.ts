@@ -31,10 +31,11 @@ export function tipLine(r: ProReason): TipLine | null {
   }
   switch (r.code) {
     case "classification_basis": {
-      const s = v(r, "student_score"), lo = v(r, "range_lower"), hi = v(r, "range_upper"), scale = v(r, "scale");
+      const s = v(r, "converted_score"), lo = v(r, "acceptance_lower"), hi = v(r, "acceptance_upper");
+      const unit = r.values.find((x) => x.name === "converted_score")?.unit ?? "점";
       if (!s || !lo || !hi) return null;
-      const n = Number(s), where = n < Number(lo) ? `아래쪽 끝(${lo}점)보다 ${(Number(lo) - n).toFixed(2)}점 낮습니다` : n > Number(hi) ? `위쪽 끝(${hi}점)보다 ${(n - Number(hi)).toFixed(2)}점 높습니다` : "안에 있습니다";
-      return { text: `이 학생의 올해 환산점수는 ${s}점이고, 이 모집단위의 핵심 검토 구간(${lo}~${hi}점) ${where}.${scale ? ` 점수는 ${scale} 기준입니다.` : ""}` };
+      const n = Number(s), where = n < Number(lo) ? `아래쪽 끝(${lo}${unit})보다 ${(Number(lo) - n).toFixed(2)}${unit} 낮습니다` : n > Number(hi) ? `위쪽 끝(${hi}${unit})보다 ${(n - Number(hi)).toFixed(2)}${unit} 높습니다` : "안에 있습니다";
+      return { text: `이 학생의 올해 환산점수는 ${s}${unit}이고, 이 모집단위의 핵심 검토 구간(${lo}~${hi}${unit}) ${where}. 점수는 이 대학 환산점수 기준입니다.` };
     }
     case "rule_weight_change": {
       const area = v(r, "area"), p = v(r, "previous_weight"), c = v(r, "current_weight"), rel = v(r, "student_relative");

@@ -105,7 +105,7 @@ export interface ProStudentReportDto {
 
 /**
   상담 tip 근거 하나(서버 pro_reason 모양 + offering_id). 문장은 화면이 코드·값으로 만들고 숫자는 지어내지 않는다.
-  서버 TIP_CODES 는 아직 6종이고 offering_id 가 없다 — 실제 연결 때 서버 계약에 같은 필드·코드를 더한다(화면팀 위임 범위).
+  서버는 classification_basis 와 offering_id 를 낸다(값 이름 converted_score·acceptance_lower·acceptance_upper). 나머지 코드는 아직 합성에서만 만든다.
   - classification_basis: 이 분류가 나온 판단 구간과 학생 환산점수
   - rule_weight_change: 전년 대비 영역 반영 비율 변화(모집요강 비교, 점수 재계산 아님)
   - subject_weight_strength: 학생의 약한·강한 영역을 이 대학이 많이 반영

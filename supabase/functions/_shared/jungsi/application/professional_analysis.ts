@@ -183,11 +183,109 @@ export class ProfessionalApprovedAnalysis implements ApprovedAnalysisPort {
     const result = operation === "pro.candidates"
       ? candidateGroups(rows, results, release.version)
       : proObject(results[proId(input.offering_id)]);
-    // Counseling signals are emitted only by a separately verified, complete evidence contract.
+    // Counseling reasons copy approved engine results with verified public basis only.
     return {
       result,
-      reasons: [],
+      reasons: counselingReasons(results, scope.authority.contract.academicYear),
       ...(operation === "pro.candidates" ? { assessments: results } : {}),
     };
   }
+}
+
+/*
+  Student-specific counseling reasons (pro_reason) composed from approved engine results only.
+  No new conversion, percentile or decision calculation happens here: values are copied from the
+  offering assessment the engine already produced, and the public basis is the verified official
+  prior-year publication the decision evidence itself carries. Missing parts emit no reason.
+*/
+const DECIDED = ["challenge", "core", "room", "outside"];
+const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+const DECIMAL = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$/;
+const MAX_BASIS = 3;
+
+const obj = (v: unknown): NativeObject | null =>
+  v !== null && typeof v === "object" && !Array.isArray(v) ? v as NativeObject : null;
+/** decimal_or_integer: exact decimal strings and safe integers stay as they are */
+function exact(v: unknown): string | null {
+  if (typeof v === "bigint") return v.toString();
+  if (typeof v === "number" && Number.isSafeInteger(v)) return String(v);
+  return typeof v === "string" && DECIMAL.test(v) ? v : null;
+}
+
+/** Verified official prior publications behind the decision (https only, de-duplicated). */
+function publicBasis(evidence: NativeObject): NativeObject[] {
+  const rows = Array.isArray(evidence.historical_metrics) ? evidence.historical_metrics : [];
+  const seen = new Set<string>(), out: NativeObject[] = [];
+  for (const raw of rows) {
+    const r = obj(raw);
+    if (!r || typeof r.source_url !== "string" || !r.source_url.startsWith("https://")) continue;
+    if (seen.has(r.source_url)) continue;
+    seen.add(r.source_url);
+    const year = typeof r.academic_year === "number" && Number.isSafeInteger(r.academic_year)
+      ? r.academic_year
+      : null;
+    const metric = typeof r.metric_name === "string" ? r.metric_name : "";
+    out.push({
+      title: [year === null ? null : `${year}학년도`, metric || null, "대학 발표"].filter(Boolean)
+        .join(" "),
+      url: r.source_url,
+      source_year: year,
+    });
+    if (out.length >= MAX_BASIS) break;
+  }
+  return out;
+}
+
+/** classification_basis: the adopted decision range and the student's converted score. */
+function classificationBasis(
+  offeringId: string,
+  assessment: NativeObject,
+  academicYear: number,
+): NativeObject | null {
+  if (assessment.status !== "ready" || !DECIDED.includes(String(assessment.category))) return null;
+  const evidence = obj(assessment.decision_evidence);
+  const range = evidence && obj(evidence.expected_acceptance_range);
+  const score = exact(assessment.converted_score);
+  if (!evidence || !range || score === null) return null;
+  const lower = exact(range.lower), upper = exact(range.upper);
+  const unit = typeof range.unit === "string" && range.unit ? range.unit : null;
+  const policy = typeof range.policy_version === "string" && IDENTIFIER.test(range.policy_version)
+    ? range.policy_version
+    : null;
+  const basis = publicBasis(evidence);
+  if (lower === null || upper === null || unit === null || policy === null || !basis.length) {
+    return null;
+  }
+  return {
+    code: "classification_basis",
+    status: "ready",
+    academic_year: academicYear,
+    offering_id: offeringId,
+    comparison_context: {
+      academic_year: academicYear,
+      reference_year: null,
+      metric: "converted_score",
+      score_scale: "university_converted_score",
+      population_id: policy,
+    },
+    values: [
+      { name: "converted_score", value: score, unit },
+      { name: "acceptance_lower", value: lower, unit },
+      { name: "acceptance_upper", value: upper, unit },
+    ],
+    public_basis: basis,
+    missing_reason: null,
+  };
+}
+
+/** Reasons for every analyzed offering, in offering-id order. Unsupported codes stay absent. */
+function counselingReasons(results: NativeObject, academicYear: number): NativeObject[] {
+  const out: NativeObject[] = [];
+  for (const offeringId of Object.keys(results).sort()) {
+    const assessment = obj(results[offeringId]);
+    if (!assessment || !IDENTIFIER.test(offeringId)) continue;
+    const reason = classificationBasis(offeringId, assessment, academicYear);
+    if (reason) out.push(reason);
+  }
+  return out;
 }

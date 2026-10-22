@@ -858,6 +858,7 @@ export class ProfessionalService {
           }).format(new Date(Number(now / 1000n))),
           student_name: student.metadata.display_name,
         },
+        counseling_reasons: [...report.reasons],
       });
     }
     if (op === "pro.bookmark.list") {

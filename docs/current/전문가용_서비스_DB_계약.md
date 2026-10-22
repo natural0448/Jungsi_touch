@@ -262,6 +262,7 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     "code",
     "status",
     "academic_year",
+    "offering_id",
     "comparison_context",
     "values",
     "public_basis",
@@ -314,7 +315,8 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     "org_id",
     "student_id",
     "snapshot",
-    "watermark"
+    "watermark",
+    "counseling_reasons"
   ],
   "student_report_page": [
     "org_id",
@@ -1012,6 +1014,11 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
       "code": "history_deduction",
       "basis": "당해 한국사 반영 규칙의 실제 엔진 적용 결과",
       "numeric_owner": "DB_engine_owner"
+    },
+    {
+      "code": "classification_basis",
+      "basis": "엔진이 채택한 판단 구간(expected_acceptance_range)·학생 환산점수를 그대로 옮기고, 판단 근거에 들어 있는 검증된 전년 공식 발표 원문을 공개 근거로 붙인다. 새 산출 없음",
+      "numeric_owner": "DB_engine_owner"
     }
   ],
   "current_basis_connection": "2027 대학별 환산·누백·판정 연결 범위의 실제 영수증 전 NOT_RUN; ready로 만들지 않는다.",
@@ -1075,4 +1082,4 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=e519bb1d9032486246f351bd3916c13a9d9d6182c9548870fff35e4e8c625c3c -->
+<!-- jungsi:generated spec_sha256=a4eb1ab37bfdefeab3ae76cc9f1757df1bce11d0215c62ecc19162304a4d7eeb -->

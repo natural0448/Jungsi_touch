@@ -54,12 +54,10 @@ export function buildTips(analyses: Record<string, AssessmentDto>, scores: Score
       list.push({
         w: 100,
         r: tip("classification_basis", [
-          { name: "category", value: a.category, unit: null },
-          { name: "student_score", value: a.converted_score, unit: "점" },
-          { name: "range_lower", value: String(range.lower), unit: "점" },
-          { name: "range_upper", value: String(range.upper), unit: "점" },
-          { name: "scale", value: `대학 환산점수(${rule.max}점 만점)`, unit: null },
-        ]),
+          { name: "converted_score", value: a.converted_score, unit: "점" },
+          { name: "acceptance_lower", value: String(range.lower), unit: "점" },
+          { name: "acceptance_upper", value: String(range.upper), unit: "점" },
+        ], { comparison_context: { academic_year: 2027, reference_year: null, metric: "converted_score", score_scale: "university_converted_score", population_id: range.policy_version }, public_basis: [RESULT(2026)] }),
       });
 
     // 2. 반영 비율 변화(전년 모집요강 대비) — 바뀐 영역마다, 학생 약점과 겹치면 무겁게
