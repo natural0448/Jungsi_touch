@@ -1,6 +1,6 @@
 # 정시터치 프레젠테이션 개발 기준
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.102이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.103이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 현재 경로와 회원별 화면 접근 범위는 route_catalog.json을 따른다. [현재 기획](../../docs/current/서비스_기획.md)과 [라우팅 명세](../../docs/current/라우팅_명세.md)를 함께 갱신한다. 실행 가능한 화면 앱과 명시 합성 응답은 develop에 통합했다. 이전 가상 화면은 기획 이력으로 보존한다. 실제 회원 인증·BFF live·운영 API의 인수 상태는 공통 진행표를 따르며 합성 화면 배포를 실제 연결 완료로 표시하지 않는다.
 
@@ -54,4 +54,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=3e03f01dd2cfff843526cacd5806961e40b65f6bbeea9998fff669a26c362534 -->
+<!-- jungsi:generated spec_sha256=4a105eb1bcddf2c1d8dde94ebd7fe8005e89ec87edb77fb218baadd4909d3e66 -->

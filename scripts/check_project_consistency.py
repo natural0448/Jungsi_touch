@@ -3946,6 +3946,18 @@ def generated_files(spec,read=None):
                       selection['metadata_and_numeric_review']+" "+selection['other_statistics']+"\n\n"+
                       snapshot['text_transport']+"\n\n"+snapshot['P2_display_model_alias']+"\n\n"+
                       table(['보류 코드','화면 안내'],[[code,message]for code,message in snapshot['display_reason_messages'].items()])+"\n")
+        stats=snapshot.get('published_statistics_extension')
+        if stats:
+            section+=("\n### 대학 발표 통계의 원형 노출\n\n"+stats['id']+" / "+stats['status']+".\n\n"+
+                      table(['항목','확정 범위'],[
+                          ['공개 표현',stats['representation']],['관측 선택',stats['selection']],
+                          ['화면',stats['display']],['결측/충돌',stats['missingness']],
+                          ['보안/상한',stats['limits_and_security']],['자료 담당',stats['data_work']],
+                          ['코드/자료/새 발행/실제 화면',stats['source_implementation']+' / '+stats['data_candidate']+' / '+stats['new_publication']+' / '+stats['new_live_browser']],
+                      ])+"\n\n검수 조건:\n\n"+'\n'.join('- '+r for r in stats['acceptance'])+"\n")
+        observation=snapshot.get('latest_scoped_observation_20261022')
+        if observation:
+            section+=("\n### 현재 정리본 읽기 관측\n\n"+observation['status']+". "+observation['observed']+" "+observation['boundary']+"\n")
         registered=spec.get('read_view_extension_contract')
         if registered:
             section+=("\n별도 조회 소스 등록: "+registered['status']+" / "+', '.join(registered['operation_ids'])+

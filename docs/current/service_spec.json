@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.102",
+  "version": "1.9.103",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -180,7 +180,7 @@
     {
       "id": "REQ-28",
       "title": "입결 화면용 판별 정리본과 근거를 보존하는 고정 열",
-      "description": "현재 정본 head마다 검증된 로컬 원자료를 재사용해 화면용 불변 정리본을 한 번 작성한다. 전체 목록·검색·필터를 화면 서버에서 처리하며 같은 내용은 재발행하지 않는다. 학년도:원래 PK, native 값/타입·단위·출처, 원문 통계/대상과 별도 정규화 코드, 충원인원/최종 합격 예비번호를 보존한다. 컷은 출처·점수 기준·대상·통계 위치를 확인해 선택하고 미해결/충돌은 null+사유로 남긴다. 새 head/body API는 구현과 엄격 확장 등록·운영 등록 후 활성화한다."
+      "description": "현재 정본 head마다 검증된 로컬 원자료를 재사용해 화면용 불변 정리본을 한 번 작성한다. 전체 목록·검색·필터를 화면 서버에서 처리하며 같은 내용은 재발행하지 않는다. 학년도:원래 PK, native 값/타입·단위·출처, 원문 통계/대상과 별도 정규화 코드, 충원인원/최종 합격 예비번호를 보존한다. 컷은 출처·점수 기준·대상·통계 위치를 확인해 선택하고 미해결/충돌은 null+사유로 남긴다. 새 head/body API는 구현과 엄격 확장 등록·운영 등록 후 활성화한다. 대학이 실제 발표·수집한 다른 비율 컷과 평균·최저 등 점수 통계는 원래 라벨·비율/null·축·집단·단위를 보존해 별도 표시하며 50/70 전용 필터로 누락하지 않는다."
     },
     {
       "id": "REQ-29",
@@ -1818,7 +1818,9 @@
         "native_edge": "HistorySnapshotService.head",
         "python_fastapi": "NOT_REGISTERED_NOT_PORTED_LOGICAL_COORDINATOR_REFERENCE_ONLY",
         "actual_new_path": "NOT_RUN"
-      }
+      },
+      "latest_scoped_P1_observation_ref": "P1_display_snapshot_contract.latest_scoped_observation_20261022",
+      "published_statistics_extension_ref": "P1_display_snapshot_contract.published_statistics_extension"
     },
     {
       "id": "history.snapshot.read",
@@ -1868,7 +1870,9 @@
         "native_edge": "HistorySnapshotService.read",
         "python_fastapi": "NOT_REGISTERED_NOT_PORTED_LOGICAL_COORDINATOR_REFERENCE_ONLY",
         "actual_new_path": "NOT_RUN"
-      }
+      },
+      "latest_scoped_P1_observation_ref": "P1_display_snapshot_contract.latest_scoped_observation_20261022",
+      "published_statistics_extension_ref": "P1_display_snapshot_contract.published_statistics_extension"
     },
     {
       "id": "report.list-own",
@@ -6990,7 +6994,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.102",
+        "contract_version": "1.9.103",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7164,7 +7168,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.102",
+        "contract_version": "1.9.103",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7330,7 +7334,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.102",
+        "contract_version": "1.9.103",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7349,7 +7353,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.102",
+        "contract_version": "1.9.103",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7374,7 +7378,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.102",
+        "contract_version": "1.9.103",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7399,7 +7403,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.102",
+        "contract_version": "1.9.103",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -8099,7 +8103,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "e51bd0479084dc11d33a2a1ff6ac7cf04a8e35fa8e751066c4f3168435018a28",
+            "source_sha256": "60edab348f15fbfc0033708f65d76dc5ac297f082aa3cc57c4b310541d62cf18",
             "symbols": [
               {
                 "kind": "class",
@@ -20060,6 +20064,16 @@
         "REQ-30"
       ],
       "summary": "Owner 5단계 P1 발행 실행판을 실제 PG17.6 권한과 대조해 보완했다. postgres의 기존 스키마 owner SET 권한은 false이므로 새 GRANT 대신 이미 발급된 전용 owner 연결을 사용한다. 006a/007은 기존 설치를 보존하고 재실행하지 않는다. 129개 Storage closure를 선행하고 최신 원자료 lock/CAS·재실행 검증·DB 실행 후 영수증 저장 실패 UNKNOWN 처리를 유지한 정확 v2 ZIP을 준비했다. 안전12·격리SQL4·실제 READ ONLY 준비 확인만 PASS이며 DB 발행·Secrets·배포는 NOT_RUN이다."
+    },
+    {
+      "date": "2026-10-22",
+      "requirements": [
+        "REQ-28",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "사용자 요청으로 현재 수집된 대학 발표 입결을 50/70/75에 한정하지 않고 별도 통계 목록에 표시하도록 범위를 확장한다. 실제 비율/비백분위null·원문 라벨·점수 축·코호트·단위/native·자격/충돌 상태를 보존한다. 최종 예비번호의 관측별 자격 검수와 누락 원문 보완을 병행하고 순위를 인원으로 바꾸지 않는다. 기존 approved 발행과 로그인 P1 표적 읽기를 현재 관측으로 분리하며 새 코드·자료·발행·화면 인수는 진행/미실행을 정확히 기록한다. 기획/라우팅/계층/운영문서를 같은 정본에서 생성한다."
     }
   ],
   "overall_analysis_contract": {
@@ -33168,6 +33182,14 @@
           "retained": "existing personal v3 artifact/policy/code/settings5/limits/expiry; legacy writes remain separate HOLD",
           "actual_Storage_publication_Secrets_deployment": "NOT_RUN"
         }
+      },
+      "latest_scoped_P1_read_20261022": {
+        "status": "BASELINE_DB_PUBLICATION_APPROVED_AND_LOGGED_IN_TARGET_UI_OBSERVED",
+        "evidence_ref": "P1_display_snapshot_contract.latest_scoped_observation_20261022",
+        "source_verification": "fc3097d9 source CI success reused; observed hosted source binding not newly certified",
+        "operation_native_or_deployment_acceptance": "NOT_CERTIFIED_BY_THIS_SCOPED_READ",
+        "new_statistics_extension_activation": "NOT_RUN",
+        "production_ready": false
       }
     }
   },
@@ -153400,8 +153422,8 @@
   "P1_display_snapshot_contract": {
     "format": "jungsi.P1-display-snapshot-contract/v1",
     "id": "P1-DISPLAY-SNAPSHOT-01",
-    "decision_date": "2026-10-20",
-    "status": "ADOPTED_REQUIREMENTS_IMPLEMENTATION_AND_FINAL_DATA_CANDIDATE_PENDING",
+    "decision_date": "2026-10-22",
+    "status": "PUBLISHED_BASELINE_SCOPED_READ_OBSERVED_PUBLISHED_STATISTICS_EXTENSION_IN_PROGRESS",
     "requirements": [
       "REQ-02",
       "REQ-24",
@@ -153432,7 +153454,11 @@
       "Unknown metric kinds remain a data review item with neutral display label and original code preserved for inspection; no guessed official score definition.",
       "Each cell retains verified_official/pending_metadata/pending_value_type/pending_value_missing/not_published and a precise missing/held reason. No null-to-zero, rank-to-count or unsupported ready conversion.",
       "Apply established direct-university versus official-adiga source priority only to qualified comparable observations. Same-priority conflicting values remain held; retain lower-priority conflicting provenance rather than silently dropping it.",
-      "A metadata-only export deliberately omits original value/source fields. Missing metadata in that export is not proof that the native original lacks it. Reuse full immutable native references and qualified overlays."
+      "A metadata-only export deliberately omits original value/source fields. Missing metadata in that export is not proof that the native original lacks it. Reuse full immutable native references and qualified overlays.",
+      "대학 발표 점수 통계를 50/70/75라는 이유만으로 선필터링하지 않는다. 기존 current/source reader에서 이미 수집된 통계와 원문 근거를 재사용하고, 조회 대상 모집행·학년도와 원문 기준을 유지해 별도 entries에 연결한다.",
+      "50/70 대표 컷의 기존 동일 점수 기준·최종등록자 자격은 유지한다. 다른 코호트·평균·최저·다른 과목 축은 별도 발표 목록으로만 표시하며 50/70의 결측을 채우지 않는다.",
+      "별도 발표 통계의 실제 비율은 1~100 정수 또는 null이다. 평균·최저 등 비백분위 통계는 null을 보존하고 원래 통계 라벨로 표시한다. 새 DTO의 닫힌 필드·개별 항목 수·전체 bytes/행 경계는 계속 검증한다.",
+      "기존 수집된 예비순위와 최종 발표 범위의 근거를 관측별로 확인한다. 날짜·URL metadata 결측만으로 이미 확인된 숫자를 지우지 않으며, 최종 예비번호 자격 미확정·다른 차수/전형 충돌은 원문 독립 검수 후에만 해소한다. 순위를 인원으로 치환하지 않는다."
     ],
     "manifest": "Deterministic semantic version/content SHA, rule version/SHA, input current-head binding, payload bytes/encoding/decompressed size, actual school/row/year counts and creation time. Shared source/basis/cohort definitions are references, not repeated audit bodies. Separate source observations, mapped display rows and unmapped held observations; reconcile all included/excluded selections to the declared source head. Measure gzip/decompressed sizes; a proposed estimate is not a physical bound or acceptance result.",
     "read_API": "Two explicit read-only operations: small current head and a version-bound gzip/full or bounded-part body. Final routes/DTO/bounds are registered with implementation. No direct browser Storage permission.",
@@ -153461,7 +153487,7 @@
       "closed_DTO": "native scalar + NULL; identity variants/source context; explicit75 entries; strict IDs, field-specific LF",
       "Python": "NOT_PORTED_DEFAULT25_AND_EXPLICIT_LEGACY22_RETAINED"
     },
-    "actual_publication": "NOT_RUN",
+    "actual_publication": "EXISTING_BASELINE_DB_APPROVED_AND_SCOPED_LOGGED_IN_P1_READ_OBSERVED_NOT_FULL_OPERATING_ACCEPTANCE",
     "existing_canonical_data_or_percentile_model_changed": false,
     "strict_extension_registration": {
       "format": "jungsi.prepared-read-view-registration-policy/v1",
@@ -153532,9 +153558,10 @@
         "canonical_correction": "NOT_GRANTED_BY_THIS_DISPLAY_DECISION"
       },
       "metadata_and_numeric_review": "Missing publication date remains null and is not a numeric-value review failure. Selected known values remain visible as pending_metadata with precise reasons. Do not promote verified_official, invent a date/unit or recompute native values to clear a display hold.",
-      "other_statistics": "Original statistics outside fixed slots are optional under the requested display contract. Any omission is an explicit projection scope, never a statement that the source is missing/unpublished. A supported alternate retains its true percentage and basis; no75-to70 or subject-to-total promotion.",
+      "other_statistics": "2026-10-22 사용자 요청으로 대학이 실제 발표하고 현재 정본에 수집된 점수 통계도 표시 범위에 포함한다. 50/70 고정 칸 밖의 비율·평균·최저·최고·중앙값·원문 정의 통계를 기존 alternate_cut.entries로 구분해 보인다. 원문 기준·점수 축·대상 집단·단위·native 값과 검수 상태를 유지하고 비율이 없는 통계에 백분위를 만들지 않는다. 별도 통계를 대표50/70 또는 학생의 합격판정 근거로 자동 승격하지 않는다.",
       "preservation": "Reuse sealed evidence, source locators and compact candidate. No additional full current-graph/DB reread, no source/native value/ID mutation, no model/CDF/forecast change, no shared pointer or DB writer, no deletion.",
-      "actual_adapter_application_independent_acceptance": "NOT_RUN_ON_THIS_PLANNING_COMMIT"
+      "actual_adapter_application_independent_acceptance": "NOT_RUN_ON_THIS_PLANNING_COMMIT",
+      "historical_other_statistics_before_20261022": "Original statistics outside fixed slots are optional under the requested display contract. Any omission is an explicit projection scope, never a statement that the source is missing/unpublished. A supported alternate retains its true percentage and basis; no75-to70 or subject-to-total promotion."
     },
     "text_transport": "Preserve original normal line-feed U+000A only in explicitly identified human department/track/statistic fields under the closed public DTO. Keep ID/URL/header/code control-character rules and secret/private URL protection strict. Do not strip source originals, invent PKs or suppress otherwise known values to satisfy a string check.",
     "P2_display_model_alias": "For an approved estimated_weights/official_all_examinees result use a neutral human label such as 공식 전체 응시자 기준 채택 추정 누백 모형. Keep exact model_version and immutable model bytes; do not hardcode a real model ID/hash or numerical model into frontend source.",
@@ -153604,6 +153631,52 @@
       "hosted_BFF_browser_acceptance": "NOT_RUN",
       "unrequested_cpu_thread_pool_or_unlimited_users_claim": false,
       "resource_authorization_ref": "supabase_deployment_contract.platform_policy.scoped_resource_exceptions.P1-DO-ONLY-20261021"
+    },
+    "published_statistics_extension": {
+      "format": "jungsi.p1-published-statistics-extension/v1",
+      "id": "P1-PUBLISHED-STATISTICS-20261022",
+      "status": "ADOPTED_REQUIREMENTS_CODE_DATA_AND_LIVE_ACCEPTANCE_IN_PROGRESS",
+      "requirements": [
+        "REQ-28",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "operations": [
+        "history.snapshot.head",
+        "history.snapshot.read"
+      ],
+      "page": "/admissions/results",
+      "representation": "기존 alternate_cut.entries를 대학 발표 통계 목록으로 확장한다. 통계 라벨·실제 비율(비백분위는 null)·점수 기준·대상 집단·원문 단위·값/native 자료형·출처/기준일·검수 상태/사유를 함께 유지한다. 기존 explicit75 판 수신과 true50/70 의미를 보존한다.",
+      "selection": "현재 정본의 모집행·학년도에 연결된 실제 점수 관측을 사용한다. 출처·통계·코호트·척도·과목/성분·발표 범위가 다른 관측은 합치지 않는다. 같은 관측을 기준별로 복제하지 않으며 동등한 값 선택과 충돌 근거를 보존한다.",
+      "display": "대학 발표 통계를 별도 영역에 원래 명칭·비율·점수 기준·집단별로 표시한다. 값이 있고 metadata만 미확인이면 값과 확인 사유를 함께 보인다. 현재 선택 범위 제외를 대학 미발표로 표현하지 않는다.",
+      "missingness": "실제0, null, 원자료 없음, 선택 범위 제외, 자격 미확정, 값/정의 충돌, 공식 미발표를 구분한다. 평균→50/최저→70/75→70/등급→환산점수 변환은 하지 않는다.",
+      "limits_and_security": "닫힌 DTO·기존 entries 수/행/객체 bytes 제한·현재 user/relay/승인/만료/공유 예산/no-store를 유지한다. 항목 상한으로 일부가 빠지면 잔여를 정확히 표시하고 완료·미발표로 표현하지 않는다. 원자료·전체 검수 본문·비밀·내부 파일 경로는 브라우저로 보내지 않는다.",
+      "data_work": "기존 학교별 원문·불변 native 참조·O/X 검수를 재사용한다. 대상 통계의 upstream50/70/75 선필터와 source qualification을 좁혀 보완한다. 전국 누백 로컬 일괄 준비/단일 writer 및 다른 팀의 live 제어를 변경하지 않는다.",
+      "owners": {
+        "planning": "develop 기획/라우팅/생성 도구",
+        "data": "원문·현재 관측·정규화/선택 근거와 독립 검수",
+        "service": "기존 application feature의 DTO/검증/공급/publisher",
+        "Owner": "기존 presentation feature의 서버 compact/화면·기존 프로젝트 배포/최종 설정"
+      },
+      "acceptance": [
+        "50/70 고정 칸과 기존75 판은 이전과 같은 의미로 수신",
+        "실제 다른 비율과 비백분위 통계가 원문 라벨/축/집단/native 값·타입을 보존하고 API→화면으로 이어짐",
+        "서로 다른 cohort/과목/만점/척도 통계의 혼합 및75→70/평균→50/최저→70 변환0",
+        "정확 SHA 소스/훅/CI와 불변 새 발행판의 독립 검수·Owner 적용·표적 실제 화면 검수 분리"
+      ],
+      "source_implementation": "IN_PROGRESS",
+      "data_candidate": "IN_PROGRESS",
+      "new_publication": "NOT_RUN",
+      "new_live_browser": "NOT_RUN"
+    },
+    "latest_scoped_observation_20261022": {
+      "status": "READ_ONLY_BASELINE_PUBLICATION_AND_TARGET_RENDERING_OBSERVED",
+      "source_baseline": "fc3097d9cb932b55c24fbf007144e27db73b24ab",
+      "private_receipts": "outputs/sync_additional_admission_20261022.v1; hashes in private source receipt, actual source values excluded from Git",
+      "observed": "기존 DB 발행 head approved와 로그인된 P1 전국 요약·대상 모집단위의 연도별 자격 보류/결측 표시를 대조했다. 과거 head0/소수 학교 화면 관측은 역사다.",
+      "boundary": "실제 사용자 JWT·토큰/계정/실제 자료 지문을 공개하지 않는다. 배포 source/Storage 직접GET/전체 보안·전체학교 인수는 이 읽기 증거만으로 PASS로 바꾸지 않는다.",
+      "target_correction": "IN_PROGRESS_SOURCE_QUALIFICATION_AND_MISSING_SOURCE_CHECK"
     }
   },
   "administrator_verification_quota_contract": {
