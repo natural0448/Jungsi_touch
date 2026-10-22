@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { CATEGORY } from "@/components/offering-parts";
+import { GRADE_RUMOR_NOTE, tipLine, tipsByOffering, tipTitle } from "@/lib/pro-tips";
 import { OverallCard, PositionChart, SubjectsSheet } from "../../../../reports/me/report-view";
 import { PrintButton } from "../../../../reports/me/print/print-button";
 import { exportStudentReport, type PrintState } from "../../../actions";
@@ -25,6 +26,7 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='360' height='200'><text x='10' y='115' transform='rotate(-24 180 100)' font-family='sans-serif' font-size='13' fill='rgba(15,23,42,0.05)'>${text.replace(/[<>&'"]/g, "")}</text></svg>`;
   const shortlist = Object.entries(snapshot.report.shortlist ?? {}).filter(([, e]) => e.selected).map(([id]) => id);
   const cands = snapshot.report.candidates;
+  const tips = tipsByOffering(state.data.counseling_reasons ?? []);
   const names = new Map([...(cands?.basic_university_groups.flatMap((g) => g.offerings) ?? []), ...(cands?.wildcards ?? [])].map((it) => [it.offering.offering_id, it.offering]));
   return (
     <>
@@ -66,6 +68,33 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
               })}
             </tbody>
           </table>
+        )}
+        {shortlist.some((id) => tips.has(id)) && (
+          <>
+            <h2>학교별 상담 메모</h2>
+            {shortlist.map((id) => {
+              const o = names.get(id), x = snapshot.report.analyses?.[id];
+              const lines = (tips.get(id) ?? []).flatMap((r) => {
+                const l = tipLine(r);
+                return l && r.status === "ready" ? [l] : [];
+              });
+              if (!x || lines.length === 0) return null;
+              return (
+                <section key={id} className="pr-tip">
+                  <h3>{o ? `${o.university_name} ${o.department}` : id} — {tipTitle(x.category)}</h3>
+                  <ol>
+                    {lines.map((l, i) => (
+                      <li key={i}>
+                        {l.text}
+                        {l.caution && <b> {l.caution}</b>}
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              );
+            })}
+            <p className="rp-foot">{GRADE_RUMOR_NOTE}</p>
+          </>
         )}
         <footer className="pr-foot">
           지원가능성은 합격 확률이 아닙니다. 대학마다 만점과 반영 방식이 달라 다른 대학의 환산점수와 크기를 비교할 수 없습니다. 모의지원 서비스에서 모집군·지원 조건·모집인원 변경을 다시 확인하세요. 교사 코드 {w.teacher_code}

@@ -53,6 +53,12 @@
         "purpose": "기관 관리자 구성원/담당 변경; 성적 정정 기능 없음"
       },
       {
+        "id": "pro.guide",
+        "front_door": "/jeongsi/pro/guide",
+        "app_route": "/pro/guide",
+        "purpose": "정시 기본 안내(원문 대조를 마친 공통 안내·출처). 학생별 상담 tip과 별개"
+      },
+      {
         "id": "pro.support",
         "front_door": "/jeongsi/management/pro-score-input-corrections",
         "app_route": "/management/pro-score-input-corrections",

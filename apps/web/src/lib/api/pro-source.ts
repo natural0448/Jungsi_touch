@@ -5,6 +5,7 @@ import type { ProfileDto, ReportDto, ScoresInput } from "@/lib/dto";
 import type { ProAssignmentDto, ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProMemberPageDto, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
 import { computeOverall } from "./synthetic-report";
+import { buildTips } from "./synthetic-tips";
 import { apiMode } from "./index";
 import { AccessDenied, ConnectionError, type Caller, type Result } from "./source";
 import { readSyntheticState } from "./synthetic";
@@ -252,7 +253,7 @@ const synSource: ProSource = {
     const now = new Date().toISOString();
     const n = x.reports.length + 1;
     const report: ReportDto = { ...last.published_result, report_version: n, updated_at: now, analyses, candidates, shortlist: last.published_result.shortlist ?? {} };
-    x.reports.push({ ...last, revision_id: n, published_result: report, created_at_utc: now });
+    x.reports.push({ ...last, revision_id: n, published_result: report, counseling_reasons: buildTips(analyses, x.profile.scores), created_at_utc: now });
     const value = { org_id: orgId, student_id: id, candidates };
     x.keys.set(key, value);
     return { ok: true, value };
@@ -312,6 +313,7 @@ const synSource: ProSource = {
         org_id: orgId, student_id: id,
         snapshot: { format: "jungsi.counseling-snapshot/v1", status: "ready", snapshot_version: revisionId, generated_at: r.created_at_utc, report: r.published_result },
         watermark: { organization_name: SYN_ORG.org_name, teacher_code: "SYNTEACH01", printed_at_seoul: printed, student_name: s.display_name },
+        counseling_reasons: r.counseling_reasons,
       },
     };
   },

@@ -48,6 +48,7 @@ registerHooks({ resolve(specifier, context, nextResolve) {
     if (specifier === "./index") return js("export function apiMode(){return 'live';}");
     if (specifier === "./synthetic-assessment") return js("export const CATALOG=[]; export function assess(){throw Error('not used');} export function buildCandidates(){throw Error('not used');}");
     if (specifier === "./synthetic-report") return js("export function computeOverall(){throw Error('not used');}");
+    if (specifier === "./synthetic-tips") return js("export function buildTips(){throw Error('not used');}");
     if (specifier === "./synthetic") return js("export function readSyntheticState(){throw Error('not used in live transport verification');}");
     if (specifier === "./source" || specifier === "../professional-bff-origin") return nextResolve(new URL(specifier + ".ts", context.parentURL).href, context);
   }

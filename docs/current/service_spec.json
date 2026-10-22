@@ -20108,6 +20108,14 @@
         "REQ-28"
       ],
       "summary": "대학 발표 통계 화면 브랜치의 정상 전체 검사에서 보존된 합성 Git fixture 경로가 Windows MAX_PATH를 넘어 정책 판정 전에 실패하는 원인을 확인했다. 파일 삭제 허용 검수용 새 저장소에만 init 직후 core.longpaths=true를 설정해 기존 branch fixture와 같은 경로 호환을 적용한다. 외부 GIT_* 환경을 제거하는 보안·모든 판정/1202검사·실파일 보존·운영 설정은 유지하며 검사나 훅을 생략하지 않는다."
+    },
+    {
+      "date": "2026-10-22",
+      "requirements": [
+        "REQ-28",
+        "REQ-30"
+      ],
+      "summary": "화면팀 변경(전문가용 상담 tip, 합성): 후보·담은 학교 줄 아래에 '왜 이 분류인가' 상자를 접어 둔다. 근거(ProReason = 서버 pro_reason 모양 + offering_id)를 영향 큰 순서로 3개 펼치고 나머지는 '이유 더 보기'. 근거 종류: 분류 판단 구간과 학생 환산점수, 전년 대비 영역 반영 비율 변화(모집요강 비교이며 학생 점수는 2027 규칙으로만 계산), 학생 약한·강한 영역 반영, 모집인원 증감, 전년 경쟁률·충원, 전년 50·70%컷 폭. 전년 컷과 같은 척도 비교는 학년도 동등화 전이라 pending 안내만 보인다. '작년 이 등급대 합격' 이야기에 대한 고정 안내와 출처를 붙인다. 문장은 화면이 코드·값으로만 만들고 값이 없으면 문장을 만들지 않는다. 실제 연결 전 남은 일: 서버 TIP_CODES·offering_id 확장(화면팀), 연도별 반영비 읽기 포트(담당자 SQL), 2027 실제 환산 규칙과 동등화(담당자). 같은 묶음: 인쇄·PDF 리포트에 담은 학교별 '상담 메모'(같은 고정 판 근거, ProPrintDto.counseling_reasons 선택 필드)와 고정 안내를 넣고, 전문가용 '정시 기본 안내' 페이지(pro.guide, /pro/guide)를 추가했다. 기본 안내는 일반 상담 가이드 v2에서 원문 대조를 마친 6개 주제(지원 규칙·일정·컷 읽는 법·충원·후보 조합·영어·한국사)와 출처만 싣고, 환산 유불리·와일드카드 변동은 서버 정의 확정 뒤 더한다. 전문가용 BFF 테스트의 pro-source 모듈 대역에 synthetic-tips 를 더했다."
     }
   ],
   "overall_analysis_contract": {
@@ -154141,6 +154149,12 @@
         "front_door": "/jeongsi/pro/management",
         "app_route": "/pro/management",
         "purpose": "기관 관리자 구성원/담당 변경; 성적 정정 기능 없음"
+      },
+      {
+        "id": "pro.guide",
+        "front_door": "/jeongsi/pro/guide",
+        "app_route": "/pro/guide",
+        "purpose": "정시 기본 안내(원문 대조를 마친 공통 안내·출처). 학생별 상담 tip과 별개"
       },
       {
         "id": "pro.support",
