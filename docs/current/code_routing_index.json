@@ -7378,6 +7378,25 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts",
+        "layer": "application",
+        "status": "field_qualification_source_synthetic_verified_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
+        "declared_exports": [
+          "VerifiedQualificationPublication",
+          "assertFieldQualificationPublication",
+          "bindFieldQualificationPublication",
+          "detachedQualificationSnapshot",
+          "validateFieldServiceQualification"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
         "layer": "application",
         "status": "read_view_source_candidate_native_activation_NOT_RUN",
@@ -7389,7 +7408,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "35d0d98ed5fa003c0e8a747ca8bd9702450b12ea06498ca0c0d311625a9a7ad1",
+        "source_sha256": "9035db789b8042d772d3dad6d08ece230c8b45cc9fb8f60b2d0ee17113e054de",
         "declared_exports": [
           "HISTORY_PUBLICATION_STATUSES",
           "HISTORY_SNAPSHOT_SLOTS",
@@ -7397,7 +7416,8 @@
           "HistorySnapshotService",
           "SnapshotPart",
           "SnapshotPublication",
-          "validateHistorySnapshotPayload"
+          "validateHistorySnapshotPayload",
+          "validateQualifiedHistorySnapshotPayload"
         ]
       },
       {
@@ -8636,7 +8656,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "d855087933085af77f16ec3cc57e9841280318464da5cd39c4af7d095cd4ea9e",
+        "source_sha256": "0b875777dd78c57561512650c2dbfa62d80a78a56e8199c1fd6e1cab61fe6669",
         "declared_exports": [
           "HistorySnapshotSource",
           "SNAPSHOT_HEAD_SQL",

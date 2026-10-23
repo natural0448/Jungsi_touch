@@ -4,8 +4,12 @@ import {
   type HistorySnapshotPort,
   type SnapshotPart,
   type SnapshotPublication,
-  validateHistorySnapshotPayload,
+  validateQualifiedHistorySnapshotPayload,
 } from "../application/history_snapshot.ts";
+import {
+  bindFieldQualificationPublication,
+  type VerifiedQualificationPublication,
+} from "../application/history_field_qualification.ts";
 import type { RequestClockPort } from "../application/ports.ts";
 import { nativeJsonSha256, type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
@@ -372,6 +376,35 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
       mappingPendingRows,
     });
   }
+  private async qualification(
+    raw: unknown,
+    publicationSha256: string,
+    sourceHeadSha256: string,
+  ): Promise<VerifiedQualificationPublication> {
+    const d = object(raw, [
+      "format",
+      "receipt",
+      "authority_sha256",
+      "previous_manifest_sha256",
+      "subject_count",
+      "approvals",
+    ]);
+    if (d.format !== "jungsi.history-field-qualification-descriptor/v1") fail();
+    const receipt = pin(d.receipt, this.binding), subjectCount = positive(d.subject_count, 2);
+    if (
+      receipt.bytes > 24576 || !Array.isArray(d.approvals) || d.approvals.length !== subjectCount
+    ) fail();
+    const authority = hash(d.authority_sha256), previous = hash(d.previous_manifest_sha256);
+    return await bindFieldQualificationPublication(d.approvals, await this.bytes(receipt), {
+      publicationSha256,
+      sourceHeadSha256,
+      scopeSha256: this.binding.scopeSha256,
+      authoritySha256: authority,
+      qualificationReceiptSha256: receipt.sha256,
+      previousManifestSha256: previous,
+      expectedSubjectCount: subjectCount,
+    });
+  }
   private async load(): Promise<
     { publication: SnapshotPublication; headSha256: string; releaseVersion: string }
   > {
@@ -467,8 +500,13 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
       m.selection_rules_sha256 !== b.selectionRulesSha256 || !Array.isArray(m.parts) ||
       m.parts.length > b.maxParts
     ) fail();
+    const reviewRaw = parseBoundedSnapshotJson(
+      await this.bytes(reviewPin),
+      b.maxMetadataBytes,
+      b.maxDepth,
+    );
     const review = object(
-      parseBoundedSnapshotJson(await this.bytes(reviewPin), b.maxMetadataBytes, b.maxDepth),
+      reviewRaw,
       [
         "format",
         "status",
@@ -480,6 +518,7 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         "selection_rules_sha256",
         "publisher_ref",
         "reviewer_ref",
+        ...(Object.hasOwn(reviewRaw, "field_qualification") ? ["field_qualification"] : []),
       ],
     );
     if (
@@ -491,6 +530,15 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
       review.selection_rules_sha256 !== b.selectionRulesSha256 ||
       review.publisher_ref !== h.publisher_ref || review.reviewer_ref !== h.reviewer_ref
     ) fail();
+    // The already byte-pinned independent review owns this optional grant descriptor.
+    // Manifest keys stay closed and unchanged; neither body q nor a request registers grants.
+    const fieldQualification = Object.hasOwn(review, "field_qualification")
+      ? await this.qualification(
+        review.field_qualification,
+        manifestPin.sha256,
+        String(h.source_head_sha256),
+      )
+      : undefined;
     const counts = object(m.counts, [
       "rows",
       "mapped_rows",
@@ -550,6 +598,7 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         counts: Object.freeze(c),
         full,
         parts: Object.freeze(parts),
+        ...(fieldQualification ? { fieldQualification } : {}),
       }),
       headSha256: row.contentSha256,
       releaseVersion: row.releaseVersion,
@@ -608,9 +657,10 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         decoded.length !== part.decodedBytes ||
         await snapshotBytesSha256(decoded) !== part.decodedSha256
       ) fail();
-      const body = validateHistorySnapshotPayload(
+      const body = await validateQualifiedHistorySnapshotPayload(
         parseBoundedSnapshotJson(decoded, this.binding.maxDecodedBytes, this.binding.maxDepth),
         part,
+        p,
       );
       this.selected.body = body;
       this.selected.bodySemanticSha256 = await nativeJsonSha256(body);
