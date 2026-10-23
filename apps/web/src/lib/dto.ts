@@ -548,6 +548,16 @@ export interface SnapshotPartPin {
   mapping_pending_rows: number;
 }
 
+/** Optional q on history_snapshot_row.final_additional_admission_rank only.
+ * Server-only raw DTO; authority verification stays in the backend publication loader. */
+export interface SnapshotRankServiceQualificationDto {
+  format: "jungsi.history-field-service-qualification/v1";
+  authority_sha256: string;
+  qualification_receipt_sha256: string;
+  subject: { observation_id: string; academic_year: AcademicYear; offering_pk: string; identity_variant_index: number };
+  normalized_service_fields: { status: "verified_official"; unit: "번" };
+}
+
 /** history_snapshot_head — 현재 발행판의 작은 머리 */
 export interface SnapshotHeadDto {
   format: "jungsi.history-snapshot-head/v1";

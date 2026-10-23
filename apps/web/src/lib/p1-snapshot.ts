@@ -5,6 +5,7 @@ import { ConnectionError, SnapshotChanged, type Caller, type JungsiSource } from
 import { P1CoordinationCore, P1CoordinationError, localP1CoordinatorClient, p1CoordinatorClient, validatePublicHead,
   type CoordinatorState, type CoordinationStore, type CoordinationView, type PublicDocument } from "./p1-coordinator-core";
 import { unitKey, type Cell, type Row, type School } from "./p1-shape";
+import { projectBackendValidatedRank } from "./p1-field-qualification";
 export type { Cell, Row, School } from "./p1-shape";
 
 /** Only immutable public bundles live in KV. The actor owns head/progress/ready and fences every commit.
@@ -116,10 +117,16 @@ function parseLossless(text: string): unknown {
 type Obj = Record<string, unknown>;
 const str = (v: unknown): string | null => (v === null || v === undefined ? null : v instanceof Raw ? v.text : String(v));
 const int = (v: unknown): number => (v instanceof Raw ? Number(v.text) : Number(v));
-function cell(o: unknown, extra?: "stage" | "cut"): Cell {
+function cell(o: unknown, extra?: "stage" | "cut", qualifiedRankRow?: Obj): Cell {
   const c = (o ?? {}) as Obj;
   const out: Cell = { v: str(c.value), s: String(c.status ?? ""), r: str(c.reason_code), u: str(c.unit), l: str(c.statistic_label) };
   if (c.value instanceof Raw) out.n = 1;
+  if (Object.hasOwn(c, "service_qualification")) {
+    // This payload came through the authenticated, backend-validating API and checked part pins.
+    // No frontend descriptor/grant registry is created from q itself.
+    out.sq = projectBackendValidatedRank(qualifiedRankRow ? "final_additional_admission_rank" : "other", c, qualifiedRankRow,
+      value => value instanceof Raw ? value.text : typeof value === "number" ? String(value) : null);
+  }
   if (extra === "stage") out.st = String(c.stage ?? "unspecified");
   if (extra === "cut") {
     out.b = str(c.basis_label);
@@ -137,6 +144,7 @@ function cell(o: unknown, extra?: "stage" | "cut"): Cell {
 }
 function compact(r: Obj): Row {
   const alt = (r.alternate_cut ?? {}) as Obj;
+  if (Object.hasOwn(alt, "service_qualification")) throw new Error("p1_field_qualification_invalid");
   const idr = (r.identity_review ?? null) as Obj | null;
   return {
     y: int(r.academic_year),
@@ -152,7 +160,7 @@ function compact(r: Obj): Row {
     rc: cell(r.recruitment_count_with_stage, "stage"),
     cr: cell(r.competition_ratio),
     ad: cell(r.additional_admission_count),
-    rk: cell(r.final_additional_admission_rank),
+    rk: cell(r.final_additional_admission_rank, undefined, r),
     c50: cell(r.final_50_percent_cut, "cut"),
     c70: cell(r.final_70_percent_cut, "cut"),
     alt: {

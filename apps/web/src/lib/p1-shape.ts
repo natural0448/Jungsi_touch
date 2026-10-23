@@ -4,6 +4,8 @@
 
 /** 칸 하나. v 는 원문 표기(숫자도 문자열), n=1 은 원문이 JSON 숫자였다는 표시 */
 export type Cell = {
+  /** Rank-only display result of the existing backend-validated snapshot API. */
+  sq?: { status: "verified_official"; unit: "번" };
   v: string | null;
   n?: 1;
   s: string; // status

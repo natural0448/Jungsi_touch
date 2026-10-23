@@ -20532,6 +20532,14 @@
         "REQ-28"
       ],
       "summary": "기획111: PR61의 검수 소스·기획/라우팅 develop 통합과 정확 source/PR/merge CI를 기록하고, 실제 reader가 받는 service core7/status approved_exact_fields·subjects7/subject4와 rich writer audit 분리를 명시한다. q/descriptor/approvals는 core 원본 SHA에만 결속하며 새 권위 승인·한도·인증·배포 권한을 추가하지 않는다. 실제 core/2parts/독립assembly·화면 q·Owner JWT/BFF/운영 배포는 별도 NOT_RUN으로 유지한다."
+    },
+    {
+      "date": "2026-10-23",
+      "requirements": [
+        "REQ-24",
+        "REQ-25"
+      ],
+      "summary": "화면팀 변경(담당자 CHECKPOINT12 화면 private v3 수신): 정확 5714 기준 5파일 패치(p1-snapshot·p1-field-qualification·dto·p1-shape·snapshot-table)를 develop 33b06e42 위에 그대로 적용했다. 인증된 snapshot part 응답에서 backend가 승인한 최종 추가합격 순위 q만 최소 표시 메타(sq: verified_official·번)로 옮기고, 원문 값·일반 보류·2026 결측·다른 통계·기존 파생 산술은 바꾸지 않는다. 브라우저 props로 q subject·권위/영수증 SHA·PK를 복사하지 않는다. p1-shape.ts는 저장소 속성(eol=lf)에 맞춰 LF로 정규화됐다. 실제 q 자료·새 판·운영 배포는 NOT_RUN이며 q가 없는 현재판 표시는 그대로다."
     }
   ],
   "overall_analysis_contract": {
