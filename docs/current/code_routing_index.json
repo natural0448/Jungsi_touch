@@ -7358,6 +7358,26 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts",
+        "layer": "application",
+        "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "5a45b0955eef1d2970e0cb5deb08a2b67f3e95eb22706576719ea94f2bd80c99",
+        "declared_exports": [
+          "GUIDE_REFERENCE_FIELDS",
+          "GuideRuleQuery",
+          "GuideRuleSourceResult",
+          "GuideRuleReferencePort",
+          "guideRuleQuery",
+          "GuideRuleReferenceService"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
         "layer": "application",
         "status": "read_view_source_candidate_native_activation_NOT_RUN",
@@ -8516,6 +8536,31 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts",
+        "layer": "data_infrastructure",
+        "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "ebe174637a5db54d37a0facd84767cf199f62eeab4114ff1ae1179368311da3a",
+        "declared_exports": [
+          "GUIDE_RULE_SOURCE_VIEWS",
+          "GUIDE_RULE_METADATA_SEEDS",
+          "GUIDE_RULE_HEADER_SQL",
+          "GUIDE_RULE_POINT_SQL",
+          "GUIDE_RULE_NATIVE_BINDING_SQL",
+          "GUIDE_RULE_NATIVE_POINT_SQL",
+          "GUIDE_RULE_NEW_POINT_SQL",
+          "GUIDE_RULE_LINEAGE_SQL",
+          "GuideRuleSourceApproval",
+          "verifyGuideRuleSourceApproval",
+          "CurrentGuideRulePostgres"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts",
         "layer": "data_infrastructure",
         "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
@@ -8559,6 +8604,24 @@
           "FORECAST_REVISION_INSERT_SQL",
           "ForecastSqlLimits",
           "SupabaseForecastRepository"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts",
+        "layer": "data_infrastructure",
+        "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "7c2785c3dc404daa8cd13fa5f470ba25acbabc2b1c62949a7dab521e6998dbc3",
+        "declared_exports": [
+          "CURRENT_PUBLIC_SOURCE_VIEWS",
+          "CURRENT_PUBLIC_METADATA_SQL",
+          "CURRENT_PUBLIC_GUIDE_COMMAND_RELATIONS",
+          "CURRENT_PUBLIC_GUIDE_COMMAND_SQL"
         ]
       },
       {
@@ -9615,6 +9678,19 @@
           "REQ-31"
         ],
         "source_sha256": "618e9ea0b6c27c1dea6552c6f8ad2f3fa9fcfef1d7b908516b4fe1e136b676eb",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/professional_guide_rule_test.ts",
+        "layer": "verification",
+        "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "8a645f334e9e32f18b107e4991efb204b6e4387641c9a00d357dc9e093e39fba",
         "declared_exports": []
       },
       {
