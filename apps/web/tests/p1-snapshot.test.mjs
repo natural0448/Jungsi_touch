@@ -28,7 +28,7 @@ let serial = 0;
 async function world(t, { parts = 2, schools = 1, missing = false, row = {} } = {}) {
   const priorMode = process.env.JUNGSI_API_MODE, priorNode = process.env.NODE_ENV;
   process.env.JUNGSI_API_MODE = "live"; process.env.NODE_ENV = "test";
-  const w = { now: Date.parse("2026-10-21T00:00:00Z"), headCalls: 0, partCalls: 0, writes: [], cache: new Map(), delayedKey: null };
+  const w = { now: Date.parse("2026-10-21T00:00:00Z"), headCalls: 0, partCalls: 0, reads: [], writes: [], cache: new Map(), delayedKey: null };
   Date.now = () => w.now;
   w.db = new DatabaseSync(":memory:");
   const ctx = { storage: { sql: { exec(sql, ...bindings) {
@@ -41,7 +41,7 @@ async function world(t, { parts = 2, schools = 1, missing = false, row = {} } = 
   } } };
   w.actor = new P1SnapshotCoordinator(ctx);
   w.restart = () => { w.actor = new P1SnapshotCoordinator(ctx); };
-  w.kv = { async get(key) { return key === w.delayedKey ? null : w.cache.get(key) ?? null; }, async put(key, value) {
+  w.kv = { async get(key) { w.reads.push(key); return key === w.delayedKey ? null : w.cache.get(key) ?? null; }, async put(key, value) {
     // Any repeated key inside one second models the documented native KV constraint.
     const previous = w.writes.findLast(x => x.key === key);
     if (previous && w.now - previous.at < 1000) throw Error("synthetic_KV_429_same_key");
@@ -83,6 +83,148 @@ async function world(t, { parts = 2, schools = 1, missing = false, row = {} } = 
   });
   return w;
 }
+
+async function partialSchool(t, options = {}) {
+  const w = await world(t, { parts: 21, ...options });
+  for (let i = 0; i < 100; i++) {
+    const reads = w.reads.length, calls = w.partCalls;
+    const result = await w.module.warmStep(w.source, w.caller);
+    assert.ok(w.partCalls - calls <= 6);
+    assert.ok(new Set(w.reads.slice(reads).filter(key => key.includes(":frag:"))).size <= 20);
+    assert.notEqual(result.state, "ready");
+    if (w.state().warm.progress.school_assembly) return w;
+  }
+  throw Error("synthetic partial school was not reached");
+}
+
+test("a 21-fragment school resumes within the existing read budget and preserves every native row", async t => {
+  const w = await partialSchool(t, { row: { final_70_percent_cut: { value: "__STAT_NUMBER__", status: "ready", unit: "점", statistic_percent: 70 } } });
+  const progress = w.state().warm.progress;
+  assert.equal(progress.school_assembly.next_fragment, 20);
+  assert.equal(progress.schoolsDone, 0); assert.deepEqual(progress.school_keys, {}); assert.equal(w.state().ready, null);
+  assert.ok(!JSON.stringify(progress).includes("9.71000000000000009"));
+  assert.ok(!JSON.stringify(progress).includes("84.10000000000000009"));
+  const partial = JSON.parse(w.cache.get(progress.school_assembly.key));
+  assert.equal(partial.rows.length, 20); assert.equal(partial.fragment_ids.length, 20);
+  const reads = w.reads.length;
+  await w.module.warmStep(w.source, w.caller);
+  assert.equal(w.reads.slice(reads).filter(key => key.includes(":frag:")).length, 1);
+  assert.equal(w.state().warm.progress.schoolsDone, 1);
+  assert.equal(w.state().warm.progress.school_assembly, undefined);
+  const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {}), rows = result.schools[0].rows;
+  assert.equal(result.total_units, 21); assert.equal(rows.length, 21);
+  assert.deepEqual(new Set(rows.map(row => row.pk)), new Set(Array.from({ length: 21 }, (_, i) => `pk${i}`)));
+  assert.ok(rows.every(row => row.cr.v === "9.71000000000000009" && row.cr.n === 1 && row.c70.v === "84.10000000000000009" && row.c70.n === 1 && row.c70.p === 70));
+  assert.equal(w.partCalls, 21); assert.equal(new Set(w.writes.map(x => x.key)).size, w.writes.length);
+});
+
+test("a school spanning 41 fragments crosses three fenced assembly steps without widening caps", async t => {
+  const w = await partialSchool(t, { parts: 41 });
+  assert.equal(w.state().warm.progress.school_assembly.next_fragment, 20);
+  let before = w.reads.length;
+  await w.second.warmStep(w.source, w.caller);
+  assert.equal(w.reads.slice(before).filter(key => key.includes(":frag:")).length, 20);
+  assert.equal(w.state().warm.progress.school_assembly.next_fragment, 40); assert.equal(w.state().warm.progress.schoolsDone, 0);
+  before = w.reads.length; await w.module.warmStep(w.source, w.caller);
+  assert.equal(w.reads.slice(before).filter(key => key.includes(":frag:")).length, 1);
+  const ready = await w.prepare(); assert.equal(ready.counts.rows, 41); assert.equal(w.partCalls, 41);
+  const result = await w.module.searchSnapshot(ready, {});
+  assert.equal(result.total_units, 41); assert.equal(result.schools[0].rows.length, 41);
+});
+
+test("two administrators resume a persisted partial school after an actor restart", async t => {
+  const w = await partialSchool(t); w.restart();
+  await Promise.all([w.module.warmStep(w.source, w.caller), w.second.warmStep(w.source, w.caller)]);
+  const ready = await w.prepare(w.second);
+  assert.equal(ready.counts.rows, 21); assert.equal(w.partCalls, 21);
+  assert.equal(w.state().warm.progress.schoolsDone, 1);
+  assert.equal(new Set(w.writes.map(x => x.key)).size, w.writes.length);
+});
+
+test("an invisible partial-school KV object stays pending and resumes without rereading source parts", async t => {
+  const w = await partialSchool(t), pending = structuredClone(w.state().warm.progress.school_assembly);
+  w.delayedKey = pending.key;
+  await assert.rejects(w.module.warmStep(w.source, w.caller), e => e.code === "p1_cache_visibility_pending");
+  assert.deepEqual(w.state().warm.progress.school_assembly, pending); assert.equal(w.state().ready, null);
+  assert.deepEqual(w.state().warm.progress.school_keys, {});
+  w.delayedKey = null; const ready = await w.prepare();
+  assert.equal(ready.counts.rows, 21); assert.equal(w.partCalls, 21);
+});
+
+test("an expired partial-school claimant cannot overwrite a newer fenced completion", async t => {
+  const w = await partialSchool(t), pending = w.state().warm.progress.school_assembly;
+  const get = w.kv.get; let release, entered, first = true;
+  const blocked = new Promise(resolve => { release = resolve; }), started = new Promise(resolve => { entered = resolve; });
+  w.kv.get = async key => { if (key === pending.key && first) { first = false; entered(); await blocked; } return get(key); };
+  const old = w.module.warmStep(w.source, w.caller); await started;
+  w.now += 120001; await w.second.warmStep(w.source, w.caller);
+  const step = w.state().warm.step, writes = w.writes.length;
+  release(); await old;
+  assert.equal(w.state().warm.step, step); assert.equal(w.writes.length, writes);
+  const ready = await w.prepare(); assert.equal(ready.counts.rows, 21); assert.equal(w.partCalls, 21);
+});
+
+test("a head change while resuming a partial school never publishes the old generation", async t => {
+  const w = await partialSchool(t), pending = w.state().warm.progress.school_assembly, oldGeneration = w.state().warm.generation;
+  const get = w.kv.get; let release, entered, first = true;
+  const blocked = new Promise(resolve => { release = resolve; }), started = new Promise(resolve => { entered = resolve; });
+  w.kv.get = async key => { if (key === pending.key && first) { first = false; entered(); await blocked; } return get(key); };
+  const old = w.module.warmStep(w.source, w.caller); await started;
+  const client = p1CoordinatorClient({ fetch: request => w.actor.fetch(request) }), view = await client.inspect();
+  const claim = await client.claimHead(view.headRevision); assert.equal(claim.state, "claimed");
+  w.head.snapshot_id = "synthetic.changed.during.partial"; w.head.publication_sha256 = "e".repeat(64);
+  await client.commitHead(claim.token, w.head); await w.second.warmStep(w.source, w.caller);
+  const generation = w.state().warm.generation; assert.notEqual(generation, oldGeneration);
+  release(); await old; assert.equal(w.state().ready, null);
+  const ready = await w.prepare(w.second);
+  assert.equal(ready.snapshot_id, w.head.snapshot_id); assert.equal(ready.publication_sha256, w.head.publication_sha256);
+  assert.ok(Object.values(w.state().warm.progress.school_keys).every(key => key.startsWith(`p1c:v1:${generation}:`)));
+  assert.ok(w.cache.has(pending.key));
+});
+
+test("partial-school metadata rejects a wrong school, offset, step or fenced key", async t => {
+  const mutations = {
+    school: p => { p.school_id = "OTHER"; }, zero: p => { p.next_fragment = 0; },
+    end: p => { p.next_fragment = 21; }, fractional: p => { p.next_fragment = 1.5; },
+    step: p => { p.step++; }, futureFence: p => { p.write_prefix = p.write_prefix.replace(/:f[0-9]+:/, ":f999999:"); p.key = `${p.write_prefix}:school-partial:${p.school_id}`; },
+    generation: p => { p.write_prefix = "p1c:v1:foreign:f1:n"; p.key = `${p.write_prefix}:school-partial:${p.school_id}`; },
+    key: p => { p.key += ":other"; },
+  };
+  for (const [name, change] of Object.entries(mutations)) await t.test(name, async t => {
+    const w = await partialSchool(t), state = w.state(); change(state.warm.progress.school_assembly);
+    w.db.prepare("UPDATE p1_coordinator_state SET body=? WHERE id=1").run(JSON.stringify(state));
+    await assert.rejects(w.module.warmStep(w.source, w.caller), e => e.code === (name === "fractional" ? "p1_coordinator_state_invalid" : "p1_cache_partial_binding_invalid"));
+    assert.equal(w.state().ready, null); assert.deepEqual(w.state().warm.progress.school_keys, {});
+  });
+});
+
+test("partial-school payload must match the current publication, generation and exact fragment order", async t => {
+  const mutations = {
+    publication: p => { p.publication_sha256 = "d".repeat(64); }, snapshot: p => { p.snapshot_id += ".other"; },
+    generation: p => { p.generation = "foreign"; }, school: p => { p.school_id = "OTHER"; },
+    order: p => { [p.fragment_ids[0], p.fragment_ids[1]] = [p.fragment_ids[1], p.fragment_ids[0]]; },
+    count: p => { p.fragment_ids.pop(); }, rows: p => { p.rows = null; },
+  };
+  for (const [name, change] of Object.entries(mutations)) await t.test(name, async t => {
+    const w = await partialSchool(t), key = w.state().warm.progress.school_assembly.key, partial = JSON.parse(w.cache.get(key));
+    change(partial); w.cache.set(key, JSON.stringify(partial));
+    await assert.rejects(w.module.warmStep(w.source, w.caller), e => e.code === "p1_cache_partial_binding_invalid");
+    assert.equal(w.state().ready, null); assert.deepEqual(w.state().warm.progress.school_keys, {});
+  });
+});
+
+test("the existing twelve-school completion and six-part step caps remain bounded", async t => {
+  const w = await world(t, { parts: 33, schools: 33 }); let priorSchools = 0;
+  for (let i = 0; i < 100; i++) {
+    const reads = w.reads.length, calls = w.partCalls, result = await w.module.warmStep(w.source, w.caller);
+    const completed = w.state().warm.progress.schoolsDone;
+    assert.ok(completed - priorSchools <= 12); priorSchools = completed;
+    assert.ok(w.partCalls - calls <= 6);
+    assert.ok(new Set(w.reads.slice(reads).filter(key => key.includes(":frag:"))).size <= 20);
+    if (result.state === "ready") { assert.equal(result.ready.counts.rows, 33); assert.equal(completed, 33); return; }
+  }
+  assert.fail("synthetic bounded school preparation did not finish");
+});
 
 test("immutable KV writes avoid the old same-key progress rate error and preserve numeric text", async t => {
   const w = await world(t), ready = await w.prepare();
