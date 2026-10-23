@@ -22,9 +22,143 @@ import {
 } from "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts";
 import { SYNTHETIC_RUNTIME_NOW as NOW } from "./synthetic_runtime_binding.ts";
 import { syntheticSnapshotBody } from "./synthetic_history_snapshot.ts";
+import {
+  syntheticQualifiableBody,
+  syntheticQualificationArtifacts,
+} from "./synthetic_history_qualification.ts";
 import { assert, equal } from "./fixture.ts";
 const encode = (raw: unknown) => new TextEncoder().encode(nativeJsonText(raw));
 const URL_BASE = "https://abcdefghijklmnopqrst.supabase.co", PREFIX = "SYNTHETIC/snapshot/";
+Deno.test("snapshot qualified review loads exact grants without adding manifest keys and reuses original gzip", async () => {
+  const f = await fixture({ qualification: true }), p = await f.source.current();
+  assert(p.fieldQualification !== undefined);
+  assert(!Object.hasOwn(f.manifest, "field_qualification"));
+  const body = await f.source.read(p, p.full!),
+    row = (body.rows as NativeObject[])[0],
+    rank = row.final_additional_admission_rank as NativeObject;
+  equal([rank.value, rank.unit, rank.status, (row.identity_review as NativeObject).status], [
+    "17",
+    null,
+    "pending_metadata",
+    "review_pending",
+  ]);
+  equal(
+    ((rank.service_qualification as NativeObject).normalized_service_fields as NativeObject).unit,
+    "번",
+  );
+  const wire = await f.source.representation(body);
+  const text = await new Response(
+    new Blob([wire.bytes]).stream().pipeThrough(new DecompressionStream("gzip")),
+  ).text();
+  assert(text.includes("1.2300e+04") && text.includes('"unit":null'));
+  equal(f.requests.filter((u) => u.endsWith("/qualification.json")).length, 1);
+});
+Deno.test("snapshot review grants leave a non-target legacy part pending", async () => {
+  const f = await fixture({
+      qualification: true,
+      body: (body) => {
+        const row = (body.rows as NativeObject[])[0],
+          rank = row.final_additional_admission_rank as NativeObject;
+        delete rank.service_qualification;
+        row.original_pk = "SYNTHETIC-other";
+        row.offering_id = "2026:SYNTHETIC-other";
+        (rank.source_context as NativeObject).observation_id = "observation:" + "c".repeat(64);
+      },
+    }),
+    p = await f.source.current(),
+    body = await f.source.read(p, p.full!);
+  const rank = (body.rows as NativeObject[])[0].final_additional_admission_rank as NativeObject;
+  equal(rank.status, "pending_metadata");
+  assert(!Object.hasOwn(rank, "service_qualification"));
+});
+for (
+  const mode of [
+    "missing-review-grants",
+    "missing-rank-q",
+    "wrong-authority",
+    "extra-subject",
+    "changed-raw-cell",
+  ]
+) {
+  Deno.test(
+    "snapshot qualified source rejects independently pinned but inconsistent content " + mode,
+    async () => {
+      const f = await fixture({
+        qualification: true,
+        review: mode === "missing-review-grants"
+          ? (r) => {
+            delete r.field_qualification;
+          }
+          : undefined,
+        body: (b) => {
+          const rank = (b.rows as NativeObject[])[0]
+            .final_additional_admission_rank as NativeObject;
+          if (mode === "missing-rank-q") delete rank.service_qualification;
+          if (mode === "changed-raw-cell") rank.value = "18";
+        },
+        qualificationDescriptor: (d) => {
+          if (mode === "wrong-authority") d.authority_sha256 = "c".repeat(64);
+          if (mode === "extra-subject") {
+            const approvals = d.approvals as NativeObject[];
+            approvals.push({
+              ...approvals[0],
+              subject: { ...approvals[0].subject as NativeObject, offering_pk: "SYNTHETIC-extra" },
+            });
+            d.subject_count = 2;
+          }
+        },
+      });
+      await denied(async () => {
+        const p = await f.source.current();
+        await f.source.read(p, p.full!);
+      }, "snapshot_invalid");
+    },
+  );
+}
+for (
+  const mode of [
+    "manifest-extra-key",
+    "review-extra-key",
+    "receipt-private-locator",
+    "receipt-overflow",
+  ]
+) {
+  Deno.test(
+    "snapshot qualification retains closed metadata and existing bounds " + mode,
+    async () => {
+      const f = await fixture({
+        qualification: true,
+        manifest: mode === "manifest-extra-key"
+          ? (m) => {
+            m.field_qualification = {};
+          }
+          : undefined,
+        review: mode === "review-extra-key"
+          ? (r) => {
+            r.unregistered_qualification = {};
+          }
+          : undefined,
+        qualificationDescriptor: (d) => {
+          if (mode === "receipt-private-locator") {
+            (d.receipt as NativeObject).object_key = "OTHER/private.json";
+          }
+          if (mode === "receipt-overflow") (d.receipt as NativeObject).bytes = 24577;
+        },
+      });
+      await denied(() => f.source.current());
+    },
+  );
+}
+Deno.test("snapshot qualification cannot bypass the current head revocation check", async () => {
+  const f = await fixture({ qualification: true }), p = await f.source.current();
+  f.setRow((r) => ({ ...r, contentSha256: "0".repeat(64) }));
+  await denied(() => f.source.read(p, p.full!), "publication_changed", 409);
+});
+Deno.test("snapshot qualification sidecar must retain its exact bytes", async () => {
+  const f = await fixture({ qualification: true });
+  f.objects.set(PREFIX + "qualification.json", new TextEncoder().encode("{}"));
+  await denied(() => f.source.current());
+});
 Deno.test("snapshot compressed public body preserves original LF in human text and rejects other controls", async () => {
   const f = await fixture({
       body: (b) => {
@@ -72,12 +206,30 @@ async function fixture(
     body?: (v: NativeObject) => void;
     parts?: boolean;
     binding?: (v: SnapshotTrustBinding) => SnapshotTrustBinding;
+    qualification?: boolean;
+    qualificationReceipt?: (v: NativeObject) => void;
+    qualificationDescriptor?: (v: NativeObject) => void;
   } = {},
 ) {
   const objects = new Map<string, Uint8Array>();
   const requests: string[] = [];
   let headCalls = 0;
-  const payload = syntheticSnapshotBody(false, options.parts ? "SYNTHETIC-part" : null);
+  const payload = options.qualification
+    ? syntheticQualifiableBody(options.parts ? "SYNTHETIC-part" : null)
+    : syntheticSnapshotBody(false, options.parts ? "SYNTHETIC-part" : null);
+  const qualification = options.qualification
+    ? await syntheticQualificationArtifacts(
+      payload,
+      PREFIX + "qualification.json",
+      options.qualificationReceipt,
+    )
+    : undefined;
+  if (qualification) {
+    ((payload.rows as NativeObject[])[0].final_additional_admission_rank as NativeObject)
+      .service_qualification = qualification.q;
+    options.qualificationDescriptor?.(qualification.descriptor);
+    objects.set(PREFIX + "qualification.json", qualification.bytes);
+  }
   options.body?.(payload);
   const decoded = encode(payload),
     gzip = new Uint8Array(
@@ -129,6 +281,7 @@ async function fixture(
     selection_rules_sha256: "d".repeat(64),
     publisher_ref: "SYNTHETIC-owner",
     reviewer_ref: "SYNTHETIC-reviewer",
+    ...(qualification ? { field_qualification: qualification.descriptor } : {}),
   };
   options.review?.(review);
   const reviewBytes = encode(review);

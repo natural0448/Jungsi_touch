@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.109이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.110이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 기존 Supabase 기반 실제 인증·기존22와 신규6 논리 API 계약의 코드·선택 연결·운영 배포를 구분한다. Google Drive와 기존 Supabase를 사용하고 P1 조정 메타데이터 Durable Object 한정 예외만 적용한다. 현재 결합20 후보·기존14 운영판·미연결8을 혼동하지 않는다.
 
@@ -589,7 +589,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=d43f2e9e15ec4d6f14c79a22901ea7d4e93949042e61746e608d640ccd74418d -->
+<!-- jungsi:generated spec_sha256=a953f2624bdc58a18bd5968f59fd895525e806f2f8f3e8335599012be53748af -->
 
 
 ## 기존 운영 조회의 후속 검수
@@ -869,7 +869,7 @@ P1-PUBLISHED-STATISTICS-20261022 / SOURCE_INTEGRATED_PRIVATE_DATA_PREPARATION_AN
 
 READ_ONLY_BASELINE_PUBLICATION_AND_TARGET_RENDERING_OBSERVED. 기존 DB 발행 head approved와 로그인된 P1 전국 요약·대상 모집단위의 연도별 자격 보류/결측 표시를 대조했다. 과거 head0/소수 학교 화면 관측은 역사다. 실제 사용자 JWT·토큰/계정/실제 자료 지문을 공개하지 않는다. 배포 source/Storage 직접GET/전체 보안·전체학교 인수는 이 읽기 증거만으로 PASS로 바꾸지 않는다.
 
-별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 다음 NOT_RUN은 등록 소스의 합성/별도 인수 기록이며 현재 combined 운영 보고는 아래 날짜별 Owner 영수증을 따른다. 별도 시험 94개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
+별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 다음 NOT_RUN은 등록 소스의 합성/별도 인수 기록이며 현재 combined 운영 보고는 아래 날짜별 Owner 영수증을 따른다. 별도 시험 196개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
 
 
 현재 운영 기준: Current installed runtime identity is this dated Owner receipt. Frozen current_deployment/current_source_verification/current_BFF_deployment objects are retained historical regression evidence; their old field names do not supersede this receipt. Read this pointer, the new-statistics extension and the private checkpoint before examining Git deltas.

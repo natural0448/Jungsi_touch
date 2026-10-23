@@ -8,6 +8,12 @@ import { utcInstant, utcText } from "../domain/time.ts";
 import { hasAsciiControl } from "../domain/text.ts";
 import { calendarDate } from "../domain/time.ts";
 import { publicSourceUrl } from "./catalog.ts";
+import {
+  assertFieldQualificationPublication,
+  detachedQualificationSnapshot,
+  validateFieldServiceQualification,
+  type VerifiedQualificationPublication,
+} from "./history_field_qualification.ts";
 export const HISTORY_SNAPSHOT_SLOTS = [
   "recruitment_count_with_stage",
   "competition_ratio",
@@ -57,6 +63,8 @@ export interface SnapshotPublication {
   };
   readonly full: SnapshotPart | null;
   readonly parts: readonly SnapshotPart[];
+  /** Private server grant context; never a field of the public snapshot head DTO. */
+  readonly fieldQualification?: VerifiedQualificationPublication;
 }
 export interface HistorySnapshotPort {
   current(): Promise<SnapshotPublication>;
@@ -345,6 +353,124 @@ export function validateHistorySnapshotPayload(raw: unknown, part: SnapshotPart)
   ) invalid();
   return cloneNativeJson(body);
 }
+function dataProperty(raw: object, name: string, optional = false): unknown {
+  const descriptor = Object.getOwnPropertyDescriptor(raw, name);
+  if (!descriptor && optional) return undefined;
+  if (!descriptor || !descriptor.enumerable || !("value" in descriptor)) invalid();
+  return descriptor.value;
+}
+function hasQualifiedRank(raw: unknown, part: SnapshotPart): boolean {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return false;
+  const rows = dataProperty(raw, "rows", true);
+  if (!Array.isArray(rows) || rows.length !== part.rows) return false;
+  for (let i = 0; i < rows.length; i++) {
+    const row = dataProperty(rows, String(i));
+    if (!row || typeof row !== "object" || Array.isArray(row)) continue;
+    const rank = dataProperty(row, "final_additional_admission_rank", true);
+    if (rank && typeof rank === "object" && Object.hasOwn(rank, "service_qualification")) {
+      return true;
+    }
+  }
+  return false;
+}
+/** Preserve the synchronous legacy validator. Only independently granted rank q is
+ * separated from a detached body, then reattached after all original checks.
+ */
+export async function validateQualifiedHistorySnapshotPayload(
+  raw: unknown,
+  part: SnapshotPart,
+  publication: SnapshotPublication | null,
+): Promise<NativeObject> {
+  const context = publication
+    ? dataProperty(publication, "fieldQualification", true) as
+      | VerifiedQualificationPublication
+      | undefined
+    : undefined;
+  if (context !== undefined && (!context || typeof context !== "object")) invalid();
+  if (!context && !hasQualifiedRank(raw, part)) return validateHistorySnapshotPayload(raw, part);
+  if (!context || !publication) invalid();
+  // Capture parent pins and all input data before the first asynchronous hash operation.
+  const publicationSha = dataProperty(publication, "publicationSha256"),
+    sourceHeadSha = dataProperty(publication, "sourceHeadSha256"),
+    scopeSha = dataProperty(publication, "scopeSha256");
+  if ([publicationSha, sourceHeadSha, scopeSha].some((v) => typeof v !== "string")) invalid();
+  const input = exact(raw, [
+    "format",
+    "payload_id",
+    "part_id",
+    "rows",
+  ]);
+  const rows = dataProperty(input, "rows");
+  if (
+    !Array.isArray(rows) || Object.getPrototypeOf(rows) !== Array.prototype ||
+    rows.length !== part.rows || Reflect.ownKeys(rows).length !== rows.length + 1
+  ) invalid();
+  const body = {
+    format: dataProperty(input, "format"),
+    payload_id: dataProperty(input, "payload_id"),
+    part_id: dataProperty(input, "part_id"),
+  };
+  const qualified: { index: number; row: NativeObject; rank: NativeObject }[] = [];
+  const legacyRows: NativeObject[] = [];
+  for (let index = 0; index < rows.length; index++) {
+    const item = dataProperty(rows, String(index));
+    if (!item || typeof item !== "object" || Array.isArray(item) || item instanceof JsonFloat) {
+      invalid();
+    }
+    const row = item as NativeObject, rank = dataProperty(row, "final_additional_admission_rank");
+    if (
+      rank && typeof rank === "object" && !Array.isArray(rank) && !(rank instanceof JsonFloat) &&
+      Object.hasOwn(rank, "service_qualification")
+    ) {
+      if (qualified.length === 2) invalid();
+      const captured = detachedQualificationSnapshot(row) as NativeObject;
+      const capturedRank = captured.final_additional_admission_rank as NativeObject;
+      qualified.push({ index, row: captured, rank: capturedRank });
+      legacyRows.push({
+        ...captured,
+        final_additional_admission_rank: Object.fromEntries(
+          Object.entries(capturedRank).filter(([key]) => key !== "service_qualification"),
+        ),
+      });
+    } else {
+      legacyRows.push(row);
+    }
+  }
+  // The legacy validator captures every other row before await, with its original
+  // payload bounds. Qualification's small-object cap applies only to its two rows.
+  const result = validateHistorySnapshotPayload({ ...body, rows: legacyRows }, part);
+  const grants = await assertFieldQualificationPublication(
+    context,
+    publicationSha as string,
+    sourceHeadSha as string,
+    scopeSha as string,
+  );
+  const resultRows = result.rows as NativeObject[];
+  for (let i = 0; i < resultRows.length; i++) {
+    const row = resultRows[i];
+    const expected = grants.some((g) => {
+      const subject = g.subject as NativeObject;
+      return subject.academic_year === row.academic_year && subject.offering_pk === row.original_pk;
+    });
+    if (expected && !qualified.some((q) => q.index === i)) invalid();
+  }
+  for (const selected of qualified) {
+    const q = await validateFieldServiceQualification(
+      "final_additional_admission_rank",
+      selected.rank,
+      selected.row,
+      publicationSha as string,
+      context,
+    );
+    if (!q) invalid();
+    const row = (result.rows as NativeObject[])[selected.index];
+    row.final_additional_admission_rank = {
+      ...row.final_additional_admission_rank as NativeObject,
+      service_qualification: q,
+    };
+  }
+  return result;
+}
 function publicPart(p: SnapshotPart): NativeObject {
   return {
     part_id: p.partId,
@@ -426,7 +552,11 @@ export class HistorySnapshotService {
         query.part_id === undefined ? 422 : 404,
       );
     }
-    const body = validateHistorySnapshotPayload(await this.source.read(p, part), part);
+    const body = await validateQualifiedHistorySnapshotPayload(
+      await this.source.read(p, part),
+      part,
+      p,
+    );
     await this.finish(session, p);
     return body;
   }
