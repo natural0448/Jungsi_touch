@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.112",
+  "contract_version": "1.9.113",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -3613,7 +3613,35 @@
         "source_only_security_invariants": "No auth/ownership/RLS/CSRF/relay/quota/backend-engine source changed in frontend delta",
         "production_ready": false
       },
-      "effective_current_frontend_crawler_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023"
+      "effective_current_frontend_crawler_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023",
+      "latest_qualified_local_delivery_20261024": {
+        "format": "jungsi.qualified-field-local-delivery-evidence/v1",
+        "date_KST": "2026-10-24",
+        "status": "LOCAL_CORE_AND_EXACT_PARTS_INDEPENDENTLY_VERIFIED_OWNER_ACTIVATION_PENDING",
+        "existing_authority_and_source_review": "REUSED_UNCHANGED_NO_NEW_SOURCE_AUTHORITY",
+        "writer": "existing development team private local compiler",
+        "independent_reviewer": "system planning Root separate from compiler author",
+        "core_and_exact_parts_receipt_sha256": "bd2339bb8d1041d8b27067670921eedfdc62ccc1c5060e32837f2f872b650e36",
+        "wire_metadata_and_offline_adapter_receipt_sha256": "7ae2f681e3986d2fad629add12ef08ffef661fba78bf80cfd448e2f05d292ae6",
+        "five_controls_delta_receipt_sha256": "2aa2b83f0ddfb74251d5fae35a23915b4941e46851747fbc05566f82ac98e364",
+        "installed_source_and_full_digest_baseline_receipt_sha256": "32a7d761898fa67f4eaae5e27ba8ecc1763a28964d04b9f16a08f283bb78b14f",
+        "bounded_readonly_current_heads_receipt_sha256": "ab28e613373f6752d4c436406ae783a885e31dd5bde512b53bb83e8848233eec",
+        "source_validation": "Actual existing adapter over real candidate bytes through a closed offline map; no live bucket, JWT or network claim",
+        "native_preservation": "Removing only the new qualification token restores both full original bodies byte for byte; all untouched references remain identical",
+        "settings_preservation": "Only approved snapshot edition controls and catalog consumer coupling change; existing cap, expiry, keys, relay, policies and budgets remain",
+        "designated_operator": "Existing frontend Owner/Administrator per direct user decision; no new role or key",
+        "runtime_source_changes_in_this_planning_commit": 0,
+        "actual_DB_publication": "NOT_RUN",
+        "actual_Storage_upload_and_GET": "NOT_RUN",
+        "actual_Secrets_or_deployment": "NOT_RUN",
+        "actual_new_snapshot_JWT_BFF_browser": "NOT_RUN",
+        "new_closure_archive_verification": "RECORDED_IN_PRIVATE_FINAL_HANDOFF_SEPARATELY",
+        "Owner_ready": false,
+        "production_ready": false,
+        "operating_mutations": 0,
+        "deletions": 0
+      },
+      "effective_current_qualified_local_delivery_ref": "supabase_deployment_contract.live_execution.latest_qualified_local_delivery_20261024"
     }
   }
 }

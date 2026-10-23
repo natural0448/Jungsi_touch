@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.112",
+  "version": "1.9.113",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7153,7 +7153,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.112",
+        "contract_version": "1.9.113",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7327,7 +7327,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.112",
+        "contract_version": "1.9.113",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7493,7 +7493,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.112",
+        "contract_version": "1.9.113",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7512,7 +7512,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.112",
+        "contract_version": "1.9.113",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7537,7 +7537,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.112",
+        "contract_version": "1.9.113",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7562,7 +7562,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.112",
+        "contract_version": "1.9.113",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -17758,14 +17758,20 @@
           "2026-10-23 회신+20:05KST 보충 / Worker99c03f4f / 본체 PR405·407",
           "Root 익명6주소·홈 범위 검수: root277B/기존규칙보존·응답header/no-store·직접403·정본301; 인증P1=200은 화면팀 보고 수용",
           "동일 헤더 중복은 보고대로 기록한다. BFF/RSC·인증거절/redirect 실제 응답과 기존 보안 전체 인수는 NOT_RUN. 본체 Actions 미실행을 CI통과로 표시하지 않는다. 크롤링 거부는 인증·소유권·relay·RLS·예산을 대신하지 않는다."
+        ],
+        [
+          "발표 입결 / 정확 필드 승인 코어와 두 분할 로컬 납품 검수",
+          "기획113 / 기존 승인·독립 원문 근거 재사용 / Source118 기존 검증 모듈",
+          "독립 원바이트 복구·별도 core/audit·정확 분할 참조·발행 metadata·설정 결속 PASS. 실제 어댑터의 새 발행판·대상 응답 검증은 오프라인 범위다.",
+          "기존 화면 Owner가 최종 등록한다. 새 Storage 사본/GET·DB 발행·설정/함수 배포·새 판 JWT/BFF/브라우저는 NOT_RUN이며 현재 운영 판과 기존 성적·권한·RLS·한도·만료를 유지한다."
         ]
       ],
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "65392e3acd044411d00eccad15cbfef1d8139295",
-        "spec_version": "1.9.111",
-        "ci_run_id": 39962564942,
+        "commit": "da57f1ebbf2c026262f7cf0c937979ae2b7c0d66",
+        "spec_version": "1.9.112",
+        "ci_run_id": 39968122985,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
@@ -20562,6 +20568,16 @@
         "REQ-28"
       ],
       "summary": "기획112: 다른 PC의33b06/spec111을 동기화하고 화면 private v3 5파일을 PR62로 통합한다. 크롤링 정책의 본체 robots277B·정문/404/워커403·헤더/no-store와 기존 규칙 보존을 독립 확인하고, 20:05KST 관리자P1 200은 화면팀 보고로 수용한다. 화면 Owner(화면팀)와 에듀터치 본체 수신자를 구분한다. BFF/RSC·인증거절/redirect·전체 보안·실제 q 신규2분할/발행판 검수는 별도 미완료이며 DB/엔진·RLS·한도·기존 권한·요금·파일 보존을 변경하지 않는다."
+    },
+    {
+      "date": "2026-10-24",
+      "requirements": [
+        "REQ-28",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "기획113: 기존 승인·독립 원문 근거를 재사용해 서비스용 strict core와 writer audit를 분리한 로컬 납품, 두 분할 원바이트 복구와 미변경 참조 보존, 실제 Source118 어댑터의 오프라인 발행판/응답 검수를 기록한다. 현재 등록 소스·설정 지문과 작은 두 head도 읽기 전용으로 대조했다. 사용자 결정대로 지정 화면 Owner가 최종 등록하며 Storage/발행/Secrets/배포·새 판 JWT/BFF/브라우저는 미완료다. 업무 코드·원문·모형·역할·RLS·예산·운영 만료·현재 운영 판은 변경하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -21785,7 +21801,7 @@
         ],
         "field_qualification_contract": {
           "format": "jungsi.history-field-qualification-read/v1",
-          "status": "SOURCE_REGISTERED_SYNTHETIC_FOCUSED_PASS_RUNTIME_NOT_ACTIVATED",
+          "status": "SOURCE_INTEGRATED_LOCAL_DELIVERY_VERIFIED_RUNTIME_NOT_ACTIVATED",
           "requirements": [
             "REQ-28",
             "REQ-24",
@@ -21836,17 +21852,18 @@
               "read_view_total": 196,
               "normal_full_snapshot_hooks_and_exact_SHA_CI": "REQUIRED_RECORDED_SEPARATELY"
             },
-            "actual_DataRoot_exact_parts": "NOT_RUN",
+            "actual_DataRoot_exact_parts": "LOCAL_DELIVERY_COMPILER_AND_ROOT_INDEPENDENT_BYTE_REVIEW_PASS_NOT_PUBLICATION",
             "actual_Owner_JWT_BFF": "NOT_RUN",
             "deployment": "NOT_RUN",
             "operating_changes": 0,
-            "public_recursive_projection": "RANK_Q_PRESERVED_OTHER_SLOT_Q_FILTERED_STANDARD_AND_PAID"
+            "public_recursive_projection": "RANK_Q_PRESERVED_OTHER_SLOT_Q_FILTERED_STANDARD_AND_PAID",
+            "local_delivery_evidence_ref": "supabase_deployment_contract.live_execution.latest_qualified_local_delivery_20261024"
           },
           "resource_compatibility": "Only qualified rows use the bounded detached qualification snapshot; every legacy row is synchronously validated and copied before await using existing payload bounds. No new whole-part row/node cap or runtime setting is introduced.",
           "descriptor_receipt_max_bytes": 24576,
           "public_fixture_regression": "tests/test_history_qualification_schema.py: exact reachable schema closure; dangling refs, missing qualification nodes and fixture mismatch fail. Fixture is not regenerated by tests.",
           "basis_commit": "43e5f0d5eb4d7eedb9eb1ecfbdd906217c9ed3db",
-          "actual_authority_status": "HOLD_PENDING_DATAROOT_EXACT_PARTS_INDEPENDENT_CHAIN_AND_OWNER_RUNTIME_ACCEPTANCE",
+          "actual_authority_status": "EXISTING_AUTHORITY_REUSED_LOCAL_CORE_AND_BYTES_VERIFIED_OWNER_ACTIVATION_PENDING",
           "source_and_test_bindings": {
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
             "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "9035db789b8042d772d3dad6d08ece230c8b45cc9fb8f60b2d0ee17113e054de",
@@ -34279,7 +34296,35 @@
         "source_only_security_invariants": "No auth/ownership/RLS/CSRF/relay/quota/backend-engine source changed in frontend delta",
         "production_ready": false
       },
-      "effective_current_frontend_crawler_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023"
+      "effective_current_frontend_crawler_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023",
+      "latest_qualified_local_delivery_20261024": {
+        "format": "jungsi.qualified-field-local-delivery-evidence/v1",
+        "date_KST": "2026-10-24",
+        "status": "LOCAL_CORE_AND_EXACT_PARTS_INDEPENDENTLY_VERIFIED_OWNER_ACTIVATION_PENDING",
+        "existing_authority_and_source_review": "REUSED_UNCHANGED_NO_NEW_SOURCE_AUTHORITY",
+        "writer": "existing development team private local compiler",
+        "independent_reviewer": "system planning Root separate from compiler author",
+        "core_and_exact_parts_receipt_sha256": "bd2339bb8d1041d8b27067670921eedfdc62ccc1c5060e32837f2f872b650e36",
+        "wire_metadata_and_offline_adapter_receipt_sha256": "7ae2f681e3986d2fad629add12ef08ffef661fba78bf80cfd448e2f05d292ae6",
+        "five_controls_delta_receipt_sha256": "2aa2b83f0ddfb74251d5fae35a23915b4941e46851747fbc05566f82ac98e364",
+        "installed_source_and_full_digest_baseline_receipt_sha256": "32a7d761898fa67f4eaae5e27ba8ecc1763a28964d04b9f16a08f283bb78b14f",
+        "bounded_readonly_current_heads_receipt_sha256": "ab28e613373f6752d4c436406ae783a885e31dd5bde512b53bb83e8848233eec",
+        "source_validation": "Actual existing adapter over real candidate bytes through a closed offline map; no live bucket, JWT or network claim",
+        "native_preservation": "Removing only the new qualification token restores both full original bodies byte for byte; all untouched references remain identical",
+        "settings_preservation": "Only approved snapshot edition controls and catalog consumer coupling change; existing cap, expiry, keys, relay, policies and budgets remain",
+        "designated_operator": "Existing frontend Owner/Administrator per direct user decision; no new role or key",
+        "runtime_source_changes_in_this_planning_commit": 0,
+        "actual_DB_publication": "NOT_RUN",
+        "actual_Storage_upload_and_GET": "NOT_RUN",
+        "actual_Secrets_or_deployment": "NOT_RUN",
+        "actual_new_snapshot_JWT_BFF_browser": "NOT_RUN",
+        "new_closure_archive_verification": "RECORDED_IN_PRIVATE_FINAL_HANDOFF_SEPARATELY",
+        "Owner_ready": false,
+        "production_ready": false,
+        "operating_mutations": 0,
+        "deletions": 0
+      },
+      "effective_current_qualified_local_delivery_ref": "supabase_deployment_contract.live_execution.latest_qualified_local_delivery_20261024"
     }
   },
   "history_presentation_contract": {
