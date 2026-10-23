@@ -6313,6 +6313,90 @@
         "REQ-31"
       ],
       "symbols": []
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts",
+      "layer": "application",
+      "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "symbols": [
+        "GUIDE_REFERENCE_FIELDS",
+        "GuideRuleQuery",
+        "GuideRuleSourceResult",
+        "GuideRuleReferencePort",
+        "guideRuleQuery",
+        "GuideRuleReferenceService"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts",
+      "layer": "data_infrastructure",
+      "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "symbols": [
+        "GUIDE_RULE_SOURCE_VIEWS",
+        "GUIDE_RULE_METADATA_SEEDS",
+        "GUIDE_RULE_HEADER_SQL",
+        "GUIDE_RULE_POINT_SQL",
+        "GUIDE_RULE_NATIVE_BINDING_SQL",
+        "GUIDE_RULE_NATIVE_POINT_SQL",
+        "GUIDE_RULE_NEW_POINT_SQL",
+        "GUIDE_RULE_LINEAGE_SQL",
+        "GuideRuleSourceApproval",
+        "verifyGuideRuleSourceApproval",
+        "CurrentGuideRulePostgres"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts",
+      "layer": "data_infrastructure",
+      "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "symbols": [
+        "CURRENT_PUBLIC_SOURCE_VIEWS",
+        "CURRENT_PUBLIC_METADATA_SQL",
+        "CURRENT_PUBLIC_GUIDE_COMMAND_RELATIONS",
+        "CURRENT_PUBLIC_GUIDE_COMMAND_SQL"
+      ]
+    },
+    {
+      "path": "tests/edge/test_guide_rule_reference.ts",
+      "layer": "verification",
+      "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "supabase/functions/_shared/professional_guide_rule_test.ts",
+      "layer": "verification",
+      "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -14842,6 +14926,26 @@
               ]
             },
             {
+              "path": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts",
+              "layer": "application",
+              "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+              "requirements": [
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-31"
+              ],
+              "source_sha256": "5a45b0955eef1d2970e0cb5deb08a2b67f3e95eb22706576719ea94f2bd80c99",
+              "declared_exports": [
+                "GUIDE_REFERENCE_FIELDS",
+                "GuideRuleQuery",
+                "GuideRuleSourceResult",
+                "GuideRuleReferencePort",
+                "guideRuleQuery",
+                "GuideRuleReferenceService"
+              ]
+            },
+            {
               "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
               "layer": "application",
               "status": "read_view_source_candidate_native_activation_NOT_RUN",
@@ -16000,6 +16104,31 @@
               ]
             },
             {
+              "path": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts",
+              "layer": "data_infrastructure",
+              "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+              "requirements": [
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-31"
+              ],
+              "source_sha256": "ebe174637a5db54d37a0facd84767cf199f62eeab4114ff1ae1179368311da3a",
+              "declared_exports": [
+                "GUIDE_RULE_SOURCE_VIEWS",
+                "GUIDE_RULE_METADATA_SEEDS",
+                "GUIDE_RULE_HEADER_SQL",
+                "GUIDE_RULE_POINT_SQL",
+                "GUIDE_RULE_NATIVE_BINDING_SQL",
+                "GUIDE_RULE_NATIVE_POINT_SQL",
+                "GUIDE_RULE_NEW_POINT_SQL",
+                "GUIDE_RULE_LINEAGE_SQL",
+                "GuideRuleSourceApproval",
+                "verifyGuideRuleSourceApproval",
+                "CurrentGuideRulePostgres"
+              ]
+            },
+            {
               "path": "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts",
               "layer": "data_infrastructure",
               "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
@@ -16043,6 +16172,24 @@
                 "FORECAST_REVISION_INSERT_SQL",
                 "ForecastSqlLimits",
                 "SupabaseForecastRepository"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts",
+              "layer": "data_infrastructure",
+              "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+              "requirements": [
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-31"
+              ],
+              "source_sha256": "7c2785c3dc404daa8cd13fa5f470ba25acbabc2b1c62949a7dab521e6998dbc3",
+              "declared_exports": [
+                "CURRENT_PUBLIC_SOURCE_VIEWS",
+                "CURRENT_PUBLIC_METADATA_SQL",
+                "CURRENT_PUBLIC_GUIDE_COMMAND_RELATIONS",
+                "CURRENT_PUBLIC_GUIDE_COMMAND_SQL"
               ]
             },
             {
@@ -17099,6 +17246,19 @@
                 "REQ-31"
               ],
               "source_sha256": "618e9ea0b6c27c1dea6552c6f8ad2f3fa9fcfef1d7b908516b4fe1e136b676eb",
+              "declared_exports": []
+            },
+            {
+              "path": "supabase/functions/_shared/professional_guide_rule_test.ts",
+              "layer": "verification",
+              "status": "internal_guide_rule_reference_source_synthetic_verified_SQL_point_only_Owner_NOT_RUN",
+              "requirements": [
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-31"
+              ],
+              "source_sha256": "8a645f334e9e32f18b107e4991efb204b6e4387641c9a00d357dc9e093e39fba",
               "declared_exports": []
             },
             {
@@ -152732,6 +152892,3088 @@
             ]
           }
         ]
+      },
+      "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts": {
+        "layer": "application",
+        "symbols": [
+          "GUIDE_REFERENCE_FIELDS",
+          "GuideRuleQuery",
+          "GuideRuleSourceResult",
+          "GuideRuleReferencePort",
+          "guideRuleQuery",
+          "GuideRuleReferenceService"
+        ],
+        "declarations": {
+          "symbols": [
+            {
+              "name": "GUIDE_REFERENCE_FIELDS",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "repr": "korean_ratio",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "korean_ratio"
+                            }
+                          },
+                          {
+                            "repr": "math_ratio",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "math_ratio"
+                            }
+                          },
+                          {
+                            "repr": "english_ratio",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "english_ratio"
+                            }
+                          },
+                          {
+                            "repr": "inquiry_ratio",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "inquiry_ratio"
+                            }
+                          },
+                          {
+                            "repr": "history_ratio",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "history_ratio"
+                            }
+                          },
+                          {
+                            "repr": "english_grade_points",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "english_grade_points"
+                            }
+                          },
+                          {
+                            "repr": "history_grade_points",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "history_grade_points"
+                            }
+                          },
+                          {
+                            "repr": "math_bonus",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "math_bonus"
+                            }
+                          },
+                          {
+                            "repr": "inquiry_bonus",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "inquiry_bonus"
+                            }
+                          },
+                          {
+                            "repr": "inquiry_subject_count",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "inquiry_subject_count"
+                            }
+                          },
+                          {
+                            "repr": "inquiry_subject_count_range",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "inquiry_subject_count_range"
+                            }
+                          },
+                          {
+                            "repr": "inquiry_selection_method",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "inquiry_selection_method"
+                            }
+                          },
+                          {
+                            "repr": "inquiry_score_basis",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "inquiry_score_basis"
+                            }
+                          },
+                          {
+                            "repr": "required_exam_areas",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "required_exam_areas"
+                            }
+                          },
+                          {
+                            "repr": "required_exam_areas_normalized",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "required_exam_areas_normalized"
+                            }
+                          },
+                          {
+                            "repr": "required_subject_choices",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "required_subject_choices"
+                            }
+                          },
+                          {
+                            "repr": "reflected_areas",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "reflected_areas"
+                            }
+                          },
+                          {
+                            "repr": "score_metrics_by_area",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "score_metrics_by_area"
+                            }
+                          },
+                          {
+                            "repr": "reflection_combination",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "reflection_combination"
+                            }
+                          },
+                          {
+                            "repr": "selection_groups",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "selection_groups"
+                            }
+                          },
+                          {
+                            "repr": "weighted_subjects",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "weighted_subjects"
+                            }
+                          },
+                          {
+                            "repr": "selection_method",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "selection_method"
+                            }
+                          },
+                          {
+                            "repr": "csat_ratio",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "csat_ratio"
+                            }
+                          },
+                          {
+                            "repr": "csat_minimum",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "csat_minimum"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GuideRuleQuery",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "academicYear",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "offeringPk",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GuideRuleSourceResult",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "version",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "sourcePointerSha256",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "row",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "repr": "NativeObject",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "NativeObject",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "../domain/json_value.ts",
+                                  "name": "NativeObject"
+                                }
+                              }
+                            },
+                            {
+                              "repr": "null",
+                              "kind": "keyword",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "lineage",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "repr": "NativeObject",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "NativeObject",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../domain/json_value.ts",
+                                    "name": "NativeObject"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GuideRuleReferencePort",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "methods": [
+                      {
+                        "name": "readCurrent",
+                        "kind": "method",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "subjectId",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "string",
+                              "kind": "keyword",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "query",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "GuideRuleQuery",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "GuideRuleQuery",
+                                "resolution": {
+                                  "kind": "local"
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "repr": "Promise",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeParams": [
+                              {
+                                "repr": "GuideRuleSourceResult",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "GuideRuleSourceResult",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            ],
+                            "typeName": "Promise"
+                          }
+                        },
+                        "parameter_source": "(subjectId: string, query: GuideRuleQuery)"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "guideRuleQuery",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "academicYear",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "offeringPk",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "GuideRuleQuery",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "GuideRuleQuery",
+                        "resolution": {
+                          "kind": "local"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(academicYear: unknown, offeringPk: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GuideRuleReferenceService",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "class",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "source",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "GuideRuleReferencePort",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "GuideRuleReferencePort",
+                                "resolution": {
+                                  "kind": "local"
+                                }
+                              }
+                            },
+                            "readonly": true
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "clock",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "RequestClockPort",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "RequestClockPort",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./ports.ts",
+                                  "name": "RequestClockPort"
+                                }
+                              }
+                            },
+                            "readonly": true
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "policy",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "ProfessionalPolicy",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "ProfessionalPolicy",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./professional_policy.ts",
+                                  "name": "ProfessionalPolicy"
+                                }
+                              }
+                            },
+                            "readonly": true
+                          }
+                        ],
+                        "parameter_source": "(\n    private readonly source: GuideRuleReferencePort,\n    private readonly clock: RequestClockPort,\n    private readonly policy: ProfessionalPolicy,\n  )"
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "name": "read",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "scope",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "ProfessionalScope",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "ProfessionalScope",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./professional_ports.ts",
+                                    "name": "ProfessionalScope"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "academicYear",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "unknown",
+                                "kind": "keyword",
+                                "value": "unknown"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "offeringPk",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "unknown",
+                                "kind": "keyword",
+                                "value": "unknown"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "NativeObject",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeName": "NativeObject",
+                                    "resolution": {
+                                      "kind": "import",
+                                      "specifier": "../domain/json_value.ts",
+                                      "name": "NativeObject"
+                                    }
+                                  }
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "object",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "v is NativeObject",
+                      "kind": "typePredicate",
+                      "value": {
+                        "param": {
+                          "type": "identifier",
+                          "name": "v"
+                        },
+                        "type": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "unavailable",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "never",
+                      "kind": "keyword",
+                      "value": "never"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PRIVATE_KEYS",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "Set",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "Set"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "safeValue",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "depth",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "number",
+                            "kind": "keyword",
+                            "value": "number"
+                          }
+                        },
+                        "right": "0"
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "count",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeLiteral",
+                            "value": {
+                              "properties": [
+                                {
+                                  "name": "n",
+                                  "tsType": {
+                                    "repr": "number",
+                                    "kind": "keyword",
+                                    "value": "number"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "right": "[UNSUPPORTED]"
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "value is NativeJson",
+                      "kind": "typePredicate",
+                      "value": {
+                        "param": {
+                          "type": "identifier",
+                          "name": "value"
+                        },
+                        "type": {
+                          "repr": "NativeJson",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeJson",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/native_json.ts",
+                              "name": "NativeJson"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown, depth = 0, count = { n: 0 })"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "publicUrl",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        },
+                        {
+                          "repr": "null",
+                          "kind": "keyword",
+                          "value": "null"
+                        }
+                      ]
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "QUALIFICATION_FIELDS",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "repr": "status",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "status"
+                            }
+                          },
+                          {
+                            "repr": "qualification_status",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "qualification_status"
+                            }
+                          },
+                          {
+                            "repr": "publication_status",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "publication_status"
+                            }
+                          },
+                          {
+                            "repr": "source_status",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "source_status"
+                            }
+                          },
+                          {
+                            "repr": "missing_reason",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "missing_reason"
+                            }
+                          },
+                          {
+                            "repr": "reason",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "reason"
+                            }
+                          },
+                          {
+                            "repr": "conditions",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "conditions"
+                            }
+                          },
+                          {
+                            "repr": "exceptions",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "exceptions"
+                            }
+                          },
+                          {
+                            "repr": "original_label",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "original_label"
+                            }
+                          },
+                          {
+                            "repr": "original_text",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "original_text"
+                            }
+                          },
+                          {
+                            "repr": "unit",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "unit"
+                            }
+                          },
+                          {
+                            "repr": "basis",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "basis"
+                            }
+                          },
+                          {
+                            "repr": "method",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "method"
+                            }
+                          },
+                          {
+                            "repr": "kind",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "kind"
+                            }
+                          },
+                          {
+                            "repr": "source_year",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "source_year"
+                            }
+                          },
+                          {
+                            "repr": "academic_year",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "academic_year"
+                            }
+                          },
+                          {
+                            "repr": "source_as_of",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "source_as_of"
+                            }
+                          },
+                          {
+                            "repr": "page",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "page"
+                            }
+                          },
+                          {
+                            "repr": "pages",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "pages"
+                            }
+                          },
+                          {
+                            "repr": "pdf_page",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "pdf_page"
+                            }
+                          },
+                          {
+                            "repr": "document_version",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "document_version"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "qualification",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "NativeObject",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "NativeObject",
+                        "resolution": {
+                          "kind": "import",
+                          "specifier": "../domain/json_value.ts",
+                          "name": "NativeObject"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "metadataText",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "identifier",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "boolean",
+                            "kind": "keyword",
+                            "value": "boolean"
+                          }
+                        },
+                        "right": "false"
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        },
+                        {
+                          "repr": "null",
+                          "kind": "keyword",
+                          "value": "null"
+                        }
+                      ]
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown, identifier = false)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "fieldReference",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "raw",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "name",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "NativeObject",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "NativeObject",
+                        "resolution": {
+                          "kind": "import",
+                          "specifier": "../domain/json_value.ts",
+                          "name": "NativeObject"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(raw: NativeObject, name: string)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "lineage",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "rows",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "repr": "NativeObject",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "NativeObject",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../domain/json_value.ts",
+                                    "name": "NativeObject"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "query",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "GuideRuleQuery",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "GuideRuleQuery",
+                            "resolution": {
+                              "kind": "local"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "array",
+                      "value": {
+                        "repr": "NativeObject",
+                        "kind": "typeRef",
+                        "value": {
+                          "typeName": "NativeObject",
+                          "resolution": {
+                            "kind": "import",
+                            "specifier": "../domain/json_value.ts",
+                            "name": "NativeObject"
+                          }
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(rows: readonly NativeObject[], query: GuideRuleQuery)"
+                  }
+                }
+              ]
+            }
+          ],
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
+              "jsDoc": {
+                "doc": "Internal counseling reference read. Call only after the existing tenant/paid authorization."
+              }
+            },
+            {
+              "importedName": "JsonFloat",
+              "originalName": "JsonFloat",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "NativeJson",
+              "originalName": "NativeJson",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "ProfessionalPolicy",
+              "originalName": "ProfessionalPolicy",
+              "src": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
+            },
+            {
+              "importedName": "ProfessionalScope",
+              "originalName": "ProfessionalScope",
+              "src": "supabase/functions/_shared/jungsi/application/professional_ports.ts"
+            },
+            {
+              "importedName": "RequestClockPort",
+              "originalName": "RequestClockPort",
+              "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+            },
+            {
+              "importedName": "cloneNativeJson",
+              "originalName": "cloneNativeJson",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "nativeJsonText",
+              "originalName": "nativeJsonText",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "publicSourceUrl",
+              "originalName": "publicSourceUrl",
+              "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
+            }
+          ],
+          "source_sha256": "5a45b0955eef1d2970e0cb5deb08a2b67f3e95eb22706576719ea94f2bd80c99"
+        },
+        "dependencies": [
+          {
+            "specifier": "../domain/json_value.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../domain/native_json.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./access.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./catalog.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/catalog.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./ports.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./professional_policy.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./professional_ports.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/professional_ports.ts"
+              }
+            ]
+          }
+        ]
+      },
+      "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts": {
+        "layer": "data_infrastructure",
+        "symbols": [
+          "GUIDE_RULE_SOURCE_VIEWS",
+          "GUIDE_RULE_METADATA_SEEDS",
+          "GUIDE_RULE_HEADER_SQL",
+          "GUIDE_RULE_POINT_SQL",
+          "GUIDE_RULE_NATIVE_BINDING_SQL",
+          "GUIDE_RULE_NATIVE_POINT_SQL",
+          "GUIDE_RULE_NEW_POINT_SQL",
+          "GUIDE_RULE_LINEAGE_SQL",
+          "GuideRuleSourceApproval",
+          "verifyGuideRuleSourceApproval",
+          "CurrentGuideRulePostgres"
+        ],
+        "declarations": {
+          "symbols": [
+            {
+              "name": "GUIDE_RULE_SOURCE_VIEWS",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "kind": "typeLiteral",
+                      "value": {
+                        "properties": [
+                          {
+                            "name": "offerings"
+                          },
+                          {
+                            "name": "relations"
+                          },
+                          {
+                            "name": "rules",
+                            "tsType": {
+                              "repr": "string",
+                              "kind": "keyword",
+                              "value": "string"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GUIDE_RULE_METADATA_SEEDS",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "any[]",
+                      "kind": "array",
+                      "value": {
+                        "repr": "any",
+                        "kind": "keyword",
+                        "value": "any"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GUIDE_RULE_HEADER_SQL",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "string",
+                      "kind": "keyword",
+                      "value": "string"
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GUIDE_RULE_POINT_SQL",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "string",
+                      "kind": "keyword",
+                      "value": "string"
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GUIDE_RULE_NATIVE_BINDING_SQL",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "SELECT jsonb_build_object(\n 'base_rule_release_id',base_rule_release_id,'before_rule_sha256',before_rule_sha256,\n 'derived_rule_sha256',derived_rule_sha256,'derived_row_sha256',derived_row_sha256,\n 'value_id',value_id)::text FROM jungsi_data_ingest.guide_native_minimum3_fields_v4\n WHERE school_id=$1::text AND academic_year=$2::integer AND offering_pk=$3::text LIMIT 2",
+                      "kind": "literal",
+                      "value": {
+                        "kind": "template",
+                        "tsTypes": [
+                          {
+                            "repr": "SELECT jsonb_build_object(\n 'base_rule_release_id',base_rule_release_id,'before_rule_sha256',before_rule_sha256,\n 'derived_rule_sha256',derived_rule_sha256,'derived_row_sha256',derived_row_sha256,\n 'value_id',value_id)::text FROM jungsi_data_ingest.guide_native_minimum3_fields_v4\n WHERE school_id=$1::text AND academic_year=$2::integer AND offering_pk=$3::text LIMIT 2",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "SELECT jsonb_build_object(\n 'base_rule_release_id',base_rule_release_id,'before_rule_sha256',before_rule_sha256,\n 'derived_rule_sha256',derived_rule_sha256,'derived_row_sha256',derived_row_sha256,\n 'value_id',value_id)::text FROM jungsi_data_ingest.guide_native_minimum3_fields_v4\n WHERE school_id=$1::text AND academic_year=$2::integer AND offering_pk=$3::text LIMIT 2"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GUIDE_RULE_NATIVE_POINT_SQL",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "string",
+                      "kind": "keyword",
+                      "value": "string"
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GUIDE_RULE_NEW_POINT_SQL",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GUIDE_RULE_LINEAGE_SQL",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "string",
+                      "kind": "keyword",
+                      "value": "string"
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GuideRuleSourceApproval",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "version",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "sourcePointerSha256",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "metadataSha256",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "expiresAtUtc",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "bigint",
+                          "kind": "keyword",
+                          "value": "bigint"
+                        }
+                      },
+                      {
+                        "name": "guideCommands",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "Readonly",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeParams": [
+                              {
+                                "repr": "Record",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeParams": [
+                                    {
+                                      "repr": "string",
+                                      "kind": "keyword",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "kind": "typeLiteral",
+                                      "value": {
+                                        "properties": [
+                                          {
+                                            "name": "count",
+                                            "tsType": {
+                                              "repr": "number",
+                                              "kind": "keyword",
+                                              "value": "number"
+                                            }
+                                          },
+                                          {
+                                            "name": "sha256",
+                                            "tsType": {
+                                              "repr": "string",
+                                              "kind": "keyword",
+                                              "value": "string"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "typeName": "Record"
+                                }
+                              }
+                            ],
+                            "typeName": "Readonly"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "verifyGuideRuleSourceApproval",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "bytes",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "Uint8Array",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "Uint8Array"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "expectedSha256",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "clock",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "RequestClockPort",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "RequestClockPort",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../application/ports.ts",
+                              "name": "RequestClockPort"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "GuideRuleSourceApproval",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeName": "GuideRuleSourceApproval",
+                              "resolution": {
+                                "kind": "local"
+                              }
+                            }
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  bytes: Uint8Array,\n  expectedSha256: string,\n  clock: RequestClockPort,\n)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "CurrentGuideRulePostgres",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "class",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "sql",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "SupabaseSqlTransport",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "SupabaseSqlTransport",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./transaction_sql.ts",
+                                  "name": "SupabaseSqlTransport"
+                                }
+                              }
+                            },
+                            "readonly": true
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "load",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "tsType": {
+                                  "repr": "Promise",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeParams": [
+                                      {
+                                        "repr": "GuideRuleSourceApproval",
+                                        "kind": "typeRef",
+                                        "value": {
+                                          "typeName": "GuideRuleSourceApproval",
+                                          "resolution": {
+                                            "kind": "local"
+                                          }
+                                        }
+                                      }
+                                    ],
+                                    "typeName": "Promise"
+                                  }
+                                },
+                                "params": []
+                              }
+                            },
+                            "readonly": true
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "clock",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "RequestClockPort",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "RequestClockPort",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "../application/ports.ts",
+                                  "name": "RequestClockPort"
+                                }
+                              }
+                            },
+                            "readonly": true
+                          }
+                        ],
+                        "parameter_source": "(\n    private readonly sql: SupabaseSqlTransport,\n    private readonly load: () => Promise<GuideRuleSourceApproval>,\n    private readonly clock: RequestClockPort,\n  )"
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "accessibility": "private",
+                        "name": "live",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "value",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "GuideRuleSourceApproval",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "GuideRuleSourceApproval",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "void",
+                            "kind": "keyword",
+                            "value": "void"
+                          },
+                          "hasBody": true
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "commands",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "tx",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "NativeSqlTransaction",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "NativeSqlTransaction",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./transaction_sql.ts",
+                                    "name": "NativeSqlTransaction"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "value",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "GuideRuleSourceApproval",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "GuideRuleSourceApproval",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "void",
+                                  "kind": "keyword",
+                                  "value": "void"
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      },
+                      {
+                        "name": "readCurrent",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "subjectId",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "input",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "GuideRuleQuery",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "GuideRuleQuery",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../application/guide_rule_reference.ts",
+                                    "name": "GuideRuleQuery"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "GuideRuleSourceResult",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeName": "GuideRuleSourceResult",
+                                    "resolution": {
+                                      "kind": "import",
+                                      "specifier": "../application/guide_rule_reference.ts",
+                                      "name": "GuideRuleSourceResult"
+                                    }
+                                  }
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      }
+                    ],
+                    "implements": [
+                      {
+                        "repr": "GuideRuleReferencePort",
+                        "kind": "typeRef",
+                        "value": {
+                          "typeName": "GuideRuleReferencePort",
+                          "resolution": {
+                            "kind": "import",
+                            "specifier": "../application/guide_rule_reference.ts",
+                            "name": "GuideRuleReferencePort"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "G",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "R",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "jungsi_data_ingest.guide_rules_compact_current_v3",
+                      "kind": "literal",
+                      "value": {
+                        "kind": "string",
+                        "string": "jungsi_data_ingest.guide_rules_compact_current_v3"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "E",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "unavailable",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "never",
+                      "kind": "keyword",
+                      "value": "never"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "object",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "v is NativeObject",
+                      "kind": "typePredicate",
+                      "value": {
+                        "param": {
+                          "type": "identifier",
+                          "name": "v"
+                        },
+                        "type": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "hash",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "v is string",
+                      "kind": "typePredicate",
+                      "value": {
+                        "param": {
+                          "type": "identifier",
+                          "name": "v"
+                        },
+                        "type": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "parsed",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "max",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "number",
+                            "kind": "keyword",
+                            "value": "number"
+                          }
+                        },
+                        "right": "65536"
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "unknown",
+                      "kind": "keyword",
+                      "value": "unknown"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown, max = 65536)"
+                  }
+                }
+              ]
+            }
+          ],
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
+              "jsDoc": {
+                "doc": "App-role, parameterized point reads of existing Guide views. No DDL, grants or engine activation."
+              }
+            },
+            {
+              "importedName": "CURRENT_PUBLIC_GUIDE_COMMAND_RELATIONS",
+              "originalName": "CURRENT_PUBLIC_GUIDE_COMMAND_RELATIONS",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts"
+            },
+            {
+              "importedName": "CURRENT_PUBLIC_GUIDE_COMMAND_SQL",
+              "originalName": "CURRENT_PUBLIC_GUIDE_COMMAND_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts"
+            },
+            {
+              "importedName": "CURRENT_PUBLIC_METADATA_SQL",
+              "originalName": "CURRENT_PUBLIC_METADATA_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts"
+            },
+            {
+              "importedName": "CURRENT_PUBLIC_SOURCE_VIEWS",
+              "originalName": "CURRENT_PUBLIC_SOURCE_VIEWS",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts"
+            },
+            {
+              "importedName": "GUIDE_REFERENCE_FIELDS",
+              "originalName": "GUIDE_REFERENCE_FIELDS",
+              "src": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts"
+            },
+            {
+              "importedName": "GuideRuleQuery",
+              "originalName": "GuideRuleQuery",
+              "src": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts"
+            },
+            {
+              "importedName": "GuideRuleReferencePort",
+              "originalName": "GuideRuleReferencePort",
+              "src": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts"
+            },
+            {
+              "importedName": "GuideRuleSourceResult",
+              "originalName": "GuideRuleSourceResult",
+              "src": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts"
+            },
+            {
+              "importedName": "JsonFloat",
+              "originalName": "JsonFloat",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "NativeSqlTransaction",
+              "originalName": "NativeSqlTransaction",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            },
+            {
+              "importedName": "RequestClockPort",
+              "originalName": "RequestClockPort",
+              "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+            },
+            {
+              "importedName": "SupabaseSqlTransport",
+              "originalName": "SupabaseSqlTransport",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            },
+            {
+              "importedName": "guideRuleQuery",
+              "originalName": "guideRuleQuery",
+              "src": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts"
+            },
+            {
+              "importedName": "nativeJsonSha256",
+              "originalName": "nativeJsonSha256",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "sqlJsonText",
+              "originalName": "sqlJsonText",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
+            },
+            {
+              "importedName": "utcInstant",
+              "originalName": "utcInstant",
+              "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ],
+          "source_sha256": "ebe174637a5db54d37a0facd84767cf199f62eeab4114ff1ae1179368311da3a"
+        },
+        "dependencies": [
+          {
+            "specifier": "../application/access.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../application/guide_rule_reference.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../application/ports.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../domain/json_value.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../domain/native_json.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../domain/time.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./guide_metadata_sql.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./sql_values.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./transaction_sql.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+              }
+            ]
+          }
+        ]
+      },
+      "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts": {
+        "layer": "data_infrastructure",
+        "symbols": [
+          "CURRENT_PUBLIC_SOURCE_VIEWS",
+          "CURRENT_PUBLIC_METADATA_SQL",
+          "CURRENT_PUBLIC_GUIDE_COMMAND_RELATIONS",
+          "CURRENT_PUBLIC_GUIDE_COMMAND_SQL"
+        ],
+        "declarations": {
+          "symbols": [
+            {
+              "name": "CURRENT_PUBLIC_SOURCE_VIEWS",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "kind": "typeLiteral",
+                      "value": {
+                        "properties": [
+                          {
+                            "name": "admissions",
+                            "tsType": {
+                              "repr": "string",
+                              "kind": "keyword",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "name": "offerings",
+                            "tsType": {
+                              "repr": "string",
+                              "kind": "keyword",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "name": "relations",
+                            "tsType": {
+                              "repr": "string",
+                              "kind": "keyword",
+                              "value": "string"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "CURRENT_PUBLIC_METADATA_SQL",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "string",
+                      "kind": "keyword",
+                      "value": "string"
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "CURRENT_PUBLIC_GUIDE_COMMAND_RELATIONS",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "repr": "guide_compact_commands_v1",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "guide_compact_commands_v1"
+                            }
+                          },
+                          {
+                            "repr": "guide_compact_commands_v3",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "guide_compact_commands_v3"
+                            }
+                          },
+                          {
+                            "repr": "guide_dentalminimum_commands_v1",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "guide_dentalminimum_commands_v1"
+                            }
+                          },
+                          {
+                            "repr": "guide_field_commands_v1",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "guide_field_commands_v1"
+                            }
+                          },
+                          {
+                            "repr": "guide_native_minimum3_commands_v4",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "guide_native_minimum3_commands_v4"
+                            }
+                          },
+                          {
+                            "repr": "guide_pairfield_commands_v1",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "guide_pairfield_commands_v1"
+                            }
+                          },
+                          {
+                            "repr": "guide_scope_commands_v1",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "guide_scope_commands_v1"
+                            }
+                          },
+                          {
+                            "repr": "guide_trifield_commands_v1",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "guide_trifield_commands_v1"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "CURRENT_PUBLIC_GUIDE_COMMAND_SQL",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "variable",
+                  "def": {
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "CURRENT_REVIEW_METADATA_SQL",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "WITH RECURSIVE seeds(oid) AS (\n SELECT to_regclass(qualified_name) FROM unnest(ARRAY(SELECT value FROM jsonb_array_elements_text($1::text::jsonb))) AS s(qualified_name)\n), closure(oid) AS (\n SELECT oid FROM seeds WHERE oid IS NOT NULL UNION\n SELECT d.refobjid FROM closure x JOIN pg_catalog.pg_rewrite rw ON rw.ev_class=x.oid\n JOIN pg_catalog.pg_depend d ON d.objid=rw.oid AND d.classid='pg_rewrite'::regclass AND d.refclassid='pg_class'::regclass\n JOIN pg_catalog.pg_class child ON child.oid=d.refobjid JOIN pg_catalog.pg_namespace ns ON ns.oid=child.relnamespace\n WHERE ns.nspname='jungsi_data_ingest' AND child.relkind IN ('r','v')\n) SELECT ns.nspname AS schema,c.relname AS relation,c.relkind AS kind,c.relrowsecurity AS rls,c.relforcerowsecurity AS force,\n to_jsonb(c.reloptions) AS reloptions,c.relowner=r.oid AS owner,\n has_table_privilege(current_user,c.oid,'SELECT') AS readable,\n has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS writable,\n has_table_privilege('anon',c.oid,'SELECT') AS anon_read,has_table_privilege('authenticated',c.oid,'SELECT') AS authenticated_read,\n CASE WHEN c.relkind='v' THEN pg_get_viewdef(c.oid,true) ELSE NULL END AS definition,\n (SELECT jsonb_agg(jsonb_build_object('name',a.attname,'type',format_type(a.atttypid,a.atttypmod),'not_null',a.attnotnull) ORDER BY a.attnum)\n  FROM pg_catalog.pg_attribute a WHERE a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped) AS columns\n FROM closure x JOIN pg_catalog.pg_class c ON c.oid=x.oid JOIN pg_catalog.pg_namespace ns ON ns.oid=c.relnamespace\n JOIN pg_catalog.pg_roles r ON r.rolname=current_user ORDER BY ns.nspname,c.relname LIMIT 129",
+                      "kind": "literal",
+                      "value": {
+                        "kind": "template",
+                        "tsTypes": [
+                          {
+                            "repr": "WITH RECURSIVE seeds(oid) AS (\n SELECT to_regclass(qualified_name) FROM unnest(ARRAY(SELECT value FROM jsonb_array_elements_text($1::text::jsonb))) AS s(qualified_name)\n), closure(oid) AS (\n SELECT oid FROM seeds WHERE oid IS NOT NULL UNION\n SELECT d.refobjid FROM closure x JOIN pg_catalog.pg_rewrite rw ON rw.ev_class=x.oid\n JOIN pg_catalog.pg_depend d ON d.objid=rw.oid AND d.classid='pg_rewrite'::regclass AND d.refclassid='pg_class'::regclass\n JOIN pg_catalog.pg_class child ON child.oid=d.refobjid JOIN pg_catalog.pg_namespace ns ON ns.oid=child.relnamespace\n WHERE ns.nspname='jungsi_data_ingest' AND child.relkind IN ('r','v')\n) SELECT ns.nspname AS schema,c.relname AS relation,c.relkind AS kind,c.relrowsecurity AS rls,c.relforcerowsecurity AS force,\n to_jsonb(c.reloptions) AS reloptions,c.relowner=r.oid AS owner,\n has_table_privilege(current_user,c.oid,'SELECT') AS readable,\n has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS writable,\n has_table_privilege('anon',c.oid,'SELECT') AS anon_read,has_table_privilege('authenticated',c.oid,'SELECT') AS authenticated_read,\n CASE WHEN c.relkind='v' THEN pg_get_viewdef(c.oid,true) ELSE NULL END AS definition,\n (SELECT jsonb_agg(jsonb_build_object('name',a.attname,'type',format_type(a.atttypid,a.atttypmod),'not_null',a.attnotnull) ORDER BY a.attnum)\n  FROM pg_catalog.pg_attribute a WHERE a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped) AS columns\n FROM closure x JOIN pg_catalog.pg_class c ON c.oid=x.oid JOIN pg_catalog.pg_namespace ns ON ns.oid=c.relnamespace\n JOIN pg_catalog.pg_roles r ON r.rolname=current_user ORDER BY ns.nspname,c.relname LIMIT 129",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "WITH RECURSIVE seeds(oid) AS (\n SELECT to_regclass(qualified_name) FROM unnest(ARRAY(SELECT value FROM jsonb_array_elements_text($1::text::jsonb))) AS s(qualified_name)\n), closure(oid) AS (\n SELECT oid FROM seeds WHERE oid IS NOT NULL UNION\n SELECT d.refobjid FROM closure x JOIN pg_catalog.pg_rewrite rw ON rw.ev_class=x.oid\n JOIN pg_catalog.pg_depend d ON d.objid=rw.oid AND d.classid='pg_rewrite'::regclass AND d.refclassid='pg_class'::regclass\n JOIN pg_catalog.pg_class child ON child.oid=d.refobjid JOIN pg_catalog.pg_namespace ns ON ns.oid=child.relnamespace\n WHERE ns.nspname='jungsi_data_ingest' AND child.relkind IN ('r','v')\n) SELECT ns.nspname AS schema,c.relname AS relation,c.relkind AS kind,c.relrowsecurity AS rls,c.relforcerowsecurity AS force,\n to_jsonb(c.reloptions) AS reloptions,c.relowner=r.oid AS owner,\n has_table_privilege(current_user,c.oid,'SELECT') AS readable,\n has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS writable,\n has_table_privilege('anon',c.oid,'SELECT') AS anon_read,has_table_privilege('authenticated',c.oid,'SELECT') AS authenticated_read,\n CASE WHEN c.relkind='v' THEN pg_get_viewdef(c.oid,true) ELSE NULL END AS definition,\n (SELECT jsonb_agg(jsonb_build_object('name',a.attname,'type',format_type(a.atttypid,a.atttypmod),'not_null',a.attnotnull) ORDER BY a.attnum)\n  FROM pg_catalog.pg_attribute a WHERE a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped) AS columns\n FROM closure x JOIN pg_catalog.pg_class c ON c.oid=x.oid JOIN pg_catalog.pg_namespace ns ON ns.oid=c.relnamespace\n JOIN pg_catalog.pg_roles r ON r.rolname=current_user ORDER BY ns.nspname,c.relname LIMIT 129"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            }
+          ],
+          "imports": [],
+          "source_sha256": "7c2785c3dc404daa8cd13fa5f470ba25acbabc2b1c62949a7dab521e6998dbc3"
+        },
+        "dependencies": []
+      },
+      "tests/edge/test_guide_rule_reference.ts": {
+        "layer": "verification",
+        "symbols": [],
+        "declarations": {
+          "symbols": [
+            {
+              "name": "assert",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "reason",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "string",
+                            "kind": "keyword",
+                            "value": "string"
+                          }
+                        },
+                        "right": "assertion_failed"
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "asserts v",
+                      "kind": "typePredicate",
+                      "value": {
+                        "asserts": true,
+                        "param": {
+                          "type": "identifier",
+                          "name": "v"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown, reason = \"assertion_failed\")"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "equal",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "a",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "b",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "void",
+                      "kind": "keyword",
+                      "value": "void"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(a: unknown, b: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "denied",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "run",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "tsType": {
+                              "repr": "Promise",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeParams": [
+                                  {
+                                    "repr": "unknown",
+                                    "kind": "keyword",
+                                    "value": "unknown"
+                                  }
+                                ],
+                                "typeName": "Promise"
+                              }
+                            },
+                            "params": []
+                          }
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "code",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "string",
+                            "kind": "keyword",
+                            "value": "string"
+                          }
+                        },
+                        "right": "current_catalog_unavailable"
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "http",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "number",
+                            "kind": "keyword",
+                            "value": "number"
+                          }
+                        },
+                        "right": "503"
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "void",
+                            "kind": "keyword",
+                            "value": "void"
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  run: () => Promise<unknown>,\n  code = \"current_catalog_unavailable\",\n  http = 503,\n)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "NOW",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "HASH",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "SUBJECT",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "00000000-0000-0000-0000-000000000001",
+                      "kind": "literal",
+                      "value": {
+                        "kind": "string",
+                        "string": "00000000-0000-0000-0000-000000000001"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PK",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "synthetic-offering-27",
+                      "kind": "literal",
+                      "value": {
+                        "kind": "string",
+                        "string": "synthetic-offering-27"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "rawRow",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "NativeObject",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "NativeObject",
+                        "resolution": {
+                          "kind": "import",
+                          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+                          "name": "NativeObject"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "rawLink",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "NativeObject",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "NativeObject",
+                        "resolution": {
+                          "kind": "import",
+                          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+                          "name": "NativeObject"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "serviceFixture",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "hasBody": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "sqlFixture",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
+            }
+          ],
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
+              "jsDoc": {
+                "doc": "Synthetic server-reference and native SQL boundary cases; no credentials or actual data."
+              }
+            },
+            {
+              "importedName": "CURRENT_PUBLIC_GUIDE_COMMAND_RELATIONS",
+              "originalName": "CURRENT_PUBLIC_GUIDE_COMMAND_RELATIONS",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts"
+            },
+            {
+              "importedName": "CURRENT_PUBLIC_GUIDE_COMMAND_SQL",
+              "originalName": "CURRENT_PUBLIC_GUIDE_COMMAND_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts"
+            },
+            {
+              "importedName": "CURRENT_PUBLIC_METADATA_SQL",
+              "originalName": "CURRENT_PUBLIC_METADATA_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts"
+            },
+            {
+              "importedName": "CurrentGuideRulePostgres",
+              "originalName": "CurrentGuideRulePostgres",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts"
+            },
+            {
+              "importedName": "GUIDE_RULE_HEADER_SQL",
+              "originalName": "GUIDE_RULE_HEADER_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts"
+            },
+            {
+              "importedName": "GUIDE_RULE_LINEAGE_SQL",
+              "originalName": "GUIDE_RULE_LINEAGE_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts"
+            },
+            {
+              "importedName": "GUIDE_RULE_METADATA_SEEDS",
+              "originalName": "GUIDE_RULE_METADATA_SEEDS",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts"
+            },
+            {
+              "importedName": "GUIDE_RULE_NATIVE_BINDING_SQL",
+              "originalName": "GUIDE_RULE_NATIVE_BINDING_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts"
+            },
+            {
+              "importedName": "GUIDE_RULE_NATIVE_POINT_SQL",
+              "originalName": "GUIDE_RULE_NATIVE_POINT_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts"
+            },
+            {
+              "importedName": "GUIDE_RULE_POINT_SQL",
+              "originalName": "GUIDE_RULE_POINT_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts"
+            },
+            {
+              "importedName": "GuideRuleReferenceService",
+              "originalName": "GuideRuleReferenceService",
+              "src": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "NativeSqlPool",
+              "originalName": "NativeSqlPool",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            },
+            {
+              "importedName": "ProfessionalPolicy",
+              "originalName": "ProfessionalPolicy",
+              "src": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
+            },
+            {
+              "importedName": "ProfessionalScope",
+              "originalName": "ProfessionalScope",
+              "src": "supabase/functions/_shared/jungsi/application/professional_ports.ts"
+            },
+            {
+              "importedName": "RUNTIME_ROLE_SQL",
+              "originalName": "RUNTIME_ROLE_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            },
+            {
+              "importedName": "SupabaseSqlTransport",
+              "originalName": "SupabaseSqlTransport",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            },
+            {
+              "importedName": "guideRuleQuery",
+              "originalName": "guideRuleQuery",
+              "src": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts"
+            },
+            {
+              "importedName": "nativeJsonSha256",
+              "originalName": "nativeJsonSha256",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "nativeJsonText",
+              "originalName": "nativeJsonText",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "parseNativeJson",
+              "originalName": "parseNativeJson",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "utcInstant",
+              "originalName": "utcInstant",
+              "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+            },
+            {
+              "importedName": "verifyGuideRuleSourceApproval",
+              "originalName": "verifyGuideRuleSourceApproval",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts"
+            }
+          ],
+          "source_sha256": "d33e86d5fee396bba1486c0e00d0e39ce299882427f82861b9138615b0f4d86f"
+        },
+        "dependencies": [
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/application/guide_rule_reference.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/application/professional_policy.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/application/professional_ports.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/professional_ports.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/native_json.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/time.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+              }
+            ]
+          }
+        ]
       }
     },
     "format": "jungsi.edge-contract/v1",
@@ -153230,7 +156472,11 @@
       "supabase/functions/_shared/jungsi/infrastructure/professional_postgres.ts": "14655911862194fad474937e6cbf59754652cc0fc381ab85238430801c24da11",
       "supabase/functions/_shared/jungsi/infrastructure/professional_runtime.ts": "23dc074c9cf32934896e201b14d0116151c297b9a26f45ca8d30ab280d44f660",
       "supabase/functions/_shared/jungsi/infrastructure/professional_usage_admission.ts": "2f6e50d969c8926a07118e0219242b4f3ddef276912ee8750a8604a736abebc3",
-      "supabase/functions/_shared/jungsi/infrastructure/professional_usage_postgres.ts": "7f36e6dbd4faffbb3e1050865e10ee42737929d9752b51b463d25b2dba1ceabc"
+      "supabase/functions/_shared/jungsi/infrastructure/professional_usage_postgres.ts": "7f36e6dbd4faffbb3e1050865e10ee42737929d9752b51b463d25b2dba1ceabc",
+      "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts": "5a45b0955eef1d2970e0cb5deb08a2b67f3e95eb22706576719ea94f2bd80c99",
+      "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts": "ebe174637a5db54d37a0facd84767cf199f62eeab4114ff1ae1179368311da3a",
+      "supabase/functions/_shared/jungsi/infrastructure/guide_metadata_sql.ts": "7c2785c3dc404daa8cd13fa5f470ba25acbabc2b1c62949a7dab521e6998dbc3",
+      "tests/edge/test_guide_rule_reference.ts": "d33e86d5fee396bba1486c0e00d0e39ce299882427f82861b9138615b0f4d86f"
     },
     "migration_evidence": {
       "sql_path": "database/migrations/006_score_input_policy.prepared.sql",
@@ -156119,7 +159365,7 @@
       "AI_external_generation": false,
       "yearly_rule_read": {
         "format": "jungsi.yearly-offering-rule-read/v1",
-        "status": "INTERNAL_READ_PORT_CONTRACT_ADOPTED_IMPLEMENTATION_IN_PROGRESS",
+        "status": "INTERNAL_READ_PORT_SOURCE_SYNTHETIC_VERIFIED_SQL_POINT_ACCEPTED_OWNER_PENDING",
         "requirements": [
           "REQ-31",
           "REQ-24",
@@ -156150,7 +159396,7 @@
           "field_qualification_and_missingness",
           "approved_lineage_reference"
         ],
-        "native_preservation": "Preserve strings, integers and decimal lexemes, field presence, actual zero, null, unknown and not-applicable distinctly. Preserve percentage versus score/deduction/bonus units and all conditional rules.",
+        "native_preservation": "Preserve strings, integers and decimal lexemes, field presence, actual zero, null, unknown and not-applicable distinctly. Preserve percentage versus score/deduction/bonus units and all conditional rules. Stored JSONB native values and retained field-presence/type metadata are distinct from pre-DB source bytes; JSONB cannot reconstruct an original numeric lexeme or original JSON-string encoding.",
         "bounded_read": "Parameterized exact year+PK lookup with the existing approved read role, source-head/qualification guard, request budget and finite response bound. No all-school raw table, private model, coefficients or review history in the response.",
         "lineage": "Cross-year comparison requires the existing verified lineage_button_link_allowed=true relation. Similar names or equal PK text across years do not establish a relation.",
         "consumers": "Owner server services compose comparison and display sentences from approved fields; the data/scoring owner retains SQL, repository adapters and conversion/percentile/decision engines.",
@@ -156162,7 +159408,7 @@
           "same-year rule exceptions and cross-year lineage preserved",
           "no model/raw source/review payload or new authorization exposure"
         ],
-        "native_DB_acceptance": "NOT_RUN",
+        "native_DB_acceptance": "REUSED_THREE_UNCHANGED_SQL_BRANCHES_AND_NATIVE_DTO_PASS_SYNTHETIC_AUTHORITY_RETURN_RECHECK_SYNTHETIC_OWNER_NOT_RUN",
         "Owner_consumption_and_deployment": "NOT_RUN",
         "test_registration_policy": {
           "format": "jungsi.professional-guide-registration-policy/v1",
@@ -156180,7 +159426,78 @@
           "count": "Positive native integer matches additive_guide_tests; actual separate suite JUnit count and existing21 operation-test names remain mandatory. Do not fix future total131/142 in common code.",
           "foundation_count_preserved": 656,
           "validation": "Synthetic metadata/snapshot counterexamples only; no service data, SQL writes, native acceptance, new HTTP operation or Owner permission."
-        }
+        },
+        "source_files": [
+          "supabase/functions/_shared/jungsi/application/guide_rule_reference.ts",
+          "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts"
+        ],
+        "verification": {
+          "additive_guide_tests": 69,
+          "retained_foundation_tests": 656,
+          "private_native_SQL_receipt_sha256": "0c6310c7537acebc87487f893fb45e1739621bc96cff1917d6470a55692097db",
+          "native_overlay_SQL_acceptance": "THREE_CURRENT_SQL_BRANCHES_PASS",
+          "migration_Secrets_deployment_changes": 0,
+          "format": "jungsi.professional-guide-verification/v1",
+          "coverage": "PROFESSIONAL_GUIDE_REFERENCE_SYNTHETIC",
+          "test_paths": [
+            "tests/edge/test_guide_rule_reference.ts"
+          ],
+          "suite_entry": "supabase/functions/_shared/professional_guide_rule_test.ts",
+          "test_count": 69,
+          "baseline_foundation_count": 656,
+          "source_bindings": [
+            {
+              "path": "tests/edge/test_guide_rule_reference.ts",
+              "sha256": "d33e86d5fee396bba1486c0e00d0e39ce299882427f82861b9138615b0f4d86f"
+            },
+            {
+              "path": "supabase/functions/_shared/professional_guide_rule_test.ts",
+              "sha256": "8a645f334e9e32f18b107e4991efb204b6e4387641c9a00d357dc9e093e39fba"
+            }
+          ],
+          "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+          "activation_status": "NOT_RUN",
+          "operating_writes": 0
+        },
+        "server_composition": {
+          "construct": "new GuideRuleReferenceService(new CurrentGuideRulePostgres(sql, loadSourceApproval, clock), clock, professionalPolicy)",
+          "read": "await guideRules.read(existingProfessionalScope, academicYear, offeringPk)",
+          "location": "Existing authorized and budgeted Owner server operation after current organization/member/student authorization. NativeProfessionalRuntime request-local SQL, clock and approved ProfessionalPolicy are the composition dependencies.",
+          "source_approval": "verifyGuideRuleSourceApproval(bytes, serverPinnedSha256, clock) validates an independently approved private source descriptor; no request-supplied fingerprint, new HTTP route, Secret registration or automatic runtime wiring.",
+          "dedicated_read": "Use a separate read-only SQL frame; surrounding write transactions are rejected.",
+          "output": "jungsi.guide-rule-reference/v1; field present/original_field_type/qualification/projection_status/value and approved_lineage. Unsafe required conditions withhold the whole field; unsafe identity metadata rejects the request."
+        },
+        "pending": [
+          "Owner approval-loader composition and real JWT/org/member/student/BFF acceptance",
+          "Per-field official-source qualification remains independent; missing URL or unverified source is not ready",
+          "No claim of all-school guide qualification or local V33 DB synchronization"
+        ],
+        "internal_DTO": {
+          "format": "jungsi.guide-rule-reference/v1",
+          "status": [
+            "collected_reference",
+            "pending"
+          ],
+          "field_reference": [
+            "present",
+            "original_field_type",
+            "qualification",
+            "source_uncertainties",
+            "verification_status",
+            "projection_status",
+            "value_when_preserved"
+          ],
+          "source_qualification": [
+            "canonical_rule_status",
+            "original_source_census_complete",
+            "verification_status"
+          ],
+          "verification_status": "pending_independent_qualification",
+          "source_url_missing": "null; do not infer an official URL or promote the source to ready",
+          "unsafe_required_qualification": "withhold the entire field value; preserve presence and a missing reason",
+          "native_type_scope": "Current stored JSONB values and retained original-field type metadata; no reconstruction of pre-DB original bytes"
+        },
+        "source_revalidation": "No repeatable-read promise is inferred from the existing SQL pool interface. Before return, requery and compare exact bounded metadata/ACL/view definitions, current year-PK header, native binding, selected rule projection and lineage; separately check all command states and approval expiry. This is a read-only double observation, not a new writer lock or a deployment acceptance."
       },
       "owner_tip_followup_20261023": {
         "status": "FEATURE_SOURCE_REVIEW_NOT_INTEGRATED_OR_OPERATING_ACCEPTANCE",
@@ -156659,6 +159976,10 @@
         {
           "path": "supabase/functions/_shared/professional_tip_semantics_test.ts",
           "sha256": "6da6e29da6c3daa63acab494287bac0707250a8f2fbe5dcfb71966c41b58827f"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_guide_rule_test.ts",
+          "sha256": "8a645f334e9e32f18b107e4991efb204b6e4387641c9a00d357dc9e093e39fba"
         }
       ],
       "migrations": [
@@ -156673,9 +159994,10 @@
           "supabase/functions/_shared/professional_http_test.ts",
           "supabase/functions/_shared/professional_runtime_test.ts",
           "supabase/functions/_shared/professional_security_test.ts",
-          "supabase/functions/_shared/professional_tip_semantics_test.ts"
+          "supabase/functions/_shared/professional_tip_semantics_test.ts",
+          "supabase/functions/_shared/professional_guide_rule_test.ts"
         ],
-        "test_count": 85,
+        "test_count": 154,
         "operation_test_names": {
           "pro.session": [
             "professional HTTP pro.session executes authorized workflow"
