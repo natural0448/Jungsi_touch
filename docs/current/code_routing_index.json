@@ -640,7 +640,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "3464dba2a549d5d09ea1de25e3f287364221b35a23eee213c559e00ed4add8a6",
+      "source_sha256": "757a205711a3eb22133c64c2e04ad66469d6c393e0304bc26225b669742bef7f",
       "symbols": [
         {
           "kind": "class",
@@ -844,6 +844,12 @@
           "kind": "function",
           "name": "policy_baseline_source_matches",
           "signature": "def policy_baseline_source_matches(spec, path, digest, indexed):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "professional_guide_test_registration",
+          "signature": "def professional_guide_test_registration(spec):",
           "decorators": []
         },
         {
@@ -1174,6 +1180,12 @@
           "kind": "function",
           "name": "validate_opening_security_operations",
           "signature": "def validate_opening_security_operations(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "validate_professional_guide_snapshot",
+          "signature": "def validate_professional_guide_snapshot(paths, read, spec):",
           "decorators": []
         },
         {

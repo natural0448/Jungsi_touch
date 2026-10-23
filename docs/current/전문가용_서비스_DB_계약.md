@@ -1,6 +1,6 @@
 # 정시터치 전문가용 서비스·DB 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.107이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.108이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 
 
@@ -1081,7 +1081,24 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
       "no model/raw source/review payload or new authorization exposure"
     ],
     "native_DB_acceptance": "NOT_RUN",
-    "Owner_consumption_and_deployment": "NOT_RUN"
+    "Owner_consumption_and_deployment": "NOT_RUN",
+    "test_registration_policy": {
+      "format": "jungsi.professional-guide-registration-policy/v1",
+      "state": "COMMON_VALIDATOR_PREPARED_GUIDE_SOURCE_NOT_INTEGRATED",
+      "canonical_verification": "professional_service_contract.counseling_tips.yearly_rule_read.verification",
+      "test_path": "tests/edge/test_guide_rule_reference.ts",
+      "separate_suite_entry": "supabase/functions/_shared/professional_guide_rule_test.ts",
+      "required_requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "rule": "Valid exact registration, existing professional source registry, verification layer/source/index SHA and selected-snapshot static import must all pass. Only this Guide test is excluded from public read3 classification. Unregistered neighbors, metadata or snapshot drift and native/operating promotion fail closed.",
+      "count": "Positive native integer matches additive_guide_tests; actual separate suite JUnit count and existing21 operation-test names remain mandatory. Do not fix future total131/142 in common code.",
+      "foundation_count_preserved": 656,
+      "validation": "Synthetic metadata/snapshot counterexamples only; no service data, SQL writes, native acceptance, new HTTP operation or Owner permission."
+    }
   },
   "owner_tip_followup_20261023": {
     "status": "FEATURE_SOURCE_REVIEW_NOT_INTEGRATED_OR_OPERATING_ACCEPTANCE",
@@ -1167,4 +1184,4 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=b8f3bf692eaa030542b3f6f4c297f8e2834bcff98cce46958867bca69fe45005 -->
+<!-- jungsi:generated spec_sha256=7fb0102b6860017b410e1d3d62193c2620c3223a348bb79d9bf876d75d4bbd49 -->

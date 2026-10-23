@@ -1,6 +1,6 @@
 {
   "format": "jungsi.professional-api-contract/v1",
-  "spec_version": "1.9.107",
+  "spec_version": "1.9.108",
   "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
   "contract": {
     "format": "jungsi.professional-service-contract/v1",
@@ -995,7 +995,24 @@
           "no model/raw source/review payload or new authorization exposure"
         ],
         "native_DB_acceptance": "NOT_RUN",
-        "Owner_consumption_and_deployment": "NOT_RUN"
+        "Owner_consumption_and_deployment": "NOT_RUN",
+        "test_registration_policy": {
+          "format": "jungsi.professional-guide-registration-policy/v1",
+          "state": "COMMON_VALIDATOR_PREPARED_GUIDE_SOURCE_NOT_INTEGRATED",
+          "canonical_verification": "professional_service_contract.counseling_tips.yearly_rule_read.verification",
+          "test_path": "tests/edge/test_guide_rule_reference.ts",
+          "separate_suite_entry": "supabase/functions/_shared/professional_guide_rule_test.ts",
+          "required_requirements": [
+            "REQ-24",
+            "REQ-25",
+            "REQ-26",
+            "REQ-31"
+          ],
+          "rule": "Valid exact registration, existing professional source registry, verification layer/source/index SHA and selected-snapshot static import must all pass. Only this Guide test is excluded from public read3 classification. Unregistered neighbors, metadata or snapshot drift and native/operating promotion fail closed.",
+          "count": "Positive native integer matches additive_guide_tests; actual separate suite JUnit count and existing21 operation-test names remain mandatory. Do not fix future total131/142 in common code.",
+          "foundation_count_preserved": 656,
+          "validation": "Synthetic metadata/snapshot counterexamples only; no service data, SQL writes, native acceptance, new HTTP operation or Owner permission."
+        }
       },
       "owner_tip_followup_20261023": {
         "status": "FEATURE_SOURCE_REVIEW_NOT_INTEGRATED_OR_OPERATING_ACCEPTANCE",

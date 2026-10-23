@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.107",
+  "version": "1.9.108",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7008,7 +7008,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.107",
+        "contract_version": "1.9.108",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7182,7 +7182,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.107",
+        "contract_version": "1.9.108",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7348,7 +7348,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.107",
+        "contract_version": "1.9.108",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7367,7 +7367,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.107",
+        "contract_version": "1.9.108",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7392,7 +7392,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.107",
+        "contract_version": "1.9.108",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7417,7 +7417,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.107",
+        "contract_version": "1.9.108",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -8124,7 +8124,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "3464dba2a549d5d09ea1de25e3f287364221b35a23eee213c559e00ed4add8a6",
+            "source_sha256": "757a205711a3eb22133c64c2e04ad66469d6c393e0304bc26225b669742bef7f",
             "symbols": [
               {
                 "kind": "class",
@@ -8328,6 +8328,12 @@
                 "kind": "function",
                 "name": "policy_baseline_source_matches",
                 "signature": "def policy_baseline_source_matches(spec, path, digest, indexed):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "professional_guide_test_registration",
+                "signature": "def professional_guide_test_registration(spec):",
                 "decorators": []
               },
               {
@@ -8658,6 +8664,12 @@
                 "kind": "function",
                 "name": "validate_opening_security_operations",
                 "signature": "def validate_opening_security_operations(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "validate_professional_guide_snapshot",
+                "signature": "def validate_professional_guide_snapshot(paths, read, spec):",
                 "decorators": []
               },
               {
@@ -17457,21 +17469,43 @@
           "spec1.9.82 / 기준 e789313;화면 ebb3d2d CI2",
           "읽기전용 메타데이터·소규모 릴리스 등록부 조사/실패 보존;정상 writer/schema 변경 없음",
           "현재값과 과거 회원/OX 이력 구분·필수 PK 유지·제한 먼저 조회. 보관/복구/정리 범위와 구현·실제 재검수는 별도이며 새로운 DB/요금 권한은 없다."
+        ],
+        [
+          "기획·화면 / 크롤링 정책과 전문가 표시 의미 통합",
+          "PR58 f0e529d → develop445cd390 / spec1.9.108",
+          "정상 commit/push·소스 CI2·병합 SHA CI 통과; 크롤링 함수6·필수 Node26 근거 재사용",
+          "앱 meta/header 소스 통합과 Owner 루트 robots 제안을 구분한다. 실제 루트 적용·Next/OpenNext 운영 빌드·정문 헤더 검수는 NOT_RUN이고 기존 보안8·권한·공유 예산을 유지한다."
+        ],
+        [
+          "기획·개발 / 내부 Guide 시험의 정확 분리",
+          "기획 공통 선행 변경 / Guide 서비스는 기존 feature 담당",
+          "정확 metadata·소스 SHA·static import 반례와 기존 별도 전문가 하네스 결속",
+          "미등록 시험과 불량 등록은 계속 실패한다. 서비스 소스 미통합·Owner 조립·실 JWT/기관/BFF 검수는 별도이며 공개 HTTP 경로와 기존28/21 operation·foundation656을 늘리거나 완화하지 않는다."
         ]
       ],
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "b03c25921c0446278d1a3a884985408bd32ab04b",
-        "spec_version": "1.9.100",
-        "ci_run_id": 39553841616,
+        "commit": "445cd3908b4ae150bb094e078fd6ce9957e2a996",
+        "spec_version": "1.9.107",
+        "ci_run_id": 39886054894,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
-          "python": 1200,
-          "deno": 926,
-          "node": 36,
+          "python": 1202,
+          "deno": 943,
           "oracle": 993
+        },
+        "deno_suite_counts": {
+          "foundation": 656,
+          "current_public": 58,
+          "owner_review": 36,
+          "professional": 85,
+          "read_view_extension": 94,
+          "whole_population": 14
+        },
+        "additional_functional_node_suite": {
+          "crawler_BFF_tips": 26
         },
         "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE"
       }
@@ -20191,6 +20225,16 @@
         "REQ-26"
       ],
       "summary": "2026-10-23 사용자 지시: security_contract.crawler_policy에 /jeongsi 전 경로의 크롤링 거부 및 색인 보조 정책을 추가한다. 도메인 루트 robots와 앱 metadata/X-Robots-Tag를 구분하며 기존 인증/권한/relay/DTO/공유예산과 Google Drive·기존 Supabase 및 기존 P1 조정 예외를 유지한다. 앱·루트 Owner 배포·실제 검수는 분리 기록한다."
+    },
+    {
+      "date": "2026-10-23",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "summary": "2026-10-23 기획108: PR58 크롤링 meta/header·전문가 표시 의미 보존의 develop 통합과 정확 SHA CI를 기록한다. 내부 Guide 시험은 소스·계층·네 요구사항·별도 suite·선택 snapshot SHA/static import가 모두 검증된 정확 경로만 공개 read3 시험과 분리하며, 미등록/불량 등록·전체 보안·공개28/전문가21/foundation656·실제 운영 미검수 상태는 유지한다."
     }
   ],
   "overall_analysis_contract": {
@@ -29618,7 +29662,7 @@
       "no_new_cost_or_resource": true,
       "no_hidden_path_disclosure": "Do not list private storage/model/secret paths in publicly readable robots.",
       "states": {
-        "app_implementation": "SOURCE_IMPLEMENTED_SYNTHETIC_FUNCTIONS_TESTED_NOT_DEPLOYED",
+        "app_implementation": "DEVELOP_MERGED_SOURCE_AND_SYNTHETIC_VERIFIED_NOT_DEPLOYED",
         "root_robots": "OWNER_PATCH_REQUIRED_NOT_APPLIED",
         "operational_readback": "NOT_RUN"
       },
@@ -29657,7 +29701,7 @@
         }
       ],
       "source_evidence": {
-        "basis_commit": "3bec3ee6a78fc33909d5ceac697cff493f58b3d1",
+        "basis_commit": "f0e529da1ef577936fa50d4c00db52c476a2f7c4",
         "source_bindings": [
           {
             "path": "apps/web/next.config.ts",
@@ -29690,7 +29734,17 @@
         "root_response_observed_sha256": "321c2f27cda24bd4aead0639e897da95836ee16ae292cdcba67df09a04fb57f2",
         "root_proposal_sha256": "185506a0ed3e733c3699e94a7635710a6eee88710346da2aa3a55eae9bad0ecf",
         "root_applied": false,
-        "operating_acceptance": "NOT_RUN"
+        "operating_acceptance": "NOT_RUN",
+        "integrated_develop_merge": "445cd3908b4ae150bb094e078fd6ce9957e2a996",
+        "exact_source_CI": {
+          "push": 39885371784,
+          "pull_request": 39885427712,
+          "conclusion": "success"
+        },
+        "exact_integration_CI": {
+          "run_id": 39886054894,
+          "conclusion": "success"
+        }
       }
     }
   },
@@ -156000,7 +156054,24 @@
           "no model/raw source/review payload or new authorization exposure"
         ],
         "native_DB_acceptance": "NOT_RUN",
-        "Owner_consumption_and_deployment": "NOT_RUN"
+        "Owner_consumption_and_deployment": "NOT_RUN",
+        "test_registration_policy": {
+          "format": "jungsi.professional-guide-registration-policy/v1",
+          "state": "COMMON_VALIDATOR_PREPARED_GUIDE_SOURCE_NOT_INTEGRATED",
+          "canonical_verification": "professional_service_contract.counseling_tips.yearly_rule_read.verification",
+          "test_path": "tests/edge/test_guide_rule_reference.ts",
+          "separate_suite_entry": "supabase/functions/_shared/professional_guide_rule_test.ts",
+          "required_requirements": [
+            "REQ-24",
+            "REQ-25",
+            "REQ-26",
+            "REQ-31"
+          ],
+          "rule": "Valid exact registration, existing professional source registry, verification layer/source/index SHA and selected-snapshot static import must all pass. Only this Guide test is excluded from public read3 classification. Unregistered neighbors, metadata or snapshot drift and native/operating promotion fail closed.",
+          "count": "Positive native integer matches additive_guide_tests; actual separate suite JUnit count and existing21 operation-test names remain mandatory. Do not fix future total131/142 in common code.",
+          "foundation_count_preserved": 656,
+          "validation": "Synthetic metadata/snapshot counterexamples only; no service data, SQL writes, native acceptance, new HTTP operation or Owner permission."
+        }
       },
       "owner_tip_followup_20261023": {
         "status": "FEATURE_SOURCE_REVIEW_NOT_INTEGRATED_OR_OPERATING_ACCEPTANCE",
