@@ -10,9 +10,9 @@ import { HISTORY, HISTORY_OFFERINGS } from "./synthetic-history";
 /** 2027 모집행 = 1페이지 합성 자료의 2027 행(같은 번호를 쓴다) */
 export const CATALOG: OfferingDto[] = HISTORY_OFFERINGS.filter((o) => o.academic_year === 2027);
 
-type Rule = { wk: number; wm: number; wi: number; center: number; band: number; max: number };
+export type Rule = { wk: number; wm: number; wi: number; center: number; band: number; max: number };
 /** 대학별 합성 반영 비율과 기준 점수(대학 환산점수 척도) */
-const RULE: Record<string, Rule> = {
+export const RULE: Record<string, Rule> = {
   "syn-gaon": { wk: 0.3, wm: 0.4, wi: 0.3, center: 915, band: 4, max: 1000 },
   "syn-raon": { wk: 0.2, wm: 0.5, wi: 0.3, center: 648, band: 3, max: 700 },
   "syn-daon": { wk: 0.33, wm: 0.34, wi: 0.33, center: 695, band: 4, max: 800 },
@@ -22,11 +22,11 @@ const RULE: Record<string, Rule> = {
 };
 /** 학과마다 기준을 따로 둔다(같은 대학이어도 판단이 다르다) */
 const OFFSET: Record<string, number> = { "syn-g1": 6, "syn-g2": 0, "syn-g3": 22, "syn-g4": 0, "syn-r1": 5, "syn-r2": 0, "syn-d1": 0, "syn-d2": -9, "syn-h1": -12, "syn-h2": -1, "syn-h3": 0, "syn-s1": 0, "syn-e1": -2 };
-const BASE = (id: string) => id.replace(/-\d{4}$/, "");
+export const BASE = (id: string) => id.replace(/-\d{4}$/, "");
 
 const fmt = (v: number, d = 2) => (Math.round(v * 10 ** d) / 10 ** d).toFixed(d);
 
-function zOf(s: ScoresInput) {
+export function zOf(s: ScoresInput) {
   const iavg = (s.inquiry[0].standard_score + s.inquiry[1].standard_score) / 2;
   return { k: (s.korean.standard_score - 128) / 9, m: (s.math.standard_score - 128) / 10, i: (iavg - 63) / 5 };
 }

@@ -1,6 +1,6 @@
 # 정시터치 전문가용 서비스·DB 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.107이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.108이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 
 
@@ -20,6 +20,7 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 | /jeongsi/pro/students/{student_id} | 고정 학생 띠·학생별 기존2~4페이지 기능·저장 전 이름/성적 확인 |
 | /jeongsi/pro/students/{student_id}/reports/{report_id} | 학생별 판 목록·재열람·비공개 PDF/인쇄 |
 | /jeongsi/pro/management | 기관 관리자 구성원/담당 변경; 성적 정정 기능 없음 |
+| /jeongsi/pro/guide | 정시 기본 안내(원문 대조를 마친 공통 안내·출처). 학생별 상담 tip과 별개 |
 | /jeongsi/management/pro-score-input-corrections | 고객센터 전용 정정 접수·대상 확인·단일 정정권 승인 |
 
 승인된 엔진/공식 자료 결과에서 검증된 사유 코드+정확 수치+단위+학년도/비교 맥락만 전달하고 화면의 고정 문장 틀로 표시한다. 사유 배열을 비우고 근거 자료 연결 전을 표시; 결측0·합격 단정·다른 집단 누백 비교·임의 산식 금지
@@ -268,6 +269,7 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     "code",
     "status",
     "academic_year",
+    "offering_id",
     "comparison_context",
     "values",
     "public_basis",
@@ -320,7 +322,8 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     "org_id",
     "student_id",
     "snapshot",
-    "watermark"
+    "watermark",
+    "counseling_reasons"
   ],
   "student_report_page": [
     "org_id",
@@ -373,7 +376,10 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     "reference_year",
     "metric",
     "score_scale",
-    "population_id"
+    "population_id",
+    "policy_version",
+    "range_definition",
+    "range_role"
   ],
   "public_basis": [
     "title",
@@ -1018,6 +1024,11 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
       "code": "history_deduction",
       "basis": "당해 한국사 반영 규칙의 실제 엔진 적용 결과",
       "numeric_owner": "DB_engine_owner"
+    },
+    {
+      "code": "classification_basis",
+      "basis": "엔진이 채택한 판단 구간(expected_acceptance_range)·학생 환산점수를 그대로 옮기고, 판단 근거에 들어 있는 검증된 전년 공식 발표 원문을 공개 근거로 붙인다. 새 산출 없음",
+      "numeric_owner": "DB_engine_owner"
     }
   ],
   "current_basis_connection": "2027 대학별 환산·누백·판정 연결 범위의 실제 영수증 전 NOT_RUN; ready로 만들지 않는다.",
@@ -1070,7 +1081,24 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
       "no model/raw source/review payload or new authorization exposure"
     ],
     "native_DB_acceptance": "NOT_RUN",
-    "Owner_consumption_and_deployment": "NOT_RUN"
+    "Owner_consumption_and_deployment": "NOT_RUN",
+    "test_registration_policy": {
+      "format": "jungsi.professional-guide-registration-policy/v1",
+      "state": "COMMON_VALIDATOR_PREPARED_GUIDE_SOURCE_NOT_INTEGRATED",
+      "canonical_verification": "professional_service_contract.counseling_tips.yearly_rule_read.verification",
+      "test_path": "tests/edge/test_guide_rule_reference.ts",
+      "separate_suite_entry": "supabase/functions/_shared/professional_guide_rule_test.ts",
+      "required_requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "rule": "Valid exact registration, existing professional source registry, verification layer/source/index SHA and selected-snapshot static import must all pass. Only this Guide test is excluded from public read3 classification. Unregistered neighbors, metadata or snapshot drift and native/operating promotion fail closed.",
+      "count": "Positive native integer matches additive_guide_tests; actual separate suite JUnit count and existing21 operation-test names remain mandatory. Do not fix future total131/142 in common code.",
+      "foundation_count_preserved": 656,
+      "validation": "Synthetic metadata/snapshot counterexamples only; no service data, SQL writes, native acceptance, new HTTP operation or Owner permission."
+    }
   },
   "owner_tip_followup_20261023": {
     "status": "FEATURE_SOURCE_REVIEW_NOT_INTEGRATED_OR_OPERATING_ACCEPTANCE",
@@ -1090,6 +1118,14 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     "guards": "Same academic year, exam, actual population, validated nonsynthetic distribution, approved baseline version and include_equal tie policy. Missing or incompatible evidence returns null/pending; no zero substitution.",
     "limitation": "This is a percentage-point position difference, not admission probability or an assurance that last-year results repeat.",
     "source": "supabase/functions/_shared/jungsi/application/offering_analysis.ts"
+  },
+  "owner_tip_semantics_source_review_20261023": {
+    "status": "SOURCE_SYNTHETIC_ONLY_NOT_DEPLOYED",
+    "baseline": "effa3f51895fd1e3ac4d72fd5657316b5c0c5a52",
+    "scope": "classification baseline context and exact decimal display; neutral rule-weight comparison; three-year historical code separate from demo_prior_year_cut_band synthetic display only",
+    "tests": "existing professional74 plus semantic11; presentation tip7; normal hooks and exact CI recorded separately",
+    "operating_requests": 0,
+    "DB_or_engine_changes": 0
   }
 }
 ```
@@ -1148,4 +1184,4 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=df7560be3989402ea56873a61bd1debaeb8b60a2ab7cc7b31e397dc27f327613 -->
+<!-- jungsi:generated spec_sha256=7fb0102b6860017b410e1d3d62193c2620c3223a348bb79d9bf876d75d4bbd49 -->

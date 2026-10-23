@@ -99,8 +99,44 @@ export interface ProStudentReportDto {
   stage: string;
   profile_id: string;
   published_result: ReportDto;
-  counseling_reasons: unknown[];
+  counseling_reasons: ProReason[];
   created_at_utc: string;
+}
+
+/**
+  상담 tip 근거 하나(서버 pro_reason 모양 + offering_id). 문장은 화면이 코드·값으로 만들고 숫자는 지어내지 않는다.
+  서버는 classification_basis 와 offering_id 를 낸다(값 이름 converted_score·acceptance_lower·acceptance_upper). 나머지 코드는 아직 합성에서만 만든다.
+  - classification_basis: 서비스 예상 기준구간 참고와 학생 환산점수(조정된 최종 분류의 근거로 단정하지 않음)
+  - rule_weight_change: 전년 대비 영역 반영 비율 변화(모집요강 비교, 점수 재계산 아님)
+  - subject_weight_strength: 학생의 약한·강한 영역을 이 대학이 많이 반영
+  - admission_capacity_change: 모집인원 증감
+  - prior_competition: 전년 경쟁률·충원
+  - historical_cut_spread: 검증된 3개년 70%컷 변동(실서비스 미연결)
+  - demo_prior_year_cut_band: 합성 시연 전용, 한 학년도 50%·70%컷(3개년 변동 아님)
+  - comparable_historical_cut_delta: 전년 컷과 같은 척도 비교(학년도 동등화 뒤에만 ready)
+  - english_deduction / history_deduction: 영어·한국사 감점
+*/
+export type ProTipCode =
+  | "classification_basis"
+  | "rule_weight_change"
+  | "subject_weight_strength"
+  | "admission_capacity_change"
+  | "prior_competition"
+  | "historical_cut_spread"
+  | "demo_prior_year_cut_band"
+  | "comparable_historical_cut_delta"
+  | "english_deduction"
+  | "history_deduction";
+
+export interface ProReason {
+  code: ProTipCode;
+  status: "ready" | "pending";
+  academic_year: number;
+  offering_id: string | null;
+  comparison_context: { academic_year: number; reference_year: number | null; metric: string; score_scale: string | null; population_id: string | null; policy_version?: string | null; range_definition?: string | null; range_role?: "baseline_reference" | null } | null;
+  values: { name: string; value: string; unit: string | null }[];
+  public_basis: { title: string; url: string; source_year: number | null }[];
+  missing_reason: string | null;
 }
 
 export interface ProStudentReportPageDto {
@@ -131,6 +167,8 @@ export interface ProPrintDto {
   student_id: string;
   snapshot: SnapshotDto;
   watermark: { organization_name: string; teacher_code: string; printed_at_seoul: string; student_name: string };
+  /** 같은 고정 판의 상담 tip 근거. 서버 계약 확장 전에는 없을 수 있다(없으면 인쇄본에 tip 을 넣지 않는다) */
+  counseling_reasons?: ProReason[];
 }
 
 /** member_page — 기관 구성원(이메일·이름 없이 구성원 번호·로그인 ID·역할만) */

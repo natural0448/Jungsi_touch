@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CRAWL_ROBOTS } from "@/lib/crawl-policy";
 import { Montserrat } from "next/font/google";
 /* CSS 순서: tokens → base → 정시터치 공통 → 화면별(각 화면 폴더) */
 import "@/styles/tokens.css";
@@ -21,6 +22,7 @@ const montserrat = Montserrat({ variable: "--font-montserrat", subsets: ["latin"
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
+  robots: CRAWL_ROBOTS,
   title: { default: "정시터치 | 에듀터치", template: "%s | 정시터치" },
   description: "수능 성적이 유리하게 반영되는 대학을 찾는 에듀터치의 정시 분석 서비스",
 };

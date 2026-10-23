@@ -914,6 +914,102 @@ READ_VIEW_RUNTIME_PATHS={
     "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
 }
 
+PROFESSIONAL_GUIDE_TEST='tests/edge/test_guide_rule_reference.ts'
+PROFESSIONAL_GUIDE_SUITE='supabase/functions/_shared/professional_guide_rule_test.ts'
+
+
+def professional_guide_test_registration(spec):
+    """정확한 전문가 Guide 등록만 별도 분류하며 실패하면 제외 경로를 반환하지 않는다."""
+    contract=spec.get('professional_service_contract')
+    tips=contract.get('counseling_tips')if isinstance(contract,dict)else None
+    guide=tips.get('yearly_rule_read')if isinstance(tips,dict)else None
+    if not isinstance(guide,dict)or 'verification'not in guide:return set(),[]
+    error='Professional Guide separate test registration invalid'
+    try:
+        verification=guide['verification']
+        required={'format','coverage','test_paths','suite_entry','test_count','baseline_foundation_count',
+                  'source_bindings','native_acceptance','activation_status','operating_writes','additive_guide_tests'}
+        retained={'retained_foundation_tests','private_native_SQL_receipt_sha256','native_overlay_SQL_acceptance',
+                  'migration_Secrets_deployment_changes','private_receipts'}
+        if (not isinstance(verification,dict)or not required<=set(verification)or set(verification)-required-retained or
+            verification['format']!='jungsi.professional-guide-verification/v1'or
+            verification['coverage']!='PROFESSIONAL_GUIDE_REFERENCE_SYNTHETIC'or
+            verification['test_paths']!=[PROFESSIONAL_GUIDE_TEST]or verification['suite_entry']!=PROFESSIONAL_GUIDE_SUITE or
+            type(verification['test_count'])is not int or verification['test_count']<=0 or
+            type(verification['additive_guide_tests'])is not int or verification['additive_guide_tests']!=verification['test_count']or
+            type(verification['baseline_foundation_count'])is not int or verification['baseline_foundation_count']!=656 or
+            verification['native_acceptance']!='NOT_VERIFIED_BY_SOURCE_SUITE'or verification['activation_status']!='NOT_RUN'or
+            type(verification['operating_writes'])is not int or verification['operating_writes']!=0):raise ValueError('shape')
+        if ('retained_foundation_tests'in verification and(type(verification['retained_foundation_tests'])is not int or verification['retained_foundation_tests']!=656)or
+            'migration_Secrets_deployment_changes'in verification and(type(verification['migration_Secrets_deployment_changes'])is not int or verification['migration_Secrets_deployment_changes']!=0)or
+            'private_native_SQL_receipt_sha256'in verification and(not isinstance(verification['private_native_SQL_receipt_sha256'],str)or not re.fullmatch('[0-9a-f]{64}',verification['private_native_SQL_receipt_sha256']))or
+            'native_overlay_SQL_acceptance'in verification and(not isinstance(verification['native_overlay_SQL_acceptance'],str)or not verification['native_overlay_SQL_acceptance'].strip())or
+            'private_receipts'in verification and not isinstance(verification['private_receipts'],(dict,list))):raise ValueError('retained metadata')
+        if (contract.get('requirement')!='REQ-31'or guide.get('format')!='jungsi.yearly-offering-rule-read/v1'or
+            guide.get('kind')!='SERVER_APPLICATION_PORT_NOT_NEW_PUBLIC_HTTP_OPERATION'or
+            not isinstance(guide.get('requirements'),list)or not {'REQ-24','REQ-25','REQ-26','REQ-31'}<=set(guide['requirements'])or
+            validate_professional_source_registration(spec)):raise ValueError('professional prerequisite')
+        registration=contract.get('source_registration')
+        if not isinstance(registration,dict):raise ValueError('registered professional source required')
+        pro_verification=registration['verification'];pro_sources={v['path']:v['sha256']for v in registration['source_bindings']}
+        if (pro_verification['test_paths'].count(PROFESSIONAL_GUIDE_SUITE)!=1 or
+            pro_verification['test_count']<verification['test_count']):raise ValueError('separate suite')
+        bindings=verification['source_bindings']
+        required_paths={PROFESSIONAL_GUIDE_TEST,PROFESSIONAL_GUIDE_SUITE}
+        if (not isinstance(bindings,list)or len(bindings)!=2 or
+            any(not isinstance(v,dict)or set(v)!={'path','sha256'}or not isinstance(v['path'],str)or
+                not isinstance(v['sha256'],str)or not re.fullmatch('[0-9a-f]{64}',v['sha256'])for v in bindings)):
+            raise ValueError('bindings')
+        sources={v['path']:v['sha256']for v in bindings}
+        if set(sources)!=required_paths:raise ValueError('exact source paths')
+        cfg=spec.get('edge_harness',{});foundation=cfg.get('tests');edge=cfg.get('files')
+        view=spec.get('read_view_extension_contract',{});view_verification=view.get('verification',{})if isinstance(view,dict)else {}
+        if (not isinstance(foundation,list)or not isinstance(edge,dict)or type(cfg.get('unit_count'))is not int or cfg['unit_count']!=656 or
+            required_paths&set(foundation)or not isinstance(view_verification,dict)or required_paths&set(view_verification.get('test_paths',[]))):
+            raise ValueError('foundation and read-view separation')
+        for path in required_paths:
+            implementations=[v for v in spec.get('implementation',[])if isinstance(v,dict)and v.get('path')==path]
+            if (len(implementations)!=1 or implementations[0].get('layer')!='verification'or
+                not isinstance(implementations[0].get('requirements'),list)or 'REQ-31'not in implementations[0]['requirements']):
+                raise ValueError('implementation verification layer')
+        test=edge.get(PROFESSIONAL_GUIDE_TEST,{})
+        if test.get('layer')!='verification'or test.get('declarations',{}).get('source_sha256')!=sources[PROFESSIONAL_GUIDE_TEST]:
+            raise ValueError('guide edge source')
+        indexed=spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('edge_sources',{}).get('files',[])
+        entry_rows=[v for v in indexed if isinstance(v,dict)and v.get('path')==PROFESSIONAL_GUIDE_SUITE]
+        if (len(entry_rows)!=1 or entry_rows[0].get('layer')!='verification'or
+            not isinstance(entry_rows[0].get('requirements'),list)or 'REQ-31'not in entry_rows[0]['requirements']or
+            entry_rows[0].get('source_sha256')!=sources[PROFESSIONAL_GUIDE_SUITE]or
+            pro_sources.get(PROFESSIONAL_GUIDE_SUITE)!=sources[PROFESSIONAL_GUIDE_SUITE]):raise ValueError('entry index and registry')
+    except (KeyError,TypeError,ValueError,AttributeError):return set(),[error]
+    return {PROFESSIONAL_GUIDE_TEST},[]
+
+
+def validate_professional_guide_snapshot(paths,read,spec):
+    """선택 snapshot 바이트만 읽어 두 SHA와 정확한 최상위 static import를 결속한다."""
+    registered,errors=professional_guide_test_registration(spec)
+    if errors or not registered:return errors
+    error='Professional Guide selected snapshot source/import binding invalid'
+    try:
+        verification=spec['professional_service_contract']['counseling_tips']['yearly_rule_read']['verification']
+        bindings={v['path']:v['sha256']for v in verification['source_bindings']};names=set(paths);blobs={}
+        for path,digest in bindings.items():
+            if path not in names:raise ValueError('selected source absent')
+            raw=read(path)
+            if not isinstance(raw,bytes)or hashlib.sha256(raw).hexdigest()!=digest:raise ValueError('selected source hash')
+            blobs[path]=raw
+        from check_edge_contract import tokens
+        stream=tokens(blobs[PROFESSIONAL_GUIDE_SUITE].decode('utf-8-sig'));depth=0;matches=0
+        for i,(kind,value,_,_)in enumerate(stream):
+            if (depth==0 and kind=='word'and value=='import'and i+1<len(stream)and
+                stream[i+1][0]=='string'and stream[i+1][1]=='../../../'+PROFESSIONAL_GUIDE_TEST):matches+=1
+            if kind=='punct'and value in ('{','(','['):depth+=1
+            elif kind=='punct'and value in ('}',')',']'):depth-=1
+        if matches!=1:raise ValueError('exact top-level static import')
+    except (KeyError,TypeError,ValueError,AttributeError,OSError,UnicodeError):return [error]
+    return []
+
+
 def validate_read_view_extension(spec):
     """Only these exact three source-bound reads may extend the preserved 22+3.
 
@@ -926,9 +1022,11 @@ def validate_read_view_extension(spec):
     if not isinstance(files,dict):files={}
     foundation_tests=cfg.get("tests",[])
     separate_tests={p for p in files if p.startswith("tests/edge/test_")and p.endswith(".ts")} - set(foundation_tests)
-    if c is None:return ["Read-view unregistered separate test source"]if separate_tests else []
-    if not isinstance(c,dict):return ["Read-view extension contract invalid"]
-    errors=[]
+    professional_tests,professional_errors=professional_guide_test_registration(spec)
+    separate_tests-=professional_tests
+    if c is None:return professional_errors+(["Read-view unregistered separate test source"]if separate_tests else [])
+    if not isinstance(c,dict):return professional_errors+["Read-view extension contract invalid"]
+    errors=professional_errors
     def exact_list(value,expected):
         return isinstance(value,list) and all(isinstance(x,str)for x in value) and len(value)==len(expected) and set(value)==set(expected)
     if (c.get("format")!="jungsi.read-view-extension-contract/v1" or
@@ -4369,6 +4467,7 @@ def validate_content(paths,read,spec):
         if sql_path not in paths or hashlib.sha256(read(sql_path)).hexdigest()!=evidence.get("sql_sha256"):errors.append("REQ-27 applied SQL bytes differ from exact native schema receipt")
     pro_sources={p:hashlib.sha256(read(p)).hexdigest()for p in paths if professional_source_path(p) or p==PROFESSIONAL_MIGRATION}
     errors.extend(validate_professional_source_registration(spec,pro_sources))
+    errors.extend(validate_professional_guide_snapshot(paths,read,spec))
     errors.extend(edge_registration_errors(paths,read,spec))
     names=set(paths)
     errors.extend(validate_catalog(paths,read,spec))

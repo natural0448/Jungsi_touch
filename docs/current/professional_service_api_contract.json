@@ -1,6 +1,6 @@
 {
   "format": "jungsi.professional-api-contract/v1",
-  "spec_version": "1.9.107",
+  "spec_version": "1.9.108",
   "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
   "contract": {
     "format": "jungsi.professional-service-contract/v1",
@@ -51,6 +51,12 @@
         "front_door": "/jeongsi/pro/management",
         "app_route": "/pro/management",
         "purpose": "기관 관리자 구성원/담당 변경; 성적 정정 기능 없음"
+      },
+      {
+        "id": "pro.guide",
+        "front_door": "/jeongsi/pro/guide",
+        "app_route": "/pro/guide",
+        "purpose": "정시 기본 안내(원문 대조를 마친 공통 안내·출처). 학생별 상담 tip과 별개"
       },
       {
         "id": "pro.support",
@@ -737,6 +743,7 @@
         "code",
         "status",
         "academic_year",
+        "offering_id",
         "comparison_context",
         "values",
         "public_basis",
@@ -789,7 +796,8 @@
         "org_id",
         "student_id",
         "snapshot",
-        "watermark"
+        "watermark",
+        "counseling_reasons"
       ],
       "student_report_page": [
         "org_id",
@@ -842,7 +850,10 @@
         "reference_year",
         "metric",
         "score_scale",
-        "population_id"
+        "population_id",
+        "policy_version",
+        "range_definition",
+        "range_role"
       ],
       "public_basis": [
         "title",
@@ -927,6 +938,11 @@
           "code": "history_deduction",
           "basis": "당해 한국사 반영 규칙의 실제 엔진 적용 결과",
           "numeric_owner": "DB_engine_owner"
+        },
+        {
+          "code": "classification_basis",
+          "basis": "엔진이 채택한 판단 구간(expected_acceptance_range)·학생 환산점수를 그대로 옮기고, 판단 근거에 들어 있는 검증된 전년 공식 발표 원문을 공개 근거로 붙인다. 새 산출 없음",
+          "numeric_owner": "DB_engine_owner"
         }
       ],
       "current_basis_connection": "2027 대학별 환산·누백·판정 연결 범위의 실제 영수증 전 NOT_RUN; ready로 만들지 않는다.",
@@ -979,7 +995,24 @@
           "no model/raw source/review payload or new authorization exposure"
         ],
         "native_DB_acceptance": "NOT_RUN",
-        "Owner_consumption_and_deployment": "NOT_RUN"
+        "Owner_consumption_and_deployment": "NOT_RUN",
+        "test_registration_policy": {
+          "format": "jungsi.professional-guide-registration-policy/v1",
+          "state": "COMMON_VALIDATOR_PREPARED_GUIDE_SOURCE_NOT_INTEGRATED",
+          "canonical_verification": "professional_service_contract.counseling_tips.yearly_rule_read.verification",
+          "test_path": "tests/edge/test_guide_rule_reference.ts",
+          "separate_suite_entry": "supabase/functions/_shared/professional_guide_rule_test.ts",
+          "required_requirements": [
+            "REQ-24",
+            "REQ-25",
+            "REQ-26",
+            "REQ-31"
+          ],
+          "rule": "Valid exact registration, existing professional source registry, verification layer/source/index SHA and selected-snapshot static import must all pass. Only this Guide test is excluded from public read3 classification. Unregistered neighbors, metadata or snapshot drift and native/operating promotion fail closed.",
+          "count": "Positive native integer matches additive_guide_tests; actual separate suite JUnit count and existing21 operation-test names remain mandatory. Do not fix future total131/142 in common code.",
+          "foundation_count_preserved": 656,
+          "validation": "Synthetic metadata/snapshot counterexamples only; no service data, SQL writes, native acceptance, new HTTP operation or Owner permission."
+        }
       },
       "owner_tip_followup_20261023": {
         "status": "FEATURE_SOURCE_REVIEW_NOT_INTEGRATED_OR_OPERATING_ACCEPTANCE",
@@ -999,6 +1032,14 @@
         "guards": "Same academic year, exam, actual population, validated nonsynthetic distribution, approved baseline version and include_equal tie policy. Missing or incompatible evidence returns null/pending; no zero substitution.",
         "limitation": "This is a percentage-point position difference, not admission probability or an assurance that last-year results repeat.",
         "source": "supabase/functions/_shared/jungsi/application/offering_analysis.ts"
+      },
+      "owner_tip_semantics_source_review_20261023": {
+        "status": "SOURCE_SYNTHETIC_ONLY_NOT_DEPLOYED",
+        "baseline": "effa3f51895fd1e3ac4d72fd5657316b5c0c5a52",
+        "scope": "classification baseline context and exact decimal display; neutral rule-weight comparison; three-year historical code separate from demo_prior_year_cut_band synthetic display only",
+        "tests": "existing professional74 plus semantic11; presentation tip7; normal hooks and exact CI recorded separately",
+        "operating_requests": 0,
+        "DB_or_engine_changes": 0
       }
     },
     "privacy_and_retention": {
@@ -1248,7 +1289,8 @@
       "encryption": "Separate metadata/operation/cursor formats and AAD; plaintext limits 1MiB/8MiB; ciphertext storage limits 2MiB/16MiB include encoding overhead",
       "shared_usage": "Original owner/policy/exam calculation-cost bucket and GLOBAL request/concurrency/result buckets; no personal distinct_scores dimension. Institution window shared by all teachers. Verified replay refunds only duplicate computation; request/result controls remain.",
       "native_limits": "Worker hard limit, lease length and clock margin must exactly match the existing approved binding. Request deadline includes ingress/auth/configuration/body/business/projection.",
-      "authority_connection": "Prepared Owner-approved 5arg STABLE jsonb function with exact owner/definition SHA/fixed pg_catalog search_path and app-only EXECUTE. Existing EduTouch source permissions are unchanged; real connection NOT_RUN."
+      "authority_connection": "Prepared Owner-approved 5arg STABLE jsonb function with exact owner/definition SHA/fixed pg_catalog search_path and app-only EXECUTE. Existing EduTouch source permissions are unchanged; real connection NOT_RUN.",
+      "counseling_range_context": "comparison_context optional nullable policy_version/range_definition/range_role preserve approved policy and baseline definition separately from nullable actual verified population_id. baseline_reference never claims to explain a counselor-adjusted category; historical official URLs are references, not service forecast announcements. Legacy unbound tips are omitted while the stored report/profile remain readable."
     },
     "source_registration": {
       "format": "jungsi.professional-source-registration/v1",
@@ -1257,118 +1299,118 @@
       "operation_bindings": {
         "pro.session": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.student.list": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.student.create": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.student.read": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.student.update": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.student.archive": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.student.assign": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.member.list": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.score.status": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.score.create": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.overall.analyze": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.report.list": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.report.read": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.university.analyze": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.candidates": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.bookmark.list": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.bookmark.add": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.report.export": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.correction.grant": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.retention.preview": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         },
         "pro.retention.notice-targets": {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
           "symbol": "ProfessionalService"
         }
       },
       "source_bindings": [
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_analysis.ts",
-          "sha256": "7fe7d976fc42ad8b7cda24d8d6480de635e190071976735c40261f586c4068f6"
+          "sha256": "30b8f6680d60255ebae5b37a956c0331c156806e419e6937fb9b55de416cd89b"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts",
-          "sha256": "70975a18317dfd7234c245fe88505441820cef1eebbc3cd764a9ae06e683f299"
+          "sha256": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_policy.ts",
@@ -1380,11 +1422,11 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_projection.ts",
-          "sha256": "9ed364f0aec2a8f24ffa122a2ae774a60bb36663af8d1019de4edd448830056f"
+          "sha256": "b4ba3397fd1d0a0a2a73f6128bc928594cb7eb3144bc8824af7e2d4bf2bc9292"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
-          "sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66"
+          "sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_usage.ts",
@@ -1445,6 +1487,10 @@
         {
           "path": "supabase/functions/jungsi-pro-api/index.ts",
           "sha256": "8b980255403974fb49a7a7d90ee310526b7390ad18a60febc0abd7429af37ff8"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_tip_semantics_test.ts",
+          "sha256": "6da6e29da6c3daa63acab494287bac0707250a8f2fbe5dcfb71966c41b58827f"
         }
       ],
       "migrations": [
@@ -1458,9 +1504,10 @@
           "supabase/functions/_shared/professional_budget_test.ts",
           "supabase/functions/_shared/professional_http_test.ts",
           "supabase/functions/_shared/professional_runtime_test.ts",
-          "supabase/functions/_shared/professional_security_test.ts"
+          "supabase/functions/_shared/professional_security_test.ts",
+          "supabase/functions/_shared/professional_tip_semantics_test.ts"
         ],
-        "test_count": 74,
+        "test_count": 85,
         "operation_test_names": {
           "pro.session": [
             "professional HTTP pro.session executes authorized workflow"
