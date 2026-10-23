@@ -1,4 +1,5 @@
 import { asOfDate } from "@/lib/format";
+import { rankDisplayModel } from "@/lib/p1-field-qualification";
 import { publishedStatisticLabel, unitKey, type Cell, type Row } from "@/lib/p1-shape";
 
 /*
@@ -60,6 +61,15 @@ function Value({ c, unitOverride }: { c: Cell; unitOverride?: string }) {
       {c.s === "pending_value_type" ? <span className="rs-hold" title={reasonText(c.r) ?? undefined}>원문</span> : c.s.startsWith("pending") && <Hold code={c.r} />}
     </>
   );
+}
+
+function RankValue({ c }: { c: Cell }) {
+  const view = rankDisplayModel(c);
+  return <>
+    <Value c={view.cell} />
+    {view.qualified && <small className="rs-bs">이 필드의 서비스 자격 확인</small>}
+    {view.qualified && view.rawPending && <small className="rs-bs" title={reasonText(c.r) ?? undefined}>원자료 메타 상태: 확인 중</small>}
+  </>;
 }
 
 function Cut({ c }: { c: Cell }) {
@@ -163,7 +173,7 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
                     <td className="r derived">
                       {dv.dropped === null ? <span className="unpub">─</span> : <><b className="num">{dv.dropped}</b><small> 명</small>{dv.heldD &&<Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
                     </td>
-                    <td className="r"><Value c={r.rk} /></td>
+                    <td className="r"><RankValue c={r.rk} /></td>
                     <td className="r"><Cut c={r.c50} /></td>
                     <td className="r"><Cut c={r.c70} /></td>
                     {hasAlt && (
