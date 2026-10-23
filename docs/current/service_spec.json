@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.108",
+  "version": "1.9.109",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7008,7 +7008,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.108",
+        "contract_version": "1.9.109",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7182,7 +7182,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.108",
+        "contract_version": "1.9.109",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7348,7 +7348,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.108",
+        "contract_version": "1.9.109",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7367,7 +7367,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.108",
+        "contract_version": "1.9.109",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7392,7 +7392,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.108",
+        "contract_version": "1.9.109",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7417,7 +7417,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.108",
+        "contract_version": "1.9.109",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -17481,18 +17481,30 @@
           "기획 공통 선행 변경 / Guide 서비스는 기존 feature 담당",
           "정확 metadata·소스 SHA·static import 반례와 기존 별도 전문가 하네스 결속",
           "미등록 시험과 불량 등록은 계속 실패한다. 서비스 소스 미통합·Owner 조립·실 JWT/기관/BFF 검수는 별도이며 공개 HTTP 경로와 기존28/21 operation·foundation656을 늘리거나 완화하지 않는다."
+        ],
+        [
+          "기획 / Guide 등록과 공통 합성 fixture 호환",
+          "기획1.9.109 / tests/test_edge_harness.py",
+          "Guide 등록 존재/부재 각각 기존14와 새5 회귀 통과; strict 등록 오류는 계속 실패",
+          "운영 검사기와 시험 수를 줄이지 않는다. 내부 Guide 소스의 정상 통합과 Owner 운영 연결은 별도이며 공통 fixture만 보정한다."
+        ],
+        [
+          "화면 / 한도 내 다단계 학교 자료 조립 통합",
+          "PR59 a65bc6c → develop f373b7c0",
+          "정상 commit/push, 정확 sourceCI2·병합CI 통과; 고정 source5061과 모듈 검수 결속",
+          "원래 수치/자료형/status 전달 검수만 수용한다. 필드별 서비스 자격 연동, 보류 해소와 새판 운영 배포 인수는 NOT_RUN이다."
         ]
       ],
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "445cd3908b4ae150bb094e078fd6ce9957e2a996",
-        "spec_version": "1.9.107",
-        "ci_run_id": 39886054894,
+        "commit": "f373b7c0213f5c7cf961b3bfda553d4435323554",
+        "spec_version": "1.9.108",
+        "ci_run_id": 39894417688,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
-          "python": 1202,
+          "python": 1220,
           "deno": 943,
           "oracle": 993
         },
@@ -17505,6 +17517,7 @@
           "whole_population": 14
         },
         "additional_functional_node_suite": {
+          "P1": 62,
           "crawler_BFF_tips": 26
         },
         "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE"
@@ -20246,6 +20259,16 @@
         "REQ-28"
       ],
       "summary": "P1 학교가20개초과 입력조각에 걸친 경우에도 기존20fragment/6part/12school 한도를 유지해 불변 partialKV와fenced offset메타데이터로 나눠 조립한다. 발행본/세대/키·fence/step/조각순서를 검증하고 미완성 학교는 색인·ready에 올리지 않는다. 실제 모듈/SQLite 합성62와 scoped strict noEmit를 추가하며 원자료·native값·상태·권한·예산·DO cap·자원은 바꾸지 않는다. 정상훅/정확CI 및 실제후보/배포 인수는 각각 별도 증거로 구분한다. 실제 후보의 값/상태 전달 PASS와 필드별 자격·보류 해소 및 새 판 운영 인수 미완료를 구분한다."
+    },
+    {
+      "date": "2026-10-23",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "summary": "공통 read-view 합성 fixture가 유효하게 등록된 Guide 시험을 제거하지 않도록 보정하고, 등록 부재·잘못된 등록·미등록 유사 경로·소스 결속 오류의 독립 회귀5를 추가한다. strict 운영 검사기·공개28·전문가21·foundation656·보안8·실운영 미검수 상태는 유지한다. PR59의 bounded 학교조립 소스 통합과 정확 SHA CI를 기록하되 원상태 전달 검수와 필드별 자격 해소를 구분한다."
     }
   ],
   "overall_analysis_contract": {

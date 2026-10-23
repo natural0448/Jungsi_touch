@@ -229,7 +229,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from check_project_consistency import (  # noqa: E402
     LEGACY_API_IDS, SCORE_POLICY_ROUTES, READ_VIEW_EXTENSION_ROUTES,
-    READ_VIEW_RUNTIME_PATHS, registered_read_view_ids,
+    READ_VIEW_RUNTIME_PATHS, registered_read_view_ids, professional_guide_test_registration,
     validate_read_view_extension, validate_score_input_policy, legacy_policy_fixture_inputs,
 )
 from run_edge_tests import read_view_registration, operation_registration  # noqa: E402
@@ -242,8 +242,12 @@ def candidate():
     spec.pop('read_view_extension_contract', None)
     spec['operations'] = [r for r in spec['operations'] if r['id'] not in READ_VIEW_EXTENSION_ROUTES]
     files = spec['edge_harness']['files']
+    guide_tests, guide_errors = professional_guide_test_registration(spec)
+    if guide_errors:
+        raise ValueError('Synthetic fixture cannot ignore invalid Guide registration')
     for p in list(files):
-        if p.startswith('tests/edge/test_') and p not in spec['edge_harness']['tests']:
+        if (p.startswith('tests/edge/test_') and p not in spec['edge_harness']['tests']
+                and p not in guide_tests):
             files.pop(p)
     service = 'supabase/functions/_shared/jungsi/application/synthetic_read_view.ts'
     test = 'tests/edge/test_synthetic_read_view_extension.ts'
@@ -411,3 +415,170 @@ class ReadViewExtensionContractTests(unittest.TestCase):
         self.assertTrue(validate_read_view_extension(spec))
         with self.assertRaisesRegex(EdgeFailure, 'registration_invalid'):
             read_view_registration(spec, {})
+
+
+class ReadViewGuideFixtureCompatibilityTests(unittest.TestCase):
+    """Synthetic fixture composition must keep only strict registered Guide tests."""
+    GUIDE_TEST = 'tests/edge/test_guide_rule_reference.ts'
+
+    def source(self):
+        # Reuse the existing professional/Guide registration fixture composition.
+        # These bodies and declared counts are synthetic, never a Deno/SQL receipt.
+        import hashlib
+        from check_project_consistency import (
+            PROFESSIONAL_ENTRY, PROFESSIONAL_APP, PROFESSIONAL_INFRA, PROFESSIONAL_TEST,
+            PROFESSIONAL_MIGRATION, PROFESSIONAL_SOURCE_STATUS, PROFESSIONAL_GENERATED,
+            PROFESSIONAL_GUIDE_TEST, PROFESSIONAL_GUIDE_SUITE, professional_source_path,
+        )
+        source = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        contract = source['professional_service_contract']
+        contract.pop('source_registration', None)
+        contract.pop('schema_application_evidence', None)
+        source['implementation'] = [
+            row for row in source['implementation']
+            if not professional_source_path(row['path']) and row['path'] != PROFESSIONAL_GUIDE_TEST]
+        indexed = source['workflow']['documentation_sync']['code_index']['edge_sources']['files']
+        indexed[:] = [row for row in indexed if not professional_source_path(row['path'])]
+        files = source['edge_harness']['files']
+        for path in list(files):
+            if professional_source_path(path):
+                files.pop(path)
+        contract['candidate_API_registration'] = 'separate_source_registered_not_added_to_existing_operations'
+        for operation in contract['candidate_operations']:
+            operation['runtime_registration'] = PROFESSIONAL_SOURCE_STATUS
+        app = PROFESSIONAL_APP + 'service.ts'
+        infra = PROFESSIONAL_INFRA + 'postgres.ts'
+        test = PROFESSIONAL_TEST + 'api_test.ts'
+        support = PROFESSIONAL_TEST + 'support.ts'
+        bodies = {
+            PROFESSIONAL_ENTRY: b'entry fixture', app: b'app fixture', infra: b'infra fixture',
+            test: b'test fixture', support: b'support fixture',
+            PROFESSIONAL_GENERATED: b'generated fixture',
+            PROFESSIONAL_MIGRATION: b'SELECT 1; -- prepared fixture only',
+            PROFESSIONAL_GUIDE_TEST: b'export {}; // SYNTHETIC UNIT FIXTURE ONLY\n',
+            PROFESSIONAL_GUIDE_SUITE: (
+                'import "../../../' + PROFESSIONAL_GUIDE_TEST +
+                '";\n// SYNTHETIC UNIT FIXTURE ONLY\n').encode(),
+        }
+        hashes = {path: hashlib.sha256(body).hexdigest() for path, body in bodies.items()}
+        registered = (PROFESSIONAL_ENTRY, app, infra, test, support, PROFESSIONAL_GENERATED)
+        for path in registered:
+            layer = ('application' if path.startswith(PROFESSIONAL_APP) else
+                     'verification' if path.startswith(PROFESSIONAL_TEST) else 'data_infrastructure')
+            source['implementation'].append(dict(
+                path=path, layer=layer, requirements=['REQ-31'],
+                symbols=['execute'] if path == app else [], status='synthetic_registry_fixture'))
+            indexed.append(dict(path=path, source_sha256=hashes[path]))
+            if path.startswith((PROFESSIONAL_APP, PROFESSIONAL_INFRA)):
+                files[path] = dict(layer=layer, declarations=dict(source_sha256=hashes[path]))
+        for path in (PROFESSIONAL_GUIDE_TEST, PROFESSIONAL_GUIDE_SUITE):
+            source['implementation'].append(dict(
+                path=path, layer='verification', requirements=['REQ-31'],
+                symbols=[], status='synthetic_unit_fixture'))
+        files[PROFESSIONAL_GUIDE_TEST] = dict(
+            layer='verification', declarations=dict(source_sha256=hashes[PROFESSIONAL_GUIDE_TEST]))
+        indexed.append(dict(
+            path=PROFESSIONAL_GUIDE_SUITE, layer='verification',
+            requirements=['REQ-31'], source_sha256=hashes[PROFESSIONAL_GUIDE_SUITE]))
+        contract['source_registration'] = dict(
+            format='jungsi.professional-source-registration/v1', status=PROFESSIONAL_SOURCE_STATUS,
+            entrypoint=PROFESSIONAL_ENTRY,
+            operation_bindings={operation['id']: dict(
+                path=app, source_sha256=hashes[app], symbol='execute')
+                for operation in contract['candidate_operations']},
+            source_bindings=[dict(path=path, sha256=hashes[path])
+                             for path in (*registered, PROFESSIONAL_GUIDE_SUITE)],
+            migrations=[dict(path=PROFESSIONAL_MIGRATION, sha256=hashes[PROFESSIONAL_MIGRATION])],
+            verification=dict(
+                test_paths=[test, PROFESSIONAL_GUIDE_SUITE], test_count=58,
+                operation_test_names={operation['id']: ['synthetic registered routes']
+                                      for operation in contract['candidate_operations']}),
+            native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE', activation_status='NOT_RUN',
+            operating_writes=0)
+        contract['DB_schema_application'] = 'PREPARED_NOT_APPLIED'
+        guide_paths = (PROFESSIONAL_GUIDE_TEST, PROFESSIONAL_GUIDE_SUITE)
+        contract['counseling_tips']['yearly_rule_read']['verification'] = dict(
+            format='jungsi.professional-guide-verification/v1',
+            coverage='PROFESSIONAL_GUIDE_REFERENCE_SYNTHETIC',
+            test_paths=[PROFESSIONAL_GUIDE_TEST], suite_entry=PROFESSIONAL_GUIDE_SUITE,
+            test_count=57, additive_guide_tests=57, baseline_foundation_count=656,
+            retained_foundation_tests=656,
+            source_bindings=[dict(path=path, sha256=hashes[path]) for path in guide_paths],
+            native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE', activation_status='NOT_RUN',
+            operating_writes=0)
+        self.assertEqual(
+            professional_guide_test_registration(source), ({PROFESSIONAL_GUIDE_TEST}, []))
+        return source
+
+    def from_source(self, source):
+        with patch.object(Path, 'read_text', return_value=json.dumps(source)):
+            return candidate()
+
+    def test_valid_registered_guide_is_retained_without_changing_contract(self):
+        source = self.source()
+        before = deepcopy(source)
+        registered, errors = professional_guide_test_registration(source)
+        self.assertEqual((registered, errors), ({self.GUIDE_TEST}, []))
+        fixture = self.from_source(source)
+        self.assertIn(self.GUIDE_TEST, fixture['edge_harness']['files'])
+        self.assertEqual(
+            fixture['professional_service_contract'],
+            before['professional_service_contract'])
+        self.assertEqual(fixture['security_contract'], before['security_contract'])
+        self.assertEqual(fixture['edge_harness']['tests'], before['edge_harness']['tests'])
+        self.assertEqual(fixture['edge_harness']['unit_count'], 656)
+        self.assertEqual(len(fixture['operations']), 28)
+        self.assertEqual(validate_read_view_extension(fixture), [])
+        self.assertEqual(source, before)
+
+    def test_absent_guide_registration_preserves_legacy_fixture_behavior(self):
+        source = self.source()
+        source['professional_service_contract']['counseling_tips']['yearly_rule_read'].pop('verification')
+        self.assertEqual(professional_guide_test_registration(source), (set(), []))
+        fixture = self.from_source(source)
+        self.assertNotIn(self.GUIDE_TEST, fixture['edge_harness']['files'])
+        self.assertEqual(validate_read_view_extension(fixture), [])
+
+    def test_malformed_guide_registration_fails_instead_of_hiding_errors(self):
+        for mode in ('format', 'bool_count', 'extra_test_path', 'missing_requirement'):
+            with self.subTest(mode=mode):
+                source = self.source()
+                guide = source['professional_service_contract']['counseling_tips']['yearly_rule_read']
+                verification = guide['verification']
+                if mode == 'format':
+                    verification['format'] = 'synthetic-invalid'
+                elif mode == 'bool_count':
+                    verification['test_count'] = True
+                elif mode == 'extra_test_path':
+                    verification['test_paths'].append('tests/edge/test_synthetic_unregistered.ts')
+                else:
+                    guide['requirements'].remove('REQ-24')
+                with self.assertRaisesRegex(ValueError, 'cannot ignore invalid Guide registration'):
+                    self.from_source(source)
+
+    def test_valid_registration_never_preserves_lookalike_or_unregistered_tests(self):
+        source = self.source()
+        extras = ('tests/edge/test_guide_rule_reference_extra.ts',
+                  'tests/edge/test_synthetic_unregistered.ts')
+        for path in extras:
+            source['edge_harness']['files'][path] = dict(
+                layer='verification', declarations=dict(source_sha256='c' * 64))
+        fixture = self.from_source(source)
+        for path in extras:
+            self.assertNotIn(path, fixture['edge_harness']['files'])
+        self.assertIn(self.GUIDE_TEST, fixture['edge_harness']['files'])
+        self.assertEqual(validate_read_view_extension(fixture), [])
+
+    def test_missing_or_unbound_registered_guide_source_is_not_silently_removed(self):
+        for mode in ('missing', 'hash', 'layer'):
+            with self.subTest(mode=mode):
+                source = self.source()
+                files = source['edge_harness']['files']
+                if mode == 'missing':
+                    files.pop(self.GUIDE_TEST)
+                elif mode == 'hash':
+                    files[self.GUIDE_TEST]['declarations']['source_sha256'] = '0' * 64
+                else:
+                    files[self.GUIDE_TEST]['layer'] = 'application'
+                with self.assertRaisesRegex(ValueError, 'cannot ignore invalid Guide registration'):
+                    self.from_source(source)
