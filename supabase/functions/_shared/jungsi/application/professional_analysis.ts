@@ -186,7 +186,7 @@ export class ProfessionalApprovedAnalysis implements ApprovedAnalysisPort {
     // Counseling reasons copy approved engine results with verified public basis only.
     return {
       result,
-      reasons: counselingReasons(results, scope.authority.contract.academicYear),
+      reasons: professionalCounselingReasons(results, scope.authority.contract.academicYear),
       ...(operation === "pro.candidates" ? { assessments: results } : {}),
     };
   }
@@ -236,7 +236,7 @@ function publicBasis(evidence: NativeObject): NativeObject[] {
   return out;
 }
 
-/** classification_basis: the adopted decision range and the student's converted score. */
+/** Baseline reference only: the adopted classification may include a counselor adjustment. */
 function classificationBasis(
   offeringId: string,
   assessment: NativeObject,
@@ -252,8 +252,20 @@ function classificationBasis(
   const policy = typeof range.policy_version === "string" && IDENTIFIER.test(range.policy_version)
     ? range.policy_version
     : null;
+  const definition = typeof range.definition === "string" && range.definition.trim()
+    ? range.definition
+    : null;
+  const percentile = obj(assessment.percentile);
+  const population = percentile?.status === "ready" && percentile.reason_code === null &&
+      percentile.academic_year === academicYear && typeof percentile.population_id === "string" &&
+      IDENTIFIER.test(percentile.population_id)
+    ? percentile.population_id
+    : null;
   const basis = publicBasis(evidence);
-  if (lower === null || upper === null || unit === null || policy === null || !basis.length) {
+  if (
+    lower === null || upper === null || unit === null || policy === null || definition === null ||
+    !basis.length
+  ) {
     return null;
   }
   return {
@@ -266,7 +278,10 @@ function classificationBasis(
       reference_year: null,
       metric: "converted_score",
       score_scale: "university_converted_score",
-      population_id: policy,
+      population_id: population,
+      policy_version: policy,
+      range_definition: definition,
+      range_role: "baseline_reference",
     },
     values: [
       { name: "converted_score", value: score, unit },
@@ -279,7 +294,10 @@ function classificationBasis(
 }
 
 /** Reasons for every analyzed offering, in offering-id order. Unsupported codes stay absent. */
-function counselingReasons(results: NativeObject, academicYear: number): NativeObject[] {
+export function professionalCounselingReasons(
+  results: NativeObject,
+  academicYear: number,
+): NativeObject[] {
   const out: NativeObject[] = [];
   for (const offeringId of Object.keys(results).sort()) {
     const assessment = obj(results[offeringId]);

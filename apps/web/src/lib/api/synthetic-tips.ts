@@ -57,7 +57,7 @@ export function buildTips(analyses: Record<string, AssessmentDto>, scores: Score
           { name: "converted_score", value: a.converted_score, unit: "점" },
           { name: "acceptance_lower", value: String(range.lower), unit: "점" },
           { name: "acceptance_upper", value: String(range.upper), unit: "점" },
-        ], { comparison_context: { academic_year: 2027, reference_year: null, metric: "converted_score", score_scale: "university_converted_score", population_id: range.policy_version }, public_basis: [RESULT(2026)] }),
+        ], { comparison_context: { academic_year: 2027, reference_year: null, metric: "converted_score", score_scale: "university_converted_score", population_id: a.percentile?.status === "ready" ? a.percentile.population_id : null, policy_version: range.policy_version, range_definition: range.definition, range_role: "baseline_reference" }, public_basis: [RESULT(2026)] }),
       });
 
     // 2. 반영 비율 변화(전년 모집요강 대비) — 바뀐 영역마다, 학생 약점과 겹치면 무겁게
@@ -129,10 +129,9 @@ export function buildTips(analyses: Record<string, AssessmentDto>, scores: Score
     if (c50 && c70)
       list.push({
         w: 25,
-        r: tip("historical_cut_spread", [
+        r: tip("demo_prior_year_cut_band", [
           { name: "cut50", value: c50, unit: "점" },
           { name: "cut70", value: c70, unit: "점" },
-          { name: "gap", value: (Number(c50) - Number(c70)).toFixed(2), unit: "점" },
         ], { comparison_context: { academic_year: 2027, reference_year: 2026, metric: "final_registrant_cut", score_scale: `대학 환산점수(${rule.max}점 만점)`, population_id: null }, public_basis: [RESULT(2026)] }),
       });
 

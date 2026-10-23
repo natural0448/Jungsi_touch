@@ -32,23 +32,22 @@ export function tipLine(r: ProReason): TipLine | null {
   switch (r.code) {
     case "classification_basis": {
       const s = v(r, "converted_score"), lo = v(r, "acceptance_lower"), hi = v(r, "acceptance_upper");
-      const unit = r.values.find((x) => x.name === "converted_score")?.unit ?? "점";
-      if (!s || !lo || !hi) return null;
-      const n = Number(s), where = n < Number(lo) ? `아래쪽 끝(${lo}${unit})보다 ${(Number(lo) - n).toFixed(2)}${unit} 낮습니다` : n > Number(hi) ? `위쪽 끝(${hi}${unit})보다 ${(n - Number(hi)).toFixed(2)}${unit} 높습니다` : "안에 있습니다";
-      return { text: `이 학생의 올해 환산점수는 ${s}${unit}이고, 이 모집단위의 핵심 검토 구간(${lo}~${hi}${unit}) ${where}. 점수는 이 대학 환산점수 기준입니다.` };
+      const unit = r.values.find((x) => x.name === "converted_score")?.unit;
+      const ctx = r.comparison_context;
+      if (!s || !lo || !hi || !unit || !ctx?.range_definition || !ctx.policy_version || ctx.range_role !== "baseline_reference") return null;
+      if (r.values.some((x) => ["converted_score", "acceptance_lower", "acceptance_upper"].includes(x.name) && x.unit !== unit)) return null;
+      return {
+        text: `이 학생의 올해 환산점수는 ${s}${unit}입니다. 서비스 예상 기준구간 참고: ${lo}~${hi}${unit}. 정의: ${ctx.range_definition} (정책 ${ctx.policy_version}).`,
+        caution: "이 기준구간은 대학 공식 발표 합격선이 아닙니다. 공식 출처는 과거 발표자료의 참고이며, 상담자 조정이 포함될 수 있는 최종 분류의 직접 근거로 단정하지 않습니다.",
+      };
     }
     case "rule_weight_change": {
-      const area = v(r, "area"), p = v(r, "previous_weight"), c = v(r, "current_weight"), rel = v(r, "student_relative");
+      const area = v(r, "area"), p = v(r, "previous_weight"), c = v(r, "current_weight");
       if (!area || !p || !c) return null;
-      const up = Number(c) > Number(p);
-      const text = `${area} 반영 비율이 작년 ${p}%에서 올해 ${c}%로 ${up ? "커졌습니다" : "줄었습니다"}.`;
-      const caution =
-        rel === "weak" && up ? `이 학생은 ${iga(area)} 다른 영역보다 약해, 같은 성적이라도 작년 방식보다 불리하게 작용합니다. ${area} 비중이 큰 대학은 지원에 유의하세요.`
-        : rel === "strong" && up ? `이 학생의 강점인 ${area} 비중이 커져 작년보다 유리하게 작용합니다.`
-        : rel === "weak" && !up ? `약한 ${area} 비중이 줄어 작년보다 부담이 덜합니다.`
-        : rel === "strong" && !up ? `강점인 ${area} 비중이 줄어 작년만큼의 이점은 기대하기 어렵습니다.`
-        : undefined;
-      return { text, caution };
+      return {
+        text: `${area} 반영 비율은 작년 ${p}%, 올해 ${c}%입니다.`,
+        caution: "반영 비율의 변화만으로 이 학생의 유불리를 판단할 수 없습니다. 학생별 영향은 검증된 별도 근거가 필요합니다.",
+      };
     }
     case "subject_weight_strength": {
       const area = v(r, "area"), w = v(r, "current_weight"), rel = v(r, "student_relative");
@@ -71,10 +70,14 @@ export function tipLine(r: ProReason): TipLine | null {
       if (!ratio) return null;
       return { text: `작년 경쟁률은 ${ratio}대 1이었습니다.${q && fill ? ` 모집 ${q}명 중 ${fill}명이 충원으로 추가 합격했습니다.` : ""}` };
     }
-    case "historical_cut_spread": {
-      const c50 = v(r, "cut50"), c70 = v(r, "cut70"), gap = v(r, "gap");
-      if (!c50 || !c70 || !gap) return null;
-      return { text: `작년 최종등록자 50%컷은 ${c50}점, 70%컷은 ${c70}점으로 ${gap}점 차이였습니다. 이 폭이 좁을수록 몇 점 차이로 결과가 갈립니다.` };
+    case "historical_cut_spread":
+      // Reserved for verified three-year 70% cut movement; no live evidence is supplied yet.
+      return null;
+    case "demo_prior_year_cut_band": {
+      const c50 = v(r, "cut50"), c70 = v(r, "cut70");
+      const year = r.comparison_context?.reference_year;
+      if (!c50 || !c70 || year == null) return null;
+      return { text: `[합성 시연] ${year}학년도 최종등록자 50%컷 ${c50}점, 70%컷 ${c70}점입니다. 한 학년도 안의 두 지표이며 3개년 70%컷 변동이 아닙니다.` };
     }
     case "english_deduction": {
       const g = v(r, "grade"), d = v(r, "deduction");

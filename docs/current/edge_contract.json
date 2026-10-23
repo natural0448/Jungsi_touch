@@ -17924,7 +17924,7 @@
             "src": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
           }
         ],
-        "source_sha256": "a4f4c0ac7b5b1bd05d018453fd66e295083c6c0dda00b867eed309549966d86d",
+        "source_sha256": "30b8f6680d60255ebae5b37a956c0331c156806e419e6937fb9b55de416cd89b",
         "symbols": [
           {
             "declarations": [
@@ -18480,6 +18480,63 @@
           {
             "declarations": [
               {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  results: NativeObject,\n  academicYear: number,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "results",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "academicYear",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "typeRef",
+                      "repr": "NativeObject",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "NativeObject",
+                          "specifier": "../domain/json_value.ts"
+                        },
+                        "typeName": "NativeObject"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "professionalCounselingReasons"
+          },
+          {
+            "declarations": [
+              {
                 "declarationKind": "private",
                 "def": {
                   "kind": "const",
@@ -18762,63 +18819,6 @@
               }
             ],
             "name": "classificationBasis"
-          },
-          {
-            "declarations": [
-              {
-                "declarationKind": "private",
-                "def": {
-                  "hasBody": true,
-                  "parameter_source": "(results: NativeObject, academicYear: number)",
-                  "params": [
-                    {
-                      "kind": "identifier",
-                      "name": "results",
-                      "optional": false,
-                      "tsType": {
-                        "kind": "typeRef",
-                        "repr": "NativeObject",
-                        "value": {
-                          "resolution": {
-                            "kind": "import",
-                            "name": "NativeObject",
-                            "specifier": "../domain/json_value.ts"
-                          },
-                          "typeName": "NativeObject"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "identifier",
-                      "name": "academicYear",
-                      "optional": false,
-                      "tsType": {
-                        "kind": "keyword",
-                        "repr": "number",
-                        "value": "number"
-                      }
-                    }
-                  ],
-                  "returnType": {
-                    "kind": "array",
-                    "value": {
-                      "kind": "typeRef",
-                      "repr": "NativeObject",
-                      "value": {
-                        "resolution": {
-                          "kind": "import",
-                          "name": "NativeObject",
-                          "specifier": "../domain/json_value.ts"
-                        },
-                        "typeName": "NativeObject"
-                      }
-                    }
-                  }
-                },
-                "kind": "function"
-              }
-            ],
-            "name": "counselingReasons"
           }
         ]
       },
@@ -18967,13 +18967,14 @@
       "layer": "application",
       "symbols": [
         "ProfessionalAnalysisDataPort",
-        "ProfessionalApprovedAnalysis"
+        "ProfessionalApprovedAnalysis",
+        "professionalCounselingReasons"
       ]
     },
     "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts": {
       "declarations": {
         "imports": [],
-        "source_sha256": "8ad2aa9b03dd9f07d8d96373e20836a438fe0ea769f1a51a70cfc20f5b9d5977",
+        "source_sha256": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4",
         "symbols": [
           {
             "declarations": [
@@ -24667,7 +24668,7 @@
             "src": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
           }
         ],
-        "source_sha256": "0a0cd81b3df3cecb2570255d23766f1f073a5e957dcaba4f75b82a29b96434a6",
+        "source_sha256": "b4ba3397fd1d0a0a2a73f6128bc928594cb7eb3144bc8824af7e2d4bf2bc9292",
         "symbols": [
           {
             "declarations": [

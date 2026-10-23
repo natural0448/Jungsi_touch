@@ -5944,7 +5944,8 @@
       ],
       "symbols": [
         "ProfessionalAnalysisDataPort",
-        "ProfessionalApprovedAnalysis"
+        "ProfessionalApprovedAnalysis",
+        "professionalCounselingReasons"
       ]
     },
     {
@@ -6293,6 +6294,18 @@
       "path": "database/migrations/008_professional_authority.prepared.sql",
       "layer": "data_infrastructure",
       "status": "prepared_original_authority_owner_application_NOT_RUN",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "supabase/functions/_shared/professional_tip_semantics_test.ts",
+      "layer": "verification",
+      "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
       "requirements": [
         "REQ-24",
         "REQ-25",
@@ -15051,10 +15064,11 @@
                 "REQ-26",
                 "REQ-31"
               ],
-              "source_sha256": "a4f4c0ac7b5b1bd05d018453fd66e295083c6c0dda00b867eed309549966d86d",
+              "source_sha256": "30b8f6680d60255ebae5b37a956c0331c156806e419e6937fb9b55de416cd89b",
               "declared_exports": [
                 "ProfessionalAnalysisDataPort",
-                "ProfessionalApprovedAnalysis"
+                "ProfessionalApprovedAnalysis",
+                "professionalCounselingReasons"
               ]
             },
             {
@@ -15067,7 +15081,7 @@
                 "REQ-26",
                 "REQ-31"
               ],
-              "source_sha256": "8ad2aa9b03dd9f07d8d96373e20836a438fe0ea769f1a51a70cfc20f5b9d5977",
+              "source_sha256": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4",
               "declared_exports": [
                 "PROFESSIONAL_CONTRACT",
                 "ProfessionalContract",
@@ -15144,7 +15158,7 @@
                 "REQ-26",
                 "REQ-31"
               ],
-              "source_sha256": "0a0cd81b3df3cecb2570255d23766f1f073a5e957dcaba4f75b82a29b96434a6",
+              "source_sha256": "b4ba3397fd1d0a0a2a73f6128bc928594cb7eb3144bc8824af7e2d4bf2bc9292",
               "declared_exports": [
                 "ProfessionalProjection"
               ]
@@ -17144,6 +17158,19 @@
                 "policyRaw",
                 "scores"
               ]
+            },
+            {
+              "path": "supabase/functions/_shared/professional_tip_semantics_test.ts",
+              "layer": "verification",
+              "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+              "requirements": [
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-31"
+              ],
+              "source_sha256": "6da6e29da6c3daa63acab494287bac0707250a8f2fbe5dcfb71966c41b58827f",
+              "declared_exports": []
             },
             {
               "path": "supabase/functions/_shared/read_view_catalog_runtime.ts",
@@ -20155,6 +20182,15 @@
         "REQ-31"
       ],
       "summary": "화면팀 변경(전문가용 상담 근거 서버 연결 1단계): pro_reason 에 offering_id(학교별 tip)를 더하고 student_print_projection 에 같은 고정 판의 counseling_reasons 를 싣는다. TIP 코드에 classification_basis 를 더해 professional_counseling.ts 가 엔진이 이미 낸 판단 구간·환산점수와, 판단 근거에 포함된 검증된 전년 공식 발표 원문(https)만으로 근거를 만든다(새 산출 없음, 공개 근거가 없으면 근거를 만들지 않음). 근거 값·맥락 이름 4개(converted_score·acceptance_lower·acceptance_upper·university_converted_score)는 공용 safe_code 를 바꾸지 않고 전문가용 투영 안에서만 허용한다. cleanReasons 의 ready·https 공개 근거 필수 규칙은 그대로다. 화면은 같은 이름으로 문장을 만든다. 실제 근거는 2027 실제 환산 규칙과 판단 근거가 연결된 뒤 채워진다."
+    },
+    {
+      "date": "2026-10-23",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "2026-10-23 사용자 지시: security_contract.crawler_policy에 /jeongsi 전 경로의 크롤링 거부 및 색인 보조 정책을 추가한다. 도메인 루트 robots와 앱 metadata/X-Robots-Tag를 구분하며 기존 인증/권한/relay/DTO/공유예산과 Google Drive·기존 Supabase 및 기존 P1 조정 예외를 유지한다. 앱·루트 Owner 배포·실제 검수는 분리 기록한다."
     }
   ],
   "overall_analysis_contract": {
@@ -29326,7 +29362,7 @@
       "credentials_in_browser_allowed": false,
       "failure_policy": "필수 서버 인증 설정 누락·잘못된 신원에 보호 대상 결과를 제공하지 않는다. 통제 의존 장애는 비밀 없는 503으로 실패한다.",
       "presentation_rule": "중계는 실제 세션·안전한 입력을 전달한다. 쿠키 세션이면 HttpOnly/Secure/SameSite와 상태변경 CSRF 검증을 적용한다. Origin/Referer/CORS는 서버·사용자 인증을 대신하지 않는다.",
-      "deployment_rule": "중계/분석은 클라우드에서 운영하며 PC 로컬 파일·상주 프로세스를 의존하지 않는다. 공개 원본·이전/preview 주소로 보안 계층을 우회하지 못하게 검수한다.",
+      "deployment_rule": "중계/분석은 클라우드에서 운영하며 PC 로컬 파일·상주 프로세스를 의존하지 않는다. 공개 원본·이전/preview 주소로 보안 계층을 우회하지 못하게 검수한다. 크롤링·색인 보조 정책(2026-10-23): 도메인 루트 /robots.txt에서 모든 크롤러의 /jeongsi 경로 수집을 거부하고, 정시 응답에 X-Robots-Tag와 HTML noindex/nofollow/noarchive/nosnippet을 적용한다. basePath 아래 robots 파일만으로 루트 정책을 대신하지 않는다. 에듀터치의 다른 경로·기존 규칙·sitemap은 보존하며 적용 그룹별 예외를 확인한다. robots/메타는 자발적 준수 신호이므로 로그인·소유권·이용권·relay·허용 DTO·유한 공유 예산을 대체하지 않는다. 앱 구현/합성검수와 Owner 루트 적용/실제 정문 응답 검수를 구분한다.",
       "owner_roles": [
         {
           "owner_layer": "presentation",
@@ -29506,6 +29542,18 @@
       {
         "title": "Supabase API grants/RLS/비공개 스키마",
         "url": "https://supabase.com/docs/guides/api/securing-your-api"
+      },
+      {
+        "title": "Google robots.txt limits",
+        "url": "https://developers.google.com/search/docs/crawling-indexing/robots/intro"
+      },
+      {
+        "title": "Robots root location and group interpretation",
+        "url": "https://developers.google.com/crawling/docs/robots-txt/robots-txt-spec"
+      },
+      {
+        "title": "OpenAI crawlers and user-initiated fetch limitations",
+        "url": "https://developers.openai.com/api/docs/bots"
       }
     ],
     "limitation": "사용자에게 정상 제공한 개별 결과 저장을 완전히 막는다고 약속하지 않는다. 내부자료 비전달·권한 밖 조회 거절·대량 수집 규모/비용 통제를 인수 범위로 한다. overall_only는 전체 selected metadata 승인·핀·버킷, pack/model 검증, finish fresh-head와 원래 한도를 유지한다. RAM 요청 검증은 hosted 운영 인수가 아니다. 추가 세 operation은 직접 승인으로 적용했고, university_only는 total_model 본문만 유예하며 나머지 release 검증과 전체 selected metadata·현재 head·마지막 확인·원래 한도를 유지한다. 새 관리자 등록물과 실제 운영 검수는 NOT_RUN이다.",
@@ -29519,7 +29567,132 @@
       "policy_revision",
       "evidence_ref"
     ],
-    "transport_transition": "기존 22 API 경로·회원·DTO를 유지한다. 기존 연결 준비의 사용자 Bearer는 중계 뒤 분석 서버에서도 검증하며 서버 전용 신원을 추가한다. 기존 화면 직접 호출 방식은 운영 보안 인수 경로로 채택하지 않는다. 중계 경로/전달 방식/오류·CSRF 세부 계약은 두 개발 담당이 구현 PR에서 정본과 함께 확정한다."
+    "transport_transition": "기존 22 API 경로·회원·DTO를 유지한다. 기존 연결 준비의 사용자 Bearer는 중계 뒤 분석 서버에서도 검증하며 서버 전용 신원을 추가한다. 기존 화면 직접 호출 방식은 운영 보안 인수 경로로 채택하지 않는다. 중계 경로/전달 방식/오류·CSRF 세부 계약은 두 개발 담당이 구현 PR에서 정본과 함께 확정한다.",
+    "crawler_policy": {
+      "format": "jungsi.crawl-indexing-policy/v1",
+      "revision": "2026.10.23.v1",
+      "authority": "Explicit user instruction2026-10-23; planning approved additive protection",
+      "status": "APPROVED_IMPLEMENTATION_IN_PROGRESS_NOT_LIVE_VERIFIED",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "service_path_prefix": "/jeongsi",
+      "canonical_robots_url": "https://edutouch.co.kr/robots.txt",
+      "robots_rule": {
+        "user_agent": "*",
+        "disallow": [
+          "/jeongsi"
+        ],
+        "location_rule": "Domain-root robots.txt is authoritative. A /jeongsi/robots.txt file alone does not apply.",
+        "group_rule": "Preserve existing host rules and sitemap. Add the service restriction to every applicable more-specific group so an existing Allow does not bypass it.",
+        "availability": "Public200 text/plain without login. Do not weaken the app preview or authentication gate to serve it.",
+        "aliases": "If another host serves the service without a canonical redirect, verify its own root robots. Do not claim cross-host coverage."
+      },
+      "html_metadata": {
+        "index": false,
+        "follow": false,
+        "archive": false,
+        "snippet": false
+      },
+      "http_header": {
+        "name": "X-Robots-Tag",
+        "value": "noindex, nofollow, noarchive, nosnippet",
+        "scope": "Service HTML/RSC and BFF/JSON, redirects and denied/error responses within the existing app delivery paths. Preserve existing authentication, origin/CSRF and cache-control semantics."
+      },
+      "ownership": {
+        "planning": "Canonical policy and synchronized planning/routing",
+        "presentation": "Existing feature/presentation-foundation metadata, headers and meaningful response-path tests",
+        "front_door_owner": "Existing edutouch host root robots merge and actual deployment/readback",
+        "DB_and_engine": "Unchanged user-led DB/calculation ownership; no schema/model changes for crawling policy"
+      },
+      "non_substitution": "Robots and indexing hints depend on client compliance. They are not access control, authentication or guaranteed data/AI-training exclusion. An identifying user-agent string does not establish trust.",
+      "required_existing_controls": [
+        "Verified session and current ownership/entitlement",
+        "Server relay authentication",
+        "Recursive role-specific response allowlist",
+        "Finite atomic request/calculation/result/concurrency budgets",
+        "Existing confidential data and secret exclusion"
+      ],
+      "no_new_cost_or_resource": true,
+      "no_hidden_path_disclosure": "Do not list private storage/model/secret paths in publicly readable robots.",
+      "states": {
+        "app_implementation": "SOURCE_IMPLEMENTED_SYNTHETIC_FUNCTIONS_TESTED_NOT_DEPLOYED",
+        "root_robots": "OWNER_PATCH_REQUIRED_NOT_APPLIED",
+        "operational_readback": "NOT_RUN"
+      },
+      "references": [
+        {
+          "title": "Google robots.txt limits",
+          "url": "https://developers.google.com/search/docs/crawling-indexing/robots/intro"
+        },
+        {
+          "title": "Robots root location and group interpretation",
+          "url": "https://developers.google.com/crawling/docs/robots-txt/robots-txt-spec"
+        },
+        {
+          "title": "OpenAI crawlers and user-initiated fetch limitations",
+          "url": "https://developers.openai.com/api/docs/bots"
+        }
+      ],
+      "acceptance_cases": [
+        {
+          "id": "SEC-CRAWL-QA-01",
+          "control": "SEC-02",
+          "scope": "front_door_root_readonly",
+          "expected": "익명 GET /robots.txt=200 text/plain; 모든 적용 그룹에서 /jeongsi 거부, 기존 타경로/sitemap 보존; 하위 robots만으로 통과하지 않음"
+        },
+        {
+          "id": "SEC-CRAWL-QA-02",
+          "control": "SEC-02",
+          "scope": "presentation_response_paths",
+          "expected": "HTML/meta 및 정상·redirect·denied/error·BFF/JSON의 적용 응답에서 noindex 등 헤더 유지; 기존 no-store와 비밀 비노출 유지"
+        },
+        {
+          "id": "SEC-CRAWL-QA-03",
+          "control": "SEC-08",
+          "scope": "authorization_regression",
+          "expected": "일반/검색/AI User-Agent가 인증·권한·relay·예산을 우회하지 못함; robots를 실제 정보보호 완료 증거로 사용하지 않음"
+        }
+      ],
+      "source_evidence": {
+        "basis_commit": "3bec3ee6a78fc33909d5ceac697cff493f58b3d1",
+        "source_bindings": [
+          {
+            "path": "apps/web/next.config.ts",
+            "sha256": "deb0bb9bdbc299ac28249b43871d6b56a41a0d6a177837cb6ab0df83b8db4886"
+          },
+          {
+            "path": "apps/web/src/app/layout.tsx",
+            "sha256": "3666330974c62bfa43220042513f8224e8d8326a1ad12901bce17eea191d1fd8"
+          },
+          {
+            "path": "apps/web/src/proxy.ts",
+            "sha256": "6102f443c2ac8b04ab8daa9c7cd69f7366376c7c9fe687b78ff115fd2533ea2e"
+          },
+          {
+            "path": "apps/web/src/lib/crawl-policy.ts",
+            "sha256": "6733615512b7f36448996f0a7c9245104e1fc1023e709bfc756b928d404ad1d8"
+          },
+          {
+            "path": "apps/web/tests/crawl-policy.test.mjs",
+            "sha256": "a3b66161cbe81ec8ebef4d51dcf51bada2b4078257119db1a4ffcdf330cb912a"
+          },
+          {
+            "path": "apps/web/tests/professional-bff-origin.test.mjs",
+            "sha256": "d21c37081e402dcae5947300fe853cad12b65f59bc41fc152160f05f69cc5537"
+          }
+        ],
+        "synthetic_crawler_function_tests": 6,
+        "mandatory_node_harness_test_count": 26,
+        "scope": "Actual config headers/redirects functions, root metadata export and proxy normal/denied paths with invented dependency ports; UA invariance. Next/OpenNext real server/build and deployed HTTP are NOT_RUN.",
+        "root_response_observed_sha256": "321c2f27cda24bd4aead0639e897da95836ee16ae292cdcba67df09a04fb57f2",
+        "root_proposal_sha256": "185506a0ed3e733c3699e94a7635710a6eee88710346da2aa3a55eae9bad0ecf",
+        "root_applied": false,
+        "operating_acceptance": "NOT_RUN"
+      }
+    }
   },
   "secured_backend_preparation_contract": {
     "format": "jungsi.secured-backend-preparation/v1",
@@ -132788,17 +132961,914 @@
         "layer": "application",
         "symbols": [
           "ProfessionalAnalysisDataPort",
-          "ProfessionalApprovedAnalysis"
+          "ProfessionalApprovedAnalysis",
+          "professionalCounselingReasons"
         ],
         "declarations": {
+          "symbols": [
+            {
+              "name": "ProfessionalAnalysisDataPort",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "extends": [
+                      {
+                        "repr": "OverallDataPort",
+                        "kind": "typeRef",
+                        "value": {
+                          "typeName": "OverallDataPort",
+                          "resolution": {
+                            "kind": "import",
+                            "specifier": "./overall_analysis.ts",
+                            "name": "OverallDataPort"
+                          }
+                        }
+                      },
+                      {
+                        "repr": "CatalogDataPort",
+                        "kind": "typeRef",
+                        "value": {
+                          "typeName": "CatalogDataPort",
+                          "resolution": {
+                            "kind": "import",
+                            "specifier": "./catalog.ts",
+                            "name": "CatalogDataPort"
+                          }
+                        }
+                      },
+                      {
+                        "repr": "UniversityAnalysisDataPort",
+                        "kind": "typeRef",
+                        "value": {
+                          "typeName": "UniversityAnalysisDataPort",
+                          "resolution": {
+                            "kind": "import",
+                            "specifier": "./university_analysis.ts",
+                            "name": "UniversityAnalysisDataPort"
+                          }
+                        }
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "name": "assertCurrentSelection",
+                        "kind": "method",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "required",
+                            "optional": true,
+                            "tsType": {
+                              "repr": "boolean",
+                              "kind": "keyword",
+                              "value": "boolean"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "repr": "Promise",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeParams": [
+                              {
+                                "repr": "void",
+                                "kind": "keyword",
+                                "value": "void"
+                              }
+                            ],
+                            "typeName": "Promise"
+                          }
+                        },
+                        "parameter_source": "(required?: boolean)"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "ProfessionalApprovedAnalysis",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "class",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "dataFactory",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "tsType": {
+                                  "repr": "Promise",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeParams": [
+                                      {
+                                        "repr": "ProfessionalAnalysisDataPort",
+                                        "kind": "typeRef",
+                                        "value": {
+                                          "typeName": "ProfessionalAnalysisDataPort",
+                                          "resolution": {
+                                            "kind": "local"
+                                          }
+                                        }
+                                      }
+                                    ],
+                                    "typeName": "Promise"
+                                  }
+                                },
+                                "params": []
+                              }
+                            },
+                            "readonly": true
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "reports",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "StudentReportPort",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "StudentReportPort",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./professional_ports.ts",
+                                  "name": "StudentReportPort"
+                                }
+                              }
+                            },
+                            "readonly": true
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "policy",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "ProfessionalPolicy",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "ProfessionalPolicy",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./professional_policy.ts",
+                                  "name": "ProfessionalPolicy"
+                                }
+                              }
+                            },
+                            "readonly": true
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "clock",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "RequestClockPort",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "RequestClockPort",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./ports.ts",
+                                  "name": "RequestClockPort"
+                                }
+                              }
+                            },
+                            "readonly": true
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "limits",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "properties": [
+                                  {
+                                    "name": "maximumOfferings",
+                                    "readonly": true,
+                                    "tsType": {
+                                      "repr": "number",
+                                      "kind": "keyword",
+                                      "value": "number"
+                                    }
+                                  },
+                                  {
+                                    "name": "unitsPerOffering",
+                                    "readonly": true,
+                                    "tsType": {
+                                      "repr": "bigint",
+                                      "kind": "keyword",
+                                      "value": "bigint"
+                                    }
+                                  },
+                                  {
+                                    "name": "reservedCandidateUnits",
+                                    "readonly": true,
+                                    "tsType": {
+                                      "repr": "bigint",
+                                      "kind": "keyword",
+                                      "value": "bigint"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ],
+                        "parameter_source": "(\n    private readonly dataFactory: () => Promise<ProfessionalAnalysisDataPort>,\n    private readonly reports: StudentReportPort,\n    private readonly policy: ProfessionalPolicy,\n    private readonly clock: RequestClockPort,\n    limits: {\n      readonly maximumOfferings: number;\n      readonly unitsPerOffering: bigint;\n      readonly reservedCandidateUnits: bigint;\n    },\n  )"
+                      }
+                    ],
+                    "properties": [
+                      {
+                        "tsType": {
+                          "repr": "Promise",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeParams": [
+                              {
+                                "repr": "ProfessionalAnalysisDataPort",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "ProfessionalAnalysisDataPort",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            ],
+                            "typeName": "Promise"
+                          }
+                        },
+                        "accessibility": "private",
+                        "optional": true,
+                        "name": "dataValue"
+                      },
+                      {
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        },
+                        "readonly": true,
+                        "accessibility": "private",
+                        "name": "maximumOfferings"
+                      },
+                      {
+                        "tsType": {
+                          "repr": "bigint",
+                          "kind": "keyword",
+                          "value": "bigint"
+                        },
+                        "readonly": true,
+                        "accessibility": "private",
+                        "name": "unitsPerOffering"
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "accessibility": "private",
+                        "name": "data",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "ProfessionalAnalysisDataPort",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeName": "ProfessionalAnalysisDataPort",
+                                    "resolution": {
+                                      "kind": "local"
+                                    }
+                                  }
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true
+                        }
+                      },
+                      {
+                        "name": "assertCurrent",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "void",
+                                  "kind": "keyword",
+                                  "value": "void"
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      },
+                      {
+                        "name": "validateScores",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "authority",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "ProfessionalAuthority",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "ProfessionalAuthority",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./professional_ports.ts",
+                                    "name": "ProfessionalAuthority"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "stage",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "ApprovedScoreStage",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "ApprovedScoreStage",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./score_input_ports.ts",
+                                    "name": "ApprovedScoreStage"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "scores",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "NativeObject",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "NativeObject",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../domain/json_value.ts",
+                                    "name": "NativeObject"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "kind": "union",
+                                  "value": [
+                                    {
+                                      "repr": "string",
+                                      "kind": "keyword",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "repr": "null",
+                                      "kind": "keyword",
+                                      "value": "null"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      },
+                      {
+                        "name": "assertOffering",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "scope",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "ProfessionalScope",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "ProfessionalScope",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./professional_ports.ts",
+                                    "name": "ProfessionalScope"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "offeringId",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "void",
+                                  "kind": "keyword",
+                                  "value": "void"
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      },
+                      {
+                        "name": "analyze",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "scope",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "ProfessionalScope",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "ProfessionalScope",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./professional_ports.ts",
+                                    "name": "ProfessionalScope"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "profile",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "ProfessionalProfile",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "ProfessionalProfile",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./professional_ports.ts",
+                                    "name": "ProfessionalProfile"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "operation",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "input",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "NativeObject",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "NativeObject",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../domain/json_value.ts",
+                                    "name": "NativeObject"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      }
+                    ],
+                    "implements": [
+                      {
+                        "repr": "ApprovedAnalysisPort",
+                        "kind": "typeRef",
+                        "value": {
+                          "typeName": "ApprovedAnalysisPort",
+                          "resolution": {
+                            "kind": "import",
+                            "specifier": "./professional_ports.ts",
+                            "name": "ApprovedAnalysisPort"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "professionalCounselingReasons",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "results",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "academicYear",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "array",
+                      "value": {
+                        "repr": "NativeObject",
+                        "kind": "typeRef",
+                        "value": {
+                          "typeName": "NativeObject",
+                          "resolution": {
+                            "kind": "import",
+                            "specifier": "../domain/json_value.ts",
+                            "name": "NativeObject"
+                          }
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(\n  results: NativeObject,\n  academicYear: number,\n)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DECIDED",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "repr": "string",
+                        "kind": "keyword",
+                        "value": "string"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "IDENTIFIER",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DECIMAL",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "MAX_BASIS",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "3",
+                      "kind": "literal",
+                      "value": {
+                        "kind": "number",
+                        "number": 3.0
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "obj",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        },
+                        {
+                          "repr": "null",
+                          "kind": "keyword",
+                          "value": "null"
+                        }
+                      ]
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "exact",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        },
+                        {
+                          "repr": "null",
+                          "kind": "keyword",
+                          "value": "null"
+                        }
+                      ]
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "publicBasis",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "evidence",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "array",
+                      "value": {
+                        "repr": "NativeObject",
+                        "kind": "typeRef",
+                        "value": {
+                          "typeName": "NativeObject",
+                          "resolution": {
+                            "kind": "import",
+                            "specifier": "../domain/json_value.ts",
+                            "name": "NativeObject"
+                          }
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(evidence: NativeObject)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "classificationBasis",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "offeringId",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "assessment",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "academicYear",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        },
+                        {
+                          "repr": "null",
+                          "kind": "keyword",
+                          "value": "null"
+                        }
+                      ]
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(\n  offeringId: string,\n  assessment: NativeObject,\n  academicYear: number,\n)"
+                  }
+                }
+              ]
+            }
+          ],
           "imports": [
             {
               "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
               "jsDoc": {
                 "doc": "Institutional orchestration of unchanged approved scoring/percentile engines."
-              },
-              "originalName": "AccessError",
-              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
             },
             {
               "importedName": "ApprovedAnalysisPort",
@@ -132921,903 +133991,7 @@
               "src": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
             }
           ],
-          "source_sha256": "a4f4c0ac7b5b1bd05d018453fd66e295083c6c0dda00b867eed309549966d86d",
-          "symbols": [
-            {
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "def": {
-                    "extends": [
-                      {
-                        "kind": "typeRef",
-                        "repr": "OverallDataPort",
-                        "value": {
-                          "resolution": {
-                            "kind": "import",
-                            "name": "OverallDataPort",
-                            "specifier": "./overall_analysis.ts"
-                          },
-                          "typeName": "OverallDataPort"
-                        }
-                      },
-                      {
-                        "kind": "typeRef",
-                        "repr": "CatalogDataPort",
-                        "value": {
-                          "resolution": {
-                            "kind": "import",
-                            "name": "CatalogDataPort",
-                            "specifier": "./catalog.ts"
-                          },
-                          "typeName": "CatalogDataPort"
-                        }
-                      },
-                      {
-                        "kind": "typeRef",
-                        "repr": "UniversityAnalysisDataPort",
-                        "value": {
-                          "resolution": {
-                            "kind": "import",
-                            "name": "UniversityAnalysisDataPort",
-                            "specifier": "./university_analysis.ts"
-                          },
-                          "typeName": "UniversityAnalysisDataPort"
-                        }
-                      }
-                    ],
-                    "methods": [
-                      {
-                        "kind": "method",
-                        "name": "assertCurrentSelection",
-                        "parameter_source": "(required?: boolean)",
-                        "params": [
-                          {
-                            "kind": "identifier",
-                            "name": "required",
-                            "optional": true,
-                            "tsType": {
-                              "kind": "keyword",
-                              "repr": "boolean",
-                              "value": "boolean"
-                            }
-                          }
-                        ],
-                        "returnType": {
-                          "kind": "typeRef",
-                          "repr": "Promise",
-                          "value": {
-                            "typeName": "Promise",
-                            "typeParams": [
-                              {
-                                "kind": "keyword",
-                                "repr": "void",
-                                "value": "void"
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "kind": "interface"
-                }
-              ],
-              "name": "ProfessionalAnalysisDataPort"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "def": {
-                    "constructors": [
-                      {
-                        "hasBody": true,
-                        "name": "constructor",
-                        "parameter_source": "(\n    private readonly dataFactory: () => Promise<ProfessionalAnalysisDataPort>,\n    private readonly reports: StudentReportPort,\n    private readonly policy: ProfessionalPolicy,\n    private readonly clock: RequestClockPort,\n    limits: {\n      readonly maximumOfferings: number;\n      readonly unitsPerOffering: bigint;\n      readonly reservedCandidateUnits: bigint;\n    },\n  )",
-                        "params": [
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "dataFactory",
-                            "optional": false,
-                            "readonly": true,
-                            "tsType": {
-                              "kind": "fnOrConstructor",
-                              "value": {
-                                "constructor": false,
-                                "params": [],
-                                "tsType": {
-                                  "kind": "typeRef",
-                                  "repr": "Promise",
-                                  "value": {
-                                    "typeName": "Promise",
-                                    "typeParams": [
-                                      {
-                                        "kind": "typeRef",
-                                        "repr": "ProfessionalAnalysisDataPort",
-                                        "value": {
-                                          "resolution": {
-                                            "kind": "local"
-                                          },
-                                          "typeName": "ProfessionalAnalysisDataPort"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "reports",
-                            "optional": false,
-                            "readonly": true,
-                            "tsType": {
-                              "kind": "typeRef",
-                              "repr": "StudentReportPort",
-                              "value": {
-                                "resolution": {
-                                  "kind": "import",
-                                  "name": "StudentReportPort",
-                                  "specifier": "./professional_ports.ts"
-                                },
-                                "typeName": "StudentReportPort"
-                              }
-                            }
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "policy",
-                            "optional": false,
-                            "readonly": true,
-                            "tsType": {
-                              "kind": "typeRef",
-                              "repr": "ProfessionalPolicy",
-                              "value": {
-                                "resolution": {
-                                  "kind": "import",
-                                  "name": "ProfessionalPolicy",
-                                  "specifier": "./professional_policy.ts"
-                                },
-                                "typeName": "ProfessionalPolicy"
-                              }
-                            }
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "clock",
-                            "optional": false,
-                            "readonly": true,
-                            "tsType": {
-                              "kind": "typeRef",
-                              "repr": "RequestClockPort",
-                              "value": {
-                                "resolution": {
-                                  "kind": "import",
-                                  "name": "RequestClockPort",
-                                  "specifier": "./ports.ts"
-                                },
-                                "typeName": "RequestClockPort"
-                              }
-                            }
-                          },
-                          {
-                            "kind": "identifier",
-                            "name": "limits",
-                            "optional": false,
-                            "tsType": {
-                              "kind": "typeLiteral",
-                              "value": {
-                                "properties": [
-                                  {
-                                    "name": "maximumOfferings",
-                                    "readonly": true,
-                                    "tsType": {
-                                      "kind": "keyword",
-                                      "repr": "number",
-                                      "value": "number"
-                                    }
-                                  },
-                                  {
-                                    "name": "unitsPerOffering",
-                                    "readonly": true,
-                                    "tsType": {
-                                      "kind": "keyword",
-                                      "repr": "bigint",
-                                      "value": "bigint"
-                                    }
-                                  },
-                                  {
-                                    "name": "reservedCandidateUnits",
-                                    "readonly": true,
-                                    "tsType": {
-                                      "kind": "keyword",
-                                      "repr": "bigint",
-                                      "value": "bigint"
-                                    }
-                                  }
-                                ]
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    ],
-                    "implements": [
-                      {
-                        "kind": "typeRef",
-                        "repr": "ApprovedAnalysisPort",
-                        "value": {
-                          "resolution": {
-                            "kind": "import",
-                            "name": "ApprovedAnalysisPort",
-                            "specifier": "./professional_ports.ts"
-                          },
-                          "typeName": "ApprovedAnalysisPort"
-                        }
-                      }
-                    ],
-                    "methods": [
-                      {
-                        "accessibility": "private",
-                        "functionDef": {
-                          "hasBody": true,
-                          "params": [],
-                          "returnType": {
-                            "kind": "typeRef",
-                            "repr": "Promise",
-                            "value": {
-                              "typeName": "Promise",
-                              "typeParams": [
-                                {
-                                  "kind": "typeRef",
-                                  "repr": "ProfessionalAnalysisDataPort",
-                                  "value": {
-                                    "resolution": {
-                                      "kind": "local"
-                                    },
-                                    "typeName": "ProfessionalAnalysisDataPort"
-                                  }
-                                }
-                              ]
-                            }
-                          }
-                        },
-                        "kind": "method",
-                        "name": "data"
-                      },
-                      {
-                        "functionDef": {
-                          "hasBody": true,
-                          "isAsync": true,
-                          "params": [],
-                          "returnType": {
-                            "kind": "typeRef",
-                            "repr": "Promise",
-                            "value": {
-                              "typeName": "Promise",
-                              "typeParams": [
-                                {
-                                  "kind": "keyword",
-                                  "repr": "void",
-                                  "value": "void"
-                                }
-                              ]
-                            }
-                          }
-                        },
-                        "kind": "method",
-                        "name": "assertCurrent"
-                      },
-                      {
-                        "functionDef": {
-                          "hasBody": true,
-                          "isAsync": true,
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "authority",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "typeRef",
-                                "repr": "ProfessionalAuthority",
-                                "value": {
-                                  "resolution": {
-                                    "kind": "import",
-                                    "name": "ProfessionalAuthority",
-                                    "specifier": "./professional_ports.ts"
-                                  },
-                                  "typeName": "ProfessionalAuthority"
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "stage",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "typeRef",
-                                "repr": "ApprovedScoreStage",
-                                "value": {
-                                  "resolution": {
-                                    "kind": "import",
-                                    "name": "ApprovedScoreStage",
-                                    "specifier": "./score_input_ports.ts"
-                                  },
-                                  "typeName": "ApprovedScoreStage"
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "scores",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "typeRef",
-                                "repr": "NativeObject",
-                                "value": {
-                                  "resolution": {
-                                    "kind": "import",
-                                    "name": "NativeObject",
-                                    "specifier": "../domain/json_value.ts"
-                                  },
-                                  "typeName": "NativeObject"
-                                }
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "kind": "typeRef",
-                            "repr": "Promise",
-                            "value": {
-                              "typeName": "Promise",
-                              "typeParams": [
-                                {
-                                  "kind": "union",
-                                  "value": [
-                                    {
-                                      "kind": "keyword",
-                                      "repr": "string",
-                                      "value": "string"
-                                    },
-                                    {
-                                      "kind": "keyword",
-                                      "repr": "null",
-                                      "value": "null"
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          }
-                        },
-                        "kind": "method",
-                        "name": "validateScores"
-                      },
-                      {
-                        "functionDef": {
-                          "hasBody": true,
-                          "isAsync": true,
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "scope",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "typeRef",
-                                "repr": "ProfessionalScope",
-                                "value": {
-                                  "resolution": {
-                                    "kind": "import",
-                                    "name": "ProfessionalScope",
-                                    "specifier": "./professional_ports.ts"
-                                  },
-                                  "typeName": "ProfessionalScope"
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "offeringId",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "keyword",
-                                "repr": "string",
-                                "value": "string"
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "kind": "typeRef",
-                            "repr": "Promise",
-                            "value": {
-                              "typeName": "Promise",
-                              "typeParams": [
-                                {
-                                  "kind": "keyword",
-                                  "repr": "void",
-                                  "value": "void"
-                                }
-                              ]
-                            }
-                          }
-                        },
-                        "kind": "method",
-                        "name": "assertOffering"
-                      },
-                      {
-                        "functionDef": {
-                          "hasBody": true,
-                          "isAsync": true,
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "scope",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "typeRef",
-                                "repr": "ProfessionalScope",
-                                "value": {
-                                  "resolution": {
-                                    "kind": "import",
-                                    "name": "ProfessionalScope",
-                                    "specifier": "./professional_ports.ts"
-                                  },
-                                  "typeName": "ProfessionalScope"
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "profile",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "typeRef",
-                                "repr": "ProfessionalProfile",
-                                "value": {
-                                  "resolution": {
-                                    "kind": "import",
-                                    "name": "ProfessionalProfile",
-                                    "specifier": "./professional_ports.ts"
-                                  },
-                                  "typeName": "ProfessionalProfile"
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "operation",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "keyword",
-                                "repr": "string",
-                                "value": "string"
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "input",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "typeRef",
-                                "repr": "NativeObject",
-                                "value": {
-                                  "resolution": {
-                                    "kind": "import",
-                                    "name": "NativeObject",
-                                    "specifier": "../domain/json_value.ts"
-                                  },
-                                  "typeName": "NativeObject"
-                                }
-                              }
-                            }
-                          ]
-                        },
-                        "kind": "method",
-                        "name": "analyze"
-                      }
-                    ],
-                    "properties": [
-                      {
-                        "accessibility": "private",
-                        "name": "dataValue",
-                        "optional": true,
-                        "tsType": {
-                          "kind": "typeRef",
-                          "repr": "Promise",
-                          "value": {
-                            "typeName": "Promise",
-                            "typeParams": [
-                              {
-                                "kind": "typeRef",
-                                "repr": "ProfessionalAnalysisDataPort",
-                                "value": {
-                                  "resolution": {
-                                    "kind": "local"
-                                  },
-                                  "typeName": "ProfessionalAnalysisDataPort"
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      },
-                      {
-                        "accessibility": "private",
-                        "name": "maximumOfferings",
-                        "readonly": true,
-                        "tsType": {
-                          "kind": "keyword",
-                          "repr": "number",
-                          "value": "number"
-                        }
-                      },
-                      {
-                        "accessibility": "private",
-                        "name": "unitsPerOffering",
-                        "readonly": true,
-                        "tsType": {
-                          "kind": "keyword",
-                          "repr": "bigint",
-                          "value": "bigint"
-                        }
-                      }
-                    ]
-                  },
-                  "kind": "class"
-                }
-              ],
-              "name": "ProfessionalApprovedAnalysis"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "kind": "const",
-                    "tsType": {
-                      "kind": "array",
-                      "value": {
-                        "kind": "keyword",
-                        "repr": "string",
-                        "value": "string"
-                      }
-                    }
-                  },
-                  "kind": "variable"
-                }
-              ],
-              "name": "DECIDED"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "kind": "const",
-                    "tsType": {
-                      "kind": "typeRef",
-                      "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
-                      "value": {
-                        "typeName": "RegExp"
-                      }
-                    }
-                  },
-                  "kind": "variable"
-                }
-              ],
-              "name": "IDENTIFIER"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "kind": "const",
-                    "tsType": {
-                      "kind": "typeRef",
-                      "repr": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$",
-                      "value": {
-                        "typeName": "RegExp"
-                      }
-                    }
-                  },
-                  "kind": "variable"
-                }
-              ],
-              "name": "DECIMAL"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "kind": "const",
-                    "tsType": {
-                      "kind": "literal",
-                      "repr": "3",
-                      "value": {
-                        "kind": "number",
-                        "number": 3.0
-                      }
-                    }
-                  },
-                  "kind": "variable"
-                }
-              ],
-              "name": "MAX_BASIS"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "(v: unknown)",
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "v",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "keyword",
-                          "repr": "unknown",
-                          "value": "unknown"
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "kind": "union",
-                      "value": [
-                        {
-                          "kind": "typeRef",
-                          "repr": "NativeObject",
-                          "value": {
-                            "resolution": {
-                              "kind": "import",
-                              "name": "NativeObject",
-                              "specifier": "../domain/json_value.ts"
-                            },
-                            "typeName": "NativeObject"
-                          }
-                        },
-                        {
-                          "kind": "keyword",
-                          "repr": "null",
-                          "value": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "obj"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "(v: unknown)",
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "v",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "keyword",
-                          "repr": "unknown",
-                          "value": "unknown"
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "kind": "union",
-                      "value": [
-                        {
-                          "kind": "keyword",
-                          "repr": "string",
-                          "value": "string"
-                        },
-                        {
-                          "kind": "keyword",
-                          "repr": "null",
-                          "value": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "exact"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "(evidence: NativeObject)",
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "evidence",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "typeRef",
-                          "repr": "NativeObject",
-                          "value": {
-                            "resolution": {
-                              "kind": "import",
-                              "name": "NativeObject",
-                              "specifier": "../domain/json_value.ts"
-                            },
-                            "typeName": "NativeObject"
-                          }
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "kind": "array",
-                      "value": {
-                        "kind": "typeRef",
-                        "repr": "NativeObject",
-                        "value": {
-                          "resolution": {
-                            "kind": "import",
-                            "name": "NativeObject",
-                            "specifier": "../domain/json_value.ts"
-                          },
-                          "typeName": "NativeObject"
-                        }
-                      }
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "publicBasis"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "(\n  offeringId: string,\n  assessment: NativeObject,\n  academicYear: number,\n)",
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "offeringId",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "keyword",
-                          "repr": "string",
-                          "value": "string"
-                        }
-                      },
-                      {
-                        "kind": "identifier",
-                        "name": "assessment",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "typeRef",
-                          "repr": "NativeObject",
-                          "value": {
-                            "resolution": {
-                              "kind": "import",
-                              "name": "NativeObject",
-                              "specifier": "../domain/json_value.ts"
-                            },
-                            "typeName": "NativeObject"
-                          }
-                        }
-                      },
-                      {
-                        "kind": "identifier",
-                        "name": "academicYear",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "keyword",
-                          "repr": "number",
-                          "value": "number"
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "kind": "union",
-                      "value": [
-                        {
-                          "kind": "typeRef",
-                          "repr": "NativeObject",
-                          "value": {
-                            "resolution": {
-                              "kind": "import",
-                              "name": "NativeObject",
-                              "specifier": "../domain/json_value.ts"
-                            },
-                            "typeName": "NativeObject"
-                          }
-                        },
-                        {
-                          "kind": "keyword",
-                          "repr": "null",
-                          "value": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "classificationBasis"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "(results: NativeObject, academicYear: number)",
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "results",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "typeRef",
-                          "repr": "NativeObject",
-                          "value": {
-                            "resolution": {
-                              "kind": "import",
-                              "name": "NativeObject",
-                              "specifier": "../domain/json_value.ts"
-                            },
-                            "typeName": "NativeObject"
-                          }
-                        }
-                      },
-                      {
-                        "kind": "identifier",
-                        "name": "academicYear",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "keyword",
-                          "repr": "number",
-                          "value": "number"
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "kind": "array",
-                      "value": {
-                        "kind": "typeRef",
-                        "repr": "NativeObject",
-                        "value": {
-                          "resolution": {
-                            "kind": "import",
-                            "name": "NativeObject",
-                            "specifier": "../domain/json_value.ts"
-                          },
-                          "typeName": "NativeObject"
-                        }
-                      }
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "counselingReasons"
-            }
-          ]
+          "source_sha256": "30b8f6680d60255ebae5b37a956c0331c156806e419e6937fb9b55de416cd89b"
         },
         "dependencies": [
           {
@@ -134334,7 +134508,7 @@
             }
           ],
           "imports": [],
-          "source_sha256": "8ad2aa9b03dd9f07d8d96373e20836a438fe0ea769f1a51a70cfc20f5b9d5977"
+          "source_sha256": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4"
         },
         "dependencies": []
       },
@@ -139623,14 +139797,636 @@
           "ProfessionalProjection"
         ],
         "declarations": {
+          "symbols": [
+            {
+              "name": "ProfessionalProjection",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "class",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "contract",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "ProfessionalContract",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "ProfessionalContract",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./professional_ports.ts",
+                                  "name": "ProfessionalContract"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "existingRegistry",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "unknown",
+                              "kind": "keyword",
+                              "value": "unknown"
+                            }
+                          }
+                        ],
+                        "parameter_source": "(contract: ProfessionalContract, existingRegistry: unknown)"
+                      }
+                    ],
+                    "properties": [
+                      {
+                        "tsType": {
+                          "repr": "PublicResponseProjection",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "PublicResponseProjection",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./public_response.ts",
+                              "name": "PublicResponseProjection"
+                            }
+                          }
+                        },
+                        "readonly": true,
+                        "accessibility": "private",
+                        "name": "projection"
+                      },
+                      {
+                        "tsType": {
+                          "repr": "Map",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeParams": [
+                              {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "indexedAccess",
+                                "value": {
+                                  "objType": {
+                                    "kind": "indexedAccess",
+                                    "value": {
+                                      "objType": {
+                                        "repr": "ProfessionalContract",
+                                        "kind": "typeRef",
+                                        "value": {
+                                          "typeName": "ProfessionalContract",
+                                          "resolution": {
+                                            "kind": "import",
+                                            "specifier": "./professional_ports.ts",
+                                            "name": "ProfessionalContract"
+                                          }
+                                        }
+                                      },
+                                      "indexType": {
+                                        "repr": "routes",
+                                        "kind": "literal",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "routes"
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "indexType": {
+                                    "repr": "number",
+                                    "kind": "keyword",
+                                    "value": "number"
+                                  }
+                                }
+                              }
+                            ],
+                            "typeName": "Map"
+                          }
+                        },
+                        "readonly": true,
+                        "accessibility": "private",
+                        "name": "routes"
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "accessibility": "private",
+                        "name": "scope",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "value",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "unknown",
+                                "kind": "keyword",
+                                "value": "unknown"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "orgId",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "repr": "string",
+                                    "kind": "keyword",
+                                    "value": "string"
+                                  },
+                                  {
+                                    "repr": "null",
+                                    "kind": "keyword",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "studentId",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "repr": "string",
+                                    "kind": "keyword",
+                                    "value": "string"
+                                  },
+                                  {
+                                    "repr": "null",
+                                    "kind": "keyword",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "void",
+                            "kind": "keyword",
+                            "value": "void"
+                          },
+                          "hasBody": true
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "cleanReasons",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "value",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "unknown",
+                                "kind": "keyword",
+                                "value": "unknown"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "array",
+                            "value": {
+                              "repr": "NativeObject",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "NativeObject",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "../domain/json_value.ts",
+                                  "name": "NativeObject"
+                                }
+                              }
+                            }
+                          },
+                          "hasBody": true
+                        }
+                      },
+                      {
+                        "name": "project",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "operation",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "response",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "ProfessionalResponse",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "ProfessionalResponse",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./professional_ports.ts",
+                                    "name": "ProfessionalResponse"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "requestId",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "NativeObject",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeName": "NativeObject",
+                              "resolution": {
+                                "kind": "import",
+                                "specifier": "../domain/json_value.ts",
+                                "name": "NativeObject"
+                              }
+                            }
+                          },
+                          "hasBody": true
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Schema",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "typeAlias",
+                  "def": {
+                    "tsType": {
+                      "repr": "Record",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "string",
+                            "kind": "keyword",
+                            "value": "string"
+                          },
+                          {
+                            "repr": "unknown",
+                            "kind": "keyword",
+                            "value": "unknown"
+                          }
+                        ],
+                        "typeName": "Record"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "scalar",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "type",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "nullable",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "boolean",
+                            "kind": "keyword",
+                            "value": "boolean"
+                          }
+                        },
+                        "right": "false"
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "extra",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "Schema",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeName": "Schema",
+                              "resolution": {
+                                "kind": "local"
+                              }
+                            }
+                          }
+                        },
+                        "right": "[UNSUPPORTED]"
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Schema",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "Schema",
+                        "resolution": {
+                          "kind": "local"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(type: string, nullable = false, extra: Schema = {})"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "ref",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "name",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "nullable",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "boolean",
+                            "kind": "keyword",
+                            "value": "boolean"
+                          }
+                        },
+                        "right": "false"
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Schema",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "Schema",
+                        "resolution": {
+                          "kind": "local"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(name: string, nullable = false)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "array",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "items",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "Schema",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "Schema",
+                            "resolution": {
+                              "kind": "local"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Schema",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "Schema",
+                        "resolution": {
+                          "kind": "local"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(items: Schema)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "object",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "properties",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "Record",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeParams": [
+                              {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              },
+                              {
+                                "repr": "Schema",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "Schema",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            ],
+                            "typeName": "Record"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Schema",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "Schema",
+                        "resolution": {
+                          "kind": "local"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(properties: Record<string, Schema>)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "map",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "values",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "Schema",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "Schema",
+                            "resolution": {
+                              "kind": "local"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Schema",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "Schema",
+                        "resolution": {
+                          "kind": "local"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(values: Schema)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "unavailable",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "never",
+                      "kind": "keyword",
+                      "value": "never"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TIP_CODES",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "repr": "string",
+                        "kind": "keyword",
+                        "value": "string"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PRO_REASON_NAMES",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "repr": "string",
+                        "kind": "keyword",
+                        "value": "string"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            }
+          ],
           "imports": [
             {
               "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
               "jsDoc": {
                 "doc": "Closed professional envelopes with the existing recursive approved result schemas."
-              },
-              "originalName": "AccessError",
-              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
             },
             {
               "importedName": "NativeObject",
@@ -139663,629 +140459,7 @@
               "src": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
             }
           ],
-          "source_sha256": "0a0cd81b3df3cecb2570255d23766f1f073a5e957dcaba4f75b82a29b96434a6",
-          "symbols": [
-            {
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "def": {
-                    "constructors": [
-                      {
-                        "hasBody": true,
-                        "name": "constructor",
-                        "parameter_source": "(contract: ProfessionalContract, existingRegistry: unknown)",
-                        "params": [
-                          {
-                            "kind": "identifier",
-                            "name": "contract",
-                            "optional": false,
-                            "tsType": {
-                              "kind": "typeRef",
-                              "repr": "ProfessionalContract",
-                              "value": {
-                                "resolution": {
-                                  "kind": "import",
-                                  "name": "ProfessionalContract",
-                                  "specifier": "./professional_ports.ts"
-                                },
-                                "typeName": "ProfessionalContract"
-                              }
-                            }
-                          },
-                          {
-                            "kind": "identifier",
-                            "name": "existingRegistry",
-                            "optional": false,
-                            "tsType": {
-                              "kind": "keyword",
-                              "repr": "unknown",
-                              "value": "unknown"
-                            }
-                          }
-                        ]
-                      }
-                    ],
-                    "methods": [
-                      {
-                        "accessibility": "private",
-                        "functionDef": {
-                          "hasBody": true,
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "value",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "keyword",
-                                "repr": "unknown",
-                                "value": "unknown"
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "orgId",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "union",
-                                "value": [
-                                  {
-                                    "kind": "keyword",
-                                    "repr": "string",
-                                    "value": "string"
-                                  },
-                                  {
-                                    "kind": "keyword",
-                                    "repr": "null",
-                                    "value": "null"
-                                  }
-                                ]
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "studentId",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "union",
-                                "value": [
-                                  {
-                                    "kind": "keyword",
-                                    "repr": "string",
-                                    "value": "string"
-                                  },
-                                  {
-                                    "kind": "keyword",
-                                    "repr": "null",
-                                    "value": "null"
-                                  }
-                                ]
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "kind": "keyword",
-                            "repr": "void",
-                            "value": "void"
-                          }
-                        },
-                        "kind": "method",
-                        "name": "scope"
-                      },
-                      {
-                        "accessibility": "private",
-                        "functionDef": {
-                          "hasBody": true,
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "value",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "keyword",
-                                "repr": "unknown",
-                                "value": "unknown"
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "kind": "array",
-                            "value": {
-                              "kind": "typeRef",
-                              "repr": "NativeObject",
-                              "value": {
-                                "resolution": {
-                                  "kind": "import",
-                                  "name": "NativeObject",
-                                  "specifier": "../domain/json_value.ts"
-                                },
-                                "typeName": "NativeObject"
-                              }
-                            }
-                          }
-                        },
-                        "kind": "method",
-                        "name": "cleanReasons"
-                      },
-                      {
-                        "functionDef": {
-                          "hasBody": true,
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "operation",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "keyword",
-                                "repr": "string",
-                                "value": "string"
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "response",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "typeRef",
-                                "repr": "ProfessionalResponse",
-                                "value": {
-                                  "resolution": {
-                                    "kind": "import",
-                                    "name": "ProfessionalResponse",
-                                    "specifier": "./professional_ports.ts"
-                                  },
-                                  "typeName": "ProfessionalResponse"
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "requestId",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "keyword",
-                                "repr": "string",
-                                "value": "string"
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "kind": "typeRef",
-                            "repr": "NativeObject",
-                            "value": {
-                              "resolution": {
-                                "kind": "import",
-                                "name": "NativeObject",
-                                "specifier": "../domain/json_value.ts"
-                              },
-                              "typeName": "NativeObject"
-                            }
-                          }
-                        },
-                        "kind": "method",
-                        "name": "project"
-                      }
-                    ],
-                    "properties": [
-                      {
-                        "accessibility": "private",
-                        "name": "projection",
-                        "readonly": true,
-                        "tsType": {
-                          "kind": "typeRef",
-                          "repr": "PublicResponseProjection",
-                          "value": {
-                            "resolution": {
-                              "kind": "import",
-                              "name": "PublicResponseProjection",
-                              "specifier": "./public_response.ts"
-                            },
-                            "typeName": "PublicResponseProjection"
-                          }
-                        }
-                      },
-                      {
-                        "accessibility": "private",
-                        "name": "routes",
-                        "readonly": true,
-                        "tsType": {
-                          "kind": "typeRef",
-                          "repr": "Map",
-                          "value": {
-                            "typeName": "Map",
-                            "typeParams": [
-                              {
-                                "kind": "keyword",
-                                "repr": "string",
-                                "value": "string"
-                              },
-                              {
-                                "kind": "indexedAccess",
-                                "value": {
-                                  "indexType": {
-                                    "kind": "keyword",
-                                    "repr": "number",
-                                    "value": "number"
-                                  },
-                                  "objType": {
-                                    "kind": "indexedAccess",
-                                    "value": {
-                                      "indexType": {
-                                        "kind": "literal",
-                                        "repr": "routes",
-                                        "value": {
-                                          "kind": "string",
-                                          "string": "routes"
-                                        }
-                                      },
-                                      "objType": {
-                                        "kind": "typeRef",
-                                        "repr": "ProfessionalContract",
-                                        "value": {
-                                          "resolution": {
-                                            "kind": "import",
-                                            "name": "ProfessionalContract",
-                                            "specifier": "./professional_ports.ts"
-                                          },
-                                          "typeName": "ProfessionalContract"
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "kind": "class"
-                }
-              ],
-              "name": "ProfessionalProjection"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "tsType": {
-                      "kind": "typeRef",
-                      "repr": "Record",
-                      "value": {
-                        "typeName": "Record",
-                        "typeParams": [
-                          {
-                            "kind": "keyword",
-                            "repr": "string",
-                            "value": "string"
-                          },
-                          {
-                            "kind": "keyword",
-                            "repr": "unknown",
-                            "value": "unknown"
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "kind": "typeAlias"
-                }
-              ],
-              "name": "Schema"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "(type: string, nullable = false, extra: Schema = {})",
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "type",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "keyword",
-                          "repr": "string",
-                          "value": "string"
-                        }
-                      },
-                      {
-                        "kind": "assign",
-                        "left": {
-                          "kind": "identifier",
-                          "name": "nullable",
-                          "optional": false,
-                          "tsType": {
-                            "kind": "keyword",
-                            "repr": "boolean",
-                            "value": "boolean"
-                          }
-                        },
-                        "right": "false"
-                      },
-                      {
-                        "kind": "assign",
-                        "left": {
-                          "kind": "identifier",
-                          "name": "extra",
-                          "optional": false,
-                          "tsType": {
-                            "kind": "typeRef",
-                            "repr": "Schema",
-                            "value": {
-                              "resolution": {
-                                "kind": "local"
-                              },
-                              "typeName": "Schema"
-                            }
-                          }
-                        },
-                        "right": "[UNSUPPORTED]"
-                      }
-                    ],
-                    "returnType": {
-                      "kind": "typeRef",
-                      "repr": "Schema",
-                      "value": {
-                        "resolution": {
-                          "kind": "local"
-                        },
-                        "typeName": "Schema"
-                      }
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "scalar"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "(name: string, nullable = false)",
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "name",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "keyword",
-                          "repr": "string",
-                          "value": "string"
-                        }
-                      },
-                      {
-                        "kind": "assign",
-                        "left": {
-                          "kind": "identifier",
-                          "name": "nullable",
-                          "optional": false,
-                          "tsType": {
-                            "kind": "keyword",
-                            "repr": "boolean",
-                            "value": "boolean"
-                          }
-                        },
-                        "right": "false"
-                      }
-                    ],
-                    "returnType": {
-                      "kind": "typeRef",
-                      "repr": "Schema",
-                      "value": {
-                        "resolution": {
-                          "kind": "local"
-                        },
-                        "typeName": "Schema"
-                      }
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "ref"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "(items: Schema)",
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "items",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "typeRef",
-                          "repr": "Schema",
-                          "value": {
-                            "resolution": {
-                              "kind": "local"
-                            },
-                            "typeName": "Schema"
-                          }
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "kind": "typeRef",
-                      "repr": "Schema",
-                      "value": {
-                        "resolution": {
-                          "kind": "local"
-                        },
-                        "typeName": "Schema"
-                      }
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "array"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "(properties: Record<string, Schema>)",
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "properties",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "typeRef",
-                          "repr": "Record",
-                          "value": {
-                            "typeName": "Record",
-                            "typeParams": [
-                              {
-                                "kind": "keyword",
-                                "repr": "string",
-                                "value": "string"
-                              },
-                              {
-                                "kind": "typeRef",
-                                "repr": "Schema",
-                                "value": {
-                                  "resolution": {
-                                    "kind": "local"
-                                  },
-                                  "typeName": "Schema"
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "kind": "typeRef",
-                      "repr": "Schema",
-                      "value": {
-                        "resolution": {
-                          "kind": "local"
-                        },
-                        "typeName": "Schema"
-                      }
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "object"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "(values: Schema)",
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "values",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "typeRef",
-                          "repr": "Schema",
-                          "value": {
-                            "resolution": {
-                              "kind": "local"
-                            },
-                            "typeName": "Schema"
-                          }
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "kind": "typeRef",
-                      "repr": "Schema",
-                      "value": {
-                        "resolution": {
-                          "kind": "local"
-                        },
-                        "typeName": "Schema"
-                      }
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "map"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "hasBody": true,
-                    "parameter_source": "()",
-                    "params": [],
-                    "returnType": {
-                      "kind": "keyword",
-                      "repr": "never",
-                      "value": "never"
-                    }
-                  },
-                  "kind": "function"
-                }
-              ],
-              "name": "unavailable"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "kind": "const",
-                    "tsType": {
-                      "kind": "array",
-                      "value": {
-                        "kind": "keyword",
-                        "repr": "string",
-                        "value": "string"
-                      }
-                    }
-                  },
-                  "kind": "variable"
-                }
-              ],
-              "name": "TIP_CODES"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "kind": "const",
-                    "tsType": {
-                      "kind": "array",
-                      "value": {
-                        "kind": "keyword",
-                        "repr": "string",
-                        "value": "string"
-                      }
-                    }
-                  },
-                  "kind": "variable"
-                }
-              ],
-              "name": "PRO_REASON_NAMES"
-            }
-          ]
+          "source_sha256": "b4ba3397fd1d0a0a2a73f6128bc928594cb7eb3144bc8824af7e2d4bf2bc9292"
         },
         "dependencies": [
           {
@@ -152955,11 +153129,11 @@
       "tests/edge/test_own_report_list_postgres.ts": "930ad76a417ca082e08b3e9f61c0ab079e9fbde7784dbe4b9306774f2d6c9178",
       "tests/edge/test_read_view_runtime.ts": "3eba5d7e5ef64c7106b6b547d6eaa9557c5476692b2f88bfb215f3a4308483c4",
       "tests/edge/test_combined_operating_admin.ts": "2f95ec71aea7378a804ecbdcb1168cf672cf7cb14b5b936fd4ba562ce19605c5",
-      "supabase/functions/_shared/jungsi/application/professional_analysis.ts": "a4f4c0ac7b5b1bd05d018453fd66e295083c6c0dda00b867eed309549966d86d",
-      "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts": "8ad2aa9b03dd9f07d8d96373e20836a438fe0ea769f1a51a70cfc20f5b9d5977",
+      "supabase/functions/_shared/jungsi/application/professional_analysis.ts": "30b8f6680d60255ebae5b37a956c0331c156806e419e6937fb9b55de416cd89b",
+      "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4",
       "supabase/functions/_shared/jungsi/application/professional_policy.ts": "6171a83c31dafe240b0d3595cd19b6cddf65f7041a6d5134d0aa9fcdc34ff8af",
       "supabase/functions/_shared/jungsi/application/professional_ports.ts": "9d15b9297bae2f0a9658f607207609d9d71b22ccd4ed76c7267f46ad880765e1",
-      "supabase/functions/_shared/jungsi/application/professional_projection.ts": "0a0cd81b3df3cecb2570255d23766f1f073a5e957dcaba4f75b82a29b96434a6",
+      "supabase/functions/_shared/jungsi/application/professional_projection.ts": "b4ba3397fd1d0a0a2a73f6128bc928594cb7eb3144bc8824af7e2d4bf2bc9292",
       "supabase/functions/_shared/jungsi/application/professional_service.ts": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
       "supabase/functions/_shared/jungsi/application/professional_usage.ts": "4f211c6fdf0fcb0161de676431eade07845a87d8ccf993efa8ed8ee793fd81f6",
       "supabase/functions/_shared/jungsi/infrastructure/professional_authority.ts": "71b2c3a0c074523c732f92f121e137041efb7bd586e31644ea9a0d7fcb41d880",
@@ -155681,7 +155855,10 @@
         "reference_year",
         "metric",
         "score_scale",
-        "population_id"
+        "population_id",
+        "policy_version",
+        "range_definition",
+        "range_role"
       ],
       "public_basis": [
         "title",
@@ -155843,6 +156020,14 @@
         "guards": "Same academic year, exam, actual population, validated nonsynthetic distribution, approved baseline version and include_equal tie policy. Missing or incompatible evidence returns null/pending; no zero substitution.",
         "limitation": "This is a percentage-point position difference, not admission probability or an assurance that last-year results repeat.",
         "source": "supabase/functions/_shared/jungsi/application/offering_analysis.ts"
+      },
+      "owner_tip_semantics_source_review_20261023": {
+        "status": "SOURCE_SYNTHETIC_ONLY_NOT_DEPLOYED",
+        "baseline": "effa3f51895fd1e3ac4d72fd5657316b5c0c5a52",
+        "scope": "classification baseline context and exact decimal display; neutral rule-weight comparison; three-year historical code separate from demo_prior_year_cut_band synthetic display only",
+        "tests": "existing professional74 plus semantic11; presentation tip7; normal hooks and exact CI recorded separately",
+        "operating_requests": 0,
+        "DB_or_engine_changes": 0
       }
     },
     "privacy_and_retention": {
@@ -156092,7 +156277,8 @@
       "encryption": "Separate metadata/operation/cursor formats and AAD; plaintext limits 1MiB/8MiB; ciphertext storage limits 2MiB/16MiB include encoding overhead",
       "shared_usage": "Original owner/policy/exam calculation-cost bucket and GLOBAL request/concurrency/result buckets; no personal distinct_scores dimension. Institution window shared by all teachers. Verified replay refunds only duplicate computation; request/result controls remain.",
       "native_limits": "Worker hard limit, lease length and clock margin must exactly match the existing approved binding. Request deadline includes ingress/auth/configuration/body/business/projection.",
-      "authority_connection": "Prepared Owner-approved 5arg STABLE jsonb function with exact owner/definition SHA/fixed pg_catalog search_path and app-only EXECUTE. Existing EduTouch source permissions are unchanged; real connection NOT_RUN."
+      "authority_connection": "Prepared Owner-approved 5arg STABLE jsonb function with exact owner/definition SHA/fixed pg_catalog search_path and app-only EXECUTE. Existing EduTouch source permissions are unchanged; real connection NOT_RUN.",
+      "counseling_range_context": "comparison_context optional nullable policy_version/range_definition/range_role preserve approved policy and baseline definition separately from nullable actual verified population_id. baseline_reference never claims to explain a counselor-adjusted category; historical official URLs are references, not service forecast announcements. Legacy unbound tips are omitted while the stored report/profile remain readable."
     },
     "source_registration": {
       "format": "jungsi.professional-source-registration/v1",
@@ -156208,11 +156394,11 @@
       "source_bindings": [
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_analysis.ts",
-          "sha256": "a4f4c0ac7b5b1bd05d018453fd66e295083c6c0dda00b867eed309549966d86d"
+          "sha256": "30b8f6680d60255ebae5b37a956c0331c156806e419e6937fb9b55de416cd89b"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts",
-          "sha256": "8ad2aa9b03dd9f07d8d96373e20836a438fe0ea769f1a51a70cfc20f5b9d5977"
+          "sha256": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_policy.ts",
@@ -156224,7 +156410,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_projection.ts",
-          "sha256": "0a0cd81b3df3cecb2570255d23766f1f073a5e957dcaba4f75b82a29b96434a6"
+          "sha256": "b4ba3397fd1d0a0a2a73f6128bc928594cb7eb3144bc8824af7e2d4bf2bc9292"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
@@ -156289,6 +156475,10 @@
         {
           "path": "supabase/functions/jungsi-pro-api/index.ts",
           "sha256": "8b980255403974fb49a7a7d90ee310526b7390ad18a60febc0abd7429af37ff8"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_tip_semantics_test.ts",
+          "sha256": "6da6e29da6c3daa63acab494287bac0707250a8f2fbe5dcfb71966c41b58827f"
         }
       ],
       "migrations": [
@@ -156302,9 +156492,10 @@
           "supabase/functions/_shared/professional_budget_test.ts",
           "supabase/functions/_shared/professional_http_test.ts",
           "supabase/functions/_shared/professional_runtime_test.ts",
-          "supabase/functions/_shared/professional_security_test.ts"
+          "supabase/functions/_shared/professional_security_test.ts",
+          "supabase/functions/_shared/professional_tip_semantics_test.ts"
         ],
-        "test_count": 74,
+        "test_count": 85,
         "operation_test_names": {
           "pro.session": [
             "professional HTTP pro.session executes authorized workflow"

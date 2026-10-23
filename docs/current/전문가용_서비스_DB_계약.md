@@ -376,7 +376,10 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     "reference_year",
     "metric",
     "score_scale",
-    "population_id"
+    "population_id",
+    "policy_version",
+    "range_definition",
+    "range_role"
   ],
   "public_basis": [
     "title",
@@ -1098,6 +1101,14 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     "guards": "Same academic year, exam, actual population, validated nonsynthetic distribution, approved baseline version and include_equal tie policy. Missing or incompatible evidence returns null/pending; no zero substitution.",
     "limitation": "This is a percentage-point position difference, not admission probability or an assurance that last-year results repeat.",
     "source": "supabase/functions/_shared/jungsi/application/offering_analysis.ts"
+  },
+  "owner_tip_semantics_source_review_20261023": {
+    "status": "SOURCE_SYNTHETIC_ONLY_NOT_DEPLOYED",
+    "baseline": "effa3f51895fd1e3ac4d72fd5657316b5c0c5a52",
+    "scope": "classification baseline context and exact decimal display; neutral rule-weight comparison; three-year historical code separate from demo_prior_year_cut_band synthetic display only",
+    "tests": "existing professional74 plus semantic11; presentation tip7; normal hooks and exact CI recorded separately",
+    "operating_requests": 0,
+    "DB_or_engine_changes": 0
   }
 }
 ```
@@ -1156,4 +1167,4 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=5610d093ed4f62c159c6646d9159d9c9162d7ff5c1129d38650e354467b293c3 -->
+<!-- jungsi:generated spec_sha256=b8f3bf692eaa030542b3f6f4c297f8e2834bcff98cce46958867bca69fe45005 -->

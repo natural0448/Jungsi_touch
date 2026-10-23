@@ -1,3 +1,5 @@
+import "./crawl-policy.test.mjs";
+import "./pro-tips.test.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { registerHooks } from "node:module";

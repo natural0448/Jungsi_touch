@@ -850,7 +850,10 @@
         "reference_year",
         "metric",
         "score_scale",
-        "population_id"
+        "population_id",
+        "policy_version",
+        "range_definition",
+        "range_role"
       ],
       "public_basis": [
         "title",
@@ -1012,6 +1015,14 @@
         "guards": "Same academic year, exam, actual population, validated nonsynthetic distribution, approved baseline version and include_equal tie policy. Missing or incompatible evidence returns null/pending; no zero substitution.",
         "limitation": "This is a percentage-point position difference, not admission probability or an assurance that last-year results repeat.",
         "source": "supabase/functions/_shared/jungsi/application/offering_analysis.ts"
+      },
+      "owner_tip_semantics_source_review_20261023": {
+        "status": "SOURCE_SYNTHETIC_ONLY_NOT_DEPLOYED",
+        "baseline": "effa3f51895fd1e3ac4d72fd5657316b5c0c5a52",
+        "scope": "classification baseline context and exact decimal display; neutral rule-weight comparison; three-year historical code separate from demo_prior_year_cut_band synthetic display only",
+        "tests": "existing professional74 plus semantic11; presentation tip7; normal hooks and exact CI recorded separately",
+        "operating_requests": 0,
+        "DB_or_engine_changes": 0
       }
     },
     "privacy_and_retention": {
@@ -1261,7 +1272,8 @@
       "encryption": "Separate metadata/operation/cursor formats and AAD; plaintext limits 1MiB/8MiB; ciphertext storage limits 2MiB/16MiB include encoding overhead",
       "shared_usage": "Original owner/policy/exam calculation-cost bucket and GLOBAL request/concurrency/result buckets; no personal distinct_scores dimension. Institution window shared by all teachers. Verified replay refunds only duplicate computation; request/result controls remain.",
       "native_limits": "Worker hard limit, lease length and clock margin must exactly match the existing approved binding. Request deadline includes ingress/auth/configuration/body/business/projection.",
-      "authority_connection": "Prepared Owner-approved 5arg STABLE jsonb function with exact owner/definition SHA/fixed pg_catalog search_path and app-only EXECUTE. Existing EduTouch source permissions are unchanged; real connection NOT_RUN."
+      "authority_connection": "Prepared Owner-approved 5arg STABLE jsonb function with exact owner/definition SHA/fixed pg_catalog search_path and app-only EXECUTE. Existing EduTouch source permissions are unchanged; real connection NOT_RUN.",
+      "counseling_range_context": "comparison_context optional nullable policy_version/range_definition/range_role preserve approved policy and baseline definition separately from nullable actual verified population_id. baseline_reference never claims to explain a counselor-adjusted category; historical official URLs are references, not service forecast announcements. Legacy unbound tips are omitted while the stored report/profile remain readable."
     },
     "source_registration": {
       "format": "jungsi.professional-source-registration/v1",
@@ -1377,11 +1389,11 @@
       "source_bindings": [
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_analysis.ts",
-          "sha256": "a4f4c0ac7b5b1bd05d018453fd66e295083c6c0dda00b867eed309549966d86d"
+          "sha256": "30b8f6680d60255ebae5b37a956c0331c156806e419e6937fb9b55de416cd89b"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts",
-          "sha256": "8ad2aa9b03dd9f07d8d96373e20836a438fe0ea769f1a51a70cfc20f5b9d5977"
+          "sha256": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_policy.ts",
@@ -1393,7 +1405,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_projection.ts",
-          "sha256": "0a0cd81b3df3cecb2570255d23766f1f073a5e957dcaba4f75b82a29b96434a6"
+          "sha256": "b4ba3397fd1d0a0a2a73f6128bc928594cb7eb3144bc8824af7e2d4bf2bc9292"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
@@ -1458,6 +1470,10 @@
         {
           "path": "supabase/functions/jungsi-pro-api/index.ts",
           "sha256": "8b980255403974fb49a7a7d90ee310526b7390ad18a60febc0abd7429af37ff8"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_tip_semantics_test.ts",
+          "sha256": "6da6e29da6c3daa63acab494287bac0707250a8f2fbe5dcfb71966c41b58827f"
         }
       ],
       "migrations": [
@@ -1471,9 +1487,10 @@
           "supabase/functions/_shared/professional_budget_test.ts",
           "supabase/functions/_shared/professional_http_test.ts",
           "supabase/functions/_shared/professional_runtime_test.ts",
-          "supabase/functions/_shared/professional_security_test.ts"
+          "supabase/functions/_shared/professional_security_test.ts",
+          "supabase/functions/_shared/professional_tip_semantics_test.ts"
         ],
-        "test_count": 74,
+        "test_count": 85,
         "operation_test_names": {
           "pro.session": [
             "professional HTTP pro.session executes authorized workflow"

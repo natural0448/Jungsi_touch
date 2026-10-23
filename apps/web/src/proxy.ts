@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { CRAWL_ROBOTS } from "@/lib/crawl-policy";
 import { NextResponse, type NextRequest } from "next/server";
 import { ignoreCookieWrites, noRefreshFetch } from "@/lib/supabase/read-only";
 
@@ -13,7 +14,7 @@ import { ignoreCookieWrites, noRefreshFetch } from "@/lib/supabase/read-only";
   설정이 빠지면 막는 쪽으로 동작한다. 오픈 때 이 관문을 지우고 회원·이용권 확인은 서비스 API 에 맡긴다.
 */
 
-const BLOCKED_HTML = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>정시터치 준비 중</title></head>
+const BLOCKED_HTML = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="robots" content="${CRAWL_ROBOTS}"><meta name="viewport" content="width=device-width,initial-scale=1"><title>정시터치 준비 중</title></head>
 <body style="font-family:system-ui,sans-serif;margin:0;display:grid;place-items:center;min-height:100vh;background:#f7f7f5;color:#222">
 <main style="text-align:center;padding:24px"><h1 style="font-size:20px">정시터치는 준비 중입니다</h1>
 <p style="color:#666">오픈 전에는 허용된 계정만 이용할 수 있습니다.</p>
@@ -22,7 +23,7 @@ const BLOCKED_HTML = `<!doctype html><html lang="ko"><head><meta charset="utf-8"
 function blocked() {
   return new NextResponse(BLOCKED_HTML, {
     status: 403,
-    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-store" },
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-store", "X-Robots-Tag": CRAWL_ROBOTS },
   });
 }
 
@@ -73,6 +74,7 @@ export async function proxy(request: NextRequest) {
   // 토큰 갱신은 에듀터치 본체 proxy 가 넘기기 전에 한다. 여기서 갱신하면 쿠키가 지워질 수 있다(lib/supabase/read-only.ts)
   const response = NextResponse.next({ request });
   response.headers.set("Cache-Control", "private, no-store");
+  response.headers.set("X-Robots-Tag", CRAWL_ROBOTS);
   return response;
 }
 

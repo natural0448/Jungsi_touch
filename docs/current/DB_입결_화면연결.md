@@ -359,4 +359,4 @@ W1 합류: 기존 history DTO의 공식 통계 표시 의미를 최소 목적에
 
 
 
-<!-- jungsi:generated spec_sha256=5610d093ed4f62c159c6646d9159d9c9162d7ff5c1129d38650e354467b293c3 -->
+<!-- jungsi:generated spec_sha256=b8f3bf692eaa030542b3f6f4c297f8e2834bcff98cce46958867bca69fe45005 -->

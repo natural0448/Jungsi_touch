@@ -145,13 +145,20 @@ export class ProfessionalProjection {
         value: ref("decimal_or_integer"),
         unit: text,
       }),
-      comparison_context: object({
-        academic_year: integer,
-        reference_year: nullableInteger,
-        metric: ref("pro_reason_name"),
-        score_scale: ref("pro_reason_name"),
-        population_id: id,
-      }),
+      comparison_context: {
+        ...object({
+          academic_year: integer,
+          reference_year: nullableInteger,
+          metric: ref("pro_reason_name"),
+          score_scale: ref("pro_reason_name"),
+          population_id: ref("identifier", true),
+          policy_version: ref("identifier", true),
+          range_definition: nullableText,
+          range_role: scalar("string", true, { enum: ["baseline_reference"] }),
+        }),
+        required: ["academic_year", "reference_year", "metric", "score_scale", "population_id"],
+        optional: ["policy_version", "range_definition", "range_role"],
+      },
       public_basis: object({
         title: text,
         url: scalar("string", false, { pattern: "https://[^\\s]+" }),
@@ -283,6 +290,16 @@ export class ProfessionalProjection {
         r.status !== "ready" || !Array.isArray(r.values) || !r.values.length ||
         !Array.isArray(r.public_basis) || !r.public_basis.length
       ) continue;
+      // Old saved reasons lack the definition/policy linkage. Preserve the report, omit that tip.
+      if (r.code === "classification_basis") {
+        const context = r.comparison_context;
+        if (!context || typeof context !== "object" || Array.isArray(context)) continue;
+        const c = context as NativeObject;
+        if (
+          c.range_role !== "baseline_reference" || typeof c.range_definition !== "string" ||
+          !c.range_definition.trim() || typeof c.policy_version !== "string" || !c.policy_version
+        ) continue;
+      }
       for (const rawBasis of r.public_basis) {
         const basis = proObject(rawBasis);
         try {
