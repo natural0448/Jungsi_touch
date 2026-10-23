@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.104이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.107이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 기존 Supabase 기반 실제 인증·기존22와 신규6 논리 API 계약의 코드·선택 연결·운영 배포를 구분한다. Google Drive와 기존 Supabase를 사용하고 P1 조정 메타데이터 Durable Object 한정 예외만 적용한다. 현재 결합20 후보·기존14 운영판·미연결8을 혼동하지 않는다.
 
@@ -156,11 +156,11 @@ Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제
 
 승인된 비공개 운영 한도와 기존 요금제 근거가 필요하다. null·미확정 값을 무제한 또는 실제 0으로 치환하지 않는다. 애플리케이션 내부 quota만으로 플랫폼 추가 과금을 방지했다고 판정하지 않는다. 기존 조직의 요금제·모든 프로젝트 사용량·포함량과 해당되는 Spend Cap 범위를 확인한다. Free는 추가 과금하지 않으며 Spend Cap은 Pro에서 적용 가능한 일부 사용량만 대상으로 한다. 실패한 Edge 호출도 invocation 사용량에 포함되므로 신규 요금제·유료 항목·초과 과금 허용을 자동 선택하지 않는다. 공식 플랫폼 상한인 worker 수명 Free150초/유료400초, 요청 idle timeout150초, active CPU2초를 구분한다. 실제 운영 요금제에 맞는 worker 최대 수명과 시계 오차 여유보다 긴 동시작업 lease를 사용하고 클라이언트의 응답 대기 만료나 재시도가 아직 실행 중인 서버 계산의 동시 lease를 초기화하지 않도록 검수한다. 이 수치는 애플리케이션 요청량·계산량 한도나 승인된 실제 운영값을 대신하지 않는다.
 
-동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다. 최신 설치는 current_deployment의 ed978 실제 영수증을 따르며 cb500 actual_editor_deployment는 당시 이력이다. current_P2_attempt는 새 실제 시도이고 회신 당시 두 실패는 P2_attempt_history에서 원래 배포·unknown 상태로 보존한다. 소스·준비상태 PASS, 제한된 로그 상관관계, 범위조회 snapshot, UI 업무 인수는 분리한다. 2026-10-21 재개는 owner_registration_20261021을 따른다. 기본 배포 대상은 기존 Supabase이며 P1 조정 메타데이터 DO만 한정 예외다. 최종 Secrets는 화면 담당 Owner가 등록한다. 정확 코드/정책/바인딩/객체 closure·기존 성적 보존 전환·006a 복귀 준비 후 같은 전환 구간에 적용하며, 실제 JWT/OTP/BFF·비용 검수 전 완료로 표시하지 않는다.
+2026-10-22 현재 설치와 기존 전국 P1 전환은 effective_current_runtime_ref의 날짜별 Owner 영수증을 따른다. 아래 source032 등 날짜별 상태와 동결 current_* 객체는 당시의 보존된 회귀 기준이며 현재 v17을 덮어쓰는 기준이 아니다. 새 통계 seq2는 기존 전환 완료와 분리하며 미발행이다. 동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다. 최신 설치는 current_deployment의 ed978 실제 영수증을 따르며 cb500 actual_editor_deployment는 당시 이력이다. current_P2_attempt는 새 실제 시도이고 회신 당시 두 실패는 P2_attempt_history에서 원래 배포·unknown 상태로 보존한다. 소스·준비상태 PASS, 제한된 로그 상관관계, 범위조회 snapshot, UI 업무 인수는 분리한다. 2026-10-21 재개는 owner_registration_20261021을 따른다. 기본 배포 대상은 기존 Supabase이며 P1 조정 메타데이터 DO만 한정 예외다. 최종 Secrets는 화면 담당 Owner가 등록한다. 정확 코드/정책/바인딩/객체 closure·기존 성적 보존 전환·006a 복귀 준비 후 같은 전환 구간에 적용하며, 실제 JWT/OTP/BFF·비용 검수 전 완료로 표시하지 않는다.
 
 ### 서버 런타임 조립과 입력 계약
 
-실제 API source032/spec1.9.70을 기존 함수에 설치·reload 결속했고 준비5경계를 검수했다. 새 정상 UI1회 저장·과목표시·GETreload와4point 표시검산은 한정 기능 관측이다. 전체누백·조합분포는 미발행pending, 정확HTTP/BFFactor 귀속은 미확정이며 전22native/배포인수0·보안3gate 미완료·production_ready=false다. cb500/ed978와 세실패·41/584 합성 이력은 보존한다.
+현재 운영 설치는 effective_current_runtime_ref의 Owner v17·고정 combined20 번들 보고를 따른다. 기존 전국 P1 발행·준비·관리자 정문과 P2/P3/P4 읽기 화면 회귀를 접수했고 Root는 현재 head와 대상 P1 표를 다시 읽었다. 새 통계 seq2 발행·새 화면 운영 검수, 전체22 native와 보안 gate는 별도다. source032 등 이전 조립·관측 결과는 historical_status_text_before_owner_20261022와 동결 원장에 보존한다.
 
 | 소스 진입점 | 경로 | SHA-256 |
 | --- | --- | --- |
@@ -202,11 +202,11 @@ binding의 sources는 private Storage object_key·정확한 bytes·SHA를 갖는
 | 현재 CA·프로젝트·앱 역할 — 기술 검수 완료 | 공식CA 체인/호스트와 기존 앱DSN·현재 프로젝트 결속·UTC/RLS의 기존 정확 영수증을 재사용한다. 다른 설정/실제 Edge 값이 선택되면 그 범위만 다시 검수한다. |
 | 네이티브 DB005 — 실제 적용 완료 | 정확Git005의3개 신규 예산 테이블·자료형/제약/인덱스·RLS·최소권한과 기존 객체 메타데이터 보존을 확인했다. 같은 API 드라이버 read-only 재조회도 통과했다. 기존003/005를 다시 적용하지 않고 실제 원자 예산·보고서·소유권·멱등·버전 충돌 검수는 별도로 수행한다. |
 | 공식 과목 시험팩 — 목적 승인·비공개 발행 완료 | 현재 decoder와 독립 산술 근거를 재사용한다. 승인 범위는 과목 성적표와 네 과목 표준점수 합이며, 불변 Storage 발행·정확 재조회와 native 선택 그래프 검수를 통과했다. 전체/대학 누백·연도 보정·판단·발행 승인은 승계하지 않는다. |
-| 현재 catalog·모형 — 최소 후보 대기 | 최신 단일정본의 native 후보·검수·출처/타입/연도/모집행 맥락을 고정한다. C140/v21_1은 역사 검수로 보존하며 현재 catalog로 재승격하지 않는다. 미검증 추정모형은 미선택·pending을 유지한다. |
-| 승인head·선택자료 — 기존발행재사용 / 등록후readiness통과 | 불변Storage·원문bytes/SHA와현재head선택그래프의기존근거를재사용했다. 등록후health200의구현경로에서binding/head/registry/selection/시험팩/사용정책·만료를검수했다. 실제사용자와업무인수는별도다. |
+| 현재 전국 P1 — Owner 전환 완료 회신 / 새 통계 자료판 준비 | 기존 approved head와 대상 화면을 실제 재조회했다. 다른 발표 기준과 가야대 두 관측은 별도 seq2 후보·독립 검수·불변 발행을 진행한다. 누백 모형의 승인/발행을 입결 표시 완료로 승계하지 않는다. |
+| 기존 정책·자료 연결 — 정확 지문 재사용 | Owner의 현재 코드·설정 지문을 기존 비공개 준비판과 대조한다. 새 적용 직전 설치 버전/지문과 current source/P1 head를 다시 결속하고, 달라지면 중단한다. |
 | 공유예산 — 기존격리SQL·실제만료검수재사용 / 실사용자업무별도 | 기존승인된과목전용정책·독립pool·동시성·재시작·멱등정산·상한거절과승인lease실시간만료의정확영수증을재사용한다. 검수행과이전실패본은보존한다. 등록후readiness는정책/현재head/만료검사통과이며실사용자의예약·정산·운영3gate인수는별도다. ceiling/GLOBAL을조직금액상한으로표시하지않고성공namespace를재실행하지않는다. |
-| 새 설정5개 — Owner등록보고수용·readiness통과 | 기존Owner가새5개등록과원파일/digest5/5일치를보고했다. 서비스팀은실제readiness200·relay403·무Bearer401을확인했다. 기존DISPLAY/relay/Auth/RLS/JWT게이트는보존하고Worker서버relay·preview제한live·실사용자검수는다음단계다. |
-| 현재 실연결 — 화면팀 기능 통과 보고 | Worker relay 등록·preview live·정상 Bearer aal1/aal2 세션 확인 보고를 수용했다. P2 본인 저장·분석·재조회와 소유권·CSRF·만료갱신은 NOT_RUN이며 검색은 미승인 작업 범위와 current catalog 준비를 분리한다. |
+| 기존 설정5개 — Owner 등록 보고 접수 | Owner가 기존 패킷의 다섯 지문 일치를 보고했다. 새 통계 판의 설정은 별도로 측정·검수해 같은 전환 구간에 적용한다. Root의 Secrets 관리 권한을 새로 부여하거나 값·키를 공개하지 않는다. |
+| 현재 BFF — 기존 P1 운영 및 세 화면 읽기 회귀 접수 | Root가 대상 P1을 새로 읽었고 Owner가 P2/P3/P4 화면 열림을 보고했다. 실제 새 저장/소유권/CSRF/만료/전체 보안 인수는 해당 영수증 없이 완료로 표시하지 않는다. |
 
 ### 위치 그래프의 기준
 
@@ -409,7 +409,7 @@ score-profile.create도 DB COMMIT 이후의 세션·응답 projection·현재 �
 | --- | --- | --- | --- |
 | OPS-SAFE-OBSERVER-DEPLOYED-20261016 | ed978c74d8c89bd6fec867b891342c1b6c6c15a3 / 80d2be1e6da55fd585c01050f5897a54fc835a0a7512554a5a342165971ed83f | SOURCE_DEPLOYED_REMOTE_EDITOR_VERIFIED / NATIVE_READINESS_AND_BOUNDARY_PASS / 4 | cdfce56877c99ee1880ef5b9f2c82f9293429ea6841c22047a34559b23d5373f |
 
-### 현재 실제 설치와 후속 준비상태
+### 보존된 source032 회귀 기준 설치원장 — 현재 운영은 최신 Owner 영수증
 
 기존 함수에 source032/spec1.9.70을 설치하고 전체 editor reload bundle 일치와 legacy JWT ON을 확인했다. 준비5경계와 한정 P2 UI/표시/재조회는 개별 영수증이며 22업무·보안3gate 인수와 분리한다.
 
@@ -589,7 +589,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=7be0ebacb1e5bff944815b301574e8babda4a2094a2afab7c00258f380e812da -->
+<!-- jungsi:generated spec_sha256=df7560be3989402ea56873a61bd1debaeb8b60a2ab7cc7b31e397dc27f327613 -->
 
 
 ## 기존 운영 조회의 후속 검수
@@ -746,7 +746,7 @@ report.read는 저장 snapshot을 읽고 계산하지 않는다. 기존 profile_
 
 ## 판별 입결 정리본·관리자 반복 검수·본인 리포트 찾기
 
-P1-DISPLAY-SNAPSHOT-01 / PUBLISHED_BASELINE_SCOPED_READ_OBSERVED_PUBLISHED_STATISTICS_EXTENSION_IN_PROGRESS. 신규 API는 구현/확장 등록과 Owner 활성화 전에는 사용할 수 없다.
+P1-DISPLAY-SNAPSHOT-01 / BASELINE_OWNER_ACTIVATION_RECEIVED_NEW_STATISTICS_SOURCE_INTEGRATED_SEQ2_PENDING. 신규 API는 구현/확장 등록과 Owner 활성화 전에는 사용할 수 없다.
 
 | 항목 | 계약 |
 | --- | --- |
@@ -846,17 +846,17 @@ For an approved estimated_weights/official_all_examinees result use a neutral hu
 
 ### 대학 발표 통계의 원형 노출
 
-P1-PUBLISHED-STATISTICS-20261022 / ADOPTED_REQUIREMENTS_CODE_DATA_AND_LIVE_ACCEPTANCE_IN_PROGRESS.
+P1-PUBLISHED-STATISTICS-20261022 / SOURCE_INTEGRATED_PRIVATE_DATA_PREPARATION_AND_NEW_OPERATING_ACCEPTANCE_PENDING.
 
 | 항목 | 확정 범위 |
 | --- | --- |
 | 공개 표현 | 기존 alternate_cut.entries를 대학 발표 통계 목록으로 확장한다. 통계 라벨·실제 비율(비백분위는 null)·점수 기준·대상 집단·원문 단위·값/native 자료형·출처/기준일·검수 상태/사유를 함께 유지한다. 기존 explicit75 판 수신과 true50/70 의미를 보존한다. |
 | 관측 선택 | 현재 정본의 모집행·학년도에 연결된 실제 점수 관측을 사용한다. 출처·통계·코호트·척도·과목/성분·발표 범위가 다른 관측은 합치지 않는다. 같은 관측을 기준별로 복제하지 않으며 동등한 값 선택과 충돌 근거를 보존한다. |
-| 화면 | 대학 발표 통계를 별도 영역에 원래 명칭·비율·점수 기준·집단별로 표시한다. 값이 있고 metadata만 미확인이면 값과 확인 사유를 함께 보인다. 현재 선택 범위 제외를 대학 미발표로 표현하지 않는다. |
+| 화면 | 대학 발표 통계를 별도 영역에 원래 명칭·비율·점수 기준·집단별로 표시한다. 값이 있고 metadata만 미확인이면 값과 확인 사유를 함께 보인다. 현재 선택 범위 제외를 대학 미발표로 표현하지 않는다. 화면 소스의 합성38건·실제 SDK 표 엄격 타입·실제 React 표 렌더 검수는 통과했다. 비율/코호트/기준일을 보존하고 entries가 없더라도 실제 잔여건수가 있으면 영역을 유지한다. 원자료의 내부 관측 ID를 새 브라우저 props에 추가하지 않는다. 새 발행판·운영 빌드/배포/실자료 화면은 별도 미실행이다. 원문 결속·지표/집단/표시 문맥을 확인한 알려진 값은 세부정의가 공란이어도 pending_metadata로 표시한다. inline basis_definition 텍스트가 없다는 사실만으로 다른 발표 통계를 일괄 제외하지 않는다. 기존 exact-kind 표시 사전의 파생명과 검증된 대학 원문 제목은 구분하고, 불완전한 척도 정의를 같은50/70 기준이나 verified_official로 승격하지 않는다. |
 | 결측/충돌 | 실제0, null, 원자료 없음, 선택 범위 제외, 자격 미확정, 값/정의 충돌, 공식 미발표를 구분한다. 평균→50/최저→70/75→70/등급→환산점수 변환은 하지 않는다. |
 | 보안/상한 | 닫힌 DTO·기존 entries 수/행/객체 bytes 제한·현재 user/relay/승인/만료/공유 예산/no-store를 유지한다. 항목 상한으로 일부가 빠지면 잔여를 정확히 표시하고 완료·미발표로 표현하지 않는다. 원자료·전체 검수 본문·비밀·내부 파일 경로는 브라우저로 보내지 않는다. |
 | 자료 담당 | 기존 학교별 원문·불변 native 참조·O/X 검수를 재사용한다. 대상 통계의 upstream50/70/75 선필터와 source qualification을 좁혀 보완한다. 전국 누백 로컬 일괄 준비/단일 writer 및 다른 팀의 live 제어를 변경하지 않는다. |
-| 코드/자료/새 발행/실제 화면 | IN_PROGRESS / IN_PROGRESS / NOT_RUN / NOT_RUN |
+| 코드/자료/새 발행/실제 화면 | SERVICE_AND_FRONTEND_REVIEWED_PR_INTEGRATED_EXACT_SOURCE_CI_PASS_NEW_DEPLOYMENT_NOT_RUN / SEALED_TYPED_REFS_COMPLETE_SELECTED_NEW_CID_ASSEMBLY_AND_INDEPENDENT_PROJECTION_REVIEW_IN_PROGRESS / NOT_RUN / NOT_RUN |
 
 검수 조건:
 
@@ -869,42 +869,45 @@ P1-PUBLISHED-STATISTICS-20261022 / ADOPTED_REQUIREMENTS_CODE_DATA_AND_LIVE_ACCEP
 
 READ_ONLY_BASELINE_PUBLICATION_AND_TARGET_RENDERING_OBSERVED. 기존 DB 발행 head approved와 로그인된 P1 전국 요약·대상 모집단위의 연도별 자격 보류/결측 표시를 대조했다. 과거 head0/소수 학교 화면 관측은 역사다. 실제 사용자 JWT·토큰/계정/실제 자료 지문을 공개하지 않는다. 배포 source/Storage 직접GET/전체 보안·전체학교 인수는 이 읽기 증거만으로 PASS로 바꾸지 않는다.
 
-별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 별도 시험 94개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
+별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 다음 NOT_RUN은 등록 소스의 합성/별도 인수 기록이며 현재 combined 운영 보고는 아래 날짜별 Owner 영수증을 따른다. 별도 시험 94개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
+
+
+현재 운영 기준: Current installed runtime identity is this dated Owner receipt. Frozen current_deployment/current_source_verification/current_BFF_deployment objects are retained historical regression evidence; their old field names do not supersede this receipt. Read this pointer, the new-statistics extension and the private checkpoint before examining Git deltas.
 
 ### 최신 Owner·화면팀 운영 영수증의 한정 수용
 
-PEER_REPORTED_INSTALLATION_AND_P1_P2_BROWSER_PASS_OTHER_CASES_OPEN. 비공개 영수증 SHA256 536edf363e4372360c37b5524022b9f2e7be9a0f64391eecb1bf3b186743c6fb / 소스 0a0f5d18b2c71c778c312081a220ec47fce2fad8 / 파생 배포 번들 7b2abbbf8463cd2e537ec9ccf1f1a288f40ed9d15c466348f401ab467db53bff.
+OWNER_REPORTED_BASELINE_SEQ1_ACTIVATION_COMPLETE_TARGETED_ROOT_HEAD_AND_UI_MATCH. 비공개 영수증 SHA256 5b325f1bf3a266dc624c6baeaf6b6a0a677b500df729b18b29284c82f0ac69e3 / 소스 fc3097d9cb932b55c24fbf007144e27db73b24ab / 파생 배포 번들 5c8840c8bb07855a03bb2fdda72ac9c618cf8b656ec47b88fcb7094739320943.
 
-OWNER_REPORTED_ALL782_BYTES_SHA_MATCH. OWNER_REPORTED_EXPECTED6_DIGESTS_MATCH; supplied document abbreviates digest values. FRONTDOOR_AAL1_MEMBER_REPORTED_NATIONWIDE_SOURCE_ROWS_AND_SEARCH_PASS_WITH_INCOMPLETE600_METRIC_CAP. FRONTDOOR_EXISTING_OWN_REPORT_OVERALL_REFRESH_REPORTED_PASS_NEW_REVISION_ESTIMATED_AND_SUBJECT_RESULTS_PRESERVED.
+OWNER_REPORTED_IMMUTABLE_OBJECT_CLOSURE_BYTES_AND_HASH_MATCH; Root did not repeat all Storage GETs. OWNER_REPORTED_EXPECTED_FIVE_DIGESTS_MATCH_PREPARED_VALUES; actual values/digests remain private. OWNER_REPORTED_APPROVED_BASELINE_PUBLICATION_ADMIN_PREPARE_AND_NATIONWIDE_FRONTDOOR_COMPLETE; standard-member preopen gate retained. OWNER_REPORTED_READONLY_P2_P3_P4_PAGE_OPEN_REGRESSION; no fresh save or per-operation native transaction acceptance inferred.
 
-Root 독립 live 재실행: NOT_RUN. 형식상 native/deployment PASS는 전체 인수 조건의 증거가 있을 때만 기록하며, 실제 배포/부분 화면 관측 사실은 아래 현재 원장으로 구분한다.
+Root 독립 live 재실행: INDEXED_SOURCE_AND_P1_HEAD_READBACK_MATCH_PLUS_RELOADED_KAYA_THREE_YEAR_TABLE; target qualifications remain held in seq1. 형식상 native/deployment PASS는 전체 인수 조건의 증거가 있을 때만 기록하며, 실제 배포/부분 화면 관측 사실은 아래 현재 원장으로 구분한다.
 
 | 기존 operation | 현재 배포 보고 | 이번 화면 관측 | 공식 인수 경계 |
 | --- | --- | --- | --- |
-| history.search | OWNER_REPORTED_V15 | PEER_REPORTED_P1_SEARCH_PASS | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| recruitment.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| score-profile.create | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| overall.analyze | OWNER_REPORTED_V15 | PEER_REPORTED_OWN_REPORT_REFRESH_PASS | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| report.read | OWNER_REPORTED_V15 | PEER_REPORTED_OWN_REPORT_READ_PASS | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| offerings.search | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| offering.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| university.analyze | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| candidates.build | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| shortlist.update | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| report.export | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| statistics.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| session.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| forecast.capabilities | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| forecast.list | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| forecast.create | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| forecast.read | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| forecast.adjust | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| forecast.validate | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| forecast.approve | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| forecast.publish | NOT_ACTIVATED_BY_EXISTING14_BINDING | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
-| forecast.published.read | OWNER_REPORTED_V15 | NOT_RUN_IN_SUPPLIED_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| history.search | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| recruitment.read | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| score-profile.create | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| overall.analyze | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| report.read | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| offerings.search | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| offering.read | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| university.analyze | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| candidates.build | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| shortlist.update | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| report.export | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| statistics.read | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| session.read | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.capabilities | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.list | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.create | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.read | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.adjust | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.validate | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.approve | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.publish | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
+| forecast.published.read | OWNER_REPORTED_V17_EXACT_COMBINED20_BUNDLE_SOURCE_PRESENCE_NOT_OPERATION_ACTIVATION | NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT | NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES |
 
-남은 인수: fresh-version P3 exact2027/paid path; input/correction ledger comparison; other-user/CSRF/no-token/bad-relay/paid403/no-store reacceptance; last incomplete row at legacy six-page boundary; new-PC report locator; admin aal2 daily exemption new policy.
+남은 인수: new collected-statistics/Kaya seq2 independent candidate review and immutable publication; new compatible code/settings and exact installed-version/hash guard immediately before application; new exact-build frontend deployment and targeted actual-data browser acceptance; complete JWT/ownership/CSRF/expiry/security and operation-specific native acceptance remain separately required.
 
 
 ## 정시터치 전문가용 · 기관 소유 학생 상담
@@ -936,4 +939,4 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 | 에듀터치 본체 Owner | 기관/계약/구성원 원본·초대/담당 관리자 화면·기존 계정·수동 계약 등록·기관 알림 전달 |
 | 기획팀 | 공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분 |
 
-21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다. 원본 authority용008은 별도 PREPARED_NOT_APPLIED 후보로 public의 기존 postgres CREATE 범위에 준비했다. set-based 원본 JOIN·계약/회원 version·무시드 승인시험·앱 EXECUTE 한정 및 support/retention 닫힘을 격리24건/바인딩144건/기존기관보안13건으로 확인했다. 실제008 적용·정의SHA/최종바인딩·시험등록·Secrets·실JWT/BFF/배포는 NOT_RUN이며 기존007/개인용28/기관21의 등록과 검증을 유지한다.
+21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다. 원본 authority용008은 별도 PREPARED_NOT_APPLIED 후보로 public의 기존 postgres CREATE 범위에 준비했다. set-based 원본 JOIN·계약/회원 version·무시드 승인시험·앱 EXECUTE 한정 및 support/retention 닫힘을 격리24건/바인딩144건/기존기관보안13건으로 확인했다. 실제008 적용·정의SHA/최종바인딩·시험등록·Secrets·실JWT/BFF/배포는 NOT_RUN이며 기존007/개인용28/기관21의 등록과 검증을 유지한다. 2026-10-23 통합 요청: 학년도+모집단위 번호별 정본 규칙의 서버 내부 읽기 포트를 추가하고, 검증된 lineage에만 전년 비교를 결속한다. 영역별 비율·영어/한국사·가산점·탐구 선택조건과 원문/자격을 보존한다. 상담 근거의 실제 모집단/정책 버전·정밀도·충원 인원/예비번호·한해 컷 폭/3개년 변동의 의미를 구분한다. 최신 Owner008 설치 보고는 이전 준비 이력과 별도 수용하며 전체 UPDATE version 트리거를 유지한다. 전문가용 계산 한도는 실제 런타임 카탈로그 범위를 먼저 확인하고 개인용·공유 물리 통제를 보존한다. 새 포트 실DB/설정·전문가용/JWT/OTP/BFF·배포 인수는 각각 NOT_RUN이다.

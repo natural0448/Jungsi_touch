@@ -86,7 +86,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
           </Form>
           <ChipRow label="지역" cur={cur} k="region" items={REGIONS} />
           <ChipRow label="모집군" cur={cur} k="group" items={[...GROUPS]} suffix="군" />
-          <p className="hint">대학이 발표한 2024~2026학년도 결과를 학년도별로 보여 드립니다. 최종 50%컷·70%컷은 같은 기준의 발표만 쓰고, 75%컷은 70%컷으로 바꾸지 않고 &lsquo;별도 컷&rsquo;에 따로 보여 드립니다. &lsquo;확인 중&rsquo; 꼬리표는 값은 발표 그대로이고 정의·단위·발표일 확인이 남았다는 뜻입니다(꼬리표에 마우스를 올리면 사유가 보입니다).</p>
+          <p className="hint">대학이 발표한 2024~2026학년도 결과를 학년도별로 보여 드립니다. 최종 50%컷·70%컷은 같은 기준의 발표만 씁니다. 대학이 다른 비율·평균·최저 등으로 발표한 값은 &lsquo;대학 발표 통계&rsquo;에 원래 기준·대상과 함께 보여 드립니다. &lsquo;확인 중&rsquo; 꼬리표는 값은 발표 그대로이고 정의·단위·발표일 확인이 남았다는 뜻입니다(꼬리표에 마우스를 올리면 사유가 보입니다).</p>
         </section>
 
         {snap.state !== "ready" || !res ? (
@@ -145,7 +145,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
             )}
           </>
         )}
-        <p className="rs-foot">대학 발표 자료만 보여 줍니다. 추정 총 지원자·추정 탈락자 두 칸만 모집인원·경쟁률·충원인원으로 계산한 값이고, 그 밖의 정시터치 추정값은 이 화면에 넣지 않습니다. 내 성적과 견주어 보려면 {p3.label}를 이용하세요.</p>
+        <p className="rs-foot">대학 발표 자료만 보여 줍니다. 추정 총 지원자(모집인원×경쟁률)와 추정 탈락자(추정 총 지원자−모집인원−충원인원) 두 칸만 계산한 값이고, 그 밖의 정시터치 추정값은 이 화면에 넣지 않습니다. 내 성적과 견주어 보려면 {p3.label}를 이용하세요.</p>
       </div>
     </>
   );

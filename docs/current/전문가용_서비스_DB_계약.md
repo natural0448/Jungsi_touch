@@ -1,6 +1,6 @@
 # 정시터치 전문가용 서비스·DB 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.104이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.107이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 
 
@@ -33,7 +33,7 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 | 에듀터치 본체 Owner | 기관/계약/구성원 원본·초대/담당 관리자 화면·기존 계정·수동 계약 등록·기관 알림 전달 |
 | 기획팀 | 공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분 |
 
-21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다. 원본 authority용008은 별도 PREPARED_NOT_APPLIED 후보로 public의 기존 postgres CREATE 범위에 준비했다. set-based 원본 JOIN·계약/회원 version·무시드 승인시험·앱 EXECUTE 한정 및 support/retention 닫힘을 격리24건/바인딩144건/기존기관보안13건으로 확인했다. 실제008 적용·정의SHA/최종바인딩·시험등록·Secrets·실JWT/BFF/배포는 NOT_RUN이며 기존007/개인용28/기관21의 등록과 검증을 유지한다.
+21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다. 원본 authority용008은 별도 PREPARED_NOT_APPLIED 후보로 public의 기존 postgres CREATE 범위에 준비했다. set-based 원본 JOIN·계약/회원 version·무시드 승인시험·앱 EXECUTE 한정 및 support/retention 닫힘을 격리24건/바인딩144건/기존기관보안13건으로 확인했다. 실제008 적용·정의SHA/최종바인딩·시험등록·Secrets·실JWT/BFF/배포는 NOT_RUN이며 기존007/개인용28/기관21의 등록과 검증을 유지한다. 2026-10-23 통합 요청: 학년도+모집단위 번호별 정본 규칙의 서버 내부 읽기 포트를 추가하고, 검증된 lineage에만 전년 비교를 결속한다. 영역별 비율·영어/한국사·가산점·탐구 선택조건과 원문/자격을 보존한다. 상담 근거의 실제 모집단/정책 버전·정밀도·충원 인원/예비번호·한해 컷 폭/3개년 변동의 의미를 구분한다. 최신 Owner008 설치 보고는 이전 준비 이력과 별도 수용하며 전체 UPDATE version 트리거를 유지한다. 전문가용 계산 한도는 실제 런타임 카탈로그 범위를 먼저 확인하고 개인용·공유 물리 통제를 보존한다. 새 포트 실DB/설정·전문가용/JWT/OTP/BFF·배포 인수는 각각 NOT_RUN이다.
 
 ## 별도 후보 API
 
@@ -185,7 +185,14 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
   "administrator_exemption_substitute": false,
   "unlimited_or_null_fallback": false,
   "capacity_twenty_means_twenty_parallel_jobs": false,
-  "shared_concurrency_or_physical_limit_change": "별도 근거와 기존 비용 한도 내 검증 전 변경하지 않는다."
+  "shared_concurrency_or_physical_limit_change": "별도 근거와 기존 비용 한도 내 검증 전 변경하지 않는다.",
+  "owner_followup_20261023": {
+    "status": "EXACT_RUNTIME_CATALOG_SCOPE_AND_CONTRACT_SCALE_VALIDATION_IN_PROGRESS",
+    "catalog_scope": "Count academic-year/practical_required=false rows in the exact runtime service-catalog object and verify its source pin. Do not substitute the P1 display-row/school counts or a local historical catalog.",
+    "design": "Preserve individual policies and positive per-offering physical costs. Contract/student input rights, reuse/idempotency and finite professional workload accounting must support sequential work for the adopted minimum student capacity.",
+    "not_authorized": "No automatic common-cap widening, zero/unlimited/null fallback, administrator exemption, new resource or billing-plan change. A new approved policy requires exact values, version, scope, source/binding pins and shared physical/concurrency checks.",
+    "readiness": "Do not register professional runtime settings until the exact active catalog, cost reservation and sequential multi-student acceptance have been checked."
+  }
 }
 ```
 
@@ -1016,7 +1023,74 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
   "current_basis_connection": "2027 대학별 환산·누백·판정 연결 범위의 실제 영수증 전 NOT_RUN; ready로 만들지 않는다.",
   "missing_basis": "사유 배열을 비우고 근거 자료 연결 전을 표시; 결측0·합격 단정·다른 집단 누백 비교·임의 산식 금지",
   "general_guide": "Owner/화면팀이 원문·출처 대조 후 버전별 공개. 개인 학생 실명·성적을 외부 모델로 전송하지 않는다.",
-  "AI_external_generation": false
+  "AI_external_generation": false,
+  "yearly_rule_read": {
+    "format": "jungsi.yearly-offering-rule-read/v1",
+    "status": "INTERNAL_READ_PORT_CONTRACT_ADOPTED_IMPLEMENTATION_IN_PROGRESS",
+    "requirements": [
+      "REQ-31",
+      "REQ-24",
+      "REQ-25",
+      "REQ-26"
+    ],
+    "kind": "SERVER_APPLICATION_PORT_NOT_NEW_PUBLIC_HTTP_OPERATION",
+    "identity": [
+      "academic_year",
+      "offering_pk"
+    ],
+    "academic_years": [
+      2024,
+      2025,
+      2026,
+      2027
+    ],
+    "source": "Current approved guide repository and exact rule/qualification references. Locally prepared fields do not silently supersede the current DB release.",
+    "fields": [
+      "area_reflection_weights_and_original_unit",
+      "english_reflection_method_and_grade_values",
+      "history_reflection_method_and_grade_values",
+      "math_and_inquiry_bonus_conditions",
+      "inquiry_subject_count_and_selection_method",
+      "original_text_and_official_source_url",
+      "source_academic_year_and_as_of",
+      "rule_version_and_current_guide_head",
+      "field_qualification_and_missingness",
+      "approved_lineage_reference"
+    ],
+    "native_preservation": "Preserve strings, integers and decimal lexemes, field presence, actual zero, null, unknown and not-applicable distinctly. Preserve percentage versus score/deduction/bonus units and all conditional rules.",
+    "bounded_read": "Parameterized exact year+PK lookup with the existing approved read role, source-head/qualification guard, request budget and finite response bound. No all-school raw table, private model, coefficients or review history in the response.",
+    "lineage": "Cross-year comparison requires the existing verified lineage_button_link_allowed=true relation. Similar names or equal PK text across years do not establish a relation.",
+    "consumers": "Owner server services compose comparison and display sentences from approved fields; the data/scoring owner retains SQL, repository adapters and conversion/percentile/decision engines.",
+    "interpretation": "A changed weight alone does not prove a particular student gained or lost. Student-specific statements require the separately verified current-year evidence contract.",
+    "acceptance": [
+      "exact identity and source head; wrong year/PK rejected",
+      "native type/unit and null/zero distinctions preserved",
+      "partial/source-unverified rules remain explicitly pending",
+      "same-year rule exceptions and cross-year lineage preserved",
+      "no model/raw source/review payload or new authorization exposure"
+    ],
+    "native_DB_acceptance": "NOT_RUN",
+    "Owner_consumption_and_deployment": "NOT_RUN"
+  },
+  "owner_tip_followup_20261023": {
+    "status": "FEATURE_SOURCE_REVIEW_NOT_INTEGRATED_OR_OPERATING_ACCEPTANCE",
+    "feature_commit": "effa3f51895fd1e3ac4d72fd5657316b5c0c5a52",
+    "classification_basis": "Copy only the approved engine converted score and adopted expected range with the same offering/year/scale. The verified prior official publication URL is a source reference; it does not make the service expected range a university announcement.",
+    "population_and_policy": "comparison_context.population_id identifies the actual verified student population. Do not fill it with a decision-policy version; preserve policy_version under its own explicit contract field.",
+    "precision": "Do not derive counseling differences by converting exact native decimal strings to a JavaScript Number. Preserve the original score/range or use the existing exact arithmetic.",
+    "additional_codes": "rule_weight_change and prior_competition remain separate proposed contracts until source/schema/tests are synchronized. Current ready-only filtering is retained; unimplemented pending reasons do not bypass it.",
+    "reserve_and_count": "Last admitted reserve number (번) and actual additional admitted people (명) are distinct metrics. Never use one as the other in prior_competition.",
+    "historical_spread": "A within-year 50%-to-70% gap is different from a three-year 70%-cut movement. Keep separate code/label/axis definitions and do not pool incomparable cohorts/scales.",
+    "print": "Only the same fixed report revision and authorized org/student evidence may be included in the print projection; no new unapproved calculation or customer data logging."
+  },
+  "advantage_definition": {
+    "format": "jungsi.converted-position-advantage-definition/v1",
+    "definition": "delta_pp = approved baseline inclusive upper-cumulative percentile minus the university-converted-score inclusive upper-cumulative percentile; positive=favorable, negative=unfavorable, zero=neutral.",
+    "baseline": "The engine baseline is the approved current-year target total distribution for Korean+math+inquiry1+inquiry2 standard scores; it is not an arbitrary prior-year raw score or a score/max ratio.",
+    "guards": "Same academic year, exam, actual population, validated nonsynthetic distribution, approved baseline version and include_equal tie policy. Missing or incompatible evidence returns null/pending; no zero substitution.",
+    "limitation": "This is a percentage-point position difference, not admission probability or an assurance that last-year results repeat.",
+    "source": "supabase/functions/_shared/jungsi/application/offering_analysis.ts"
+  }
 }
 ```
 
@@ -1074,4 +1148,4 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=7be0ebacb1e5bff944815b301574e8babda4a2094a2afab7c00258f380e812da -->
+<!-- jungsi:generated spec_sha256=df7560be3989402ea56873a61bd1debaeb8b60a2ab7cc7b31e397dc27f327613 -->
