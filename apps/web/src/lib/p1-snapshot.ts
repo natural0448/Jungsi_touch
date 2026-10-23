@@ -89,8 +89,13 @@ export type Ready = {
 type Progress = {
   snapshot_id: string; publication_sha256: string; done: string[]; part_keys: Record<string, string>;
   schoolParts: Record<string, string[]>; school_keys: Record<string, string>;
+  school_assembly?: { school_id: string; next_fragment: number; key: string; write_prefix: string; step: number };
   phase: "parts" | "schools" | "index" | "ready"; schoolsDone: number; indexDone: number;
   index_segments: string[]; started_at: string;
+};
+type PartialSchool = {
+  format: "jungsi.p1-school-partial/v1"; snapshot_id: string; publication_sha256: string; generation: string;
+  school_id: string; fragment_ids: string[]; rows: Row[];
 };
 
 class Raw {
@@ -261,21 +266,52 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
       if (pg.done.length === head.parts.length) pg.phase = "schools";
     } else if (pg.phase === "schools") {
       const ids = Object.keys(pg.schoolParts).sort(), frags = new Map<string, Record<string, Row[]>>();
+      if (pg.school_assembly && pg.school_assembly.school_id !== ids[pg.schoolsDone])
+        throw new ConnectionError("unavailable", "p1_cache_partial_binding_invalid");
       let completed = 0;
       for (const u of ids.slice(pg.schoolsDone, pg.schoolsDone + SCHOOLS_PER_STEP)) {
-        const missing = pg.schoolParts[u].filter(part => !frags.has(part));
-        if (frags.size + missing.length > MAX_FRAGMENT_READS) {
-          if (completed === 0) throw new ConnectionError("unavailable", "p1_cache_layout_budget_exceeded");
-          break;
+        const parts = pg.schoolParts[u], pending = pg.school_assembly;
+        let rows: Row[] = [], at = 0;
+        if (pending) {
+          const generationPrefix = `p1c:v1:${token.generation}:f`;
+          const stamp = typeof pending.write_prefix === "string" && pending.write_prefix.startsWith(generationPrefix)
+            ? /^([1-9][0-9]*):([A-Za-z0-9][A-Za-z0-9._:-]{0,127})$/.exec(pending.write_prefix.slice(generationPrefix.length)) : null;
+          const previousFence = stamp ? Number(stamp[1]) : NaN;
+          if (pending.school_id !== u || !Number.isSafeInteger(pending.next_fragment) || pending.next_fragment < 1 ||
+              pending.next_fragment >= parts.length || !Number.isSafeInteger(pending.step) || pending.step !== token.step - 1 ||
+              !Number.isSafeInteger(previousFence) || previousFence >= token.fence ||
+              pending.key !== `${pending.write_prefix}:school-partial:${u}`)
+            throw new ConnectionError("unavailable", "p1_cache_partial_binding_invalid");
+          const cached = await cacheValue<PartialSchool>(store, pending.key);
+          if (cached.format !== "jungsi.p1-school-partial/v1" || cached.snapshot_id !== head.snapshot_id ||
+              cached.publication_sha256 !== head.publication_sha256 || cached.generation !== token.generation || cached.school_id !== u ||
+              !Array.isArray(cached.fragment_ids) || cached.fragment_ids.length !== pending.next_fragment ||
+              cached.fragment_ids.some((part, i) => part !== parts[i]) || !Array.isArray(cached.rows))
+            throw new ConnectionError("unavailable", "p1_cache_partial_binding_invalid");
+          rows = cached.rows; at = pending.next_fragment;
         }
-        const rows: Row[] = [];
-        for (const part of pg.schoolParts[u]) {
-          if (!frags.has(part)) frags.set(part, await cacheValue<Record<string, Row[]>>(store, pg.part_keys[part]));
+        const start = at;
+        for (; at < parts.length; at++) {
+          const part = parts[at];
+          if (!frags.has(part)) {
+            if (frags.size === MAX_FRAGMENT_READS) break;
+            frags.set(part, await cacheValue<Record<string, Row[]>>(store, pg.part_keys[part]));
+          }
           const found = frags.get(part)![u];
           if (!found) throw new ConnectionError("unavailable", "p1_cache_reference_missing");
           rows.push(...found);
         }
+        if (at === start) break;
+        if (at < parts.length) {
+          const key = `${P}:school-partial:${u}`;
+          await write(key, { format: "jungsi.p1-school-partial/v1", snapshot_id: head.snapshot_id,
+            publication_sha256: head.publication_sha256, generation: token.generation!, school_id: u,
+            fragment_ids: parts.slice(0, at), rows } satisfies PartialSchool);
+          pg.school_assembly = { school_id: u, next_fragment: at, key, write_prefix: P, step: token.step };
+          break;
+        }
         const key = `${P}:school:${u}`; await write(key, rows); pg.school_keys[u] = key; completed++;
+        delete pg.school_assembly;
       }
       pg.schoolsDone += completed;
       if (pg.schoolsDone === ids.length) pg.phase = "index";
