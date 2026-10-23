@@ -7580,10 +7580,11 @@
           "REQ-26",
           "REQ-31"
         ],
-        "source_sha256": "7fe7d976fc42ad8b7cda24d8d6480de635e190071976735c40261f586c4068f6",
+        "source_sha256": "30b8f6680d60255ebae5b37a956c0331c156806e419e6937fb9b55de416cd89b",
         "declared_exports": [
           "ProfessionalAnalysisDataPort",
-          "ProfessionalApprovedAnalysis"
+          "ProfessionalApprovedAnalysis",
+          "professionalCounselingReasons"
         ]
       },
       {
@@ -7596,7 +7597,7 @@
           "REQ-26",
           "REQ-31"
         ],
-        "source_sha256": "70975a18317dfd7234c245fe88505441820cef1eebbc3cd764a9ae06e683f299",
+        "source_sha256": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4",
         "declared_exports": [
           "PROFESSIONAL_CONTRACT",
           "ProfessionalContract",
@@ -7673,7 +7674,7 @@
           "REQ-26",
           "REQ-31"
         ],
-        "source_sha256": "9ed364f0aec2a8f24ffa122a2ae774a60bb36663af8d1019de4edd448830056f",
+        "source_sha256": "b4ba3397fd1d0a0a2a73f6128bc928594cb7eb3144bc8824af7e2d4bf2bc9292",
         "declared_exports": [
           "ProfessionalProjection"
         ]
@@ -7688,7 +7689,7 @@
           "REQ-26",
           "REQ-31"
         ],
-        "source_sha256": "4e68856bc30b5b3b971cfec9db7775a13eb6a876a1583ba446b8e1af13b4bf66",
+        "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
         "declared_exports": [
           "ProfessionalDelivery",
           "ProfessionalOutcome",
@@ -9673,6 +9674,19 @@
           "policyRaw",
           "scores"
         ]
+      },
+      {
+        "path": "supabase/functions/_shared/professional_tip_semantics_test.ts",
+        "layer": "verification",
+        "status": "professional_source_registered_synthetic_verified_native_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "6da6e29da6c3daa63acab494287bac0707250a8f2fbe5dcfb71966c41b58827f",
+        "declared_exports": []
       },
       {
         "path": "supabase/functions/_shared/read_view_catalog_runtime.ts",

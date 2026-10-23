@@ -133,8 +133,7 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
             <OverallCard a={a} />
             <SubjectsSheet a={a} />
             <PositionChart a={a} />
-            <p className="pro-note">상담 tip(이 학생에게 유리한 이유 설명)은 서버의 근거 자료가 연결되면 이 자리에 보입니다. 지금은 근거 연결 전입니다.</p>
-            <div className="pro-sechd">
+                        <div className="pro-sechd">
               <Link className="btn" href={`/pro/students/${encodeURIComponent(student.student_id)}/print?org=${encodeURIComponent(svc.org_id)}&report=${encodeURIComponent(shown.report_id)}&rev=${shown.revision_id}`}>
                 상담 리포트 인쇄·PDF
               </Link>
@@ -161,6 +160,7 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
                 c={shown.published_result.candidates}
                 shortlist={shown.published_result.shortlist ?? {}}
                 fields={svc.role === "teacher" ? { org_id: svc.org_id, student_id: student.student_id, report_id: shown.report_id } : null}
+                reasons={shown.counseling_reasons ?? []}
               />
             ) : (
               <p className="pro-note">아직 찾지 않았습니다. 저장한 성적으로 대학별 환산·유불리와 와일드카드 후보를 찾습니다.</p>
@@ -171,7 +171,7 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
         {shown && (
           <section className="pro-sec" aria-labelledby="picked-h">
             <h2 id="picked-h">담은 학교</h2>
-            <PickedList shortlist={shown.published_result.shortlist ?? {}} analyses={shown.published_result.analyses ?? {}} names={names} />
+            <PickedList shortlist={shown.published_result.shortlist ?? {}} analyses={shown.published_result.analyses ?? {}} names={names} reasons={shown.counseling_reasons ?? []} />
           </section>
         )}
 

@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
   */
   basePath: "/jeongsi",
   turbopack: { root: appRoot },
+  // Next prefixes this source with /jeongsi, including its root, API and redirects.
+  // The domain-root robots.txt is owned by EduTouch and requires a separate bounded patch.
+  async headers() {
+    return [{ source: "/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive, nosnippet" }] }];
+  },
   /*
     서버 액션(성적 저장·담기·관리 작업)의 Origin 허용 목록.
     에듀터치 본체가 /jeongsi/* 를 이 워커로 대신 넘기는 동안(JEONGSI_PREVIEW_ORIGIN)에는

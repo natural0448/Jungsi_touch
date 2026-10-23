@@ -26,6 +26,14 @@ const TIP_CODES = [
   "historical_cut_spread",
   "english_deduction",
   "history_deduction",
+  "classification_basis",
+];
+/** 상담 근거 값·비교 맥락 이름 중 공용 safe_code 에 없는 전문가용 이름(classification_basis 용) */
+const PRO_REASON_NAMES = [
+  "converted_score",
+  "acceptance_lower",
+  "acceptance_upper",
+  "university_converted_score",
 ];
 export class ProfessionalProjection {
   private readonly projection: PublicResponseProjection;
@@ -37,6 +45,9 @@ export class ProfessionalProjection {
     if (!Array.isArray(safeCodes)) unavailable();
     schemas.pro_reason_code = scalar("string", false, {
       enum: [...safeCodes, "counseling_basis_not_connected"],
+    });
+    schemas.pro_reason_name = scalar("string", false, {
+      enum: [...safeCodes, ...PRO_REASON_NAMES],
     });
     const id = ref("identifier"),
       text = scalar("string"),
@@ -130,17 +141,24 @@ export class ProfessionalProjection {
       student_candidates: object({ org_id: id, student_id: id, candidates: ref("candidates") }),
       student_bookmarks: object({ org_id: id, student_id: id, shortlist: map(ref("shortlist")) }),
       reason_value: object({
-        name: ref("safe_code"),
+        name: ref("pro_reason_name"),
         value: ref("decimal_or_integer"),
         unit: text,
       }),
-      comparison_context: object({
-        academic_year: integer,
-        reference_year: nullableInteger,
-        metric: ref("safe_code"),
-        score_scale: ref("safe_code"),
-        population_id: id,
-      }),
+      comparison_context: {
+        ...object({
+          academic_year: integer,
+          reference_year: nullableInteger,
+          metric: ref("pro_reason_name"),
+          score_scale: ref("pro_reason_name"),
+          population_id: ref("identifier", true),
+          policy_version: ref("identifier", true),
+          range_definition: nullableText,
+          range_role: scalar("string", true, { enum: ["baseline_reference"] }),
+        }),
+        required: ["academic_year", "reference_year", "metric", "score_scale", "population_id"],
+        optional: ["policy_version", "range_definition", "range_role"],
+      },
       public_basis: object({
         title: text,
         url: scalar("string", false, { pattern: "https://[^\\s]+" }),
@@ -150,6 +168,7 @@ export class ProfessionalProjection {
         code: scalar("string", false, { enum: TIP_CODES }),
         status: scalar("string", false, { enum: ["ready"] }),
         academic_year: integer,
+        offering_id: ref("identifier", true),
         comparison_context: ref("pro_comparison_context"),
         values: array(ref("pro_reason_value")),
         public_basis: array(ref("pro_public_basis")),
@@ -185,6 +204,7 @@ export class ProfessionalProjection {
         student_id: id,
         snapshot: ref("snapshot_paid"),
         watermark: ref("pro_watermark"),
+        counseling_reasons: array(ref("pro_reason")),
       }),
       retention_fingerprints: object({
         students: array(
@@ -270,6 +290,16 @@ export class ProfessionalProjection {
         r.status !== "ready" || !Array.isArray(r.values) || !r.values.length ||
         !Array.isArray(r.public_basis) || !r.public_basis.length
       ) continue;
+      // Old saved reasons lack the definition/policy linkage. Preserve the report, omit that tip.
+      if (r.code === "classification_basis") {
+        const context = r.comparison_context;
+        if (!context || typeof context !== "object" || Array.isArray(context)) continue;
+        const c = context as NativeObject;
+        if (
+          c.range_role !== "baseline_reference" || typeof c.range_definition !== "string" ||
+          !c.range_definition.trim() || typeof c.policy_version !== "string" || !c.policy_version
+        ) continue;
+      }
       for (const rawBasis of r.public_basis) {
         const basis = proObject(rawBasis);
         try {
@@ -303,6 +333,9 @@ export class ProfessionalProjection {
     }
     if (route.response_schema === "student_report") {
       data.counseling_reasons = this.cleanReasons(data.counseling_reasons);
+    }
+    if (route.response_schema === "student_print_projection") {
+      data.counseling_reasons = this.cleanReasons(data.counseling_reasons ?? []);
     }
     if (route.response_schema === "student_report_page" && Array.isArray(data.items)) {
       for (const row of data.items) {
