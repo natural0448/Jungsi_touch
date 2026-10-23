@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.111",
+  "version": "1.9.112",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7153,7 +7153,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.111",
+        "contract_version": "1.9.112",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7327,7 +7327,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.111",
+        "contract_version": "1.9.112",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7493,7 +7493,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.111",
+        "contract_version": "1.9.112",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7512,7 +7512,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.111",
+        "contract_version": "1.9.112",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7537,7 +7537,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.111",
+        "contract_version": "1.9.112",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7562,7 +7562,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.111",
+        "contract_version": "1.9.112",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -17746,27 +17746,39 @@
           "기획111 / 기준develop5714f75 / PR61 소스 통합",
           "source·PR·merge CI3 PASS·정상1226/Edge1114/oracle993 mismatch0·독립144+schema1 재사용",
           "실제 strict core7/status approved_exact_fields·subjects7/subject4를 명시하고 rich writer proof와 분리한다. 기존 권위·원자료·native·한도·보안·소유권은 유지하며 DataRoot producer wire delta와 실제 자료/Owner 인수·배포는 별도 미완료다."
+        ],
+        [
+          "화면 / 최종 합격 예비번호의 최소 표시 자격 연결",
+          "PR62 source65392e3a → develop 11f9c5f1",
+          "source5 exact bytes/LF-only 비교 PASS; 기존41/ReactSSR8/추가3 재사용; source·PR 정확CI PASS, 병합/최종CI는 별도 영수증",
+          "backend가 검증한 rank q만 sq(verified_official·번)로 옮긴다. 원문/native·보류·2026결측·다른 통계·파생 산술·권한은 보존한다. 화면 Owner(화면팀)가 Worker99c03f4f 배포를 보고했다. 실제 q/core·2parts·assembly·새 판 브라우저는 별도 NOT_RUN이다."
+        ],
+        [
+          "크롤링 / 에듀터치 본체·정시 화면 실제 적용 부분 인수",
+          "2026-10-23 회신+20:05KST 보충 / Worker99c03f4f / 본체 PR405·407",
+          "Root 익명6주소·홈 범위 검수: root277B/기존규칙보존·응답header/no-store·직접403·정본301; 인증P1=200은 화면팀 보고 수용",
+          "동일 헤더 중복은 보고대로 기록한다. BFF/RSC·인증거절/redirect 실제 응답과 기존 보안 전체 인수는 NOT_RUN. 본체 Actions 미실행을 CI통과로 표시하지 않는다. 크롤링 거부는 인증·소유권·relay·RLS·예산을 대신하지 않는다."
         ]
       ],
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
       "latest_verified_source": {
         "format": "jungsi.verified-source-reference/v1",
-        "commit": "f373b7c0213f5c7cf961b3bfda553d4435323554",
-        "spec_version": "1.9.108",
-        "ci_run_id": 39894417688,
+        "commit": "65392e3acd044411d00eccad15cbfef1d8139295",
+        "spec_version": "1.9.111",
+        "ci_run_id": 39962564942,
         "ci_conclusion": "success",
         "source_only": true,
         "checks": {
-          "python": 1220,
-          "deno": 943,
+          "python": 1226,
+          "deno": 1114,
           "oracle": 993
         },
         "deno_suite_counts": {
           "foundation": 656,
           "current_public": 58,
           "owner_review": 36,
-          "professional": 85,
-          "read_view_extension": 94,
+          "professional": 154,
+          "read_view_extension": 196,
           "whole_population": 14
         },
         "additional_functional_node_suite": {
@@ -20540,6 +20552,16 @@
         "REQ-25"
       ],
       "summary": "화면팀 변경(담당자 CHECKPOINT12 화면 private v3 수신): 정확 5714 기준 5파일 패치(p1-snapshot·p1-field-qualification·dto·p1-shape·snapshot-table)를 develop 33b06e42 위에 그대로 적용했다. 인증된 snapshot part 응답에서 backend가 승인한 최종 추가합격 순위 q만 최소 표시 메타(sq: verified_official·번)로 옮기고, 원문 값·일반 보류·2026 결측·다른 통계·기존 파생 산술은 바꾸지 않는다. 브라우저 props로 q subject·권위/영수증 SHA·PK를 복사하지 않는다. p1-shape.ts는 저장소 속성(eol=lf)에 맞춰 LF로 정규화됐다. 실제 q 자료·새 판·운영 배포는 NOT_RUN이며 q가 없는 현재판 표시는 그대로다."
+    },
+    {
+      "date": "2026-10-23",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "기획112: 다른 PC의33b06/spec111을 동기화하고 화면 private v3 5파일을 PR62로 통합한다. 크롤링 정책의 본체 robots277B·정문/404/워커403·헤더/no-store와 기존 규칙 보존을 독립 확인하고, 20:05KST 관리자P1 200은 화면팀 보고로 수용한다. 화면 Owner(화면팀)와 에듀터치 본체 수신자를 구분한다. BFF/RSC·인증거절/redirect·전체 보안·실제 q 신규2분할/발행판 검수는 별도 미완료이며 DB/엔진·RLS·한도·기존 권한·요금·파일 보존을 변경하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -30045,7 +30067,7 @@
       "format": "jungsi.crawl-indexing-policy/v1",
       "revision": "2026.10.23.v1",
       "authority": "Explicit user instruction2026-10-23; planning approved additive protection",
-      "status": "APPROVED_IMPLEMENTATION_IN_PROGRESS_NOT_LIVE_VERIFIED",
+      "status": "DEPLOYED_PUBLIC_SUBSET_VERIFIED_AUTHENTICATED_P1_OWNER_REPORTED_FULL_ACCEPTANCE_PENDING",
       "requirements": [
         "REQ-24",
         "REQ-25",
@@ -30076,8 +30098,8 @@
       },
       "ownership": {
         "planning": "Canonical policy and synchronized planning/routing",
-        "presentation": "Existing feature/presentation-foundation metadata, headers and meaningful response-path tests",
-        "front_door_owner": "Existing edutouch host root robots merge and actual deployment/readback",
+        "presentation": "화면 Owner(화면팀): existing feature/presentation-foundation, Worker/BFF and authenticated response acceptance",
+        "front_door_owner": "에듀터치 본체: existing host root robots and frontdoor response delivery, separate from 화면 Owner(화면팀)",
         "DB_and_engine": "Unchanged user-led DB/calculation ownership; no schema/model changes for crawling policy"
       },
       "non_substitution": "Robots and indexing hints depend on client compliance. They are not access control, authentication or guaranteed data/AI-training exclusion. An identifying user-agent string does not establish trust.",
@@ -30091,9 +30113,9 @@
       "no_new_cost_or_resource": true,
       "no_hidden_path_disclosure": "Do not list private storage/model/secret paths in publicly readable robots.",
       "states": {
-        "app_implementation": "DEVELOP_MERGED_SOURCE_AND_SYNTHETIC_VERIFIED_NOT_DEPLOYED",
-        "root_robots": "OWNER_PATCH_REQUIRED_NOT_APPLIED",
-        "operational_readback": "NOT_RUN"
+        "app_implementation": "DEVELOP_SOURCE_INTEGRATED_OWNER_REPORTS_WORKER_DEPLOYED",
+        "root_robots": "APPLIED_INDEPENDENT_PUBLIC277B_RULE_PRESERVATION_PASS",
+        "operational_readback": "PUBLIC_SUBSET_PASS_AUTHENTICATED_P1_OWNER_REPORTED_BFF_AND_NEGATIVE_PATHS_NOT_RUN"
       },
       "references": [
         {
@@ -30162,8 +30184,8 @@
         "scope": "Actual config headers/redirects functions, root metadata export and proxy normal/denied paths with invented dependency ports; UA invariance. Next/OpenNext real server/build and deployed HTTP are NOT_RUN.",
         "root_response_observed_sha256": "321c2f27cda24bd4aead0639e897da95836ee16ae292cdcba67df09a04fb57f2",
         "root_proposal_sha256": "185506a0ed3e733c3699e94a7635710a6eee88710346da2aa3a55eae9bad0ecf",
-        "root_applied": false,
-        "operating_acceptance": "NOT_RUN",
+        "root_applied": true,
+        "operating_acceptance": "SCOPED_PUBLIC_HTTP_PASS_AUTHENTICATED_P1_OWNER_REPORTED_FULL_OPERATING_NOT_RUN",
         "integrated_develop_merge": "445cd3908b4ae150bb094e078fd6ce9957e2a996",
         "exact_source_CI": {
           "push": 39885371784,
@@ -30173,8 +30195,22 @@
         "exact_integration_CI": {
           "run_id": 39886054894,
           "conclusion": "success"
-        }
-      }
+        },
+        "root_current_sha256": "7914438d567aa6d2d68974862f55fd5228975d99ad2b265c7e848aad9ffe815f",
+        "root_current_bytes": 277,
+        "latest_operating_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023"
+      },
+      "history_before_20261023_operating_receipt": {
+        "status": "APPROVED_IMPLEMENTATION_IN_PROGRESS_NOT_LIVE_VERIFIED",
+        "states": {
+          "app_implementation": "DEVELOP_MERGED_SOURCE_AND_SYNTHETIC_VERIFIED_NOT_DEPLOYED",
+          "root_robots": "OWNER_PATCH_REQUIRED_NOT_APPLIED",
+          "operational_readback": "NOT_RUN"
+        },
+        "root_applied": false,
+        "operating_acceptance": "NOT_RUN"
+      },
+      "operating_scope_note": "Identical repeated X-Robots-Tag values are recorded as reported, no additional redeployment is required solely to deduplicate. Framework404 exposes noindex meta with all four HTTP directives. The www301 has no independent content and no header. Authenticated BFF/RSC/error/redirect acceptance and full security regression remain separate."
     }
   },
   "secured_backend_preparation_contract": {
@@ -31021,7 +31057,8 @@
             "OPS-P2-ADMIN-SESSION-FIX-SUBJECT-DISPLAY-20261016",
             "OPS-OWNER-P1-P2-V3-20261020",
             "OPS-OWNER-NATIONWIDE-BROWSER-20261022"
-          ]
+          ],
+          "crawler_scoped_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023"
         },
         "security_gates": {
           "label": "응답·직접 권한·수집 방지 세 보안 gate",
@@ -34198,7 +34235,51 @@
         "all_security_gates_passed": false,
         "production_ready": false
       },
-      "effective_current_runtime_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+      "effective_current_runtime_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022",
+      "latest_frontend_crawler_receipt_20261023": {
+        "format": "jungsi.frontend-crawler-scoped-operating-receipt/v1",
+        "evidence_id": "OPS-FRONTEND-CRAWL-SCOPED-20261023",
+        "date_KST": "2026-10-23",
+        "status": "OWNER_DEPLOYMENT_REPORTED_PUBLIC_HTTP_INDEPENDENTLY_VERIFIED_AUTHENTICATED_P1_REPORTED",
+        "candidate_commit": "65392e3acd044411d00eccad15cbfef1d8139295",
+        "integrated_develop_merge": "11f9c5f1a16ea184d44ff8f3ba3b27447e6bf05c",
+        "worker_version_reported": "99c03f4f-7857-43a7-9c22-d4eefdc6da6c",
+        "worker_deployment_time_reported": "2026-10-23 evening KST; exact deployment timestamp not supplied",
+        "deployment_settings": "Owner reports --keep-vars and no settings/secrets/resource/plan changes",
+        "source_markdown_sha256": "7dde0b63c2eb73d0264520ecfa58b129d32cfacd78e9053055b93f62146c29f2",
+        "independent_public_receipt_sha256": "ce1f9044920126ab68a1d71954b344c3cdcf16fcfb37b4c5e8007319a71f6336",
+        "source_byte_review_sha256": "d823326417040a9a915eddd8c1f430f49d99fb8eedcc9144e7cf1b73dc478d8c",
+        "root_deployment_reported": {
+          "repository": "hottaes1694-cyber/edutouch",
+          "robots_PR": 405,
+          "frontdoor_headers_PR": 407,
+          "frontdoor_main_short_sha": "795c8fa"
+        },
+        "root_robots_observed": {
+          "bytes": 277,
+          "sha256": "7914438d567aa6d2d68974862f55fd5228975d99ad2b265c7e848aad9ffe815f",
+          "old_rules_and_sitemap_preserved": true
+        },
+        "public_paths": "Independent anonymous200/404/403 headers+no-store, root277B and canonical301 observed; no cookies/auth/body retained",
+        "authenticated_P1": {
+          "evidence_kind": "USER_FORWARDED_FRONTEND_OWNER_OBSERVATION",
+          "time_KST": "2026-10-23T20:05:00+09:00",
+          "path": "/jeongsi/admissions/results",
+          "status": 200,
+          "X-Opennext": "1",
+          "X-Robots-Tag": "noindex, nofollow, noarchive, nosnippet; same repeated values reported",
+          "Cache-Control": "private, no-store",
+          "Root_independent_rerun": "NOT_RUN"
+        },
+        "authenticated_BFF_RSC_denied_redirect_headers": "NOT_RUN",
+        "full_security_or_22_operation_acceptance": "NOT_ESTABLISHED_BY_THIS_RECEIPT",
+        "actual_q_new_publication_browser": "NOT_RUN_CURRENT_PUBLICATION_HAS_NO_q",
+        "edutouch_root_CI": "OWNER_REPORTED_ACTIONS_NOT_STARTED_BILLING; local tsc/eslint and deployed build only, no CI success claimed",
+        "transient_public_timeouts": "Two later anonymous GETs timed out; primary successes preserved; no response-speed acceptance",
+        "source_only_security_invariants": "No auth/ownership/RLS/CSRF/relay/quota/backend-engine source changed in frontend delta",
+        "production_ready": false
+      },
+      "effective_current_frontend_crawler_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023"
     }
   },
   "history_presentation_contract": {

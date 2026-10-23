@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.111",
+  "contract_version": "1.9.112",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -391,7 +391,8 @@
             "OPS-P2-ADMIN-SESSION-FIX-SUBJECT-DISPLAY-20261016",
             "OPS-OWNER-P1-P2-V3-20261020",
             "OPS-OWNER-NATIONWIDE-BROWSER-20261022"
-          ]
+          ],
+          "crawler_scoped_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023"
         },
         "security_gates": {
           "label": "응답·직접 권한·수집 방지 세 보안 gate",
@@ -3568,7 +3569,51 @@
         "all_security_gates_passed": false,
         "production_ready": false
       },
-      "effective_current_runtime_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+      "effective_current_runtime_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022",
+      "latest_frontend_crawler_receipt_20261023": {
+        "format": "jungsi.frontend-crawler-scoped-operating-receipt/v1",
+        "evidence_id": "OPS-FRONTEND-CRAWL-SCOPED-20261023",
+        "date_KST": "2026-10-23",
+        "status": "OWNER_DEPLOYMENT_REPORTED_PUBLIC_HTTP_INDEPENDENTLY_VERIFIED_AUTHENTICATED_P1_REPORTED",
+        "candidate_commit": "65392e3acd044411d00eccad15cbfef1d8139295",
+        "integrated_develop_merge": "11f9c5f1a16ea184d44ff8f3ba3b27447e6bf05c",
+        "worker_version_reported": "99c03f4f-7857-43a7-9c22-d4eefdc6da6c",
+        "worker_deployment_time_reported": "2026-10-23 evening KST; exact deployment timestamp not supplied",
+        "deployment_settings": "Owner reports --keep-vars and no settings/secrets/resource/plan changes",
+        "source_markdown_sha256": "7dde0b63c2eb73d0264520ecfa58b129d32cfacd78e9053055b93f62146c29f2",
+        "independent_public_receipt_sha256": "ce1f9044920126ab68a1d71954b344c3cdcf16fcfb37b4c5e8007319a71f6336",
+        "source_byte_review_sha256": "d823326417040a9a915eddd8c1f430f49d99fb8eedcc9144e7cf1b73dc478d8c",
+        "root_deployment_reported": {
+          "repository": "hottaes1694-cyber/edutouch",
+          "robots_PR": 405,
+          "frontdoor_headers_PR": 407,
+          "frontdoor_main_short_sha": "795c8fa"
+        },
+        "root_robots_observed": {
+          "bytes": 277,
+          "sha256": "7914438d567aa6d2d68974862f55fd5228975d99ad2b265c7e848aad9ffe815f",
+          "old_rules_and_sitemap_preserved": true
+        },
+        "public_paths": "Independent anonymous200/404/403 headers+no-store, root277B and canonical301 observed; no cookies/auth/body retained",
+        "authenticated_P1": {
+          "evidence_kind": "USER_FORWARDED_FRONTEND_OWNER_OBSERVATION",
+          "time_KST": "2026-10-23T20:05:00+09:00",
+          "path": "/jeongsi/admissions/results",
+          "status": 200,
+          "X-Opennext": "1",
+          "X-Robots-Tag": "noindex, nofollow, noarchive, nosnippet; same repeated values reported",
+          "Cache-Control": "private, no-store",
+          "Root_independent_rerun": "NOT_RUN"
+        },
+        "authenticated_BFF_RSC_denied_redirect_headers": "NOT_RUN",
+        "full_security_or_22_operation_acceptance": "NOT_ESTABLISHED_BY_THIS_RECEIPT",
+        "actual_q_new_publication_browser": "NOT_RUN_CURRENT_PUBLICATION_HAS_NO_q",
+        "edutouch_root_CI": "OWNER_REPORTED_ACTIONS_NOT_STARTED_BILLING; local tsc/eslint and deployed build only, no CI success claimed",
+        "transient_public_timeouts": "Two later anonymous GETs timed out; primary successes preserved; no response-speed acceptance",
+        "source_only_security_invariants": "No auth/ownership/RLS/CSRF/relay/quota/backend-engine source changed in frontend delta",
+        "production_ready": false
+      },
+      "effective_current_frontend_crawler_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023"
     }
   }
 }
