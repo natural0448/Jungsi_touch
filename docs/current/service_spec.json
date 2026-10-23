@@ -20235,6 +20235,17 @@
         "REQ-31"
       ],
       "summary": "2026-10-23 기획108: PR58 크롤링 meta/header·전문가 표시 의미 보존의 develop 통합과 정확 SHA CI를 기록한다. 내부 Guide 시험은 소스·계층·네 요구사항·별도 suite·선택 snapshot SHA/static import가 모두 검증된 정확 경로만 공개 read3 시험과 분리하며, 미등록/불량 등록·전체 보안·공개28/전문가21/foundation656·실제 운영 미검수 상태는 유지한다."
+    },
+    {
+      "date": "2026-10-23",
+      "requirements": [
+        "REQ-02",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "P1 학교가20개초과 입력조각에 걸친 경우에도 기존20fragment/6part/12school 한도를 유지해 불변 partialKV와fenced offset메타데이터로 나눠 조립한다. 발행본/세대/키·fence/step/조각순서를 검증하고 미완성 학교는 색인·ready에 올리지 않는다. 실제 모듈/SQLite 합성62와 scoped strict noEmit를 추가하며 원자료·native값·상태·권한·예산·DO cap·자원은 바꾸지 않는다. 정상훅/정확CI 및 실제후보/배포 인수는 각각 별도 증거로 구분한다. 실제 후보의 값/상태 전달 PASS와 필드별 자격·보류 해소 및 새 판 운영 인수 미완료를 구분한다."
     }
   ],
   "overall_analysis_contract": {
@@ -154458,7 +154469,7 @@
     "manifest": "Deterministic semantic version/content SHA, rule version/SHA, input current-head binding, payload bytes/encoding/decompressed size, actual school/row/year counts and creation time. Shared source/basis/cohort definitions are references, not repeated audit bodies. Separate source observations, mapped display rows and unmapped held observations; reconcile all included/excluded selections to the declared source head. Measure gzip/decompressed sizes; a proposed estimate is not a physical bound or acceptance result.",
     "read_API": "Two explicit read-only operations: small current head and a version-bound gzip/full or bounded-part body. Final routes/DTO/bounds are registered with implementation. No direct browser Storage permission.",
     "refresh": "New current head/rules produce one cross-reviewed immutable snapshot; identical content reuses existing bytes. Stable trust anchor, publisher scope, expected-head CAS and rollback must be defined; never remove pins to trust arbitrary mutable content.",
-    "cache": "Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization. Actual authenticated head/body API calls retain request/result accounting; a BFF/KV hit with no API call is not charged a fictional full-body API read. Existing personal/engine logical cache accounting stays unchanged. No cache_delivery intent or client quota waiver flag is introduced. FE-CONC-01~04의 화면 소스는 불변 KV 키와 native SQLite 조정자(JT_P1_COORDINATOR/P1SnapshotCoordinator)로 준비한다. head/progress/ready를 KV 잠금으로 처리하지 않고, 복수 인스턴스의 head 재확인·관리자 단일 준비·만료 fence를 원자적으로 조정한다. 최종 색인 작성 직후 최신 head를 다시 확인하며 live/synthetic 조정 상태는 서버 고정 이름으로 분리한다. 필수 KV·조정 바인딩이 없는 실연결/배포는 실패로 표시하고, 명시 synthetic+development/test에서만 같은 상태 기계의 메모리 저장소를 허용한다. 동시 합성36건과 기존 전체 후보의 로컬 재생은 통과했지만 native 자원 생성·worker packaging·실제 배포·운영 혼합 부하는 NOT_RUN이다. CPU 멀티스레딩이나 이용자 무대기를 확정하지 않는다. 사용자 P1-DO-ONLY-20261021에 따라 해당 조정자만 예외 허용됐으며, 실제 계정의 비용 검수·자원 등록·배포·정문 인수는 별도 영수증 전까지 NOT_RUN이다. 회원 표시 getUser 전환과 방문 기록 헤더 조건 보완의 소스 검토를 수용하되 영역 표지나 정상 관측만으로 중계 인증을 완료 처리하지 않는다.",
+    "cache": "Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization. Actual authenticated head/body API calls retain request/result accounting; a BFF/KV hit with no API call is not charged a fictional full-body API read. Existing personal/engine logical cache accounting stays unchanged. No cache_delivery intent or client quota waiver flag is introduced. FE-CONC-01~04의 화면 소스는 불변 KV 키와 native SQLite 조정자(JT_P1_COORDINATOR/P1SnapshotCoordinator)로 준비한다. head/progress/ready를 KV 잠금으로 처리하지 않고, 복수 인스턴스의 head 재확인·관리자 단일 준비·만료 fence를 원자적으로 조정한다. 최종 색인 작성 직후 최신 head를 다시 확인하며 live/synthetic 조정 상태는 서버 고정 이름으로 분리한다. 필수 KV·조정 바인딩이 없는 실연결/배포는 실패로 표시하고, 명시 synthetic+development/test에서만 같은 상태 기계의 메모리 저장소를 허용한다. 동시 합성36건과 기존 전체 후보의 로컬 재생은 통과했지만 native 자원 생성·worker packaging·실제 배포·운영 혼합 부하는 NOT_RUN이다. CPU 멀티스레딩이나 이용자 무대기를 확정하지 않는다. 사용자 P1-DO-ONLY-20261021에 따라 해당 조정자만 예외 허용됐으며, 실제 계정의 비용 검수·자원 등록·배포·정문 인수는 별도 영수증 전까지 NOT_RUN이다. 회원 표시 getUser 전환과 방문 기록 헤더 조건 보완의 소스 검토를 수용하되 영역 표지나 정상 관측만으로 중계 인증을 완료 처리하지 않는다. 학교가 여러 입력 조각에 걸쳐 있으면 기존 단계당 원문6조각·학교완료12개·고유 fragment읽기20개 한도 안에서 여러 fenced step으로 조립한다. 미완성 학교 rows는 현재 발행본/세대에 결속한 불변 KV key에만 두며 조정 progress에는 학교ID·다음조각 offset·키·이전쓰기prefix·step 메타데이터만 둔다. offset 범위·이전 fence/step·발행본·세대·원래 fragment 순서를 검증하며 완성 전에는 school_keys/학교완료수·ready에 노출하지 않는다. 부분 KV 전파지연·head변경·만료 writer는 fail closed/새 fence 재개로 처리하고 원문 재읽기나 한도 확대·새 자원을 요구하지 않는다. 이 후속의 실제 모듈/SQLite 합성62 및 최소 framework ambient 경계 strict noEmit 통과는 운영 배포나 실제 후보 전수 검수 완료를 뜻하지 않는다. 별도 Root 비공개 전체후보 모듈 재생 PASS는 동결 source hash와 최종 commit blob 동일성에만 결속하며 Worker 용량·실제 인증·배포 인수를 대신하지 않는다. 숫자 전달 PASS는 원래 pending_metadata와 unit=null을 ready로 승격하거나 보류를 해소한 검수가 아니다. 별도 필드별 출처 자격 refs의 계약/DTO 연동/검수와 새 판 운영 인수는 본 조립 수정에 포함하지 않는다.",
     "pagination": "Snapshot-backed page/search covers its entire manifest domain with server-side university paging and exact filtered counts. Legacy history.search retains its original bounded cursor and six-page UI behavior until the new path is live; no claim that a partial600 metric result is a whole snapshot.",
     "performance": "Frontend target first page within2s and local search within1s; separate cold version acquisition from warm server-cache page/search timing. These are acceptance targets, not measured PASS.",
     "acceptance": [
@@ -154625,7 +154636,82 @@
       },
       "hosted_BFF_browser_acceptance": "NOT_RUN",
       "unrequested_cpu_thread_pool_or_unlimited_users_claim": false,
-      "resource_authorization_ref": "supabase_deployment_contract.platform_policy.scoped_resource_exceptions.P1-DO-ONLY-20261021"
+      "resource_authorization_ref": "supabase_deployment_contract.platform_policy.scoped_resource_exceptions.P1-DO-ONLY-20261021",
+      "school_fragment_resume": {
+        "format": "jungsi.p1-school-fragment-resume/v1",
+        "status": "SOURCE_IMPLEMENTED_SYNTHETIC62_AND_SCOPED_TYPECHECK_PASS_NOT_DEPLOYED",
+        "baseline_source_sha": "f0e529da1ef577936fa50d4c00db52c476a2f7c4",
+        "requirements": [
+          "REQ-02",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "issues": [
+          "FE-CONC-01",
+          "FE-CONC-02",
+          "FE-CONC-03",
+          "FE-CONC-04"
+        ],
+        "source_bindings": [
+          {
+            "path": "apps/web/src/lib/p1-snapshot.ts",
+            "sha256": "5061b970ff12ce139dd71170f00c9d1119f19df1c0c13b1aa739aea2c796fd11"
+          },
+          {
+            "path": "apps/web/tests/p1-snapshot.test.mjs",
+            "sha256": "3d4e108846e2664379b9a7989be6327c5f85704f0f7001416ab0c9036329202c"
+          }
+        ],
+        "existing_limits_preserved": {
+          "source_parts_per_step": 6,
+          "unique_fragment_reads_per_step": 20,
+          "school_completions_per_step": 12,
+          "coordinator_progress_document_cap_bytes": 131072,
+          "coordinator_receipt_step_limit": 256
+        },
+        "partial_checkpoint": {
+          "KV": "immutable token writePrefix key; rows plus exact snapshot/publication/generation and original ordered fragment IDs",
+          "coordinator_progress": "school_id, next_fragment, key, write_prefix, step metadata only; no row body",
+          "validation": "first incomplete school; bounded nonterminal integer offset; immediately prior committed step; same generation prefix with older valid fence; exact partial key; current publication and snapshot; exact ordered fragment prefix",
+          "publication": "school_keys and schoolsDone only after all school fragments; ready only after existing final current-head revalidation"
+        },
+        "verification": {
+          "actual_modules_and_native_SQLite_in_memory": {
+            "tests": 62,
+            "pass": 62,
+            "fail": 0,
+            "skipped": 0
+          },
+          "focused_cases": [
+            "21 and41 fragments; <=20 unique fragment reads, <=6 original parts, <=12 school completions each step",
+            "all original PK rows, native number text and published statistic definition/unit preserved",
+            "actor restart and two-admin shared writer",
+            "partial KV visibility pending, no empty-ready or source reread",
+            "expired partial claimant and concurrent publication change",
+            "wrong school/offset/step/fence/generation/key/publication/snapshot/fragment order rejected"
+          ],
+          "scoped_strict_typecheck": "actual module/local imports with minimal ambient framework boundary PASS; actual SDK and full framework build NOT_RUN",
+          "normal_hooks_and_exact_CI": "required separate exact followup commit receipts",
+          "actual_candidate_replay": "ROOT_PRIVATE_OFFLINE_MODULE_REPLAY_PASS_ON_FROZEN_SOURCE; final_commit_blob_identity_binding_required",
+          "root_private_module_replay": {
+            "receipt_sha256": "f256be410b72cf9ba112707c78299aba6d03028ab0abc93b21bc98e25ca5ac1b",
+            "source_sha256": "5061b970ff12ce139dd71170f00c9d1119f19df1c0c13b1aa739aea2c796fd11",
+            "scope": "Root verified offline whole candidate module consumer; actual SDK/build/Worker capacity/auth/runtime approval/deployment NOT_RUN"
+          },
+          "original_status_transport_and_pending_resolution": {
+            "transport": "Root private MODULE/React checks preserve original numeric value, native status and unit only",
+            "pending_metadata_and_null_unit": "PRESERVED; NOT_PROMOTED_TO_READY",
+            "field_specific_source_qualification_refs": "Separate contract/DTO/acceptance followup; not implemented by this partial assembly change",
+            "pending_resolution_and_new_publication_or_operating_acceptance": "NOT_RUN"
+          }
+        },
+        "operating_deployment": "NOT_RUN",
+        "existing_canonical_data_or_percentile_model_changed": false,
+        "new_resources_roles_policy_budget_or_Secrets_changed": false,
+        "approved_planning_base": "944f87be740a7ae5408f90f3310f7e55cee1915b"
+      }
     },
     "published_statistics_extension": {
       "format": "jungsi.p1-published-statistics-extension/v1",
