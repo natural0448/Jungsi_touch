@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.110",
+  "version": "1.9.111",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7153,7 +7153,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.110",
+        "contract_version": "1.9.111",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7327,7 +7327,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.110",
+        "contract_version": "1.9.111",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7493,7 +7493,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.110",
+        "contract_version": "1.9.111",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7512,7 +7512,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.110",
+        "contract_version": "1.9.111",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7537,7 +7537,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.110",
+        "contract_version": "1.9.111",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7562,7 +7562,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.110",
+        "contract_version": "1.9.111",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -17740,6 +17740,12 @@
           "PR59 a65bc6c → develop f373b7c0",
           "정상 commit/push, 정확 sourceCI2·병합CI 통과; 고정 source5061과 모듈 검수 결속",
           "원래 수치/자료형/status 전달 검수만 수용한다. 필드별 서비스 자격 연동, 보류 해소와 새판 운영 배포 인수는 NOT_RUN이다."
+        ],
+        [
+          "q core 영수증·작성 감사기록 형식 일치화",
+          "기획111 / 기준develop5714f75 / PR61 소스 통합",
+          "source·PR·merge CI3 PASS·정상1226/Edge1114/oracle993 mismatch0·독립144+schema1 재사용",
+          "실제 strict core7/status approved_exact_fields·subjects7/subject4를 명시하고 rich writer proof와 분리한다. 기존 권위·원자료·native·한도·보안·소유권은 유지하며 DataRoot producer wire delta와 실제 자료/Owner 인수·배포는 별도 미완료다."
         ]
       ],
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
@@ -20516,6 +20522,16 @@
         "REQ-31"
       ],
       "summary": "공통 read-view 합성 fixture가 유효하게 등록된 Guide 시험을 제거하지 않도록 보정하고, 등록 부재·잘못된 등록·미등록 유사 경로·소스 결속 오류의 독립 회귀5를 추가한다. strict 운영 검사기·공개28·전문가21·foundation656·보안8·실운영 미검수 상태는 유지한다. PR59의 bounded 학교조립 소스 통합과 정확 SHA CI를 기록하되 원상태 전달 검수와 필드별 자격 해소를 구분한다."
+    },
+    {
+      "date": "2026-10-23",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "기획111: PR61의 검수 소스·기획/라우팅 develop 통합과 정확 source/PR/merge CI를 기록하고, 실제 reader가 받는 service core7/status approved_exact_fields·subjects7/subject4와 rich writer audit 분리를 명시한다. q/descriptor/approvals는 core 원본 SHA에만 결속하며 새 권위 승인·한도·인증·배포 권한을 추가하지 않는다. 실제 core/2parts/독립assembly·화면 q·Owner JWT/BFF/운영 배포는 별도 NOT_RUN으로 유지한다."
     }
   ],
   "overall_analysis_contract": {
@@ -21731,7 +21747,11 @@
         "rules": [
           "Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.",
           "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.",
-          "Only final_additional_admission_rank has optional service_qualification. Exact authority/receipt and CID/year/PK/selected variant grants come from the existing byte-pinned independent review; raw value/status/unit/URL/date/general identity stay unchanged. Other cells never accept q."
+          "Only final_additional_admission_rank has optional service_qualification. Exact authority/receipt and CID/year/PK/selected variant grants come from the existing byte-pinned independent review; raw value/status/unit/URL/date/general identity stay unchanged. Other cells never accept q.",
+          "서비스용 core 영수증은 jungsi.history-field-qualification-receipt/v1, status=approved_exact_fields이며 정확7키(format,status,authority_sha256,source_head_sha256,scope_sha256,expected_previous_manifest_sha256,subjects)만 받는다. 작성 감사용 rich proof를 서비스 영수증으로 대신하지 않는다.",
+          "core subjects 각 항목의 정확7키는 field,subject,expected_raw_cell_sha256,expected_native_value_type,expected_raw_status,expected_raw_unit,expected_identity_review_sha256이다. field=final_additional_admission_rank, subject는 observation_id/academic_year/offering_pk/identity_variant_index 정확4키이며 string/pending_metadata/null 원형을 결속한다.",
+          "q.qualification_receipt_sha256, review-only descriptor.receipt의 원본 bytes/SHA와 approvals는 같은 service core 바이트 SHA를 가리킨다. jungsi.p1-writer-field-qualification-receipt/v1 rich writer proof는 별도 감사 근거로 보존하고 core 지문을 참조한다. audit 파일을 core로 다시 라벨링하거나 양 형식을 느슨하게 함께 수용하지 않는다.",
+          "기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다."
         ],
         "field_qualification_contract": {
           "format": "jungsi.history-field-qualification-read/v1",
@@ -21812,6 +21832,44 @@
             "rank_only": true,
             "shared_cell_unchanged": true,
             "hash_scope": "EXACT_GIT_SOURCE_BYTES_UTF8_LF"
+          },
+          "core_receipt_fields": [
+            "format",
+            "status",
+            "authority_sha256",
+            "source_head_sha256",
+            "scope_sha256",
+            "expected_previous_manifest_sha256",
+            "subjects"
+          ],
+          "core_receipt_status": "approved_exact_fields",
+          "core_receipt_subject_fields": [
+            "field",
+            "subject",
+            "expected_raw_cell_sha256",
+            "expected_native_value_type",
+            "expected_raw_status",
+            "expected_raw_unit",
+            "expected_identity_review_sha256"
+          ],
+          "writer_audit_separation": {
+            "audit_format": "jungsi.p1-writer-field-qualification-receipt/v1",
+            "service_receipt_format": "jungsi.history-field-qualification-receipt/v1",
+            "q_descriptor_and_approvals_pin": "SHA256 of exact service core UTF8 bytes only",
+            "audit_role": "Preserved independent writer audit; references core SHA. Never relabel or load audit as service core.",
+            "operating_activation": "NOT_RUN"
+          },
+          "source_integration": {
+            "PR": 61,
+            "source_commit": "238c9b25932317cb9a0fa810a61e38fb53821b7e",
+            "develop_merge": "5714f75b98199e78ce646a1d85b0374670a7b0d0",
+            "source_and_merge_tree": "1c60743dfc6c3550ea7a36818a5f162d53d63189",
+            "exact_success_CI": [
+              39909303803,
+              39910303787,
+              39911395866
+            ],
+            "actual_data_and_Owner_activation": "NOT_RUN"
           }
         }
       },
