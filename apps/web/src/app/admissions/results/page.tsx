@@ -1,3 +1,4 @@
+import { AutoRefresh } from "@/components/auto-refresh";
 import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import Form from "next/form";
@@ -164,13 +165,14 @@ function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
     d: l.d,
     sub: [l.c, l.t, l.pk === null ? "모집행 연결 확인 중" : null].filter(Boolean).join(" · "),
     r27: null,
+    ratio27: null, // 2027 반영비율도 담당자 자료(연도별 반영비 조회) 연결 뒤 여기서 채운다
   };
 }
 
 function NotReady({ state }: { state: "none" | "changed" | "expired" | "checking" | "ready" }) {
   const text =
     state === "checking"
-      ? { h: "입시결과의 현재판을 확인하고 있습니다", p: "현재판 확인을 함께 처리하고 있습니다. 잠시 후 다시 열어 주세요. 이전 판을 최신처럼 보여 드리지는 않습니다." }
+      ? { h: "입시결과의 현재판을 확인하고 있습니다", p: "몇 초 뒤 자동으로 다시 불러옵니다. 계속 이 화면이면 잠시 후 다시 열어 주세요. 이전 판을 최신처럼 보여 드리지는 않습니다." }
       : state === "changed"
       ? { h: "입시결과 새 판을 준비하고 있습니다", p: "대학 발표 정리본이 새 판으로 바뀌어, 확인을 마칠 때까지 잠시 보여 드리지 않습니다. 이전 판을 최신처럼 보이지 않기 위해서입니다." }
       : state === "expired"
@@ -180,6 +182,7 @@ function NotReady({ state }: { state: "none" | "changed" | "expired" | "checking
     <section className="gate flat">
       <h2>{text.h}</h2>
       <p>{text.p}</p>
+      {state === "checking" && <AutoRefresh />}
     </section>
   );
 }

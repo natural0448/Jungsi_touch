@@ -60,12 +60,13 @@ async function putJson(store: Kv, key: string, value: unknown): Promise<void> {
 function document(value: object): PublicDocument { return value as unknown as PublicDocument; }
 const pause = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
-/** One claimant performs the authenticated API read; other requests poll metadata for at most 700ms.
+/** One claimant performs the authenticated API read; other requests poll metadata for at most 3.5s.
  * Polling never holds another request's I/O promise. A busy boundary stays pending, never stale-ready.
+ * (10-24 QA: 700ms was shorter than a cold head read, so overlapping visitors saw "checking"; the page also retries itself.)
  */
 async function checkedHead(src: JungsiSource, caller: Caller, coordinator: Client, afterRevision?: number): Promise<CoordinationView | null> {
   let claim = await coordinator.claimHead(afterRevision);
-  for (const ms of [100, 200, 400]) {
+  for (const ms of [100, 200, 400, 800, 1000, 1000]) {
     if (claim.state !== "busy") break;
     await pause(ms); claim = await coordinator.claimHead(afterRevision);
   }
@@ -424,13 +425,16 @@ async function school(ready: Ready, id: string): Promise<Row[]> {
 export const PAGE_SCHOOLS = 20;
 const norm = (s: string) => s.normalize("NFC").replace(/\s+/g, "").toLowerCase();
 export type SearchResult = { total_schools: number; total_units: number; total_pending: number; page: number; pages: number; schools: { school: School; rows: Row[]; keys: Set<string> }[] };
+/** 쉼표(, ， 、)로 나눈 여러 검색어. 하나라도 맞으면 찾는다(10-24: "강원대, 홍익대"가 한 글자열로 취급돼 0건이었다) */
+const terms = (s?: string) => (s ?? "").split(/[,，、]/).map(norm).filter(Boolean).slice(0, 10);
+const anyHit = (qs: string[], hay: string[]) => qs.some(q => hay.some(h => norm(h).includes(q)));
 export async function searchSnapshot(ready: Ready, q: { university?: string; unit?: string; region?: string; group?: string; page?: number }): Promise<SearchResult> {
-  const ix = await index(ready), uq = q.university ? norm(q.university) : "", dq = q.unit ? norm(q.unit) : "";
-  const schoolHit = ix.schools.map(s => !uq || s.names.some(n => norm(n).includes(uq)));
+  const ix = await index(ready), uq = terms(q.university), dq = terms(q.unit);
+  const schoolHit = ix.schools.map(s => !uq.length || anyHit(uq, s.names));
   const matched = new Map<number, Set<string>>(); let units = 0, pending = 0;
   for (const [si, key, deps, groups, regions, names] of ix.units) {
-    if (!schoolHit[si] && !(uq && names.split("\n").some(n => norm(n).includes(uq)))) continue;
-    if (dq && !deps.split("\n").some(d => norm(d).includes(dq))) continue;
+    if (!schoolHit[si] && !(uq.length && anyHit(uq, names.split("\n")))) continue;
+    if (dq.length && !anyHit(dq, deps.split("\n"))) continue;
     if (q.group && !groups.split("\n").includes(q.group)) continue;
     if (q.region && !regions.split("\n").includes(q.region)) continue;
     let set = matched.get(si); if (!set) matched.set(si, set = new Set()); set.add(key);
