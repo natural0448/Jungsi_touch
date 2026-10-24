@@ -80,7 +80,6 @@ function Cut({ c }: { c: Cell }) {
       <Value c={c} />
       {c.v !== null && basis && <small className="rs-bs">{basis}</small>}
       {c.v !== null && asOf && <small className="rs-bs">자료 기준 {asOf}</small>}
-      {c.v !== null && c.url && <small className="rs-bs"><a href={c.url} target="_blank" rel="noopener noreferrer" aria-label={`${publishedStatisticLabel(c)} 원문`}>원문</a></small>}
     </>
   );
 }
@@ -126,7 +125,7 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
   const hasAlt = rows.some((r) => r.alt.e.length > 0 || r.alt.om > 0);
   const pending = latest.pk === null;
   const variants = Math.max(...rows.map((r) => r.idv));
-  const urls = [...new Set(rows.flatMap((r) => [r.rc, r.cr, r.ad, r.rk, r.c50, r.c70, ...r.alt.e].map((c) => c.url).filter((u): u is string => !!u)))].slice(0, 3);
+  // 출처 링크는 보이지 않는다(2026-10-24 사용자 결정): 상당수가 어디가 내부 요청 주소라 직접 열면 오류 화면이 나온다
   return (
     <div className="rs-yt">
       {pending && <p className="rs-idnote">모집행 연결 확인 중인 발표입니다. 다른 학년도와 합치지 않고 원문 그대로 보입니다.</p>}
@@ -198,16 +197,6 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
           </tbody>
         </table>
       </div>
-      {urls.length > 0 && (
-        <p className="rs-src">
-          출처{" "}
-          {urls.map((u, i) => (
-            <a key={u} href={u} target="_blank" rel="noopener noreferrer">
-              {i + 1}
-            </a>
-          ))}
-        </p>
-      )}
     </div>
   );
 }
