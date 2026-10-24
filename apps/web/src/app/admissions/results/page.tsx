@@ -12,8 +12,8 @@ import { currentSnapshot, searchSnapshot, type Current, type SearchResult } from
 import { lockFor, page } from "@/lib/routes";
 import { GROUPS, PATH, REGIONS, hrefWith, parseQuery, type Query } from "./query";
 import { groupUnits, latestOf } from "./snapshot-table";
-import { UnitList, type SumCell, type SumItem } from "./unit-row";
-import { unitKey, type Cell } from "@/lib/p1-shape";
+import { UnitList, type SumItem } from "./unit-row";
+import { unitKey } from "@/lib/p1-shape";
 import "./results.css";
 
 const route = page("PAGE-01");
@@ -151,8 +151,11 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   );
 }
 
-const sumCell = (c: Cell): SumCell => [c.v, c.u, c.s.startsWith("pending") && (c.v !== null || c.s === "pending_metadata") ? c.r : null];
-/** 접힌 줄에 넘길 작은 요약: 가장 최근 학년도의 모집인원·경쟁률·50/70%컷 */
+/**
+ * 접힌 줄에 넘길 작은 요약: 2027학년도 모집인원만(2026-10-24 사용자 결정).
+ * 정리본은 2024~2026 발표만 담고 1페이지 모집단위 → 2027 모집행 연결이 아직 없어(담당자 요청 10-24) r27 은 null 이다.
+ * 담당자가 자료 모양을 정하면 여기서만 채운다.
+ */
 function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
   const l = latestOf(rows);
   return {
@@ -160,8 +163,7 @@ function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
     g: l.g,
     d: l.d,
     sub: [l.c, l.t, l.pk === null ? "모집행 연결 확인 중" : null].filter(Boolean).join(" · "),
-    y: l.y,
-    c: [sumCell(l.rc), sumCell(l.cr), sumCell(l.c50), sumCell(l.c70)],
+    r27: null,
   };
 }
 
