@@ -10,6 +10,7 @@ import { ShortlistTray } from "@/components/shortlist-tray";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
+import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
 import { ensureAnalyses, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
 import { viewPath } from "@/lib/content-view";
@@ -129,7 +130,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                     <b className="num">{res.matching_school_count}</b>개 대학 · <b className="num">{res.matching_offering_count}</b>개 모집단위
                   </>
                 )}
-                {res.as_of && <small> · {res.as_of.replaceAll("-", ".")} 기준</small>}
+                {/* 날짜만(YYYY-MM-DD)이든 시각까지(ISO)든 'YYYY.MM.DD'로 보인다(10-24 QA: 'T14:51:47Z'가 그대로 보였다) */}
+                {asOfDate(res.as_of) && <small> · {asOfDate(res.as_of)} 기준</small>}
               </span>
               {report && <CategoryLegend />}
             </div>
