@@ -435,7 +435,8 @@ export async function searchSnapshot(ready: Ready, q: { university?: string; uni
   for (const [si, key, deps, groups, regions, names] of ix.units) {
     if (!schoolHit[si] && !(uq.length && anyHit(uq, names.split("\n")))) continue;
     if (dq.length && !anyHit(dq, deps.split("\n"))) continue;
-    if (q.group && !groups.split("\n").includes(q.group)) continue;
+    // 발표 표기가 '다'와 '다군'으로 섞여 있어 '군'을 떼고 비교한다(10-24 QA)
+    if (q.group && !groups.split("\n").some(g => g.replace(/군$/, "") === q.group)) continue;
     if (q.region && !regions.split("\n").includes(q.region)) continue;
     let set = matched.get(si); if (!set) matched.set(si, set = new Set()); set.add(key);
     if (key.startsWith("ob:")) pending++; else units++;

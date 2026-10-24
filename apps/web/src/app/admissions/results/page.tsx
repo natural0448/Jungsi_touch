@@ -161,7 +161,8 @@ function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
   const l = latestOf(rows);
   return {
     k: unitKey(l),
-    g: l.g,
+    // 모집군은 '가군·나군·다군'으로 통일해 보인다(발표 표기 '다'·'다군'이 섞여 있다, 10-24 사용자 결정)
+    g: l.g ? l.g.replace(/^([가나다])군?$/, "$1군") : null,
     d: l.d,
     sub: [l.c, l.t, l.pk === null ? "모집행 연결 확인 중" : null].filter(Boolean).join(" · "),
     r27: null,
