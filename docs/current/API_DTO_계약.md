@@ -1,10 +1,10 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.115이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.116이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
-POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/키의 동일 요청은 최초 결과를 현재 권한으로 반환하고 다른 본문/경로는 409다. 리포트 갱신은 expected_version CAS와 PostgreSQL 트랜잭션을 사용한다.
+POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/키의 동일 요청은 최초 결과를 현재 권한으로 반환하고 다른 본문/경로는 409다. 리포트 갱신은 expected_version CAS와 PostgreSQL 트랜잭션을 사용한다. 2026-10-25 채택 후속: 학교별 산출 결과와 회원별 관심대학 본문은 기존 비공개 Storage JSON으로 분리해 새 DB 결과 테이블/본문 중복 저장을 피한다. 기존 트랜잭션·입력권·멱등/권한 메타데이터·기록은 그대로 유지하며 실제 전환 전까지 기존 저장 경로가 동작한다. JSON의 단순 upsert를 CAS로 가정하지 않고 동시성/장애 복구를 인수한 뒤 활성화한다.
 
 권한은 body·query 검증/자료 조회/멱등 조회보다 먼저 검사한다. unknown field와 중복 query key는 거절한다. 숫자 점수/누적은 엔진의 소수 문자열이며 원자료/전체 분포/가중치/비밀값/로컬 출처 경로는 제공하지 않는다. 모든 응답은 Cache-Control: no-store다.
 
@@ -420,7 +420,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=02f92b43de6fa494d87e57574dc67647701f7eb4aa1382a80cdc6d16ce490ffc -->
+<!-- jungsi:generated spec_sha256=bd7134ab3695d8f9a80f8f1a68e7e0ea6259b64381ea33e3e805adad26d7cef7 -->
 
 
 ## P1·P2 화면 변경의 한정 수용
