@@ -32,7 +32,8 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
               // 유료인데 만료일이 없으면 서버가 관리자 이용권 예외로 연 것이다(FE-ADMIN-ACCESS-01).
               // 실제 이용권이 있는 관리자는 서버가 그 만료일을 보내므로 날짜가 그대로 나온다
               session.entitlement_expires_at ? (
-                <span className="pass">이용권 {seoulDate(session.entitlement_expires_at)}까지</span>
+                // 좁은 휴대폰(≤400px)에서는 날짜를 줄여 머리글이 옆으로 밀리지 않게 한다(jungsi.css)
+                <span className="pass">이용권<span className="pass-until"> {seoulDate(session.entitlement_expires_at)}까지</span></span>
               ) : (
                 <span className="pass">관리자 이용</span>
               )
