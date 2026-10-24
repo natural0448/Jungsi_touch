@@ -104,6 +104,30 @@ export interface RuntimeComposition {
   /** Receives exactly five safe fields; never request data or exception objects. */
   readonly observe?: (event: SafeRuntimeObservation) => void | Promise<void>;
 }
+/** The serving graph forwards every scoring capability through the same request-local provider. */
+export function runtimeAnalysisDataPort(
+  context: Pick<NativeRuntimeRequest, "data">,
+  phase: <T>(next: ObservationStage, work: () => Promise<T>) => Promise<T>,
+): UniversityAnalysisDataPort & OverallDataPort & CatalogDataPort {
+  return {
+    getCatalog: async () =>
+      await phase("catalog_provider", async () => (await context.data()).getCatalog()),
+    getExamPack: async (...a) =>
+      await phase("exam_provider", async () => (await context.data()).getExamPack(...a)),
+    getTotalModel: async (...a) =>
+      await phase("total_model_provider", async () => (await context.data()).getTotalModel(...a)),
+    getConversion: async (...a) =>
+      await phase("conversion_provider", async () => (await context.data()).getConversion(...a)),
+    getReference: async (...a) =>
+      await phase("conversion_provider", async () => (await context.data()).getReference(...a)),
+    withScoringBatch: async <T>(work: () => Promise<T>) =>
+      await phase("analysis_provider", async () => (await context.data()).withScoringBatch(work)),
+    getPercentile: async (...a) =>
+      await phase("percentile_provider", async () => (await context.data()).getPercentile(...a)),
+    getAnalysis: async (...a) =>
+      await phase("analysis_provider", async () => (await context.data()).getAnalysis(...a)),
+  };
+}
 function operation(policies: readonly ApiRoutePolicy[], request: Request): ApiOperationId | null {
   const pathname = new URL(request.url).pathname;
   const ordered = [...policies].sort((a, b) =>
@@ -295,29 +319,7 @@ export class NativeRuntimeApi {
         activeReports: async (...a) =>
           await phase("active_reports", async () => (await context.platform()).activeReports(...a)),
       };
-      const data: UniversityAnalysisDataPort & OverallDataPort & CatalogDataPort = {
-        getCatalog: async () =>
-          await phase("catalog_provider", async () => (await context.data()).getCatalog()),
-        getExamPack: async (...a) =>
-          await phase("exam_provider", async () => (await context.data()).getExamPack(...a)),
-        getTotalModel: async (...a) =>
-          await phase(
-            "total_model_provider",
-            async () => (await context.data()).getTotalModel(...a),
-          ),
-        getConversion: async (...a) =>
-          await phase(
-            "conversion_provider",
-            async () => (await context.data()).getConversion(...a),
-          ),
-        getPercentile: async (...a) =>
-          await phase(
-            "percentile_provider",
-            async () => (await context.data()).getPercentile(...a),
-          ),
-        getAnalysis: async (...a) =>
-          await phase("analysis_provider", async () => (await context.data()).getAnalysis(...a)),
-      };
+      const data = runtimeAnalysisDataPort(context, phase);
       const catalog = this.config.readViewExtensions && this.config.candidateCatalog
         ? this.config.candidateCatalog(data, this.clock, sql, this.config.environment, context)
         : new CatalogService(data, this.clock);

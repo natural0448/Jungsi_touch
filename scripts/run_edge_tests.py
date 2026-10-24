@@ -163,7 +163,8 @@ SCHOOL_REFERENCE_SOURCES=tuple('supabase/functions/_shared/jungsi/'+name+'.ts'fo
     'application/school_score_inputs','application/school_reference_scoring','application/history_metric_alias',
     'domain/saved_reference_projection','infrastructure/school_reference_source','application/university_scoring',
     'application/university_analysis','application/offering_analysis','domain/exam_pack','infrastructure/native_data_provider',
-    'infrastructure/native_source_selection','infrastructure/supabase_artifacts','infrastructure/runtime_controls'))
+    'infrastructure/native_source_selection','infrastructure/supabase_artifacts','infrastructure/runtime_controls',
+    'infrastructure/runtime_composition'))
 
 def school_reference_registration(spec,before):
     """Keep the original 656 cases and bind the additive reference suite to exact snapshot bytes."""

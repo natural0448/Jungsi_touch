@@ -4,6 +4,7 @@ import { SupabaseArtifactClient } from "../../supabase/functions/_shared/jungsi/
 import { NativeSourceSelection } from "../../supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts";
 import { NativeDataProvider } from "../../supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts";
 import { UniversityScoringService } from "../../supabase/functions/_shared/jungsi/application/university_scoring.ts";
+import { runtimeAnalysisDataPort } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts";
 import {
   cloneNativeJson,
   nativeJsonText,
@@ -333,9 +334,13 @@ Deno.test("concrete runtime controls and shared physical budget keep one and 100
     const p = f.f.profile();
     (p.scores.inquiry as NativeObject[])[0].percentile = 31;
     (p.scores.inquiry as NativeObject[])[1].percentile = 17;
+    const runtimeData = runtimeAnalysisDataPort(
+      { data: () => Promise.resolve(f.data) },
+      (_stage, work) => work(),
+    );
     const before = f.budget!.snapshot(),
       heads = f.headCount(),
-      scorer = new UniversityScoringService(f.data);
+      scorer = new UniversityScoringService(runtimeData);
     await scorer.batch(async () => {
       for (const offering of f.offerings) {
         equal((await scorer.calculate(offering, p)).dto().converted_score, "31.00");

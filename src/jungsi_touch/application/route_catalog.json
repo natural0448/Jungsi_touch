@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.115",
-  "source_sha256": "85715fa6813cbae30e2fa73c27f6816d1ad5196aa93011e720c48f9048c01382",
+  "source_sha256": "b7b008fced565f05f99b75c69602bc4314c4e4c30eb62381500fe73adcd552a4",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3652,11 +3652,11 @@
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
-            "sha256": "33dd8e0ccbebf4b06ab53623ca644c0614ed5505e5b1b324e1973667e181ba15"
+            "sha256": "6a38cb848f338e8492e1d90589e865799d79c95f7b1766526ee0b8664ba1fe9a"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog_test.ts",
-            "sha256": "6cf0dd329d026af3791486c718ea2698b3df645a8ced540bfb25393245b9b2bf"
+            "sha256": "d04c0c3fc800a456fcb54c1a4ab72c856552b1c8a007cbab914faf4cc2f4f4f8"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/history_metric_alias.ts",
@@ -3699,6 +3699,10 @@
             "sha256": "3c9ef09bfa6ba1885545c632621da8eb13d776e311e47066a590df9097e23523"
           },
           {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+            "sha256": "96190d07a6402a5261defc243c9c6d2d3ccb49b6796804c2795caa8c2e2f0139"
+          },
+          {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
             "sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b"
           },
@@ -3728,7 +3732,7 @@
           },
           {
             "path": "tests/edge/test_school_reference_provider.ts",
-            "sha256": "8ee144039279ae170df62dd7da0b0edf599493a8b350555a0eb70c8de7b60429"
+            "sha256": "503cf88c2eee0b902b4d70b78377f6628f65606b96796f0c1e2bbd836ccf1001"
           },
           {
             "path": "tests/edge/test_school_reference_scoring.ts",
@@ -3742,7 +3746,8 @@
         "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
         "activation_status": "NOT_RUN",
         "operating_writes": 0
-      }
+      },
+      "serving_composition": "NativeRuntimeApi uses runtimeAnalysisDataPort to forward getReference and withScoringBatch; current unqualified selections suppress reference lookup alongside production conversion."
     }
   },
   "university_percentile_contract": {

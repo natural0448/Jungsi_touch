@@ -1,4 +1,5 @@
 """The added source suite cannot borrow the original foundation count or stale bytes."""
+import ast
 import copy
 import json
 from pathlib import Path
@@ -18,6 +19,9 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
         verification = runner.school_reference_registration(spec, before)
         self.assertEqual(verification['test_count'], 46)
         self.assertEqual(spec['edge_harness']['unit_count'], 656)
+        source = Path(__file__).resolve().parents[1] / 'scripts/check_project_consistency.py'
+        functions = [n.name for n in ast.parse(source.read_text(encoding='utf8')).body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        self.assertEqual(len(functions), len(set(functions)), 'Common validation functions must not silently override one another')
 
     def test_additive_suite_cannot_lose_pins_or_count(self):
         for mutation in ('hash', 'count', 'baseline', 'paths'):

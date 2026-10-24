@@ -563,6 +563,11 @@ export class CurrentPublicCatalogService extends CatalogService {
     data.getConversion = async (id) =>
       this.unqualifiedSelections.has(id) ? null : await conversion(id);
     data.getAnalysis = async (id) => this.unqualifiedSelections.has(id) ? null : await analysis(id);
+    if (data.getReference) {
+      const reference = data.getReference.bind(data);
+      data.getReference = async (id) =>
+        this.unqualifiedSelections.has(id) ? null : await reference(id);
+    }
   }
   override offering(release: CatalogRelease, id: unknown): NativeObject {
     if (typeof id === "string" && this.currentSelections.has(id)) {

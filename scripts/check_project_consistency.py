@@ -1028,22 +1028,6 @@ def school_reference_test_registration(spec):
     return set(registered['test_paths']),[]
 
 
-def school_reference_test_registration(spec):
-    """Only the independently pinned additive reference suite leaves the read-view set."""
-    verification=spec.get('university_scoring_contract',{}).get('scoped_reference_contract',{}).get('verification')
-    if verification is None:return set(),[]
-    from run_edge_tests import school_reference_registration,EdgeFailure
-    bindings=verification.get('source_bindings')
-    if not isinstance(bindings,list):return set(),['School reference source/test registration invalid']
-    try:
-        hashes={b['path']:b['sha256']for b in bindings}
-        registered=school_reference_registration(spec,hashes)
-        indexed={p:v.get('declarations',{}).get('source_sha256')for p,v in spec.get('edge_harness',{}).get('files',{}).items()}
-        indexed.update({v['path']:v.get('source_sha256')for v in spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('edge_sources',{}).get('files',[])})
-        if registered is None or any(not re.fullmatch(r'[a-f0-9]{64}',str(sha))or(path in indexed and indexed[path]!=sha)for path,sha in hashes.items()):
-            raise ValueError('source hash')
-    except (EdgeFailure,KeyError,TypeError,ValueError):return set(),['School reference source/test registration invalid']
-    return set(registered['test_paths']),[]
 
 
 def validate_read_view_extension(spec):
@@ -1060,9 +1044,6 @@ def validate_read_view_extension(spec):
     separate_tests={p for p in files if p.startswith("tests/edge/test_")and p.endswith(".ts")} - set(foundation_tests)
     professional_tests,professional_errors=professional_guide_test_registration(spec)
     separate_tests-=professional_tests
-    reference_tests,reference_errors=school_reference_test_registration(spec)
-    separate_tests-=reference_tests
-    professional_errors+=reference_errors
     reference_tests,reference_errors=school_reference_test_registration(spec)
     separate_tests-=reference_tests
     professional_errors+=reference_errors

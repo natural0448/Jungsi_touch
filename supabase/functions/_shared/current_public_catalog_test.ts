@@ -756,6 +756,10 @@ Deno.test("current public unqualified new offering suppresses conversion and jud
   req.body = { expected_version: 1, offering_ids: ["2027:SYNTHETIC-NEW-PK"] };
   let calls = 0;
   const native = {
+    getReference: (_id: string) => {
+      calls++;
+      return Promise.resolve(null);
+    },
     getExamPack: () => Promise.resolve(null),
     getConversion: async (_id: string) => {
       await Promise.resolve(); // Simulate the asynchronous data-port boundary.
@@ -777,6 +781,7 @@ Deno.test("current public unqualified new offering suppresses conversion and jud
     null,
   );
   equal(await native.getConversion("2027:SYNTHETIC-NEW-PK"), null);
+  equal(await native.getReference("2027:SYNTHETIC-NEW-PK"), null);
   equal(await native.getAnalysis("2027:SYNTHETIC-NEW-PK"), null);
   equal(calls, 0);
 });

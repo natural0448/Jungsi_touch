@@ -640,7 +640,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "96edb81286c715293b1971e82f5fe2c07a68e9b8bbebcfeed7a08ebf3c990587",
+      "source_sha256": "cfcb5476d98655b1efab458862a3d215b2997cf853c1a0369a34df4b9fc483e9",
       "symbols": [
         {
           "kind": "class",
@@ -904,12 +904,6 @@
           "kind": "function",
           "name": "runtime_connection_document",
           "signature": "def runtime_connection_document(spec):",
-          "decorators": []
-        },
-        {
-          "kind": "function",
-          "name": "school_reference_test_registration",
-          "signature": "def school_reference_test_registration(spec):",
           "decorators": []
         },
         {
@@ -1597,7 +1591,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "0a3c13e48d4250dda1a3dd21f3620a4e5cef6cd53ee4f8402e8ca05be6cfdc38",
+      "source_sha256": "e026d11c15d383e06b178f254b6af66c08b2b05a78f3de42fd78d5b73bcc6f6f",
       "symbols": [
         {
           "kind": "function",
@@ -6716,7 +6710,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "33dd8e0ccbebf4b06ab53623ca644c0614ed5505e5b1b324e1973667e181ba15",
+        "source_sha256": "6a38cb848f338e8492e1d90589e865799d79c95f7b1766526ee0b8664ba1fe9a",
         "declared_exports": [
           "CURRENT_PUBLIC_OPERATIONS",
           "parsePublicCatalogQuery",
@@ -6840,7 +6834,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "6cf0dd329d026af3791486c718ea2698b3df645a8ced540bfb25393245b9b2bf",
+        "source_sha256": "d04c0c3fc800a456fcb54c1a4ab72c856552b1c8a007cbab914faf4cc2f4f4f8",
         "declared_exports": []
       },
       {
@@ -9244,13 +9238,14 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "eeac06ed226b310e3f780fa30a8ac75fa17d726014a9bb8428b378abb76a8797",
+        "source_sha256": "96190d07a6402a5261defc243c9c6d2d3ccb49b6796804c2795caa8c2e2f0139",
         "declared_exports": [
           "RuntimeRoutePolicy",
           "RuntimeComposition",
           "NativeRuntimeApi",
           "SafeRuntimeObservation",
-          "observeRuntimeResponse"
+          "observeRuntimeResponse",
+          "runtimeAnalysisDataPort"
         ]
       },
       {

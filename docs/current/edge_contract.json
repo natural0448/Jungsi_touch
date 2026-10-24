@@ -84002,7 +84002,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "eeac06ed226b310e3f780fa30a8ac75fa17d726014a9bb8428b378abb76a8797",
+        "source_sha256": "96190d07a6402a5261defc243c9c6d2d3ccb49b6796804c2795caa8c2e2f0139",
         "symbols": [
           {
             "declarations": [
@@ -84361,6 +84361,179 @@
               }
             ],
             "name": "RuntimeComposition"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  context: Pick<NativeRuntimeRequest, \"data\">,\n  phase: <T>(next: ObservationStage, work: () => Promise<T>) => Promise<T>,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "context",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Pick",
+                        "value": {
+                          "typeName": "Pick",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeRuntimeRequest",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeRuntimeRequest",
+                                  "specifier": "./runtime_context.ts"
+                                },
+                                "typeName": "NativeRuntimeRequest"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "data",
+                              "value": {
+                                "kind": "string",
+                                "string": "data"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "phase",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "next",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "ObservationStage",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "ObservationStage"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "work",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "fnOrConstructor",
+                                "value": {
+                                  "constructor": false,
+                                  "params": [],
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "Promise",
+                                    "value": {
+                                      "typeName": "Promise",
+                                      "typeParams": [
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "T",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "typeParam"
+                                            },
+                                            "typeName": "T"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "T",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "typeParam"
+                                    },
+                                    "typeName": "T"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "typeParams": [
+                            {
+                              "name": "T"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "intersection",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "UniversityAnalysisDataPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "UniversityAnalysisDataPort",
+                            "specifier": "../application/university_analysis.ts"
+                          },
+                          "typeName": "UniversityAnalysisDataPort"
+                        }
+                      },
+                      {
+                        "kind": "typeRef",
+                        "repr": "OverallDataPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "OverallDataPort",
+                            "specifier": "../application/overall_analysis.ts"
+                          },
+                          "typeName": "OverallDataPort"
+                        }
+                      },
+                      {
+                        "kind": "typeRef",
+                        "repr": "CatalogDataPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "CatalogDataPort",
+                            "specifier": "../application/catalog.ts"
+                          },
+                          "typeName": "CatalogDataPort"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "runtimeAnalysisDataPort"
           },
           {
             "declarations": [
@@ -85384,7 +85557,8 @@
         "RuntimeComposition",
         "NativeRuntimeApi",
         "SafeRuntimeObservation",
-        "observeRuntimeResponse"
+        "observeRuntimeResponse",
+        "runtimeAnalysisDataPort"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": {
@@ -119328,6 +119502,11 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
+            "importedName": "runtimeAnalysisDataPort",
+            "originalName": "runtimeAnalysisDataPort",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+          },
+          {
             "importedName": "syntheticRuntimeBinding",
             "originalName": "syntheticRuntimeBinding",
             "src": "tests/edge/synthetic_runtime_binding.ts"
@@ -119338,7 +119517,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "8ee144039279ae170df62dd7da0b0edf599493a8b350555a0eb70c8de7b60429",
+        "source_sha256": "503cf88c2eee0b902b4d70b78377f6628f65606b96796f0c1e2bbd836ccf1001",
         "symbols": [
           {
             "declarations": [
@@ -119660,6 +119839,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
             }
           ]
         },
