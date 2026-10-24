@@ -202,7 +202,7 @@ function LoginGate() {
       <section className="gate" aria-labelledby="gate-h">
         <div className="ic"><LockIcon size={20} /></div>
         <h2 id="gate-h">로그인하면 성적을 넣고 내 위치를 볼 수 있습니다</h2>
-        <p>성적 입력과 전체 위치는 에듀터치 회원이면 이용권 없이 쓸 수 있습니다.</p>
+        <p>성적 입력과 리포트는 이용권 회원이 쓸 수 있습니다. 로그인하면 이용권 없이도 예시 리포트를 미리 볼 수 있습니다.</p>
         <div className="acts">
           <a className="btn p" href={loginHref(route.path)}>에듀터치 로그인</a>
         </div>

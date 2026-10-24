@@ -63,6 +63,25 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
     throw e;
   }
 
+  if (state.kind === "failed") {
+    return (
+      <>
+        {head}
+        <div className="wrap pg-body fv">
+          <ScoreBasis overall={state.report.overall ?? null} emptyText="유리한 대학 찾기는 확인된 성적으로 계산합니다." />
+          <section className="gate flat">
+            <h2>유리한 학교를 지금 찾지 못했습니다</h2>
+            <p>저장한 성적은 그대로 있습니다. 잠시 뒤 다시 열어 주세요. 계속되면 고객센터에 알려 주세요. (사유 코드 {state.code})</p>
+            <div className="acts">
+              <Link className="btn p" href={route.path}>다시 열기</Link>
+              <Link className="btn" href={p3.path}>{p3.label}</Link>
+            </div>
+          </section>
+        </div>
+      </>
+    );
+  }
+
   if (state.kind !== "ready") {
     return (
       <>

@@ -60,7 +60,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     throw e;
   }
 
-  const report = state.kind === "ready" ? state.report : null;
+  // 갱신이 거절돼도(failed) 이미 붙어 있던 분석은 그대로 보인다. 새로 붙이지 못한 칸만 분석 없음으로 남는다
+  const report = state.kind === "ready" || state.kind === "failed" ? state.report : null;
   const an = (id: string): Cell => (report ? report.analyses?.[id] ?? null : "need");
   const picked = new Set(picks.map((p) => p.offering_id));
   const items = res.items ?? [];
@@ -87,6 +88,9 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
         />
         {state.kind === "score_required" && (
           <p className="ps-warn">성적 확인이 끝나지 않아 모집단위 분석을 붙이지 않았습니다. 내 성적 리포트에서 입력을 확인해 주세요.</p>
+        )}
+        {state.kind === "failed" && (
+          <p className="ps-warn">이 목록의 모집단위 분석을 지금 붙이지 못했습니다. 잠시 뒤 다시 열어 주세요. 계속되면 고객센터에 알려 주세요. (사유 코드 {state.code})</p>
         )}
 
         <section className="filter" aria-label="검색 조건">

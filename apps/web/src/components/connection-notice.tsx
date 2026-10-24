@@ -1,14 +1,17 @@
-import { missingConfig } from "@/lib/api";
+import { apiMode, missingConfig } from "@/lib/api";
 import type { ConnectionError } from "@/lib/api";
+import { isEdutouchAdmin } from "@/lib/admin";
 import { seoulTime } from "@/lib/format";
 
 /**
  * 우리 서비스 API 에 닿지 못했거나 서버가 요청을 제한했을 때의 안내(DEV-006 mode_rules, SEC-07).
  * 결과·건수·점수를 지어내지 않고, 일반 회원이나 합성 응답으로 대신 보이지도 않는다.
- * 설정값 자체(주소·키)는 화면에 내보내지 않고 이름만 적는다. 제한 안내는 사유 코드와 재시도 시각만 보인다.
+ * 설정값 자체(주소·키)는 화면에 내보내지 않는다. 빠진 설정의 이름은 운영에서는 에듀터치 관리자에게만,
+ * 개발·합성 환경에서는 누구에게나 보인다(회원에게는 내부 이름이 뜻 없는 정보라 감춘다). 제한 안내는 사유 코드와 재시도 시각만 보인다.
  */
-export function ConnectionNotice({ e }: { e: ConnectionError }) {
-  const missing = e.kind === "unconfigured" ? missingConfig() : [];
+export async function ConnectionNotice({ e }: { e: ConnectionError }) {
+  const showNames = e.kind === "unconfigured" && (apiMode() !== "live" || (await isEdutouchAdmin().catch(() => false)));
+  const missing = showNames ? missingConfig() : [];
   // 서버가 이 기능의 자료를 아직 승인·연결하지 않았다(503 operation_scope_not_approved). 장애나 이용권 문제가 아니다.
   // 이 코드만 따로 안내하고 다른 503(security_policy_unavailable 등)은 아래 일반 문구 그대로 둔다
   const pendingScope = e.code === "operation_scope_not_approved";

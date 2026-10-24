@@ -18,7 +18,12 @@ function key(prefix: string, report: ReportDto, extra = "") {
   return `${prefix}-${report.report_version}-${h.toString(36)}`.slice(0, 128);
 }
 
-export type ReportState = { kind: "none" } | { kind: "ready"; report: ReportDto } | { kind: "score_required"; report: ReportDto | null };
+/** failed: 서버가 갱신을 거절했다(사유 코드). 화면 전체를 깨지 않고 갱신 전 리포트로 그리며 사유만 안내한다 */
+export type ReportState =
+  | { kind: "none" }
+  | { kind: "ready"; report: ReportDto }
+  | { kind: "score_required"; report: ReportDto | null }
+  | { kind: "failed"; report: ReportDto; code: string };
 
 /** 내 리포트(이 브라우저가 기억한 번호). 없으면 성적 입력이 먼저다 */
 export async function loadMine(src: JungsiSource, caller: Caller): Promise<ReportDto | null> {
@@ -32,7 +37,7 @@ async function retryOnConflict(src: JungsiSource, caller: Caller, report: Report
     const res = await run(current);
     if (res.ok) return { kind: "ready", report: res.value };
     if (res.code === "score_confirmation_required") return { kind: "score_required", report: current };
-    if (res.code !== "revision_conflict") throw new Error(`정시터치 리포트 갱신 실패: ${res.code}`);
+    if (res.code !== "revision_conflict") return { kind: "failed", report: current, code: res.code };
     const fresh = await src.readReport(caller, current.report_id);
     if (!fresh) return { kind: "none" };
     current = fresh;

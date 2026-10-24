@@ -20578,6 +20578,14 @@
         "REQ-26"
       ],
       "summary": "기획113: 기존 승인·독립 원문 근거를 재사용해 서비스용 strict core와 writer audit를 분리한 로컬 납품, 두 분할 원바이트 복구와 미변경 참조 보존, 실제 Source118 어댑터의 오프라인 발행판/응답 검수를 기록한다. 현재 등록 소스·설정 지문과 작은 두 head도 읽기 전용으로 대조했다. 사용자 결정대로 지정 화면 Owner가 최종 등록하며 Storage/발행/Secrets/배포·새 판 JWT/BFF/브라우저는 미완료다. 업무 코드·원문·모형·역할·RLS·예산·운영 만료·현재 운영 판은 변경하지 않는다."
+    },
+    {
+      "date": "2026-10-24",
+      "requirements": [
+        "REQ-24",
+        "REQ-25"
+      ],
+      "summary": "화면팀 변경(10-30 회원 공개 QA 대비): app/error.tsx·global-error.tsx·not-found.tsx 추가(예상 못 한 예외에 Next 기본 영어 화면 대신 다시 시도·고객센터 안내, 오류 내용 대신 digest만). report-ops 의 리포트 갱신 거절을 throw 대신 ReportState failed(사유 코드)로 돌려 3·4페이지가 깨지지 않고 기존 분석·안내를 보인다. 담기·빼기(shortlist.update) 실패를 조용히 무시하지 않고 버튼 옆에 이유를 보인다(PickButton 클라이언트 컴포넌트, 보내는 중 비활성). 2페이지 비로그인 안내 문구를 실제 정책(성적 입력·리포트는 이용권 회원)에 맞췄다. 연결 설정 누락 안내의 설정 이름은 운영에서 에듀터치 관리자에게만 보인다. 서버 계약·인증·한도·DB는 바꾸지 않았다."
     }
   ],
   "overall_analysis_contract": {
