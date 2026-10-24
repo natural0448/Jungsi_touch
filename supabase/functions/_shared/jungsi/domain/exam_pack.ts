@@ -311,6 +311,11 @@ export class NativeExamPack {
     if (!Object.hasOwn(mapped, "grade")) mapped.grade = result.grade;
     return mapped;
   }
+  inquiryCategory(subject: unknown): string {
+    const s = row(row(this.data.subjects)[examSubjectKey(subject)]);
+    check(["social", "science", "vocational"].includes(s.category as string), "invalid_inquiry");
+    return s.category as string;
+  }
   analyze(payload: unknown): NativeExamAnalysis {
     const p = row(payload),
       subjects = row(this.data.subjects),

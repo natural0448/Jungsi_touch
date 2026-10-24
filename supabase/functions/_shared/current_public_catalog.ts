@@ -17,6 +17,10 @@ import {
 import { JsonFloat, type NativeJson, parseNativeJson } from "./jungsi/domain/native_json.ts";
 import { hasAsciiControl, pythonTrim, unicodeCasefold } from "./jungsi/domain/text.ts";
 import { utcText } from "./jungsi/domain/time.ts";
+import {
+  currentHistoryServiceItem,
+  type HistoryAliasEvidence,
+} from "./jungsi/application/history_metric_alias.ts";
 /** Retain the reviewed 5c9 scalar comparison contract without loading an Owner runtime graph. */
 function decimal(value: string): string | null {
   const m = value.match(
@@ -370,7 +374,25 @@ export async function publicCatalogHistory(
     : "pending_metadata";
   return {
     ...await publicCatalogOffering(row, record.guide),
-    metric_name: field(row, "metric_kind"),
+    metric_name: currentHistoryServiceItem(
+      field(row, "metric_kind"),
+      field(row, "statistic_label"),
+      {
+        observation_id: field(row, "canonical_result_id"),
+        academic_year: typeof row.academic_year === "number" ? row.academic_year : null,
+        offering_id: field(row, "offering_id"),
+        cohort: field(row, "cohort"),
+        score_basis: field(meta, "score_basis"),
+        score_scope: field(meta, "score_scope"),
+        source_round: field(meta, "source_round"),
+        statistic_percent: typeof meta.statistic_percent === "number"
+          ? meta.statistic_percent
+          : null,
+      },
+      object(meta.metric_alias_evidence)
+        ? meta.metric_alias_evidence as unknown as HistoryAliasEvidence
+        : null,
+    ),
     statistic_label: field(row, "statistic_label"),
     cohort: field(row, "cohort"),
     value_json_type: field(row, "metric_value_json_type"),

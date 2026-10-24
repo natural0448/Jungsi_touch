@@ -256,6 +256,45 @@ export class SupabaseArtifactClient {
     }
     return key;
   }
+  /** Separate reference-calculation scope; legacy production approvals are never rewritten. */
+  validateReferenceCalculation(raw: Readonly<NativeObject>): string {
+    const entry = object(raw), key = this.validateReference(entry);
+    if (
+      entry.kind !== "reference_conversion" || entry.status !== "approved_reference" ||
+      entry.approval_scope !== "same_exam_mathematical_reference" ||
+      entry.engine_approved !== false || entry.production_allowed !== false ||
+      typeof entry.source_review_sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/.test(entry.source_review_sha256) ||
+      typeof entry.independent_review_sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/.test(entry.independent_review_sha256)
+    ) {
+      fail("artifact_not_approved");
+    }
+    if (entry.archive_only !== false) fail("storage_archive_only");
+    const context = object(entry.reference_context);
+    if (
+      Object.keys(context).sort().join(",") !==
+        "academic_year,exam_id,exam_type,offering_ids,rule_version,score_scale_id,source_pack_version" ||
+      typeof context.academic_year !== "number" || !Number.isSafeInteger(context.academic_year) ||
+      context.academic_year < 2024 || context.academic_year > 2027 ||
+      !["csat", "june_mock", "september_mock"].includes(String(context.exam_type)) ||
+      ["exam_id", "source_pack_version", "rule_version", "score_scale_id"].some((k) =>
+        typeof context[k] !== "string" ||
+        !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(context[k] as string)
+      ) ||
+      !Array.isArray(context.offering_ids) || context.offering_ids.length < 1 ||
+      context.offering_ids.length > 256 ||
+      context.offering_ids.some((v) =>
+        typeof v !== "string" || v.length < 1 || v.length > 128 || hasAsciiControl(v)
+      ) ||
+      new Set(context.offering_ids).size !== context.offering_ids.length
+    ) fail("storage_reference_invalid");
+    if (
+      (entry.bytes as number | bigint) > this.settings.limits.maxArtifactBytes ||
+      (entry.bytes as number | bigint) > 131072
+    ) fail("storage_artifact_too_large");
+    return key;
+  }
   private async get(path: string, limit: number): Promise<Uint8Array<ArrayBuffer>> {
     const url = this.origin + "/storage/v1/" + path, controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.settings.limits.requestTimeoutMs);
@@ -330,7 +369,8 @@ export class SupabaseArtifactClient {
     if (!entries.length) fail("storage_reference_invalid");
     let maximum = 0;
     for (const entry of entries) {
-      this.validateSelectedReference(entry);
+      if (entry.kind === "reference_conversion") this.validateReferenceCalculation(entry);
+      else this.validateSelectedReference(entry);
       maximum = Math.max(maximum, Number(entry.bytes));
     }
     await this.assertBucket(maximum);
@@ -338,6 +378,15 @@ export class SupabaseArtifactClient {
   async artifact(raw: Readonly<NativeObject>): Promise<VerifiedStorageArtifact> {
     // Snapshot the selected entry before any await; later caller mutations cannot repin a read.
     const entry = cloneNativeJson(object(raw)), key = this.validateSelectedReference(entry);
+    return await this.fetchArtifact(entry, key);
+  }
+  async referenceCalculationArtifact(
+    raw: Readonly<NativeObject>,
+  ): Promise<VerifiedStorageArtifact> {
+    const entry = cloneNativeJson(object(raw)), key = this.validateReferenceCalculation(entry);
+    return await this.fetchArtifact(entry, key);
+  }
+  private async fetchArtifact(entry: NativeObject, key: string): Promise<VerifiedStorageArtifact> {
     const bytes = Number(entry.bytes);
     await this.assertBucket(bytes);
     const path = "object/authenticated/" + encodeURIComponent(this.settings.bucket) + "/" +
