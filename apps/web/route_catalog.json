@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.114",
-  "source_sha256": "22ae4e8544c39d4f5ee920a8d7db544989a6cc9fd5db38edd21553817e71bb99",
+  "spec_version": "1.9.115",
+  "source_sha256": "02f92b43de6fa494d87e57574dc67647701f7eb4aa1382a80cdc6d16ce490ffc",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2373,7 +2373,7 @@
         "pending"
       ],
       "independence": "conversion.ready와 assessment.pending은 함께 존재할 수 있다. 대학 분포·입결·지원 판단·자격 미확인은 각각의 사유로 보존한다.",
-      "compatibility": "기존 assessment.converted_score는 계산 완료 값과 일치한다. 판단이 pending이어도 환산 성공 값을 없애지 않는다. years는 학년도별 실제/모평/보정 추정 기준과 pending 사유를 구분한다.",
+      "compatibility": "기존 assessment.converted_score는 계산 완료 값과 일치한다. 판단이 pending이어도 환산 성공 값을 없애지 않는다. years는 학년도별 실제/모평/보정 추정 기준과 pending 사유를 구분한다. 검수 참조값이 존재하면 값은 표시하고 학교별 수능 반영분 참고점수임을 안내한다. pending을 자료 자체 없음으로 표현하지 않고, 참고점수 계산과 정식 지원 판단의 승인 상태를 구별한다.",
       "excluded": [
         "내부 exact 분수",
         "실행 trace",
@@ -8176,7 +8176,10 @@
       "모집·충원·공식 지원자수의 빈 문자열과 공백은 실제 0으로 변환하지 않는다. 파싱 전 결측·형식·안전정수 범위를 검사하고 검수된 정수 원값 0만 0으로 표시한다.",
       "자료가 부족한 카드에서도 추정 총 지원자·추정 탈락자 2열을 유지하고 계산 불가 칸에 ─를 표시한다. 공식 A/Q/C가 확인된 분기는 R 지표나 경쟁률 열의 존재로 탈락자 열을 숨기지 않는다.",
       "2027 모집 상자는 recruitment.read 응답의 모집행 결속과 offering.academic_year=2027을 ready/pending 문구보다 먼저 확인한다. 과거 2024~2026 또는 학년도 미확인 응답은 상태에 관계없이 연계 확인 전이다. 해당 2027 모집행이 확인된 뒤에만 ready 수치 또는 2027 모집 정보 미발행 상태를 표시한다. 과거 응답을 2027 값으로 재명명하거나 연결 미확인을 공식 미공개 확정으로 바꾸지 않는다.",
-      "next_cursor가 남은 학년도는 조건을 좁힌 뒤에도 일부 조회일 수 있다. 잔여 커서 해소 증거 없이 조건을 좁히면 전부 볼 수 있다고 보장하지 않는다. 조회 예산 종료·미완전 모집행 보류로 표시 카드가 0개여도 잔여가 있으면 조회 미완료로 안내한다. 완전한 검색의 빈 결과와 구분하며 일부 조회 중에 조건에 맞는 발행 결과가 없다고 단정하지 않는다."
+      "next_cursor가 남은 학년도는 조건을 좁힌 뒤에도 일부 조회일 수 있다. 잔여 커서 해소 증거 없이 조건을 좁히면 전부 볼 수 있다고 보장하지 않는다. 조회 예산 종료·미완전 모집행 보류로 표시 카드가 0개여도 잔여가 있으면 조회 미완료로 안내한다. 완전한 검색의 빈 결과와 구분하며 일부 조회 중에 조건에 맞는 발행 결과가 없다고 단정하지 않는다.",
+      "같은 의미로 확인된 원문 표현은 정본 관측 ID·native 값·원명칭·단위·출처를 보존한 채 한 서비스 표시 항목에 연결한다. 동의어 연결은 현재 관측 복제·새 CID 생성·원값 덮어쓰기·출처 간 숫자 합산을 뜻하지 않는다. 같은 학년도·모집행·전형·군·코호트·성분·모집 단계·발표 차수의 정의를 함께 확인한다.",
+      "최종충원순위·충원합격순위·최종합격자 예비번호·마지막 합격 후보순위처럼 마지막 합격 순번임이 확인된 표현은 최종 합격 예비번호(번)로 통일한다. 충원인원·추가합격인원·추가모집인원 등의 제목도 대학 공식 설명이 마지막 합격 순번임을 확인하면 같은 항목에 연결하고 원문 제목·단위는 근거로 보존한다.",
+      "추가모집의 별도 모집정원, 실제 추가 합격자 수, 최초 부여 대기번호, 차수별 예비순번과 최종 합격 예비번호를 제목 유사성이나 단위·값 크기만으로 합치지 않는다. 애매한 항목은 이미 알려진 원값·확인 사유를 유지한다. 평균/50/70/75·모집인원/등록인원/지원자수·최초/최종/이월을 구분하고 기존 source qualification을 동의어 처리로 승격하지 않는다."
     ],
     "preview": {
       "selected_preparation": "C_local_review_package",
@@ -8673,6 +8676,58 @@
       "default_entitlement_change_allowed": false,
       "superseded_for_current_consumer_scope": true,
       "historical_boundary": "2026-10-08 최소 C/학교별 부분 발행의 보존 이력이다. 2026-10-19 전국 현재 정본 공개 결정의 선행 조건으로 재적용하지 않는다."
+    },
+    "semantic_alias_contract": {
+      "format": "jungsi.published-metric-semantic-alias-contract/v1",
+      "scope": "Current canonical observations selected for P1 display; raw originals remain immutable.",
+      "status": "SOURCE_LABEL_AUDIT_COMPLETE_RUNTIME_AND_SOURCE_DEFINITION_REVIEW_IN_PROGRESS",
+      "canonical_families": [
+        "recruitment_count_with_stage",
+        "competition_ratio",
+        "additional_admission_count",
+        "final_additional_admission_rank",
+        "final_50_percent_cut",
+        "final_70_percent_cut",
+        "alternate_cut"
+      ],
+      "strong_final_waitlist_labels": [
+        "최종충원순위",
+        "충원합격순위",
+        "최종합격자 예비번호",
+        "마지막 합격 후보순위"
+      ],
+      "ambiguous_labels_require_definition": [
+        "충원인원",
+        "추가합격인원",
+        "추가모집인원",
+        "합격대기번호",
+        "예비번호"
+      ],
+      "canonical_rank_label": "최종 합격 예비번호",
+      "canonical_rank_unit": "번",
+      "preserved": [
+        "current_observation_id",
+        "raw_statistic_label",
+        "raw_native_value_and_type",
+        "raw_unit",
+        "official_source_reference",
+        "qualification_and_reason",
+        "cohort",
+        "academic_year",
+        "offering",
+        "publication_stage_and_round"
+      ],
+      "forbidden": [
+        "name_only_CID_merge",
+        "count_to_rank_without_definition",
+        "additional_recruitment_to_replenishment_guess",
+        "initial_waitlist_to_final_rank_guess",
+        "mean_to_cut50",
+        "cut75_to_cut70",
+        "pending_to_verified_alias_promotion"
+      ],
+      "source_definition_required_for_reclassification": true,
+      "runtime_activation": "NOT_RUN_REVIEWED_PUBLISHER_NEW_IMMUTABLE_EDITION_AND_OWNER_RECEIPTS_REQUIRED"
     }
   },
   "security_contract": {
