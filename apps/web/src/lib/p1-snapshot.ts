@@ -383,8 +383,14 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
 }
 
 /** Admin status only; an unfresh actor never exposes the stored ready as current. */
-export async function warmInfo(): Promise<{ ready: Ready | null }> {
-  try { const mode = configuredMode(), { coordinator } = await services(mode); return { ready: await readyOf(await coordinator.inspect(), mode) }; }
+/** 관리 화면용. stale: 현재판 확인 기한(10분)이 지나 아직 다시 확인하지 않은 상태 — 준비본이 없는 것과 구분한다(10-24 Root 관측).
+ * 오래된 판을 준비 완료로 인정하지는 않는다(ready 는 그대로 null). */
+export async function warmInfo(): Promise<{ ready: Ready | null; stale: { snapshot_id: string } | null }> {
+  try {
+    const mode = configuredMode(), { coordinator } = await services(mode), view = await coordinator.inspect();
+    const ready = await readyOf(view, mode);
+    return { ready, stale: !ready && view.head && !view.headFresh ? { snapshot_id: view.head.snapshot_id } : null };
+  }
   catch (error) { return servicesFailure(error); }
 }
 

@@ -28,7 +28,8 @@ export default async function Page() {
       </>
     );
   let ready: Awaited<ReturnType<typeof warmInfo>>["ready"];
-  try { ({ ready } = await warmInfo()); }
+  let stale: Awaited<ReturnType<typeof warmInfo>>["stale"];
+  try { ({ ready, stale } = await warmInfo()); }
   catch (error) {
     if (!(error instanceof ConnectionError)) throw error;
     return <>{head}<div className="wrap pg-body"><section className="gate flat"><h2>공유 준비 저장소 연결이 필요합니다</h2><p>운영용 저장소와 준비 조정자가 연결되지 않아 준비를 시작하지 않았습니다. 설정을 확인한 뒤 다시 열어 주세요.</p></section></div></>;
@@ -44,6 +45,12 @@ export default async function Page() {
               {ready.snapshot_id} · 발행 SHA {ready.publication_sha256.slice(0, 12)}… · 행 {ready.counts.rows}(연결 {ready.counts.mapped_rows} · 미연결 {ready.counts.mapping_pending_rows}) · 학교 {ready.counts.schools}
               <br />
               정리본 생성 {seoulDateTime(ready.generated_at)} · 준비 완료 {seoulDateTime(ready.warmed_at)} · 확인 기한 {seoulDateTime(ready.expires_at)}
+            </p>
+          ) : stale ? (
+            <p>
+              현재판({stale.snapshot_id})을 다시 확인하기 전입니다. 확인 기한(10분)이 지나 잠시 표시하지 않을 뿐, 준비본이 없다는 뜻은 아닙니다.
+              <br />
+              1페이지를 한 번 열면 다시 확인되고 이 화면도 새로 고치면 준비본이 보입니다. 그래도 보이지 않을 때만 아래 준비 버튼을 누르세요.
             </p>
           ) : (
             <p>아직 준비된 판이 없습니다. 1페이지는 &lsquo;자료 준비 중&rsquo;으로 보입니다.</p>

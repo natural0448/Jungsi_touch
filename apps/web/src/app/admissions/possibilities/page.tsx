@@ -121,7 +121,14 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
           <>
             <div className="count">
               <span>
-                <b className="num">{res.matching_school_count ?? 0}</b>개 대학 · <b className="num">{res.matching_offering_count ?? 0}</b>개 모집단위
+                {/* 서버가 전체 개수를 주지 않으면(null) 0으로 보이지 않는다(10-24 QA: 목록이 있는데 '0개 대학') */}
+                {res.matching_school_count == null || res.matching_offering_count == null ? (
+                  <>검색 결과</>
+                ) : (
+                  <>
+                    <b className="num">{res.matching_school_count}</b>개 대학 · <b className="num">{res.matching_offering_count}</b>개 모집단위
+                  </>
+                )}
                 {res.as_of && <small> · {res.as_of.replaceAll("-", ".")} 기준</small>}
               </span>
               {report && <CategoryLegend />}
