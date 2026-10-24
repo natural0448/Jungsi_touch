@@ -86,7 +86,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
           </Form>
           <ChipRow label="지역" cur={cur} k="region" items={REGIONS} />
           <ChipRow label="모집군" cur={cur} k="group" items={[...GROUPS]} suffix="군" />
-          <p className="hint">대학이 발표한 2024~2026학년도 결과를 학년도별로 보여 드립니다. 최종 50%컷·70%컷은 같은 기준의 발표만 씁니다. 대학이 다른 비율·평균·최저 등으로 발표한 값은 &lsquo;대학 발표 통계&rsquo;에 원래 기준·대상과 함께 보여 드립니다. &lsquo;확인 중&rsquo; 꼬리표는 값은 발표 그대로이고 정의·단위·발표일 확인이 남았다는 뜻입니다(꼬리표에 마우스를 올리면 사유가 보입니다).</p>
+          <p className="hint">대학이 발표한 2024~2026학년도 결과를 학년도별로 보여 드립니다. 최종 50%컷·70%컷은 같은 기준의 발표만 씁니다. &lsquo;확인 중&rsquo; 꼬리표는 값은 발표 그대로이고 정의·단위·발표일 확인이 남았다는 뜻입니다(꼬리표에 마우스를 올리면 사유가 보입니다).</p>
         </section>
 
         {snap.state !== "ready" || !res ? (

@@ -1,11 +1,12 @@
 import { asOfDate } from "@/lib/format";
 import { rankDisplayModel } from "@/lib/p1-field-qualification";
-import { publishedStatisticLabel, unitKey, type Cell, type Row } from "@/lib/p1-shape";
+import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
 
 /*
   정리본 한 모집단위: 학년도별 한 줄, 이전 고정 표 배치(연결계약 v3 §5).
-  모집인원 · 경쟁률 · 추정 총 지원자 · 충원인원 · 추정 탈락자 · 최종 합격 예비번호 · 최종 50%컷 · 최종 70%컷
-  (+ 다른 비율·평균·최저 등 수집된 발표는 '대학 발표 통계' 칸). 값은 원문 표기 그대로, null 은 0 이 아니다.
+  모집인원 · 경쟁률 · 추정 총 지원자 · 충원인원 · 추정 탈락자 · 최종 합격 예비번호 · 최종 50%컷 · 최종 70%컷.
+  값은 원문 표기 그대로, null 은 0 이 아니다. 모집인원 단계·컷 기준 꼬리표·'대학 발표 통계' 칸·출처 링크는
+  보이지 않는다(2026-10-24 사용자 결정). 정리본 자료는 그대로 보존한다.
   값이 있는데 확인 중(pending_metadata)이면 값과 확인 사유를 함께 보인다. 예비번호는 '번', 충원은 '명'.
   추정 2열만 기존 승인 산식(모집인원×경쟁률 반올림, −모집−충원)으로 계산하고 발표 칸을 덮지 않는다.
   추정 총 지원자는 충원인원 없이도 계산하고, 추정 탈락자만 충원인원이 있어야 계산한다.
@@ -30,13 +31,6 @@ const REASON: Record<string, string> = {
   NONNUMERIC_LITERAL_REQUIRES_SOURCE_REVIEW: "숫자가 아닌 원문 값 — 확인 중",
 };
 export const reasonText = (code: string | null) => (code ? (REASON[code] ?? code) : null);
-
-const COHORT: Record<string, string> = {
-  final_registrants: "최종등록자", initial_admits: "최초합격자", final_admits: "최종합격자",
-  final_enrolled_students: "최종입학생", registrants_finality_not_specified: "등록자(최종 여부 확인 중)",
-};
-const cohortText = (c: string | null | undefined) => (c ? (COHORT[c] ?? c) : null);
-const STAGE: Record<string, string> = { initial: "최초", rollover: "이월", final: "최종", unspecified: "단계 미명시" };
 
 /** 확인 중 표시(값 옆 작은 꼬리표). 사유는 title 과 화면 읽기 프로그램용 글자로 함께 */
 function Hold({ code }: { code: string | null }) {
@@ -72,13 +66,12 @@ function RankValue({ c }: { c: Cell }) {
   </>;
 }
 
+/** 컷 값. 점수 기준·대상 집단 꼬리표는 보이지 않는다(2026-10-24 사용자 결정) */
 function Cut({ c }: { c: Cell }) {
-  const basis = [c.b, cohortText(c.co ?? c.cc)].filter(Boolean).join(" · ");
   const asOf = asOfDate(c.at);
   return (
     <>
       <Value c={c} />
-      {c.v !== null && basis && <small className="rs-bs">{basis}</small>}
       {c.v !== null && asOf && <small className="rs-bs">자료 기준 {asOf}</small>}
     </>
   );
@@ -122,7 +115,7 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
   const byYear = new Map<number, Row[]>();
   for (const r of rows) byYear.set(r.y, [...(byYear.get(r.y) ?? []), r]);
   const years = [...byYear.keys()].sort((a, b) => b - a);
-  const hasAlt = rows.some((r) => r.alt.e.length > 0 || r.alt.om > 0);
+  // 모집인원 단계·컷 기준·대학 발표 통계 열은 보이지 않는다(2026-10-24 사용자 결정). 정리본 자료는 그대로 보존한다
   const pending = latest.pk === null;
   const variants = Math.max(...rows.map((r) => r.idv));
   // 출처 링크는 보이지 않는다(2026-10-24 사용자 결정): 상당수가 어디가 내부 요청 주소라 직접 열면 오류 화면이 나온다
@@ -143,7 +136,6 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
               <th scope="col" className="r">최종 합격 예비번호</th>
               <th scope="col" className="r">최종 50%컷</th>
               <th scope="col" className="r">최종 70%컷</th>
-              {hasAlt && <th scope="col" className="r">대학 발표 통계</th>}
             </tr>
           </thead>
           <tbody>
@@ -160,10 +152,7 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
                       {otherName && <small>발표명 {otherName}</small>}
                       {renamedDept && <small>당시 {renamedDept}</small>}
                     </th>
-                    <td className="r">
-                      <Value c={r.rc} />
-                      {r.rc.v !== null && r.rc.st && <small className="rs-bs">{STAGE[r.rc.st] ?? r.rc.st}</small>}
-                    </td>
+                    <td className="r"><Value c={r.rc} /></td>
                     <td className="r"><Value c={r.cr} /></td>
                     <td className="r derived">
                       {dv.applicants === null ? <span className="unpub">─</span> : <><b className="num">{dv.applicants}</b><small> 명</small>{dv.heldA && <Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
@@ -175,21 +164,6 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
                     <td className="r"><RankValue c={r.rk} /></td>
                     <td className="r"><Cut c={r.c50} /></td>
                     <td className="r"><Cut c={r.c70} /></td>
-                    {hasAlt && (
-                      <td className="r">
-                        {r.alt.e.length === 0 ? (
-                          <span className="unpub" title={reasonText(r.alt.r) ?? undefined}>─</span>
-                        ) : (
-                          r.alt.e.map((e, k) => (
-                            <div key={k}>
-                              <small style={{ whiteSpace: "pre-line" }}>{publishedStatisticLabel(e)} </small>
-                              <Cut c={e} />
-                            </div>
-                          ))
-                        )}
-                        {r.alt.om > 0 && <small className="rs-bs">이 판에 표시하지 않은 다른 기준 {r.alt.om}건</small>}
-                      </td>
-                    )}
                   </tr>
                 );
               }),
