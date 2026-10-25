@@ -33,6 +33,8 @@ import { cloneNativeJson, type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat, type NativeJson } from "../domain/native_json.ts";
 import { utcInstant, utcText } from "../domain/time.ts";
 import { type NativeRuntimeKind, NativeSourceSelection } from "./native_source_selection.ts";
+import { decodeSchoolReferencePayload } from "./school_reference_source.ts";
+import type { SchoolReferenceFunction } from "../application/school_reference_scoring.ts";
 function fail(code: string, http = 503): never {
   throw new AccessError(code, http);
 }
@@ -109,6 +111,9 @@ export class NativeDataProvider
     OfferingAnalysisDataPort {
   private readonly cache = new Map<string, unknown>();
   private readonly freshness?: NativeSelectionFreshness;
+  private referenceKeys?: ReadonlyMap<string, string | null>;
+  private scoringBatchActive = false;
+  private scoringBatchReady = false;
   constructor(
     private readonly selection: NativeSourceSelection,
     freshness?: NativeSelectionFreshness,
@@ -147,6 +152,34 @@ export class NativeDataProvider
       fail("artifact_not_approved");
     }
   }
+  private async assertDecodeSelection(): Promise<void> {
+    if (!this.scoringBatchActive) {
+      await this.assertCurrentSelection();
+      return;
+    }
+    if (!this.scoringBatchReady) fail("analysis_release_invalid");
+    const f = this.freshness;
+    if (f) {
+      const now = f.clock.nowUtc();
+      if (typeof now !== "bigint" || now >= f.expiresAtUtc) fail("artifact_version_mismatch");
+    }
+  }
+  /** One request's bounded calculation phase only. Final freshness precedes report writes. */
+  async withScoringBatch<T>(work: () => Promise<T>): Promise<T> {
+    if (this.scoringBatchActive) fail("analysis_release_invalid");
+    this.scoringBatchActive = true;
+    try {
+      await this.assertCurrentSelection();
+      this.scoringBatchReady = true;
+      const value = await work();
+      this.scoringBatchReady = false;
+      await this.assertCurrentSelection();
+      return value;
+    } finally {
+      this.scoringBatchReady = false;
+      this.scoringBatchActive = false;
+    }
+  }
   load(kind: NativeRuntimeKind, key: string): NativeObject | null {
     return this.selection.load(kind, key)?.payload ?? null;
   }
@@ -156,7 +189,7 @@ export class NativeDataProvider
     code: string,
     build: (raw: NativeObject, entry: NativeObject) => T,
   ): Promise<T | null> {
-    await this.assertCurrentSelection();
+    await this.assertDecodeSelection();
     const identity = JSON.stringify([
       this.selection.registryHash,
       this.selection.selectionHash,
@@ -165,17 +198,17 @@ export class NativeDataProvider
     ]);
     if (this.cache.has(identity)) {
       const cached = this.cache.get(identity) as T;
-      await this.assertCurrentSelection();
+      await this.assertDecodeSelection();
       return cached;
     }
     const selected = this.selection.load(kind, key);
     if (selected === null) {
-      await this.assertCurrentSelection();
+      await this.assertDecodeSelection();
       return null;
     }
     try {
       const result = build(selected.payload, selected.entry);
-      await this.assertCurrentSelection();
+      await this.assertDecodeSelection();
       this.cache.set(identity, result);
       return result;
     } catch (error) {
@@ -224,6 +257,37 @@ export class NativeDataProvider
         const key = conversionBindingKey(year(offering.academic_year), id);
         offeringIndex.set(key, offeringIndex.has(key) ? null : offering);
         offeringIdIndex.set(id, offeringIdIndex.has(id) ? null : offering);
+      }
+      // Every reference metadata row is checked, without loading unrequested rule bodies.
+      const referencePacks = new Map<string, { year: number; version: string; type: unknown }>();
+      if (!overallOnly) {
+        for (const { entry } of this.selection.referenceMetadata()) {
+          const c = object(entry.reference_context), examId = text(c.exam_id);
+          let pack = referencePacks.get(examId);
+          if (!pack) {
+            const source = this.selection.load("exam_pack", examId);
+            if (!source) fail("reference_exam_context_mismatch");
+            const decoded = new NativeExamPack(source.payload);
+            pack = {
+              year: decoded.academicYear,
+              version: decoded.packVersion,
+              type: object(source.payload.exam).exam_type,
+            };
+            referencePacks.set(examId, pack);
+          }
+          if (
+            pack.year !== c.academic_year || pack.version !== c.source_pack_version ||
+            pack.type !== c.exam_type
+          ) {
+            fail("reference_exam_context_mismatch");
+          }
+          if (
+            !Array.isArray(c.offering_ids) ||
+            c.offering_ids.some((pk) =>
+              !offeringIndex.get(conversionBindingKey(c.academic_year, pk))
+            )
+          ) fail("reference_offering_context_mismatch");
+        }
       }
       const missing: NativeObject[] = [];
       const packFor = (
@@ -372,6 +436,31 @@ export class NativeDataProvider
                 bundle.release.binding(year(b.academic_year), b.offering_pk as string) !==
                   b.rule_version
               ) fail("analysis_release_invalid");
+            }
+            break;
+          }
+          case "reference_conversion": {
+            const reference = await this.referenceGroup(key);
+            if (!reference) fail("reference_conversion_missing");
+            const packSource = this.selection.load("exam_pack", reference.examId);
+            if (!packSource) fail("reference_exam_context_mismatch");
+            const pack = new NativeExamPack(packSource.payload),
+              exam = object(packSource.payload.exam);
+            if (
+              pack.packVersion !== reference.packVersion ||
+              pack.academicYear !== reference.academicYear ||
+              exam.exam_type !== reference.examType
+            ) fail("reference_exam_context_mismatch");
+            for (const b of reference.bindings) {
+              const matching = offeringIndex.get(
+                conversionBindingKey(reference.academicYear, b.offering_pk),
+              );
+              if (
+                !matching ||
+                !CONVERSION_CONTEXT_FIELDS.every((field) => b[field] === matching[field])
+              ) {
+                fail("reference_offering_context_mismatch");
+              }
             }
             break;
           }
@@ -608,6 +697,67 @@ export class NativeDataProvider
         });
       }))
     );
+  }
+  private async referenceGroup(key: string) {
+    await this.assertDecodeSelection();
+    const selected = await this.selection.loadReference(key);
+    if (!selected) {
+      await this.assertDecodeSelection();
+      return null;
+    }
+    return this.decode(
+      "reference_conversion",
+      key,
+      "reference_conversion_unavailable",
+      (raw, entry) => {
+        if (
+          entry.kind !== "reference_conversion" || entry.status !== "approved_reference" ||
+          entry.approval_scope !== "same_exam_mathematical_reference" ||
+          entry.engine_approved !== false ||
+          entry.production_allowed !== false
+        ) fail("artifact_not_approved");
+        const decoded = decodeSchoolReferencePayload(raw, {
+          sourceSha256: text(entry.source_review_sha256),
+          independentSha256: text(entry.independent_review_sha256),
+        });
+        const c = object(entry.reference_context);
+        if (
+          [
+            ["academic_year", decoded.academicYear],
+            ["exam_id", decoded.examId],
+            ["source_pack_version", decoded.packVersion],
+            ["exam_type", decoded.examType],
+            ["score_scale_id", decoded.scoreScaleId],
+            ["rule_version", decoded.rule.data.rule_version],
+          ]
+            .some(([k, v]) => c[k as string] !== v) ||
+          !Array.isArray(c.offering_ids) ||
+          c.offering_ids.length !== decoded.bindings.length ||
+          decoded.bindings.some((b) => !(c.offering_ids as unknown[]).includes(b.offering_pk))
+        ) fail("reference_rule_context_mismatch");
+        return decoded;
+      },
+    );
+  }
+  async getReference(offeringId: string): Promise<SchoolReferenceFunction | null> {
+    if (!this.referenceKeys) {
+      const index = new Map<string, string | null>();
+      for (const { key, entry } of this.selection.referenceMetadata()) {
+        for (const value of object(entry.reference_context).offering_ids as unknown[]) {
+          const pk = text(value);
+          index.set(pk, index.has(pk) ? null : key);
+        }
+      }
+      this.referenceKeys = index;
+    }
+    const key = this.referenceKeys.get(offeringId);
+    if (key === null) fail("reference_offering_ambiguous");
+    if (key === undefined) return null;
+    const group = await this.referenceGroup(key);
+    if (!group) return null;
+    const binding = group.bindings.find((b) => b.offering_pk === offeringId);
+    if (!binding) fail("reference_offering_context_mismatch");
+    return Object.freeze({ ...group, binding });
   }
   getPercentile(offeringId: string): Promise<UniversityPercentileRelease | null> {
     return new Promise((resolve) =>

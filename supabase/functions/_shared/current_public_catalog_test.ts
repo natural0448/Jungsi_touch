@@ -690,6 +690,41 @@ Deno.test("current public preserves original statistic labels and cohorts as add
       "최초합격자",
     ]],
   );
+  // An exact definition can change one service item while raw value, label and qualification stay intact.
+  const c = row("SYNTHETIC-ALIAS");
+  c.row.offering_pk = "SYNTHETIC-A";
+  c.row.metric_kind = "충원인원";
+  c.row.statistic_label = "충원인원";
+  c.row.cohort = "최종등록자";
+  const scope = {
+    observation_id: "SYNTHETIC-ALIAS",
+    academic_year: 2024,
+    offering_id: null as string | null,
+    cohort: "최종등록자",
+    score_basis: null,
+    score_scope: null,
+    source_round: null,
+    statistic_percent: null,
+  };
+  const before = await publicCatalogHistory(c);
+  equal(before.metric_name, "충원인원");
+  // A missing selected public offering address cannot authorize a semantic reclassification.
+  (c.row.curation_fields as NativeObject).metric_alias_evidence = {
+    status: "meaning_verified",
+    definition_sha256: "a".repeat(64),
+    source_label: "충원인원",
+    family: "final_waitlist_rank",
+    scope,
+  };
+  equal((await publicCatalogHistory(c)).metric_name, "충원인원");
+  c.row.offering_id = "2024:SYNTHETIC-A";
+  scope.offering_id = c.row.offering_id as string;
+  const aliased = await publicCatalogHistory(c);
+  equal(aliased.metric_name, "final_waitlist_rank");
+  equal(aliased.statistic_label, "충원인원");
+  equal(aliased.value, 0);
+  equal(aliased.publication_status, "pending_metadata");
+  equal(c.row.canonical_result_id, "SYNTHETIC-ALIAS");
 });
 Deno.test("current public only explicit qualified official missing publication is not_published", async () => {
   const a = row();
@@ -721,6 +756,10 @@ Deno.test("current public unqualified new offering suppresses conversion and jud
   req.body = { expected_version: 1, offering_ids: ["2027:SYNTHETIC-NEW-PK"] };
   let calls = 0;
   const native = {
+    getReference: (_id: string) => {
+      calls++;
+      return Promise.resolve(null);
+    },
     getExamPack: () => Promise.resolve(null),
     getConversion: async (_id: string) => {
       await Promise.resolve(); // Simulate the asynchronous data-port boundary.
@@ -742,6 +781,7 @@ Deno.test("current public unqualified new offering suppresses conversion and jud
     null,
   );
   equal(await native.getConversion("2027:SYNTHETIC-NEW-PK"), null);
+  equal(await native.getReference("2027:SYNTHETIC-NEW-PK"), null);
   equal(await native.getAnalysis("2027:SYNTHETIC-NEW-PK"), null);
   equal(calls, 0);
 });

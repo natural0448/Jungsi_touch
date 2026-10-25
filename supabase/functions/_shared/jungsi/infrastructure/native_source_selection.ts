@@ -10,6 +10,7 @@ export const NATIVE_RUNTIME_KINDS = [
   "total_model",
   "catalog",
   "conversion",
+  "reference_conversion",
   "percentile",
   "estimate_receipt",
   "analysis",
@@ -68,7 +69,8 @@ async function pinned(raw: PinnedSourceBytes): Promise<{ body: NativeObject; has
   }
 }
 export class NativeSourceSelection {
-  private readonly artifacts: ReadonlyMap<string, SelectedNativeArtifact>;
+  private readonly artifacts: Map<string, SelectedNativeArtifact>;
+  private readonly referenceLoads = new Map<string, Promise<SelectedNativeArtifact | null>>();
   private readonly references: ReadonlyMap<string, NativeObject>;
   private constructor(
     artifacts: ReadonlyMap<string, SelectedNativeArtifact>,
@@ -76,6 +78,7 @@ export class NativeSourceSelection {
     readonly selectionHash: string,
     selected: ReadonlyMap<string, NativeObject>,
     readonly payloadMode: NativePayloadMode,
+    private readonly client: SupabaseArtifactClient,
   ) {
     this.references = new Map([...selected].map(([id, entry]) => [id, cloneNativeJson(entry)]));
     this.artifacts = new Map([...artifacts].map(([id, row]) => [id, {
@@ -125,36 +128,39 @@ export class NativeSourceSelection {
       if (chosen.has(id)) fail("registry_identity_conflict");
       const entry = entries.get(id);
       if (!entry) fail("runtime_dependency_missing");
-      client.validateSelectedReference(entry);
+      if (entry.kind === "reference_conversion") client.validateReferenceCalculation(entry);
+      else client.validateSelectedReference(entry);
       if (entry.source_timezone != null && typeof entry.source_timezone !== "string") {
         fail("artifact_time_invalid");
       }
       chosen.set(id, entry);
     }
-    if (payloadMode === "catalog_only" && [...chosen.values()].some((e) => e.kind !== "catalog")) {
-      await client.assertSelectedMetadata([...chosen.values()]);
-    }
     if (
+      [...chosen.values()].some((e) => e.kind === "reference_conversion") ||
+      payloadMode === "catalog_only" && [...chosen.values()].some((e) => e.kind !== "catalog") ||
       payloadMode === "overall_only" &&
-      [...chosen.values()].some((e) => !["exam_pack", "total_model"].includes(e.kind as string))
-    ) {
-      await client.assertSelectedMetadata([...chosen.values()]);
-    }
-    if (
+        [...chosen.values()].some((e) =>
+          !["exam_pack", "total_model"].includes(e.kind as string)
+        ) ||
       payloadMode === "university_only" &&
-      [...chosen.values()].some((e) => e.kind === "total_model")
+        [...chosen.values()].some((e) => e.kind === "total_model")
     ) {
       await client.assertSelectedMetadata([...chosen.values()]);
     }
     const artifacts = new Map<string, SelectedNativeArtifact>();
     for (const [id, entry] of chosen) {
+      // Metadata and approval remain complete; reference bodies are selected by trusted PK routing.
+      if (entry.kind === "reference_conversion") continue;
       if (payloadMode === "catalog_only" && entry.kind !== "catalog") continue;
       if (payloadMode === "university_only" && entry.kind === "total_model") continue;
       if (
         payloadMode === "overall_only" &&
         !["exam_pack", "total_model"].includes(entry.kind as string)
       ) continue;
-      const verified = await client.artifact(entry), payload = verified.payload;
+      const verified = entry.kind === "reference_conversion"
+          ? await client.referenceCalculationArtifact(entry)
+          : await client.artifact(entry),
+        payload = verified.payload;
       if (Object.hasOwn(payload, "as_of") && payload.as_of !== null && payload.as_of !== "") {
         if (
           typeof payload.as_of !== "string" ||
@@ -171,7 +177,43 @@ export class NativeSourceSelection {
       }
       artifacts.set(id, { entry, payload });
     }
-    return new NativeSourceSelection(artifacts, registry.hash, selection.hash, chosen, payloadMode);
+    return new NativeSourceSelection(
+      artifacts,
+      registry.hash,
+      selection.hash,
+      chosen,
+      payloadMode,
+      client,
+    );
+  }
+  referenceMetadata(): readonly { key: string; entry: NativeObject }[] {
+    return [...this.references.values()].filter((e) => e.kind === "reference_conversion")
+      .map((e) => ({ key: e.key as string, entry: cloneNativeJson(e) }));
+  }
+  async loadReference(key: string): Promise<SelectedNativeArtifact | null> {
+    if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {
+      fail("runtime_dependency_not_loaded");
+    }
+    const id = identity("reference_conversion", key), entry = this.references.get(id);
+    if (!entry) return null;
+    if (!this.referenceLoads.has(id)) {
+      this.referenceLoads.set(
+        id,
+        (async () => {
+          const verified = await this.client.referenceCalculationArtifact(entry);
+          const value = {
+            entry: cloneNativeJson(entry),
+            payload: cloneNativeJson(verified.payload),
+          };
+          this.artifacts.set(id, value);
+          return value;
+        })(),
+      );
+    }
+    const value = await this.referenceLoads.get(id)!;
+    return value
+      ? { entry: cloneNativeJson(value.entry), payload: cloneNativeJson(value.payload) }
+      : null;
   }
   reference(kind: NativeRuntimeKind, key: string): NativeObject | null {
     const entry = this.references.get(identity(kind, key));
@@ -199,6 +241,15 @@ export class NativeSourceSelection {
       selection_sha256: this.selectionHash,
       production_ready: false,
       engine_acceptance: "NOT_VERIFIED_BY_RAW_SOURCE_SELECTION",
+      ...(this.referenceMetadata().length
+        ? {
+          reference_calculation_payloads: "ON_DEMAND_REQUEST_SCOPED_RULE_KEY_CACHE",
+          selected_reference_metadata_count: this.referenceMetadata().length,
+          loaded_reference_payload_count:
+            [...this.artifacts.values()].filter((v) => v.entry.kind === "reference_conversion")
+              .length,
+        }
+        : {}),
       ...(this.payloadMode !== "all"
         ? {
           payload_mode: this.payloadMode,

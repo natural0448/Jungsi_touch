@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
   "spec_version": "1.9.116",
-  "source_sha256": "bd7134ab3695d8f9a80f8f1a68e7e0ea6259b64381ea33e3e805adad26d7cef7",
+  "source_sha256": "1d58f2bbeb999c2f691428866adc3e2fb5da34461c8a61d823ae30ef0b9db60b",
   "pages": [
     {
       "id": "PAGE-01",
@@ -8179,7 +8179,8 @@
       "next_cursor가 남은 학년도는 조건을 좁힌 뒤에도 일부 조회일 수 있다. 잔여 커서 해소 증거 없이 조건을 좁히면 전부 볼 수 있다고 보장하지 않는다. 조회 예산 종료·미완전 모집행 보류로 표시 카드가 0개여도 잔여가 있으면 조회 미완료로 안내한다. 완전한 검색의 빈 결과와 구분하며 일부 조회 중에 조건에 맞는 발행 결과가 없다고 단정하지 않는다.",
       "같은 의미로 확인된 원문 표현은 정본 관측 ID·native 값·원명칭·단위·출처를 보존한 채 한 서비스 표시 항목에 연결한다. 동의어 연결은 현재 관측 복제·새 CID 생성·원값 덮어쓰기·출처 간 숫자 합산을 뜻하지 않는다. 같은 학년도·모집행·전형·군·코호트·성분·모집 단계·발표 차수의 정의를 함께 확인한다.",
       "최종충원순위·충원합격순위·최종합격자 예비번호·마지막 합격 후보순위처럼 마지막 합격 순번임이 확인된 표현은 최종 합격 예비번호(번)로 통일한다. 충원인원·추가합격인원·추가모집인원 등의 제목도 대학 공식 설명이 마지막 합격 순번임을 확인하면 같은 항목에 연결하고 원문 제목·단위는 근거로 보존한다.",
-      "추가모집의 별도 모집정원, 실제 추가 합격자 수, 최초 부여 대기번호, 차수별 예비순번과 최종 합격 예비번호를 제목 유사성이나 단위·값 크기만으로 합치지 않는다. 애매한 항목은 이미 알려진 원값·확인 사유를 유지한다. 평균/50/70/75·모집인원/등록인원/지원자수·최초/최종/이월을 구분하고 기존 source qualification을 동의어 처리로 승격하지 않는다."
+      "추가모집의 별도 모집정원, 실제 추가 합격자 수, 최초 부여 대기번호, 차수별 예비순번과 최종 합격 예비번호를 제목 유사성이나 단위·값 크기만으로 합치지 않는다. 애매한 항목은 이미 알려진 원값·확인 사유를 유지한다. 평균/50/70/75·모집인원/등록인원/지원자수·최초/최종/이월을 구분하고 기존 source qualification을 동의어 처리로 승격하지 않는다.",
+      "현재 입결 단일 관측의 의미 동의어는 서버 alias 포트에서 원문/값/native/CID/연도/PK/코호트/축/차수/통계율을 보존한다. 애매한 충원인원·추가모집·예비번호는 정확한 필드 정의 없이 순위나 인원으로 재분류하지 않는다. P1 고정 snapshot의 기존 값/CID/q는 이동·승격하지 않으며 신규 publisher 결속은 별도 검수다."
     ],
     "preview": {
       "selected_preparation": "C_local_review_package",
@@ -8680,7 +8681,7 @@
     "semantic_alias_contract": {
       "format": "jungsi.published-metric-semantic-alias-contract/v1",
       "scope": "Current canonical observations selected for P1 display; raw originals remain immutable.",
-      "status": "SOURCE_LABEL_AUDIT_COMPLETE_RUNTIME_AND_SOURCE_DEFINITION_REVIEW_IN_PROGRESS",
+      "status": "SCOPED_ALIAS_SOURCE_AND_SYNTHETIC_VERIFIED_SOURCE_DEFINITION_AND_PUBLISHER_PENDING",
       "canonical_families": [
         "recruitment_count_with_stage",
         "competition_ratio",
@@ -8727,7 +8728,8 @@
         "pending_to_verified_alias_promotion"
       ],
       "source_definition_required_for_reclassification": true,
-      "runtime_activation": "NOT_RUN_REVIEWED_PUBLISHER_NEW_IMMUTABLE_EDITION_AND_OWNER_RECEIPTS_REQUIRED"
+      "runtime_activation": "NOT_RUN_REVIEWED_PUBLISHER_NEW_IMMUTABLE_EDITION_AND_OWNER_RECEIPTS_REQUIRED",
+      "runtime_boundary": "current_public_catalog record item alias is connected; p1MetricSlotAlias is a publisher bridge only. Frozen P1 sequence values, CIDs and q qualification are unchanged; ambiguous source labels need exact definition evidence."
     }
   },
   "security_contract": {
