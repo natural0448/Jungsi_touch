@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
-import { ensureAnalyses, ensureCandidates, loadMine, type ReportState } from "@/lib/report-ops";
+import { canonicalOfferingIds, ensureAnalyses, ensureCandidates, loadMine, type ReportState } from "@/lib/report-ops";
 
 export type RunResult = { error: string | null };
 
@@ -20,9 +20,9 @@ function explain(st: ReportState, failed: string): RunResult {
 }
 
 async function run(failed: string, work: (src: ReturnType<typeof source>, caller: Awaited<ReturnType<typeof getCaller>>) => Promise<ReportState>): Promise<RunResult> {
-  const caller = await getCaller();
-  const src = source();
   try {
+    const caller = await getCaller();
+    const src = source();
     const out = explain(await work(src, caller), failed);
     if (out.error) return out;
   } catch (e) {
@@ -37,7 +37,7 @@ async function run(failed: string, work: (src: ReturnType<typeof source>, caller
 
 /** 보이는(또는 담은) 모집행 중 분석이 없는 것만, 한 번에 100개까지 */
 export async function analyzeNow(_prev: RunResult, fd: FormData): Promise<RunResult> {
-  const ids = String(fd.get("ids") ?? "").split(",").map((s) => s.trim()).filter(Boolean).slice(0, 100);
+  const ids = canonicalOfferingIds(String(fd.get("ids") ?? "").split(",")).slice(0, 100);
   if (ids.length === 0) return { error: null };
   return run("분석하지 못했습니다", async (src, caller) => {
     const mine = await loadMine(src, caller);
