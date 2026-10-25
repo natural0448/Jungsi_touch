@@ -19,6 +19,7 @@ import jungsi_touch.infrastructure.http_api as legacy
 
 BASE_HTTP = Path(legacy.__file__)
 import jungsi_touch.infrastructure.supabase_runtime as runtime
+from check_project_consistency import registered_member_shortlist_ids
 Selection = runtime.RuntimeArtifactSelection
 TOKEN = 'SYNTHETIC-relay-token-for-testing-only-000000'
 
@@ -118,8 +119,10 @@ class SupabaseRuntimeTests(unittest.TestCase):
         self.assertFalse(self.db);self.assertFalse(self.network)
     def test_existing_API_bindings_and_user_authentication_are_retained(self):
         app=self.app();ops=json.loads((BASE_HTTP.parents[1]/'application/route_catalog.json').read_text(encoding='utf-8'))['operations']
-        self.assertEqual(len(ops),28)
-        policy_ops=[o for o in ops if o['id'] not in {'history.snapshot.head','history.snapshot.read','report.list-own'}]
+        source=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
+        member_ids=registered_member_shortlist_ids(source)
+        self.assertEqual(len(ops),28+len(member_ids))
+        policy_ops=[o for o in ops if o['id'] not in {'history.snapshot.head','history.snapshot.read','report.list-own'}|member_ids]
         self.assertEqual(len(policy_ops),25)
         legacy_ops=[o for o in policy_ops if o['id'] not in {'score-input.status.read','score-input.correction.grant','report.sample.read'}]
         self.assertEqual(len(legacy_ops),22)

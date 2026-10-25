@@ -111,7 +111,9 @@
       "report.sample.read",
       "history.snapshot.head",
       "history.snapshot.read",
-      "report.list-own"
+      "report.list-own",
+      "member-shortlist.read",
+      "member-shortlist.update"
     ],
     "health": {
       "public_path": "/health/live",

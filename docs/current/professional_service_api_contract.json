@@ -22,7 +22,7 @@
       }
     ],
     "individual_deployment_is_independent": true,
-    "existing_individual_API_count": 28,
+    "existing_individual_API_count": 30,
     "candidate_API_registration": "separate_source_registered_not_added_to_existing_operations",
     "runtime_activation": "NOT_RUN",
     "DB_schema_application": "APPLIED_ADDITIVE_SCHEMA_READBACK",

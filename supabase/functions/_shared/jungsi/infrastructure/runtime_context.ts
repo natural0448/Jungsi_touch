@@ -36,6 +36,13 @@ import {
 } from "./history_snapshot_source.ts";
 import { SupabaseOwnReportList } from "./own_report_list_postgres.ts";
 import { OwnReportCursor } from "./own_report_cursor.ts";
+import { MemberShortlistService } from "../application/member_shortlist.ts";
+import { MemberJsonResults } from "../application/member_json_results.ts";
+import { MemberJsonStorage } from "./member_json_storage.ts";
+import {
+  SupabaseMemberShortlist,
+  SupabaseMemberShortlistLegacy,
+} from "./member_shortlist_postgres.ts";
 function fail(): never {
   throw new AccessError("security_policy_unavailable", 503);
 }
@@ -87,6 +94,7 @@ export class NativeRuntimeRequest {
       const binding = await this.binding();
       return new SupabasePlatformRepository(this.sql(), {
         maxRecordBytes: binding.repositoryLimits.maxRecordBytes,
+        serializeMemberShortlist: binding.memberJson !== undefined,
       });
     })();
     return this.platformValue;
@@ -136,6 +144,41 @@ export class NativeRuntimeRequest {
   async assertReadViewScope(): Promise<void> {
     const binding = await this.binding();
     if (!binding.readViews) throw new AccessError("operation_scope_not_approved", 503);
+  }
+  async assertMemberShortlistScope(): Promise<void> {
+    const b = await this.binding();
+    if (!b.memberJson) throw new AccessError("operation_scope_not_approved", 503);
+  }
+  async memberShortlist(catalog: CatalogService): Promise<MemberShortlistService> {
+    await this.assertMemberShortlistScope();
+    const [b, controls] = await Promise.all([this.binding(), this.controls()]), m = b.memberJson!;
+    const storage = new MemberJsonStorage({
+      projectUrl: b.projectUrl,
+      bucket: b.storage.bucket,
+      prefix: m.prefix,
+      secretKey: b.storage.secretKey,
+      maxBytes: m.maxObjectBytes,
+      maxItems: m.maxItems,
+      timeoutMs: b.storage.limits.requestTimeoutMs,
+    }, controls.fetcher);
+    const legacy = new SupabaseMemberShortlistLegacy(
+      this.sql(),
+      b.repositoryLimits.maxRecordBytes,
+      m.maxItems,
+    );
+    const approvedYears = new Set(
+      [...(await this.budget()).policy.exams.values()].map((e) => e.academicYear),
+    );
+    return new MemberShortlistService(
+      new SupabaseMemberShortlist(this.sql(), storage, legacy, b.storage.limits.maxMetadataBytes),
+      legacy,
+      { lookup: (owner, year, ids) => catalog.selectedOfferings(owner, year, ids) },
+      new MemberJsonResults(legacy, m.maxItems),
+      this.clock,
+      m.maxItems,
+      approvedYears,
+      () => this.assertCurrent(),
+    );
   }
   private snapshot(owner: string): Promise<HistorySnapshotSource> {
     if (this.snapshotOwner !== undefined && this.snapshotOwner !== owner) fail();

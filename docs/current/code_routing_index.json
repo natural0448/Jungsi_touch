@@ -3957,7 +3957,7 @@
         "REQ-26",
         "REQ-27"
       ],
-      "source_sha256": "2363dbe48a3c092cc6f7389efbc55d43d05553805c7e1766ef88a638f1614f1b",
+      "source_sha256": "4506b324e91329bf77adbe26acb3237d4c26d6cd168e82f00395083a5b8d8fc3",
       "symbols": [
         {
           "kind": "function",
@@ -6484,11 +6484,14 @@
           "REQ-27",
           "REQ-28",
           "REQ-29",
-          "REQ-30"
+          "REQ-30",
+          "REQ-11",
+          "REQ-12"
         ],
-        "source_sha256": "df02468a2d6f45429462fe2c1caed4dff6d151b8835c8b78626b6967095e9464",
+        "source_sha256": "4cd41a9a7bb9f17ce7929a5e243e9ed8e1919f5e5090b684d4936229ca4381e1",
         "declared_exports": [
-          "createCombinedPolicyCatalogService"
+          "createCombinedPolicyCatalogService",
+          "createMemberShortlistCatalogService"
         ]
       },
       {
@@ -6726,21 +6729,37 @@
           "REQ-20",
           "REQ-24",
           "REQ-25",
-          "REQ-26"
+          "REQ-26",
+          "REQ-11",
+          "REQ-12",
+          "REQ-27",
+          "REQ-30"
         ],
-        "source_sha256": "6a38cb848f338e8492e1d90589e865799d79c95f7b1766526ee0b8664ba1fe9a",
+        "source_sha256": "917ca1358161dc94d1c8e084bd2e79b2d4aead613fc9df14f99043d566fe1b82",
         "declared_exports": [
           "CURRENT_PUBLIC_OPERATIONS",
-          "parsePublicCatalogQuery",
-          "comparePublicCatalogKeys",
-          "publicCatalogKey",
-          "publicCatalogOfferingId",
-          "publicCatalogOffering",
-          "publicCatalogHistory",
           "CurrentPublicCatalogCursor",
-          "publicCatalogRecruitment",
+          "CurrentPublicCatalogPort",
           "CurrentPublicCatalogService",
-          "currentPublicResponseSchemas"
+          "CurrentPublicKeySelectionPort",
+          "PublicCatalogCursorBinding",
+          "PublicCatalogCursorPort",
+          "PublicCatalogKey",
+          "PublicCatalogKind",
+          "PublicCatalogPage",
+          "PublicCatalogPublication",
+          "PublicCatalogQuery",
+          "PublicCatalogRecord",
+          "PublicPreparedKey",
+          "PublicPreparedKeyPage",
+          "comparePublicCatalogKeys",
+          "currentPublicResponseSchemas",
+          "parsePublicCatalogQuery",
+          "publicCatalogHistory",
+          "publicCatalogKey",
+          "publicCatalogOffering",
+          "publicCatalogOfferingId",
+          "publicCatalogRecruitment"
         ]
       },
       {
@@ -7241,16 +7260,27 @@
           "REQ-24",
           "REQ-25",
           "REQ-26",
-          "REQ-27"
+          "REQ-27",
+          "REQ-30"
         ],
-        "source_sha256": "45162b8a2ccd8d405dddeeef4ec128f41954169d6adaa8578b89a1e21dead88e",
+        "source_sha256": "50be2cb82f617fdd88139b6fe431e6aa03ec44104972d5b5ead290cc20f4fa89",
         "declared_exports": [
           "API_OPERATION_IDS",
           "ApiBusinessPort",
           "ApiExecution",
           "ApiOperationId",
           "ApiRoutePolicy",
+          "COMBINED_POLICY_CONSUMER_OPERATION_IDS",
           "LEGACY_API_OPERATION_IDS",
+          "LEGACY_CONSUMER_OPERATION_IDS",
+          "MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS",
+          "MEMBER_SHORTLIST_OPERATION_IDS",
+          "MEMBER_SHORTLIST_ROUTE_PATHS",
+          "READ_VIEW_CONSUMER_OPERATION_IDS",
+          "READ_VIEW_OPERATION_IDS",
+          "READ_VIEW_REGISTERED_API_OPERATION_IDS",
+          "READ_VIEW_ROUTE_PATHS",
+          "REGISTERED_API_OPERATION_IDS",
           "SCORE_POLICY_OPERATION_IDS"
         ]
       },
@@ -7274,9 +7304,12 @@
           "REQ-22",
           "REQ-24",
           "REQ-25",
-          "REQ-26"
+          "REQ-26",
+          "REQ-12",
+          "REQ-27",
+          "REQ-30"
         ],
-        "source_sha256": "31493452aa56f6615f679998d1885fda16686dc760658a07290a0a6f348d791d",
+        "source_sha256": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
         "declared_exports": [
           "CATALOG_OPERATIONS",
           "CatalogDataPort",
@@ -7489,6 +7522,75 @@
           "ManagementDecision",
           "authorizeManagement",
           "requireManagementUniversity"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/member_json_results.ts",
+        "layer": "application",
+        "status": "member_shortlist_JSON_source_synthetic59_verified_operating_NOT_RUN",
+        "requirements": [
+          "REQ-11",
+          "REQ-12",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27",
+          "REQ-30"
+        ],
+        "source_sha256": "59363bd855241f2524a0985c2d52dea2520a52ab9b2fa571dc3a3615ca238090",
+        "declared_exports": [
+          "MemberAssessmentContext",
+          "MemberJsonResults",
+          "MemberSavedResultsPort"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/member_shortlist.ts",
+        "layer": "application",
+        "status": "member_shortlist_JSON_source_synthetic59_verified_operating_NOT_RUN",
+        "requirements": [
+          "REQ-11",
+          "REQ-12",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27",
+          "REQ-30"
+        ],
+        "source_sha256": "3a66a21ca2f337a41b66dd32aef9573a818fe21db4d0321ea2c8aa0fb21416d6",
+        "declared_exports": [
+          "LegacyShortlistSource",
+          "MemberSelection",
+          "MemberShortlistCatalogPort",
+          "MemberShortlistCommit",
+          "MemberShortlistDocument",
+          "MemberShortlistLegacyPort",
+          "MemberShortlistPort",
+          "MemberShortlistReplay",
+          "MemberShortlistReplyProof",
+          "MemberShortlistService",
+          "PublishedMemberShortlist",
+          "validateMemberShortlist"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/member_shortlist_schema.ts",
+        "layer": "application",
+        "status": "member_shortlist_JSON_source_synthetic59_verified_operating_NOT_RUN",
+        "requirements": [
+          "REQ-11",
+          "REQ-12",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27",
+          "REQ-30"
+        ],
+        "source_sha256": "04695f7b26c862a109c88036eab345b7bf8b94fd8f78dbcaee20dc5e06a5de54",
+        "declared_exports": [
+          "legacyReadViewRegistration",
+          "memberShortlistPolicies",
+          "memberShortlistResponseSchemas"
         ]
       },
       {
@@ -7927,9 +8029,10 @@
           "REQ-24",
           "REQ-25",
           "REQ-26",
-          "REQ-27"
+          "REQ-27",
+          "REQ-30"
         ],
-        "source_sha256": "e1b7da8d671fabf542d0e5fd881302227a2a9864969709538d19af718eac8bf4",
+        "source_sha256": "eede4780f44e34d3f6a5b92079286e1b49fcfb084d22a2f301312be460a5cee0",
         "declared_exports": [
           "BUDGET_OPERATIONS",
           "BudgetRequest",
@@ -8635,14 +8738,15 @@
           "REQ-24",
           "REQ-25",
           "REQ-26",
-          "REQ-27"
+          "REQ-27",
+          "REQ-30"
         ],
-        "source_sha256": "97f26fad6727fb95728647f64b2ee24f1cf0ec34ee047e85d213f53f93adf939",
+        "source_sha256": "6eb4908465cdc5a7a27381e0d5915734a7478e8b69aab2b178dcc8c9f79efd93",
         "declared_exports": [
-          "ApiHttpPorts",
-          "createApiHandler",
           "API_REQUEST_STAGES",
-          "ApiRequestStage"
+          "ApiHttpPorts",
+          "ApiRequestStage",
+          "createApiHandler"
         ]
       },
       {
@@ -8656,9 +8760,12 @@
           "REQ-24",
           "REQ-25",
           "REQ-26",
-          "REQ-27"
+          "REQ-27",
+          "REQ-11",
+          "REQ-12",
+          "REQ-30"
         ],
-        "source_sha256": "23b166d7ed7e5109acf95f2786296332f0291060ae5ce574f3649d7a57e46874",
+        "source_sha256": "1f85423d2cbfe71c92ebe39861584def53e6fe1a898d41705e7645511d4e2137",
         "declared_exports": [
           "BoundaryPorts",
           "RelayBoundary",
@@ -8850,6 +8957,55 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts",
+        "layer": "data_infrastructure",
+        "status": "member_shortlist_JSON_source_synthetic59_verified_operating_NOT_RUN",
+        "requirements": [
+          "REQ-11",
+          "REQ-12",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27",
+          "REQ-30"
+        ],
+        "source_sha256": "2724ccaba547730d3fe8249ddea22847698c42007cbb4681606a6811ee3ddae3",
+        "declared_exports": [
+          "MemberJsonReference",
+          "MemberJsonStorage",
+          "MemberJsonStorageSettings",
+          "memberBytesSha"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts",
+        "layer": "data_infrastructure",
+        "status": "member_shortlist_JSON_source_synthetic59_verified_operating_NOT_RUN",
+        "requirements": [
+          "REQ-11",
+          "REQ-12",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27",
+          "REQ-30"
+        ],
+        "source_sha256": "5dfc7f16f6e9b3d505b00bc4a611826be781131fecb29c79b9d4c526131deb5c",
+        "declared_exports": [
+          "MEMBER_LEGACY_EXACT_SQL",
+          "MEMBER_LEGACY_LOCK_SQL",
+          "MEMBER_LEGACY_SQL",
+          "MEMBER_POINTER_INSERT_SQL",
+          "MEMBER_PUBLICATION_SQL",
+          "MEMBER_REPLAY_SQL",
+          "MEMBER_RESULTS_SQL",
+          "MEMBER_REVISION_SQL",
+          "SupabaseMemberShortlist",
+          "SupabaseMemberShortlistLegacy",
+          "lockMemberShortlist"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
         "layer": "data_infrastructure",
         "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
@@ -8982,9 +9138,10 @@
           "REQ-24",
           "REQ-25",
           "REQ-26",
-          "REQ-27"
+          "REQ-27",
+          "REQ-30"
         ],
-        "source_sha256": "0cf3047b473e69ebb7efc4fd433988606eb7139846edd6f5b554931c02a03128",
+        "source_sha256": "4dc06e6f32096ac07705a97d0444d05a90d930062597e495d2975ae121774fda",
         "declared_exports": [
           "AUDIT_INSERT_SQL",
           "PROFILE_INSERT_SQL",
@@ -9213,15 +9370,16 @@
           "REQ-24",
           "REQ-25",
           "REQ-26",
-          "REQ-27"
+          "REQ-27",
+          "REQ-30"
         ],
-        "source_sha256": "1cf7fa5b599f5a55deef7dda5f3dd282c176e7fe99859255a2d0c5e1a1a0a82c",
+        "source_sha256": "213a56295b0924e15631b34509d53b1ca90f334ee4ea008a00d37d42b5f065d4",
         "declared_exports": [
-          "RuntimeExamBudget",
-          "RuntimeUsagePolicy",
-          "RuntimeRequestBudget",
           "RUNTIME_BUDGET_STAGES",
-          "RuntimeBudgetStage"
+          "RuntimeBudgetStage",
+          "RuntimeExamBudget",
+          "RuntimeRequestBudget",
+          "RuntimeUsagePolicy"
         ]
       },
       {
@@ -9254,13 +9412,14 @@
           "REQ-24",
           "REQ-25",
           "REQ-26",
-          "REQ-27"
+          "REQ-27",
+          "REQ-30"
         ],
-        "source_sha256": "96190d07a6402a5261defc243c9c6d2d3ccb49b6796804c2795caa8c2e2f0139",
+        "source_sha256": "f5abd7f0221e354169e7d2266c4847c2a863ecc1751041b7b342894969016607",
         "declared_exports": [
-          "RuntimeRoutePolicy",
-          "RuntimeComposition",
           "NativeRuntimeApi",
+          "RuntimeComposition",
+          "RuntimeRoutePolicy",
           "SafeRuntimeObservation",
           "observeRuntimeResponse",
           "runtimeAnalysisDataPort"
@@ -9296,9 +9455,10 @@
           "REQ-24",
           "REQ-25",
           "REQ-26",
-          "REQ-27"
+          "REQ-27",
+          "REQ-30"
         ],
-        "source_sha256": "27951970a48e043420b5df908061b5b0c2984668f679fc81e5927170e38e4663",
+        "source_sha256": "3c53222c3ac579ec3f5f8cb588916644c42e1434385813f41d86f3a904f3ad54",
         "declared_exports": [
           "NativeRuntimeRequest"
         ]
@@ -9369,22 +9529,24 @@
           "REQ-22",
           "REQ-24",
           "REQ-25",
-          "REQ-26"
+          "REQ-26",
+          "REQ-27",
+          "REQ-30"
         ],
-        "source_sha256": "81617698fdf4c30348d18acfb11ca2f48ee8394aab8c75e840cc2f3b6e3124b4",
+        "source_sha256": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
         "declared_exports": [
-          "RuntimeEnvironment",
+          "ApprovedRuntimeBinding",
           "BasicRuntimeSettings",
           "CONTROL_SOURCE_NAMES",
           "ControlSourceName",
           "PinnedControlReference",
+          "RuntimeEnvironment",
           "RuntimeReadLimits",
           "RuntimeRepositoryLimits",
-          "ApprovedRuntimeBinding",
-          "runtimeInteger",
-          "readBasicRuntimeSettings",
           "readApprovedRuntimeBinding",
-          "resolveRuntimeEnvironment"
+          "readBasicRuntimeSettings",
+          "resolveRuntimeEnvironment",
+          "runtimeInteger"
         ]
       },
       {
@@ -10007,6 +10169,22 @@
           "REQ-26"
         ],
         "source_sha256": "ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/jungsi-api/member_shortlist_entry.ts",
+        "layer": "data_infrastructure",
+        "status": "member_shortlist_JSON_source_synthetic59_verified_operating_NOT_RUN",
+        "requirements": [
+          "REQ-11",
+          "REQ-12",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27",
+          "REQ-30"
+        ],
+        "source_sha256": "34f896869bd107bd5c49bf16235fa9df193cc226be0c8f3b4c74964c6052630f",
         "declared_exports": []
       },
       {
