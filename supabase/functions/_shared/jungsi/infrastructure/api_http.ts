@@ -5,7 +5,10 @@ import {
   type ApiBusinessPort,
   type ApiExecution,
   type ApiRoutePolicy,
+  MEMBER_SHORTLIST_OPERATION_IDS,
+  MEMBER_SHORTLIST_ROUTE_PATHS,
   READ_VIEW_OPERATION_IDS,
+  READ_VIEW_REGISTERED_API_OPERATION_IDS,
   READ_VIEW_ROUTE_PATHS,
   REGISTERED_API_OPERATION_IDS,
 } from "../application/api_dispatch.ts";
@@ -72,6 +75,7 @@ export interface ApiHttpPorts {
   };
   /** Explicit candidate opt-in; must verify the approved v2 binding before any new work. */
   readonly readViewScope?: { assert(operation: ApiExecution["operation"]): Promise<void> };
+  readonly memberShortlistScope?: { assert(): Promise<void> };
   readonly relay: RelayBoundary;
   readonly sessions: UserSessionPort;
   readonly passes: PublicPassPort;
@@ -101,14 +105,31 @@ const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 function configuration(): never {
   throw new AccessError("security_policy_unavailable", 503);
 }
-function routes(policies: readonly ApiRoutePolicy[], extended = false): Route[] {
-  const expected = extended ? REGISTERED_API_OPERATION_IDS : API_OPERATION_IDS;
+function routes(
+  policies: readonly ApiRoutePolicy[],
+  extended = false,
+  memberShortlist = false,
+): Route[] {
+  const expected = memberShortlist
+    ? REGISTERED_API_OPERATION_IDS
+    : extended
+    ? READ_VIEW_REGISTERED_API_OPERATION_IDS
+    : API_OPERATION_IDS;
   if (
     !Array.isArray(policies) || policies.length !== expected.length ||
     new Set(policies.map((p) => p?.id)).size !== expected.length ||
     expected.some((id) => !policies.some((p) => p?.id === id))
   ) configuration();
   const result = policies.map((policy: ApiRoutePolicy) => {
+    if (policy && MEMBER_SHORTLIST_OPERATION_IDS.some((id) => id === policy.id)) {
+      const id = policy.id as typeof MEMBER_SHORTLIST_OPERATION_IDS[number];
+      if (
+        policy.path !== MEMBER_SHORTLIST_ROUTE_PATHS[id] ||
+        policy.method !== (id === "member-shortlist.read" ? "GET" : "PUT") ||
+        policy.member_tiers?.length !== 1 || policy.member_tiers[0] !== "paid" ||
+        policy.report_owner !== false || policy.confirmed_score_profile !== false
+      ) configuration();
+    }
     if (policy && READ_VIEW_OPERATION_IDS.some((id) => id === policy.id)) {
       const id = policy.id as typeof READ_VIEW_OPERATION_IDS[number];
       if (
@@ -270,7 +291,15 @@ export function createApiHandler(
   policies: readonly ApiRoutePolicy[],
   ports: ApiHttpPorts,
 ): (request: Request) => Promise<Response> {
-  const registered = routes(policies, ports.readViewScope !== undefined);
+  const registered = routes(
+    policies,
+    ports.readViewScope !== undefined,
+    ports.memberShortlistScope !== undefined,
+  );
+  if (
+    ports.memberShortlistScope &&
+    (!ports.readViewScope || typeof ports.memberShortlistScope.assert !== "function")
+  ) configuration();
   if (ports.readViewScope && typeof ports.readViewScope.assert !== "function") configuration();
   if (
     !ports?.budget || typeof ports.budget.run !== "function" ||
@@ -316,6 +345,10 @@ export function createApiHandler(
       if (!policy.member_tiers.includes(session.tier)) {
         throw new AccessError("paid_required", 403);
       }
+      if (MEMBER_SHORTLIST_OPERATION_IDS.some((id) => id === policy.id)) {
+        if (!ports.memberShortlistScope) configuration();
+        await ports.memberShortlistScope.assert();
+      }
       if (READ_VIEW_OPERATION_IDS.some((id) => id === policy.id)) {
         if (!ports.readViewScope) configuration();
         await ports.readViewScope.assert(policy.id);
@@ -337,7 +370,10 @@ export function createApiHandler(
       // Authorization is complete before consuming any untrusted body or query.
       stage("request_body");
       const selectedQuery = query(url);
-      if (policy.method !== "GET" && Object.keys(selectedQuery).length > 0) {
+      if (
+        policy.method !== "GET" && policy.id !== "member-shortlist.update" &&
+        Object.keys(selectedQuery).length > 0
+      ) {
         throw new AccessError("invalid_request", 422);
       }
       const payload = await body(request);

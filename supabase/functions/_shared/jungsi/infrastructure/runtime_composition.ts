@@ -8,6 +8,8 @@ import type {
 } from "../application/api_dispatch.ts";
 import { REGISTERED_API_OPERATION_IDS } from "../application/api_dispatch.ts";
 import { READ_VIEW_OPERATION_IDS } from "../application/api_dispatch.ts";
+import { MEMBER_SHORTLIST_OPERATION_IDS } from "../application/api_dispatch.ts";
+import { legacyReadViewRegistration } from "../application/member_shortlist_schema.ts";
 import {
   CATALOG_OPERATIONS,
   type CatalogDataPort,
@@ -93,6 +95,7 @@ export interface SafeRuntimeObservation {
   readonly request_id: string;
 }
 export interface RuntimeComposition {
+  readonly memberShortlistExtensions?: true;
   readonly readViewExtensions?: true;
   readonly candidateCatalog?: ReadViewCatalogFactory;
   readonly environment: RuntimeEnvironment;
@@ -200,9 +203,23 @@ export class NativeRuntimeApi {
       !config || typeof config.environment?.get !== "function" ||
       typeof config.createPool !== "function"
     ) throw new AccessError("security_policy_unavailable", 503);
+    if (
+      config.readViewExtensions && !config.memberShortlistExtensions &&
+      config.policies.length === 30
+    ) {
+      const legacy = legacyReadViewRegistration(config.policies, config.responseSchemas);
+      this.config = {
+        ...config,
+        policies: legacy.policies,
+        responseSchemas: legacy.responseSchemas,
+      };
+    }
     this.clock = config.clock ?? { nowUtc: () => BigInt(Date.now()) * 1000n };
     this.fetcher = config.fetcher ?? fetch;
-    this.projection = new PublicResponseProjection(config.responseSchemas, config.policies);
+    this.projection = new PublicResponseProjection(
+      this.config.responseSchemas,
+      this.config.policies,
+    );
   }
   readonly fetch = async (request: Request): Promise<Response> => {
     const requestId = crypto.randomUUID().replaceAll("-", "");
@@ -393,6 +410,18 @@ export class NativeRuntimeApi {
       );
       const business: ApiBusinessPort = {
         execute: async (r) => {
+          if (
+            r.operation === "report.export" && Object.keys(r.query).length &&
+            this.config.memberShortlistExtensions
+          ) {
+            return await (await context.memberShortlist(catalog)).print(r);
+          }
+          if (MEMBER_SHORTLIST_OPERATION_IDS.some((id) => id === r.operation)) {
+            if (!this.config.memberShortlistExtensions) {
+              throw new AccessError("operation_scope_not_approved", 503);
+            }
+            return await (await context.memberShortlist(catalog)).execute(r);
+          }
           if (READ_VIEW_OPERATION_IDS.some((id) => id === r.operation)) {
             return await context.readView(r);
           }
@@ -419,6 +448,9 @@ export class NativeRuntimeApi {
       };
       let inputAdmission: PreparedUsageAdmission | undefined;
       const handler = createApiHandler(this.config.policies, {
+        ...(this.config.memberShortlistExtensions
+          ? { memberShortlistScope: { assert: () => context.assertMemberShortlistScope() } }
+          : {}),
         ...(this.config.readViewExtensions
           ? {
             readViewScope: { assert: () => context.assertReadViewScope() },

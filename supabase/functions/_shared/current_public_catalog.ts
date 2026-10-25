@@ -4,6 +4,7 @@ import {
   type CatalogDataPort,
   type CatalogRelease,
   CatalogService,
+  offeringDto,
 } from "./jungsi/application/catalog.ts";
 import type { ApiExecution } from "./jungsi/application/api_dispatch.ts";
 import type { UniversityAnalysisDataPort } from "./jungsi/application/university_analysis.ts";
@@ -554,6 +555,30 @@ export function publicCatalogRecruitment(guide: NativeObject): NativeObject {
 }
 /** Four public reads never call getCatalog(); selected analysis alone may reuse its old artifact. */
 export class CurrentPublicCatalogService extends CatalogService {
+  override async selectedOfferings(
+    owner: string,
+    year: number,
+    ids: readonly string[],
+  ): Promise<ReadonlyMap<string, NativeObject>> {
+    if (!ids.length) return new Map();
+    if (ids.length > 100 || new Set(ids).size !== ids.length || ids.some((id) => !ID.test(id))) {
+      fail("current_catalog_page_invalid");
+    }
+    const pub = await this.live(), page = await this.current.lookup(owner, ids, false);
+    this.page(page, pub, ids.length);
+    const out = new Map<string, NativeObject>();
+    for (const r of page.rows) {
+      const row = await publicCatalogOffering(r.row, r.guide);
+      if (
+        typeof row.offering_id !== "string" || !ids.includes(row.offering_id) ||
+        out.has(row.offering_id)
+      ) fail("current_catalog_identity_conflict");
+      if (Number(row.academic_year) !== year) fail("current_catalog_identity_conflict");
+      out.set(row.offering_id as string, offeringDto(row));
+    }
+    await this.live();
+    return out;
+  }
   private selection: { subject: string; ids: readonly string[] } | null = null;
   private readonly currentSelections = new Map<string, NativeObject>();
   private readonly unqualifiedSelections = new Set<string>();

@@ -160,6 +160,14 @@ async function sha(text: string): Promise<string> {
   return Array.from(bytes, (v) => v.toString(16).padStart(2, "0")).join("");
 }
 export class CatalogService implements ApiBusinessPort {
+  /** A concrete approved bounded provider must override this; no nationwide fallback. */
+  selectedOfferings(
+    _owner: string,
+    _year: number,
+    _ids: readonly string[],
+  ): Promise<ReadonlyMap<string, NativeObject>> {
+    throw new AccessError("operation_scope_not_approved", 503);
+  }
   constructor(private readonly data: CatalogDataPort, private readonly clock: RequestClockPort) {}
   async catalog(): Promise<CatalogRelease | null> {
     let release: CatalogRelease | null;

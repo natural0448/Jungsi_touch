@@ -392,6 +392,34 @@
           "nullable": false
         }
       }
+    },
+    {
+      "id": "member-shortlist.read",
+      "contract_ref": "backend_platform_contract.dto_schemas.member_shortlist",
+      "roots": {
+        "standard": {
+          "ref": "member_shortlist",
+          "nullable": false
+        },
+        "paid": {
+          "ref": "member_shortlist",
+          "nullable": false
+        }
+      }
+    },
+    {
+      "id": "member-shortlist.update",
+      "contract_ref": "backend_platform_contract.dto_schemas.member_shortlist",
+      "roots": {
+        "standard": {
+          "ref": "member_shortlist",
+          "nullable": false
+        },
+        "paid": {
+          "ref": "member_shortlist",
+          "nullable": false
+        }
+      }
     }
   ],
   "schemas": {
@@ -559,6 +587,7 @@
         "candidate_subject_context_mismatch",
         "catalog_field_invalid",
         "catalog_identity_conflict",
+        "catalog_offering_missing",
         "catalog_release_invalid",
         "catalog_release_missing",
         "catalog_release_not_approved",
@@ -587,6 +616,7 @@
         "counselor_adjustment_range_unconfirmed",
         "counselor_adjustment_unapproved",
         "cumulative_mismatch",
+        "current_saved_assessment_missing",
         "cursor_version_mismatch",
         "decision_context_mismatch",
         "decision_evidence_context_mismatch",
@@ -983,6 +1013,7 @@
         "revision_conflict",
         "route_not_found",
         "rule_estimate_context_mismatch",
+        "saved_assessment_missing",
         "school_identity_conflict",
         "score_confirmation_required",
         "score_outside_domain",
@@ -991,6 +1022,7 @@
         "sensitivity_scenario_unchanged",
         "serialization_population_mismatch",
         "serialization_weight_underflow",
+        "shortlist_limit_exceeded",
         "status",
         "storage_archive_only",
         "storage_artifact_invalid",
@@ -3225,6 +3257,14 @@
         "report": {
           "ref": "report_paid",
           "nullable": false
+        },
+        "shortlist_revision": {
+          "type": "integer",
+          "nullable": false
+        },
+        "member_shortlist": {
+          "ref": "member_shortlist",
+          "nullable": false
         }
       },
       "required": [
@@ -3234,7 +3274,10 @@
         "generated_at",
         "report"
       ],
-      "optional": []
+      "optional": [
+        "shortlist_revision",
+        "member_shortlist"
+      ]
     },
     "rank": {
       "type": "object",
@@ -4535,6 +4578,7 @@
         "sensitivity_scenario_unchanged",
         "serialization_population_mismatch",
         "serialization_weight_underflow",
+        "shortlist_limit_exceeded",
         "storage_archive_only",
         "storage_artifact_invalid",
         "storage_artifact_too_large",
@@ -6087,6 +6131,227 @@
       "optional": [
         "service_qualification"
       ]
+    },
+    "member_shortlist_legacy": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "report_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "report_version": {
+          "type": "integer",
+          "nullable": false
+        }
+      },
+      "required": [
+        "report_id",
+        "report_version"
+      ],
+      "optional": []
+    },
+    "member_shortlist_assessment_context": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "report_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "report_version": {
+          "type": "integer",
+          "nullable": false
+        },
+        "profile_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "exam_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "pack_version": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "academic_year": {
+          "type": "integer",
+          "nullable": false
+        },
+        "source": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "selected_report",
+            "current_profile"
+          ]
+        }
+      },
+      "required": [
+        "report_id",
+        "report_version",
+        "profile_id",
+        "exam_id",
+        "pack_version",
+        "academic_year",
+        "source"
+      ],
+      "optional": []
+    },
+    "member_shortlist_display": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "university_name": {
+          "type": "string",
+          "nullable": true
+        },
+        "department": {
+          "type": "string",
+          "nullable": true
+        },
+        "group": {
+          "type": "string",
+          "nullable": true
+        },
+        "track": {
+          "type": "string",
+          "nullable": true
+        },
+        "campus": {
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "required": [
+        "university_name",
+        "department",
+        "group",
+        "track",
+        "campus"
+      ],
+      "optional": []
+    },
+    "member_shortlist_item": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "offering_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "selected": {
+          "type": "boolean",
+          "nullable": false
+        },
+        "changed_at": {
+          "type": "string",
+          "nullable": false
+        },
+        "display": {
+          "ref": "member_shortlist_display",
+          "nullable": true
+        },
+        "catalog_status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "available",
+            "missing"
+          ]
+        },
+        "assessment": {
+          "ref": "assessment",
+          "nullable": true
+        },
+        "assessment_status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "ready",
+            "pending",
+            "ineligible",
+            "missing"
+          ]
+        },
+        "assessment_reason_code": {
+          "ref": "safe_code",
+          "nullable": true
+        }
+      },
+      "required": [
+        "offering_id",
+        "selected",
+        "changed_at",
+        "display",
+        "catalog_status",
+        "assessment",
+        "assessment_status",
+        "assessment_reason_code"
+      ],
+      "optional": []
+    },
+    "member_shortlist": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.member-shortlist/v1"
+          ]
+        },
+        "year": {
+          "type": "integer",
+          "nullable": false
+        },
+        "revision": {
+          "type": "integer",
+          "nullable": false
+        },
+        "updated_at": {
+          "type": "string",
+          "nullable": true
+        },
+        "origin": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "member_json",
+            "legacy_report",
+            "empty"
+          ]
+        },
+        "legacy_source": {
+          "ref": "member_shortlist_legacy",
+          "nullable": true
+        },
+        "assessment_context": {
+          "ref": "member_shortlist_assessment_context",
+          "nullable": true
+        },
+        "items": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "member_shortlist_item",
+            "nullable": false
+          }
+        }
+      },
+      "required": [
+        "format",
+        "year",
+        "revision",
+        "updated_at",
+        "origin",
+        "legacy_source",
+        "assessment_context",
+        "items"
+      ],
+      "optional": []
     }
   },
   "auxiliary_roots": {

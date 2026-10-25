@@ -8,7 +8,7 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 
 권한은 body·query 검증/자료 조회/멱등 조회보다 먼저 검사한다. unknown field와 중복 query key는 거절한다. 숫자 점수/누적은 엔진의 소수 문자열이며 원자료/전체 분포/가중치/비밀값/로컬 출처 경로는 제공하지 않는다. 모든 응답은 Cache-Control: no-store다.
 
-## 28개 요청과 응답
+## 30개 요청과 응답
 
 | API | 메서드/경로 | 본문 | 쿼리 | 응답 DTO | 키 필수 |
 | --- | --- | --- | --- | --- | --- |
@@ -22,7 +22,7 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 | university.analyze | POST /api/v1/reports/{report_id}/university-results | expected_version: positive integer; offering_ids: 서로 다른 등록 ID 1~100개 | 없음 | report (analyses 갱신); backend_platform_contract.dto_schemas.report | True |
 | candidates.build | POST /api/v1/reports/{report_id}/candidates | expected_version: positive integer | 없음 | report (analyses/candidates 갱신); backend_platform_contract.dto_schemas.report | True |
 | shortlist.update | PUT /api/v1/reports/{report_id}/shortlist/{offering_id} | selected: boolean; expected_version: positive integer | 없음 | report (shortlist 갱신); backend_platform_contract.dto_schemas.report | True |
-| report.export | GET /api/v1/reports/{report_id}/print | 없음 | 없음 | snapshot; backend_platform_contract.dto_schemas.snapshot | False |
+| report.export | GET /api/v1/reports/{report_id}/print | 없음 | year (optional explicit member shortlist print group; required with expected_report_version/shortlist_revision), expected_report_version (required positive integer with explicit member shortlist print group), shortlist_revision (required nonnegative integer with explicit member shortlist print group), legacy_source_report_id (optional paired with legacy_source_report_version only at shortlist_revision0), legacy_source_report_version (optional positive integer paired with legacy_source_report_id only at shortlist_revision0) | snapshot; backend_platform_contract.dto_schemas.snapshot | False |
 | statistics.read | GET /api/v1/reports/{report_id}/offerings/{offering_id}/live-statistics | 없음 | 없음 | statistics; backend_platform_contract.dto_schemas.statistics | False |
 | session.read | GET /api/v1/me | 없음 | 없음 | session; backend_platform_contract.dto_schemas.session | False |
 | forecast.capabilities | GET /api/v1/forecast-capabilities | 없음 | 없음 | forecast_capabilities; backend_platform_contract.dto_schemas.forecast_capabilities | False |
@@ -40,6 +40,8 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 | history.snapshot.head | GET /api/v1/admission-history/snapshot/head | 없음 | 없음 | history_snapshot_head; backend_platform_contract.dto_schemas.history_snapshot_head | False |
 | history.snapshot.read | GET /api/v1/admission-history/snapshots/{snapshot_id} | 없음 | part_id | history_snapshot_body; backend_platform_contract.dto_schemas.history_snapshot_body | False |
 | report.list-own | GET /api/v1/me/reports | 없음 | exam_id, cursor, limit (1~20; default 10) | own_report_list; backend_platform_contract.dto_schemas.own_report_list | False |
+| member-shortlist.read | GET /api/v1/me/shortlist | 없음 | year (required 4-digit integer in approved service years), report_id (optional owned selected report context) | member_shortlist; backend_platform_contract.dto_schemas.member_shortlist | False |
+| member-shortlist.update | PUT /api/v1/me/shortlist/{offering_id} | selected: boolean; expected_revision: nonnegative safe integer; expected_legacy_source: optional report_id/report_version for uninitialized legacy projection | year (required), report_id (optional owned selected report context) | member_shortlist; backend_platform_contract.dto_schemas.member_shortlist | True |
 
 모든 HTTP 업무 서비스는 PlatformService.execute이며 FastAPI create_app이 경로를 등록한다. 요청은 operations[].http_contract, 응답은 해당 contract_ref를 따른다. overall.analyze의 HTTP 응답은 persisted report이고 내부 overall 필드만 기존 OverallAnalysisService의 jungsi.overall-analysis/v1 엔진 DTO다. 두 객체를 루트 응답으로 혼동하지 않는다.
 
@@ -339,6 +341,17 @@ format: jungsi.own-report-list/v1
 - Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.
 - Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.
 
+### member_shortlist
+
+format: jungsi.member-shortlist/v1
+
+필드: format, year, revision, updated_at, origin, legacy_source, assessment_context, items.
+
+- A안: 선택 보고서/성적 버전의 저장된 허용 assessment만 목록에 함께 붙인다. 없으면 null+명시 상태/사유를 반환한다. report_id가 있으면 그 본인 보고서의 버전을 결속하며, 생략 시 선택한 본인 해당학년도 보고서 문맥을 응답에 명시한다. GET/리포트 열람·목록읽기에서 계산·분석 POST·입력권 차감·결과 쓰기를 하지 않는다. 필요한 표시/판정은 한 번의 제한된 배치/공유 저장본 읽기로 해결하며 학교별 N+1·회원 전체 JSON 순회는 금지한다.
+- expected_revision과 이전 JSON SHA/유효한 fencing을 결속해 한 세대만 게시한다. 같은 상태 쓰기는 revision을 올리거나 결과 객체를 다시 쓰지 않는다. 같은 키/동일 본문·경로는 최초 고정 응답을 현재 권한으로 재검증하고 다른 본문은409다. 단순 Storage upsert를 CAS로 가정하지 않는다. 응답 중단·게시 전후 실패·두 기기 충돌을 복구하며 모든 이전 파일과 후보를 보존한다. 원 보고서 revision·응답 지문을 결속하며 카탈로그 변경 등으로 원 응답을 재현할 수 없으면 다른 내용으로 성공시키지 않고409로 닫는다.
+- GET에는 쓰기를 넣지 않는다. 새 JSON이 없으면 가장 최근의 본인·해당학년도 보고서 shortlist를 origin=legacy_report, revision=0, legacy_source={report_id,report_version}로 읽기 전용 표시한다. 첫 실제 변경 PUT은 예상 legacy source와 현재 원본/본인 소유권을 확인하고 기존 목록을 보존한 JSON revision1에 그 변경만 적용한다. 동시 legacy 변경은409이며 예전 true만 합쳐 해제 학교를 되살리지 않는다. 이미 초기화한 회원 JSON을 legacy로 덮지 않는다. 동일 상태 no-op는 초기화 쓰기도 하지 않는다.
+- 기존 무query report.export 권리는 유지한다. 새 명시 year/expected_report_version/shortlist_revision 요청은 본인 선택 성적 보고서와 정확 관심목록을 독립 결속한다. revision0에서만 optional 쌍 legacy_source_report_id/legacy_source_report_version으로 GET legacy_source의 정확 본인·동일연도 report revision 목록을 읽는다. GET 후 최신 legacy가 바뀌어도 그 목록을 보존하며 JSON 생성·입력권 차감·새 산출은 없다. 쌍을 생략하면 선택보고서가 최신 legacy 원본과 일치할 때만 성공하며 불일치는409다. 쌍 한쪽·잘못된 형식·rev>0의 쌍은422, 타인·다른연도·없는 exact 원본은404다. rev>0은 정확 불변 JSON revision을 사용하고 최신으로 치환하지 않는다.
+
 ## 시간 표시
 
 서버 instant는 UTC Z, 날짜는 YYYY-MM-DD다. 화면은 instant만 Asia/Seoul로 변환하고 date-only에 시각을 붙이지 않는다. 401은 재인증, 403은 현재 이용권, 409는 확인 성적/최신 revision·카탈로그/요청 키를 재확인한다. 재시도는 같은 본문·경로·키를 보존한다. UI/인쇄 렌더링은 별도 담당이다.
@@ -420,12 +433,12 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=daf3c66542f4bb7653bdc73e951d1a35fba1abbba7b64dcf026dd30277140056 -->
+<!-- jungsi:generated spec_sha256=5a388e7b7469046757f6832bb90d02a1772fb57d6a7935f1595446a6a18d7182 -->
 
 
 ## 회원별 관심대학 JSON API
 
-MEMBER-SHORTLIST-01 / API_CONTRACT_PREPARED_IMPLEMENTATION_AND_ACTIVATION_PENDING. 회원·대상 학년도별 비공개 JSON 관심대학을 기존 리포트와 분리한다. 저장 판정 동봉 A안을 채택하고 기존 report-bound API와 전문가용은 유지한다.
+MEMBER-SHORTLIST-01 / SOURCE_REGISTERED_NOT_ACTIVATED. 회원·대상 학년도별 비공개 JSON 관심대학을 기존 리포트와 분리한다. 저장 판정 동봉 A안을 채택하고 기존 report-bound API와 전문가용은 유지한다.
 
 | 항목 | 계약 |
 | --- | --- |
@@ -437,7 +450,7 @@ MEMBER-SHORTLIST-01 / API_CONTRACT_PREPARED_IMPLEMENTATION_AND_ACTIVATION_PENDIN
 | retry | revision_conflict는 한 번 다시 GET한 뒤 새 expected_revision과 새 Idempotency-Key로 같은 selected 의도를 한 번만 재시도한다. 통신 결과가 불명확하면 원래 키와 동일 본문으로 먼저 복구한다. 이미 확정된 명령의 본문을 같은 키로 바꾸지 않는다. |
 | error | 기존 {status:error,error:{code},request_id} 봉투를 유지한다. current_revision 오류 추가 필드는 필수가 아니며 재조회 응답으로 확인한다. 선언된 사용자표시 상한만 공개 가능하고 내부 요청/동시성/물리 한도는 반환하지 않는다. 개수/본문 초과는 shortlist_limit_exceeded로 원래 상태를 보존한다. 실제 수치 상한·허용 학년도·물리 비용은 기존 승인 정책을 재사용/결속하며 임의 값·null→무제한을 만들지 않는다. |
 | migration | GET에는 쓰기를 넣지 않는다. 새 JSON이 없으면 가장 최근의 본인·해당학년도 보고서 shortlist를 origin=legacy_report, revision=0, legacy_source={report_id,report_version}로 읽기 전용 표시한다. 첫 실제 변경 PUT은 예상 legacy source와 현재 원본/본인 소유권을 확인하고 기존 목록을 보존한 JSON revision1에 그 변경만 적용한다. 동시 legacy 변경은409이며 예전 true만 합쳐 해제 학교를 되살리지 않는다. 이미 초기화한 회원 JSON을 legacy로 덮지 않는다. 동일 상태 no-op는 초기화 쓰기도 하지 않는다. |
-| printing | 기존 무query report.export는 기존 report-bound 고정본을 유지한다. 새 명시 year/expected_report_version/shortlist_revision 요청만 본인 선택 보고서와 정확 관심대학 세대·목록의 고정본을 결속한다. 응답에 shortlist_revision과 그 목록/표시·저장 판정 문맥을 함께 보존한다. 인쇄 처리 중 최신 세대로 슬쩍 치환하거나 본문을 새로 계산하지 않는다. 없는 버전·변경된 보고서 문맥은 명시 오류로 처리한다. 신규 회원 관심대학 읽기는 paid 경로이며 표준/만료 회원의 기존 본인 리포트 무query 열람/인쇄 권리는 그대로 보존한다. |
+| printing | 기존 무query report.export 권리는 유지한다. 새 명시 year/expected_report_version/shortlist_revision 요청은 본인 선택 성적 보고서와 정확 관심목록을 독립 결속한다. revision0에서만 optional 쌍 legacy_source_report_id/legacy_source_report_version으로 GET legacy_source의 정확 본인·동일연도 report revision 목록을 읽는다. GET 후 최신 legacy가 바뀌어도 그 목록을 보존하며 JSON 생성·입력권 차감·새 산출은 없다. 쌍을 생략하면 선택보고서가 최신 legacy 원본과 일치할 때만 성공하며 불일치는409다. 쌍 한쪽·잘못된 형식·rev>0의 쌍은422, 타인·다른연도·없는 exact 원본은404다. rev>0은 정확 불변 JSON revision을 사용하고 최신으로 치환하지 않는다. |
 | frontend | 화면팀 shortlist.ts의 selectedIds/readPicks/setPick를 전환 지점으로 삼는다. 2·3·4페이지·와일드카드·트레이·인쇄가 같은 회원 목록을 쓰며, 판정 없음은 미산출 안내로 유지하고 GET 진입에 숨은 분석 요청을 붙이지 않는다. 새 operation·설정·정확 배포판의 Owner 영수증 전까지 기존 연결을 유지한다. |
 
 | operation | method | path |

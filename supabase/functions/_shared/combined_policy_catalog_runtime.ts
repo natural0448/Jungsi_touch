@@ -1,6 +1,9 @@
 /** Explicit combined-policy20 factory. Exact14 and read-view17 factories remain separate. */
 import { AccessError } from "./jungsi/application/access.ts";
-import { COMBINED_POLICY_CONSUMER_OPERATION_IDS } from "./jungsi/application/api_dispatch.ts";
+import {
+  COMBINED_POLICY_CONSUMER_OPERATION_IDS,
+  MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS,
+} from "./jungsi/application/api_dispatch.ts";
 import type { CatalogDataPort } from "./jungsi/application/catalog.ts";
 import type { RequestClockPort } from "./jungsi/application/ports.ts";
 import { nativeJsonSha256 } from "./jungsi/domain/json_value.ts";
@@ -21,7 +24,7 @@ import {
 } from "./current_public_catalog_sql.ts";
 import { CurrentPublicMetadataKeyIndex } from "./current_public_key_index.ts";
 import { currentPublicKeyObjectReader } from "./current_public_key_storage.ts";
-export function createCombinedPolicyCatalogService(
+function createBoundCatalogService(
   data: CatalogDataPort,
   clock: RequestClockPort,
   sql: () => SupabaseSqlTransport,
@@ -30,6 +33,7 @@ export function createCombinedPolicyCatalogService(
     binding(): Promise<ApprovedRuntimeBinding>;
     controls(): Promise<{ fetcher: typeof fetch }>;
   },
+  memberJson = false,
 ): CurrentPublicCatalogService {
   let verified: ReturnType<typeof verifyPublicCatalogDescriptor> | undefined,
     cipher: CurrentPublicCatalogCursor | undefined,
@@ -47,11 +51,17 @@ export function createCombinedPolicyCatalogService(
   const load = () =>
     verified ??= (async () => {
       const binding = await context.binding();
+      // The new candidate can serve existing20 under the preserved v3 settings during rollout.
+      // New member operations still require the separate v4 binding gate in composition.
+      const memberActive = memberJson && binding.memberJson !== undefined;
       if (
-        !binding.readViews || binding.consumerGeneration !== "operating-admin-20" ||
-        binding.operations.length !== 20 ||
-        new Set(binding.operations).size !== 20 ||
-        COMBINED_POLICY_CONSUMER_OPERATION_IDS.some((id) => !binding.operations.includes(id))
+        !binding.readViews ||
+        binding.consumerGeneration !== (memberActive ? "member-json-22" : "operating-admin-20") ||
+        binding.operations.length !== (memberActive ? 22 : 20) ||
+        new Set(binding.operations).size !== (memberActive ? 22 : 20) ||
+        (memberActive
+          ? MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS
+          : COMBINED_POLICY_CONSUMER_OPERATION_IDS).some((id) => !binding.operations.includes(id))
       ) throw new AccessError("operation_scope_not_approved", 503);
       const raw = env.get("JUNGSI_CURRENT_PUBLIC_CATALOG_BINDING"),
         sha = env.get("JUNGSI_CURRENT_PUBLIC_CATALOG_BINDING_SHA256");
@@ -101,4 +111,15 @@ export function createCombinedPolicyCatalogService(
     open: (...args) => key().open(...args),
   };
   return new CurrentPublicCatalogService(data, current, clock, cursor);
+}
+
+export function createCombinedPolicyCatalogService(
+  ...args: Parameters<typeof createBoundCatalogService>
+): CurrentPublicCatalogService {
+  return createBoundCatalogService(args[0], args[1], args[2], args[3], args[4], false);
+}
+export function createMemberShortlistCatalogService(
+  ...args: Parameters<typeof createBoundCatalogService>
+): CurrentPublicCatalogService {
+  return createBoundCatalogService(args[0], args[1], args[2], args[3], args[4], true);
 }

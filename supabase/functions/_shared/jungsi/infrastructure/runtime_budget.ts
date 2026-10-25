@@ -1,6 +1,9 @@
 /** Private approved policy -> request-local shared reservations. No capacities or approvals default. */
 import { AccessError } from "../application/access.ts";
-import { COMBINED_POLICY_CONSUMER_OPERATION_IDS } from "../application/api_dispatch.ts";
+import {
+  COMBINED_POLICY_CONSUMER_OPERATION_IDS,
+  MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS,
+} from "../application/api_dispatch.ts";
 import { ApprovedAdministratorUsagePolicy } from "../application/administrator_usage_policy.ts";
 import { ApprovedOperatingPolicy } from "../application/operating_policy.ts";
 import { validateScoreInput, validateScoreStructure } from "../application/overall_analysis.ts";
@@ -135,10 +138,18 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
     ) fail();
     const combined = row.format === "jungsi.runtime-usage-policy/v4";
     if (
-      combined !== (binding.consumerGeneration === "operating-admin-20") ||
+      combined !==
+        (["operating-admin-20", "member-json-22"].includes(binding.consumerGeneration ?? "")) ||
       combined && (mode !== "rights" || !binding.readViews ||
-          binding.operations.length !== COMBINED_POLICY_CONSUMER_OPERATION_IDS.length ||
-          COMBINED_POLICY_CONSUMER_OPERATION_IDS.some((id) => !binding.operations.includes(id)) ||
+          binding.operations.length !==
+            (binding.memberJson
+              ? MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS
+              : COMBINED_POLICY_CONSUMER_OPERATION_IDS).length ||
+          (binding.memberJson
+            ? MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS
+            : COMBINED_POLICY_CONSUMER_OPERATION_IDS).some((id) =>
+              !binding.operations.includes(id)
+            ) ||
           !Object.hasOwn(row, "operating_policy") || !Object.hasOwn(row, "administrator_policy"))
     ) fail();
     try {

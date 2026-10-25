@@ -83,7 +83,7 @@
       "engine_in_browser_allowed": false,
       "runtime": "supabase_edge_typescript_deno",
       "hosting_target_status": "selected_migration_pending",
-      "API_count": 28,
+      "API_count": 30,
       "API_DTO_session_changes": true,
       "server_timezone": "UTC",
       "source_display_timezone": "Asia/Seoul",

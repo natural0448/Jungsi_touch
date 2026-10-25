@@ -42,10 +42,22 @@ export const READ_VIEW_OPERATION_IDS = [
   "history.snapshot.read",
   "report.list-own",
 ] as const;
-export const REGISTERED_API_OPERATION_IDS = [
+export const READ_VIEW_REGISTERED_API_OPERATION_IDS = [
   ...API_OPERATION_IDS,
   ...READ_VIEW_OPERATION_IDS,
 ] as const;
+export const MEMBER_SHORTLIST_OPERATION_IDS = [
+  "member-shortlist.read",
+  "member-shortlist.update",
+] as const;
+export const REGISTERED_API_OPERATION_IDS = [
+  ...READ_VIEW_REGISTERED_API_OPERATION_IDS,
+  ...MEMBER_SHORTLIST_OPERATION_IDS,
+] as const;
+export const MEMBER_SHORTLIST_ROUTE_PATHS = {
+  "member-shortlist.read": "/api/v1/me/shortlist",
+  "member-shortlist.update": "/api/v1/me/shortlist/{offering_id}",
+} as const;
 export const READ_VIEW_ROUTE_PATHS = {
   "history.snapshot.head": "/api/v1/admission-history/snapshot/head",
   "history.snapshot.read": "/api/v1/admission-history/snapshots/{snapshot_id}",
@@ -77,6 +89,10 @@ export const COMBINED_POLICY_CONSUMER_OPERATION_IDS = [
   ...SCORE_POLICY_OPERATION_IDS,
 ] as const;
 export type ApiOperationId = typeof REGISTERED_API_OPERATION_IDS[number];
+export const MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS = [
+  ...COMBINED_POLICY_CONSUMER_OPERATION_IDS,
+  ...MEMBER_SHORTLIST_OPERATION_IDS,
+] as const;
 export interface ApiRoutePolicy {
   readonly id: ApiOperationId;
   readonly method: "GET" | "POST" | "PUT";

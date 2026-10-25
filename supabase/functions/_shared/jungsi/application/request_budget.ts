@@ -48,4 +48,6 @@ export const BUDGET_OPERATIONS = [
   "history.snapshot.head",
   "history.snapshot.read",
   "report.list-own",
+  "member-shortlist.read",
+  "member-shortlist.update",
 ] as const;

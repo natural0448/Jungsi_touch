@@ -10,7 +10,7 @@ sys.path.insert(0,str(ROOT/'src'));sys.path.insert(0,str(ROOT/'scripts'))
 from backend_synthetic_fixture import FrozenClock,SyntheticRepository,SyntheticSessions,SyntheticData,score_input
 from jungsi_touch.infrastructure.http_api import create_app
 from jungsi_touch.infrastructure.settings import ServerSettings
-from check_project_consistency import validate_score_input_policy
+from check_project_consistency import validate_score_input_policy,registered_member_shortlist_ids
 from starlette.testclient import TestClient
 
 class ScoreInputPolicyContractTests(unittest.TestCase):
@@ -26,8 +26,10 @@ class ScoreInputPolicyContractTests(unittest.TestCase):
         self.assertEqual(self.app.state.operating_mode,'rights')
         self.assertEqual(len([r for r in self.app.routes if r.path.startswith('/api/v1/')]),25)
         operations=json.loads((ROOT/'src/jungsi_touch/application/route_catalog.json').read_text(encoding='utf-8'))['operations']
-        self.assertEqual(len(operations),28)
-        operations=[o for o in operations if o['id'] not in {'history.snapshot.head','history.snapshot.read','report.list-own'}]
+        source=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
+        member_ids=registered_member_shortlist_ids(source)
+        self.assertEqual(len(operations),28+len(member_ids))
+        operations=[o for o in operations if o['id'] not in {'history.snapshot.head','history.snapshot.read','report.list-own'}|member_ids]
         self.assertEqual(len(operations),25)
         for operation in operations:
             with self.subTest(operation=operation['id']):
@@ -45,7 +47,7 @@ class ScoreInputPolicyContractTests(unittest.TestCase):
             app=create_app(settings=ServerSettings(),repository=self.repository,data=self.data,sessions=SyntheticSessions(self.clock),clock=self.clock,operating_mode=mode)
             routes={r.path for r in app.routes if r.path.startswith('/api/v1/')}
             self.assertEqual(len(routes),expected)
-            self.assertTrue(routes.isdisjoint({'/api/v1/admission-history/snapshot/head','/api/v1/admission-history/snapshots/{snapshot_id}','/api/v1/me/reports'}))
+            self.assertTrue(routes.isdisjoint({'/api/v1/admission-history/snapshot/head','/api/v1/admission-history/snapshots/{snapshot_id}','/api/v1/me/reports','/api/v1/me/shortlist','/api/v1/me/shortlist/{offering_id}'}))
         self.assertEqual(self.repository.access_calls,[])
         self.assertEqual(self.data.calls,[])
     def test_free_personal_input_is_403_and_never_falls_back_to_old_overall(self):

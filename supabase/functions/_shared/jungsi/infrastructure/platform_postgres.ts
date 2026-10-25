@@ -14,6 +14,7 @@ import { JsonFloat } from "../domain/native_json.ts";
 import { utcInstant, utcText } from "../domain/time.ts";
 import { sqlIntegerText, sqlObjectText, sqlUtcText } from "./sql_values.ts";
 import { nativeJsonbText } from "./jsonb_value.ts";
+import { lockMemberShortlist } from "./member_shortlist_postgres.ts";
 import { type NativeSqlTransaction, SupabaseSqlTransport } from "./transaction_sql.ts";
 
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
@@ -156,7 +157,10 @@ export class SupabasePlatformRepository implements PlatformRepositoryPort {
   private readonly maxRecordBytes: number;
   constructor(
     private readonly sql: SupabaseSqlTransport,
-    limits: { readonly maxRecordBytes: number },
+    private readonly limits: {
+      readonly maxRecordBytes: number;
+      readonly serializeMemberShortlist?: boolean;
+    },
     private readonly uuid: () => string = () => crypto.randomUUID().replaceAll("-", ""),
   ) {
     if (!limits || !Number.isSafeInteger(limits.maxRecordBytes) || limits.maxRecordBytes < 1) {
@@ -341,6 +345,14 @@ export class SupabasePlatformRepository implements PlatformRepositoryPort {
     }
     const now = utcText(input.nowUtc), bodyText = encoded(input.body, this.maxRecordBytes);
     return await this.sql.write(owner, async (tx) => {
+      if (this.limits.serializeMemberShortlist) {
+        const overall = input.body.overall,
+          exam = object(overall) ? overall.exam : null,
+          year = object(exam) ? exam.academic_year : null;
+        const n = typeof year === "bigint" ? Number(year) : year;
+        if (typeof n !== "number" || !Number.isSafeInteger(n) || n < 1000 || n > 9999) invalid();
+        await lockMemberShortlist(tx, owner, n);
+      }
       await lock(tx, owner, op, key);
       const replay = await this.replayIn(tx, owner, op, key, digest);
       if (replay) {

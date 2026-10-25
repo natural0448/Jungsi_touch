@@ -6,7 +6,7 @@
 
 ## 회원별 관심대학 JSON API
 
-MEMBER-SHORTLIST-01 / API_CONTRACT_PREPARED_IMPLEMENTATION_AND_ACTIVATION_PENDING. 회원·대상 학년도별 비공개 JSON 관심대학을 기존 리포트와 분리한다. 저장 판정 동봉 A안을 채택하고 기존 report-bound API와 전문가용은 유지한다.
+MEMBER-SHORTLIST-01 / SOURCE_REGISTERED_NOT_ACTIVATED. 회원·대상 학년도별 비공개 JSON 관심대학을 기존 리포트와 분리한다. 저장 판정 동봉 A안을 채택하고 기존 report-bound API와 전문가용은 유지한다.
 
 | 항목 | 계약 |
 | --- | --- |
@@ -18,7 +18,7 @@ MEMBER-SHORTLIST-01 / API_CONTRACT_PREPARED_IMPLEMENTATION_AND_ACTIVATION_PENDIN
 | retry | revision_conflict는 한 번 다시 GET한 뒤 새 expected_revision과 새 Idempotency-Key로 같은 selected 의도를 한 번만 재시도한다. 통신 결과가 불명확하면 원래 키와 동일 본문으로 먼저 복구한다. 이미 확정된 명령의 본문을 같은 키로 바꾸지 않는다. |
 | error | 기존 {status:error,error:{code},request_id} 봉투를 유지한다. current_revision 오류 추가 필드는 필수가 아니며 재조회 응답으로 확인한다. 선언된 사용자표시 상한만 공개 가능하고 내부 요청/동시성/물리 한도는 반환하지 않는다. 개수/본문 초과는 shortlist_limit_exceeded로 원래 상태를 보존한다. 실제 수치 상한·허용 학년도·물리 비용은 기존 승인 정책을 재사용/결속하며 임의 값·null→무제한을 만들지 않는다. |
 | migration | GET에는 쓰기를 넣지 않는다. 새 JSON이 없으면 가장 최근의 본인·해당학년도 보고서 shortlist를 origin=legacy_report, revision=0, legacy_source={report_id,report_version}로 읽기 전용 표시한다. 첫 실제 변경 PUT은 예상 legacy source와 현재 원본/본인 소유권을 확인하고 기존 목록을 보존한 JSON revision1에 그 변경만 적용한다. 동시 legacy 변경은409이며 예전 true만 합쳐 해제 학교를 되살리지 않는다. 이미 초기화한 회원 JSON을 legacy로 덮지 않는다. 동일 상태 no-op는 초기화 쓰기도 하지 않는다. |
-| printing | 기존 무query report.export는 기존 report-bound 고정본을 유지한다. 새 명시 year/expected_report_version/shortlist_revision 요청만 본인 선택 보고서와 정확 관심대학 세대·목록의 고정본을 결속한다. 응답에 shortlist_revision과 그 목록/표시·저장 판정 문맥을 함께 보존한다. 인쇄 처리 중 최신 세대로 슬쩍 치환하거나 본문을 새로 계산하지 않는다. 없는 버전·변경된 보고서 문맥은 명시 오류로 처리한다. 신규 회원 관심대학 읽기는 paid 경로이며 표준/만료 회원의 기존 본인 리포트 무query 열람/인쇄 권리는 그대로 보존한다. |
+| printing | 기존 무query report.export 권리는 유지한다. 새 명시 year/expected_report_version/shortlist_revision 요청은 본인 선택 성적 보고서와 정확 관심목록을 독립 결속한다. revision0에서만 optional 쌍 legacy_source_report_id/legacy_source_report_version으로 GET legacy_source의 정확 본인·동일연도 report revision 목록을 읽는다. GET 후 최신 legacy가 바뀌어도 그 목록을 보존하며 JSON 생성·입력권 차감·새 산출은 없다. 쌍을 생략하면 선택보고서가 최신 legacy 원본과 일치할 때만 성공하며 불일치는409다. 쌍 한쪽·잘못된 형식·rev>0의 쌍은422, 타인·다른연도·없는 exact 원본은404다. rev>0은 정확 불변 JSON revision을 사용하고 최신으로 치환하지 않는다. |
 | frontend | 화면팀 shortlist.ts의 selectedIds/readPicks/setPick를 전환 지점으로 삼는다. 2·3·4페이지·와일드카드·트레이·인쇄가 같은 회원 목록을 쓰며, 판정 없음은 미산출 안내로 유지하고 GET 진입에 숨은 분석 요청을 붙이지 않는다. 새 operation·설정·정확 배포판의 Owner 영수증 전까지 기존 연결을 유지한다. |
 
 | operation | method | path |
@@ -100,4 +100,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=daf3c66542f4bb7653bdc73e951d1a35fba1abbba7b64dcf026dd30277140056 -->
+<!-- jungsi:generated spec_sha256=5a388e7b7469046757f6832bb90d02a1772fb57d6a7935f1595446a6a18d7182 -->

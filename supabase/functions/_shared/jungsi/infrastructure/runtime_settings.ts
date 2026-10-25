@@ -4,7 +4,9 @@ import {
   API_OPERATION_IDS,
   type ApiOperationId,
   COMBINED_POLICY_CONSUMER_OPERATION_IDS,
+  MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS,
   READ_VIEW_CONSUMER_OPERATION_IDS,
+  READ_VIEW_REGISTERED_API_OPERATION_IDS,
   REGISTERED_API_OPERATION_IDS,
 } from "../application/api_dispatch.ts";
 import type { SnapshotTrustBinding } from "./history_snapshot_source.ts";
@@ -61,7 +63,7 @@ export interface RuntimeRepositoryLimits {
   readonly maxBatchIds: number;
 }
 export interface ApprovedRuntimeBinding {
-  readonly consumerGeneration?: "read-view-17" | "operating-admin-20";
+  readonly consumerGeneration?: "read-view-17" | "operating-admin-20" | "member-json-22";
   readonly descriptorSha256: string;
   readonly projectUrl: string;
   readonly approvalReferenceSha256: string;
@@ -79,6 +81,11 @@ export interface ApprovedRuntimeBinding {
   readonly readLimits: RuntimeReadLimits;
   readonly repositoryLimits: RuntimeRepositoryLimits;
   readonly usageStoreLimits: UsageStoreLimits;
+  readonly memberJson?: {
+    readonly prefix: string;
+    readonly maxItems: number;
+    readonly maxObjectBytes: number;
+  };
   readonly readViews?: {
     readonly snapshot: SnapshotTrustBinding;
     readonly cursorLifetimeMicroseconds: bigint;
@@ -203,17 +210,23 @@ export async function readApprovedRuntimeBinding(
       "scope",
       "sources",
       "limits",
-      ...(["jungsi.edge-api-binding/v2", "jungsi.edge-api-binding/v3"].includes(
-          parsed.format as string,
-        )
-        ? ["read_views"]
+      ...(["jungsi.edge-api-binding/v2", "jungsi.edge-api-binding/v3", "jungsi.edge-api-binding/v4"]
+          .includes(
+            parsed.format as string,
+          )
+        ? ["read_views", ...(parsed.format === "jungsi.edge-api-binding/v4" ? ["member_json"] : [])]
         : []),
     ]);
   } catch {
     fail();
   }
   if (
-    !["jungsi.edge-api-binding/v1", "jungsi.edge-api-binding/v2", "jungsi.edge-api-binding/v3"]
+    ![
+      "jungsi.edge-api-binding/v1",
+      "jungsi.edge-api-binding/v2",
+      "jungsi.edge-api-binding/v3",
+      "jungsi.edge-api-binding/v4",
+    ]
       .includes(row.format as string) ||
     row.status !== "approved" ||
     row.purpose !== "jungsi-api-runtime" ||
@@ -233,8 +246,11 @@ export async function readApprovedRuntimeBinding(
   ) fail();
   const operations = scope.operations.map((value) => {
     const allowed: readonly string[] =
-      ["jungsi.edge-api-binding/v2", "jungsi.edge-api-binding/v3"].includes(row.format as string)
-        ? REGISTERED_API_OPERATION_IDS
+      ["jungsi.edge-api-binding/v2", "jungsi.edge-api-binding/v3", "jungsi.edge-api-binding/v4"]
+          .includes(row.format as string)
+        ? row.format === "jungsi.edge-api-binding/v4"
+          ? REGISTERED_API_OPERATION_IDS
+          : READ_VIEW_REGISTERED_API_OPERATION_IDS
         : API_OPERATION_IDS;
     if (typeof value !== "string" || !allowed.includes(value)) fail();
     return value as ApiOperationId;
@@ -249,6 +265,11 @@ export async function readApprovedRuntimeBinding(
     row.format === "jungsi.edge-api-binding/v3" &&
     (operations.length !== COMBINED_POLICY_CONSUMER_OPERATION_IDS.length ||
       COMBINED_POLICY_CONSUMER_OPERATION_IDS.some((id) => !operations.includes(id)))
+  ) fail();
+  if (
+    row.format === "jungsi.edge-api-binding/v4" &&
+    (operations.length !== MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS.length ||
+      MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS.some((id) => !operations.includes(id)))
   ) fail();
   const artifacts = scope.artifacts.map((value) => {
     const entry = object(value, ["kind", "key"]);
@@ -298,8 +319,33 @@ export async function readApprovedRuntimeBinding(
   if (CONTROL_SOURCE_NAMES.some((name) => !references[name].objectKey.startsWith(objectPrefix))) {
     fail();
   }
+  let memberJson: ApprovedRuntimeBinding["memberJson"];
+  if (row.format === "jungsi.edge-api-binding/v4") {
+    const m = object(row.member_json, [
+      "format",
+      "status",
+      "object_prefix",
+      "max_items",
+      "max_object_bytes",
+    ]);
+    const prefix = text(m.object_prefix),
+      maxItems = size(m.max_items),
+      maxObjectBytes = size(m.max_object_bytes);
+    if (
+      m.format !== "jungsi.member-json-runtime/v1" || m.status !== "approved" ||
+      !prefix.startsWith(objectPrefix) || prefix === objectPrefix || !prefix.endsWith("/") ||
+      /[\\%\s]/.test(prefix) || prefix.slice(0, -1).split("/").some((p) =>
+        !p || p === "." || p === ".."
+      ) || maxItems > size(repositories.max_batch_ids) || maxItems > 100 ||
+      maxObjectBytes > size(storage.max_artifact_bytes)
+    ) fail();
+    memberJson = Object.freeze({ prefix, maxItems, maxObjectBytes });
+  }
   let readViews: ApprovedRuntimeBinding["readViews"];
-  if (["jungsi.edge-api-binding/v2", "jungsi.edge-api-binding/v3"].includes(row.format as string)) {
+  if (
+    ["jungsi.edge-api-binding/v2", "jungsi.edge-api-binding/v3", "jungsi.edge-api-binding/v4"]
+      .includes(row.format as string)
+  ) {
     const views = object(row.read_views, ["format", "status", "snapshot", "report_locator"]);
     if (views.format !== "jungsi.read-view-runtime/v1" || views.status !== "approved") fail();
     const s = object(views.snapshot, [
@@ -392,10 +438,13 @@ export async function readApprovedRuntimeBinding(
       maxBatchIds: size(repositories.max_batch_ids),
     }),
     usageStoreLimits,
+    ...(memberJson ? { memberJson } : {}),
     ...(readViews
       ? {
         readViews,
-        consumerGeneration: row.format === "jungsi.edge-api-binding/v3"
+        consumerGeneration: row.format === "jungsi.edge-api-binding/v4"
+          ? "member-json-22" as const
+          : row.format === "jungsi.edge-api-binding/v3"
           ? "operating-admin-20" as const
           : "read-view-17" as const,
       }
