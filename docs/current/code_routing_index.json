@@ -640,7 +640,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "cfcb5476d98655b1efab458862a3d215b2997cf853c1a0369a34df4b9fc483e9",
+      "source_sha256": "c0113ed3a38099054f0c069fae0ccea1548b21e89dfd03052667bb2cfdb80f33",
       "symbols": [
         {
           "kind": "class",
@@ -836,6 +836,12 @@
         },
         {
           "kind": "function",
+          "name": "member_shortlist_registration",
+          "signature": "def member_shortlist_registration(spec, source_hashes=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "opening_security_document_body",
           "signature": "def opening_security_document_body(spec):",
           "decorators": []
@@ -880,6 +886,12 @@
           "kind": "function",
           "name": "public_metadata_matches_shape",
           "signature": "def public_metadata_matches_shape(value, shape):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "registered_member_shortlist_ids",
+          "signature": "def registered_member_shortlist_ids(spec):",
           "decorators": []
         },
         {
@@ -1591,7 +1603,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "e026d11c15d383e06b178f254b6af66c08b2b05a78f3de42fd78d5b73bcc6f6f",
+      "source_sha256": "8f8cf8283706dd52cb30cf490b3f9636aa977f44fe0e9bb73a781a4d25bcd17e",
       "symbols": [
         {
           "kind": "function",
@@ -1609,6 +1621,12 @@
           "kind": "function",
           "name": "main",
           "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "member_shortlist_suite_registration",
+          "signature": "def member_shortlist_suite_registration(spec, before):",
           "decorators": []
         },
         {

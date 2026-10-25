@@ -80,6 +80,16 @@ def operation_registration(spec):
           contract_operation_count=3,registered_operation_ids=view['operation_ids'],registered_operation_count=3,
           implementation_bindings=view['implementation_bindings'],runtime_test_bindings=view['runtime_test_bindings'],
           status='CODE_REGISTERED',native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN')
+    from check_project_consistency import member_shortlist_registration
+    member,member_errors=member_shortlist_registration(spec)
+    if member_errors:raise EdgeFailure('member_shortlist_source_registration_invalid')
+    if member is not None:
+        result['member_shortlist_source_registration']=dict(
+            format='jungsi.member-shortlist-source-registration-receipt/v1',
+            contract_operation_count=2,registered_operation_ids=member['operation_ids'],registered_operation_count=2,
+            baseline_operation_count=28,status='CODE_REGISTERED',
+            implementation_bindings=member['implementation_bindings'],
+            native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN')
     return result
 
 def owner_review_registration(spec,before):
@@ -185,6 +195,12 @@ def school_reference_registration(spec,before):
         any(not isinstance(b.get('sha256'),str) or before.get(b['path'])!=b['sha256']for b in bindings)):
         raise EdgeFailure('school_reference_source_or_test_binding_invalid')
     return v
+
+def member_shortlist_suite_registration(spec,before):
+    from check_project_consistency import member_shortlist_registration
+    registered,errors=member_shortlist_registration(spec,before)
+    if errors:raise EdgeFailure('member_shortlist_source_or_test_binding_invalid')
+    return registered
 
 def professional_suite_registration(spec,before):
     """Separate exact pro source/SQL suite; source registration never opens an institution."""
@@ -332,6 +348,15 @@ def run_workspace(root,manifest,deno,python,output):
           coverage='READ_VIEW_EXTENSION_SYNTHETIC',source_bindings=read_view['source_bindings'],
           baseline_foundation_count=656,native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',
           activation_status='NOT_RUN',operating_writes=0)
+    member_shortlist_unit=None
+    member=member_shortlist_suite_registration(spec,before)
+    if member is not None:
+        member_junit=output.resolve()/'member_shortlist.junit.xml'
+        command([deno,'test',*common,'--reporter=dot','--junit-path',str(member_junit),
+          *member['verification']['test_paths']],root=root,output=output,name='member_shortlist_unit')
+        member_shortlist_unit=dict(**parse_junit(member_junit,member['verification']['test_count']),
+          coverage='MEMBER_JSON_SHORTLIST_SYNTHETIC',source_bindings=member['verification']['source_bindings'],
+          baseline_foundation_count=656,native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN',operating_writes=0)
     professional_unit=None
     school_reference_unit=None
     school_reference=school_reference_registration(spec,before)
@@ -384,6 +409,7 @@ def run_workspace(root,manifest,deno,python,output):
     if read_view_unit is not None:result['read_view_extension_unit']=read_view_unit
     if professional_unit is not None:result['professional_unit']=professional_unit
     if school_reference_unit is not None:result['school_reference_unit']=school_reference_unit
+    if member_shortlist_unit is not None:result['member_shortlist_unit']=member_shortlist_unit
     write_new(output/"edge_run_receipt.json",json_bytes(result));return result
 def main():
     p=argparse.ArgumentParser(description=__doc__)

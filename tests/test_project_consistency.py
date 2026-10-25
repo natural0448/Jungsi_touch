@@ -2746,3 +2746,101 @@ class CatalogPayloadBoundaryTests(unittest.TestCase):
         self.assertTrue(validate_catalog_payload_scope(spec))
         spec=self.source();spec['service_performance_contract']['parent_cache_candidate']['preserved']=False
         self.assertTrue(validate_catalog_payload_scope(spec))
+
+
+# Additional strict member-JSON registration cases; existing planning tests retain their scope.
+import copy
+import check_project_consistency as checker
+import run_edge_tests as runner
+
+class MemberShortlistRegistrationCases(unittest.TestCase):
+    def fixture(self):
+        spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
+        spec.pop('member_shortlist_contract',None)
+        spec['operations']=[r for r in spec['operations']if r['id']not in checker.MEMBER_SHORTLIST_ROUTES]
+        base=copy.deepcopy(spec['operations'][0])
+        for oid,(method,path)in checker.MEMBER_SHORTLIST_ROUTES.items():
+            row={**base,'id':oid,'method':method,'path':path,'member_tiers':['paid'],'report_owner':False,'confirmed_score_profile':False,'requirements':['REQ-11','REQ-24','REQ-25','REQ-26']}
+            row['http_contract']={**row.get('http_contract',{}),'idempotency_key_required':method=='PUT','response_schema':'member_shortlist'}
+            row['contract_ref']='backend_platform_contract.dto_schemas.member_shortlist'
+            spec['operations'].append(row)
+        impl='supabase/functions/_shared/jungsi/application/member_shortlist.ts'
+        required=checker.MEMBER_SHORTLIST_CRITICAL_SOURCES|set(checker.MEMBER_SHORTLIST_TESTS)|{impl}
+        hashes={p:'1'*64 for p in required}
+        for p,sha in hashes.items():spec['edge_harness']['files'][p]={'declarations':{'source_sha256':sha},'layer':'verification'if p in checker.MEMBER_SHORTLIST_TESTS else 'application'}
+        for row in spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']:
+            if row['path']in hashes:row['source_sha256']=hashes[row['path']]
+        bindings={oid:dict(path=impl,source_sha256=hashes[impl],symbol='MemberShortlistService.execute')for oid in checker.MEMBER_SHORTLIST_ROUTES}
+        reg=dict(format='jungsi.member-shortlist-source-registration/v1',status='SOURCE_REGISTERED_NOT_ACTIVATED',operation_ids=list(checker.MEMBER_SHORTLIST_ROUTES),baseline_operation_count=28,source_operation_count=30,activation_status='NOT_RUN',native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',operating_writes=0,new_DB_result_tables=0,implementation_bindings=bindings,verification=dict(coverage='MEMBER_JSON_SHORTLIST_SYNTHETIC',test_paths=list(checker.MEMBER_SHORTLIST_TESTS),test_count=4,baseline_foundation_count=656,source_bindings=[dict(path=p,sha256=sha)for p,sha in sorted(hashes.items())]))
+        spec['member_shortlist_contract']={'source_registration':reg}
+        return spec,hashes
+    def test_default28_has_no_implicit_registration(self):
+        spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
+        spec.pop('member_shortlist_contract',None)
+        self.assertEqual((None,[]),checker.member_shortlist_registration(spec))
+        self.assertIsNone(runner.member_shortlist_suite_registration(spec,{}))
+        self.assertEqual(28,len(spec['operations']))
+    def test_exact_member2_registration_preserves_foundation656(self):
+        spec,before=self.fixture()
+        registration,errors=checker.member_shortlist_registration(spec,before)
+        self.assertEqual([],errors)
+        self.assertEqual(2,len(checker.registered_member_shortlist_ids(spec)))
+        self.assertEqual(656,spec['edge_harness']['unit_count'])
+        self.assertEqual(4,registration['verification']['test_count'])
+        self.assertIs(registration,runner.member_shortlist_suite_registration(spec,before))
+    def test_registration_required_for_new_route_or_test(self):
+        spec,_=self.fixture();spec['member_shortlist_contract'].pop('source_registration')
+        self.assertTrue(checker.member_shortlist_registration(spec)[1])
+        with self.assertRaises(runner.EdgeFailure):runner.member_shortlist_suite_registration(spec,{})
+    def test_wrong_method_path_tier_or_legacy_replacement_is_rejected(self):
+        for key,value in [('method','POST'),('path','/api/v1/anything'),('member_tiers',['standard','paid']),('report_owner',True),('aliases',['shortlist.update'])]:
+            with self.subTest(key=key):
+                spec,_=self.fixture();row=next(r for r in spec['operations']if r['id']=='member-shortlist.update');row[key]=value
+                self.assertTrue(checker.member_shortlist_registration(spec)[1])
+        spec,_=self.fixture();next(r for r in spec['operations']if r['id']=='shortlist.update')['path']='/api/v1/me/shortlist'
+        self.assertTrue(checker.member_shortlist_registration(spec)[1])
+    def test_extra_or_missing_operation_fails_closed(self):
+        spec,_=self.fixture();spec['operations'].append({**spec['operations'][-1],'id':'member-shortlist.export'})
+        self.assertTrue(checker.member_shortlist_registration(spec)[1])
+        spec,_=self.fixture();spec['operations'].pop()
+        self.assertTrue(checker.member_shortlist_registration(spec)[1])
+    def test_source_drift_missing_duplicate_or_stale_snapshot_is_rejected(self):
+        for mode in ('missing','duplicate','hash','bytes'):
+            with self.subTest(mode=mode):
+                spec,before=self.fixture();rows=spec['member_shortlist_contract']['source_registration']['verification']['source_bindings']
+                if mode=='missing':rows.pop()
+                elif mode=='duplicate':rows.append(rows[0].copy())
+                elif mode=='hash':rows[0]['sha256']='2'*64
+                else:before[rows[0]['path']]='3'*64
+                self.assertTrue(checker.member_shortlist_registration(spec,before)[1])
+    def test_suite_count_paths_and_operating_claim_cannot_drift(self):
+        for mode in ('foundation','paths','count','activation','table','writes'):
+            with self.subTest(mode=mode):
+                spec,_=self.fixture();r=spec['member_shortlist_contract']['source_registration'];v=r['verification']
+                if mode=='foundation':v['baseline_foundation_count']=660
+                elif mode=='paths':v['test_paths'].append('tests/edge/test_unregistered.ts')
+                elif mode=='count':v['test_count']=0
+                elif mode=='activation':r['activation_status']='PASS'
+                elif mode=='table':r['new_DB_result_tables']=1
+                else:r['operating_writes']=True
+                self.assertTrue(checker.member_shortlist_registration(spec)[1])
+    def test_public_schema_is_bound_to_actual_snapshot_not_an_unrelated_index(self):
+        spec,before=self.fixture()
+        path='src/jungsi_touch/application/public_response_schemas.json'
+        spec['edge_harness']['files'].pop(path)
+        self.assertEqual([],checker.member_shortlist_registration(spec,before)[1])
+        before[path]='f'*64
+        self.assertTrue(checker.member_shortlist_registration(spec,before)[1])
+    def test_write_cannot_drop_idempotency_or_use_an_unrelated_DTO(self):
+        for mode in ('key','schema','contract'):
+            with self.subTest(mode=mode):
+                spec,_=self.fixture();row=next(r for r in spec['operations']if r['id']=='member-shortlist.update')
+                if mode=='key':row['http_contract']['idempotency_key_required']=False
+                elif mode=='schema':row['http_contract']['response_schema']='report'
+                else:row['contract_ref']='backend_platform_contract.dto_schemas.report'
+                self.assertTrue(checker.member_shortlist_registration(spec)[1])
+    def test_no_silent_duplicate_common_definitions(self):
+        import ast
+        path=Path(__file__).resolve().parents[1]/'scripts/check_project_consistency.py'
+        functions=[n.name for n in ast.parse(path.read_text(encoding='utf8')).body if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))]
+        self.assertEqual(len(functions),len(set(functions)))
