@@ -337,8 +337,10 @@ class LocalVerificationContractTests(unittest.TestCase):
         self.assertNotIn('composition',frontend)
         self.assertNotIn('source_provenance',frontend)
         self.assertNotIn('local_filesystem_selection',frontend)
-        self.assertEqual(len(self.spec['operations']),28)
-        self.assertEqual(len([o for o in self.spec['operations'] if o['id'] not in {'history.snapshot.head','history.snapshot.read','report.list-own'}]),25)
+        from check_project_consistency import registered_member_shortlist_ids
+        member_ids=set(registered_member_shortlist_ids(self.spec))
+        self.assertEqual(len(self.spec['operations']),28+len(member_ids))
+        self.assertEqual(len([o for o in self.spec['operations'] if o['id'] not in ({'history.snapshot.head','history.snapshot.read','report.list-own'}|member_ids)]),25)
 
     def test_local_guide_cannot_be_redirected_or_contract_removed(self):
         for path in ('.env','outputs/private.md','docs/current/임의가이드.md'):
@@ -2754,6 +2756,17 @@ import check_project_consistency as checker
 import run_edge_tests as runner
 
 class MemberShortlistRegistrationCases(unittest.TestCase):
+    def legacy28(self,current):
+        registration,errors=checker.member_shortlist_registration(current)
+        self.assertEqual([],errors)
+        spec=copy.deepcopy(current)
+        if registration is not None:
+            spec['operations']=[r for r in spec['operations']if r['id']not in checker.MEMBER_SHORTLIST_ROUTES]
+            for path in checker.MEMBER_SHORTLIST_TESTS:spec['edge_harness']['files'].pop(path,None)
+            index=spec['workflow']['documentation_sync']['code_index']['edge_sources']
+            index['files']=[r for r in index['files']if r['path']not in checker.MEMBER_SHORTLIST_TESTS]
+        spec.pop('member_shortlist_contract',None)
+        return spec
     def fixture(self):
         spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
         spec.pop('member_shortlist_contract',None)
@@ -2776,10 +2789,18 @@ class MemberShortlistRegistrationCases(unittest.TestCase):
         return spec,hashes
     def test_default28_has_no_implicit_registration(self):
         spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
-        spec.pop('member_shortlist_contract',None)
+        spec=self.legacy28(spec)
         self.assertEqual((None,[]),checker.member_shortlist_registration(spec))
         self.assertIsNone(runner.member_shortlist_suite_registration(spec,{}))
         self.assertEqual(28,len(spec['operations']))
+    def test_legacy_fixture_keeps_actual_registered30_and_its_evidence_unchanged(self):
+        current,_=self.fixture();before=copy.deepcopy(current)
+        legacy=self.legacy28(current)
+        self.assertEqual(before,current)
+        self.assertEqual(30,len(current['operations']))
+        self.assertEqual(28,len(legacy['operations']))
+        self.assertEqual((None,[]),checker.member_shortlist_registration(legacy))
+        self.assertEqual(656,legacy['edge_harness']['unit_count'])
     def test_exact_member2_registration_preserves_foundation656(self):
         spec,before=self.fixture()
         registration,errors=checker.member_shortlist_registration(spec,before)
