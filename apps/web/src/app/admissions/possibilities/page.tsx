@@ -12,7 +12,8 @@ import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from 
 import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
 import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
-import { ensureAnalyses, loadMine, type ReportState } from "@/lib/report-ops";
+import { loadMine, type ReportState } from "@/lib/report-ops";
+import { RunAnalysis } from "@/components/run-analysis";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
@@ -51,8 +52,9 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     const [found, mine] = await Promise.all([src.searchOfferings(caller, toSearch(cur)), loadMine(src, caller)]);
     res = found;
     const items = found.items ?? [];
-    // 보이는 모집행만 분석한다. 리포트가 없으면(성적 전) 검색과 모집 정보만
-    state = mine ? await ensureAnalyses(src, caller, mine, items.map((o) => o.offering_id)) : { kind: "none" };
+    // 화면을 열 때는 저장된 분석만 붙인다. 분석이 없는 행은 아래 버튼을 눌러야 계산한다(담당자 회신 2026-10-25).
+    // 리포트가 없으면(성적 전) 검색과 모집 정보만
+    state = mine ? { kind: "ready", report: mine } : { kind: "none" };
     const report = state.kind === "none" ? null : state.report;
     // 펼친 모집행의 2027 모집 정보·발행 기준은 화면에서 펼친 뒤 따로 받는다(item-shell.tsx · extras-actions.ts)
     picks = report ? await readPicks(src, caller, report, items) : [];
@@ -62,11 +64,12 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     throw e;
   }
 
-  // 갱신이 거절돼도(failed) 이미 붙어 있던 분석은 그대로 보인다. 새로 붙이지 못한 칸만 분석 없음으로 남는다
-  const report = state.kind === "ready" || state.kind === "failed" ? state.report : null;
+  // 저장된 분석만 보인다. 분석이 없는 칸은 '분석 대기'로 남고 버튼으로 채운다
+  const report = state.kind === "ready" ? state.report : null;
   const an = (id: string): Cell => (report ? report.analyses?.[id] ?? null : "need");
   const picked = new Set(picks.map((p) => p.offering_id));
   const items = res.items ?? [];
+  const missing = report ? items.filter((o) => !report.analyses?.[o.offering_id]).map((o) => o.offering_id) : [];
 
   // 같은 대학끼리 묶는다(받은 순서를 지킨다)
   const groups: { id: string; name: string; rows: OfferingDto[] }[] = [];
@@ -88,12 +91,6 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
           overall={state.kind === "none" ? null : state.report?.overall ?? null}
           emptyText="검색과 모집 정보는 지금 볼 수 있고, 성적을 넣으면 모집단위마다 내 분석이 붙습니다."
         />
-        {state.kind === "score_required" && (
-          <p className="ps-warn">성적 확인이 끝나지 않아 모집단위 분석을 붙이지 않았습니다. 내 성적 리포트에서 입력을 확인해 주세요.</p>
-        )}
-        {state.kind === "failed" && (
-          <p className="ps-warn">이 목록의 모집단위 분석을 지금 붙이지 못했습니다. 잠시 뒤 다시 열어 주세요. 계속되면 고객센터에 알려 주세요. (사유 코드 {state.code})</p>
-        )}
 
         <section className="filter" aria-label="검색 조건">
           <Form action={route.path} prefetch={false} className="search" role="search">
@@ -152,6 +149,16 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                 <div className="acts"><Link className="btn" href={route.path}>조건 지우기</Link></div>
               </section>
             ) : (
+              <>
+              {report && missing.length > 0 && (
+                <RunAnalysis
+                  ids={missing}
+                  title={`이 목록의 ${missing.length}개 모집단위는 아직 내 성적으로 분석하지 않았습니다`}
+                  desc="누르면 지금 보이는 모집단위만 내 성적으로 분석합니다. 한 번 분석한 곳은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력권은 줄지 않습니다."
+                  label="내 성적으로 분석"
+                  busy="분석하는 중…"
+                />
+              )}
               <div className="list">
                 {groups.map((g) => (
                   <section key={`${g.id}-${g.rows[0].offering_id}`} className="univ" aria-label={g.name}>
@@ -208,6 +215,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                   </section>
                 ))}
               </div>
+              </>
             )}
 
             {(cur.cursor || res.next_cursor) && (

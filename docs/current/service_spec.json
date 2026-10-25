@@ -20650,6 +20650,15 @@
         "REQ-10"
       ],
       "summary": "화면팀 변경(사용자 결정 10-25 회원 JSON 관심대학 저장 대비): 2·3·4페이지·인쇄·담기 버튼의 담은 학교 읽기·쓰기를 apps/web/src/lib/shortlist.ts(selectedIds·readPicks·setPick) 한 곳으로 모았다. 지금은 기존 report.shortlist 를 그대로 쓰며 화면 변화는 없다. 새 관심대학 API 가 생기면 이 파일만 바꾼다(화면팀 API 제안서 전달)."
+    },
+    {
+      "date": "2026-10-25",
+      "requirements": [
+        "REQ-02",
+        "REQ-10",
+        "REQ-11"
+      ],
+      "summary": "화면팀 변경(담당자 회신 MEMBER-SHORTLIST-01 2026-10-25): 화면을 열거나 다시 접속할 때 university.analyze·candidates.build 를 자동으로 부르지 않는다. 2페이지 담은 학교의 빠진 분석, 3페이지 보이는 모집행의 빠진 분석(100개까지), 4페이지 후보가 없을 때의 후보 만들기는 회원이 버튼을 누를 때만 보낸다(app/analysis-actions.ts·components/run-analysis.tsx). 저장된 분석·후보(보류 포함)는 다시 만들지 않으며, 거절 사유 코드는 버튼 옆에 보인다."
     }
   ],
   "overall_analysis_contract": {
