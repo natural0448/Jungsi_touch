@@ -10,8 +10,11 @@ import { ShortlistTray } from "@/components/shortlist-tray";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
+import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
-import { ensureAnalyses, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
+import { loadMine, type ReportState } from "@/lib/report-ops";
+import { RunAnalysis } from "@/components/run-analysis";
+import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { ItemShell } from "./item-shell";
@@ -49,21 +52,24 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     const [found, mine] = await Promise.all([src.searchOfferings(caller, toSearch(cur)), loadMine(src, caller)]);
     res = found;
     const items = found.items ?? [];
-    // 보이는 모집행만 분석한다. 리포트가 없으면(성적 전) 검색과 모집 정보만
-    state = mine ? await ensureAnalyses(src, caller, mine, items.map((o) => o.offering_id)) : { kind: "none" };
+    // 화면을 열 때는 저장된 분석만 붙인다. 분석이 없는 행은 아래 버튼을 눌러야 계산한다(담당자 회신 2026-10-25).
+    // 리포트가 없으면(성적 전) 검색과 모집 정보만
+    state = mine ? { kind: "ready", report: mine } : { kind: "none" };
     const report = state.kind === "none" ? null : state.report;
     // 펼친 모집행의 2027 모집 정보·발행 기준은 화면에서 펼친 뒤 따로 받는다(item-shell.tsx · extras-actions.ts)
-    picks = report ? await pickedItems(src, caller, report, items) : [];
+    picks = report ? await readPicks(src, caller, report, items) : [];
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
     throw e;
   }
 
+  // 저장된 분석만 보인다. 분석이 없는 칸은 '분석 대기'로 남고 버튼으로 채운다
   const report = state.kind === "ready" ? state.report : null;
   const an = (id: string): Cell => (report ? report.analyses?.[id] ?? null : "need");
   const picked = new Set(picks.map((p) => p.offering_id));
   const items = res.items ?? [];
+  const missing = report ? items.filter((o) => !report.analyses?.[o.offering_id]).map((o) => o.offering_id) : [];
 
   // 같은 대학끼리 묶는다(받은 순서를 지킨다)
   const groups: { id: string; name: string; rows: OfferingDto[] }[] = [];
@@ -85,9 +91,6 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
           overall={state.kind === "none" ? null : state.report?.overall ?? null}
           emptyText="검색과 모집 정보는 지금 볼 수 있고, 성적을 넣으면 모집단위마다 내 분석이 붙습니다."
         />
-        {state.kind === "score_required" && (
-          <p className="ps-warn">성적 확인이 끝나지 않아 모집단위 분석을 붙이지 않았습니다. 내 성적 리포트에서 입력을 확인해 주세요.</p>
-        )}
 
         <section className="filter" aria-label="검색 조건">
           <Form action={route.path} prefetch={false} className="search" role="search">
@@ -117,8 +120,16 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
           <>
             <div className="count">
               <span>
-                <b className="num">{res.matching_school_count ?? 0}</b>개 대학 · <b className="num">{res.matching_offering_count ?? 0}</b>개 모집단위
-                {res.as_of && <small> · {res.as_of.replaceAll("-", ".")} 기준</small>}
+                {/* 서버가 전체 개수를 주지 않으면(null) 0으로 보이지 않는다(10-24 QA: 목록이 있는데 '0개 대학') */}
+                {res.matching_school_count == null || res.matching_offering_count == null ? (
+                  <>검색 결과</>
+                ) : (
+                  <>
+                    <b className="num">{res.matching_school_count}</b>개 대학 · <b className="num">{res.matching_offering_count}</b>개 모집단위
+                  </>
+                )}
+                {/* 날짜만(YYYY-MM-DD)이든 시각까지(ISO)든 'YYYY.MM.DD'로 보인다(10-24 QA: 'T14:51:47Z'가 그대로 보였다) */}
+                {asOfDate(res.as_of) && <small> · {asOfDate(res.as_of)} 기준</small>}
               </span>
               {report && <CategoryLegend />}
             </div>
@@ -138,6 +149,16 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                 <div className="acts"><Link className="btn" href={route.path}>조건 지우기</Link></div>
               </section>
             ) : (
+              <>
+              {report && missing.length > 0 && (
+                <RunAnalysis
+                  ids={missing}
+                  title={`이 목록의 ${missing.length}개 모집단위는 아직 내 성적으로 분석하지 않았습니다`}
+                  desc="누르면 지금 보이는 모집단위만 내 성적으로 분석합니다. 한 번 분석한 곳은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력권은 줄지 않습니다."
+                  label="내 성적으로 분석"
+                  busy="분석하는 중…"
+                />
+              )}
               <div className="list">
                 {groups.map((g) => (
                   <section key={`${g.id}-${g.rows[0].offering_id}`} className="univ" aria-label={g.name}>
@@ -194,6 +215,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                   </section>
                 ))}
               </div>
+              </>
             )}
 
             {(cur.cursor || res.next_cursor) && (

@@ -1,3 +1,4 @@
+import { AutoRefresh } from "@/components/auto-refresh";
 import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import Form from "next/form";
@@ -12,8 +13,8 @@ import { currentSnapshot, searchSnapshot, type Current, type SearchResult } from
 import { lockFor, page } from "@/lib/routes";
 import { GROUPS, PATH, REGIONS, hrefWith, parseQuery, type Query } from "./query";
 import { groupUnits, latestOf } from "./snapshot-table";
-import { UnitList, type SumCell, type SumItem } from "./unit-row";
-import { unitKey, type Cell } from "@/lib/p1-shape";
+import { UnitList, type SumItem } from "./unit-row";
+import { unitKey } from "@/lib/p1-shape";
 import "./results.css";
 
 const route = page("PAGE-01");
@@ -86,7 +87,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
           </Form>
           <ChipRow label="지역" cur={cur} k="region" items={REGIONS} />
           <ChipRow label="모집군" cur={cur} k="group" items={[...GROUPS]} suffix="군" />
-          <p className="hint">대학이 발표한 2024~2026학년도 결과를 학년도별로 보여 드립니다. 최종 50%컷·70%컷은 같은 기준의 발표만 씁니다. 대학이 다른 비율·평균·최저 등으로 발표한 값은 &lsquo;대학 발표 통계&rsquo;에 원래 기준·대상과 함께 보여 드립니다. &lsquo;확인 중&rsquo; 꼬리표는 값은 발표 그대로이고 정의·단위·발표일 확인이 남았다는 뜻입니다(꼬리표에 마우스를 올리면 사유가 보입니다).</p>
+          <p className="hint">대학이 발표한 2024~2026학년도 결과를 학년도별로 보여 드립니다. 최종 50%컷·70%컷은 같은 기준의 발표만 씁니다. &lsquo;확인 중&rsquo; 꼬리표는 값은 발표 그대로이고 정의·단위·발표일 확인이 남았다는 뜻입니다(꼬리표에 마우스를 올리면 사유가 보입니다).</p>
         </section>
 
         {snap.state !== "ready" || !res ? (
@@ -151,24 +152,28 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   );
 }
 
-const sumCell = (c: Cell): SumCell => [c.v, c.u, c.s.startsWith("pending") && (c.v !== null || c.s === "pending_metadata") ? c.r : null];
-/** 접힌 줄에 넘길 작은 요약: 가장 최근 학년도의 모집인원·경쟁률·50/70%컷 */
+/**
+ * 접힌 줄에 넘길 작은 요약: 2027학년도 모집인원만(2026-10-24 사용자 결정).
+ * 정리본은 2024~2026 발표만 담고 1페이지 모집단위 → 2027 모집행 연결이 아직 없어(담당자 요청 10-24) r27 은 null 이다.
+ * 담당자가 자료 모양을 정하면 여기서만 채운다.
+ */
 function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
   const l = latestOf(rows);
   return {
     k: unitKey(l),
-    g: l.g,
+    // 모집군은 '가군·나군·다군'으로 통일해 보인다(발표 표기 '다'·'다군'이 섞여 있다, 10-24 사용자 결정)
+    g: l.g ? l.g.replace(/^([가나다])군?$/, "$1군") : null,
     d: l.d,
     sub: [l.c, l.t, l.pk === null ? "모집행 연결 확인 중" : null].filter(Boolean).join(" · "),
-    y: l.y,
-    c: [sumCell(l.rc), sumCell(l.cr), sumCell(l.c50), sumCell(l.c70)],
+    r27: null,
+    ratio27: null, // 2027 반영비율도 담당자 자료(연도별 반영비 조회) 연결 뒤 여기서 채운다
   };
 }
 
 function NotReady({ state }: { state: "none" | "changed" | "expired" | "checking" | "ready" }) {
   const text =
     state === "checking"
-      ? { h: "입시결과의 현재판을 확인하고 있습니다", p: "현재판 확인을 함께 처리하고 있습니다. 잠시 후 다시 열어 주세요. 이전 판을 최신처럼 보여 드리지는 않습니다." }
+      ? { h: "입시결과의 현재판을 확인하고 있습니다", p: "몇 초 뒤 자동으로 다시 불러옵니다. 계속 이 화면이면 잠시 후 다시 열어 주세요. 이전 판을 최신처럼 보여 드리지는 않습니다." }
       : state === "changed"
       ? { h: "입시결과 새 판을 준비하고 있습니다", p: "대학 발표 정리본이 새 판으로 바뀌어, 확인을 마칠 때까지 잠시 보여 드리지 않습니다. 이전 판을 최신처럼 보이지 않기 위해서입니다." }
       : state === "expired"
@@ -178,6 +183,7 @@ function NotReady({ state }: { state: "none" | "changed" | "expired" | "checking
     <section className="gate flat">
       <h2>{text.h}</h2>
       <p>{text.p}</p>
+      {state === "checking" && <AutoRefresh />}
     </section>
   );
 }

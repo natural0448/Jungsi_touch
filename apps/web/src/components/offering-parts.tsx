@@ -1,4 +1,3 @@
-import { togglePick } from "@/app/shortlist-actions";
 import type { AssessmentDto, Category, ReasonDto, StatisticsDto } from "@/lib/dto";
 import { pctText, seoulDate } from "@/lib/format";
 
@@ -98,25 +97,8 @@ export function AdvantageCell({ a }: { a: Cell }) {
   );
 }
 
-export function PickButton({ id, on, variant = "pill" }: { id: string; on: boolean; variant?: "pill" | "wide" | "wild" }) {
-  return (
-    <form action={togglePick} className={variant === "wild" ? "pick-wild" : undefined}>
-      <input type="hidden" name="offering_id" value={id} />
-      <input type="hidden" name="selected" value={on ? "0" : "1"} />
-      {variant === "pill" ? (
-        <button className={`pick${on ? " on" : ""}`} aria-pressed={on}>
-          {on ? "담음" : "담기"}
-        </button>
-      ) : variant === "wide" ? (
-        <button className={`btn${on ? "" : " t"}`}>{on ? "핵심 지원 학교에서 빼기" : "핵심 지원 학교에 담기"}</button>
-      ) : (
-        <button className={on ? "on" : undefined} aria-pressed={on}>
-          {on ? "핵심 지원 학교에 담음" : "핵심 지원 학교에 담기"}
-        </button>
-      )}
-    </form>
-  );
-}
+// 담기·빼기는 실패 이유를 보여야 해서 클라이언트 컴포넌트로 옮겼다. 기존 import 경로는 그대로 둔다
+export { PickButton } from "./pick-button";
 
 /** REQ-10: 서비스 안의 추천·선택 인원과 내 순위. 실제 대학 지원자 수가 아니다 */
 export function StatsLine({ s }: { s: StatisticsDto | null | undefined }) {

@@ -1,5 +1,5 @@
 import Link from "@/components/link";
-import type { PickedItem } from "@/lib/report-ops";
+import type { PickedItem } from "@/lib/shortlist";
 import { page } from "@/lib/routes";
 
 /** 핵심 지원 학교 띠. 3·4페이지가 같은 report.shortlist 를 보여 주고 2페이지 리포트로 잇는다 */

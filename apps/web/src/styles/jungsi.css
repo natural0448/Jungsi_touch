@@ -28,6 +28,19 @@ body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;lin
 .et .jt-user .pass{padding:2px 8px;border-radius:10px;background:var(--touch-soft);color:var(--touch);font-weight:700;font-size:12px;white-space:nowrap}
 .et .jt-user .pass.off{background:var(--sub-2);color:var(--muted)}
 .et .jt-user .btn{height:32px}
+/* 좁은 휴대폰: 머리글 한 줄이 화면을 넘지 않게 줄인다(10-24 QA, 폭 320px에서 이용권 날짜가 화면 밖으로 밀렸다) */
+@media (max-width:400px){
+  .et .jt-util .wrap{gap:8px}
+  .et .logo{font-size:18px}
+  .et .jt-name{font-size:16px}
+  .et .jt-user{gap:6px;min-width:0}
+  .et .jt-user .btn{height:28px;padding:0 8px;font-size:12px}
+}
+/* 그래도 넘치는 아주 좁은 화면에서만 이용권 날짜를 숨긴다 */
+@media (max-width:359px){
+  .et .jt-user .pass-until{display:none}
+  .et .jt-tabs a{font-size:13px;padding:0 6px}
+}
 
 /* 탭 */
 .et .jt-tabs{border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:40}
@@ -75,8 +88,13 @@ body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;lin
 .et .jt-foot .wrap{padding-top:18px;padding-bottom:26px}
 .et .jt-foot p{margin:0 0 4px}
 
+.et .jt-tabs .tab-short{display:none}
 @media (max-width:520px){
   .et .jt-tabs a{font-size:14px;padding:0 10px}
+  /* 휴대폰: 짧은 이름으로 네 탭을 한 줄에. 화면 읽기 프로그램은 긴 이름을 읽는다 */
+  .et .jt-tabs .tab-full{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .et .jt-tabs .tab-short{display:inline}
+  .et .jt-tabs ul{gap:0;justify-content:space-between}
   .et .pg-head h1{font-size:24px}
 }
 

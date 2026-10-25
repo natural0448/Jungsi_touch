@@ -7,9 +7,9 @@ import { loadUnitRows, type UnitRows } from "./unit-actions";
 
 /** 접힌 줄 하나의 작은 요약 자료. 칸은 [원문 값, 단위, 확인 중 사유 코드(없으면 null)] */
 export type SumCell = [string | null, string | null, string | null];
-export type SumItem = { k: string; g: string | null; d: string; sub: string; y: number; c: [SumCell, SumCell, SumCell, SumCell] };
-
-const LABELS = ["모집", "경쟁률", "50%", "70%"] as const;
+/** 접힌 줄에는 2027학년도 모집인원만 보인다(2026-10-24 사용자 결정). 자료가 연결되기 전에는 r27 = null → '준비 중' */
+export type SumItem = { k: string; g: string | null; d: string; sub: string; r27: SumCell | null; ratio27: string | null };
+/* ratio27: 2027 수능 영역별 반영비율 한 줄(예: "국 30 · 수 40 · 영 20 · 탐 10"). 담당자 자료 연결 전에는 null 이라 칸을 그리지 않는다 */
 
 function V({ c }: { c: SumCell }) {
   const [v, u, hold] = c;
@@ -62,13 +62,12 @@ function Item({ pub, schoolId, schoolName, it }: { pub: string; schoolId: string
           <b>{it.d}</b>
           {it.sub && <small>{it.sub}</small>}
         </span>
+        {it.ratio27 && <span className="rs-ratio" title="2027학년도 수능 영역별 반영비율">{it.ratio27}</span>}
         <span className="rs-sum">
-          <span className="y num">{it.y}</span>
-          {it.c.map((c, i) => (
-            <span key={i}>
-              <small>{LABELS[i]}</small> <V c={c} />
-            </span>
-          ))}
+          <span className="y num">2027</span>
+          <span>
+            <small>모집</small> {it.r27 ? <V c={it.r27} /> : <span className="unpub" title="2027학년도 모집인원 자료를 연결하고 있습니다">준비 중</span>}
+          </span>
         </span>
         <span className="go"><ChevronIcon /></span>
       </button>

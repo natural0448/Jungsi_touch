@@ -9,7 +9,9 @@ import { ScoreBasis } from "@/components/score-basis";
 import { ShortlistTray } from "@/components/shortlist-tray";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { StatisticsDto } from "@/lib/dto";
-import { ensureCandidates, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
+import { loadMine, type ReportState } from "@/lib/report-ops";
+import { RunAnalysis } from "@/components/run-analysis";
+import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { FILTERS, hrefWith, parseQuery } from "./query";
@@ -45,7 +47,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   let stats = new Map<string, StatisticsDto | null>();
   try {
     const mine = await loadMine(src, caller);
-    state = mine ? await ensureCandidates(src, caller, mine) : { kind: "none" };
+    // 저장된 후보만 읽는다. 후보가 아직 없으면 회원이 버튼을 눌러야 만든다(담당자 회신 2026-10-25)
+    state = mine ? { kind: "ready", report: mine } : { kind: "none" };
     if (state.kind === "ready") {
       const report = state.report;
       const c = report.candidates;
@@ -53,7 +56,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
       const openGroup = c?.basic_university_groups.find((g) => g.university_id === cur.open);
       const ids = Array.from(new Set([...(openGroup?.offerings ?? []), ...(c?.wildcards ?? [])].map((i) => i.offering.offering_id)));
       const known = c ? [...c.basic_university_groups.flatMap((g) => g.offerings), ...c.wildcards].map((i) => i.offering) : [];
-      const [p, s] = await Promise.all([pickedItems(src, caller, report, known), Promise.all(ids.map(async (id) => [id, await src.readStatistics(caller, report.report_id, id)] as const))]);
+      const [p, s] = await Promise.all([readPicks(src, caller, report, known), Promise.all(ids.map(async (id) => [id, await src.readStatistics(caller, report.report_id, id)] as const))]);
       picks = p;
       stats = new Map(s);
     }
@@ -68,12 +71,12 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
       <>
         {head}
         <div className="wrap pg-body fv">
-          <ScoreBasis overall={state.kind === "score_required" ? state.report?.overall ?? null : null} emptyText="유리한 대학 찾기는 확인된 성적으로 계산합니다. 성적을 넣으면 학교 목록과 와일드카드가 나옵니다." />
+          <ScoreBasis overall={null} emptyText="유리한 대학 찾기는 확인된 성적으로 계산합니다. 성적을 넣으면 학교 목록과 와일드카드가 나옵니다." />
           <section className="gate flat">
-            <h2>{state.kind === "score_required" ? "성적 확인이 끝나면 유리한 학교를 찾아 드립니다" : "성적을 넣으면 유리한 학교를 찾아 드립니다"}</h2>
+            <h2>성적을 넣으면 유리한 학교를 찾아 드립니다</h2>
             <p>성적 없이 대학·학과를 둘러보려면 {p3.label}에서 검색하세요. 모집 정보는 성적 없이도 볼 수 있습니다.</p>
             <div className="acts">
-              <Link className="btn p" href={page("PAGE-02").path}>{state.kind === "score_required" ? "성적 확인하기" : "성적 입력하기"}</Link>
+              <Link className="btn p" href={page("PAGE-02").path}>성적 입력하기</Link>
               <Link className="btn" href={p3.path}>{p3.label}</Link>
             </div>
           </section>
@@ -84,6 +87,23 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
 
   const report = state.report;
   const c = report.candidates;
+  if (!c) {
+    return (
+      <>
+        {head}
+        <div className="wrap pg-body fv">
+          <ScoreBasis overall={report.overall} emptyText="" />
+          <RunAnalysis
+            title="이 성적으로 아직 유리한 학교를 찾지 않았습니다"
+            desc="누르면 저장한 성적으로 학교 목록과 와일드카드를 한 번 만듭니다. 만든 목록은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력권은 줄지 않습니다."
+            label="유리한 학교 찾기"
+            busy="찾는 중…"
+          />
+          <p className="fv-note">성적 없이 대학·학과를 둘러보려면 <Link href={p3.path}>{p3.label}</Link>에서 검색하세요.</p>
+        </div>
+      </>
+    );
+  }
   const groups = [...(c?.basic_university_groups ?? [])].sort((a, b) => (bestDelta(b) ?? -Infinity) - (bestDelta(a) ?? -Infinity));
   const wildcards = c?.wildcards ?? [];
   const pendingCount = c?.pending_offerings.length ?? 0;

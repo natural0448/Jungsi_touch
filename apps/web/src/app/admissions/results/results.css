@@ -134,6 +134,10 @@
 .et .rs-off .rs-btn{margin-bottom:0}
 .et .rs-off.open .rs-btn{margin-bottom:8px}
 .et .rs-sum{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+/* 2027 수능 반영비율 한 줄(학과 이름과 2027 모집 사이). 자료가 없으면 그리지 않는다 */
+.et .rs-ratio{font-size:12px;color:var(--ink-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+/* 모집군 '가군·나군·다군' 두 글자가 들어가도록 칸을 넓힌다 */
+.et .rs-offhd .grp{width:auto;min-width:36px;padding:0 5px;white-space:nowrap}
 .et .rs-sum small{font-size:11px;color:var(--muted)}
 .et .rs-sum b{font-weight:800;color:var(--ink)}
 .et .rs-sum .y{font-weight:800;color:var(--deep)}

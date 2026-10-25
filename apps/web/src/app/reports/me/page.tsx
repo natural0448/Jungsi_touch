@@ -10,7 +10,8 @@ import { EXAM, examTypeLabel } from "@/lib/exam";
 import { seoulDate } from "@/lib/format";
 import { PASS_HREF, loginHref } from "@/lib/links";
 import { getReportId } from "@/lib/report-ref";
-import { ensureAnalyses, pickedItems, type PickedItem } from "@/lib/report-ops";
+import { readPicks, type PickedItem } from "@/lib/shortlist";
+import { RunAnalysis } from "@/components/run-analysis";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
@@ -106,17 +107,16 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   let shortlist: PickedItem[] = [];
   if (paid) {
     try {
-      // 담은 곳 중 분석이 없는 것(성적을 바꾼 뒤 등)은 지금 리포트로 다시 분석한다
-      const ids = Object.entries(report.shortlist ?? {}).filter(([, e]) => e.selected).map(([id]) => id);
-      const st = await ensureAnalyses(src, caller, report, ids);
-      if (st.kind !== "none" && st.report) report = st.report;
-      shortlist = await pickedItems(src, caller, report);
+      // 리포트 열람에서는 저장된 판정만 읽는다. 분석이 없는 곳은 아래 버튼을 눌러야 계산한다(담당자 회신 2026-10-25)
+      shortlist = await readPicks(src, caller, report);
     } catch (e) {
       if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
       if (!(e instanceof AccessDenied)) throw e;
     }
   }
   const a = report.overall;
+  // 담은 곳 중 지금 리포트에 분석이 없는 곳(성적을 새로 넣은 뒤 등)
+  const unanalyzed = shortlist.filter((s) => !s.assessment).map((s) => s.offering_id);
 
   return (
     <>
@@ -160,7 +160,18 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
                 </div>
               </div>
             ) : (
-              <PickedTable items={shortlist} />
+              <>
+                {unanalyzed.length > 0 && (
+                  <RunAnalysis
+                    ids={unanalyzed}
+                    title={`담은 학교 ${unanalyzed.length}곳은 지금 성적으로 아직 분석하지 않았습니다`}
+                    desc="누르면 이 리포트의 성적으로 그 학교만 분석합니다. 성적을 다시 저장하지 않으며 입력권은 줄지 않습니다."
+                    label="지금 성적으로 분석"
+                    busy="분석하는 중…"
+                  />
+                )}
+                <PickedTable items={shortlist} />
+              </>
             )}
             <p className="rp-foot">모의지원 서비스에서 각 모집단위의 모집군·지원 조건·모집인원 변경을 다시 확인하세요. 정시터치는 외부 서비스에 성적을 보내거나 자동으로 등록하지 않습니다.</p>
           </section>
@@ -202,7 +213,7 @@ function LoginGate() {
       <section className="gate" aria-labelledby="gate-h">
         <div className="ic"><LockIcon size={20} /></div>
         <h2 id="gate-h">로그인하면 성적을 넣고 내 위치를 볼 수 있습니다</h2>
-        <p>성적 입력과 전체 위치는 에듀터치 회원이면 이용권 없이 쓸 수 있습니다.</p>
+        <p>성적 입력과 리포트는 이용권 회원이 쓸 수 있습니다. 로그인하면 이용권 없이도 예시 리포트를 미리 볼 수 있습니다.</p>
         <div className="acts">
           <a className="btn p" href={loginHref(route.path)}>에듀터치 로그인</a>
         </div>
