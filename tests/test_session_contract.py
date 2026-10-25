@@ -3,7 +3,7 @@ from copy import deepcopy
 import json,sys,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
-from check_project_consistency import validate_spec,generated_files
+from check_project_consistency import validate_spec,generated_files,registered_member_shortlist_ids
 class FormalSessionContractTests(unittest.TestCase):
     def setUp(self):
         self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
@@ -47,7 +47,8 @@ class FormalSessionContractTests(unittest.TestCase):
         self.assertIn('Superseded proposed session contract must not be revived',validate_spec(self.spec))
     def test_generated_API_title_uses_current_operations_count(self):
         path=self.spec['current_documents']['api_dto'];text=generated_files(self.spec)[path].decode()
-        self.assertEqual(len(self.spec['operations']),28)
-        self.assertEqual(len([o for o in self.spec['operations'] if o['id'] not in {'history.snapshot.head','history.snapshot.read','report.list-own'}]),25)
-        self.assertIn('## 28개 요청과 응답',text);self.assertNotIn('## 22개 요청과 응답',text)
+        member_ids=registered_member_shortlist_ids(self.spec);count=28+len(member_ids)
+        self.assertEqual(len(self.spec['operations']),count)
+        self.assertEqual(len([o for o in self.spec['operations'] if o['id'] not in ({'history.snapshot.head','history.snapshot.read','report.list-own'}|member_ids)]),25)
+        self.assertIn(f'## {count}개 요청과 응답',text);self.assertNotIn('## 22개 요청과 응답',text)
 if __name__=='__main__':unittest.main()

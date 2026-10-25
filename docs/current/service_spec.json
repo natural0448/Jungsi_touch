@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.118",
+  "version": "1.9.119",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7251,7 +7251,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.118",
+        "contract_version": "1.9.119",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7425,7 +7425,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.118",
+        "contract_version": "1.9.119",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7591,7 +7591,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.118",
+        "contract_version": "1.9.119",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7610,7 +7610,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.118",
+        "contract_version": "1.9.119",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7635,7 +7635,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.118",
+        "contract_version": "1.9.119",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -7660,7 +7660,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.118",
+        "contract_version": "1.9.119",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -20872,6 +20872,17 @@
         "REQ-26"
       ],
       "summary": "회원 관심대학 등록 전28/등록 후30 공통 회귀를 분리한다. 유효한 정확2 등록에만 현재 count를 확장하고 기존22+입력권3+읽기3 고정 범위와656를 보존한다. 이전28 fixture는 명시 두 operation/네 전용시험만 RAM 사본에서 제외하며 원본30 등록/해시·미인수 증거는 불변이다. 멱등 원응답의 보고서 revision/지문을 결속하고 catalog 변경시409 fail-closed를 명시한다. 코드/DB/Storage/배포 활성화는 포함하지 않는다."
+    },
+    {
+      "date": "2026-10-25",
+      "requirements": [
+        "REQ-11",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-31"
+      ],
+      "summary": "회원2의 정확한 유효 등록에 따른 현재30과 기존 read-view28/Python25/legacy22 합성 회귀를 분리한다. read-view candidate/registry는 정확 member2와 네 전용시험만 RAM 사본에서 투영하고 미등록·중복·추가·누락은 계속 거절한다. 실제 현재 등록·원본·59 전용·pro21·foundation656·미활성 증거를 보존한다. 세션/전문가/공통 하네스 제목과 범위 검사는 유효 등록 결과로만 현재 개수를 산정하며 임의28/30 허용이나 운영인수 승격은 하지 않는다."
     }
   ],
   "overall_analysis_contract": {

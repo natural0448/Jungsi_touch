@@ -138,14 +138,20 @@ class PolicyExtensionRegistrationCases(unittest.TestCase):
         result=runner.operation_registration(self.source)
         self.assertEqual(result['all_22'],'CODE_REGISTERED')
         legacy=result['source_registration'];extension=result['policy_extension_source_registration']
-        self.assertEqual((legacy['contract_operation_count'],legacy['legacy_scope_operation_count'],legacy['registered_operation_count']),(28,22,22))
+        member_ids=registered_member_shortlist_ids(self.source)
+        self.assertEqual((legacy['contract_operation_count'],legacy['legacy_scope_operation_count'],legacy['registered_operation_count']),(28+len(member_ids),22,22))
         self.assertEqual((extension['contract_operation_count'],extension['registered_operation_count']),(3,3))
         prior=set(legacy['registered_operation_ids'])|set(extension['registered_operation_ids'])
         self.assertEqual(len(prior),25)
         read=result['read_view_extension_source_registration']
         self.assertEqual(set(read['registered_operation_ids']),{'history.snapshot.head','history.snapshot.read','report.list-own'})
         self.assertFalse(prior&set(read['registered_operation_ids']))
-        self.assertEqual(prior|set(read['registered_operation_ids']),{o['id']for o in self.source['operations']})
+        self.assertEqual(prior|set(read['registered_operation_ids'])|member_ids,{o['id']for o in self.source['operations']})
+        if member_ids:
+            member=result['member_shortlist_source_registration']
+            self.assertEqual(set(member['registered_operation_ids']),member_ids)
+            self.assertEqual(member['activation_status'],'NOT_RUN')
+            self.assertEqual(member['native_acceptance'],'NOT_VERIFIED_BY_SOURCE_SUITE')
         self.assertFalse(set(legacy['registered_operation_ids'])&set(extension['registered_operation_ids']))
         self.assertEqual(extension['activation_status'],'NOT_RUN')
         self.assertEqual(extension['native_acceptance'],'NOT_VERIFIED_BY_SOURCE_SUITE')
@@ -230,15 +236,33 @@ sys.path.insert(0, str(ROOT / 'scripts'))
 from check_project_consistency import (  # noqa: E402
     LEGACY_API_IDS, SCORE_POLICY_ROUTES, READ_VIEW_EXTENSION_ROUTES,
     READ_VIEW_RUNTIME_PATHS, registered_read_view_ids, professional_guide_test_registration,
+    MEMBER_SHORTLIST_ROUTES, MEMBER_SHORTLIST_TESTS, member_shortlist_registration,
+    registered_member_shortlist_ids,
     validate_read_view_extension, validate_score_input_policy, legacy_policy_fixture_inputs,
 )
 from run_edge_tests import read_view_registration, operation_registration  # noqa: E402
 from check_edge_contract import EdgeFailure  # noqa: E402
 
 
+def retained_legacy28_fixture(current):
+    """Project only an exact valid member extension in RAM; retain the current evidence."""
+    registered, errors = member_shortlist_registration(current)
+    if errors:
+        raise ValueError('Synthetic fixture cannot ignore invalid member registration')
+    spec = deepcopy(current)
+    if registered is not None:
+        spec['operations'] = [r for r in spec['operations'] if r['id'] not in MEMBER_SHORTLIST_ROUTES]
+        for path in MEMBER_SHORTLIST_TESTS:
+            spec['edge_harness']['files'].pop(path, None)
+        index = spec['workflow']['documentation_sync']['code_index']['edge_sources']
+        index['files'] = [r for r in index['files'] if r['path'] not in MEMBER_SHORTLIST_TESTS]
+        spec['member_shortlist_contract'].pop('source_registration')
+    return spec
+
+
 def candidate():
     """A source registration fixture, never a runtime implementation or approval."""
-    spec = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+    spec = retained_legacy28_fixture(json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8')))
     spec.pop('read_view_extension_contract', None)
     spec['operations'] = [r for r in spec['operations'] if r['id'] not in READ_VIEW_EXTENSION_ROUTES]
     files = spec['edge_harness']['files']
@@ -281,12 +305,33 @@ def candidate():
 class ReadViewExtensionContractTests(unittest.TestCase):
     def registry(self):
         registry=json.loads((ROOT/'src/jungsi_touch/application/public_response_schemas.json').read_text(encoding='utf-8'))
-        registry['operations']=[row for row in registry['operations']if row['id']not in READ_VIEW_EXTENSION_ROUTES]
+        current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        registered,errors=member_shortlist_registration(current)
+        if errors:raise ValueError('Synthetic registry cannot ignore invalid member registration')
+        member_ids=set(MEMBER_SHORTLIST_ROUTES)if registered is not None else set()
+        actual=[r['id']for r in registry['operations']]
+        if len(actual)!=len(set(actual))or set(actual)!={r['id']for r in current['operations']}:raise ValueError('public response schema operation coverage drift')
+        registry['operations']=[row for row in registry['operations']if row['id']not in set(READ_VIEW_EXTENSION_ROUTES)|member_ids]
         registry['schemas']['synthetic_read3_only']={'type':'string','nullable':False}
         for oid in READ_VIEW_EXTENSION_ROUTES:
             registry['operations'].append(dict(id=oid,roots={'standard':{'ref':'synthetic_read3_only','nullable':False},'paid':{'ref':'synthetic_read3_only','nullable':False}}))
         return registry
 
+    def test_legacy28_projection_preserves_current_member_evidence(self):
+        current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        before=deepcopy(current);legacy=retained_legacy28_fixture(current)
+        self.assertEqual(current,before)
+        self.assertEqual(len(legacy['operations']),28)
+        self.assertEqual(member_shortlist_registration(legacy),(None,[]))
+        self.assertEqual(legacy['edge_harness']['unit_count'],656)
+    def test_legacy28_projection_cannot_hide_invalid_member_scope(self):
+        current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        if registered_member_shortlist_ids(current):
+            current['member_shortlist_contract']['source_registration']['operation_ids'].append('unregistered.member')
+        else:
+            current['operations'].append(dict(current['operations'][0],id='member-shortlist.read'))
+        with self.assertRaisesRegex(ValueError,'cannot ignore invalid member registration'):
+            retained_legacy28_fixture(current)
     def test_legacy_fixture_keeps25_and_new_registry_stays28_unchanged(self):
         spec=candidate();registry=self.registry();original=deepcopy(registry)
         operations,filtered=legacy_policy_fixture_inputs(spec,registry)
