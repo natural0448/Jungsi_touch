@@ -334,7 +334,7 @@ class ProfessionalGuideTestRegistrationTests(unittest.TestCase):
         self.assertEqual(checker.professional_guide_test_registration(spec),({checker.PROFESSIONAL_GUIDE_TEST},[]))
         self.assertEqual(checker.validate_read_view_extension(spec),[])
         self.assertEqual(checker.validate_professional_source_registration(spec),[])
-        self.assertEqual(len(spec['operations']),28)
+        self.assertEqual(len(spec['operations']),28+len(checker.registered_member_shortlist_ids(spec)))
         self.assertEqual(len(spec['professional_service_contract']['candidate_operations']),21)
         self.assertEqual(spec['edge_harness']['unit_count'],656)
 

@@ -628,12 +628,24 @@ export function evaluateOffering(
     result = blockedOffering(offering.offering_id, "analysis_release_invalid");
   }
   if (conversion) {
+    const referenceCalculated =
+      conversion.state.reason_code === "reference_conversion_not_production_approved" &&
+      conversion.state.context.reference_status === "reference_calculated" &&
+      conversion.state.converted_score !== null;
+    if (referenceCalculated) {
+      // Preserve the successful same-exam number without adopting a legacy curve or judgment.
+      const years = Array.isArray(result.years) ? result.years : [];
+      result = {
+        ...blockedOffering(offering.offering_id, "reference_conversion_not_production_approved"),
+        years,
+      };
+    }
     result.conversion = conversion.dto();
     result.recommendation_reasons = [
       ...(conversion.ready ? cloneNativeJson([...conversion.state.explanations]) : []),
       ...((result.recommendation_reasons ?? []) as NativeJson[]),
     ];
-    if (conversion.ready) {
+    if (conversion.ready || referenceCalculated) {
       result.converted_score = conversion.state.converted_score;
       const versions = record(result.versions);
       versions.rule = conversion.state.rule_version;
@@ -644,8 +656,8 @@ export function evaluateOffering(
         offering_id: offering.offering_id,
         score_basis: conversion.state.score_basis,
         converted_score: conversion.state.converted_score,
-        status: "ready",
-        reason_code: null,
+        status: conversion.ready ? "ready" : "pending",
+        reason_code: conversion.ready ? null : conversion.state.reason_code,
       });
       result.years = EQUATING_YEARS.map((y) =>
         years.get(y) ??

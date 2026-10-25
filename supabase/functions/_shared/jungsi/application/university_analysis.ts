@@ -264,88 +264,90 @@ export class UniversityAnalysisService implements ApiBusinessPort {
         return reportDto(session, result);
       }
       const results: NativeObject = {};
-      for (const offering of rows) {
-        this.fresh(session);
-        const conversion = await this.scoring.calculate(offering, profile),
-          percentile = await this.percentile.calculate(offering, conversion);
-        let assessment: NativeObject;
-        try {
-          const bundle = await this.data.getAnalysis(offering.offering_id as string);
-          assessment = evaluateOffering(
-            offering,
-            profile,
-            updated.overall as NativeObject,
-            bundle,
-            conversion,
-            percentile,
-          );
-        } catch (e) {
-          assessment = evaluateOffering(
-            offering,
-            profile,
-            updated.overall as NativeObject,
-            null,
-            conversion,
-            percentile,
-          );
-          assessment.reason_code = e instanceof AccessError ? e.code : "analysis_release_invalid";
-        }
-        if (this.forecasts) {
+      await this.scoring.batch(async () => {
+        for (const offering of rows) {
+          this.fresh(session);
+          const conversion = await this.scoring.calculate(offering, profile),
+            percentile = await this.percentile.calculate(offering, conversion);
+          let assessment: NativeObject;
           try {
-            if (batchError) throw batchError;
-            if (!batch.has(offering.offering_id as string)) fail("forecast_release_invalid");
-            const published = batch.get(offering.offering_id as string)!;
-            if (published instanceof AccessError) throw published;
-            if (published !== null) {
-              const evidence = assessment.decision_evidence,
-                historical = object(evidence) && Array.isArray(evidence.historical_metrics)
-                  ? evidence.historical_metrics
-                  : [];
-              const newer = await this.forecasts.evaluateRelease(
-                offering,
-                profile,
-                conversion,
-                percentile,
-                published,
-                historical,
-              );
-              newer.years = assessment.years;
-              newer.advantage = percentile.state.population_scope === "whole_complete"
-                ? assessment.advantage ?? null
-                : null;
-              if (newer.advantage !== null) {
-                const old = Array.isArray(assessment.recommendation_reasons)
-                  ? assessment.recommendation_reasons
-                  : [];
-                if (!Array.isArray(newer.recommendation_reasons)) fail();
-                newer.recommendation_reasons.push(
-                  ...old.filter((r) =>
-                    object(r) &&
-                    [
-                      "converted_score_position_gain",
-                      "converted_score_position_loss",
-                      "converted_score_position_equal",
-                    ].includes(r.code as string)
-                  ),
-                );
-              }
-              assessment = newer;
-            }
+            const bundle = await this.data.getAnalysis(offering.offering_id as string);
+            assessment = evaluateOffering(
+              offering,
+              profile,
+              updated.overall as NativeObject,
+              bundle,
+              conversion,
+              percentile,
+            );
           } catch (e) {
-            Object.assign(assessment, {
-              status: "pending",
-              category: "pending",
-              reason_code: e instanceof AccessError ? e.code : "forecast_release_invalid",
-            });
+            assessment = evaluateOffering(
+              offering,
+              profile,
+              updated.overall as NativeObject,
+              null,
+              conversion,
+              percentile,
+            );
+            assessment.reason_code = e instanceof AccessError ? e.code : "analysis_release_invalid";
+          }
+          if (this.forecasts) {
+            try {
+              if (batchError) throw batchError;
+              if (!batch.has(offering.offering_id as string)) fail("forecast_release_invalid");
+              const published = batch.get(offering.offering_id as string)!;
+              if (published instanceof AccessError) throw published;
+              if (published !== null) {
+                const evidence = assessment.decision_evidence,
+                  historical = object(evidence) && Array.isArray(evidence.historical_metrics)
+                    ? evidence.historical_metrics
+                    : [];
+                const newer = await this.forecasts.evaluateRelease(
+                  offering,
+                  profile,
+                  conversion,
+                  percentile,
+                  published,
+                  historical,
+                );
+                newer.years = assessment.years;
+                newer.advantage = percentile.state.population_scope === "whole_complete"
+                  ? assessment.advantage ?? null
+                  : null;
+                if (newer.advantage !== null) {
+                  const old = Array.isArray(assessment.recommendation_reasons)
+                    ? assessment.recommendation_reasons
+                    : [];
+                  if (!Array.isArray(newer.recommendation_reasons)) fail();
+                  newer.recommendation_reasons.push(
+                    ...old.filter((r) =>
+                      object(r) &&
+                      [
+                        "converted_score_position_gain",
+                        "converted_score_position_loss",
+                        "converted_score_position_equal",
+                      ].includes(r.code as string)
+                    ),
+                  );
+                }
+                assessment = newer;
+              }
+            } catch (e) {
+              Object.assign(assessment, {
+                status: "pending",
+                category: "pending",
+                reason_code: e instanceof AccessError ? e.code : "forecast_release_invalid",
+              });
+            }
+          }
+          const oid = offering.offering_id as string;
+          results[oid] = assessment;
+          if (context !== null) contexts["analysis:" + oid] = context;
+          if (op === "university.analyze" && personalAssessment(assessment)) {
+            originKeys.push("analysis:" + oid);
           }
         }
-        const oid = offering.offering_id as string;
-        results[oid] = assessment;
-        if (context !== null) contexts["analysis:" + oid] = context;
-        if (op === "university.analyze" && personalAssessment(assessment)) {
-          originKeys.push("analysis:" + oid);
-        }
-      }
+      });
       if (!object(updated.analyses) || !object(updated.shortlist)) fail();
       Object.assign(updated.analyses, results);
       updated.catalog_version = release.version;

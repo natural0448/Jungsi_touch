@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.113",
-  "source_sha256": "acff34c77be0fcd6eb891b52fba2d01d19fc6810ab8b861aae4fa1efd70fbf63",
+  "spec_version": "1.9.119",
+  "source_sha256": "9347a3939b4a5535d3a03fe40012f2885d03caeb26fcee539d5b0c7eed57ba8f",
   "pages": [
     {
       "id": "PAGE-01",
@@ -665,7 +665,13 @@
       "contract_ref": "backend_platform_contract.dto_schemas.snapshot",
       "http_contract": {
         "body": [],
-        "query": [],
+        "query": [
+          "year (optional explicit member shortlist print group; required with expected_report_version/shortlist_revision)",
+          "expected_report_version (required positive integer with explicit member shortlist print group)",
+          "shortlist_revision (required nonnegative integer with explicit member shortlist print group)",
+          "legacy_source_report_id (optional paired with legacy_source_report_version only at shortlist_revision0)",
+          "legacy_source_report_version (optional positive integer paired with legacy_source_report_id only at shortlist_revision0)"
+        ],
         "response": "snapshot",
         "idempotency_key_required": false,
         "response_schema": "snapshot"
@@ -1391,6 +1397,100 @@
         ],
         "enforcement_status": "pending_runtime_implementation"
       }
+    },
+    {
+      "id": "member-shortlist.read",
+      "method": "GET",
+      "path": "/api/v1/me/shortlist",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-11",
+        "REQ-12",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27",
+        "REQ-30"
+      ],
+      "response_scope": "현재 인증 주체 본인의 회원·학년도 관심대학 및 정확 저장 판정 문맥",
+      "implementation_status": "source_registered_synthetic59_verified_live_activation_NOT_RUN",
+      "contract_ref": "backend_platform_contract.dto_schemas.member_shortlist",
+      "http_contract": {
+        "body": [],
+        "query": [
+          "year (required 4-digit integer in approved service years)",
+          "report_id (optional owned selected report context)"
+        ],
+        "response": "member_shortlist",
+        "response_schema": "member_shortlist",
+        "idempotency_key_required": false
+      },
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
+    },
+    {
+      "id": "member-shortlist.update",
+      "method": "PUT",
+      "path": "/api/v1/me/shortlist/{offering_id}",
+      "member_tiers": [
+        "paid"
+      ],
+      "report_owner": false,
+      "confirmed_score_profile": false,
+      "requirements": [
+        "REQ-11",
+        "REQ-12",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27",
+        "REQ-30"
+      ],
+      "response_scope": "현재 인증 주체 본인의 회원·학년도 관심대학 및 정확 저장 판정 문맥",
+      "implementation_status": "source_registered_synthetic59_verified_live_activation_NOT_RUN",
+      "contract_ref": "backend_platform_contract.dto_schemas.member_shortlist",
+      "http_contract": {
+        "body": [
+          "selected: boolean",
+          "expected_revision: nonnegative safe integer",
+          "expected_legacy_source: optional report_id/report_version for uninitialized legacy projection"
+        ],
+        "query": [
+          "year (required)",
+          "report_id (optional owned selected report context)"
+        ],
+        "response": "member_shortlist",
+        "response_schema": "member_shortlist",
+        "idempotency_key_required": true
+      },
+      "security_policy": {
+        "contract_ref": "security_contract",
+        "control_ids": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08",
+          "SEC-05",
+          "SEC-06"
+        ],
+        "enforcement_status": "pending_runtime_implementation"
+      }
     }
   ],
   "backend_contract": {
@@ -1399,7 +1499,7 @@
     "live_server_status": "not_run_Jungsi_API_deployment_contract_pending",
     "live_data_status": "not_run_operational_release_binding_pending",
     "authentication": "Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.",
-    "writes": "POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/키의 동일 요청은 최초 결과를 현재 권한으로 반환하고 다른 본문/경로는 409다. 리포트 갱신은 expected_version CAS와 PostgreSQL 트랜잭션을 사용한다.",
+    "writes": "POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/키의 동일 요청은 최초 결과를 현재 권한으로 반환하고 다른 본문/경로는 409다. 리포트 갱신은 expected_version CAS와 PostgreSQL 트랜잭션을 사용한다. 2026-10-25 채택 후속: 학교별 산출 결과와 회원별 관심대학 본문은 기존 비공개 Storage JSON으로 분리해 새 DB 결과 테이블/본문 중복 저장을 피한다. 기존 트랜잭션·입력권·멱등/권한 메타데이터·기록은 그대로 유지하며 실제 전환 전까지 기존 저장 경로가 동작한다. JSON의 단순 upsert를 CAS로 가정하지 않고 동시성/장애 복구를 인수한 뒤 활성화한다.",
     "errors": [
       [
         "authentication_required",
@@ -1761,7 +1861,13 @@
           "snapshot_version은 고정된 report_version이고 report는 현재 권한을 적용한 상담 DTO다. GET은 Drive 쓰기를 수행하지 않는다.",
           "서버 내부 ReportPublicationService는 같은 revision의 updated_at을 generated_at으로 채택하여 재시도 내용 해시를 고정하고 별도 비공개 폴더에 새 파일을 기록한다.",
           "인쇄/PDF 렌더링은 별도 UI 담당이다."
-        ]
+        ],
+        "optional_role_fields": {
+          "paid": [
+            "shortlist_revision",
+            "member_shortlist"
+          ]
+        }
       },
       "statistics": {
         "format": null,
@@ -2316,6 +2422,35 @@
           "Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.",
           "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN."
         ]
+      },
+      "member_shortlist": {
+        "format": "jungsi.member-shortlist/v1",
+        "fields": [
+          "format",
+          "year",
+          "revision",
+          "updated_at",
+          "origin",
+          "legacy_source",
+          "assessment_context",
+          "items"
+        ],
+        "item_fields": [
+          "offering_id",
+          "selected",
+          "changed_at",
+          "display",
+          "assessment",
+          "assessment_status",
+          "assessment_reason_code",
+          "catalog_status"
+        ],
+        "rules": [
+          "A안: 선택 보고서/성적 버전의 저장된 허용 assessment만 목록에 함께 붙인다. 없으면 null+명시 상태/사유를 반환한다. report_id가 있으면 그 본인 보고서의 버전을 결속하며, 생략 시 선택한 본인 해당학년도 보고서 문맥을 응답에 명시한다. GET/리포트 열람·목록읽기에서 계산·분석 POST·입력권 차감·결과 쓰기를 하지 않는다. 필요한 표시/판정은 한 번의 제한된 배치/공유 저장본 읽기로 해결하며 학교별 N+1·회원 전체 JSON 순회는 금지한다.",
+          "expected_revision과 이전 JSON SHA/유효한 fencing을 결속해 한 세대만 게시한다. 같은 상태 쓰기는 revision을 올리거나 결과 객체를 다시 쓰지 않는다. 같은 키/동일 본문·경로는 최초 고정 응답을 현재 권한으로 재검증하고 다른 본문은409다. 단순 Storage upsert를 CAS로 가정하지 않는다. 응답 중단·게시 전후 실패·두 기기 충돌을 복구하며 모든 이전 파일과 후보를 보존한다. 원 보고서 revision·응답 지문을 결속하며 카탈로그 변경 등으로 원 응답을 재현할 수 없으면 다른 내용으로 성공시키지 않고409로 닫는다.",
+          "GET에는 쓰기를 넣지 않는다. 새 JSON이 없으면 가장 최근의 본인·해당학년도 보고서 shortlist를 origin=legacy_report, revision=0, legacy_source={report_id,report_version}로 읽기 전용 표시한다. 첫 실제 변경 PUT은 예상 legacy source와 현재 원본/본인 소유권을 확인하고 기존 목록을 보존한 JSON revision1에 그 변경만 적용한다. 동시 legacy 변경은409이며 예전 true만 합쳐 해제 학교를 되살리지 않는다. 이미 초기화한 회원 JSON을 legacy로 덮지 않는다. 동일 상태 no-op는 초기화 쓰기도 하지 않는다.",
+          "기존 무query report.export 권리는 유지한다. 새 명시 year/expected_report_version/shortlist_revision 요청은 본인 선택 성적 보고서와 정확 관심목록을 독립 결속한다. revision0에서만 optional 쌍 legacy_source_report_id/legacy_source_report_version으로 GET legacy_source의 정확 본인·동일연도 report revision 목록을 읽는다. GET 후 최신 legacy가 바뀌어도 그 목록을 보존하며 JSON 생성·입력권 차감·새 산출은 없다. 쌍을 생략하면 선택보고서가 최신 legacy 원본과 일치할 때만 성공하며 불일치는409다. 쌍 한쪽·잘못된 형식·rev>0의 쌍은422, 타인·다른연도·없는 exact 원본은404다. rev>0은 정확 불변 JSON revision을 사용하고 최신으로 치환하지 않는다."
+        ]
       }
     },
     "datetime": {
@@ -2373,7 +2508,7 @@
         "pending"
       ],
       "independence": "conversion.ready와 assessment.pending은 함께 존재할 수 있다. 대학 분포·입결·지원 판단·자격 미확인은 각각의 사유로 보존한다.",
-      "compatibility": "기존 assessment.converted_score는 계산 완료 값과 일치한다. 판단이 pending이어도 환산 성공 값을 없애지 않는다. years는 학년도별 실제/모평/보정 추정 기준과 pending 사유를 구분한다.",
+      "compatibility": "기존 assessment.converted_score는 계산 완료 값과 일치한다. 판단이 pending이어도 환산 성공 값을 없애지 않는다. years는 학년도별 실제/모평/보정 추정 기준과 pending 사유를 구분한다. 검수 참조값이 존재하면 값은 표시하고 학교별 수능 반영분 참고점수임을 안내한다. pending을 자료 자체 없음으로 표현하지 않고, 참고점수 계산과 정식 지원 판단의 승인 상태를 구별한다.",
       "excluded": [
         "내부 exact 분수",
         "실행 trace",
@@ -2384,6 +2519,306 @@
         "학생 소유자 ID",
         "로컬 경로·원문·해시·비밀값"
       ]
+    }
+  },
+  "member_shortlist_contract": {
+    "format": "jungsi.member-shortlist-contract/v1",
+    "id": "MEMBER-SHORTLIST-01",
+    "status": "SOURCE_REGISTERED_NOT_ACTIVATED",
+    "revision": "2026.10.25.v1",
+    "requirements": [
+      "REQ-11",
+      "REQ-12",
+      "REQ-24",
+      "REQ-25",
+      "REQ-26",
+      "REQ-27",
+      "REQ-30"
+    ],
+    "decision": "회원·대상 학년도별 비공개 JSON 관심대학을 기존 리포트와 분리한다. 저장 판정 동봉 A안을 채택하고 기존 report-bound API와 전문가용은 유지한다.",
+    "storage": "기존 Supabase 비공개 Storage 불변 JSON/리비전과 작은 기존 원자 메타데이터를 사용한다. 새 결과/관심대학 DB 테이블·신규 서비스·키·과금은 만들지 않는다. 기존 성적/리포트/입력권·원본은 보존한다.",
+    "access": "검증 JWT에서 본인 UUID를 결정한다. 두 신규 경로는 기존 paid 판정과 active·aal2 관리자 예외를 따르며, 클라이언트 UUID/파일 경로는 받지 않는다. 공개 DB/Storage 직접 접근·서명 URL 노출 없이 기존 relay·CSRF·RLS/소유권·현재 권한·공유 예산·no-store를 유지한다.",
+    "proposed_operations": [
+      {
+        "id": "member-shortlist.read",
+        "method": "GET",
+        "path": "/api/v1/me/shortlist",
+        "query": [
+          "year (required 4-digit integer in approved service years)",
+          "report_id (optional owned selected report context)"
+        ],
+        "body": [],
+        "response": "member_shortlist",
+        "idempotency_key_required": false
+      },
+      {
+        "id": "member-shortlist.update",
+        "method": "PUT",
+        "path": "/api/v1/me/shortlist/{offering_id}",
+        "query": [
+          "year (required)",
+          "report_id (optional owned selected report context)"
+        ],
+        "body": [
+          "selected: boolean",
+          "expected_revision: nonnegative safe integer",
+          "expected_legacy_source: optional report_id/report_version for uninitialized legacy projection"
+        ],
+        "response": "member_shortlist",
+        "idempotency_key_required": true
+      }
+    ],
+    "legacy": "기존 PUT /api/v1/reports/{report_id}/shortlist/{offering_id}와 shortlist.update의 의미·권한·DTO는 바꾸지 않는다. 신규 두 operation만 명시 등록한 뒤 28→30이며 계약 준비만으로 현재 binding/배포를 넓히지 않는다. /pro 학생별 고정 리포트는 이번 범위에서 제외한다.",
+    "dto": {
+      "format": "jungsi.member-shortlist/v1",
+      "fields": [
+        "format",
+        "year",
+        "revision",
+        "updated_at",
+        "origin",
+        "legacy_source",
+        "assessment_context",
+        "items"
+      ],
+      "item_fields": [
+        "offering_id",
+        "selected",
+        "changed_at",
+        "display",
+        "assessment",
+        "assessment_status",
+        "assessment_reason_code",
+        "catalog_status"
+      ],
+      "display_fields": [
+        "university_name",
+        "department",
+        "group",
+        "track",
+        "campus (optional)"
+      ],
+      "origin": [
+        "member_json",
+        "legacy_report",
+        "empty"
+      ],
+      "legacy_source": "null or {report_id, report_version}; revision0 is uninitialized; private object paths/hashes never returned",
+      "assessment_context": "null or exact owner-validated {report_id,report_version,profile_id,exam_id,pack_version,academic_year,source}; source=selected_report/current_profile",
+      "empty": "정말 JSON도 기존 본인 해당학년도 목록도 없을 때 items=[]/revision=0/updated_at=null. 권한·Storage·해시·타입 오류를 빈 목록으로 바꾸지 않는다.",
+      "assessment_status": [
+        "ready",
+        "pending",
+        "ineligible",
+        "missing"
+      ],
+      "catalog_status": [
+        "available",
+        "missing"
+      ]
+    },
+    "assessment": "A안: 선택 보고서/성적 버전의 저장된 허용 assessment만 목록에 함께 붙인다. 없으면 null+명시 상태/사유를 반환한다. report_id가 있으면 그 본인 보고서의 버전을 결속하며, 생략 시 선택한 본인 해당학년도 보고서 문맥을 응답에 명시한다. GET/리포트 열람·목록읽기에서 계산·분석 POST·입력권 차감·결과 쓰기를 하지 않는다. 필요한 표시/판정은 한 번의 제한된 배치/공유 저장본 읽기로 해결하며 학교별 N+1·회원 전체 JSON 순회는 금지한다.",
+    "concurrency": "expected_revision과 이전 JSON SHA/유효한 fencing을 결속해 한 세대만 게시한다. 같은 상태 쓰기는 revision을 올리거나 결과 객체를 다시 쓰지 않는다. 같은 키/동일 본문·경로는 최초 고정 응답을 현재 권한으로 재검증하고 다른 본문은409다. 단순 Storage upsert를 CAS로 가정하지 않는다. 응답 중단·게시 전후 실패·두 기기 충돌을 복구하며 모든 이전 파일과 후보를 보존한다. 원 보고서 revision·응답 지문을 결속하며 카탈로그 변경 등으로 원 응답을 재현할 수 없으면 다른 내용으로 성공시키지 않고409로 닫는다.",
+    "retry": "revision_conflict는 한 번 다시 GET한 뒤 새 expected_revision과 새 Idempotency-Key로 같은 selected 의도를 한 번만 재시도한다. 통신 결과가 불명확하면 원래 키와 동일 본문으로 먼저 복구한다. 이미 확정된 명령의 본문을 같은 키로 바꾸지 않는다.",
+    "error": "기존 {status:error,error:{code},request_id} 봉투를 유지한다. current_revision 오류 추가 필드는 필수가 아니며 재조회 응답으로 확인한다. 선언된 사용자표시 상한만 공개 가능하고 내부 요청/동시성/물리 한도는 반환하지 않는다. 개수/본문 초과는 shortlist_limit_exceeded로 원래 상태를 보존한다. 실제 수치 상한·허용 학년도·물리 비용은 기존 승인 정책을 재사용/결속하며 임의 값·null→무제한을 만들지 않는다.",
+    "migration": "GET에는 쓰기를 넣지 않는다. 새 JSON이 없으면 가장 최근의 본인·해당학년도 보고서 shortlist를 origin=legacy_report, revision=0, legacy_source={report_id,report_version}로 읽기 전용 표시한다. 첫 실제 변경 PUT은 예상 legacy source와 현재 원본/본인 소유권을 확인하고 기존 목록을 보존한 JSON revision1에 그 변경만 적용한다. 동시 legacy 변경은409이며 예전 true만 합쳐 해제 학교를 되살리지 않는다. 이미 초기화한 회원 JSON을 legacy로 덮지 않는다. 동일 상태 no-op는 초기화 쓰기도 하지 않는다.",
+    "printing": "기존 무query report.export 권리는 유지한다. 새 명시 year/expected_report_version/shortlist_revision 요청은 본인 선택 성적 보고서와 정확 관심목록을 독립 결속한다. revision0에서만 optional 쌍 legacy_source_report_id/legacy_source_report_version으로 GET legacy_source의 정확 본인·동일연도 report revision 목록을 읽는다. GET 후 최신 legacy가 바뀌어도 그 목록을 보존하며 JSON 생성·입력권 차감·새 산출은 없다. 쌍을 생략하면 선택보고서가 최신 legacy 원본과 일치할 때만 성공하며 불일치는409다. 쌍 한쪽·잘못된 형식·rev>0의 쌍은422, 타인·다른연도·없는 exact 원본은404다. rev>0은 정확 불변 JSON revision을 사용하고 최신으로 치환하지 않는다.",
+    "frontend": "화면팀 shortlist.ts의 selectedIds/readPicks/setPick를 전환 지점으로 삼는다. 2·3·4페이지·와일드카드·트레이·인쇄가 같은 회원 목록을 쓰며, 판정 없음은 미산출 안내로 유지하고 GET 진입에 숨은 분석 요청을 붙이지 않는다. 새 operation·설정·정확 배포판의 Owner 영수증 전까지 기존 연결을 유지한다.",
+    "verification": {
+      "implementation": "SOURCE_IMPLEMENTED_SYNTHETIC59_VERIFIED",
+      "operational_Storage": "NOT_RUN",
+      "BFF_browser": "NOT_RUN",
+      "source_API_count": 30,
+      "new_API_count_after_strict_registration": 30,
+      "baseline_foundation_count": 656
+    },
+    "acceptance": [
+      "본인/타인 UUID·만료/일반·paid·active aal2와 relay/CSRF·RLS 검수",
+      "GET/로그인/동일상태 no-op의 계산0·객체 PUT0·큰 DB본문 쓰기0·입력권 차감0",
+      "표시/assessment 배치조회 횟수가 관심대학 수에 비례해 증가하지 않음",
+      "빈 목록·실제0·null·pending·참고 환산을 구분하고 native 값을 보존",
+      "legacy 최초복사·동시변경·무목록·원본보존·새JSON우선 검수",
+      "두기기 한세대 게시·멱등타임아웃·stale fence·키/본문충돌 검수",
+      "인쇄 후 관심대학/성적변경에도 요청 당시 두 revision·정확목록 보존",
+      "새2 API·실저장 어댑터·실제 런타임·허용 DTO·현재성 검사 종단 검수",
+      "기존28 API/기존656와 전용추가시험·정확SHA 정상CI 유지",
+      "Owner 실제 객체/권한/소스/설정/정문 검수 전 운영완료 표시 금지"
+    ],
+    "initial_print_binding": "Optional legacy_source_report_id/version pair at shortlist_revision0 pins the exact own/year legacy list independently of selected report/version. Missing source returns404; malformed/partial pair or pair on revision>0 returns422. Without pair, selected report must equal latest legacy source or409. Read and print create no JSON or input debit.",
+    "replay_evidence": "No historical catalogue provider exists here. Store small immutable list/report references plus first response SHA; if pinned evidence cannot reproduce it, revision_conflict409. Never compute or store the full response in DB.",
+    "selection_bound": "Approved max_items bounds active selections. The current revision omits unselected IDs; every previous immutable revision and legacy source remains preserved.",
+    "legacy_commit": "Per-owner idempotency-key lock, then owner/year advisory shared with this candidate report writer, then latest legacy FOR SHARE OF r through publication; existing FOR UPDATE writer conflicts. Remote Storage work remains outside metadata transactions.",
+    "legacy_reference_compatibility": {
+      "source_bindings": [
+        {
+          "path": "src/jungsi_touch/infrastructure/http_api.py",
+          "sha256": "4506b324e91329bf77adbe26acb3237d4c26d6cd168e82f00395083a5b8d8fc3"
+        },
+        {
+          "path": "tests/test_score_input_policy_contract.py",
+          "sha256": "fcda3534d85b0608778d030327116099d470a5bf8be95bb896100a99034164fd"
+        },
+        {
+          "path": "tests/test_supabase_runtime.py",
+          "sha256": "ce87c0e0a7f7a87b34fbad6ce3444cbb7353f42782172b36e37e95f34be34cf1"
+        },
+        {
+          "path": "tests/edge/synthetic_history_qualification.ts",
+          "sha256": "3a5c3a0aeff9d67a7aa2dfa6c7230d065250d2f0d21f7e064a8e1d230fe8b1c3"
+        }
+      ],
+      "Python_current_routes": 25,
+      "Python_legacy_routes": 22,
+      "source_count_rule": "28 plus exact validated registered member2 only; unsupported new routes are never inherited by Python",
+      "scoped_tests": 6,
+      "normal_verification": "pending final normal hooks/CI"
+    },
+    "source_registration": {
+      "format": "jungsi.member-shortlist-source-registration/v1",
+      "status": "SOURCE_REGISTERED_NOT_ACTIVATED",
+      "operation_ids": [
+        "member-shortlist.read",
+        "member-shortlist.update"
+      ],
+      "baseline_operation_count": 28,
+      "source_operation_count": 30,
+      "activation_status": "NOT_RUN",
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "operating_writes": 0,
+      "new_DB_result_tables": 0,
+      "implementation_bindings": {
+        "member-shortlist.read": {
+          "path": "supabase/functions/_shared/jungsi/application/member_shortlist.ts",
+          "source_sha256": "3a66a21ca2f337a41b66dd32aef9573a818fe21db4d0321ea2c8aa0fb21416d6",
+          "symbol": "MemberShortlistService.execute"
+        },
+        "member-shortlist.update": {
+          "path": "supabase/functions/_shared/jungsi/application/member_shortlist.ts",
+          "source_sha256": "3a66a21ca2f337a41b66dd32aef9573a818fe21db4d0321ea2c8aa0fb21416d6",
+          "symbol": "MemberShortlistService.execute"
+        }
+      },
+      "verification": {
+        "coverage": "MEMBER_JSON_SHORTLIST_SYNTHETIC",
+        "test_paths": [
+          "tests/edge/test_member_shortlist.ts",
+          "tests/edge/test_member_json_storage.ts",
+          "tests/edge/test_member_json_results.ts",
+          "tests/edge/test_member_shortlist_http.ts"
+        ],
+        "test_count": 59,
+        "baseline_foundation_count": 656,
+        "source_bindings": [
+          {
+            "path": "src/jungsi_touch/application/public_response_schemas.json",
+            "sha256": "babeedc48f5a0c142b60c7dac82ed3f6b3a917958e9f623e3f803c761abaaaaa"
+          },
+          {
+            "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
+            "sha256": "4cd41a9a7bb9f17ce7929a5e243e9ed8e1919f5e5090b684d4936229ca4381e1"
+          },
+          {
+            "path": "supabase/functions/_shared/current_public_catalog.ts",
+            "sha256": "917ca1358161dc94d1c8e084bd2e79b2d4aead613fc9df14f99043d566fe1b82"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+            "sha256": "50be2cb82f617fdd88139b6fe431e6aa03ec44104972d5b5ead290cc20f4fa89"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
+            "sha256": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/member_json_results.ts",
+            "sha256": "59363bd855241f2524a0985c2d52dea2520a52ab9b2fa571dc3a3615ca238090"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/member_shortlist.ts",
+            "sha256": "3a66a21ca2f337a41b66dd32aef9573a818fe21db4d0321ea2c8aa0fb21416d6"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/member_shortlist_schema.ts",
+            "sha256": "04695f7b26c862a109c88036eab345b7bf8b94fd8f78dbcaee20dc5e06a5de54"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+            "sha256": "7b39971ed0563ea41e415c2616eb0f0828ebf7b7da41e9a0bff1fe7d1c6fe157"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/request_budget.ts",
+            "sha256": "eede4780f44e34d3f6a5b92079286e1b49fcfb084d22a2f301312be460a5cee0"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+            "sha256": "6eb4908465cdc5a7a27381e0d5915734a7478e8b69aab2b178dcc8c9f79efd93"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
+            "sha256": "1f85423d2cbfe71c92ebe39861584def53e6fe1a898d41705e7645511d4e2137"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts",
+            "sha256": "2724ccaba547730d3fe8249ddea22847698c42007cbb4681606a6811ee3ddae3"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts",
+            "sha256": "5dfc7f16f6e9b3d505b00bc4a611826be781131fecb29c79b9d4c526131deb5c"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts",
+            "sha256": "4dc06e6f32096ac07705a97d0444d05a90d930062597e495d2975ae121774fda"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
+            "sha256": "213a56295b0924e15631b34509d53b1ca90f334ee4ea008a00d37d42b5f065d4"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+            "sha256": "f5abd7f0221e354169e7d2266c4847c2a863ecc1751041b7b342894969016607"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+            "sha256": "3c53222c3ac579ec3f5f8cb588916644c42e1434385813f41d86f3a904f3ad54"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
+            "sha256": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99"
+          },
+          {
+            "path": "supabase/functions/jungsi-api/member_shortlist_entry.ts",
+            "sha256": "34f896869bd107bd5c49bf16235fa9df193cc226be0c8f3b4c74964c6052630f"
+          },
+          {
+            "path": "tests/edge/member_shortlist_fixture.ts",
+            "sha256": "2bab484557612a697916f287b89ce08603bd5b2b3e8a34378ddea4d7f420af35"
+          },
+          {
+            "path": "tests/edge/public_api_contract_fixture.ts",
+            "sha256": "e28a6d07abe34d5932a40ec40aa0b6355397f5f706341ca20be800904dd70d14"
+          },
+          {
+            "path": "tests/edge/synthetic_history_qualification.ts",
+            "sha256": "3a5c3a0aeff9d67a7aa2dfa6c7230d065250d2f0d21f7e064a8e1d230fe8b1c3"
+          },
+          {
+            "path": "tests/edge/test_member_json_results.ts",
+            "sha256": "da7ba0fc7e1c2f23635c200ad82009d60bea57df7b9420677eae32b2d4da0758"
+          },
+          {
+            "path": "tests/edge/test_member_json_storage.ts",
+            "sha256": "7a2473efc9376f3591f971f555e2638d9fa0390b2adc34f45cc4a8dc70a85967"
+          },
+          {
+            "path": "tests/edge/test_member_shortlist.ts",
+            "sha256": "3319fd673e616d8d83791547d3eb26769cc9d4f1d0ddac0e0655cbde9cb27cd4"
+          },
+          {
+            "path": "tests/edge/test_member_shortlist_http.ts",
+            "sha256": "693d14dace3af400eb6e9aab6ab48a277c71cfcfa65a185e33de9768f8a14250"
+          }
+        ]
+      }
     }
   },
   "university_percentile_contract": {
@@ -8176,7 +8611,11 @@
       "모집·충원·공식 지원자수의 빈 문자열과 공백은 실제 0으로 변환하지 않는다. 파싱 전 결측·형식·안전정수 범위를 검사하고 검수된 정수 원값 0만 0으로 표시한다.",
       "자료가 부족한 카드에서도 추정 총 지원자·추정 탈락자 2열을 유지하고 계산 불가 칸에 ─를 표시한다. 공식 A/Q/C가 확인된 분기는 R 지표나 경쟁률 열의 존재로 탈락자 열을 숨기지 않는다.",
       "2027 모집 상자는 recruitment.read 응답의 모집행 결속과 offering.academic_year=2027을 ready/pending 문구보다 먼저 확인한다. 과거 2024~2026 또는 학년도 미확인 응답은 상태에 관계없이 연계 확인 전이다. 해당 2027 모집행이 확인된 뒤에만 ready 수치 또는 2027 모집 정보 미발행 상태를 표시한다. 과거 응답을 2027 값으로 재명명하거나 연결 미확인을 공식 미공개 확정으로 바꾸지 않는다.",
-      "next_cursor가 남은 학년도는 조건을 좁힌 뒤에도 일부 조회일 수 있다. 잔여 커서 해소 증거 없이 조건을 좁히면 전부 볼 수 있다고 보장하지 않는다. 조회 예산 종료·미완전 모집행 보류로 표시 카드가 0개여도 잔여가 있으면 조회 미완료로 안내한다. 완전한 검색의 빈 결과와 구분하며 일부 조회 중에 조건에 맞는 발행 결과가 없다고 단정하지 않는다."
+      "next_cursor가 남은 학년도는 조건을 좁힌 뒤에도 일부 조회일 수 있다. 잔여 커서 해소 증거 없이 조건을 좁히면 전부 볼 수 있다고 보장하지 않는다. 조회 예산 종료·미완전 모집행 보류로 표시 카드가 0개여도 잔여가 있으면 조회 미완료로 안내한다. 완전한 검색의 빈 결과와 구분하며 일부 조회 중에 조건에 맞는 발행 결과가 없다고 단정하지 않는다.",
+      "같은 의미로 확인된 원문 표현은 정본 관측 ID·native 값·원명칭·단위·출처를 보존한 채 한 서비스 표시 항목에 연결한다. 동의어 연결은 현재 관측 복제·새 CID 생성·원값 덮어쓰기·출처 간 숫자 합산을 뜻하지 않는다. 같은 학년도·모집행·전형·군·코호트·성분·모집 단계·발표 차수의 정의를 함께 확인한다.",
+      "최종충원순위·충원합격순위·최종합격자 예비번호·마지막 합격 후보순위처럼 마지막 합격 순번임이 확인된 표현은 최종 합격 예비번호(번)로 통일한다. 충원인원·추가합격인원·추가모집인원 등의 제목도 대학 공식 설명이 마지막 합격 순번임을 확인하면 같은 항목에 연결하고 원문 제목·단위는 근거로 보존한다.",
+      "추가모집의 별도 모집정원, 실제 추가 합격자 수, 최초 부여 대기번호, 차수별 예비순번과 최종 합격 예비번호를 제목 유사성이나 단위·값 크기만으로 합치지 않는다. 애매한 항목은 이미 알려진 원값·확인 사유를 유지한다. 평균/50/70/75·모집인원/등록인원/지원자수·최초/최종/이월을 구분하고 기존 source qualification을 동의어 처리로 승격하지 않는다.",
+      "현재 입결 단일 관측의 의미 동의어는 서버 alias 포트에서 원문/값/native/CID/연도/PK/코호트/축/차수/통계율을 보존한다. 애매한 충원인원·추가모집·예비번호는 정확한 필드 정의 없이 순위나 인원으로 재분류하지 않는다. P1 고정 snapshot의 기존 값/CID/q는 이동·승격하지 않으며 신규 publisher 결속은 별도 검수다."
     ],
     "preview": {
       "selected_preparation": "C_local_review_package",
@@ -8673,6 +9112,59 @@
       "default_entitlement_change_allowed": false,
       "superseded_for_current_consumer_scope": true,
       "historical_boundary": "2026-10-08 최소 C/학교별 부분 발행의 보존 이력이다. 2026-10-19 전국 현재 정본 공개 결정의 선행 조건으로 재적용하지 않는다."
+    },
+    "semantic_alias_contract": {
+      "format": "jungsi.published-metric-semantic-alias-contract/v1",
+      "scope": "Current canonical observations selected for P1 display; raw originals remain immutable.",
+      "status": "SCOPED_ALIAS_SOURCE_AND_SYNTHETIC_VERIFIED_SOURCE_DEFINITION_AND_PUBLISHER_PENDING",
+      "canonical_families": [
+        "recruitment_count_with_stage",
+        "competition_ratio",
+        "additional_admission_count",
+        "final_additional_admission_rank",
+        "final_50_percent_cut",
+        "final_70_percent_cut",
+        "alternate_cut"
+      ],
+      "strong_final_waitlist_labels": [
+        "최종충원순위",
+        "충원합격순위",
+        "최종합격자 예비번호",
+        "마지막 합격 후보순위"
+      ],
+      "ambiguous_labels_require_definition": [
+        "충원인원",
+        "추가합격인원",
+        "추가모집인원",
+        "합격대기번호",
+        "예비번호"
+      ],
+      "canonical_rank_label": "최종 합격 예비번호",
+      "canonical_rank_unit": "번",
+      "preserved": [
+        "current_observation_id",
+        "raw_statistic_label",
+        "raw_native_value_and_type",
+        "raw_unit",
+        "official_source_reference",
+        "qualification_and_reason",
+        "cohort",
+        "academic_year",
+        "offering",
+        "publication_stage_and_round"
+      ],
+      "forbidden": [
+        "name_only_CID_merge",
+        "count_to_rank_without_definition",
+        "additional_recruitment_to_replenishment_guess",
+        "initial_waitlist_to_final_rank_guess",
+        "mean_to_cut50",
+        "cut75_to_cut70",
+        "pending_to_verified_alias_promotion"
+      ],
+      "source_definition_required_for_reclassification": true,
+      "runtime_activation": "NOT_RUN_REVIEWED_PUBLISHER_NEW_IMMUTABLE_EDITION_AND_OWNER_RECEIPTS_REQUIRED",
+      "runtime_boundary": "current_public_catalog record item alias is connected; p1MetricSlotAlias is a publisher bridge only. Frozen P1 sequence values, CIDs and q qualification are unchanged; ambiguous source labels need exact definition evidence."
     }
   },
   "security_contract": {

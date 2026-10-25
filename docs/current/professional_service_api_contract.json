@@ -1,6 +1,6 @@
 {
   "format": "jungsi.professional-api-contract/v1",
-  "spec_version": "1.9.113",
+  "spec_version": "1.9.119",
   "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
   "contract": {
     "format": "jungsi.professional-service-contract/v1",
@@ -22,7 +22,7 @@
       }
     ],
     "individual_deployment_is_independent": true,
-    "existing_individual_API_count": 28,
+    "existing_individual_API_count": 30,
     "candidate_API_registration": "separate_source_registered_not_added_to_existing_operations",
     "runtime_activation": "NOT_RUN",
     "DB_schema_application": "APPLIED_ADDITIVE_SCHEMA_READBACK",

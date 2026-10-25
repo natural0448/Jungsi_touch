@@ -14,6 +14,19 @@ import type { NativeObject } from "../../supabase/functions/_shared/jungsi/domai
 import { SyntheticNativeRepository } from "./synthetic_platform_repository.ts";
 import { syntheticOfferingAnalysisFixture } from "./synthetic_offering_analysis.ts";
 import { assert, equal } from "./fixture.ts";
+import { SyntheticReferenceBytes } from "./synthetic_school_reference.ts";
+import { PinnedSchoolReferenceSource } from "../../supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts";
+import {
+  type ApiHttpPorts,
+  createApiHandler,
+} from "../../supabase/functions/_shared/jungsi/infrastructure/api_http.ts";
+import { RelayBoundary } from "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts";
+import { PublicResponseProjection } from "../../supabase/functions/_shared/jungsi/application/public_response.ts";
+import {
+  canonicalApiPolicies,
+  canonicalPublicResponseSchemas,
+} from "./public_api_contract_fixture.ts";
+import { OverallAnalysisService } from "../../supabase/functions/_shared/jungsi/application/overall_analysis.ts";
 Deno.test("completed university and candidate keys reject forbidden query before replay", async () => {
   for (const op of ["university.analyze", "candidates.build"] as const) {
     const f = fixture(),
@@ -176,6 +189,7 @@ function fixture(forecasts: PublishedForecastPort | null = null) {
     repo,
     state,
     data,
+    catalog,
     clock,
     catalogReads: () => catalogReads,
     expire: () => {
@@ -191,6 +205,121 @@ function fixture(forecasts: PublishedForecastPort | null = null) {
     ),
   };
 }
+async function referenceAnalysis() {
+  const f = fixture(),
+    bytes = await new SyntheticReferenceBytes().seal(),
+    source = new PinnedSchoolReferenceSource(bytes);
+  const p = f.repo.profiles.get(PID)!;
+  (p.scores.inquiry as NativeObject[])[0].percentile = 31;
+  (p.scores.inquiry as NativeObject[])[1].percentile = 17;
+  const overall = await new OverallAnalysisService({
+    getExamPack: f.data.getExamPack,
+    getTotalModel: () => Promise.resolve(null),
+  }).analyze(request().session, p.scores);
+  f.repo.reports.get(RID)!.body.overall = overall as NativeObject;
+  Object.assign((f.repo.reports.get(RID)!.body.shortlist as NativeObject)[OID] as NativeObject, {
+    changed_at: TIME,
+    catalog_version: "SYNTHETIC-catalog.v1",
+  });
+  const data = {
+    ...f.data,
+    getConversion: () => Promise.resolve(null),
+    getReference: source.getReference.bind(source),
+  };
+  const service = new UniversityAnalysisService(f.repo, f.catalog, data, f.clock, null, {
+    mode: "legacy_synthetic",
+  });
+  return { ...f, service };
+}
+async function referenceConversionSurvivesAnalysis() {
+  const f = await referenceAnalysis(), r = await f.service.execute(request());
+  const a = (r.analyses as NativeObject)[OID] as NativeObject;
+  equal(a.converted_score, "31.00");
+  equal(a.status, "pending");
+  equal(a.reason_code, "reference_conversion_not_production_approved");
+}
+async function referenceConversionSurvivesHttp() {
+  const f = await referenceAnalysis(), relay = "SYNTHETIC-REFERENCE-RELAY-" + "x".repeat(32);
+  const ports: ApiHttpPorts = {
+    relay: new RelayBoundary(relay),
+    clock: f.clock,
+    sessions: {
+      verifyUserBearer: () => Promise.resolve({ subjectId: OWNER, expiresAtUtc: NOW + 1000000n }),
+    },
+    passes: {
+      readCurrent: (subjectId, evaluatedAtUtc) =>
+        Promise.resolve({
+          authority: "public.jeongsi_passes",
+          metadataVerified: true,
+          subjectId,
+          evaluatedAtUtc,
+          paidUntilUtc: NOW + 500000n,
+        }),
+    },
+    reports: { lookupAccess: () => Promise.resolve({ ownerId: OWNER, confirmed: true }) },
+    authorities: {
+      readCurrent: () => {
+        throw new Error("Unrequested authority");
+      },
+    },
+    resources: {
+      readScope: () => {
+        throw new Error("Unrequested resource");
+      },
+    },
+    projection: new PublicResponseProjection(
+      canonicalPublicResponseSchemas(),
+      canonicalApiPolicies(),
+    ),
+    budget: {
+      async run(_request, work) {
+        return await work();
+      },
+    },
+    business: f.service,
+  };
+  const handler = createApiHandler(
+    canonicalApiPolicies().map(({ contract_ref: _, ...route }) => route),
+    ports,
+  );
+  const url = "https://synthetic.invalid/api/v1/reports/" + RID + "/university-results";
+  const deniedResponse = await handler(
+    new Request(url, {
+      method: "POST",
+      headers: { Authorization: "Bearer SYNTHETIC-token" },
+      body: "{}",
+    }),
+  );
+  equal(deniedResponse.status, 403);
+  const response = await handler(
+    new Request(url, {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer SYNTHETIC-token",
+        "X-Jungsi-Relay-Token": relay,
+        "Idempotency-Key": "SYNTHETIC-reference-http",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ expected_version: 1, offering_ids: [OID] }),
+    }),
+  );
+  assert(response.status === 200, await response.clone().text());
+  const dto = await response.json(), a = dto.analyses[OID];
+  equal(a.converted_score, "31.00");
+  equal(a.status, "pending");
+  equal(a.reason_code, "reference_conversion_not_production_approved");
+  const text = JSON.stringify(dto);
+  for (
+    const key of [
+      "source_sha256",
+      "independent_sha256",
+      "reference_context",
+      "exactScore",
+      "source_refs",
+    ]
+  ) assert(!text.includes(key));
+  equal(response.headers.get("Cache-Control"), "private, no-store");
+}
 async function denied(run: () => Promise<unknown>, code: string, http: number) {
   let error: unknown;
   try {
@@ -203,6 +332,8 @@ async function denied(run: () => Promise<unknown>, code: string, http: number) {
   equal(error.http, http);
 }
 Deno.test("university analysis persists owned immutable revision and all four year outcomes", async () => {
+  await referenceConversionSurvivesAnalysis();
+  await referenceConversionSurvivesHttp();
   const f = fixture(),
     before = f.repo.reports.get(RID)!,
     r = await f.service.execute(request());

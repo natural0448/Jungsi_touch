@@ -1,6 +1,6 @@
 # DEV006 서비스·DB 응답과 외부 프런트 인계
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.113이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.119이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 다음 기존 본문은 1.8.8까지의 준비/관측 이력과 계약 정의다. ②③ 응답 계약은 그대로 유지하고 현재 통합·자료메타 인수는 마지막1.8.9추가관측과current_followup을 따른다.
 
@@ -223,4 +223,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=acff34c77be0fcd6eb891b52fba2d01d19fc6810ab8b861aae4fa1efd70fbf63 -->
+<!-- jungsi:generated spec_sha256=9347a3939b4a5535d3a03fe40012f2885d03caeb26fcee539d5b0c7eed57ba8f -->

@@ -195,6 +195,7 @@ const SAFE_CODES = new Set([
   "offering_not_found",
   "idempotency_conflict",
   "revision_conflict",
+  "shortlist_limit_exceeded",
   "cursor_version_mismatch",
   "pack_version_mismatch",
   "exam_data_unavailable",

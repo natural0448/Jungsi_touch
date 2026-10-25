@@ -1010,6 +1010,108 @@ def validate_professional_guide_snapshot(paths,read,spec):
     return []
 
 
+def school_reference_test_registration(spec):
+    """Only the independently pinned additive reference suite leaves the read-view set."""
+    verification=spec.get('university_scoring_contract',{}).get('scoped_reference_contract',{}).get('verification')
+    if verification is None:return set(),[]
+    from run_edge_tests import school_reference_registration,EdgeFailure
+    bindings=verification.get('source_bindings')
+    if not isinstance(bindings,list):return set(),['School reference source/test registration invalid']
+    try:
+        hashes={b['path']:b['sha256']for b in bindings}
+        registered=school_reference_registration(spec,hashes)
+        indexed={p:v.get('declarations',{}).get('source_sha256')for p,v in spec.get('edge_harness',{}).get('files',{}).items()}
+        indexed.update({v['path']:v.get('source_sha256')for v in spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('edge_sources',{}).get('files',[])})
+        if registered is None or any(not re.fullmatch(r'[a-f0-9]{64}',str(sha))or(path in indexed and indexed[path]!=sha)for path,sha in hashes.items()):
+            raise ValueError('source hash')
+    except (EdgeFailure,KeyError,TypeError,ValueError):return set(),['School reference source/test registration invalid']
+    return set(registered['test_paths']),[]
+
+
+
+
+MEMBER_SHORTLIST_ROUTES={
+    "member-shortlist.read":("GET","/api/v1/me/shortlist"),
+    "member-shortlist.update":("PUT","/api/v1/me/shortlist/{offering_id}"),
+}
+MEMBER_SHORTLIST_TESTS=tuple("tests/edge/"+name+".ts"for name in (
+    "test_member_shortlist","test_member_json_storage","test_member_json_results","test_member_shortlist_http"))
+MEMBER_SHORTLIST_CRITICAL_SOURCES={
+    "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+    "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+    "src/jungsi_touch/application/public_response_schemas.json",
+}
+
+def member_shortlist_registration(spec,source_hashes=None):
+    """An optional exact personal-JSON extension; old28 and foundation656 stay mandatory."""
+    error="Member shortlist exact source/test/operation registration invalid"
+    cfg=spec.get("edge_harness",{});files=cfg.get("files",{})
+    indexed={p:r.get("declarations",{}).get("source_sha256")for p,r in files.items()if isinstance(r,dict)}if isinstance(files,dict)else {}
+    for row in spec.get("workflow",{}).get("documentation_sync",{}).get("code_index",{}).get("edge_sources",{}).get("files",[]):
+        if isinstance(row,dict)and isinstance(row.get("path"),str):indexed[row["path"]]=row.get("source_sha256")
+    contract=spec.get("member_shortlist_contract")
+    if contract is not None and not isinstance(contract,dict):return None,[error]
+    registered=contract.get("source_registration")if isinstance(contract,dict)else None
+    rows=spec.get("operations",[])
+    if not isinstance(rows,list)or any(not isinstance(o,dict)for o in rows):return None,[error]
+    by_id={o.get("id"):o for o in rows}
+    if registered is None:
+        if set(MEMBER_SHORTLIST_ROUTES)&set(by_id)or set(MEMBER_SHORTLIST_TESTS)&set(indexed):return None,[error]
+        return None,[]
+    try:
+        if (not isinstance(registered,dict)or registered.get("format")!="jungsi.member-shortlist-source-registration/v1"or
+            registered.get("status")!="SOURCE_REGISTERED_NOT_ACTIVATED"or
+            registered.get("operation_ids")!=list(MEMBER_SHORTLIST_ROUTES)or
+            type(registered.get("baseline_operation_count"))is not int or registered["baseline_operation_count"]!=28 or
+            type(registered.get("source_operation_count"))is not int or registered["source_operation_count"]!=30 or
+            registered.get("activation_status")!="NOT_RUN"or registered.get("native_acceptance")!="NOT_VERIFIED_BY_SOURCE_SUITE"or
+            any(type(registered.get(k))is not int or registered[k]!=0 for k in ("operating_writes","new_DB_result_tables"))):raise ValueError("registration")
+        expected=LEGACY_API_IDS|set(SCORE_POLICY_ROUTES)|set(READ_VIEW_EXTENSION_ROUTES)|set(MEMBER_SHORTLIST_ROUTES)
+        if len(rows)!=30 or len(by_id)!=30 or set(by_id)!=expected:raise ValueError("operation coverage")
+        for oid,(method,path)in MEMBER_SHORTLIST_ROUTES.items():
+            row=by_id[oid]
+            if (row.get("method")!=method or row.get("path")!=path or row.get("member_tiers")!=["paid"]or
+                row.get("report_owner")is not False or row.get("confirmed_score_profile")is not False or
+                row.get("aliases",[])!=[]or not {"REQ-11","REQ-24","REQ-25","REQ-26"}<=set(row.get("requirements",[]))or
+                row.get("http_contract",{}).get("idempotency_key_required")is not(method=="PUT")or
+                row.get("http_contract",{}).get("response_schema")!="member_shortlist"or
+                row.get("contract_ref")!="backend_platform_contract.dto_schemas.member_shortlist"):raise ValueError("route")
+        legacy=by_id["shortlist.update"]
+        if (legacy.get("method")!="PUT"or legacy.get("path")!="/api/v1/reports/{report_id}/shortlist/{offering_id}"or
+            legacy.get("member_tiers")!=["paid"]or legacy.get("report_owner")is not True):raise ValueError("legacy path")
+        implementations=registered.get("implementation_bindings")
+        if not isinstance(implementations,dict)or set(implementations)!=set(MEMBER_SHORTLIST_ROUTES):raise ValueError("implementation")
+        impl_path="supabase/functions/_shared/jungsi/application/member_shortlist.ts"
+        for b in implementations.values():
+            if (not isinstance(b,dict)or set(b)!={"path","source_sha256","symbol"}or b["path"]!=impl_path or
+                b["symbol"]!="MemberShortlistService.execute"or not isinstance(b["source_sha256"],str)or
+                not re.fullmatch("[a-f0-9]{64}",b["source_sha256"])or indexed.get(impl_path)!=b["source_sha256"]):raise ValueError("implementation source")
+        verification=registered.get("verification")
+        if (not isinstance(verification,dict)or verification.get("coverage")!="MEMBER_JSON_SHORTLIST_SYNTHETIC"or
+            verification.get("test_paths")!=list(MEMBER_SHORTLIST_TESTS)or type(verification.get("test_count"))is not int or verification["test_count"]<=0 or
+            type(verification.get("baseline_foundation_count"))is not int or verification["baseline_foundation_count"]!=656):raise ValueError("suite")
+        if any(path in cfg.get("tests",[])for path in MEMBER_SHORTLIST_TESTS):raise ValueError("foundation separation")
+        bindings=verification.get("source_bindings")
+        if not isinstance(bindings,list)or not bindings:raise ValueError("bindings")
+        mapped={}
+        for b in bindings:
+            if (not isinstance(b,dict)or set(b)!={"path","sha256"}or not isinstance(b["path"],str)or
+                not isinstance(b["sha256"],str)or not re.fullmatch("[a-f0-9]{64}",b["sha256"])or b["path"]in mapped or
+                not (b["path"].startswith("supabase/functions/")or b["path"].startswith("tests/edge/")or b["path"]=="src/jungsi_touch/application/public_response_schemas.json")or
+                (b["path"]!="src/jungsi_touch/application/public_response_schemas.json"and indexed.get(b["path"])!=b["sha256"])):raise ValueError("exact binding")
+            mapped[b["path"]]=b["sha256"]
+        required=MEMBER_SHORTLIST_CRITICAL_SOURCES|set(MEMBER_SHORTLIST_TESTS)|{impl_path}
+        if not required<=set(mapped):raise ValueError("critical closure")
+        if source_hashes is not None and any(source_hashes.get(path)!=sha for path,sha in mapped.items()):raise ValueError("snapshot bytes")
+        return registered,[]
+    except (KeyError,TypeError,ValueError):return None,[error]
+
+def registered_member_shortlist_ids(spec):
+    registered,errors=member_shortlist_registration(spec)
+    return set(MEMBER_SHORTLIST_ROUTES)if registered is not None and not errors else set()
+
 def validate_read_view_extension(spec):
     """Only these exact three source-bound reads may extend the preserved 22+3.
 
@@ -1024,6 +1126,12 @@ def validate_read_view_extension(spec):
     separate_tests={p for p in files if p.startswith("tests/edge/test_")and p.endswith(".ts")} - set(foundation_tests)
     professional_tests,professional_errors=professional_guide_test_registration(spec)
     separate_tests-=professional_tests
+    reference_tests,reference_errors=school_reference_test_registration(spec)
+    separate_tests-=reference_tests
+    professional_errors+=reference_errors
+    member,member_errors=member_shortlist_registration(spec)
+    if member is not None:separate_tests-=set(MEMBER_SHORTLIST_TESTS)
+    professional_errors+=member_errors
     if c is None:return professional_errors+(["Read-view unregistered separate test source"]if separate_tests else [])
     if not isinstance(c,dict):return professional_errors+["Read-view extension contract invalid"]
     errors=professional_errors
@@ -1044,7 +1152,8 @@ def validate_read_view_extension(spec):
         errors.append("Read-view source versus activation/writer boundary drift")
     rows=spec.get("operations",[])
     by_id={o.get("id"):o for o in rows if isinstance(o,dict)}
-    if len(rows)!=28 or len(by_id)!=28 or set(by_id)!=LEGACY_API_IDS|set(SCORE_POLICY_ROUTES)|set(READ_VIEW_EXTENSION_ROUTES):
+    member_ids=registered_member_shortlist_ids(spec)
+    if len(rows)!=28+len(member_ids)or len(by_id)!=28+len(member_ids)or set(by_id)!=LEGACY_API_IDS|set(SCORE_POLICY_ROUTES)|set(READ_VIEW_EXTENSION_ROUTES)|member_ids:
         errors.append("Read-view complete operation registration drift")
     for oid,(method,path,requirement)in READ_VIEW_EXTENSION_ROUTES.items():
         row=by_id.get(oid,{})
@@ -1102,7 +1211,7 @@ def legacy_policy_fixture_inputs(spec,schemas):
     operations=spec["operations"]
     if spec.get("read_view_extension_contract")is None:return operations,schemas
     if validate_score_input_policy(spec):raise ValueError("Read-view fixture scope invalid")
-    ids=registered_read_view_ids(spec)
+    ids=registered_read_view_ids(spec)|registered_member_shortlist_ids(spec)
     old=[o for o in operations if o["id"]not in ids]
     if len(old)!=25 or {o["id"]for o in old}!=LEGACY_API_IDS|set(SCORE_POLICY_ROUTES):
         raise ValueError("Legacy25 fixture coverage drift")
@@ -1110,7 +1219,8 @@ def legacy_policy_fixture_inputs(spec,schemas):
         raise ValueError("Public schema fixture registry invalid")
     schema_ops=schemas["operations"];definitions=schemas["schemas"]
     schema_ids=[o.get("id")for o in schema_ops if isinstance(o,dict)]
-    if len(schema_ops)!=28 or len(schema_ids)!=28 or any(not isinstance(x,str)for x in schema_ids)or len(set(schema_ids))!=28 or set(schema_ids)!={o["id"]for o in operations}:
+    full_count=28+len(registered_member_shortlist_ids(spec))
+    if len(schema_ops)!=full_count or len(schema_ids)!=full_count or any(not isinstance(x,str)for x in schema_ids)or len(set(schema_ids))!=full_count or set(schema_ids)!={o["id"]for o in operations}:
         raise ValueError("Full28 schema fixture coverage drift")
     def references(node):
         if isinstance(node,list):
@@ -1146,7 +1256,7 @@ def validate_score_input_policy(spec):
     if c is None:return ["REQ-27 policy contract missing"] if required else []
     if not isinstance(c,dict):return ["REQ-27 policy contract invalid"]
     rows=spec.get("operations",[]);by_id={o.get("id"):o for o in rows}
-    errors.extend(validate_read_view_extension(spec));read_view_ids=registered_read_view_ids(spec)
+    errors.extend(validate_read_view_extension(spec));read_view_ids=registered_read_view_ids(spec)|registered_member_shortlist_ids(spec)
     if (set(c.get("legacy_operation_ids",[]))!=LEGACY_API_IDS or len(c.get("legacy_operation_ids",[]))!=22 or
         set(c.get("extension_operation_ids",[]))!=set(SCORE_POLICY_ROUTES) or len(c.get("extension_operation_ids",[]))!=3 or
         set(by_id)!=LEGACY_API_IDS|set(SCORE_POLICY_ROUTES)|read_view_ids or len(rows)!=25+len(read_view_ids) or c.get("operation_count")!=25):errors.append("REQ-27 exact legacy22 plus extension3 scope drift")
@@ -1199,7 +1309,7 @@ def validate_service_performance(spec):
         set(cache.get("excluded",[]))!={"head","registry_selection_decisions","usage_policy","user_responses","authorization","reservations","pending_promises"}):errors.append("Service performance cache trust/budget boundary drift")
     if (proof.get("baseline_edge_tests")!=624 or proof.get("added_edge_tests")!=20 or proof.get("current_edge_tests")!=(656 if spec.get("catalog_payload_scope_contract") else 644) or spec.get("edge_harness",{}).get("unit_count")!=(656 if spec.get("catalog_payload_scope_contract") else 644) or
         set(proof.get("test_paths",[]))!={"tests/edge/test_supabase_artifacts.ts","tests/edge/test_runtime_controls.ts","tests/edge/test_runtime_context.ts"} or proof.get("live_auth_DB_Storage")!="NOT_RUN" or proof.get("deployment")!="NOT_RUN"):errors.append("Service performance additive test/evidence drift")
-    if (batch.get("status")!="PROPOSED_NOT_IMPLEMENTED" or batch.get("registered_operation_count")!=25 or len(spec.get("operations",[]))!=25+len(registered_read_view_ids(spec)) or c.get("retry",{}).get("server_wait")!="NOT_IMPLEMENTED_NO_SOCKET_OR_TRANSACTION_QUEUE" or
+    if (batch.get("status")!="PROPOSED_NOT_IMPLEMENTED" or batch.get("registered_operation_count")!=25 or len(spec.get("operations",[]))!=25+len(registered_read_view_ids(spec)|registered_member_shortlist_ids(spec)) or c.get("retry",{}).get("server_wait")!="NOT_IMPLEMENTED_NO_SOCKET_OR_TRANSACTION_QUEUE" or
         activation.get("006_sql_changed")is not False or activation.get("deploy")!="NOT_RUN" or activation.get("candidate_includes_REQ27")is not True):errors.append("Service performance proposed API/activation boundary drift")
     return errors
 
@@ -3660,6 +3770,17 @@ def generated_files(spec,read=None):
                 files[path]=files[path].replace(marker,section+marker)
         frontend['university_scoring_contract']={k:scoring[k] for k in ('format','code_status','operation','input_rules','score_basis_rules','public_result_contract')}
         backend['university_scoring_contract']=scoring
+        files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
+        files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
+    member=spec.get('member_shortlist_contract')
+    if member:
+        section='\n\n## 회원별 관심대학 JSON API\n\n'+member['id']+' / '+member['status']+'. '+member['decision']+'\n\n'+table(['항목','계약'],[[k,member[k]]for k in ('storage','access','legacy','assessment','concurrency','retry','error','migration','printing','frontend')])+'\n\n'+table(['operation','method','path'],[[o['id'],o['method'],o['path']]for o in member['proposed_operations']])+'\n\n검수 기준:\n\n'+'\n'.join('- '+v for v in member['acceptance'])
+        files[spec['current_documents']['member_shortlist']]=doc('회원별 관심대학 JSON API 계약',section)
+        for key in ('planning','routing','architecture','workflow','development_sync','presentation_handoff','api_dto','frontend_reply','frontend_followup'):
+            target=spec['current_documents'].get(key)
+            if target in files:files[target]+=section
+        frontend['member_shortlist_contract']=member
+        backend['member_shortlist_contract']=member
         files['apps/web/route_catalog.json']=json.dumps(frontend,ensure_ascii=False,indent=2)+'\n'
         files['src/jungsi_touch/application/route_catalog.json']=json.dumps(backend,ensure_ascii=False,indent=2)+'\n'
     percentile=spec.get('university_percentile_contract')
