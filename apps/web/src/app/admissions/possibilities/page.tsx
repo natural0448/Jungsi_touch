@@ -61,6 +61,21 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
+    // 다음 쪽 커서는 몇 분만 유효하다. 오래된 링크·뒤로 가기로 다시 열면 화면 오류 대신 처음부터 보게 한다
+    if (cur.cursor && e instanceof Error && e.message.includes("invalid_cursor")) {
+      return (
+        <>
+          {head}
+          <div className="wrap pg-body ps">
+            <section className="gate flat">
+              <h2>다음 목록을 여는 시간이 지났습니다</h2>
+              <p>검색 결과의 다음 쪽은 잠시 동안만 열 수 있습니다. 같은 조건으로 처음부터 다시 보여 드립니다.</p>
+              <div className="acts"><Link className="btn p" href={hrefWith(cur, { cursor: undefined, open: undefined })}>처음부터 다시 보기</Link></div>
+            </section>
+          </div>
+        </>
+      );
+    }
     throw e;
   }
 

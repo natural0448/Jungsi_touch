@@ -24,7 +24,8 @@ export function parseQuery(sp: Record<string, string | string[] | undefined>): Q
     department_q: one(sp.unit),
     region: one(sp.region),
     group: group && GROUPS.includes(group) ? group : undefined,
-    cursor: one(sp.cursor, 200),
+    // 서버 커서는 200자를 넘는다(10-26 운영: 200자에서 잘려 다음 쪽이 400 invalid_cursor). 서버 상한 4096자까지 그대로 보낸다
+    cursor: one(sp.cursor, 4096),
     open: one(sp.open, 128),
   };
 }

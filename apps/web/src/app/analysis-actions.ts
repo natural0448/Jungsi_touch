@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
+import { connectionText } from "@/lib/connection-text";
 import { canonicalOfferingIds, ensureAnalyses, ensureCandidates, loadMine, type ReportState } from "@/lib/report-ops";
 
 export type RunResult = { error: string | null };
@@ -28,7 +29,7 @@ async function run(failed: string, work: (src: ReturnType<typeof source>, caller
   } catch (e) {
     if (e instanceof AccessDenied) return { error: `${failed}. ${e.status === 401 ? "다시 로그인해 주세요." : "이용권 회원만 분석할 수 있습니다."}` };
     if (e instanceof ConnectionError)
-      return { error: `${failed}. ${e.kind === "rate_limited" ? "요청이 겹쳤습니다. 몇 초 뒤 다시 눌러 주세요." : "정시터치 서버에 연결할 수 없습니다."}` };
+      return { error: `${failed}. ${connectionText(e)}` };
     throw e;
   }
   revalidatePath("/", "layout");

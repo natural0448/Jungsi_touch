@@ -16,6 +16,7 @@ const mocks = new Map([
   ["@/lib/api", apiUrl],
   ["@/lib/report-ref", data("export async function getReportId(){return globalThis.__reportOpsFixture.reportId}")],
   ["@/lib/report-ops", opsUrl],
+  ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],
   ["next/cache", data("export function revalidatePath(...args){globalThis.__reportOpsFixture.revalidations.push(args)}")],
 ]);
 registerHooks({ resolve(id, context, next) { return next(mocks.get(id) ?? id, context); } });
