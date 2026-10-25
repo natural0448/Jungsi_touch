@@ -9,7 +9,8 @@ import { ScoreBasis } from "@/components/score-basis";
 import { ShortlistTray } from "@/components/shortlist-tray";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { StatisticsDto } from "@/lib/dto";
-import { ensureCandidates, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
+import { ensureCandidates, loadMine, type ReportState } from "@/lib/report-ops";
+import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { FILTERS, hrefWith, parseQuery } from "./query";
@@ -53,7 +54,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
       const openGroup = c?.basic_university_groups.find((g) => g.university_id === cur.open);
       const ids = Array.from(new Set([...(openGroup?.offerings ?? []), ...(c?.wildcards ?? [])].map((i) => i.offering.offering_id)));
       const known = c ? [...c.basic_university_groups.flatMap((g) => g.offerings), ...c.wildcards].map((i) => i.offering) : [];
-      const [p, s] = await Promise.all([pickedItems(src, caller, report, known), Promise.all(ids.map(async (id) => [id, await src.readStatistics(caller, report.report_id, id)] as const))]);
+      const [p, s] = await Promise.all([readPicks(src, caller, report, known), Promise.all(ids.map(async (id) => [id, await src.readStatistics(caller, report.report_id, id)] as const))]);
       picks = p;
       stats = new Map(s);
     }

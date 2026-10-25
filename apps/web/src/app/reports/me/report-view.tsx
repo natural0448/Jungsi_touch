@@ -3,7 +3,7 @@ import type { OverallAnalysisDto } from "@/lib/dto";
 import { DATA_KIND, overallWaitLabel } from "@/lib/analysis-labels";
 import { AREA_LABEL } from "@/lib/exam";
 import { pctText } from "@/lib/format";
-import type { PickedItem } from "@/lib/report-ops";
+import type { PickedItem } from "@/lib/shortlist";
 
 /* 2페이지 리포트의 전체 성적 부분 — 일반·유료 모두 보는 범위(REQ-02). 인쇄 화면도 같은 부품을 쓴다 */
 

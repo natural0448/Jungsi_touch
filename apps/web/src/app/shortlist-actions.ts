@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
-import { loadMine, togglePickOn } from "@/lib/report-ops";
+import { loadMine } from "@/lib/report-ops";
+import { setPick } from "@/lib/shortlist";
 
 export type PickResult = { error: string | null };
 
@@ -21,7 +22,7 @@ export async function togglePick(_prev: PickResult, fd: FormData): Promise<PickR
   try {
     const report = await loadMine(src, caller);
     if (!report) return { error: `${failed}. 내 성적 리포트를 먼저 열어 주세요.` };
-    const st = await togglePickOn(src, caller, report, id, selected);
+    const st = await setPick(src, caller, report, id, selected);
     if (st.kind === "failed") return { error: `${failed}. 잠시 뒤 다시 눌러 주세요. (사유 코드 ${st.code})` };
     if (st.kind === "score_required") return { error: `${failed}. 성적 확인이 끝난 뒤 담을 수 있습니다.` };
     if (st.kind === "none") return { error: `${failed}. 리포트를 찾지 못했습니다.` };

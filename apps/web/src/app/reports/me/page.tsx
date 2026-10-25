@@ -10,7 +10,8 @@ import { EXAM, examTypeLabel } from "@/lib/exam";
 import { seoulDate } from "@/lib/format";
 import { PASS_HREF, loginHref } from "@/lib/links";
 import { getReportId } from "@/lib/report-ref";
-import { ensureAnalyses, pickedItems, type PickedItem } from "@/lib/report-ops";
+import { ensureAnalyses } from "@/lib/report-ops";
+import { readPicks, selectedIds, type PickedItem } from "@/lib/shortlist";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
@@ -107,10 +108,10 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   if (paid) {
     try {
       // 담은 곳 중 분석이 없는 것(성적을 바꾼 뒤 등)은 지금 리포트로 다시 분석한다
-      const ids = Object.entries(report.shortlist ?? {}).filter(([, e]) => e.selected).map(([id]) => id);
+      const ids = selectedIds(report);
       const st = await ensureAnalyses(src, caller, report, ids);
       if (st.kind !== "none" && st.report) report = st.report;
-      shortlist = await pickedItems(src, caller, report);
+      shortlist = await readPicks(src, caller, report);
     } catch (e) {
       if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
       if (!(e instanceof AccessDenied)) throw e;

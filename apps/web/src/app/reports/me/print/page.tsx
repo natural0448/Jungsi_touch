@@ -8,7 +8,7 @@ import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import type { SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { getReportId } from "@/lib/report-ref";
-import { pickedItems, type PickedItem } from "@/lib/report-ops";
+import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { page } from "@/lib/routes";
 import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "../report-view";
 import { PrintButton } from "./print-button";
@@ -30,7 +30,7 @@ export default async function Page() {
   try {
     snap = reportId ? await src.exportReport(caller, reportId) : null;
     // 고정된 revision 의 shortlist·analyses 를 그대로 쓴다. 이름만 offering.read 로 붙인다
-    if (snap) shortlist = await pickedItems(src, caller, snap.report);
+    if (snap) shortlist = await readPicks(src, caller, snap.report);
   } catch (e) {
     if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
     if (!(e instanceof AccessDenied)) throw e;

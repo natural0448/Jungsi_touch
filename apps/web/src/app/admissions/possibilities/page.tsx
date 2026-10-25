@@ -12,7 +12,8 @@ import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from 
 import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
 import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
-import { ensureAnalyses, loadMine, pickedItems, type PickedItem, type ReportState } from "@/lib/report-ops";
+import { ensureAnalyses, loadMine, type ReportState } from "@/lib/report-ops";
+import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { ItemShell } from "./item-shell";
@@ -54,7 +55,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     state = mine ? await ensureAnalyses(src, caller, mine, items.map((o) => o.offering_id)) : { kind: "none" };
     const report = state.kind === "none" ? null : state.report;
     // 펼친 모집행의 2027 모집 정보·발행 기준은 화면에서 펼친 뒤 따로 받는다(item-shell.tsx · extras-actions.ts)
-    picks = report ? await pickedItems(src, caller, report, items) : [];
+    picks = report ? await readPicks(src, caller, report, items) : [];
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
