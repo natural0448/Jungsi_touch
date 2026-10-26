@@ -16,8 +16,9 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
       <div className="jt-util">
         <div className="wrap">
           <a className="logo" href={edutouch("/")} aria-label="에듀터치 첫 화면">
-            <b>EDU</b>
-            <i>touch</i>
+            {/* 에듀터치 본체의 공개 로고를 그대로 쓴다(10-26 로고 확정, 본체 요청서). 로고가 바뀌면 함께 바뀐다 */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="https://edutouch.co.kr/brand/logo-horizontal.png" alt="EduTouch 에듀터치" width={550} height={108} />
           </a>
           <span className="jt-sep" aria-hidden="true" />
           <Link prefetch={false} href="/" className="jt-name">

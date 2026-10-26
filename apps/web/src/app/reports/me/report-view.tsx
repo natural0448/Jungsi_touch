@@ -17,6 +17,8 @@ const PENDING: Record<string, string> = {
 const officialEstimate = (o: OverallAnalysisDto["overall"]) =>
   o.status === "estimated" && o.data_kind === "estimated_weights" && o.population_id === OFFICIAL_ALL;
 const OFFICIAL_ALL = "official_all_examinees";
+/** 상위 % 를 '1,000명 중 위에서 몇 번째쯤'으로 바꾼다(최소 1번째) */
+const rankOf1000 = (pct: string | number) => Math.max(1, Math.round(Number(pct) * 10)).toLocaleString("ko-KR");
 
 /** 전체 위치: 국·수·탐2 표준점수 합을 점수축으로, 서버가 밝힌 비교집단에서 위에서 몇 % */
 export function OverallCard({ a }: { a: OverallAnalysisDto }) {
@@ -32,7 +34,7 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
         <span className="unit">점</span>
       </div>
       <div className="n">
-        <small>{official ? "공식 전체 응시자 기준 추정 전체 누백" : "전체 응시자 기준 상위"}</small>
+        <small>{official ? "공식 전체 응시자 기준 추정 전체 누적백분위" : "전체 응시자 기준 상위"}</small>
         {o.status !== "pending" && o.inclusive_top_percent ? (
           <>
             <b className="num big">{pctText(o.inclusive_top_percent)}%</b>
@@ -41,7 +43,10 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
               (official ? (
                 // 추정 분포의 동점 비중을 실제로 센 학생 수로 말하지 않는다
                 <p className="tie">
-                  추정 분포에서 나와 같은 총점이 차지하는 부분을 빼면 상위 <b className="num">{pctText(interval.lower)}%</b>, 포함하면 상위 <b className="num">{pctText(interval.upper)}%</b>입니다. 이 구간은 세는 방법의 차이일 뿐, 합격 확률이나 오차 범위가 아닙니다.
+                  누적백분위는 전체 응시자를 국어·수학·탐구 2과목 표준점수 합 순서로 줄 세웠을 때 내가 위에서 몇 % 안에 드는지를 뜻합니다.
+                  {" "}상위 <b className="num">{pctText(o.inclusive_top_percent)}%</b>는 응시자 1,000명으로 치면 위에서 약 <b className="num">{rankOf1000(o.inclusive_top_percent)}</b>번째쯤입니다.
+                  {" "}나와 총점이 똑같은 학생도 있어서, 나보다 점수가 높은 학생만 세면 상위 <b className="num">{pctText(interval.lower)}%</b>, 같은 점수 학생까지 함께 세면 상위 <b className="num">{pctText(interval.upper)}%</b>입니다(큰 숫자는 같은 점수까지 센 값).
+                  {" "}두 숫자의 차이는 같은 점수를 어떻게 세느냐의 차이일 뿐, 합격 가능성이나 오차 범위를 뜻하지 않습니다.
                 </p>
               ) : (
                 <p className="tie">
@@ -49,11 +54,11 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
                 </p>
               ))}
             {official ? (
-              <p className="tie">
-                공식 전체 응시자를 분모로 한 추정 위치입니다. 응시하지 않았거나 비어 있는 과목은 모형으로 보완했으며, 실제 학생별 성적을 모아 센 결과가 아닙니다.
-                {/* 중립 표시명을 쓰고 정확한 model_version 은 근거로 남긴다(담당자 연결계약 v3 §6 — 모형 bytes·ID 는 바꾸지 않음) */}
-                {" "}공식 전체 응시자 기준 채택 추정 누백 모형으로 계산했습니다.
-                {o.model_version && <small className="model-ref" title="모형 정확 버전(근거)"> (모형 버전 {o.model_version})</small>}
+              // 정확한 model_version 은 근거로 남기되 화면 글자로는 보이지 않는다(10-26 사용자 결정: 학생·학부모·교사에게 의미 없는 내부 식별자)
+              <p className="tie" data-model-version={o.model_version ?? undefined}>
+                이 위치는 이번 시험의 공식 전체 응시자 수를 기준으로 계산한 <b>추정값</b>입니다. 정시터치 회원들의 성적을 모아 순위를 매긴 것이 아닙니다.
+                {" "}학생마다 본 과목이 다르고 일부 과목을 보지 않은 학생도 있어, 그런 부분은 통계 모형으로 채워 계산했습니다.
+                {" "}그래서 성적표의 과목별 백분위나 실제 대학 지원 결과와는 차이가 날 수 있습니다. 내 대략적인 위치를 가늠하는 참고 자료로 보시고, 대학별 지원 가능성은 &lsquo;가능성 보기&rsquo;에서 학교마다 따로 확인하세요.
               </p>
             ) : (
               kind && <p className="tie">{kind.note}</p>
