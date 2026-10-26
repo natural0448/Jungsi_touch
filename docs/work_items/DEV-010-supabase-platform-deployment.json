@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.123",
+  "contract_version": "1.9.124",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -747,7 +747,8 @@
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
           },
-          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026"
+          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026",
+          "post_save_503_followup_ref": "supabase_deployment_contract.live_execution.post_save_503_repair_20261027"
         },
         "candidates.build": {
           "code": "PORTED",
@@ -841,7 +842,8 @@
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
           },
-          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026"
+          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026",
+          "post_save_503_followup_ref": "supabase_deployment_contract.live_execution.post_save_503_repair_20261027"
         },
         "report.export": {
           "code": "PORTED",
@@ -4075,6 +4077,22 @@
         "deployment": "NOT_RUN_SOURCE_CANDIDATE_ONLY",
         "DB_Storage_Secrets_rights_limits_writes": "NOT_RUN_UNCHANGED",
         "production_ready": false
+      },
+      "post_save_503_repair_20261027": {
+        "status": "SOURCE_SYNTHETIC_CANDIDATE_NOT_DEPLOYED",
+        "basis_commit": "516a9c67d507580c46a97f7b355706d0a2aa3682",
+        "operations": [
+          "university.analyze",
+          "shortlist.update"
+        ],
+        "owner_observation": "Owner reports stored analyses/shortlist changes followed by security_policy_unavailable. Saved work is preserved; no operating POST replay is performed by this development task.",
+        "reproduction": "Pinned compiled deployed components with synthetic controls/index and mocked store reproduce the two reported failure stages. This is scoped component evidence, not a live trace or full HTTP acceptance.",
+        "repair": "Preserve full selected body validation inside a bounded fresh immutable preflight frame, and forward the already registered analysis batch guard in the limited installed-source overlay. Leave read limits and mutable final checks unchanged.",
+        "verification": "Focused provider/context39 tests including 3 new bounded-frame scenarios and private compiled boundary probes; normal full hooks and exact commit CI pending.",
+        "native": "NOT_RUN",
+        "deployment": "NOT_RUN",
+        "frontend": "No UI implementation in the service branch. Owner UI recovery and P1 compatible preparation are separately verified.",
+        "P1": "P1 historical reference read contract stays in its independent merged change; combine source candidates only after the maintenance source is independently accepted."
       }
     }
   }

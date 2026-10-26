@@ -355,6 +355,7 @@ Deno.test("selected release preflight decodes the complete graph without another
   equal(receipt.native_acceptance, "NOT_VERIFIED_BY_SOURCE_PREFLIGHT");
   equal(f.calls.length, calls);
   equal(nativeJsonText(f.data.load("conversion", f.oid)), before);
+  await verifyBoundedPreflightCases();
 });
 Deno.test("serving preflight requires a fresh approved head even when offline source decoding succeeds", async () => {
   const f = await fixture();
@@ -880,5 +881,37 @@ async function verifyAdditionalUniversityScopeCases(): Promise<void> {
     } catch (error) {
       throw new Error(name, { cause: error });
     }
+  }
+}
+
+async function verifyBoundedPreflightCases(): Promise<void> {
+  {
+    const f = await servingFixture();
+    const receipt = await f.data.preflight();
+    equal(receipt.status, "verified_selected_release_graph");
+    equal(receipt.artifacts, f.selected.identities().length);
+    equal(f.headCalls(), 4);
+    const before = f.headCalls();
+    assert(await f.data.getCatalog());
+    equal(f.headCalls(), before + 2);
+  }
+  for (const mode of ["all", "catalog_only", "university_only", "overall_only"] as const) {
+    const f = await servingFixture(() => {}, mode, 4);
+    await denied(() => f.data.preflight(), "artifact_version_mismatch");
+    equal(f.headCalls(), 4);
+    f.head.status = "approved";
+    const before = f.headCalls();
+    assert(await f.data.withScoringBatch(() => Promise.resolve(true)));
+    equal(f.headCalls(), before + 2);
+  }
+  {
+    const f = await servingFixture((sources) => {
+      const release = [...sources].find(([key]) => key.startsWith("conversion|"))![1];
+      (release.bindings as NativeObject[])[0].department = "SYNTHETIC-mismatched-department";
+    });
+    await denied(() => f.data.preflight(), "analysis_release_invalid");
+    const before = f.headCalls();
+    assert(await f.data.getCatalog());
+    equal(f.headCalls(), before + 2);
   }
 }
