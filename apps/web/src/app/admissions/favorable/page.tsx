@@ -122,6 +122,14 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
       <div className="wrap pg-body fv">
         <ScoreBasis overall={report.overall} emptyText="" />
 
+        <RunAnalysis
+          refresh={{ id: crypto.randomUUID(), reportId: report.report_id, profileId: report.profile_id, reportVersion: report.report_version }}
+          title="저장된 후보를 현재 자료로 다시 확인합니다"
+          desc="저장한 성적을 그대로 사용해 후보를 현재 승인 자료로 다시 확인합니다. 현재 결과가 갱신될 수 있으며 성적 입력권은 사용하지 않습니다."
+          label="후보 다시 확인"
+          busy="다시 확인하는 중…"
+        />
+
         {/* 좁은 화면에서는 와일드카드가 목록 아래로 내려간다. 있다는 것을 위에서 먼저 알린다 */}
         {wildcards.length > 0 && (
           <a className="wd-teaser" href="#wildcard">

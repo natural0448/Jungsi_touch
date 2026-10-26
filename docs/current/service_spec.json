@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.119",
+  "version": "1.9.120",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7624,7 +7624,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.119",
+        "contract_version": "1.9.120",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7798,7 +7798,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.119",
+        "contract_version": "1.9.120",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7964,7 +7964,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.119",
+        "contract_version": "1.9.120",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7983,7 +7983,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.119",
+        "contract_version": "1.9.120",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8008,7 +8008,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.119",
+        "contract_version": "1.9.120",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8033,7 +8033,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.119",
+        "contract_version": "1.9.120",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -21535,6 +21535,25 @@
         "REQ-11"
       ],
       "summary": "화면팀 변경(10-26 운영 확인): ① 3페이지 '다음 30개' 커서를 200자에서 잘라 보내 서버가 400 invalid_cursor 로 거절하고 화면 오류가 나던 것을 고쳤다(서버 상한 4096자까지 그대로 보냄). 커서가 만료돼 거절되면 화면 오류 대신 '처음부터 다시 보기' 안내를 보인다. ② 분석·담기 버튼의 503 등 서버 사유 코드를 '서버에 연결할 수 없습니다'로 뭉치지 않고 사유 코드와 함께 보인다(lib/connection-text.ts). 운영에서 university.analyze 가 503 score_input_transition_pending 으로 거절되는 것을 확인했다(담당자 전환 보류 상태, 화면 결함 아님)."
+    },
+    {
+      "date": "2026-10-26",
+      "version": "1.9.120",
+      "requirements": [
+        "REQ-02",
+        "REQ-03",
+        "REQ-04",
+        "REQ-05",
+        "REQ-11",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "summary": "SCORE-INPUT-TRANSITION-EXPLICIT-REFRESH-01: score_input_transition_pending은 자료 계산 전 승인 rollout·기존 성적 보존 연결 가드이며 DB 자료 업로드와 별도로 전환한다. P3 현재 범위(최대100개)와 P4 후보를 사용자가 명시적으로 다시 확인하는 서버 서비스/버튼을 추가한다. 기본 missing-only·저장된 ready/pending 재사용과 GET 자동 분석 금지는 유지하고, 명시 refresh는 성적 재저장·입력권 소비 없이 같은 profile을 기존 university.analyze/candidates.build로 보낸다. UUID intent·원래 report/profile/revision·정규화 본문에 요청 키를 결속하고 한 번의409 재조회 후에도 다른 성적으로 대상을 바꾸지 않으며 두 번째 충돌은 실패로 보존한다. 새 승인 자료 문맥의 재계산과 동일 문맥 no-op·정확 과거 key 재응답을 구분하며 DB 업로드만으로 문맥이 바뀌었다고 간주하지 않는다. 503은 Result/예외/전체 연결 안내에서 같은 성적 보존 문구로 표시하고 미확정 개방일이나 즉시 재시도를 약속하지 않는다. 현재 Owner 선택·native 접근 근거·append-only 전환·실제 운영 검수는 별도 미완료이며 기존 member JSON 관심대학의 공개 후 HOLD는 그대로다. 신규 API/DB/권한/본문 필드·운영 배포를 추가하지 않고 source·기획·라우팅·정상 훅·정확 SHA CI를 결속한다."
     }
   ],
   "overall_analysis_contract": {
@@ -175059,6 +175078,77 @@
       "tests/edge/test_score_input_policy.ts": "c4d1adfb34a55997f8c69158f2ac6125b3fc2082f5a51717e2d3e9812576f5a9",
       "tests/edge/public_api_contract_fixture.ts": "e28a6d07abe34d5932a40ec40aa0b6355397f5f706341ca20be800904dd70d14",
       "tests/edge/synthetic_api_contract.ts": "a856ab6d53a83d44be4698af62145b1dec1a9160569e48ce9943e2e0468b577d"
+    },
+    "current_transition_followup": {
+      "change_id": "SCORE-INPUT-TRANSITION-EXPLICIT-REFRESH-01",
+      "date": "2026-10-26",
+      "status": "SOURCE_PREPARATION_OPERATING_TRANSITION_NOT_ACTIVATED",
+      "guard_meaning": "score_input_transition_pending is a pre-computation policy/legacy-preservation integrity gate. A data upload does not validate a rollout or create profile-to-input-right links.",
+      "guarded_operations": [
+        "score-profile.create",
+        "score-input.status.read",
+        "overall.analyze",
+        "university.analyze",
+        "candidates.build",
+        "score-input.correction.grant"
+      ],
+      "no_direct_transition_guard": [
+        "shortlist.update",
+        "report.read",
+        "report.export",
+        "report.list-own",
+        "report.sample.read",
+        "history.search",
+        "history.snapshot.head",
+        "history.snapshot.read"
+      ],
+      "authorization_note": "An absent transition guard is not permission or guaranteed success. Existing verified identity/active pass or active-aal2 admin, ownership, original snapshot scope, relay, RLS, budgets, binding and approved data checks remain. Exact accepted request replay is distinct from a fresh operation.",
+      "preservation": "Re-read the exact current profile/report/revision baseline. Account-holder current-profile choice, native fingerprint and original saved-access evidence are required before append-only legacy adoption. Do not choose newest automatically, fabricate validated rows, reset rights/counters, or replace existing successful profiles/reports. A stale preservation manifest fails CAS.",
+      "release_sequence": "Existing appointed Owner validates current metadata and completes only the missing legacy/rollout adoption, followed by actual readback and same-runtime acceptance. The current combined runtime already implements the guard; do not require needless reinstallation, a new function or a blanket Secrets replacement. Data-consumer activation is a separate exact closure when its graph changes.",
+      "data_consumer_context": "After the final data team's one-time batch and readback, approve/register the actual consumer registry/selection/calculation and catalog/forecast versions. Uploading DB rows while retaining the old approved graph/context can legitimately reuse an old pending no-op result. Do not relabel a local package or unapproved model as production-ready.",
+      "explicit_refresh": {
+        "execution_layer": "presentation-owned server application actions using existing approved API ports",
+        "operations": [
+          "university.analyze",
+          "candidates.build"
+        ],
+        "new_operations_or_API_body_fields": false,
+        "P3_scope": "Current visible offering IDs only, normalized and bounded to100; explicit refresh may include saved pending and ready rows.",
+        "P4_scope": "Same explicit own report; existing candidates.build recomputes candidates for the approved current catalog serviceRows of the report academic year. No widening beyond the existing operation contract.",
+        "default_behavior": "Existing missing-only helpers and P2/P3/P4 GET remain read-only with respect to analysis/candidate generation; no automatic refresh on login or page entry.",
+        "intent_key": "One explicit user submission carries a UUID intent and report/profile/original revision. Its exact request key includes operation, report, original revision, normalized scope and intent. Exact retransmission keeps that key; a new explicit submission uses a new intent even at the same report revision.",
+        "conflict": "Re-read once after409 revision_conflict and retry the same explicit scope/intent with the new revision/body key. Never silently retarget a different report/profile; a second conflict remains failure with the latest saved result.",
+        "delivery_limit": "No durable BFF intent ledger or cross-request exactly-once guarantee is introduced. Existing exact-key/body API replay and approved-context no-op remain authoritative, including recovery limitations after a second-attempt transport uncertainty.",
+        "no_new_score": "Use the saved profile; no score-profile.create, new grade, correction grant or input-right consumption is requested by refresh. Current report results may be updated; original score and prior revisions remain preserved.",
+        "cache_semantics": "The server decides same-approved-context no-op versus recomputation after a new approved context. Never force execution by changing privileges, scope, context labels without a real release or the default saved-pending reuse path.",
+        "source_paths": [
+          "apps/web/src/lib/report-ops.ts",
+          "apps/web/src/app/analysis-actions.ts",
+          "apps/web/src/components/run-analysis.tsx",
+          "apps/web/src/app/admissions/possibilities/page.tsx",
+          "apps/web/src/app/admissions/favorable/page.tsx"
+        ],
+        "regression_paths": [
+          "apps/web/tests/report-ops.test.mjs",
+          "apps/web/tests/report-refresh.test.mjs",
+          "tests/test_report_ops_node.py",
+          "tests/test_report_refresh_node.py"
+        ]
+      },
+      "error_presentation": {
+        "code": "score_input_transition_pending",
+        "notice": "성적 입력 정책 전환을 준비하고 있습니다. 저장된 성적과 리포트는 유지되며, 같은 성적을 다시 입력할 필요가 없습니다. 준비가 끝나면 이 화면에서 안내합니다.",
+        "all_paths": "Both Result failures and ConnectionError presentation retain this preservation meaning; do not advise immediate retry, invent an opening date, or convert503 into0 remaining/ready."
+      },
+      "opening_target": "Prepare input-policy readiness before the planned public opening. Actual opening time requires appointed Owner application/readback and exact-runtime acceptance; planned data completion is not a release receipt.",
+      "independent_deferral": "The post-opening member JSON shortlist activation remains a separate HOLD. It does not delay the existing score-input policy transition or require a new member binding for this work.",
+      "operating_state": {
+        "DB_readonly_preflight": "SCOPED_SOURCE_TUPLE_AND_PRESERVATION_READBACK",
+        "new_rollout_or_rights_writes": "NOT_RUN",
+        "Storage_Secrets_deployment": "NOT_RUN",
+        "authenticated_frontdoor_acceptance": "NOT_RUN"
+      },
+      "evidence_policy": "Private exact source/test/native readback receipts record scope and hashes. Do not place account IDs, scores, native evidence, operational limit values, credentials or private locators in public planning/code."
     }
   },
   "service_runtime_followup": {

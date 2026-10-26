@@ -174,6 +174,16 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                   busy="분석하는 중…"
                 />
               )}
+              {report && items.some((o) => report.analyses?.[o.offering_id]) && (
+                <RunAnalysis
+                  ids={items.slice(0, 100).map((o) => o.offering_id)}
+                  refresh={{ id: crypto.randomUUID(), reportId: report.report_id, profileId: report.profile_id, reportVersion: report.report_version }}
+                  title="지금 보이는 모집단위를 다시 확인합니다"
+                  desc="저장한 성적을 그대로 사용해 이 범위를 현재 승인 자료로 다시 확인합니다. 현재 결과가 갱신될 수 있으며 성적 입력권은 사용하지 않습니다."
+                  label="이 범위 다시 확인"
+                  busy="다시 확인하는 중…"
+                />
+              )}
               <div className="list">
                 {groups.map((g) => (
                   <section key={`${g.id}-${g.rows[0].offering_id}`} className="univ" aria-label={g.name}>

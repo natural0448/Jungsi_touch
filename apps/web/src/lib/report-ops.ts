@@ -37,10 +37,10 @@ export async function loadMine(src: JungsiSource, caller: Caller): Promise<Repor
   return id ? src.readReport(caller, id) : null;
 }
 
-async function retryOnConflict(src: JungsiSource, caller: Caller, report: ReportDto, run: (r: ReportDto) => ReturnType<JungsiSource["analyzeUniversities"]>): Promise<ReportState> {
+async function retryOnConflict(src: JungsiSource, caller: Caller, report: ReportDto, run: (r: ReportDto, attempt: number) => ReturnType<JungsiSource["analyzeUniversities"]>): Promise<ReportState> {
   let current = report;
   for (let attempt = 0; attempt < 2; attempt++) {
-    const res = await run(current);
+    const res = await run(current, attempt);
     if (res.ok) return { kind: "ready", report: res.value };
     if (res.code === "score_confirmation_required") return { kind: "score_required", report: current };
     if (res.code !== "revision_conflict") return { kind: "failed", report: current, code: res.code };
@@ -68,6 +68,57 @@ export async function ensureCandidates(src: JungsiSource, caller: Caller, report
   return retryOnConflict(src, caller, report, async (r) => {
     if (r.candidates) return { ok: true, value: r };
     return src.buildCandidates(caller, r.report_id, r.report_version, await key("cb", r, { expected_version: r.report_version }));
+  });
+}
+
+/** 한 번의 명시 조작을 리포트·원래 성적·표시 당시 revision에 결속한다. 재전송은 같은 intent를 쓴다. */
+export interface RefreshIntent {
+  id: string;
+  reportId: string;
+  profileId: string;
+  reportVersion: number;
+}
+
+function refreshGuard(report: ReportDto, intent: RefreshIntent): ReportState | null {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(intent.id) ||
+      !Number.isSafeInteger(intent.reportVersion) || intent.reportVersion < 1 || intent.reportVersion > report.report_version) {
+    return { kind: "failed", report, code: "invalid_refresh_intent" };
+  }
+  if (report.report_id !== intent.reportId || report.profile_id !== intent.profileId) {
+    return { kind: "failed", report, code: "refresh_target_changed" };
+  }
+  return null;
+}
+
+/** 명시한 모집행만 재확인한다. 저장된 ready/pending을 이유로 요청을 생략하지 않는다. */
+export async function refreshAnalyses(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[], intent: RefreshIntent): Promise<ReportState> {
+  const rejected = refreshGuard(report, intent);
+  if (rejected) return rejected;
+  const targets = canonicalOfferingIds(ids);
+  if (targets.length < 1 || targets.length > 100) return { kind: "failed", report, code: "invalid_refresh_scope" };
+  return retryOnConflict(src, caller, report, async (r, attempt) => {
+    const changed = refreshGuard(r, intent);
+    if (changed) return { ok: false, code: changed.kind === "failed" ? changed.code : "refresh_target_changed", status: 409 };
+    // 첫 전송은 폼에 결속한 revision을 유지해 같은 intent의 저장 응답을 회복할 수 있게 한다.
+    // 충돌 후 한 번의 재조회에서만 현재 revision으로 다시 보낸다.
+    const expected = attempt === 0 ? intent.reportVersion : r.report_version;
+    const wire = { ...r, report_version: expected };
+    const body = { expected_version: expected, offering_ids: targets };
+    return src.analyzeUniversities(caller, r.report_id, expected, targets, await key("uar", wire, { intent_id: intent.id, request: body }));
+  });
+}
+
+/** 명시한 기존 성적의 후보를 다시 확인한다. 현재 context의 no-op 판단은 서버가 맡는다. */
+export async function refreshCandidates(src: JungsiSource, caller: Caller, report: ReportDto, intent: RefreshIntent): Promise<ReportState> {
+  const rejected = refreshGuard(report, intent);
+  if (rejected) return rejected;
+  return retryOnConflict(src, caller, report, async (r, attempt) => {
+    const changed = refreshGuard(r, intent);
+    if (changed) return { ok: false, code: changed.kind === "failed" ? changed.code : "refresh_target_changed", status: 409 };
+    const expected = attempt === 0 ? intent.reportVersion : r.report_version;
+    const wire = { ...r, report_version: expected };
+    const body = { expected_version: expected };
+    return src.buildCandidates(caller, r.report_id, expected, await key("cbr", wire, { intent_id: intent.id, request: body }));
   });
 }
 
