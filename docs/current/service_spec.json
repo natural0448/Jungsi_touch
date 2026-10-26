@@ -21569,6 +21569,13 @@
         "REQ-24"
       ],
       "summary": "화면팀 변경(사용자 결정 10-26): ① 2페이지 전체 위치 카드 제목을 '공식 전체 응시자 기준 추정 전체 누적백분위'로, 설명을 학생·학부모·교사용으로 풀어 썼다(1,000명 중 몇 번째쯤, 같은 점수 세는 법, 추정값의 뜻과 활용). 화면의 모형 버전 문구는 지우고 model_version 은 data-model-version 속성으로만 남긴다. 수치·계산 변화 없음. ② 머리글 로고를 에듀터치 확정 로고(https://edutouch.co.kr/brand/logo-horizontal.png, EduTouch)로 교체. 높이 28px·640px 이하 24px·400px 이하 20px."
+    },
+    {
+      "date": "2026-10-26",
+      "requirements": [
+        "REQ-11"
+      ],
+      "summary": "화면팀 변경(사용자 결정 10-26): 상담 리포트 인쇄본 머리에 에듀터치 로고(https://edutouch.co.kr/brand/logo-horizontal.png, 높이 22px)를 넣고 문구를 '정시터치 · 상담 리포트'로 둔다. 인쇄 시 색 유지(print-color-adjust:exact)."
     }
   ],
   "overall_analysis_contract": {

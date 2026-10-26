@@ -68,7 +68,12 @@ export default async function Page() {
       <article className="pr-sheet">
         <header className="pr-hd">
           <div>
-            <p className="pr-brand">에듀터치 정시터치 · 상담 리포트</p>
+            <p className="pr-brand">
+              {/* 인쇄본 머리에도 에듀터치 로고(10-26 사용자 결정). 본체 공개 주소를 그대로 쓴다 */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="https://edutouch.co.kr/brand/logo-horizontal.png" alt="EduTouch 에듀터치" width={550} height={108} />
+              <span>정시터치 · 상담 리포트</span>
+            </p>
             <h1>{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)} 기준</h1>
           </div>
           <dl>

@@ -135,7 +135,8 @@
 .et .pr-tools{display:flex;justify-content:space-between;gap:8px}
 .et .pr-sheet{display:grid;gap:14px;max-width:860px;width:100%;margin:0 auto;padding:28px 32px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg)}
 .et .pr-hd{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:2px solid var(--ink)}
-.et .pr-brand{margin:0 0 4px;font-size:12px;font-weight:800;color:var(--touch)}
+.et .pr-brand{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:12px;font-weight:800;color:var(--touch)}
+.et .pr-brand img{display:block;height:22px;width:auto;max-width:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .et .pr-hd h1{font-size:22px;font-weight:900}
 .et .pr-hd dl{display:flex;gap:18px;margin:0}
 .et .pr-hd dt{font-size:11px;color:var(--muted)}
