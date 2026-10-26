@@ -1,5 +1,6 @@
 /** Existing app-role head SELECT plus bounded private immutable object reads. No publisher writes. */
 import { AccessError } from "../application/access.ts";
+import { bindHistoricalReferencePublication } from "../application/history_reference_estimates.ts";
 import {
   type HistorySnapshotPort,
   type SnapshotPart,
@@ -519,6 +520,7 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         "publisher_ref",
         "reviewer_ref",
         ...(Object.hasOwn(reviewRaw, "field_qualification") ? ["field_qualification"] : []),
+        ...(Object.hasOwn(reviewRaw, "historical_references") ? ["historical_references"] : []),
       ],
     );
     if (
@@ -537,6 +539,14 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         review.field_qualification,
         manifestPin.sha256,
         String(h.source_head_sha256),
+      )
+      : undefined;
+    const historicalReferences = Object.hasOwn(review, "historical_references")
+      ? bindHistoricalReferencePublication(
+        review.historical_references,
+        manifestPin.sha256,
+        String(h.source_head_sha256),
+        b.scopeSha256,
       )
       : undefined;
     const counts = object(m.counts, [
@@ -599,6 +609,7 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         full,
         parts: Object.freeze(parts),
         ...(fieldQualification ? { fieldQualification } : {}),
+        ...(historicalReferences ? { historicalReferences } : {}),
       }),
       headSha256: row.contentSha256,
       releaseVersion: row.releaseVersion,

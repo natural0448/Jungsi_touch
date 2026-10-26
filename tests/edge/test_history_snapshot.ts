@@ -4,7 +4,9 @@ import {
   HISTORY_SNAPSHOT_SLOTS,
   HistorySnapshotService,
   validateHistorySnapshotPayload,
+  validateQualifiedHistorySnapshotPayload,
 } from "../../supabase/functions/_shared/jungsi/application/history_snapshot.ts";
+import { bindHistoricalReferencePublication } from "../../supabase/functions/_shared/jungsi/application/history_reference_estimates.ts";
 import {
   nativeJsonText,
   type NativeObject,
@@ -24,6 +26,219 @@ const session = {
   tier: "standard" as const,
   paidUntilUtc: null,
 };
+function historicalReference(seed = "1"): NativeObject {
+  return {
+    format: "jungsi.historical-cutoff-reference/v1",
+    observation_id: "observation:" + seed.repeat(64),
+    academic_year: 2026,
+    school_id: "SYNTHETIC-university",
+    offering_pk: "SYNTHETIC-pk",
+    value: "1.2300",
+    unit: "%",
+    status: "model_estimated",
+    label: "추정상위누백(전체응시자)",
+    scope: "historical_admission_cutoff",
+    method_id: "estimated-whole-cohort-percentile:" + "2".repeat(64),
+    release_id: "reference-percentile:" + "3".repeat(64),
+    display_role: "independent_observation",
+    statistic_label: null,
+    reference_status: "CALCULATED_WHOLE_COHORT_MODEL_ESTIMATE",
+    engine_approved: false,
+    production_allowed: false,
+  };
+}
+function historicalFixture() {
+  const body = syntheticSnapshotStatisticsBody(), row = (body.rows as NativeObject[])[0];
+  const publication = syntheticSnapshotPublication();
+  const descriptor = {
+    format: "jungsi.history-reference-estimates/v1",
+    release_id: historicalReference().release_id,
+    source_export_sha256: "4".repeat(64),
+    head_readback_receipt_sha256: "5".repeat(64),
+    metric: "estimated_upper_cumulative_percent_all_examinees",
+    observation_count: 2,
+    school_count: 1,
+    engine_approved: false,
+    production_allowed: false,
+    display_scope: "historical_admission_only",
+  };
+  row.historical_cutoff_references = [historicalReference()];
+  return {
+    body,
+    row,
+    descriptor,
+    publication: {
+      ...publication,
+      historicalReferences: bindHistoricalReferencePublication(
+        descriptor,
+        publication.publicationSha256,
+        publication.sourceHeadSha256,
+        publication.scopeSha256,
+      ),
+    },
+  };
+}
+Deno.test("historical references keep native text and every original pending cell unchanged", async () => {
+  const f = historicalFixture();
+  const original = nativeJsonText(syntheticSnapshotStatisticsBody());
+  const out = await validateQualifiedHistorySnapshotPayload(
+    f.body,
+    syntheticSnapshotPart(),
+    f.publication,
+  );
+  const row = { ...(out.rows as NativeObject[])[0] };
+  equal((row.historical_cutoff_references as NativeObject[])[0].value, "1.2300");
+  delete row.historical_cutoff_references;
+  equal(nativeJsonText({ ...out, rows: [row] }), original);
+});
+Deno.test("historical references require a verified review context for serving", async () => {
+  const f = historicalFixture();
+  await denied(
+    () =>
+      validateQualifiedHistorySnapshotPayload(
+        f.body,
+        syntheticSnapshotPart(),
+        syntheticSnapshotPublication(),
+      ),
+    "snapshot_invalid",
+  );
+  await denied(() =>
+    validateQualifiedHistorySnapshotPayload(f.body, syntheticSnapshotPart(), {
+      ...f.publication,
+      historicalReferences: { ...f.publication.historicalReferences },
+    }), "snapshot_invalid");
+});
+Deno.test("historical reference review context is bound to all three publication pins", async () => {
+  for (const key of ["publicationSha256", "sourceHeadSha256", "scopeSha256"]) {
+    const f = historicalFixture();
+    await denied(() =>
+      validateQualifiedHistorySnapshotPayload(f.body, syntheticSnapshotPart(), {
+        ...f.publication,
+        [key]: "6".repeat(64),
+      }), "snapshot_invalid");
+  }
+});
+Deno.test("historical references reject wrong year school PK CID and inferred statistic labels", async () => {
+  for (
+    const [key, value] of [
+      ["academic_year", 2025],
+      ["school_id", "SYNTHETIC-other"],
+      ["offering_pk", "SYNTHETIC-other"],
+      ["observation_id", "bad"],
+      ["statistic_label", "70%"],
+      ["scope", "student_rank"],
+      ["display_role", "final_70_percent_cut"],
+    ] as const
+  ) {
+    const f = historicalFixture();
+    (f.row.historical_cutoff_references as NativeObject[])[0][key] = value;
+    await denied(
+      () => validateHistorySnapshotPayload(f.body, syntheticSnapshotPart()),
+      "snapshot_invalid",
+    );
+  }
+});
+Deno.test("historical reference decimals reject numeric coercion out of range and unsafe exponents", async () => {
+  for (
+    const value of [0, null, "", "NaN", "Infinity", "-0.0001", "100.0001", "1e10001", "01.2", " 1 "]
+  ) {
+    const f = historicalFixture();
+    (f.row.historical_cutoff_references as NativeObject[])[0].value = value;
+    await denied(
+      () => validateHistorySnapshotPayload(f.body, syntheticSnapshotPart()),
+      "snapshot_invalid",
+    );
+  }
+  for (const value of ["0", "0.00", "100.000", "1e-3"]) {
+    const f = historicalFixture();
+    (f.row.historical_cutoff_references as NativeObject[])[0].value = value;
+    const out = validateHistorySnapshotPayload(f.body, syntheticSnapshotPart());
+    equal(
+      ((out.rows as NativeObject[])[0].historical_cutoff_references as NativeObject[])[0].value,
+      value,
+    );
+  }
+});
+Deno.test("historical references reject duplicate observations and exceedance of the row bound", async () => {
+  for (
+    const refs of [
+      [],
+      [historicalReference(), historicalReference()],
+      Array(17).fill(historicalReference()),
+    ]
+  ) {
+    const f = historicalFixture();
+    f.row.historical_cutoff_references = refs;
+    await denied(
+      () => validateHistorySnapshotPayload(f.body, syntheticSnapshotPart()),
+      "snapshot_invalid",
+    );
+  }
+});
+Deno.test("historical references reject approval promotion hidden fields and getters", async () => {
+  for (const key of ["engine_approved", "production_allowed", "private_model"]) {
+    const f = historicalFixture();
+    (f.row.historical_cutoff_references as NativeObject[])[0][key] = true;
+    await denied(
+      () => validateHistorySnapshotPayload(f.body, syntheticSnapshotPart()),
+      "snapshot_invalid",
+    );
+  }
+  const f = historicalFixture();
+  let reads = 0;
+  Object.defineProperty((f.row.historical_cutoff_references as NativeObject[])[0], "value", {
+    enumerable: true,
+    get() {
+      reads++;
+      return "1";
+    },
+  });
+  await denied(
+    () => validateHistorySnapshotPayload(f.body, syntheticSnapshotPart()),
+    "snapshot_invalid",
+  );
+  equal(reads, 0);
+});
+Deno.test("historical reference release must match the verified independent review", async () => {
+  const f = historicalFixture();
+  (f.row.historical_cutoff_references as NativeObject[])[0].release_id = "reference-percentile:" +
+    "7".repeat(64);
+  await denied(
+    () => validateQualifiedHistorySnapshotPayload(f.body, syntheticSnapshotPart(), f.publication),
+    "snapshot_invalid",
+  );
+});
+Deno.test("historical reference review rejects inconsistent counts and runtime approval", async () => {
+  for (
+    const extra of [{ observation_count: 0 }, { school_count: 3 }, { engine_approved: true }, {
+      production_allowed: true,
+    }, { private_model: "hidden" }]
+  ) {
+    const f = historicalFixture();
+    await denied(
+      () =>
+        bindHistoricalReferencePublication(
+          { ...f.descriptor, ...extra },
+          f.publication.publicationSha256,
+          f.publication.sourceHeadSha256,
+          f.publication.scopeSha256,
+        ),
+      "snapshot_invalid",
+    );
+  }
+});
+Deno.test("historical reference context count bounds the complete part", async () => {
+  const f = historicalFixture();
+  f.row.historical_cutoff_references = [
+    historicalReference("1"),
+    historicalReference("a"),
+    historicalReference("b"),
+  ];
+  await denied(
+    () => validateQualifiedHistorySnapshotPayload(f.body, syntheticSnapshotPart(), f.publication),
+    "snapshot_invalid",
+  );
+});
 Deno.test("snapshot strict IDs reject controls while preserving PK 001 and 0 strings", async () => {
   for (const pk of ["001", "0"]) {
     const body = syntheticSnapshotBody(),

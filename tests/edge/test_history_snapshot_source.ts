@@ -28,27 +28,132 @@ import {
 } from "./synthetic_history_qualification.ts";
 import { assert, equal } from "./fixture.ts";
 const encode = (raw: unknown) => new TextEncoder().encode(nativeJsonText(raw));
-const URL_BASE = "https://abcdefghijklmnopqrst.supabase.co", PREFIX = "SYNTHETIC/snapshot/";
+const URL_BASE = "https://abcdefghijklmnopqrst.supabase.co",
+  PREFIX = "SYNTHETIC/snapshot/";
+function addHistoricalSourceReference(body: NativeObject) {
+  const row = (body.rows as NativeObject[])[0];
+  row.historical_cutoff_references = [{
+    format: "jungsi.historical-cutoff-reference/v1",
+    observation_id: "observation:" + "1".repeat(64),
+    academic_year: row.academic_year,
+    school_id: row.university_id,
+    offering_pk: row.original_pk,
+    value: "1.2500",
+    unit: "%",
+    status: "model_estimated",
+    label: "추정상위누백(전체응시자)",
+    scope: "historical_admission_cutoff",
+    method_id: "estimated-whole-cohort-percentile:" + "2".repeat(64),
+    release_id: "reference-percentile:" + "3".repeat(64),
+    display_role: "independent_observation",
+    statistic_label: null,
+    reference_status: "CALCULATED_WHOLE_COHORT_MODEL_ESTIMATE",
+    engine_approved: false,
+    production_allowed: false,
+  }];
+}
+function addHistoricalSourceReview(review: NativeObject) {
+  review.historical_references = {
+    format: "jungsi.history-reference-estimates/v1",
+    release_id: "reference-percentile:" + "3".repeat(64),
+    source_export_sha256: "4".repeat(64),
+    head_readback_receipt_sha256: "5".repeat(64),
+    metric: "estimated_upper_cumulative_percent_all_examinees",
+    observation_count: 1,
+    school_count: 1,
+    engine_approved: false,
+    production_allowed: false,
+    display_scope: "historical_admission_only",
+  };
+}
+for (const qualification of [false, true]) {
+  Deno.test(
+    "snapshot source binds historical reference review and preserves rank q=" +
+      qualification,
+    async () => {
+      const f = await fixture({
+        qualification,
+        body: addHistoricalSourceReference,
+        review: addHistoricalSourceReview,
+      });
+      const p = await f.source.current();
+      assert(p.historicalReferences !== undefined);
+      equal(p.fieldQualification !== undefined, qualification);
+      const body = await f.source.read(p, p.full!);
+      const row = (body.rows as NativeObject[])[0];
+      equal(
+        (row.historical_cutoff_references as NativeObject[])[0].value,
+        "1.2500",
+      );
+      const wire = await f.source.representation(body);
+      equal(await snapshotBytesSha256(wire.bytes), p.full!.gzipSha256);
+      equal(
+        Object.hasOwn(
+          row.final_additional_admission_rank as NativeObject,
+          "service_qualification",
+        ),
+        qualification,
+      );
+    },
+  );
+}
+Deno.test("snapshot source rejects missing reference review changed release and promoted approval", async () => {
+  for (
+    const mode of [
+      "missing-review",
+      "wrong-release",
+      "engine-approved",
+      "production-allowed",
+    ]
+  ) {
+    const f = await fixture({
+      body: addHistoricalSourceReference,
+      review: (review) => {
+        if (mode === "missing-review") return;
+        addHistoricalSourceReview(review);
+        const d = review.historical_references as NativeObject;
+        if (mode === "wrong-release") {
+          d.release_id = "reference-percentile:" + "6".repeat(64);
+        }
+        if (mode === "engine-approved") d.engine_approved = true;
+        if (mode === "production-allowed") d.production_allowed = true;
+      },
+    });
+    await denied(async () => {
+      const p = await f.source.current();
+      await f.source.read(p, p.full!);
+    }, "snapshot_invalid");
+  }
+});
 Deno.test("snapshot qualified review loads exact grants without adding manifest keys and reuses original gzip", async () => {
-  const f = await fixture({ qualification: true }), p = await f.source.current();
+  const f = await fixture({ qualification: true }),
+    p = await f.source.current();
   assert(p.fieldQualification !== undefined);
   assert(!Object.hasOwn(f.manifest, "field_qualification"));
   const body = await f.source.read(p, p.full!),
     row = (body.rows as NativeObject[])[0],
     rank = row.final_additional_admission_rank as NativeObject;
-  equal([rank.value, rank.unit, rank.status, (row.identity_review as NativeObject).status], [
+  equal([
+    rank.value,
+    rank.unit,
+    rank.status,
+    (row.identity_review as NativeObject).status,
+  ], [
     "17",
     null,
     "pending_metadata",
     "review_pending",
   ]);
   equal(
-    ((rank.service_qualification as NativeObject).normalized_service_fields as NativeObject).unit,
+    ((rank.service_qualification as NativeObject)
+      .normalized_service_fields as NativeObject).unit,
     "번",
   );
   const wire = await f.source.representation(body);
   const text = await new Response(
-    new Blob([wire.bytes]).stream().pipeThrough(new DecompressionStream("gzip")),
+    new Blob([wire.bytes]).stream().pipeThrough(
+      new DecompressionStream("gzip"),
+    ),
   ).text();
   assert(text.includes("1.2300e+04") && text.includes('"unit":null'));
   equal(f.requests.filter((u) => u.endsWith("/qualification.json")).length, 1);
@@ -62,12 +167,14 @@ Deno.test("snapshot review grants leave a non-target legacy part pending", async
         delete rank.service_qualification;
         row.original_pk = "SYNTHETIC-other";
         row.offering_id = "2026:SYNTHETIC-other";
-        (rank.source_context as NativeObject).observation_id = "observation:" + "c".repeat(64);
+        (rank.source_context as NativeObject).observation_id = "observation:" +
+          "c".repeat(64);
       },
     }),
     p = await f.source.current(),
     body = await f.source.read(p, p.full!);
-  const rank = (body.rows as NativeObject[])[0].final_additional_admission_rank as NativeObject;
+  const rank = (body.rows as NativeObject[])[0]
+    .final_additional_admission_rank as NativeObject;
   equal(rank.status, "pending_metadata");
   assert(!Object.hasOwn(rank, "service_qualification"));
 });
@@ -81,7 +188,8 @@ for (
   ]
 ) {
   Deno.test(
-    "snapshot qualified source rejects independently pinned but inconsistent content " + mode,
+    "snapshot qualified source rejects independently pinned but inconsistent content " +
+      mode,
     async () => {
       const f = await fixture({
         qualification: true,
@@ -102,7 +210,10 @@ for (
             const approvals = d.approvals as NativeObject[];
             approvals.push({
               ...approvals[0],
-              subject: { ...approvals[0].subject as NativeObject, offering_pk: "SYNTHETIC-extra" },
+              subject: {
+                ...approvals[0].subject as NativeObject,
+                offering_pk: "SYNTHETIC-extra",
+              },
             });
             d.subject_count = 2;
           }
@@ -124,7 +235,8 @@ for (
   ]
 ) {
   Deno.test(
-    "snapshot qualification retains closed metadata and existing bounds " + mode,
+    "snapshot qualification retains closed metadata and existing bounds " +
+      mode,
     async () => {
       const f = await fixture({
         qualification: true,
@@ -142,7 +254,9 @@ for (
           if (mode === "receipt-private-locator") {
             (d.receipt as NativeObject).object_key = "OTHER/private.json";
           }
-          if (mode === "receipt-overflow") (d.receipt as NativeObject).bytes = 24577;
+          if (mode === "receipt-overflow") {
+            (d.receipt as NativeObject).bytes = 24577;
+          }
         },
       });
       await denied(() => f.source.current());
@@ -150,7 +264,8 @@ for (
   );
 }
 Deno.test("snapshot qualification cannot bypass the current head revocation check", async () => {
-  const f = await fixture({ qualification: true }), p = await f.source.current();
+  const f = await fixture({ qualification: true }),
+    p = await f.source.current();
   f.setRow((r) => ({ ...r, contentSha256: "0".repeat(64) }));
   await denied(() => f.source.read(p, p.full!), "publication_changed", 409);
 });
@@ -176,11 +291,15 @@ Deno.test("snapshot compressed public body preserves original LF in human text a
   for (const forbidden of ["\r", "\u0000"]) {
     const bad = await fixture({
         body: (b) => {
-          (b.rows as NativeObject[])[0].department = "SYNTHETIC" + forbidden + "이름";
+          (b.rows as NativeObject[])[0].department = "SYNTHETIC" + forbidden +
+            "이름";
         },
       }),
       publication = await bad.source.current();
-    await denied(() => bad.source.read(publication, publication.full!), "snapshot_invalid");
+    await denied(
+      () => bad.source.read(publication, publication.full!),
+      "snapshot_invalid",
+    );
   }
 });
 async function denied(
@@ -225,7 +344,8 @@ async function fixture(
     )
     : undefined;
   if (qualification) {
-    ((payload.rows as NativeObject[])[0].final_additional_admission_rank as NativeObject)
+    ((payload.rows as NativeObject[])[0]
+      .final_additional_admission_rank as NativeObject)
       .service_qualification = qualification.q;
     options.qualificationDescriptor?.(qualification.descriptor);
     objects.set(PREFIX + "qualification.json", qualification.bytes);
@@ -233,7 +353,9 @@ async function fixture(
   options.body?.(payload);
   const decoded = encode(payload),
     gzip = new Uint8Array(
-      await new Response(new Blob([decoded]).stream().pipeThrough(new CompressionStream("gzip")))
+      await new Response(
+        new Blob([decoded]).stream().pipeThrough(new CompressionStream("gzip")),
+      )
         .arrayBuffer(),
     );
   objects.set(PREFIX + "body.json.gz", gzip);
@@ -262,7 +384,13 @@ async function fixture(
     normalization_rules_sha256: "c".repeat(64),
     selection_rules_version: "SYNTHETIC-selection-v1",
     selection_rules_sha256: "d".repeat(64),
-    counts: { rows: 1, mapped_rows: 1, mapping_pending_rows: 0, observations: 1, schools: 1 },
+    counts: {
+      rows: 1,
+      mapped_rows: 1,
+      mapping_pending_rows: 0,
+      observations: 1,
+      schools: 1,
+    },
     full: options.parts ? null : part,
     parts: options.parts ? [part] : [],
   };
@@ -366,14 +494,23 @@ async function fixture(
     { nowUtc: () => NOW },
     { maxReadBytes: 1048576, maxResultBytes: 8192n, runtimeMilliseconds: 5000 },
     ((url, init) => {
-      assert(init?.method === "GET" && init.redirect === "error" && init.cache === "no-store");
+      assert(
+        init?.method === "GET" && init.redirect === "error" &&
+          init.cache === "no-store",
+      );
       equal(new Headers(init.headers).get("apikey"), "sb_secret_SYNTHETIC_key");
       const u = String(url);
       requests.push(u);
       const bytes = u.endsWith("/bucket/synthetic-private")
-        ? encode({ id: "synthetic-private", public: false, file_size_limit: 1048576 })
+        ? encode({
+          id: "synthetic-private",
+          public: false,
+          file_size_limit: 1048576,
+        })
         : objects.get(
-          decodeURIComponent(u.split("/object/authenticated/synthetic-private/")[1] ?? ""),
+          decodeURIComponent(
+            u.split("/object/authenticated/synthetic-private/")[1] ?? "",
+          ),
         );
       const response = new Response(bytes ? Uint8Array.from(bytes) : null, {
         status: bytes ? 200 : 404,
@@ -397,7 +534,8 @@ async function fixture(
 Deno.test("snapshot source verifies scoped head receipt immutable bytes and projected gzip semantics", async () => {
   const f = await fixture(), p = await f.source.current();
   assert(p.full);
-  const body = await f.source.read(p, p.full), wire = await f.source.representation(body);
+  const body = await f.source.read(p, p.full),
+    wire = await f.source.representation(body);
   equal(wire.snapshotId, p.snapshotId);
   equal(wire.bytes.length, p.full.gzipBytes);
   equal(await snapshotBytesSha256(wire.bytes), p.full.gzipSha256);
@@ -427,7 +565,11 @@ Deno.test("snapshot source rejects other lineage draft expired rewind purpose an
 });
 Deno.test("snapshot source rejects modified source and rule hashes even with a repinned head", async () => {
   for (
-    const field of ["source_head_sha256", "normalization_rules_sha256", "selection_rules_sha256"]
+    const field of [
+      "source_head_sha256",
+      "normalization_rules_sha256",
+      "selection_rules_sha256",
+    ]
   ) {
     const f = await fixture({
       head: (h) => {
@@ -456,11 +598,17 @@ Deno.test("snapshot source requires independently approved reviewer receipt with
 Deno.test("snapshot source final current binds release version status and metadata hash", async () => {
   for (
     const change of [
-      (r: SnapshotHeadRow) => ({ ...r, releaseVersion: "SYNTHETIC-lineage:00000000000000000002" }),
+      (r: SnapshotHeadRow) => ({
+        ...r,
+        releaseVersion: "SYNTHETIC-lineage:00000000000000000002",
+      }),
       (r: SnapshotHeadRow) => ({ ...r, reviewStatus: "draft" }),
       (r: SnapshotHeadRow) => ({
         ...r,
-        metadataText: r.metadataText.replace("p1-public-history", "p1-private-history"),
+        metadataText: r.metadataText.replace(
+          "p1-public-history",
+          "p1-private-history",
+        ),
       }),
     ]
   ) {
@@ -512,12 +660,18 @@ Deno.test("snapshot source rejects duplicate parts and mismatched mapped and pen
   }
 });
 Deno.test("snapshot source reuses no body until strict public projection matches the validated source", async () => {
-  const f = await fixture(), p = await f.source.current(), body = await f.source.read(p, p.full!);
+  const f = await fixture(),
+    p = await f.source.current(),
+    body = await f.source.read(p, p.full!);
   await denied(() => f.source.representation({ ...body, private_model: {} }));
   await denied(() => f.source.representation({ ...body, rows: [] }));
 });
 Deno.test("snapshot depth scanner ignores braces in strings and rejects deep duplicate key JSON", async () => {
-  equal(parseBoundedSnapshotJson(new TextEncoder().encode('{"x":"{[\\""}'), 100, 1).x, '{["');
+  equal(
+    parseBoundedSnapshotJson(new TextEncoder().encode('{"x":"{[\\""}'), 100, 1)
+      .x,
+    '{["',
+  );
   for (const s of ['{"x":[[[0]]]}', '{"x":1,"x":2}', '{"x":']) {
     await denied(() => parseBoundedSnapshotJson(new TextEncoder().encode(s), 100, 2));
   }
@@ -596,7 +750,14 @@ Deno.test("snapshot metadata SQL is one kind and C ordered lineage range under e
   await port.latest("SYNTHETIC-p1-head", "SYNTHETIC-lineage");
   const selected = calls.filter((c) => c.s === SNAPSHOT_HEAD_SQL);
   equal(selected.length, 1);
-  equal(selected[0].p, ["SYNTHETIC-p1-head", "SYNTHETIC-lineage:", "SYNTHETIC-lineage;"]);
-  assert(SNAPSHOT_HEAD_SQL.includes('COLLATE "C"') && SNAPSHOT_HEAD_SQL.includes("LIMIT 1"));
+  equal(selected[0].p, [
+    "SYNTHETIC-p1-head",
+    "SYNTHETIC-lineage:",
+    "SYNTHETIC-lineage;",
+  ]);
+  assert(
+    SNAPSHOT_HEAD_SQL.includes('COLLATE "C"') &&
+      SNAPSHOT_HEAD_SQL.includes("LIMIT 1"),
+  );
   assert(!/\b(INSERT|UPDATE|DELETE)\b/.test(SNAPSHOT_HEAD_SQL));
 });
