@@ -168,11 +168,16 @@ test("explicit candidate action preserves a stored pending result without POST",
   const f = fixture(report({ candidates })); assert.deepEqual(await buildNow(), { error: null });
   assert.equal(writes(f, "cb").length, 0); assert.equal(reads(f).length, 1);
 });
-for (const error of [new AccessDenied(401, "unauthorized"), new AccessDenied(403, "forbidden"), new ConnectionError("rate_limited", "quota"), new ConnectionError("unavailable", "down")]) {
+for (const error of [new AccessDenied(401, "unauthorized"), new AccessDenied(403, "forbidden"), new ConnectionError("rate_limited", "quota")]) {
   test(`action maps ${error.message} without false success`, async () => {
     const f = fixture(report(), { writes: [error] }); assert.ok((await buildNow()).error); assert.equal(f.revalidations.length, 0);
   });
 }
+// 503(unavailable)은 서버가 저장을 마친 뒤 응답만 실패했을 수 있다(10-26 운영 관측). 오류는 그대로 보이되 화면은 다시 읽는다
+test("action maps unavailable as an error and refreshes the page to show the real saved state", async () => {
+  const f = fixture(report(), { writes: [new ConnectionError("unavailable", "down")] }); const out = await buildNow();
+  assert.ok(out.error); assert.match(out.error, /실제 저장 상태/); assert.deepEqual(f.revalidations, [["/", "layout"]]);
+});
 test("caller failure is mapped by the same action error boundary", async () => {
   const f = fixture(report(), { callerError: new AccessDenied(401, "expired") });
   assert.match((await buildNow()).error, /로그인/); assert.equal(f.calls.length, 0);

@@ -21583,6 +21583,14 @@
         "REQ-10"
       ],
       "summary": "화면팀 변경(담당자 회신 10-26 가천대 offering_not_found): 3페이지 분석 버튼이 offering_not_found 로 거절되면 '잠시 뒤 다시 눌러 주세요' 대신 담당자 지정 문구('선택한 모집단위가 분석 자료에 연결되지 않아 계산하지 못했습니다…')를 보인다. 자동 재시도·행 숨김 없음."
+    },
+    {
+      "date": "2026-10-26",
+      "requirements": [
+        "REQ-10",
+        "REQ-11"
+      ],
+      "summary": "화면팀 변경(10-26 운영 관측: jungsi-api v20 에서 가천대 university.analyze·shortlist.update 가 저장된 뒤 응답만 503 security_policy_unavailable): 분석·담기 버튼이 503(unavailable, 전환 보류 코드 제외)을 받으면 오류 문구를 보이면서 화면을 다시 읽어 실제 저장 상태를 보이고, '지금 화면에 보이는 상태가 실제 저장 상태' 안내를 덧붙인다. 성공으로 표시하지 않는다."
     }
   ],
   "overall_analysis_contract": {

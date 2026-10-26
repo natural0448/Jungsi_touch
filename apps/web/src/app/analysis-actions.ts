@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
-import { connectionText, OFFERING_NOT_LINKED_NOTICE, SCORE_INPUT_TRANSITION_NOTICE } from "@/lib/connection-text";
+import { MAYBE_SAVED, connectionText, OFFERING_NOT_LINKED_NOTICE, SCORE_INPUT_TRANSITION_NOTICE } from "@/lib/connection-text";
 import { canonicalOfferingIds, ensureAnalyses, ensureCandidates, loadMine, refreshAnalyses, refreshCandidates, type RefreshIntent, type ReportState } from "@/lib/report-ops";
 
 export type RunResult = { error: string | null };
@@ -31,8 +31,14 @@ async function run(failed: string, work: (src: ReturnType<typeof source>, caller
     if (out.error) return out;
   } catch (e) {
     if (e instanceof AccessDenied) return { error: `${failed}. ${e.status === 401 ? "다시 로그인해 주세요." : "이용권 회원만 분석할 수 있습니다."}` };
-    if (e instanceof ConnectionError)
-      return { error: `${failed}. ${connectionText(e)}` };
+    // 서버가 저장을 끝낸 뒤 응답 단계에서 503 을 낼 수 있다(10-26 운영: 가천대 분석·담기가 저장된 채 503).
+    // 실패로만 두지 않고 화면을 다시 읽어 실제 저장 상태를 보이게 한다
+    if (e instanceof ConnectionError) {
+      // 전환 보류(score_input_transition_pending)는 쓰기 전에 막힌 것이라 다시 읽지 않는다
+      const unsure = e.kind === "unavailable" && e.code !== "score_input_transition_pending";
+      if (unsure) revalidatePath("/", "layout");
+      return { error: `${failed}. ${connectionText(e)}${unsure ? ` ${MAYBE_SAVED}` : ""}` };
+    }
     throw e;
   }
   revalidatePath("/", "layout");
