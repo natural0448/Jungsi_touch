@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
-import { canonicalOfferingIds, ensureAnalyses, ensureCandidates, loadMine, type ReportState } from "@/lib/report-ops";
+import { connectionText, SCORE_INPUT_TRANSITION_NOTICE } from "@/lib/connection-text";
+import { canonicalOfferingIds, ensureAnalyses, ensureCandidates, loadMine, refreshAnalyses, refreshCandidates, type RefreshIntent, type ReportState } from "@/lib/report-ops";
 
 export type RunResult = { error: string | null };
 
@@ -13,6 +14,7 @@ export type RunResult = { error: string | null };
 */
 
 function explain(st: ReportState, failed: string): RunResult {
+  if (st.kind === "failed" && st.code === "score_input_transition_pending") return { error: `${failed}. ${SCORE_INPUT_TRANSITION_NOTICE} (사유 코드 score_input_transition_pending)` };
   if (st.kind === "failed") return { error: `${failed}. 잠시 뒤 다시 눌러 주세요. (사유 코드 ${st.code})` };
   if (st.kind === "score_required") return { error: `${failed}. 성적 확인이 끝난 뒤 분석할 수 있습니다.` };
   if (st.kind === "none") return { error: `${failed}. 내 성적 리포트를 먼저 열어 주세요.` };
@@ -28,7 +30,7 @@ async function run(failed: string, work: (src: ReturnType<typeof source>, caller
   } catch (e) {
     if (e instanceof AccessDenied) return { error: `${failed}. ${e.status === 401 ? "다시 로그인해 주세요." : "이용권 회원만 분석할 수 있습니다."}` };
     if (e instanceof ConnectionError)
-      return { error: `${failed}. ${e.kind === "rate_limited" ? "요청이 겹쳤습니다. 몇 초 뒤 다시 눌러 주세요." : "정시터치 서버에 연결할 수 없습니다."}` };
+      return { error: `${failed}. ${connectionText(e)}` };
     throw e;
   }
   revalidatePath("/", "layout");
@@ -50,5 +52,38 @@ export async function buildNow(): Promise<RunResult> {
   return run("유리한 학교를 찾지 못했습니다", async (src, caller) => {
     const mine = await loadMine(src, caller);
     return mine ? ensureCandidates(src, caller, mine) : { kind: "none" };
+  });
+}
+
+function refreshIntent(fd: FormData): RefreshIntent | null {
+  const id = String(fd.get("refresh_intent") ?? "");
+  const reportId = String(fd.get("report_id") ?? "");
+  const profileId = String(fd.get("profile_id") ?? "");
+  const version = String(fd.get("report_version") ?? "");
+  const token = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ||
+      !token.test(reportId) || !token.test(profileId) || !/^[1-9][0-9]*$/.test(version)) return null;
+  const reportVersion = Number(version);
+  return Number.isSafeInteger(reportVersion) ? { id, reportId, profileId, reportVersion } : null;
+}
+
+/** 별도 명시 재확인. 기본 missing-only 동작과 자동 GET은 그대로 유지한다. */
+export async function refreshAnalysesNow(_prev: RunResult, fd: FormData): Promise<RunResult> {
+  const intent = refreshIntent(fd);
+  const ids = canonicalOfferingIds(String(fd.get("ids") ?? "").split(","));
+  if (!intent || ids.length < 1 || ids.length > 100) return { error: "다시 확인할 리포트와 모집행 1~100개를 선택해 주세요." };
+  return run("다시 분석하지 못했습니다", async (src, caller) => {
+    const mine = await loadMine(src, caller);
+    return mine ? refreshAnalyses(src, caller, mine, ids, intent) : { kind: "none" };
+  });
+}
+
+/** 저장된 후보(보류 포함)를 버튼으로 재확인한다. 새 성적이나 입력권을 생성하지 않는다. */
+export async function refreshCandidatesNow(_prev: RunResult, fd: FormData): Promise<RunResult> {
+  const intent = refreshIntent(fd);
+  if (!intent) return { error: "다시 확인할 리포트를 먼저 열어 주세요." };
+  return run("후보를 다시 확인하지 못했습니다", async (src, caller) => {
+    const mine = await loadMine(src, caller);
+    return mine ? refreshCandidates(src, caller, mine, intent) : { kind: "none" };
   });
 }

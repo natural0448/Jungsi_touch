@@ -61,6 +61,21 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
+    // 다음 쪽 커서는 몇 분만 유효하다. 오래된 링크·뒤로 가기로 다시 열면 화면 오류 대신 처음부터 보게 한다
+    if (cur.cursor && e instanceof Error && e.message.includes("invalid_cursor")) {
+      return (
+        <>
+          {head}
+          <div className="wrap pg-body ps">
+            <section className="gate flat">
+              <h2>다음 목록을 여는 시간이 지났습니다</h2>
+              <p>검색 결과의 다음 쪽은 잠시 동안만 열 수 있습니다. 같은 조건으로 처음부터 다시 보여 드립니다.</p>
+              <div className="acts"><Link className="btn p" href={hrefWith(cur, { cursor: undefined, open: undefined })}>처음부터 다시 보기</Link></div>
+            </section>
+          </div>
+        </>
+      );
+    }
     throw e;
   }
 
@@ -157,6 +172,16 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                   desc="누르면 지금 보이는 모집단위만 내 성적으로 분석합니다. 한 번 분석한 곳은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력권은 줄지 않습니다."
                   label="내 성적으로 분석"
                   busy="분석하는 중…"
+                />
+              )}
+              {report && items.some((o) => report.analyses?.[o.offering_id]) && (
+                <RunAnalysis
+                  ids={items.slice(0, 100).map((o) => o.offering_id)}
+                  refresh={{ id: crypto.randomUUID(), reportId: report.report_id, profileId: report.profile_id, reportVersion: report.report_version }}
+                  title="지금 보이는 모집단위를 다시 확인합니다"
+                  desc="저장한 성적을 그대로 사용해 이 범위를 현재 승인 자료로 다시 확인합니다. 현재 결과가 갱신될 수 있으며 성적 입력권은 사용하지 않습니다."
+                  label="이 범위 다시 확인"
+                  busy="다시 확인하는 중…"
                 />
               )}
               <div className="list">
