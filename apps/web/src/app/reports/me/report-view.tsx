@@ -100,8 +100,9 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <th scope="colgroup" colSpan={2}>탐구 영역</th>
           </tr>
           <tr>
-            <th scope="col" className="sub">{q1?.subject ?? "과목 1"}</th>
-            <th scope="col" className="sub">{q2?.subject ?? "과목 2"}</th>
+            {/* 과목명은 다른 영역처럼 '선택과목' 줄에 둔다(10-26 사용자 지적: 머리글에 과목명이 올라가 있었다) */}
+            <th scope="col" className="sub">탐구 1</th>
+            <th scope="col" className="sub">탐구 2</th>
           </tr>
         </thead>
         <tbody>
@@ -111,8 +112,8 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td>{k?.choice ?? "─"}</td>
             <td>{m?.choice ?? "─"}</td>
             <td className="na">{na}</td>
-            <td className="na">{na}</td>
-            <td className="na">{na}</td>
+            <td>{q1?.subject ?? "─"}</td>
+            <td>{q2?.subject ?? "─"}</td>
           </tr>
           <tr className="key">
             <th scope="row">표준점수</th>

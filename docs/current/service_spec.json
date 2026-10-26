@@ -21554,6 +21554,13 @@
         "REQ-27"
       ],
       "summary": "SCORE-INPUT-TRANSITION-EXPLICIT-REFRESH-01: score_input_transition_pending은 자료 계산 전 승인 rollout·기존 성적 보존 연결 가드이며 DB 자료 업로드와 별도로 전환한다. P3 현재 범위(최대100개)와 P4 후보를 사용자가 명시적으로 다시 확인하는 서버 서비스/버튼을 추가한다. 기본 missing-only·저장된 ready/pending 재사용과 GET 자동 분석 금지는 유지하고, 명시 refresh는 성적 재저장·입력권 소비 없이 같은 profile을 기존 university.analyze/candidates.build로 보낸다. UUID intent·원래 report/profile/revision·정규화 본문에 요청 키를 결속하고 한 번의409 재조회 후에도 다른 성적으로 대상을 바꾸지 않으며 두 번째 충돌은 실패로 보존한다. 새 승인 자료 문맥의 재계산과 동일 문맥 no-op·정확 과거 key 재응답을 구분하며 DB 업로드만으로 문맥이 바뀌었다고 간주하지 않는다. 503은 Result/예외/전체 연결 안내에서 같은 성적 보존 문구로 표시하고 미확정 개방일이나 즉시 재시도를 약속하지 않는다. 현재 Owner 선택·native 접근 근거·append-only 전환·실제 운영 검수는 별도 미완료이며 기존 member JSON 관심대학의 공개 후 HOLD는 그대로다. 신규 API/DB/권한/본문 필드·운영 배포를 추가하지 않고 source·기획·라우팅·정상 훅·정확 SHA CI를 결속한다."
+    },
+    {
+      "date": "2026-10-26",
+      "requirements": [
+        "REQ-02"
+      ],
+      "summary": "화면팀 변경(사용자 지적 10-26): 2페이지·인쇄의 과목별 결과 성적표에서 탐구 과목명(생활과 윤리 등)이 머리글 둘째 줄에 있던 것을 다른 영역처럼 '선택과목' 줄로 옮기고, 머리글은 '탐구 1·탐구 2'로 둔다. 수치·계산 변화 없음."
     }
   ],
   "overall_analysis_contract": {
