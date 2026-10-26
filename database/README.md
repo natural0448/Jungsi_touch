@@ -1,6 +1,6 @@
 # 정시터치 데이터 계층 개발 기준
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.120이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.121이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 이 폴더에는 실제 값이 없는 DB 구조·마이그레이션 코드만 추가할 수 있다. database/migrations/001_pre_data_platform.sql은 추가 정의만 제공한다. 자동 적용하지 않으며 기존 DB를 reset/drop/delete하지 않는다. 전용 jungsi_backend 스키마의 사용자/이용권/리포트 접근은 서버 역할과 SQL owner 조건으로 제한하고 anon/authenticated 직접 접근은 허용하지 않는다. schema_versions와 실제 11개 timestamptz/date 컬럼 형식을 함께 확인한다. 002_forecast_policy.sql은예상기준관리의추가테이블/권한/불변revision과발행저장계약이다. 현재readiness는NOT_RUN이며실제적용·권한·동시성·멱등·게시검증이전에는운영준비완료로표시하지않는다. 원자료·성적·입결·환산표·곡선·모델·덤프·접속 비밀값은 여기에 복사하지 않는다.
 
@@ -78,4 +78,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=e8648551f885519407d76db5b9a95a6eec88db7b577fdb2eba26052c682ee130 -->
+<!-- jungsi:generated spec_sha256=0d227840fb71005d5eed7031abf4780e667fd382c4fdc69cf7e46554ebf1f6ce -->

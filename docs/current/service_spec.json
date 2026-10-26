@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.120",
+  "version": "1.9.121",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7624,7 +7624,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.120",
+        "contract_version": "1.9.121",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7798,7 +7798,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.120",
+        "contract_version": "1.9.121",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -7964,7 +7964,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.120",
+        "contract_version": "1.9.121",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -7983,7 +7983,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.120",
+        "contract_version": "1.9.121",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8008,7 +8008,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.120",
+        "contract_version": "1.9.121",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8033,7 +8033,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.120",
+        "contract_version": "1.9.121",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -21554,6 +21554,25 @@
         "REQ-27"
       ],
       "summary": "SCORE-INPUT-TRANSITION-EXPLICIT-REFRESH-01: score_input_transition_pending은 자료 계산 전 승인 rollout·기존 성적 보존 연결 가드이며 DB 자료 업로드와 별도로 전환한다. P3 현재 범위(최대100개)와 P4 후보를 사용자가 명시적으로 다시 확인하는 서버 서비스/버튼을 추가한다. 기본 missing-only·저장된 ready/pending 재사용과 GET 자동 분석 금지는 유지하고, 명시 refresh는 성적 재저장·입력권 소비 없이 같은 profile을 기존 university.analyze/candidates.build로 보낸다. UUID intent·원래 report/profile/revision·정규화 본문에 요청 키를 결속하고 한 번의409 재조회 후에도 다른 성적으로 대상을 바꾸지 않으며 두 번째 충돌은 실패로 보존한다. 새 승인 자료 문맥의 재계산과 동일 문맥 no-op·정확 과거 key 재응답을 구분하며 DB 업로드만으로 문맥이 바뀌었다고 간주하지 않는다. 503은 Result/예외/전체 연결 안내에서 같은 성적 보존 문구로 표시하고 미확정 개방일이나 즉시 재시도를 약속하지 않는다. 현재 Owner 선택·native 접근 근거·append-only 전환·실제 운영 검수는 별도 미완료이며 기존 member JSON 관심대학의 공개 후 HOLD는 그대로다. 신규 API/DB/권한/본문 필드·운영 배포를 추가하지 않고 source·기획·라우팅·정상 훅·정확 SHA CI를 결속한다."
+    },
+    {
+      "date": "2026-10-26",
+      "version": "1.9.121",
+      "requirements": [
+        "REQ-02",
+        "REQ-03",
+        "REQ-04",
+        "REQ-05",
+        "REQ-11",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "summary": "SCORE-TRANSITION-OWNER-PR66-ACCEPTANCE-01: Owner의 PR66 정확 source41ff51c8·Worker88867a15·10:35:42KST 배포 회신을 기존 source/merge CI와 결속했다. 12:24:37KST 실제 append-only 전환과 별도 커밋 후 재조회·Root 본인 입력권/P3 명시 분석·재확인/P4 후보·재확인 및 기존 원본/입력 사용량 보존 근거를 날짜별 scoped 운영 영수증으로 등록한다. 전환 전 pending·초기 빈 schema·source 후보의 NOT_RUN은 이력으로 보존하고 현재 범위와 구분한다. 기존 Source118 backend·동결 원장·모든22 native/보안 gate와 별도 member/기관/자료 활성화 경계는 유지한다. 신규 API/코드/DB/Secrets/권한/한도 변경이나 전환 재실행·성적 재저장·재배포는 없다. Owner 별도 계정 담기·인쇄·과거 리포트 수신은 별도 미관측이다."
     }
   ],
   "overall_analysis_contract": {
@@ -32365,8 +32384,10 @@
             "OPS-005-NATIVE-READBACK-20261015",
             "OPS-BUDGET-NATIVE-20261015",
             "OPS-P2-ADMIN-SESSION-FIX-OWNER-BEFORE-20261016",
-            "OPS-P2-ADMIN-SESSION-FIX-OWNER-AFTER-20261016"
-          ]
+            "OPS-P2-ADMIN-SESSION-FIX-OWNER-AFTER-20261016",
+            "OPS-SCORE-TRANSITION-DB-20261026"
+          ],
+          "scoped_score_transition_receipt_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026"
         },
         "existing_plan_and_quotas": {
           "label": "기존 요금제·포함량·Spend Cap·승인된 원자적 예산",
@@ -32414,9 +32435,11 @@
             "OPS-P2-ADMIN-SESSION-FIX-RELOAD-UI-20261016",
             "OPS-P2-ADMIN-SESSION-FIX-SUBJECT-DISPLAY-20261016",
             "OPS-OWNER-P1-P2-V3-20261020",
-            "OPS-OWNER-NATIONWIDE-BROWSER-20261022"
+            "OPS-OWNER-NATIONWIDE-BROWSER-20261022",
+            "OPS-SCORE-TRANSITION-ROOT-20261026"
           ],
-          "crawler_scoped_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023"
+          "crawler_scoped_receipt_ref": "supabase_deployment_contract.live_execution.latest_frontend_crawler_receipt_20261023",
+          "scoped_score_transition_receipt_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026"
         },
         "security_gates": {
           "label": "응답·직접 권한·수집 방지 세 보안 gate",
@@ -32603,14 +32626,16 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": [],
+          "evidence_ids": [
+            "OPS-SCORE-TRANSITION-ROOT-20261026"
+          ],
           "current_owner_receipt": {
-            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "evidence_id": "OPS-SCORE-TRANSITION-ROOT-20261026",
             "code_in_installed14_scope": true,
-            "source_deployment": "OWNER_V19_SOURCE118_ROOT_FULL_SOURCE_HASH_MATCH_NOT_ALL_OPERATION_ACCEPTANCE",
-            "new_BFF_observation": "ROOT_OWN_EXISTING_REPORT_READ_AND_ESTIMATED_OVERALL_PERCENTILE_VISIBLE_WITHOUT_NEW_SAVE",
-            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
-            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
+            "source_deployment": "EXISTING_SOURCE118_BACKEND_UNCHANGED_OWNER_PR66_FRONTEND_RECEIPT_BOUND",
+            "new_BFF_observation": "ROOT_CURRENT_OWN_REPORT_AND_OWN_LIST_RENDERED_OLD_REVISIONS_PRESERVED",
+            "formal_native_and_operating_acceptance": "SCOPED_ACTUAL_BROWSER_AND_STORED_RESULT_PASS_FULL_NATIVE_SECURITY_CASES_NOT_RUN",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026"
           },
           "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
@@ -32626,6 +32651,14 @@
             "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_before_transition_20261026": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_V19_SOURCE118_ROOT_FULL_SOURCE_HASH_MATCH_NOT_ALL_OPERATION_ACCEPTANCE",
+            "new_BFF_observation": "ROOT_OWN_EXISTING_REPORT_READ_AND_ESTIMATED_OVERALL_PERCENTILE_VISIBLE_WITHOUT_NEW_SAVE",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
           }
         },
         "offerings.search": {
@@ -32717,7 +32750,9 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": [],
+          "evidence_ids": [
+            "OPS-SCORE-TRANSITION-ROOT-20261026"
+          ],
           "payload_scope_candidate": {
             "mode": "university_only",
             "source_spec_version": "1.9.90",
@@ -32725,12 +32760,12 @@
             "deployment": "NOT_RUN"
           },
           "current_owner_receipt": {
-            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "evidence_id": "OPS-SCORE-TRANSITION-ROOT-20261026",
             "code_in_installed14_scope": true,
-            "source_deployment": "OWNER_V19_SOURCE118_ROOT_FULL_SOURCE_HASH_MATCH_NOT_ALL_OPERATION_ACCEPTANCE",
-            "new_BFF_observation": "ROOT_PAGE_BUSINESS_UNAVAILABLE; existing logs separately show score_input_transition_pending, exact approved transition diagnosis pending",
-            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
-            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
+            "source_deployment": "EXISTING_SOURCE118_BACKEND_UNCHANGED_OWNER_PR66_FRONTEND_RECEIPT_BOUND",
+            "new_BFF_observation": "ROOT_EXPLICIT_ONE_TARGET_ANALYSIS_AND_REFRESH_PASS_SAVED_RESULT_READBACK_INPUT_ATTEMPTS_UNCHANGED",
+            "formal_native_and_operating_acceptance": "SCOPED_ACTUAL_BROWSER_AND_STORED_RESULT_PASS_FULL_NATIVE_SECURITY_CASES_NOT_RUN",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026"
           },
           "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
@@ -32746,6 +32781,14 @@
             "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_before_transition_20261026": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_V19_SOURCE118_ROOT_FULL_SOURCE_HASH_MATCH_NOT_ALL_OPERATION_ACCEPTANCE",
+            "new_BFF_observation": "ROOT_PAGE_BUSINESS_UNAVAILABLE; existing logs separately show score_input_transition_pending, exact approved transition diagnosis pending",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
           }
         },
         "candidates.build": {
@@ -32761,7 +32804,9 @@
             "scope": "source_registered_runtime_entry_assembled_native_deployment_NOT_RUN",
             "runtime_assembly_ref": "supabase_deployment_contract.live_execution.runtime_assembly"
           },
-          "evidence_ids": [],
+          "evidence_ids": [
+            "OPS-SCORE-TRANSITION-ROOT-20261026"
+          ],
           "payload_scope_candidate": {
             "mode": "university_only",
             "source_spec_version": "1.9.90",
@@ -32769,12 +32814,12 @@
             "deployment": "NOT_RUN"
           },
           "current_owner_receipt": {
-            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "evidence_id": "OPS-SCORE-TRANSITION-ROOT-20261026",
             "code_in_installed14_scope": true,
-            "source_deployment": "OWNER_V19_SOURCE118_ROOT_FULL_SOURCE_HASH_MATCH_NOT_ALL_OPERATION_ACCEPTANCE",
-            "new_BFF_observation": "ROOT_PAGE_BUSINESS_UNAVAILABLE; existing logs separately show score_input_transition_pending, exact approved transition diagnosis pending",
-            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
-            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
+            "source_deployment": "EXISTING_SOURCE118_BACKEND_UNCHANGED_OWNER_PR66_FRONTEND_RECEIPT_BOUND",
+            "new_BFF_observation": "ROOT_EXPLICIT_BUILD_AND_REFRESH_PASS_DATA_PENDING_PRESERVED_SAVED_RESULT_READBACK_INPUT_ATTEMPTS_UNCHANGED",
+            "formal_native_and_operating_acceptance": "SCOPED_ACTUAL_BROWSER_AND_STORED_RESULT_PASS_FULL_NATIVE_SECURITY_CASES_NOT_RUN",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026"
           },
           "historical_owner_receipt_20261020": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
@@ -32790,6 +32835,14 @@
             "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
+          },
+          "historical_owner_receipt_before_transition_20261026": {
+            "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+            "code_in_installed14_scope": true,
+            "source_deployment": "OWNER_V19_SOURCE118_ROOT_FULL_SOURCE_HASH_MATCH_NOT_ALL_OPERATION_ACCEPTANCE",
+            "new_BFF_observation": "ROOT_PAGE_BUSINESS_UNAVAILABLE; existing logs separately show score_input_transition_pending, exact approved transition diagnosis pending",
+            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
           }
         },
         "shortlist.update": {
@@ -33741,9 +33794,38 @@
           "operations": [],
           "scope": "Owner-reported baseline seq1 deployment/admin preparation and read-only page regression; Root indexed head/target P1 readback only. New seq2, full native22 and security not certified.",
           "does_not_imply_operation_acceptance": true
+        },
+        "OPS-OWNER-PR66-20261026": {
+          "kind": "bff_browser",
+          "candidate_commit": "41ff51c8dfbc328397deac4ec759c8b7abf2d808",
+          "receipt_sha256": "2ba934ab1a8b9eceba87a2eb3a6f4ca292d32dd4be00ad00fe03da049e7f7779",
+          "operations": [],
+          "scope": "Owner-reported existing Cloudflare Worker source/version/time; bound to exact CI and later Root scoped browser acceptance. Not a new backend deployment or independent full bundle readback.",
+          "does_not_imply_operation_acceptance": true
+        },
+        "OPS-SCORE-TRANSITION-ROOT-20261026": {
+          "kind": "bff_browser",
+          "candidate_commit": "41ff51c8dfbc328397deac4ec759c8b7abf2d808",
+          "receipt_sha256": "a9cb9abdf74cda6c4e6dbcf1403c8e2e40ef351d6d8c871229efd71195d364fc",
+          "operations": [
+            "report.read",
+            "university.analyze",
+            "candidates.build"
+          ],
+          "scope": "Actual Root verified-session current-account input status, explicit one-offering analysis/refresh, candidate build/refresh and separate stored-result/input-usage readback. Full native API, cross-account and security cases remain separate.",
+          "does_not_imply_operation_acceptance": false,
+          "scope_limit": "Listed browser business flow only; no new score save or correction consumption"
+        },
+        "OPS-SCORE-TRANSITION-DB-20261026": {
+          "kind": "sql",
+          "candidate_commit": "23833fe5a419f5a57ca4b474c4c5a56c7ef3567e",
+          "receipt_sha256": "c2729fc2d2fb355a4d36e3a50647adb0dee26cca9440239ac576e11709ffb168",
+          "operations": [],
+          "scope": "Authorized append-only legacy adoption committed once; exact registration and preserved original values verified in-transaction and separate read-only post-commit. No source/role/RLS/Secrets changes or all-API promotion.",
+          "does_not_imply_operation_acceptance": true
         }
       },
-      "rule": "2026-10-24 current installed scoped evidence follows effective_current_runtime_ref (Source118/Owner v19/seq2). Earlier v17 and frozen current_* records are retained history. Current P1 publication, qualified-field browser evidence, old-report read, input-right transition, new 2027 metadata and all22/security acceptance are distinct. 2026-10-22 현재 설치와 기존 전국 P1 전환은 effective_current_runtime_ref의 날짜별 Owner 영수증을 따른다. 아래 source032 등 날짜별 상태와 동결 current_* 객체는 당시의 보존된 회귀 기준이며 현재 v17을 덮어쓰는 기준이 아니다. 새 통계 seq2는 기존 전환 완료와 분리하며 미발행이다. 동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다. 최신 설치는 current_deployment의 ed978 실제 영수증을 따르며 cb500 actual_editor_deployment는 당시 이력이다. current_P2_attempt는 새 실제 시도이고 회신 당시 두 실패는 P2_attempt_history에서 원래 배포·unknown 상태로 보존한다. 소스·준비상태 PASS, 제한된 로그 상관관계, 범위조회 snapshot, UI 업무 인수는 분리한다. 2026-10-21 재개는 owner_registration_20261021을 따른다. 기본 배포 대상은 기존 Supabase이며 P1 조정 메타데이터 DO만 한정 예외다. 최종 Secrets는 화면 담당 Owner가 등록한다. 정확 코드/정책/바인딩/객체 closure·기존 성적 보존 전환·006a 복귀 준비 후 같은 전환 구간에 적용하며, 실제 JWT/OTP/BFF·비용 검수 전 완료로 표시하지 않는다.",
+      "rule": "2026-10-26: current frontend deployment follows effective_current_frontend_deployment_ref; scoped actual input transition and Root browser recovery follow effective_current_score_transition_ref. effective_current_runtime_ref remains the exact unchanged Source118 backend installation. Earlier transition_pending observations are pre-adoption history; full native/security acceptance remains separate. 2026-10-24 current installed scoped evidence follows effective_current_runtime_ref (Source118/Owner v19/seq2). Earlier v17 and frozen current_* records are retained history. Current P1 publication, qualified-field browser evidence, old-report read, input-right transition, new 2027 metadata and all22/security acceptance are distinct. 2026-10-22 현재 설치와 기존 전국 P1 전환은 effective_current_runtime_ref의 날짜별 Owner 영수증을 따른다. 아래 source032 등 날짜별 상태와 동결 current_* 객체는 당시의 보존된 회귀 기준이며 현재 v17을 덮어쓰는 기준이 아니다. 새 통계 seq2는 기존 전환 완료와 분리하며 미발행이다. 동일 operation의 구현은 등록된 Edge 파일·SHA에 연결한다. 실제 검수·배포 PASS는 해당 후보 커밋과 비공개 영수증 SHA 및 검사 범위에 결속한다. 검증한 공통 명세에서 기획·라우팅·3티어·배포 문서를 함께 생성한다. 다음 에이전트는 최신 근거 이후의 Git 차이부터 확인한다. 최초 synthetic 화면 검수는 과거 이력이다. 현재 정상 /jeongsi의 Worker relay·live·실제 Bearer 세션 기능 통과는 2026-10-16 화면팀 보고로 수용한다. 보고된 부분 관측과 업무22 API·소유권/CSRF·배포 인수는 구분한다. 새 오류 분류를 포함한 고정 cb500f7/동일 tree develop1ba331c 번들을 기존 함수에 실제 배포하고 editor 전체 재조회를 확인했다. 새 코드 준비 health·거절 경계는 별도 실제 영수증으로 확인했다. 같은 BFF의 안전 오류 코드 표시만 부분 관측했으며 실제 HTTP·관리 aal2·업무 인수는 미완료다. P2 단일 제출 실패는 current_P2_attempt로 구분하고 성공으로 세지 않는다. 배포 영수증의 소스·tree·번들 해시를 결속하며 소스 배포를 검색 활성화나 operation별 배포 인수로 승격하지 않는다. 정상 Edge 소스 시험은 선택된 Git 스냅샷에서 operation의 등록 소스·해시 범위를 따로 기록한다. CODE_REGISTERED/PARTIAL_CODE_REGISTERED는 실제 JWT·DB 업무·Edge 배포 인수가 아니다. native_acceptance=NOT_VERIFIED_BY_SOURCE_SUITE와 해당 시험의 production_ready=false·운영 쓰기0을 유지한다. 후속 화면팀 P2 회신의 이전 Root 시도·새 Worker 배포 보고·별도 가상1건 실패를 frontend_P2_reply와 current_P2_attempt로 분리한다. source SHA 미제공·미푸시 Worker를 remote59f에 결속하지 않고 실패 HTTP·DB쓰기를 추정하지 않는다. 후속 관리자 UI 진입은 JWT·aal2 추적 인수와 분리한다. 최신 설치는 current_deployment의 ed978 실제 영수증을 따르며 cb500 actual_editor_deployment는 당시 이력이다. current_P2_attempt는 새 실제 시도이고 회신 당시 두 실패는 P2_attempt_history에서 원래 배포·unknown 상태로 보존한다. 소스·준비상태 PASS, 제한된 로그 상관관계, 범위조회 snapshot, UI 업무 인수는 분리한다. 2026-10-21 재개는 owner_registration_20261021을 따른다. 기본 배포 대상은 기존 Supabase이며 P1 조정 메타데이터 DO만 한정 예외다. 최종 Secrets는 화면 담당 Owner가 등록한다. 정확 코드/정책/바인딩/객체 closure·기존 성적 보존 전환·006a 복귀 준비 후 같은 전환 구간에 적용하며, 실제 JWT/OTP/BFF·비용 검수 전 완료로 표시하지 않는다.",
       "position_graph": {
         "formula_rows": [
           [
@@ -35919,7 +36001,84 @@
           "bytes": 966,
           "sha256": "5401a4dbeb68d7f4c99cd2436e2d39dea5f8ca477731b13a5e676036a0f8cde4"
         }
-      }
+      },
+      "latest_frontend_deployment_20261026": {
+        "format": "jungsi.owner-frontend-deployment-receipt/v1",
+        "evidence_id": "OPS-OWNER-PR66-20261026",
+        "status": "OWNER_REPORT_ACCEPTED_SOURCE_CI_AND_ROOT_POST_ADOPTION_BROWSER_SCOPE_BOUND",
+        "date_KST": "2026-10-26",
+        "source_commit": "41ff51c8dfbc328397deac4ec759c8b7abf2d808",
+        "accepted_develop_commit": "23833fe5a419f5a57ca4b474c4c5a56c7ef3567e",
+        "worker_name": "jeongsi-touch",
+        "worker_version": "88867a15-049a-4728-908a-76612646f295",
+        "traffic_percent_Owner_reported": 100,
+        "deployed_at_UTC": "2026-10-26T01:35:42+00:00",
+        "Owner_report": {
+          "bytes": 3221,
+          "sha256": "2ba934ab1a8b9eceba87a2eb3a6f4ca292d32dd4be00ad00fe03da049e7f7779"
+        },
+        "Root_intake": {
+          "bytes": 4255,
+          "sha256": "38458da77f8258779ef2bc9dd1d1674f51e79b6b5ed7ae27e981490881b39150"
+        },
+        "source_CI": {
+          "run_id": 40250683660,
+          "conclusion": "success",
+          "receipt": {
+            "bytes": 1865,
+            "sha256": "bbf72b2d56817d1a643c3933c584f05396769197951edec2093563535a35ac11"
+          }
+        },
+        "merge_CI": {
+          "run_id": 40251714311,
+          "conclusion": "success",
+          "receipt": {
+            "bytes": 1866,
+            "sha256": "47d1f9fe0333051e30adc3727c4226535e643a5eb19d1fcc78523ade3204d390"
+          }
+        },
+        "pre_adoption_pending": "Retain Owner observation before the actual adoption; Root post-adoption scoped acceptance is separate and later",
+        "independent_Cloudflare_full_bundle_readback": "NOT_RUN_OWNER_REPORTED_METADATA_ONLY",
+        "backend_source_and_binding": "Existing Source118 installation unchanged; use effective_current_runtime_ref for the preserved actual backend source",
+        "additional_deployment_or_Secrets_required_by_this_receipt": false
+      },
+      "effective_current_frontend_deployment_ref": "supabase_deployment_contract.live_execution.latest_frontend_deployment_20261026",
+      "latest_score_transition_acceptance_20261026": {
+        "format": "jungsi.actual-score-transition-scoped-acceptance/v1",
+        "evidence_id": "OPS-SCORE-TRANSITION-ROOT-20261026",
+        "status": "ACTUAL_APPEND_ONLY_ADOPTION_AND_ROOT_BROWSER_SCOPE_ACCEPTED_OWNER_PR66_DEPLOYMENT_RECEIPT_BOUND",
+        "date_KST": "2026-10-26",
+        "scope": "Existing approved September mock stage only; account-holder chosen current profile, original profiles/reports/revisions and input usage preserved",
+        "adoption_committed_at_UTC": "2026-10-26T03:24:37.972314+00:00",
+        "actual_adoption_receipt": {
+          "bytes": 12062,
+          "sha256": "c2729fc2d2fb355a4d36e3a50647adb0dee26cca9440239ac576e11709ffb168"
+        },
+        "post_browser_DB_receipt": {
+          "bytes": 4319,
+          "sha256": "f4b0a32cac50d7f14636a87c8ff80e6db971cfbcbaa9956b7f9149ea0d599ed4"
+        },
+        "Root_browser_result": {
+          "bytes": 5890,
+          "sha256": "a9cb9abdf74cda6c4e6dbcf1403c8e2e40ef351d6d8c871229efd71195d364fc"
+        },
+        "frontend_deployment_ref": "supabase_deployment_contract.live_execution.latest_frontend_deployment_20261026",
+        "actual_policy_write_scope": "Existing approved append-only adoption only; no profile/report rewrite, deletion, rights reset, role/RLS/Secrets or data source changes",
+        "P2": "Existing current report and own-report list render; actual input status reports preserved initial usage and remaining correction eligibility without transition_pending",
+        "P3": "One target offering explicit analysis and explicit recheck completed; converted score rendered and actual stored report revision verified",
+        "P4": "Explicit candidate build and recheck completed; missing approved data remains offering_analysis_pending, not a zero/ready substitute",
+        "reuse_and_usage": "Actual post-browser readback preserved original data and prior revisions, unchanged input states/attempts/links; only explicit analysis/candidate revisions added",
+        "HTTP_response_capture": "NOT_RUN_THIS_SCOPED_BROWSER_RECEIPT; rendered business state and stored result metadata were verified",
+        "fresh_first_save_and_correction_consumption": "NOT_RUN_EXISTING_RIGHTS_PRESERVED",
+        "Owner_other_account_post_adoption_acceptance": "NOT_RUN_PENDING_SEPARATE_OWNER_RECEIPT",
+        "shortlist_and_physical_print_acceptance": "NOT_RUN_SEPARATE_SCOPE",
+        "all_native_operations_accepted": false,
+        "all_security_gates_passed": false,
+        "production_ready": false,
+        "no_registration_replay": "Already committed; do not repeat adoption SQL or new score save to refresh results",
+        "frozen_source_candidate_rule": "The original candidate activation/migration-preparation fields are retained historical source evidence; this scoped dated receipt is current only for the listed actual operations"
+      },
+      "effective_current_score_transition_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026"
     }
   },
   "history_presentation_contract": {
@@ -174589,7 +174748,7 @@
     "activation_status": "NOT_RUN",
     "actual_migration_status": "APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED",
     "actual_new_policy_requests": "NOT_RUN",
-    "source_scope": "서비스 API/DTO·애플리케이션·저장소·준비 SQL·검증. 화면 구현은 화면팀 담당이다.",
+    "source_scope": "기존 소스 후보 검수 기록을 아래에 보존한다. 현재 승인된 모의평가 범위의 실제 전환·본인 입력권·명시 분석/후보 흐름은 2026-10-26 날짜별 supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026를 따른다. 후보 기록의 NOT_RUN을 현재 전환 미완료로 다시 해석하거나 전체 API/보안 인수 완료로 확대하지 않는다. 서비스 API/DTO·애플리케이션·저장소·준비 SQL·검증. 화면 구현은 화면팀 담당이다.",
     "runtime_matrix": {
       "native_edge": "서비스 구현 후보; 새 승인 usage-policy/v2·006·전환·범위/비용/배포 검수 전 개인 입력 503 hold; 별도 binding/v3 소비20과 usage-policy/v4는 기존 입력권+관리자 일일예외를 함께 검증하는 소스 후보이며 006/006a/기존profile 전환/실제 운영 활성화는 NOT_RUN.",
       "python_fastapi": "REQ-27 입력권/정정/첫사용 미구현. 운영 경로는 개인 새 입력/분석 및 신규 API를 503 hold; legacy_synthetic 검증은 명시적 모드로 분리한다."
@@ -175082,7 +175241,7 @@
     "current_transition_followup": {
       "change_id": "SCORE-INPUT-TRANSITION-EXPLICIT-REFRESH-01",
       "date": "2026-10-26",
-      "status": "SOURCE_PREPARATION_OPERATING_TRANSITION_NOT_ACTIVATED",
+      "status": "SCOPED_ACTUAL_ADOPTION_AND_ROOT_BROWSER_ACCEPTED_OWNER_PR66_DEPLOYMENT_RECEIPT_BOUND",
       "guard_meaning": "score_input_transition_pending is a pre-computation policy/legacy-preservation integrity gate. A data upload does not validate a rollout or create profile-to-input-right links.",
       "guarded_operations": [
         "score-profile.create",
@@ -175140,23 +175299,37 @@
         "notice": "성적 입력 정책 전환을 준비하고 있습니다. 저장된 성적과 리포트는 유지되며, 같은 성적을 다시 입력할 필요가 없습니다. 준비가 끝나면 이 화면에서 안내합니다.",
         "all_paths": "Both Result failures and ConnectionError presentation retain this preservation meaning; do not advise immediate retry, invent an opening date, or convert503 into0 remaining/ready."
       },
-      "opening_target": "Prepare input-policy readiness before the planned public opening. Actual opening time requires appointed Owner application/readback and exact-runtime acceptance; planned data completion is not a release receipt.",
+      "opening_target": "Existing approved current mock stage transition is applied on2026-10-26. No10-30 start-date gate was added. Future exam windows and new approved data graphs remain separate exact activations.",
       "independent_deferral": "The post-opening member JSON shortlist activation remains a separate HOLD. It does not delay the existing score-input policy transition or require a new member binding for this work.",
       "operating_state": {
-        "DB_readonly_preflight": "SCOPED_SOURCE_TUPLE_AND_PRESERVATION_READBACK",
-        "new_rollout_or_rights_writes": "NOT_RUN",
-        "Storage_Secrets_deployment": "NOT_RUN",
-        "authenticated_frontdoor_acceptance": "NOT_RUN"
+        "DB_readonly_preflight": "REUSED_EXACT_PRE_ADOPTION_PRESERVATION_EVIDENCE",
+        "new_rollout_or_rights_writes": "COMMITTED_APPROVED_APPEND_ONLY_ADOPTION_SEPARATE_POST_COMMIT_READBACK_PASS",
+        "Storage_Secrets_deployment": "NO_NEW_CHANGES_FOR_ADOPTION_OWNER_PR66_FRONTEND_REPORT_ACCEPTED",
+        "authenticated_frontdoor_acceptance": "SCOPED_CURRENT_ACCOUNT_INPUT_STATUS_P3_ANALYSIS_AND_P4_CANDIDATE_REFRESH_PASS",
+        "evidence_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026",
+        "new_score_save": "NOT_RUN_NO_INPUT_CREDIT_RESET"
       },
-      "evidence_policy": "Private exact source/test/native readback receipts record scope and hashes. Do not place account IDs, scores, native evidence, operational limit values, credentials or private locators in public planning/code."
-    }
+      "evidence_policy": "Private exact source/test/native readback receipts record scope and hashes. Do not place account IDs, scores, native evidence, operational limit values, credentials or private locators in public planning/code.",
+      "history_before_actual_adoption_20261026": {
+        "status": "SOURCE_PREPARATION_OPERATING_TRANSITION_NOT_ACTIVATED",
+        "opening_target": "Prepare input-policy readiness before the planned public opening. Actual opening time requires appointed Owner application/readback and exact-runtime acceptance; planned data completion is not a release receipt.",
+        "operating_state": {
+          "DB_readonly_preflight": "SCOPED_SOURCE_TUPLE_AND_PRESERVATION_READBACK",
+          "new_rollout_or_rights_writes": "NOT_RUN",
+          "Storage_Secrets_deployment": "NOT_RUN",
+          "authenticated_frontdoor_acceptance": "NOT_RUN"
+        }
+      }
+    },
+    "current_operating_receipt_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026",
+    "source_candidate_status_rule": "activation_status, actual_new_policy_requests and the initial empty-schema evidence are frozen source-candidate records. Do not use them as the current operational state of the scoped dated acceptance; do not promote full native/security acceptance from the new receipt."
   },
   "service_runtime_followup": {
     "format": "jungsi.service-runtime-followup/v1",
-    "status": "RECOVERY_READINESS_VERIFIED_REPORT_OWNER_REPORTED",
+    "status": "SCOPED_SCORE_TRANSITION_RECOVERY_ACCEPTED_OWNER_FRONTEND_RECEIPT_BOUND",
     "operation": "report.read",
-    "scope": "기존 운영 조회의 구성 복구 보고 및 독립 준비 확인을 수신했다. 실제 저장 결과 재조회 성공은 Owner의 외부 증거이며 별도 요청을 재실행한 검수와 구분한다. 상세 운영 근거는 비공개 영수증에 보존한다.",
-    "new_policy_relation": "새 정책 후보의 배포·활성화와 분리한다. 이전 성공 증거는 보존한다.",
+    "scope": "2026-10-26 실제 append-only 전환·커밋 후 재조회와 본인 계정 P2 입력권/P3 명시 분석·재확인/P4 후보·재확인이 통과했다. 원점수·원래 리포트 이력·입력 사용량을 보존했다.",
+    "new_policy_relation": "기존 승인된 모의평가 범위에 한한다. 전환 전 score_input_transition_pending은 이력이며, 새 성적 저장·정정권 소비·Owner 별도 계정의 담기/인쇄 검수·미발행 대학별 자료·전체 보안 인수는 별도다.",
     "new_policy_deployed": false,
     "data_replay_or_resave": false,
     "recovery_accepted": false,
@@ -175170,9 +175343,15 @@
         "scope": "외부 복구 보고 수신과 독립 검수 대기 상태를 보존한다."
       }
     ],
-    "recovery_verification_status": "READINESS_VERIFIED_REPORT_READ_EXTERNAL_EVIDENCE",
+    "recovery_verification_status": "SCOPED_ACTUAL_DB_AND_ROOT_BROWSER_PASS; supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026",
     "readiness_verified": true,
-    "report_read_owner_reported": true
+    "report_read_owner_reported": true,
+    "historical_before_score_transition_20261026": {
+      "status": "RECOVERY_READINESS_VERIFIED_REPORT_OWNER_REPORTED",
+      "scope": "기존 운영 조회의 구성 복구 보고 및 독립 준비 확인을 수신했다. 실제 저장 결과 재조회 성공은 Owner의 외부 증거이며 별도 요청을 재실행한 검수와 구분한다. 상세 운영 근거는 비공개 영수증에 보존한다.",
+      "new_policy_relation": "새 정책 후보의 배포·활성화와 분리한다. 이전 성공 증거는 보존한다.",
+      "recovery_verification_status": "READINESS_VERIFIED_REPORT_READ_EXTERNAL_EVIDENCE"
+    }
   },
   "service_performance_contract": {
     "format": "jungsi.service-performance/v1",
