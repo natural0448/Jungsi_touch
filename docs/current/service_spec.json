@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.123",
+  "version": "1.9.124",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7662,7 +7662,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.123",
+        "contract_version": "1.9.124",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7836,7 +7836,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.123",
+        "contract_version": "1.9.124",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8002,7 +8002,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.123",
+        "contract_version": "1.9.124",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8021,7 +8021,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.123",
+        "contract_version": "1.9.124",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8046,7 +8046,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.123",
+        "contract_version": "1.9.124",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8071,7 +8071,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.123",
+        "contract_version": "1.9.124",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -17190,7 +17190,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "9f9e3a11b9bffe2efb75f507f388edad0f5dbcd617a2a4a85d2524a693285d54",
+              "source_sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f",
               "declared_exports": [
                 "NativeDataProvider",
                 "NativeForecastInputs",
@@ -21669,6 +21669,19 @@
         "REQ-26"
       ],
       "summary": "P1-HISTORICAL-REFERENCE-01: 과거 입결의 원관측별 추정상위누백을 별도 행 목록으로 공급한다. 원문 값·소수/정수 토큰·컷 선택·검수 보류·기존 q는 보존하고 같은 CID만 선택 컷에 연결한다. 동일 manifest/source/scope에 결속된 독립 review만 새 필드를 허용하며 오염·중복·다른 릴리스·개인 순위/운영 승인 승격은 거절한다. 신규 합성13·관련68 및 별도 로컬 후보 전 부품의 일반/유료 필터·gzip 재사용 검증 PASS. 실제 DB/Storage 실행·Secrets 변경·배포·활성화와 개인 수학참고 산식 실행은 NOT_RUN이다."
+    },
+    {
+      "date": "2026-10-27",
+      "version": "1.9.124",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "POST-SAVE-503-01: 선택된 불변 자료의 전체 preflight를 기존 배타적 읽기 구간으로 감싸 반복 head 조회를 줄인다. 기존 operation별 본문 검증과 명시 상태 확인·만료·오류 후 복구·저장 전후/응답 직전 fresh 확인은 유지한다. 배포본의 분석 루프에는 이미 등록된 TS batch 포트 경계를 한정 이식하는 별도 후보를 준비한다. 읽기/바이트/시간 상한·공유 예산·Secrets·DB 결과 캐시는 바꾸지 않는다. 신규 경계 회귀3·공급자/실제 context39 시험 내 신규 경계 사례3 PASS이며 실제 저장 결과·이력은 보존한다. 정상 전체 훅·정확 SHA CI는 진행하며 운영 요청 재실행·DB/Storage 실행·배포는 NOT_RUN이다."
     }
   ],
   "overall_analysis_contract": {
@@ -21912,7 +21925,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-            "sha256": "9f9e3a11b9bffe2efb75f507f388edad0f5dbcd617a2a4a85d2524a693285d54"
+            "sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
@@ -24299,7 +24312,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-            "sha256": "9f9e3a11b9bffe2efb75f507f388edad0f5dbcd617a2a4a85d2524a693285d54"
+            "sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
@@ -32973,7 +32986,8 @@
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
           },
-          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026"
+          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026",
+          "post_save_503_followup_ref": "supabase_deployment_contract.live_execution.post_save_503_repair_20261027"
         },
         "candidates.build": {
           "code": "PORTED",
@@ -33067,7 +33081,8 @@
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
           },
-          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026"
+          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026",
+          "post_save_503_followup_ref": "supabase_deployment_contract.live_execution.post_save_503_repair_20261027"
         },
         "report.export": {
           "code": "PORTED",
@@ -36301,6 +36316,22 @@
         "deployment": "NOT_RUN_SOURCE_CANDIDATE_ONLY",
         "DB_Storage_Secrets_rights_limits_writes": "NOT_RUN_UNCHANGED",
         "production_ready": false
+      },
+      "post_save_503_repair_20261027": {
+        "status": "SOURCE_SYNTHETIC_CANDIDATE_NOT_DEPLOYED",
+        "basis_commit": "516a9c67d507580c46a97f7b355706d0a2aa3682",
+        "operations": [
+          "university.analyze",
+          "shortlist.update"
+        ],
+        "owner_observation": "Owner reports stored analyses/shortlist changes followed by security_policy_unavailable. Saved work is preserved; no operating POST replay is performed by this development task.",
+        "reproduction": "Pinned compiled deployed components with synthetic controls/index and mocked store reproduce the two reported failure stages. This is scoped component evidence, not a live trace or full HTTP acceptance.",
+        "repair": "Preserve full selected body validation inside a bounded fresh immutable preflight frame, and forward the already registered analysis batch guard in the limited installed-source overlay. Leave read limits and mutable final checks unchanged.",
+        "verification": "Focused provider/context39 tests including 3 new bounded-frame scenarios and private compiled boundary probes; normal full hooks and exact commit CI pending.",
+        "native": "NOT_RUN",
+        "deployment": "NOT_RUN",
+        "frontend": "No UI implementation in the service branch. Owner UI recovery and P1 compatible preparation are separately verified.",
+        "P1": "P1 historical reference read contract stays in its independent merged change; combine source candidates only after the maintenance source is independently accepted."
       }
     }
   },
@@ -113354,7 +113385,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "9f9e3a11b9bffe2efb75f507f388edad0f5dbcd617a2a4a85d2524a693285d54",
+          "source_sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f",
           "symbols": [
             {
               "declarations": [
@@ -113973,6 +114004,37 @@
                       {
                         "functionDef": {
                           "hasBody": true,
+                          "params": [],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeName": "NativeObject",
+                                    "resolution": {
+                                      "kind": "import",
+                                      "specifier": "../domain/json_value.ts",
+                                      "name": "NativeObject"
+                                    }
+                                  },
+                                  "repr": "NativeObject"
+                                }
+                              ]
+                            }
+                          },
+                          "isAsync": true
+                        },
+                        "kind": "method",
+                        "name": "preflightSelected",
+                        "accessibility": "private"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
                           "params": [
                             {
                               "kind": "identifier",
@@ -114029,8 +114091,8 @@
                               "name": "examId",
                               "optional": false,
                               "tsType": {
-                                "kind": "keyword",
                                 "repr": "string",
+                                "kind": "keyword",
                                 "value": "string"
                               }
                             },
@@ -114039,8 +114101,8 @@
                               "name": "packVersion",
                               "optional": false,
                               "tsType": {
-                                "kind": "keyword",
                                 "repr": "string",
+                                "kind": "keyword",
                                 "value": "string"
                               }
                             }
@@ -114135,34 +114197,34 @@
                             }
                           ],
                           "returnType": {
-                            "kind": "typeRef",
                             "repr": "Promise",
+                            "kind": "typeRef",
                             "value": {
-                              "typeName": "Promise",
                               "typeParams": [
                                 {
                                   "kind": "union",
                                   "value": [
                                     {
-                                      "kind": "typeRef",
                                       "repr": "UniversityConversionRelease",
+                                      "kind": "typeRef",
                                       "value": {
+                                        "typeName": "UniversityConversionRelease",
                                         "resolution": {
                                           "kind": "import",
-                                          "name": "UniversityConversionRelease",
-                                          "specifier": "../application/university_scoring.ts"
-                                        },
-                                        "typeName": "UniversityConversionRelease"
+                                          "specifier": "../application/university_scoring.ts",
+                                          "name": "UniversityConversionRelease"
+                                        }
                                       }
                                     },
                                     {
-                                      "kind": "keyword",
                                       "repr": "null",
+                                      "kind": "keyword",
                                       "value": "null"
                                     }
                                   ]
                                 }
-                              ]
+                              ],
+                              "typeName": "Promise"
                             }
                           }
                         },
@@ -114170,7 +114232,6 @@
                         "name": "getConversion"
                       },
                       {
-                        "accessibility": "private",
                         "functionDef": {
                           "hasBody": true,
                           "isAsync": true,
@@ -114188,12 +114249,12 @@
                           ]
                         },
                         "kind": "method",
-                        "name": "referenceGroup"
+                        "name": "referenceGroup",
+                        "accessibility": "private"
                       },
                       {
                         "functionDef": {
                           "hasBody": true,
-                          "isAsync": true,
                           "params": [
                             {
                               "kind": "identifier",
@@ -114236,7 +114297,8 @@
                                 }
                               ]
                             }
-                          }
+                          },
+                          "isAsync": true
                         },
                         "kind": "method",
                         "name": "getReference"
@@ -114292,54 +114354,54 @@
                         "name": "getPercentile"
                       },
                       {
+                        "name": "getAnalysis",
+                        "kind": "method",
                         "functionDef": {
-                          "hasBody": true,
                           "params": [
                             {
                               "kind": "identifier",
                               "name": "offeringId",
                               "optional": false,
                               "tsType": {
-                                "kind": "keyword",
                                 "repr": "string",
+                                "kind": "keyword",
                                 "value": "string"
                               }
                             }
                           ],
                           "returnType": {
-                            "kind": "typeRef",
                             "repr": "Promise",
+                            "kind": "typeRef",
                             "value": {
-                              "typeName": "Promise",
                               "typeParams": [
                                 {
                                   "kind": "union",
                                   "value": [
                                     {
-                                      "kind": "typeRef",
                                       "repr": "NativeOfferingAnalysisRelease",
+                                      "kind": "typeRef",
                                       "value": {
+                                        "typeName": "NativeOfferingAnalysisRelease",
                                         "resolution": {
                                           "kind": "import",
-                                          "name": "NativeOfferingAnalysisRelease",
-                                          "specifier": "../application/offering_analysis.ts"
-                                        },
-                                        "typeName": "NativeOfferingAnalysisRelease"
+                                          "specifier": "../application/offering_analysis.ts",
+                                          "name": "NativeOfferingAnalysisRelease"
+                                        }
                                       }
                                     },
                                     {
-                                      "kind": "keyword",
                                       "repr": "null",
+                                      "kind": "keyword",
                                       "value": "null"
                                     }
                                   ]
                                 }
-                              ]
+                              ],
+                              "typeName": "Promise"
                             }
-                          }
-                        },
-                        "kind": "method",
-                        "name": "getAnalysis"
+                          },
+                          "hasBody": true
+                        }
                       }
                     ],
                     "properties": [
@@ -162403,7 +162465,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "01d66cdf1b12697c50ab8762eb09155c5e19ed72f7e84c8c6e00a9c126568ddf",
+          "source_sha256": "864f79ee0574e7376c4137a9a4f0d580e240224c6b60d2119a93c81b092fa91e",
           "symbols": [
             {
               "declarations": [
@@ -163024,6 +163086,35 @@
                 }
               ],
               "name": "verifyAdditionalUniversityScopeCases"
+            },
+            {
+              "name": "verifyBoundedPreflightCases",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "void",
+                            "kind": "keyword",
+                            "value": "void"
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -177019,7 +177110,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/management_postgres.ts": "a80ccb35c33703d76a765b530a2d9e02d3cd86d9ba72d15cd3db51c481435032",
       "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts": "2724ccaba547730d3fe8249ddea22847698c42007cbb4681606a6811ee3ddae3",
       "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "5dfc7f16f6e9b3d505b00bc4a611826be781131fecb29c79b9d4c526131deb5c",
-      "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "9f9e3a11b9bffe2efb75f507f388edad0f5dbcd617a2a4a85d2524a693285d54",
+      "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f",
       "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "3c9ef09bfa6ba1885545c632621da8eb13d776e311e47066a590df9097e23523",
       "supabase/functions/_shared/jungsi/infrastructure/own_report_cursor.ts": "b2273effe7558e9f27abc5e92c21c2f8d89653e67e30f450a96b12db8219c538",
       "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts": "cd8753d36e9060b36d54d41fe03bf6e92823a6630f6bcd2550c55f7bca24407e",
@@ -177093,7 +177184,7 @@
       "tests/edge/test_member_shortlist.ts": "3319fd673e616d8d83791547d3eb26769cc9d4f1d0ddac0e0655cbde9cb27cd4",
       "tests/edge/test_member_shortlist_http.ts": "693d14dace3af400eb6e9aab6ab48a277c71cfcfa65a185e33de9768f8a14250",
       "tests/edge/test_native_auth.ts": "c6b1781256e4bea7c075ad4c74575f9537013787a09f28fd863ccd4f895ef872",
-      "tests/edge/test_native_data_provider.ts": "01d66cdf1b12697c50ab8762eb09155c5e19ed72f7e84c8c6e00a9c126568ddf",
+      "tests/edge/test_native_data_provider.ts": "864f79ee0574e7376c4137a9a4f0d580e240224c6b60d2119a93c81b092fa91e",
       "tests/edge/test_native_source_selection.ts": "58d06b56856ea32c959a152eabc5ad30fb33cef235e735c97877e13ea7e6ff34",
       "tests/edge/test_native_sql.ts": "1a36c576d0c4b1d7c548ff7bd55c3fbb6837d221fc2a46e2a40a644828561697",
       "tests/edge/test_offering_analysis.ts": "6b725fb51e791c36c614d4c79d7739c2c3f8610c7f168f4d6d74aa0397bc32c0",
@@ -177625,6 +177716,40 @@
       "September_total_model": "NOT_CONNECTED",
       "REQ27_activation": "NOT_RUN",
       "production_ready": false
+    },
+    "immutable_preflight_frame": {
+      "format": "jungsi.immutable-preflight-frame/v1",
+      "status": "SOURCE_SYNTHETIC_VERIFIED_DEPLOYMENT_NOT_RUN",
+      "source": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
+      "basis_commit": "516a9c67d507580c46a97f7b355706d0a2aa3682",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "scope": "Only request-local immutable selected graph decoding. Keep every existing payload, reference metadata, binding and publication validation for the chosen operation mode.",
+      "freshness": "Use the existing exclusive before-and-after scoring frame for preflight. Keep its inner explicit current checks, expiry checks, reset on all exits, provider checks outside the frame and all business/final response freshness checks.",
+      "preserve": [
+        "registry_selection_metadata_and_body_scope",
+        "full_readiness_graph",
+        "no_mutable_control_or_DB_result_cache",
+        "same_request_read_byte_time_limits",
+        "shared_atomic_admission_and_settlement",
+        "relay_JWT_paid_ownership_revision_idempotency",
+        "successful_scores_saved_reports_and_pending_reasons"
+      ],
+      "verification": {
+        "focused_provider_context_tests": 39,
+        "added_regressions": 3,
+        "test_path": "tests/edge/test_native_data_provider.ts",
+        "normal_hooks_exact_SHA_CI": "PENDING",
+        "actual_business_DB_Storage_and_deployment": "NOT_RUN",
+        "new_cases_in_existing_foundation_test": 3
+      },
+      "operating_bundle_rule": "Build the limited maintenance overlay from the exact independently pinned installed source. Reuse the registered TS analysis batch boundary in its runtime port/scoring loop; do not deploy an unrelated full current bundle or treat synthetic components as live HTTP acceptance."
     }
   },
   "catalog_payload_scope_contract": {

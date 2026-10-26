@@ -72403,7 +72403,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "9f9e3a11b9bffe2efb75f507f388edad0f5dbcd617a2a4a85d2524a693285d54",
+        "source_sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f",
         "symbols": [
           {
             "declarations": [
@@ -73018,6 +73018,37 @@
                       },
                       "kind": "method",
                       "name": "preflight"
+                    },
+                    {
+                      "accessibility": "private",
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "NativeObject",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "NativeObject",
+                                    "specifier": "../domain/json_value.ts"
+                                  },
+                                  "typeName": "NativeObject"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "preflightSelected"
                     },
                     {
                       "functionDef": {
@@ -121452,7 +121483,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "01d66cdf1b12697c50ab8762eb09155c5e19ed72f7e84c8c6e00a9c126568ddf",
+        "source_sha256": "864f79ee0574e7376c4137a9a4f0d580e240224c6b60d2119a93c81b092fa91e",
         "symbols": [
           {
             "declarations": [
@@ -122073,6 +122104,35 @@
               }
             ],
             "name": "verifyAdditionalUniversityScopeCases"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyBoundedPreflightCases"
           }
         ]
       },
