@@ -1603,7 +1603,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "8f8cf8283706dd52cb30cf490b3f9636aa977f44fe0e9bb73a781a4d25bcd17e",
+      "source_sha256": "6ee2f539da339ba6ae025d241fb8405b6be4336234ad908b8b4d94741c40c716",
       "symbols": [
         {
           "kind": "function",
@@ -6871,7 +6871,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "d04c0c3fc800a456fcb54c1a4ab72c856552b1c8a007cbab914faf4cc2f4f4f8",
+        "source_sha256": "af1707b0f84b84025e8e6a139fad2c4bec20ed33b8f477ce880fa776456025b0",
         "declared_exports": []
       },
       {
@@ -9334,10 +9334,11 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "abd6cdc1eba62c095f35835201495896b2bacff8151f637261646fabb057ba31",
+        "source_sha256": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
         "declared_exports": [
           "ReadViewCatalogContext",
-          "ReadViewCatalogFactory"
+          "ReadViewCatalogFactory",
+          "ReadViewCatalogService"
         ]
       },
       {
@@ -9415,7 +9416,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "f5abd7f0221e354169e7d2266c4847c2a863ecc1751041b7b342894969016607",
+        "source_sha256": "76ad62f358d8631e7f9cef1730d2888ae071855dd061af254c6dc54dea81ac1c",
         "declared_exports": [
           "NativeRuntimeApi",
           "RuntimeComposition",

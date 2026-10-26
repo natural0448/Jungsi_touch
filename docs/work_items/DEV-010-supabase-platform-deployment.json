@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.121",
+  "contract_version": "1.9.122",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -746,7 +746,8 @@
             "new_BFF_observation": "ROOT_PAGE_BUSINESS_UNAVAILABLE; existing logs separately show score_input_transition_pending, exact approved transition diagnosis pending",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
-          }
+          },
+          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026"
         },
         "candidates.build": {
           "code": "PORTED",
@@ -800,7 +801,8 @@
             "new_BFF_observation": "ROOT_PAGE_BUSINESS_UNAVAILABLE; existing logs separately show score_input_transition_pending, exact approved transition diagnosis pending",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
-          }
+          },
+          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026"
         },
         "shortlist.update": {
           "code": "PORTED",
@@ -838,7 +840,8 @@
             "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
             "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
-          }
+          },
+          "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026"
         },
         "report.export": {
           "code": "PORTED",
@@ -4035,7 +4038,44 @@
         "no_registration_replay": "Already committed; do not repeat adoption SQL or new score save to refresh results",
         "frozen_source_candidate_rule": "The original candidate activation/migration-preparation fields are retained historical source evidence; this scoped dated receipt is current only for the listed actual operations"
       },
-      "effective_current_score_transition_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026"
+      "effective_current_score_transition_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026",
+      "current_selection_hook_repair_20261026": {
+        "id": "CURRENT-CATALOG-SELECTION-HOOK-01",
+        "status": "SOURCE_REPAIRED_FOCUSED_SYNTHETIC_PASS_FULL_HOOK_CI_PENDING",
+        "basis_commit": "5d0c7aa04e7b51a282af2ce4979284c4c998aacd",
+        "requirements": [
+          "REQ-14",
+          "REQ-15",
+          "REQ-16",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27"
+        ],
+        "operations": [
+          "university.analyze",
+          "shortlist.update"
+        ],
+        "paths": [
+          "POST /api/v1/reports/{report_id}/university-results",
+          "PUT /api/v1/reports/{report_id}/shortlist/{offering_id}"
+        ],
+        "layer": "server application composition / feature/application-pre-data-platform",
+        "installed_source_observation": "Source118 full readback verified; both catalog hooks declared once and called zero times. Existing sparse artifact is not complete current search coverage.",
+        "repair": "Require both hooks in catalog factory; guard qualification at request construction; prepare exact IDs for the two existing mutations without private IO. Actual lookup remains in catalog after existing access/revision/budget flow.",
+        "invariants": "Known ID missing formula stays pending; unknown ID whole-batch404; practical and qualification fail closed; ownership/JWT/relay/paid/input rights/revision/idempotency/shared budget/safe DTO preserved.",
+        "candidates": "Existing catalog scope preserved; no name fallback, splitting, partial-success DTO or new API.",
+        "synthetic_verification": {
+          "new_real_runtime_cases": 12,
+          "related_regression_cases": 116,
+          "status": "PASS",
+          "external_ports": "synthetic only; network permission absent"
+        },
+        "actual_Owner_target8_exact_HTTP_capture": "NOT_RUN; department descriptions are not independently captured submitted IDs",
+        "deployment": "NOT_RUN_SOURCE_CANDIDATE_ONLY",
+        "DB_Storage_Secrets_rights_limits_writes": "NOT_RUN_UNCHANGED",
+        "production_ready": false
+      }
     }
   }
 }
