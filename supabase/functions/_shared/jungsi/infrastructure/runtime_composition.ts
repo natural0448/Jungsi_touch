@@ -337,9 +337,11 @@ export class NativeRuntimeApi {
           await phase("active_reports", async () => (await context.platform()).activeReports(...a)),
       };
       const data = runtimeAnalysisDataPort(context, phase);
-      const catalog = this.config.readViewExtensions && this.config.candidateCatalog
+      const selectedCatalog = this.config.readViewExtensions && this.config.candidateCatalog
         ? this.config.candidateCatalog(data, this.clock, sql, this.config.environment, context)
-        : new CatalogService(data, this.clock);
+        : null;
+      selectedCatalog?.restrictAnalysisData(data);
+      const catalog = selectedCatalog ?? new CatalogService(data, this.clock);
       const authorities = {
         readCurrent: (subject: string, now: bigint) =>
           new SupabaseForecastAuthorities(sql()).readCurrent(subject, now),
@@ -435,11 +437,15 @@ export class NativeRuntimeApi {
             return await catalog.execute(r);
           }
           if (REPORT_ACTION_OPERATIONS.some((id) => id === r.operation)) {
+            if (r.operation === "shortlist.update") selectedCatalog?.prepareSelection(r);
             return await actions.execute(r);
           }
           if (
             UNIVERSITY_ANALYSIS_OPERATIONS.some((id) => id === r.operation)
-          ) return await universities.execute(r);
+          ) {
+            if (r.operation === "university.analyze") selectedCatalog?.prepareSelection(r);
+            return await universities.execute(r);
+          }
           if (FORECAST_OPERATIONS.some((id) => id === r.operation)) {
             return await forecasts.execute(r);
           }

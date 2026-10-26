@@ -87594,6 +87594,11 @@
       "declarations": {
         "imports": [
           {
+            "importedName": "ApiExecution",
+            "originalName": "ApiExecution",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
             "importedName": "ApprovedRuntimeBinding",
             "originalName": "ApprovedRuntimeBinding",
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
@@ -87628,9 +87633,14 @@
             "importedName": "SupabaseSqlTransport",
             "originalName": "SupabaseSqlTransport",
             "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+          },
+          {
+            "importedName": "UniversityAnalysisDataPort",
+            "originalName": "UniversityAnalysisDataPort",
+            "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
           }
         ],
-        "source_sha256": "abd6cdc1eba62c095f35835201495896b2bacff8151f637261646fabb057ba31",
+        "source_sha256": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
         "symbols": [
           {
             "declarations": [
@@ -87701,6 +87711,91 @@
               }
             ],
             "name": "ReadViewCatalogContext"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "extends": [
+                    {
+                      "kind": "typeRef",
+                      "repr": "CatalogService",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "CatalogService",
+                          "specifier": "../application/catalog.ts"
+                        },
+                        "typeName": "CatalogService"
+                      }
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "prepareSelection",
+                      "parameter_source": "(request: ApiExecution)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "request",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "ApiExecution",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "ApiExecution",
+                                "specifier": "../application/api_dispatch.ts"
+                              },
+                              "typeName": "ApiExecution"
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "keyword",
+                        "repr": "void",
+                        "value": "void"
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "restrictAnalysisData",
+                      "parameter_source": "(data: UniversityAnalysisDataPort)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "data",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "UniversityAnalysisDataPort",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "UniversityAnalysisDataPort",
+                                "specifier": "../application/university_analysis.ts"
+                              },
+                              "typeName": "UniversityAnalysisDataPort"
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "keyword",
+                        "repr": "void",
+                        "value": "void"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "ReadViewCatalogService"
           },
           {
             "declarations": [
@@ -87805,14 +87900,12 @@
                       ],
                       "tsType": {
                         "kind": "typeRef",
-                        "repr": "CatalogService",
+                        "repr": "ReadViewCatalogService",
                         "value": {
                           "resolution": {
-                            "kind": "import",
-                            "name": "CatalogService",
-                            "specifier": "../application/catalog.ts"
+                            "kind": "local"
                           },
-                          "typeName": "CatalogService"
+                          "typeName": "ReadViewCatalogService"
                         }
                       }
                     }
@@ -87826,6 +87919,16 @@
         ]
       },
       "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../application/api_dispatch.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+            }
+          ]
+        },
         {
           "dynamic": false,
           "specifier": "../application/catalog.ts",
@@ -87843,6 +87946,16 @@
             {
               "kind": "type",
               "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/university_analysis.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
             }
           ]
         },
@@ -87870,7 +87983,8 @@
       "layer": "data_infrastructure",
       "symbols": [
         "ReadViewCatalogContext",
-        "ReadViewCatalogFactory"
+        "ReadViewCatalogFactory",
+        "ReadViewCatalogService"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": {
@@ -90057,7 +90171,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "f5abd7f0221e354169e7d2266c4847c2a863ecc1751041b7b342894969016607",
+        "source_sha256": "76ad62f358d8631e7f9cef1730d2888ae071855dd061af254c6dc54dea81ac1c",
         "symbols": [
           {
             "declarations": [
@@ -113742,6 +113856,878 @@
       "layer": "verification",
       "symbols": []
     },
+    "tests/edge/test_current_catalog_composition.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "ApprovedOperatingPolicy",
+            "originalName": "ApprovedOperatingPolicy",
+            "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
+          },
+          {
+            "importedName": "BudgetRequest",
+            "originalName": "BudgetRequest",
+            "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+          },
+          {
+            "importedName": "NOW",
+            "originalName": "SYNTHETIC_RUNTIME_NOW",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "NativeRuntimeApi",
+            "jsDoc": {
+              "doc": "Actual runtime/factory/HTTP and business services; every external port is synthetic."
+            },
+            "originalName": "NativeRuntimeApi",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+          },
+          {
+            "importedName": "NativeRuntimeRequest",
+            "originalName": "NativeRuntimeRequest",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"
+          },
+          {
+            "importedName": "OverallAnalysisService",
+            "originalName": "OverallAnalysisService",
+            "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
+          },
+          {
+            "importedName": "PublicJeongsiPassesReader",
+            "originalName": "PublicJeongsiPassesReader",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts"
+          },
+          {
+            "importedName": "ReadViewCatalogFactory",
+            "originalName": "ReadViewCatalogFactory",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts"
+          },
+          {
+            "importedName": "RequestLimitError",
+            "originalName": "RequestLimitError",
+            "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+          },
+          {
+            "importedName": "RuntimeRoutePolicy",
+            "originalName": "RuntimeRoutePolicy",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+          },
+          {
+            "importedName": "SYNTHETIC_RUNTIME_URL",
+            "originalName": "SYNTHETIC_RUNTIME_URL",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
+            "importedName": "SyntheticNativeRepository",
+            "originalName": "SyntheticNativeRepository",
+            "src": "tests/edge/synthetic_platform_repository.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "syntheticOfferingAnalysisFixture",
+            "originalName": "syntheticOfferingAnalysisFixture",
+            "src": "tests/edge/synthetic_offering_analysis.ts"
+          },
+          {
+            "importedName": "syntheticRuntimeBinding",
+            "originalName": "syntheticRuntimeBinding",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
+            "importedName": "utcText",
+            "originalName": "utcText",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          }
+        ],
+        "source_sha256": "ece2a933069972df2294506d2d4ff69d4503e6fe7799b91d25c2a5d9021bdafd",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  createCatalog: (\n    data: Parameters<ReadViewCatalogFactory>[0],\n    clock: Parameters<ReadViewCatalogFactory>[1],\n    current: CurrentCatalogTestPort,\n  ) => ReturnType<ReadViewCatalogFactory>,\n  routeCatalog: { operations: readonly RuntimeRoutePolicy[] },\n  responseSchemas: unknown,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "createCatalog",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "data",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "indexedAccess",
+                                "value": {
+                                  "indexType": {
+                                    "kind": "literal",
+                                    "repr": "0",
+                                    "value": {
+                                      "kind": "number",
+                                      "number": 0.0
+                                    }
+                                  },
+                                  "objType": {
+                                    "kind": "typeRef",
+                                    "repr": "Parameters",
+                                    "value": {
+                                      "typeName": "Parameters",
+                                      "typeParams": [
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "ReadViewCatalogFactory",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "import",
+                                              "name": "ReadViewCatalogFactory",
+                                              "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts"
+                                            },
+                                            "typeName": "ReadViewCatalogFactory"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "clock",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "indexedAccess",
+                                "value": {
+                                  "indexType": {
+                                    "kind": "literal",
+                                    "repr": "1",
+                                    "value": {
+                                      "kind": "number",
+                                      "number": 1.0
+                                    }
+                                  },
+                                  "objType": {
+                                    "kind": "typeRef",
+                                    "repr": "Parameters",
+                                    "value": {
+                                      "typeName": "Parameters",
+                                      "typeParams": [
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "ReadViewCatalogFactory",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "import",
+                                              "name": "ReadViewCatalogFactory",
+                                              "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts"
+                                            },
+                                            "typeName": "ReadViewCatalogFactory"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "current",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "CurrentCatalogTestPort",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "CurrentCatalogTestPort"
+                                }
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "ReturnType",
+                            "value": {
+                              "typeName": "ReturnType",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "ReadViewCatalogFactory",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "ReadViewCatalogFactory",
+                                      "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts"
+                                    },
+                                    "typeName": "ReadViewCatalogFactory"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "routeCatalog",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeLiteral",
+                        "value": {
+                          "properties": [
+                            {
+                              "name": "operations",
+                              "tsType": {
+                                "kind": "typeOperator",
+                                "value": {
+                                  "operator": "readonly",
+                                  "tsType": {
+                                    "kind": "array",
+                                    "value": {
+                                      "kind": "typeRef",
+                                      "repr": "RuntimeRoutePolicy",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "RuntimeRoutePolicy",
+                                          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+                                        },
+                                        "typeName": "RuntimeRoutePolicy"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "responseSchemas",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "currentCatalogCompositionFixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "OWNER"
+                        },
+                        {
+                          "name": "OTHER"
+                        },
+                        {
+                          "name": "PID"
+                        },
+                        {
+                          "name": "RID"
+                        },
+                        {
+                          "name": "OLD"
+                        },
+                        {
+                          "name": "IDS"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "currentCatalogCompositionValues"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "row",
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "NativeObject",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeObject",
+                                "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                              },
+                              "typeName": "NativeObject"
+                            }
+                          }
+                        },
+                        {
+                          "name": "guide",
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "NativeObject",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeObject",
+                                "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                              },
+                              "typeName": "NativeObject"
+                            }
+                          }
+                        },
+                        {
+                          "name": "key",
+                          "tsType": {
+                            "kind": "tuple",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "CurrentCatalogTestRecord"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "publication",
+                      "parameter_source": "()",
+                      "params": [],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "properties": [
+                                  {
+                                    "name": "version",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    }
+                                  },
+                                  {
+                                    "name": "sha256",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    }
+                                  },
+                                  {
+                                    "name": "expiresAtUtc",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "bigint",
+                                      "value": "bigint"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "lookup",
+                      "parameter_source": "(\n    owner: string,\n    ids: readonly string[],\n    detail?: boolean,\n  )",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "owner",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "ids",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "detail",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "properties": [
+                                  {
+                                    "name": "version",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    }
+                                  },
+                                  {
+                                    "name": "head",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    }
+                                  },
+                                  {
+                                    "name": "asOfUtc",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "bigint",
+                                      "value": "bigint"
+                                    }
+                                  },
+                                  {
+                                    "name": "rows",
+                                    "tsType": {
+                                      "kind": "typeOperator",
+                                      "value": {
+                                        "operator": "readonly",
+                                        "tsType": {
+                                          "kind": "array",
+                                          "value": {
+                                            "kind": "typeRef",
+                                            "repr": "CurrentCatalogTestRecord",
+                                            "value": {
+                                              "resolution": {
+                                                "kind": "local"
+                                              },
+                                              "typeName": "CurrentCatalogTestRecord"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "search",
+                      "parameter_source": "()",
+                      "params": [],
+                      "returnType": {
+                        "kind": "keyword",
+                        "repr": "never",
+                        "value": "never"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "CurrentCatalogTestPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "00000000-0000-0000-0000-000000000001",
+                    "value": {
+                      "kind": "string",
+                      "string": "00000000-0000-0000-0000-000000000001"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OWNER"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "00000000-0000-0000-0000-000000000002",
+                    "value": {
+                      "kind": "string",
+                      "string": "00000000-0000-0000-0000-000000000002"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OTHER"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-profile",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-profile"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-report",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-report"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "RID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-A-2027",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-A-2027"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OLD"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "IDS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "EXPIRY"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(owner: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "owner",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "bearer"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/operating_policy.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/overall_analysis.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/request_budget.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/public_passes.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+            },
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_offering_analysis.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_offering_analysis.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_platform_repository.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_platform_repository.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_runtime_binding.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_runtime_binding.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": [
+        "currentCatalogCompositionFixture",
+        "currentCatalogCompositionValues"
+      ]
+    },
     "tests/edge/test_exam_pack.ts": {
       "declarations": {
         "imports": [
@@ -133416,7 +134402,8 @@
     "tests/edge/test_usage_postgres.ts",
     "tests/edge/test_usage_service.ts",
     "tests/edge/test_year_equating.ts",
-    "tests/edge/test_score_input_policy.ts"
+    "tests/edge/test_score_input_policy.ts",
+    "tests/edge/test_current_catalog_composition.ts"
   ],
   "unit_count": 656
 }

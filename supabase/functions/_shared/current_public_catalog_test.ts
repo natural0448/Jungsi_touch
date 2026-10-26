@@ -912,3 +912,222 @@ Deno.test("current known practical or inactive guide cannot escape through an ac
     await denied(() => fixture([r]).service.execute(request()), "current_catalog_page_invalid");
   }
 });
+
+import {
+  currentCatalogCompositionFixture,
+  currentCatalogCompositionValues,
+} from "../../../tests/edge/test_current_catalog_composition.ts";
+// Real runtime/factory regression; the common fixture has synthetic external ports only.
+{
+  const { OWNER, OTHER, RID, OLD, IDS } = currentCatalogCompositionValues;
+  const fixture = () =>
+    currentCatalogCompositionFixture(
+      (data, clock, current) =>
+        new CurrentPublicCatalogService(
+          data,
+          current,
+          clock,
+          new CurrentPublicCatalogCursor(new Uint8Array(32).fill(7)),
+        ),
+      routeCatalog as {
+        operations:
+          readonly import("./jungsi/infrastructure/runtime_composition.ts").RuntimeRoutePolicy[];
+      },
+      schemas,
+    );
+  const error = async (response: Response, status: number, code: string) => {
+    const body = await response.json();
+    assert(
+      response.status === status,
+      JSON.stringify({ expected: { status, code }, actual: { status: response.status, body } }),
+    );
+    equal(body.error.code, code);
+  };
+  Deno.test("current catalog composition supplements eight exact IDs through NativeRuntimeApi and leaves missing formulas pending", async () => {
+    const f = await fixture();
+    await f.run(async () => {
+      const response = await f.api.fetch(f.request());
+      equal(response.status, 200);
+      const body = await response.json();
+      equal(Object.keys(body.analyses).sort(), IDS);
+      equal(f.calls.lookups, [{ owner: OWNER, ids: IDS }]);
+      equal(f.calls.restrict, 1);
+      equal(f.calls.prepare, 1);
+      equal(f.repo.reports.get(RID)!.revision, 2);
+      equal(f.calls.profileSave, 0);
+      equal(f.inputStates.get(OWNER)!.version, 1);
+      for (const id of IDS) {
+        equal(body.analyses[id].conversion.status, "pending");
+        equal(body.analyses[id].conversion.reason_code, "conversion_release_missing");
+      }
+    });
+  });
+  Deno.test("current catalog composition unknown exact ID keeps whole-batch404 without partial revision", async () => {
+    const f = await fixture();
+    await f.run(async () => {
+      await error(
+        await f.api.fetch(f.request([IDS[0], "2027:SYNTHETIC-UNKNOWN"])),
+        404,
+        "offering_not_found",
+      );
+      equal(f.repo.reports.get(RID)!.revision, 1);
+      equal(f.calls.profileSave, 0);
+    });
+  });
+  Deno.test("current catalog composition unqualified metadata blocks conversion reference and model reads", async () => {
+    const f = await fixture();
+    f.state.qualified = false;
+    await f.run(async () => {
+      const response = await f.api.fetch(f.request([IDS[0]]));
+      equal(response.status, 200);
+      equal([f.calls.conversion, f.calls.reference, f.calls.analysis], [0, 0, 0]);
+      const body = await response.json();
+      equal(body.analyses[IDS[0]].conversion.status, "pending");
+    });
+  });
+  Deno.test("current catalog composition known practical row is refused before any calculation", async () => {
+    const f = await fixture();
+    f.state.practical = true;
+    await f.run(async () => {
+      await error(await f.api.fetch(f.request([IDS[0]])), 503, "backend_dependency_unavailable");
+      equal([f.calls.conversion, f.calls.reference, f.calls.analysis], [0, 0, 0]);
+      equal(f.repo.reports.get(RID)!.revision, 1);
+    });
+  });
+  Deno.test("current catalog composition access and current revision reject before exact lookup", async () => {
+    for (const kind of ["owner", "revision", "paid", "relay", "auth", "budget"]) {
+      const f = await fixture();
+      await f.run(async () => {
+        if (kind === "paid") f.state.paid = false;
+        if (kind === "auth") f.state.auth = false;
+        if (kind === "budget") f.state.denyBudget = true;
+        const response = await f.api.fetch(
+          f.request(
+            IDS,
+            kind === "revision" ? 2 : 1,
+            "SYNTHETIC-key",
+            OWNER,
+            kind === "owner" ? RID + "-other" : RID,
+            kind !== "relay",
+          ),
+        );
+        const expected = {
+          owner: [404, "report_not_found"],
+          revision: [409, "revision_conflict"],
+          paid: [403, "paid_required"],
+          relay: [403, "relay_authentication_failed"],
+          auth: [401, "authentication_required"],
+          budget: [429, "rate_limit_exceeded"],
+        }[kind]!;
+        if (kind === "budget") equal(response.headers.get("Retry-After"), "7");
+        await error(response, expected[0] as number, expected[1] as string);
+        equal(f.calls.lookups.length, 0);
+        equal(f.calls.catalog, 0);
+        equal(f.repo.reports.get(RID)!.revision, 1);
+      });
+    }
+  });
+  Deno.test("current catalog composition exact replay and conflict preserve lookup and revision semantics", async () => {
+    const f = await fixture();
+    await f.run(async () => {
+      const first = await f.api.fetch(f.request([IDS[0]]));
+      equal(first.status, 200);
+      const result = await first.json();
+      const reads = f.calls.lookups.length;
+      equal(await (await f.api.fetch(f.request([IDS[0]]))).json(), result);
+      equal(f.calls.lookups.length, reads);
+      equal(f.repo.reports.get(RID)!.revision, 2);
+      await error(await f.api.fetch(f.request([IDS[1]])), 409, "idempotency_conflict");
+      equal(f.calls.lookups.length, reads);
+      equal(f.repo.reports.get(RID)!.revision, 2);
+    });
+  });
+  Deno.test("current catalog composition selection and qualification guards stay request-local", async () => {
+    const f = await fixture();
+    await f.run(async () => {
+      f.state.qualified = false;
+      equal((await f.api.fetch(f.request([IDS[0]]))).status, 200);
+      equal(f.calls.conversion, 0);
+      f.state.qualified = true;
+      const response = await f.api.fetch(
+        f.request([IDS[1]], 1, "SYNTHETIC-other-key", OTHER, RID + "-other"),
+      );
+      equal(response.status, 200);
+      equal(f.calls.lookups.map((r) => r.owner), [OWNER, OTHER]);
+      assert(f.calls.conversion > 0);
+      equal(f.calls.profileSave, 0);
+    });
+  });
+  Deno.test("current catalog composition base approved offering needs no current-public supplementation", async () => {
+    const f = await fixture();
+    await f.run(async () => {
+      const response = await f.api.fetch(f.request([OLD]));
+      equal(response.status, 200);
+      equal(f.calls.lookups.length, 0);
+      assert(f.calls.conversion > 0);
+      equal(f.repo.reports.get(RID)!.revision, 2);
+    });
+  });
+  Deno.test("current catalog composition expired publication fails closed without saved result", async () => {
+    const f = await fixture();
+    f.state.publicationExpired = true;
+    await f.run(async () => {
+      await error(await f.api.fetch(f.request([IDS[0]])), 503, "backend_dependency_unavailable");
+      equal(f.repo.reports.get(RID)!.revision, 1);
+      equal(f.calls.profileSave, 0);
+    });
+  });
+  Deno.test("current catalog composition shortlist uses exact current selection without calculating or saving scores", async () => {
+    const f = await fixture();
+    await f.run(async () => {
+      const response = await f.api.fetch(f.reportRequest("shortlist.update"));
+      equal(response.status, 200);
+      const result = await response.json();
+      equal(result.shortlist[IDS[0]].selected, true);
+      equal(result.shortlist[IDS[0]].assessment_status, "pending");
+      equal(f.calls.lookups, [{ owner: OWNER, ids: [IDS[0]] }]);
+      equal(f.calls.prepare, 1);
+      equal([f.calls.conversion, f.calls.reference, f.calls.analysis, f.calls.profileSave], [
+        0,
+        0,
+        0,
+        0,
+      ]);
+      equal(f.repo.reports.get(RID)!.revision, 2);
+      equal(await (await f.api.fetch(f.reportRequest("shortlist.update"))).json(), result);
+      equal(f.calls.lookups.length, 1);
+      equal(f.repo.reports.get(RID)!.revision, 2);
+    });
+  });
+  Deno.test("current catalog composition shortlist unknown ID and stale revision preserve the report", async () => {
+    const f = await fixture();
+    await f.run(async () => {
+      await error(
+        await f.api.fetch(f.reportRequest("shortlist.update", "2027:SYNTHETIC-UNKNOWN")),
+        404,
+        "offering_not_found",
+      );
+      equal(f.repo.reports.get(RID)!.revision, 1);
+      await error(
+        await f.api.fetch(f.reportRequest("shortlist.update", IDS[0], 2, "SYNTHETIC-stale")),
+        409,
+        "revision_conflict",
+      );
+      equal(f.calls.lookups.length, 1);
+      equal(f.repo.reports.get(RID)!.revision, 1);
+    });
+  });
+  Deno.test("current catalog composition candidates keep the existing approved catalog scope", async () => {
+    const f = await fixture();
+    await f.run(async () => {
+      const response = await f.api.fetch(f.reportRequest("candidates.build"));
+      equal(response.status, 200);
+      equal(f.calls.prepare, 0);
+      equal(f.calls.lookups.length, 0);
+      equal(f.calls.publication, 0);
+      equal(Object.keys(f.repo.reports.get(RID)!.body.analyses as NativeObject), [OLD]);
+      equal(f.calls.profileSave, 0);
+      equal(f.inputStates.get(OWNER)!.version, 1);
+    });
+  });
+}
