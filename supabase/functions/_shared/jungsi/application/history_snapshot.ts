@@ -14,6 +14,12 @@ import {
   validateFieldServiceQualification,
   type VerifiedQualificationPublication,
 } from "./history_field_qualification.ts";
+import {
+  assertHistoricalReferenceBody,
+  HISTORICAL_REFERENCE_FIELD,
+  validateHistoricalReferenceList,
+  type VerifiedHistoricalReferencePublication,
+} from "./history_reference_estimates.ts";
 export const HISTORY_SNAPSHOT_SLOTS = [
   "recruitment_count_with_stage",
   "competition_ratio",
@@ -65,6 +71,8 @@ export interface SnapshotPublication {
   readonly parts: readonly SnapshotPart[];
   /** Private server grant context; never a field of the public snapshot head DTO. */
   readonly fieldQualification?: VerifiedQualificationPublication;
+  /** Pinned independent historical reference data; never grants raw-cell or applicant eligibility. */
+  readonly historicalReferences?: VerifiedHistoricalReferencePublication;
 }
 export interface HistorySnapshotPort {
   current(): Promise<SnapshotPublication>;
@@ -275,6 +283,9 @@ export function validateHistorySnapshotPayload(raw: unknown, part: SnapshotPart)
       "admission_track",
       "group",
       ...HISTORY_SNAPSHOT_SLOTS,
+      ...(item && typeof item === "object" && Object.hasOwn(item, HISTORICAL_REFERENCE_FIELD)
+        ? [HISTORICAL_REFERENCE_FIELD]
+        : []),
     ]);
     const review = exact(row.identity_review, ["status", "reason_code", "variants"]);
     if (
@@ -326,6 +337,9 @@ export function validateHistorySnapshotPayload(raw: unknown, part: SnapshotPart)
     for (const k of ["university_name", "department", "admission_track"]) text(row[k], true, true);
     for (const k of ["region", "campus", "group"]) text(row[k], true, k !== "group");
     for (const slot of HISTORY_SNAPSHOT_SLOTS) cell(row[slot], slot);
+    if (Object.hasOwn(row, HISTORICAL_REFERENCE_FIELD)) {
+      validateHistoricalReferenceList(row[HISTORICAL_REFERENCE_FIELD], row);
+    }
     for (const slot of HISTORY_SNAPSHOT_SLOTS) {
       const c = row[slot] as NativeObject, context = c.source_context as NativeObject | null;
       if (context !== null && Number(context.identity_variant_index) >= review.variants.length) {
@@ -381,13 +395,28 @@ export async function validateQualifiedHistorySnapshotPayload(
   part: SnapshotPart,
   publication: SnapshotPublication | null,
 ): Promise<NativeObject> {
+  const validateBody = (value: unknown): NativeObject => {
+    const result = validateHistorySnapshotPayload(value, part);
+    assertHistoricalReferenceBody(
+      result,
+      publication
+        ? dataProperty(publication, "historicalReferences", true) as
+          | VerifiedHistoricalReferencePublication
+          | undefined
+        : undefined,
+      publication ? dataProperty(publication, "publicationSha256") as string : undefined,
+      publication ? dataProperty(publication, "sourceHeadSha256") as string : undefined,
+      publication ? dataProperty(publication, "scopeSha256") as string : undefined,
+    );
+    return result;
+  };
   const context = publication
     ? dataProperty(publication, "fieldQualification", true) as
       | VerifiedQualificationPublication
       | undefined
     : undefined;
   if (context !== undefined && (!context || typeof context !== "object")) invalid();
-  if (!context && !hasQualifiedRank(raw, part)) return validateHistorySnapshotPayload(raw, part);
+  if (!context && !hasQualifiedRank(raw, part)) return validateBody(raw);
   if (!context || !publication) invalid();
   // Capture parent pins and all input data before the first asynchronous hash operation.
   const publicationSha = dataProperty(publication, "publicationSha256"),
@@ -438,7 +467,7 @@ export async function validateQualifiedHistorySnapshotPayload(
   }
   // The legacy validator captures every other row before await, with its original
   // payload bounds. Qualification's small-object cap applies only to its two rows.
-  const result = validateHistorySnapshotPayload({ ...body, rows: legacyRows }, part);
+  const result = validateBody({ ...body, rows: legacyRows });
   const grants = await assertFieldQualificationPublication(
     context,
     publicationSha as string,

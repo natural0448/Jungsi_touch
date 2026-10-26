@@ -5646,6 +5646,14 @@
         "alternate_cut": {
           "ref": "history_snapshot_alternate_cell",
           "nullable": false
+        },
+        "historical_cutoff_references": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "history_snapshot_historical_reference",
+            "nullable": false
+          }
         }
       },
       "required": [
@@ -5670,7 +5678,9 @@
         "final_70_percent_cut",
         "alternate_cut"
       ],
-      "optional": []
+      "optional": [
+        "historical_cutoff_references"
+      ]
     },
     "history_snapshot_part": {
       "type": "object",
@@ -6350,6 +6360,133 @@
         "legacy_source",
         "assessment_context",
         "items"
+      ],
+      "optional": []
+    },
+    "history_snapshot_historical_reference": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.historical-cutoff-reference/v1"
+          ]
+        },
+        "observation_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "school_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "offering_pk": {
+          "type": "string",
+          "nullable": false
+        },
+        "value": {
+          "type": "string",
+          "nullable": false
+        },
+        "unit": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "%"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "model_estimated"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "추정상위누백(전체응시자)"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "historical_admission_cutoff"
+          ]
+        },
+        "method_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "release_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "display_role": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "independent_observation"
+          ]
+        },
+        "reference_status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "CALCULATED_WHOLE_COHORT_MODEL_ESTIMATE"
+          ]
+        },
+        "academic_year": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            2024,
+            2025,
+            2026,
+            2027
+          ]
+        },
+        "statistic_label": {
+          "type": "string",
+          "nullable": true
+        },
+        "engine_approved": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            false
+          ]
+        },
+        "production_allowed": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "observation_id",
+        "school_id",
+        "offering_pk",
+        "value",
+        "unit",
+        "status",
+        "label",
+        "scope",
+        "method_id",
+        "release_id",
+        "display_role",
+        "reference_status",
+        "academic_year",
+        "statistic_label",
+        "engine_approved",
+        "production_allowed"
       ],
       "optional": []
     }

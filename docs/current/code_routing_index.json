@@ -7482,6 +7482,26 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts",
+        "layer": "application",
+        "status": "historical_reference_read_source_synthetic_only_not_activated",
+        "requirements": [
+          "REQ-28",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
+        "declared_exports": [
+          "HISTORICAL_REFERENCE_FIELD",
+          "HISTORICAL_REFERENCE_METRIC",
+          "VerifiedHistoricalReferencePublication",
+          "assertHistoricalReferenceBody",
+          "bindHistoricalReferencePublication",
+          "validateHistoricalReferenceList"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
         "layer": "application",
         "status": "read_view_source_candidate_native_activation_NOT_RUN",
@@ -7493,7 +7513,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "9035db789b8042d772d3dad6d08ece230c8b45cc9fb8f60b2d0ee17113e054de",
+        "source_sha256": "a84a5edb79d440b3f775f3b1e86773599c4cac8bb9b681a78ea21b12902deeb4",
         "declared_exports": [
           "HISTORY_PUBLICATION_STATUSES",
           "HISTORY_SNAPSHOT_SLOTS",
@@ -8874,7 +8894,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "0b875777dd78c57561512650c2dbfa62d80a78a56e8199c1fd6e1cab61fe6669",
+        "source_sha256": "afea15c94ef1b81910ae71eabf2d8e8768a6eb9a627bc18792d42d37f8e2b842",
         "declared_exports": [
           "HistorySnapshotSource",
           "SNAPSHOT_HEAD_SQL",

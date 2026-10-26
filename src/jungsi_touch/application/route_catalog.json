@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.122",
-  "source_sha256": "e8fcf63868dfaf2907a93f3ffc5b5fe10964756ebf1cc329a73d80f7be618478",
+  "spec_version": "1.9.123",
+  "source_sha256": "1915977533229db9e0df73ec83d74cb3a91fb2bc9e76e4eac534711857620d7d",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2896,7 +2896,8 @@
           "서비스용 core 영수증은 jungsi.history-field-qualification-receipt/v1, status=approved_exact_fields이며 정확7키(format,status,authority_sha256,source_head_sha256,scope_sha256,expected_previous_manifest_sha256,subjects)만 받는다. 작성 감사용 rich proof를 서비스 영수증으로 대신하지 않는다.",
           "core subjects 각 항목의 정확7키는 field,subject,expected_raw_cell_sha256,expected_native_value_type,expected_raw_status,expected_raw_unit,expected_identity_review_sha256이다. field=final_additional_admission_rank, subject는 observation_id/academic_year/offering_pk/identity_variant_index 정확4키이며 string/pending_metadata/null 원형을 결속한다.",
           "q.qualification_receipt_sha256, review-only descriptor.receipt의 원본 bytes/SHA와 approvals는 같은 service core 바이트 SHA를 가리킨다. jungsi.p1-writer-field-qualification-receipt/v1 rich writer proof는 별도 감사 근거로 보존하고 core 지문을 참조한다. audit 파일을 core로 다시 라벨링하거나 양 형식을 느슨하게 함께 수용하지 않는다.",
-          "기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다."
+          "기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다.",
+          "Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope."
         ],
         "field_qualification_contract": {
           "format": "jungsi.history-field-qualification-read/v1",
@@ -2965,16 +2966,16 @@
           "actual_authority_status": "EXISTING_AUTHORITY_REUSED_LOCAL_CORE_AND_BYTES_VERIFIED_OWNER_ACTIVATION_PENDING",
           "source_and_test_bindings": {
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
-            "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "9035db789b8042d772d3dad6d08ece230c8b45cc9fb8f60b2d0ee17113e054de",
-            "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "0b875777dd78c57561512650c2dbfa62d80a78a56e8199c1fd6e1cab61fe6669",
-            "tests/edge/synthetic_history_qualification.ts": "99918a9e8b89f07e702685b521e1935db13d5c15bc025a6c2c8d25cadccf2604",
+            "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "a84a5edb79d440b3f775f3b1e86773599c4cac8bb9b681a78ea21b12902deeb4",
+            "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "afea15c94ef1b81910ae71eabf2d8e8768a6eb9a627bc18792d42d37f8e2b842",
+            "tests/edge/synthetic_history_qualification.ts": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce",
             "tests/edge/test_history_field_qualification.ts": "19ac3bdbd4c5beed7239dbef7b426d9a4787169a0bbdc1cdd806bf8260cdeefb",
             "tests/edge/test_history_snapshot_qualification.ts": "eb8e11fed820cda8650a6ac4a0a285e43bb1c2412feb323225ad9ea7fb098023",
-            "tests/edge/test_history_snapshot_source.ts": "2dc0c1ec8923935839ec307d23f68d887a1a81281ed9824012114eef85c45af0"
+            "tests/edge/test_history_snapshot_source.ts": "0e924980944db2e0add3dde9ac188a55b27c4a80b11abaac82c009e7d8ce8804"
           },
           "public_response_schema": {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "7d5b456e2aa090b4ed92c598590fa2b9cac1d7bd8a5e438fd2ad2f1dd18692e2",
+            "sha256": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea",
             "rank_only": true,
             "shared_cell_unchanged": true,
             "hash_scope": "EXACT_GIT_SOURCE_BYTES_UTF8_LF"
@@ -3017,6 +3018,92 @@
             ],
             "actual_data_and_Owner_activation": "NOT_RUN"
           }
+        },
+        "historical_reference_contract": {
+          "format": "jungsi.history-reference-estimates-read/v1",
+          "status": "SOURCE_AND_LOCAL_CANDIDATE_VERIFIED_NOT_ACTIVATED",
+          "requirements": [
+            "REQ-28",
+            "REQ-24",
+            "REQ-25",
+            "REQ-26"
+          ],
+          "operations": [
+            "history.snapshot.head",
+            "history.snapshot.read"
+          ],
+          "API_paths": [
+            "GET /api/v1/admission-history/snapshot/head",
+            "GET /api/v1/admission-history/snapshots/{snapshot_id}"
+          ],
+          "layer": "server application; existing private snapshot infrastructure",
+          "membership": [
+            "standard",
+            "paid"
+          ],
+          "ownership": "Existing authenticated shared public history; no student/report ownership or writer change.",
+          "row_field": "historical_cutoff_references",
+          "descriptor_location": "Optional historical_references on existing byte-pinned independent review only; manifest/head exact keys unchanged.",
+          "descriptor_fields": [
+            "format",
+            "release_id",
+            "source_export_sha256",
+            "head_readback_receipt_sha256",
+            "metric",
+            "observation_count",
+            "school_count",
+            "engine_approved",
+            "production_allowed",
+            "display_scope"
+          ],
+          "estimate_fields": [
+            "format",
+            "observation_id",
+            "academic_year",
+            "school_id",
+            "offering_pk",
+            "value",
+            "unit",
+            "status",
+            "label",
+            "scope",
+            "method_id",
+            "release_id",
+            "display_role",
+            "statistic_label",
+            "reference_status",
+            "engine_approved",
+            "production_allowed"
+          ],
+          "display_label": "추정상위누백(전체응시자)",
+          "display_scope": "historical_admission_cutoff",
+          "original_statistic_label": "NULL when not independently exported; no 50/70/mean inference.",
+          "value": "Exact decimal text from approved publisher export. No numeric recomputation or student percentile.",
+          "bounds": {
+            "max_references_per_row": 16,
+            "existing_snapshot_limits_unchanged": true
+          },
+          "security": "WeakMap-verified frozen publication context plus exact manifest/source/scope, release and duplicate checks. engine_approved=false and production_allowed=false. Existing authentication/relay/budget/response filters/final-head checks and q grants preserved.",
+          "source_and_test_bindings": {
+            "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
+            "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "a84a5edb79d440b3f775f3b1e86773599c4cac8bb9b681a78ea21b12902deeb4",
+            "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "afea15c94ef1b81910ae71eabf2d8e8768a6eb9a627bc18792d42d37f8e2b842",
+            "tests/edge/test_history_snapshot.ts": "84586a7e86eb9ef64c7a08c29256397045dda53fa1defc7ebaf644979b313c3d",
+            "tests/edge/test_history_snapshot_source.ts": "0e924980944db2e0add3dde9ac188a55b27c4a80b11abaac82c009e7d8ce8804",
+            "src/jungsi_touch/application/public_response_schemas.json": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea",
+            "tests/edge/synthetic_history_qualification.ts": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce"
+          },
+          "verification": {
+            "new_synthetic_cases": 13,
+            "related_synthetic_cases": 68,
+            "status": "PASS_LOCAL_SYNTHETIC",
+            "candidate_all_parts_service_validation": "PASS_LOCAL_FAKE_PORTS; separate private byte-pinned receipt",
+            "normal_hooks_CI": "PENDING",
+            "DB_Storage_operations": "NOT_RUN",
+            "Owner_deployment": "NOT_RUN",
+            "UI": "Separate SHA-bound preserved-copy Owner proposal; no UI implementation in application branch."
+          },
+          "production_ready": false
         }
       },
       "own_report_list": {
@@ -3821,7 +3908,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "babeedc48f5a0c142b60c7dac82ed3f6b3a917958e9f623e3f803c761abaaaaa"
+            "sha256": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -4202,7 +4289,7 @@
         },
         {
           "path": "tests/edge/synthetic_history_qualification.ts",
-          "sha256": "3a5c3a0aeff9d67a7aa2dfa6c7230d065250d2f0d21f7e064a8e1d230fe8b1c3"
+          "sha256": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce"
         }
       ],
       "Python_current_routes": 25,
@@ -4249,7 +4336,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "babeedc48f5a0c142b60c7dac82ed3f6b3a917958e9f623e3f803c761abaaaaa"
+            "sha256": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
@@ -4337,7 +4424,7 @@
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",
-            "sha256": "3a5c3a0aeff9d67a7aa2dfa6c7230d065250d2f0d21f7e064a8e1d230fe8b1c3"
+            "sha256": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce"
           },
           {
             "path": "tests/edge/test_member_json_results.ts",
