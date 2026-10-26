@@ -35,7 +35,9 @@ export async function togglePick(_prev: PickResult, fd: FormData): Promise<PickR
       // 전환 보류(score_input_transition_pending)는 쓰기 전에 막힌 것이라 다시 읽지 않는다
       const unsure = e.kind === "unavailable" && e.code !== "score_input_transition_pending";
       if (unsure) revalidatePath("/", "layout");
-      return { error: `${failed}. ${connectionText(e)}${unsure ? ` ${MAYBE_SAVED}` : ""}` };
+      // 저장됐을 수 있으므로 '못했습니다·다시 눌러 주세요'라고 하지 않는다(10-27 사용자 지적)
+      if (unsure) return { error: `${MAYBE_SAVED} (사유 코드 ${e.code})` };
+      return { error: `${failed}. ${connectionText(e)}` };
     }
     throw e;
   }
