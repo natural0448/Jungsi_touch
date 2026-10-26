@@ -21576,6 +21576,13 @@
         "REQ-11"
       ],
       "summary": "화면팀 변경(사용자 결정 10-26): 상담 리포트 인쇄본 머리에 에듀터치 로고(https://edutouch.co.kr/brand/logo-horizontal.png, 높이 22px)를 넣고 문구를 '정시터치 · 상담 리포트'로 둔다. 인쇄 시 색 유지(print-color-adjust:exact)."
+    },
+    {
+      "date": "2026-10-26",
+      "requirements": [
+        "REQ-10"
+      ],
+      "summary": "화면팀 변경(담당자 회신 10-26 가천대 offering_not_found): 3페이지 분석 버튼이 offering_not_found 로 거절되면 '잠시 뒤 다시 눌러 주세요' 대신 담당자 지정 문구('선택한 모집단위가 분석 자료에 연결되지 않아 계산하지 못했습니다…')를 보인다. 자동 재시도·행 숨김 없음."
     }
   ],
   "overall_analysis_contract": {

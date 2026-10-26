@@ -1,5 +1,7 @@
 import type { ConnectionError } from "@/lib/api";
 
+export const OFFERING_NOT_LINKED_NOTICE = "선택한 모집단위가 분석 자료에 연결되지 않아 계산하지 못했습니다. 저장한 성적과 리포트는 유지됩니다. 자료 연결이 완료된 뒤 다시 확인해 주세요.";
+
 export const SCORE_INPUT_TRANSITION_NOTICE = "성적 입력 정책 전환을 준비하고 있습니다. 저장된 성적과 리포트는 유지되며, 같은 성적을 다시 입력할 필요가 없습니다. 준비가 끝나면 이 화면에서 안내합니다.";
 
 /**

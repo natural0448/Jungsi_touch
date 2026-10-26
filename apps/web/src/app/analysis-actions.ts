@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
-import { connectionText, SCORE_INPUT_TRANSITION_NOTICE } from "@/lib/connection-text";
+import { connectionText, OFFERING_NOT_LINKED_NOTICE, SCORE_INPUT_TRANSITION_NOTICE } from "@/lib/connection-text";
 import { canonicalOfferingIds, ensureAnalyses, ensureCandidates, loadMine, refreshAnalyses, refreshCandidates, type RefreshIntent, type ReportState } from "@/lib/report-ops";
 
 export type RunResult = { error: string | null };
@@ -14,6 +14,8 @@ export type RunResult = { error: string | null };
 */
 
 function explain(st: ReportState, failed: string): RunResult {
+  // 모집단위가 분석 자료에 연결되지 않은 경우. 다시 눌러도 같으므로 '잠시 뒤 다시'라고 하지 않는다(담당자 회신 10-26 문구)
+  if (st.kind === "failed" && st.code === "offering_not_found") return { error: `${failed}. ${OFFERING_NOT_LINKED_NOTICE} (사유 코드: offering_not_found)` };
   if (st.kind === "failed" && st.code === "score_input_transition_pending") return { error: `${failed}. ${SCORE_INPUT_TRANSITION_NOTICE} (사유 코드 score_input_transition_pending)` };
   if (st.kind === "failed") return { error: `${failed}. 잠시 뒤 다시 눌러 주세요. (사유 코드 ${st.code})` };
   if (st.kind === "score_required") return { error: `${failed}. 성적 확인이 끝난 뒤 분석할 수 있습니다.` };
