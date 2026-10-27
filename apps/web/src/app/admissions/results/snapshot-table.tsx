@@ -1,12 +1,14 @@
 import { asOfDate } from "@/lib/format";
 import { rankDisplayModel } from "@/lib/p1-field-qualification";
+import { publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
 
 /*
   정리본 한 모집단위: 학년도별 한 줄, 이전 고정 표 배치(연결계약 v3 §5).
-  모집인원 · 경쟁률 · 추정 총 지원자 · 충원인원 · 추정 탈락자 · 최종 합격 예비번호 · 최종 50%컷 · 최종 70%컷.
-  값은 원문 표기 그대로, null 은 0 이 아니다. 모집인원 단계·컷 기준 꼬리표·'대학 발표 통계' 칸·출처 링크는
-  보이지 않는다(2026-10-24 사용자 결정). 정리본 자료는 그대로 보존한다.
+  모집인원 · 경쟁률 · 추정 총 지원자 · 충원인원 · 추정 탈락자 · 최종 합격 예비번호 · 대학 발표 성적 ①·②.
+  값은 원문 표기 그대로, null 은 0 이 아니다. 모집인원 단계·대상 집단 꼬리표·출처 링크는 보이지 않는다(2026-10-24 사용자 결정).
+  발표 성적 두 칸은 대학마다 다른 통계(50·70%컷, 평균·75%컷 등) 중 두 개를 골라 통계 이름과 함께 보인다(2026-10-28 사용자 결정,
+  고르는 규칙은 lib/p1-published-stats.ts). 별도 '대학 발표 추가 통계' 열은 만들지 않는다. 정리본 자료는 그대로 보존한다.
   값이 있는데 확인 중(pending_metadata)이면 값과 확인 사유를 함께 보인다. 예비번호는 '번', 충원은 '명'.
   추정 2열만 기존 승인 산식(모집인원×경쟁률 반올림, −모집−충원)으로 계산하고 발표 칸을 덮지 않는다.
   추정 총 지원자는 충원인원 없이도 계산하고, 추정 탈락자만 충원인원이 있어야 계산한다.
@@ -66,13 +68,15 @@ function RankValue({ c }: { c: Cell }) {
   </>;
 }
 
-/** 컷 값. 점수 기준·대상 집단 꼬리표는 보이지 않는다(2026-10-24 사용자 결정) */
-function Cut({ c }: { c: Cell }) {
-  const asOf = asOfDate(c.at);
+/** 발표 성적 한 칸: 통계 이름 + 값. 대상 집단은 쓰지 않고, 학생부 등급일 때만 기준을 붙인다(2026-10-28 사용자 결정) */
+function Stat({ s }: { s: PublishedStat | undefined }) {
+  if (!s) return <span className="unpub">─</span>;
+  const asOf = asOfDate(s.cell.at);
   return (
     <>
-      <Value c={c} />
-      {c.v !== null && asOf && <small className="rs-bs">자료 기준 {asOf}</small>}
+      <small className="rs-stat">{s.label}</small> <Value c={s.cell} />
+      {s.schoolRecord && <small className="rs-bs">학생부 등급</small>}
+      {asOf && <small className="rs-bs">자료 기준 {asOf}</small>}
     </>
   );
 }
@@ -115,7 +119,7 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
   const byYear = new Map<number, Row[]>();
   for (const r of rows) byYear.set(r.y, [...(byYear.get(r.y) ?? []), r]);
   const years = [...byYear.keys()].sort((a, b) => b - a);
-  // 모집인원 단계·컷 기준·대학 발표 통계 열은 보이지 않는다(2026-10-24 사용자 결정). 정리본 자료는 그대로 보존한다
+  // 모집인원 단계·대상 집단 꼬리표는 보이지 않는다(2026-10-24 사용자 결정). 정리본 자료는 그대로 보존한다
   const pending = latest.pk === null;
   const variants = Math.max(...rows.map((r) => r.idv));
   // 출처 링크는 보이지 않는다(2026-10-24 사용자 결정): 상당수가 어디가 내부 요청 주소라 직접 열면 오류 화면이 나온다
@@ -134,14 +138,15 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
               <th scope="col" className="r">충원인원</th>
               <th scope="col" className="r derived">추정 탈락자</th>
               <th scope="col" className="r">최종 합격 예비번호</th>
-              <th scope="col" className="r">최종 50%컷</th>
-              <th scope="col" className="r">최종 70%컷</th>
+              <th scope="col" className="r">대학 발표 성적 ①</th>
+              <th scope="col" className="r">대학 발표 성적 ②</th>
             </tr>
           </thead>
           <tbody>
             {years.flatMap((y) =>
               byYear.get(y)!.map((r, i) => {
                 const dv = derived(r);
+                const ps = publishedStats(r);
                 const renamedDept = r.d !== latest.d ? r.d : null;
                 const otherName = r.n !== schoolName ? r.n : null;
                 return (
@@ -162,8 +167,8 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
                       {dv.dropped === null ? <span className="unpub">─</span> : <><b className="num">{dv.dropped}</b><small> 명</small>{dv.heldD &&<Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
                     </td>
                     <td className="r"><RankValue c={r.rk} /></td>
-                    <td className="r"><Cut c={r.c50} /></td>
-                    <td className="r"><Cut c={r.c70} /></td>
+                    <td className="r"><Stat s={ps[0]} /></td>
+                    <td className="r"><Stat s={ps[1]} /></td>
                   </tr>
                 );
               }),
