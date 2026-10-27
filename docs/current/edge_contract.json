@@ -107634,7 +107634,7 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           }
         ],
-        "source_sha256": "e28a6d07abe34d5932a40ec40aa0b6355397f5f706341ca20be800904dd70d14",
+        "source_sha256": "5bf3f9131292a68abb54649a0ef066e81c641a35a8eeff3c81ff286b969475f5",
         "symbols": [
           {
             "declarations": [
@@ -129711,6 +129711,11 @@
             "src": "supabase/functions/_shared/jungsi/application/access.ts"
           },
           {
+            "importedName": "ApiHttpPorts",
+            "originalName": "ApiHttpPorts",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
             "importedName": "ApprovedOperatingPolicy",
             "originalName": "ApprovedOperatingPolicy",
             "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
@@ -129821,6 +129826,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
           },
           {
+            "importedName": "RelayBoundary",
+            "originalName": "RelayBoundary",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
             "importedName": "SCORE_CONTENT_REJECTION_CODES",
             "originalName": "SCORE_CONTENT_REJECTION_CODES",
             "src": "supabase/functions/_shared/jungsi/application/score_input_service.ts"
@@ -129891,6 +129901,11 @@
             "src": "supabase/functions/_shared/jungsi/domain/score_input_rights.ts"
           },
           {
+            "importedName": "createApiHandler",
+            "originalName": "createApiHandler",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
             "importedName": "equal",
             "originalName": "equal",
             "src": "tests/edge/fixture.ts"
@@ -129919,6 +129934,11 @@
             "importedName": "readSessionSnapshot",
             "originalName": "readSessionSnapshot",
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "reportDto",
+            "originalName": "reportDto",
+            "src": "supabase/functions/_shared/jungsi/application/profile_reports.ts"
           },
           {
             "importedName": "safeFailure",
@@ -129951,7 +129971,7 @@
             "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
           }
         ],
-        "source_sha256": "c4d1adfb34a55997f8c69158f2ac6125b3fc2082f5a51717e2d3e9812576f5a9",
+        "source_sha256": "cce54568dfbf59a5bc6980060ce16ed822e5b660d214a86a3092f9705763bd7f",
         "symbols": [
           {
             "declarations": [
@@ -131076,6 +131096,35 @@
               }
             ],
             "name": "adminSnapshot"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "storedSnapshotHttpRegression"
           }
         ]
       },
@@ -131237,6 +131286,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
             }
           ]
         },

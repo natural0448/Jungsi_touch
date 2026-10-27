@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.129",
+  "version": "1.9.130",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -582,7 +582,7 @@
         "REQ-26",
         "REQ-27"
       ],
-      "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외",
+      "response_scope": "현재 등급과 무관하게 본인 저장 리포트를 읽는다. 승인된 저장 출처의 결과만 읽기 전용 스냅샷으로 제공하며 새 계산·검색·변경 권한을 추가하지 않는다.",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -7668,7 +7668,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7842,7 +7842,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8008,7 +8008,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8027,7 +8027,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8052,7 +8052,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8077,7 +8077,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -21763,6 +21763,20 @@
         "REQ-28"
       ],
       "summary": "기존 Owner 503 수정판의 실제 설치 소스를 새로 내려받아 전체 bytes/SHA를 독립 확인했다. 새 Owner 회신 대기와 현재 화면·로컬 후보·설치본 인수를 구분하고 철회된 읽기 예산 분리 제안을 적용하지 않는다. 미연결 검토 대상은 기존 명부·한 분할·native byte 위치를 재사용해 원형과 네 식별 필드를 대조했으며, 집합 발표를 단일 모집단위 결과로 복제하지 않는 원칙과 제한된 중복 검수/미확인 정의를 기획·라우팅에 일치화한다. DB·산출 본체·권한·기존 인증/예산/Secrets·새판 배포 상태는 변경하지 않는다."
+    },
+    {
+      "date": "2026-10-27",
+      "version": "1.9.130",
+      "requirements": [
+        "REQ-02",
+        "REQ-11",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "summary": "무이용권·만료 회원의 본인 저장 리포트 읽기와 출력에서 read_only_snapshot.shortlist의 응답 스키마를 서비스가 생성하는 ID별 관심 항목 맵과 일치시킨다. 실제 서버 로그의 response_projection 503 및 같은 단계의 합성 재현을 근거로 하는 수정 후보다. 저장 출처 범위·본인 소유권·relay·유료 신규 기능 차단·재귀 응답 필터와 오류 시 차단을 유지한다. 합성 읽기/출력·타인 404·잘못된 값·빈 목록·유료 권한 회귀를 검증하며 운영 배포와 실제 회원 재시험은 미실행이다."
     }
   ],
   "overall_analysis_contract": {
@@ -22272,7 +22286,8 @@
           "overall은 저장된 본인의 기존 학생 DTO다.",
           "유료 요청은 기존 paid_fields를 유지한다. 만료·무이용권 본인 read/export는 승인된 저장 출처가 있는 결과만 닫힌 read_only_snapshot으로 읽으며 새 계산은 하지 않는다.",
           "미확인 legacy 출처는 유료 결과를 임의 확장하거나 first-use 날짜를 추정하지 않는다.",
-          "정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다."
+          "정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다.",
+          "read_only_snapshot.shortlist는 승인된 분석 ID를 키로 하는 관심 항목 맵이다. 각 키와 값은 닫힌 identifier 및 shortlist 스키마로 재귀 검증하며 승인되지 않은 저장 결과는 포함하지 않는다."
         ],
         "optional_role_fields": {
           "standard": [
@@ -23067,7 +23082,7 @@
           },
           "public_response_schema": {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea",
+            "sha256": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f",
             "rank_only": true,
             "shared_cell_unchanged": true,
             "hash_scope": "EXACT_GIT_SOURCE_BYTES_UTF8_LF"
@@ -23182,7 +23197,7 @@
             "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "afea15c94ef1b81910ae71eabf2d8e8768a6eb9a627bc18792d42d37f8e2b842",
             "tests/edge/test_history_snapshot.ts": "84586a7e86eb9ef64c7a08c29256397045dda53fa1defc7ebaf644979b313c3d",
             "tests/edge/test_history_snapshot_source.ts": "0e924980944db2e0add3dde9ac188a55b27c4a80b11abaac82c009e7d8ce8804",
-            "src/jungsi_touch/application/public_response_schemas.json": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea",
+            "src/jungsi_touch/application/public_response_schemas.json": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f",
             "tests/edge/synthetic_history_qualification.ts": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce"
           },
           "verification": {
@@ -24349,7 +24364,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea"
+            "sha256": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -24417,7 +24432,7 @@
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "e28a6d07abe34d5932a40ec40aa0b6355397f5f706341ca20be800904dd70d14"
+            "sha256": "5bf3f9131292a68abb54649a0ef066e81c641a35a8eeff3c81ff286b969475f5"
           },
           {
             "path": "tests/edge/synthetic_school_reference.ts",
@@ -148986,7 +149001,7 @@
               "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
             }
           ],
-          "source_sha256": "e28a6d07abe34d5932a40ec40aa0b6355397f5f706341ca20be800904dd70d14",
+          "source_sha256": "5bf3f9131292a68abb54649a0ef066e81c641a35a8eeff3c81ff286b969475f5",
           "symbols": [
             {
               "declarations": [
@@ -171063,6 +171078,11 @@
               "src": "supabase/functions/_shared/jungsi/application/access.ts"
             },
             {
+              "importedName": "ApiHttpPorts",
+              "originalName": "ApiHttpPorts",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+            },
+            {
               "importedName": "ApprovedOperatingPolicy",
               "originalName": "ApprovedOperatingPolicy",
               "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
@@ -171173,6 +171193,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
             },
             {
+              "importedName": "RelayBoundary",
+              "originalName": "RelayBoundary",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            },
+            {
               "importedName": "SCORE_CONTENT_REJECTION_CODES",
               "originalName": "SCORE_CONTENT_REJECTION_CODES",
               "src": "supabase/functions/_shared/jungsi/application/score_input_service.ts"
@@ -171243,6 +171268,11 @@
               "src": "supabase/functions/_shared/jungsi/domain/score_input_rights.ts"
             },
             {
+              "importedName": "createApiHandler",
+              "originalName": "createApiHandler",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+            },
+            {
               "importedName": "equal",
               "originalName": "equal",
               "src": "tests/edge/fixture.ts"
@@ -171271,6 +171301,11 @@
               "importedName": "readSessionSnapshot",
               "originalName": "readSessionSnapshot",
               "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            },
+            {
+              "importedName": "reportDto",
+              "originalName": "reportDto",
+              "src": "supabase/functions/_shared/jungsi/application/profile_reports.ts"
             },
             {
               "importedName": "safeFailure",
@@ -171303,7 +171338,7 @@
               "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
             }
           ],
-          "source_sha256": "c4d1adfb34a55997f8c69158f2ac6125b3fc2082f5a51717e2d3e9812576f5a9",
+          "source_sha256": "cce54568dfbf59a5bc6980060ce16ed822e5b660d214a86a3092f9705763bd7f",
           "symbols": [
             {
               "declarations": [
@@ -172428,6 +172463,35 @@
                 }
               ],
               "name": "adminSnapshot"
+            },
+            {
+              "name": "storedSnapshotHttpRegression",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "void",
+                            "kind": "keyword",
+                            "value": "void"
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -172594,6 +172658,16 @@
           },
           {
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
             "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
             "targets": [
               {
@@ -172653,8 +172727,8 @@
             ]
           },
           {
-            "dynamic": false,
             "specifier": "./synthetic_exam_pack.ts",
+            "dynamic": false,
             "targets": [
               {
                 "kind": "code",
@@ -177513,7 +177587,7 @@
       "tests/edge/fixture.ts": "267c4377d3852de1a289cdc87fbcb38c99929967e584c89a62b6db8c8c3a53af",
       "tests/edge/member_shortlist_fixture.ts": "2bab484557612a697916f287b89ce08603bd5b2b3e8a34378ddea4d7f420af35",
       "tests/edge/parity_driver.ts": "8121d1f2d181b4efe5f4c826d5ac2e8b348522ddd5e89fe272517ac7c03ecb9a",
-      "tests/edge/public_api_contract_fixture.ts": "e28a6d07abe34d5932a40ec40aa0b6355397f5f706341ca20be800904dd70d14",
+      "tests/edge/public_api_contract_fixture.ts": "5bf3f9131292a68abb54649a0ef066e81c641a35a8eeff3c81ff286b969475f5",
       "tests/edge/synthetic_api_contract.ts": "a856ab6d53a83d44be4698af62145b1dec1a9160569e48ce9943e2e0468b577d",
       "tests/edge/synthetic_catalog.ts": "552d796efec54591941027d7e6289fcaafa2defa8ff0e2a9726b839dd34c18b8",
       "tests/edge/synthetic_exam_pack.ts": "0bab8e592fad298945a787c9af511cc6ce875b2452e4c3e2a4dd064be21a7937",
@@ -177577,7 +177651,7 @@
       "tests/edge/test_saved_reference_projection.ts": "3598b2c3bdd087fdc603b7734c41be170d7751600c7ff4e0a3ff0601fa87c888",
       "tests/edge/test_school_reference_provider.ts": "503cf88c2eee0b902b4d70b78377f6628f65606b96796f0c1e2bbd836ccf1001",
       "tests/edge/test_school_reference_scoring.ts": "23dcf09ff4f6474b0327d986213562b28b607393e022084cf158f6bd99c38424",
-      "tests/edge/test_score_input_policy.ts": "c4d1adfb34a55997f8c69158f2ac6125b3fc2082f5a51717e2d3e9812576f5a9",
+      "tests/edge/test_score_input_policy.ts": "cce54568dfbf59a5bc6980060ce16ed822e5b660d214a86a3092f9705763bd7f",
       "tests/edge/test_session_candidate.ts": "8f05110f32d7285671e33b7f2f04500ef1b227be319c792ea99fde1b99c1b3d5",
       "tests/edge/test_sql_values.ts": "85c8f851e0389572ddf658c42d488c6c2a9d81d675df5f4f7e8949bf583080bd",
       "tests/edge/test_supabase_api_ingress.ts": "94e3f05ffa572daa35519dc722a22199e73441df5da3524fa7de19e4979e7fb7",
@@ -177675,8 +177749,8 @@
       "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "50be2cb82f617fdd88139b6fe431e6aa03ec44104972d5b5ead290cc20f4fa89",
       "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "6eb4908465cdc5a7a27381e0d5915734a7478e8b69aab2b178dcc8c9f79efd93",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "76ad62f358d8631e7f9cef1730d2888ae071855dd061af254c6dc54dea81ac1c",
-      "tests/edge/test_score_input_policy.ts": "c4d1adfb34a55997f8c69158f2ac6125b3fc2082f5a51717e2d3e9812576f5a9",
-      "tests/edge/public_api_contract_fixture.ts": "e28a6d07abe34d5932a40ec40aa0b6355397f5f706341ca20be800904dd70d14",
+      "tests/edge/test_score_input_policy.ts": "cce54568dfbf59a5bc6980060ce16ed822e5b660d214a86a3092f9705763bd7f",
+      "tests/edge/public_api_contract_fixture.ts": "5bf3f9131292a68abb54649a0ef066e81c641a35a8eeff3c81ff286b969475f5",
       "tests/edge/synthetic_api_contract.ts": "a856ab6d53a83d44be4698af62145b1dec1a9160569e48ce9943e2e0468b577d"
     },
     "current_transition_followup": {
@@ -177763,7 +177837,20 @@
       }
     },
     "current_operating_receipt_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026",
-    "source_candidate_status_rule": "activation_status, actual_new_policy_requests and the initial empty-schema evidence are frozen source-candidate records. Do not use them as the current operational state of the scoped dated acceptance; do not promote full native/security acceptance from the new receipt."
+    "source_candidate_status_rule": "activation_status, actual_new_policy_requests and the initial empty-schema evidence are frozen source-candidate records. Do not use them as the current operational state of the scoped dated acceptance; do not promote full native/security acceptance from the new receipt.",
+    "snapshot_projection_repair_20261027": {
+      "status": "SOURCE_CANDIDATE_SCOPED_SYNTHETIC_PASS",
+      "scope": [
+        "report.read",
+        "report.export"
+      ],
+      "trigger": "verified-own stored snapshot shortlist was emitted as an identifier-keyed map but projected as one item",
+      "security": "scope-filtered saved origins only; existing owner, relay, paid feature gates and recursive validation remain",
+      "verification": "synthetic HTTP read/export including no active pass and expired pass, other-owner 404, paid gate, unknown-field removal, invalid values and empty map",
+      "actual_request_retest": "NOT_RUN",
+      "deployment": "NOT_RUN",
+      "exact_commit_CI": "PENDING"
+    }
   },
   "service_runtime_followup": {
     "format": "jungsi.service-runtime-followup/v1",
@@ -181698,7 +181785,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea"
+            "sha256": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
@@ -181782,7 +181869,7 @@
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "e28a6d07abe34d5932a40ec40aa0b6355397f5f706341ca20be800904dd70d14"
+            "sha256": "5bf3f9131292a68abb54649a0ef066e81c641a35a8eeff3c81ff286b969475f5"
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",

@@ -4668,8 +4668,16 @@
           "nullable": true
         },
         "shortlist": {
-          "ref": "shortlist",
-          "nullable": false
+          "type": "map",
+          "nullable": false,
+          "keys": {
+            "ref": "identifier",
+            "nullable": false
+          },
+          "values": {
+            "ref": "shortlist",
+            "nullable": false
+          }
         },
         "analysis_status": {
           "ref": "read_only_analysis_status",

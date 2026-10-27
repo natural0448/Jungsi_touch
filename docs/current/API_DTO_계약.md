@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.129이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.130이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -82,6 +82,7 @@ format: jungsi.persisted-report/v1
 - 유료 요청은 기존 paid_fields를 유지한다. 만료·무이용권 본인 read/export는 승인된 저장 출처가 있는 결과만 닫힌 read_only_snapshot으로 읽으며 새 계산은 하지 않는다.
 - 미확인 legacy 출처는 유료 결과를 임의 확장하거나 first-use 날짜를 추정하지 않는다.
 - 정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다.
+- read_only_snapshot.shortlist는 승인된 분석 ID를 키로 하는 관심 항목 맵이다. 각 키와 값은 닫힌 identifier 및 shortlist 스키마로 재귀 검증하며 승인되지 않은 저장 결과는 포함하지 않는다.
 
 ### catalog_search
 
@@ -434,7 +435,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=a6eb7fe0acef3eafa6b26d288ff5c006bdc7e5ffa3b32d8d7d9d0f1a21ffc11c -->
+<!-- jungsi:generated spec_sha256=8cc9bb269fc9b810fb7ac0368481c09961f74029d129df48c2415a633544acdd -->
 
 
 ## 회원별 관심대학 JSON API

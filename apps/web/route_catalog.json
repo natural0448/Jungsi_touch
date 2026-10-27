@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.129",
-  "source_sha256": "a6eb7fe0acef3eafa6b26d288ff5c006bdc7e5ffa3b32d8d7d9d0f1a21ffc11c",
+  "spec_version": "1.9.130",
+  "source_sha256": "8cc9bb269fc9b810fb7ac0368481c09961f74029d129df48c2415a633544acdd",
   "pages": [
     {
       "id": "PAGE-01",
@@ -398,7 +398,7 @@
         "REQ-26",
         "REQ-27"
       ],
-      "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외",
+      "response_scope": "현재 등급과 무관하게 본인 저장 리포트를 읽는다. 승인된 저장 출처의 결과만 읽기 전용 스냅샷으로 제공하며 새 계산·검색·변경 권한을 추가하지 않는다.",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
@@ -1577,7 +1577,8 @@
           "overall은 저장된 본인의 기존 학생 DTO다.",
           "유료 요청은 기존 paid_fields를 유지한다. 만료·무이용권 본인 read/export는 승인된 저장 출처가 있는 결과만 닫힌 read_only_snapshot으로 읽으며 새 계산은 하지 않는다.",
           "미확인 legacy 출처는 유료 결과를 임의 확장하거나 first-use 날짜를 추정하지 않는다.",
-          "정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다."
+          "정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다.",
+          "read_only_snapshot.shortlist는 승인된 분석 ID를 키로 하는 관심 항목 맵이다. 각 키와 값은 닫힌 identifier 및 shortlist 스키마로 재귀 검증하며 승인되지 않은 저장 결과는 포함하지 않는다."
         ],
         "optional_role_fields": {
           "standard": [
@@ -2372,7 +2373,7 @@
           },
           "public_response_schema": {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea",
+            "sha256": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f",
             "rank_only": true,
             "shared_cell_unchanged": true,
             "hash_scope": "EXACT_GIT_SOURCE_BYTES_UTF8_LF"
@@ -2487,7 +2488,7 @@
             "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "afea15c94ef1b81910ae71eabf2d8e8768a6eb9a627bc18792d42d37f8e2b842",
             "tests/edge/test_history_snapshot.ts": "84586a7e86eb9ef64c7a08c29256397045dda53fa1defc7ebaf644979b313c3d",
             "tests/edge/test_history_snapshot_source.ts": "0e924980944db2e0add3dde9ac188a55b27c4a80b11abaac82c009e7d8ce8804",
-            "src/jungsi_touch/application/public_response_schemas.json": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea",
+            "src/jungsi_touch/application/public_response_schemas.json": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f",
             "tests/edge/synthetic_history_qualification.ts": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce"
           },
           "verification": {
@@ -2804,7 +2805,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea"
+            "sha256": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
@@ -2888,7 +2889,7 @@
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "e28a6d07abe34d5932a40ec40aa0b6355397f5f706341ca20be800904dd70d14"
+            "sha256": "5bf3f9131292a68abb54649a0ef066e81c641a35a8eeff3c81ff286b969475f5"
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",

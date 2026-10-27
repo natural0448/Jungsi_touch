@@ -1,4 +1,9 @@
 import { safeFailure } from "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts";
+import { RelayBoundary } from "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts";
+import {
+  type ApiHttpPorts,
+  createApiHandler,
+} from "../../supabase/functions/_shared/jungsi/infrastructure/api_http.ts";
 import {
   canonicalApiPolicies,
   canonicalPublicResponseSchemas,
@@ -13,7 +18,10 @@ import {
   verifyStageBudgetProof,
 } from "../../supabase/functions/_shared/jungsi/application/operating_policy.ts";
 import { OverallAnalysisService } from "../../supabase/functions/_shared/jungsi/application/overall_analysis.ts";
-import { ProfileReportService } from "../../supabase/functions/_shared/jungsi/application/profile_reports.ts";
+import {
+  ProfileReportService,
+  reportDto,
+} from "../../supabase/functions/_shared/jungsi/application/profile_reports.ts";
 import {
   SCORE_CONTENT_REJECTION_CODES,
   ScoreInputService,
@@ -1253,6 +1261,209 @@ Deno.test("cached overall on a new pass records its access pass while original p
   equal(f.pool.state.origins[0].pass, "1");
   equal(f.pool.state.profiles.size, 1);
 });
+
+async function storedSnapshotHttpRegression(): Promise<void> {
+  const f = nativeFixture(), original = await overallReport(f);
+  const allowed = "SYNTHETIC-allowed", ungranted = "SYNTHETIC-ungranted";
+  const assessment = (id: string): NativeObject => ({
+    offering_id: id,
+    status: "pending",
+    reason_code: "offering_analysis_not_requested",
+    converted_score: null,
+    converted_percentile: null,
+    category: "pending",
+    advantage: null,
+    years: [],
+    versions: {},
+    eligibility_status: null,
+    internal_value: "SYNTHETIC-private",
+  });
+  const item = {
+    selected: true,
+    changed_at: null,
+    assessment_status: "pending",
+    profile_id: original.profile_id,
+    catalog_version: null,
+    internal_value: "SYNTHETIC-private",
+  };
+  const saved = await f.platform.writeReport({
+    owner: A,
+    reportId: original.report_id as string,
+    profileId: original.profile_id as string,
+    body: {
+      overall: original.overall,
+      analyses: {
+        [allowed]: assessment(allowed),
+        [ungranted]: assessment(ungranted),
+      },
+      candidates: null,
+      shortlist: { [allowed]: item, [ungranted]: item },
+      analysis_status: {
+        status: "pending",
+        reason_code: "offering_analysis_not_requested",
+      },
+    },
+    expected: 1,
+    nowUtc: NOW,
+    operation: "university.analyze",
+    key: "SYNTHETIC-snapshot-origin",
+    digest: HASH,
+    paidOrigin: f.service.origin(f.verified, "university.analyze", [
+      "analysis:" + allowed,
+    ]),
+  });
+  const projection = new PublicResponseProjection(
+    RESPONSE_SCHEMAS,
+    SERVICE_SPEC.operations,
+  );
+  const relay = "SYNTHETIC-snapshot-relay-" + "x".repeat(32);
+  let owner = A, paidUntilUtc: bigint | null = null;
+  const stages: string[] = [];
+  const ports: ApiHttpPorts = {
+    onStage: (stage) => {
+      stages.push(stage);
+    },
+    relay: new RelayBoundary(relay),
+    clock,
+    sessions: {
+      verifyUserBearer: () => Promise.resolve({ subjectId: owner, expiresAtUtc: NOW + 1000000n }),
+    },
+    passes: {
+      readCurrent: (subjectId, evaluatedAtUtc) =>
+        Promise.resolve({
+          authority: "public.jeongsi_passes" as const,
+          metadataVerified: true as const,
+          subjectId,
+          evaluatedAtUtc,
+          paidUntilUtc: paidUntilUtc !== null && paidUntilUtc > evaluatedAtUtc
+            ? paidUntilUtc
+            : null,
+          passId: paidUntilUtc !== null && paidUntilUtc > evaluatedAtUtc ? "1" : null,
+        }),
+    },
+    reports: f.platform,
+    authorities: {
+      readCurrent: () => {
+        throw new Error("Unrequested authority");
+      },
+    },
+    resources: {
+      readScope: () => {
+        throw new Error("Unrequested resource");
+      },
+    },
+    projection,
+    budget: { run: async (_request, work) => await work() },
+    business: f.profile,
+  };
+  const handler = createApiHandler(
+    SERVICE_SPEC.operations.map(({ contract_ref: _, ...policy }) => policy),
+    ports,
+  );
+  const url = "https://synthetic.invalid/api/v1/reports/" + saved.report_id;
+  const headers = {
+    Authorization: "Bearer SYNTHETIC-token",
+    "X-Jungsi-Relay-Token": relay,
+  };
+  for (const until of [null, NOW - 1n]) {
+    paidUntilUtc = until;
+    for (const suffix of ["", "/print"]) {
+      stages.length = 0;
+      const response = await handler(new Request(url + suffix, { headers }));
+      assert(
+        response.status === 200,
+        "HTTP " + response.status + " at " + stages.at(-1),
+      );
+      assert(
+        stages.includes("response_projection") &&
+          stages.includes("final_projection"),
+      );
+      const outer = await response.json();
+      const report = suffix ? outer.report : outer;
+      assert(!Object.hasOwn(report, "analyses"));
+      assert(!Object.hasOwn(report, "shortlist"));
+      equal(Object.keys(report.read_only_snapshot.analyses), [allowed]);
+      equal(Object.keys(report.read_only_snapshot.shortlist), [allowed]);
+      equal(report.read_only_snapshot.shortlist[allowed].selected, true);
+      assert(!JSON.stringify(report).includes("SYNTHETIC-private"));
+      assert(!JSON.stringify(report).includes(ungranted));
+    }
+    const paidOnly = await handler(
+      new Request(url + "/university-results", {
+        method: "POST",
+        headers,
+        body: "{}",
+      }),
+    );
+    equal(paidOnly.status, 403);
+  }
+  owner = B;
+  equal((await handler(new Request(url, { headers }))).status, 404);
+  owner = A;
+  const withoutRelay = await handler(
+    new Request(url, { headers: { Authorization: "Bearer SYNTHETIC-token" } }),
+  );
+  equal(withoutRelay.status, 403);
+  paidUntilUtc = NOW + 1000000n;
+  const paid = await handler(new Request(url, { headers }));
+  equal(paid.status, 200);
+  const paidBody = await paid.json();
+  assert(Object.hasOwn(paidBody.analyses, allowed));
+  assert(Object.hasOwn(paidBody.analyses, ungranted));
+  assert(!Object.hasOwn(paidBody, "read_only_snapshot"));
+  paidUntilUtc = null;
+  const standard = await handler(new Request(url, { headers }));
+  const standardBody = await standard.json();
+  for (
+    const scope of [
+      {
+        overall: true,
+        analysisIds: [],
+        candidates: true,
+        legacyVerified: false,
+      },
+      {
+        overall: true,
+        analysisIds: [],
+        candidates: false,
+        legacyVerified: true,
+      },
+    ]
+  ) {
+    const empty = projection.project(
+      "report.read",
+      "standard",
+      reportDto(session(A, false), saved, scope),
+    ) as NativeObject;
+    equal((empty.read_only_snapshot as NativeObject).shortlist, {});
+    equal((empty.read_only_snapshot as NativeObject).analyses, {});
+  }
+  const invalidKey = structuredClone(standardBody);
+  invalidKey.read_only_snapshot.shortlist["bad key"] =
+    invalidKey.read_only_snapshot.shortlist[allowed];
+  await denied(
+    () =>
+      Promise.resolve(
+        projection.project("report.read", "standard", invalidKey),
+      ),
+    "security_policy_unavailable",
+    503,
+  );
+  const invalidValue = structuredClone(standardBody);
+  invalidValue.read_only_snapshot.shortlist[allowed].selected = "not-a-boolean";
+  await denied(
+    () =>
+      Promise.resolve(
+        projection.project("report.read", "standard", invalidValue),
+      ),
+    "security_policy_unavailable",
+    503,
+  );
+  equal(f.pool.state.revisions.size, 2);
+  equal(f.pool.state.profiles.size, 1);
+  equal(f.pool.state.origins.length, 2);
+}
+
 Deno.test("first-use write failure is a 503 and own stored read recovers original delivery without score resave", async () => {
   const f = nativeFixture(), result = await overallReport(f);
   f.pool.failDelivery = true;
@@ -1283,6 +1494,7 @@ Deno.test("first-use write failure is a 503 and own stored read recovers origina
   equal(f.pool.state.firstUse.get("1")?.basis, "pending_original_delivery");
   equal(f.pool.state.profiles.size, 1);
   equal(f.pool.state.attempts.length, 1);
+  await storedSnapshotHttpRegression();
 });
 Deno.test("many component origins and delivery each use a bounded batch query", async () => {
   const f = nativeFixture(), profile = await f.save();
