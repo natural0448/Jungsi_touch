@@ -21613,6 +21613,13 @@
         "REQ-24"
       ],
       "summary": "화면팀 변경(10-27 QA A-06): 관리 화면 /management/current-review 에 다른 관리 화면(p1-snapshot·score-corrections)과 같은 에듀터치 관리자 확인(isEdutouchAdmin)을 넣었다. 회원 공개 뒤 일반 회원에게 검색 양식이 보이지 않게 한다. 조회 권한(검수 계정) 판단은 서버 그대로."
+    },
+    {
+      "date": "2026-10-27",
+      "requirements": [
+        "REQ-24"
+      ],
+      "summary": "화면팀 변경(10-27 QA A-02): 상담 리포트 인쇄(/reports/me/print)에서 이용권 없는 회원은 리포트를 찾기 전에 '이용권 회원 전용' 안내를 본다. 전에는 '인쇄할 리포트가 없습니다 · 성적 입력하기'로 보내 입력할 수 없는 화면으로 이어졌다. 유료 회원 흐름과 서버 권한 판단은 그대로."
     }
   ],
   "overall_analysis_contract": {

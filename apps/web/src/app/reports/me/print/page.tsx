@@ -4,7 +4,7 @@ import { MemberMark } from "@/components/member-mark";
 import { PASS_HREF } from "@/lib/links";
 import type { Metadata } from "next";
 import Link from "@/components/link";
-import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { getReportId } from "@/lib/report-ref";
@@ -24,6 +24,19 @@ export default async function Page() {
   const back = page("PAGE-02").path;
   const caller = await getCaller();
   const src = source();
+  const paidOnly = (
+    <div className="wrap pg-body">
+      <section className="gate">
+        <h2>상담 리포트 인쇄는 이용권 회원 전용입니다</h2>
+        <p>전체 성적 위치는 내 성적 리포트에서 그대로 볼 수 있습니다.</p>
+        <div className="acts"><a className="btn t" href={PASS_HREF}>이용권 보기</a><Link className="btn" href={back}>내 성적 리포트로</Link></div>
+      </section>
+    </div>
+  );
+  // 이용권 없는 회원은 리포트가 없어 '성적 입력하기'로 보내면 막다른 길이 된다 — 먼저 이용권 안내(QA A-02)
+  const { session, down } = await sessionOrDown(src, caller);
+  if (down) return <ConnectionNotice e={down} />;
+  if (session && session.member_tier !== "paid") return paidOnly;
   const reportId = await getReportId();
   let snap: SnapshotDto | null = null;
   let shortlist: PickedItem[] = [];
@@ -34,15 +47,7 @@ export default async function Page() {
   } catch (e) {
     if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
     if (!(e instanceof AccessDenied)) throw e;
-    return (
-      <div className="wrap pg-body">
-        <section className="gate">
-          <h2>상담 리포트 인쇄는 이용권 회원 전용입니다</h2>
-          <p>전체 성적 위치는 내 성적 리포트에서 그대로 볼 수 있습니다.</p>
-          <div className="acts"><a className="btn t" href={PASS_HREF}>이용권 보기</a><Link className="btn" href={back}>내 성적 리포트로</Link></div>
-        </section>
-      </div>
-    );
+    return paidOnly;
   }
   if (!snap) {
     return (
