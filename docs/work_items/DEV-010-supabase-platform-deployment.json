@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.128",
+  "contract_version": "1.9.129",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -4173,7 +4173,7 @@
       "latest_owner_post_save_503_activation_20261027": {
         "format": "jungsi.owner-post-save-503-scoped-acceptance/v1",
         "evidence_id": "OPS-OWNER-POST-SAVE-503-20261027",
-        "status": "OWNER_REPORTED_DEPLOYED_V21_SCOPED_BUSINESS_ACCEPTANCE_ROOT_PIN_MATCHED",
+        "status": "OWNER_V21_SCOPED_REPAIR_FULL_HOSTED_SOURCE_INDEPENDENTLY_VERIFIED_NEW_FOLLOWUP_ACCEPTANCE_PENDING",
         "date_KST": "2026-10-27",
         "Owner_report": {
           "bytes": 4798,
@@ -4183,7 +4183,7 @@
         "prior_function_version_Owner_reported": 20,
         "bundle_bytes": 1794567,
         "bundle_sha256": "6dfe2d296b10219140b4c06083893fcee0b48457a7d09df2c4909e18c66b8c0f",
-        "Root_comparison": "The reported post-deployment bytes and full SHA match the independently pinned limited maintenance overlay in the adopted handoff. Root has not downloaded a new hosted source in this task.",
+        "Root_comparison": "Root freshly downloaded the installed function through the existing Supabase Dashboard. The entire source bytes and full SHA match the adopted limited maintenance bundle; the Dashboard shows the reported deployment count and JWT verification remains enabled. This verifies installed-source identity, not a new unpublished local candidate or full business/security acceptance.",
         "source_composition": "Limited overlay on the pinned installed runtime, including the registered batch boundary and bounded immutable preflight. This receipt does not represent deployment of the whole current develop runtime.",
         "source_verification": {
           "develop_commit": "75c92941ee9ce0d76e619357da4501bdc23af69f",
@@ -4223,7 +4223,6 @@
         "Root_operating_mutations": 0,
         "DB_Storage_Secrets_or_resource_changes_in_this_task": 0,
         "remaining_NOT_RUN": [
-          "Root fresh hosted full-source download",
           "exact successful HTTP response and row-level reason-code capture",
           "print and previous-report regression in this receipt",
           "no-token and other-owner rejection in this receipt",
@@ -4240,14 +4239,44 @@
         "Storage_authenticated_GET": "No new Root authenticated Storage read or source publication in this task. The maintenance receipt reports no Storage/configuration change.",
         "P1": "New historical-reference edition is not activated by this receipt; preserve existing qualified data and use the current independently pinned source tuple for preparation.",
         "P2": "Owner reports the existing input-right state preserved. No new score save or transition SQL was run in this acceptance.",
-        "Root_independent_live_rerun": "NOT_RUN. Root compared the full reported deployed source pin to the adopted maintenance bundle and preserved the Owner receipt. Successful response bodies and row reason codes were not attached.",
+        "Root_independent_live_rerun": "Fresh installed-source identity PASS. Login and the existing P1 screen were observed read-only; current screens are not evidence that an unpublished local candidate was deployed. Exact successful business HTTP, row reasons, old-report/print and full security acceptance remain separate and unverified.",
         "residual": [
-          "Root fresh deployed-source and explicit successful HTTP evidence",
+          "explicit successful HTTP evidence for the specified final candidate",
           "print/previous-report and no-token/other-owner regression",
           "full operation-specific security acceptance",
           "current-year conversion/domain adapter readiness",
           "new P1 edition preparation and separate activation"
-        ]
+        ],
+        "Root_hosted_source_readback": {
+          "evidence_id": "OPS-ROOT-OWNER503-SOURCE-20261027",
+          "status": "PASS_FRESH_DOWNLOAD_FULL_BYTES_AND_SHA_MATCH",
+          "receipt_sha256": "d3625e21f3e7f7536598f80a0d97e1d73edfe86db45f0f00d3fbe3c1a0da1d8e",
+          "dashboard_boundary_receipt_sha256": "6d8eac53039807b951cc75e6bdddd841ec0cf04c46fb15abdea5baded38fd1ed",
+          "deployment_count_matches_report": true,
+          "JWT_verification_enabled": true,
+          "Secrets_or_configuration_changed": false,
+          "new_Owner_followup_reply": "NOT_RECEIVED",
+          "current_screen_is_new_release_acceptance": false
+        }
+      },
+      "owner_followup_acceptance_boundary_20261027": {
+        "status": "LATEST_OWNER_FOLLOWUP_PENDING_SOURCE_LOCAL_DATA_EVIDENCE_SEPARATE",
+        "requirements": [
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "operations": [
+          "university.analyze",
+          "shortlist.update"
+        ],
+        "rule": "Use the actual final source commit and deployed full-source pin together with scoped response evidence. A currently visible page, no warning log, historical Owner receipt, or local test alone does not accept a new release. Preserve working scores, ownership, auth/MFA/relay, idempotency and existing budgets.",
+        "withdrawn_budget_proposal": "PRESERVE_ONLY_DO_NOT_APPLY",
+        "source_regression": "Reuse the prior exact maintenance-source/CI and bounded component regression where the freshly read source SHA agrees. Rerun only changed paths or unresolved cases.",
+        "Owner": "Existing frontend/system-service responsibility and existing installation authority; no new DB, scoring or Secrets delegation.",
+        "production_ready": false
       }
     }
   }

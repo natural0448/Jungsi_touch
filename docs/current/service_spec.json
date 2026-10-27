@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.128",
+  "version": "1.9.129",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7668,7 +7668,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.128",
+        "contract_version": "1.9.129",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7842,7 +7842,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.128",
+        "contract_version": "1.9.129",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8008,7 +8008,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.128",
+        "contract_version": "1.9.129",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8027,7 +8027,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.128",
+        "contract_version": "1.9.129",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8052,7 +8052,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.128",
+        "contract_version": "1.9.129",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8077,7 +8077,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.128",
+        "contract_version": "1.9.129",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -21750,6 +21750,19 @@
         "REQ-26"
       ],
       "summary": "DB-CAP-01: 미사용 원본 intake 압축사본의 원형 보관·실제 PostgreSQL 복원·Drive 재다운로드 지문 대조 후 정확 대상만 DROP RESTRICT로 제거하고 커밋·사후조회했다. 현재 서비스·보호 객체·head와 원본/복구 보관을 유지하며 일회성 진단 파일 정리는 별도 사용자 지정 명부로 완료했다. 할당 디스크/청구 축소나 엔진/배포 완료로 확대하지 않는다. RAM cache/buffer·swap·commit 해석은 유지하며 강제 캐시 비우기·재시작·설정/요금 변경을 하지 않는다. 새 공개 API/DTO·회원/소유권·relay/예산·환산/누백 산출과 조건부 분류/사유 코드의 구현·활성 상태를 바꾸지 않는다."
+    },
+    {
+      "date": "2026-10-27",
+      "version": "1.9.129",
+      "requirements": [
+        "REQ-02",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "기존 Owner 503 수정판의 실제 설치 소스를 새로 내려받아 전체 bytes/SHA를 독립 확인했다. 새 Owner 회신 대기와 현재 화면·로컬 후보·설치본 인수를 구분하고 철회된 읽기 예산 분리 제안을 적용하지 않는다. 미연결 검토 대상은 기존 명부·한 분할·native byte 위치를 재사용해 원형과 네 식별 필드를 대조했으며, 집합 발표를 단일 모집단위 결과로 복제하지 않는 원칙과 제한된 중복 검수/미확인 정의를 기획·라우팅에 일치화한다. DB·산출 본체·권한·기존 인증/예산/Secrets·새판 배포 상태는 변경하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -36585,7 +36598,7 @@
       "latest_owner_post_save_503_activation_20261027": {
         "format": "jungsi.owner-post-save-503-scoped-acceptance/v1",
         "evidence_id": "OPS-OWNER-POST-SAVE-503-20261027",
-        "status": "OWNER_REPORTED_DEPLOYED_V21_SCOPED_BUSINESS_ACCEPTANCE_ROOT_PIN_MATCHED",
+        "status": "OWNER_V21_SCOPED_REPAIR_FULL_HOSTED_SOURCE_INDEPENDENTLY_VERIFIED_NEW_FOLLOWUP_ACCEPTANCE_PENDING",
         "date_KST": "2026-10-27",
         "Owner_report": {
           "bytes": 4798,
@@ -36595,7 +36608,7 @@
         "prior_function_version_Owner_reported": 20,
         "bundle_bytes": 1794567,
         "bundle_sha256": "6dfe2d296b10219140b4c06083893fcee0b48457a7d09df2c4909e18c66b8c0f",
-        "Root_comparison": "The reported post-deployment bytes and full SHA match the independently pinned limited maintenance overlay in the adopted handoff. Root has not downloaded a new hosted source in this task.",
+        "Root_comparison": "Root freshly downloaded the installed function through the existing Supabase Dashboard. The entire source bytes and full SHA match the adopted limited maintenance bundle; the Dashboard shows the reported deployment count and JWT verification remains enabled. This verifies installed-source identity, not a new unpublished local candidate or full business/security acceptance.",
         "source_composition": "Limited overlay on the pinned installed runtime, including the registered batch boundary and bounded immutable preflight. This receipt does not represent deployment of the whole current develop runtime.",
         "source_verification": {
           "develop_commit": "75c92941ee9ce0d76e619357da4501bdc23af69f",
@@ -36635,7 +36648,6 @@
         "Root_operating_mutations": 0,
         "DB_Storage_Secrets_or_resource_changes_in_this_task": 0,
         "remaining_NOT_RUN": [
-          "Root fresh hosted full-source download",
           "exact successful HTTP response and row-level reason-code capture",
           "print and previous-report regression in this receipt",
           "no-token and other-owner rejection in this receipt",
@@ -36652,14 +36664,44 @@
         "Storage_authenticated_GET": "No new Root authenticated Storage read or source publication in this task. The maintenance receipt reports no Storage/configuration change.",
         "P1": "New historical-reference edition is not activated by this receipt; preserve existing qualified data and use the current independently pinned source tuple for preparation.",
         "P2": "Owner reports the existing input-right state preserved. No new score save or transition SQL was run in this acceptance.",
-        "Root_independent_live_rerun": "NOT_RUN. Root compared the full reported deployed source pin to the adopted maintenance bundle and preserved the Owner receipt. Successful response bodies and row reason codes were not attached.",
+        "Root_independent_live_rerun": "Fresh installed-source identity PASS. Login and the existing P1 screen were observed read-only; current screens are not evidence that an unpublished local candidate was deployed. Exact successful business HTTP, row reasons, old-report/print and full security acceptance remain separate and unverified.",
         "residual": [
-          "Root fresh deployed-source and explicit successful HTTP evidence",
+          "explicit successful HTTP evidence for the specified final candidate",
           "print/previous-report and no-token/other-owner regression",
           "full operation-specific security acceptance",
           "current-year conversion/domain adapter readiness",
           "new P1 edition preparation and separate activation"
-        ]
+        ],
+        "Root_hosted_source_readback": {
+          "evidence_id": "OPS-ROOT-OWNER503-SOURCE-20261027",
+          "status": "PASS_FRESH_DOWNLOAD_FULL_BYTES_AND_SHA_MATCH",
+          "receipt_sha256": "d3625e21f3e7f7536598f80a0d97e1d73edfe86db45f0f00d3fbe3c1a0da1d8e",
+          "dashboard_boundary_receipt_sha256": "6d8eac53039807b951cc75e6bdddd841ec0cf04c46fb15abdea5baded38fd1ed",
+          "deployment_count_matches_report": true,
+          "JWT_verification_enabled": true,
+          "Secrets_or_configuration_changed": false,
+          "new_Owner_followup_reply": "NOT_RECEIVED",
+          "current_screen_is_new_release_acceptance": false
+        }
+      },
+      "owner_followup_acceptance_boundary_20261027": {
+        "status": "LATEST_OWNER_FOLLOWUP_PENDING_SOURCE_LOCAL_DATA_EVIDENCE_SEPARATE",
+        "requirements": [
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "operations": [
+          "university.analyze",
+          "shortlist.update"
+        ],
+        "rule": "Use the actual final source commit and deployed full-source pin together with scoped response evidence. A currently visible page, no warning log, historical Owner receipt, or local test alone does not accept a new release. Preserve working scores, ownership, auth/MFA/relay, idempotency and existing budgets.",
+        "withdrawn_budget_proposal": "PRESERVE_ONLY_DO_NOT_APPLY",
+        "source_regression": "Reuse the prior exact maintenance-source/CI and bounded component regression where the freshly read source SHA agrees. Rerun only changed paths or unresolved cases.",
+        "Owner": "Existing frontend/system-service responsibility and existing installation authority; no new DB, scoring or Secrets delegation.",
+        "production_ready": false
       }
     }
   },
@@ -179478,6 +179520,44 @@
       "original_statistics_unchanged": true,
       "student_rank": false,
       "Owner_activation": "NOT_RUN"
+    },
+    "original_provenance_duplicate_review": {
+      "format": "jungsi.p1-bounded-original-observation-review/v1",
+      "evidence_id": "DATA-P1-ORIGIN58-20261027",
+      "status": "BOUNDED_NATIVE_ORIGIN_AND_IDENTITY_PASS_AGGREGATE_SCOPE_INDEPENDENT_REVIEW_PENDING",
+      "requirements": [
+        "REQ-02",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "operations_ref": "P1_display_snapshot_contract.read_API",
+      "page": "/jeongsi/admissions/results",
+      "layers": {
+        "planning": "shared contract and routing",
+        "data": "canonical observation, official source, population and duplicate adjudication",
+        "application": "registered ports and projection/DTO consumption",
+        "presentation": "approved display and explanations"
+      },
+      "reuse": "Reuse the recovered manifest, its one relevant part, pinned input hashes, four-field review and exact native source byte ranges. Do not reread every school, original graph or all parts on each turn.",
+      "origin_check": "Exact pinned source-line hashes and native university/department/track/group identities agree with the preserved counterpart. This recovers bounded current-origin evidence without claiming byte identity of the missing historical generator or original private provenance artifact.",
+      "population_rule": "A verified aggregate offering set is a distinct publication grain. Preserve its original null single PK and the actual multi-offering relationship. Never choose one member arbitrarily or copy the aggregate value into each member as that member's individual result.",
+      "duplicate_rule": "No collision was found within the reviewed set for the available identity context or the same source-cell/metric/statistic/cohort tuple. This is a bounded candidate check, not whole-database or official-definition duplicate approval. Compare year, campus/track/group, population, statistic, component, unit, basis, fullmark and formula-year before any merge; preserve missing cohort and source definitions as unresolved.",
+      "membership_ownership": "Existing authentication/paid-free and owner/subject scope remain enforced. Aggregate evidence does not grant new access or change existing display approval.",
+      "data_review": "Data team independently reviews the same pinned references with O/X and evidence pointers; no observation or raw-value copies in review rounds.",
+      "service_review": "Development team traces where aggregate provenance is lost in the existing P1 projection/DTO. Any necessary candidate remains on the existing application branch and must preserve public response allowlists and missingness.",
+      "receipt_sha256": "43646676b826d9f4432c06b384bddd428c6a87743442980623f8cfdd8b05a996",
+      "DB_writer": "No writer or publication from this bounded review. Keep the existing current pointer and single final writer; qualified mapped observations can proceed independently of unresolved ones.",
+      "remaining": [
+        "independent data semantic and duplicate review",
+        "exact historical generator/private provenance if asserting old-output regeneration identity",
+        "registered service consumption review",
+        "new edition and final Owner receipt/acceptance"
+      ],
+      "existing_canonical_values_changed": false,
+      "new_API_or_DTO_activated": false,
+      "publication_or_deployment_complete": false
     }
   },
   "administrator_verification_quota_contract": {
