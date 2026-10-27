@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.124",
+  "version": "1.9.125",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7662,7 +7662,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.124",
+        "contract_version": "1.9.125",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7836,7 +7836,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.124",
+        "contract_version": "1.9.125",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8002,7 +8002,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.124",
+        "contract_version": "1.9.125",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8021,7 +8021,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.124",
+        "contract_version": "1.9.125",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8046,7 +8046,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.124",
+        "contract_version": "1.9.125",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8071,7 +8071,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.124",
+        "contract_version": "1.9.125",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -18616,6 +18616,12 @@
           "기획1.9.123 / P1-HISTORICAL-REFERENCE-01 / REQ-28·24~26",
           "신규 합성13·관련68 및 정확 로컬 후보 서비스 검증 PASS; 정상 훅·정확 SHA CI 진행",
           "독립 검수 descriptor와 exact source/manifest/scope 결속. 원문·보류·q 및 기존 상한 유지. DB/Storage·배포·Owner 활성화 NOT_RUN. UI는 지정 SHA의 별도 Owner 패치."
+        ],
+        [
+          "운영 / 저장 후 503 수정판과 철회된 예산 분리안",
+          "기획1.9.125 / POST-SAVE-503-01 / REQ-14~16·24~26",
+          "정확 소스·병합 CI와 정상 검사 재사용. Owner v21 소스 지문 일치 보고 및 분석·담기·빼기 제한 범위 정상 회신 수용.",
+          "Root 새 운영 HTTP·보안 전체 검수 NOT_RUN. 예산 분리안은 보존만 하며 기존 한도 유지. 2027 산식·P3-01 실패 및 새 P1 자료 발행은 별도 미완료."
         ]
       ],
       "execution_ledger_source": "supabase_deployment_contract.live_execution",
@@ -21682,6 +21688,19 @@
         "REQ-26"
       ],
       "summary": "POST-SAVE-503-01: 선택된 불변 자료의 전체 preflight를 기존 배타적 읽기 구간으로 감싸 반복 head 조회를 줄인다. 기존 operation별 본문 검증과 명시 상태 확인·만료·오류 후 복구·저장 전후/응답 직전 fresh 확인은 유지한다. 배포본의 분석 루프에는 이미 등록된 TS batch 포트 경계를 한정 이식하는 별도 후보를 준비한다. 읽기/바이트/시간 상한·공유 예산·Secrets·DB 결과 캐시는 바꾸지 않는다. 신규 경계 회귀3·공급자/실제 context39 시험 내 신규 경계 사례3 PASS이며 실제 저장 결과·이력은 보존한다. 정상 전체 훅·정확 SHA CI는 진행하며 운영 요청 재실행·DB/Storage 실행·배포는 NOT_RUN이다."
+    },
+    {
+      "date": "2026-10-27",
+      "version": "1.9.125",
+      "requirements": [
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "Owner의 기존 Supabase v21 저장 후503 수정판 배포 회신을 제한 범위로 수용한다. 재다운로드 보고의 전체 소스 지문을 기존 유지보수 overlay 핀과 맞추고 분석·담기·빼기 및 입력상태 보존 보고를 실제 Root HTTP/전체 보안 검수와 구분한다. 이전 배포대기·Source118 이력은 보존한다. 먼저 보낸 키색인 예산 분리안은 최신 회신에서 철회되어 보존만 하며 읽기/바이트/시간·공유 예산과 기존 인증·소유권·입력권·멱등은 변경하지 않는다. 2027 환산 자료와 새 P1 발행은 별도이며 P3-01 실패·보안 gate·production_ready=false를 유지한다. 새 DB/Storage/Secrets·유료 자원 변경이나 운영 재실행은 없다."
     }
   ],
   "overall_analysis_contract": {
@@ -32958,9 +32977,9 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-SCORE-TRANSITION-ROOT-20261026",
             "code_in_installed14_scope": true,
-            "source_deployment": "EXISTING_SOURCE118_BACKEND_UNCHANGED_OWNER_PR66_FRONTEND_RECEIPT_BOUND",
-            "new_BFF_observation": "ROOT_EXPLICIT_ONE_TARGET_ANALYSIS_AND_REFRESH_PASS_SAVED_RESULT_READBACK_INPUT_ATTEMPTS_UNCHANGED",
-            "formal_native_and_operating_acceptance": "SCOPED_ACTUAL_BROWSER_AND_STORED_RESULT_PASS_FULL_NATIVE_SECURITY_CASES_NOT_RUN",
+            "source_deployment": "OWNER_REPORTED_V21_LIMITED_MAINTENANCE_OVERLAY_FULL_SOURCE_PIN_MATCHED",
+            "new_BFF_observation": "OWNER_REPORTED_SCOPED_UI_SUCCESS_AND_NO_NON2XX_WARNING; EXACT_SUCCESSFUL_HTTP_CAPTURE_NOT_RUN",
+            "formal_native_and_operating_acceptance": "NOT_RUN_FULL_OPERATION_SECURITY_ACCEPTANCE; DO_NOT_INFER_FROM_SCOPED_OWNER_REPORT",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026"
           },
           "historical_owner_receipt_20261020": {
@@ -32987,7 +33006,17 @@
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
           },
           "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026",
-          "post_save_503_followup_ref": "supabase_deployment_contract.live_execution.post_save_503_repair_20261027"
+          "post_save_503_followup_ref": "supabase_deployment_contract.live_execution.post_save_503_repair_20261027",
+          "history_before_Owner_v21_receipt": {
+            "current_owner_receipt": {
+              "evidence_id": "OPS-SCORE-TRANSITION-ROOT-20261026",
+              "code_in_installed14_scope": true,
+              "source_deployment": "EXISTING_SOURCE118_BACKEND_UNCHANGED_OWNER_PR66_FRONTEND_RECEIPT_BOUND",
+              "new_BFF_observation": "ROOT_EXPLICIT_ONE_TARGET_ANALYSIS_AND_REFRESH_PASS_SAVED_RESULT_READBACK_INPUT_ATTEMPTS_UNCHANGED",
+              "formal_native_and_operating_acceptance": "SCOPED_ACTUAL_BROWSER_AND_STORED_RESULT_PASS_FULL_NATIVE_SECURITY_CASES_NOT_RUN",
+              "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026"
+            }
+          }
         },
         "candidates.build": {
           "code": "PORTED",
@@ -33061,9 +33090,9 @@
           "current_owner_receipt": {
             "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
             "code_in_installed14_scope": true,
-            "source_deployment": "OWNER_V19_SOURCE118_ROOT_FULL_SOURCE_HASH_MATCH_NOT_ALL_OPERATION_ACCEPTANCE",
-            "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
-            "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+            "source_deployment": "OWNER_REPORTED_V21_LIMITED_MAINTENANCE_OVERLAY_FULL_SOURCE_PIN_MATCHED",
+            "new_BFF_observation": "OWNER_REPORTED_SCOPED_UI_SUCCESS_AND_NO_NON2XX_WARNING; EXACT_SUCCESSFUL_HTTP_CAPTURE_NOT_RUN",
+            "formal_native_and_operating_acceptance": "NOT_RUN_FULL_OPERATION_SECURITY_ACCEPTANCE; DO_NOT_INFER_FROM_SCOPED_OWNER_REPORT",
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
           },
           "historical_owner_receipt_20261020": {
@@ -33082,7 +33111,17 @@
             "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261022"
           },
           "source_candidate_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026",
-          "post_save_503_followup_ref": "supabase_deployment_contract.live_execution.post_save_503_repair_20261027"
+          "post_save_503_followup_ref": "supabase_deployment_contract.live_execution.post_save_503_repair_20261027",
+          "history_before_Owner_v21_receipt": {
+            "current_owner_receipt": {
+              "evidence_id": "OPS-OWNER-P1-P2-V3-20261020",
+              "code_in_installed14_scope": true,
+              "source_deployment": "OWNER_V19_SOURCE118_ROOT_FULL_SOURCE_HASH_MATCH_NOT_ALL_OPERATION_ACCEPTANCE",
+              "new_BFF_observation": "NO_NEW_OPERATION_TRACE_FROM_READONLY_PAGE_OPEN_RECEIPT",
+              "formal_native_and_operating_acceptance": "NOT_RUN_RESIDUAL_SECURITY_AND_BUSINESS_CASES",
+              "latest_evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024"
+            }
+          }
         },
         "report.export": {
           "code": "PORTED",
@@ -36053,7 +36092,7 @@
         "all_security_gates_passed": false,
         "production_ready": false
       },
-      "effective_current_runtime_ref": "supabase_deployment_contract.live_execution.latest_owner_activation_20261024",
+      "effective_current_runtime_ref": "supabase_deployment_contract.live_execution.latest_owner_post_save_503_activation_20261027",
       "latest_frontend_crawler_receipt_20261023": {
         "format": "jungsi.frontend-crawler-scoped-operating-receipt/v1",
         "evidence_id": "OPS-FRONTEND-CRAWL-SCOPED-20261023",
@@ -36282,7 +36321,7 @@
       "effective_current_score_transition_ref": "supabase_deployment_contract.live_execution.latest_score_transition_acceptance_20261026",
       "current_selection_hook_repair_20261026": {
         "id": "CURRENT-CATALOG-SELECTION-HOOK-01",
-        "status": "SOURCE_REPAIRED_FOCUSED_SYNTHETIC_PASS_FULL_HOOK_CI_PENDING",
+        "status": "SOURCE_MERGED_EXACT_CI_PASS_OWNER_REPORTED_SCOPED_MAINTENANCE_ACTIVATION",
         "basis_commit": "5d0c7aa04e7b51a282af2ce4979284c4c998aacd",
         "requirements": [
           "REQ-14",
@@ -36312,13 +36351,51 @@
           "status": "PASS",
           "external_ports": "synthetic only; network permission absent"
         },
-        "actual_Owner_target8_exact_HTTP_capture": "NOT_RUN; department descriptions are not independently captured submitted IDs",
-        "deployment": "NOT_RUN_SOURCE_CANDIDATE_ONLY",
-        "DB_Storage_Secrets_rights_limits_writes": "NOT_RUN_UNCHANGED",
-        "production_ready": false
+        "actual_Owner_target8_exact_HTTP_capture": "NOT_RUN; Owner reports the expected targets included in a successful first-range UI analysis, without submitted-ID/response capture.",
+        "deployment": "OWNER_REPORTED_LIMITED_V21_OVERLAY; NOT_WHOLE_DEVELOP_DEPLOYMENT",
+        "DB_Storage_Secrets_rights_limits_writes": "No additional change reported for the maintenance deployment; this planning task performs no operating writes.",
+        "production_ready": false,
+        "history_before_Owner_v21_receipt": {
+          "id": "CURRENT-CATALOG-SELECTION-HOOK-01",
+          "status": "SOURCE_REPAIRED_FOCUSED_SYNTHETIC_PASS_FULL_HOOK_CI_PENDING",
+          "basis_commit": "5d0c7aa04e7b51a282af2ce4979284c4c998aacd",
+          "requirements": [
+            "REQ-14",
+            "REQ-15",
+            "REQ-16",
+            "REQ-24",
+            "REQ-25",
+            "REQ-26",
+            "REQ-27"
+          ],
+          "operations": [
+            "university.analyze",
+            "shortlist.update"
+          ],
+          "paths": [
+            "POST /api/v1/reports/{report_id}/university-results",
+            "PUT /api/v1/reports/{report_id}/shortlist/{offering_id}"
+          ],
+          "layer": "server application composition / feature/application-pre-data-platform",
+          "installed_source_observation": "Source118 full readback verified; both catalog hooks declared once and called zero times. Existing sparse artifact is not complete current search coverage.",
+          "repair": "Require both hooks in catalog factory; guard qualification at request construction; prepare exact IDs for the two existing mutations without private IO. Actual lookup remains in catalog after existing access/revision/budget flow.",
+          "invariants": "Known ID missing formula stays pending; unknown ID whole-batch404; practical and qualification fail closed; ownership/JWT/relay/paid/input rights/revision/idempotency/shared budget/safe DTO preserved.",
+          "candidates": "Existing catalog scope preserved; no name fallback, splitting, partial-success DTO or new API.",
+          "synthetic_verification": {
+            "new_real_runtime_cases": 12,
+            "related_regression_cases": 116,
+            "status": "PASS",
+            "external_ports": "synthetic only; network permission absent"
+          },
+          "actual_Owner_target8_exact_HTTP_capture": "NOT_RUN; department descriptions are not independently captured submitted IDs",
+          "deployment": "NOT_RUN_SOURCE_CANDIDATE_ONLY",
+          "DB_Storage_Secrets_rights_limits_writes": "NOT_RUN_UNCHANGED",
+          "production_ready": false
+        },
+        "evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_post_save_503_activation_20261027"
       },
       "post_save_503_repair_20261027": {
-        "status": "SOURCE_SYNTHETIC_CANDIDATE_NOT_DEPLOYED",
+        "status": "OWNER_REPORTED_DEPLOYED_V21_SCOPED_ACCEPTANCE",
         "basis_commit": "516a9c67d507580c46a97f7b355706d0a2aa3682",
         "operations": [
           "university.analyze",
@@ -36327,11 +36404,108 @@
         "owner_observation": "Owner reports stored analyses/shortlist changes followed by security_policy_unavailable. Saved work is preserved; no operating POST replay is performed by this development task.",
         "reproduction": "Pinned compiled deployed components with synthetic controls/index and mocked store reproduce the two reported failure stages. This is scoped component evidence, not a live trace or full HTTP acceptance.",
         "repair": "Preserve full selected body validation inside a bounded fresh immutable preflight frame, and forward the already registered analysis batch guard in the limited installed-source overlay. Leave read limits and mutable final checks unchanged.",
-        "verification": "Focused provider/context39 tests including 3 new bounded-frame scenarios and private compiled boundary probes; normal full hooks and exact commit CI pending.",
-        "native": "NOT_RUN",
-        "deployment": "NOT_RUN",
-        "frontend": "No UI implementation in the service branch. Owner UI recovery and P1 compatible preparation are separately verified.",
-        "P1": "P1 historical reference read contract stays in its independent merged change; combine source candidates only after the maintenance source is independently accepted."
+        "verification": "Exact source/merge CI and normal checks passed; see the latest scoped Owner receipt. Additional boundary scenarios are nested within existing tests.",
+        "native": "OWNER_REPORTED_SCOPED_BUSINESS_FLOWS; ROOT_FRESH_HTTP_AND_FULL_SECURITY_NOT_RUN",
+        "deployment": "OWNER_REPORTED_V21_FULL_SOURCE_SHA_MATCHES_PINNED_OVERLAY; ROOT_FRESH_DOWNLOAD_NOT_RUN",
+        "frontend": "Owner reports existing UI recovery retained; no new UI deployment is claimed by this planning update.",
+        "P1": "Historical reference source contract is merged independently. Prepare its new edition only against the current data tuple and retain the accepted 503 maintenance overlay.",
+        "history_before_Owner_v21_receipt": {
+          "status": "SOURCE_SYNTHETIC_CANDIDATE_NOT_DEPLOYED",
+          "basis_commit": "516a9c67d507580c46a97f7b355706d0a2aa3682",
+          "operations": [
+            "university.analyze",
+            "shortlist.update"
+          ],
+          "owner_observation": "Owner reports stored analyses/shortlist changes followed by security_policy_unavailable. Saved work is preserved; no operating POST replay is performed by this development task.",
+          "reproduction": "Pinned compiled deployed components with synthetic controls/index and mocked store reproduce the two reported failure stages. This is scoped component evidence, not a live trace or full HTTP acceptance.",
+          "repair": "Preserve full selected body validation inside a bounded fresh immutable preflight frame, and forward the already registered analysis batch guard in the limited installed-source overlay. Leave read limits and mutable final checks unchanged.",
+          "verification": "Focused provider/context39 tests including 3 new bounded-frame scenarios and private compiled boundary probes; normal full hooks and exact commit CI pending.",
+          "native": "NOT_RUN",
+          "deployment": "NOT_RUN",
+          "frontend": "No UI implementation in the service branch. Owner UI recovery and P1 compatible preparation are separately verified.",
+          "P1": "P1 historical reference read contract stays in its independent merged change; combine source candidates only after the maintenance source is independently accepted."
+        },
+        "evidence_ref": "supabase_deployment_contract.live_execution.latest_owner_post_save_503_activation_20261027",
+        "withdrawn_key_index_budget_proposal": "Preserve only. No separate-budget patch, aggregate budget increase, Secrets change or additional service."
+      },
+      "latest_owner_post_save_503_activation_20261027": {
+        "format": "jungsi.owner-post-save-503-scoped-acceptance/v1",
+        "evidence_id": "OPS-OWNER-POST-SAVE-503-20261027",
+        "status": "OWNER_REPORTED_DEPLOYED_V21_SCOPED_BUSINESS_ACCEPTANCE_ROOT_PIN_MATCHED",
+        "date_KST": "2026-10-27",
+        "Owner_report": {
+          "bytes": 4798,
+          "sha256": "d605c280477ff96365d2ab56986b0ee0826857cf4de4f3605f5e23d176b16260"
+        },
+        "function_version_Owner_reported": 21,
+        "prior_function_version_Owner_reported": 20,
+        "bundle_bytes": 1794567,
+        "bundle_sha256": "6dfe2d296b10219140b4c06083893fcee0b48457a7d09df2c4909e18c66b8c0f",
+        "Root_comparison": "The reported post-deployment bytes and full SHA match the independently pinned limited maintenance overlay in the adopted handoff. Root has not downloaded a new hosted source in this task.",
+        "source_composition": "Limited overlay on the pinned installed runtime, including the registered batch boundary and bounded immutable preflight. This receipt does not represent deployment of the whole current develop runtime.",
+        "source_verification": {
+          "develop_commit": "75c92941ee9ce0d76e619357da4501bdc23af69f",
+          "merge_CI_run_id": 40366013377,
+          "merge_CI_conclusion": "success",
+          "normal_python_tests": 1244,
+          "normal_Edge_tests": 1244,
+          "oracle_comparisons": 993,
+          "new_boundary_scenarios_nested_in_existing_tests": 3,
+          "scope": "Previously completed exact source and merge checks; the current planning-only update has its own normal hooks and exact CI."
+        },
+        "deployed_at_KST_Owner_reported": "2026-10-27 approximately 09:08; downloaded-file timestamp only, exact Dashboard time not independently read",
+        "frontend_version_Owner_reported": "ea85ebcd",
+        "Owner_source_readback": "before-deploy and after-deploy PASS reported; full private raw receipts remain on the Owner PC and were not attached",
+        "Secrets": "Owner reports matching eight-character digest prefixes for the existing five settings. Full digest columns and values were not freshly read by Root; no registration change is reported.",
+        "scoped_business_acceptance": {
+          "source": "Owner front-door UI and non-2xx-only BFF warning log observation during 09:08-09:12 KST",
+          "university_analyze": "First and next result ranges and the existing baseline row reported normal; stored pending results are preserved.",
+          "shortlist_update": "Add, reread, remove and reread reported normal with the initial shortlist state restored.",
+          "candidate_and_input_status": "Pending candidate explanation and the existing input-right state remained visible.",
+          "http_evidence_limit": "No successful response body, exact status or request-id capture is attached. Absence of non-2xx warnings is Owner-reported supporting evidence, not a new Root HTTP trace.",
+          "no_new_score_save_or_transition_SQL_in_this_acceptance": true
+        },
+        "withdrawn_key_index_budget_proposal": {
+          "status": "WITHDRAWN_BY_OWNER_LATEST_RECEIPT_PRESERVE_ARCHIVE_ONLY",
+          "proposal_sha256": "d224308ec414c83cc030b1f2921da41574f1056d71ea5be0e3f7e6512552e106",
+          "archive_sha256": "0b54c4eeed3b997870ab624f79e95bcec5221092501b0f7598aa14f66b9317e3",
+          "rule": "Do not deploy the stale v20 separate-budget candidate or widen aggregate read/byte limits. The accepted maintenance repair retains the existing limits."
+        },
+        "preserve": [
+          "JWT/MFA/relay/ownership/revision/idempotency",
+          "shared atomic budget and existing read/byte/time limits",
+          "existing DB, Storage, Secrets and successful scores/reports",
+          "UI read-after-incomplete-response recovery",
+          "independent pending reasons and source lineage"
+        ],
+        "Root_operating_mutations": 0,
+        "DB_Storage_Secrets_or_resource_changes_in_this_task": 0,
+        "remaining_NOT_RUN": [
+          "Root fresh hosted full-source download",
+          "exact successful HTTP response and row-level reason-code capture",
+          "print and previous-report regression in this receipt",
+          "no-token and other-owner rejection in this receipt",
+          "full operation-specific JWT/MFA/CSRF/expiry/security acceptance",
+          "new P1 edition activation and browser acceptance"
+        ],
+        "P3_01": "FAIL remains: scoped transport recovery does not supply missing current-year conversion rules or approve a personal scoring engine.",
+        "all_business_native_accepted": false,
+        "all_security_gates_passed": false,
+        "production_ready": false,
+        "current_pointer_rule": "This supersedes the earlier deployment-pending status for the limited 503 repair only. Preserve previous runtime and acceptance receipts as history; retain independent data and engine gates.",
+        "receipt_sha256": "d605c280477ff96365d2ab56986b0ee0826857cf4de4f3605f5e23d176b16260",
+        "candidate_commit": "a678badcd7e4bd03409f3203f5549785e834719d",
+        "Storage_authenticated_GET": "No new Root authenticated Storage read or source publication in this task. The maintenance receipt reports no Storage/configuration change.",
+        "P1": "New historical-reference edition is not activated by this receipt; preserve existing qualified data and use the current independently pinned source tuple for preparation.",
+        "P2": "Owner reports the existing input-right state preserved. No new score save or transition SQL was run in this acceptance.",
+        "Root_independent_live_rerun": "NOT_RUN. Root compared the full reported deployed source pin to the adopted maintenance bundle and preserved the Owner receipt. Successful response bodies and row reason codes were not attached.",
+        "residual": [
+          "Root fresh deployed-source and explicit successful HTTP evidence",
+          "print/previous-report and no-token/other-owner regression",
+          "full operation-specific security acceptance",
+          "current-year conversion/domain adapter readiness",
+          "new P1 edition preparation and separate activation"
+        ]
       }
     }
   },
