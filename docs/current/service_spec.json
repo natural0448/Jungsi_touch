@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.125",
+  "version": "1.9.126",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7662,7 +7662,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.125",
+        "contract_version": "1.9.126",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7836,7 +7836,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.125",
+        "contract_version": "1.9.126",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8002,7 +8002,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.125",
+        "contract_version": "1.9.126",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8021,7 +8021,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.125",
+        "contract_version": "1.9.126",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8046,7 +8046,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.125",
+        "contract_version": "1.9.126",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8071,7 +8071,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.125",
+        "contract_version": "1.9.126",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -21701,6 +21701,19 @@
         "REQ-26"
       ],
       "summary": "Owner의 기존 Supabase v21 저장 후503 수정판 배포 회신을 제한 범위로 수용한다. 재다운로드 보고의 전체 소스 지문을 기존 유지보수 overlay 핀과 맞추고 분석·담기·빼기 및 입력상태 보존 보고를 실제 Root HTTP/전체 보안 검수와 구분한다. 이전 배포대기·Source118 이력은 보존한다. 먼저 보낸 키색인 예산 분리안은 최신 회신에서 철회되어 보존만 하며 읽기/바이트/시간·공유 예산과 기존 인증·소유권·입력권·멱등은 변경하지 않는다. 2027 환산 자료와 새 P1 발행은 별도이며 P3-01 실패·보안 gate·production_ready=false를 유지한다. 새 DB/Storage/Secrets·유료 자원 변경이나 운영 재실행은 없다."
+    },
+    {
+      "date": "2026-10-27",
+      "version": "1.9.126",
+      "requirements": [
+        "REQ-13",
+        "REQ-16",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "사용자가 요청한 서브에이전트 분담으로 공유 DB 용량을 제한 실측하고 legacy 검수·회원 전체 snapshot 누적, 단일 current 소비 경로와 개별 복구 pin을 구분한다. 기존 파일의 fresh 해시·CSV 원형·릴리스별 메모리 복원 PASS를 실제 DB 전필드 대조·PostgreSQL 복원·원격 보관 확인과 구분한다. 현재·검증된 직전 완료2개·모든 소비자 pin과 미확인 정정은 유지하며 단순 비current 목록을 삭제 허용명부로 쓰지 않는다. 동시 진행된 정당한 reference head 갱신은 새 native 영수증·포인터로 인수하고 구판 입력을 현재 발행에 재사용하지 않는다. 정확 보관/복구·참조 폐쇄·단일 writer 조정과 별도 대상 실행 gate를 유지한다. ordinary VACUUM의 내부 재사용과 실제 할당디스크/청구 축소를 구분하고 FULL·REINDEX·재작성은 기존 범위 밖으로 유지한다. DB 삭제·DDL·유지보수·요금·배포 변경은 실행하지 않았으며 보안·예산·산출 의미는 그대로다."
     }
   ],
   "overall_analysis_contract": {
@@ -177718,7 +177731,7 @@
     "shared_db_capacity_followup": {
       "format": "jungsi.shared-db-capacity-followup/v1",
       "id": "DB-CAP-01",
-      "status": "EXACT_EXECUTION_PLAN_PREPARED_NATIVE_ARCHIVE_RESTORE_VERIFIED_OPERATOR_CHECKS_PENDING",
+      "status": "FRESH_BOUNDED_CAPACITY_AND_ARCHIVE_SHAPE_REVIEW_COMPLETE_KEEP_REFERENCE_CLOSURE_AND_EXACT_EXECUTION_PENDING",
       "scope": [
         "current review first/next range",
         "current public history.search bounded supply",
@@ -177850,7 +177863,30 @@
           "local_files_deleted": false,
           "DB_delete": "NOT_RUN",
           "ordinary_VACUUM": "NOT_RUN"
-        }
+        },
+        "latest_refresh_date": "2026-10-27",
+        "latest_refresh_status": "FRESH_LOCAL_ARCHIVE_SHAPE_PASS_CURRENT_AND_PREVIOUS_PIN_CLOSURE_PENDING_NO_EXECUTION"
+      },
+      "prior_status_before_20261027_refresh": "EXACT_EXECUTION_PLAN_PREPARED_NATIVE_ARCHIVE_RESTORE_VERIFIED_OPERATOR_CHECKS_PENDING",
+      "latest_bounded_review": {
+        "date": "2026-10-27",
+        "scope": "Fresh read-only catalog and installed-source/consumer delta review for legacy review and membership snapshots; preserve both percentile metric families and all current heads.",
+        "delegation": "User explicitly requested sub-agents. Separate catalog/dependency, archive/restore and service-consumer/writer reviews; DB writes remain with the existing coordinated single writer.",
+        "grain_result": "Per-release complete review and membership snapshots accumulate across historical releases. This is a retention/storage-grain issue, not proof that current observations or all historical rows are duplicates.",
+        "view_dependency_result": "Count distinct dependent views separately from dependent columns; a column dependency count is not a view count.",
+        "installed_source_boundary": "Registered Owner SQL metadata in an installed bundle is not evidence that its execution function is bundled. Preserve the separate current-review consumer and its contracts.",
+        "local_archive_check": "Existing content-addressed input files freshly hashed once per representative content; strict CSV byte roundtrip and complete per-release in-memory review/member key-field reconstruction passed. This does not replace actual DB field comparison, PostgreSQL restore or remote archive durability checks.",
+        "keep_closure": "Preserve current and receipt-verified previous completed releases, all runtime/report/binding/recovery pins and unresolved corrections. A preliminary noncurrent list is not a deletion allowlist.",
+        "head_drift_rule": "A concurrent legitimate reference-head update was detected. Preserve old and new evidence, accept producer native readback and refresh source pointers before any removal scope or P1 publication input is sealed. Do not restore an older head or equate a DB release with production activation.",
+        "execution": "No removal, DDL, maintenance, billing or deployment follows from this review. Finish exact native archival/restore, consumer closure, writer coordination and measured space/WAL/load checks; use the existing exact-scope administrator approval gate.",
+        "maintenance": "Ordinary VACUUM provides internal reuse and does not guarantee lower provisioned disk or billing. VACUUM FULL, REINDEX and table rewrite remain outside the adopted retention scope.",
+        "future_writer": "Prepare a separately reviewed retention-aware/no-op writer proposal with current consumer compatibility; do not activate shared-row storage or silently evict required previous/pinned releases.",
+        "operational_numbers_and_source_rows": "Private operational checkpoint only; no actual rows, release identifiers, sizes, credentials or private model values copied into Git.",
+        "DB_delete": "NOT_RUN",
+        "DDL": "NOT_RUN",
+        "ordinary_VACUUM": "NOT_RUN",
+        "writer_change": "PROPOSAL_ONLY_NOT_APPLIED",
+        "production_ready": false
       }
     },
     "frontend_P1_P2_intake": {
