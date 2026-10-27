@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.126이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.127이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 기존 Supabase 기반 실제 인증·기존22와 신규6 논리 API 계약의 코드·선택 연결·운영 배포를 구분한다. Google Drive와 기존 Supabase를 사용하고 P1 조정 메타데이터 Durable Object 한정 예외만 적용한다. 현재 결합20 후보·기존14 운영판·미연결8을 혼동하지 않는다.
 
@@ -589,7 +589,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=737d51bee56880ca30ef82ed23d3ecdbf1113a33fb0bfb4bea3fa32d29f82aa4 -->
+<!-- jungsi:generated spec_sha256=fd27ec0ef4ce75020094647d6e2f45847de49c51804699eafce59d571d4268b5 -->
 
 
 ## 기존 운영 조회의 후속 검수
@@ -627,7 +627,7 @@ CR-P1-BOUNDED-READ-20261018-01는 PROPOSED_NOT_IMPLEMENTED다. 기존 history.se
 
 ## 누백 릴리스 보관·정리 실행 경계
 
-DB-CAP-01-RETENTION / POLICY_ADOPTED_EXACT_PLAN_PREPARED_NOT_A_DELETE_EXECUTION_APPROVAL. 보관 원칙 승인과 정확 대상의 실제 실행 승인은 별개다.
+DB-CAP-01-RETENTION / BOUNDED_ROW_CLEANUP_PARTIAL_POSTCHECK_PASS_THEN_USER_SCOPE_CHANGED_TO_UNUSED_TABLE_DROP. 보관 원칙 승인과 정확 대상의 실제 실행 승인은 별개다.
 
 | 항목 | 기준 |
 | --- | --- |
@@ -643,12 +643,12 @@ DB-CAP-01-RETENTION / POLICY_ADOPTED_EXACT_PLAN_PREPARED_NOT_A_DELETE_EXECUTION_
 
 | 단계 | 산출물 | 상태 |
 | --- | --- | --- |
-| RET-00 | current lineage and consumer reference inventory | CURRENT_LINEAGE_AND_BOUNDED_REFERENCES_VERIFIED_EXTERNAL_OWNER_ROSTER_PENDING |
-| RET-01 | native archive/readback/isolated restore proof | LOCAL_NATIVE_ARCHIVE_RESTORE_PASS_REMOTE_DURABILITY_CHECK_PENDING |
-| RET-02 | exact removal plan and administrator execution approval | EXACT_PLAN_PREPARED_ALL_TARGETS_HELD_NOT_APPROVED |
-| RET-03 | approved single-writer historical-row cleanup | NOT_RUN |
+| RET-00 | current lineage and consumer reference inventory | CURRENT_LINEAGE_BOUNDED_CONSUMERS_AND_HUMAN_SHARED_SCOPE_VERIFIED |
+| RET-01 | native archive/readback/isolated restore proof | LOCAL_NATIVE_RESTORE_AND_LIVE_PROOF_REUSED_REMOTE_VERIFIED_SUBSET_USER_STOPPED |
+| RET-02 | exact removal plan and administrator execution approval | DIRECT_HUMAN_EXACT_ROW_SCOPE_RECEIVED_SUPERSEDED_BY_NEW_TABLE_SCOPE |
+| RET-03 | approved single-writer historical-row cleanup | BOUNDED_PARTIAL_COMMITTED_POSTCHECK_PASS_STOPPED_ON_USER_INSTRUCTION |
 | RET-04 | affected-table ordinary VACUUM ANALYZE and before/after receipt | NOT_RUN |
-| RET-05 | frontend scoped post-maintenance recheck | NOT_RUN |
+| RET-05 | frontend scoped post-maintenance recheck | NOT_RUN_AUTHENTICATED_SERVICE_SCREEN |
 
 공식 참고: https://www.postgresql.org/docs/current/sql-vacuum.html / https://supabase.com/docs/guides/platform/cost-control. 실제 ID·대상행·용량·계정·SQL·보관위치는 비공개 계획에 고정한다.
 

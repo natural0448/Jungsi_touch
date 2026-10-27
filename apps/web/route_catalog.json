@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.126",
-  "source_sha256": "737d51bee56880ca30ef82ed23d3ecdbf1113a33fb0bfb4bea3fa32d29f82aa4",
+  "spec_version": "1.9.127",
+  "source_sha256": "fd27ec0ef4ce75020094647d6e2f45847de49c51804699eafce59d571d4268b5",
   "pages": [
     {
       "id": "PAGE-01",
@@ -526,9 +526,12 @@
         "REQ-14",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-07",
+        "REQ-12",
+        "REQ-15"
       ],
-      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
@@ -571,9 +574,12 @@
         "REQ-14",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-07",
+        "REQ-12",
+        "REQ-15"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
@@ -2965,6 +2971,67 @@
         ],
         "pending": null,
         "meaning": "전체 국수탐2 비교집단과 해당 대학식 필수 성적 보유 비교집단의 구분. 실제 개인 정답/전국 원자료 보유를 뜻하지 않음"
+      },
+      "conditional_population_scope_proposal": {
+        "id": "PERCENTILE-DENOMINATOR-NUMERATOR-SCOPE-PROPOSAL",
+        "status": "NOT_IMPLEMENTED_NOT_CONNECTED",
+        "active": false,
+        "operations": [
+          "university.analyze",
+          "candidates.build"
+        ],
+        "meaning": "분모와 분자의 비교집단을 별도 결속하는 조건부 CDF 제안. 개인의 실제 지원자격·입학 적격·합격 판단을 제공하지 않는다.",
+        "candidate_fields": {
+          "denominator_scope": {
+            "proposed_enum": [
+              "whole_complete"
+            ],
+            "meaning": "기존 승인 전체 응시자 비교집단의 같은 학년도/시험/모형/가중치 분모를 그대로 보존한다."
+          },
+          "numerator_scope": {
+            "proposed_enum": [
+              "offering_minimum_criteria_met"
+            ],
+            "meaning": "해당 모집행 수능최저 조건을 충족하는 모형 구성원 중 해당 점수 이상/초과인 분자 범위다. 실제 지원자격 확인 결과가 아니다."
+          }
+        },
+        "field_names_and_enums_finalized": false,
+        "current_population_scope_unchanged": true,
+        "current_fields_allowlist_unchanged": true,
+        "current_response_fields_enabled": [],
+        "binding": "서버 내부에서 분모 집단·분자 조건·모집행·학년도/시험·고정 모형/곡선/정책 버전을 검증한다. 실제 식별자·조건 자료/수치·모형·CDF는 비공개다.",
+        "compatibility": "현재 전체/필수입력집단 계약에 손실 없이 표현할 수 없는 새 조건부 결과는 현재 DTO에 실어 ready로 반환하지 않는다. 기존 성공 결과/동점 의미와 pending/null을 보존한다.",
+        "activation": "최종 필드/스키마·source adapter·재귀 응답 필터·표시 문구·저장/인쇄/재응답·유료/본인 권한·원자 예산·실제 운영 검증이 같은 소스/정확 SHA로 인수되기 전 NOT_IMPLEMENTED/NOT_RUN이다.",
+        "numeric_result_publication": "NOT_ENABLED",
+        "adapter_implementation": "NOT_IMPLEMENTED",
+        "public_DTO_implementation": "NOT_IMPLEMENTED",
+        "operating_verification": "NOT_RUN",
+        "server_transition_classifier": {
+          "status": "CONTRACT_REGISTERED_IMPLEMENTATION_NOT_VERIFIED",
+          "server_only": true,
+          "classes": [
+            "legacy_verified",
+            "snu_scoped",
+            "conditional_minimum",
+            "unknown"
+          ],
+          "target_binding": "Private exact offering/year/exam/rule/scope version and head-bound registry; no client selector or schoolwide wildcard.",
+          "legacy_success": "Preserve verified baseline and unaffected successful results.",
+          "conditional_or_unknown": "Affected result only pending/null unless matching scoped adapter and all activation gates pass; never unconditional fallback.",
+          "public_fields_added": []
+        },
+        "safe_reason_candidates": [
+          "percentile_scope_unavailable",
+          "percentile_scope_invalid",
+          "percentile_scoped_provider_missing",
+          "percentile_scoped_provider_invalid",
+          "percentile_scoped_context_mismatch",
+          "percentile_scoped_release_mismatch",
+          "percentile_scoped_result_invalid",
+          "percentile_scope_release_mismatch",
+          "percentile_scoped_provider_unavailable",
+          "scoped_comparison_pending"
+        ]
       }
     },
     "presentation_rules": [

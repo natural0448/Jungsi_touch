@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.126",
-  "source_sha256": "737d51bee56880ca30ef82ed23d3ecdbf1113a33fb0bfb4bea3fa32d29f82aa4",
+  "spec_version": "1.9.127",
+  "source_sha256": "fd27ec0ef4ce75020094647d6e2f45847de49c51804699eafce59d571d4268b5",
   "pages": [
     {
       "id": "PAGE-01",
@@ -435,9 +435,12 @@
         "REQ-14",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-07",
+        "REQ-12",
+        "REQ-15"
       ],
-      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -490,9 +493,12 @@
         "REQ-14",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-07",
+        "REQ-12",
+        "REQ-15"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -4520,7 +4526,18 @@
         "approval_population_scope_checks_unchanged": true,
         "private_source_only": true,
         "public_DTO_changed": false
-      }
+      },
+      "scoped_method_lookup": "제안 계약/미연결: jungsi_data_ingest.reference_snu_2024_scoped_method_v1(text,jsonb)는 기존 university.analyze와 candidates.build의 서버 application/data 내부 조건부 방법 조회 후보다. 새 공개 API/HTTP 입력/응답 필드를 만들지 않는다. 기존 PlatformDataProvider.get_percentile와 독립 환산/분석 포트의 실제 소비 연결은 미구현이며 기존 포트·서비스를 새 심벌로 대체하지 않는다.",
+      "scoped_method_binding": "서울대 2024 native integer 학년도, 정확한 서버 승인 모집행·조건 버전·검증된 과탐 2-2와 기존 동일 학년도 방법/CDF 결속만 허용하는 제안이다. 미적분/기하, 서로 다른 과탐 두 과목·같은 분야 I+II 제외, 필수 성적/등급·기존 산식 범위를 확인하며 미모델 분기·결측·자료형/범위 오류·타 학년도·중복/불일치는 결과 없이 HOLD한다. 내신·면접을0으로 치환하거나 다른 분포로 우회하지 않는다. 기존 무조건 current view/4필드 방법 링크를 넓히지 않는다.",
+      "scoped_method_security": "제안 SQL은 SECURITY INVOKER, search_path=pg_catalog이며 기존 jungsi_backend_app만 EXECUTE 후보로 한정하고 PUBLIC·anon·authenticated의 직접 실행은 거부한다. schema USAGE/SELECT·기존 RLS와 제한 정책·역할 상속/BYPASSRLS 및 실제 app-role 호출을 확인해야 한다. owner 호출 성공은 app-role 실행 근거가 아니다. relay/JWT·유료/본인 report·입력권·멱등·공유 원자 예산·429/503·재귀 DTO 허용목록과 SEC-01~08은 기존 계약 그대로다.",
+      "scoped_method_result_boundary": "함수가 선택하는 method_id·release·모집행 결속은 서버 내부 자료이며 기존 학생/인쇄/오류/멱등/저장 DTO와 브라우저 전달물에 추가하지 않는다. 실제 값·PK·방법 식별자·점수·도수/곡선·모형·개인자료·비밀·자료경로를 공개 계약/응답에 넣지 않는다. 수능 성분 방법 조회만으로 입학 적격·지원/합격 판정·엔진 승인·정식 운영 완료를 주장하지 않는다.",
+      "scoped_method_verification": "상태는 PROPOSED_INTERNAL_CONTRACT_NOT_CONNECTED이다. 비공개 독립 합성 근거는 재사용하지만 운영 함수 설치·실제 app-role 허용/거부 실행·어댑터/엔진 연결·배포는 NOT_RUN이다. 기존 head/원문/native 타입·단일 writer·예상 이전 상태·command 멱등·사후 재조회 계약을 유지하며 이 기획 등록으로 권한/기존 current/head를 바꾸지 않는다.",
+      "conditional_scope_proposal": "고려대 신규 조건부 CDF의 제안 의미는 기존 승인 전체 응시자 비교집단 분모와 해당 모집행 수능최저 조건을 만족하는 모형 구성원 중 점수 이상/초과인 조건부 분자를 구분하는 것이다. 전체 분모를 부분집단 가중치로 재정규화하거나 다른 scope를 전체로 표시하지 않는다. 기존 population_scope의 whole_complete/required_rule_inputs_present를 이 두 축의 대체 표기로 재해석하지 않는다.",
+      "conditional_scope_activation": "university_percentile_contract.public_result_contract.conditional_population_scope_proposal 및 security_contract.response_boundary.proposed_schema_extensions는 비활성 제안만 등록한다. 현재 fields/enum/DTO 허용목록은 그대로이며 제안 필드는 반환 불가다. 새 어댑터/DTO·분모/분자 결속·공개 표시·회귀/역할별 재귀 필터가 같은 변경으로 검증되기 전 신규 조건부 결과는 pending/HOLD이고 새 ready/누백 수치를 노출하지 않는다. 기존 승인된 성공 점수/누백은 보존한다.",
+      "scoped_transition_classifier": "이행 계약/구현 미확인: 서버 전용 범위 분류기는 승인된 학년도·시험·자료판·정확 모집행·규칙/조건 버전·현재 release 결속으로 legacy_verified, snu_scoped, conditional_minimum, unknown을 구분한다. 검증된 기존 모집행은 legacy_verified 경로와 성공 결과를 유지한다. 비공개 정확 대상 명부에 결속된 새 조건부 모집행에만 가드를 적용하며 학교명·연도 전체·학과 문자열 유추로 넓히지 않는다. 요청자가 분류·method·검증 flag를 지정하지 못한다.",
+      "scoped_transition_fail_closed": "서버 명부/버전·head·범위 근거가 없거나 불일치한 affected 모집행은 unknown/pending으로 보류한다. 알려진 조건부 대상에서 scoped 공급자 부재·잘못된 학생 입력·미모델 조건·오류를 기존 무조건 view/다른 CDF로 fallback하지 않는다. 분류 근거 부재를 비대상으로 간주하지 않으며, 동시에 무관한 검증 완료 모집행을 일괄 보류하지 않는다. 기존 검증 baseline 결속도 확인할 수 없는 행만 해당 결과를 보류한다.",
+      "scoped_transition_activation": "분류기/저장소 포트·조건부 함수/CDF 연결·native 분모/분자 및 시험/산식 문맥·실제 앱 역할 실행과 재귀 응답 필터를 같은 소스/정확 SHA에서 검증한 후 affected 모집행별 연결 상태를 갱신한다. 정본 등록, DB 설치/실제 재조회, 서버 이식, 배포는 별도 단계다. 현재 기획 등록은 분류기·새 수치·DB/권한/엔진/운영 배포를 활성화하지 않는다.",
+      "scoped_transition_safe_reasons": "조건부 경로의 공개 pending 사유는 명시 목록 percentile_scope_unavailable, percentile_scope_invalid, percentile_scoped_provider_missing, percentile_scoped_provider_invalid, percentile_scoped_context_mismatch, percentile_scoped_release_mismatch, percentile_scoped_result_invalid, percentile_scope_release_mismatch, percentile_scoped_provider_unavailable, scoped_comparison_pending만 최소 후보로 등록한다. 공개 safe_code 스키마/동일 원본 enum 및 알려지지 않은 코드 거부 회귀를 책임 서비스 브랜치에서 함께 구현한다. 자유 문자열·예외 원문·DB/자료/개인 식별자·수치/비밀을 허용하지 않으며 기존 역할·소유권·relay/예산·필드 projection을 완화하지 않는다. 허용목록 코드의 부재를 임의 503 은폐로 우회하지 않는다. 현재 구현·운영 적용은 NOT_RUN이다."
     },
     "public_result_contract": {
       "location": "본인 유료 report.analyses[offering_id].percentile",
@@ -4570,6 +4587,67 @@
         ],
         "pending": null,
         "meaning": "전체 국수탐2 비교집단과 해당 대학식 필수 성적 보유 비교집단의 구분. 실제 개인 정답/전국 원자료 보유를 뜻하지 않음"
+      },
+      "conditional_population_scope_proposal": {
+        "id": "PERCENTILE-DENOMINATOR-NUMERATOR-SCOPE-PROPOSAL",
+        "status": "NOT_IMPLEMENTED_NOT_CONNECTED",
+        "active": false,
+        "operations": [
+          "university.analyze",
+          "candidates.build"
+        ],
+        "meaning": "분모와 분자의 비교집단을 별도 결속하는 조건부 CDF 제안. 개인의 실제 지원자격·입학 적격·합격 판단을 제공하지 않는다.",
+        "candidate_fields": {
+          "denominator_scope": {
+            "proposed_enum": [
+              "whole_complete"
+            ],
+            "meaning": "기존 승인 전체 응시자 비교집단의 같은 학년도/시험/모형/가중치 분모를 그대로 보존한다."
+          },
+          "numerator_scope": {
+            "proposed_enum": [
+              "offering_minimum_criteria_met"
+            ],
+            "meaning": "해당 모집행 수능최저 조건을 충족하는 모형 구성원 중 해당 점수 이상/초과인 분자 범위다. 실제 지원자격 확인 결과가 아니다."
+          }
+        },
+        "field_names_and_enums_finalized": false,
+        "current_population_scope_unchanged": true,
+        "current_fields_allowlist_unchanged": true,
+        "current_response_fields_enabled": [],
+        "binding": "서버 내부에서 분모 집단·분자 조건·모집행·학년도/시험·고정 모형/곡선/정책 버전을 검증한다. 실제 식별자·조건 자료/수치·모형·CDF는 비공개다.",
+        "compatibility": "현재 전체/필수입력집단 계약에 손실 없이 표현할 수 없는 새 조건부 결과는 현재 DTO에 실어 ready로 반환하지 않는다. 기존 성공 결과/동점 의미와 pending/null을 보존한다.",
+        "activation": "최종 필드/스키마·source adapter·재귀 응답 필터·표시 문구·저장/인쇄/재응답·유료/본인 권한·원자 예산·실제 운영 검증이 같은 소스/정확 SHA로 인수되기 전 NOT_IMPLEMENTED/NOT_RUN이다.",
+        "numeric_result_publication": "NOT_ENABLED",
+        "adapter_implementation": "NOT_IMPLEMENTED",
+        "public_DTO_implementation": "NOT_IMPLEMENTED",
+        "operating_verification": "NOT_RUN",
+        "server_transition_classifier": {
+          "status": "CONTRACT_REGISTERED_IMPLEMENTATION_NOT_VERIFIED",
+          "server_only": true,
+          "classes": [
+            "legacy_verified",
+            "snu_scoped",
+            "conditional_minimum",
+            "unknown"
+          ],
+          "target_binding": "Private exact offering/year/exam/rule/scope version and head-bound registry; no client selector or schoolwide wildcard.",
+          "legacy_success": "Preserve verified baseline and unaffected successful results.",
+          "conditional_or_unknown": "Affected result only pending/null unless matching scoped adapter and all activation gates pass; never unconditional fallback.",
+          "public_fields_added": []
+        },
+        "safe_reason_candidates": [
+          "percentile_scope_unavailable",
+          "percentile_scope_invalid",
+          "percentile_scoped_provider_missing",
+          "percentile_scoped_provider_invalid",
+          "percentile_scoped_context_mismatch",
+          "percentile_scoped_release_mismatch",
+          "percentile_scoped_result_invalid",
+          "percentile_scope_release_mismatch",
+          "percentile_scoped_provider_unavailable",
+          "scoped_comparison_pending"
+        ]
       }
     },
     "presentation_rules": [
@@ -4589,7 +4667,10 @@
       "로컬 예시의 ready/분포대기/미승인/성적입력전·일반/유료·모바일 화면에서 학교 누백 수치와 각 상태를 확인한다.",
       "실제 데이터 readiness는 기존 정본/검산 근거를 재사용해 별도 기록한다. 전국 학교 승인 또는 실서버 연결을 합성 구현 완료로 주장하지 않는다.",
       "전체/필수입력보유 집단 구분·missing 영어 비치환·승인 없는 subset 거절·규칙과 필터 불일치·제외 가중치/집계 범위·모집단 차이에서 유불리 보류를 검수한다.",
-      "Deno v2 정수 유리수 점수의 정확 정렬·동점 포함/제외·범위·native bigint·잘못된 분모/혼합 표현·중복 bin을 검수한다. NativeDataProvider preflight→환산→독립 누백 경로와 공개 DTO의 내부 분수 비노출을 함께 검사하며 미승인 v2는 성공 환산을 보존하고 누백만 보류한다."
+      "Deno v2 정수 유리수 점수의 정확 정렬·동점 포함/제외·범위·native bigint·잘못된 분모/혼합 표현·중복 bin을 검수한다. NativeDataProvider preflight→환산→독립 누백 경로와 공개 DTO의 내부 분수 비노출을 함께 검사하며 미승인 v2는 성공 환산을 보존하고 누백만 보류한다.",
+      "조건부 내부 방법 조회는 native 학년도/검증 범위/미모델·결측·타입/중복·head 변경/HOLD, SECURITY INVOKER/search_path 및 PUBLIC/anon/authenticated 직접 거부를 독립 검수한다. 운영 app-role 실행·엔진 연결은 로컬 합성과 구분한다.",
+      "조건부 CDF의 전체 분모+조건부 분자를 기존 population_scope enum으로 오라벨하거나 부분 분모로 재정규화하지 않는다. 새 scope adapter/DTO/재귀 허용목록이 미구현인 동안 제안 필드는 반환하지 않고 신규 결과는 pending/HOLD하며 기존 성공값을 보존한다.",
+      "조건부 대상 분류·이행: 비대상 검증 baseline 보존, 정확 대상만 조건 가드, 명부/버전/head 부재와 known-conditional 공급자 오류 시 무조건 fallback 거부, client method/분류/검증 flag 주입 거부, 최소 safe_code 후보 및 미등록 코드 거부를 같은 SHA에서 검증한다. 계약 등록과 실제 구현/DB/운영 완료는 구분한다."
     ],
     "remaining": [
       "사용자 제공 자료 기반 자체 추정 공동분포·대학 환산곡선의 보정/holdout/민감도 검증과 estimated_weights 발행; 기획 추가 계약·자료팀 prototype 연계",
