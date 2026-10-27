@@ -76,12 +76,14 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   const canCorrect = !!corr && canRequestCorrection(status, latestCorr);
   const correctHref = canCorrect || latestCorr?.status === "pending" || latestCorr?.status === "returned" ? `${route.path}?correct=1` : null;
   if (sp.correct === "1" && status && corr) {
+    // 관리자가 저장된 점수와 비교하도록 지금 성적의 리포트를 함께 보낸다. 이 브라우저에 연 리포트가 없으면 서버가 알려 준 현재 리포트를 읽는다
+    const current = report ?? (status.current_report_id ? await src.readReport(caller, status.current_report_id).catch(() => null) : null);
     return (
       <>
         {head}
         <div className="wrap pg-body rp">
           <InputStatus st={status} />
-          <CorrectionPanel st={status} latest={latestCorr} can={canCorrect} savedScores={report ? JSON.stringify(defaultsFrom(report)) : ""} />
+          <CorrectionPanel st={status} latest={latestCorr} can={canCorrect} savedScores={current ? JSON.stringify(defaultsFrom(current)) : ""} />
           <Link className="btn" href={route.path}>내 성적 리포트로 돌아가기</Link>
         </div>
       </>

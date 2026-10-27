@@ -1,3 +1,4 @@
+import Link from "@/components/link";
 import type { ScoreInputStatusDto } from "@/lib/dto";
 import { seoulDate, seoulDateTime } from "@/lib/format";
 import { SUPPORT_HREF } from "@/lib/links";
@@ -49,7 +50,7 @@ export function NoInput({ st, correctHref }: { st: ScoreInputStatusDto | null; c
         <p>
           이 시험 단계의 성적 입력을 이미 사용했습니다. 저장한 리포트는 계속 볼 수 있습니다.{" "}
           {correctHref ? (
-            <>성적표와 다르게 저장했다면 성적표 사진과 함께 <a href={correctHref}>정정을 요청</a>해 주세요(이 단계에서 한 번).</>
+            <>성적표와 다르게 저장했다면 성적표 사진과 함께 <Link href={correctHref}>정정을 요청</Link>해 주세요(이 단계에서 한 번).</>
           ) : (
             <>궁금한 점은 <a href={SUPPORT_HREF}>고객센터</a>로 알려 주세요.</>
           )}

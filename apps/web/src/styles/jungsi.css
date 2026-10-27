@@ -137,3 +137,16 @@ body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;lin
 @keyframes jt-spin{to{transform:rotate(360deg)}}
 @keyframes jt-shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
 @media (prefers-reduced-motion:reduce){.et .jt-spinner,.et .jt-skel i{animation:none}}
+
+/* 맨 위 이용 메뉴 줄 — 에듀터치 본체 .util 과 같은 모양(2026-10-28) */
+.et .jt-top{border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-2);background:var(--bg)}
+.et .jt-top .wrap{display:flex;justify-content:flex-end;align-items:center;height:34px;overflow-x:auto;scrollbar-width:none}
+.et .jt-top .wrap::-webkit-scrollbar{display:none}
+.et .jt-top ul{display:flex;gap:16px;align-items:center;margin:0;padding:0;list-style:none}
+.et .jt-top li{flex:none}
+.et .jt-top a,.et .jt-top button{color:var(--ink-2);text-decoration:none;font:inherit;background:none;border:0;padding:0;cursor:pointer}
+.et .jt-top a:hover,.et .jt-top button:hover{color:var(--ink)}
+.et .jt-top .uname{font-weight:700;color:var(--ink)}
+.et .jt-top .prem{color:#C2410C;font-weight:700}
+.et .jt-top form{display:inline}
+@media (max-width:480px){.et .jt-top ul{gap:12px}}

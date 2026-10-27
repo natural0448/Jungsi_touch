@@ -7,6 +7,7 @@ import "@/styles/base.css";
 import "@/styles/jungsi.css";
 import "@/styles/offering.css";
 import { SiteHeader } from "@/components/site-header";
+import { EdutouchUtil } from "@/components/edutouch-util";
 import { SyntheticBar } from "@/components/synthetic-bar";
 import { LocalBar } from "@/components/local-bar";
 import { ConnectionNotice } from "@/components/connection-notice";
@@ -50,6 +51,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <div className="et jt">
           <SyntheticBar />
           <LocalBar />
+          <EdutouchUtil />
           <SiteHeader session={session} down={Boolean(down)} />
           <main>{down ? <ConnectionNotice e={down} /> : children}</main>
           <footer className="jt-foot">

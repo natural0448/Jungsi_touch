@@ -14,10 +14,16 @@ import { supabaseServer } from "@/lib/supabase/server";
 const BACK = "/admin/jeongsi/corrections";
 const SAME_SITE = new Set(["https://edutouch.co.kr", "https://www.edutouch.co.kr"]);
 
+/**
+ * 관리자 페이지로 돌아간다. 303 을 보내면 본체 프록시가 정시터치 응답을 받아 오면서 리다이렉트를 따라가 버려
+ * 주소창이 이 경로로 남고 새로고침하면 다시 POST 된다(2026-10-28 운영 확인). 그래서 브라우저가 직접 옮겨 가는 작은 HTML 을 준다.
+ */
 function back(request: NextRequest, id: string, result: string) {
   const origin = request.headers.get("origin");
   const base = origin && SAME_SITE.has(origin) ? origin : "https://edutouch.co.kr";
-  return NextResponse.redirect(`${base}${BACK}?id=${encodeURIComponent(id)}&r=${encodeURIComponent(result)}`, 303);
+  const to = `${base}${BACK}?id=${encodeURIComponent(id)}&r=${encodeURIComponent(result)}`;
+  const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${to}"><title>처리 중</title></head><body><script>location.replace(${JSON.stringify(to)})</script><a href="${to}">관리자 화면으로 돌아가기</a></body></html>`;
+  return new NextResponse(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-store" } });
 }
 
 export async function POST(request: NextRequest) {
