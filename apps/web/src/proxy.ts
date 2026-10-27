@@ -20,11 +20,12 @@ import { ignoreCookieWrites, noRefreshFetch } from "@/lib/supabase/read-only";
   이용권(유료) 판정은 여전히 서비스 API 가 한다.
 */
 
-const BLOCKED_HTML = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="robots" content="${CRAWL_ROBOTS}"><meta name="viewport" content="width=device-width,initial-scale=1"><title>정시터치 준비 중</title></head>
+/** 문이 닫혔을 때의 안내. 오픈 전·공개 뒤 긴급 점검(관문을 preview 로 되돌림)·정지 회원에 모두 맞는 문장으로 둔다(2026-10-28) */
+const BLOCKED_HTML = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="robots" content="${CRAWL_ROBOTS}"><meta name="viewport" content="width=device-width,initial-scale=1"><title>정시터치 이용 안내</title></head>
 <body style="font-family:system-ui,sans-serif;margin:0;display:grid;place-items:center;min-height:100vh;background:#f7f7f5;color:#222">
-<main style="text-align:center;padding:24px"><h1 style="font-size:20px">정시터치는 준비 중입니다</h1>
-<p style="color:#666">오픈 전에는 허용된 계정만 이용할 수 있습니다.</p>
-<p><a href="https://edutouch.co.kr" style="color:#2457c5">에듀터치로 가기</a></p></main></body></html>`;
+<main style="text-align:center;padding:24px;max-width:420px"><h1 style="font-size:20px">지금은 정시터치를 열 수 없습니다</h1>
+<p style="color:#666;line-height:1.6">점검 중이거나 이 계정으로는 이용할 수 없는 화면입니다. 이미 저장한 성적과 리포트는 그대로 있습니다. 잠시 후 다시 시도해 주시고, 계속 열리지 않으면 고객센터로 알려 주세요.</p>
+<p><a href="https://edutouch.co.kr" style="color:#2457c5">에듀터치로 가기</a> · <a href="https://edutouch.co.kr/contact" style="color:#2457c5">고객센터</a></p></main></body></html>`;
 
 function blocked() {
   return new NextResponse(BLOCKED_HTML, {
