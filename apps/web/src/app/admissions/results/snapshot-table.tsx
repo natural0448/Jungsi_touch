@@ -121,7 +121,7 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
   // 출처 링크는 보이지 않는다(2026-10-24 사용자 결정): 상당수가 어디가 내부 요청 주소라 직접 열면 오류 화면이 나온다
   return (
     <div className="rs-yt">
-      {pending && <p className="rs-idnote">모집행 연결 확인 중인 발표입니다. 다른 학년도와 합치지 않고 원문 그대로 보입니다.</p>}
+      {pending && <p className="rs-idnote">모집행 연결 확인 중인 발표입니다. 다른 학년도와 합치지 않고 원문 그대로 보입니다. 대학이 여러 학과를 묶어 한꺼번에 발표했을 수 있으니, 이 숫자를 이 학과만의 결과로 보지 마세요.</p>}
       {variants > 1 && <p className="rs-idnote">대학명·전형 표기가 발표마다 달라({variants}가지) 같은 모집단위인지 확인 중입니다. 숫자는 발표 그대로입니다.</p>}
       <div className="tblwrap">
         <table className="tb rs-years">
