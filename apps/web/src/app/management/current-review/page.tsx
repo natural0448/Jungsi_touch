@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { readFile } from "node:fs/promises";
 import { ConnectionNotice } from "@/components/connection-notice";
 import { PageHead } from "@/components/page-head";
+import { isEdutouchAdmin } from "@/lib/admin";
 import { apiMode, getCaller, sessionOrDown, source } from "@/lib/api";
 import { seoulTime } from "@/lib/format";
 import { loginHref } from "@/lib/links";
@@ -203,6 +204,20 @@ export default async function Page({ searchParams }: PageProps<"/management/curr
       desc="현재 정본(admission_results_current)의 검수 조회입니다. 승인된 검수 계정으로만 열리며, 값은 발표·수집 원문 그대로이고 보류 표시가 있어도 원 값을 지우지 않습니다. 일반 회원 화면이 아닙니다."
     />
   );
+
+  // 10-30 회원 공개 뒤에는 로그인 회원 누구나 이 주소에 닿을 수 있다. 조회는 서버가 검수 계정으로만 허용하지만,
+  // 검색 양식 자체도 에듀터치 관리자에게만 보인다(다른 관리 화면과 같은 기준, 10-27 QA A-06)
+  if (!(await isEdutouchAdmin()))
+    return (
+      <>
+        {head}
+        <div className="wrap pg-body">
+          <section className="gate flat">
+            <h2>에듀터치 관리자만 쓸 수 있는 화면입니다</h2>
+          </section>
+        </div>
+      </>
+    );
 
   let body: React.ReactNode = null;
   if (down) {

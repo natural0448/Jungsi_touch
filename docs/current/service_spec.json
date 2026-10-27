@@ -21606,6 +21606,13 @@
         "REQ-24"
       ],
       "summary": "화면팀 변경(본체 안내 10-27, 10-30 회원 공개 준비): 워커 관문에 JEONGSI_ACCESS_GATE=members 모드를 추가했다. 로그인한 활동 회원(profiles.status=active)은 연다. 로그인이 없으면 화면 요청(HTML GET)은 본체 /login?next=/jeongsi…(워커 주소로 직접 온 요청은 https://edutouch.co.kr 절대 주소)로 307, RSC·서버 액션·API 는 401. 정지 회원·확인 실패는 403. 전문가용(/pro)은 기존 규칙(관리자·허용 명단·계약 기관 구성원) 그대로. 현재 설정값은 preview 그대로라 동작 변화 없음."
+    },
+    {
+      "date": "2026-10-27",
+      "requirements": [
+        "REQ-24"
+      ],
+      "summary": "화면팀 변경(10-27 QA A-06): 관리 화면 /management/current-review 에 다른 관리 화면(p1-snapshot·score-corrections)과 같은 에듀터치 관리자 확인(isEdutouchAdmin)을 넣었다. 회원 공개 뒤 일반 회원에게 검색 양식이 보이지 않게 한다. 조회 권한(검수 계정) 판단은 서버 그대로."
     }
   ],
   "overall_analysis_contract": {
