@@ -1,13 +1,11 @@
-import type { SampleReportDto, ScoreInputStatusDto } from "@/lib/dto";
+import type { ScoreInputStatusDto } from "@/lib/dto";
 import { seoulDate, seoulDateTime } from "@/lib/format";
-import { PASS_HREF, SUPPORT_HREF } from "@/lib/links";
+import { SUPPORT_HREF } from "@/lib/links";
 
 /*
-  2페이지 입력권·예시 리포트 표시(기획 1.9.95, 담당자 연결계약 v3 §10).
-  숫자는 score-input-status 응답 그대로 쓰고 추정하지 않는다. 예시 리포트는 가상 학생 견본이며 실제 개인 성적으로 꾸미지 않는다.
+  2페이지 입력권 표시(기획 1.9.95, 담당자 연결계약 v3 §10).
+  숫자는 score-input-status 응답 그대로 쓰고 추정하지 않는다. 가상 학생 견본은 2026-10-27 사용자 결정으로 뺐다.
 */
-
-const AREA: Record<string, string> = { korean: "국어", math: "수학", inquiry1: "탐구 1", inquiry2: "탐구 2" };
 
 /** 입력 가능 여부: 열린 단계이고(서버 판단) 남은 저장 횟수가 있거나 미리보기 예외일 때 */
 export function canInput(st: ScoreInputStatusDto | null): boolean {
@@ -53,56 +51,6 @@ export function NoInput({ st }: { st: ScoreInputStatusDto | null }) {
           {st.correction_request_remaining > 0 ? `(남은 정정 요청 ${st.correction_request_remaining}회)` : ""}.
         </p>
       )}
-    </section>
-  );
-}
-
-/** 무료 회원: 가상 학생 견본 리포트 + 이용권 안내 */
-export function SampleReport({ s }: { s: SampleReportDto | null }) {
-  return (
-    <section className="rp-sample" aria-labelledby="sample-h">
-      <div className="rp-sechd">
-        <h2 id="sample-h">예시 리포트 <small>{s?.label ?? "가상 학생 견본"} · 실제 성적이 아닙니다</small></h2>
-      </div>
-      {s ? (
-        <>
-          <div className="tblwrap">
-            <table className="tb">
-              <thead>
-                <tr>
-                  <th scope="col">과목</th>
-                  <th scope="col" className="r">표준점수</th>
-                </tr>
-              </thead>
-              <tbody>
-                {s.report.subjects.map((x) => (
-                  <tr key={x.area}>
-                    <th scope="row">{AREA[x.area] ?? x.area}</th>
-                    <td className="r num">{x.standard_score}</td>
-                  </tr>
-                ))}
-                <tr>
-                  <th scope="row">표준점수 합</th>
-                  <td className="r num"><b>{s.report.total_standard_score}</b></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <p className="rp-foot">
-            견본은 화면 구성을 보여 드리는 가상 학생 자료이며 저장되지 않습니다
-            {s.report.overall.status !== "estimated" && " — 전체 위치는 견본에서 계산하지 않습니다"}.
-          </p>
-        </>
-      ) : (
-        <p className="rp-foot">예시 리포트를 지금 불러오지 못했습니다.</p>
-      )}
-      <div className="rp-lock">
-        <div>
-          <h2>내 성적 입력과 전체 위치는 이용권으로 열립니다</h2>
-          <p>이용권이 있으면 시험 단계마다 성적을 1회 입력하고, 전체 응시자 중 내 위치와 대학 분석을 볼 수 있습니다.</p>
-        </div>
-        <a className="btn t" href={PASS_HREF}>이용권 보기</a>
-      </div>
     </section>
   );
 }

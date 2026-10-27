@@ -124,11 +124,6 @@
 .et .rp-empty p{margin:0 0 10px;font-size:13px;color:var(--ink-2)}
 .et .rp-empty .acts{display:flex;gap:8px;flex-wrap:wrap}
 .et .rp-foot{margin:0;font-size:12px;color:var(--muted)}
-.et .rp-lock{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-card)}
-.et .rp-lock .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--touch-soft);color:var(--touch);flex:none}
-.et .rp-lock div:nth-child(2){flex:1;min-width:220px}
-.et .rp-lock h2{font-size:15px;font-weight:900}
-.et .rp-lock p{margin:4px 0 0;font-size:13px;color:var(--ink-2)}
 
 /* ── 인쇄용 ── */
 .et .pr{display:grid;gap:14px;padding-bottom:40px}
@@ -235,8 +230,6 @@
 .et .rp-rights>b{color:var(--deep)}
 .et .rp-rights .num{color:var(--ink)}
 .et .rp-rights .warn{color:var(--reach);font-weight:700}
-.et .rp-sample{display:grid;gap:12px}
-.et .rp-sample h2 small{margin-left:8px;font-size:12px;font-weight:700;color:var(--reach)}
 .et .rp-own{display:grid;gap:8px;padding:14px 18px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg)}
 .et .rp-own h2{font-size:15px}
 .et .rp-own ul{display:grid;gap:6px;margin:0;padding:0;list-style:none}
