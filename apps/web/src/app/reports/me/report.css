@@ -248,3 +248,5 @@
 .et .rp-correct .hint{font-size:12px;color:var(--muted);margin:0}
 .et .rp-correct .btn{justify-self:start}
 .et .rp-err{margin:0;padding:10px 14px;border-radius:var(--r-sm);background:var(--risk-soft);color:var(--risk);font-size:13px}
+/* 리포트 표시: '현재 성적'·'정정 입력'(판 번호 대신, 2026-10-28) */
+.et .rp-tag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:10px;background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:700;vertical-align:middle}

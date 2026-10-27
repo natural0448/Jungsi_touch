@@ -8,7 +8,7 @@ import { pickReport, type PickState } from "./actions";
  * 내 리포트 목록(report.list-own). 다른 기기에서 저장한 리포트를 이 브라우저에서 열 때 쓴다.
  * 고르면 서버가 본인 리포트인지 다시 확인한 뒤 HttpOnly 쿠키에 담는다 — 성적 저장·분석은 하지 않는다
  */
-export function OwnReports({ items, currentId, hasMore }: { items: { report_id: string; report_version: number; updated_at: string }[]; currentId: string | null; hasMore: boolean }) {
+export function OwnReports({ items, currentId, hasMore, tags }: { items: { report_id: string; updated_at: string }[]; currentId: string | null; hasMore: boolean; tags: Record<string, string> }) {
   const [state, action, pending] = useActionState<PickState, FormData>(pickReport, null);
   return (
     <section className="rp-own" aria-labelledby="own-h">
@@ -18,7 +18,8 @@ export function OwnReports({ items, currentId, hasMore }: { items: { report_id: 
         {items.map((it) => (
           <li key={it.report_id}>
             <span>
-              리포트 {it.report_version}번째 판 · <span className="num">{seoulDateTime(it.updated_at)}</span> 저장
+              <span className="num">{seoulDateTime(it.updated_at)}</span> 저장
+              {tags[it.report_id] && <span className="rp-tag">{tags[it.report_id]}</span>}
             </span>
             {it.report_id === currentId ? (
               <span className="cur">지금 보는 리포트</span>

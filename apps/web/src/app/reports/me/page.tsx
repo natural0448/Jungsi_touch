@@ -7,7 +7,7 @@ import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { OwnReportListDto, ReportDto, ScoreInputStatusDto } from "@/lib/dto";
 import { EXAM, examTypeLabel } from "@/lib/exam";
-import { seoulDate } from "@/lib/format";
+import { seoulDateTime } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { PaidGate } from "@/components/paid-gate";
 import { getReportId } from "@/lib/report-ref";
@@ -89,10 +89,12 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
       </>
     );
   }
+  // 리포트 표시(2026-10-28 사용자 결정): 판 번호 대신 저장 시각과 '현재 성적'·'정정 입력' 표시. 판 번호는 서버의 겹침 방지에만 쓴다
+  const tagOf = (id: string) => (status && id === status.current_report_id ? (status.correction_used > 0 ? "정정 입력 · 현재 성적" : "현재 성적") : null);
   // 본인 리포트 목록: 이 브라우저에 리포트가 없을 때, 또는 '다른 리포트 열기'를 눌렀을 때만 부른다
   let own: OwnReportListDto | null = null;
   if (!report || picking) own = await src.listOwnReports(caller, { exam_id: EXAM.exam_id, limit: 10 }).catch(() => null);
-  const ownBlock = own && own.items.length > 0 && <OwnReports items={own.items} currentId={report?.report_id ?? null} hasMore={own.has_more} />;
+  const ownBlock = own && own.items.length > 0 && <OwnReports items={own.items} currentId={report?.report_id ?? null} hasMore={own.has_more} tags={Object.fromEntries(own.items.flatMap((it) => (tagOf(it.report_id) ? [[it.report_id, tagOf(it.report_id)!]] : [])))} />;
   const idem = crypto.randomUUID();
 
   if (!report || editing) {
@@ -140,7 +142,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
       <div className="wrap pg-body rp">
         <div className="rp-meta">
           <span>{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)}</span>
-          <span>리포트 {report.report_version}번째 · {seoulDate(report.updated_at)} 저장</span>
+          <span>{seoulDateTime(report.updated_at)} 저장</span>
+          {tagOf(report.report_id) && <span className="rp-tag">{tagOf(report.report_id)}</span>}
           {/* 저장한 성적은 고치지 않는다 — 입력권이 남은 유료 회원만 새 성적으로 리포트의 새 판을 만든다 */}
           {inputOpen && <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>}
           {!inputOpen && correctHref && <Link className="btn" href={correctHref}>{canCorrect ? "성적 정정 요청" : "정정 요청 상태"}</Link>}
