@@ -19,6 +19,8 @@ import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } fr
 import { OwnReports } from "./own-reports";
 import { RefreshOverall } from "./refresh-overall";
 import { InputStatus, NoInput, canInput } from "./rights";
+import { CorrectionPanel } from "./correction";
+import { canRequestCorrection, myLatestCorrection } from "@/lib/correction";
 import { ScoreForm, type ScoreDefaults } from "./score-form";
 import "./report.css";
 
@@ -68,6 +70,23 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // 입력권 상태. 확인하지 못하면 저장을 열지 않는다(횟수를 추정하지 않는다)
   const status: ScoreInputStatusDto | null = await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null);
   const inputOpen = canInput(status);
+  // 성적 정정 요청(2026-10-28 사용자 결정): 이 단계의 내 마지막 요청. 표를 읽지 못하면 요청 길을 열지 않는다
+  const corr = status ? await myLatestCorrection(EXAM.exam_id, status.stage) : null;
+  const latestCorr = corr?.row ?? null;
+  const canCorrect = !!corr && canRequestCorrection(status, latestCorr);
+  const correctHref = canCorrect || latestCorr?.status === "pending" || latestCorr?.status === "returned" ? `${route.path}?correct=1` : null;
+  if (sp.correct === "1" && status && corr) {
+    return (
+      <>
+        {head}
+        <div className="wrap pg-body rp">
+          <InputStatus st={status} />
+          <CorrectionPanel st={status} latest={latestCorr} can={canCorrect} savedScores={report ? JSON.stringify(defaultsFrom(report)) : ""} />
+          <Link className="btn" href={route.path}>내 성적 리포트로 돌아가기</Link>
+        </div>
+      </>
+    );
+  }
   // 본인 리포트 목록: 이 브라우저에 리포트가 없을 때, 또는 '다른 리포트 열기'를 눌렀을 때만 부른다
   let own: OwnReportListDto | null = null;
   if (!report || picking) own = await src.listOwnReports(caller, { exam_id: EXAM.exam_id, limit: 10 }).catch(() => null);
@@ -90,7 +109,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
               <ScoreForm examLabel={EXAM.label} idem={idem} defaults={report ? defaultsFrom(report) : {}} update={report ? { reportId: report.report_id, version: report.report_version } : undefined} />
             </>
           ) : (
-            <NoInput st={status} />
+            <NoInput st={status} correctHref={correctHref} />
           )}
           {ownBlock}
           {report && <Link className="btn" href={route.path}>고치지 않고 돌아가기</Link>}
@@ -122,6 +141,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
           <span>리포트 {report.report_version}번째 · {seoulDate(report.updated_at)} 저장</span>
           {/* 저장한 성적은 고치지 않는다 — 입력권이 남은 유료 회원만 새 성적으로 리포트의 새 판을 만든다 */}
           {inputOpen && <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>}
+          {!inputOpen && correctHref && <Link className="btn" href={correctHref}>{canCorrect ? "성적 정정 요청" : "정정 요청 상태"}</Link>}
           <Link className="btn" href={`${route.path}?pick=1`}>다른 리포트 열기</Link>
         </div>
 

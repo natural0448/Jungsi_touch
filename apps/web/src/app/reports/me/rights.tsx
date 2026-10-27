@@ -37,8 +37,8 @@ export function InputStatus({ st }: { st: ScoreInputStatusDto }) {
   );
 }
 
-/** 입력할 수 없는 유료 회원 안내(이미 1회 사용 등). 정정은 고객센터 */
-export function NoInput({ st }: { st: ScoreInputStatusDto | null }) {
+/** 입력할 수 없는 유료 회원 안내(이미 1회 사용 등). 정정은 이 화면의 정정 요청(성적표 사진, 2026-10-28) */
+export function NoInput({ st, correctHref }: { st: ScoreInputStatusDto | null; correctHref?: string | null }) {
   return (
     <section className="rp-empty">
       {st === null ? (
@@ -47,8 +47,12 @@ export function NoInput({ st }: { st: ScoreInputStatusDto | null }) {
         <p>이 시험 단계는 지금 성적을 입력할 수 있는 기간이 아닙니다.</p>
       ) : (
         <p>
-          이 시험 단계의 성적 입력 1회를 이미 사용했습니다. 저장한 리포트는 계속 볼 수 있습니다. 성적표와 다르게 저장했다면 <a href={SUPPORT_HREF}>고객센터</a>에 정정을 요청해 주세요
-          {st.correction_request_remaining > 0 ? `(남은 정정 요청 ${st.correction_request_remaining}회)` : ""}.
+          이 시험 단계의 성적 입력을 이미 사용했습니다. 저장한 리포트는 계속 볼 수 있습니다.{" "}
+          {correctHref ? (
+            <>성적표와 다르게 저장했다면 성적표 사진과 함께 <a href={correctHref}>정정을 요청</a>해 주세요(이 단계에서 한 번).</>
+          ) : (
+            <>궁금한 점은 <a href={SUPPORT_HREF}>고객센터</a>로 알려 주세요.</>
+          )}
         </p>
       )}
     </section>
