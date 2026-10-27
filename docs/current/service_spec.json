@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.127",
+  "version": "1.9.128",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7668,7 +7668,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.127",
+        "contract_version": "1.9.128",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7842,7 +7842,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.127",
+        "contract_version": "1.9.128",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8008,7 +8008,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.127",
+        "contract_version": "1.9.128",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8027,7 +8027,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.127",
+        "contract_version": "1.9.128",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8052,7 +8052,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.127",
+        "contract_version": "1.9.128",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8077,7 +8077,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.127",
+        "contract_version": "1.9.128",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -18697,8 +18697,8 @@
     "DEP-IO-01: 사용자 제공 Supabase 디스크 I/O 예산 경고로 추가 I/O 집약 DB 작업은 HOLD한다. 실제 I/O 예산 회복·작업 중첩·부하 원인은 아직 확인하지 않았으며 57014와의 인과를 확정하지 않는다. 개발팀은 성능CR의 초기 구축/증분 갱신·유한 배치·중단 조건을 파일로 준비하고, 데이터팀은 진행 중 작업의 안전한 체크포인트를 정리한다. 실제 성능 검수·대량복사·전체 재적재·VACUUM·새 read model DB 구축은 NOT_RUN이며 source/local synthetic/Git 검수만 계속한다.",
     "spec1.9.31: 전수 검수 API 후보의 source/docs는 PR23으로 develop에 정상 통합되고 853+853/native41/번들/독립 검토/CI273·274가 PASS했다. 실제 전수 payload·집계는 기존5초에서57014 FAIL/성공페이지0이며 I/O 집약 실제DB 작업은 DEP-IO-01 HOLD다. 조회 모델 CR 문서의 타입/FK·봉인lineage·정확bytecodec·완전dependency 영향명부를 보완하고 독립 기술 검토·실제 I/O 재개 조건·Owner 적용범위를 갖춰야 한다. 새로운 승인/PIN4/DB구축/함수배포/실JWT/BFF/브라우저/보안3gate·일반회원 공개는 NOT_RUN이다.",
     "DEP-AUTH-COOKIE-01: 정문 수정/직접 자연만료·첫다음 PASS는 화면팀 보고 수용. chunk/redirect/오류/fetch no-store,실제만료/head·동시성/회수·비승인계정 잔여 NOT_RUN을 유지한다.",
-    "DB-CAP-01: 행별 정리는 검증된 일부 커밋·사후조회에서 중지했고, 최신 사용자 지시인 테이블별 필요성 검증·불필요 테이블 DROP으로 전환했다. 현재/예정 서비스·정본·엔진·에듀터치·모든 파일을 보존하며 미사용 이름/통계0만으로 DROP하지 않는다. 정확 의존·복구·최신 OID/head와 데이터팀 작업 창을 확인하는 중이고 테이블 DROP/정비는 NOT_RUN이다.",
-    "DB-CAP-01: 행별 정리는 검증된 일부 커밋·사후조회에서 중지했고, 최신 사용자 지시인 테이블별 필요성 검증·불필요 테이블 DROP으로 전환했다. 현재/예정 서비스·정본·엔진·에듀터치·모든 파일을 보존하며 미사용 이름/통계0만으로 DROP하지 않는다. 정확 의존·복구·최신 OID/head와 데이터팀 작업 창을 확인하는 중이고 테이블 DROP/정비는 NOT_RUN이다.",
+    "DB-CAP-01: 미사용 원본 intake 압축사본의 원형 보관·실제 PostgreSQL 복원·Drive 재다운로드 지문 대조 후 정확 대상만 DROP RESTRICT로 제거하고 커밋·사후조회했다. 현재 서비스·보호 객체·head와 원본/복구 보관을 유지하며 일회성 진단 파일 정리는 별도 사용자 지정 명부로 완료했다. 할당 디스크/청구 축소나 엔진/배포 완료로 확대하지 않는다.",
+    "DB-CAP-01: 미사용 원본 intake 압축사본의 원형 보관·실제 PostgreSQL 복원·Drive 재다운로드 지문 대조 후 정확 대상만 DROP RESTRICT로 제거하고 커밋·사후조회했다. 현재 서비스·보호 객체·head와 원본/복구 보관을 유지하며 일회성 진단 파일 정리는 별도 사용자 지정 명부로 완료했다. 할당 디스크/청구 축소나 엔진/배포 완료로 확대하지 않는다.",
     "조건부 내부 방법 조회와 전체 분모/조건부 분자 범위 계약은 비활성 제안으로 등록했다. 실제 함수 설치/app-role 검수·어댑터/DTO·엔진·운영 연결은 별도 근거가 필요하며, 기존 응답 허용목록/성공값을 변경하지 않는다."
   ],
   "source_documents": [
@@ -21737,6 +21737,19 @@
         "REQ-26"
       ],
       "summary": "직접 승인된 제한 과거행 정리의 실제 커밋·사후조회와 최신 사용자 지시인 테이블 필요성 검증/불필요 테이블 제거로의 전환을 구분한다. 행별 작업은 닫고 데이터팀에 단일 writer 창을 반환했으며 DROP/정비는 미실행이다. 현재/예정 서비스·정본·환산/분포/CDF·에듀터치·모든 파일을 보존하고 이름/통계0으로 미사용을 판단하지 않는다. 서울대 조건부 방법 조회의 내부 서버·native 학년도·SECURITY INVOKER/기존 앱 역할·HOLD 경계를 제안 등록하며, 고려대 조건부 CDF의 전체 분모와 조건부 분자 범위를 비활성 계약으로 분리한다. 새 공개 API·활성 DTO/응답 허용필드·권한/예산·엔진 승인/배포를 바꾸지 않는다. 표별 현재 사용처/계보를 대조한 결과 입증된 미사용 DROP 대상은 없고, 원본 payload/출처의 미확정 사용처는 보존한다. RAM cache/buffer·swap·commit과 영구 저장을 구분한다. 기존 승인 모집행을 유지하는 정확 대상 서버 분류·이행 계약과 제한 공개 사유 코드 후보를 등록하며 구현/운영 미확인을 보존한다."
+    },
+    {
+      "date": "2026-10-27",
+      "version": "1.9.128",
+      "requirements": [
+        "REQ-13",
+        "REQ-16",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "DB-CAP-01: 미사용 원본 intake 압축사본의 원형 보관·실제 PostgreSQL 복원·Drive 재다운로드 지문 대조 후 정확 대상만 DROP RESTRICT로 제거하고 커밋·사후조회했다. 현재 서비스·보호 객체·head와 원본/복구 보관을 유지하며 일회성 진단 파일 정리는 별도 사용자 지정 명부로 완료했다. 할당 디스크/청구 축소나 엔진/배포 완료로 확대하지 않는다. RAM cache/buffer·swap·commit 해석은 유지하며 강제 캐시 비우기·재시작·설정/요금 변경을 하지 않는다. 새 공개 API/DTO·회원/소유권·relay/예산·환산/누백 산출과 조건부 분류/사유 코드의 구현·활성 상태를 바꾸지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -177859,7 +177872,7 @@
     "shared_db_capacity_followup": {
       "format": "jungsi.shared-db-capacity-followup/v1",
       "id": "DB-CAP-01",
-      "status": "TABLE_NECESSITY_REVIEW_CLOSED_NO_PROVEN_UNUSED_TABLE_DROP_TARGET",
+      "status": "EXACT_UNUSED_INTAKE_COPY_TABLES_REMOVED_NATIVE_RECOVERY_AND_POSTCHECK_VERIFIED",
       "scope": [
         "current review first/next range",
         "current public history.search bounded supply",
@@ -178021,7 +178034,7 @@
       "table_necessity_cleanup": {
         "format": "jungsi.table-necessity-cleanup/v1",
         "id": "DB-CAP-01-TABLE",
-        "status": "NECESSITY_AND_CURRENT_READER_CLOSURE_REVIEWED_NO_PROVEN_UNUSED_TARGET",
+        "status": "EXACT_TWO_DROP_RESTRICT_COMMITTED_AND_POSTCHECK_VERIFIED",
         "decision_date": "2026-10-27",
         "scope": "기존 프로젝트의 정시 소유 물리 테이블별 실제 필요성을 검증하고, 불필요함이 입증된 정확 대상만 DROP한다. 새 요청은 기존 행별 정리를 대체한다.",
         "candidate_schemas": [
@@ -178029,18 +178042,22 @@
           "jungsi_backend",
           "jungsi_professional"
         ],
-        "protected": "에듀터치/관리 스키마·현재/계획상 필요한 서비스와 DB·정본·회원/성적/리포트/권한/감사·산식/분포/CDF 및 모든 파일/Drive 원본을 보존한다.",
+        "protected": "에듀터치/관리 스키마·현재/계획상 필요한 서비스와 DB·정본·회원/성적/리포트/권한/감사·산식/분포/CDF 및 자료 원본·복구 보관본·현재 인수인계/검증 도구를 보존한다. 파일 정리는 사용자가 별도로 지정한 종료된 API/DB 연결 진단 파일·로그의 정확 명부만 적용한다.",
         "evidence": "최신 검증 Git/라우팅·실제 reader/writer·view/function/FK/trigger·RLS/권한과 원형 보관/복구를 대조한다. 이름의 old/v1·통계0·본문이 현재 화면에 없다는 사실만으로 미사용을 판정하지 않는다. 기존 메타데이터 범위의 공백만 제한 catalog 조회로 보완하며 원자료/전체 학생·학교 본문 full scan을 하지 않는다.",
-        "execution": "정확 테이블/OID/소유·의존·보관 SHA를 고정하고 데이터팀과 실제 단일 writer 창을 직렬 조정한다. 최신 head 변경은 합법적 신규 입력으로 인수하며 과거 head를 복구하지 않는다. DROP은 RESTRICT이며 CASCADE·전체 schema 삭제·역할/요금/자원 변경·파일 삭제를 허용하지 않는다. 사용 중 표는 유지한다.",
-        "exact_targets": [],
-        "DROP": "NOT_RUN_NO_PROVEN_UNUSED_TARGET",
-        "DDL": "NOT_RUN",
+        "execution": "정확 테이블/OID/소유·전체 원형·의존·보관 SHA를 결속하고 데이터팀의 실제 단일 writer 창을 별도로 조율한다. 대상 잠금 뒤 최신 본체/스키마와 보관본을 대조하며, 현재 head는 실행창의 최신값을 인수해 보존한다. 활성 DDL event trigger의 원형과 부작용을 검토한 정확 allowlist가 일치해야 한다. DROP은 literal 두 문장의 RESTRICT만 허용하며, 보호 객체·head·원형 변경/새 참조/잠금 경합은 중단한다. 두 DROP과 사전 검사가 모두 성공해야 커밋하고 새 읽기 전용 조회로 부재·보호 객체·head와 연결 종료를 확인한다.",
+        "exact_targets": [
+          "jungsi_data_ingest.csv_files",
+          "jungsi_data_ingest.support_files"
+        ],
+        "DROP": "CONFIRMED_COMMITTED_POSTCHECK_VERIFIED",
+        "DDL": "EXACT_TWO_PERMANENT_TABLE_DROPS_RESTRICT_ONLY",
         "current_service_preserved": true,
-        "file_deletions": false,
+        "file_deletions": "ONLY_SEPARATELY_AUTHORIZED_GENERATED_API_DB_DIAGNOSTICS_EXACT_MANIFEST",
         "production_ready": false,
-        "decision": "현재 조회 기저·FK/뷰/함수·고정 reader/getter·서비스 및 예정 기능 계약과 정본 계보를 교차 검토했다. 버전 접미사가 있는 검수표도 현재 조회·검수에서 사용한다. 확인한 범위에서 통째로 불필요함이 입증된 표는 없으며 exact_targets는 비워 둔다. 직접 writer 또는 전체 복원 근거가 일부 미확정인 원본 payload/출처 표는 HOLD로 보존한다.",
+        "decision": "현재 고정 운영 소스의 엄격한 binding과 Storage 전용 공급 경로, 데이터팀의 실제 writer 및 DB 의존을 대조했다. 원본 intake 압축사본 두 표는 현재 서비스 소비가 확인되지 않으며, 전체 native 키·필드·압축 바이트를 Drive에 보관하고 실제 기존 PostgreSQL에서 복원·대조한 뒤 롤백했다. 다른 현재/계획상 필요한 표는 유지한다.",
         "coverage": "프로젝트 소유 테이블 명부의 누락을 보완한 제한 메타데이터 재조회와 현재 고정 소비 코드의 필요한 경로만 확인했다. 실제 OID/명부·용량·출처/코드 SHA·KEEP/HOLD 판정 및 한계는 비공개 영수증에 둔다. 함수의 보수적 문자열 일치는 정확한 스키마 결속으로 과장하지 않는다.",
-        "writer_coordination": "행별 정리는 기존 커밋 경계에서 닫고 writer 창을 데이터팀에 반환했다. 새 데이터 반영을 막지 않으며, 새 DROP 근거가 생기면 최신 head와 작업 창부터 다시 결속한다."
+        "writer_coordination": "별도 데이터팀 작업 창에서 정확 대상만 제거하고 커밋·사후조회·연결 종료 뒤 writer 창을 반환한다. 실제 창 반환 영수증과 최신 head를 확인하며 과거 head를 복구하지 않는다.",
+        "archive_and_restore": "전체 현재 명부의 누락 없는 원형 스키마·native 필드·압축 바이트·권한/정책 정의와 논리 키를 결속했다. 독립 지문 검사, 기존 PostgreSQL의 TEMP 복원·전체 필드/바이트 지문 대조·ROLLBACK/임시 표 부재와 사용자가 Drive에서 재다운로드한 복구 ZIP의 전체 SHA 대조를 완료했다. 원격 도구의 실패 시도와 실제 성공 경로를 분리 보존한다. 임시 데이터 복원은 영구 운영 RLS/ACL/FK 재설치 완료를 뜻하지 않는다."
       },
       "memory_cache_review": {
         "status": "MEMORY_AND_PERSISTENT_STORAGE_DISTINGUISHED_READONLY_OBSERVATION",
@@ -178054,6 +178071,16 @@
           "https://supabase.com/kb/troubleshooting/exhaust-swap",
           "https://www.postgresql.org/docs/17/runtime-config-resource.html"
         ]
+      },
+      "temporary_diagnostic_cleanup": {
+        "format": "jungsi.generated-api-db-diagnostic-cleanup/v1",
+        "decision_date": "2026-10-27",
+        "status": "SCOPED_GENERATED_DIAGNOSTICS_REMOVED_AND_PROTECTED_INPUTS_VERIFIED",
+        "authorization": "사용자가 API/DB 연결 확인을 위해 작업자가 만든 일회성 파일·스크립트·로그의 정리를 직접 지정했다. 이 목적이 입증된 정확 대상만 정리하며 새 일반 삭제 승인을 되묻지 않는다.",
+        "method": "담당 서브에이전트 한 명이 정확 경로·크기·SHA·생성 근거·현재 사용처 부재 명부를 먼저 보존하고, 확인한 파일만 개별 삭제했다. 삭제 후 부재와 보호 파일의 해시 불변을 실제 확인했다. 실패/지연 관찰과 성공 결과는 구분한다.",
+        "protected": "운영 API/SQL·원본/실제 자료·복구 ZIP/증거·현재 verifier와 인수인계를 보존한다. 모든 outputs/Storage 폴더, 이름이 old인 파일 또는 다른 사용자의 파일을 일괄 삭제 대상으로 넓히지 않는다. 재귀 폴더 삭제·wildcard 삭제·원본 덮어쓰기/초기화는 하지 않는다.",
+        "evidence": "비공개 정확 삭제 명부·실제 부재·보호 해시 영수증만 보관하며 개인 식별자·운영 수치·자료/비밀을 Git에 복사하지 않는다.",
+        "runtime_or_auth_or_billing_changes": false
       }
     },
     "frontend_P1_P2_intake": {
