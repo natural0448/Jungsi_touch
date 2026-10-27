@@ -26,7 +26,7 @@ const STAGE = "mock";
 
 /*
   전문가용 학생 화면(계약 pro.student). 화면 위에 '지금 보는 학생' 띠를 고정하고, 그 아래 학생별 입력 상태 → 성적 입력
-  (확인 창에 학생 이름을 크게) → 최근 리포트(개인용과 같은 전체 위치 화면) → 리포트 판 목록이 온다.
+  (확인 창에 학생 이름을 크게) → 최근 리포트(개인용과 같은 전체 위치 화면) → 저장한 리포트 목록이 온다.
   다른 기관·담당 아닌 학생은 서비스가 404 로 막고 화면도 '없음'만 보인다. 열람 전용은 입력하지 않는다.
 */
 export default async function Page({ params, searchParams }: PageProps<"/pro/students/[studentId]">) {
@@ -69,6 +69,11 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
   const self = `/pro/students/${encodeURIComponent(student.student_id)}?org=${encodeURIComponent(svc.org_id)}`;
   const canInput = svc.role === "teacher" && !student.archived && status !== null && status.initial_remaining > 0;
   const a = shown?.published_result.overall ?? null;
+  // 판 번호 대신 '현재 성적'·'정정 입력' 표시(2026-10-28 사용자 결정, 개인용 2페이지와 같은 규칙).
+  // 서버 입력 상태의 current_report_id 리포트 중 가장 최근 판이 현재 성적이다. 판 번호는 열기·인쇄 주소에만 쓴다
+  const curRev = Math.max(0, ...reports.filter((r) => r.report_id === status?.current_report_id).map((r) => r.revision_id));
+  const tagOf = (r: { report_id: string; revision_id: number }) =>
+    status && r.report_id === status.current_report_id && r.revision_id === curRev ? (status.correction_used > 0 ? "정정 입력 · 현재 성적" : "현재 성적") : null;
   // 담은 학교의 이름은 같은 판의 후보 목록에서 찾는다(별도 조회 없음)
   const names = new Map(
     [...(shown?.published_result.candidates?.basic_university_groups.flatMap((g) => g.offerings) ?? []), ...(shown?.published_result.candidates?.wildcards ?? [])].map((it) => [it.offering.offering_id, it.offering]),
@@ -127,7 +132,8 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
           <section className="pro-sec" aria-labelledby="report-h">
             <div className="pro-sechd">
               <h2 id="report-h">
-                리포트 <small className="pro-note">{shown.revision_id}번째 판 · {seoulDateTime(shown.created_at_utc)}</small>
+                리포트 <small className="pro-note">{seoulDateTime(shown.created_at_utc)} 저장</small>
+                {tagOf(shown) && <span className="rp-tag">{tagOf(shown)}</span>}
               </h2>
             </div>
             <OverallCard a={a} />
@@ -177,12 +183,13 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
 
         {reports.length > 0 && (
           <section className="pro-sec" aria-labelledby="hist-h">
-            <h2 id="hist-h">리포트 판 목록</h2>
+            <h2 id="hist-h">저장한 리포트</h2>
             <ul className="pro-hist">
               {reports.map((r) => (
                 <li key={`${r.report_id}-${r.revision_id}`}>
                   <span>
-                    {r.revision_id}번째 판 · <span className="num">{seoulDateTime(r.created_at_utc)}</span>
+                    <span className="num">{seoulDateTime(r.created_at_utc)}</span> 저장
+                    {tagOf(r) && <span className="rp-tag">{tagOf(r)}</span>}
                   </span>
                   {shown?.report_id === r.report_id && shown.revision_id === r.revision_id ? (
                     <span className="cur">보는 중</span>
