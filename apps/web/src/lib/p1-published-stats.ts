@@ -17,6 +17,16 @@ import type { Cell, Row } from "./p1-shape";
   자료(c50·c70·alt)는 그대로 두고 고르기만 한다. 값을 만들거나 다른 집단·기준의 값을 섞지 않는다.
 */
 
+/**
+ * 대학이 인원이 적어 공개하지 않은 칸(2026-10-29 사용자 결정: 빈칸 대신 '비공개(3명 이하)').
+ * 서버가 그 칸의 reason_code 를 SOURCE_NONDISCLOSED_LE_<인원> 으로 보낼 때만 쓴다(담당자 요청 2026-10-29).
+ * 값이 없는 다른 까닭(미발표·확인 중 등)은 지금처럼 빈칸이다. 숫자를 만들지 않는다.
+ */
+export function nondisclosedLabel(c: Cell): string | null {
+  const m = c.v === null && c.r ? /^SOURCE_NONDISCLOSED_LE_([1-9]\d?)$/.exec(c.r) : null;
+  return m ? `비공개(${Number(m[1])}명 이하)` : null;
+}
+
 export type PublishedStat = { label: string; cell: Cell; schoolRecord: boolean };
 
 const UNKNOWN_BASIS = "대학 발표 성적 · 기준 확인 중";

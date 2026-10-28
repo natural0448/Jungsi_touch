@@ -1,6 +1,6 @@
 import { asOfDate } from "@/lib/format";
 import { rankDisplayModel } from "@/lib/p1-field-qualification";
-import { publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
+import { nondisclosedLabel, publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
 
 /*
@@ -69,8 +69,9 @@ function RankValue({ c }: { c: Cell }) {
 }
 
 /** 발표 성적 한 칸: 통계 이름 + 값. 대상 집단은 쓰지 않고, 학생부 등급일 때만 기준을 붙인다(2026-10-28 사용자 결정) */
-function Stat({ s }: { s: PublishedStat | undefined }) {
-  if (!s) return <span className="unpub">─</span>;
+function Stat({ s, closed }: { s: PublishedStat | undefined; closed?: string | null }) {
+  // 대학이 인원이 적어 공개하지 않은 칸은 빈칸 대신 그 사실을 적는다(2026-10-29 사용자 결정)
+  if (!s) return closed ? <span className="unpub">{closed}</span> : <span className="unpub">─</span>;
   const asOf = asOfDate(s.cell.at);
   return (
     <>
@@ -167,8 +168,8 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
                       {dv.dropped === null ? <span className="unpub">─</span> : <><b className="num">{dv.dropped}</b><small> 명</small>{dv.heldD &&<Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
                     </td>
                     <td className="r"><RankValue c={r.rk} /></td>
-                    <td className="r"><Stat s={ps[0]} /></td>
-                    <td className="r"><Stat s={ps[1]} /></td>
+                    <td className="r"><Stat s={ps[0]} closed={nondisclosedLabel(r.c50)} /></td>
+                    <td className="r"><Stat s={ps[1]} closed={nondisclosedLabel(r.c70)} /></td>
                   </tr>
                 );
               }),
