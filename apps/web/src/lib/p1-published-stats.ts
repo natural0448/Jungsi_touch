@@ -12,6 +12,8 @@ import type { Cell, Row } from "./p1-shape";
   - 이름: '85% 컷'·'85%cut'·'85_percent_cut' 은 학교 표기 차이일 뿐이라 모두 '85%컷'. 최상위·최대 → 최고, 최하위 → 최저
   - 숨김(담당자 확인 대기): 영어 mean·best·worst, 뜻이 애매한 이름(상위80% 집단 평균 등), 기준 '대학 발표 성적 · 기준 확인 중',
     같은 이름·기준·대상에 값이 둘 이상인 통계(예: 평균 553 과 631.3)
+  - 발표 용도가 실제 입결이 아닌 값(시뮬레이션·다른 학년도 산식 재환산 참고값·미확인)은 대학 발표 성적 칸에 쓰지 않는다
+    (2026-10-28 사용자 결정: 한국항공대 2025 는 2025 산식 평균 631.3 이 실제 입결, 2026 산식 553.0 은 참고값). 용도 표시가 없는 기존 자료는 그대로
   자료(c50·c70·alt)는 그대로 두고 고르기만 한다. 값을 만들거나 다른 집단·기준의 값을 섞지 않는다.
 */
 
@@ -60,7 +62,7 @@ const SECOND_NAMED: Record<string, number> = { 평균: 2, 최저: 3, 최고: 4 }
 export function publishedStats(r: Row): [PublishedStat | undefined, PublishedStat | undefined] {
   const all: { label: string; cell: Cell; i: number }[] = [];
   const add = (label: string | null, cell: Cell) => {
-    if (label === null || cell.v === null || cell.b === UNKNOWN_BASIS) return;
+    if (label === null || cell.v === null || cell.b === UNKNOWN_BASIS || (cell.pr !== undefined && cell.pr !== "actual_result")) return;
     all.push({ label, cell, i: all.length });
   };
   add("50%컷", r.c50);

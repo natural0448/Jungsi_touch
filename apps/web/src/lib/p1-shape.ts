@@ -20,6 +20,8 @@ export type Cell = {
   cc?: string | null; // 원래 대상 집단 코드
   at?: string | null; // 원문 자료 기준일/시각(값이 없으면 null)
   ctx?: { identity_variant_index: number; scope_status: string } | null;
+  /** 발표 용도(서버 publication_context.publication_role, 담당자 서비스 후보 2026-10-28). 없으면 기존 v1 */
+  pr?: "actual_result" | "simulation_reference" | "unresolved";
   url?: string | null;
 };
 export type Row = {

@@ -54,3 +54,12 @@ test("학생부 등급 values are marked, and nothing is invented for an empty r
   assert.deepEqual(r.map((x) => [x.label, x.cell.v, x.schoolRecord]), [["50%컷", "4.92", true], ["70%컷", "5.23", true]]);
   assert.deepEqual(publishedStats(row(null, null, [])), [undefined, undefined]);
 });
+
+test("only actual results fill the columns once a publication role is given (한국항공대 2025: 631.3 actual, 553.0 reference)", () => {
+  const actual = { ...cell("평균", "631.3"), pr: "actual_result" };
+  const reference = { ...cell("평균", "553.0"), pr: "simulation_reference" };
+  assert.deepEqual(pick(row(cell("50%컷", "630.44"), null, [actual, reference])), ["50%컷 630.44", "평균 631.3"]);
+  // 미확인 용도도 쓰지 않는다. 용도 표시가 없는 기존 자료는 그대로
+  assert.deepEqual(pick(row(null, null, [{ ...cell("평균", "5"), pr: "unresolved" }])), ["─", "─"]);
+  assert.deepEqual(pick(row(null, null, [cell("평균", "5")])), ["평균 5", "─"]);
+});

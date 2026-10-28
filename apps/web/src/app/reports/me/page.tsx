@@ -11,7 +11,7 @@ import { seoulDateTime } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { PaidGate } from "@/components/paid-gate";
 import { getReportId } from "@/lib/report-ref";
-import { onlyReportAfterCorrection } from "@/lib/superseded";
+import { onlyReportAfterCorrection, visibleOwnItems } from "@/lib/superseded";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { RunAnalysis } from "@/components/run-analysis";
 import { viewPath } from "@/lib/content-view";
@@ -101,8 +101,9 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // 본인 리포트 목록: 이 브라우저에 리포트가 없을 때, 또는 '다른 리포트 열기'를 눌렀을 때만 부른다
   let own: OwnReportListDto | null = null;
   if (!report || picking) own = await src.listOwnReports(caller, { exam_id: EXAM.exam_id, limit: 10 }).catch(() => null);
-  const ownItems = own ? (only ? own.items.filter((it) => it.report_id === only) : own.items) : [];
-  const ownBlock = own && ownItems.length > 0 && <OwnReports items={ownItems} currentId={report?.report_id ?? null} hasMore={!only && own.has_more} tags={Object.fromEntries(ownItems.flatMap((it) => (tagOf(it.report_id) ? [[it.report_id, tagOf(it.report_id)!]] : [])))} />;
+  const visible = own ? visibleOwnItems(own.items, only) : null;
+  const ownItems = visible?.items ?? [];
+  const ownBlock = own && ownItems.length > 0 && <OwnReports items={ownItems} currentId={report?.report_id ?? null} hasMore={(visible!.byServer || !only) && own.has_more} tags={Object.fromEntries(ownItems.flatMap((it) => (tagOf(it.report_id) ? [[it.report_id, tagOf(it.report_id)!]] : [])))} />;
   const idem = crypto.randomUUID();
 
   if (!report || editing) {

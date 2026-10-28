@@ -582,7 +582,8 @@ export interface SnapshotHeadDto {
 /** own_report_list — 현재 로그인한 본인의 리포트 요약 */
 export interface OwnReportListDto {
   format: "jungsi.own-report-list/v1";
-  items: { report_id: string; exam_id: string | null; report_version: number; updated_at: string }[];
+  /** stage·is_current: 담당자 서비스 후보(2026-10-28 cross-PC v4). 아직 운영 응답에 없을 수 있어 선택 필드다. null 은 서버가 모름 */
+  items: { report_id: string; exam_id: string | null; report_version: number; updated_at: string; stage?: string | null; is_current?: boolean | null }[];
   next_cursor: string | null;
   has_more: boolean;
 }

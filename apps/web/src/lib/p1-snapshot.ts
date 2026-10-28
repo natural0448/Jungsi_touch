@@ -141,6 +141,9 @@ function cell(o: unknown, extra?: "stage" | "cut", qualifiedRankRow?: Obj): Cell
   out.ctx = context ? { identity_variant_index: int(context.identity_variant_index), scope_status: String(context.scope_status) } : null;
   const url = str(c.source_url);
   if (url) out.url = url;
+  // 발표 용도. 실제 입결 / 다른 학년도 산식으로 다시 계산한 참고값 / 미확인. 모르는 값은 버린다(기존 v1 과 같게)
+  const role = ((c.publication_context ?? null) as Obj | null)?.publication_role;
+  if (role === "actual_result" || role === "simulation_reference" || role === "unresolved") out.pr = role;
   return out;
 }
 function compact(r: Obj): Row {
