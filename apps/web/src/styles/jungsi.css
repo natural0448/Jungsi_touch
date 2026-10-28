@@ -150,8 +150,9 @@ body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;lin
 .et .jt-top li.me{display:flex;align-items:center;gap:6px;margin-right:14px;padding-right:16px;border-right:1px solid var(--line)}
 .et .jt-top .urole{padding:1px 6px;border-radius:4px;background:var(--sub-2,#ECEEF4);color:var(--ink-2);font-size:11px;font-weight:600}
 .et .jt-top a.bell{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:999px;background:#FFF1E6;color:#C2410C;font-weight:700}
-.et .jt-top .bell b{font-variant-numeric:tabular-nums}
+/* 넓은 화면은 '1개의 알림이 있습니다'만, 좁은 화면은 숫자만 */
+.et .jt-top .bell b{display:none;font-variant-numeric:tabular-nums}
 .et .jt-top .bell span{font-weight:600}
 .et .jt-top .prem{color:#C2410C;font-weight:700}
 .et .jt-top form{display:inline}
-@media (max-width:480px){.et .jt-top ul{gap:12px}.et .jt-top .hide-sm{display:none}.et .jt-top li.me{margin-right:4px;padding-right:12px}}
+@media (max-width:480px){.et .jt-top ul{gap:12px}.et .jt-top .hide-sm{display:none}.et .jt-top li.me{margin-right:4px;padding-right:12px}.et .jt-top .bell b{display:inline}}
