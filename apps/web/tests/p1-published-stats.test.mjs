@@ -42,6 +42,9 @@ test("final registrants beat first-round admits; one cohort and one basis per ro
   // 같은 집단 안에서는 환산점수를 먼저 쓰고 등급과 섞지 않는다
   const mixed = row(null, null, [cell("평균", "3.7", "학생부 등급"), cell("평균", "295.1"), cell("최저", "4.1", "학생부 등급")]);
   assert.deepEqual(pick(mixed), ["평균 295.1", "─"]);
+  // 같은 이름·기준·대상에 값이 둘이면 그 통계는 숨긴다. 값이 같으면 하나로 본다
+  assert.deepEqual(pick(row(cell("50%컷", "630.44"), null, [cell("평균", "553"), cell("평균", "631.3")])), ["50%컷 630.44", "─"]);
+  assert.deepEqual(pick(row(cell("50%컷", "630.44"), null, [cell("평균", "631.3"), cell("평균", "631.3")])), ["50%컷 630.44", "평균 631.3"]);
   // 기준이 확인 중인 값은 보이지 않는다
   assert.deepEqual(pick(row(null, null, [cell("평균", "412.5", "대학 발표 성적 · 기준 확인 중")])), ["─", "─"]);
 });

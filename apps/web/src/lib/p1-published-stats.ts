@@ -10,7 +10,8 @@ import type { Cell, Row } from "./p1-shape";
     ② 70%컷 → 다른 %컷(작은 비율부터) → 평균(① 이 50%컷일 때) → 최저 → 최고
     70%컷만 있으면 ①은 비우고 ②에 둔다. 학년도마다 같은 통계가 같은 칸에 서도록 하기 위해서다
   - 이름: '85% 컷'·'85%cut'·'85_percent_cut' 은 학교 표기 차이일 뿐이라 모두 '85%컷'. 최상위·최대 → 최고, 최하위 → 최저
-  - 숨김(담당자 확인 대기): 영어 mean·best·worst, 뜻이 애매한 이름(상위80% 집단 평균 등), 기준 '대학 발표 성적 · 기준 확인 중'
+  - 숨김(담당자 확인 대기): 영어 mean·best·worst, 뜻이 애매한 이름(상위80% 집단 평균 등), 기준 '대학 발표 성적 · 기준 확인 중',
+    같은 이름·기준·대상에 값이 둘 이상인 통계(예: 평균 553 과 631.3)
   자료(c50·c70·alt)는 그대로 두고 고르기만 한다. 값을 만들거나 다른 집단·기준의 값을 섞지 않는다.
 */
 
@@ -69,7 +70,10 @@ export function publishedStats(r: Row): [PublishedStat | undefined, PublishedSta
   const tier = Math.min(...all.map((x) => cohortTier(x.cell)));
   const inTier = all.filter((x) => cohortTier(x.cell) === tier);
   const basis = inTier.reduce((best, x) => (basisRank(x.cell.b) < basisRank(best) ? x.cell.b ?? null : best), inTier[0].cell.b ?? null);
-  const same = inTier.filter((x) => (x.cell.b ?? null) === basis);
+  // 같은 이름·기준·대상에 값이 둘 이상이면 어느 쪽이 맞는지 화면이 정할 수 없어 그 통계는 숨긴다(10-28 사용자 결정, 담당자 확인 요청)
+  const values = new Map<string, Set<string>>();
+  for (const x of inTier.filter((y) => (y.cell.b ?? null) === basis)) values.set(x.label, (values.get(x.label) ?? new Set()).add(x.cell.v!));
+  const same = inTier.filter((x) => (x.cell.b ?? null) === basis && values.get(x.label)!.size === 1);
   const stat = (x: { label: string; cell: Cell } | undefined): PublishedStat | undefined =>
     x && { label: x.label, cell: x.cell, schoolRecord: x.cell.b === "학생부 등급" };
   const first = same.find((x) => x.label === "50%컷") ?? same.find((x) => x.label === "평균");
