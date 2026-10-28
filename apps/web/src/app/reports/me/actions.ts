@@ -5,6 +5,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import type { ScoresInput } from "@/lib/dto";
+import { csatReleaseOn } from "@/lib/correction";
+import { correctionInputClosed } from "@/lib/csat-release";
 import { EXAM } from "@/lib/exam";
 import { onlyReportAfterCorrection } from "@/lib/superseded";
 import { getReportId, setReportId } from "@/lib/report-ref";
@@ -89,6 +91,13 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
 
   const caller = await getCaller();
   const src = source();
+  // 수능 성적표 배부일이 지나면 승인받은 가채점 정정도 저장하지 않는다(2026-10-29 사용자 결정, 본체 관리자 설정)
+  const release = await csatReleaseOn();
+  if (release) {
+    const st = await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null);
+    if (st?.stage === "provisional" && correctionInputClosed(st, await csatReleaseOn(st.academic_year)))
+      return fail("수능 성적표가 배부되어 가채점 정정 입력 기간이 끝났습니다. 실채점 성적은 실채점 단계에서 입력해 주세요.");
+  }
   // 어느 단계에서 멈췄는지(성적 저장 / 전체 분석). 성적만 저장된 부분 성공을 구분하려고 문구에 붙인다
   let step = "성적 저장";
   try {

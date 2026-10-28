@@ -21,7 +21,8 @@ import { OwnReports } from "./own-reports";
 import { RefreshOverall } from "./refresh-overall";
 import { InputStatus, NoInput, canInput } from "./rights";
 import { CorrectionPanel } from "./correction";
-import { canRequestCorrection, myLatestCorrection } from "@/lib/correction";
+import { canRequestCorrection, csatReleaseOn, myLatestCorrection } from "@/lib/correction";
+import { correctionInputClosed } from "@/lib/csat-release";
 import { ScoreForm, type ScoreDefaults } from "./score-form";
 import "./report.css";
 
@@ -70,14 +71,16 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   }
   // 입력권 상태. 확인하지 못하면 저장을 열지 않는다(횟수를 추정하지 않는다)
   const status: ScoreInputStatusDto | null = await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null);
-  const inputOpen = canInput(status);
+  // 수능 성적표 배부일(본체 관리자 설정). 가채점 정정은 배부일 전날까지만 요청·입력한다(2026-10-29 사용자 결정)
+  const releaseOn = status?.stage === "provisional" ? await csatReleaseOn(status.academic_year) : null;
+  const inputOpen = canInput(status) && !correctionInputClosed(status, releaseOn);
   // 정정 입력 뒤에는 이 단계의 현재 리포트만 보인다(2026-10-28 사용자 결정). 이 브라우저가 정정 전 리포트를 기억하고 있으면 현재 리포트로 바꿔 읽는다
   const only = onlyReportAfterCorrection(status);
   if (only && report?.report_id !== only) report = await src.readReport(caller, only).catch(() => null);
   // 성적 정정 요청(2026-10-28 사용자 결정): 이 단계의 내 마지막 요청. 표를 읽지 못하면 요청 길을 열지 않는다
   const corr = status ? await myLatestCorrection(EXAM.exam_id, status.stage) : null;
   const latestCorr = corr?.row ?? null;
-  const canCorrect = !!corr && canRequestCorrection(status, latestCorr);
+  const canCorrect = !!corr && canRequestCorrection(status, latestCorr, releaseOn);
   const correctHref = canCorrect || latestCorr?.status === "pending" || latestCorr?.status === "returned" ? `${route.path}?correct=1` : null;
   if (sp.correct === "1" && status && corr) {
     // 관리자가 저장된 점수와 비교하도록 지금 성적의 리포트를 함께 보낸다. 이 브라우저에 연 리포트가 없으면 서버가 알려 준 현재 리포트를 읽는다
@@ -87,7 +90,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         {head}
         <div className="wrap pg-body rp">
           <InputStatus st={status} />
-          <CorrectionPanel st={status} latest={latestCorr} can={canCorrect} savedScores={current ? JSON.stringify(defaultsFrom(current)) : ""} />
+          <CorrectionPanel st={status} latest={latestCorr} can={canCorrect} releaseOn={releaseOn} savedScores={current ? JSON.stringify(defaultsFrom(current)) : ""} />
           <Link className="btn" href={route.path}>내 성적 리포트로 돌아가기</Link>
         </div>
       </>

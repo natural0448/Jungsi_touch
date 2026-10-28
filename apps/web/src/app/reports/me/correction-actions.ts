@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getCaller, source } from "@/lib/api";
-import { CORRECTION_BUCKET, canRequestCorrection, myLatestCorrection } from "@/lib/correction";
+import { CORRECTION_BUCKET, canRequestCorrection, csatReleaseOn, myLatestCorrection } from "@/lib/correction";
 import { EXAM } from "@/lib/exam";
 import { supabaseServer } from "@/lib/supabase/server";
 
@@ -34,7 +34,8 @@ export async function requestCorrection(_prev: CorrectionFormState, fd: FormData
   const st = await source().readScoreInputStatus(await getCaller(), EXAM.exam_id).catch(() => null);
   const latest = st ? await myLatestCorrection(EXAM.exam_id, st.stage) : null;
   if (!st || !latest) return { ok: false, error: "입력 상태를 확인하지 못했습니다. 잠시 뒤 다시 시도해 주세요." };
-  if (!canRequestCorrection(st, latest.row)) return { ok: false, error: "이 시험 단계에서는 지금 정정을 요청할 수 없습니다. 화면을 새로 고쳐 상태를 확인해 주세요." };
+  const releaseOn = st.stage === "provisional" ? await csatReleaseOn(st.academic_year) : null;
+  if (!canRequestCorrection(st, latest.row, releaseOn)) return { ok: false, error: "이 시험 단계에서는 지금 정정을 요청할 수 없습니다. 화면을 새로 고쳐 상태를 확인해 주세요." };
 
   let saved: unknown = null;
   try {

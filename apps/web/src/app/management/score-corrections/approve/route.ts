@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isEdutouchAdmin } from "@/lib/admin";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
+import { csatReleaseOn } from "@/lib/correction";
+import { provisionalClosed } from "@/lib/csat-release";
 import { supabaseServer } from "@/lib/supabase/server";
 
 /*
@@ -44,6 +46,8 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
   if (!row) return back(request, id, "not_found");
   if (row.status !== "pending") return back(request, id, "not_pending");
+  // 수능 성적표 배부일이 지나면 가채점 정정은 승인하지 않는다(2026-10-29 사용자 결정, 본체 관리자 설정)
+  if (row.stage === "provisional" && provisionalClosed(await csatReleaseOn())) return back(request, id, "provisional_closed");
 
   try {
     const r = await source().grantScoreCorrection(

@@ -1,4 +1,5 @@
 import type { CorrectionRow } from "@/lib/correction";
+import { lastCorrectionDay, provisionalClosed } from "@/lib/csat-release";
 import type { ScoreInputStatusDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { SUPPORT_HREF } from "@/lib/links";
@@ -10,8 +11,12 @@ export const STAGE_LABEL: Record<string, string> = { mock: "모의평가", provi
  * 2페이지 성적 정정 영역(?correct=1). 내 마지막 요청 상태와, 요청할 수 있으면 양식을 보인다.
  * 승인되면 서버 입력권 상태에 '승인된 정정'이 생겨 기존 입력 양식이 열리므로 여기서는 안내만 한다.
  */
-export function CorrectionPanel({ st, latest, can, savedScores }: { st: ScoreInputStatusDto; latest: CorrectionRow | null; can: boolean; savedScores: string }) {
+export function CorrectionPanel({ st, latest, can, releaseOn = null, savedScores }: { st: ScoreInputStatusDto; latest: CorrectionRow | null; can: boolean; releaseOn?: string | null; savedScores: string }) {
   const stage = STAGE_LABEL[st.stage] ?? st.stage;
+  // 가채점 정정은 수능 성적표 배부일 전날까지(본체 관리자 설정). 날짜가 없으면 입력 기간 끝을 안내한다
+  const provisional = st.stage === "provisional";
+  const closedByRelease = provisional && provisionalClosed(releaseOn);
+  const until = provisional ? (releaseOn ? lastCorrectionDay(releaseOn) : st.closes_at ? seoulDate(st.closes_at) : null) : null;
   return (
     <section className="rp-sec" aria-labelledby="corr-h">
       <h2 id="corr-h">{stage} 성적 정정 요청</h2>
@@ -23,9 +28,13 @@ export function CorrectionPanel({ st, latest, can, savedScores }: { st: ScoreInp
       {latest?.status === "approved" && (
         <p className="rp-note">
           정정 요청이 승인되었습니다{latest.handled_at ? `(${seoulDate(latest.handled_at)})` : ""}.
-          {st.correction_granted > st.correction_used ? " '내 성적 리포트'로 돌아가 바른 성적을 다시 입력해 주세요." : " 정정 입력을 이미 사용했습니다."}
-          {/* 가채점 정정은 성적표 배부 전까지만(2026-10-28 사용자 결정). 가채점 입력 기간이 통지일 전날 닫히면 승인된 정정도 쓸 수 없다 */}
-          {st.stage === "provisional" && st.correction_granted > st.correction_used && st.closes_at && ` 가채점 정정은 성적표 배부 전, ${seoulDate(st.closes_at)}까지 저장해야 합니다.`}
+          {st.correction_granted <= st.correction_used
+            ? " 정정 입력을 이미 사용했습니다."
+            : closedByRelease
+              ? " 수능 성적표가 배부되어 가채점 정정 입력 기간이 끝났습니다. 실채점 성적은 실채점 단계에서 입력해 주세요."
+              : " '내 성적 리포트'로 돌아가 바른 성적을 다시 입력해 주세요."}
+          {/* 가채점 정정은 성적표 배부 전까지만(2026-10-28 사용자 결정) */}
+          {provisional && !closedByRelease && st.correction_granted > st.correction_used && until && ` 가채점 정정은 성적표 배부 전, ${until}까지 저장해야 합니다.`}
         </p>
       )}
       {latest?.status === "returned" && (
@@ -34,9 +43,14 @@ export function CorrectionPanel({ st, latest, can, savedScores }: { st: ScoreInp
         </p>
       )}
       {can ? (
-        <CorrectionForm stageLabel={stage} savedScores={savedScores} />
+        <>
+          {provisional && releaseOn && until && <p className="rp-note">가채점 정정은 수능 성적표 배부 전, {until}까지 요청하고 다시 입력해야 합니다.</p>}
+          <CorrectionForm stageLabel={stage} savedScores={savedScores} />
+        </>
       ) : (
-        !latest && (
+        closedByRelease ? (
+          <p className="rp-note">수능 성적표가 배부되어 가채점 정정은 더 요청할 수 없습니다. 실채점 성적은 실채점 단계에서 입력해 주세요.</p>
+        ) : !latest && (
           <p className="rp-note">
             지금은 정정을 요청할 수 없습니다. 정정은 이 단계의 성적을 한 번 저장한 뒤 한 번만 요청할 수 있습니다. 궁금한 점은 <a href={SUPPORT_HREF}>고객센터</a>로 알려 주세요.
           </p>
