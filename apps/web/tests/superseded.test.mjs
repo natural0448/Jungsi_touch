@@ -23,4 +23,10 @@ test("own list follows server is_current per stage when given, otherwise the sta
   const legacy = visibleOwnItems([{ report_id: "a", exam_id: "e", report_version: 1, updated_at: "" }, { report_id: "b", exam_id: "e", report_version: 1, updated_at: "" }], "b");
   assert.deepEqual(legacy.items.map((x) => x.report_id), ["b"]);
   assert.equal(visibleOwnItems(legacy.items, null).items.length, 1);
+  // 새 서버가 키는 보내고 값이 모두 null(모름): 아무것도 숨기지 않고, 입력 상태 하나로 되돌아가지도 않는다
+  const allNull = visibleOwnItems([it("a", null, null), it("b", "final", null)], "b");
+  assert.deepEqual(allNull.items.map((x) => x.report_id), ["a", "b"]);
+  assert.equal(allNull.byServer, true);
+  // 빈 목록
+  assert.deepEqual(visibleOwnItems([], "b").items, []);
 });
