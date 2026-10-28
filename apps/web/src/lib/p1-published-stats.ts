@@ -6,7 +6,8 @@ import type { Cell, Row } from "./p1-shape";
   - 대상: 최종등록자(입학자·최종입학생 등 같은 뜻) → 최초합격자 → 그 밖(최종합격자 등) 순으로 한 집단만 쓴다. 대상은 화면에 쓰지 않는다
   - 기준: 같은 집단 안에서 대학 환산점수를 먼저 쓰고, 두 값은 같은 기준끼리만 짝짓는다
   - 칸 자리는 통계마다 고정(2026-10-28 사용자 정정): ① 칸은 50%컷 자리, ② 칸은 70%컷 자리.
-    ① 50%컷 → 평균 → 70% 미만 %컷 → 최고 / ② 70%컷 → 70% 넘는 %컷(작은 비율부터) → 최저.
+    ① 50%컷 → 평균
+    ② 70%컷 → 다른 %컷(작은 비율부터) → 평균(① 이 50%컷일 때) → 최저 → 최고
     70%컷만 있으면 ①은 비우고 ②에 둔다. 학년도마다 같은 통계가 같은 칸에 서도록 하기 위해서다
   - 이름: '85% 컷'·'85%cut'·'85_percent_cut' 은 학교 표기 차이일 뿐이라 모두 '85%컷'. 최상위·최대 → 최고, 최하위 → 최저
   - 숨김(담당자 확인 대기): 영어 mean·best·worst, 뜻이 애매한 이름(상위80% 집단 평균 등), 기준 '대학 발표 성적 · 기준 확인 중'
@@ -46,16 +47,13 @@ const basisRank = (b: string | null | undefined) => {
   const i = BASIS_ORDER.indexOf(b ?? "");
   return i < 0 ? BASIS_ORDER.length : i;
 };
-/** 통계의 칸 자리(0 = ①, 1 = ②)와 그 칸 안의 우선순위 */
-const slotOf = (name: string): { slot: 0 | 1; rank: number } => {
-  if (name === "50%컷") return { slot: 0, rank: 0 };
-  if (name === "평균") return { slot: 0, rank: 1 };
-  if (name === "최고") return { slot: 0, rank: 3 };
-  if (name === "최저") return { slot: 1, rank: 3 };
-  const n = Number(name.slice(0, -2));
-  if (n === 70) return { slot: 1, rank: 0 };
-  return n < 70 ? { slot: 0, rank: 2 + n / 1000 } : { slot: 1, rank: 1 + n / 1000 };
+/** ② 칸 우선순위: 70%컷 → 다른 %컷(작은 비율부터) → 평균 → 최저 → 최고. 평균은 ① 이 50%컷일 때만 온다 */
+const secondRank = (name: string) => {
+  if (name === "70%컷") return 0;
+  if (name.endsWith("%컷")) return 1 + Number(name.slice(0, -2)) / 1000;
+  return SECOND_NAMED[name] ?? 9;
 };
+const SECOND_NAMED: Record<string, number> = { 평균: 2, 최저: 3, 최고: 4 };
 
 /** 한 학년도 행의 발표 통계 [① 칸, ② 칸]. 맞는 통계가 없는 칸은 undefined */
 export function publishedStats(r: Row): [PublishedStat | undefined, PublishedStat | undefined] {
@@ -72,9 +70,11 @@ export function publishedStats(r: Row): [PublishedStat | undefined, PublishedSta
   const inTier = all.filter((x) => cohortTier(x.cell) === tier);
   const basis = inTier.reduce((best, x) => (basisRank(x.cell.b) < basisRank(best) ? x.cell.b ?? null : best), inTier[0].cell.b ?? null);
   const same = inTier.filter((x) => (x.cell.b ?? null) === basis);
-  const best = (slot: 0 | 1) => {
-    const x = same.filter((c) => slotOf(c.label).slot === slot).sort((a, b) => slotOf(a.label).rank - slotOf(b.label).rank || a.i - b.i)[0];
-    return x && { label: x.label, cell: x.cell, schoolRecord: x.cell.b === "학생부 등급" };
-  };
-  return [best(0), best(1)];
+  const stat = (x: { label: string; cell: Cell } | undefined): PublishedStat | undefined =>
+    x && { label: x.label, cell: x.cell, schoolRecord: x.cell.b === "학생부 등급" };
+  const first = same.find((x) => x.label === "50%컷") ?? same.find((x) => x.label === "평균");
+  const second = same
+    .filter((x) => x !== first && x.label !== "50%컷" && (x.label !== "평균" || first?.label === "50%컷"))
+    .sort((a, b) => secondRank(a.label) - secondRank(b.label) || a.i - b.i)[0];
+  return [stat(first), stat(second)];
 }

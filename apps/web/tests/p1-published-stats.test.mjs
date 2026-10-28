@@ -21,9 +21,17 @@ test("fixed columns: ① is the 50%컷 place (평균 next), ② is the 70%컷 pl
   // 70%컷만 있으면 ① 은 비고 ② 에 선다
   assert.deepEqual(pick(row(null, cell("70%컷", "403.00"), [])), ["─", "70%컷 403.00"]);
   assert.deepEqual(pick(row(null, null, [cell("80%컷", "4")])), ["─", "80%컷 4"]);
-  assert.deepEqual(pick(row(null, null, [cell("최고", "9"), cell("85% 컷", "3"), cell("75%컷", "4"), cell("최저", "1")])), ["최고 9", "75%컷 4"]);
-  assert.deepEqual(pick(row(null, null, [cell("최고", "9"), cell("최저", "1")])), ["최고 9", "최저 1"]);
+  // ② 칸: 다른 %컷이 최저·최고보다 먼저. 최저는 최고보다 먼저. 평균은 ① 이 50%컷일 때만 ② 로 간다
+  assert.deepEqual(pick(row(null, null, [cell("최고", "9"), cell("85% 컷", "3"), cell("75%컷", "4"), cell("최저", "1")])), ["─", "75%컷 4"]);
+  assert.deepEqual(pick(row(null, null, [cell("최고", "9"), cell("최저", "1")])), ["─", "최저 1"]);
+  assert.deepEqual(pick(row(null, null, [cell("최고", "9")])), ["─", "최고 9"]);
+  assert.deepEqual(pick(row(null, null, [cell("평균", "5"), cell("최저", "1"), cell("최고", "9")])), ["평균 5", "최저 1"]);
+  assert.deepEqual(pick(row(cell("50%컷", "5"), null, [cell("최저", "1")])), ["50%컷 5", "최저 1"]);
+  assert.deepEqual(pick(row(cell("50%컷", "5"), null, [cell("최저", "1"), cell("평균", "4")])), ["50%컷 5", "평균 4"]);
   assert.deepEqual(pick(row(null, null, [cell("mean", "5"), cell("평균", "6")])), ["평균 6", "─"]);
+  // 50%컷과 평균만 있으면 평균이 ② 칸으로 간다. ② 자리 통계가 있으면 그대로
+  assert.deepEqual(pick(row(cell("50%컷", "390"), null, [cell("평균", "385")])), ["50%컷 390", "평균 385"]);
+  assert.deepEqual(pick(row(cell("50%컷", "390"), null, [cell("평균", "385"), cell("75%컷", "380")])), ["50%컷 390", "75%컷 380"]);
 });
 
 test("final registrants beat first-round admits; one cohort and one basis per row", () => {
