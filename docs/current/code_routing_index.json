@@ -640,7 +640,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "c0113ed3a38099054f0c069fae0ccea1548b21e89dfd03052667bb2cfdb80f33",
+      "source_sha256": "6f136b71010b2cdf9598a54b69ac193ceeb47fe40049565b9ef783b58f494496",
       "symbols": [
         {
           "kind": "class",
@@ -886,6 +886,12 @@
           "kind": "function",
           "name": "public_metadata_matches_shape",
           "signature": "def public_metadata_matches_shape(value, shape):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "recovery_input_registration",
+          "signature": "def recovery_input_registration(spec, source_hashes=None):",
           "decorators": []
         },
         {
@@ -1280,6 +1286,12 @@
         },
         {
           "kind": "function",
+          "name": "validate_score_input_native_guard",
+          "signature": "def validate_score_input_native_guard(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "validate_score_input_policy",
           "signature": "def validate_score_input_policy(spec):",
           "decorators": []
@@ -1330,6 +1342,12 @@
           "kind": "function",
           "name": "validate_supabase_second_actual_update_contract",
           "signature": "def validate_supabase_second_actual_update_contract(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "verify_recovery_test_partition",
+          "signature": "def verify_recovery_test_partition(source):",
           "decorators": []
         },
         {
@@ -1564,7 +1582,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "f6b574db5815e5d630dd82b3d2611a986ee50484feffcf04b44a2e1de534d028",
+      "source_sha256": "6d404729090396de8be3ccad36496aa9eb77a536e2d5aa499552bc26c256d2c4",
       "symbols": [
         {
           "kind": "function",
@@ -1595,6 +1613,12 @@
           "name": "run_retained",
           "signature": "def run_retained(workspace, manifest, destination, deno=None):",
           "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "summarize_edge_units",
+          "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required):",
+          "decorators": []
         }
       ]
     },
@@ -1603,7 +1627,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "6ee2f539da339ba6ae025d241fb8405b6be4336234ad908b8b4d94741c40c716",
+      "source_sha256": "4ac45e0a81f4ae8b054a50c583d19844238862d03e8d0e62585569ecac236148",
       "symbols": [
         {
           "kind": "function",
@@ -1649,6 +1673,12 @@
         },
         {
           "kind": "function",
+          "name": "parse_recovery_partition_junit",
+          "signature": "def parse_recovery_partition_junit(path, selected, excluded, expected_class):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "professional_native_dependency_inputs",
           "signature": "def professional_native_dependency_inputs(entrypoint, lock_bytes, before):",
           "decorators": []
@@ -1673,6 +1703,36 @@
         },
         {
           "kind": "function",
+          "name": "recovery_test_filter",
+          "signature": "def recovery_test_filter(names):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require_disjoint_junit_identities",
+          "signature": "def require_disjoint_junit_identities(left, right):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require_disjoint_junit_identities.identities",
+          "signature": "def identities(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require_exact_junit_names",
+          "signature": "def require_exact_junit_names(path, expected):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require_no_recovery_cases",
+          "signature": "def require_no_recovery_cases(path, excluded):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "require_oracle",
           "signature": "def require_oracle(receipt, count, cases_sha):",
           "decorators": []
@@ -1681,6 +1741,12 @@
           "kind": "function",
           "name": "require_professional_operation_tests",
           "signature": "def require_professional_operation_tests(junit, names_by_operation):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "require_unique_junit_identities",
+          "signature": "def require_unique_junit_identities(path):",
           "decorators": []
         },
         {

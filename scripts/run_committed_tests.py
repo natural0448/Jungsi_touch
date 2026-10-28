@@ -49,6 +49,30 @@ def files_hashes(root,names):
         if not target.resolve().is_relative_to(root.resolve()):raise ValueError("Snapshot escape")
         values[name]=hashlib.sha256(target.read_bytes()).hexdigest()
     return values
+EDGE_UNIT_KEYS = frozenset({
+    "unit", "owner_review_unit", "current_public_unit", "whole_population_unit",
+    "read_view_extension_unit", "professional_unit", "school_reference_unit",
+    "member_shortlist_unit", "incident_recovery_unit",
+})
+
+def summarize_edge_units(edge, expected_foundation, recovery_required):
+    """Count all executed, separately registered Edge suites; keep oracle cases separate."""
+    if (not isinstance(edge,dict) or type(expected_foundation)is not int or expected_foundation<1 or
+        type(recovery_required)is not bool):raise ValueError("edge_count_input_invalid")
+    keys={name for name in edge if name=="unit" or name.endswith("_unit")}
+    if "unit" not in keys or keys-EDGE_UNIT_KEYS:raise ValueError("edge_unit_coverage_invalid")
+    if ("incident_recovery_unit" in keys)!=recovery_required:raise ValueError("edge_recovery_unit_missing_or_unregistered")
+    counts={}
+    for name in sorted(keys):
+        value=edge[name]
+        if (not isinstance(value,dict) or type(value.get("tests_run"))is not int or value["tests_run"]<1 or
+            any(type(value.get(k))is not int or value[k]!=0 for k in ("failures","errors","skipped"))):
+            raise ValueError("edge_unit_result_invalid")
+        counts[name]=value["tests_run"]
+    if counts["unit"]!=expected_foundation:raise ValueError("edge_foundation_count_invalid")
+    if recovery_required and counts["incident_recovery_unit"]!=50:raise ValueError("edge_recovery_count_invalid")
+    return {"total_tests":sum(counts.values()),"by_suite":counts}
+
 def run_retained(workspace,manifest,destination,deno=None):
     workspace=Path(workspace).resolve();destination=Path(destination)
     destination.mkdir(parents=True,exist_ok=False)
@@ -77,7 +101,8 @@ def run_retained(workspace,manifest,destination,deno=None):
     if not py_ok:
         summary=dict(format="jungsi.combined-snapshot-tests/v1",successful=False,python=python,edge=dict(status="NOT_RUN_PYTHON_FAILED"),source_manifest_sha256=hashlib.sha256(encode(manifest)).hexdigest())
     else:
-        scope=classify_sources(before,lambda p:(workspace/p).read_bytes(),json.loads((workspace/SPEC_PATH).read_bytes()))
+        selected_spec=json.loads((workspace/SPEC_PATH).read_bytes())
+        scope=classify_sources(before,lambda p:(workspace/p).read_bytes(),selected_spec)
         edge_sources=scope["foundation_active"]
         if edge_sources:
             args=[sys.executable,"-B","-X","utf8",str(workspace/"scripts/run_edge_tests.py"),"--snapshot-root",str(workspace),"--source-manifest",str((destination/"source_manifest.json").resolve()),"--python",sys.executable,"--output-root",str((destination/"edge").resolve())]
@@ -88,6 +113,15 @@ def run_retained(workspace,manifest,destination,deno=None):
             edge=json.loads(p.read_bytes()) if p.is_file() else dict(successful=False,missing_edge_result=True)
             expected_hash=hashlib.sha256(encode(manifest)).hexdigest()
             edge_ok=edge_process.returncode==0 and edge.get("successful") is True and edge.get("status")=="PASS" and edge.get("source_manifest_sha256")==expected_hash
+            if edge_ok:
+                try:
+                    recovery_required=selected_spec.get("backend_platform_contract",{}).get("native_edge_v5_extension") is not None
+                    counts=summarize_edge_units(edge,selected_spec["edge_harness"]["unit_count"],recovery_required)
+                    edge["total_tests"]=counts["total_tests"]
+                    edge["unit_counts"]=counts["by_suite"]
+                except (KeyError,TypeError,ValueError) as error:
+                    edge_ok=False
+                    edge["test_count_error"]=str(error)
             edge["exit_code"]=edge_process.returncode
         else:
             edge=dict(status="NOT_APPLICABLE_NO_FOUNDATION_SOURCE",edge_execution=False,coexisting_edge_sources=len(scope["coexisting_bound"]),coverage="DEV010_FOUNDATION");edge_ok=True

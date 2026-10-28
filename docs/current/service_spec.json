@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.130",
+  "version": "1.9.131",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7199,7 +7199,9 @@
         "tests/test_edge_runtime_supply.py",
         "edge-runtime.lock.json",
         "tests/test_owner_system_professional_contract.py",
-        "tests/test_committed_runner_progress.py"
+        "tests/test_committed_runner_progress.py",
+        "tests/test_incident_recovery_harness.py",
+        "tests/test_edge_unit_aggregation.py"
       ],
       "child_templates": [
         {
@@ -7668,7 +7670,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.130",
+        "contract_version": "1.9.131",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7842,7 +7844,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.130",
+        "contract_version": "1.9.131",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8008,7 +8010,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.130",
+        "contract_version": "1.9.131",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8027,7 +8029,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.130",
+        "contract_version": "1.9.131",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8052,7 +8054,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.130",
+        "contract_version": "1.9.131",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8077,7 +8079,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.130",
+        "contract_version": "1.9.131",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -8130,7 +8132,22 @@
         "invariants": "No global or operating Git settings, source/fixture files, test assertions, denial rules, security gates or deletion approvals are changed. Prior failed receipts and retained repositories are preserved.",
         "evidence": "The previous presentation checkout runs failed at synthetic update-ref with Filename too long before policy evaluation; all 1202 tests remain mandatory."
       },
-      "operating_receipt_resolution": "Current installed runtime identity is this dated Owner receipt. Frozen current_deployment/current_source_verification/current_BFF_deployment objects are retained historical regression evidence; their old field names do not supersede this receipt. Read this pointer, the new-statistics extension and the private checkpoint before examining Git deltas."
+      "operating_receipt_resolution": "Current installed runtime identity is this dated Owner receipt. Frozen current_deployment/current_source_verification/current_BFF_deployment objects are retained historical regression evidence; their old field names do not supersede this receipt. Read this pointer, the new-statistics extension and the private checkpoint before examining Git deltas.",
+      "incident_recovery_v5_preparation": {
+        "status": "optional_exact_registry_support_source_prepared",
+        "implementation_branch": "feature/application-pre-data-platform",
+        "current_feature_activation": "NOT_RUN",
+        "legacy_foundation_count": 656,
+        "new_suite_count": 50,
+        "owner_v3_evidence": "preserved",
+        "owner_v4_candidate_count": 43,
+        "selection": "rest625_all_plus_exact_old31_and_separate_exact_new17_plus33_all",
+        "gates": "Source/body/complete_names/duplicates/selected_failures_or_skip/JUnit_counts_and_normal_hooks_exact_CI_retained",
+        "self_including_generated_hashes": "not_registered_generated_bytes_use_existing_exact_generation_gate",
+        "service_code_in_this_develop_change": false,
+        "live_DB_DDL_or_deploy": false,
+        "native_guard_evidence": "native record from848 remains immutable; exact registered v5 binds current source with native_API_empty_guard=NOT_RUN; no rewrite of historical success"
+      }
     },
     "documentation_sync": {
       "format": "jungsi.documentation-sync-policy/v1",
@@ -8784,7 +8801,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "c0113ed3a38099054f0c069fae0ccea1548b21e89dfd03052667bb2cfdb80f33",
+            "source_sha256": "6f136b71010b2cdf9598a54b69ac193ceeb47fe40049565b9ef783b58f494496",
             "symbols": [
               {
                 "kind": "class",
@@ -9030,6 +9047,12 @@
                 "kind": "function",
                 "name": "public_metadata_matches_shape",
                 "signature": "def public_metadata_matches_shape(value, shape):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "recovery_input_registration",
+                "signature": "def recovery_input_registration(spec, source_hashes=None):",
                 "decorators": []
               },
               {
@@ -9424,6 +9447,12 @@
               },
               {
                 "kind": "function",
+                "name": "validate_score_input_native_guard",
+                "signature": "def validate_score_input_native_guard(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "validate_score_input_policy",
                 "signature": "def validate_score_input_policy(spec):",
                 "decorators": []
@@ -9474,6 +9503,12 @@
                 "kind": "function",
                 "name": "validate_supabase_second_actual_update_contract",
                 "signature": "def validate_supabase_second_actual_update_contract(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "verify_recovery_test_partition",
+                "signature": "def verify_recovery_test_partition(source):",
                 "decorators": []
               },
               {
@@ -9708,7 +9743,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "f6b574db5815e5d630dd82b3d2611a986ee50484feffcf04b44a2e1de534d028",
+            "source_sha256": "6d404729090396de8be3ccad36496aa9eb77a536e2d5aa499552bc26c256d2c4",
             "symbols": [
               {
                 "kind": "function",
@@ -9739,6 +9774,12 @@
                 "name": "run_retained",
                 "signature": "def run_retained(workspace, manifest, destination, deno=None):",
                 "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "summarize_edge_units",
+                "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required):",
+                "decorators": []
               }
             ]
           },
@@ -9747,7 +9788,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "6ee2f539da339ba6ae025d241fb8405b6be4336234ad908b8b4d94741c40c716",
+            "source_sha256": "4ac45e0a81f4ae8b054a50c583d19844238862d03e8d0e62585569ecac236148",
             "symbols": [
               {
                 "kind": "function",
@@ -9793,6 +9834,12 @@
               },
               {
                 "kind": "function",
+                "name": "parse_recovery_partition_junit",
+                "signature": "def parse_recovery_partition_junit(path, selected, excluded, expected_class):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "professional_native_dependency_inputs",
                 "signature": "def professional_native_dependency_inputs(entrypoint, lock_bytes, before):",
                 "decorators": []
@@ -9817,6 +9864,36 @@
               },
               {
                 "kind": "function",
+                "name": "recovery_test_filter",
+                "signature": "def recovery_test_filter(names):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "require_disjoint_junit_identities",
+                "signature": "def require_disjoint_junit_identities(left, right):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "require_disjoint_junit_identities.identities",
+                "signature": "def identities(path):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "require_exact_junit_names",
+                "signature": "def require_exact_junit_names(path, expected):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "require_no_recovery_cases",
+                "signature": "def require_no_recovery_cases(path, excluded):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "require_oracle",
                 "signature": "def require_oracle(receipt, count, cases_sha):",
                 "decorators": []
@@ -9825,6 +9902,12 @@
                 "kind": "function",
                 "name": "require_professional_operation_tests",
                 "signature": "def require_professional_operation_tests(junit, names_by_operation):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "require_unique_junit_identities",
+                "signature": "def require_unique_junit_identities(path):",
                 "decorators": []
               },
               {
@@ -21793,6 +21876,18 @@
         "REQ-26"
       ],
       "summary": "화면팀 CSV 목록 겹침과 DB 관측 중복을 구분하고 원 ID·대상·점수 기준/성분/만점·native 정밀도를 보존하는 선택 계약을 명시한다. 정본 전환은 실제 조회 성능·의미/소비자 대조 후 실행하고 현재 뷰가 참조하는 이전 누백·정규화 요강·승인 발행판을 이름만으로 폐기하지 않는다. 선택기 후보·원문 미확인·운영 미적용을 분리하며 DB/Storage/설정/배포/삭제·산출 및 기존 권한/인증/예산은 변경하지 않는다."
+    },
+    {
+      "date": "2026-10-28",
+      "requirements": [
+        "REQ-16",
+        "REQ-23",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "summary": "기존656개 foundation을 유지하면서 장애복구 v5의 정확50개 추가군과 Owner v4의43개 신규스냅샷을 별도 검증할 공통하네스 지원을 준비한다. 이전 v3 증거와 기존22/25/28/30 operation 집합은 보존하며 신규 서비스 자체의 통합/배포/DB 적용 완료를 뜻하지 않는다. 생성물 자기참조 해시를 제외하고 정상 생성물 일치·동일커밋 CI를 유지한다."
     }
   ],
   "overall_analysis_contract": {
