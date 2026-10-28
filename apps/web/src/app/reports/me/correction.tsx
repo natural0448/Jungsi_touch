@@ -24,6 +24,8 @@ export function CorrectionPanel({ st, latest, can, savedScores }: { st: ScoreInp
         <p className="rp-note">
           정정 요청이 승인되었습니다{latest.handled_at ? `(${seoulDate(latest.handled_at)})` : ""}.
           {st.correction_granted > st.correction_used ? " '내 성적 리포트'로 돌아가 바른 성적을 다시 입력해 주세요." : " 정정 입력을 이미 사용했습니다."}
+          {/* 가채점 정정은 성적표 배부 전까지만(2026-10-28 사용자 결정). 가채점 입력 기간이 통지일 전날 닫히면 승인된 정정도 쓸 수 없다 */}
+          {st.stage === "provisional" && st.correction_granted > st.correction_used && st.closes_at && ` 가채점 정정은 성적표 배부 전, ${seoulDate(st.closes_at)}까지 저장해야 합니다.`}
         </p>
       )}
       {latest?.status === "returned" && (
