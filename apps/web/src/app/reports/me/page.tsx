@@ -11,6 +11,7 @@ import { seoulDateTime } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { PaidGate } from "@/components/paid-gate";
 import { getReportId } from "@/lib/report-ref";
+import { onlyReportAfterCorrection } from "@/lib/superseded";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { RunAnalysis } from "@/components/run-analysis";
 import { viewPath } from "@/lib/content-view";
@@ -70,6 +71,9 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // 입력권 상태. 확인하지 못하면 저장을 열지 않는다(횟수를 추정하지 않는다)
   const status: ScoreInputStatusDto | null = await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null);
   const inputOpen = canInput(status);
+  // 정정 입력 뒤에는 이 단계의 현재 리포트만 보인다(2026-10-28 사용자 결정). 이 브라우저가 정정 전 리포트를 기억하고 있으면 현재 리포트로 바꿔 읽는다
+  const only = onlyReportAfterCorrection(status);
+  if (only && report?.report_id !== only) report = await src.readReport(caller, only).catch(() => null);
   // 성적 정정 요청(2026-10-28 사용자 결정): 이 단계의 내 마지막 요청. 표를 읽지 못하면 요청 길을 열지 않는다
   const corr = status ? await myLatestCorrection(EXAM.exam_id, status.stage) : null;
   const latestCorr = corr?.row ?? null;
@@ -94,7 +98,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // 본인 리포트 목록: 이 브라우저에 리포트가 없을 때, 또는 '다른 리포트 열기'를 눌렀을 때만 부른다
   let own: OwnReportListDto | null = null;
   if (!report || picking) own = await src.listOwnReports(caller, { exam_id: EXAM.exam_id, limit: 10 }).catch(() => null);
-  const ownBlock = own && own.items.length > 0 && <OwnReports items={own.items} currentId={report?.report_id ?? null} hasMore={own.has_more} tags={Object.fromEntries(own.items.flatMap((it) => (tagOf(it.report_id) ? [[it.report_id, tagOf(it.report_id)!]] : [])))} />;
+  const ownItems = own ? (only ? own.items.filter((it) => it.report_id === only) : own.items) : [];
+  const ownBlock = own && ownItems.length > 0 && <OwnReports items={ownItems} currentId={report?.report_id ?? null} hasMore={!only && own.has_more} tags={Object.fromEntries(ownItems.flatMap((it) => (tagOf(it.report_id) ? [[it.report_id, tagOf(it.report_id)!]] : [])))} />;
   const idem = crypto.randomUUID();
 
   if (!report || editing) {

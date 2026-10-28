@@ -8,6 +8,8 @@ import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from 
 import type { SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { getReportId } from "@/lib/report-ref";
+import { EXAM } from "@/lib/exam";
+import { onlyReportAfterCorrection } from "@/lib/superseded";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { page } from "@/lib/routes";
 import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "../report-view";
@@ -37,7 +39,10 @@ export default async function Page() {
   const { session, down } = await sessionOrDown(src, caller);
   if (down) return <ConnectionNotice e={down} />;
   if (session && session.member_tier !== "paid") return paidOnly;
-  const reportId = await getReportId();
+  // 정정 입력 뒤에는 정정 전 리포트를 인쇄하지 않는다(2026-10-28 사용자 결정)
+  const only = onlyReportAfterCorrection(await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null));
+  const saved = await getReportId();
+  const reportId = only ?? saved;
   let snap: SnapshotDto | null = null;
   let shortlist: PickedItem[] = [];
   try {

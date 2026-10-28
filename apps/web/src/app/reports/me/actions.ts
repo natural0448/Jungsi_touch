@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import type { ScoresInput } from "@/lib/dto";
 import { EXAM } from "@/lib/exam";
+import { onlyReportAfterCorrection } from "@/lib/superseded";
 import { getReportId, setReportId } from "@/lib/report-ref";
 
 import type { ScoreDefaults } from "./score-form";
@@ -178,7 +179,12 @@ export async function pickReport(_prev: PickState, fd: FormData): Promise<PickSt
   const id = String(fd.get("report_id") ?? "");
   if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(id)) return { error: "고른 리포트를 확인할 수 없습니다. 화면을 새로 고쳐 주세요." };
   try {
-    const report = await source().readReport(await getCaller(), id);
+    const src = source();
+    const caller = await getCaller();
+    // 정정 입력 뒤에는 정정 전 리포트를 열지 않는다(2026-10-28 사용자 결정)
+    const only = onlyReportAfterCorrection(await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null));
+    if (only && id !== only) return { error: "성적을 정정한 뒤에는 정정한 리포트만 볼 수 있습니다." };
+    const report = await src.readReport(caller, id);
     if (!report) return { error: "이 계정의 리포트가 아니거나 찾을 수 없습니다." };
     await setReportId(report.report_id);
   } catch (e) {
