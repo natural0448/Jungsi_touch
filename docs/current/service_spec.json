@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.129",
+  "version": "1.9.130",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7668,7 +7668,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7842,7 +7842,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8008,7 +8008,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8027,7 +8027,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8052,7 +8052,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8077,7 +8077,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.129",
+        "contract_version": "1.9.130",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -18699,7 +18699,9 @@
     "DEP-AUTH-COOKIE-01: 정문 수정/직접 자연만료·첫다음 PASS는 화면팀 보고 수용. chunk/redirect/오류/fetch no-store,실제만료/head·동시성/회수·비승인계정 잔여 NOT_RUN을 유지한다.",
     "DB-CAP-01: 미사용 원본 intake 압축사본의 원형 보관·실제 PostgreSQL 복원·Drive 재다운로드 지문 대조 후 정확 대상만 DROP RESTRICT로 제거하고 커밋·사후조회했다. 현재 서비스·보호 객체·head와 원본/복구 보관을 유지하며 일회성 진단 파일 정리는 별도 사용자 지정 명부로 완료했다. 할당 디스크/청구 축소나 엔진/배포 완료로 확대하지 않는다.",
     "DB-CAP-01: 미사용 원본 intake 압축사본의 원형 보관·실제 PostgreSQL 복원·Drive 재다운로드 지문 대조 후 정확 대상만 DROP RESTRICT로 제거하고 커밋·사후조회했다. 현재 서비스·보호 객체·head와 원본/복구 보관을 유지하며 일회성 진단 파일 정리는 별도 사용자 지정 명부로 완료했다. 할당 디스크/청구 축소나 엔진/배포 완료로 확대하지 않는다.",
-    "조건부 내부 방법 조회와 전체 분모/조건부 분자 범위 계약은 비활성 제안으로 등록했다. 실제 함수 설치/app-role 검수·어댑터/DTO·엔진·운영 연결은 별도 근거가 필요하며, 기존 응답 허용목록/성공값을 변경하지 않는다."
+    "조건부 내부 방법 조회와 전체 분모/조건부 분자 범위 계약은 비활성 제안으로 등록했다. 실제 함수 설치/app-role 검수·어댑터/DTO·엔진·운영 연결은 별도 근거가 필요하며, 기존 응답 허용목록/성공값을 변경하지 않는다.",
+    "CSV 검토 목록의 겹침을 DB 관측 중복으로 취급하지 않는다. 대상·기준 코드·성분·만점·원 ID에 따른 선택 후보를 검수하며 후보 코드와 실제 운영 판의 적용·호환 검수를 구분한다.",
+    "정본 조회 전환은 기존 제한 내 성능·의미·소비자 전환을 먼저 검수한다. 정규화된 요강 계보·발행 스냅샷·누백 현재 뷰를 이름만으로 제거하지 않는다."
   ],
   "source_documents": [
     "docs/planning/2026-09-30-v0.12/handoff/candidate-contract.json",
@@ -21763,6 +21765,20 @@
         "REQ-28"
       ],
       "summary": "기존 Owner 503 수정판의 실제 설치 소스를 새로 내려받아 전체 bytes/SHA를 독립 확인했다. 새 Owner 회신 대기와 현재 화면·로컬 후보·설치본 인수를 구분하고 철회된 읽기 예산 분리 제안을 적용하지 않는다. 미연결 검토 대상은 기존 명부·한 분할·native byte 위치를 재사용해 원형과 네 식별 필드를 대조했으며, 집합 발표를 단일 모집단위 결과로 복제하지 않는 원칙과 제한된 중복 검수/미확인 정의를 기획·라우팅에 일치화한다. DB·산출 본체·권한·기존 인증/예산/Secrets·새판 배포 상태는 변경하지 않는다."
+    },
+    {
+      "date": "2026-10-28",
+      "version": "1.9.130",
+      "requirements": [
+        "REQ-01",
+        "REQ-08",
+        "REQ-13",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "화면팀 CSV 목록 겹침과 DB 관측 중복을 구분하고 원 ID·대상·점수 기준/성분/만점·native 정밀도를 보존하는 선택 계약을 명시한다. 정본 전환은 실제 조회 성능·의미/소비자 대조 후 실행하고 현재 뷰가 참조하는 이전 누백·정규화 요강·승인 발행판을 이름만으로 폐기하지 않는다. 선택기 후보·원문 미확인·운영 미적용을 분리하며 DB/Storage/설정/배포/삭제·산출 및 기존 권한/인증/예산은 변경하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -37311,7 +37327,46 @@
       ],
       "source_definition_required_for_reclassification": true,
       "runtime_activation": "NOT_RUN_REVIEWED_PUBLISHER_NEW_IMMUTABLE_EDITION_AND_OWNER_RECEIPTS_REQUIRED",
-      "runtime_boundary": "current_public_catalog record item alias is connected; p1MetricSlotAlias is a publisher bridge only. Frozen P1 sequence values, CIDs and q qualification are unchanged; ambiguous source labels need exact definition evidence."
+      "runtime_boundary": "current_public_catalog record item alias is connected; p1MetricSlotAlias is a publisher bridge only. Frozen P1 sequence values, CIDs and q qualification are unchanged; ambiguous source labels need exact definition evidence.",
+      "csv_review_policy": {
+        "format": "jungsi.published-statistic-export-review-policy/v1",
+        "requirements": [
+          "REQ-01",
+          "REQ-13",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "status": "SOURCE_AND_DRAFT_REVIEWED_SAFE_SELECTOR_CANDIDATE_NOT_INTEGRATED_NOT_DEPLOYED",
+        "review_list_overlap_is_DB_duplicate_proof": false,
+        "identity": [
+          "academic_year",
+          "university_campus",
+          "offering",
+          "track",
+          "recruit_group",
+          "canonical_observation_id",
+          "cohort",
+          "statistic_definition",
+          "score_basis_code",
+          "score_component",
+          "full_mark",
+          "native_type",
+          "source_scope"
+        ],
+        "missing_ID_is_same_observation": false,
+        "same_value_or_display_label_is_same_observation": false,
+        "grouping": "Compare evidence-backed cohort and score axis; equal priority tier or equal display label alone never proves equivalence.",
+        "conflict": "Keep distinct source references and pending status; do not select the first different value silently.",
+        "English_alias": "Display mean/best/worst only as aliases where original statistic meaning, score direction and source cohort are verified; retain raw labels and values.",
+        "score_basis": "Use registered source definitions; a recognized code does not prove component/fullmark or authorize inferred conversion.",
+        "school_record": "Preserve school-record grade as a distinct labelled metric in a CSAT-named track; verify mixed criteria/track identity against existing school-year evidence.",
+        "group_mean": "Top/bottom-group averages are not percentile cutoffs. Initial/final mean do not become 50/70 cuts.",
+        "numeric": "Preserve native numeric/string type and precision. Browser binary64 or CSV display equality is not source-value equality.",
+        "candidate_boundary": "Unapproved private snapshot, canonical DB, approved immutable edition and browser acceptance are distinct states.",
+        "activation": "Owner review, normal source gates and compatible DTO/provenance acceptance required before deployment."
+      }
     }
   },
   "official_history_db_display_contract": {
@@ -179008,7 +179063,33 @@
     "frontend_existing_option_intake_ref": "service_performance_contract.frontend_P1_P2_intake",
     "latest_peer_receipt_ref": "supabase_deployment_contract.live_execution.latest_owner_frontend_receipt_20261020",
     "snapshot_successor_ref": "P1_display_snapshot_contract",
-    "selection_runtime_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026"
+    "selection_runtime_followup_ref": "supabase_deployment_contract.live_execution.current_selection_hook_repair_20261026",
+    "canonical_transition_review_contract": {
+      "format": "jungsi.canonical-runtime-retirement-review/v1",
+      "status": "TARGETED_METADATA_AND_SOURCE_REVIEW_ONLY_NO_CUTOVER_NO_RETIREMENT",
+      "canonical_view": "jungsi_data_ingest.admission_results_current",
+      "approved_projection": "Approved immutable P1 edition and bounded key index are controlled projections, not automatically disposable temporary copies.",
+      "normalized_guide": "Native-minimum and compact guide current views can have live lineage/getters; names or versions do not establish redundancy.",
+      "legacy_percentile": "Legacy result-percentile head and reference-cutoff head have distinct source/method/value contracts; counts or timestamps do not prove replaceability.",
+      "cutover_gate": [
+        "same_scope_identity_definition_native_value_reconciliation",
+        "canonical_read_performance_with_existing_limits",
+        "auth_ownership_relay_budget_preserved",
+        "consumer_migration_and_actual_readback",
+        "Owner_binding_deployment_receipt_if_required"
+      ],
+      "retirement_gate": [
+        "no_remaining_SQL_code_external_consumers",
+        "exact_relation_OIDs_dependencies",
+        "verified_native_backup_restore_redownload",
+        "user_defined_exact_deletion_scope",
+        "single_writer_expected_heads_postcheck"
+      ],
+      "destructive_or_activation_actions": "NOT_RUN",
+      "source_engine_and_production_flags_changed": false,
+      "existing_Google_Drive_and_Supabase_only": true,
+      "new_cost_or_subscription_changes": false
+    }
   },
   "P1_display_snapshot_contract": {
     "format": "jungsi.P1-display-snapshot-contract/v1",

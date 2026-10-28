@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.129",
-  "source_sha256": "a6eb7fe0acef3eafa6b26d288ff5c006bdc7e5ffa3b32d8d7d9d0f1a21ffc11c",
+  "spec_version": "1.9.130",
+  "source_sha256": "c33a4ce1f4fcc54569d432de384e2bb6602f95c0dbfc8d1ae9e670b4ad648d51",
   "pages": [
     {
       "id": "PAGE-01",
@@ -11607,7 +11607,46 @@
       ],
       "source_definition_required_for_reclassification": true,
       "runtime_activation": "NOT_RUN_REVIEWED_PUBLISHER_NEW_IMMUTABLE_EDITION_AND_OWNER_RECEIPTS_REQUIRED",
-      "runtime_boundary": "current_public_catalog record item alias is connected; p1MetricSlotAlias is a publisher bridge only. Frozen P1 sequence values, CIDs and q qualification are unchanged; ambiguous source labels need exact definition evidence."
+      "runtime_boundary": "current_public_catalog record item alias is connected; p1MetricSlotAlias is a publisher bridge only. Frozen P1 sequence values, CIDs and q qualification are unchanged; ambiguous source labels need exact definition evidence.",
+      "csv_review_policy": {
+        "format": "jungsi.published-statistic-export-review-policy/v1",
+        "requirements": [
+          "REQ-01",
+          "REQ-13",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "status": "SOURCE_AND_DRAFT_REVIEWED_SAFE_SELECTOR_CANDIDATE_NOT_INTEGRATED_NOT_DEPLOYED",
+        "review_list_overlap_is_DB_duplicate_proof": false,
+        "identity": [
+          "academic_year",
+          "university_campus",
+          "offering",
+          "track",
+          "recruit_group",
+          "canonical_observation_id",
+          "cohort",
+          "statistic_definition",
+          "score_basis_code",
+          "score_component",
+          "full_mark",
+          "native_type",
+          "source_scope"
+        ],
+        "missing_ID_is_same_observation": false,
+        "same_value_or_display_label_is_same_observation": false,
+        "grouping": "Compare evidence-backed cohort and score axis; equal priority tier or equal display label alone never proves equivalence.",
+        "conflict": "Keep distinct source references and pending status; do not select the first different value silently.",
+        "English_alias": "Display mean/best/worst only as aliases where original statistic meaning, score direction and source cohort are verified; retain raw labels and values.",
+        "score_basis": "Use registered source definitions; a recognized code does not prove component/fullmark or authorize inferred conversion.",
+        "school_record": "Preserve school-record grade as a distinct labelled metric in a CSAT-named track; verify mixed criteria/track identity against existing school-year evidence.",
+        "group_mean": "Top/bottom-group averages are not percentile cutoffs. Initial/final mean do not become 50/70 cuts.",
+        "numeric": "Preserve native numeric/string type and precision. Browser binary64 or CSV display equality is not source-value equality.",
+        "candidate_boundary": "Unapproved private snapshot, canonical DB, approved immutable edition and browser acceptance are distinct states.",
+        "activation": "Owner review, normal source gates and compatible DTO/provenance acceptance required before deployment."
+      }
     }
   },
   "security_contract": {
