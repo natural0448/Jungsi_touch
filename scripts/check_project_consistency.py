@@ -1108,6 +1108,126 @@ def member_shortlist_registration(spec,source_hashes=None):
         return registered,[]
     except (KeyError,TypeError,ValueError):return None,[error]
 
+RECOVERY_TEST_PATHS = ('tests/edge/test_incident_recovery_rights.ts', 'tests/edge/test_incident_recovery_service.ts', 'tests/edge/test_incident_recovery_http.ts', 'tests/edge/test_incident_recovery_binding.ts')
+RECOVERY_SAMEFILE_PATH = 'tests/edge/test_score_input_policy.ts'
+RECOVERY_SAMEFILE_NAMES = ('recovery repository atomically saves profile and use without spending correction', 'recovery repository keeps credit on a semantic rejection', 'recovery repository rolls back profile state attempt and use on post-save failure', 'recovery repository serializes competing request-local saves', 'recovery grant binds registered incident and consumed attempt without spending correction', 'recovery grant replay remains idempotent after the recovery credit is spent', 'different aliases for the same incident cannot grant twice', 'unknown or conflicting incident aliases fail closed', 'registered incident must match exam stage fault and evidence fingerprint', 'registered operation rejection and time must match a consumed scoped attempt', 'registered time window includes both boundaries', 'grant rejects a stale state or an existing saved profile', 'grant verification failure rolls back state and grant together', 'competing distinct keys cannot issue the same incident twice', 'grant request key cannot be reused with a different digest', 'recovery ledger refuses unsafe runtime privileges before grant or save', 'confirmed server failure needs an actually consumed matching attempt')
+RECOVERY_STANDALONE_NAMES = ('incident recovery balance rejects absent or inconsistent ledger state', 'incident recovery never consumes the initial right before initial entry', 'incident recovery takes priority over a granted ordinary correction', 'incident recovery save leaves correction request available when ungranted', 'incident recovery save preserves an already granted unused correction', 'incident recovery save requires a distinct in-scope unused grant', 'incident recovery cannot be silently used for rejected or malformed save', 'incident recovery exhaustion preserves ordinary credit decisions', 'incident grant requires a verified active admin with aal2', 'incident grant returns latest recovery and separate correction availability', 'incident grant replay reads current balance after the recovery is used', 'incident grant prevents same key changed request and same event double issuance', 'incident and ticket references resolve before duplicate detection', 'incident grant fails closed for unverified incident or saved usable score', 'incident grant rejects stale expected version', 'incident grant rejects malformed requests and unsupported stage', 'incident grant rejects invalid storage receipts without inventing result', 'incident grant rejects incoherent current balance', 'incident grant rechecks admin session before transaction commit', 'recovery HTTP requires its separate approved scope', 'recovery HTTP requires verified admin aal2 before business', 'recovery HTTP rejects missing relay before business', 'recovery HTTP passes approved admin through budget and closed response projection', 'recovery HTTP rejects missing idempotency key', 'recovery HTTP cannot be activated by supplying a route without its scope', 'v5 status projects recovery balance while the old schema remains unchanged', 'v5 safe failure retains registered duplicate and evidence conflict status', 'v5 schema requires the explicit recovery operation and retains all old routes', 'v5 startup rejects routing security or DTO drift from the approved contract', 'v5 binding requires the exact 23-operation recovery generation', 'v5 binding rejects missing scope or unapproved recovery', 'v5 binding cannot duplicate an operation or omit existing member controls', 'v5 shared usage policy requires an explicit recovery operation cost')
+RECOVERY_BASELINE_NAMES = ('stage rights allow initial plus one granted correction and preserve invalid attempt history', 'native state refuses a numeric ID and a version-zero fabricated attempt', 'preview exemption preserves normal initial right and never changes free membership', 'stage budget proof is identity-bound, cannot be forged and expires at request runtime', 'unapproved CSAT stage and exhausted physical work fail closed', 'canonical scope is shared by approved aliases without new input credit', 'one-slot actual adapter persists a single profile and same-key replay without nested connection', 'distinct concurrent keys serialize on one initial right and preserve one accepted profile', 'semantic integer999 consumes one attempt and rejection replay consumes none', 'semantic grade10 consumes one attempt and rejection replay consumes none', 'non-integer structural score is not a free semantic probing attempt', 'unregistered legacy profile blocks zero-credit initialization and preserves the original', 'missing rollout prevents new input without mutating existing storage', 'post-profile projection failure rolls back both profile and input attempt', 'one-slot budget settlement failure preserves request frequency and rolls back profile and input right', 'two request-local forks share one pool without mixing subjects or admitting cross-subject writes', 'a shared base transport cannot acquire request transaction state', 'strict workflow denies free input before writes and paid flat overall before debit', 'a paid workflow without an approved policy never falls back to legacy score input', 'delivery only counts the current operation numerical component, and separates current pass from origin', 'sample and statistics never record first use; numeric zero is still an actual personal result', 'closed-stage correction never consumes a grant, even for verified active admin aal2', 'one admin correction is immutable, replay-safe, and cannot replace the initial profile', 'a successful profile POST followed by separate overall 503 preserves its accepted input', 'cached overall on a new pass records its access pass while original provenance stays unchanged', 'first-use write failure is a 503 and own stored read recovers original delivery without score resave', 'many component origins and delivery each use a bounded batch query', 'new three API DTOs project through all25 closed bindings with session v1 unchanged', 'allowlisted unknown/inactive profiles cannot use preview exemption', 'requesting only pending B cannot mark a new pass because stored analysis A has numbers', 'all consumable semantic rejections keep HTTP422 rather than becoming a misleading503')
+RECOVERY_REQUIRED_BINDINGS = ('src/jungsi_touch/application/public_response_schemas.json', 'supabase/functions/_shared/jungsi/application/api_dispatch.ts', 'supabase/functions/_shared/jungsi/application/incident_recovery_ports.ts', 'supabase/functions/_shared/jungsi/application/incident_recovery_schema.ts', 'supabase/functions/_shared/jungsi/application/incident_recovery_service.ts', 'supabase/functions/_shared/jungsi/application/member_shortlist_schema.ts', 'supabase/functions/_shared/jungsi/application/request_budget.ts', 'supabase/functions/_shared/jungsi/application/score_input_ports.ts', 'supabase/functions/_shared/jungsi/application/score_input_service.ts', 'supabase/functions/_shared/jungsi/application/session_service.ts', 'supabase/functions/_shared/jungsi/domain/incident_recovery_rights.ts', 'supabase/functions/_shared/jungsi/domain/score_input_rights.ts', 'supabase/functions/_shared/jungsi/infrastructure/api_http.ts', 'supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts', 'supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts', 'supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts', 'supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts', 'supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts', 'supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts', 'supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts', 'supabase/functions/_shared/jungsi/infrastructure/sql_values.ts', 'supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts', 'supabase/functions/jungsi-api/incident_recovery_entry.ts', 'tests/edge/fixture.ts', 'tests/edge/member_shortlist_fixture.ts', 'tests/edge/public_api_contract_fixture.ts', 'tests/edge/synthetic_exam_pack.ts', 'tests/edge/synthetic_platform_repository.ts', 'tests/edge/synthetic_runtime_binding.ts', 'tests/edge/test_incident_recovery_binding.ts', 'tests/edge/test_incident_recovery_http.ts', 'tests/edge/test_incident_recovery_rights.ts', 'tests/edge/test_incident_recovery_service.ts', 'tests/edge/test_score_input_policy.ts')
+RECOVERY_BASELINE_COMMIT = '848dc97b6657eb36932ba33908b6cdc147c032c4'
+RECOVERY_BASELINE_SOURCE_SHA256 = 'cce54568dfbf59a5bc6980060ce16ed822e5b660d214a86a3092f9705763bd7f'
+RECOVERY_BASELINE_DECLARATIONS_SHA256 = '2d2ba4ac6355abd4481a0fce573a1b54a1eaee72b74d7bbdbbe21050e7a4b9ea'
+
+def recovery_input_registration(spec,source_hashes=None):
+    """Exact additive v5 suite; never expand legacy registrations or assert live readiness."""
+    error="Incident recovery exact separate source/test registration invalid"
+    backend=spec.get("backend_platform_contract",{})
+    ext=backend.get("native_edge_v5_extension") if isinstance(backend,dict) else None
+    if ext is None:return None,[]
+    try:
+        if not isinstance(ext,dict):raise ValueError("extension")
+        v=ext.get("verification")
+        if not isinstance(v,dict):raise ValueError("missing verification")
+        if (ext.get("format")!="jungsi.native-edge-v5-extension/v1" or
+            ext.get("generation")!="member-input-recovery-31" or ext.get("base_operation_count")!=30 or
+            ext.get("activation")!="NOT_RUN" or
+            ext.get("response_schema_overrides")!={"score-input.status.read":"score_input_status_v5"} or
+            not isinstance(ext.get("operations"),list) or len(ext["operations"])!=1):raise ValueError("v5 scope")
+        op=ext["operations"][0]
+        if (not isinstance(op,dict) or op.get("id")!="score-input.incident-recovery.grant" or
+            op.get("method")!="POST" or op.get("path")!="/api/v1/management/score-input-recovery-grants" or
+            op.get("member_tiers")!=["paid"] or op.get("report_owner")is not False or
+            op.get("confirmed_score_profile")is not False or
+            op.get("contract_ref")!="backend_platform_contract.dto_schemas.score_input_incident_recovery" or
+            op.get("requirements")!=["REQ-24","REQ-25","REQ-26","REQ-27"] or
+            op.get("http_contract",{}).get("idempotency_key_required")is not True or
+            op.get("http_contract",{}).get("response_schema")!="score_input_incident_recovery" or
+            op.get("http_contract",{}).get("response")!="score_input_incident_recovery" or
+            op.get("http_contract",{}).get("query")!=[] or
+            op.get("http_contract",{}).get("body")!=["subject_id: UUID","exam_id: string",
+              "stage: provisional|final","fault_kind: confirmed_server_failure|confirmed_incorrect_rejection",
+              "expected_version: positive safe integer","incident_id: optional registered alias",
+              "ticket_ref: optional registered alias; incident_id or ticket_ref required"] or
+            op.get("security_policy",{}).get("contract_ref")!="security_contract" or
+            op.get("security_policy",{}).get("control_ids")!=["SEC-01","SEC-03","SEC-04","SEC-05","SEC-06","SEC-07","SEC-08"] or
+            any(x.get("id")==op["id"] for x in spec.get("operations",[]) if isinstance(x,dict))):raise ValueError("route")
+        expected_fields=["format","grant_id","incident_key","ticket_ref","fault_kind","exam_id","stage",
+          "entry_version","recovery_remaining","correction_granted","correction_used",
+          "correction_request_remaining","effective_save_remaining","replayed"]
+        dtos=backend["dto_schemas"];legacy=dtos["score_input_status"];status=dtos["score_input_status_v5"];grant=dtos["score_input_incident_recovery"]
+        status_fields=["format","exam_id","pack_version","academic_year","stage","stage_state","opens_at","closes_at",
+          "paid_input_allowed","input_limit_mode","initial_used","initial_remaining","correction_granted","correction_used",
+          "correction_request_remaining","effective_save_remaining","entry_version","current_profile_id","current_report_id",
+          "last_attempt_outcome","last_rejection_code","legacy_transition_status","current_pass_first_paid_result_at"]
+        if (grant.get("format")!="jungsi.score-input-incident-recovery-grant/v1" or grant.get("fields")!=expected_fields or
+            legacy.get("format")!="jungsi.score-input-status/v1" or legacy.get("fields")!=status_fields or
+            status.get("format")!=legacy.get("format") or status.get("fields")!=status_fields+["recovery_remaining"]):
+            raise ValueError("dto")
+        if (v.get("format")!="jungsi.incident-recovery-source-verification/v1" or
+            v.get("coverage")!="INCIDENT_RECOVERY_V5_SYNTHETIC" or
+            v.get("test_paths")!=list(RECOVERY_TEST_PATHS) or
+            v.get("same_file_path")!=RECOVERY_SAMEFILE_PATH or
+            v.get("same_file_case_names")!=list(RECOVERY_SAMEFILE_NAMES) or
+            v.get("standalone_case_names")!=list(RECOVERY_STANDALONE_NAMES) or
+            v.get("baseline_score_case_names")!=list(RECOVERY_BASELINE_NAMES) or
+            v.get("baseline_commit")!=RECOVERY_BASELINE_COMMIT or
+            v.get("baseline_score_source_sha256")!=RECOVERY_BASELINE_SOURCE_SHA256 or
+            v.get("baseline_score_declarations_sha256")!=RECOVERY_BASELINE_DECLARATIONS_SHA256 or
+            any(type(v.get(k))is not int or v[k]!=n for k,n in
+              [("test_count",50),("standalone_test_count",33),("same_file_test_count",17),
+               ("baseline_score_test_count",31),("baseline_foundation_count",656),("operating_writes",0)]) or
+            v.get("native_acceptance")!="NOT_VERIFIED_BY_SOURCE_SUITE" or v.get("activation_status")!="NOT_RUN"):
+            raise ValueError("verification")
+        groups=[RECOVERY_SAMEFILE_NAMES,RECOVERY_STANDALONE_NAMES,RECOVERY_BASELINE_NAMES]
+        if any(len(set(g))!=len(g) for g in groups) or len(set().union(*map(set,groups)))!=81:
+            raise ValueError("duplicate case names")
+        cfg=spec["edge_harness"];foundation=cfg["tests"]
+        if cfg.get("unit_count")!=656 or foundation.count(RECOVERY_SAMEFILE_PATH)!=1 or any(p in foundation for p in RECOVERY_TEST_PATHS):
+            raise ValueError("foundation separation")
+        for other in (
+          spec.get("read_view_extension_contract",{}).get("verification",{}).get("test_paths",[]),
+          spec.get("member_shortlist_contract",{}).get("source_registration",{}).get("verification",{}).get("test_paths",[]),
+          spec.get("university_scoring_contract",{}).get("scoped_reference_contract",{}).get("verification",{}).get("test_paths",[])):
+            if set(RECOVERY_TEST_PATHS)&set(other):raise ValueError("other suite overlap")
+        bindings=v.get("source_bindings")
+        if not isinstance(bindings,list) or len(bindings)!=len(RECOVERY_REQUIRED_BINDINGS):raise ValueError("bindings")
+        mapped={}
+        for item in bindings:
+            if (not isinstance(item,dict) or set(item)!={"path","sha256"} or item["path"] in mapped or
+                not isinstance(item["sha256"],str) or not re.fullmatch("[a-f0-9]{64}",item["sha256"])):
+                raise ValueError("binding row")
+            mapped[item["path"]]=item["sha256"]
+        if set(mapped)!=set(RECOVERY_REQUIRED_BINDINGS):raise ValueError("binding paths")
+        if source_hashes is not None and any(source_hashes.get(p)!=h for p,h in mapped.items()):raise ValueError("snapshot hash")
+        return v,[]
+    except (KeyError,TypeError,ValueError,AttributeError):return None,[error]
+
+def verify_recovery_test_partition(source):
+    """Preserve exact 848 baseline test declarations; identify only 17 named additions."""
+    from check_edge_contract import tokens
+    if not isinstance(source,bytes):raise ValueError("source bytes")
+    text=source.decode("utf-8-sig").replace("\r\n","\n")
+    t=tokens(text);calls=[]
+    for i in range(len(t)-5):
+        if [x[1] for x in t[i:i+4]]!=["Deno",".","test","("]:continue
+        level=1
+        for j in range(i+4,len(t)):
+            if t[j][0]=="punct" and t[j][1]=="(":level+=1
+            elif t[j][0]=="punct" and t[j][1]==")":
+                level-=1
+                if level==0:
+                    name=t[i+4][1] if t[i+4][0]=="string" and t[i+5][1]=="," else None
+                    calls.append((name,text[t[i][2]:t[j][3]]))
+                    break
+        else:raise ValueError("unbalanced Deno.test")
+    added=[(name,body) for name,body in calls if name in RECOVERY_SAMEFILE_NAMES]
+    original=[body for name,body in calls if name not in RECOVERY_SAMEFILE_NAMES]
+    if (len(calls)!=47 or len(added)!=17 or len(original)!=30 or
+        len({name for name,_ in added})!=17 or {name for name,_ in added}!=set(RECOVERY_SAMEFILE_NAMES)):
+        raise ValueError("test declaration partition")
+    digest=hashlib.sha256(json.dumps(original,ensure_ascii=True,separators=(",",":")).encode()).hexdigest()
+    if digest!=RECOVERY_BASELINE_DECLARATIONS_SHA256:raise ValueError("baseline test body changed")
+
 def registered_member_shortlist_ids(spec):
     registered,errors=member_shortlist_registration(spec)
     return set(MEMBER_SHORTLIST_ROUTES)if registered is not None and not errors else set()
@@ -1132,6 +1252,9 @@ def validate_read_view_extension(spec):
     member,member_errors=member_shortlist_registration(spec)
     if member is not None:separate_tests-=set(MEMBER_SHORTLIST_TESTS)
     professional_errors+=member_errors
+    recovery,recovery_errors=recovery_input_registration(spec)
+    if recovery is not None:separate_tests-=set(RECOVERY_TEST_PATHS)
+    professional_errors+=recovery_errors
     if c is None:return professional_errors+(["Read-view unregistered separate test source"]if separate_tests else [])
     if not isinstance(c,dict):return professional_errors+["Read-view extension contract invalid"]
     errors=professional_errors
@@ -1250,6 +1373,62 @@ def policy_baseline_source_matches(spec,path,digest,indexed):
     prior=c.get("prior_source_bindings",{})
     if not isinstance(prior,dict) or hashlib.sha256(json.dumps(prior,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()!=REQ27_BASELINE_SOURCE_MANIFEST_SHA256:return False
     return prior.get(path)==digest and c.get("current_source_bindings",{}).get(path)==indexed.get(path)
+NATIVE_GUARD_HISTORY_SHA256="93236619b0293ac768c2968542bdc4e515bd5155417da728b765db9179e58b42"
+NATIVE_GUARD_SOURCE_PATH="supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
+
+
+def validate_score_input_native_guard(spec):
+    """Keep the historical native guard evidence distinct from a v5 source candidate."""
+    error="REQ-27 native empty guard evidence boundary drift"
+    c=spec.get("score_input_policy_contract")
+    if not isinstance(c,dict):return [error]
+    evidence=c.get("native_SQL_preparation_evidence",{})
+    if not isinstance(evidence,dict):return [error]
+    native=evidence.get("guard")
+    continuation=evidence.get("guard_current_source")
+    backend=spec.get("backend_platform_contract",{})
+    ext=backend.get("native_edge_v5_extension") if isinstance(backend,dict) else None
+    if ext is None:
+        if continuation is not None:return [error]
+        if native is None:return []
+        if (not isinstance(native,dict) or native.get("status")!="PASS_BOUNDED_READONLY_EMPTY_ROLLOUT" or
+            native.get("receipt_sha256")!="0eca093fd02e40f6878b321ed99275684d7bbf790ba437c2bc220d554894b677" or
+            native.get("source_sha256")!=c.get("current_source_bindings",{}).get(native.get("source_path")) or
+            native.get("expected_http_status")!=503 or native.get("expected_code")!="score_input_transition_pending" or
+            native.get("writes")!=0 or native.get("authenticated_API_verified")is not False or
+            native.get("rollout_approved")is not False):return [error]
+        return []
+    registered,registration_errors=recovery_input_registration(spec)
+    if registration_errors or registered is None or not isinstance(native,dict) or not isinstance(continuation,dict):
+        return [error]
+    historical_digest=hashlib.sha256(json.dumps(native,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    if historical_digest!=NATIVE_GUARD_HISTORY_SHA256 or native.get("source_path")!=NATIVE_GUARD_SOURCE_PATH:
+        return [error]
+    bindings=c.get("current_source_bindings",{})
+    current=bindings.get(NATIVE_GUARD_SOURCE_PATH) if isinstance(bindings,dict) else None
+    v5_bindings={item["path"]:item["sha256"] for item in registered["source_bindings"]}
+    indexed=spec.get("edge_harness",{}).get("files",{}).get(NATIVE_GUARD_SOURCE_PATH,{}).get("declarations",{}).get("source_sha256")
+    expected={
+      "format":"jungsi.score-input-native-guard-continuation/v1",
+      "historical_guard_sha256":NATIVE_GUARD_HISTORY_SHA256,
+      "historical_source_commit":RECOVERY_BASELINE_COMMIT,
+      "source_path":NATIVE_GUARD_SOURCE_PATH,
+      "source_sha256":current,
+      "native_API_empty_guard":"NOT_RUN",
+      "authenticated_API_verified":False,
+      "rollout_approved":False,
+      "writes":0,
+    }
+    if (not isinstance(current,str) or not re.fullmatch(r"[a-f0-9]{64}",current) or
+        current!=indexed or current!=v5_bindings.get(NATIVE_GUARD_SOURCE_PATH) or
+        set(continuation)!=set(expected) or continuation!=expected or
+        continuation.get("authenticated_API_verified")is not False or
+        continuation.get("rollout_approved")is not False or
+        type(continuation.get("writes")) is not int):
+        return [error]
+    return []
+
+
 def validate_score_input_policy(spec):
     c=spec.get("score_input_policy_contract");errors=[]
     required=tuple(int(x) for x in spec.get("version","0.0.0").split("."))>=(1,9,73)
@@ -1268,9 +1447,7 @@ def validate_score_input_policy(spec):
     if migration=="APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED":
         evidence=c.get("migration_evidence",{})
         if (evidence.get("sql_sha256")!="448c4d7a9463054219c54fb0e524bc6a0d55831f25c0cab99abab5bd893ecd55" or evidence.get("sql_path")!="database/migrations/006_score_input_policy.prepared.sql" or not re.fullmatch(r"[a-f0-9]{64}",str(evidence.get("native_receipt_sha256",""))) or evidence.get("new_tables")!=7 or evidence.get("new_table_rows")!=0 or evidence.get("app_select_tables")!=7 or evidence.get("app_insert_tables")!=5 or evidence.get("new_rls_policies")!=12 or evidence.get("schema_version")!="006_score_input_policy" or any(evidence.get(key)is not True for key in ("ACL_RLS_FK_verified","empty_ledgers_verified","005_retained")) or any(type(evidence.get(key))is not int or evidence.get(key)!=0 for key in ("student_data_DML","admission_data_DML","rollout_rows","new_policy_requests")) or evidence.get("activation")!="NOT_RUN" or evidence.get("public_RPC_006a")!="NOT_RUN"):errors.append("REQ-27 applied empty schema requires exact SQL/native evidence and no activation")
-    native=c.get("native_SQL_preparation_evidence",{}).get("guard")
-    if native is not None:
-        if (not isinstance(native,dict) or native.get("status")!="PASS_BOUNDED_READONLY_EMPTY_ROLLOUT" or native.get("receipt_sha256")!="0eca093fd02e40f6878b321ed99275684d7bbf790ba437c2bc220d554894b677" or native.get("source_sha256")!=c.get("current_source_bindings",{}).get(native.get("source_path")) or native.get("expected_http_status")!=503 or native.get("expected_code")!="score_input_transition_pending" or native.get("writes")!=0 or native.get("authenticated_API_verified")is not False or native.get("rollout_approved")is not False):errors.append("REQ-27 native empty guard evidence boundary drift")
+    errors.extend(validate_score_input_native_guard(spec))
     for oid,(method,path,tiers) in SCORE_POLICY_ROUTES.items():
         row=by_id.get(oid,{})
         if row.get("method")!=method or row.get("path")!=path or row.get("member_tiers")!=tiers or row.get("report_owner")is not False or row.get("confirmed_score_profile")is not False or "REQ-27" not in row.get("requirements",[]):errors.append("REQ-27 route policy drift: "+oid)
@@ -4582,6 +4759,17 @@ def edge_document_text(spec):
 
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
+    recovery,recovery_errors=recovery_input_registration(spec)
+    errors.extend(recovery_errors)
+    if recovery is None:
+        if set(RECOVERY_TEST_PATHS)&set(paths):errors.append("Incident recovery tests require exact registration")
+    else:
+        try:
+            bindings={b["path"]:b["sha256"] for b in recovery["source_bindings"]}
+            if any(p not in paths or hashlib.sha256(read(p)).hexdigest()!=h for p,h in bindings.items()):
+                raise ValueError("source hash")
+            verify_recovery_test_partition(read(RECOVERY_SAMEFILE_PATH))
+        except (KeyError,ValueError,UnicodeError,OSError):errors.append("Incident recovery selected source/test partition invalid")
     migration=spec.get("score_input_policy_contract",{})
     if migration.get("actual_migration_status")=="APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED":
         evidence=migration.get("migration_evidence",{});sql_path=evidence.get("sql_path")
