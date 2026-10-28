@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.131",
+  "version": "1.9.132",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7670,7 +7670,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.131",
+        "contract_version": "1.9.132",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7844,7 +7844,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.131",
+        "contract_version": "1.9.132",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8010,7 +8010,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.131",
+        "contract_version": "1.9.132",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8029,7 +8029,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.131",
+        "contract_version": "1.9.132",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8054,7 +8054,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.131",
+        "contract_version": "1.9.132",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8079,7 +8079,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.131",
+        "contract_version": "1.9.132",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -21874,6 +21874,15 @@
         "REQ-27"
       ],
       "summary": "기존656개 foundation을 유지하면서 장애복구 v5의 정확50개 추가군과 Owner v4의43개 신규스냅샷을 별도 검증할 공통하네스 지원을 준비한다. 이전 v3 증거와 기존22/25/28/30 operation 집합은 보존하며 신규 서비스 자체의 통합/배포/DB 적용 완료를 뜻하지 않는다. 생성물 자기참조 해시를 제외하고 정상 생성물 일치·동일커밋 CI를 유지한다."
+    },
+    {
+      "date": "2026-10-28",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "Owner 검증의 역사 v3 fixture와 현재 v4 fixture를 분리한다. 구36건과 신43건의 정확한 바인딩을 각각 검증하고 역사 해시·현재 소스·건수·case·activation·writes 변조 거부를 회귀 검사한다. 복구권 합성 fixture는 사본에서만 v4를 분리해 구·신 단계를 검증한다. 공통 runner와 보호 조건 및 실제 운영 상태는 변경하지 않는다."
     }
   ],
   "overall_analysis_contract": {

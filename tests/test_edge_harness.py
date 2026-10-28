@@ -1,5 +1,5 @@
 """Synthetic negative cases for shared Edge gates. No Deno install or file cleanup."""
-import copy,json,sys,unittest,uuid
+import copy,hashlib,json,sys,unittest,uuid
 from pathlib import Path
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"scripts"))
@@ -204,22 +204,64 @@ class PolicyExtensionRegistrationCases(unittest.TestCase):
 if __name__=="__main__":unittest.main()
 
 class OwnerReviewRegistrationCases(unittest.TestCase):
-    def current(self):
+    def current(self, *, historical_v3=False):
         spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
-        bindings=spec['owner_current_review_contract']['verification']['source_bindings']
+        owner=spec['owner_current_review_contract']
+        if historical_v3:
+            # A retained v3 fixture is a copy, not a change to current metadata.
+            owner.pop('verification_v4', None)
+        verification=owner.get('verification_v4') or owner['verification']
+        bindings=verification['source_bindings']
         return spec,{b['path']:b['sha256']for b in bindings}
     def test_owner_suite_is_separate_and_bound_to_current_source(self):
-        s,b=self.current();self.assertEqual(runner.owner_review_registration(s,b)['test_count'],36)
+        s,b=self.current();owner=s['owner_current_review_contract']
+        expected=43 if owner.get('verification_v4') is not None else 36
+        self.assertEqual(runner.owner_review_registration(s,b)['test_count'],expected)
+        self.assertEqual(owner['verification']['test_count'],36)
         self.assertEqual(s['edge_harness']['unit_count'],656)
+    def test_historical_owner_v3_fixture_keeps_its_own_bindings(self):
+        current,_=self.current();before=copy.deepcopy(current)
+        s,b=self.current(historical_v3=True)
+        self.assertNotIn('verification_v4',s['owner_current_review_contract'])
+        self.assertEqual(runner.owner_review_registration(s,b)['test_count'],36)
+        self.assertEqual(current,before)
     def test_owner_source_cannot_silently_drop_its_contract(self):
         s,b=self.current();s.pop('owner_current_review_contract')
         with self.assertRaisesRegex(edge.EdgeFailure,'owner_review_contract_missing'):runner.owner_review_registration(s,b)
     def test_owner_suite_rejects_hash_or_count_drift(self):
         for mode in ('hash','count'):
-            s,b=self.current();v=s['owner_current_review_contract']['verification']
+            s,b=self.current(historical_v3=True);v=s['owner_current_review_contract']['verification']
             if mode=='hash':v['source_bindings'][0]['sha256']='f'*64
             else:v['test_count']=35
             with self.assertRaisesRegex(edge.EdgeFailure,'owner_review_'):runner.owner_review_registration(s,b)
+    def test_owner_v4_rejects_current_and_historical_evidence_drift(self):
+        s,b=self.current();owner=s['owner_current_review_contract']
+        if owner.get('verification_v4') is None:
+            # Invented hashes isolate registration guards on a planning-only base.
+            b={path:hashlib.sha256(('SYNTHETIC-owner-v4:'+path).encode()).hexdigest() for path in b}
+            owner['verification_v4']=dict(
+                format='jungsi.owner-current-review-v4-synthetic-verification/v1',
+                test_path=owner['verification']['test_path'],test_count=43,
+                case_names=list(runner.OWNER_V4_CASE_NAMES),
+                historical_v3_verification_sha256=runner.OWNER_V3_HISTORY_SHA256,
+                activation_status='NOT_RUN',operating_writes=0,
+                source_bindings=[dict(path=path,sha256=sha)for path,sha in b.items()])
+        self.assertEqual(runner.owner_review_registration(s,b)['test_count'],43)
+        original=copy.deepcopy(s)
+        for mode in ('history','hash','count','case','activation','writes','bool_writes','missing_binding','history_reference'):
+            with self.subTest(mode=mode):
+                changed=copy.deepcopy(s);c=changed['owner_current_review_contract'];v=c['verification_v4']
+                if mode=='history':c['verification']['source_bindings'][0]['sha256']='0'*64
+                elif mode=='hash':v['source_bindings'][0]['sha256']='0'*64
+                elif mode=='count':v['test_count']=36
+                elif mode=='case':v['case_names'].pop()
+                elif mode=='activation':v['activation_status']='PASS'
+                elif mode=='writes':v['operating_writes']=1
+                elif mode=='bool_writes':v['operating_writes']=False
+                elif mode=='missing_binding':v['source_bindings'].pop()
+                else:v['historical_v3_verification_sha256']='0'*64
+                with self.assertRaises(edge.EdgeFailure):runner.owner_review_registration(changed,b)
+        self.assertEqual(s,original)
     def test_original_fixtures_without_owner_source_keep_their_scope(self):
         self.assertIsNone(runner.owner_review_registration({},{}))
 
