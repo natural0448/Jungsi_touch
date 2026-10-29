@@ -18,13 +18,14 @@ import type { Cell, Row } from "./p1-shape";
 */
 
 /**
- * 대학이 인원이 적어 공개하지 않은 칸(2026-10-29 사용자 결정: 빈칸 대신 '비공개(3명 이하)').
- * 서버가 그 칸의 reason_code 를 SOURCE_NONDISCLOSED_LE_<인원> 으로 보낼 때만 쓴다(담당자 요청 2026-10-29).
- * 값이 없는 다른 까닭(미발표·확인 중 등)은 지금처럼 빈칸이다. 숫자를 만들지 않는다.
+ * 선택한 발표 성적 칸의 null 표시(2026-10-29 사용자 결정).
+ * 숫자·원문 사유는 그대로 보존하며 원문이 3인 이하라고 새로 판정하지 않는다.
+ * 참고·미확인 발표 용도와 숨김 점수 기준에는 대체 문구를 붙이지 않는다.
  */
-export function nondisclosedLabel(c: Cell): string | null {
-  const m = c.v === null && c.r ? /^SOURCE_NONDISCLOSED_LE_([1-9]\d?)$/.exec(c.r) : null;
-  return m ? `비공개(${Number(m[1])}명 이하)` : null;
+export function publishedScoreNullLabel(c: Cell): string | null {
+  if (c.v !== null || c.b === UNKNOWN_BASIS ||
+      (c.pr !== undefined && c.pr !== "actual_result")) return null;
+  return "3인이하미발표";
 }
 
 export type PublishedStat = { label: string; cell: Cell; schoolRecord: boolean };

@@ -64,12 +64,23 @@ test("only actual results fill the columns once a publication role is given (한
   assert.deepEqual(pick(row(null, null, [cell("평균", "5")])), ["평균 5", "─"]);
 });
 
-test("a cell the university withheld for few registrants reads '비공개(N명 이하)'; other blanks stay blank", async () => {
-  const { nondisclosedLabel } = await import("../src/lib/p1-published-stats.ts");
-  assert.equal(nondisclosedLabel({ ...none, r: "SOURCE_NONDISCLOSED_LE_3" }), "비공개(3명 이하)");
-  assert.equal(nondisclosedLabel({ ...none, r: "SOURCE_NONDISCLOSED_LE_5" }), "비공개(5명 이하)");
-  assert.equal(nondisclosedLabel({ ...none, r: "NO_FINAL_REGISTRANT_SAME_BASIS_CUT50" }), null);
-  assert.equal(nondisclosedLabel({ ...none, r: "SOURCE_NONDISCLOSED_LE_0" }), null);
-  // 값이 있으면 비공개 표시를 하지 않는다
-  assert.equal(nondisclosedLabel({ ...cell("50%컷", "5"), r: "SOURCE_NONDISCLOSED_LE_3" }), null);
+test("published-score null uses the exact label without changing source reasons or native values", async () => {
+  const { publishedScoreNullLabel } = await import("../src/lib/p1-published-stats.ts");
+  for (const r of [null, "SOURCE_NONDISCLOSED_LE_3", "SOURCE_NONDISCLOSED_LE_5", "NO_FINAL_REGISTRANT_SAME_BASIS_CUT50"]) {
+    const c = { ...none, r };
+    const before = structuredClone(c);
+    assert.equal(publishedScoreNullLabel(c), "3인이하미발표");
+    assert.deepEqual(c, before);
+  }
+  for (const v of ["0", "0.000", "631.300", 0, undefined])
+    assert.equal(publishedScoreNullLabel({ ...none, v }), null);
+});
+
+test("hidden reference roles and unknown score bases keep the existing display", async () => {
+  const { publishedScoreNullLabel } = await import("../src/lib/p1-published-stats.ts");
+  for (const pr of ["simulation_reference", "unresolved"])
+    assert.equal(publishedScoreNullLabel({ ...none, pr }), null);
+  assert.equal(publishedScoreNullLabel({ ...none, b: "대학 발표 성적 · 기준 확인 중" }), null);
+  assert.equal(publishedScoreNullLabel({ ...none, pr: "actual_result" }), "3인이하미발표");
+  assert.deepEqual(publishedStats(row(null, null, [])), [undefined, undefined]);
 });
