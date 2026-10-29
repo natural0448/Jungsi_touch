@@ -90,8 +90,8 @@ export const syntheticSource: JungsiSource = {
     const s = await readSyntheticState();
     if (s === "guest") return null;
     if (s === "standard" || s === "operator") return { format: "jungsi.session/v1", member_tier: "standard", entitlement_expires_at: null };
-    // 2027-02-28 23:59:59 서울 = 14:59:59 UTC
-    return { format: "jungsi.session/v1", member_tier: "paid", entitlement_expires_at: "2027-02-28T14:59:59Z" };
+    // 정시터치 2027 시즌 마지막 이용일(2027-01-08 0시 종료, 2026-10-29 사용자 결정): 2027-01-07 23:59:59 서울 = 14:59:59 UTC
+    return { format: "jungsi.session/v1", member_tier: "paid", entitlement_expires_at: "2027-01-07T14:59:59Z" };
   },
 
   async searchHistory(_caller, q) {
