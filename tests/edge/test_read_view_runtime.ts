@@ -509,6 +509,53 @@ Deno.test("synthetic HTTP preserves simulation context through service and both-
         "business",
       ]);
       equal(sourceReads, 2);
+
+      // The v2-capable projection schema alone accepts this shaped field on a
+      // v1 row. The real service must validate the v1 body before projection.
+      delete alternate.publication_context;
+      f.events.length = 0;
+      const validLegacy = await handler(request(url));
+      equal(validLegacy.status, 200);
+      equal(sourceReads, 3);
+      for (const year of [2026, 2027]) {
+        row.academic_year = year;
+        row.offering_id = String(year) + ":SYNTHETIC-pk";
+        (entry.score_calculation_context as NativeObject).source_result_year = year;
+        delete row.r27_source;
+        f.events.length = 0;
+        const matchingLegacy = await handler(request(url));
+        equal(matchingLegacy.status, 200);
+        const validBytes = new Uint8Array(await matchingLegacy.arrayBuffer());
+        const validText = gzip
+          ? await new Response(
+            new Blob([validBytes]).stream().pipeThrough(new DecompressionStream("gzip")),
+          ).text()
+          : new TextDecoder().decode(validBytes);
+        assert(!validText.includes('"r27_source"'));
+        row.r27_source = {
+          scope_key: "SYNTHETIC-SCOPE",
+          scope_review: "eligible",
+          quota: {},
+          quota_review_status: "stage_unknown",
+          history_link_status: "not_reviewed",
+          history_link_pending_years: [],
+          historical_links: [],
+        };
+        const projectedOnly = projection.project(
+          "history.snapshot.read",
+          tier,
+          body,
+        ) as NativeObject;
+        assert(Object.hasOwn((projectedOnly.rows as NativeObject[])[0], "r27_source"));
+        f.events.length = 0;
+        const invalidLegacy = await handler(request(url));
+        equal(invalidLegacy.status, 503);
+        const invalidResult = await invalidLegacy.json();
+        equal(invalidResult.error.code, "snapshot_invalid");
+        assert(!JSON.stringify(invalidResult).includes("r27_source"));
+        equal(f.events, ["auth", "membership", "candidate_scope", "reserve", "business"]);
+      }
+      equal(sourceReads, 7);
     }
   }
 });

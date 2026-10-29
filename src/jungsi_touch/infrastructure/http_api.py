@@ -11,6 +11,7 @@ from ..application.sessions import SessionService
 from ..application.platform_ports import PlatformError
 from ..application.overall_analysis import OverallAnalysisError
 from ..application.time_contract import UtcClock, utc_text
+from ..application.service_end_admission import assert_service_admission
 from ..application.publication import ReportPublicationService
 from .settings import ServerSettings, UnavailableRepository
 from .supabase_session import SupabaseSessionProvider
@@ -49,16 +50,28 @@ def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=N
     service.session_service=auth
     app=FastAPI(title='Jungsi Touch Backend',version='1.2.0',docs_url=None,redoc_url=None,openapi_url=None,debug=False)
 
+    if settings.allowed_origins:
+        app.add_middleware(CORSMiddleware,allow_origins=list(settings.allowed_origins),allow_methods=['GET','POST','PUT'],
+                           allow_headers=['Authorization','Content-Type','Idempotency-Key'],allow_credentials=False)
+
     @app.middleware('http')
     async def safe_boundary(request,call_next):
         request.state.request_id=uuid4().hex
         try:
-            if boundary is not None and (request.url.path.startswith('/api/v1/') or request.url.path=='/health/ready'):
+            path=request.url.path
+            protected=path.startswith('/api/v1/') or path=='/health/ready'
+            preflight=(bool(settings.allowed_origins) and request.method=='OPTIONS' and
+                       request.headers.get('origin') is not None and
+                       request.headers.get('access-control-request-method') is not None)
+            if boundary is not None and protected and not preflight:
                 boundary.verify(request)
+            if protected:
+                assert_service_admission(clock.now())
             response=await call_next(request)
         except PlatformError as error:
             response=(boundary.error(request,error.code,error.http_status) if boundary is not None else
-                      JSONResponse(status_code=503,content=dict(status='error',error={'code':'backend_dependency_unavailable'},request_id=request.state.request_id)))
+                      JSONResponse(status_code=403 if error.code=='service_ended' and error.http_status==403 else 503,
+                                   content=dict(status='error',error={'code':'service_ended' if error.code=='service_ended' and error.http_status==403 else 'backend_dependency_unavailable'},request_id=request.state.request_id)))
         except Exception:
             # Adapter failures never place raw data, connection URLs or tokens in
             # response/log exception text. Detailed private diagnostics are separate.
@@ -67,11 +80,16 @@ def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=N
         response.headers['Cache-Control']='no-store'
         response.headers['X-Request-ID']=request.state.request_id
         response.headers['X-Content-Type-Options']='nosniff'
+        # The admission boundary is outside CORS so rejected requests retain only the
+        # already configured Origin policy; never reflect an unapproved Origin.
+        origin=request.headers.get('origin')
+        if origin is not None and 'access-control-allow-origin' not in response.headers:
+            if '*' in settings.allowed_origins:
+                response.headers['Access-Control-Allow-Origin']='*'
+            elif origin in settings.allowed_origins:
+                response.headers['Access-Control-Allow-Origin']=origin
+                response.headers.append('Vary','Origin')
         return response
-    if settings.allowed_origins:
-        app.add_middleware(CORSMiddleware,allow_origins=list(settings.allowed_origins),allow_methods=['GET','POST','PUT'],
-                           allow_headers=['Authorization','Content-Type','Idempotency-Key'],allow_credentials=False)
-
     @app.exception_handler(PlatformError)
     @app.exception_handler(OverallAnalysisError)
     async def failure(request,error):
@@ -151,6 +169,7 @@ def _compose_app(*,settings=None,repository=None,data=None,sessions=None,clock=N
     for operation in operations:
         app.add_api_route(operation['path'],handler(operation['id']),methods=[operation['method']],
                           operation_id=operation['id'].replace('.','_'),openapi_extra={'x-jungsi-operation':operation['id']})
+    app.state.service_end_clock=clock
     app.state.forecasts=forecasts
     app.state.platform=service
     app.state.operating_mode=operating_mode

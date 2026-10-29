@@ -52,16 +52,18 @@ def files_hashes(root,names):
 EDGE_UNIT_KEYS = frozenset({
     "unit", "owner_review_unit", "current_public_unit", "whole_population_unit",
     "read_view_extension_unit", "professional_unit", "school_reference_unit",
-    "member_shortlist_unit", "incident_recovery_unit",
+    "member_shortlist_unit", "incident_recovery_unit", "service_candidate_aux_unit", "service_staged_aux_unit",
 })
 
-def summarize_edge_units(edge, expected_foundation, recovery_required):
+def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False):
     """Count all executed, separately registered Edge suites; keep oracle cases separate."""
     if (not isinstance(edge,dict) or type(expected_foundation)is not int or expected_foundation<1 or
-        type(recovery_required)is not bool):raise ValueError("edge_count_input_invalid")
+        type(recovery_required)is not bool or type(auxiliary_required)is not bool or type(staged_required)is not bool):raise ValueError("edge_count_input_invalid")
     keys={name for name in edge if name=="unit" or name.endswith("_unit")}
     if "unit" not in keys or keys-EDGE_UNIT_KEYS:raise ValueError("edge_unit_coverage_invalid")
     if ("incident_recovery_unit" in keys)!=recovery_required:raise ValueError("edge_recovery_unit_missing_or_unregistered")
+    if ("service_candidate_aux_unit" in keys)!=auxiliary_required:raise ValueError("edge_aux_unit_missing_or_unregistered")
+    if ("service_staged_aux_unit" in keys)!=staged_required:raise ValueError("edge_staged_aux_unit_missing_or_unregistered")
     counts={}
     for name in sorted(keys):
         value=edge[name]
@@ -71,7 +73,14 @@ def summarize_edge_units(edge, expected_foundation, recovery_required):
         counts[name]=value["tests_run"]
     if counts["unit"]!=expected_foundation:raise ValueError("edge_foundation_count_invalid")
     if recovery_required and counts["incident_recovery_unit"]!=50:raise ValueError("edge_recovery_count_invalid")
+    if auxiliary_required and counts["service_candidate_aux_unit"]!=14:raise ValueError("edge_aux_count_invalid")
+    if staged_required and counts["service_staged_aux_unit"]!=76:raise ValueError("edge_staged_aux_count_invalid")
     return {"total_tests":sum(counts.values()),"by_suite":counts}
+
+def suite_python_environment(base,deno,scratch):
+    if not deno or not Path(deno).is_absolute() or not Path(scratch).is_absolute():
+        raise ValueError("Explicit absolute Deno and suite scratch are required")
+    return {**base,"JUNGSI_DENO":str(deno),"JUNGSI_REVIEW_SUITE_SCRATCH":str(scratch)}
 
 def run_retained(workspace,manifest,destination,deno=None):
     workspace=Path(workspace).resolve();destination=Path(destination)
@@ -86,6 +95,13 @@ def run_retained(workspace,manifest,destination,deno=None):
     tests=[p for p in before if p.startswith("tests/test_") and p.endswith(".py")]
     if not tests:raise ValueError("No selected Python tests")
     env={**os.environ,"PYTHONDONTWRITEBYTECODE":"1"}
+    selected_spec=json.loads((workspace/SPEC_PATH).read_bytes())
+    if selected_spec.get("backend_platform_contract",{}).get("service_candidate_suite_extension") is not None:
+        scratch=destination.resolve()/"service_candidate_suite"
+        scratch.mkdir(exist_ok=False)
+        (scratch/"cache").mkdir(exist_ok=False)
+        (scratch/"tmp").mkdir(exist_ok=False)
+        env=suite_python_environment(env,deno,scratch)
     try:
         result=subprocess.run([sys.executable,"-B","-X","utf8","-c",HELPER],cwd=workspace,input=json.dumps(tests).encode(),capture_output=True,env=env,timeout=PYTHON_SUITE_TIMEOUT_SECONDS)
     except subprocess.TimeoutExpired as error:
@@ -116,7 +132,9 @@ def run_retained(workspace,manifest,destination,deno=None):
             if edge_ok:
                 try:
                     recovery_required=selected_spec.get("backend_platform_contract",{}).get("native_edge_v5_extension") is not None
-                    counts=summarize_edge_units(edge,selected_spec["edge_harness"]["unit_count"],recovery_required)
+                    auxiliary_required=selected_spec.get("backend_platform_contract",{}).get("service_aux_test_extension") is not None
+                    staged_required=selected_spec.get("backend_platform_contract",{}).get("service_staged_test_extension") is not None
+                    counts=summarize_edge_units(edge,selected_spec["edge_harness"]["unit_count"],recovery_required,auxiliary_required,staged_required)
                     edge["total_tests"]=counts["total_tests"]
                     edge["unit_counts"]=counts["by_suite"]
                 except (KeyError,TypeError,ValueError) as error:

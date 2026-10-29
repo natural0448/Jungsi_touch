@@ -1,3 +1,4 @@
+import { assertAdmissionMicros } from "../application/service_end_admission.ts";
 /** Native institutional composition. Missing Owner source/configuration is a safe unavailable response. */
 import { AccessError } from "../application/access.ts";
 import type { ApiOperationId } from "../application/api_dispatch.ts";
@@ -136,12 +137,13 @@ export class NativeProfessionalRuntime {
   }
   readonly fetch = async (request: Request): Promise<Response> => {
     const requestId = crypto.randomUUID().replaceAll("-", "");
-    const ingressStartedAtUtc = this.clock.nowUtc();
     try {
+      const ingressStartedAtUtc = this.clock.nowUtc();
       // Reject unauthenticated traffic before decoding private policy or creating a database pool.
       const env = resolveRuntimeEnvironment(this.config.environment),
         relay = new RelayBoundary(env.get("JUNGSI_RELAY_TOKEN") ?? null);
       await relay.verify(request.headers);
+      assertAdmissionMicros(this.clock.nowUtc());
       const approved = await settings(env, this.clock.nowUtc()),
         basic = readBasicRuntimeSettings(env),
         key = JSON.stringify(basic.database);

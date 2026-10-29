@@ -305,8 +305,12 @@ class IncidentRecoveryHarnessTests(unittest.TestCase):
         self.assertNotIn("(?", baseline.pattern.replace("(?:", ""))
 
     def test_owner_v3_history_is_unchanged_and_v4_has_separate_evidence(self):
+        active_owner = deepcopy(self.spec["owner_current_review_contract"])
         spec = deepcopy(self.spec)
         owner = spec["owner_current_review_contract"]
+        # Isolate only this copied historical fixture from current/future registrations.
+        owner.pop("verification_v3_rebound_20261030", None)
+        owner.pop("verification_v4", None)
         old = owner["verification"]
         before_old = {b["path"]: b["sha256"] for b in old["source_bindings"]}
         self.assertEqual(runner.owner_review_registration(spec, before_old)["test_count"], 36)
@@ -335,6 +339,7 @@ class IncidentRecoveryHarnessTests(unittest.TestCase):
             mutate(changed)
             with self.assertRaises(runner.EdgeFailure):
                 runner.owner_review_registration(changed, before_v4)
+        self.assertEqual(self.spec["owner_current_review_contract"], active_owner)
 
 
 if __name__ == "__main__":

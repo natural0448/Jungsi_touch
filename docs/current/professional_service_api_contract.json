@@ -1,6 +1,6 @@
 {
   "format": "jungsi.professional-api-contract/v1",
-  "spec_version": "1.9.136",
+  "spec_version": "1.9.139",
   "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
   "contract": {
     "format": "jungsi.professional-service-contract/v1",
@@ -1521,7 +1521,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/professional_runtime.ts",
-          "sha256": "23dc074c9cf32934896e201b14d0116151c297b9a26f45ca8d30ab280d44f660"
+          "sha256": "71c1b34209736c466f5ad4cd79ac7e44fa187aeeda3f592547969323e54b3e98"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/professional_usage_admission.ts",
@@ -1659,6 +1659,297 @@
       "migration_sha256": "531c3093ecf704f5ae1c8f3de8f329366aab9961b9348375df779a8fa55f9c2d",
       "receipt_sha256": "4a3ec9ec384cbfaac574a101a5a6ba2513fbe756da0ad61a369be49db1eb1836",
       "institution_records_created": 0
+    },
+    "historical_source_registration_before_20261029_review": {
+      "format": "jungsi.professional-source-registration/v1",
+      "status": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
+      "entrypoint": "supabase/functions/jungsi-pro-api/index.ts",
+      "operation_bindings": {
+        "pro.session": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.list": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.create": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.read": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.update": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.archive": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.student.assign": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.member.list": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.score.status": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.score.create": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.overall.analyze": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.report.list": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.report.read": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.university.analyze": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.candidates": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.bookmark.list": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.bookmark.add": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.report.export": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.correction.grant": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.retention.preview": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        },
+        "pro.retention.notice-targets": {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+          "symbol": "ProfessionalService"
+        }
+      },
+      "source_bindings": [
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_analysis.ts",
+          "sha256": "30b8f6680d60255ebae5b37a956c0331c156806e419e6937fb9b55de416cd89b"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts",
+          "sha256": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_policy.ts",
+          "sha256": "6171a83c31dafe240b0d3595cd19b6cddf65f7041a6d5134d0aa9fcdc34ff8af"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_ports.ts",
+          "sha256": "9d15b9297bae2f0a9658f607207609d9d71b22ccd4ed76c7267f46ad880765e1"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_projection.ts",
+          "sha256": "b4ba3397fd1d0a0a2a73f6128bc928594cb7eb3144bc8824af7e2d4bf2bc9292"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_service.ts",
+          "sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/professional_usage.ts",
+          "sha256": "4f211c6fdf0fcb0161de676431eade07845a87d8ccf993efa8ed8ee793fd81f6"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_authority.ts",
+          "sha256": "71b2c3a0c074523c732f92f121e137041efb7bd586e31644ea9a0d7fcb41d880"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_crypto.ts",
+          "sha256": "287461fa8a1188d24d3c86fb952c708251d8a6667e8b025b37f0450e8f096b08"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_http.ts",
+          "sha256": "6c69f122dc2481ecb8d66a7cf3f844a1abec437c0e50dfbdc9a6317c40efb6fe"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_postgres.ts",
+          "sha256": "14655911862194fad474937e6cbf59754652cc0fc381ab85238430801c24da11"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_runtime.ts",
+          "sha256": "23dc074c9cf32934896e201b14d0116151c297b9a26f45ca8d30ab280d44f660"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_usage_admission.ts",
+          "sha256": "2f6e50d969c8926a07118e0219242b4f3ddef276912ee8750a8604a736abebc3"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/professional_usage_postgres.ts",
+          "sha256": "7f36e6dbd4faffbb3e1050865e10ee42737929d9752b51b463d25b2dba1ceabc"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_budget_support.ts",
+          "sha256": "e1aaf3a0b75b576f60af4544562ddb99682970fa0f0c1d365ab08f90ef92e2c9"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_budget_test.ts",
+          "sha256": "618e9ea0b6c27c1dea6552c6f8ad2f3fa9fcfef1d7b908516b4fe1e136b676eb"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_http_test.ts",
+          "sha256": "c2b71a546c470e78afea0b63470b2778468e6bb70bd8b4d0f61a31dc651f7e30"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_runtime_test.ts",
+          "sha256": "86facfdbbf05ecf5e7633eeb77909a5fa16b4f07f0d511ec1dbbe466c523b266"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_security_test.ts",
+          "sha256": "1fff33bbadb0ff74939d11c1beaf113c965ab2a14e5c8bbb324c94f0daea19b8"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_support.ts",
+          "sha256": "356cd4def2fcf60926872ae68191167c681b491a4cab4804ac1db3e6841e0e8f"
+        },
+        {
+          "path": "supabase/functions/jungsi-pro-api/index.ts",
+          "sha256": "8b980255403974fb49a7a7d90ee310526b7390ad18a60febc0abd7429af37ff8"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_tip_semantics_test.ts",
+          "sha256": "6da6e29da6c3daa63acab494287bac0707250a8f2fbe5dcfb71966c41b58827f"
+        },
+        {
+          "path": "supabase/functions/_shared/professional_guide_rule_test.ts",
+          "sha256": "8a645f334e9e32f18b107e4991efb204b6e4387641c9a00d357dc9e093e39fba"
+        }
+      ],
+      "migrations": [
+        {
+          "path": "database/migrations/007_professional_platform.prepared.sql",
+          "sha256": "531c3093ecf704f5ae1c8f3de8f329366aab9961b9348375df779a8fa55f9c2d"
+        }
+      ],
+      "verification": {
+        "test_paths": [
+          "supabase/functions/_shared/professional_budget_test.ts",
+          "supabase/functions/_shared/professional_http_test.ts",
+          "supabase/functions/_shared/professional_runtime_test.ts",
+          "supabase/functions/_shared/professional_security_test.ts",
+          "supabase/functions/_shared/professional_tip_semantics_test.ts",
+          "supabase/functions/_shared/professional_guide_rule_test.ts"
+        ],
+        "test_count": 154,
+        "operation_test_names": {
+          "pro.session": [
+            "professional HTTP pro.session executes authorized workflow"
+          ],
+          "pro.student.list": [
+            "professional HTTP pro.student.list executes authorized workflow"
+          ],
+          "pro.student.create": [
+            "professional HTTP pro.student.create executes authorized workflow"
+          ],
+          "pro.student.read": [
+            "professional HTTP pro.student.read executes authorized workflow"
+          ],
+          "pro.student.update": [
+            "professional HTTP pro.student.update executes authorized workflow"
+          ],
+          "pro.student.archive": [
+            "professional HTTP pro.student.archive executes authorized workflow"
+          ],
+          "pro.student.assign": [
+            "professional HTTP pro.student.assign executes authorized workflow"
+          ],
+          "pro.member.list": [
+            "professional HTTP pro.member.list executes authorized workflow"
+          ],
+          "pro.score.status": [
+            "professional HTTP pro.score.status executes authorized workflow"
+          ],
+          "pro.score.create": [
+            "professional HTTP pro.score.create executes authorized workflow"
+          ],
+          "pro.overall.analyze": [
+            "professional HTTP pro.overall.analyze executes authorized workflow"
+          ],
+          "pro.report.list": [
+            "professional HTTP pro.report.list executes authorized workflow"
+          ],
+          "pro.report.read": [
+            "professional HTTP pro.report.read executes authorized workflow"
+          ],
+          "pro.university.analyze": [
+            "professional HTTP pro.university.analyze executes authorized workflow"
+          ],
+          "pro.candidates": [
+            "professional HTTP pro.candidates executes authorized workflow"
+          ],
+          "pro.bookmark.list": [
+            "professional HTTP pro.bookmark.list executes authorized workflow"
+          ],
+          "pro.bookmark.add": [
+            "professional HTTP pro.bookmark.add executes authorized workflow"
+          ],
+          "pro.report.export": [
+            "professional HTTP pro.report.export executes authorized workflow"
+          ],
+          "pro.correction.grant": [
+            "professional HTTP pro.correction.grant executes authorized workflow"
+          ],
+          "pro.retention.preview": [
+            "professional HTTP pro.retention.preview executes authorized workflow"
+          ],
+          "pro.retention.notice-targets": [
+            "professional HTTP pro.retention.notice-targets executes authorized workflow"
+          ]
+        }
+      },
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
     }
   }
 }

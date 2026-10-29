@@ -1,3 +1,4 @@
+import { assertAdmissionOrConsume } from "../application/service_end_admission.ts";
 /** All 25 HTTP routes (legacy 22 plus policy 3). Concrete business/provider/budget wiring is supplied separately. */
 import { AccessError, authorizeReport } from "../application/access.ts";
 import {
@@ -58,6 +59,7 @@ export const API_REQUEST_STAGES = [
 ] as const;
 export type ApiRequestStage = typeof API_REQUEST_STAGES[number];
 export interface ApiHttpPorts {
+  readonly admissionPermit?: object;
   readonly representation?: {
     encode(
       request: ApiExecution,
@@ -334,6 +336,7 @@ export function createApiHandler(
         );
       stage("relay");
       await ports.relay.verify(request.headers);
+      assertAdmissionOrConsume(() => ports.clock.nowUtc(), request, ports.admissionPermit);
       stage("user_session");
       const session = await readSessionSnapshot(
         bearer(request.headers),

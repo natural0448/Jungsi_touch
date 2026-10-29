@@ -210,7 +210,8 @@ class OwnerReviewRegistrationCases(unittest.TestCase):
         if historical_v3:
             # A retained v3 fixture is a copy, not a change to current metadata.
             owner.pop('verification_v4', None)
-        verification=owner.get('verification_v4') or owner['verification']
+            owner.pop('verification_v3_rebound_20261030', None)
+        verification=owner.get('verification_v4') or owner.get('verification_v3_rebound_20261030') or owner['verification']
         bindings=verification['source_bindings']
         return spec,{b['path']:b['sha256']for b in bindings}
     def test_owner_suite_is_separate_and_bound_to_current_source(self):
@@ -237,6 +238,7 @@ class OwnerReviewRegistrationCases(unittest.TestCase):
     def test_owner_v4_rejects_current_and_historical_evidence_drift(self):
         s,b=self.current();owner=s['owner_current_review_contract']
         if owner.get('verification_v4') is None:
+            owner.pop('verification_v3_rebound_20261030', None)
             # Invented hashes isolate registration guards on a planning-only base.
             b={path:hashlib.sha256(('SYNTHETIC-owner-v4:'+path).encode()).hexdigest() for path in b}
             owner['verification_v4']=dict(
@@ -262,6 +264,28 @@ class OwnerReviewRegistrationCases(unittest.TestCase):
                 else:v['historical_v3_verification_sha256']='0'*64
                 with self.assertRaises(edge.EdgeFailure):runner.owner_review_registration(changed,b)
         self.assertEqual(s,original)
+    def test_owner_rebound_requires_original_history_and_current_selected_bytes(self):
+        s,b=self.current();owner=s['owner_current_review_contract']
+        rebound=owner.get('verification_v3_rebound_20261030')
+        self.assertIsInstance(rebound,dict)
+        root=Path(__file__).resolve().parents[1]
+        actual={p:hashlib.sha256((root/p).read_bytes()).hexdigest() for p in b}
+        self.assertEqual(runner.owner_review_registration(s,actual)['test_count'],36)
+        for mode in ('history','source','count','cases','status','activation','native','writes','conflicting_v4','missing_rebound'):
+            changed=copy.deepcopy(s); c=changed['owner_current_review_contract']
+            v=c['verification_v3_rebound_20261030']
+            if mode=='history':c['verification']['source_bindings'][0]['sha256']='0'*64
+            elif mode=='source':v['source_bindings'][0]['sha256']='0'*64
+            elif mode=='count':v['test_count']=35
+            elif mode=='cases':v['case_names'].pop()
+            elif mode=='status':v['status']='PASS'
+            elif mode=='activation':v['activation_status']='PASS'
+            elif mode=='native':v['native_acceptance']='PASS'
+            elif mode=='writes':v['operating_writes']=1
+            elif mode=='conflicting_v4':c['verification_v4']={}
+            else:c.pop('verification_v3_rebound_20261030')
+            with self.subTest(mode=mode),self.assertRaises(edge.EdgeFailure):
+                runner.owner_review_registration(changed,actual)
     def test_original_fixtures_without_owner_source_keep_their_scope(self):
         self.assertIsNone(runner.owner_review_registration({},{}))
 
@@ -308,6 +332,12 @@ def candidate(current=None):
     if current is None:
         current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
     spec = retained_legacy28_fixture(current)
+    from check_project_consistency import service_aux_registration, service_staged_registration
+    for key, registration in (("service_aux_test_extension", service_aux_registration),
+                              ("service_staged_test_extension", service_staged_registration)):
+        registered, errors = registration(spec)
+        if errors:raise ValueError("Synthetic fixture cannot ignore invalid additive suite registration")
+        if registered is not None:spec["backend_platform_contract"].pop(key)
     if spec['backend_platform_contract'].get('stage_projection_source_extension') is not None:
         if validate_score_input_native_guard(spec):
             raise ValueError('Synthetic fixture cannot ignore invalid stage guard evidence')
@@ -356,6 +386,13 @@ def candidate(current=None):
 
 
 class ReadViewExtensionContractTests(unittest.TestCase):
+    def test_legacy_fixture_cannot_hide_invalid_additive_suite(self):
+        for key in ("service_aux_test_extension", "service_staged_test_extension"):
+            current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+            if key in current['backend_platform_contract']:
+                current['backend_platform_contract'][key]['test_count']=True
+                with self.subTest(key=key),self.assertRaisesRegex(ValueError,'invalid additive suite registration'):
+                    candidate(current)
     def test_legacy_read_fixture_isolates_stage_evidence_without_mutating_current(self):
         current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
         original=deepcopy(current);legacy=candidate(current)

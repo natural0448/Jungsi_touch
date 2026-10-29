@@ -29,10 +29,24 @@ def verify_manifest(root,manifest):
     if manifest.get("format")!="jungsi.retained-snapshot/v1" or not isinstance(manifest.get("files"),dict) or not manifest["files"]: raise EdgeFailure("source_manifest_invalid")
     if hashes(root,manifest["files"])!=manifest["files"]: raise EdgeFailure("source_manifest_mismatch")
     return manifest["files"]
-def command(argv,*,root,output,name,timeout=45,input=None):
+def command(argv,*,root,output,name,timeout=45,input=None,native_deno_proxy=None):
+    environment={**os.environ,"DENO_DIR":str(output/"deno_cache"),"DENO_NO_UPDATE_CHECK":"1","PYTHONDONTWRITEBYTECODE":"1"}
+    if native_deno_proxy is not None:
+        expected={"professional_native_check":"check","professional_native_info":"info"}
+        if len(argv)<2 or expected.get(name)!=argv[1]:
+            raise EdgeFailure("native_proxy_scope_invalid")
+        # Apply only to the two native Deno children, never the Python oracle or parent.
+        for key in list(environment):
+            if key.lower() in {"http_proxy","https_proxy","all_proxy","no_proxy"}:
+                del environment[key]
+        environment.update(HTTP_PROXY=native_deno_proxy,HTTPS_PROXY=native_deno_proxy,
+                           ALL_PROXY=native_deno_proxy,NO_PROXY="")
+        if os.name!="nt":
+            environment.update(http_proxy=native_deno_proxy,https_proxy=native_deno_proxy,
+                               all_proxy=native_deno_proxy,no_proxy="")
     try:
         p=subprocess.run(argv,cwd=root,input=input,capture_output=True,timeout=timeout,
-          env={**os.environ,"DENO_DIR":str(output/"deno_cache"),"DENO_NO_UPDATE_CHECK":"1","PYTHONDONTWRITEBYTECODE":"1"})
+          env=environment)
     except subprocess.TimeoutExpired as e:
         write_new(output/(name+".stdout"),e.stdout or b"");write_new(output/(name+".stderr"),e.stderr or b"")
         raise EdgeFailure("step_timeout:"+name) from e
@@ -122,13 +136,75 @@ def dynamic_imports(text):
                 raise EdgeFailure("computed_dynamic_import_unsupported")
             literals.append(t[i+2][1])
     return literals
-def normalize_graph(raw,root,registered,layer_by_path):
+def verify_graph_literals(root,graph,paths):
+    """Apply the existing literal dynamic-import gate to every participating TS node."""
+    for path in paths:
+        literal=dynamic_imports((root/path).read_text(encoding="utf-8"))
+        if path not in graph:raise EdgeFailure("dynamic_graph_source_missing:"+path)
+        resolved={row["specifier"] for row in graph[path]}
+        if not set(literal)<=resolved:raise EdgeFailure("dynamic_graph_incomplete:"+path)
+# Only this public JSON artifact and this indexed coexisting TS are graph exceptions.
+PUBLIC_SCHEMA_PATH="src/jungsi_touch/application/public_response_schemas.json"
+PUBLIC_SCHEMA_SHA256="8b79e9a25c930cae178c16675e9050c2a7cdad7029202401918ea283d89109d6"
+CURRENT_CATALOG_PATH="supabase/functions/_shared/current_public_catalog.ts"
+GRAPH_ASSET_LAYER="application"
+
+def graph_coexisting_catalog(root,scope,spec,manifest):
+    """Bind the one allowed coexisting graph source to the same snapshot and code index."""
+    path=CURRENT_CATALOG_PATH
+    if path not in scope.get("coexisting_bound",[]):return {}
+    if not isinstance(manifest,dict) or path not in manifest:raise EdgeFailure("coexisting_graph_manifest_missing")
+    index=spec.get("workflow",{}).get("documentation_sync",{}).get("code_index",{}).get("edge_sources",{})
+    if index.get("format")!="jungsi.typescript-source-hash-index/v1" or index.get("verification")!="whole_source_hash_not_type_or_runtime_proof":raise EdgeFailure("coexisting_graph_index_unsupported")
+    rows=[r for r in index.get("files",[]) if isinstance(r,dict) and r.get("path")==path]
+    impl=[r for r in spec.get("implementation",[]) if isinstance(r,dict) and r.get("path")==path]
+    if len(rows)!=1 or len(impl)!=1:raise EdgeFailure("coexisting_graph_registration_missing")
+    row,item=rows[0],impl[0]
+    if row.get("layer")!=GRAPH_ASSET_LAYER or any(row.get(k)!=item.get(k) for k in ("layer","status","requirements")) or row.get("declared_exports")!=item.get("symbols",[]):raise EdgeFailure("coexisting_graph_registration_mismatch")
+    if hashes(root,[path])[path]!=manifest[path]:raise EdgeFailure("coexisting_graph_manifest_mismatch")
+    try:normalized=(root/path).read_bytes().decode("utf-8-sig").replace("\r\n","\n").encode()
+    except (UnicodeError,OSError):raise EdgeFailure("coexisting_graph_source_unavailable")
+    if digest(normalized)!=row.get("source_sha256"):raise EdgeFailure("coexisting_graph_index_mismatch")
+    return {path:{"layer":GRAPH_ASSET_LAYER,"source_sha256":row["source_sha256"]}}
+
+def normalize_graph(raw,root,registered,layer_by_path,*,manifest=None,coexisting=None):
     if raw.get("version")!=1 or not isinstance(raw.get("modules"),list) or not isinstance(raw.get("roots"),list):raise EdgeFailure("info_schema_unsupported")
     if raw.get("redirects") or raw.get("npmPackages"):raise EdgeFailure("external_graph_resolution")
-    edges={};seen=set()
+    if coexisting is None:coexisting={}
+    if not isinstance(coexisting,dict) or set(coexisting)-{CURRENT_CATALOG_PATH}:raise EdgeFailure("coexisting_graph_scope_invalid")
+    edges={};seen=set();asset_node=False;asset_edge=False;coex_nodes=set();coex_edges=set();verified=set()
+    def verify_asset(path):
+        if path in verified:return
+        if not isinstance(manifest,dict) or path not in manifest:raise EdgeFailure("graph_asset_manifest_missing:"+path)
+        actual=hashes(root,[path])[path]
+        if actual!=manifest[path]:raise EdgeFailure("graph_asset_manifest_mismatch:"+path)
+        if path==PUBLIC_SCHEMA_PATH:
+            if actual!=PUBLIC_SCHEMA_SHA256:raise EdgeFailure("public_schema_hash_mismatch")
+        elif path==CURRENT_CATALOG_PATH:
+            entry=coexisting.get(path)
+            if not isinstance(entry,dict) or set(entry)!={"layer","source_sha256"} or entry.get("layer")!=GRAPH_ASSET_LAYER:raise EdgeFailure("coexisting_graph_unapproved")
+            try:normalized=(root/path).read_bytes().decode("utf-8-sig").replace("\r\n","\n").encode()
+            except (UnicodeError,OSError):raise EdgeFailure("coexisting_graph_source_unavailable")
+            if digest(normalized)!=entry.get("source_sha256"):raise EdgeFailure("coexisting_graph_index_mismatch")
+        else:raise EdgeFailure("graph_asset_unapproved")
+        verified.add(path)
+    def graph_layer(path):
+        if path in registered:return layer_by_path[path]
+        if path in coexisting:
+            verify_asset(path);return coexisting[path]["layer"]
+        raise EdgeFailure("unregistered_graph_module:"+path)
     for module in raw["modules"]:
         path=local_url(module["specifier"],root)
-        if path not in registered:raise EdgeFailure("unregistered_graph_module:"+path)
+        if path==PUBLIC_SCHEMA_PATH:
+            if path in registered or asset_node:raise EdgeFailure("public_schema_graph_duplicate_or_registered")
+            verify_asset(path)
+            if module.get("kind")!="asserted" or module.get("mediaType")!="Json" or "error" in module or module.get("dependencies",[]) or module.get("size")!=(root/path).stat().st_size:raise EdgeFailure("public_schema_graph_node_invalid")
+            if any(local_url(v,root)==path for v in raw["roots"]):raise EdgeFailure("public_schema_cannot_be_graph_root")
+            seen.add(path);asset_node=True;continue
+        src_layer=graph_layer(path)
+        if path in coexisting and path not in registered:
+            if path in coex_nodes or any(local_url(v,root)==path for v in raw["roots"]):raise EdgeFailure("coexisting_graph_duplicate_or_root")
+            coex_nodes.add(path)
         if module.get("kind")!="esm" or module.get("mediaType") not in ("TypeScript","Tsx") or "error" in module:raise EdgeFailure("module_parse_or_resolution_failure")
         seen.add(path);rows=[]
         for dep in module.get("dependencies",[]):
@@ -139,14 +215,22 @@ def normalize_graph(raw,root,registered,layer_by_path):
                 if target is None:continue
                 if not isinstance(target,dict) or "error" in target or not isinstance(target.get("specifier"),str):raise EdgeFailure("dependency_resolution_failure")
                 destination=local_url(target["specifier"],root)
-                if destination not in registered:raise EdgeFailure("unregistered_dependency:"+destination)
-                src_layer=layer_by_path[path];dst_layer=layer_by_path[destination]
+                if destination==PUBLIC_SCHEMA_PATH:
+                    verify_asset(destination)
+                    if kind!="code" or dep.get("assertionType")!="json" or dep.get("isDynamic",False) is not False:raise EdgeFailure("public_schema_import_invalid")
+                    dst_layer=GRAPH_ASSET_LAYER;asset_edge=True
+                else:
+                    if destination not in registered and destination not in coexisting:raise EdgeFailure("unregistered_dependency:"+destination)
+                    dst_layer=graph_layer(destination)
+                    if destination in coexisting and destination not in registered:coex_edges.add(destination)
                 allowed={"application":{"application"},"data_infrastructure":{"application","data_infrastructure"},"verification":{"application","data_infrastructure","verification"}}
                 if dst_layer not in allowed.get(src_layer,set()):raise EdgeFailure("layer_dependency_violation:"+path)
                 resolved.append(dict(kind=kind,path=destination))
             if not resolved:raise EdgeFailure("unresolved_dependency")
             rows.append(dict(specifier=dep["specifier"],dynamic=dep.get("isDynamic",False),targets=resolved))
         edges[path]=sorted(rows,key=lambda r:json.dumps(r,sort_keys=True))
+    if asset_node!=asset_edge:raise EdgeFailure("public_schema_graph_incomplete")
+    if coex_nodes!=coex_edges:raise EdgeFailure("coexisting_graph_incomplete")
     return edges,seen
 def declaration_model(module,root,path,registered=None):
     if not isinstance(module.get("symbols"),list) or not isinstance(module.get("imports",[]),list):raise EdgeFailure("doc_node_schema_unsupported")
@@ -186,13 +270,19 @@ def declaration_model(module,root,path,registered=None):
     for row in module.get("imports",[]):
         imports.append({**row,"src":local_url(row["src"],root)})
     return dict(symbols=symbols,imports=sorted(imports,key=lambda r:json.dumps(r,sort_keys=True)),source_sha256=digest(source))
-def parse_contract(root,contract,deno,output,*,spec=None,manifest_names=None):
+def graph_offline_flags(no_remote=True,no_npm=True):
+    if no_remote is not True or no_npm is not True:raise EdgeFailure("graph_offline_flags_required")
+    return ["--no-remote","--no-npm"]
+
+def parse_contract(root,contract,deno,output,*,spec=None,manifest_names=None,no_remote=True,no_npm=True):
+    offline=graph_offline_flags(no_remote,no_npm)
     paths=list(contract["files"]);registered=set(paths);layers={p:r["layer"] for p,r in contract["files"].items()}
     expected=sorted(p.relative_to(root).as_posix() for folder in ("supabase","tests/edge") if (root/folder).exists() for p in (root/folder).rglob("*") if p.suffix in {".ts",".tsx",".js",".jsx",".mts",".cts"} and p.is_file())
     if manifest_names is not None and not set(expected)<=set(manifest_names):raise EdgeFailure("edge_sources_outside_manifest")
     scope=classify_sources(expected,lambda p:(root/p).read_bytes(),spec or {"edge_harness":contract},contract)
     if scope["foundation_ts"]!=sorted(paths):raise EdgeFailure("TS_registration_coverage_mismatch")
-    for p in paths:
+    coexisting=graph_coexisting_catalog(root,scope,spec or {"edge_harness":contract},manifest_names)
+    for p in [*paths,*coexisting]:
         hashes(root,[p]);dynamic_imports((root/p).read_text(encoding="utf-8"))
     tool=runtime(deno,contract,root,output)
     config=safe_path(contract["config"])
@@ -212,28 +302,27 @@ def parse_contract(root,contract,deno,output,*,spec=None,manifest_names=None):
         if "scopes" in config_value:mapping["scopes"]={target_url(k):{a:target_url(v) for a,v in values.items()} for k,values in config_value["scopes"].items()}
         import_map=output.resolve()/"import_map.json"
         write_new(import_map,json_bytes(mapping));resolver=["--import-map",str(import_map)]
-    raw=json.loads(command([deno,"doc","--json","--private","--no-lock","--no-remote","--no-npm","--config",config,*resolver,*paths],root=root,output=output,name="doc"))
+    raw=json.loads(command([deno,"doc","--json","--private","--no-lock",*offline,"--config",config,*resolver,*paths],root=root,output=output,name="doc"))
     if raw.get("version")!=2 or not isinstance(raw.get("nodes"),dict):raise EdgeFailure("doc_schema_unsupported")
     nodes={local_url(k,root):v for k,v in raw["nodes"].items()}
     if set(nodes)!=registered:raise EdgeFailure("doc_root_coverage_mismatch")
     for p in paths:
         if not set(contract["files"][p]["symbols"])<={s["name"] for s in nodes[p]["symbols"]}:raise EdgeFailure("registered_symbol_missing:"+p)
-    files={p:{**contract["files"][p],"declarations":declaration_model(nodes[p],root,p,registered)} for p in paths}
+    files={p:{**contract["files"][p],"declarations":declaration_model(nodes[p],root,p,registered|set(coexisting))} for p in paths}
     graph={}
     for i,path in enumerate(paths):
-        info=json.loads(command([deno,"info","--json","--no-lock","--no-remote","--no-npm","--config",config,*resolver,path],root=root,output=output,name="info-"+str(i)))
-        parsed,_=normalize_graph(info,root,registered,layers)
+        info=json.loads(command([deno,"info","--json","--no-lock",*offline,"--config",config,*resolver,path],root=root,output=output,name="info-"+str(i)))
+        parsed,_=normalize_graph(info,root,registered,layers,manifest=manifest_names,coexisting=coexisting)
         for key,value in parsed.items():
             if key in graph and graph[key]!=value:raise EdgeFailure("inconsistent_import_graph")
             graph[key]=value
-    if set(graph)!=registered:raise EdgeFailure("graph_coverage_mismatch")
+    if not registered<=set(graph) or set(graph)-(registered|set(coexisting)):raise EdgeFailure("graph_coverage_mismatch")
+    verify_graph_literals(root,graph,[*paths,*(p for p in coexisting if p in graph)])
     for p in paths:
-        literal=dynamic_imports((root/p).read_text(encoding="utf-8"))
-        resolved={x["specifier"] for x in graph[p]}
-        if not set(literal)<=resolved:raise EdgeFailure("dynamic_graph_incomplete")
         files[p]["dependencies"]=graph[p]
     return {**contract,"files":files},tool
-def check_workspace(root,manifest,deno,output,*,emit=False):
+def check_workspace(root,manifest,deno,output,*,emit=False,no_remote=True,no_npm=True):
+    graph_offline_flags(no_remote,no_npm)
     root=Path(root).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
     before=verify_manifest(root,manifest);spec=json.loads((root/"docs/current/service_spec.json").read_bytes())
     contract=spec.get("edge_harness")
@@ -244,7 +333,7 @@ def check_workspace(root,manifest,deno,output,*,emit=False):
     if not isinstance(contract,dict) or contract.get("state")!="required":raise EdgeFailure("edge_registration_not_activated")
     required={*contract["files"],contract["config"],contract["oracle"],*contract["tests"]}
     if not required<=set(before):raise EdgeFailure("edge_sources_outside_manifest")
-    model,tool=parse_contract(root,contract,deno,output,spec=spec,manifest_names=before)
+    model,tool=parse_contract(root,contract,deno,output,spec=spec,manifest_names=before,no_remote=no_remote,no_npm=no_npm)
     expected=contract
     if not emit and model!=expected:raise EdgeFailure("parsed_declarations_or_graph_drift")
     if verify_manifest(root,manifest)!=before:raise EdgeFailure("snapshot_changed_during_check")
@@ -256,7 +345,13 @@ def main():
     mode.add_argument("--snapshot-root");mode.add_argument("--staged",action="store_true");mode.add_argument("--revision")
     parser.add_argument("--source-manifest");parser.add_argument("--deno",default=os.environ.get("JUNGSI_DENO"));parser.add_argument("--output-root",required=True)
     parser.add_argument("--emit-contract",action="store_true")
+    parser.add_argument("--no-remote",action="store_true",default=None)
+    parser.add_argument("--no-npm",action="store_true",default=None)
     args=parser.parse_args();output=Path(args.output_root)
+    if (args.no_remote is None)!=(args.no_npm is None):raise EdgeFailure("graph_offline_flags_incomplete")
+    no_remote=True if args.no_remote is None else args.no_remote
+    no_npm=True if args.no_npm is None else args.no_npm
+    graph_offline_flags(no_remote,no_npm)
     if args.snapshot_root:
         if not args.source_manifest:raise EdgeFailure("source_manifest_required")
         root=Path(args.snapshot_root);manifest=json.loads(Path(args.source_manifest).read_bytes())
@@ -271,7 +366,7 @@ def main():
         root=output.parent/(output.name+"-workspace");root.mkdir(parents=True,exist_ok=False)
         for p in snapshot.paths:write_new(root/safe_path(p),snapshot.read(p))
         manifest=dict(format="jungsi.retained-snapshot/v1",files=hashes(root,snapshot.paths),snapshot=snapshot.revision or "index")
-    result=check_workspace(root,manifest,args.deno,output,emit=args.emit_contract);print(json.dumps({k:v for k,v in result.items() if k!="contract"},ensure_ascii=False));return 0
+    result=check_workspace(root,manifest,args.deno,output,emit=args.emit_contract,no_remote=no_remote,no_npm=no_npm);print(json.dumps({k:v for k,v in result.items() if k!="contract"},ensure_ascii=False));return 0
 if __name__=="__main__":
     try:raise SystemExit(main())
     except (ValueError,KeyError,OSError,subprocess.SubprocessError,json.JSONDecodeError) as e:
