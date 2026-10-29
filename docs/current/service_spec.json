@@ -21749,6 +21749,13 @@
         "REQ-24"
       ],
       "summary": "화면팀 변경(10-29 사용자 결정): 대학이 인원이 적어 공개하지 않은 칸은 1페이지 '대학 발표 성적' ①·② 에 빈칸 대신 '비공개(N명 이하)'로 보인다. 서버가 c50·c70 칸의 reason_code 를 SOURCE_NONDISCLOSED_LE_<인원>(값 null)으로 보낼 때만 쓰며(담당자 요청), 다른 빈칸 사유는 그대로 ─ 이다(lib/p1-published-stats.ts nondisclosedLabel)."
+    },
+    {
+      "date": "2026-10-29",
+      "requirements": [
+        "REQ-24"
+      ],
+      "summary": "화면팀 변경(10-29 사용자 결정): 전문가용 서버 연결 전(pro_api_not_configured)에는 선생님께 사유 코드 없이 '정시터치 전문가용을 준비하고 있습니다 — 시범 운영을 시작할 때 열리고 시작 날짜는 기관 관리자께 메일로 알린다'만 보인다. 에듀터치 관리자에게는 사유 코드와 빠진 설정 이름이 그대로 보인다(components/connection-notice.tsx)."
     }
   ],
   "overall_analysis_contract": {

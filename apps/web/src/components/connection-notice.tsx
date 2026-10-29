@@ -17,10 +17,14 @@ export async function ConnectionNotice({ e }: { e: ConnectionError }) {
   // 이 코드만 따로 안내하고 다른 503(security_policy_unavailable 등)은 아래 일반 문구 그대로 둔다
   const pendingScope = e.code === "operation_scope_not_approved";
   const transitionPending = e.code === "score_input_transition_pending";
-  const heading = transitionPending ? "성적 입력 정책 전환을 준비하고 있습니다" : pendingScope
+  // 전문가용 서버 연결 전(시범 준비 중, 2026-10-29 사용자 결정): 선생님께는 사유 코드 없이 준비 안내만 보인다
+  const proPending = e.code === "pro_api_not_configured";
+  const heading = proPending ? "정시터치 전문가용을 준비하고 있습니다" : transitionPending ? "성적 입력 정책 전환을 준비하고 있습니다" : pendingScope
     ? "이 화면의 자료를 연결하고 있습니다"
     : e.kind === "unconfigured" ? "정시터치 서버 연결 설정을 기다리고 있습니다" : e.kind === "rate_limited" ? "요청이 많아 잠시 제한되었습니다" : "정시터치 서버에 잠시 연결할 수 없습니다";
-  const body = transitionPending ? SCORE_INPUT_TRANSITION_NOTICE : pendingScope
+  const body = proPending
+    ? "학생 성적 입력과 분석은 시범 운영을 시작할 때 열립니다. 시작 날짜는 에듀터치가 기관 관리자께 메일로 알려 드립니다. 위의 기관·계약 정보는 지금도 확인하실 수 있습니다."
+    : transitionPending ? SCORE_INPUT_TRANSITION_NOTICE : pendingScope
     ? "대학 입시결과·모집단위 검색 자료가 아직 서비스에 연결되지 않았습니다. 연결이 끝나면 이 화면에서 바로 보여 드립니다. 이용권이 있어도 연결 전까지는 같은 안내가 나오며, 지원 가능 여부를 뜻하지 않습니다."
     : e.kind === "unconfigured"
       ? "이 화면이 쓸 서비스 연결이 아직 설정되지 않았습니다. 설정이 끝나면 결과를 보여 드립니다."
@@ -46,9 +50,11 @@ export async function ConnectionNotice({ e }: { e: ConnectionError }) {
             ))}
           </p>
         )}
-        <p className="conn-code">
-          사유 코드 <code>{e.code}</code>
-        </p>
+        {(!proPending || showNames) && (
+          <p className="conn-code">
+            사유 코드 <code>{e.code}</code>
+          </p>
+        )}
       </section>
     </div>
   );
