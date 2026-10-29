@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.134",
-  "source_sha256": "3e9a2502b953d06b0a2c6b1e4d1788ddd9681cf25193bf042f18e530d11dd3b1",
+  "spec_version": "1.9.137",
+  "source_sha256": "1de727d57708934ac0f73ce9279b9017c39509539b78e86f20ac8e13dd6db2c6",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4145,6 +4145,87 @@
       "actual_registration": "NOT_RUN",
       "actual_deployment": "NOT_RUN",
       "actual_data_publication": "NOT_RUN"
+    },
+    "Owner_v7_기간사전점검_NULL완료_P1추가_20261029": {
+      "status": "Owner_reply_received_null_live_complete_service_period_and_P1_extension_pending",
+      "requirements": [
+        "REQ-24",
+        "REQ-26",
+        "REQ-27",
+        "REQ-28",
+        "REQ-30",
+        "REQ-31"
+      ],
+      "development_source_boundary": {
+        "develop_implementation_unchanged": true,
+        "service_candidate_commit": "799293cdc190a014e7508f3316e1381fecfc0ee4",
+        "service_candidate_spec": "1.9.136",
+        "service_PR": "https://github.com/natural0448/Jungsi_touch/pull/70",
+        "service_PR_merged": false,
+        "presentation_source_commit": "9e0e54ee36a6a3ad68467848cb608bf69ec693ec"
+      },
+      "Owner_null_acceptance": {
+        "source_files": "three reviewed public UI/test files match exactly",
+        "reported_worker_version": "eb11252e-ae0b-41b1-b148-209874f88abc",
+        "reported_date": "2026-10-29",
+        "reported_typecheck_lint_and_Node_7": "PASS",
+        "independent_live_label_check": "3인이하미발표 visible; definition-pending cells remain separate",
+        "native_null_zero_precision_and_reason": "preserved",
+        "legacy_SOURCE_NONDISCLOSED_LE_n_request": "withdrawn_by_Owner; no additional reason-code implementation required"
+      },
+      "period_wire_resolution": {
+        "choice": "keep_existing_binding_limit",
+        "access_end_exclusive_UTC": "2026-12-31T15:00:00Z",
+        "precision": "equivalent to 2026-12-31T15:00:00.000000Z at the exact microsecond boundary",
+        "approved_budget_or_size_limit_increase": false,
+        "diagnostic_oversized_policy_approval": "not_adopted",
+        "current_six_metadata_revalidated": true,
+        "candidate_native_parser_and_real_context_checks": "PASS_OFFLINE_ONLY",
+        "existing_versions_counter_identity_technical_timers": "preserved"
+      },
+      "latest_service_validation": {
+        "normal_precommit_and_prepush_each": {
+          "Python": 1282,
+          "Edge": 1305,
+          "oracle": 993,
+          "mismatch": 0,
+          "skipped": 0
+        },
+        "identical_source_files": 675,
+        "remote_CI": "account_billing_spending_block_before_execution",
+        "remote_CI_marked_pass": false,
+        "CI_substitution": "direct_user_permission_once_for_this_operating_deployment; exact final normal full local checks; no global gate removal"
+      },
+      "P1_expiry_followup": {
+        "current_head": "actual approved publication still uses the previous operating access expiry",
+        "manifest_review": "existing closed metadata schemas have no intrinsic expiry field; reuse only byte-pinned approved scope",
+        "proposal": "append next head sequence with previous current head and new access expiry; preserve numerical manifest/review/parts and source-as-of",
+        "publication_order": [
+          "existing DB owner installs period schema and immutable renewal reference",
+          "deploy verified service candidate with current settings and verify old report/input status",
+          "Owner activates matching new settings and verifies exact digests",
+          "existing single writer CAS-publishes renewed P1 head only after settings are active",
+          "Owner rebuilds ready cache and verifies front-door pages"
+        ],
+        "early_publication_risk": "new P1 head expiry greater than old snapshot binding fails closed with503",
+        "single_writer": "reuse existing publisher advisory plus source command lock and exact latest-source/head compare; conflicts remain HOLD",
+        "actual_P1_head_insert": "NOT_RUN"
+      },
+      "R27_recruitment_display": {
+        "source_cause": "Owner summaryOf unconditionally sets r27:null in apps/web/src/app/admissions/results/page.tsx at the observed source commit",
+        "canonical_data": "bounded actual DB read confirms 2027 quota data exists; no data values copied into Git",
+        "current_status": "not_connected_to_collapsed_summary",
+        "candidate_checks": "internal batch/projection synthetic only; per-ID shared budget, snapshot binding and live Owner integration still NOT_IMPLEMENTED",
+        "preserve": "exact lineage and campus/track/group; pending stage values are not promoted to final, actual0/null/conditional carry-over remain distinct"
+      },
+      "operating_status": {
+        "new_service_DB_DDL_and_period_reference": "NOT_RUN",
+        "new_settings_and_function_deployment": "NOT_RUN",
+        "new_control_objects": "prepared_and_actual_remote_bytes_SHA_readback_passed; not activated",
+        "new_service_JWT_OTP_BFF_acceptance": "NOT_RUN",
+        "Owner_packet_delivery": "user_confirmed_delivered_but_not_updated"
+      },
+      "reuse_rule": "start from exact branch/head and prior proof pins; no manual full source/data rescan or numeric shard reread for an access-only renewal"
     }
   },
   "management_pages": [
