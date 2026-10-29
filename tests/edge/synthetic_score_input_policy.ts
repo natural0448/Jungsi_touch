@@ -181,6 +181,7 @@ class OneSlotPool implements NativeSqlPool {
     subject: string | null;
   }[] = [];
   rolloutReady = true;
+  rolloutDecision: ((parameters: readonly unknown[]) => boolean) | null = null;
   failDelivery = false;
   readonly passes = new Map([["1", A], ["2", A], ["3", B]]);
   active = 0;
@@ -475,7 +476,7 @@ class OneSlotPool implements NativeSqlPool {
           return !approved ||
             !parameters[5] && l!.scope === parameters[6] && l!.stage === parameters[7];
         });
-        return [[this.rolloutReady, unmapped]];
+        return [[this.rolloutDecision?.(parameters) ?? this.rolloutReady, unmapped]];
       }
       if (sql.startsWith("INSERT INTO jungsi_backend.score_input_states")) {
         db.states.push([...parameters]);

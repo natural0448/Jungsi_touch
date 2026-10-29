@@ -43,6 +43,7 @@ export interface OperatingPolicyBinding {
   >;
   readonly registrySha256: string;
   readonly selectionSha256: string;
+  readonly renewalContext?: NativeObject;
 }
 export interface StageBudgetProof {
   readonly owner: string;
@@ -79,6 +80,8 @@ export class ApprovedOperatingPolicy {
   private readonly previewEnabled: boolean;
   private readonly previewExpiresAtUtc: bigint;
   private readonly allowSubjects: ReadonlySet<string>;
+  private readonly renewalSemantics: NativeObject | null;
+  private renewalSemanticsHash: Promise<string> | undefined;
   constructor(raw: NativeJson | undefined, private readonly binding: OperatingPolicyBinding) {
     if (raw === undefined) fail();
     const r = object(cloneNativeJson(raw));
@@ -163,6 +166,29 @@ export class ApprovedOperatingPolicy {
     }
     if (!stages.size) fail();
     this.stages = stages;
+    const unchanged = cloneNativeJson(r);
+    delete unchanged.expires_at;
+    delete unchanged.approval_reference_sha256;
+    delete object(unchanged.preview).expires_at;
+    const exams: NativeObject = Object.create(null);
+    for (const [examId, exam] of binding.exams) {
+      exams[examId] = { pack_version: exam.packVersion, academic_year: exam.academicYear };
+    }
+    this.renewalSemantics = binding.renewalContext === undefined ? null : {
+      format: "jungsi.score-input-renewal-context/v2",
+      policy: unchanged,
+      preview_expiry_offset_microseconds: this.previewExpiresAtUtc - this.expiresAtUtc,
+      binding_policy_version: binding.policyVersion,
+      registry_sha256: binding.registrySha256,
+      selection_sha256: binding.selectionSha256,
+      exams,
+      usage_context: cloneNativeJson(binding.renewalContext),
+    };
+  }
+  /** Bind a renewal to the unchanged policy and counter/catalog identity. */
+  renewalSemanticsSha256(): Promise<string | null> {
+    if (this.renewalSemantics === null) return Promise.resolve(null);
+    return this.renewalSemanticsHash ??= nativeJsonSha256(this.renewalSemantics);
   }
   assertLive(now: bigint): void {
     if (typeof now !== "bigint" || now >= this.expiresAtUtc) fail();

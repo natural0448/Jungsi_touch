@@ -20630,7 +20630,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "ab60a39ae83cf666fe9a7efa353b1f7f86adfbef1859aba0c1214d058627ee3d",
+        "source_sha256": "477b312405d0d3daa24bc546df1f6ef8fec25795536bbbf85d5d21f0f231bf49",
         "symbols": [
           {
             "declarations": [
@@ -20724,6 +20724,23 @@
                         "kind": "keyword",
                         "repr": "string",
                         "value": "string"
+                      }
+                    },
+                    {
+                      "name": "renewalContext",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
                       }
                     }
                   ]
@@ -20968,6 +20985,38 @@
                     }
                   ],
                   "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "renewalSemanticsSha256"
+                    },
                     {
                       "functionDef": {
                         "hasBody": true,
@@ -21488,6 +21537,61 @@
                             }
                           ]
                         }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "renewalSemantics",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "NativeObject",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeObject",
+                                "specifier": "../domain/json_value.ts"
+                              },
+                              "typeName": "NativeObject"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "renewalSemanticsHash",
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "undefined",
+                            "value": "undefined"
+                          }
+                        ]
                       }
                     }
                   ]
@@ -76010,6 +76114,11 @@
             "src": "supabase/functions/_shared/jungsi/application/ports.ts"
           },
           {
+            "importedName": "SCORE_INPUT_ROLLOUT_VALID_SQL",
+            "originalName": "SCORE_INPUT_ROLLOUT_VALID_SQL",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
+          },
+          {
             "importedName": "SCORE_INPUT_STAGES",
             "originalName": "SCORE_INPUT_STAGES",
             "src": "supabase/functions/_shared/jungsi/domain/score_input_rights.ts"
@@ -76055,7 +76164,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "0de2a6fc01e1ee456558408d8696e4544ea41eb3275b29bba7988357bb3ae2c0",
+        "source_sha256": "f650c33832d1896cee3f60f950d4fb334fa4d541e52746b75d3664c1b68fa2d2",
         "symbols": [
           {
             "declarations": [
@@ -89344,7 +89453,7 @@
             "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
           }
         ],
-        "source_sha256": "213a56295b0924e15631b34509d53b1ca90f334ee4ea008a00d37d42b5f065d4",
+        "source_sha256": "dd7b81549fabc6382ff996ea4daa12dcb2c745ad89337c7627d0fd2e07683ee0",
         "symbols": [
           {
             "declarations": [
@@ -89405,6 +89514,67 @@
               }
             ],
             "name": "RuntimeExamBudget"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  row: NativeObject,\n  binding: ApprovedRuntimeBinding,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "row",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "binding",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ApprovedRuntimeBinding",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ApprovedRuntimeBinding",
+                            "specifier": "./runtime_settings.ts"
+                          },
+                          "typeName": "ApprovedRuntimeBinding"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "buildPeriodRenewalContext"
           },
           {
             "declarations": [
@@ -90882,6 +91052,46 @@
                 "declarationKind": "private",
                 "def": {
                   "hasBody": true,
+                  "parameter_source": "(value: unknown, anchor: bigint)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "anchor",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "bigint",
+                    "value": "bigint"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "expiryOffset"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
                   "parameter_source": "(value: unknown)",
                   "params": [
                     {
@@ -91076,7 +91286,8 @@
         "RuntimeBudgetStage",
         "RuntimeExamBudget",
         "RuntimeRequestBudget",
-        "RuntimeUsagePolicy"
+        "RuntimeUsagePolicy",
+        "buildPeriodRenewalContext"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": {
@@ -97774,7 +97985,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "e0c5480ba0560c7e7ba5da26d2ccebfffe42c1d195f9869863b9463f49852474",
+        "source_sha256": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77",
         "symbols": [
           {
             "declarations": [
@@ -97936,6 +98147,35 @@
               }
             ],
             "name": "SCORE_INPUT_UNMAPPED_PROFILE_SQL"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "EXISTS(SELECT 1 FROM jungsi_backend.score_policy_rollouts r\n JOIN jungsi_backend.score_policy_period_renewals p\n  ON p.rollout_id=r.rollout_id AND p.policy_version=r.policy_version\n  AND p.previous_approval_sha256=r.approval_sha256 AND p.status='validated'\n WHERE r.rollout_id=g.rollout_id AND r.policy_version=g.policy_version AND r.status='validated'\n AND p.policy_semantics_sha256=g.policy_semantics_sha256\n AND ((r.approval_sha256=g.approval_sha256 AND p.previous_expires_at=g.policy_expires_at\n   AND g.evaluated_at<p.previous_expires_at AND statement_timestamp()<p.previous_expires_at)\n  OR (p.new_approval_sha256=g.approval_sha256 AND p.new_expires_at=g.policy_expires_at\n   AND p.effective_at<=g.evaluated_at AND g.evaluated_at<p.new_expires_at\n   AND p.effective_at<=statement_timestamp() AND statement_timestamp()<p.new_expires_at)))",
+                    "value": {
+                      "kind": "template",
+                      "tsTypes": [
+                        {
+                          "kind": "literal",
+                          "repr": "EXISTS(SELECT 1 FROM jungsi_backend.score_policy_rollouts r\n JOIN jungsi_backend.score_policy_period_renewals p\n  ON p.rollout_id=r.rollout_id AND p.policy_version=r.policy_version\n  AND p.previous_approval_sha256=r.approval_sha256 AND p.status='validated'\n WHERE r.rollout_id=g.rollout_id AND r.policy_version=g.policy_version AND r.status='validated'\n AND p.policy_semantics_sha256=g.policy_semantics_sha256\n AND ((r.approval_sha256=g.approval_sha256 AND p.previous_expires_at=g.policy_expires_at\n   AND g.evaluated_at<p.previous_expires_at AND statement_timestamp()<p.previous_expires_at)\n  OR (p.new_approval_sha256=g.approval_sha256 AND p.new_expires_at=g.policy_expires_at\n   AND p.effective_at<=g.evaluated_at AND g.evaluated_at<p.new_expires_at\n   AND p.effective_at<=statement_timestamp() AND statement_timestamp()<p.new_expires_at)))",
+                          "value": {
+                            "kind": "string",
+                            "string": "EXISTS(SELECT 1 FROM jungsi_backend.score_policy_rollouts r\n JOIN jungsi_backend.score_policy_period_renewals p\n  ON p.rollout_id=r.rollout_id AND p.policy_version=r.policy_version\n  AND p.previous_approval_sha256=r.approval_sha256 AND p.status='validated'\n WHERE r.rollout_id=g.rollout_id AND r.policy_version=g.policy_version AND r.status='validated'\n AND p.policy_semantics_sha256=g.policy_semantics_sha256\n AND ((r.approval_sha256=g.approval_sha256 AND p.previous_expires_at=g.policy_expires_at\n   AND g.evaluated_at<p.previous_expires_at AND statement_timestamp()<p.previous_expires_at)\n  OR (p.new_approval_sha256=g.approval_sha256 AND p.new_expires_at=g.policy_expires_at\n   AND p.effective_at<=g.evaluated_at AND g.evaluated_at<p.new_expires_at\n   AND p.effective_at<=statement_timestamp() AND statement_timestamp()<p.new_expires_at)))"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SCORE_INPUT_ROLLOUT_VALID_SQL"
           },
           {
             "declarations": [
@@ -100279,7 +100519,8 @@
       "layer": "data_infrastructure",
       "symbols": [
         "SupabaseScoreInputRepository",
-        "isCommittedScoreRejection"
+        "isCommittedScoreRejection",
+        "SCORE_INPUT_ROLLOUT_VALID_SQL"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/session_http.ts": {
@@ -111944,7 +112185,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "7071627e5990ae30f183a8bc8e6a8268a38940a0b1ba7ab642f5e37363d1913b",
+        "source_sha256": "d233bc24fd51dcb843ee0eec1941027e98b6d5371f3374c94b04da1d3caa062c",
         "symbols": [
           {
             "declarations": [
@@ -112378,6 +112619,54 @@
                         "kind": "keyword",
                         "repr": "boolean",
                         "value": "boolean"
+                      }
+                    },
+                    {
+                      "name": "rolloutDecision",
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "parenthesized",
+                            "value": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [
+                                  {
+                                    "kind": "identifier",
+                                    "name": "parameters",
+                                    "optional": false,
+                                    "tsType": {
+                                      "kind": "typeOperator",
+                                      "value": {
+                                        "operator": "readonly",
+                                        "tsType": {
+                                          "kind": "array",
+                                          "value": {
+                                            "kind": "keyword",
+                                            "repr": "unknown",
+                                            "value": "unknown"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                ],
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
                       }
                     },
                     {
@@ -133529,6 +133818,953 @@
             {
               "kind": "code",
               "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_score_input_policy.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_score_input_policy.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/test_score_policy_period_renewal.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "A",
+            "originalName": "A",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "ADMINISTRATOR_DAILY_KINDS",
+            "originalName": "ADMINISTRATOR_DAILY_KINDS",
+            "src": "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts"
+          },
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "In-memory synthetic checks only; no PostgreSQL or operational state is used."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ApprovedOperatingPolicy",
+            "originalName": "ApprovedOperatingPolicy",
+            "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
+          },
+          {
+            "importedName": "ApprovedRuntimeBinding",
+            "originalName": "ApprovedRuntimeBinding",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
+          },
+          {
+            "importedName": "BUDGET_OPERATIONS",
+            "originalName": "BUDGET_OPERATIONS",
+            "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+          },
+          {
+            "importedName": "COMBINED_POLICY_CONSUMER_OPERATION_IDS",
+            "originalName": "COMBINED_POLICY_CONSUMER_OPERATION_IDS",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "NOW",
+            "originalName": "NOW",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "OWN_REPORT_LIST_SQL",
+            "originalName": "OWN_REPORT_LIST_SQL",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts"
+          },
+          {
+            "importedName": "OWN_REPORT_SCOPE_GUARD_SQL",
+            "originalName": "OWN_REPORT_SCOPE_GUARD_SQL",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts"
+          },
+          {
+            "importedName": "RuntimeUsagePolicy",
+            "originalName": "RuntimeUsagePolicy",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+          },
+          {
+            "importedName": "SCORE_INPUT_ROLLOUT_VALID_SQL",
+            "originalName": "SCORE_INPUT_ROLLOUT_VALID_SQL",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
+          },
+          {
+            "importedName": "SCORE_INPUT_UNMAPPED_PROFILE_SQL",
+            "originalName": "SCORE_INPUT_UNMAPPED_PROFILE_SQL",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
+          },
+          {
+            "importedName": "SupabaseOwnReportList",
+            "originalName": "SupabaseOwnReportList",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts"
+          },
+          {
+            "importedName": "SupabaseScoreInputRepository",
+            "originalName": "SupabaseScoreInputRepository",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
+          },
+          {
+            "importedName": "SupabaseSqlTransport",
+            "originalName": "SupabaseSqlTransport",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+          },
+          {
+            "importedName": "SyntheticNativeRepository",
+            "originalName": "SyntheticNativeRepository",
+            "src": "tests/edge/synthetic_platform_repository.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "buildPeriodRenewalContext",
+            "originalName": "buildPeriodRenewalContext",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+          },
+          {
+            "importedName": "cloneNativeJson",
+            "originalName": "cloneNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "nativeFixture",
+            "originalName": "nativeFixture",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "nativeJsonSha256",
+            "originalName": "nativeJsonSha256",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "nativeJsonText",
+            "originalName": "nativeJsonText",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "scoreInputBalance",
+            "originalName": "scoreInputBalance",
+            "src": "supabase/functions/_shared/jungsi/domain/score_input_rights.ts"
+          },
+          {
+            "importedName": "scores",
+            "originalName": "scores",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "syntheticRuntimeBinding",
+            "originalName": "syntheticRuntimeBinding",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
+            "importedName": "utcInstant",
+            "originalName": "utcInstant",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          },
+          {
+            "importedName": "utcText",
+            "originalName": "utcText",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          }
+        ],
+        "source_sha256": "b193774c516deb32124356bdb8d4f7b2a5a883be544f293110e2f1db4cff35e6",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OLD_HASH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "NEW_HASH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OLD_END"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "NEW_END"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-mock",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-mock"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "EXAM"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-canonical-season",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-canonical-season"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SCOPE"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-rollout",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-rollout"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ROLLOUT"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-policy-v2",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-policy-v2"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "VERSION"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "change",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "fnOrConstructor",
+                            "value": {
+                              "constructor": false,
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "raw",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "NativeObject",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "NativeObject",
+                                        "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                                      },
+                                      "typeName": "NativeObject"
+                                    }
+                                  }
+                                }
+                              ],
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "name": "usageVersion",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "registryHash",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "selectionHash",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "extraExam",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "budgetCeiling",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          }
+                        },
+                        {
+                          "name": "noRenewalContext",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Options"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(approval: string, expiresAt: bigint, options: Options = {})",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "approval",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "expiresAt",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "options",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Options",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Options"
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "makePolicy"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(policy: ApprovedOperatingPolicy)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "policy",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ApprovedOperatingPolicy",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ApprovedOperatingPolicy",
+                            "specifier": "../../supabase/functions/_shared/jungsi/application/operating_policy.ts"
+                          },
+                          "typeName": "ApprovedOperatingPolicy"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "renewalHash"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "rollout",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "version",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "previous",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "next",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "semantics",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "previousEnd",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        },
+                        {
+                          "name": "effective",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        },
+                        {
+                          "name": "end",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        },
+                        {
+                          "name": "status",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Renewal"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(row: Renewal | null, dbNow = NOW, originalValidated = true)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "row",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "Renewal",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Renewal"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "dbNow",
+                        "optional": false
+                      },
+                      "right": "NOW"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "originalValidated",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "right": "true"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rolloutDecision"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(pool: ReturnType<typeof nativeFixture>[\"pool\"])",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "pool",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "indexedAccess",
+                        "value": {
+                          "indexType": {
+                            "kind": "literal",
+                            "repr": "pool",
+                            "value": {
+                              "kind": "string",
+                              "string": "pool"
+                            }
+                          },
+                          "objType": {
+                            "kind": "typeRef",
+                            "repr": "ReturnType",
+                            "value": {
+                              "typeName": "ReturnType",
+                              "typeParams": [
+                                {
+                                  "kind": "typeQuery",
+                                  "repr": "nativeFixture",
+                                  "value": "nativeFixture"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "records"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(work: () => Promise<unknown>)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "work",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "deniedTransition"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": []
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fixtureWithHistory"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/operating_policy.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/request_budget.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/score_input_rights.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/score_input_rights.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_platform_repository.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_platform_repository.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_runtime_binding.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_runtime_binding.ts"
             }
           ]
         },

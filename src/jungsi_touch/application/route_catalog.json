@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.135",
-  "source_sha256": "5cb1bb9867561964dbe1a3fd8caa92549c8ec8dbfe39fa4a4064f7dff99162e7",
+  "spec_version": "1.9.136",
+  "source_sha256": "8cf9abf0e22ba2d2b65c4dece0d3148fca366444f85704795d28217de9cf5f35",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3704,7 +3704,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts",
-          "sha256": "0de2a6fc01e1ee456558408d8696e4544ea41eb3275b29bba7988357bb3ae2c0"
+          "sha256": "f650c33832d1896cee3f60f950d4fb334fa4d541e52746b75d3664c1b68fa2d2"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
@@ -3712,7 +3712,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
-          "sha256": "e0c5480ba0560c7e7ba5da26d2ccebfffe42c1d195f9869863b9463f49852474"
+          "sha256": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77"
         },
         {
           "path": "tests/edge/test_score_input_policy.ts",
@@ -3724,7 +3724,7 @@
         },
         {
           "path": "tests/edge/synthetic_score_input_policy.ts",
-          "sha256": "7071627e5990ae30f183a8bc8e6a8268a38940a0b1ba7ab642f5e37363d1913b"
+          "sha256": "d233bc24fd51dcb843ee0eec1941027e98b6d5371f3374c94b04da1d3caa062c"
         }
       ],
       "verification": {
@@ -3743,6 +3743,47 @@
       "authenticated_API_verified": false,
       "rollout_approved": false,
       "writes": 0
+    },
+    "period_renewal_source_extension": {
+      "format": "jungsi.period-renewal-source-extension/v1",
+      "status": "SOURCE_PREPARED_NOT_ACTIVATED",
+      "baseline_commit": "b41886d901275f27012dcd426cb51583847b5ad2",
+      "schema_source": "database/migrations/010_score_policy_period_renewal.prepared.sql",
+      "legacy_ledgers_modified": false,
+      "new_role_or_account_rights": false,
+      "operating_DB_writes": 0,
+      "test_path": "tests/edge/test_score_policy_period_renewal.ts",
+      "test_count": 9,
+      "source_bindings": [
+        {
+          "path": "supabase/functions/_shared/jungsi/application/operating_policy.ts",
+          "sha256": "477b312405d0d3daa24bc546df1f6ef8fec25795536bbbf85d5d21f0f231bf49"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
+          "sha256": "dd7b81549fabc6382ff996ea4daa12dcb2c745ad89337c7627d0fd2e07683ee0"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
+          "sha256": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts",
+          "sha256": "f650c33832d1896cee3f60f950d4fb334fa4d541e52746b75d3664c1b68fa2d2"
+        },
+        {
+          "path": "tests/edge/synthetic_score_input_policy.ts",
+          "sha256": "d233bc24fd51dcb843ee0eec1941027e98b6d5371f3374c94b04da1d3caa062c"
+        },
+        {
+          "path": "database/migrations/010_score_policy_period_renewal.prepared.sql",
+          "sha256": "121b81712b18894e257efddef5abf82f6efe074d48364f9be1dd6e4d91f54e98"
+        },
+        {
+          "path": "tests/edge/test_score_policy_period_renewal.ts",
+          "sha256": "b193774c516deb32124356bdb8d4f7b2a5a883be544f293110e2f1db4cff35e6"
+        }
+      ]
     }
   },
   "university_scoring_contract": {
@@ -4456,7 +4497,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
-            "sha256": "213a56295b0924e15631b34509d53b1ca90f334ee4ea008a00d37d42b5f065d4"
+            "sha256": "dd7b81549fabc6382ff996ea4daa12dcb2c745ad89337c7627d0fd2e07683ee0"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
@@ -6022,6 +6063,57 @@
       "exact_CI": "REQUIRED_NO_WAIVER_ACCOUNT_BILLING_LIMIT_UNRESOLVED",
       "source_provenance": "Verified v7 and57-file preservation; source files and only synthetic added test hunks adopted. Original archives and before/after bytes retained.",
       "DB_approval_rebind": "A new period approval changes the exact score_policy_rollouts guard. Emit old/new approval/policy hash review; DB owner reconciles immutable rollout/state/legacy/current rights before any new settings registration. No blind rollout update, reset or new privileges. Current DB binding is NOT_RUN."
+    },
+    "연말DB기간_불변갱신과_Owner배포_20261029": {
+      "status": "source_prepared_Owner_DB_settings_and_screen_deploy_NOT_RUN",
+      "basis_commit": "b41886d901275f27012dcd426cb51583847b5ad2",
+      "source_branch": "feature/application-pre-data-platform",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27",
+        "REQ-28",
+        "REQ-30",
+        "REQ-31"
+      ],
+      "access_end_exclusive_UTC": "2026-12-31T15:00:00Z",
+      "local_last_day_Asia_Seoul": "2026-12-31",
+      "period_guard": "immutable original rollout/state/attempt/legacy remains; separate owner-validated renewal matches exact approval, endpoint, policy and shared limit fingerprint",
+      "approved_expiry_paths": [
+        "binding.expires_at",
+        "usage.expires_at",
+        "usage.operating_policy.expires_at",
+        "usage.operating_policy.preview.expires_at",
+        "usage.administrator_policy.expires_at",
+        "binding.read_views.snapshot.expires_at"
+      ],
+      "normalization": "only these access instants use exact microsecond offsets from the operating expiry; enabled subjects, admin roles, official stage windows, request quotas, leases/cursors and all read/storage/budget limits remain bound",
+      "DB_prepared_source": "database/migrations/010_score_policy_period_renewal.prepared.sql",
+      "DB_execution": "NOT_RUN_existing_DB_owner_required_no_new_role_grants",
+      "existing_paid_licenses": "preserve longer valid licenses, revoked status and counters; do not shorten or revive; overall service is capped by approved year-end operating settings",
+      "institutional_contract": "quoted/unapproved contract is not activated; retention/purge deadlines remain separate",
+      "null_display": "visible published score null cells use exactly 3인이하미발표; preserve native null, actual0, precision and source reason; unresolved/reference/unknown-basis rows remain filtered",
+      "Owner_frontend_adoption": "SOURCE_ADOPTED_EXACT_BYTES at feature/presentation-foundation 9e0e54ee36a6a3ad68467848cb608bf69ec693ec; three reviewed UI/test files are byte-identical; full Owner build and actual deployment remain NOT_VERIFIED",
+      "settings": "actual current baseline and four controls read back; six expiry instants and new immutable control fingerprints only; existing max bytes and logical policy versions unchanged",
+      "activation_order": [
+        "Owner installs additive schema and validated immutable renewal reference while old code/settings remain",
+        "deploy exact reviewed code with old settings and verify existing report/input status",
+        "read back uploaded new head/usage objects then register matching five Owner settings",
+        "Owner applies tested null-label patch, builds and deploys exact source",
+        "verify actual JWT/OTP/BFF, year-end boundary, old reports and current input state without creating new rights"
+      ],
+      "legacy_guard_history": "old native evidence preserved; source and offline checks do not certify live activation",
+      "verification": {
+        "new_synthetic_cases": 9,
+        "foundation_preserved": 656,
+        "read_view_registered_count": 270,
+        "operating_postgres_RLS": "NOT_RUN",
+        "normal_final_commit_full_hooks": "RUN_REQUIRED",
+        "live_DB_Storage_Secrets_deployment": "NOT_RUN",
+        "scoped_CI_substitution": "this_deployment_only_user_allowed_normal_exact_commit_full_local_checks"
+      },
+      "DB_role_preflight": "only the existing non-inherited/non-SET postgres administrative membership may remain; unexpected links or options fail closed; no role changes"
     }
   },
   "management_pages": [

@@ -80,6 +80,81 @@ interface Cost {
   base: bigint;
   perOffering: bigint;
 }
+function expiryOffset(value: unknown, anchor: bigint): bigint {
+  if (typeof value !== "string") fail();
+  try {
+    return utcInstant(value) - anchor;
+  } catch {
+    return fail();
+  }
+}
+/** Only approved period fields may move together; all relative offsets stay bound. */
+export function buildPeriodRenewalContext(
+  row: NativeObject,
+  binding: ApprovedRuntimeBinding,
+): NativeObject {
+  const unchanged = cloneNativeJson(row);
+  const operating = object(unchanged.operating_policy);
+  if (typeof operating.expires_at !== "string" || typeof binding.expiresAtUtc !== "bigint") fail();
+  let operatingEnd: bigint;
+  try {
+    operatingEnd = utcInstant(operating.expires_at);
+  } catch {
+    return fail();
+  }
+  const preview = object(operating.preview);
+  const offsets: NativeObject = {
+    usage: expiryOffset(unchanged.expires_at, operatingEnd),
+    operating: 0n,
+    preview: expiryOffset(preview.expires_at, operatingEnd),
+    administrator: null,
+    binding: binding.expiresAtUtc - operatingEnd,
+    snapshot: null,
+  };
+  if (binding.readViews) {
+    if (typeof binding.readViews.snapshot.expiresAtUtc !== "bigint") fail();
+    offsets.snapshot = binding.readViews.snapshot.expiresAtUtc - operatingEnd;
+  }
+  delete unchanged.expires_at;
+  delete unchanged.approval_reference_sha256;
+  delete operating.expires_at;
+  delete operating.approval_reference_sha256;
+  delete preview.expires_at;
+  if (Object.hasOwn(unchanged, "administrator_policy")) {
+    const administrator = object(unchanged.administrator_policy);
+    offsets.administrator = expiryOffset(administrator.expires_at, operatingEnd);
+    delete administrator.expires_at;
+    delete administrator.approval_reference_sha256;
+  }
+  const snapshotContext: NativeObject | null = binding.readViews
+    ? Object.fromEntries(
+      Object.entries(binding.readViews.snapshot).filter(([key]) => key !== "expiresAtUtc"),
+    ) as NativeObject
+    : null;
+  const readViews: NativeObject | null = binding.readViews
+    ? { ...binding.readViews, snapshot: snapshotContext } as unknown as NativeObject
+    : null;
+  return {
+    format: "jungsi.runtime-renewal-context/v2",
+    expiration_offsets_microseconds: offsets,
+    usage_policy: unchanged,
+    project_url: binding.projectUrl,
+    scope_sha256: binding.scopeSha256,
+    consumer_generation: binding.consumerGeneration ?? null,
+    operations: [...binding.operations],
+    artifacts: binding.artifacts.map((a) => ({ kind: a.kind, key: a.key })),
+    registry_reference: { ...binding.references.registry },
+    selection_reference: { ...binding.references.selection },
+    storage_bucket: binding.storage.bucket,
+    storage_prefix: binding.storage.objectPrefix,
+    storage_limits: { ...binding.storage.limits },
+    read_limits: { ...binding.readLimits },
+    repository_limits: { ...binding.repositoryLimits },
+    usage_store_limits: { ...binding.usageStoreLimits },
+    member_json: binding.memberJson ? { ...binding.memberJson } : null,
+    read_view_limits: readViews,
+  };
+}
 export class RuntimeUsagePolicy implements UsagePlanningPort {
   private readonly dimensions: ReadonlyMap<BudgetKind, Dimension>;
   private readonly costs: ReadonlyMap<string, Cost>;
@@ -243,6 +318,7 @@ export class RuntimeUsagePolicy implements UsagePlanningPort {
         exams,
         registrySha256: binding.references.registry.sha256,
         selectionSha256: binding.references.selection.sha256,
+        renewalContext: buildPeriodRenewalContext(row, binding),
       })
       : null;
     if (

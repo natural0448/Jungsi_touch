@@ -7717,14 +7717,14 @@
       {
         "path": "supabase/functions/_shared/jungsi/application/operating_policy.ts",
         "layer": "application",
-        "status": "implemented_candidate_scoped_synthetic_runtime_NOT_RUN",
+        "status": "period_renewal_source_prepared_owner_execution_NOT_RUN",
         "requirements": [
           "REQ-24",
           "REQ-25",
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "ab60a39ae83cf666fe9a7efa353b1f7f86adfbef1859aba0c1214d058627ee3d",
+        "source_sha256": "477b312405d0d3daa24bc546df1f6ef8fec25795536bbbf85d5d21f0f231bf49",
         "declared_exports": [
           "OperatingPolicyBinding",
           "StageBudgetProof",
@@ -9189,7 +9189,7 @@
       {
         "path": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts",
         "layer": "data_infrastructure",
-        "status": "read_view_source_candidate_native_activation_NOT_RUN",
+        "status": "period_renewal_source_prepared_owner_execution_NOT_RUN",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -9198,7 +9198,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "0de2a6fc01e1ee456558408d8696e4544ea41eb3275b29bba7988357bb3ae2c0",
+        "source_sha256": "f650c33832d1896cee3f60f950d4fb334fa4d541e52746b75d3664c1b68fa2d2",
         "declared_exports": [
           "OWN_REPORT_LIST_SQL",
           "SupabaseOwnReportList"
@@ -9436,7 +9436,7 @@
       {
         "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
         "layer": "data_infrastructure",
-        "status": "source_assembled_synthetic_verified_native_deployment_NOT_RUN",
+        "status": "period_renewal_source_prepared_owner_execution_NOT_RUN",
         "requirements": [
           "REQ-01",
           "REQ-02",
@@ -9466,13 +9466,14 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "213a56295b0924e15631b34509d53b1ca90f334ee4ea008a00d37d42b5f065d4",
+        "source_sha256": "dd7b81549fabc6382ff996ea4daa12dcb2c745ad89337c7627d0fd2e07683ee0",
         "declared_exports": [
           "RUNTIME_BUDGET_STAGES",
           "RuntimeBudgetStage",
           "RuntimeExamBudget",
           "RuntimeRequestBudget",
-          "RuntimeUsagePolicy"
+          "RuntimeUsagePolicy",
+          "buildPeriodRenewalContext"
         ]
       },
       {
@@ -9665,17 +9666,18 @@
       {
         "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
         "layer": "data_infrastructure",
-        "status": "implemented_candidate_scoped_synthetic_runtime_NOT_RUN",
+        "status": "period_renewal_source_prepared_owner_execution_NOT_RUN",
         "requirements": [
           "REQ-24",
           "REQ-25",
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "e0c5480ba0560c7e7ba5da26d2ccebfffe42c1d195f9869863b9463f49852474",
+        "source_sha256": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77",
         "declared_exports": [
           "SupabaseScoreInputRepository",
-          "isCommittedScoreRejection"
+          "isCommittedScoreRejection",
+          "SCORE_INPUT_ROLLOUT_VALID_SQL"
         ]
       },
       {

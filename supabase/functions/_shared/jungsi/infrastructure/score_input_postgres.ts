@@ -107,6 +107,19 @@ export const SCORE_INPUT_UNMAPPED_PROFILE_SQL = `EXISTS(
     OR (NOT g.has_state AND l.input_scope=g.input_scope AND l.stage=g.stage)))
   )
 )`;
+/** The original rollout is immutable; only a separately validated period renewal may match. */
+export const SCORE_INPUT_ROLLOUT_VALID_SQL =
+  `EXISTS(SELECT 1 FROM jungsi_backend.score_policy_rollouts r
+ JOIN jungsi_backend.score_policy_period_renewals p
+  ON p.rollout_id=r.rollout_id AND p.policy_version=r.policy_version
+  AND p.previous_approval_sha256=r.approval_sha256 AND p.status='validated'
+ WHERE r.rollout_id=g.rollout_id AND r.policy_version=g.policy_version AND r.status='validated'
+ AND p.policy_semantics_sha256=g.policy_semantics_sha256
+ AND ((r.approval_sha256=g.approval_sha256 AND p.previous_expires_at=g.policy_expires_at
+   AND g.evaluated_at<p.previous_expires_at AND statement_timestamp()<p.previous_expires_at)
+  OR (p.new_approval_sha256=g.approval_sha256 AND p.new_expires_at=g.policy_expires_at
+   AND p.effective_at<=g.evaluated_at AND g.evaluated_at<p.new_expires_at
+   AND p.effective_at<=statement_timestamp() AND statement_timestamp()<p.new_expires_at)))`;
 function invalid(): never {
   throw new AccessError("storage_result_invalid", 503);
 }
@@ -238,15 +251,19 @@ export class SupabaseScoreInputRepository implements ScoreInputRepositoryPort {
     c: ScoreInputContext,
     hasState: boolean,
   ): Promise<void> {
+    const now = this.clock.nowUtc();
+    this.policy.assertLive(now);
     const ids = this.policy.scopeExams(c.stage.scopeId, c.stage.stage);
-    const mappings = approvedProfileStages(this.policy, ids, this.clock.nowUtc());
+    const mappings = approvedProfileStages(this.policy, ids, now);
+    const semantics = await this.policy.renewalSemanticsSha256();
     const row = one(
       await tx.query(
-        `SELECT EXISTS(SELECT 1 FROM jungsi_backend.score_policy_rollouts
-   WHERE rollout_id=$1 AND policy_version=$2 AND approval_sha256=$3 AND status='validated'),
+        `SELECT ${SCORE_INPUT_ROLLOUT_VALID_SQL},
    ${SCORE_INPUT_UNMAPPED_PROFILE_SQL}
    FROM (SELECT $4::text AS owner_id,$5::jsonb AS exam_ids,$6::boolean AS has_state,
-    $7::text AS input_scope,$8::text AS stage,$1::text AS rollout_id,$9::jsonb AS stage_mappings) g`,
+    $7::text AS input_scope,$8::text AS stage,$1::text AS rollout_id,$9::jsonb AS stage_mappings,
+    $2::text AS policy_version,$3::text AS approval_sha256,$10::timestamptz AS evaluated_at,
+    $11::timestamptz AS policy_expires_at,$12::text AS policy_semantics_sha256) g`,
         [
           c.stage.rolloutId,
           c.stage.policyVersion,
@@ -257,6 +274,9 @@ export class SupabaseScoreInputRepository implements ScoreInputRepositoryPort {
           c.stage.scopeId,
           c.stage.stage,
           JSON.stringify(mappings),
+          utcText(now),
+          utcText(this.policy.expiresAtUtc),
+          semantics,
         ],
       ),
       2,
@@ -264,6 +284,7 @@ export class SupabaseScoreInputRepository implements ScoreInputRepositoryPort {
     if (!row || row[0] !== true || row[1] !== false) {
       throw new AccessError("score_input_transition_pending", 503);
     }
+    this.policy.assertLive(this.clock.nowUtc());
   }
   private async stateIn(
     tx: NativeSqlTransaction,

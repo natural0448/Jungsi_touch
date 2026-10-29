@@ -10,6 +10,7 @@ import { sqlIntegerText, sqlUtcText } from "./sql_values.ts";
 import {
   type ApprovedProfileStage,
   approvedProfileStages,
+  SCORE_INPUT_ROLLOUT_VALID_SQL,
   SCORE_INPUT_UNMAPPED_PROFILE_SQL,
 } from "./score_input_postgres.ts";
 import type { SupabaseSqlTransport } from "./transaction_sql.ts";
@@ -67,11 +68,10 @@ export const OWN_REPORT_SCOPE_GUARD_SQL = `WITH scopes AS MATERIALIZED (
   policy_version text,approval_sha256 text,exam_ids jsonb,stage_mappings jsonb)
 )
  SELECT g.input_scope,g.stage,
- EXISTS(SELECT 1 FROM jungsi_backend.score_policy_rollouts r
-  WHERE r.rollout_id=g.rollout_id AND r.policy_version=g.policy_version
-   AND r.approval_sha256=g.approval_sha256 AND r.status='validated'),
+ ${SCORE_INPUT_ROLLOUT_VALID_SQL},
  NOT ${SCORE_INPUT_UNMAPPED_PROFILE_SQL}
- FROM (SELECT $1::text AS owner_id,s.*,true AS has_state FROM scopes s) g`;
+ FROM (SELECT $1::text AS owner_id,s.*,true AS has_state,$3::timestamptz AS evaluated_at,
+  $4::timestamptz AS policy_expires_at,$5::text AS policy_semantics_sha256 FROM scopes s) g`;
 
 function invalid(): never {
   throw new AccessError("storage_result_invalid", 503);
@@ -208,7 +208,16 @@ export class SupabaseOwnReportList implements OwnReportListPort {
         policy.assertLive(this.clock.nowUtc());
         return candidates.map((c) => c.row);
       }
-      const guardRows = await tx.query(OWN_REPORT_SCOPE_GUARD_SQL, [input.owner, encoded]);
+      const now = this.clock.nowUtc();
+      policy.assertLive(now);
+      const semantics = await policy.renewalSemanticsSha256();
+      const guardRows = await tx.query(OWN_REPORT_SCOPE_GUARD_SQL, [
+        input.owner,
+        encoded,
+        utcText(now),
+        utcText(policy.expiresAtUtc),
+        semantics,
+      ]);
       if (!Array.isArray(guardRows) || guardRows.length !== guards.size) invalid();
       const verified = new Map<string, boolean>();
       for (const guard of guardRows) {
