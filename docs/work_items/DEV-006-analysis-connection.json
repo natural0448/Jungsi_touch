@@ -13,7 +13,7 @@
   ],
   "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
   "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-  "contract_version": "1.9.131",
+  "contract_version": "1.9.134",
   "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
   "owner": "외부 프런트 전담 개발자",
   "candidate_only": true,
@@ -779,6 +779,55 @@
     "security_contract_ref": "security_contract",
     "security_transition_status": "pending_runtime_implementation",
     "latest_followup_ref": "supabase_operations_handoff_contract.current_followup",
-    "history_display_ref": "history_presentation_contract"
+    "history_display_ref": "history_presentation_contract",
+    "시즌이용기한과_입결NULL표시_20261029": {
+      "format": "jungsi.season-access-and-published-null-display/v1",
+      "decision_date": "2026-10-29",
+      "requirements": [
+        "REQ-24",
+        "REQ-26",
+        "REQ-28",
+        "REQ-30",
+        "REQ-31"
+      ],
+      "verification_status": "COMMON_GUARD_CONTINUATION_SUPPORTED_SERVICE_CANDIDATE_SCOPED_PASS_OWNER_REGISTRATION_NOT_RUN",
+      "screen_paths": [
+        "/jeongsi/admissions/results",
+        "/jeongsi/pro"
+      ],
+      "API_paths": [
+        "/api/v1/admission-history/snapshots/{snapshot_id}",
+        "/api/v1/me/reports",
+        "/api/v1/pro/organizations/{org_id}/students/{student_id}/candidates"
+      ],
+      "season_expiry": {
+        "last_service_date": "2026-12-31",
+        "timezone": "Asia/Seoul",
+        "end_exclusive_local": "2027-01-01T00:00:00+09:00",
+        "expires_at_UTC": "2026-12-31T15:00:00.000000Z",
+        "rule": "now_utc < expires_at_UTC",
+        "scope": "새 버전으로 등록하는 운영 API binding·snapshot 읽기 승인·공유 usage policy·전문가용 policy/usage·승인된 기관 계약/개인 이용권의 이용 만료일을 같은 시즌 끝점으로 맞춘다. 기존 권한/회수 상태·허용 API와 대상은 유지한다.",
+        "registration": "기존 assembler로 새 판의 registry·selection·approval·내용 SHA를 다시 결속해 Owner가 등록하고 실제 읽기로 확인한다. 날짜 문자열의 일괄 치환이나 과거 증거 변경을 하지 않는다.",
+        "technical_timers": "JWT·OTP·cursor·요청 윈도·실행 lease·통신 timeout과 별도 개인정보 파기 일정은 이용 만료일과 구분해 기존 계약을 유지한다."
+      },
+      "published_score_null_display": {
+        "fields": [
+          "final_50_percent_cut",
+          "final_70_percent_cut",
+          "selected_published_score"
+        ],
+        "text": "3인이하미발표",
+        "application": "기존 전형/집단/산식/발표용도·화면 선택 필터를 통과한 입결 성적 칸의 native null에 표시한다.",
+        "native_values": "정본/DTO의 null·숫자0·문자열 정밀도·원문 사유는 보존하며 UI 대체 문구만 적용한다. 모든 null을 SOURCE_NONDISCLOSED_LE_3의 원문 증거로 분류하지 않는다.",
+        "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다."
+      },
+      "own_report_list": "is_current 키 부재인 구서버와 키가 있으나 전부 null인 신서버를 구분한다. 신판의 전체 null은 숨기지 않고 혼합 값은 false만 숨기며 정정 후 첫 페이지부터 재조회한다. Owner 수정 보고와 실제 배포 증거는 별도로 확인한다.",
+      "professional_usage": "만료일 연장은 계산 비용·요청량 한도의 승인을 대신하지 않는다. 기존 개인 한도를 유지하는 전문가용 별도 계산 capacity와 정확한 승인 카탈로그·원자적 예약·다학생 순차 수용 증거를 준비한 뒤 활성화한다. units_per_offering을 근거 없이 상수 비용으로 낮추지 않는다.",
+      "layer_ownership": "기간 승인과 기획/라우팅은 시스템팀, 표시·서비스 조합/DTO·BFF·최종 등록/화면은 Owner, DB·정본 writer·환산/누백 산출은 기존 사용자 주도 담당이다.",
+      "source_sync": "검토 v7·57파일 보존본을 로컬 G에서 수신·해시 대조했고 개발팀이 기존 서비스 브랜치의 별도 작업공간에서 선별 반영·합성 검수했다. 구기획/화면/생성문서를 일괄 적용하지 않았다. 이 develop 변경은 공통 검사 지원이며 서비스 source 통합·Owner 등록/배포는 별도다.",
+      "actual_registration": "NOT_RUN",
+      "actual_deployment": "NOT_RUN",
+      "actual_data_publication": "NOT_RUN"
+    }
   }
 }

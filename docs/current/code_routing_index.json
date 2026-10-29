@@ -640,7 +640,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "6f136b71010b2cdf9598a54b69ac193ceeb47fe40049565b9ef783b58f494496",
+      "source_sha256": "e98ac347e61ae890a2ce47e857e4c3ecc99e91563b59bf9b5aa858a06de6bf74",
       "symbols": [
         {
           "kind": "class",
@@ -1012,6 +1012,12 @@
           "kind": "function",
           "name": "snapshot_changed_paths.parse_entries",
           "signature": "def parse_entries(raw, *, index):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "stage_projection_guard_registration",
+          "signature": "def stage_projection_guard_registration(spec):",
           "decorators": []
         },
         {

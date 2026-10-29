@@ -1377,6 +1377,65 @@ NATIVE_GUARD_HISTORY_SHA256="93236619b0293ac768c2968542bdc4e515bd5155417da728b76
 NATIVE_GUARD_SOURCE_PATH="supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
 
 
+STAGE_PROJECTION_SOURCE_PATHS=(
+    "supabase/functions/_shared/jungsi/application/own_report_list.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
+    "tests/edge/test_score_input_policy.ts",
+    "tests/edge/test_score_input_stage_projection.ts",
+    "tests/edge/synthetic_score_input_policy.ts",
+)
+STAGE_PROJECTION_CASE_NAMES=(
+    "approved different stages retain independent input rights for the same exact exam",
+    "another stage never hides unregistered legacy or a same-stage profile with no state",
+    "other-stage legacy mapping must match the approved rollout and exact exam policy",
+    "other-stage accepted mapping requires matching exact exam and original accepted state",
+)
+
+
+def stage_projection_guard_registration(spec):
+    """Register exact source-only stage guards without rewriting historical native evidence."""
+    error="REQ-27 stage projection guard source registration invalid"
+    backend=spec.get("backend_platform_contract",{})
+    ext=backend.get("stage_projection_source_extension") if isinstance(backend,dict) else None
+    if ext is None:return None,[]
+    try:
+        expected_keys={"format","status","baseline_commit","source_bindings","verification",
+                       "native_API_empty_guard","authenticated_API_verified","rollout_approved","writes"}
+        if (not isinstance(ext,dict) or set(ext)!=expected_keys or
+            ext["format"]!="jungsi.stage-projection-source-extension/v1" or
+            ext["status"]!="SOURCE_REGISTERED_NOT_ACTIVATED" or
+            ext["baseline_commit"]!=RECOVERY_BASELINE_COMMIT or
+            ext["native_API_empty_guard"]!="NOT_RUN" or
+            ext["authenticated_API_verified"] is not False or ext["rollout_approved"] is not False or
+            type(ext["writes"]) is not int or ext["writes"]!=0 or backend.get("native_edge_v5_extension") is not None):
+            raise ValueError("source-only boundary")
+        cfg=spec["edge_harness"];files=cfg["files"];rows=ext["source_bindings"]
+        if (not isinstance(rows,list) or len(rows)!=len(STAGE_PROJECTION_SOURCE_PATHS) or
+            any(not isinstance(x,dict) or set(x)!={"path","sha256"} for x in rows) or
+            {x["path"]for x in rows}!=set(STAGE_PROJECTION_SOURCE_PATHS)):
+            raise ValueError("exact sources")
+        for item in rows:
+            expected=files.get(item["path"],{}).get("declarations",{}).get("source_sha256")
+            if not re.fullmatch(r"[a-f0-9]{64}",str(item["sha256"])) or item["sha256"]!=expected:
+                raise ValueError("source hash")
+        v=ext["verification"]
+        expected_verification={"baseline_foundation_count":656,"baseline_score_input_count":31,
+                               "added_stage_count":4,"test_path":"tests/edge/test_score_input_stage_projection.ts",
+                               "case_names":list(STAGE_PROJECTION_CASE_NAMES)}
+        if (not isinstance(v,dict) or set(v)!=set(expected_verification) or v!=expected_verification or
+            any(type(v[k]) is not int for k in ("baseline_foundation_count","baseline_score_input_count","added_stage_count"))):
+            raise ValueError("exact verification")
+        tests=cfg["tests"];view=spec["read_view_extension_contract"]["verification"]["test_paths"]
+        if (cfg["unit_count"]!=656 or tests.count("tests/edge/test_score_input_policy.ts")!=1 or
+            v["test_path"] in tests or view.count(v["test_path"])!=1):
+            raise ValueError("disjoint foundation and additions")
+        return ext,[]
+    except (KeyError,TypeError,ValueError,AttributeError):
+        return None,[error]
+
+
 def validate_score_input_native_guard(spec):
     """Keep the historical native guard evidence distinct from a v5 source candidate."""
     error="REQ-27 native empty guard evidence boundary drift"
@@ -1388,7 +1447,9 @@ def validate_score_input_native_guard(spec):
     continuation=evidence.get("guard_current_source")
     backend=spec.get("backend_platform_contract",{})
     ext=backend.get("native_edge_v5_extension") if isinstance(backend,dict) else None
-    if ext is None:
+    stage,stage_errors=stage_projection_guard_registration(spec)
+    if stage_errors:return [error]
+    if ext is None and stage is None:
         if continuation is not None:return [error]
         if native is None:return []
         if (not isinstance(native,dict) or native.get("status")!="PASS_BOUNDED_READONLY_EMPTY_ROLLOUT" or
@@ -1398,7 +1459,10 @@ def validate_score_input_native_guard(spec):
             native.get("writes")!=0 or native.get("authenticated_API_verified")is not False or
             native.get("rollout_approved")is not False):return [error]
         return []
-    registered,registration_errors=recovery_input_registration(spec)
+    if stage is not None:
+        registered,registration_errors=stage,[]
+    else:
+        registered,registration_errors=recovery_input_registration(spec)
     if registration_errors or registered is None or not isinstance(native,dict) or not isinstance(continuation,dict):
         return [error]
     historical_digest=hashlib.sha256(json.dumps(native,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
