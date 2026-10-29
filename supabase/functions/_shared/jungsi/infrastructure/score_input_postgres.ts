@@ -21,6 +21,8 @@ import {
   consumeScoreInput,
   grantScoreCorrection,
   initialScoreInputState,
+  SCORE_INPUT_STAGES,
+  type ScoreInputStage,
   type ScoreInputState,
 } from "../domain/score_input_rights.ts";
 import { ContractError } from "../domain/exact.ts";
@@ -37,6 +39,74 @@ const STATE_BASE =
   `SELECT ${STATE_COLUMNS} FROM jungsi_backend.score_input_states WHERE owner_id=$1 AND input_scope=$2 AND stage=$3`;
 const ATTEMPT_BASE =
   `SELECT attempt_id,request_digest,outcome,profile_id,rejection_code,state_version::text,input_scope,stage,exam_id,pack_version,preview_exempt FROM jungsi_backend.score_input_attempts`;
+export type ApprovedProfileStage = {
+  readonly exam_id: string;
+  readonly input_scope: string;
+  readonly stage: ScoreInputStage;
+};
+const MAX_TRANSITION_EXAMS = 256, MAX_TRANSITION_BYTES = 65536;
+/** Exact exam-stage-scope bindings from the current approved policy, with no alias inference. */
+export function approvedProfileStages(
+  policy: ApprovedOperatingPolicy,
+  exams: readonly string[],
+  now: bigint,
+): readonly ApprovedProfileStage[] {
+  if (
+    !exams.length || exams.length > MAX_TRANSITION_EXAMS || new Set(exams).size !== exams.length ||
+    exams.some((exam) => typeof exam !== "string" || !ID.test(exam))
+  ) {
+    throw new AccessError("score_input_transition_pending", 503);
+  }
+  const mappings: ApprovedProfileStage[] = [];
+  for (const exam of exams) {
+    for (const stage of SCORE_INPUT_STAGES) {
+      try {
+        const selected = policy.stage(exam, stage, now, false);
+        mappings.push({ exam_id: exam, input_scope: selected.scopeId, stage });
+      } catch (error) {
+        if (!(error instanceof AccessError) || error.code !== "score_stage_unavailable") {
+          throw error;
+        }
+      }
+    }
+  }
+  if (new TextEncoder().encode(JSON.stringify(mappings)).byteLength > MAX_TRANSITION_BYTES) {
+    throw new AccessError("score_input_transition_pending", 503);
+  }
+  return mappings;
+}
+/** g supplies an owner, complete exam IDs, current stage/scope/rollout, state existence and approved mappings. */
+export const SCORE_INPUT_UNMAPPED_PROFILE_SQL = `EXISTS(
+ SELECT 1 FROM jungsi_backend.profiles p
+ LEFT JOIN jungsi_backend.score_input_attempts a ON a.owner_id=p.owner_id
+  AND a.profile_id=p.profile_id AND a.outcome='accepted'
+ LEFT JOIN jungsi_backend.score_input_legacy_links l ON l.owner_id=p.owner_id
+  AND l.profile_id=p.profile_id
+ WHERE p.owner_id=g.owner_id
+  AND p.scores->>'exam_id' IN (SELECT jsonb_array_elements_text(g.exam_ids))
+  AND (
+   (a.profile_id IS NULL AND l.profile_id IS NULL)
+   OR (a.profile_id IS NOT NULL AND l.profile_id IS NOT NULL
+    AND (a.input_scope<>l.input_scope OR a.stage<>l.stage))
+   OR (a.profile_id IS NOT NULL AND (
+    a.exam_id<>(p.scores->>'exam_id') OR NOT EXISTS(
+     SELECT 1 FROM jungsi_backend.score_input_states st
+     WHERE st.owner_id=a.owner_id AND st.input_scope=a.input_scope AND st.stage=a.stage
+      AND st.version=a.state_version AND st.last_attempt_id=a.attempt_id
+      AND st.last_outcome='accepted' AND st.current_profile_id=a.profile_id)
+    OR NOT EXISTS(
+     SELECT 1 FROM jsonb_to_recordset(g.stage_mappings)
+      AS m(exam_id text,input_scope text,stage text)
+     WHERE m.exam_id=a.exam_id AND m.input_scope=a.input_scope AND m.stage=a.stage)
+    OR (NOT g.has_state AND a.input_scope=g.input_scope AND a.stage=g.stage)))
+   OR (a.profile_id IS NULL AND l.profile_id IS NOT NULL AND (
+    l.rollout_id<>g.rollout_id OR NOT EXISTS(
+     SELECT 1 FROM jsonb_to_recordset(g.stage_mappings)
+      AS m(exam_id text,input_scope text,stage text)
+     WHERE m.exam_id=(p.scores->>'exam_id') AND m.input_scope=l.input_scope AND m.stage=l.stage)
+    OR (NOT g.has_state AND l.input_scope=g.input_scope AND l.stage=g.stage)))
+  )
+)`;
 function invalid(): never {
   throw new AccessError("storage_result_invalid", 503);
 }
@@ -169,16 +239,14 @@ export class SupabaseScoreInputRepository implements ScoreInputRepositoryPort {
     hasState: boolean,
   ): Promise<void> {
     const ids = this.policy.scopeExams(c.stage.scopeId, c.stage.stage);
-    if (!ids.length) throw new AccessError("score_input_transition_pending", 503);
+    const mappings = approvedProfileStages(this.policy, ids, this.clock.nowUtc());
     const row = one(
       await tx.query(
         `SELECT EXISTS(SELECT 1 FROM jungsi_backend.score_policy_rollouts
    WHERE rollout_id=$1 AND policy_version=$2 AND approval_sha256=$3 AND status='validated'),
-   EXISTS(SELECT 1 FROM jungsi_backend.profiles p WHERE p.owner_id=$4 AND p.scores->>'exam_id' IN (SELECT jsonb_array_elements_text($5::jsonb))
-    AND (NOT $6::boolean OR NOT EXISTS(SELECT 1 FROM jungsi_backend.score_input_attempts a
-     WHERE a.owner_id=p.owner_id AND a.profile_id=p.profile_id AND a.input_scope=$7 AND a.stage=$8)
-     AND NOT EXISTS(SELECT 1 FROM jungsi_backend.score_input_legacy_links l
-      WHERE l.owner_id=p.owner_id AND l.profile_id=p.profile_id AND l.input_scope=$7 AND l.stage=$8 AND l.rollout_id=$1)))`,
+   ${SCORE_INPUT_UNMAPPED_PROFILE_SQL}
+   FROM (SELECT $4::text AS owner_id,$5::jsonb AS exam_ids,$6::boolean AS has_state,
+    $7::text AS input_scope,$8::text AS stage,$1::text AS rollout_id,$9::jsonb AS stage_mappings) g`,
         [
           c.stage.rolloutId,
           c.stage.policyVersion,
@@ -188,6 +256,7 @@ export class SupabaseScoreInputRepository implements ScoreInputRepositoryPort {
           hasState,
           c.stage.scopeId,
           c.stage.stage,
+          JSON.stringify(mappings),
         ],
       ),
       2,

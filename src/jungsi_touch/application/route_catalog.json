@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.134",
-  "source_sha256": "aa5dda88f6e5ca7ee314460e299dc2db491e29bb7e3bbfabeaa703be7ce5af22",
+  "spec_version": "1.9.135",
+  "source_sha256": "5cb1bb9867561964dbe1a3fd8caa92549c8ec8dbfe39fa4a4064f7dff99162e7",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2904,7 +2904,8 @@
           "core subjects 각 항목의 정확7키는 field,subject,expected_raw_cell_sha256,expected_native_value_type,expected_raw_status,expected_raw_unit,expected_identity_review_sha256이다. field=final_additional_admission_rank, subject는 observation_id/academic_year/offering_pk/identity_variant_index 정확4키이며 string/pending_metadata/null 원형을 결속한다.",
           "q.qualification_receipt_sha256, review-only descriptor.receipt의 원본 bytes/SHA와 approvals는 같은 service core 바이트 SHA를 가리킨다. jungsi.p1-writer-field-qualification-receipt/v1 rich writer proof는 별도 감사 근거로 보존하고 core 지문을 참조한다. audit 파일을 core로 다시 라벨링하거나 양 형식을 느슨하게 함께 수용하지 않는다.",
           "기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다.",
-          "Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope."
+          "Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope.",
+          "Optional publication_context and score_context preserve source-native scalar/NULL, exact academic-year formula and actual_result versus simulation_reference/unresolved purpose. Presentation filtering cannot promote reference scores into actual published results."
         ],
         "field_qualification_contract": {
           "format": "jungsi.history-field-qualification-read/v1",
@@ -2973,16 +2974,16 @@
           "actual_authority_status": "EXISTING_AUTHORITY_REUSED_LOCAL_CORE_AND_BYTES_VERIFIED_OWNER_ACTIVATION_PENDING",
           "source_and_test_bindings": {
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
-            "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "a84a5edb79d440b3f775f3b1e86773599c4cac8bb9b681a78ea21b12902deeb4",
+            "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "6697919d0e01860f6aee36cf46c81855debd7f37060f024d60b149392f4729ff",
             "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "afea15c94ef1b81910ae71eabf2d8e8768a6eb9a627bc18792d42d37f8e2b842",
-            "tests/edge/synthetic_history_qualification.ts": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce",
+            "tests/edge/synthetic_history_qualification.ts": "227da395c0e21738bea4401a82c4e090f7c6c849cc52bb0cbdf8d591bc5b3220",
             "tests/edge/test_history_field_qualification.ts": "19ac3bdbd4c5beed7239dbef7b426d9a4787169a0bbdc1cdd806bf8260cdeefb",
             "tests/edge/test_history_snapshot_qualification.ts": "eb8e11fed820cda8650a6ac4a0a285e43bb1c2412feb323225ad9ea7fb098023",
-            "tests/edge/test_history_snapshot_source.ts": "0e924980944db2e0add3dde9ac188a55b27c4a80b11abaac82c009e7d8ce8804"
+            "tests/edge/test_history_snapshot_source.ts": "abe9ebadaacc701dbc2499e3d51513494c12e16cb09cc66c5e46bbf7c42a91be"
           },
           "public_response_schema": {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f",
+            "sha256": "f5e7047162a35ec357e507ae034019cd6010f9da56570f08155292405b1c3d1a",
             "rank_only": true,
             "shared_cell_unchanged": true,
             "hash_scope": "EXACT_GIT_SOURCE_BYTES_UTF8_LF"
@@ -3093,12 +3094,12 @@
           "security": "WeakMap-verified frozen publication context plus exact manifest/source/scope, release and duplicate checks. engine_approved=false and production_allowed=false. Existing authentication/relay/budget/response filters/final-head checks and q grants preserved.",
           "source_and_test_bindings": {
             "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
-            "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "a84a5edb79d440b3f775f3b1e86773599c4cac8bb9b681a78ea21b12902deeb4",
+            "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "6697919d0e01860f6aee36cf46c81855debd7f37060f024d60b149392f4729ff",
             "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "afea15c94ef1b81910ae71eabf2d8e8768a6eb9a627bc18792d42d37f8e2b842",
-            "tests/edge/test_history_snapshot.ts": "84586a7e86eb9ef64c7a08c29256397045dda53fa1defc7ebaf644979b313c3d",
-            "tests/edge/test_history_snapshot_source.ts": "0e924980944db2e0add3dde9ac188a55b27c4a80b11abaac82c009e7d8ce8804",
-            "src/jungsi_touch/application/public_response_schemas.json": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f",
-            "tests/edge/synthetic_history_qualification.ts": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce"
+            "tests/edge/test_history_snapshot.ts": "8cac219685d87feb192b9e8a68209d4ba4790ada7102970786782fc389f800eb",
+            "tests/edge/test_history_snapshot_source.ts": "abe9ebadaacc701dbc2499e3d51513494c12e16cb09cc66c5e46bbf7c42a91be",
+            "src/jungsi_touch/application/public_response_schemas.json": "f5e7047162a35ec357e507ae034019cd6010f9da56570f08155292405b1c3d1a",
+            "tests/edge/synthetic_history_qualification.ts": "227da395c0e21738bea4401a82c4e090f7c6c849cc52bb0cbdf8d591bc5b3220"
           },
           "verification": {
             "new_synthetic_cases": 13,
@@ -3123,7 +3124,8 @@
         ],
         "rules": [
           "Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.",
-          "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN."
+          "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.",
+          "Each item exposes stage and is_current; verified current input scope/stage is read from the owner-bound input ledger. Missing or unverified mappings are null, never guessed. is_current is evaluated at request time and current report selection matches score-input.status.read."
         ]
       },
       "member_shortlist": {
@@ -3690,6 +3692,57 @@
         "private_receipt_sha256": "39377697bd4de5fb023c4a4e3692b86274e382bbece4dfc657713c55ef13668f",
         "full_committed_snapshot_checks": "required separately"
       }
+    },
+    "stage_projection_source_extension": {
+      "format": "jungsi.stage-projection-source-extension/v1",
+      "status": "SOURCE_REGISTERED_NOT_ACTIVATED",
+      "baseline_commit": "848dc97b6657eb36932ba33908b6cdc147c032c4",
+      "source_bindings": [
+        {
+          "path": "supabase/functions/_shared/jungsi/application/own_report_list.ts",
+          "sha256": "ade1d75288df633ef20e1d8e26f602687615ece0e7d4764fd5a05e180d0a2bf2"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts",
+          "sha256": "0de2a6fc01e1ee456558408d8696e4544ea41eb3275b29bba7988357bb3ae2c0"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+          "sha256": "d7a7fa6de8faefa56950269a90eb87c2e12cd070f436ef1e1c736be945911b55"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
+          "sha256": "e0c5480ba0560c7e7ba5da26d2ccebfffe42c1d195f9869863b9463f49852474"
+        },
+        {
+          "path": "tests/edge/test_score_input_policy.ts",
+          "sha256": "c7f588ab811dc61a822966e92f31840d944f36d853d5a64f22fe1e9634744a21"
+        },
+        {
+          "path": "tests/edge/test_score_input_stage_projection.ts",
+          "sha256": "3b21336df00c4a68c6fc8bcb818b85121fab175586cfaac28443d39c591a5e2a"
+        },
+        {
+          "path": "tests/edge/synthetic_score_input_policy.ts",
+          "sha256": "7071627e5990ae30f183a8bc8e6a8268a38940a0b1ba7ab642f5e37363d1913b"
+        }
+      ],
+      "verification": {
+        "baseline_foundation_count": 656,
+        "baseline_score_input_count": 31,
+        "added_stage_count": 4,
+        "test_path": "tests/edge/test_score_input_stage_projection.ts",
+        "case_names": [
+          "approved different stages retain independent input rights for the same exact exam",
+          "another stage never hides unregistered legacy or a same-stage profile with no state",
+          "other-stage legacy mapping must match the approved rollout and exact exam policy",
+          "other-stage accepted mapping requires matching exact exam and original accepted state"
+        ]
+      },
+      "native_API_empty_guard": "NOT_RUN",
+      "authenticated_API_verified": false,
+      "rollout_approved": false,
+      "writes": 0
     }
   },
   "university_scoring_contract": {
@@ -3915,7 +3968,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f"
+            "sha256": "f5e7047162a35ec357e507ae034019cd6010f9da56570f08155292405b1c3d1a"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -4343,7 +4396,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "b5598ffa90608fd365160fc520cbe9657cdbc6a0ebc4783d10ae387856a4027f"
+            "sha256": "f5e7047162a35ec357e507ae034019cd6010f9da56570f08155292405b1c3d1a"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
@@ -4411,7 +4464,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "3c53222c3ac579ec3f5f8cb588916644c42e1434385813f41d86f3a904f3ad54"
+            "sha256": "d7a7fa6de8faefa56950269a90eb87c2e12cd070f436ef1e1c736be945911b55"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
@@ -4431,7 +4484,7 @@
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",
-            "sha256": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce"
+            "sha256": "227da395c0e21738bea4401a82c4e090f7c6c849cc52bb0cbdf8d591bc5b3220"
           },
           {
             "path": "tests/edge/test_member_json_results.ts",
@@ -5896,7 +5949,7 @@
         "REQ-30",
         "REQ-31"
       ],
-      "verification_status": "COMMON_GUARD_CONTINUATION_SUPPORTED_SERVICE_CANDIDATE_SCOPED_PASS_OWNER_REGISTRATION_NOT_RUN",
+      "verification_status": "SERVICE_CANDIDATE_INTEGRATED_SCOPED_PASS_NORMAL_HOOKS_AND_OWNER_OPERATING_REGISTRATION_PENDING",
       "screen_paths": [
         "/jeongsi/admissions/results",
         "/jeongsi/pro"
@@ -5930,10 +5983,45 @@
       "own_report_list": "is_current 키 부재인 구서버와 키가 있으나 전부 null인 신서버를 구분한다. 신판의 전체 null은 숨기지 않고 혼합 값은 false만 숨기며 정정 후 첫 페이지부터 재조회한다. Owner 수정 보고와 실제 배포 증거는 별도로 확인한다.",
       "professional_usage": "만료일 연장은 계산 비용·요청량 한도의 승인을 대신하지 않는다. 기존 개인 한도를 유지하는 전문가용 별도 계산 capacity와 정확한 승인 카탈로그·원자적 예약·다학생 순차 수용 증거를 준비한 뒤 활성화한다. units_per_offering을 근거 없이 상수 비용으로 낮추지 않는다.",
       "layer_ownership": "기간 승인과 기획/라우팅은 시스템팀, 표시·서비스 조합/DTO·BFF·최종 등록/화면은 Owner, DB·정본 writer·환산/누백 산출은 기존 사용자 주도 담당이다.",
-      "source_sync": "검토 v7·57파일 보존본을 로컬 G에서 수신·해시 대조했고 개발팀이 기존 서비스 브랜치의 별도 작업공간에서 선별 반영·합성 검수했다. 구기획/화면/생성문서를 일괄 적용하지 않았다. 이 develop 변경은 공통 검사 지원이며 서비스 source 통합·Owner 등록/배포는 별도다.",
+      "source_sync": "다른 PC 검토 v7과 전체57파일 보존본을 수신·해시 검증한 뒤 서비스/공개 schema/시험을 선별 반영했다. 구기획131·생성문서·화면 파일 전체를 복사하지 않는다. 기존 복구권/offload 후보는 별도로 보존하며 이번 범위에 섞지 않는다.",
       "actual_registration": "NOT_RUN",
       "actual_deployment": "NOT_RUN",
       "actual_data_publication": "NOT_RUN"
+    },
+    "v7서비스_코드반영과_Owner배포인계_20261029": {
+      "format": "jungsi.v7-service-adoption-owner-handoff/v1",
+      "requirements": [
+        "REQ-24",
+        "REQ-26",
+        "REQ-27",
+        "REQ-28",
+        "REQ-30",
+        "REQ-31"
+      ],
+      "branch": "feature/application-pre-data-platform",
+      "baseline_commit": "146a1db0f5abc4a8696287c43b8dd07eada1deac",
+      "planning_basis_commit": "3ad7733503f8aa14afae197463b7a7c5d1f98c21",
+      "status": "WORKSPACE_SOURCE_APPLIED_SCOPED_TESTS_PASS_NORMAL_SNAPSHOT_CHECKS_REQUIRED",
+      "API_paths": [
+        "/api/v1/me/reports",
+        "/api/v1/admission-history/snapshots/{snapshot_id}"
+      ],
+      "screen_path": "/jeongsi/admissions/results",
+      "service_changes": "publication/score context, exact native values, nullable verified stage/is_current in own lists and stage-specific input transition checks. Existing owner/approval/current ledger and lock/write/replay guards remain.",
+      "test_partition": "Original foundation656/input31 and original school reference46 remain. Separate read-view252 + stage4 + alias1 + year-end4 =261. Separate JSON registry projection5 and common guard15; overlapping test totals are not added.",
+      "season_expiry": "2026-12-31T15:00:00.000000Z; before endpoint accepted, exact endpoint rejected. Settings reassembly changes only approved access expiry and control hashes; technical timers, logical budget policy versions/counters and approved stage windows remain.",
+      "null_display": "Owner patch against observed presentation commit1e180961 uses exact 3인이하미발표 for visible published score null cells. Native NULL, zero, precision and source reason remain. Reference/unresolved/unknown-basis hidden values stay filtered. Owner branch adoption/build/deployment are NOT_RUN.",
+      "owner_settings": "Offline create-only assembler validates current baseline pins; preserves registry/selection and approved scopes, counters and physical budgets; emits new immutable head/usage control objects and five matching settings. Final current Owner export/native verification/upload-readback/registration are required. Historical reference-parser tests do not prove live state.",
+      "ownership": "DB/SQL/RLS, canonical writer and conversion/percentile engines retain existing ownership. Owner handles presentation/BFF/final settings and existing project deployment. No new infrastructure, plan or charge.",
+      "separate_backlog": "Previously staged incident-recovery and review-history offload work remains preserved and unmerged; shared runtime_context/score_input_postgres changes require semantic reconciliation before combining.",
+      "actual_DB_data_or_DDL": "NOT_RUN",
+      "actual_publication": "NOT_RUN",
+      "actual_registration": "NOT_RUN",
+      "actual_deployment": "NOT_RUN",
+      "actual_JWT_OTP_BFF_acceptance": "NOT_RUN",
+      "exact_CI": "REQUIRED_NO_WAIVER_ACCOUNT_BILLING_LIMIT_UNRESOLVED",
+      "source_provenance": "Verified v7 and57-file preservation; source files and only synthetic added test hunks adopted. Original archives and before/after bytes retained.",
+      "DB_approval_rebind": "A new period approval changes the exact score_policy_rollouts guard. Emit old/new approval/policy hash review; DB owner reconciles immutable rollout/state/legacy/current rights before any new settings registration. No blind rollout update, reset or new privileges. Current DB binding is NOT_RUN."
     }
   },
   "management_pages": [

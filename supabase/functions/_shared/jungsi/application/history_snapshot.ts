@@ -118,6 +118,7 @@ function scalar(v: unknown): boolean {
 function cell(
   raw: unknown,
   slot: typeof HISTORY_SNAPSHOT_SLOTS[number],
+  sourceYear: number,
   alternateEntry = false,
 ): void {
   const cut = slot.endsWith("percent_cut") || slot === "alternate_cut";
@@ -145,7 +146,53 @@ function cell(
         "selection_rule_ref",
       ]
       : []),
+    ...(cut && raw && typeof raw === "object" && Object.hasOwn(raw, "score_calculation_context")
+      ? ["score_calculation_context"]
+      : []),
+    ...(cut && (slot !== "alternate_cut" || alternateEntry) && raw && typeof raw === "object" &&
+        Object.hasOwn(raw, "publication_context")
+      ? ["publication_context"]
+      : []),
   ]);
+  if (Object.hasOwn(row, "score_calculation_context")) {
+    const context = exact(row.score_calculation_context, [
+      "source_result_year",
+      "score_calculation_year",
+      "observation_role",
+    ]);
+    const year = context.score_calculation_year, role = context.observation_role;
+    if (
+      !Number.isSafeInteger(context.source_result_year) ||
+      context.source_result_year !== sourceYear ||
+      year !== null && (!Number.isSafeInteger(year) || Number(year) < 1 || Number(year) > 9999) ||
+      !["actual_result", "prior_year_recalculated_reference", "unresolved"].includes(
+        role as string,
+      ) ||
+      role !== "unresolved" && year === null ||
+      role === "actual_result" && Number(year) !== sourceYear ||
+      role === "prior_year_recalculated_reference" &&
+        (!alternateEntry || Number(year) <= sourceYear) ||
+      role === "unresolved" && !alternateEntry && row.value !== null
+    ) invalid();
+  }
+  if (Object.hasOwn(row, "publication_context")) {
+    const publication = exact(row.publication_context, [
+      "publication_role",
+      "simulation_target_academic_year",
+    ]);
+    const role = publication.publication_role, target = publication.simulation_target_academic_year;
+    const score = row.score_calculation_context as NativeObject | undefined;
+    if (
+      !["actual_result", "simulation_reference", "unresolved"].includes(role as string) ||
+      target !== null &&
+        (!Number.isSafeInteger(target) || Number(target) < 1 || Number(target) > 9999) ||
+      role !== "simulation_reference" && target !== null ||
+      role === "simulation_reference" && !alternateEntry ||
+      role === "unresolved" && !alternateEntry && row.value !== null ||
+      role === "actual_result" && score?.observation_role === "prior_year_recalculated_reference" ||
+      role === "simulation_reference" && score?.observation_role === "actual_result"
+    ) invalid();
+  }
   if (row.source_context !== null) {
     const c = exact(row.source_context, [
       "observation_id",
@@ -166,7 +213,7 @@ function cell(
       !Number.isSafeInteger(row.omitted_other_basis_count) ||
       Number(row.omitted_other_basis_count) < 0
     ) invalid();
-    for (const entry of row.entries) cell(entry, "alternate_cut", true);
+    for (const entry of row.entries) cell(entry, "alternate_cut", sourceYear, true);
   }
   if (
     slot === "recruitment_count_with_stage" &&
@@ -336,7 +383,7 @@ export function validateHistorySnapshotPayload(raw: unknown, part: SnapshotPart)
     // Missing descriptive metadata remains null. A valid original PK does not prove its labels.
     for (const k of ["university_name", "department", "admission_track"]) text(row[k], true, true);
     for (const k of ["region", "campus", "group"]) text(row[k], true, k !== "group");
-    for (const slot of HISTORY_SNAPSHOT_SLOTS) cell(row[slot], slot);
+    for (const slot of HISTORY_SNAPSHOT_SLOTS) cell(row[slot], slot, Number(row.academic_year));
     if (Object.hasOwn(row, HISTORICAL_REFERENCE_FIELD)) {
       validateHistoricalReferenceList(row[HISTORICAL_REFERENCE_FIELD], row);
     }
@@ -356,10 +403,25 @@ export function validateHistorySnapshotPayload(raw: unknown, part: SnapshotPart)
     }
     const lower = row.final_50_percent_cut as NativeObject,
       upper = row.final_70_percent_cut as NativeObject;
-    if (
-      lower.value !== null && upper.value !== null &&
-      ["basis_code", "cohort_code", "unit"].some((k) => lower[k] !== upper[k])
-    ) invalid();
+    if (lower.value !== null && upper.value !== null) {
+      if (["basis_code", "cohort_code", "unit"].some((k) => lower[k] !== upper[k])) invalid();
+      const lowContext = lower.score_calculation_context as NativeObject | undefined;
+      const highContext = upper.score_calculation_context as NativeObject | undefined;
+      if (
+        (lowContext || highContext) &&
+        (!lowContext || !highContext || lowContext.observation_role !== "actual_result" ||
+          highContext.observation_role !== "actual_result" ||
+          lowContext.score_calculation_year !== highContext.score_calculation_year)
+      ) invalid();
+      const lowPublication = lower.publication_context as NativeObject | undefined;
+      const highPublication = upper.publication_context as NativeObject | undefined;
+      if (
+        (lowPublication || highPublication) &&
+        (!lowPublication || !highPublication ||
+          lowPublication.publication_role !== "actual_result" ||
+          highPublication.publication_role !== "actual_result")
+      ) invalid();
+    }
   }
   if (
     mapped !== part.mappedRows || pending !== part.mappingPendingRows ||

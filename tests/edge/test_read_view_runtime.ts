@@ -10,7 +10,17 @@ import {
   createApiHandler,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/api_http.ts";
 import { RelayBoundary } from "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts";
-import { PublicResponseProjection } from "../../supabase/functions/_shared/jungsi/application/public_response.ts";
+import {
+  publicJsonText,
+  PublicResponseProjection,
+} from "../../supabase/functions/_shared/jungsi/application/public_response.ts";
+import { HistorySnapshotService } from "../../supabase/functions/_shared/jungsi/application/history_snapshot.ts";
+import { JsonFloat } from "../../supabase/functions/_shared/jungsi/domain/native_json.ts";
+import { SYNTHETIC_QUALIFICATION_SCHEMA_JSON } from "./synthetic_history_qualification.ts";
+import {
+  syntheticSnapshotPublication,
+  syntheticSnapshotStatisticsBody,
+} from "./synthetic_history_snapshot.ts";
 import { syntheticApiPolicies } from "./synthetic_api_contract.ts";
 import {
   SYNTHETIC_RUNTIME_NOW as NOW,
@@ -338,5 +348,167 @@ Deno.test("read view binding rejects malformed limits out of prefix expiry and m
     await denied(async () =>
       await (await binding((d) => change(d.read_views as NativeObject))).load()
     );
+  }
+});
+
+Deno.test("synthetic HTTP preserves simulation context through service and both-tier projection", async () => {
+  for (const tier of ["standard", "paid"] as const) {
+    for (const gzip of [false, true]) {
+      const f = fixture({ extended: true });
+      const body = syntheticSnapshotStatisticsBody();
+      const row = (body.rows as NativeObject[])[0];
+      const alternate = row.alternate_cut as NativeObject;
+      const entry = (alternate.entries as NativeObject[])[3];
+      entry.value = new JsonFloat("0.000000123400");
+      entry.score_calculation_context = {
+        source_result_year: 2026,
+        score_calculation_year: null,
+        observation_role: "unresolved",
+      };
+      entry.publication_context = {
+        publication_role: "simulation_reference",
+        simulation_target_academic_year: 2027,
+      };
+      alternate.entries = [entry];
+      const p = syntheticSnapshotPublication();
+      let sourceReads = 0;
+      const service = new HistorySnapshotService(
+        {
+          current: () => Promise.resolve(p),
+          read: () => {
+            sourceReads++;
+            return Promise.resolve(body);
+          },
+          assertCurrent: () => Promise.resolve(),
+        },
+        f.ports.clock,
+        "a".repeat(64),
+      );
+
+      // Reuse the real history schema closure while retaining synthetic roots for
+      // the other required routes. No network request or private source is used.
+      const registry = JSON.parse(SYNTHETIC_QUALIFICATION_SCHEMA_JSON);
+      const historyRoots = registry.operations[0].roots;
+      const expected = f.policies.map((policy) => ({
+        id: policy.id,
+        contract_ref: "SYNTHETIC",
+      }));
+      const root = {
+        type: "object",
+        nullable: false,
+        properties: { shown: { type: "string", nullable: false } },
+        required: ["shown"],
+        optional: [],
+      };
+      const projection = new PublicResponseProjection({
+        ...registry,
+        schemas: { ...registry.schemas, synthetic_http_result: root },
+        operations: expected.map((policy) => ({
+          ...policy,
+          roots: policy.id === "history.snapshot.read" ? historyRoots : {
+            standard: { ref: "synthetic_http_result", nullable: false },
+            paid: { ref: "synthetic_http_result", nullable: false },
+          },
+        })),
+      }, expected);
+      const originalPasses = f.ports.passes;
+      const handler = createApiHandler(f.policies, {
+        ...f.ports,
+        projection,
+        passes: {
+          readCurrent: async (subjectId, evaluatedAtUtc) => ({
+            ...await originalPasses.readCurrent(subjectId, evaluatedAtUtc),
+            paidUntilUtc: tier === "paid" ? NOW + 60000000n : null,
+          }),
+        },
+        business: {
+          execute: (request) => {
+            f.events.push("business");
+            return service.read(
+              request.session,
+              request.params.snapshot_id,
+              request.query,
+            );
+          },
+        },
+        ...(gzip
+          ? {
+            representation: {
+              encode: async (_request, result) => {
+                const decoded = new TextEncoder().encode(
+                  publicJsonText(result),
+                );
+                const bytes = new Uint8Array(
+                  await new Response(
+                    new Blob([decoded]).stream().pipeThrough(
+                      new CompressionStream("gzip"),
+                    ),
+                  ).arrayBuffer(),
+                );
+                return {
+                  body: bytes,
+                  status: 200 as const,
+                  etag: '"' + "a".repeat(64) + '"',
+                  gzip: true,
+                };
+              },
+            },
+          }
+          : {}),
+      });
+      const url = extra[1].path.replace("{snapshot_id}", p.snapshotId);
+      const response = await handler(request(url));
+      equal(response.status, 200);
+      equal(response.headers.get("Cache-Control"), "private, no-store");
+      equal(response.headers.get("Content-Encoding"), gzip ? "gzip" : null);
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const decoded = gzip
+        ? await new Response(
+          new Blob([bytes]).stream().pipeThrough(
+            new DecompressionStream("gzip"),
+          ),
+        ).text()
+        : new TextDecoder().decode(bytes);
+      assert(decoded.includes('"value":0.000000123400'));
+      const output = JSON.parse(decoded);
+      const outputEntry = output.rows[0].alternate_cut.entries[0];
+      equal(outputEntry.publication_context, {
+        publication_role: "simulation_reference",
+        simulation_target_academic_year: 2027,
+      });
+      equal(outputEntry.score_calculation_context.score_calculation_year, null);
+      equal(f.events, [
+        "auth",
+        "membership",
+        "candidate_scope",
+        "reserve",
+        "business",
+        "settle",
+        "finish",
+        "deliver",
+      ]);
+      equal(sourceReads, 1);
+
+      // A wrapper claiming actual while its child is a simulation must fail
+      // before any response body is delivered.
+      f.events.length = 0;
+      alternate.publication_context = {
+        publication_role: "actual_result",
+        simulation_target_academic_year: null,
+      };
+      const rejected = await handler(request(url));
+      equal(rejected.status, 503);
+      const failure = await rejected.json();
+      equal(failure.error.code, "snapshot_invalid");
+      assert(!JSON.stringify(failure).includes("simulation_reference"));
+      equal(f.events, [
+        "auth",
+        "membership",
+        "candidate_scope",
+        "reserve",
+        "business",
+      ]);
+      equal(sourceReads, 2);
+    }
   }
 });

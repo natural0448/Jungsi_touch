@@ -215,7 +215,11 @@ export class NativeRuntimeRequest {
         configured = binding.readViews.cursorLifetimeMicroseconds;
       if (remaining < 1n) fail();
       return await new OwnReportListService(
-        new SupabaseOwnReportList(this.sql()),
+        new SupabaseOwnReportList(
+          this.sql(),
+          (await this.budget()).policy.operating ?? null,
+          this.clock,
+        ),
         new OwnReportCursor(
           Uint8Array.from(hex.match(/../g)!, (x) => parseInt(x, 16)),
           binding.readViews.maxCursorCharacters,

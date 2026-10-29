@@ -5362,6 +5362,14 @@
         "selection_rule_ref": {
           "type": "string",
           "nullable": true
+        },
+        "score_calculation_context": {
+          "ref": "history_snapshot_score_calculation_context",
+          "nullable": false
+        },
+        "publication_context": {
+          "ref": "history_snapshot_publication_context",
+          "nullable": false
         }
       },
       "required": [
@@ -5381,7 +5389,10 @@
         "cohort_label",
         "selection_rule_ref"
       ],
-      "optional": []
+      "optional": [
+        "score_calculation_context",
+        "publication_context"
+      ]
     },
     "history_snapshot_alternate_cell": {
       "type": "object",
@@ -5475,6 +5486,10 @@
         "omitted_other_basis_count": {
           "type": "integer",
           "nullable": false
+        },
+        "score_calculation_context": {
+          "ref": "history_snapshot_score_calculation_context",
+          "nullable": false
         }
       },
       "required": [
@@ -5496,7 +5511,9 @@
         "entries",
         "omitted_other_basis_count"
       ],
-      "optional": []
+      "optional": [
+        "score_calculation_context"
+      ]
     },
     "history_snapshot_identity_variant": {
       "type": "object",
@@ -5948,13 +5965,28 @@
               "updated_at": {
                 "type": "string",
                 "nullable": false
+              },
+              "stage": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                  "mock",
+                  "provisional",
+                  "final"
+                ]
+              },
+              "is_current": {
+                "type": "boolean",
+                "nullable": true
               }
             },
             "required": [
               "report_id",
               "exam_id",
               "report_version",
-              "updated_at"
+              "updated_at",
+              "stage",
+              "is_current"
             ],
             "optional": []
           }
@@ -6495,6 +6527,59 @@
         "statistic_label",
         "engine_approved",
         "production_allowed"
+      ],
+      "optional": []
+    },
+    "history_snapshot_score_calculation_context": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "source_result_year": {
+          "type": "integer",
+          "nullable": false
+        },
+        "score_calculation_year": {
+          "type": "integer",
+          "nullable": true
+        },
+        "observation_role": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "actual_result",
+            "prior_year_recalculated_reference",
+            "unresolved"
+          ]
+        }
+      },
+      "required": [
+        "source_result_year",
+        "score_calculation_year",
+        "observation_role"
+      ],
+      "optional": []
+    },
+    "history_snapshot_publication_context": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "publication_role": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "actual_result",
+            "simulation_reference",
+            "unresolved"
+          ]
+        },
+        "simulation_target_academic_year": {
+          "type": "integer",
+          "nullable": true
+        }
+      },
+      "required": [
+        "publication_role",
+        "simulation_target_academic_year"
       ],
       "optional": []
     }

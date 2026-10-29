@@ -1,6 +1,7 @@
 /** Small, owner-bound report discovery. It never loads report bodies or saves a score. */
 import { AccessError } from "./access.ts";
 import type { RequestClockPort } from "./ports.ts";
+import { SCORE_INPUT_STAGES, type ScoreInputStage } from "../domain/score_input_rights.ts";
 import { sessionDto, type SessionSnapshot } from "./session_service.ts";
 import { utcInstant, utcText } from "../domain/time.ts";
 
@@ -11,6 +12,10 @@ export interface OwnReportListRow {
   readonly reportOwner: string;
   readonly profileOwner: string;
   readonly examId: string | null;
+  /** Null means no verified stage mapping; never infer a phase from the exam or date. */
+  readonly stage: ScoreInputStage | null;
+  /** Null means the latest state or its current report could not be established. */
+  readonly isCurrent: boolean | null;
   readonly revision: number;
   readonly updatedAtUtc: bigint;
 }
@@ -107,7 +112,10 @@ export class OwnReportListService {
       if (
         !row || row.reportOwner !== owner || row.profileOwner !== owner || !ID.test(row.reportId) ||
         row.examId !== null && !ID.test(row.examId) ||
-        examId !== null && row.examId !== examId || !Number.isSafeInteger(row.revision) ||
+        examId !== null && row.examId !== examId ||
+        row.stage !== null && !SCORE_INPUT_STAGES.includes(row.stage) ||
+        row.isCurrent !== null && typeof row.isCurrent !== "boolean" ||
+        row.stage === null && row.isCurrent !== null || !Number.isSafeInteger(row.revision) ||
         row.revision < 1 ||
         typeof row.updatedAtUtc !== "bigint" || row.updatedAtUtc > asOfUtc ||
         seen.has(row.reportId) || previous && !before(row, previous)
@@ -134,6 +142,8 @@ export class OwnReportListService {
       items: page.map((row) => ({
         report_id: row.reportId,
         exam_id: row.examId,
+        stage: row.stage,
+        is_current: row.isCurrent,
         report_version: row.revision,
         updated_at: utcText(row.updatedAtUtc),
       })),

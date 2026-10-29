@@ -281,6 +281,7 @@ from check_project_consistency import (  # noqa: E402
     MEMBER_SHORTLIST_ROUTES, MEMBER_SHORTLIST_TESTS, member_shortlist_registration,
     registered_member_shortlist_ids,
     validate_read_view_extension, validate_score_input_policy, legacy_policy_fixture_inputs,
+    validate_score_input_native_guard,
 )
 from run_edge_tests import read_view_registration, operation_registration  # noqa: E402
 from check_edge_contract import EdgeFailure  # noqa: E402
@@ -302,9 +303,19 @@ def retained_legacy28_fixture(current):
     return spec
 
 
-def candidate():
+def candidate(current=None):
     """A source registration fixture, never a runtime implementation or approval."""
-    spec = retained_legacy28_fixture(json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8')))
+    if current is None:
+        current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+    spec = retained_legacy28_fixture(current)
+    if spec['backend_platform_contract'].get('stage_projection_source_extension') is not None:
+        if validate_score_input_native_guard(spec):
+            raise ValueError('Synthetic fixture cannot ignore invalid stage guard evidence')
+        # This invented three-route fixture does not claim current stage/native acceptance.
+        spec['backend_platform_contract'].pop('stage_projection_source_extension')
+        evidence = spec['score_input_policy_contract']['native_SQL_preparation_evidence']
+        evidence.pop('guard_current_source', None)
+        evidence.pop('guard', None)
     spec.pop('read_view_extension_contract', None)
     spec['operations'] = [r for r in spec['operations'] if r['id'] not in READ_VIEW_EXTENSION_ROUTES]
     files = spec['edge_harness']['files']
@@ -345,6 +356,23 @@ def candidate():
 
 
 class ReadViewExtensionContractTests(unittest.TestCase):
+    def test_legacy_read_fixture_isolates_stage_evidence_without_mutating_current(self):
+        current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        original=deepcopy(current);legacy=candidate(current)
+        self.assertEqual(current,original)
+        if current['backend_platform_contract'].get('stage_projection_source_extension') is not None:
+            self.assertNotIn('stage_projection_source_extension',legacy['backend_platform_contract'])
+            self.assertNotIn('guard',legacy['score_input_policy_contract']['native_SQL_preparation_evidence'])
+            self.assertNotIn('guard_current_source',legacy['score_input_policy_contract']['native_SQL_preparation_evidence'])
+
+    def test_legacy_read_fixture_cannot_hide_invalid_stage_evidence(self):
+        current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        if current['backend_platform_contract'].get('stage_projection_source_extension') is not None:
+            current['score_input_policy_contract']['native_SQL_preparation_evidence']['guard_current_source']['writes']=1
+            with self.assertRaisesRegex(ValueError,'invalid stage guard evidence'):candidate(current)
+        else:
+            self.assertEqual(validate_score_input_native_guard(current),[])
+
     def registry(self):
         registry=json.loads((ROOT/'src/jungsi_touch/application/public_response_schemas.json').read_text(encoding='utf-8'))
         current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
