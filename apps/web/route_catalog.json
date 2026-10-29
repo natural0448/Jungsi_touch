@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.133",
-  "source_sha256": "d7f8964b40b8a16f6bb5f58190e2dd6d38979dcccd203660a2fc828840217b4a",
+  "spec_version": "1.9.134",
+  "source_sha256": "3e9a2502b953d06b0a2c6b1e4d1788ddd9681cf25193bf042f18e530d11dd3b1",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4107,7 +4107,7 @@
         "REQ-30",
         "REQ-31"
       ],
-      "verification_status": "USER_DECISION_PREPARED_OWNER_REGISTRATION_AND_LIVE_ACCEPTANCE_NOT_RUN",
+      "verification_status": "COMMON_GUARD_CONTINUATION_SUPPORTED_SERVICE_CANDIDATE_SCOPED_PASS_OWNER_REGISTRATION_NOT_RUN",
       "screen_paths": [
         "/jeongsi/admissions/results",
         "/jeongsi/pro"
@@ -4141,7 +4141,7 @@
       "own_report_list": "is_current 키 부재인 구서버와 키가 있으나 전부 null인 신서버를 구분한다. 신판의 전체 null은 숨기지 않고 혼합 값은 false만 숨기며 정정 후 첫 페이지부터 재조회한다. Owner 수정 보고와 실제 배포 증거는 별도로 확인한다.",
       "professional_usage": "만료일 연장은 계산 비용·요청량 한도의 승인을 대신하지 않는다. 기존 개인 한도를 유지하는 전문가용 별도 계산 capacity와 정확한 승인 카탈로그·원자적 예약·다학생 순차 수용 증거를 준비한 뒤 활성화한다. units_per_offering을 근거 없이 상수 비용으로 낮추지 않는다.",
       "layer_ownership": "기간 승인과 기획/라우팅은 시스템팀, 표시·서비스 조합/DTO·BFF·최종 등록/화면은 Owner, DB·정본 writer·환산/누백 산출은 기존 사용자 주도 담당이다.",
-      "source_sync": "확인한 원격 develop 8a1a664f 및 Owner 수신 P1/report 서비스 v5의 해시를 재사용했다. 다른 PC의 v7·57파일 보존본은 이 PC 미수신이므로 최신 적용 완료로 표시하지 않는다.",
+      "source_sync": "검토 v7·57파일 보존본을 로컬 G에서 수신·해시 대조했고 개발팀이 기존 서비스 브랜치의 별도 작업공간에서 선별 반영·합성 검수했다. 구기획/화면/생성문서를 일괄 적용하지 않았다. 이 develop 변경은 공통 검사 지원이며 서비스 source 통합·Owner 등록/배포는 별도다.",
       "actual_registration": "NOT_RUN",
       "actual_deployment": "NOT_RUN",
       "actual_data_publication": "NOT_RUN"

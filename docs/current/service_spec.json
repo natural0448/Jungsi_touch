@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.133",
+  "version": "1.9.134",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7201,7 +7201,8 @@
         "tests/test_owner_system_professional_contract.py",
         "tests/test_committed_runner_progress.py",
         "tests/test_incident_recovery_harness.py",
-        "tests/test_edge_unit_aggregation.py"
+        "tests/test_edge_unit_aggregation.py",
+        "tests/test_stage_projection_guard_registration.py"
       ],
       "child_templates": [
         {
@@ -7670,7 +7671,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.133",
+        "contract_version": "1.9.134",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -7844,7 +7845,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.133",
+        "contract_version": "1.9.134",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8010,7 +8011,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.133",
+        "contract_version": "1.9.134",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8029,7 +8030,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.133",
+        "contract_version": "1.9.134",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8054,7 +8055,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.133",
+        "contract_version": "1.9.134",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8079,7 +8080,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.133",
+        "contract_version": "1.9.134",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -8147,6 +8148,18 @@
         "service_code_in_this_develop_change": false,
         "live_DB_DDL_or_deploy": false,
         "native_guard_evidence": "native record from848 remains immutable; exact registered v5 binds current source with native_API_empty_guard=NOT_RUN; no rewrite of historical success"
+      },
+      "stage_projection_guard_continuation": {
+        "status": "OPTIONAL_EXACT_SOURCE_ONLY_REGISTRATION_SUPPORTED",
+        "registration": "backend_platform_contract.stage_projection_source_extension",
+        "historical_native_guard": "IMMUTABLE_ORIGINAL_RECEIPT_AND_SOURCE_DIGEST",
+        "current_native_API_empty_guard": "NOT_RUN",
+        "foundation": 656,
+        "original_score_input_tests": 31,
+        "added_stage_tests": 4,
+        "rule": "Exact source pins and separated test paths/case names; false auth/rollout, integer writes0. Existing v5 recovery registration and stage extension cannot be combined implicitly. Normal hooks and exact SHA CI remain required.",
+        "service_source_in_this_change": false,
+        "DB_SQL_deployment": false
       }
     },
     "documentation_sync": {
@@ -8801,7 +8814,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "6f136b71010b2cdf9598a54b69ac193ceeb47fe40049565b9ef783b58f494496",
+            "source_sha256": "e98ac347e61ae890a2ce47e857e4c3ecc99e91563b59bf9b5aa858a06de6bf74",
             "symbols": [
               {
                 "kind": "class",
@@ -9173,6 +9186,12 @@
                 "kind": "function",
                 "name": "snapshot_changed_paths.parse_entries",
                 "signature": "def parse_entries(raw, *, index):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "stage_projection_guard_registration",
+                "signature": "def stage_projection_guard_registration(spec):",
                 "decorators": []
               },
               {
@@ -21894,6 +21913,18 @@
         "REQ-31"
       ],
       "summary": "사용자 결정: 2026시즌 이용·운영 연결·승인 만료 기준을 Asia/Seoul 12월31일 전체로 정하고 배타적 UTC 끝점을 결속한다. 선택된 입결 성적 칸 native null의 화면 문구는 3인이하미발표로 통일한다. 원문 사유/native 값·is_current 상태·기술 TTL·기존 권한/예산을 보존하고 Owner 등록/발행/실제 화면 수용 미실행을 구분한다. 다른 PC의 v86와 P1 서비스 v5 수신·후속 v7 미수신을 분리한다."
+    },
+    {
+      "date": "2026-10-29",
+      "requirements": [
+        "REQ-24",
+        "REQ-26",
+        "REQ-27",
+        "REQ-28",
+        "REQ-30",
+        "REQ-31"
+      ],
+      "summary": "1.9.134: 검토 v7/57 수신 사실 갱신. 기존 native 빈 rollout 검증을 불변 보존하고 새 단계 source/NOT_RUN을 분리하는 선택형 정확 등록을 공통 하네스에서 지원한다. 기존foundation656/입력권31·보안·정확CI·v5 분할을 유지하며 DB/서비스배포를 실행하지 않는다."
     }
   ],
   "overall_analysis_contract": {
@@ -26195,7 +26226,7 @@
         "REQ-30",
         "REQ-31"
       ],
-      "verification_status": "USER_DECISION_PREPARED_OWNER_REGISTRATION_AND_LIVE_ACCEPTANCE_NOT_RUN",
+      "verification_status": "COMMON_GUARD_CONTINUATION_SUPPORTED_SERVICE_CANDIDATE_SCOPED_PASS_OWNER_REGISTRATION_NOT_RUN",
       "screen_paths": [
         "/jeongsi/admissions/results",
         "/jeongsi/pro"
@@ -26229,7 +26260,7 @@
       "own_report_list": "is_current 키 부재인 구서버와 키가 있으나 전부 null인 신서버를 구분한다. 신판의 전체 null은 숨기지 않고 혼합 값은 false만 숨기며 정정 후 첫 페이지부터 재조회한다. Owner 수정 보고와 실제 배포 증거는 별도로 확인한다.",
       "professional_usage": "만료일 연장은 계산 비용·요청량 한도의 승인을 대신하지 않는다. 기존 개인 한도를 유지하는 전문가용 별도 계산 capacity와 정확한 승인 카탈로그·원자적 예약·다학생 순차 수용 증거를 준비한 뒤 활성화한다. units_per_offering을 근거 없이 상수 비용으로 낮추지 않는다.",
       "layer_ownership": "기간 승인과 기획/라우팅은 시스템팀, 표시·서비스 조합/DTO·BFF·최종 등록/화면은 Owner, DB·정본 writer·환산/누백 산출은 기존 사용자 주도 담당이다.",
-      "source_sync": "확인한 원격 develop 8a1a664f 및 Owner 수신 P1/report 서비스 v5의 해시를 재사용했다. 다른 PC의 v7·57파일 보존본은 이 PC 미수신이므로 최신 적용 완료로 표시하지 않는다.",
+      "source_sync": "검토 v7·57파일 보존본을 로컬 G에서 수신·해시 대조했고 개발팀이 기존 서비스 브랜치의 별도 작업공간에서 선별 반영·합성 검수했다. 구기획/화면/생성문서를 일괄 적용하지 않았다. 이 develop 변경은 공통 검사 지원이며 서비스 source 통합·Owner 등록/배포는 별도다.",
       "actual_registration": "NOT_RUN",
       "actual_deployment": "NOT_RUN",
       "actual_data_publication": "NOT_RUN"
