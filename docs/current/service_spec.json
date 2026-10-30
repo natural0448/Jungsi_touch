@@ -7220,6 +7220,45 @@
         "P1R27RequestInputs",
         "P1R27RequestAdmission"
       ]
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_catalog_descriptor_review.ts",
+      "layer": "application",
+      "status": "review_only_descriptor_rebind_synthetic_operational_NOT_RUN",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-08",
+        "REQ-13",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "CatalogDescriptorVerifier",
+        "CatalogDescriptorReviewClaims",
+        "CatalogDescriptorReview",
+        "catalogRootReviewEndKey",
+        "makeCatalogRootOnlyMemoryReader",
+        "prepareCatalogDescriptorReview"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_catalog_descriptor_review_test.ts",
+      "layer": "verification",
+      "status": "review_only_descriptor_rebind_synthetic_operational_NOT_RUN",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-08",
+        "REQ-13",
+        "REQ-20",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -16707,6 +16746,47 @@
                 "PAYLOAD_SCOPE_COMPAT_INPUTS",
                 "patchInstalled032PayloadScopeSources"
               ]
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_catalog_descriptor_review.ts",
+              "layer": "application",
+              "status": "review_only_descriptor_rebind_synthetic_operational_NOT_RUN",
+              "requirements": [
+                "REQ-01",
+                "REQ-03",
+                "REQ-08",
+                "REQ-13",
+                "REQ-20",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26"
+              ],
+              "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
+              "declared_exports": [
+                "CatalogDescriptorVerifier",
+                "CatalogDescriptorReviewClaims",
+                "CatalogDescriptorReview",
+                "catalogRootReviewEndKey",
+                "makeCatalogRootOnlyMemoryReader",
+                "prepareCatalogDescriptorReview"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_catalog_descriptor_review_test.ts",
+              "layer": "verification",
+              "status": "review_only_descriptor_rebind_synthetic_operational_NOT_RUN",
+              "requirements": [
+                "REQ-01",
+                "REQ-03",
+                "REQ-08",
+                "REQ-13",
+                "REQ-20",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26"
+              ],
+              "source_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
+              "declared_exports": []
             },
             {
               "path": "supabase/functions/_shared/current_public_catalog_runtime.ts",
@@ -199346,12 +199426,12 @@
     "production_ready": false,
     "adapter_candidate": {
       "status": "EXACT_SOURCE_ACCEPTED_EXACT_PUBLICATION_BINDING_OWNER_REGISTRATION_AND_HOSTED_INTAKE_PENDING",
-      "mechanism": "점수·정원 원값 없이 키·검색 메타데이터만 분할한다. 요청마다 최대101개 키를 선택해 같은 READ ONLY 트랜잭션에서 현재 DB를 일괄 JOIN한다. 기존 5초·객체 byte·페이지·요청 공유 예산과 fresh head 검사는 유지한다. 별도 root/lookup v3는 두 hash 버킷과 엄격한 가역 guide tuple2(학년도/학교 코드, 원래 PK 문자열) 및 기존 사전 tuple8 fallback으로 중복 주소만 제거한다. v1/v2 파서·행·byte 검사는 보존하며 v3 전체 lookup 논리 상한도 종전과 같다. namespace·schema·8종 guide command 상태가 어긋나면 첫503/후속409다.",
+      "mechanism": "점수·정원 원값 없이 키·검색 메타데이터만 분할한다. 요청마다 최대101개 키를 선택해 같은 READ ONLY 트랜잭션에서 현재 DB를 일괄 JOIN한다. 기존 5초·객체 byte·페이지·요청 공유 예산과 fresh head 검사는 유지한다. 별도 root/lookup v3는 두 hash 버킷과 엄격한 가역 guide tuple2(학년도/학교 코드, 원래 PK 문자열) 및 기존 사전 tuple8 fallback으로 중복 주소만 제거한다. v1/v2 파서·행·byte 검사는 보존하며 v3 전체 lookup 논리 상한도 종전과 같다. namespace·schema·8종 guide command 상태가 어긋나면 첫503/후속409다. 503 대응 descriptor 재결속 서비스 함수는 이전 descriptor와 V3 root의 head·metadata·guide·canonical coverage 지문을 대조해 HOLD 검토 후보만 만든다.",
       "approval_boundary": "전국 현재 정본 공급 범위는 사용자 채택 상태다. 이번 키 인덱스 v2의 정확 snapshot·coverage 검수·불변 객체와 publication/v2 결속 및 hosted 전환은 최종 운영 승인으로 분리한다. 준비·표본 실제 읽기는 DB 전체 값 인수나 브라우저 인수를 대신하지 않는다.",
       "compatibility": "설치032의 정확 runtime_composition/index 두 입력을 패치하고, P2 v2는 exam_pack/overall_analysis/native_data_provider 세 입력의 정확032 해시를 따로 확인한다. 새 domain 한 파일만 기존 exact/native_json/percentile/exam_pack/time 의존성에 연결한다. 최신 platform 전체를 반입하지 않고 consumer14·usage-v1·기존032 입력검증/프로필/역할/소유권을 보존한다. REQ27·006a·profile migration·usage-v2 활성화는 별도다.",
       "dto": "원래 DB offering_pk는 보존한다. 현재 DB 조회의 공개 offering_id는 실제 academic_year와 native PK의 가역 주소(year:PK)로 학년도 사이 중복을 구분하며 2027 계보를 만들지 않는다. PK 없는 관측은 기존 current-public-observation|year|canonical ID의 SHA 주소를 쓴다. guide tuple의 다섯째 키는 같은 공개 주소이며 버전은 별도 head/command 상태에 결속한다. 미검증 지표 정의/단위/출처는 pending_metadata이고 의미가 다른 충원인원·예비번호·컷을 임의 별칭으로 통합하지 않는다. 제어문자 이름은 기존 공개 필드의 null/빈 검색 처리와 동일하게 보류하고 원자료는 바꾸지 않는다.",
       "pagination_boundary": "요청당 최대12개 키 shard, shard당256개 키, 반환 최대100개+다음 판정1개다. 물리 읽기 상한에 닿으면 빈 결과에도 다음 cursor를 보존하며 전체 무결과로 표시하지 않는다. 이 제한과 UI 최대6페이지/600지표의 드문 검색어·부분 모집행 동작은 실제 인수 대기다. 12개 lookup shard를 넘는 새 ID 배치는 false404 대신 fail closed다.",
-      "remaining": "최종 exact source CI·전국 coverage 검토·객체 readback·승인 publication/binding 등록과 실제 P1/P3/보안·만료·예산/화면 인수. 현재 정본 수정·새 DB 스키마/writer/운영 배포는 이 소스 검증에 포함하지 않는다.",
+      "remaining": "최종 exact source CI·전국 coverage 검토·객체 readback·승인 publication/binding 등록과 실제 P1/P3/보안·만료·예산/화면 인수. 현재 정본 수정·새 DB 스키마/writer/운영 배포는 이 소스 검증에 포함하지 않는다. 재결속 후보의 caller 지문은 독립 승인·현재 시각/head/consumer·Storage readback·전체 coverage를 입증하지 않는다. 실제 등록과 화면 인수는 별도다.",
       "source_basis_commit": "ee226b68672cf0994ceafb6df96c06d8d2161c8e",
       "private_read_validation": {
         "status": "PASS_BOUNDED_CACHED100_DETAIL_ONLY",
@@ -199488,6 +199568,24 @@
       "source_engine_and_production_flags_changed": false,
       "existing_Google_Drive_and_Supabase_only": true,
       "new_cost_or_subscription_changes": false
+    },
+    "descriptor_rebind_review": {
+      "format": "jungsi.catalog-descriptor-rebind-review/v1",
+      "status": "HOLD_REVIEW_ONLY_NOT_ACTIVATED",
+      "source": "supabase/functions/_shared/current_public_catalog_descriptor_review.ts",
+      "test_source": "supabase/functions/_shared/current_public_catalog_descriptor_review_test.ts",
+      "snapshot_test_runner": "tests/test_catalog_descriptor_review.py",
+      "synthetic_test_count": 21,
+      "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
+      "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
+      "bridge_sha256": "c1038c4af39bc379bba49d8828248d07291c2553a0895efa8e3f15c574e48ba0",
+      "graph_manifest_path": "tests/catalog_descriptor_review_graph.json",
+      "graph_manifest_sha256": "8fc3047a0c58bce310de77ef078f229681e17fa60f19dd2a31ce10dae1587832",
+      "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
+      "approval_boundary": "All inputs are caller claims; runtime-shaped candidate JSON does not establish independent approval, current time/head/consumer binding, Storage permission/readback, shard contents or nationwide coverage. The actual verifier must be wired by a trusted composition.",
+      "expiration": "Previous descriptor validity window is preserved, not extended.",
+      "activation": "NOT_RUN",
+      "production_ready": false
     }
   },
   "P1_display_snapshot_contract": {

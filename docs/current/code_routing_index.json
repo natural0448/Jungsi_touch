@@ -7061,6 +7061,47 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/current_public_catalog_descriptor_review.ts",
+        "layer": "application",
+        "status": "review_only_descriptor_rebind_synthetic_operational_NOT_RUN",
+        "requirements": [
+          "REQ-01",
+          "REQ-03",
+          "REQ-08",
+          "REQ-13",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
+        "declared_exports": [
+          "CatalogDescriptorVerifier",
+          "CatalogDescriptorReviewClaims",
+          "CatalogDescriptorReview",
+          "catalogRootReviewEndKey",
+          "makeCatalogRootOnlyMemoryReader",
+          "prepareCatalogDescriptorReview"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_public_catalog_descriptor_review_test.ts",
+        "layer": "verification",
+        "status": "review_only_descriptor_rebind_synthetic_operational_NOT_RUN",
+        "requirements": [
+          "REQ-01",
+          "REQ-03",
+          "REQ-08",
+          "REQ-13",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
+        "declared_exports": []
+      },
+      {
         "path": "supabase/functions/_shared/current_public_catalog_runtime.ts",
         "layer": "infrastructure",
         "status": "candidate_national_provider_synthetic58_full_request_budget_candidate_hosted_NOT_RUN",
