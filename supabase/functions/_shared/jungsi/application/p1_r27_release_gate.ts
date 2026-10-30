@@ -4,6 +4,7 @@ import { assertP1R27DeliveryMode } from "./p1_r27_delivery_mode.ts";
 import { p1R27DeliveryDigest } from "./p1_r27_delivery_digest.ts";
 import { validateP1PreparedPartsGlobal } from "./p1_r27_global_parts.ts";
 import { bindR27ScopeIndex, type VerifiedR27ScopeIndex } from "./history_r27_scope_index.ts";
+import { assertSealedR27Publication } from "./p1_r27_composition.ts";
 import { detachedQualificationSnapshot } from "./history_field_qualification.ts";
 import type { SnapshotPart, SnapshotPublication } from "./history_snapshot.ts";
 import { nativeJsonText, type NativeObject } from "../domain/json_value.ts";
@@ -241,6 +242,7 @@ export async function prepareP1R27GlobalReceipt(
   coverageSha256: string,
   gzipParts: readonly Uint8Array[],
   rawLimits: P1R27GateLimits,
+  sealedCandidateIndex?: NativeObject,
 ): Promise<NativeObject> {
   const lim = checkedLimits(rawLimits),
     indexSha = digest(indexSha256),
@@ -290,6 +292,9 @@ export async function prepareP1R27GlobalReceipt(
     scopeSha256: p.scopeSha256,
     coverageSha256: coverageSha,
   });
+  // Both complete and partial receipts require the source-bound in-process
+  // candidate index; otherwise a partial body could masquerade as complete.
+  if (sealedCandidateIndex === undefined) fail();
   const selected = Object.freeze({ ...p, r27ScopeIndex: verified });
   let timer: ReturnType<typeof setTimeout> | undefined, timedOut = false;
   const deadline = new Promise<null>((resolve) =>
@@ -320,6 +325,7 @@ export async function prepareP1R27GlobalReceipt(
       maxPartBytes: lim.maxPartBytes,
       maxDepth: lim.maxDepth,
     });
+    assertSealedR27Publication(sealedCandidateIndex, index, decoded);
     const delivery = await p1R27DeliveryDigest(p);
     if (timedOut) fail();
     return Object.freeze({

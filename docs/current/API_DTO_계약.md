@@ -313,16 +313,17 @@ format: jungsi.sample-report/v1
 
 format: jungsi.history-snapshot-head/v1
 
-필드: format, status, snapshot_id, publication_sha256, source_head_sha256, generated_at, source_as_of, schema_version, normalization_rules_version, selection_rules_version, counts, delivery_mode, full, parts, expires_at.
+필드: format, status, snapshot_id, publication_sha256, source_head_sha256, generated_at, source_as_of, schema_version, normalization_rules_version, selection_rules_version, counts, delivery_mode, full, parts, expires_at, r27_scope_coverage.
 
 - Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.
 - Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.
+- Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required.
 
 ### history_snapshot_body
 
 format: jungsi.history-snapshot/v1
 
-필드: format, payload_id, part_id, rows.
+필드: format, payload_id, part_id, rows, r27_scope_coverage.
 
 - Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.
 - Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.
@@ -332,6 +333,7 @@ format: jungsi.history-snapshot/v1
 - q.qualification_receipt_sha256, review-only descriptor.receipt의 원본 bytes/SHA와 approvals는 같은 service core 바이트 SHA를 가리킨다. jungsi.p1-writer-field-qualification-receipt/v1 rich writer proof는 별도 감사 근거로 보존하고 core 지문을 참조한다. audit 파일을 core로 다시 라벨링하거나 양 형식을 느슨하게 함께 수용하지 않는다.
 - 기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다.
 - Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope.
+- Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required.
 
 ### own_report_list
 
@@ -434,7 +436,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=cb628e2ba6f2fe57a3740ca34628f2f3a0f69e04d3f15106d669c31473b29309 -->
+<!-- jungsi:generated spec_sha256=3bc32c8832f39705c261258d7f834acf2a7736331e67737b69ae15f46df18a0e -->
 
 
 ## 회원별 관심대학 JSON API

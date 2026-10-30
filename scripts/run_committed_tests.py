@@ -1,6 +1,6 @@
 """Run Python and required Edge checks from one retained Git snapshot. No deletion."""
 from __future__ import annotations
-import argparse,datetime,hashlib,json,os,subprocess,sys
+import argparse,datetime,hashlib,json,os,re,subprocess,sys
 from pathlib import Path
 from edge_source_scope import classify_sources
 from check_project_consistency import ROOT,GitSnapshot,validate_content,validate_changed_paths,snapshot_changed_paths,validate_snapshot_baseline,SPEC_PATH
@@ -123,30 +123,62 @@ def run_retained(workspace,manifest,destination,deno=None):
         if edge_sources:
             args=[sys.executable,"-B","-X","utf8",str(workspace/"scripts/run_edge_tests.py"),"--snapshot-root",str(workspace),"--source-manifest",str((destination/"source_manifest.json").resolve()),"--python",sys.executable,"--output-root",str((destination/"edge").resolve())]
             if deno:args+=["--deno",deno]
-            edge_process=subprocess.run(args,cwd=workspace,capture_output=True,env=env,timeout=300)
-            create(destination/"edge.stdout",edge_process.stdout);create(destination/"edge.stderr",edge_process.stderr)
-            p=destination/"edge/edge_run_receipt.json"
-            edge=json.loads(p.read_bytes()) if p.is_file() else dict(successful=False,missing_edge_result=True)
-            expected_hash=hashlib.sha256(encode(manifest)).hexdigest()
-            edge_ok=edge_process.returncode==0 and edge.get("successful") is True and edge.get("status")=="PASS" and edge.get("source_manifest_sha256")==expected_hash
-            if edge_ok:
-                try:
-                    recovery_required=selected_spec.get("backend_platform_contract",{}).get("native_edge_v5_extension") is not None
-                    auxiliary_required=selected_spec.get("backend_platform_contract",{}).get("service_aux_test_extension") is not None
-                    staged_required=selected_spec.get("backend_platform_contract",{}).get("service_staged_test_extension") is not None
-                    counts=summarize_edge_units(edge,selected_spec["edge_harness"]["unit_count"],recovery_required,auxiliary_required,staged_required)
-                    edge["total_tests"]=counts["total_tests"]
-                    edge["unit_counts"]=counts["by_suite"]
-                except (KeyError,TypeError,ValueError) as error:
-                    edge_ok=False
-                    edge["test_count_error"]=str(error)
-            edge["exit_code"]=edge_process.returncode
+            try:
+                edge_process=subprocess.run(args,cwd=workspace,capture_output=True,env=env,timeout=300)
+            except subprocess.TimeoutExpired as error:
+                create(destination/"edge.stdout",error.stdout or b"");create(destination/"edge.stderr",error.stderr or b"")
+                edge=dict(successful=False,status="EDGE_TIMEOUT",timeout=True,
+                    retained_results_directory=str(destination.resolve()))
+                edge_ok=False
+            else:
+                create(destination/"edge.stdout",edge_process.stdout);create(destination/"edge.stderr",edge_process.stderr)
+                p=destination/"edge/edge_run_receipt.json"
+                edge=json.loads(p.read_bytes()) if p.is_file() else dict(successful=False,missing_edge_result=True)
+                expected_hash=hashlib.sha256(encode(manifest)).hexdigest()
+                edge_ok=edge_process.returncode==0 and edge.get("successful") is True and edge.get("status")=="PASS" and edge.get("source_manifest_sha256")==expected_hash
+                if edge_ok:
+                    try:
+                        recovery_required=selected_spec.get("backend_platform_contract",{}).get("native_edge_v5_extension") is not None
+                        auxiliary_required=selected_spec.get("backend_platform_contract",{}).get("service_aux_test_extension") is not None
+                        staged_required=selected_spec.get("backend_platform_contract",{}).get("service_staged_test_extension") is not None
+                        counts=summarize_edge_units(edge,selected_spec["edge_harness"]["unit_count"],recovery_required,auxiliary_required,staged_required)
+                        edge["total_tests"]=counts["total_tests"]
+                        edge["unit_counts"]=counts["by_suite"]
+                    except (KeyError,TypeError,ValueError) as error:
+                        edge_ok=False
+                        edge["test_count_error"]=str(error)
+                edge["exit_code"]=edge_process.returncode
         else:
             edge=dict(status="NOT_APPLICABLE_NO_FOUNDATION_SOURCE",edge_execution=False,coexisting_edge_sources=len(scope["coexisting_bound"]),coverage="DEV010_FOUNDATION");edge_ok=True
         summary=dict(format="jungsi.combined-snapshot-tests/v1",successful=py_ok and edge_ok,python=python,edge=edge,source_manifest_sha256=hashlib.sha256(encode(manifest)).hexdigest())
     summary.update(snapshot=manifest["snapshot"],test_files=tests,snapshot_workspace=str(workspace),source_preserved=files_hashes(workspace,before)==before,production_ready=False)
     summary["successful"]=summary["successful"] and summary["source_preserved"]
     create(destination/"verification.json",encode(summary));return summary
+def retained_results_destination(destination,workspace,environ):
+    """Optionally retain all generated test results under an explicit safe external root."""
+    destination=Path(destination);workspace=Path(workspace).resolve(strict=True)
+    raw=environ.get("JUNGSI_RETAINED_RESULTS_ROOT")
+    if raw is None:
+        return destination/"results",{}
+    if not isinstance(raw,str) or not raw or not Path(raw).is_absolute():
+        raise ValueError("Retained results root must be an absolute directory")
+    root=Path(raw)
+    if any(p.is_symlink() or p.is_junction() for p in [root,*root.parents]):
+        raise ValueError("Retained results root cannot use links or junctions")
+    root=root.resolve(strict=True)
+    if not root.is_dir() or root.is_relative_to(workspace) or workspace.is_relative_to(root):
+        raise ValueError("Retained results root must be separate from the snapshot")
+    stamp=destination.name
+    if not re.fullmatch(r"[0-9]{8}T[0-9]{12}Z",stamp):
+        raise ValueError("Retained run identifier invalid")
+    run_root=root/("committed-results-"+stamp)
+    run_root.mkdir(exist_ok=False)
+    temporary=run_root/"tmp"
+    temporary.mkdir(exist_ok=False)
+    updates={key:str(temporary) for key in ("TEMP","TMP","TMPDIR")}
+    updates["DENO_DIR"]=str(run_root/"deno-cache")
+    return run_root/"results",updates
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__);choice=parser.add_mutually_exclusive_group()
     choice.add_argument("--staged",action="store_true");choice.add_argument("--revision")
@@ -169,13 +201,25 @@ def main():
     for name in snapshot.paths:create(workspace/name,snapshot.read(name))
     manifest=dict(format="jungsi.retained-snapshot/v1",snapshot=snapshot.revision or "index",files=files_hashes(workspace,snapshot.paths))
     create(destination/"source_manifest.json",encode(manifest))
-    argv=[sys.executable,"-B","-X","utf8",str(workspace/"scripts/run_committed_tests.py"),"--snapshot-root",str(workspace),"--source-manifest",str(destination/"source_manifest.json"),"--output-root",str(destination/"results")]
+    result_directory,temp_env=retained_results_destination(destination,workspace,os.environ)
+    argv=[sys.executable,"-B","-X","utf8",str(workspace/"scripts/run_committed_tests.py"),"--snapshot-root",str(workspace),"--source-manifest",str(destination/"source_manifest.json"),"--output-root",str(result_directory)]
     if args.deno:argv+=["--deno",args.deno]
-    selected=subprocess.run(argv,cwd=workspace,capture_output=True,env={**os.environ,"PYTHONDONTWRITEBYTECODE":"1"},timeout=RETAINED_RUNNER_TIMEOUT_SECONDS)
+    if temp_env:
+        create(destination/"retained_results_location.json",encode(dict(format="jungsi.retained-results-location/v1",directory=str(result_directory),source_manifest_sha256=hashlib.sha256(encode(manifest)).hexdigest())))
+    try:
+        selected=subprocess.run(argv,cwd=workspace,capture_output=True,env={**os.environ,"PYTHONDONTWRITEBYTECODE":"1",**temp_env},timeout=RETAINED_RUNNER_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired as error:
+        create(destination/"runner.stdout",error.stdout or b"");create(destination/"runner.stderr",error.stderr or b"")
+        summary=dict(format="jungsi.combined-snapshot-tests/v1",successful=False,status="RETAINED_RUNNER_TIMEOUT",
+            timeout=True,snapshot=manifest["snapshot"],source_manifest_sha256=hashlib.sha256(encode(manifest)).hexdigest(),
+            retained_results_directory=str(result_directory),production_ready=False)
+        create(destination/"runner_failure.json",encode(summary))
+        print(json.dumps(summary,ensure_ascii=False,indent=2));return 1
     create(destination/"runner.stdout",selected.stdout);create(destination/"runner.stderr",selected.stderr)
-    result_path=destination/"results/verification.json"
+    result_path=result_directory/"verification.json"
     summary=json.loads(result_path.read_bytes()) if result_path.is_file() else dict(successful=False,missing_combined_receipt=True)
     summary["successful"]=selected.returncode==0 and summary.get("successful") is True and summary.get("source_manifest_sha256")==hashlib.sha256(encode(manifest)).hexdigest()
+    if temp_env:summary["retained_results_directory"]=str(result_directory)
     if args.staged:snapshot_changed_paths(snapshot)
     print(json.dumps(summary,ensure_ascii=False,indent=2));return 0 if summary["successful"] else 1
 if __name__=="__main__":

@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.139",
-  "source_sha256": "cb628e2ba6f2fe57a3740ca34628f2f3a0f69e04d3f15106d669c31473b29309",
+  "source_sha256": "3bc32c8832f39705c261258d7f834acf2a7736331e67737b69ae15f46df18a0e",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2880,11 +2880,13 @@
           "delivery_mode",
           "full",
           "parts",
-          "expires_at"
+          "expires_at",
+          "r27_scope_coverage"
         ],
         "rules": [
           "Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.",
-          "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN."
+          "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.",
+          "Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required."
         ]
       },
       "history_snapshot_body": {
@@ -2893,7 +2895,8 @@
           "format",
           "payload_id",
           "part_id",
-          "rows"
+          "rows",
+          "r27_scope_coverage"
         ],
         "rules": [
           "Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.",
@@ -2903,7 +2906,8 @@
           "core subjects 각 항목의 정확7키는 field,subject,expected_raw_cell_sha256,expected_native_value_type,expected_raw_status,expected_raw_unit,expected_identity_review_sha256이다. field=final_additional_admission_rank, subject는 observation_id/academic_year/offering_pk/identity_variant_index 정확4키이며 string/pending_metadata/null 원형을 결속한다.",
           "q.qualification_receipt_sha256, review-only descriptor.receipt의 원본 bytes/SHA와 approvals는 같은 service core 바이트 SHA를 가리킨다. jungsi.p1-writer-field-qualification-receipt/v1 rich writer proof는 별도 감사 근거로 보존하고 core 지문을 참조한다. audit 파일을 core로 다시 라벨링하거나 양 형식을 느슨하게 함께 수용하지 않는다.",
           "기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다.",
-          "Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope."
+          "Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope.",
+          "Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required."
         ],
         "field_qualification_contract": {
           "format": "jungsi.history-field-qualification-read/v1",
@@ -3705,7 +3709,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-          "sha256": "d7a7fa6de8faefa56950269a90eb87c2e12cd070f436ef1e1c736be945911b55"
+          "sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
@@ -3842,15 +3846,15 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "03e17c4a184dccae1bb1f58613678b36811ef4a915d5b56dd4062d60840ad5f6"
+        "sha256": "b80a4e88c85dac7e9d99a559219c679ff92c28bde57af7a241083a31943a53fa"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "2d10e99574a83beebf095189bea2366fc46917b839f68f41ef74e188ebb9c23f"
+        "sha256": "fcdf9da27b639ccc8a31040bfcb5288bb202faf8700c079a13803468ccebb9f4"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "54a9d39a64fc59e87f464aafb10b848794955d08a8a6dda886900cd0ee4d35df"
+        "sha256": "c3081e00db095a73d8e26850f241e80d5f7999c94582139d4c2bd28aa9976361"
       },
       "groups": {
         "p1_review": {
@@ -3883,6 +3887,16 @@
             "tests/search503/test_current_public_key_index_immutable.synthetic.v2.mjs"
           ],
           "test_count": 48
+        },
+        "service_p1": {
+          "roots": [
+            "tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs",
+            "tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs",
+            "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs",
+            "tests/service_p1/test_p1_r27_request_admission.synthetic.ts",
+            "tests/service_p1/test_p1_r27_http_order.synthetic.ts"
+          ],
+          "test_count": 36
         }
       },
       "runtime_scope": "DENO_2_9_7_PORTABLE_CI_NOT_VERIFIED",
@@ -4020,7 +4034,7 @@
       "source_bindings": [
         {
           "path": "scripts/check_edge_contract.py",
-          "sha256": "c69bf25309c1fba649129ac7b2e02c6a663977f35793caaf064b2d0c183db3fe"
+          "sha256": "f700b177590b39e7b6812d8a71c4e1f047054267e9fdedc0076425db2a0e56d9"
         },
         {
           "path": "scripts/run_edge_tests.py",
@@ -4264,7 +4278,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "8b79e9a25c930cae178c16675e9050c2a7cdad7029202401918ea283d89109d6"
+            "sha256": "ead322cca8bdf3d15b098031f5588779041b2e38ebdbd06f6bbb9a0835a465a8"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -4316,7 +4330,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "a9034c4fb1854ea90bce7659b3a1dd35db5f735a6108c4d7cd9275344db27de0"
+            "sha256": "1db480c309ffb6609a0eccc0d04d17627e9571722239c4a3a944ec990b9dba50"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
@@ -4692,7 +4706,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "8b79e9a25c930cae178c16675e9050c2a7cdad7029202401918ea283d89109d6"
+            "sha256": "ead322cca8bdf3d15b098031f5588779041b2e38ebdbd06f6bbb9a0835a465a8"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
@@ -4756,11 +4770,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "a9034c4fb1854ea90bce7659b3a1dd35db5f735a6108c4d7cd9275344db27de0"
+            "sha256": "1db480c309ffb6609a0eccc0d04d17627e9571722239c4a3a944ec990b9dba50"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "d7a7fa6de8faefa56950269a90eb87c2e12cd070f436ef1e1c736be945911b55"
+            "sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
@@ -4780,7 +4794,7 @@
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",
-            "sha256": "62d8878e91b66f91569c9168dcc6fe6db1a1c4b29a523f0fda8eb726830f34c9"
+            "sha256": "e026d3cde979bc70b0b178dde743d2f257dc4d58ffd9cc11f0093f6f572798f9"
           },
           {
             "path": "tests/edge/test_member_json_results.ts",

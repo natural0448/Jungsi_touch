@@ -240,6 +240,7 @@ await test("duplicate_full_scope_contradicts_zero_duplicate_receipt", async () =
 });
 await test("old_2027_exact_scope_preserves_other_cells_and_updates_quota", async () => {
   const old=historical(2027,{original_pk:"SYN-PK",offering_id:"2027:SYN-PK"});
+  old.recruitment_count_with_stage={...old.recruitment_count_with_stage,status:"pending_value_missing",reason_code:"R27_OTHER_DATA_NOT_REVIEWED"};
   old.competition_ratio = { ...emptyCell("competition_ratio"), value: "SYN-PREV", status:"pending_metadata", reason_code:"SYN_PENDING" };
   const out=await (await fixture([sourceRow({department:"SYN PRIOR"})],[ [old] ])).build();
   const row=out.body.rows[0];
@@ -445,7 +446,7 @@ await test("v2_head_read_projection_and_gzip_pins_use_service", async () => {
   const index=await buildCandidateR27ScopeIndex(out,f.context), indexBytes=encode(index),indexSha=await hash(indexBytes);
   const scopePins={indexSha256:indexSha,publicationSha256:manifestSha,sourceHeadSha256:H,scopeSha256:SCOPE,coverageSha256:out.coverage_sha256};
   const limits={maxParts:4,maxRows:20,maxDecodedBytes:262144,maxPartBytes:131072,maxDepth:64,maxTotalGzipBytes:262144,maxPartGzipBytes:131072,maxManifestBytes:65536,maxIndexBytes:65536,timeoutMs:5000};
-  const global=await prepareP1R27GlobalReceipt(beforeGate,manifestBytes,indexBytes,indexSha,out.coverage_sha256,[Uint8Array.from(compressed)],limits),globalBytes=encode(global);
+  const global=await prepareP1R27GlobalReceipt(beforeGate,manifestBytes,indexBytes,indexSha,out.coverage_sha256,[Uint8Array.from(compressed)],limits,index),globalBytes=encode(global);
   const consumer={format:"jungsi.p1-r27-consumer-approval/v1",status:"approved",manifest_sha256:manifestSha,source_head_sha256:H,scope_sha256:SCOPE,
     consumer_build_sha256:"3".repeat(64),consumer_contract_sha256:"4".repeat(64),r27_scope_key_supported:true,expires_at_utc_micros:"9999999"};
   const consumerBytes=encode(consumer),headSha="5".repeat(64);

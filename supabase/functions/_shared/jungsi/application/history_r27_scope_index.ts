@@ -15,7 +15,17 @@ export interface R27ScopeIndexPins {
 export interface VerifiedR27ScopeIndex {
   readonly kind: "verified_r27_scope_index";
 }
-type IndexState = R27ScopeIndexPins & { readonly keys: ReadonlyMap<string, string> };
+export interface R27PartialCoverage {
+  readonly status: "partial";
+  readonly source_rows: number;
+  readonly included_rows: number;
+  readonly excluded_rows: number;
+  readonly review_pending_rows: number;
+}
+type IndexState = R27ScopeIndexPins & {
+  readonly keys: ReadonlyMap<string, string>;
+  readonly partialCoverage: R27PartialCoverage | null;
+};
 const states = new WeakMap<VerifiedR27ScopeIndex, IndexState>();
 function fail(): never {
   throw new AccessError("snapshot_invalid", 503);
@@ -85,19 +95,53 @@ export async function bindR27ScopeIndex(
   } catch {
     fail();
   }
+  // v1 is the existing complete index. v2 explicitly discloses a partial source scope.
+  const partial = !!parsed && typeof parsed === "object" && !Array.isArray(parsed) &&
+    Object.getOwnPropertyDescriptor(parsed, "format")?.value ===
+      "jungsi.r27-global-scope-index/v2";
   const index = object(parsed, [
     "format",
     "source_head_sha256",
     "scope_sha256",
     "coverage_sha256",
+    ...(partial
+      ? ["coverage_status", "source_rows", "included_rows", "excluded_rows", "review_pending_rows"]
+      : []),
     "entries",
   ]);
   if (
-    index.format !== "jungsi.r27-global-scope-index/v1" ||
+    index.format !==
+      (partial ? "jungsi.r27-global-scope-index/v2" : "jungsi.r27-global-scope-index/v1") ||
     index.source_head_sha256 !== pin.sourceHeadSha256 || index.scope_sha256 !== pin.scopeSha256 ||
     index.coverage_sha256 !== pin.coverageSha256 || !Array.isArray(index.entries) ||
     index.entries.length > 20_000
   ) fail();
+  let partialCoverage: R27PartialCoverage | null = null;
+  if (partial) {
+    const fields = [
+      "source_rows",
+      "included_rows",
+      "excluded_rows",
+      "review_pending_rows",
+    ] as const;
+    if (
+      index.coverage_status !== "partial" ||
+      fields.some((field) =>
+        typeof index[field] !== "number" || !Number.isSafeInteger(index[field]) ||
+        Number(index[field]) < 0 || Number(index[field]) > 20_000
+      ) || index.included_rows !== index.entries.length || index.included_rows === 0 ||
+      index.review_pending_rows === 0 ||
+      Number(index.included_rows) + Number(index.excluded_rows) +
+            Number(index.review_pending_rows) !== index.source_rows
+    ) fail();
+    partialCoverage = Object.freeze({
+      status: "partial",
+      source_rows: Number(index.source_rows),
+      included_rows: Number(index.included_rows),
+      excluded_rows: Number(index.excluded_rows),
+      review_pending_rows: Number(index.review_pending_rows),
+    });
+  }
   const keys = new Map<string, string>(), schoolsByPk = new Map<string, string>();
   for (const raw of index.entries) {
     const entry = object(raw, [
@@ -133,8 +177,22 @@ export async function bindR27ScopeIndex(
     keys.set(key, entry.row_sha256);
   }
   const context = Object.freeze({ kind: "verified_r27_scope_index" as const });
-  states.set(context, { ...pin, keys });
+  states.set(context, { ...pin, keys, partialCoverage });
   return context;
+}
+/** Returns the pinned, aggregate partial-scope notice; no held identities or private references. */
+export function readR27PartialCoverage(
+  context: VerifiedR27ScopeIndex | undefined,
+  publicationSha256: string,
+  sourceHeadSha256: string,
+  scopeSha256: string,
+): R27PartialCoverage | null {
+  const state = context && states.get(context);
+  if (
+    !state || state.publicationSha256 !== publicationSha256 ||
+    state.sourceHeadSha256 !== sourceHeadSha256 || state.scopeSha256 !== scopeSha256
+  ) fail();
+  return state.partialCoverage;
 }
 export async function assertR27ScopeIndex(
   context: VerifiedR27ScopeIndex | undefined,

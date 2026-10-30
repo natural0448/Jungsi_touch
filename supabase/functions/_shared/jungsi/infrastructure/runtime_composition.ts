@@ -233,6 +233,7 @@ export class NativeRuntimeApi {
     );
     let stage: ObservationStage = "entry";
     let selectedOperation: ApiOperationId | "health.ready" | null = null;
+    let closeP1R27: (() => void) | undefined;
     const mark = (next: ObservationStage) => {
       const before = stage;
       stage = next;
@@ -302,6 +303,7 @@ export class NativeRuntimeApi {
         this.artifactCache,
         request.headers.get("If-None-Match"),
       );
+      closeP1R27 = () => context.closeP1R27();
       if (pathname === "/health/ready" && request.method === "GET") {
         stage = "relay";
         await relay.verify(request.headers);
@@ -451,6 +453,11 @@ export class NativeRuntimeApi {
             return await (await context.memberShortlist(catalog)).execute(r);
           }
           if (READ_VIEW_OPERATION_IDS.some((id) => id === r.operation)) {
+            if (
+              r.operation === "history.snapshot.head" || r.operation === "history.snapshot.read"
+            ) {
+              await context.prepareP1R27(request, r);
+            }
             return await context.readView(r);
           }
           if (SCORE_POLICY_OPERATION_IDS.some((id) => id === r.operation)) {
@@ -526,6 +533,7 @@ export class NativeRuntimeApi {
           },
           current: async () => {
             await phase("runtime_final_current", () => context.assertCurrent());
+            context.assertP1R27Current();
           },
           deliver: async (r, result, id) => {
             if (
@@ -572,6 +580,9 @@ export class NativeRuntimeApi {
         },
       });
       const response = await handler(request);
+      // Handler error responses are already safe; keep their status, request ID and headers.
+      // Successful/redirect-class representations include conditional 304 and must be current.
+      if (response.status < 400) context.assertP1R27Current();
       searchCorrelation.finish(response);
       if (response.ok) stage = "complete";
       return await observeRuntimeResponse(
@@ -591,6 +602,10 @@ export class NativeRuntimeApi {
         stage,
         requestId,
       );
+    } finally {
+      try {
+        closeP1R27?.();
+      } catch { /* Never change the response during cleanup. */ }
     }
   };
   async close(): Promise<void> {

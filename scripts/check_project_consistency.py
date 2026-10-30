@@ -5014,6 +5014,11 @@ def edge_document_text(spec):
       "\n\n같은 Git snapshot에서 기존 Python 전체 검산 다음에 Deno check/lint/fmt·"+
       str(c["unit_count"])+" 단위검산·Python–Deno "+str(c["oracle_count"])+" 합성 대조를 실행한다. 로컬 훅은 명시한 Deno 경로를 사용한다. CI는 edge-runtime.lock.json의 공식 Deno "+c["runtime"]["deno"]+" 배포 파일을 scripts/bootstrap_edge_runtime.py로 새 보존 폴더에 공급하고 아카이브 해시·크기·실행 버전을 검증한다. 기존 폴더 덮어쓰기·삭제·시스템 설치·최신 버전 대체는 없다. 미설치·비호환·파서 실패·결과 누락은 실패이고 skip 성공은 없다. foundation 소스가 없는 공통 준비 단계는 NOT_APPLICABLE_NO_FOUNDATION_SOURCE이며 실행 검산 완료가 아니다. 실행기 공급 영수증도 서비스 단위검산·oracle 통과를 대신하지 않는다. 기존 공개 Edge 소스는 현재 문서 동기화 색인으로 결속하며 foundation 선언·graph·단위검산·oracle 결과에 포함하지 않는다.")
 
+SERVICE_CANDIDATE_SHARED_FIXTURES = {
+    "service_end": frozenset({"tests/edge/synthetic_exam_pack.ts"}),
+    "service_p1": frozenset(['tests/edge/fixture.ts', 'tests/edge/synthetic_api_contract.ts', 'tests/edge/synthetic_history_qualification.ts', 'tests/edge/synthetic_history_snapshot.ts', 'tests/edge/synthetic_runtime_binding.ts']),
+}
+
 SERVICE_CANDIDATE_GROUPS = {
     "p1_review": (["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs"], 80, ["node:assert/strict", "node:fs", "node:zlib"]),
     "service_end": (["tests/service_end/" + name for name in (
@@ -5021,6 +5026,7 @@ SERVICE_CANDIDATE_GROUPS = {
         "test_service_end_error_schema.synthetic.ts", "test_service_end_http.synthetic.ts",
         "test_service_end_official_display.synthetic.ts", "test_service_end_professional.synthetic.ts",
         "test_service_end_runtime.synthetic.ts", "test_official_display_final_expiry.synthetic.ts")], 125, []),
+    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts'], 36, ["node:assert/strict", "node:fs", "node:zlib"]),
     "search503": (["tests/search503/" + name for name in (
         "test_combined_search503_end.synthetic.v5.mjs", "test_search503_stream_limits.synthetic.v4.mjs",
         "test_search503_reader_unlock.synthetic.v3.mjs", "test_search503_final_error.synthetic.v2.mjs",
@@ -5030,6 +5036,7 @@ SERVICE_CANDIDATE_MANUAL_READS = {
     "p1_review": ["tests/p1_review/fixtures/p1_public_registry_799.reference.json",
                   "src/jungsi_touch/application/public_response_schemas.json"],
     "service_end": [], "search503": [],
+    "service_p1": ["src/jungsi_touch/application/public_response_schemas.json"],
 }
 SERVICE_CANDIDATE_LAYERS = {
     "domain": {"domain"}, "application": {"application", "domain"},
@@ -5134,9 +5141,12 @@ def service_candidate_suite_errors(paths, read, spec):
                         raise ValueError("generated route drift")
                 elif not re.fullmatch(r"[0-9a-f]{64}", digest) or hashlib.sha256(read(path)).hexdigest() != digest:
                     raise ValueError("closure source hash")
-                if path.startswith("tests/") and not path.startswith("tests/" + name + "/") and not (name == "service_end" and path == "tests/edge/synthetic_exam_pack.ts"):
+                if path.startswith("tests/") and not path.startswith("tests/" + name + "/") and path not in SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset()):
                     raise ValueError("test scope")
                 if path.startswith(prefixes): union_tests.add(path)
+            extra_fixtures = {p for p in sf if p.startswith("tests/") and not p.startswith("tests/" + name + "/")}
+            if extra_fixtures != set(SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset())):
+                raise ValueError("exact shared fixture set")
             if layers["files"] != {p: service_candidate_layer(p) for p in sorted(sf)} or layers["observed_layer_edges"] != [list(x) for x in sorted(layer_edges)]:
                 raise ValueError("layer registry")
         if union_tests != group_paths: raise ValueError("test inventory")

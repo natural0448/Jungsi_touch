@@ -87,6 +87,11 @@ type PagePin = { readonly sha256: string; readonly bytes: number; readonly rows:
 type Evidence = P1R27Pins & { readonly pages: readonly PagePin[]; readonly expectedRows: number };
 const bindings = new WeakMap<BoundP1R27Evidence, Evidence>();
 const candidateSeals = new WeakMap<P1R27Candidate, BoundP1R27Evidence>();
+const candidateIndexSeals = new WeakMap<NativeObject, {
+  readonly candidate: P1R27Candidate;
+  readonly evidence: BoundP1R27Evidence;
+  readonly partial: boolean;
+}>();
 /** Inputs were decoded and bounded inside this module before freezing. */
 function freezeTree(root: unknown): void {
   const pending: object[] = [], visited = new Set<object>();
@@ -286,8 +291,8 @@ function newCell(slot: typeof HISTORY_SNAPSHOT_SLOTS[number]): NativeObject {
   return {
     value: null,
     unit: null,
-    status: "not_published",
-    reason_code: "R27_OTHER_DATA_NOT_PUBLISHED",
+    status: "pending_value_missing",
+    reason_code: "R27_OTHER_DATA_NOT_REVIEWED",
     source_url: null,
     source_as_of: null,
     statistic_label: null,
@@ -297,11 +302,7 @@ function newCell(slot: typeof HISTORY_SNAPSHOT_SLOTS[number]): NativeObject {
     ...(slot === "alternate_cut" ? { entries: [], omitted_other_basis_count: 0 } : {}),
     ...(cut
       ? {
-        statistic_percent: slot === "final_50_percent_cut"
-          ? 50
-          : slot === "final_70_percent_cut"
-          ? 70
-          : 75,
+        statistic_percent: null,
         basis_code: null,
         basis_label: null,
         cohort_code: null,
@@ -318,6 +319,32 @@ const quotaFields = [
   "quota_condition_text",
   "quota_cell",
 ] as const;
+function priorRecruitmentIsSubstantive(cell: NativeObject): boolean {
+  // Only this generator's exact empty pending placeholder can be replaced freely.
+  // Earlier reasons, labels, cohorts and all provenance are otherwise preserved.
+  return nativeJsonText(cell, true) !==
+    nativeJsonText(newCell("recruitment_count_with_stage"), true);
+}
+function priorRecruitmentConflicts(previous: NativeObject, projected: NativeObject): boolean {
+  const prior = previous.recruitment_count_with_stage as NativeObject;
+  if (!priorRecruitmentIsSubstantive(prior)) return false;
+  const next = Object.hasOwn(projected, "quota_value") ? projected.quota_value : null;
+  const nextStage = Object.hasOwn(projected, "quota_stage") ? projected.quota_stage : null;
+  const conditional = typeof projected.quota_condition_text === "string" ||
+    projected.quota_literal_state === "conditional_transfer" ||
+    projected.quota_literal_state === "conditional_carryover";
+  const meta = projected.quota_cell && typeof projected.quota_cell === "object" &&
+      !Array.isArray(projected.quota_cell) && !(projected.quota_cell instanceof JsonFloat)
+    ? projected.quota_cell as NativeObject
+    : null;
+  const incompatibleUnit = prior.unit !== null && meta?.unit !== null &&
+    meta?.unit !== undefined && prior.unit !== meta.unit;
+  return nativeJsonText(prior.value, true) !== nativeJsonText(next, true) || conditional ||
+    incompatibleUnit ||
+    (prior.stage === "unspecified"
+      ? nextStage !== null && nextStage !== "unspecified"
+      : nextStage !== prior.stage);
+}
 function r27Row(
   projected: NativeObject,
   previous: NativeObject | undefined,
@@ -376,7 +403,12 @@ function r27Row(
     source_context: null,
     stage: "unspecified",
   };
-  row.recruitment_count_with_stage = recruitment;
+  // Preserve a substantive prior cell exactly when the new source agrees; conflicting
+  // or missing replacements are held before this function is called.
+  row.recruitment_count_with_stage = previous &&
+      priorRecruitmentIsSubstantive(previous.recruitment_count_with_stage as NativeObject)
+    ? previous.recruitment_count_with_stage
+    : recruitment;
   row.r27_source = {
     scope_key: key(row),
     scope_review: "eligible",
@@ -790,9 +822,10 @@ export async function composeP1R27Candidate(
         old[field] !== null && old[field] !== undefined && sourceRow[field] !== null &&
         sourceRow[field] !== undefined && old[field] !== sourceRow[field]
       );
+    const quotaConflict = sourceRow && priorRecruitmentConflicts(old, sourceRow);
     if (
-      heldKeys.has(k) || !sourceRow || metadataConflict || oldReview.status === "review_pending" ||
-      oldReview.status === "mapping_pending"
+      heldKeys.has(k) || !sourceRow || metadataConflict || quotaConflict ||
+      oldReview.status === "review_pending" || oldReview.status === "mapping_pending"
     ) {
       if (sourceRow) {
         used.add(k);
@@ -847,6 +880,138 @@ export async function composeP1R27Candidate(
   return sealedCandidate;
 }
 
+/**
+ * Candidate-only partial index. The independently evidenced source remains complete, while
+ * scope-unknown records are withheld and counted. This is not approval or publication.
+ * Previous publication rows and qualification rebinding must still be resolved.
+ */
+export async function buildCandidateR27PartialScopeIndex(
+  candidate: P1R27Candidate,
+  evidence: BoundP1R27Evidence,
+): Promise<NativeObject> {
+  const e = bindings.get(evidence);
+  need(
+    e && candidateSeals.get(candidate) === evidence && candidate.status === "HOLD_UNPUBLISHED" &&
+      candidate.source_head_sha256 === e.source_head_sha256 &&
+      candidate.coverage_sha256 === e.coverage_sha256 &&
+      candidate.previous_publication_sha256 === e.previous_publication_sha256 &&
+      candidate.held_rows.length > 0 && candidate.held_previous_rows.length === 0 &&
+      candidate.rebind_required.length === 0,
+    "candidate_partial_scope_unresolved",
+  );
+  const body = validateHistorySnapshotPayload(candidate.body, candidate.counts);
+  const rows = (body.rows as NativeObject[]).filter((row) =>
+    row.academic_year === 2027 && row.mapping_status === "mapped"
+  );
+  need(
+    rows.length > 0 &&
+      rows.length + candidate.excluded_count + candidate.held_rows.length === e.expectedRows,
+    "candidate_partial_scope_incomplete",
+  );
+  const entries: NativeObject[] = [];
+  for (const row of rows) {
+    entries.push({
+      academic_year: row.academic_year,
+      university_id: row.university_id,
+      original_pk: row.original_pk,
+      campus: row.campus,
+      admission_track: row.admission_track,
+      group: row.group,
+      row_sha256: await nativeJsonSha256(row),
+    });
+  }
+  const index: NativeObject = {
+    format: "jungsi.r27-global-scope-index/v2",
+    source_head_sha256: e.source_head_sha256,
+    scope_sha256: e.scope_sha256,
+    coverage_sha256: e.coverage_sha256,
+    coverage_status: "partial",
+    source_rows: e.expectedRows,
+    included_rows: rows.length,
+    excluded_rows: candidate.excluded_count,
+    review_pending_rows: candidate.held_rows.length,
+    entries,
+  };
+  freezeTree(index);
+  candidateIndexSeals.set(index, { candidate, evidence, partial: true });
+  return index;
+}
+function partialCoverageFromIndex(index: NativeObject): NativeObject {
+  return {
+    status: "partial",
+    source_rows: index.source_rows,
+    included_rows: index.included_rows,
+    excluded_rows: index.excluded_rows,
+    review_pending_rows: index.review_pending_rows,
+  };
+}
+/** Supply this notice in each compressed part as well as in the pinned head. */
+export function buildCandidateR27PartialBody(
+  candidate: P1R27Candidate,
+  evidence: BoundP1R27Evidence,
+  index: NativeObject,
+): NativeObject {
+  const seal = candidateIndexSeals.get(index);
+  need(
+    seal && seal.partial && seal.candidate === candidate && seal.evidence === evidence &&
+      candidateSeals.get(candidate) === evidence,
+    "candidate_partial_index_unsealed",
+  );
+  const body: NativeObject = {
+    ...candidate.body,
+    r27_scope_coverage: partialCoverageFromIndex(index),
+  };
+  const validated = validateHistorySnapshotPayload(body, candidate.counts);
+  freezeTree(validated);
+  return validated;
+}
+/**
+ * Publisher-side conservation proof. The index must be the in-process object
+ * sealed from this candidate, and every row of the to-be-published parts must
+ * be byte-semantically identical to its frozen, source-bound candidate.
+ * This is not independent source approval.
+ */
+export function assertSealedR27Publication(
+  index: NativeObject | undefined,
+  indexBytes: Uint8Array<ArrayBuffer>,
+  decodedParts: readonly Uint8Array<ArrayBuffer>[],
+): void {
+  const seal = index && candidateIndexSeals.get(index);
+  need(seal && candidateSeals.get(seal.candidate) === seal.evidence, "candidate_index_unsealed");
+  need(
+    nativeJsonText(parsed(indexBytes), true) === nativeJsonText(index, true) &&
+      seal.partial === (index!.format === "jungsi.r27-global-scope-index/v2"),
+    "candidate_index_changed",
+  );
+  const expectedRows = seal.candidate.body.rows as NativeObject[];
+  const coverage = seal.partial ? partialCoverageFromIndex(index!) : null;
+  let position = 0;
+  for (const bytes of decodedParts) {
+    const part = object(parsed(bytes), [
+      "format",
+      "payload_id",
+      "part_id",
+      "rows",
+      ...(seal.partial ? ["r27_scope_coverage"] : []),
+    ]);
+    need(
+      part.format === "jungsi.history-snapshot/v2" && Array.isArray(part.rows) &&
+        (!seal.partial ||
+          nativeJsonText(part.r27_scope_coverage, true) === nativeJsonText(coverage, true)),
+      "candidate_body_coverage",
+    );
+    for (const row of part.rows) {
+      need(
+        position < expectedRows.length &&
+          nativeJsonText(row, true) === nativeJsonText(expectedRows[position], true),
+        "candidate_rows_changed",
+      );
+      position++;
+    }
+  }
+  need(position === expectedRows.length, "candidate_rows_incomplete");
+}
+
 /** Candidate-only whole-publication index for subsequent independent review and pinning. */
 export async function buildCandidateR27ScopeIndex(
   candidate: P1R27Candidate,
@@ -879,11 +1044,14 @@ export async function buildCandidateR27ScopeIndex(
       row_sha256: await nativeJsonSha256(row),
     });
   }
-  return {
+  const index: NativeObject = {
     format: "jungsi.r27-global-scope-index/v1",
     source_head_sha256: e.source_head_sha256,
     scope_sha256: e.scope_sha256,
     coverage_sha256: e.coverage_sha256,
     entries,
   };
+  freezeTree(index);
+  candidateIndexSeals.set(index, { candidate, evidence, partial: false });
+  return index;
 }

@@ -229,13 +229,14 @@ export async function bindReviewedR27Scope(
   const grants: ScopeGrant[] = core.grants.map((raw) => {
     const g = exact(raw, ["source", "state", "evidence_sha256"]);
     need(
-      ["eligible_non_practical", "excluded_practical"].includes(String(g.state)) &&
+      typeof g.state === "string" &&
+        ["eligible_non_practical", "excluded_practical"].includes(g.state) &&
         typeof g.evidence_sha256 === "string" && HASH.test(g.evidence_sha256),
       "invalid_scope_grant",
     );
     return {
       source: identity(g.source, "2027"),
-      state: String(g.state),
+      state: g.state,
       evidence: g.evidence_sha256,
     };
   });
@@ -336,9 +337,8 @@ function project(
     ident = rowIdentity(source);
   const scope = exact(source.scope, ["state", "evidence_sha256"]);
   need(
-    ["eligible_non_practical", "excluded_practical", "review_pending"].includes(
-      String(scope.state),
-    ),
+    typeof scope.state === "string" &&
+      ["eligible_non_practical", "excluded_practical", "review_pending"].includes(scope.state),
     "invalid_scope",
   );
   need(

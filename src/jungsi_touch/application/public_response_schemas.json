@@ -5882,6 +5882,10 @@
         "expires_at": {
           "type": "string",
           "nullable": false
+        },
+        "r27_scope_coverage": {
+          "ref": "history_snapshot_r27_partial_coverage",
+          "nullable": false
         }
       },
       "required": [
@@ -5901,7 +5905,9 @@
         "parts",
         "expires_at"
       ],
-      "optional": []
+      "optional": [
+        "r27_scope_coverage"
+      ]
     },
     "history_snapshot_body": {
       "type": "object",
@@ -5930,6 +5936,10 @@
             "ref": "history_snapshot_row",
             "nullable": false
           }
+        },
+        "r27_scope_coverage": {
+          "ref": "history_snapshot_r27_partial_coverage",
+          "nullable": false
         }
       },
       "required": [
@@ -5938,7 +5948,9 @@
         "part_id",
         "rows"
       ],
-      "optional": []
+      "optional": [
+        "r27_scope_coverage"
+      ]
     },
     "own_report_list": {
       "type": "object",
@@ -6776,6 +6788,43 @@
         "history_link_status",
         "history_link_pending_years",
         "historical_links"
+      ],
+      "optional": []
+    },
+    "history_snapshot_r27_partial_coverage": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "partial"
+          ]
+        },
+        "source_rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "included_rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "excluded_rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "review_pending_rows": {
+          "type": "integer",
+          "nullable": false
+        }
+      },
+      "required": [
+        "status",
+        "source_rows",
+        "included_rows",
+        "excluded_rows",
+        "review_pending_rows"
       ],
       "optional": []
     }

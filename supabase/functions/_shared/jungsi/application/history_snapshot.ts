@@ -8,7 +8,11 @@ import { utcInstant, utcText } from "../domain/time.ts";
 import { hasAsciiControl } from "../domain/text.ts";
 import { calendarDate } from "../domain/time.ts";
 import { publicSourceUrl } from "./catalog.ts";
-import { assertR27ScopeIndex, type VerifiedR27ScopeIndex } from "./history_r27_scope_index.ts";
+import {
+  assertR27ScopeIndex,
+  readR27PartialCoverage,
+  type VerifiedR27ScopeIndex,
+} from "./history_r27_scope_index.ts";
 import { assertP1R27DeliveryMode } from "./p1_r27_delivery_mode.ts";
 import { assertP1R27ConsumerGate, type VerifiedP1R27ConsumerGate } from "./p1_r27_consumer_gate.ts";
 import {
@@ -439,7 +443,40 @@ export function validateHistorySnapshotPayload(
   raw: unknown,
   part: SnapshotPayloadCounts,
 ): NativeObject {
-  const body = exact(raw, ["format", "payload_id", "part_id", "rows"]);
+  const hasPartialCoverage = !!raw && typeof raw === "object" && !Array.isArray(raw) &&
+    Object.hasOwn(raw, "r27_scope_coverage");
+  const body = exact(raw, [
+    "format",
+    "payload_id",
+    "part_id",
+    "rows",
+    ...(hasPartialCoverage ? ["r27_scope_coverage"] : []),
+  ]);
+  if (hasPartialCoverage) {
+    if (body.format !== "jungsi.history-snapshot/v2") invalid();
+    const coverage = exact(body.r27_scope_coverage, [
+      "status",
+      "source_rows",
+      "included_rows",
+      "excluded_rows",
+      "review_pending_rows",
+    ]);
+    const fields = [
+      "source_rows",
+      "included_rows",
+      "excluded_rows",
+      "review_pending_rows",
+    ] as const;
+    if (
+      coverage.status !== "partial" ||
+      fields.some((field) =>
+        typeof coverage[field] !== "number" || !Number.isSafeInteger(coverage[field]) ||
+        Number(coverage[field]) < 0 || Number(coverage[field]) > 20_000
+      ) || coverage.included_rows === 0 || coverage.review_pending_rows === 0 ||
+      Number(coverage.included_rows) + Number(coverage.excluded_rows) +
+            Number(coverage.review_pending_rows) !== coverage.source_rows
+    ) invalid();
+  }
   if (
     !["jungsi.history-snapshot/v1", "jungsi.history-snapshot/v2"].includes(body.format as string) ||
     body.payload_id !== part.payloadId ||
@@ -514,6 +551,9 @@ export function validateHistorySnapshotPayload(
       identity = row.observation_key;
       pending++;
     } else invalid();
+    // Unmapped 2027 rows have no independently verified R27 scope index entry;
+    // emitting them would bypass practical-exclusion review.
+    if (version2 && row.academic_year === 2027 && row.mapping_status !== "mapped") invalid();
     if (version2 && row.academic_year === 2027 && row.mapping_status === "mapped") {
       const pk = String(row.original_pk), school = String(row.university_id);
       const previousSchool = v2SchoolsByPk.get(pk);
@@ -611,13 +651,27 @@ export async function validateQualifiedHistorySnapshotPayloadForPublisher(
     const result = validateHistorySnapshotPayload(value, part);
     if (publication && result.format !== dataProperty(publication, "schemaVersion")) invalid();
     if (publication && result.format === "jungsi.history-snapshot/v2") {
+      const index = dataProperty(publication, "r27ScopeIndex", true) as
+        | VerifiedR27ScopeIndex
+        | undefined;
+      const publicationSha = dataProperty(publication, "publicationSha256") as string;
+      const sourceHeadSha = dataProperty(publication, "sourceHeadSha256") as string;
+      const scopeSha = dataProperty(publication, "scopeSha256") as string;
       await assertR27ScopeIndex(
-        dataProperty(publication, "r27ScopeIndex", true) as VerifiedR27ScopeIndex | undefined,
-        dataProperty(publication, "publicationSha256") as string,
-        dataProperty(publication, "sourceHeadSha256") as string,
-        dataProperty(publication, "scopeSha256") as string,
+        index,
+        publicationSha,
+        sourceHeadSha,
+        scopeSha,
         result.rows as NativeObject[],
       );
+      const partial = readR27PartialCoverage(index, publicationSha, sourceHeadSha, scopeSha);
+      if (
+        partial === null && Object.hasOwn(result, "r27_scope_coverage") ||
+        partial !== null && (
+            !Object.hasOwn(result, "r27_scope_coverage") ||
+            nativeJsonText(result.r27_scope_coverage, true) !== nativeJsonText(partial, true)
+          )
+      ) invalid();
     }
     assertHistoricalReferenceBody(
       result,
@@ -650,6 +704,9 @@ export async function validateQualifiedHistorySnapshotPayloadForPublisher(
     "payload_id",
     "part_id",
     "rows",
+    ...(raw && typeof raw === "object" && Object.hasOwn(raw, "r27_scope_coverage")
+      ? ["r27_scope_coverage"]
+      : []),
   ]);
   const rows = dataProperty(input, "rows");
   if (
@@ -660,6 +717,13 @@ export async function validateQualifiedHistorySnapshotPayloadForPublisher(
     format: dataProperty(input, "format"),
     payload_id: dataProperty(input, "payload_id"),
     part_id: dataProperty(input, "part_id"),
+    ...(Object.hasOwn(input, "r27_scope_coverage")
+      ? {
+        r27_scope_coverage: detachedQualificationSnapshot(
+          dataProperty(input, "r27_scope_coverage"),
+        ),
+      }
+      : {}),
   };
   const qualified: { index: number; row: NativeObject; rank: NativeObject }[] = [];
   const legacyRows: NativeObject[] = [];
@@ -794,6 +858,14 @@ export class HistorySnapshotService {
   ): Promise<NativeObject> {
     if (Object.keys(query).length) throw new AccessError("invalid_request", 422);
     const p = await this.current(session);
+    const partialCoverage = p.schemaVersion === "jungsi.history-snapshot/v2"
+      ? readR27PartialCoverage(
+        p.r27ScopeIndex,
+        p.publicationSha256,
+        p.sourceHeadSha256,
+        p.scopeSha256,
+      )
+      : null;
     const result: NativeObject = {
       format: "jungsi.history-snapshot-head/v1",
       status: "approved",
@@ -810,6 +882,7 @@ export class HistorySnapshotService {
       full: p.full ? publicPart(p.full) : null,
       parts: p.parts.map(publicPart),
       expires_at: utcText(p.expiresAtUtc),
+      ...(partialCoverage ? { r27_scope_coverage: { ...partialCoverage } } : {}),
     };
     await this.finish(session, p);
     return result;

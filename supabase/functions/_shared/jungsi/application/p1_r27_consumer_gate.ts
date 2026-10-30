@@ -2,7 +2,11 @@
 import { AccessError } from "./access.ts";
 import { assertP1R27DeliveryMode } from "./p1_r27_delivery_mode.ts";
 import { p1R27DeliveryDigest } from "./p1_r27_delivery_digest.ts";
-import { bindR27ScopeIndex, type VerifiedR27ScopeIndex } from "./history_r27_scope_index.ts";
+import {
+  bindR27ScopeIndex,
+  readR27PartialCoverage,
+  type VerifiedR27ScopeIndex,
+} from "./history_r27_scope_index.ts";
 import { detachedQualificationSnapshot } from "./history_field_qualification.ts";
 import type { SnapshotPublication } from "./history_snapshot.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
@@ -194,6 +198,21 @@ export async function bindP1R27ConsumerGate(
     g.delivery_sha256 !== await p1R27DeliveryDigest(p) || g.parts_checked !== expectedParts ||
     g.rows_checked !== p.counts.rows
   ) fail();
+  const scopeIndex = await bindR27ScopeIndex(idx, {
+    indexSha256: pins.indexSha256,
+    publicationSha256: pins.manifestSha256,
+    sourceHeadSha256: pins.sourceHeadSha256,
+    scopeSha256: pins.scopeSha256,
+    coverageSha256: pins.coverageSha256,
+  });
+  const partial = readR27PartialCoverage(
+    scopeIndex,
+    pins.manifestSha256,
+    pins.sourceHeadSha256,
+    pins.scopeSha256,
+  );
+  // A consumer that understands v2 scope keys is not necessarily able to disclose
+  // a partial scope. Partial delivery requires an independently pinned v2 receipt.
   const c = exact(parsed(consumer, 32), [
     "format",
     "status",
@@ -203,26 +222,23 @@ export async function bindP1R27ConsumerGate(
     "consumer_build_sha256",
     "consumer_contract_sha256",
     "r27_scope_key_supported",
+    ...(partial ? ["r27_partial_coverage_supported"] : []),
     "expires_at_utc_micros",
   ]);
   if (
-    c.format !== "jungsi.p1-r27-consumer-approval/v1" || c.status !== "approved" ||
+    c.format !==
+      (partial ? "jungsi.p1-r27-consumer-approval/v2" : "jungsi.p1-r27-consumer-approval/v1") ||
+    c.status !== "approved" ||
     c.manifest_sha256 !== pins.manifestSha256 || c.source_head_sha256 !== pins.sourceHeadSha256 ||
     c.scope_sha256 !== pins.scopeSha256 ||
     c.consumer_build_sha256 !== pins.consumerBuildSha256 ||
     c.consumer_contract_sha256 !== pins.consumerContractSha256 ||
     c.r27_scope_key_supported !== true ||
+    (partial !== null && c.r27_partial_coverage_supported !== true) ||
     typeof c.expires_at_utc_micros !== "string" ||
     !/^[1-9][0-9]{0,19}$/.test(c.expires_at_utc_micros) ||
     (BigInt(c.expires_at_utc_micros) <= nowUtc || BigInt(c.expires_at_utc_micros) < p.expiresAtUtc)
   ) fail();
-  const scopeIndex = await bindR27ScopeIndex(idx, {
-    indexSha256: pins.indexSha256,
-    publicationSha256: pins.manifestSha256,
-    sourceHeadSha256: pins.sourceHeadSha256,
-    scopeSha256: pins.scopeSha256,
-    coverageSha256: pins.coverageSha256,
-  });
   const gate = Object.freeze({ kind: "verified_p1_r27_consumer_gate" as const });
   gates.set(gate, {
     manifestSha256: pins.manifestSha256,

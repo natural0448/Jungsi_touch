@@ -505,7 +505,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "c69bf25309c1fba649129ac7b2e02c6a663977f35793caaf064b2d0c183db3fe",
+      "source_sha256": "f700b177590b39e7b6812d8a71c4e1f047054267e9fdedc0076425db2a0e56d9",
       "symbols": [
         {
           "kind": "class",
@@ -670,7 +670,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "3e703e98c4cf29e7c6b653b0c1d1b9370c915e5b199ab87e879485efcade3060",
+      "source_sha256": "4908dd5eb4ace1b6c9059dfdfa743166686b9d1a73933313dc3fce6ebb3204af",
       "symbols": [
         {
           "kind": "class",
@@ -1660,7 +1660,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "c68f1c9a18951522dc9641f378869e58b0509687013766b5c3664b9092b53e8a",
+      "source_sha256": "165fd61793123d48149067e3833d5470788b125788594043f427803d97f496b2",
       "symbols": [
         {
           "kind": "function",
@@ -1684,6 +1684,12 @@
           "kind": "function",
           "name": "main",
           "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "retained_results_destination",
+          "signature": "def retained_results_destination(destination, workspace, environ):",
           "decorators": []
         },
         {
@@ -7758,13 +7764,15 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "e702079f5d39364fbebeaf07b0e75c5601dfdbad32f8648b2e6d8e720027bc40",
+        "source_sha256": "3407c415a68422a5f2f62967a0826cf8d1792ed1d0555e02e3d8dd9a570940e9",
         "declared_exports": [
           "R27ScopeIndexPins",
           "VerifiedR27ScopeIndex",
           "bindR27ScopeIndex",
           "assertR27ScopeIndex",
-          "assertCompleteR27ScopeIndex"
+          "assertCompleteR27ScopeIndex",
+          "R27PartialCoverage",
+          "readR27PartialCoverage"
         ]
       },
       {
@@ -7799,7 +7807,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "6ea0fd51bc16088d2217fbac05bed984b77cf9d2d4e03e650b78f2f1ea6000bb",
+        "source_sha256": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30",
         "declared_exports": [
           "HISTORY_PUBLICATION_STATUSES",
           "HISTORY_SNAPSHOT_SLOTS",
@@ -8013,7 +8021,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "67ccaab95e6463ca772bc4ec5a4d3cf66b74f5f9bbd049ce79f6688b90db27f0",
+        "source_sha256": "fe3f8ca958caf1830d4d6653e4acd7a2565664caff0864d74c5375414cb7131e",
         "declared_exports": [
           "P1R27Pins",
           "BoundP1R27Evidence",
@@ -8023,7 +8031,10 @@
           "P1R27Limits",
           "P1R27Candidate",
           "composeP1R27Candidate",
-          "buildCandidateR27ScopeIndex"
+          "buildCandidateR27ScopeIndex",
+          "buildCandidateR27PartialScopeIndex",
+          "buildCandidateR27PartialBody",
+          "assertSealedR27Publication"
         ]
       },
       {
@@ -8037,7 +8048,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "bc0d7b8205eace2ae2453103c3ad8ef59c4df2c39aa695cb3d767413c1eb14fd",
+        "source_sha256": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
         "declared_exports": [
           "VerifiedP1R27ConsumerGate",
           "P1R27ConsumerPins",
@@ -8104,7 +8115,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "650e15612e10c88a0eaa0f073eee88597d5835437c2d0fe4759cf9bdcf8e8d84",
+        "source_sha256": "c7affb470d2d0814779acdba6ad1e56731a15e0e9dc3d30570ffc1d2bb289f04",
         "declared_exports": [
           "P1R27GateLimits",
           "prepareP1R27GlobalReceipt"
@@ -8411,7 +8422,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "b02c625cb794973357fea321421c814e5bd28ff52473a849587eb1e49ab39c2c",
+        "source_sha256": "4cb7dbcb39185245b764ef07fedd57f1a2713bf56a49c04abb1394a66c7620cc",
         "declared_exports": [
           "ReviewedR27Links",
           "R27LinkPin",
@@ -9579,6 +9590,22 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/p1_r27_request_admission.ts",
+        "layer": "data_infrastructure",
+        "status": "read_view_source_candidate_native_activation_NOT_RUN",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "2642661bbf6779c502f4692038378c68828937e2f7d9bb2102e158e0911ce632",
+        "declared_exports": [
+          "P1R27RequestInputs",
+          "P1R27RequestAdmission"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts",
         "layer": "data_infrastructure",
         "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
@@ -9883,7 +9910,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "a9034c4fb1854ea90bce7659b3a1dd35db5f735a6108c4d7cd9275344db27de0",
+        "source_sha256": "1db480c309ffb6609a0eccc0d04d17627e9571722239c4a3a944ec990b9dba50",
         "declared_exports": [
           "NativeRuntimeApi",
           "RuntimeComposition",
@@ -9926,7 +9953,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "d7a7fa6de8faefa56950269a90eb87c2e12cd070f436ef1e1c736be945911b55",
+        "source_sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f",
         "declared_exports": [
           "NativeRuntimeRequest"
         ]

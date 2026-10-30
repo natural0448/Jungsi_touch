@@ -180,7 +180,7 @@ async function material(n=2){
   generated_at:"2026-10-15T00:00:00Z",source_as_of:"2026-10-14",schema_version:"jungsi.history-snapshot/v2",normalization_rules_version:"SYN-NORM",normalization_rules_sha256:"1".repeat(64),selection_rules_version:"SYN-SELECT",selection_rules_sha256:"2".repeat(64),counts,full:null,parts:parts.map(partWire)};
  const manifestBytes=encode(manifest),manifestSha=await hash(manifestBytes);
  const publication={snapshotId:"SYN-V2",publicationSha256:manifestSha,sourceHeadSha256:H,scopeSha256:SCOPE,generatedAt:manifest.generated_at,sourceAsOf:manifest.source_as_of,schemaVersion:manifest.schema_version,normalizationRulesVersion:"SYN-NORM",selectionRulesVersion:"SYN-SELECT",expiresAtUtc:EXP,counts,full:null,parts};
- const global=await prepareP1R27GlobalReceipt(publication,manifestBytes,indexBytes,indexSha,out.coverage_sha256,gzips,LIMITS),globalBytes=encode(global);
+ const global=await prepareP1R27GlobalReceipt(publication,manifestBytes,indexBytes,indexSha,out.coverage_sha256,gzips,LIMITS,index),globalBytes=encode(global);
  const consumer={format:"jungsi.p1-r27-consumer-approval/v1",status:"approved",manifest_sha256:manifestSha,source_head_sha256:H,scope_sha256:SCOPE,consumer_build_sha256:"3".repeat(64),consumer_contract_sha256:"4".repeat(64),r27_scope_key_supported:true,expires_at_utc_micros:String(EXP)};
  const consumerBytes=encode(consumer),pin=async(key,bytes)=>({object_key:PREFIX+key,bytes:bytes.length,sha256:await hash(bytes)});
  const review={format:"jungsi.history-snapshot-independent-review/v1",status:"approved",lineage:"SYN-LINEAGE",manifest_sha256:manifestSha,source_head_sha256:H,scope_sha256:SCOPE,normalization_rules_sha256:"1".repeat(64),selection_rules_sha256:"2".repeat(64),publisher_ref:"SYN-OWNER",reviewer_ref:"SYN-REVIEWER",
@@ -210,7 +210,7 @@ await test("publisher binds all compressed parts and consumer binds exact truste
  for(let i=0;i<x.parts.length;i++)await assert.doesNotReject(validateQualifiedHistorySnapshotPayload(x.bodies[i],bound.parts[i],bound));
 });
 await test("publisher rejects missing changed swapped gzip and forged manifest or index",async()=>{
- const x=await material(),run=(p,m,idx,z)=>prepareP1R27GlobalReceipt(p,m,idx,x.indexSha,x.out.coverage_sha256,z,LIMITS);
+ const x=await material(),run=(p,m,idx,z)=>prepareP1R27GlobalReceipt(p,m,idx,x.indexSha,x.out.coverage_sha256,z,LIMITS,x.index);
  await assert.rejects(run(x.publication,x.manifestBytes,x.indexBytes,x.gzips.slice(0,1)));
  const bad=x.gzips.map(v=>Uint8Array.from(v));bad[0][0]^=1;await assert.rejects(run(x.publication,x.manifestBytes,x.indexBytes,bad));
  await assert.rejects(run(x.publication,x.manifestBytes,x.indexBytes,[x.gzips[1],x.gzips[0]]));
@@ -218,8 +218,8 @@ await test("publisher rejects missing changed swapped gzip and forged manifest o
  const changedIndex=Uint8Array.from(x.indexBytes);changedIndex[0]^=1;await assert.rejects(run(x.publication,x.manifestBytes,changedIndex,x.gzips));
 });
 await test("publisher rejects full plus parts and altered manifest descriptor",async()=>{
- const x=await material();await assert.rejects(prepareP1R27GlobalReceipt({...x.publication,full:{...x.parts[0],partId:null}},x.manifestBytes,x.indexBytes,x.indexSha,x.out.coverage_sha256,x.gzips,LIMITS));
- await assert.rejects(prepareP1R27GlobalReceipt({...x.publication,parts:[{...x.parts[0],objectKey:PREFIX+"other"},x.parts[1]]},x.manifestBytes,x.indexBytes,x.indexSha,x.out.coverage_sha256,x.gzips,LIMITS));
+ const x=await material();await assert.rejects(prepareP1R27GlobalReceipt({...x.publication,full:{...x.parts[0],partId:null}},x.manifestBytes,x.indexBytes,x.indexSha,x.out.coverage_sha256,x.gzips,LIMITS,x.index));
+ await assert.rejects(prepareP1R27GlobalReceipt({...x.publication,parts:[{...x.parts[0],objectKey:PREFIX+"other"},x.parts[1]]},x.manifestBytes,x.indexBytes,x.indexSha,x.out.coverage_sha256,x.gzips,LIMITS,x.index));
 });
 await test("consumer refuses missing or changed head, receipts, build and expired acceptance",async()=>{
  const x=await material(),bind=(p,g,c,t,h= x.headSha,now=NOW)=>bindP1R27ConsumerGate(p,x.indexBytes,g,c,t,h,now);

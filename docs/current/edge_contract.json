@@ -4,7 +4,7 @@
     "files": {
       "src/jungsi_touch/application/public_response_schemas.json": {
         "layer": "application",
-        "sha256": "8b79e9a25c930cae178c16675e9050c2a7cdad7029202401918ea283d89109d6"
+        "sha256": "ead322cca8bdf3d15b098031f5588779041b2e38ebdbd06f6bbb9a0835a465a8"
       },
       "supabase/functions/_shared/current_public_catalog.ts": {
         "layer": "application",
@@ -13238,7 +13238,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "e702079f5d39364fbebeaf07b0e75c5601dfdbad32f8648b2e6d8e720027bc40",
+        "source_sha256": "3407c415a68422a5f2f62967a0826cf8d1792ed1d0555e02e3d8dd9a570940e9",
         "symbols": [
           {
             "declarations": [
@@ -13328,6 +13328,67 @@
               {
                 "declarationKind": "export",
                 "def": {
+                  "properties": [
+                    {
+                      "name": "status",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "literal",
+                        "repr": "partial",
+                        "value": {
+                          "kind": "string",
+                          "string": "partial"
+                        }
+                      }
+                    },
+                    {
+                      "name": "source_rows",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "name": "included_rows",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "name": "excluded_rows",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "name": "review_pending_rows",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "R27PartialCoverage"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
                   "hasBody": true,
                   "isAsync": true,
                   "parameter_source": "(\n  rawBytes: Uint8Array,\n  trusted: R27ScopeIndexPins,\n)",
@@ -13384,6 +13445,96 @@
               }
             ],
             "name": "bindR27ScopeIndex"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  context: VerifiedR27ScopeIndex | undefined,\n  publicationSha256: string,\n  sourceHeadSha256: string,\n  scopeSha256: string,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "context",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "VerifiedR27ScopeIndex",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "VerifiedR27ScopeIndex"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "undefined",
+                            "value": "undefined"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "publicationSha256",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "sourceHeadSha256",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "scopeSha256",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "R27PartialCoverage",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "R27PartialCoverage"
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "readR27PartialCoverage"
           },
           {
             "declarations": [
@@ -13689,6 +13840,30 @@
                                   ]
                                 }
                               }
+                            },
+                            {
+                              "name": "partialCoverage",
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "R27PartialCoverage",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "R27PartialCoverage"
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
                             }
                           ]
                         }
@@ -13947,7 +14122,9 @@
         "VerifiedR27ScopeIndex",
         "bindR27ScopeIndex",
         "assertR27ScopeIndex",
-        "assertCompleteR27ScopeIndex"
+        "assertCompleteR27ScopeIndex",
+        "R27PartialCoverage",
+        "readR27PartialCoverage"
       ]
     },
     "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": {
@@ -14619,6 +14796,11 @@
             "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
           },
           {
+            "importedName": "readR27PartialCoverage",
+            "originalName": "readR27PartialCoverage",
+            "src": "supabase/functions/_shared/jungsi/application/history_r27_scope_index.ts"
+          },
+          {
             "importedName": "sessionDto",
             "originalName": "sessionDto",
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
@@ -14644,7 +14826,7 @@
             "src": "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts"
           }
         ],
-        "source_sha256": "6ea0fd51bc16088d2217fbac05bed984b77cf9d2d4e03e650b78f2f1ea6000bb",
+        "source_sha256": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30",
         "symbols": [
           {
             "declarations": [
@@ -24960,7 +25142,7 @@
             "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
           }
         ],
-        "source_sha256": "67ccaab95e6463ca772bc4ec5a4d3cf66b74f5f9bbd049ce79f6688b90db27f0",
+        "source_sha256": "fe3f8ca958caf1830d4d6653e4acd7a2565664caff0864d74c5375414cb7131e",
         "symbols": [
           {
             "declarations": [
@@ -25935,6 +26117,245 @@
                 "kind": "function"
               }
             ],
+            "name": "buildCandidateR27PartialScopeIndex"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  candidate: P1R27Candidate,\n  evidence: BoundP1R27Evidence,\n  index: NativeObject,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "candidate",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "P1R27Candidate",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "P1R27Candidate"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "evidence",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "BoundP1R27Evidence",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "BoundP1R27Evidence"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "index",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "buildCandidateR27PartialBody"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  index: NativeObject | undefined,\n  indexBytes: Uint8Array<ArrayBuffer>,\n  decodedParts: readonly Uint8Array<ArrayBuffer>[],\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "index",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "NativeObject",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeObject",
+                                "specifier": "../domain/json_value.ts"
+                              },
+                              "typeName": "NativeObject"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "undefined",
+                            "value": "undefined"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "indexBytes",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Uint8Array",
+                        "value": {
+                          "typeName": "Uint8Array",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ArrayBuffer",
+                              "value": {
+                                "typeName": "ArrayBuffer"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "decodedParts",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "typeRef",
+                              "repr": "Uint8Array",
+                              "value": {
+                                "typeName": "Uint8Array",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "ArrayBuffer",
+                                    "value": {
+                                      "typeName": "ArrayBuffer"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "assertSealedR27Publication"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  candidate: P1R27Candidate,\n  evidence: BoundP1R27Evidence,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "candidate",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "P1R27Candidate",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "P1R27Candidate"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "evidence",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "BoundP1R27Evidence",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "BoundP1R27Evidence"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
             "name": "buildCandidateR27ScopeIndex"
           },
           {
@@ -26496,6 +26917,83 @@
               {
                 "declarationKind": "private",
                 "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "WeakMap",
+                    "value": {
+                      "typeName": "WeakMap",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        },
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "candidate",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "P1R27Candidate",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "P1R27Candidate"
+                                  }
+                                }
+                              },
+                              {
+                                "name": "evidence",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "BoundP1R27Evidence",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "BoundP1R27Evidence"
+                                  }
+                                }
+                              },
+                              {
+                                "name": "partial",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "candidateIndexSeals"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
                   "hasBody": true,
                   "parameter_source": "(root: unknown)",
                   "params": [
@@ -26664,6 +27162,97 @@
               }
             ],
             "name": "quotaFields"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(cell: NativeObject)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "cell",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "priorRecruitmentIsSubstantive"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(previous: NativeObject, projected: NativeObject)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "previous",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "projected",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "priorRecruitmentConflicts"
           },
           {
             "declarations": [
@@ -27041,6 +27630,50 @@
               }
             ],
             "name": "validateBaselineManifest"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(index: NativeObject)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "index",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "partialCoverageFromIndex"
           }
         ]
       },
@@ -27096,7 +27729,10 @@
         "P1R27Limits",
         "P1R27Candidate",
         "composeP1R27Candidate",
-        "buildCandidateR27ScopeIndex"
+        "buildCandidateR27ScopeIndex",
+        "buildCandidateR27PartialScopeIndex",
+        "buildCandidateR27PartialBody",
+        "assertSealedR27Publication"
       ]
     },
     "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": {
@@ -27149,9 +27785,14 @@
             "importedName": "parseNativeJson",
             "originalName": "parseNativeJson",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "readR27PartialCoverage",
+            "originalName": "readR27PartialCoverage",
+            "src": "supabase/functions/_shared/jungsi/application/history_r27_scope_index.ts"
           }
         ],
-        "source_sha256": "bc0d7b8205eace2ae2453103c3ad8ef59c4df2c39aa695cb3d767413c1eb14fd",
+        "source_sha256": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
         "symbols": [
           {
             "declarations": [
@@ -28821,6 +29462,11 @@
             "src": "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts"
           },
           {
+            "importedName": "assertSealedR27Publication",
+            "originalName": "assertSealedR27Publication",
+            "src": "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts"
+          },
+          {
             "importedName": "bindR27ScopeIndex",
             "originalName": "bindR27ScopeIndex",
             "src": "supabase/functions/_shared/jungsi/application/history_r27_scope_index.ts"
@@ -28851,7 +29497,7 @@
             "src": "supabase/functions/_shared/jungsi/application/p1_r27_global_parts.ts"
           }
         ],
-        "source_sha256": "650e15612e10c88a0eaa0f073eee88597d5835437c2d0fe4759cf9bdcf8e8d84",
+        "source_sha256": "c7affb470d2d0814779acdba6ad1e56731a15e0e9dc3d30570ffc1d2bb289f04",
         "symbols": [
           {
             "declarations": [
@@ -28963,7 +29609,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(\n  publication: SnapshotPublication,\n  manifestBytes: Uint8Array,\n  indexBytes: Uint8Array,\n  indexSha256: string,\n  coverageSha256: string,\n  gzipParts: readonly Uint8Array[],\n  rawLimits: P1R27GateLimits,\n)",
+                  "parameter_source": "(\n  publication: SnapshotPublication,\n  manifestBytes: Uint8Array,\n  indexBytes: Uint8Array,\n  indexSha256: string,\n  coverageSha256: string,\n  gzipParts: readonly Uint8Array[],\n  rawLimits: P1R27GateLimits,\n  sealedCandidateIndex?: NativeObject,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -29059,6 +29705,23 @@
                             "kind": "local"
                           },
                           "typeName": "P1R27GateLimits"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "sealedCandidateIndex",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
                         }
                       }
                     }
@@ -29747,6 +30410,16 @@
             {
               "kind": "type",
               "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./p1_r27_composition.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts"
             }
           ]
         },
@@ -44117,7 +44790,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "b02c625cb794973357fea321421c814e5bd28ff52473a849587eb1e49ab39c2c",
+        "source_sha256": "4cb7dbcb39185245b764ef07fedd57f1a2713bf56a49c04abb1394a66c7620cc",
         "symbols": [
           {
             "declarations": [
@@ -86516,6 +87189,1567 @@
         "OWN_REPORT_SCOPE_GUARD_SQL"
       ]
     },
+    "supabase/functions/_shared/jungsi/infrastructure/p1_r27_request_admission.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "JsonFloat",
+            "jsDoc": {
+              "doc": "REVIEW ONLY: request-local v2 consumer admission.\nThe two descriptor settings are trusted only when provisioned by an independently\nauthorized Owner process. A SHA match or an \"approved\" string is not issuer authentication.\nThe credential authenticates its holder, not the bytes of the running consumer build."
+            },
+            "originalName": "JsonFloat",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "parseNativeJson",
+            "jsDoc": {
+              "doc": "REVIEW ONLY: request-local v2 consumer admission.\nThe two descriptor settings are trusted only when provisioned by an independently\nauthorized Owner process. A SHA match or an \"approved\" string is not issuer authentication.\nThe credential authenticates its holder, not the bytes of the running consumer build."
+            },
+            "originalName": "parseNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          }
+        ],
+        "source_sha256": "2642661bbf6779c502f4692038378c68828937e2f7d9bb2102e158e0911ce632",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "trust",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Trust",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Trust"
+                        }
+                      }
+                    },
+                    {
+                      "name": "admission",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeLiteral",
+                        "value": {
+                          "methods": [
+                            {
+                              "kind": "method",
+                              "name": "assertBoundConsumer",
+                              "parameter_source": "(input: AdmissionInput)",
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "input",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "AdmissionInput",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "AdmissionInput"
+                                    }
+                                  }
+                                }
+                              ],
+                              "returnType": {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "P1R27RequestInputs"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(request: Request, clock: () => bigint)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "request",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Request",
+                            "value": {
+                              "typeName": "Request"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "clock",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "fnOrConstructor",
+                            "value": {
+                              "constructor": false,
+                              "params": [],
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "bigint",
+                                "value": "bigint"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "env",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Environment",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Environment"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "binding",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Binding",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Binding"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "request",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Request",
+                              "value": {
+                                "typeName": "Request"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "execution",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Execution",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Execution"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "prepare"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "execution",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Execution",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Execution"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "owner",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "P1R27RequestInputs",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "P1R27RequestInputs"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "undefined",
+                              "value": "undefined"
+                            }
+                          ]
+                        }
+                      },
+                      "kind": "method",
+                      "name": "take"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "assertCurrent"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "close"
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "P1R27RequestAdmission"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[0-9a-f]{64}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "HASH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[A-Za-z0-9_-]{43,128}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "CREDENTIAL"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "history.snapshot.head",
+                          "value": {
+                            "kind": "string",
+                            "string": "history.snapshot.head"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "history.snapshot.read",
+                          "value": {
+                            "kind": "string",
+                            "string": "history.snapshot.read"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OPS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "headSha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "headSha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "manifestSha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "manifestSha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "sourceHeadSha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "sourceHeadSha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "scopeSha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "scopeSha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "indexSha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "indexSha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "coverageSha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "coverageSha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "globalReceiptSha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "globalReceiptSha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "consumerReceiptSha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "consumerReceiptSha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "consumerBuildSha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "consumerBuildSha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "consumerContractSha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "consumerContractSha256"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PIN_NAMES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "indexedAccess",
+                    "value": {
+                      "indexType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      },
+                      "objType": {
+                        "kind": "typeQuery",
+                        "repr": "PIN_NAMES",
+                        "value": "PIN_NAMES"
+                      }
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "PinName"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "PinName",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "PinName"
+                                }
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Pins"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "methods": [
+                        {
+                          "kind": "method",
+                          "name": "get",
+                          "parameter_source": "(name: string)",
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "name",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "undefined",
+                                "value": "undefined"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Environment"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "operation",
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "session",
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeLiteral",
+                            "value": {
+                              "properties": [
+                                {
+                                  "name": "evaluatedAtUtc",
+                                  "readonly": true,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "bigint",
+                                    "value": "bigint"
+                                  }
+                                },
+                                {
+                                  "name": "user",
+                                  "readonly": true,
+                                  "tsType": {
+                                    "kind": "typeLiteral",
+                                    "value": {
+                                      "properties": [
+                                        {
+                                          "name": "subjectId",
+                                          "readonly": true,
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "expiresAtUtc",
+                                          "readonly": true,
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "bigint",
+                                            "value": "bigint"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Execution"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "descriptorSha256",
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "expiresAtUtc",
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        },
+                        {
+                          "name": "operations",
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "name": "readLimits",
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeLiteral",
+                            "value": {
+                              "properties": [
+                                {
+                                  "name": "maxBytes",
+                                  "readonly": true,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "number",
+                                    "value": "number"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "name": "readViews",
+                          "optional": true,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeLiteral",
+                            "value": {
+                              "properties": [
+                                {
+                                  "name": "snapshot",
+                                  "readonly": true,
+                                  "tsType": {
+                                    "kind": "typeLiteral",
+                                    "value": {
+                                      "properties": [
+                                        {
+                                          "name": "scopeSha256",
+                                          "readonly": true,
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "maxMetadataBytes",
+                                          "readonly": true,
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "number",
+                                            "value": "number"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Binding"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "pins",
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Pins",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "Pins"
+                                  }
+                                }
+                              },
+                              {
+                                "name": "maxExtraBytes",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              },
+                              {
+                                "name": "maxIndexBytes",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Trust"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Pick",
+                          "value": {
+                            "typeName": "Pick",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Pins",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "Pins"
+                                }
+                              },
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "literal",
+                                    "repr": "headSha256",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "headSha256"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "manifestSha256",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "manifestSha256"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "scopeSha256",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "scopeSha256"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "consumerBuildSha256",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "consumerBuildSha256"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "consumerContractSha256",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "consumerContractSha256"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "AdmissionInput"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "trust",
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Trust",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "Trust"
+                                  }
+                                }
+                              },
+                              {
+                                "name": "credentialSha",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "expires",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "bigint",
+                                  "value": "bigint"
+                                }
+                              },
+                              {
+                                "name": "operations",
+                                "tsType": {
+                                  "kind": "typeOperator",
+                                  "value": {
+                                    "operator": "readonly",
+                                    "tsType": {
+                                      "kind": "array",
+                                      "value": {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "name": "configText",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "configSha",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Config"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "()",
+                      "params": []
+                    }
+                  ],
+                  "extends": "Error"
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "P1R27ValidationFailure"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "never",
+                    "value": "never"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "invalid"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown, names: readonly string[])",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "names",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Record",
+                    "value": {
+                      "typeName": "Record",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "closed"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "hash"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown, max: number)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "max",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "number",
+                    "value": "number"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "positive"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "bigint",
+                    "value": "bigint"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "instant"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(bytes: Uint8Array<ArrayBuffer>)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "bytes",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Uint8Array",
+                        "value": {
+                          "typeName": "Uint8Array",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ArrayBuffer",
+                              "value": {
+                                "typeName": "ArrayBuffer"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Uint8Array",
+                          "value": {
+                            "typeName": "Uint8Array",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "ArrayBuffer",
+                                "value": {
+                                  "typeName": "ArrayBuffer"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "digest"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(bytes: Uint8Array)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "bytes",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Uint8Array",
+                        "value": {
+                          "typeName": "Uint8Array"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "hex"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Uint8Array",
+                    "value": {
+                      "typeName": "Uint8Array",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "ArrayBuffer",
+                          "value": {
+                            "typeName": "ArrayBuffer"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "unhex"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  left: Uint8Array<ArrayBuffer>,\n  right: Uint8Array<ArrayBuffer>,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "left",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Uint8Array",
+                        "value": {
+                          "typeName": "Uint8Array",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ArrayBuffer",
+                              "value": {
+                                "typeName": "ArrayBuffer"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "right",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Uint8Array",
+                        "value": {
+                          "typeName": "Uint8Array",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ArrayBuffer",
+                              "value": {
+                                "typeName": "ArrayBuffer"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sameDigest"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(env: Environment, binding: Binding, now: bigint)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "env",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Environment",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Environment"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "binding",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Binding",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Binding"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "now",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "Config",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "Config"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "readConfig"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/native_json.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "data_infrastructure",
+      "symbols": [
+        "P1R27RequestInputs",
+        "P1R27RequestAdmission"
+      ]
+    },
     "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts": {
       "declarations": {
         "imports": [
@@ -101225,7 +103459,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "a9034c4fb1854ea90bce7659b3a1dd35db5f735a6108c4d7cd9275344db27de0",
+        "source_sha256": "1db480c309ffb6609a0eccc0d04d17627e9571722239c4a3a944ec990b9dba50",
         "symbols": [
           {
             "declarations": [
@@ -102934,6 +105168,11 @@
             "src": "supabase/functions/_shared/jungsi/application/own_report_list.ts"
           },
           {
+            "importedName": "P1R27RequestAdmission",
+            "originalName": "P1R27RequestAdmission",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/p1_r27_request_admission.ts"
+          },
+          {
             "importedName": "RepositoryUsageReplays",
             "originalName": "RepositoryUsageReplays",
             "src": "supabase/functions/_shared/jungsi/application/usage_service.ts"
@@ -103049,7 +105288,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
           }
         ],
-        "source_sha256": "d7a7fa6de8faefa56950269a90eb87c2e12cd070f436ef1e1c736be945911b55",
+        "source_sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f",
         "symbols": [
           {
             "declarations": [
@@ -103523,6 +105762,85 @@
                       "name": "memberShortlist"
                     },
                     {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "request",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Request",
+                              "value": {
+                                "typeName": "Request"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "execution",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "ApiExecution",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "ApiExecution",
+                                  "specifier": "../application/api_dispatch.ts"
+                                },
+                                "typeName": "ApiExecution"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "prepareP1R27"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "assertP1R27Current"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "closeP1R27"
+                    },
+                    {
                       "accessibility": "private",
                       "functionDef": {
                         "hasBody": true,
@@ -103535,6 +105853,23 @@
                               "kind": "keyword",
                               "repr": "string",
                               "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "execution",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "ApiExecution",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "ApiExecution",
+                                  "specifier": "../application/api_dispatch.ts"
+                                },
+                                "typeName": "ApiExecution"
+                              }
                             }
                           }
                         ],
@@ -104176,6 +106511,23 @@
                         "repr": "string",
                         "value": "string"
                       }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "p1R27Admission",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "P1R27RequestAdmission",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "P1R27RequestAdmission",
+                            "specifier": "./p1_r27_request_admission.ts"
+                          },
+                          "typeName": "P1R27RequestAdmission"
+                        }
+                      }
                     }
                   ]
                 },
@@ -104427,6 +106779,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./p1_r27_request_admission.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/p1_r27_request_admission.ts"
             }
           ]
         },
@@ -120200,7 +122562,7 @@
             "src": "tests/edge/synthetic_history_snapshot.ts"
           }
         ],
-        "source_sha256": "62d8878e91b66f91569c9168dcc6fe6db1a1c4b29a523f0fda8eb726830f34c9",
+        "source_sha256": "e026d3cde979bc70b0b178dde743d2f257dc4d58ffd9cc11f0093f6f572798f9",
         "symbols": [
           {
             "declarations": [

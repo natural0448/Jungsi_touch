@@ -33,9 +33,9 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
     def errors(self):
         return checker.service_candidate_suite_errors(sorted(self.names), self.read, self.spec)
 
-    def test_exact_three_suites_are_registered(self):
+    def test_exact_four_suites_are_registered(self):
         self.assertEqual(self.errors(), [])
-        self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503")], [80, 125, 48])
+        self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [80, 125, 48, 36])
         self.assertEqual(self.ext["activation_status"], "NOT_RUN")
 
     def test_missing_registry_never_silently_omits_suites(self):
@@ -81,13 +81,51 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
         self.rebind_manifest(changed)
         self.assertTrue(self.errors())
 
+    def test_service_p1_missing_extra_root_or_false_count_fails(self):
+        self.names.add("tests/service_p1/unregistered.synthetic.ts")
+        self.assertTrue(self.errors())
+        self.names.remove("tests/service_p1/unregistered.synthetic.ts")
+        self.names.remove(self.ext["groups"]["service_p1"]["roots"][0])
+        self.assertTrue(self.errors())
+        self.names.add(self.ext["groups"]["service_p1"]["roots"][0])
+        changed = copy.deepcopy(self.manifest)
+        changed["suites"]["service_p1"]["expected_count"] = 35
+        self.rebind_manifest(changed)
+        self.assertTrue(self.errors())
+
+    def test_service_p1_rehashed_unapproved_fixture_is_rejected(self):
+        changed = copy.deepcopy(self.manifest)
+        suite = changed["suites"]["service_p1"]
+        root = suite["roots"][0]
+        bad = "tests/edge/unapproved_service_fixture.ts"
+        self.names.add(bad)
+        self.overrides[bad] = b"synthetic unapproved fixture"
+        digest = hashlib.sha256(self.overrides[bad]).hexdigest()
+        suite["files"][bad] = digest
+        suite["graphs"][root]["files"][bad] = digest
+        suite["layers"]["files"][bad] = "synthetic_fixture"
+        self.rebind_manifest(changed)
+        self.assertTrue(self.errors())
+
+    def test_service_p1_rehashed_graph_and_missing_manual_read_fail(self):
+        changed = copy.deepcopy(self.manifest)
+        suite = changed["suites"]["service_p1"]
+        graph = suite["graphs"][suite["roots"][0]]
+        graph["edges"][0][1] = "https://invalid.example/forged.ts"
+        self.rebind_manifest(changed)
+        self.assertTrue(self.errors())
+        changed = copy.deepcopy(self.manifest)
+        changed["suites"]["service_p1"]["manual_read_files"] = []
+        self.rebind_manifest(changed)
+        self.assertTrue(self.errors())
+
     def test_runtime_missing_is_failure_not_skip_for_each_suite(self):
         path = ROOT / self.ext["wrapper"]["path"]
         module_spec = importlib.util.spec_from_file_location("service_candidate_wrapper_for_regression", path)
         module = importlib.util.module_from_spec(module_spec)
         module_spec.loader.exec_module(module)
         with patch.object(module, "load_manifest", side_effect=FileNotFoundError("synthetic missing runtime")):
-            for name in ("test_p1_deno_80", "test_service_end_deno_125", "test_search503_deno_48"):
+            for name in ("test_p1_deno_80", "test_service_end_deno_125", "test_search503_deno_48", "test_service_p1_deno_36"):
                 result = unittest.TestResult()
                 module.ReviewSuites(name).run(result)
                 self.assertFalse(result.wasSuccessful())
@@ -189,6 +227,79 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
              patch.object(self.m,"verify_suite",return_value={"manual_read_files":[]}), \
              patch.object(self.m,"invoke") as call:
             with self.assertRaisesRegex(ValueError,"manual-read scope"):self.m.ReviewSuites("test_p1_deno_80").test_p1_deno_80()
+            call.assert_not_called()
+
+    def test_service_p1_rejects_dynamic_import_before_execution(self):
+        from types import SimpleNamespace
+        roots = self.m.SERVICE_P1_ROOTS
+        data = {"suites": {"service_p1": {"roots": roots, "allowed_builtins": self.m.NODE_ALLOWED,
+                "expected_count": 36, "graphs": {p: {} for p in roots},
+                "files": {"tests/service_p1/injected.synthetic.mjs": "0" * 64}}}}
+        fake = SimpleNamespace(read_text=lambda **kwargs: 'import("./untrusted.ts")')
+        with patch.object(self.m, "safe_file", return_value=fake), patch.object(self.m, "invoke") as call:
+            with self.assertRaisesRegex(ValueError, "dynamic import"):
+                self.m.verify_suite(data, "service_p1", roots, self.m.NODE_ALLOWED, 36)
+            call.assert_not_called()
+
+    def test_service_p1_pinned_type_import_rejects_changed_bytes_and_runtime_import(self):
+        from types import SimpleNamespace
+        roots = self.m.SERVICE_P1_ROOTS
+        path = "supabase/functions/_shared/jungsi/application/platform_repository.ts"
+        data = {"suites": {"service_p1": {"roots": roots, "allowed_builtins": self.m.NODE_ALLOWED,
+                "expected_count": 36, "graphs": {p: {} for p in roots}, "files": {path: "0" * 64}}}}
+        pin = self.m.SERVICE_P1_PINNED_TYPE_IMPORTS[path][0]
+        cases = [
+            ('import("./score_input_ports.ts").PaidResultOriginWrite', "0" * 64),
+            ('import("./runtime_import.ts")', pin),
+            ('import(variable)', pin),
+        ]
+        for text, fake_sha in cases:
+            with self.subTest(text=text), \
+                 patch.object(self.m, "safe_file", return_value=SimpleNamespace(read_text=lambda **kw: text)), \
+                 patch.object(self.m, "sha", return_value=fake_sha), \
+                 patch.object(self.m, "invoke") as call:
+                with self.assertRaises(ValueError):
+                    self.m.verify_suite(data, "service_p1", roots, self.m.NODE_ALLOWED, 36)
+                call.assert_not_called()
+
+    def test_score_input_service_exact_type_only_pin_and_tamper(self):
+        from types import SimpleNamespace
+        path = "supabase/functions/_shared/jungsi/application/score_input_service.ts"
+        expected_sha = "26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1"
+        self.assertEqual(self.m.SERVICE_P1_PINNED_TYPE_IMPORTS[path], (expected_sha, ["./score_input_ports.ts"]))
+        source = self.m.safe_file(path)
+        self.assertEqual(self.m.sha(source), expected_sha)
+        def make_data(name):
+            return {"suites": {name: {"roots": [], "allowed_builtins": self.m.NODE_ALLOWED,
+                    "expected_count": 36, "graphs": {}, "files": {path: expected_sha}, "layers": {}}}}
+        with patch.object(self.m, "SERVICE_CANDIDATE_SHARED_FIXTURES", {"service_p1": frozenset()}), \
+             patch.object(self.m, "layer_bindings", return_value={}):
+            self.m.verify_suite(make_data("service_p1"), "service_p1", [], self.m.NODE_ALLOWED, 36)
+        cases = [
+            ('operation as import("./score_input_ports.ts").PaidResultDelivery["operation"]; // changed', "1" * 64),
+            ('import("./score_input_ports.ts")', "2" * 64),
+            ('import("./other.ts").Other', expected_sha),
+            ('import(variable)', expected_sha),
+        ]
+        for text, fake_sha in cases:
+            with self.subTest(text=text), \
+                 patch.object(self.m, "safe_file", return_value=SimpleNamespace(read_text=lambda **kw: text)), \
+                 patch.object(self.m, "sha", return_value=fake_sha), \
+                 patch.object(self.m, "invoke") as call:
+                with self.assertRaises(ValueError):
+                    self.m.verify_suite(make_data("service_p1"), "service_p1", [], self.m.NODE_ALLOWED, 36)
+                call.assert_not_called()
+        with patch.object(self.m, "invoke") as call:
+            with self.assertRaises(ValueError):
+                self.m.verify_suite(make_data("p1_review"), "p1_review", [], self.m.NODE_ALLOWED, 36)
+            call.assert_not_called()
+
+    def test_service_p1_rejects_wrong_manual_scope_before_execution(self):
+        with patch.object(self.m, "load_manifest", return_value=self.data), \
+             patch.object(self.m, "verify_suite", return_value={"manual_read_files": []}), \
+             patch.object(self.m, "invoke") as call:
+            with self.assertRaisesRegex(ValueError, "manual-read scope"):
+                self.m.ReviewSuites("test_service_p1_deno_36").test_service_p1_deno_36()
             call.assert_not_called()
 
     def test_runner_requires_absolute_runtime_and_scratch(self):
