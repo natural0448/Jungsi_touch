@@ -25,7 +25,7 @@ const encode = new TextEncoder(), realNow = Date.now;
 const sha = async b => Buffer.from(await crypto.subtle.digest("SHA-256", b)).toString("hex");
 let serial = 0;
 
-async function world(t, { parts = 2, schools = 1, missing = false, row = {} } = {}) {
+async function world(t, { parts = 2, schools = 1, missing = false, row = {}, rowsOf = null, schema = "synthetic.v1", body = {}, headExtra = {} } = {}) {
   const priorMode = process.env.JUNGSI_API_MODE, priorNode = process.env.NODE_ENV;
   process.env.JUNGSI_API_MODE = "live"; process.env.NODE_ENV = "test";
   const w = { now: Date.parse("2026-10-21T00:00:00Z"), headCalls: 0, partCalls: 0, reads: [], writes: [], cache: new Map(), delayedKey: null };
@@ -51,22 +51,26 @@ async function world(t, { parts = 2, schools = 1, missing = false, row = {} } = 
     assert.equal(name, "public-v2:live"); return { fetch: request => w.actor.fetch(request) };
   } } } };
   const pins = [], bodies = new Map();
+  let total = 0;
   for (let i = 0; i < parts; i++) {
     const part = `part${i}`, university = `TEST${i % schools}`;
-    const json = JSON.stringify({ format: "jungsi.history-snapshot/v1", part_id: part, payload_id: `payload${i}`, rows: [{
+    const rows = rowsOf ? rowsOf(i, university) : [{
       university_id: university, university_name: `가상대학교${i % schools}`, academic_year: 2026,
       original_pk: `pk${i}`, department: `가상학과${i}`, region: "가상지역", group: "가",
       competition_ratio: { value: "__EXACT_NUMBER__", status: "ready", unit: "대1" },
       ...row,
-    }] }).replace('"__EXACT_NUMBER__"', "9.71000000000000009").replace('"__STAT_NUMBER__"', "84.10000000000000009");
-    const decoded = encode.encode(json), gzip = gzipSync(decoded);
-    pins.push({ part_id: part, payload_id: `payload${i}`, gzip_bytes: gzip.length, gzip_sha256: await sha(gzip), decoded_bytes: decoded.length, decoded_sha256: await sha(decoded), rows: 1, mapped_rows: 1, mapping_pending_rows: 0 });
-    bodies.set(part, i % 2 ? decoded : gzip);
+    }];
+    const format = schema === "jungsi.history-snapshot/v2" ? schema : "jungsi.history-snapshot/v1";
+    const json = JSON.stringify({ format, part_id: part, payload_id: `payload${i}`, rows, ...body }).replace('"__EXACT_NUMBER__"', "9.71000000000000009").replace('"__STAT_NUMBER__"', "84.10000000000000009");
+    const decoded = encode.encode(json), gzip = gzipSync(decoded), pending = rows.filter(r => r.original_pk === null).length;
+    pins.push({ part_id: part, payload_id: `payload${i}`, gzip_bytes: gzip.length, gzip_sha256: await sha(gzip), decoded_bytes: decoded.length, decoded_sha256: await sha(decoded), rows: rows.length, mapped_rows: rows.length - pending, mapping_pending_rows: pending });
+    bodies.set(part, i % 2 ? decoded : gzip); total += rows.length;
   }
+  const pendingRows = pins.reduce((n, p) => n + p.mapping_pending_rows, 0);
   w.head = { format: "jungsi.history-snapshot-head/v1", status: "approved", snapshot_id: "synthetic.snapshot.v1",
     publication_sha256: "a".repeat(64), source_head_sha256: "b".repeat(64), generated_at: "2026-10-20T00:00:00Z", source_as_of: null,
-    schema_version: "synthetic.v1", normalization_rules_version: "synthetic.v1", selection_rules_version: "synthetic.v1",
-    counts: { rows: parts, mapped_rows: parts, mapping_pending_rows: 0, schools }, delivery_mode: "parts", full: null, parts: pins, expires_at: "2099-01-01T00:00:00Z" };
+    schema_version: schema, normalization_rules_version: "synthetic.v1", selection_rules_version: "synthetic.v1",
+    counts: { rows: total, mapped_rows: total - pendingRows, mapping_pending_rows: pendingRows, schools }, delivery_mode: "parts", full: null, parts: pins, expires_at: "2099-01-01T00:00:00Z", ...headExtra };
   w.source = { kind: "live", async readSnapshotHead() { w.headCalls++; await new Promise(r => setTimeout(r, 5)); return structuredClone(w.head); },
     async readSnapshotPart(_caller, _snapshot, id) { w.partCalls++; await new Promise(r => setTimeout(r, 1)); return bodies.get(id); } };
   w.caller = { accessToken: "SYNTHETIC_PRIVATE_CALLER_DO_NOT_STORE" };
@@ -391,4 +395,93 @@ test("published statistic labels preserve source wording and do not turn a mean 
   assert.equal(publishedStatisticLabel({ ...base, p: null }), "발표 기준 확인 중");
   assert.equal(publishedStatisticLabel({ ...base, p: 0 }), "발표 기준 확인 중");
   assert.equal(publishedStatisticLabel({ ...base, p: 101 }), "발표 기준 확인 중");
+});
+
+/* ── 2027 모집행 수신(담당자 1.9.141 schema v2, r27_source·r27_scope_coverage) ── */
+const coverage = { status: "partial", source_rows: 10, included_rows: 3, excluded_rows: 2, review_pending_rows: 5 };
+const r27Row = (university, pk, quota, links = []) => ({
+  university_id: university, university_name: "가상대학교0", academic_year: 2027, original_pk: pk, department: "가상학과", region: "가상지역", group: "가",
+  mapping_status: "mapped", recruitment_count_with_stage: { value: null, status: "pending_value_missing", stage: "unspecified" },
+  r27_source: { scope_key: `scope:${pk}`, scope_review: "eligible", quota, quota_review_status: quota.quota_literal_state ? "condition_present" : "source_stage_only",
+    history_link_status: links.length ? "exact_reviewed" : "not_reviewed", history_link_pending_years: [],
+    historical_links: links.map(([y, p]) => ({ academic_year: y, school_id: university, original_pk: p, campus: null, admission_track: null, group: "가" })) },
+});
+const pastRow = (university, year, pk) => ({ university_id: university, university_name: "가상대학교0", academic_year: year, original_pk: pk, department: "가상학과", region: "가상지역", group: "가" });
+
+test("a v2 partial publication keeps 2027 quotas verbatim and groups only server-reviewed history", async t => {
+  const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
+    rowsOf: (_i, u) => [
+      r27Row(u, "k27a", { quota_value: 12, quota_literal_state: "conditional_carryover", quota_stage: "initial", quota_condition_text: "수시 미충원 인원 이월" }, [[2026, "p26a"], [2025, "p25a"]]),
+      r27Row(u, "k27b", { quota_value: null, quota_literal_state: "conditional_transfer", quota_stage: null }, [[2026, "shared"]]),
+      r27Row(u, "k27c", { quota_value: "0", quota_literal_state: null, quota_stage: "final" }, [[2026, "shared"]]),
+      pastRow(u, 2026, "p26a"), pastRow(u, 2025, "p25a"), pastRow(u, 2026, "shared"), pastRow(u, 2024, "alone"),
+    ] });
+  const ready = await w.prepare();
+  assert.deepEqual(ready.r27_scope_coverage, coverage);
+  const result = await w.module.searchSnapshot(ready, {}), rows = result.schools[0].rows;
+  const { unitKey, r27Summary } = await import("../src/lib/p1-shape.ts");
+  const keyOf = pk => unitKey(rows.find(r => r.pk === pk));
+  // Reviewed links join the 2027 row; a past row claimed by two 2027 rows and an unlinked one stay separate.
+  assert.equal(keyOf("p26a"), "pk:k27a"); assert.equal(keyOf("p25a"), "pk:k27a");
+  assert.equal(keyOf("shared"), "pk:shared"); assert.equal(keyOf("alone"), "pk:alone");
+  assert.equal(result.total_units, 5);
+  const a = rows.find(r => r.pk === "k27a");
+  assert.deepEqual(a.q27, { v: "12", ls: "conditional_carryover", st: "initial", ct: "수시 미충원 인원 이월", cs: null, rs: "condition_present" });
+  assert.deepEqual(a.hl, ["2026|p26a", "2025|p25a"]);
+  const units = await w.module.unitRows(ready, "TEST0", "pk:k27a");
+  assert.deepEqual(units.map(r => r.y).sort(), [2025, 2026, 2027]);
+  assert.equal(r27Summary(a.q27).carry, true); assert.equal(r27Summary(a.q27).v, "12");
+  // A native zero stays zero; it is never replaced by a missing value.
+  assert.equal(r27Summary(rows.find(r => r.pk === "k27c").q27).v, "0");
+});
+
+test("2027 coverage must match between head and every part, and v2 heads refuse v1 bodies", async t => {
+  const one = (u) => [pastRow(u, 2026, "p")];
+  const cases = [
+    { schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: { ...coverage, excluded_rows: 1, review_pending_rows: 6 } } },
+    { schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage } },
+    { schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: { ...coverage, note: "x" } } },
+    { body: { r27_scope_coverage: coverage } },
+    { schema: "jungsi.history-snapshot/v2", body: { format: "jungsi.history-snapshot/v1" } },
+  ];
+  for (const c of cases) {
+    const w = await world(t, { parts: 1, rowsOf: (_i, u) => one(u), ...c });
+    await assert.rejects(w.prepare(), /p1_part_invalid/);
+  }
+});
+
+test("the public head accepts r27_scope_coverage only as an exact, internally consistent v2 partial disclosure", async () => {
+  const { validatePublicHead } = await import("../src/lib/p1-coordinator-core.ts");
+  const pin = { part_id: "p0", payload_id: "y0", gzip_bytes: 1, gzip_sha256: "c".repeat(64), decoded_bytes: 1, decoded_sha256: "d".repeat(64), rows: 1, mapped_rows: 1, mapping_pending_rows: 0 };
+  const head = { format: "jungsi.history-snapshot-head/v1", status: "approved", snapshot_id: "s1", publication_sha256: "a".repeat(64), source_head_sha256: "b".repeat(64),
+    generated_at: "2026-10-20T00:00:00Z", source_as_of: null, schema_version: "jungsi.history-snapshot/v2", normalization_rules_version: "n", selection_rules_version: "s",
+    counts: { rows: 1, mapped_rows: 1, mapping_pending_rows: 0, schools: 1 }, delivery_mode: "parts", full: null, parts: [pin], expires_at: "2099-01-01T00:00:00Z" };
+  const now = Date.parse("2026-11-02T00:00:00Z");
+  assert.equal(validatePublicHead({ ...head }, now).r27_scope_coverage, undefined);
+  assert.deepEqual(validatePublicHead({ ...head, r27_scope_coverage: coverage }, now).r27_scope_coverage, coverage);
+  for (const bad of [
+    { ...coverage, status: "complete" }, { ...coverage, review_pending_rows: 0, excluded_rows: 7 }, { ...coverage, included_rows: 0, excluded_rows: 5 },
+    { ...coverage, source_rows: 11 }, { ...coverage, extra: 1 }, { ...coverage, included_rows: 3.5 }, null, [],
+  ]) assert.throws(() => validatePublicHead({ ...head, r27_scope_coverage: bad }, now), /p1_head_invalid|p1_coordinator_metadata_invalid/);
+  assert.throws(() => validatePublicHead({ ...head, schema_version: "jungsi.history-snapshot/v1", r27_scope_coverage: coverage }, now), /p1_head_invalid/);
+});
+
+test("the 2027 quota summary shows source wording and never turns carryover or unknown states into a number", async () => {
+  const { r27Summary } = await import("../src/lib/p1-shape.ts");
+  const q = (o) => ({ v: null, ls: null, st: null, ct: null, cs: null, rs: "source_stage_only", ...o });
+  const pick = s => [s.hold, s.v, s.carry, s.initial];
+  assert.deepEqual(pick(r27Summary(q({ v: "12", st: "final" }))), [false, "12", false, false]);
+  assert.deepEqual(pick(r27Summary(q({ v: "12", st: "initial" }))), [false, "12", false, true]);
+  assert.deepEqual(pick(r27Summary(q({ v: "12", ls: "conditional_carryover", st: "initial" }))), [false, "12", true, false]);
+  assert.deepEqual(pick(r27Summary(q({ v: "0", ls: "conditional_transfer" }))), [false, "0", true, false]);
+  const only = r27Summary(q({ ls: "conditional_carryover" }));
+  assert.deepEqual(pick(only), [false, null, true, false]);
+  assert.match(only.note, /남은 인원이 있을 때만/);
+  assert.equal(r27Summary(q({ v: null })).hold, true);
+  assert.equal(r27Summary(q({ v: "12", ls: "unknown_future_state" })).hold, true);
+  assert.equal(r27Summary(q({ v: "약 10", ls: "conditional_carryover" })).hold, true);
+  assert.equal(r27Summary(q({ v: "12", rs: "source_conflict" })).hold, true);
+  assert.equal(r27Summary(undefined).hold, true);
+  assert.equal(r27Summary(q({ v: "12", cs: "pending_metadata" })).check, true);
+  assert.match(r27Summary(q({ v: "3", ct: "수시 미충원 시 이월" })).note, /모집요강: 수시 미충원 시 이월/);
 });

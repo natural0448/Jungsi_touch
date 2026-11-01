@@ -575,6 +575,8 @@ export interface SnapshotHeadDto {
   full: SnapshotPartPin | null;
   parts: SnapshotPartPin[];
   expires_at: string;
+  /** 2027 부분 발행 때만(schema v2). 화면 수신 영수증을 낸 뒤에만 온다(담당자 1.9.141) */
+  r27_scope_coverage?: { status: "partial"; source_rows: number; included_rows: number; excluded_rows: number; review_pending_rows: number };
 }
 
 /* ── 2페이지 입력권·본인 목록·예시(기획 1.9.95, 결합 20) ── */

@@ -4,7 +4,7 @@ import type { SnapshotHeadDto, SnapshotPartPin } from "@/lib/dto";
 import { ConnectionError, SnapshotChanged, type Caller, type JungsiSource } from "@/lib/api/source";
 import { P1CoordinationCore, P1CoordinationError, localP1CoordinatorClient, p1CoordinatorClient, validatePublicHead,
   type CoordinatorState, type CoordinationStore, type CoordinationView, type PublicDocument } from "./p1-coordinator-core";
-import { unitKey, type Cell, type Row, type School } from "./p1-shape";
+import { linkR27, unitKey, type Cell, type R27Coverage, type Row, type School } from "./p1-shape";
 import { projectBackendValidatedRank } from "./p1-field-qualification";
 export type { Cell, Row, School } from "./p1-shape";
 
@@ -86,6 +86,7 @@ export type Ready = {
   snapshot_id: string; publication_sha256: string; source_head_sha256: string;
   normalization_rules_version: string; selection_rules_version: string;
   generated_at: string; source_as_of: string | null; expires_at: string; counts: SnapshotHeadDto["counts"];
+  r27_scope_coverage?: R27Coverage;
   warmed_at: string; pub: string; index_key: string; cache_mode: Mode;
 };
 type Progress = {
@@ -173,8 +174,28 @@ function compact(r: Obj): Row {
       om: int(alt.omitted_other_basis_count ?? 0),
       e: Array.isArray(alt.entries) ? (alt.entries as unknown[]).map((e) => cell(e, "cut")) : [],
     },
+    ...r27Of(r),
   };
 }
+/** 2027 모집행의 r27_source 만 옮긴다. 모집인원·조건 원문은 그대로, 과거 연결은 서버가 검토 확인한 것만 */
+function r27Of(r: Obj): Pick<Row, "q27" | "hl"> {
+  const s = r.r27_source as Obj | undefined;
+  if (int(r.academic_year) !== 2027 || !s || typeof s !== "object") return {};
+  const q = (s.quota ?? {}) as Obj, qc = (q.quota_cell ?? null) as Obj | null;
+  const links = Array.isArray(s.historical_links) ? (s.historical_links as Obj[]) : [];
+  return {
+    q27: { v: str(q.quota_value), ls: str(q.quota_literal_state), st: str(q.quota_stage), ct: str(q.quota_condition_text),
+      cs: qc ? str(qc.status) : null, rs: String(s.quota_review_status ?? "") },
+    hl: links.map(l => `${int(l.academic_year)}|${str(l.original_pk)}`),
+  };
+}
+/** 분할 본문의 부분 발행 표시(무손실 파싱 숫자). 키가 다르면 head 와 같아질 수 없는 값으로 둔다 */
+function rawCoverage(v: unknown): unknown {
+  if (v === undefined) return undefined;
+  if (!v || typeof v !== "object" || Array.isArray(v) || Object.keys(v).length !== 5) return { status: "invalid" };
+  return Object.fromEntries(Object.entries(v as Obj).map(([k, x]) => [k, x instanceof Raw ? Number(x.text) : x]));
+}
+const canonicalCoverage = (v: unknown) => (v === undefined ? "" : JSON.stringify(v, ["status", "source_rows", "included_rows", "excluded_rows", "review_pending_rows"]));
 
 /* ── 받은 bytes 검증 ── */
 
@@ -227,6 +248,7 @@ async function readyOf(view: CoordinationView, mode: Mode): Promise<Ready | null
   if (r.snapshot_id !== h.snapshot_id || r.publication_sha256 !== h.publication_sha256 || r.source_head_sha256 !== h.source_head_sha256 ||
       r.normalization_rules_version !== h.normalization_rules_version || r.selection_rules_version !== h.selection_rules_version ||
       r.expires_at !== h.expires_at || Date.parse(r.expires_at) <= Date.now() || r.cache_mode !== mode ||
+      canonicalCoverage(r.r27_scope_coverage) !== canonicalCoverage(h.r27_scope_coverage) ||
       r.pub !== await pubKeyOf(h) || typeof r.index_key !== "string") throw new ConnectionError("unavailable", "p1_ready_binding_invalid");
   return r;
 }
@@ -261,7 +283,9 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
       for (const pin of next) {
         const text = await verifiedText(await src.readSnapshotPart(caller, head.snapshot_id, pin.part_id), pin);
         const body = parseLossless(text) as Obj;
-        if (body.format !== "jungsi.history-snapshot/v1" || body.part_id !== pin.part_id || body.payload_id !== pin.payload_id || !Array.isArray(body.rows)) throw new Error(`p1_part_invalid ${pin.part_id}`);
+        const format = head.schema_version === "jungsi.history-snapshot/v2" ? "jungsi.history-snapshot/v2" : "jungsi.history-snapshot/v1";
+        if (body.format !== format || body.part_id !== pin.part_id || body.payload_id !== pin.payload_id || !Array.isArray(body.rows) ||
+            canonicalCoverage(rawCoverage(body.r27_scope_coverage)) !== canonicalCoverage(head.r27_scope_coverage)) throw new Error(`p1_part_invalid ${pin.part_id}`);
         const rows = (body.rows as Obj[]).map(r => [String(r.university_id ?? ""), compact(r)] as const);
         const mapped = rows.filter(([, r]) => r.pk !== null).length;
         if (rows.length !== pin.rows || mapped !== pin.mapped_rows || rows.length - mapped !== pin.mapping_pending_rows) throw new Error(`p1_part_counts_mismatch ${pin.part_id}`);
@@ -322,7 +346,7 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
           pg.school_assembly = { school_id: u, next_fragment: at, key, write_prefix: P, step: token.step };
           break;
         }
-        const key = `${P}:school:${u}`; await write(key, rows); pg.school_keys[u] = key; completed++;
+        const key = `${P}:school:${u}`; await write(key, linkR27(rows)); pg.school_keys[u] = key; completed++;
         delete pg.school_assembly;
       }
       pg.schoolsDone += completed;
@@ -360,6 +384,7 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
         ready = { snapshot_id: head.snapshot_id, publication_sha256: head.publication_sha256, source_head_sha256: head.source_head_sha256,
           normalization_rules_version: head.normalization_rules_version, selection_rules_version: head.selection_rules_version,
           generated_at: head.generated_at, source_as_of: head.source_as_of, expires_at: head.expires_at, counts: head.counts,
+          ...(head.r27_scope_coverage ? { r27_scope_coverage: head.r27_scope_coverage } : {}),
           warmed_at: new Date().toISOString(), pub, index_key: indexKey, cache_mode: mode };
         pg.phase = "ready";
       }

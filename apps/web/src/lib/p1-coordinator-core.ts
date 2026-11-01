@@ -74,10 +74,19 @@ export function publicDocument(v: unknown): PublicDocument {
   if (new TextEncoder().encode(JSON.stringify(v)).length > 131072) coordinationError("p1_coordinator_metadata_too_large");
   return structuredClone(v) as PublicDocument;
 }
+/** 2027 부분 발행 표시. schema v2 에서만, 정확한 5키, 포함+제외+검토 중 = 원천 행, 포함·검토 중은 1 이상(서버 index v2 규칙) */
+export function r27Coverage(value: unknown, schemaVersion: unknown): boolean {
+  if (schemaVersion !== "jungsi.history-snapshot/v2" || !value || typeof value !== "object" || Array.isArray(value)) return false;
+  const c = value as Record<string, unknown>, counts = ["source_rows", "included_rows", "excluded_rows", "review_pending_rows"];
+  return Object.keys(c).length === 5 && c.status === "partial" && counts.every(k => integer(c[k])) &&
+    Number(c.included_rows) >= 1 && Number(c.review_pending_rows) >= 1 &&
+    Number(c.included_rows) + Number(c.excluded_rows) + Number(c.review_pending_rows) === Number(c.source_rows);
+}
 export function validatePublicHead(value: unknown, now: number): SnapshotHeadDto {
   const h = publicDocument(value);
   const keys = ["format", "status", "snapshot_id", "publication_sha256", "source_head_sha256", "generated_at", "source_as_of", "schema_version", "normalization_rules_version", "selection_rules_version", "counts", "delivery_mode", "full", "parts", "expires_at"];
-  if (Object.keys(h).some(k => !keys.includes(k)) || keys.some(k => !(k in h)) ||
+  if (Object.keys(h).some(k => !keys.includes(k) && k !== "r27_scope_coverage") || keys.some(k => !(k in h)) ||
+      ("r27_scope_coverage" in h && !r27Coverage(h.r27_scope_coverage, h.schema_version)) ||
       h.format !== "jungsi.history-snapshot-head/v1" || h.status !== "approved" ||
       typeof h.snapshot_id !== "string" || !ID.test(h.snapshot_id) ||
       typeof h.publication_sha256 !== "string" || !HASH.test(h.publication_sha256) ||

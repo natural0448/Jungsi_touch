@@ -14,7 +14,7 @@ import { lockFor, page } from "@/lib/routes";
 import { GROUPS, PATH, REGIONS, hrefWith, parseQuery, type Query } from "./query";
 import { groupUnits, latestOf } from "./snapshot-table";
 import { UnitList, type SumItem } from "./unit-row";
-import { unitKey } from "@/lib/p1-shape";
+import { r27Summary, unitKey } from "@/lib/p1-shape";
 import "./results.css";
 
 const route = page("PAGE-01");
@@ -24,8 +24,8 @@ export const metadata: Metadata = { title: route.label };
   1페이지는 전국 정리본(history.snapshot.*, 기획 1.9.95)으로 그린다. 관리자가 미리 받아 검증·저장해 둔 학교별 묶음과
   작은 검색 색인만 읽으므로 첫 화면부터 전국 전체가 보이고, 검색은 서버 API 를 다시 부르지 않는다.
   옛 history.search 6쪽 조립·'조회 미완료'는 이 화면에서 쓰지 않는다(연결계약 v3 §4-5). 두 경로를 함께 부르지 않는다.
-  학년도 결합은 같은 원래 PK 일 때만, PK 미연결 관측은 따로 원문 그대로 보인다. 2027 모집 정보는 검증된 목표 모집행
-  ID 가 없어 연결하지 않는다(year_mapping).
+  학년도 결합은 같은 원래 PK 일 때만, PK 미연결 관측은 따로 원문 그대로 보인다. 2027 모집행은 자기 PK 로 따로 두고,
+  과거 행은 서버의 검토 확인 연결(historical_links)로만 묶는다. 부분 발행이면 맨 위에 그 사실을 알린다(담당자 1.9.141).
 */
 
 /**
@@ -104,6 +104,11 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
               </span>
               {filtered && <Link href={hrefWith(cur, { university: undefined, unit: undefined, region: undefined, group: undefined })}>조건 지우기</Link>}
             </div>
+            {snap.ready.r27_scope_coverage && (
+              <p className="rs-idnote">
+                2027학년도 모집 정보는 지금 <b>일부 모집단위만</b> 반영되어 있습니다. 검토 중인 <b className="num">{snap.ready.r27_scope_coverage.review_pending_rows}</b>건은 확인이 끝나는 대로 더해집니다.
+              </p>
+            )}
 
             {res.schools.length === 0 ? (
               <section className="gate flat">
@@ -154,18 +159,18 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
 
 /**
  * 접힌 줄에 넘길 작은 요약: 2027학년도 모집인원만(2026-10-24 사용자 결정).
- * 정리본은 2024~2026 발표만 담고 1페이지 모집단위 → 2027 모집행 연결이 아직 없어(담당자 요청 10-24) r27 은 null 이다.
- * 담당자가 자료 모양을 정하면 여기서만 채운다.
+ * 2027 모집행(schema v2 의 r27_source)이 있으면 그 모집인원 원문을, 없으면 null('준비 중')을 넘긴다.
+ * 과거 학년도는 담당자가 검토 확인한 연결만 같은 줄로 묶인다(lib/p1-shape linkR27).
  */
 function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
-  const l = latestOf(rows);
+  const l = latestOf(rows), r27 = rows.find((r) => r.y === 2027);
   return {
     k: unitKey(l),
     // 모집군은 '가군·나군·다군'으로 통일해 보인다(발표 표기 '다'·'다군'이 섞여 있다, 10-24 사용자 결정)
     g: l.g ? l.g.replace(/^([가나다])군?$/, "$1군") : null,
     d: l.d,
     sub: [l.c, l.t, l.pk === null ? "모집행 연결 확인 중" : null].filter(Boolean).join(" · "),
-    r27: null,
+    r27: r27 ? r27Summary(r27.q27) : null,
     ratio27: null, // 2027 반영비율도 담당자 자료(연도별 반영비 조회) 연결 뒤 여기서 채운다
   };
 }

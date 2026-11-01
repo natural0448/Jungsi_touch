@@ -115,7 +115,11 @@ function derived(r: Row): { applicants: number | null; dropped: number | null; h
 export const latestOf = (rows: Row[]) => [...rows].sort((a, b) => b.y - a.y)[0];
 
 /** 한 모집단위(같은 원래 PK 또는 미연결 관측 하나)의 학년도별 고정 표 */
-export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: string }) {
+export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: string }) {
+  // 2027 모집행은 접힌 줄 요약에만 보이고, 이 표는 2024~2026 대학 발표 결과만 보인다(담당자 v9 §3)
+  const rows = all.filter((r) => r.y < 2027);
+  if (rows.length === 0)
+    return <p className="rs-idnote">이 모집단위는 2027학년도 모집 정보만 있습니다. 2024~2026학년도 대학 발표 결과와 같은 모집단위인지 아직 확인되지 않아 함께 보이지 않습니다.</p>;
   const latest = latestOf(rows);
   const byYear = new Map<number, Row[]>();
   for (const r of rows) byYear.set(r.y, [...(byYear.get(r.y) ?? []), r]);

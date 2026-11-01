@@ -2,23 +2,26 @@
 
 import { useRef, useState } from "react";
 import { ChevronIcon } from "@/components/icons";
-import { reasonText, YearTable } from "./snapshot-table";
+import type { R27Summary } from "@/lib/p1-shape";
+import { YearTable } from "./snapshot-table";
 import { loadUnitRows, type UnitRows } from "./unit-actions";
 
-/** 접힌 줄 하나의 작은 요약 자료. 칸은 [원문 값, 단위, 확인 중 사유 코드(없으면 null)] */
-export type SumCell = [string | null, string | null, string | null];
-/** 접힌 줄에는 2027학년도 모집인원만 보인다(2026-10-24 사용자 결정). 자료가 연결되기 전에는 r27 = null → '준비 중' */
-export type SumItem = { k: string; g: string | null; d: string; sub: string; r27: SumCell | null; ratio27: string | null };
+/** 접힌 줄에는 2027학년도 모집인원만 보인다(2026-10-24 사용자 결정). 2027 모집행이 없으면 r27 = null → '준비 중' */
+export type SumItem = { k: string; g: string | null; d: string; sub: string; r27: R27Summary | null; ratio27: string | null };
 /* ratio27: 2027 수능 영역별 반영비율 한 줄(예: "국 30 · 수 40 · 영 20 · 탐 10"). 담당자 자료 연결 전에는 null 이라 칸을 그리지 않는다 */
 
-function V({ c }: { c: SumCell }) {
-  const [v, u, hold] = c;
+/** 2027 모집 칸(11-02 사용자 확인 문구). 이월 미정은 0 이 아니라 '이월 시 선발', 모르는 상태는 '확인 중' */
+function V({ c }: { c: R27Summary }) {
+  if (c.hold) return <span className="unpub" title="2027학년도 모집인원을 모집요강 원문과 대조하고 있습니다">확인 중</span>;
+  if (c.v === null) return <b title={c.note ?? undefined}>이월 시 선발</b>;
   return (
-    <>
-      {v === null ? <span className="unpub">─</span> : <b className="num">{v}</b>}
-      {v !== null && u && <small>{u}</small>}
-      {hold && <i className="q" title={reasonText(hold) ?? undefined}>{v === null ? "확인 중" : "확인"}</i>}
-    </>
+    <span title={c.note ?? undefined}>
+      <b className="num">{c.v}</b>
+      <small>명</small>
+      {c.carry && <b> + 이월</b>}
+      {c.initial && <small> 최초</small>}
+      {c.check && <i className="q" title="값은 모집요강 그대로이고 단위·기준일 확인이 남았습니다">확인</i>}
+    </span>
   );
 }
 
@@ -71,6 +74,7 @@ function Item({ pub, schoolId, schoolName, it }: { pub: string; schoolId: string
         </span>
         <span className="go"><ChevronIcon /></span>
       </button>
+      {open && it.r27?.note && <p className="rs-idnote">2027 모집: {it.r27.note}</p>}
       {open &&
         (got === null ? (
           <p className="rs-wait">학년도별 결과를 불러오는 중…</p>

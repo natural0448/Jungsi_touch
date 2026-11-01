@@ -70,6 +70,9 @@
   .et .rs-search{grid-template-columns:1fr}
   .et .rs-off{padding:12px 12px 14px}
   .et .rs-defs div{grid-template-columns:1fr;gap:2px}
+  /* 긴 학과명(띄어쓰기 없는 한 단어)이 2027 모집 칸과 겹치지 않게 줄을 바꾼다 */
+  .et .rs-offhd .unit b{overflow-wrap:anywhere}
+  .et .rs-offhd .rs-sum{flex-shrink:0;max-width:52%;justify-content:flex-end}
 }
 
 /* ── 한 모집단위에 3개년 결과 + 2027 모집 한 줄 ── */
