@@ -4500,6 +4500,7 @@
         "official_history_db_unavailable",
         "official_history_runtime_role_unverified",
         "official_history_scope_unverified",
+        "overall_model_refresh_pending",
         "pack_version_mismatch",
         "paid_delivery_provenance_unavailable",
         "paid_delivery_scope_unavailable",

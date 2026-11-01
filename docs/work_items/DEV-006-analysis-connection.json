@@ -13,7 +13,7 @@
   ],
   "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
   "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-  "contract_version": "1.9.141",
+  "contract_version": "1.9.144",
   "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
   "owner": "외부 프런트 전담 개발자",
   "candidate_only": true,
@@ -816,10 +816,22 @@
           "final_70_percent_cut",
           "selected_published_score"
         ],
-        "text": "3인이하미발표",
-        "application": "기존 전형/집단/산식/발표용도·화면 선택 필터를 통과한 입결 성적 칸의 native null에 표시한다.",
+        "text": "해당조건미발표",
+        "application": "기존 전형·집단·산식·발표용도·화면 선택 필터를 통과한 입결 성적 칸의 native null에 표시한다. 원문 사유·모집인원만으로 특정 미발표 인원 기준을 추정하지 않는다.",
         "native_values": "정본/DTO의 null·숫자0·문자열 정밀도·원문 사유는 보존하며 UI 대체 문구만 적용한다. 모든 null을 SOURCE_NONDISCLOSED_LE_3의 원문 증거로 분류하지 않는다.",
-        "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다."
+        "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다.",
+        "historical_20261029_before_user_correction": {
+          "fields": [
+            "final_50_percent_cut",
+            "final_70_percent_cut",
+            "selected_published_score"
+          ],
+          "text": "3인이하미발표",
+          "application": "기존 전형/집단/산식/발표용도·화면 선택 필터를 통과한 입결 성적 칸의 native null에 표시한다.",
+          "native_values": "정본/DTO의 null·숫자0·문자열 정밀도·원문 사유는 보존하며 UI 대체 문구만 적용한다. 모든 null을 SOURCE_NONDISCLOSED_LE_3의 원문 증거로 분류하지 않는다.",
+          "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다."
+        },
+        "display_reason_evidence": "현행 Cell 계약은 해당 관측·코호트·통계에 원문 사유가 검증 결속됐는지 보장하지 않으므로 이유코드만으로 3인 이하 문구를 노출하지 않는다. 사유가 확인된 개별 표시 기능은 별도 계약·근거·검수 후 적용한다."
       },
       "own_report_list": "is_current 키 부재인 구서버와 키가 있으나 전부 null인 신서버를 구분한다. 신판의 전체 null은 숨기지 않고 혼합 값은 false만 숨기며 정정 후 첫 페이지부터 재조회한다. Owner 수정 보고와 실제 배포 증거는 별도로 확인한다.",
       "professional_usage": "만료일 연장은 계산 비용·요청량 한도의 승인을 대신하지 않는다. 기존 개인 한도를 유지하는 전문가용 별도 계산 capacity와 정확한 승인 카탈로그·원자적 예약·다학생 순차 수용 증거를 준비한 뒤 활성화한다. units_per_offering을 근거 없이 상수 비용으로 낮추지 않는다.",

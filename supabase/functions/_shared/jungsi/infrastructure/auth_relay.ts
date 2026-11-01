@@ -260,7 +260,8 @@ const SAFE_CODES = new Set([
 ]);
 export function safeFailure(error: unknown, requestId: string): Response {
   const known = error instanceof AccessError &&
-    (SAFE_CODES.has(error.code) || error.code === "service_ended" && error.http === 403) &&
+    (SAFE_CODES.has(error.code) || error.code === "service_ended" && error.http === 403 ||
+      error.code === "overall_model_refresh_pending" && error.http === 503) &&
     [400, 401, 403, 404, 405, 409, 413, 422, 429, 503].includes(error.http) &&
     (error.http !== 429 || error instanceof RequestLimitError);
   const code = known ? error.code : "backend_dependency_unavailable",

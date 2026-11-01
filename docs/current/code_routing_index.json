@@ -505,7 +505,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "f700b177590b39e7b6812d8a71c4e1f047054267e9fdedc0076425db2a0e56d9",
+      "source_sha256": "3e491e7b513a7937a5173a413b5e1d139432bfb2aedbc44179fb2201dd6eae9d",
       "symbols": [
         {
           "kind": "class",
@@ -8410,7 +8410,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "7b39971ed0563ea41e415c2616eb0f0828ebf7b7da41e9a0bff1fe7d1c6fe157",
+        "source_sha256": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d",
         "declared_exports": [
           "PROFILE_REPORT_OPERATIONS",
           "ProfileReportService",
@@ -8478,6 +8478,22 @@
           "R27PagedSource",
           "R27BatchOptions",
           "buildStandaloneR27"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts",
+        "layer": "application",
+        "status": "INTERNAL_DTO_SOURCE_REGISTERED_OPERATING_BINDING_NOT_RUN",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "ba1cf4303b5a448bd9101288baa44ae60c60a5088b6eb08886fe12eddd590533",
+        "declared_exports": [
+          "assembleRecruitmentStageReview",
+          "readOperatingRecruitmentStages"
         ]
       },
       {
@@ -9281,7 +9297,7 @@
           "REQ-12",
           "REQ-30"
         ],
-        "source_sha256": "747b86f3c4e610efc3178c62db0abd17aac32ee524d10a66e1b5923fe942cb58",
+        "source_sha256": "fb13ae4540205cf40c2c4d6df3a7d5a756cbeff9a7cb819a0311a11ced257821",
         "declared_exports": [
           "BoundaryPorts",
           "RelayBoundary",

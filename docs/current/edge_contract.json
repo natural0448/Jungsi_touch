@@ -4,7 +4,7 @@
     "files": {
       "src/jungsi_touch/application/public_response_schemas.json": {
         "layer": "application",
-        "sha256": "ead322cca8bdf3d15b098031f5588779041b2e38ebdbd06f6bbb9a0835a465a8"
+        "sha256": "8b4d0e1d2ddffb3753f443642fea4983d5178cdf056ffab5503c82efa14fcd1d"
       },
       "supabase/functions/_shared/current_public_catalog.ts": {
         "layer": "application",
@@ -43226,7 +43226,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "7b39971ed0563ea41e415c2616eb0f0828ebf7b7da41e9a0bff1fe7d1c6fe157",
+        "source_sha256": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d",
         "symbols": [
           {
             "declarations": [
@@ -47215,6 +47215,604 @@
         "R27PagedSource",
         "R27BatchOptions",
         "buildStandaloneR27"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "NativeObject",
+            "jsDoc": {
+              "doc": "Internal application DTO candidate. No route, DB, writer, issuer verifier or publisher.\nSource approval labels are data-port assertions, never independently verified authority.\nPublic/operating integration stays unavailable until the existing source/consumer gates bind."
+            },
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "cloneNativeJson",
+            "jsDoc": {
+              "doc": "Internal application DTO candidate. No route, DB, writer, issuer verifier or publisher.\nSource approval labels are data-port assertions, never independently verified authority.\nPublic/operating integration stays unavailable until the existing source/consumer gates bind."
+            },
+            "originalName": "cloneNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "hasAsciiControl",
+            "originalName": "hasAsciiControl",
+            "src": "supabase/functions/_shared/jungsi/domain/text.ts"
+          },
+          {
+            "importedName": "nativeJsonText",
+            "jsDoc": {
+              "doc": "Internal application DTO candidate. No route, DB, writer, issuer verifier or publisher.\nSource approval labels are data-port assertions, never independently verified authority.\nPublic/operating integration stays unavailable until the existing source/consumer gates bind."
+            },
+            "originalName": "nativeJsonText",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          }
+        ],
+        "source_sha256": "ba1cf4303b5a448bd9101288baa44ae60c60a5088b6eb08886fe12eddd590533",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "assembleRecruitmentStageReview"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  ..._args: unknown[]\n)",
+                  "params": [
+                    {
+                      "arg": {
+                        "kind": "identifier",
+                        "name": "_args",
+                        "optional": false
+                      },
+                      "kind": "rest",
+                      "tsType": {
+                        "kind": "array",
+                        "value": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "never",
+                          "value": "never"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "readOperatingRecruitmentStages"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[a-f0-9]{64}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "HASH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "academic_year",
+                          "value": {
+                            "kind": "string",
+                            "string": "academic_year"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "school_id",
+                          "value": {
+                            "kind": "string",
+                            "string": "school_id"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "original_pk",
+                          "value": {
+                            "kind": "string",
+                            "string": "original_pk"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "campus",
+                          "value": {
+                            "kind": "string",
+                            "string": "campus"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "admission_track",
+                          "value": {
+                            "kind": "string",
+                            "string": "admission_track"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "group",
+                          "value": {
+                            "kind": "string",
+                            "string": "group"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "IDENTITY"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown, code: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "asserts v",
+                    "value": {
+                      "asserts": true,
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "need"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  raw: unknown,\n  required: readonly string[],\n  optional: readonly string[] = [],\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "required",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "optional",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "object"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown, max = 4096)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "max",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "right": "4096"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "v is string",
+                    "value": {
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "text"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "identity"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "count"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(a: NativeObject, b: NativeObject)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "a",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "b",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sameIdentity"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown, id: NativeObject, revision: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "id",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "revision",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "proof"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/text.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/text.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "assembleRecruitmentStageReview",
+        "readOperatingRecruitmentStages"
       ]
     },
     "supabase/functions/_shared/jungsi/application/report_actions.ts": {
@@ -73094,7 +73692,7 @@
             "src": "supabase/functions/_shared/jungsi/application/access.ts"
           }
         ],
-        "source_sha256": "747b86f3c4e610efc3178c62db0abd17aac32ee524d10a66e1b5923fe942cb58",
+        "source_sha256": "fb13ae4540205cf40c2c4d6df3a7d5a756cbeff9a7cb819a0311a11ced257821",
         "symbols": [
           {
             "declarations": [
@@ -121188,7 +121786,7 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           }
         ],
-        "source_sha256": "2395998b1d4e0f54da45c2b41d07b1a50213af9415cff03743c408041c0188a1",
+        "source_sha256": "3cd3edc348addd802945b9c89b6a86a9a0074a2ff80e7d9c5f04a35eab3e39fd",
         "symbols": [
           {
             "declarations": [
@@ -122562,7 +123160,7 @@
             "src": "tests/edge/synthetic_history_snapshot.ts"
           }
         ],
-        "source_sha256": "e026d3cde979bc70b0b178dde743d2f257dc4d58ffd9cc11f0093f6f572798f9",
+        "source_sha256": "ac3d4943340c86d35b135d511372add4dc515d681f2a32dfb782a45ec5c87d37",
         "symbols": [
           {
             "declarations": [
@@ -139491,6 +140089,1948 @@
       "layer": "verification",
       "symbols": []
     },
+    "tests/edge/test_overall_refresh_boundaries.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ApiExecution",
+            "originalName": "ApiExecution",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "ApiHttpPorts",
+            "originalName": "ApiHttpPorts",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
+            "importedName": "PublicResponseProjection",
+            "originalName": "PublicResponseProjection",
+            "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
+          },
+          {
+            "importedName": "RelayBoundary",
+            "originalName": "RelayBoundary",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "SafeRuntimeObservation",
+            "originalName": "SafeRuntimeObservation",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "createApiHandler",
+            "originalName": "createApiHandler",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "observeRuntimeResponse",
+            "originalName": "observeRuntimeResponse",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+          },
+          {
+            "importedName": "safeFailure",
+            "originalName": "safeFailure",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "schemas",
+            "jsDoc": {
+              "doc": "Synthetic error boundary, HTTP admission and observation checks; no runtime I/O."
+            },
+            "originalName": "default",
+            "src": "src/jungsi_touch/application/public_response_schemas.json"
+          },
+          {
+            "importedName": "syncPromise",
+            "originalName": "syncPromise",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "syntheticApiPolicies",
+            "originalName": "syntheticApiPolicies",
+            "src": "tests/edge/synthetic_api_contract.ts"
+          }
+        ],
+        "source_sha256": "17c2f3fb8807f5bf093985bf12b410a7746fa34ebe6e15787998f7f02e2f32ec",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "overall_model_refresh_pending",
+                    "value": {
+                      "kind": "string",
+                      "string": "overall_model_refresh_pending"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "CODE"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "RELAY"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "00000000-0000-0000-0000-000000000001",
+                    "value": {
+                      "kind": "string",
+                      "string": "00000000-0000-0000-0000-000000000001"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SUBJECT"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "1700000000000000",
+                    "value": {
+                      "kind": "bigInt",
+                      "string": "1700000000000000"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "NOW"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "/api/v1/overall-reports",
+                    "value": {
+                      "kind": "string",
+                      "string": "/api/v1/overall-reports"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PATH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PAYLOAD"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(options: { authenticated?: boolean; paid?: boolean; failBudget?: boolean } = {})",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "options",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "authenticated",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              },
+                              {
+                                "name": "paid",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              },
+                              {
+                                "name": "failBudget",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(extra: Record<string, string> = {})",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "extra",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "request"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(response: Response, status: number, code: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "response",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Response",
+                        "value": {
+                          "typeName": "Response"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "status",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "safeError"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../src/jungsi_touch/application/public_response_schemas.json",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "src/jungsi_touch/application/public_response_schemas.json"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/public_response.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/public_response.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_api_contract.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_api_contract.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/test_overall_refresh_http.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "A",
+            "originalName": "A",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "ApiHttpPorts",
+            "originalName": "ApiHttpPorts",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
+            "importedName": "NOW",
+            "originalName": "NOW",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "NativeExamPack",
+            "originalName": "NativeExamPack",
+            "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+          },
+          {
+            "importedName": "NativeExamTotalModel",
+            "originalName": "NativeExamTotalModel",
+            "src": "supabase/functions/_shared/jungsi/domain/total_model.ts"
+          },
+          {
+            "importedName": "ProfileReportService",
+            "jsDoc": {
+              "doc": "P2 refresh through the actual HTTP handler and in-memory ports; no real data or network."
+            },
+            "originalName": "ProfileReportService",
+            "src": "supabase/functions/_shared/jungsi/application/profile_reports.ts"
+          },
+          {
+            "importedName": "PublicResponseProjection",
+            "originalName": "PublicResponseProjection",
+            "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
+          },
+          {
+            "importedName": "RelayBoundary",
+            "originalName": "RelayBoundary",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "canonicalApiPolicies",
+            "originalName": "canonicalApiPolicies",
+            "src": "tests/edge/public_api_contract_fixture.ts"
+          },
+          {
+            "importedName": "canonicalPublicResponseSchemas",
+            "originalName": "canonicalPublicResponseSchemas",
+            "src": "tests/edge/public_api_contract_fixture.ts"
+          },
+          {
+            "importedName": "clock",
+            "originalName": "clock",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "createApiHandler",
+            "originalName": "createApiHandler",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "nativeFixture",
+            "originalName": "nativeFixture",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "syntheticNativeModelData",
+            "originalName": "syntheticNativeModelData",
+            "src": "tests/edge/synthetic_exam_pack.ts"
+          },
+          {
+            "importedName": "syntheticNativePackData",
+            "originalName": "syntheticNativePackData",
+            "src": "tests/edge/synthetic_exam_pack.ts"
+          }
+        ],
+        "source_sha256": "c91df265da7f386f110213664c87b82ff41b13e7e17cd3b0ae58b2a0a6fb71a4",
+        "symbols": []
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/profile_reports.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/public_response.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/public_response.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/total_model.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/total_model.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./public_api_contract_fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/public_api_contract_fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_exam_pack.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_score_input_policy.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_score_input_policy.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/test_overall_refresh_races.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "A",
+            "originalName": "A",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Review-only synthetic race tests, adapted to this test directory.\nUses request-local transports over an in-memory fixture.\nThe single-slot SQL fixture serializes individual transactions; this is not\na claim of real PostgreSQL execution or production concurrency coverage."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ApiExecution",
+            "originalName": "ApiExecution",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "NOW",
+            "originalName": "NOW",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "NativeExamPack",
+            "originalName": "NativeExamPack",
+            "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+          },
+          {
+            "importedName": "NativeExamTotalModel",
+            "originalName": "NativeExamTotalModel",
+            "src": "supabase/functions/_shared/jungsi/domain/total_model.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "ProfileReportService",
+            "originalName": "ProfileReportService",
+            "src": "supabase/functions/_shared/jungsi/application/profile_reports.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "clock",
+            "originalName": "clock",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "cloneNativeJson",
+            "originalName": "cloneNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "nativeFixture",
+            "originalName": "nativeFixture",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "session",
+            "originalName": "session",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "syntheticNativeModelData",
+            "originalName": "syntheticNativeModelData",
+            "src": "tests/edge/synthetic_exam_pack.ts"
+          },
+          {
+            "importedName": "syntheticNativePackData",
+            "originalName": "syntheticNativePackData",
+            "src": "tests/edge/synthetic_exam_pack.ts"
+          }
+        ],
+        "source_sha256": "23309a904159043b48c60382d4f1145ec2ff382b3753167752cd1c72014c5d49",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(profileId: string, key: string, previous?: NativeObject)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "profileId",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "key",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "previous",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "ApiExecution",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "ApiExecution",
+                        "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+                      },
+                      "typeName": "ApiExecution"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "execution"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": []
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "barrier"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(work: Promise<T>)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "work",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "T",
+                              "value": {
+                                "resolution": {
+                                  "declaringKind": "function",
+                                  "declaringName": "caught",
+                                  "kind": "typeParam"
+                                },
+                                "typeName": "T"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "typeParams": [
+                    {
+                      "name": "T"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "caught"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  entered: Promise<void>,\n  outcome: Promise<{ value: unknown; error: unknown }>,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "entered",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "outcome",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "properties": [
+                                  {
+                                    "name": "value",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "unknown",
+                                      "value": "unknown"
+                                    }
+                                  },
+                                  {
+                                    "name": "error",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "unknown",
+                                      "value": "unknown"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "awaitBarrier"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(error: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "error",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "assertConflict"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  f: ReturnType<typeof nativeFixture>,\n  reportId: string,\n  profileId: string,\n  key: string,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "f",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReturnType",
+                        "value": {
+                          "typeName": "ReturnType",
+                          "typeParams": [
+                            {
+                              "kind": "typeQuery",
+                              "repr": "nativeFixture",
+                              "value": "nativeFixture"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "reportId",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "profileId",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "key",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "concurrentRevision"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(key: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "key",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "requestKey"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/profile_reports.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/total_model.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/total_model.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_exam_pack.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_score_input_policy.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_score_input_policy.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/test_overall_refresh_recovery.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "A",
+            "originalName": "A",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Explicit refresh recovery; invented data and existing in-memory repositories only."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ApiExecution",
+            "originalName": "ApiExecution",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "NativeExamPack",
+            "originalName": "NativeExamPack",
+            "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+          },
+          {
+            "importedName": "NativeExamTotalModel",
+            "originalName": "NativeExamTotalModel",
+            "src": "supabase/functions/_shared/jungsi/domain/total_model.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "ProfileReportService",
+            "originalName": "ProfileReportService",
+            "src": "supabase/functions/_shared/jungsi/application/profile_reports.ts"
+          },
+          {
+            "importedName": "SyntheticNativeRepository",
+            "originalName": "SyntheticNativeRepository",
+            "src": "tests/edge/synthetic_platform_repository.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "clock",
+            "originalName": "clock",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "cloneNativeJson",
+            "originalName": "cloneNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "nativeFixture",
+            "originalName": "nativeFixture",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "safeFailure",
+            "originalName": "safeFailure",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "session",
+            "originalName": "session",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "syntheticNativeModelData",
+            "originalName": "syntheticNativeModelData",
+            "src": "tests/edge/synthetic_exam_pack.ts"
+          },
+          {
+            "importedName": "syntheticNativePackData",
+            "originalName": "syntheticNativePackData",
+            "src": "tests/edge/synthetic_exam_pack.ts"
+          }
+        ],
+        "source_sha256": "0845e1c82f3e26ecfa25e698225049ec7931a9abb5bed1bcdfae28225b52752b",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(profileId: string, key: string, previous?: NativeObject)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "profileId",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "key",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "previous",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "ApiExecution",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "ApiExecution",
+                        "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+                      },
+                      "typeName": "ApiExecution"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "execution"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(report: NativeObject)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "report",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "pending"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(work: () => Promise<unknown>, code = \"overall_model_refresh_pending\")",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "work",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "code",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "overall_model_refresh_pending"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "blocked"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(f: ReturnType<typeof nativeFixture>)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "f",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReturnType",
+                        "value": {
+                          "typeName": "ReturnType",
+                          "typeParams": [
+                            {
+                              "kind": "typeQuery",
+                              "repr": "nativeFixture",
+                              "value": "nativeFixture"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "readyService"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  kind: \"analysis\" | \"candidates\" | \"shortlist\" | \"invalid_analysis\" | \"invalid_candidates\",\n  changedContext = false,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "kind",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "analysis",
+                            "value": {
+                              "kind": "string",
+                              "string": "analysis"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "candidates",
+                            "value": {
+                              "kind": "string",
+                              "string": "candidates"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "shortlist",
+                            "value": {
+                              "kind": "string",
+                              "string": "shortlist"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "invalid_analysis",
+                            "value": {
+                              "kind": "string",
+                              "string": "invalid_analysis"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "invalid_candidates",
+                            "value": {
+                              "kind": "string",
+                              "string": "invalid_candidates"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "changedContext",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "right": "false"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "storedPending"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(f: ReturnType<typeof nativeFixture>)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "f",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReturnType",
+                        "value": {
+                          "typeName": "ReturnType",
+                          "typeParams": [
+                            {
+                              "kind": "typeQuery",
+                              "repr": "nativeFixture",
+                              "value": "nativeFixture"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "preservedState"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(kind: \"analysis\" | \"candidates\", changedContext: boolean)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "kind",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "analysis",
+                            "value": {
+                              "kind": "string",
+                              "string": "analysis"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "candidates",
+                            "value": {
+                              "kind": "string",
+                              "string": "candidates"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "changedContext",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "storedReady"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/profile_reports.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/total_model.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/total_model.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_exam_pack.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_platform_repository.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_platform_repository.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_score_input_policy.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_score_input_policy.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/test_overall_runtime_order.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "A",
+            "originalName": "A",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "ApiHttpPorts",
+            "originalName": "ApiHttpPorts",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
+            "importedName": "NOW",
+            "originalName": "NOW",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "NativeExamPack",
+            "originalName": "NativeExamPack",
+            "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+          },
+          {
+            "importedName": "NativeExamTotalModel",
+            "originalName": "NativeExamTotalModel",
+            "src": "supabase/functions/_shared/jungsi/domain/total_model.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "ProfileReportService",
+            "jsDoc": {
+              "doc": "Local-only fault-injection review; same transaction boundaries as overall runtime."
+            },
+            "originalName": "ProfileReportService",
+            "src": "supabase/functions/_shared/jungsi/application/profile_reports.ts"
+          },
+          {
+            "importedName": "PublicResponseProjection",
+            "originalName": "PublicResponseProjection",
+            "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
+          },
+          {
+            "importedName": "RelayBoundary",
+            "originalName": "RelayBoundary",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "canonicalApiPolicies",
+            "originalName": "canonicalApiPolicies",
+            "src": "tests/edge/public_api_contract_fixture.ts"
+          },
+          {
+            "importedName": "canonicalPublicResponseSchemas",
+            "originalName": "canonicalPublicResponseSchemas",
+            "src": "tests/edge/public_api_contract_fixture.ts"
+          },
+          {
+            "importedName": "clock",
+            "originalName": "clock",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "createApiHandler",
+            "originalName": "createApiHandler",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "nativeFixture",
+            "originalName": "nativeFixture",
+            "src": "tests/edge/synthetic_score_input_policy.ts"
+          },
+          {
+            "importedName": "syntheticNativeModelData",
+            "originalName": "syntheticNativeModelData",
+            "src": "tests/edge/synthetic_exam_pack.ts"
+          },
+          {
+            "importedName": "syntheticNativePackData",
+            "originalName": "syntheticNativePackData",
+            "src": "tests/edge/synthetic_exam_pack.ts"
+          }
+        ],
+        "source_sha256": "b9609bb4908a3206457e860f763e40c517c08849643d12abe6cdbeb3b46cc858",
+        "symbols": []
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/profile_reports.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/public_response.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/public_response.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/total_model.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/total_model.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./public_api_contract_fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/public_api_contract_fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_exam_pack.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_exam_pack.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_score_input_policy.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_score_input_policy.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
     "tests/edge/test_overall_service.ts": {
       "declarations": {
         "imports": [
@@ -143487,6 +146027,593 @@
             {
               "kind": "code",
               "path": "tests/edge/synthetic_runtime_binding.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/test_recruitment_stage_review.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "build",
+            "jsDoc": {
+              "doc": "Synthetic internal DTO checks. No public route, authority, DB or publication."
+            },
+            "originalName": "assembleRecruitmentStageReview",
+            "src": "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "readOperatingRecruitmentStages",
+            "jsDoc": {
+              "doc": "Synthetic internal DTO checks. No public route, authority, DB or publication."
+            },
+            "originalName": "readOperatingRecruitmentStages",
+            "src": "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts"
+          }
+        ],
+        "source_sha256": "495f340433ac4301b36db74ee0e4fda49769ccf3517d1c93bd207a1f2205441f",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "academic_year",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          }
+                        },
+                        {
+                          "name": "school_id",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "original_pk",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "campus",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "admission_track",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "group",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "id"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(override: Record<string, unknown> = {})",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "override",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "unknown",
+                                "value": "unknown"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "proof"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  stage: string,\n  value: unknown,\n  state = \"reported\",\n  override: Record<string, unknown> = {},\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "stage",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "state",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "reported"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "override",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "unknown",
+                                "value": "unknown"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fact"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown, override: Record<string, unknown> = {})",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "override",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "unknown",
+                                "value": "unknown"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "initial"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  value: unknown,\n  state = \"reported\",\n  override: Record<string, unknown> = {},\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "state",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "reported"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "override",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "unknown",
+                                "value": "unknown"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "final"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(override: Record<string, unknown> = {})",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "override",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "unknown",
+                                "value": "unknown"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "input"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown, path: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "path",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "unknown",
+                    "value": "unknown"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "at"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(actual: unknown, expected: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "actual",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "expected",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "is"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(action: () => unknown, code: RegExp)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "action",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "unknown",
+                            "value": "unknown"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RegExp",
+                        "value": {
+                          "typeName": "RegExp"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "throws"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: Record<string, unknown>, field: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Record",
+                        "value": {
+                          "typeName": "Record",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "field",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "without"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
             }
           ]
         }
