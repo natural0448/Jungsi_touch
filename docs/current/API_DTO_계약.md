@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.137이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.141이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -313,16 +313,17 @@ format: jungsi.sample-report/v1
 
 format: jungsi.history-snapshot-head/v1
 
-필드: format, status, snapshot_id, publication_sha256, source_head_sha256, generated_at, source_as_of, schema_version, normalization_rules_version, selection_rules_version, counts, delivery_mode, full, parts, expires_at.
+필드: format, status, snapshot_id, publication_sha256, source_head_sha256, generated_at, source_as_of, schema_version, normalization_rules_version, selection_rules_version, counts, delivery_mode, full, parts, expires_at, r27_scope_coverage.
 
 - Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.
 - Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.
+- Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required.
 
 ### history_snapshot_body
 
 format: jungsi.history-snapshot/v1
 
-필드: format, payload_id, part_id, rows.
+필드: format, payload_id, part_id, rows, r27_scope_coverage.
 
 - Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.
 - Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.
@@ -332,6 +333,7 @@ format: jungsi.history-snapshot/v1
 - q.qualification_receipt_sha256, review-only descriptor.receipt의 원본 bytes/SHA와 approvals는 같은 service core 바이트 SHA를 가리킨다. jungsi.p1-writer-field-qualification-receipt/v1 rich writer proof는 별도 감사 근거로 보존하고 core 지문을 참조한다. audit 파일을 core로 다시 라벨링하거나 양 형식을 느슨하게 함께 수용하지 않는다.
 - 기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다.
 - Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope.
+- Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required.
 
 ### own_report_list
 
@@ -434,7 +436,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=01d482002ed790f5488a3a1f556107a295726a2f378a2b214052b777ee74d311 -->
+<!-- jungsi:generated spec_sha256=d7842fdb130badaa38e8d5906625653106fc6fcdfd6452df27a00b6916b2faae -->
 
 
 ## 회원별 관심대학 JSON API
@@ -520,7 +522,7 @@ Existing DB stays readable while national numerical supplementation is prepared 
 
 ### 서비스 어댑터 후보와 최종 결속 경계
 
-EXACT_SOURCE_ACCEPTED_EXACT_PUBLICATION_BINDING_OWNER_REGISTRATION_AND_HOSTED_INTAKE_PENDING. 점수·정원 원값 없이 키·검색 메타데이터만 분할한다. 요청마다 최대101개 키를 선택해 같은 READ ONLY 트랜잭션에서 현재 DB를 일괄 JOIN한다. 기존 5초·객체 byte·페이지·요청 공유 예산과 fresh head 검사는 유지한다. 별도 root/lookup v3는 두 hash 버킷과 엄격한 가역 guide tuple2(학년도/학교 코드, 원래 PK 문자열) 및 기존 사전 tuple8 fallback으로 중복 주소만 제거한다. v1/v2 파서·행·byte 검사는 보존하며 v3 전체 lookup 논리 상한도 종전과 같다. namespace·schema·8종 guide command 상태가 어긋나면 첫503/후속409다.
+EXACT_SOURCE_ACCEPTED_EXACT_PUBLICATION_BINDING_OWNER_REGISTRATION_AND_HOSTED_INTAKE_PENDING. 점수·정원 원값 없이 키·검색 메타데이터만 분할한다. 요청마다 최대101개 키를 선택해 같은 READ ONLY 트랜잭션에서 현재 DB를 일괄 JOIN한다. 기존 5초·객체 byte·페이지·요청 공유 예산과 fresh head 검사는 유지한다. 별도 root/lookup v3는 두 hash 버킷과 엄격한 가역 guide tuple2(학년도/학교 코드, 원래 PK 문자열) 및 기존 사전 tuple8 fallback으로 중복 주소만 제거한다. v1/v2 파서·행·byte 검사는 보존하며 v3 전체 lookup 논리 상한도 종전과 같다. namespace·schema·8종 guide command 상태가 어긋나면 첫503/후속409다. 503 대응 descriptor 재결속 서비스 함수는 이전 descriptor와 V3 root의 head·metadata·guide·canonical coverage 지문을 대조해 HOLD 검토 후보만 만든다.
 
 전국 현재 정본 공급 범위는 사용자 채택 상태다. 이번 키 인덱스 v2의 정확 snapshot·coverage 검수·불변 객체와 publication/v2 결속 및 hosted 전환은 최종 운영 승인으로 분리한다. 준비·표본 실제 읽기는 DB 전체 값 인수나 브라우저 인수를 대신하지 않는다.
 
@@ -530,7 +532,7 @@ EXACT_SOURCE_ACCEPTED_EXACT_PUBLICATION_BINDING_OWNER_REGISTRATION_AND_HOSTED_IN
 
 요청당 최대12개 키 shard, shard당256개 키, 반환 최대100개+다음 판정1개다. 물리 읽기 상한에 닿으면 빈 결과에도 다음 cursor를 보존하며 전체 무결과로 표시하지 않는다. 이 제한과 UI 최대6페이지/600지표의 드문 검색어·부분 모집행 동작은 실제 인수 대기다. 12개 lookup shard를 넘는 새 ID 배치는 false404 대신 fail closed다.
 
-최종 exact source CI·전국 coverage 검토·객체 readback·승인 publication/binding 등록과 실제 P1/P3/보안·만료·예산/화면 인수. 현재 정본 수정·새 DB 스키마/writer/운영 배포는 이 소스 검증에 포함하지 않는다.
+최종 exact source CI·전국 coverage 검토·객체 readback·승인 publication/binding 등록과 실제 P1/P3/보안·만료·예산/화면 인수. 현재 정본 수정·새 DB 스키마/writer/운영 배포는 이 소스 검증에 포함하지 않는다. 재결속 후보의 caller 지문은 독립 승인·현재 시각/head/consumer·Storage readback·전체 coverage를 입증하지 않는다. 실제 등록과 화면 인수는 별도다.
 
 
 ## 전체 응시자 추정 모형의 별도 v2 계약
@@ -677,7 +679,7 @@ P1-PUBLISHED-STATISTICS-20261022 / SOURCE118_SEQ2_SCOPED_ACTIVATION_VERIFIED_SIX
 
 READ_ONLY_BASELINE_PUBLICATION_AND_TARGET_RENDERING_OBSERVED. 기존 DB 발행 head approved와 로그인된 P1 전국 요약·대상 모집단위의 연도별 자격 보류/결측 표시를 대조했다. 과거 head0/소수 학교 화면 관측은 역사다. 실제 사용자 JWT·토큰/계정/실제 자료 지문을 공개하지 않는다. 배포 source/Storage 직접GET/전체 보안·전체학교 인수는 이 읽기 증거만으로 PASS로 바꾸지 않는다.
 
-별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 다음 NOT_RUN은 등록 소스의 합성/별도 인수 기록이며 현재 combined 운영 보고는 아래 날짜별 Owner 영수증을 따른다. 별도 시험 209개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
+별도 조회 소스 등록: SOURCE_REGISTERED_NOT_ACTIVATED / history.snapshot.head, history.snapshot.read, report.list-own. 전체 논리 API28개, 기존22·입력권3·조회3의 소스/시험 증거를 분리한다. 다음 NOT_RUN은 등록 소스의 합성/별도 인수 기록이며 현재 combined 운영 보고는 아래 날짜별 Owner 영수증을 따른다. 별도 시험 256개이며 실제 인수 NOT_VERIFIED_BY_SOURCE_SUITE, 새 binding 활성화 NOT_RUN다.
 
 
 현재 운영 기준: This supersedes the earlier deployment-pending status for the limited 503 repair only. Preserve previous runtime and acceptance receipts as history; retain independent data and engine gates.

@@ -35,6 +35,7 @@ import {
   SupabaseSnapshotHead,
 } from "./history_snapshot_source.ts";
 import { SupabaseOwnReportList } from "./own_report_list_postgres.ts";
+import { P1R27RequestAdmission } from "./p1_r27_request_admission.ts";
 import { OwnReportCursor } from "./own_report_cursor.ts";
 import { MemberShortlistService } from "../application/member_shortlist.ts";
 import { MemberJsonResults } from "../application/member_json_results.ts";
@@ -56,6 +57,7 @@ export class NativeRuntimeRequest {
   private scoresValue?: Promise<SupabaseScoreInputRepository>;
   private snapshotValue?: Promise<HistorySnapshotSource>;
   private snapshotOwner?: string;
+  private p1R27Admission?: P1R27RequestAdmission;
   constructor(
     private readonly env: RuntimeEnvironment,
     private readonly basic: () => BasicRuntimeSettings,
@@ -180,9 +182,26 @@ export class NativeRuntimeRequest {
       () => this.assertCurrent(),
     );
   }
-  private snapshot(owner: string): Promise<HistorySnapshotSource> {
+  /** Invoked only by the native business branch after relay and user checks. */
+  async prepareP1R27(request: Request, execution: ApiExecution): Promise<void> {
+    if (this.p1R27Admission) fail();
+    const admission = new P1R27RequestAdmission(request, () => this.clock.nowUtc());
+    this.p1R27Admission = admission;
+    await admission.prepare(this.env, await this.binding(), request, execution);
+  }
+  assertP1R27Current(): void {
+    this.p1R27Admission?.assertCurrent();
+  }
+  closeP1R27(): void {
+    this.p1R27Admission?.close();
+  }
+  private snapshot(owner: string, execution?: ApiExecution): Promise<HistorySnapshotSource> {
     if (this.snapshotOwner !== undefined && this.snapshotOwner !== owner) fail();
     this.snapshotOwner = owner;
+    // Result measurement may use a detached budget request after the business work.
+    // It can reuse this request's already-created source, never create a new one.
+    if (this.snapshotValue) return this.snapshotValue;
+    if (!execution) fail();
     this.snapshotValue ??= (async () => {
       const [binding, controls, budget] = await Promise.all([
         this.binding(),
@@ -190,6 +209,7 @@ export class NativeRuntimeRequest {
         this.budget(),
       ]);
       if (!binding.readViews) fail();
+      const r27 = this.p1R27Admission?.take(execution, owner);
       return new HistorySnapshotSource(
         new SupabaseSnapshotHead(this.sql(), owner),
         binding.readViews.snapshot,
@@ -201,6 +221,8 @@ export class NativeRuntimeRequest {
           runtimeMilliseconds: Number(binding.usageStoreLimits.runtimeHardLimitSeconds * 1000n),
         },
         controls.fetcher,
+        r27?.trust,
+        r27?.admission,
       );
     })();
     return this.snapshotValue;
@@ -215,7 +237,11 @@ export class NativeRuntimeRequest {
         configured = binding.readViews.cursorLifetimeMicroseconds;
       if (remaining < 1n) fail();
       return await new OwnReportListService(
-        new SupabaseOwnReportList(this.sql()),
+        new SupabaseOwnReportList(
+          this.sql(),
+          (await this.budget()).policy.operating ?? null,
+          this.clock,
+        ),
         new OwnReportCursor(
           Uint8Array.from(hex.match(/../g)!, (x) => parseInt(x, 16)),
           binding.readViews.maxCursorCharacters,
@@ -224,7 +250,7 @@ export class NativeRuntimeRequest {
         configured < remaining ? configured : remaining,
       ).execute(request.session, request.query);
     }
-    const source = await this.snapshot(request.session.user.subjectId),
+    const source = await this.snapshot(request.session.user.subjectId, request),
       service = new HistorySnapshotService(
         source,
         this.clock,

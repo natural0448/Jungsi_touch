@@ -143,16 +143,54 @@ function shard(x: unknown): KeyShard {
   ) return fail();
   return { ...s, first, last } as unknown as KeyShard;
 }
+const nativeTypedArrayByteLength = Object.getOwnPropertyDescriptor(
+  Object.getPrototypeOf(Uint8Array.prototype),
+  "byteLength",
+)?.get;
+const nativeUint8Set = Uint8Array.prototype.set;
+
+/** Snapshot a plain, approved reference before invoking an asynchronous port. */
+function immutableReference(ref: PublicKeyObjectReference): PublicKeyObjectReference {
+  try {
+    const d = Object.getOwnPropertyDescriptors(ref);
+    if (
+      Object.keys(ref).length !== 3 ||
+      !d.object_key || !("value" in d.object_key) ||
+      !d.bytes || !("value" in d.bytes) ||
+      !d.sha256 || !("value" in d.sha256)
+    ) return fail();
+    return Object.freeze(reference({
+      object_key: d.object_key.value,
+      bytes: d.bytes.value,
+      sha256: d.sha256.value,
+    }));
+  } catch {
+    return fail();
+  }
+}
+
+/** Copy exactly the returned view into a private buffer before hashing or parsing. */
+function immutableBytes(raw: unknown, expected: number): Uint8Array {
+  try {
+    if (
+      !(raw instanceof Uint8Array) || !nativeTypedArrayByteLength ||
+      nativeTypedArrayByteLength.call(raw) !== expected
+    ) return fail();
+    const bytes = new Uint8Array(new ArrayBuffer(expected));
+    Reflect.apply(nativeUint8Set, bytes, [raw]);
+    return bytes;
+  } catch {
+    return fail();
+  }
+}
+
 async function checked(
   read: PublicKeyObjectRead,
   ref: PublicKeyObjectReference,
 ): Promise<unknown> {
-  reference(ref);
-  const bytes = await read(Object.freeze({ ...ref }));
-  if (
-    !(bytes instanceof Uint8Array) || bytes.length !== ref.bytes ||
-    await publicKeyRawHash(bytes) !== ref.sha256
-  ) return fail();
+  const pin = immutableReference(ref);
+  const bytes = immutableBytes(await read(pin), pin.bytes);
+  if (await publicKeyRawHash(bytes) !== pin.sha256) return fail();
   try {
     return parseNativeJson(
       new TextDecoder("utf-8", { fatal: true }).decode(bytes),

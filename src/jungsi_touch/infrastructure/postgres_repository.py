@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 import hashlib
 import json
+import os
 from uuid import uuid4
 from datetime import date, datetime
 from ..application.platform_ports import PlatformError
@@ -29,7 +30,31 @@ class PostgresRepository:
     def transaction(self, *, include_baseline=False, read_only=False):
         if not self._url: raise PlatformError('storage_not_configured',503)
         try:
-            with self._connector(self._url,sslmode='require',connect_timeout=5,prepare_threshold=None) as connection:
+            # Parse libpq syntax without logging the connection string. A keyword
+            # overrides conninfo, so carrying forward its mode avoids weakening a
+            # configured verify-ca/verify-full connection to require.
+            try:
+                from psycopg.conninfo import conninfo_to_dict
+                options=conninfo_to_dict(self._url)
+            except Exception:
+                raise PlatformError('storage_unavailable',503) from None
+            mode=options.get('sslmode')
+            rootcert=options.get('sslrootcert') or os.environ.get('PGSSLROOTCERT')
+            if not mode:
+                # Service files are resolved by libpq at connect time. Do not
+                # replace an unknown service SSL policy with a weaker default.
+                if options.get('service') or os.environ.get('PGSERVICE'):
+                    raise PlatformError('storage_unavailable',503)
+                mode=os.environ.get('PGSSLMODE') or ('verify-full' if rootcert=='system' else 'require')
+            if mode not in ('require','verify-ca','verify-full'):
+                raise PlatformError('storage_unavailable',503)
+            if rootcert=='system' and mode!='verify-full':
+                raise PlatformError('storage_unavailable',503)
+            with self._connector(self._url,sslmode=mode,connect_timeout=5,prepare_threshold=None) as connection:
+                # libpq can prefer GSS encryption even with sslmode set. Do not
+                # run a query unless this connection actually negotiated TLS.
+                if connection.pgconn.ssl_in_use is not True:
+                    raise PlatformError('storage_unavailable',503)
                 if read_only:connection.execute('SET TRANSACTION READ ONLY')
                 baseline=connection.execute('SHOW TIMEZONE').fetchone()[0] if include_baseline else None
                 # Works for transaction pooling too; never depends on a prior session.

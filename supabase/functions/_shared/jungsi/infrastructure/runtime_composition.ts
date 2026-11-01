@@ -1,4 +1,9 @@
+import {
+  assertAdmissionMicros,
+  issueAdmissionPermit,
+} from "../application/service_end_admission.ts";
 /** Concrete service graph with an injected native pool and transport. No server starts on import. */
+import { SearchFailureCorrelation } from "./search503_correlation.ts";
 import { AccessError } from "../application/access.ts";
 import type {
   ApiBusinessPort,
@@ -223,8 +228,12 @@ export class NativeRuntimeApi {
   }
   readonly fetch = async (request: Request): Promise<Response> => {
     const requestId = crypto.randomUUID().replaceAll("-", "");
+    const searchCorrelation = new SearchFailureCorrelation((event) =>
+      console.info(JSON.stringify(event))
+    );
     let stage: ObservationStage = "entry";
     let selectedOperation: ApiOperationId | "health.ready" | null = null;
+    let closeP1R27: (() => void) | undefined;
     const mark = (next: ObservationStage) => {
       const before = stage;
       stage = next;
@@ -278,6 +287,12 @@ export class NativeRuntimeApi {
       selectedOperation = pathname === "/health/ready"
         ? "health.ready"
         : operation(this.config.policies, request);
+      let admissionPermit: object | undefined;
+      if (selectedOperation !== null && selectedOperation !== "health.ready") {
+        stage = "relay";
+        await relay.verify(request.headers);
+        admissionPermit = issueAdmissionPermit(this.clock.nowUtc(), request);
+      }
       const context = new NativeRuntimeRequest(
         this.config.environment,
         basic,
@@ -288,9 +303,11 @@ export class NativeRuntimeApi {
         this.artifactCache,
         request.headers.get("If-None-Match"),
       );
+      closeP1R27 = () => context.closeP1R27();
       if (pathname === "/health/ready" && request.method === "GET") {
         stage = "relay";
         await relay.verify(request.headers);
+        assertAdmissionMicros(this.clock.nowUtc());
         stage = "readiness_schema";
         if (!await sql().probeUsageSchema()) {
           throw new AccessError("security_policy_unavailable", 503);
@@ -337,8 +354,19 @@ export class NativeRuntimeApi {
           await phase("active_reports", async () => (await context.platform()).activeReports(...a)),
       };
       const data = runtimeAnalysisDataPort(context, phase);
+      const catalogContext = {
+        binding: () => context.binding(),
+        controls: () => context.controls(),
+        searchDiagnostic: searchCorrelation.capture,
+      };
       const selectedCatalog = this.config.readViewExtensions && this.config.candidateCatalog
-        ? this.config.candidateCatalog(data, this.clock, sql, this.config.environment, context)
+        ? this.config.candidateCatalog(
+          data,
+          this.clock,
+          sql,
+          this.config.environment,
+          catalogContext,
+        )
         : null;
       selectedCatalog?.restrictAnalysisData(data);
       const catalog = selectedCatalog ?? new CatalogService(data, this.clock);
@@ -425,6 +453,11 @@ export class NativeRuntimeApi {
             return await (await context.memberShortlist(catalog)).execute(r);
           }
           if (READ_VIEW_OPERATION_IDS.some((id) => id === r.operation)) {
+            if (
+              r.operation === "history.snapshot.head" || r.operation === "history.snapshot.read"
+            ) {
+              await context.prepareP1R27(request, r);
+            }
             return await context.readView(r);
           }
           if (SCORE_POLICY_OPERATION_IDS.some((id) => id === r.operation)) {
@@ -466,6 +499,7 @@ export class NativeRuntimeApi {
           }
           : {}),
         relay,
+        admissionPermit,
         clock: this.clock,
         projection: this.projection,
         reports: platform,
@@ -499,6 +533,7 @@ export class NativeRuntimeApi {
           },
           current: async () => {
             await phase("runtime_final_current", () => context.assertCurrent());
+            context.assertP1R27Current();
           },
           deliver: async (r, result, id) => {
             if (
@@ -545,6 +580,10 @@ export class NativeRuntimeApi {
         },
       });
       const response = await handler(request);
+      // Handler error responses are already safe; keep their status, request ID and headers.
+      // Successful/redirect-class representations include conditional 304 and must be current.
+      if (response.status < 400) context.assertP1R27Current();
+      searchCorrelation.finish(response);
       if (response.ok) stage = "complete";
       return await observeRuntimeResponse(
         this.config.observe,
@@ -554,13 +593,19 @@ export class NativeRuntimeApi {
         requestId,
       );
     } catch (error) {
+      const response = safeFailure(error, requestId);
+      searchCorrelation.finish(response);
       return await observeRuntimeResponse(
         this.config.observe,
-        safeFailure(error, requestId),
+        response,
         selectedOperation,
         stage,
         requestId,
       );
+    } finally {
+      try {
+        closeP1R27?.();
+      } catch { /* Never change the response during cleanup. */ }
     }
   };
   async close(): Promise<void> {

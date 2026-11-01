@@ -4,9 +4,12 @@ from copy import deepcopy
 from datetime import date,timedelta
 import hashlib
 import json
+import os
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.parse import parse_qs,urlsplit
 
@@ -149,6 +152,7 @@ class SupabaseSessionTests(unittest.TestCase):
 class FakePgConnection:
     def __init__(self,*,missing_schema=False,default_zone='UTC',wrong_type=False,forecast_missing=False,forecast_unversioned=False,forecast_partial=False,forecast_rls=False,forecast_constraint=False,forecast_grant=False):
         self.calls=[];self.missing_schema=missing_schema;self.default_zone=default_zone;self.utc=False;self.row=None;self.rows=[];self.wrong_type=wrong_type
+        self.pgconn=SimpleNamespace(ssl_in_use=True)
         self.forecast_missing=forecast_missing;self.forecast_unversioned=forecast_unversioned;self.forecast_partial=forecast_partial;self.forecast_rls=forecast_rls;self.forecast_constraint=forecast_constraint;self.forecast_grant=forecast_grant
     def __enter__(self):return self
     def __exit__(self,*args):return False
@@ -180,10 +184,113 @@ class FakePgConnection:
 
 
 class PostgreSQLContractTests(unittest.TestCase):
+    def setUp(self):
+        environment=patch.dict(os.environ,{'PGSSLMODE':'','PGSERVICE':'','PGSSLROOTCERT':''})
+        environment.start();self.addCleanup(environment.stop)
     def connector(self,**values):
         connection=FakePgConnection(**values);calls=[]
         def connect(url,**kwargs):calls.append((url,kwargs));return connection
-        return PostgresRepository('SYNTHETIC-DSN',connector=connect),connection,calls
+        return PostgresRepository('dbname=SYNTHETIC',connector=connect),connection,calls
+    def test_secure_explicit_modes_and_ca_are_preserved(self):
+        for mode in ('require','verify-ca','verify-full'):
+            for dsn in (f'dbname=SYNTHETIC sslmode={mode} sslrootcert=SYNTHETIC-CA',
+                        f'postgresql://SYNTHETIC@localhost/SYNTHETIC?sslmode={mode}&sslrootcert=SYNTHETIC-CA'):
+                with self.subTest(mode=mode,kind=dsn.split(':',1)[0]):
+                    calls=[];connection=FakePgConnection()
+                    def connect(url,**kwargs):calls.append((url,kwargs));return connection
+                    with PostgresRepository(dsn,connector=connect).transaction(read_only=True):pass
+                    self.assertEqual(calls[0][0],dsn)
+                    self.assertEqual(calls[0][1]['sslmode'],mode)
+                    self.assertNotIn('sslrootcert',calls[0][1])
+    def test_missing_mode_defaults_to_require_or_preserves_secure_environment(self):
+        for configured,expected in (('','require'),('require','require'),('verify-ca','verify-ca'),('verify-full','verify-full')):
+            with self.subTest(configured=configured),patch.dict(os.environ,{'PGSSLMODE':configured}):
+                repo,_,calls=self.connector()
+                with repo.transaction(read_only=True):pass
+                self.assertEqual(calls[0][1]['sslmode'],expected)
+    def test_insecure_or_unknown_modes_fail_before_connecting(self):
+        for mode in ('disable','allow','prefer','invalid','VERIFY-FULL'):
+            for source in ('conninfo','environment'):
+                with self.subTest(mode=mode,source=source):
+                    calls=[]
+                    dsn='dbname=SYNTHETIC'+(f' sslmode={mode}' if source=='conninfo' else '')
+                    with patch.dict(os.environ,{'PGSSLMODE':mode if source=='environment' else ''}):
+                        repo=PostgresRepository(dsn,connector=lambda *a,**k:calls.append((a,k)))
+                        with self.assertRaises(PlatformError) as caught:
+                            with repo.transaction(read_only=True):pass
+                    self.assertEqual(caught.exception.code,'storage_unavailable')
+                    self.assertEqual(calls,[])
+    def test_explicit_mode_overrides_insecure_environment(self):
+        calls=[];connection=FakePgConnection()
+        def connect(url,**kwargs):calls.append((url,kwargs));return connection
+        with patch.dict(os.environ,{'PGSSLMODE':'disable'}):
+            with PostgresRepository('dbname=SYNTHETIC sslmode=verify-full',connector=connect).transaction():pass
+        self.assertEqual(calls[0][1]['sslmode'],'verify-full')
+    def test_empty_mode_and_duplicate_options_follow_libpq_precedence(self):
+        for dsn,environment,expected in (
+            ("dbname=SYNTHETIC sslmode=''",'','require'),
+            ("dbname=SYNTHETIC sslmode=''",'verify-full','verify-full'),
+            ('dbname=SYNTHETIC sslmode=require sslmode=verify-full','','verify-full'),
+        ):
+            with self.subTest(expected=expected):
+                calls=[];connection=FakePgConnection()
+                def connect(url,**kwargs):calls.append((url,kwargs));return connection
+                with patch.dict(os.environ,{'PGSSLMODE':environment}):
+                    with PostgresRepository(dsn,connector=connect).transaction():pass
+                self.assertEqual(calls[0][1]['sslmode'],expected)
+        calls=[];repo=PostgresRepository('dbname=SYNTHETIC sslmode=verify-full sslmode=disable',connector=lambda *a,**k:calls.append((a,k)))
+        with self.assertRaises(PlatformError):
+            with repo.transaction():pass
+        self.assertEqual(calls,[])
+    def test_unresolved_service_policy_is_rejected_without_explicit_mode(self):
+        for dsn,service in (('service=SYNTHETIC',''),('dbname=SYNTHETIC','SYNTHETIC')):
+            with self.subTest(service=bool(service)):
+                calls=[]
+                with patch.dict(os.environ,{'PGSERVICE':service,'PGSSLMODE':'verify-full'}):
+                    repo=PostgresRepository(dsn,connector=lambda *a,**k:calls.append((a,k)))
+                    with self.assertRaises(PlatformError) as caught:
+                        with repo.transaction():pass
+                self.assertEqual(caught.exception.code,'storage_unavailable');self.assertEqual(calls,[])
+    def test_explicit_secure_mode_with_service_is_preserved(self):
+        calls=[];connection=FakePgConnection()
+        def connect(url,**kwargs):calls.append((url,kwargs));return connection
+        with PostgresRepository('service=SYNTHETIC sslmode=verify-full',connector=connect).transaction():pass
+        self.assertEqual(calls[0][1]['sslmode'],'verify-full')
+    def test_system_roots_default_to_verify_full_and_honor_conninfo_precedence(self):
+        cases=(('dbname=SYNTHETIC sslrootcert=system','','verify-full'),
+               ('dbname=SYNTHETIC','system','verify-full'),
+               ('dbname=SYNTHETIC sslrootcert=SYNTHETIC-CA','system','require'))
+        for dsn,root,expected in cases:
+            with self.subTest(expected=expected):
+                calls=[];connection=FakePgConnection()
+                def connect(url,**kwargs):calls.append((url,kwargs));return connection
+                with patch.dict(os.environ,{'PGSSLROOTCERT':root}):
+                    with PostgresRepository(dsn,connector=connect).transaction():pass
+                self.assertEqual(calls[0][1]['sslmode'],expected)
+    def test_system_roots_with_weaker_explicit_mode_fail_before_connecting(self):
+        for mode,source in (('require','conninfo'),('verify-ca','conninfo'),('require','environment')):
+            with self.subTest(mode=mode,source=source):
+                calls=[]
+                dsn='dbname=SYNTHETIC sslrootcert=system'+(f' sslmode={mode}' if source=='conninfo' else '')
+                with patch.dict(os.environ,{'PGSSLMODE':mode if source=='environment' else ''}):
+                    repo=PostgresRepository(dsn,connector=lambda *a,**k:calls.append((a,k)))
+                    with self.assertRaises(PlatformError):
+                        with repo.transaction():pass
+                self.assertEqual(calls,[])
+    def test_non_tls_transport_fails_before_running_any_query(self):
+        connection=FakePgConnection();connection.pgconn.ssl_in_use=False;calls=[]
+        def connect(url,**kwargs):calls.append((url,kwargs));return connection
+        repo=PostgresRepository('dbname=SYNTHETIC sslmode=verify-full gssencmode=require',connector=connect)
+        with self.assertRaises(PlatformError) as caught:
+            with repo.transaction():pass
+        self.assertEqual(caught.exception.code,'storage_unavailable')
+        self.assertEqual(len(calls),1);self.assertNotIn('gssencmode',calls[0][1]);self.assertEqual(connection.calls,[])
+    def test_malformed_conninfo_is_sanitized_and_does_not_connect(self):
+        calls=[];repo=PostgresRepository('SYNTHETIC-PRIVATE-BAD',connector=lambda *a,**k:calls.append((a,k)))
+        with self.assertRaises(PlatformError) as caught:
+            with repo.transaction():pass
+        self.assertEqual(caught.exception.code,'storage_unavailable')
+        self.assertNotIn('SYNTHETIC-PRIVATE',str(caught.exception));self.assertEqual(calls,[])
     def test_read_only_probe_utc_timestamptz_date_schema_and_pool_options(self):
         repo,connection,calls=self.connector();result=repo.probe()
         self.assertEqual(result['status'],'verified');self.assertEqual(result['storage_schema'],'verified')

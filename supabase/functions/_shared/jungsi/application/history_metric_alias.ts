@@ -62,6 +62,20 @@ function strongLabel(label: string | null): HistorySemanticFamily | null {
     ? "initial_waitlist_number"
     : null;
 }
+/** This only checks the existing evidence shape and scope; it does not establish independent trust. */
+function matchingEvidenceBase(
+  label: string | null,
+  scope: HistoryAliasScope,
+  evidence: HistoryAliasEvidence,
+): boolean {
+  return evidence.status === "meaning_verified" &&
+    /^[a-f0-9]{64}$/.test(evidence.definition_sha256) &&
+    evidence.source_label === label && !!evidence.scope && typeof evidence.scope === "object" &&
+    !Array.isArray(evidence.scope) && FAMILIES.includes(evidence.family) &&
+    scope.observation_id !== null && scope.academic_year !== null && scope.offering_id !== null &&
+    nativeJsonText(scope as unknown as NativeObject, true) ===
+      nativeJsonText(evidence.scope as unknown as NativeObject, true);
+}
 /** Ambiguous labels such as 충원인원/추가모집인원/합격대기번호 require exact definition evidence. */
 export function resolveHistoryMetricAlias(
   kind: string | null,
@@ -76,14 +90,7 @@ export function resolveHistoryMetricAlias(
   let family: HistorySemanticFamily | null = null;
   if (evidence) {
     if (
-      evidence.status !== "meaning_verified" ||
-      !/^[a-f0-9]{64}$/.test(evidence.definition_sha256) ||
-      evidence.source_label !== label || !evidence.scope || typeof evidence.scope !== "object" ||
-      Array.isArray(evidence.scope) ||
-      !FAMILIES.includes(evidence.family) || scope.observation_id === null ||
-      scope.academic_year === null ||
-      scope.offering_id === null || nativeJsonText(scope as unknown as NativeObject, true) !==
-        nativeJsonText(evidence.scope as unknown as NativeObject, true) ||
+      !matchingEvidenceBase(label, scope, evidence) ||
       strong && strong !== evidence.family || existing && existing !== evidence.family
     ) {
       return { family: null, label: null, reason: "semantic_alias_evidence_mismatch" };
@@ -161,4 +168,24 @@ export function p1MetricSlotAlias(
     serviceLabel: a.label,
     reason: a.reason ?? "semantic_family_has_no_existing_P1_slot",
   };
+}
+
+/** Explicit waitlist kind/label/evidence contradictions are never promoted as facts. */
+export function hasWaitlistSemanticConflict(
+  kind: string | null,
+  label: string | null,
+  scope: HistoryAliasScope,
+  evidence?: HistoryAliasEvidence | null,
+): boolean {
+  const kindFamily = canonicalKind(kind) ?? strongLabel(kind), labelFamily = strongLabel(label);
+  const waitlist = (family: HistorySemanticFamily | null): boolean =>
+    family === "final_waitlist_rank" || family === "additional_admission_count";
+  if (
+    kindFamily && labelFamily && kindFamily !== labelFamily &&
+    (waitlist(kindFamily) || waitlist(labelFamily))
+  ) return true;
+  if (!evidence || !matchingEvidenceBase(label, scope, evidence)) return false;
+  return [kindFamily, labelFamily].some((family) =>
+    family !== null && family !== evidence.family && (waitlist(family) || waitlist(evidence.family))
+  );
 }

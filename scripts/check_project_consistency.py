@@ -1232,6 +1232,135 @@ def registered_member_shortlist_ids(spec):
     registered,errors=member_shortlist_registration(spec)
     return set(MEMBER_SHORTLIST_ROUTES)if registered is not None and not errors else set()
 
+SERVICE_AUX_TEST_PATHS = (
+    "tests/edge/test_history_metric_alias_source.ts",
+    "tests/edge/test_score_policy_period_renewal.ts",
+    "tests/edge/test_year_end_access.ts",
+)
+SERVICE_AUX_CASE_IDENTITY_SHA256 = "2d080d4123b5ad4987b3aaa49cd32e28175482986cdf7fbcc4c928c23e777b34"
+
+def service_aux_registration(spec, source_hashes=None):
+    """Optional exact separate synthetic suite; absent preserves the old gate."""
+    error = "Service auxiliary exact separate source/test registration invalid"
+    backend = spec.get("backend_platform_contract", {})
+    ext = backend.get("service_aux_test_extension") if isinstance(backend, dict) else None
+    if ext is None:
+        return None, []
+    try:
+        fields = {"format", "status", "test_paths", "case_names_by_path", "case_identity_sha256", "test_count",
+                  "baseline_foundation_count", "source_bindings", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
+        if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.service-auxiliary-tests/v1" or
+                ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["test_paths"] != list(SERVICE_AUX_TEST_PATHS) or
+                type(ext["test_count"]) is not int or ext["test_count"] != 14 or
+                type(ext["baseline_foundation_count"]) is not int or ext["baseline_foundation_count"] != 656 or
+                ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
+                type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0):
+            raise ValueError("suite state or paths")
+        cases = ext["case_names_by_path"]
+        if not isinstance(cases, dict) or set(cases) != set(SERVICE_AUX_TEST_PATHS):
+            raise ValueError("suite identities")
+        lengths = (1, 9, 4)
+        names = []
+        for path, count in zip(SERVICE_AUX_TEST_PATHS, lengths):
+            values = cases[path]
+            if not isinstance(values, list) or len(values) != count or values != sorted(values) or any(not isinstance(x, str) or not x for x in values):
+                raise ValueError("suite names")
+            names.extend(values)
+        digest = hashlib.sha256(json.dumps(cases, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        if len(set(names)) != 14 or digest != SERVICE_AUX_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"] != digest:
+            raise ValueError("suite identities mismatch")
+        test = ext["regression_test"]
+        if (not isinstance(test, dict) or set(test) != {"path", "sha256"} or
+                test["path"] != "tests/test_service_aux_registration.py" or
+                not isinstance(test["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", test["sha256"]) or
+                source_hashes is not None and source_hashes.get(test["path"]) != test["sha256"]):
+            raise ValueError("guard regression binding")
+        cfg = spec["edge_harness"]
+        rows = ext["source_bindings"]
+        if (not isinstance(rows, list) or len(rows) != len(SERVICE_AUX_TEST_PATHS) or
+                any(not isinstance(row, dict) or set(row) != {"path", "sha256"} for row in rows) or
+                [row["path"] for row in rows] != list(SERVICE_AUX_TEST_PATHS)):
+            raise ValueError("suite bindings")
+        for row in rows:
+            path, h = row["path"], row["sha256"]
+            item = cfg["files"].get(path, {})
+            if (item.get("layer") != "verification" or path in cfg.get("tests", []) or
+                    not isinstance(h, str) or not re.fullmatch(r"[0-9a-f]{64}", h) or
+                    item.get("declarations", {}).get("source_sha256") != h or
+                    source_hashes is not None and source_hashes.get(path) != h):
+                raise ValueError("suite source hash")
+        view = spec.get("read_view_extension_contract", {}).get("verification", {}).get("test_paths", [])
+        member = spec.get("member_shortlist_contract", {}).get("source_registration", {}).get("verification", {}).get("test_paths", [])
+        school = spec.get("university_scoring_contract", {}).get("scoped_reference_contract", {}).get("verification", {}).get("test_paths", [])
+        if set(SERVICE_AUX_TEST_PATHS) & (set(view) | set(member) | set(school) | set(RECOVERY_TEST_PATHS)):
+            raise ValueError("suite overlap")
+        return ext, []
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None, [error]
+
+SERVICE_STAGED_TEST_PATHS = ('tests/edge/test_history_snapshot_source_concurrency.synthetic.ts', 'tests/edge/test_p1_r27_delivery_mode.synthetic.ts', 'tests/edge/test_waitlist_conflict_guard.synthetic.ts', 'tests/edge/test_waitlist_conflict_service.formatted.v2.ts')
+SERVICE_STAGED_CASE_IDENTITY_SHA256 = '14ca9a3bda82ff36829dcb0b490b6bee5acb1246bf3f075af4bb3020ed5302f9'
+
+def service_staged_registration(spec, source_hashes=None):
+    """Optional exact separate synthetic suite; absent preserves the old gate."""
+    error = "Service staged exact separate source/test registration invalid"
+    backend = spec.get("backend_platform_contract", {})
+    ext = backend.get("service_staged_test_extension") if isinstance(backend, dict) else None
+    if ext is None:
+        return None, []
+    try:
+        fields = {"format", "status", "test_paths", "case_names_by_path", "case_identity_sha256", "test_count",
+                  "baseline_foundation_count", "source_bindings", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
+        if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.service-staged-tests/v1" or
+                ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["test_paths"] != list(SERVICE_STAGED_TEST_PATHS) or
+                type(ext["test_count"]) is not int or ext["test_count"] != 76 or
+                type(ext["baseline_foundation_count"]) is not int or ext["baseline_foundation_count"] != 656 or
+                ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
+                type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0):
+            raise ValueError("suite state or paths")
+        cases = ext["case_names_by_path"]
+        if not isinstance(cases, dict) or set(cases) != set(SERVICE_STAGED_TEST_PATHS):
+            raise ValueError("suite identities")
+        lengths = (52, 6, 17, 1)
+        names = []
+        for path, count in zip(SERVICE_STAGED_TEST_PATHS, lengths):
+            values = cases[path]
+            if not isinstance(values, list) or len(values) != count or values != sorted(values) or any(not isinstance(x, str) or not x for x in values):
+                raise ValueError("suite names")
+            names.extend(values)
+        digest = hashlib.sha256(json.dumps(cases, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        if len(set(names)) != 76 or digest != SERVICE_STAGED_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"] != digest:
+            raise ValueError("suite identities mismatch")
+        test = ext["regression_test"]
+        if (not isinstance(test, dict) or set(test) != {"path", "sha256"} or
+                test["path"] != "tests/test_service_staged_registration.py" or
+                not isinstance(test["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", test["sha256"]) or
+                source_hashes is not None and source_hashes.get(test["path"]) != test["sha256"]):
+            raise ValueError("guard regression binding")
+        cfg = spec["edge_harness"]
+        rows = ext["source_bindings"]
+        if (not isinstance(rows, list) or len(rows) != len(SERVICE_STAGED_TEST_PATHS) or
+                any(not isinstance(row, dict) or set(row) != {"path", "sha256"} for row in rows) or
+                [row["path"] for row in rows] != list(SERVICE_STAGED_TEST_PATHS)):
+            raise ValueError("suite bindings")
+        for row in rows:
+            path, h = row["path"], row["sha256"]
+            item = cfg["files"].get(path, {})
+            if (item.get("layer") != "verification" or path in cfg.get("tests", []) or
+                    not isinstance(h, str) or not re.fullmatch(r"[0-9a-f]{64}", h) or
+                    item.get("declarations", {}).get("source_sha256") != h or
+                    source_hashes is not None and source_hashes.get(path) != h):
+                raise ValueError("suite source hash")
+        view = spec.get("read_view_extension_contract", {}).get("verification", {}).get("test_paths", [])
+        member = spec.get("member_shortlist_contract", {}).get("source_registration", {}).get("verification", {}).get("test_paths", [])
+        school = spec.get("university_scoring_contract", {}).get("scoped_reference_contract", {}).get("verification", {}).get("test_paths", [])
+        if set(SERVICE_STAGED_TEST_PATHS) & (set(view) | set(member) | set(school) | set(RECOVERY_TEST_PATHS)):
+            raise ValueError("suite overlap")
+        return ext, []
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None, [error]
+
+
 def validate_read_view_extension(spec):
     """Only these exact three source-bound reads may extend the preserved 22+3.
 
@@ -1255,6 +1384,12 @@ def validate_read_view_extension(spec):
     recovery,recovery_errors=recovery_input_registration(spec)
     if recovery is not None:separate_tests-=set(RECOVERY_TEST_PATHS)
     professional_errors+=recovery_errors
+    auxiliary, auxiliary_errors=service_aux_registration(spec)
+    if auxiliary is not None:separate_tests-=set(auxiliary["test_paths"])
+    professional_errors+=auxiliary_errors
+    staged, staged_errors=service_staged_registration(spec)
+    if staged is not None:separate_tests-=set(staged["test_paths"])
+    professional_errors+=staged_errors
     if c is None:return professional_errors+(["Read-view unregistered separate test source"]if separate_tests else [])
     if not isinstance(c,dict):return professional_errors+["Read-view extension contract invalid"]
     errors=professional_errors
@@ -4855,6 +4990,64 @@ def validate_public_response_registry(paths,read,spec):
     return validate_public_response_catalog(catalog,spec)
 
 
+def foundation_graph_extension_errors(paths,read,spec):
+    """One coexisting application source and one public JSON, source-bound."""
+    ext=spec.get("edge_harness",{}).get("bound_graph_extensions")
+    staged_waitlist={"tests/edge/test_waitlist_conflict_guard.synthetic.ts",
+                     "tests/edge/test_waitlist_conflict_service.formatted.v2.ts"}
+    if ext is None:
+        return ["Foundation graph extension source/JSON binding invalid"] if staged_waitlist & set(paths) else []
+    expected={"supabase/functions/_shared/current_public_catalog.ts","src/jungsi_touch/application/public_response_schemas.json"}
+    try:
+        if not isinstance(ext,dict) or set(ext)!={"format","files","regression_test","offline_cli_test"} or ext["format"]!="jungsi.edge-graph-extension/v1" or set(ext["files"])!=expected:raise ValueError("paths")
+        regression=ext["regression_test"]
+        if not isinstance(regression,dict) or set(regression)!={"path","sha256"} or regression["path"]!="tests/test_foundation_graph_extension.py" or regression["path"] not in paths or hashlib.sha256(read(regression["path"])).hexdigest()!=regression["sha256"]:raise ValueError("regression")
+        offline_test=ext["offline_cli_test"]
+        if not isinstance(offline_test,dict) or set(offline_test)!={"path","sha256"} or offline_test["path"]!="tests/test_offline_graph_cli.py" or offline_test["path"] not in paths or hashlib.sha256(read(offline_test["path"])).hexdigest()!=offline_test["sha256"]:raise ValueError("offline test")
+        for path in expected:
+            row=ext["files"][path]
+            if not isinstance(row,dict) or set(row)!={"layer","sha256"} or row["layer"]!="application" or path not in paths or hashlib.sha256(read(path)).hexdigest()!=row["sha256"]:raise ValueError("binding")
+            impl=next(x for x in spec["implementation"] if x["path"]==path)
+            if impl["layer"]!="application":raise ValueError("layer")
+        return []
+    except (KeyError,TypeError,ValueError,StopIteration,OSError):return ["Foundation graph extension source/JSON binding invalid"]
+
+def native_seed_candidate_errors(paths,read,spec):
+    error="Native seed candidate source/test registration invalid"
+    names=set(paths);ext=spec.get("backend_platform_contract",{}).get("native_seed_candidate_extension")
+    test="tests/test_native_seed_opt_in.py";guard="tests/test_native_seed_binding.py"
+    if ext is None:return [error] if test in names or guard in names else []
+    try:
+        required={"format","status","source_bindings","tests","network_isolation","activation"}
+        if not isinstance(ext,dict) or set(ext)!=required or ext["format"]!="jungsi.native-seed-candidate/v1" or ext["status"]!="SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["network_isolation"]!="NOT_VERIFIED" or ext["activation"]!="NOT_RUN":raise ValueError("state")
+        expected_sources={"scripts/check_edge_contract.py","scripts/run_edge_tests.py"};expected_tests={test,guard}
+        for key,expected in (("source_bindings",expected_sources),("tests",expected_tests)):
+            rows=ext[key]
+            if not isinstance(rows,list) or len(rows)!=len(expected) or {x.get("path") for x in rows if isinstance(x,dict)}!=expected:raise ValueError("paths")
+            for row in rows:
+                if set(row)!={"path","sha256"} or row["path"] not in names or hashlib.sha256(read(row["path"])).hexdigest()!=row["sha256"]:raise ValueError("hash")
+        return []
+    except (KeyError,TypeError,ValueError,OSError):return [error]
+
+def service_history_report_preservation_errors(paths,read,spec):
+    error="Historical service notes or saved-report read scope invalid"
+    test="tests/test_history_report_preservation.py"
+    try:
+        hist=spec.get("workflow",{}).get("development_harness",{}).get("local_service_integration_history_20261030",{})
+        data=hist.get("service_01a3_1_9_136_unmerged_change_notes")
+        if data is None:return [error] if test in paths else []
+        expected=["10e8abd0fef81c11ef5dbc02fed313bb97cea9fc6b0a37c9c4233dc10de1768a","c99369c240876e9f06f2cc8e736ab6ec3e56f62d26ac357266690164f488e648","aa46fb2e7ca39f279bc22b017f077edcdbbaa19d0b3c8fb5b0308a0a0139ab69","7e3e10fc22c958b6c732eba8df0470b8db51350b5674a5e35b48f8a0e6ddbbca"]
+        canonical=lambda x:hashlib.sha256(json.dumps(x,ensure_ascii=False,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+        if not isinstance(data,dict) or data.get("status")!="HISTORICAL_ONLY_NOT_CURRENT_CI_APPROVAL" or data.get("source_spec_sha256")!="9df050a1631789ef54c09ad92def2be9aca79a931af1e08597c7a5514dfd219d" or data.get("entry_sha256")!=expected or not isinstance(data.get("entries"),list) or [canonical(x) for x in data["entries"]]!=expected:raise ValueError("history notes")
+        ci=hist["service_01a3_1_9_136_historical_records"]["scoped_CI_substitution_20261029"]
+        if canonical(ci)!="7d4c24aaababfa8c0066c2cbdfc2deaeabd7e5678eaa2e3d21de5f9c9ab7985b":raise ValueError("historical ci")
+        rows=[x for x in spec["operations"] if x.get("id")=="report.read"]
+        if len(rows)!=1 or hashlib.sha256(rows[0]["response_scope"].encode()).hexdigest()!="f51db04aeea3cc2d03717e689e1979b21dff52df54324888a3009a033fbaf9c1":raise ValueError("report scope")
+        test_binding=data.get("regression_test")
+        if not isinstance(test_binding,dict) or set(test_binding)!={"path","sha256"} or test_binding["path"]!=test or test not in paths or hashlib.sha256(read(test)).hexdigest()!=test_binding["sha256"]:raise ValueError("test binding")
+        return []
+    except (KeyError,TypeError,ValueError,AttributeError,OSError):return [error]
+
 def edge_registration_errors(paths,read,spec):
     """Structural preflight only; Deno parser and execution are required by the retained runner."""
     names=set(paths)
@@ -4868,7 +5061,7 @@ def edge_registration_errors(paths,read,spec):
         return [] if c is None or c.get("state")=="prepared" else ["Active Edge registry has no sources"]
     if not isinstance(c,dict) or c.get("format")!="jungsi.edge-contract/v1" or c.get("state")!="required":
         return ["Edge sources require an activated common registry"]
-    errors=[]
+    errors=foundation_graph_extension_errors(names,read,spec)
     if ts!=set(c.get("files",{})):errors.append("Edge registration coverage mismatch")
     for p,row in c.get("files",{}).items():
         if p not in names:errors.append("Registered Edge file absent: "+p);continue
@@ -4894,6 +5087,146 @@ def edge_document_text(spec):
       "\n\n같은 Git snapshot에서 기존 Python 전체 검산 다음에 Deno check/lint/fmt·"+
       str(c["unit_count"])+" 단위검산·Python–Deno "+str(c["oracle_count"])+" 합성 대조를 실행한다. 로컬 훅은 명시한 Deno 경로를 사용한다. CI는 edge-runtime.lock.json의 공식 Deno "+c["runtime"]["deno"]+" 배포 파일을 scripts/bootstrap_edge_runtime.py로 새 보존 폴더에 공급하고 아카이브 해시·크기·실행 버전을 검증한다. 기존 폴더 덮어쓰기·삭제·시스템 설치·최신 버전 대체는 없다. 미설치·비호환·파서 실패·결과 누락은 실패이고 skip 성공은 없다. foundation 소스가 없는 공통 준비 단계는 NOT_APPLICABLE_NO_FOUNDATION_SOURCE이며 실행 검산 완료가 아니다. 실행기 공급 영수증도 서비스 단위검산·oracle 통과를 대신하지 않는다. 기존 공개 Edge 소스는 현재 문서 동기화 색인으로 결속하며 foundation 선언·graph·단위검산·oracle 결과에 포함하지 않는다.")
 
+SERVICE_CANDIDATE_SHARED_FIXTURES = {
+    "service_end": frozenset({"tests/edge/synthetic_exam_pack.ts"}),
+    "service_p1": frozenset(['tests/edge/fixture.ts', 'tests/edge/synthetic_api_contract.ts', 'tests/edge/synthetic_history_qualification.ts', 'tests/edge/synthetic_history_snapshot.ts', 'tests/edge/synthetic_runtime_binding.ts']),
+}
+
+SERVICE_CANDIDATE_GROUPS = {
+    "p1_review": (["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs"], 80, ["node:assert/strict", "node:fs", "node:zlib"]),
+    "service_end": (["tests/service_end/" + name for name in (
+        "test_service_end_current_review.synthetic.ts", "test_service_end_entrypoints.synthetic.ts",
+        "test_service_end_error_schema.synthetic.ts", "test_service_end_http.synthetic.ts",
+        "test_service_end_official_display.synthetic.ts", "test_service_end_professional.synthetic.ts",
+        "test_service_end_runtime.synthetic.ts", "test_official_display_final_expiry.synthetic.ts")], 125, []),
+    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts'], 36, ["node:assert/strict", "node:fs", "node:zlib"]),
+    "search503": (["tests/search503/" + name for name in (
+        "test_combined_search503_end.synthetic.v5.mjs", "test_search503_stream_limits.synthetic.v4.mjs",
+        "test_search503_reader_unlock.synthetic.v3.mjs", "test_search503_final_error.synthetic.v2.mjs",
+        "test_current_public_key_index_immutable.synthetic.v2.mjs")], 48, ["node:assert/strict"]),
+}
+SERVICE_CANDIDATE_MANUAL_READS = {
+    "p1_review": ["tests/p1_review/fixtures/p1_public_registry_799.reference.json",
+                  "src/jungsi_touch/application/public_response_schemas.json"],
+    "service_end": [], "search503": [],
+    "service_p1": ["src/jungsi_touch/application/public_response_schemas.json"],
+}
+SERVICE_CANDIDATE_LAYERS = {
+    "domain": {"domain"}, "application": {"application", "domain"},
+    "infrastructure": {"application", "domain", "infrastructure"},
+    "edge_adapter": {"application", "domain", "infrastructure", "edge_adapter", "public_contract_json"},
+    "synthetic_fixture": {"application", "domain", "infrastructure", "edge_adapter", "synthetic_fixture", "public_contract_json", "node_builtin"},
+    "suite_test": {"application", "domain", "infrastructure", "edge_adapter", "synthetic_fixture", "public_contract_json", "node_builtin", "suite_test"},
+}
+
+def service_candidate_layer(path):
+    if path.startswith("node:"): return "node_builtin"
+    if path.startswith("tests/"): return "suite_test" if PurePosixPath(path).name.startswith("test_") else "synthetic_fixture"
+    if path == "supabase/functions/deno.json": return "runtime_config"
+    if path.startswith("src/jungsi_touch/application/") and path.endswith(".json"): return "public_contract_json"
+    if path.startswith("supabase/functions/_shared/jungsi/"):
+        value = path.split("/")[4]
+        if value in {"domain", "application", "infrastructure"}: return value
+        raise ValueError("unknown layer")
+    if path in {"supabase/functions/_shared/professional_support.ts", "supabase/functions/_shared/professional_budget_support.ts"}:
+        return "synthetic_fixture"
+    if path.endswith("_support.ts"): raise ValueError("unregistered support")
+    if path.startswith("supabase/functions/_shared/"): return "edge_adapter"
+    raise ValueError("unregistered layer")
+
+def service_candidate_suite_errors(paths, read, spec):
+    """Require each separate synthetic suite and its pinned local closure; never suppress existing gates."""
+    error = "Service candidate suite registration or local closure invalid"
+    prefixes = tuple("tests/" + name + "/" for name in SERVICE_CANDIDATE_GROUPS)
+    names = set(paths)
+    group_paths = {p for p in names if p.startswith(prefixes)}
+    backend = spec.get("backend_platform_contract", {})
+    ext = backend.get("service_candidate_suite_extension") if isinstance(backend, dict) else None
+    if ext is None:
+        return [error] if group_paths else []
+    try:
+        fields = {"format", "status", "manifest", "wrapper", "regression_test", "groups", "runtime_scope",
+                  "native_acceptance", "activation_status", "operating_writes"}
+        if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.service-candidate-suites/v1" or
+                ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["runtime_scope"] != "DENO_2_9_7_PORTABLE_CI_NOT_VERIFIED" or
+                ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
+                type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0): raise ValueError("suite status")
+        expected_files = {"manifest": "tests/review_suite_manifest.json", "wrapper": "tests/test_service_candidate_suites.py",
+                          "regression_test": "tests/test_service_candidate_registry.py"}
+        for key, path in expected_files.items():
+            item = ext[key]
+            if (not isinstance(item, dict) or set(item) != {"path", "sha256"} or item["path"] != path or path not in names or
+                    not isinstance(item["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", item["sha256"]) or
+                    hashlib.sha256(read(path)).hexdigest() != item["sha256"]): raise ValueError("bound guard file")
+        expected_groups = {name: {"roots": roots, "test_count": count} for name, (roots, count, _) in SERVICE_CANDIDATE_GROUPS.items()}
+        if ext["groups"] != expected_groups: raise ValueError("suite group metadata")
+        manifest = json.loads(read(expected_files["manifest"]))
+        if manifest.get("format") != "jungsi.review-suite-closure/v2" or manifest.get("review_only") is not True:
+            raise ValueError("manifest format")
+        if manifest.get("runtime") != {"deno_sha256": "e020f3e232bd16e33768dee528e5983349c962952051ced0a5d58ad42f5d9b33", "node_sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"}:
+            raise ValueError("runtime pin")
+        if set(manifest.get("suites", {})) != set(SERVICE_CANDIDATE_GROUPS): raise ValueError("suite names")
+        config = manifest.get("config")
+        if (not isinstance(config, dict) or set(config) != {"path", "sha256"} or
+                config.get("path") != "supabase/functions/deno.json" or config.get("path") not in names or
+                not isinstance(config.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", config["sha256"]) or
+                hashlib.sha256(read(config["path"])).hexdigest() != config["sha256"]): raise ValueError("suite config")
+        union_tests = set()
+        for name, (roots, count, allowed) in SERVICE_CANDIDATE_GROUPS.items():
+            suite = manifest["suites"][name]
+            if (suite.get("roots") != roots or type(suite.get("expected_count")) is not int or suite["expected_count"] != count or
+                    suite.get("allowed_builtins") != allowed or suite.get("manual_read_files") != SERVICE_CANDIDATE_MANUAL_READS[name]):
+                raise ValueError("suite roots or count")
+            sf, graphs, layers = suite["files"], suite["graphs"], suite["layers"]
+            if not isinstance(sf, dict) or not isinstance(graphs, dict) or set(graphs) != set(roots): raise ValueError("suite graph")
+            if sf.get("supabase/functions/deno.json") != config["sha256"]: raise ValueError("suite config hash")
+            if not isinstance(layers, dict) or set(layers) != {"files", "observed_layer_edges"}: raise ValueError("suite layers")
+            all_graph_files = set(); layer_edges = set()
+            for root in roots:
+                graph = graphs[root]
+                if not isinstance(graph, dict) or set(graph) != {"files", "builtins", "edges"}: raise ValueError("graph fields")
+                gf, builtins = graph["files"], graph["builtins"]
+                if not isinstance(gf, dict) or root not in gf or not isinstance(builtins, list) or len(set(builtins)) != len(builtins) or not set(builtins) <= set(allowed):
+                    raise ValueError("graph modules")
+                if any(sf.get(p) != h for p, h in gf.items()): raise ValueError("graph hash")
+                all_graph_files.update(gf)
+                for edge in graph["edges"]:
+                    if not isinstance(edge, list) or len(edge) != 3: raise ValueError("edge")
+                    source, raw, targets = edge
+                    if source not in gf or not isinstance(raw, str) or not raw.startswith((".", "node:")) or not isinstance(targets, list) or not targets:
+                        raise ValueError("edge source")
+                    for pair in targets:
+                        if not isinstance(pair, list) or len(pair) != 2 or pair[0] not in {"code", "type"}: raise ValueError("edge target")
+                        target = pair[1]
+                        if target not in gf and target not in builtins: raise ValueError("external edge")
+                        src, dst = service_candidate_layer(source), service_candidate_layer(target)
+                        if dst not in SERVICE_CANDIDATE_LAYERS.get(src, set()): raise ValueError("layer boundary")
+                        layer_edges.add((src, dst))
+            if set(sf) != all_graph_files | set(SERVICE_CANDIDATE_MANUAL_READS[name]) | {"supabase/functions/deno.json"}:
+                raise ValueError("closure coverage")
+            for path, digest in sf.items():
+                q = PurePosixPath(path)
+                if (not isinstance(path, str) or q.is_absolute() or ".." in q.parts or "\\" in path or ":" in path or
+                        path not in names or not isinstance(digest, str)): raise ValueError("closure source")
+                generated_route = "src/jungsi_touch/application/route_catalog.json"
+                if path == generated_route:
+                    if digest != "GENERATED_BY_SPEC_VIA_COMMON_GATE" or generated_files(spec, read=read).get(path) != read(path):
+                        raise ValueError("generated route drift")
+                elif not re.fullmatch(r"[0-9a-f]{64}", digest) or hashlib.sha256(read(path)).hexdigest() != digest:
+                    raise ValueError("closure source hash")
+                if path.startswith("tests/") and not path.startswith("tests/" + name + "/") and path not in SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset()):
+                    raise ValueError("test scope")
+                if path.startswith(prefixes): union_tests.add(path)
+            extra_fixtures = {p for p in sf if p.startswith("tests/") and not p.startswith("tests/" + name + "/")}
+            if extra_fixtures != set(SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset())):
+                raise ValueError("exact shared fixture set")
+            if layers["files"] != {p: service_candidate_layer(p) for p in sorted(sf)} or layers["observed_layer_edges"] != [list(x) for x in sorted(layer_edges)]:
+                raise ValueError("layer registry")
+        if union_tests != group_paths: raise ValueError("test inventory")
+        return []
+    except (KeyError, TypeError, ValueError, AttributeError, UnicodeError, OSError, json.JSONDecodeError):
+        return [error]
+
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
     recovery,recovery_errors=recovery_input_registration(spec)
@@ -4916,8 +5249,19 @@ def validate_content(paths,read,spec):
     errors.extend(validate_professional_guide_snapshot(paths,read,spec))
     errors.extend(edge_registration_errors(paths,read,spec))
     names=set(paths)
+    auxiliary, auxiliary_errors = service_aux_registration(spec)
+    errors.extend(auxiliary_errors)
+    if auxiliary is not None:
+        regression = auxiliary["regression_test"]
+        if regression["path"] not in names or hashlib.sha256(read(regression["path"])).hexdigest() != regression["sha256"]:
+            errors.append("Service auxiliary guard regression source drift")
     errors.extend(validate_catalog(paths,read,spec))
     errors.extend(validate_public_response_registry(names,read,spec))
+    staged, staged_errors = service_staged_registration(spec, {p:hashlib.sha256(read(p)).hexdigest() for p in SERVICE_STAGED_TEST_PATHS if p in names} | ({"tests/test_service_staged_registration.py":hashlib.sha256(read("tests/test_service_staged_registration.py")).hexdigest()} if "tests/test_service_staged_registration.py" in names else {}))
+    errors.extend(staged_errors)
+    errors.extend(service_candidate_suite_errors(paths,read,spec))
+    errors.extend(native_seed_candidate_errors(paths,read,spec))
+    errors.extend(service_history_report_preservation_errors(paths,read,spec))
     transition=spec.get('supabase_operations_handoff_contract',{}).get('service_transition_contract',{})
     if transition.get('implementation_mode')=='explicit_prepared_default_unchanged':
         for path in transition.get('implementation_code_paths',[]):

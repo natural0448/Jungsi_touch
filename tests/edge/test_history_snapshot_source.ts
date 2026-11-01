@@ -1,5 +1,6 @@
 /** Credential and SQL strings are synthetic; network and database ports are explicit fakes. */
 import { AccessError } from "../../supabase/functions/_shared/jungsi/application/access.ts";
+import { PublicResponseProjection } from "../../supabase/functions/_shared/jungsi/application/public_response.ts";
 import {
   HistorySnapshotSource,
   parseBoundedSnapshotJson,
@@ -15,14 +16,19 @@ import {
   nativeJsonText,
   type NativeObject,
 } from "../../supabase/functions/_shared/jungsi/domain/json_value.ts";
+import { JsonFloat } from "../../supabase/functions/_shared/jungsi/domain/native_json.ts";
 import {
   type NativeSqlPool,
   RUNTIME_ROLE_SQL,
   SupabaseSqlTransport,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts";
 import { SYNTHETIC_RUNTIME_NOW as NOW } from "./synthetic_runtime_binding.ts";
-import { syntheticSnapshotBody } from "./synthetic_history_snapshot.ts";
 import {
+  syntheticSnapshotBody,
+  syntheticSnapshotStatisticsBody,
+} from "./synthetic_history_snapshot.ts";
+import {
+  SYNTHETIC_QUALIFICATION_SCHEMA_JSON,
   syntheticQualifiableBody,
   syntheticQualificationArtifacts,
 } from "./synthetic_history_qualification.ts";
@@ -760,4 +766,291 @@ Deno.test("snapshot metadata SQL is one kind and C ordered lineage range under e
       SNAPSHOT_HEAD_SQL.includes("LIMIT 1"),
   );
   assert(!/\b(INSERT|UPDATE|DELETE)\b/.test(SNAPSHOT_HEAD_SQL));
+});
+
+Deno.test("snapshot source returns pinned gzip after calculation context survives public projection", async () => {
+  const f = await fixture({
+    body: (body) => {
+      Object.assign(body, syntheticSnapshotStatisticsBody());
+      const row = (body.rows as NativeObject[])[0];
+      row.academic_year = 2025;
+      row.offering_id = "2025:" + row.original_pk;
+      const alt = row.alternate_cut as NativeObject;
+      const entries = alt.entries as NativeObject[];
+      alt.entries = [
+        {
+          ...entries[3],
+          value: new JsonFloat("0.000000123400"),
+          score_calculation_context: {
+            source_result_year: 2025,
+            score_calculation_year: 2025,
+            observation_role: "actual_result",
+          },
+          publication_context: {
+            publication_role: "actual_result",
+            simulation_target_academic_year: null,
+          },
+        },
+        {
+          ...entries[4],
+          value: new JsonFloat("0.000000567800"),
+          score_calculation_context: {
+            source_result_year: 2025,
+            score_calculation_year: 2026,
+            observation_role: "prior_year_recalculated_reference",
+          },
+          publication_context: {
+            publication_role: "simulation_reference",
+            simulation_target_academic_year: 2027,
+          },
+        },
+      ];
+    },
+  });
+  const p = await f.source.current(), body = await f.source.read(p, p.full!);
+  const schemas = JSON.parse(SYNTHETIC_QUALIFICATION_SCHEMA_JSON);
+  const projection = new PublicResponseProjection(
+    schemas,
+    schemas.operations.map((o: { id: string; contract_ref: string }) => ({
+      id: o.id,
+      contract_ref: o.contract_ref,
+    })),
+  );
+  for (const tier of ["standard", "paid"] as const) {
+    const projected = projection.project("history.snapshot.read", tier, body);
+    equal(await nativeJsonSha256(projected), await nativeJsonSha256(body));
+    const wire = await f.source.representation(projected);
+    equal(await snapshotBytesSha256(wire.bytes), p.full!.gzipSha256);
+    const decoded = await new Response(
+      new Blob([wire.bytes]).stream().pipeThrough(
+        new DecompressionStream("gzip"),
+      ),
+    ).text();
+    equal(
+      await snapshotBytesSha256(new TextEncoder().encode(decoded)),
+      p.full!.decodedSha256,
+    );
+    assert(decoded.includes('"observation_role":"actual_result"'));
+    assert(
+      decoded.includes(
+        '"observation_role":"prior_year_recalculated_reference"',
+      ),
+    );
+    assert(decoded.includes('"score_calculation_year":2026'));
+    assert(decoded.includes('"publication_role":"actual_result"'));
+    assert(decoded.includes('"publication_role":"simulation_reference"'));
+    assert(decoded.includes('"simulation_target_academic_year":2027'));
+    assert(decoded.includes('"value":0.000000123400'));
+    assert(decoded.includes('"value":0.000000567800'));
+  }
+});
+
+Deno.test("snapshot source retains score components and pending identity variants in pinned gzip", async () => {
+  const f = await fixture({
+    body: (body) => {
+      Object.assign(body, syntheticSnapshotStatisticsBody());
+      const row = (body.rows as NativeObject[])[0];
+      row.identity_review = {
+        status: "review_pending",
+        reason_code: "SYNTHETIC_IDENTITY_REVIEW_PENDING",
+        variants: [
+          {
+            university_name: "SYNTHETIC 학교",
+            department: "SYNTHETIC unit A",
+            admission_track: "SYNTHETIC 전형",
+            group: null,
+          },
+          {
+            university_name: "SYNTHETIC 학교",
+            department: "SYNTHETIC unit B",
+            admission_track: "SYNTHETIC 전형",
+            group: null,
+          },
+        ],
+      };
+      const alt = row.alternate_cut as NativeObject;
+      const entries = (alt.entries as NativeObject[]).slice(3, 5);
+      for (const [i, entry] of entries.entries()) {
+        entry.value = new JsonFloat(
+          i === 0 ? "0.000000013570" : "0.000000097530",
+        );
+        entry.statistic_label = "SYNTHETIC 평균";
+        entry.basis_code = i === 0 ? "SYNTHETIC-component-a" : "SYNTHETIC-component-b";
+        entry.basis_label = i === 0 ? "SYNTHETIC component A" : "SYNTHETIC component B";
+        entry.status = "pending_metadata";
+        entry.reason_code = "SYNTHETIC_IDENTITY_REVIEW_PENDING";
+        entry.score_calculation_context = {
+          source_result_year: 2026,
+          score_calculation_year: null,
+          observation_role: "unresolved",
+        };
+        entry.publication_context = {
+          publication_role: "simulation_reference",
+          simulation_target_academic_year: 2027,
+        };
+        (entry.source_context as NativeObject).identity_variant_index = i;
+        (entry.source_context as NativeObject).scope_status = "review_pending";
+      }
+      alt.entries = entries;
+    },
+  });
+  const p = await f.source.current(), body = await f.source.read(p, p.full!);
+  const schemas = JSON.parse(SYNTHETIC_QUALIFICATION_SCHEMA_JSON);
+  const projection = new PublicResponseProjection(
+    schemas,
+    schemas.operations.map((o: { id: string; contract_ref: string }) => ({
+      id: o.id,
+      contract_ref: o.contract_ref,
+    })),
+  );
+  for (const tier of ["standard", "paid"] as const) {
+    const projected = projection.project("history.snapshot.read", tier, body);
+    equal(await nativeJsonSha256(projected), await nativeJsonSha256(body));
+    const wire = await f.source.representation(projected);
+    equal(await snapshotBytesSha256(wire.bytes), p.full!.gzipSha256);
+    const decoded = await new Response(
+      new Blob([wire.bytes]).stream().pipeThrough(
+        new DecompressionStream("gzip"),
+      ),
+    ).text();
+    equal(
+      await snapshotBytesSha256(new TextEncoder().encode(decoded)),
+      p.full!.decodedSha256,
+    );
+    assert(decoded.includes('"basis_code":"SYNTHETIC-component-a"'));
+    assert(decoded.includes('"basis_code":"SYNTHETIC-component-b"'));
+    assert(decoded.includes('"identity_variant_index":0'));
+    assert(decoded.includes('"identity_variant_index":1'));
+    assert(decoded.includes('"scope_status":"review_pending"'));
+    assert(decoded.includes('"publication_role":"simulation_reference"'));
+    assert(decoded.includes('"simulation_target_academic_year":2027'));
+    assert(decoded.includes('"score_calculation_year":null'));
+    assert(decoded.includes('"value":0.000000013570'));
+    assert(decoded.includes('"value":0.000000097530'));
+  }
+});
+
+Deno.test("snapshot source gzip preserves synthetic conflict holds and missing 50", async () => {
+  const f = await fixture({
+    body: (body) => {
+      Object.assign(body, syntheticSnapshotStatisticsBody());
+      const row = (body.rows as NativeObject[])[0];
+      const alt = row.alternate_cut as NativeObject;
+      const originals = alt.entries as NativeObject[];
+      row.final_70_percent_cut = {
+        ...originals[0],
+        value: new JsonFloat("0.000000010020"),
+        statistic_percent: 70,
+        statistic_label: "SYNTHETIC original 70 label",
+      };
+      alt.entries = [originals[3], originals[4]].map((entry, i) => ({
+        ...entry,
+        value: new JsonFloat(i === 0 ? "0.000000030040" : "0.000000050060"),
+        statistic_percent: null,
+        statistic_label: "SYNTHETIC original mean label",
+        cohort: "SYNTHETIC original cohort",
+        cohort_label: "SYNTHETIC original cohort label",
+        basis_code: i === 0 ? "SYNTHETIC-score-component-a" : "SYNTHETIC-score-component-b",
+        basis_label: i === 0 ? "SYNTHETIC original component A" : "SYNTHETIC original component B",
+        selection_rule_ref: "SYNTHETIC-common-rule",
+        status: "pending_metadata",
+        reason_code: "SYNTHETIC_PRIORITY_CONFLICT_PENDING",
+        source_context: {
+          ...(entry.source_context as NativeObject),
+          scope_status: "review_pending",
+        },
+        score_calculation_context: {
+          source_result_year: 2026,
+          score_calculation_year: null,
+          observation_role: "unresolved",
+        },
+        publication_context: i === 0
+          ? { publication_role: "unresolved", simulation_target_academic_year: null }
+          : { publication_role: "simulation_reference", simulation_target_academic_year: null },
+      }));
+      alt.reason_code = "SYNTHETIC_PRIORITY_CONFLICT_PENDING";
+    },
+  });
+  const p = await f.source.current(), body = await f.source.read(p, p.full!);
+  const schemas = JSON.parse(SYNTHETIC_QUALIFICATION_SCHEMA_JSON);
+  const projection = new PublicResponseProjection(
+    schemas,
+    schemas.operations.map((o: { id: string; contract_ref: string }) => ({
+      id: o.id,
+      contract_ref: o.contract_ref,
+    })),
+  );
+  for (const tier of ["standard", "paid"] as const) {
+    const projected = projection.project("history.snapshot.read", tier, body);
+    equal(await nativeJsonSha256(projected), await nativeJsonSha256(body));
+    const wire = await f.source.representation(projected);
+    equal(await snapshotBytesSha256(wire.bytes), p.full!.gzipSha256);
+    const decoded = await new Response(
+      new Blob([wire.bytes]).stream().pipeThrough(new DecompressionStream("gzip")),
+    ).text();
+    equal(await snapshotBytesSha256(new TextEncoder().encode(decoded)), p.full!.decodedSha256);
+    assert(decoded.includes('"value":0.000000010020'));
+    assert(decoded.includes('"value":0.000000030040'));
+    assert(decoded.includes('"value":0.000000050060'));
+    const result = JSON.parse(decoded);
+    const row = result.rows[0];
+    const entries = row.alternate_cut.entries;
+    equal(row.final_50_percent_cut.value, null);
+    equal(row.final_50_percent_cut.status, "not_published");
+    equal(row.final_70_percent_cut.statistic_label, "SYNTHETIC original 70 label");
+    equal(entries.map((e: NativeObject) => e.statistic_label), [
+      "SYNTHETIC original mean label",
+      "SYNTHETIC original mean label",
+    ]);
+    equal(entries.map((e: NativeObject) => e.source_url), [
+      "https://synthetic.invalid/official-statistics",
+      "https://synthetic.invalid/official-statistics",
+    ]);
+    equal(entries.map((e: NativeObject) => e.source_as_of), ["2026-10-14", "2026-10-14"]);
+    equal(entries.map((e: NativeObject) => (e.source_context as NativeObject).scope_status), [
+      "review_pending",
+      "review_pending",
+    ]);
+    equal(entries.map((e: NativeObject) => e.selection_rule_ref), [
+      "SYNTHETIC-common-rule",
+      "SYNTHETIC-common-rule",
+    ]);
+    equal(entries.map((e: NativeObject) => e.cohort), [
+      "SYNTHETIC original cohort",
+      "SYNTHETIC original cohort",
+    ]);
+    equal(entries.map((e: NativeObject) => e.cohort_label), [
+      "SYNTHETIC original cohort label",
+      "SYNTHETIC original cohort label",
+    ]);
+    equal(entries.map((e: NativeObject) => e.basis_code), [
+      "SYNTHETIC-score-component-a",
+      "SYNTHETIC-score-component-b",
+    ]);
+    equal(entries.map((e: NativeObject) => e.basis_label), [
+      "SYNTHETIC original component A",
+      "SYNTHETIC original component B",
+    ]);
+    equal(entries.map((e: NativeObject) => e.status), ["pending_metadata", "pending_metadata"]);
+    equal(entries.map((e: NativeObject) => e.reason_code), [
+      "SYNTHETIC_PRIORITY_CONFLICT_PENDING",
+      "SYNTHETIC_PRIORITY_CONFLICT_PENDING",
+    ]);
+    equal(
+      entries.map((e: NativeObject) =>
+        (e.score_calculation_context as NativeObject).score_calculation_year
+      ),
+      [null, null],
+    );
+    equal(
+      entries.map((e: NativeObject) => (e.publication_context as NativeObject).publication_role),
+      ["unresolved", "simulation_reference"],
+    );
+    equal(
+      entries.map((e: NativeObject) =>
+        (e.publication_context as NativeObject).simulation_target_academic_year
+      ),
+      [null, null],
+    );
+  }
 });

@@ -1,3 +1,4 @@
+import { admissionMillis } from "./jungsi/application/service_end_admission.ts";
 import { isOwnerCurrentReview, OWNER_REVIEW_FORMAT, OWNER_REVIEW_WIRE_RECIPE, OWNER_PERCENTILE_VIEW, ownerCurrentProjectionSha256, parseOwnerCurrentQuery, validateOwnerCurrentQuery, validatePercentileHead, closeOwnerCurrentPage } from './current_admission_owner.ts';
 /** Reviewer-only current observations. No publication, engine, default-member or frozen-C transition. */
 import { DB_FIELDS, DisplayError, nowMicros, sameJson, utcInstantMicros, utcText } from './official_history_display.ts';
@@ -281,8 +282,11 @@ export function createCurrentAdmissionReviewHandler(ports:CurrentReviewPorts,t:C
       if(xor!==0||actual!.length!==t.relayToken.length)throw fail('relay_authentication_failed',403);
       const url=new URL(request.url);
       if(request.method!=='GET'||url.pathname!==t.pathPrefix+CURRENT_REVIEW_ROUTE)throw fail('display_operation_not_supported');
+      const now=(t.now??Date.now)(), admission=admissionMillis(now);
+      if(admission==='invalid_clock')throw fail('security_policy_unavailable');
+      if(admission==='ended')throw fail('service_ended',403);
       const auth=request.headers.get('Authorization');if(!auth?.startsWith('Bearer ')||!/^[^\s,]{1,16384}$/.test(auth.slice(7)))throw fail('authentication_required',401);
-      const now=(t.now??Date.now)(),session=await ports.verifySession(auth.slice(7),now);
+      const session=await ports.verifySession(auth.slice(7),now);
       if(!session||!uuid(session.subjectId)||!Number.isSafeInteger(session.expiresAt)||session.expiresAt<=now)throw fail('authentication_required',401);
       const descriptor=await validateCurrentReviewDescriptor(await ports.loadDescriptor(),t.environment,now);
       if(!(descriptor.approval.review_subjects as string[]).includes(session.subjectId))throw fail('review_subject_not_allowed',403);

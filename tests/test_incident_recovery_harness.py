@@ -17,6 +17,8 @@ import run_edge_tests as runner
 def synthetic_spec():
     """Keep the checked-in planning base and add only invented v5 test metadata."""
     spec = json.loads((check.ROOT / "docs/current/service_spec.json").read_text(encoding="utf-8"))
+    # This fixture exercises v5 alone; the combined real extensions remain denied.
+    spec["backend_platform_contract"].pop("stage_projection_source_extension", None)
     legacy = spec["backend_platform_contract"]["dto_schemas"]["score_input_status"]
     grant_fields = [
         "format", "grant_id", "incident_key", "ticket_ref", "fault_kind", "exam_id", "stage",
@@ -303,10 +305,11 @@ class IncidentRecoveryHarnessTests(unittest.TestCase):
         self.assertNotIn("(?", baseline.pattern.replace("(?:", ""))
 
     def test_owner_v3_history_is_unchanged_and_v4_has_separate_evidence(self):
-        untouched = deepcopy(self.spec)
+        active_owner = deepcopy(self.spec["owner_current_review_contract"])
         spec = deepcopy(self.spec)
         owner = spec["owner_current_review_contract"]
-        # Exercise v3 against its retained bindings before adding a synthetic v4.
+        # Isolate only this copied historical fixture from current/future registrations.
+        owner.pop("verification_v3_rebound_20261030", None)
         owner.pop("verification_v4", None)
         old = owner["verification"]
         before_old = {b["path"]: b["sha256"] for b in old["source_bindings"]}
@@ -336,7 +339,7 @@ class IncidentRecoveryHarnessTests(unittest.TestCase):
             mutate(changed)
             with self.assertRaises(runner.EdgeFailure):
                 runner.owner_review_registration(changed, before_v4)
-        self.assertEqual(self.spec, untouched)
+        self.assertEqual(self.spec["owner_current_review_contract"], active_owner)
 
 
 if __name__ == "__main__":

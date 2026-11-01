@@ -6,6 +6,7 @@ No real account, entitlement, database URL or filesystem fixture is used.
 from datetime import datetime, timedelta, timezone
 import json
 import sqlite3
+from types import SimpleNamespace
 import unittest
 from uuid import UUID
 
@@ -34,6 +35,7 @@ class Rows:
 
 class SyntheticConnection:
     def __init__(self):
+        self.pgconn = SimpleNamespace(ssl_in_use=True)
         self.calls = []; self.columns = list(COLUMNS); self.constraints = list(CONSTRAINTS)
         self.role = (True,False,False,False,True,False,False); self.policies = list(POLICIES)
         self.exists = True; self.failure = False
@@ -75,7 +77,7 @@ class EntitlementAdapterTests(unittest.TestCase):
     def setUp(self):
         self.c = SyntheticConnection(); self.options = []
         def connect(url,**options): self.options.append(options); return self.c
-        self.repo = PostgresJeongsiPassesRepository('SYNTHETIC-private-url',connector=connect)
+        self.repo = PostgresJeongsiPassesRepository('dbname=SYNTHETIC sslmode=require',connector=connect)
 
     def tearDown(self): self.c.sql.close()
 
@@ -89,7 +91,7 @@ class EntitlementAdapterTests(unittest.TestCase):
         for start,end,expected in ((0,1,True),(-1,0,False),(1,2,False)):
             with self.subTest(start=start,end=end):
                 connection=SyntheticConnection(); connection.add(OWNER,start,end)
-                repo=PostgresJeongsiPassesRepository('SYNTHETIC',connector=lambda *a,**k:connection)
+                repo=PostgresJeongsiPassesRepository('dbname=SYNTHETIC sslmode=require',connector=lambda *a,**k:connection)
                 self.assertIs(repo.active_paid(OWNER,NOW),expected)
                 connection.sql.close()
 

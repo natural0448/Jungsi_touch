@@ -20,7 +20,9 @@ import { hasAsciiControl, pythonTrim, unicodeCasefold } from "./jungsi/domain/te
 import { utcText } from "./jungsi/domain/time.ts";
 import {
   currentHistoryServiceItem,
+  hasWaitlistSemanticConflict,
   type HistoryAliasEvidence,
+  type HistoryAliasScope,
 } from "./jungsi/application/history_metric_alias.ts";
 /** Retain the reviewed 5c9 scalar comparison contract without loading an Owner runtime graph. */
 function decimal(value: string): string | null {
@@ -273,9 +275,37 @@ export function publicCatalogKey(v: unknown): PublicCatalogKey {
   ) fail("current_catalog_page_invalid");
   return [...(v as PublicCatalogKey)];
 }
+/** Capture only fields used by the public projection before the first await. */
+function snapshotOfferingFields(input: NativeObject, names: readonly string[]): NativeObject {
+  const copy: NativeObject = Object.create(null);
+  for (const name of names) {
+    const descriptor = Object.getOwnPropertyDescriptor(input, name);
+    if (!descriptor) continue;
+    if (!descriptor.enumerable || !("value" in descriptor)) fail("current_catalog_page_invalid");
+    copy[name] = descriptor.value as NativeJson;
+  }
+  return Object.freeze(copy);
+}
+const OFFERING_ID_FIELDS = [
+  "academic_year",
+  "offering_pk",
+  "offering_id",
+  "canonical_result_id",
+] as const;
+const OFFERING_ROW_FIELDS = [
+  ...OFFERING_ID_FIELDS,
+  "university_code",
+  "school_id",
+  "university",
+  "department",
+  "track",
+  "recruit_group",
+] as const;
+const OFFERING_GUIDE_FIELDS = ["campus", "location", "wildcard_group"] as const;
 export async function publicCatalogOfferingId(
-  row: NativeObject,
+  input: NativeObject,
 ): Promise<string> {
+  const row = snapshotOfferingFields(input, OFFERING_ID_FIELDS);
   if (
     !Number.isSafeInteger(row.academic_year) ||
     ![2024, 2025, 2026, 2027].includes(row.academic_year as number)
@@ -313,9 +343,11 @@ export async function publicCatalogOfferingId(
   return observation;
 }
 export async function publicCatalogOffering(
-  row: NativeObject,
-  guide: NativeObject | null,
+  input: NativeObject,
+  inputGuide: NativeObject | null,
 ): Promise<NativeObject> {
+  const row = snapshotOfferingFields(input, OFFERING_ROW_FIELDS),
+    guide = inputGuide ? snapshotOfferingFields(inputGuide, OFFERING_GUIDE_FIELDS) : null;
   return {
     offering_id: await publicCatalogOfferingId(row),
     academic_year: row.academic_year,
@@ -360,6 +392,25 @@ export async function publicCatalogHistory(
     scale = scalar(meta.original_scale) ? cloneNativeJson(meta.original_scale) : null;
   const url = publicUrl(meta.source_url ?? location.source_url ?? location.url),
     asOf = date(meta.source_as_of ?? location.source_as_of);
+  const kind = field(row, "metric_kind"), label = field(row, "statistic_label");
+  const aliasScope: HistoryAliasScope = {
+    observation_id: field(row, "canonical_result_id"),
+    academic_year: typeof row.academic_year === "number" ? row.academic_year : null,
+    offering_id: field(row, "offering_id"),
+    cohort: field(row, "cohort"),
+    score_basis: field(meta, "score_basis"),
+    score_scope: field(meta, "score_scope"),
+    source_round: field(meta, "source_round"),
+    statistic_percent: typeof meta.statistic_percent === "number" ? meta.statistic_percent : null,
+  };
+  const aliasEvidence = object(meta.metric_alias_evidence)
+    ? meta.metric_alias_evidence as unknown as HistoryAliasEvidence
+    : null;
+  const semanticConflict = hasWaitlistSemanticConflict(kind, label, aliasScope, aliasEvidence);
+  const metricName = semanticConflict
+    ? null
+    : currentHistoryServiceItem(kind, label, aliasScope, aliasEvidence);
+  const valueType = field(row, "metric_value_json_type");
   const qualified = meta.qualification_status === "verified_official" &&
     definition !== null && unit !== null && url !== null && asOf !== null &&
     (meta.original_scale === undefined || scalar(meta.original_scale));
@@ -375,33 +426,17 @@ export async function publicCatalogHistory(
     : "pending_metadata";
   return {
     ...await publicCatalogOffering(row, record.guide),
-    metric_name: currentHistoryServiceItem(
-      field(row, "metric_kind"),
-      field(row, "statistic_label"),
-      {
-        observation_id: field(row, "canonical_result_id"),
-        academic_year: typeof row.academic_year === "number" ? row.academic_year : null,
-        offering_id: field(row, "offering_id"),
-        cohort: field(row, "cohort"),
-        score_basis: field(meta, "score_basis"),
-        score_scope: field(meta, "score_scope"),
-        source_round: field(meta, "source_round"),
-        statistic_percent: typeof meta.statistic_percent === "number"
-          ? meta.statistic_percent
-          : null,
-      },
-      object(meta.metric_alias_evidence)
-        ? meta.metric_alias_evidence as unknown as HistoryAliasEvidence
-        : null,
-    ),
-    statistic_label: field(row, "statistic_label"),
-    cohort: field(row, "cohort"),
-    value_json_type: field(row, "metric_value_json_type"),
+    metric_name: metricName,
+    statistic_label: label,
+    cohort: aliasScope.cohort,
+    value_json_type: valueType,
     metric_definition: definition,
-    value,
+    value: semanticConflict ? null : value,
     unit,
     original_scale: scale,
-    publication_status: status,
+    publication_status: semanticConflict && status === "verified_official"
+      ? "pending_metadata"
+      : status,
     source_url: url,
     source_as_of: asOf,
   };
