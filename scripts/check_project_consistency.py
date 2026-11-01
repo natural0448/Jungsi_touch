@@ -4433,6 +4433,66 @@ def generated_files(spec,read=None):
                           [op,state['current_owner_receipt']['source_deployment'],state['current_owner_receipt']['new_BFF_observation'],state['current_owner_receipt']['formal_native_and_operating_acceptance']]
                           for op,state in spec['supabase_deployment_contract']['live_execution']['operations'].items()
                       ])+"\n\n남은 인수: "+'; '.join(peer['residual'])+".\n")
+        partial=snapshot.get('offering_2027_partial_scope_service_candidate_20261030')
+        successor=snapshot.get('offering_2027_independent_scope_successor_20261029')
+        safety=snapshot.get('planning_preview_20261031')
+        if partial and successor and safety:
+            section+=("\n### 2027 부분 발행과 현재성 검토 후보\n\n"+
+                      "소스 후보 "+safety['source_commit']+" / "+partial['status']+". "+safety['candidate_boundary']+"\n\n"+
+                      table(['구분','검토 계약'],[
+                          ['기획 참고',successor['id']+' / '+successor['status']],
+                          ['화면·경로',successor['page']+' / '+', '.join(partial['operations'])],
+                          ['부분 범위',partial['contract']],
+                          ['권한·소비자',partial['consumer']],
+                          ['원문·미확정',successor['value_rules']+' '+successor['independent_history']],
+                          ['DB 대조',safety['db_comparison']],
+                          ['승인 현재성',safety['authorization_currentness']],
+                          ['연결·화면',safety['historical_link']],
+                          ['미인수',', '.join(partial['not_verified'])+'; '+safety['remaining']],
+                      ])+"\n")
+        owner_review=snapshot.get('planning_owner_review_20261031')
+        if owner_review:
+            section+=("\n### 화면팀 운영 영향 회신 검토 (미인수)\n\n"+
+                      owner_review['status']+'. '+owner_review['source_scope']+"\n\n"+
+                      table(['구분','확인·후속 상태'],[
+                          ['SSL 현황',owner_review['ssl_status']],
+                          ['연결 코드 보고',owner_review['ssl_clients']],
+                          ['강제 전환 조건',owner_review['ssl_cutover']],
+                          ['대조 부하',owner_review['comparison']],
+                          ['2027 발행',owner_review['publication']],
+                          ['3페이지 head 결속',owner_review['rebind']],
+                          ['화면·API·권한',owner_review['routes']],
+                          ['미실행',owner_review['not_run']],
+                      ])+"\n")
+        latest_owner=snapshot.get('planning_owner_review_20261101')
+        if latest_owner:
+            section+=("\n### 2026-11-01 화면 Owner 재적용 회신과 선택 시간\n\n"+
+                      latest_owner['status']+"\n\n"+
+                      table(['구분','확인·후속 상태'],[
+                          ['Owner 보고',latest_owner['owner_report']],
+                          ['원시 파일 정합성',latest_owner['line_endings']],
+                          ['GitHub CI',latest_owner['ci']],
+                          ['증거 범위',latest_owner['scope']],
+                          ['선택 시간',latest_owner['window']],
+                          ['다른 접속 도구',latest_owner['other_clients']],
+                          ['전환 후 검수',latest_owner['verification']],
+                          ['오프라인 자료 검수',latest_owner['offline_data']],
+                          ['기존 자료와 승인',latest_owner['remaining']],
+                          ['경로·권한',latest_owner['routes']],
+                          ['미실행',latest_owner['not_run']],
+                      ])+"\n")
+        quota_review=snapshot.get('planning_quota_stage_review_20261031')
+        if quota_review:
+            section+=("\n### 2027 모집인원 단계 계약 검토 후보\n\n"+
+                      quota_review['status']+'. '+quota_review['scope']+"\n\n"+
+                      table(['구분','현재 후보와 검토 조건'],[
+                          ['입결 snapshot 조합',quota_review['snapshot']],
+                          ['별도 모집정보 경로',quota_review['recruitment']],
+                          ['표시·계산 안전',quota_review['display_safety']],
+                          ['단계·결측 의미',quota_review['semantics']],
+                          ['기존 소비자 호환',quota_review['compatibility']],
+                          ['검증·발행 상태',quota_review['verification']],
+                      ])+"\n")
         for key in ('planning','routing','architecture','workflow','supabase_deployment','development_sync','history_display','presentation_handoff','frontend_reply','frontend_followup','api_dto','security'):
             target=spec['current_documents'].get(key)
             if target in files:files[target]+=section
