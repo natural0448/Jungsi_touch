@@ -1,4 +1,4 @@
-import { asOfDate } from "@/lib/format";
+import { asOfDate, ratioText } from "@/lib/format";
 import { rankDisplayModel } from "@/lib/p1-field-qualification";
 import { publishedScoreNullLabel, publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
@@ -92,7 +92,8 @@ const personInt = (c: Cell): number | null => {
 const ratioOf = (c: Cell): { n: number; s: number } | null => {
   if (c.v === null) return null;
   if (c.u !== null && !c.u.includes("대")) return null;
-  const t = /^(\d+)(?:\.(\d+))?$/.exec(c.v.trim());
+  // 화면에 보이는 반올림 값(둘째 자리)으로 계산해 표의 경쟁률과 추정 총 지원자가 서로 맞게 한다
+  const t = /^(\d+)(?:\.(\d+))?$/.exec(ratioText(c.v.trim()));
   if (!t) return null;
   const frac = t[2] ?? "";
   if ((t[1] + frac).length > 10) return null;
@@ -163,7 +164,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                       {renamedDept && <small>당시 {renamedDept}</small>}
                     </th>
                     <td className="r"><Value c={r.rc} /></td>
-                    <td className="r"><Value c={r.cr} /></td>
+                    <td className="r"><Value c={r.cr.v === null ? r.cr : { ...r.cr, v: ratioText(r.cr.v) }} /></td>
                     <td className="r derived">
                       {dv.applicants === null ? <span className="unpub">─</span> : <><b className="num">{dv.applicants}</b><small> 명</small>{dv.heldA && <Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
                     </td>

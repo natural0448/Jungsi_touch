@@ -38,6 +38,21 @@ export function pctText(v: string | number): string {
   return n.toFixed(2);
 }
 
+/**
+ * 경쟁률 표시(2026-11-02 사용자 결정): 소수 셋째 자리 이상이면 둘째 자리까지 반올림(half-up)한다.
+ * "5.0999999999999996" → "5.1", "4.567" → "4.57". 둘째 자리 이하 원문("3.3"·"4.50")과 숫자가 아닌 원문은 그대로 둔다.
+ * 부동소수 변환 없이 십진 문자열로 계산한다.
+ */
+export function ratioText(v: string): string {
+  const t = /^(\d+)\.(\d{3,})$/.exec(v.trim());
+  if (!t) return v;
+  let n = BigInt(t[1] + t[2].slice(0, 2));
+  if (t[2][2] >= "5") n += BigInt(1);
+  const d = n.toString().padStart(3, "0");
+  const frac = d.slice(-2).replace(/0+$/, "");
+  return frac ? `${d.slice(0, -2)}.${frac}` : d.slice(0, -2);
+}
+
 /** 변경분 +2 / -1 / 0 */
 export function signed(n: number): string {
   return n > 0 ? `+${n}` : String(n);
