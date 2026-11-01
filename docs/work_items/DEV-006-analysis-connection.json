@@ -13,7 +13,7 @@
   ],
   "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
   "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-  "contract_version": "1.9.140",
+  "contract_version": "1.9.141",
   "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
   "owner": "외부 프런트 전담 개발자",
   "candidate_only": true,
@@ -917,7 +917,7 @@
         "canonical_data": "bounded actual DB read confirms 2027 quota data exists; no data values copied into Git",
         "current_status": "not_connected_to_collapsed_summary",
         "candidate_checks": "internal batch/projection synthetic only; per-ID shared budget, snapshot binding and live Owner integration still NOT_IMPLEMENTED",
-        "preserve": "source 2027 canonical offering PK and original quota; show 2027-only rows even when historical linkage is not established; join historical rows only on verified lineage; preserve campus/track/group and stage unknown/actual0/null/conditional carry-over"
+        "preserve": "source 2027 canonical offering PK and original quota; preserve 2027-only rows even when historical linkage is not established; join historical rows only on verified lineage; preserve exact lineage, campus/track/group and publication stage; do not promote pending/unknown stage values to final; keep actual 0, native null and conditional carry-over distinct"
       },
       "operating_status": {
         "new_service_DB_DDL_and_period_reference": "NOT_RUN",
