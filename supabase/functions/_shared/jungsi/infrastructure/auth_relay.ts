@@ -264,7 +264,15 @@ export function safeFailure(error: unknown, requestId: string): Response {
       error.code === "overall_model_refresh_pending" && error.http === 503) &&
     [400, 401, 403, 404, 405, 409, 413, 422, 429, 503].includes(error.http) &&
     (error.http !== 429 || error instanceof RequestLimitError);
-  const code = known ? error.code : "backend_dependency_unavailable",
+  // This internal reason is raised only after the refresh service checks the user's
+  // profile, report ownership and expected revision. Expose no underlying result details.
+  const preservedReport = error instanceof AccessError &&
+    error.code === "overall_refresh_result_preservation_required" && error.http === 503;
+  const code = preservedReport
+      ? "report_refresh_preserved"
+      : known
+      ? error.code
+      : "backend_dependency_unavailable",
     http = known ? error.http : 503;
   return Response.json({
     status: "error",

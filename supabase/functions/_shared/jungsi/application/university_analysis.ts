@@ -1,6 +1,12 @@
 /** Paid owned-report university and full-catalog candidate workflows. No in-place profile edits. */
 import { AccessError, authorizeReport } from "./access.ts";
-import type { ApiBusinessPort, ApiExecution } from "./api_dispatch.ts";
+import type { ApiBusinessPort, ApiExecution, ApiExecutionBoundary } from "./api_dispatch.ts";
+import { buildWildcardCandidateReview } from "./wildcard_candidate_review.ts";
+import {
+  materializeWildcardReview,
+  requestWildcardGrant,
+  type WildcardRuntimeGate,
+} from "./wildcard_runtime_gate.ts";
 import { CatalogService, offeringDto } from "./catalog.ts";
 import { evaluateOffering, type OfferingAnalysisDataPort } from "./offering_analysis.ts";
 import type { PlatformRepositoryPort, StoredProfile, StoredReport } from "./platform_repository.ts";
@@ -131,6 +137,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
     private readonly clock: RequestClockPort,
     private readonly forecasts: PublishedForecastPort | null,
     private readonly policyMode: ScoreWorkflowMode = { mode: "rights", workflow: null },
+    private readonly wildcardGate: WildcardRuntimeGate | null = null,
   ) {
     this.scoring = new UniversityScoringService(data);
     this.percentile = new UniversityPercentileService(data);
@@ -156,7 +163,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
     ) fail();
     return report;
   }
-  async execute(request: ApiExecution): Promise<NativeObject> {
+  async execute(request: ApiExecution, boundary?: ApiExecutionBoundary): Promise<NativeObject> {
     const { operation: op, session, params, body, query } = request;
     if (
       !UNIVERSITY_ANALYSIS_OPERATIONS.includes(op as typeof UNIVERSITY_ANALYSIS_OPERATIONS[number])
@@ -237,17 +244,64 @@ export class UniversityAnalysisService implements ApiBusinessPort {
           forecast_error: batchError?.code ?? null,
         })
         : null;
+      let wildcardGrant = null;
+      if (op === "candidates.build" && this.wildcardGate) {
+        const overall = updated.overall;
+        if (
+          !object(overall) || !object(overall.exam) ||
+          typeof overall.exam.academic_year !== "number" ||
+          typeof overall.exam.exam_id !== "string" ||
+          typeof overall.score_basis !== "string"
+        ) fail("security_policy_unavailable", 503);
+        wildcardGrant = await requestWildcardGrant(
+          {
+            audience: "personal",
+            operation: "candidates.build",
+            subjectId: session.user.subjectId,
+            organizationId: null,
+            studentId: null,
+            reportId: record.report_id,
+            sourceReportRevision: record.revision,
+            profileId: profile.profile_id,
+            academicYear: overall.exam.academic_year,
+            examId: overall.exam.exam_id,
+            scoreBasis: overall.score_basis,
+            catalogVersion: release.version,
+            analysisContextSha256: context,
+          },
+          this.wildcardGate,
+          boundary,
+        );
+        this.fresh(session);
+      }
+      const candidateContext = context !== null && wildcardGrant
+        ? await nativeJsonSha256({
+          base: context,
+          wildcard: wildcardGrant.cachePins,
+          request_scope: wildcardGrant.context.operationContextSha256,
+          overall: await nativeJsonSha256(updated.overall),
+          // Preserve the exact allowed universe, independent of input ordering.
+          rows: await nativeJsonSha256([...rows].sort((a, b) => {
+            const x = String(a.offering_id), y = String(b.offering_id);
+            return x < y ? -1 : x > y ? 1 : 0;
+          })),
+        })
+        : context;
       if (!object(updated.operation_contexts)) updated.operation_contexts = {};
       const contexts = updated.operation_contexts as NativeObject;
       const cached = context !== null && batchError === null &&
         (op === "candidates.build"
-          ? contexts.candidates === context && object(updated.candidates)
+          ? contexts.candidates === candidateContext && object(updated.candidates)
           : object(updated.analyses) &&
             rows.every((r) =>
               contexts["analysis:" + r.offering_id] === context &&
               object((updated.analyses as NativeObject)[r.offering_id as string])
             ));
       if (cached) {
+        if (wildcardGrant) {
+          await wildcardGrant.assertCurrent();
+          this.fresh(session);
+        }
         const result = await this.repository.writeReport({
           owner: session.user.subjectId,
           reportId: record.report_id,
@@ -260,6 +314,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
           digest,
           noOp: true,
         });
+        if (wildcardGrant) await wildcardGrant.assertCurrent();
         this.fresh(session);
         return reportDto(session, result);
       }
@@ -357,8 +412,28 @@ export class UniversityAnalysisService implements ApiBusinessPort {
         reason_code: ready ? null : "offering_analysis_pending",
       };
       if (op === "candidates.build") {
-        updated.candidates = candidateGroups(rows, results, release.version);
-        if (context !== null) contexts.candidates = context;
+        if (wildcardGrant) {
+          const review = await buildWildcardCandidateReview(
+            rows,
+            results,
+            release.version,
+            wildcardGrant.context,
+            wildcardGrant.evidence,
+            wildcardGrant.signal,
+          );
+          await wildcardGrant.assertCurrent();
+          this.fresh(session);
+          updated.candidates = materializeWildcardReview(review);
+          const complete = review.preview.wildcard_selection.status === "ready" &&
+            review.preview.wildcard_selection.card_stability.every((item) =>
+              item.status === "verified"
+            );
+          if (candidateContext !== null && complete) contexts.candidates = candidateContext;
+          else delete contexts.candidates;
+        } else {
+          updated.candidates = candidateGroups(rows, results, release.version);
+          if (context !== null) contexts.candidates = context;
+        }
         if (personalResultComponents({ candidates: updated.candidates }).includes("candidates")) {
           originKeys.push("candidates");
         }

@@ -1,12 +1,21 @@
 /** Separate institutional ingress; the personal API route table is unchanged. */
 import { AccessError, authorizeUser } from "../application/access.ts";
 import type { RequestClockPort, UserSessionPort, VerifiedUser } from "../application/ports.ts";
-import type { ProfessionalContract } from "../application/professional_ports.ts";
+import type {
+  ProfessionalContract,
+  ProfessionalResponse,
+} from "../application/professional_ports.ts";
 import { proFresh, proId, proObject } from "../application/professional_policy.ts";
 import { ProfessionalProjection } from "../application/professional_projection.ts";
-import { ProfessionalService } from "../application/professional_service.ts";
+import {
+  type ProfessionalDeliveryBoundary,
+  ProfessionalService,
+} from "../application/professional_service.ts";
 import { RequestLimitError } from "../application/request_budget.ts";
-import { publicJsonText } from "../application/public_response.ts";
+import {
+  publicJsonText,
+  type WildcardProjectionAuthority,
+} from "../application/public_response.ts";
 import { parseNativeJson } from "../domain/native_json.ts";
 import { RelayBoundary, safeFailure } from "./auth_relay.ts";
 
@@ -16,11 +25,41 @@ export interface ProfessionalHttpPorts {
   readonly sessions: UserSessionPort;
   readonly clock: RequestClockPort;
   readonly projection: ProfessionalProjection;
+  /** Absent until an independent same-request immutable-revision verifier is approved. */
+  readonly wildcardProjectionAuthority?: {
+    resolve(
+      operation: string,
+      user: VerifiedUser,
+      response: ProfessionalResponse,
+      boundary: ProfessionalDeliveryBoundary,
+      signal: AbortSignal,
+    ): Promise<WildcardProjectionAuthority | null>;
+  };
   readonly service: (operation: string, user: VerifiedUser) => Promise<ProfessionalService>;
   /** Verified BFF CSRF result is required in addition to relay and exact bearer verification. */
   readonly mutationGuard: (request: Request) => Promise<void>;
   readonly maximumRequestMilliseconds: number;
   readonly ingressStartedAtUtc?: bigint;
+}
+function hasPrivateWildcardProfessional(operation: string, value: unknown): boolean {
+  const object = (x: unknown): x is Record<string, unknown> =>
+    !!x && typeof x === "object" && !Array.isArray(x);
+  const candidate = (x: unknown) => object(x) && Object.hasOwn(x, "_wildcard_selection_view");
+  const report = (x: unknown) =>
+    object(x) && (candidate(x.candidates) ||
+      object(x.read_only_snapshot) && candidate(x.read_only_snapshot.candidates));
+  if (!object(value)) return false;
+  if (operation === "pro.candidates") return candidate(value.candidates);
+  if (operation === "pro.overall.analyze") return report(value.report);
+  if (operation === "pro.report.read") return report(value.published_result);
+  if (operation === "pro.report.export") {
+    return object(value.snapshot) && report(value.snapshot.report);
+  }
+  if (operation === "pro.report.list") {
+    return Array.isArray(value.items) &&
+      value.items.some((item) => object(item) && report(item.published_result));
+  }
+  return false;
 }
 const SAFE = new Set([
   "professional_access_denied",
@@ -179,6 +218,7 @@ export function createProfessionalHandler(
     const requestId = crypto.randomUUID().replaceAll("-", "");
     const startedAtUtc = ports.ingressStartedAtUtc ?? ports.clock.nowUtc(),
       controller = new AbortController();
+    const combinedSignal = AbortSignal.any([controller.signal, request.signal]);
     const remaining = Math.max(
       1,
       ports.maximumRequestMilliseconds - Number((ports.clock.nowUtc() - startedAtUtc) / 1000n),
@@ -210,7 +250,7 @@ export function createProfessionalHandler(
         }
         const user = await authorizeUser(bearer[1], ports.sessions, ports.clock.nowUtc());
         proFresh(user, ports.clock.nowUtc());
-        controller.signal.throwIfAborted();
+        combinedSignal.throwIfAborted();
         if (found.route.request.BFF_CSRF_required) await ports.mutationGuard(request);
         const match = found.pattern.exec(path)!,
           params: Record<string, string> = {},
@@ -235,16 +275,16 @@ export function createProfessionalHandler(
         }
         if (key !== null) proId(key);
         const service = await ports.service(found.route.id, user);
-        controller.signal.throwIfAborted();
+        combinedSignal.throwIfAborted();
         if (
           service.policy.operating.maxRequestRuntimeMilliseconds >
             BigInt(ports.maximumRequestMilliseconds)
         ) throw new AccessError("professional_policy_unavailable", 503);
-        const input = await body(request, service.policy.maxBodyBytes, controller.signal);
+        const input = await body(request, service.policy.maxBodyBytes, combinedSignal);
         if (request.method === "GET" && Object.keys(input).length) {
           throw new AccessError("invalid_request", 422);
         }
-        return await service.execute({
+        const delivery = await service.execute({
           operation: found.route.id,
           user,
           params,
@@ -253,11 +293,30 @@ export function createProfessionalHandler(
           key,
           requestId,
           startedAtUtc,
-        }, async (outcome) => {
-          controller.signal.throwIfAborted();
+        }, async (outcome, boundary) => {
+          combinedSignal.throwIfAborted();
           const now = ports.clock.nowUtc();
           current(user, await authorizeUser(bearer[1], ports.sessions, now), now);
           let text: string, status: number;
+          let authority: WildcardProjectionAuthority | null = null;
+          if (
+            outcome.response && ports.wildcardProjectionAuthority && boundary &&
+            hasPrivateWildcardProfessional(found.route.id, outcome.response.data)
+          ) {
+            try {
+              authority = await ports.wildcardProjectionAuthority.resolve(
+                found.route.id,
+                user,
+                outcome.response,
+                boundary,
+                combinedSignal,
+              );
+              if (authority) await authority.assertCurrent(combinedSignal);
+            } catch {
+              authority = null;
+            }
+            combinedSignal.throwIfAborted();
+          }
           if (outcome.error) {
             text = JSON.stringify({
               status: "error",
@@ -267,7 +326,12 @@ export function createProfessionalHandler(
             status = outcome.error.http;
           } else if (outcome.response) {
             text = publicJsonText(
-              ports.projection.project(found.route.id, outcome.response, requestId),
+              ports.projection.project(
+                found.route.id,
+                outcome.response,
+                requestId,
+                authority ?? undefined,
+              ),
             );
             status = found.route.method === "POST" &&
                 ["pro.student.create", "pro.score.create"].includes(found.route.id)
@@ -275,10 +339,30 @@ export function createProfessionalHandler(
               : 200;
           } else throw new AccessError("professional_response_invalid", 503);
           return {
-            value: response(text, status),
+            value: { initial: response(text, status), text, status, authority, outcome },
             bytes: BigInt(new TextEncoder().encode(text).byteLength),
           };
-        });
+        }, combinedSignal);
+        if (!delivery.authority) return delivery.initial;
+        combinedSignal.throwIfAborted();
+        const now = ports.clock.nowUtc();
+        current(user, await authorizeUser(bearer[1], ports.sessions, now), now);
+        // Final authentication is asynchronous; check the selection authority afterwards.
+        combinedSignal.throwIfAborted();
+        await delivery.authority.assertCurrent(combinedSignal);
+        combinedSignal.throwIfAborted();
+        proFresh(user, ports.clock.nowUtc());
+        if (!delivery.outcome.response) throw new AccessError("professional_response_invalid", 503);
+        const finalText = publicJsonText(ports.projection.project(
+          found.route.id,
+          delivery.outcome.response,
+          requestId,
+          delivery.authority,
+        ));
+        if (finalText !== delivery.text) {
+          throw new AccessError("professional_response_invalid", 503);
+        }
+        return response(finalText, delivery.status);
       } catch (error) {
         return failure(error, requestId);
       }

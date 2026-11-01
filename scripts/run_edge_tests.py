@@ -732,6 +732,19 @@ def run_workspace(root,manifest,deno,python,output):
         service_staged_aux_unit = dict(**counted, coverage="SERVICE_STAGED_P1_WAITLIST_SYNTHETIC",
             source_bindings=staged["source_bindings"], baseline_foundation_count=656,
             native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE", activation_status="NOT_RUN", operating_writes=0)
+    from check_project_consistency import service_wildcard_registration
+    wildcard, wildcard_errors = service_wildcard_registration(spec, before)
+    if wildcard_errors: raise EdgeFailure("service_wildcard_registration_invalid")
+    service_wildcard_unit = None
+    if wildcard is not None:
+        wildcard_junit = output.resolve() / "service_wildcard.junit.xml"
+        command([deno, "test", *common, "--reporter=dot", "--junit-path", str(wildcard_junit),
+                 *wildcard["test_paths"]], root=root, output=output, name="service_wildcard_unit")
+        counted = parse_junit(wildcard_junit, wildcard["test_count"])
+        require_auxiliary_junit_identities(wildcard_junit, wildcard["case_names_by_path"])
+        service_wildcard_unit = dict(**counted, coverage="WILDCARD_AND_REPORT_SAFETY_SYNTHETIC",
+            source_bindings=wildcard["source_bindings"], baseline_foundation_count=656,
+            native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE", activation_status="NOT_RUN", operating_writes=0)
     member_shortlist_unit=None
     member=member_shortlist_suite_registration(spec,before)
     if member is not None:
@@ -797,6 +810,7 @@ def run_workspace(root,manifest,deno,python,output):
     if member_shortlist_unit is not None:result['member_shortlist_unit']=member_shortlist_unit
     if service_candidate_aux_unit is not None:result['service_candidate_aux_unit']=service_candidate_aux_unit
     if service_staged_aux_unit is not None:result['service_staged_aux_unit']=service_staged_aux_unit
+    if service_wildcard_unit is not None:result['service_wildcard_unit']=service_wildcard_unit
     write_new(output/"edge_run_receipt.json",json_bytes(result));return result
 def main():
     p=argparse.ArgumentParser(description=__doc__)

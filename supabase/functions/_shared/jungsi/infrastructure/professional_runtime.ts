@@ -248,6 +248,8 @@ export class NativeProfessionalRuntime {
               ...approved.analysis,
               reservedCandidateUnits: BigInt(proInteger(candidate.calculation_units, 1)),
             },
+            // The production graph has no approved revision-bound wildcard authority.
+            null,
           );
           const usage = new ProfessionalSharedUsage(
             usageRaw,

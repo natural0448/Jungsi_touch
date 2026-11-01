@@ -103,3 +103,7 @@
 /supabase/functions/_shared/current_admission_owner.ts text eol=lf
 /supabase/functions/_shared/read_view_catalog_runtime.ts text eol=lf
 /docs/team_sessions/2026-10-05/DEV006_서비스_DB_응답.md text eol=lf
+/tests/test_professional_fixture_graph.py text eol=lf
+/tests/test_service_wildcard_registration.py text eol=lf
+/tests/catalog_descriptor_review_graph.20261102.json text eol=lf
+/tests/test_catalog_descriptor_review.py text eol=lf

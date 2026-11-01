@@ -1002,6 +1002,7 @@
         "registry_private_location_required",
         "relay_authentication_failed",
         "report_not_found",
+        "report_refresh_preserved",
         "report_required",
         "reported_formula_context_mismatch",
         "reported_formula_source_conflict",
@@ -1067,6 +1068,9 @@
         "validation_reference_source_mismatch",
         "vocational_common_population_mismatch",
         "vocational_common_subject_required",
+        "wildcard_assessment_pending",
+        "wildcard_comparison_unverified",
+        "wildcard_evidence_unavailable",
         "year_bridge_required"
       ]
     },
@@ -2997,6 +3001,63 @@
             "ref": "offering_state",
             "nullable": false
           }
+        },
+        "wildcard_selection": {
+          "type": "object",
+          "nullable": true,
+          "properties": {
+            "status": {
+              "type": "string",
+              "nullable": false,
+              "enum": [
+                "ready",
+                "partial",
+                "pending"
+              ]
+            },
+            "reason_code": {
+              "type": "string",
+              "nullable": true,
+              "enum": [
+                "wildcard_evidence_unavailable",
+                "wildcard_assessment_pending",
+                "wildcard_comparison_unverified"
+              ]
+            },
+            "card_stability": {
+              "type": "array",
+              "nullable": false,
+              "items": {
+                "type": "object",
+                "nullable": false,
+                "properties": {
+                  "offering_id": {
+                    "ref": "identifier",
+                    "nullable": false
+                  },
+                  "status": {
+                    "type": "string",
+                    "nullable": false,
+                    "enum": [
+                      "verified",
+                      "pending"
+                    ]
+                  }
+                },
+                "required": [
+                  "offering_id",
+                  "status"
+                ],
+                "optional": []
+              }
+            }
+          },
+          "required": [
+            "status",
+            "reason_code",
+            "card_stability"
+          ],
+          "optional": []
         }
       },
       "required": [
@@ -3009,7 +3070,9 @@
         "outside_offerings",
         "ineligible_offerings"
       ],
-      "optional": []
+      "optional": [
+        "wildcard_selection"
+      ]
     },
     "shortlist": {
       "type": "object",
@@ -4550,6 +4613,7 @@
         "registry_private_location_required",
         "relay_authentication_failed",
         "report_not_found",
+        "report_refresh_preserved",
         "report_required",
         "reported_formula_context_mismatch",
         "reported_formula_source_conflict",

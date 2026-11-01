@@ -315,7 +315,7 @@ Deno.test("pending refresh protects zero-score analysis, selection, origins, and
   const response = safeFailure(error, "a".repeat(32));
   equal(response.status, 503);
   equal(response.headers.get("Cache-Control"), "no-store");
-  equal((await response.json()).error.code, "backend_dependency_unavailable");
+  equal((await response.json()).error.code, "report_refresh_preserved");
 });
 
 Deno.test("pending refresh protects candidates even when the analysis map is empty and context changed", async () => {
