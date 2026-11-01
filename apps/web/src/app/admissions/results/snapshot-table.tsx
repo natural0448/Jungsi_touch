@@ -5,11 +5,12 @@ import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
 
 /*
   정리본 한 모집단위: 학년도별 한 줄, 이전 고정 표 배치(연결계약 v3 §5).
-  모집인원 · 경쟁률 · 추정 총 지원자 · 충원인원 · 추정 탈락자 · 최종 합격 예비번호 · 대학 발표 성적 ①·②.
+  모집인원 · 경쟁률 · 추정 총 지원자 · 최종 합격 예비번호 · 추정 탈락자 · 대학 발표 성적 ①·②.
+  충원인원(실제 추가 합격자 수, 명)은 열로 보이지 않고 추정 탈락자 계산에만 쓴다. 예비번호와 뜻이 달라 서로 바꿔 쓰지 않는다(2026-11-02 사용자 결정).
   값은 원문 표기 그대로, null 은 0 이 아니다. 모집인원 단계·대상 집단 꼬리표·출처 링크는 보이지 않는다(2026-10-24 사용자 결정).
   발표 성적 두 칸은 대학마다 다른 통계(50·70%컷, 평균·75%컷 등) 중 두 개를 골라 통계 이름과 함께 보인다(2026-10-28 사용자 결정,
   고르는 규칙은 lib/p1-published-stats.ts). ① 은 50%컷 자리, ② 는 70%컷 자리로 통계마다 칸이 고정된다(같은 날 정정). 별도 '대학 발표 추가 통계' 열은 만들지 않는다. 정리본 자료는 그대로 보존한다.
-  값이 있는데 확인 중(pending_metadata)이면 값과 확인 사유를 함께 보인다. 예비번호는 '번', 충원은 '명'.
+  값이 있는데 확인 중(pending_metadata)이면 값과 확인 사유를 함께 보인다. 예비번호는 '번'.
   추정 2열만 기존 승인 산식(모집인원×경쟁률 반올림, −모집−충원)으로 계산하고 발표 칸을 덮지 않는다.
   추정 총 지원자는 충원인원 없이도 계산하고, 추정 탈락자만 충원인원이 있어야 계산한다.
 */
@@ -140,9 +141,8 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
               <th scope="col" className="r">모집인원</th>
               <th scope="col" className="r">경쟁률</th>
               <th scope="col" className="r derived">추정 총 지원자</th>
-              <th scope="col" className="r">충원인원</th>
-              <th scope="col" className="r derived">추정 탈락자</th>
               <th scope="col" className="r">최종 합격 예비번호</th>
+              <th scope="col" className="r derived">추정 탈락자</th>
               <th scope="col" className="r">대학 발표 성적 ①</th>
               <th scope="col" className="r">대학 발표 성적 ②</th>
             </tr>
@@ -167,11 +167,10 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                     <td className="r derived">
                       {dv.applicants === null ? <span className="unpub">─</span> : <><b className="num">{dv.applicants}</b><small> 명</small>{dv.heldA && <Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
                     </td>
-                    <td className="r"><Value c={r.ad} /></td>
+                    <td className="r"><RankValue c={r.rk} /></td>
                     <td className="r derived">
                       {dv.dropped === null ? <span className="unpub">─</span> : <><b className="num">{dv.dropped}</b><small> 명</small>{dv.heldD &&<Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
                     </td>
-                    <td className="r"><RankValue c={r.rk} /></td>
                     <td className="r"><Stat s={ps[0]} closed={publishedScoreNullLabel(r.c50)} /></td>
                     <td className="r"><Stat s={ps[1]} closed={publishedScoreNullLabel(r.c70)} /></td>
                   </tr>

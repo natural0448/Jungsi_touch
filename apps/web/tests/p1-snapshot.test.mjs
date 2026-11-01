@@ -48,7 +48,7 @@ async function world(t, { parts = 2, schools = 1, missing = false, row = {}, row
     w.writes.push({ key, at: w.now }); w.cache.set(key, value);
   } };
   globalThis.__p1TestBindings = { env: missing ? {} : { JT_SHARED_CACHE: w.kv, JT_P1_COORDINATOR: { getByName(name) {
-    assert.equal(name, "public-v2:live"); return { fetch: request => w.actor.fetch(request) };
+    assert.equal(name, "public-v3:live"); return { fetch: request => w.actor.fetch(request) };
   } } } };
   const pins = [], bodies = new Map();
   let total = 0;
@@ -292,7 +292,7 @@ test("live and deployed synthetic modes fail closed when shared bindings are abs
 });
 test("explicit local synthetic dev mode uses the same coordinator state machine", async t => {
   const w = await world(t, { missing: true }); process.env.JUNGSI_API_MODE = "synthetic";
-  globalThis.__jtP1ExplicitLocalV2 = undefined;
+  globalThis.__jtP1ExplicitLocalV3 = undefined;
   const ready = await w.module.warmStep({ ...w.source, kind: "synthetic" }, w.caller);
   assert.equal(ready.state, "running"); assert.equal(w.partCalls, 2);
 });
@@ -350,8 +350,8 @@ test("live and synthetic use separate server-selected actors on the same native 
     transactionSync(work) { db.exec("BEGIN IMMEDIATE"); try { const r = work(); db.exec("COMMIT"); return r; } catch (e) { db.exec("ROLLBACK"); throw e; } },
   } });
   globalThis.__p1TestBindings.env.JT_P1_COORDINATOR.getByName = name => {
-    names.push(name); assert.ok(["public-v2:live", "public-v2:synthetic"].includes(name));
-    return { fetch: request => (name === "public-v2:live" ? w.actor : syntheticActor).fetch(request) };
+    names.push(name); assert.ok(["public-v3:live", "public-v3:synthetic"].includes(name));
+    return { fetch: request => (name === "public-v3:live" ? w.actor : syntheticActor).fetch(request) };
   };
   const ready = await w.prepare(), live = JSON.stringify(w.state());
   await w.second.warmStep({ ...w.source, kind: "synthetic", async readSnapshotHead() {
@@ -360,7 +360,7 @@ test("live and synthetic use separate server-selected actors on the same native 
   assert.equal(JSON.stringify(w.state()), live);
   assert.equal((await w.module.currentSnapshot(w.source, w.caller)).state, "ready");
   assert.equal(ready.cache_mode, "live");
-  assert.ok(names.includes("public-v2:live")); assert.ok(names.includes("public-v2:synthetic"));
+  assert.ok(names.includes("public-v3:live")); assert.ok(names.includes("public-v3:synthetic"));
 });
 
 test("published statistics retain their own percent, cohort, source context and native numeric text through warming", async t => {
@@ -400,13 +400,13 @@ test("published statistic labels preserve source wording and do not turn a mean 
 /* ── 2027 모집행 수신(담당자 1.9.141 schema v2, r27_source·r27_scope_coverage) ── */
 const coverage = { status: "partial", source_rows: 10, included_rows: 3, excluded_rows: 2, review_pending_rows: 5 };
 const r27Row = (university, pk, quota, links = []) => ({
-  university_id: university, university_name: "가상대학교0", academic_year: 2027, original_pk: pk, department: "가상학과", region: "가상지역", group: "가",
+  university_id: university, university_name: "가상대학교0", academic_year: 2027, original_pk: pk, department: "가상학과", region: "가상지역", group: "가", campus: "가상캠퍼스", admission_track: "가상전형",
   mapping_status: "mapped", recruitment_count_with_stage: { value: null, status: "pending_value_missing", stage: "unspecified" },
   r27_source: { scope_key: `scope:${pk}`, scope_review: "eligible", quota, quota_review_status: quota.quota_literal_state ? "condition_present" : "source_stage_only",
     history_link_status: links.length ? "exact_reviewed" : "not_reviewed", history_link_pending_years: [],
-    historical_links: links.map(([y, p]) => ({ academic_year: y, school_id: university, original_pk: p, campus: null, admission_track: null, group: "가" })) },
+    historical_links: links.map(([y, p]) => ({ academic_year: y, school_id: university, original_pk: p, campus: "가상캠퍼스", admission_track: "가상전형", group: "가" })) },
 });
-const pastRow = (university, year, pk) => ({ university_id: university, university_name: "가상대학교0", academic_year: year, original_pk: pk, department: "가상학과", region: "가상지역", group: "가" });
+const pastRow = (university, year, pk) => ({ university_id: university, university_name: "가상대학교0", academic_year: year, original_pk: pk, department: "가상학과", region: "가상지역", group: "가", campus: "가상캠퍼스", admission_track: "가상전형" });
 
 test("a v2 partial publication keeps 2027 quotas verbatim and groups only server-reviewed history", async t => {
   const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
@@ -422,17 +422,40 @@ test("a v2 partial publication keeps 2027 quotas verbatim and groups only server
   const { unitKey, r27Summary } = await import("../src/lib/p1-shape.ts");
   const keyOf = pk => unitKey(rows.find(r => r.pk === pk));
   // Reviewed links join the 2027 row; a past row claimed by two 2027 rows and an unlinked one stay separate.
-  assert.equal(keyOf("p26a"), "pk:k27a"); assert.equal(keyOf("p25a"), "pk:k27a");
+  assert.match(keyOf("k27a"), /^r27:[0-9]+$/);
+  assert.equal(keyOf("p26a"), keyOf("k27a")); assert.equal(keyOf("p25a"), keyOf("k27a"));
   assert.equal(keyOf("shared"), "pk:shared"); assert.equal(keyOf("alone"), "pk:alone");
   assert.equal(result.total_units, 5);
   const a = rows.find(r => r.pk === "k27a");
   assert.deepEqual(a.q27, { v: "12", ls: "conditional_carryover", st: "initial", ct: "수시 미충원 인원 이월", cs: null, rs: "condition_present" });
-  assert.deepEqual(a.hl, ["2026|p26a", "2025|p25a"]);
-  const units = await w.module.unitRows(ready, "TEST0", "pk:k27a");
+  assert.deepEqual(a.hl, [2026, 2025].map((year, i) => ({ academic_year: year, school_id: "TEST0", original_pk: ["p26a", "p25a"][i], campus: "가상캠퍼스", admission_track: "가상전형", group: "가" })));
+  const units = await w.module.unitRows(ready, "TEST0", keyOf("k27a"));
   assert.deepEqual(units.map(r => r.y).sort(), [2025, 2026, 2027]);
   assert.equal(r27Summary(a.q27).carry, true); assert.equal(r27Summary(a.q27).v, "12");
   // A native zero stays zero; it is never replaced by a missing value.
   assert.equal(r27Summary(rows.find(r => r.pk === "k27c").q27).v, "0");
+});
+
+test("an unreviewed same-PK 2027 row remains separate through cache and search", async t => {
+  const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
+    rowsOf: (_i, u) => [r27Row(u, "same", { quota_value: 2, quota_stage: "initial" }), pastRow(u, 2026, "same")] });
+  const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
+  const { unitKey } = await import("../src/lib/p1-shape.ts");
+  const rows = result.schools[0].rows, newest = rows.find(r => r.y === 2027), old = rows.find(r => r.y === 2026);
+  assert.notEqual(unitKey(newest), unitKey(old));
+  assert.equal(result.total_units, 2);
+  assert.deepEqual((await w.module.unitRows(ready, "TEST0", unitKey(newest))).map(r => r.y), [2027]);
+});
+
+test("ambiguous historical identity is not linked through cache and search", async t => {
+  const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
+    rowsOf: (_i, u) => [r27Row(u, "new", { quota_value: 2, quota_stage: "initial" }, [[2026, "duplicate"]]), pastRow(u, 2026, "duplicate"), pastRow(u, 2026, "duplicate")] });
+  const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
+  const { unitKey } = await import("../src/lib/p1-shape.ts");
+  const rows = result.schools[0].rows, newest = rows.find(r => r.y === 2027), historical = rows.filter(r => r.y === 2026);
+  assert.equal(historical.length, 2);
+  assert.ok(historical.every(r => unitKey(r) !== unitKey(newest)));
+  assert.deepEqual((await w.module.unitRows(ready, "TEST0", unitKey(newest))).map(r => r.y), [2027]);
 });
 
 test("2027 coverage must match between head and every part, and v2 heads refuse v1 bodies", async t => {

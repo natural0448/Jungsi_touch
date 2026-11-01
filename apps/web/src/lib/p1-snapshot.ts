@@ -12,7 +12,7 @@ export type { Cell, Row, School } from "./p1-shape";
  * Credentials and request-scoped I/O promises never enter shared state. Authenticate at each page/action.
  * Version 1 is retained; a new namespace cannot accidentally consume its unfenced ready/progress keys.
  */
-const FORMAT = 2;
+const FORMAT = 3;
 const PARTS_PER_STEP = 6;
 const SCHOOLS_PER_STEP = 12;
 const INDEX_SCHOOLS_PER_STEP = 20;
@@ -39,14 +39,14 @@ async function services(mode: Mode): Promise<Services> {
   // 명시한 합성+development 에서는 아래 메모리 상태 기계를 쓴다 — 배포(production)·live 는 이 분기를 타지 않는다
   const localDev = mode === "synthetic" && env().NODE_ENV === "development";
   if (!localDev && store && typeof store.get === "function" && typeof store.put === "function" && ns) {
-    const actorName = mode === "live" ? "public-v2:live" : "public-v2:synthetic";
+    const actorName = mode === "live" ? "public-v3:live" : "public-v3:synthetic";
     const stub = ns.getByName ? ns.getByName(actorName) : ns.idFromName && ns.get ? ns.get(ns.idFromName(actorName)) : null;
     if (stub) return { kv: store, coordinator: p1CoordinatorClient(stub) };
   }
   if (mode !== "synthetic" || !["development", "test"].includes(env().NODE_ENV ?? ""))
     throw new ConnectionError("unconfigured", "p1_shared_coordination_unconfigured");
-  const g = globalThis as { __jtP1ExplicitLocalV2?: Local };
-  const local = g.__jtP1ExplicitLocalV2 ??= { cache: new Map(), state: null };
+  const g = globalThis as { __jtP1ExplicitLocalV3?: Local };
+  const local = g.__jtP1ExplicitLocalV3 ??= { cache: new Map(), state: null };
   const atomic: CoordinationStore = { read: () => local.state, atomic: change => { const next = change(local.state); local.state = next.state; return next.result; } };
   return { kv: { get: async k => local.cache.get(k) ?? null, put: async (k, v) => { local.cache.set(k, v); } }, coordinator: localP1CoordinatorClient(new P1CoordinationCore(atomic)) };
 }
@@ -178,7 +178,7 @@ function compact(r: Obj): Row {
   };
 }
 /** 2027 모집행의 r27_source 만 옮긴다. 모집인원·조건 원문은 그대로, 과거 연결은 서버가 검토 확인한 것만 */
-function r27Of(r: Obj): Pick<Row, "q27" | "hl"> {
+function r27Of(r: Obj): Pick<Row, "q27" | "hl" | "scope27"> {
   const s = r.r27_source as Obj | undefined;
   if (int(r.academic_year) !== 2027 || !s || typeof s !== "object") return {};
   const q = (s.quota ?? {}) as Obj, qc = (q.quota_cell ?? null) as Obj | null;
@@ -186,7 +186,9 @@ function r27Of(r: Obj): Pick<Row, "q27" | "hl"> {
   return {
     q27: { v: str(q.quota_value), ls: str(q.quota_literal_state), st: str(q.quota_stage), ct: str(q.quota_condition_text),
       cs: qc ? str(qc.status) : null, rs: String(s.quota_review_status ?? "") },
-    hl: links.map(l => `${int(l.academic_year)}|${str(l.original_pk)}`),
+    scope27: str(s.scope_key) ?? undefined,
+    hl: links.map(l => ({ academic_year: int(l.academic_year), school_id: str(l.school_id),
+      original_pk: str(l.original_pk), campus: str(l.campus), admission_track: str(l.admission_track), group: str(l.group) })),
   };
 }
 /** 분할 본문의 부분 발행 표시(무손실 파싱 숫자). 키가 다르면 head 와 같아질 수 없는 값으로 둔다 */
@@ -346,7 +348,7 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
           pg.school_assembly = { school_id: u, next_fragment: at, key, write_prefix: P, step: token.step };
           break;
         }
-        const key = `${P}:school:${u}`; await write(key, linkR27(rows)); pg.school_keys[u] = key; completed++;
+        const key = `${P}:school:${u}`; await write(key, linkR27(rows, u)); pg.school_keys[u] = key; completed++;
         delete pg.school_assembly;
       }
       pg.schoolsDone += completed;

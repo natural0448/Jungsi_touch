@@ -12,7 +12,7 @@ export type UnitRows = { ok: true; rows: Row[] } | { ok: false; code: string };
  * 회원 확인은 매번 한다. 판이 바뀌었으면 옛 판 행을 돌려주지 않는다
  */
 export async function loadUnitRows(pub: string, schoolId: string, key: string): Promise<UnitRows> {
-  if (!/^[0-9a-f]{32}$/.test(pub) || !/^[A-Za-z0-9._:-]{1,64}$/.test(schoolId) || !/^(pk|ob):[A-Za-z0-9._:-]{1,160}$/.test(key)) return { ok: false, code: "invalid_request" };
+  if (!/^[0-9a-f]{32}$/.test(pub) || !/^[A-Za-z0-9._:-]{1,64}$/.test(schoolId) || !/^(?:(?:pk|ob):[A-Za-z0-9._:-]{1,160}|r27:(?:0|[1-9][0-9]{0,9}))$/.test(key)) return { ok: false, code: "invalid_request" };
   const caller = await getCaller();
   const src = source();
   const { session, down } = await sessionOrDown(src, caller);

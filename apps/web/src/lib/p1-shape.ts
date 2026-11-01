@@ -44,10 +44,16 @@ export type Row = {
   alt: { s: string; r: string | null; om: number; e: Cell[] };
   /** 2027 모집행만: 서버 r27_source.quota 원문(담당자 1.9.141). 없으면 2024~2026 발표 행 */
   q27?: Quota27;
-  /** 2027 모집행만: 담당자가 같은 모집단위로 검토 확인한 과거 행 `${학년도}|${원래 PK}` */
-  hl?: string[];
-  /** 과거 행만: 검토 확인된 2027 모집행 아래로 묶일 때 그 키(학교 묶음을 만들 때 붙인다) */
+  /** 2027 모집행: 서버가 검토한 과거 행의 전체 식별자와 2027 scope */
+  hl?: HistoryLink[];
+  scope27?: string;
+  /** 학교 묶음의 확인된 표시 키. 근거가 없는 연도는 별도 키를 유지한다. */
   gk?: string;
+};
+/** 과거 행 식별자. 캠퍼스·전형·군이 없는 행은 null 그대로 둬야 그 과거 행의 c·t·g 와 맞는다 */
+export type HistoryLink = {
+  academic_year: number; school_id: string | null; original_pk: string | null;
+  campus: string | null; admission_track: string | null; group: string | null;
 };
 export type School = { id: string; name: string; names: string[]; region: string | null; units: number; pending: number };
 /** 2027 모집인원 원문. v 는 quota_value 원문 표기, ls·st·ct 는 quota_literal_state·quota_stage·quota_condition_text,
@@ -56,24 +62,49 @@ export type Quota27 = { v: string | null; ls: string | null; st: string | null; 
 /** 2027 부분 발행 표시(서버 r27_scope_coverage). head 와 모든 분할이 같은 값이다 */
 export type R27Coverage = { status: "partial"; source_rows: number; included_rows: number; excluded_rows: number; review_pending_rows: number };
 
-/** 학교 묶음 안의 모집단위 키: 연결된 행은 원래 PK, 미연결 관측은 관측 주소. 검토 확인된 과거 행은 2027 모집행 키 */
+/** 학교별 조립이 끝난 행의 표시 키. 2027 행은 linkR27에서 기존 PK와 다른 scope 키를 받는다. */
 export const unitKey = (r: Row) => r.gk ?? (r.pk !== null ? `pk:${r.pk}` : `ob:${r.ob}`);
 
 /**
- * 한 학교의 행에 2027 모집행 연결을 붙인다. 담당자가 검토 확인한 과거 행(historical_links)만 그 2027 행 아래로 묶는다.
- * 이름이 같다는 이유로 묶지 않고, 한 과거 행을 두 2027 행이 가리키면 어느 쪽에도 묶지 않는다.
+ * 한 학교의 모든 조각을 받은 뒤 1회 실행한다. 원래 PK가 같아도 2027 행은 별도 scope 키로 시작한다.
+ * 서버가 승인한 전체 식별자가 정확히 한 과거 행을 가리키고, 그 행을 주장한 2027 scope가 하나일 때만 연결한다.
  */
-export function linkR27(rows: Row[]): Row[] {
-  const owner = new Map<string, string | null>();
-  for (const r of rows) {
-    if (r.y !== 2027 || r.pk === null || !r.hl) continue;
-    for (const target of r.hl) owner.set(target, owner.has(target) && owner.get(target) !== `pk:${r.pk}` ? null : `pk:${r.pk}`);
+export function linkR27(rows: Row[], schoolId: string): Row[] {
+  const result = rows.map(r => ({ ...r }));
+  const id = (year: number, school: string, pk: string | null, campus: string | null, track: string | null, group: string | null) =>
+    JSON.stringify([year, school, pk, campus, track, group]);
+  const historical = new Map<string, number[]>();
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (r.y === 2027 || r.pk === null) continue;
+    const key = id(r.y, schoolId, r.pk, r.c, r.t, r.g);
+    const found = historical.get(key);
+    if (found) found.push(i); else historical.set(key, [i]);
   }
-  return rows.map((r) => {
-    if (r.y === 2027 || r.pk === null) return r;
-    const key = owner.get(`${r.y}|${r.pk}`);
-    return key ? { ...r, gk: key } : r;
-  });
+  // 같은 scope 를 두 2027 행이 쓰면 서버 자료 오류다. 학교 전체를 막지 않고 그 행들만 연결하지 않는다
+  const scopeCount = new Map<string, number>();
+  for (const r of rows) if (r.y === 2027 && r.pk !== null && r.scope27) scopeCount.set(r.scope27, (scopeCount.get(r.scope27) ?? 0) + 1);
+  const claims = new Map<string, Set<string>>();
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (r.y !== 2027 || r.pk === null) continue;
+    // 학교 캐시 안의 행 번호라 판·학교에 묶이고 주소에 scope 원문이 드러나지 않는다
+    const key = `r27:${i}`;
+    result[i].gk = key;
+    if (!r.scope27 || scopeCount.get(r.scope27) !== 1) continue;
+    // 대상은 과거 행 자신의 전체 식별자로 맞춘다. 학년도 사이 전형명·군이 바뀐 검토 연결도 있어 2027 행의 c·t·g 와 같을 필요는 없다
+    for (const link of r.hl ?? []) {
+      if (![2024, 2025, 2026].includes(link.academic_year) || link.school_id !== schoolId || !link.original_pk) continue;
+      const target = id(link.academic_year, link.school_id, link.original_pk, link.campus, link.admission_track, link.group);
+      const owners = claims.get(target);
+      if (owners) owners.add(key); else claims.set(target, new Set([key]));
+    }
+  }
+  for (const [target, owners] of claims) {
+    const found = historical.get(target);
+    if (owners.size === 1 && found?.length === 1) result[found[0]].gk = [...owners][0];
+  }
+  return result;
 }
 
 /** 접힌 줄의 2027 모집 칸. hold 면 '확인 중', carry 는 수시 이월 조건, initial 은 최초 인원 */
