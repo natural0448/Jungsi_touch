@@ -16,6 +16,7 @@ import sys
 from urllib.parse import urlsplit
 from starlette.responses import JSONResponse
 from ..application.platform_ports import PlatformError, VerifiedSession
+from ..application.service_end_admission import assert_service_admission
 from ..application.time_contract import UtcClock, utc_instant, utc_text
 from .drive_provider import DriveDataProvider, MissingDataProvider
 from .http_api import create_app
@@ -115,6 +116,14 @@ class LocalBoundary:
                 message = {**message, 'headers': [*message.get('headers', []), (b'x-jungsi-mode', MODE.encode())]}
             await send(message)
         if scope.get('path') == '/health/ready' and scope.get('method') == 'GET':
+            try:
+                assert_service_admission(self.app.state.service_end_clock.now())
+            except PlatformError as error:
+                code = 'service_ended' if error.code == 'service_ended' and error.http_status == 403 else 'security_policy_unavailable'
+                response = JSONResponse(status_code=403 if code == 'service_ended' else 503,
+                    content={'status':'error','error':{'code':code}},
+                    headers={'Cache-Control':'no-store','X-Jungsi-Mode':MODE})
+                return await response(scope, receive, send)
             response = JSONResponse(dict(status='local_ready', mode=MODE, local_ready=True, production_ready=False,
                 storage='memory_ephemeral_lost_on_restart', database='NOT_RUN', auth='test_allowlist',
                 real_data=self.diagnostic(), server_timezone='UTC'), headers={'Cache-Control': 'no-store'})

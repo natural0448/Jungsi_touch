@@ -2,18 +2,31 @@
 import { AccessError } from "./access.ts";
 import type { RequestClockPort } from "./ports.ts";
 import { sessionDto, type SessionSnapshot } from "./session_service.ts";
-import { cloneNativeJson, type NativeObject } from "../domain/json_value.ts";
+import { cloneNativeJson, nativeJsonText, type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat } from "../domain/native_json.ts";
 import { utcInstant, utcText } from "../domain/time.ts";
 import { hasAsciiControl } from "../domain/text.ts";
 import { calendarDate } from "../domain/time.ts";
 import { publicSourceUrl } from "./catalog.ts";
 import {
+  assertR27ScopeIndex,
+  readR27PartialCoverage,
+  type VerifiedR27ScopeIndex,
+} from "./history_r27_scope_index.ts";
+import { assertP1R27DeliveryMode } from "./p1_r27_delivery_mode.ts";
+import { assertP1R27ConsumerGate, type VerifiedP1R27ConsumerGate } from "./p1_r27_consumer_gate.ts";
+import {
   assertFieldQualificationPublication,
   detachedQualificationSnapshot,
   validateFieldServiceQualification,
   type VerifiedQualificationPublication,
 } from "./history_field_qualification.ts";
+import {
+  assertHistoricalReferenceBody,
+  HISTORICAL_REFERENCE_FIELD,
+  validateHistoricalReferenceList,
+  type VerifiedHistoricalReferencePublication,
+} from "./history_reference_estimates.ts";
 export const HISTORY_SNAPSHOT_SLOTS = [
   "recruitment_count_with_stage",
   "competition_ratio",
@@ -50,7 +63,7 @@ export interface SnapshotPublication {
   readonly scopeSha256: string;
   readonly generatedAt: string;
   readonly sourceAsOf: string | null;
-  readonly schemaVersion: "jungsi.history-snapshot/v1";
+  readonly schemaVersion: "jungsi.history-snapshot/v1" | "jungsi.history-snapshot/v2";
   readonly normalizationRulesVersion: string;
   readonly selectionRulesVersion: string;
   readonly expiresAtUtc: bigint;
@@ -65,6 +78,11 @@ export interface SnapshotPublication {
   readonly parts: readonly SnapshotPart[];
   /** Private server grant context; never a field of the public snapshot head DTO. */
   readonly fieldQualification?: VerifiedQualificationPublication;
+  /** Pinned independent historical reference data; never grants raw-cell or applicant eligibility. */
+  readonly historicalReferences?: VerifiedHistoricalReferencePublication;
+  /** Verified whole-publication 2027 identity scope, bound by the trusted publisher descriptor. */
+  readonly r27ScopeIndex?: VerifiedR27ScopeIndex;
+  readonly r27Gate?: VerifiedP1R27ConsumerGate;
 }
 export interface HistorySnapshotPort {
   current(): Promise<SnapshotPublication>;
@@ -107,9 +125,129 @@ function scalar(v: unknown): boolean {
   return v === null || typeof v === "string" || typeof v === "bigint" ||
     typeof v === "number" && Number.isSafeInteger(v) || v instanceof JsonFloat;
 }
+
+/** Proposed v2 identity is based only on already-public, explicitly supplied scope. */
+function r27ScopeKey(row: NativeObject): string {
+  return JSON.stringify([
+    row.academic_year,
+    row.university_id,
+    row.original_pk,
+    row.campus,
+    row.admission_track,
+    row.group,
+  ]);
+}
+function r27Optional(raw: unknown, allowed: readonly string[]): NativeObject {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw) || raw instanceof JsonFloat) invalid();
+  const fields = Object.keys(raw);
+  if (fields.some((field) => !allowed.includes(field))) invalid();
+  return exact(raw, fields);
+}
+function r27Source(row: NativeObject): void {
+  const info = exact(row.r27_source, [
+    "scope_key",
+    "scope_review",
+    "quota",
+    "quota_review_status",
+    "history_link_status",
+    "history_link_pending_years",
+    "historical_links",
+  ]);
+  if (info.scope_key !== r27ScopeKey(row) || info.scope_review !== "eligible") invalid();
+  const quota = r27Optional(info.quota, [
+    "quota_value",
+    "quota_literal_state",
+    "quota_stage",
+    "quota_condition_text",
+    "quota_cell",
+  ]);
+  if (Object.hasOwn(quota, "quota_value") && !scalar(quota.quota_value)) invalid();
+  if (typeof quota.quota_value === "string" && quota.quota_value.length > 1024) invalid();
+  for (const name of ["quota_literal_state", "quota_stage", "quota_condition_text"]) {
+    if (Object.hasOwn(quota, name)) text(quota[name], true);
+  }
+  let meta: NativeObject | null = null;
+  if (Object.hasOwn(quota, "quota_cell") && quota.quota_cell !== null) {
+    meta = r27Optional(quota.quota_cell, ["status", "reason_code", "unit", "source_as_of"]);
+    for (const name of Object.keys(meta)) text(meta[name], true);
+    if (meta.source_as_of !== null && meta.source_as_of !== undefined) {
+      try {
+        if (typeof meta.source_as_of === "string" && meta.source_as_of.length === 10) {
+          calendarDate(meta.source_as_of);
+        } else instant(meta.source_as_of);
+      } catch {
+        invalid();
+      }
+    }
+  }
+  const expectedValue = Object.hasOwn(quota, "quota_value") ? quota.quota_value : null;
+  const conflict = meta?.status === "verified_official" &&
+    (expectedValue === null || expectedValue === "");
+  if (conflict) invalid();
+  const conditional = typeof quota.quota_condition_text === "string" ||
+    quota.quota_literal_state === "conditional_transfer" ||
+    quota.quota_literal_state === "conditional_carryover";
+  const expectedReview = conditional
+    ? "condition_present"
+    : !Object.hasOwn(quota, "quota_stage") || quota.quota_stage === null
+    ? "stage_unknown"
+    : "source_stage_only";
+  if (info.quota_review_status !== expectedReview) invalid();
+  const cell = row.recruitment_count_with_stage as NativeObject;
+  if (nativeJsonText(cell.value) !== nativeJsonText(expectedValue)) invalid();
+  if (
+    (!Object.hasOwn(quota, "quota_stage") || quota.quota_stage === null) &&
+    cell.stage !== "unspecified"
+  ) invalid();
+  if (conditional && cell.stage === "final") invalid();
+  if (cell.stage !== "unspecified" && cell.stage !== quota.quota_stage) invalid();
+
+  const pending = info.history_link_pending_years, links = info.historical_links;
+  if (!Array.isArray(pending) || !Array.isArray(links) || pending.length > 3 || links.length > 3) {
+    invalid();
+  }
+  const pendingYears = new Set<number>();
+  for (const year of pending) {
+    if (
+      !Number.isSafeInteger(year) || ![2024, 2025, 2026].includes(Number(year)) ||
+      pendingYears.has(Number(year))
+    ) invalid();
+    pendingYears.add(Number(year));
+  }
+  const linkedYears = new Set<number>();
+  for (const rawLink of links) {
+    const link = exact(rawLink, [
+      "academic_year",
+      "school_id",
+      "original_pk",
+      "campus",
+      "admission_track",
+      "group",
+    ]);
+    const year = Number(link.academic_year);
+    if (
+      !Number.isSafeInteger(link.academic_year) || ![2024, 2025, 2026].includes(year) ||
+      linkedYears.has(year) || pendingYears.has(year) ||
+      typeof link.original_pk !== "string" || !ID.test(link.original_pk) ||
+      link.school_id !== row.university_id ||
+      [row.campus, row.admission_track, row.group].some((v) => v === null) ||
+      link.campus !== row.campus || link.admission_track !== row.admission_track ||
+      link.group !== row.group
+    ) invalid();
+    linkedYears.add(year);
+  }
+  const expectedLinkStatus = pending.length
+    ? links.length ? "partially_reviewed" : "conflict_pending"
+    : links.length
+    ? "exact_reviewed"
+    : "not_reviewed";
+  if (info.history_link_status !== expectedLinkStatus) invalid();
+}
+
 function cell(
   raw: unknown,
   slot: typeof HISTORY_SNAPSHOT_SLOTS[number],
+  sourceYear: number,
   alternateEntry = false,
 ): void {
   const cut = slot.endsWith("percent_cut") || slot === "alternate_cut";
@@ -137,7 +275,53 @@ function cell(
         "selection_rule_ref",
       ]
       : []),
+    ...(cut && raw && typeof raw === "object" && Object.hasOwn(raw, "score_calculation_context")
+      ? ["score_calculation_context"]
+      : []),
+    ...(cut && (slot !== "alternate_cut" || alternateEntry) && raw && typeof raw === "object" &&
+        Object.hasOwn(raw, "publication_context")
+      ? ["publication_context"]
+      : []),
   ]);
+  if (Object.hasOwn(row, "score_calculation_context")) {
+    const context = exact(row.score_calculation_context, [
+      "source_result_year",
+      "score_calculation_year",
+      "observation_role",
+    ]);
+    const year = context.score_calculation_year, role = context.observation_role;
+    if (
+      !Number.isSafeInteger(context.source_result_year) ||
+      context.source_result_year !== sourceYear ||
+      year !== null && (!Number.isSafeInteger(year) || Number(year) < 1 || Number(year) > 9999) ||
+      !["actual_result", "prior_year_recalculated_reference", "unresolved"].includes(
+        role as string,
+      ) ||
+      role !== "unresolved" && year === null ||
+      role === "actual_result" && Number(year) !== sourceYear ||
+      role === "prior_year_recalculated_reference" &&
+        (!alternateEntry || Number(year) <= sourceYear) ||
+      role === "unresolved" && !alternateEntry && row.value !== null
+    ) invalid();
+  }
+  if (Object.hasOwn(row, "publication_context")) {
+    const publication = exact(row.publication_context, [
+      "publication_role",
+      "simulation_target_academic_year",
+    ]);
+    const role = publication.publication_role, target = publication.simulation_target_academic_year;
+    const score = row.score_calculation_context as NativeObject | undefined;
+    if (
+      !["actual_result", "simulation_reference", "unresolved"].includes(role as string) ||
+      target !== null &&
+        (!Number.isSafeInteger(target) || Number(target) < 1 || Number(target) > 9999) ||
+      role !== "simulation_reference" && target !== null ||
+      role === "simulation_reference" && !alternateEntry ||
+      role === "unresolved" && !alternateEntry && row.value !== null ||
+      role === "actual_result" && score?.observation_role === "prior_year_recalculated_reference" ||
+      role === "simulation_reference" && score?.observation_role === "actual_result"
+    ) invalid();
+  }
   if (row.source_context !== null) {
     const c = exact(row.source_context, [
       "observation_id",
@@ -158,7 +342,7 @@ function cell(
       !Number.isSafeInteger(row.omitted_other_basis_count) ||
       Number(row.omitted_other_basis_count) < 0
     ) invalid();
-    for (const entry of row.entries) cell(entry, "alternate_cut", true);
+    for (const entry of row.entries) cell(entry, "alternate_cut", sourceYear, true);
   }
   if (
     slot === "recruitment_count_with_stage" &&
@@ -251,13 +435,56 @@ function cell(
   }
 }
 /** Reject private/unknown fields before a pre-generated compressed body can be returned intact. */
-export function validateHistorySnapshotPayload(raw: unknown, part: SnapshotPart): NativeObject {
-  const body = exact(raw, ["format", "payload_id", "part_id", "rows"]);
+export type SnapshotPayloadCounts = Pick<
+  SnapshotPart,
+  "partId" | "payloadId" | "rows" | "mappedRows" | "mappingPendingRows"
+>;
+export function validateHistorySnapshotPayload(
+  raw: unknown,
+  part: SnapshotPayloadCounts,
+): NativeObject {
+  const hasPartialCoverage = !!raw && typeof raw === "object" && !Array.isArray(raw) &&
+    Object.hasOwn(raw, "r27_scope_coverage");
+  const body = exact(raw, [
+    "format",
+    "payload_id",
+    "part_id",
+    "rows",
+    ...(hasPartialCoverage ? ["r27_scope_coverage"] : []),
+  ]);
+  if (hasPartialCoverage) {
+    if (body.format !== "jungsi.history-snapshot/v2") invalid();
+    const coverage = exact(body.r27_scope_coverage, [
+      "status",
+      "source_rows",
+      "included_rows",
+      "excluded_rows",
+      "review_pending_rows",
+    ]);
+    const fields = [
+      "source_rows",
+      "included_rows",
+      "excluded_rows",
+      "review_pending_rows",
+    ] as const;
+    if (
+      coverage.status !== "partial" ||
+      fields.some((field) =>
+        typeof coverage[field] !== "number" || !Number.isSafeInteger(coverage[field]) ||
+        Number(coverage[field]) < 0 || Number(coverage[field]) > 20_000
+      ) || coverage.included_rows === 0 || coverage.review_pending_rows === 0 ||
+      Number(coverage.included_rows) + Number(coverage.excluded_rows) +
+            Number(coverage.review_pending_rows) !== coverage.source_rows
+    ) invalid();
+  }
   if (
-    body.format !== "jungsi.history-snapshot/v1" || body.payload_id !== part.payloadId ||
+    !["jungsi.history-snapshot/v1", "jungsi.history-snapshot/v2"].includes(body.format as string) ||
+    body.payload_id !== part.payloadId ||
     body.part_id !== part.partId || !Array.isArray(body.rows) || body.rows.length !== part.rows
   ) invalid();
   const identities = new Set<string>();
+  const v2SchoolsByPk = new Map<string, string>();
+  const version2 = body.format === "jungsi.history-snapshot/v2";
   let mapped = 0, pending = 0;
   for (const item of body.rows) {
     const row = exact(item, [
@@ -275,6 +502,14 @@ export function validateHistorySnapshotPayload(raw: unknown, part: SnapshotPart)
       "admission_track",
       "group",
       ...HISTORY_SNAPSHOT_SLOTS,
+      ...(version2 && item && typeof item === "object" && !Array.isArray(item) &&
+          !(item instanceof JsonFloat) && (item as NativeObject).academic_year === 2027 &&
+          (item as NativeObject).mapping_status === "mapped"
+        ? ["r27_source"]
+        : []),
+      ...(item && typeof item === "object" && Object.hasOwn(item, HISTORICAL_REFERENCE_FIELD)
+        ? [HISTORICAL_REFERENCE_FIELD]
+        : []),
     ]);
     const review = exact(row.identity_review, ["status", "reason_code", "variants"]);
     if (
@@ -316,6 +551,16 @@ export function validateHistorySnapshotPayload(raw: unknown, part: SnapshotPart)
       identity = row.observation_key;
       pending++;
     } else invalid();
+    // Unmapped 2027 rows have no independently verified R27 scope index entry;
+    // emitting them would bypass practical-exclusion review.
+    if (version2 && row.academic_year === 2027 && row.mapping_status !== "mapped") invalid();
+    if (version2 && row.academic_year === 2027 && row.mapping_status === "mapped") {
+      const pk = String(row.original_pk), school = String(row.university_id);
+      const previousSchool = v2SchoolsByPk.get(pk);
+      if (previousSchool !== undefined && previousSchool !== school) invalid();
+      v2SchoolsByPk.set(pk, school);
+      identity += ":" + r27ScopeKey(row);
+    }
     if (identities.has(identity)) invalid();
     identities.add(identity);
     if (
@@ -325,7 +570,12 @@ export function validateHistorySnapshotPayload(raw: unknown, part: SnapshotPart)
     // Missing descriptive metadata remains null. A valid original PK does not prove its labels.
     for (const k of ["university_name", "department", "admission_track"]) text(row[k], true, true);
     for (const k of ["region", "campus", "group"]) text(row[k], true, k !== "group");
-    for (const slot of HISTORY_SNAPSHOT_SLOTS) cell(row[slot], slot);
+    for (const slot of HISTORY_SNAPSHOT_SLOTS) cell(row[slot], slot, Number(row.academic_year));
+    if (version2 && row.academic_year === 2027 && row.mapping_status === "mapped") r27Source(row);
+    if (Object.hasOwn(row, HISTORICAL_REFERENCE_FIELD)) {
+      if (version2 && row.academic_year === 2027) invalid();
+      validateHistoricalReferenceList(row[HISTORICAL_REFERENCE_FIELD], row);
+    }
     for (const slot of HISTORY_SNAPSHOT_SLOTS) {
       const c = row[slot] as NativeObject, context = c.source_context as NativeObject | null;
       if (context !== null && Number(context.identity_variant_index) >= review.variants.length) {
@@ -342,10 +592,25 @@ export function validateHistorySnapshotPayload(raw: unknown, part: SnapshotPart)
     }
     const lower = row.final_50_percent_cut as NativeObject,
       upper = row.final_70_percent_cut as NativeObject;
-    if (
-      lower.value !== null && upper.value !== null &&
-      ["basis_code", "cohort_code", "unit"].some((k) => lower[k] !== upper[k])
-    ) invalid();
+    if (lower.value !== null && upper.value !== null) {
+      if (["basis_code", "cohort_code", "unit"].some((k) => lower[k] !== upper[k])) invalid();
+      const lowContext = lower.score_calculation_context as NativeObject | undefined;
+      const highContext = upper.score_calculation_context as NativeObject | undefined;
+      if (
+        (lowContext || highContext) &&
+        (!lowContext || !highContext || lowContext.observation_role !== "actual_result" ||
+          highContext.observation_role !== "actual_result" ||
+          lowContext.score_calculation_year !== highContext.score_calculation_year)
+      ) invalid();
+      const lowPublication = lower.publication_context as NativeObject | undefined;
+      const highPublication = upper.publication_context as NativeObject | undefined;
+      if (
+        (lowPublication || highPublication) &&
+        (!lowPublication || !highPublication ||
+          lowPublication.publication_role !== "actual_result" ||
+          highPublication.publication_role !== "actual_result")
+      ) invalid();
+    }
   }
   if (
     mapped !== part.mappedRows || pending !== part.mappingPendingRows ||
@@ -376,18 +641,58 @@ function hasQualifiedRank(raw: unknown, part: SnapshotPart): boolean {
 /** Preserve the synchronous legacy validator. Only independently granted rank q is
  * separated from a detached body, then reattached after all original checks.
  */
-export async function validateQualifiedHistorySnapshotPayload(
+export async function validateQualifiedHistorySnapshotPayloadForPublisher(
   raw: unknown,
   part: SnapshotPart,
   publication: SnapshotPublication | null,
 ): Promise<NativeObject> {
+  if (publication) assertP1R27DeliveryMode(publication);
+  const validateBody = async (value: unknown): Promise<NativeObject> => {
+    const result = validateHistorySnapshotPayload(value, part);
+    if (publication && result.format !== dataProperty(publication, "schemaVersion")) invalid();
+    if (publication && result.format === "jungsi.history-snapshot/v2") {
+      const index = dataProperty(publication, "r27ScopeIndex", true) as
+        | VerifiedR27ScopeIndex
+        | undefined;
+      const publicationSha = dataProperty(publication, "publicationSha256") as string;
+      const sourceHeadSha = dataProperty(publication, "sourceHeadSha256") as string;
+      const scopeSha = dataProperty(publication, "scopeSha256") as string;
+      await assertR27ScopeIndex(
+        index,
+        publicationSha,
+        sourceHeadSha,
+        scopeSha,
+        result.rows as NativeObject[],
+      );
+      const partial = readR27PartialCoverage(index, publicationSha, sourceHeadSha, scopeSha);
+      if (
+        partial === null && Object.hasOwn(result, "r27_scope_coverage") ||
+        partial !== null && (
+            !Object.hasOwn(result, "r27_scope_coverage") ||
+            nativeJsonText(result.r27_scope_coverage, true) !== nativeJsonText(partial, true)
+          )
+      ) invalid();
+    }
+    assertHistoricalReferenceBody(
+      result,
+      publication
+        ? dataProperty(publication, "historicalReferences", true) as
+          | VerifiedHistoricalReferencePublication
+          | undefined
+        : undefined,
+      publication ? dataProperty(publication, "publicationSha256") as string : undefined,
+      publication ? dataProperty(publication, "sourceHeadSha256") as string : undefined,
+      publication ? dataProperty(publication, "scopeSha256") as string : undefined,
+    );
+    return result;
+  };
   const context = publication
     ? dataProperty(publication, "fieldQualification", true) as
       | VerifiedQualificationPublication
       | undefined
     : undefined;
   if (context !== undefined && (!context || typeof context !== "object")) invalid();
-  if (!context && !hasQualifiedRank(raw, part)) return validateHistorySnapshotPayload(raw, part);
+  if (!context && !hasQualifiedRank(raw, part)) return validateBody(raw);
   if (!context || !publication) invalid();
   // Capture parent pins and all input data before the first asynchronous hash operation.
   const publicationSha = dataProperty(publication, "publicationSha256"),
@@ -399,6 +704,9 @@ export async function validateQualifiedHistorySnapshotPayload(
     "payload_id",
     "part_id",
     "rows",
+    ...(raw && typeof raw === "object" && Object.hasOwn(raw, "r27_scope_coverage")
+      ? ["r27_scope_coverage"]
+      : []),
   ]);
   const rows = dataProperty(input, "rows");
   if (
@@ -409,6 +717,13 @@ export async function validateQualifiedHistorySnapshotPayload(
     format: dataProperty(input, "format"),
     payload_id: dataProperty(input, "payload_id"),
     part_id: dataProperty(input, "part_id"),
+    ...(Object.hasOwn(input, "r27_scope_coverage")
+      ? {
+        r27_scope_coverage: detachedQualificationSnapshot(
+          dataProperty(input, "r27_scope_coverage"),
+        ),
+      }
+      : {}),
   };
   const qualified: { index: number; row: NativeObject; rank: NativeObject }[] = [];
   const legacyRows: NativeObject[] = [];
@@ -424,6 +739,9 @@ export async function validateQualifiedHistorySnapshotPayload(
     ) {
       if (qualified.length === 2) invalid();
       const captured = detachedQualificationSnapshot(row) as NativeObject;
+      if (input.format === "jungsi.history-snapshot/v2" && captured.academic_year === 2027) {
+        invalid();
+      }
       const capturedRank = captured.final_additional_admission_rank as NativeObject;
       qualified.push({ index, row: captured, rank: capturedRank });
       legacyRows.push({
@@ -438,7 +756,7 @@ export async function validateQualifiedHistorySnapshotPayload(
   }
   // The legacy validator captures every other row before await, with its original
   // payload bounds. Qualification's small-object cap applies only to its two rows.
-  const result = validateHistorySnapshotPayload({ ...body, rows: legacyRows }, part);
+  const result = await validateBody({ ...body, rows: legacyRows });
   const grants = await assertFieldQualificationPublication(
     context,
     publicationSha as string,
@@ -471,6 +789,22 @@ export async function validateQualifiedHistorySnapshotPayload(
   }
   return result;
 }
+/** Public consumer validation requires a verified v2 gate; publisher preflight uses the separate internal API. */
+export async function validateQualifiedHistorySnapshotPayload(
+  raw: unknown,
+  part: SnapshotPart,
+  publication: SnapshotPublication | null,
+): Promise<NativeObject> {
+  if (publication && dataProperty(publication, "schemaVersion") === "jungsi.history-snapshot/v2") {
+    assertP1R27DeliveryMode(publication);
+    const index = await assertP1R27ConsumerGate(
+      dataProperty(publication, "r27Gate", true) as VerifiedP1R27ConsumerGate | undefined,
+      publication,
+    );
+    if (index !== dataProperty(publication, "r27ScopeIndex", true)) invalid();
+  }
+  return await validateQualifiedHistorySnapshotPayloadForPublisher(raw, part, publication);
+}
 function publicPart(p: SnapshotPart): NativeObject {
   return {
     part_id: p.partId,
@@ -499,6 +833,18 @@ export class HistorySnapshotService {
       p.scopeSha256 !== this.scopeSha256 || !ID.test(p.snapshotId) ||
       !HASH.test(p.publicationSha256) || p.expiresAtUtc <= this.clock.nowUtc()
     ) invalid();
+    if (p.schemaVersion === "jungsi.history-snapshot/v2") {
+      assertP1R27DeliveryMode(p);
+      const gateIndex = await assertP1R27ConsumerGate(p.r27Gate, p);
+      if (gateIndex !== p.r27ScopeIndex) invalid();
+      await assertR27ScopeIndex(
+        p.r27ScopeIndex,
+        p.publicationSha256,
+        p.sourceHeadSha256,
+        p.scopeSha256,
+        [],
+      );
+    } else if (p.schemaVersion !== "jungsi.history-snapshot/v1") invalid();
     return p;
   }
   private async finish(session: SessionSnapshot, p: SnapshotPublication): Promise<void> {
@@ -512,6 +858,14 @@ export class HistorySnapshotService {
   ): Promise<NativeObject> {
     if (Object.keys(query).length) throw new AccessError("invalid_request", 422);
     const p = await this.current(session);
+    const partialCoverage = p.schemaVersion === "jungsi.history-snapshot/v2"
+      ? readR27PartialCoverage(
+        p.r27ScopeIndex,
+        p.publicationSha256,
+        p.sourceHeadSha256,
+        p.scopeSha256,
+      )
+      : null;
     const result: NativeObject = {
       format: "jungsi.history-snapshot-head/v1",
       status: "approved",
@@ -528,6 +882,7 @@ export class HistorySnapshotService {
       full: p.full ? publicPart(p.full) : null,
       parts: p.parts.map(publicPart),
       expires_at: utcText(p.expiresAtUtc),
+      ...(partialCoverage ? { r27_scope_coverage: { ...partialCoverage } } : {}),
     };
     await this.finish(session, p);
     return result;

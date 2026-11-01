@@ -4578,6 +4578,7 @@
         "sensitivity_scenario_unchanged",
         "serialization_population_mismatch",
         "serialization_weight_underflow",
+        "service_ended",
         "shortlist_limit_exceeded",
         "storage_archive_only",
         "storage_artifact_invalid",
@@ -4668,8 +4669,16 @@
           "nullable": true
         },
         "shortlist": {
-          "ref": "shortlist",
-          "nullable": false
+          "type": "map",
+          "nullable": false,
+          "keys": {
+            "ref": "identifier",
+            "nullable": false
+          },
+          "values": {
+            "ref": "shortlist",
+            "nullable": false
+          }
         },
         "analysis_status": {
           "ref": "read_only_analysis_status",
@@ -5354,6 +5363,14 @@
         "selection_rule_ref": {
           "type": "string",
           "nullable": true
+        },
+        "score_calculation_context": {
+          "ref": "history_snapshot_score_calculation_context",
+          "nullable": false
+        },
+        "publication_context": {
+          "ref": "history_snapshot_publication_context",
+          "nullable": false
         }
       },
       "required": [
@@ -5373,7 +5390,10 @@
         "cohort_label",
         "selection_rule_ref"
       ],
-      "optional": []
+      "optional": [
+        "score_calculation_context",
+        "publication_context"
+      ]
     },
     "history_snapshot_alternate_cell": {
       "type": "object",
@@ -5467,6 +5487,10 @@
         "omitted_other_basis_count": {
           "type": "integer",
           "nullable": false
+        },
+        "score_calculation_context": {
+          "ref": "history_snapshot_score_calculation_context",
+          "nullable": false
         }
       },
       "required": [
@@ -5488,7 +5512,9 @@
         "entries",
         "omitted_other_basis_count"
       ],
-      "optional": []
+      "optional": [
+        "score_calculation_context"
+      ]
     },
     "history_snapshot_identity_variant": {
       "type": "object",
@@ -5646,6 +5672,18 @@
         "alternate_cut": {
           "ref": "history_snapshot_alternate_cell",
           "nullable": false
+        },
+        "historical_cutoff_references": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "history_snapshot_historical_reference",
+            "nullable": false
+          }
+        },
+        "r27_source": {
+          "ref": "history_snapshot_r27_source",
+          "nullable": false
         }
       },
       "required": [
@@ -5670,7 +5708,10 @@
         "final_70_percent_cut",
         "alternate_cut"
       ],
-      "optional": []
+      "optional": [
+        "historical_cutoff_references",
+        "r27_source"
+      ]
     },
     "history_snapshot_part": {
       "type": "object",
@@ -5802,7 +5843,8 @@
           "type": "string",
           "nullable": false,
           "enum": [
-            "jungsi.history-snapshot/v1"
+            "jungsi.history-snapshot/v1",
+            "jungsi.history-snapshot/v2"
           ]
         },
         "normalization_rules_version": {
@@ -5840,6 +5882,10 @@
         "expires_at": {
           "type": "string",
           "nullable": false
+        },
+        "r27_scope_coverage": {
+          "ref": "history_snapshot_r27_partial_coverage",
+          "nullable": false
         }
       },
       "required": [
@@ -5859,7 +5905,9 @@
         "parts",
         "expires_at"
       ],
-      "optional": []
+      "optional": [
+        "r27_scope_coverage"
+      ]
     },
     "history_snapshot_body": {
       "type": "object",
@@ -5869,7 +5917,8 @@
           "type": "string",
           "nullable": false,
           "enum": [
-            "jungsi.history-snapshot/v1"
+            "jungsi.history-snapshot/v1",
+            "jungsi.history-snapshot/v2"
           ]
         },
         "payload_id": {
@@ -5887,6 +5936,10 @@
             "ref": "history_snapshot_row",
             "nullable": false
           }
+        },
+        "r27_scope_coverage": {
+          "ref": "history_snapshot_r27_partial_coverage",
+          "nullable": false
         }
       },
       "required": [
@@ -5895,7 +5948,9 @@
         "part_id",
         "rows"
       ],
-      "optional": []
+      "optional": [
+        "r27_scope_coverage"
+      ]
     },
     "own_report_list": {
       "type": "object",
@@ -5930,13 +5985,28 @@
               "updated_at": {
                 "type": "string",
                 "nullable": false
+              },
+              "stage": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                  "mock",
+                  "provisional",
+                  "final"
+                ]
+              },
+              "is_current": {
+                "type": "boolean",
+                "nullable": true
               }
             },
             "required": [
               "report_id",
               "exam_id",
               "report_version",
-              "updated_at"
+              "updated_at",
+              "stage",
+              "is_current"
             ],
             "optional": []
           }
@@ -6350,6 +6420,411 @@
         "legacy_source",
         "assessment_context",
         "items"
+      ],
+      "optional": []
+    },
+    "history_snapshot_historical_reference": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "jungsi.historical-cutoff-reference/v1"
+          ]
+        },
+        "observation_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "school_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "offering_pk": {
+          "type": "string",
+          "nullable": false
+        },
+        "value": {
+          "type": "string",
+          "nullable": false
+        },
+        "unit": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "%"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "model_estimated"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "추정상위누백(전체응시자)"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "historical_admission_cutoff"
+          ]
+        },
+        "method_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "release_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "display_role": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "independent_observation"
+          ]
+        },
+        "reference_status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "CALCULATED_WHOLE_COHORT_MODEL_ESTIMATE"
+          ]
+        },
+        "academic_year": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            2024,
+            2025,
+            2026,
+            2027
+          ]
+        },
+        "statistic_label": {
+          "type": "string",
+          "nullable": true
+        },
+        "engine_approved": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            false
+          ]
+        },
+        "production_allowed": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "observation_id",
+        "school_id",
+        "offering_pk",
+        "value",
+        "unit",
+        "status",
+        "label",
+        "scope",
+        "method_id",
+        "release_id",
+        "display_role",
+        "reference_status",
+        "academic_year",
+        "statistic_label",
+        "engine_approved",
+        "production_allowed"
+      ],
+      "optional": []
+    },
+    "history_snapshot_score_calculation_context": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "source_result_year": {
+          "type": "integer",
+          "nullable": false
+        },
+        "score_calculation_year": {
+          "type": "integer",
+          "nullable": true
+        },
+        "observation_role": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "actual_result",
+            "prior_year_recalculated_reference",
+            "unresolved"
+          ]
+        }
+      },
+      "required": [
+        "source_result_year",
+        "score_calculation_year",
+        "observation_role"
+      ],
+      "optional": []
+    },
+    "history_snapshot_publication_context": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "publication_role": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "actual_result",
+            "simulation_reference",
+            "unresolved"
+          ]
+        },
+        "simulation_target_academic_year": {
+          "type": "integer",
+          "nullable": true
+        }
+      },
+      "required": [
+        "publication_role",
+        "simulation_target_academic_year"
+      ],
+      "optional": []
+    },
+    "history_snapshot_r27_cell_metadata": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": true
+        },
+        "reason_code": {
+          "type": "string",
+          "nullable": true
+        },
+        "unit": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_as_of": {
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "required": [],
+      "optional": [
+        "status",
+        "reason_code",
+        "unit",
+        "source_as_of"
+      ]
+    },
+    "history_snapshot_r27_quota": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "quota_value": {
+          "type": "union",
+          "nullable": true,
+          "options": [
+            {
+              "type": "string",
+              "nullable": false
+            },
+            {
+              "type": "number",
+              "nullable": false
+            }
+          ]
+        },
+        "quota_literal_state": {
+          "type": "string",
+          "nullable": true
+        },
+        "quota_stage": {
+          "type": "string",
+          "nullable": true
+        },
+        "quota_condition_text": {
+          "type": "string",
+          "nullable": true
+        },
+        "quota_cell": {
+          "ref": "history_snapshot_r27_cell_metadata",
+          "nullable": true
+        }
+      },
+      "required": [],
+      "optional": [
+        "quota_value",
+        "quota_literal_state",
+        "quota_stage",
+        "quota_condition_text",
+        "quota_cell"
+      ]
+    },
+    "history_snapshot_r27_history_link": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "academic_year": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            2024,
+            2025,
+            2026
+          ]
+        },
+        "school_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "original_pk": {
+          "type": "string",
+          "nullable": false
+        },
+        "campus": {
+          "type": "string",
+          "nullable": true
+        },
+        "admission_track": {
+          "type": "string",
+          "nullable": true
+        },
+        "group": {
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "required": [
+        "academic_year",
+        "school_id",
+        "original_pk",
+        "campus",
+        "admission_track",
+        "group"
+      ],
+      "optional": []
+    },
+    "history_snapshot_r27_source": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "scope_key": {
+          "type": "string",
+          "nullable": false
+        },
+        "scope_review": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "eligible"
+          ]
+        },
+        "quota": {
+          "ref": "history_snapshot_r27_quota",
+          "nullable": false
+        },
+        "quota_review_status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "condition_present",
+            "stage_unknown",
+            "source_stage_only"
+          ]
+        },
+        "history_link_status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "not_reviewed",
+            "exact_reviewed",
+            "partially_reviewed",
+            "conflict_pending"
+          ]
+        },
+        "history_link_pending_years": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "type": "integer",
+            "nullable": false,
+            "enum": [
+              2024,
+              2025,
+              2026
+            ]
+          }
+        },
+        "historical_links": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "history_snapshot_r27_history_link",
+            "nullable": false
+          }
+        }
+      },
+      "required": [
+        "scope_key",
+        "scope_review",
+        "quota",
+        "quota_review_status",
+        "history_link_status",
+        "history_link_pending_years",
+        "historical_links"
+      ],
+      "optional": []
+    },
+    "history_snapshot_r27_partial_coverage": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "partial"
+          ]
+        },
+        "source_rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "included_rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "excluded_rows": {
+          "type": "integer",
+          "nullable": false
+        },
+        "review_pending_rows": {
+          "type": "integer",
+          "nullable": false
+        }
+      },
+      "required": [
+        "status",
+        "source_rows",
+        "included_rows",
+        "excluded_rows",
+        "review_pending_rows"
       ],
       "optional": []
     }

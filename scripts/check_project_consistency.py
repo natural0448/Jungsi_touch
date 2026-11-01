@@ -1108,9 +1108,258 @@ def member_shortlist_registration(spec,source_hashes=None):
         return registered,[]
     except (KeyError,TypeError,ValueError):return None,[error]
 
+RECOVERY_TEST_PATHS = ('tests/edge/test_incident_recovery_rights.ts', 'tests/edge/test_incident_recovery_service.ts', 'tests/edge/test_incident_recovery_http.ts', 'tests/edge/test_incident_recovery_binding.ts')
+RECOVERY_SAMEFILE_PATH = 'tests/edge/test_score_input_policy.ts'
+RECOVERY_SAMEFILE_NAMES = ('recovery repository atomically saves profile and use without spending correction', 'recovery repository keeps credit on a semantic rejection', 'recovery repository rolls back profile state attempt and use on post-save failure', 'recovery repository serializes competing request-local saves', 'recovery grant binds registered incident and consumed attempt without spending correction', 'recovery grant replay remains idempotent after the recovery credit is spent', 'different aliases for the same incident cannot grant twice', 'unknown or conflicting incident aliases fail closed', 'registered incident must match exam stage fault and evidence fingerprint', 'registered operation rejection and time must match a consumed scoped attempt', 'registered time window includes both boundaries', 'grant rejects a stale state or an existing saved profile', 'grant verification failure rolls back state and grant together', 'competing distinct keys cannot issue the same incident twice', 'grant request key cannot be reused with a different digest', 'recovery ledger refuses unsafe runtime privileges before grant or save', 'confirmed server failure needs an actually consumed matching attempt')
+RECOVERY_STANDALONE_NAMES = ('incident recovery balance rejects absent or inconsistent ledger state', 'incident recovery never consumes the initial right before initial entry', 'incident recovery takes priority over a granted ordinary correction', 'incident recovery save leaves correction request available when ungranted', 'incident recovery save preserves an already granted unused correction', 'incident recovery save requires a distinct in-scope unused grant', 'incident recovery cannot be silently used for rejected or malformed save', 'incident recovery exhaustion preserves ordinary credit decisions', 'incident grant requires a verified active admin with aal2', 'incident grant returns latest recovery and separate correction availability', 'incident grant replay reads current balance after the recovery is used', 'incident grant prevents same key changed request and same event double issuance', 'incident and ticket references resolve before duplicate detection', 'incident grant fails closed for unverified incident or saved usable score', 'incident grant rejects stale expected version', 'incident grant rejects malformed requests and unsupported stage', 'incident grant rejects invalid storage receipts without inventing result', 'incident grant rejects incoherent current balance', 'incident grant rechecks admin session before transaction commit', 'recovery HTTP requires its separate approved scope', 'recovery HTTP requires verified admin aal2 before business', 'recovery HTTP rejects missing relay before business', 'recovery HTTP passes approved admin through budget and closed response projection', 'recovery HTTP rejects missing idempotency key', 'recovery HTTP cannot be activated by supplying a route without its scope', 'v5 status projects recovery balance while the old schema remains unchanged', 'v5 safe failure retains registered duplicate and evidence conflict status', 'v5 schema requires the explicit recovery operation and retains all old routes', 'v5 startup rejects routing security or DTO drift from the approved contract', 'v5 binding requires the exact 23-operation recovery generation', 'v5 binding rejects missing scope or unapproved recovery', 'v5 binding cannot duplicate an operation or omit existing member controls', 'v5 shared usage policy requires an explicit recovery operation cost')
+RECOVERY_BASELINE_NAMES = ('stage rights allow initial plus one granted correction and preserve invalid attempt history', 'native state refuses a numeric ID and a version-zero fabricated attempt', 'preview exemption preserves normal initial right and never changes free membership', 'stage budget proof is identity-bound, cannot be forged and expires at request runtime', 'unapproved CSAT stage and exhausted physical work fail closed', 'canonical scope is shared by approved aliases without new input credit', 'one-slot actual adapter persists a single profile and same-key replay without nested connection', 'distinct concurrent keys serialize on one initial right and preserve one accepted profile', 'semantic integer999 consumes one attempt and rejection replay consumes none', 'semantic grade10 consumes one attempt and rejection replay consumes none', 'non-integer structural score is not a free semantic probing attempt', 'unregistered legacy profile blocks zero-credit initialization and preserves the original', 'missing rollout prevents new input without mutating existing storage', 'post-profile projection failure rolls back both profile and input attempt', 'one-slot budget settlement failure preserves request frequency and rolls back profile and input right', 'two request-local forks share one pool without mixing subjects or admitting cross-subject writes', 'a shared base transport cannot acquire request transaction state', 'strict workflow denies free input before writes and paid flat overall before debit', 'a paid workflow without an approved policy never falls back to legacy score input', 'delivery only counts the current operation numerical component, and separates current pass from origin', 'sample and statistics never record first use; numeric zero is still an actual personal result', 'closed-stage correction never consumes a grant, even for verified active admin aal2', 'one admin correction is immutable, replay-safe, and cannot replace the initial profile', 'a successful profile POST followed by separate overall 503 preserves its accepted input', 'cached overall on a new pass records its access pass while original provenance stays unchanged', 'first-use write failure is a 503 and own stored read recovers original delivery without score resave', 'many component origins and delivery each use a bounded batch query', 'new three API DTOs project through all25 closed bindings with session v1 unchanged', 'allowlisted unknown/inactive profiles cannot use preview exemption', 'requesting only pending B cannot mark a new pass because stored analysis A has numbers', 'all consumable semantic rejections keep HTTP422 rather than becoming a misleading503')
+RECOVERY_REQUIRED_BINDINGS = ('src/jungsi_touch/application/public_response_schemas.json', 'supabase/functions/_shared/jungsi/application/api_dispatch.ts', 'supabase/functions/_shared/jungsi/application/incident_recovery_ports.ts', 'supabase/functions/_shared/jungsi/application/incident_recovery_schema.ts', 'supabase/functions/_shared/jungsi/application/incident_recovery_service.ts', 'supabase/functions/_shared/jungsi/application/member_shortlist_schema.ts', 'supabase/functions/_shared/jungsi/application/request_budget.ts', 'supabase/functions/_shared/jungsi/application/score_input_ports.ts', 'supabase/functions/_shared/jungsi/application/score_input_service.ts', 'supabase/functions/_shared/jungsi/application/session_service.ts', 'supabase/functions/_shared/jungsi/domain/incident_recovery_rights.ts', 'supabase/functions/_shared/jungsi/domain/score_input_rights.ts', 'supabase/functions/_shared/jungsi/infrastructure/api_http.ts', 'supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts', 'supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts', 'supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts', 'supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts', 'supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts', 'supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts', 'supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts', 'supabase/functions/_shared/jungsi/infrastructure/sql_values.ts', 'supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts', 'supabase/functions/jungsi-api/incident_recovery_entry.ts', 'tests/edge/fixture.ts', 'tests/edge/member_shortlist_fixture.ts', 'tests/edge/public_api_contract_fixture.ts', 'tests/edge/synthetic_exam_pack.ts', 'tests/edge/synthetic_platform_repository.ts', 'tests/edge/synthetic_runtime_binding.ts', 'tests/edge/test_incident_recovery_binding.ts', 'tests/edge/test_incident_recovery_http.ts', 'tests/edge/test_incident_recovery_rights.ts', 'tests/edge/test_incident_recovery_service.ts', 'tests/edge/test_score_input_policy.ts')
+RECOVERY_BASELINE_COMMIT = '848dc97b6657eb36932ba33908b6cdc147c032c4'
+RECOVERY_BASELINE_SOURCE_SHA256 = 'cce54568dfbf59a5bc6980060ce16ed822e5b660d214a86a3092f9705763bd7f'
+RECOVERY_BASELINE_DECLARATIONS_SHA256 = '2d2ba4ac6355abd4481a0fce573a1b54a1eaee72b74d7bbdbbe21050e7a4b9ea'
+
+def recovery_input_registration(spec,source_hashes=None):
+    """Exact additive v5 suite; never expand legacy registrations or assert live readiness."""
+    error="Incident recovery exact separate source/test registration invalid"
+    backend=spec.get("backend_platform_contract",{})
+    ext=backend.get("native_edge_v5_extension") if isinstance(backend,dict) else None
+    if ext is None:return None,[]
+    try:
+        if not isinstance(ext,dict):raise ValueError("extension")
+        v=ext.get("verification")
+        if not isinstance(v,dict):raise ValueError("missing verification")
+        if (ext.get("format")!="jungsi.native-edge-v5-extension/v1" or
+            ext.get("generation")!="member-input-recovery-31" or ext.get("base_operation_count")!=30 or
+            ext.get("activation")!="NOT_RUN" or
+            ext.get("response_schema_overrides")!={"score-input.status.read":"score_input_status_v5"} or
+            not isinstance(ext.get("operations"),list) or len(ext["operations"])!=1):raise ValueError("v5 scope")
+        op=ext["operations"][0]
+        if (not isinstance(op,dict) or op.get("id")!="score-input.incident-recovery.grant" or
+            op.get("method")!="POST" or op.get("path")!="/api/v1/management/score-input-recovery-grants" or
+            op.get("member_tiers")!=["paid"] or op.get("report_owner")is not False or
+            op.get("confirmed_score_profile")is not False or
+            op.get("contract_ref")!="backend_platform_contract.dto_schemas.score_input_incident_recovery" or
+            op.get("requirements")!=["REQ-24","REQ-25","REQ-26","REQ-27"] or
+            op.get("http_contract",{}).get("idempotency_key_required")is not True or
+            op.get("http_contract",{}).get("response_schema")!="score_input_incident_recovery" or
+            op.get("http_contract",{}).get("response")!="score_input_incident_recovery" or
+            op.get("http_contract",{}).get("query")!=[] or
+            op.get("http_contract",{}).get("body")!=["subject_id: UUID","exam_id: string",
+              "stage: provisional|final","fault_kind: confirmed_server_failure|confirmed_incorrect_rejection",
+              "expected_version: positive safe integer","incident_id: optional registered alias",
+              "ticket_ref: optional registered alias; incident_id or ticket_ref required"] or
+            op.get("security_policy",{}).get("contract_ref")!="security_contract" or
+            op.get("security_policy",{}).get("control_ids")!=["SEC-01","SEC-03","SEC-04","SEC-05","SEC-06","SEC-07","SEC-08"] or
+            any(x.get("id")==op["id"] for x in spec.get("operations",[]) if isinstance(x,dict))):raise ValueError("route")
+        expected_fields=["format","grant_id","incident_key","ticket_ref","fault_kind","exam_id","stage",
+          "entry_version","recovery_remaining","correction_granted","correction_used",
+          "correction_request_remaining","effective_save_remaining","replayed"]
+        dtos=backend["dto_schemas"];legacy=dtos["score_input_status"];status=dtos["score_input_status_v5"];grant=dtos["score_input_incident_recovery"]
+        status_fields=["format","exam_id","pack_version","academic_year","stage","stage_state","opens_at","closes_at",
+          "paid_input_allowed","input_limit_mode","initial_used","initial_remaining","correction_granted","correction_used",
+          "correction_request_remaining","effective_save_remaining","entry_version","current_profile_id","current_report_id",
+          "last_attempt_outcome","last_rejection_code","legacy_transition_status","current_pass_first_paid_result_at"]
+        if (grant.get("format")!="jungsi.score-input-incident-recovery-grant/v1" or grant.get("fields")!=expected_fields or
+            legacy.get("format")!="jungsi.score-input-status/v1" or legacy.get("fields")!=status_fields or
+            status.get("format")!=legacy.get("format") or status.get("fields")!=status_fields+["recovery_remaining"]):
+            raise ValueError("dto")
+        if (v.get("format")!="jungsi.incident-recovery-source-verification/v1" or
+            v.get("coverage")!="INCIDENT_RECOVERY_V5_SYNTHETIC" or
+            v.get("test_paths")!=list(RECOVERY_TEST_PATHS) or
+            v.get("same_file_path")!=RECOVERY_SAMEFILE_PATH or
+            v.get("same_file_case_names")!=list(RECOVERY_SAMEFILE_NAMES) or
+            v.get("standalone_case_names")!=list(RECOVERY_STANDALONE_NAMES) or
+            v.get("baseline_score_case_names")!=list(RECOVERY_BASELINE_NAMES) or
+            v.get("baseline_commit")!=RECOVERY_BASELINE_COMMIT or
+            v.get("baseline_score_source_sha256")!=RECOVERY_BASELINE_SOURCE_SHA256 or
+            v.get("baseline_score_declarations_sha256")!=RECOVERY_BASELINE_DECLARATIONS_SHA256 or
+            any(type(v.get(k))is not int or v[k]!=n for k,n in
+              [("test_count",50),("standalone_test_count",33),("same_file_test_count",17),
+               ("baseline_score_test_count",31),("baseline_foundation_count",656),("operating_writes",0)]) or
+            v.get("native_acceptance")!="NOT_VERIFIED_BY_SOURCE_SUITE" or v.get("activation_status")!="NOT_RUN"):
+            raise ValueError("verification")
+        groups=[RECOVERY_SAMEFILE_NAMES,RECOVERY_STANDALONE_NAMES,RECOVERY_BASELINE_NAMES]
+        if any(len(set(g))!=len(g) for g in groups) or len(set().union(*map(set,groups)))!=81:
+            raise ValueError("duplicate case names")
+        cfg=spec["edge_harness"];foundation=cfg["tests"]
+        if cfg.get("unit_count")!=656 or foundation.count(RECOVERY_SAMEFILE_PATH)!=1 or any(p in foundation for p in RECOVERY_TEST_PATHS):
+            raise ValueError("foundation separation")
+        for other in (
+          spec.get("read_view_extension_contract",{}).get("verification",{}).get("test_paths",[]),
+          spec.get("member_shortlist_contract",{}).get("source_registration",{}).get("verification",{}).get("test_paths",[]),
+          spec.get("university_scoring_contract",{}).get("scoped_reference_contract",{}).get("verification",{}).get("test_paths",[])):
+            if set(RECOVERY_TEST_PATHS)&set(other):raise ValueError("other suite overlap")
+        bindings=v.get("source_bindings")
+        if not isinstance(bindings,list) or len(bindings)!=len(RECOVERY_REQUIRED_BINDINGS):raise ValueError("bindings")
+        mapped={}
+        for item in bindings:
+            if (not isinstance(item,dict) or set(item)!={"path","sha256"} or item["path"] in mapped or
+                not isinstance(item["sha256"],str) or not re.fullmatch("[a-f0-9]{64}",item["sha256"])):
+                raise ValueError("binding row")
+            mapped[item["path"]]=item["sha256"]
+        if set(mapped)!=set(RECOVERY_REQUIRED_BINDINGS):raise ValueError("binding paths")
+        if source_hashes is not None and any(source_hashes.get(p)!=h for p,h in mapped.items()):raise ValueError("snapshot hash")
+        return v,[]
+    except (KeyError,TypeError,ValueError,AttributeError):return None,[error]
+
+def verify_recovery_test_partition(source):
+    """Preserve exact 848 baseline test declarations; identify only 17 named additions."""
+    from check_edge_contract import tokens
+    if not isinstance(source,bytes):raise ValueError("source bytes")
+    text=source.decode("utf-8-sig").replace("\r\n","\n")
+    t=tokens(text);calls=[]
+    for i in range(len(t)-5):
+        if [x[1] for x in t[i:i+4]]!=["Deno",".","test","("]:continue
+        level=1
+        for j in range(i+4,len(t)):
+            if t[j][0]=="punct" and t[j][1]=="(":level+=1
+            elif t[j][0]=="punct" and t[j][1]==")":
+                level-=1
+                if level==0:
+                    name=t[i+4][1] if t[i+4][0]=="string" and t[i+5][1]=="," else None
+                    calls.append((name,text[t[i][2]:t[j][3]]))
+                    break
+        else:raise ValueError("unbalanced Deno.test")
+    added=[(name,body) for name,body in calls if name in RECOVERY_SAMEFILE_NAMES]
+    original=[body for name,body in calls if name not in RECOVERY_SAMEFILE_NAMES]
+    if (len(calls)!=47 or len(added)!=17 or len(original)!=30 or
+        len({name for name,_ in added})!=17 or {name for name,_ in added}!=set(RECOVERY_SAMEFILE_NAMES)):
+        raise ValueError("test declaration partition")
+    digest=hashlib.sha256(json.dumps(original,ensure_ascii=True,separators=(",",":")).encode()).hexdigest()
+    if digest!=RECOVERY_BASELINE_DECLARATIONS_SHA256:raise ValueError("baseline test body changed")
+
 def registered_member_shortlist_ids(spec):
     registered,errors=member_shortlist_registration(spec)
     return set(MEMBER_SHORTLIST_ROUTES)if registered is not None and not errors else set()
+
+SERVICE_AUX_TEST_PATHS = (
+    "tests/edge/test_history_metric_alias_source.ts",
+    "tests/edge/test_score_policy_period_renewal.ts",
+    "tests/edge/test_year_end_access.ts",
+)
+SERVICE_AUX_CASE_IDENTITY_SHA256 = "2d080d4123b5ad4987b3aaa49cd32e28175482986cdf7fbcc4c928c23e777b34"
+
+def service_aux_registration(spec, source_hashes=None):
+    """Optional exact separate synthetic suite; absent preserves the old gate."""
+    error = "Service auxiliary exact separate source/test registration invalid"
+    backend = spec.get("backend_platform_contract", {})
+    ext = backend.get("service_aux_test_extension") if isinstance(backend, dict) else None
+    if ext is None:
+        return None, []
+    try:
+        fields = {"format", "status", "test_paths", "case_names_by_path", "case_identity_sha256", "test_count",
+                  "baseline_foundation_count", "source_bindings", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
+        if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.service-auxiliary-tests/v1" or
+                ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["test_paths"] != list(SERVICE_AUX_TEST_PATHS) or
+                type(ext["test_count"]) is not int or ext["test_count"] != 14 or
+                type(ext["baseline_foundation_count"]) is not int or ext["baseline_foundation_count"] != 656 or
+                ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
+                type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0):
+            raise ValueError("suite state or paths")
+        cases = ext["case_names_by_path"]
+        if not isinstance(cases, dict) or set(cases) != set(SERVICE_AUX_TEST_PATHS):
+            raise ValueError("suite identities")
+        lengths = (1, 9, 4)
+        names = []
+        for path, count in zip(SERVICE_AUX_TEST_PATHS, lengths):
+            values = cases[path]
+            if not isinstance(values, list) or len(values) != count or values != sorted(values) or any(not isinstance(x, str) or not x for x in values):
+                raise ValueError("suite names")
+            names.extend(values)
+        digest = hashlib.sha256(json.dumps(cases, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        if len(set(names)) != 14 or digest != SERVICE_AUX_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"] != digest:
+            raise ValueError("suite identities mismatch")
+        test = ext["regression_test"]
+        if (not isinstance(test, dict) or set(test) != {"path", "sha256"} or
+                test["path"] != "tests/test_service_aux_registration.py" or
+                not isinstance(test["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", test["sha256"]) or
+                source_hashes is not None and source_hashes.get(test["path"]) != test["sha256"]):
+            raise ValueError("guard regression binding")
+        cfg = spec["edge_harness"]
+        rows = ext["source_bindings"]
+        if (not isinstance(rows, list) or len(rows) != len(SERVICE_AUX_TEST_PATHS) or
+                any(not isinstance(row, dict) or set(row) != {"path", "sha256"} for row in rows) or
+                [row["path"] for row in rows] != list(SERVICE_AUX_TEST_PATHS)):
+            raise ValueError("suite bindings")
+        for row in rows:
+            path, h = row["path"], row["sha256"]
+            item = cfg["files"].get(path, {})
+            if (item.get("layer") != "verification" or path in cfg.get("tests", []) or
+                    not isinstance(h, str) or not re.fullmatch(r"[0-9a-f]{64}", h) or
+                    item.get("declarations", {}).get("source_sha256") != h or
+                    source_hashes is not None and source_hashes.get(path) != h):
+                raise ValueError("suite source hash")
+        view = spec.get("read_view_extension_contract", {}).get("verification", {}).get("test_paths", [])
+        member = spec.get("member_shortlist_contract", {}).get("source_registration", {}).get("verification", {}).get("test_paths", [])
+        school = spec.get("university_scoring_contract", {}).get("scoped_reference_contract", {}).get("verification", {}).get("test_paths", [])
+        if set(SERVICE_AUX_TEST_PATHS) & (set(view) | set(member) | set(school) | set(RECOVERY_TEST_PATHS)):
+            raise ValueError("suite overlap")
+        return ext, []
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None, [error]
+
+SERVICE_STAGED_TEST_PATHS = ('tests/edge/test_history_snapshot_source_concurrency.synthetic.ts', 'tests/edge/test_p1_r27_delivery_mode.synthetic.ts', 'tests/edge/test_waitlist_conflict_guard.synthetic.ts', 'tests/edge/test_waitlist_conflict_service.formatted.v2.ts')
+SERVICE_STAGED_CASE_IDENTITY_SHA256 = '14ca9a3bda82ff36829dcb0b490b6bee5acb1246bf3f075af4bb3020ed5302f9'
+
+def service_staged_registration(spec, source_hashes=None):
+    """Optional exact separate synthetic suite; absent preserves the old gate."""
+    error = "Service staged exact separate source/test registration invalid"
+    backend = spec.get("backend_platform_contract", {})
+    ext = backend.get("service_staged_test_extension") if isinstance(backend, dict) else None
+    if ext is None:
+        return None, []
+    try:
+        fields = {"format", "status", "test_paths", "case_names_by_path", "case_identity_sha256", "test_count",
+                  "baseline_foundation_count", "source_bindings", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
+        if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.service-staged-tests/v1" or
+                ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["test_paths"] != list(SERVICE_STAGED_TEST_PATHS) or
+                type(ext["test_count"]) is not int or ext["test_count"] != 76 or
+                type(ext["baseline_foundation_count"]) is not int or ext["baseline_foundation_count"] != 656 or
+                ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
+                type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0):
+            raise ValueError("suite state or paths")
+        cases = ext["case_names_by_path"]
+        if not isinstance(cases, dict) or set(cases) != set(SERVICE_STAGED_TEST_PATHS):
+            raise ValueError("suite identities")
+        lengths = (52, 6, 17, 1)
+        names = []
+        for path, count in zip(SERVICE_STAGED_TEST_PATHS, lengths):
+            values = cases[path]
+            if not isinstance(values, list) or len(values) != count or values != sorted(values) or any(not isinstance(x, str) or not x for x in values):
+                raise ValueError("suite names")
+            names.extend(values)
+        digest = hashlib.sha256(json.dumps(cases, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        if len(set(names)) != 76 or digest != SERVICE_STAGED_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"] != digest:
+            raise ValueError("suite identities mismatch")
+        test = ext["regression_test"]
+        if (not isinstance(test, dict) or set(test) != {"path", "sha256"} or
+                test["path"] != "tests/test_service_staged_registration.py" or
+                not isinstance(test["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", test["sha256"]) or
+                source_hashes is not None and source_hashes.get(test["path"]) != test["sha256"]):
+            raise ValueError("guard regression binding")
+        cfg = spec["edge_harness"]
+        rows = ext["source_bindings"]
+        if (not isinstance(rows, list) or len(rows) != len(SERVICE_STAGED_TEST_PATHS) or
+                any(not isinstance(row, dict) or set(row) != {"path", "sha256"} for row in rows) or
+                [row["path"] for row in rows] != list(SERVICE_STAGED_TEST_PATHS)):
+            raise ValueError("suite bindings")
+        for row in rows:
+            path, h = row["path"], row["sha256"]
+            item = cfg["files"].get(path, {})
+            if (item.get("layer") != "verification" or path in cfg.get("tests", []) or
+                    not isinstance(h, str) or not re.fullmatch(r"[0-9a-f]{64}", h) or
+                    item.get("declarations", {}).get("source_sha256") != h or
+                    source_hashes is not None and source_hashes.get(path) != h):
+                raise ValueError("suite source hash")
+        view = spec.get("read_view_extension_contract", {}).get("verification", {}).get("test_paths", [])
+        member = spec.get("member_shortlist_contract", {}).get("source_registration", {}).get("verification", {}).get("test_paths", [])
+        school = spec.get("university_scoring_contract", {}).get("scoped_reference_contract", {}).get("verification", {}).get("test_paths", [])
+        if set(SERVICE_STAGED_TEST_PATHS) & (set(view) | set(member) | set(school) | set(RECOVERY_TEST_PATHS)):
+            raise ValueError("suite overlap")
+        return ext, []
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None, [error]
+
 
 def validate_read_view_extension(spec):
     """Only these exact three source-bound reads may extend the preserved 22+3.
@@ -1132,6 +1381,15 @@ def validate_read_view_extension(spec):
     member,member_errors=member_shortlist_registration(spec)
     if member is not None:separate_tests-=set(MEMBER_SHORTLIST_TESTS)
     professional_errors+=member_errors
+    recovery,recovery_errors=recovery_input_registration(spec)
+    if recovery is not None:separate_tests-=set(RECOVERY_TEST_PATHS)
+    professional_errors+=recovery_errors
+    auxiliary, auxiliary_errors=service_aux_registration(spec)
+    if auxiliary is not None:separate_tests-=set(auxiliary["test_paths"])
+    professional_errors+=auxiliary_errors
+    staged, staged_errors=service_staged_registration(spec)
+    if staged is not None:separate_tests-=set(staged["test_paths"])
+    professional_errors+=staged_errors
     if c is None:return professional_errors+(["Read-view unregistered separate test source"]if separate_tests else [])
     if not isinstance(c,dict):return professional_errors+["Read-view extension contract invalid"]
     errors=professional_errors
@@ -1250,6 +1508,126 @@ def policy_baseline_source_matches(spec,path,digest,indexed):
     prior=c.get("prior_source_bindings",{})
     if not isinstance(prior,dict) or hashlib.sha256(json.dumps(prior,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()!=REQ27_BASELINE_SOURCE_MANIFEST_SHA256:return False
     return prior.get(path)==digest and c.get("current_source_bindings",{}).get(path)==indexed.get(path)
+NATIVE_GUARD_HISTORY_SHA256="93236619b0293ac768c2968542bdc4e515bd5155417da728b765db9179e58b42"
+NATIVE_GUARD_SOURCE_PATH="supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
+
+
+STAGE_PROJECTION_SOURCE_PATHS=(
+    "supabase/functions/_shared/jungsi/application/own_report_list.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
+    "tests/edge/test_score_input_policy.ts",
+    "tests/edge/test_score_input_stage_projection.ts",
+    "tests/edge/synthetic_score_input_policy.ts",
+)
+STAGE_PROJECTION_CASE_NAMES=(
+    "approved different stages retain independent input rights for the same exact exam",
+    "another stage never hides unregistered legacy or a same-stage profile with no state",
+    "other-stage legacy mapping must match the approved rollout and exact exam policy",
+    "other-stage accepted mapping requires matching exact exam and original accepted state",
+)
+
+
+def stage_projection_guard_registration(spec):
+    """Register exact source-only stage guards without rewriting historical native evidence."""
+    error="REQ-27 stage projection guard source registration invalid"
+    backend=spec.get("backend_platform_contract",{})
+    ext=backend.get("stage_projection_source_extension") if isinstance(backend,dict) else None
+    if ext is None:return None,[]
+    try:
+        expected_keys={"format","status","baseline_commit","source_bindings","verification",
+                       "native_API_empty_guard","authenticated_API_verified","rollout_approved","writes"}
+        if (not isinstance(ext,dict) or set(ext)!=expected_keys or
+            ext["format"]!="jungsi.stage-projection-source-extension/v1" or
+            ext["status"]!="SOURCE_REGISTERED_NOT_ACTIVATED" or
+            ext["baseline_commit"]!=RECOVERY_BASELINE_COMMIT or
+            ext["native_API_empty_guard"]!="NOT_RUN" or
+            ext["authenticated_API_verified"] is not False or ext["rollout_approved"] is not False or
+            type(ext["writes"]) is not int or ext["writes"]!=0 or backend.get("native_edge_v5_extension") is not None):
+            raise ValueError("source-only boundary")
+        cfg=spec["edge_harness"];files=cfg["files"];rows=ext["source_bindings"]
+        if (not isinstance(rows,list) or len(rows)!=len(STAGE_PROJECTION_SOURCE_PATHS) or
+            any(not isinstance(x,dict) or set(x)!={"path","sha256"} for x in rows) or
+            {x["path"]for x in rows}!=set(STAGE_PROJECTION_SOURCE_PATHS)):
+            raise ValueError("exact sources")
+        for item in rows:
+            expected=files.get(item["path"],{}).get("declarations",{}).get("source_sha256")
+            if not re.fullmatch(r"[a-f0-9]{64}",str(item["sha256"])) or item["sha256"]!=expected:
+                raise ValueError("source hash")
+        v=ext["verification"]
+        expected_verification={"baseline_foundation_count":656,"baseline_score_input_count":31,
+                               "added_stage_count":4,"test_path":"tests/edge/test_score_input_stage_projection.ts",
+                               "case_names":list(STAGE_PROJECTION_CASE_NAMES)}
+        if (not isinstance(v,dict) or set(v)!=set(expected_verification) or v!=expected_verification or
+            any(type(v[k]) is not int for k in ("baseline_foundation_count","baseline_score_input_count","added_stage_count"))):
+            raise ValueError("exact verification")
+        tests=cfg["tests"];view=spec["read_view_extension_contract"]["verification"]["test_paths"]
+        if (cfg["unit_count"]!=656 or tests.count("tests/edge/test_score_input_policy.ts")!=1 or
+            v["test_path"] in tests or view.count(v["test_path"])!=1):
+            raise ValueError("disjoint foundation and additions")
+        return ext,[]
+    except (KeyError,TypeError,ValueError,AttributeError):
+        return None,[error]
+
+
+def validate_score_input_native_guard(spec):
+    """Keep the historical native guard evidence distinct from a v5 source candidate."""
+    error="REQ-27 native empty guard evidence boundary drift"
+    c=spec.get("score_input_policy_contract")
+    if not isinstance(c,dict):return [error]
+    evidence=c.get("native_SQL_preparation_evidence",{})
+    if not isinstance(evidence,dict):return [error]
+    native=evidence.get("guard")
+    continuation=evidence.get("guard_current_source")
+    backend=spec.get("backend_platform_contract",{})
+    ext=backend.get("native_edge_v5_extension") if isinstance(backend,dict) else None
+    stage,stage_errors=stage_projection_guard_registration(spec)
+    if stage_errors:return [error]
+    if ext is None and stage is None:
+        if continuation is not None:return [error]
+        if native is None:return []
+        if (not isinstance(native,dict) or native.get("status")!="PASS_BOUNDED_READONLY_EMPTY_ROLLOUT" or
+            native.get("receipt_sha256")!="0eca093fd02e40f6878b321ed99275684d7bbf790ba437c2bc220d554894b677" or
+            native.get("source_sha256")!=c.get("current_source_bindings",{}).get(native.get("source_path")) or
+            native.get("expected_http_status")!=503 or native.get("expected_code")!="score_input_transition_pending" or
+            native.get("writes")!=0 or native.get("authenticated_API_verified")is not False or
+            native.get("rollout_approved")is not False):return [error]
+        return []
+    if stage is not None:
+        registered,registration_errors=stage,[]
+    else:
+        registered,registration_errors=recovery_input_registration(spec)
+    if registration_errors or registered is None or not isinstance(native,dict) or not isinstance(continuation,dict):
+        return [error]
+    historical_digest=hashlib.sha256(json.dumps(native,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    if historical_digest!=NATIVE_GUARD_HISTORY_SHA256 or native.get("source_path")!=NATIVE_GUARD_SOURCE_PATH:
+        return [error]
+    bindings=c.get("current_source_bindings",{})
+    current=bindings.get(NATIVE_GUARD_SOURCE_PATH) if isinstance(bindings,dict) else None
+    v5_bindings={item["path"]:item["sha256"] for item in registered["source_bindings"]}
+    indexed=spec.get("edge_harness",{}).get("files",{}).get(NATIVE_GUARD_SOURCE_PATH,{}).get("declarations",{}).get("source_sha256")
+    expected={
+      "format":"jungsi.score-input-native-guard-continuation/v1",
+      "historical_guard_sha256":NATIVE_GUARD_HISTORY_SHA256,
+      "historical_source_commit":RECOVERY_BASELINE_COMMIT,
+      "source_path":NATIVE_GUARD_SOURCE_PATH,
+      "source_sha256":current,
+      "native_API_empty_guard":"NOT_RUN",
+      "authenticated_API_verified":False,
+      "rollout_approved":False,
+      "writes":0,
+    }
+    if (not isinstance(current,str) or not re.fullmatch(r"[a-f0-9]{64}",current) or
+        current!=indexed or current!=v5_bindings.get(NATIVE_GUARD_SOURCE_PATH) or
+        set(continuation)!=set(expected) or continuation!=expected or
+        continuation.get("authenticated_API_verified")is not False or
+        continuation.get("rollout_approved")is not False or
+        type(continuation.get("writes")) is not int):
+        return [error]
+    return []
+
+
 def validate_score_input_policy(spec):
     c=spec.get("score_input_policy_contract");errors=[]
     required=tuple(int(x) for x in spec.get("version","0.0.0").split("."))>=(1,9,73)
@@ -1268,9 +1646,7 @@ def validate_score_input_policy(spec):
     if migration=="APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED":
         evidence=c.get("migration_evidence",{})
         if (evidence.get("sql_sha256")!="448c4d7a9463054219c54fb0e524bc6a0d55831f25c0cab99abab5bd893ecd55" or evidence.get("sql_path")!="database/migrations/006_score_input_policy.prepared.sql" or not re.fullmatch(r"[a-f0-9]{64}",str(evidence.get("native_receipt_sha256",""))) or evidence.get("new_tables")!=7 or evidence.get("new_table_rows")!=0 or evidence.get("app_select_tables")!=7 or evidence.get("app_insert_tables")!=5 or evidence.get("new_rls_policies")!=12 or evidence.get("schema_version")!="006_score_input_policy" or any(evidence.get(key)is not True for key in ("ACL_RLS_FK_verified","empty_ledgers_verified","005_retained")) or any(type(evidence.get(key))is not int or evidence.get(key)!=0 for key in ("student_data_DML","admission_data_DML","rollout_rows","new_policy_requests")) or evidence.get("activation")!="NOT_RUN" or evidence.get("public_RPC_006a")!="NOT_RUN"):errors.append("REQ-27 applied empty schema requires exact SQL/native evidence and no activation")
-    native=c.get("native_SQL_preparation_evidence",{}).get("guard")
-    if native is not None:
-        if (not isinstance(native,dict) or native.get("status")!="PASS_BOUNDED_READONLY_EMPTY_ROLLOUT" or native.get("receipt_sha256")!="0eca093fd02e40f6878b321ed99275684d7bbf790ba437c2bc220d554894b677" or native.get("source_sha256")!=c.get("current_source_bindings",{}).get(native.get("source_path")) or native.get("expected_http_status")!=503 or native.get("expected_code")!="score_input_transition_pending" or native.get("writes")!=0 or native.get("authenticated_API_verified")is not False or native.get("rollout_approved")is not False):errors.append("REQ-27 native empty guard evidence boundary drift")
+    errors.extend(validate_score_input_native_guard(spec))
     for oid,(method,path,tiers) in SCORE_POLICY_ROUTES.items():
         row=by_id.get(oid,{})
         if row.get("method")!=method or row.get("path")!=path or row.get("member_tiers")!=tiers or row.get("report_owner")is not False or row.get("confirmed_score_profile")is not False or "REQ-27" not in row.get("requirements",[]):errors.append("REQ-27 route policy drift: "+oid)
@@ -4192,6 +4568,79 @@ def generated_files(spec,read=None):
                           [op,state['current_owner_receipt']['source_deployment'],state['current_owner_receipt']['new_BFF_observation'],state['current_owner_receipt']['formal_native_and_operating_acceptance']]
                           for op,state in spec['supabase_deployment_contract']['live_execution']['operations'].items()
                       ])+"\n\n남은 인수: "+'; '.join(peer['residual'])+".\n")
+        partial=snapshot.get('offering_2027_partial_scope_service_candidate_20261030')
+        successor=snapshot.get('offering_2027_independent_scope_successor_20261029')
+        safety=snapshot.get('planning_preview_20261031')
+        if partial and successor and safety:
+            section+=("\n### 2027 부분 발행과 현재성 검토 후보\n\n"+
+                      "소스 후보 "+safety['source_commit']+" / "+partial['status']+". "+safety['candidate_boundary']+"\n\n"+
+                      table(['구분','검토 계약'],[
+                          ['기획 참고',successor['id']+' / '+successor['status']],
+                          ['화면·경로',successor['page']+' / '+', '.join(partial['operations'])],
+                          ['부분 범위',partial['contract']],
+                          ['권한·소비자',partial['consumer']],
+                          ['원문·미확정',successor['value_rules']+' '+successor['independent_history']],
+                          ['DB 대조',safety['db_comparison']],
+                          ['승인 현재성',safety['authorization_currentness']],
+                          ['연결·화면',safety['historical_link']],
+                          ['미인수',', '.join(partial['not_verified'])+'; '+safety['remaining']],
+                      ])+"\n")
+        owner_review=snapshot.get('planning_owner_review_20261031')
+        if owner_review:
+            section+=("\n### 화면팀 운영 영향 회신 검토 (미인수)\n\n"+
+                      owner_review['status']+'. '+owner_review['source_scope']+"\n\n"+
+                      table(['구분','확인·후속 상태'],[
+                          ['SSL 현황',owner_review['ssl_status']],
+                          ['연결 코드 보고',owner_review['ssl_clients']],
+                          ['강제 전환 조건',owner_review['ssl_cutover']],
+                          ['대조 부하',owner_review['comparison']],
+                          ['2027 발행',owner_review['publication']],
+                          ['3페이지 head 결속',owner_review['rebind']],
+                          ['화면·API·권한',owner_review['routes']],
+                          ['미실행',owner_review['not_run']],
+                      ])+"\n")
+        latest_owner=snapshot.get('planning_owner_review_20261101')
+        if latest_owner:
+            section+=("\n### 2026-11-01 화면 Owner 재적용 회신과 선택 시간\n\n"+
+                      latest_owner['status']+"\n\n"+
+                      table(['구분','확인·후속 상태'],[
+                          ['Owner 보고',latest_owner['owner_report']],
+                          ['원시 파일 정합성',latest_owner['line_endings']],
+                          ['GitHub CI',latest_owner['ci']],
+                          ['증거 범위',latest_owner['scope']],
+                          ['선택 시간',latest_owner['window']],
+                          ['다른 접속 도구',latest_owner['other_clients']],
+                          ['전환 후 검수',latest_owner['verification']],
+                          ['오프라인 자료 검수',latest_owner['offline_data']],
+                          ['기존 자료와 승인',latest_owner['remaining']],
+                          ['경로·권한',latest_owner['routes']],
+                          ['미실행',latest_owner['not_run']],
+                      ])+"\n")
+        screen_deployment=snapshot.get('planning_screen_deployment_20261101')
+        if screen_deployment:
+            section+=("\n### 2026-11-01 화면 배포 보고와 대조 준비\n\n"+
+                      screen_deployment['status']+"\n\n"+
+                      table(['구분','확인·후속 상태'],[
+                          ['배포 보고',screen_deployment['source']],
+                          ['합성·운영 기간',screen_deployment['synthetic']],
+                          ['화면 관측 범위',screen_deployment['screen']],
+                          ['대조 연결 준비',screen_deployment['coverage']],
+                          ['후속 일정',screen_deployment['followup']],
+                          ['경로·권한',screen_deployment['routes']],
+                          ['미실행',screen_deployment['not_run']],
+                      ])+"\n")
+        quota_review=snapshot.get('planning_quota_stage_review_20261031')
+        if quota_review:
+            section+=("\n### 2027 모집인원 단계 계약 검토 후보\n\n"+
+                      quota_review['status']+'. '+quota_review['scope']+"\n\n"+
+                      table(['구분','현재 후보와 검토 조건'],[
+                          ['입결 snapshot 조합',quota_review['snapshot']],
+                          ['별도 모집정보 경로',quota_review['recruitment']],
+                          ['표시·계산 안전',quota_review['display_safety']],
+                          ['단계·결측 의미',quota_review['semantics']],
+                          ['기존 소비자 호환',quota_review['compatibility']],
+                          ['검증·발행 상태',quota_review['verification']],
+                      ])+"\n")
         for key in ('planning','routing','architecture','workflow','supabase_deployment','development_sync','history_display','presentation_handoff','frontend_reply','frontend_followup','api_dto','security'):
             target=spec['current_documents'].get(key)
             if target in files:files[target]+=section
@@ -4541,6 +4990,64 @@ def validate_public_response_registry(paths,read,spec):
     return validate_public_response_catalog(catalog,spec)
 
 
+def foundation_graph_extension_errors(paths,read,spec):
+    """One coexisting application source and one public JSON, source-bound."""
+    ext=spec.get("edge_harness",{}).get("bound_graph_extensions")
+    staged_waitlist={"tests/edge/test_waitlist_conflict_guard.synthetic.ts",
+                     "tests/edge/test_waitlist_conflict_service.formatted.v2.ts"}
+    if ext is None:
+        return ["Foundation graph extension source/JSON binding invalid"] if staged_waitlist & set(paths) else []
+    expected={"supabase/functions/_shared/current_public_catalog.ts","src/jungsi_touch/application/public_response_schemas.json"}
+    try:
+        if not isinstance(ext,dict) or set(ext)!={"format","files","regression_test","offline_cli_test"} or ext["format"]!="jungsi.edge-graph-extension/v1" or set(ext["files"])!=expected:raise ValueError("paths")
+        regression=ext["regression_test"]
+        if not isinstance(regression,dict) or set(regression)!={"path","sha256"} or regression["path"]!="tests/test_foundation_graph_extension.py" or regression["path"] not in paths or hashlib.sha256(read(regression["path"])).hexdigest()!=regression["sha256"]:raise ValueError("regression")
+        offline_test=ext["offline_cli_test"]
+        if not isinstance(offline_test,dict) or set(offline_test)!={"path","sha256"} or offline_test["path"]!="tests/test_offline_graph_cli.py" or offline_test["path"] not in paths or hashlib.sha256(read(offline_test["path"])).hexdigest()!=offline_test["sha256"]:raise ValueError("offline test")
+        for path in expected:
+            row=ext["files"][path]
+            if not isinstance(row,dict) or set(row)!={"layer","sha256"} or row["layer"]!="application" or path not in paths or hashlib.sha256(read(path)).hexdigest()!=row["sha256"]:raise ValueError("binding")
+            impl=next(x for x in spec["implementation"] if x["path"]==path)
+            if impl["layer"]!="application":raise ValueError("layer")
+        return []
+    except (KeyError,TypeError,ValueError,StopIteration,OSError):return ["Foundation graph extension source/JSON binding invalid"]
+
+def native_seed_candidate_errors(paths,read,spec):
+    error="Native seed candidate source/test registration invalid"
+    names=set(paths);ext=spec.get("backend_platform_contract",{}).get("native_seed_candidate_extension")
+    test="tests/test_native_seed_opt_in.py";guard="tests/test_native_seed_binding.py"
+    if ext is None:return [error] if test in names or guard in names else []
+    try:
+        required={"format","status","source_bindings","tests","network_isolation","activation"}
+        if not isinstance(ext,dict) or set(ext)!=required or ext["format"]!="jungsi.native-seed-candidate/v1" or ext["status"]!="SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["network_isolation"]!="NOT_VERIFIED" or ext["activation"]!="NOT_RUN":raise ValueError("state")
+        expected_sources={"scripts/check_edge_contract.py","scripts/run_edge_tests.py"};expected_tests={test,guard}
+        for key,expected in (("source_bindings",expected_sources),("tests",expected_tests)):
+            rows=ext[key]
+            if not isinstance(rows,list) or len(rows)!=len(expected) or {x.get("path") for x in rows if isinstance(x,dict)}!=expected:raise ValueError("paths")
+            for row in rows:
+                if set(row)!={"path","sha256"} or row["path"] not in names or hashlib.sha256(read(row["path"])).hexdigest()!=row["sha256"]:raise ValueError("hash")
+        return []
+    except (KeyError,TypeError,ValueError,OSError):return [error]
+
+def service_history_report_preservation_errors(paths,read,spec):
+    error="Historical service notes or saved-report read scope invalid"
+    test="tests/test_history_report_preservation.py"
+    try:
+        hist=spec.get("workflow",{}).get("development_harness",{}).get("local_service_integration_history_20261030",{})
+        data=hist.get("service_01a3_1_9_136_unmerged_change_notes")
+        if data is None:return [error] if test in paths else []
+        expected=["10e8abd0fef81c11ef5dbc02fed313bb97cea9fc6b0a37c9c4233dc10de1768a","c99369c240876e9f06f2cc8e736ab6ec3e56f62d26ac357266690164f488e648","aa46fb2e7ca39f279bc22b017f077edcdbbaa19d0b3c8fb5b0308a0a0139ab69","7e3e10fc22c958b6c732eba8df0470b8db51350b5674a5e35b48f8a0e6ddbbca"]
+        canonical=lambda x:hashlib.sha256(json.dumps(x,ensure_ascii=False,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+        if not isinstance(data,dict) or data.get("status")!="HISTORICAL_ONLY_NOT_CURRENT_CI_APPROVAL" or data.get("source_spec_sha256")!="9df050a1631789ef54c09ad92def2be9aca79a931af1e08597c7a5514dfd219d" or data.get("entry_sha256")!=expected or not isinstance(data.get("entries"),list) or [canonical(x) for x in data["entries"]]!=expected:raise ValueError("history notes")
+        ci=hist["service_01a3_1_9_136_historical_records"]["scoped_CI_substitution_20261029"]
+        if canonical(ci)!="7d4c24aaababfa8c0066c2cbdfc2deaeabd7e5678eaa2e3d21de5f9c9ab7985b":raise ValueError("historical ci")
+        rows=[x for x in spec["operations"] if x.get("id")=="report.read"]
+        if len(rows)!=1 or hashlib.sha256(rows[0]["response_scope"].encode()).hexdigest()!="f51db04aeea3cc2d03717e689e1979b21dff52df54324888a3009a033fbaf9c1":raise ValueError("report scope")
+        test_binding=data.get("regression_test")
+        if not isinstance(test_binding,dict) or set(test_binding)!={"path","sha256"} or test_binding["path"]!=test or test not in paths or hashlib.sha256(read(test)).hexdigest()!=test_binding["sha256"]:raise ValueError("test binding")
+        return []
+    except (KeyError,TypeError,ValueError,AttributeError,OSError):return [error]
+
 def edge_registration_errors(paths,read,spec):
     """Structural preflight only; Deno parser and execution are required by the retained runner."""
     names=set(paths)
@@ -4554,7 +5061,7 @@ def edge_registration_errors(paths,read,spec):
         return [] if c is None or c.get("state")=="prepared" else ["Active Edge registry has no sources"]
     if not isinstance(c,dict) or c.get("format")!="jungsi.edge-contract/v1" or c.get("state")!="required":
         return ["Edge sources require an activated common registry"]
-    errors=[]
+    errors=foundation_graph_extension_errors(names,read,spec)
     if ts!=set(c.get("files",{})):errors.append("Edge registration coverage mismatch")
     for p,row in c.get("files",{}).items():
         if p not in names:errors.append("Registered Edge file absent: "+p);continue
@@ -4580,8 +5087,159 @@ def edge_document_text(spec):
       "\n\n같은 Git snapshot에서 기존 Python 전체 검산 다음에 Deno check/lint/fmt·"+
       str(c["unit_count"])+" 단위검산·Python–Deno "+str(c["oracle_count"])+" 합성 대조를 실행한다. 로컬 훅은 명시한 Deno 경로를 사용한다. CI는 edge-runtime.lock.json의 공식 Deno "+c["runtime"]["deno"]+" 배포 파일을 scripts/bootstrap_edge_runtime.py로 새 보존 폴더에 공급하고 아카이브 해시·크기·실행 버전을 검증한다. 기존 폴더 덮어쓰기·삭제·시스템 설치·최신 버전 대체는 없다. 미설치·비호환·파서 실패·결과 누락은 실패이고 skip 성공은 없다. foundation 소스가 없는 공통 준비 단계는 NOT_APPLICABLE_NO_FOUNDATION_SOURCE이며 실행 검산 완료가 아니다. 실행기 공급 영수증도 서비스 단위검산·oracle 통과를 대신하지 않는다. 기존 공개 Edge 소스는 현재 문서 동기화 색인으로 결속하며 foundation 선언·graph·단위검산·oracle 결과에 포함하지 않는다.")
 
+SERVICE_CANDIDATE_SHARED_FIXTURES = {
+    "service_end": frozenset({"tests/edge/synthetic_exam_pack.ts"}),
+    "service_p1": frozenset(['tests/edge/fixture.ts', 'tests/edge/synthetic_api_contract.ts', 'tests/edge/synthetic_history_qualification.ts', 'tests/edge/synthetic_history_snapshot.ts', 'tests/edge/synthetic_runtime_binding.ts']),
+}
+
+SERVICE_CANDIDATE_GROUPS = {
+    "p1_review": (["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs"], 80, ["node:assert/strict", "node:fs", "node:zlib"]),
+    "service_end": (["tests/service_end/" + name for name in (
+        "test_service_end_current_review.synthetic.ts", "test_service_end_entrypoints.synthetic.ts",
+        "test_service_end_error_schema.synthetic.ts", "test_service_end_http.synthetic.ts",
+        "test_service_end_official_display.synthetic.ts", "test_service_end_professional.synthetic.ts",
+        "test_service_end_runtime.synthetic.ts", "test_official_display_final_expiry.synthetic.ts")], 125, []),
+    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts'], 36, ["node:assert/strict", "node:fs", "node:zlib"]),
+    "search503": (["tests/search503/" + name for name in (
+        "test_combined_search503_end.synthetic.v5.mjs", "test_search503_stream_limits.synthetic.v4.mjs",
+        "test_search503_reader_unlock.synthetic.v3.mjs", "test_search503_final_error.synthetic.v2.mjs",
+        "test_current_public_key_index_immutable.synthetic.v2.mjs")], 48, ["node:assert/strict"]),
+}
+SERVICE_CANDIDATE_MANUAL_READS = {
+    "p1_review": ["tests/p1_review/fixtures/p1_public_registry_799.reference.json",
+                  "src/jungsi_touch/application/public_response_schemas.json"],
+    "service_end": [], "search503": [],
+    "service_p1": ["src/jungsi_touch/application/public_response_schemas.json"],
+}
+SERVICE_CANDIDATE_LAYERS = {
+    "domain": {"domain"}, "application": {"application", "domain"},
+    "infrastructure": {"application", "domain", "infrastructure"},
+    "edge_adapter": {"application", "domain", "infrastructure", "edge_adapter", "public_contract_json"},
+    "synthetic_fixture": {"application", "domain", "infrastructure", "edge_adapter", "synthetic_fixture", "public_contract_json", "node_builtin"},
+    "suite_test": {"application", "domain", "infrastructure", "edge_adapter", "synthetic_fixture", "public_contract_json", "node_builtin", "suite_test"},
+}
+
+def service_candidate_layer(path):
+    if path.startswith("node:"): return "node_builtin"
+    if path.startswith("tests/"): return "suite_test" if PurePosixPath(path).name.startswith("test_") else "synthetic_fixture"
+    if path == "supabase/functions/deno.json": return "runtime_config"
+    if path.startswith("src/jungsi_touch/application/") and path.endswith(".json"): return "public_contract_json"
+    if path.startswith("supabase/functions/_shared/jungsi/"):
+        value = path.split("/")[4]
+        if value in {"domain", "application", "infrastructure"}: return value
+        raise ValueError("unknown layer")
+    if path in {"supabase/functions/_shared/professional_support.ts", "supabase/functions/_shared/professional_budget_support.ts"}:
+        return "synthetic_fixture"
+    if path.endswith("_support.ts"): raise ValueError("unregistered support")
+    if path.startswith("supabase/functions/_shared/"): return "edge_adapter"
+    raise ValueError("unregistered layer")
+
+def service_candidate_suite_errors(paths, read, spec):
+    """Require each separate synthetic suite and its pinned local closure; never suppress existing gates."""
+    error = "Service candidate suite registration or local closure invalid"
+    prefixes = tuple("tests/" + name + "/" for name in SERVICE_CANDIDATE_GROUPS)
+    names = set(paths)
+    group_paths = {p for p in names if p.startswith(prefixes)}
+    backend = spec.get("backend_platform_contract", {})
+    ext = backend.get("service_candidate_suite_extension") if isinstance(backend, dict) else None
+    if ext is None:
+        return [error] if group_paths else []
+    try:
+        fields = {"format", "status", "manifest", "wrapper", "regression_test", "groups", "runtime_scope",
+                  "native_acceptance", "activation_status", "operating_writes"}
+        if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.service-candidate-suites/v1" or
+                ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["runtime_scope"] != "DENO_2_9_7_PORTABLE_CI_NOT_VERIFIED" or
+                ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
+                type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0): raise ValueError("suite status")
+        expected_files = {"manifest": "tests/review_suite_manifest.json", "wrapper": "tests/test_service_candidate_suites.py",
+                          "regression_test": "tests/test_service_candidate_registry.py"}
+        for key, path in expected_files.items():
+            item = ext[key]
+            if (not isinstance(item, dict) or set(item) != {"path", "sha256"} or item["path"] != path or path not in names or
+                    not isinstance(item["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", item["sha256"]) or
+                    hashlib.sha256(read(path)).hexdigest() != item["sha256"]): raise ValueError("bound guard file")
+        expected_groups = {name: {"roots": roots, "test_count": count} for name, (roots, count, _) in SERVICE_CANDIDATE_GROUPS.items()}
+        if ext["groups"] != expected_groups: raise ValueError("suite group metadata")
+        manifest = json.loads(read(expected_files["manifest"]))
+        if manifest.get("format") != "jungsi.review-suite-closure/v2" or manifest.get("review_only") is not True:
+            raise ValueError("manifest format")
+        if manifest.get("runtime") != {"deno_sha256": "e020f3e232bd16e33768dee528e5983349c962952051ced0a5d58ad42f5d9b33", "node_sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"}:
+            raise ValueError("runtime pin")
+        if set(manifest.get("suites", {})) != set(SERVICE_CANDIDATE_GROUPS): raise ValueError("suite names")
+        config = manifest.get("config")
+        if (not isinstance(config, dict) or set(config) != {"path", "sha256"} or
+                config.get("path") != "supabase/functions/deno.json" or config.get("path") not in names or
+                not isinstance(config.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", config["sha256"]) or
+                hashlib.sha256(read(config["path"])).hexdigest() != config["sha256"]): raise ValueError("suite config")
+        union_tests = set()
+        for name, (roots, count, allowed) in SERVICE_CANDIDATE_GROUPS.items():
+            suite = manifest["suites"][name]
+            if (suite.get("roots") != roots or type(suite.get("expected_count")) is not int or suite["expected_count"] != count or
+                    suite.get("allowed_builtins") != allowed or suite.get("manual_read_files") != SERVICE_CANDIDATE_MANUAL_READS[name]):
+                raise ValueError("suite roots or count")
+            sf, graphs, layers = suite["files"], suite["graphs"], suite["layers"]
+            if not isinstance(sf, dict) or not isinstance(graphs, dict) or set(graphs) != set(roots): raise ValueError("suite graph")
+            if sf.get("supabase/functions/deno.json") != config["sha256"]: raise ValueError("suite config hash")
+            if not isinstance(layers, dict) or set(layers) != {"files", "observed_layer_edges"}: raise ValueError("suite layers")
+            all_graph_files = set(); layer_edges = set()
+            for root in roots:
+                graph = graphs[root]
+                if not isinstance(graph, dict) or set(graph) != {"files", "builtins", "edges"}: raise ValueError("graph fields")
+                gf, builtins = graph["files"], graph["builtins"]
+                if not isinstance(gf, dict) or root not in gf or not isinstance(builtins, list) or len(set(builtins)) != len(builtins) or not set(builtins) <= set(allowed):
+                    raise ValueError("graph modules")
+                if any(sf.get(p) != h for p, h in gf.items()): raise ValueError("graph hash")
+                all_graph_files.update(gf)
+                for edge in graph["edges"]:
+                    if not isinstance(edge, list) or len(edge) != 3: raise ValueError("edge")
+                    source, raw, targets = edge
+                    if source not in gf or not isinstance(raw, str) or not raw.startswith((".", "node:")) or not isinstance(targets, list) or not targets:
+                        raise ValueError("edge source")
+                    for pair in targets:
+                        if not isinstance(pair, list) or len(pair) != 2 or pair[0] not in {"code", "type"}: raise ValueError("edge target")
+                        target = pair[1]
+                        if target not in gf and target not in builtins: raise ValueError("external edge")
+                        src, dst = service_candidate_layer(source), service_candidate_layer(target)
+                        if dst not in SERVICE_CANDIDATE_LAYERS.get(src, set()): raise ValueError("layer boundary")
+                        layer_edges.add((src, dst))
+            if set(sf) != all_graph_files | set(SERVICE_CANDIDATE_MANUAL_READS[name]) | {"supabase/functions/deno.json"}:
+                raise ValueError("closure coverage")
+            for path, digest in sf.items():
+                q = PurePosixPath(path)
+                if (not isinstance(path, str) or q.is_absolute() or ".." in q.parts or "\\" in path or ":" in path or
+                        path not in names or not isinstance(digest, str)): raise ValueError("closure source")
+                generated_route = "src/jungsi_touch/application/route_catalog.json"
+                if path == generated_route:
+                    if digest != "GENERATED_BY_SPEC_VIA_COMMON_GATE" or generated_files(spec, read=read).get(path) != read(path):
+                        raise ValueError("generated route drift")
+                elif not re.fullmatch(r"[0-9a-f]{64}", digest) or hashlib.sha256(read(path)).hexdigest() != digest:
+                    raise ValueError("closure source hash")
+                if path.startswith("tests/") and not path.startswith("tests/" + name + "/") and path not in SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset()):
+                    raise ValueError("test scope")
+                if path.startswith(prefixes): union_tests.add(path)
+            extra_fixtures = {p for p in sf if p.startswith("tests/") and not p.startswith("tests/" + name + "/")}
+            if extra_fixtures != set(SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset())):
+                raise ValueError("exact shared fixture set")
+            if layers["files"] != {p: service_candidate_layer(p) for p in sorted(sf)} or layers["observed_layer_edges"] != [list(x) for x in sorted(layer_edges)]:
+                raise ValueError("layer registry")
+        if union_tests != group_paths: raise ValueError("test inventory")
+        return []
+    except (KeyError, TypeError, ValueError, AttributeError, UnicodeError, OSError, json.JSONDecodeError):
+        return [error]
+
 def validate_content(paths,read,spec):
     errors=validate_spec(spec)
+    recovery,recovery_errors=recovery_input_registration(spec)
+    errors.extend(recovery_errors)
+    if recovery is None:
+        if set(RECOVERY_TEST_PATHS)&set(paths):errors.append("Incident recovery tests require exact registration")
+    else:
+        try:
+            bindings={b["path"]:b["sha256"] for b in recovery["source_bindings"]}
+            if any(p not in paths or hashlib.sha256(read(p)).hexdigest()!=h for p,h in bindings.items()):
+                raise ValueError("source hash")
+            verify_recovery_test_partition(read(RECOVERY_SAMEFILE_PATH))
+        except (KeyError,ValueError,UnicodeError,OSError):errors.append("Incident recovery selected source/test partition invalid")
     migration=spec.get("score_input_policy_contract",{})
     if migration.get("actual_migration_status")=="APPLIED_EMPTY_SCHEMA_NOT_ACTIVATED":
         evidence=migration.get("migration_evidence",{});sql_path=evidence.get("sql_path")
@@ -4591,8 +5249,19 @@ def validate_content(paths,read,spec):
     errors.extend(validate_professional_guide_snapshot(paths,read,spec))
     errors.extend(edge_registration_errors(paths,read,spec))
     names=set(paths)
+    auxiliary, auxiliary_errors = service_aux_registration(spec)
+    errors.extend(auxiliary_errors)
+    if auxiliary is not None:
+        regression = auxiliary["regression_test"]
+        if regression["path"] not in names or hashlib.sha256(read(regression["path"])).hexdigest() != regression["sha256"]:
+            errors.append("Service auxiliary guard regression source drift")
     errors.extend(validate_catalog(paths,read,spec))
     errors.extend(validate_public_response_registry(names,read,spec))
+    staged, staged_errors = service_staged_registration(spec, {p:hashlib.sha256(read(p)).hexdigest() for p in SERVICE_STAGED_TEST_PATHS if p in names} | ({"tests/test_service_staged_registration.py":hashlib.sha256(read("tests/test_service_staged_registration.py")).hexdigest()} if "tests/test_service_staged_registration.py" in names else {}))
+    errors.extend(staged_errors)
+    errors.extend(service_candidate_suite_errors(paths,read,spec))
+    errors.extend(native_seed_candidate_errors(paths,read,spec))
+    errors.extend(service_history_report_preservation_errors(paths,read,spec))
     transition=spec.get('supabase_operations_handoff_contract',{}).get('service_transition_contract',{})
     if transition.get('implementation_mode')=='explicit_prepared_default_unchanged':
         for path in transition.get('implementation_code_paths',[]):

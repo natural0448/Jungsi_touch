@@ -1,5 +1,13 @@
 /** Existing app-role head SELECT plus bounded private immutable object reads. No publisher writes. */
 import { AccessError } from "../application/access.ts";
+import { assertP1R27DeliveryMode } from "../application/p1_r27_delivery_mode.ts";
+import {
+  assertP1R27ConsumerGate,
+  bindP1R27ConsumerGate,
+  type P1R27ConsumerPins,
+} from "../application/p1_r27_consumer_gate.ts";
+import { detachedQualificationSnapshot } from "../application/history_field_qualification.ts";
+import { bindHistoricalReferencePublication } from "../application/history_reference_estimates.ts";
 import {
   type HistorySnapshotPort,
   type SnapshotPart,
@@ -49,6 +57,27 @@ export interface SnapshotResourceEnvelope {
   readonly maxReadBytes: number;
   readonly maxResultBytes: bigint;
   readonly runtimeMilliseconds: number;
+}
+/** Optional exact pins from separately approved server binding; never from request or current head. */
+export interface P1R27SourceTrust {
+  readonly pins: P1R27ConsumerPins;
+  readonly maxExtraBytes: number;
+  readonly maxIndexBytes: number;
+}
+/** Server-injected request-scoped proof from preverified consumer identity; never an HTTP claim.
+ * The implementation must synchronously verify the actual caller and approved build/contract.
+ * This port grants no identity or authorization by itself and may not perform I/O.
+ */
+export interface P1R27ConsumerAdmissionPort {
+  assertBoundConsumer(
+    input: Readonly<{
+      headSha256: string;
+      manifestSha256: string;
+      scopeSha256: string;
+      consumerBuildSha256: string;
+      consumerContractSha256: string;
+    }>,
+  ): void;
 }
 export interface SnapshotHeadPort {
   latest(artifactKind: string, lineage: string): Promise<SnapshotHeadRow | null>;
@@ -161,6 +190,18 @@ export function parseBoundedSnapshotJson(
     fail();
   }
 }
+/** Cancellation must not delay or replace the original bounded-read failure. */
+function cancelSnapshotStream(target: { cancel: () => Promise<void> } | null): void {
+  if (!target) return;
+  try {
+    void target.cancel().catch(() => {});
+  } catch { /* best effort */ }
+}
+function releaseSnapshotReader(reader: ReadableStreamDefaultReader<Uint8Array>): void {
+  try {
+    reader.releaseLock();
+  } catch { /* best effort */ }
+}
 export async function readBoundedSnapshotStream(
   stream: ReadableStream<Uint8Array>,
   limit: number,
@@ -172,11 +213,11 @@ export async function readBoundedSnapshotStream(
   const aborted = new Promise<never>((_resolve, reject) => rejectAbort = reject);
   const abort = () => {
     rejectAbort?.(new AccessError("snapshot_unavailable", 503));
-    void reader.cancel().catch(() => {});
+    cancelSnapshotStream(reader);
   };
   if (signal?.aborted) {
-    await reader.cancel();
-    reader.releaseLock();
+    cancelSnapshotStream(reader);
+    releaseSnapshotReader(reader);
     fail();
   }
   signal?.addEventListener("abort", abort, { once: true });
@@ -185,7 +226,7 @@ export async function readBoundedSnapshotStream(
       const chunk = await (signal ? Promise.race([reader.read(), aborted]) : reader.read());
       if (chunk.done) break;
       if (!(chunk.value instanceof Uint8Array) || chunk.value.length > limit - total) {
-        await reader.cancel();
+        cancelSnapshotStream(reader);
         fail();
       }
       total += chunk.value.length;
@@ -193,7 +234,7 @@ export async function readBoundedSnapshotStream(
     }
   } finally {
     signal?.removeEventListener("abort", abort);
-    reader.releaseLock();
+    releaseSnapshotReader(reader);
   }
   const bytes = new Uint8Array(total);
   let offset = 0;
@@ -216,20 +257,59 @@ function pin(raw: unknown, b: SnapshotTrustBinding): Pin {
     sha256: hash(r.sha256),
   };
 }
+/** Stop waiting on an abort even if a faulty fetcher ignores its signal. */
+function boundedSnapshotResponse(work: Promise<Response>, signal: AbortSignal): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const abort = () => {
+      if (!settled) {
+        settled = true;
+        reject(new AccessError("snapshot_unavailable", 503));
+      }
+    };
+    signal.addEventListener("abort", abort, { once: true });
+    if (signal.aborted) abort();
+    Promise.resolve(work).then((response) => {
+      signal.removeEventListener("abort", abort);
+      if (settled || signal.aborted) {
+        abort();
+        // Best effort only: a faulty/locked transport may ignore cancellation.
+        try {
+          cancelSnapshotStream(response?.body ?? null);
+        } catch { /* best effort */ }
+        return;
+      }
+      settled = true;
+      resolve(response);
+    }, (error) => {
+      signal.removeEventListener("abort", abort);
+      if (!settled) {
+        settled = true;
+        reject(error);
+      }
+    });
+  });
+}
+type SelectedSnapshot = {
+  publication: SnapshotPublication;
+  headSha256: string;
+  releaseVersion: string;
+  body?: NativeObject;
+  bodySemanticSha256?: string;
+  gzip?: Uint8Array<ArrayBuffer>;
+  part?: SnapshotPart;
+};
 export class HistorySnapshotSource implements HistorySnapshotPort {
-  private selected?: {
-    publication: SnapshotPublication;
-    headSha256: string;
-    releaseVersion: string;
-    body?: NativeObject;
-    bodySemanticSha256?: string;
-    gzip?: Uint8Array<ArrayBuffer>;
-    part?: SnapshotPart;
-  };
+  private selected?: SelectedSnapshot;
+  private selectionFlight?: Promise<SelectedSnapshot>;
+  private failed = false;
+  private readState: "available" | "reserved" | "complete" | "failed" = "available";
   private readonly binding: SnapshotTrustBinding;
   private readonly storage: StorageArtifactSettings;
   private readonly started = performance.now();
   private readonly timeoutMs: number;
+  private readonly r27Trust?: P1R27SourceTrust;
+  private readonly r27Admission?: P1R27ConsumerAdmissionPort;
   constructor(
     private readonly heads: SnapshotHeadPort,
     binding: SnapshotTrustBinding,
@@ -237,6 +317,8 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
     private readonly clock: RequestClockPort,
     envelope: SnapshotResourceEnvelope,
     private readonly fetcher: typeof fetch = fetch,
+    r27Trust?: P1R27SourceTrust,
+    r27Admission?: P1R27ConsumerAdmissionPort,
   ) {
     new SupabaseArtifactClient(storage, fetcher);
     if (
@@ -281,12 +363,63 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
     });
     this.storage = Object.freeze({ ...storage, limits: Object.freeze({ ...storage.limits }) });
     this.timeoutMs = Math.min(storage.limits.requestTimeoutMs, envelope.runtimeMilliseconds);
+    this.r27Admission = r27Admission;
+    if (r27Trust !== undefined) {
+      const frozen = detachedQualificationSnapshot(r27Trust) as P1R27SourceTrust;
+      const keys = [
+        "headSha256",
+        "manifestSha256",
+        "sourceHeadSha256",
+        "scopeSha256",
+        "indexSha256",
+        "coverageSha256",
+        "globalReceiptSha256",
+        "consumerReceiptSha256",
+        "consumerBuildSha256",
+        "consumerContractSha256",
+      ];
+      if (
+        !frozen || Object.keys(frozen).length !== 3 || !frozen.pins ||
+        Object.keys(frozen.pins).length !== keys.length ||
+        keys.some((k) =>
+          !Object.hasOwn(frozen.pins, k) ||
+          !HASH.test(String((frozen.pins as unknown as Record<string, unknown>)[k]))
+        ) ||
+        frozen.pins.scopeSha256 !== binding.scopeSha256 ||
+        !Number.isSafeInteger(frozen.maxExtraBytes) || frozen.maxExtraBytes < 1 ||
+        frozen.maxExtraBytes > envelope.maxReadBytes ||
+        !Number.isSafeInteger(frozen.maxIndexBytes) || frozen.maxIndexBytes < 1 ||
+        frozen.maxIndexBytes > binding.maxMetadataBytes || frozen.maxIndexBytes > 8388608
+      ) fail();
+      this.r27Trust = frozen;
+    }
   }
   private live(): void {
     if (
       this.clock.nowUtc() >= this.binding.expiresAtUtc ||
       performance.now() - this.started >= this.timeoutMs
     ) fail();
+  }
+  /** Bound this request's wait; the head port has no cancellation contract. */
+  private async latestHead(): Promise<SnapshotHeadRow | null> {
+    this.live();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const deadline = new Promise<never>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new AccessError("snapshot_unavailable", 503)),
+        Math.max(1, this.timeoutMs - (performance.now() - this.started)),
+      );
+    });
+    try {
+      const row = await Promise.race([
+        this.heads.latest(this.binding.artifactKind, this.binding.lineage),
+        deadline,
+      ]);
+      this.live();
+      return row;
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
   }
   private async get(
     path: string,
@@ -302,18 +435,22 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
       );
     const combined = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
     try {
-      const r = await this.fetcher(url, {
-        method: "GET",
-        headers: { apikey: this.storage.secretKey, Accept: "application/octet-stream" },
-        cache: "no-store",
-        redirect: "error",
-        signal: combined,
-      });
+      if (combined.aborted) fail();
+      const r = await boundedSnapshotResponse(
+        this.fetcher(url, {
+          method: "GET",
+          headers: { apikey: this.storage.secretKey, Accept: "application/octet-stream" },
+          cache: "no-store",
+          redirect: "error",
+          signal: combined,
+        }),
+        combined,
+      );
       if (
         r.status !== 200 || r.redirected || r.url !== url || !r.body ||
         r.headers.has("Content-Encoding") && r.headers.get("Content-Encoding") !== "identity"
       ) {
-        await r.body?.cancel();
+        cancelSnapshotStream(r.body);
         fail();
       }
       const length = r.headers.get("Content-Length");
@@ -321,7 +458,7 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         length !== null &&
         (!/^(0|[1-9][0-9]{0,15})$/.test(length) || BigInt(length) > BigInt(limit))
       ) {
-        await r.body.cancel();
+        cancelSnapshotStream(r.body);
         fail();
       }
       const bytes = await readBoundedSnapshotStream(r.body, limit, combined);
@@ -409,7 +546,10 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
     { publication: SnapshotPublication; headSha256: string; releaseVersion: string }
   > {
     this.live();
-    const b = this.binding, row = await this.heads.latest(b.artifactKind, b.lineage);
+    const b = this.binding, loaded = await this.latestHead();
+    const row = this.r27Trust && loaded
+      ? detachedQualificationSnapshot(loaded) as unknown as SnapshotHeadRow
+      : loaded;
     if (
       !row || row.reviewStatus !== "approved" || !HASH.test(row.contentSha256) ||
       new TextEncoder().encode(row.metadataText).length > b.maxMetadataBytes
@@ -493,7 +633,12 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
     if (
       m.format !== "jungsi.history-snapshot-manifest/v1" || m.status !== "approved" ||
       m.source_head_sha256 !== h.source_head_sha256 || m.scope_sha256 !== b.scopeSha256 ||
-      m.schema_version !== "jungsi.history-snapshot/v1" ||
+      (m.schema_version !== "jungsi.history-snapshot/v1" &&
+        (m.schema_version !== "jungsi.history-snapshot/v2" || !this.r27Trust ||
+          !this.r27Admission ||
+          this.r27Trust.pins.headSha256 !== row.contentSha256 ||
+          this.r27Trust.pins.manifestSha256 !== manifestPin.sha256 ||
+          this.r27Trust.pins.sourceHeadSha256 !== h.source_head_sha256)) ||
       m.normalization_rules_version !== b.normalizationRulesVersion ||
       m.normalization_rules_sha256 !== b.normalizationRulesSha256 ||
       m.selection_rules_version !== b.selectionRulesVersion ||
@@ -519,6 +664,8 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         "publisher_ref",
         "reviewer_ref",
         ...(Object.hasOwn(reviewRaw, "field_qualification") ? ["field_qualification"] : []),
+        ...(Object.hasOwn(reviewRaw, "historical_references") ? ["historical_references"] : []),
+        ...(m.schema_version === "jungsi.history-snapshot/v2" ? ["r27_gate"] : []),
       ],
     );
     if (
@@ -537,6 +684,14 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         review.field_qualification,
         manifestPin.sha256,
         String(h.source_head_sha256),
+      )
+      : undefined;
+    const historicalReferences = Object.hasOwn(review, "historical_references")
+      ? bindHistoricalReferencePublication(
+        review.historical_references,
+        manifestPin.sha256,
+        String(h.source_head_sha256),
+        b.scopeSha256,
       )
       : undefined;
     const counts = object(m.counts, [
@@ -583,54 +738,148 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         if (m.source_as_of > String(m.generated_at).slice(0, 10)) fail();
       } else if (time(m.source_as_of) > generated) fail();
     }
+    let publication: SnapshotPublication = Object.freeze({
+      snapshotId: id(m.snapshot_id),
+      publicationSha256: manifestPin.sha256,
+      sourceHeadSha256: String(h.source_head_sha256),
+      scopeSha256: b.scopeSha256,
+      generatedAt: m.generated_at as string,
+      sourceAsOf: m.source_as_of as string | null,
+      schemaVersion: m.schema_version as SnapshotPublication["schemaVersion"],
+      normalizationRulesVersion: b.normalizationRulesVersion,
+      selectionRulesVersion: b.selectionRulesVersion,
+      expiresAtUtc: expires,
+      counts: Object.freeze(c),
+      full,
+      parts: Object.freeze(parts),
+      ...(fieldQualification ? { fieldQualification } : {}),
+      ...(historicalReferences ? { historicalReferences } : {}),
+    });
+    if (publication.schemaVersion === "jungsi.history-snapshot/v2") {
+      const trust = this.r27Trust;
+      if (
+        !trust || !this.r27Admission || typeof this.r27Admission.assertBoundConsumer !== "function"
+      ) fail();
+      const admission: unknown = this.r27Admission.assertBoundConsumer(Object.freeze({
+        headSha256: trust.pins.headSha256,
+        manifestSha256: trust.pins.manifestSha256,
+        scopeSha256: trust.pins.scopeSha256,
+        consumerBuildSha256: trust.pins.consumerBuildSha256,
+        consumerContractSha256: trust.pins.consumerContractSha256,
+      }));
+      if (admission !== undefined) {
+        void Promise.resolve(admission).catch(() => {});
+        fail();
+      }
+      assertP1R27DeliveryMode(publication);
+      const d = object(review.r27_gate, [
+        "format",
+        "scope_index",
+        "global_receipt",
+        "consumer_receipt",
+      ]);
+      if (d.format !== "jungsi.p1-r27-review-gate/v1") fail();
+      const index = pin(d.scope_index, b),
+        global = pin(d.global_receipt, b),
+        consumer = pin(d.consumer_receipt, b);
+      if (
+        index.sha256 !== trust.pins.indexSha256 ||
+        global.sha256 !== trust.pins.globalReceiptSha256 ||
+        consumer.sha256 !== trust.pins.consumerReceiptSha256 || index.bytes > trust.maxIndexBytes ||
+        global.bytes > 65536 || consumer.bytes > 65536 ||
+        new Set([index.objectKey, global.objectKey, consumer.objectKey]).size !== 3 ||
+        index.bytes + global.bytes + consumer.bytes > trust.maxExtraBytes
+      ) fail();
+      const oldMemory = 4n * BigInt(b.maxGzipBytes) + 12n * BigInt(b.maxDecodedBytes) +
+        2048n * BigInt(b.maxRows) + 1024n * BigInt(b.maxParts) + 8n * BigInt(b.maxMetadataBytes);
+      const extraMemory = 8n * BigInt(index.bytes) + 8n * BigInt(global.bytes + consumer.bytes);
+      if (oldMemory + extraMemory > BigInt(b.maxInMemoryBytes)) fail();
+      // Exactly three bounded pinned metadata objects per source instance; never per part or row.
+      const group = new AbortController();
+      let objects: [Uint8Array<ArrayBuffer>, Uint8Array<ArrayBuffer>, Uint8Array<ArrayBuffer>];
+      try {
+        objects = await Promise.all([
+          this.bytes(index, group.signal),
+          this.bytes(global, group.signal),
+          this.bytes(consumer, group.signal),
+        ]);
+      } finally {
+        group.abort();
+      }
+      const [indexBytes, globalBytes, consumerBytes] = objects;
+      const r27Gate = await bindP1R27ConsumerGate(
+        publication,
+        indexBytes,
+        globalBytes,
+        consumerBytes,
+        trust.pins,
+        row.contentSha256,
+        this.clock.nowUtc(),
+      );
+      const r27ScopeIndex = await assertP1R27ConsumerGate(r27Gate, publication);
+      publication = Object.freeze({ ...publication, r27ScopeIndex, r27Gate });
+    }
     return {
-      publication: Object.freeze({
-        snapshotId: id(m.snapshot_id),
-        publicationSha256: manifestPin.sha256,
-        sourceHeadSha256: String(h.source_head_sha256),
-        scopeSha256: b.scopeSha256,
-        generatedAt: m.generated_at as string,
-        sourceAsOf: m.source_as_of as string | null,
-        schemaVersion: "jungsi.history-snapshot/v1",
-        normalizationRulesVersion: b.normalizationRulesVersion,
-        selectionRulesVersion: b.selectionRulesVersion,
-        expiresAtUtc: expires,
-        counts: Object.freeze(c),
-        full,
-        parts: Object.freeze(parts),
-        ...(fieldQualification ? { fieldQualification } : {}),
-      }),
+      publication,
       headSha256: row.contentSha256,
       releaseVersion: row.releaseVersion,
     };
   }
   async current(): Promise<SnapshotPublication> {
-    if (!this.selected) this.selected = await this.load();
-    this.live();
-    return this.selected.publication;
+    if (this.failed) fail();
+    try {
+      if (!this.selectionFlight) {
+        // Store the flight before invoking any port; rejection stays request-local and fail-closed.
+        this.selectionFlight = Promise.resolve().then(() => this.load()).then((selection) => {
+          this.selected = selection;
+          return selection;
+        });
+      }
+      const selection = await this.selectionFlight;
+      if (this.failed) fail();
+      this.live();
+      return selection.publication;
+    } catch (error) {
+      this.failed = true;
+      throw error;
+    }
   }
   async assertCurrent(p: SnapshotPublication): Promise<void> {
-    this.live();
-    if (!this.selected || this.selected.publication !== p) fail();
-    const row = await this.heads.latest(this.binding.artifactKind, this.binding.lineage);
-    if (
-      !row || row.reviewStatus !== "approved" || row.contentSha256 !== this.selected.headSha256 ||
-      row.releaseVersion !== this.selected.releaseVersion ||
-      await nativeJsonSha256(
-          parseBoundedSnapshotJson(
-            new TextEncoder().encode(row.metadataText),
-            this.binding.maxMetadataBytes,
-            this.binding.maxDepth,
-          ),
-        ) !== row.contentSha256
-    ) throw new AccessError("publication_changed", 409);
-    if (p.expiresAtUtc <= this.clock.nowUtc()) fail();
+    if (this.failed) fail();
+    try {
+      this.live();
+      const selected = this.selected;
+      if (!selected || selected.publication !== p) fail();
+      const row = await this.latestHead();
+      this.live();
+      if (this.failed || this.selected !== selected) fail();
+      if (
+        !row || row.reviewStatus !== "approved" || row.contentSha256 !== selected.headSha256 ||
+        row.releaseVersion !== selected.releaseVersion ||
+        await nativeJsonSha256(
+            parseBoundedSnapshotJson(
+              new TextEncoder().encode(row.metadataText),
+              this.binding.maxMetadataBytes,
+              this.binding.maxDepth,
+            ),
+          ) !== row.contentSha256
+      ) throw new AccessError("publication_changed", 409);
+      this.live();
+      if (this.failed || p.expiresAtUtc <= this.clock.nowUtc()) fail();
+    } catch (error) {
+      this.failed = true;
+      throw error;
+    }
   }
   async read(p: SnapshotPublication, part: SnapshotPart): Promise<NativeObject> {
+    const selected = this.selected;
     if (
-      !this.selected || this.selected.publication !== p ||
-      part !== p.full && !p.parts.includes(part) || this.selected.body
+      this.failed || !selected || selected.publication !== p ||
+      part !== p.full && !p.parts.includes(part) || this.readState !== "available"
     ) fail();
+    // Reserve before the first await; concurrent or failed attempts cannot select another part.
+    this.readState = "reserved";
+    let succeeded = false;
     const controller = new AbortController(),
       timer = setTimeout(
         () => controller.abort(),
@@ -662,13 +911,28 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
         part,
         p,
       );
-      this.selected.body = body;
-      this.selected.bodySemanticSha256 = await nativeJsonSha256(body);
-      this.selected.gzip = gzip;
-      this.selected.part = part;
+      const bodySemanticSha256 = await nativeJsonSha256(body);
       await this.assertCurrent(p);
+      // Recheck after the final await and commit without another asynchronous gap.
+      if (
+        this.failed || this.readState !== "reserved" || this.selected !== selected ||
+        selected.publication !== p
+      ) fail();
+      this.live();
+      if (p.expiresAtUtc <= this.clock.nowUtc()) fail();
+      // Publish the complete representation only after all asynchronous checks succeed.
+      selected.body = body;
+      selected.bodySemanticSha256 = bodySemanticSha256;
+      selected.gzip = gzip;
+      selected.part = part;
+      this.readState = "complete";
+      succeeded = true;
       return body;
     } finally {
+      if (!succeeded) {
+        this.readState = "failed";
+        this.failed = true;
+      }
       clearTimeout(timer);
     }
   }
@@ -679,15 +943,30 @@ export class HistorySnapshotSource implements HistorySnapshotPort {
     { bytes: Uint8Array<ArrayBuffer>; etag: string; snapshotId: string; publicationSha256: string }
   > {
     const s = this.selected;
-    if (!s?.body || !s.gzip || !s.part || await nativeJsonSha256(result) !== s.bodySemanticSha256) {
+    if (
+      this.failed || !s?.body || !s.gzip || !s.part ||
+      await nativeJsonSha256(result) !== s.bodySemanticSha256
+    ) {
       fail();
     }
     await this.assertCurrent(s.publication);
-    return {
-      bytes: Uint8Array.from(s.gzip),
-      etag: '"' + s.part.gzipSha256 + '"',
-      snapshotId: s.publication.snapshotId,
-      publicationSha256: s.publication.publicationSha256,
-    };
+    try {
+      // The captured representation and deadline must still hold after the final await.
+      if (
+        this.failed || this.readState !== "complete" || this.selected !== s ||
+        !s.body || !s.gzip || !s.part
+      ) fail();
+      this.live();
+      if (s.publication.expiresAtUtc <= this.clock.nowUtc()) fail();
+      return {
+        bytes: Uint8Array.from(s.gzip),
+        etag: '"' + s.part.gzipSha256 + '"',
+        snapshotId: s.publication.snapshotId,
+        publicationSha256: s.publication.publicationSha256,
+      };
+    } catch (error) {
+      this.failed = true;
+      throw error;
+    }
   }
 }

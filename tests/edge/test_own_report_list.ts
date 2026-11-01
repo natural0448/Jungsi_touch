@@ -5,6 +5,7 @@ import {
   OwnReportListService,
 } from "../../supabase/functions/_shared/jungsi/application/own_report_list.ts";
 import { OwnReportCursor } from "../../supabase/functions/_shared/jungsi/infrastructure/own_report_cursor.ts";
+import { PublicResponseProjection } from "../../supabase/functions/_shared/jungsi/application/public_response.ts";
 import { assert, equal } from "./fixture.ts";
 const OWNER = "00000000-0000-0000-0000-000000000001",
   OTHER = "00000000-0000-0000-0000-000000000002";
@@ -20,6 +21,8 @@ const row = (id: string, time = NOW - 1n): OwnReportListRow => ({
   reportOwner: OWNER,
   profileOwner: OWNER,
   examId: "SYNTHETIC-exam",
+  stage: "provisional",
+  isCurrent: true,
   revision: 2,
   updatedAtUtc: time,
 });
@@ -60,8 +63,10 @@ Deno.test("own report list projects only own summaries with bounded lookahead", 
   assert(typeof result.next_cursor === "string");
   equal(Object.keys(result.items[0]).sort(), [
     "exam_id",
+    "is_current",
     "report_id",
     "report_version",
+    "stage",
     "updated_at",
   ]);
   assert(!JSON.stringify(result).includes(OWNER));
@@ -172,6 +177,9 @@ Deno.test("own report list fails closed on foreign, duplicate and out-of-order r
       [row("SYNTHETIC-a"), row("SYNTHETIC-a")],
       [row("SYNTHETIC-a"), row("SYNTHETIC-b")],
       [{ ...row("SYNTHETIC-a"), revision: 0 }],
+      [{ ...row("SYNTHETIC-a"), stage: "bad" as never }],
+      [{ ...row("SYNTHETIC-a"), stage: null, isCurrent: true }],
+      [{ ...row("SYNTHETIC-a"), isCurrent: "false" as never }],
       [row("SYNTHETIC-a", NOW + 1n)],
     ]
   ) {
@@ -180,5 +188,131 @@ Deno.test("own report list fails closed on foreign, duplicate and out-of-order r
       "storage_result_invalid",
       503,
     );
+  }
+});
+
+Deno.test("own report list keeps independent stage current flags and unknown legacy state", async () => {
+  const records: OwnReportListRow[] = [
+    { ...row("SYNTHETIC-c"), stage: "final", isCurrent: true },
+    { ...row("SYNTHETIC-b"), stage: "provisional", isCurrent: true },
+    { ...row("SYNTHETIC-a"), stage: null, isCurrent: null },
+  ];
+  const result = await fixture(records).service.execute(session, {});
+  equal(result.items.map(({ stage, is_current }) => [stage, is_current]), [
+    ["final", true],
+    ["provisional", true],
+    [null, null],
+  ]);
+});
+
+/** Synthetic closed contract; the repository registry has its own Python projection checks. */
+function ownListProjection(): PublicResponseProjection {
+  const contract = "backend_platform_contract.dto_schemas.own_report_list";
+  const object = (properties: Record<string, unknown>, required: string[]) => ({
+    type: "object",
+    nullable: false,
+    properties,
+    required,
+    optional: [],
+  });
+  const item = object({
+    report_id: { type: "string", nullable: false },
+    exam_id: { type: "string", nullable: true },
+    report_version: { type: "integer", nullable: false },
+    updated_at: { type: "string", nullable: false },
+    stage: { type: "string", nullable: true, enum: ["mock", "provisional", "final"] },
+    is_current: { type: "boolean", nullable: true },
+  }, ["report_id", "exam_id", "report_version", "updated_at", "stage", "is_current"]);
+  const list = object({
+    format: { type: "string", nullable: false, enum: ["jungsi.own-report-list/v1"] },
+    items: { type: "array", nullable: false, items: item },
+    next_cursor: { type: "string", nullable: true },
+    has_more: { type: "boolean", nullable: false },
+  }, ["format", "items", "next_cursor", "has_more"]);
+  const root = { ref: "own_report_list", nullable: false };
+  return new PublicResponseProjection({
+    format: "jungsi.public-response-schemas/v1",
+    schemas: {
+      own_report_list: list,
+      unused: { type: "string", nullable: false },
+    },
+    operations: [{
+      id: "report.list-own",
+      contract_ref: contract,
+      roots: { standard: root, paid: root },
+    }],
+    auxiliary_roots: {
+      error: { ref: "unused", nullable: false },
+      readiness: { ref: "unused", nullable: false },
+    },
+  }, [{ id: "report.list-own", contract_ref: contract }]);
+}
+function tierSession(tier: "standard" | "paid") {
+  return tier === "paid" ? { ...session, tier, paidUntilUtc: NOW + 1000000n } : session;
+}
+Deno.test("own report list preserves present all-null current flags in JSON and role projection", async () => {
+  const records: OwnReportListRow[] = [
+    { ...row("SYNTHETIC-b"), stage: "final", isCurrent: null },
+    { ...row("SYNTHETIC-a", NOW - 2n), examId: null, stage: null, isCurrent: null },
+  ];
+  for (const tier of ["standard", "paid"] as const) {
+    const result = await fixture(records).service.execute(tierSession(tier), {});
+    const projected = ownListProjection().project("report.list-own", tier, result);
+    for (
+      const wire of [JSON.parse(JSON.stringify(result)), JSON.parse(JSON.stringify(projected))]
+    ) {
+      equal(wire.items.length, 2);
+      equal(wire.items.map((item: { stage: unknown }) => item.stage), ["final", null]);
+      for (const item of wire.items) {
+        assert(Object.hasOwn(item, "is_current"));
+        equal(item.is_current, null);
+      }
+    }
+  }
+});
+Deno.test("own report list preserves mixed current flags across exams and stages", async () => {
+  const records: OwnReportListRow[] = [
+    { ...row("SYNTHETIC-e"), examId: "SYNTHETIC-exam-A", stage: "final", isCurrent: true },
+    {
+      ...row("SYNTHETIC-d", NOW - 2n),
+      examId: "SYNTHETIC-exam-A",
+      stage: "provisional",
+      isCurrent: true,
+    },
+    {
+      ...row("SYNTHETIC-c", NOW - 3n),
+      examId: "SYNTHETIC-exam-A",
+      stage: "final",
+      isCurrent: false,
+    },
+    {
+      ...row("SYNTHETIC-b", NOW - 4n),
+      examId: "SYNTHETIC-exam-B",
+      stage: "provisional",
+      isCurrent: null,
+    },
+    { ...row("SYNTHETIC-a", NOW - 5n), examId: "SYNTHETIC-exam-C", stage: null, isCurrent: null },
+  ];
+  const expected = [
+    ["SYNTHETIC-e", "SYNTHETIC-exam-A", "final", true],
+    ["SYNTHETIC-d", "SYNTHETIC-exam-A", "provisional", true],
+    ["SYNTHETIC-c", "SYNTHETIC-exam-A", "final", false],
+    ["SYNTHETIC-b", "SYNTHETIC-exam-B", "provisional", null],
+    ["SYNTHETIC-a", "SYNTHETIC-exam-C", null, null],
+  ];
+  for (const tier of ["standard", "paid"] as const) {
+    const result = await fixture(records).service.execute(tierSession(tier), {});
+    const projected = ownListProjection().project("report.list-own", tier, result);
+    for (
+      const wire of [JSON.parse(JSON.stringify(result)), JSON.parse(JSON.stringify(projected))]
+    ) {
+      equal(
+        wire.items.map((
+          item: { report_id: unknown; exam_id: unknown; stage: unknown; is_current: unknown },
+        ) => [item.report_id, item.exam_id, item.stage, item.is_current]),
+        expected,
+      );
+      assert(wire.items.every((item: object) => Object.hasOwn(item, "is_current")));
+    }
   }
 });

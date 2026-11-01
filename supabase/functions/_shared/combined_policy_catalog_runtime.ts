@@ -1,3 +1,4 @@
+/** REVIEW ONLY: isolated 799 wiring candidate; not a deployed 859c source. */
 /** Explicit combined-policy20 factory. Exact14 and read-view17 factories remain separate. */
 import { AccessError } from "./jungsi/application/access.ts";
 import {
@@ -24,6 +25,12 @@ import {
 } from "./current_public_catalog_sql.ts";
 import { CurrentPublicMetadataKeyIndex } from "./current_public_key_index.ts";
 import { currentPublicKeyObjectReader } from "./current_public_key_storage.ts";
+import {
+  ObservedCurrentPublicCatalogService,
+  observeKeySelection,
+  SearchDiagnostic,
+  type ServerOnlySink,
+} from "./search_failure_diagnostic.ts";
 function createBoundCatalogService(
   data: CatalogDataPort,
   clock: RequestClockPort,
@@ -32,9 +39,11 @@ function createBoundCatalogService(
   context: {
     binding(): Promise<ApprovedRuntimeBinding>;
     controls(): Promise<{ fetcher: typeof fetch }>;
+    searchDiagnostic?: ServerOnlySink;
   },
   memberJson = false,
 ): CurrentPublicCatalogService {
+  const trace = new SearchDiagnostic(context.searchDiagnostic);
   let verified: ReturnType<typeof verifyPublicCatalogDescriptor> | undefined,
     cipher: CurrentPublicCatalogCursor | undefined,
     reader: CurrentPublicCatalogSql | undefined;
@@ -85,14 +94,17 @@ function createBoundCatalogService(
       context.binding(),
       context.controls(),
     ]);
-    const index = new CurrentPublicMetadataKeyIndex({
-      requiredFormat: "jungsi.current-public-key-index/v3",
-      root: descriptor.key_index,
-      metadataSha256: descriptor.metadata_sha256,
-      guideCommandStateSha256: await nativeJsonSha256(descriptor.guide_command_state),
-      admissionHead: descriptor.admission_head,
-      coverageReceiptSha256: descriptor.coverage_receipt_sha256,
-    }, currentPublicKeyObjectReader(binding, controls.fetcher));
+    const index = observeKeySelection(
+      new CurrentPublicMetadataKeyIndex({
+        requiredFormat: "jungsi.current-public-key-index/v3",
+        root: descriptor.key_index,
+        metadataSha256: descriptor.metadata_sha256,
+        guideCommandStateSha256: await nativeJsonSha256(descriptor.guide_command_state),
+        admissionHead: descriptor.admission_head,
+        coverageReceiptSha256: descriptor.coverage_receipt_sha256,
+      }, currentPublicKeyObjectReader(binding, controls.fetcher)),
+      trace,
+    );
     return reader = new CurrentPublicCatalogSql(sql(), load, clock, index);
   };
   const current: CurrentPublicCatalogPort = {
@@ -110,7 +122,7 @@ function createBoundCatalogService(
     seal: (...args) => key().seal(...args),
     open: (...args) => key().open(...args),
   };
-  return new CurrentPublicCatalogService(data, current, clock, cursor);
+  return new ObservedCurrentPublicCatalogService(data, current, clock, cursor, trace);
 }
 
 export function createCombinedPolicyCatalogService(

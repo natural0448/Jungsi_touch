@@ -218,6 +218,9 @@ export class NativeDataProvider
   }
   /** Decode the explicit payload scope; full readiness retains every selected release check. */
   async preflight(): Promise<NativeObject> {
+    return await this.withScoringBatch(() => this.preflightSelected());
+  }
+  private async preflightSelected(): Promise<NativeObject> {
     try {
       await this.assertCurrentSelection(true);
       const identities = this.selection.identities();

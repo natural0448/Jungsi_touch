@@ -1,3 +1,4 @@
+import { admissionMillis } from "./jungsi/application/service_end_admission.ts";
 /** Application-owned ports and closed DTO mapping. No SQL, Auth SDK or env imports. */
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type Row = Record<string, Json>;
@@ -27,6 +28,7 @@ export const HISTORY_FIELDS = [...OFFERING_FIELDS, 'metric_name', 'metric_defini
 export const DB_FIELDS = ['release_id', 'result_id', 'academic_year', 'school_id', 'university_code', 'university', 'recruit_group', 'recruit_group_raw', 'department', 'track', 'offering_pk', 'anchor_2027_pks', 'metric_kind', 'metric_value_literal', 'metric_value_numeric', 'metric_value_json_type', 'cohort', 'statistic_label', 'active_service', 'source_path', 'source_sha256', 'source_location', 'source_review_status', 'original_record_locator', 'field_presence_types', 'row_fingerprint', 'curation_release_id', 'curation_fields', 'curation_evidence'];
 export const GUARD_FIELDS = ['guard_active_curation_release_id','guard_school_source_school_id','guard_school_after_row_fingerprint'];
 const SAFE_ERRORS: Record<string, number> = {
+  service_ended:403,
   official_history_scope_unverified:503,official_history_db_unavailable:503,official_history_runtime_role_unverified:503,
   review_subject_not_allowed:403,display_operation_not_supported:503,security_policy_unavailable:503,
   relay_authentication_failed:403,authentication_required:401,auth_unavailable:503,entitlement_unavailable:503,
@@ -274,7 +276,7 @@ async function sameRelay(a: string, b: string) { const [x,y] = await Promise.all
 export function createOfficialHistoryDisplayHandler(ports: OfficialHistoryPorts, transport: DisplayTransport): (request: Request) => Promise<Response> {
   return async (request) => {
     const requestId = crypto.randomUUID().replace(/-/g,'');
-    const response = (body: Row, status = 200) => new Response(JSON.stringify(body), {status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store','X-Request-ID':requestId,'X-Content-Type-Options':'nosniff'}});
+    const response = (body: Row, status = 200, beforeSend?: () => void) => { const encoded=JSON.stringify(body); beforeSend?.(); return new Response(encoded, {status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store','X-Request-ID':requestId,'X-Content-Type-Options':'nosniff'}}); };
     try {
       if (!relay(transport.relayToken) || !/^\/(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._-]+$/.test(transport.pathPrefix)) throw new DisplayError('security_policy_unavailable');
       const actualRelay = request.headers.get('X-Jungsi-Relay-Token');
@@ -295,22 +297,44 @@ export function createOfficialHistoryDisplayHandler(ports: OfficialHistoryPorts,
         }
       }
       if (request.method !== 'GET' || !operation) throw new DisplayError('display_operation_not_supported');
+      const now=(transport.now??Date.now)(), admission=admissionMillis(now);
+      if(admission==='invalid_clock')throw new DisplayError('security_policy_unavailable');
+      if(admission==='ended')throw new DisplayError('service_ended',403);
       const authorization = request.headers.get('Authorization');
       if (!authorization?.startsWith('Bearer ') || !/^[^\s,]{1,16384}$/.test(authorization.slice(7))) throw new DisplayError('authentication_required',401);
-      const now = (transport.now ?? Date.now)(), verified = await ports.verifySession(authorization.slice(7),now);
+      const verified = await ports.verifySession(authorization.slice(7),now);
       if (!verified || !uuid(verified.subjectId) || !Number.isFinite(verified.expiresAt) || verified.expiresAt <= now) throw new DisplayError('authentication_required',401);
       const descriptor = validateDisplayScope(await ports.loadDescriptor(), transport.environment, now);
       if (!(descriptor.approval.review_subjects as string[]).includes(verified.subjectId)) throw new DisplayError('review_subject_not_allowed',403);
       const until = await ports.paidUntil(verified.subjectId,now);
       if (until !== null && utcInstantMicros(until) <= nowMicros(now)) throw new DisplayError('entitlement_unavailable');
-      if (operation === 'session.read') { queryObject(url,[]); return response({format:'jungsi.session/v1',member_tier:until === null?'standard':'paid',entitlement_expires_at:until === null?null:utcText(until)}); }
+      const complete = (body: Row) => response(body, 200, () => {
+        const current = () => {
+          let value: number;
+          try { value=(transport.now??Date.now)(); } catch { throw new DisplayError('security_policy_unavailable'); }
+          if(!Number.isSafeInteger(value)||!Number.isSafeInteger(value*1000)||value<now||value<0)throw new DisplayError('security_policy_unavailable');
+          return value;
+        };
+        const checked=current();
+        if(verified.expiresAt<=checked)throw new DisplayError('authentication_required',401);
+        validateDisplayScope(descriptor,transport.environment,checked);
+        const sending=current();
+        if(sending<checked)throw new DisplayError('security_policy_unavailable');
+        if(verified.expiresAt<=sending)throw new DisplayError('authentication_required',401);
+        const approval=descriptor.approval, micros=nowMicros(sending);
+        if(!record(approval)||approval.status!=='approved'||approval.revoked!==false||
+           !Array.isArray(approval.review_subjects)||!approval.review_subjects.includes(verified.subjectId)||
+           utcInstantMicros(approval.issued_at)>micros||utcInstantMicros(approval.expires_at)<=micros)throw invalid();
+        if(until!==null&&utcInstantMicros(until)<=micros)throw new DisplayError('entitlement_unavailable');
+      });
+      if (operation === 'session.read') { queryObject(url,[]); return complete({format:'jungsi.session/v1',member_tier:until === null?'standard':'paid',entitlement_expires_at:until === null?null:utcText(until)}); }
       if (['offerings.search','offering.read'].includes(operation) && until === null) throw new DisplayError('paid_required',403);
       const catalog = mapScopedCatalog(descriptor, await ports.readRows(descriptor));
-      if (operation === 'history.search' || operation === 'offerings.search') return response(await search(catalog,operation,url));
+      if (operation === 'history.search' || operation === 'offerings.search') return complete(await search(catalog,operation,url));
       queryObject(url,[]); const offering = (catalog.offerings as Row[]).find(r => r.offering_id === offeringId);
       if (!offering) throw new DisplayError('offering_not_found',404);
-      if (operation === 'offering.read') return response({status:'ready',reason_code:null,offering:pick(offering,OFFERING_FIELDS),catalog_version:catalog.version});
-      return response({status:'pending',reason_code:'recruitment_not_published',offering:pick(offering,OFFERING_FIELDS),recruitment:null});
+      if (operation === 'offering.read') return complete({status:'ready',reason_code:null,offering:pick(offering,OFFERING_FIELDS),catalog_version:catalog.version});
+      return complete({status:'pending',reason_code:'recruitment_not_published',offering:pick(offering,OFFERING_FIELDS),recruitment:null});
     } catch (e) {
       const failure = e instanceof DisplayError && Object.hasOwn(SAFE_ERRORS,e.code) && SAFE_ERRORS[e.code]===e.status ? e : new DisplayError('backend_dependency_unavailable');
       return response({status:'error',error:{code:failure.code},request_id:requestId},failure.status);

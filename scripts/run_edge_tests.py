@@ -3,8 +3,9 @@ No runtime install, source fallback, skipped green result, cleanup or live servi
 A separate native shell check may resolve only the existing frozen driver package.
 """
 from __future__ import annotations
-import argparse,json,os,sys,xml.etree.ElementTree as ET
-from pathlib import Path
+import argparse,base64,binascii,hashlib,io,json,os,re,sys,tarfile,xml.etree.ElementTree as ET
+from pathlib import Path, PurePosixPath
+from urllib.parse import urlsplit
 from edge_source_scope import classify_sources
 from check_edge_contract import EdgeFailure,check_workspace,command,digest,hashes,json_bytes,verify_manifest,write_new
 def parse_junit(path,expected):
@@ -92,25 +93,60 @@ def operation_registration(spec):
             native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN')
     return result
 
+OWNER_V4_CASE_NAMES = ('owner v4 keeps approved subjects expiry and actual percentile security invoker', 'owner v4 descriptor rejects the legacy v3 contract', 'owner v4 rejects a cursor bound to the previous projection', 'owner SQL no longer fetches a separate detailed review array', 'owner current-state SQL avoids the legacy review table entirely', 'owner SQL rejects unpinned or mixed state relations', 'owner observation state binds a validated archive digest', 'owner query is closed and binds explicit activity and exact current identifiers', 'owner response includes original metric identity explicit source version and unknown counts', 'owner relay and explicit subject remain required', 'owner approval expiry is rechecked on every page', 'owner percentile head changes invalidate next cursor with 409', 'owner admission head changes invalidate next cursor with 409', 'owner activity filter changes cannot reuse cursor', 'owner inactive observations stay visible with explicit exclusion reason', 'owner zero null and missing preserve native meaning', 'owner uncomputed percentile stays missing without fallback student rank', 'owner multiple healthy sources are never automatically duplicate errors', 'owner formula percentile preserves precise text and hides raw formula evidence', 'owner v4 rejects a legacy raw review array rather than ignoring it', 'owner multiple variants stay explicit with offline review archive metadata', 'owner stale source hold is preserved without substituting old percentile', 'owner calculated percentile rejects invalid bounds identity and publication flags', 'owner percentile diagnostic overflow is visible and bounded', 'owner empty filtered window returns continuation without global no-match claim', 'owner invalid scan metadata cannot imply complete current coverage', 'owner null percentile head is explicit and never a numeric zero', 'owner SQL retains canonical C ordering and bounded keys without global counts', 'owner SQL joins only page keys with current head and exact reference semantics', 'owner SQL rejects missing or repeated pinned view dependencies', 'owner nested original JSON remains held and never leaks extra internals', 'bounded admission definitions preserve SQL regex dollar tokens literally', 'bounded percentile definitions preserve replacement tokens without duplicating SQL', 'owner metadata seeds include the release table directly read outside the current view', 'owner full descriptor rejects missing direct release dependency even with valid hash', 'owner stable head session and query survive fourteen seconds of wall clock advance', 'owner stable short JWT expiry cap permits advance and still rejects actual expiry', 'owner equivalent UTC timestamp spellings keep the same head revision', 'owner changing the actual timestamp by one microsecond remains a head rejection', 'owner actual admission and percentile revisions report the source comparison stage', 'owner changed session expiry remains rejected and reports only safe enum and request ID', 'owner changed query subject and approval expiry are still denied', 'owner current state unapproved maps to distinct safe third comparison reason')
+OWNER_V3_HISTORY_SHA256 = "8c02c05ca95a146295cdd9e18002352ecd4bf979a03fd5f4f5d415036289f40e"
+OWNER_V3_REBOUND_CASE_NAMES = ('owner v3 keeps approved subjects expiry and actual percentile security invoker', 'owner query is closed and binds explicit activity and exact current identifiers', 'owner response includes original metric identity explicit source version and unknown counts', 'owner relay and explicit subject remain required', 'owner approval expiry is rechecked on every page', 'owner percentile head changes invalidate next cursor with 409', 'owner admission head changes invalidate next cursor with 409', 'owner activity filter changes cannot reuse cursor', 'owner inactive observations stay visible with explicit exclusion reason', 'owner zero null and missing preserve native meaning', 'owner uncomputed percentile stays missing without fallback student rank', 'owner multiple healthy sources are never automatically duplicate errors', 'owner formula percentile preserves precise text and hides raw formula evidence', 'owner multiple variants and review items remain explicit', 'owner stale source hold is preserved without substituting old percentile', 'owner calculated percentile rejects invalid bounds identity and publication flags', 'owner diagnostic overflow is visible and bounded', 'owner empty filtered window returns continuation without global no-match claim', 'owner invalid scan metadata cannot imply complete current coverage', 'owner null percentile head is explicit and never a numeric zero', 'owner SQL retains canonical C ordering and bounded keys without global counts', 'owner SQL joins only page keys with current head and exact reference semantics', 'owner SQL rejects missing or repeated pinned view dependencies', 'owner nested original JSON remains held and never leaks extra internals', 'bounded admission definitions preserve SQL regex dollar tokens literally', 'bounded percentile definitions preserve replacement tokens without duplicating SQL', 'owner metadata seeds include the release table directly read outside the current view', 'owner full descriptor rejects missing direct release dependency even with valid hash', 'owner stable head session and query survive fourteen seconds of wall clock advance', 'owner stable short JWT expiry cap permits advance and still rejects actual expiry', 'owner equivalent UTC timestamp spellings keep the same head revision', 'owner changing the actual timestamp by one microsecond remains a head rejection', 'owner actual admission and percentile revisions report the source comparison stage', 'owner changed session expiry remains rejected and reports only safe enum and request ID', 'owner changed query subject and approval expiry are still denied', 'owner current state unapproved maps to distinct safe third comparison reason')
+
 def owner_review_registration(spec,before):
-    """Separate pure Owner suite; foundation 656 and legacy22+extension3 stay exact."""
-    c=spec.get('owner_current_review_contract')
-    entry='supabase/functions/_shared/current_admission_owner_test.ts'
+    """Retain the v3 record and run v4 independently when its exact registration exists."""
+    c=spec.get("owner_current_review_contract")
+    entry="supabase/functions/_shared/current_admission_owner_test.ts"
     if c is None:
-        if entry in before:raise EdgeFailure('owner_review_contract_missing')
+        if entry in before:raise EdgeFailure("owner_review_contract_missing")
         return None
-    v=c.get('verification',{})
-    if (c.get('format')!='jungsi.owner-current-review-contract/v1' or
-        v.get('test_path')!=entry or v.get('test_count')!=36 or
-        not isinstance(v.get('source_bindings'),list) or not v['source_bindings']):
-        raise EdgeFailure('owner_review_verification_invalid')
-    required={entry,*['supabase/functions/_shared/'+name+'.ts' for name in
-      ['current_admission_owner','current_admission_owner_sql','current_admission_review',
-       'current_admission_review_sql','current_admission_display','official_history_display']]}
-    bindings=v['source_bindings']
-    if (len(bindings)!=len(required) or {b.get('path')for b in bindings}!=required or
-        any(not isinstance(b.get('sha256'),str) or before.get(b['path'])!=b['sha256']for b in bindings)):
-        raise EdgeFailure('owner_review_source_binding_invalid')
+    v=c.get("verification",{})
+    if (c.get("format")!="jungsi.owner-current-review-contract/v1" or
+        v.get("test_path")!=entry or v.get("test_count")!=36 or
+        not isinstance(v.get("source_bindings"),list) or not v["source_bindings"]):
+        raise EdgeFailure("owner_review_verification_invalid")
+    required={entry,*["supabase/functions/_shared/"+name+".ts" for name in
+      ["current_admission_owner","current_admission_owner_sql","current_admission_review",
+       "current_admission_review_sql","current_admission_display","official_history_display"]]}
+    v4=c.get("verification_v4")
+    rebound=c.get("verification_v3_rebound_20261030")
+    if v4 is not None and rebound is not None:
+        raise EdgeFailure("owner_rebound_and_v4_conflict")
+    if rebound is not None:
+        old_hash=hashlib.sha256(json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=True).encode()).hexdigest()
+        required_fields={"format","status","test_path","test_count","case_names","historical_v3_verification_sha256",
+                         "source_bindings","activation_status","operating_writes","native_acceptance"}
+        if (old_hash!=OWNER_V3_HISTORY_SHA256 or not isinstance(rebound,dict) or set(rebound)!=required_fields or
+            rebound.get("format")!="jungsi.owner-v3-current-source-synthetic/v1" or
+            rebound.get("status")!="SOURCE_REGISTERED_NOT_EXECUTED" or
+            rebound.get("test_path")!=entry or type(rebound.get("test_count")) is not int or rebound.get("test_count")!=36 or
+            rebound.get("case_names")!=list(OWNER_V3_REBOUND_CASE_NAMES) or
+            rebound.get("historical_v3_verification_sha256")!=OWNER_V3_HISTORY_SHA256 or
+            rebound.get("activation_status")!="NOT_RUN" or rebound.get("native_acceptance")!="NOT_VERIFIED_BY_SOURCE_SUITE" or
+            type(rebound.get("operating_writes")) is not int or rebound.get("operating_writes")!=0):
+            raise EdgeFailure("owner_rebound_verification_invalid")
+        v=rebound
+    if v4 is not None:
+        old_hash=hashlib.sha256(json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=True).encode()).hexdigest()
+        if (old_hash!=OWNER_V3_HISTORY_SHA256 or not isinstance(v4,dict) or
+            v4.get("format")!="jungsi.owner-current-review-v4-synthetic-verification/v1" or
+            v4.get("test_path")!=entry or v4.get("test_count")!=43 or
+            v4.get("case_names")!=list(OWNER_V4_CASE_NAMES) or
+            v4.get("historical_v3_verification_sha256")!=OWNER_V3_HISTORY_SHA256 or
+            v4.get("activation_status")!="NOT_RUN" or
+            type(v4.get("operating_writes"))is not int or v4.get("operating_writes")!=0):
+            raise EdgeFailure("owner_v4_verification_invalid")
+        v=v4
+    bindings=v.get("source_bindings")
+    if (not isinstance(bindings,list) or len(bindings)!=len(required) or
+        {b.get("path") for b in bindings if isinstance(b,dict)}!=required or
+        any(not isinstance(b,dict) or set(b)!={"path","sha256"} or
+            not isinstance(b.get("sha256"),str) or before.get(b["path"])!=b["sha256"] for b in bindings)):
+        raise EdgeFailure("owner_review_source_binding_invalid")
     return v
 
 def current_public_registration(spec,before):
@@ -128,7 +164,7 @@ def current_public_registration(spec,before):
     tests=[prefix+n+'.ts'for n in names if n.endswith('_test')]
     bindings=c.get('source_bindings')
     if (c.get('format')!='jungsi.current-public-provider-verification/v1' or
-        c.get('test_paths')!=tests or c.get('test_count')!=58 or
+        c.get('test_paths')!=tests or c.get('test_count')!=70 or
         not isinstance(bindings,list) or len(bindings)!=len(required) or
         {b.get('path')for b in bindings}!=required or
         any(not isinstance(b.get('sha256'),str)or before.get(b['path'])!=b['sha256']for b in bindings)):
@@ -216,6 +252,217 @@ PROFESSIONAL_NATIVE_LOCK='supabase/functions/jungsi-api/deno.lock'
 PROFESSIONAL_NATIVE_SOURCES=('supabase/functions/jungsi-api/postgres_pool.ts','supabase/functions/_shared/node_compat_bootstrap.ts')
 PROFESSIONAL_NATIVE_LOCK_SHA256='774160ee9e5942b0bc50eac30caf68fb282210a319ed12b3f88940c7da0b8e26'
 
+_NATIVE_SEED_ENABLE='JUNGSI_NATIVE_NPM_SEED'
+_NATIVE_SEED_FIELDS=('JUNGSI_NATIVE_NPM_MANIFEST','JUNGSI_NATIVE_NPM_MANIFEST_SHA256',
+    'JUNGSI_NATIVE_NPM_TARBALL','JUNGSI_NATIVE_NPM_APPROVED_SCRATCH','JUNGSI_NATIVE_NPM_DENY_PROXY')
+_NATIVE_SEED_HEX=re.compile(r'[a-f0-9]{64}\Z')
+_NATIVE_SEED_RESERVED={'CON','PRN','AUX','NUL',*(f'COM{i}' for i in range(1,10)),
+    *(f'LPT{i}' for i in range(1,10))}
+
+def _native_seed_error(reason):
+    raise EdgeFailure('native_seed_'+reason)
+
+def _native_junction_supported():
+    return os.name!='nt' or hasattr(Path,'is_junction')
+
+def _native_no_reparse(path):
+    if not _native_junction_supported():_native_seed_error('junction_detection_unavailable')
+    if not isinstance(path,(str,os.PathLike)):_native_seed_error('path_invalid')
+    path=Path(path)
+    if not path.is_absolute():_native_seed_error('path_not_absolute')
+    for item in (path,*path.parents):
+        if item.is_symlink() or (hasattr(item,'is_junction') and item.is_junction()):
+            _native_seed_error('reparse_path')
+    return path
+
+def _native_inside(root,path):
+    root=_native_no_reparse(root).resolve(strict=True)
+    path=_native_no_reparse(path).resolve(strict=False)
+    if not path.is_relative_to(root):_native_seed_error('outside_approved_scratch')
+    return path
+
+def _native_file(path,maximum):
+    path=_native_no_reparse(path)
+    if not path.is_file() or path.stat().st_nlink!=1:_native_seed_error('file_not_regular')
+    with path.open('rb') as stream:
+        raw=stream.read(maximum+1)
+    if len(raw)>maximum:_native_seed_error('file_too_large')
+    return raw
+
+def _native_json(raw):
+    def pairs(values):
+        out={}
+        for key,value in values:
+            if key in out:_native_seed_error('duplicate_json_key')
+            out[key]=value
+        return out
+    def bad_constant(_value):_native_seed_error('invalid_json_constant')
+    try:return json.loads(raw,object_pairs_hook=pairs,parse_constant=bad_constant)
+    except (UnicodeError,ValueError,TypeError) as error:raise EdgeFailure('native_seed_json_invalid') from error
+
+def _native_rel(name):
+    if not isinstance(name,str) or not name or '\\' in name or ':' in name:
+        _native_seed_error('unsafe_path')
+    parts=name.split('/')
+    if any(not p or p in {'.','..'} or p[-1] in {'.',' '} or
+           any(ord(c)<32 or ord(c)==127 or c in '<>"|?*' for c in p) or
+           p.split('.')[0].upper() in _NATIVE_SEED_RESERVED for p in parts):
+        _native_seed_error('unsafe_path')
+    parsed=PurePosixPath(name)
+    if parsed.is_absolute() or parsed.as_posix()!=name:_native_seed_error('unsafe_path')
+    return parsed
+
+def _native_inventory(root):
+    root=_native_no_reparse(root)
+    if not root.exists():return set()
+    if not root.is_dir():_native_seed_error('cache_not_directory')
+    found=set()
+    def onerror(error):raise EdgeFailure('native_seed_inventory_unavailable') from error
+    for parent,dirs,files in os.walk(root,followlinks=False,onerror=onerror):
+        for name in dirs:_native_no_reparse(Path(parent)/name)
+        for name in files:
+            path=_native_no_reparse(Path(parent)/name)
+            if not path.is_file() or path.stat().st_nlink!=1:_native_seed_error('file_not_regular')
+            found.add(path.relative_to(root).as_posix())
+    return found
+
+def _native_check_directories(root,names):
+    if not root.exists():return
+    allowed=set()
+    for name in names:
+        path=_native_rel(name)
+        for parent in path.parents:
+            if parent.as_posix()!='.':allowed.add(parent.as_posix())
+    def onerror(error):raise EdgeFailure('native_seed_inventory_unavailable') from error
+    for parent,dirs,_files in os.walk(root,followlinks=False,onerror=onerror):
+        for name in dirs:
+            path=_native_no_reparse(Path(parent)/name)
+            if path.relative_to(root).as_posix() not in allowed:
+                _native_seed_error('unexpected_cache_directory')
+
+def _native_verify_cache(destination,files):
+    _native_check_directories(destination,files)
+    if _native_inventory(destination)!=set(files):_native_seed_error('destination_inventory_mismatch')
+    for name,expected in files.items():
+        if _native_file(destination.joinpath(*_native_rel(name).parts),len(expected))!=expected:
+            _native_seed_error('destination_content_mismatch')
+
+def prepare_optional_native_seed(lock_bytes,output):
+    """Seed only the exact approved native npm cache; no installation or network proof."""
+    enabled=os.environ.get(_NATIVE_SEED_ENABLE)
+    if enabled is None:return None
+    if enabled!='1':_native_seed_error('opt_in_invalid')
+    values=[os.environ.get(key) for key in _NATIVE_SEED_FIELDS]
+    if any(not isinstance(value,str) or not value for value in values):_native_seed_error('input_missing')
+    manifest_path,manifest_sha,tar_path,scratch_raw,proxy=values
+    if not _NATIVE_SEED_HEX.fullmatch(manifest_sha):_native_seed_error('approval_pin_invalid')
+    try:
+        parsed_proxy=urlsplit(proxy)
+        port=parsed_proxy.port
+    except ValueError as error:raise EdgeFailure('native_seed_proxy_invalid') from error
+    if (parsed_proxy.scheme!='http' or parsed_proxy.hostname!='127.0.0.1' or port is None or
+        not 1<=port<=65535 or parsed_proxy.username is not None or parsed_proxy.password is not None or
+        parsed_proxy.path not in ('','/') or parsed_proxy.query or parsed_proxy.fragment):
+        _native_seed_error('proxy_invalid')
+    scratch=_native_no_reparse(scratch_raw)
+    if not scratch.is_dir():_native_seed_error('scratch_missing')
+    scratch=scratch.resolve(strict=True)
+    out=_native_inside(scratch,Path(output)/'deno_cache')
+    if not out.parent.is_dir():_native_seed_error('output_parent_missing')
+    manifest_raw=_native_file(manifest_path,262144)
+    if digest(manifest_raw)!=manifest_sha:_native_seed_error('manifest_not_approved')
+    manifest=_native_json(manifest_raw)
+    lock=_native_json(lock_bytes)
+    if (not isinstance(manifest,dict) or manifest.get('format')!='offline-postgres-cache-observation/v1' or
+        not isinstance(lock,dict)):_native_seed_error('manifest_invalid')
+    try:
+        integrity=lock['npm']['postgres@3.4.5']['integrity']
+        if lock['specifiers']['npm:postgres@3.4.5']!='3.4.5':_native_seed_error('lock_identity')
+        if (not isinstance(integrity,str) or not integrity.startswith('sha512-') or
+            len(base64.b64decode(integrity[7:],validate=True))!=64 or
+            manifest.get('lock_integrity')!=integrity):_native_seed_error('lock_identity')
+    except (KeyError,TypeError,binascii.Error,ValueError) as error:
+        raise EdgeFailure('native_seed_lock_invalid') from error
+    source=_native_inside(scratch,manifest.get('cache_root'))
+    tar_path=_native_inside(scratch,tar_path)
+    if not source.is_dir():_native_seed_error('source_missing')
+    # Bind the approved root to the source's exact retained Deno cache layout;
+    # an ancestor such as a drive root must never broaden the write boundary.
+    relative=source.relative_to(scratch).parts
+    if len(relative)!=5 or tuple(relative[1:])!=('deno','npm','registry.npmjs.org','postgres'):
+        _native_seed_error('source_scratch_binding')
+    tar_raw=_native_file(tar_path,16777216)
+    if 'sha512-'+base64.b64encode(hashlib.sha512(tar_raw).digest()).decode('ascii')!=integrity:
+        _native_seed_error('tarball_integrity_mismatch')
+    rows=manifest.get('files')
+    if not isinstance(rows,list) or len(rows)!=38:_native_seed_error('inventory_invalid')
+    entries={};folded=set()
+    for row in rows:
+        if (not isinstance(row,dict) or set(row)!={'path','bytes','sha256'} or
+            type(row['bytes']) is not int or not 0<=row['bytes']<=16777216 or
+            not isinstance(row['sha256'],str) or not _NATIVE_SEED_HEX.fullmatch(row['sha256'])):
+            _native_seed_error('file_record_invalid')
+        name=_native_rel(row['path']).as_posix()
+        if name in entries or name.casefold() in folded:_native_seed_error('duplicate_path')
+        entries[name]=row;folded.add(name.casefold())
+    if sum(row['bytes'] for row in entries.values())>33554432:_native_seed_error('cache_size_limit')
+    _native_check_directories(source,entries)
+    if _native_inventory(source)!=set(entries):_native_seed_error('source_inventory_mismatch')
+    files={}
+    for name,row in entries.items():
+        path=_native_inside(source,source.joinpath(*_native_rel(name).parts))
+        raw=_native_file(path,row['bytes'])
+        if len(raw)!=row['bytes'] or digest(raw)!=row['sha256']:_native_seed_error('source_content_mismatch')
+        files[name]=raw
+    if 'registry.json' not in files:_native_seed_error('registry_missing')
+    tar_files={};tar_size=0
+    try:
+        with tarfile.open(fileobj=io.BytesIO(tar_raw),mode='r:gz') as archive:
+            for member in archive:
+                path=_native_rel(member.name)
+                if not member.isfile() or len(path.parts)<2 or path.parts[0]!='package':
+                    _native_seed_error('tar_member_invalid')
+                name='3.4.5/'+PurePosixPath(*path.parts[1:]).as_posix()
+                if name in tar_files or member.size<0 or member.size>16777216:
+                    _native_seed_error('tar_member_invalid')
+                tar_size+=member.size
+                if tar_size>33554432:_native_seed_error('cache_size_limit')
+                stream=archive.extractfile(member)
+                if stream is None:_native_seed_error('tar_member_invalid')
+                with stream:raw=stream.read(member.size+1)
+                if len(raw)!=member.size:_native_seed_error('tar_member_invalid')
+                tar_files[name]=raw
+    except (tarfile.TarError,OSError,EOFError) as error:
+        raise EdgeFailure('native_seed_tar_invalid') from error
+    if len(tar_files)!=37 or set(files)-{'registry.json'}!=set(tar_files):
+        _native_seed_error('tar_inventory_mismatch')
+    if any(files[name]!=raw for name,raw in tar_files.items()):_native_seed_error('tar_content_mismatch')
+    registry=_native_json(files['registry.json']);package=_native_json(files['3.4.5/package.json'])
+    try:
+        if (registry['name']!='postgres' or registry['versions']['3.4.5']['dist']['integrity']!=integrity or
+            package['name']!='postgres' or package['version']!='3.4.5'):
+            _native_seed_error('registry_package_identity')
+    except (KeyError,TypeError) as error:raise EdgeFailure('native_seed_registry_invalid') from error
+    destination=out/'npm'/'registry.npmjs.org'/'postgres'
+    if destination.is_relative_to(source) or source.is_relative_to(destination):
+        _native_seed_error('source_destination_overlap')
+    _native_check_directories(destination,files)
+    current=_native_inventory(destination)
+    if not current.issubset(files):_native_seed_error('unexpected_existing_cache_file')
+    for name in current:
+        if _native_file(destination.joinpath(*_native_rel(name).parts),len(files[name]))!=files[name]:
+            _native_seed_error('existing_cache_conflict')
+    for name,raw in files.items():
+        target=_native_inside(scratch,destination.joinpath(*_native_rel(name).parts))
+        target.parent.mkdir(parents=True,exist_ok=True)
+        _native_no_reparse(target)
+        if target.exists():
+            if _native_file(target,len(raw))!=raw:_native_seed_error('destination_changed')
+        else:
+            with target.open('xb') as stream:stream.write(raw)
+    _native_verify_cache(destination,files)
+    return dict(proxy=proxy,destination=destination,files=files,manifest_sha256=manifest_sha)
+
 def professional_native_dependency_inputs(entrypoint,lock_bytes,before):
     """The native shell may resolve only the already pinned PostgreSQL dependency."""
     if entrypoint!=PROFESSIONAL_NATIVE_ENTRYPOINT or digest(lock_bytes.replace(b'\r\n',b'\n'))!=PROFESSIONAL_NATIVE_LOCK_SHA256:
@@ -267,16 +514,24 @@ def check_professional_native_entrypoint(root,before,deno,config,output,entrypoi
     lock_path=Path(root)/PROFESSIONAL_NATIVE_LOCK
     lock_bytes=lock_path.read_bytes()
     bindings=professional_native_dependency_inputs(entrypoint,lock_bytes,before)
+    seed=prepare_optional_native_seed(lock_bytes,output)
+    proxy=seed['proxy'] if seed else None
     native=['--no-remote','--node-modules-dir=none','--lock',PROFESSIONAL_NATIVE_LOCK,'--frozen-lockfile','--config',config]
-    command([deno,'check',*native,entrypoint],root=root,output=output,name='professional_native_check')
-    raw=command([deno,'info','--json',*native,entrypoint],root=root,output=output,name='professional_native_info')
+    extra={'native_deno_proxy':proxy} if seed else {}
+    check_cache=['--cached-only'] if seed else []
+    command([deno,'check',*check_cache,*native,entrypoint],root=root,output=output,name='professional_native_check',**extra)
+    if seed:_native_verify_cache(seed['destination'],seed['files'])
+    raw=command([deno,'info','--json',*native,entrypoint],root=root,output=output,name='professional_native_info',**extra)
+    if seed:_native_verify_cache(seed['destination'],seed['files'])
     try:graph=json.loads(raw)
     except (UnicodeError,ValueError)as error:raise EdgeFailure('professional_native_graph_JSON_invalid')from error
     closure=professional_native_graph(graph,root,before)
     if lock_path.read_bytes()!=lock_bytes:raise EdgeFailure('professional_native_lock_changed')
     return dict(status='PASS_PINNED_NATIVE_TYPECHECK_AND_STATIC_GRAPH',source_bindings=bindings,closure=closure,
         fixed_lock=True,local_node_modules_created=False,foundation_and_business_tests_no_npm=True,
-        actual_DB='NOT_RUN',JWT_OTP_BFF='NOT_RUN',deployment='NOT_RUN')
+        actual_DB='NOT_RUN',JWT_OTP_BFF='NOT_RUN',deployment='NOT_RUN',
+        **({'native_cache_seed':dict(manifest_sha256=seed['manifest_sha256'],package_files=37,
+            registry_files=1,tarball_sri='MATCHED',proxy_network_isolation='NOT_VERIFIED')} if seed else {}))
 
 def require_professional_operation_tests(junit,names_by_operation):
     """A declared route cannot borrow evidence from a testcase that never ran."""
@@ -284,6 +539,62 @@ def require_professional_operation_tests(junit,names_by_operation):
     if any(not set(names)<=ran for names in names_by_operation.values()):
         raise EdgeFailure('professional_operation_test_did_not_run')
 
+
+def recovery_test_filter(names):
+    # Deno uses Rust regex; avoid unsupported lookaround and match exact known names.
+    pattern="(?:"+"|".join(re.escape(name).replace("\\ "," ") for name in names)+")"
+    return "/^"+pattern+"$/"
+
+def require_exact_junit_names(path,expected):
+    root=ET.fromstring(Path(path).read_bytes())
+    names=[case.get("name") for case in root.iter("testcase")]
+    if len(names)!=len(expected) or len(set(names))!=len(names) or set(names)!=set(expected):
+        raise EdgeFailure("incident_recovery_junit_names_or_duplicates_invalid")
+
+def parse_recovery_partition_junit(path,selected,excluded,expected_class):
+    """Allow only the exact other partition's unexecuted JUnit records, never a selected skip."""
+    if not Path(path).is_file():raise EdgeFailure("deno_test_result_missing")
+    cases=list(ET.fromstring(Path(path).read_bytes()).iter("testcase"))
+    selected=set(selected);excluded=set(excluded)
+    if selected&excluded or len(cases)!=len(selected)+len(excluded):
+        raise EdgeFailure("recovery_partition_junit_count_invalid")
+    names=[case.get("name") for case in cases]
+    if len(set(names))!=len(names) or set(names)!=selected|excluded:
+        raise EdgeFailure("recovery_partition_junit_names_invalid")
+    for case in cases:
+        name=case.get("name")
+        classname=(case.get("classname") or "").replace(chr(92),"/")
+        if not classname.endswith(expected_class):raise EdgeFailure("recovery_partition_junit_source_invalid")
+        children=list(case)
+        if name in selected:
+            if children or case.get("time") is None:raise EdgeFailure("selected_recovery_test_not_passed")
+        elif len(children)!=1 or children[0].tag!="skipped" or case.get("time") is not None:
+            raise EdgeFailure("unexpected_recovery_partition_skip")
+    return dict(tests_run=len(selected),failures=0,errors=0,skipped=0,filtered_out=len(excluded))
+
+def require_unique_junit_identities(path):
+    root=ET.fromstring(Path(path).read_bytes())
+    keys=[(case.get("classname"),case.get("name")) for case in root.iter("testcase")]
+    if len(set(keys))!=len(keys):raise EdgeFailure("foundation_junit_duplicate_identity")
+
+def require_disjoint_junit_identities(left,right):
+    def identities(path):
+        return {(case.get("classname"),case.get("name")) for case in ET.fromstring(Path(path).read_bytes()).iter("testcase")}
+    if identities(left)&identities(right):raise EdgeFailure("foundation_junit_cross_suite_duplicate")
+
+def require_no_recovery_cases(path,excluded):
+    names={case.get("name") for case in ET.fromstring(Path(path).read_bytes()).iter("testcase")}
+    if names&set(excluded):raise EdgeFailure("recovery_case_leaked_into_foundation")
+
+def require_auxiliary_junit_identities(path, cases):
+    root = ET.fromstring(Path(path).read_bytes())
+    actual = []
+    for case in root.iter("testcase"):
+        classname = (case.get("classname") or "").replace(chr(92), "/").removeprefix("./")
+        actual.append((classname, case.get("name")))
+    expected = {(path, name) for path, names in cases.items() for name in names}
+    if len(actual) != len(expected) or len(set(actual)) != len(actual) or set(actual) != expected:
+        raise EdgeFailure("service_auxiliary_junit_identity_invalid")
 
 def run_workspace(root,manifest,deno,python,output):
     root=Path(root).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
@@ -300,19 +611,66 @@ def run_workspace(root,manifest,deno,python,output):
     command([deno,"check",*common,*paths],root=root,output=output,name="check")
     command([deno,"lint","--config",cfg["config"],*paths],root=root,output=output,name="lint")
     command([deno,"fmt","--check","--config",cfg["config"],*paths],root=root,output=output,name="fmt")
+    from check_project_consistency import (recovery_input_registration,verify_recovery_test_partition,
+      RECOVERY_SAMEFILE_NAMES,RECOVERY_STANDALONE_NAMES,RECOVERY_BASELINE_NAMES,RECOVERY_SAMEFILE_PATH)
+    recovery,recovery_errors=recovery_input_registration(spec,before)
+    if recovery_errors:raise EdgeFailure("incident_recovery_source_or_test_binding_invalid")
+    if recovery is not None:verify_recovery_test_partition((root/RECOVERY_SAMEFILE_PATH).read_bytes())
     junit=output.resolve()/"deno.junit.xml"
     if junit.exists():raise EdgeFailure("deno_test_output_exists")
-    command([deno,"test",*common,"--reporter=dot","--junit-path",str(junit),*cfg["tests"]],root=root,output=output,name="unit")
-    unit=parse_junit(junit,cfg["unit_count"])
+    recovery_unit=None
+    if recovery is None:
+        command([deno,"test",*common,"--reporter=dot","--junit-path",str(junit),*cfg["tests"]],root=root,output=output,name="unit")
+        unit=parse_junit(junit,cfg["unit_count"])
+    else:
+        # Run every other foundation module without a filter; select the old score cases by exact positive names.
+        rest=[path for path in cfg["tests"] if path!=RECOVERY_SAMEFILE_PATH]
+        command([deno,"test",*common,"--reporter=dot","--junit-path",str(junit),*rest],root=root,output=output,name="unit")
+        other=parse_junit(junit,625)
+        require_unique_junit_identities(junit)
+        require_no_recovery_cases(junit,RECOVERY_SAMEFILE_NAMES)
+        base_junit=output.resolve()/"recovery_baseline_score.junit.xml"
+        command([deno,"test",*common,"--filter",recovery_test_filter(RECOVERY_BASELINE_NAMES),
+          "--reporter=dot","--junit-path",str(base_junit),RECOVERY_SAMEFILE_PATH],
+          root=root,output=output,name="recovery_baseline_score")
+        score=parse_recovery_partition_junit(base_junit,RECOVERY_BASELINE_NAMES,RECOVERY_SAMEFILE_NAMES,RECOVERY_SAMEFILE_PATH)
+        require_unique_junit_identities(base_junit)
+        require_disjoint_junit_identities(junit,base_junit)
+        unit=dict(tests_run=other["tests_run"]+score["tests_run"],failures=0,errors=0,skipped=0)
+        if unit["tests_run"]!=cfg["unit_count"]:raise EdgeFailure("foundation_split_count_invalid")
+        added_junit=output.resolve()/"recovery_samefile.junit.xml"
+        command([deno,"test",*common,"--filter",recovery_test_filter(RECOVERY_SAMEFILE_NAMES),
+          "--reporter=dot","--junit-path",str(added_junit),RECOVERY_SAMEFILE_PATH],
+          root=root,output=output,name="recovery_samefile")
+        same=parse_recovery_partition_junit(added_junit,RECOVERY_SAMEFILE_NAMES,RECOVERY_BASELINE_NAMES,RECOVERY_SAMEFILE_PATH)
+        standalone_junit=output.resolve()/"recovery_standalone.junit.xml"
+        command([deno,"test",*common,"--reporter=dot","--junit-path",str(standalone_junit),
+          *recovery["test_paths"]],root=root,output=output,name="recovery_standalone")
+        standalone=parse_junit(standalone_junit,33);require_exact_junit_names(standalone_junit,RECOVERY_STANDALONE_NAMES)
+        recovery_unit=dict(tests_run=same["tests_run"]+standalone["tests_run"],failures=0,errors=0,skipped=0,
+          same_file_tests=same["tests_run"],standalone_tests=standalone["tests_run"],
+          baseline_score_filtered_out=score["filtered_out"],same_file_filtered_out=same["filtered_out"],
+          baseline_foundation_count=656,baseline_score_tests=31,coverage="INCIDENT_RECOVERY_V5_SYNTHETIC",
+          source_bindings=recovery["source_bindings"],native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE",
+          activation_status="NOT_RUN",operating_writes=0)
     owner_registration=owner_review_registration(spec,before);owner_unit=None
     if owner_registration is not None:
         owner_junit=output.resolve()/"owner_review.junit.xml"
         command([deno,"test","--no-config","--no-lock","--no-remote","--no-npm",
           "--reporter=dot","--junit-path",str(owner_junit),owner_registration['test_path']],
           root=root,output=output,name="owner_review_unit")
+        owner_format=owner_registration.get("format")
+        if owner_format=="jungsi.owner-current-review-v4-synthetic-verification/v1":
+            require_exact_junit_names(owner_junit,OWNER_V4_CASE_NAMES)
+        elif owner_format=="jungsi.owner-v3-current-source-synthetic/v1":
+            require_exact_junit_names(owner_junit,OWNER_V3_REBOUND_CASE_NAMES)
+        owner_coverage=('OWNER_CURRENT_REVIEW_V4_SYNTHETIC' if owner_format=="jungsi.owner-current-review-v4-synthetic-verification/v1"
+            else 'OWNER_CURRENT_REVIEW_V3_REBOUND_SYNTHETIC' if owner_format=="jungsi.owner-v3-current-source-synthetic/v1"
+            else 'OWNER_CURRENT_REVIEW_V3_SYNTHETIC')
         owner_unit=dict(**parse_junit(owner_junit,owner_registration['test_count']),
-          coverage='OWNER_CURRENT_REVIEW_V3_SYNTHETIC',source_bindings=owner_registration['source_bindings'],
-          actual_DB='NOT_RUN',deployment='NOT_RUN')
+          coverage=owner_coverage,source_bindings=owner_registration['source_bindings'],actual_DB='NOT_RUN',deployment='NOT_RUN')
+        if owner_format in ("jungsi.owner-current-review-v4-synthetic-verification/v1","jungsi.owner-v3-current-source-synthetic/v1"):
+            owner_unit["historical_v3_verification_sha256"]=OWNER_V3_HISTORY_SHA256
     public_registration=current_public_registration(spec,before);public_unit=None
     if public_registration is not None:
         public_paths=[b['path']for b in public_registration['source_bindings']]
@@ -348,6 +706,32 @@ def run_workspace(root,manifest,deno,python,output):
           coverage='READ_VIEW_EXTENSION_SYNTHETIC',source_bindings=read_view['source_bindings'],
           baseline_foundation_count=656,native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',
           activation_status='NOT_RUN',operating_writes=0)
+    from check_project_consistency import service_aux_registration
+    auxiliary, auxiliary_errors = service_aux_registration(spec, before)
+    if auxiliary_errors: raise EdgeFailure("service_auxiliary_registration_invalid")
+    service_candidate_aux_unit = None
+    if auxiliary is not None:
+        aux_junit = output.resolve() / "service_candidate_aux.junit.xml"
+        command([deno, "test", *common, "--reporter=dot", "--junit-path", str(aux_junit),
+                 *auxiliary["test_paths"]], root=root, output=output, name="service_candidate_aux_unit")
+        counted = parse_junit(aux_junit, auxiliary["test_count"])
+        require_auxiliary_junit_identities(aux_junit, auxiliary["case_names_by_path"])
+        service_candidate_aux_unit = dict(**counted, coverage="SERVICE_AUXILIARY_SYNTHETIC",
+            source_bindings=auxiliary["source_bindings"], baseline_foundation_count=656,
+            native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE", activation_status="NOT_RUN", operating_writes=0)
+    from check_project_consistency import service_staged_registration
+    staged, staged_errors = service_staged_registration(spec, before)
+    if staged_errors: raise EdgeFailure("service_staged_registration_invalid")
+    service_staged_aux_unit = None
+    if staged is not None:
+        staged_junit = output.resolve() / "service_staged_aux.junit.xml"
+        command([deno, "test", *common, "--reporter=dot", "--junit-path", str(staged_junit),
+                 *staged["test_paths"]], root=root, output=output, name="service_staged_aux_unit")
+        counted = parse_junit(staged_junit, staged["test_count"])
+        require_auxiliary_junit_identities(staged_junit, staged["case_names_by_path"])
+        service_staged_aux_unit = dict(**counted, coverage="SERVICE_STAGED_P1_WAITLIST_SYNTHETIC",
+            source_bindings=staged["source_bindings"], baseline_foundation_count=656,
+            native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE", activation_status="NOT_RUN", operating_writes=0)
     member_shortlist_unit=None
     member=member_shortlist_suite_registration(spec,before)
     if member is not None:
@@ -403,6 +787,7 @@ def run_workspace(root,manifest,deno,python,output):
       coverage="DEV010_FOUNDATION",coexisting_edge_sources=len(scope["coexisting_bound"]),unit=unit,oracle=dict(case_count=receipt["case_count"],mismatch_count=receipt["mismatch_count"]),
       source_manifest_sha256=digest(json_bytes(manifest)),contract_receipt_sha256=digest((output/"contract/edge_contract_receipt.json").read_bytes()),
       oracle_receipt_sha256=digest(receipt_path.read_bytes()),tool=parsed["tool"],production_ready=False,operating_writes=0,**operation_registration(spec))
+    if recovery_unit is not None:result['incident_recovery_unit']=recovery_unit
     if owner_unit is not None:result['owner_review_unit']=owner_unit
     if public_unit is not None:result['current_public_unit']=public_unit
     if whole_population_unit is not None:result['whole_population_unit']=whole_population_unit
@@ -410,6 +795,8 @@ def run_workspace(root,manifest,deno,python,output):
     if professional_unit is not None:result['professional_unit']=professional_unit
     if school_reference_unit is not None:result['school_reference_unit']=school_reference_unit
     if member_shortlist_unit is not None:result['member_shortlist_unit']=member_shortlist_unit
+    if service_candidate_aux_unit is not None:result['service_candidate_aux_unit']=service_candidate_aux_unit
+    if service_staged_aux_unit is not None:result['service_staged_aux_unit']=service_staged_aux_unit
     write_new(output/"edge_run_receipt.json",json_bytes(result));return result
 def main():
     p=argparse.ArgumentParser(description=__doc__)

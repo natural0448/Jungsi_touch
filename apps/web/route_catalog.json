@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.120",
-  "source_sha256": "f083459db37df43a61e8c2e86aa110b5b63204cbfa728f0ae5203e78fab49abc",
+  "spec_version": "1.9.141",
+  "source_sha256": "d0e31011786db5854bd1af7923c069aeeab3c936b52a32b6071e9779434cff38",
   "pages": [
     {
       "id": "PAGE-01",
@@ -398,7 +398,7 @@
         "REQ-26",
         "REQ-27"
       ],
-      "response_scope": "본인 리포트의 권한별 허용 부분; 일반은 대학 분석 제외",
+      "response_scope": "현재 등급과 무관하게 본인 저장 리포트를 읽는다. 승인된 저장 출처의 결과만 읽기 전용 스냅샷으로 제공하며 새 계산·검색·변경 권한을 추가하지 않는다.",
       "implementation_status": "workflow_HTTP_adapter_implemented_live_configuration_pending",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
@@ -526,9 +526,12 @@
         "REQ-14",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-07",
+        "REQ-12",
+        "REQ-15"
       ],
-      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
@@ -571,9 +574,12 @@
         "REQ-14",
         "REQ-24",
         "REQ-25",
-        "REQ-26"
+        "REQ-26",
+        "REQ-07",
+        "REQ-12",
+        "REQ-15"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분)",
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
@@ -2265,11 +2271,13 @@
           "delivery_mode",
           "full",
           "parts",
-          "expires_at"
+          "expires_at",
+          "r27_scope_coverage"
         ],
         "rules": [
           "Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.",
-          "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN."
+          "Edge source/synthetic coverage only; Python path and hosted activation NOT_RUN.",
+          "Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required."
         ]
       },
       "history_snapshot_body": {
@@ -2278,7 +2286,8 @@
           "format",
           "payload_id",
           "part_id",
-          "rows"
+          "rows",
+          "r27_scope_coverage"
         ],
         "rules": [
           "Closed recursive allowlist in public_response_schemas.json; native scalar and explicit NULL preserved.",
@@ -2287,7 +2296,9 @@
           "서비스용 core 영수증은 jungsi.history-field-qualification-receipt/v1, status=approved_exact_fields이며 정확7키(format,status,authority_sha256,source_head_sha256,scope_sha256,expected_previous_manifest_sha256,subjects)만 받는다. 작성 감사용 rich proof를 서비스 영수증으로 대신하지 않는다.",
           "core subjects 각 항목의 정확7키는 field,subject,expected_raw_cell_sha256,expected_native_value_type,expected_raw_status,expected_raw_unit,expected_identity_review_sha256이다. field=final_additional_admission_rank, subject는 observation_id/academic_year/offering_pk/identity_variant_index 정확4키이며 string/pending_metadata/null 원형을 결속한다.",
           "q.qualification_receipt_sha256, review-only descriptor.receipt의 원본 bytes/SHA와 approvals는 같은 service core 바이트 SHA를 가리킨다. jungsi.p1-writer-field-qualification-receipt/v1 rich writer proof는 별도 감사 근거로 보존하고 core 지문을 참조한다. audit 파일을 core로 다시 라벨링하거나 양 형식을 느슨하게 함께 수용하지 않는다.",
-          "기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다."
+          "기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다.",
+          "Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope.",
+          "Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required."
         ],
         "field_qualification_contract": {
           "format": "jungsi.history-field-qualification-read/v1",
@@ -2356,16 +2367,16 @@
           "actual_authority_status": "EXISTING_AUTHORITY_REUSED_LOCAL_CORE_AND_BYTES_VERIFIED_OWNER_ACTIVATION_PENDING",
           "source_and_test_bindings": {
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
-            "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "9035db789b8042d772d3dad6d08ece230c8b45cc9fb8f60b2d0ee17113e054de",
-            "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "0b875777dd78c57561512650c2dbfa62d80a78a56e8199c1fd6e1cab61fe6669",
-            "tests/edge/synthetic_history_qualification.ts": "99918a9e8b89f07e702685b521e1935db13d5c15bc025a6c2c8d25cadccf2604",
+            "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "a84a5edb79d440b3f775f3b1e86773599c4cac8bb9b681a78ea21b12902deeb4",
+            "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "afea15c94ef1b81910ae71eabf2d8e8768a6eb9a627bc18792d42d37f8e2b842",
+            "tests/edge/synthetic_history_qualification.ts": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce",
             "tests/edge/test_history_field_qualification.ts": "19ac3bdbd4c5beed7239dbef7b426d9a4787169a0bbdc1cdd806bf8260cdeefb",
             "tests/edge/test_history_snapshot_qualification.ts": "eb8e11fed820cda8650a6ac4a0a285e43bb1c2412feb323225ad9ea7fb098023",
-            "tests/edge/test_history_snapshot_source.ts": "2dc0c1ec8923935839ec307d23f68d887a1a81281ed9824012114eef85c45af0"
+            "tests/edge/test_history_snapshot_source.ts": "0e924980944db2e0add3dde9ac188a55b27c4a80b11abaac82c009e7d8ce8804"
           },
           "public_response_schema": {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "7d5b456e2aa090b4ed92c598590fa2b9cac1d7bd8a5e438fd2ad2f1dd18692e2",
+            "sha256": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea",
             "rank_only": true,
             "shared_cell_unchanged": true,
             "hash_scope": "EXACT_GIT_SOURCE_BYTES_UTF8_LF"
@@ -2408,6 +2419,92 @@
             ],
             "actual_data_and_Owner_activation": "NOT_RUN"
           }
+        },
+        "historical_reference_contract": {
+          "format": "jungsi.history-reference-estimates-read/v1",
+          "status": "SOURCE_AND_LOCAL_CANDIDATE_VERIFIED_NOT_ACTIVATED",
+          "requirements": [
+            "REQ-28",
+            "REQ-24",
+            "REQ-25",
+            "REQ-26"
+          ],
+          "operations": [
+            "history.snapshot.head",
+            "history.snapshot.read"
+          ],
+          "API_paths": [
+            "GET /api/v1/admission-history/snapshot/head",
+            "GET /api/v1/admission-history/snapshots/{snapshot_id}"
+          ],
+          "layer": "server application; existing private snapshot infrastructure",
+          "membership": [
+            "standard",
+            "paid"
+          ],
+          "ownership": "Existing authenticated shared public history; no student/report ownership or writer change.",
+          "row_field": "historical_cutoff_references",
+          "descriptor_location": "Optional historical_references on existing byte-pinned independent review only; manifest/head exact keys unchanged.",
+          "descriptor_fields": [
+            "format",
+            "release_id",
+            "source_export_sha256",
+            "head_readback_receipt_sha256",
+            "metric",
+            "observation_count",
+            "school_count",
+            "engine_approved",
+            "production_allowed",
+            "display_scope"
+          ],
+          "estimate_fields": [
+            "format",
+            "observation_id",
+            "academic_year",
+            "school_id",
+            "offering_pk",
+            "value",
+            "unit",
+            "status",
+            "label",
+            "scope",
+            "method_id",
+            "release_id",
+            "display_role",
+            "statistic_label",
+            "reference_status",
+            "engine_approved",
+            "production_allowed"
+          ],
+          "display_label": "추정상위누백(전체응시자)",
+          "display_scope": "historical_admission_cutoff",
+          "original_statistic_label": "NULL when not independently exported; no 50/70/mean inference.",
+          "value": "Exact decimal text from approved publisher export. No numeric recomputation or student percentile.",
+          "bounds": {
+            "max_references_per_row": 16,
+            "existing_snapshot_limits_unchanged": true
+          },
+          "security": "WeakMap-verified frozen publication context plus exact manifest/source/scope, release and duplicate checks. engine_approved=false and production_allowed=false. Existing authentication/relay/budget/response filters/final-head checks and q grants preserved.",
+          "source_and_test_bindings": {
+            "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
+            "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "a84a5edb79d440b3f775f3b1e86773599c4cac8bb9b681a78ea21b12902deeb4",
+            "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "afea15c94ef1b81910ae71eabf2d8e8768a6eb9a627bc18792d42d37f8e2b842",
+            "tests/edge/test_history_snapshot.ts": "84586a7e86eb9ef64c7a08c29256397045dda53fa1defc7ebaf644979b313c3d",
+            "tests/edge/test_history_snapshot_source.ts": "0e924980944db2e0add3dde9ac188a55b27c4a80b11abaac82c009e7d8ce8804",
+            "src/jungsi_touch/application/public_response_schemas.json": "7da2d3d22b6a9f646e9b164c26bc4a377a6d0356972bdfc51e73fc2f505cecea",
+            "tests/edge/synthetic_history_qualification.ts": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce"
+          },
+          "verification": {
+            "new_synthetic_cases": 13,
+            "related_synthetic_cases": 68,
+            "status": "PASS_LOCAL_SYNTHETIC",
+            "candidate_all_parts_service_validation": "PASS_LOCAL_FAKE_PORTS; separate private byte-pinned receipt",
+            "normal_hooks_CI": "PENDING",
+            "DB_Storage_operations": "NOT_RUN",
+            "Owner_deployment": "NOT_RUN",
+            "UI": "Separate SHA-bound preserved-copy Owner proposal; no UI implementation in application branch."
+          },
+          "production_ready": false
         }
       },
       "own_report_list": {
@@ -2664,7 +2761,7 @@
         },
         {
           "path": "tests/edge/synthetic_history_qualification.ts",
-          "sha256": "3a5c3a0aeff9d67a7aa2dfa6c7230d065250d2f0d21f7e064a8e1d230fe8b1c3"
+          "sha256": "2453fb1a27d3ef4d197c0ff8ffa73c04c121d74769e87ae4661c6b6b1b03d8ce"
         }
       ],
       "Python_current_routes": 25,
@@ -2711,15 +2808,15 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "babeedc48f5a0c142b60c7dac82ed3f6b3a917958e9f623e3f803c761abaaaaa"
+            "sha256": "ead322cca8bdf3d15b098031f5588779041b2e38ebdbd06f6bbb9a0835a465a8"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
-            "sha256": "4cd41a9a7bb9f17ce7929a5e243e9ed8e1919f5e5090b684d4936229ca4381e1"
+            "sha256": "1348f10c385795acf573d33f22ace63eb8365aa44ccfdccfa32d6031c95ab2f9"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
-            "sha256": "917ca1358161dc94d1c8e084bd2e79b2d4aead613fc9df14f99043d566fe1b82"
+            "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
@@ -2751,11 +2848,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
-            "sha256": "6eb4908465cdc5a7a27381e0d5915734a7478e8b69aab2b178dcc8c9f79efd93"
+            "sha256": "2711332e39f12119dbfdf9ca0aa2a124344c5ceab96903a64e9a6f0757d95542"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
-            "sha256": "1f85423d2cbfe71c92ebe39861584def53e6fe1a898d41705e7645511d4e2137"
+            "sha256": "747b86f3c4e610efc3178c62db0abd17aac32ee524d10a66e1b5923fe942cb58"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts",
@@ -2771,15 +2868,15 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
-            "sha256": "213a56295b0924e15631b34509d53b1ca90f334ee4ea008a00d37d42b5f065d4"
+            "sha256": "dd7b81549fabc6382ff996ea4daa12dcb2c745ad89337c7627d0fd2e07683ee0"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "f5abd7f0221e354169e7d2266c4847c2a863ecc1751041b7b342894969016607"
+            "sha256": "1db480c309ffb6609a0eccc0d04d17627e9571722239c4a3a944ec990b9dba50"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "3c53222c3ac579ec3f5f8cb588916644c42e1434385813f41d86f3a904f3ad54"
+            "sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
@@ -2795,11 +2892,11 @@
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "e28a6d07abe34d5932a40ec40aa0b6355397f5f706341ca20be800904dd70d14"
+            "sha256": "2395998b1d4e0f54da45c2b41d07b1a50213af9415cff03743c408041c0188a1"
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",
-            "sha256": "3a5c3a0aeff9d67a7aa2dfa6c7230d065250d2f0d21f7e064a8e1d230fe8b1c3"
+            "sha256": "e026d3cde979bc70b0b178dde743d2f257dc4d58ffd9cc11f0093f6f572798f9"
           },
           {
             "path": "tests/edge/test_member_json_results.ts",
@@ -2878,6 +2975,67 @@
         ],
         "pending": null,
         "meaning": "전체 국수탐2 비교집단과 해당 대학식 필수 성적 보유 비교집단의 구분. 실제 개인 정답/전국 원자료 보유를 뜻하지 않음"
+      },
+      "conditional_population_scope_proposal": {
+        "id": "PERCENTILE-DENOMINATOR-NUMERATOR-SCOPE-PROPOSAL",
+        "status": "NOT_IMPLEMENTED_NOT_CONNECTED",
+        "active": false,
+        "operations": [
+          "university.analyze",
+          "candidates.build"
+        ],
+        "meaning": "분모와 분자의 비교집단을 별도 결속하는 조건부 CDF 제안. 개인의 실제 지원자격·입학 적격·합격 판단을 제공하지 않는다.",
+        "candidate_fields": {
+          "denominator_scope": {
+            "proposed_enum": [
+              "whole_complete"
+            ],
+            "meaning": "기존 승인 전체 응시자 비교집단의 같은 학년도/시험/모형/가중치 분모를 그대로 보존한다."
+          },
+          "numerator_scope": {
+            "proposed_enum": [
+              "offering_minimum_criteria_met"
+            ],
+            "meaning": "해당 모집행 수능최저 조건을 충족하는 모형 구성원 중 해당 점수 이상/초과인 분자 범위다. 실제 지원자격 확인 결과가 아니다."
+          }
+        },
+        "field_names_and_enums_finalized": false,
+        "current_population_scope_unchanged": true,
+        "current_fields_allowlist_unchanged": true,
+        "current_response_fields_enabled": [],
+        "binding": "서버 내부에서 분모 집단·분자 조건·모집행·학년도/시험·고정 모형/곡선/정책 버전을 검증한다. 실제 식별자·조건 자료/수치·모형·CDF는 비공개다.",
+        "compatibility": "현재 전체/필수입력집단 계약에 손실 없이 표현할 수 없는 새 조건부 결과는 현재 DTO에 실어 ready로 반환하지 않는다. 기존 성공 결과/동점 의미와 pending/null을 보존한다.",
+        "activation": "최종 필드/스키마·source adapter·재귀 응답 필터·표시 문구·저장/인쇄/재응답·유료/본인 권한·원자 예산·실제 운영 검증이 같은 소스/정확 SHA로 인수되기 전 NOT_IMPLEMENTED/NOT_RUN이다.",
+        "numeric_result_publication": "NOT_ENABLED",
+        "adapter_implementation": "NOT_IMPLEMENTED",
+        "public_DTO_implementation": "NOT_IMPLEMENTED",
+        "operating_verification": "NOT_RUN",
+        "server_transition_classifier": {
+          "status": "CONTRACT_REGISTERED_IMPLEMENTATION_NOT_VERIFIED",
+          "server_only": true,
+          "classes": [
+            "legacy_verified",
+            "snu_scoped",
+            "conditional_minimum",
+            "unknown"
+          ],
+          "target_binding": "Private exact offering/year/exam/rule/scope version and head-bound registry; no client selector or schoolwide wildcard.",
+          "legacy_success": "Preserve verified baseline and unaffected successful results.",
+          "conditional_or_unknown": "Affected result only pending/null unless matching scoped adapter and all activation gates pass; never unconditional fallback.",
+          "public_fields_added": []
+        },
+        "safe_reason_candidates": [
+          "percentile_scope_unavailable",
+          "percentile_scope_invalid",
+          "percentile_scoped_provider_missing",
+          "percentile_scoped_provider_invalid",
+          "percentile_scoped_context_mismatch",
+          "percentile_scoped_release_mismatch",
+          "percentile_scoped_result_invalid",
+          "percentile_scope_release_mismatch",
+          "percentile_scoped_provider_unavailable",
+          "scoped_comparison_pending"
+        ]
       }
     },
     "presentation_rules": [
@@ -3942,7 +4100,197 @@
     "security_contract_ref": "security_contract",
     "security_transition_status": "pending_runtime_implementation",
     "latest_followup_ref": "supabase_operations_handoff_contract.current_followup",
-    "history_display_ref": "history_presentation_contract"
+    "history_display_ref": "history_presentation_contract",
+    "시즌이용기한과_입결NULL표시_20261029": {
+      "format": "jungsi.season-access-and-published-null-display/v1",
+      "decision_date": "2026-10-29",
+      "requirements": [
+        "REQ-24",
+        "REQ-26",
+        "REQ-28",
+        "REQ-30",
+        "REQ-31"
+      ],
+      "verification_status": "COMMON_GUARD_CONTINUATION_SUPPORTED_SERVICE_CANDIDATE_SCOPED_PASS_OWNER_REGISTRATION_NOT_RUN",
+      "screen_paths": [
+        "/jeongsi/admissions/results",
+        "/jeongsi/pro"
+      ],
+      "API_paths": [
+        "/api/v1/admission-history/snapshots/{snapshot_id}",
+        "/api/v1/me/reports",
+        "/api/v1/pro/organizations/{org_id}/students/{student_id}/candidates"
+      ],
+      "season_expiry": {
+        "last_service_date": "2027-01-07",
+        "timezone": "Asia/Seoul",
+        "end_exclusive_local": "2027-01-08T00:00:00+09:00",
+        "expires_at_UTC": "2027-01-07T15:00:00Z",
+        "rule": "now_utc < expires_at_UTC",
+        "scope": "서비스 전체 종료는 개인·전문가·관리자에 공통 적용한다. 개별 이용권·기관 계약의 짧은 만료와 회수 상태는 유지하며 서비스 종료 이후의 권리는 서비스 종료를 우회하지 못한다.",
+        "registration": "새 source·coverage·binding과 승인 지문을 함께 검증해 기존 Owner가 등록한다. 이전 12월31일 패킷과 기존 비활성 객체는 보존하며 실행하지 않는다.",
+        "technical_timers": "JWT·OTP·cursor·요청 윈도·실행 lease·통신 timeout과 별도 개인정보 파기 일정은 이용 만료일과 구분해 기존 계약을 유지한다."
+      },
+      "published_score_null_display": {
+        "fields": [
+          "final_50_percent_cut",
+          "final_70_percent_cut",
+          "selected_published_score"
+        ],
+        "text": "3인이하미발표",
+        "application": "기존 전형/집단/산식/발표용도·화면 선택 필터를 통과한 입결 성적 칸의 native null에 표시한다.",
+        "native_values": "정본/DTO의 null·숫자0·문자열 정밀도·원문 사유는 보존하며 UI 대체 문구만 적용한다. 모든 null을 SOURCE_NONDISCLOSED_LE_3의 원문 증거로 분류하지 않는다.",
+        "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다."
+      },
+      "own_report_list": "is_current 키 부재인 구서버와 키가 있으나 전부 null인 신서버를 구분한다. 신판의 전체 null은 숨기지 않고 혼합 값은 false만 숨기며 정정 후 첫 페이지부터 재조회한다. Owner 수정 보고와 실제 배포 증거는 별도로 확인한다.",
+      "professional_usage": "만료일 연장은 계산 비용·요청량 한도의 승인을 대신하지 않는다. 기존 개인 한도를 유지하는 전문가용 별도 계산 capacity와 정확한 승인 카탈로그·원자적 예약·다학생 순차 수용 증거를 준비한 뒤 활성화한다. units_per_offering을 근거 없이 상수 비용으로 낮추지 않는다.",
+      "layer_ownership": "기간 승인과 기획/라우팅은 시스템팀, 표시·서비스 조합/DTO·BFF·최종 등록/화면은 Owner, DB·정본 writer·환산/누백 산출은 기존 사용자 주도 담당이다.",
+      "source_sync": "검토 v7·57파일 보존본을 로컬 G에서 수신·해시 대조했고 개발팀이 기존 서비스 브랜치의 별도 작업공간에서 선별 반영·합성 검수했다. 구기획/화면/생성문서를 일괄 적용하지 않았다. 이 develop 변경은 공통 검사 지원이며 서비스 source 통합·Owner 등록/배포는 별도다.",
+      "actual_registration": "NOT_RUN",
+      "actual_deployment": "NOT_RUN",
+      "actual_data_publication": "NOT_RUN",
+      "historical_original_season_expiry_before_owner_20261029_update": {
+        "last_service_date": "2026-12-31",
+        "timezone": "Asia/Seoul",
+        "end_exclusive_local": "2027-01-01T00:00:00+09:00",
+        "expires_at_UTC": "2026-12-31T15:00:00.000000Z",
+        "rule": "now_utc < expires_at_UTC",
+        "scope": "새 버전으로 등록하는 운영 API binding·snapshot 읽기 승인·공유 usage policy·전문가용 policy/usage·승인된 기관 계약/개인 이용권의 이용 만료일을 같은 시즌 끝점으로 맞춘다. 기존 권한/회수 상태·허용 API와 대상은 유지한다.",
+        "registration": "기존 assembler로 새 판의 registry·selection·approval·내용 SHA를 다시 결속해 Owner가 등록하고 실제 읽기로 확인한다. 날짜 문자열의 일괄 치환이나 과거 증거 변경을 하지 않는다.",
+        "technical_timers": "JWT·OTP·cursor·요청 윈도·실행 lease·통신 timeout과 별도 개인정보 파기 일정은 이용 만료일과 구분해 기존 계약을 유지한다."
+      }
+    },
+    "Owner_v7_기간사전점검_NULL완료_P1추가_20261029": {
+      "status": "OWNER_REPORT_RECEIVED_INDEPENDENT_LIVE_NOT_VERIFIED_SERVICE_PERIOD_AND_P1_EXTENSION_PENDING",
+      "requirements": [
+        "REQ-24",
+        "REQ-26",
+        "REQ-27",
+        "REQ-28",
+        "REQ-30",
+        "REQ-31"
+      ],
+      "development_source_boundary": {
+        "develop_implementation_unchanged": true,
+        "service_candidate_commit": "799293cdc190a014e7508f3316e1381fecfc0ee4",
+        "service_candidate_spec": "1.9.136",
+        "service_PR": "https://github.com/natural0448/Jungsi_touch/pull/70",
+        "service_PR_merged": false,
+        "presentation_source_commit": "9e0e54ee36a6a3ad68467848cb608bf69ec693ec"
+      },
+      "Owner_null_acceptance": {
+        "source_files": "three reviewed public UI/test files match exactly",
+        "reported_worker_version": "eb11252e-ae0b-41b1-b148-209874f88abc",
+        "reported_date": "2026-10-29",
+        "reported_typecheck_lint_and_Node_7": "PASS",
+        "independent_live_label_check": "NOT_VERIFIED",
+        "native_null_zero_precision_and_reason": "SOURCE_REVIEW_REPORTED_RUNTIME_NOT_INDEPENDENTLY_VERIFIED",
+        "legacy_SOURCE_NONDISCLOSED_LE_n_request": "withdrawn_by_Owner; no additional reason-code implementation required",
+        "owner_deployment_report": {
+          "status": "OWNER_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+          "report_sha256": "ca1c0a2ce4cde1fb027d46a7c79f482533db700f986838b0e00669fead37d565",
+          "reported_date": "2026-10-29",
+          "scope": "Owner reports deploying the cited screen Worker version; current active version and visible behavior are not independently verified."
+        },
+        "service_function_deployment": "NOT_RUN_BY_OWNER_REPORT"
+      },
+      "period_wire_resolution": {
+        "choice": "keep_existing_binding_limit",
+        "access_end_exclusive_UTC": "2026-12-31T15:00:00Z",
+        "precision": "equivalent to 2026-12-31T15:00:00.000000Z at the exact microsecond boundary",
+        "approved_budget_or_size_limit_increase": false,
+        "diagnostic_oversized_policy_approval": "not_adopted",
+        "current_six_metadata_revalidated": true,
+        "candidate_native_parser_and_real_context_checks": "PASS_OFFLINE_ONLY",
+        "existing_versions_counter_identity_technical_timers": "preserved",
+        "historical_status": "2026-12-31 candidate was superseded by Owner 2027-01-08 service-end decision; earlier parser/size evidence does not verify new bytes"
+      },
+      "latest_service_validation": {
+        "normal_precommit_and_prepush_each": {
+          "Python": 1282,
+          "Edge": 1305,
+          "oracle": 993,
+          "mismatch": 0,
+          "skipped": 0
+        },
+        "identical_source_files": 675,
+        "remote_CI": "account_billing_spending_block_before_execution",
+        "remote_CI_marked_pass": false,
+        "CI_substitution": "direct_user_permission_once_for_this_operating_deployment; exact final normal full local checks; no global gate removal"
+      },
+      "P1_expiry_followup": {
+        "current_head": "actual approved publication still uses the previous operating access expiry",
+        "manifest_review": "existing closed metadata schemas have no intrinsic expiry field; reuse only byte-pinned approved scope",
+        "proposal": "append next head sequence with previous current head and new access expiry; preserve numerical manifest/review/parts and source-as-of",
+        "publication_order": [
+          "existing DB owner installs period schema and immutable renewal reference",
+          "deploy verified service candidate with current settings and verify old report/input status",
+          "Owner activates matching new settings and verifies exact digests",
+          "existing single writer CAS-publishes renewed P1 head only after settings are active",
+          "Owner rebuilds ready cache and verifies front-door pages"
+        ],
+        "early_publication_risk": "new P1 head expiry greater than old snapshot binding fails closed with503",
+        "single_writer": "reuse existing publisher advisory plus source command lock and exact latest-source/head compare; conflicts remain HOLD",
+        "actual_P1_head_insert": "NOT_RUN"
+      },
+      "R27_recruitment_display": {
+        "source_cause": "Owner summaryOf unconditionally sets r27:null in apps/web/src/app/admissions/results/page.tsx at the observed source commit",
+        "canonical_data": "bounded actual DB read confirms 2027 quota data exists; no data values copied into Git",
+        "current_status": "not_connected_to_collapsed_summary",
+        "candidate_checks": "internal batch/projection synthetic only; per-ID shared budget, snapshot binding and live Owner integration still NOT_IMPLEMENTED",
+        "preserve": "source 2027 canonical offering PK and original quota; preserve 2027-only rows even when historical linkage is not established; join historical rows only on verified lineage; preserve exact lineage, campus/track/group and publication stage; do not promote pending/unknown stage values to final; keep actual 0, native null and conditional carry-over distinct"
+      },
+      "operating_status": {
+        "new_service_DB_DDL_and_period_reference": "NOT_RUN",
+        "new_settings_and_function_deployment": "NOT_RUN",
+        "new_control_objects": "prepared_and_actual_remote_bytes_SHA_readback_passed; not activated",
+        "new_service_JWT_OTP_BFF_acceptance": "NOT_RUN",
+        "Owner_packet_delivery": "user_confirmed_delivered_but_not_updated"
+      },
+      "reuse_rule": "start from exact branch/head and prior proof pins; no manual full source/data rescan or numeric shard reread for an access-only renewal",
+      "interpretation": "Historical key name is not proof of current deployed version or independent live acceptance."
+    },
+    "Owner_종료일_2027모집_출시점검_20261029": {
+      "status": "OWNER_REPLIES_RECEIVED_NEW_RELEASE_AND_OPERATING_ACCEPTANCE_PENDING",
+      "effective_service_end_exclusive_utc": "2027-01-07T15:00:00Z",
+      "timezone": "Asia/Seoul",
+      "last_service_date": "2027-01-07",
+      "scope": "personal_professional_and_admin",
+      "review_approval_end": "same_service_end; new descriptor and exact pins required",
+      "prior_end_packet": "HOLD_preserve_inactive_objects_and_old_receipts",
+      "size_limit": "keep_existing; validate_exact_new_binding_bytes; 4096_request_withdrawn",
+      "p1_source": "old_source_mismatch_HOLD_rebind_P1_key_index_coverage_descriptor_and_binding_to_latest_source",
+      "r27": "snapshot_embedded_2027_quota_from_full_canonical_2027_offering_rows_by_original_PK; use_2027_only_row_if_historical_lineage_unavailable; match_2024_2026_only_on_verified_lineage; no_per_row_API; preserve_stage_unknown_zero_unpublished_and_conditional",
+      "r27_acceptance": "reconcile_all_current_2027_canonical_rows_and_values_by_PK_against_snapshot_with_measured_missing_duplicates_and_conflicts; historical_lineage_is_not_a_prerequisite_for_2027_only_display; snapshot_publication_and_browser_NOT_RUN",
+      "p3_search": "Owner_reports_three_503_backend_dependency_unavailable_on_2026-10-29; root_cause_and_operational_fix_NOT_CONFIRMED",
+      "replenishment": "original_count_and_final_waitlist_number_are_distinct_unless_official_source_documents_equivalence; owner_requested_ten_case_recheck_NOT_RUN",
+      "execution_order": [
+        "owner_DB_period_reference",
+        "verified_service_code",
+        "actual_matching_settings_activation",
+        "current_source_and_previous_head_CAS_publication",
+        "ready_preparation_and_front_door_acceptance"
+      ],
+      "owner_front_door_PR471": "reported_not_merged_or_deployed",
+      "actual_registration": "NOT_RUN",
+      "actual_deployment": "NOT_RUN",
+      "actual_data_publication": "NOT_RUN",
+      "actual_browser_acceptance": "NOT_RUN",
+      "r27_query_security": "batch_join_on_exact_2027_source_PK; avoid_N_plus_one; retain_RLS_and_existing_roles; validate_indexed_execution_plan_IO_budget_and_source_head; no_browser_DB_access"
+    },
+    "season_service_end_20261029_successor": {
+      "status": "CANDIDATE_NOT_DEPLOYED",
+      "service_end_exclusive_kst": "2027-01-08T00:00:00+09:00",
+      "service_end_exclusive_utc": "2027-01-07T15:00:00Z",
+      "applies_to": "all personal, professional, administrative service and data operations including readiness; independent earlier entitlement, session, evidence and authorization expiry remain enforced",
+      "inflight_rule": "requests admitted before end may complete with consistent committed result, subject to existing authentication and rights checks; no new business admission at or after cutoff",
+      "health_live": "public /health/live liveness without business data remains available by owner decision",
+      "retention": "existing record preservation and destruction obligations are separate; no automatic exception for business API; verify lawful operational pathway separately",
+      "error": "service_ended is an explicit error contract; verify allowed error translation, public DTO and browser CORS",
+      "coverage": "all actual Edge, Python and other entrypoints, policy and bindings; no assertion until each verified",
+      "actual_registration": "NOT_RUN",
+      "actual_deployment": "NOT_RUN"
+    }
   },
   "management_pages": [
     {
@@ -9164,7 +9512,46 @@
       ],
       "source_definition_required_for_reclassification": true,
       "runtime_activation": "NOT_RUN_REVIEWED_PUBLISHER_NEW_IMMUTABLE_EDITION_AND_OWNER_RECEIPTS_REQUIRED",
-      "runtime_boundary": "current_public_catalog record item alias is connected; p1MetricSlotAlias is a publisher bridge only. Frozen P1 sequence values, CIDs and q qualification are unchanged; ambiguous source labels need exact definition evidence."
+      "runtime_boundary": "current_public_catalog record item alias is connected; p1MetricSlotAlias is a publisher bridge only. Frozen P1 sequence values, CIDs and q qualification are unchanged; ambiguous source labels need exact definition evidence.",
+      "csv_review_policy": {
+        "format": "jungsi.published-statistic-export-review-policy/v1",
+        "requirements": [
+          "REQ-01",
+          "REQ-13",
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "status": "SOURCE_AND_DRAFT_REVIEWED_SAFE_SELECTOR_CANDIDATE_NOT_INTEGRATED_NOT_DEPLOYED",
+        "review_list_overlap_is_DB_duplicate_proof": false,
+        "identity": [
+          "academic_year",
+          "university_campus",
+          "offering",
+          "track",
+          "recruit_group",
+          "canonical_observation_id",
+          "cohort",
+          "statistic_definition",
+          "score_basis_code",
+          "score_component",
+          "full_mark",
+          "native_type",
+          "source_scope"
+        ],
+        "missing_ID_is_same_observation": false,
+        "same_value_or_display_label_is_same_observation": false,
+        "grouping": "Compare evidence-backed cohort and score axis; equal priority tier or equal display label alone never proves equivalence.",
+        "conflict": "Keep distinct source references and pending status; do not select the first different value silently.",
+        "English_alias": "Display mean/best/worst only as aliases where original statistic meaning, score direction and source cohort are verified; retain raw labels and values.",
+        "score_basis": "Use registered source definitions; a recognized code does not prove component/fullmark or authorize inferred conversion.",
+        "school_record": "Preserve school-record grade as a distinct labelled metric in a CSAT-named track; verify mixed criteria/track identity against existing school-year evidence.",
+        "group_mean": "Top/bottom-group averages are not percentile cutoffs. Initial/final mean do not become 50/70 cuts.",
+        "numeric": "Preserve native numeric/string type and precision. Browser binary64 or CSV display equality is not source-value equality.",
+        "candidate_boundary": "Unapproved private snapshot, canonical DB, approved immutable edition and browser acceptance are distinct states.",
+        "activation": "Owner review, normal source gates and compatible DTO/provenance acceptance required before deployment."
+      }
     }
   },
   "security_contract": {

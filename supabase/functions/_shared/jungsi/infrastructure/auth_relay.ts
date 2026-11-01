@@ -259,7 +259,8 @@ const SAFE_CODES = new Set([
   "profile_required",
 ]);
 export function safeFailure(error: unknown, requestId: string): Response {
-  const known = error instanceof AccessError && SAFE_CODES.has(error.code) &&
+  const known = error instanceof AccessError &&
+    (SAFE_CODES.has(error.code) || error.code === "service_ended" && error.http === 403) &&
     [400, 401, 403, 404, 405, 409, 413, 422, 429, 503].includes(error.http) &&
     (error.http !== 429 || error instanceof RequestLimitError);
   const code = known ? error.code : "backend_dependency_unavailable",
