@@ -4481,6 +4481,19 @@ def generated_files(spec,read=None):
                           ['경로·권한',latest_owner['routes']],
                           ['미실행',latest_owner['not_run']],
                       ])+"\n")
+        screen_deployment=snapshot.get('planning_screen_deployment_20261101')
+        if screen_deployment:
+            section+=("\n### 2026-11-01 화면 배포 보고와 대조 준비\n\n"+
+                      screen_deployment['status']+"\n\n"+
+                      table(['구분','확인·후속 상태'],[
+                          ['배포 보고',screen_deployment['source']],
+                          ['합성·운영 기간',screen_deployment['synthetic']],
+                          ['화면 관측 범위',screen_deployment['screen']],
+                          ['대조 연결 준비',screen_deployment['coverage']],
+                          ['후속 일정',screen_deployment['followup']],
+                          ['경로·권한',screen_deployment['routes']],
+                          ['미실행',screen_deployment['not_run']],
+                      ])+"\n")
         quota_review=snapshot.get('planning_quota_stage_review_20261031')
         if quota_review:
             section+=("\n### 2027 모집인원 단계 계약 검토 후보\n\n"+
