@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.150",
+  "version": "1.9.151",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -46,7 +46,7 @@
     {
       "id": "REQ-01",
       "title": "공식 입시결과 조회",
-      "description": "1페이지는 개인 성적 없이 대학·학과를 검색하고 대학 발표 지표명·결과치·단위·출처를 제공한다. 자체 누적·예상컷·개인 분석으로 미발표 값을 채우지 않는다. 추정 총 지원자·추정 탈락자 2열은 공식 값과 분리된 화면 파생값으로 유지한다. 산식·오차·실제 불합격자수와의 차이를 표시하고 동일 학년도/모집행/통계 분모·자료 결측을 검사한다. 공식 DTO·발행 자료에 추정값을 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다."
+      "description": "1페이지는 개인 성적 없이 대학·학과를 검색하고 대학 발표 지표명·결과치·단위·출처를 제공한다. 자체 누적·예상컷·개인 분석으로 미발표 값을 채우지 않는다. 추정 총 지원자·추정 탈락자 2열은 공식 값과 분리된 화면 파생값으로 유지한다. 산식·오차·실제 불합격자수와의 차이를 표시하고 동일 학년도/모집행/통계 분모·자료 결측을 검사한다. 공식 DTO·발행 자료에 추정값을 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-03 사용자 결정: 전국 전체는 2027학년도 실제 모집이 확인된 모집행 전체를 뜻한다. 2024~2026에만 있는 단독 항목은 회원 화면에 노출하지 않고 검증된 2027 모집행의 과거 참고자료로만 연결한다. 0명·이월 미확정은 모집 확정 후 추가하며 모집 사실이 확인된 인원 미확인은 확인 중으로 보존한다."
     },
     {
       "id": "REQ-02",
@@ -56,12 +56,12 @@
     {
       "id": "REQ-03",
       "title": "유료 직접 검색",
-      "description": "3페이지의 검색·건수·목록·상세·개인 분석은 유료 전용이다. 유료 사용자는 추천·유불리·성적 입력 여부와 관계없이 서비스의 모든 모집단위를 검색한다. 분석이 없으면 모집행과 보류 사유를 표시한다."
+      "description": "3페이지의 검색·건수·목록·상세·개인 분석은 유료 전용이다. 유료 사용자는 추천·유불리·성적 입력 여부와 관계없이 서비스의 모든 모집단위를 검색한다. 분석이 없으면 모집행과 보류 사유를 표시한다. 2026-11-03 사용자 결정: 직접 검색과 대학 선택의 서비스 대상은 2027학년도 실제 모집이 확인된 전국 모집행이며 과거 연도만 존재하는 모집행을 독립 결과로 반환하지 않는다."
     },
     {
       "id": "REQ-04",
       "title": "유리한 대학과 학과 찾기",
-      "description": "4페이지는 기본 대학 목록과 간호·보건·교육·채용 조건형 계약학과·해양 항해·기관·철도 와일드카드를 제공한다. 서버가 여유·핵심·도전 순과 검증된 공통 기준으로 최대 4개를 선택하고, 앞 3개는 가능한 한 다른 계열로 구성하며 4번째는 남은 후보에서 선택한다. 화면은 3개를 먼저 보여주고 4번째를 더보기로 표시한다. 비교 가능한 승인 기준으로 최대 4장을 선택하며 상태는 ready·partial·pending으로 구분한다. 구 리포트의 신뢰되지 않은 새 필드는 숨기고 기존 목록과 replay를 보존한다. 승인된 공급·writer 증거·예산·화면 수신이 확인되기 전에는 새 선택 기능을 비활성으로 둔다."
+      "description": "4페이지는 기본 대학 목록과 간호·보건·교육·채용 조건형 계약학과·해양 항해·기관·철도 와일드카드를 제공한다. 서버가 여유·핵심·도전 순과 검증된 공통 기준으로 최대 4개를 선택하고, 앞 3개는 가능한 한 다른 계열로 구성하며 4번째는 남은 후보에서 선택한다. 화면은 3개를 먼저 보여주고 4번째를 더보기로 표시한다. 비교 가능한 승인 기준으로 최대 4장을 선택하며 상태는 ready·partial·pending으로 구분한다. 구 리포트의 신뢰되지 않은 새 필드는 숨기고 기존 목록과 replay를 보존한다. 승인된 공급·writer 증거·예산·화면 수신이 확인되기 전에는 새 선택 기능을 비활성으로 둔다. 2026-11-03 사용자 결정: 기본 후보와 와일드카드도 2027학년도 실제 모집이 확인된 모집행에서 구성하고 과거 연도에만 존재하는 항목은 후보로 내보내지 않는다."
     },
     {
       "id": "REQ-05",
@@ -218,7 +218,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "purpose": "개인 성적 없이 공식 결과를 검색하고, 분리된 추정 2열은 표기·산술 조건에 따라 표시한다. 현재 서비스 대상 정본 전체를 검색하며 일부 고정 검수 묶음을 전국 범위로 설명하지 않는다.",
+      "purpose": "개인 성적 없이 공식 결과를 검색하고, 분리된 추정 2열은 표기·산술 조건에 따라 표시한다. 현재 서비스 대상 정본 전체를 검색하며 일부 고정 검수 묶음을 전국 범위로 설명하지 않는다. 2027 실제 모집행을 기준으로 하고 연계된 과거 발표만 참고 표시한다.",
       "score_required_to_browse": false,
       "operations": [
         "session.read",
@@ -285,7 +285,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "purpose": "추천 밖 모집단위까지 검색하고 개인 환산·지원 검토·유불리를 확인한다.",
+      "purpose": "추천 밖 모집단위까지 검색하고 개인 환산·지원 검토·유불리를 확인한다. 2027 실제 모집이 확인된 전국 모집행만 대상이다.",
       "score_required_to_browse": false,
       "operations": [
         "session.read",
@@ -318,7 +318,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "purpose": "기본 학교와 학과별 범위, 특수계열 와일드카드를 비교해 핵심 지원 학교를 선택한다.",
+      "purpose": "기본 학교와 학과별 범위, 특수계열 와일드카드를 비교해 핵심 지원 학교를 선택한다. 2027 실제 모집이 확인된 전국 모집행만 대상이다.",
       "score_required_to_browse": false,
       "operations": [
         "session.read",
@@ -8219,7 +8219,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.150",
+        "contract_version": "1.9.151",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -8393,7 +8393,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.150",
+        "contract_version": "1.9.151",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8559,7 +8559,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.150",
+        "contract_version": "1.9.151",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8578,7 +8578,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.150",
+        "contract_version": "1.9.151",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8603,7 +8603,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.150",
+        "contract_version": "1.9.151",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8628,7 +8628,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.150",
+        "contract_version": "1.9.151",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -24884,6 +24884,15 @@
       "date": "2026-11-02",
       "requirements": [],
       "summary": "화면팀이 실제 작업본에서 검증한 병합 미리보기 후속 보완: outputs 폴더가 없으면 생성 방법을 안내하고, 명세 동기화 결과를 환경과 관계없이 LF 바이트로 저장한다. 병합 후보는 검토 전용으로 유지하며 기존 파일과 충돌 검사를 보존한다."
+    },
+    {
+      "date": "2026-11-03",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-04"
+      ],
+      "summary": "사용자 결정: 전국 회원 화면의 기준을 2027 실제 모집행으로 통일한다. 2024~2026만 존재하는 과거 단독 모집행은 노출하지 않고 검증된 2027 행의 참고자료로 연결한다. 이월 미확정과 0은 현재 비노출, 실제 모집 확정 후 추가하며 모집 사실이 확인된 인원 미확인은 0으로 치환하지 않는다. 원본·기존 리포트·관리자 검수와 RLS를 보존하고 set-based/P1 정리본을 사용한다. 구현·DB·배포·실화면 인수는 별도다."
     }
   ],
   "overall_analysis_contract": {
@@ -29984,7 +29993,8 @@
       "coverage": "all actual Edge, Python and other entrypoints, policy and bindings; no assertion until each verified",
       "actual_registration": "NOT_RUN",
       "actual_deployment": "NOT_RUN"
-    }
+    },
+    "current_recruitment_scope_ref": "P1_display_snapshot_contract.active_recruitment_scope_20261103"
   },
   "contract_review": {
     "format": "jungsi.contract-review/v1",
@@ -41284,7 +41294,8 @@
         "candidate_boundary": "Unapproved private snapshot, canonical DB, approved immutable edition and browser acceptance are distinct states.",
         "activation": "Owner review, normal source gates and compatible DTO/provenance acceptance required before deployment."
       }
-    }
+    },
+    "current_recruitment_scope_ref": "P1_display_snapshot_contract.active_recruitment_scope_20261103"
   },
   "official_history_db_display_contract": {
     "format": "jungsi.official-history-db-display/v1",
@@ -216008,7 +216019,7 @@
     ],
     "source": "jungsi_data_ingest.admission_results_current and independently verified current offering/guide metadata; never promote an older frozen release as the current canonical source",
     "access": "P1 standard/paid without a personal score; P3 offerings/search/detail remains paid, existing active+aal2 admin exception and ownership/auth/relay rules unchanged",
-    "scope": "All currently available eligible national canonical rows, not only an approved school subset; preserve active_service=false and actual-practical exclusions. All searchable does not mean a single unbounded response or automatic bulk retrieval.",
+    "scope": "For member-facing discovery, all currently eligible 2027 nationwide offerings with confirmed actual recruitment; historical-only offerings are not independent member results. Keep prior-year observations as verified references to those current offerings and preserve all source/admin review data. Apply existing practical exclusions and explicit user exceptions. National scope is not a school subset or unbounded response.",
     "source_flags": "No DB production_allowed/engine_approved/source release flag rewrite; authorise the explicit read provider and public projection separately. Missing unpublished fields remain distinct from source eligibility.",
     "public_projection": "Existing public history/offering/recruitment DTO and recursive allowlist. Preserve original statistic/cohort/score kind/scale/unit/year/source and scalar types allowed by that DTO; unrepresentable source fields are explicit pending, not fabricated.",
     "private_exclusions": [
@@ -216034,7 +216045,7 @@
       "interpretation": "New explicit whole-query UI cap, not a claim that prior three-year page arithmetic was 600. Server per-request ceilings and account-wide atomic charge remain authoritative.",
       "partial": "Remaining cursor means incomplete query. Only the final unfinished offering group is held; preserve original PK/year and do not claim unseen years complete.",
       "new_operation": false,
-      "scope_boundary": "Legacy cursor path only. New complete display snapshot is adopted as REQ-28 but is not implemented/activated by this planning change."
+      "scope_boundary": "Legacy cursor path only. New complete display snapshot is adopted as REQ-28 but is not implemented/activated by this planning change. 2026-11-03 이후 회원 제공은 검증된 실제 모집 2027 anchor에 연결된 과거행으로 제한한다. 실제 source/query와 P1 정리본에 필터를 적용하기 전에는 구현·운영 완료가 아니다."
     },
     "security": "Fresh verified JWT, relay, public.jeongsi_passes, active+aal2 admin exception, RLS app role, no-store, recursive output filtering, shared atomic quota and timeout/read/result caps unchanged. No bypass to repair409.",
     "expiry": "Reuse current consumer binding expiry unless separately approved; no automatic review approval renewal or access-period extension.",
@@ -216222,7 +216233,8 @@
       "expiration": "Previous descriptor validity window is preserved, not extended.",
       "activation": "NOT_RUN",
       "production_ready": false
-    }
+    },
+    "current_recruitment_scope_ref": "P1_display_snapshot_contract.active_recruitment_scope_20261103"
   },
   "P1_display_snapshot_contract": {
     "format": "jungsi.P1-display-snapshot-contract/v1",
@@ -216237,8 +216249,8 @@
       "REQ-28"
     ],
     "page": "/admissions/results",
-    "source": "DATA_ACTIVE_ADMISSION_CURRENT_v1.json / jungsi_data_ingest.admission_results_current; trusted local current caches and school source evidence reused; no request-path full view aggregate",
-    "grain": "one display row per academic_year:original_PK_string with verified identity/year links; observations without a verified PK keep original null and their existing opaque observation address in an explicitly counted mapping_pending domain; never fabricate an offering PK or inferred 2027 ID",
+    "source": "DATA_ACTIVE_ADMISSION_CURRENT_v1.json / jungsi_data_ingest.admission_results_current; trusted local current caches and school source evidence reused; no request-path full view aggregate; 2027 current recruiting anchors and verified year links come from the approved current official guide and confirmed rollover state",
+    "grain": "Internal historical observations retain their original academic_year:PK and verified identity/year links. Member-facing offering groups require an eligible, currently recruiting 2027 anchor. Historical-only or unresolved mappings stay in data/admin review and are not independent public cards; never invent an offering PK or 2027 identity.",
     "cells": [
       "recruitment_count_with_stage",
       "competition_ratio",
@@ -216270,7 +216282,7 @@
     "read_API": "Two explicit read-only operations: small current head and a version-bound gzip/full or bounded-part body. Final routes/DTO/bounds are registered with implementation. No direct browser Storage permission.",
     "refresh": "New current head/rules produce one cross-reviewed immutable snapshot; identical content reuses existing bytes. Stable trust anchor, publisher scope, expected-head CAS and rollback must be defined; never remove pins to trust arbitrary mutable content.",
     "cache": "Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization. Actual authenticated head/body API calls retain request/result accounting; a BFF/KV hit with no API call is not charged a fictional full-body API read. Existing personal/engine logical cache accounting stays unchanged. No cache_delivery intent or client quota waiver flag is introduced. FE-CONC-01~04의 화면 소스는 불변 KV 키와 native SQLite 조정자(JT_P1_COORDINATOR/P1SnapshotCoordinator)로 준비한다. head/progress/ready를 KV 잠금으로 처리하지 않고, 복수 인스턴스의 head 재확인·관리자 단일 준비·만료 fence를 원자적으로 조정한다. 최종 색인 작성 직후 최신 head를 다시 확인하며 live/synthetic 조정 상태는 서버 고정 이름으로 분리한다. 필수 KV·조정 바인딩이 없는 실연결/배포는 실패로 표시하고, 명시 synthetic+development/test에서만 같은 상태 기계의 메모리 저장소를 허용한다. 동시 합성36건과 기존 전체 후보의 로컬 재생은 통과했지만 native 자원 생성·worker packaging·실제 배포·운영 혼합 부하는 NOT_RUN이다. CPU 멀티스레딩이나 이용자 무대기를 확정하지 않는다. 사용자 P1-DO-ONLY-20261021에 따라 해당 조정자만 예외 허용됐으며, 실제 계정의 비용 검수·자원 등록·배포·정문 인수는 별도 영수증 전까지 NOT_RUN이다. 회원 표시 getUser 전환과 방문 기록 헤더 조건 보완의 소스 검토를 수용하되 영역 표지나 정상 관측만으로 중계 인증을 완료 처리하지 않는다. 학교가 여러 입력 조각에 걸쳐 있으면 기존 단계당 원문6조각·학교완료12개·고유 fragment읽기20개 한도 안에서 여러 fenced step으로 조립한다. 미완성 학교 rows는 현재 발행본/세대에 결속한 불변 KV key에만 두며 조정 progress에는 학교ID·다음조각 offset·키·이전쓰기prefix·step 메타데이터만 둔다. offset 범위·이전 fence/step·발행본·세대·원래 fragment 순서를 검증하며 완성 전에는 school_keys/학교완료수·ready에 노출하지 않는다. 부분 KV 전파지연·head변경·만료 writer는 fail closed/새 fence 재개로 처리하고 원문 재읽기나 한도 확대·새 자원을 요구하지 않는다. 이 후속의 실제 모듈/SQLite 합성62 및 최소 framework ambient 경계 strict noEmit 통과는 운영 배포나 실제 후보 전수 검수 완료를 뜻하지 않는다. 별도 Root 비공개 전체후보 모듈 재생 PASS는 동결 source hash와 최종 commit blob 동일성에만 결속하며 Worker 용량·실제 인증·배포 인수를 대신하지 않는다. 숫자 전달 PASS는 원래 pending_metadata와 unit=null을 ready로 승격하거나 보류를 해소한 검수가 아니다. 별도 필드별 출처 자격 refs의 계약/DTO 연동/검수와 새 판 운영 인수는 본 조립 수정에 포함하지 않는다.",
-    "pagination": "Snapshot-backed page/search covers its entire manifest domain with server-side university paging and exact filtered counts. Legacy history.search retains its original bounded cursor and six-page UI behavior until the new path is live; no claim that a partial600 metric result is a whole snapshot.",
+    "pagination": "Snapshot-backed page/search covers its entire manifest domain with server-side university paging and exact filtered counts. Legacy history.search retains its original bounded cursor and six-page UI behavior until the new path is live; no claim that a partial600 metric result is a whole snapshot. 2027 실제 모집 대상 판정을 검색·정렬·건수·페이지 계산 전에 적용한다.",
     "performance": "Frontend target first page within2s and local search within1s; separate cold version acquisition from warm server-cache page/search timing. These are acceptance targets, not measured PASS.",
     "acceptance": [
       "Exact manifest/payload SHA and observed row/school/year counts; no duplicate academic_year:original_PK row",
@@ -216279,7 +216291,15 @@
       "No full current-view COUNT/GROUP/FETCH or N+1 in request path; preserve existing dataset and RLS",
       "JWT/relay/ownership/current role, public-cache segregation, response allowlist/no-store, physical bounds and new operation negative cases",
       "Exact candidate source/normal hooks/CI; private final artifact proof; Owner upload/readback/settings; fresh deployed BFF/browser observations remain distinct",
-      "최종 합격 예비번호 단일 열·행 정렬, 실제 인원 only·null·0·명시 근거 없는 사유·기존 추정 탈락 산식과 동일 report/source ID를 합성·운영에서 각각 검증한다."
+      "최종 합격 예비번호 단일 열·행 정렬, 실제 인원 only·null·0·명시 근거 없는 사유·기존 추정 탈락 산식과 동일 report/source ID를 합성·운영에서 각각 검증한다.",
+      "2027 실제 모집행은 과거 자료 유무와 무관하게 전국 검색·목록에 나타난다.",
+      "2024~2026만 있는 단독 모집행은 1·3·4페이지 회원 화면에 노출되지 않지만 정본과 관리자 검수에는 보존된다.",
+      "검증된 2027 연계 과거 입결은 원래 학년도·전형·군·코호트·통계·단위와 출처를 유지한다.",
+      "0명·이월 미확정 행은 비노출하고, 공식 이월 후 양수 모집이 확인되면 같은 행의 새 정본으로 추가한다.",
+      "모집 사실만 확인되고 인원이 미확인인 행은 확인 중으로 표시하며 0과 구분한다.",
+      "연결이 불명확한 과거 행은 현재 행의 잘못된 값으로 붙이지 않으며 2027 현재 모집행 자체는 유지한다.",
+      "필터를 페이지와 건수 계산 전에 적용하고 1·3·4페이지 결과 범위와 PK/권한을 일치시킨다.",
+      "해당 head 변경 전후 재준비·재사용, 입력 1·101·6,081 합성 및 허용 범위 실DB 실행계획/응답속도, 실제 Owner 설정과 화면 인수를 각각 확인한다."
     ],
     "owners": {
       "planning": "develop SSOT and shared harness",
@@ -217001,6 +217021,49 @@
         },
         "prior_current_spec_sha256": "3ea68b665425aebd785c8f352f9bf728a8fac827916cafc6887d5ab9d3b450f0"
       }
+    },
+    "active_recruitment_scope_20261103": {
+      "id": "P1-CURRENT-2027-RECRUITMENT-ANCHOR-20261103",
+      "status": "USER_DECIDED_IMPLEMENTATION_PUBLICATION_AND_LIVE_ACCEPTANCE_PENDING",
+      "decision_date": "2026-11-03",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-04",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "pages": [
+        "/admissions/results",
+        "/admissions/possibilities",
+        "/admissions/favorable"
+      ],
+      "decision": "전국에서 2027학년도 실제 모집이 확인된 모집단위·전형·모집군만 회원용 검색·목록·선택·분석·후보의 기준으로 삼는다. 전국 전체는 이 기준에 해당하는 전국 전체이며 특정 학교의 소수 고정 묶음을 뜻하지 않는다.",
+      "anchor": "2027학년도 공식 모집자료의 실제 모집 여부와 학년도·정규 학교·캠퍼스·모집단위 PK·전형·군을 기준으로 한다. 2027 모집행이 있고 해당 전형에서 실제 모집이 확인되면 과거 입결이 없어도 현재 모집행은 표시한다.",
+      "past_only": "2024~2026에만 존재하며 검증된 2027 모집행이 없는 과거 모집단위는 회원 화면의 독립 목록·검색 결과·대학 선택·후보로 노출하지 않는다. 원본·현재 관측·기존 리포트와 이력은 삭제하거나 덮어쓰지 않는다.",
+      "historical_links": "2024~2026 공식 입결은 검증된 2027 모집행의 연도간 관계가 있을 때만 그 현재 모집행의 과거 참고자료로 연결한다. 명칭 유사·점수 일치 또는 학교 같음만으로 통합·분리·전형·군·모집집단의 동일성을 추정하지 않는다. 관계 미확인은 현재 모집행을 숨기는 사유로 삼지 않고 과거자료 연결 확인 중으로 남긴다.",
+      "zero_and_rollover": "실제 모집하지 않는 것으로 확인된 0명 행과 수시 이월이 생겨야만 모집하는 미확정 행은 현재 회원 대상에 넣지 않는다. 공식 이월 등으로 실제 모집이 확정되면 새 정본/head에서 해당 행을 추가하고 정리본을 다시 준비한다. 원래 0·조건부·공란·미확인은 구분한다.",
+      "missing_count": "공식 자료로 2027 모집 사실 자체는 확인됐으나 인원 숫자만 미확인인 행은 0으로 바꾸거나 실모집 없음으로 단정하지 않고, 현재 모집행으로 포함해 인원 확인 중을 표시한다. 실제 모집 사실이 불명확하고 이월 발생 여부에만 의존하면 확정 전 비노출한다.",
+      "admin_review": "전체 정본의 관리자·자료 검수 화면과 이미 저장된 리포트·감사 이력은 이 회원용 모집 대상 필터로 지우거나 변경하지 않는다. 관리자 검수에서 미연결·과거 관측을 보존해 조사할 수 있다.",
+      "batch_and_cache": "2027 대상 키 집합과 과거 관계/관측은 검증된 동일 head에서 set-based JOIN 또는 제한된 묶음으로 구성하고 회원·학교·학과별 N+1 호출을 금지한다. 인덱스·실행계획·실제 IO를 검증하고 정본 변경 시에만 기존 계약의 불변 P1 정리본을 갱신해 재사용한다.",
+      "pagination_and_security": "현재 모집 대상 판정은 검색·정렬·페이지/건수 계산 이전에 적용한다. 기존 회원 권한·RLS·relay·DTO allowlist·원자 예산과 실기 전형 제외 및 기존 사용자 예외를 유지한다. 권한 밖 DB 직접 접근이나 기존 게이트 완화는 없다.",
+      "coverage": "2027 전체 대상에 적용하며 100개 키는 묶음 크기이지 전국 공개 상한이 아니다. 공식 검증 전 후보·미확정/보류의 숫자는 별도 집계하며 2027 PK가 없다는 것과 자료 손실·미발표를 혼동하지 않는다.",
+      "acceptance": [
+        "2027 실제 모집행은 과거 자료 유무와 무관하게 전국 검색·목록에 나타난다.",
+        "2024~2026만 있는 단독 모집행은 1·3·4페이지 회원 화면에 노출되지 않지만 정본과 관리자 검수에는 보존된다.",
+        "검증된 2027 연계 과거 입결은 원래 학년도·전형·군·코호트·통계·단위와 출처를 유지한다.",
+        "0명·이월 미확정 행은 비노출하고, 공식 이월 후 양수 모집이 확인되면 같은 행의 새 정본으로 추가한다.",
+        "모집 사실만 확인되고 인원이 미확인인 행은 확인 중으로 표시하며 0과 구분한다.",
+        "연결이 불명확한 과거 행은 현재 행의 잘못된 값으로 붙이지 않으며 2027 현재 모집행 자체는 유지한다.",
+        "필터를 페이지와 건수 계산 전에 적용하고 1·3·4페이지 결과 범위와 PK/권한을 일치시킨다.",
+        "해당 head 변경 전후 재준비·재사용, 입력 1·101·6,081 합성 및 허용 범위 실DB 실행계획/응답속도, 실제 Owner 설정과 화면 인수를 각각 확인한다."
+      ],
+      "implementation": "NOT_IMPLEMENTED_BY_THIS_PLANNING_DECISION",
+      "DB_or_source_mutation": "NOT_RUN",
+      "deployment": "NOT_RUN",
+      "live_browser_acceptance": "NOT_RUN"
     }
   },
   "administrator_verification_quota_contract": {
