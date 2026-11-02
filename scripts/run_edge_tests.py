@@ -7,7 +7,7 @@ import argparse,base64,binascii,hashlib,io,json,os,re,sys,tarfile,xml.etree.Elem
 from pathlib import Path, PurePosixPath
 from urllib.parse import urlsplit
 from edge_source_scope import classify_sources
-from check_edge_contract import EdgeFailure,check_workspace,command,digest,hashes,json_bytes,verify_manifest,write_new
+from check_edge_contract import EdgeFailure,check_workspace,command,digest,hashes,json_bytes,verify_manifest,write_new,dynamic_imports,local_url,safe_path,tokens
 def parse_junit(path,expected):
     if not Path(path).is_file():raise EdgeFailure("deno_test_result_missing")
     root=ET.fromstring(Path(path).read_bytes());cases=list(root.iter("testcase"))
@@ -620,6 +620,556 @@ def require_auxiliary_junit_identities(path, cases):
     if len(actual) != len(expected) or len(set(actual)) != len(actual) or set(actual) != expected:
         raise EdgeFailure("service_auxiliary_junit_identity_invalid")
 
+P1_REVIEW_SOURCES = (
+    "supabase/functions/_shared/jungsi/application/recruitment_final_qualification.ts",
+    "supabase/functions/_shared/jungsi/application/p1_quota_fingerprint_adapter.ts",
+    "supabase/functions/_shared/jungsi/application/history_score_context_review.ts",
+)
+P1_REVIEW_SUITES = (
+    ("tests/p1_contract_review/test_recruitment_final_qualification.js", 38),
+    ("tests/p1_contract_review/test_p1_quota_fingerprint_adapter.js", 12),
+    ("tests/p1_contract_review/test_history_score_context_review.js", 21),
+    ("tests/p1_contract_review/test_history_score_context_validator.js", 1),
+)
+P1_REVIEW_AGGREGATION_TEST = "tests/test_p1_edge_unit_aggregation.py"
+
+def p1_review_registration(spec, before):
+    """Bind additive P1 review suites without changing the foundation test set."""
+    contract = spec.get("p1_recruitment_score_review_verification")
+    required = set(P1_REVIEW_SOURCES) | {path for path, _ in P1_REVIEW_SUITES} | {P1_REVIEW_AGGREGATION_TEST}
+    if contract is None:
+        if required & set(before): raise EdgeFailure("p1_review_registration_missing")
+        return None
+    if (not isinstance(contract, dict) or
+        contract.get("format") != "jungsi.p1-recruitment-score-review/v1" or
+        contract.get("status") != "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED" or
+        contract.get("baseline_foundation_count") != 656 or
+        contract.get("baseline_foundation_test_files") != 44 or
+        contract.get("production_ready") is not False):
+        raise EdgeFailure("p1_review_registration_invalid")
+    cfg = spec.get("edge_harness", {})
+    if cfg.get("unit_count") != 656 or len(cfg.get("tests", [])) != 44 or required & set(cfg.get("tests", [])):
+        raise EdgeFailure("p1_review_foundation_scope_invalid")
+    sources = contract.get("source_bindings")
+    suites = contract.get("test_suites")
+    if (not isinstance(sources, list) or len(sources) != len(P1_REVIEW_SOURCES) or
+        not all(isinstance(x, dict) for x in sources) or
+        {x.get("path") for x in sources} != set(P1_REVIEW_SOURCES) or
+        not isinstance(suites, list) or len(suites) != len(P1_REVIEW_SUITES) or
+        not all(isinstance(x, dict) for x in suites) or
+        [(x.get("path"), x.get("count")) for x in suites] != list(P1_REVIEW_SUITES)):
+        raise EdgeFailure("p1_review_bindings_invalid")
+    for item in [*sources, *suites]:
+        if (not isinstance(item.get("sha256"), str) or not re.fullmatch(r"[a-f0-9]{64}", item["sha256"]) or
+            before.get(item["path"]) != item["sha256"]):
+            raise EdgeFailure("p1_review_snapshot_binding_invalid")
+    regression = contract.get("aggregation_regression")
+    if (not isinstance(regression, dict) or set(regression) != {"path", "sha256"} or
+        regression.get("path") != P1_REVIEW_AGGREGATION_TEST or
+        not isinstance(regression.get("sha256"), str) or not re.fullmatch(r"[a-f0-9]{64}", regression["sha256"]) or
+        before.get(P1_REVIEW_AGGREGATION_TEST) != regression["sha256"]):
+        raise EdgeFailure("p1_review_aggregation_regression_invalid")
+    names = {}
+    for suite in suites:
+        cases = suite.get("case_names")
+        if (not isinstance(cases, list) or len(cases) != suite["count"] or
+            any(not isinstance(n, str) or not n for n in cases) or len(set(cases)) != len(cases)):
+            raise EdgeFailure("p1_review_case_names_invalid")
+        names[suite["path"]] = cases
+    return dict(test_paths=[x["path"] for x in suites], test_count=sum(x["count"] for x in suites),
+        case_names_by_path=names, source_bindings=sources, test_bindings=suites, regression_binding=regression)
+
+P1_SELECTION_BRIDGE_SOURCES = (
+    "supabase/functions/_shared/p1_r27_selection_bridge.ts",
+    "supabase/functions/_shared/current_public_r27_bounded.ts",
+    "supabase/functions/_shared/current_public_r27_selection.ts",
+    "supabase/functions/_shared/current_public_catalog.ts",
+    "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+    "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts",
+    "supabase/functions/_shared/jungsi/application/r27_standalone.ts",
+    "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
+    "supabase/functions/_shared/jungsi/domain/json_value.ts",
+    "supabase/functions/_shared/jungsi/domain/native_json.ts",
+)
+P1_SELECTION_BRIDGE_TEST = "tests/p1_contract_review/test_p1_r27_selection_bridge.synthetic.js"
+P1_SELECTION_BRIDGE_FIXTURE = "tests/p1_contract_review/fixture.bridge.v2.synthetic.mjs"
+
+def p1_selection_bridge_registration(spec, before):
+    """Bind P1 selection source, reused sources and offline test fixture."""
+    c = spec.get("p1_selection_bridge_review_verification")
+    required = set(P1_SELECTION_BRIDGE_SOURCES) | {P1_SELECTION_BRIDGE_TEST, P1_SELECTION_BRIDGE_FIXTURE}
+    if c is None:
+        if P1_SELECTION_BRIDGE_SOURCES[0] in before: raise EdgeFailure("p1_selection_bridge_registration_missing")
+        return None
+    if (not isinstance(c, dict) or c.get("format") != "jungsi.p1-selection-bridge-review/v1" or
+        c.get("status") != "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED" or
+        c.get("baseline_foundation_count") != 656 or c.get("baseline_foundation_test_files") != 44 or
+        c.get("production_ready") is not False or c.get("test_count") != 17 or
+        c.get("test_path") != P1_SELECTION_BRIDGE_TEST or c.get("fixture_path") != P1_SELECTION_BRIDGE_FIXTURE):
+        raise EdgeFailure("p1_selection_bridge_registration_invalid")
+    cfg = spec.get("edge_harness", {})
+    if cfg.get("unit_count") != 656 or len(cfg.get("tests", [])) != 44 or required & set(cfg.get("tests", [])):
+        raise EdgeFailure("p1_selection_bridge_foundation_scope_invalid")
+    bindings = c.get("source_bindings")
+    if (not isinstance(bindings, list) or len(bindings) != len(P1_SELECTION_BRIDGE_SOURCES) or
+        not all(isinstance(x, dict) for x in bindings) or
+        {x.get("path") for x in bindings} != set(P1_SELECTION_BRIDGE_SOURCES)):
+        raise EdgeFailure("p1_selection_bridge_bindings_invalid")
+    test_bindings = [{"path": P1_SELECTION_BRIDGE_TEST, "sha256": c.get("test_sha256")},
+                     {"path": P1_SELECTION_BRIDGE_FIXTURE, "sha256": c.get("fixture_sha256")}]
+    for item in [*bindings, *test_bindings]:
+        if (not isinstance(item.get("sha256"), str) or not re.fullmatch(r"[a-f0-9]{64}", item["sha256"]) or
+            before.get(item["path"]) != item["sha256"]):
+            raise EdgeFailure("p1_selection_bridge_snapshot_binding_invalid")
+    names = c.get("case_names")
+    if (not isinstance(names, list) or len(names) != 17 or
+        any(not isinstance(n, str) or not n for n in names) or len(set(names)) != 17):
+        raise EdgeFailure("p1_selection_bridge_case_names_invalid")
+    return dict(test_path=P1_SELECTION_BRIDGE_TEST, test_count=17,
+        case_names_by_path={P1_SELECTION_BRIDGE_TEST: names}, source_bindings=bindings, test_bindings=test_bindings)
+
+SERVICE_END_SYNTHETIC_SOURCES = (
+    "supabase/functions/_shared/jungsi/application/operating_policy.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
+    "supabase/functions/_shared/jungsi/application/service_end_admission.ts",
+    "supabase/functions/_shared/jungsi/domain/time.ts",
+    "tests/edge/synthetic_score_input_policy.ts",
+    "tests/edge/synthetic_exam_pack.ts",
+    "tests/edge/fixture.ts",
+)
+SERVICE_END_SYNTHETIC_TEST = "tests/p1_contract_review/test_score_010_cutoff.synthetic.js"
+
+def service_end_synthetic_registration(spec, before):
+    """Bind simulated cutoff and expired rollout checks, without executing SQL."""
+    c = spec.get("service_end_score_cutoff_synthetic_verification")
+    if c is None:
+        if SERVICE_END_SYNTHETIC_TEST in before: raise EdgeFailure("service_end_synthetic_registration_missing")
+        return None
+    if (not isinstance(c, dict) or c.get("format") != "jungsi.service-end-score-cutoff-synthetic/v1" or
+        c.get("status") != "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE" or
+        c.get("baseline_foundation_count") != 656 or c.get("baseline_foundation_test_files") != 44 or
+        c.get("production_ready") is not False or c.get("test_count") != 3 or
+        c.get("test_path") != SERVICE_END_SYNTHETIC_TEST):
+        raise EdgeFailure("service_end_synthetic_registration_invalid")
+    cfg = spec.get("edge_harness", {})
+    if cfg.get("unit_count") != 656 or len(cfg.get("tests", [])) != 44 or SERVICE_END_SYNTHETIC_TEST in cfg.get("tests", []):
+        raise EdgeFailure("service_end_synthetic_foundation_scope_invalid")
+    bindings = c.get("source_bindings")
+    if (not isinstance(bindings, list) or len(bindings) != len(SERVICE_END_SYNTHETIC_SOURCES) or
+        not all(isinstance(x, dict) for x in bindings) or
+        {x.get("path") for x in bindings} != set(SERVICE_END_SYNTHETIC_SOURCES)):
+        raise EdgeFailure("service_end_synthetic_bindings_invalid")
+    test_binding = {"path": SERVICE_END_SYNTHETIC_TEST, "sha256": c.get("test_sha256")}
+    for item in [*bindings, test_binding]:
+        if (not isinstance(item.get("sha256"), str) or not re.fullmatch(r"[a-f0-9]{64}", item["sha256"]) or
+            before.get(item["path"]) != item["sha256"]):
+            raise EdgeFailure("service_end_synthetic_snapshot_binding_invalid")
+    names = c.get("case_names")
+    if (not isinstance(names, list) or len(names) != 3 or
+        any(not isinstance(n, str) or not n for n in names) or len(set(names)) != 3):
+        raise EdgeFailure("service_end_synthetic_case_names_invalid")
+    return dict(test_path=SERVICE_END_SYNTHETIC_TEST, test_count=3,
+        case_names_by_path={SERVICE_END_SYNTHETIC_TEST: names}, source_bindings=bindings, test_binding=test_binding)
+
+P1CG_PREFIX = "tests/p1_contract_review/"
+P1CG_ROOTS = tuple(P1CG_PREFIX + n for n in (
+    "test_recruitment_final_qualification.js", "test_p1_quota_fingerprint_adapter.js",
+    "test_history_score_context_review.js", "test_history_score_context_validator.js",
+    "test_p1_r27_selection_bridge.synthetic.js", "test_score_010_cutoff.synthetic.js"))
+P1CG_FIXTURE = P1CG_PREFIX + "fixture.bridge.v2.synthetic.mjs"
+P1CG_TEST_FILES = frozenset((*P1CG_ROOTS, P1CG_FIXTURE))
+P1CG_GRAPH_MANIFEST = "tests/p1_contract_review_graph.json"
+P1CG_GRAPH_FORMAT = "jungsi.p1-contract-offline-closure/v1"
+P1CG_CONFIG_PATH = "supabase/functions/deno.json"
+P1CG_SHARED_FIXTURES = frozenset((
+    "tests/edge/fixture.ts", "tests/edge/synthetic_exam_pack.ts",
+    "tests/edge/synthetic_score_input_policy.ts"))
+P1CG_EDGE_ADAPTERS = frozenset((
+    "supabase/functions/_shared/current_public_catalog.ts",
+    "supabase/functions/_shared/current_public_r27_bounded.ts",
+    "supabase/functions/_shared/current_public_r27_selection.ts",
+    "supabase/functions/_shared/p1_r27_selection_bridge.ts"))
+P1CG_NODE_BY_ROOT = {p: frozenset() for p in P1CG_ROOTS}
+P1CG_NODE_BY_ROOT[P1CG_ROOTS[4]] = frozenset(("node:assert/strict", "node:zlib"))
+P1CG_PINNED_TYPE_IMPORTS = {
+    "supabase/functions/_shared/jungsi/application/platform_repository.ts": (
+        "839a70ed64ef53b626b0b404b91a0a4fbbdc58704159d5b6d76ed82945f57744", ["./score_input_ports.ts"]),
+    "supabase/functions/_shared/jungsi/application/profile_reports.ts": (
+        "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d",
+        ["./score_input_ports.ts", "./score_input_ports.ts"]),
+    "supabase/functions/_shared/jungsi/application/score_input_ports.ts": (
+        "c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c", ["./session_service.ts"] * 6),
+    "supabase/functions/_shared/jungsi/application/score_input_service.ts": (
+        "26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1", ["./score_input_ports.ts"]),
+}
+P1CG_ALLOWED_LAYERS = {
+    "domain": {"domain"}, "application": {"application", "domain"},
+    "infrastructure": {"application", "domain", "infrastructure"},
+    "edge_adapter": {"application", "domain", "infrastructure", "edge_adapter"},
+    "synthetic_fixture": {"application", "domain", "infrastructure", "edge_adapter",
+                          "synthetic_fixture", "node_builtin"},
+    "suite_test": {"application", "domain", "infrastructure", "edge_adapter",
+                   "synthetic_fixture", "node_builtin"},
+}
+P1CG_MEDIA = {".ts": "TypeScript", ".tsx": "Tsx", ".js": "JavaScript", ".mjs": "Mjs"}
+
+def _p1cg_need(ok, reason):
+    if not ok:
+        raise EdgeFailure("p1_contract_graph_" + reason)
+
+def _p1cg_sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+def _p1cg_snapshot_bytes(root, before, path):
+    safe_path(path)
+    _p1cg_need(isinstance(before, dict) and isinstance(before.get(path), str), "missing_snapshot_entry")
+    p = root / path
+    _p1cg_need(not any(q.is_symlink() or (hasattr(q, "is_junction") and q.is_junction())
+                  for q in (p, *p.parents)), "linked_path")
+    _p1cg_need(p.is_file() and p.resolve().is_relative_to(root.resolve()), "unsafe_file")
+    raw = p.read_bytes()
+    _p1cg_need(_p1cg_sha(raw) == before[path], "snapshot_hash")
+    return raw
+
+def _p1cg_layer(path):
+    if path.startswith("node:"):
+        return "node_builtin"
+    if path in P1CG_TEST_FILES:
+        return "suite_test" if PurePosixPath(path).name.startswith("test_") else "synthetic_fixture"
+    if path in P1CG_SHARED_FIXTURES:
+        return "synthetic_fixture"
+    if path.startswith("supabase/functions/_shared/jungsi/"):
+        category = path.split("/")[4]
+        _p1cg_need(category in {"application", "domain", "infrastructure"}, "unknown_layer")
+        return category
+    if path in P1CG_EDGE_ADAPTERS:
+        return "edge_adapter"
+    raise EdgeFailure("p1_contract_graph_unapproved_source")
+
+def _p1cg_check_literals(path, raw):
+    try:
+        literals = dynamic_imports(raw.decode("utf-8"))
+    except (UnicodeError, ValueError) as error:
+        raise EdgeFailure("p1_contract_graph_invalid_source") from error
+    if literals:
+        pin = P1CG_PINNED_TYPE_IMPORTS.get(path)
+        _p1cg_need(pin is not None and _p1cg_sha(raw) == pin[0] and literals == pin[1], "dynamic_import")
+    return literals
+
+
+def _p1cg_static_imports(raw):
+    """Conservatively extract literal ES imports/re-exports from the source lexer."""
+    try:
+        stream = tokens(raw.decode("utf-8"))
+    except (UnicodeError, ValueError) as error:
+        raise EdgeFailure("p1_contract_graph_invalid_source") from error
+    _p1cg_need(not any(k in ("word", "string") and v in ("eval", "Function", "require")
+                  for k, v, _, _ in stream), "dynamic_evaluation")
+    found = []
+    for i, (kind, word, _, _) in enumerate(stream):
+        if kind != "word" or word not in ("import", "export") or (i and stream[i-1][1] == "."):
+            continue
+        j = i + 1
+        if j >= len(stream):
+            if word == "import": raise EdgeFailure("p1_contract_graph_invalid_import")
+            continue
+        nxt = stream[j][1]
+        if word == "import" and nxt in ("(", "."):
+            continue
+        if word == "import" and stream[j][0] == "string":
+            value = stream[j][1]
+            _p1cg_need("\\" not in value, "escaped_import")
+            found.append(value)
+            continue
+        if word == "export":
+            if nxt == "type" and j+1 < len(stream) and stream[j+1][1] in ("{", "*"):
+                j += 1; nxt = stream[j][1]
+            if nxt == "{":
+                depth = 1; j += 1
+                while j < len(stream) and depth:
+                    if stream[j][1] == "{": depth += 1
+                    elif stream[j][1] == "}": depth -= 1
+                    j += 1
+                _p1cg_need(depth == 0, "invalid_export")
+                if j < len(stream) and stream[j][1] == "from":
+                    _p1cg_need(j+1 < len(stream) and stream[j+1][0] == "string", "invalid_export")
+                    value = stream[j+1][1]; _p1cg_need("\\" not in value, "escaped_import"); found.append(value)
+                continue
+            if nxt != "*":
+                continue
+        found_from = False
+        while j < len(stream):
+            t = stream[j]
+            if t[1] == ";" or (j > i+1 and t[0] == "word" and t[1] in ("import", "export")):
+                break
+            if t[0] == "word" and t[1] == "from" and j+1 < len(stream) and stream[j+1][0] == "string":
+                value = stream[j+1][1]; _p1cg_need("\\" not in value, "escaped_import")
+                found.append(value); found_from = True; break
+            j += 1
+        _p1cg_need(found_from, "invalid_import")
+    return found
+
+
+def _p1cg_check_test_edge(source, target):
+    _p1cg_need(not (source in P1CG_ROOTS and target in P1CG_ROOTS), "test_root_cross_import")
+    if target == P1CG_FIXTURE:
+        _p1cg_need(source == P1CG_ROOTS[4], "bridge_fixture_scope")
+
+def normalize_p1_graph(info, root, before, entry):
+    """Validate one fresh Deno info graph and return a path-independent model."""
+    root = Path(root).resolve()
+    _p1cg_need(entry in P1CG_ROOTS and isinstance(info, dict) and
+          set(info) == {"version", "roots", "modules", "redirects", "npmPackages"} and
+          type(info.get("version")) is int and info["version"] == 1, "schema")
+    _p1cg_need(type(info.get("redirects")) is dict and info["redirects"] == {} and
+          type(info.get("npmPackages")) is dict and info["npmPackages"] == {}, "external_graph")
+    roots = info.get("roots")
+    _p1cg_need(isinstance(roots, list) and len(roots) == 1 and local_url(roots[0], root) == entry, "root")
+    modules = info.get("modules")
+    _p1cg_need(isinstance(modules, list) and 1 <= len(modules) <= 512, "module_count")
+    uri_to_path, file_hashes, modules_by_path, module_literals = {}, {}, {}, {}
+    node_specs = set()
+    for m in modules:
+        _p1cg_need(isinstance(m, dict) and m.get("error") is None, "module")
+        uri, kind = m.get("specifier"), m.get("kind")
+        _p1cg_need(isinstance(uri, str) and uri not in uri_to_path, "duplicate_module")
+        if kind == "node":
+            _p1cg_need(uri in P1CG_NODE_BY_ROOT[entry] and uri not in node_specs, "node_builtin")
+            node_specs.add(uri); uri_to_path[uri] = uri
+            continue
+        _p1cg_need(kind == "esm" and isinstance(m.get("local"), str), "module_kind")
+        path = local_url(uri, root)
+        _p1cg_need(path not in modules_by_path and uri == (root / path).resolve().as_uri(), "module_alias")
+        _p1cg_need(Path(m["local"]).resolve() == (root / path).resolve(), "module_local")
+        _p1cg_need(P1CG_MEDIA.get(PurePosixPath(path).suffix) == m.get("mediaType"), "media_type")
+        _p1cg_layer(path)
+        raw = _p1cg_snapshot_bytes(root, before, path)
+        _p1cg_need(type(m.get("size")) is int and m["size"] == len(raw), "module_size")
+        module_literals[path] = _p1cg_check_literals(path, raw) + _p1cg_static_imports(raw)
+        uri_to_path[uri] = path; modules_by_path[path] = m; file_hashes[path] = _p1cg_sha(raw)
+    _p1cg_need(node_specs == P1CG_NODE_BY_ROOT[entry] and entry in modules_by_path, "node_coverage")
+    edges = []
+    for path, module in modules_by_path.items():
+        deps = module.get("dependencies", [])
+        _p1cg_need(isinstance(deps, list), "dependencies")
+        _p1cg_need(set(module_literals[path]) <= {d.get("specifier") for d in deps if isinstance(d, dict)},
+              "source_import_not_graphed")
+        for dep in deps:
+            _p1cg_need(isinstance(dep, dict) and dep.get("isDynamic", False) is False and
+                  dep.get("is_dynamic", False) is False, "dynamic_import")
+            raw = dep.get("specifier")
+            _p1cg_need(isinstance(raw, str) and (raw.startswith(("./", "../")) or raw.startswith("node:"))
+                  and not any(x in raw for x in ("\\", "?", "#", "%")), "specifier")
+            targets = []
+            for kind in ("code", "type"):
+                resolved = dep.get(kind)
+                if resolved is None:
+                    continue
+                _p1cg_need(isinstance(resolved, dict) and resolved.get("error") is None and
+                      resolved.get("specifier") in uri_to_path, "unresolved")
+                target = uri_to_path[resolved["specifier"]]
+                if raw.startswith("node:"):
+                    _p1cg_need(raw == target and target in node_specs, "node_resolution")
+                else:
+                    _p1cg_need(not target.startswith("node:") and (root / path).parent.joinpath(raw).resolve()
+                          == (root / target).resolve(), "relative_resolution")
+                _p1cg_check_test_edge(path, target)
+                src_layer, dst_layer = _p1cg_layer(path), _p1cg_layer(target)
+                _p1cg_need(dst_layer in P1CG_ALLOWED_LAYERS[src_layer], "layer")
+                targets.append([kind, target])
+            _p1cg_need(bool(targets), "unresolved")
+            edges.append([path, raw, targets])
+    _p1cg_need(len(edges) <= 4096, "edge_count")
+    ordered = sorted(edges, key=lambda v: json.dumps(v, sort_keys=True))
+    _p1cg_need(len({json.dumps(v, sort_keys=True) for v in edges}) == len(edges), "duplicate_edge")
+    reachable, pending = {entry}, [entry]
+    while pending:
+        source = pending.pop()
+        for edge in edges:
+            if edge[0] == source:
+                for _, target in edge[2]:
+                    if target not in reachable:
+                        reachable.add(target); pending.append(target)
+    _p1cg_need(reachable == set(file_hashes) | node_specs, "unreachable_module")
+    return {"files": {p: file_hashes[p] for p in sorted(file_hashes)},
+            "builtins": sorted(node_specs), "edges": ordered}
+
+def build_p1_graph_manifest(root, before, graphs):
+    """Generate a proposed model only; acceptance requires independent review."""
+    root = Path(root).resolve()
+    _p1cg_need(set(graphs) == set(P1CG_ROOTS), "root_inventory")
+    _p1cg_need({p for p in before if p.startswith(P1CG_PREFIX)} == P1CG_TEST_FILES, "test_inventory")
+    tests = {p: _p1cg_sha(_p1cg_snapshot_bytes(root, before, p)) for p in sorted(P1CG_TEST_FILES)}
+    config_sha = _p1cg_sha(_p1cg_snapshot_bytes(root, before, P1CG_CONFIG_PATH))
+    normalized = {p: normalize_p1_graph(graphs[p], root, before, p) for p in P1CG_ROOTS}
+    shared = {p for g in normalized.values() for p in g["files"]
+              if p.startswith("tests/") and not p.startswith(P1CG_PREFIX)}
+    _p1cg_need(shared == P1CG_SHARED_FIXTURES, "shared_fixture_coverage")
+    return {"format": P1CG_GRAPH_FORMAT, "roots": list(P1CG_ROOTS), "test_files": tests,
+            "config": {"path": P1CG_CONFIG_PATH, "sha256": config_sha}, "graphs": normalized}
+
+def active_p1_roots(spec):
+    _p1cg_need(isinstance(spec, dict), "spec")
+    roots = []
+    if "p1_recruitment_score_review_verification" in spec: roots.extend(P1CG_ROOTS[:4])
+    if "p1_selection_bridge_review_verification" in spec: roots.append(P1CG_ROOTS[4])
+    if "service_end_score_cutoff_synthetic_verification" in spec: roots.append(P1CG_ROOTS[5])
+    return tuple(roots)
+
+def verify_p1_graph_manifest(root, before, spec, manifest_sha256, graphs):
+    """Verify a separately pinned proposal and fresh offline graphs; supports subsets."""
+    root = Path(root).resolve(); active = active_p1_roots(spec)
+    observed = {p for p in before if p.startswith(P1CG_PREFIX)}
+    if not active:
+        _p1cg_need(not observed and P1CG_GRAPH_MANIFEST not in before, "unregistered_files")
+        return {"status": "NOT_APPLICABLE_NO_P1_CONTRACT_SUITE", "roots": 0}
+    expected_files = set(active)
+    if P1CG_ROOTS[4] in active: expected_files.add(P1CG_FIXTURE)
+    _p1cg_need(observed == expected_files and set(graphs) == set(active), "test_inventory")
+    raw = _p1cg_snapshot_bytes(root, before, P1CG_GRAPH_MANIFEST)
+    _p1cg_need(isinstance(manifest_sha256, str) and len(manifest_sha256) == 64 and
+          _p1cg_sha(raw) == manifest_sha256, "manifest_pin")
+    try: ref = json.loads(raw)
+    except (UnicodeError, ValueError) as error:
+        raise EdgeFailure("p1_contract_graph_manifest_invalid") from error
+    _p1cg_need(isinstance(ref, dict) and set(ref) == {"format", "roots", "test_files", "config", "graphs"}
+          and ref["format"] == P1CG_GRAPH_FORMAT and ref["roots"] == list(P1CG_ROOTS)
+          and isinstance(ref["test_files"], dict) and set(ref["test_files"]) == P1CG_TEST_FILES
+          and isinstance(ref["graphs"], dict) and set(ref["graphs"]) == set(P1CG_ROOTS), "manifest_schema")
+    _p1cg_need(ref["config"] == {"path": P1CG_CONFIG_PATH,
+          "sha256": _p1cg_sha(_p1cg_snapshot_bytes(root, before, P1CG_CONFIG_PATH))}, "config_pin")
+    for path in expected_files:
+        _p1cg_need(ref["test_files"][path] == _p1cg_sha(_p1cg_snapshot_bytes(root, before, path)), "test_pin")
+    for entry in active:
+        _p1cg_need(normalize_p1_graph(graphs[entry], root, before, entry) == ref["graphs"][entry],
+              "graph_changed")
+    return {"status": "PASS_OFFLINE_PINNED_GRAPH_REVIEW_ONLY", "roots": len(active),
+            "files": len(expected_files), "production_ready": False}
+
+
+def reference_p1_graph_info(root, before, entry, model):
+    """Build a synthetic info object from a pinned model for pre-read validation."""
+    root = Path(root).resolve()
+    _p1cg_need(entry in P1CG_ROOTS and isinstance(model, dict) and set(model) == {"files", "builtins", "edges"},
+          "reference_schema")
+    files, builtins, edges = model["files"], model["builtins"], model["edges"]
+    _p1cg_need(isinstance(files, dict) and 1 <= len(files) <= 512 and entry in files and
+          isinstance(builtins, list) and len(builtins) == len(set(builtins)) and
+          set(builtins) == P1CG_NODE_BY_ROOT[entry] and isinstance(edges, list) and len(edges) <= 4096,
+          "reference_schema")
+    nodes = {}
+    for path, expected in files.items():
+        _p1cg_layer(path)
+        raw = _p1cg_snapshot_bytes(root, before, path)
+        _p1cg_need(_p1cg_sha(raw) == expected and PurePosixPath(path).suffix in P1CG_MEDIA, "reference_source_pin")
+        p = (root / path).resolve()
+        nodes[path] = {"kind": "esm", "specifier": p.as_uri(), "local": str(p),
+                       "mediaType": P1CG_MEDIA[PurePosixPath(path).suffix], "size": len(raw),
+                       "dependencies": []}
+    for edge in edges:
+        _p1cg_need(isinstance(edge, list) and len(edge) == 3 and edge[0] in nodes and
+              isinstance(edge[1], str) and isinstance(edge[2], list), "reference_edge")
+        dep = {"specifier": edge[1]}
+        for pair in edge[2]:
+            _p1cg_need(isinstance(pair, list) and len(pair) == 2 and pair[0] in ("code", "type") and
+                  pair[0] not in dep and (pair[1] in nodes or pair[1] in builtins), "reference_edge")
+            target = pair[1] if pair[1] in builtins else (root / pair[1]).resolve().as_uri()
+            dep[pair[0]] = {"specifier": target}
+        nodes[edge[0]]["dependencies"].append(dep)
+    return {"version": 1, "roots": [(root / entry).resolve().as_uri()],
+            "modules": [*nodes.values(), *({"kind": "node", "specifier": n} for n in builtins)],
+            "redirects": {}, "npmPackages": {}}
+
+def preflight_p1_graph_manifest(root, before, spec, manifest_sha256):
+    """Check pinned source/import closure before invoking Deno info."""
+    root = Path(root).resolve()
+    active = active_p1_roots(spec)
+    if not active:
+        return verify_p1_graph_manifest(root, before, spec, manifest_sha256, {})
+    raw = _p1cg_snapshot_bytes(root, before, P1CG_GRAPH_MANIFEST)
+    _p1cg_need(isinstance(manifest_sha256, str) and _p1cg_sha(raw) == manifest_sha256, "manifest_pin")
+    try: ref = json.loads(raw)
+    except (UnicodeError, ValueError) as error:
+        raise EdgeFailure("p1_contract_graph_manifest_invalid") from error
+    _p1cg_need(isinstance(ref, dict) and isinstance(ref.get("graphs"), dict) and
+          all(p in ref["graphs"] for p in active), "manifest_schema")
+    graphs = {p: reference_p1_graph_info(root, before, p, ref["graphs"][p]) for p in active}
+    return verify_p1_graph_manifest(root, before, spec, manifest_sha256, graphs)
+
+
+P1CG_META_KEY = "p1_contract_offline_graph_verification"
+P1CG_REGRESSION_PATH = "tests/test_p1_contract_graph_guard.py"
+P1CG_DENY_FLAGS = ("--no-prompt", "--deny-read", "--deny-net", "--deny-env", "--deny-run",
+                   "--deny-sys", "--deny-ffi", "--deny-write")
+
+def _p1cg_unique_pairs(pairs):
+    result = {}
+    for key, value in pairs:
+        _p1cg_need(key not in result, "duplicate_json_key")
+        result[key] = value
+    return result
+
+def run_p1_contract_offline_guard(root, before, spec, deno, cfg, output, tool):
+    active = active_p1_roots(spec)
+    if not active:
+        _p1cg_need(P1CG_META_KEY not in spec, "orphan_registration")
+        verify_p1_graph_manifest(root, before, spec, "", {})
+        return None
+    meta = spec.get(P1CG_META_KEY)
+    _p1cg_need(isinstance(meta, dict) and set(meta) == {
+        "format", "status", "manifest_path", "manifest_sha256", "regression_test", "production_ready"
+    } and meta.get("format") == "jungsi.p1-contract-offline-verification/v1"
+       and meta.get("status") == "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED"
+       and meta.get("manifest_path") == P1CG_GRAPH_MANIFEST
+       and meta.get("production_ready") is False, "registration")
+    regression = meta.get("regression_test")
+    _p1cg_need(isinstance(regression, dict) and set(regression) == {"path", "sha256"}
+       and regression.get("path") == P1CG_REGRESSION_PATH
+       and regression.get("sha256") == _p1cg_sha(_p1cg_snapshot_bytes(root, before, P1CG_REGRESSION_PATH)),
+       "regression_binding")
+    _p1cg_need(isinstance(cfg, dict) and cfg.get("config") == P1CG_CONFIG_PATH, "config_path")
+    config = json.loads(_p1cg_snapshot_bytes(root, before, P1CG_CONFIG_PATH),
+                        object_pairs_hook=_p1cg_unique_pairs)
+    _p1cg_need(isinstance(config, dict) and not any(config.get(k) for k in
+       ("imports", "scopes", "extends", "importMap", "vendor", "nodeModulesDir"))
+       and isinstance(config.get("compilerOptions", {}), dict)
+       and not any(config.get("compilerOptions", {}).get(k) for k in ("types", "jsxImportSource")),
+       "config_resolution")
+    # Validate the pinned model, its source hashes and literal import closure before Deno parses files.
+    preflight_p1_graph_manifest(root, before, spec, meta.get("manifest_sha256"))
+    executable = Path(deno)
+    _p1cg_need(isinstance(tool, dict) and isinstance(tool.get("sha256"), str) and executable.is_file()
+       and not any(p.is_symlink() or (hasattr(p, "is_junction") and p.is_junction())
+                   for p in (executable, *executable.parents))
+       and _p1cg_sha(executable.read_bytes()) == tool["sha256"], "deno_pin")
+    graphs = {}
+    for i, entry in enumerate(active):
+        _p1cg_need(_p1cg_sha(executable.read_bytes()) == tool["sha256"], "deno_pin")
+        raw = command([deno, "info", "--json", "--no-lock", "--no-remote", "--no-npm",
+                       "--config", P1CG_CONFIG_PATH, "./" + entry],
+                      root=root, output=output, name="p1_contract_graph_info_" + str(i))
+        _p1cg_need(len(raw) <= 8_388_608 and _p1cg_sha(executable.read_bytes()) == tool["sha256"],
+                   "deno_pin_or_graph_size")
+        graphs[entry] = json.loads(raw, object_pairs_hook=_p1cg_unique_pairs)
+    result = verify_p1_graph_manifest(root, before, spec, meta["manifest_sha256"], graphs)
+    test_paths = list(active) + ([P1CG_FIXTURE] if P1CG_ROOTS[4] in active else [])
+    common = ["--no-lock", "--no-remote", "--no-npm", "--config", P1CG_CONFIG_PATH]
+    command([deno, "check", *common, *test_paths], root=root, output=output, name="p1_contract_check")
+    command([deno, "lint", "--config", P1CG_CONFIG_PATH, *test_paths],
+            root=root, output=output, name="p1_contract_lint")
+    command([deno, "fmt", "--check", "--config", P1CG_CONFIG_PATH, *test_paths],
+            root=root, output=output, name="p1_contract_fmt")
+    _p1cg_need(_p1cg_sha(executable.read_bytes()) == tool["sha256"], "deno_pin")
+    return result
+
+def run_p1_contract_suite(deno, common, junit, paths, root, output, name):
+    _p1cg_need(common == ["--no-lock", "--no-remote", "--no-npm", "--config", P1CG_CONFIG_PATH]
+       and isinstance(paths, (list, tuple)) and paths and set(paths) <= set(P1CG_ROOTS),
+       "suite_scope")
+    return command([deno, "test", *common, *P1CG_DENY_FLAGS, "--reporter=dot",
+                    "--junit-path", str(junit), *paths], root=root, output=output, name=name)
+
+
 def run_workspace(root,manifest,deno,python,output):
     root=Path(root).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
     before=verify_manifest(root,manifest);spec=json.loads((root/"docs/current/service_spec.json").read_bytes())
@@ -631,6 +1181,7 @@ def run_workspace(root,manifest,deno,python,output):
     if not python or not Path(python).is_file():raise EdgeFailure("python_runtime_unavailable")
     cfg=spec["edge_harness"]
     parsed=check_workspace(root,manifest,deno,output/"contract")
+    p1_graph_guard=run_p1_contract_offline_guard(root,before,spec,deno,cfg,output,parsed["tool"])
     paths=list(cfg["files"]);common=["--no-lock","--no-remote","--no-npm","--config",cfg["config"]]
     command([deno,"check",*common,*paths],root=root,output=output,name="check")
     command([deno,"lint","--config",cfg["config"],*paths],root=root,output=output,name="lint")
@@ -677,6 +1228,39 @@ def run_workspace(root,manifest,deno,python,output):
           baseline_foundation_count=656,baseline_score_tests=31,coverage="INCIDENT_RECOVERY_V5_SYNTHETIC",
           source_bindings=recovery["source_bindings"],native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE",
           activation_status="NOT_RUN",operating_writes=0)
+    p1_review = p1_review_registration(spec, before)
+    p1_review_unit = None
+    if p1_review is not None:
+        p1_junit = output.resolve() / "p1_recruitment_score_review.junit.xml"
+        run_p1_contract_suite(deno, common, p1_junit, p1_review["test_paths"], root, output, "p1_recruitment_score_review_unit")
+        counted = parse_junit(p1_junit, p1_review["test_count"])
+        require_auxiliary_junit_identities(p1_junit, p1_review["case_names_by_path"])
+        p1_review_unit = dict(**counted, coverage="P1_RECRUITMENT_SCORE_REVIEW_SYNTHETIC",
+            source_bindings=p1_review["source_bindings"], test_bindings=p1_review["test_bindings"],
+            regression_binding=p1_review["regression_binding"], baseline_foundation_count=656, native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE",
+            activation_status="NOT_RUN", operating_writes=0)
+    p1_selection = p1_selection_bridge_registration(spec, before)
+    p1_selection_unit = None
+    if p1_selection is not None:
+        selection_junit = output.resolve() / "p1_selection_bridge_review.junit.xml"
+        run_p1_contract_suite(deno, common, selection_junit, [p1_selection["test_path"]], root, output, "p1_selection_bridge_review_unit")
+        counted = parse_junit(selection_junit, p1_selection["test_count"])
+        require_auxiliary_junit_identities(selection_junit, p1_selection["case_names_by_path"])
+        p1_selection_unit = dict(**counted, coverage="P1_SELECTION_BRIDGE_REVIEW_SYNTHETIC",
+            source_bindings=p1_selection["source_bindings"], test_bindings=p1_selection["test_bindings"],
+            baseline_foundation_count=656, native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE",
+            actual_DB="NOT_RUN", activation_status="NOT_RUN", operating_writes=0)
+    service_end_check = service_end_synthetic_registration(spec, before)
+    service_end_unit = None
+    if service_end_check is not None:
+        end_junit = output.resolve() / "service_end_score_cutoff_synthetic.junit.xml"
+        run_p1_contract_suite(deno, common, end_junit, [service_end_check["test_path"]], root, output, "service_end_score_cutoff_unit")
+        counted = parse_junit(end_junit, service_end_check["test_count"])
+        require_auxiliary_junit_identities(end_junit, service_end_check["case_names_by_path"])
+        service_end_unit = dict(**counted, coverage="SERVICE_END_SCORE_CUTOFF_SYNTHETIC",
+            source_bindings=service_end_check["source_bindings"], test_binding=service_end_check["test_binding"],
+            baseline_foundation_count=656, native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE",
+            actual_DB="NOT_RUN", sql_010_application="NOT_RUN", activation_status="NOT_RUN", operating_writes=0)
     owner_registration=owner_review_registration(spec,before);owner_unit=None
     if owner_registration is not None:
         owner_junit=output.resolve()/"owner_review.junit.xml"
@@ -841,6 +1425,10 @@ def run_workspace(root,manifest,deno,python,output):
       coverage="DEV010_FOUNDATION",coexisting_edge_sources=len(scope["coexisting_bound"]),unit=unit,oracle=dict(case_count=receipt["case_count"],mismatch_count=receipt["mismatch_count"]),
       source_manifest_sha256=digest(json_bytes(manifest)),contract_receipt_sha256=digest((output/"contract/edge_contract_receipt.json").read_bytes()),
       oracle_receipt_sha256=digest(receipt_path.read_bytes()),tool=parsed["tool"],production_ready=False,operating_writes=0,**operation_registration(spec))
+    if p1_graph_guard is not None:result['p1_contract_offline_graph_guard']=p1_graph_guard
+    if p1_review_unit is not None:result['p1_recruitment_score_review_unit']=p1_review_unit
+    if p1_selection_unit is not None:result['p1_selection_bridge_review_unit']=p1_selection_unit
+    if service_end_unit is not None:result['service_end_score_cutoff_unit']=service_end_unit
     if recovery_unit is not None:result['incident_recovery_unit']=recovery_unit
     if owner_unit is not None:result['owner_review_unit']=owner_unit
     if public_unit is not None:result['current_public_unit']=public_unit

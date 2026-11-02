@@ -1885,8 +1885,14 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "df197742dce96d37a1bd2176abc558e9630daea7fcfbc4010e298d39ce8e824d",
+      "source_sha256": "00a2b460c00671f50213872212c2afb606cc0301a9f608d42bc0b7772ce89408",
       "symbols": [
+        {
+          "kind": "function",
+          "name": "additional_p1_unit_flags",
+          "signature": "def additional_p1_unit_flags(spec):",
+          "decorators": []
+        },
         {
           "kind": "function",
           "name": "create",
@@ -1932,7 +1938,7 @@
         {
           "kind": "function",
           "name": "summarize_edge_units",
-          "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False):",
+          "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False, p1_review_required=False, p1_selection_required=False, service_end_required=False):",
           "decorators": []
         }
       ]
@@ -1942,7 +1948,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "5812ffd9d44cc22d729bea26f50d4c30457ad069370d0e0fe5746e90517149fb",
+      "source_sha256": "162ca053e8d19e9acddb4b411fc6c9db2032c019e93e85acb2fc60af2b9218bb",
       "symbols": [
         {
           "kind": "function",
@@ -2030,6 +2036,66 @@
         },
         {
           "kind": "function",
+          "name": "_p1cg_check_literals",
+          "signature": "def _p1cg_check_literals(path, raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_p1cg_check_test_edge",
+          "signature": "def _p1cg_check_test_edge(source, target):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_p1cg_layer",
+          "signature": "def _p1cg_layer(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_p1cg_need",
+          "signature": "def _p1cg_need(ok, reason):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_p1cg_sha",
+          "signature": "def _p1cg_sha(raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_p1cg_snapshot_bytes",
+          "signature": "def _p1cg_snapshot_bytes(root, before, path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_p1cg_static_imports",
+          "signature": "def _p1cg_static_imports(raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_p1cg_unique_pairs",
+          "signature": "def _p1cg_unique_pairs(pairs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "active_p1_roots",
+          "signature": "def active_p1_roots(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "build_p1_graph_manifest",
+          "signature": "def build_p1_graph_manifest(root, before, graphs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "check_professional_native_entrypoint",
           "signature": "def check_professional_native_entrypoint(root, before, deno, config, output, entrypoint):",
           "decorators": []
@@ -2060,6 +2126,12 @@
         },
         {
           "kind": "function",
+          "name": "normalize_p1_graph",
+          "signature": "def normalize_p1_graph(info, root, before, entry):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "operation_registration",
           "signature": "def operation_registration(spec):",
           "decorators": []
@@ -2072,6 +2144,18 @@
         },
         {
           "kind": "function",
+          "name": "p1_review_registration",
+          "signature": "def p1_review_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "p1_selection_bridge_registration",
+          "signature": "def p1_selection_bridge_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "parse_junit",
           "signature": "def parse_junit(path, expected):",
           "decorators": []
@@ -2080,6 +2164,12 @@
           "kind": "function",
           "name": "parse_recovery_partition_junit",
           "signature": "def parse_recovery_partition_junit(path, selected, excluded, expected_class):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "preflight_p1_graph_manifest",
+          "signature": "def preflight_p1_graph_manifest(root, before, spec, manifest_sha256):",
           "decorators": []
         },
         {
@@ -2116,6 +2206,12 @@
           "kind": "function",
           "name": "recovery_test_filter",
           "signature": "def recovery_test_filter(names):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "reference_p1_graph_info",
+          "signature": "def reference_p1_graph_info(root, before, entry, model):",
           "decorators": []
         },
         {
@@ -2168,6 +2264,18 @@
         },
         {
           "kind": "function",
+          "name": "run_p1_contract_offline_guard",
+          "signature": "def run_p1_contract_offline_guard(root, before, spec, deno, cfg, output, tool):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "run_p1_contract_suite",
+          "signature": "def run_p1_contract_suite(deno, common, junit, paths, root, output, name):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "run_workspace",
           "signature": "def run_workspace(root, manifest, deno, python, output):",
           "decorators": []
@@ -2176,6 +2284,18 @@
           "kind": "function",
           "name": "school_reference_registration",
           "signature": "def school_reference_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "service_end_synthetic_registration",
+          "signature": "def service_end_synthetic_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "verify_p1_graph_manifest",
+          "signature": "def verify_p1_graph_manifest(root, before, spec, manifest_sha256, graphs):",
           "decorators": []
         },
         {
@@ -8133,6 +8253,23 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/application/history_score_context_review.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-01",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "a30a8f92d2fb11d053c8a1c6167503cf2f29bebaf8aedfd310b44e38f997ac78",
+        "declared_exports": [
+          "TrustedScoreContextAuthority",
+          "reviewHistoryScoreContexts"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
         "layer": "application",
         "status": "read_view_source_candidate_native_activation_NOT_RUN",
@@ -8345,6 +8482,23 @@
           "OwnReportListRow",
           "OwnReportListService",
           "OwnReportPosition"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/p1_quota_fingerprint_adapter.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-01",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "6e1c3bd82d1c3435cbac975647bfe3f0622709956a882bab5a97bed9f25779c7",
+        "declared_exports": [
+          "TrustedCellEvidenceBatchPort",
+          "bindP1QuotaFingerprintBatch"
         ]
       },
       {
@@ -8778,6 +8932,25 @@
           "buildStandaloneR27",
           "R27ReviewBinding",
           "assertReviewedR27LinkBinding"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/recruitment_final_qualification.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-01",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "0481232414ef418dae02e26ae5a4a30708f199904136671e3ba16ec2c078ca40",
+        "declared_exports": [
+          "RecruitmentQualificationError",
+          "TrustedQualificationAuthority",
+          "nativeValueSha256",
+          "prepareRecruitmentFinalCandidates"
         ]
       },
       {
@@ -10935,6 +11108,30 @@
           "createOfficialHistoryInfrastructure",
           "loadPinnedDisplayDescriptor",
           "OfficialHistoryInfrastructureSettings"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/p1_r27_selection_bridge.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-01",
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "66cdb94942a4644abda302813fafe99b8472bfd7418a836d58b2841d7017d173",
+        "declared_exports": [
+          "P1SelectionGate",
+          "P1PagePin",
+          "P1SelectionBatchSource",
+          "P1SelectionBaselineBatch",
+          "SourcePageAuthorization",
+          "IndependentP1SelectionIssuer",
+          "P1SelectionBridgeBudget",
+          "composeSelectedP1R27Candidate"
         ]
       },
       {

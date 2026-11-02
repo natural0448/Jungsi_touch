@@ -14733,6 +14733,919 @@
         "validateHistoricalReferenceList"
       ]
     },
+    "supabase/functions/_shared/jungsi/application/history_score_context_review.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "JsonFloat",
+            "originalName": "JsonFloat",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "NativeJson",
+            "originalName": "NativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "nativeJsonSha256",
+            "jsDoc": {
+              "doc": "REVIEW ONLY. Internal per-observation score context candidate; no route, writer,\nsource adapter or activation. A separately authenticated authority must independently\nverify the existing source observation, target, group, population and formula against\npinned evidence. Caller-provided fields, equal labels and matching PK are not approval.\nThe source observations are never modified and every result remains non-publishable."
+            },
+            "originalName": "nativeJsonSha256",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          }
+        ],
+        "source_sha256": "a30a8f92d2fb11d053c8a1c6167503cf2f29bebaf8aedfd310b44e38f997ac78",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "assertLive",
+                      "parameter_source": "(pins: Pins)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "pins",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Pins",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Pins"
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "verifyBatch",
+                      "parameter_source": "(pins: Pins, subjects: readonly Readonly<Obj>[])",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "pins",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Pins",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Pins"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "subjects",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "typeRef",
+                                  "repr": "Readonly",
+                                  "value": {
+                                    "typeName": "Readonly",
+                                    "typeParams": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "Obj",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "local"
+                                          },
+                                          "typeName": "Obj"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "TrustedScoreContextAuthority"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  rawPins: unknown,\n  rawRows: unknown,\n  authority: TrustedScoreContextAuthority,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "rawPins",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rawRows",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "authority",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "TrustedScoreContextAuthority",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "TrustedScoreContextAuthority"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "typeRef",
+                                "repr": "Obj",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "Obj"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "reviewHistoryScoreContexts"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Record",
+                    "value": {
+                      "typeName": "Record",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Obj"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "source_head_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "descriptor_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "scope_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "authority_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Pins"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[a-f0-9]{64}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "HASH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^(?:observation|admission):[a-f0-9]{64}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OBS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "string",
+                      "value": "string"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PIN"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "string",
+                      "value": "string"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "INPUT"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "string",
+                      "value": "string"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PROOF"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "extends": "Error"
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "ReviewError"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "need"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown, fields: readonly string[])",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "fields",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "exact"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown, max: number)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "max",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "unknown",
+                      "value": "unknown"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "dense"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "v is string",
+                    "value": {
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "hash"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "v is string",
+                    "value": {
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "id"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "v is number",
+                    "value": {
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "year"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "nullableText"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeJson",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeJson",
+                        "specifier": "../domain/native_json.ts"
+                      },
+                      "typeName": "NativeJson"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "nativeValue"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "observation"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "undefined",
+                        "value": "undefined"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "preservedProduction"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(index: number, reason: string, production?: boolean)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "index",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "reason",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "production",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "hold"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/native_json.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "TrustedScoreContextAuthority",
+        "reviewHistoryScoreContexts"
+      ]
+    },
     "supabase/functions/_shared/jungsi/application/history_snapshot.ts": {
       "declarations": {
         "imports": [
@@ -25097,6 +26010,2297 @@
         "OwnReportListRow",
         "OwnReportListService",
         "OwnReportPosition"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/application/p1_quota_fingerprint_adapter.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "nativeJsonSha256",
+            "jsDoc": {
+              "doc": "REVIEW_ONLY. Ports must independently authenticate the issuer and current\nreference, source/head, part, row, literal, projection and scope. No IO here.\nCompact UTF-8 JSON compatibility is limited to checked string-valued cells."
+            },
+            "originalName": "nativeJsonSha256",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "nativeValueSha256",
+            "originalName": "nativeValueSha256",
+            "src": "supabase/functions/_shared/jungsi/application/recruitment_final_qualification.ts"
+          },
+          {
+            "importedName": "parseNativeJson",
+            "originalName": "parseNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          }
+        ],
+        "source_sha256": "6e1c3bd82d1c3435cbac975647bfe3f0622709956a882bab5a97bed9f25779c7",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "assertLive",
+                      "parameter_source": "(pins: Pins)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "pins",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Pins",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Pins"
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "executeWithSharedBudget",
+                      "parameter_source": "(pins: Pins, meta: ChunkMeta, work: () => Promise<void>)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "pins",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Pins",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Pins"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "meta",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "ChunkMeta",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "ChunkMeta"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "work",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "fnOrConstructor",
+                            "value": {
+                              "constructor": false,
+                              "params": [],
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "authorizeRequestScope",
+                      "parameter_source": "(pins: Pins, requestScope: RequestScope)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "pins",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Pins",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Pins"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "requestScope",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "RequestScope",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "RequestScope"
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "readTrustedSnapshotBatch",
+                      "parameter_source": "(\n    pins: Pins,\n    selectors: readonly Selector[],\n    includeReference: boolean,\n    requestScope: RequestScope,\n  )",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "pins",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Pins",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Pins"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "selectors",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "typeRef",
+                                  "repr": "Selector",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "Selector"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "includeReference",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "requestScope",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "RequestScope",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "RequestScope"
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "verifyBindingsBatch",
+                      "parameter_source": "(\n    pins: Pins,\n    requestScope: RequestScope,\n    subjects: readonly Obj[],\n  )",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "pins",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Pins",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Pins"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "requestScope",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "RequestScope",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "RequestScope"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "subjects",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "typeRef",
+                                  "repr": "Obj",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "Obj"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "TrustedCellEvidenceBatchPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  rawPins: unknown,\n  rawSelectors: unknown,\n  port: TrustedCellEvidenceBatchPort,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "rawPins",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rawSelectors",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "port",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "TrustedCellEvidenceBatchPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "TrustedCellEvidenceBatchPort"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Obj",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Obj"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "bindP1QuotaFingerprintBatch"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "0481232414ef418dae02e26ae5a4a30708f199904136671e3ba16ec2c078ca40",
+                    "value": {
+                      "kind": "string",
+                      "string": "0481232414ef418dae02e26ae5a4a30708f199904136671e3ba16ec2c078ca40"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "QUALIFICATION_SOURCE_SHA256"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(cell: Obj)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "cell",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Obj",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Obj"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "serviceCellEnvelopeSha"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Record",
+                    "value": {
+                      "typeName": "Record",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Obj"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "approved_reference_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "approved_reference_schema",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "current_source_head_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "current_p1_manifest_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "approved_scope_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "authority_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Pins"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "academic_year",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              },
+                              {
+                                "name": "school_id",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "offering_pk",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Selector"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[a-f0-9]{64}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "HASH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^(?:observation|admission):[a-f0-9]{64}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "CID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SHA256 compact sorted-key UTF-8 JSON; scalar native types preserved",
+                    "value": {
+                      "kind": "string",
+                      "string": "SHA256 compact sorted-key UTF-8 JSON; scalar native types preserved"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ENCODING"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "sql_numeric_integer_canonical_decimal/v1",
+                    "value": {
+                      "kind": "string",
+                      "string": "sql_numeric_integer_canonical_decimal/v1"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PROJECTION_CODEC"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "approved_reference_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_reference_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_reference_schema",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_reference_schema"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "current_source_head_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "current_source_head_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "current_p1_manifest_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "current_p1_manifest_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_scope_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_scope_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "authority_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "authority_sha256"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PIN"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "academic_year",
+                          "value": {
+                            "kind": "string",
+                            "string": "academic_year"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "school_id",
+                          "value": {
+                            "kind": "string",
+                            "string": "school_id"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "offering_pk",
+                          "value": {
+                            "kind": "string",
+                            "string": "offering_pk"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SEL"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "academic_year",
+                          "value": {
+                            "kind": "string",
+                            "string": "academic_year"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "school_id",
+                          "value": {
+                            "kind": "string",
+                            "string": "school_id"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "offering_pk",
+                          "value": {
+                            "kind": "string",
+                            "string": "offering_pk"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "admission_track",
+                          "value": {
+                            "kind": "string",
+                            "string": "admission_track"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "recruit_group",
+                          "value": {
+                            "kind": "string",
+                            "string": "recruit_group"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "p1_part_id",
+                          "value": {
+                            "kind": "string",
+                            "string": "p1_part_id"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "p1_part_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "p1_part_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "p1_row_1based",
+                          "value": {
+                            "kind": "string",
+                            "string": "p1_row_1based"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "existing_canonical_result_id",
+                          "value": {
+                            "kind": "string",
+                            "string": "existing_canonical_result_id"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "identity_variant_index",
+                          "value": {
+                            "kind": "string",
+                            "string": "identity_variant_index"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "previous_cell",
+                          "value": {
+                            "kind": "string",
+                            "string": "previous_cell"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "metric_value_json_type",
+                          "value": {
+                            "kind": "string",
+                            "string": "metric_value_json_type"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "metric_value_literal",
+                          "value": {
+                            "kind": "string",
+                            "string": "metric_value_literal"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "numeric_projection",
+                          "value": {
+                            "kind": "string",
+                            "string": "numeric_projection"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "raw_source_row_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "raw_source_row_sha256"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "READ"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "value",
+                          "value": {
+                            "kind": "string",
+                            "string": "value"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "unit",
+                          "value": {
+                            "kind": "string",
+                            "string": "unit"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "status",
+                          "value": {
+                            "kind": "string",
+                            "string": "status"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "reason_code",
+                          "value": {
+                            "kind": "string",
+                            "string": "reason_code"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_url",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_url"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_as_of",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_as_of"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "statistic_label",
+                          "value": {
+                            "kind": "string",
+                            "string": "statistic_label"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "cohort",
+                          "value": {
+                            "kind": "string",
+                            "string": "cohort"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_context",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_context"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "stage",
+                          "value": {
+                            "kind": "string",
+                            "string": "stage"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "CELL"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "disposition",
+                          "value": {
+                            "kind": "string",
+                            "string": "disposition"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "subject_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "subject_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "authority_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "authority_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_reference_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_reference_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "current_source_head_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "current_source_head_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "current_p1_manifest_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "current_p1_manifest_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_scope_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_scope_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "current_p1_part_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "current_p1_part_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "previous_cell_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "previous_cell_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "part_bytes_verified",
+                          "value": {
+                            "kind": "string",
+                            "string": "part_bytes_verified"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "same_snapshot_verified",
+                          "value": {
+                            "kind": "string",
+                            "string": "same_snapshot_verified"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_row_verified",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_row_verified"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "metric_literal_verified",
+                          "value": {
+                            "kind": "string",
+                            "string": "metric_literal_verified"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "numeric_projection_verified",
+                          "value": {
+                            "kind": "string",
+                            "string": "numeric_projection_verified"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "fingerprint_codec_verified",
+                          "value": {
+                            "kind": "string",
+                            "string": "fingerprint_codec_verified"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_request_scope_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_request_scope_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_request_scope_count",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_request_scope_count"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "request_scope_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "request_scope_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_metric_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_metric_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_production_allowed",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_production_allowed"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_cohort_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_cohort_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_cohort_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_cohort_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_announced_groups",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_announced_groups"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_announced_groups_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_announced_groups_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "target_membership_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "target_membership_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "target_membership_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "target_membership_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "target_cell_group_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "target_cell_group_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "target_cell_selection",
+                          "value": {
+                            "kind": "string",
+                            "string": "target_cell_selection"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "target_cell_selected_observation_id",
+                          "value": {
+                            "kind": "string",
+                            "string": "target_cell_selected_observation_id"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PROOF"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "disposition",
+                          "value": {
+                            "kind": "string",
+                            "string": "disposition"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "authority_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "authority_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_reference_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_reference_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "current_source_head_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "current_source_head_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "current_p1_manifest_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "current_p1_manifest_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_scope_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_scope_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_request_scope_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_request_scope_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_request_scope_count",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_request_scope_count"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "request_scope_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "request_scope_binding"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SCOPE_AUTH_PROOF"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "extends": "Error"
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "BindingError"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown, code: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "asserts v",
+                    "value": {
+                      "asserts": true,
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "need"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown, keys: readonly string[])",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "keys",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rec"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "v is string",
+                    "value": {
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "text"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "v is string",
+                    "value": {
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "hash"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "v is string",
+                    "value": {
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "id"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "cellSnapshot"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Uint8Array",
+                    "value": {
+                      "typeName": "Uint8Array",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "ArrayBuffer",
+                          "value": {
+                            "typeName": "ArrayBuffer"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "copyBytes"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(b: Uint8Array<ArrayBuffer>)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "b",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Uint8Array",
+                        "value": {
+                          "typeName": "Uint8Array",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ArrayBuffer",
+                              "value": {
+                                "typeName": "ArrayBuffer"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sha"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "object"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "codec",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "approved_reference_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "current_source_head_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "current_p1_manifest_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "approved_scope_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "qualification_source_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "selectors",
+                                "tsType": {
+                                  "kind": "typeOperator",
+                                  "value": {
+                                    "operator": "readonly",
+                                    "tsType": {
+                                      "kind": "array",
+                                      "value": {
+                                        "kind": "typeRef",
+                                        "repr": "Selector",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "local"
+                                          },
+                                          "typeName": "Selector"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "name": "request_scope_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "request_scope_count",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "RequestScope"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "chunk_index",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              },
+                              {
+                                "name": "selector_count",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              },
+                              {
+                                "name": "include_reference",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              },
+                              {
+                                "name": "max_authorization_calls",
+                                "tsType": {
+                                  "kind": "union",
+                                  "value": [
+                                    {
+                                      "kind": "literal",
+                                      "repr": "0",
+                                      "value": {
+                                        "kind": "number",
+                                        "number": 0.0
+                                      }
+                                    },
+                                    {
+                                      "kind": "literal",
+                                      "repr": "1",
+                                      "value": {
+                                        "kind": "number",
+                                        "number": 1.0
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "max_read_calls",
+                                "tsType": {
+                                  "kind": "literal",
+                                  "repr": "1",
+                                  "value": {
+                                    "kind": "number",
+                                    "number": 1.0
+                                  }
+                                }
+                              },
+                              {
+                                "name": "max_verify_calls",
+                                "tsType": {
+                                  "kind": "literal",
+                                  "repr": "1",
+                                  "value": {
+                                    "kind": "number",
+                                    "number": 1.0
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "ChunkMeta"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown, max: number)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "max",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "unknown",
+                      "value": "unknown"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "dense"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeOperator",
+                    "value": {
+                      "operator": "readonly",
+                      "tsType": {
+                        "kind": "array",
+                        "value": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sourceGroupSet"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(s: Obj)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "s",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Obj",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Obj"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "string",
+                    "value": "string"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "key"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(s: Obj, reason: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "s",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Obj",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Obj"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "reason",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "status"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(reason: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "reason",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "batchHold"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/native_json.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./recruitment_final_qualification.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/recruitment_final_qualification.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "TrustedCellEvidenceBatchPort",
+        "bindP1QuotaFingerprintBatch"
       ]
     },
     "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": {
@@ -48596,6 +51800,1874 @@
         "buildStandaloneR27",
         "R27ReviewBinding",
         "assertReviewedR27LinkBinding"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/application/recruitment_final_qualification.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "nativeJsonSha256",
+            "jsDoc": {
+              "doc": "Internal P1 recruitment final-stage qualification/publisher candidate.\nNo DB, SQL, route, Guide write, observation creation or actual publication.\nTrustedQualificationAuthority is an injected independent server boundary, not\na caller assertion; the synthetic stub proves neither issuer nor production.\nUses the project native JSON hash; this envelope is an unapproved review contract.\nThe data team's original row SHA is separately bound, never recomputed."
+            },
+            "originalName": "nativeJsonSha256",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          }
+        ],
+        "source_sha256": "0481232414ef418dae02e26ae5a4a30708f199904136671e3ba16ec2c078ca40",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(code: string)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "code",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "extends": "Error"
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "RecruitmentQualificationError"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(v: NativeValue)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeValue",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "NativeValue"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "nativeValueSha256"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "verifyBatch",
+                      "parameter_source": "(pins: Pins, subjects: readonly Obj[])",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "pins",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Pins",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Pins"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "subjects",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "typeRef",
+                                  "repr": "Obj",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "Obj"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "assertLive",
+                      "parameter_source": "(pins: Pins)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "pins",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Pins",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Pins"
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "TrustedQualificationAuthority"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  rawPins: unknown,\n  rawInputs: unknown,\n  authority: TrustedQualificationAuthority,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "rawPins",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rawInputs",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "authority",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "TrustedQualificationAuthority",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "TrustedQualificationAuthority"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "prepareRecruitmentFinalCandidates"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Record",
+                    "value": {
+                      "typeName": "Record",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Obj"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "bigint",
+                        "value": "bigint"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "NativeValue"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[a-f0-9]{64}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "HASH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^(?:observation|admission):[a-f0-9]{64}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "CID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "2048",
+                    "value": {
+                      "kind": "number",
+                      "number": 2048.0
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "MAX"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown, code: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "asserts x",
+                    "value": {
+                      "asserts": true,
+                      "param": {
+                        "name": "x",
+                        "type": "identifier"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "need"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown, fields: readonly string[])",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "fields",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "record"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown, fields: readonly string[])",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "fields",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "proofRecord"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown, max: number)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "max",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "keyword",
+                      "repr": "unknown",
+                      "value": "unknown"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "dense"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sourceGroups"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "x is string",
+                    "value": {
+                      "param": {
+                        "name": "x",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "hash"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "x is string",
+                    "value": {
+                      "param": {
+                        "name": "x",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "id"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "x is ",
+                    "value": {
+                      "param": {
+                        "name": "x",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "nullableText"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "x is ",
+                    "value": {
+                      "param": {
+                        "name": "x",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "bigint",
+                            "value": "bigint"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "count"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "jungsi.p1-recruitment-native-json-envelope/v1",
+                    "value": {
+                      "kind": "string",
+                      "string": "jungsi.p1-recruitment-native-json-envelope/v1"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "VALUE_CODEC"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "jungsi.p1-recruitment-subject-native-json/v1",
+                    "value": {
+                      "kind": "string",
+                      "string": "jungsi.p1-recruitment-subject-native-json/v1"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SUBJECT_CODEC"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "jungsi.p1-recruitment-prior-cell-native-json/v1",
+                    "value": {
+                      "kind": "string",
+                      "string": "jungsi.p1-recruitment-prior-cell-native-json/v1"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PRIOR_CODEC"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: NativeValue)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeValue",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "NativeValue"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "literal",
+                        "repr": "null",
+                        "value": {
+                          "kind": "string",
+                          "string": "null"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "string",
+                        "value": {
+                          "kind": "string",
+                          "string": "string"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "number",
+                        "value": {
+                          "kind": "string",
+                          "string": "number"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "jsonType"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "x is string",
+                    "value": {
+                      "param": {
+                        "name": "x",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "publicUrl"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(x: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "x",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "x is string",
+                    "value": {
+                      "param": {
+                        "name": "x",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "calendarDate"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "source_head_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_head_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_scope_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_scope_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "authority_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "authority_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "previous_manifest_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "previous_manifest_sha256"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PIN_FIELDS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "observation_id",
+                          "value": {
+                            "kind": "string",
+                            "string": "observation_id"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "academic_year",
+                          "value": {
+                            "kind": "string",
+                            "string": "academic_year"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "school_id",
+                          "value": {
+                            "kind": "string",
+                            "string": "school_id"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "offering_pk",
+                          "value": {
+                            "kind": "string",
+                            "string": "offering_pk"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "admission_track",
+                          "value": {
+                            "kind": "string",
+                            "string": "admission_track"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "recruit_group",
+                          "value": {
+                            "kind": "string",
+                            "string": "recruit_group"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "identity_variant_index",
+                          "value": {
+                            "kind": "string",
+                            "string": "identity_variant_index"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "metric_kind",
+                          "value": {
+                            "kind": "string",
+                            "string": "metric_kind"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "active_service",
+                          "value": {
+                            "kind": "string",
+                            "string": "active_service"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "value",
+                          "value": {
+                            "kind": "string",
+                            "string": "value"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "expected_native_value_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "expected_native_value_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "raw_source_row_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "raw_source_row_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "previous_cell",
+                          "value": {
+                            "kind": "string",
+                            "string": "previous_cell"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "INPUT_FIELDS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "value",
+                          "value": {
+                            "kind": "string",
+                            "string": "value"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "unit",
+                          "value": {
+                            "kind": "string",
+                            "string": "unit"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "status",
+                          "value": {
+                            "kind": "string",
+                            "string": "status"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "reason_code",
+                          "value": {
+                            "kind": "string",
+                            "string": "reason_code"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_url",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_url"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_as_of",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_as_of"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "statistic_label",
+                          "value": {
+                            "kind": "string",
+                            "string": "statistic_label"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "cohort",
+                          "value": {
+                            "kind": "string",
+                            "string": "cohort"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_context",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_context"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "stage",
+                          "value": {
+                            "kind": "string",
+                            "string": "stage"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "CELL_FIELDS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "subject_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "subject_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_head_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_head_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "approved_scope_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved_scope_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "authority_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "authority_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "previous_manifest_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "previous_manifest_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "previous_cell_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "previous_cell_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "previous_cell_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "previous_cell_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "identity_variant_index",
+                          "value": {
+                            "kind": "string",
+                            "string": "identity_variant_index"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "target_cell_group_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "target_cell_group_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "target_cell_selection",
+                          "value": {
+                            "kind": "string",
+                            "string": "target_cell_selection"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "target_cell_selected_observation_id",
+                          "value": {
+                            "kind": "string",
+                            "string": "target_cell_selected_observation_id"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "native_value_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "native_value_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "native_value_type",
+                          "value": {
+                            "kind": "string",
+                            "string": "native_value_type"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "native_value_json_type",
+                          "value": {
+                            "kind": "string",
+                            "string": "native_value_json_type"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "native_value_codec",
+                          "value": {
+                            "kind": "string",
+                            "string": "native_value_codec"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "raw_source_row_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "raw_source_row_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_snapshot_confirmed",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_snapshot_confirmed"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "stage",
+                          "value": {
+                            "kind": "string",
+                            "string": "stage"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "unit",
+                          "value": {
+                            "kind": "string",
+                            "string": "unit"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_ref",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_ref"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_url",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_url"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_as_of",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_as_of"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_as_of_kind",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_as_of_kind"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_metric_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_metric_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_production_allowed",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_production_allowed"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_cohort_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_cohort_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_cohort_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_cohort_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_announced_groups",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_announced_groups"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "source_announced_groups_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "source_announced_groups_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "target_membership_sha256",
+                          "value": {
+                            "kind": "string",
+                            "string": "target_membership_sha256"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "target_membership_binding",
+                          "value": {
+                            "kind": "string",
+                            "string": "target_membership_binding"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "disposition",
+                          "value": {
+                            "kind": "string",
+                            "string": "disposition"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PROOF_FIELDS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "source_head_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "approved_scope_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "authority_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "previous_manifest_sha256",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Pins"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "Obj",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "Obj"
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "previous"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(p: Obj | null)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "p",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "Obj",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Obj"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "previousCellSha256"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(p: Obj | null)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "p",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "Obj",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "Obj"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "emptyPrevious"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Obj",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "Obj"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "input"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "RecruitmentQualificationError",
+        "TrustedQualificationAuthority",
+        "nativeValueSha256",
+        "prepareRecruitmentFinalCandidates"
       ]
     },
     "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts": {
