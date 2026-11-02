@@ -109,6 +109,16 @@
 .et .rs-years td.derived{background:#F8F9FC}
 .et .rs-years td.derived .num{color:var(--ink-2)}
 
+/* 넓은 표 옆으로 넘기기(휴대폰): 학년도 열 고정 + 안내 한 줄 + 남은 쪽 그림자(scroll-hint.tsx) */
+.et .rs-years tr>:first-child{position:sticky;left:0;z-index:1}
+.et .rs-years tbody th{background:var(--bg)}
+.et .rs-scroll{position:relative}
+.et .rs-scroll::after{content:"";position:absolute;top:1px;right:1px;bottom:1px;width:28px;border-radius:0 var(--r-card) var(--r-card) 0;background:linear-gradient(to left,rgba(17,32,77,.14),rgba(17,32,77,0));opacity:0;transition:opacity .15s;pointer-events:none}
+.et .rs-scroll.more-r::after{opacity:1}
+.et .rs-scroll.more-l .rs-years tr>:first-child{box-shadow:6px 0 6px -6px rgba(17,32,77,.35)}
+.et .rs-swipe{margin:0 0 6px;font-size:11.5px;font-weight:700;color:var(--ink-2);text-align:right}
+@media print{.et .rs-swipe{display:none}.et .rs-scroll::after{display:none}}
+
 /* 전국 현재 정본: 받은 지표 그대로(줄=지표·통계·대상, 열=학년도) */
 .et .rs-rawwrap{display:grid;gap:6px}
 .et .rs-raw{min-width:420px}

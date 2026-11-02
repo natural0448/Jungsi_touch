@@ -3,6 +3,7 @@ import { derived } from "@/lib/p1-derived";
 import { rankDisplayModel } from "@/lib/p1-field-qualification";
 import { publishedScoreNullLabel, publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
+import { ScrollHint } from "./scroll-hint";
 
 /*
   정리본 한 모집단위: 학년도별 한 줄, 이전 고정 표 배치(연결계약 v3 §5).
@@ -15,6 +16,7 @@ import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
   추정 2열만 계산하고 발표 칸을 덮지 않는다: 추정 총 지원자 = 모집인원×경쟁률(반올림),
   추정 탈락자 = 추정 총 지원자 − (모집인원 + 최종 합격 예비번호)(2026-11-02 사용자 결정, 이전 산식의 충원인원 대신).
   추정 탈락자는 표에 보이는 예비번호(정수, '번')가 있을 때만 계산한다.
+  휴대폰처럼 표가 넘치면 학년도 열을 왼쪽에 고정하고 옆으로 넘기라는 안내를 보인다(scroll-hint.tsx, 2026-11-02).
 */
 
 export const PAST_YEARS = [2026, 2025, 2024] as const;
@@ -105,7 +107,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
     <div className="rs-yt">
       {pending && <p className="rs-idnote">모집행 연결 확인 중인 발표입니다. 다른 학년도와 합치지 않고 원문 그대로 보입니다. 대학이 여러 학과를 묶어 한꺼번에 발표했을 수 있으니, 이 숫자를 이 학과만의 결과로 보지 마세요.</p>}
       {variants > 1 && <p className="rs-idnote">대학명·전형 표기가 발표마다 달라({variants}가지) 같은 모집단위인지 확인 중입니다. 숫자는 발표 그대로입니다.</p>}
-      <div className="tblwrap">
+      <ScrollHint>
         <table className="tb rs-years">
           <thead>
             <tr>
@@ -151,7 +153,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
             )}
           </tbody>
         </table>
-      </div>
+      </ScrollHint>
     </div>
   );
 }
