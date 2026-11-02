@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
   "contract_ref": "official_history_db_display_contract",
-  "contract_version": "1.9.141",
+  "contract_version": "1.9.146",
   "requirements": [
     "REQ-01",
     "REQ-08",
@@ -1668,7 +1668,7 @@
             "new_full_DB_scan": "NOT_RUN",
             "general_publication": "NOT_RUN"
           },
-          "frontend_request": "새 feature에서 별도 최종 합격 예비번호 열을 번 단위로 추가한다. 충원인원 alias/충원C/추정탈락 입력으로 사용하지 않는다. 현재 최소판에 실제충원C가 없어 추정2열은dash가 정상이다.",
+          "frontend_request": "기존에는 별도 최종 합격 예비번호 열을 요청했다. 2026-11-01 사용자 정정이 우선하며 화면은 최종 합격 예비번호 한 열만 둔다. 원문에서 확정된 순위만 번으로 표시하고 실제 충원인원·추정탈락 입력은 내부 보존한다. 코드 후보와 운영 적용은 구분한다.",
           "local_native": {
             "status": "PASS_SCOPED_LOCAL_TCP_WORKTREE_NULLABLE_DELTA_SOURCE_HASH_BOUND_FINAL_GIT_SEAL_SEPARATE",
             "private_receipt": "ACTUAL_W1_MINIMUM_NATIVE_HTTP_RECEIPT.v3.json",

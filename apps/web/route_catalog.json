@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.141",
-  "source_sha256": "d7842fdb130badaa38e8d5906625653106fc6fcdfd6452df27a00b6916b2faae",
+  "spec_version": "1.9.146",
+  "source_sha256": "5fd443611899939467c11a21ce2bb73810d185e77184caa388ddd795ac7f2c43",
   "pages": [
     {
       "id": "PAGE-01",
@@ -304,7 +304,7 @@
         "REQ-26",
         "REQ-27"
       ],
-      "response_scope": "본인에게 귀속되는 성적 프로필의 생성 결과",
+      "response_scope": "본인에게 귀속되는 성적 프로필의 생성 결과 성적 정정의 실제 원자 저장 포트 미구현·미검증과 구 worker 차단·전환 미완료로 관련 후보 운영 배포는 차단한다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "contract_ref": "backend_platform_contract.dto_schemas.profile",
       "http_contract": {
@@ -352,7 +352,7 @@
         "REQ-26",
         "REQ-27"
       ],
-      "response_scope": "본인의 저장된 현재 프로필을 사용한 분석; 동일 계산 자료 버전은 저장 결과 재사용. flat 입력은 명시적 legacy_synthetic 검증 모드에만 존재한다.",
+      "response_scope": "본인의 저장된 현재 프로필을 사용한 분석; 동일 계산 자료 버전은 저장 결과 재사용. flat 입력은 명시적 legacy_synthetic 검증 모드에만 존재한다. 이전 전체 결과가 pending이든 ready든 재계산 시 기존 분석·후보가 있으면 반영을 보류하며, 같은 문맥의 기존 성공 no-op은 유지한다. 성적 정정 원자 저장 포트와 구 worker 전환의 구현·검증 전 관련 후보 운영 배포는 차단한다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
@@ -579,7 +579,7 @@
         "REQ-12",
         "REQ-15"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다.",
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 새 와일드카드 선택은 본인 소유 리포트의 승인된 자료·정책과 정확 revision에 결속해 목록과 상태를 함께 투영하는 서버 후보이며, 검증되지 않은 구 필드는 숨기고 과거 replay와 목록을 유지한다. 승인 공급자와 writer 증거가 없어 기본 비활성이다. 이 후보를 장래 활성화하면 새 report revision의 candidates JSON에 비공개 선택 초안을 저장할 수 있으므로 기존 writer·불변 선택 증거·복구 계약과 별도 검토가 필요하다. 현재 구성에서는 저장하지 않는다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
@@ -2808,7 +2808,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "ead322cca8bdf3d15b098031f5588779041b2e38ebdbd06f6bbb9a0835a465a8"
+            "sha256": "89138419ab060d10ce581eca037b4e7b4c6d1f9ca319fa0c2882424b01130e5a"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
@@ -2820,7 +2820,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
-            "sha256": "50be2cb82f617fdd88139b6fe431e6aa03ec44104972d5b5ead290cc20f4fa89"
+            "sha256": "0ef599db025f26cd923bba8bd5464ff09fb8ea5a08bc7dfc09eb0bd75313ce38"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
@@ -2840,19 +2840,19 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
-            "sha256": "7b39971ed0563ea41e415c2616eb0f0828ebf7b7da41e9a0bff1fe7d1c6fe157"
+            "sha256": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/request_budget.ts",
-            "sha256": "eede4780f44e34d3f6a5b92079286e1b49fcfb084d22a2f301312be460a5cee0"
+            "sha256": "e208ac4a8e4d15dcacf0a98b5a84f852b00470a9983085e638725243132c52f2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
-            "sha256": "2711332e39f12119dbfdf9ca0aa2a124344c5ceab96903a64e9a6f0757d95542"
+            "sha256": "6fe695a27a87ddc45eb9041cc0827373df3cc1a05696a1a1d3c2394954521149"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
-            "sha256": "747b86f3c4e610efc3178c62db0abd17aac32ee524d10a66e1b5923fe942cb58"
+            "sha256": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts",
@@ -2868,11 +2868,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
-            "sha256": "dd7b81549fabc6382ff996ea4daa12dcb2c745ad89337c7627d0fd2e07683ee0"
+            "sha256": "cccfa8ebe2597062d94bdf6534f5e4ca5adaecf39208f47ae2f1dec9c06b9591"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "1db480c309ffb6609a0eccc0d04d17627e9571722239c4a3a944ec990b9dba50"
+            "sha256": "93ae8db8bd20127fe3207601ecb3d0573b1d557cd5122a83a3ba7fa599d05309"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
@@ -2892,11 +2892,11 @@
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "2395998b1d4e0f54da45c2b41d07b1a50213af9415cff03743c408041c0188a1"
+            "sha256": "227dc89330ea7bae939134dbf0b165365201831c9327b6476d166e8c6abf6973"
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",
-            "sha256": "e026d3cde979bc70b0b178dde743d2f257dc4d58ffd9cc11f0093f6f572798f9"
+            "sha256": "251d03982c8e8dd2319091e89394969c341a2b5978fb1c893be0f50ce8c7fa8b"
           },
           {
             "path": "tests/edge/test_member_json_results.ts",
@@ -4137,10 +4137,28 @@
           "final_70_percent_cut",
           "selected_published_score"
         ],
-        "text": "3인이하미발표",
-        "application": "기존 전형/집단/산식/발표용도·화면 선택 필터를 통과한 입결 성적 칸의 native null에 표시한다.",
+        "text": "해당조건미발표",
+        "application": "공식 근거로 다른 통계만 발표되어 선택 조건이 미발표임이 확인된 경우 해당조건미발표, 해당 관측·코호트·통계에 3인 이하 미발표가 공식 근거로 확인된 경우에만 3인이하미발표를 표시한다. 사유가 확인되지 않은 null은 미확인·미발표 상태를 보존한다. 2026-11-02 사용자 조건별 결정은 2026-11-01 일괄 공란 표기 요약에 우선하며, 해당 예전 요약은 당시 결정 이력으로 보존한다. 화면 v3 후보, 사유 DTO 결속 및 운영 배포는 각각 미완료다.",
         "native_values": "정본/DTO의 null·숫자0·문자열 정밀도·원문 사유는 보존하며 UI 대체 문구만 적용한다. 모든 null을 SOURCE_NONDISCLOSED_LE_3의 원문 증거로 분류하지 않는다.",
-        "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다."
+        "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다.",
+        "historical_20261029_before_user_correction": {
+          "fields": [
+            "final_50_percent_cut",
+            "final_70_percent_cut",
+            "selected_published_score"
+          ],
+          "text": "3인이하미발표",
+          "application": "기존 전형/집단/산식/발표용도·화면 선택 필터를 통과한 입결 성적 칸의 native null에 표시한다.",
+          "native_values": "정본/DTO의 null·숫자0·문자열 정밀도·원문 사유는 보존하며 UI 대체 문구만 적용한다. 모든 null을 SOURCE_NONDISCLOSED_LE_3의 원문 증거로 분류하지 않는다.",
+          "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다."
+        },
+        "display_reason_evidence": "현행 Cell의 이유코드 하나 또는 모집인원만으로 사유의 원문 결속을 단정하지 않는다. 출처·관측·학년도·전형·코호트·통계 조건에 결속된 공식 근거를 검증한 경우에만 해당 사유 문구를 표시한다. 적용 코드는 후속 검수 전이다.",
+        "condition_texts": {
+          "other_statistic_published_and_selected_condition_missing": "해당조건미발표",
+          "officially_verified_three_or_fewer": "3인이하미발표",
+          "reason_unknown": "미확인"
+        },
+        "condition_priority": "동일 관측·코호트·점수축에 두 사유의 공식 근거가 모두 확인된 경우 3인 이하 문구를 우선한다. 어느 사유도 확인되지 않으면 미확인 상태를 유지한다."
       },
       "own_report_list": "is_current 키 부재인 구서버와 키가 있으나 전부 null인 신서버를 구분한다. 신판의 전체 null은 숨기지 않고 혼합 값은 false만 숨기며 정정 후 첫 페이지부터 재조회한다. Owner 수정 보고와 실제 배포 증거는 별도로 확인한다.",
       "professional_usage": "만료일 연장은 계산 비용·요청량 한도의 승인을 대신하지 않는다. 기존 개인 한도를 유지하는 전문가용 별도 계산 capacity와 정확한 승인 카탈로그·원자적 예약·다학생 순차 수용 증거를 준비한 뒤 활성화한다. units_per_offering을 근거 없이 상수 비용으로 낮추지 않는다.",
@@ -6224,7 +6242,7 @@
             "new_full_DB_scan": "NOT_RUN",
             "general_publication": "NOT_RUN"
           },
-          "frontend_request": "새 feature에서 별도 최종 합격 예비번호 열을 번 단위로 추가한다. 충원인원 alias/충원C/추정탈락 입력으로 사용하지 않는다. 현재 최소판에 실제충원C가 없어 추정2열은dash가 정상이다.",
+          "frontend_request": "기존에는 별도 최종 합격 예비번호 열을 요청했다. 2026-11-01 사용자 정정이 우선하며 화면은 최종 합격 예비번호 한 열만 둔다. 원문에서 확정된 순위만 번으로 표시하고 실제 충원인원·추정탈락 입력은 내부 보존한다. 코드 후보와 운영 적용은 구분한다.",
           "local_native": {
             "status": "PASS_SCOPED_LOCAL_TCP_WORKTREE_NULLABLE_DELTA_SOURCE_HASH_BOUND_FINAL_GIT_SEAL_SEPARATE",
             "private_receipt": "ACTUAL_W1_MINIMUM_NATIVE_HTTP_RECEIPT.v3.json",
@@ -8929,7 +8947,7 @@
       "recruitment.read"
     ],
     "status": "FE_967_SOURCE_REVIEWED_C_LOCAL_APPROVED_ACTUAL_TCP31_PASS_EXTERNAL_BROWSER_AND_THREE_FE_FIXES_PENDING",
-    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다.",
+    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-01 사용자 정정: 충원 표시는 최종 합격 예비번호 한 열로 통일하고 원문 명칭이 마지막 순번을 뜻한다고 검증된 경우에만 그 항목에 연결한다. 실제 추가 합격 인원은 내부 산술 입력으로 유지한다. 입결 성적 null은 공식 근거로 해당 조건 미발표 또는 3인 이하가 확인된 경우에만 해당 문구를 구분하며 사유 미확인은 보존한다.",
     "estimated_columns": [
       {
         "id": "estimated_applicants",
@@ -8963,7 +8981,9 @@
       "같은 의미로 확인된 원문 표현은 정본 관측 ID·native 값·원명칭·단위·출처를 보존한 채 한 서비스 표시 항목에 연결한다. 동의어 연결은 현재 관측 복제·새 CID 생성·원값 덮어쓰기·출처 간 숫자 합산을 뜻하지 않는다. 같은 학년도·모집행·전형·군·코호트·성분·모집 단계·발표 차수의 정의를 함께 확인한다.",
       "최종충원순위·충원합격순위·최종합격자 예비번호·마지막 합격 후보순위처럼 마지막 합격 순번임이 확인된 표현은 최종 합격 예비번호(번)로 통일한다. 충원인원·추가합격인원·추가모집인원 등의 제목도 대학 공식 설명이 마지막 합격 순번임을 확인하면 같은 항목에 연결하고 원문 제목·단위는 근거로 보존한다.",
       "추가모집의 별도 모집정원, 실제 추가 합격자 수, 최초 부여 대기번호, 차수별 예비순번과 최종 합격 예비번호를 제목 유사성이나 단위·값 크기만으로 합치지 않는다. 애매한 항목은 이미 알려진 원값·확인 사유를 유지한다. 평균/50/70/75·모집인원/등록인원/지원자수·최초/최종/이월을 구분하고 기존 source qualification을 동의어 처리로 승격하지 않는다.",
-      "현재 입결 단일 관측의 의미 동의어는 서버 alias 포트에서 원문/값/native/CID/연도/PK/코호트/축/차수/통계율을 보존한다. 애매한 충원인원·추가모집·예비번호는 정확한 필드 정의 없이 순위나 인원으로 재분류하지 않는다. P1 고정 snapshot의 기존 값/CID/q는 이동·승격하지 않으며 신규 publisher 결속은 별도 검수다."
+      "현재 입결 단일 관측의 의미 동의어는 서버 alias 포트에서 원문/값/native/CID/연도/PK/코호트/축/차수/통계율을 보존한다. 애매한 충원인원·추가모집·예비번호는 정확한 필드 정의 없이 순위나 인원으로 재분류하지 않는다. P1 고정 snapshot의 기존 값/CID/q는 이동·승격하지 않으며 신규 publisher 결속은 별도 검수다.",
+      "입결 표에 별도 충원인원 열과 최종 합격 예비번호 열을 동시에 두지 않는다. 최종 합격 예비번호(번) 한 열을 표시한다. 실제 인원 r.ad는 원자료와 추정 탈락자 계산에 유지하며 예비번호를 인원으로 치환하지 않는다.",
+      "공식 근거로 다른 통계만 발표된 성적 조건은 해당조건미발표, 동일 관측에서 3인 이하가 공식 확인된 경우만 3인이하미발표로 표시한다. 사유 미확인, native null·0·원문 사유를 보존한다."
     ],
     "preview": {
       "selected_preparation": "C_local_review_package",

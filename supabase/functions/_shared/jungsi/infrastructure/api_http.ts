@@ -28,7 +28,11 @@ import type {
   RequestClockPort,
   UserSessionPort,
 } from "../application/ports.ts";
-import { publicJsonText, PublicResponseProjection } from "../application/public_response.ts";
+import {
+  publicJsonText,
+  PublicResponseProjection,
+  type WildcardProjectionAuthority,
+} from "../application/public_response.ts";
 import { BUDGET_OPERATIONS, type RequestBudgetPort } from "../application/request_budget.ts";
 import {
   isVerifiedAdminSnapshot,
@@ -88,6 +92,15 @@ export interface ApiHttpPorts {
   readonly authorities: ForecastAuthorityPort;
   readonly resources: ManagementResourcePort;
   readonly projection: PublicResponseProjection;
+  /** Optional approved, request-bound immutable-revision verifier; absent in the runtime. */
+  readonly wildcardProjectionAuthority?: {
+    resolve(
+      request: ApiExecution,
+      result: unknown,
+      admission: unknown,
+      signal: AbortSignal,
+    ): Promise<WildcardProjectionAuthority | null>;
+  };
   readonly budget: RequestBudgetPort;
   readonly business: ApiBusinessPort;
   readonly completion?: {
@@ -106,6 +119,19 @@ interface Route {
 const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 function configuration(): never {
   throw new AccessError("security_policy_unavailable", 503);
+}
+function hasPrivateWildcardReport(value: unknown, operation: string): boolean {
+  const object = (x: unknown): x is Record<string, unknown> =>
+    !!x && typeof x === "object" && !Array.isArray(x);
+  let report = value;
+  if (operation === "report.export" && object(report)) report = report.report;
+  if (!object(report)) return false;
+  const selected = object(report.candidates)
+    ? report.candidates
+    : object(report.read_only_snapshot) && object(report.read_only_snapshot.candidates)
+    ? report.read_only_snapshot.candidates
+    : null;
+  return !!selected && Object.hasOwn(selected, "_wildcard_selection_view");
 }
 function routes(
   policies: readonly ApiRoutePolicy[],
@@ -394,11 +420,13 @@ export function createApiHandler(
         params,
         requestKey: request.headers.get("Idempotency-Key"),
       };
-      const work = async () => {
+      let authority: WildcardProjectionAuthority | null = null;
+      let trustedRaw: unknown, firstProjection: string | null = null;
+      const work = async (admission?: unknown) => {
         stage("business");
         const result = policy.id === "session.read"
           ? sessionDto(session, ports.clock.nowUtc())
-          : await ports.business.execute(selected);
+          : await ports.business.execute(selected, { signal: request.signal, admission });
         if (
           policy.id === "session.read" &&
           (Object.keys(selectedQuery).length ||
@@ -408,7 +436,44 @@ export function createApiHandler(
         stage("business_session");
         sessionDto(session, ports.clock.nowUtc());
         stage("response_projection");
-        return ports.projection.project(policy.id, session.tier, result);
+        if (
+          ports.wildcardProjectionAuthority && [
+            "overall.analyze",
+            "university.analyze",
+            "candidates.build",
+            "report.read",
+            "report.export",
+            "shortlist.update",
+          ].includes(policy.id) && hasPrivateWildcardReport(result, policy.id)
+        ) {
+          if (request.signal.aborted) configuration();
+          // An absent or failing proof source must leave old response and cards intact.
+          if (admission !== null && admission !== undefined) {
+            try {
+              authority = await ports.wildcardProjectionAuthority.resolve(
+                selected,
+                result,
+                admission,
+                request.signal,
+              );
+              if (authority) await authority.assertCurrent(request.signal);
+            } catch {
+              authority = null;
+            }
+          }
+          if (request.signal.aborted) configuration();
+        }
+        const projected = ports.projection.project(
+          policy.id,
+          session.tier,
+          result,
+          authority ?? undefined,
+        );
+        if (authority) {
+          trustedRaw = result;
+          firstProjection = publicJsonText(projected);
+        }
+        return projected;
       };
       const complete = async () => {
         stage("budget");
@@ -421,7 +486,17 @@ export function createApiHandler(
         stage("final_session");
         sessionDto(session, ports.clock.nowUtc());
         stage("final_projection");
-        const approved = ports.projection.project(policy.id, session.tier, result);
+        if (authority && firstProjection !== null) await authority.assertCurrent(request.signal);
+        const approved = authority && firstProjection !== null
+          ? ports.projection.project(policy.id, session.tier, trustedRaw, authority)
+          : ports.projection.project(policy.id, session.tier, result);
+        // Identity or a request-local cache is only transport: the independent authority
+        // must approve both passes and the settled representation must match byte-for-byte.
+        if (
+          authority && firstProjection !== null &&
+          (request.signal.aborted || publicJsonText(result) !== firstProjection ||
+            publicJsonText(approved) !== firstProjection)
+        ) configuration();
         stage("response_serialization");
         const encoded = await ports.representation?.encode(selected, approved);
         if (
@@ -456,6 +531,19 @@ export function createApiHandler(
         stage("response_current");
         await ports.completion?.current();
         sessionDto(session, ports.clock.nowUtc());
+        // This check is before any delivery receipt. It narrows one race only;
+        // the later receipt and actual transport are not atomic with revocation.
+        if (authority && firstProjection !== null) {
+          await authority.assertCurrent(request.signal);
+          if (
+            request.signal.aborted ||
+            publicJsonText(
+                ports.projection.project(policy.id, session.tier, trustedRaw, authority),
+              ) !==
+              firstProjection
+          ) configuration();
+          sessionDto(session, ports.clock.nowUtc());
+        }
         stage("response_delivery");
         await ports.completion?.deliver(selected, approved, requestId);
         return response;

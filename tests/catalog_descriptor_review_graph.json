@@ -1593,7 +1593,7 @@
         "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "cfd650bce6d497a2ff50ef5cb080d678f471d261235159e1691a7d8355e2e2ee",
         "supabase/functions/_shared/jungsi/application/platform_repository.ts": "839a70ed64ef53b626b0b404b91a0a4fbbdc58704159d5b6d76ed82945f57744",
         "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
-        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "7b39971ed0563ea41e415c2616eb0f0828ebf7b7da41e9a0bff1fe7d1c6fe157",
+        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d",
         "supabase/functions/_shared/jungsi/application/rule_explanations.ts": "06665302e154a32106bb2ea9a10057004690e63762dde36e3ceeb48b2cec3028",
         "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts": "b7df1e1859b6f485dd672d4d0299792bada03d245baa5e650fa4f36cf5b702b4",
         "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "4f95a22edbdc24b5174094144bc49332582c47178f54c678ade74e1318bd56de",
@@ -3439,7 +3439,7 @@
         "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "cfd650bce6d497a2ff50ef5cb080d678f471d261235159e1691a7d8355e2e2ee",
         "supabase/functions/_shared/jungsi/application/platform_repository.ts": "839a70ed64ef53b626b0b404b91a0a4fbbdc58704159d5b6d76ed82945f57744",
         "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
-        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "7b39971ed0563ea41e415c2616eb0f0828ebf7b7da41e9a0bff1fe7d1c6fe157",
+        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d",
         "supabase/functions/_shared/jungsi/application/rule_explanations.ts": "06665302e154a32106bb2ea9a10057004690e63762dde36e3ceeb48b2cec3028",
         "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts": "b7df1e1859b6f485dd672d4d0299792bada03d245baa5e650fa4f36cf5b702b4",
         "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "4f95a22edbdc24b5174094144bc49332582c47178f54c678ade74e1318bd56de",
@@ -3480,7 +3480,7 @@
     },
     "supabase/functions/_shared/jungsi/application/profile_reports.ts": {
       "classification": "PINNED_TYPE_ONLY",
-      "sha256": "7b39971ed0563ea41e415c2616eb0f0828ebf7b7da41e9a0bff1fe7d1c6fe157",
+      "sha256": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d",
       "specifiers": [
         "./score_input_ports.ts",
         "./score_input_ports.ts"

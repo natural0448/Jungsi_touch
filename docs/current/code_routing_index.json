@@ -505,7 +505,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "f700b177590b39e7b6812d8a71c4e1f047054267e9fdedc0076425db2a0e56d9",
+      "source_sha256": "882f6bbda8054dd3f0cbb4743027e6e99d2255d270fad00219be0c2cddc4e09f",
       "symbols": [
         {
           "kind": "class",
@@ -670,7 +670,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "dc488c5ee8a7ad52a1af5ea5bd63b943272cb969433764177c95bc13b8f1d8ca",
+      "source_sha256": "54e9e05c5bb098d8985f4ced7a5a53383c768b014984d6b48c4a3275ecb6092a",
       "symbols": [
         {
           "kind": "class",
@@ -1042,6 +1042,12 @@
           "kind": "function",
           "name": "service_staged_registration",
           "signature": "def service_staged_registration(spec, source_hashes=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "service_wildcard_registration",
+          "signature": "def service_wildcard_registration(spec, source_hashes=None):",
           "decorators": []
         },
         {
@@ -1660,7 +1666,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "165fd61793123d48149067e3833d5470788b125788594043f427803d97f496b2",
+      "source_sha256": "3e66266eeeba15a37ceaf27b444a59038807c86868d5a4650b8d79b977fbcc4a",
       "symbols": [
         {
           "kind": "function",
@@ -1707,7 +1713,7 @@
         {
           "kind": "function",
           "name": "summarize_edge_units",
-          "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False):",
+          "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False):",
           "decorators": []
         }
       ]
@@ -1717,7 +1723,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "53ea42712bc84372aabe012c0b4a4e22139d04a11c0fa9f4f5d9baa9cdd2fa21",
+      "source_sha256": "813a602e237814ec4cb5d088986949dde915a81d13b3d04a1a2c34025c51cecb",
       "symbols": [
         {
           "kind": "function",
@@ -7576,7 +7582,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "50be2cb82f617fdd88139b6fe431e6aa03ec44104972d5b5ead290cc20f4fa89",
+        "source_sha256": "0ef599db025f26cd923bba8bd5464ff09fb8ea5a08bc7dfc09eb0bd75313ce38",
         "declared_exports": [
           "API_OPERATION_IDS",
           "ApiBusinessPort",
@@ -7848,7 +7854,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30",
+        "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
         "declared_exports": [
           "HISTORY_PUBLICATION_STATUSES",
           "HISTORY_SNAPSHOT_SLOTS",
@@ -8062,7 +8068,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "fe3f8ca958caf1830d4d6653e4acd7a2565664caff0864d74c5375414cb7131e",
+        "source_sha256": "18182c85bea7ab111699bf53deb9faabf643ea1fef23e0777c7a3bc150a946a6",
         "declared_exports": [
           "P1R27Pins",
           "BoundP1R27Evidence",
@@ -8075,7 +8081,9 @@
           "buildCandidateR27ScopeIndex",
           "buildCandidateR27PartialScopeIndex",
           "buildCandidateR27PartialBody",
-          "assertSealedR27Publication"
+          "assertSealedR27Publication",
+          "P1R27RebindAuthorityPort",
+          "rebindP1R27Candidate"
         ]
       },
       {
@@ -8156,7 +8164,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "c7affb470d2d0814779acdba6ad1e56731a15e0e9dc3d30570ffc1d2bb289f04",
+        "source_sha256": "76f54539218534f679cf49d231958526265411bf94f0054f9b2e2c1b670c092f",
         "declared_exports": [
           "P1R27GateLimits",
           "prepareP1R27GlobalReceipt"
@@ -8253,7 +8261,7 @@
           "REQ-26",
           "REQ-31"
         ],
-        "source_sha256": "30b8f6680d60255ebae5b37a956c0331c156806e419e6937fb9b55de416cd89b",
+        "source_sha256": "b9e22d6bc8c3853ff9dcb372ac7a573dc11ad2b4c8a486e5eaf9f4fb10eb7531",
         "declared_exports": [
           "ProfessionalAnalysisDataPort",
           "ProfessionalApprovedAnalysis",
@@ -8308,7 +8316,7 @@
           "REQ-26",
           "REQ-31"
         ],
-        "source_sha256": "9d15b9297bae2f0a9658f607207609d9d71b22ccd4ed76c7267f46ad880765e1",
+        "source_sha256": "e2a561f303f9ee39fe8afedbc7932fcd2e8d1d4a47e867a91c40fca97977c492",
         "declared_exports": [
           "ApprovedAnalysisPort",
           "OrganizationStudentRepositoryPort",
@@ -8347,7 +8355,7 @@
           "REQ-26",
           "REQ-31"
         ],
-        "source_sha256": "b4ba3397fd1d0a0a2a73f6128bc928594cb7eb3144bc8824af7e2d4bf2bc9292",
+        "source_sha256": "5cd70e5b5ef77f39c10ab7ad00cef27111fb1c9f34ee0f7d8a15b57948b96342",
         "declared_exports": [
           "ProfessionalProjection"
         ]
@@ -8362,7 +8370,7 @@
           "REQ-26",
           "REQ-31"
         ],
-        "source_sha256": "818e55cfd2ea785d6ad4b0b3ef1ab401e923c94bb3d63fff58db1184b9c6b84b",
+        "source_sha256": "7a8f29503dd289fd20a2802fe9dc12a0515fb4ad5ecc650ecaa73d9184d149bc",
         "declared_exports": [
           "ProfessionalDelivery",
           "ProfessionalOutcome",
@@ -8410,7 +8418,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "7b39971ed0563ea41e415c2616eb0f0828ebf7b7da41e9a0bff1fe7d1c6fe157",
+        "source_sha256": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d",
         "declared_exports": [
           "PROFILE_REPORT_OPERATIONS",
           "ProfileReportService",
@@ -8446,7 +8454,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "03d97a942e5a16e6fc9fa72446259591b3cf89e8c2a9321b83d160623f503ec9",
+        "source_sha256": "ef19900a3b0e02ddb132324a4a9bf47af4330bc9324ac7c0254b42d63a3ab2e7",
         "declared_exports": [
           "PublicResponseProjection",
           "publicJsonText"
@@ -8463,7 +8471,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "4cb7dbcb39185245b764ef07fedd57f1a2713bf56a49c04abb1394a66c7620cc",
+        "source_sha256": "d7528eea5cecf5b8d4cd681c80cc704c240fa4400892dfbb5a9517f96688f860",
         "declared_exports": [
           "ReviewedR27Links",
           "R27LinkPin",
@@ -8477,7 +8485,25 @@
           "R27BatchPage",
           "R27PagedSource",
           "R27BatchOptions",
-          "buildStandaloneR27"
+          "buildStandaloneR27",
+          "R27ReviewBinding",
+          "assertReviewedR27LinkBinding"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts",
+        "layer": "application",
+        "status": "INTERNAL_DTO_SOURCE_REGISTERED_OPERATING_BINDING_NOT_RUN",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "ba1cf4303b5a448bd9101288baa44ae60c60a5088b6eb08886fe12eddd590533",
+        "declared_exports": [
+          "assembleRecruitmentStageReview",
+          "readOperatingRecruitmentStages"
         ]
       },
       {
@@ -8527,7 +8553,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "eede4780f44e34d3f6a5b92079286e1b49fcfb084d22a2f301312be460a5cee0",
+        "source_sha256": "e208ac4a8e4d15dcacf0a98b5a84f852b00470a9983085e638725243132c52f2",
         "declared_exports": [
           "BUDGET_OPERATIONS",
           "BudgetRequest",
@@ -8715,7 +8741,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "f1071f0b1881b03eec574e66dfc88803a29ec97670f24fd7b8474affd616bd08",
+        "source_sha256": "3d294305b2217a664e10c254853d6502ce0601bc9ac116a281d3b68a88ddeee5",
         "declared_exports": [
           "PublishedForecastPort",
           "UNIVERSITY_ANALYSIS_OPERATIONS",
@@ -8830,7 +8856,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "3bcf4e629dad73cf7101a881696753fb5f7b7eb82d3ff306733fa0c39c6483e5",
+        "source_sha256": "969582f43649cc60bc1b0689d00e81ebd593f8fcb6c429d08cf9017c0041852d",
         "declared_exports": [
           "ApprovedUsagePlan",
           "RepositoryUsageReplays",
@@ -8838,6 +8864,91 @@
           "UsagePlanningPort",
           "UsageReplayVerificationPort",
           "PreparedUsageAdmission"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/wildcard_candidate_review.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-04",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "5cc27e4ef6310cb1d36c74c6c8cb286aa4ec69944d511717acb5a287deaf8d6e",
+        "declared_exports": [
+          "WildcardBatchBinding",
+          "WildcardBatchRecord",
+          "WildcardCandidateRequest",
+          "WildcardEvidenceBatchPort",
+          "WildcardRequestReviewGate",
+          "WildcardReviewContext",
+          "WildcardReviewResult",
+          "WildcardSelectionDto",
+          "WildcardSelectionReason",
+          "WildcardSelectionStatus",
+          "WildcardStabilityStatus",
+          "buildWildcardCandidateReview",
+          "prepareWildcardSelectionForRequest"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/wildcard_public_contract.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-04",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "6cd243ecd7e212500c00eff08357365e2bf5e4cbe25f4a964b0105a70a285b70",
+        "declared_exports": [
+          "validWildcardSelection"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/wildcard_runtime_gate.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-04",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "0a295516b4587d3072ff6a6a34a7dac4395dbd86ed3e354beb2cb57575514137",
+        "declared_exports": [
+          "WildcardAuthorizedScope",
+          "WildcardExecutionBoundary",
+          "WildcardGateRequirements",
+          "WildcardRuntimeGate",
+          "WildcardRuntimeGrant",
+          "materializeWildcardReview",
+          "requestWildcardGrant"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/wildcard_selection.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-04",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-31"
+        ],
+        "source_sha256": "83731a53497e5be55720bf7bd64cd493a19ec9fc291c6bcf110d0397f193dcae",
+        "declared_exports": [
+          "WildcardChoice",
+          "WildcardSelection",
+          "WildcardStability",
+          "selectWildcards"
         ]
       },
       {
@@ -9257,7 +9368,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "2711332e39f12119dbfdf9ca0aa2a124344c5ceab96903a64e9a6f0757d95542",
+        "source_sha256": "6fe695a27a87ddc45eb9041cc0827373df3cc1a05696a1a1d3c2394954521149",
         "declared_exports": [
           "API_REQUEST_STAGES",
           "ApiHttpPorts",
@@ -9281,7 +9392,7 @@
           "REQ-12",
           "REQ-30"
         ],
-        "source_sha256": "747b86f3c4e610efc3178c62db0abd17aac32ee524d10a66e1b5923fe942cb58",
+        "source_sha256": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
         "declared_exports": [
           "BoundaryPorts",
           "RelayBoundary",
@@ -9737,7 +9848,7 @@
           "REQ-26",
           "REQ-31"
         ],
-        "source_sha256": "6c69f122dc2481ecb8d66a7cf3f844a1abec437c0e50dfbdc9a6317c40efb6fe",
+        "source_sha256": "2005a9720e4a3b60324db5ffdc318d1535905ca114191540c2c5bea4e265502a",
         "declared_exports": [
           "ProfessionalHttpPorts",
           "createProfessionalHandler",
@@ -9770,7 +9881,7 @@
           "REQ-26",
           "REQ-31"
         ],
-        "source_sha256": "71c1b34209736c466f5ad4cd79ac7e44fa187aeeda3f592547969323e54b3e98",
+        "source_sha256": "8712cec557d746811e8c8127c086be84b72488b332de545e91a155e18faf5c03",
         "declared_exports": [
           "NativeProfessionalRuntime"
         ]
@@ -9908,7 +10019,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "dd7b81549fabc6382ff996ea4daa12dcb2c745ad89337c7627d0fd2e07683ee0",
+        "source_sha256": "cccfa8ebe2597062d94bdf6534f5e4ca5adaecf39208f47ae2f1dec9c06b9591",
         "declared_exports": [
           "RUNTIME_BUDGET_STAGES",
           "RuntimeBudgetStage",
@@ -9951,7 +10062,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "1db480c309ffb6609a0eccc0d04d17627e9571722239c4a3a944ec990b9dba50",
+        "source_sha256": "93ae8db8bd20127fe3207601ecb3d0573b1d557cd5122a83a3ba7fa599d05309",
         "declared_exports": [
           "NativeRuntimeApi",
           "RuntimeComposition",

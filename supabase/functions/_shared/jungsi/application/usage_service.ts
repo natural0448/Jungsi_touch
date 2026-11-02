@@ -264,7 +264,7 @@ export class SharedRequestBudget implements RequestBudgetPort {
   /** Reservation precedes the profile transaction so failed requests retain frequency accounting. */
   async runAdmitted<T>(
     admission: PreparedUsageAdmission,
-    work: () => Promise<T>,
+    work: (admission?: unknown) => Promise<T>,
     request: BudgetRequest = admission.originalRequest,
   ): Promise<T> {
     const record = admissions.get(admission);
@@ -288,7 +288,7 @@ export class SharedRequestBudget implements RequestBudgetPort {
     let result: T, resultBytes = 0n;
     try {
       sessionDto(request.session, this.clock.nowUtc());
-      result = await work();
+      result = await work(admission);
       resultBytes = this.measureResult
         ? await this.measureResult(protectedRequest, result)
         : BigInt(new TextEncoder().encode(nativeJsonText(result)).byteLength);
@@ -346,7 +346,7 @@ export class SharedRequestBudget implements RequestBudgetPort {
       unavailable();
     }
   }
-  async run<T>(request: BudgetRequest, work: () => Promise<T>): Promise<T> {
+  async run<T>(request: BudgetRequest, work: (admission?: unknown) => Promise<T>): Promise<T> {
     return await this.runAdmitted(await this.admit(request), work, request);
   }
 }

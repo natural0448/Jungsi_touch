@@ -332,12 +332,18 @@ def candidate(current=None):
     if current is None:
         current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
     spec = retained_legacy28_fixture(current)
-    from check_project_consistency import service_aux_registration, service_staged_registration
+    from check_project_consistency import service_aux_registration, service_staged_registration, service_wildcard_registration
+    wildcard_tests = set()
     for key, registration in (("service_aux_test_extension", service_aux_registration),
-                              ("service_staged_test_extension", service_staged_registration)):
+                              ("service_staged_test_extension", service_staged_registration),
+                              ("service_wildcard_test_extension", service_wildcard_registration)):
         registered, errors = registration(spec)
         if errors:raise ValueError("Synthetic fixture cannot ignore invalid additive suite registration")
-        if registered is not None:spec["backend_platform_contract"].pop(key)
+        if registered is not None:
+            if key == "service_wildcard_test_extension":
+                wildcard_tests.update(registered["test_paths"])
+            else:
+                spec["backend_platform_contract"].pop(key)
     if spec['backend_platform_contract'].get('stage_projection_source_extension') is not None:
         if validate_score_input_native_guard(spec):
             raise ValueError('Synthetic fixture cannot ignore invalid stage guard evidence')
@@ -354,7 +360,7 @@ def candidate(current=None):
         raise ValueError('Synthetic fixture cannot ignore invalid Guide registration')
     for p in list(files):
         if (p.startswith('tests/edge/test_') and p not in spec['edge_harness']['tests']
-                and p not in guide_tests):
+                and p not in guide_tests and p not in wildcard_tests):
             files.pop(p)
     service = 'supabase/functions/_shared/jungsi/application/synthetic_read_view.ts'
     test = 'tests/edge/test_synthetic_read_view_extension.ts'
@@ -386,8 +392,39 @@ def candidate(current=None):
 
 
 class ReadViewExtensionContractTests(unittest.TestCase):
+    def test_legacy_read_fixture_preserves_valid_wildcard_registration(self):
+        from check_project_consistency import SERVICE_WILDCARD_IMPLEMENTATION_SENTINELS
+        current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        original=deepcopy(current);fixture=candidate(current)
+        extension=current['backend_platform_contract'].get('service_wildcard_test_extension')
+        if extension is None:
+            self.assertNotIn('service_wildcard_test_extension',fixture['backend_platform_contract'])
+        else:
+            self.assertEqual(fixture['backend_platform_contract']['service_wildcard_test_extension'],extension)
+            for path in (*extension['test_paths'], *SERVICE_WILDCARD_IMPLEMENTATION_SENTINELS):
+                self.assertIn(path,current['edge_harness']['files'])
+                self.assertEqual(fixture['edge_harness']['files'].get(path),current['edge_harness']['files'][path])
+            self.assertEqual(validate_read_view_extension(fixture),[])
+        self.assertEqual(fixture['security_contract'],original['security_contract'])
+        self.assertEqual(current,original)
+
+    def test_legacy_read_fixture_rejects_missing_or_tampered_wildcard_evidence(self):
+        current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        if current['backend_platform_contract'].get('service_wildcard_test_extension') is None:
+            return
+        for mode in ('missing_extension','guard_pin','missing_test'):
+            source=deepcopy(current);extension=source['backend_platform_contract']['service_wildcard_test_extension']
+            if mode=='missing_extension':
+                source['backend_platform_contract'].pop('service_wildcard_test_extension')
+            elif mode=='guard_pin':
+                extension['fixture_graph_guard']['sha256']='0'*64
+            else:
+                source['edge_harness']['files'].pop(extension['test_paths'][0])
+            with self.subTest(mode=mode),self.assertRaisesRegex(ValueError,'invalid additive suite registration'):
+                candidate(source)
+
     def test_legacy_fixture_cannot_hide_invalid_additive_suite(self):
-        for key in ("service_aux_test_extension", "service_staged_test_extension"):
+        for key in ("service_aux_test_extension", "service_staged_test_extension", "service_wildcard_test_extension"):
             current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
             if key in current['backend_platform_contract']:
                 current['backend_platform_contract'][key]['test_count']=True

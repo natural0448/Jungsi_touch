@@ -1,7 +1,11 @@
 /** Closed professional envelopes with the existing recursive approved result schemas. */
 import { AccessError } from "./access.ts";
 import type { ProfessionalContract, ProfessionalResponse } from "./professional_ports.ts";
-import { PublicResponseProjection } from "./public_response.ts";
+import {
+  publicJsonText,
+  PublicResponseProjection,
+  type WildcardProjectionAuthority,
+} from "./public_response.ts";
 import { proObject } from "./professional_policy.ts";
 import { cloneNativeJson, type NativeObject } from "../domain/json_value.ts";
 
@@ -318,7 +322,12 @@ export class ProfessionalProjection {
     }
     return result;
   }
-  project(operation: string, response: ProfessionalResponse, requestId: string): NativeObject {
+  project(
+    operation: string,
+    response: ProfessionalResponse,
+    requestId: string,
+    authority?: WildcardProjectionAuthority,
+  ): NativeObject {
     const route = this.routes.get(operation);
     if (!route) unavailable();
     const data = cloneNativeJson(proObject(response.data));
@@ -352,8 +361,10 @@ export class ProfessionalProjection {
         data,
         reason_codes: [...response.reasons],
         request_id: requestId,
-      }),
+      }, authority),
     );
+    // Reasons must describe the same publicly projected data returned below.
+    const firstPublicData = authority ? publicJsonText(projected.data) : null;
     const reasons = new Set<string>(response.reasons);
     if (
       [
@@ -379,8 +390,29 @@ export class ProfessionalProjection {
       Object.values(row).forEach(pending);
     };
     pending(projected.data);
+    // Only this operation's wildcard partial selection affects the envelope.
+    // The nested selection was already restricted by the recursive public schema.
+    if (operation === "pro.candidates") {
+      const data = proObject(projected.data), candidates = proObject(data.candidates);
+      const selection = candidates.wildcard_selection;
+      if (selection && typeof selection === "object" && !Array.isArray(selection)) {
+        const value = selection as Record<string, unknown>;
+        if (
+          value.status === "partial" && typeof value.reason_code === "string" && [
+            "wildcard_evidence_unavailable",
+            "wildcard_assessment_pending",
+            "wildcard_comparison_unverified",
+          ].includes(value.reason_code)
+        ) reasons.add(value.reason_code);
+      }
+    }
     projected.status = reasons.size ? "pending" : "ready";
     projected.reason_codes = [...reasons];
-    return proObject(this.projection.project(operation, "standard", projected));
+    // Re-project from the internal source so a revision-bound authority can atomically
+    // authorize the private view on both passes; raw fields are filtered again.
+    projected.data = data;
+    const final = proObject(this.projection.project(operation, "standard", projected, authority));
+    if (firstPublicData !== null && publicJsonText(final.data) !== firstPublicData) unavailable();
+    return final;
   }
 }

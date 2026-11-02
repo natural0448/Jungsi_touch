@@ -12,13 +12,13 @@ TEST_PATH = "supabase/functions/_shared/current_public_catalog_descriptor_review
 SOURCE_PATH = "supabase/functions/_shared/current_public_catalog_descriptor_review.ts"
 BRIDGE_PATH = "tests/test_catalog_descriptor_review.py"
 EXPECTED_CASES = 21
-GRAPH_MANIFEST_PATH = "tests/catalog_descriptor_review_graph.json"
-GRAPH_MANIFEST_SHA256 = "8fc3047a0c58bce310de77ef078f229681e17fa60f19dd2a31ce10dae1587832"
+GRAPH_MANIFEST_PATH = "tests/catalog_descriptor_review_graph.20261102.json"
+GRAPH_MANIFEST_SHA256 = "afd44c9dd856112d480b11b4653091b891e031c2643e69dbf9e3ab1eaf12c3f1"
 BASE_COMMIT = "42b7ac28bae3c2c5c0041d16bcf505c2014bf404"
 SCANNER_PATH = "scripts/check_edge_contract.py"
-SCANNER_SHA256 = "f700b177590b39e7b6812d8a71c4e1f047054267e9fdedc0076425db2a0e56d9"
+SCANNER_SHA256 = "882f6bbda8054dd3f0cbb4743027e6e99d2255d270fad00219be0c2cddc4e09f"
 SUPPORT_PATH = "tests/test_service_candidate_suites.py"
-SUPPORT_SHA256 = "fcdf9da27b639ccc8a31040bfcb5288bb202faf8700c079a13803468ccebb9f4"
+SUPPORT_SHA256 = "2af51fd7e445a22b744737501eeeb6fcf346204eb3df76695d9f005e4e3e43fb"
 
 
 def snapshot_file(name):
