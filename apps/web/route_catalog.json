@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.150",
-  "source_sha256": "ec6e49099b576447ef62a78e4851cd5382f2c250da2efc780eafb19bd89fd943",
+  "spec_version": "1.9.151",
+  "source_sha256": "46ff84f1684be23f7936d04b552ec87055b492af976a10e4c4c72c29d32ac18d",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4308,7 +4308,8 @@
       "coverage": "all actual Edge, Python and other entrypoints, policy and bindings; no assertion until each verified",
       "actual_registration": "NOT_RUN",
       "actual_deployment": "NOT_RUN"
-    }
+    },
+    "current_recruitment_scope_ref": "P1_display_snapshot_contract.active_recruitment_scope_20261103"
   },
   "management_pages": [
     {
@@ -9572,7 +9573,8 @@
         "candidate_boundary": "Unapproved private snapshot, canonical DB, approved immutable edition and browser acceptance are distinct states.",
         "activation": "Owner review, normal source gates and compatible DTO/provenance acceptance required before deployment."
       }
-    }
+    },
+    "current_recruitment_scope_ref": "P1_display_snapshot_contract.active_recruitment_scope_20261103"
   },
   "security_contract": {
     "format": "jungsi.external-access-security/v1",
