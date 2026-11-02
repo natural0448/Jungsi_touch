@@ -41,8 +41,8 @@ class CommittedRunnerProgressTests(unittest.TestCase):
         result,receipt=self.execute('    @unittest.skip("synthetic skip")\n    def test_a(self): pass\n')
         self.assertEqual(receipt['tests_run'],1)
         self.assertEqual(receipt['skipped'],1)
-        self.assertEqual(runner.PYTHON_SUITE_TIMEOUT_SECONDS,1800)
-        self.assertEqual(runner.RETAINED_RUNNER_TIMEOUT_SECONDS,2200)
+        self.assertEqual(runner.PYTHON_SUITE_TIMEOUT_SECONDS,3600)
+        self.assertEqual(runner.RETAINED_RUNNER_TIMEOUT_SECONDS,4200)
         self.assertGreater(runner.RETAINED_RUNNER_TIMEOUT_SECONDS,runner.PYTHON_SUITE_TIMEOUT_SECONDS+300)
 
 
