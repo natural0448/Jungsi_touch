@@ -1,4 +1,5 @@
 import { asOfDate, ratioText } from "@/lib/format";
+import { derived } from "@/lib/p1-derived";
 import { rankDisplayModel } from "@/lib/p1-field-qualification";
 import { publishedScoreNullLabel, publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
@@ -6,13 +7,14 @@ import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
 /*
   정리본 한 모집단위: 학년도별 한 줄, 이전 고정 표 배치(연결계약 v3 §5).
   모집인원 · 경쟁률 · 추정 총 지원자 · 최종 합격 예비번호 · 추정 탈락자 · 대학 발표 성적 ①·②.
-  충원인원(실제 추가 합격자 수, 명)은 열로 보이지 않고 추정 탈락자 계산에만 쓴다. 예비번호와 뜻이 달라 서로 바꿔 쓰지 않는다(2026-11-02 사용자 결정).
+  충원인원(실제 추가 합격자 수, 명)은 열로 보이지 않는다(2026-11-02 사용자 결정). 정리본 자료는 그대로 보존한다.
   값은 원문 표기 그대로, null 은 0 이 아니다. 모집인원 단계·대상 집단 꼬리표·출처 링크는 보이지 않는다(2026-10-24 사용자 결정).
   발표 성적 두 칸은 대학마다 다른 통계(50·70%컷, 평균·75%컷 등) 중 두 개를 골라 통계 이름과 함께 보인다(2026-10-28 사용자 결정,
   고르는 규칙은 lib/p1-published-stats.ts). ① 은 50%컷 자리, ② 는 70%컷 자리로 통계마다 칸이 고정된다(같은 날 정정). 별도 '대학 발표 추가 통계' 열은 만들지 않는다. 정리본 자료는 그대로 보존한다.
   값이 있는데 확인 중(pending_metadata)이면 값과 확인 사유를 함께 보인다. 예비번호는 '번'.
-  추정 2열만 기존 승인 산식(모집인원×경쟁률 반올림, −모집−충원)으로 계산하고 발표 칸을 덮지 않는다.
-  추정 총 지원자는 충원인원 없이도 계산하고, 추정 탈락자만 충원인원이 있어야 계산한다.
+  추정 2열만 계산하고 발표 칸을 덮지 않는다: 추정 총 지원자 = 모집인원×경쟁률(반올림),
+  추정 탈락자 = 추정 총 지원자 − (모집인원 + 최종 합격 예비번호)(2026-11-02 사용자 결정, 이전 산식의 충원인원 대신).
+  추정 탈락자는 표에 보이는 예비번호(정수, '번')가 있을 때만 계산한다.
 */
 
 export const PAST_YEARS = [2026, 2025, 2024] as const;
@@ -81,37 +83,6 @@ function Stat({ s, closed }: { s: PublishedStat | undefined; closed?: string | n
       {asOf && <small className="rs-bs">자료 기준 {asOf}</small>}
     </>
   );
-}
-
-/* 추정 2열 재료: 십진 문법을 직접 검사한다(Number("") → 0 같은 변환을 쓰지 않는다) */
-const personInt = (c: Cell): number | null => {
-  if (c.v === null || c.u !== "명") return null;
-  const s = c.v.trim();
-  return /^\d{1,9}$/.test(s) ? Number(s) : null;
-};
-const ratioOf = (c: Cell): { n: number; s: number } | null => {
-  if (c.v === null) return null;
-  if (c.u !== null && !c.u.includes("대")) return null;
-  // 화면에 보이는 반올림 값(둘째 자리)으로 계산해 표의 경쟁률과 추정 총 지원자가 서로 맞게 한다
-  const t = /^(\d+)(?:\.(\d+))?$/.exec(ratioText(c.v.trim()));
-  if (!t) return null;
-  const frac = t[2] ?? "";
-  if ((t[1] + frac).length > 10) return null;
-  return { n: Number(t[1] + frac), s: 10 ** frac.length };
-};
-/* 추정 총 지원자 = 모집인원×경쟁률(충원 불필요), 추정 탈락자 = 그 값 − 모집인원 − 충원인원(충원이 있을 때만). 2026-10-22 사용자 확인 */
-function derived(r: Row): { applicants: number | null; dropped: number | null; heldA: boolean; heldD: boolean } {
-  const cap = personInt(r.rc);
-  const fill = personInt(r.ad);
-  const ratio = ratioOf(r.cr);
-  const isHeld = (c: Cell) => c.s !== "verified_official" && c.s.startsWith("pending");
-  if (cap === null || ratio === null || cap >= 1e5) return { applicants: null, dropped: null, heldA: false, heldD: false };
-  // half-up(Q×R)을 정수 분수로: floor((2QR + s) / 2s)
-  const applicants = Math.floor((2 * cap * ratio.n + ratio.s) / (2 * ratio.s));
-  const heldA = isHeld(r.rc) || isHeld(r.cr);
-  if (fill === null) return { applicants, dropped: null, heldA, heldD: false };
-  const d = applicants - cap - fill;
-  return { applicants, dropped: d >= 0 ? d : null, heldA, heldD: heldA || isHeld(r.ad) };
 }
 
 export const latestOf = (rows: Row[]) => [...rows].sort((a, b) => b.y - a.y)[0];
