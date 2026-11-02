@@ -670,7 +670,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "54e9e05c5bb098d8985f4ced7a5a53383c768b014984d6b48c4a3275ecb6092a",
+      "source_sha256": "135f3797d3f46c07188a4b0935848cf0c55e2ce246c8c4c3a1aa4e8be18e4de5",
       "symbols": [
         {
           "kind": "class",
@@ -8679,6 +8679,21 @@
         "declared_exports": [
           "SCORE_CONTENT_REJECTION_CODES",
           "ScoreInputService"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
+        "layer": "application",
+        "status": "INTERNAL_REVIEW_ONLY_AUTHORITY_AND_PUBLIC_DTO_NOT_BOUND",
+        "requirements": [
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "e0552f3b3862d28b07bf28d4212c93c46695cdb3cf92b5965bdb9f385eb8339a",
+        "declared_exports": [
+          "projectScoreNullReasons"
         ]
       },
       {

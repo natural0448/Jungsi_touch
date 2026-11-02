@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.146",
-  "source_sha256": "5fd443611899939467c11a21ce2bb73810d185e77184caa388ddd795ac7f2c43",
+  "spec_version": "1.9.147",
+  "source_sha256": "aaae9da74044fa890f9924e6fb24aacb4bf7793f99dabf658ed9ed0d97433e20",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3899,15 +3899,15 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "c83314926543d0364b6f41cc609d7fc60c3fe134a5b694136ebebfd2071da9da"
+        "sha256": "9edf17b8ee73179070121142802790e693533e5e0ec7313dd66321f500ca2b95"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "2af51fd7e445a22b744737501eeeb6fcf346204eb3df76695d9f005e4e3e43fb"
+        "sha256": "6e3586fbb43fedb7fc199443a928f4277a163c5f5bea069f7734062f0c0b5934"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "cb67d013dce97df15ddbdb02250f6ed444abb2304cf3898116a784737778b9c1"
+        "sha256": "837725ab0d1b4df9a55e937896fbead3d88f908451af6931dfef50f489b4eb72"
       },
       "groups": {
         "p1_review": {
@@ -3947,9 +3947,10 @@
             "tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs",
             "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs",
             "tests/service_p1/test_p1_r27_request_admission.synthetic.ts",
-            "tests/service_p1/test_p1_r27_http_order.synthetic.ts"
+            "tests/service_p1/test_p1_r27_http_order.synthetic.ts",
+            "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
           ],
-          "test_count": 46
+          "test_count": 79
         }
       },
       "runtime_scope": "DENO_2_9_7_PORTABLE_CI_NOT_VERIFIED",
@@ -6523,7 +6524,7 @@
           "selected_published_score"
         ],
         "text": "해당조건미발표",
-        "application": "공식 근거로 다른 통계만 발표되어 선택 조건이 미발표임이 확인된 경우 해당조건미발표, 해당 관측·코호트·통계에 3인 이하 미발표가 공식 근거로 확인된 경우에만 3인이하미발표를 표시한다. 사유가 확인되지 않은 null은 미확인·미발표 상태를 보존한다. 2026-11-02 사용자 조건별 결정은 2026-11-01 일괄 공란 표기 요약에 우선하며, 해당 예전 요약은 당시 결정 이력으로 보존한다. 화면 v3 후보, 사유 DTO 결속 및 운영 배포는 각각 미완료다.",
+        "application": "공식 근거로 다른 통계만 발표되어 선택 조건이 미발표임이 확인된 경우 해당조건미발표, 해당 관측·코호트·통계에 3인 이하 미발표가 공식 근거로 확인된 경우에만 3인이하미발표를 표시한다. 사유가 확인되지 않은 null은 미확인·미발표 상태를 보존한다. 2026-11-02 사용자의 직접 조건별 선택이 현재 기준이다. 2026-11-01 일괄 공란 표기 요약은 당시 기록으로 보존하되 사용자 직접 발언의 원문과 시각은 확인되지 않았다. 화면 v3 후보, 사유 DTO 결속 및 운영 배포는 각각 미완료다.",
         "native_values": "정본/DTO의 null·숫자0·문자열 정밀도·원문 사유는 보존하며 UI 대체 문구만 적용한다. 모든 null을 SOURCE_NONDISCLOSED_LE_3의 원문 증거로 분류하지 않는다.",
         "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다.",
         "historical_20261029_before_user_correction": {
@@ -9128,7 +9129,7 @@
             "new_full_DB_scan": "NOT_RUN",
             "general_publication": "NOT_RUN"
           },
-          "frontend_request": "기존에는 별도 최종 합격 예비번호 열을 요청했다. 2026-11-01 사용자 정정이 우선하며 화면은 최종 합격 예비번호 한 열만 둔다. 원문에서 확정된 순위만 번으로 표시하고 실제 충원인원·추정탈락 입력은 내부 보존한다. 코드 후보와 운영 적용은 구분한다.",
+          "frontend_request": "기존에는 별도 최종 합격 예비번호 열을 요청했다. 2026-11-02 Owner가 확인한 충원 열 결정에 따라 화면은 최종 합격 예비번호 한 열만 둔다. 원문에서 확정된 순위만 번으로 표시하고 실제 충원인원·추정탈락 입력은 내부 보존한다. 코드 후보와 운영 적용은 구분한다.",
           "local_native": {
             "status": "PASS_SCOPED_LOCAL_TCP_WORKTREE_NULLABLE_DELTA_SOURCE_HASH_BOUND_FINAL_GIT_SEAL_SEPARATE",
             "private_receipt": "ACTUAL_W1_MINIMUM_NATIVE_HTTP_RECEIPT.v3.json",
@@ -11833,7 +11834,7 @@
       "recruitment.read"
     ],
     "status": "FE_967_SOURCE_REVIEWED_C_LOCAL_APPROVED_ACTUAL_TCP31_PASS_EXTERNAL_BROWSER_AND_THREE_FE_FIXES_PENDING",
-    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-01 사용자 정정: 충원 표시는 최종 합격 예비번호 한 열로 통일하고 원문 명칭이 마지막 순번을 뜻한다고 검증된 경우에만 그 항목에 연결한다. 실제 추가 합격 인원은 내부 산술 입력으로 유지한다. 입결 성적 null은 공식 근거로 해당 조건 미발표 또는 3인 이하가 확인된 경우에만 해당 문구를 구분하며 사유 미확인은 보존한다.",
+    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-02 Owner 확인(충원 열): 충원 표시는 최종 합격 예비번호 한 열로 통일하고 원문 명칭이 마지막 순번을 뜻한다고 검증된 경우에만 그 항목에 연결한다. 실제 추가 합격 인원은 내부 산술 입력으로 유지한다. 2026-11-02 사용자 직접 선택(성적 공란): 입결 성적 null은 공식 근거로 해당 조건 미발표 또는 3인 이하가 확인된 경우에만 해당 문구를 구분하며 사유 미확인은 보존한다.",
     "estimated_columns": [
       {
         "id": "estimated_applicants",

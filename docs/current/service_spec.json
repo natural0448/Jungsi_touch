@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.146",
+  "version": "1.9.147",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -181,7 +181,7 @@
     {
       "id": "REQ-28",
       "title": "입결 화면용 판별 정리본과 근거를 보존하는 고정 열",
-      "description": "현재 정본 head마다 검증된 로컬 원자료를 재사용해 화면용 불변 정리본을 한 번 작성한다. 전체 목록·검색·필터를 화면 서버에서 처리하며 같은 내용은 재발행하지 않는다. 학년도:원래 PK, native 값/타입·단위·출처, 원문 통계/대상과 별도 정규화 코드, 충원인원/최종 합격 예비번호를 보존한다. 컷은 출처·점수 기준·대상·통계 위치를 확인해 선택하고 미해결/충돌은 null+사유로 남긴다. 새 head/body API는 구현과 엄격 확장 등록·운영 등록 후 활성화한다. 대학이 실제 발표·수집한 다른 비율 컷과 평균·최저 등 점수 통계는 원래 라벨·비율/null·축·집단·단위를 보존해 별도 표시하며 50/70 전용 필터로 누락하지 않는다. 정확한 독립 검수 영수증의 필드별 표시자격은 승인된 마지막 합격 예비번호 셀에만 결속하고, 원값·원상태·원단위·일반 검수 보류를 바꾸지 않는다. 2026-11-01 사용자 정정: 과거 입결 표에서 충원인원과 최종 합격 예비번호를 각각 표시하지 않고 최종 합격 예비번호 한 열만 사용한다. 실제 추가 합격 인원은 내부 원자료와 추정 탈락자 입력으로 유지한다. 입결 성적 null은 공식 근거로 다른 통계만 발표된 경우 해당조건미발표, 같은 관측의 3인 이하가 공식 확인된 경우 3인이하미발표로 표시하고 사유 미확인은 보존한다."
+      "description": "현재 정본 head마다 검증된 로컬 원자료를 재사용해 화면용 불변 정리본을 한 번 작성한다. 전체 목록·검색·필터를 화면 서버에서 처리하며 같은 내용은 재발행하지 않는다. 학년도:원래 PK, native 값/타입·단위·출처, 원문 통계/대상과 별도 정규화 코드, 충원인원/최종 합격 예비번호를 보존한다. 컷은 출처·점수 기준·대상·통계 위치를 확인해 선택하고 미해결/충돌은 null+사유로 남긴다. 새 head/body API는 구현과 엄격 확장 등록·운영 등록 후 활성화한다. 대학이 실제 발표·수집한 다른 비율 컷과 평균·최저 등 점수 통계는 원래 라벨·비율/null·축·집단·단위를 보존해 별도 표시하며 50/70 전용 필터로 누락하지 않는다. 정확한 독립 검수 영수증의 필드별 표시자격은 승인된 마지막 합격 예비번호 셀에만 결속하고, 원값·원상태·원단위·일반 검수 보류를 바꾸지 않는다. 2026-11-02 Owner 확인(충원 열): 과거 입결 표에서 충원인원과 최종 합격 예비번호를 각각 표시하지 않고 최종 합격 예비번호 한 열만 사용한다. 실제 추가 합격 인원은 내부 원자료와 추정 탈락자 입력으로 유지한다. 2026-11-02 사용자 직접 선택(성적 공란): 입결 성적 null은 공식 근거로 다른 통계만 발표된 경우 해당조건미발표, 같은 관측의 3인 이하가 공식 확인된 경우 3인이하미발표로 표시하고 사유 미확인은 보존한다."
     },
     {
       "id": "REQ-29",
@@ -7504,6 +7504,20 @@
         "REQ-31"
       ],
       "symbols": []
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
+      "layer": "application",
+      "status": "INTERNAL_REVIEW_ONLY_AUTHORITY_AND_PUBLIC_DTO_NOT_BOUND",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "symbols": [
+        "projectScoreNullReasons"
+      ]
     }
   ],
   "workflow": {
@@ -8202,7 +8216,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.146",
+        "contract_version": "1.9.147",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -8376,7 +8390,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.146",
+        "contract_version": "1.9.147",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8542,7 +8556,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.146",
+        "contract_version": "1.9.147",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8561,7 +8575,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.146",
+        "contract_version": "1.9.147",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8586,7 +8600,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.146",
+        "contract_version": "1.9.147",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8611,7 +8625,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.146",
+        "contract_version": "1.9.147",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -10602,7 +10616,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "54e9e05c5bb098d8985f4ced7a5a53383c768b014984d6b48c4a3275ecb6092a",
+            "source_sha256": "135f3797d3f46c07188a4b0935848cf0c55e2ce246c8c4c3a1aa4e8be18e4de5",
             "symbols": [
               {
                 "kind": "class",
@@ -18614,6 +18628,21 @@
               ]
             },
             {
+              "path": "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
+              "layer": "application",
+              "status": "INTERNAL_REVIEW_ONLY_AUTHORITY_AND_PUBLIC_DTO_NOT_BOUND",
+              "requirements": [
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-28"
+              ],
+              "source_sha256": "e0552f3b3862d28b07bf28d4212c93c46695cdb3cf92b5965bdb9f385eb8339a",
+              "declared_exports": [
+                "projectScoreNullReasons"
+              ]
+            },
+            {
               "path": "supabase/functions/_shared/jungsi/application/service_end_admission.ts",
               "layer": "application",
               "status": "review_only_source_candidate_native_activation_NOT_RUN",
@@ -24547,7 +24576,7 @@
       "requirements": [
         "REQ-24"
       ],
-      "summary": "사용자의 후속 결정에 따라 근거가 특정되지 않은 대학 발표 성적 공란은 해당조건미발표로 표시한다. 과거 3인 이하 표기의 변경 이력은 보존하되 현재 사유의 근거로 사용하지 않는다. native null·원문 이유·실제 0을 구분하고 모집인원만으로 비공개 사유를 추정하지 않는다. 화면 적용과 실제 운영 검수는 별도 미실행이다."
+      "summary": "2026-11-01의 공란 일괄 표시 요약은 당시 기록으로 보존하되 사용자 직접 발언의 원문과 시각은 확인되지 않았다. 현재 기준은 2026-11-02 사용자의 직접 선택이다. 동일 관측의 공식 근거로 다른 통계만 발표돼 선택 조건이 미발표면 해당조건미발표, 3인 이하 미발표가 확인되면 3인이하미발표를 표시한다. 사유가 확인되지 않은 경우 미확인으로 유지한다. native null·원문 이유·실제 0은 구분하며 모집인원만으로 사유를 추정하지 않는다. 화면 적용과 운영 검수는 미완료다."
     },
     {
       "date": "2026-11-01",
@@ -24599,7 +24628,17 @@
         "REQ-24",
         "REQ-28"
       ],
-      "summary": "사용자 확인: 2026-11-01의 공란 일괄 표기 요약은 당시 이력으로 보존하고 최신 조건별 결정에 적용하지 않는다. 동일 관측·코호트·점수축의 공식 근거로 다른 통계만 발표돼 선택 조건이 미발표면 해당조건미발표, 3인 이하 미발표가 확인되면 3인이하미발표를 표시하고 두 근거가 모두 있으면 3인 이하를 우선한다. 사유 근거가 없으면 미확인으로 보존한다. 화면 v3 후보 적용·서버 사유 DTO 결속·운영 배포는 각각 미완료다."
+      "summary": "2026-11-02 사용자가 직접 선택한 기준: 동일 관측·코호트·점수축의 공식 근거로 다른 통계만 발표돼 선택 조건이 미발표면 해당조건미발표, 3인 이하 미발표가 확인되면 3인이하미발표를 표시하고 두 근거가 모두 있으면 3인 이하를 우선한다. 사유 근거가 없으면 미확인으로 보존한다. 2026-11-01 일괄 표기 요약의 사용자 직접 발언 원문과 시각은 확인되지 않았다. 화면 v3 후보 적용·서버 사유 DTO 결속·운영 배포는 각각 미완료다."
+    },
+    {
+      "date": "2026-11-02",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "Internal review candidate for evidence-bound missing-score reasons; unverified cases remain unknown and issuer, public DTO, UI, database, and deployment are not connected."
     }
   ],
   "overall_analysis_contract": {
@@ -26822,15 +26861,15 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "c83314926543d0364b6f41cc609d7fc60c3fe134a5b694136ebebfd2071da9da"
+        "sha256": "9edf17b8ee73179070121142802790e693533e5e0ec7313dd66321f500ca2b95"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "2af51fd7e445a22b744737501eeeb6fcf346204eb3df76695d9f005e4e3e43fb"
+        "sha256": "6e3586fbb43fedb7fc199443a928f4277a163c5f5bea069f7734062f0c0b5934"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "cb67d013dce97df15ddbdb02250f6ed444abb2304cf3898116a784737778b9c1"
+        "sha256": "837725ab0d1b4df9a55e937896fbead3d88f908451af6931dfef50f489b4eb72"
       },
       "groups": {
         "p1_review": {
@@ -26870,9 +26909,10 @@
             "tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs",
             "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs",
             "tests/service_p1/test_p1_r27_request_admission.synthetic.ts",
-            "tests/service_p1/test_p1_r27_http_order.synthetic.ts"
+            "tests/service_p1/test_p1_r27_http_order.synthetic.ts",
+            "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
           ],
-          "test_count": 46
+          "test_count": 79
         }
       },
       "runtime_scope": "DENO_2_9_7_PORTABLE_CI_NOT_VERIFIED",
@@ -29529,7 +29569,7 @@
           "selected_published_score"
         ],
         "text": "해당조건미발표",
-        "application": "공식 근거로 다른 통계만 발표되어 선택 조건이 미발표임이 확인된 경우 해당조건미발표, 해당 관측·코호트·통계에 3인 이하 미발표가 공식 근거로 확인된 경우에만 3인이하미발표를 표시한다. 사유가 확인되지 않은 null은 미확인·미발표 상태를 보존한다. 2026-11-02 사용자 조건별 결정은 2026-11-01 일괄 공란 표기 요약에 우선하며, 해당 예전 요약은 당시 결정 이력으로 보존한다. 화면 v3 후보, 사유 DTO 결속 및 운영 배포는 각각 미완료다.",
+        "application": "공식 근거로 다른 통계만 발표되어 선택 조건이 미발표임이 확인된 경우 해당조건미발표, 해당 관측·코호트·통계에 3인 이하 미발표가 공식 근거로 확인된 경우에만 3인이하미발표를 표시한다. 사유가 확인되지 않은 null은 미확인·미발표 상태를 보존한다. 2026-11-02 사용자의 직접 조건별 선택이 현재 기준이다. 2026-11-01 일괄 공란 표기 요약은 당시 기록으로 보존하되 사용자 직접 발언의 원문과 시각은 확인되지 않았다. 화면 v3 후보, 사유 DTO 결속 및 운영 배포는 각각 미완료다.",
         "native_values": "정본/DTO의 null·숫자0·문자열 정밀도·원문 사유는 보존하며 UI 대체 문구만 적용한다. 모든 null을 SOURCE_NONDISCLOSED_LE_3의 원문 증거로 분류하지 않는다.",
         "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다.",
         "historical_20261029_before_user_correction": {
@@ -40374,7 +40414,7 @@
       "recruitment.read"
     ],
     "status": "FE_967_SOURCE_REVIEWED_C_LOCAL_APPROVED_ACTUAL_TCP31_PASS_EXTERNAL_BROWSER_AND_THREE_FE_FIXES_PENDING",
-    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-01 사용자 정정: 충원 표시는 최종 합격 예비번호 한 열로 통일하고 원문 명칭이 마지막 순번을 뜻한다고 검증된 경우에만 그 항목에 연결한다. 실제 추가 합격 인원은 내부 산술 입력으로 유지한다. 입결 성적 null은 공식 근거로 해당 조건 미발표 또는 3인 이하가 확인된 경우에만 해당 문구를 구분하며 사유 미확인은 보존한다.",
+    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-02 Owner 확인(충원 열): 충원 표시는 최종 합격 예비번호 한 열로 통일하고 원문 명칭이 마지막 순번을 뜻한다고 검증된 경우에만 그 항목에 연결한다. 실제 추가 합격 인원은 내부 산술 입력으로 유지한다. 2026-11-02 사용자 직접 선택(성적 공란): 입결 성적 null은 공식 근거로 해당 조건 미발표 또는 3인 이하가 확인된 경우에만 해당 문구를 구분하며 사유 미확인은 보존한다.",
     "estimated_columns": [
       {
         "id": "estimated_applicants",
@@ -42649,7 +42689,7 @@
             "new_full_DB_scan": "NOT_RUN",
             "general_publication": "NOT_RUN"
           },
-          "frontend_request": "기존에는 별도 최종 합격 예비번호 열을 요청했다. 2026-11-01 사용자 정정이 우선하며 화면은 최종 합격 예비번호 한 열만 둔다. 원문에서 확정된 순위만 번으로 표시하고 실제 충원인원·추정탈락 입력은 내부 보존한다. 코드 후보와 운영 적용은 구분한다.",
+          "frontend_request": "기존에는 별도 최종 합격 예비번호 열을 요청했다. 2026-11-02 Owner가 확인한 충원 열 결정에 따라 화면은 최종 합격 예비번호 한 열만 둔다. 원문에서 확정된 순위만 번으로 표시하고 실제 충원인원·추정탈락 입력은 내부 보존한다. 코드 후보와 운영 적용은 구분한다.",
           "local_native": {
             "status": "PASS_SCOPED_LOCAL_TCP_WORKTREE_NULLABLE_DELTA_SOURCE_HASH_BOUND_FINAL_GIT_SEAL_SEPARATE",
             "private_receipt": "ACTUAL_W1_MINIMUM_NATIVE_HTTP_RECEIPT.v3.json",
@@ -212507,6 +212547,1315 @@
         ],
         "layer": "verification",
         "symbols": []
+      },
+      "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts": {
+        "declarations": {
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "jsDoc": {
+                "doc": "REVIEW-ONLY projection for missing published-score cells.\nNo route, publisher, database, runtime authority or evidence adapter is installed here.\nThe only public DTO is a per-cell allowlisted reason array; generic reason_code is never evidence."
+              },
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
+              "importedName": "JsonFloat",
+              "originalName": "JsonFloat",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "detachedQualificationSnapshot",
+              "originalName": "detachedQualificationSnapshot",
+              "src": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
+            },
+            {
+              "importedName": "hasAsciiControl",
+              "originalName": "hasAsciiControl",
+              "src": "supabase/functions/_shared/jungsi/domain/text.ts"
+            },
+            {
+              "importedName": "nativeJsonSha256",
+              "originalName": "nativeJsonSha256",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ],
+          "source_sha256": "e0552f3b3862d28b07bf28d4212c93c46695cdb3cf92b5965bdb9f385eb8339a",
+          "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "tsType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "other_statistic_only",
+                          "value": {
+                            "kind": "string",
+                            "string": "other_statistic_only"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "three_or_fewer",
+                          "value": {
+                            "kind": "string",
+                            "string": "three_or_fewer"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "VerifiedScoreNullReason"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "field",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ScoreField",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ScoreField"
+                          }
+                        }
+                      },
+                      {
+                        "name": "verified_score_null_reasons",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "typeRef",
+                                "repr": "VerifiedScoreNullReason",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "VerifiedScoreNullReason"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ScoreNullReasonDto"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "publication_sha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "source_head_sha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "scope_sha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ScoreNullReasonSnapshot"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "field",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ScoreField",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ScoreField"
+                          }
+                        }
+                      },
+                      {
+                        "name": "row",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      },
+                      {
+                        "name": "selection",
+                        "optional": true,
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "Readonly",
+                              "value": {
+                                "typeName": "Readonly",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeLiteral",
+                                    "value": {
+                                      "properties": [
+                                        {
+                                          "name": "anchor_field",
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "typeRef",
+                                                "repr": "ScoreField",
+                                                "value": {
+                                                  "resolution": {
+                                                    "kind": "local"
+                                                  },
+                                                  "typeName": "ScoreField"
+                                                }
+                                              },
+                                              {
+                                                "kind": "literal",
+                                                "repr": "alternate_cut",
+                                                "value": {
+                                                  "kind": "string",
+                                                  "string": "alternate_cut"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "name": "entry_index",
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "number",
+                                                "value": "number"
+                                              },
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "null",
+                                                "value": "null"
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "Readonly",
+                              "value": {
+                                "typeName": "Readonly",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeLiteral",
+                                    "value": {
+                                      "properties": [
+                                        {
+                                          "name": "anchor_field",
+                                          "tsType": {
+                                            "kind": "literal",
+                                            "repr": "target_slot",
+                                            "value": {
+                                              "kind": "string",
+                                              "string": "target_slot"
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "name": "entry_index",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "null",
+                                            "value": "null"
+                                          }
+                                        },
+                                        {
+                                          "name": "cohort_code",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "basis_code",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "official_document_sha256",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ScoreNullReasonTarget"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "snapshot",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ScoreNullReasonSnapshot",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ScoreNullReasonSnapshot"
+                          }
+                        }
+                      },
+                      {
+                        "name": "subjects",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "typeRef",
+                                "repr": "Readonly",
+                                "value": {
+                                  "typeName": "Readonly",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeLiteral",
+                                      "value": {
+                                        "properties": [
+                                          {
+                                            "name": "subject",
+                                            "tsType": {
+                                              "kind": "typeRef",
+                                              "repr": "NativeObject",
+                                              "value": {
+                                                "resolution": {
+                                                  "kind": "import",
+                                                  "name": "NativeObject",
+                                                  "specifier": "../domain/json_value.ts"
+                                                },
+                                                "typeName": "NativeObject"
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "name": "cell_sha256",
+                                            "tsType": {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            }
+                                          },
+                                          {
+                                            "name": "identity_review_sha256",
+                                            "tsType": {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ScoreNullReasonEvidenceRequest"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "methods": [
+                      {
+                        "kind": "method",
+                        "name": "verifyBatch",
+                        "parameter_source": "(request: ScoreNullReasonEvidenceRequest)",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "request",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "ScoreNullReasonEvidenceRequest",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "ScoreNullReasonEvidenceRequest"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "unknown",
+                                "value": "unknown"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "kind": "method",
+                        "name": "assertCurrent",
+                        "parameter_source": "(\n    snapshot: ScoreNullReasonSnapshot,\n    receiptSha256s: readonly string[],\n  )",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "snapshot",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "ScoreNullReasonSnapshot",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "ScoreNullReasonSnapshot"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "receiptSha256s",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeOperator",
+                              "value": {
+                                "operator": "readonly",
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ScoreNullReasonEvidencePort"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  snapshotInput: ScoreNullReasonSnapshot,\n  targetsInput: readonly ScoreNullReasonTarget[],\n  evidencePort: ScoreNullReasonEvidencePort | null,\n  nowUtcMilliseconds: () => number,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "snapshotInput",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ScoreNullReasonSnapshot",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ScoreNullReasonSnapshot"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "targetsInput",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "typeRef",
+                                "repr": "ScoreNullReasonTarget",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "ScoreNullReasonTarget"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "evidencePort",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ScoreNullReasonEvidencePort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "ScoreNullReasonEvidencePort"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "nowUtcMilliseconds",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [],
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "typeRef",
+                                  "repr": "ScoreNullReasonDto",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "ScoreNullReasonDto"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "projectScoreNullReasons"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "tsType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "final_50_percent_cut",
+                          "value": {
+                            "kind": "string",
+                            "string": "final_50_percent_cut"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "final_70_percent_cut",
+                          "value": {
+                            "kind": "string",
+                            "string": "final_70_percent_cut"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "ScoreField"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^[a-f0-9]{64}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "HASH"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "ID"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^(?:observation|admission):[a-f0-9]{64}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "OBS"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "final_50_percent_cut",
+                            "value": {
+                              "kind": "string",
+                              "string": "final_50_percent_cut"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "final_70_percent_cut",
+                            "value": {
+                              "kind": "string",
+                              "string": "final_70_percent_cut"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "FIELDS"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeOperator",
+                      "value": {
+                        "operator": "readonly",
+                        "tsType": {
+                          "kind": "array",
+                          "value": {
+                            "kind": "typeRef",
+                            "repr": "VerifiedScoreNullReason",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "VerifiedScoreNullReason"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "EMPTY"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "never",
+                      "value": "never"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "invalid"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Record",
+                      "value": {
+                        "typeName": "Record",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "unknown",
+                            "value": "unknown"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "object"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown, keys: readonly string[])",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "keys",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Record",
+                      "value": {
+                        "typeName": "Record",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "unknown",
+                            "value": "unknown"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "exact"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "string",
+                      "value": "string"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "hash"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown, max = 256)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "max",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          }
+                        },
+                        "right": "256"
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typePredicate",
+                      "repr": "value is string",
+                      "value": {
+                        "param": {
+                          "name": "value",
+                          "type": "identifier"
+                        },
+                        "type": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "stringValue"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "ScoreNullReasonSnapshot",
+                      "value": {
+                        "resolution": {
+                          "kind": "local"
+                        },
+                        "typeName": "ScoreNullReasonSnapshot"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "snapshot"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "field",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ScoreField",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ScoreField"
+                          }
+                        }
+                      },
+                      {
+                        "name": "subject",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      },
+                      {
+                        "name": "subjectSha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "cellSha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "identityReviewSha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "Candidate"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  raw: unknown,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "raw",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "typeLiteral",
+                            "value": {
+                              "properties": [
+                                {
+                                  "name": "field",
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ScoreField",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "ScoreField"
+                                    }
+                                  }
+                                },
+                                {
+                                  "name": "candidate",
+                                  "tsType": {
+                                    "kind": "union",
+                                    "value": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "Candidate",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "local"
+                                          },
+                                          "typeName": "Candidate"
+                                        }
+                                      },
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "null",
+                                        "value": "null"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "candidate"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(raw: unknown, subject: NativeObject)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "raw",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "subject",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "VerifiedScoreNullReason",
+                      "value": {
+                        "resolution": {
+                          "kind": "local"
+                        },
+                        "typeName": "VerifiedScoreNullReason"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "validReason"
+            }
+          ]
+        },
+        "dependencies": [
+          {
+            "dynamic": false,
+            "specifier": "../domain/json_value.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../domain/native_json.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../domain/text.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/text.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./access.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./history_field_qualification.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
+              }
+            ]
+          }
+        ],
+        "layer": "application",
+        "symbols": [
+          "projectScoreNullReasons"
+        ]
       }
     },
     "format": "jungsi.edge-contract/v1",
@@ -213076,7 +214425,8 @@
       "tests/edge/test_wildcard_projection.synthetic.ts": "5821ab415c3b212888469f0a7c431866d4e0f2713fa7fe1534b7cd991447fd08",
       "tests/edge/test_wildcard_selection.synthetic.ts": "e5ecd01e8501606f34cbddc0e0a991fbf428e08d4ba200ae292a2152712f958f",
       "tests/edge/test_year_end_access.ts": "425c44fe01c553e3a9c38a32a82dc9a09a29ed9947c28d4bc7cd8e879a405d03",
-      "tests/edge/test_year_equating.ts": "fd49e41b550b6f53582a591298d0b315b5bbfa6e949b15c9dc6f6e594ca23713"
+      "tests/edge/test_year_equating.ts": "fd49e41b550b6f53582a591298d0b315b5bbfa6e949b15c9dc6f6e594ca23713",
+      "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts": "e0552f3b3862d28b07bf28d4212c93c46695cdb3cf92b5965bdb9f385eb8339a"
     },
     "migration_evidence": {
       "sql_path": "database/migrations/006_score_input_policy.prepared.sql",
@@ -214619,7 +215969,7 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "06d00a039b4f31897a2a9b210e9de7dcdf6e9e0f49368c722d73fa8b757eaac2",
+      "bridge_sha256": "64a23498045336d6684d56c99121048eb8191c6fe3f4099abee3c44c99247bd4",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
       "graph_manifest_sha256": "afd44c9dd856112d480b11b4653091b891e031c2643e69dbf9e3ab1eaf12c3f1",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
@@ -215352,6 +216702,60 @@
         "legacy_native_type_conflict"
       ],
       "planning_decision": "새 공개 stage capability/schema와 실제 자료 포트를 별도로 결속한다. 내부 DTO 합성 검사로 공개 승인·실DB 저장·배포를 완료 처리하지 않는다."
+    },
+    "score_null_reason_projection_candidate_20261102": {
+      "status": "INTERNAL_REVIEW_ONLY_AUTHORITY_AND_PUBLIC_DTO_NOT_BOUND",
+      "operation": "history.snapshot.read",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "internal_path": "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
+      "synthetic_test": "tests/service_p1/test_score_null_reason_review.synthetic.mjs",
+      "test_runner": "tests/test_score_null_reason_node.py",
+      "result": "field and ordered verified_score_null_reasons enum array, maximum two; verified three_or_fewer has display priority",
+      "evidence_scope": "Exact publication/source heads, row, year, university, campus, offering, track, group, target slot and null cell, cohort, score axis, criterion, official document and independently approved proof; reject stale, revoked, ambiguous, missing or mismatched proof. A same-row actual published alternative can anchor other-statistic proof; an authenticated target slot may independently support three-or-fewer without inventing an observation.",
+      "fallback": "No trusted provider or insufficient evidence yields an empty reason array; no inference from recruitment headcount, generic reason code or null alone. Existing null and zero are unchanged.",
+      "not_run": [
+        "authority_issuer_and_revocation_adapter",
+        "public_DTO_and_route",
+        "frontend_connection",
+        "real_evidence",
+        "database",
+        "production_deployment"
+      ],
+      "gaya_unresolved": "HOLD_PENDING_EVIDENCE",
+      "synthetic_suite_registration": {
+        "status": "PROPOSAL_NOT_YET_ACCEPTED",
+        "existing_cases": 46,
+        "additional_cases": 33,
+        "total_cases": 79,
+        "old_cases_checked_separately": true,
+        "new_root_allowed_builtins": [
+          "node:assert/strict",
+          "node:test"
+        ],
+        "old_roots_allowed_builtins_unchanged": true
+      },
+      "historical_attribution_correction": {
+        "status": "ORIGINAL_QUOTE_AND_TIME_UNVERIFIED",
+        "prior_record_date": "2026-11-01",
+        "current_direct_decision_date": "2026-11-02",
+        "preserved_prior_summaries": [
+          "사용자의 후속 결정에 따라 근거가 특정되지 않은 대학 발표 성적 공란은 해당조건미발표로 표시한다. 과거 3인 이하 표기의 변경 이력은 보존하되 현재 사유의 근거로 사용하지 않는다. native null·원문 이유·실제 0을 구분하고 모집인원만으로 비공개 사유를 추정하지 않는다. 화면 적용과 실제 운영 검수는 별도 미실행이다.",
+          "사용자 확인: 2026-11-01의 공란 일괄 표기 요약은 당시 이력으로 보존하고 최신 조건별 결정에 적용하지 않는다. 동일 관측·코호트·점수축의 공식 근거로 다른 통계만 발표돼 선택 조건이 미발표면 해당조건미발표, 3인 이하 미발표가 확인되면 3인이하미발표를 표시하고 두 근거가 모두 있으면 3인 이하를 우선한다. 사유 근거가 없으면 미확인으로 보존한다. 화면 v3 후보 적용·서버 사유 DTO 결속·운영 배포는 각각 미완료다."
+        ],
+        "preserved_prior_application": "공식 근거로 다른 통계만 발표되어 선택 조건이 미발표임이 확인된 경우 해당조건미발표, 해당 관측·코호트·통계에 3인 이하 미발표가 공식 근거로 확인된 경우에만 3인이하미발표를 표시한다. 사유가 확인되지 않은 null은 미확인·미발표 상태를 보존한다. 2026-11-02 사용자 조건별 결정은 2026-11-01 일괄 공란 표기 요약에 우선하며, 해당 예전 요약은 당시 결정 이력으로 보존한다. 화면 v3 후보, 사유 DTO 결속 및 운영 배포는 각각 미완료다.",
+        "prior_spec_sha256": "1da016a356f657eeb7a42aaf4ce758856dc7526fa48ad953ac50ee7bcf44d03c",
+        "preserved_prior_current_descriptions": {
+          "requirements[27].description": "현재 정본 head마다 검증된 로컬 원자료를 재사용해 화면용 불변 정리본을 한 번 작성한다. 전체 목록·검색·필터를 화면 서버에서 처리하며 같은 내용은 재발행하지 않는다. 학년도:원래 PK, native 값/타입·단위·출처, 원문 통계/대상과 별도 정규화 코드, 충원인원/최종 합격 예비번호를 보존한다. 컷은 출처·점수 기준·대상·통계 위치를 확인해 선택하고 미해결/충돌은 null+사유로 남긴다. 새 head/body API는 구현과 엄격 확장 등록·운영 등록 후 활성화한다. 대학이 실제 발표·수집한 다른 비율 컷과 평균·최저 등 점수 통계는 원래 라벨·비율/null·축·집단·단위를 보존해 별도 표시하며 50/70 전용 필터로 누락하지 않는다. 정확한 독립 검수 영수증의 필드별 표시자격은 승인된 마지막 합격 예비번호 셀에만 결속하고, 원값·원상태·원단위·일반 검수 보류를 바꾸지 않는다. 2026-11-01 사용자 정정: 과거 입결 표에서 충원인원과 최종 합격 예비번호를 각각 표시하지 않고 최종 합격 예비번호 한 열만 사용한다. 실제 추가 합격 인원은 내부 원자료와 추정 탈락자 입력으로 유지한다. 입결 성적 null은 공식 근거로 다른 통계만 발표된 경우 해당조건미발표, 같은 관측의 3인 이하가 공식 확인된 경우 3인이하미발표로 표시하고 사유 미확인은 보존한다.",
+          "history_presentation_contract.decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-01 사용자 정정: 충원 표시는 최종 합격 예비번호 한 열로 통일하고 원문 명칭이 마지막 순번을 뜻한다고 검증된 경우에만 그 항목에 연결한다. 실제 추가 합격 인원은 내부 산술 입력으로 유지한다. 입결 성적 null은 공식 근거로 해당 조건 미발표 또는 3인 이하가 확인된 경우에만 해당 문구를 구분하며 사유 미확인은 보존한다.",
+          "admission_metrics.frontend_request": "기존에는 별도 최종 합격 예비번호 열을 요청했다. 2026-11-01 사용자 정정이 우선하며 화면은 최종 합격 예비번호 한 열만 둔다. 원문에서 확정된 순위만 번으로 표시하고 실제 충원인원·추정탈락 입력은 내부 보존한다. 코드 후보와 운영 적용은 구분한다."
+        },
+        "prior_current_spec_sha256": "3ea68b665425aebd785c8f352f9bf728a8fac827916cafc6887d5ab9d3b450f0"
+      }
     }
   },
   "administrator_verification_quota_contract": {

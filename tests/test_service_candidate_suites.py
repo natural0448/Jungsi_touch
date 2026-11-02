@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "tests/review_suite_manifest.json"
-MANIFEST_SHA256 = "c83314926543d0364b6f41cc609d7fc60c3fe134a5b694136ebebfd2071da9da"
+MANIFEST_SHA256 = "9edf17b8ee73179070121142802790e693533e5e0ec7313dd66321f500ca2b95"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None
@@ -30,7 +30,8 @@ SERVICE_CANDIDATE_SHARED_FIXTURES = {
 
 SERVICE_P1_PINNED_TYPE_IMPORTS = {'supabase/functions/_shared/jungsi/application/platform_repository.ts': ('839a70ed64ef53b626b0b404b91a0a4fbbdc58704159d5b6d76ed82945f57744', ['./score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/profile_reports.ts': ('190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d', ['./score_input_ports.ts', './score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/score_input_ports.ts': ('c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c', ['./session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts']), 'supabase/functions/_shared/jungsi/application/score_input_service.ts': ('26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1', ['./score_input_ports.ts'])}
 
-SERVICE_P1_ROOTS = ['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts']
+SCORE_NULL_SUITE_ROOT = "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
+SERVICE_P1_ROOTS = ['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts', SCORE_NULL_SUITE_ROOT]
 
 SERVICE_ROOTS = ["tests/service_end/" + name for name in (
     "test_service_end_current_review.synthetic.ts", "test_service_end_entrypoints.synthetic.ts",
@@ -259,6 +260,7 @@ def load_manifest():
 
 
 def verify_suite(data, name, expected_roots, allowed, expected_count):
+    suite_name = name
     suite = data["suites"][name]
     if (suite["roots"] != expected_roots or suite["allowed_builtins"] != allowed or
             suite["expected_count"] != expected_count or set(suite["graphs"]) != set(expected_roots)):
@@ -290,7 +292,8 @@ def verify_suite(data, name, expected_roots, allowed, expected_count):
     if layer_bindings(suite["files"], suite["graphs"]) != suite["layers"]:
         raise ValueError("registered layer graph mismatch")
     for root in expected_roots:
-        if graph(root, allowed) != suite["graphs"][root]:
+        root_allowed = ["node:assert/strict", "node:test"] if suite_name == "service_p1" and root == SCORE_NULL_SUITE_ROOT else allowed
+        if graph(root, root_allowed) != suite["graphs"][root]:
             raise ValueError("module closure mismatch: " + root)
     return suite
 
@@ -320,7 +323,7 @@ class ReviewSuites(unittest.TestCase):
 
     def test_service_p1_deno_46(self):
         data = load_manifest()
-        suite = verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 46)
+        suite = verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 79)
         manual = ["src/jungsi_touch/application/public_response_schemas.json"]
         if suite["manual_read_files"] != manual:
             raise ValueError("service P1 manual-read scope mismatch")
@@ -348,12 +351,19 @@ class ReviewSuites(unittest.TestCase):
                 raise AssertionError("service P1 exact result or case mismatch: " + root)
         args = [str(DENO), "test", "--config", CONFIG, "--cached-only", "--no-lock", "--no-prompt",
                 "--no-remote", "--no-npm", "--deny-read", "--deny-write", "--deny-net", "--deny-env",
-                "--deny-run", "--deny-sys", "--deny-ffi", "--reporter=dot", *SERVICE_P1_ROOTS[3:]]
+                "--deny-run", "--deny-sys", "--deny-ffi", "--reporter=dot", *SERVICE_P1_ROOTS[3:5]]
         output = invoke(args, 90)
         matches = re.findall(r"^ok \| (\d+) passed \| (\d+) failed(?: \| (\d+) ignored)?(?: \| (\d+) filtered out)? \(", output, re.M)
         if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (18, 0, 0, 0):
             raise AssertionError("service P1 Deno result/count mismatch: " + output[-1000:])
-        verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 46)
+        args = [str(DENO), "test", "--config", CONFIG, "--cached-only", "--no-lock", "--no-prompt",
+                "--no-remote", "--no-npm", "--deny-read", "--deny-write", "--deny-net", "--deny-env",
+                "--deny-run", "--deny-sys", "--deny-ffi", "--reporter=dot", SCORE_NULL_SUITE_ROOT]
+        output = invoke(args, 90)
+        matches = re.findall(r"^ok \| (\d+) passed \| (\d+) failed(?: \| (\d+) ignored)?(?: \| (\d+) filtered out)? \(", output, re.M)
+        if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (33, 0, 0, 0):
+            raise AssertionError("score-null Deno result/count mismatch: " + output[-1000:])
+        verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 79)
 
     def test_service_end_deno_125(self):
         data = load_manifest()
