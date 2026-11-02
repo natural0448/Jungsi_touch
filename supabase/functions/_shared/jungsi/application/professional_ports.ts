@@ -197,6 +197,11 @@ export interface StudentReportPort {
     maximum: number,
   ): Promise<NativeObject>;
 }
+/** Internal signal and same-request usage reservation, never public response data. */
+export interface ProfessionalAnalysisBoundary {
+  readonly signal: AbortSignal;
+  readonly admission: ProfessionalUsageLease;
+}
 export interface ApprovedAnalysisPort {
   /** Validate content through the unchanged approved exam pack; structural errors throw. */
   validateScores(
@@ -209,6 +214,7 @@ export interface ApprovedAnalysisPort {
     profile: ProfessionalProfile,
     operation: string,
     input: NativeObject,
+    boundary?: ProfessionalAnalysisBoundary,
   ): Promise<
     { result: NativeObject; reasons: readonly NativeObject[]; assessments?: NativeObject }
   >;

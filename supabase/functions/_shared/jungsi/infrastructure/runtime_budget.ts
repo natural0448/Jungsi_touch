@@ -539,7 +539,7 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
   async runAdmitted<T>(
     admission: PreparedUsageAdmission,
     request: BudgetRequest,
-    work: () => Promise<T>,
+    work: (admission?: unknown) => Promise<T>,
     onStage?: (stage: RuntimeBudgetStage) => void | (() => void),
   ): Promise<T> {
     const stage = (name: RuntimeBudgetStage) => {
@@ -552,9 +552,9 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
     stage("budget_business_current");
     await this.controls.current();
     this.policy.assertLive();
-    const result = await this.shared.runAdmitted(admission, async () => {
+    const result = await this.shared.runAdmitted(admission, async (activeAdmission) => {
       stage("budget_business");
-      const value = await work();
+      const value = await work(activeAdmission);
       stage("budget_business_current");
       await this.controls.current();
       this.policy.assertLive();
@@ -575,7 +575,7 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
   }
   async run<T>(
     request: BudgetRequest,
-    work: () => Promise<T>,
+    work: (admission?: unknown) => Promise<T>,
     onStage?: (stage: RuntimeBudgetStage) => void | (() => void),
   ): Promise<T> {
     const stage = (value: RuntimeBudgetStage) => {
@@ -626,11 +626,11 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
     stage("budget_current");
     await this.controls.current();
     this.policy.assertLive();
-    const result = await shared.run(request, async () => {
+    const result = await shared.run(request, async (activeAdmission) => {
       stage("budget_business_current");
       await this.controls.current();
       stage("budget_business");
-      const value = await work();
+      const value = await work(activeAdmission);
       stage("budget_business_current");
       await this.controls.current();
       this.policy.assertLive();

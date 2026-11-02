@@ -35,8 +35,17 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
 
     def test_exact_four_suites_are_registered(self):
         self.assertEqual(self.errors(), [])
-        self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [80, 125, 48, 36])
+        self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [80, 125, 48, 79])
         self.assertEqual(self.ext["activation_status"], "NOT_RUN")
+
+    def test_new_builtin_is_limited_to_score_null_root(self):
+        for root_index, bad_builtin in ((0, "node:test"), (-1, "node:fs")):
+            with self.subTest(root_index=root_index, bad_builtin=bad_builtin):
+                changed = copy.deepcopy(self.manifest)
+                suite = changed["suites"]["service_p1"]
+                suite["graphs"][suite["roots"][root_index]]["builtins"].append(bad_builtin)
+                self.rebind_manifest(changed)
+                self.assertTrue(self.errors())
 
     def test_missing_registry_never_silently_omits_suites(self):
         del self.spec["backend_platform_contract"]["service_candidate_suite_extension"]
@@ -125,7 +134,7 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
         module = importlib.util.module_from_spec(module_spec)
         module_spec.loader.exec_module(module)
         with patch.object(module, "load_manifest", side_effect=FileNotFoundError("synthetic missing runtime")):
-            for name in ("test_p1_deno_80", "test_service_end_deno_125", "test_search503_deno_48", "test_service_p1_deno_36"):
+            for name in ("test_p1_deno_80", "test_service_end_deno_125", "test_search503_deno_48", "test_service_p1_deno_46"):
                 result = unittest.TestResult()
                 module.ReviewSuites(name).run(result)
                 self.assertFalse(result.wasSuccessful())
@@ -233,12 +242,12 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
         from types import SimpleNamespace
         roots = self.m.SERVICE_P1_ROOTS
         data = {"suites": {"service_p1": {"roots": roots, "allowed_builtins": self.m.NODE_ALLOWED,
-                "expected_count": 36, "graphs": {p: {} for p in roots},
+                "expected_count": 46, "graphs": {p: {} for p in roots},
                 "files": {"tests/service_p1/injected.synthetic.mjs": "0" * 64}}}}
         fake = SimpleNamespace(read_text=lambda **kwargs: 'import("./untrusted.ts")')
         with patch.object(self.m, "safe_file", return_value=fake), patch.object(self.m, "invoke") as call:
             with self.assertRaisesRegex(ValueError, "dynamic import"):
-                self.m.verify_suite(data, "service_p1", roots, self.m.NODE_ALLOWED, 36)
+                self.m.verify_suite(data, "service_p1", roots, self.m.NODE_ALLOWED, 46)
             call.assert_not_called()
 
     def test_service_p1_pinned_type_import_rejects_changed_bytes_and_runtime_import(self):
@@ -246,7 +255,7 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
         roots = self.m.SERVICE_P1_ROOTS
         path = "supabase/functions/_shared/jungsi/application/platform_repository.ts"
         data = {"suites": {"service_p1": {"roots": roots, "allowed_builtins": self.m.NODE_ALLOWED,
-                "expected_count": 36, "graphs": {p: {} for p in roots}, "files": {path: "0" * 64}}}}
+                "expected_count": 46, "graphs": {p: {} for p in roots}, "files": {path: "0" * 64}}}}
         pin = self.m.SERVICE_P1_PINNED_TYPE_IMPORTS[path][0]
         cases = [
             ('import("./score_input_ports.ts").PaidResultOriginWrite', "0" * 64),
@@ -259,7 +268,7 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
                  patch.object(self.m, "sha", return_value=fake_sha), \
                  patch.object(self.m, "invoke") as call:
                 with self.assertRaises(ValueError):
-                    self.m.verify_suite(data, "service_p1", roots, self.m.NODE_ALLOWED, 36)
+                    self.m.verify_suite(data, "service_p1", roots, self.m.NODE_ALLOWED, 46)
                 call.assert_not_called()
 
     def test_score_input_service_exact_type_only_pin_and_tamper(self):
@@ -271,10 +280,10 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
         self.assertEqual(self.m.sha(source), expected_sha)
         def make_data(name):
             return {"suites": {name: {"roots": [], "allowed_builtins": self.m.NODE_ALLOWED,
-                    "expected_count": 36, "graphs": {}, "files": {path: expected_sha}, "layers": {}}}}
+                    "expected_count": 46, "graphs": {}, "files": {path: expected_sha}, "layers": {}}}}
         with patch.object(self.m, "SERVICE_CANDIDATE_SHARED_FIXTURES", {"service_p1": frozenset()}), \
              patch.object(self.m, "layer_bindings", return_value={}):
-            self.m.verify_suite(make_data("service_p1"), "service_p1", [], self.m.NODE_ALLOWED, 36)
+            self.m.verify_suite(make_data("service_p1"), "service_p1", [], self.m.NODE_ALLOWED, 46)
         cases = [
             ('operation as import("./score_input_ports.ts").PaidResultDelivery["operation"]; // changed', "1" * 64),
             ('import("./score_input_ports.ts")', "2" * 64),
@@ -287,11 +296,11 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
                  patch.object(self.m, "sha", return_value=fake_sha), \
                  patch.object(self.m, "invoke") as call:
                 with self.assertRaises(ValueError):
-                    self.m.verify_suite(make_data("service_p1"), "service_p1", [], self.m.NODE_ALLOWED, 36)
+                    self.m.verify_suite(make_data("service_p1"), "service_p1", [], self.m.NODE_ALLOWED, 46)
                 call.assert_not_called()
         with patch.object(self.m, "invoke") as call:
             with self.assertRaises(ValueError):
-                self.m.verify_suite(make_data("p1_review"), "p1_review", [], self.m.NODE_ALLOWED, 36)
+                self.m.verify_suite(make_data("p1_review"), "p1_review", [], self.m.NODE_ALLOWED, 46)
             call.assert_not_called()
 
     def test_service_p1_rejects_wrong_manual_scope_before_execution(self):
@@ -299,8 +308,60 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
              patch.object(self.m, "verify_suite", return_value={"manual_read_files": []}), \
              patch.object(self.m, "invoke") as call:
             with self.assertRaisesRegex(ValueError, "manual-read scope"):
-                self.m.ReviewSuites("test_service_p1_deno_36").test_service_p1_deno_36()
+                self.m.ReviewSuites("test_service_p1_deno_46").test_service_p1_deno_46()
             call.assert_not_called()
+
+    def test_service_p1_old_and_new_counts_are_checked_separately(self):
+        legacy = [
+            {"cases": 21, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
+            {"result": "SYNTHETIC_ONLY", "passed": 4, "cases": [
+                "real runtime context wires request admission into synthetic P1 v2 source",
+                "invalid optional R27 settings and credentials fail v2 before r27 metadata",
+                "same optional R27 failures keep actual synthetic P1 v1 usable",
+                "common runtime binding failure propagates"]},
+            {"result": "SYNTHETIC_ONLY", "passed": 3, "cases": [
+                "request context partial v2 head and body preserve pinned coverage and exclude held rows",
+                "missing or incorrect dedicated credential blocks both partial head and direct read",
+                "repinned legacy or unsupported consumer approval cannot release partial head or body"]},
+        ]
+        outputs = [json.dumps(x) for x in legacy] + ["ok | 18 passed | 0 failed (1ms)", "ok | 33 passed | 0 failed (1ms)"]
+        suite = {"manual_read_files": ["src/jungsi_touch/application/public_response_schemas.json"]}
+        with patch.object(self.m, "load_manifest", return_value=self.data), \
+             patch.object(self.m, "verify_suite", return_value=suite), \
+             patch.object(self.m, "DENO", Path(sys.executable)), \
+             patch.object(self.m, "invoke", side_effect=outputs) as call:
+            self.m.ReviewSuites("test_service_p1_deno_46").test_service_p1_deno_46()
+        self.assertEqual(call.call_count, 5)
+        old_args = call.call_args_list[3].args[0]
+        new_args = call.call_args_list[4].args[0]
+        self.assertEqual(old_args[-2:], self.m.SERVICE_P1_ROOTS[3:5])
+        self.assertEqual(new_args[-1], self.m.SCORE_NULL_SUITE_ROOT)
+        for flag in ("--deny-read", "--deny-write", "--deny-net", "--deny-env", "--deny-run", "--deny-sys", "--deny-ffi"):
+            self.assertIn(flag, old_args)
+            self.assertIn(flag, new_args)
+
+    def test_service_p1_wrong_new_count_fails(self):
+        legacy = [
+            {"cases": 21, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
+            {"result": "SYNTHETIC_ONLY", "passed": 4, "cases": [
+                "real runtime context wires request admission into synthetic P1 v2 source",
+                "invalid optional R27 settings and credentials fail v2 before r27 metadata",
+                "same optional R27 failures keep actual synthetic P1 v1 usable",
+                "common runtime binding failure propagates"]},
+            {"result": "SYNTHETIC_ONLY", "passed": 3, "cases": [
+                "request context partial v2 head and body preserve pinned coverage and exclude held rows",
+                "missing or incorrect dedicated credential blocks both partial head and direct read",
+                "repinned legacy or unsupported consumer approval cannot release partial head or body"]},
+        ]
+        for invalid in ("ok | 32 passed | 0 failed (1ms)", "ok | 33 passed | 0 failed | 1 ignored (1ms)"):
+            outputs = [json.dumps(x) for x in legacy] + ["ok | 18 passed | 0 failed (1ms)", invalid]
+            with self.subTest(output=invalid), \
+                 patch.object(self.m, "load_manifest", return_value=self.data), \
+                 patch.object(self.m, "verify_suite", return_value={"manual_read_files": ["src/jungsi_touch/application/public_response_schemas.json"]}), \
+                 patch.object(self.m, "DENO", Path(sys.executable)), \
+                 patch.object(self.m, "invoke", side_effect=outputs):
+                with self.assertRaisesRegex(AssertionError, "score-null Deno result/count mismatch"):
+                    self.m.ReviewSuites("test_service_p1_deno_46").test_service_p1_deno_46()
 
     def test_runner_requires_absolute_runtime_and_scratch(self):
         import run_committed_tests as runner

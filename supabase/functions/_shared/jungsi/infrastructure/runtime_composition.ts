@@ -437,9 +437,11 @@ export class NativeRuntimeApi {
         this.clock,
         forecasts,
         mode,
+        // No approved revision-bound authority or bounded evidence adapter exists yet.
+        null,
       );
       const business: ApiBusinessPort = {
-        execute: async (r) => {
+        execute: async (r, boundary) => {
           if (
             r.operation === "report.export" && Object.keys(r.query).length &&
             this.config.memberShortlistExtensions
@@ -477,7 +479,7 @@ export class NativeRuntimeApi {
             UNIVERSITY_ANALYSIS_OPERATIONS.some((id) => id === r.operation)
           ) {
             if (r.operation === "university.analyze") selectedCatalog?.prepareSelection(r);
-            return await universities.execute(r);
+            return await universities.execute(r, boundary);
           }
           if (FORECAST_OPERATIONS.some((id) => id === r.operation)) {
             return await forecasts.execute(r);

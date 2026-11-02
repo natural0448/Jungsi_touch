@@ -26,7 +26,7 @@ export interface RequestBudgetPort {
    * settle or release within the same call. Replay still consumes request/volume.
    * Missing/unapproved policy and dependency failure must throw a safe 503.
    */
-  run<T>(request: BudgetRequest, work: () => Promise<T>): Promise<T>;
+  run<T>(request: BudgetRequest, work: (admission?: unknown) => Promise<T>): Promise<T>;
 }
 export const BUDGET_OPERATIONS = [
   "history.search",

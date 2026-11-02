@@ -4,6 +4,12 @@ import { type CatalogDataPort, CatalogService } from "./catalog.ts";
 import { OverallAnalysisService, type OverallDataPort } from "./overall_analysis.ts";
 import { evaluateOffering } from "./offering_analysis.ts";
 import { candidateGroups, type UniversityAnalysisDataPort } from "./university_analysis.ts";
+import { buildWildcardCandidateReview } from "./wildcard_candidate_review.ts";
+import {
+  materializeWildcardReview,
+  requestWildcardGrant,
+  type WildcardRuntimeGate,
+} from "./wildcard_runtime_gate.ts";
 import { UniversityScoringService } from "./university_scoring.ts";
 import { UniversityPercentileService } from "./university_percentile.ts";
 import { SCORE_CONTENT_REJECTION_CODES } from "./score_input_service.ts";
@@ -18,13 +24,14 @@ import {
 } from "./professional_policy.ts";
 import type {
   ApprovedAnalysisPort,
+  ProfessionalAnalysisBoundary,
   ProfessionalAuthority,
   ProfessionalProfile,
   ProfessionalScope,
   StudentReportPort,
 } from "./professional_ports.ts";
 import { ContractError } from "../domain/exact.ts";
-import { type NativeObject } from "../domain/json_value.ts";
+import { nativeJsonSha256, type NativeObject } from "../domain/json_value.ts";
 export interface ProfessionalAnalysisDataPort
   extends OverallDataPort, CatalogDataPort, UniversityAnalysisDataPort {
   assertCurrentSelection(required?: boolean): Promise<void>;
@@ -43,6 +50,7 @@ export class ProfessionalApprovedAnalysis implements ApprovedAnalysisPort {
       readonly unitsPerOffering: bigint;
       readonly reservedCandidateUnits: bigint;
     },
+    private readonly wildcardGate: WildcardRuntimeGate | null = null,
   ) {
     this.maximumOfferings = proInteger(limits.maximumOfferings, 1);
     this.unitsPerOffering = limits.unitsPerOffering;
@@ -100,6 +108,7 @@ export class ProfessionalApprovedAnalysis implements ApprovedAnalysisPort {
     profile: ProfessionalProfile,
     operation: string,
     input: NativeObject,
+    boundary?: ProfessionalAnalysisBoundary,
   ) {
     this.policy.assertStudent(scope.authority, scope.student, operation, this.clock.nowUtc());
     this.policy.stage(
@@ -180,9 +189,57 @@ export class ProfessionalApprovedAnalysis implements ApprovedAnalysisPort {
       );
     }
     await this.assertCurrent();
-    const result = operation === "pro.candidates"
-      ? candidateGroups(rows, results, release.version)
-      : proObject(results[proId(input.offering_id)]);
+    let result: NativeObject;
+    if (operation === "pro.candidates" && this.wildcardGate) {
+      if (!scope.student || typeof overall.score_basis !== "string") {
+        throw new AccessError("professional_policy_unavailable", 503);
+      }
+      const analysisContextSha256 = await nativeJsonSha256({
+        profile: profile.profileId,
+        profile_version: profile.version,
+        exam: profile.examId,
+        stage: profile.stage,
+        filters: input.filters ?? {},
+        report: saved.reportId,
+        report_revision: saved.revision,
+      });
+      const grant = await requestWildcardGrant(
+        {
+          audience: "professional",
+          operation: "pro.candidates",
+          subjectId: scope.authority.user.subjectId,
+          organizationId: scope.authority.contract.orgId,
+          studentId: scope.student.studentId,
+          reportId: saved.reportId,
+          sourceReportRevision: saved.revision,
+          profileId: profile.profileId,
+          academicYear: scope.authority.contract.academicYear,
+          examId: profile.examId,
+          scoreBasis: overall.score_basis,
+          catalogVersion: release.version,
+          analysisContextSha256,
+        },
+        this.wildcardGate,
+        boundary,
+      );
+      if (!grant) throw new AccessError("professional_policy_unavailable", 503);
+      const review = await buildWildcardCandidateReview(
+        rows,
+        results,
+        release.version,
+        grant.context,
+        grant.evidence,
+        grant.signal,
+      );
+      await grant.assertCurrent();
+      this.policy.assertStudent(scope.authority, scope.student, operation, this.clock.nowUtc());
+      await this.assertCurrent();
+      result = materializeWildcardReview(review);
+    } else {
+      result = operation === "pro.candidates"
+        ? candidateGroups(rows, results, release.version)
+        : proObject(results[proId(input.offering_id)]);
+    }
     // Counseling reasons copy approved engine results with verified public basis only.
     return {
       result,

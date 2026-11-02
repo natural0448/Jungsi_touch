@@ -110,6 +110,11 @@ export interface ApiExecution {
   readonly params: Readonly<Record<string, string>>;
   readonly requestKey: string | null;
 }
+/** Internal boundary is attached only after the existing budget calls business work. */
+export interface ApiExecutionBoundary {
+  readonly signal: AbortSignal;
+  readonly admission?: unknown;
+}
 export interface ApiBusinessPort {
-  execute(request: ApiExecution): Promise<unknown>;
+  execute(request: ApiExecution, boundary?: ApiExecutionBoundary): Promise<unknown>;
 }

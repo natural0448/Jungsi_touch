@@ -107,12 +107,25 @@ function rowIdentity(row: NativeObject): NativeObject {
 export interface ReviewedR27Links {
   readonly kind: "reviewed_r27_links";
 }
+export interface R27ReviewBinding {
+  readonly source_head_sha256: string;
+  readonly previous_publication_sha256: string;
+  readonly previous_source_head_sha256: string;
+  readonly scope_sha256: string;
+  readonly authority_sha256: string;
+}
 export interface R27LinkPin {
   readonly receiptSha256: string;
   readonly sourceSha256: string;
+  readonly reviewBinding?: R27ReviewBinding;
 }
-type Grant = { source: NativeObject; target: NativeObject; evidence: string };
-type LinkData = { sourceSha: string; grants: readonly Grant[] };
+type Grant = {
+  source: NativeObject;
+  target: NativeObject;
+  evidence: string;
+  explicitScope: boolean;
+};
+type LinkData = { sourceSha: string; grants: readonly Grant[]; binding: R27ReviewBinding | null };
 const sealed = new WeakMap<ReviewedR27Links, LinkData>();
 /** Preserve exactly the input view, without invoking a caller-provided iterator. */
 function snapshotReceiptBytes(bytes: Uint8Array, failure: string): Uint8Array<ArrayBuffer> {
@@ -132,7 +145,7 @@ async function sha(raw: Uint8Array<ArrayBuffer>): Promise<string> {
     .map((x) => x.toString(16).padStart(2, "0")).join("");
 }
 function dataPin(pin: unknown): R27LinkPin {
-  const p = exact(pin, ["receiptSha256", "sourceSha256"]);
+  const p = exact(pin, ["receiptSha256", "sourceSha256"], ["reviewBinding"]);
   const receiptSha256 = Object.getOwnPropertyDescriptor(p, "receiptSha256")?.value;
   const sourceSha256 = Object.getOwnPropertyDescriptor(p, "sourceSha256")?.value;
   need(
@@ -140,7 +153,22 @@ function dataPin(pin: unknown): R27LinkPin {
       typeof sourceSha256 === "string" && HASH.test(sourceSha256),
     "invalid_link_pin",
   );
-  return Object.freeze({ receiptSha256, sourceSha256 });
+  if (!Object.hasOwn(p, "reviewBinding")) return Object.freeze({ receiptSha256, sourceSha256 });
+  const fields = [
+    "source_head_sha256",
+    "previous_publication_sha256",
+    "previous_source_head_sha256",
+    "scope_sha256",
+    "authority_sha256",
+  ] as const;
+  const raw = exact(p.reviewBinding, fields);
+  for (const field of fields) {
+    need(typeof raw[field] === "string" && HASH.test(raw[field] as string), "invalid_link_pin");
+  }
+  const reviewBinding = Object.freeze(
+    Object.fromEntries(fields.map((k) => [k, raw[k]])) as unknown as R27ReviewBinding,
+  );
+  return Object.freeze({ receiptSha256, sourceSha256, reviewBinding });
 }
 /** The caller must obtain the trusted pin from its approved descriptor, not a request body.
  * SHA matching does not authenticate the issuer. The same copied bytes are hashed and parsed.
@@ -157,28 +185,69 @@ export async function bindReviewedR27Links(
     "status",
     "source_sha256",
     "grants",
-  ]);
+  ], ["review_binding"]);
+  const v2 = core.format === "jungsi.r27-reviewed-links/v2";
+  if (v2) {
+    const fields = [
+      "source_head_sha256",
+      "previous_publication_sha256",
+      "previous_source_head_sha256",
+      "scope_sha256",
+      "authority_sha256",
+    ] as const;
+    const binding = exact(core.review_binding, fields);
+    need(
+      pin.reviewBinding && fields.every((k) => binding[k] === pin.reviewBinding![k]),
+      "review_binding_mismatch",
+    );
+  } else {
+    need(!Object.hasOwn(core, "review_binding") && !pin.reviewBinding, "review_binding_mismatch");
+  }
   need(
-    core.format === "jungsi.r27-reviewed-links/v1" && core.status === "approved_exact_mappings" &&
+    ["jungsi.r27-reviewed-links/v1", "jungsi.r27-reviewed-links/v2"].includes(
+      String(core.format),
+    ) &&
+      core.status === "approved_exact_mappings" &&
       core.source_sha256 === pin.sourceSha256 && Array.isArray(core.grants) &&
       core.grants.length <= 64,
     "invalid_link_receipt",
   );
   const grants: Grant[] = core.grants.map((raw) => {
-    const g = exact(raw, ["source", "target", "review_state", "evidence_sha256"]);
+    const g = exact(raw, [
+      "source",
+      "target",
+      "review_state",
+      "evidence_sha256",
+      ...(v2 ? ["source_field_states", "target_field_states"] : []),
+    ]);
     need(
       g.review_state === "approved" && typeof g.evidence_sha256 === "string" &&
         HASH.test(g.evidence_sha256),
       "invalid_link_grant",
     );
-    return {
-      source: identity(g.source, "2027"),
-      target: identity(g.target, "past"),
-      evidence: g.evidence_sha256,
-    };
+    const source = identity(g.source, "2027"), target = identity(g.target, "past");
+    if (v2) {
+      // A trusted, independently approved receipt must explicitly certify each field.
+      // Missing or unknown is not evidence of a confirmed null.
+      for (
+        const [rawStates, value] of [[g.source_field_states, source], [
+          g.target_field_states,
+          target,
+        ]] as const
+      ) {
+        const states = exact(rawStates, ["campus", "admission_track", "group"]);
+        for (const field of ["campus", "admission_track", "group"]) {
+          need(
+            states[field] === (value[field] === null ? "confirmed_null" : "confirmed_value"),
+            "unconfirmed_link_scope",
+          );
+        }
+      }
+    }
+    return { source, target, evidence: g.evidence_sha256, explicitScope: v2 };
   });
   const ctx = Object.freeze({ kind: "reviewed_r27_links" as const });
-  sealed.set(ctx, { sourceSha: pin.sourceSha256, grants });
+  sealed.set(ctx, { sourceSha: pin.sourceSha256, grants, binding: pin.reviewBinding ?? null });
   return ctx;
 }
 export function combineReviewedR27Links(contexts: readonly ReviewedR27Links[]): ReviewedR27Links {
@@ -187,18 +256,51 @@ export function combineReviewedR27Links(contexts: readonly ReviewedR27Links[]): 
     "link_context_required",
   );
   let sourceSha: string | null = null;
+  let binding: R27ReviewBinding | null = null;
   const grants: Grant[] = [];
   for (const ctx of contexts) {
     const data = sealed.get(ctx);
     need(data && (sourceSha === null || sourceSha === data.sourceSha), "link_source_changed");
     sourceSha = data.sourceSha;
+    if (data.binding) {
+      need(
+        binding === null || JSON.stringify(binding) === JSON.stringify(data.binding),
+        "review_binding_mismatch",
+      );
+      binding = data.binding;
+    }
     grants.push(...data.grants);
     need(grants.length <= 20000, "link_bound");
   }
   need(sourceSha !== null, "link_context_required");
   const result = Object.freeze({ kind: "reviewed_r27_links" as const });
-  sealed.set(result, { sourceSha, grants });
+  sealed.set(result, { sourceSha, grants, binding });
   return result;
+}
+/** V2 publication preparation must use exactly the heads and scope independently
+ * bound to the approved descriptor. The authority pin is not issuer authentication. */
+export function assertReviewedR27LinkBinding(
+  ctx: ReviewedR27Links | undefined,
+  expected: Pick<
+    R27ReviewBinding,
+    | "source_head_sha256"
+    | "previous_publication_sha256"
+    | "previous_source_head_sha256"
+    | "scope_sha256"
+  >,
+): void {
+  if (ctx === undefined) return;
+  const data = sealed.get(ctx);
+  need(data, "unsealed_link_context");
+  if (data.binding) {
+    const fields = [
+      "source_head_sha256",
+      "previous_publication_sha256",
+      "previous_source_head_sha256",
+      "scope_sha256",
+    ] as const;
+    need(fields.every((k) => data.binding![k] === expected[k]), "review_binding_mismatch");
+  }
 }
 export interface ReviewedR27Scope {
   readonly kind: "reviewed_r27_scope";
@@ -300,9 +402,12 @@ function compileLinks(ctx?: ReviewedR27Links): {
     const year = Number(grant.target.academic_year);
     const scopeFields = ["school_id", "campus", "admission_track", "group"];
     if (
-      scopeFields.some((k) =>
-        grant.source[k] === null || grant.target[k] === null || grant.source[k] !== grant.target[k]
-      )
+      grant.source.school_id !== grant.target.school_id ||
+      (!grant.explicitScope &&
+        scopeFields.some((k) =>
+          grant.source[k] === null || grant.target[k] === null ||
+          grant.source[k] !== grant.target[k]
+        ))
     ) {
       conflict(skey, year);
       continue;

@@ -1,8 +1,33 @@
 /** Same closed recursive public catalog as the Python service, supplied by composition. */
 import { AccessError } from "./access.ts";
+import { validWildcardSelection } from "./wildcard_public_contract.ts";
 import { JsonFloat } from "../domain/native_json.ts";
 
 type Row = Record<string, unknown>;
+/** Must be supplied only from an independently verified, request-bound immutable writer record.
+ * It must bind owner/tenant, report and exact revision (or verified source revision), the
+ * selection and order, and approved policy/data context. A hash or payload claim alone is not proof.
+ * The normal runtime currently supplies no such authority, so legacy output is preserved.
+ */
+export interface WildcardProjectionAuthority {
+  /** Recheck revocation, expiry, revision and source currentness at each delivery boundary. */
+  assertCurrent(signal: AbortSignal): Promise<void>;
+  authorizes(
+    input: {
+      readonly operation: string;
+      readonly tier: "standard" | "paid";
+      readonly root: unknown;
+      readonly candidates: unknown;
+      readonly privateView: unknown;
+    },
+  ): boolean;
+}
+type ProjectionContext = {
+  readonly operation: string;
+  readonly tier: "standard" | "paid";
+  readonly root: unknown;
+  readonly authority?: WildcardProjectionAuthority;
+};
 function record(value: unknown): value is Row {
   return value !== null && typeof value === "object" && !Array.isArray(value) &&
     [Object.prototype, null].includes(Object.getPrototypeOf(value));
@@ -118,10 +143,43 @@ export class PublicResponseProjection {
         unavailable();
     }
   }
-  private walk(raw: unknown, value: unknown): unknown {
+  private walk(raw: unknown, value: unknown, context?: ProjectionContext): unknown {
     const node = raw as Row;
     if (value === null) return node.nullable === true ? null : unavailable();
-    if (Object.hasOwn(node, "ref")) return this.walk(this.schemas[node.ref as string], value);
+    if (Object.hasOwn(node, "ref")) {
+      if (node.ref === "candidates" && record(value)) {
+        const input: Row = { ...value };
+        // Old unknown fields never authorize a new result. Keep legacy cards unchanged.
+        delete input.wildcard_selection;
+        const privateView = value._wildcard_selection_view;
+        let trusted = false;
+        if (Object.hasOwn(value, "_wildcard_selection_view") && context?.authority) {
+          try {
+            trusted = context.authority.authorizes({
+              operation: context.operation,
+              tier: context.tier,
+              root: context.root,
+              candidates: value,
+              privateView,
+            }) === true;
+          } catch {
+            trusted = false;
+          }
+        }
+        if (trusted) {
+          if (
+            !record(privateView) || !record(privateView.wildcard_selection) ||
+            !Object.hasOwn(privateView, "wildcards")
+          ) unavailable();
+          input.wildcards = privateView.wildcards;
+          input.wildcard_selection = privateView.wildcard_selection;
+        }
+        const result = this.walk(this.schemas[node.ref as string], input, context);
+        if (trusted && !validWildcardSelection(result)) unavailable();
+        return result;
+      }
+      return this.walk(this.schemas[node.ref as string], value, context);
+    }
     switch (node.type) {
       case "object": {
         if (!record(value) || (node.required as string[]).some((k) => !Object.hasOwn(value, k))) {
@@ -129,25 +187,29 @@ export class PublicResponseProjection {
         }
         const result: Row = Object.create(null);
         for (const [key, child] of Object.entries(node.properties as Row)) {
-          if (Object.hasOwn(value, key)) result[key] = this.walk(child, value[key]);
+          if (Object.hasOwn(value, key)) result[key] = this.walk(child, value[key], context);
         }
         return result;
       }
       case "array":
         if (!Array.isArray(value)) unavailable();
-        return value.map((x) => this.walk(node.items, x));
+        return value.map((x) => this.walk(node.items, x, context));
       case "map": {
         if (!record(value)) unavailable();
         const result: Row = Object.create(null);
         for (const [key, child] of Object.entries(value)) {
-          result[this.walk(node.keys, key) as string] = this.walk(node.values, child);
+          result[this.walk(node.keys, key, context) as string] = this.walk(
+            node.values,
+            child,
+            context,
+          );
         }
         return result;
       }
       case "union":
         for (const child of node.options as unknown[]) {
           try {
-            return this.walk(child, value);
+            return this.walk(child, value, context);
           } catch (error) {
             if (!(error instanceof AccessError)) throw error;
           }
@@ -174,11 +236,16 @@ export class PublicResponseProjection {
     ) unavailable();
     return value;
   }
-  project(operation: string, tier: "standard" | "paid", value: unknown): unknown {
+  project(
+    operation: string,
+    tier: "standard" | "paid",
+    value: unknown,
+    authority?: WildcardProjectionAuthority,
+  ): unknown {
     try {
       const roots = this.operations.get(operation);
       if (!roots || !Object.hasOwn(roots, tier)) unavailable();
-      return this.walk(roots[tier], value);
+      return this.walk(roots[tier], value, { operation, tier, root: value, authority });
     } catch {
       unavailable();
     }

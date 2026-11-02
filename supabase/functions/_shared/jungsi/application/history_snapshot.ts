@@ -229,11 +229,12 @@ function r27Source(row: NativeObject): void {
       !Number.isSafeInteger(link.academic_year) || ![2024, 2025, 2026].includes(year) ||
       linkedYears.has(year) || pendingYears.has(year) ||
       typeof link.original_pk !== "string" || !ID.test(link.original_pk) ||
-      link.school_id !== row.university_id ||
-      [row.campus, row.admission_track, row.group].some((v) => v === null) ||
-      link.campus !== row.campus || link.admission_track !== row.admission_track ||
-      link.group !== row.group
+      link.school_id !== row.university_id
     ) invalid();
+    for (const field of ["campus", "admission_track", "group"]) {
+      text(link[field], true);
+      if (typeof link[field] === "string" && (link[field] as string).length > 256) invalid();
+    }
     linkedYears.add(year);
   }
   const expectedLinkStatus = pending.length

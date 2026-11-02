@@ -11,11 +11,20 @@ import {
 import { PublicResponseProjection } from "../../supabase/functions/_shared/jungsi/application/public_response.ts";
 import { bindR27ScopeIndex, assertR27ScopeIndex } from "../../supabase/functions/_shared/jungsi/application/history_r27_scope_index.ts";
 import { prepareP1R27GlobalReceipt } from "../../supabase/functions/_shared/jungsi/application/p1_r27_release_gate.ts";
+import { p1R27DeliveryDigest } from "../../supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts";
 import { bindP1R27ConsumerGate, assertP1R27ConsumerGate } from "../../supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts";
 import { bindReviewedR27Scope, combineReviewedR27Scopes, bindReviewedR27Links, projectStandaloneR27Row } from "../../supabase/functions/_shared/jungsi/application/r27_standalone.ts";
-import { bindP1R27Evidence, composeP1R27Candidate, buildCandidateR27ScopeIndex, buildCandidateR27PartialScopeIndex, buildCandidateR27PartialBody } from "../../supabase/functions/_shared/jungsi/application/p1_r27_composition.ts";
+import { bindHistoricalReferencePublication } from "../../supabase/functions/_shared/jungsi/application/history_reference_estimates.ts";
+import { bindFieldQualificationPublication } from "../../supabase/functions/_shared/jungsi/application/history_field_qualification.ts";
+import { rebindP1R27Candidate, bindP1R27Evidence, composeP1R27Candidate, buildCandidateR27ScopeIndex, buildCandidateR27PartialScopeIndex, buildCandidateR27PartialBody } from "../../supabase/functions/_shared/jungsi/application/p1_r27_composition.ts";
 
 const S = "a".repeat(64), H = "b".repeat(64), OLD = "c".repeat(64), PUB = "d".repeat(64), SCOPE = "e".repeat(64), EV = "f".repeat(64);
+const rebindAuthority = { revoked:false, hang:false, calls:0, scopes:[], async assertCurrent(scope) {
+  this.calls++; this.scopes.push(scope);
+  assert.equal(typeof scope.source_head_sha256,"string");
+  if(this.revoked) throw Error("SYN_APPROVAL_REVOKED");
+  if(this.hang && scope.phase==="publication") return await new Promise(()=>{});
+} };
 const results = [];
 async function test(name, fn) { await fn(); results.push(name); }
 const encode = x => new TextEncoder().encode(nativeJsonText(x));
@@ -148,10 +157,10 @@ function buildLimits(overrides={}) {
     max_part_gzip_bytes:1000000,max_part_decoded_bytes:1000000,max_depth:64,...overrides};
 }
 async function fixture(rows, groups = [[historical()]], opts = {}) {
-  const previous = await previousPort(groups);
+  const previous = opts.previous ?? await previousPort(groups);
   const e = await evidenceFor(rows, opts.coverage ?? {}, previous.pub.publicationSha256);
   const context = await bindP1R27Evidence(e.manifestBytes, e.coverageBytes, e.pins);
-  const scope = await scopes(rows), link = await links(opts.links ?? []);
+  const scope = await scopes(rows), link = opts.linkContextFactory ? await opts.linkContextFactory(previous.pub.publicationSha256) : (opts.linkContext ?? await links(opts.links ?? []));
   const source = { calls: 0, finishes: 0, pages: e.pageBytes, failFinish: false,
     async readPage(index) { this.calls++; return this.pages[index]; },
     async assertSourceHead(head) { this.finishes++; assert.equal(head, H); if (this.failFinish) throw Error("SYN_SOURCE_CHANGED"); },
@@ -402,6 +411,426 @@ await test("exact_prior_unknown_placeholder_can_receive_new_quota_without_losing
   assert.equal(result.body.rows[0].recruitment_count_with_stage.value,0);
   assert.equal(result.body.rows[0].competition_ratio.value,"SYN-PREV");
   assert.equal(result.held_previous_rows.length,0);
+});
+
+
+async function linksV2(grants, previousPublication = PUB, changes = {}) {
+  const reviewBinding={source_head_sha256:H,previous_publication_sha256:previousPublication,
+    previous_source_head_sha256:OLD,scope_sha256:SCOPE,authority_sha256:EV,...changes};
+  const b = encode({format:"jungsi.r27-reviewed-links/v2",status:"approved_exact_mappings",
+    source_sha256:S,review_binding:reviewBinding,grants});
+  return bindReviewedR27Links(b,{receiptSha256:await hash(b),sourceSha256:S,reviewBinding});
+}
+function v2grant(r,t) {
+  const states = id => Object.fromEntries(["campus","admission_track","group"].map(k=>[k,id[k]===null?"confirmed_null":"confirmed_value"]));
+  const src=ident(r);
+  return {source:src,target:t,review_state:"approved",evidence_sha256:EV,source_field_states:states(src),target_field_states:states(t)};
+}
+await test("v2_reviewed_changes_survive_composition_and_v1_stays_held", async()=>{
+  for (const [row,old] of [
+    [sourceRow({campus:null}),historical(2026,{campus:null})],
+    [sourceRow(),historical(2026,{admission_track:"SYN-PREV-TRACK"})],
+    [sourceRow(),historical(2026,{group:"SYN-PREV-GROUP"})],
+  ]) {
+    const tg=target(old);
+    const result=await (await fixture([row],[[old]],{linkContextFactory:pub=>linksV2([v2grant(row,tg)],pub)})).build();
+    const current=result.body.rows.find(r=>r.academic_year===2027);
+    assert.equal(current.r27_source.history_link_status,"exact_reviewed");
+    assert.deepEqual(current.r27_source.historical_links.map(x=>({...x})),[tg]);
+    const legacy=await (await fixture([row],[[old]],{links:[grant(row,tg)]})).build();
+    assert.equal(legacy.body.rows.find(r=>r.academic_year===2027).r27_source.history_link_status,"conflict_pending");
+  }
+});
+await test("v2_missing_or_unknown_scope_cannot_become_confirmed_null",async()=>{
+  const row=sourceRow({campus:null}), tg=target(historical(2026,{campus:null})), g=v2grant(row,tg);
+  for (const state of ["unknown","absent","confirmed_value",null]) {
+    const bad=structuredClone(g); bad.source_field_states.campus=state;
+    await assert.rejects(linksV2([bad]));
+  }
+  const missing=structuredClone(g); delete missing.target_field_states.campus;
+  await assert.rejects(linksV2([missing]));
+  const bytes=encode({format:"jungsi.r27-reviewed-links/v2",status:"approved_exact_mappings",source_sha256:S,grants:[g]});
+  await assert.rejects(bindReviewedR27Links(bytes,{receiptSha256:"0".repeat(64),sourceSha256:S}));
+});
+await test("v2_cross_school_and_ambiguous_target_are_held",async()=>{
+  const a=sourceRow({original_pk:"SYN-A"}), b=sourceRow({original_pk:"SYN-B"}), old=historical();
+  const cross={...target(old),school_id:"SYN-OTHER-SCHOOL"};
+  const crossContext=await linksV2([v2grant(a,cross)]);
+  const crossing=projectStandaloneR27Row(a,crossContext,S,await scopes([a]));
+  assert.equal(crossing.row.history_link_status,"conflict_pending");
+  const duplicate=await (await fixture([a,b],[[old]],{linkContextFactory:pub=>linksV2([v2grant(a,target(old)),v2grant(b,target(old))],pub)})).build();
+  for(const row of duplicate.body.rows.filter(x=>x.academic_year===2027)) {
+    assert.equal(row.r27_source.history_link_status,"conflict_pending");
+    assert.equal(row.r27_source.historical_links.length,0);
+  }
+});
+
+
+await test("v2_duplicated_historical_identity_never_links",async()=>{
+  const row=sourceRow(), old=historical();
+  const f=await fixture([row],[[old,structuredClone(old)]],{linkContextFactory:pub=>linksV2([v2grant(row,target(old))],pub)});
+  await assert.rejects(f.build(),error=>error.code==="snapshot_invalid" && error.http===503);
+});
+
+
+await test("v2_receipt_rejects_replay_against_other_heads_or_scope",async()=>{
+  const row=sourceRow(), old=historical(), g=v2grant(row,target(old));
+  for (const changed of [
+    {source_head_sha256:"1".repeat(64)},
+    {previous_publication_sha256:"2".repeat(64)},
+    {previous_source_head_sha256:"3".repeat(64)},
+    {scope_sha256:"4".repeat(64)},
+  ]) {
+    const f=await fixture([row],[[old]],{linkContextFactory:pub=>linksV2([g],pub,changed)});
+    await assert.rejects(f.build(),/review_binding_mismatch/);
+  }
+  const binding={source_head_sha256:H,previous_publication_sha256:PUB,
+    previous_source_head_sha256:OLD,scope_sha256:SCOPE,authority_sha256:EV};
+  const raw=encode({format:"jungsi.r27-reviewed-links/v2",status:"approved_exact_mappings",
+    source_sha256:S,review_binding:binding,grants:[g]});
+  await assert.rejects(bindReviewedR27Links(raw,{receiptSha256:await hash(raw),sourceSha256:S}));
+  await assert.rejects(bindReviewedR27Links(raw,{receiptSha256:await hash(raw),sourceSha256:S,
+    reviewBinding:{...binding,authority_sha256:"9".repeat(64)}}),/review_binding_mismatch/);
+});
+
+
+await test("independently_qualified_old_rank_is_preserved_but_new_index_remains_blocked",async()=>{
+  const old=historical();
+  old.identity_review={status:"review_pending",reason_code:"SYN-REVIEW",variants:[{
+    university_name:"SYN SCHOOL",department:"SYN PRIOR",admission_track:"SYN-TRACK",group:"SYN-GROUP"
+  }]};
+  const subject={observation_id:"observation:"+S,academic_year:2026,offering_pk:old.original_pk,identity_variant_index:0};
+  old.final_additional_admission_rank={...old.final_additional_admission_rank,value:"17",
+    status:"pending_metadata",reason_code:"SYN-RAW",source_context:{
+      observation_id:subject.observation_id,identity_variant_index:0,scope_status:"review_pending"
+    }};
+  const approval={field:"final_additional_admission_rank",subject,
+    expected_raw_cell_sha256:await nativeJsonSha256(old.final_additional_admission_rank),
+    expected_native_value_type:"string",expected_raw_status:"pending_metadata",expected_raw_unit:null,
+    expected_identity_review_sha256:await nativeJsonSha256(old.identity_review)};
+  const oldReceipt=encode({format:"jungsi.history-field-qualification-receipt/v1",status:"approved_exact_fields",
+    authority_sha256:EV,source_head_sha256:OLD,scope_sha256:SCOPE,
+    expected_previous_manifest_sha256:"6".repeat(64),subjects:[approval]});
+  const oldReceiptSha=await hash(oldReceipt);
+  const oldDescriptor=[{...approval,authority_sha256:EV,qualification_receipt_sha256:oldReceiptSha}];
+  old.final_additional_admission_rank.service_qualification={format:"jungsi.history-field-service-qualification/v1",
+    authority_sha256:EV,qualification_receipt_sha256:oldReceiptSha,subject,
+    normalized_service_fields:{status:"verified_official",unit:"번"}};
+  const previous=await previousPort([[old]]);
+  previous.pub.fieldQualification=await bindFieldQualificationPublication(oldDescriptor,oldReceipt,{
+    publicationSha256:previous.pub.publicationSha256,sourceHeadSha256:OLD,scopeSha256:SCOPE,
+    authoritySha256:EV,qualificationReceiptSha256:oldReceiptSha,previousManifestSha256:"6".repeat(64),
+    expectedSubjectCount:1});
+  const f=await fixture([sourceRow()],[],{previous});
+  const candidate=await f.build();
+  assert.equal(candidate.rebind_required.length,1);
+  assert.equal(candidate.rebind_required[0].kind,"field_qualification");
+  assert.equal(nativeJsonText(candidate.rebind_required[0].row.final_additional_admission_rank.service_qualification),
+    nativeJsonText(old.final_additional_admission_rank.service_qualification));
+  const prior=candidate.body.rows.find(x=>x.academic_year===2026);
+  assert.equal(prior.final_additional_admission_rank.value,"17");
+  assert.equal(Object.hasOwn(prior.final_additional_admission_rank,"service_qualification"),false);
+  await assert.rejects(buildCandidateR27ScopeIndex(candidate,f.context),/candidate_scope_unresolved/);
+});
+
+
+await test("unreviewed_link_cannot_cross_sealed_publisher_but_untrusted_all_pins_are_not_authority",async()=>{
+  const row=sourceRow(), old=historical(2026,{group:"SYN-OLD-GROUP"});
+  const f=await fixture([row],[[old]]),candidate=await f.build();
+  const genuineIndex=await buildCandidateR27ScopeIndex(candidate,f.context);
+  const forgedBody=structuredClone(candidate.body);
+  const current=forgedBody.rows.find(x=>x.academic_year===2027);
+  assert.equal(current.r27_source.history_link_status,"not_reviewed");
+  current.r27_source.history_link_status="exact_reviewed";
+  current.r27_source.historical_links=[target(old)];
+  // Shape alone accepts the claimed same-school mapping; the approval gate is essential.
+  assert.doesNotThrow(()=>validateHistorySnapshotPayload(forgedBody,candidate.counts));
+  const fakeIndex=structuredClone(genuineIndex);
+  fakeIndex.entries[0].row_sha256=await nativeJsonSha256(current);
+  const raw=encode(forgedBody),compressed=gzipSync(raw);
+  const part={...candidate.counts,gzipBytes:compressed.length,gzipSha256:await hash(compressed),
+    decodedBytes:raw.length,decodedSha256:await hash(raw),objectKey:"SYN-PRIVATE"};
+  const counts={rows:candidate.counts.rows,mapped_rows:candidate.counts.mappedRows,
+    mapping_pending_rows:candidate.counts.mappingPendingRows,observations:0,schools:1};
+  const wire={part_id:part.partId,payload_id:part.payloadId,object_key:part.objectKey,
+    gzip_bytes:part.gzipBytes,gzip_sha256:part.gzipSha256,decoded_bytes:part.decodedBytes,
+    decoded_sha256:part.decodedSha256,rows:part.rows,mapped_rows:part.mappedRows,
+    mapping_pending_rows:part.mappingPendingRows};
+  const manifest={format:"jungsi.history-snapshot-manifest/v1",status:"approved",snapshot_id:"SYN-FORGED",
+    source_head_sha256:H,scope_sha256:SCOPE,generated_at:"2026-01-01T00:00:00Z",
+    source_as_of:"2026-01-01",schema_version:"jungsi.history-snapshot/v2",
+    normalization_rules_version:"SYN",normalization_rules_sha256:"1".repeat(64),
+    selection_rules_version:"SYN",selection_rules_sha256:"2".repeat(64),counts,full:wire,parts:[]};
+  const manifestBytes=encode(manifest),indexBytes=encode(fakeIndex),indexSha=await hash(indexBytes);
+  const pub=Object.freeze({snapshotId:"SYN-FORGED",publicationSha256:await hash(manifestBytes),
+    sourceHeadSha256:H,scopeSha256:SCOPE,generatedAt:manifest.generated_at,sourceAsOf:manifest.source_as_of,
+    schemaVersion:manifest.schema_version,normalizationRulesVersion:"SYN",selectionRulesVersion:"SYN",
+    expiresAtUtc:9999999n,counts:Object.freeze(counts),full:Object.freeze(part),parts:Object.freeze([])});
+  const limits={maxParts:4,maxRows:20,maxDecodedBytes:262144,maxPartBytes:131072,maxDepth:64,
+    maxTotalGzipBytes:262144,maxPartGzipBytes:131072,maxManifestBytes:65536,maxIndexBytes:65536,timeoutMs:5000};
+  await assert.rejects(prepareP1R27GlobalReceipt(pub,manifestBytes,indexBytes,indexSha,
+    candidate.coverage_sha256,[Uint8Array.from(compressed)],limits,fakeIndex),/candidate_index_unsealed/);
+  // If an attacker also controls the supposedly trusted descriptor pins, a forged JSON
+  // receipt can be made internally consistent. Hash checking is not issuer authentication.
+  const global={format:"jungsi.p1-r27-global-validation/v1",status:"global_checks_passed",
+    manifest_sha256:pub.publicationSha256,source_head_sha256:H,scope_sha256:SCOPE,
+    coverage_sha256:candidate.coverage_sha256,index_sha256:indexSha,
+    delivery_sha256:await p1R27DeliveryDigest(pub),parts_checked:1,rows_checked:counts.rows};
+  const consumer={format:"jungsi.p1-r27-consumer-approval/v1",status:"approved",
+    manifest_sha256:pub.publicationSha256,source_head_sha256:H,scope_sha256:SCOPE,
+    consumer_build_sha256:"3".repeat(64),consumer_contract_sha256:"4".repeat(64),
+    r27_scope_key_supported:true,expires_at_utc_micros:"9999999"};
+  const globalBytes=encode(global),consumerBytes=encode(consumer),head="5".repeat(64);
+  const pins={headSha256:head,manifestSha256:pub.publicationSha256,sourceHeadSha256:H,
+    scopeSha256:SCOPE,indexSha256:indexSha,coverageSha256:candidate.coverage_sha256,
+    globalReceiptSha256:await hash(globalBytes),consumerReceiptSha256:await hash(consumerBytes),
+    consumerBuildSha256:"3".repeat(64),consumerContractSha256:"4".repeat(64)};
+  const gate=await bindP1R27ConsumerGate(pub,indexBytes,globalBytes,consumerBytes,pins,head,1n);
+  const boundIndex=await assertP1R27ConsumerGate(gate,pub);
+  const forgedPub=Object.freeze({...pub,r27ScopeIndex:boundIndex,r27Gate:gate});
+  const read=await validateQualifiedHistorySnapshotPayload(forgedBody,part,forgedPub);
+  assert.equal(read.rows.find(x=>x.academic_year===2027).r27_source.history_link_status,"exact_reviewed");
+});
+
+
+await test("qualified_rank_rebinds_with_new_receipt_and_final_manifest_without_losing_original",async()=>{
+  const old=historical();
+  old.identity_review={status:"review_pending",reason_code:"SYN-REVIEW",variants:[{
+    university_name:"SYN SCHOOL",department:"SYN PRIOR",admission_track:"SYN-TRACK",group:"SYN-GROUP"}]};
+  const subject={observation_id:"observation:"+S,academic_year:2026,offering_pk:old.original_pk,identity_variant_index:0};
+  old.final_additional_admission_rank={...old.final_additional_admission_rank,value:"17",
+    status:"pending_metadata",reason_code:"SYN-RAW",source_context:{
+      observation_id:subject.observation_id,identity_variant_index:0,scope_status:"review_pending"}};
+  const approval={field:"final_additional_admission_rank",subject,
+    expected_raw_cell_sha256:await nativeJsonSha256(old.final_additional_admission_rank),
+    expected_native_value_type:"string",expected_raw_status:"pending_metadata",expected_raw_unit:null,
+    expected_identity_review_sha256:await nativeJsonSha256(old.identity_review)};
+  const oldBytes=encode({format:"jungsi.history-field-qualification-receipt/v1",status:"approved_exact_fields",
+    authority_sha256:EV,source_head_sha256:OLD,scope_sha256:SCOPE,
+    expected_previous_manifest_sha256:"6".repeat(64),subjects:[approval]});
+  const oldSha=await hash(oldBytes),oldDescriptor=[{...approval,authority_sha256:EV,qualification_receipt_sha256:oldSha}];
+  old.final_additional_admission_rank.service_qualification={format:"jungsi.history-field-service-qualification/v1",
+    authority_sha256:EV,qualification_receipt_sha256:oldSha,subject,
+    normalized_service_fields:{status:"verified_official",unit:"번"}};
+  const previous=await previousPort([[old]]);
+  previous.pub.fieldQualification=await bindFieldQualificationPublication(oldDescriptor,oldBytes,{
+    publicationSha256:previous.pub.publicationSha256,sourceHeadSha256:OLD,scopeSha256:SCOPE,
+    authoritySha256:EV,qualificationReceiptSha256:oldSha,previousManifestSha256:"6".repeat(64),expectedSubjectCount:1});
+  const f=await fixture([sourceRow()],[],{previous}),candidate=await f.build();
+  const newAuthority="8".repeat(64);
+  const qBytes=encode({format:"jungsi.history-field-qualification-receipt/v1",status:"approved_exact_fields",
+    authority_sha256:newAuthority,source_head_sha256:H,scope_sha256:SCOPE,
+    expected_previous_manifest_sha256:previous.pub.publicationSha256,subjects:[approval]});
+  const qSha=await hash(qBytes),descriptor=[{...approval,authority_sha256:newAuthority,qualification_receipt_sha256:qSha}];
+  const proof={qualification:{descriptor_approvals:descriptor,receipt_bytes:qBytes,authority_sha256:newAuthority,
+    receipt_sha256:qSha,expected_subject_count:1},reference:null};
+  await assert.rejects(rebindP1R27Candidate(candidate,f.context,f.source,f.previous,rebindAuthority,
+    {...proof,qualification:{...proof.qualification,receipt_sha256:"0".repeat(64)}}));
+  assert.equal(candidate.rebind_required.length,1);
+  const rebound=await rebindP1R27Candidate(candidate,f.context,f.source,f.previous,rebindAuthority,proof);
+  assert.equal(rebound.rebind_required.length,0);
+  assert.equal(candidate.rebind_required.length,1);
+  const current=rebound.body.rows.find(x=>x.academic_year===2026);
+  assert.equal(current.final_additional_admission_rank.value,"17");
+  assert.equal(current.final_additional_admission_rank.status,"pending_metadata");
+  assert.equal(current.final_additional_admission_rank.service_qualification.subject.observation_id,subject.observation_id);
+  assert.equal(current.final_additional_admission_rank.service_qualification.qualification_receipt_sha256,qSha);
+  const index=await buildCandidateR27ScopeIndex(rebound,f.context),indexBytes=encode(index);
+  const raw=encode(rebound.body),compressed=gzipSync(raw);
+  const part={...rebound.counts,gzipBytes:compressed.length,gzipSha256:await hash(compressed),
+    decodedBytes:raw.length,decodedSha256:await hash(raw),objectKey:"SYN-PRIVATE"};
+  const counts={rows:rebound.counts.rows,mapped_rows:rebound.counts.mappedRows,
+    mapping_pending_rows:rebound.counts.mappingPendingRows,observations:0,schools:1};
+  const wire={part_id:part.partId,payload_id:part.payloadId,object_key:part.objectKey,
+    gzip_bytes:part.gzipBytes,gzip_sha256:part.gzipSha256,decoded_bytes:part.decodedBytes,
+    decoded_sha256:part.decodedSha256,rows:part.rows,mapped_rows:part.mappedRows,
+    mapping_pending_rows:part.mappingPendingRows};
+  const manifest={format:"jungsi.history-snapshot-manifest/v1",status:"approved",snapshot_id:"SYN-REBOUND",
+    source_head_sha256:H,scope_sha256:SCOPE,generated_at:"2026-01-01T00:00:00Z",source_as_of:"2026-01-01",
+    schema_version:"jungsi.history-snapshot/v2",normalization_rules_version:"SYN",normalization_rules_sha256:"1".repeat(64),
+    selection_rules_version:"SYN",selection_rules_sha256:"2".repeat(64),counts,full:wire,parts:[]};
+  const manifestBytes=encode(manifest),manifestSha=await hash(manifestBytes);
+  const fieldQualification=await bindFieldQualificationPublication(descriptor,qBytes,{
+    publicationSha256:manifestSha,sourceHeadSha256:H,scopeSha256:SCOPE,authoritySha256:newAuthority,
+    qualificationReceiptSha256:qSha,previousManifestSha256:previous.pub.publicationSha256,expectedSubjectCount:1});
+  const pub={snapshotId:"SYN-REBOUND",publicationSha256:manifestSha,sourceHeadSha256:H,scopeSha256:SCOPE,
+    generatedAt:manifest.generated_at,sourceAsOf:manifest.source_as_of,schemaVersion:manifest.schema_version,
+    normalizationRulesVersion:"SYN",selectionRulesVersion:"SYN",expiresAtUtc:9999999n,counts,full:part,parts:[],fieldQualification};
+  const limits={maxParts:4,maxRows:20,maxDecodedBytes:262144,maxPartBytes:131072,maxDepth:64,
+    maxTotalGzipBytes:262144,maxPartGzipBytes:131072,maxManifestBytes:65536,maxIndexBytes:65536,timeoutMs:5000};
+  const receipt=await prepareP1R27GlobalReceipt(pub,manifestBytes,indexBytes,await hash(indexBytes),
+    rebound.coverage_sha256,[Uint8Array.from(compressed)],limits,index);
+  assert.equal(receipt.status,"global_checks_passed");
+  assert.ok(rebindAuthority.scopes.some(x=>x.phase==="candidate" && x.publication_sha256===null));
+  assert.ok(rebindAuthority.scopes.some(x=>x.phase==="publication" && x.publication_sha256===manifestSha));
+  rebindAuthority.hang=true;
+  await assert.rejects(prepareP1R27GlobalReceipt(pub,manifestBytes,indexBytes,await hash(indexBytes),
+    rebound.coverage_sha256,[Uint8Array.from(compressed)],{...limits,timeoutMs:30},index),
+    error=>error.code==="snapshot_invalid");
+  rebindAuthority.hang=false;
+  rebindAuthority.revoked=true;
+  await assert.rejects(prepareP1R27GlobalReceipt(pub,manifestBytes,indexBytes,await hash(indexBytes),
+    rebound.coverage_sha256,[Uint8Array.from(compressed)],limits,index),/SYN_APPROVAL_REVOKED/);
+  rebindAuthority.revoked=false;
+  const partialF=await fixture([sourceRow(),sourceRow({original_pk:"SYN-HOLD",
+    scope:{state:"review_pending",evidence_sha256:null}})],[],{previous});
+  const partialCandidate=await partialF.build();
+  const partialRebound=await rebindP1R27Candidate(partialCandidate,partialF.context,
+    partialF.source,partialF.previous,rebindAuthority,proof);
+  const partialIndex=await buildCandidateR27PartialScopeIndex(partialRebound,partialF.context);
+  const partialBody=buildCandidateR27PartialBody(partialRebound,partialF.context,partialIndex);
+  const partialOld=partialBody.rows.find(x=>x.academic_year===2026);
+  assert.equal(partialOld.final_additional_admission_rank.value,"17");
+  assert.equal(partialOld.final_additional_admission_rank.service_qualification.qualification_receipt_sha256,qSha);
+  assert.equal(partialBody.r27_scope_coverage.status,"partial");
+  f.source.failFinish=true;
+  await assert.rejects(rebindP1R27Candidate(candidate,f.context,f.source,f.previous,rebindAuthority,proof),/SYN_SOURCE_CHANGED/);
+});
+
+
+await test("historical_reference_rebind_preserves_value_and_checks_final_export_pin",async()=>{
+  const old=historical();
+  const release="reference-percentile:"+"3".repeat(64),newExport="4".repeat(64);
+  old.historical_cutoff_references=[{
+    format:"jungsi.historical-cutoff-reference/v1",observation_id:"observation:"+"1".repeat(64),
+    academic_year:2026,school_id:old.university_id,offering_pk:old.original_pk,value:"1.2300",unit:"%",
+    status:"model_estimated",label:"추정상위누백(전체응시자)",scope:"historical_admission_cutoff",
+    method_id:"estimated-whole-cohort-percentile:"+"2".repeat(64),release_id:release,
+    display_role:"independent_observation",statistic_label:null,
+    reference_status:"CALCULATED_WHOLE_COHORT_MODEL_ESTIMATE",engine_approved:false,production_allowed:false}];
+  const previous=await previousPort([[old]]);
+  const descriptor=(exportSha)=>({format:"jungsi.history-reference-estimates/v1",release_id:release,
+    source_export_sha256:exportSha,head_readback_receipt_sha256:"5".repeat(64),
+    metric:"estimated_upper_cumulative_percent_all_examinees",observation_count:1,school_count:1,
+    engine_approved:false,production_allowed:false,display_scope:"historical_admission_only"});
+  previous.pub.historicalReferences=bindHistoricalReferencePublication(descriptor("7".repeat(64)),
+    previous.pub.publicationSha256,OLD,SCOPE);
+  const f=await fixture([sourceRow()],[],{previous}),candidate=await f.build();
+  assert.equal(candidate.rebind_required.length,1);
+  assert.equal(candidate.rebind_required[0].kind,"historical_reference");
+  const preserved=candidate.rebind_required[0].row;
+  const rowKey=JSON.stringify([preserved.academic_year,preserved.university_id,preserved.original_pk,
+    preserved.campus,preserved.admission_track,preserved.group]);
+  const entry={row_key:rowKey,previous_row_sha256:await nativeJsonSha256(preserved),
+    references_sha256:await nativeJsonSha256(preserved.historical_cutoff_references)};
+  const refBytes=encode({format:"jungsi.p1-history-reference-rebind/v1",status:"approved_exact_carry_forward",
+    authority_sha256:EV,source_head_sha256:H,previous_publication_sha256:previous.pub.publicationSha256,
+    previous_source_head_sha256:OLD,scope_sha256:SCOPE,export_sha256:newExport,entries:[entry]});
+  const proof={qualification:null,reference:{receipt_bytes:refBytes,receipt_sha256:await hash(refBytes),authority_sha256:EV}};
+  await assert.rejects(rebindP1R27Candidate(candidate,f.context,f.source,f.previous,rebindAuthority,
+    {...proof,reference:{...proof.reference,authority_sha256:"8".repeat(64)}}),/reference_receipt_mismatch/);
+  for(const changed of [
+    {source_head_sha256:"9".repeat(64),entries:[entry]},
+    {source_head_sha256:H,entries:[{...entry,previous_row_sha256:"9".repeat(64)}]},
+    {source_head_sha256:H,entries:[{...entry,references_sha256:"9".repeat(64)}]},
+    {source_head_sha256:H,entries:[entry,entry]},
+  ]) {
+    const tampered=encode({format:"jungsi.p1-history-reference-rebind/v1",status:"approved_exact_carry_forward",
+      authority_sha256:EV,source_head_sha256:changed.source_head_sha256,
+      previous_publication_sha256:previous.pub.publicationSha256,previous_source_head_sha256:OLD,
+      scope_sha256:SCOPE,export_sha256:newExport,entries:changed.entries});
+    await assert.rejects(rebindP1R27Candidate(candidate,f.context,f.source,f.previous,rebindAuthority,
+      {...proof,reference:{...proof.reference,receipt_bytes:tampered,receipt_sha256:await hash(tampered)}}));
+  }
+  const rebound=await rebindP1R27Candidate(candidate,f.context,f.source,f.previous,rebindAuthority,proof);
+  assert.equal(candidate.rebind_required.length,1);
+  assert.equal(rebound.rebind_required.length,0);
+  assert.equal(rebound.body.rows.find(x=>x.academic_year===2026).historical_cutoff_references[0].value,"1.2300");
+  const index=await buildCandidateR27ScopeIndex(rebound,f.context),indexBytes=encode(index);
+  const raw=encode(rebound.body),compressed=gzipSync(raw);
+  const part={...rebound.counts,gzipBytes:compressed.length,gzipSha256:await hash(compressed),
+    decodedBytes:raw.length,decodedSha256:await hash(raw),objectKey:"SYN-PRIVATE"};
+  const counts={rows:rebound.counts.rows,mapped_rows:rebound.counts.mappedRows,
+    mapping_pending_rows:rebound.counts.mappingPendingRows,observations:0,schools:1};
+  const wire={part_id:part.partId,payload_id:part.payloadId,object_key:part.objectKey,
+    gzip_bytes:part.gzipBytes,gzip_sha256:part.gzipSha256,decoded_bytes:part.decodedBytes,
+    decoded_sha256:part.decodedSha256,rows:part.rows,mapped_rows:part.mappedRows,mapping_pending_rows:part.mappingPendingRows};
+  const manifest={format:"jungsi.history-snapshot-manifest/v1",status:"approved",snapshot_id:"SYN-REF-REBOUND",
+    source_head_sha256:H,scope_sha256:SCOPE,generated_at:"2026-01-01T00:00:00Z",source_as_of:"2026-01-01",
+    schema_version:"jungsi.history-snapshot/v2",normalization_rules_version:"SYN",normalization_rules_sha256:"1".repeat(64),
+    selection_rules_version:"SYN",selection_rules_sha256:"2".repeat(64),counts,full:wire,parts:[]};
+  const manifestBytes=encode(manifest),manifestSha=await hash(manifestBytes);
+  const basePub={snapshotId:"SYN-REF-REBOUND",publicationSha256:manifestSha,sourceHeadSha256:H,scopeSha256:SCOPE,
+    generatedAt:manifest.generated_at,sourceAsOf:manifest.source_as_of,schemaVersion:manifest.schema_version,
+    normalizationRulesVersion:"SYN",selectionRulesVersion:"SYN",expiresAtUtc:9999999n,counts,full:part,parts:[]};
+  const limits={maxParts:4,maxRows:20,maxDecodedBytes:262144,maxPartBytes:131072,maxDepth:64,
+    maxTotalGzipBytes:262144,maxPartGzipBytes:131072,maxManifestBytes:65536,maxIndexBytes:65536,timeoutMs:5000};
+  const bad={...basePub,historicalReferences:bindHistoricalReferencePublication(descriptor("9".repeat(64)),manifestSha,H,SCOPE)};
+  await assert.rejects(prepareP1R27GlobalReceipt(bad,manifestBytes,indexBytes,await hash(indexBytes),
+    rebound.coverage_sha256,[Uint8Array.from(compressed)],limits,index),/reference_export_mismatch/);
+  const good={...basePub,historicalReferences:bindHistoricalReferencePublication(descriptor(newExport),manifestSha,H,SCOPE)};
+  const receipt=await prepareP1R27GlobalReceipt(good,manifestBytes,indexBytes,await hash(indexBytes),
+    rebound.coverage_sha256,[Uint8Array.from(compressed)],limits,index);
+  assert.equal(receipt.status,"global_checks_passed");
+  previous.failFinish=true;
+  await assert.rejects(rebindP1R27Candidate(candidate,f.context,f.source,previous,rebindAuthority,proof),/SYN_PREVIOUS_CHANGED/);
+});
+
+
+await test("both_reference_and_qualification_require_separate_proofs_for_same_row",async()=>{
+  const old=historical(),release="reference-percentile:"+"3".repeat(64);
+  old.identity_review={status:"review_pending",reason_code:"SYN-REVIEW",variants:[{
+    university_name:"SYN SCHOOL",department:"SYN PRIOR",admission_track:"SYN-TRACK",group:"SYN-GROUP"}]};
+  const subject={observation_id:"observation:"+S,academic_year:2026,offering_pk:old.original_pk,identity_variant_index:0};
+  old.final_additional_admission_rank={...old.final_additional_admission_rank,value:"17",
+    status:"pending_metadata",reason_code:"SYN-RAW",source_context:{
+      observation_id:subject.observation_id,identity_variant_index:0,scope_status:"review_pending"}};
+  const approval={field:"final_additional_admission_rank",subject,
+    expected_raw_cell_sha256:await nativeJsonSha256(old.final_additional_admission_rank),
+    expected_native_value_type:"string",expected_raw_status:"pending_metadata",expected_raw_unit:null,
+    expected_identity_review_sha256:await nativeJsonSha256(old.identity_review)};
+  const oldBytes=encode({format:"jungsi.history-field-qualification-receipt/v1",status:"approved_exact_fields",
+    authority_sha256:EV,source_head_sha256:OLD,scope_sha256:SCOPE,
+    expected_previous_manifest_sha256:"6".repeat(64),subjects:[approval]});
+  const oldSha=await hash(oldBytes),oldDescriptor=[{...approval,authority_sha256:EV,qualification_receipt_sha256:oldSha}];
+  old.final_additional_admission_rank.service_qualification={format:"jungsi.history-field-service-qualification/v1",
+    authority_sha256:EV,qualification_receipt_sha256:oldSha,subject,
+    normalized_service_fields:{status:"verified_official",unit:"번"}};
+  old.historical_cutoff_references=[{format:"jungsi.historical-cutoff-reference/v1",
+    observation_id:"observation:"+"1".repeat(64),academic_year:2026,school_id:old.university_id,
+    offering_pk:old.original_pk,value:"1.2300",unit:"%",status:"model_estimated",label:"추정상위누백(전체응시자)",
+    scope:"historical_admission_cutoff",method_id:"estimated-whole-cohort-percentile:"+"2".repeat(64),
+    release_id:release,display_role:"independent_observation",statistic_label:null,
+    reference_status:"CALCULATED_WHOLE_COHORT_MODEL_ESTIMATE",engine_approved:false,production_allowed:false}];
+  const previous=await previousPort([[old]]);
+  previous.pub.fieldQualification=await bindFieldQualificationPublication(oldDescriptor,oldBytes,{
+    publicationSha256:previous.pub.publicationSha256,sourceHeadSha256:OLD,scopeSha256:SCOPE,
+    authoritySha256:EV,qualificationReceiptSha256:oldSha,previousManifestSha256:"6".repeat(64),expectedSubjectCount:1});
+  const descriptor={format:"jungsi.history-reference-estimates/v1",release_id:release,
+    source_export_sha256:"7".repeat(64),head_readback_receipt_sha256:"5".repeat(64),
+    metric:"estimated_upper_cumulative_percent_all_examinees",observation_count:1,school_count:1,
+    engine_approved:false,production_allowed:false,display_scope:"historical_admission_only"};
+  previous.pub.historicalReferences=bindHistoricalReferencePublication(descriptor,previous.pub.publicationSha256,OLD,SCOPE);
+  const f=await fixture([sourceRow()],[],{previous}),candidate=await f.build();
+  assert.equal(candidate.rebind_required.length,2);
+  const preserved=candidate.rebind_required.find(x=>x.kind==="historical_reference").row;
+  const rowKey=JSON.stringify([preserved.academic_year,preserved.university_id,preserved.original_pk,
+    preserved.campus,preserved.admission_track,preserved.group]);
+  const refBytes=encode({format:"jungsi.p1-history-reference-rebind/v1",status:"approved_exact_carry_forward",
+    authority_sha256:EV,source_head_sha256:H,previous_publication_sha256:previous.pub.publicationSha256,
+    previous_source_head_sha256:OLD,scope_sha256:SCOPE,export_sha256:"4".repeat(64),
+    entries:[{row_key:rowKey,previous_row_sha256:await nativeJsonSha256(preserved),
+      references_sha256:await nativeJsonSha256(preserved.historical_cutoff_references)}]});
+  const newAuthority="8".repeat(64);
+  const qBytes=encode({format:"jungsi.history-field-qualification-receipt/v1",status:"approved_exact_fields",
+    authority_sha256:newAuthority,source_head_sha256:H,scope_sha256:SCOPE,
+    expected_previous_manifest_sha256:previous.pub.publicationSha256,subjects:[approval]});
+  const qSha=await hash(qBytes);
+  const proof={qualification:{descriptor_approvals:[{...approval,authority_sha256:newAuthority,
+    qualification_receipt_sha256:qSha}],receipt_bytes:qBytes,authority_sha256:newAuthority,
+    receipt_sha256:qSha,expected_subject_count:1},reference:{receipt_bytes:refBytes,
+    receipt_sha256:await hash(refBytes),authority_sha256:EV}};
+  await assert.rejects(rebindP1R27Candidate(candidate,f.context,f.source,f.previous,rebindAuthority,
+    {...proof,reference:null}));
+  await assert.rejects(rebindP1R27Candidate(candidate,f.context,f.source,f.previous,rebindAuthority,
+    {...proof,qualification:null}));
+  const next=await rebindP1R27Candidate(candidate,f.context,f.source,f.previous,rebindAuthority,proof);
+  assert.equal(next.rebind_required.length,0);
+  const oldRow=next.body.rows.find(x=>x.academic_year===2026);
+  assert.equal(oldRow.final_additional_admission_rank.value,"17");
+  assert.equal(oldRow.final_additional_admission_rank.service_qualification.qualification_receipt_sha256,qSha);
+  assert.equal(oldRow.historical_cutoff_references[0].value,"1.2300");
+  assert.ok(await buildCandidateR27ScopeIndex(next,f.context));
 });
 
 process.stdout.write(JSON.stringify({cases:results.length,status:"PASS_SYNTHETIC_ONLY",v1_and_v2_service:true})+"\n");

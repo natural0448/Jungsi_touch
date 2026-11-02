@@ -276,13 +276,17 @@ export class ProfileReportService implements ApiBusinessPort {
           }
         }
         const cached = await workflow.reusableOverall(session, profile);
-        if (cached && (rid === null || rid === cached.report_id)) {
+        // A user explicitly refreshing a stored pending result needs the current provider,
+        // even when its approval/registry context has not changed. Ordinary reuse is preserved.
+        const refreshPending = rid !== null && cached && object(cached.body.overall) &&
+          object(cached.body.overall.overall) && cached.body.overall.overall.status === "pending";
+        if (cached && (rid === null || rid === cached.report_id) && !refreshPending) {
           const reused = await this.repository.writeReport({
             owner: session.user.subjectId,
             reportId: cached.report_id,
             profileId: profile.profile_id,
             body: cached.body,
-            expected: cached.revision,
+            expected: rid === null ? cached.revision : expected,
             nowUtc: this.fresh(session),
             operation: "overall.analyze",
             key,
@@ -296,6 +300,27 @@ export class ProfileReportService implements ApiBusinessPort {
       result = await this.overall.analyze(session, profile.scores) as NativeObject;
     }
     const previous = rid === null ? null : await this.report(session, rid);
+    if (previous && previous.revision !== expected) throw new AccessError("revision_conflict", 409);
+    // Keep the last stored revision (including its successful subject/university results)
+    // when the explicitly requested refresh still cannot supply an overall percentile.
+    // Initial analysis and a different profile keep their existing pending semantics.
+    if (
+      previous && previous.profile_id === profile.profile_id && object(result.overall) &&
+      result.overall.status === "pending"
+    ) throw new AccessError("overall_model_refresh_pending", 503);
+    if (previous && previous.profile_id === profile.profile_id) {
+      if (
+        !object(previous.body) || !object(previous.body.overall) ||
+        !object(previous.body.overall.overall)
+      ) invalid();
+      if (
+        !object(previous.body.analyses) ||
+        (previous.body.candidates !== null && !object(previous.body.candidates))
+      ) invalid();
+      if (Object.keys(previous.body.analyses).length > 0 || previous.body.candidates !== null) {
+        throw new AccessError("overall_refresh_result_preservation_required", 503);
+      }
+    }
     let shortlist: NativeObject = {};
     if (previous) {
       if (!object(previous.body.shortlist)) invalid();

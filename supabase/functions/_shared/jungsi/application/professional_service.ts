@@ -4,6 +4,7 @@ import type { RequestClockPort } from "./ports.ts";
 import type {
   ApprovedAnalysisPort,
   OrganizationStudentRepositoryPort,
+  ProfessionalAnalysisBoundary,
   ProfessionalAuditPort,
   ProfessionalAuthority,
   ProfessionalAuthorityPort,
@@ -17,6 +18,7 @@ import type {
   ProfessionalRetentionPort,
   ProfessionalScope,
   ProfessionalStudent,
+  ProfessionalUsageLease,
   ProfessionalUsagePort,
   StudentReportPort,
   StudentScoreInputPort,
@@ -47,6 +49,12 @@ export interface ProfessionalOutcome {
 export interface ProfessionalDelivery<T> {
   readonly value: T;
   readonly bytes: bigint;
+}
+/** Existing authorization scope and live reservation, only for an approved verifier. */
+export interface ProfessionalDeliveryBoundary {
+  readonly scope: ProfessionalScope;
+  readonly admission: ProfessionalUsageLease;
+  readonly signal?: AbortSignal;
 }
 export interface ProfessionalServicePorts {
   readonly authority: ProfessionalAuthorityPort;
@@ -159,7 +167,11 @@ export class ProfessionalService {
   }
   async execute<T = ProfessionalOutcome>(
     r: ProfessionalExecution,
-    complete?: (outcome: ProfessionalOutcome) => Promise<ProfessionalDelivery<T>>,
+    complete?: (
+      outcome: ProfessionalOutcome,
+      boundary?: ProfessionalDeliveryBoundary,
+    ) => Promise<ProfessionalDelivery<T>>,
+    signal?: AbortSignal,
   ): Promise<T> {
     const route = this.routes.get(r.operation);
     if (!route) throw new AccessError("route_not_found", 404);
@@ -262,7 +274,12 @@ export class ProfessionalService {
           const stored = proShape(replay.result, ["response", "error"]);
           outcome = stored as unknown as ProfessionalOutcome;
         } else {
-          outcome = await this.dispatch(r, scope, deadline);
+          outcome = await this.dispatch(
+            r,
+            scope,
+            deadline,
+            signal ? { signal, admission: lease } : undefined,
+          );
           if (command) {
             await this.ports.students.remember(scope, command, outcome as unknown as NativeObject);
           }
@@ -281,7 +298,7 @@ export class ProfessionalService {
           ticketRef: authority.ticketRef,
         });
         await this.verifyResult(r, scope, outcome, deadline);
-        const delivery = await finish(outcome);
+        const delivery = await finish(outcome, { scope, admission: lease, signal });
         await this.ports.analysis.assertCurrent();
         if (
           typeof delivery.bytes !== "bigint" || delivery.bytes < 0n ||
@@ -442,7 +459,10 @@ export class ProfessionalService {
     r: ProfessionalExecution,
     authorities: readonly ProfessionalAuthority[],
     deadline: bigint,
-    finish: (outcome: ProfessionalOutcome) => Promise<ProfessionalDelivery<T>>,
+    finish: (
+      outcome: ProfessionalOutcome,
+      boundary?: ProfessionalDeliveryBoundary,
+    ) => Promise<ProfessionalDelivery<T>>,
   ): Promise<T> {
     const organizations: NativeObject[] = [];
     const scope: ProfessionalScope = { authority: authorities[0], student: null };
@@ -506,7 +526,7 @@ export class ProfessionalService {
           },
         },
       };
-      const delivery = await finish(outcome);
+      const delivery = await finish(outcome, { scope, admission: lease });
       if (delivery.bytes < 0n || delivery.bytes > BigInt(this.policy.maxResultBytes)) {
         throw new AccessError("professional_result_limit_exceeded", 503);
       }
@@ -573,6 +593,7 @@ export class ProfessionalService {
     r: ProfessionalExecution,
     scope: ProfessionalScope,
     deadline: bigint,
+    boundary?: ProfessionalAnalysisBoundary,
   ): Promise<ProfessionalOutcome> {
     const a = scope.authority, body = r.body, op = r.operation;
     if (op === "pro.student.list") {
@@ -800,7 +821,7 @@ export class ProfessionalService {
     }
     if (["pro.overall.analyze", "pro.university.analyze", "pro.candidates"].includes(op)) {
       const profile = await this.selectedProfile(r, scope, deadline),
-        analyzed = await this.ports.analysis.analyze(scope, profile, op, body);
+        analyzed = await this.ports.analysis.analyze(scope, profile, op, body, boundary);
       const report = await this.ports.reports.publish(
         scope,
         profile,

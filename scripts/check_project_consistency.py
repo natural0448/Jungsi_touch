@@ -1361,6 +1361,88 @@ def service_staged_registration(spec, source_hashes=None):
         return None, [error]
 
 
+SERVICE_WILDCARD_TEST_PATHS = ('tests/edge/test_wildcard_selection.synthetic.ts', 'tests/edge/test_wildcard_independent.synthetic.ts', 'tests/edge/test_wildcard_prefix.synthetic.ts', 'tests/edge/test_overall_preserve_relay.synthetic.ts', 'tests/edge/test_wildcard_candidate_review.synthetic.ts', 'tests/edge/test_wildcard_off_baseline.synthetic.ts', 'tests/edge/test_wildcard_personal_http.synthetic.ts', 'tests/edge/test_wildcard_professional_http.synthetic.ts', 'tests/edge/test_wildcard_projection.synthetic.ts')
+SERVICE_WILDCARD_CASE_IDENTITY_SHA256 = '4d0b383325e64f37d440d9c2d0d3585d24a07095fe76b89de302d087d2ba0235'
+PROFESSIONAL_FIXTURE_GRAPH_GUARD = ('tests/test_professional_fixture_graph.py', '533c74359590144b8258f49fb2ec1bc115f5d70951abb22e6bf68bc5f8c8a7fa')
+SERVICE_WILDCARD_IMPLEMENTATION_SENTINELS = (
+    "supabase/functions/_shared/jungsi/application/wildcard_candidate_review.ts",
+    "supabase/functions/_shared/jungsi/application/wildcard_public_contract.ts",
+    "supabase/functions/_shared/jungsi/application/wildcard_runtime_gate.ts",
+    "supabase/functions/_shared/jungsi/application/wildcard_selection.ts",
+)
+
+def service_wildcard_registration(spec, source_hashes=None):
+    """Optional exact separate synthetic suite; absent preserves the old gate."""
+    error = "Service wildcard exact separate source/test registration invalid"
+    backend = spec.get("backend_platform_contract", {})
+    ext = backend.get("service_wildcard_test_extension") if isinstance(backend, dict) else None
+    if ext is None:
+        harness = spec.get("edge_harness", {})
+        registered = harness.get("files", {}) if isinstance(harness, dict) else {}
+        if isinstance(registered, dict) and any(p in registered for p in SERVICE_WILDCARD_IMPLEMENTATION_SENTINELS): return None, [error]
+        implementation = spec.get("implementation", [])
+        if isinstance(implementation, list) and any(isinstance(row, dict) and row.get("path") in SERVICE_WILDCARD_IMPLEMENTATION_SENTINELS for row in implementation): return None, [error]
+        if source_hashes is not None and any(p in source_hashes for p in (*SERVICE_WILDCARD_TEST_PATHS, *SERVICE_WILDCARD_IMPLEMENTATION_SENTINELS, PROFESSIONAL_FIXTURE_GRAPH_GUARD[0], "tests/test_service_wildcard_registration.py")): return None, [error]
+        return None, []
+    try:
+        fields = {"format", "status", "test_paths", "case_names_by_path", "case_identity_sha256", "test_count",
+                  "baseline_foundation_count", "source_bindings", "regression_test", "fixture_graph_guard", "native_acceptance", "activation_status", "operating_writes"}
+        if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.service-wildcard-tests/v1" or
+                ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["test_paths"] != list(SERVICE_WILDCARD_TEST_PATHS) or
+                type(ext["test_count"]) is not int or ext["test_count"] != 97 or
+                type(ext["baseline_foundation_count"]) is not int or ext["baseline_foundation_count"] != 656 or
+                ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
+                type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0):
+            raise ValueError("suite state or paths")
+        cases = ext["case_names_by_path"]
+        if not isinstance(cases, dict) or set(cases) != set(SERVICE_WILDCARD_TEST_PATHS):
+            raise ValueError("suite identities")
+        lengths = (11, 9, 9, 2, 17, 1, 19, 11, 18)
+        names = []
+        for path, count in zip(SERVICE_WILDCARD_TEST_PATHS, lengths):
+            values = cases[path]
+            if not isinstance(values, list) or len(values) != count or values != sorted(values) or any(not isinstance(x, str) or not x for x in values):
+                raise ValueError("suite names")
+            names.extend(values)
+        digest = hashlib.sha256(json.dumps(cases, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        if len(set(names)) != 97 or digest != SERVICE_WILDCARD_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"] != digest:
+            raise ValueError("suite identities mismatch")
+        test = ext["regression_test"]
+        if (not isinstance(test, dict) or set(test) != {"path", "sha256"} or
+                test["path"] != "tests/test_service_wildcard_registration.py" or
+                not isinstance(test["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", test["sha256"]) or
+                source_hashes is not None and source_hashes.get(test["path"]) != test["sha256"]):
+            raise ValueError("guard regression binding")
+        fixture_guard = ext["fixture_graph_guard"]
+        if (not isinstance(fixture_guard, dict) or set(fixture_guard) != {"path", "sha256"} or
+                fixture_guard.get("path") != PROFESSIONAL_FIXTURE_GRAPH_GUARD[0] or
+                fixture_guard.get("sha256") != PROFESSIONAL_FIXTURE_GRAPH_GUARD[1] or
+                source_hashes is not None and source_hashes.get(PROFESSIONAL_FIXTURE_GRAPH_GUARD[0]) != PROFESSIONAL_FIXTURE_GRAPH_GUARD[1]):
+            raise ValueError("professional fixture graph guard binding")
+        cfg = spec["edge_harness"]
+        rows = ext["source_bindings"]
+        if (not isinstance(rows, list) or len(rows) != len(SERVICE_WILDCARD_TEST_PATHS) or
+                any(not isinstance(row, dict) or set(row) != {"path", "sha256"} for row in rows) or
+                [row["path"] for row in rows] != list(SERVICE_WILDCARD_TEST_PATHS)):
+            raise ValueError("suite bindings")
+        for row in rows:
+            path, h = row["path"], row["sha256"]
+            item = cfg["files"].get(path, {})
+            if (item.get("layer") != "verification" or path in cfg.get("tests", []) or
+                    not isinstance(h, str) or not re.fullmatch(r"[0-9a-f]{64}", h) or
+                    item.get("declarations", {}).get("source_sha256") != h or
+                    source_hashes is not None and source_hashes.get(path) != h):
+                raise ValueError("suite source hash")
+        view = spec.get("read_view_extension_contract", {}).get("verification", {}).get("test_paths", [])
+        member = spec.get("member_shortlist_contract", {}).get("source_registration", {}).get("verification", {}).get("test_paths", [])
+        school = spec.get("university_scoring_contract", {}).get("scoped_reference_contract", {}).get("verification", {}).get("test_paths", [])
+        if set(SERVICE_WILDCARD_TEST_PATHS) & (set(view) | set(member) | set(school) | set(RECOVERY_TEST_PATHS) | set(SERVICE_AUX_TEST_PATHS) | set(SERVICE_STAGED_TEST_PATHS)):
+            raise ValueError("suite overlap")
+        return ext, []
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None, [error]
+
+
 def validate_read_view_extension(spec):
     """Only these exact three source-bound reads may extend the preserved 22+3.
 
@@ -1390,6 +1472,9 @@ def validate_read_view_extension(spec):
     staged, staged_errors=service_staged_registration(spec)
     if staged is not None:separate_tests-=set(staged["test_paths"])
     professional_errors+=staged_errors
+    wildcard, wildcard_errors=service_wildcard_registration(spec)
+    if wildcard is not None:separate_tests-=set(wildcard["test_paths"])
+    professional_errors+=wildcard_errors
     if c is None:return professional_errors+(["Read-view unregistered separate test source"]if separate_tests else [])
     if not isinstance(c,dict):return professional_errors+["Read-view extension contract invalid"]
     errors=professional_errors
@@ -5092,6 +5177,8 @@ SERVICE_CANDIDATE_SHARED_FIXTURES = {
     "service_p1": frozenset(['tests/edge/fixture.ts', 'tests/edge/synthetic_api_contract.ts', 'tests/edge/synthetic_history_qualification.ts', 'tests/edge/synthetic_history_snapshot.ts', 'tests/edge/synthetic_runtime_binding.ts']),
 }
 
+SCORE_NULL_SUITE_ROOT = "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
+
 SERVICE_CANDIDATE_GROUPS = {
     "p1_review": (["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs"], 80, ["node:assert/strict", "node:fs", "node:zlib"]),
     "service_end": (["tests/service_end/" + name for name in (
@@ -5099,7 +5186,7 @@ SERVICE_CANDIDATE_GROUPS = {
         "test_service_end_error_schema.synthetic.ts", "test_service_end_http.synthetic.ts",
         "test_service_end_official_display.synthetic.ts", "test_service_end_professional.synthetic.ts",
         "test_service_end_runtime.synthetic.ts", "test_official_display_final_expiry.synthetic.ts")], 125, []),
-    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts'], 36, ["node:assert/strict", "node:fs", "node:zlib"]),
+    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts', SCORE_NULL_SUITE_ROOT], 79, ["node:assert/strict", "node:fs", "node:zlib"]),
     "search503": (["tests/search503/" + name for name in (
         "test_combined_search503_end.synthetic.v5.mjs", "test_search503_stream_limits.synthetic.v4.mjs",
         "test_search503_reader_unlock.synthetic.v3.mjs", "test_search503_final_error.synthetic.v2.mjs",
@@ -5186,7 +5273,8 @@ def service_candidate_suite_errors(paths, read, spec):
                 graph = graphs[root]
                 if not isinstance(graph, dict) or set(graph) != {"files", "builtins", "edges"}: raise ValueError("graph fields")
                 gf, builtins = graph["files"], graph["builtins"]
-                if not isinstance(gf, dict) or root not in gf or not isinstance(builtins, list) or len(set(builtins)) != len(builtins) or not set(builtins) <= set(allowed):
+                root_allowed = ["node:assert/strict", "node:test"] if name == "service_p1" and root == SCORE_NULL_SUITE_ROOT else allowed
+                if not isinstance(gf, dict) or root not in gf or not isinstance(builtins, list) or len(set(builtins)) != len(builtins) or not set(builtins) <= set(root_allowed):
                     raise ValueError("graph modules")
                 if any(sf.get(p) != h for p, h in gf.items()): raise ValueError("graph hash")
                 all_graph_files.update(gf)
@@ -5259,6 +5347,13 @@ def validate_content(paths,read,spec):
     errors.extend(validate_public_response_registry(names,read,spec))
     staged, staged_errors = service_staged_registration(spec, {p:hashlib.sha256(read(p)).hexdigest() for p in SERVICE_STAGED_TEST_PATHS if p in names} | ({"tests/test_service_staged_registration.py":hashlib.sha256(read("tests/test_service_staged_registration.py")).hexdigest()} if "tests/test_service_staged_registration.py" in names else {}))
     errors.extend(staged_errors)
+    wildcard_hashes = {p:hashlib.sha256(read(p)).hexdigest() for p in (*SERVICE_WILDCARD_TEST_PATHS, *SERVICE_WILDCARD_IMPLEMENTATION_SENTINELS) if p in names}
+    wildcard_test = "tests/test_service_wildcard_registration.py"
+    if wildcard_test in names: wildcard_hashes[wildcard_test] = hashlib.sha256(read(wildcard_test)).hexdigest()
+    fixture_guard = PROFESSIONAL_FIXTURE_GRAPH_GUARD[0]
+    if fixture_guard in names: wildcard_hashes[fixture_guard] = hashlib.sha256(read(fixture_guard)).hexdigest()
+    _, wildcard_errors = service_wildcard_registration(spec, wildcard_hashes)
+    errors.extend(wildcard_errors)
     errors.extend(service_candidate_suite_errors(paths,read,spec))
     errors.extend(native_seed_candidate_errors(paths,read,spec))
     errors.extend(service_history_report_preservation_errors(paths,read,spec))

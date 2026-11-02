@@ -145,34 +145,46 @@ def verify_graph_literals(root,graph,paths):
         if not set(literal)<=resolved:raise EdgeFailure("dynamic_graph_incomplete:"+path)
 # Only this public JSON artifact and this indexed coexisting TS are graph exceptions.
 PUBLIC_SCHEMA_PATH="src/jungsi_touch/application/public_response_schemas.json"
-PUBLIC_SCHEMA_SHA256="ead322cca8bdf3d15b098031f5588779041b2e38ebdbd06f6bbb9a0835a465a8"
+PUBLIC_SCHEMA_SHA256="89138419ab060d10ce581eca037b4e7b4c6d1f9ca319fa0c2882424b01130e5a"
 CURRENT_CATALOG_PATH="supabase/functions/_shared/current_public_catalog.ts"
+PROFESSIONAL_FIXTURE_PATH="supabase/functions/_shared/professional_support.ts"
+# Independent approved pin: a source, manifest and index changed together must not widen the graph.
+PROFESSIONAL_FIXTURE_SHA256="356cd4def2fcf60926872ae68191167c681b491a4cab4804ac1db3e6841e0e8f"
+PROFESSIONAL_FIXTURE_IMPORTER="tests/edge/test_wildcard_professional_http.synthetic.ts"
+PROFESSIONAL_FIXTURE_SPECIFIER="../../supabase/functions/_shared/professional_support.ts"
+PROFESSIONAL_FIXTURE_SYNTHETIC_PACK="tests/edge/synthetic_exam_pack.ts"
 GRAPH_ASSET_LAYER="application"
+COEXISTING_GRAPH_LAYERS={CURRENT_CATALOG_PATH:"application",PROFESSIONAL_FIXTURE_PATH:"verification"}
 
 def graph_coexisting_catalog(root,scope,spec,manifest):
-    """Bind the one allowed coexisting graph source to the same snapshot and code index."""
-    path=CURRENT_CATALOG_PATH
-    if path not in scope.get("coexisting_bound",[]):return {}
-    if not isinstance(manifest,dict) or path not in manifest:raise EdgeFailure("coexisting_graph_manifest_missing")
-    index=spec.get("workflow",{}).get("documentation_sync",{}).get("code_index",{}).get("edge_sources",{})
-    if index.get("format")!="jungsi.typescript-source-hash-index/v1" or index.get("verification")!="whole_source_hash_not_type_or_runtime_proof":raise EdgeFailure("coexisting_graph_index_unsupported")
-    rows=[r for r in index.get("files",[]) if isinstance(r,dict) and r.get("path")==path]
-    impl=[r for r in spec.get("implementation",[]) if isinstance(r,dict) and r.get("path")==path]
-    if len(rows)!=1 or len(impl)!=1:raise EdgeFailure("coexisting_graph_registration_missing")
-    row,item=rows[0],impl[0]
-    if row.get("layer")!=GRAPH_ASSET_LAYER or any(row.get(k)!=item.get(k) for k in ("layer","status","requirements")) or row.get("declared_exports")!=item.get("symbols",[]):raise EdgeFailure("coexisting_graph_registration_mismatch")
-    if hashes(root,[path])[path]!=manifest[path]:raise EdgeFailure("coexisting_graph_manifest_mismatch")
-    try:normalized=(root/path).read_bytes().decode("utf-8-sig").replace("\r\n","\n").encode()
-    except (UnicodeError,OSError):raise EdgeFailure("coexisting_graph_source_unavailable")
-    if digest(normalized)!=row.get("source_sha256"):raise EdgeFailure("coexisting_graph_index_mismatch")
-    return {path:{"layer":GRAPH_ASSET_LAYER,"source_sha256":row["source_sha256"]}}
+    """Bind only individually registered coexisting application/test sources to the snapshot."""
+    out={}
+    for path,allowed_layer in COEXISTING_GRAPH_LAYERS.items():
+        if path not in scope.get("coexisting_bound",[]):continue
+        if not isinstance(manifest,dict) or path not in manifest:raise EdgeFailure("coexisting_graph_manifest_missing")
+        index=spec.get("workflow",{}).get("documentation_sync",{}).get("code_index",{}).get("edge_sources",{})
+        if index.get("format")!="jungsi.typescript-source-hash-index/v1" or index.get("verification")!="whole_source_hash_not_type_or_runtime_proof":raise EdgeFailure("coexisting_graph_index_unsupported")
+        rows=[r for r in index.get("files",[]) if isinstance(r,dict) and r.get("path")==path]
+        impl=[r for r in spec.get("implementation",[]) if isinstance(r,dict) and r.get("path")==path]
+        if len(rows)!=1 or len(impl)!=1:raise EdgeFailure("coexisting_graph_registration_missing")
+        row,item=rows[0],impl[0]
+        if row.get("layer")!=allowed_layer or any(row.get(k)!=item.get(k) for k in ("layer","status","requirements")) or row.get("declared_exports")!=item.get("symbols",[]):raise EdgeFailure("coexisting_graph_registration_mismatch")
+        actual=hashes(root,[path])[path]
+        if actual!=manifest[path]:raise EdgeFailure("coexisting_graph_manifest_mismatch")
+        try:normalized=(root/path).read_bytes().decode("utf-8-sig").replace("\r\n","\n").encode()
+        except (UnicodeError,OSError):raise EdgeFailure("coexisting_graph_source_unavailable")
+        if digest(normalized)!=row.get("source_sha256"):raise EdgeFailure("coexisting_graph_index_mismatch")
+        if path==PROFESSIONAL_FIXTURE_PATH and (actual!=PROFESSIONAL_FIXTURE_SHA256 or digest(normalized)!=PROFESSIONAL_FIXTURE_SHA256):raise EdgeFailure("professional_fixture_fixed_pin_mismatch")
+        out[path]={"layer":allowed_layer,"source_sha256":row["source_sha256"]}
+    return out
 
 def normalize_graph(raw,root,registered,layer_by_path,*,manifest=None,coexisting=None):
     if raw.get("version")!=1 or not isinstance(raw.get("modules"),list) or not isinstance(raw.get("roots"),list):raise EdgeFailure("info_schema_unsupported")
     if raw.get("redirects") or raw.get("npmPackages"):raise EdgeFailure("external_graph_resolution")
     if coexisting is None:coexisting={}
-    if not isinstance(coexisting,dict) or set(coexisting)-{CURRENT_CATALOG_PATH}:raise EdgeFailure("coexisting_graph_scope_invalid")
-    edges={};seen=set();asset_node=False;asset_edge=False;coex_nodes=set();coex_edges=set();verified=set()
+    if not isinstance(coexisting,dict) or set(coexisting)-set(COEXISTING_GRAPH_LAYERS):raise EdgeFailure("coexisting_graph_scope_invalid")
+    if set(coexisting)&set(registered):raise EdgeFailure("coexisting_graph_registered_overlap")
+    edges={};seen=set();asset_node=False;asset_edge=False;coex_nodes=set();coex_edges=set();verified=set();fixture_imports=0
     def verify_asset(path):
         if path in verified:return
         if not isinstance(manifest,dict) or path not in manifest:raise EdgeFailure("graph_asset_manifest_missing:"+path)
@@ -180,12 +192,13 @@ def normalize_graph(raw,root,registered,layer_by_path,*,manifest=None,coexisting
         if actual!=manifest[path]:raise EdgeFailure("graph_asset_manifest_mismatch:"+path)
         if path==PUBLIC_SCHEMA_PATH:
             if actual!=PUBLIC_SCHEMA_SHA256:raise EdgeFailure("public_schema_hash_mismatch")
-        elif path==CURRENT_CATALOG_PATH:
+        elif path in COEXISTING_GRAPH_LAYERS:
             entry=coexisting.get(path)
-            if not isinstance(entry,dict) or set(entry)!={"layer","source_sha256"} or entry.get("layer")!=GRAPH_ASSET_LAYER:raise EdgeFailure("coexisting_graph_unapproved")
+            if not isinstance(entry,dict) or set(entry)!={"layer","source_sha256"} or entry.get("layer")!=COEXISTING_GRAPH_LAYERS[path]:raise EdgeFailure("coexisting_graph_unapproved")
             try:normalized=(root/path).read_bytes().decode("utf-8-sig").replace("\r\n","\n").encode()
             except (UnicodeError,OSError):raise EdgeFailure("coexisting_graph_source_unavailable")
             if digest(normalized)!=entry.get("source_sha256"):raise EdgeFailure("coexisting_graph_index_mismatch")
+            if path==PROFESSIONAL_FIXTURE_PATH and (actual!=PROFESSIONAL_FIXTURE_SHA256 or digest(normalized)!=PROFESSIONAL_FIXTURE_SHA256):raise EdgeFailure("professional_fixture_fixed_pin_mismatch")
         else:raise EdgeFailure("graph_asset_unapproved")
         verified.add(path)
     def graph_layer(path):
@@ -223,6 +236,18 @@ def normalize_graph(raw,root,registered,layer_by_path,*,manifest=None,coexisting
                     if destination not in registered and destination not in coexisting:raise EdgeFailure("unregistered_dependency:"+destination)
                     dst_layer=graph_layer(destination)
                     if destination in coexisting and destination not in registered:coex_edges.add(destination)
+                if destination==PROFESSIONAL_FIXTURE_PATH:
+                    if (path!=PROFESSIONAL_FIXTURE_IMPORTER or src_layer!="verification" or kind!="code" or
+                            dep.get("specifier")!=PROFESSIONAL_FIXTURE_SPECIFIER or dep.get("isDynamic",False) is not False or
+                            len(raw["roots"])!=1 or local_url(raw["roots"][0],root)!=PROFESSIONAL_FIXTURE_IMPORTER):
+                        raise EdgeFailure("professional_fixture_incoming_denied")
+                    fixture_imports+=1
+                if path==PROFESSIONAL_FIXTURE_PATH and dep.get("isDynamic",False) is not False:
+                    raise EdgeFailure("professional_fixture_dynamic_dependency_denied")
+                if path==PROFESSIONAL_FIXTURE_PATH and dst_layer=="verification" and (
+                        destination!=PROFESSIONAL_FIXTURE_SYNTHETIC_PACK or kind!="code" or
+                        dep.get("specifier")!="../../../tests/edge/synthetic_exam_pack.ts"):
+                    raise EdgeFailure("professional_fixture_verification_dependency_denied")
                 allowed={"application":{"application"},"data_infrastructure":{"application","data_infrastructure"},"verification":{"application","data_infrastructure","verification"}}
                 if dst_layer not in allowed.get(src_layer,set()):raise EdgeFailure("layer_dependency_violation:"+path)
                 resolved.append(dict(kind=kind,path=destination))
@@ -231,6 +256,12 @@ def normalize_graph(raw,root,registered,layer_by_path,*,manifest=None,coexisting
         edges[path]=sorted(rows,key=lambda r:json.dumps(r,sort_keys=True))
     if asset_node!=asset_edge:raise EdgeFailure("public_schema_graph_incomplete")
     if coex_nodes!=coex_edges:raise EdgeFailure("coexisting_graph_incomplete")
+    roots=[local_url(value,root) for value in raw["roots"]]
+    if PROFESSIONAL_FIXTURE_IMPORTER in roots:
+        if roots!=[PROFESSIONAL_FIXTURE_IMPORTER] or fixture_imports!=1 or PROFESSIONAL_FIXTURE_PATH not in coex_nodes:
+            raise EdgeFailure("professional_fixture_required_once")
+    elif fixture_imports or PROFESSIONAL_FIXTURE_PATH in coex_nodes:
+        raise EdgeFailure("professional_fixture_import_count_invalid")
     return edges,seen
 def declaration_model(module,root,path,registered=None):
     if not isinstance(module.get("symbols"),list) or not isinstance(module.get("imports",[]),list):raise EdgeFailure("doc_node_schema_unsupported")

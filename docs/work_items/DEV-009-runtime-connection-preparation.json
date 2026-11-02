@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "accepted_on_develop_scoped_synthetic_verified",
   "contract_ref": "runtime_connection_preparation_contract",
-  "contract_version": "1.9.141",
+  "contract_version": "1.9.147",
   "requirements": [
     "REQ-12",
     "REQ-14",
