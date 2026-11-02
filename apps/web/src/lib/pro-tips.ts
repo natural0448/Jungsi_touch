@@ -1,4 +1,5 @@
 import type { Category } from "@/lib/dto";
+import { ratioText } from "./format";
 import type { ProReason } from "@/lib/pro-dto";
 
 /*
@@ -68,7 +69,7 @@ export function tipLine(r: ProReason): TipLine | null {
     case "prior_competition": {
       const ratio = v(r, "competition_ratio"), fill = v(r, "additional_admitted"), q = v(r, "quota");
       if (!ratio) return null;
-      return { text: `작년 경쟁률은 ${ratio}대 1이었습니다.${q && fill ? ` 모집 ${q}명 중 ${fill}명이 충원으로 추가 합격했습니다.` : ""}` };
+      return { text: `작년 경쟁률은 ${ratioText(ratio)}대 1이었습니다.${q && fill ? ` 모집 ${q}명 중 ${fill}명이 충원으로 추가 합격했습니다.` : ""}` };
     }
     case "historical_cut_spread":
       // Reserved for verified three-year 70% cut movement; no live evidence is supplied yet.

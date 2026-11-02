@@ -53,6 +53,16 @@ export function ratioText(v: string): string {
   return frac ? `${d.slice(0, -2)}.${frac}` : d.slice(0, -2);
 }
 
+/**
+ * 이용권 '…까지' 날짜. 서버가 끝 시각을 '그 시각 전까지'(예: 2027-01-07T15:00:00Z = 1월 8일 0시 KST)로 보내도
+ * 마지막 이용일(1월 7일)이 보이게 1ms 앞 시각의 서울 날짜를 쓴다. 23:59:59 로 오는 값은 그대로 같은 날이다.
+ */
+export function untilDate(isoUtc: string | null): string {
+  if (!isoUtc) return "─";
+  const t = Date.parse(isoUtc);
+  return Number.isNaN(t) ? "─" : seoulDate(new Date(t - 1).toISOString());
+}
+
 /** 변경분 +2 / -1 / 0 */
 export function signed(n: number): string {
   return n > 0 ? `+${n}` : String(n);

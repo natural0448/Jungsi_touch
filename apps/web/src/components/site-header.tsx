@@ -1,6 +1,6 @@
 import Link from "@/components/link";
 import type { Session } from "@/lib/dto";
-import { seoulDate } from "@/lib/format";
+import { untilDate } from "@/lib/format";
 import { PASS_HREF, edutouch, loginHref } from "@/lib/links";
 import { PAGES, lockFor } from "@/lib/routes";
 import { Tabs } from "./tabs";
@@ -34,7 +34,7 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
               // 실제 이용권이 있는 관리자는 서버가 그 만료일을 보내므로 날짜가 그대로 나온다
               session.entitlement_expires_at ? (
                 // 좁은 휴대폰(≤400px)에서는 날짜를 줄여 머리글이 옆으로 밀리지 않게 한다(jungsi.css)
-                <span className="pass">이용권<span className="pass-until"> {seoulDate(session.entitlement_expires_at)}까지</span></span>
+                <span className="pass">이용권<span className="pass-until"> {untilDate(session.entitlement_expires_at)}까지</span></span>
               ) : (
                 <span className="pass">관리자 이용</span>
               )

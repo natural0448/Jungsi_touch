@@ -1,6 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { tipLine } from "../src/lib/pro-tips.ts";
+import { registerHooks } from "node:module";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+// pro-tips 가 확장자 없이 부르는 같은 폴더 모듈(./format)을 .ts 로 찾는다
+registerHooks({ resolve(specifier, context, next) {
+  if (specifier.startsWith(".") && context.parentURL?.startsWith("file:") && !/\.[cm]?[jt]sx?$/.test(specifier)) {
+    const url = new URL(`${specifier}.ts`, context.parentURL);
+    if (existsSync(fileURLToPath(url))) return next(url.href, context);
+  }
+  return next(specifier, context);
+} });
+const { tipLine } = await import("../src/lib/pro-tips.ts");
 const reason = () => ({ code: "classification_basis", status: "ready", academic_year: 2027, offering_id: "SYNTHETIC-offering", comparison_context: { academic_year: 2027, reference_year: null, metric: "converted_score", score_scale: "university_converted_score", population_id: "SYNTHETIC-population", policy_version: "SYNTHETIC-policy", range_definition: "승인된 서비스 기준 정의", range_role: "baseline_reference" }, values: [ { name: "converted_score", value: "9007199254740993.1234567890123456789", unit: "점" }, { name: "acceptance_lower", value: "9007199254740992.0000000000000000001", unit: "점" }, { name: "acceptance_upper", value: "9007199254740994.9999999999999999999", unit: "점" } ], public_basis: [], missing_reason: null });
 test("classification text preserves exact decimals and baseline definition without invented differences", () => {
   const r = reason(), line = tipLine(r);
@@ -24,4 +35,9 @@ test("three-year code cannot display synthetic within-year band", () => {
   assert.equal(tipLine(r), null);
   r.code = "demo_prior_year_cut_band"; r.comparison_context.reference_year = 2026;
   assert.ok(tipLine(r).text.includes("합성 시연")); assert.ok(tipLine(r).text.includes("3개년 70%컷 변동이 아닙니다"));
+});
+
+test("prior competition text rounds long ratios to two decimals like page 1", () => {
+  const r = { code: "prior_competition", status: "ready", values: [{ name: "competition_ratio", value: "5.0999999999999996", unit: "대 1" }], public_basis: [], missing_reason: null };
+  assert.match(tipLine(r).text, /작년 경쟁률은 5\.1대 1이었습니다/);
 });
