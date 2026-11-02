@@ -1,5 +1,6 @@
 """Protect stale documents and delta-only review without weakening snapshot gates."""
 import copy
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -284,6 +285,16 @@ class DocumentationSyncTests(unittest.TestCase):
         self.assertIn("Documentation code index parser/format missing", self.delta(spec, files, prior, files)["errors"])
 
 
+
+
+class CanonicalSpecBytesTests(unittest.TestCase):
+    def test_spec_bytes_have_platform_independent_lf(self):
+        spec={'version':'synthetic','label':'\uad6d\ub9bd','change_notes':[{'summary':'one'}]}
+        actual=audit.spec_bytes(spec)
+        self.assertNotIn(b'\r\n',actual)
+        self.assertEqual(json.loads(actual),spec)
+        self.assertTrue(actual.endswith(b'\n'))
+        self.assertIn('국립'.encode('utf-8'),actual)
 
 
 class GeneratedWriteModeRegressionTests(unittest.TestCase):

@@ -272,6 +272,8 @@ def load_generator(repo,index,blob,expected_gen,expected_audit,dependencies):
 
 def check_destination(repo, dest):
     out=repo/'outputs'
+    if not out.exists() and not out.is_symlink():
+        raise Stop('outputs_missing: create the outputs folder in the repository root and retry')
     if not out.is_dir() or out.is_symlink(): raise Stop('outputs_not_regular')
     dest=Path(dest)
     if not dest.is_absolute(): dest=repo/dest

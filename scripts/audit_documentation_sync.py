@@ -376,6 +376,11 @@ def delta_audit(paths, read, spec, base_paths, base_read, base_spec=None):
             "scope": "changed source AST and current documentation index; independent full snapshot/security/branch/test gates remain mandatory"}
 
 
+def spec_bytes(spec):
+    """Serialize a spec with the same platform-independent LF bytes as merge previews."""
+    return (json.dumps(spec, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", default="HEAD", help="Resolve once to an immutable review baseline")
@@ -405,7 +410,7 @@ def main():
                 raise ValueError("Documentation destination must stay inside the regular workspace: " + relative)
         with (destination / "service_spec.before.json").open("xb") as target:
             target.write(snapshot.read(SPEC_PATH))
-        (ROOT / SPEC_PATH).write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        (ROOT / SPEC_PATH).write_bytes(spec_bytes(spec))
         for relative, content in generated.items():
             target = ROOT / relative
             if target.is_symlink():

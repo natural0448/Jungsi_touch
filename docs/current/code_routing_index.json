@@ -23,7 +23,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "25501cb3adbc1dead70dd6747f9d606822c83c140ff948bc57867b82f7d36590",
+      "source_sha256": "37d8b5fcafb2b3fc92079937124d5a59a53201ab9f8e9cb938a7973d7e815859",
       "symbols": [
         {
           "kind": "function",
@@ -125,6 +125,12 @@
           "kind": "function",
           "name": "source_paths",
           "signature": "def source_paths(paths, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "spec_bytes",
+          "signature": "def spec_bytes(spec):",
           "decorators": []
         },
         {
@@ -1651,7 +1657,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "03c9ed9713dbbcaca7fd32464ed7c9fc4f65c8e9d2ea16529b169895f1b98f11",
+      "source_sha256": "0b561393bd12493a1ca65913a13f33d32fa678914bde4efa14e112fe652de8f2",
       "symbols": [
         {
           "kind": "class",

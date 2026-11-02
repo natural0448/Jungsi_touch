@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.149",
+  "version": "1.9.150",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -8219,7 +8219,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.149",
+        "contract_version": "1.9.150",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -8393,7 +8393,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.149",
+        "contract_version": "1.9.150",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8559,7 +8559,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.149",
+        "contract_version": "1.9.150",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8578,7 +8578,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.149",
+        "contract_version": "1.9.150",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8603,7 +8603,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.149",
+        "contract_version": "1.9.150",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8628,7 +8628,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.149",
+        "contract_version": "1.9.150",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -9972,7 +9972,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "25501cb3adbc1dead70dd6747f9d606822c83c140ff948bc57867b82f7d36590",
+            "source_sha256": "37d8b5fcafb2b3fc92079937124d5a59a53201ab9f8e9cb938a7973d7e815859",
             "symbols": [
               {
                 "kind": "function",
@@ -10074,6 +10074,12 @@
                 "kind": "function",
                 "name": "source_paths",
                 "signature": "def source_paths(paths, spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "spec_bytes",
+                "signature": "def spec_bytes(spec):",
                 "decorators": []
               },
               {
@@ -11600,7 +11606,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "03c9ed9713dbbcaca7fd32464ed7c9fc4f65c8e9d2ea16529b169895f1b98f11",
+            "source_sha256": "0b561393bd12493a1ca65913a13f33d32fa678914bde4efa14e112fe652de8f2",
             "symbols": [
               {
                 "kind": "class",
@@ -24873,6 +24879,11 @@
       "date": "2026-11-02",
       "requirements": [],
       "summary": "완전한 스냅샷 시험이 느린 PC에서 1800초 제한에 반복 중단되어 Python 시험 제한을 3600초, 상위 보존 실행 제한을 4200초로 조정한다. 실패·스킵 차단 및 전체 시험을 유지하며 GitHub 워크플로의 40분 제한은 별도다."
+    },
+    {
+      "date": "2026-11-02",
+      "requirements": [],
+      "summary": "화면팀이 실제 작업본에서 검증한 병합 미리보기 후속 보완: outputs 폴더가 없으면 생성 방법을 안내하고, 명세 동기화 결과를 환경과 관계없이 LF 바이트로 저장한다. 병합 후보는 검토 전용으로 유지하며 기존 파일과 충돌 검사를 보존한다."
     }
   ],
   "overall_analysis_contract": {
