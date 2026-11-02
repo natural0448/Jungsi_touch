@@ -107,3 +107,14 @@
 /tests/test_service_wildcard_registration.py text eol=lf
 /tests/catalog_descriptor_review_graph.20261102.json text eol=lf
 /tests/test_catalog_descriptor_review.py text eol=lf
+
+# Exact-byte cursor suite registration and existing score-null fixture on Windows.
+/supabase/functions/_shared/current_public_bound_cursor.ts text eol=lf
+/supabase/functions/_shared/current_public_scoped_service.ts text eol=lf
+/tests/cursor_contract_review/combined_policy_catalog_runtime.original.ts text eol=lf
+/tests/cursor_contract_review/combined_policy_catalog_runtime.test.ts text eol=lf
+/tests/cursor_contract_review/current_public_bound_cursor.test.ts text eol=lf
+/tests/cursor_contract_review_graph.json text eol=lf
+/tests/test_cursor_contract_graph_guard.py text eol=lf
+/tests/test_cursor_edge_unit_aggregation.py text eol=lf
+/tests/service_p1/test_score_null_reason_review.synthetic.mjs text eol=lf

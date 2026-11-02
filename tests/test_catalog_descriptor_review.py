@@ -18,7 +18,7 @@ BASE_COMMIT = "42b7ac28bae3c2c5c0041d16bcf505c2014bf404"
 SCANNER_PATH = "scripts/check_edge_contract.py"
 SCANNER_SHA256 = "882f6bbda8054dd3f0cbb4743027e6e99d2255d270fad00219be0c2cddc4e09f"
 SUPPORT_PATH = "tests/test_service_candidate_suites.py"
-SUPPORT_SHA256 = "6e3586fbb43fedb7fc199443a928f4277a163c5f5bea069f7734062f0c0b5934"
+SUPPORT_SHA256 = "98ca9379623f817f016e5c53cd402b67d451f169f92873a85f9ad56681b75ca4"
 
 
 def snapshot_file(name):

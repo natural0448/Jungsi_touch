@@ -1170,6 +1170,256 @@ def run_p1_contract_suite(deno, common, junit, paths, root, output, name):
                     "--junit-path", str(junit), *paths], root=root, output=output, name=name)
 
 
+# Separately pinned offline closure for cursor tests. Inserted into the existing
+# snapshot runner only; does not alter the existing P1 graph policy.
+CURCG_PREFIX = "tests/cursor_contract_review/"
+CURCG_ROOTS = (CURCG_PREFIX + "combined_policy_catalog_runtime.test.ts",
+               CURCG_PREFIX + "current_public_bound_cursor.test.ts")
+CURCG_FIXTURE = CURCG_PREFIX + "combined_policy_catalog_runtime.original.ts"
+CURCG_SHARED = "tests/edge/synthetic_api_contract.ts"
+CURCG_TEST_FILES = frozenset((*CURCG_ROOTS, CURCG_FIXTURE))
+CURCG_MANIFEST = "tests/cursor_contract_review_graph.json"
+CURCG_FORMAT = "jungsi.cursor-contract-offline-closure/v1"
+CURCG_META = "cursor_contract_offline_graph_verification"
+CURCG_REGRESSION = "tests/test_cursor_contract_graph_guard.py"
+CURCG_AGGREGATION = "tests/test_cursor_edge_unit_aggregation.py"
+CURCG_ADAPTERS = frozenset("supabase/functions/_shared/" + p for p in (
+    "combined_policy_catalog_runtime.ts", "current_public_bound_cursor.ts",
+    "current_public_catalog.ts", "current_public_catalog_sql.ts", "current_public_key_index.ts",
+    "current_public_key_storage.ts", "current_public_scoped_service.ts", "search_failure_diagnostic.ts"))
+CURCG_NEW_SOURCES = frozenset(("supabase/functions/_shared/current_public_bound_cursor.ts",
+    "supabase/functions/_shared/current_public_scoped_service.ts"))
+CURCG_PROJECT_BINDING = "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts"
+CURCG_PROJECT_SHA = "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490"
+CURCG_LAYERS = {
+    "domain": {"domain"}, "application": {"application", "domain"},
+    "infrastructure": {"application", "domain", "infrastructure"},
+    "edge_adapter": {"application", "domain", "infrastructure", "edge_adapter"},
+    "synthetic_fixture": {"application", "domain", "infrastructure", "edge_adapter", "synthetic_fixture"},
+    "suite_test": {"application", "domain", "infrastructure", "edge_adapter", "synthetic_fixture"},
+}
+
+def _curcg_need(ok, reason):
+    if not ok: raise EdgeFailure("cursor_contract_graph_" + reason)
+
+def _curcg_layer(path):
+    if path in CURCG_ROOTS: return "suite_test"
+    if path in (CURCG_FIXTURE, CURCG_SHARED): return "synthetic_fixture"
+    if path.startswith("supabase/functions/_shared/jungsi/"):
+        layer = path.split("/")[4]
+        _curcg_need(layer in {"application", "domain", "infrastructure"}, "layer")
+        return layer
+    if path in CURCG_ADAPTERS: return "edge_adapter"
+    raise EdgeFailure("cursor_contract_graph_unapproved_source")
+
+def _curcg_imports(path, raw):
+    # The existing, pinned project-binding source contains the literal string
+    # "require" as an SSL-mode name, not a JavaScript require call.
+    _p1cg_check_literals(path, raw)
+    if path == CURCG_PROJECT_BINDING:
+        _curcg_need(_p1cg_sha(raw) == CURCG_PROJECT_SHA and raw.count(b'"require"') == 1,
+                    "project_binding_pin")
+        raw = raw.replace(b'"require"', b'"sslmode_require_literal"', 1)
+    return _p1cg_check_literals(path, raw) + _p1cg_static_imports(raw)
+
+def normalize_cursor_graph(info, root, before, entry):
+    root = Path(root).resolve()
+    _curcg_need(entry in CURCG_ROOTS and isinstance(info, dict) and
+        set(info) == {"version", "roots", "modules", "redirects", "npmPackages"} and
+        type(info.get("version")) is int and info["version"] == 1 and
+        info.get("redirects") == {} and info.get("npmPackages") == {}, "schema_or_external")
+    _curcg_need(isinstance(info.get("roots"), list) and len(info["roots"]) == 1 and
+        local_url(info["roots"][0], root) == entry, "root")
+    modules = info.get("modules")
+    _curcg_need(isinstance(modules, list) and 1 <= len(modules) <= 512, "module_count")
+    uri_to_path, modules_by_path, file_hashes, literals = {}, {}, {}, {}
+    for module in modules:
+        _curcg_need(isinstance(module, dict) and module.get("error") is None and
+            module.get("kind") == "esm" and isinstance(module.get("local"), str), "module_kind")
+        uri = module.get("specifier")
+        _curcg_need(isinstance(uri, str) and uri not in uri_to_path, "duplicate_module")
+        path = local_url(uri, root)
+        _curcg_need(path not in modules_by_path and uri == (root / path).resolve().as_uri() and
+            Path(module["local"]).resolve() == (root / path).resolve(), "module_alias")
+        _curcg_need(P1CG_MEDIA.get(PurePosixPath(path).suffix) == module.get("mediaType"), "media_type")
+        _curcg_layer(path)
+        raw = _p1cg_snapshot_bytes(root, before, path)
+        _curcg_need(type(module.get("size")) is int and module["size"] == len(raw), "module_size")
+        literals[path] = _curcg_imports(path, raw)
+        uri_to_path[uri] = path; modules_by_path[path] = module; file_hashes[path] = _p1cg_sha(raw)
+    _curcg_need(entry in modules_by_path, "root_missing")
+    edges = []
+    for path, module in modules_by_path.items():
+        deps = module.get("dependencies", [])
+        _curcg_need(isinstance(deps, list) and set(literals[path]) <=
+            {d.get("specifier") for d in deps if isinstance(d, dict)}, "ungraphed_import")
+        for dep in deps:
+            _curcg_need(isinstance(dep, dict) and dep.get("isDynamic", False) is False and
+                dep.get("is_dynamic", False) is False, "dynamic_import")
+            raw = dep.get("specifier")
+            _curcg_need(isinstance(raw, str) and raw.startswith(("./", "../")) and
+                not any(x in raw for x in ("\\", "?", "#", "%")), "specifier")
+            targets = []
+            for kind in ("code", "type"):
+                resolved = dep.get(kind)
+                if resolved is None: continue
+                _curcg_need(isinstance(resolved, dict) and resolved.get("error") is None and
+                    resolved.get("specifier") in uri_to_path, "unresolved")
+                target = uri_to_path[resolved["specifier"]]
+                _curcg_need((root / path).parent.joinpath(raw).resolve() == (root / target).resolve(),
+                    "relative_resolution")
+                _curcg_need(not (path in CURCG_ROOTS and target in CURCG_ROOTS), "cross_test")
+                if target in (CURCG_FIXTURE, CURCG_SHARED):
+                    _curcg_need(path == CURCG_ROOTS[0], "fixture_scope")
+                _curcg_need(_curcg_layer(target) in CURCG_LAYERS[_curcg_layer(path)], "dependency_layer")
+                targets.append([kind, target])
+            _curcg_need(bool(targets), "unresolved")
+            edges.append([path, raw, targets])
+    _curcg_need(len(edges) <= 4096 and len({json.dumps(v, sort_keys=True) for v in edges}) == len(edges),
+        "edge_inventory")
+    reachable, pending = {entry}, [entry]
+    while pending:
+        source = pending.pop()
+        for edge in edges:
+            if edge[0] == source:
+                for _, target in edge[2]:
+                    if target not in reachable: reachable.add(target); pending.append(target)
+    _curcg_need(reachable == set(file_hashes), "unreachable")
+    return {"files": {p: file_hashes[p] for p in sorted(file_hashes)},
+            "edges": sorted(edges, key=lambda v: json.dumps(v, sort_keys=True))}
+
+def build_cursor_graph_manifest(root, before, graphs):
+    root = Path(root).resolve()
+    _curcg_need(set(graphs) == set(CURCG_ROOTS) and
+        {p for p in before if p.startswith(CURCG_PREFIX)} == CURCG_TEST_FILES, "inventory")
+    tests = {p: _p1cg_sha(_p1cg_snapshot_bytes(root, before, p)) for p in sorted(CURCG_TEST_FILES)}
+    cfg = {"path": P1CG_CONFIG_PATH, "sha256": _p1cg_sha(_p1cg_snapshot_bytes(root, before, P1CG_CONFIG_PATH))}
+    normalized = {p: normalize_cursor_graph(graphs[p], root, before, p) for p in CURCG_ROOTS}
+    _curcg_need(CURCG_NEW_SOURCES <= set(normalized[CURCG_ROOTS[0]]["files"]) and
+        "supabase/functions/_shared/current_public_bound_cursor.ts" in normalized[CURCG_ROOTS[1]]["files"], "required_sources")
+    shared = {p for g in normalized.values() for p in g["files"] if p.startswith("tests/") and not p.startswith(CURCG_PREFIX)}
+    _curcg_need(shared == {CURCG_SHARED}, "shared_fixture_coverage")
+    return {"format": CURCG_FORMAT, "roots": list(CURCG_ROOTS), "test_files": tests, "config": cfg, "graphs": normalized}
+
+def reference_cursor_graph_info(root, before, entry, model):
+    root = Path(root).resolve()
+    _curcg_need(entry in CURCG_ROOTS and isinstance(model, dict) and set(model) == {"files", "edges"}, "reference_schema")
+    files, edges = model["files"], model["edges"]
+    _curcg_need(isinstance(files, dict) and 1 <= len(files) <= 512 and entry in files and
+        isinstance(edges, list) and len(edges) <= 4096, "reference_schema")
+    nodes = {}
+    for path, expected in files.items():
+        _curcg_layer(path)
+        raw = _p1cg_snapshot_bytes(root, before, path)
+        _curcg_need(_p1cg_sha(raw) == expected and PurePosixPath(path).suffix in P1CG_MEDIA, "reference_pin")
+        p = (root / path).resolve()
+        nodes[path] = {"kind": "esm", "specifier": p.as_uri(), "local": str(p),
+            "mediaType": P1CG_MEDIA[PurePosixPath(path).suffix], "size": len(raw), "dependencies": []}
+    for edge in edges:
+        _curcg_need(isinstance(edge, list) and len(edge) == 3 and edge[0] in nodes and
+            isinstance(edge[1], str) and isinstance(edge[2], list), "reference_edge")
+        dep = {"specifier": edge[1]}
+        for pair in edge[2]:
+            _curcg_need(isinstance(pair, list) and len(pair) == 2 and pair[0] in ("code", "type") and
+                pair[0] not in dep and pair[1] in nodes, "reference_edge")
+            dep[pair[0]] = {"specifier": (root / pair[1]).resolve().as_uri()}
+        nodes[edge[0]]["dependencies"].append(dep)
+    return {"version": 1, "roots": [(root / entry).resolve().as_uri()],
+            "modules": list(nodes.values()), "redirects": {}, "npmPackages": {}}
+
+def verify_cursor_graph_manifest(root, before, meta, graphs):
+    root = Path(root).resolve()
+    _curcg_need({p for p in before if p.startswith(CURCG_PREFIX)} == CURCG_TEST_FILES and
+        set(graphs) == set(CURCG_ROOTS), "inventory")
+    raw = _p1cg_snapshot_bytes(root, before, CURCG_MANIFEST)
+    _curcg_need(isinstance(meta, dict) and _p1cg_sha(raw) == meta.get("manifest_sha256"), "manifest_pin")
+    try: ref = json.loads(raw, object_pairs_hook=_p1cg_unique_pairs)
+    except (UnicodeError, ValueError) as error: raise EdgeFailure("cursor_contract_graph_manifest_invalid") from error
+    _curcg_need(isinstance(ref, dict) and set(ref) == {"format", "roots", "test_files", "config", "graphs"} and
+        ref["format"] == CURCG_FORMAT and ref["roots"] == list(CURCG_ROOTS) and
+        isinstance(ref["test_files"], dict) and set(ref["test_files"]) == CURCG_TEST_FILES and
+        isinstance(ref["graphs"], dict) and set(ref["graphs"]) == set(CURCG_ROOTS), "manifest_schema")
+    _curcg_need(ref["config"] == {"path": P1CG_CONFIG_PATH,
+        "sha256": _p1cg_sha(_p1cg_snapshot_bytes(root, before, P1CG_CONFIG_PATH))}, "config_pin")
+    for path in CURCG_TEST_FILES:
+        _curcg_need(ref["test_files"][path] == _p1cg_sha(_p1cg_snapshot_bytes(root, before, path)), "test_pin")
+    _curcg_need(CURCG_NEW_SOURCES <= set(ref["graphs"][CURCG_ROOTS[0]]["files"]) and
+        "supabase/functions/_shared/current_public_bound_cursor.ts" in ref["graphs"][CURCG_ROOTS[1]]["files"], "required_sources")
+    for entry in CURCG_ROOTS:
+        _curcg_need(normalize_cursor_graph(graphs[entry], root, before, entry) == ref["graphs"][entry], "graph_changed")
+    return {"status": "PASS_OFFLINE_PINNED_GRAPH_REVIEW_ONLY", "roots": len(CURCG_ROOTS),
+            "files": len(CURCG_TEST_FILES), "production_ready": False}
+
+def preflight_cursor_graph_manifest(root, before, meta):
+    raw = _p1cg_snapshot_bytes(Path(root).resolve(), before, CURCG_MANIFEST)
+    _curcg_need(isinstance(meta, dict) and _p1cg_sha(raw) == meta.get("manifest_sha256"), "manifest_pin")
+    try: ref = json.loads(raw, object_pairs_hook=_p1cg_unique_pairs)
+    except (UnicodeError, ValueError) as error: raise EdgeFailure("cursor_contract_graph_manifest_invalid") from error
+    _curcg_need(isinstance(ref, dict) and isinstance(ref.get("graphs"), dict) and
+        set(ref["graphs"]) == set(CURCG_ROOTS), "manifest_schema")
+    graphs = {p: reference_cursor_graph_info(root, before, p, ref["graphs"][p]) for p in CURCG_ROOTS}
+    return verify_cursor_graph_manifest(root, before, meta, graphs)
+
+def cursor_contract_registration(root, before, spec):
+    meta = spec.get(CURCG_META)
+    if meta is None:
+        _curcg_need(not any(p.startswith(CURCG_PREFIX) for p in before) and CURCG_MANIFEST not in before and
+                    not CURCG_NEW_SOURCES.intersection(before), "unregistered_files")
+        return None
+    _curcg_need(isinstance(meta, dict) and set(meta) == {
+        "format", "status", "manifest_path", "manifest_sha256", "regression_test", "aggregation_test",
+        "cases", "production_ready"} and
+        meta.get("format") == "jungsi.cursor-contract-offline-verification/v1" and
+        meta.get("status") == "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED" and
+        meta.get("manifest_path") == CURCG_MANIFEST and meta.get("production_ready") is False, "registration")
+    for field, path in (("regression_test", CURCG_REGRESSION), ("aggregation_test", CURCG_AGGREGATION)):
+        item = meta.get(field)
+        _curcg_need(isinstance(item, dict) and set(item) == {"path", "sha256"} and item.get("path") == path and
+            item.get("sha256") == _p1cg_sha(_p1cg_snapshot_bytes(root, before, path)), "regression_binding")
+    cases = meta.get("cases")
+    _curcg_need(isinstance(cases, dict) and set(cases) == set(CURCG_ROOTS), "case_registration")
+    for entry, count in zip(CURCG_ROOTS, (7, 15)):
+        names = cases[entry]
+        _curcg_need(isinstance(names, list) and len(names) == count and all(isinstance(n, str) and n for n in names) and
+            len(set(names)) == count, "case_registration")
+    cfg = spec.get("edge_harness", {})
+    _curcg_need(cfg.get("unit_count") == 656 and len(cfg.get("tests", [])) == 44 and
+        not set(CURCG_ROOTS) & set(cfg.get("tests", [])), "foundation_scope")
+    return meta
+
+def run_cursor_contract_guard(root, before, spec, deno, cfg, output, tool):
+    meta = cursor_contract_registration(root, before, spec)
+    if meta is None: return None
+    _curcg_need(cfg.get("config") == P1CG_CONFIG_PATH, "config_path")
+    config = json.loads(_p1cg_snapshot_bytes(root, before, P1CG_CONFIG_PATH), object_pairs_hook=_p1cg_unique_pairs)
+    _curcg_need(isinstance(config, dict) and not any(config.get(k) for k in
+        ("imports", "scopes", "extends", "importMap", "vendor", "nodeModulesDir")) and
+        isinstance(config.get("compilerOptions", {}), dict) and not any(config.get("compilerOptions", {}).get(k)
+        for k in ("types", "jsxImportSource")), "config_resolution")
+    # Validate the pinned source and literal dependency closure before launching Deno.
+    preflight_cursor_graph_manifest(root, before, meta)
+    executable = Path(deno)
+    _curcg_need(isinstance(tool, dict) and isinstance(tool.get("sha256"), str) and executable.is_file() and
+        not any(p.is_symlink() or (hasattr(p, "is_junction") and p.is_junction()) for p in (executable, *executable.parents)) and
+        _p1cg_sha(executable.read_bytes()) == tool["sha256"], "deno_pin")
+    graphs = {}
+    for i, entry in enumerate(CURCG_ROOTS):
+        _curcg_need(_p1cg_sha(executable.read_bytes()) == tool["sha256"], "deno_pin")
+        raw = command([deno, "info", "--json", "--no-lock", "--no-remote", "--no-npm", "--config", P1CG_CONFIG_PATH,
+            "./" + entry], root=root, output=output, name="cursor_contract_graph_info_" + str(i))
+        _curcg_need(len(raw) <= 8_388_608 and _p1cg_sha(executable.read_bytes()) == tool["sha256"], "deno_pin_or_graph_size")
+        graphs[entry] = json.loads(raw, object_pairs_hook=_p1cg_unique_pairs)
+    result = verify_cursor_graph_manifest(root, before, meta, graphs)
+    paths = [*CURCG_ROOTS, CURCG_FIXTURE]
+    common = ["--no-lock", "--no-remote", "--no-npm", "--config", P1CG_CONFIG_PATH]
+    command([deno, "check", *common, *paths], root=root, output=output, name="cursor_contract_check")
+    command([deno, "lint", "--config", P1CG_CONFIG_PATH, *paths], root=root, output=output, name="cursor_contract_lint")
+    command([deno, "fmt", "--check", "--config", P1CG_CONFIG_PATH, *paths], root=root, output=output, name="cursor_contract_fmt")
+    _curcg_need(_p1cg_sha(executable.read_bytes()) == tool["sha256"], "deno_pin")
+    return result
+
+
+
 def run_workspace(root,manifest,deno,python,output):
     root=Path(root).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
     before=verify_manifest(root,manifest);spec=json.loads((root/"docs/current/service_spec.json").read_bytes())
@@ -1182,6 +1432,7 @@ def run_workspace(root,manifest,deno,python,output):
     cfg=spec["edge_harness"]
     parsed=check_workspace(root,manifest,deno,output/"contract")
     p1_graph_guard=run_p1_contract_offline_guard(root,before,spec,deno,cfg,output,parsed["tool"])
+    cursor_graph_guard=run_cursor_contract_guard(root,before,spec,deno,cfg,output,parsed["tool"])
     paths=list(cfg["files"]);common=["--no-lock","--no-remote","--no-npm","--config",cfg["config"]]
     command([deno,"check",*common,*paths],root=root,output=output,name="check")
     command([deno,"lint","--config",cfg["config"],*paths],root=root,output=output,name="lint")
@@ -1228,6 +1479,19 @@ def run_workspace(root,manifest,deno,python,output):
           baseline_foundation_count=656,baseline_score_tests=31,coverage="INCIDENT_RECOVERY_V5_SYNTHETIC",
           source_bindings=recovery["source_bindings"],native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE",
           activation_status="NOT_RUN",operating_writes=0)
+    cursor_unit = None
+    if cursor_graph_guard is not None:
+        cursor_meta = cursor_contract_registration(root, before, spec)
+        cursor_junit = output.resolve() / "cursor_contract_review.junit.xml"
+        command([deno, "test", *common, *P1CG_DENY_FLAGS, "--reporter=dot",
+                 "--junit-path", str(cursor_junit), *CURCG_ROOTS],
+                root=root, output=output, name="cursor_contract_review_unit")
+        counted = parse_junit(cursor_junit, 22)
+        require_auxiliary_junit_identities(cursor_junit, cursor_meta["cases"])
+        cursor_unit = dict(**counted, coverage="CURSOR_SCOPE_CONTINUITY_SYNTHETIC",
+            graph_manifest_sha256=cursor_meta["manifest_sha256"], baseline_foundation_count=656,
+            native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE", activation_status="NOT_RUN",
+            actual_DB="NOT_RUN", deployment="NOT_RUN", operating_writes=0)
     p1_review = p1_review_registration(spec, before)
     p1_review_unit = None
     if p1_review is not None:
@@ -1426,6 +1690,8 @@ def run_workspace(root,manifest,deno,python,output):
       source_manifest_sha256=digest(json_bytes(manifest)),contract_receipt_sha256=digest((output/"contract/edge_contract_receipt.json").read_bytes()),
       oracle_receipt_sha256=digest(receipt_path.read_bytes()),tool=parsed["tool"],production_ready=False,operating_writes=0,**operation_registration(spec))
     if p1_graph_guard is not None:result['p1_contract_offline_graph_guard']=p1_graph_guard
+    if cursor_graph_guard is not None:result['cursor_contract_offline_graph_guard']=cursor_graph_guard
+    if cursor_unit is not None:result['cursor_contract_review_unit']=cursor_unit
     if p1_review_unit is not None:result['p1_recruitment_score_review_unit']=p1_review_unit
     if p1_selection_unit is not None:result['p1_selection_bridge_review_unit']=p1_selection_unit
     if service_end_unit is not None:result['service_end_score_cutoff_unit']=service_end_unit

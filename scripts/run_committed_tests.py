@@ -54,14 +54,15 @@ EDGE_UNIT_KEYS = frozenset({
     "read_view_extension_unit", "professional_unit", "school_reference_unit",
     "member_shortlist_unit", "incident_recovery_unit", "service_candidate_aux_unit", "service_staged_aux_unit", "service_wildcard_unit",
     "p1_recruitment_score_review_unit", "p1_selection_bridge_review_unit", "service_end_score_cutoff_unit",
+    "cursor_contract_review_unit",
 })
 
 def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False,
-                         p1_review_required=False, p1_selection_required=False, service_end_required=False):
+                         p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False):
     """Count all executed, separately registered Edge suites; keep oracle cases separate."""
     if (not isinstance(edge,dict) or type(expected_foundation)is not int or expected_foundation<1 or
         any(type(flag) is not bool for flag in (recovery_required,auxiliary_required,staged_required,wildcard_required,
-            p1_review_required,p1_selection_required,service_end_required))):raise ValueError("edge_count_input_invalid")
+            p1_review_required,p1_selection_required,service_end_required,cursor_required))):raise ValueError("edge_count_input_invalid")
     keys={name for name in edge if name=="unit" or name.endswith("_unit")}
     if "unit" not in keys or keys-EDGE_UNIT_KEYS:raise ValueError("edge_unit_coverage_invalid")
     if ("incident_recovery_unit" in keys)!=recovery_required:raise ValueError("edge_recovery_unit_missing_or_unregistered")
@@ -70,7 +71,8 @@ def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary
     if ("service_wildcard_unit" in keys)!=wildcard_required:raise ValueError("edge_wildcard_unit_missing_or_unregistered")
     additional=(("p1_recruitment_score_review_unit",p1_review_required,72),
         ("p1_selection_bridge_review_unit",p1_selection_required,17),
-        ("service_end_score_cutoff_unit",service_end_required,3))
+        ("service_end_score_cutoff_unit",service_end_required,3),
+        ("cursor_contract_review_unit",cursor_required,22))
     for name,required,_ in additional:
         if (name in keys)!=required:raise ValueError("edge_additional_unit_missing_or_unregistered:"+name)
     counts={}
@@ -95,6 +97,11 @@ def additional_p1_unit_flags(spec):
     return dict(p1_review_required="p1_recruitment_score_review_verification" in spec,
         p1_selection_required="p1_selection_bridge_review_verification" in spec,
         service_end_required="service_end_score_cutoff_synthetic_verification" in spec)
+
+def cursor_unit_required(spec):
+    """Require the cursor suite whenever its snapshot registration is present."""
+    if not isinstance(spec,dict):raise ValueError("edge_count_spec_invalid")
+    return "cursor_contract_offline_graph_verification" in spec
 
 def suite_python_environment(base,deno,scratch):
     if not deno or not Path(deno).is_absolute() or not Path(scratch).is_absolute():
@@ -162,7 +169,7 @@ def run_retained(workspace,manifest,destination,deno=None):
                         staged_required=selected_spec.get("backend_platform_contract",{}).get("service_staged_test_extension") is not None
                         wildcard_required=selected_spec.get("backend_platform_contract",{}).get("service_wildcard_test_extension") is not None
                         counts=summarize_edge_units(edge,selected_spec["edge_harness"]["unit_count"],recovery_required,auxiliary_required,staged_required,wildcard_required,
-                            **additional_p1_unit_flags(selected_spec))
+                            cursor_required=cursor_unit_required(selected_spec),**additional_p1_unit_flags(selected_spec))
                         edge["total_tests"]=counts["total_tests"]
                         edge["unit_counts"]=counts["by_suite"]
                     except (KeyError,TypeError,ValueError) as error:

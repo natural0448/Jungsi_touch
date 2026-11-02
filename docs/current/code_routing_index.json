@@ -1885,7 +1885,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "00a2b460c00671f50213872212c2afb606cc0301a9f608d42bc0b7772ce89408",
+      "source_sha256": "b3ed94a01a2140ff087943b5278c4b413a7bff3dcba8facd3439496118ed984a",
       "symbols": [
         {
           "kind": "function",
@@ -1897,6 +1897,12 @@
           "kind": "function",
           "name": "create",
           "signature": "def create(p, data):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "cursor_unit_required",
+          "signature": "def cursor_unit_required(spec):",
           "decorators": []
         },
         {
@@ -1938,7 +1944,7 @@
         {
           "kind": "function",
           "name": "summarize_edge_units",
-          "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False, p1_review_required=False, p1_selection_required=False, service_end_required=False):",
+          "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False, p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False):",
           "decorators": []
         }
       ]
@@ -1948,8 +1954,26 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "162ca053e8d19e9acddb4b411fc6c9db2032c019e93e85acb2fc60af2b9218bb",
+      "source_sha256": "8c534afeb87ce0c5f1b0e8fdd4d7d2d09b432c27a9720fcd0131d43f7da62138",
       "symbols": [
+        {
+          "kind": "function",
+          "name": "_curcg_imports",
+          "signature": "def _curcg_imports(path, raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_curcg_layer",
+          "signature": "def _curcg_layer(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "_curcg_need",
+          "signature": "def _curcg_need(ok, reason):",
+          "decorators": []
+        },
         {
           "kind": "function",
           "name": "_native_check_directories",
@@ -2090,6 +2114,12 @@
         },
         {
           "kind": "function",
+          "name": "build_cursor_graph_manifest",
+          "signature": "def build_cursor_graph_manifest(root, before, graphs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "build_p1_graph_manifest",
           "signature": "def build_p1_graph_manifest(root, before, graphs):",
           "decorators": []
@@ -2114,6 +2144,12 @@
         },
         {
           "kind": "function",
+          "name": "cursor_contract_registration",
+          "signature": "def cursor_contract_registration(root, before, spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "main",
           "signature": "def main():",
           "decorators": []
@@ -2122,6 +2158,12 @@
           "kind": "function",
           "name": "member_shortlist_suite_registration",
           "signature": "def member_shortlist_suite_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "normalize_cursor_graph",
+          "signature": "def normalize_cursor_graph(info, root, before, entry):",
           "decorators": []
         },
         {
@@ -2168,6 +2210,12 @@
         },
         {
           "kind": "function",
+          "name": "preflight_cursor_graph_manifest",
+          "signature": "def preflight_cursor_graph_manifest(root, before, meta):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "preflight_p1_graph_manifest",
           "signature": "def preflight_p1_graph_manifest(root, before, spec, manifest_sha256):",
           "decorators": []
@@ -2206,6 +2254,12 @@
           "kind": "function",
           "name": "recovery_test_filter",
           "signature": "def recovery_test_filter(names):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "reference_cursor_graph_info",
+          "signature": "def reference_cursor_graph_info(root, before, entry, model):",
           "decorators": []
         },
         {
@@ -2264,6 +2318,12 @@
         },
         {
           "kind": "function",
+          "name": "run_cursor_contract_guard",
+          "signature": "def run_cursor_contract_guard(root, before, spec, deno, cfg, output, tool):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "run_p1_contract_offline_guard",
           "signature": "def run_p1_contract_offline_guard(root, before, spec, deno, cfg, output, tool):",
           "decorators": []
@@ -2290,6 +2350,12 @@
           "kind": "function",
           "name": "service_end_synthetic_registration",
           "signature": "def service_end_synthetic_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "verify_cursor_graph_manifest",
+          "signature": "def verify_cursor_graph_manifest(root, before, meta, graphs):",
           "decorators": []
         },
         {
@@ -7111,7 +7177,7 @@
           "REQ-11",
           "REQ-12"
         ],
-        "source_sha256": "1348f10c385795acf573d33f22ace63eb8365aa44ccfdccfa32d6031c95ab2f9",
+        "source_sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53",
         "declared_exports": [
           "createCombinedPolicyCatalogService",
           "createMemberShortlistCatalogService"
@@ -7339,6 +7405,26 @@
         ],
         "source_sha256": "49bb36a7a85f47a73f53c04bb8860e26473fb696aff1f1e49ca114337fb6e10c",
         "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/current_public_bound_cursor.ts",
+        "layer": "data_infrastructure",
+        "status": "cursor_scope_continuity_candidate_synthetic_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-01",
+          "REQ-03",
+          "REQ-08",
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "36bf1a4d8307e38351b335f62330fd3bba6a900888b4a47d87ecab233ddeb14c",
+        "declared_exports": [
+          "ExistingCatalogTrust",
+          "CurrentPublicBoundCursor",
+          "executeWithExistingCatalogTrust"
+        ]
       },
       {
         "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -7677,6 +7763,24 @@
         ],
         "source_sha256": "7a4eaa053b1073bde9e06580a3cf30b011acdc738ac4c368b2afebebc5f2898b",
         "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/current_public_scoped_service.ts",
+        "layer": "data_infrastructure",
+        "status": "cursor_scope_continuity_candidate_synthetic_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-01",
+          "REQ-03",
+          "REQ-08",
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "698a257920b70648323b996f6b208264d0325000c89729ef8c0f9581a5c641b9",
+        "declared_exports": [
+          "CurrentPublicSearchScopedService"
+        ]
       },
       {
         "path": "supabase/functions/_shared/current_review_model_codec.ts",

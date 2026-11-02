@@ -7744,6 +7744,42 @@
         "REQ-27"
       ],
       "symbols": []
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_bound_cursor.ts",
+      "layer": "data_infrastructure",
+      "status": "cursor_scope_continuity_candidate_synthetic_NOT_ACTIVATED",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-08",
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "ExistingCatalogTrust",
+        "CurrentPublicBoundCursor",
+        "executeWithExistingCatalogTrust"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_scoped_service.ts",
+      "layer": "data_infrastructure",
+      "status": "cursor_scope_continuity_candidate_synthetic_NOT_ACTIVATED",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-08",
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "CurrentPublicSearchScopedService"
+      ]
     }
   ],
   "workflow": {
@@ -12060,7 +12096,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "00a2b460c00671f50213872212c2afb606cc0301a9f608d42bc0b7772ce89408",
+            "source_sha256": "b3ed94a01a2140ff087943b5278c4b413a7bff3dcba8facd3439496118ed984a",
             "symbols": [
               {
                 "kind": "function",
@@ -12072,6 +12108,12 @@
                 "kind": "function",
                 "name": "create",
                 "signature": "def create(p, data):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "cursor_unit_required",
+                "signature": "def cursor_unit_required(spec):",
                 "decorators": []
               },
               {
@@ -12113,7 +12155,7 @@
               {
                 "kind": "function",
                 "name": "summarize_edge_units",
-                "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False, p1_review_required=False, p1_selection_required=False, service_end_required=False):",
+                "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False, p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False):",
                 "decorators": []
               }
             ]
@@ -12123,8 +12165,26 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "162ca053e8d19e9acddb4b411fc6c9db2032c019e93e85acb2fc60af2b9218bb",
+            "source_sha256": "8c534afeb87ce0c5f1b0e8fdd4d7d2d09b432c27a9720fcd0131d43f7da62138",
             "symbols": [
+              {
+                "kind": "function",
+                "name": "_curcg_imports",
+                "signature": "def _curcg_imports(path, raw):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "_curcg_layer",
+                "signature": "def _curcg_layer(path):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "_curcg_need",
+                "signature": "def _curcg_need(ok, reason):",
+                "decorators": []
+              },
               {
                 "kind": "function",
                 "name": "_native_check_directories",
@@ -12265,6 +12325,12 @@
               },
               {
                 "kind": "function",
+                "name": "build_cursor_graph_manifest",
+                "signature": "def build_cursor_graph_manifest(root, before, graphs):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "build_p1_graph_manifest",
                 "signature": "def build_p1_graph_manifest(root, before, graphs):",
                 "decorators": []
@@ -12289,6 +12355,12 @@
               },
               {
                 "kind": "function",
+                "name": "cursor_contract_registration",
+                "signature": "def cursor_contract_registration(root, before, spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "main",
                 "signature": "def main():",
                 "decorators": []
@@ -12297,6 +12369,12 @@
                 "kind": "function",
                 "name": "member_shortlist_suite_registration",
                 "signature": "def member_shortlist_suite_registration(spec, before):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "normalize_cursor_graph",
+                "signature": "def normalize_cursor_graph(info, root, before, entry):",
                 "decorators": []
               },
               {
@@ -12343,6 +12421,12 @@
               },
               {
                 "kind": "function",
+                "name": "preflight_cursor_graph_manifest",
+                "signature": "def preflight_cursor_graph_manifest(root, before, meta):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "preflight_p1_graph_manifest",
                 "signature": "def preflight_p1_graph_manifest(root, before, spec, manifest_sha256):",
                 "decorators": []
@@ -12381,6 +12465,12 @@
                 "kind": "function",
                 "name": "recovery_test_filter",
                 "signature": "def recovery_test_filter(names):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "reference_cursor_graph_info",
+                "signature": "def reference_cursor_graph_info(root, before, entry, model):",
                 "decorators": []
               },
               {
@@ -12439,6 +12529,12 @@
               },
               {
                 "kind": "function",
+                "name": "run_cursor_contract_guard",
+                "signature": "def run_cursor_contract_guard(root, before, spec, deno, cfg, output, tool):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
                 "name": "run_p1_contract_offline_guard",
                 "signature": "def run_p1_contract_offline_guard(root, before, spec, deno, cfg, output, tool):",
                 "decorators": []
@@ -12465,6 +12561,12 @@
                 "kind": "function",
                 "name": "service_end_synthetic_registration",
                 "signature": "def service_end_synthetic_registration(spec, before):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "verify_cursor_graph_manifest",
+                "signature": "def verify_cursor_graph_manifest(root, before, meta, graphs):",
                 "decorators": []
               },
               {
@@ -17286,7 +17388,7 @@
                 "REQ-11",
                 "REQ-12"
               ],
-              "source_sha256": "1348f10c385795acf573d33f22ace63eb8365aa44ccfdccfa32d6031c95ab2f9",
+              "source_sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53",
               "declared_exports": [
                 "createCombinedPolicyCatalogService",
                 "createMemberShortlistCatalogService"
@@ -17514,6 +17616,26 @@
               ],
               "source_sha256": "49bb36a7a85f47a73f53c04bb8860e26473fb696aff1f1e49ca114337fb6e10c",
               "declared_exports": []
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_bound_cursor.ts",
+              "layer": "data_infrastructure",
+              "status": "cursor_scope_continuity_candidate_synthetic_NOT_ACTIVATED",
+              "requirements": [
+                "REQ-01",
+                "REQ-03",
+                "REQ-08",
+                "REQ-13",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26"
+              ],
+              "source_sha256": "36bf1a4d8307e38351b335f62330fd3bba6a900888b4a47d87ecab233ddeb14c",
+              "declared_exports": [
+                "ExistingCatalogTrust",
+                "CurrentPublicBoundCursor",
+                "executeWithExistingCatalogTrust"
+              ]
             },
             {
               "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -17852,6 +17974,24 @@
               ],
               "source_sha256": "7a4eaa053b1073bde9e06580a3cf30b011acdc738ac4c368b2afebebc5f2898b",
               "declared_exports": []
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_scoped_service.ts",
+              "layer": "data_infrastructure",
+              "status": "cursor_scope_continuity_candidate_synthetic_NOT_ACTIVATED",
+              "requirements": [
+                "REQ-01",
+                "REQ-03",
+                "REQ-08",
+                "REQ-13",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26"
+              ],
+              "source_sha256": "698a257920b70648323b996f6b208264d0325000c89729ef8c0f9581a5c641b9",
+              "declared_exports": [
+                "CurrentPublicSearchScopedService"
+              ]
             },
             {
               "path": "supabase/functions/_shared/current_review_model_codec.ts",
@@ -24140,11 +24280,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "9edf17b8ee73179070121142802790e693533e5e0ec7313dd66321f500ca2b95"
+        "sha256": "77ca4338cab4df6ed91d24b8e0566878284732cf0b364f5c6117dd1dc8e33d96"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "6e3586fbb43fedb7fc199443a928f4277a163c5f5bea069f7734062f0c0b5934"
+        "sha256": "98ca9379623f817f016e5c53cd402b67d451f169f92873a85f9ad56681b75ca4"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -24333,7 +24473,7 @@
         },
         {
           "path": "scripts/run_edge_tests.py",
-          "sha256": "162ca053e8d19e9acddb4b411fc6c9db2032c019e93e85acb2fc60af2b9218bb"
+          "sha256": "8c534afeb87ce0c5f1b0e8fdd4d7d2d09b432c27a9720fcd0131d43f7da62138"
         }
       ],
       "tests": [
@@ -218325,7 +218465,7 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "64a23498045336d6684d56c99121048eb8191c6fe3f4099abee3c44c99247bd4",
+      "bridge_sha256": "e1677b75942171f7a2e962daa3b7d8fd100941126fa2a01555091922a4bf8b3e",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
       "graph_manifest_sha256": "afd44c9dd856112d480b11b4653091b891e031c2643e69dbf9e3ab1eaf12c3f1",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
@@ -221674,7 +221814,7 @@
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
-            "sha256": "1348f10c385795acf573d33f22ace63eb8365aa44ccfdccfa32d6031c95ab2f9"
+            "sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -225528,6 +225668,62 @@
         "REQ-04"
       ],
       "summary": "사용자 결정: 전국 회원 화면의 기준을 2027 실제 모집행으로 통일한다. 2024~2026만 존재하는 과거 단독 모집행은 노출하지 않고 검증된 2027 행의 참고자료로 연결한다. 이월 미확정과 0은 현재 비노출, 실제 모집 확정 후 추가하며 모집 사실이 확인된 인원 미확인은 0으로 치환하지 않는다. 원본·기존 리포트·관리자 검수와 RLS를 보존하고 set-based/P1 정리본을 사용한다. 구현·DB·배포·실화면 인수는 별도다."
+    },
+    {
+      "date": "2026-11-03",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-08",
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "기존 승인 binding과 같은 자료 head·모집 범위에서 검색 cursor를 이어가는 서버 후보와 독립 오프라인 합성 22건을 등록한다. descriptor 부가정보 갱신은 동일 범위일 때 허용하고 기존 세션·소유권·만료·relay·예산·기존 V1 검증을 보존한다. 2027 실제 범위 필터·과거 전용 상세 차단·실DB·발행·배포는 별도이며 이 변경으로 완료를 주장하지 않는다."
     }
-  ]
+  ],
+  "cursor_contract_offline_graph_verification": {
+    "format": "jungsi.cursor-contract-offline-verification/v1",
+    "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+    "manifest_path": "tests/cursor_contract_review_graph.json",
+    "manifest_sha256": "66829191b3021cf02d72e2a0079acde6497f8e5efd3ce645377a297b580d9e0b",
+    "regression_test": {
+      "path": "tests/test_cursor_contract_graph_guard.py",
+      "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"
+    },
+    "aggregation_test": {
+      "path": "tests/test_cursor_edge_unit_aggregation.py",
+      "sha256": "e6657d2feec20a27d27511240cdfba6663d2342eab555e80ec99baaa4da60b73"
+    },
+    "cases": {
+      "tests/cursor_contract_review/combined_policy_catalog_runtime.test.ts": [
+        "actual combined factory composes verified descriptor, index and SQL wire for two 2027 pages",
+        "legacy-issued cursor keeps the previous behavior and changed range is rejected",
+        "history search uses the same approved factory and returns the synthetic 2026 observation",
+        "non-search offering reads and prepareSelection remain on the existing service",
+        "existing diagnostic emits the original failure phase and unauthorized search avoids IO",
+        "overlapping searches preserve independent original expiry caps",
+        "HTTP relay and existing budget wrap the scoped factory search"
+      ],
+      "tests/cursor_contract_review/current_public_bound_cursor.test.ts": [
+        "same descriptor and query advance without a new authority",
+        "only descriptive descriptor reissue continues V2, while V1 retains its old 409",
+        "semantic index, approval and runtime scope changes fail closed",
+        "changed query or head rejects the page",
+        "runtime binding mismatch and expired runtime authorization fail closed",
+        "subject, paid access, expiry, truncation, and key rotation remain enforced",
+        "safe HTTP failure projection retains cursor 409 and 400",
+        "expiry extension never extends the original cursor lifetime",
+        "a shorter descriptor expiry caps all subsequent continuation",
+        "descriptor replacement within the current page cannot mix states",
+        "V2 preserves a long valid cursor without truncation",
+        "expiration during the last page discards its result",
+        "unknown and zero synthetic quotas do not remove approved recruitment rows",
+        "revoked descriptor authorization fails the existing verifier",
+        "descriptor version labels remain the existing public response values"
+      ]
+    },
+    "production_ready": false
+  }
 }
