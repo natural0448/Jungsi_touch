@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.144",
+  "version": "1.9.146",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -181,7 +181,7 @@
     {
       "id": "REQ-28",
       "title": "입결 화면용 판별 정리본과 근거를 보존하는 고정 열",
-      "description": "현재 정본 head마다 검증된 로컬 원자료를 재사용해 화면용 불변 정리본을 한 번 작성한다. 전체 목록·검색·필터를 화면 서버에서 처리하며 같은 내용은 재발행하지 않는다. 학년도:원래 PK, native 값/타입·단위·출처, 원문 통계/대상과 별도 정규화 코드, 충원인원/최종 합격 예비번호를 보존한다. 컷은 출처·점수 기준·대상·통계 위치를 확인해 선택하고 미해결/충돌은 null+사유로 남긴다. 새 head/body API는 구현과 엄격 확장 등록·운영 등록 후 활성화한다. 대학이 실제 발표·수집한 다른 비율 컷과 평균·최저 등 점수 통계는 원래 라벨·비율/null·축·집단·단위를 보존해 별도 표시하며 50/70 전용 필터로 누락하지 않는다. 정확한 독립 검수 영수증의 필드별 표시자격은 승인된 마지막 합격 예비번호 셀에만 결속하고, 원값·원상태·원단위·일반 검수 보류를 바꾸지 않는다. 2026-11-01 사용자 정정: 과거 입결 표에서 충원인원과 최종 합격 예비번호를 각각 표시하지 않고 최종 합격 예비번호 한 열만 사용한다. 실제 추가 합격 인원은 내부 원자료와 추정 탈락자 입력으로 유지한다. 입결 성적 null은 해당조건미발표로 표시하며 특정 사유를 추정하지 않는다."
+      "description": "현재 정본 head마다 검증된 로컬 원자료를 재사용해 화면용 불변 정리본을 한 번 작성한다. 전체 목록·검색·필터를 화면 서버에서 처리하며 같은 내용은 재발행하지 않는다. 학년도:원래 PK, native 값/타입·단위·출처, 원문 통계/대상과 별도 정규화 코드, 충원인원/최종 합격 예비번호를 보존한다. 컷은 출처·점수 기준·대상·통계 위치를 확인해 선택하고 미해결/충돌은 null+사유로 남긴다. 새 head/body API는 구현과 엄격 확장 등록·운영 등록 후 활성화한다. 대학이 실제 발표·수집한 다른 비율 컷과 평균·최저 등 점수 통계는 원래 라벨·비율/null·축·집단·단위를 보존해 별도 표시하며 50/70 전용 필터로 누락하지 않는다. 정확한 독립 검수 영수증의 필드별 표시자격은 승인된 마지막 합격 예비번호 셀에만 결속하고, 원값·원상태·원단위·일반 검수 보류를 바꾸지 않는다. 2026-11-01 사용자 정정: 과거 입결 표에서 충원인원과 최종 합격 예비번호를 각각 표시하지 않고 최종 합격 예비번호 한 열만 사용한다. 실제 추가 합격 인원은 내부 원자료와 추정 탈락자 입력으로 유지한다. 입결 성적 null은 공식 근거로 다른 통계만 발표된 경우 해당조건미발표, 같은 관측의 3인 이하가 공식 확인된 경우 3인이하미발표로 표시하고 사유 미확인은 보존한다."
     },
     {
       "id": "REQ-29",
@@ -7031,7 +7031,9 @@
         "buildCandidateR27ScopeIndex",
         "buildCandidateR27PartialScopeIndex",
         "buildCandidateR27PartialBody",
-        "assertSealedR27Publication"
+        "assertSealedR27Publication",
+        "P1R27RebindAuthorityPort",
+        "rebindP1R27Candidate"
       ]
     },
     {
@@ -7073,7 +7075,9 @@
         "R27BatchPage",
         "R27PagedSource",
         "R27BatchOptions",
-        "buildStandaloneR27"
+        "buildStandaloneR27",
+        "R27ReviewBinding",
+        "assertReviewedR27LinkBinding"
       ]
     },
     {
@@ -8198,7 +8202,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.144",
+        "contract_version": "1.9.146",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -8372,7 +8376,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.144",
+        "contract_version": "1.9.146",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8538,7 +8542,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.144",
+        "contract_version": "1.9.146",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8557,7 +8561,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.144",
+        "contract_version": "1.9.146",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8582,7 +8586,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.144",
+        "contract_version": "1.9.146",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8607,7 +8611,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.144",
+        "contract_version": "1.9.146",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -10598,7 +10602,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "14ca2af63e4485c6d08b99ddc7d50157bacd0c8ea5bfdba3391b904abdeb57a2",
+            "source_sha256": "54e9e05c5bb098d8985f4ced7a5a53383c768b014984d6b48c4a3275ecb6092a",
             "symbols": [
               {
                 "kind": "class",
@@ -17782,7 +17786,7 @@
                 "REQ-29",
                 "REQ-30"
               ],
-              "source_sha256": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30",
+              "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
               "declared_exports": [
                 "HISTORY_PUBLICATION_STATUSES",
                 "HISTORY_SNAPSHOT_SLOTS",
@@ -17996,7 +18000,7 @@
                 "REQ-01",
                 "REQ-28"
               ],
-              "source_sha256": "fe3f8ca958caf1830d4d6653e4acd7a2565664caff0864d74c5375414cb7131e",
+              "source_sha256": "18182c85bea7ab111699bf53deb9faabf643ea1fef23e0777c7a3bc150a946a6",
               "declared_exports": [
                 "P1R27Pins",
                 "BoundP1R27Evidence",
@@ -18009,7 +18013,9 @@
                 "buildCandidateR27ScopeIndex",
                 "buildCandidateR27PartialScopeIndex",
                 "buildCandidateR27PartialBody",
-                "assertSealedR27Publication"
+                "assertSealedR27Publication",
+                "P1R27RebindAuthorityPort",
+                "rebindP1R27Candidate"
               ]
             },
             {
@@ -18090,7 +18096,7 @@
                 "REQ-01",
                 "REQ-28"
               ],
-              "source_sha256": "c7affb470d2d0814779acdba6ad1e56731a15e0e9dc3d30570ffc1d2bb289f04",
+              "source_sha256": "76f54539218534f679cf49d231958526265411bf94f0054f9b2e2c1b670c092f",
               "declared_exports": [
                 "P1R27GateLimits",
                 "prepareP1R27GlobalReceipt"
@@ -18397,7 +18403,7 @@
                 "REQ-01",
                 "REQ-28"
               ],
-              "source_sha256": "4cb7dbcb39185245b764ef07fedd57f1a2713bf56a49c04abb1394a66c7620cc",
+              "source_sha256": "d7528eea5cecf5b8d4cd681c80cc704c240fa4400892dfbb5a9517f96688f860",
               "declared_exports": [
                 "ReviewedR27Links",
                 "R27LinkPin",
@@ -18411,7 +18417,9 @@
                 "R27BatchPage",
                 "R27PagedSource",
                 "R27BatchOptions",
-                "buildStandaloneR27"
+                "buildStandaloneR27",
+                "R27ReviewBinding",
+                "assertReviewedR27LinkBinding"
               ]
             },
             {
@@ -24562,6 +24570,36 @@
         "REQ-31"
       ],
       "summary": "서비스 후보: 본인 리포트 보존 사유를 공개 오류로 구분하고, 개인·전문가의 6계열 와일드카드 선택과 권한·예산·재귀 투영 연결을 합성 검증한다. 구 revision의 비신뢰 필드와 기존 목록·replay는 보존한다. 신뢰 writer/자료 공급·취소 및 화면 수신 증거가 없는 실제 구성은 비활성이며 운영 DB 적용·배포·인수는 NOT_RUN이다. 장래 gate 활성화 시 새 revision의 candidates JSON에 비공개 선택 초안이 추가되는 저장 변경도 후보이며, 운영 writer·증거·복구 조건이 확인되기 전 적용하지 않는다."
+    },
+    {
+      "date": "2026-11-02",
+      "requirements": [
+        "REQ-01",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "2027 연도 연결 합성 후보: 출처와 대상의 범위 확인 상태를 분리한 검토 영수증 v2와 대상 연도 식별 검사를 추가한다. 기존 v1과 미확인 보류를 유지한다. 성적 null 문구는 공식 사유의 확인 여부에 따라 구분한다. 실제 승인·발행·배포와 브라우저 검수는 미실행이다."
+    },
+    {
+      "date": "2026-11-02",
+      "requirements": [
+        "REQ-01",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "합성 검토 후보: 기존 예비번호 자격과 과거 참조를 새 발행본에 별도 재결속하고 원값·이전 행·자료 head·범위·승인 재확인을 검사한다. 실제 승인권자 어댑터·DB·발행·배포는 미검증이다. 동일 관측의 두 미발표 사유가 모두 확인되면 3인 이하 표시를 우선한다."
+    },
+    {
+      "date": "2026-11-02",
+      "requirements": [
+        "REQ-24",
+        "REQ-28"
+      ],
+      "summary": "사용자 확인: 2026-11-01의 공란 일괄 표기 요약은 당시 이력으로 보존하고 최신 조건별 결정에 적용하지 않는다. 동일 관측·코호트·점수축의 공식 근거로 다른 통계만 발표돼 선택 조건이 미발표면 해당조건미발표, 3인 이하 미발표가 확인되면 3인이하미발표를 표시하고 두 근거가 모두 있으면 3인 이하를 우선한다. 사유 근거가 없으면 미확인으로 보존한다. 화면 v3 후보 적용·서버 사유 DTO 결속·운영 배포는 각각 미완료다."
     }
   ],
   "overall_analysis_contract": {
@@ -26784,15 +26822,15 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "65f5f096afd6e7812e63d789f1d58a3171bf7fe9d293e16fdfc146a4f1d652fb"
+        "sha256": "c83314926543d0364b6f41cc609d7fc60c3fe134a5b694136ebebfd2071da9da"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "d0eb430eec42b60032716189a2755a239421734187cb1a147681df527367e962"
+        "sha256": "2af51fd7e445a22b744737501eeeb6fcf346204eb3df76695d9f005e4e3e43fb"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "c3081e00db095a73d8e26850f241e80d5f7999c94582139d4c2bd28aa9976361"
+        "sha256": "cb67d013dce97df15ddbdb02250f6ed444abb2304cf3898116a784737778b9c1"
       },
       "groups": {
         "p1_review": {
@@ -26834,7 +26872,7 @@
             "tests/service_p1/test_p1_r27_request_admission.synthetic.ts",
             "tests/service_p1/test_p1_r27_http_order.synthetic.ts"
           ],
-          "test_count": 36
+          "test_count": 46
         }
       },
       "runtime_scope": "DENO_2_9_7_PORTABLE_CI_NOT_VERIFIED",
@@ -29491,7 +29529,7 @@
           "selected_published_score"
         ],
         "text": "해당조건미발표",
-        "application": "기존 전형·집단·산식·발표용도·화면 선택 필터를 통과한 입결 성적 칸의 native null에 표시한다. 원문 사유·모집인원만으로 특정 미발표 인원 기준을 추정하지 않는다.",
+        "application": "공식 근거로 다른 통계만 발표되어 선택 조건이 미발표임이 확인된 경우 해당조건미발표, 해당 관측·코호트·통계에 3인 이하 미발표가 공식 근거로 확인된 경우에만 3인이하미발표를 표시한다. 사유가 확인되지 않은 null은 미확인·미발표 상태를 보존한다. 2026-11-02 사용자 조건별 결정은 2026-11-01 일괄 공란 표기 요약에 우선하며, 해당 예전 요약은 당시 결정 이력으로 보존한다. 화면 v3 후보, 사유 DTO 결속 및 운영 배포는 각각 미완료다.",
         "native_values": "정본/DTO의 null·숫자0·문자열 정밀도·원문 사유는 보존하며 UI 대체 문구만 적용한다. 모든 null을 SOURCE_NONDISCLOSED_LE_3의 원문 증거로 분류하지 않는다.",
         "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다.",
         "historical_20261029_before_user_correction": {
@@ -29505,7 +29543,13 @@
           "native_values": "정본/DTO의 null·숫자0·문자열 정밀도·원문 사유는 보존하며 UI 대체 문구만 적용한다. 모든 null을 SOURCE_NONDISCLOSED_LE_3의 원문 증거로 분류하지 않는다.",
           "other_nulls": "is_current·stage·권한·ID 등의 null은 기존 상태 의미를 유지하고, 키 부재와도 구분한다. 모집인원/예비번호와 숨긴 참고값을 점수 칸으로 만들지 않는다."
         },
-        "display_reason_evidence": "현행 Cell 계약은 해당 관측·코호트·통계에 원문 사유가 검증 결속됐는지 보장하지 않으므로 이유코드만으로 3인 이하 문구를 노출하지 않는다. 사유가 확인된 개별 표시 기능은 별도 계약·근거·검수 후 적용한다."
+        "display_reason_evidence": "현행 Cell의 이유코드 하나 또는 모집인원만으로 사유의 원문 결속을 단정하지 않는다. 출처·관측·학년도·전형·코호트·통계 조건에 결속된 공식 근거를 검증한 경우에만 해당 사유 문구를 표시한다. 적용 코드는 후속 검수 전이다.",
+        "condition_texts": {
+          "other_statistic_published_and_selected_condition_missing": "해당조건미발표",
+          "officially_verified_three_or_fewer": "3인이하미발표",
+          "reason_unknown": "미확인"
+        },
+        "condition_priority": "동일 관측·코호트·점수축에 두 사유의 공식 근거가 모두 확인된 경우 3인 이하 문구를 우선한다. 어느 사유도 확인되지 않으면 미확인 상태를 유지한다."
       },
       "own_report_list": "is_current 키 부재인 구서버와 키가 있으나 전부 null인 신서버를 구분한다. 신판의 전체 null은 숨기지 않고 혼합 값은 false만 숨기며 정정 후 첫 페이지부터 재조회한다. Owner 수정 보고와 실제 배포 증거는 별도로 확인한다.",
       "professional_usage": "만료일 연장은 계산 비용·요청량 한도의 승인을 대신하지 않는다. 기존 개인 한도를 유지하는 전문가용 별도 계산 capacity와 정확한 승인 카탈로그·원자적 예약·다학생 순차 수용 증거를 준비한 뒤 활성화한다. units_per_offering을 근거 없이 상수 비용으로 낮추지 않는다.",
@@ -40330,7 +40374,7 @@
       "recruitment.read"
     ],
     "status": "FE_967_SOURCE_REVIEWED_C_LOCAL_APPROVED_ACTUAL_TCP31_PASS_EXTERNAL_BROWSER_AND_THREE_FE_FIXES_PENDING",
-    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-01 사용자 정정: 충원 표시는 최종 합격 예비번호 한 열로 통일하고 원문 명칭이 마지막 순번을 뜻한다고 검증된 경우에만 그 항목에 연결한다. 실제 추가 합격 인원은 내부 산술 입력으로 유지한다. 입결 성적 null은 해당조건미발표로 표시한다.",
+    "decision": "추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-01 사용자 정정: 충원 표시는 최종 합격 예비번호 한 열로 통일하고 원문 명칭이 마지막 순번을 뜻한다고 검증된 경우에만 그 항목에 연결한다. 실제 추가 합격 인원은 내부 산술 입력으로 유지한다. 입결 성적 null은 공식 근거로 해당 조건 미발표 또는 3인 이하가 확인된 경우에만 해당 문구를 구분하며 사유 미확인은 보존한다.",
     "estimated_columns": [
       {
         "id": "estimated_applicants",
@@ -40366,7 +40410,7 @@
       "추가모집의 별도 모집정원, 실제 추가 합격자 수, 최초 부여 대기번호, 차수별 예비순번과 최종 합격 예비번호를 제목 유사성이나 단위·값 크기만으로 합치지 않는다. 애매한 항목은 이미 알려진 원값·확인 사유를 유지한다. 평균/50/70/75·모집인원/등록인원/지원자수·최초/최종/이월을 구분하고 기존 source qualification을 동의어 처리로 승격하지 않는다.",
       "현재 입결 단일 관측의 의미 동의어는 서버 alias 포트에서 원문/값/native/CID/연도/PK/코호트/축/차수/통계율을 보존한다. 애매한 충원인원·추가모집·예비번호는 정확한 필드 정의 없이 순위나 인원으로 재분류하지 않는다. P1 고정 snapshot의 기존 값/CID/q는 이동·승격하지 않으며 신규 publisher 결속은 별도 검수다.",
       "입결 표에 별도 충원인원 열과 최종 합격 예비번호 열을 동시에 두지 않는다. 최종 합격 예비번호(번) 한 열을 표시한다. 실제 인원 r.ad는 원자료와 추정 탈락자 계산에 유지하며 예비번호를 인원으로 치환하지 않는다.",
-      "선택된 입결 성적의 null은 해당조건미발표로 표시한다. 원문 이유 코드 하나나 모집인원만으로 3인 이하 미발표라고 단정하지 않는다. 출처·조건·코호트에 결속된 명시 근거의 추후 사용은 별도 계약·검수한다. native null·0·원문 사유는 보존한다."
+      "공식 근거로 다른 통계만 발표된 성적 조건은 해당조건미발표, 동일 관측에서 3인 이하가 공식 확인된 경우만 3인이하미발표로 표시한다. 사유 미확인, native null·0·원문 사유를 보존한다."
     ],
     "preview": {
       "selected_preparation": "C_local_review_package",
@@ -60427,7 +60471,7 @@
               "src": "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts"
             }
           ],
-          "source_sha256": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30",
+          "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
           "symbols": [
             {
               "declarations": [
@@ -70707,9 +70751,29 @@
               "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
             },
             {
+              "importedName": "assertReviewedR27LinkBinding",
+              "originalName": "assertReviewedR27LinkBinding",
+              "src": "supabase/functions/_shared/jungsi/application/r27_standalone.ts"
+            },
+            {
+              "importedName": "bindFieldQualificationPublication",
+              "originalName": "bindFieldQualificationPublication",
+              "src": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
+            },
+            {
               "importedName": "buildStandaloneR27",
               "originalName": "buildStandaloneR27",
               "src": "supabase/functions/_shared/jungsi/application/r27_standalone.ts"
+            },
+            {
+              "importedName": "cloneNativeJson",
+              "originalName": "cloneNativeJson",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "detachedQualificationSnapshot",
+              "originalName": "detachedQualificationSnapshot",
+              "src": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
             },
             {
               "importedName": "nativeJsonSha256",
@@ -70725,6 +70789,11 @@
               "importedName": "parseNativeJson",
               "originalName": "parseNativeJson",
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "validateFieldServiceQualification",
+              "originalName": "validateFieldServiceQualification",
+              "src": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
             },
             {
               "importedName": "validateHistorySnapshotPayload",
@@ -70743,7 +70812,7 @@
               "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
             }
           ],
-          "source_sha256": "fe3f8ca958caf1830d4d6653e4acd7a2565664caff0864d74c5375414cb7131e",
+          "source_sha256": "18182c85bea7ab111699bf53deb9faabf643ea1fef23e0777c7a3bc150a946a6",
           "symbols": [
             {
               "declarations": [
@@ -71658,6 +71727,327 @@
                 {
                   "declarationKind": "export",
                   "def": {
+                    "methods": [
+                      {
+                        "kind": "method",
+                        "name": "assertCurrent",
+                        "parameter_source": "(\n    input: Readonly<{\n      phase: \"candidate\" | \"publication\";\n      publication_sha256: string | null;\n      source_head_sha256: string;\n      previous_publication_sha256: string;\n      previous_source_head_sha256: string;\n      scope_sha256: string;\n      qualification_authority_sha256: string | null;\n      qualification_receipt_sha256: string | null;\n      reference_authority_sha256: string | null;\n      reference_receipt_sha256: string | null;\n    }>,\n  )",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "input",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Readonly",
+                              "value": {
+                                "typeName": "Readonly",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeLiteral",
+                                    "value": {
+                                      "properties": [
+                                        {
+                                          "name": "phase",
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "literal",
+                                                "repr": "candidate",
+                                                "value": {
+                                                  "kind": "string",
+                                                  "string": "candidate"
+                                                }
+                                              },
+                                              {
+                                                "kind": "literal",
+                                                "repr": "publication",
+                                                "value": {
+                                                  "kind": "string",
+                                                  "string": "publication"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "name": "publication_sha256",
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "string",
+                                                "value": "string"
+                                              },
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "null",
+                                                "value": "null"
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "name": "source_head_sha256",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "previous_publication_sha256",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "previous_source_head_sha256",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "scope_sha256",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "qualification_authority_sha256",
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "string",
+                                                "value": "string"
+                                              },
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "null",
+                                                "value": "null"
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "name": "qualification_receipt_sha256",
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "string",
+                                                "value": "string"
+                                              },
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "null",
+                                                "value": "null"
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "name": "reference_authority_sha256",
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "string",
+                                                "value": "string"
+                                              },
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "null",
+                                                "value": "null"
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "name": "reference_receipt_sha256",
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "string",
+                                                "value": "string"
+                                              },
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "null",
+                                                "value": "null"
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "P1R27RebindAuthorityPort"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  candidate: P1R27Candidate,\n  evidence: BoundP1R27Evidence,\n  source: P1R27ByteSource,\n  previous: P1BaselineBatchPort,\n  authority: P1R27RebindAuthorityPort,\n  rawProof: unknown,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "candidate",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "P1R27Candidate",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "P1R27Candidate"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "evidence",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "BoundP1R27Evidence",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "BoundP1R27Evidence"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "source",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "P1R27ByteSource",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "P1R27ByteSource"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "previous",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "P1BaselineBatchPort",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "P1BaselineBatchPort"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "authority",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "P1R27RebindAuthorityPort",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "P1R27RebindAuthorityPort"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "rawProof",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "P1R27Candidate",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "P1R27Candidate"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "rebindP1R27Candidate"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
                     "hasBody": true,
                     "isAsync": true,
                     "parameter_source": "(\n  candidate: P1R27Candidate,\n  evidence: BoundP1R27Evidence,\n)",
@@ -71800,7 +72190,8 @@
                   "declarationKind": "export",
                   "def": {
                     "hasBody": true,
-                    "parameter_source": "(\n  index: NativeObject | undefined,\n  indexBytes: Uint8Array<ArrayBuffer>,\n  decodedParts: readonly Uint8Array<ArrayBuffer>[],\n)",
+                    "isAsync": true,
+                    "parameter_source": "(\n  index: NativeObject | undefined,\n  indexBytes: Uint8Array<ArrayBuffer>,\n  decodedParts: readonly Uint8Array<ArrayBuffer>[],\n  publication: SnapshotPublication,\n)",
                     "params": [
                       {
                         "kind": "identifier",
@@ -71879,12 +72270,38 @@
                             }
                           }
                         }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "publication",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "SnapshotPublication",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "SnapshotPublication",
+                              "specifier": "./history_snapshot.ts"
+                            },
+                            "typeName": "SnapshotPublication"
+                          }
+                        }
                       }
                     ],
                     "returnType": {
-                      "kind": "keyword",
-                      "repr": "void",
-                      "value": "void"
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
                     }
                   },
                   "kind": "function"
@@ -72512,6 +72929,141 @@
                 }
               ],
               "name": "candidateSeals"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "WeakMap",
+                      "value": {
+                        "typeName": "WeakMap",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "P1R27Candidate",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "P1R27Candidate"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "candidateBodyLimits"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "WeakMap",
+                      "value": {
+                        "typeName": "WeakMap",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "P1R27Candidate",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "P1R27Candidate"
+                            }
+                          },
+                          {
+                            "kind": "fnOrConstructor",
+                            "value": {
+                              "constructor": false,
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "publicationSha",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  }
+                                }
+                              ],
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "candidateRebindFreshness"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "WeakMap",
+                      "value": {
+                        "typeName": "WeakMap",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "P1R27Candidate",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "P1R27Candidate"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "candidateRebindExportSeals"
             },
             {
               "declarations": [
@@ -73238,6 +73790,48 @@
                   "declarationKind": "private",
                   "def": {
                     "hasBody": true,
+                    "parameter_source": "(candidate: P1R27Candidate)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "candidate",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "P1R27Candidate",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "P1R27Candidate"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "NativeObject",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "NativeObject",
+                          "specifier": "../domain/json_value.ts"
+                        },
+                        "typeName": "NativeObject"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "rebindStructuralBody"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
                     "parameter_source": "(index: NativeObject)",
                     "params": [
                       {
@@ -73301,6 +73895,16 @@
           },
           {
             "dynamic": false,
+            "specifier": "./history_field_qualification.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
             "specifier": "./history_snapshot.ts",
             "targets": [
               {
@@ -73333,7 +73937,9 @@
           "buildCandidateR27ScopeIndex",
           "buildCandidateR27PartialScopeIndex",
           "buildCandidateR27PartialBody",
-          "assertSealedR27Publication"
+          "assertSealedR27Publication",
+          "P1R27RebindAuthorityPort",
+          "rebindP1R27Candidate"
         ]
       },
       "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": {
@@ -75098,7 +75704,7 @@
               "src": "supabase/functions/_shared/jungsi/application/p1_r27_global_parts.ts"
             }
           ],
-          "source_sha256": "c7affb470d2d0814779acdba6ad1e56731a15e0e9dc3d30570ffc1d2bb289f04",
+          "source_sha256": "76f54539218534f679cf49d231958526265411bf94f0054f9b2e2c1b670c092f",
           "symbols": [
             {
               "declarations": [
@@ -90949,7 +91555,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "4cb7dbcb39185245b764ef07fedd57f1a2713bf56a49c04abb1394a66c7620cc",
+          "source_sha256": "d7528eea5cecf5b8d4cd681c80cc704c240fa4400892dfbb5a9517f96688f860",
           "symbols": [
             {
               "declarations": [
@@ -90983,6 +91589,64 @@
                   "def": {
                     "properties": [
                       {
+                        "name": "source_head_sha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "previous_publication_sha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "previous_source_head_sha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "scope_sha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "authority_sha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "R27ReviewBinding"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
                         "name": "receiptSha256",
                         "readonly": true,
                         "tsType": {
@@ -90998,6 +91662,21 @@
                           "kind": "keyword",
                           "repr": "string",
                           "value": "string"
+                        }
+                      },
+                      {
+                        "name": "reviewBinding",
+                        "optional": true,
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "R27ReviewBinding",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "R27ReviewBinding"
+                          }
                         }
                       }
                     ]
@@ -91117,6 +91796,112 @@
                 }
               ],
               "name": "combineReviewedR27Links"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(\n  ctx: ReviewedR27Links | undefined,\n  expected: Pick<\n    R27ReviewBinding,\n    | \"source_head_sha256\"\n    | \"previous_publication_sha256\"\n    | \"previous_source_head_sha256\"\n    | \"scope_sha256\"\n  >,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "ctx",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ReviewedR27Links",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "ReviewedR27Links"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "undefined",
+                              "value": "undefined"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "expected",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Pick",
+                          "value": {
+                            "typeName": "Pick",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "R27ReviewBinding",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "R27ReviewBinding"
+                                }
+                              },
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "literal",
+                                    "repr": "source_head_sha256",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "source_head_sha256"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "previous_publication_sha256",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "previous_publication_sha256"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "previous_source_head_sha256",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "previous_source_head_sha256"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "scope_sha256",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "scope_sha256"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "void",
+                      "value": "void"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "assertReviewedR27LinkBinding"
             },
             {
               "declarations": [
@@ -92513,6 +93298,14 @@
                               "repr": "string",
                               "value": "string"
                             }
+                          },
+                          {
+                            "name": "explicitScope",
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "boolean",
+                              "value": "boolean"
+                            }
                           }
                         ]
                       }
@@ -92560,6 +93353,29 @@
                                   }
                                 }
                               }
+                            }
+                          },
+                          {
+                            "name": "binding",
+                            "tsType": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "R27ReviewBinding",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "R27ReviewBinding"
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
                             }
                           }
                         ]
@@ -93373,7 +94189,9 @@
           "R27BatchPage",
           "R27PagedSource",
           "R27BatchOptions",
-          "buildStandaloneR27"
+          "buildStandaloneR27",
+          "R27ReviewBinding",
+          "assertReviewedR27LinkBinding"
         ]
       },
       "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts": {
@@ -212049,7 +212867,7 @@
       "supabase/functions/_shared/jungsi/application/history_metric_alias.ts": "2fba3870d82e7ca1514c1b84fef44c741ed23bdf53b869281a4f7e81d1c70c7d",
       "supabase/functions/_shared/jungsi/application/history_r27_scope_index.ts": "3407c415a68422a5f2f62967a0826cf8d1792ed1d0555e02e3d8dd9a570940e9",
       "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
-      "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30",
+      "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
       "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
       "supabase/functions/_shared/jungsi/application/member_json_results.ts": "59363bd855241f2524a0985c2d52dea2520a52ab9b2fa571dc3a3615ca238090",
       "supabase/functions/_shared/jungsi/application/member_shortlist.ts": "3a66a21ca2f337a41b66dd32aef9573a818fe21db4d0321ea2c8aa0fb21416d6",
@@ -212058,12 +212876,12 @@
       "supabase/functions/_shared/jungsi/application/operating_policy.ts": "477b312405d0d3daa24bc546df1f6ef8fec25795536bbbf85d5d21f0f231bf49",
       "supabase/functions/_shared/jungsi/application/overall_analysis.ts": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7",
       "supabase/functions/_shared/jungsi/application/own_report_list.ts": "ade1d75288df633ef20e1d8e26f602687615ece0e7d4764fd5a05e180d0a2bf2",
-      "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "fe3f8ca958caf1830d4d6653e4acd7a2565664caff0864d74c5375414cb7131e",
+      "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "18182c85bea7ab111699bf53deb9faabf643ea1fef23e0777c7a3bc150a946a6",
       "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
       "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
       "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
       "supabase/functions/_shared/jungsi/application/p1_r27_global_parts.ts": "fd88739c95bc58c9c178d4bd3ac52395e90cbe46445779bd94977c0e2016768e",
-      "supabase/functions/_shared/jungsi/application/p1_r27_release_gate.ts": "c7affb470d2d0814779acdba6ad1e56731a15e0e9dc3d30570ffc1d2bb289f04",
+      "supabase/functions/_shared/jungsi/application/p1_r27_release_gate.ts": "76f54539218534f679cf49d231958526265411bf94f0054f9b2e2c1b670c092f",
       "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "cfd650bce6d497a2ff50ef5cb080d678f471d261235159e1691a7d8355e2e2ee",
       "supabase/functions/_shared/jungsi/application/platform_repository.ts": "839a70ed64ef53b626b0b404b91a0a4fbbdc58704159d5b6d76ed82945f57744",
       "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
@@ -212076,7 +212894,7 @@
       "supabase/functions/_shared/jungsi/application/professional_usage.ts": "4f211c6fdf0fcb0161de676431eade07845a87d8ccf993efa8ed8ee793fd81f6",
       "supabase/functions/_shared/jungsi/application/profile_reports.ts": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d",
       "supabase/functions/_shared/jungsi/application/public_response.ts": "ef19900a3b0e02ddb132324a4a9bf47af4330bc9324ac7c0254b42d63a3ab2e7",
-      "supabase/functions/_shared/jungsi/application/r27_standalone.ts": "4cb7dbcb39185245b764ef07fedd57f1a2713bf56a49c04abb1394a66c7620cc",
+      "supabase/functions/_shared/jungsi/application/r27_standalone.ts": "d7528eea5cecf5b8d4cd681c80cc704c240fa4400892dfbb5a9517f96688f860",
       "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts": "ba1cf4303b5a448bd9101288baa44ae60c60a5088b6eb08886fe12eddd590533",
       "supabase/functions/_shared/jungsi/application/report_actions.ts": "66ba67f196a5ae4b394ee908276fec4983adda4fa7a65c228ef69dcc3f45447f",
       "supabase/functions/_shared/jungsi/application/request_budget.ts": "e208ac4a8e4d15dcacf0a98b5a84f852b00470a9983085e638725243132c52f2",
@@ -212093,6 +212911,10 @@
       "supabase/functions/_shared/jungsi/application/university_scoring.ts": "7782fd76cc8757181212bd9b034893d4c359119c63315eddafebddedbfe2c249",
       "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
       "supabase/functions/_shared/jungsi/application/usage_service.ts": "969582f43649cc60bc1b0689d00e81ebd593f8fcb6c429d08cf9017c0041852d",
+      "supabase/functions/_shared/jungsi/application/wildcard_candidate_review.ts": "5cc27e4ef6310cb1d36c74c6c8cb286aa4ec69944d511717acb5a287deaf8d6e",
+      "supabase/functions/_shared/jungsi/application/wildcard_public_contract.ts": "6cd243ecd7e212500c00eff08357365e2bf5e4cbe25f4a964b0105a70a285b70",
+      "supabase/functions/_shared/jungsi/application/wildcard_runtime_gate.ts": "0a295516b4587d3072ff6a6a34a7dac4395dbd86ed3e354beb2cb57575514137",
+      "supabase/functions/_shared/jungsi/application/wildcard_selection.ts": "83731a53497e5be55720bf7bd64cd493a19ec9fc291c6bcf110d0397f193dcae",
       "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts": "9e9210da291261207e6bd49969c22c62e9c7ee06c76edafa71bb9105fd4c821d",
       "supabase/functions/_shared/jungsi/domain/conversion.ts": "f17d26ebb957813a3f818bcd2bc1090469c3f190fa99afc15e3d8c6097d43486",
       "supabase/functions/_shared/jungsi/domain/conversion_release.ts": "9d7e0ff22c42deb6abaf90c72582f3bf4c2cf9ad63760ccb8ae8692c6274ad98",
@@ -212204,6 +213026,7 @@
       "tests/edge/test_native_sql.ts": "1a36c576d0c4b1d7c548ff7bd55c3fbb6837d221fc2a46e2a40a644828561697",
       "tests/edge/test_offering_analysis.ts": "6b725fb51e791c36c614d4c79d7739c2c3f8610c7f168f4d6d74aa0397bc32c0",
       "tests/edge/test_official_subject_runtime.ts": "979a33749052649f63fda1c755b3ec06c20459ccf56420a7e62b352771817b51",
+      "tests/edge/test_overall_preserve_relay.synthetic.ts": "dcb6f8a8a4de9d5e2a633dc4bee2c0457ea8c38232244a24fb370cb34030fd14",
       "tests/edge/test_overall_refresh_boundaries.ts": "17c2f3fb8807f5bf093985bf12b410a7746fa34ebe6e15787998f7f02e2f32ec",
       "tests/edge/test_overall_refresh_http.ts": "c91df265da7f386f110213664c87b82ff41b13e7e17cd3b0ae58b2a0a6fb71a4",
       "tests/edge/test_overall_refresh_races.ts": "23309a904159043b48c60382d4f1145ec2ff382b3753167752cd1c72014c5d49",
@@ -212244,21 +213067,16 @@
       "tests/edge/test_usage_service.ts": "1488f2be2b2197fb05fffa32d976e6b9ee972daacb08a13364baebbe7db0eb9b",
       "tests/edge/test_waitlist_conflict_guard.synthetic.ts": "14e1eeda4afbf4bc1b2e98d1dcc5bbc1d519e7979746ea7c48cd7368275dce0b",
       "tests/edge/test_waitlist_conflict_service.formatted.v2.ts": "0e664b3e1b1753c8951f09d1f061c57a76e6726e6d2d952421cffb5f0c783b0b",
-      "tests/edge/test_year_end_access.ts": "425c44fe01c553e3a9c38a32a82dc9a09a29ed9947c28d4bc7cd8e879a405d03",
-      "tests/edge/test_year_equating.ts": "fd49e41b550b6f53582a591298d0b315b5bbfa6e949b15c9dc6f6e594ca23713",
-      "supabase/functions/_shared/jungsi/application/wildcard_candidate_review.ts": "5cc27e4ef6310cb1d36c74c6c8cb286aa4ec69944d511717acb5a287deaf8d6e",
-      "supabase/functions/_shared/jungsi/application/wildcard_public_contract.ts": "6cd243ecd7e212500c00eff08357365e2bf5e4cbe25f4a964b0105a70a285b70",
-      "supabase/functions/_shared/jungsi/application/wildcard_runtime_gate.ts": "0a295516b4587d3072ff6a6a34a7dac4395dbd86ed3e354beb2cb57575514137",
-      "supabase/functions/_shared/jungsi/application/wildcard_selection.ts": "83731a53497e5be55720bf7bd64cd493a19ec9fc291c6bcf110d0397f193dcae",
-      "tests/edge/test_wildcard_selection.synthetic.ts": "e5ecd01e8501606f34cbddc0e0a991fbf428e08d4ba200ae292a2152712f958f",
-      "tests/edge/test_wildcard_independent.synthetic.ts": "3ce87e4b6655287c84215172b1701ceac5cc011e118f80bb0e52d54322d71472",
-      "tests/edge/test_wildcard_prefix.synthetic.ts": "1d6000b8a666d9573aafe9eb77d22fccf1438ab142a4d76aa0590cd9cb2ab7fc",
-      "tests/edge/test_overall_preserve_relay.synthetic.ts": "dcb6f8a8a4de9d5e2a633dc4bee2c0457ea8c38232244a24fb370cb34030fd14",
       "tests/edge/test_wildcard_candidate_review.synthetic.ts": "de2e17a26bebfbed3f2c377c0d54590cca6f1a2a3c7064f852c406ff70a38862",
+      "tests/edge/test_wildcard_independent.synthetic.ts": "3ce87e4b6655287c84215172b1701ceac5cc011e118f80bb0e52d54322d71472",
       "tests/edge/test_wildcard_off_baseline.synthetic.ts": "d726cb87e434e655942b985e3e0695e87918fb25650fb776e3d160d2da9af885",
       "tests/edge/test_wildcard_personal_http.synthetic.ts": "1a679012a82cede23afccc9f90bf057c7e3834f4708f14b329ce8ef48885b744",
+      "tests/edge/test_wildcard_prefix.synthetic.ts": "1d6000b8a666d9573aafe9eb77d22fccf1438ab142a4d76aa0590cd9cb2ab7fc",
       "tests/edge/test_wildcard_professional_http.synthetic.ts": "752bb6bb235c1dbf0858faaf834cddc012de49f18eae1ecc48ccacfa9292619a",
-      "tests/edge/test_wildcard_projection.synthetic.ts": "5821ab415c3b212888469f0a7c431866d4e0f2713fa7fe1534b7cd991447fd08"
+      "tests/edge/test_wildcard_projection.synthetic.ts": "5821ab415c3b212888469f0a7c431866d4e0f2713fa7fe1534b7cd991447fd08",
+      "tests/edge/test_wildcard_selection.synthetic.ts": "e5ecd01e8501606f34cbddc0e0a991fbf428e08d4ba200ae292a2152712f958f",
+      "tests/edge/test_year_end_access.ts": "425c44fe01c553e3a9c38a32a82dc9a09a29ed9947c28d4bc7cd8e879a405d03",
+      "tests/edge/test_year_equating.ts": "fd49e41b550b6f53582a591298d0b315b5bbfa6e949b15c9dc6f6e594ca23713"
     },
     "migration_evidence": {
       "sql_path": "database/migrations/006_score_input_policy.prepared.sql",
@@ -213801,7 +214619,7 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "b6bac0883d0e80f7af4320b6cb2f7d8c92604b87de9fe91bfc04fffbb9cb3be6",
+      "bridge_sha256": "06d00a039b4f31897a2a9b210e9de7dcdf6e9e0f49368c722d73fa8b757eaac2",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
       "graph_manifest_sha256": "afd44c9dd856112d480b11b4653091b891e031c2643e69dbf9e3ab1eaf12c3f1",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
@@ -214382,7 +215200,7 @@
         "track",
         "admission_group"
       ],
-      "independent_history": "keep standalone 2027 rows, link past years only where authorized scope and evidence match; unresolved history does not drop the 2027 row",
+      "independent_history": "keep standalone 2027 rows, link past years only where authorized scope and evidence match; unresolved history does not drop the 2027 row Reviewed links v2 requires separately approved exact source and target scope field states (confirmed_value or confirmed_null) and an evidence-pinned trusted descriptor. A missing or unknown field never becomes confirmed null. Historical matching uses the exact target identity and a unique mapped historical row; cross-school and competing grants remain held. Legacy v1 matching remains unchanged. These assertions do not authenticate the issuer or establish actual evidence. V2 must bind source head, previous publication and source head, scope, and authority digest through a separately trusted descriptor; compose rejects a head or scope mismatch. Hash matches do not authenticate an issuer.",
       "native_fields": [
         "quota_value",
         "quota_literal_state",
@@ -214395,7 +215213,7 @@
       "transport": "preserve immutable v1 bytes and pins; versioned v2 body and separately pinned manifests/parts/consumer gates; no claim that v1 adapter supports v2",
       "coverage": "within a consistent snapshot compare source and supplied identities in both directions, counts, duplicates, values, exclusions and head; validate all parts globally against pinned manifest before publication",
       "security": "existing RLS and authorization; bounded batch/joins without N+1; read plan, indexes, IO/time budget and single writer verified before actual operation",
-      "publication_gate": "trusted source/head/coverage, publisher and version-aware consumer are NOT_VERIFIED; HOLD_UNPUBLISHED",
+      "publication_gate": "trusted source/head/coverage, publisher and version-aware consumer are NOT_VERIFIED; HOLD_UNPUBLISHED Reviewed-link v2, issuer authority, original evidence and consumer acceptance remain NOT_VERIFIED until independently checked.",
       "screen_owner": "consumer supports composite scope and 2027-only rows; actual browser acceptance NOT_RUN",
       "evidence": "source hash or flags alone do not prove official origin, eligibility, identity, completeness or approval",
       "actual_db": "NOT_RUN",
@@ -214420,7 +215238,7 @@
       ],
       "contract": "Partial R27 v2 scope exposes only independently reviewed eligible_non_practical rows; excluded and held rows are counted, not included. Both head and every body part carry matching partial coverage. Full and partial global receipts require an in-process sealed source-bound candidate/index and exact ordered rows.",
       "consumer": "Separate server-controlled descriptor and dedicated relay credential, plus independently pinned partial-aware consumer receipt; missing or invalid optional settings leave v1 available and v2 fail-closed.",
-      "preservation": "Previously substantive recruitment cells are preserved when compatible and held on conflict; unknown new statistics remain pending with null percent; prior qualification and historical references must be rebound before publication.",
+      "preservation": "Previously substantive recruitment cells are preserved when compatible and held on conflict; unknown new statistics remain pending with null percent; prior qualification and historical references must be rebound before publication. Review candidate only: separately pinned previous qualification and historical reference receipts can rebind exactly unchanged original subjects, native values and prior rows. Trusted owner authority must recheck current source/previous head, scope, expiry and revocation before preparation and for the exact final manifest. Reference export digest must match the final historical reference descriptor. The authorized authority port, writer, cancellation and actual evidence are NOT_IMPLEMENTED_OR_NOT_VERIFIED; no production activation.",
       "not_verified": [
         "actual_source_head_and_scope",
         "independent_descriptor_authority",
@@ -214642,12 +215460,12 @@
       "history.snapshot.head": {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
         "symbol": "HistorySnapshotService.head",
-        "source_sha256": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30"
+        "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3"
       },
       "history.snapshot.read": {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
         "symbol": "HistorySnapshotService.read",
-        "source_sha256": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30"
+        "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3"
       },
       "report.list-own": {
         "path": "supabase/functions/_shared/jungsi/application/own_report_list.ts",
@@ -214705,7 +215523,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
-          "sha256": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30"
+          "sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/own_report_list.ts",

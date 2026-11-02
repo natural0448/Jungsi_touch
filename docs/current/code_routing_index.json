@@ -670,7 +670,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "14ca2af63e4485c6d08b99ddc7d50157bacd0c8ea5bfdba3391b904abdeb57a2",
+      "source_sha256": "54e9e05c5bb098d8985f4ced7a5a53383c768b014984d6b48c4a3275ecb6092a",
       "symbols": [
         {
           "kind": "class",
@@ -7854,7 +7854,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30",
+        "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
         "declared_exports": [
           "HISTORY_PUBLICATION_STATUSES",
           "HISTORY_SNAPSHOT_SLOTS",
@@ -8068,7 +8068,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "fe3f8ca958caf1830d4d6653e4acd7a2565664caff0864d74c5375414cb7131e",
+        "source_sha256": "18182c85bea7ab111699bf53deb9faabf643ea1fef23e0777c7a3bc150a946a6",
         "declared_exports": [
           "P1R27Pins",
           "BoundP1R27Evidence",
@@ -8081,7 +8081,9 @@
           "buildCandidateR27ScopeIndex",
           "buildCandidateR27PartialScopeIndex",
           "buildCandidateR27PartialBody",
-          "assertSealedR27Publication"
+          "assertSealedR27Publication",
+          "P1R27RebindAuthorityPort",
+          "rebindP1R27Candidate"
         ]
       },
       {
@@ -8162,7 +8164,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "c7affb470d2d0814779acdba6ad1e56731a15e0e9dc3d30570ffc1d2bb289f04",
+        "source_sha256": "76f54539218534f679cf49d231958526265411bf94f0054f9b2e2c1b670c092f",
         "declared_exports": [
           "P1R27GateLimits",
           "prepareP1R27GlobalReceipt"
@@ -8469,7 +8471,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "4cb7dbcb39185245b764ef07fedd57f1a2713bf56a49c04abb1394a66c7620cc",
+        "source_sha256": "d7528eea5cecf5b8d4cd681c80cc704c240fa4400892dfbb5a9517f96688f860",
         "declared_exports": [
           "ReviewedR27Links",
           "R27LinkPin",
@@ -8483,7 +8485,9 @@
           "R27BatchPage",
           "R27PagedSource",
           "R27BatchOptions",
-          "buildStandaloneR27"
+          "buildStandaloneR27",
+          "R27ReviewBinding",
+          "assertReviewedR27LinkBinding"
         ]
       },
       {

@@ -14875,7 +14875,7 @@
             "src": "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts"
           }
         ],
-        "source_sha256": "b37a5bdf7092a1aa4b65fba2a031b713dc53f09d927b7cb22c36901f5ffb8a30",
+        "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
         "symbols": [
           {
             "declarations": [
@@ -25155,9 +25155,29 @@
             "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
           },
           {
+            "importedName": "assertReviewedR27LinkBinding",
+            "originalName": "assertReviewedR27LinkBinding",
+            "src": "supabase/functions/_shared/jungsi/application/r27_standalone.ts"
+          },
+          {
+            "importedName": "bindFieldQualificationPublication",
+            "originalName": "bindFieldQualificationPublication",
+            "src": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
+          },
+          {
             "importedName": "buildStandaloneR27",
             "originalName": "buildStandaloneR27",
             "src": "supabase/functions/_shared/jungsi/application/r27_standalone.ts"
+          },
+          {
+            "importedName": "cloneNativeJson",
+            "originalName": "cloneNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "detachedQualificationSnapshot",
+            "originalName": "detachedQualificationSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
           },
           {
             "importedName": "nativeJsonSha256",
@@ -25173,6 +25193,11 @@
             "importedName": "parseNativeJson",
             "originalName": "parseNativeJson",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "validateFieldServiceQualification",
+            "originalName": "validateFieldServiceQualification",
+            "src": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
           },
           {
             "importedName": "validateHistorySnapshotPayload",
@@ -25191,7 +25216,7 @@
             "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
           }
         ],
-        "source_sha256": "fe3f8ca958caf1830d4d6653e4acd7a2565664caff0864d74c5375414cb7131e",
+        "source_sha256": "18182c85bea7ab111699bf53deb9faabf643ea1fef23e0777c7a3bc150a946a6",
         "symbols": [
           {
             "declarations": [
@@ -26106,6 +26131,327 @@
               {
                 "declarationKind": "export",
                 "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "assertCurrent",
+                      "parameter_source": "(\n    input: Readonly<{\n      phase: \"candidate\" | \"publication\";\n      publication_sha256: string | null;\n      source_head_sha256: string;\n      previous_publication_sha256: string;\n      previous_source_head_sha256: string;\n      scope_sha256: string;\n      qualification_authority_sha256: string | null;\n      qualification_receipt_sha256: string | null;\n      reference_authority_sha256: string | null;\n      reference_receipt_sha256: string | null;\n    }>,\n  )",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "input",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Readonly",
+                            "value": {
+                              "typeName": "Readonly",
+                              "typeParams": [
+                                {
+                                  "kind": "typeLiteral",
+                                  "value": {
+                                    "properties": [
+                                      {
+                                        "name": "phase",
+                                        "tsType": {
+                                          "kind": "union",
+                                          "value": [
+                                            {
+                                              "kind": "literal",
+                                              "repr": "candidate",
+                                              "value": {
+                                                "kind": "string",
+                                                "string": "candidate"
+                                              }
+                                            },
+                                            {
+                                              "kind": "literal",
+                                              "repr": "publication",
+                                              "value": {
+                                                "kind": "string",
+                                                "string": "publication"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "name": "publication_sha256",
+                                        "tsType": {
+                                          "kind": "union",
+                                          "value": [
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            },
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "null",
+                                              "value": "null"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "name": "source_head_sha256",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        }
+                                      },
+                                      {
+                                        "name": "previous_publication_sha256",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        }
+                                      },
+                                      {
+                                        "name": "previous_source_head_sha256",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        }
+                                      },
+                                      {
+                                        "name": "scope_sha256",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        }
+                                      },
+                                      {
+                                        "name": "qualification_authority_sha256",
+                                        "tsType": {
+                                          "kind": "union",
+                                          "value": [
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            },
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "null",
+                                              "value": "null"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "name": "qualification_receipt_sha256",
+                                        "tsType": {
+                                          "kind": "union",
+                                          "value": [
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            },
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "null",
+                                              "value": "null"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "name": "reference_authority_sha256",
+                                        "tsType": {
+                                          "kind": "union",
+                                          "value": [
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            },
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "null",
+                                              "value": "null"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "name": "reference_receipt_sha256",
+                                        "tsType": {
+                                          "kind": "union",
+                                          "value": [
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            },
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "null",
+                                              "value": "null"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "P1R27RebindAuthorityPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  candidate: P1R27Candidate,\n  evidence: BoundP1R27Evidence,\n  source: P1R27ByteSource,\n  previous: P1BaselineBatchPort,\n  authority: P1R27RebindAuthorityPort,\n  rawProof: unknown,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "candidate",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "P1R27Candidate",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "P1R27Candidate"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "evidence",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "BoundP1R27Evidence",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "BoundP1R27Evidence"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "source",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "P1R27ByteSource",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "P1R27ByteSource"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "previous",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "P1BaselineBatchPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "P1BaselineBatchPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "authority",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "P1R27RebindAuthorityPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "P1R27RebindAuthorityPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rawProof",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "P1R27Candidate",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "P1R27Candidate"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rebindP1R27Candidate"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
                   "hasBody": true,
                   "isAsync": true,
                   "parameter_source": "(\n  candidate: P1R27Candidate,\n  evidence: BoundP1R27Evidence,\n)",
@@ -26248,7 +26594,8 @@
                 "declarationKind": "export",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(\n  index: NativeObject | undefined,\n  indexBytes: Uint8Array<ArrayBuffer>,\n  decodedParts: readonly Uint8Array<ArrayBuffer>[],\n)",
+                  "isAsync": true,
+                  "parameter_source": "(\n  index: NativeObject | undefined,\n  indexBytes: Uint8Array<ArrayBuffer>,\n  decodedParts: readonly Uint8Array<ArrayBuffer>[],\n  publication: SnapshotPublication,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -26327,12 +26674,38 @@
                           }
                         }
                       }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "publication",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SnapshotPublication",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "SnapshotPublication",
+                            "specifier": "./history_snapshot.ts"
+                          },
+                          "typeName": "SnapshotPublication"
+                        }
+                      }
                     }
                   ],
                   "returnType": {
-                    "kind": "keyword",
-                    "repr": "void",
-                    "value": "void"
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
                   }
                 },
                 "kind": "function"
@@ -26960,6 +27333,141 @@
               }
             ],
             "name": "candidateSeals"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "WeakMap",
+                    "value": {
+                      "typeName": "WeakMap",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "P1R27Candidate",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "P1R27Candidate"
+                          }
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "candidateBodyLimits"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "WeakMap",
+                    "value": {
+                      "typeName": "WeakMap",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "P1R27Candidate",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "P1R27Candidate"
+                          }
+                        },
+                        {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [
+                              {
+                                "kind": "identifier",
+                                "name": "publicationSha",
+                                "optional": false,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            ],
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Promise",
+                              "value": {
+                                "typeName": "Promise",
+                                "typeParams": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "void",
+                                    "value": "void"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "candidateRebindFreshness"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "WeakMap",
+                    "value": {
+                      "typeName": "WeakMap",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "P1R27Candidate",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "P1R27Candidate"
+                          }
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "candidateRebindExportSeals"
           },
           {
             "declarations": [
@@ -27686,6 +28194,48 @@
                 "declarationKind": "private",
                 "def": {
                   "hasBody": true,
+                  "parameter_source": "(candidate: P1R27Candidate)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "candidate",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "P1R27Candidate",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "P1R27Candidate"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rebindStructuralBody"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
                   "parameter_source": "(index: NativeObject)",
                   "params": [
                     {
@@ -27749,6 +28299,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "./history_field_qualification.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "./history_snapshot.ts",
           "targets": [
             {
@@ -27781,7 +28341,9 @@
         "buildCandidateR27ScopeIndex",
         "buildCandidateR27PartialScopeIndex",
         "buildCandidateR27PartialBody",
-        "assertSealedR27Publication"
+        "assertSealedR27Publication",
+        "P1R27RebindAuthorityPort",
+        "rebindP1R27Candidate"
       ]
     },
     "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": {
@@ -29546,7 +30108,7 @@
             "src": "supabase/functions/_shared/jungsi/application/p1_r27_global_parts.ts"
           }
         ],
-        "source_sha256": "c7affb470d2d0814779acdba6ad1e56731a15e0e9dc3d30570ffc1d2bb289f04",
+        "source_sha256": "76f54539218534f679cf49d231958526265411bf94f0054f9b2e2c1b670c092f",
         "symbols": [
           {
             "declarations": [
@@ -45397,7 +45959,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "4cb7dbcb39185245b764ef07fedd57f1a2713bf56a49c04abb1394a66c7620cc",
+        "source_sha256": "d7528eea5cecf5b8d4cd681c80cc704c240fa4400892dfbb5a9517f96688f860",
         "symbols": [
           {
             "declarations": [
@@ -45431,6 +45993,64 @@
                 "def": {
                   "properties": [
                     {
+                      "name": "source_head_sha256",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "previous_publication_sha256",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "previous_source_head_sha256",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "scope_sha256",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "authority_sha256",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "R27ReviewBinding"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
                       "name": "receiptSha256",
                       "readonly": true,
                       "tsType": {
@@ -45446,6 +46066,21 @@
                         "kind": "keyword",
                         "repr": "string",
                         "value": "string"
+                      }
+                    },
+                    {
+                      "name": "reviewBinding",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "R27ReviewBinding",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "R27ReviewBinding"
+                        }
                       }
                     }
                   ]
@@ -45565,6 +46200,112 @@
               }
             ],
             "name": "combineReviewedR27Links"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  ctx: ReviewedR27Links | undefined,\n  expected: Pick<\n    R27ReviewBinding,\n    | \"source_head_sha256\"\n    | \"previous_publication_sha256\"\n    | \"previous_source_head_sha256\"\n    | \"scope_sha256\"\n  >,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "ctx",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "ReviewedR27Links",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "ReviewedR27Links"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "undefined",
+                            "value": "undefined"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "expected",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Pick",
+                        "value": {
+                          "typeName": "Pick",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "R27ReviewBinding",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "R27ReviewBinding"
+                              }
+                            },
+                            {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "literal",
+                                  "repr": "source_head_sha256",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "source_head_sha256"
+                                  }
+                                },
+                                {
+                                  "kind": "literal",
+                                  "repr": "previous_publication_sha256",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "previous_publication_sha256"
+                                  }
+                                },
+                                {
+                                  "kind": "literal",
+                                  "repr": "previous_source_head_sha256",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "previous_source_head_sha256"
+                                  }
+                                },
+                                {
+                                  "kind": "literal",
+                                  "repr": "scope_sha256",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "scope_sha256"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "assertReviewedR27LinkBinding"
           },
           {
             "declarations": [
@@ -46961,6 +47702,14 @@
                             "repr": "string",
                             "value": "string"
                           }
+                        },
+                        {
+                          "name": "explicitScope",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
                         }
                       ]
                     }
@@ -47008,6 +47757,29 @@
                                 }
                               }
                             }
+                          }
+                        },
+                        {
+                          "name": "binding",
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "R27ReviewBinding",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "R27ReviewBinding"
+                                }
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "null",
+                                "value": "null"
+                              }
+                            ]
                           }
                         }
                       ]
@@ -47821,7 +48593,9 @@
         "R27BatchPage",
         "R27PagedSource",
         "R27BatchOptions",
-        "buildStandaloneR27"
+        "buildStandaloneR27",
+        "R27ReviewBinding",
+        "assertReviewedR27LinkBinding"
       ]
     },
     "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts": {

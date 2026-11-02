@@ -325,7 +325,11 @@ export async function prepareP1R27GlobalReceipt(
       maxPartBytes: lim.maxPartBytes,
       maxDepth: lim.maxDepth,
     });
-    assertSealedR27Publication(sealedCandidateIndex, index, decoded);
+    const sealed = await Promise.race([
+      assertSealedR27Publication(sealedCandidateIndex, index, decoded, selected).then(() => true),
+      deadline,
+    ]);
+    if (sealed !== true) fail();
     const delivery = await p1R27DeliveryDigest(p);
     if (timedOut) fail();
     return Object.freeze({

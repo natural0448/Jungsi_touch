@@ -7,9 +7,20 @@ import {
   validateHistorySnapshotPayload,
   validateQualifiedHistorySnapshotPayload,
 } from "./history_snapshot.ts";
-import { nativeJsonSha256, nativeJsonText, type NativeObject } from "../domain/json_value.ts";
+import {
+  cloneNativeJson,
+  nativeJsonSha256,
+  nativeJsonText,
+  type NativeObject,
+} from "../domain/json_value.ts";
+import {
+  bindFieldQualificationPublication,
+  detachedQualificationSnapshot,
+  validateFieldServiceQualification,
+} from "./history_field_qualification.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
 import {
+  assertReviewedR27LinkBinding,
   buildStandaloneR27,
   type ReviewedR27Links,
   type ReviewedR27Scope,
@@ -87,6 +98,12 @@ type PagePin = { readonly sha256: string; readonly bytes: number; readonly rows:
 type Evidence = P1R27Pins & { readonly pages: readonly PagePin[]; readonly expectedRows: number };
 const bindings = new WeakMap<BoundP1R27Evidence, Evidence>();
 const candidateSeals = new WeakMap<P1R27Candidate, BoundP1R27Evidence>();
+const candidateBodyLimits = new WeakMap<P1R27Candidate, number>();
+const candidateRebindFreshness = new WeakMap<
+  P1R27Candidate,
+  (publicationSha: string) => Promise<void>
+>();
+const candidateRebindExportSeals = new WeakMap<P1R27Candidate, string>();
 const candidateIndexSeals = new WeakMap<NativeObject, {
   readonly candidate: P1R27Candidate;
   readonly evidence: BoundP1R27Evidence;
@@ -583,6 +600,7 @@ export async function composeP1R27Candidate(
 ): Promise<P1R27Candidate> {
   const e = bindings.get(evidence);
   need(e, "evidence_not_bound");
+  assertReviewedR27LinkBinding(links, e);
   const limit = object(limits, [
     "max_baseline_parts",
     "max_combined_rows",
@@ -794,11 +812,17 @@ export async function composeP1R27Candidate(
   }
   const heldKeys = new Set(heldRows.map(key));
   const excludedKeys = new Set(stage.excluded.map(key));
+  const historicalCounts = new Map<string, number>();
+  for (const row of oldRows) {
+    if (row.academic_year !== 2027 && row.mapping_status === "mapped") {
+      const k = key(row);
+      historicalCounts.set(k, (historicalCounts.get(k) ?? 0) + 1);
+    }
+  }
+  // Ambiguous prior identities must remain pending even if their tuple matches.
   const historicalKeys = new Set(
-    oldRows.filter((row) =>
-      row.academic_year !== 2027 &&
-      row.mapping_status === "mapped"
-    ).map(key),
+    [...historicalCounts].filter(([, count]) => count === 1)
+      .map(([k]) => k),
   );
   const used = new Set<string>(), baselineKeys = new Set<string>();
   const assembled: NativeObject[] = [], heldPrevious: NativeObject[] = [];
@@ -877,7 +901,257 @@ export async function composeP1R27Candidate(
   };
   freezeTree(sealedCandidate);
   candidateSeals.set(sealedCandidate, evidence);
+  candidateBodyLimits.set(sealedCandidate, maxBodyBytes);
   return sealedCandidate;
+}
+
+/** Internal structural check only. This is called after an in-process candidate seal.
+ * Actual qualification authority is verified separately before a new seal is created. */
+function rebindStructuralBody(candidate: P1R27Candidate): NativeObject {
+  const raw = cloneNativeJson(candidate.body);
+  const rows = raw.rows;
+  need(Array.isArray(rows), "candidate_invalid");
+  for (const row of rows) {
+    if (!row || typeof row !== "object" || Array.isArray(row)) continue;
+    const item = row as NativeObject, rank = item.final_additional_admission_rank;
+    if (
+      rank && typeof rank === "object" && !Array.isArray(rank) &&
+      Object.hasOwn(rank, "service_qualification")
+    ) {
+      need(item.academic_year !== 2027, "candidate_invalid");
+      item.final_additional_admission_rank = Object.fromEntries(
+        Object.entries(rank).filter(([field]) => field !== "service_qualification"),
+      ) as NativeObject;
+    }
+  }
+  return validateHistorySnapshotPayload(raw, candidate.counts);
+}
+
+export interface P1R27RebindAuthorityPort {
+  /** Trusted owner implementation verifies issuer, exact scope and current approval,
+   * including expiry/revocation. The candidate cannot manufacture that authority. */
+  assertCurrent(
+    input: Readonly<{
+      phase: "candidate" | "publication";
+      publication_sha256: string | null;
+      source_head_sha256: string;
+      previous_publication_sha256: string;
+      previous_source_head_sha256: string;
+      scope_sha256: string;
+      qualification_authority_sha256: string | null;
+      qualification_receipt_sha256: string | null;
+      reference_authority_sha256: string | null;
+      reference_receipt_sha256: string | null;
+    }>,
+  ): Promise<void>;
+}
+/** Prepared from separately approved server descriptors only, never request input.
+ * Hash pins provide integrity, not issuer authentication or live DB authorization. */
+export async function rebindP1R27Candidate(
+  candidate: P1R27Candidate,
+  evidence: BoundP1R27Evidence,
+  source: P1R27ByteSource,
+  previous: P1BaselineBatchPort,
+  authority: P1R27RebindAuthorityPort,
+  rawProof: unknown,
+): Promise<P1R27Candidate> {
+  const e = bindings.get(evidence);
+  const maxBodyBytes = candidateBodyLimits.get(candidate);
+  need(
+    e && candidateSeals.get(candidate) === evidence && maxBodyBytes !== undefined &&
+      candidate.status === "HOLD_UNPUBLISHED" && candidate.rebind_required.length > 0,
+    "rebind_candidate_unsealed",
+  );
+  const proof = object(rawProof, ["qualification", "reference"]);
+  const qualifiedRows = candidate.rebind_required.filter((v) => v.kind === "field_qualification");
+  const referenceRows = candidate.rebind_required.filter((v) => v.kind === "historical_reference");
+  need(
+    qualifiedRows.length + referenceRows.length === candidate.rebind_required.length,
+    "rebind_kind_invalid",
+  );
+  const assertSource = source.assertSourceHead.bind(source);
+  const assertPrevious = previous.assertCurrent.bind(previous);
+  const expectedPrevious = Object.freeze({
+    previous_publication_sha256: e.previous_publication_sha256,
+    previous_source_head_sha256: e.previous_source_head_sha256,
+    scope_sha256: e.scope_sha256,
+  });
+  let qInput: Record<string, unknown> | null = null;
+  let qBytes: Uint8Array<ArrayBuffer> | null = null;
+  let qDescriptor: unknown;
+  if (qualifiedRows.length) {
+    qInput = object(proof.qualification, [
+      "descriptor_approvals",
+      "receipt_bytes",
+      "authority_sha256",
+      "receipt_sha256",
+      "expected_subject_count",
+    ]);
+    qBytes = bytesSnapshot(qInput.receipt_bytes as Uint8Array, 24576);
+    qDescriptor = detachedQualificationSnapshot(qInput.descriptor_approvals);
+    need(qInput.expected_subject_count === qualifiedRows.length, "qualification_count_mismatch");
+    shaField(qInput.authority_sha256);
+    shaField(qInput.receipt_sha256);
+  } else need(proof.qualification === null, "unexpected_qualification_proof");
+  let refInput: Record<string, unknown> | null = null;
+  let refBytes: Uint8Array<ArrayBuffer> | null = null;
+  if (referenceRows.length) {
+    refInput = object(proof.reference, ["receipt_bytes", "receipt_sha256", "authority_sha256"]);
+    refBytes = bytesSnapshot(refInput.receipt_bytes as Uint8Array, 8388608);
+    shaField(refInput.receipt_sha256);
+    shaField(refInput.authority_sha256);
+  } else need(proof.reference === null, "unexpected_reference_proof");
+  need(authority && typeof authority.assertCurrent === "function", "rebind_authority_required");
+  const assertAuthority = authority.assertCurrent.bind(authority);
+  const approvalScope = Object.freeze({
+    source_head_sha256: e.source_head_sha256,
+    previous_publication_sha256: e.previous_publication_sha256,
+    previous_source_head_sha256: e.previous_source_head_sha256,
+    scope_sha256: e.scope_sha256,
+    qualification_authority_sha256: qInput ? qInput.authority_sha256 as string : null,
+    qualification_receipt_sha256: qInput ? qInput.receipt_sha256 as string : null,
+    reference_authority_sha256: refInput ? refInput.authority_sha256 as string : null,
+    reference_receipt_sha256: refInput ? refInput.receipt_sha256 as string : null,
+  });
+  const assertFresh = async (publicationSha: string | null) => {
+    if (publicationSha !== null) shaField(publicationSha);
+    await assertSource(e.source_head_sha256);
+    await assertPrevious(expectedPrevious);
+    await assertAuthority(Object.freeze({
+      ...approvalScope,
+      phase: publicationSha === null ? "candidate" as const : "publication" as const,
+      publication_sha256: publicationSha,
+    }));
+  };
+  await assertFresh(null);
+  const body = cloneNativeJson(candidate.body);
+  need(Array.isArray(body.rows), "candidate_invalid");
+  const byKey = new Map<string, NativeObject>();
+  for (const raw of body.rows) {
+    need(raw && typeof raw === "object" && !Array.isArray(raw), "candidate_invalid");
+    const row = raw as NativeObject, k = key(row);
+    need(!byKey.has(k), "rebind_duplicate_row");
+    byKey.set(k, row);
+  }
+  for (const item of candidate.rebind_required) {
+    const old = item.row, current = byKey.get(key(old));
+    need(current && old.academic_year !== 2027, "rebind_row_missing");
+    const plain = cloneNativeJson(old);
+    const rank = plain.final_additional_admission_rank;
+    if (
+      rank && typeof rank === "object" && !Array.isArray(rank) &&
+      Object.hasOwn(rank, "service_qualification")
+    ) {
+      plain.final_additional_admission_rank = Object.fromEntries(
+        Object.entries(rank).filter(([field]) => field !== "service_qualification"),
+      ) as NativeObject;
+    }
+    need(
+      nativeJsonText(plain, true) === nativeJsonText(current, true),
+      "rebind_previous_row_changed",
+    );
+  }
+  let referenceExportSha: string | null = null;
+  if (refInput && refBytes) {
+    need(await sha(refBytes) === refInput.receipt_sha256, "reference_receipt_sha_mismatch");
+    const receipt = object(parseBounded(refBytes, 32), [
+      "format",
+      "status",
+      "authority_sha256",
+      "source_head_sha256",
+      "previous_publication_sha256",
+      "previous_source_head_sha256",
+      "scope_sha256",
+      "export_sha256",
+      "entries",
+    ]);
+    need(
+      receipt.format === "jungsi.p1-history-reference-rebind/v1" &&
+        receipt.status === "approved_exact_carry_forward" &&
+        receipt.authority_sha256 === refInput.authority_sha256 &&
+        receipt.source_head_sha256 === e.source_head_sha256 &&
+        receipt.previous_publication_sha256 === e.previous_publication_sha256 &&
+        receipt.previous_source_head_sha256 === e.previous_source_head_sha256 &&
+        receipt.scope_sha256 === e.scope_sha256 && Array.isArray(receipt.entries) &&
+        receipt.entries.length === referenceRows.length,
+      "reference_receipt_mismatch",
+    );
+    referenceExportSha = shaField(receipt.export_sha256);
+    const entries = new Map<string, Record<string, unknown>>();
+    for (const value of receipt.entries) {
+      const entry = object(value, ["row_key", "previous_row_sha256", "references_sha256"]);
+      need(
+        typeof entry.row_key === "string" && entry.row_key.length <= 2048 &&
+          !entries.has(entry.row_key),
+        "reference_subject_invalid",
+      );
+      shaField(entry.previous_row_sha256);
+      shaField(entry.references_sha256);
+      entries.set(entry.row_key, entry);
+    }
+    for (const item of referenceRows) {
+      const entry = entries.get(key(item.row));
+      need(
+        entry && Array.isArray(item.row.historical_cutoff_references) &&
+          await nativeJsonSha256(item.row) === entry.previous_row_sha256 &&
+          await nativeJsonSha256(item.row.historical_cutoff_references) === entry.references_sha256,
+        "reference_row_mismatch",
+      );
+    }
+  }
+  if (qInput && qBytes) {
+    // Preview context is not a publication. A final context must be independently bound
+    // to the actual manifest after the parts have been serialized.
+    const preview = await nativeJsonSha256({
+      format: "jungsi.p1-rebind-preview/v1",
+      source_head_sha256: e.source_head_sha256,
+      previous_publication_sha256: e.previous_publication_sha256,
+      coverage_sha256: e.coverage_sha256,
+    });
+    const context = await bindFieldQualificationPublication(qDescriptor, qBytes, {
+      publicationSha256: preview,
+      sourceHeadSha256: e.source_head_sha256,
+      scopeSha256: e.scope_sha256,
+      authoritySha256: qInput.authority_sha256 as string,
+      qualificationReceiptSha256: qInput.receipt_sha256 as string,
+      previousManifestSha256: e.previous_publication_sha256,
+      expectedSubjectCount: qInput.expected_subject_count as number,
+    });
+    for (const item of qualifiedRows) {
+      const current = byKey.get(key(item.row))!;
+      const oldRank = item.row.final_additional_admission_rank as NativeObject;
+      const oldQ = oldRank.service_qualification as NativeObject;
+      need(oldQ && typeof oldQ === "object" && !Array.isArray(oldQ), "qualification_missing");
+      const rank = current.final_additional_admission_rank as NativeObject;
+      const nextRank: NativeObject = {
+        ...rank,
+        service_qualification: {
+          ...cloneNativeJson(oldQ),
+          authority_sha256: qInput.authority_sha256 as string,
+          qualification_receipt_sha256: qInput.receipt_sha256 as string,
+        },
+      };
+      const validated = await validateFieldServiceQualification(
+        "final_additional_admission_rank",
+        nextRank,
+        current,
+        preview,
+        context,
+      );
+      need(validated, "qualification_rebind_invalid");
+      current.final_additional_admission_rank = { ...rank, service_qualification: validated };
+    }
+  }
+  need(new TextEncoder().encode(nativeJsonText(body)).length <= maxBodyBytes, "body_byte_limit");
+  const next: P1R27Candidate = { ...candidate, body, rebind_required: [] };
+  rebindStructuralBody(next);
+  await assertFresh(null);
+  freezeTree(next);
+  candidateSeals.set(next, evidence);
+  candidateBodyLimits.set(next, maxBodyBytes);
+  candidateRebindFreshness.set(next, (publicationSha) => assertFresh(publicationSha));
+  if (referenceExportSha !== null) candidateRebindExportSeals.set(next, referenceExportSha);
+  return next;
 }
 
 /**
@@ -899,7 +1173,7 @@ export async function buildCandidateR27PartialScopeIndex(
       candidate.rebind_required.length === 0,
     "candidate_partial_scope_unresolved",
   );
-  const body = validateHistorySnapshotPayload(candidate.body, candidate.counts);
+  const body = rebindStructuralBody(candidate);
   const rows = (body.rows as NativeObject[]).filter((row) =>
     row.academic_year === 2027 && row.mapping_status === "mapped"
   );
@@ -961,9 +1235,9 @@ export function buildCandidateR27PartialBody(
     ...candidate.body,
     r27_scope_coverage: partialCoverageFromIndex(index),
   };
-  const validated = validateHistorySnapshotPayload(body, candidate.counts);
-  freezeTree(validated);
-  return validated;
+  rebindStructuralBody({ ...candidate, body });
+  freezeTree(body);
+  return body;
 }
 /**
  * Publisher-side conservation proof. The index must be the in-process object
@@ -971,18 +1245,29 @@ export function buildCandidateR27PartialBody(
  * be byte-semantically identical to its frozen, source-bound candidate.
  * This is not independent source approval.
  */
-export function assertSealedR27Publication(
+export async function assertSealedR27Publication(
   index: NativeObject | undefined,
   indexBytes: Uint8Array<ArrayBuffer>,
   decodedParts: readonly Uint8Array<ArrayBuffer>[],
-): void {
+  publication: SnapshotPublication,
+): Promise<void> {
   const seal = index && candidateIndexSeals.get(index);
   need(seal && candidateSeals.get(seal.candidate) === seal.evidence, "candidate_index_unsealed");
+  const expectedExport = candidateRebindExportSeals.get(seal.candidate);
+  if (expectedExport !== undefined) {
+    const descriptor = Object.getOwnPropertyDescriptor(publication, "historicalReferences");
+    const actual = descriptor && "value" in descriptor ? descriptor.value : undefined;
+    need(
+      actual && Object.getOwnPropertyDescriptor(actual, "exportSha256")?.value === expectedExport,
+      "reference_export_mismatch",
+    );
+  }
   need(
     nativeJsonText(parsed(indexBytes), true) === nativeJsonText(index, true) &&
       seal.partial === (index!.format === "jungsi.r27-global-scope-index/v2"),
     "candidate_index_changed",
   );
+  const refresh = candidateRebindFreshness.get(seal.candidate);
   const expectedRows = seal.candidate.body.rows as NativeObject[];
   const coverage = seal.partial ? partialCoverageFromIndex(index!) : null;
   let position = 0;
@@ -1010,6 +1295,11 @@ export function assertSealedR27Publication(
     }
   }
   need(position === expectedRows.length, "candidate_rows_incomplete");
+  if (refresh) {
+    const pubSha = Object.getOwnPropertyDescriptor(publication, "publicationSha256")?.value;
+    need(typeof pubSha === "string" && HASH.test(pubSha), "publication_pin_invalid");
+    await refresh(pubSha);
+  }
 }
 
 /** Candidate-only whole-publication index for subsequent independent review and pinning. */
@@ -1027,7 +1317,7 @@ export async function buildCandidateR27ScopeIndex(
       candidate.rebind_required.length === 0,
     "candidate_scope_unresolved",
   );
-  const body = validateHistorySnapshotPayload(candidate.body, candidate.counts);
+  const body = rebindStructuralBody(candidate);
   const rows = (body.rows as NativeObject[]).filter((row) =>
     row.academic_year === 2027 && row.mapping_status === "mapped"
   );

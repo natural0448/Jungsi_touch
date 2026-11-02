@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "tests/review_suite_manifest.json"
-MANIFEST_SHA256 = "65f5f096afd6e7812e63d789f1d58a3171bf7fe9d293e16fdfc146a4f1d652fb"
+MANIFEST_SHA256 = "c83314926543d0364b6f41cc609d7fc60c3fe134a5b694136ebebfd2071da9da"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None
@@ -318,9 +318,9 @@ class ReviewSuites(unittest.TestCase):
                 raise AssertionError("P1 exact result or case count mismatch: " + root)
         verify_suite(data, "p1_review", P1_ROOTS, NODE_ALLOWED, 80)
 
-    def test_service_p1_deno_36(self):
+    def test_service_p1_deno_46(self):
         data = load_manifest()
-        suite = verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 36)
+        suite = verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 46)
         manual = ["src/jungsi_touch/application/public_response_schemas.json"]
         if suite["manual_read_files"] != manual:
             raise ValueError("service P1 manual-read scope mismatch")
@@ -328,7 +328,7 @@ class ReviewSuites(unittest.TestCase):
         if "," in path:
             raise ValueError("comma in allowed path is unsupported")
         expected = [
-            {"cases": 11, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
+            {"cases": 21, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
             {"result": "SYNTHETIC_ONLY", "passed": 4, "cases": [
                 "real runtime context wires request admission into synthetic P1 v2 source",
                 "invalid optional R27 settings and credentials fail v2 before r27 metadata",
@@ -353,7 +353,7 @@ class ReviewSuites(unittest.TestCase):
         matches = re.findall(r"^ok \| (\d+) passed \| (\d+) failed(?: \| (\d+) ignored)?(?: \| (\d+) filtered out)? \(", output, re.M)
         if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (18, 0, 0, 0):
             raise AssertionError("service P1 Deno result/count mismatch: " + output[-1000:])
-        verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 36)
+        verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 46)
 
     def test_service_end_deno_125(self):
         data = load_manifest()

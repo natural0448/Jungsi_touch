@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.144이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.146이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -410,7 +410,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 ## 1페이지 추정 2열과 초안 시사
 
-[공식 자료·추정 표기·시사 계약](1페이지_공식자료_추정표기_시사.md)을 따른다. 추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-01 사용자 정정: 충원 표시는 최종 합격 예비번호 한 열로 통일하고 원문 명칭이 마지막 순번을 뜻한다고 검증된 경우에만 그 항목에 연결한다. 실제 추가 합격 인원은 내부 산술 입력으로 유지한다. 입결 성적 null은 해당조건미발표로 표시한다. 동일 학년도/모집행/통계 분모와 결측·실제0·음수를 검사하고 실제 불합격자수와의 차이를 표시한다. API의 공식 history_metric과 회원 권한은 유지한다. 학교별 부분 발행은 단일 활성 catalog의 누적 불변 판으로 착수하며 source 승격·자동 병합을 하지 않는다. 실제 발행된 과거 입결의 목록/검수 계보·부분 조회를 화면에서 대조하고 승인·선택·수신·브라우저·운영 발행은 별도 인수다.
+[공식 자료·추정 표기·시사 계약](1페이지_공식자료_추정표기_시사.md)을 따른다. 추정 총 지원자·추정 탈락자 2열을 유지한다. 대학 발표 공식 지표와 분리된 화면 파생값이며 자체 누백/예상컷/개인 분석을 1페이지에 추가하지 않는다. 2026-10-19 사용자 채택: 1페이지의 자료 공급 범위는 현재 단일 정본의 서비스 대상 전국 전체다. 학교별 부분 발행 완료를 기다리는 조건을 이번 연결에 적용하지 않는다. 현재값을 읽는 공개 어댑터·명시 승인 binding과 페이지별 검수는 별도로 완료해야 하며, 자료가 부족한 셀은 보류/null로 보존한다. 2026-11-01 사용자 정정: 충원 표시는 최종 합격 예비번호 한 열로 통일하고 원문 명칭이 마지막 순번을 뜻한다고 검증된 경우에만 그 항목에 연결한다. 실제 추가 합격 인원은 내부 산술 입력으로 유지한다. 입결 성적 null은 공식 근거로 해당 조건 미발표 또는 3인 이하가 확인된 경우에만 해당 문구를 구분하며 사유 미확인은 보존한다. 동일 학년도/모집행/통계 분모와 결측·실제0·음수를 검사하고 실제 불합격자수와의 차이를 표시한다. API의 공식 history_metric과 회원 권한은 유지한다. 학교별 부분 발행은 단일 활성 catalog의 누적 불변 판으로 착수하며 source 승격·자동 병합을 하지 않는다. 실제 발행된 과거 입결의 목록/검수 계보·부분 조회를 화면에서 대조하고 승인·선택·수신·브라우저·운영 발행은 별도 인수다.
 
 ## 공통 도구의 확인된 이전 인수 기준
 
@@ -436,7 +436,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=7da2deaeb3e3adab90fcb5a943455d87ed668406ae3dce7aaf225b454185b5aa -->
+<!-- jungsi:generated spec_sha256=5fd443611899939467c11a21ce2bb73810d185e77184caa388ddd795ac7f2c43 -->
 
 
 ## 회원별 관심대학 JSON API
@@ -731,7 +731,7 @@ Root 독립 live 재실행: Fresh installed-source identity PASS. Login and the 
 | 화면·경로 | /admissions/results / history.snapshot.head, history.snapshot.read |
 | 부분 범위 | Partial R27 v2 scope exposes only independently reviewed eligible_non_practical rows; excluded and held rows are counted, not included. Both head and every body part carry matching partial coverage. Full and partial global receipts require an in-process sealed source-bound candidate/index and exact ordered rows. |
 | 권한·소비자 | Separate server-controlled descriptor and dedicated relay credential, plus independently pinned partial-aware consumer receipt; missing or invalid optional settings leave v1 available and v2 fail-closed. |
-| 원문·미확정 | preserve absent, explicit null, zero, original literal, uncertainty and conditional rollover separately; never infer final or initial from unknown stage keep standalone 2027 rows, link past years only where authorized scope and evidence match; unresolved history does not drop the 2027 row |
+| 원문·미확정 | preserve absent, explicit null, zero, original literal, uncertainty and conditional rollover separately; never infer final or initial from unknown stage keep standalone 2027 rows, link past years only where authorized scope and evidence match; unresolved history does not drop the 2027 row Reviewed links v2 requires separately approved exact source and target scope field states (confirmed_value or confirmed_null) and an evidence-pinned trusted descriptor. A missing or unknown field never becomes confirmed null. Historical matching uses the exact target identity and a unique mapped historical row; cross-school and competing grants remain held. Legacy v1 matching remains unchanged. These assertions do not authenticate the issuer or establish actual evidence. V2 must bind source head, previous publication and source head, scope, and authority digest through a separately trusted descriptor; compose rejects a head or scope mismatch. Hash matches do not authenticate an issuer. |
 | DB 대조 | 현재 정본 head·writer·동일 스냅샷·앱 역할/RLS·전체 출처와 미반환/중복을 대조하고 실행계획·실측 부하를 검증한다. 미확인 값은 보류한다. |
 | 승인 현재성 | 서버가 실제 사용자·중계 신원 및 공유 원자적 예산을 유지하고 발행판·원천·범위·소비자·만료·취소와 revision을 일관되게 확인한다. 확인 경로 미구현은 v2 전달을 차단한다. |
 | 연결·화면 | 검토된 연도별 연결만 묶는다. 보류·미확인 연결, 복수 전형·모집군, 조건부 이월과 발표 단계를 구분하고 모집인원을 임의로 채우지 않는다. |
