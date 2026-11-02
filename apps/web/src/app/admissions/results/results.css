@@ -117,7 +117,7 @@
 .et .rs-scroll.more-r::after{opacity:1}
 .et .rs-scroll.more-l .rs-years tr>:first-child{box-shadow:6px 0 6px -6px rgba(17,32,77,.35)}
 .et .rs-swipe{margin:0 0 6px;font-size:11.5px;font-weight:700;color:var(--ink-2);text-align:right}
-@media print{.et .rs-swipe{display:none}.et .rs-scroll::after{display:none}}
+@media print{.et .rs-swipe{display:none}.et .rs-scroll::after{display:none}.et .rs-scroll.more-l .rs-years tr>:first-child{box-shadow:none}}
 
 /* 전국 현재 정본: 받은 지표 그대로(줄=지표·통계·대상, 열=학년도) */
 .et .rs-rawwrap{display:grid;gap:6px}
