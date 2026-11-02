@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.147",
+  "version": "1.9.149",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -181,7 +181,7 @@
     {
       "id": "REQ-28",
       "title": "입결 화면용 판별 정리본과 근거를 보존하는 고정 열",
-      "description": "현재 정본 head마다 검증된 로컬 원자료를 재사용해 화면용 불변 정리본을 한 번 작성한다. 전체 목록·검색·필터를 화면 서버에서 처리하며 같은 내용은 재발행하지 않는다. 학년도:원래 PK, native 값/타입·단위·출처, 원문 통계/대상과 별도 정규화 코드, 충원인원/최종 합격 예비번호를 보존한다. 컷은 출처·점수 기준·대상·통계 위치를 확인해 선택하고 미해결/충돌은 null+사유로 남긴다. 새 head/body API는 구현과 엄격 확장 등록·운영 등록 후 활성화한다. 대학이 실제 발표·수집한 다른 비율 컷과 평균·최저 등 점수 통계는 원래 라벨·비율/null·축·집단·단위를 보존해 별도 표시하며 50/70 전용 필터로 누락하지 않는다. 정확한 독립 검수 영수증의 필드별 표시자격은 승인된 마지막 합격 예비번호 셀에만 결속하고, 원값·원상태·원단위·일반 검수 보류를 바꾸지 않는다. 2026-11-02 Owner 확인(충원 열): 과거 입결 표에서 충원인원과 최종 합격 예비번호를 각각 표시하지 않고 최종 합격 예비번호 한 열만 사용한다. 실제 추가 합격 인원은 내부 원자료와 추정 탈락자 입력으로 유지한다. 2026-11-02 사용자 직접 선택(성적 공란): 입결 성적 null은 공식 근거로 다른 통계만 발표된 경우 해당조건미발표, 같은 관측의 3인 이하가 공식 확인된 경우 3인이하미발표로 표시하고 사유 미확인은 보존한다."
+      "description": "현재 정본 head마다 검증된 로컬 원자료를 재사용해 화면용 불변 정리본을 한 번 작성한다. 전체 목록·검색·필터를 화면 서버에서 처리하며 같은 내용은 재발행하지 않는다. 학년도:원래 PK, native 값/타입·단위·출처, 원문 통계/대상과 별도 정규화 코드, 충원인원/최종 합격 예비번호를 보존한다. 컷은 출처·점수 기준·대상·통계 위치를 확인해 선택하고 미해결/충돌은 null+사유로 남긴다. 새 head/body API는 구현과 엄격 확장 등록·운영 등록 후 활성화한다. 대학이 실제 발표·수집한 다른 비율 컷과 평균·최저 등 점수 통계는 원래 라벨·비율/null·축·집단·단위를 보존해 별도 표시하며 50/70 전용 필터로 누락하지 않는다. 정확한 독립 검수 영수증의 필드별 표시자격은 승인된 마지막 합격 예비번호 셀에만 결속하고, 원값·원상태·원단위·일반 검수 보류를 바꾸지 않는다. 2026-11-02 Owner 확인(충원 열): 과거 입결 표에서 충원인원과 최종 합격 예비번호를 각각 표시하지 않고 최종 합격 예비번호 한 열만 사용한다. 실제 추가 합격 인원과 최종 합격 예비번호는 정의·단위·원문·출처를 구분해 내부 원자료에 보존한다. 과거 입결 표에는 최종 합격 예비번호 한 열만 표시한다. 2026-11-02 Owner 회신 3절의 사용자 결정에 따라 추정 탈락자는 화면에 표시한 경쟁률로 산출한 추정 총 지원자에서 모집인원과 표에 표시된 정수 단위의 최종 합격 예비번호를 차감한다. 예비번호 결측·부적합 또는 음수 결과는 표시하지 않으며, 추정치와 실제 탈락자·실제 충원 인원을 구분한다. 화면 발표·배포 여부는 별도로 기록한다. 2026-11-02 사용자 직접 선택(성적 공란): 입결 성적 null은 공식 근거로 다른 통계만 발표된 경우 해당조건미발표, 같은 관측의 3인 이하가 공식 확인된 경우 3인이하미발표로 표시하고 사유 미확인은 보존한다."
     },
     {
       "id": "REQ-29",
@@ -7563,7 +7563,8 @@
       "scripts/check_edge_contract.py",
       "scripts/run_edge_tests.py",
       "scripts/edge_source_scope.py",
-      "scripts/bootstrap_edge_runtime.py"
+      "scripts/bootstrap_edge_runtime.py",
+      "scripts/merge_branch_generated.py"
     ],
     "line_endings": "LF for generated documents, route catalogs, hooks and new service foundation",
     "feature_ownership": "시스템기획팀만 develop에서 기획·공통 관리 설정을 직접 관리한다. 시스템·콘텐츠 개발자는 feature/application-pre-data-platform, 화면 개발자는 feature/presentation-foundation을 상시 재사용한다. 다른 팀은 develop에서 직접 구현하지 않고 담당 브랜치의 PR로 누적한다. 3티어는 폴더·포트·의존 관계로 구분한다. 하위 작업은 필요 시 부모·담당·사유를 정본에 등록하며 작업 항목이나 에이전트마다 생성하지 않는다.",
@@ -7747,7 +7748,9 @@
         "tests/test_committed_runner_progress.py",
         "tests/test_incident_recovery_harness.py",
         "tests/test_edge_unit_aggregation.py",
-        "tests/test_stage_projection_guard_registration.py"
+        "tests/test_stage_projection_guard_registration.py",
+        "scripts/merge_branch_generated.py",
+        "tests/test_merge_branch_generated.py"
       ],
       "child_templates": [
         {
@@ -7801,10 +7804,10 @@
       ],
       "registration_rule": "새 하위 브랜치 생성 전 시스템기획팀이 develop 정본의 additional_branches에 name·kind·owner·parent·pr_target·status·temporary=true·purpose·base_commit을 기록한다. 출발 SHA는 부모의 실제 커밋이어야 한다. 최초 생성 후 부모 변경은 협의해 명세와 PR base를 함께 갱신한다. 상시 노드뿐 아니라 같은 담당의 등록 임시 노드 아래에도 꼭 필요하면 작업을 등록할 수 있다. allowed_parent_kinds가 허용한 부모 역할만 사용하며 직계 부모를 건너뛰지 않는다.",
       "hierarchy_note": "Git 브랜치는 네이티브 폴더 트리가 아니다. 이 문서의 부모는 출발 커밋과 PR 통합 경로를 뜻한다. 상시 브랜치명 뒤에 /를 붙인 하위 ref는 이름 충돌을 일으킬 수 있으므로 별도 task 접두어와 부모 등록을 사용한다.",
-      "sync_rule": "origin/develop의 최신 기획·HEAD를 확인해 자기 상시 브랜치에 일반 merge로 가져온다. 충돌은 해당 담당이 현재 공통 명세와 코드 변경 범위로 해결한다. 다른 체크아웃을 reset하거나 원자료를 재집계하지 않는다.",
+      "sync_rule": "origin/develop의 최신 기획·HEAD를 확인해 자기 상시 브랜치에 일반 merge로 가져온다. 충돌은 해당 담당이 현재 공통 명세와 코드 변경 범위로 해결한다. 다른 체크아웃을 reset하거나 원자료를 재집계하지 않는다. 관련 PR이 develop에 병합되거나 계약이 바뀌면 다음 작업 전 대조하고, 각 담당 PR 제출·갱신 전에도 기준 SHA를 확인한다. 명세 충돌에는 검증 기준 커밋과 인덱스에 결속된 병합 미리보기를 사용할 수 있다. 같은 키·배열의 판단 불가 충돌과 생성물 외 충돌은 중단하며, 실제 생성 목록을 재생성하고 동일 스냅샷 검사를 별도로 통과한다. 미리보기는 작업본·인덱스·ref를 자동 수정하지 않는다. 충돌 단계 1·2·3을 유일 공통 조상과 양쪽 부모의 명세 파일 mode·blob에 각각 결속하며 불일치 시 중단한다. 무관한 정상 신규 파일은 허용한다. 명세가 stage 0이거나 부모별 변경 경로가 256개를 넘는 경우 이 도구는 보수적으로 중단하고 별도 검토한다.",
       "merge_rule": "임시 개발 작업은 등록된 직계 부모에 먼저 PR한다. 일반적으로 부모는 담당 상시 브랜치이며 기존 PR #9처럼 등록한 임시 부모가 있으면 그 단계를 따른다. 상시 시스템/화면 브랜치는 develop에 PR한다. 최종 main PR은 develop에서만 연다. GitHub 병합은 merge commit으로 수행해 상시 브랜치의 이력을 이어 간다.",
       "lifecycle_rule": "기본 노드는 상시 4개뿐이다. 임시 작업은 등록 후 필요할 때만 만들며 종료 시 status=retired_merged와 병합 PR/커밋을 기록한다. 브랜치 ref·로컬 파일·worktree·캐시·잠금 파일 삭제는 자동화하지 않는다. 삭제 대상·범위를 사용자에게 명시해 허용받기 전 보존한다.",
-      "review_rule": "develop의 기획/계약 최종 검토와 통합 조율은 시스템기획팀이 담당한다. 두 개발자는 담당 브랜치에서 작업한다. 계약 변경에는 작업 요구사항·API·DTO·소유권·계층과 변경 검증을 같은 커밋에 포함한다. 상시 브랜치 간 직접 병합으로 develop을 우회하지 않는다. REQ-24~26·보안 개발기준은 모든 구현의 필수 참조이며 보안 gate/operation/증거 누락은 인수하지 않는다. 2026-10-19 서비스 함수 공동 개발은 service_delegation_policy를 따른다. 허용 기능은 함수별 사전 승인 없이 화면팀이 구현하고 정상 PR로 통합한다.",
+      "review_rule": "develop의 기획/계약 최종 검토와 통합 조율은 시스템기획팀이 담당한다. 두 개발자는 담당 브랜치에서 작업한다. 계약 변경에는 작업 요구사항·API·DTO·소유권·계층과 변경 검증을 같은 커밋에 포함한다. 상시 브랜치 간 직접 병합으로 develop을 우회하지 않는다. REQ-24~26·보안 개발기준은 모든 구현의 필수 참조이며 보안 gate/operation/증거 누락은 인수하지 않는다. 2026-10-19 서비스 함수 공동 개발은 service_delegation_policy를 따른다. 허용 기능은 함수별 사전 승인 없이 화면팀이 구현하고 정상 PR로 통합한다. 시스템기획팀은 공통 명세·기획·라우팅을, 개발팀은 서비스 구현을 검토한다. DB·환산 엔진의 기존 사용자 주도 범위를 유지하고 PR 준비·병합·운영 배포 상태를 구분한다.",
       "github_settings": {
         "default_branch": "main",
         "allow_merge_commit": true,
@@ -8216,7 +8219,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.147",
+        "contract_version": "1.9.149",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -8390,7 +8393,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.147",
+        "contract_version": "1.9.149",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8556,7 +8559,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.147",
+        "contract_version": "1.9.149",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8575,7 +8578,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.147",
+        "contract_version": "1.9.149",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8600,7 +8603,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.147",
+        "contract_version": "1.9.149",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8625,7 +8628,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.147",
+        "contract_version": "1.9.149",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -11593,6 +11596,219 @@
             ]
           },
           {
+            "path": "scripts/merge_branch_generated.py",
+            "layer": "planning_tool",
+            "status": "shared_management_or_synthetic_CLI",
+            "requirements": [],
+            "source_sha256": "03c9ed9713dbbcaca7fd32464ed7c9fc4f65c8e9d2ea16529b169895f1b98f11",
+            "symbols": [
+              {
+                "kind": "class",
+                "name": "Blobs",
+                "signature": "class Blobs:",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "Blobs.__init__",
+                "signature": "def __init__(self, repo):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "Blobs.close",
+                "signature": "def close(self):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "Blobs.read",
+                "signature": "def read(self, oid):",
+                "decorators": []
+              },
+              {
+                "kind": "class",
+                "name": "Stop",
+                "signature": "class Stop(ValueError):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "attributes",
+                "signature": "def attributes(repo, options):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "check_destination",
+                "signature": "def check_destination(repo, dest):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "check_spec_tree_identity",
+                "signature": "def check_spec_tree_identity(repo, base, parent):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "context",
+                "signature": "def context(repo):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "ensure_generated_conflicts",
+                "signature": "def ensure_generated_conflicts(index, generated):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "ensure_git_environment",
+                "signature": "def ensure_git_environment():",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "git",
+                "signature": "def git(repo, *args):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "key",
+                "signature": "def key(value):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "load_generator",
+                "signature": "def load_generator(repo, index, blob, expected_gen, expected_audit, dependencies):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "main",
+                "signature": "def main(argv=None):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "merge_notes",
+                "signature": "def merge_notes(base, ours, theirs):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "merge_spec",
+                "signature": "def merge_spec(base, ours, theirs):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "merge_value",
+                "signature": "def merge_value(base, ours, theirs, path=()):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "parse_index",
+                "signature": "def parse_index(raw):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "parse_json",
+                "signature": "def parse_json(raw):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "parse_json.exact_float",
+                "signature": "def exact_float(text):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "parse_json.invalid",
+                "signature": "def invalid(_):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "parse_json.pairs",
+                "signature": "def pairs(items):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "parse_tree_changes",
+                "signature": "def parse_tree_changes(raw, allow_renames):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "pins_from_commit",
+                "signature": "def pins_from_commit(repo, commit, index):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "preview",
+                "signature": "def preview(repo, dest, expected_head, expected_parent, expected_gen, expected_audit, dependencies, verified_commit=None):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "preview.read",
+                "signature": "def read(path):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "read_worktree",
+                "signature": "def read_worktree(repo, path):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "renormalize_setting",
+                "signature": "def renormalize_setting(repo):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "safe_path",
+                "signature": "def safe_path(name):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "same",
+                "signature": "def same(a, b):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "tree_spec",
+                "signature": "def tree_spec(repo, revision):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "verify_stage_binding",
+                "signature": "def verify_stage_binding(repo, head, parent, index):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "write_new",
+                "signature": "def write_new(root, relative, data):",
+                "decorators": []
+              }
+            ]
+          },
+          {
             "path": "scripts/probe_backend_connection.py",
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
@@ -11612,7 +11828,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "3e66266eeeba15a37ceaf27b444a59038807c86868d5a4650b8d79b977fbcc4a",
+            "source_sha256": "df197742dce96d37a1bd2176abc558e9630daea7fcfbc4010e298d39ce8e824d",
             "symbols": [
               {
                 "kind": "function",
@@ -24639,6 +24855,24 @@
         "REQ-28"
       ],
       "summary": "Internal review candidate for evidence-bound missing-score reasons; unverified cases remain unknown and issuer, public DTO, UI, database, and deployment are not connected."
+    },
+    {
+      "date": "2026-11-02",
+      "requirements": [
+        "REQ-24",
+        "REQ-28"
+      ],
+      "summary": "화면 Owner의 2026-11-02 후속 회신 3절과 현재 화면 소스에 맞춰 REQ-28의 추정 탈락자 입력을 최종 합격 예비번호로 수정한다. 실제 충원 인원과 예비번호의 의미·단위·원문은 구분해 보존하고 계산값은 실제 탈락자와 구별한다. 경쟁률은 원문을 보존하며 화면 표시용 반올림 값을 추정에 사용한다. DB 정정·운영 배포는 별도 검증 전이다."
+    },
+    {
+      "date": "2026-11-02",
+      "requirements": [],
+      "summary": "브랜치 동기화 시점과 담당 검토를 명확히 하고, 양쪽 변경을 보존하며 충돌 시 중단하는 정본 병합 미리보기 도구를 공유한다. 생성 문서는 합친 명세에서 재생성하며 자동 ours 설정을 사용하지 않는다. 합성 검증과 실제 충돌 검증을 구분한다."
+    },
+    {
+      "date": "2026-11-02",
+      "requirements": [],
+      "summary": "완전한 스냅샷 시험이 느린 PC에서 1800초 제한에 반복 중단되어 Python 시험 제한을 3600초, 상위 보존 실행 제한을 4200초로 조정한다. 실패·스킵 차단 및 전체 시험을 유지하며 GitHub 워크플로의 40분 제한은 별도다."
     }
   ],
   "overall_analysis_contract": {

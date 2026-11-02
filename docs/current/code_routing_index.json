@@ -1647,6 +1647,219 @@
       ]
     },
     {
+      "path": "scripts/merge_branch_generated.py",
+      "layer": "planning_tool",
+      "status": "shared_management_or_synthetic_CLI",
+      "requirements": [],
+      "source_sha256": "03c9ed9713dbbcaca7fd32464ed7c9fc4f65c8e9d2ea16529b169895f1b98f11",
+      "symbols": [
+        {
+          "kind": "class",
+          "name": "Blobs",
+          "signature": "class Blobs:",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "Blobs.__init__",
+          "signature": "def __init__(self, repo):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "Blobs.close",
+          "signature": "def close(self):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "Blobs.read",
+          "signature": "def read(self, oid):",
+          "decorators": []
+        },
+        {
+          "kind": "class",
+          "name": "Stop",
+          "signature": "class Stop(ValueError):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "attributes",
+          "signature": "def attributes(repo, options):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "check_destination",
+          "signature": "def check_destination(repo, dest):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "check_spec_tree_identity",
+          "signature": "def check_spec_tree_identity(repo, base, parent):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "context",
+          "signature": "def context(repo):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ensure_generated_conflicts",
+          "signature": "def ensure_generated_conflicts(index, generated):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "ensure_git_environment",
+          "signature": "def ensure_git_environment():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "git",
+          "signature": "def git(repo, *args):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "key",
+          "signature": "def key(value):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "load_generator",
+          "signature": "def load_generator(repo, index, blob, expected_gen, expected_audit, dependencies):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "main",
+          "signature": "def main(argv=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "merge_notes",
+          "signature": "def merge_notes(base, ours, theirs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "merge_spec",
+          "signature": "def merge_spec(base, ours, theirs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "merge_value",
+          "signature": "def merge_value(base, ours, theirs, path=()):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_index",
+          "signature": "def parse_index(raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_json",
+          "signature": "def parse_json(raw):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_json.exact_float",
+          "signature": "def exact_float(text):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_json.invalid",
+          "signature": "def invalid(_):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_json.pairs",
+          "signature": "def pairs(items):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "parse_tree_changes",
+          "signature": "def parse_tree_changes(raw, allow_renames):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "pins_from_commit",
+          "signature": "def pins_from_commit(repo, commit, index):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "preview",
+          "signature": "def preview(repo, dest, expected_head, expected_parent, expected_gen, expected_audit, dependencies, verified_commit=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "preview.read",
+          "signature": "def read(path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "read_worktree",
+          "signature": "def read_worktree(repo, path):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "renormalize_setting",
+          "signature": "def renormalize_setting(repo):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "safe_path",
+          "signature": "def safe_path(name):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "same",
+          "signature": "def same(a, b):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "tree_spec",
+          "signature": "def tree_spec(repo, revision):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "verify_stage_binding",
+          "signature": "def verify_stage_binding(repo, head, parent, index):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "write_new",
+          "signature": "def write_new(root, relative, data):",
+          "decorators": []
+        }
+      ]
+    },
+    {
       "path": "scripts/probe_backend_connection.py",
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
@@ -1666,7 +1879,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "3e66266eeeba15a37ceaf27b444a59038807c86868d5a4650b8d79b977fbcc4a",
+      "source_sha256": "df197742dce96d37a1bd2176abc558e9630daea7fcfbc4010e298d39ce8e824d",
       "symbols": [
         {
           "kind": "function",

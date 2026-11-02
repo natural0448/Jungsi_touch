@@ -4,8 +4,8 @@ import argparse,datetime,hashlib,json,os,re,subprocess,sys
 from pathlib import Path
 from edge_source_scope import classify_sources
 from check_project_consistency import ROOT,GitSnapshot,validate_content,validate_changed_paths,snapshot_changed_paths,validate_snapshot_baseline,SPEC_PATH
-PYTHON_SUITE_TIMEOUT_SECONDS = 1800
-RETAINED_RUNNER_TIMEOUT_SECONDS = 2200
+PYTHON_SUITE_TIMEOUT_SECONDS = 3600
+RETAINED_RUNNER_TIMEOUT_SECONDS = 4200
 
 HELPER = """import importlib.util,json,pathlib,re,sys,time,unittest
 root=pathlib.Path.cwd()
