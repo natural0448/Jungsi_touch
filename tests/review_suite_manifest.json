@@ -37044,7 +37044,7 @@
         "node:fs",
         "node:zlib"
       ],
-      "expected_count": 46,
+      "expected_count": 79,
       "files": {
         "src/jungsi_touch/application/public_response_schemas.json": "89138419ab060d10ce581eca037b4e7b4c6d1f9ca319fa0c2882424b01130e5a",
         "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
@@ -37087,6 +37087,7 @@
         "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "4f95a22edbdc24b5174094144bc49332582c47178f54c678ade74e1318bd56de",
         "supabase/functions/_shared/jungsi/application/score_input_ports.ts": "c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c",
         "supabase/functions/_shared/jungsi/application/score_input_service.ts": "26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1",
+        "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts": "e0552f3b3862d28b07bf28d4212c93c46695cdb3cf92b5965bdb9f385eb8339a",
         "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
         "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
         "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3d294305b2217a664e10c254853d6502ce0601bc9ac116a281d3b68a88ddeee5",
@@ -37155,7 +37156,8 @@
         "tests/service_p1/test_p1_r27_http_order.synthetic.ts": "bfaf2570c7bfc8ed32e02a7a06b5dc2fa9fa81c8404baa8fee5555a76916bf6c",
         "tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs": "e3246840d2c9fe3b2c5c5e7aef876c4655b02b1abb0be76e70e12624c71e142d",
         "tests/service_p1/test_p1_r27_request_admission.synthetic.ts": "9a2f54948bfefcc814707111f42f36510ce73adcbd7259137f4645e365f8f1ba",
-        "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs": "c7da5948fd93e9c4b7b5085b1d2aebfa64cd9491b3ad7054e09087f603338694"
+        "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs": "c7da5948fd93e9c4b7b5085b1d2aebfa64cd9491b3ad7054e09087f603338694",
+        "tests/service_p1/test_score_null_reason_review.synthetic.mjs": "482a13404b5c43566d99e76a9595b3883238719c6bbf4f74d8c79f749f984974"
       },
       "graphs": {
         "tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs": {
@@ -54926,6 +54928,216 @@
             "supabase/functions/_shared/jungsi/infrastructure/usage_postgres.ts": "6f18fff45c14e97d02379cc8ef13c13ee414a605ff287f1807be9c0f980cdd9a",
             "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs": "c7da5948fd93e9c4b7b5085b1d2aebfa64cd9491b3ad7054e09087f603338694"
           }
+        },
+        "tests/service_p1/test_score_null_reason_review.synthetic.mjs": {
+          "builtins": [
+            "node:assert/strict",
+            "node:test"
+          ],
+          "edges": [
+            [
+              "supabase/functions/_shared/jungsi/application/access.ts",
+              "../domain/exact.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/exact.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/access.ts",
+              "../domain/time.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/time.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/access.ts",
+              "./ports.ts",
+              [
+                [
+                  "type",
+                  "supabase/functions/_shared/jungsi/application/ports.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/history_field_qualification.ts",
+              "../domain/json_value.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/json_value.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/history_field_qualification.ts",
+              "../domain/native_json.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/native_json.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/history_field_qualification.ts",
+              "./access.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/access.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
+              "../domain/json_value.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/json_value.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
+              "../domain/native_json.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/native_json.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
+              "../domain/text.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/text.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
+              "./access.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/access.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
+              "./history_field_qualification.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/domain/json_value.ts",
+              "./exact.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/exact.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/domain/json_value.ts",
+              "./native_json.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/native_json.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/domain/native_json.ts",
+              "./exact.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/exact.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/domain/time.ts",
+              "./exact.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/exact.ts"
+                ]
+              ]
+            ],
+            [
+              "tests/service_p1/test_score_null_reason_review.synthetic.mjs",
+              "../../supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts"
+                ]
+              ]
+            ],
+            [
+              "tests/service_p1/test_score_null_reason_review.synthetic.mjs",
+              "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/json_value.ts"
+                ]
+              ]
+            ],
+            [
+              "tests/service_p1/test_score_null_reason_review.synthetic.mjs",
+              "node:assert/strict",
+              [
+                [
+                  "code",
+                  "node:assert/strict"
+                ]
+              ]
+            ],
+            [
+              "tests/service_p1/test_score_null_reason_review.synthetic.mjs",
+              "node:test",
+              [
+                [
+                  "code",
+                  "node:test"
+                ]
+              ]
+            ]
+          ],
+          "files": {
+            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
+            "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
+            "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts": "e0552f3b3862d28b07bf28d4212c93c46695cdb3cf92b5965bdb9f385eb8339a",
+            "supabase/functions/_shared/jungsi/domain/exact.ts": "ae40f4365f6578b7bb3b571da0365b79382594e59c1e841f71adb287ed7eddf5",
+            "supabase/functions/_shared/jungsi/domain/json_value.ts": "ba38aeac3fff9d1f73d96e1bcaad06431f9e2e28179a3a7477700d9a359cd98a",
+            "supabase/functions/_shared/jungsi/domain/native_json.ts": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a",
+            "supabase/functions/_shared/jungsi/domain/text.ts": "da8931fbab3f328fe4dbf89db8dbcfdb5fc55898c44dcdbbf6f8cedb59677fe9",
+            "supabase/functions/_shared/jungsi/domain/time.ts": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
+            "tests/service_p1/test_score_null_reason_review.synthetic.mjs": "482a13404b5c43566d99e76a9595b3883238719c6bbf4f74d8c79f749f984974"
+          }
         }
       },
       "layers": {
@@ -54971,6 +55183,7 @@
           "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "application",
           "supabase/functions/_shared/jungsi/application/score_input_ports.ts": "application",
           "supabase/functions/_shared/jungsi/application/score_input_service.ts": "application",
+          "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts": "application",
           "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "application",
           "supabase/functions/_shared/jungsi/application/session_service.ts": "application",
           "supabase/functions/_shared/jungsi/application/university_analysis.ts": "application",
@@ -55039,7 +55252,8 @@
           "tests/service_p1/test_p1_r27_http_order.synthetic.ts": "suite_test",
           "tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs": "suite_test",
           "tests/service_p1/test_p1_r27_request_admission.synthetic.ts": "suite_test",
-          "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs": "suite_test"
+          "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs": "suite_test",
+          "tests/service_p1/test_score_null_reason_review.synthetic.mjs": "suite_test"
         },
         "observed_layer_edges": [
           [
@@ -55112,7 +55326,8 @@
         "tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs",
         "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs",
         "tests/service_p1/test_p1_r27_request_admission.synthetic.ts",
-        "tests/service_p1/test_p1_r27_http_order.synthetic.ts"
+        "tests/service_p1/test_p1_r27_http_order.synthetic.ts",
+        "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
       ]
     }
   }

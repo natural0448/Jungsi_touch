@@ -5177,6 +5177,8 @@ SERVICE_CANDIDATE_SHARED_FIXTURES = {
     "service_p1": frozenset(['tests/edge/fixture.ts', 'tests/edge/synthetic_api_contract.ts', 'tests/edge/synthetic_history_qualification.ts', 'tests/edge/synthetic_history_snapshot.ts', 'tests/edge/synthetic_runtime_binding.ts']),
 }
 
+SCORE_NULL_SUITE_ROOT = "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
+
 SERVICE_CANDIDATE_GROUPS = {
     "p1_review": (["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs"], 80, ["node:assert/strict", "node:fs", "node:zlib"]),
     "service_end": (["tests/service_end/" + name for name in (
@@ -5184,7 +5186,7 @@ SERVICE_CANDIDATE_GROUPS = {
         "test_service_end_error_schema.synthetic.ts", "test_service_end_http.synthetic.ts",
         "test_service_end_official_display.synthetic.ts", "test_service_end_professional.synthetic.ts",
         "test_service_end_runtime.synthetic.ts", "test_official_display_final_expiry.synthetic.ts")], 125, []),
-    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts'], 46, ["node:assert/strict", "node:fs", "node:zlib"]),
+    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts', SCORE_NULL_SUITE_ROOT], 79, ["node:assert/strict", "node:fs", "node:zlib"]),
     "search503": (["tests/search503/" + name for name in (
         "test_combined_search503_end.synthetic.v5.mjs", "test_search503_stream_limits.synthetic.v4.mjs",
         "test_search503_reader_unlock.synthetic.v3.mjs", "test_search503_final_error.synthetic.v2.mjs",
@@ -5271,7 +5273,8 @@ def service_candidate_suite_errors(paths, read, spec):
                 graph = graphs[root]
                 if not isinstance(graph, dict) or set(graph) != {"files", "builtins", "edges"}: raise ValueError("graph fields")
                 gf, builtins = graph["files"], graph["builtins"]
-                if not isinstance(gf, dict) or root not in gf or not isinstance(builtins, list) or len(set(builtins)) != len(builtins) or not set(builtins) <= set(allowed):
+                root_allowed = ["node:assert/strict", "node:test"] if name == "service_p1" and root == SCORE_NULL_SUITE_ROOT else allowed
+                if not isinstance(gf, dict) or root not in gf or not isinstance(builtins, list) or len(set(builtins)) != len(builtins) or not set(builtins) <= set(root_allowed):
                     raise ValueError("graph modules")
                 if any(sf.get(p) != h for p, h in gf.items()): raise ValueError("graph hash")
                 all_graph_files.update(gf)
