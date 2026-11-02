@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.150",
-  "source_sha256": "b80af8ed22a80e4655ed93a21b9aa1f85a1541759336200d0ab535ceedee2637",
+  "source_sha256": "46705ca825defeabfaeb371b0940bd6e95c139832be2cb94d4a2abe7aa518d76",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4092,7 +4092,7 @@
         },
         {
           "path": "scripts/run_edge_tests.py",
-          "sha256": "813a602e237814ec4cb5d088986949dde915a81d13b3d04a1a2c34025c51cecb"
+          "sha256": "5812ffd9d44cc22d729bea26f50d4c30457ad069370d0e0fe5746e90517149fb"
         }
       ],
       "tests": [

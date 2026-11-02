@@ -171,6 +171,30 @@ def current_public_registration(spec,before):
         raise EdgeFailure('current_public_source_or_test_binding_invalid')
     return c
 
+def current_public_own_2027_registration(spec,before):
+    """Bind the separate own-2027 internal candidate without changing the old provider suite."""
+    source='supabase/functions/_shared/current_public_r27_selection.ts'
+    test='supabase/functions/_shared/current_public_r27_selection_test.ts'
+    existing='supabase/functions/_shared/current_public_catalog.ts'
+    bounded='supabase/functions/_shared/current_public_r27_bounded.ts'
+    bounded_test='supabase/functions/_shared/current_public_r27_bounded_test.ts'
+    required={source,test,existing,bounded,bounded_test}
+    contract=spec.get('current_public_supply_contract',{}).get('own_2027_batch_verification')
+    if contract is None:
+        if any(p in before for p in required if p!=existing):raise EdgeFailure('own_2027_batch_verification_missing')
+        return None
+    bindings=contract.get('source_bindings') if isinstance(contract,dict) else None
+    if (not isinstance(contract,dict) or contract.get('format')!='jungsi.own-2027-batch-verification/v1' or
+        contract.get('status')!='SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED' or
+        contract.get('test_path')!=test or contract.get('test_count')!=11 or
+        contract.get('bounded_test_path')!=bounded_test or contract.get('bounded_test_count')!=8 or
+        not isinstance(bindings,list) or len(bindings)!=len(required) or
+        {b.get('path') for b in bindings if isinstance(b,dict)}!=required or
+        any(not isinstance(b,dict) or set(b)!={'path','sha256'} or
+            not isinstance(b.get('sha256'),str) or before.get(b['path'])!=b['sha256'] for b in bindings)):
+        raise EdgeFailure('own_2027_batch_source_or_test_binding_invalid')
+    return contract
+
 def whole_population_registration(spec,before):
     """Separate strict v2 regressions; keep the foundation and v1 checks exact."""
     prefix='supabase/functions/_shared/'
@@ -684,6 +708,23 @@ def run_workspace(root,manifest,deno,python,output):
           coverage='CURRENT_PUBLIC_PROVIDER_CANDIDATE_SYNTHETIC',
           source_bindings=public_registration['source_bindings'],
           actual_DB='NOT_VERIFIED_BY_SOURCE_SUITE',publication='NOT_APPROVED_BY_SOURCE_SUITE',deployment='NOT_RUN')
+    own_2027=current_public_own_2027_registration(spec,before)
+    if own_2027 is not None:
+        if public_unit is None:raise EdgeFailure('own_2027_requires_current_public_provider')
+        own_paths=['supabase/functions/_shared/current_public_r27_selection.ts',own_2027['test_path'],
+          'supabase/functions/_shared/current_public_r27_bounded.ts',own_2027['bounded_test_path']]
+        command([deno,'check',*common,*own_paths],root=root,output=output,name='own_2027_batch_check')
+        command([deno,'lint','--config',cfg['config'],*own_paths],root=root,output=output,name='own_2027_batch_lint')
+        command([deno,'fmt','--check','--config',cfg['config'],*own_paths],root=root,output=output,name='own_2027_batch_fmt')
+        own_junit=output.resolve()/'own_2027_batch.junit.xml'
+        command([deno,'test',*common,'--reporter=dot','--junit-path',str(own_junit),own_2027['test_path'],own_2027['bounded_test_path']],
+          root=root,output=output,name='own_2027_batch_unit')
+        own_unit=dict(**parse_junit(own_junit,own_2027['test_count']+own_2027['bounded_test_count']),
+          coverage='OWN_2027_BATCH_SYNTHETIC',source_bindings=own_2027['source_bindings'],
+          actual_DB='NOT_RUN',publication='NOT_RUN',deployment='NOT_RUN')
+        public_unit['baseline_tests_run']=public_unit['tests_run']
+        public_unit['own_2027_batch']=own_unit
+        public_unit['tests_run']+=own_unit['tests_run']
     whole_population_unit=None
     whole_population=whole_population_registration(spec,before)
     if whole_population is not None:

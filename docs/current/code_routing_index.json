@@ -1942,7 +1942,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "813a602e237814ec4cb5d088986949dde915a81d13b3d04a1a2c34025c51cecb",
+      "source_sha256": "5812ffd9d44cc22d729bea26f50d4c30457ad069370d0e0fe5746e90517149fb",
       "symbols": [
         {
           "kind": "function",
@@ -2032,6 +2032,12 @@
           "kind": "function",
           "name": "check_professional_native_entrypoint",
           "signature": "def check_professional_native_entrypoint(root, before, deno, config, output, entrypoint):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "current_public_own_2027_registration",
+          "signature": "def current_public_own_2027_registration(spec, before):",
           "decorators": []
         },
         {
@@ -7485,6 +7491,71 @@
           "REQ-26"
         ],
         "source_sha256": "29c51cf48be034bda7ba2e381ab0ae6d57e2f7424827a411e017d1bbc922c0aa",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/current_public_r27_bounded.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "b80a4297687fb97bea8cd45a8963687b02ed613d0f8d7523e2e2322296daeecc",
+        "declared_exports": [
+          "OWN_2027_CANDIDATE_MAX_KEYS",
+          "CurrentPublicR27BoundedService"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_public_r27_bounded_test.ts",
+        "layer": "verification",
+        "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "57f514f2067309862b0f552fba722ef75a65258e843ccc66a56a70685bc430ab",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/current_public_r27_selection.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "7e7b272f45bc7b6bf3b7440b9422bb0acb1d78883d03243cd9f4414b391e6c8f",
+        "declared_exports": [
+          "Own2027SelectionTrust",
+          "Own2027SelectionKey",
+          "Own2027NativeQuota",
+          "Own2027SelectionItem",
+          "CurrentPublicR27SelectionService"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_public_r27_selection_test.ts",
+        "layer": "verification",
+        "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "7a4eaa053b1073bde9e06580a3cf30b011acdc738ac4c368b2afebebc5f2898b",
         "declared_exports": []
       },
       {

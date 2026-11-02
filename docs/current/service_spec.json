@@ -7518,6 +7518,67 @@
       "symbols": [
         "projectScoreNullReasons"
       ]
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_r27_selection.ts",
+      "layer": "application",
+      "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+      "requirements": [
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "symbols": [
+        "Own2027SelectionTrust",
+        "Own2027SelectionKey",
+        "Own2027NativeQuota",
+        "Own2027SelectionItem",
+        "CurrentPublicR27SelectionService"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_r27_selection_test.ts",
+      "layer": "verification",
+      "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+      "requirements": [
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "symbols": []
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_r27_bounded.ts",
+      "layer": "application",
+      "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+      "requirements": [
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "symbols": [
+        "OWN_2027_CANDIDATE_MAX_KEYS",
+        "CurrentPublicR27BoundedService"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_r27_bounded_test.ts",
+      "layer": "verification",
+      "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+      "requirements": [
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -11891,7 +11952,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "813a602e237814ec4cb5d088986949dde915a81d13b3d04a1a2c34025c51cecb",
+            "source_sha256": "5812ffd9d44cc22d729bea26f50d4c30457ad069370d0e0fe5746e90517149fb",
             "symbols": [
               {
                 "kind": "function",
@@ -11981,6 +12042,12 @@
                 "kind": "function",
                 "name": "check_professional_native_entrypoint",
                 "signature": "def check_professional_native_entrypoint(root, before, deno, config, output, entrypoint):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "current_public_own_2027_registration",
+                "signature": "def current_public_own_2027_registration(spec, before):",
                 "decorators": []
               },
               {
@@ -17434,6 +17501,71 @@
                 "REQ-26"
               ],
               "source_sha256": "29c51cf48be034bda7ba2e381ab0ae6d57e2f7424827a411e017d1bbc922c0aa",
+              "declared_exports": []
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_r27_bounded.ts",
+              "layer": "application",
+              "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+              "requirements": [
+                "REQ-13",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-28"
+              ],
+              "source_sha256": "b80a4297687fb97bea8cd45a8963687b02ed613d0f8d7523e2e2322296daeecc",
+              "declared_exports": [
+                "OWN_2027_CANDIDATE_MAX_KEYS",
+                "CurrentPublicR27BoundedService"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_r27_bounded_test.ts",
+              "layer": "verification",
+              "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+              "requirements": [
+                "REQ-13",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-28"
+              ],
+              "source_sha256": "57f514f2067309862b0f552fba722ef75a65258e843ccc66a56a70685bc430ab",
+              "declared_exports": []
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_r27_selection.ts",
+              "layer": "application",
+              "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+              "requirements": [
+                "REQ-13",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-28"
+              ],
+              "source_sha256": "7e7b272f45bc7b6bf3b7440b9422bb0acb1d78883d03243cd9f4414b391e6c8f",
+              "declared_exports": [
+                "Own2027SelectionTrust",
+                "Own2027SelectionKey",
+                "Own2027NativeQuota",
+                "Own2027SelectionItem",
+                "CurrentPublicR27SelectionService"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_r27_selection_test.ts",
+              "layer": "verification",
+              "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+              "requirements": [
+                "REQ-13",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-28"
+              ],
+              "source_sha256": "7a4eaa053b1073bde9e06580a3cf30b011acdc738ac4c368b2afebebc5f2898b",
               "declared_exports": []
             },
             {
@@ -24884,6 +25016,17 @@
       "date": "2026-11-02",
       "requirements": [],
       "summary": "화면팀이 실제 작업본에서 검증한 병합 미리보기 후속 보완: outputs 폴더가 없으면 생성 방법을 안내하고, 명세 동기화 결과를 환경과 관계없이 LF 바이트로 저장한다. 병합 후보는 검토 전용으로 유지하며 기존 파일과 충돌 검사를 보존한다."
+    },
+    {
+      "date": "2026-11-02",
+      "requirements": [
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "기존 현재 카탈로그와 과거 검수 지문을 보존하고 2027 자체 모집 PK의 내부 서버 선택 후보를 등록한다. 공유 예산과 독립 승인된 전체 scope·subject·publication·composite head를 결속하며 100개씩 순서대로 조회한다. 자료 조건·실기 자격과 실제 운영 binding이 미검증이므로 결과는 HOLD다. 1·36·101건 논리 호출 및 실제 SQL 포트 합성 연결을 포함한 19개 시험을 별도 필수 검사한다. 공개 API·DB 쓰기·운영 배포는 없다."
     }
   ],
   "overall_analysis_contract": {
@@ -27299,7 +27442,7 @@
         },
         {
           "path": "scripts/run_edge_tests.py",
-          "sha256": "813a602e237814ec4cb5d088986949dde915a81d13b3d04a1a2c34025c51cecb"
+          "sha256": "5812ffd9d44cc22d729bea26f50d4c30457ad069370d0e0fe5746e90517149fb"
         }
       ],
       "tests": [
@@ -216222,6 +216365,39 @@
       "expiration": "Previous descriptor validity window is preserved, not extended.",
       "activation": "NOT_RUN",
       "production_ready": false
+    },
+    "own_2027_batch_verification": {
+      "format": "jungsi.own-2027-batch-verification/v1",
+      "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+      "test_path": "supabase/functions/_shared/current_public_r27_selection_test.ts",
+      "test_count": 11,
+      "source_bindings": [
+        {
+          "path": "supabase/functions/_shared/current_public_r27_selection.ts",
+          "sha256": "7e7b272f45bc7b6bf3b7440b9422bb0acb1d78883d03243cd9f4414b391e6c8f"
+        },
+        {
+          "path": "supabase/functions/_shared/current_public_r27_selection_test.ts",
+          "sha256": "7a4eaa053b1073bde9e06580a3cf30b011acdc738ac4c368b2afebebc5f2898b"
+        },
+        {
+          "path": "supabase/functions/_shared/current_public_catalog.ts",
+          "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+        },
+        {
+          "path": "supabase/functions/_shared/current_public_r27_bounded.ts",
+          "sha256": "b80a4297687fb97bea8cd45a8963687b02ed613d0f8d7523e2e2322296daeecc"
+        },
+        {
+          "path": "supabase/functions/_shared/current_public_r27_bounded_test.ts",
+          "sha256": "57f514f2067309862b0f552fba722ef75a65258e843ccc66a56a70685bc430ab"
+        }
+      ],
+      "scope": "내부 서버 서비스 후보. 인증 요청과 공유 budget admission, 독립 신뢰 포트의 전체 scope·subject·publication·composite head를 앞뒤로 결속한다. 기존 CurrentPublicCatalogPort를 이용해 2027 원래 PK를 최대 100개씩 순서대로 조회하며 후보 상한은 1,000개다. 기존 prefix 한도와 역할/RLS·예산을 유지하고 개별 행 fallback이나 다건 공개 API를 추가하지 않는다.",
+      "missingness": "원래 0·null·필드 부재·자료형은 분리한다. 조건부 근거, SQL NULL/JSON null 구별 및 서비스/비실기 적격성이 독립 증명되지 않아 각 결과는 HOLD다.",
+      "activation": "실제 서버 guard·공유 예산·owner descriptor/head·자료 증거·P1 소비자 및 운영 배포는 NOT_RUN이며, 합성 논리 lookup 수는 실제 물리 I/O 성능이나 취소의 증거가 아니다.",
+      "bounded_test_path": "supabase/functions/_shared/current_public_r27_bounded_test.ts",
+      "bounded_test_count": 8
     }
   },
   "P1_display_snapshot_contract": {
