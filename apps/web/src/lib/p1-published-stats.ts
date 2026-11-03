@@ -25,7 +25,16 @@ import type { Cell, Row } from "./p1-shape";
 export function publishedScoreNullLabel(c: Cell): string | null {
   if (c.v !== null || c.b === UNKNOWN_BASIS ||
       (c.pr !== undefined && c.pr !== "actual_result")) return null;
-  return "3인이하미발표";
+  // 검증된 칸별 사유는 서버가 아직 공급하지 않는다. 공급 전에는 10-29 결정 표시를 유지한다(2026-11-03 사용자 결정).
+  // 공급되면 그 사유만 쓴다. 일반 사유 코드·모집인원·단순 null은 근거가 아니다.
+  const reasons = c.verified_score_null_reasons;
+  if (reasons === undefined) return "3인이하미발표";
+  if (!Array.isArray(reasons) || reasons.length < 1 || reasons.length > 2 ||
+      reasons.some(r => r !== "other_statistic_only" && r !== "three_or_fewer") ||
+      new Set(reasons).size !== reasons.length) return null;
+  if (reasons.includes("three_or_fewer")) return "3인이하미발표";
+  if (reasons.includes("other_statistic_only")) return "해당조건미발표";
+  return null;
 }
 
 export type PublishedStat = { label: string; cell: Cell; schoolRecord: boolean };

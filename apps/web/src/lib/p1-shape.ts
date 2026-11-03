@@ -7,6 +7,8 @@ export type Cell = {
   /** Rank-only display result of the existing backend-validated snapshot API. */
   sq?: { status: "verified_official"; unit: "번" };
   v: string | null;
+  /** 발행 서버가 해당 성적 칸에 대해 독립 검증한 사유만 허용한다. 미전달은 미확인이다. */
+  verified_score_null_reasons?: readonly ("other_statistic_only" | "three_or_fewer")[];
   n?: 1;
   s: string; // status
   r: string | null; // reason_code
@@ -50,6 +52,10 @@ export type Row = {
   /** 학교 묶음의 확인된 표시 키. 근거가 없는 연도는 별도 키를 유지한다. */
   gk?: string;
 };
+/** 과거 발표 연도의 전형·군·캠퍼스를 원문 그대로 구분한다. */
+export function historyConditions(row:Pick<Row,"c"|"t"|"g">):string {
+  return [row.c && `캠퍼스 ${row.c}`,row.t && `전형 ${row.t}`,row.g && `모집군 ${row.g}`].filter(Boolean).join(" · ");
+}
 /** 과거 행 식별자. 캠퍼스·전형·군이 없는 행은 null 그대로 둬야 그 과거 행의 c·t·g 와 맞는다 */
 export type HistoryLink = {
   academic_year: number; school_id: string | null; original_pk: string | null;
@@ -113,10 +119,12 @@ const CARRY_STATES = new Set(["conditional_transfer", "conditional_carryover"]);
 /** 모집인원 원문을 그대로 보인다. 이월 미정을 0 으로 바꾸지 않고, 모르는 상태 값은 '확인 중'으로 둔다 */
 export function r27Summary(q: Quota27 | undefined): R27Summary {
   const hold: R27Summary = { v: null, carry: false, initial: false, check: false, hold: true, note: null };
-  if (!q || q.rs === "source_conflict" || (q.ls !== null && !CARRY_STATES.has(q.ls))) return hold;
-  const carry = q.ls !== null || q.ct !== null;
-  const v = q.v !== null && /^[0-9]+$/.test(q.v.trim()) ? String(Number(q.v.trim())) : null;
-  if (v === null && (!carry || (q.v !== null && q.v.trim() !== ""))) return hold;
+  if (!q || q.rs === "source_conflict" || (q.ls !== null && q.ls !== "numeric_literal" && !CARRY_STATES.has(q.ls))) return hold;
+  const carry = (q.ls !== null && CARRY_STATES.has(q.ls)) || q.ct !== null;
+  const parsed = q.v !== null && /^[0-9]+$/.test(q.v.trim()) ? Number(q.v.trim()) : NaN;
+  const v = Number.isSafeInteger(parsed) && parsed >= 0 ? String(parsed) : null;
+  if (v === null && (q.ls === "numeric_literal" || !carry || (q.v !== null && q.v.trim() !== ""))) return hold;
+  // 원문 0은 0 그대로 둔다. 최종 0 행의 회원 목록 제외는 서버 발급 범위가 맡는다(범위 공급 전 화면에서 숨기지 않음, 2026-11-03 사용자 결정)
   const base = carry
     ? v === null
       ? "수시에서 남은 인원이 있을 때만 정시로 뽑습니다. 인원은 아직 정해지지 않았습니다."

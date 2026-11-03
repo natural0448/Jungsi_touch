@@ -2,7 +2,7 @@ import { asOfDate, ratioText } from "@/lib/format";
 import { derived } from "@/lib/p1-derived";
 import { rankDisplayModel } from "@/lib/p1-field-qualification";
 import { publishedScoreNullLabel, publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
-import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
+import { historyConditions, unitKey, type Cell, type Row } from "@/lib/p1-shape";
 import { ScrollHint } from "./scroll-hint";
 
 /*
@@ -128,6 +128,8 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                 const ps = publishedStats(r);
                 const renamedDept = r.d !== latest.d ? r.d : null;
                 const otherName = r.n !== schoolName ? r.n : null;
+                // 전형·군·캠퍼스는 최근 발표와 달라진 해만 원문대로 붙인다(휴대폰 첫 열이 좁아서, 2026-11-03 사용자 결정)
+                const cond = historyConditions(r) !== historyConditions(latest) ? historyConditions(r) : "";
                 return (
                   <tr key={`${y}-${i}`}>
                     <th scope="row">
@@ -135,6 +137,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                       {byYear.get(y)!.length > 1 && <small>같은 해 발표 {i + 1}</small>}
                       {otherName && <small>발표명 {otherName}</small>}
                       {renamedDept && <small>당시 {renamedDept}</small>}
+                      {cond && <small>당시 {cond}</small>}
                     </th>
                     <td className="r"><Value c={r.rc} /></td>
                     <td className="r"><Value c={r.cr.v === null ? r.cr : { ...r.cr, v: ratioText(r.cr.v) }} /></td>
