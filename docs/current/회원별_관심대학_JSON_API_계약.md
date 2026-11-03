@@ -1,6 +1,6 @@
 # 회원별 관심대학 JSON API 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.151이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.152이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 
 
@@ -100,4 +100,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=6e09e8f4b51e9e8a5077bc162a75ec14b7d4e5c95c512b0b1192f00f604cd8fc -->
+<!-- jungsi:generated spec_sha256=719bbe06f7713f625a77091c8971906cfc9bfbadd638936d3454a6c8c5f0ad4d -->
