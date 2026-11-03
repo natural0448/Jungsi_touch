@@ -195,6 +195,28 @@ def current_public_own_2027_registration(spec,before):
         raise EdgeFailure('own_2027_batch_source_or_test_binding_invalid')
     return contract
 
+def current_public_snapshot_batch_registration(spec,before):
+    """Pin the non-activated snapshot batch candidate and its synthetic tests."""
+    prefix='supabase/functions/_shared/'
+    source=prefix+'current_public_p1_snapshot_batch.ts'
+    test=prefix+'current_public_p1_snapshot_batch_test.ts'
+    required={source,test,prefix+'current_public_catalog.ts',prefix+'current_public_key_index.ts'}
+    contract=spec.get('current_public_supply_contract',{}).get('snapshot_batch_verification')
+    if contract is None:
+        if source in before or test in before:raise EdgeFailure('snapshot_batch_verification_missing')
+        return None
+    bindings=contract.get('source_bindings') if isinstance(contract,dict) else None
+    if (not isinstance(contract,dict) or contract.get('format')!='jungsi.snapshot-batch-verification/v1' or
+        contract.get('status')!='SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED' or
+        contract.get('test_path')!=test or contract.get('test_count')!=46 or
+        not isinstance(bindings,list) or len(bindings)!=len(required) or
+        {b.get('path') for b in bindings if isinstance(b,dict)}!=required or
+        any(not isinstance(b,dict) or set(b)!={'path','sha256'} or
+            not isinstance(b.get('sha256'),str) or before.get(b['path'])!=b['sha256'] for b in bindings)):
+        raise EdgeFailure('snapshot_batch_source_or_test_binding_invalid')
+    return contract
+
+
 def whole_population_registration(spec,before):
     """Separate strict v2 regressions; keep the foundation and v1 checks exact."""
     prefix='supabase/functions/_shared/'
@@ -1573,6 +1595,21 @@ def run_workspace(root,manifest,deno,python,output):
         public_unit['baseline_tests_run']=public_unit['tests_run']
         public_unit['own_2027_batch']=own_unit
         public_unit['tests_run']+=own_unit['tests_run']
+    snapshot_batch=current_public_snapshot_batch_registration(spec,before)
+    if snapshot_batch is not None:
+        if public_unit is None:raise EdgeFailure('snapshot_batch_requires_current_public_provider')
+        snapshot_paths=['supabase/functions/_shared/current_public_p1_snapshot_batch.ts',snapshot_batch['test_path']]
+        command([deno,'check',*common,*snapshot_paths],root=root,output=output,name='snapshot_batch_check')
+        command([deno,'lint','--config',cfg['config'],*snapshot_paths],root=root,output=output,name='snapshot_batch_lint')
+        command([deno,'fmt','--check','--config',cfg['config'],*snapshot_paths],root=root,output=output,name='snapshot_batch_fmt')
+        snapshot_junit=output.resolve()/'snapshot_batch.junit.xml'
+        command([deno,'test',*common,'--reporter=dot','--junit-path',str(snapshot_junit),snapshot_batch['test_path']],
+          root=root,output=output,name='snapshot_batch_unit')
+        batch_unit=dict(**parse_junit(snapshot_junit,snapshot_batch['test_count']),
+          coverage='SNAPSHOT_BATCH_SYNTHETIC_NOT_ACTIVATED',source_bindings=snapshot_batch['source_bindings'],
+          actual_DB='NOT_RUN',publication='NOT_RUN',deployment='NOT_RUN')
+        public_unit['snapshot_batch']=batch_unit
+        public_unit['tests_run']+=batch_unit['tests_run']
     whole_population_unit=None
     whole_population=whole_population_registration(spec,before)
     if whole_population is not None:

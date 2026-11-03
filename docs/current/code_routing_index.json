@@ -1954,7 +1954,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "8c534afeb87ce0c5f1b0e8fdd4d7d2d09b432c27a9720fcd0131d43f7da62138",
+      "source_sha256": "8db96e031274158fcff378ac58b152a6e43391c55ae012cd31520f96532a59b0",
       "symbols": [
         {
           "kind": "function",
@@ -2140,6 +2140,12 @@
           "kind": "function",
           "name": "current_public_registration",
           "signature": "def current_public_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "current_public_snapshot_batch_registration",
+          "signature": "def current_public_snapshot_batch_registration(spec, before):",
           "decorators": []
         },
         {
@@ -7735,6 +7741,45 @@
           "REFERENCE_EVIDENCE_METHOD_SQL",
           "readReferenceMethodEvidence"
         ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_public_p1_snapshot_batch.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "95000be5f4ad44d54edfe0fe91b8a0f3bdf01734f5e8e7649d9577d551145470",
+        "declared_exports": [
+          "NativeQuotaValue",
+          "VerifiedGuideEvidence",
+          "VerifiedQuotaStage",
+          "ConfirmedBaseRecruitment",
+          "UnresolvedRolloverEvidence",
+          "SnapshotBatchDecision",
+          "SnapshotBatchTrust",
+          "SnapshotBatchItem",
+          "snapshotRecruitmentStage",
+          "readSnapshotRecruitmentBatch"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/current_public_p1_snapshot_batch_test.ts",
+        "layer": "verification",
+        "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "04ce5287dfb1253cbe309baf516c2696d2f894d9234b4dddf96aaba9f72a2d07",
+        "declared_exports": []
       },
       {
         "path": "supabase/functions/_shared/current_public_r27_bounded.ts",

@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.154",
+  "version": "1.9.155",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -7815,6 +7815,43 @@
         "REFERENCE_EVIDENCE_METHOD_SQL",
         "readReferenceMethodEvidence"
       ]
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_p1_snapshot_batch.ts",
+      "layer": "application",
+      "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+      "requirements": [
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "symbols": [
+        "NativeQuotaValue",
+        "VerifiedGuideEvidence",
+        "VerifiedQuotaStage",
+        "ConfirmedBaseRecruitment",
+        "UnresolvedRolloverEvidence",
+        "SnapshotBatchDecision",
+        "SnapshotBatchTrust",
+        "SnapshotBatchItem",
+        "snapshotRecruitmentStage",
+        "readSnapshotRecruitmentBatch"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_p1_snapshot_batch_test.ts",
+      "layer": "verification",
+      "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+      "requirements": [
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -8516,7 +8553,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.154",
+        "contract_version": "1.9.155",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -8690,7 +8727,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.154",
+        "contract_version": "1.9.155",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8856,7 +8893,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.154",
+        "contract_version": "1.9.155",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8875,7 +8912,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.154",
+        "contract_version": "1.9.155",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8900,7 +8937,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.154",
+        "contract_version": "1.9.155",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8925,7 +8962,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.154",
+        "contract_version": "1.9.155",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -12200,7 +12237,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "8c534afeb87ce0c5f1b0e8fdd4d7d2d09b432c27a9720fcd0131d43f7da62138",
+            "source_sha256": "8db96e031274158fcff378ac58b152a6e43391c55ae012cd31520f96532a59b0",
             "symbols": [
               {
                 "kind": "function",
@@ -12386,6 +12423,12 @@
                 "kind": "function",
                 "name": "current_public_registration",
                 "signature": "def current_public_registration(spec, before):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "current_public_snapshot_batch_registration",
+                "signature": "def current_public_snapshot_batch_registration(spec, before):",
                 "decorators": []
               },
               {
@@ -17981,6 +18024,45 @@
                 "REFERENCE_EVIDENCE_METHOD_SQL",
                 "readReferenceMethodEvidence"
               ]
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_p1_snapshot_batch.ts",
+              "layer": "application",
+              "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+              "requirements": [
+                "REQ-13",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-28"
+              ],
+              "source_sha256": "95000be5f4ad44d54edfe0fe91b8a0f3bdf01734f5e8e7649d9577d551145470",
+              "declared_exports": [
+                "NativeQuotaValue",
+                "VerifiedGuideEvidence",
+                "VerifiedQuotaStage",
+                "ConfirmedBaseRecruitment",
+                "UnresolvedRolloverEvidence",
+                "SnapshotBatchDecision",
+                "SnapshotBatchTrust",
+                "SnapshotBatchItem",
+                "snapshotRecruitmentStage",
+                "readSnapshotRecruitmentBatch"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_p1_snapshot_batch_test.ts",
+              "layer": "verification",
+              "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+              "requirements": [
+                "REQ-13",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-28"
+              ],
+              "source_sha256": "04ce5287dfb1253cbe309baf516c2696d2f894d9234b4dddf96aaba9f72a2d07",
+              "declared_exports": []
             },
             {
               "path": "supabase/functions/_shared/current_public_r27_bounded.ts",
@@ -25660,6 +25742,17 @@
     {
       "date": "2026-11-03",
       "requirements": [
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "다른 PC의 P1 스냅샷 모집인원 묶음 조회 후보와 합성 46건을 등록한다. 관계별 보류, 동일 대상의 근거 충돌, 최초 0과 이월 미확정, 원래 자료형 및 현재 요청·자료판 결속을 구분한다. 독립 신뢰 공급자, 공개 응답 경로, 실제 DB·Storage 검증, 운영 발행과 배포는 미연결·미실행이다."
+    },
+    {
+      "date": "2026-11-03",
+      "requirements": [
         "REQ-01",
         "REQ-03",
         "REQ-04",
@@ -28084,7 +28177,7 @@
         },
         {
           "path": "scripts/run_edge_tests.py",
-          "sha256": "8c534afeb87ce0c5f1b0e8fdd4d7d2d09b432c27a9720fcd0131d43f7da62138"
+          "sha256": "8db96e031274158fcff378ac58b152a6e43391c55ae012cd31520f96532a59b0"
         }
       ],
       "tests": [
@@ -222118,7 +222211,35 @@
       "bounded_test_path": "supabase/functions/_shared/current_public_r27_bounded_test.ts",
       "bounded_test_count": 8
     },
-    "current_recruitment_scope_ref": "P1_display_snapshot_contract.active_recruitment_scope_20261103"
+    "current_recruitment_scope_ref": "P1_display_snapshot_contract.active_recruitment_scope_20261103",
+    "snapshot_batch_verification": {
+      "format": "jungsi.snapshot-batch-verification/v1",
+      "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+      "test_path": "supabase/functions/_shared/current_public_p1_snapshot_batch_test.ts",
+      "test_count": 46,
+      "source_bindings": [
+        {
+          "path": "supabase/functions/_shared/current_public_p1_snapshot_batch.ts",
+          "sha256": "95000be5f4ad44d54edfe0fe91b8a0f3bdf01734f5e8e7649d9577d551145470"
+        },
+        {
+          "path": "supabase/functions/_shared/current_public_p1_snapshot_batch_test.ts",
+          "sha256": "04ce5287dfb1253cbe309baf516c2696d2f894d9234b4dddf96aaba9f72a2d07"
+        },
+        {
+          "path": "supabase/functions/_shared/current_public_catalog.ts",
+          "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+        },
+        {
+          "path": "supabase/functions/_shared/current_public_key_index.ts",
+          "sha256": "7c9983b3ece51d1204cd63faae1632465fa32356b9546f023137983d8b393fae"
+        }
+      ],
+      "scope": "기존 history.snapshot.read 요청의 서버 범위와 현재 카탈로그를 결속하는 내부 후보. 최대 100키를 기존 색인 shard 한도에 맞춰 12개씩 조회하며 기존 인증·공유 예산과 2027 연결을 유지한다. 명시 제외는 excluded, 보류와 미연결은 pending으로 구분한다.",
+      "boundary": "실제 요청·snapshot·head·target 지문·보류 판정과 예산을 결속하는 신뢰 공급자 및 공개 응답 경로는 미연결이다. 공급자가 없거나 결속이 바뀌면 실패하며 실제 자료·운영 화면·DB 검증을 뜻하지 않는다.",
+      "activation": "NOT_RUN",
+      "production_ready": false
+    }
   },
   "P1_display_snapshot_contract": {
     "format": "jungsi.P1-display-snapshot-contract/v1",
