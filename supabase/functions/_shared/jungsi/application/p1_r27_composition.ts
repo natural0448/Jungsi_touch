@@ -886,8 +886,8 @@ export async function composeP1R27Candidate(
     "body_byte_limit",
   );
   const body = validateHistorySnapshotPayload(candidate, counts);
-  await assertSource(e.source_head_sha256);
-  await assertPrevious(expectedHead);
+  need(await assertSource(e.source_head_sha256) === undefined, "compose_source_assert_invalid");
+  need(await assertPrevious(expectedHead) === undefined, "compose_previous_assert_invalid");
   const sealedCandidate: P1R27Candidate = {
     status: "HOLD_UNPUBLISHED",
     body,
@@ -1016,13 +1016,14 @@ export async function rebindP1R27Candidate(
   });
   const assertFresh = async (publicationSha: string | null) => {
     if (publicationSha !== null) shaField(publicationSha);
-    await assertSource(e.source_head_sha256);
-    await assertPrevious(expectedPrevious);
-    await assertAuthority(Object.freeze({
+    need(await assertSource(e.source_head_sha256) === undefined, "rebind_source_assert_invalid");
+    need(await assertPrevious(expectedPrevious) === undefined, "rebind_previous_assert_invalid");
+    const result: unknown = await assertAuthority(Object.freeze({
       ...approvalScope,
       phase: publicationSha === null ? "candidate" as const : "publication" as const,
       publication_sha256: publicationSha,
     }));
+    need(result === undefined, "rebind_authority_assert_invalid");
   };
   await assertFresh(null);
   const body = cloneNativeJson(candidate.body);

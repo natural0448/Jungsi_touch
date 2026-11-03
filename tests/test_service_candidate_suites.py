@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "tests/review_suite_manifest.json"
-MANIFEST_SHA256 = "0b7c1c13be2d6929a8a09f468978f069329fc2af4dbc6460dd078efb4c249f6c"
+MANIFEST_SHA256 = "8b9097637ce91f301359b578eddef96328d5f8f66964c153c00a97c9684a696a"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None
@@ -325,7 +325,7 @@ class ReviewSuites(unittest.TestCase):
 
     def test_service_p1_deno_46(self):
         data = load_manifest()
-        suite = verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 79)
+        suite = verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 81)
         manual = ["src/jungsi_touch/application/public_response_schemas.json"]
         if suite["manual_read_files"] != manual:
             raise ValueError("service P1 manual-read scope mismatch")
@@ -333,7 +333,7 @@ class ReviewSuites(unittest.TestCase):
         if "," in path:
             raise ValueError("comma in allowed path is unsupported")
         expected = [
-            {"cases": 21, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
+            {"cases": 23, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
             {"result": "SYNTHETIC_ONLY", "passed": 4, "cases": [
                 "real runtime context wires request admission into synthetic P1 v2 source",
                 "invalid optional R27 settings and credentials fail v2 before r27 metadata",
@@ -365,7 +365,7 @@ class ReviewSuites(unittest.TestCase):
         matches = re.findall(r"^ok \| (\d+) passed \| (\d+) failed(?: \| (\d+) ignored)?(?: \| (\d+) filtered out)? \(", output, re.M)
         if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (33, 0, 0, 0):
             raise AssertionError("score-null Deno result/count mismatch: " + output[-1000:])
-        verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 79)
+        verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 81)
 
     def test_service_end_deno_125(self):
         data = load_manifest()

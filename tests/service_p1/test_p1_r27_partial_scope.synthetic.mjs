@@ -303,6 +303,23 @@ await test("partial_rejects_prior_held_2027_and_all_unknown",async()=>{
   await assert.rejects(buildCandidateR27PartialScopeIndex(await all.build(),all.context),/candidate_partial_scope_incomplete/);
 });
 
+await test("compose_head_assertions_require_exact_void",async()=>{
+  for(const which of ["source","previous"]) {
+    for(const value of [false,null,"throw"]) {
+      const f=await fixture([sourceRow()]);
+      const outcome=()=>{if(value==="throw")throw new Error("SYN_COMPOSE_"+which.toUpperCase()+"_EXCEPTION");return value;};
+      if(which==="source")f.source.assertSourceHead=async expected=>{assert.equal(expected,H);return outcome();};
+      else f.previous.assertCurrent=async expected=>{assert.equal(expected.previous_publication_sha256,f.previous.pub.publicationSha256);return outcome();};
+      const expected=value==="throw"?new RegExp("SYN_COMPOSE_"+which.toUpperCase()+"_EXCEPTION"):
+        new RegExp("compose_"+which+"_assert_invalid");
+      await assert.rejects(f.build(),expected);
+      if(which==="source")assert.equal(f.previous.finishes,0);
+    }
+  }
+  const good=await (await fixture([sourceRow()])).build();
+  assert.equal(good.status,"HOLD_UNPUBLISHED");
+});
+
 
 await test("new_2027_unknown_cells_are_not_falsely_unpublished_or_75_percent",async()=>{
   const f=await fixture([sourceRow()]), candidate=await f.build();
@@ -663,6 +680,51 @@ await test("qualified_rank_rebinds_with_new_receipt_and_final_manifest_without_l
   assert.equal(receipt.status,"global_checks_passed");
   assert.ok(rebindAuthority.scopes.some(x=>x.phase==="candidate" && x.publication_sha256===null));
   assert.ok(rebindAuthority.scopes.some(x=>x.phase==="publication" && x.publication_sha256===manifestSha));
+  await test("rebind_assertions_require_void_at_candidate_and_publication",async()=>{
+    const seen={source:0,previous:0,authority:0};
+    const modes={source:null,previous:null,authority:null};
+    const reset=()=>{for(const key of Object.keys(seen)){seen[key]=0;modes[key]=null;}};
+    const outcome=(key)=>{
+      seen[key]++;
+      const m=modes[key];
+      if(!m || seen[key]!==m.at)return undefined;
+      if(m.value==="throw")throw new Error("SYN_REBIND_"+key.toUpperCase()+"_EXCEPTION");
+      return m.value;
+    };
+    const source={...f.source,async assertSourceHead(expected){await f.source.assertSourceHead(expected);return outcome("source");}};
+    const previousPort={...f.previous,async assertCurrent(expected){await f.previous.assertCurrent(expected);return outcome("previous");}};
+    const authority={async assertCurrent(input){await rebindAuthority.assertCurrent(input);return outcome("authority");}};
+    for(const which of ["source","previous","authority"]) {
+      for(const value of [false,null,"throw"]) {
+        for(const at of [1,2]) {
+          reset();modes[which]={at,value};
+          const expected=value==="throw"?new RegExp("SYN_REBIND_"+which.toUpperCase()+"_EXCEPTION"):
+            new RegExp("rebind_"+which+"_assert_invalid");
+          await assert.rejects(rebindP1R27Candidate(candidate,f.context,source,previousPort,authority,proof),expected);
+          assert.equal(seen[which],at);assert.equal(candidate.rebind_required.length,1);
+        }
+      }
+    }
+    reset();
+    const guarded=await rebindP1R27Candidate(candidate,f.context,source,previousPort,authority,proof);
+    const guardedIndex=await buildCandidateR27ScopeIndex(guarded,f.context), guardedBytes=encode(guardedIndex);
+    assert.equal(nativeJsonText(guarded.body,true),nativeJsonText(rebound.body,true));
+    assert.equal(nativeJsonText(guardedIndex,true),nativeJsonText(index,true));
+    for(const which of ["source","previous","authority"]) {
+      for(const value of [false,null,"throw"]) {
+        reset();modes[which]={at:1,value};
+        const expected=value==="throw"?new RegExp("SYN_REBIND_"+which.toUpperCase()+"_EXCEPTION"):
+          new RegExp("rebind_"+which+"_assert_invalid");
+        await assert.rejects(prepareP1R27GlobalReceipt(pub,manifestBytes,guardedBytes,await hash(guardedBytes),
+          guarded.coverage_sha256,[Uint8Array.from(compressed)],limits,guardedIndex),expected);
+        assert.equal(seen[which],1);
+      }
+    }
+    reset();
+    const ok=await prepareP1R27GlobalReceipt(pub,manifestBytes,guardedBytes,await hash(guardedBytes),
+      guarded.coverage_sha256,[Uint8Array.from(compressed)],limits,guardedIndex);
+    assert.equal(ok.status,"global_checks_passed");
+  });
   rebindAuthority.hang=true;
   await assert.rejects(prepareP1R27GlobalReceipt(pub,manifestBytes,indexBytes,await hash(indexBytes),
     rebound.coverage_sha256,[Uint8Array.from(compressed)],{...limits,timeoutMs:30},index),

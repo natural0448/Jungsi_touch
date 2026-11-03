@@ -38261,7 +38261,7 @@
             "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
           }
         ],
-        "source_sha256": "2a340e6e1817b747f7a28dbf238c76b6a51822f7971558be1cfd7eaf87c2a174",
+        "source_sha256": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
         "symbols": [
           {
             "declarations": [

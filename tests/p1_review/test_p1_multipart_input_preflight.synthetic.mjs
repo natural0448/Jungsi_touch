@@ -361,6 +361,26 @@ await test("false or null from current-head assertions is rejected", async () =>
     const b = await fixture([sourceRow()]); b.source.assertSourceHead = async () => value;
     await assert.rejects(run(b), /source_assert_invalid/); assert.equal(b.source.calls, 0);
   }
+  for (const which of ["previous", "source"]) {
+    for (const at of (which === "previous" ? [1, 2, 3] : [1, 2])) {
+      for (const value of [false, null, "throw"]) {
+        const f=await fixture([sourceRow()]); let calls=0;
+        const port=which==="previous"?f.previous:f.source;
+        const method=which==="previous"?"assertCurrent":"assertSourceHead";
+        const original=port[method].bind(port);
+        port[method]=async (...args)=>{
+          await original(...args);calls++;
+          if(calls!==at)return undefined;
+          if(value==="throw")throw new Error("SYN_PREFLIGHT_"+which.toUpperCase()+"_EXCEPTION");
+          return value;
+        };
+        const expected=value==="throw"?new RegExp("SYN_PREFLIGHT_"+which.toUpperCase()+"_EXCEPTION"):
+          new RegExp(which+"_assert_invalid");
+        await assert.rejects(run(f),expected);assert.equal(calls,at);
+      }
+    }
+  }
+  assert.equal((await run(await fixture([sourceRow()]))).status,"HOLD_UNPUBLISHED");
 });
 
 await test("compressed and source page alterations fail their own pins", async () => {

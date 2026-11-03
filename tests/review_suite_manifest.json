@@ -27,7 +27,7 @@
         "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
         "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
         "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
-        "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "2a340e6e1817b747f7a28dbf238c76b6a51822f7971558be1cfd7eaf87c2a174",
+        "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
         "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
         "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
         "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
@@ -56,7 +56,7 @@
         "tests/p1_review/fixtures/p1_history_snapshot_799.reference.ts": "058255b944ec815a42b81a08ed6f7ecc2033a3069826dcec87ce1e7cc0662645",
         "tests/p1_review/fixtures/p1_public_registry_799.reference.json": "3c77825dba9c3486f403a8828a6756aaee9b0bdc25a8e916c137d86648eacd39",
         "tests/p1_review/synthetic_api_contract.ts": "a856ab6d53a83d44be4698af62145b1dec1a9160569e48ce9943e2e0468b577d",
-        "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs": "02d83eea2f142b29e4b9667e29f39b1ce3f87a801d03610178a574cab448ec8b",
+        "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs": "fcdcfd8b1392e6d4cd4843011d98fb336e7f77da6b35cef2e17c33b87493153c",
         "tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs": "0f97917a501c1ff98fd25e5724ab4741243b061a212191a1956c7af9b9e1f167",
         "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs": "c1ebdae4e98dfefe2499ee2984b42995a641ec106af80598baa790a185fb0358",
         "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs": "948db802c8660a905ce3619f8fb051d87c9224c72e509192d26649a35a4e1a88"
@@ -828,7 +828,7 @@
             "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
             "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
             "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
-            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "2a340e6e1817b747f7a28dbf238c76b6a51822f7971558be1cfd7eaf87c2a174",
+            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
             "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
@@ -840,7 +840,7 @@
             "supabase/functions/_shared/jungsi/domain/native_json.ts": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a",
             "supabase/functions/_shared/jungsi/domain/text.ts": "da8931fbab3f328fe4dbf89db8dbcfdb5fc55898c44dcdbbf6f8cedb59677fe9",
             "supabase/functions/_shared/jungsi/domain/time.ts": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
-            "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs": "02d83eea2f142b29e4b9667e29f39b1ce3f87a801d03610178a574cab448ec8b"
+            "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs": "fcdcfd8b1392e6d4cd4843011d98fb336e7f77da6b35cef2e17c33b87493153c"
           }
         },
         "tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs": {
@@ -1990,7 +1990,7 @@
             "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
             "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
             "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
-            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "2a340e6e1817b747f7a28dbf238c76b6a51822f7971558be1cfd7eaf87c2a174",
+            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
             "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
@@ -3662,7 +3662,7 @@
             "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
             "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
             "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
-            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "2a340e6e1817b747f7a28dbf238c76b6a51822f7971558be1cfd7eaf87c2a174",
+            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
             "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
@@ -5344,7 +5344,7 @@
             "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
             "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
             "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
-            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "2a340e6e1817b747f7a28dbf238c76b6a51822f7971558be1cfd7eaf87c2a174",
+            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
             "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
@@ -38874,7 +38874,7 @@
         "node:fs",
         "node:zlib"
       ],
-      "expected_count": 79,
+      "expected_count": 81,
       "files": {
         "src/jungsi_touch/application/public_response_schemas.json": "89138419ab060d10ce581eca037b4e7b4c6d1f9ca319fa0c2882424b01130e5a",
         "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
@@ -38899,7 +38899,7 @@
         "supabase/functions/_shared/jungsi/application/operating_policy.ts": "477b312405d0d3daa24bc546df1f6ef8fec25795536bbbf85d5d21f0f231bf49",
         "supabase/functions/_shared/jungsi/application/overall_analysis.ts": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7",
         "supabase/functions/_shared/jungsi/application/own_report_list.ts": "ade1d75288df633ef20e1d8e26f602687615ece0e7d4764fd5a05e180d0a2bf2",
-        "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "2a340e6e1817b747f7a28dbf238c76b6a51822f7971558be1cfd7eaf87c2a174",
+        "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
         "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
         "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
         "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
@@ -38986,7 +38986,7 @@
         "tests/service_p1/p1_r27_expiry_clock_http.synthetic_support.ts": "285f8e45dc959db8a0c5a92146ccae06c58215a16436a54a9d99b8ac018e5bf0",
         "tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs": "182c448fb11a19ee8b2a75ed702b01f805c624a51c2628c44b4c08d0420dba03",
         "tests/service_p1/test_p1_r27_http_order.synthetic.ts": "bfaf2570c7bfc8ed32e02a7a06b5dc2fa9fa81c8404baa8fee5555a76916bf6c",
-        "tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs": "e3246840d2c9fe3b2c5c5e7aef876c4655b02b1abb0be76e70e12624c71e142d",
+        "tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs": "aebc3cadb49e17c6febf4c92f224673fe288a41ebdaeddf92b29b148a3042392",
         "tests/service_p1/test_p1_r27_request_admission.synthetic.ts": "9a2f54948bfefcc814707111f42f36510ce73adcbd7259137f4645e365f8f1ba",
         "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs": "c7da5948fd93e9c4b7b5085b1d2aebfa64cd9491b3ad7054e09087f603338694",
         "tests/service_p1/test_score_null_reason_review.synthetic.mjs": "482a13404b5c43566d99e76a9595b3883238719c6bbf4f74d8c79f749f984974"
@@ -43516,7 +43516,7 @@
             "supabase/functions/_shared/jungsi/application/operating_policy.ts": "477b312405d0d3daa24bc546df1f6ef8fec25795536bbbf85d5d21f0f231bf49",
             "supabase/functions/_shared/jungsi/application/overall_analysis.ts": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7",
             "supabase/functions/_shared/jungsi/application/own_report_list.ts": "ade1d75288df633ef20e1d8e26f602687615ece0e7d4764fd5a05e180d0a2bf2",
-            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "2a340e6e1817b747f7a28dbf238c76b6a51822f7971558be1cfd7eaf87c2a174",
+            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
             "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
@@ -46280,7 +46280,7 @@
             "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
             "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
             "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
-            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "2a340e6e1817b747f7a28dbf238c76b6a51822f7971558be1cfd7eaf87c2a174",
+            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
             "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
@@ -46296,7 +46296,7 @@
             "supabase/functions/_shared/jungsi/domain/native_json.ts": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a",
             "supabase/functions/_shared/jungsi/domain/text.ts": "da8931fbab3f328fe4dbf89db8dbcfdb5fc55898c44dcdbbf6f8cedb59677fe9",
             "supabase/functions/_shared/jungsi/domain/time.ts": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
-            "tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs": "e3246840d2c9fe3b2c5c5e7aef876c4655b02b1abb0be76e70e12624c71e142d"
+            "tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs": "aebc3cadb49e17c6febf4c92f224673fe288a41ebdaeddf92b29b148a3042392"
           }
         },
         "tests/service_p1/test_p1_r27_request_admission.synthetic.ts": {
@@ -56908,7 +56908,7 @@
             "supabase/functions/_shared/jungsi/application/operating_policy.ts": "477b312405d0d3daa24bc546df1f6ef8fec25795536bbbf85d5d21f0f231bf49",
             "supabase/functions/_shared/jungsi/application/overall_analysis.ts": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7",
             "supabase/functions/_shared/jungsi/application/own_report_list.ts": "ade1d75288df633ef20e1d8e26f602687615ece0e7d4764fd5a05e180d0a2bf2",
-            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "2a340e6e1817b747f7a28dbf238c76b6a51822f7971558be1cfd7eaf87c2a174",
+            "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
             "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",

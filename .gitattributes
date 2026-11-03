@@ -118,3 +118,6 @@
 /tests/test_cursor_contract_graph_guard.py text eol=lf
 /tests/test_cursor_edge_unit_aggregation.py text eol=lf
 /tests/service_p1/test_score_null_reason_review.synthetic.mjs text eol=lf
+
+# Preserve exact-byte multipart preflight test on every checkout.
+/tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs text eol=lf

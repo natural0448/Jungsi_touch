@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.157",
-  "source_sha256": "79d34f734c0a1af85547cb871ef4de54bc4db84d791097027289431f679adbd7",
+  "source_sha256": "214cf593eacd50f37e18189b44908853af7f9bad705bc98b0796cec2a8ef1aae",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3899,15 +3899,15 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "0b7c1c13be2d6929a8a09f468978f069329fc2af4dbc6460dd078efb4c249f6c"
+        "sha256": "8b9097637ce91f301359b578eddef96328d5f8f66964c153c00a97c9684a696a"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "7a78fc90ead8c30071e0fed10eafa5b153dbc04970087e7d963c832912c20846"
+        "sha256": "54312f5c7eada1ed33da439fc4e2ebfcb02b28ddb056b2d8ea6134392c8784a0"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "07e48f57576061f245ea12e7a451f6835b04d103e9fd0a55778a5a602c56406d"
+        "sha256": "cb09fdfa169eeda374b771306f80ba9cd1a4e98feee63e0b51472cb4bd6b88b4"
       },
       "groups": {
         "p1_review": {
@@ -3951,7 +3951,7 @@
             "tests/service_p1/test_p1_r27_http_order.synthetic.ts",
             "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
           ],
-          "test_count": 79
+          "test_count": 81
         }
       },
       "runtime_scope": "DENO_2_9_7_PORTABLE_CI_NOT_VERIFIED",

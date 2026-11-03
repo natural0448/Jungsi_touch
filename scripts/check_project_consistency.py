@@ -5211,7 +5211,7 @@ SERVICE_CANDIDATE_GROUPS = {
         "test_service_end_error_schema.synthetic.ts", "test_service_end_http.synthetic.ts",
         "test_service_end_official_display.synthetic.ts", "test_service_end_professional.synthetic.ts",
         "test_service_end_runtime.synthetic.ts", "test_official_display_final_expiry.synthetic.ts")], 125, []),
-    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts', SCORE_NULL_SUITE_ROOT], 79, ["node:assert/strict", "node:fs", "node:zlib"]),
+    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts', SCORE_NULL_SUITE_ROOT], 81, ["node:assert/strict", "node:fs", "node:zlib"]),
     "search503": (["tests/search503/" + name for name in (
         "test_combined_search503_end.synthetic.v5.mjs", "test_search503_stream_limits.synthetic.v4.mjs",
         "test_search503_reader_unlock.synthetic.v3.mjs", "test_search503_final_error.synthetic.v2.mjs",

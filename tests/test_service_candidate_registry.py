@@ -35,7 +35,7 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
 
     def test_exact_four_suites_are_registered(self):
         self.assertEqual(self.errors(), [])
-        self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [104, 125, 48, 79])
+        self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [104, 125, 48, 81])
         self.assertEqual(self.ext["activation_status"], "NOT_RUN")
 
     def test_new_builtin_is_limited_to_score_null_root(self):
@@ -314,7 +314,7 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
 
     def test_service_p1_old_and_new_counts_are_checked_separately(self):
         legacy = [
-            {"cases": 21, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
+            {"cases": 23, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
             {"result": "SYNTHETIC_ONLY", "passed": 4, "cases": [
                 "real runtime context wires request admission into synthetic P1 v2 source",
                 "invalid optional R27 settings and credentials fail v2 before r27 metadata",
@@ -343,7 +343,7 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
 
     def test_service_p1_wrong_new_count_fails(self):
         legacy = [
-            {"cases": 21, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
+            {"cases": 23, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
             {"result": "SYNTHETIC_ONLY", "passed": 4, "cases": [
                 "real runtime context wires request admission into synthetic P1 v2 source",
                 "invalid optional R27 settings and credentials fail v2 before r27 metadata",
