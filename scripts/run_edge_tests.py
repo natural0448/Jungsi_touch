@@ -217,6 +217,32 @@ def current_public_snapshot_batch_registration(spec,before):
     return contract
 
 
+def current_page_projection_registration(spec,before):
+    """Pin a disabled current-page application candidate and its synthetic tests."""
+    source="supabase/functions/_shared/jungsi/application/history_current_page.ts"
+    test="supabase/functions/_shared/jungsi/application/history_current_page_test.ts"
+    prefix="supabase/functions/_shared/"
+    guide=prefix+"current_2027_guide_search_review_only.ts"
+    guide_tests=[prefix+"current_2027_guide_search_review_only_test.ts",prefix+"current_2027_guide_search_sql_integration_test.ts"]
+    required={source,test,guide,*guide_tests,prefix+"current_public_catalog.ts",prefix+"current_public_catalog_sql.ts"}
+    contract=spec.get("current_public_supply_contract",{}).get("current_page_projection_verification")
+    if contract is None:
+        if source in before or test in before:raise EdgeFailure("current_page_projection_verification_missing")
+        return None
+    bindings=contract.get("source_bindings") if isinstance(contract,dict) else None
+    if (not isinstance(contract,dict) or contract.get("format")!="jungsi.current-page-projection-verification/v1" or
+        contract.get("status")!="SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED" or
+        contract.get("test_path")!=test or contract.get("test_count")!=47 or
+        contract.get("guide_test_paths")!=guide_tests or contract.get("guide_test_count")!=20 or
+        contract.get("activation")!="NOT_RUN" or contract.get("production_ready") is not False or
+        not isinstance(bindings,list) or len(bindings)!=len(required) or
+        {b.get("path") for b in bindings if isinstance(b,dict)}!=required or
+        any(not isinstance(b,dict) or set(b)!={"path","sha256"} or
+            not isinstance(b.get("sha256"),str) or before.get(b["path"])!=b["sha256"] for b in bindings)):
+        raise EdgeFailure("current_page_projection_source_or_test_binding_invalid")
+    return contract
+
+
 def whole_population_registration(spec,before):
     """Separate strict v2 regressions; keep the foundation and v1 checks exact."""
     prefix='supabase/functions/_shared/'
@@ -1610,6 +1636,33 @@ def run_workspace(root,manifest,deno,python,output):
           actual_DB='NOT_RUN',publication='NOT_RUN',deployment='NOT_RUN')
         public_unit['snapshot_batch']=batch_unit
         public_unit['tests_run']+=batch_unit['tests_run']
+    current_page=current_page_projection_registration(spec,before)
+    if current_page is not None:
+        if public_unit is None:raise EdgeFailure("current_page_requires_current_public_provider")
+        current_page_paths=["supabase/functions/_shared/jungsi/application/history_current_page.ts",current_page["test_path"]]
+        command([deno,"check",*common,*current_page_paths],root=root,output=output,name="current_page_check")
+        command([deno,"lint","--config",cfg["config"],*current_page_paths],root=root,output=output,name="current_page_lint")
+        command([deno,"fmt","--check","--config",cfg["config"],*current_page_paths],root=root,output=output,name="current_page_fmt")
+        current_page_junit=output.resolve()/"current_page_projection.junit.xml"
+        command([deno,"test",*common,"--deny-read","--deny-write","--deny-net","--deny-env","--deny-run","--deny-sys","--deny-ffi",
+          "--reporter=dot","--junit-path",str(current_page_junit),current_page["test_path"]],
+          root=root,output=output,name="current_page_unit")
+        current_page_unit=dict(**parse_junit(current_page_junit,current_page["test_count"]),
+          coverage="CURRENT_PAGE_PROJECTION_SYNTHETIC_NOT_ACTIVATED",source_bindings=current_page["source_bindings"],
+          actual_DB="NOT_RUN",publication="NOT_RUN",deployment="NOT_RUN")
+        public_unit["current_page_projection"]=current_page_unit
+        public_unit["tests_run"]+=current_page_unit["tests_run"]
+        guide_paths=["supabase/functions/_shared/current_2027_guide_search_review_only.ts",*current_page["guide_test_paths"]]
+        command([deno,"check",*common,*guide_paths],root=root,output=output,name="current_guide_check")
+        command([deno,"lint","--config",cfg["config"],*guide_paths],root=root,output=output,name="current_guide_lint")
+        command([deno,"fmt","--check","--config",cfg["config"],*guide_paths],root=root,output=output,name="current_guide_fmt")
+        guide_junit=output.resolve()/"current_guide_adapter.junit.xml"
+        command([deno,"test",*common,"--deny-read","--deny-write","--deny-net","--deny-env","--deny-run","--deny-sys","--deny-ffi",
+          "--reporter=dot","--junit-path",str(guide_junit),*current_page["guide_test_paths"]],root=root,output=output,name="current_guide_unit")
+        guide_unit=dict(**parse_junit(guide_junit,current_page["guide_test_count"]),
+          coverage="CURRENT_GUIDE_ADAPTER_SYNTHETIC_NOT_ACTIVATED",actual_DB="NOT_RUN",publication="NOT_RUN",deployment="NOT_RUN")
+        public_unit["current_guide_adapter"]=guide_unit
+        public_unit["tests_run"]+=guide_unit["tests_run"]
     whole_population_unit=None
     whole_population=whole_population_registration(spec,before)
     if whole_population is not None:
