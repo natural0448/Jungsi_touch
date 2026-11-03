@@ -56,6 +56,15 @@ export type Row = {
 export function historyConditions(row:Pick<Row,"c"|"t"|"g">):string {
   return [row.c && `캠퍼스 ${row.c}`,row.t && `전형 ${row.t}`,row.g && `모집군 ${row.g}`].filter(Boolean).join(" · ");
 }
+/** 직전 학년도와 확인된 조건의 차이가 있을 때만 표시한다. */
+export function historyConditionsChanged(row: Pick<Row, "c" | "t" | "g">, previous: readonly Pick<Row, "c" | "t" | "g">[]): boolean {
+  if (previous.length === 0) return false;
+  const fields = ["c", "t", "g"] as const;
+  return previous.every(p => fields.some(field => {
+    const now = row[field]?.trim() ?? "", before = p[field]?.trim() ?? "";
+    return now !== "" && before !== "" && now !== before;
+  }));
+}
 /** 과거 행 식별자. 캠퍼스·전형·군이 없는 행은 null 그대로 둬야 그 과거 행의 c·t·g 와 맞는다 */
 export type HistoryLink = {
   academic_year: number; school_id: string | null; original_pk: string | null;
@@ -114,15 +123,17 @@ export function linkR27(rows: Row[], schoolId: string): Row[] {
 }
 
 /** 접힌 줄의 2027 모집 칸. hold 면 '확인 중', carry 는 수시 이월 조건, initial 은 최초 인원 */
-export type R27Summary = { v: string | null; carry: boolean; initial: boolean; check: boolean; hold: boolean; note: string | null };
+export type R27Summary = { v: string | null; carry: boolean; initial: boolean; check: boolean; hold: boolean; note: string | null; stageUnknown?: boolean };
 const CARRY_STATES = new Set(["conditional_transfer", "conditional_carryover"]);
 /** 모집인원 원문을 그대로 보인다. 이월 미정을 0 으로 바꾸지 않고, 모르는 상태 값은 '확인 중'으로 둔다 */
 export function r27Summary(q: Quota27 | undefined): R27Summary {
   const hold: R27Summary = { v: null, carry: false, initial: false, check: false, hold: true, note: null };
   if (!q || q.rs === "source_conflict" || (q.ls !== null && q.ls !== "numeric_literal" && !CARRY_STATES.has(q.ls))) return hold;
-  const carry = (q.ls !== null && CARRY_STATES.has(q.ls)) || q.ct !== null;
+  // 일반 모집조건 문구만으로 이월을 추정하지 않는다.
+  const carry = q.ls !== null && CARRY_STATES.has(q.ls);
+  if (carry && q.st === "final") return hold;
   const parsed = q.v !== null && /^[0-9]+$/.test(q.v.trim()) ? Number(q.v.trim()) : NaN;
-  const v = Number.isSafeInteger(parsed) && parsed >= 0 ? String(parsed) : null;
+  const v = Number.isSafeInteger(parsed) && parsed >= 0 ? q.v!.trim() : null;
   if (v === null && (q.ls === "numeric_literal" || !carry || (q.v !== null && q.v.trim() !== ""))) return hold;
   // 원문 0은 0 그대로 둔다. 최종 0 행의 회원 목록 제외는 서버 발급 범위가 맡는다(범위 공급 전 화면에서 숨기지 않음, 2026-11-03 사용자 결정)
   const base = carry
@@ -133,7 +144,8 @@ export function r27Summary(q: Quota27 | undefined): R27Summary {
   const condition = q.ct ? `모집요강: ${q.ct.length > 200 ? `${q.ct.slice(0, 200)}…` : q.ct}` : null;
   return {
     v, carry, hold: false,
-    initial: !carry && q.st === "initial",
+    initial: q.st === "initial",
+    stageUnknown: v !== null && q.st !== "initial" && q.st !== "final",
     check: v !== null && q.cs !== null && q.cs !== "verified_official",
     note: [base, condition].filter(Boolean).join(" ") || null,
   };

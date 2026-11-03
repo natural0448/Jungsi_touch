@@ -20,6 +20,7 @@ function V({ c }: { c: R27Summary }) {
       <small>명</small>
       {c.carry && <b> + 이월</b>}
       {c.initial && <small> 최초</small>}
+      {c.stageUnknown && <small> 단계 확인 중</small>}
       {c.check && <i className="q" title="값은 모집요강 그대로이고 단위·기준일 확인이 남았습니다">확인</i>}
     </span>
   );

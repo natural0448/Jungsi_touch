@@ -2,7 +2,7 @@ import { asOfDate, ratioText } from "@/lib/format";
 import { derived } from "@/lib/p1-derived";
 import { rankDisplayModel } from "@/lib/p1-field-qualification";
 import { publishedScoreNullLabel, publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
-import { historyConditions, unitKey, type Cell, type Row } from "@/lib/p1-shape";
+import { historyConditions, historyConditionsChanged, unitKey, type Cell, type Row } from "@/lib/p1-shape";
 import { ScrollHint } from "./scroll-hint";
 
 /*
@@ -128,8 +128,8 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                 const ps = publishedStats(r);
                 const renamedDept = r.d !== latest.d ? r.d : null;
                 const otherName = r.n !== schoolName ? r.n : null;
-                // 전형·군·캠퍼스는 최근 발표와 달라진 해만 원문대로 붙인다(휴대폰 첫 열이 좁아서, 2026-11-03 사용자 결정)
-                const cond = historyConditions(r) !== historyConditions(latest) ? historyConditions(r) : "";
+                // 확인된 직전 학년도와 조건이 다른 경우에만 원문대로 표시한다.
+                const cond = historyConditionsChanged(r, byYear.get(y - 1) ?? []) ? historyConditions(r) : "";
                 return (
                   <tr key={`${y}-${i}`}>
                     <th scope="row">

@@ -495,7 +495,7 @@ test("the 2027 quota summary shows source wording and never turns carryover or u
   const pick = s => [s.hold, s.v, s.carry, s.initial];
   assert.deepEqual(pick(r27Summary(q({ v: "12", st: "final" }))), [false, "12", false, false]);
   assert.deepEqual(pick(r27Summary(q({ v: "12", st: "initial" }))), [false, "12", false, true]);
-  assert.deepEqual(pick(r27Summary(q({ v: "12", ls: "conditional_carryover", st: "initial" }))), [false, "12", true, false]);
+  assert.deepEqual(pick(r27Summary(q({ v: "12", ls: "conditional_carryover", st: "initial" }))), [false, "12", true, true]); // 최초 인원과 검증된 이월을 함께 보인다(11-03 담당자 후속 보완)
   assert.deepEqual(pick(r27Summary(q({ v: "0", ls: "conditional_transfer" }))), [false, "0", true, false]);
   const only = r27Summary(q({ ls: "conditional_carryover" }));
   assert.deepEqual(pick(only), [false, null, true, false]);
