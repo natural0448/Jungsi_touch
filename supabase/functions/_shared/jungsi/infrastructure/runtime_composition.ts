@@ -8,10 +8,19 @@ import { AccessError } from "../application/access.ts";
 import type {
   ApiBusinessPort,
   ApiExecution,
+  ApiExecutionBoundary,
   ApiOperationId,
   ApiRoutePolicy,
 } from "../application/api_dispatch.ts";
 import { REGISTERED_API_OPERATION_IDS } from "../application/api_dispatch.ts";
+import { CURRENT_PAGE_OPERATION_ID } from "../application/api_dispatch.ts";
+import { isCurrentPagePolicy } from "../application/api_dispatch.ts";
+import {
+  type CurrentPageExecution,
+  type CurrentPageLimits,
+  type CurrentPagePorts,
+  HistoryCurrentPageService,
+} from "../application/history_current_page.ts";
 import { READ_VIEW_OPERATION_IDS } from "../application/api_dispatch.ts";
 import { MEMBER_SHORTLIST_OPERATION_IDS } from "../application/api_dispatch.ts";
 import { legacyReadViewRegistration } from "../application/member_shortlist_schema.ts";
@@ -41,8 +50,17 @@ import {
   UniversityAnalysisService,
 } from "../application/university_analysis.ts";
 import { utcText } from "../domain/time.ts";
-import { API_REQUEST_STAGES, type ApiRequestStage, createApiHandler } from "./api_http.ts";
-import { RUNTIME_BUDGET_STAGES, type RuntimeBudgetStage } from "./runtime_budget.ts";
+import {
+  API_REQUEST_STAGES,
+  type ApiHttpPorts,
+  type ApiRequestStage,
+  createApiHandler,
+} from "./api_http.ts";
+import {
+  RUNTIME_BUDGET_STAGES,
+  type RuntimeBudgetStage,
+  type RuntimeRequestBudget,
+} from "./runtime_budget.ts";
 import { RelayBoundary, safeFailure } from "./auth_relay.ts";
 import { SupabaseForecastAuthorities, SupabaseManagementResources } from "./management_postgres.ts";
 import { NativeForecastInputs } from "./native_data_provider.ts";
@@ -103,6 +121,28 @@ export interface RuntimeComposition {
   readonly memberShortlistExtensions?: true;
   readonly readViewExtensions?: true;
   readonly candidateCatalog?: ReadViewCatalogFactory;
+  /** Separate reviewed configuration only; no authority is installed by default. */
+  readonly currentPage?: {
+    assert(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
+    readonly ports: CurrentPagePorts;
+    readonly limits: CurrentPageLimits;
+    readonly policy: RuntimeRoutePolicy;
+    readonly projection: PublicResponseProjection;
+    assertCurrent(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
+    readonly schemaAuthority: {
+      assert(
+        request: ApiExecution,
+        boundary: ApiExecutionBoundary,
+        binding: Readonly<{
+          operation: string;
+          contract_ref: string;
+          schema_sha256: string;
+          schema_bytes_sha256: string;
+        }>,
+        phase: "active" | "settled_success",
+      ): Promise<void>;
+    };
+  };
   readonly environment: RuntimeEnvironment;
   readonly policies: readonly RuntimeRoutePolicy[];
   readonly responseSchemas: unknown;
@@ -111,6 +151,91 @@ export interface RuntimeComposition {
   readonly fetcher?: typeof fetch;
   /** Receives exactly five safe fields; never request data or exception objects. */
   readonly observe?: (event: SafeRuntimeObservation) => void | Promise<void>;
+}
+/** New route only: verify the exact issuer and phase before consulting candidate authorities. */
+export function currentPageBudgetScope(
+  config: Pick<
+    NonNullable<RuntimeComposition["currentPage"]>,
+    "assert" | "assertCurrent" | "projection" | "schemaAuthority"
+  >,
+  budget: () => Promise<RuntimeRequestBudget>,
+  assertBaseCurrent: () => Promise<void>,
+): NonNullable<ApiHttpPorts["currentPageScope"]> {
+  const requests = new WeakMap<ApiExecutionBoundary, {
+    readonly request: ApiExecution;
+    readonly budget: RuntimeRequestBudget;
+  }>();
+  const assertAdmission = async (
+    request: ApiExecution,
+    boundary: ApiExecutionBoundary,
+    phase: "active" | "settled_success",
+  ) => {
+    if (
+      request.operation !== CURRENT_PAGE_OPERATION_ID || !boundary.admission ||
+      boundary.signal.aborted
+    ) {
+      throw new AccessError("security_policy_unavailable", 503);
+    }
+    let record = requests.get(boundary);
+    if (phase === "settled_success" && !record) {
+      throw new AccessError("security_policy_unavailable", 503);
+    }
+    if (!record) {
+      const issuedBy = await budget();
+      issuedBy.assertRunAdmission(boundary.admission as PreparedUsageAdmission, request, "active");
+      record = { request, budget: issuedBy };
+      requests.set(boundary, record);
+    }
+    if (record.request !== request) throw new AccessError("security_policy_unavailable", 503);
+    record.budget.assertRunAdmission(boundary.admission as PreparedUsageAdmission, request, phase);
+    if (boundary.signal.aborted) throw new AccessError("security_policy_unavailable", 503);
+  };
+  return {
+    projection: config.projection,
+    assert: async (request, boundary) => {
+      await assertAdmission(request, boundary, "active");
+      const result = await config.assert(request, boundary);
+      await assertAdmission(request, boundary, "active");
+      return result;
+    },
+    assertCurrent: async (request, boundary) => {
+      await assertAdmission(request, boundary, "active");
+      const result = await config.assertCurrent(request, boundary);
+      if (result !== undefined) return result;
+      await assertAdmission(request, boundary, "active");
+      const baseResult = await assertBaseCurrent();
+      if (baseResult !== undefined) return baseResult;
+      await assertAdmission(request, boundary, "active");
+    },
+    assertReceipt: async (request, boundary) => {
+      // Previously captured request-local budget only; no factory, provider or I/O.
+      await assertAdmission(request, boundary, "settled_success");
+    },
+    schemaAuthority: {
+      assert: async (request, boundary, binding, phase) => {
+        if (phase !== "active") throw new AccessError("security_policy_unavailable", 503);
+        await assertAdmission(request, boundary, phase);
+        const result = await config.schemaAuthority.assert(request, boundary, binding, phase);
+        await assertAdmission(request, boundary, "active");
+        return result;
+      },
+    },
+  };
+}
+/** Preserve legacy final checks; the new page uses only already-captured local state after settlement. */
+export async function runtimeCompletionCurrent(
+  operation: string | null,
+  pageBudget: RuntimeRequestBudget | undefined,
+  existingCurrent: () => Promise<void>,
+  assertP1Current: () => void,
+): Promise<void> {
+  if (operation === CURRENT_PAGE_OPERATION_ID) {
+    if (!pageBudget) throw new AccessError("security_policy_unavailable", 503);
+    pageBudget.policy.assertLive();
+  } else {
+    await existingCurrent();
+  }
+  assertP1Current();
 }
 /** The serving graph forwards every scoring capability through the same request-local provider. */
 export function runtimeAnalysisDataPort(
@@ -135,6 +260,20 @@ export function runtimeAnalysisDataPort(
     getAnalysis: async (...a) =>
       await phase("analysis_provider", async () => (await context.data()).getAnalysis(...a)),
   };
+}
+/** Used only inside the authenticated, scoped and already-reserved business callback. */
+async function invokeCurrentPageService(
+  config: NonNullable<RuntimeComposition["currentPage"]> | undefined,
+  clock: RequestClockPort,
+  request: ApiExecution,
+  boundary?: ApiExecutionBoundary,
+): Promise<unknown> {
+  if (
+    !config || request.operation !== CURRENT_PAGE_OPERATION_ID ||
+    !boundary?.admission || boundary.signal.aborted
+  ) throw new AccessError("security_policy_unavailable", 503);
+  const service = new HistoryCurrentPageService(config.ports, clock, config.limits);
+  return await service.execute(request as ApiExecution & CurrentPageExecution, boundary);
 }
 function operation(policies: readonly ApiRoutePolicy[], request: Request): ApiOperationId | null {
   const pathname = new URL(request.url).pathname;
@@ -166,10 +305,11 @@ export async function observeRuntimeResponse(
       ? fallbackId
       : null;
     if (!requestId) return response;
-    const safeOperation = operationId === "health.ready" ||
-        REGISTERED_API_OPERATION_IDS.includes(operationId as ApiOperationId)
-      ? operationId
-      : null;
+    const safeOperation =
+      operationId === "health.ready" || operationId === CURRENT_PAGE_OPERATION_ID ||
+        (REGISTERED_API_OPERATION_IDS as readonly string[]).includes(operationId ?? "")
+        ? operationId
+        : null;
     let code: string | null = null;
     if (response.status >= 400) {
       const body = await response.clone().json();
@@ -200,6 +340,7 @@ export async function observeRuntimeResponse(
 export class NativeRuntimeApi {
   private readonly clock: RequestClockPort;
   private readonly fetcher: typeof fetch;
+  private readonly currentPageEnabled: boolean;
   private readonly projection: PublicResponseProjection;
   private readonly pools = new Map<string, SupabaseSqlTransport>();
   private readonly artifactCache = new VerifiedArtifactCache();
@@ -225,6 +366,17 @@ export class NativeRuntimeApi {
       this.config.responseSchemas,
       this.config.policies,
     );
+    const page = this.config.currentPage;
+    this.currentPageEnabled = !!this.config.readViewExtensions && !!page &&
+      typeof page.assert === "function" && !!page.ports && !!page.limits &&
+      typeof page.assertCurrent === "function" &&
+      typeof page.schemaAuthority?.assert === "function" &&
+      isCurrentPagePolicy(page.policy) && page.projection instanceof PublicResponseProjection &&
+      page.projection.hasExactRegistryBytes() &&
+      page.projection.supportsOperation(CURRENT_PAGE_OPERATION_ID, page.policy.contract_ref) &&
+      !this.config.policies.some((p) =>
+        p.method === page.policy.method && p.path === page.policy.path
+      );
   }
   readonly fetch = async (request: Request): Promise<Response> => {
     const requestId = crypto.randomUUID().replaceAll("-", "");
@@ -284,9 +436,12 @@ export class NativeRuntimeApi {
         return requestSql;
       };
       const relay = new RelayBoundary(this.config.environment.get("JUNGSI_RELAY_TOKEN") ?? null);
+      const requestPolicies = this.currentPageEnabled
+        ? [...this.config.policies, this.config.currentPage!.policy]
+        : this.config.policies;
       selectedOperation = pathname === "/health/ready"
         ? "health.ready"
-        : operation(this.config.policies, request);
+        : operation(requestPolicies, request);
       let admissionPermit: object | undefined;
       if (selectedOperation !== null && selectedOperation !== "health.ready") {
         stage = "relay";
@@ -442,6 +597,9 @@ export class NativeRuntimeApi {
       );
       const business: ApiBusinessPort = {
         execute: async (r, boundary) => {
+          if (r.operation === CURRENT_PAGE_OPERATION_ID) {
+            return await invokeCurrentPageService(this.config.currentPage, this.clock, r, boundary);
+          }
           if (
             r.operation === "report.export" && Object.keys(r.query).length &&
             this.config.memberShortlistExtensions
@@ -488,7 +646,17 @@ export class NativeRuntimeApi {
         },
       };
       let inputAdmission: PreparedUsageAdmission | undefined;
-      const handler = createApiHandler(this.config.policies, {
+      let currentPageBudget: RuntimeRequestBudget | undefined;
+      const handler = createApiHandler(requestPolicies, {
+        ...(this.currentPageEnabled
+          ? {
+            currentPageScope: currentPageBudgetScope(
+              this.config.currentPage!,
+              () => context.budget(),
+              () => context.assertCurrent(),
+            ),
+          }
+          : {}),
         ...(this.config.memberShortlistExtensions
           ? { memberShortlistScope: { assert: () => context.assertMemberShortlistScope() } }
           : {}),
@@ -534,8 +702,12 @@ export class NativeRuntimeApi {
             }
           },
           current: async () => {
-            await phase("runtime_final_current", () => context.assertCurrent());
-            context.assertP1R27Current();
+            await runtimeCompletionCurrent(
+              selectedOperation,
+              currentPageBudget,
+              () => phase("runtime_final_current", () => context.assertCurrent()),
+              () => context.assertP1R27Current(),
+            );
           },
           deliver: async (r, result, id) => {
             if (
@@ -575,6 +747,12 @@ export class NativeRuntimeApi {
         budget: {
           run: async (r, work) => {
             const budget = await phase("budget_initialize", () => context.budget());
+            if (r.operation === CURRENT_PAGE_OPERATION_ID) {
+              if (currentPageBudget && currentPageBudget !== budget) {
+                throw new AccessError("security_policy_unavailable", 503);
+              }
+              currentPageBudget = budget;
+            }
             return inputAdmission
               ? await budget.runAdmitted(inputAdmission, r, work, mark)
               : await budget.run(r, work, mark);

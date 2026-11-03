@@ -5,7 +5,11 @@ import {
   API_OPERATION_IDS,
   type ApiBusinessPort,
   type ApiExecution,
+  type ApiExecutionBoundary,
   type ApiRoutePolicy,
+  CURRENT_PAGE_OPERATION_ID,
+  CURRENT_PAGE_ROUTE_PATH,
+  isCurrentPagePolicy,
   MEMBER_SHORTLIST_OPERATION_IDS,
   MEMBER_SHORTLIST_ROUTE_PATHS,
   READ_VIEW_OPERATION_IDS,
@@ -82,6 +86,29 @@ export interface ApiHttpPorts {
   /** Explicit candidate opt-in; must verify the approved v2 binding before any new work. */
   readonly readViewScope?: { assert(operation: ApiExecution["operation"]): Promise<void> };
   readonly memberShortlistScope?: { assert(): Promise<void> };
+  /** Explicit opt-in to a separately authorized candidate; no default authority. */
+  readonly currentPageScope?: {
+    assert(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
+    /** Final external/head validation while this request's reservation is active. */
+    assertCurrent(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
+    /** Request-local settled receipt only: no new DB, Storage or business I/O. */
+    assertReceipt(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
+    readonly projection: PublicResponseProjection;
+    readonly schemaAuthority: {
+      /** Independently approve this request, admission, operation, contract and exact schema pin. */
+      assert(
+        request: ApiExecution,
+        boundary: ApiExecutionBoundary,
+        binding: Readonly<{
+          operation: string;
+          contract_ref: string;
+          schema_sha256: string;
+          schema_bytes_sha256: string;
+        }>,
+        phase: "active" | "settled_success",
+      ): Promise<void>;
+    };
+  };
   readonly relay: RelayBoundary;
   readonly sessions: UserSessionPort;
   readonly passes: PublicPassPort;
@@ -137,18 +164,28 @@ function routes(
   policies: readonly ApiRoutePolicy[],
   extended = false,
   memberShortlist = false,
+  currentPage = false,
 ): Route[] {
-  const expected = memberShortlist
+  const base = memberShortlist
     ? REGISTERED_API_OPERATION_IDS
     : extended
     ? READ_VIEW_REGISTERED_API_OPERATION_IDS
     : API_OPERATION_IDS;
+  const expected: readonly string[] = currentPage ? [...base, CURRENT_PAGE_OPERATION_ID] : base;
   if (
     !Array.isArray(policies) || policies.length !== expected.length ||
     new Set(policies.map((p) => p?.id)).size !== expected.length ||
     expected.some((id) => !policies.some((p) => p?.id === id))
   ) configuration();
   const result = policies.map((policy: ApiRoutePolicy) => {
+    if (policy?.id === CURRENT_PAGE_OPERATION_ID) {
+      if (
+        !currentPage || !extended || policy.method !== "GET" ||
+        policy.path !== CURRENT_PAGE_ROUTE_PATH || policy.member_tiers?.length !== 2 ||
+        !policy.member_tiers.includes("standard") || !policy.member_tiers.includes("paid") ||
+        policy.report_owner !== false || policy.confirmed_score_profile !== false
+      ) configuration();
+    }
     if (policy && MEMBER_SHORTLIST_OPERATION_IDS.some((id) => id === policy.id)) {
       const id = policy.id as typeof MEMBER_SHORTLIST_OPERATION_IDS[number];
       if (
@@ -168,7 +205,8 @@ function routes(
       ) configuration();
     }
     if (
-      !policy || !REGISTERED_API_OPERATION_IDS.includes(policy.id) ||
+      !policy || !(REGISTERED_API_OPERATION_IDS as readonly string[]).includes(policy.id) &&
+        policy.id !== CURRENT_PAGE_OPERATION_ID ||
       !["GET", "POST", "PUT"].includes(policy.method) ||
       typeof policy.path !== "string" ||
       !/^\/api\/v1\/[A-Za-z0-9_{}./:-]+$/.test(policy.path) ||
@@ -319,10 +357,43 @@ export function createApiHandler(
   policies: readonly ApiRoutePolicy[],
   ports: ApiHttpPorts,
 ): (request: Request) => Promise<Response> {
+  const candidates = policies.filter((p) => p?.id === CURRENT_PAGE_OPERATION_ID);
+  const currentPageEnabled = candidates.length === 1 && isCurrentPagePolicy(candidates[0]) &&
+    !!ports.readViewScope && typeof ports.currentPageScope?.assert === "function" &&
+    typeof ports.currentPageScope?.assertCurrent === "function" &&
+    typeof ports.currentPageScope?.assertReceipt === "function" &&
+    typeof ports.currentPageScope?.schemaAuthority?.assert === "function" &&
+    ports.currentPageScope.projection instanceof PublicResponseProjection &&
+    ports.currentPageScope.projection.hasExactRegistryBytes() &&
+    ports.currentPageScope.projection.supportsOperation(
+      CURRENT_PAGE_OPERATION_ID,
+      candidates[0].contract_ref!,
+    ) &&
+    !policies.some((p) =>
+      p?.id !== CURRENT_PAGE_OPERATION_ID &&
+      p?.method === candidates[0].method && p?.path === candidates[0].path
+    );
+  const currentPageAssert = currentPageEnabled
+    ? ports.currentPageScope!.assert.bind(ports.currentPageScope)
+    : null;
+  const currentPageProjection = currentPageEnabled ? ports.currentPageScope!.projection : null;
+  const currentPageRecheck = currentPageEnabled
+    ? ports.currentPageScope!.assertCurrent.bind(ports.currentPageScope)
+    : null;
+  const currentPageReceipt = currentPageEnabled
+    ? ports.currentPageScope!.assertReceipt.bind(ports.currentPageScope)
+    : null;
+  const schemaAssert = currentPageEnabled
+    ? ports.currentPageScope!.schemaAuthority.assert.bind(ports.currentPageScope!.schemaAuthority)
+    : null;
+  const effectivePolicies = currentPageEnabled
+    ? policies
+    : policies.filter((p) => p?.id !== CURRENT_PAGE_OPERATION_ID);
   const registered = routes(
-    policies,
+    effectivePolicies,
     ports.readViewScope !== undefined,
     ports.memberShortlistScope !== undefined,
+    currentPageEnabled,
   );
   if (
     ports.memberShortlistScope &&
@@ -378,7 +449,10 @@ export function createApiHandler(
         if (!ports.memberShortlistScope) configuration();
         await ports.memberShortlistScope.assert();
       }
-      if (READ_VIEW_OPERATION_IDS.some((id) => id === policy.id)) {
+      if (
+        policy.id === CURRENT_PAGE_OPERATION_ID ||
+        READ_VIEW_OPERATION_IDS.some((id) => id === policy.id)
+      ) {
         if (!ports.readViewScope) configuration();
         await ports.readViewScope.assert(policy.id);
       }
@@ -420,13 +494,78 @@ export function createApiHandler(
         params,
         requestKey: request.headers.get("Idempotency-Key"),
       };
+      if (policy.id === CURRENT_PAGE_OPERATION_ID) {
+        Object.freeze(selectedQuery);
+        Object.freeze(params);
+        Object.freeze(selected);
+      }
       let authority: WildcardProjectionAuthority | null = null;
+      let pageContext: {
+        boundary: ApiExecutionBoundary;
+        schema: Readonly<{
+          operation: string;
+          contract_ref: string;
+          schema_sha256: string;
+          schema_bytes_sha256: string;
+        }>;
+      } | null = null;
+      let pageCurrentVerified = false;
+      const checkPageReceipt = async () => {
+        if (
+          !pageContext || !pageCurrentVerified || !currentPageReceipt || !currentPageProjection ||
+          pageContext.boundary.signal.aborted
+        ) configuration();
+        if (await currentPageReceipt(selected, pageContext.boundary) !== undefined) configuration();
+        const current = await currentPageProjection.schemaBinding(
+          CURRENT_PAGE_OPERATION_ID,
+          policy.contract_ref!,
+        );
+        if (
+          current.operation !== pageContext.schema.operation ||
+          current.contract_ref !== pageContext.schema.contract_ref ||
+          current.schema_sha256 !== pageContext.schema.schema_sha256 ||
+          current.schema_bytes_sha256 !== pageContext.schema.schema_bytes_sha256
+        ) configuration();
+        if (pageContext.boundary.signal.aborted) configuration();
+      };
+      const requirePageCountNull = (value: unknown) => {
+        if (
+          !value || typeof value !== "object" || Array.isArray(value) ||
+          !Object.hasOwn(value, "matching_count") ||
+          (value as Record<string, unknown>).matching_count !== null
+        ) configuration();
+      };
       let trustedRaw: unknown, firstProjection: string | null = null;
+      let firstPageProjection: string | null = null;
       const work = async (admission?: unknown) => {
         stage("business");
+        const rawBoundary = { signal: request.signal, admission };
+        const boundary = policy.id === CURRENT_PAGE_OPERATION_ID
+          ? Object.freeze(rawBoundary)
+          : rawBoundary;
+        if (policy.id === CURRENT_PAGE_OPERATION_ID) {
+          if (
+            !currentPageAssert || !currentPageProjection || !schemaAssert || !admission ||
+            boundary.signal.aborted
+          ) configuration();
+          const schema = await currentPageProjection.schemaBinding(
+            CURRENT_PAGE_OPERATION_ID,
+            policy.contract_ref!,
+          );
+          if (await schemaAssert(selected, boundary, schema, "active") !== undefined) {
+            configuration();
+          }
+          if (await currentPageAssert(selected, boundary) !== undefined) configuration();
+          if (boundary.signal.aborted || selected.operation !== CURRENT_PAGE_OPERATION_ID) {
+            configuration();
+          }
+          sessionDto(session, ports.clock.nowUtc());
+          pageContext = Object.freeze({ boundary, schema });
+        }
         const result = policy.id === "session.read"
           ? sessionDto(session, ports.clock.nowUtc())
-          : await ports.business.execute(selected, { signal: request.signal, admission });
+          : await ports.business.execute(selected, boundary);
+        if (policy.id === CURRENT_PAGE_OPERATION_ID) requirePageCountNull(result);
         if (
           policy.id === "session.read" &&
           (Object.keys(selectedQuery).length ||
@@ -463,12 +602,29 @@ export function createApiHandler(
           }
           if (request.signal.aborted) configuration();
         }
-        const projected = ports.projection.project(
+        const projection = policy.id === CURRENT_PAGE_OPERATION_ID
+          ? currentPageProjection!
+          : ports.projection;
+        const projected = projection.project(
           policy.id,
           session.tier,
           result,
           authority ?? undefined,
         );
+        if (policy.id === CURRENT_PAGE_OPERATION_ID) {
+          requirePageCountNull(projected);
+          firstPageProjection = publicJsonText(projected);
+          if (!pageContext || !currentPageRecheck || !schemaAssert || boundary.signal.aborted) {
+            configuration();
+          }
+          if (
+            await currentPageRecheck(selected, boundary) !== undefined ||
+            await schemaAssert(selected, boundary, pageContext.schema, "active") !== undefined
+          ) configuration();
+          if (boundary.signal.aborted) configuration();
+          sessionDto(session, ports.clock.nowUtc());
+          pageCurrentVerified = true;
+        }
         if (authority) {
           trustedRaw = result;
           firstProjection = publicJsonText(projected);
@@ -482,14 +638,26 @@ export function createApiHandler(
           )
           ? await ports.budget.run(selected, work)
           : await work();
+        if (policy.id === CURRENT_PAGE_OPERATION_ID) await checkPageReceipt();
         // Budget settlement or a future cache hit must still pass the final boundary.
         stage("final_session");
         sessionDto(session, ports.clock.nowUtc());
         stage("final_projection");
         if (authority && firstProjection !== null) await authority.assertCurrent(request.signal);
+        const projection = policy.id === CURRENT_PAGE_OPERATION_ID
+          ? currentPageProjection!
+          : ports.projection;
         const approved = authority && firstProjection !== null
-          ? ports.projection.project(policy.id, session.tier, trustedRaw, authority)
-          : ports.projection.project(policy.id, session.tier, result);
+          ? projection.project(policy.id, session.tier, trustedRaw, authority)
+          : projection.project(policy.id, session.tier, result);
+        if (policy.id === CURRENT_PAGE_OPERATION_ID) {
+          requirePageCountNull(result);
+          requirePageCountNull(approved);
+          if (
+            firstPageProjection === null || publicJsonText(result) !== firstPageProjection ||
+            publicJsonText(approved) !== firstPageProjection
+          ) configuration();
+        }
         // Identity or a request-local cache is only transport: the independent authority
         // must approve both passes and the settled representation must match byte-for-byte.
         if (
@@ -498,7 +666,9 @@ export function createApiHandler(
             publicJsonText(approved) !== firstProjection)
         ) configuration();
         stage("response_serialization");
-        const encoded = await ports.representation?.encode(selected, approved);
+        const encoded = policy.id === CURRENT_PAGE_OPERATION_ID
+          ? null
+          : await ports.representation?.encode(selected, approved);
         if (
           encoded &&
           (!READ_VIEW_OPERATION_IDS.some((id) => id === policy.id) ||
@@ -509,7 +679,13 @@ export function createApiHandler(
             encoded.publicationSha256 !== undefined &&
               !/^[a-f0-9]{64}$/.test(encoded.publicationSha256))
         ) configuration();
-        const response = new Response(encoded ? encoded.body : publicJsonText(approved), {
+        const responseBody = encoded ? encoded.body : publicJsonText(approved);
+        // encode() is asynchronous: compare the actual immutable wire body after it returns.
+        if (
+          policy.id === CURRENT_PAGE_OPERATION_ID &&
+          (typeof responseBody !== "string" || responseBody !== firstPageProjection)
+        ) configuration();
+        const response = new Response(responseBody, {
           status: encoded
             ? encoded.status
             : ["score-profile.create", "overall.analyze"].includes(policy.id)
@@ -531,6 +707,17 @@ export function createApiHandler(
         stage("response_current");
         await ports.completion?.current();
         sessionDto(session, ports.clock.nowUtc());
+        if (policy.id === CURRENT_PAGE_OPERATION_ID) await checkPageReceipt();
+        if (policy.id === CURRENT_PAGE_OPERATION_ID) {
+          requirePageCountNull(result);
+          requirePageCountNull(approved);
+          if (
+            firstPageProjection === null || publicJsonText(result) !== firstPageProjection ||
+            publicJsonText(approved) !== firstPageProjection
+          ) {
+            configuration();
+          }
+        }
         // This check is before any delivery receipt. It narrows one race only;
         // the later receipt and actual transport are not atomic with revocation.
         if (authority && firstProjection !== null) {

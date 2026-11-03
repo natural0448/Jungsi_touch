@@ -63,6 +63,8 @@ function fixture(limit = 2) {
     scanCovered: true,
     globallyCollisionFree: true,
     projection: new Map<string, "VERIFIED" | "HOLD">(),
+    scopeEnrollment: new Map<string, "CONFIRMED" | "HOLD" | "EXCLUDE">(),
+    scopePractical: new Map<string, "NON_PRACTICAL" | "HOLD" | "EXCLUDE">(),
     abortOnSearch: false,
     wrongHead: false,
     changedPublication: false,
@@ -162,6 +164,12 @@ function fixture(limit = 2) {
     },
     assertScanCoverage: () =>
       state.scanCovered ? Promise.resolve() : Promise.reject(new Error("unknown_scan")),
+    verifyGuideScope: (_ctx, claims) =>
+      Promise.resolve(claims.map(({ target }) => ({
+        target,
+        enrollment: state.scopeEnrollment.get(target.offering_pk) ?? "CONFIRMED",
+        practical: state.scopePractical.get(target.offering_pk) ?? "NON_PRACTICAL",
+      }))),
     classifyGuideProjections: (_ctx, claims) =>
       Promise.resolve(claims.map(({ target }) => ({
         target,
@@ -524,4 +532,397 @@ Deno.test("false practical flag alone does not resolve independently held scope"
   const items = result.items as Array<Record<string, unknown>>;
   assert(items[0].status === "pending" && items[0].offering === null);
   assert(items[1].offering !== null);
+});
+
+Deno.test("direct paging collapses same-key release collision into pending without skipping next key", async () => {
+  const f = fixture(1);
+  f.state.records = [row("A", "release-one"), row("A", "release-two"), row("B", "release-two")];
+  const direct = createGuideSearchPageComposition(
+    f.catalog,
+    f.authority,
+    f.codec,
+    f.clock,
+    () => f.catalog,
+  );
+  await direct.authority.begin(f.context.execution, f.context.boundary);
+  const first = await direct.offerings.page(f.context, f.query, null);
+  assert(first.items.length === 1 && first.incomplete_before && first.next_position !== null);
+  const membership = await direct.authority.classifyGuideMembership(f.context, [
+    first.items[0].key,
+  ]);
+  assert(membership[0].decision === "HOLD");
+  const second = await direct.offerings.page(f.context, f.query, first.next_position);
+  assert(second.items.length === 1 && second.items[0].key.offering_pk === "B");
+});
+
+async function integratedDirect(
+  f: ReturnType<typeof fixture>,
+  historyComplete = true,
+  rolloverUnresolved = false,
+) {
+  const composed = createGuideSearchPageComposition(
+    f.catalog,
+    f.authority,
+    f.codec,
+    f.clock,
+    () => f.catalog,
+  );
+  const service = new HistoryCurrentPageService(
+    {
+      authority: composed.authority,
+      offerings: composed.offerings,
+      histories: {
+        read: (_ctx, keys) =>
+          Promise.resolve({ claims: [], complete_targets: historyComplete ? keys : [] }),
+      },
+      recruitment_evidence: rolloverUnresolved
+        ? {
+          verify: (_ctx, decisions) =>
+            Promise.resolve(
+              decisions.filter((d) => d.decision === "INCLUDE").map(({ target }) => ({
+                target,
+                finality: "pending" as const,
+                carryover_status: "unresolved" as const,
+              })),
+            ),
+        }
+        : null,
+      cursors: {
+        open: () => Promise.reject(new Error("unexpected")),
+        seal: () => Promise.resolve("synthetic-outer-cursor"),
+      },
+    },
+    f.clock,
+    {
+      max_cursor_chars: 512,
+      max_position_chars: 256,
+      max_text_chars: 256,
+      max_history_claims: 500,
+      max_metrics_per_claim: 20,
+      max_result_bytes: 1000000,
+    },
+  );
+  return await service.execute(f.context.execution, f.context.boundary);
+}
+
+Deno.test("direct INCLUDE conflicting with raw practical or active signal holds just that row", async () => {
+  for (const scenario of ["practical", "inactive", "malformed"] as const) {
+    const f = fixture();
+    if (scenario === "practical") f.state.records[0].guide!.practical_required = true;
+    if (scenario === "inactive") f.state.records[0].guide!.active_service = false;
+    if (scenario === "malformed") f.state.records[0].guide!.practical_required = "unknown";
+    const result = await integratedDirect(f),
+      items = result.items as Array<Record<string, unknown>>;
+    assert(items.length === 2 && items[0].status === "pending" && items[0].offering === null);
+    assert(items[1].offering !== null);
+  }
+});
+
+Deno.test("direct explicit contradictory signal may be removed only with verified EXCLUDE", async () => {
+  const f = fixture();
+  f.state.records[0].guide!.practical_required = true;
+  f.state.targets.set("A", "EXCLUDE");
+  const result = await integratedDirect(f), items = result.items as Array<Record<string, unknown>>;
+  const offering = items[0].offering as Record<string, unknown>;
+  assert(items.length === 1 && offering.offering_id === "2027:B");
+});
+
+Deno.test("direct quota claim rejects missing/null/type/condition/stage/source conflicts individually", async () => {
+  for (
+    const scenario of [
+      "missing",
+      "null",
+      "type",
+      "condition",
+      "stage",
+      "source",
+      "literal",
+    ] as const
+  ) {
+    const f = fixture(), raw = f.state.records[0].row;
+    if (scenario !== "missing") {
+      raw.quota_value = scenario === "null" ? null : scenario === "type" ? "0" : 0;
+    }
+    raw.quota_literal_state = scenario === "null" || scenario === "literal"
+      ? "json_null"
+      : "numeric_literal";
+    raw.metadata = {
+      quota_stage: "initial",
+      source_url: "https://university.example/guide",
+      source_as_of: "2026-10-01",
+    };
+    const previous = f.authority.classifyTargets;
+    f.authority.classifyTargets = async (ctx, keys) => {
+      const rows = await previous(ctx, keys);
+      return rows.map((v) =>
+        v.target.offering_pk !== "A" ? v : ({
+          target: v.target,
+          decision: "INCLUDE" as const,
+          quota: {
+            value: 0,
+            status: "verified_official" as const,
+            stage: scenario === "stage" ? "final" as const : "initial" as const,
+            unit: "명",
+            condition: "unknown" as const,
+            condition_text: scenario === "condition" ? "invented" : null,
+            source_url: scenario === "source"
+              ? "https://other.example/guide"
+              : "https://university.example/guide",
+            source_as_of: "2026-10-01",
+          },
+        })
+      );
+    };
+    const result = await integratedDirect(f),
+      items = result.items as Array<Record<string, unknown>>;
+    assert(items.length === 2 && items[0].status === "pending" && items[0].offering === null);
+    assert(items[1].offering !== null);
+  }
+});
+
+Deno.test("direct mode without independent scope provider fails before any catalog I/O", async () => {
+  const f = fixture();
+  delete f.authority.verifyGuideScope;
+  await rejects(() =>
+    Promise.resolve().then(() =>
+      createGuideSearchPageComposition(
+        f.catalog,
+        f.authority,
+        f.codec,
+        f.clock,
+        () => f.catalog,
+      )
+    )
+  );
+  assert(f.state.publications === 0 && f.state.searches === 0);
+});
+
+Deno.test("absent raw scope fields require independent enrollment and non-practical evidence", async () => {
+  for (const scenario of ["recruitment", "practical", "contradictory-exclusion"] as const) {
+    const f = fixture();
+    if (scenario === "recruitment") f.state.scopeEnrollment.set("A", "HOLD");
+    if (scenario === "practical") f.state.scopePractical.set("A", "HOLD");
+    if (scenario === "contradictory-exclusion") f.state.scopePractical.set("A", "EXCLUDE");
+    const result = await integratedDirect(f),
+      items = result.items as Array<Record<string, unknown>>;
+    assert(items.length === 2 && items[0].status === "pending" && items[0].offering === null);
+    assert(items[1].offering !== null);
+  }
+});
+
+Deno.test("direct raw quota claim is copied before asynchronous authority work", async () => {
+  const f = fixture(), raw = f.state.records[0].row;
+  raw.quota_value = 0;
+  raw.quota_literal_state = "numeric_literal";
+  raw.metadata = {
+    quota_stage: "initial",
+    source_url: "https://university.example/guide",
+    source_as_of: "2026-10-01",
+  };
+  const priorProjection = f.authority.classifyGuideProjections;
+  f.authority.classifyGuideProjections = async (ctx, claims) => {
+    const claim = claims.find((c) => c.target.offering_pk === "A")!;
+    assert(claim.rawQuota.value.state === "present" && claim.rawQuota.value.value === 0);
+    await Promise.resolve();
+    raw.quota_value = 9;
+    return await priorProjection(ctx, claims);
+  };
+  const priorTargets = f.authority.classifyTargets;
+  f.authority.classifyTargets = async (ctx, keys) =>
+    (await priorTargets(ctx, keys)).map((v) =>
+      v.target.offering_pk !== "A" ? v : ({
+        target: v.target,
+        decision: "INCLUDE" as const,
+        quota: {
+          value: 0,
+          status: "verified_official" as const,
+          stage: "initial" as const,
+          unit: "명",
+          condition: "unknown" as const,
+          condition_text: null,
+          source_url: "https://university.example/guide",
+          source_as_of: "2026-10-01",
+        },
+      })
+    );
+  const result = await integratedDirect(f), items = result.items as Array<Record<string, unknown>>;
+  const quota = items[0].recruitment as Record<string, unknown>;
+  assert(items[0].offering !== null && quota.value === 0 && raw.quota_value === 9);
+});
+
+Deno.test("absent or merely labeled practical metadata never substitutes for independent O", async () => {
+  for (const scenario of ["absent", "raw-verified"] as const) {
+    const f = fixture();
+    f.state.scopePractical.set("A", "HOLD");
+    if (scenario === "raw-verified") {
+      f.state.records[0].row.practical_required = false;
+      f.state.records[0].guide!.practical_required = false;
+      f.state.records[0].row.metadata = { participation_conditions_status: "verified" };
+    }
+    const prior = f.authority.verifyGuideScope!;
+    f.authority.verifyGuideScope = async (ctx, claims) => {
+      const claim = claims.find((c) => c.target.offering_pk === "A")!;
+      if (scenario === "absent") assert(claim.scopeSignals.participationStatus.state === "missing");
+      else {assert(
+          claim.scopeSignals.participationStatus.state === "present" &&
+            claim.scopeSignals.participationStatus.value === "verified",
+        );}
+      return await prior(ctx, claims);
+    };
+    const result = await integratedDirect(f),
+      items = result.items as Array<Record<string, unknown>>;
+    assert(
+      items[0].status === "pending" && items[0].offering === null && items[1].offering !== null,
+    );
+  }
+});
+
+Deno.test("direct confirmed enrollment preserves raw null as null and keeps the row", async () => {
+  const f = fixture(), raw = f.state.records[0].row;
+  raw.quota_value = null;
+  raw.quota_literal_state = "json_null";
+  const result = await integratedDirect(f), items = result.items as Array<Record<string, unknown>>;
+  const quota = items[0].recruitment as Record<string, unknown>;
+  const source = quota.source_quota as Record<string, unknown>;
+  assert(
+    items[0].offering !== null && quota.value === null && quota.status === "pending_value_missing",
+  );
+  assert(
+    Object.hasOwn(source, "quota_value") && source.quota_value === null &&
+      source.quota_literal_state === "json_null",
+  );
+});
+
+Deno.test("direct verified quota retains original number or string zero without type coercion", async () => {
+  for (const value of [0, "0"] as const) {
+    const f = fixture(), raw = f.state.records[0].row;
+    raw.quota_value = value;
+    raw.quota_literal_state = "numeric_literal";
+    raw.metadata = {
+      quota_stage: "initial",
+      source_url: "https://university.example/guide",
+      source_as_of: "2026-10-01",
+    };
+    const previous = f.authority.classifyTargets;
+    f.authority.classifyTargets = async (ctx, keys) =>
+      (await previous(ctx, keys)).map((v) =>
+        v.target.offering_pk !== "A" ? v : ({
+          target: v.target,
+          decision: "INCLUDE" as const,
+          quota: {
+            value,
+            status: "verified_official" as const,
+            stage: "initial" as const,
+            unit: "명",
+            condition: "unknown" as const,
+            condition_text: null,
+            source_url: "https://university.example/guide",
+            source_as_of: "2026-10-01",
+          },
+        })
+      );
+    const result = await integratedDirect(f),
+      items = result.items as Array<Record<string, unknown>>;
+    const quota = items[0].recruitment as Record<string, unknown>,
+      source = quota.source_quota as Record<string, unknown>;
+    assert(
+      items[0].offering !== null && quota.value === value && typeof quota.value === typeof value,
+    );
+    assert(source.quota_value === value && typeof source.quota_value === typeof value);
+  }
+});
+
+Deno.test("missing raw quota stays visible when same-head scope and row proof are independently verified", async () => {
+  const f = fixture();
+  assert(!Object.hasOwn(f.state.records[0].row, "quota_value"));
+  const result = await integratedDirect(f), items = result.items as Array<Record<string, unknown>>;
+  const quota = items[0].recruitment as Record<string, unknown>;
+  assert(
+    items[0].offering !== null && quota.value === null && quota.status === "pending_value_missing",
+  );
+});
+
+Deno.test("43 synthetic candidates retain 42 verified rows when one scope and all history are unresolved", async () => {
+  const f = fixture(50);
+  f.state.records = Array.from({ length: 43 }, (_, i) => {
+    const candidate = row(`C${String(i).padStart(2, "0")}`, i % 2 ? "release-two" : "release-one");
+    candidate.row.quota_value = i;
+    candidate.row.quota_literal_state = "numeric_literal";
+    candidate.row.metadata = {
+      quota_stage: "initial",
+      source_url: "https://university.example/guide",
+      source_as_of: "2026-10-01",
+    };
+    return candidate;
+  });
+  const previousProjection = f.authority.classifyGuideProjections;
+  f.authority.classifyGuideProjections = async (ctx, claims) => {
+    for (const claim of claims) {
+      const n = Number(claim.target.offering_pk.slice(1));
+      assert(claim.rowFingerprint === "7".repeat(64) && ctx.pins.guide_head_sha256 === GUIDE);
+      assert(claim.rawQuota.value.state === "present" && claim.rawQuota.value.value === n);
+      assert(claim.rawQuota.stage.state === "present" && claim.rawQuota.stage.value === "initial");
+    }
+    return await previousProjection(ctx, claims);
+  };
+  const previousTargets = f.authority.classifyTargets;
+  f.authority.classifyTargets = async (ctx, keys) =>
+    (await previousTargets(ctx, keys)).map((v) => ({
+      target: v.target,
+      decision: "INCLUDE" as const,
+      quota: {
+        value: Number(v.target.offering_pk.slice(1)),
+        status: "verified_official" as const,
+        stage: "initial" as const,
+        unit: "명",
+        condition: "unknown" as const,
+        condition_text: null,
+        source_url: "https://university.example/guide",
+        source_as_of: "2026-10-01",
+      },
+    }));
+  f.state.scopePractical.set("C17", "HOLD");
+  const result = await integratedDirect(f, false, true),
+    items = result.items as Array<Record<string, unknown>>;
+  assert(items.length === 43 && items.filter((item) => item.offering !== null).length === 42);
+  assert(items[17].status === "pending" && items[17].offering === null);
+  const retained = items[0],
+    recruitment = retained.recruitment as Record<string, unknown>,
+    history = retained.history as Record<string, unknown>;
+  assert(
+    retained.offering !== null && recruitment.value === 0 && recruitment.stage === "initial" &&
+      recruitment.carryover_status === "unresolved" && history.status === "pending",
+  );
+  assert(f.state.searches === 1 && f.state.lookups === 0);
+});
+
+Deno.test("unverified raw numeric quota stays pending without a false value conflict", async () => {
+  const f = fixture(), raw = f.state.records[0].row;
+  raw.quota_value = 3;
+  raw.quota_literal_state = "numeric_literal";
+  const result = await integratedDirect(f), items = result.items as Array<Record<string, unknown>>;
+  const quota = items[0].recruitment as Record<string, unknown>;
+  const source = quota.source_quota as Record<string, unknown>;
+  assert(
+    items[0].offering !== null && quota.value === null && quota.status === "pending_value_missing",
+  );
+  assert(!Object.hasOwn(source, "quota_value") && source.quota_literal_state === "numeric_literal");
+});
+
+Deno.test("same-named current candidates use verified PK scope rather than inferred history names", async () => {
+  const f = fixture();
+  assert(f.state.records[0].row.department === f.state.records[1].row.department);
+  f.state.scopeEnrollment.set("B", "HOLD");
+  const result = await integratedDirect(f), items = result.items as Array<Record<string, unknown>>;
+  const offering = items[0].offering as Record<string, unknown>;
+  assert(offering.offering_id === "2027:A" && items[1].offering === null);
+});
+
+Deno.test("historical-only candidate cannot become a 2027 row merely by name", async () => {
+  const f = fixture();
+  const old = f.state.records[0];
+  old.key[0] = 2026;
+  old.row.academic_year = 2026;
+  old.guide!.academic_year = 2026;
+  await rejects(() => integratedDirect(f));
 });

@@ -723,7 +723,7 @@
       ],
       "files": {
         "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
-        "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "0ef599db025f26cd923bba8bd5464ff09fb8ea5a08bc7dfc09eb0bd75313ce38",
+        "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
         "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
         "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
         "supabase/functions/_shared/jungsi/application/history_r27_scope_index.ts": "3407c415a68422a5f2f62967a0826cf8d1792ed1d0555e02e3d8dd9a570940e9",
@@ -3239,7 +3239,7 @@
         "supabase/functions/_shared/current_public_r27_bounded.ts": "b80a4297687fb97bea8cd45a8963687b02ed613d0f8d7523e2e2322296daeecc",
         "supabase/functions/_shared/current_public_r27_selection.ts": "7e7b272f45bc7b6bf3b7440b9422bb0acb1d78883d03243cd9f4414b391e6c8f",
         "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
-        "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "0ef599db025f26cd923bba8bd5464ff09fb8ea5a08bc7dfc09eb0bd75313ce38",
+        "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
         "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
         "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
         "supabase/functions/_shared/jungsi/application/history_metric_alias.ts": "2fba3870d82e7ca1514c1b84fef44c741ed23bdf53b869281a4f7e81d1c70c7d",
@@ -3916,7 +3916,7 @@
       ],
       "files": {
         "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
-        "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "0ef599db025f26cd923bba8bd5464ff09fb8ea5a08bc7dfc09eb0bd75313ce38",
+        "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
         "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
         "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
         "supabase/functions/_shared/jungsi/application/history_r27_scope_index.ts": "3407c415a68422a5f2f62967a0826cf8d1792ed1d0555e02e3d8dd9a570940e9",
@@ -5497,7 +5497,7 @@
       ],
       "files": {
         "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
-        "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "0ef599db025f26cd923bba8bd5464ff09fb8ea5a08bc7dfc09eb0bd75313ce38",
+        "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
         "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
         "supabase/functions/_shared/jungsi/application/member_json_results.ts": "59363bd855241f2524a0985c2d52dea2520a52ab9b2fa571dc3a3615ca238090",
         "supabase/functions/_shared/jungsi/application/member_shortlist.ts": "3a66a21ca2f337a41b66dd32aef9573a818fe21db4d0321ea2c8aa0fb21416d6",

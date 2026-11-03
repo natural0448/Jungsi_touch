@@ -2,6 +2,7 @@
 import { AccessError } from "../application/access.ts";
 import {
   COMBINED_POLICY_CONSUMER_OPERATION_IDS,
+  CURRENT_PAGE_OPERATION_ID,
   MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS,
 } from "../application/api_dispatch.ts";
 import { ApprovedAdministratorUsagePolicy } from "../application/administrator_usage_policy.ts";
@@ -521,6 +522,12 @@ function ignoreStageCompletion(value: unknown): void {
 }
 export class RuntimeRequestBudget implements RequestBudgetPort {
   private readonly shared: SharedRequestBudget;
+  private readonly runAdmissions = new WeakMap<PreparedUsageAdmission, {
+    readonly issuer: SharedRequestBudget;
+    readonly request: BudgetRequest;
+    readonly expiresAtUtc: bigint;
+    state: "active" | "settling" | "settled_success" | "failed";
+  }>();
   constructor(
     readonly policy: RuntimeUsagePolicy,
     private readonly store: UsageBudgetStorePort,
@@ -569,6 +576,21 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
   assertAdmission(admission: PreparedUsageAdmission, request: BudgetRequest): void {
     this.policy.assertLive();
     this.shared.assertAdmission(admission, request);
+  }
+  /** A run-issued admission is valid only for its issuer, request and lifecycle phase. */
+  assertRunAdmission(
+    admission: PreparedUsageAdmission,
+    request: BudgetRequest,
+    phase: "active" | "settled_success",
+  ): void {
+    this.policy.assertLive();
+    const record = this.runAdmissions.get(admission);
+    if (!record || record.request !== request || record.state !== phase) fail();
+    if (phase === "active") {
+      const now = this.clock.nowUtc();
+      if (typeof now !== "bigint" || now >= record.expiresAtUtc) fail();
+    }
+    record.issuer.assertAdmission(admission, request);
   }
   cancelAdmission(admission: PreparedUsageAdmission): Promise<void> {
     return this.shared.cancel(admission);
@@ -626,19 +648,50 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
     stage("budget_current");
     await this.controls.current();
     this.policy.assertLive();
-    const result = await shared.run(request, async (activeAdmission) => {
-      stage("budget_business_current");
-      await this.controls.current();
-      stage("budget_business");
-      const value = await work(activeAdmission);
-      stage("budget_business_current");
-      await this.controls.current();
+    let issued: PreparedUsageAdmission | undefined;
+    try {
+      const result = await shared.run(request, async (activeAdmission) => {
+        if (request.operation === CURRENT_PAGE_OPERATION_ID) {
+          if (!activeAdmission || typeof activeAdmission !== "object") fail();
+          const prepared = activeAdmission as PreparedUsageAdmission;
+          if (typeof prepared.lease?.expiresAtUtc !== "bigint") fail();
+          issued = prepared;
+          const record = {
+            issuer: shared,
+            request,
+            expiresAtUtc: issued.lease.expiresAtUtc,
+            state: "active" as const,
+          };
+          this.runAdmissions.set(issued, record);
+        }
+        try {
+          stage("budget_business_current");
+          await this.controls.current();
+          stage("budget_business");
+          const value = await work(activeAdmission);
+          if (issued) {
+            this.assertRunAdmission(issued, request, "active");
+            this.runAdmissions.get(issued)!.state = "settling";
+          }
+          stage("budget_business_current");
+          await this.controls.current();
+          this.policy.assertLive();
+          return value;
+        } catch (error) {
+          if (issued) this.runAdmissions.get(issued)!.state = "failed";
+          throw error;
+        }
+      });
+      stage("budget_final_current");
+      // The current-page external control/head check already ran inside work.
+      // Other operations retain their existing post-settlement check.
+      if (request.operation !== CURRENT_PAGE_OPERATION_ID) await this.controls.current();
       this.policy.assertLive();
-      return value;
-    });
-    stage("budget_final_current");
-    await this.controls.current();
-    this.policy.assertLive();
-    return result;
+      if (issued) this.runAdmissions.get(issued)!.state = "settled_success";
+      return result;
+    } catch (error) {
+      if (issued) this.runAdmissions.get(issued)!.state = "failed";
+      throw error;
+    }
   }
 }

@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.156이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.157이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 기존 Supabase 기반 실제 인증·기존22와 신규6 논리 API 계약의 코드·선택 연결·운영 배포를 구분한다. Google Drive와 기존 Supabase를 사용하고 P1 조정 메타데이터 Durable Object 한정 예외만 적용한다. 현재 결합20 후보·기존14 운영판·미연결8을 혼동하지 않는다.
 
@@ -165,7 +165,7 @@ Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제
 | 소스 진입점 | 경로 | SHA-256 |
 | --- | --- | --- |
 | native_entry | supabase/functions/jungsi-api/index.ts | ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2 |
-| composition | supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts | b757ad470d5a3d9cb44b8ad08203ca7d42359dd2657d9d91581674c639e6f557 |
+| composition | supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts | 53f4c48faf0eed9f7ef4071d728dcb71f73ce21a6774cf63739bddbde6a78e38 |
 
 | 서버 설정 이름 | 허용된 기존 이름 | 현재 상태 | 입력의 의미 |
 | --- | --- | --- | --- |
@@ -589,7 +589,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=1386e55c1de8b6b9ab47409790de076172502e53deb12e148f6607819dc54ef1 -->
+<!-- jungsi:generated spec_sha256=791b470dcf4eaf351c0056cc4d6b4aa8ad26b8bcb2cfa8a507ce7814383355bd -->
 
 
 ## 기존 운영 조회의 후속 검수

@@ -676,7 +676,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "135f3797d3f46c07188a4b0935848cf0c55e2ce246c8c4c3a1aa4e8be18e4de5",
+      "source_sha256": "6dae7bea6118f33518fa4c011fba8a628ae7863f64e483718db2ae85f28de7fb",
       "symbols": [
         {
           "kind": "class",
@@ -736,6 +736,12 @@
           "kind": "function",
           "name": "contract_body",
           "signature": "def contract_body(contract):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "current_page_route_test_registration",
+          "signature": "def current_page_route_test_registration(spec):",
           "decorators": []
         },
         {
@@ -1954,7 +1960,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "f1d6c0a380bde82117bd4391ffa03b5af0fd2cf13eb67542997334d08774e7d0",
+      "source_sha256": "8f5bdc6c6ff9f1d01a65b93baabaf8a29a543d1d218345a88d8694e92a9d8f27",
       "symbols": [
         {
           "kind": "function",
@@ -2134,6 +2140,12 @@
           "kind": "function",
           "name": "current_page_projection_registration",
           "signature": "def current_page_projection_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "current_page_route_registration",
+          "signature": "def current_page_route_registration(spec, before):",
           "decorators": []
         },
         {
@@ -7196,6 +7208,36 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/current_2027_guide_direct_integration_test.ts",
+        "layer": "verification",
+        "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "c3acc26a589c7cec3f2623689d96a6bacb6d5f40c8de832ab3cfcf27d6ef44fd",
+        "declared_exports": []
+      },
+      {
+        "path": "supabase/functions/_shared/current_2027_guide_direct_review_only.ts",
+        "layer": "infrastructure",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "16f88904300ab2149ee71bbbf07be8663cd03acbee1856505fef33b72c8be131",
+        "declared_exports": [
+          "createP1DirectGuideComposition"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/current_2027_guide_search_review_only.ts",
         "layer": "application",
         "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
@@ -7206,12 +7248,16 @@
           "REQ-26",
           "REQ-28"
         ],
-        "source_sha256": "ce47e5297732350e43ccb69b13780d477834ae06ce980cbb1e025984e9a5c3fc",
+        "source_sha256": "8fb155b7e0bcb6a2c8f26f815b4c40ee5a65e6b01bf41615bb72d636b0891170",
         "declared_exports": [
           "GuideSearchAuthority",
           "GuideProjectionClaim",
           "GuidePositionCodec",
-          "createGuideSearchPageComposition"
+          "createGuideSearchPageComposition",
+          "GuideRawField",
+          "GuideQuotaScalar",
+          "GuideRawQuota",
+          "GuideRequestCatalogFactory"
         ]
       },
       {
@@ -7225,7 +7271,7 @@
           "REQ-26",
           "REQ-28"
         ],
-        "source_sha256": "1a665f4c424bbe7f1de6a42353b23187120dbb077d3ca5e197a38803171ba235",
+        "source_sha256": "16db97563948bbaa058c82c8dbc876f40b43dc8ccba59c627e08b74a303404e6",
         "declared_exports": []
       },
       {
@@ -7631,7 +7677,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "b32cb672332eb4559260cbcd9d43b8434a694fd0d3c0e5ca2583befe0c6fd735",
+        "source_sha256": "85d4ff60680434f2202fcbf7748fb7a3e26df2759afbae235e869564eb7e2758",
         "declared_exports": [
           "CURRENT_PUBLIC_SOURCE_VIEWS",
           "CURRENT_PUBLIC_METADATA_SQL",
@@ -7646,7 +7692,9 @@
           "CURRENT_PUBLIC_HISTORY_BY_KEYS_SQL",
           "CURRENT_PUBLIC_LOOKUP_SQL",
           "CURRENT_PUBLIC_PREPARED_RECRUITMENT_SQL",
-          "CurrentPublicCatalogSql"
+          "CurrentPublicCatalogSql",
+          "buildCurrentPublicP1DirectOfferingsSql",
+          "P1DirectGuideGuard"
         ]
       },
       {
@@ -8231,7 +8279,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "0ef599db025f26cd923bba8bd5464ff09fb8ea5a08bc7dfc09eb0bd75313ce38",
+        "source_sha256": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
         "declared_exports": [
           "API_OPERATION_IDS",
           "ApiBusinessPort",
@@ -8249,7 +8297,10 @@
           "READ_VIEW_REGISTERED_API_OPERATION_IDS",
           "READ_VIEW_ROUTE_PATHS",
           "REGISTERED_API_OPERATION_IDS",
-          "SCORE_POLICY_OPERATION_IDS"
+          "SCORE_POLICY_OPERATION_IDS",
+          "CURRENT_PAGE_OPERATION_ID",
+          "CURRENT_PAGE_ROUTE_PATH",
+          "isCurrentPagePolicy"
         ]
       },
       {
@@ -8448,6 +8499,20 @@
           "CurrentPagePorts",
           "HistoryCurrentPageService"
         ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/history_current_page_public_registry_test.ts",
+        "layer": "verification",
+        "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "8fc6feb038cec11adb4f84842b4c537f0cd7faa3112264cec555bcb170c26d21",
+        "declared_exports": []
       },
       {
         "path": "supabase/functions/_shared/jungsi/application/history_current_page_test.ts",
@@ -8669,7 +8734,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "04695f7b26c862a109c88036eab345b7bf8b94fd8f78dbcaee20dc5e06a5de54",
+        "source_sha256": "bf24dfd519f07c99651299bd5d3ace8a1cbd1e0ccab6bbadaf0e919013faa934",
         "declared_exports": [
           "legacyReadViewRegistration",
           "memberShortlistPolicies",
@@ -9192,7 +9257,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "ef19900a3b0e02ddb132324a4a9bf47af4330bc9324ac7c0254b42d63a3ab2e7",
+        "source_sha256": "f00ace3a8974e6983875ec9532dd424ab0e7dce4e15ca5e1371637a947d69d76",
         "declared_exports": [
           "PublicResponseProjection",
           "publicJsonText"
@@ -9310,7 +9375,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "e208ac4a8e4d15dcacf0a98b5a84f852b00470a9983085e638725243132c52f2",
+        "source_sha256": "287b51a90ea6e50d9104ea6b557b310c9bfb046b5110687b98d7629e1bfc1830",
         "declared_exports": [
           "BUDGET_OPERATIONS",
           "BudgetRequest",
@@ -10140,7 +10205,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "6fe695a27a87ddc45eb9041cc0827373df3cc1a05696a1a1d3c2394954521149",
+        "source_sha256": "f91e064d1e46ab1db6a1701cf6a145daf1ef8fea0f5889d8b3c284c81ff1826b",
         "declared_exports": [
           "API_REQUEST_STAGES",
           "ApiHttpPorts",
@@ -10791,7 +10856,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "cccfa8ebe2597062d94bdf6534f5e4ca5adaecf39208f47ae2f1dec9c06b9591",
+        "source_sha256": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
         "declared_exports": [
           "RUNTIME_BUDGET_STAGES",
           "RuntimeBudgetStage",
@@ -10834,14 +10899,16 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "93ae8db8bd20127fe3207601ecb3d0573b1d557cd5122a83a3ba7fa599d05309",
+        "source_sha256": "53f4c48faf0eed9f7ef4071d728dcb71f73ce21a6774cf63739bddbde6a78e38",
         "declared_exports": [
           "NativeRuntimeApi",
           "RuntimeComposition",
           "RuntimeRoutePolicy",
           "SafeRuntimeObservation",
           "observeRuntimeResponse",
-          "runtimeAnalysisDataPort"
+          "runtimeAnalysisDataPort",
+          "currentPageBudgetScope",
+          "runtimeCompletionCurrent"
         ]
       },
       {
@@ -11403,6 +11470,37 @@
           "loadPinnedDisplayDescriptor",
           "OfficialHistoryInfrastructureSettings"
         ]
+      },
+      {
+        "path": "supabase/functions/_shared/p1_local_scope_matcher_review_only.ts",
+        "layer": "application",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "4f20f4240f6f61a2bc9fdfe44bb0178079df6070ce3bed96d23b543db8d77ca7",
+        "declared_exports": [
+          "LocalScopeReviewTrust",
+          "createLocalScopeCandidateMatcher"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/p1_local_scope_matcher_review_only_test.ts",
+        "layer": "verification",
+        "status": "SYNTHETIC_ONLY_NO_OPERATING_ACCEPTANCE",
+        "requirements": [
+          "REQ-13",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28"
+        ],
+        "source_sha256": "8261c7fb35a6506ae2ce3908aaf8c985289599950982f4ad0fd6763d5c9baf3e",
+        "declared_exports": []
       },
       {
         "path": "supabase/functions/_shared/p1_r27_selection_bridge.ts",

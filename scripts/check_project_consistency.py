@@ -1443,6 +1443,28 @@ def service_wildcard_registration(spec, source_hashes=None):
         return None, [error]
 
 
+def current_page_route_test_registration(spec):
+    """Bind the disabled current-page suite separately from the 656-test foundation."""
+    error="Current-page route exact source/test registration invalid"
+    files=spec.get("edge_harness",{}).get("files",{})
+    contract=spec.get("current_public_supply_contract",{}).get("current_page_route_verification")
+    test="tests/edge/test_current_page_routing.synthetic.ts"
+    if contract is None:return (set(),[error]) if test in files else (set(),[])
+    try:
+        from run_edge_tests import current_page_route_registration,EdgeFailure
+        bindings=contract.get("source_bindings")
+        if not isinstance(bindings,list):raise ValueError("bindings")
+        hashes={b["path"]:b["sha256"] for b in bindings}
+        registered=current_page_route_registration(spec,hashes)
+        indexed={p:v.get("declarations",{}).get("source_sha256") for p,v in files.items()}
+        for row in spec.get("workflow",{}).get("documentation_sync",{}).get("code_index",{}).get("edge_sources",{}).get("files",[]):
+            if isinstance(row,dict) and isinstance(row.get("path"),str):indexed[row["path"]]=row.get("source_sha256")
+        if (registered is None or test not in files or
+            any(path in indexed and indexed[path]!=sha for path,sha in hashes.items())):raise ValueError("source")
+        return set(registered["test_paths"]),[]
+    except (EdgeFailure,KeyError,TypeError,ValueError):return set(),[error]
+
+
 def validate_read_view_extension(spec):
     """Only these exact three source-bound reads may extend the preserved 22+3.
 
@@ -1475,6 +1497,9 @@ def validate_read_view_extension(spec):
     wildcard, wildcard_errors=service_wildcard_registration(spec)
     if wildcard is not None:separate_tests-=set(wildcard["test_paths"])
     professional_errors+=wildcard_errors
+    page_tests,page_errors=current_page_route_test_registration(spec)
+    separate_tests-=page_tests
+    professional_errors+=page_errors
     if c is None:return professional_errors+(["Read-view unregistered separate test source"]if separate_tests else [])
     if not isinstance(c,dict):return professional_errors+["Read-view extension contract invalid"]
     errors=professional_errors

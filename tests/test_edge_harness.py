@@ -332,7 +332,13 @@ def candidate(current=None):
     if current is None:
         current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
     spec = retained_legacy28_fixture(current)
-    from check_project_consistency import service_aux_registration, service_staged_registration, service_wildcard_registration
+    from check_project_consistency import (service_aux_registration, service_staged_registration,
+        service_wildcard_registration, current_page_route_test_registration)
+    # Validate the real additive suite before projecting it out of this invented legacy fixture.
+    _, page_errors = current_page_route_test_registration(spec)
+    if page_errors:
+        raise ValueError("Synthetic fixture cannot ignore invalid current-page route registration")
+    spec.get("current_public_supply_contract", {}).pop("current_page_route_verification", None)
     wildcard_tests = set()
     for key, registration in (("service_aux_test_extension", service_aux_registration),
                               ("service_staged_test_extension", service_staged_registration),
@@ -392,6 +398,23 @@ def candidate(current=None):
 
 
 class ReadViewExtensionContractTests(unittest.TestCase):
+    def test_legacy_read_fixture_isolates_valid_current_page_registration(self):
+        current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        original=deepcopy(current);fixture=candidate(current)
+        self.assertEqual(current,original)
+        self.assertNotIn('current_page_route_verification',fixture.get('current_public_supply_contract',{}))
+        self.assertNotIn('tests/edge/test_current_page_routing.synthetic.ts',fixture['edge_harness']['files'])
+        self.assertEqual(validate_read_view_extension(fixture),[])
+
+    def test_legacy_read_fixture_rejects_tampered_current_page_registration(self):
+        current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        contract=current.get('current_public_supply_contract',{}).get('current_page_route_verification')
+        if contract is None:
+            return
+        contract['test_count']=True
+        with self.assertRaisesRegex(ValueError,'invalid current-page route registration'):
+            candidate(current)
+
     def test_legacy_read_fixture_preserves_valid_wildcard_registration(self):
         from check_project_consistency import SERVICE_WILDCARD_IMPLEMENTATION_SENTINELS
         current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))

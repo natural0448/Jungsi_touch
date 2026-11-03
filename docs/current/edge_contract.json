@@ -1236,7 +1236,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "0ef599db025f26cd923bba8bd5464ff09fb8ea5a08bc7dfc09eb0bd75313ce38",
+        "source_sha256": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
         "symbols": [
           {
             "declarations": [
@@ -2367,6 +2367,46 @@
                 "def": {
                   "kind": "const",
                   "tsType": {
+                    "kind": "literal",
+                    "repr": "history.current-page",
+                    "value": {
+                      "kind": "string",
+                      "string": "history.current-page"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "CURRENT_PAGE_OPERATION_ID"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "/api/v1/admission-history/current-page",
+                    "value": {
+                      "kind": "string",
+                      "string": "/api/v1/admission-history/current-page"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "CURRENT_PAGE_ROUTE_PATH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
                     "kind": "array",
                     "value": {
                       "kind": "union",
@@ -2834,19 +2874,29 @@
                 "declarationKind": "export",
                 "def": {
                   "tsType": {
-                    "kind": "indexedAccess",
-                    "value": {
-                      "indexType": {
-                        "kind": "keyword",
-                        "repr": "number",
-                        "value": "number"
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "indexedAccess",
+                        "value": {
+                          "indexType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          },
+                          "objType": {
+                            "kind": "typeQuery",
+                            "repr": "REGISTERED_API_OPERATION_IDS",
+                            "value": "REGISTERED_API_OPERATION_IDS"
+                          }
+                        }
                       },
-                      "objType": {
+                      {
                         "kind": "typeQuery",
-                        "repr": "REGISTERED_API_OPERATION_IDS",
-                        "value": "REGISTERED_API_OPERATION_IDS"
+                        "repr": "CURRENT_PAGE_OPERATION_ID",
+                        "value": "CURRENT_PAGE_OPERATION_ID"
                       }
-                    }
+                    ]
                   }
                 },
                 "kind": "typeAlias"
@@ -3166,6 +3216,16 @@
                         "repr": "boolean",
                         "value": "boolean"
                       }
+                    },
+                    {
+                      "name": "contract_ref",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
                     }
                   ]
                 },
@@ -3173,6 +3233,51 @@
               }
             ],
             "name": "ApiRoutePolicy"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(policy: ApiRoutePolicy | undefined)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "policy",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "ApiRoutePolicy",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "ApiRoutePolicy"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "undefined",
+                            "value": "undefined"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "isCurrentPagePolicy"
           },
           {
             "declarations": [
@@ -3492,7 +3597,10 @@
         "READ_VIEW_REGISTERED_API_OPERATION_IDS",
         "READ_VIEW_ROUTE_PATHS",
         "REGISTERED_API_OPERATION_IDS",
-        "SCORE_POLICY_OPERATION_IDS"
+        "SCORE_POLICY_OPERATION_IDS",
+        "CURRENT_PAGE_OPERATION_ID",
+        "CURRENT_PAGE_ROUTE_PATH",
+        "isCurrentPagePolicy"
       ]
     },
     "supabase/functions/_shared/jungsi/application/catalog.ts": {
@@ -16800,6 +16908,845 @@
         "HistoryCurrentPageService"
       ]
     },
+    "supabase/functions/_shared/jungsi/application/history_current_page_public_registry_test.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Synthetic-only candidate tests. No runtime route, DB, Storage, or network."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "CurrentOffering",
+            "originalName": "CurrentOffering",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "CurrentPageExecution",
+            "originalName": "CurrentPageExecution",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "CurrentPagePins",
+            "originalName": "CurrentPagePins",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "CurrentPagePorts",
+            "originalName": "CurrentPagePorts",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "CurrentPageQuery",
+            "originalName": "CurrentPageQuery",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "CursorScope",
+            "originalName": "CursorScope",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "HistoryClaim",
+            "originalName": "HistoryClaim",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "HistoryCurrentPageService",
+            "originalName": "HistoryCurrentPageService",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "JsonFloat",
+            "originalName": "JsonFloat",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "PhysicalKey",
+            "originalName": "PhysicalKey",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "PublicResponseProjection",
+            "originalName": "PublicResponseProjection",
+            "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
+          },
+          {
+            "importedName": "QuotaDecision",
+            "originalName": "QuotaDecision",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "nativeJsonText",
+            "originalName": "nativeJsonText",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "readSessionSnapshot",
+            "originalName": "readSessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          }
+        ],
+        "source_sha256": "8fc6feb038cec11adb4f84842b4c537f0cd7faa3112264cec555bcb170c26d21",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "registry"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown, message = \"assertion failed\")",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "message",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "assertion failed"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "asserts value",
+                    "value": {
+                      "asserts": true,
+                      "param": {
+                        "name": "value",
+                        "type": "identifier"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "ok"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(actual: unknown, expected: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "actual",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "expected",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "eq"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  fn: () => Promise<unknown>,\n  code: string,\n  http: number,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "fn",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "code",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "http",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rejects"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "1700000000000000",
+                    "value": {
+                      "kind": "bigInt",
+                      "string": "1700000000000000"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "NOW"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "hash"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(pk: string, school = \"new-school\")",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "pk",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "school",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "new-school"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "PhysicalKey",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "PhysicalKey",
+                        "specifier": "./history_current_page.ts"
+                      },
+                      "typeName": "PhysicalKey"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "target"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(pk: string, school: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "pk",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "school",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "PhysicalKey",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "PhysicalKey",
+                        "specifier": "./history_current_page.ts"
+                      },
+                      "typeName": "PhysicalKey"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "previous"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(pk: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "pk",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "CurrentOffering",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "CurrentOffering",
+                        "specifier": "./history_current_page.ts"
+                      },
+                      "typeName": "CurrentOffering"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "offering"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  pk: string,\n  value: number | bigint | string | JsonFloat | null = 5,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "pk",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "bigint",
+                              "value": "bigint"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "JsonFloat",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "JsonFloat",
+                                  "specifier": "../domain/native_json.ts"
+                                },
+                                "typeName": "JsonFloat"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "right": "5"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "QuotaDecision",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "QuotaDecision",
+                        "specifier": "./history_current_page.ts"
+                      },
+                      "typeName": "QuotaDecision"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "quota"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  id: string,\n  source: PhysicalKey,\n  proof: string,\n  pk = \"current-1\",\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "id",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "source",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "PhysicalKey",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "PhysicalKey",
+                            "specifier": "./history_current_page.ts"
+                          },
+                          "typeName": "PhysicalKey"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "proof",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "pk",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      "right": "current-1"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "HistoryClaim",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "HistoryClaim",
+                        "specifier": "./history_current_page.ts"
+                      },
+                      "typeName": "HistoryClaim"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "claim"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(scope: CursorScope)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "scope",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "CursorScope",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "CursorScope",
+                            "specifier": "./history_current_page.ts"
+                          },
+                          "typeName": "CursorScope"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "scopeKey"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": []
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: Awaited<ReturnType<HistoryCurrentPageService[\"execute\"]>>)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Awaited",
+                        "value": {
+                          "typeName": "Awaited",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ReturnType",
+                              "value": {
+                                "typeName": "ReturnType",
+                                "typeParams": [
+                                  {
+                                    "kind": "indexedAccess",
+                                    "value": {
+                                      "indexType": {
+                                        "kind": "literal",
+                                        "repr": "execute",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "execute"
+                                        }
+                                      },
+                                      "objType": {
+                                        "kind": "typeRef",
+                                        "repr": "HistoryCurrentPageService",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "HistoryCurrentPageService",
+                                            "specifier": "./history_current_page.ts"
+                                          },
+                                          "typeName": "HistoryCurrentPageService"
+                                        }
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "asJson"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": []
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "schemaProjection"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": []
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fullActualResponse"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "unknown",
+                    "value": "unknown"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "cloneWithSentinels"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/native_json.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./history_current_page.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./public_response.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/public_response.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./session_service.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
     "supabase/functions/_shared/jungsi/application/history_current_page_test.ts": {
       "declarations": {
         "imports": [
@@ -27355,7 +28302,7 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           }
         ],
-        "source_sha256": "04695f7b26c862a109c88036eab345b7bf8b94fd8f78dbcaee20dc5e06a5de54",
+        "source_sha256": "bf24dfd519f07c99651299bd5d3ace8a1cbd1e0ccab6bbadaf0e919013faa934",
         "symbols": [
           {
             "declarations": [
@@ -54643,12 +55590,22 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           },
           {
+            "importedName": "nativeJsonSha256",
+            "originalName": "nativeJsonSha256",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "parseNativeJson",
+            "originalName": "parseNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
             "importedName": "validWildcardSelection",
             "originalName": "validWildcardSelection",
             "src": "supabase/functions/_shared/jungsi/application/wildcard_public_contract.ts"
           }
         ],
-        "source_sha256": "ef19900a3b0e02ddb132324a4a9bf47af4330bc9324ac7c0254b42d63a3ab2e7",
+        "source_sha256": "f00ace3a8974e6983875ec9532dd424ab0e7dce4e15ca5e1371637a947d69d76",
         "symbols": [
           {
             "declarations": [
@@ -54843,6 +55800,209 @@
                     }
                   ],
                   "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "bytes",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Uint8Array",
+                              "value": {
+                                "typeName": "Uint8Array"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "expectedOperations",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeOperator",
+                              "value": {
+                                "operator": "readonly",
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "kind": "typeLiteral",
+                                    "value": {
+                                      "properties": [
+                                        {
+                                          "name": "id",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "contract_ref",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "PublicResponseProjection",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "PublicResponseProjection"
+                          }
+                        }
+                      },
+                      "isStatic": true,
+                      "kind": "method",
+                      "name": "fromExactRegistryBytes"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "hasExactRegistryBytes"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "operation",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "contractRef",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "supportsOperation"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "operation",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "contractRef",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Readonly",
+                                "value": {
+                                  "typeName": "Readonly",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeLiteral",
+                                      "value": {
+                                        "properties": [
+                                          {
+                                            "name": "operation",
+                                            "tsType": {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            }
+                                          },
+                                          {
+                                            "name": "contract_ref",
+                                            "tsType": {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            }
+                                          },
+                                          {
+                                            "name": "schema_sha256",
+                                            "tsType": {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            }
+                                          },
+                                          {
+                                            "name": "schema_bytes_sha256",
+                                            "tsType": {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "schemaBinding"
+                    },
                     {
                       "accessibility": "private",
                       "functionDef": {
@@ -55110,6 +56270,30 @@
                     },
                     {
                       "accessibility": "private",
+                      "name": "contractRefs",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Map",
+                        "value": {
+                          "typeName": "Map",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
                       "name": "auxiliaryRoots",
                       "readonly": true,
                       "tsType": {
@@ -55121,6 +56305,16 @@
                           },
                           "typeName": "Row"
                         }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "registrySnapshot",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
                       }
                     }
                   ]
@@ -55317,6 +56511,59 @@
                 "declarationKind": "private",
                 "def": {
                   "hasBody": true,
+                  "parameter_source": "(value: unknown, seen = new WeakSet<object>())",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "seen",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "WeakSet",
+                          "value": {
+                            "typeName": "WeakSet",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "object",
+                                "value": "object"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "freezeRegistry"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
                   "parameter_source": "()",
                   "params": [],
                   "returnType": {
@@ -55400,6 +56647,16 @@
         ]
       },
       "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
         {
           "dynamic": false,
           "specifier": "../domain/native_json.ts",
@@ -61473,7 +62730,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "e208ac4a8e4d15dcacf0a98b5a84f852b00470a9983085e638725243132c52f2",
+        "source_sha256": "287b51a90ea6e50d9104ea6b557b310c9bfb046b5110687b98d7629e1bfc1830",
         "symbols": [
           {
             "declarations": [
@@ -61928,6 +63185,14 @@
                           "value": {
                             "kind": "string",
                             "string": "history.snapshot.read"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "history.current-page",
+                          "value": {
+                            "kind": "string",
+                            "string": "history.current-page"
                           }
                         },
                         {
@@ -90178,6 +91443,11 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           },
           {
+            "importedName": "ApiExecutionBoundary",
+            "originalName": "ApiExecutionBoundary",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
             "importedName": "ApiRoutePolicy",
             "originalName": "ApiRoutePolicy",
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
@@ -90186,6 +91456,16 @@
             "importedName": "BUDGET_OPERATIONS",
             "originalName": "BUDGET_OPERATIONS",
             "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+          },
+          {
+            "importedName": "CURRENT_PAGE_OPERATION_ID",
+            "originalName": "CURRENT_PAGE_OPERATION_ID",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "CURRENT_PAGE_ROUTE_PATH",
+            "originalName": "CURRENT_PAGE_ROUTE_PATH",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           },
           {
             "importedName": "ForecastAuthorityPort",
@@ -90311,6 +91591,11 @@
             "src": "supabase/functions/_shared/jungsi/application/access.ts"
           },
           {
+            "importedName": "isCurrentPagePolicy",
+            "originalName": "isCurrentPagePolicy",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
             "importedName": "isVerifiedAdminSnapshot",
             "originalName": "isVerifiedAdminSnapshot",
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
@@ -90346,7 +91631,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "6fe695a27a87ddc45eb9041cc0827373df3cc1a05696a1a1d3c2394954521149",
+        "source_sha256": "f91e064d1e46ab1db6a1701cf6a145daf1ef8fea0f5889d8b3c284c81ff1826b",
         "symbols": [
           {
             "declarations": [
@@ -90791,6 +92076,346 @@
                                       "kind": "keyword",
                                       "repr": "void",
                                       "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "name": "currentPageScope",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeLiteral",
+                        "value": {
+                          "methods": [
+                            {
+                              "kind": "method",
+                              "name": "assert",
+                              "parameter_source": "(request: ApiExecution, boundary: ApiExecutionBoundary)",
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "request",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiExecution",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiExecution",
+                                        "specifier": "../application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiExecution"
+                                    }
+                                  }
+                                },
+                                {
+                                  "kind": "identifier",
+                                  "name": "boundary",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiExecutionBoundary",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiExecutionBoundary",
+                                        "specifier": "../application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiExecutionBoundary"
+                                    }
+                                  }
+                                }
+                              ],
+                              "returnType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "kind": "method",
+                              "name": "assertCurrent",
+                              "parameter_source": "(request: ApiExecution, boundary: ApiExecutionBoundary)",
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "request",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiExecution",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiExecution",
+                                        "specifier": "../application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiExecution"
+                                    }
+                                  }
+                                },
+                                {
+                                  "kind": "identifier",
+                                  "name": "boundary",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiExecutionBoundary",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiExecutionBoundary",
+                                        "specifier": "../application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiExecutionBoundary"
+                                    }
+                                  }
+                                }
+                              ],
+                              "returnType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "kind": "method",
+                              "name": "assertReceipt",
+                              "parameter_source": "(request: ApiExecution, boundary: ApiExecutionBoundary)",
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "request",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiExecution",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiExecution",
+                                        "specifier": "../application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiExecution"
+                                    }
+                                  }
+                                },
+                                {
+                                  "kind": "identifier",
+                                  "name": "boundary",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiExecutionBoundary",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiExecutionBoundary",
+                                        "specifier": "../application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiExecutionBoundary"
+                                    }
+                                  }
+                                }
+                              ],
+                              "returnType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ],
+                          "properties": [
+                            {
+                              "name": "projection",
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "PublicResponseProjection",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "PublicResponseProjection",
+                                    "specifier": "../application/public_response.ts"
+                                  },
+                                  "typeName": "PublicResponseProjection"
+                                }
+                              }
+                            },
+                            {
+                              "name": "schemaAuthority",
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "typeLiteral",
+                                "value": {
+                                  "methods": [
+                                    {
+                                      "kind": "method",
+                                      "name": "assert",
+                                      "parameter_source": "(\n        request: ApiExecution,\n        boundary: ApiExecutionBoundary,\n        binding: Readonly<{\n          operation: string;\n          contract_ref: string;\n          schema_sha256: string;\n          schema_bytes_sha256: string;\n        }>,\n        phase: \"active\" | \"settled_success\",\n      )",
+                                      "params": [
+                                        {
+                                          "kind": "identifier",
+                                          "name": "request",
+                                          "optional": false,
+                                          "tsType": {
+                                            "kind": "typeRef",
+                                            "repr": "ApiExecution",
+                                            "value": {
+                                              "resolution": {
+                                                "kind": "import",
+                                                "name": "ApiExecution",
+                                                "specifier": "../application/api_dispatch.ts"
+                                              },
+                                              "typeName": "ApiExecution"
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "kind": "identifier",
+                                          "name": "boundary",
+                                          "optional": false,
+                                          "tsType": {
+                                            "kind": "typeRef",
+                                            "repr": "ApiExecutionBoundary",
+                                            "value": {
+                                              "resolution": {
+                                                "kind": "import",
+                                                "name": "ApiExecutionBoundary",
+                                                "specifier": "../application/api_dispatch.ts"
+                                              },
+                                              "typeName": "ApiExecutionBoundary"
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "kind": "identifier",
+                                          "name": "binding",
+                                          "optional": false,
+                                          "tsType": {
+                                            "kind": "typeRef",
+                                            "repr": "Readonly",
+                                            "value": {
+                                              "typeName": "Readonly",
+                                              "typeParams": [
+                                                {
+                                                  "kind": "typeLiteral",
+                                                  "value": {
+                                                    "properties": [
+                                                      {
+                                                        "name": "operation",
+                                                        "tsType": {
+                                                          "kind": "keyword",
+                                                          "repr": "string",
+                                                          "value": "string"
+                                                        }
+                                                      },
+                                                      {
+                                                        "name": "contract_ref",
+                                                        "tsType": {
+                                                          "kind": "keyword",
+                                                          "repr": "string",
+                                                          "value": "string"
+                                                        }
+                                                      },
+                                                      {
+                                                        "name": "schema_sha256",
+                                                        "tsType": {
+                                                          "kind": "keyword",
+                                                          "repr": "string",
+                                                          "value": "string"
+                                                        }
+                                                      },
+                                                      {
+                                                        "name": "schema_bytes_sha256",
+                                                        "tsType": {
+                                                          "kind": "keyword",
+                                                          "repr": "string",
+                                                          "value": "string"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "kind": "identifier",
+                                          "name": "phase",
+                                          "optional": false,
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "literal",
+                                                "repr": "active",
+                                                "value": {
+                                                  "kind": "string",
+                                                  "string": "active"
+                                                }
+                                              },
+                                              {
+                                                "kind": "literal",
+                                                "repr": "settled_success",
+                                                "value": {
+                                                  "kind": "string",
+                                                  "string": "settled_success"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ],
+                                      "returnType": {
+                                        "kind": "typeRef",
+                                        "repr": "Promise",
+                                        "value": {
+                                          "typeName": "Promise",
+                                          "typeParams": [
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "void",
+                                              "value": "void"
+                                            }
+                                          ]
+                                        }
+                                      }
                                     }
                                   ]
                                 }
@@ -91546,7 +93171,7 @@
                 "declarationKind": "private",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(\n  policies: readonly ApiRoutePolicy[],\n  extended = false,\n  memberShortlist = false,\n)",
+                  "parameter_source": "(\n  policies: readonly ApiRoutePolicy[],\n  extended = false,\n  memberShortlist = false,\n  currentPage = false,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -91593,6 +93218,20 @@
                       "left": {
                         "kind": "identifier",
                         "name": "memberShortlist",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "right": "false"
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "currentPage",
                         "optional": false,
                         "tsType": {
                           "kind": "keyword",
@@ -120341,6 +121980,11 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           },
           {
+            "importedName": "CURRENT_PAGE_OPERATION_ID",
+            "originalName": "CURRENT_PAGE_OPERATION_ID",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
             "importedName": "JsonFloat",
             "originalName": "JsonFloat",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
@@ -120451,7 +122095,7 @@
             "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
           }
         ],
-        "source_sha256": "cccfa8ebe2597062d94bdf6534f5e4ca5adaecf39208f47ae2f1dec9c06b9591",
+        "source_sha256": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
         "symbols": [
           {
             "declarations": [
@@ -121626,6 +123270,80 @@
                                 "typeName": "PreparedUsageAdmission"
                               }
                             }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "request",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "BudgetRequest",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "BudgetRequest",
+                                  "specifier": "../application/request_budget.ts"
+                                },
+                                "typeName": "BudgetRequest"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "phase",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "literal",
+                                  "repr": "active",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "active"
+                                  }
+                                },
+                                {
+                                  "kind": "literal",
+                                  "repr": "settled_success",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "settled_success"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "assertRunAdmission"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "admission",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "PreparedUsageAdmission",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "PreparedUsageAdmission",
+                                  "specifier": "../application/usage_service.ts"
+                                },
+                                "typeName": "PreparedUsageAdmission"
+                              }
+                            }
                           }
                         ],
                         "returnType": {
@@ -121812,6 +123530,120 @@
                             "specifier": "../application/usage_service.ts"
                           },
                           "typeName": "SharedRequestBudget"
+                        }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "runAdmissions",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "WeakMap",
+                        "value": {
+                          "typeName": "WeakMap",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "PreparedUsageAdmission",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "PreparedUsageAdmission",
+                                  "specifier": "../application/usage_service.ts"
+                                },
+                                "typeName": "PreparedUsageAdmission"
+                              }
+                            },
+                            {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "properties": [
+                                  {
+                                    "name": "issuer",
+                                    "readonly": true,
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "SharedRequestBudget",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "SharedRequestBudget",
+                                          "specifier": "../application/usage_service.ts"
+                                        },
+                                        "typeName": "SharedRequestBudget"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "request",
+                                    "readonly": true,
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "BudgetRequest",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "BudgetRequest",
+                                          "specifier": "../application/request_budget.ts"
+                                        },
+                                        "typeName": "BudgetRequest"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "expiresAtUtc",
+                                    "readonly": true,
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "bigint",
+                                      "value": "bigint"
+                                    }
+                                  },
+                                  {
+                                    "name": "state",
+                                    "tsType": {
+                                      "kind": "union",
+                                      "value": [
+                                        {
+                                          "kind": "literal",
+                                          "repr": "active",
+                                          "value": {
+                                            "kind": "string",
+                                            "string": "active"
+                                          }
+                                        },
+                                        {
+                                          "kind": "literal",
+                                          "repr": "settling",
+                                          "value": {
+                                            "kind": "string",
+                                            "string": "settling"
+                                          }
+                                        },
+                                        {
+                                          "kind": "literal",
+                                          "repr": "settled_success",
+                                          "value": {
+                                            "kind": "string",
+                                            "string": "settled_success"
+                                          }
+                                        },
+                                        {
+                                          "kind": "literal",
+                                          "repr": "failed",
+                                          "value": {
+                                            "kind": "string",
+                                            "string": "failed"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
                         }
                       }
                     }
@@ -122334,6 +124166,16 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           },
           {
+            "importedName": "ApiExecutionBoundary",
+            "originalName": "ApiExecutionBoundary",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "ApiHttpPorts",
+            "originalName": "ApiHttpPorts",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
             "importedName": "ApiOperationId",
             "originalName": "ApiOperationId",
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
@@ -122364,6 +124206,11 @@
             "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
           },
           {
+            "importedName": "CURRENT_PAGE_OPERATION_ID",
+            "originalName": "CURRENT_PAGE_OPERATION_ID",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
             "importedName": "CatalogDataPort",
             "originalName": "CatalogDataPort",
             "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
@@ -122372,6 +124219,21 @@
             "importedName": "CatalogService",
             "originalName": "CatalogService",
             "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
+          },
+          {
+            "importedName": "CurrentPageExecution",
+            "originalName": "CurrentPageExecution",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "CurrentPageLimits",
+            "originalName": "CurrentPageLimits",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "CurrentPagePorts",
+            "originalName": "CurrentPagePorts",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
           },
           {
             "importedName": "FORECAST_OPERATIONS",
@@ -122387,6 +124249,11 @@
             "importedName": "ForecastRepositoryPort",
             "originalName": "ForecastRepositoryPort",
             "src": "supabase/functions/_shared/jungsi/application/forecast_ports.ts"
+          },
+          {
+            "importedName": "HistoryCurrentPageService",
+            "originalName": "HistoryCurrentPageService",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
           },
           {
             "importedName": "MEMBER_SHORTLIST_OPERATION_IDS",
@@ -122489,6 +124356,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
           },
           {
+            "importedName": "RuntimeRequestBudget",
+            "originalName": "RuntimeRequestBudget",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+          },
+          {
             "importedName": "SCORE_POLICY_OPERATION_IDS",
             "originalName": "SCORE_POLICY_OPERATION_IDS",
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
@@ -122567,6 +124439,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
           },
           {
+            "importedName": "isCurrentPagePolicy",
+            "originalName": "isCurrentPagePolicy",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
             "importedName": "issueAdmissionPermit",
             "originalName": "issueAdmissionPermit",
             "src": "supabase/functions/_shared/jungsi/application/service_end_admission.ts"
@@ -122607,7 +124484,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "93ae8db8bd20127fe3207601ecb3d0573b1d557cd5122a83a3ba7fa599d05309",
+        "source_sha256": "53f4c48faf0eed9f7ef4071d728dcb71f73ce21a6774cf63739bddbde6a78e38",
         "symbols": [
           {
             "declarations": [
@@ -122789,6 +124666,337 @@
                             "specifier": "./read_view_catalog_runtime.ts"
                           },
                           "typeName": "ReadViewCatalogFactory"
+                        }
+                      }
+                    },
+                    {
+                      "name": "currentPage",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeLiteral",
+                        "value": {
+                          "methods": [
+                            {
+                              "kind": "method",
+                              "name": "assert",
+                              "parameter_source": "(request: ApiExecution, boundary: ApiExecutionBoundary)",
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "request",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiExecution",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiExecution",
+                                        "specifier": "../application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiExecution"
+                                    }
+                                  }
+                                },
+                                {
+                                  "kind": "identifier",
+                                  "name": "boundary",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiExecutionBoundary",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiExecutionBoundary",
+                                        "specifier": "../application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiExecutionBoundary"
+                                    }
+                                  }
+                                }
+                              ],
+                              "returnType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "kind": "method",
+                              "name": "assertCurrent",
+                              "parameter_source": "(request: ApiExecution, boundary: ApiExecutionBoundary)",
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "request",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiExecution",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiExecution",
+                                        "specifier": "../application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiExecution"
+                                    }
+                                  }
+                                },
+                                {
+                                  "kind": "identifier",
+                                  "name": "boundary",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "ApiExecutionBoundary",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ApiExecutionBoundary",
+                                        "specifier": "../application/api_dispatch.ts"
+                                      },
+                                      "typeName": "ApiExecutionBoundary"
+                                    }
+                                  }
+                                }
+                              ],
+                              "returnType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ],
+                          "properties": [
+                            {
+                              "name": "ports",
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "CurrentPagePorts",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "CurrentPagePorts",
+                                    "specifier": "../application/history_current_page.ts"
+                                  },
+                                  "typeName": "CurrentPagePorts"
+                                }
+                              }
+                            },
+                            {
+                              "name": "limits",
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "CurrentPageLimits",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "CurrentPageLimits",
+                                    "specifier": "../application/history_current_page.ts"
+                                  },
+                                  "typeName": "CurrentPageLimits"
+                                }
+                              }
+                            },
+                            {
+                              "name": "policy",
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "RuntimeRoutePolicy",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "RuntimeRoutePolicy"
+                                }
+                              }
+                            },
+                            {
+                              "name": "projection",
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "PublicResponseProjection",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "PublicResponseProjection",
+                                    "specifier": "../application/public_response.ts"
+                                  },
+                                  "typeName": "PublicResponseProjection"
+                                }
+                              }
+                            },
+                            {
+                              "name": "schemaAuthority",
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "typeLiteral",
+                                "value": {
+                                  "methods": [
+                                    {
+                                      "kind": "method",
+                                      "name": "assert",
+                                      "parameter_source": "(\n        request: ApiExecution,\n        boundary: ApiExecutionBoundary,\n        binding: Readonly<{\n          operation: string;\n          contract_ref: string;\n          schema_sha256: string;\n          schema_bytes_sha256: string;\n        }>,\n        phase: \"active\" | \"settled_success\",\n      )",
+                                      "params": [
+                                        {
+                                          "kind": "identifier",
+                                          "name": "request",
+                                          "optional": false,
+                                          "tsType": {
+                                            "kind": "typeRef",
+                                            "repr": "ApiExecution",
+                                            "value": {
+                                              "resolution": {
+                                                "kind": "import",
+                                                "name": "ApiExecution",
+                                                "specifier": "../application/api_dispatch.ts"
+                                              },
+                                              "typeName": "ApiExecution"
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "kind": "identifier",
+                                          "name": "boundary",
+                                          "optional": false,
+                                          "tsType": {
+                                            "kind": "typeRef",
+                                            "repr": "ApiExecutionBoundary",
+                                            "value": {
+                                              "resolution": {
+                                                "kind": "import",
+                                                "name": "ApiExecutionBoundary",
+                                                "specifier": "../application/api_dispatch.ts"
+                                              },
+                                              "typeName": "ApiExecutionBoundary"
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "kind": "identifier",
+                                          "name": "binding",
+                                          "optional": false,
+                                          "tsType": {
+                                            "kind": "typeRef",
+                                            "repr": "Readonly",
+                                            "value": {
+                                              "typeName": "Readonly",
+                                              "typeParams": [
+                                                {
+                                                  "kind": "typeLiteral",
+                                                  "value": {
+                                                    "properties": [
+                                                      {
+                                                        "name": "operation",
+                                                        "tsType": {
+                                                          "kind": "keyword",
+                                                          "repr": "string",
+                                                          "value": "string"
+                                                        }
+                                                      },
+                                                      {
+                                                        "name": "contract_ref",
+                                                        "tsType": {
+                                                          "kind": "keyword",
+                                                          "repr": "string",
+                                                          "value": "string"
+                                                        }
+                                                      },
+                                                      {
+                                                        "name": "schema_sha256",
+                                                        "tsType": {
+                                                          "kind": "keyword",
+                                                          "repr": "string",
+                                                          "value": "string"
+                                                        }
+                                                      },
+                                                      {
+                                                        "name": "schema_bytes_sha256",
+                                                        "tsType": {
+                                                          "kind": "keyword",
+                                                          "repr": "string",
+                                                          "value": "string"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "kind": "identifier",
+                                          "name": "phase",
+                                          "optional": false,
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "literal",
+                                                "repr": "active",
+                                                "value": {
+                                                  "kind": "string",
+                                                  "string": "active"
+                                                }
+                                              },
+                                              {
+                                                "kind": "literal",
+                                                "repr": "settled_success",
+                                                "value": {
+                                                  "kind": "string",
+                                                  "string": "settled_success"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ],
+                                      "returnType": {
+                                        "kind": "typeRef",
+                                        "repr": "Promise",
+                                        "value": {
+                                          "typeName": "Promise",
+                                          "typeParams": [
+                                            {
+                                              "kind": "keyword",
+                                              "repr": "void",
+                                              "value": "void"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
                         }
                       }
                     },
@@ -122979,6 +125187,317 @@
               }
             ],
             "name": "RuntimeComposition"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  config: Pick<\n    NonNullable<RuntimeComposition[\"currentPage\"]>,\n    \"assert\" | \"assertCurrent\" | \"projection\" | \"schemaAuthority\"\n  >,\n  budget: () => Promise<RuntimeRequestBudget>,\n  assertBaseCurrent: () => Promise<void>,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "config",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Pick",
+                        "value": {
+                          "typeName": "Pick",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NonNullable",
+                              "value": {
+                                "typeName": "NonNullable",
+                                "typeParams": [
+                                  {
+                                    "kind": "indexedAccess",
+                                    "value": {
+                                      "indexType": {
+                                        "kind": "literal",
+                                        "repr": "currentPage",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "currentPage"
+                                        }
+                                      },
+                                      "objType": {
+                                        "kind": "typeRef",
+                                        "repr": "RuntimeComposition",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "local"
+                                          },
+                                          "typeName": "RuntimeComposition"
+                                        }
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "literal",
+                                  "repr": "assert",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "assert"
+                                  }
+                                },
+                                {
+                                  "kind": "literal",
+                                  "repr": "assertCurrent",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "assertCurrent"
+                                  }
+                                },
+                                {
+                                  "kind": "literal",
+                                  "repr": "projection",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "projection"
+                                  }
+                                },
+                                {
+                                  "kind": "literal",
+                                  "repr": "schemaAuthority",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "schemaAuthority"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "budget",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "RuntimeRequestBudget",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "RuntimeRequestBudget",
+                                      "specifier": "./runtime_budget.ts"
+                                    },
+                                    "typeName": "RuntimeRequestBudget"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "assertBaseCurrent",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "void",
+                                  "value": "void"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NonNullable",
+                    "value": {
+                      "typeName": "NonNullable",
+                      "typeParams": [
+                        {
+                          "kind": "indexedAccess",
+                          "value": {
+                            "indexType": {
+                              "kind": "literal",
+                              "repr": "currentPageScope",
+                              "value": {
+                                "kind": "string",
+                                "string": "currentPageScope"
+                              }
+                            },
+                            "objType": {
+                              "kind": "typeRef",
+                              "repr": "ApiHttpPorts",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "ApiHttpPorts",
+                                  "specifier": "./api_http.ts"
+                                },
+                                "typeName": "ApiHttpPorts"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "currentPageBudgetScope"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  operation: string | null,\n  pageBudget: RuntimeRequestBudget | undefined,\n  existingCurrent: () => Promise<void>,\n  assertP1Current: () => void,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "operation",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "pageBudget",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "RuntimeRequestBudget",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "RuntimeRequestBudget",
+                                "specifier": "./runtime_budget.ts"
+                              },
+                              "typeName": "RuntimeRequestBudget"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "undefined",
+                            "value": "undefined"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "existingCurrent",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "void",
+                                  "value": "void"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "assertP1Current",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "runtimeCompletionCurrent"
           },
           {
             "declarations": [
@@ -123367,6 +125886,16 @@
                         "kind": "typeQuery",
                         "repr": "fetch",
                         "value": "fetch"
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "currentPageEnabled",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
                       }
                     },
                     {
@@ -123772,6 +126301,134 @@
                 "declarationKind": "private",
                 "def": {
                   "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  config: NonNullable<RuntimeComposition[\"currentPage\"]> | undefined,\n  clock: RequestClockPort,\n  request: ApiExecution,\n  boundary?: ApiExecutionBoundary,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "config",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "NonNullable",
+                            "value": {
+                              "typeName": "NonNullable",
+                              "typeParams": [
+                                {
+                                  "kind": "indexedAccess",
+                                  "value": {
+                                    "indexType": {
+                                      "kind": "literal",
+                                      "repr": "currentPage",
+                                      "value": {
+                                        "kind": "string",
+                                        "string": "currentPage"
+                                      }
+                                    },
+                                    "objType": {
+                                      "kind": "typeRef",
+                                      "repr": "RuntimeComposition",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "RuntimeComposition"
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "undefined",
+                            "value": "undefined"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "clock",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RequestClockPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RequestClockPort",
+                            "specifier": "../application/ports.ts"
+                          },
+                          "typeName": "RequestClockPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "request",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ApiExecution",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ApiExecution",
+                            "specifier": "../application/api_dispatch.ts"
+                          },
+                          "typeName": "ApiExecution"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "boundary",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ApiExecutionBoundary",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ApiExecutionBoundary",
+                            "specifier": "../application/api_dispatch.ts"
+                          },
+                          "typeName": "ApiExecutionBoundary"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "invokeCurrentPageService"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
                   "parameter_source": "(policies: readonly ApiRoutePolicy[], request: Request)",
                   "params": [
                     {
@@ -123895,6 +126552,16 @@
             {
               "kind": "type",
               "path": "supabase/functions/_shared/jungsi/application/forecast_ports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/history_current_page.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
             }
           ]
         },
@@ -124206,7 +126873,9 @@
         "RuntimeRoutePolicy",
         "SafeRuntimeObservation",
         "observeRuntimeResponse",
-        "runtimeAnalysisDataPort"
+        "runtimeAnalysisDataPort",
+        "currentPageBudgetScope",
+        "runtimeCompletionCurrent"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": {
@@ -149483,6 +152152,1475 @@
         "currentCatalogCompositionFixture",
         "currentCatalogCompositionValues"
       ]
+    },
+    "tests/edge/test_current_page_routing.synthetic.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Synthetic routing contract only; no real authority, publication or DB."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ApiExecution",
+            "originalName": "ApiExecution",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "ApiExecutionBoundary",
+            "originalName": "ApiExecutionBoundary",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "ApiHttpPorts",
+            "originalName": "ApiHttpPorts",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
+            "importedName": "ApiRoutePolicy",
+            "originalName": "ApiRoutePolicy",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "BudgetRequest",
+            "originalName": "BudgetRequest",
+            "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+          },
+          {
+            "importedName": "CURRENT_PAGE_OPERATION_ID",
+            "originalName": "CURRENT_PAGE_OPERATION_ID",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "CURRENT_PAGE_ROUTE_PATH",
+            "originalName": "CURRENT_PAGE_ROUTE_PATH",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "CurrentPageExecution",
+            "originalName": "CurrentPageExecution",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "CurrentPagePorts",
+            "originalName": "CurrentPagePorts",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "HistoryClaim",
+            "originalName": "HistoryClaim",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "HistoryCurrentPageService",
+            "originalName": "HistoryCurrentPageService",
+            "src": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+          },
+          {
+            "importedName": "PreparedUsageAdmission",
+            "originalName": "PreparedUsageAdmission",
+            "src": "supabase/functions/_shared/jungsi/application/usage_service.ts"
+          },
+          {
+            "importedName": "PublicResponseProjection",
+            "originalName": "PublicResponseProjection",
+            "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
+          },
+          {
+            "importedName": "READ_VIEW_CONSUMER_OPERATION_IDS",
+            "originalName": "READ_VIEW_CONSUMER_OPERATION_IDS",
+            "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+          },
+          {
+            "importedName": "RelayBoundary",
+            "originalName": "RelayBoundary",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "RuntimeRequestBudget",
+            "originalName": "RuntimeRequestBudget",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+          },
+          {
+            "importedName": "RuntimeUsagePolicy",
+            "originalName": "RuntimeUsagePolicy",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+          },
+          {
+            "importedName": "SupabaseRuntimeControls",
+            "originalName": "SupabaseRuntimeControls",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
+          },
+          {
+            "importedName": "UsageBudgetStorePort",
+            "originalName": "UsageBudgetStorePort",
+            "src": "supabase/functions/_shared/jungsi/application/usage_budget.ts"
+          },
+          {
+            "importedName": "assert",
+            "originalName": "assert",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "createApiHandler",
+            "originalName": "createApiHandler",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
+            "importedName": "currentPageBudgetScope",
+            "originalName": "currentPageBudgetScope",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+          },
+          {
+            "importedName": "equal",
+            "originalName": "equal",
+            "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "nativeJsonSha256",
+            "originalName": "nativeJsonSha256",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "runtimeCompletionCurrent",
+            "originalName": "runtimeCompletionCurrent",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+          },
+          {
+            "importedName": "syntheticApiPolicies",
+            "originalName": "syntheticApiPolicies",
+            "src": "tests/edge/synthetic_api_contract.ts"
+          }
+        ],
+        "source_sha256": "049d4e430327d05e4459362737363a02e062eca51a5bcb7daef2a30c46dcfb5e",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "1700000000000000",
+                    "value": {
+                      "kind": "bigInt",
+                      "string": "1700000000000000"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "NOW"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SYNTHETIC-relay-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                    "value": {
+                      "kind": "string",
+                      "string": "SYNTHETIC-relay-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "RELAY"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "00000000-0000-0000-0000-000000000001",
+                    "value": {
+                      "kind": "string",
+                      "string": "00000000-0000-0000-0000-000000000001"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "OWNER"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "typeRef",
+                      "repr": "ApiRoutePolicy",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "ApiRoutePolicy",
+                          "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+                        },
+                        "typeName": "ApiRoutePolicy"
+                      }
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "extra"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "ApiRoutePolicy",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "ApiRoutePolicy",
+                        "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+                      },
+                      "typeName": "ApiRoutePolicy"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "current"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "type",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "nullable",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "properties",
+                          "tsType": {
+                            "kind": "typeLiteral",
+                            "value": {
+                              "properties": [
+                                {
+                                  "name": "shown",
+                                  "tsType": {
+                                    "kind": "typeLiteral",
+                                    "value": {
+                                      "properties": [
+                                        {
+                                          "name": "type",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "nullable",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "boolean",
+                                            "value": "boolean"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "name": "required",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        },
+                        {
+                          "name": "optional"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "resultRoot"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "type",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "nullable",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "textNode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "type",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "nullable",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "intNode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "type",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "nullable",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "boolNode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "type",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "nullable",
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "options",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "properties": [
+                                  {
+                                    "name": "type",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    }
+                                  },
+                                  {
+                                    "name": "nullable",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "boolean",
+                                      "value": "boolean"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "scalarNode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(properties: Record<string, unknown>, nullable = false)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "properties",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Record",
+                        "value": {
+                          "typeName": "Record",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "nullable",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "right": "false"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "objectNode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(items: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "items",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "arrayNode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "contextNode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "value"
+                        },
+                        {
+                          "name": "status"
+                        },
+                        {
+                          "name": "unit"
+                        },
+                        {
+                          "name": "reason_code"
+                        },
+                        {
+                          "name": "statistic_label"
+                        },
+                        {
+                          "name": "cohort"
+                        },
+                        {
+                          "name": "source_url"
+                        },
+                        {
+                          "name": "source_as_of"
+                        },
+                        {
+                          "name": "source_context"
+                        },
+                        {
+                          "name": "statistic_percent"
+                        },
+                        {
+                          "name": "basis_code"
+                        },
+                        {
+                          "name": "basis_label"
+                        },
+                        {
+                          "name": "cohort_code"
+                        },
+                        {
+                          "name": "cohort_label"
+                        },
+                        {
+                          "name": "selection_rule_ref"
+                        },
+                        {
+                          "name": "metric_definition"
+                        },
+                        {
+                          "name": "value_json_type"
+                        },
+                        {
+                          "name": "original_scale"
+                        },
+                        {
+                          "name": "stage"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "metricProps"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "metricNode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "sourceQuotaNode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "historyNode"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "currentRoot"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "enabled",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "badScope",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "noAdmission",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "failBudget",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "abortInScope",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "finalFailure",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "realService",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "evidence",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "literal",
+                                "repr": "unresolved",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "unresolved"
+                                }
+                              },
+                              {
+                                "kind": "literal",
+                                "repr": "not_applicable",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "not_applicable"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "richHistory",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "quotaValue",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "null",
+                                "value": "null"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "denyAuthority",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "comparisonConflict",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "badScopeValue",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "literal",
+                                "repr": "false",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "false"
+                                }
+                              },
+                              {
+                                "kind": "literal",
+                                "repr": "null",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "null"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "schemaMismatch",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "schemaRevoke",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "schemaValue",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "literal",
+                                "repr": "false",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "false"
+                                }
+                              },
+                              {
+                                "kind": "literal",
+                                "repr": "null",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "null"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "registryBytes",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Uint8Array",
+                            "value": {
+                              "typeName": "Uint8Array"
+                            }
+                          }
+                        },
+                        {
+                          "name": "approvedByteSha",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "approvedSemanticSha",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "name": "paid",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "invalidMatchingCount",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        {
+                          "name": "badCurrent",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "literal",
+                                "repr": "false",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "false"
+                                }
+                              },
+                              {
+                                "kind": "literal",
+                                "repr": "null",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "null"
+                                }
+                              },
+                              {
+                                "kind": "literal",
+                                "repr": "throw",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "throw"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Options"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(options: Options = {})",
+                  "params": [
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "options",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Options",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Options"
+                          }
+                        }
+                      },
+                      "right": "[UNSUPPORTED]"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(run: () => void)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "run",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "admissionDenied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  f: ReturnType<typeof fixture>,\n  mode:\n    | \"ok\"\n    | \"quota\"\n    | \"settle_failure\"\n    | \"expired\"\n    | \"expire_during_work\"\n    | \"mutate_measure\"\n    | \"abort_during_settle\"\n    | \"deny_control_after_settle\" = \"ok\",\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "f",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReturnType",
+                        "value": {
+                          "typeName": "ReturnType",
+                          "typeParams": [
+                            {
+                              "kind": "typeQuery",
+                              "repr": "fixture",
+                              "value": "fixture"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "left": {
+                        "kind": "identifier",
+                        "name": "mode",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "literal",
+                              "repr": "ok",
+                              "value": {
+                                "kind": "string",
+                                "string": "ok"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "quota",
+                              "value": {
+                                "kind": "string",
+                                "string": "quota"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "settle_failure",
+                              "value": {
+                                "kind": "string",
+                                "string": "settle_failure"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "expired",
+                              "value": {
+                                "kind": "string",
+                                "string": "expired"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "expire_during_work",
+                              "value": {
+                                "kind": "string",
+                                "string": "expire_during_work"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "mutate_measure",
+                              "value": {
+                                "kind": "string",
+                                "string": "mutate_measure"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "abort_during_settle",
+                              "value": {
+                                "kind": "string",
+                                "string": "abort_during_settle"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "deny_control_after_settle",
+                              "value": {
+                                "kind": "string",
+                                "string": "deny_control_after_settle"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "right": "ok"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "runtimeBudgetFixture"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "URL",
+                    "value": {
+                      "typeName": "URL"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "REVIEW_SCHEMA"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "579ecbad541b8d002ea21db13312e7882fbd8fab0e19ffd060ea03c7ee6d80f0",
+                    "value": {
+                      "kind": "string",
+                      "string": "579ecbad541b8d002ea21db13312e7882fbd8fab0e19ffd060ea03c7ee6d80f0"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "REVIEW_RAW_SHA"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "e5c306ab1346dc54f19e012e5fb2a6dcf31276d878c37bd0e4827ba4a364319b",
+                    "value": {
+                      "kind": "string",
+                      "string": "e5c306ab1346dc54f19e012e5fb2a6dcf31276d878c37bd0e4827ba4a364319b"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "REVIEW_SEMANTIC_SHA"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(bytes: Uint8Array)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "bytes",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Uint8Array",
+                        "value": {
+                          "typeName": "Uint8Array"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rawSha"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/history_current_page.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/public_response.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/public_response.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/request_budget.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/usage_budget.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/usage_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/usage_service.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/usage_service.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./fixture.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/fixture.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_api_contract.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_api_contract.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
     },
     "tests/edge/test_exam_pack.ts": {
       "declarations": {
