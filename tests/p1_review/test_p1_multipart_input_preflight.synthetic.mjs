@@ -257,9 +257,25 @@ await test("same PK collisions hold present-campus and formerly excluded claims"
   const a = sourceRow({ campus: null });
   const b = sourceRow({ campus: "SYN-CAMPUS-B", admission_track: "SYN-OTHER-TRACK" });
   const unrelated = sourceRow({ original_pk: "SYN-OTHER" });
-  const same = await fixture([a, b, unrelated]);
-  const both = await run(same);
-  assert.equal(both.source_scope_only_candidates, 1); assert.equal(both.source_scope_only_held, 2);
+  // Fully specified, independently scoped claims remain separate; this is
+  // still preflight only and does not establish any physical target or seal.
+  const variants = [
+    ...["campus", "admission_track", "group"].map((field) =>
+      sourceRow({ ...a, [field]: field === "group" ? "SYN-GROUP-B" : "SYN-VARIANT" })),
+    b,
+  ];
+  for (const other of variants) {
+    const same = await fixture([a, other, unrelated]);
+    const both = await run(same);
+    assert.equal(both.source_scope_only_candidates, 3); assert.equal(both.source_scope_only_held, 0);
+    assert.equal(both.source_scope_reconciliation, "NOT_VERIFIED");
+    assert.equal(both.publication_ready, false);
+  }
+  // An identical full scope is not a distinct claim, even when quota differs.
+  const duplicate = await fixture([a, { ...a, quota_value: 7 }, unrelated]);
+  const duplicated = await run(duplicate);
+  assert.equal(duplicated.source_scope_only_candidates, 1);
+  assert.equal(duplicated.source_scope_only_held, 2);
   const excluded = sourceRow({ campus: null, scope: { state: "excluded_practical", evidence_sha256: EV } });
   const eligible = sourceRow({ campus: "SYN-CAMPUS-B" });
   const mixed = await fixture([excluded, eligible, unrelated]);

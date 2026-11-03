@@ -815,7 +815,7 @@ export async function composeP1R27Candidate(
     "coverage_source_scope_conflict",
   );
   const schoolsByPk = new Map<string, Set<string>>();
-  for (const row of [...stage.rows, ...stage.held]) {
+  for (const row of [...stage.rows, ...stage.held, ...stage.excluded]) {
     const pk = String(row.original_pk), schools = schoolsByPk.get(pk) ?? new Set<string>();
     schools.add(String(row.school_id));
     schoolsByPk.set(pk, schools);
@@ -1733,18 +1733,23 @@ export async function preflightP1MultipartInputs(
     }
   }
   need(sourceRows === e.expectedRows, "source_page_incomplete");
-  // The PK identity is global across pages and across both campus-presence
-  // groups.  A conflicting claim must not become a scope candidate merely
-  // because the two rows were processed by different projectors.
+  // Preserve separate, fully specified six-field scopes. When any campus is
+  // absent, retain the conservative cross-projector HOLD: the source scope
+  // grant alone does not establish an independent physical target.
   const sourceBaseKey = (row: NativeObject): string =>
     JSON.stringify([row.academic_year, row.school_id, row.original_pk]);
-  const sourceBaseCounts = new Map<string, number>();
+  const sourceBaseCounts = new Map<string, { total: number; absent: boolean }>();
   for (const row of [...presentRows, ...absentRows]) {
     const key = sourceBaseKey(row);
-    sourceBaseCounts.set(key, (sourceBaseCounts.get(key) ?? 0) + 1);
+    const counts = sourceBaseCounts.get(key) ?? { total: 0, absent: false };
+    counts.total++;
+    counts.absent ||= !Object.hasOwn(row, "campus");
+    sourceBaseCounts.set(key, counts);
   }
-  const sourceBaseConflicts = (row: NativeObject): boolean =>
-    (sourceBaseCounts.get(sourceBaseKey(row)) ?? 0) > 1;
+  const sourceBaseConflicts = (row: NativeObject): boolean => {
+    const counts = sourceBaseCounts.get(sourceBaseKey(row));
+    return counts !== undefined && counts.total > 1 && counts.absent;
+  };
   // The grant campus is examined independently and never copied into the source row.
   const absentReviews = absentRows.length
     ? reviewR27AbsentCampusScope(absentRows, e.source_sha256, scope)
