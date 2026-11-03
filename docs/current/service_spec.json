@@ -7780,6 +7780,41 @@
       "symbols": [
         "CurrentPublicSearchScopedService"
       ]
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_p1_reference_method.ts",
+      "layer": "application",
+      "status": "REVIEW_ONLY_UNREGISTERED_AUTHORITY_AND_OPERATION_NOT_RUN",
+      "requirements": [
+        "REQ-01",
+        "REQ-08",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "symbols": [
+        "matchesOriginalMethodAndCdf"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/current_public_p1_reference_port.ts",
+      "layer": "application",
+      "status": "REVIEW_ONLY_UNREGISTERED_AUTHORITY_AND_OPERATION_NOT_RUN",
+      "requirements": [
+        "REQ-01",
+        "REQ-08",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "symbols": [
+        "ReferencePortResult",
+        "REFERENCE_EVIDENCE_EDGE_SQL",
+        "REFERENCE_EVIDENCE_METHOD_SQL",
+        "readReferenceMethodEvidence"
+      ]
     }
   ],
   "workflow": {
@@ -17909,6 +17944,43 @@
               ],
               "source_sha256": "29c51cf48be034bda7ba2e381ab0ae6d57e2f7424827a411e017d1bbc922c0aa",
               "declared_exports": []
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_p1_reference_method.ts",
+              "layer": "application",
+              "status": "REVIEW_ONLY_UNREGISTERED_AUTHORITY_AND_OPERATION_NOT_RUN",
+              "requirements": [
+                "REQ-01",
+                "REQ-08",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-28"
+              ],
+              "source_sha256": "c30e0ecb1a6d05b9f8862ced387694bb28f62fe9642856de586e8a0ac06fec5d",
+              "declared_exports": [
+                "matchesOriginalMethodAndCdf"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/current_public_p1_reference_port.ts",
+              "layer": "application",
+              "status": "REVIEW_ONLY_UNREGISTERED_AUTHORITY_AND_OPERATION_NOT_RUN",
+              "requirements": [
+                "REQ-01",
+                "REQ-08",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-28"
+              ],
+              "source_sha256": "57cf47ccf015dbe65305d59ad4652b624501cb3ad8f3730000007993b92a5a23",
+              "declared_exports": [
+                "ReferencePortResult",
+                "REFERENCE_EVIDENCE_EDGE_SQL",
+                "REFERENCE_EVIDENCE_METHOD_SQL",
+                "readReferenceMethodEvidence"
+              ]
             },
             {
               "path": "supabase/functions/_shared/current_public_r27_bounded.ts",
@@ -225681,6 +225753,18 @@
         "REQ-26"
       ],
       "summary": "기존 승인 binding과 같은 자료 head·모집 범위에서 검색 cursor를 이어가는 서버 후보와 독립 오프라인 합성 22건을 등록한다. descriptor 부가정보 갱신은 동일 범위일 때 허용하고 기존 세션·소유권·만료·relay·예산·기존 V1 검증을 보존한다. 2027 실제 범위 필터·과거 전용 상세 차단·실DB·발행·배포는 별도이며 이 변경으로 완료를 주장하지 않는다."
+    },
+    {
+      "date": "2026-11-03",
+      "requirements": [
+        "REQ-01",
+        "REQ-08",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "기존 관측 ID·모집 PK와 누백 방법 원문을 제한 조회·대조하는 서버 후보 및 합성 검사를 추가한다. 인증·공유 예산과 원문을 보존하며, 실제 출처·발급자·현재 자료판·RLS·공개 응답 및 운영 배포는 검증 전이다."
     }
   ],
   "cursor_contract_offline_graph_verification": {
