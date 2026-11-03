@@ -63,17 +63,40 @@ function shaField(value: unknown): string {
   need(typeof value === "string" && HASH.test(value), "invalid_pin");
   return value;
 }
-/** Copies the exact view using typed-array internals, without calling its iterator. */
+/** Copies an unshared exact view without invoking caller-supplied properties or iterator. */
 function bytesSnapshot(raw: Uint8Array, max: number): Uint8Array<ArrayBuffer> {
-  const getter = Object.getOwnPropertyDescriptor(
-    Object.getPrototypeOf(Uint8Array.prototype),
-    "byteLength",
-  )?.get;
-  need(raw instanceof Uint8Array && typeof getter === "function", "invalid_bytes");
-  const size = Reflect.apply(getter, raw, []) as number;
-  need(size > 0 && size <= max, "invalid_bytes");
+  const prototype = Object.getPrototypeOf(Uint8Array.prototype);
+  const lengthGetter = Object.getOwnPropertyDescriptor(prototype, "byteLength")?.get;
+  const bufferGetter = Object.getOwnPropertyDescriptor(prototype, "buffer")?.get;
+  const arrayBufferLength = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, "byteLength")
+    ?.get;
+  need(
+    raw instanceof Uint8Array && typeof lengthGetter === "function" &&
+      typeof bufferGetter === "function" && typeof arrayBufferLength === "function",
+    "invalid_bytes",
+  );
+  let size: number;
+  let buffer: ArrayBuffer;
+  try {
+    size = Reflect.apply(lengthGetter, raw, []) as number;
+    buffer = Reflect.apply(bufferGetter, raw, []) as ArrayBuffer;
+    // The ArrayBuffer brand check rejects SharedArrayBuffer and detached inputs.
+    Reflect.apply(arrayBufferLength, buffer, []);
+  } catch {
+    throw new Error("invalid_bytes");
+  }
+  need(Number.isSafeInteger(size) && size > 0 && size <= max, "invalid_bytes");
   const copy = new Uint8Array(new ArrayBuffer(size));
-  Uint8Array.prototype.set.call(copy, raw);
+  try {
+    Uint8Array.prototype.set.call(copy, raw);
+    need(
+      Reflect.apply(lengthGetter, raw, []) === size &&
+        Reflect.apply(bufferGetter, raw, []) === buffer,
+      "invalid_bytes",
+    );
+  } catch {
+    throw new Error("invalid_bytes");
+  }
   return copy;
 }
 async function sha(raw: Uint8Array<ArrayBuffer>): Promise<string> {

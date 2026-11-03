@@ -398,6 +398,26 @@ await test("part and compressed input arrays reject getters and sparse elements"
     else {const original=arr[0];Object.defineProperty(arr,"0",{enumerable:true,configurable:true,get(){invoked++;return original}})}
     await assert.rejects(run(f),/baseline_array_invalid/); assert.equal(invoked,0);
   }
+  const shared = (input) => {
+    const out = new Uint8Array(new SharedArrayBuffer(input.length));
+    out.set(input);
+    return out;
+  };
+  const e = await evidenceFor([sourceRow()]);
+  await assert.rejects(bindP1R27Evidence(shared(e.manifestBytes), e.coverageBytes, e.pins), /invalid_bytes/);
+  await assert.rejects(bindP1R27Evidence(e.manifestBytes, shared(e.coverageBytes), e.pins), /invalid_bytes/);
+  const page = await fixture([sourceRow()]);
+  page.source.pages[0] = shared(page.source.pages[0]);
+  await assert.rejects(run(page), /invalid_bytes/);
+  const previous = await fixture([sourceRow()]);
+  previous.previous.images[0] = shared(previous.previous.images[0]);
+  await assert.rejects(run(previous), /invalid_bytes/);
+  const copy = new Uint8Array(e.manifestBytes); let invoked = 0;
+  for (const key of ["byteLength", "buffer", Symbol.iterator]) {
+    Object.defineProperty(copy, key, { get() { invoked++; throw Error("SYN_SPOOFED_PROPERTY"); } });
+  }
+  await bindP1R27Evidence(copy, e.coverageBytes, e.pins);
+  assert.equal(invoked, 0);
 });
 
 await test("source bytes and all input rows, including held rows, consume explicit budgets", async () => {

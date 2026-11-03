@@ -3249,7 +3249,7 @@
         "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
         "supabase/functions/_shared/jungsi/application/offering_analysis.ts": "9f18b188101095e6503f39a1e99db12c017877b0cb5bcf27f7b98d4abb5fc76a",
         "supabase/functions/_shared/jungsi/application/overall_analysis.ts": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7",
-        "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
+        "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "800a369089fcd1e8bfdbde5180470405651fecf7c5aeca36ba97c61b063896e7",
         "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
         "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
         "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",

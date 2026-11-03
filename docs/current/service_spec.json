@@ -19468,7 +19468,7 @@
                 "REQ-01",
                 "REQ-28"
               ],
-              "source_sha256": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
+              "source_sha256": "800a369089fcd1e8bfdbde5180470405651fecf7c5aeca36ba97c61b063896e7",
               "declared_exports": [
                 "P1R27Pins",
                 "BoundP1R27Evidence",
@@ -28600,11 +28600,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "8b9097637ce91f301359b578eddef96328d5f8f66964c153c00a97c9684a696a"
+        "sha256": "60d3a8a72fc8b26f895dc6fa94b08e34e7636b742fad6d5be43a5cab4a753988"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "54312f5c7eada1ed33da439fc4e2ebfcb02b28ddb056b2d8ea6134392c8784a0"
+        "sha256": "c4290dcff575b6a0629884f930c0562782a380c978d9bf35bfb514fc052c6757"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -77779,7 +77779,7 @@
               "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
             }
           ],
-          "source_sha256": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
+          "source_sha256": "800a369089fcd1e8bfdbde5180470405651fecf7c5aeca36ba97c61b063896e7",
           "symbols": [
             {
               "declarations": [
@@ -236040,7 +236040,7 @@
       "supabase/functions/_shared/jungsi/application/operating_policy.ts": "477b312405d0d3daa24bc546df1f6ef8fec25795536bbbf85d5d21f0f231bf49",
       "supabase/functions/_shared/jungsi/application/overall_analysis.ts": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7",
       "supabase/functions/_shared/jungsi/application/own_report_list.ts": "ade1d75288df633ef20e1d8e26f602687615ece0e7d4764fd5a05e180d0a2bf2",
-      "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490",
+      "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "800a369089fcd1e8bfdbde5180470405651fecf7c5aeca36ba97c61b063896e7",
       "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
       "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
       "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
@@ -237791,7 +237791,7 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "ff382672ce9dbee07459fdb8ca84ea2bbcd30577748bef96376b55fb2611280a",
+      "bridge_sha256": "478256c8118af33ac82d3173013f409ef9caaeed7a050f5b35a5ce03038406f2",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
       "graph_manifest_sha256": "a3aedad1e2a7885ef799b7c7c3f72f23ea76e3a9c350551f4516983380e76276",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
@@ -238630,7 +238630,7 @@
       ],
       "contract": "Partial R27 v2 scope exposes only independently reviewed eligible_non_practical rows; excluded and held rows are counted, not included. Both head and every body part carry matching partial coverage. Full and partial global receipts require an in-process sealed source-bound candidate/index and exact ordered rows.",
       "consumer": "Separate server-controlled descriptor and dedicated relay credential, plus independently pinned partial-aware consumer receipt; missing or invalid optional settings leave v1 available and v2 fail-closed.",
-      "preservation": "Previously substantive recruitment cells are preserved when compatible and held on conflict; unknown new statistics remain pending with null percent; prior qualification and historical references must be rebound before publication. Review candidate only: separately pinned previous qualification and historical reference receipts can rebind exactly unchanged original subjects, native values and prior rows. Trusted owner authority must recheck current source/previous head, scope, expiry and revocation before preparation and for the exact final manifest. Reference export digest must match the final historical reference descriptor. Successful asynchronous source and previous-head assertions in composition and source, previous-head and authority assertions in rebinding must return exactly undefined; false, null or exceptions fail closed for candidate and final-manifest rechecks. The multipart preflight test uses exact LF bytes in this service branch; shared Git-attributes integration into develop remains a planning-owner review. The authorized authority port, writer, cancellation and actual evidence are NOT_IMPLEMENTED_OR_NOT_VERIFIED; no production activation.",
+      "preservation": "Previously substantive recruitment cells are preserved when compatible and held on conflict; unknown new statistics remain pending with null percent; prior qualification and historical references must be rebound before publication. Review candidate only: separately pinned previous qualification and historical reference receipts can rebind exactly unchanged original subjects, native values and prior rows. Trusted owner authority must recheck current source/previous head, scope, expiry and revocation before preparation and for the exact final manifest. Reference export digest must match the final historical reference descriptor. Successful asynchronous source and previous-head assertions in composition and source, previous-head and authority assertions in rebinding must return exactly undefined; false, null or exceptions fail closed for candidate and final-manifest rechecks. The multipart preflight test uses exact LF bytes in this service branch; shared Git-attributes integration into develop remains a planning-owner review. The evidence, source pages, prior parts and rebinding receipts are copied from ordinary unshared ArrayBuffer views; shared or detached inputs fail closed and caller-owned byte properties or iterators are not invoked. The authorized authority port, writer, cancellation and actual evidence are NOT_IMPLEMENTED_OR_NOT_VERIFIED; no production activation.",
       "not_verified": [
         "actual_source_head_and_scope",
         "independent_descriptor_authority",
@@ -241638,7 +241638,7 @@
       },
       {
         "path": "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts",
-        "sha256": "aad292bcc9de84fc3d0ff905fe66d89eeed33d59377d993911c16678f9ae7490"
+        "sha256": "800a369089fcd1e8bfdbde5180470405651fecf7c5aeca36ba97c61b063896e7"
       },
       {
         "path": "supabase/functions/_shared/jungsi/application/r27_standalone.ts",
@@ -241742,7 +241742,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.json",
-    "manifest_sha256": "199a2da91f60461f63f9424b061ad4c42f8dcdfe26b2a9382318516280b6e0d7",
+    "manifest_sha256": "7b32f16262754fe30d49ae8a2180dbe8183af643e198d5191b4699bcb0b90677",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
