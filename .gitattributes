@@ -121,3 +121,16 @@
 
 # Preserve exact-byte multipart preflight test on every checkout.
 /tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs text eol=lf
+
+# Preserve exact P1 contract graph and referenced bytes on checkout.
+/tests/p1_contract_review_graph.json text eol=lf
+/supabase/functions/_shared/current_public_r27_bounded.ts text eol=lf
+/supabase/functions/_shared/current_public_r27_selection.ts text eol=lf
+/supabase/functions/_shared/p1_r27_selection_bridge.ts text eol=lf
+/tests/p1_contract_review/fixture.bridge.v2.synthetic.mjs text eol=lf
+/tests/p1_contract_review/test_history_score_context_review.js text eol=lf
+/tests/p1_contract_review/test_history_score_context_validator.js text eol=lf
+/tests/p1_contract_review/test_p1_quota_fingerprint_adapter.js text eol=lf
+/tests/p1_contract_review/test_p1_r27_selection_bridge.synthetic.js text eol=lf
+/tests/p1_contract_review/test_recruitment_final_qualification.js text eol=lf
+/tests/p1_contract_review/test_score_010_cutoff.synthetic.js text eol=lf
